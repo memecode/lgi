@@ -695,7 +695,10 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 	{
 		if (target->Msgs.Length() == 0 ||
 			target->Msgs.Find(Msg->Msg()))
-			target->OnEvent(Msg);
+		{
+			if (target->OnEvent(Msg) == ViewEventTarget::OBJ_DELETED)
+				return 0;
+		}
 	}
 	
 	int Id;

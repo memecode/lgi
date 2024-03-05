@@ -897,6 +897,8 @@ public:
 		LHashTbl<IntKey<int>,bool> Msgs;
 
 	public:
+		constexpr static int OBJ_DELETED = -1000;
+	
 		ViewEventTarget
 		(
 			/// The view to attach to.

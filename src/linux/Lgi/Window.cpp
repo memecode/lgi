@@ -842,7 +842,8 @@ struct LGtkDrop : public LView::ViewEventTarget
 				if (HasData >= Formats.Length())
 				{
 					LgiTrace("%s:%i - LWindowDragDataDrop got all the formats.\n", _FL);
-					OnComplete(true);
+					OnComplete(false);
+					return OBJ_DELETED;
 				}
 				break;
 			}
@@ -873,33 +874,8 @@ struct LGtkDrop : public LView::ViewEventTarget
 gboolean
 LWindowDragDataDrop(GtkWidget *widget, GdkDragContext *context, gint x, gint y, guint time, LWindow *Wnd)
 {
-	new LGtkDrop(widget, context, x, y, time, Wnd);
-	return true;
-
-	/*
-	// Wait for the data to arrive...
-	auto Start = LCurrentTime();
-	while (true)
-	{
-		size_t HasData = 0;
-		for (auto d: t->Data)
-			if (d.Data.Length() > 0)
-				HasData++;
-
-		if (HasData >= Formats.Length())
-		{
-			LgiTrace("%s:%i - LWindowDragDataDrop got all the formats.\n", _FL);
-			break;
-		}
-			
-		if (LCurrentTime()-Start >= 5000)
-		{
-			LgiTrace("%s:%i - LWindowDragDataDrop timeout.\n", _FL);
-			break;
-		}
-	}
-
-	*/
+	auto obj = new LGtkDrop(widget, context, x, y, time, Wnd);
+	return obj != NULL;
 }
 
 void
