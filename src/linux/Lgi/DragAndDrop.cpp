@@ -1,10 +1,10 @@
 /*
-**	FILE:			GDragAndDrop.cpp
+**	FILE:			src/linux/Lgi/DragAndDrop.cpp
 **	AUTHOR:			Matthew Allen
 **	DATE:			30/11/98
 **	DESCRIPTION:	Drag and drop support
 **
-**	Copyright (C) 1998-2014, Matthew Allen
+**	Copyright (C) 1998-2024, Matthew Allen
 **		fret@memecode.com
 */
 

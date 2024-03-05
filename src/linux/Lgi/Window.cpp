@@ -723,25 +723,41 @@ LWindowDragDataReceived(GtkWidget *widget, GdkDragContext *context, gint x, gint
 	LViewI *v;
 	LDragDropTarget *t;
 	if (!DndPointMap(v, p, t, Wnd, x, y))
+	{
+		LgiTrace("%s:%i - DndPointMap false.\n", _FL);
 		return;
+	}
 
+	bool matched = false;
+	auto type = gdk_atom_name(gtk_selection_data_get_data_type(data));
 	for (auto &d: t->Data)
 	{
-		auto type = gdk_atom_name(gtk_selection_data_get_data_type(data));
 		if (d.Format.Equals(type))
 		{
+			matched = true;
+			
 			gint length = 0;
 			auto ptr = gtk_selection_data_get_data_with_length(data, &length);
 			if (ptr)
 			{
+				LgiTrace("%s:%i - LWindowDragDataReceived got data '%s'.\n", _FL, type);
 				d.Data[0].SetBinary(length, (void*)ptr, false);
+			}
+			else
+			{
+				LgiTrace("%s:%i - LWindowDragDataReceived: gtk_selection_data_get_data_with_length failed for '%s'.\n", _FL, type);
 			}
 			break;
 		}
 	}
+	if (!matched)
+	{
+		LgiTrace("%s:%i - LWindowDragDataReceived: no matching data '%s'.\n", _FL, type);
+	}
+	Wnd->PostEvent(M_DND_DATA_RECEIVED);
 }
 
-int GetAcceptFmts(::LString::Array &Formats, GdkDragContext *context, LDragDropTarget *t, LPoint &p)
+int GetAcceptFmts(LString::Array &Formats, GdkDragContext *context, LDragDropTarget *t, LPoint &p)
 {
 	int KeyState = 0;
 	LDragFormats Fmts(true);
@@ -767,44 +783,123 @@ int GetAcceptFmts(::LString::Array &Formats, GdkDragContext *context, LDragDropT
 	return Flags;
 }
 
-gboolean
-LWindowDragDataDrop(GtkWidget *widget, GdkDragContext *context, gint x, gint y, guint time, LWindow *Wnd)
+struct LGtkDrop : public LView::ViewEventTarget
 {
-	// Map the point to a view...
+	uint64_t Start = 0;
 	LPoint p;
-	LViewI *v;
-	LDragDropTarget *t;
-	if (!DndPointMap(v, p, t, Wnd, x, y))
-		return false;
-	t->Data.Length(0);
+	LViewI *v = NULL;
+	LDragDropTarget *t = NULL;
 
-	// Request the data...
 	LArray<LDragData> Data;
 	LString::Array Formats;
 	int KeyState = 0;
-	int Flags = GetAcceptFmts(Formats, context, t, p);
-	for (auto f: Formats)
+	int Flags = 0;
+	
+	const char *GetClass() { return "LGtkDrop"; }
+	
+	LGtkDrop(GtkWidget *widget, GdkDragContext *context, gint x, gint y, guint time, LWindow *Wnd) :
+		LView::ViewEventTarget(Wnd, M_DND_DATA_RECEIVED)
 	{
-		t->Data.New().Format = f;
-		gtk_drag_get_data(widget, context, gdk_atom_intern(f, true), time);
-	}
+		Start = LCurrentTime();
+		
+		// Map the point to a view...
+		if (!DndPointMap(v, p, t, Wnd, x, y))
+			return;
+			
+		t->Data.Length(0);
 
-	// Wait for the data to arrive...
-	uint64_t Start = LCurrentTime();
-	while (LCurrentTime()-Start < 2000)
+		// Request the data...
+		Flags = GetAcceptFmts(Formats, context, t, p);
+		for (auto f: Formats)
+		{
+			t->Data.New().Format = f;
+			gtk_drag_get_data(widget, context, gdk_atom_intern(f, true), time);
+		}
+		
+		// Callbacks should be received by LWindowDragDataReceived
+		// Once they have all arrived or the timeout has been reached we call OnComplete
+		LgiTrace("%s:%i - LGtkDrop created...\n", _FL);
+	}
+	
+	~LGtkDrop()
 	{
-		int HasData = 0;
+		LgiTrace("%s:%i - LGtkDrop deleted.\n", _FL);
+	}
+	
+	LMessage::Result OnEvent(LMessage *Msg)
+	{
+		switch (Msg->Msg())
+		{
+			case M_DND_DATA_RECEIVED:
+			{
+				size_t HasData = 0;
+				for (auto d: t->Data)
+					if (d.Data.Length() > 0)
+						HasData++;
+
+				LgiTrace("%s:%i - Got M_DND_DATA_RECEIVED %i of %i\n",
+					_FL, (int)HasData, (int)Formats.Length());
+				if (HasData >= Formats.Length())
+				{
+					LgiTrace("%s:%i - LWindowDragDataDrop got all the formats.\n", _FL);
+					OnComplete(true);
+				}
+				break;
+			}
+		}
+		return 0;
+	}
+	
+	void OnPulse()
+	{
+		auto now = LCurrentTime();
+		if (now - Start >= 5000)
+		{
+			OnComplete(true);
+		}
+	}
+	
+	void OnComplete(bool isTimeout)
+	{
+		auto Result = t->OnDrop(t->Data, p, KeyState);
+		// if (Flags != DROPEFFECT_NONE)
+		// 	gdk_drag_status(context, EffectToDragAction(Flags), time);
+		// return Result != DROPEFFECT_NONE;
+		
+		delete this;
+	}
+};
+
+gboolean
+LWindowDragDataDrop(GtkWidget *widget, GdkDragContext *context, gint x, gint y, guint time, LWindow *Wnd)
+{
+	new LGtkDrop(widget, context, x, y, time, Wnd);
+	return true;
+
+	/*
+	// Wait for the data to arrive...
+	auto Start = LCurrentTime();
+	while (true)
+	{
+		size_t HasData = 0;
 		for (auto d: t->Data)
 			if (d.Data.Length() > 0)
 				HasData++;
+
 		if (HasData >= Formats.Length())
+		{
+			LgiTrace("%s:%i - LWindowDragDataDrop got all the formats.\n", _FL);
 			break;
+		}
+			
+		if (LCurrentTime()-Start >= 5000)
+		{
+			LgiTrace("%s:%i - LWindowDragDataDrop timeout.\n", _FL);
+			break;
+		}
 	}
 
-	auto Result = t->OnDrop(t->Data, p, KeyState);
-	if (Flags != DROPEFFECT_NONE)
-		gdk_drag_status(context, EffectToDragAction(Flags), time);
-	return Result != DROPEFFECT_NONE;
+	*/
 }
 
 void

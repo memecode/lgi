@@ -49,6 +49,10 @@ enum LgiMessages
 		/// Sent from a worker thread when calling LTextLabel::Name
 		M_TEXT_UPDATE_NAME,
 		
+		/// Dnd data received via LWindowDragDataReceived
+		/// /sa 
+		M_DND_DATA_RECEIVED,
+		
 	#elif defined(WINNATIVE)
 
 		// [WM_APP:WM_APP+200] is reserved for LGI itself.
