@@ -435,16 +435,6 @@ int BrowseUi::OnNotify(LViewI *Ctrl, LNotification n)
 			if (!d->Log->GetAll(items))
 				break;
 
-			/*
-			case LGraph:      lst->AddColumn("---",      60); break;
-			case LIndex:      lst->AddColumn("Index",    60); break;
-			case LBranch:     lst->AddColumn("Branch",   60); break;
-			case LRevision:   lst->AddColumn("Revision", 60); break;
-			case LAuthor:     lst->AddColumn("Author",   240); break;
-			case LTime:       lst->AddColumn("Date",     130); break;
-			case LMessageTxt: lst->AddColumn("Message",  700); break;
-			*/
-
 			auto revIdx    = d->Folder->IndexOfCommitField(LRevision);
 			auto authorIdx = d->Folder->IndexOfCommitField(LAuthor);
 			auto msgIdx    = d->Folder->IndexOfCommitField(LMessageTxt);
@@ -457,11 +447,7 @@ int BrowseUi::OnNotify(LViewI *Ctrl, LNotification n)
 				auto match = Stristr(rev, f) ||
 							 Stristr(author, f) ||
 							 Stristr(msg, f);
-
-				if (f)
-					i->GetCss(true)->Display(match ? LCss::DispBlock : LCss::DispNone);
-				else
-					i->GetCss(true)->Display(LCss::DispBlock);
+				i->GetCss(true)->Display(!f && match ? LCss::DispBlock : LCss::DispNone);
 			}
 
 			d->Log->UpdateAllItems();

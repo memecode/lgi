@@ -2026,10 +2026,14 @@ LString LDateTime::DescribePeriod(double seconds)
 	mins -= hrs * 60;
 	int days = hrs / 24;
 	hrs -= days * 24;
+	int years = days / 365; // leap year, sheap year lol
+	days -= years * 365;
 	
 	LString s;
-	if (days > 0)
-		s.Printf("%id %ih %im %is", days, hrs, mins, (int)seconds);
+	if (years > 0)
+		s.Printf("%iyrs %id %ih", years, days, hrs);
+	else if (days > 0)
+		s.Printf("%id %ih %im", days, hrs, mins);
 	else if (hrs > 0)
 		s.Printf("%ih %im %is", hrs, mins, (int)seconds);
 	else if (mins > 0)
