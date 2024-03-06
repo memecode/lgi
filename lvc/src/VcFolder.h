@@ -312,6 +312,7 @@ public:
 	VcLeaf *FindLeaf(const char *Path, bool OpenTree);
 	void DefaultFields();
 	void UpdateColumns(LList *lst = NULL);
+	int IndexOfCommitField(CommitField fld);
 	const char *GetText(int Col);
 	LArray<CommitField> &GetFields() { return Fields; }
 	bool Serialize(LXmlTag *t, bool Write);

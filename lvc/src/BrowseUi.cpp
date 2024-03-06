@@ -7,6 +7,8 @@
 #include "lgi/common/List.h"
 #include "lgi/common/TextLog.h"
 #include "lgi/common/ClipBoard.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/PopupNotification.h"
 
 #include "Lvc.h"
 #include "VcFolder.h"
@@ -16,8 +18,16 @@
 
 enum Ids {
 	IDC_STATIC = -1,
-	IDC_FILTER = 100,
-	IDC_TABLE,
+	
+	IDC_BLAME_FILTER = 100,
+	IDC_BLAME_TABLE,
+	IDC_BLAME_FILTER_CLEAR,
+	IDC_BLAME_LST,
+	
+	IDC_LOG_TABLE,
+	IDC_LOG_FILTER,
+	IDC_LOG_FILTER_CLEAR,
+	IDC_LOG_LST,
 
 	IDM_COPY_USER,
 	IDM_COPY_REF,
@@ -32,7 +42,8 @@ struct BrowseUiPriv
 	LTabView *Tabs = NULL;
 	AppPriv *Priv = NULL;
 	VcFolder *Folder = NULL;
-	LTableLayout *Tbl = NULL;
+	LTableLayout *BlameTbl = NULL;
+	LTableLayout *LogTbl = NULL;
 
 	BrowseUi::TMode Mode;
 	LString Output;
@@ -261,14 +272,18 @@ BrowseUi::BrowseUi(TMode mode, AppPriv *priv, VcFolder *folder, LString path)
 		AddView(d->Tabs = new LTabView(IDC_TABS));
 
 		auto BlameTab = d->Tabs->Append("Blame");
-		BlameTab->Append(d->Tbl = new LTableLayout(IDC_TABLE));
-		auto c = d->Tbl->GetCell(0, 0);
+		BlameTab->Append(d->BlameTbl = new LTableLayout(IDC_BLAME_TABLE));
+
+		auto c = d->BlameTbl->GetCell(0, 0);
 		c->Add(new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Filter:"));
 		c->VerticalAlign(LCss::VerticalMiddle);
-		c = d->Tbl->GetCell(1, 0);
-		c->Add(new LEdit(IDC_FILTER, 0, 0, -1, -1));
-		c = d->Tbl->GetCell(0, 1, true, 2);
-		c->Add(d->Blame = new LList(IDC_BLAME));
+		c = d->BlameTbl->GetCell(1, 0);
+		c->Add(new LEdit(IDC_BLAME_FILTER, 0, 0, -1, -1));
+		c = d->BlameTbl->GetCell(2, 0);
+		c->Add(new LButton(IDC_BLAME_FILTER_CLEAR, 0, 0, -1, -1, "x"));
+		
+		c = d->BlameTbl->GetCell(0, 1, true, 3);
+		c->Add(d->Blame = new LList(IDC_BLAME_LST));
 		d->Blame->AddColumn("Ref", 100);
 		d->Blame->AddColumn("User", 100);
 		d->Blame->AddColumn("Date", 100);
@@ -277,7 +292,17 @@ BrowseUi::BrowseUi(TMode mode, AppPriv *priv, VcFolder *folder, LString path)
 		d->Blame->SetPourLargest(true);
 
 		auto LogTab = d->Tabs->Append("Log");
-		LogTab->Append(d->Log = new LList(IDC_LOG));
+		LogTab->Append(d->LogTbl = new LTableLayout(IDC_LOG_TABLE));
+		c = d->LogTbl->GetCell(0, 0);
+		c->Add(new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Filter:"));
+		c->VerticalAlign(LCss::VerticalMiddle);
+		c = d->LogTbl->GetCell(1, 0);
+		c->Add(new LEdit(IDC_LOG_FILTER, 0, 0, -1, -1));
+		c = d->LogTbl->GetCell(2, 0);
+		c->Add(new LButton(IDC_LOG_FILTER_CLEAR, 0, 0, -1, -1, "x"));
+
+		c = d->LogTbl->GetCell(0, 1, true, 3);
+		c->Add(d->Log = new LList(IDC_LOG_LST));
 		folder->UpdateColumns(d->Log);
 		d->Log->SetPourLargest(true);
 
@@ -286,10 +311,6 @@ BrowseUi::BrowseUi(TMode mode, AppPriv *priv, VcFolder *folder, LString path)
 
 		AttachChildren();
 		Visible(true);
-
-		LView *e;
-		if (GetViewById(IDC_FILTER, e))
-			e->Focus(true);
 	}
 }
 
@@ -321,6 +342,10 @@ void BrowseUi::ParseBlame(LArray<BlameLine> &lines, LString raw)
 
 	d->Blame->Insert(items);
 	d->Blame->ResizeColumnsToContent(16);
+
+	LView *e;
+	if (GetViewById(IDC_BLAME_FILTER, e))
+		e->Focus(true);
 }
 
 void BrowseUi::ParseLog(LArray<VcCommit*> &commits, LString raw)
@@ -337,15 +362,24 @@ void BrowseUi::ParseLog(LArray<VcCommit*> &commits, LString raw)
 		d->Log->Insert(commit);
 
 	d->Log->ResizeColumnsToContent();
+
+	LView *e;
+	if (GetViewById(IDC_LOG_FILTER, e))
+		e->Focus(true);
 }
 
 int BrowseUi::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	switch (Ctrl->GetId())
 	{
-		case IDC_FILTER:
+		case IDC_BLAME_FILTER_CLEAR:
 		{
-			auto f = Ctrl->Name();
+			SetCtrlName(IDC_BLAME_FILTER, NULL);
+			// Fall through
+		}
+		case IDC_BLAME_FILTER:
+		{
+			auto f = GetCtrlName(IDC_BLAME_FILTER);
 			LArray<BrowseItem*> items;
 			if (!d->Blame->GetAll(items))
 				break;
@@ -366,18 +400,71 @@ int BrowseUi::OnNotify(LViewI *Ctrl, LNotification n)
 			else
 			{
 				bool first = true;
+				size_t matches = 0;
 				for (auto i: items)
 				{
+					auto ln = i->GetText(TLine);
 					auto src = i->GetText(TSrc);
 					auto match = Stristr(src, f) != NULL;
 					i->Select(match);
-					if (match && first)
+					if (match)
 					{
-						first = false;
-						i->ScrollTo();
+						matches++;
+						if (first)
+						{
+							first = false;
+							i->ScrollTo();
+						}
 					}
 				}
+
+				if (matches == 0)
+					LPopupNotification::Message(this, "No matches found.");
 			}
+			break;
+		}
+		case IDC_LOG_FILTER_CLEAR:
+		{
+			SetCtrlName(IDC_LOG_FILTER, NULL);
+			// Fall through
+		}
+		case IDC_LOG_FILTER:
+		{
+			auto f = GetCtrlName(IDC_LOG_FILTER);
+			LArray<VcCommit*> items;
+			if (!d->Log->GetAll(items))
+				break;
+
+			/*
+			case LGraph:      lst->AddColumn("---",      60); break;
+			case LIndex:      lst->AddColumn("Index",    60); break;
+			case LBranch:     lst->AddColumn("Branch",   60); break;
+			case LRevision:   lst->AddColumn("Revision", 60); break;
+			case LAuthor:     lst->AddColumn("Author",   240); break;
+			case LTime:       lst->AddColumn("Date",     130); break;
+			case LMessageTxt: lst->AddColumn("Message",  700); break;
+			*/
+
+			auto revIdx    = d->Folder->IndexOfCommitField(LRevision);
+			auto authorIdx = d->Folder->IndexOfCommitField(LAuthor);
+			auto msgIdx    = d->Folder->IndexOfCommitField(LMessageTxt);
+
+			for (auto i: items)
+			{
+				auto rev = i->GetText(revIdx);
+				auto author = i->GetText(authorIdx);
+				auto msg = i->GetText(msgIdx);
+				auto match = Stristr(rev, f) ||
+							 Stristr(author, f) ||
+							 Stristr(msg, f);
+
+				if (f)
+					i->GetCss(true)->Display(match ? LCss::DispBlock : LCss::DispNone);
+				else
+					i->GetCss(true)->Display(LCss::DispBlock);
+			}
+
+			d->Log->UpdateAllItems();
 			break;
 		}
 	}
