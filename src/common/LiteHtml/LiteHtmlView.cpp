@@ -11,6 +11,7 @@
 #include "lgi/common/Http.h"
 #include "lgi/common/PopupNotification.h"
 #include "lgi/common/Path.h"
+#include "lgi/common/ClipBoard.h"
 
 #undef min
 #undef max
@@ -22,8 +23,12 @@
 enum Messages
 {
 	M_LOAD_URI = M_USER + 100,
-};
 
+};
+enum Ids
+{
+	ID_COPY_URL = 100,
+};
 
 struct LiteHtmlViewPriv :
 	public litehtml::document_container,
@@ -121,6 +126,21 @@ struct LiteHtmlViewPriv :
 	LString CurrentUrl()
 	{
 		return history[historyPos];
+	}
+
+	LString AbsoluteUrl(LString part)
+	{
+		LString abs;
+		LUri p(part);
+
+		// Absolute?
+		if (p.sProtocol)
+			return part;
+
+		// Relative?
+		LUri u(CurrentUrl());
+		u += part;
+		return u.ToString();
 	}
 
 	LColour Convert(const litehtml::web_color &c)
@@ -614,6 +634,13 @@ void LiteHtmlView::HistoryForward()
 	}
 }
 
+bool LiteHtmlView::Refresh()
+{
+	d->Empty();
+	Invalidate();
+	return LoadCurrent();
+}
+
 bool LiteHtmlView::LoadCurrent()
 {
 	OnHistory(d->historyPos > 0, d->historyPos < d->history.Length() - 1);
@@ -637,7 +664,7 @@ bool LiteHtmlView::LoadCurrent()
 			return false;
 
 		d->client = GetClient();
-		d->doc = litehtml::document::createFromString(html_text, d);
+		d->doc = litehtml::document::createFromString(html_text.Get(), d);
 		if (!d->doc)
 			return false;
 
@@ -649,7 +676,7 @@ bool LiteHtmlView::LoadCurrent()
 			{
 				if (data)
 				{
-					d->doc = litehtml::document::createFromString(data, d);
+					d->doc = litehtml::document::createFromString(data.Get(), d);
 					OnNavigate(url);
 					Invalidate();
 				}
@@ -741,12 +768,32 @@ void LiteHtmlView::OnMouseClick(LMouse &m)
 	int64_t sx, sy;
 	GetScrollPos(sx, sy);
 	litehtml::position::vector redraw_boxes;
+
+	LString lnk;
+	if (d->doc)
+	{
+		if (auto e = d->doc->get_over_element())
+		{
+			auto tag = e->get_tagName();
+			if (!Stricmp(tag, "a"))
+				lnk = e->get_attr("href");
+		}
+	}
 	
 	if (m.IsContextMenu())
 	{
 		LSubMenu sub;
-		sub.AppendItem("notImpl: submenu", -1, false);
-		sub.Float(this, m);
+		sub.AppendItem("Copy link", ID_COPY_URL, !lnk.IsEmpty());
+		switch (sub.Float(this, m))
+		{
+			case ID_COPY_URL:
+			{
+				LClipBoard c(this);
+				auto abs = d->AbsoluteUrl(lnk);
+				c.Text(abs);
+				break;
+			}
+		}
 	}
 	else if (m.Left())
 	{
@@ -754,6 +801,16 @@ void LiteHtmlView::OnMouseClick(LMouse &m)
 			d->doc->on_lbutton_down(m.x+sx, m.y+sy, m.x, m.y, redraw_boxes);
 		else
 			d->doc->on_lbutton_up(m.x+sx, m.y+sy, m.x, m.y, redraw_boxes);
+	}
+	else if (m.Button1())
+	{
+		if (m.Down())
+			HistoryBack();
+	}
+	else if (m.Button2())
+	{
+		if (m.Down())
+			HistoryForward();
 	}
 
 	d->UpdateScreen(redraw_boxes);

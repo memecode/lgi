@@ -16,6 +16,7 @@ public:
 	bool SetUrl(LString url);
 	void HistoryBack();
 	void HistoryForward();
+	bool Refresh();
 
 	// Events:
 	// The current url has been set and the document created, but not fully loaded

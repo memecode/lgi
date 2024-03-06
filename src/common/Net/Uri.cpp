@@ -49,6 +49,8 @@ LUri &LUri::operator +=(const char *s)
 
 	auto parts = sPath.SplitDelimit("/\\");
 	parts.SetFixedLength(false);
+	if (parts.Length() > 0)
+		parts.PopLast();
 
 	for (auto p: LString(s).SplitDelimit("/\\"))
 	{

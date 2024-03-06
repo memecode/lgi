@@ -19,6 +19,7 @@ enum Ctrls
 	IDC_BROWSER,
 	IDC_BACK,
 	IDC_FORWARD,
+	IDC_REFRESH,
 };
 
 class AppLiteHtmlView : public LiteHtmlView
@@ -51,6 +52,7 @@ class App : public LWindow
 	LiteHtmlView *browser = NULL;
 	LButton *back = NULL;
 	LButton *forward = NULL;
+	LButton *refresh = NULL;
 
 public:
 	App()
@@ -66,11 +68,13 @@ public:
 			AddView(box = new LBox(IDC_BOX, true));
 			box->AddView(ctrls = new LBox(IDC_CTRLS, false));
 			ctrls->AddView(back = new LButton(IDC_BACK, 0, 0, -1, -1, "<"));
-			back->GetCss(true)->Width("2em");
-			back->Enabled(false);
+				back->GetCss(true)->Width("2em");
+				back->Enabled(false);
 			ctrls->AddView(forward = new LButton(IDC_FORWARD, 0, 0, -1, -1, ">"));
-			forward->GetCss(true)->Width("2em");
-			forward->Enabled(false);
+				forward->GetCss(true)->Width("2em");
+				forward->Enabled(false);
+			ctrls->AddView(refresh = new LButton(IDC_REFRESH, 0, 0, -1, -1, "\xE2\x9F\xB3"));
+				refresh->GetCss(true)->Width("2em");
 			ctrls->AddView(location = new LEdit(IDC_LOCATION, 0, 0, 100, 20));
 			
 			box->AddView(browser = new AppLiteHtmlView(IDC_BROWSER));
@@ -102,6 +106,9 @@ public:
 				break;
 			case IDC_FORWARD:
 				browser->HistoryForward();
+				break;
+			case IDC_REFRESH:
+				browser->Refresh();
 				break;
 			case IDC_LOCATION:
 				if (n.Type == LNotifyReturnKey)
