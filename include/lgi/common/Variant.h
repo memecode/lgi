@@ -468,6 +468,7 @@ public:
 	int32_t Int32At(size_t i, int32_t Default = 0);
 	int64_t Int64At(size_t i, int64_t Default = 0);
 	double DoubleAt(size_t i, double Default = 0);
+	LDom *DomAt(size_t i);
 };
 
 #endif

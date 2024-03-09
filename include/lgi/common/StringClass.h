@@ -950,6 +950,12 @@ public:
 		}
 		return true;
 	}
+
+	/// Check string is UTF8
+	bool IsUtf8()
+	{
+		return Str ? LIsUtf8(Str->Str, Str->Len) : true;
+	}
 	
 	/// Reverses all the characters in the string
 	LString Reverse()

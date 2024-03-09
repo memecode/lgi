@@ -2426,6 +2426,11 @@ double LScriptArguments::DoubleAt(size_t i, double Default)
 	return IdxCheck(i) ? (*this)[i]->CastDouble() : Default;
 }
 
+LDom *LScriptArguments::DomAt(size_t i)
+{
+	return IdxCheck(i) ? (*this)[i]->CastDom() : NULL;
+}
+
 bool LScriptArguments::Throw(const char *file, int line, const char *Msg, ...)
 {
 	if (!Vm)

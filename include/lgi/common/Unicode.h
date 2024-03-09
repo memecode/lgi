@@ -886,4 +886,8 @@ LgiFunc char *WideToUtf8
 	ptrdiff_t InLen = -1
 );
 
+/// Return true if the string is valid utf-8
+/// \ingroup Text
+LgiClass bool LIsUtf8(const char *s, ssize_t len = -1);
+
 #endif

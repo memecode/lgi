@@ -33,7 +33,7 @@
 #define MAIL_INFO_COLOUR					Rgb24(0, 0, 0)
 
 // Helper functions
-extern void TokeniseStrList(char *Str, List<char> &Output, const char *Delim);
+extern void TokeniseStrList(const char *Str, LString::Array &Output, const char *Delim);
 extern char ConvHexToBin(char c);
 #define ConvBinToHex(i) (((i)<10)?'0'+(i):'A'+(i)-10)
 extern void DecodeAddrName(const char *Start, std::function<void(LString,LString)> cb, const char *DefaultDomain);
@@ -815,6 +815,7 @@ public:
 	bool Status(char *Path, int *Recent);
 	bool Search(bool Uids, LArray<LString> &SeqNumbers, const char *Filter);
 
+	#if 0
 	// Utility
 	static bool Http(LSocketI *S,
 					LAutoString *OutHeaders,
@@ -824,6 +825,7 @@ public:
 					const char *InUri,
 					const char *InHeaders,
 					const char *InBody);
+	#endif
 };
 
 #endif

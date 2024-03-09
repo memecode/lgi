@@ -268,7 +268,8 @@ public:
 	/// object passed into this function.
 	virtual bool SetStream(LAutoStreamI stream) { return false; }
 	/// Parses the headers of the object and updates all the metadata fields
-	virtual bool ParseHeaders() { return false; }
+	virtual bool ParseHeaders();
+	virtual bool ParseAddresses(const char *Str, int CC);
 };
 
 /// An interface to a folder structure

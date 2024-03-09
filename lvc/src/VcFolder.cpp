@@ -794,7 +794,7 @@ void VcFolder::DefaultFields()
 
 int VcFolder::IndexOfCommitField(CommitField fld)
 {
-	return Fields.IndexOf(fld);
+	return (int)Fields.IndexOf(fld);
 }
 
 void VcFolder::UpdateColumns(LList *lst)

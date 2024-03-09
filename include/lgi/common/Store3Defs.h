@@ -451,6 +451,7 @@ enum Store3Fields
 	FIELD_STORE_STATUS = 169,			// (ScribeAccountletStatusIcon) Status (icon) of a LDataStoreI
 	FIELD_RECEIVED_DOMAIN = 170,		// (char*) First "Received:" header domain. (See also SdReceivedDomain)
 	FIELD_FOLDER_ITEMS = 171,			// (int64) Number of items in a folder..
+	FIELD_PARENT = 172,					// (LDataFolderI*) Parent of store3 item
 
 	FIELD_MAX,
 };

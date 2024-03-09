@@ -1476,7 +1476,7 @@ case IDomCall:
 			Arg[i] = Resolve();
 		}
 	
-		LDomProperty p = LStringToDomProp(sName);
+		auto p = LStringToDomProp(sName);
 		if (p == ObjType)
 		{
 			*Dst = LVariant::TypeToString(Dom->Type);
@@ -1489,7 +1489,7 @@ case IDomCall:
 			{
 				auto *dom = Dom->CastDom();
 				CheckParam(dom);
-				bool Ret = dom->CallMethod(sName, Arg);
+				auto Ret = dom->CallMethod(sName, Arg);
 				if (!Ret)
 				{
 					Dst->Empty();
@@ -1504,7 +1504,7 @@ case IDomCall:
 			case GV_DATETIME:
 			{
 				CheckParam(Dom->Value.Date);
-				bool Ret = Dom->Value.Date->CallMethod(sName, Dst, Arg);
+				auto Ret = Dom->Value.Date->CallMethod(sName, Dst, Arg);
 				if (!Ret)
 				{
 					Dst->Empty();
@@ -1531,9 +1531,9 @@ case IDomCall:
 						if (Arg.Length() > 0 &&
 							Arg[0])
 						{
-							int Index = Arg.Length() > 1 ? Arg[1]->CastInt32() : -1;
+							auto Index = Arg.Length() > 1 ? Arg[1]->CastInt32() : -1;
 
-							LVariant *v = new LVariant;
+							auto v = new LVariant;
 							*v = *Arg[0];
 							Dom->Value.Lst->Insert(v, Index);
 						}
@@ -1543,11 +1543,11 @@ case IDomCall:
 					{
 						for (unsigned i=0; i<Arg.Length(); i++)
 						{
-							LVariant *Idx = Arg[i];
+							auto Idx = Arg[i];
 							if (Idx)
 							{
-								int32 n = Arg[i]->CastInt32();
-								LVariant *Elem = Dom->Value.Lst->ItemAt(n);
+								auto n = Arg[i]->CastInt32();
+								auto Elem = Dom->Value.Lst->ItemAt(n);
 								if (Elem)
 								{
 									Dom->Value.Lst->Delete(Elem);
@@ -1561,7 +1561,7 @@ case IDomCall:
 					{
 						if (Arg.Length() > 0 && Arg[0])
 						{
-							int Index = Arg[0]->CastInt32();
+							auto Index = Arg[0]->CastInt32();
 							*Dst = (bool) (Index >= 0 && Index < (int)Dom->Value.Lst->Length());
 						}
 						else
@@ -1590,7 +1590,7 @@ case IDomCall:
 					}
 					case ContainerSort:
 					{
-						LVariant *Param = Arg.Length() > 0 ? Arg[0] : NULL;
+						auto Param = Arg.Length() > 0 ? Arg[0] : NULL;
 						Dom->Value.Lst->Sort(LVariantCmp, (NativeInt)Param);
 						break;
 					}

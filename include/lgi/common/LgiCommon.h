@@ -163,10 +163,6 @@ LgiFunc char *LSeekUtf8
 	char *Start = 0
 );
 
-/// Return true if the string is valid utf-8
-/// \ingroup Text
-LgiFunc bool LIsUtf8(const char *s, ssize_t len = -1);
-
 /// Returns the next token in a string, leaving the argument pointing to the end of the token
 /// \ingroup Text
 LgiFunc char *LTokStr(const char *&s);

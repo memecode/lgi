@@ -245,6 +245,7 @@ ssize_t MailIMap::ParseImapResponse(char *Buffer, ssize_t BufferLen, LArray<StrR
 }
 
 ////////////////////////////////////////////////////////////////////////////
+#if 0
 bool MailIMap::Http(LSocketI *S,
 					LAutoString *OutHeaders,
 					LAutoString *OutBody,
@@ -345,6 +346,7 @@ bool MailIMap::Http(LSocketI *S,
 
 	return true;
 }
+#endif
 
 LAutoString ImapBasicTokenize(char *&s)
 {

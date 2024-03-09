@@ -166,60 +166,53 @@ bool ValidNonWSStr(const char *s)
 	return false;
 }
 
-void TokeniseStrList(char *Str, List<char> &Output, const char *Delim)
+void TokeniseStrList(const char *Str, LString::Array &Output, const char *Delim)
 {
-	if (Str && Delim)
+	if (!Str || !Delim)
+		return;
+
+	auto s = Str;
+	while (*s)
 	{
-		char *s = Str;
-		while (*s)
+		while (*s && strchr(LWhiteSpace, *s))
+		    s++;
+
+		auto e = s;
+		for (; *e; e++)
 		{
-		    while (*s && strchr(LWhiteSpace, *s))
-		        s++;
-
-			char *e = s;
-			for (; *e; e++)
+			if (strchr("\'\"", *e))
 			{
-				if (strchr("\'\"", *e))
-				{
-					// handle string constant
-					char delim = *e++;
-					e = strchr(e, delim);
-				}
-				else if (*e == '<')
-				{
-					e = strchr(e, '>');
-				}
-				else
-				{
-					while (*e && *e != '<' && !IsWhite(*e) && !strchr(Delim, *e))
-						e++;
-				}
-
-				if (!e || !*e || strchr(Delim, *e))
-				{
-					break;
-				}
+				// handle string constant
+				char delim = *e++;
+				e = strchr(e, delim);
+			}
+			else if (*e == '<')
+			{
+				e = strchr(e, '>');
+			}
+			else
+			{
+				while (*e && *e != '<' && !IsWhite(*e) && !strchr(Delim, *e))
+					e++;
 			}
 
-			ssize_t Len = e ? e - s : strlen(s);
-			if (Len > 0)
+			if (!e || !*e || strchr(Delim, *e))
 			{
-				char *Temp = new char[Len+1];
-				if (Temp)
-				{
-					memcpy(Temp, s, Len);
-					Temp[Len] = 0;
-					Output.Insert(Temp);
-				}
+				break;
 			}
-
-			if (e)
-			{
-				s = e;
-				for (; *s && strchr(Delim, *s); s++);
-			}
-			else break;
 		}
+
+		ssize_t Len = e ? e - s : strlen(s);
+		if (Len > 0)
+			Output.New().Set(s, Len);
+
+		if (e)
+		{
+			s = e;
+			for (; *s && strchr(Delim, *s); s++)
+				;
+		}
+		else break;
 	}
 }
 
@@ -232,13 +225,9 @@ void DeNullText(char *in, ssize_t &len)
 	while (in < end)
 	{
 		if (*in)
-		{
 			*out++ = *in;
-		}
 		else
-		{
 			len--;
-		}
 		in++;
 	}
 }
