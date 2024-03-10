@@ -51,7 +51,7 @@ LExecutionStatus LHostFunc::Call(LScriptContext *Ctx, LScriptArguments &Args)
 	return (Ctx->*(Func))(Args) ? ScriptSuccess : ScriptError;
 }
 
-const char *InstToString(GInstruction i)
+const char *InstToString(LInstruction i)
 {
 	#undef _i
 	#define _i(name, opcode, desc) \

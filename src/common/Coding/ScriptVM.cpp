@@ -576,6 +576,11 @@ public:
 			return;
 		}
 
+		static bool InException = false;
+		if (InException)
+			return;
+
+		InException = true;
 		if (Address < 0)
 		{
 			uint8_t *Base = &Code->ByteCode[0];
@@ -631,6 +636,8 @@ public:
 			// Set the script status...
 			Status = ScriptError;
 		}
+
+		InException = false;
 	}
 
 	LExecutionStatus Decompile(LScriptContext *Context, LCompiledCode *Code, LStream *log)

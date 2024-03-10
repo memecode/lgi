@@ -104,6 +104,12 @@ enum LOperator
 	OpAnd,
 	OpOr,
 	OpNot,
+	OpBitwiseAnd,
+	OpBitwiseOr,
+	OpBitwiseNegate,
+	OpBitwiseXor,
+	OpShiftLeft,
+	OpShiftRight,
 };
 
 class LgiClass LCustomType : public LDom

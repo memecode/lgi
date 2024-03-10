@@ -11,31 +11,37 @@
 
 #define AllInstructions \
 	_i(INop,				0,					"Nop") \
-	_i(IAssign,				OpAssign,			"OpAssign") \
-	_i(IPlus,				OpPlus,				"OpPlus") \
-	_i(IUnaryPlus,			OpUnaryPlus,		"OpUnaryPlus") \
-	_i(IMinus,				OpMinus,			"OpMinus") \
-	_i(IUnaryMinus,			OpUnaryMinus,		"OpUnaryMinus") \
-	_i(IMul,				OpMul,				"OpMul") \
-	_i(IDiv,				OpDiv,				"OpDiv") \
-	_i(IMod,				OpMod,				"OpMod") \
-	_i(ILessThan,			OpLessThan,			"OpLessThan") \
-	_i(ILessThanEqual,		OpLessThanEqual,	"OpLessThanEqual") \
-	_i(IGreaterThan,		OpGreaterThan,		"OpGreaterThan") \
-	_i(IGreaterThanEqual,	OpGreaterThanEqual,	"OpGreaterThanEqual") \
-	_i(IEquals,				OpEquals,			"OpEquals") \
-	_i(INotEquals,			OpNotEquals,		"OpNotEquals") \
-	_i(IPlusEquals,			OpPlusEquals,		"OpPlusEquals") \
-	_i(IMinusEquals,		OpMinusEquals,		"OpMinusEquals") \
-	_i(IMulEquals,			OpMulEquals,		"OpMulEquals") \
-	_i(IDivEquals,			OpDivEquals,		"OpDivEquals") \
-	_i(IPostInc,			OpPostInc,			"OpPostInc") \
-	_i(IPostDec,			OpPostDec,			"OpPostDec") \
-	_i(IPreInc,				OpPreInc,			"OpPreInc") \
-	_i(IPreDec,				OpPreDec,			"OpPreDec") \
-	_i(IAnd,				OpAnd,				"OpAnd") \
-	_i(IOr,					OpOr,				"OpOr") \
-	_i(INot,				OpNot,				"OpNot") \
+	_i(IAssign,				OpAssign,			"IAssign") \
+	_i(IPlus,				OpPlus,				"IPlus") \
+	_i(IUnaryPlus,			OpUnaryPlus,		"IUnaryPlus") \
+	_i(IMinus,				OpMinus,			"IMinus") \
+	_i(IUnaryMinus,			OpUnaryMinus,		"IUnaryMinus") \
+	_i(IMul,				OpMul,				"IMul") \
+	_i(IDiv,				OpDiv,				"IDiv") \
+	_i(IMod,				OpMod,				"IMod") \
+	_i(ILessThan,			OpLessThan,			"ILessThan") \
+	_i(ILessThanEqual,		OpLessThanEqual,	"ILessThanEqual") \
+	_i(IGreaterThan,		OpGreaterThan,		"IGreaterThan") \
+	_i(IGreaterThanEqual,	OpGreaterThanEqual,	"IGreaterThanEqual") \
+	_i(IEquals,				OpEquals,			"IEquals") \
+	_i(INotEquals,			OpNotEquals,		"INotEquals") \
+	_i(IPlusEquals,			OpPlusEquals,		"IPlusEquals") \
+	_i(IMinusEquals,		OpMinusEquals,		"IMinusEquals") \
+	_i(IMulEquals,			OpMulEquals,		"IMulEquals") \
+	_i(IDivEquals,			OpDivEquals,		"IDivEquals") \
+	_i(IPostInc,			OpPostInc,			"IPostInc") \
+	_i(IPostDec,			OpPostDec,			"IPostDec") \
+	_i(IPreInc,				OpPreInc,			"IPreInc") \
+	_i(IPreDec,				OpPreDec,			"IPreDec") \
+	_i(IAnd,				OpAnd,				"IAnd") \
+	_i(IOr,					OpOr,				"IOr") \
+	_i(INot,				OpNot,				"INot") \
+	_i(IBitwiseAnd,			OpBitwiseAnd,		"IBitwiseAnd") \
+	_i(IBitwiseOr,			OpBitwiseOr,		"IBitwiseOr") \
+	_i(IBitwiseNegate,		OpBitwiseNegate,	"IBitwiseNegate") \
+	_i(IBitwiseXor,			OpBitwiseXor,		"IBitwiseXor") \
+	_i(IShiftLeft,			OpShiftLeft,		"IShiftLeft") \
+	_i(IShiftRight,			OpShiftRight,		"IShiftRight") \
 	\
 	/** Calls a another part of the script */ \
 	_i(ICallScript,			64,					"CallScript") \
@@ -57,7 +63,7 @@
 	/* Open the debugger */ \
 	_i(IDebug,				79,					"Debug") \
 
-enum GInstruction {
+enum LInstruction {
 	AllInstructions
 };
 
@@ -104,7 +110,7 @@ extern char16 sEndSqBracket[];
 extern char16 sStartCurlyBracket[];
 extern char16 sEndCurlyBracket[];
 
-extern const char *InstToString(GInstruction i);
+extern const char *InstToString(LInstruction i);
 
 /*
 	Variable Reference:
@@ -211,6 +217,7 @@ protected:
 			case OpPreInc:
 			case OpPreDec:
 			case OpNot:
+			case OpBitwiseNegate:
 				return OpPrefix;
 
 			case OpPostInc:
@@ -235,21 +242,34 @@ protected:
 			case OpDivEquals:
 				return 16;
 
+			case OpOr:
+				return 15;
+
 			case OpAnd:
+				return 14;
+
+			case OpBitwiseOr:
 				return 13;
 
-			case OpOr:
-				return 14;
+			case OpBitwiseXor:
+				return 12;
+
+			case OpBitwiseAnd:
+				return 11;
 
 			case OpEquals:
 			case OpNotEquals:
-				return 9;
+				return 10;
 
 			case OpLessThan:
 			case OpLessThanEqual:
 			case OpGreaterThan:
 			case OpGreaterThanEqual:
-				return 8;
+				return 9;
+
+			case OpShiftLeft:
+			case OpShiftRight:
+				return 7;
 
 			case OpPlus:
 			case OpMinus:
@@ -265,6 +285,7 @@ protected:
 			case OpPreInc:
 			case OpPreDec:
 			case OpNot:
+			case OpBitwiseNegate:
 				return 3;
 			
 			case OpPostInc:
@@ -312,6 +333,10 @@ protected:
 
 					return OpUnaryMinus;
 				}
+				case '&': return OpBitwiseAnd;
+				case '|': return OpBitwiseOr;
+				case '~': return OpBitwiseNegate;
+				case '^': return OpBitwiseXor;
 			}
 		}
 		else if (s[0] != 0 && s[1] == '=' && !s[2])
@@ -351,6 +376,14 @@ protected:
 		else if (s[0] == '|' && s[1] == '|' && !s[2])
 		{
 			return OpOr;
+		}
+		else if (s[0] == '<' && s[1] == '<' && !s[2])
+		{
+			return OpShiftLeft;
+		}
+		else if (s[0] == '>' && s[1] == '>' && !s[2])
+		{
+			return OpShiftRight;
 		}
 
 		return OpNull;

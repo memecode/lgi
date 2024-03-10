@@ -12,11 +12,19 @@ struct ConsoleLog : public LStream
 	}
 };
 
-class App : public LApp, public LScriptContext, public LVmCallback
+class App :
+	public LApp,
+	public LScriptContext,
+	public LVmCallback
 {
 	LScriptEngine *Engine;
-	LAutoString SrcFile;
+	LString SrcFile;
 	ConsoleLog Log;
+
+	LStream *GetLog()
+	{
+		return &Log;
+	}
 
 	bool CallCallback(LVirtualMachine &Vm, LString CallbackName, LScriptArguments &Args)
 	{
@@ -57,7 +65,7 @@ public:
 
 	void OnReceiveFiles(LArray<const char*> &Files)
 	{
-		for (int i=0; i<Files.Length(); i++)
+		for (unsigned i=0; i<Files.Length(); i++)
 		{
 			if (!RunScript(Files[i]))
 			{
@@ -83,20 +91,15 @@ public:
 	
 	bool RunScript(const char *File)
 	{
-		bool Disassemble = LAppInst->GetOption("disassemble");
+		auto Disassemble = LAppInst->GetOption("disassemble");
 		if (!LFileExists(File))
 		{
 			printf("Error: '%s' not found.\n", File);
 			return false;
 		}
 		
-		if (!SrcFile.Reset(NewStr(File)))
-		{
-			printf("Error: Mem alloc failed.\n");
-			return false;
-		}
-		
-		LScriptEngine Eng(NULL, NULL, this);
+		SrcFile = File;		
+		LScriptEngine Eng(NULL, this, this);
 		Eng.SetConsole(&Log);
 
 		auto Src = LReadFile(SrcFile);
@@ -114,7 +117,7 @@ public:
 		}
 		
 		LVariant Ret;
-		LExecutionStatus s = Eng.Run(Obj, &Ret);
+		auto s = Eng.Run(Obj, &Ret);
 		if (s == ScriptError)
 		{
 			printf("Error: Execution failed '%s'.\n", SrcFile.Get());

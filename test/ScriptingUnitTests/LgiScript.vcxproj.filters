@@ -19,22 +19,22 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\common\Coding\LexCpp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\common\Coding\ScriptCompiler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\common\Coding\ScriptLibrary.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\common\Coding\ScriptVM.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Scripting</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\common\Lgi\LgiMain.cpp">
+      <Filter>Source Files\Scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\Coding\ScriptCompiler.cpp">
+      <Filter>Source Files\Scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\Coding\ScriptLibrary.cpp">
+      <Filter>Source Files\Scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\Coding\ScriptVM.cpp">
+      <Filter>Source Files\Scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -72,20 +72,33 @@
     <None Include="Scripts\FunctionScope.script">
       <Filter>Source Files\Test Scripts</Filter>
     </None>
-    <None Include="..\..\docs\scripting\index.html" />
-    <None Include="..\..\docs\scripting\library.html" />
-    <None Include="..\..\docs\scripting\scripting.css" />
-    <None Include="..\..\docs\scripting\syntax.html" />
+    <None Include="..\..\docs\scripting\scripting.css">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="..\..\docs\scripting\syntax.html">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="..\..\docs\scripting\index.html">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="..\..\docs\scripting\library.html">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="Scripts\BitwiseOps.script">
+      <Filter>Source Files\Test Scripts</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\common\Scripting.h" />
-    <ClInclude Include="..\..\src\common\Coding\ScriptingPriv.h" />
-    <ClInclude Include="..\..\src\common\Coding\TokenType.h" />
-    <ClInclude Include="..\..\src\common\Coding\Instructions.h" />
+    <ClInclude Include="..\..\src\common\Coding\Instructions.h">
+      <Filter>Source Files\Scripting\Hdrs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\Coding\ScriptingPriv.h">
+      <Filter>Source Files\Scripting\Hdrs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\src\common\Coding\ExternCall.asm">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Scripting</Filter>
     </CustomBuild>
   </ItemGroup>
 </Project>

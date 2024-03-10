@@ -263,9 +263,6 @@
     <ClCompile Include="..\src\XmlTest.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\include\common\GStringClass.h" />
-    <ClInclude Include="..\..\..\include\common\LHashTable.h" />
-    <ClInclude Include="..\..\..\include\common\LUnrolledList.h" />
     <ClInclude Include="..\..\..\include\lgi\common\TextConvert.h" />
     <ClInclude Include="..\src\UnitTests.h" />
   </ItemGroup>

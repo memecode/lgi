@@ -17,66 +17,57 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\AutoPtrTest.cpp">
+    <ClCompile Include="..\src\UnitTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ContainerTests.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\CssTest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\MatrixTest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\StringClassTests.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\BitsTest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\RangeTest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\JsonTest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\common\General\New.cpp">
-      <Filter>Lgi</Filter>
-    </ClCompile>
-    <ClCompile Include="src\UnitTests.cpp">
+    <ClCompile Include="..\src\AutoPtrTest.cpp">
       <Filter>Source Files\Testing</Filter>
     </ClCompile>
-    <ClCompile Include="src\NetworkTests.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="..\src\BitsTest.cpp">
+      <Filter>Source Files\Testing</Filter>
     </ClCompile>
-    <ClCompile Include="src\StringTests.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="..\src\ContainerTests.cpp">
+      <Filter>Source Files\Testing</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\common\Text\TextConvert.cpp">
+    <ClCompile Include="..\src\CssTest.cpp">
+      <Filter>Source Files\Testing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\DateTime.cpp">
+      <Filter>Source Files\Testing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\JsonTest.cpp">
+      <Filter>Source Files\Testing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\MatrixTest.cpp">
+      <Filter>Source Files\Testing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\NetworkTests.cpp">
+      <Filter>Source Files\Testing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\RangeTest.cpp">
+      <Filter>Source Files\Testing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\StringClassTests.cpp">
+      <Filter>Source Files\Testing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\StringTests.cpp">
+      <Filter>Source Files\Testing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\XmlTest.cpp">
+      <Filter>Source Files\Testing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Text\TextConvert.cpp">
       <Filter>Lgi</Filter>
     </ClCompile>
-    <ClCompile Include="src\XmlTest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\DateTime.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="..\..\..\src\common\General\New.cpp">
+      <Filter>Lgi</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\common\GStringClass.h">
+    <ClInclude Include="..\src\UnitTests.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\common\LHashTable.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\common\LUnrolledList.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\UnitTests.h">
-      <Filter>Source Files\Testing</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\lgi\common\TextConvert.h">
+    <ClInclude Include="..\..\..\include\lgi\common\TextConvert.h">
       <Filter>Lgi</Filter>
     </ClInclude>
   </ItemGroup>

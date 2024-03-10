@@ -383,24 +383,24 @@ class LCompilerPriv :
 	LArray<LAutoPtr<LExternFunc>> FuncMem;
 
 public:
-	LScriptContext *SysCtx;
-	LScriptContext *UserCtx;
-	LCompiledCode *Code;
-	LStream *Log;
+	LScriptContext *SysCtx = NULL;
+	LScriptContext *UserCtx = NULL;
+	LCompiledCode *Code = NULL;
+	LStream *Log = NULL;
 	LArray<char16*> Tokens;	
 	TokenRanges Lines;
-	char16 *Script;
+	char16 *Script = NULL;
 	LHashTbl<StrKey<char, false>, LFunc*> Methods;
-	uint64_t Regs;
+	uint64_t Regs = 0;
 	LArray<LVariables*> Scopes;
 	LArray<LinkFixup> Fixups;
 	LHashTbl<StrKey<char16>, char16*> Defines;
 	LHashTbl<ConstStrKey<char16,false>, LTokenType> ExpTok;
-	LDom *ScriptArgs;
+	LDom *ScriptArgs = NULL;
 	LVarRef ScriptArgsRef;
-	bool ErrShowFirstOnly;
+	bool ErrShowFirstOnly = true;
 	LArray<LString> ErrLog;
-	bool Debug;
+	bool Debug = false;
 
 	#ifdef _DEBUG
 	LString::Array RegAllocators;
@@ -408,15 +408,6 @@ public:
 
 	LCompilerPriv()
 	{
-		Debug = false;
-		ErrShowFirstOnly = true;
-		SysCtx = NULL;
-		UserCtx = NULL;
-		Code = 0;
-		Log = 0;
-		Script = 0;
-		Regs = 0;
-		ScriptArgs = NULL;
 		ScriptArgsRef.Empty();
 		
 		#define LNULL NULL
@@ -465,7 +456,7 @@ public:
 		SysCtx = NULL;
 		UserCtx = NULL;
 		DeleteObj(Code);
-		Log = 0;
+		Log = NULL;
 		Tokens.DeleteArrays();
 		Lines.Empty();
 		DeleteArray(Script);
@@ -3632,7 +3623,7 @@ bool LCompiler::Compile
 	d->Methods.Empty();
 	if (SysContext)
 	{
-		LHostFunc *f = SysContext->GetCommands();
+		auto f = SysContext->GetCommands();
 		for (int i=0; f[i].Method; i++)
 		{
 			f[i].Context = SysContext;
@@ -3644,7 +3635,7 @@ bool LCompiler::Compile
 	d->UserCtx = UserContext;
 	if (d->UserCtx)
 	{
-		LHostFunc *f = d->UserCtx->GetCommands();
+		auto f = d->UserCtx->GetCommands();
 		if (f)
 		{
 			for (int i=0; f[i].Method; i++)
@@ -3697,20 +3688,12 @@ bool LCompiler::Compile
 class LScriptEnginePrivate
 {
 public:
-	LViewI *Parent;
+	LViewI *Parent = NULL;
 	SystemFunctions SysContext;
-	LScriptContext *UserContext;
-	LCompiledCode *Code;
-	LVmCallback *Callback;
+	LScriptContext *UserContext = NULL;
+	LCompiledCode *Code = NULL;
+	LVmCallback *Callback = NULL;
 	LVariant ReturnValue;
-
-	LScriptEnginePrivate()
-	{
-		UserContext = NULL;
-		Parent = NULL;
-		Code = NULL;
-		Callback = NULL;
-	}
 };
 
 LScriptEngine::LScriptEngine(LViewI *parent, LScriptContext *UserContext, LVmCallback *Callback)

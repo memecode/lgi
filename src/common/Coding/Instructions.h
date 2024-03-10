@@ -19,11 +19,11 @@
 
 default:
 {
-	#if VM_DECOMP
+	#if 1// VM_DECOMP
 	if (Log)
-		Log->Print("\t%p Unknown instruction %i (0x%x)\n",
+		Log->Print("\t%p Unknown instruction %i (%s)\n",
 					CurrentScriptAddress - 1,
-					c.u8[-1], c.u8[-1]);
+					c.u8[-1], InstToString((LInstruction)c.u8[-1]));
 	#endif
 	OnException(_FL, CurrentScriptAddress, "Unknown instruction");
 	SetScriptError;
@@ -186,6 +186,112 @@ case IUnaryMinus:
 			*Var = -Var->CastInt32();
 			break;
 	}
+	#endif
+	break;
+}
+case IBitwiseOr:
+{
+	#if VM_DECOMP
+	if (Log)
+		Log->Print("%p BitwiseOr %s | %s\n",
+			CurrentScriptAddress - 1,
+			c.r[0].GetStr(),
+			c.r[1].GetStr());
+	#endif
+
+	LResolveRef(Dst) Resolve();
+	LResolveRef(Src) Resolve();
+
+	#ifdef VM_EXECUTE
+	*Dst = Dst->CastInt64() | Src->CastInt64();
+	#endif
+	break;
+}
+case IBitwiseAnd:
+{
+	#if VM_DECOMP
+	if (Log)
+		Log->Print("%p BitwiseAnd %s & %s\n",
+			CurrentScriptAddress - 1,
+			c.r[0].GetStr(),
+			c.r[1].GetStr());
+	#endif
+
+	LResolveRef(Dst) Resolve();
+	LResolveRef(Src) Resolve();
+
+	#ifdef VM_EXECUTE
+	*Dst = Dst->CastInt64() & Src->CastInt64();
+	#endif
+	break;
+}
+case IBitwiseXor:
+{
+	#if VM_DECOMP
+	if (Log)
+		Log->Print("%p BitwiseXor %s & %s\n",
+			CurrentScriptAddress - 1,
+			c.r[0].GetStr(),
+			c.r[1].GetStr());
+	#endif
+
+	LResolveRef(Dst) Resolve();
+	LResolveRef(Src) Resolve();
+
+	#ifdef VM_EXECUTE
+	*Dst = Dst->CastInt64() ^ Src->CastInt64();
+	#endif
+	break;
+}
+case IBitwiseNegate:
+{
+	#if VM_DECOMP
+	if (Log)
+		Log->Print("%p BitwiseNegate %s = ~%s\n",
+			CurrentScriptAddress - 1,
+			c.r[0].GetStr(),
+			c.r[0].GetStr());
+	#endif
+
+	LResolveRef(Dst) Resolve();
+	#ifdef VM_EXECUTE
+	*Dst = ~Dst->CastInt64();
+	#endif
+	break;
+}
+case IShiftLeft:
+{
+	#if VM_DECOMP
+	if (Log)
+		Log->Print("%p ShiftLeft %s << %s\n",
+			CurrentScriptAddress - 1,
+			c.r[0].GetStr(),
+			c.r[1].GetStr());
+	#endif
+
+	LResolveRef(Dst) Resolve();
+	LResolveRef(Src) Resolve();
+
+	#ifdef VM_EXECUTE
+	*Dst = Dst->CastInt64() << Src->CastInt64();
+	#endif
+	break;
+}
+case IShiftRight:
+{
+	#if VM_DECOMP
+	if (Log)
+		Log->Print("%p Plus %s += %s\n",
+			CurrentScriptAddress - 1,
+			c.r[0].GetStr(),
+			c.r[1].GetStr());
+	#endif
+
+	LResolveRef(Dst) Resolve();
+	LResolveRef(Src) Resolve();
+
+	#ifdef VM_EXECUTE
+	*Dst = Dst->CastInt64() >> Src->CastInt64();
 	#endif
 	break;
 }

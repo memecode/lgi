@@ -1,0 +1,46 @@
+
+a = 0x04;
+b = a | 0x80;
+if (b != 0x84)
+{
+	Print("Bitwise OR failed.\n");
+	return false;
+}
+
+b = a & 0x84;
+if (b != 0x04)
+{
+	Print("Bitwise AND failed.\n");
+	return false;
+}
+
+b = ~0xaa;
+if (b != -171)
+{
+	Print("Bitwise NEGATE failed.\n");
+	return false;
+}
+
+b = a ^ 0x84;
+if (b != 0x80)
+{
+	Print("Bitwise XOR failed.\n");
+	return false;
+}
+
+b = a << 4;
+if (b != 0x40)
+{
+	Print("<< operator failed.\n");
+	return false;
+}
+
+b = a >> 1;
+if (b != 0x2)
+{
+	Print(">> operator failed.\n");
+	return false;
+}
+
+return true;
+
