@@ -46,7 +46,7 @@ public:
 		{
 			case IDC_BROWSE_OUTPUT:
 			{
-				LFileSelect *s = new LFileSelect;
+				auto s = new LFileSelect;
 				s->Parent(this);
 				s->OpenFolder([this](auto s, auto ok)
 				{
@@ -152,7 +152,7 @@ void NewProjectFromTemplate(LViewI *parent)
 		#ifdef MAC
 		"../../../../"
 		#endif
-		"../../templates";
+		"../templates";
 	if (!p.Exists())
 	{
 		LgiMsg(parent, "The path '%s' doesn't exist.", AppName, MB_OK, p.GetFull().Get());
@@ -164,21 +164,25 @@ void NewProjectFromTemplate(LViewI *parent)
 	auto Dlg = new NewProjFromTemplate(parent);
 	Dlg->DoModal([Dlg](auto dlg, auto code)
 	{
-		LTree *t;
-		if (!Dlg->GetViewById(IDC_TEMPLATES, t))
+		if (code)
 		{
-			LgiTrace("%s:%i - No tree.\n", _FL);
-			return;
+			LTree *t;
+			if (!Dlg->GetViewById(IDC_TEMPLATES, t))
+			{
+				LgiTrace("%s:%i - No tree.\n", _FL);
+				return;
+			}
+		
+			auto sel = t->Selection();
+			if (!sel)
+			{
+				LgiTrace("%s:%i - No selection.\n", _FL);
+				return;
+			}
+		
+			CreateProject(Dlg->GetCtrlName(IDC_PROJ_NAME), sel->GetText(1), Dlg->GetCtrlName(IDC_FOLDER));
 		}
-	
-		auto sel = t->Selection();
-		if (!sel)
-		{
-			LgiTrace("%s:%i - No selection.\n", _FL);
-			return;
-		}
-	
-		CreateProject(Dlg->GetCtrlName(IDC_PROJ_NAME), sel->GetText(1), Dlg->GetCtrlName(IDC_FOLDER));
+		
 		delete Dlg;
 	});
 }

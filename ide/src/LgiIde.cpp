@@ -4005,15 +4005,13 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_COPY:
 		{
-			LTextView3 *Doc = FocusEdit();
-			if (Doc)
+			if (auto Doc = FocusEdit())
 				Doc->PostEvent(M_COPY);
 			break;
 		}
 		case IDM_PASTE:
 		{
-			LTextView3 *Doc = FocusEdit();
-			if (Doc)
+			if (auto Doc = FocusEdit())
 			{
 				#if 0
 				
@@ -4066,7 +4064,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 					}
 				}
 				
-				IdeProject *p = RootProject();
+				auto p = RootProject();
 				if (p)
 				{
 					LAutoString Base = p->GetBasePath();
@@ -4111,8 +4109,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_FIND_SYMBOL:
 		{
-			IdeDoc *Doc = FocusDoc();
-			if (Doc)
+			if (auto Doc = FocusDoc())
 			{
 				Doc->GotoSearch(IDC_SYMBOL_SEARCH);
 			}
@@ -4128,17 +4125,13 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_GOTO_SYMBOL:
 		{
-			IdeDoc *Doc = FocusDoc();
-			if (Doc)
-			{
+			if (auto Doc = FocusDoc())
 				Doc->SearchSymbol();
-			}
 			break;
 		}
 		case IDM_FIND_PROJECT_FILE:
 		{
-			IdeDoc *Doc = FocusDoc();
-			if (Doc)
+			if (auto Doc = FocusDoc())
 			{
 				Doc->SearchFile();
 			}
@@ -4153,12 +4146,11 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_FIND_REFERENCES:
 		{
-			LViewI *f = LAppInst->GetFocus();
-			LDocView *doc = dynamic_cast<LDocView*>(f);
+			auto doc = dynamic_cast<LDocView*>(LAppInst->GetFocus());
 			if (!doc)
 				break;
 
-			ssize_t c = doc->GetCaret();
+			auto c = doc->GetCaret();
 			if (c < 0)
 				break;
 
