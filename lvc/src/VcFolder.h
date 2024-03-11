@@ -219,6 +219,10 @@ class VcFolder : public LTreeItem
 	LArray<CommitField> Fields;
 	LArray<std::function<void()>> OnVcsTypeEvents;
 
+	// Author name/email
+	LString AuthorName, AuthorEmail;
+	bool IsGettingAuthor = false;
+
 	// This is set when a blame or log is looking at a particular file, 
 	// and wants it selected after the file list is populated
 	LString FileToSelect;
@@ -319,6 +323,8 @@ public:
 	LString &GetCurrentBranch();
 	void SetCurrentBranch(LString name);
 	LXmlTag *Save();
+	bool GetRepoAuthor();
+	void UpdateAuthorUi();
 	void Empty();
 	void Select(bool b);
 	void ListCommit(VcCommit *c);

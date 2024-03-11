@@ -1044,11 +1044,11 @@ public:
 			Menu->Load(this, "IDM_MENU");
 		}
 
-		LBox *ToolsBox = new LBox(IDC_TOOLS_BOX, true, "ToolsBox");
+		auto ToolsBox = new LBox(IDC_TOOLS_BOX, true, "ToolsBox");
 		FoldersBox = new LBox(IDC_FOLDERS_BOX, false, "FoldersBox");
-		LBox *CommitsBox = new LBox(IDC_COMMITS_BOX, true, "CommitsBox");
+		auto CommitsBox = new LBox(IDC_COMMITS_BOX, true, "CommitsBox");
 
-		ToolBar *Tools = new ToolBar;
+		auto Tools = new ToolBar;
 
 		ToolsBox->Attach(this);
 		Tools->Attach(ToolsBox);
@@ -1097,15 +1097,15 @@ public:
 		FilesLayout->GetCss(true)->Width("35%");
 		FilesLayout->Attach(FilesBox);
 
-		LBox *MsgBox = new LBox(IDC_MSG_BOX, true);
+		auto MsgBox = new LBox(IDC_MSG_BOX, true);
 		MsgBox->Attach(FilesBox);
 		
-		CommitCtrls *Commit = new CommitCtrls;
+		auto Commit = new CommitCtrls;
 		Commit->Attach(MsgBox);
-		Commit->GetCss(true)->Height("25%");
+		Commit->GetCss(true)->Height("30%");
 		if (Commit->GetViewById(IDC_MSG, Msg))
 		{
-			LTextView3 *Tv = dynamic_cast<LTextView3*>(Msg);
+			auto Tv = dynamic_cast<LTextView3*>(Msg);
 			if (Tv)
 			{
 				Tv->Sunken(true);
@@ -1116,10 +1116,10 @@ public:
 
 		Tabs = new LTabView(IDC_TAB_VIEW);
 		Tabs->Attach(MsgBox);
-		const char *Style = "Padding: 0px 8px 8px 0px";
+		auto Style = "Padding: 0px 8px 8px 0px";
 		Tabs->GetCss(true)->Parse(Style);
 
-		LTabPage *p = Tabs->Append("Diff");
+		auto p = Tabs->Append("Diff");
 		p->Append(Diff = new DiffView(IDC_TXT));
 		// Diff->Sunken(true);
 		Diff->SetWrapType(L_WRAP_NONE);
@@ -1133,7 +1133,7 @@ public:
 
 		AttachChildren();
 
-		LXmlTag *f = Opts.LockTag(OPT_Folders, _FL);
+		auto f = Opts.LockTag(OPT_Folders, _FL);
 		if (!f)
 		{
 			Opts.CreateTag(OPT_Folders);

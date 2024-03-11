@@ -41,6 +41,8 @@
 #define IDS_ERR_NO_VCS_FOUND					87
 #define IDS_ERR_ADD_FAILED						88
 #define IDS_ERR_REVERT_FAILED					89
+#define IDC_AUTHOR								91
+#define IDC_EDIT_AUTHOR							92
 #define IDC_TABLE								500
 #define IDC_COMMIT								501
 #define IDC_PULL								502

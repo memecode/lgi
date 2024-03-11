@@ -840,6 +840,79 @@ void VcFolder::FilterCurrentFiles()
 	d->Files->ResizeColumnsToContent();
 }
 
+void VcFolder::UpdateAuthorUi()
+{
+	if (AuthorEmail && AuthorName)
+	{
+		auto author = LString::Fmt("%s <%s>", AuthorName.Get(), AuthorEmail.Get());
+		d->Wnd()->SetCtrlName(IDC_AUTHOR, author);
+	}
+}
+
+bool VcFolder::GetRepoAuthor()
+{
+	switch (GetType())
+	{
+		case VcGit:
+		{
+			if (IsGettingAuthor)
+				return true;
+
+			auto params = new ParseParams;
+			params->Callback = [this](auto code, auto s)
+			{
+				for (auto ln: s.Strip().SplitDelimit("\r\n"))
+				{
+					auto parts = ln.SplitDelimit("=", 1);
+					if (parts.Length() == 2)
+					{
+						if (parts[0].Equals("user.email"))
+							AuthorEmail = parts[1];
+						else if (parts[0].Equals("user.name"))
+							AuthorName = parts[1];
+					}
+				}
+
+				IsGettingAuthor = false;
+				UpdateAuthorUi();
+			};
+			IsGettingAuthor = StartCmd("-P config -l", NULL, params);
+			break;
+		}
+		case VcHg:
+		{
+			if (IsGettingAuthor)
+				return true;
+
+			auto params = new ParseParams;
+			params->Callback = [this](auto code, auto s)
+			{
+				s = s.Strip();
+				auto start = s.Find("<");
+				auto end = s.Find(">", start);
+				if (start >= 0 &&
+					end >= start)
+				{
+					AuthorName = s(0, start).Strip();
+					AuthorEmail = s(start + 1, end).Strip();
+				}
+
+				IsGettingAuthor = false;
+				UpdateAuthorUi();
+			};
+			IsGettingAuthor = StartCmd("config ui.username", NULL, params);
+			break;
+		}
+		default:
+		{
+			NoImplementation(_FL);
+			return false;
+		}
+	}
+
+	return true;
+}
+
 void VcFolder::Select(bool b)
 {
 	#if PROFILE_FN
@@ -861,6 +934,11 @@ void VcFolder::Select(bool b)
 
 		PROF("DefaultFields");
 		DefaultFields();
+
+		if (AuthorEmail)
+			UpdateAuthorUi();
+		else
+			GetRepoAuthor();
 
 		PROF("Type Change");
 		if (GetType() != d->PrevType)

@@ -60,6 +60,9 @@
 		<String Ref="80" Cid="80" Define="IDC_GIT_LIMIT" />
 		<String Ref="81" Cid="81" Define="IDC_HG_LIMIT" />
 		<String Ref="82" Cid="82" Define="IDC_CVS_LIMIT" />
+		<String Ref="90" Cid="-1" Define="IDC_STATIC" en="Author:" />
+		<String Ref="91" Cid="91" Define="IDC_AUTHOR" />
+		<String Ref="92" Cid="92" Define="IDC_EDIT_AUTHOR" en="..." />
 	</string-group>
 	<string-group Name="General">
 		<String Ref="84" Cid="84" Define="IDS_CREATE_NEW_BRANCH" en="Push will create a new remote branch. Is that ok?" />
@@ -69,8 +72,8 @@
 		<String Ref="88" Cid="88" Define="IDS_ERR_ADD_FAILED" en="Add file failed." />
 		<String Ref="89" Cid="89" Define="IDS_ERR_REVERT_FAILED" en="Error reverting changes." />
 	</string-group>
-	<Dialog pos="7,7,464,203" ref="9">
-		<TableLayout pos="7,7,447,167" ref="10" cols="0.200,0.200,0.200,0.200,0.200" rows="0.311,0.454,0.236">
+	<Dialog pos="7,7,464,223" ref="9">
+		<TableLayout pos="7,7,447,184" ref="10" cols="0.200,0.200,0.200,0.200,0.200" rows="0.252,0.367,0.191,0.191">
 			<tr>
 				<td addr="0,0" align="Max" valign="Center">
 					<StaticText pos="7,0,69,12" ref="12" />
@@ -89,16 +92,27 @@
 				</td>
 			</tr>
 			<tr>
-				<td addr="0,1" align="Max">
-					<StaticText pos="7,55,73,68" ref="15" />
+				<td addr="0,1" align="Max" valign="Center">
+					<StaticText pos="14,56,69,76" ref="90" />
 				</td>
-				<td addr="1,1" colspan="4" rowspan="2">
-					<EditBox Pos="105,56,419,132" MultiLine="1" ref="16" />
+				<td addr="1,1" colspan="3">
+					<EditBox Pos="98,56,307,76" Enabled="0" ref="91" />
+				</td>
+				<td addr="4,1">
+					<Button pos="364,56,391,76" ref="92" image="" toggle="0" />
 				</td>
 			</tr>
 			<tr>
 				<td addr="0,2" align="Max">
-					<CheckBox pos="7,126,69,139" ref="50" />
+					<StaticText pos="7,110,73,123" ref="15" />
+				</td>
+				<td addr="1,2" colspan="4" rowspan="2">
+					<EditBox Pos="105,112,419,153" MultiLine="1" ref="16" />
+				</td>
+			</tr>
+			<tr>
+				<td addr="0,3" align="Max">
+					<CheckBox pos="7,145,69,158" ref="50" />
 				</td>
 			</tr>
 		</TableLayout>
@@ -244,7 +258,7 @@
 		</TableLayout>
 	</Dialog>
 	<Dialog pos="7,7,998,136" ref="1">
-		<TableLayout pos="7,7,972,97" ref="2" Style="padding-top: 3px;" CellStyle="padding-right: 1em;" cols="0.128,0.133,0.124,0.085,0.063,0.210,0.128,0.128" rows="1.000">
+		<TableLayout pos="7,7,972,97" ref="2" Style="padding-top: 3px;" cols="0.128,0.133,0.124,0.085,0.063,0.210,0.128,0.128" rows="1.000">
 			<tr>
 				<td addr="0,0" valign="Center" style="padding-left: 4px;&#10;padding-right: 1em;">
 					<Button pos="7,21,71,48" ref="18" toggle="0" />
