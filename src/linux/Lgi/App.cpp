@@ -306,6 +306,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	LColour::OnChange();
 
 	Gtk::gchar id[256];
+	LAssert(strchr(name, '/') == NULL); // name can't have slashes in it.
 	sprintf_s(id, sizeof(id), "com.memecode.%s", name);
 	d->App = Gtk::gtk_application_new(id, Gtk::G_APPLICATION_FLAGS_NONE); 
 	LAssert(d->App != NULL);

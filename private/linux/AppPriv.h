@@ -71,7 +71,7 @@ public:
 	{
 		GuiThread = LCurrentThreadHnd();
 		GuiThreadId = LCurrentThreadId();
-		printf("GuiThread: %" PRIx64 " id=%i\n", GuiThread, GuiThreadId);
+		// printf("GuiThread: %" PRIx64 " id=%i\n", GuiThread, GuiThreadId);
 	}
 
 	~LAppPrivate()

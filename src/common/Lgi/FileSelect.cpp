@@ -1769,30 +1769,30 @@ void LFolderItem::OnDelete(bool Ask)
 
 void LFolderItem::OnRename()
 {
-	LInput *Inp = new LInput(Dlg, File, "New name:", Dlg->Name());
-	Inp->DoModal([&](auto d, auto code)
+	auto Inp = new LInput(Dlg, File, "New name:", Dlg->Name());
+	Inp->DoModal([this, Inp](auto d, auto code)
 	{
-		if (!code)
-			return;
-			
-		char Old[MAX_PATH_LEN];
-		strcpy_s(Old, sizeof(Old), Path);
+		if (code)
+		{			
+			char Old[MAX_PATH_LEN];
+			strcpy_s(Old, sizeof(Old), Path);
 
-		char New[MAX_PATH_LEN];
-		File[0] = 0;
-		LMakePath(New, sizeof(New), Path, Inp->GetStr());
-		
-		if (FileDev->Move(Old, New))
-		{
-			DeleteArray(Path);
-			Path = NewStr(New);
-			File = strrchr(Path, DIR_CHAR);
-			if (File) File++;
-			Update();
-		}
-		else
-		{
-			LgiMsg(Dlg, "Renaming '%s' failed.", Dlg->Name(), MB_OK);
+			char New[MAX_PATH_LEN];
+			File[0] = 0;
+			LMakePath(New, sizeof(New), Path, Inp->GetStr());
+			
+			if (FileDev->Move(Old, New))
+			{
+				Path = New;
+				File = strrchr(Path, DIR_CHAR);
+				if (File)
+					File++;
+				Update();
+			}
+			else
+			{
+				LgiMsg(Inp, "Renaming '%s' failed.", Dlg->Name(), MB_OK);
+			}
 		}
 		
 		delete Inp;
