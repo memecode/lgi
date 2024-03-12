@@ -84,6 +84,9 @@
     <ClInclude Include="..\Src\VcFolder.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\lgi\common\IniFile.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resources\Lvc.rc">

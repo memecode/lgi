@@ -4,6 +4,7 @@
 #include "lgi/common/ClipBoard.h"
 #include "lgi/common/Json.h"
 #include "lgi/common/ProgressDlg.h"
+#include "lgi/common/IniFile.h"
 
 #include "resdefs.h"
 
@@ -882,32 +883,7 @@ LString VcFolder::GetConfigFile(bool local)
 	return LString();
 }
 
-LString GetIni(LString::Array &lines, LString section, LString var)
-{
-	LString curSection;
-	LString sect = section.Lower();
-	for (auto &ln: lines)
-	{
-		auto s = ln.LStrip();
-		if (s(0) == '[')
-		{
-			auto end = s.Find("]", 1);
-			if (end > 0)
-				curSection = s(1, end).Strip().Lower();
-		}
-		else if (curSection == sect)
-		{
-			auto p = ln.SplitDelimit("=", 1);
-			if (p.Length() == 2)
-			{
-				if (p[0].Strip() == var)
-					return p[1].Strip();
-			}
-		}
-	}
 
-	return LString();
-}
 
 bool VcFolder::GetAuthor(bool local, std::function<void(LString name,LString email)> callback)
 {
@@ -946,12 +922,8 @@ bool VcFolder::GetAuthor(bool local, std::function<void(LString name,LString ema
 			if (!config)
 				return false;
 
-			auto data = LReadFile(config);
-			if (!data)
-				return false;
-
-			auto lines = data.SplitDelimit("\r\n");
-			auto author = GetIni(lines, "ui", "username");
+			LIniFile data(config);
+			auto author = data.Get("ui", "username");
 
 			auto start = author.Find("<");
 			auto end = author.Find(">", start);
@@ -1003,7 +975,12 @@ bool VcFolder::SetAuthor(bool local, LString name, LString email)
 			if (!config)
 				return false;
 
-			break;
+			LString author;
+			author.Printf("%s <%s>", name.Get(), email.Get());
+
+			LIniFile data(config);
+			data.Set("ui", "username", author);
+			return data.Write();
 		}
 		default:
 		{

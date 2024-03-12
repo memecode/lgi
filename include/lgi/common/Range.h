@@ -72,6 +72,11 @@ struct LRange
 		return Start >= 0 && Len > 0;
 	}
 
+	operator bool() const
+	{
+		return Start >= 0 && Len > 0;
+	}
+
 	bool operator ==(const LRange &r) const { return Start == r.Start && Len == r.Len; }
 	bool operator !=(const LRange &r) const { return Start != r.Start || Len != r.Len; }
 	bool operator >(const LRange &r) const { return Start > r.Start; }

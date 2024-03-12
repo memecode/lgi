@@ -189,6 +189,7 @@
     <Manifest Include="..\..\src\win\General\Lgi.manifest" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\include\lgi\common\IniFile.h" />
     <ClInclude Include="..\..\include\lgi\common\StructuredIo.h" />
     <ClInclude Include="..\..\include\lgi\common\StructuredLog.h" />
     <ClInclude Include="..\Src\Lvc.h" />

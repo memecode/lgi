@@ -2026,12 +2026,26 @@ const char* toString(VersionCtrl v)
 }
 
 //////////////////////////////////////////////////////////////////
+#include "lgi/common/IniFile.h"
+void LIniFileTest()
+{
+	auto fn = "C:\\Users\\Matthew\\temp\\mercurial.ini";
+	LIniFile ini(fn);
+	LAssert(ini);
+	auto user = ini.Get("ui", "username");
+	LAssert(user.Find("fret@memecode.com")>=0);
+	ini.Set("ui", "username", "Matthew Allen2 <fret@memecode.com>");
+	auto res = ini.Write();
+	LAssert(res);
+}
+
 int LgiMain(OsAppArguments &AppArgs)
 {
 	LApp a(AppArgs, AppName);
 	if (a.IsOk())
 	{
 		// LStructuredLog::UnitTest();
+		// LIniFileTest();
 
 		a.AppWnd = new App;
 		a.Run();
