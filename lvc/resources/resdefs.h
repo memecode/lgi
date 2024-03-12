@@ -43,6 +43,12 @@
 #define IDS_ERR_REVERT_FAILED					89
 #define IDC_AUTHOR								91
 #define IDC_EDIT_AUTHOR							92
+#define IDD_AUTHOR								93
+#define IDD_									94
+#define IDC_LOCAL_NAME							95
+#define IDC_LOCAL_EMAIL							104
+#define IDC_GLOBAL_NAME							105
+#define IDC_GLOBAL_EMAIL						106
 #define IDC_TABLE								500
 #define IDC_COMMIT								501
 #define IDC_PULL								502

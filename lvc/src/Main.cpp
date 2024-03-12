@@ -127,6 +127,50 @@ public:
 	}
 };
 
+class EditAuthor : public LDialog
+{
+	VcFolder *folder = NULL;
+
+public:
+	EditAuthor(VcFolder *f) : folder(f)
+	{
+		SetParent(folder->GetTree());
+		LoadFromResource(IDD_AUTHOR);
+
+		f->GetAuthor(true, [this](auto name, auto email)
+		{
+			SetCtrlName(IDC_LOCAL_NAME, name);
+			SetCtrlName(IDC_LOCAL_EMAIL, email);
+		});
+
+		f->GetAuthor(false, [this](auto name, auto email)
+		{
+			SetCtrlName(IDC_GLOBAL_NAME, name);
+			SetCtrlName(IDC_GLOBAL_EMAIL, email);
+		});
+	}
+
+	int OnNotify(LViewI *Ctrl, LNotification n)
+	{
+		switch (Ctrl->GetId())
+		{
+			case IDOK:
+			{
+				folder->SetAuthor(true,  GetCtrlName(IDC_LOCAL_NAME),  GetCtrlName(IDC_LOCAL_EMAIL));
+				folder->SetAuthor(false, GetCtrlName(IDC_GLOBAL_NAME), GetCtrlName(IDC_GLOBAL_EMAIL));
+				// fall through
+			}
+			case IDCANCEL:
+			{
+				EndModal(Ctrl->GetId() == IDOK);
+				break;
+			}
+		}
+
+		return 0;
+	}
+};
+
 class ToolBar : public LLayout, public LResourceLoad
 {
 public:
@@ -1464,6 +1508,13 @@ public:
 			f->FilterCurrentFiles();
 	}
 
+	VcFolder *GetCurrent()
+	{
+		if (!Tree)
+			return NULL;
+		return dynamic_cast<VcFolder*>(Tree->Selection());
+	}
+
 	int OnNotify(LViewI *c, LNotification n)
 	{
 		switch (c->GetId())
@@ -1651,17 +1702,24 @@ public:
 				else LgiMsg(this, "No message for commit.", AppName);
 				break;
 			}
+			case IDC_EDIT_AUTHOR:
+			{
+				if (auto f = GetCurrent())
+				{
+					auto dlg = new EditAuthor(f);
+					dlg->DoModal(NULL);
+				}
+				break;
+			}
 			case IDC_PUSH:
 			{
-				VcFolder *f = dynamic_cast<VcFolder*>(Tree->Selection());
-				if (f)
+				if (auto f = GetCurrent())
 					f->Push();
 				break;
 			}
 			case IDC_PULL:
 			{
-				VcFolder *f = dynamic_cast<VcFolder*>(Tree->Selection());
-				if (f)
+				if (auto f = GetCurrent())
 					f->Pull();
 				break;
 			}

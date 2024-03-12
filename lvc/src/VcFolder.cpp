@@ -849,17 +849,76 @@ void VcFolder::UpdateAuthorUi()
 	}
 }
 
-bool VcFolder::GetRepoAuthor()
+LString VcFolder::GetConfigFile(bool local)
 {
+	switch (GetType())
+	{
+		case VcHg:
+		{
+			LFile::Path p;
+			if (local)
+			{
+				p = LFile::Path(LocalPath()) / ".hg" / "hgrc";
+			}
+			else
+			{
+				p = LFile::Path(LSP_HOME) / ".hgrc";
+				if (!p.Exists())
+					p = LFile::Path(LSP_HOME) / "mercurial.ini";
+			}
+
+			d->Log->Print("%s: %i\n", p.GetFull().Get(), p.Exists());
+			if (p.Exists())
+				return p.GetFull();
+			break;
+		}
+		default:
+		{
+			NoImplementation(_FL);
+			return false;
+		}
+	}
+
+	return LString();
+}
+
+LString GetIni(LString::Array &lines, LString section, LString var)
+{
+	LString curSection;
+	LString sect = section.Lower();
+	for (auto &ln: lines)
+	{
+		auto s = ln.LStrip();
+		if (s(0) == '[')
+		{
+			auto end = s.Find("]", 1);
+			if (end > 0)
+				curSection = s(1, end).Strip().Lower();
+		}
+		else if (curSection == sect)
+		{
+			auto p = ln.SplitDelimit("=", 1);
+			if (p.Length() == 2)
+			{
+				if (p[0].Strip() == var)
+					return p[1].Strip();
+			}
+		}
+	}
+
+	return LString();
+}
+
+bool VcFolder::GetAuthor(bool local, std::function<void(LString name,LString email)> callback)
+{
+	auto scope = local ? "--local" : "--global";
+
 	switch (GetType())
 	{
 		case VcGit:
 		{
-			if (IsGettingAuthor)
-				return true;
-
 			auto params = new ParseParams;
-			params->Callback = [this](auto code, auto s)
+			params->Callback = [this, callback](auto code, auto s)
 			{
 				for (auto ln: s.Strip().SplitDelimit("\r\n"))
 				{
@@ -874,33 +933,76 @@ bool VcFolder::GetRepoAuthor()
 				}
 
 				IsGettingAuthor = false;
-				UpdateAuthorUi();
+				callback(AuthorName, AuthorEmail);
 			};
-			IsGettingAuthor = StartCmd("-P config -l", NULL, params);
+
+			auto args = LString::Fmt("-P config -l %s", scope);
+			StartCmd(args, NULL, params);
 			break;
 		}
 		case VcHg:
 		{
-			if (IsGettingAuthor)
-				return true;
+			auto config = GetConfigFile(local);
+			if (!config)
+				return false;
 
-			auto params = new ParseParams;
-			params->Callback = [this](auto code, auto s)
+			auto data = LReadFile(config);
+			if (!data)
+				return false;
+
+			auto lines = data.SplitDelimit("\r\n");
+			auto author = GetIni(lines, "ui", "username");
+
+			auto start = author.Find("<");
+			auto end = author.Find(">", start);
+			if (start >= 0 &&
+				end >= start)
 			{
-				s = s.Strip();
-				auto start = s.Find("<");
-				auto end = s.Find(">", start);
-				if (start >= 0 &&
-					end >= start)
-				{
-					AuthorName = s(0, start).Strip();
-					AuthorEmail = s(start + 1, end).Strip();
-				}
+				AuthorName = author(0, start).Strip();
+				AuthorEmail = author(start + 1, end).Strip();
+			}
 
-				IsGettingAuthor = false;
-				UpdateAuthorUi();
-			};
-			IsGettingAuthor = StartCmd("config ui.username", NULL, params);
+			IsGettingAuthor = false;
+			callback(AuthorName, AuthorEmail);
+			break;
+		}
+		default:
+		{
+			NoImplementation(_FL);
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool VcFolder::SetAuthor(bool local, LString name, LString email)
+{
+	auto scope = local ? "--local" : "--global";
+
+	if (local)
+	{
+		AuthorName = name;
+		AuthorEmail = email;
+	}
+
+	switch (GetType())
+	{
+		case VcGit:
+		{
+			auto args = LString::Fmt("config %s user.name \"%s\"", scope, name.Get());
+			StartCmd(args);
+
+			args = LString::Fmt("config %s user.email \"%s\"", scope, email.Get());
+			StartCmd(args);
+			break;
+		}
+		case VcHg:
+		{
+			auto config = GetConfigFile(local);
+			if (!config)
+				return false;
+
 			break;
 		}
 		default:
@@ -938,7 +1040,10 @@ void VcFolder::Select(bool b)
 		if (AuthorEmail)
 			UpdateAuthorUi();
 		else
-			GetRepoAuthor();
+			GetAuthor(true, [this](auto name, auto email)
+			{
+				UpdateAuthorUi();
+			});
 
 		PROF("Type Change");
 		if (GetType() != d->PrevType)

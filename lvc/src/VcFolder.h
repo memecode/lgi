@@ -323,7 +323,9 @@ public:
 	LString &GetCurrentBranch();
 	void SetCurrentBranch(LString name);
 	LXmlTag *Save();
-	bool GetRepoAuthor();
+	LString GetConfigFile(bool local);
+	bool GetAuthor(bool local, std::function<void(LString name,LString email)> callback);
+	bool SetAuthor(bool local, LString name, LString email);
 	void UpdateAuthorUi();
 	void Empty();
 	void Select(bool b);
