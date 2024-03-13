@@ -1,11 +1,16 @@
-#ifndef _RANGES_H_
-#define _RANGES_H_
+#pragma once
 
 /// This class keeps an array of ranges in sorted order, merging 
 /// adjacent ranges when new ranges are added.
 class LRanges : public LArray<LRange>
 {
 public:
+	LRanges(const char *init = NULL)
+	{
+		if (init)
+			FromString(init);
+	}
+
 	LRanges &operator +=(const LRange &r)
 	{
 		// Insert at the right position
@@ -22,7 +27,7 @@ public:
 				auto &mr = (*this)[mid];
 				if (r < mr)
 					e = mid - 1;
-				else if (r >= mr.End())
+				else if (r >= mr)
 					s = mid + 1;
 				else
 				{
@@ -34,7 +39,7 @@ public:
 			auto &cur = (*this)[s];
 			if (r < cur)
 				AddAt(s, r);
-			else if (r >= cur.End())
+			else if (r >= cur)
 				AddAt(s + 1, r);
 			else
 			{
@@ -101,6 +106,19 @@ public:
 		return true;
 	}
 
+	// Check the ranges are sorted and non-overlapping
+	bool IsValid() const
+	{
+		for (size_t i=0; i<Length()-1; i++)
+		{
+			auto &a = ItemAt(i);
+			auto &b = ItemAt(i+1);
+			if (a.End() >= b.Start)
+				return false;
+		}
+		return true;
+	}
+
 	LString ToString()
 	{
 		LStringPipe p;
@@ -124,7 +142,7 @@ public:
 		return true;
 	}
 
-	bool UnitTests()
+	static bool UnitTests()
 	{
 		/*
 		// Out of order merge test
@@ -137,16 +155,15 @@ public:
 		*/
 
 		// Overlapping insert test
-		LRange *r = NULL;
-		FromString("10-20,30-40,50-60,70-80,90-100");
-		*this += LRange(55,10);
-		if (Length() != 5)
+		LRanges r("10-20,30-40,50-60,70-80,90-100");
+		LRange *rng = NULL;
+		r += LRange(55,10);
+		if (r.Length() != 5)
 			goto Error;
-		r = AddressOf(2);
-		if (r->Start != 50 || r->Len != 15)
+		rng = r.AddressOf(2);
+		if (rng->Start != 50 || rng->Len != 15)
 			goto Error;
 
-		Length(0);
 		return true;
 
 	Error:
@@ -155,4 +172,3 @@ public:
 	}
 };
 
-#endif

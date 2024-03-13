@@ -79,10 +79,10 @@ struct LRange
 
 	bool operator ==(const LRange &r) const { return Start == r.Start && Len == r.Len; }
 	bool operator !=(const LRange &r) const { return Start != r.Start || Len != r.Len; }
-	bool operator >(const LRange &r) const { return Start > r.Start; }
-	bool operator >=(const LRange &r) const { return Start >= r.Start; }
-	bool operator <(const LRange &r) const { return Start < r.Start; }
-	bool operator <=(const LRange &r) const { return Start < r.Start; }
+	bool operator >(const LRange &r) const { return Start > r.End(); }
+	bool operator >=(const LRange &r) const { return Start >= r.End(); }
+	bool operator <(const LRange &r) const { return End() < r.Start; }
+	bool operator <=(const LRange &r) const { return End() <= r.Start; }
 
 	LRange &operator -=(const LRange &del)
 	{
