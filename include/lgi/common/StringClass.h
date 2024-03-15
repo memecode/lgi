@@ -939,7 +939,7 @@ public:
 	}
 
 	/// Check for non whitespace
-	bool IsEmpty()
+	bool IsEmpty() const
 	{
 		if (!Str)
 			return true;

@@ -32,9 +32,6 @@
     <ClCompile Include="..\src\CssTest.cpp">
       <Filter>Source Files\Testing</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\DateTime.cpp">
-      <Filter>Source Files\Testing</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\JsonTest.cpp">
       <Filter>Source Files\Testing</Filter>
     </ClCompile>

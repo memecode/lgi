@@ -843,11 +843,10 @@ void VcFolder::FilterCurrentFiles()
 
 void VcFolder::UpdateAuthorUi()
 {
-	if (AuthorEmail && AuthorName)
-	{
-		auto author = LString::Fmt("%s <%s>", AuthorName.Get(), AuthorEmail.Get());
-		d->Wnd()->SetCtrlName(IDC_AUTHOR, author);
-	}
+	if (AuthorLocal)
+		d->Wnd()->SetCtrlName(IDC_AUTHOR, AuthorLocal.ToString());
+	else if (AuthorGlobal)
+		d->Wnd()->SetCtrlName(IDC_AUTHOR, AuthorGlobal.ToString());
 }
 
 LString VcFolder::GetConfigFile(bool local)
@@ -883,18 +882,20 @@ LString VcFolder::GetConfigFile(bool local)
 	return LString();
 }
 
-
-
 bool VcFolder::GetAuthor(bool local, std::function<void(LString name,LString email)> callback)
 {
 	auto scope = local ? "--local" : "--global";
+	auto target = local ? &AuthorLocal : &AuthorGlobal;
 
 	switch (GetType())
 	{
 		case VcGit:
 		{
+			if (target->InProgress)
+				return true;
+
 			auto params = new ParseParams;
-			params->Callback = [this, callback](auto code, auto s)
+			params->Callback = [this, callback, target](auto code, auto s)
 			{
 				for (auto ln: s.Strip().SplitDelimit("\r\n"))
 				{
@@ -902,18 +903,19 @@ bool VcFolder::GetAuthor(bool local, std::function<void(LString name,LString ema
 					if (parts.Length() == 2)
 					{
 						if (parts[0].Equals("user.email"))
-							AuthorEmail = parts[1];
+							target->email = parts[1];
 						else if (parts[0].Equals("user.name"))
-							AuthorName = parts[1];
+							target->name = parts[1];
 					}
 				}
 
-				IsGettingAuthor = false;
-				callback(AuthorName, AuthorEmail);
+				target->InProgress = false;
+				if (callback)
+					callback(target->name, target->email);
 			};
 
 			auto args = LString::Fmt("-P config -l %s", scope);
-			StartCmd(args, NULL, params);
+			target->InProgress = StartCmd(args, NULL, params);
 			break;
 		}
 		case VcHg:
@@ -930,12 +932,12 @@ bool VcFolder::GetAuthor(bool local, std::function<void(LString name,LString ema
 			if (start >= 0 &&
 				end >= start)
 			{
-				AuthorName = author(0, start).Strip();
-				AuthorEmail = author(start + 1, end).Strip();
+				target->name = author(0, start).Strip();
+				target->email = author(start + 1, end).Strip();
 			}
 
 			IsGettingAuthor = false;
-			callback(AuthorName, AuthorEmail);
+			callback(target->name, target->email);
 			break;
 		}
 		default:
@@ -951,12 +953,10 @@ bool VcFolder::GetAuthor(bool local, std::function<void(LString name,LString ema
 bool VcFolder::SetAuthor(bool local, LString name, LString email)
 {
 	auto scope = local ? "--local" : "--global";
+	auto target = local ? &AuthorLocal : &AuthorGlobal;
 
-	if (local)
-	{
-		AuthorName = name;
-		AuthorEmail = email;
-	}
+	target->name = name;
+	target->email = email;
 
 	switch (GetType())
 	{
@@ -1014,13 +1014,17 @@ void VcFolder::Select(bool b)
 		PROF("DefaultFields");
 		DefaultFields();
 
-		if (AuthorEmail)
-			UpdateAuthorUi();
-		else
+		if (!AuthorLocal)
 			GetAuthor(true, [this](auto name, auto email)
 			{
 				UpdateAuthorUi();
 			});
+		if (!AuthorGlobal)
+			GetAuthor(false, [this](auto name, auto email)
+			{
+				UpdateAuthorUi();
+			});
+		UpdateAuthorUi();
 
 		PROF("Type Change");
 		if (GetType() != d->PrevType)

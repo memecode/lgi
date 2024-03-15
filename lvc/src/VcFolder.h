@@ -131,6 +131,14 @@ class VcFolder : public LTreeItem
 {
 	friend class VcCommit;
 
+	struct Author
+	{
+		bool InProgress = false;
+		LString name, email;
+		operator bool() const { return !name.IsEmpty() && !email.IsEmpty(); }
+		LString ToString() { return LString::Fmt("%s <%s>", name.Get(), email.Get()); }
+	};
+
 	class Cmd : public LStream
 	{
 		LString::Array Context;
@@ -220,7 +228,7 @@ class VcFolder : public LTreeItem
 	LArray<std::function<void()>> OnVcsTypeEvents;
 
 	// Author name/email
-	LString AuthorName, AuthorEmail;
+	Author AuthorLocal, AuthorGlobal;
 	bool IsGettingAuthor = false;
 
 	// This is set when a blame or log is looking at a particular file, 
