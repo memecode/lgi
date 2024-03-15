@@ -866,8 +866,8 @@ public:
 		inline It operator++(int) {It tmp(*this); ++Idx; return tmp;}
 		inline It operator--(int) {It tmp(*this); --Idx; return tmp;}
 		inline difference_type operator-(const It& rhs) const {return Idx-rhs.Idx;}
-		inline It operator+(difference_type amt) { return It(*this, Idx + amt); }
-		inline It operator-(difference_type amt) { return It(*this, Idx - amt); }
+		inline It operator+(difference_type amt) const { return It(*this, Idx + amt); }
+		inline It operator-(difference_type amt) const { return It(*this, Idx - amt); }
 		friend inline It operator+(difference_type lhs, const It& rhs) {return It(lhs+rhs.Idx);}
 		friend inline It operator-(difference_type lhs, const It& rhs) {return It(lhs-rhs.Idx);}
 		inline bool operator==(const It& rhs) const {return Idx == rhs.Idx;}
@@ -887,29 +887,13 @@ public:
 		std::sort
 		(
 			Start, End,
-			[Compare](T &a, T &b)->bool
+			[Compare](auto &a, auto &b)->bool
 			{
 				return Compare(a, b) < 0;
 			}
 		);
 	}
 	
-	// Sort with extra user data
-	template<typename Fn, typename User>
-	void Sort(Fn Compare, User Data)
-	{
-		RandomAccessIter Start(this, 0);
-		RandomAccessIter End(Start, Items);
-		std::sort
-		(
-			Start, End,
-			[Compare, Data](T &a, T &b)->bool
-			{
-				return Compare(a, b, Data) < 0;
-			}
-		);
-	}
-
 	/// Assign the contents of another list to this one
 	LUnrolledList<T,BlockSize> &operator =(const LUnrolledList<T,BlockSize> &lst)
 	{

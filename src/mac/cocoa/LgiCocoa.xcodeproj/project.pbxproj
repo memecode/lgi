@@ -156,6 +156,7 @@
 		34B14E3426951C6E004C22CC /* Slider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34B14E3326951C6E004C22CC /* Slider.cpp */; };
 		34B531D822F65734002B50F7 /* Menu.h in Headers */ = {isa = PBXBuildFile; fileRef = 34B531D722F65734002B50F7 /* Menu.h */; };
 		34B6B19123CFD0F100C24906 /* DragAndDropCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34B6B19023CFD0F100C24906 /* DragAndDropCommon.cpp */; };
+		34B6F5502BA3A81A0095B1C5 /* UnrolledList.h in Headers */ = {isa = PBXBuildFile; fileRef = 34B6F54F2BA3A81A0095B1C5 /* UnrolledList.h */; };
 		34BF15072871503B001B4CA5 /* DrawListSurface.h in Headers */ = {isa = PBXBuildFile; fileRef = 34BF15062871503B001B4CA5 /* DrawListSurface.h */; };
 		34C072C12369878100E1E222 /* DropFiles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C072C02369878100E1E222 /* DropFiles.cpp */; };
 		34C81A5A25DA0AA10053F93A /* Base64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C81A5925DA0AA10053F93A /* Base64.cpp */; };
@@ -325,6 +326,7 @@
 		34B14E3326951C6E004C22CC /* Slider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Slider.cpp; path = ../../common/Widgets/Slider.cpp; sourceTree = SOURCE_ROOT; };
 		34B531D722F65734002B50F7 /* Menu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Menu.h; path = ../../../include/lgi/common/Menu.h; sourceTree = "<group>"; };
 		34B6B19023CFD0F100C24906 /* DragAndDropCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DragAndDropCommon.cpp; path = ../../common/Lgi/DragAndDropCommon.cpp; sourceTree = SOURCE_ROOT; };
+		34B6F54F2BA3A81A0095B1C5 /* UnrolledList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UnrolledList.h; path = ../../../include/lgi/common/UnrolledList.h; sourceTree = "<group>"; };
 		34BF15062871503B001B4CA5 /* DrawListSurface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DrawListSurface.h; path = ../../../../../lgi/trunk/include/lgi/common/DrawListSurface.h; sourceTree = "<group>"; };
 		34C072C02369878100E1E222 /* DropFiles.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = DropFiles.cpp; path = ../../common/Lgi/DropFiles.cpp; sourceTree = SOURCE_ROOT; };
 		34C81A5925DA0AA10053F93A /* Base64.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Base64.cpp; path = ../../common/Net/Base64.cpp; sourceTree = SOURCE_ROOT; };
@@ -488,6 +490,7 @@
 		3477C29A1CBF0A700028B84B /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				34B6F54F2BA3A81A0095B1C5 /* UnrolledList.h */,
 				348E99CD2876850F0067E92A /* ObjCWrapper.h */,
 				34BF15062871503B001B4CA5 /* DrawListSurface.h */,
 				3477C2A71CBF0AAF0028B84B /* Lgi.h */,
@@ -774,6 +777,7 @@
 				3477C2A31CBF0A920028B84B /* LgiMac.h in Headers */,
 				3418EBD125D9FEF500EA168A /* ProgressDlg.h in Headers */,
 				343874B6230F46B200CF96B4 /* View.h in Headers */,
+				34B6F5502BA3A81A0095B1C5 /* UnrolledList.h in Headers */,
 				345920FF1F25649000098DFD /* Font.h in Headers */,
 				3415169426EC32FF007EE35F /* TextView4.h in Headers */,
 				3477C2A81CBF0AAF0028B84B /* Lgi.h in Headers */,

@@ -464,7 +464,10 @@ public:
 			return;
 
 		LListItem *Kb = Keyboard >= 0 && Keyboard < (int)Items.Length() ? Items[Keyboard] : NULL;
-		Items.Sort(Compare, Data);
+		Items.Sort([Compare, Data](auto a, auto b)
+		{
+			return Compare(a, b, Data);
+		});
 		Keyboard = Kb ? (int)Items.IndexOf(Kb) : -1;
 		Unlock();
 		Invalidate(&ItemsPos);
@@ -480,13 +483,12 @@ public:
 		LListItem *Kb = Items[Keyboard];
 		Items.Sort
 		(
-			[](LListItem *a, LListItem *b, int Column) -> int
+			[Column](LListItem *a, LListItem *b) -> int
 			{
 				const char *ATxt = a->GetText(Column);
 				const char *BTxt = b->GetText(Column);
 				return (ATxt && BTxt) ? stricmp(ATxt, BTxt) : 0;
-			},
-			Column
+			}
 		);
 		Keyboard = Kb ? (int)Items.IndexOf(Kb) : -1;
 		Unlock();

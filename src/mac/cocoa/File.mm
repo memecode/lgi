@@ -611,10 +611,9 @@ LVolume *LVolume::First()
 					auto IcoRef = LSSharedFileListItemCopyIconRef(item);
 					if (IcoRef)
 					{
-						NSImage *img = [[NSImage alloc] initWithIconRef:IcoRef];
+						auto img = [[NSImage alloc] initWithIconRef:IcoRef];
 						v->d->Icon.Reset(new LMemDC(img));
 						[img release];
-						CFRelease(IcoRef);
 					}
 
 					d->Insert(v);
