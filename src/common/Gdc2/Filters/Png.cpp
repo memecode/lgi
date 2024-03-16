@@ -82,17 +82,17 @@ const char *sLibrary =
 			#ifdef _MSC_VER_STR
 				"_"
 				#if _MSC_VER >= _MSC_VER_VS2019
-				_MSC_YEAR_STR
+					_MSC_YEAR_STR
 				#else
-				_MSC_VER_STR
+					_MSC_VER_STR
 				#endif
 				#if defined(LGI_64BIT)
-				"x64"
+					"x64"
 				#else
-				"x32"
+					"x32"
 				#endif
 				#ifdef _DEBUG
-				"d"
+					"d"
 				#endif
 			#endif
 		#endif

@@ -534,8 +534,16 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 
 		// Execution will pass to here if the 'Exe' can't run or doesn't exist
 		// So by exiting with an error the parent process can handle it.
-		printf("GSUBPROCESS_ERROR\n");
-		exit(GSUBPROCESS_ERROR);
+		printf("LSUBPROCESS_ERROR\n");
+
+		#ifdef MAC
+		// While 'exit' would be nice and clean it does cause crashes in free the global InitLibPng object
+		// We HAVE to call exec??? to replace the process... anything will do... 'ls' will just quit quickly
+		char *a= {0};
+		execv("/bin/ls", &a);
+		#else
+		exit(LSUBPROCESS_ERROR);
+		#endif
 	}
 	else
 	{

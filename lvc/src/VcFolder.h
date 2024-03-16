@@ -21,7 +21,7 @@ enum LoggingType
 enum LvcError
 {
 	ErrNone,
-	ErrSubProcessFailed = GSUBPROCESS_ERROR,
+	ErrSubProcessFailed = LSUBPROCESS_ERROR,
 };
 
 enum LvcStatus

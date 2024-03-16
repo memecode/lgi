@@ -19,7 +19,7 @@
 		3457FE502081CBE500014BE4 /* SubProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE4F2081CBE500014BE4 /* SubProcess.cpp */; };
 		3457FE522081CC4800014BE4 /* Lvc.lr8 in Resources */ = {isa = PBXBuildFile; fileRef = 3457FE512081CC4800014BE4 /* Lvc.lr8 */; };
 		3465A7E32B2AB1BF00084F66 /* PostBuildStep.py in Resources */ = {isa = PBXBuildFile; fileRef = 3465A7E22B2AB1BF00084F66 /* PostBuildStep.py */; };
-		346F5AC72BA507C000D64829 /* libssh.4.7.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 34DB96442BA5060A0058A51D /* libssh.4.7.2.dylib */; };
+		346F5AC72BA507C000D64829 /* libssh.4.9.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 34DB96442BA5060A0058A51D /* libssh.4.9.6.dylib */; };
 		347D1489252D453300422DA9 /* DeEscape.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 347D1488252D453300422DA9 /* DeEscape.cpp */; };
 		3485E7F5294F13F70020C14D /* PatchViewer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3485E7F4294F13F70020C14D /* PatchViewer.cpp */; };
 		34A3CCB92B64647E000AD22F /* libpng16.16.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34A3CCB52B646469000AD22F /* libpng16.16.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -31,7 +31,7 @@
 		34C032BD2319CEC100470DF2 /* OptionsFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C032BC2319CEC100470DF2 /* OptionsFile.cpp */; };
 		34C032BE2319CEF200470DF2 /* LgiCocoa.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34C032B92319CDFE00470DF2 /* LgiCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		34CE07102327B3B100807DCB /* Png.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CE070F2327B3B100807DCB /* Png.cpp */; };
-		34DB96462BA5061E0058A51D /* libssh.4.7.2.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34DB96442BA5060A0058A51D /* libssh.4.7.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		34DB96462BA5061E0058A51D /* libssh.4.9.6.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34DB96442BA5060A0058A51D /* libssh.4.9.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34E1910C20B1898E00005243 /* image-list.png in Resources */ = {isa = PBXBuildFile; fileRef = 34E1910B20B1898E00005243 /* image-list.png */; };
 		8D0C4E8D0486CD37000505A6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0867D6AAFE840B52C02AAC07 /* InfoPlist.strings */; };
 /* End PBXBuildFile section */
@@ -60,7 +60,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				34DB96462BA5061E0058A51D /* libssh.4.7.2.dylib in CopyFiles */,
+				34DB96462BA5061E0058A51D /* libssh.4.9.6.dylib in CopyFiles */,
 				34A3CCBA2B646487000AD22F /* libz.1.3.1.dylib in CopyFiles */,
 				34A3CCB92B64647E000AD22F /* libpng16.16.dylib in CopyFiles */,
 				34C032BE2319CEF200470DF2 /* LgiCocoa.framework in CopyFiles */,
@@ -99,7 +99,7 @@
 		34C032B42319CDFE00470DF2 /* LgiCocoa.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LgiCocoa.xcodeproj; path = ../../src/mac/cocoa/LgiCocoa.xcodeproj; sourceTree = "<group>"; };
 		34C032BC2319CEC100470DF2 /* OptionsFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OptionsFile.cpp; path = ../../src/common/Lgi/OptionsFile.cpp; sourceTree = "<group>"; };
 		34CE070F2327B3B100807DCB /* Png.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Png.cpp; path = ../../src/common/Gdc2/Filters/Png.cpp; sourceTree = "<group>"; };
-		34DB96442BA5060A0058A51D /* libssh.4.7.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssh.4.7.2.dylib; path = ../../../../../codelib/libssh/build/src/libssh.4.7.2.dylib; sourceTree = "<group>"; };
+		34DB96442BA5060A0058A51D /* libssh.4.9.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssh.4.9.6.dylib; path = /opt/local/lib/libssh.4.9.6.dylib; sourceTree = "<absolute>"; };
 		34E1910B20B1898E00005243 /* image-list.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "image-list.png"; path = "../Resources/image-list.png"; sourceTree = "<group>"; };
 		8D0C4E960486CD37000505A6 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D0C4E970486CD37000505A6 /* Lvc.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Lvc.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -112,7 +112,7 @@
 			files = (
 				34C032BB2319CE8C00470DF2 /* LgiCocoa.framework in Frameworks */,
 				34C032B32319CDE900470DF2 /* Cocoa.framework in Frameworks */,
-				346F5AC72BA507C000D64829 /* libssh.4.7.2.dylib in Frameworks */,
+				346F5AC72BA507C000D64829 /* libssh.4.9.6.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -174,7 +174,7 @@
 		20286C32FDCF999611CA2CEA /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				34DB96442BA5060A0058A51D /* libssh.4.7.2.dylib */,
+				34DB96442BA5060A0058A51D /* libssh.4.9.6.dylib */,
 				34A3CCB52B646469000AD22F /* libpng16.16.dylib */,
 				34A3CCB72B646472000AD22F /* libz.1.3.1.dylib */,
 				34C032B42319CDFE00470DF2 /* LgiCocoa.xcodeproj */,

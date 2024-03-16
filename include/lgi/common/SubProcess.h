@@ -33,12 +33,12 @@
 
 #if defined(MAC)
 	#include <errno.h>
-	#define GSUBPROCESS_ERROR	EBADEXEC
+	#define LSUBPROCESS_ERROR	EBADEXEC
 #elif defined(LINUX) || defined(HAIKU)
 	#include <errno.h>
-	#define GSUBPROCESS_ERROR	ECHILD
+	#define LSUBPROCESS_ERROR	ECHILD
 #elif defined(WINDOWS)
-	#define GSUBPROCESS_ERROR	ERROR_PROCESS_ABORTED
+	#define LSUBPROCESS_ERROR	ERROR_PROCESS_ABORTED
 #endif
 
 LgiExtern bool LIsProcess(OsProcessId Pid);

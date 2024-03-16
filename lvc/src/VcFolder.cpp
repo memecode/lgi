@@ -2552,7 +2552,7 @@ void VcFolder::OnPulse()
 				else if (c->PostOp)
 				{
 					if (s.Length() == 18 &&
-						s.Equals("GSUBPROCESS_ERROR\n"))
+						s.Equals("LSUBPROCESS_ERROR\n"))
 					{
 						OnCmdError(s, "Sub process failed.");
 					}
