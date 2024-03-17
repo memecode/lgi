@@ -178,11 +178,10 @@ bool LContainers::Run()
 
 		StrLst.Sort
 		(
-			[](LString &a, LString &b, int Dir)
+			[](auto a, auto b)
 			{
-				return _stricmp(a, b) * Dir;
-			},
-			1
+				return _stricmp(a.Get(), b.Get());
+			}
 		);
 
 		StrLst.Delete("Tyertw");

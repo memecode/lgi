@@ -623,14 +623,14 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<LDstInfo> &Info, LDateTime &Start,
 			auto next = [tz nextDaylightSavingTimeTransitionAfterDate:startDate];
 			auto &i = Info.New();
 			
-			auto nextTs = [next timeIntervalSince1970];
-			i.Utc = (nextTs + Offset1800) * Second64Bit;
+			auto nextTs = (time_t)[next timeIntervalSince1970];
+			i.Utc = nextTs;
 			i.Offset = (int)([tz secondsFromGMTForDate:[next dateByAddingTimeInterval:60]]/60);
 			
 			#if DEBUG_DST_INFO
 			{
 				LDateTime dt;
-				dt.Set(i.UtcTimeStamp);
+				dt.Set(i.Utc);
 				LgiTrace("%s:%i - Ts=%s Off=%i\n", _FL, dt.Get().Get(), i.Offset);
 			}
 			#endif
@@ -892,7 +892,12 @@ bool LDateTime::DstToLocal(LArray<LDstInfo> &Dst, LDateTime &dt)
 		LgiTrace("Dst: %s = %i\n", d.GetLocal().Get().Get(), d.Offset);
 	#endif
 	LgiTrace("%s:%i - No valid DST range for: %s\n", _FL, dt.Get().Get());
-	LAssert(!"No valid DST range for this date.");
+	static bool first = true;
+	if (first)
+	{
+		first = false;
+		LAssert(!"No valid DST range for this date.");
+	}
 	return false;
 }
 

@@ -2702,7 +2702,8 @@ void VcFolder::OnMouseClick(LMouse &m)
 			}
 			case IDM_TERMINAL:
 			{
-				TerminalAt(LocalPath());
+				auto p = LocalPath();
+				TerminalAt(p);
 				break;
 			}
 			case IDM_CLEAN:

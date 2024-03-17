@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3432AF7D2ADFE35C0029F2D7 /* libpng16.15.29.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3432AF7B2ADFE34B0029F2D7 /* libpng16.15.29.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		3432AF7E2ADFE3610029F2D7 /* libz_local.1.2.5.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3432AF792ADFE3450029F2D7 /* libz_local.1.2.5.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		3432AF7D2ADFE35C0029F2D7 /* libpng16.16.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3432AF7B2ADFE34B0029F2D7 /* libpng16.16.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		3432AF7E2ADFE3610029F2D7 /* libz.1.3.1.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3432AF792ADFE3450029F2D7 /* libz.1.3.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		343FB8952386621600797ABC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 343FB8942386621600797ABC /* Assets.xcassets */; };
 		343FB8AB238662C500797ABC /* LgiMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 343FB8AA238662C500797ABC /* LgiMain.cpp */; };
 		343FB8C62386638C00797ABC /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 343FB8A92386627A00797ABC /* LgiCocoa.framework */; };
@@ -63,8 +63,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				3432AF7E2ADFE3610029F2D7 /* libz_local.1.2.5.dylib in CopyFiles */,
-				3432AF7D2ADFE35C0029F2D7 /* libpng16.15.29.0.dylib in CopyFiles */,
+				3432AF7E2ADFE3610029F2D7 /* libz.1.3.1.dylib in CopyFiles */,
+				3432AF7D2ADFE35C0029F2D7 /* libpng16.16.dylib in CopyFiles */,
 				343FB8C82386639C00797ABC /* LgiCocoa.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -72,8 +72,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		3432AF792ADFE3450029F2D7 /* libz_local.1.2.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz_local.1.2.5.dylib; path = ../../../../../codelib/libpng/build/release/zlib_dir/libz_local.1.2.5.dylib; sourceTree = "<group>"; };
-		3432AF7B2ADFE34B0029F2D7 /* libpng16.15.29.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng16.15.29.0.dylib; path = ../../../../../codelib/libpng/build/release/libpng16.15.29.0.dylib; sourceTree = "<group>"; };
+		3432AF792ADFE3450029F2D7 /* libz.1.3.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.3.1.dylib; path = ../../../../../../../opt/local/lib/libz.1.3.1.dylib; sourceTree = "<group>"; };
+		3432AF7B2ADFE34B0029F2D7 /* libpng16.16.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng16.16.dylib; path = /opt/local/lib/libpng16.16.dylib; sourceTree = "<absolute>"; };
 		343FB88E2386621400797ABC /* LgiRes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LgiRes.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		343FB8942386621600797ABC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		343FB8992386621600797ABC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -201,8 +201,8 @@
 		343FB8C52386638C00797ABC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				3432AF7B2ADFE34B0029F2D7 /* libpng16.15.29.0.dylib */,
-				3432AF792ADFE3450029F2D7 /* libz_local.1.2.5.dylib */,
+				3432AF7B2ADFE34B0029F2D7 /* libpng16.16.dylib */,
+				3432AF792ADFE3450029F2D7 /* libz.1.3.1.dylib */,
 				34CC003E23AAD34600CCAAEA /* Cocoa.framework */,
 			);
 			name = Frameworks;
@@ -471,12 +471,11 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 2AV9WN2LD8;
 				HEADER_SEARCH_PATHS = (
-					../../include,
-					../../include/lgi/mac/cocoa,
 					../src,
 					../resources,
-					../../../../../CodeLib/libpng/build/release,
-					../../../../../CodeLib/libpng,
+					../../include,
+					../../include/lgi/mac/cocoa,
+					/opt/local/include,
 				);
 				INFOPLIST_FILE = Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -503,12 +502,11 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 2AV9WN2LD8;
 				HEADER_SEARCH_PATHS = (
-					../../include,
-					../../include/lgi/mac/cocoa,
 					../src,
 					../resources,
-					../../../../../CodeLib/libpng/build/release,
-					../../../../../CodeLib/libpng,
+					../../include,
+					../../include/lgi/mac/cocoa,
+					/opt/local/include,
 				);
 				INFOPLIST_FILE = Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
