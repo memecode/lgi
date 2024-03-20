@@ -1,12 +1,14 @@
 syntax: glob
 
 .vs
+.vscode
 .DS_Store
-Lib
+lib
 *.o
 *.obj
 *.d
 *.VC.db
+*.orig
 *.Matthew
 *.matthew
 *.user

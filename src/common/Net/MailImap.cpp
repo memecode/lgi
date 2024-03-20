@@ -388,7 +388,7 @@ LAutoString ImapBasicTokenize(char *&s)
 	return LAutoString();
 }
 
-char *Tok(char *&s)
+bool _tokenize(char *&s, std::function<void(char *start, size_t len)> callback)
 {
 	char *Ret = 0;
 
@@ -397,27 +397,48 @@ char *Tok(char *&s)
 
 	if (*s == '=' || *s == ',')
 	{
-		Ret = NewStr(s++, 1);
+		callback(s++, 1);
 	}
 	else if (*s == '\'' || *s == '\"')
 	{
-		char d = *s++;
-		char *e = strchr(s, d);
-		if (e)
-		{
-			Ret = NewStr(s, e - s);
-			s = e + 1;
-		}
+		char delimit = *s++;
+		char *e = strchr(s, delimit);
+		if (!e)
+			return false;
+
+		callback(s, e - s);
+		s = e + 1;
 	}
 	else if (*s)
 	{
 		char *e;
-		for (e=s; *e && (IsDigit(*e) || IsAlpha(*e) || *e == '-'); e++);
-		Ret = NewStr(s, e - s);
+		for (e=s; *e && (IsDigit(*e) || IsAlpha(*e) || *e == '-'); e++)
+			;
+		callback(s, e - s);
 		s = e;
 	}
 
-	return Ret;
+	return true;
+}
+
+char *Tok(char *&s)
+{
+	char *t = NULL;
+	_tokenize(s, [&](auto str, auto len)
+	{
+		t = NewStr(str, len);
+	});
+	return t;
+}
+
+LString LTok(char *&s)
+{
+	LString t;
+	_tokenize(s, [&](auto str, auto len)
+	{
+		t.Set(str, len);
+	});
+	return t;
 }
 
 char *DecodeImapString(const char *s)
@@ -3127,39 +3148,41 @@ bool MailIMap::ExpungeFolder()
 
 bool MailIMap::Search(bool Uids, LArray<LString> &SeqNumbers, const char *Filter)
 {
+	if (!ValidStr(Filter))
+		return false;
+
+	if (!Lock(_FL))
+		return false;
+
 	bool Status = false;
-
-	if (ValidStr(Filter) && Lock(_FL))
+	int Cmd = d->NextCmd++;
+	sprintf_s(Buf, sizeof(Buf), "A%4.4i %sSEARCH %s\r\n", Cmd, Uids?"UID ":"", Filter);
+	if (WriteBuf())
 	{
-		int Cmd = d->NextCmd++;
-		sprintf_s(Buf, sizeof(Buf), "A%4.4i %sSEARCH %s\r\n", Cmd, Uids?"UID ":"", Filter);
-		if (WriteBuf())
+		ClearDialog();
+		if (ReadResponse(Cmd))
 		{
-			ClearDialog();
-			if (ReadResponse(Cmd))
+			for (auto d: Dialog)
 			{
-				for (auto d: Dialog)
+				if (*d != '*')
+					continue;
+
+				d++;
+				auto s = LTok(d);
+				if (!s.Equals("Search"))
+					continue;
+
+				while (s = LTok(d))
 				{
-					if (*d != '*')
-						continue;
-
-					d++;
-					LAutoString s(Tok(d));
-					if (!s || _stricmp(s, "Search"))
-						continue;
-
-					while (s.Reset(Tok(d)))
-					{
-						SeqNumbers.New() = s.Get();
-						Status = true;
-					}
+					SeqNumbers.New() = s;
+					Status = true;
 				}
 			}
-			CommandFinished();
 		}
-
-		Unlock();
+		CommandFinished();
 	}
+
+	Unlock();
 
 	return Status;
 }
