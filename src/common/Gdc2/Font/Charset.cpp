@@ -1157,7 +1157,9 @@ void *LNewConvertCp(const char *OutCharset, const void *In, const char *InCharse
 	}
 	else
 	{
+		#ifndef LGI_STATIC
 		BufConvert:
+		#endif
 		char Buf[2 << 10];
 		while (InLen > 0)
 		{

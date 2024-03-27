@@ -9,11 +9,8 @@
 
 #include "LgiInc.h"
 
-#ifdef MAC
 #define REG
-#else
-#define REG register
-#endif
+
 typedef unsigned char uint8_t;
 typedef signed char int8;
 typedef signed short int16;

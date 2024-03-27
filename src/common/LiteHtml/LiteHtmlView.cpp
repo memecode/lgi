@@ -19,6 +19,7 @@
 
 #define NOT_IMPL \
 	LgiTrace("%s:%i - %s not impl.\n", _FL, __func__);
+#define NOT_SUPPORT_COLOUR	LColour(255, 0, 255)
 
 enum Messages
 {
@@ -143,15 +144,14 @@ struct LiteHtmlViewPriv :
 		return u.ToString();
 	}
 
-	LColour Convert(const litehtml::web_color &c)
+	LColour Convert(const litehtml::web_color &c) const
 	{
 		return LColour(c.red, c.green, c.blue, c.alpha);
 	}
 
-	LRect Convert(const litehtml::position &p)
+	LRect Convert(const litehtml::position &p) const
 	{
-		LRect r(p.x, p.y, p.x + p.width - 1, p.y + p.height - 1);
-		return r;
+		return LRect(p.x, p.y, p.x + p.width - 1, p.y + p.height - 1);
 	}
 
 	LSurface *Convert(litehtml::uint_ptr hdc)
@@ -166,6 +166,11 @@ struct LiteHtmlViewPriv :
 			clipSet = false;
 		}
 		return pdc;
+	}
+
+	LPointF Convert(const litehtml::pointF &p) const
+	{
+		return LPointF(p.x, p.y);
 	}
 
 	void UpdateScreen(litehtml::position::vector &redraw)
@@ -321,20 +326,10 @@ struct LiteHtmlViewPriv :
 
 		auto cur = CurrentUrl();
 		LUri c(cur);
-		if (c.IsFile())
-		{
-			LFile::Path p(c.LocalPath());
-			p = p / ".." / src;
-			c.sPath = p.GetFull().Replace(DIR_STR, "/");
-			return c.ToString();
-		}
-		else if (s.sPath)
-		{
-			c += s.sPath;
-			return c.ToString();
-		}
 
-		c += src;
+		LFile::Path p(c.LocalPath());
+		p = p / ".." / src;
+		c.sPath = p.GetFull().Replace(DIR_STR, "/");
 		return c.ToString();
 	}
 
@@ -346,7 +341,7 @@ struct LiteHtmlViewPriv :
 
 		if (!imageCache.Find(absUri))
 		{
-			// LgiTrace("load_image(%s) %s + %s\n", absUri.Get(), currentUrl.Get(), src);
+			LgiTrace("load_image(%s) %s + %s\n", absUri.Get(), baseurl, src);
 			if (auto i = new Image)
 			{
 				i->uri = absUri;
@@ -401,6 +396,85 @@ struct LiteHtmlViewPriv :
 		}
 	}
 
+	void draw_image(litehtml::uint_ptr hdc, const litehtml::background_layer& layer, const std::string& url, const std::string& base_url)
+	{
+		auto pDC = Convert(hdc);
+		auto pos = Convert(layer.border_box);
+		auto absUri = FullUri(url.c_str(), base_url.c_str());
+
+		if (auto i = imageCache.Find(absUri))
+		{
+			if (i->img)
+			{
+				auto op = pDC->Op(GDC_ALPHA);
+				pDC->Blt(pos.x1, pos.y1, i->img);
+				pDC->Op(op);
+				return;
+			}
+		}
+
+		// Draw missing image
+		pDC->Colour(L_HIGH);
+		pDC->Rectangle(&pos);
+		pDC->Colour(LColour::Red);
+		pDC->Line(pos.x1, pos.y1, pos.x2, pos.y2);
+		pDC->Line(pos.x2, pos.y1, pos.x1, pos.y2);
+	}
+
+	void draw_solid_fill(litehtml::uint_ptr hdc, const litehtml::background_layer& layer, const litehtml::web_color& color)
+	{
+		auto pDC = Convert(hdc);
+		auto pos = Convert(layer.border_box);
+
+		pDC->Colour(Convert(color));
+		pDC->Rectangle(&pos);
+	}
+
+	void draw_linear_gradient(litehtml::uint_ptr hdc, const litehtml::background_layer& layer, const litehtml::background_layer::linear_gradient& gradient)
+	{
+		auto pDC = Convert(hdc);
+		auto pos = Convert(layer.border_box);
+		auto origin = pos.TopLeft();
+
+		LMemDC mem(pos.X(), pos.Y(), System32BitColourSpace);
+		LArray<LBlendStop> stops;
+		for (auto &in: gradient.color_points)
+		{
+			auto &out = stops.New();
+			out.Pos = in.offset;
+			out.c32 = Convert(in.color).c32();
+		}
+
+		LLinearBlendBrush brush(Convert(gradient.start) - origin,
+								Convert(gradient.end)   - origin,
+								(int)stops.Length(),
+								stops.AddressOf());
+		LPath path;
+
+		path.Rectangle(0.0, 0.0, mem.X(), mem.Y());
+		path.Fill(&mem, brush);
+		pDC->Blt(pos.x1, pos.y1, &mem);
+	}
+
+	void draw_radial_gradient(litehtml::uint_ptr hdc, const litehtml::background_layer& layer, const litehtml::background_layer::radial_gradient& gradient)
+	{
+		auto pDC = Convert(hdc);
+		auto pos = Convert(layer.border_box);
+
+		pDC->Colour(NOT_SUPPORT_COLOUR);
+		pDC->Rectangle(&pos);
+	}
+
+	void draw_conic_gradient(litehtml::uint_ptr hdc, const litehtml::background_layer& layer, const litehtml::background_layer::conic_gradient& gradient)
+	{
+		auto pDC = Convert(hdc);
+		auto pos = Convert(layer.border_box);
+
+		pDC->Colour(NOT_SUPPORT_COLOUR);
+		pDC->Rectangle(&pos);
+	}
+
+	/*
 	void draw_background(litehtml::uint_ptr hdc, const std::vector<litehtml::background_paint> &background)
 	{
 		auto pDC = Convert(hdc);
@@ -447,6 +521,7 @@ struct LiteHtmlViewPriv :
 			}
 		}
 	}
+	*/
 
 	void draw_borders(litehtml::uint_ptr hdc, const litehtml::borders& borders, const litehtml::position& draw_pos, bool root)
 	{

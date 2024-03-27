@@ -9,12 +9,7 @@
 #ifndef _GPixelRops_h
 #define _GPixelRops_h
 
-#ifdef MAC
 #define REG
-#else
-#define REG register
-#endif
-
 
 //////////////////////////////////////////////////////////////////////////
 // 24 bit over

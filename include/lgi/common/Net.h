@@ -105,7 +105,7 @@ public:
 	ssize_t	BytesRead, BytesWritten;
 
 	/// Creates the class
-	LSocket(LStreamI *logger = 0, void *unused_param = 0);
+	LSocket(LStreamI *logger = NULL, void *unused_param = NULL);
 	
 	/// Destroys the class
 	~LSocket();

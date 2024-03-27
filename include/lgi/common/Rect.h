@@ -172,6 +172,11 @@ public:
 	/// Returns how near a point is to a rectangle
 	int Near(LRect &r);
 
+	/// Returns the top left corner coords
+	LPoint TopLeft() { return LPoint(x1, y1); }
+	/// Returns the bottom right corner coords
+	LPoint BottomRight() { return LPoint(x2, y2); }
+
 	LRect ZeroTranslate()
 	{
 		return LRect(0, 0, X()-1, Y()-1);
