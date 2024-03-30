@@ -47,11 +47,10 @@ LUri &LUri::operator +=(const char *s)
 	if (*s == '/')
 		sPath.Empty(); // reset
 
-	bool isFolder = sPath ? sPath(-1) : false;
-	auto parts = sPath.SplitDelimit("/\\");
+	auto lastSep = sPath.RFind("/");
+	auto path = lastSep >= 0 ? sPath(0, lastSep) : sPath;
+	auto parts = path.SplitDelimit("/\\");
 	parts.SetFixedLength(false);
-	if (parts.Length() > 0 && !isFolder)
-		parts.PopLast();
 
 	for (auto p: LString(s).SplitDelimit("/\\"))
 	{

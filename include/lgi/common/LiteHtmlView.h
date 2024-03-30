@@ -23,6 +23,8 @@ public:
 	virtual void OnNavigate(LString url);
 	// The history position has changed and the validity of going forward/back needs to be updated
 	virtual void OnHistory(bool hasBack, bool hasForward) {}
+	// Set the page name in the title bar of the window.
+	virtual void SetCaption(LString name) {}
 
 	// LLayout impl
 	void OnAttach() override;

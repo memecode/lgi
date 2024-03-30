@@ -30,6 +30,11 @@ public:
 
 	}
 
+	void SetCaption(LString name) override
+	{
+		GetWindow()->Name(LString::Fmt("%s - %s", AppName, name.Get()));
+	}
+
 	void OnNavigate(LString url) override
 	{
 		GetWindow()->SetCtrlName(IDC_LOCATION, url);

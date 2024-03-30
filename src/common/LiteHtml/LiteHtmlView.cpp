@@ -324,12 +324,8 @@ struct LiteHtmlViewPriv :
 		if (s.sProtocol)
 			return src;
 
-		auto cur = CurrentUrl();
-		LUri c(cur);
-
-		LFile::Path p(c.LocalPath());
-		p = p / ".." / src;
-		c.sPath = p.GetFull().Replace(DIR_STR, "/");
+		LUri c(CurrentUrl());
+		c += src;
 		return c.ToString();
 	}
 
@@ -426,8 +422,23 @@ struct LiteHtmlViewPriv :
 		auto pDC = Convert(hdc);
 		auto pos = Convert(layer.border_box);
 
-		pDC->Colour(Convert(color));
-		pDC->Rectangle(&pos);
+		if (hasRadius(layer.border_radius))
+		{
+			LPath path;
+			LMemDC mem(pos.X(), pos.Y(), System32BitColourSpace);
+			mem.Colour(0, 32);
+			mem.Rectangle();
+			draw_radius(path, pos.ZeroTranslate(), layer.border_radius);
+			LSolidBrush brush(Convert(color));
+			path.Fill(&mem, brush);
+			pDC->Op(GDC_ALPHA);
+			pDC->Blt(pos.x1, pos.y1, &mem);
+		}
+		else
+		{
+			pDC->Colour(Convert(color));
+			pDC->Rectangle(&pos);
+		}
 	}
 
 	void draw_linear_gradient(litehtml::uint_ptr hdc, const litehtml::background_layer& layer, const litehtml::background_layer::linear_gradient& gradient)
@@ -451,8 +462,19 @@ struct LiteHtmlViewPriv :
 								stops.AddressOf());
 		LPath path;
 
-		path.Rectangle(0.0, 0.0, mem.X(), mem.Y());
+		if (hasRadius(layer.border_radius))
+		{
+			mem.Colour(0, 32);
+			mem.Rectangle();
+			draw_radius(path, pos.ZeroTranslate(), layer.border_radius);
+		}
+		else
+		{
+			path.Rectangle(0.0, 0.0, mem.X(), mem.Y());
+		}
+
 		path.Fill(&mem, brush);
+		pDC->Op(GDC_ALPHA);
 		pDC->Blt(pos.x1, pos.y1, &mem);
 	}
 
@@ -474,80 +496,106 @@ struct LiteHtmlViewPriv :
 		pDC->Rectangle(&pos);
 	}
 
-	/*
-	void draw_background(litehtml::uint_ptr hdc, const std::vector<litehtml::background_paint> &background)
+	bool hasRadius(const litehtml::border_radiuses &r)
 	{
-		auto pDC = Convert(hdc);
-		for (auto b: background)
-		{
-			auto rc = Convert(b.border_box);
-			if (!b.image.empty())
-			{
-				auto absUri = FullUri(b.image.c_str(), b.baseurl.c_str());
-				if (auto i = imageCache.Find(absUri))
-				{
-					if (i->img)
-					{
-						auto op = pDC->Op(GDC_ALPHA);
-						pDC->Blt(b.position_x, b.position_y, i->img);
-						pDC->Op(op);
-					}
-					else LgiTrace("%s:%i - draw_background(img=%s) img no surface\n", _FL, b.image.c_str());
-				}
-				else LgiTrace("%s:%i - draw_background(img=%s) img not found\n", _FL, b.image.c_str());
-			}
-			else if (!b.gradient.is_empty())
-			{
-				if (b.gradient.m_type == litehtml::web_gradient::linear_gradient &&
-					b.gradient.m_colors.size() == 2)
-				{
-					LMemDC mem(rc.X(), rc.Y(), System32BitColourSpace);
-					LBlendStop stops[2] = {
-						{0.0, Convert(b.gradient.m_colors[0]).c32()},
-						{1.0, Convert(b.gradient.m_colors[1]).c32()}
-					};
-					LLinearBlendBrush brush(LPointF(0.0, 0.0), LPointF(0.0, rc.Y()), 2, stops);
-					LPath path;
-					path.Rectangle(0.0, 0.0, mem.X(), mem.Y());
-					path.Fill(&mem, brush);
-					pDC->Blt(rc.x1, rc.y1, &mem);
-				}
-				else LgiTrace("%s:%i - Invalid gradient.\n", _FL);
-			}
-			else
-			{
-				pDC->Colour(Convert(b.color));
-				pDC->Rectangle(&rc);
-			}
-		}
+		return	r.top_left_x != 0 ||
+				r.top_left_y != 0 ||
+				r.top_right_x != 0 ||
+				r.top_right_y != 0 ||
+				r.bottom_right_x != 0 ||
+				r.bottom_right_y != 0 ||
+				r.bottom_left_x != 0 ||
+				r.bottom_left_y != 0;
 	}
-	*/
+
+	void draw_radius(LPath &path, LRect &b, const litehtml::border_radiuses &rad)
+	{
+		#define K(rad)	(0.5522847498 * (rad))
+
+		path.MoveTo(b.x1 + rad.top_left_x, b.y1);
+
+		LPointF c(b.x2 - rad.top_right_x, b.y1 + rad.top_right_y);
+		path.LineTo(c.x, b.y1);
+		path.CubicBezierTo(	c.x + K(rad.top_right_x), b.y1,
+							b.x2, c.y - K(rad.top_right_y),
+							b.x2, c.y);
+
+		c.Set(b.x2 - rad.bottom_right_x, b.y2 - rad.bottom_right_y);
+		path.LineTo(b.x2, c.y);
+
+		path.CubicBezierTo(	b.x2, c.y + K(rad.bottom_right_y),
+						c.x + K(rad.bottom_right_x), b.y2,
+						c.x, b.y2);
+
+		c.Set(b.x1 + rad.bottom_left_x, b.y2 - rad.bottom_left_y);
+		path.LineTo(c.x, b.y2);
+
+		path.CubicBezierTo(	c.x - K(rad.bottom_left_x), b.y2,
+							b.x1, c.y + K(rad.bottom_left_y),
+							b.x1, c.y);
+
+		c.Set(b.x1 + rad.top_left_x, b.y1 + rad.top_left_y);
+		path.LineTo(b.x1, c.y);
+
+		path.CubicBezierTo(	b.x1, c.y - K(rad.top_left_y),
+							c.x - K(rad.top_left_x), b.y1,
+							c.x, b.y1);
+	}
 
 	void draw_borders(litehtml::uint_ptr hdc, const litehtml::borders& borders, const litehtml::position& draw_pos, bool root)
 	{
 		auto pDC = Convert(hdc);
-		auto drawEdge = [&](const litehtml::border &b, int x, int y, int dx, int dy, int ix, int iy)
+		if (hasRadius(borders.radius))
 		{
-			pDC->Colour(Convert(b.color));
-			for (int i=0; i<b.width; i++)
-			{
-				pDC->Line(x, y, x+dx, y+dy);
-				x += ix;
-				y += iy;
-			}
-		};
+			LPath path;
+			auto b = Convert(draw_pos).ZeroTranslate();
+			LMemDC mem(draw_pos.width, draw_pos.height, System32BitColourSpace);
 
-		int x2 = draw_pos.width - 1;
-		int y2 = draw_pos.height - 1;
-		drawEdge(borders.left,   draw_pos.x,    draw_pos.y,    0,  y2, 1,  0);
-		drawEdge(borders.top,    draw_pos.x,    draw_pos.y,    x2, 0,  0,  1);
-		drawEdge(borders.right,  draw_pos.x+x2, draw_pos.y,    0,  y2, -1, 0);
-		drawEdge(borders.bottom, draw_pos.x,    draw_pos.y+y2, x2, 0,  0, -1);
+			mem.Colour(0, 32);
+			mem.Rectangle();
+			
+			path.SetFillRule(FILLRULE_ODDEVEN);
+			draw_radius(path, b, borders.radius);
+			b.x1 += borders.left.width;
+			b.y1 += borders.top.width;
+			b.x2 -= borders.right.width;
+			b.y2 -= borders.bottom.width;
+			draw_radius(path, b, borders.radius);
+
+			LSolidBrush brush(Convert(borders.top.color));
+			path.Fill(&mem, brush);
+
+			// mem.Colour(LColour::Red);
+			// mem.Line(0, 0, draw_pos.width, draw_pos.height);
+
+			pDC->Op(GDC_ALPHA);
+			pDC->Blt(draw_pos.x, draw_pos.y, &mem);
+		}
+		else
+		{
+			auto drawEdge = [&](const litehtml::border &b, int x, int y, int dx, int dy, int ix, int iy)
+			{
+				pDC->Colour(Convert(b.color));
+				for (int i=0; i<b.width; i++)
+				{
+					pDC->Line(x, y, x+dx, y+dy);
+					x += ix;
+					y += iy;
+				}
+			};
+
+			int x2 = draw_pos.width - 1;
+			int y2 = draw_pos.height - 1;
+			drawEdge(borders.left,   draw_pos.x,    draw_pos.y,    0,  y2, 1,  0);
+			drawEdge(borders.top,    draw_pos.x,    draw_pos.y,    x2, 0,  0,  1);
+			drawEdge(borders.right,  draw_pos.x+x2, draw_pos.y,    0,  y2, -1, 0);
+			drawEdge(borders.bottom, draw_pos.x,    draw_pos.y+y2, x2, 0,  0, -1);
+		}
 	}
 
 	void set_caption(const char* caption)
 	{
-		wnd->Name(caption);
+		view->SetCaption(caption);
 	}
 
 	void set_base_url(const char* base_url)
