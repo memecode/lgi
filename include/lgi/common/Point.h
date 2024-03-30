@@ -192,6 +192,19 @@ public:
 		y += ty;
 		return *this;
 	}
+	
+	LPointF operator *(double scale)
+	{
+		LPointF p(x * scale, y * scale);
+		return p;
+	}
+
+	LPointF &operator *=(double scale)
+	{
+		x *= scale;
+		y *= scale;
+		return *this;
+	}
 
 	// Angle in radians
 	LPointF &Rotate(double a)

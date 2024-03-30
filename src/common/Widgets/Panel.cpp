@@ -206,7 +206,7 @@ int LPanel::OnNotify(LViewI *Ctrl, LNotification n)
 
 void LPanel::OnPaint(LSurface *pDC)
 {
-	LRect r = GetClient();
+	auto r = GetClient();
 	LCssTools Tools(this);
 	LColour cFore = Tools.GetFore();
 	LColour cBack = Tools.GetBack();
@@ -229,7 +229,10 @@ void LPanel::OnPaint(LSurface *pDC)
 	if (OpenSize > 0)
 	{
 		// Draw thumb
-		ThumbPos.ZOff(8, 8);
+		auto scale = GetWindow()->GetDpiScale();
+		scale *= 1.2;
+		int gapPx = (int)(scale.x * 2);
+		ThumbPos.ZOff(8 * scale.x, 8 * scale.y);
 		ThumbPos.Offset(r.x1 + 3, r.y1 + 3);
 		
 		pDC->Colour(L_LOW);
@@ -237,17 +240,19 @@ void LPanel::OnPaint(LSurface *pDC)
 		pDC->Colour(L_WHITE);
 		pDC->Rectangle(ThumbPos.x1+1, ThumbPos.y1+1, ThumbPos.x2-1, ThumbPos.y2-1);
 		pDC->Colour(L_SHADOW);
-		pDC->Line(	ThumbPos.x1+2,
-					ThumbPos.y1+4,
-					ThumbPos.x1+6,
-					ThumbPos.y1+4);
+		
+		auto center = ThumbPos.Center();
+		pDC->Line(	ThumbPos.x1+gapPx,
+					center.y,
+					ThumbPos.x2-gapPx,
+					center.y);
 		
 		if (!Open())
 		{
-			pDC->Line(	ThumbPos.x1+4,
-						ThumbPos.y1+2,
-						ThumbPos.x1+4,
-						ThumbPos.y1+6);
+			pDC->Line(	center.x,
+						ThumbPos.y1+gapPx,
+						center.x,
+						ThumbPos.y2-gapPx);
 		}
 	}
 }
@@ -256,22 +261,22 @@ void LPanel::OnMouseClick(LMouse &m)
 {
 	if (OpenSize > 0 &&
 		m.Left() &&
-		m.Down() &&
-		ThumbPos.Overlap(m.x, m.y))
+		m.Down())
 	{
-		Open(!IsOpen);
-		if (GetParent())
-			OnNotify(this, LNotifyItemClick);
+		if (ThumbPos.Overlap(m.x, m.y))
+		{
+			Open(!IsOpen);
+			if (GetParent())
+				OnNotify(this, LNotifyItemClick);
+		}
+		else LgiTrace("%s:%i - Not over %i,%i - %s\n", _FL, m.x, m.y, ThumbPos.GetStr());
 	}
 }
 
 void LPanel::RePour()
 {
-	LWindow *Top = dynamic_cast<LWindow*>(GetWindow());
-	if (Top)
-	{
+	if (auto Top = GetWindow())
 		Top->PourAll();
-	}
 }
 
 void LPanel::SetChildrenVisibility(bool i)
