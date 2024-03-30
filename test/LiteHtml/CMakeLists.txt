@@ -4,7 +4,7 @@ project(LgiLiteHtml)
 
 set(LGI_LIB_ONLY TRUE)
 add_subdirectory(../.. lgi)
-add_subdirectory(../../../../../codelib/litehtml litehtml)
+add_subdirectory(../../../../../codelib/litehtml_theirs litehtml)
 
 set(SRC
     src/main.cpp
