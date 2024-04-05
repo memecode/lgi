@@ -107,7 +107,8 @@ enum AppIds
 	IDM_DELETE,
 	IDC_TABS,
 	IDC_BLAME,
-	IDC_RAW
+	IDC_RAW,
+	IDM_FORGET
 };
 
 enum AppMessages

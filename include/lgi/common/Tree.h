@@ -196,7 +196,6 @@ protected:
 	
 	LRect rItems;
 	
-	LPoint _ScrollPos();
 	LTreeItem *GetAdjacent(LTreeItem *From, bool Down);
 	void OnDragEnter();
 	void OnDragExit();
@@ -230,6 +229,7 @@ public:
 	void OnPulse() override;
 	int GetContentSize(int ColumnIdx) override;
 	LCursor GetCursor(int x, int y) override;
+	LPoint ScrollPxPos();
 
 	/// Add a item to the tree
 	LTreeItem *Insert(LTreeItem *Obj = 0, ssize_t Pos = -1);

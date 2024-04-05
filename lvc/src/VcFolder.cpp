@@ -312,19 +312,15 @@ bool VcFolder::IsLocal()
 	return Uri.IsProtocol("file");
 }
 
-const char *VcFolder::LocalPath()
+LString VcFolder::LocalPath()
 {
 	if (!Uri.IsProtocol("file") || Uri.sPath.IsEmpty())
 	{
 		LAssert(!"Shouldn't call this if not a file path.");
-		return NULL;
+		return LString();
 	}
-	auto c = Uri.sPath.Get();
-	#ifdef WINDOWS
-	if (*c == '/')
-		c++;
-	#endif
-	return c;
+
+	return Uri.LocalPath();
 }
 
 const char *VcFolder::GetText(int Col)
@@ -372,7 +368,7 @@ bool VcFolder::Serialize(LXmlTag *t, bool Write)
 
 LXmlTag *VcFolder::Save()
 {
-	LXmlTag *t = new LXmlTag(OPT_Folder);
+	auto t = new LXmlTag(OPT_Folder);
 	if (t)
 		Serialize(t, true);
 	return t;
@@ -496,8 +492,8 @@ bool VcFolder::StartCmd(const char *Args, ParseFn Parser, ParseParams *Params, L
 
 int LogDateCmp(LListItem *a, LListItem *b, NativeInt Data)
 {
-	VcCommit *A = dynamic_cast<VcCommit*>(a);
-	VcCommit *B = dynamic_cast<VcCommit*>(b);
+	auto A = dynamic_cast<VcCommit*>(a);
+	auto B = dynamic_cast<VcCommit*>(b);
 
 	if ((A != NULL) ^ (B != NULL))
 	{
@@ -2692,7 +2688,8 @@ void VcFolder::OnMouseClick(LMouse &m)
 			s.AppendItem("Edit Location", IDM_EDIT);
 		}
 		
-		int Cmd = s.Float(GetTree(), m);
+		m -= GetTree()->ScrollPxPos();
+		auto Cmd = s.Float(GetTree(), m);
 		switch (Cmd)
 		{
 			case IDM_BROWSE_FOLDER:
@@ -2818,6 +2815,43 @@ void VcFolder::Checkout(const char *Rev, bool isBranch)
 			Args.Printf("update -r %s", Rev);
 			IsUpdate = StartCmd(Args, &VcFolder::ParseCheckout, params.Release(), LogNormal);
 			break;
+		default:
+		{
+			NoImplementation(_FL);
+			break;
+		}
+	}
+}
+
+bool VcFolder::ParseDelete(int Result, LString s, ParseParams *Params)
+{
+	switch (GetType())
+	{
+		case VcHg:
+		{
+			
+			break;
+		}
+	}
+
+	return true;
+}
+
+void VcFolder::Delete(const char *Path, bool KeepLocal)
+{
+	switch (GetType())
+	{
+		case VcHg:
+		{
+			LString args;
+			if (KeepLocal)
+				args.Printf("forget \"%s\"", Path);
+			else
+				args.Printf("remove \"%s\"", Path);
+
+			StartCmd(args, &VcFolder::ParseDelete);
+			break;
+		}
 		default:
 		{
 			NoImplementation(_FL);
@@ -3109,23 +3143,23 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 			Tmp.Close();
 			#endif
 
-			LString::Array a = s.Split("===================================================================");
+			auto a = s.Split("===================================================================");
 			for (auto i : a)
 			{
-				LString::Array Lines = i.SplitDelimit("\r\n");
+				auto Lines = i.SplitDelimit("\r\n");
 				if (Lines.Length() == 0)
 					continue;
-				LString f = Lines[0].Strip();
+				auto f = Lines[0].Strip();
 				if (f.Find("File:") == 0)
 				{
-					LString::Array Parts = f.SplitDelimit("\t");
-					LString File = Parts[0].Split(": ").Last().Strip();
-					LString Status = Parts[1].Split(": ").Last();
+					auto Parts = f.SplitDelimit("\t");
+					auto File = Parts[0].Split(": ").Last().Strip();
+					auto Status = Parts[1].Split(": ").Last();
 					LString WorkingRev;
 
 					for (auto l : Lines)
 					{
-						LString::Array p = l.Strip().Split(":", 1);
+						auto p = l.Strip().Split(":", 1);
 						if (p.Length() > 1 &&
 							p[0].Strip().Equals("Working revision"))
 						{
@@ -3133,7 +3167,7 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 						}
 					}
 
-					VcFile *f = Map.Find(File);
+					auto f = Map.Find(File);
 					if (!f)
 					{
 						if ((f = new VcFile(d, this, WorkingRev, IsWorking)))

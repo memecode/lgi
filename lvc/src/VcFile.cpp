@@ -191,6 +191,10 @@ void VcFile::OnMouseClick(LMouse &m)
 			s.AppendItem("Browse To", IDM_BROWSE, !LocalPath.IsEmpty());
 			s.AppendItem("Log", IDM_LOG_FILE);
 			s.AppendItem("Blame", IDM_BLAME);
+			s.AppendSeparator();
+			s.AppendItem("Delete from repo, keep local", IDM_FORGET);
+			s.AppendItem("Delete from repo and local", IDM_REMOVE);
+			s.AppendSeparator();
 
 			int CurEol = LocalPath ? GetEol(LocalPath) : 0;
 			auto Ln = s.AppendSub("Line Endings");
@@ -264,6 +268,16 @@ void VcFile::OnMouseClick(LMouse &m)
 					LBrowseToFile(LocalPath);
 				else
 					LgiMsg(GetList(), "Can't find path '%s'.", AppName, MB_OK, LocalPath.Get());
+				break;
+			}
+			case IDM_FORGET:
+			{
+				Owner->Delete(LocalPath, true);
+				break;
+			}
+			case IDM_REMOVE:
+			{
+				Owner->Delete(LocalPath, false);
 				break;
 			}
 			case IDM_REVERT_TO_REV:

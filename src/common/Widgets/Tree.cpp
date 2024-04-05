@@ -434,7 +434,7 @@ LRect *LTreeItem::Pos()
 LPoint LTreeItem::_ScrollPos()
 {
 	LPoint p;
-	if (Tree) p = Tree->_ScrollPos();
+	if (Tree) p = Tree->ScrollPxPos();
 	return p;
 }
 
@@ -1125,7 +1125,7 @@ void LTree::_Update(LRect *r, bool Now)
 	if (r)
 	{
 		LRect u = *r;
-		LPoint s = _ScrollPos();
+		LPoint s = ScrollPxPos();
 		LRect c = GetClient();
 		u.Offset(c.x1-s.x, c.y1-s.y);
 		Invalidate(&u, Now && !d->InPour);
@@ -1140,7 +1140,7 @@ void LTree::_UpdateBelow(int y, bool Now)
 {
 	TREELOCK(this)
 
-	LPoint s = _ScrollPos();
+	LPoint s = ScrollPxPos();
 	LRect c = GetClient();
 	LRect u(c.x1, y - s.y + c.y1, X()-1, Y()-1);
 	Invalidate(&u, Now);
@@ -1155,7 +1155,7 @@ void LTree::ClearDs(int Col)
 		i->_ClearDs(Col);
 }
 
-LPoint LTree::_ScrollPos()
+LPoint LTree::ScrollPxPos()
 {
 	TREELOCK(this)
 
@@ -1175,7 +1175,7 @@ void LTree::_UpdateScrollBars()
 		
 		{
 			TREELOCK(this)
-			LPoint Old = _ScrollPos();
+			LPoint Old = ScrollPxPos();
 			
 			LRect Client = GetClient();
 			bool x = d->Limit.x > Client.X();
@@ -1212,7 +1212,7 @@ void LTree::_UpdateScrollBars()
 				*/
 			}
 
-			LPoint New = _ScrollPos();
+			LPoint New = ScrollPxPos();
 			if (Old.x != New.x ||
 				Old.y != New.y)
 			{
@@ -1585,7 +1585,7 @@ LTreeItem *LTree::ItemAtPoint(int x, int y, bool Debug)
 {
 	TREELOCK(this)
 
-	LPoint s = _ScrollPos();
+	LPoint s = ScrollPxPos();
 
 	List<LTreeItem>::I it = Items.begin();
 	LTreeItem *Hit = NULL;
@@ -1669,7 +1669,7 @@ void LTree::OnMouseClick(LMouse &m)
 			d->LastHit = ItemAtPoint(m.x, m.y, true);
 			if (d->LastHit)
 			{
-				LPoint c = _ScrollPos();
+				LPoint c = ScrollPxPos();
 				m.x += c.x;
 				m.y += c.y;
 				d->LastHit->_MouseClick(m);
@@ -1692,7 +1692,7 @@ void LTree::OnMouseClick(LMouse &m)
 			d->LastHit = ItemAtPoint(m.x, m.y);
 			if (d->LastHit)
 			{
-				LPoint c = _ScrollPos();
+				LPoint c = ScrollPxPos();
 				m.x += c.x;
 				m.y += c.y;
 				d->LastHit->_MouseClick(m);
@@ -1835,7 +1835,7 @@ void LTree::OnPaint(LSurface *pDC)
 	}
 
 	// scroll
-	LPoint s = _ScrollPos();
+	LPoint s = ScrollPxPos();
 	int Ox, Oy;
 	pDC->GetOrigin(Ox, Oy);
 	pDC->SetOrigin(Ox + s.x, Oy + s.y);

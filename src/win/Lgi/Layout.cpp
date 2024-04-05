@@ -43,17 +43,17 @@ LViewI *LLayout::FindControl(int Id)
 	return LView::FindControl(Id);
 }
 
+LPoint LLayout::GetScrollPos()
+{
+	int64 x, y;
+	GetScrollPos(x, y);
+	return LPoint(x, y);
+}
+
 void LLayout::GetScrollPos(int64 &x, int64 &y)
 {
-	if (HScroll)
-		x = (int)HScroll->Value();
-	else
-		x = 0;
-
-	if (VScroll)
-		y = (int)VScroll->Value();
-	else
-		y = 0;
+	x = HScroll ? HScroll->Value() : 0;
+	y = VScroll ? VScroll->Value() : 0;
 }
 
 void LLayout::SetScrollPos(int64 x, int64 y)

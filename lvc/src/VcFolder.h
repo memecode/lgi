@@ -309,6 +309,7 @@ class VcFolder : public LTreeItem
 	bool ParseRemoteFind(int Result, LString s, ParseParams *Params);
 	bool ParseStartBranch(int Result, LString s, ParseParams *Params);
 	bool ParseSelectCommit(int Result, LString s, ParseParams *Params);
+	bool ParseDelete(int Result, LString s, ParseParams *Params);
 	void DoExpand();
 	
 public:
@@ -319,7 +320,7 @@ public:
 	VersionCtrl GetType();
 	AppPriv *GetPriv() { return d; }
 	bool IsLocal();
-	const char *LocalPath();
+	LString LocalPath();
 	LUri GetUri() { return Uri; }
 	VcLeaf *FindLeaf(const char *Path, bool OpenTree);
 	void DefaultFields();
@@ -370,6 +371,7 @@ public:
 	void GetRemoteUrl(std::function<void(int32_t, LString)> Callback);
 	void SelectCommit(LWindow *Parent, LString Commit, LString Path);
 	void Checkout(const char *Rev, bool isBranch);
+	void Delete(const char *Path, bool KeepLocal = true);
 
 	void OnPulse();
 	void OnMouseClick(LMouse &m);

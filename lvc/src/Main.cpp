@@ -1407,7 +1407,7 @@ public:
 			for (auto f: Folders)
 			{
 				if (f->GetUri().IsFile() &&
-					!Stricmp(f->LocalPath(), Fld))
+					!Stricmp(f->LocalPath().Get(), Fld))
 				{
 					Has = f;
 					break;
