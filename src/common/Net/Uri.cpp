@@ -47,7 +47,13 @@ LUri &LUri::operator +=(const char *s)
 	if (*s == '/')
 		sPath.Empty(); // reset
 
-	auto lastSep = sPath.RFind("/");
+	ssize_t lastSep;
+	for (lastSep=sPath.Length()-1; lastSep>=0; lastSep--)
+	{
+		auto c = sPath(lastSep);
+		if (c == '/' || c == '\\')
+			break;
+	}
 	auto path = lastSep >= 0 ? sPath(0, lastSep) : sPath;
 	auto parts = path.SplitDelimit("/\\");
 	parts.SetFixedLength(false);
@@ -62,7 +68,7 @@ LUri &LUri::operator +=(const char *s)
 			parts.Add(p);
 	}
 
-	sPath = LString(IsFile() ? DIR_STR : "/").Join(parts);
+	sPath = LString("/").Join(parts);
 	return *this;
 }
 
@@ -227,7 +233,14 @@ bool LUri::Set(const char *uri)
 
 	if (hasPath)
 	{
-		sPath = hasPath;
+		sPath = LString(hasPath).Replace("\\", "/");
+		if (IsFile() &&
+			LDirExists(LocalPath()))
+		{
+			// Folders should have a trailing slash
+			if (sPath(-1) != '/')
+				sPath += "/";
+		}
 	}
 
 	if (sPath)

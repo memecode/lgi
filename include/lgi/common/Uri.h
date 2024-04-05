@@ -11,7 +11,7 @@ public:
 	LString sPass;
 	LString sHost;
 	int Port = 0;
-	LString sPath;
+	LString sPath; // Should always have unix '/' style slashes
 	LString sAnchor;
 
 	/// Parser for URI's.

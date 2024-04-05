@@ -4936,12 +4936,12 @@ LString VcLeaf::Full()
 
 void VcLeaf::OnBrowse()
 {
-	auto full = Full();
+	LUri full(Full());
 
 	LList *Files = d->Files;
 	Files->Empty();
 	LDirectory Dir;
-	for (int b = Dir.First(full); b; b = Dir.Next())
+	for (int b = Dir.First(full.LocalPath()); b; b = Dir.Next())
 	{
 		if (Dir.IsDir())
 			continue;
@@ -4956,7 +4956,7 @@ void VcLeaf::OnBrowse()
 	}
 	Files->ResizeColumnsToContent();
 	if (Folder)
-		Parent->FolderStatus(full, this);
+		Parent->FolderStatus(full.ToString(), this);
 }
 
 void VcLeaf::AfterBrowse()
