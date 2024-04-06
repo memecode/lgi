@@ -573,7 +573,7 @@ void LFilterItem::SetValue(char *s)
 #define StartCtrl(Rc, Ed, Name, Obj) \
 	if (!d->Ed) \
 	{ \
-		LPoint sc = d->Data->Tree->_ScrollPos(); \
+		LPoint sc = d->Data->Tree->ScrollPxPos(); \
 		d->Ed = new Obj(n++, c.x1 + Pos->x1 + Rc.x1 - sc.x, c.y1 + Pos->y1 + Rc.y1 - sc.y, \
 								Rc.X(), Rc.Y(), \
 								Name); \
@@ -585,7 +585,7 @@ void LFilterItem::SetValue(char *s)
 	else \
 	{ \
 		LRect r = Rc; \
-		LPoint sc = d->Data->Tree->_ScrollPos(); \
+		LPoint sc = d->Data->Tree->ScrollPxPos(); \
 		r.Offset(c.x1 + Pos->x1 - sc.x, c.y1 + Pos->y1 - sc.y); \
 		d->Ed->SetPos(r); \
 	}
