@@ -448,7 +448,7 @@ bool VcFolder::StartCmd(const char *Args, ParseFn Parser, ParseParams *Params, L
 		if (!Process)
 			return false;
 
-		Process->SetInitFolder(Params && Params->AltInitPath ? Params->AltInitPath.Get() : LocalPath());
+		Process->SetInitFolder(Params && Params->AltInitPath ? Params->AltInitPath : LocalPath());
 		#if 0//def MAC
 			// Mac GUI apps don't share the terminal path, so this overrides that and make it work
 			auto Path = LGetPath();

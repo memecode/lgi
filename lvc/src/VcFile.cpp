@@ -120,7 +120,7 @@ void VcFile::OnMouseClick(LMouse &m)
 		LUri u(GetUri());
 		if (u.IsProtocol("file"))
 		{
-			LFile::Path p = u.sPath ? Uri.sPath(1,-1).Get() : Owner->LocalPath();
+			LFile::Path p = u.sPath ? Uri.sPath(1,-1) : Owner->LocalPath();
 			p += File;
 			LocalPath = p.GetFull();
 		}
