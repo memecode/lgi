@@ -239,7 +239,8 @@ enum Store3ItemTypes
 	MAGIC_CALENDAR					= (MAGIC_BASE+11),	// Calendar event
 	MAGIC_ATTENDEE					= (MAGIC_BASE+12),	// Event attendee
 	MAGIC_GROUP						= (MAGIC_BASE+13),	// Group of contacts
-	MAGIC_MAX						= (MAGIC_BASE+14)	// One past the end
+	MAGIC_CALENDAR_FILE				= (MAGIC_BASE+14),	// Calendar attachment
+	MAGIC_MAX						= (MAGIC_BASE+15)	// One past the end
 };
 
 extern const char *Store3ItemTypeName(Store3ItemTypes t);
@@ -341,13 +342,8 @@ enum Store3Fields
 
 	FIELD_CAL_TIMEZONE = 83,			// (char*) The timezone as text
 	FIELD_CAL_PRIVACY = 84,				// (CalendarPrivacyType) The privacy setting
-
-	// Attendee fields
 	FIELD_ATTENDEE_JSON = 85,
-	// FIELD_ATTENDEE_EMAIL = 86,
-	// FIELD_ATTENDEE_ATTENDENCE = 87,
-	// FIELD_ATTENDEE_NOTE = 88,
-	// FIELD_ATTENDEE_RESPONSE = 89,
+	FIELD_CAL_ATTACHMENTS = 86,			// List of attached files
 
 	// 2nd lot of contact fields
 	FIELD_WORK_STREET = 90,				// (char*)
