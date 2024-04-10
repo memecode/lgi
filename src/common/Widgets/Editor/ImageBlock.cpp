@@ -8,6 +8,12 @@
 #include "RichTextEditPriv.h"
 
 #define LOADER_THREAD_LOGGING		1
+#if LOADER_THREAD_LOGGING
+#define LOADER_LOG(...)				LgiTrace(__VA_ARGS__)
+#else
+#define LOADER_LOG(...)				;
+#endif
+
 #define TIMEOUT_LOAD_PROGRESS		100 // ms
 
 int ImgScales[] = { 15, 25, 50, 75, 100 };
@@ -32,9 +38,7 @@ public:
 	~ImageLoader()
 	{
 		Progress::Cancel(true);
-		#if LOADER_THREAD_LOGGING
-		LgiTrace("%s:%i - ~ImageLoader\n", _FL);
-		#endif
+		LOADER_LOG("%s:%i - ~ImageLoader\n", _FL);
 	}
 	
 	const char *GetClass() override { return "ImageLoader"; }
@@ -79,33 +83,25 @@ public:
 				LAutoPtr<LString> Str((LString*)Msg->A());
 				File = *Str;
 
-				#if LOADER_THREAD_LOGGING
-				LgiTrace("%s:%i - Thread.Receive(M_IMAGE_LOAD_FILE): '%s'\n", _FL, File.Get());
-				#endif
+				LOADER_LOG("%s:%i - Thread.Receive(M_IMAGE_LOAD_FILE): '%s'\n", _FL, File.Get());
 				
 				Filter = LFilterFactory::New(File, O_READ, NULL);
 				if (!Filter)
 				{
-					#if LOADER_THREAD_LOGGING
-					LgiTrace("%s:%i - Thread.Send(M_IMAGE_ERROR): no filter\n", _FL);
-					#endif
+					LOADER_LOG("%s:%i - Thread.Send(M_IMAGE_ERROR): no filter\n", _FL);
 					return PostSink(M_IMAGE_ERROR);
 				}
 
 				if (!In.Reset(new LFile) ||
 					!In->Open(File, O_READ))
 				{
-					#if LOADER_THREAD_LOGGING
-					LgiTrace("%s:%i - Thread.Send(M_IMAGE_ERROR): can't read\n", _FL);
-					#endif
+					LOADER_LOG("%s:%i - Thread.Send(M_IMAGE_ERROR): can't read\n", _FL);
 					return PostSink(M_IMAGE_ERROR);
 				}
 
 				if (!(Img = new LMemDC))
 				{
-					#if LOADER_THREAD_LOGGING
-					LgiTrace("%s:%i - Thread.Send(M_IMAGE_ERROR): alloc err\n", _FL);
-					#endif
+					LOADER_LOG("%s:%i - Thread.Send(M_IMAGE_ERROR): alloc err\n", _FL);
 					return PostSink(M_IMAGE_ERROR);
 				}
 
@@ -118,29 +114,21 @@ public:
 					if (Status == LFilter::IoComponentMissing)
 					{
 						LString *s = new LString(Filter->GetComponentName());
-						#if LOADER_THREAD_LOGGING
-						LgiTrace("%s:%i - Thread.Send(M_IMAGE_COMPONENT_MISSING)\n", _FL);
-						#endif
+						LOADER_LOG("%s:%i - Thread.Send(M_IMAGE_COMPONENT_MISSING)\n", _FL);
 						return PostSink(M_IMAGE_COMPONENT_MISSING, (LMessage::Param)s);
 					}
 
-					#if LOADER_THREAD_LOGGING
-					LgiTrace("%s:%i - Thread.Send(M_IMAGE_ERROR): Filter::ReadImage err\n", _FL);
-					#endif
+					LOADER_LOG("%s:%i - Thread.Send(M_IMAGE_ERROR): Filter::ReadImage err\n", _FL);
 					return PostSink(M_IMAGE_ERROR);
 				}
 
 				if (!SurfaceSent)
 				{
-					#if LOADER_THREAD_LOGGING
-					LgiTrace("%s:%i - Thread.Send(M_IMAGE_SET_SURFACE)\n", _FL);
-					#endif
+					LOADER_LOG("%s:%i - Thread.Send(M_IMAGE_SET_SURFACE)\n", _FL);
 					PostSink(M_IMAGE_SET_SURFACE, (LMessage::Param)Img, (LMessage::Param)In.Release());
 				}
 
-				#if LOADER_THREAD_LOGGING
-				LgiTrace("%s:%i - Thread.Send(M_IMAGE_FINISHED)\n", _FL);
-				#endif
+				LOADER_LOG("%s:%i - Thread.Send(M_IMAGE_FINISHED)\n", _FL);
 				PostSink(M_IMAGE_FINISHED);
 				break;
 			}
@@ -148,9 +136,7 @@ public:
 			{
 				LAutoPtr<LStreamI> Stream((LStreamI*)Msg->A());
 				LAutoPtr<LString> FileName((LString*)Msg->B());
-				#if LOADER_THREAD_LOGGING
-				LgiTrace("%s:%i - Thread.Receive(M_IMAGE_LOAD_STREAM)\n", _FL);
-				#endif
+				LOADER_LOG("%s:%i - Thread.Receive(M_IMAGE_LOAD_STREAM)\n", _FL);
 				if (!Stream)
 				{
 					LAssert(!"No stream.");
@@ -162,17 +148,13 @@ public:
 				Filter = LFilterFactory::New(FileName ? *FileName : 0, O_READ, (const uchar*)Mem->GetBasePtr());
 				if (!Filter)
 				{
-					#if LOADER_THREAD_LOGGING
-					LgiTrace("%s:%i - Thread.Send(M_IMAGE_ERROR): no filter\n", _FL);
-					#endif
+					LOADER_LOG("%s:%i - Thread.Send(M_IMAGE_ERROR): no filter\n", _FL);
 					return PostSink(M_IMAGE_ERROR);
 				}
 
 				if (!(Img = new LMemDC))
 				{
-					#if LOADER_THREAD_LOGGING
-					LgiTrace("%s:%i - Thread.Send(M_IMAGE_ERROR): alloc err\n", _FL);
-					#endif
+					LOADER_LOG("%s:%i - Thread.Send(M_IMAGE_ERROR): alloc err\n", _FL);
 					return PostSink(M_IMAGE_ERROR);
 				}
 
@@ -185,55 +167,40 @@ public:
 					if (Status == LFilter::IoComponentMissing)
 					{
 						LString *s = new LString(Filter->GetComponentName());
-						#if LOADER_THREAD_LOGGING
-						LgiTrace("%s:%i - Thread.Send(M_IMAGE_COMPONENT_MISSING)\n", _FL);
-						#endif
+						LOADER_LOG("%s:%i - Thread.Send(M_IMAGE_COMPONENT_MISSING)\n", _FL);
 						return PostSink(M_IMAGE_COMPONENT_MISSING, (LMessage::Param)s);
 					}
 
-					#if LOADER_THREAD_LOGGING
-					LgiTrace("%s:%i - Thread.Send(M_IMAGE_ERROR): Filter::ReadImage err\n", _FL);
-					#endif
+					LOADER_LOG("%s:%i - Thread.Send(M_IMAGE_ERROR): Filter::ReadImage err\n", _FL);
 					return PostSink(M_IMAGE_ERROR);
 				}
 
 				if (!SurfaceSent)
 				{
-					#if LOADER_THREAD_LOGGING
-					LgiTrace("%s:%i - Thread.Send(M_IMAGE_SET_SURFACE)\n", _FL);
-					#endif
+					LOADER_LOG("%s:%i - Thread.Send(M_IMAGE_SET_SURFACE)\n", _FL);
 					PostSink(M_IMAGE_SET_SURFACE, (LMessage::Param)Img, (LMessage::Param)In.Release());
 				}
 
-				#if LOADER_THREAD_LOGGING
-				LgiTrace("%s:%i - Thread.Send(M_IMAGE_FINISHED)\n", _FL);
-				#endif
+				LOADER_LOG("%s:%i - Thread.Send(M_IMAGE_FINISHED)\n", _FL);
 				PostSink(M_IMAGE_FINISHED);
 				break;
 			}
 			case M_IMAGE_RESAMPLE:
 			{
-				LSurface *Dst = (LSurface*) Msg->A();
-				LSurface *Src = (LSurface*) Msg->B();
-				#if LOADER_THREAD_LOGGING
-				LgiTrace("%s:%i - Thread.Receive(M_IMAGE_RESAMPLE)\n", _FL);
-				#endif
+				auto Dst = (LSurface*) Msg->A();
+				auto Src = (LSurface*) Msg->B();
+				LOADER_LOG("%s:%i - Thread.Receive(M_IMAGE_RESAMPLE)\n", _FL);
 				if (Src && Dst)
 				{
 					ResampleDC(Dst, Src);
 					if (PostSink(M_IMAGE_RESAMPLE))
-					{
-						#if LOADER_THREAD_LOGGING
-						LgiTrace("%s:%i - Thread.Send(M_IMAGE_RESAMPLE)\n", _FL);
-						#endif
-					}
-					else LgiTrace("%s:%i - Error sending re-sample msg.\n", _FL);
+						LOADER_LOG("%s:%i - Thread.Send(M_IMAGE_RESAMPLE)\n", _FL);
+					else
+						LgiTrace("%s:%i - Error sending re-sample msg.\n", _FL);
 				}
 				else
 				{
-					#if LOADER_THREAD_LOGGING
-					LgiTrace("%s:%i - Thread.Send(M_IMAGE_ERROR): ptr err %p %p\n", _FL, Src, Dst);
-					#endif
+					LOADER_LOG("%s:%i - Thread.Send(M_IMAGE_ERROR): ptr err %p %p\n", _FL, Src, Dst);
 					return PostSink(M_IMAGE_ERROR);
 				}
 				break;
@@ -241,15 +208,11 @@ public:
 			case M_IMAGE_COMPRESS:
 			{
 				LSurface *img = (LSurface*)Msg->A();
-				LRichTextPriv::ImageBlock::ScaleInf *si = (LRichTextPriv::ImageBlock::ScaleInf*)Msg->B();
-				#if LOADER_THREAD_LOGGING
-				LgiTrace("%s:%i - Thread.Receive(M_IMAGE_COMPRESS)\n", _FL);
-				#endif
+				auto si = (LRichTextPriv::ImageBlock::ScaleInf*)Msg->B();
+				LOADER_LOG("%s:%i - Thread.Receive(M_IMAGE_COMPRESS) si: %s\n", _FL, si->ToString().Get());
 				if (!img || !si)
 				{
-					#if LOADER_THREAD_LOGGING
-					LgiTrace("%s:%i - Thread.Send(M_IMAGE_ERROR): invalid ptr\n", _FL);
-					#endif
+					LOADER_LOG("%s:%i - Thread.Send(M_IMAGE_ERROR): invalid ptr\n", _FL);
 					PostSink(M_IMAGE_ERROR, (LMessage::Param) new LString("Invalid pointer."));
 					break;
 				}
@@ -257,9 +220,7 @@ public:
 				auto f = LFilterFactory::New("a.jpg", O_READ, NULL);
 				if (!f)
 				{
-					#if LOADER_THREAD_LOGGING
-					LgiTrace("%s:%i - Thread.Send(M_IMAGE_ERROR): No JPEG filter available\n", _FL);
-					#endif
+					LOADER_LOG("%s:%i - Thread.Send(M_IMAGE_ERROR): No JPEG filter available\n", _FL);
 					PostSink(M_IMAGE_ERROR, (LMessage::Param) new LString("No JPEG filter available."));
 					break;
 				}
@@ -281,24 +242,18 @@ public:
 				LAutoPtr<LMemStream> jpg(new LMemStream(1024));
 				if (!f->WriteImage(jpg, img))
 				{
-					#if LOADER_THREAD_LOGGING
-					LgiTrace("%s:%i - Thread.Send(M_IMAGE_ERROR): Image compression failed\n", _FL);
-					#endif
+					LOADER_LOG("%s:%i - Thread.Send(M_IMAGE_ERROR): Image compression failed\n", _FL);
 					PostSink(M_IMAGE_ERROR, (LMessage::Param) new LString("Image compression failed."));
 					break;
 				}
 
-				#if LOADER_THREAD_LOGGING
-				LgiTrace("%s:%i - Thread.Send(M_IMAGE_COMPRESS)\n", _FL);
-				#endif
+				LOADER_LOG("%s:%i - Thread.Send(M_IMAGE_COMPRESS)\n", _FL);
 				PostSink(M_IMAGE_COMPRESS, (LMessage::Param)jpg.Release(), (LMessage::Param)si);
 				break;
 			}
 			case M_IMAGE_ROTATE:
 			{
-				#if LOADER_THREAD_LOGGING
-				LgiTrace("%s:%i - Thread.Receive(M_IMAGE_ROTATE)\n", _FL);
-				#endif
+				LOADER_LOG("%s:%i - Thread.Receive(M_IMAGE_ROTATE)\n", _FL);
 				LSurface *Img = (LSurface*)Msg->A();
 				if (!Img)
 				{
@@ -307,18 +262,14 @@ public:
 				}
 
 				RotateDC(Img, Msg->B() == 1 ? 90 : 270);
-				#if LOADER_THREAD_LOGGING
-				LgiTrace("%s:%i - Thread.Send(M_IMAGE_ROTATE)\n", _FL);
-				#endif
+				LOADER_LOG("%s:%i - Thread.Send(M_IMAGE_ROTATE)\n", _FL);
 				PostSink(M_IMAGE_ROTATE);
 				break;
 			}
 			case M_IMAGE_FLIP:
 			{
-				#if LOADER_THREAD_LOGGING
-				LgiTrace("%s:%i - Thread.Receive(M_IMAGE_FLIP)\n", _FL);
-				#endif
-				LSurface *Img = (LSurface*)Msg->A();
+				LOADER_LOG("%s:%i - Thread.Receive(M_IMAGE_FLIP)\n", _FL);
+				auto Img = (LSurface*)Msg->A();
 				if (!Img)
 				{
 					LAssert(!"No image.");
@@ -329,17 +280,13 @@ public:
 					FlipXDC(Img);
 				else
 					FlipYDC(Img);
-				#if LOADER_THREAD_LOGGING
-				LgiTrace("%s:%i - Thread.Send(M_IMAGE_FLIP)\n", _FL);
-				#endif
+				LOADER_LOG("%s:%i - Thread.Send(M_IMAGE_FLIP)\n", _FL);
 				PostSink(M_IMAGE_FLIP);
 				break;
 			}
 			case M_CLOSE:
 			{
-				#if LOADER_THREAD_LOGGING
-				LgiTrace("%s:%i - Thread.Receive(M_CLOSE)\n", _FL);
-				#endif
+				LOADER_LOG("%s:%i - Thread.Receive(M_CLOSE)\n", _FL);
 				EndThread();
 				break;
 			}
@@ -351,17 +298,10 @@ public:
 
 LRichTextPriv::ImageBlock::ImageBlock(LRichTextPriv *priv) : Block(priv)
 {
-	ThreadHnd = 0;
-	IsDeleted = false;
-	LayoutDirty = false;
 	Pos.ZOff(-1, -1);
-	Style = NULL;
 	Size.x = 200;
 	Size.y = 64;
-	Scale = 1;
 	SourceValid.ZOff(-1, -1);
-	ResizeIdx = -1;
-	ThreadBusy = 0;
 
 	Margin.ZOff(0, 0);
 	Border.ZOff(0, 0);
@@ -370,12 +310,9 @@ LRichTextPriv::ImageBlock::ImageBlock(LRichTextPriv *priv) : Block(priv)
 
 LRichTextPriv::ImageBlock::ImageBlock(const ImageBlock *Copy) : Block(Copy->d)
 {
-	ThreadHnd = 0;
-	ThreadBusy = 0;
 	LayoutDirty = true;
 	SourceImg.Reset(new LMemDC(Copy->SourceImg));
 	Size = Copy->Size;
-	IsDeleted = false;
 
 	Margin = Copy->Margin;
 	Border = Copy->Border;
@@ -400,12 +337,8 @@ bool LRichTextPriv::ImageBlock::IsBusy(bool Stop)
 	return ThreadBusy != 0;
 }
 
-bool LRichTextPriv::ImageBlock::SetImage(LAutoPtr<LSurface> Img)
+void LRichTextPriv::ImageBlock::OnDimensions()
 {
-	SourceImg = Img;
-	if (!SourceImg)
-		return false;
-
 	Scales.Length(CountOf(ImgScales));
 	for (int i=0; i<CountOf(ImgScales); i++)
 	{
@@ -415,12 +348,78 @@ bool LRichTextPriv::ImageBlock::SetImage(LAutoPtr<LSurface> Img)
 		si.Percent = ImgScales[i];
 	
 		if (si.Sz.x == SourceImg->X() &&
-			si.Sz.y == SourceImg->Y())
+			si.Sz.y == SourceImg->Y() &&
+			ResizeIdx < 0)
 		{
 			ResizeIdx = i;
+			ResizeSrc = SourceDefault;
 		}
 	}
+}
 
+void LRichTextPriv::ImageBlock::GetCompressedSize()
+{
+	// Also create a JPG for the current scale (needed before 
+	// we save to HTML).
+	if (Scales.IdxCheck(ResizeIdx))
+	{
+		ScaleInf &si = Scales[ResizeIdx];
+		if (!si.Compressing && !si.Compressed)
+		{
+			si.Compressing = true;
+			LOADER_LOG("%s:%i post M_IMAGE_COMPRESS %s\n", _FL, si.ToString().Get());
+			if (PostThreadEvent(GetThreadHandle(), M_IMAGE_COMPRESS, (LMessage::Param)SourceImg.Get(), (LMessage::Param)&si))
+				UpdateThreadBusy(_FL, 1);
+		}
+	}
+	else LAssert(!"ResizeIdx should be valid.");
+}
+
+void LRichTextPriv::ImageBlock::MaxImageFilter()
+{
+	LgiTrace("MaxImageFilter: ResizeIdx=%i ResizeSrc=%s\n", ResizeIdx, ToString(ResizeSrc));
+	for (int i=0; i<CountOf(ImgScales); i++)
+	{
+		ScaleInf &si = Scales[i];
+		LgiTrace("[%i]: %s\n", i, si.ToString().Get());
+	}
+
+	if (Scales.IdxCheck(ResizeIdx))
+	{
+		ScaleInf &si = Scales[ResizeIdx];
+		if (!si.Compressed)
+		{
+			LAssert(!"No compressed image?");
+			LOADER_LOG("%s:%i - no compressed image?\n", _FL);
+			return;
+		}
+
+		LRichTextEdit::ImgParams params;
+		params.Sz = si.Sz;
+		params.Bytes = si.Compressed->GetSize();
+		if (d->View->MaxImageFilter(params))
+		{
+			if (ResizeIdx <= 0)
+				LOADER_LOG("%s:%i no more resize steps available?\n", _FL);
+			else if (ResizeSrc == SourceUser)
+				LOADER_LOG("%s:%i we won't override the user's request.\n", _FL);
+			else
+			{
+				ResizeIdx--;
+				LOADER_LOG("%s:%i dec ResizeIdx=%i\n", _FL, ResizeIdx);
+				GetCompressedSize();
+			}
+		}
+	}
+}
+
+bool LRichTextPriv::ImageBlock::SetImage(LAutoPtr<LSurface> Img)
+{
+	SourceImg = Img;
+	if (!SourceImg)
+		return false;
+
+	OnDimensions();
 	LayoutDirty = true;
 	UpdateDisplayImg();
 	if (DisplayImg)
@@ -435,15 +434,7 @@ bool LRichTextPriv::ImageBlock::SetImage(LAutoPtr<LSurface> Img)
 	}
 	else LayoutDirty = true;
 
-	// Also create a JPG for the current scale (needed before 
-	// we save to HTML).
-	if (ResizeIdx >= 0 && ResizeIdx < (int)Scales.Length())
-	{
-		ScaleInf &si = Scales[ResizeIdx];
-		if (PostThreadEvent(GetThreadHandle(), M_IMAGE_COMPRESS, (LMessage::Param)SourceImg.Get(), (LMessage::Param)&si))
-			UpdateThreadBusy(_FL, 1);
-	}
-	else LAssert(!"ResizeIdx should be valid.");
+	GetCompressedSize();
 	
 	return true;
 }
@@ -455,11 +446,11 @@ bool LRichTextPriv::ImageBlock::Load(const char *Src)
 
 	LAutoPtr<LStreamI> Stream;
 	
-	LString::Array a = Source.Strip().Split(":", 1);
+	auto a = Source.Strip().Split(":", 1);
 	if (a.Length() > 1 &&
 		a[0].Equals("cid"))
 	{
-		LDocumentEnv *Env = d->View->GetEnv();
+		auto Env = d->View->GetEnv();
 		if (!Env)
 			return false;
 		
@@ -507,9 +498,7 @@ bool LRichTextPriv::ImageBlock::Load(const char *Src)
 
 	if (Stream)
 	{
-		#if LOADER_THREAD_LOGGING
-		LgiTrace("%s:%i - Posting M_IMAGE_LOAD_STREAM\n", _FL);
-		#endif
+		LOADER_LOG("%s:%i - Posting M_IMAGE_LOAD_STREAM\n", _FL);
 		if (PostThreadEvent(GetThreadHandle(), M_IMAGE_LOAD_STREAM, (LMessage::Param)Stream.Release(), (LMessage::Param) (FileName ? new LString(FileName) : NULL)))
 		{
 			UpdateThreadBusy(_FL, 1);
@@ -519,9 +508,7 @@ bool LRichTextPriv::ImageBlock::Load(const char *Src)
 	
 	if (FileName)
 	{
-		#if LOADER_THREAD_LOGGING
-		LgiTrace("%s:%i - Posting M_IMAGE_LOAD_FILE\n", _FL);
-		#endif
+		LOADER_LOG("%s:%i - Posting M_IMAGE_LOAD_FILE\n", _FL);
 		if (PostThreadEvent(GetThreadHandle(), M_IMAGE_LOAD_FILE, (LMessage::Param)new LString(FileName)))
 		{
 			UpdateThreadBusy(_FL, 1);
@@ -610,7 +597,7 @@ bool LRichTextPriv::ImageBlock::ToHtml(LStream &s, LArray<LDocView::ContentMedia
 		Cm.Id = ContentId;
 
 		LString Style;
-		ScaleInf *Si = ResizeIdx >= 0 && ResizeIdx < (int)Scales.Length() ? &Scales[ResizeIdx] : NULL;
+		auto Si = ResizeIdx >= 0 && ResizeIdx < (int)Scales.Length() ? &Scales[ResizeIdx] : NULL;
 		if (Si && Si->Compressed)
 		{
 			// Attach a copy of the resized JPEG...
@@ -642,18 +629,13 @@ bool LRichTextPriv::ImageBlock::ToHtml(LStream &s, LArray<LDocView::ContentMedia
 			Cm.MimeType = LAppInst->GetFileMimeType(Source);
 			Cm.FileName = LGetLeaf(Source);
 
-			LFile *f = new LFile;
+			LAutoPtr<LFile> f(new LFile);
 			if (f)
 			{
 				if (f->Open(Source, O_READ))
-				{
-					Cm.Stream.Reset(f);
-				}
+					Cm.Stream.Reset(f.Release());
 				else
-				{
-					delete f;
 					LgiTrace("%s:%i - Failed to open link image '%s'.\n", _FL, Source.Get());
-				}
 			}
 		}
 		else
@@ -1046,6 +1028,7 @@ void LRichTextPriv::ImageBlock::UpdateDisplay(int yy)
 		s.y2 = SourceValid.y2 = yy;
 	}
 
+	/* This seems to be broken...
 	if (DisplayImg)
 	{
 		LRect d(0, s.y1 / Scale, DisplayImg->X()-1, s.y2 / Scale);
@@ -1066,6 +1049,7 @@ void LRichTextPriv::ImageBlock::UpdateDisplay(int yy)
 			}
 		}
 	}
+	*/
 
 	LayoutDirty = true;
 	this->d->InvalidateDoc(NULL);
@@ -1124,15 +1108,11 @@ void LRichTextPriv::ImageBlock::UpdateThreadBusy(const char *File, int Line, int
 	if (ThreadBusy + Off >= 0)
 	{
 		ThreadBusy += Off;
-		#if LOADER_THREAD_LOGGING
-		LgiTrace("%s:%i - ThreadBusy=%i\n", File, Line, ThreadBusy);
-		#endif
+		LOADER_LOG("%s:%i - ThreadBusy=%i\n", File, Line, ThreadBusy);
 	}
 	else
 	{
-		#if LOADER_THREAD_LOGGING
-		LgiTrace("%s:%i - Error: ThreadBusy=%i\n", File, Line, ThreadBusy, ThreadBusy + Off);
-		#endif
+		LOADER_LOG("%s:%i - Error: ThreadBusy=%i\n", File, Line, ThreadBusy, ThreadBusy + Off);
 		LAssert(0);
 	}
 }
@@ -1146,17 +1126,17 @@ LMessage::Result LRichTextPriv::ImageBlock::OnEvent(LMessage *Msg)
 			if (!SourceImg)
 				break;
 			if (Msg->A() >= IDM_SCALE_IMAGE &&
-				Msg->A() < IDM_SCALE_IMAGE + CountOf(ImgScales))
+				Msg->A() <  IDM_SCALE_IMAGE + CountOf(ImgScales))
 			{
 				int i = (int)Msg->A() - IDM_SCALE_IMAGE;
 				if (i >= 0 && i < (int)Scales.Length())
 				{
 					ScaleInf &si = Scales[i];
 					ResizeIdx = i;
+					ResizeSrc = SourceUser;
+					LgiTrace("%s:%i - user setting image scale to %i\n", _FL, ResizeIdx);
 
-					#if LOADER_THREAD_LOGGING
-					LgiTrace("%s:%i - Posting M_IMAGE_COMPRESS\n", _FL);
-					#endif
+					LOADER_LOG("%s:%i - Posting M_IMAGE_COMPRESS\n", _FL);
 					if (PostThreadEvent(GetThreadHandle(), M_IMAGE_COMPRESS, (LMessage::Param)SourceImg.Get(), (LMessage::Param)&si))
 						UpdateThreadBusy(_FL, 1);
 					else
@@ -1166,30 +1146,22 @@ LMessage::Result LRichTextPriv::ImageBlock::OnEvent(LMessage *Msg)
 			else switch (Msg->A())
 			{
 				case IDM_CLOCKWISE:
-					#if LOADER_THREAD_LOGGING
-					LgiTrace("%s:%i - Posting M_IMAGE_ROTATE\n", _FL);
-					#endif
+					LOADER_LOG("%s:%i - Posting M_IMAGE_ROTATE\n", _FL);
 					if (PostThreadEvent(GetThreadHandle(), M_IMAGE_ROTATE, (LMessage::Param) SourceImg.Get(), 1))
 						UpdateThreadBusy(_FL, 1);
 					break;
 				case IDM_ANTI_CLOCKWISE:
-					#if LOADER_THREAD_LOGGING
-					LgiTrace("%s:%i - Posting M_IMAGE_ROTATE\n", _FL);
-					#endif
+					LOADER_LOG("%s:%i - Posting M_IMAGE_ROTATE\n", _FL);
 					if (PostThreadEvent(GetThreadHandle(), M_IMAGE_ROTATE, (LMessage::Param) SourceImg.Get(), -1))
 						UpdateThreadBusy(_FL, 1);
 					break;
 				case IDM_X_FLIP:
-					#if LOADER_THREAD_LOGGING
-					LgiTrace("%s:%i - Posting M_IMAGE_FLIP\n", _FL);
-					#endif
+					LOADER_LOG("%s:%i - Posting M_IMAGE_FLIP\n", _FL);
 					if (PostThreadEvent(GetThreadHandle(), M_IMAGE_FLIP, (LMessage::Param) SourceImg.Get(), 1))
 						UpdateThreadBusy(_FL, 1);
 					break;
 				case IDM_Y_FLIP:
-					#if LOADER_THREAD_LOGGING
-					LgiTrace("%s:%i - Posting M_IMAGE_FLIP\n", _FL);
-					#endif
+					LOADER_LOG("%s:%i - Posting M_IMAGE_FLIP\n", _FL);
 					if (PostThreadEvent(GetThreadHandle(), M_IMAGE_FLIP, (LMessage::Param) SourceImg.Get(), 0))
 						UpdateThreadBusy(_FL, 1);
 					break;
@@ -1198,44 +1170,39 @@ LMessage::Result LRichTextPriv::ImageBlock::OnEvent(LMessage *Msg)
 		}
 		case M_IMAGE_COMPRESS:
 		{
-			LAutoPtr<LMemStream> Jpg((LMemStream*)Msg->A());
-			ScaleInf *Si = (ScaleInf*)Msg->B();
+			auto Jpg = Msg->AutoA<LMemStream>();
+			auto Si = (ScaleInf*)Msg->B();
 			if (!Jpg || !Si)
 			{
 				LAssert(0);
-				#if LOADER_THREAD_LOGGING
-				LgiTrace("%s:%i - Error: M_IMAGE_COMPRESS bad arg\n", _FL);
-				#endif
+				LOADER_LOG("%s:%i - Error: M_IMAGE_COMPRESS bad arg\n", _FL);
 				break;
 			}
 
-			#if LOADER_THREAD_LOGGING
-			LgiTrace("%s:%i - Received M_IMAGE_COMPRESS\n", _FL);
-			#endif
+			Si->Compressing = false;
 			Si->Compressed.Reset(Jpg.Release());
 			Si->MimeType = "image/jpeg";
+			LOADER_LOG("%s:%i - Received M_IMAGE_COMPRESS: %s\n", _FL, Si->ToString().Get());
 			UpdateThreadBusy(_FL, -1);
 
 			// Change the doc to dirty
 			d->Dirty = true;
 			d->View->SendNotify(LNotifyDocChanged);
+
+			MaxImageFilter();
 			break;
 		}
 		case M_IMAGE_ERROR:
 		{
 			LAutoPtr<LString> ErrMsg((LString*) Msg->A());
-			#if LOADER_THREAD_LOGGING
-			LgiTrace("%s:%i - Received M_IMAGE_ERROR, posting M_CLOSE\n", _FL);
-			#endif
+			LOADER_LOG("%s:%i - Received M_IMAGE_ERROR, posting M_CLOSE\n", _FL);
 			UpdateThreadBusy(_FL, -1);
 			break;
 		}
 		case M_IMAGE_COMPONENT_MISSING:
 		{
 			LAutoPtr<LString> Component((LString*) Msg->A());
-			#if LOADER_THREAD_LOGGING
-			LgiTrace("%s:%i - Received M_IMAGE_COMPONENT_MISSING, posting M_CLOSE\n", _FL);
-			#endif
+			LOADER_LOG("%s:%i - Received M_IMAGE_COMPONENT_MISSING, posting M_CLOSE\n", _FL);
 			UpdateThreadBusy(_FL, -1);
 
 			if (Component)
@@ -1249,28 +1216,18 @@ LMessage::Result LRichTextPriv::ImageBlock::OnEvent(LMessage *Msg)
 		}
 		case M_IMAGE_SET_SURFACE:
 		{
-			LAutoPtr<LStream> File((LStream*)Msg->B());
-
-			#if LOADER_THREAD_LOGGING
-			LgiTrace("%s:%i - Received M_IMAGE_SET_SURFACE\n", _FL);
-			#endif
-
+			auto File = Msg->AutoB<LStream>();
+			LOADER_LOG("%s:%i - Received M_IMAGE_SET_SURFACE\n", _FL);			
 			if (SourceImg.Reset((LSurface*)Msg->A()))
 			{
-				Scales.Length(CountOf(ImgScales));
+				OnDimensions();
 				for (int i=0; i<CountOf(ImgScales); i++)
 				{
 					ScaleInf &si = Scales[i];
-					si.Sz.x = SourceImg->X() * ImgScales[i] / 100;
-					si.Sz.y = SourceImg->Y() * ImgScales[i] / 100;
-					si.Percent = ImgScales[i];
-				
 					if (si.Sz.x == SourceImg->X() &&
 						si.Sz.y == SourceImg->Y())
 					{
-						ResizeIdx = i;
 						si.Compressed.Reset(File.Release());
-
 						if (StreamMimeType)
 						{
 							si.MimeType = StreamMimeType;
@@ -1282,30 +1239,30 @@ LMessage::Result LRichTextPriv::ImageBlock::OnEvent(LMessage *Msg)
 						}
 					}
 				}
+				LAssert(File.Get() == NULL); // One of the scales should have claimed the data
 
 				UpdateDisplayImg();
+				MaxImageFilter();
 			}
 			break;
 		}
 		case M_IMAGE_PROGRESS:
 		{
-			#if LOADER_THREAD_LOGGING
-			LgiTrace("%s:%i - Received M_IMAGE_PROGRESS\n", _FL);
-			#endif
-
+			LOADER_LOG("%s:%i - Received M_IMAGE_PROGRESS\n", _FL);
+			
 			UpdateDisplay((int)Msg->A());
 			break;
 		}
 		case M_IMAGE_FINISHED:
 		{
-			#if LOADER_THREAD_LOGGING
-			LgiTrace("%s:%i - Received M_IMAGE_FINISHED\n", _FL);
-			#endif
+			LOADER_LOG("%s:%i - Received M_IMAGE_FINISHED\n", _FL);
 			UpdateThreadBusy(_FL, -1);
 
 			if (SourceImg)
 			{
+				OnDimensions();
 				UpdateDisplay(SourceImg->Y()-1);
+
 				if
 				(
 					DisplayImg != NULL &&
@@ -1317,15 +1274,15 @@ LMessage::Result LRichTextPriv::ImageBlock::OnEvent(LMessage *Msg)
 				{
 					UpdateThreadBusy(_FL, 1);
 				}
+
+				GetCompressedSize();
 			}
 			break;
 		}
 		case M_IMAGE_RESAMPLE:
 		{
-			#if LOADER_THREAD_LOGGING
-			LgiTrace("%s:%i - Received M_IMAGE_RESAMPLE\n", _FL);
-			#endif
-
+			LOADER_LOG("%s:%i - Received M_IMAGE_RESAMPLE\n", _FL);
+			
 			LayoutDirty = true;
 			UpdateThreadBusy(_FL, -1);
 			d->InvalidateDoc(NULL);
@@ -1335,10 +1292,8 @@ LMessage::Result LRichTextPriv::ImageBlock::OnEvent(LMessage *Msg)
 		case M_IMAGE_ROTATE:
 		case M_IMAGE_FLIP:
 		{
-			#if LOADER_THREAD_LOGGING
-			LgiTrace("%s:%i - Received %s\n", _FL, Msg->Msg()==M_IMAGE_ROTATE?"M_IMAGE_ROTATE":"M_IMAGE_FLIP");
-			#endif
-
+			LOADER_LOG("%s:%i - Received %s\n", _FL, Msg->Msg()==M_IMAGE_ROTATE?"M_IMAGE_ROTATE":"M_IMAGE_FLIP");
+			
 			LAutoPtr<LSurface> Img = SourceImg;
 			UpdateThreadBusy(_FL, -1);
 			SetImage(Img);

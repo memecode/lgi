@@ -851,21 +851,24 @@ LString VcFolder::GetConfigFile(bool local)
 	{
 		case VcHg:
 		{
-			LFile::Path p;
-			if (local)
+			if (Uri.IsFile())
 			{
-				p = LFile::Path(LocalPath()) / ".hg" / "hgrc";
-			}
-			else
-			{
-				p = LFile::Path(LSP_HOME) / ".hgrc";
-				if (!p.Exists())
-					p = LFile::Path(LSP_HOME) / "mercurial.ini";
-			}
+				LFile::Path p;
+				if (local)
+				{
+					p = LFile::Path(LocalPath()) / ".hg" / "hgrc";
+				}
+				else
+				{
+					p = LFile::Path(LSP_HOME) / ".hgrc";
+					if (!p.Exists())
+						p = LFile::Path(LSP_HOME) / "mercurial.ini";
+				}
 
-			d->Log->Print("%s: %i\n", p.GetFull().Get(), p.Exists());
-			if (p.Exists())
-				return p.GetFull();
+				d->Log->Print("%s: %i\n", p.GetFull().Get(), p.Exists());
+				if (p.Exists())
+					return p.GetFull();
+			}
 			break;
 		}
 		default:

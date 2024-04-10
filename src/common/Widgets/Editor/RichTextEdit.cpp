@@ -799,8 +799,8 @@ bool LRichTextEdit::Paste()
 		}
 		else if (Img)
 		{
-			LRichTextPriv::Block *b = d->Cursor->Blk;
-			ssize_t BlkIdx = d->Blocks.IndexOf(b);
+			auto b = d->Cursor->Blk;
+			auto BlkIdx = d->Blocks.IndexOf(b);
 			LRichTextPriv::Block *After = NULL;
 			ssize_t AddIndex;
 		
@@ -810,7 +810,7 @@ bool LRichTextEdit::Paste()
 			if (d->Cursor->Offset > 0)
 			{
 				After = b->Split(Trans, d->Cursor->Offset);
-				AddIndex = BlkIdx+1;									
+				AddIndex = BlkIdx + 1;									
 			}
 			else
 			{
@@ -818,8 +818,7 @@ bool LRichTextEdit::Paste()
 				AddIndex = BlkIdx;
 			}
 
-			LRichTextPriv::ImageBlock *ImgBlk = new LRichTextPriv::ImageBlock(d);
-			if (ImgBlk)
+			if (auto ImgBlk = new LRichTextPriv::ImageBlock(d))
 			{
 				d->Blocks.AddAt(AddIndex++, ImgBlk);
 				if (After)
@@ -1235,8 +1234,7 @@ int LRichTextEdit::OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
 									AddIndex = BlkIdx;
 								}
 
-								LRichTextPriv::ImageBlock *ImgBlk = new LRichTextPriv::ImageBlock(d);
-								if (ImgBlk)
+								if (auto ImgBlk = new LRichTextPriv::ImageBlock(d))
 								{
 									d->Blocks.AddAt(AddIndex++, ImgBlk);
 									if (After)
@@ -2583,7 +2581,7 @@ LMessage::Result LRichTextEdit::OnEvent(LMessage *Msg)
 		}
 		case M_BLOCK_MSG:
 		{
-			LRichTextPriv::Block *b = (LRichTextPriv::Block*)Msg->A();
+			auto b = (LRichTextPriv::Block*)Msg->A();
 			LAutoPtr<LMessage> msg((LMessage*)Msg->B());
 			if (d->Blocks.HasItem(b) && msg)
 			{

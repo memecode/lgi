@@ -228,6 +228,15 @@ public:
 	virtual void OnEnter(LKey &k) override;
 	virtual void OnUrl(char *Url) override;
 	virtual void DoContextMenu(LMouse &m);
+	
+	struct ImgParams
+	{
+		LPoint Sz;
+		size_t Bytes = 0;
+		int JpegQuality = 0; // suggested...
+	};
+	/// \returns true if the image should be resized to be smaller
+	virtual bool MaxImageFilter(ImgParams &params) { return false; }
 
 	#if _DEBUG
 	void DumpNodes(LTree *Root);

@@ -1141,30 +1141,55 @@ public:
 			LPoint Sz;
 			LString MimeType;
 			LAutoPtr<LStreamI> Compressed;
-			int Percent;
+			int Percent = 0;
+			bool Compressing = false;
 
-			ScaleInf()
+			LString ToString()
 			{
-				Sz.x = Sz.y = 0;
-				Percent = 0;
+				return LString::Fmt("sz=%s, mime=%s, comp=%s, pc=%i",
+					Sz.GetStr().Get(),
+					MimeType.Get(),
+					LFormatSize(Compressed ? Compressed->GetSize() : 0).Get(),
+					Percent);
 			}
 		};
 
-		int ThreadHnd;
+		int ThreadHnd = 0;
 
 	protected:
-		LNamedStyle *Style;
-		int Scale;
+		LNamedStyle *Style = NULL;
+		int Scale = 1;
 		LRect SourceValid;
 		LString FileName;
 		LString ContentId;
 		LString StreamMimeType;
 		LString FileMimeType;
 
+		enum ResizeIdxSource
+		{
+			SourceNone,
+			SourceDefault,
+			SourceUser,
+			SourceMaxImage,
+		};
+		const char *ToString(ResizeIdxSource s)
+		{
+			switch (s)
+			{
+			case SourceNone:     return "SourceNone";
+			case SourceDefault:  return "SourceDefault";
+			case SourceUser:     return "SourceUser";
+			case SourceMaxImage: return "SourceMaxImage";
+			}
+			return NULL;
+		}
+
+		int ResizeIdx = -1;
+		ResizeIdxSource ResizeSrc = SourceNone;
+
 		LArray<ScaleInf> Scales;
-		int ResizeIdx;
-		int ThreadBusy;
-		bool IsDeleted;
+		int ThreadBusy = 0;
+		bool IsDeleted = false;
 		void UpdateThreadBusy(const char *File, int Line, int Off);
 
 		int GetThreadHandle();
@@ -1178,7 +1203,7 @@ public:
 		LString Source;
 		LPoint Size;
 		
-		bool LayoutDirty;
+		bool LayoutDirty = false;
 		LRect Pos; // position in document co-ordinates
 		LRect ImgPos;
 		
@@ -1190,6 +1215,9 @@ public:
 		bool IsBusy(bool Stop = false);
 		bool Load(const char *Src = NULL);
 		bool SetImage(LAutoPtr<LSurface> Img);
+		void OnDimensions();
+		void GetCompressedSize();
+		void MaxImageFilter();
 
 		// No state change methods
 		int GetLines();
