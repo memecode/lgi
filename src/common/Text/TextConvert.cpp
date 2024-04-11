@@ -109,7 +109,33 @@ char *DecodeQuotedPrintableStr(char *Str, ssize_t Len)
 	return Str;
 }
 
-LString LDecodeQuotedPrintableStr(LString InStr)
+LString LEncodeQuotedPrintable(LString Str, int MaxLine, int PreCount)
+{
+	LStringPipe p(256);
+	if (Str)
+	{
+		auto s = (uint8_t*)Str.Get();
+		auto e = s + Str.Length();
+		size_t CurLen = PreCount;
+		while (s < e)
+		{
+			auto quote = *s & 0x80 || *s == 0;
+			if (CurLen + (quote ? 3 : 1) > MaxLine)
+			{
+				p.Print("=\r\n");
+				CurLen = 0;
+			}
+			if (quote)
+				CurLen += p.Print("=%2.2x", *s);
+			else
+				CurLen += p.Write(s, 1);
+		}
+	}
+
+	return p.NewLStr();
+}
+
+LString LDecodeQuotedPrintable(LString InStr)
 {
 	if (!InStr.Get())
 		return InStr;
@@ -229,7 +255,7 @@ static void DecodeRfc2047_Impl(char *Str, std::function<void(LStringPipe&)> Outp
 								Block = LDecodeBase64Str(Block);
 								break;
 							case CONTENT_QUOTED_PRINTABLE:
-								Block = LDecodeQuotedPrintableStr(Block);
+								Block = LDecodeQuotedPrintable(Block);
 								break;
 						}
 

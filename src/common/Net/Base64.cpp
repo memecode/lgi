@@ -135,7 +135,7 @@ LString LToBinary(LString base64)
 	return LToBinary(base64.Get(), base64.Length());
 }
 
-LString LToBinary(void *base64, size_t length)
+LString LToBinary(const void *base64, size_t length)
 {
 	LString bin;
 	if (bin.Length(BufferLen_64ToBin(length)))
@@ -217,7 +217,7 @@ LString LToBase64(LString bin)
 	return LToBase64(bin.Get(), bin.Length());
 }
 
-LString LToBase64(void *binary, size_t length)
+LString LToBase64(const void *binary, size_t length)
 {
 	LString base64;
 	if (binary && base64.Length(BufferLen_BinTo64(length)))

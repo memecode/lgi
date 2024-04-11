@@ -4,8 +4,9 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/vCard-vCal.h"
-#include "ScribeDefs.h"
 #include "lgi/common/Json.h"
+#include "lgi/common/TextConvert.h"
+#include "ScribeDefs.h"
 
 #define DEBUG_LOGGING			0
 
@@ -224,8 +225,10 @@ bool VIo::ParseDuration(LDateTime &Out, int &Sign, char *In)
 	return Status;
 }
 
-void VIo::Fold(LStreamI &o, const char *i, int pre_chars)
+void VIo::Fold(LStreamI &o, const char *i, int pre_chars, const char *encoding)
 {
+	bool base64 = !Stricmp(encoding, "base64");
+	bool quotePrintable = !base64;
 	int x = pre_chars;
 	for (const char *s=i; s && *s;)
 	{
@@ -237,7 +240,7 @@ void VIo::Fold(LStreamI &o, const char *i, int pre_chars)
 			x = 0;
 			i = s;
 		}
-		else if (*s == '=' || ((((uint8_t)*s) & 0x80) != 0))
+		else if (quotePrintable && (*s == '=' || ((((uint8_t)*s) & 0x80) != 0)))
 		{
 			// quoted printable
 			o.Write(i, (int)(s-i));
@@ -699,43 +702,60 @@ bool VIo::ReadField(LStreamI &s, LString &Name, ParamArray *Params, LString &Dat
 
 void VIo::WriteField(LStreamI &s, const char *Name, ParamArray *Params, const char *Data)
 {
-	if (Name && Data)
+	if (!Name || !Data)
 	{
-		int64 Size = s.GetSize();
+		LAssert(!"Invalid params");
+		return;
+	}
 
-		LStreamPrint(&s, "%s", Name);
-		if (Params)
-		{
-			for (uint32_t i=0; i<Params->Length(); i++)
-			{
-				Parameter &p = (*Params)[i];
-				LStreamPrint(&s, "%s%s=%s", i?"":";", p.Field.Get(), p.Value.Get());
-			}
-		}
+	int64 Size = s.GetSize();
+
+	LStreamPrint(&s, "%s", Name);
+	const char *encoding = NULL;
+	const char *charset = NULL;
+	if (Params)
+	{
+		for (auto &p: *Params)
+			LStreamPrint(&s, ";%s=%s", p.Field.Get(), p.Value.Get());
+		encoding = Params->Find("ENCODING");
+		charset = Params->Find("CHARSET");
+	}
 		
-		bool Is8Bit = false;
-		bool HasEq = false;
-		for (uint8_t *c = (uint8_t*)Data; *c; c++)
+	size_t Is7Bit = 0;
+	size_t Is8Bit = 0;
+	size_t HasEq = 0;
+	for (uint8_t *c = (uint8_t*)Data; *c; c++)
+	{
+		if ((*c & 0x80) != 0)
+			Is8Bit++;
+		else if (*c == '=')
+			HasEq++;
+		else
+			Is7Bit++;
+	}
+	
+	size_t DataLen = Is7Bit + Is8Bit + HasEq;
+	if (Is8Bit || HasEq)
+	{
+		if (!encoding)
 		{
-			if ((*c & 0x80) != 0)
-			{
-				Is8Bit = true;
-			}
-			else if (*c == '=')
-			{
-				HasEq = true;
-			}
+			encoding = "quoted-printable";
+			LStreamPrint(&s, ";ENCODING=%s", encoding);
 		}
-		if (Is8Bit || HasEq)
-		{
-			if (Is8Bit) s.Write((char*)";charset=utf-8", 14);
-			s.Write((char*)";encoding=quoted-printable", 26);
-		}
+			
+		if (Is8Bit && !charset)
+			LStreamPrint(&s, ";charset=utf-8");
+	}
+	s.Write((char*)":", 1);
 
-		s.Write((char*)":", 1);
-		Fold(s, Data, (int) (s.GetSize() - Size));
-		s.Write((char*)"\r\n", 2);
-	}	
+	LString encoded;
+	if (encoding && !Stricmp(encoding, "base64"))
+	{
+		encoded = LToBase64(Data, DataLen);
+		Data = encoded.Get();
+	}
+	Fold(s, Data, (int) (s.GetSize() - Size), encoding);
+	s.Write((char*)"\r\n", 2);
 }
 
 bool VCard::Export(LDataPropI *c, LStreamI *o)
@@ -1216,11 +1236,13 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 						auto MimeType = Params.Find("FMTTYPE");
 						auto Encoding = Params.Find("ENCODING");
 						auto Value    = Params.Find("VALUE");
+						auto Now	  = LDateTime::Now();
 						
 						if (FileName)
 							file->SetStr(FIELD_NAME, FileName);
 						if (MimeType)
 							file->SetStr(FIELD_MIME_TYPE, MimeType);
+						file->SetDate(FIELD_DATE_MODIFIED, &Now);
 						
 						if (!Stricmp(Encoding, "base64"))
 						{

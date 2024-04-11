@@ -6,7 +6,8 @@ bool Is8Bit(const char *Text);
 LString LDecodeBase64Str(LString Str);
 
 [[deprecated]] char *DecodeQuotedPrintableStr(char *Str, ssize_t Len = -1);
-LString LDecodeQuotedPrintableStr(LString Str);
+LString LDecodeQuotedPrintable(LString Str);
+LString LEncodeQuotedPrintable(LString Str, int MaxLine = 76, int PreCount = 0);
 
 [[deprecated]] char *DecodeRfc2047(char *Str);
 LString LDecodeRfc2047(LString Str);

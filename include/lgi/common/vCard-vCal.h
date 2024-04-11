@@ -87,7 +87,7 @@ protected:
 	bool ParseDate(LDateTime &out, char *in);
 	bool ParseDuration(LDateTime &Out, int &Sign, char *In);
 
-	void Fold(LStreamI &o, const char *i, int pre_chars = 0);
+	void Fold(LStreamI &o, const char *i, int pre_chars = 0, const char *encoding = NULL);
 	char *Unfold(char *In);
 	char *UnMultiLine(char *In);
 
