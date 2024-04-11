@@ -52,13 +52,27 @@ public:
 	
 		const char *Find(const char *s)
 		{
-			for (unsigned i=0; i<Length(); i++)
+			for (auto &p: *this)
 			{
-				Parameter &p = (*this)[i];
 				if (p.Field.Equals(s))
 					return p.Value;
 			}
 			return NULL;
+		}
+		
+		void Set(const char *var, const char *value)
+		{
+			for (auto &p: *this)
+			{
+				if (p.Field.Equals(var))
+				{
+					p.Value = value;
+					return;
+				}
+			}
+			auto &p = New();
+			p.Field = var;
+			p.Value = value;
 		}
 
 		void Empty()

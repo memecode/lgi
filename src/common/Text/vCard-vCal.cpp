@@ -1167,8 +1167,8 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 				auto Email = Data.SplitDelimit(":=").Last();
 				if (LIsValidEmail(Email))
 				{
-					const char *Name = Params.Find("CN");
-					const char *Role = Params.Find("Role");
+					auto Name = Params.Find("CN");
+					auto Role = Params.Find("Role");
 					
 					LString k;
 					k.Printf("[%i].email", Attendee);
@@ -1192,6 +1192,63 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 			else if (IsVar(Field, "status"))
 			{
 				c->SetStr(FIELD_CAL_STATUS, Data);
+			}
+			else if (IsVar(Field, "attach"))
+			{
+				// None of these error cases are fatal, the backend may not support
+				// attachments... but log something for the user in that case.
+				auto attachments = c->GetList(FIELD_CAL_ATTACHMENTS);
+				if (!attachments)
+				{
+					LgiTrace("%s:%i - vCal import: No attachment list...\n", _FL);
+				}
+				else if (auto data = dynamic_cast<LDataI*>(c))
+				{
+					auto store = data->GetStore();
+					if (!store)
+					{
+						LgiTrace("%s:%i - vCal import: No store object.\n", _FL);
+					}
+					// Create a new attachment object to receive the file
+					else if (auto file = attachments->Create(store))
+					{
+						auto FileName = Params.Find("X-FILENAME");
+						auto MimeType = Params.Find("FMTTYPE");
+						auto Encoding = Params.Find("ENCODING");
+						auto Value    = Params.Find("VALUE");
+						
+						if (FileName)
+							file->SetStr(FIELD_NAME, FileName);
+						if (MimeType)
+							file->SetStr(FIELD_MIME_TYPE, MimeType);
+						
+						if (!Stricmp(Encoding, "base64"))
+						{
+							auto bin = LToBinary(Data);
+							file->SetStr(FIELD_ATTACHMENTS_DATA, bin);
+						}
+						else if (Data.Find("://") >= 0)
+						{
+							file->SetStr(FIELD_URI, Data);
+						}
+						else
+						{
+							LgiTrace("%s:%i - vCal import: Unknown data type?\n", _FL);
+							LAssert(!"What is 'Data'?");
+						}
+						
+						if (auto fileData = dynamic_cast<LDataI*>(file))
+							fileData->Save(data);
+					}
+					else
+					{
+						LgiTrace("%s:%i - vCal import: Couldn't create attachment object\n", _FL);
+					}
+				}
+				else
+				{
+					LgiTrace("%s:%i - vCal import: no LDataI object\n", _FL);
+				}
 			}
 		}
 		else if (IsTimeZone && TzInfo)
@@ -1445,6 +1502,60 @@ bool VCal::Export(LDataPropI *c, LStreamI *o)
 			LDateTime dt = *Dt;
 			dt.ToUtc();
 			LStreamPrint(o, "DTEND:%s\r\n", ToString(dt).Get());
+		}
+		
+		if (auto attachments = c->GetList(FIELD_CAL_ATTACHMENTS))
+		{
+			// Save the attachments to 'ATTACH' fields
+			for (auto file = attachments->First(); file; file = attachments->Next())
+			{
+				auto fileData = dynamic_cast<LDataI*>(file);
+				auto uri = file->GetStr(FIELD_URI);
+				auto fileName = file->GetStr(FIELD_NAME);
+				auto mimeType = file->GetStr(FIELD_MIME_TYPE);
+				
+				ParamArray param;
+				if (fileName)
+					param.Set("X-FILENAME", fileName);
+				if (mimeType)
+					param.Set("FMTTYPE", mimeType);
+
+				if (uri)
+				{
+					// Save as a URI
+					WriteField(*o, "ATTACH", &param, uri);
+				}
+				else if (!fileData)
+				{
+					LAssert(!"Should be a LDataI object.");
+				}
+				else
+				{
+					auto stream = fileData->GetStream(_FL);
+					if (!stream)
+						LAssert(!"Should have either URI or Stream");
+					else
+					{
+						// Base64 encode the stream
+						LString bin;
+						if (!bin.Length(stream->GetSize()))
+							LAssert(!"Failed to set string size");
+						else
+						{
+							stream->Read(bin.Get(), bin.Length());
+							auto b64 = LToBase64(bin);
+							if (!b64)
+								LAssert(!"Failed to convert to base64");
+							else
+							{
+								param.Set("ENCODING", "BASE64");
+								param.Set("VALUE", "BINARY");
+								WriteField(*o, "ATTACH", &param, b64);
+							}
+						}
+					}
+				}
+			}
 		}
 
 		const char *Reminders;
