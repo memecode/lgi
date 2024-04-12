@@ -27,6 +27,7 @@ public:
 		int From, To;
 		LDateTime Start;
 		LString Rule;
+		LString Name;
 	};
 	
 	struct TimeZoneInfo

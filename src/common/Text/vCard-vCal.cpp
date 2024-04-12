@@ -1074,58 +1074,64 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 
 	while (ReadField(*In, Field, &Params, Data))
 	{
-		if (!_stricmp(Field, "begin"))
+		if (Field.Equals("begin"))
 		{
-			if (_stricmp(Data, "vevent") == 0
+			if (!SectionType)
+				SectionType = Field;
+
+			if (Data.Equals("vevent")
 				||
-				_stricmp(Data, "vtodo") == 0)
+				Data.Equals("vtodo"))
 			{
 				IsEvent = true;
-				SectionType = Data;
-
-				int Type = _stricmp(Data, "vtodo") == 0 ? 1 : 0;
+				int Type = Data.Equals("vtodo") ? 1 : 0;
 				c->SetInt(FIELD_CAL_TYPE, Type);
 			}
-			else if (!_stricmp(Data, "vtimezone"))
+			else if (Data.Equals("vtimezone"))
 			{
 				IsTimeZone = true;
 				TzInfo = &TzInfos.New();
 			}
-			else if (_stricmp(Data, "vcalendar") == 0)
+			else if (Data.Equals("vcalendar"))
 				IsCal = true;
-			else if (!_stricmp(Data, "standard"))
+			else if (Data.Equals("standard"))
 				IsNormalTz = true;
-			else if (!_stricmp(Data, "daylight"))
+			else if (Data.Equals("daylight"))
 				IsDaylightTz = true;
-			else if (!_stricmp(Data, "valarm"))
+			else if (Data.Equals("valarm"))
 			{
 				IsAlarm = true;
 				AlarmIdx++;
 			}
 		}
-		else if (_stricmp(Field, "end") == 0)
+		else if (Field.Equals("end"))
 		{
-			if (_stricmp(Data, "vcalendar") == 0)
+			LgiTrace("end:%s\n", Data.Get());
+			if (Data.Equals("vcalendar"))
 			{
 				IsCal = false;
 			}
-			else if (SectionType && _stricmp(Data, SectionType) == 0)
+			else if (Data.Equals("vevent")
+				||
+				Data.Equals("vtodo"))
 			{
 				Status = true;
 				IsEvent = false;
-				break; // exit loop
 			}
-			else if (!_stricmp(Data, "vtimezone"))
+			else if (Data.Equals("vtimezone"))
 			{
 				IsTimeZone = false;
 				TzInfo = NULL;
 			}
-			else if (!_stricmp(Data, "standard"))
+			else if (Data.Equals("standard"))
 				IsNormalTz = false;
-			else if (!_stricmp(Data, "daylight"))
+			else if (Data.Equals("daylight"))
 				IsDaylightTz = false;
-			else if (!_stricmp(Data, "valarm"))
+			else if (Data.Equals("valarm"))
 				IsAlarm = false;
+
+			if (SectionType && SectionType.Equals(Data))
+				break;
 		}
 		else if (IsEvent)
 		{
@@ -1295,15 +1301,13 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 			
 			*/
 			
-			if (IsVar(Field, "TZID"))
-			{
-				TzInfo->Name = Data;
-			}
-			else if (IsNormalTz || IsDaylightTz)
+			if (IsNormalTz || IsDaylightTz)
 			{
 				TimeZoneSection &Sect = IsNormalTz ? TzInfo->Normal : TzInfo->Daylight;
 				if (IsVar(Field, "DTSTART"))
 					ParseDate(Sect.Start, Data);
+				else if (IsVar(Field, "TZNAME"))
+					Sect.Name = Data;
 				else if (IsVar(Field, "TZOFFSETFROM"))
 					Sect.From = (int)Data.Int();
 				else if (IsVar(Field, "TZOFFSETTO"))
@@ -1311,6 +1315,10 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 				else if (IsVar(Field, "RRULE"))
 					Sect.Rule = Data;				
 			}			
+			else if (IsVar(Field, "TZID"))
+			{
+				TzInfo->Name = Data;
+			}
 		}
 	}
 
@@ -1328,7 +1336,7 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 		{
 			if (TzInfos[i].Name.Equals(StartTz))
 			{
-				Match = &TzInfos[i];
+				Match = TzInfos.AddressOf(i);
 				break;
 			}
 		}
@@ -1387,8 +1395,10 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 			else if (EndTz)
 				c->SetStr(FIELD_CAL_TIMEZONE, EndTz);
 			
+			/* This isn't going to work.
 			if (StartTz)
 				EffectiveTz = TimezoneToOffset(StartTz);
+			*/
 		}
 		
 		if (EffectiveTz)
