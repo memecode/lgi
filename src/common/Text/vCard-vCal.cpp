@@ -1513,13 +1513,15 @@ bool VCal::Export(LDataPropI *c, LStreamI *o)
 		}
 
 		const LDateTime *Dt;
-		if ((Dt = c->GetDate(FIELD_CAL_START_UTC)))
+		if ((Dt = c->GetDate(FIELD_CAL_START_UTC)) &&
+			Dt->IsValid())
 		{
 			LDateTime dt = *Dt;
 			dt.ToUtc();
 			LStreamPrint(o, "DTSTART:%s\r\n", ToString(dt).Get());
 		}
-		if ((Dt = c->GetDate(FIELD_CAL_END_UTC)))
+		if ((Dt = c->GetDate(FIELD_CAL_END_UTC)) &&
+			Dt->IsValid())
 		{
 			LDateTime dt = *Dt;
 			dt.ToUtc();
