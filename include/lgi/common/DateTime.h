@@ -52,6 +52,7 @@
 
 class LDateTime;
 
+/// Wrapper around a uint64_t timestamp.
 class LgiClass LTimeStamp
 {
 	uint64_t ts = 0;
@@ -95,6 +96,47 @@ public:
 	LTimeStamp &operator -=(int64_t i) { ts -= i; return *this; }
 };
 
+/// Daylight savings info record
+struct LgiClass LDstInfo
+{
+	/// Timestamp where the DST timezone changes to 'Offset'
+	LTimeStamp Utc;
+	/// The new offset in minutes (e.g. 600 = +10 hours)
+	int Offset;
+
+	LDateTime GetLocal();
+};
+
+/// Time zone information
+struct LgiClass LTimeZone
+{
+public:
+	/// The offset from UTC
+	float Offset;
+	/// The name of the zone
+	const char *Text;
+
+	/// A list of all known timezones.
+	static LTimeZone *GetTimeZones();
+
+	/// Retrieves daylight savings start and end events for a given period. One event will be emitted
+	/// for the current DST/TZ setting at the datetime specified by 'Start', followed by any changes that occur
+	/// between that and the 'End' datetime. To retreive just the DST info for start, use NULL for end.
+	static bool
+	GetDaylightSavingsInfo
+	(
+		/// [Out] The array to receive DST info. At minimum one record will be returned
+		/// matching the TZ in place for the start datetime.
+		LArray<LDstInfo> &Out,
+		/// [In] The start date that you want DST info for.
+		LDateTime &Start,
+		/// [Optional In] The end of the period you want DST info for.
+		LDateTime *End = 0
+	);
+
+	/// Using the DST info this will convert 'dt' from UTC to local
+	static bool DstToLocal(LArray<LDstInfo> &Dst, LDateTime &dt);
+};
 
 /// A date/time class
 ///
@@ -378,35 +420,6 @@ public:
 	/// timezone uneffected by DST use TimeZone() - TimeZoneOffset().
 	static int SystemTimeZoneOffset();
 
-	/// Daylight savings info record
-	struct LgiClass LDstInfo
-	{
-		/// Timestamp where the DST timezone changes to 'Offset'
-		LTimeStamp Utc;
-		/// The new offset in minutes (e.g. 600 = +10 hours)
-		int Offset;
-
-		LDateTime GetLocal();
-	};
-
-	/// Retreives daylight savings start and end events for a given period. One event will be emitted
-	/// for the current DST/TZ setting at the datetime specified by 'Start', followed by any changes that occur
-	/// between that and the 'End' datetime. To retreive just the DST info for start, use NULL for end.
-	static bool
-	GetDaylightSavingsInfo
-	(
-		/// [Out] The array to receive DST info. At minimum one record will be returned
-		/// matching the TZ in place for the start datetime.
-		LArray<LDstInfo> &Out,
-		/// [In] The start date that you want DST info for.
-		LDateTime &Start,
-		/// [Optional In] The end of the period you want DST info for.
-		LDateTime *End = 0
-	);
-
-	/// Using the DST info this will convert 'dt' from UTC to local
-	static bool DstToLocal(LArray<LDstInfo> &Dst, LDateTime &dt);
-
 	/// Decodes an email date into the current instance
 	bool Decode(const char *In);
 
@@ -461,17 +474,8 @@ public:
 	#endif
 };
 
-/// Time zone information
-struct LTimeZone
-{
-public:
-	/// The offset from UTC
-	float Offset;
-	/// The name of the zone
-	const char *Text;
-};
-
-/// A list of all known timezones.
-extern LTimeZone LTimeZones[];
+#ifdef WINDOWS
+LgiExtern LDateTime ConvertSysTime(SYSTEMTIME &st, int year);
+#endif
 
 #endif

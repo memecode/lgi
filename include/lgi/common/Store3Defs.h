@@ -211,8 +211,11 @@ enum CalendarType
 	CalJournal,
 	CalRequest,
 	CalReply,
-};
 
+	CalTypeMax,
+};
+CalendarType ParseCalendarType(const char *type);
+const char *ToString(CalendarType type);
 
 enum CalendarPrivacyType
 {
@@ -340,7 +343,8 @@ enum Store3Fields
 	FIELD_CAL_RECUR_END_TYPE = 81,		// (CalRecurEndType) Which ending to use... needs an enum
 	FIELD_CAL_RECUR = 82,				// (int) true if the event recurs.
 
-	FIELD_CAL_TIMEZONE = 83,			// (char*) The timezone as text
+	FIELD_CAL_TIMEZONE = 83,			// (char*) The timezone as text in the form <offsetInMinutes>[,<tzIdentifier>]
+										// Where offsetInMinutes is numeric and tzIdentifier is textual, usually in the form: Continent/City
 	FIELD_CAL_PRIVACY = 84,				// (CalendarPrivacyType) The privacy setting
 	FIELD_ATTENDEE_JSON = 85,
 	FIELD_CAL_ATTACHMENTS = 86,			// List of attached files

@@ -215,6 +215,7 @@
     <ClCompile Include="..\src\common\General\Containers.cpp" />
     <ClCompile Include="..\src\common\General\DateTime.cpp" />
     <ClCompile Include="..\src\common\General\FileCommon.cpp" />
+    <ClCompile Include="..\src\common\General\TimeZone.cpp" />
     <ClCompile Include="..\src\common\Lgi\Library.cpp" />
     <ClCompile Include="..\src\common\Lgi\LgiCommon.cpp" />
     <ClCompile Include="..\src\common\Lgi\Mutex.cpp" />

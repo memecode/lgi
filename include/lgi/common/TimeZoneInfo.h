@@ -10,7 +10,7 @@
 
 class LTimeZoneInfo
 {
-	static int TimeToSeconds(LString t)
+	static int64_t TimeToSeconds(LString t)
 	{
 		auto parts = t.SplitDelimit(":");
 		auto hrs = parts[0].Int();
@@ -339,7 +339,6 @@ class LTimeZoneInfo
 	}
 
 public:
-	using LDstInfo = LDateTime::LDstInfo;
 	constexpr static const char *DefaultFile = "/etc/localtime";
 
 	LTimeZoneInfo(const char *fileName = NULL)

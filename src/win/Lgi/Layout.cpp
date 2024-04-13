@@ -47,7 +47,7 @@ LPoint LLayout::GetScrollPos()
 {
 	int64 x, y;
 	GetScrollPos(x, y);
-	return LPoint(x, y);
+	return LPoint((int)x, (int)y);
 }
 
 void LLayout::GetScrollPos(int64 &x, int64 &y)

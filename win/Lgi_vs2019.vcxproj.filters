@@ -497,6 +497,9 @@
     <ClCompile Include="..\src\win\Lgi\SubProcess.cpp">
       <Filter>Source Files\Core\Process</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\common\General\TimeZone.cpp">
+      <Filter>Source Files\Core\DateTime</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\lgi\common\About.h">

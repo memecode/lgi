@@ -10,7 +10,7 @@
 
 #define DEBUG_LOGGING			0
 
-#define Push(s) Write(s, (int)strlen(s))
+#define Push(s) Write(s, strlen(s))
 
 #define ClearFields() \
 	Field.Empty(); \
@@ -19,33 +19,6 @@
 
 
 #define IsType(str) (Params.Find(str) != 0)
-
-struct TzMap
-{
-	int Offset;
-	const char *Name;
-};
-
-#define TZ(h,m) (((h)*100) + (m))
-static TzMap Timezones[] =
-{
-	{TZ(11,0), "Australia/Sydney"},
-};
-
-int TimezoneToOffset(const char *Tz)
-{
-	if (!Tz)
-		return 0;
-
-	for (int i=0; i<CountOf(Timezones); i++)
-	{
-		auto *t = Timezones + i;
-		if (!Stricmp(t->Name, Tz))
-			return t->Offset;
-	}
-
-	return (int)Atoi(Tz);
-}
 
 #if 1
 bool IsVar(char *field, const char *s)
@@ -141,9 +114,9 @@ bool VIo::ParseDate(LDateTime &Out, char *In)
 		{
 			if (v[0].Length() == 8)
 			{
-				auto Year = v[0](0, 4);
+				auto Year  = v[0](0, 4);
 				auto Month = v[0](4, 6);
-				auto Day = v[0](6, 8);
+				auto Day   = v[0](6, 8);
 				Out.Year ((int)Year.Int());
 				Out.Month((int)Month.Int());
 				Out.Day  ((int)Day.Int());
@@ -153,7 +126,7 @@ bool VIo::ParseDate(LDateTime &Out, char *In)
 			char *t = v[1];
 			if (t && strlen(t) >= 6)
 			{
-				char Hour[3] = {t[0], t[1], 0};
+				char Hour[3]   = {t[0], t[1], 0};
 				char Minute[3] = {t[2], t[3], 0};
 				char Second[3] = {t[4], t[5], 0};
 				Out.Hours(atoi(Hour));
@@ -267,65 +240,32 @@ void VIo::Fold(LStreamI &o, const char *i, int pre_chars, const char *encoding)
 			x++;
 		}
 	}
-	o.Write(i, (int)strlen(i));
+	o.Write(i, strlen(i));
 }
 
-char *VIo::Unfold(char *In)
+LString VIo::UnMultiLine(char *In)
 {
-	if (In)
+	if (!In)
+		return LString();
+
+	LStringPipe p;
+	char *n;
+	for (auto i = In; i && *i; i = n)
 	{
-		LStringPipe p(256);
-
-		for (char *i=In; i && *i; i++)
+		n = stristr(i, "\\n");
+		if (n)
 		{
-			if (*i == '\n')
-			{
-				if (i[1] && strchr(" \t", i[1]))
-				{
-					i++;
-				}
-				else
-				{
-					p.Write(i, 1);
-				}
-			}
-			else
-			{
-				p.Write(i, 1);
-			}
+			p.Write(i, (int)(n-i));
+			p.Push((char*)"\n");
+			n += 2;
 		}
-
-		return p.NewStr();
+		else
+		{
+			p.Push(i);
+		}
 	}
 
-	return 0;
-}
-
-char *VIo::UnMultiLine(char *In)
-{
-	if (In)
-	{
-		LStringPipe p;
-		char *n;
-		for (char *i=In; i && *i; i=n)
-		{
-			n = stristr(i, "\\n");
-			if (n)
-			{
-				p.Write(i, (int)(n-i));
-				p.Push((char*)"\n");
-				n += 2;
-			}
-			else
-			{
-				p.Push(i);
-			}
-		}
-
-		return p.NewStr();
-	}
-
-	return 0;
+	return p.NewLStr();
 }
 
 /////////////////////////////////////////////////////////////
@@ -358,8 +298,8 @@ bool VCard::Import(LDataPropI *c, LStreamI *s)
 				if (IsVar(Field, "n"))
 				{
 					auto Name = Data.SplitDelimit(";", -1, false);
+					char *Last  = Name[0];
 					char *First = Name[1];
-					char *Last = Name[0];
 					char *Title = Name[3];
 
 					if (First)
@@ -457,10 +397,10 @@ bool VCard::Import(LDataPropI *c, LStreamI *s)
 						}
 					}
 
-					if (Addr[3]) c->SetStr(IsWork ? FIELD_WORK_SUBURB : FIELD_HOME_SUBURB, Addr[3]);
-					if (Addr[4]) c->SetStr(IsWork ? FIELD_WORK_STATE : FIELD_HOME_STATE, Addr[4]);
+					if (Addr[3]) c->SetStr(IsWork ? FIELD_WORK_SUBURB   : FIELD_HOME_SUBURB,   Addr[3]);
+					if (Addr[4]) c->SetStr(IsWork ? FIELD_WORK_STATE    : FIELD_HOME_STATE,    Addr[4]);
 					if (Addr[5]) c->SetStr(IsWork ? FIELD_WORK_POSTCODE : FIELD_HOME_POSTCODE, Addr[5]);
-					if (Addr[6]) c->SetStr(IsWork ? FIELD_WORK_COUNTRY : FIELD_HOME_COUNTRY, Addr[6]);
+					if (Addr[6]) c->SetStr(IsWork ? FIELD_WORK_COUNTRY  : FIELD_HOME_COUNTRY,  Addr[6]);
 				}
 				else if (IsVar(Field, "note"))
 				{
@@ -478,16 +418,10 @@ bool VCard::Import(LDataPropI *c, LStreamI *s)
 				}
 				else if (IsVar(Field, "url"))
 				{
-					bool IsWork = IsType("work");
-					bool IsHome = IsType("home");
-					if (IsWork)
-					{
+					if (IsType("work"))
 						c->SetStr(FIELD_HOME_WEBPAGE, Data);
-					}
-					else if (IsHome)
-					{
+					else if (IsType("home"))
 						c->SetStr(FIELD_WORK_WEBPAGE, Data);
-					}
 				}
 				else if (IsVar(Field, "nickname"))
 				{
@@ -585,7 +519,8 @@ bool VIo::ReadField(LStreamI &s, LString &Name, ParamArray *Params, LString &Dat
 
 		if (r <= 0)
 			break;
-		if ((r == 1 && Temp[0] == '\n') || (r == 2 && Temp[0] == '\r' && Temp[1] == '\n')) // Blank line case...
+		if ((r == 1 && Temp[0] == '\n') ||
+			(r == 2 && Temp[0] == '\r' && Temp[1] == '\n')) // Blank line case...
 			continue;
 
 		// Unfold
@@ -668,22 +603,12 @@ bool VIo::ReadField(LStreamI &s, LString &Name, ParamArray *Params, LString &Dat
 			}
 		}
 
-		bool QuotedPrintable = false;
-		const char *Enc = Params->Find("encoding");
-		if (Enc)
-		{
-			if (_stricmp(Enc, "quoted-printable") == 0)
-			{
-				QuotedPrintable = true;
-			}
-			#if DEBUG_LOGGING
-			else LgiTrace("%s:%i - Unknown encoding '%s'\n", __FILE__, __LINE__, Enc);
-			#endif
-		}
+		auto Enc = Params->Find("encoding");
+		auto QuotedPrintable = !Stricmp(Enc, "quoted-printable");
 
 		DeEscape(e, QuotedPrintable);
 
-		const char *Charset = Params->Find("charset");
+		auto Charset = Params->Find("charset");
 		if (Charset)
 		{
 			LAutoString u((char*)LNewConvertCp("utf-8", e, Charset));
@@ -770,9 +695,9 @@ bool VCard::Export(LDataPropI *c, LStreamI *o)
 	o->Push("begin:vcard\r\n");
 	o->Push("version:3.0\r\n");
 
-	const char *First = 0, *Last = 0, *Title = 0;
+	const char *First = NULL, *Last = NULL, *Title = NULL;
 	First = c->GetStr(FIELD_FIRST_NAME);
-	Last = c->GetStr(FIELD_LAST_NAME);
+	Last  = c->GetStr(FIELD_LAST_NAME);
 	Title = c->GetStr(FIELD_TITLE);
 	if (First || Last)
 	{
@@ -785,17 +710,17 @@ bool VCard::Export(LDataPropI *c, LStreamI *o)
 	}
 
 	#define OutputTypedField(Field, Name, Type)		\
-		{ const char *str = 0;								\
-		if ((str = c->GetStr(Name)))					\
+		{ const char *str = 0;						\
+		if ((str = c->GetStr(Name)))				\
 		{											\
-			WriteField(*o, Field, Type, str);			\
+			WriteField(*o, Field, Type, str);		\
 		} }
 
 	#define OutputField(Field, Name)				\
-		{ const char *str = 0;								\
-		if ((str = c->GetStr(Name)))					\
+		{ const char *str = 0;						\
+		if ((str = c->GetStr(Name)))				\
 		{											\
-			WriteField(*o, Field, 0, str);				\
+			WriteField(*o, Field, 0, str);			\
 		} }
 
 	ParamArray Work("Work"), WorkCell("Work,Cell"), WorkFax("Work,Fax");
@@ -887,10 +812,10 @@ bool VCard::Export(LDataPropI *c, LStreamI *o)
 		WriteField(*o, "note", 0, Note);
 	}
 	
-	const LVariant *Photo = c->GetVar(FIELD_CONTACT_IMAGE);
+	auto Photo = c->GetVar(FIELD_CONTACT_IMAGE);
 	if (Photo && Photo->Type == GV_BINARY)
 	{
-		ssize_t B64Len = BufferLen_BinTo64(Photo->Value.Binary.Length);
+		auto B64Len = BufferLen_BinTo64(Photo->Value.Binary.Length);
 		LAutoPtr<char> B64Buf(new char[B64Len]);
 		if (B64Buf)
 		{
@@ -944,8 +869,8 @@ bool EvalRule(LDateTime &out, VIo::TimeZoneSection &tz, int yr)
 			Params.New().Set(v[0], v[1]);
 	}
 	
-	const char *ByDay = Params.Find("byday");
-	const char *ByMonth = Params.Find("bymonth");
+	auto ByDay = Params.Find("byday");
+	auto ByMonth = Params.Find("bymonth");
 	if (!ByDay || !ByMonth)
 	{
 		#if DEBUG_LOGGING
@@ -975,11 +900,11 @@ bool EvalRule(LDateTime &out, VIo::TimeZoneSection &tz, int yr)
 		return false;
 	}
 	
-	int Idx = atoi(ByDay);
+	auto Idx = atoi(ByDay);
 	while (*ByDay && IsDigit(*ByDay))
 		ByDay++;
 		
-	int WeekDay = StringToWeekDay(ByDay);
+	auto WeekDay = StringToWeekDay(ByDay);
 	if (WeekDay < 0)
 	{
 		#if DEBUG_LOGGING
@@ -1017,13 +942,13 @@ struct LAlarm
 	LString GetStr()
 	{
 		// Fields are: Number, CalendarReminderUnits, CalendarReminderType, Param
-		CalendarReminderType Type = CalMaxType;
+		auto Type = CalMaxType;
 		if (Action.Equals("DISPLAY")) Type = CalPopup;
 		else if (Action.Equals("EMAIL")) Type = CalEmail;
 		else if (Action.Equals("X-SCRIPT")) Type = CalScriptCallback;
 		else return LString();
 
-		CalendarReminderUnits Units = CalMaxUnit;
+		auto Units = CalMaxUnit;
 		char Last = Trigger.Strip()(-1);
 		if (ToUpper(Last) == 'M') Units = CalMinutes;
 		else if (ToUpper(Last) == 'H') Units = CalHours;
@@ -1079,12 +1004,10 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 			if (!SectionType)
 				SectionType = Field;
 
-			if (Data.Equals("vevent")
-				||
-				Data.Equals("vtodo"))
+			auto Type = ParseCalendarType(Data);
+			if (Type != CalTypeMax)
 			{
 				IsEvent = true;
-				int Type = Data.Equals("vtodo") ? 1 : 0;
 				c->SetInt(FIELD_CAL_TYPE, Type);
 			}
 			else if (Data.Equals("vtimezone"))
@@ -1106,18 +1029,14 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 		}
 		else if (Field.Equals("end"))
 		{
-			LgiTrace("end:%s\n", Data.Get());
-			if (Data.Equals("vcalendar"))
-			{
-				IsCal = false;
-			}
-			else if (Data.Equals("vevent")
-				||
-				Data.Equals("vtodo"))
+			auto Type = ParseCalendarType(Data);
+			if (Type != CalTypeMax)
 			{
 				Status = true;
 				IsEvent = false;
 			}
+			else if (Data.Equals("vcalendar"))
+				IsCal = false;
 			else if (Data.Equals("vtimezone"))
 			{
 				IsTimeZone = false;
@@ -1163,8 +1082,7 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 			}
 			else if (IsVar(Field, "description"))
 			{
-				LAutoString Sum(UnMultiLine(Data));
-				if (Sum)
+				if (auto Sum = UnMultiLine(Data))
 					c->SetStr(FIELD_CAL_NOTES, Sum);
 			}
 			else if (IsVar(Field, "location"))
@@ -1382,23 +1300,18 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 		{
 			// Store whatever they gave us
 			StoreStringTz:
+
+			LString TzName;
 			if (StartTz.Equals(EndTz))
-				c->SetStr(FIELD_CAL_TIMEZONE, StartTz);
+				TzName = StartTz;
 			else if (StartTz.Get() && EndTz.Get())
-			{
-				LString s;
-				s.Printf("%s,%s", StartTz.Get(), EndTz.Get());
-				c->SetStr(FIELD_CAL_TIMEZONE, s);
-			}
+				TzName.Printf("%s,%s", StartTz.Get(), EndTz.Get());
 			else if (StartTz)
-				c->SetStr(FIELD_CAL_TIMEZONE, StartTz);
+				TzName = StartTz;
 			else if (EndTz)
-				c->SetStr(FIELD_CAL_TIMEZONE, EndTz);
+				TzName = EndTz;
 			
-			/* This isn't going to work.
-			if (StartTz)
-				EffectiveTz = TimezoneToOffset(StartTz);
-			*/
+			c->SetStr(FIELD_CAL_TIMEZONE, LString::Fmt(",%s", TzName.Get()));
 		}
 		
 		if (EffectiveTz)
@@ -1463,18 +1376,27 @@ bool VCal::Export(LDataPropI *c, LStreamI *o)
 	if (!c || !o)
 		return false;
 
-	int64 Type = c->GetInt(FIELD_CAL_TYPE);
-	// auto *TimeZone = c->GetStr(FIELD_CAL_TIMEZONE);
-	char *TypeStr = Type == 1 ? (char*)"VTODO" : (char*)"VEVENT";
+	auto Type = (CalendarType) c->GetInt(FIELD_CAL_TYPE);
+	LString TypeStr;
+	if (auto str = ToString(Type))
+	{
+		TypeStr.Printf("V%s", str);
+		TypeStr = TypeStr.Upper();
+	}
+	else
+	{
+		LAssert(!"Unknown calendar event type.");
+		return false;
+	}
 
-	o->Push((char*)"BEGIN:VCALENDAR\r\n"
+	o->Push("BEGIN:VCALENDAR\r\n"
 			"VERSION:2.0\r\n"
 			"CALSCALE:GREGORIAN\r\n"
 			"PRODID:Memecode vcal filter\r\n");
 
 	if (c)
 	{
-		LStreamPrint(o, "BEGIN:%s\r\n", TypeStr);
+		LStreamPrint(o, "BEGIN:%s\r\n", TypeStr.Get());
 
 		#define OutputStr(Field, Name)						\
 		{													\
@@ -1502,16 +1424,16 @@ bool VCal::Export(LDataPropI *c, LStreamI *o)
 			{
 				default:
 				case CalFree:
-					o->Push((char*)"X-SHOWAS:FREE\r\n");
+					o->Push("X-SHOWAS:FREE\r\n");
 					break;
 				case CalTentative:
-					o->Push((char*)"X-SHOWAS:TENTATIVE\r\n");
+					o->Push("X-SHOWAS:TENTATIVE\r\n");
 					break;
 				case CalBusy:
-					o->Push((char*)"X-SHOWAS:BUSY\r\n");
+					o->Push("X-SHOWAS:BUSY\r\n");
 					break;
 				case CalOut:
-					o->Push((char*)"X-SHOWAS:OUT\r\n");
+					o->Push("X-SHOWAS:OUT\r\n");
 					break;
 			}
 		}
@@ -1607,9 +1529,9 @@ bool VCal::Export(LDataPropI *c, LStreamI *o)
 					switch (p[1].Int())
 					{
 						case CalMinutes: Duration = "M"; break;
-						case CalHours: Duration = "H"; break;
-						case CalDays: Duration = "D"; break;
-						case CalWeeks: Duration = "D"; Count *= 7; break;
+						case CalHours:   Duration = "H"; break;
+						case CalDays:    Duration = "D"; break;
+						case CalWeeks:   Duration = "D"; Count *= 7; break;
 					}
 
 					const char *Action = NULL;
@@ -1628,12 +1550,11 @@ bool VCal::Export(LDataPropI *c, LStreamI *o)
 									"DESCRIPTION:REMINDER\r\n"
 									"TRIGGER:-PT" LPrintfInt64 "%s\r\n",
 									Action,
-									Count, Duration
-								);
+									Count, Duration);
 						if (p.Length() > 3)
 							s += LString("X-PARAM: ") + p[3];
 						s += "END:VALARM\r\n";
-						o->Write(s.Get(), s.Length());
+						o->Write(s);
 					}
 					else LAssert(0);
 				}
@@ -1661,10 +1582,10 @@ bool VCal::Export(LDataPropI *c, LStreamI *o)
 			}				
 		}
 
-		LStreamPrint(o, "END:%s\r\n", TypeStr);
+		LStreamPrint(o, "END:%s\r\n", TypeStr.Get());
 	}
 
-	o->Push((char*)"END:VCALENDAR\r\n");
+	o->Push("END:VCALENDAR\r\n");
 
 	return true;
 }

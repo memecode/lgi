@@ -232,7 +232,7 @@ void LPanel::OnPaint(LSurface *pDC)
 		auto scale = GetWindow()->GetDpiScale();
 		scale *= 1.2;
 		int gapPx = (int)(scale.x * 2);
-		ThumbPos.ZOff(8 * scale.x, 8 * scale.y);
+		ThumbPos.ZOff((int)(8 * scale.x), (int)(8 * scale.y));
 		ThumbPos.Offset(r.x1 + 3, r.y1 + 3);
 		
 		pDC->Colour(L_LOW);

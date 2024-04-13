@@ -249,6 +249,7 @@
     <ClCompile Include="..\src\common\General\Growl.cpp" />
     <ClCompile Include="..\src\common\General\Password.cpp" />
     <ClCompile Include="..\src\common\General\DateTime.cpp" />
+    <ClCompile Include="..\src\common\General\TimeZone.cpp" />
     <ClCompile Include="..\src\common\Hash\md5\md5.c" />
     <ClCompile Include="..\src\common\Hash\sha1\sha1.c" />
     <ClCompile Include="..\src\common\Lgi\ClipBoardCommon.cpp" />

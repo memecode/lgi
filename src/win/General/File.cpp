@@ -1076,12 +1076,12 @@ LDateTime LDirectory::TsToDateTime(uint64_t timeStamp, bool convertToLocalTz)
 	dt.SetTimeZone(0, false); // UTC
 	dt.Set(timeStamp);
 
-	LArray<LDateTime::LDstInfo> dst;
+	LArray<LDstInfo> dst;
 	if (convertToLocalTz &&
-		LDateTime::GetDaylightSavingsInfo(dst, dt))
+		LTimeZone::GetDaylightSavingsInfo(dst, dt))
 	{
 		// Convert to local using the timezone in effect at 'dt'
-		LDateTime::DstToLocal(dst, dt);
+		LTimeZone::DstToLocal(dst, dt);
 	}
 	else
 	{

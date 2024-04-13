@@ -89,8 +89,7 @@ protected:
 	bool ParseDuration(LDateTime &Out, int &Sign, char *In);
 
 	void Fold(LStreamI &o, const char *i, int pre_chars = 0, const char *encoding = NULL);
-	char *Unfold(char *In);
-	char *UnMultiLine(char *In);
+	LString UnMultiLine(char *In);
 
 	bool ReadField(LStreamI &s, LString &Name, ParamArray *Type, LString &Data);
 	void WriteField(LStreamI &s, const char *Name, ParamArray *Type, const char *Data);
