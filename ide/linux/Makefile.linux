@@ -36,8 +36,7 @@ ifeq ($(Build),Debug)
 		-I../private/common \
 		-I../include/lgi/linux/Gtk \
 		-I../include/lgi/linux \
-		-I../include \
-		-I../../../../codelib/openssl/include
+		-I../include
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
@@ -55,8 +54,7 @@ else
 		-I../private/common \
 		-I../include/lgi/linux/Gtk \
 		-I../include/lgi/linux \
-		-I../include \
-		-I../../../../codelib/openssl/include
+		-I../include
 endif
 
 # Dependencies
@@ -313,6 +311,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/common/General/FileCommon.cpp \
 	../src/common/General/Password.cpp \
 	../src/common/General/Properties.cpp \
+	../src/common/General/TimeZone.cpp \
 	../src/common/Hash/md5/md5.c \
 	../src/common/Hash/md5/md5.h \
 	../src/common/Hash/sha1/sha1.c \
@@ -403,7 +402,8 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/linux/Lgi/Thread.cpp \
 	../src/linux/Lgi/View.cpp \
 	../src/linux/Lgi/Window.cpp \
-	../src/posix/SubProcess.cpp
+	../src/posix/SubProcess.cpp \
+	../../../../../../usr/include/libayatana-appindicator3-0.1/libayatana-appindicator/app-indicator.h
 	export Build=$(Build); \
 	$(MAKE) -C ../ -f ./linux/Makefile.linux
 

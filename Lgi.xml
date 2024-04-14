@@ -3,8 +3,9 @@
 	<Node Name="Source Files" Type="1" Platforms="15" Open="1" Id="1">
 		<Node Name="Core" Type="1" Platforms="15" Open="1" Id="2">
 			<Node Name="DateTime" Type="1" Platforms="15" Open="0" Id="3">
-				<Node File=".\src\common\General\DateTime.cpp" Type="2" Platforms="15" />
-				<Node File=".\include\lgi\common\DateTime.h" Type="3" Platforms="15" />
+				<Node File="./src/common/General/DateTime.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/DateTime.h" Type="3" Platforms="15" />
+				<Node File="./src/common/General/TimeZone.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Drag and Drop" Type="1" Platforms="15" Open="0" Id="4">
 				<Node Name="Haiku" Type="1" Platforms="15" Id="4">

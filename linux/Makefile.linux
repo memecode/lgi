@@ -149,6 +149,7 @@ Source =	src/posix/SubProcess.cpp \
 			src/common/Lgi/Alert.cpp \
 			src/common/Hash/sha1/sha1.c \
 			src/common/Hash/md5/md5.c \
+			src/common/General/TimeZone.cpp \
 			src/common/General/Properties.cpp \
 			src/common/General/Password.cpp \
 			src/common/General/FileCommon.cpp \
