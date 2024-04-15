@@ -45,16 +45,16 @@ class IdeDocPrivate : public NodeView, public LMutex
 	LString Buffer;
 
 public:
-	IdeDoc *Doc;
-	AppWnd *App;
-	IdeProject *Project;
+	IdeDoc *Doc = NULL;
+	AppWnd *App = NULL;
+	IdeProject *Project = NULL;
 	LDateTime ModTs;
-	class DocEdit *Edit;
-	EditTray *Tray;
+	class DocEdit *Edit = NULL;
+	EditTray *Tray = NULL;
 	LHashTbl<IntKey<ssize_t>, bool> BreakPoints;
-	class ProjFilePopup *FilePopup;
-	class ProjMethodPopup *MethodPopup;
-	class ProjSymPopup *SymPopup;
+	class ProjFilePopup *FilePopup = NULL;
+	class ProjMethodPopup *MethodPopup = NULL;
+	class ProjSymPopup *SymPopup = NULL;
 	LString::Array WriteBuf;
 	LAutoPtr<LThread> Build;
 	

@@ -2985,7 +2985,6 @@ void AppWnd::GotoReference(const char *File, int Line, bool CurIp, bool WithHist
 {
 	if (!InThread())
 	{
-		printf("\tGotoReference(%s,%i,%i,%i) out of thread\n", File, Line, CurIp, WithHistory);
 		RunCallback
 		(
 			[this, File=LString(File), Line, CurIp, WithHistory, Callback]()
@@ -2996,15 +2995,13 @@ void AppWnd::GotoReference(const char *File, int Line, bool CurIp, bool WithHist
 		return;
 	}
 
-	printf("\tGotoReference(%s,%i,%i,%i) in thread\n", File, Line, CurIp, WithHistory);
-
 	if (!WithHistory)
 		d->InHistorySeek = true;
 
 	IdeDoc *Doc = File ? OpenFile(File) : GetCurrentDoc();
 	if (Doc)
 	{
-		Doc->SetLine(Line, CurIp);
+		Doc->SetLine(Line, CurIp && d->Debugging);
 		Doc->Focus(true);
 	}
 	else
@@ -3357,10 +3354,11 @@ LMessage::Result AppWnd::OnEvent(LMessage *m)
 				d->Debugging = Debugging;
 				if (!Debugging)
 				{
+					// Find 'CurIpDoc' doc...
+					auto CurIpDoc = FindOpenFile(IdeDoc::GetCurIpDoc());
 					IdeDoc::ClearCurrentIp();
-					IdeDoc *c = GetCurrentDoc();
-					if (c)
-						c->UpdateControl();
+					if (CurIpDoc)
+						CurIpDoc->UpdateControl();
 						
 					// Shutdown the debug context and free the memory
 					DeleteObj(d->DbgContext);
@@ -3545,7 +3543,6 @@ int AppWnd::OnNotify(LViewI *Ctrl, LNotification n)
 		{
 			if (d->DbgContext && n.Type == LNotifyValueChanged)
 			{
-				printf("IDC_DEBUG_TAB notification: %s\n", n.Sender.Get());
 				switch (Ctrl->Value())
 				{
 					case AppWnd::LocalsTab:

@@ -757,7 +757,7 @@ bool LTextView4::ValidateLines(bool CheckBox)
 
 OnError:
 	#if DEBUG_EDIT_LOG
-	SaveLog("C:\\Code\\TextView4.slog");
+	SaveLog("TextView4.slog");
 	#endif
 	return false;
 }
@@ -1528,7 +1528,7 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 
 					PROF("NoWrap add lines");
 					
-					LgiTrace("Insert '%S' at %i, size=%i\n", Data, (int)At, (int)Size);
+					// LgiTrace("Insert '%S' at %i, size=%i\n", Data, (int)At, (int)Size);
 
 					// Add any new lines that we need...
 					char16 *e = Text + At + Len;
@@ -1541,7 +1541,7 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 							size_t Pos = c - Text;
 							Cur->Len = Pos - Cur->Start;
 							Cur->NewLine = true;
-							LgiTrace("	LF at %i, Idx=%i\n", (int)Pos, (int)Idx);
+							// LgiTrace("	LF at %i, Idx=%i\n", (int)Pos, (int)Idx);
 
 							if (!*++c)
 							{
@@ -1555,7 +1555,7 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 								return false;
 							Cur->Start = c - Text;
 							Line.AddAt(++Idx, Cur);
-							LgiTrace("	newLine at %i, Idx=%i\n", (int)Cur->Start, Idx);
+							// LgiTrace("	newLine at %i, Idx=%i\n", (int)Cur->Start, Idx);
 						}
 					}
 
@@ -1565,8 +1565,7 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 					{
 						// Make sure the last Line's length is set..
 						Cur->CalcLen(Text);
-						LgiTrace("	CalcLen, size=%i, start=%i, len=%i\n",
-							(int)Size, (int)Cur->Start, (int)Cur->Len);
+						// LgiTrace("	CalcLen, size=%i, start=%i, len=%i\n", (int)Size, (int)Cur->Start, (int)Cur->Len);
 					}
 
 					PROF("UpdatePos");
@@ -1592,8 +1591,10 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 				if (WrapType == L_WRAP_NONE)
 				{
 					LTextLine *l = *Line.rbegin();
+					#if 0
 					printf("%s:%i - Insert error: no cur, At=%i, Size=%i, Lines=%i, WrapType=%i\n",
 						_FL, (int)At, (int)Size, (int)Line.Length(), (int)WrapType);
+					#endif
 					if (l)
 						printf("Last=%i, %i\n", (int)l->Start, (int)l->Len);
 				}

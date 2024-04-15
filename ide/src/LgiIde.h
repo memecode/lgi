@@ -285,14 +285,18 @@ public:
 	bool IsClean();
 	void SaveAll(std::function<void(bool)> Callback, bool CloseDirty = false);
 	void CloseAll();
-	IdeDoc *OpenFile(const char *FileName, NodeSource *Src = 0);
+
+	IdeDoc *OpenFile(const char *FileName, NodeSource *Src = NULL);
 	IdeDoc *NewDocWnd(const char *FileName, NodeSource *Src);
 	IdeDoc *GetCurrentDoc();
-	IdeProject *OpenProject(const char *FileName, IdeProject *ParentProj, bool Create = false, ProjectNode *DepParent = NULL);
-	IdeProject *RootProject();
-	FindSymbolSystem *GetFindSym();
 	IdeDoc *TopDoc();
 	IdeDoc *FocusDoc();
+	IdeDoc *FindOpenFile(char *FileName);
+
+	IdeProject *OpenProject(const char *FileName, IdeProject *ParentProj, bool Create = false, ProjectNode *DepParent = NULL);
+	IdeProject *RootProject();
+
+	FindSymbolSystem *GetFindSym();
 	LTextView3 *FocusEdit();
 	void AppendOutput(char *Txt, Channels Channel);
 	int OnFixBuildErrors();
@@ -306,7 +310,6 @@ public:
 	LStream *GetOutputLog();
 	LStream *GetBuildLog();
 	LStream *GetDebugLog();
-	IdeDoc *FindOpenFile(char *FileName);
 	void GotoReference(const char *File, int Line, bool CurIp, bool WithHistory, std::function<void(IdeDoc*)> Callback);
 	void FindSymbol(int ResultsSinkHnd, const char *Sym);
 	bool GetSystemIncludePaths(LArray<LString> &Paths);

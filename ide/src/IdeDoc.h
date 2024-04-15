@@ -50,6 +50,7 @@ public:
 	ssize_t GetLine();
 	void SetLine(int Line, bool CurIp);
 	static void ClearCurrentIp();
+	static LString GetCurIpDoc() { return CurIpDoc; }
 	bool IsCurrentIp();
 	void GotoSearch(int CtrlId, char *InitialText = NULL);
 	void SearchSymbol();

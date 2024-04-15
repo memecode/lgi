@@ -376,14 +376,11 @@ void EditTray::OnFunctionList(LMouse &m)
 		
 		LPoint p(m.x, m.y);
 		PointToScreen(p);
-		int Goto = s.Float(this, p.x, p.y, true);
+		auto Goto = s.Float(this, p.x, p.y, true);
 		if (Goto)
 		{
-			DefnInfo *Info = a[Goto-1];
-			if (Info)
-			{
+			if (auto Info = a[Goto-1])
 				Ctrl->SetLine(Info->Line);
-			}
 		}
 	}
 	else
@@ -868,16 +865,11 @@ public:
 ////////////////////////////////////////////////////////////////////////////////////////////
 IdeDocPrivate::IdeDocPrivate(IdeDoc *d, AppWnd *a, NodeSource *src, const char *file) : NodeView(src), LMutex("IdeDocPrivate.Lock")
 {
-	FilePopup = NULL;
-	MethodPopup = NULL;
-	SymPopup = NULL;
-
 	App = a;
 	Doc = d;
-	Project = 0;
 	FileName = file;
 	
-	LFontType Font, *Use = 0;
+	LFontType Font, *Use = NULL;
 	if (Font.Serialize(App->GetOptions(), OPT_EditorFont, false))
 	{
 		Use = &Font;
@@ -1420,6 +1412,8 @@ void IdeDoc::UpdateControl()
 {
 	if (d->Edit)
 		d->Edit->Invalidate();
+	else
+		LgiTrace("%s:%i - Error: no edit control?\n", _FL);
 }
 
 void IdeDoc::SearchFile()
@@ -1429,11 +1423,7 @@ void IdeDoc::SearchFile()
 
 bool IdeDoc::IsCurrentIp()
 {
-	auto Fn = GetFileName();
-	bool DocMatch = CurIpDoc &&
-					Fn &&
-					!_stricmp(Fn, CurIpDoc);
-	return DocMatch;
+	return !Stricmp(GetFileName(), CurIpDoc.Get());
 }
 
 void IdeDoc::ClearCurrentIp()
@@ -1606,7 +1596,6 @@ void IdeDoc::SetLine(int Line, bool CurIp)
 			CurIpLine = Line;
 			CurIpDoc = CurDoc;
 			
-			// LgiTrace("%s:%i - CurIpLine=%i\n", _FL, CurIpLine);
 			d->Edit->InvalidateLine(CurIpLine - 1);
 		}
 	}

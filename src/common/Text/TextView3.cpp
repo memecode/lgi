@@ -4704,7 +4704,6 @@ bool LTextView3::OnKey(LKey &k)
 							
 							if (k.Down())
 							{
-								printf("key copy\n");
 								Copy();
 							}
 							

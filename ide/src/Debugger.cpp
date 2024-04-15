@@ -216,12 +216,10 @@ class Gdb : public LDebugger, public LThread, public Callback
 		if (a.Length() == 2)
 		{
 			LString k = a[1].Strip();			
-			// printf("%s:%i - k='%s'\n", _FL, k.Get());
 			
 			if (k.Find("0x") == 0)
 			{			
 				LString::Array b = a[1].SplitDelimit(":,");
-				// printf("%s:%i - b.len=%i\n", _FL, b.Length());
 				for (unsigned i=0; i<b.Length(); i++)
 				{
 					LString s = b[i].Strip();
@@ -238,15 +236,12 @@ class Gdb : public LDebugger, public LThread, public Callback
 			else
 			{
 				auto e = k.Find(":");
-				// printf("%s:%i - e=%i\n", _FL, e);
 				if (e > 0)
 				{
 					e++;
 					while (e < k.Length() && IsDigit(k(e)))
 						e++;
-					// printf("%s:%i - e=%i\n", _FL, e);
 					LString::Array b = k(0, e).RSplit(":", 1);
-					//  printf("%s:%i - b.len=%i\n", _FL, b.Length());
 					if (b.Length() == 2)
 					{
 						File = b[0];
@@ -258,13 +253,17 @@ class Gdb : public LDebugger, public LThread, public Callback
 		}
 		else
 		{
-			printf("Error: %i parts (%s:%i).\n", (int)a.Length(), _FL);
-			int i=0;
-			for (auto part: a)
-			{
-				printf("[%i]='%s'\n", i++, part.Get());
-			}
+			// 1 part only means something like:
+			// <line-number><line-from-src>
+			auto parts = a[0].SplitDelimit();
+			if (parts[0].IsNumeric())
+				Line = parts[0];
+			else
+				printf("%s:%i Unhandled line: '%s'\n", _FL, f.Get());
 		}
+
+		if (!File && CurFile)
+			File = CurFile;
 
 		if (File && Line.Int() > 0)
 		{
@@ -333,7 +332,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 				ParseState = ParseBreakPoint;
 				BreakInfo.New().Set(Start, Length);
 				
-				printf("######## ParseBreakPoint!!!\n");
+				// printf("######## ParseBreakPoint!!!\n");
 			}
 			else if (*Start == '[')
 			{
