@@ -37,6 +37,7 @@ rvc/Lvc.xml
 rvc/lvc
 rvc/mac/build
 lvc/mac/DerivedData
+lvc/mac/build/XCBuildData
 
 resourceEditor/mac/build
 resourceEditor/lgires
@@ -71,6 +72,7 @@ test/GuiTest/gui_test.txt
 test/GuiTest/Lgi Test App.xml
 test/GuiTest/Mac/DerivedData
 test/GuiTest/Mac/build
+test/UnitTests/mac/DerivedData
 
 utils/SlogViewer/slogviewer
 

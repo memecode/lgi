@@ -1417,7 +1417,9 @@ public:
 			if (Has)
 			{
 				Has->Select(true);
-				LPopupNotification::Message(this, LString::Fmt("'%s' is already open", Has->LocalPath()));
+				LPopupNotification::Message(this,
+											LString::Fmt("'%s' is already open",
+														Has->LocalPath().Get()));
 			}
 			else
 			{

@@ -24,6 +24,7 @@
 		3418EBCF25D9FEA600EA168A /* Progress.h in Headers */ = {isa = PBXBuildFile; fileRef = 3418EBCE25D9FEA600EA168A /* Progress.h */; };
 		3418EBD125D9FEF500EA168A /* ProgressDlg.h in Headers */ = {isa = PBXBuildFile; fileRef = 3418EBD025D9FEF500EA168A /* ProgressDlg.h */; };
 		3427064727A0E20C0043F733 /* CocoaView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3427064627A0E20C0043F733 /* CocoaView.mm */; };
+		3428D9212BCDD7D7008E5A2A /* TimeZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3428D9202BCDD7D7008E5A2A /* TimeZone.cpp */; };
 		343874B5230F46B200CF96B4 /* Window.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B1230F46B200CF96B4 /* Window.h */; };
 		343874B6230F46B200CF96B4 /* View.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B2230F46B200CF96B4 /* View.h */; };
 		343874B7230F46B200CF96B4 /* App.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B3230F46B200CF96B4 /* App.h */; };
@@ -192,6 +193,7 @@
 		3418EBCE25D9FEA600EA168A /* Progress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Progress.h; path = ../../../include/lgi/common/Progress.h; sourceTree = "<group>"; };
 		3418EBD025D9FEF500EA168A /* ProgressDlg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ProgressDlg.h; path = ../../../include/lgi/common/ProgressDlg.h; sourceTree = "<group>"; };
 		3427064627A0E20C0043F733 /* CocoaView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CocoaView.mm; sourceTree = SOURCE_ROOT; };
+		3428D9202BCDD7D7008E5A2A /* TimeZone.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = TimeZone.cpp; path = ../../../common/General/TimeZone.cpp; sourceTree = "<group>"; };
 		343874B1230F46B200CF96B4 /* Window.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Window.h; path = ../../../include/lgi/common/Window.h; sourceTree = SOURCE_ROOT; };
 		343874B2230F46B200CF96B4 /* View.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = View.h; path = ../../../include/lgi/common/View.h; sourceTree = "<group>"; };
 		343874B3230F46B200CF96B4 /* App.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = App.h; path = ../../../include/lgi/common/App.h; sourceTree = SOURCE_ROOT; };
@@ -320,7 +322,7 @@
 		348CD46925C63E56001AA32B /* AppCommon.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = AppCommon.cpp; path = ../../common/Lgi/AppCommon.cpp; sourceTree = SOURCE_ROOT; };
 		348E99CD2876850F0067E92A /* ObjCWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ObjCWrapper.h; path = ../../../include/lgi/mac/cocoa/ObjCWrapper.h; sourceTree = "<group>"; };
 		3491A28423678DB700604C29 /* DropFiles.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = DropFiles.h; path = ../../../include/lgi/common/DropFiles.h; sourceTree = SOURCE_ROOT; };
-		349F939D2B92CBAD002410A2 /* TextConvert.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TextConvert.cpp; path = ../../../common/Text/TextConvert.cpp; sourceTree = "<group>"; };
+		349F939D2B92CBAD002410A2 /* TextConvert.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TextConvert.cpp; path = ../../common/Text/TextConvert.cpp; sourceTree = SOURCE_ROOT; };
 		34A3ACE720568D5800B1D62A /* StringLayout.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StringLayout.cpp; path = ../../common/Gdc2/Font/StringLayout.cpp; sourceTree = SOURCE_ROOT; };
 		34A3ACE920568D9700B1D62A /* MenuCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MenuCommon.cpp; path = ../../common/Lgi/MenuCommon.cpp; sourceTree = SOURCE_ROOT; };
 		34B14E3326951C6E004C22CC /* Slider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Slider.cpp; path = ../../common/Widgets/Slider.cpp; sourceTree = SOURCE_ROOT; };
@@ -338,8 +340,8 @@
 		34D6AA1622D3749A005D739E /* Gdc2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Gdc2.h; path = ../../../include/lgi/common/Gdc2.h; sourceTree = SOURCE_ROOT; };
 		34EE8BB02748A55600F12915 /* TextFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TextFile.h; path = ../../../include/lgi/common/TextFile.h; sourceTree = "<group>"; };
 		34F3EC4229BD374E00BB9B58 /* Rect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Rect.h; path = ../../../include/lgi/common/Rect.h; sourceTree = SOURCE_ROOT; };
-		34F6151D27E55C5D00FE5B0C /* Thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Thread.h; path = ../../../../../lgi/trunk/include/lgi/common/Thread.h; sourceTree = "<group>"; };
-		34F6151E27E55C5D00FE5B0C /* ThreadEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ThreadEvent.h; path = ../../../../../lgi/trunk/include/lgi/common/ThreadEvent.h; sourceTree = "<group>"; };
+		34F6151D27E55C5D00FE5B0C /* Thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Thread.h; path = ../../../include/lgi/common/Thread.h; sourceTree = SOURCE_ROOT; };
+		34F6151E27E55C5D00FE5B0C /* ThreadEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ThreadEvent.h; path = ../../../include/lgi/common/ThreadEvent.h; sourceTree = SOURCE_ROOT; };
 		34F6153D27E5628600FE5B0C /* Token.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Token.h; path = ../../../../../lgi/trunk/include/lgi/common/Token.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -364,6 +366,16 @@
 				3477C2C41CC046310028B84B /* TextView3.cpp */,
 			);
 			name = TextCtrls;
+			sourceTree = "<group>";
+		};
+		3428D91F2BCDD762008E5A2A /* DateTime */ = {
+			isa = PBXGroup;
+			children = (
+				3428D9202BCDD7D7008E5A2A /* TimeZone.cpp */,
+				3477C3401CC0A68E0028B84B /* DateTime.cpp */,
+				34D28925275B3D9F005961A8 /* DateTime.h */,
+			);
+			name = DateTime;
 			sourceTree = "<group>";
 		};
 		345BABCE2B78952D005795A0 /* Frameworks */ = {
@@ -404,6 +416,7 @@
 		3477C26A1CBF020F0028B84B /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				3428D91F2BCDD762008E5A2A /* DateTime */,
 				3477C2B21CBF96E60028B84B /* Dialogs */,
 				3477C33B1CC0881E0028B84B /* Files */,
 				3477C2931CBF09240028B84B /* General */,
@@ -473,14 +486,11 @@
 			isa = PBXGroup;
 			children = (
 				34C81A5925DA0AA10053F93A /* Base64.cpp */,
-				3477C3401CC0A68E0028B84B /* DateTime.cpp */,
-				34D28925275B3D9F005961A8 /* DateTime.h */,
 				3477C3421CC0A6B90028B84B /* DocView.cpp */,
 				3477C2951CBF09320028B84B /* Mem.mm */,
 				3477C34C1CC0ACED0028B84B /* md5.c */,
 				3477C3231CC04DD70028B84B /* Object.cpp */,
 				3477C2E81CC04B5D0028B84B /* Rand.cpp */,
-				3477C2961CBF09320028B84B /* ShowFileProp_Mac.mm */,
 				3477C3271CC04E020028B84B /* Variant.cpp */,
 				34D28928275B3DB0005961A8 /* Variant.h */,
 			);
@@ -507,8 +517,6 @@
 				3409C0CF275812CB0050302A /* Profile.h */,
 				3477C29C1CBF0A920028B84B /* SymLookup.h */,
 				34EE8BB02748A55600F12915 /* TextFile.h */,
-				34F6151D27E55C5D00FE5B0C /* Thread.h */,
-				34F6151E27E55C5D00FE5B0C /* ThreadEvent.h */,
 				34F6153D27E5628600FE5B0C /* Token.h */,
 			);
 			name = Headers;
@@ -678,6 +686,8 @@
 		3477C3171CC04CDE0028B84B /* Threads */ = {
 			isa = PBXGroup;
 			children = (
+				34F6151D27E55C5D00FE5B0C /* Thread.h */,
+				34F6151E27E55C5D00FE5B0C /* ThreadEvent.h */,
 				34D21CEB217981AE003D1EA6 /* EventTargetThread.h */,
 				3477C27E1CBF086A0028B84B /* Thread.mm */,
 				3477C3251CC04DE20028B84B /* Mutex.cpp */,
@@ -700,6 +710,7 @@
 		3477C33B1CC0881E0028B84B /* Files */ = {
 			isa = PBXGroup;
 			children = (
+				3477C2961CBF09320028B84B /* ShowFileProp_Mac.mm */,
 				3477C33C1CC088590028B84B /* FileCommon.cpp */,
 				3477C2A91CBF22A00028B84B /* File.h */,
 				3477C2941CBF09320028B84B /* File.mm */,
@@ -955,6 +966,7 @@
 				3477C2DD1CC048F90028B84B /* FontSystem.cpp in Sources */,
 				3477C3101CC04C790028B84B /* Css.cpp in Sources */,
 				3477C2C91CC046310028B84B /* Unicode.cpp in Sources */,
+				3428D9212BCDD7D7008E5A2A /* TimeZone.cpp in Sources */,
 				3477C3221CC04DA00028B84B /* Colour.cpp in Sources */,
 				3477C2D31CC048100028B84B /* Containers.cpp in Sources */,
 				3477C2F01CC04BBB0028B84B /* List.cpp in Sources */,

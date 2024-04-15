@@ -179,7 +179,7 @@ bool LTimeZone::GetDaylightSavingsInfo(LArray<LDstInfo> &Info, LDateTime &Start,
 		auto ToUnix = To.GetUnix();
 
 		auto tz = [NSTimeZone systemTimeZone];
-		auto startDate = [[NSDate alloc] initWithTimeIntervalSince1970:(From.Ts().Get() / Second64Bit) - Offset1800];
+		auto startDate = [[NSDate alloc] initWithTimeIntervalSince1970:(From.Ts().Get() / LDateTime::Second64Bit) - LDateTime::Offset1800];
 		while (startDate)
 		{
 			auto next = [tz nextDaylightSavingTimeTransitionAfterDate:startDate];
