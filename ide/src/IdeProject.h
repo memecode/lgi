@@ -13,6 +13,8 @@
 
 #define OPT_Ftp						"ftp"
 #define OPT_Www						"www"
+#define OPT_NodeFlags				"NodeFlags"
+#define OPT_Breakpoint				"Breakpoint"
 
 enum ExeAction
 {
@@ -89,7 +91,7 @@ public:
 
 	IdeProject *GetProject() { return Project; }
 	bool OnOpen(LProgressDlg *Prog, LXmlTag *Src);	
-	void CollectAllSubProjects(List<IdeProject> &c);
+	void CollectAllSubProjects(LArray<IdeProject*> &c);
 	void CollectAllSource(LArray<LString> &c, IdePlatform Platform);
 	void SortChildren();
 	void InsertTag(LXmlTag *t) override;
@@ -164,12 +166,19 @@ public:
 	LString GetTargetFile(IdePlatform Platform);
 	bool BuildIncludePaths(LString::Array &Paths, LString::Array *SysPaths, bool Recurse, bool IncludeSystem, IdePlatform Platform);
 	void ShowFileProperties(const char *File);
-	bool GetExpanded(int Id);
-	void SetExpanded(int Id, bool Exp);
 	int AllocateId();
 	bool CheckExists(LString &p, bool Debug = false);
 	bool CheckExists(LAutoString &p, bool Debug = false);
 	void OnMakefileCreated();
+
+	// User file settings
+	bool GetExpanded(int Id);
+	void SetExpanded(int Id, bool Exp);
+	void AddBreakpoint(LDebugger::BreakPoint &bp);
+	bool DeleteBreakpoint(LDebugger::BreakPoint &bp);
+	bool HasBreakpoint(LDebugger::BreakPoint &bp);
+	bool LoadBreakPoints(IdeDoc *doc);
+	bool LoadBreakPoints(LDebugger *db);
 	
 	// Nodes
 	char *FindFullPath(const char *File, class ProjectNode **Node = NULL);
@@ -178,7 +187,8 @@ public:
 
 	// Project hierarchy
 	IdeProject *GetParentProject();
-	bool GetChildProjects(List<IdeProject> &c);
+	LArray<IdeProject*> GetAllProjects();
+	bool GetChildProjects(LArray<IdeProject*> &c);
 	void SetParentProject(IdeProject *p);
 
 	// File

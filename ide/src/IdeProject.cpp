@@ -220,7 +220,15 @@ public:
 	// User info file
 	LString UserFile;
 	LHashTbl<IntKey<int>,int> UserNodeFlags;
+	LArray<LDebugger::BreakPoint> UserBreakpoints;
 
+	void EmptyUserData()
+	{
+		UserNodeFlags.Empty();
+		UserBreakpoints.Empty();
+	}
+
+	// Constructor
 	IdeProjectPrivate(AppWnd *a, IdeProject *project, ProjectNode *depParent) :
 		Project(project),
 		Settings(project),
@@ -595,7 +603,7 @@ public:
 			sDefines[BuildRelease] = sDefines[BuildDebug];
 		}
 
-		List<IdeProject> Deps;
+		LArray<IdeProject*> Deps;
 		Proj->GetChildProjects(Deps);
 
 		for (int Cfg = BuildDebug; Cfg < BuildMax; Cfg++)
@@ -2157,7 +2165,15 @@ void IdeProject::SetParentProject(IdeProject *p)
 	d->ParentProject = p;
 }
 
-bool IdeProject::GetChildProjects(List<IdeProject> &c)
+LArray<IdeProject*> IdeProject::GetAllProjects()
+{
+	LArray<IdeProject*> a;
+	a.Add(this);
+	GetChildProjects(a);
+	return a;	
+}
+
+bool IdeProject::GetChildProjects(LArray<IdeProject*> &c)
 {
 	CollectAllSubProjects(c);
 	return c.Length() > 0;
@@ -2516,10 +2532,7 @@ bool IdeProject::IsMakefileUpToDate()
 	if (IsMakefileAScript())
 		return true; // We can't know if it's up to date...
 
-	List<IdeProject> Proj;
-	GetChildProjects(Proj);
-
-	Proj.Insert(this);
+	auto Proj = GetAllProjects();
 	for (auto p: Proj)
 	{
 		// Is the project file modified after the makefile?
@@ -2577,9 +2590,9 @@ bool IdeProject::FindDuplicateSymbols()
 	LStream *Log = d->App->GetBuildLog();	
 	Log->Print("FindDuplicateSymbols starting...\n");
 
-	List<IdeProject> Proj;
+	LArray<IdeProject*> Proj;
 	CollectAllSubProjects(Proj);
-	Proj.Insert(this);
+	Proj.Add(this);
 
 	int Lines = 0;
 	
@@ -2918,7 +2931,7 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 
 	Prof.Add("Init");
 
-	d->UserNodeFlags.Empty();
+	d->EmptyUserData();
 	if (LIsRelativePath(FileName))
 	{
 		char p[MAX_PATH_LEN];
@@ -2985,15 +2998,42 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 	if (LFileExists(d->UserFile))
 	{
 		LFile Uf;
-		if (Uf.Open(d->UserFile, O_READ))
+		if (!Uf.Open(d->UserFile, O_READ))
+			LgiTrace("%s:%i failed to open '%s' for reading.\n", _FL, d->UserFile.Get());
+		else
 		{
-			LString::Array Ln = Uf.Read().SplitDelimit("\n");
-			for (unsigned i=0; i<Ln.Length(); i++)
+			LString::Array lines = Uf.Read().SplitDelimit("\n");
+			for (auto &ln: lines)
 			{
-				LString::Array p = Ln[i].SplitDelimit(",");
-				if (p.Length() == 2)
-					d->UserNodeFlags.Add((int)p[0].Int(), (int)p[1].Int(16));
+				LString var, value;
+				auto hasColon = ln.Find(":");
+				if (hasColon > 0)
+				{
+					auto p = ln.SplitDelimit(":", 1);
+					var = p[0];
+					value = p[1];
+				}
+				else value = ln;
+				
+				auto p = value.SplitDelimit(",");
+				if (!var || var.Equals(OPT_NodeFlags))
+				{
+					if (p.Length() == 2)
+						d->UserNodeFlags.Add((int)p[0].Int(), (int)p[1].Int(16));
+					else
+						LAssert(!"Wrong length");
+				}
+				else if (var.Equals(OPT_Breakpoint))
+				{
+					d->UserBreakpoints.New().Load(value);
+				}
+				else LgiTrace("%s:%i - Unknown user file line: '%s'\n", _FL, ln.Get());
 			}
+
+			#if 0
+			LgiTrace("%s:%i Loaded %i,%i user project lines.\n",
+				_FL, (int)d->UserNodeFlags.Length(), (int)d->UserBreakpoints.Length());
+			#endif
 		}
 	}
 	
@@ -3070,17 +3110,47 @@ bool IdeProject::SaveFile()
 			f.SetSize(0);
 
 			// Save user file details..
-			for (auto i : d->UserNodeFlags)
-				f.Print("%i,%x\n", i.key, i.value);
+			for (auto i: d->UserNodeFlags)
+				f.Print("%s:%i,%x\n", OPT_NodeFlags, i.key, i.value);
+			for (auto bp: d->UserBreakpoints)
+				f.Print("%s:%s\n", OPT_Breakpoint, bp.Save().Get());
 
 			d->UserFileDirty = false;
+			#if 0
+			LgiTrace("%s:%i Saved %i,%i user project lines.\n",
+				_FL, (int)d->UserNodeFlags.Length(), (int)d->UserBreakpoints.Length());
+			#endif
 		}
 	}
 
-	printf("\tIdeProject::SaveFile %i %i\n", d->Dirty, d->UserFileDirty);
-
 	return	!d->Dirty &&
 			!d->UserFileDirty;
+}
+
+bool IdeProject::LoadBreakPoints(IdeDoc *doc)
+{
+	if (!doc)
+		return false;
+
+	auto fn = doc->GetFileName();
+	for (auto &bp: d->UserBreakpoints)
+	{
+		if (bp.File.Equals(fn))
+			doc->AddBreakPoint(bp, true);
+	}
+
+	return true;
+}
+
+bool IdeProject::LoadBreakPoints(LDebugger *db)
+{
+	if (!db)
+		return false;
+		
+	for (auto &bp: d->UserBreakpoints)
+		db->SetBreakPoint(&bp);
+		
+	return true;
 }
 
 void IdeProject::SetDirty()
@@ -3091,7 +3161,11 @@ void IdeProject::SetDirty()
 
 void IdeProject::SetUserFileDirty()
 {
-	d->UserFileDirty = true;
+	if (!d->UserFileDirty)
+	{
+		d->UserFileDirty = true;
+		LgiTrace("%s:%i UserFileDirty is dirty.\n", _FL);
+	}
 }
 
 bool IdeProject::GetExpanded(int Id)
@@ -3112,6 +3186,37 @@ void IdeProject::SetExpanded(int Id, bool Exp)
 int IdeProject::AllocateId()
 {
 	return d->NextNodeId++;
+}
+
+void IdeProject::AddBreakpoint(LDebugger::BreakPoint &bp)
+{
+	auto idx = d->UserBreakpoints.IndexOf(bp);
+	if (idx >= 0)
+	{
+		// LgiTrace("%s:%i bp already exists: %s\n", _FL, bp.Save().Get());
+		return;
+	}
+
+	d->UserBreakpoints.Add(bp);
+	SetUserFileDirty();
+}
+
+bool IdeProject::DeleteBreakpoint(LDebugger::BreakPoint &bp)
+{
+	auto idx = d->UserBreakpoints.IndexOf(bp);
+	if (idx < 0)
+	{
+		LgiTrace("%s:%i bp doesn't exist: %s\n", _FL, bp.Save().Get());
+		return false;
+	}
+	
+	SetUserFileDirty();
+	return d->UserBreakpoints.DeleteAt(idx);
+}
+
+bool IdeProject::HasBreakpoint(LDebugger::BreakPoint &bp)
+{
+	return d->UserBreakpoints.IndexOf(bp) >= 0;
 }
 
 template<typename T, typename Fn>
@@ -3700,10 +3805,10 @@ bool PkgConfigPaths(LString::Array &out, LString in)
 
 bool IdeProject::BuildIncludePaths(LString::Array &Paths, LString::Array *SysPaths, bool Recurse, bool IncludeSystem, IdePlatform Platform)
 {
-	List<IdeProject> Projects;
+	LArray<IdeProject*> Projects;
 	if (Recurse)
 		GetChildProjects(Projects);
-	Projects.Insert(this, 0);
+	Projects.AddAt(0, this);
 
 	LHashTbl<StrKey<char>, bool> MapProj, MapSys;
 	

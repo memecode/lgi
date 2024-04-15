@@ -16,6 +16,7 @@ public:
 	virtual void OnError(int Code, const char *Str) = 0;
 	virtual void OnCrash(int Code) = 0;
 	virtual void Ungrab() = 0;
+	virtual void OnWarning(LString str) = 0;
 };
 
 class LDebugger
@@ -23,21 +24,24 @@ class LDebugger
 public:
 	struct BreakPoint
 	{
-		int Index;
-		bool Added;
+		int Index = 0;
+		bool Added = false;
 
 		// Use File:Line
 		LString File;
-		ssize_t Line;
+		ssize_t Line = 0;
 		// -or-
 		// A symbol reference
 		LString Symbol;
 		
 		BreakPoint()
 		{
-			Index = 0;
-			Line = 0;
-			Added = false;
+		}
+		
+		BreakPoint(const char *file, ssize_t line)
+		{
+			File = file;
+			Line = line;
 		}
 		
 		BreakPoint &operator =(const BreakPoint &b)
@@ -57,6 +61,44 @@ public:
 				return true;
 			
 			return false;
+		}
+		
+		LString Save()
+		{
+			if (File && Line > 0)
+				return LString::Fmt("file://%s:" LPrintfSSizeT, File.Get(), Line);
+			else if (Symbol)
+				return LString::Fmt("symbol://%s", Symbol.Get());
+			
+			LAssert(!"Invalid breakpoint");
+			return LString();
+		}
+		
+		bool Load(LString s)
+		{
+			auto sep = s.Find("://");
+			if (sep < 0)
+				return false;
+			auto var = s(0, sep);
+			auto value = s(sep+3, -1);
+			if (var.Equals("file"))
+			{
+				auto p = value.SplitDelimit(":");
+				LAssert(p.Length() == 2);
+				File = p[0];
+				Line = p[1].Int();
+			}
+			else if (var.Equals("symbol"))
+			{
+				Symbol = value;
+			}
+			else
+			{
+				LAssert(!"Invalid type");
+				return false;
+			}
+			
+			return true;			
 		}
 	};
 

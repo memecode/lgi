@@ -295,6 +295,7 @@ public:
 
 	IdeProject *OpenProject(const char *FileName, IdeProject *ParentProj, bool Create = false, ProjectNode *DepParent = NULL);
 	IdeProject *RootProject();
+	LArray<IdeProject*> AllProjects();
 
 	FindSymbolSystem *GetFindSym();
 	LTextView3 *FocusEdit();
@@ -334,7 +335,6 @@ public:
 	class LDebugContext *GetDebugContext();
 	bool ToggleBreakpoint(const char *File, ssize_t Line);
 	bool OnBreakPoint(LDebugger::BreakPoint &b, bool Add);
-	bool LoadBreakPoints(IdeDoc *doc);
 	bool LoadBreakPoints(LDebugger *db);
 	void OnDebugState(bool Debugging, bool Running);
 };

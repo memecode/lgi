@@ -37,7 +37,7 @@ public:
 	void OnPosChange() override;
 	void OnPaint(LSurface *pDC) override;
 	bool IsFile(const char *File);
-	bool AddBreakPoint(ssize_t Line, bool Add);
+	bool AddBreakPoint(LDebugger::BreakPoint &bp, bool Add);
 	
 	bool OpenFile(const char *File);
 	void SetEditorParams(int IndentSize, int TabSize, bool HardTabs, bool ShowWhiteSpace);

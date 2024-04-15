@@ -757,7 +757,7 @@ bool LTextView4::ValidateLines(bool CheckBox)
 
 OnError:
 	#if DEBUG_EDIT_LOG
-	SaveLog("TextView4.slog");
+	// SaveLog("TextView4.slog");
 	#endif
 	return false;
 }
@@ -1594,9 +1594,9 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 					#if 0
 					printf("%s:%i - Insert error: no cur, At=%i, Size=%i, Lines=%i, WrapType=%i\n",
 						_FL, (int)At, (int)Size, (int)Line.Length(), (int)WrapType);
-					#endif
 					if (l)
 						printf("Last=%i, %i\n", (int)l->Start, (int)l->Len);
+					#endif
 				}
 			}
 

@@ -631,7 +631,7 @@ bool LSubProcess::Signal(int which)
 {
 	if (d->ChildPid == INVALID_PID)
 	{
-		printf("%s:%i - child pid doesn't exist (%s).\n", _FL, d->Exe.Get());
+		// printf("%s:%i - child pid doesn't exist (%s).\n", _FL, d->Exe.Get());
 		return false;
 	}
 

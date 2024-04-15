@@ -44,17 +44,17 @@ bool IdeCommon::OnOpen(LProgressDlg *Prog, LXmlTag *Src)
 	return true;
 }
 
-void IdeCommon::CollectAllSubProjects(List<IdeProject> &c)
+void IdeCommon::CollectAllSubProjects(LArray<IdeProject*> &c)
 {
-	for (auto i:*this)
+	for (auto i: *this)
 	{
-		ProjectNode *p = dynamic_cast<ProjectNode*>(i);
+		auto p = dynamic_cast<ProjectNode*>(i);
 		if (!p) break;
 
 		if (p->GetType() == NodeDependancy)
 		{
 			if (p->GetDep())
-				c.Insert(p->GetDep());
+				c.Add(p->GetDep());
 		}
 		
 		p->CollectAllSubProjects(c);

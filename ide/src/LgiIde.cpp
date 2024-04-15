@@ -67,9 +67,7 @@ SysIncThread::SysIncThread(	AppWnd* app,
 		if (proj)
 		{
 			// Get all the nodes
-			List<IdeProject> All;
-			proj->GetChildProjects(All);
-			All.Insert(proj);
+			auto All = proj->GetAllProjects();
 			for (auto Cur : All)
 			{
 				if (LString Lst = Cur->GetSettings()->GetStr(ProjSystemIncludes, NULL, Platform))
@@ -255,13 +253,8 @@ public:
 		LArray<ProjectNode*> Matches, Nodes;
 
 		auto Platforms = App->GetPlatform();
-		List<IdeProject> All;
-		p->GetChildProjects(All);
-		All.Insert(p);
-		for (auto p: All)
-		{
+		for (auto p: p->GetAllProjects())
 			p->GetAllNodes(Nodes);
-		}
 
 		FilterFiles(Matches, Nodes, s, Platforms);
 
@@ -1178,34 +1171,34 @@ struct FileLoc
 class AppWndPrivate
 {
 public:
-	AppWnd *App;
+	AppWnd *App = NULL;
 	int Platform = 0;
-	LMdiParent *Mdi;
+	LMdiParent *Mdi = NULL;
 	LOptionsFile Options;
-	LBox *HBox, *VBox;
+	LBox *HBox = NULL, *VBox = NULL;
 	List<IdeDoc> Docs;
 	List<IdeProject> Projects;
-	LImageList *Icons;
-	LTree *Tree;
-	IdeOutput *Output;
-	bool Debugging;
-	bool Running;
-	bool Building;
+	LImageList *Icons = NULL;
+	LTree *Tree = NULL;
+	IdeOutput *Output = NULL;
+	bool Debugging = false;
+	bool Running = false;
+	bool Building = false;
 	bool FixBuildWait = false;
 	int RebuildWait = 0;
-	LSubMenu *WindowsMenu;
-	LSubMenu *CreateMakefileMenu;
+	LSubMenu *WindowsMenu = NULL;
+	LSubMenu *CreateMakefileMenu = NULL;
 	LAutoPtr<FindSymbolSystem> FindSym;
 	LArray<LAutoString> SystemIncludePaths;
-	LArray<LDebugger::BreakPoint> BreakPoints;
+	// LArray<LDebugger::BreakPoint> BreakPoints;
 	
 	// Debugging
-	LDebugContext *DbgContext;
+	LDebugContext *DbgContext = NULL;
 	
 	// Cursor history tracking
-	int HistoryLoc;
+	int HistoryLoc = 0;
 	LArray<FileLoc> CursorHistory;
-	bool InHistorySeek;
+	bool InHistorySeek = false;
 	
 	void SeekHistory(int Direction)
 	{
@@ -1240,18 +1233,7 @@ public:
 		AppHnd(LEventSinkMap::Dispatch.AddSink(a))
 	{
 		FindSym.Reset(new FindSymbolSystem(AppHnd));
-		HistoryLoc = 0;
-		InHistorySeek = false;
-		WindowsMenu = 0;
 		App = a;
-		HBox = VBox = NULL;
-		Tree = 0;
-		Mdi = NULL;
-		DbgContext = NULL;
-		Output = 0;
-		Debugging = false;
-		Running = false;
-		Building = false;
 
 		Icons = LLoadImageList("icons.png", 16, 16);
 
@@ -1260,8 +1242,6 @@ public:
 
 		SerializeStringList("RecentFiles", &RecentFiles, false);
 		SerializeStringList("RecentProjects", &RecentProjects, false);
-		
-		// printf("Options.GetFile()='%s'\n", Options.GetFile());
 	}
 	
 	~AppWndPrivate()
@@ -2670,6 +2650,12 @@ bool AppWnd::IsClean()
 	return true;
 }
 
+#if 0
+#define SAVE_LOG(...) printf(__VA_ARGS__)
+#else
+#define SAVE_LOG(...)
+#endif
+
 struct SaveState
 {
 	AppWndPrivate *d = NULL;
@@ -2685,10 +2671,11 @@ struct SaveState
 		{
 			auto doc = Docs[0];
 			Docs.DeleteAt(0);
-			// printf("Saving doc...\n");
+			
+			SAVE_LOG("Saving doc...\n");
 			doc->SetClean([this, doc](bool ok)
 			{
-				// printf("SetClean cb ok=%i\n", ok);
+				SAVE_LOG("SetClean cb ok=%i\n", ok);
 				if (ok)
 					d->OnFile(doc->GetFileName());
 				else
@@ -2697,7 +2684,8 @@ struct SaveState
 						delete doc;
 					Status = false;
 				}
-				// printf("SetClean cb iter\n", ok);
+
+				SAVE_LOG("SetClean cb iter: %i\n", ok);
 				Iterate();
 			});
 		}
@@ -2706,9 +2694,10 @@ struct SaveState
 			auto proj = Projects[0];
 			Projects.DeleteAt(0);
 			
-			printf("Saving proj...\n");
+			SAVE_LOG("Saving proj...\n");
 			proj->SetClean([this, proj](bool ok)
 			{
+				SAVE_LOG("Proj save cb...\n");
 				if (ok)
 					d->OnFile(proj->GetFileName(), true);
 				else
@@ -2717,16 +2706,18 @@ struct SaveState
 						delete proj;
 					Status = false;
 				}
+
+				SAVE_LOG("Proj save iterate...\n");
 				Iterate();
 			});
 		}
 		else
 		{
-			// printf("Doing callback...\n");
+			SAVE_LOG("Doing callback...\n");
 			if (Callback)
 				Callback(Status);
 
-			// printf("Deleting...\n");
+			SAVE_LOG("Deleting...\n");
 			delete this;
 		}
 	}
@@ -2800,36 +2791,23 @@ bool AppWnd::OnBreakPoint(LDebugger::BreakPoint &b, bool Add)
 {
 	List<IdeDoc>::I it = d->Docs.begin();
 
+	bool found = false;
 	for (IdeDoc *doc = *it; doc; doc = *++it)
 	{
 		auto fn = doc->GetFileName();
 		bool Match = !Stricmp(fn, b.File.Get());
 		if (Match)
-			doc->AddBreakPoint(b.Line, Add);
-	}
-
-	if (d->DbgContext)
-		d->DbgContext->OnBreakPoint(b, Add);
-	
-	return true;
-}
-
-bool AppWnd::LoadBreakPoints(IdeDoc *doc)
-{
-	if (!doc)
-		return false;
-
-	auto fn = doc->GetFileName();
-	for (int i=0; i<d->BreakPoints.Length(); i++)
-	{
-		LDebugger::BreakPoint &b = d->BreakPoints[i];
-		if (!_stricmp(fn, b.File))
 		{
-			doc->AddBreakPoint(b.Line, true);
+			doc->AddBreakPoint(b, Add);
+			found = true;
 		}
 	}
-
-	return true;
+	if (!found)
+		LAssert(!"Document not found?");
+	else if (d->DbgContext)
+		d->DbgContext->OnBreakPoint(b, Add);
+	
+	return found;
 }
 
 bool AppWnd::LoadBreakPoints(LDebugger *db)
@@ -2837,40 +2815,25 @@ bool AppWnd::LoadBreakPoints(LDebugger *db)
 	if (!db)
 		return false;
 
-	for (int i=0; i<d->BreakPoints.Length(); i++)
-	{
-		LDebugger::BreakPoint &bp = d->BreakPoints[i];
-		db->SetBreakPoint(&bp);
-	}
-
+	auto projects = AllProjects();
+	for (auto p: projects)
+		p->LoadBreakPoints(db);
+		
 	return true;
 }
 
 bool AppWnd::ToggleBreakpoint(const char *File, ssize_t Line)
 {
-	bool DeleteBp = false;
-
-	for (int i=0; i<d->BreakPoints.Length(); i++)
+	bool has = false;
+	LDebugger::BreakPoint bp(File, Line);
+	auto projects = AllProjects();
+	for (auto p: projects)
 	{
-		LDebugger::BreakPoint &b = d->BreakPoints[i];
-		if (!_stricmp(File, b.File) &&
-			b.Line == Line)
-		{
-			OnBreakPoint(b, false);
-			d->BreakPoints.DeleteAt(i);
-			DeleteBp = true;
+		if (has = p->HasBreakpoint(bp))
 			break;
-		}
 	}
-	
-	if (!DeleteBp)
-	{
-		LDebugger::BreakPoint &b = d->BreakPoints.New();
-		b.File = File;
-		b.Line = Line;
-		OnBreakPoint(b, true);
-	}
-	
+
+	OnBreakPoint(bp, !has);
 	return true;
 }
 
@@ -3070,11 +3033,11 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 	LString FullPath;
 	if (LIsRelativePath(File))
 	{
-		IdeProject *Proj = Src && Src->GetProject() ? Src->GetProject() : RootProject();
+		auto Proj = Src && Src->GetProject() ? Src->GetProject() : RootProject();
 		if (Proj)
 		{
-			List<IdeProject> Projs;
-			Projs.Insert(Proj);
+			LArray<IdeProject*> Projs;
+			Projs.Add(Proj);
 			Proj->CollectAllSubProjects(Projs);
 
 			for (auto p: Projs)
@@ -3176,6 +3139,21 @@ IdeProject *AppWnd::RootProject()
 	
 	return NULL;
 }
+
+LArray<IdeProject*> AppWnd::AllProjects()
+{
+	LArray<IdeProject*> projects;
+	
+	auto root = RootProject();
+	if (root)
+	{
+		projects.Add(root);
+		root->CollectAllSubProjects(projects);
+	}
+	
+	return projects;
+}
+
 
 FindSymbolSystem *AppWnd::GetFindSym()
 {
@@ -4075,12 +4053,8 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 					{
 						Dlg->Params->ProjectFiles.Length(0);
 						
-						List<IdeProject> Projects;
-						Projects.Insert(p);
-						p->GetChildProjects(Projects);
-
 						LArray<ProjectNode*> Nodes;
-						for (auto p: Projects)
+						for (auto p: p->GetAllProjects())
 							p->GetAllNodes(Nodes);
 
 						for (unsigned i=0; i<Nodes.Length(); i++)
@@ -4173,22 +4147,17 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			IdeProject *p = RootProject();
 			if (!p)
 				break;
-			List<IdeProject> Projects;
-			Projects.Insert(p);
-			p->GetChildProjects(Projects);
 
 			LArray<ProjectNode*> Nodes;
-			for (auto p: Projects)
-				p->GetAllNodes(Nodes);
+			for (auto proj: p->GetAllProjects())
+				proj->GetAllNodes(Nodes);
 
 			LAutoPtr<FindParams> Params(new FindParams);
 			Params->Type = FifSearchSolution;
 			Params->MatchWord = true;
 			Params->Text = Word;
-			for (unsigned i = 0; i < Nodes.Length(); i++)
-			{
-				Params->ProjectFiles.New() = Nodes[i]->GetFullPath();
-			}
+			for (auto n: Nodes)
+				Params->ProjectFiles.New() = n->GetFullPath();
 
 			d->Finder->Stop();
 			d->Finder->PostEvent(FindInFilesThread::M_START_SEARCH, (LMessage::Param) Params.Release());
@@ -5023,7 +4992,7 @@ int LgiMain(OsAppArguments &AppArgs)
 		// LDirTest();
 
 		// TimeZoneInfoTest();
-		
+
 		a.Run();
 	}
 

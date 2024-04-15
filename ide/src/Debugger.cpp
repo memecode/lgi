@@ -76,7 +76,6 @@ class Gdb : public LDebugger, public LThread, public Callback
 	{
 		if (SuppressNextFileLine)
 		{
-			// printf("%s:%i - SuppressNextFileLine\n", _FL);
 			SuppressNextFileLine = false;
 		}
 		else if (Events)
@@ -87,21 +86,13 @@ class Gdb : public LDebugger, public LThread, public Callback
 				CurLine = Line;
 			
 			if (CurFile && CurLine > 0)
-			{
-				// printf("%i: OnFileLine...\n", LCurrentThreadId());
 				Events->OnFileLine(CurFile, CurLine, CurrentIp);
-				// printf("%i: OnFileLine done.\n", LCurrentThreadId());
-			}
-			/*
-			else
-				printf("%s:%i - Error: Cur loc incomplete: %s %i.\n", _FL, CurFile.Get(), CurLine);
-			*/
 		}
 	}
 
 	bool ParseLocation(LString::Array &p)
 	{
-		for (int i=0; i<p.Length(); i++)
+		for (size_t i=0; i<p.Length(); i++)
 		{
 			LString::Array a = p[i].SplitDelimit(LWhiteSpace);
 			if (a.Length() > 0)
@@ -257,9 +248,16 @@ class Gdb : public LDebugger, public LThread, public Callback
 			// <line-number><line-from-src>
 			auto parts = a[0].SplitDelimit();
 			if (parts[0].IsNumeric())
+			{
 				Line = parts[0];
+			}
 			else
-				printf("%s:%i Unhandled line: '%s'\n", _FL, f.Get());
+			{
+				if (Events && f.Find("warning:") == 0)
+					Events->OnWarning(f.Strip());
+				else
+					printf("%s:%i Unhandled line: '%s'\n", _FL, f.Get());
+			}
 		}
 
 		if (!File && CurFile)
@@ -883,16 +881,16 @@ public:
 				bp.Symbol = "main";
 				if (SetBreakPoint(&bp))
 				{
-					printf("Set break point for main\n");
+					// printf("Set break point for main\n");
 					if (!Cmd(a))
 						return false;
 					SetState(true, true);
 					
-					printf("Waiting for prompt\n");
+					// printf("Waiting for prompt\n");
 					if (!WaitPrompt(_FL))
 						return false;
 
-					printf("Removing temp bp\n");
+					// printf("Removing temp bp\n");
 					RemoveBreakPoint(&bp);
 					
 					LStringPipe p;

@@ -46,4 +46,5 @@ public:
 	void OnError(int Code, const char *Str);
 	void OnCrash(int Code);
 	void Ungrab();
+	void OnWarning(LString str) override;
 };

@@ -186,13 +186,10 @@ public:
 
 			LHashTbl<StrKey<char>,bool> Flds;
 
-			List<IdeProject> Child;
-			Proj->GetChildProjects(Child);
-			Child.Add(Proj);
-
+			auto All = Proj->GetAllProjects();
 			LArray<ProjectNode*> Nodes;
 
-			for (auto p: Child)
+			for (auto p: All)
 			{
 				if (p->GetAllNodes(Nodes))
 				{

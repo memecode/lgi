@@ -1327,15 +1327,26 @@ bool IdeDoc::IsFile(const char *File)
 	return File ? d->IsFile(File) : false;
 }
 
-bool IdeDoc::AddBreakPoint(ssize_t Line, bool Add)
+bool IdeDoc::AddBreakPoint(LDebugger::BreakPoint &bp, bool Add)
 {
 	if (Add)
-		d->BreakPoints.Add(Line, true);
+		d->BreakPoints.Add(bp.Line, true);
 	else
-		d->BreakPoints.Delete(Line);
+		d->BreakPoints.Delete(bp.Line);
 	
 	if (d->Edit)
 		d->Edit->Invalidate();
+
+	if (auto proj = GetProject())
+	{
+		if (Add)
+			proj->AddBreakpoint(bp);
+		else
+			proj->DeleteBreakpoint(bp);
+		
+		// LgiTrace("%s:%i %s bp %s\n", _FL, Add?"add":"del", bp.Save().Get());
+	}
+	else LgiTrace("%s:%i no project for this doc?\n", _FL);
 
 	return true;
 }
@@ -1617,7 +1628,7 @@ void IdeDoc::SetProject(IdeProject *p)
 	
 	if (d->Project->GetApp() &&
 		d->BreakPoints.Length() == 0)
-		d->Project->GetApp()->LoadBreakPoints(this);
+		d->Project->LoadBreakPoints(this);
 }
 
 const char *IdeDoc::GetFileName()
@@ -1775,10 +1786,7 @@ int IdeDoc::OnNotify(LViewI *v, LNotification n)
 						if (p)
 						{
 							// Get all the nodes
-							List<IdeProject> All;
-							p->GetChildProjects(All);
-							All.Insert(p);
-													
+							auto All = p->GetAllProjects();
 							for (auto p: All)
 							{
 								p->GetAllNodes(d->FilePopup->Nodes);

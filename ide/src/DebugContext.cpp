@@ -1,6 +1,8 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/TextLog.h"
 #include "lgi/common/List.h"
+#include "lgi/common/PopupNotification.h"
+
 #include "LgiIde.h"
 #include "IdeProject.h"
 
@@ -735,6 +737,11 @@ void LDebugContext::OnError(int Code, const char *Str)
 void LDebugContext::OnCrash(int Code)
 {
 	d->App->PostEvent(M_ON_CRASH);
+}
+
+void LDebugContext::OnWarning(LString str)
+{
+	LPopupNotification::Message(d->App, str);
 }
 
 void LDebugContext::Ungrab()

@@ -446,8 +446,9 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 				}
 
 				double seconds = (double)(LCurrentTime() - startTs) / 1000.0;
-				LgiTrace("%s:%i M_FIND_SYM_REQUEST searched " LPrintfSizeT " symbols in %gs\n",
-					_FL, recordsSearched, seconds);
+				if (seconds > 0.1)
+					LgiTrace("%s:%i M_FIND_SYM_REQUEST searched " LPrintfSizeT " symbols in %gs\n",
+						_FL, recordsSearched, seconds);
 
 				ClassMatches.Sort(ScoreCmp);
 				Req->Results.Add(ClassMatches);
