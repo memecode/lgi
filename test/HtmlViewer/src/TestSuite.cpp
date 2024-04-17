@@ -17,6 +17,7 @@
 #include "lgi/common/EmojiFont.h"
 #include "lgi/common/Http.h"
 #include "lgi/common/Menu.h"
+#include "lgi/common/PopupNotification.h"
 #include "resdefs.h"
 
 #define HAS_LOG_VIEW			0
@@ -160,7 +161,7 @@ public:
 	{
 		if (Lock(_FL))
 		{
-			In.Add(j);
+			In.Add(j.Release());
 			Unlock();
 		}
 	}
@@ -254,12 +255,15 @@ public:
 	}
 };
 
-class AppWnd : public LWindow, public LDefaultDocumentEnv
+class AppWnd :
+	public LWindow,
+	public LDefaultDocumentEnv,
+	public LCapabilityTarget
 {
-	LList *Lst;
-    HtmlScriptContext *Html;
-    LTextView3 *Text;
-	char Base[256];
+	LList *Lst = NULL;
+    HtmlScriptContext *Html = NULL;
+    LTextView3 *Text = NULL;
+	char Base[256] = "";
 	LAutoPtr<LScriptEngine> Script;
 	LAutoPtr<HtmlImageLoader> Worker;
 	LAutoPtr<LEmojiFont> Emoji;
@@ -305,14 +309,24 @@ class AppWnd : public LWindow, public LDefaultDocumentEnv
 		#endif
 	}
 
+	bool NeedsCapability(const char *Name, const char *Param) override
+	{
+		RunCallback([this, Name=LString::Fmt("Needs capability '%s'", Name)]()
+		{
+			LPopupNotification::Message(this, Name);
+		});
+		return true;
+	}
+	
+	void OnInstall(CapsHash *Caps, bool Status) override { }
+	void OnCloseInstaller() override { }
+
 public:
 	AppWnd()
 	{
-		Html = 0;
-		Lst = 0;
-		Text = NULL;
-		Base[0] = 0;
 		Emoji.Reset(new LEmojiFont());
+
+		LFontSystem::Inst()->Register(this);
 		
 		Name("Html Test Suite");
 		SetQuitOnClose(true);
@@ -375,6 +389,7 @@ public:
 					if (stristr(Base, "Release") || stristr(Base, "Debug"))
 						LTrimDir(Base);
 					#endif
+					LTrimDir(Base);
 					#if defined(MAC) && defined(__GTK_H__)
 					LMakePath(Base, sizeof(Base), Base, "../../../..");
 					#endif
@@ -436,78 +451,122 @@ public:
 	{
 	}
 	
+	struct SaveImagesState :
+		public LProgressDlg,
+		public LThread
+	{
+		AppWnd *App = NULL;
+		LArray<char*> Files;
+		LString OutPath;
+		LPoint PageSize = LPoint(1000, 2000);
+
+	public:
+		SaveImagesState(AppWnd *app) :
+			LProgressDlg(app),
+			LThread("SaveImagesState", AddDispatch()),
+			App(app)
+		{
+			SetDescription("Scanning for HTML...");
+			
+			char p[MAX_PATH_LEN];
+			LGetSystemPath(LSP_APP_INSTALL, p, sizeof(p));
+			LTrimDir(p);
+
+			Visible(true);
+			DeleteOnExit = true;
+
+			LArray<const char*> Ext;
+			Ext.Add("*.html");
+			Ext.Add("*.htm");				
+			if (LRecursiveFileSearch(p, &Ext, &Files))
+			{
+				LDateTime Now;
+				Now.SetNow();
+				char NowStr[32];
+				sprintf_s(	NowStr, sizeof(NowStr),
+							"%.4i-%.2i-%.2i_%.2i-%.2i-%.2i",
+							Now.Year(), Now.Month(), Now.Day(),
+							Now.Hours(), Now.Minutes(), Now.Seconds());
+				LFile::Path path(p, "Output");
+				if (!path.Exists())
+					FileDev->CreateFolder(path);
+				path += NowStr;
+				if (!path.Exists())
+					FileDev->CreateFolder(path);
+				OutPath = path.GetFull();
+					
+				SetDescription("Saving renders...");
+				SetRange(Files.Length());
+			}
+
+			Run();
+		}
+
+		~SaveImagesState()
+		{
+			Cancel();
+			WaitForExit();
+			Files.DeleteArrays();
+		}
+
+		int Main()
+		{
+			for (auto file: Files)
+			{
+				LString Content;
+				char Png[MAX_PATH_LEN] = "", p[MAX_PATH_LEN] = "";
+
+				if (IsCancelled())
+					break;
+
+				Content = LReadFile(file);
+				if (!Content)
+				{
+					LAssert(0);
+					break;
+				}
+
+				auto Leaf = strrchr(file, DIR_CHAR);
+				if (!Leaf)
+				{
+					LAssert(0);
+					break;
+				}
+			
+				Leaf++;
+				strcpy_s(Png, sizeof(Png), Leaf);
+				char *Ext = strrchr(Png, '.');
+				if (Ext) *Ext = 0;
+				strcat_s(Png, sizeof(Png), ".png");
+				LMakePath(p, sizeof(p), OutPath, Png);
+
+				Html1::LHtml Html(100, 0, 0, PageSize.x, PageSize.y, App);
+				Html.Name(Content);
+
+				LMemDC Screen(PageSize.x, PageSize.y, System24BitColourSpace);
+				Screen.Colour(LColour(255, 255, 255));
+				Screen.Rectangle();
+				Html.OnPaint(&Screen);
+				if (!GdcD->Save(p, &Screen))
+				{
+					LAssert(0);
+					break;
+				}
+
+				(*this)++;
+			}
+						
+			return 0;
+		}
+	};
+
 	int OnCommand(int Cmd, int Event, OsView Wnd)
 	{
 		switch (Cmd)
 		{
 			case IDM_SAVE_IMGS:
 			{
-				LPoint PageSize(1000, 2000);
-				
-				LProgressDlg Prog(this, true);
-				Prog.SetDescription("Scanning for HTML...");
-				
-				char p[MAX_PATH_LEN];
-				LGetSystemPath(LSP_APP_INSTALL, p, sizeof(p));
-				LArray<const char*> Ext;
-				LArray<char*> Files;
-				Ext.Add("*.html");
-				Ext.Add("*.htm");				
-				if (LRecursiveFileSearch(p, &Ext, &Files))
-				{
-					LDateTime Now;
-					Now.SetNow();
-					char OutPath[MAX_PATH_LEN], NowStr[32];
-					sprintf_s(	NowStr, sizeof(NowStr),
-								"%.4i-%.2i-%.2i_%.2i-%.2i-%.2i",
-								Now.Year(), Now.Month(), Now.Day(),
-								Now.Hours(), Now.Minutes(), Now.Seconds());
-					LMakePath(OutPath, sizeof(OutPath), p, "Output");
-					if (!LDirExists(OutPath))
-						FileDev->CreateFolder(OutPath);
-					LMakePath(OutPath, sizeof(OutPath), OutPath, NowStr);
-					if (!LDirExists(OutPath))
-						FileDev->CreateFolder(OutPath);
-					
-					Prog.SetDescription("Saving renders...");
-					Prog.SetRange(Files.Length());
-					for (int i=0; i<Files.Length() && !Prog.IsCancelled(); i++)
-					{
-						char *File = Files[i];
-						auto Content = LReadFile(File);
-						if (!Content)
-						{
-							LAssert(0);
-							continue;
-						}
-
-						char *Leaf = strrchr(File, DIR_CHAR);
-						if (!Leaf)
-						{
-							LAssert(0);
-							continue;
-						}
-						Leaf++;
-						char Png[256];
-						strcpy_s(Png, sizeof(Png), Leaf);
-						char *Ext = strrchr(Png, '.');
-						if (Ext) *Ext = 0;
-						strcat_s(Png, sizeof(Png), ".png");
-						LMakePath(p, sizeof(p), OutPath, Png);
-
-						Html1::LHtml Html(100, 0, 0, PageSize.x, PageSize.y, this);
-						Html.Name(Content);
-						LMemDC Screen(PageSize.x, PageSize.y, System24BitColourSpace);
-						Screen.Colour(LColour(255, 255, 255));
-						Screen.Rectangle();
-						Html.OnPaint(&Screen);
-						if (!GdcD->Save(p, &Screen))
-							LAssert(0);
-						
-						Prog.Value(i);
-					}
-					Files.DeleteArrays();
-				}
+				new SaveImagesState(this);
 				break;
 			}
 			case IDM_COMPARE_IMAGES:

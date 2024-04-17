@@ -291,7 +291,10 @@ char *LHtmlParser::ParseName(char *s, LAutoString &Name)
 	else
 	{
 		char* Start = s;
-		auto Inc = "!-:"; // I'm removing these \"\' because they really aren't appropriate for a name string...
+		auto Inc = "!-"; // I'm removing these \"\' because they really aren't appropriate for a name string...
+						 // Also removing ':' because if the CSS leaks into the HTML parsing we should detect that
+						 // and stop parsing the name. e.g.:
+						 //		<td style="width:90%" border-collapse: collapse;">
 		while (*s && (IsAlpha(*s) || strchr(Inc, *s) || IsDigit(*s)))
 			s++;
 
@@ -319,7 +322,7 @@ char *LHtmlParser::ParsePropList(char *s, LHtmlElement *Obj, bool &Closed)
 			break;
 
 		// get name
-		char *Name = 0;
+		char *Name = NULL;
 		char *n = ParseName(s, &Name);
 		if (!n || !*n)
 			break;
@@ -332,7 +335,14 @@ char *LHtmlParser::ParsePropList(char *s, LHtmlElement *Obj, bool &Closed)
 		while (*s && IsWhite(*s))
 			s++;
 
-		if (*s == '=')
+		if (*s == ':')
+		{
+			// This happens when CSS leaks into the HTML, e.g.:
+			//	<td style="width:90%" border-collapse: collapse;">
+			while (*s && *s != '/' && *s != '>')
+				s++;
+		}
+		else if (*s == '=')
 		{
 			// get value
 			s++;

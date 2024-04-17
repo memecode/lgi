@@ -152,7 +152,7 @@ void NewProjectFromTemplate(LViewI *parent)
 		#ifdef MAC
 		"../../../../"
 		#endif
-		"../templates";
+		"../../templates";
 	if (!p.Exists())
 	{
 		LgiMsg(parent, "The path '%s' doesn't exist.", AppName, MB_OK, p.GetFull().Get());
