@@ -10,8 +10,10 @@ template<typename TView>
 class LThreadSafeTextView : public TView, public LStream
 {
 protected:
-	bool ProcessReturns;
-	size_t Pos;
+	// This strips out '\r' characters in the input.
+	// And also removes previous input when receiving '\b' backspace chars.
+	bool ProcessInput = true;
+	size_t Pos = 0;
 	
 	LMutex Sem;
 	LArray<char16> Txt;
@@ -48,8 +50,6 @@ protected:
 public:
 	LThreadSafeTextView(int id) : TView(id, 0, 0, 2000, 1000), Sem("LThreadSafeTextView")
 	{
-		ProcessReturns = true;
-		Pos = 0;
 		TView::Sunken(true);
 		TView::SetPourLargest(true);
 		TView::SetUndoOn(false);
@@ -76,8 +76,6 @@ public:
 		if (SizeLimit > 0 &&
 			TView::Length() >= SizeLimit)
 			TView::Name("");
-		
-		// LgiTrace("Size=%s\n", LFormatSize(TView::Length()).Get());
 	}
 
 	virtual void Add(char16 *w, ssize_t chars = -1)
@@ -85,9 +83,9 @@ public:
 		ssize_t Len = chars >= 0 ? chars : StrlenW(w);
 		bool AtEnd = TView::GetCaret() == TView::Size;
 		
-		if (ProcessReturns)
+		if (ProcessInput)
 		{
-			auto *s = w, *prev = w;
+			auto *s = w, *prev = w, *end = w + Len;
 			
 			auto Ins = [this](char16 *s, ssize_t len)
 			{
@@ -101,12 +99,21 @@ public:
 				}
 			};			
 			
-			for (s = w;
-				chars >= 0 ? s < w + chars : *s;
-				s++)
+			for (; s < end; s++)
 			{
-				if (*s == '\r')
+				if (*s == '\b')
 				{
+					// Remove previous character
+					if (Pos > 0)
+					{
+						Ins(prev, s - prev);
+						Pos--;
+						prev = s + 1;
+					}
+				}
+				else if (*s == '\r')
+				{
+					// Insert processed text
 					Ins(prev, s - prev);
 					prev = s + 1;
 					while (Pos > 0 && TView::Text[Pos-1] != '\n')
@@ -117,6 +124,7 @@ public:
 					Pos = TView::Size;
 				}
 			}
+			
 			Ins(prev, s - prev);
 		}
 		else
