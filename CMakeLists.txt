@@ -152,6 +152,7 @@ set (CommonSource
 	src/common/General/Containers.cpp
 	include/lgi/common/DateTime.h
 	src/common/General/DateTime.cpp
+	src/common/General/TimeZone.cpp
 	src/common/General/ExeCheck.cpp
 	include/lgi/common/File.h
 	src/common/General/FileCommon.cpp
@@ -421,6 +422,7 @@ add_library(lgi-stub STATIC
     src/common/Gdc2/Font/Charset.cpp
     src/common/General/Containers.cpp
     src/common/General/DateTime.cpp
+	src/common/General/TimeZone.cpp
     src/common/General/FileCommon.cpp
     src/common/Lgi/Library.cpp
     src/common/Lgi/LgiCommon.cpp

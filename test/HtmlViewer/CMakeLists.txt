@@ -18,7 +18,7 @@ endif()
 
 add_executable(HtmlTest ${APP_TYPE}
 
-    TestSuite.cpp
+    src/TestSuite.cpp
     ${LGI_DIR}/src/common/Coding/LexCpp.cpp
     ${LGI_DIR}/src/common/Coding/ScriptCompiler.cpp
     ${LGI_DIR}/src/common/Coding/ScriptLibrary.cpp

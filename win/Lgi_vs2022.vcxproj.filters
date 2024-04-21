@@ -410,9 +410,6 @@
     <ClCompile Include="..\src\common\Gdc2\Font\StringLayout.cpp">
       <Filter>Source Files\Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Lgi\SubProcess.cpp">
-      <Filter>Source Files\Core\Process</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\common\Gdc2\Surface.cpp">
       <Filter>Source Files\Graphics\Surfaces</Filter>
     </ClCompile>
@@ -493,6 +490,12 @@
     </ClCompile>
     <ClCompile Include="..\src\common\Net\Uri.cpp">
       <Filter>Source Files\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\win\Lgi\SubProcess.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\General\TimeZone.cpp">
+      <Filter>Source Files\Core\DateTime</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

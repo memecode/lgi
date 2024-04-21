@@ -45,7 +45,7 @@ typedef ZoomTile *SuperTilePtr;
 
 class LZoomViewPriv
 {
-	int Zoom;
+	int Zoom = 0;
 	LAutoPtr<LMemDC> TileCache;
 
 public:
@@ -56,13 +56,13 @@ public:
 	bool ScrollBarsDirty = false;
 	
 	/// The image surface we are displaying
-	LSurface *pDC;
+	LSurface *pDC = NULL;
 
 	/// The parent view that owns us
-	LZoomView *View;
+	LZoomView *View = NULL;
 	
 	/// The callback object...
-	LZoomViewCallback *Callback;
+	LZoomViewCallback *Callback = NULL;
 
 	/// This is the zoom factor. However:
 	///     -3 = 1/4 (scale down)
@@ -79,19 +79,19 @@ public:
 	int TotalTiles;
 	
 	/// Width and height of the tile...
-	int TileSize;
+	int TileSize = 128;
 	
 	/// Size of image in tiles
 	LPoint Tiles;
 	
 	/// The array of tiles. Unused entries will be NULL.
-	ZoomTile ***Tile;
+	ZoomTile ***Tile = NULL;
 
 	// Type of sampling to use
-	LZoomView::SampleMode SampleMode;
+	LZoomView::SampleMode SampleMode = LZoomView::SampleNearest;
 	
 	// Default zooming behaviour
-	LZoomView::DefaultZoomMode DefaultZoom;
+	LZoomView::DefaultZoomMode DefaultZoom = LZoomView::ZoomFitBothAxis;
 
 	// Threading stuff
 	enum WorkerMode
@@ -101,24 +101,12 @@ public:
 		Active,
 		Stopping,
 		Stopped,
-	}	Mode;
+	}	Mode = Waiting;
 
 	LZoomViewPriv(LZoomView *view, LZoomViewCallback *callback)
 	{
 		View = view;
 		Callback = callback;
-		Mode = Waiting;
-		Zoom = 0;
-		TileSize = 128;
-		
-		Tiles.x = Tiles.y = 0;
-		Tile = NULL;
-		
-		OwnDC = false;
-		pDC = NULL;
-		
-		SampleMode = LZoomView::SampleNearest;
-		DefaultZoom = LZoomView::ZoomFitBothAxis;
 	}
 	
 	~LZoomViewPriv()
@@ -1167,7 +1155,6 @@ public:
 LZoomView::LZoomView(LZoomViewCallback *callback) : ResObject(Res_Custom)
 {
 	d = new LZoomViewPriv(this, callback);
-	// Sunken(true);
 }
 
 LZoomView::~LZoomView()
@@ -1379,6 +1366,26 @@ void LZoomView::ScrollToPoint(LPoint DocCoord)
 		else if (DocCoord.y > y2)
 			VScroll->Value(MIN(DocCoord.y-Page+1, MaxVal));
 	}
+}
+
+LPoint LZoomView::DocToScreen(LPoint p)
+{
+	return d->DocToScreen(p);
+}
+
+LPoint LZoomView::ScreenToDoc(LPoint p)
+{
+	return d->ScreenToDoc(p);
+}
+
+LRect LZoomView::DocToScreen(LRect s)
+{
+	return d->DocToScreen(s);
+}
+
+LRect LZoomView::ScreenToDoc(LRect s)
+{
+	return d->ScreenToDoc(s);
 }
 
 void LZoomView::SetSampleMode(SampleMode sm)

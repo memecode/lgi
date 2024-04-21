@@ -18,11 +18,11 @@ public:
 private:
 	LString File;
 	LString Error;
-	bool Dirty;
-	PortableType Mode;
+	bool Dirty = false;
+	PortableType Mode = UnknownMode;
 	
-	char *LockFile;
-	int LockLine;
+	char *LockFile = NULL;
+	int LockLine = 0;
 
 	void _Init();
 	bool _OnAccess(bool Start);

@@ -6,9 +6,6 @@
 
 void LOptionsFile::_Init()
 {
-	Dirty = false;
-	LockFile = NULL;
-	LockLine = -1;
 	Tag = Allocator->Alloc(OptOptions);
 	
 	if (Lock(_FL))

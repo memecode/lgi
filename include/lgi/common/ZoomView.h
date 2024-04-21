@@ -93,6 +93,12 @@ public:
 	DefaultZoomMode GetDefaultZoomMode();
 	void ScrollToPoint(LPoint DocCoord);
 
+	// Coordinate conversion
+	LPoint DocToScreen(LPoint p);
+	LPoint ScreenToDoc(LPoint p);
+	LRect DocToScreen(LRect s);
+	LRect ScreenToDoc(LRect s);
+
 	// Subclass
 	void SetSurface(LSurface *dc, bool own);
 	LSurface *GetSurface();
