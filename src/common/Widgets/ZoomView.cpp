@@ -1368,24 +1368,36 @@ void LZoomView::ScrollToPoint(LPoint DocCoord)
 	}
 }
 
+/* Doc to screen: subtract scrolling BEFORE conversion */
 LPoint LZoomView::DocToScreen(LPoint p)
 {
+    auto scroll = GetScrollPos();
+	LPoint r(p.x - scroll.x, p.y - scroll.y);
 	return d->DocToScreen(p);
-}
-
-LPoint LZoomView::ScreenToDoc(LPoint p)
-{
-	return d->ScreenToDoc(p);
 }
 
 LRect LZoomView::DocToScreen(LRect s)
 {
-	return d->DocToScreen(s);
+    auto scroll = GetScrollPos();	
+	auto r = s;
+	r.Offset(-scroll.x, -scroll.y);
+	return d->DocToScreen(r);
+}
+
+/* Screen to doc: add scrolling AFTER conversion */
+LPoint LZoomView::ScreenToDoc(LPoint p)
+{
+    auto scroll = GetScrollPos();
+	auto r = d->ScreenToDoc(p);
+	return r + scroll;
 }
 
 LRect LZoomView::ScreenToDoc(LRect s)
 {
-	return d->ScreenToDoc(s);
+    auto scroll = GetScrollPos();
+	auto r = d->ScreenToDoc(s);
+	r += scroll;
+	return r;
 }
 
 void LZoomView::SetSampleMode(SampleMode sm)
