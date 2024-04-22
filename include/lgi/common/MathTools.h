@@ -109,13 +109,45 @@ LAutoPtr<LSurface> LGraph(LArray<T> &data, LColour col = LColour::Blue)
 }
 
 template<typename T>
-T LMaxOf(LArray<T> &a)
+T LMax(LArray<T> &a)
 {
 	T max = 0;
 	for (auto i: a)
 		if (i > max)
 			max = i;
 	return max;
+}
+
+template<typename T>
+T LMin(LArray<T> &a)
+{
+	if (a.Length() == 0)
+		return 0;
+	T min = a[0];
+	for (size_t i=1; i<a.Length(); i++)
+		if (a[i] < min)
+			min = a[i];
+	return min;
+}
+
+template<typename T>
+T LMedian(LArray<T> &a)
+{
+	a.Sort();
+	return a[a.Length()>>1];
+}
+
+template<typename T>
+T LAverage(LArray<T> &a)
+{
+	if (a.Length() == 0)
+		return 0;
+
+	T sum = 0;
+	for (auto i: a)
+		sum += i;
+
+	return (T) (sum / a.Length());
 }
 
 template<typename T>
