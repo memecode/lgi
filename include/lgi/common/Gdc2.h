@@ -1465,6 +1465,15 @@ LgiFunc bool LFindBounds
 	LRect *rc
 );
 
+/// Convert a pixel to grey scale
+template<typename Px>
+uint8_t LGreyScale(Px *px)
+{
+    auto g = 77 * (int)px->r + 151 * (int)px->g + 28 * (int)px->b;
+    LAssert(g < 0x10000);
+    return g >> 8;
+}
+
 #if defined(LGI_SDL)
 LgiFunc LColourSpace PixelFormat2ColourSpace(SDL_PixelFormat *pf);
 #endif
