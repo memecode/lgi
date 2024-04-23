@@ -605,6 +605,15 @@ public:
 
 		LArray<IdeProject*> Deps;
 		Proj->GetChildProjects(Deps);
+		for (auto d: Deps)
+		{
+			printf("Dep is: %p\n", d);
+			if (!d)
+			{
+				LAssert(!"Dep is NULL!");
+				return -1;
+			}
+		}
 
 		for (int Cfg = BuildDebug; Cfg < BuildMax; Cfg++)
 		{
@@ -688,6 +697,9 @@ public:
 
 			for (auto dep: Deps)
 			{
+				printf("Dep2 is: %p\n", d);
+				if (!dep)
+					continue;
 				LString Target = dep->GetTargetName(Platform);
 				if (Target)
 				{
@@ -1049,6 +1061,11 @@ public:
 							PlatformExecutableExt(Platform));					
 					for (auto Dep: Deps)
 					{
+						if (!Dep)
+						{
+							Log->Print("%s:%i - NULL dep?\n", _FL);
+							continue;
+						}
 						auto Mk = Dep->GetMakefile(Platform);
 						if (Mk)
 						{

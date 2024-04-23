@@ -1119,35 +1119,35 @@ void LTabView::OnPaint(LSurface *pDC)
 void LTabView::OnPosChange()
 {
 	GetTabClient();
-	if (Children.Length())
-	{
-		TabIterator it(Children);
-		LTabPage *p = it[d->Current];
-		if (p)
-		{
-			p->SetPos(d->TabClient, true);
-			if (d->PourChildren)
-			{
-				LRect r = d->TabClient;
-				r.Offset(-r.x1, -r.y1);
-				LRegion Rgn(r);
+	if (!Children.Length())
+		return;
 
-				for (LViewI *c: p->IterateViews())
-					c->Pour(Rgn);
-			}
-			else
+	TabIterator it(Children);
+	auto p = it[d->Current];
+	if (!p)
+		return;
+
+	p->SetPos(d->TabClient, true);
+	if (d->PourChildren)
+	{
+		LRect r = d->TabClient;
+		r.Offset(-r.x1, -r.y1);
+		LRegion Rgn(r);
+
+		for (LViewI *c: p->IterateViews())
+			c->Pour(Rgn);
+	}
+	else
+	{
+		auto It = p->IterateViews();
+		if (It.Length() == 1)
+		{
+			LTableLayout *tl = dynamic_cast<LTableLayout*>(It[0]);
+			if (tl)
 			{
-				auto It = p->IterateViews();
-				if (It.Length() == 1)
-				{
-					LTableLayout *tl = dynamic_cast<LTableLayout*>(It[0]);
-					if (tl)
-					{
-						LRect r = p->GetClient();
-						r.Inset(LTableLayout::CellSpacing, LTableLayout::CellSpacing);
-						tl->SetPos(r);
-					}
-				}
+				LRect r = p->GetClient();
+				r.Inset(LTableLayout::CellSpacing, LTableLayout::CellSpacing);
+				tl->SetPos(r);
 			}
 		}
 	}
@@ -1415,26 +1415,29 @@ LMessage::Result LTabPage::OnEvent(LMessage *Msg)
 
 void LTabPage::Append(LViewI *Wnd)
 {
-	if (Wnd)
+	if (!Wnd)
 	{
-		Wnd->SetNotify(TabCtrl);
-
-		if (IsAttached() && TabCtrl)
-		{
-			Wnd->Attach(this);
-
-			LTabView *v = dynamic_cast<LTabView*>(GetParent());
-			if (v && v->GetPourChildren())
-			{
-				v->OnPosChange();
-			}
-		}
-		else if (!HasView(Wnd))
-		{
-			AddView(Wnd);
-		}
-		else LAssert(0);
+		LgiTrace("%s:%i - no wnd.\n", _FL);
+		return;
 	}
+
+	Wnd->SetNotify(TabCtrl);
+
+	if (IsAttached() && TabCtrl)
+	{
+		Wnd->Attach(this);
+
+		auto v = dynamic_cast<LTabView*>(GetParent());
+		if (v && v->GetPourChildren())
+		{
+			v->OnPosChange();
+		}
+	}
+	else if (!HasView(Wnd))
+	{
+		AddView(Wnd);
+	}
+	else LAssert(0);
 }
 
 bool LTabPage::Remove(LViewI *Wnd)

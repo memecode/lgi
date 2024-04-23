@@ -15,7 +15,7 @@ endif
 MakeDir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 BuildDir = $(Build)
 
-CFlags = -MMD -MP -g -fPIC -fno-inline
+CFlags = -MMD -MP -fPIC -fno-inline
 CppFlags = $(CFlags) -fpermissive -std=c++14
 
 ifeq ($(Build),Debug)
@@ -29,13 +29,13 @@ ifeq ($(Build),Debug)
 		-llgi-gtk3$(Tag) \
 		-L../../$(BuildDir)
 	Inc =  \
+		-I./resources \
 		`pkg-config --cflags gtk+-3.0` \
 		-I../../../../../../../usr/include/gstreamer-1.0 \
 		-I../../private/common \
 		-I../../include/lgi/linux/Gtk \
 		-I../../include/lgi/linux \
-		-I../../include \
-		-I../../../../../codelib/openssl/include
+		-I../../include
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
@@ -46,17 +46,17 @@ else
 		-llgi-gtk3$(Tag) \
 		-L../../$(BuildDir)
 	Inc =  \
+		-I./resources \
 		`pkg-config --cflags gtk+-3.0` \
 		-I../../../../../../../usr/include/gstreamer-1.0 \
 		-I../../private/common \
 		-I../../include/lgi/linux/Gtk \
 		-I../../include/lgi/linux \
-		-I../../include \
-		-I../../../../../codelib/openssl/include
+		-I../../include
 endif
 
 # Dependencies
-Source =	TestSuite.cpp \
+Source =	src/TestSuite.cpp \
 			../../src/common/Widgets/ZoomView.cpp \
 			../../src/common/Text/HtmlParser.cpp \
 			../../src/common/Text/HtmlCommon.cpp \
@@ -209,6 +209,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/SkinEngine.h \
 	../../include/lgi/common/Slider.h \
 	../../include/lgi/common/Splitter.h \
+	../../include/lgi/common/Stat.h \
 	../../include/lgi/common/StatusBar.h \
 	../../include/lgi/common/Store3Defs.h \
 	../../include/lgi/common/Stream.h \
@@ -219,12 +220,14 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/SubProcess.h \
 	../../include/lgi/common/TableLayout.h \
 	../../include/lgi/common/TabView.h \
+	../../include/lgi/common/TextConvert.h \
 	../../include/lgi/common/TextFile.h \
 	../../include/lgi/common/TextLabel.h \
 	../../include/lgi/common/TextLog.h \
 	../../include/lgi/common/TextView3.h \
 	../../include/lgi/common/Thread.h \
 	../../include/lgi/common/ThreadEvent.h \
+	../../include/lgi/common/TimeZoneInfo.h \
 	../../include/lgi/common/Token.h \
 	../../include/lgi/common/ToolBar.h \
 	../../include/lgi/common/ToolTip.h \
@@ -283,6 +286,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/common/General/FileCommon.cpp \
 	../../src/common/General/Password.cpp \
 	../../src/common/General/Properties.cpp \
+	../../src/common/General/TimeZone.cpp \
 	../../src/common/Hash/md5/md5.c \
 	../../src/common/Hash/md5/md5.h \
 	../../src/common/Hash/sha1/sha1.c \
@@ -326,6 +330,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/common/Skins/Gel/Gel.cpp \
 	../../src/common/Text/DocView.cpp \
 	../../src/common/Text/String.cpp \
+	../../src/common/Text/TextConvert.cpp \
 	../../src/common/Text/TextView3.cpp \
 	../../src/common/Text/Token.cpp \
 	../../src/common/Text/Unicode.cpp \
@@ -363,6 +368,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/linux/Gtk/ScreenDC.cpp \
 	../../src/linux/Lgi/App.cpp \
 	../../src/linux/Lgi/ClipBoard.cpp \
+	../../src/linux/Lgi/Dialog.cpp \
 	../../src/linux/Lgi/DragAndDrop.cpp \
 	../../src/linux/Lgi/General.cpp \
 	../../src/linux/Lgi/Layout.cpp \
@@ -370,9 +376,9 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/linux/Lgi/Printer.cpp \
 	../../src/linux/Lgi/Thread.cpp \
 	../../src/linux/Lgi/View.cpp \
-	../../src/linux/Lgi/Dialog.cpp \
 	../../src/linux/Lgi/Window.cpp \
-	../../src/posix/SubProcess.cpp
+	../../src/posix/SubProcess.cpp \
+	../../../../../../../usr/include/libayatana-appindicator3-0.1/libayatana-appindicator/app-indicator.h
 	export Build=$(Build); \
 	$(MAKE) -C ../../ -f ./linux/Makefile.linux
 
@@ -390,7 +396,7 @@ cleanall :
 	+make -C "../../" -f ./linux/Makefile.linux clean
 
 VPATH=$(BuildDir) \
-	./ \
+	./src \
 	../../src/common/Widgets \
 	../../src/common/Text/Homoglyphs \
 	../../src/common/Text/Emoji \

@@ -27,10 +27,10 @@
 		<Node File="../../src/common/Widgets/ZoomView.cpp" Type="2" Platforms="15" />
 	</Node>
 	<Node Name="Resources" Type="1" Platforms="15" Id="1">
-		<Node File="./HtmlTestSuite.lr8" Type="5" Platforms="15" />
+		<Node File="./resources/HtmlTestSuite.lr8" Type="5" Platforms="15" />
 	</Node>
 	<Node Name="Source" Type="1" Open="1" Platforms="7" Id="1">
-		<Node File="./TestSuite.cpp" Type="2" Platforms="7" />
+		<Node File="./src/TestSuite.cpp" Type="2" Platforms="7" />
 	</Node>
 	<Node Name="Tests" Type="1" Platforms="15" Id="1" />
 	<Node File="../../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
@@ -38,9 +38,11 @@
 		<Build>
 			<IncludePaths>
 				<All>
-					<Debug>../../include
+					<Debug>resources
+../../include
 ../../private/common</Debug>
-					<Release>../../include
+					<Release>resources
+../../include
 ../../private/common</Release>
 				</All>
 				<Linux>
@@ -74,7 +76,6 @@
 					<Release>-static-libgcc 
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
-				<All />
 			</Libraries>
 			<TargetName>
 				<Linux>
@@ -82,15 +83,9 @@
 					<Release>lgi-html-test-suite</Release>
 				</Linux>
 			</TargetName>
-			<Defines>
-				<All />
-				<Linux />
-			</Defines>
-			<LibraryPaths>
-				<All />
-				<Linux />
-			</LibraryPaths>
-			<ApplicationIcon />
+			<Defines />
+			<LibraryPaths />
+			<Options />
 		</Build>
 		<General>
 			<Makefile>
@@ -103,35 +98,14 @@
 					<Release>./HtmlTestSuite</Release>
 				</Linux>
 			</Executable>
-			<Compiler />
-			<CCrossCompiler />
-			<CppCrossCompiler />
 		</General>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
+		<Remote />
 		<Debug>
-			<Environment />
-			<Arguments>
-				<All />
-			</Arguments>
-			<DebugAdmin />
-			<InitialDir />
+			<Arguments />
 		</Debug>
-		<Editor>
-			<TabSize />
-			<IndentSize />
-			<ShowWhiteSpace />
-			<UseHardTabs />
-			<CommentFile />
-			<CommentFunction />
-		</Editor>
+		<Editor />
 		<Advanced>
-			<OtherMakefileRules />
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
+			<PostBuildCommands />
 		</Advanced>
 	</Settings>
 </Project>

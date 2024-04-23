@@ -96,7 +96,7 @@ class LgiClass LTabPage :
 	bool Attach(LViewI *parent) override;
 
 	// Vars
-	LTabView *TabCtrl;
+	LTabView *TabCtrl = NULL;
 	
 	// Position of the clickable UI element for selecting the tab.
 	LRect TabPos;
