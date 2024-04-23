@@ -141,6 +141,7 @@ set (CommonSource
 	include/lgi/common/Colour.h
 	src/common/Gdc2/Colour.cpp
 	include/lgi/common/Gdc2.h
+	include/lgi/common/Palette.h
 	include/lgi/common/MathTools.h
 	src/common/Gdc2/GdcCommon.cpp
 	include/lgi/common/Rect.h

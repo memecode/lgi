@@ -13,6 +13,10 @@
 #include "lgi/common/Gdc2.h"
 #include "lgi/common/Palette.h"
 
+#define LookupIdx5bit(r, g, b)		( ((int)(r)<<10) | ((int)(g)<<5) | (b) )
+#define LookupIdx6bit(r, g, b)		( ((int)(r)<<13) | ((int)(g)<<7) | ((b)<<1) )
+#define Lookup8to6bit(r8, g8, b8)	( (((r8)>>2&0x3f)<<12) | (((g8)>>2&0x3f)<<6) | ((b8)>>2&0x3f) )
+
 /// 8 bit paletted applicators
 class LgiClass GdcApp8 : public LApplicator
 {
@@ -295,7 +299,7 @@ uchar Mul6[6] = {0, 6, 12, 18, 24, 30};
 uchar Mul36[6] = {0, 36, 72, 108, 144, 180};
 
 template<typename OutPx, typename InPx>
-void GConvertIndexed(OutPx *out, InPx *in, int len, LColourSpace inCs, LPalette *pal)
+void LConvertIndexed(OutPx *out, InPx *in, int len, LColourSpace inCs, LPalette *pal)
 {
 	switch (inCs)
 	{
@@ -336,7 +340,7 @@ void GConvertIndexed(OutPx *out, InPx *in, int len, LColourSpace inCs, LPalette 
 }
 
 template<typename OutPx, typename InPx>
-void GConvertRgb24(OutPx *out, InPx *in, int len, LColourSpace inCs, LPalette *pal)
+void LConvertRgb24(OutPx *out, InPx *in, int len, LColourSpace inCs, LPalette *pal)
 {
 	switch (inCs)
 	{
@@ -394,11 +398,11 @@ void Convert(System24BitPixel *Dst, LBmpMem *Src, int Line, LPalette *SPal)
 	{
 		#define ConvertCase(type) \
 			case Cs##type: \
-				GConvertRgb24<System24BitPixel, L##type>(Dst, (L##type*) In, Src->x, Src->Cs, NULL); \
+				LConvertRgb24<System24BitPixel, L##type>(Dst, (L##type*) In, Src->x, Src->Cs, NULL); \
 				break
 		
 		case CsIndex8:
-			GConvertIndexed<System24BitPixel, uint8_t>(Dst, In, Src->x, Src->Cs, SPal);
+			LConvertIndexed<System24BitPixel, uint8_t>(Dst, In, Src->x, Src->Cs, SPal);
 			break;
 		ConvertCase(Rgb15);
 		ConvertCase(Bgr15);
@@ -422,7 +426,7 @@ void BltNearest16(uchar *Lookup, uint8_t *out, Pixel *p, int x)
 	REG Pixel *src = p, *e = src + x;
 	while (src < e)
 	{
-		*out++ = Lookup[Rgb15(src->r<<3, src->g<<2, src->b<<3)];
+		*out++ = Lookup[Lookup8to6bit(src->r<<3, src->g<<2, src->b<<3)];
 		src++;
 	}
 }
@@ -433,7 +437,7 @@ void BltNearest24(uchar *Lookup, uint8_t *out, Pixel *p, int x)
 	REG Pixel *src = p, *e = src + x;
 	while (src < e)
 	{
-		*out++ = Lookup[Rgb15(src->r, src->g, src->b)];
+		*out++ = Lookup[Lookup8to6bit(src->r, src->g, src->b)];
 		src++;
 	}
 }
@@ -444,12 +448,10 @@ void BltNearest48(uchar *Lookup, uint8_t *out, Pixel *p, int x)
 	REG Pixel *src = p, *e = src + x;
 	while (src < e)
 	{
-		*out++ = Lookup[Rgb15(src->r >> 8, src->g >> 8, src->b >> 8)];
+		*out++ = Lookup[Lookup8to6bit(src->r >> 8, src->g >> 8, src->b >> 8)];
 		src++;
 	}
 }
-
-#define LookupIdx5bit(r, g, b) ( ((int)(r)<<10) | ((int)(g)<<5) | (b) )
 
 bool GdcApp8Set::Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha)
 {
@@ -460,14 +462,43 @@ bool GdcApp8Set::Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha)
 		{
 			case CsIndex8:
 			{
-				uchar *s = Src->Base;
-				for (int y=0; y<Src->y; y++)
+				if (!Pal)
 				{
-					MemCpy(Ptr, s, Src->x);
-					s += Src->Line;
-					Ptr += Dest->Line;
+					uchar *s = Src->Base;
+					if (SPal)
+					{
+						// Colour to grey scale conversion
+						uchar map[256] = {};
+						for (int i=0; i<SPal->GetSize(); i++)
+						{
+							map[i] = LGreyScale((*SPal)[i]);
+						}
+
+						for (int y=0; y<Src->y; y++)
+						{
+							auto p = Ptr;
+							auto e = p + Src->x;
+							auto src = s;
+							while (p < e)
+								*p++ = map[*src++];
+
+							s += Src->Line;
+							Ptr += Dest->Line;
+						}
+					}
+					else
+					{
+						// Grey scale to grey scale = no conversion
+						for (int y=0; y<Src->y; y++)
+						{
+							MemCpy(Ptr, s, Src->x);
+							s += Src->Line;
+							Ptr += Dest->Line;
+						}
+						break;
+					}
 				}
-				break;
+				// else fall through
 			}
 			default:
 			{
@@ -479,19 +510,24 @@ bool GdcApp8Set::Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha)
 						if (Pal)
 						{
 							// Create colour lookup table
-							int LookupSize = 32 << 10;
+							
+							// int LookupSize = 32 << 10;
+							int LookupSize = 64 * 64 * 64;
+							int Mask = LookupSize - 1;
 							LAutoPtr<uchar,true> Mem(new uchar[LookupSize]);
 							if (Mem)
 							{
     							uchar *Lookup = Mem;
+								LHashTbl<IntKey<int>, int> map;
     							
 								for (int i=0; i<LookupSize; i++)
 								{
-									int r = Rc15(i);
-									int g = Gc15(i);
-									int b = Bc15(i);
+									int r = (i >> 12) & 0x3f;
+									int g = (i >> 6)  & 0x3f;
+									int b = (i >> 0)  & 0x3f;
 
-									Lookup[i] = Pal->MatchRgb(Rgb24(r, g, b));
+									Lookup[i] = Pal->MatchRgb(Rgb24(r << 2, g << 2, b << 2));
+									map.Add(Lookup[i], 1);
 								}
 
 								// loop through all pixels and convert colour
@@ -507,22 +543,53 @@ bool GdcApp8Set::Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha)
 											LAssert(!"Not impl.");
 											break;
 										}
+										case CsIndex8:
+										{
+											if (SPal)
+											{
+												// Palette to palette conversion
+												if (*Pal == *SPal)
+												{
+													// No-op
+													auto s = Src->Base + (y * Src->Line);
+													MemCpy(d, s, Src->x);
+												}
+												else
+												{
+													LAssert(!"Impl me.");
+												}
+											}
+											else
+											{
+
+												// Grey scale to palette conversion..
+												auto s = Src->Base + (y * Src->Line);
+												auto end = s + Src->x;
+												while (s < end)
+												{
+													int c = *s++ >> 2;
+													*d++ = Lookup[(c << 12) | (c << 6) | c];
+												}
+											}
+											break;
+										}
 										case CsRgb15:
 										{
-											ushort *s = (ushort*) (Src->Base + (y * Src->Line));
+											auto s = (LRgb15*) (Src->Base + (y * Src->Line));
 											for (int x=0; x<Src->x; x++)
 											{
-												*d++ = Lookup[*s++ & 0x7fff];
+												uint16 u = LookupIdx6bit(s->r, s->g, s->b);
+												*d++ = Lookup[u & Mask];
 											}
 											break;
 										}
 										case CsBgr15:
 										{
-											LBgr15 *s = (LBgr15*) (Src->Base + (y * Src->Line));
+											auto s = (LBgr15*) (Src->Base + (y * Src->Line));
 											for (int x=0; x<Src->x; x++)
 											{
-												uint16 u = LookupIdx5bit(s->r, s->g, s->b);
-												*d++ = Lookup[u];
+												uint16 u = LookupIdx6bit(s->r, s->g, s->b);
+												*d++ = Lookup[u & Mask];
 												s++;
 											}
 											break;
@@ -552,6 +619,8 @@ bool GdcApp8Set::Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha)
 										#undef Case
 									}
 								}
+
+								int asd=0;
 							}
 						}
 						break;

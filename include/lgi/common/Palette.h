@@ -9,13 +9,13 @@ class LgiClass LPalette
 {
 protected:
 	#if WINNATIVE
-	HPALETTE	hPal;
-	LOGPALETTE	*Data;
+	HPALETTE	hPal = NULL;
+	LOGPALETTE	*Data = NULL;
 	#else
-	int			Size;
-	LRgba32		*Data;
+	int			Size = 0;
+	LRgba32		*Data = NULL;
 	#endif
-	uchar *Lut;
+	uchar *Lut = NULL;
 
 public:
 	static size_t Instances;

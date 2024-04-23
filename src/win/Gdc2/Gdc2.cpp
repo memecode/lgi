@@ -81,26 +81,17 @@ size_t LPalette::Instances = 0;
 LPalette::LPalette()
 {
 	Instances++;
-	Data = 0;
-	hPal = NULL;
-	Lut = 0;
 }
 
 LPalette::LPalette(LPalette *pPal)
 {
 	Instances++;
-	Data = NULL;
-	hPal = NULL;
-	Lut = NULL;
 	Set(pPal);
 }
 
 LPalette::LPalette(uchar *pPal, int s)
 {
 	Instances++;
-	Data = NULL;
-	hPal = NULL;
-	Lut = NULL;
 	if (pPal || s > 0)
 		Set(pPal, s);
 }
