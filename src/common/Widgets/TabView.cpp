@@ -443,26 +443,31 @@ int LTabView::OnNotify(LViewI *Ctrl, LNotification n)
 
 bool LTabView::Append(LTabPage *Page, int Where)
 {
-	if (Page)
+	if (!Page)
+		return false;
+
+	Page->TabCtrl = this;
+	Page->_Window = _Window;
+	AddView(Page, Where);
+
+	TabIterator tabs(Children);
+	for (size_t i=0; i<tabs.Length(); i++)
 	{
-		Page->TabCtrl = this;
-		Page->_Window = _Window;
-		if (IsAttached() && Children.Length() == 1)
-		{
-			Page->Attach(this);
-			OnPosChange();
-		}
-		else
-		{
-			Page->Visible(Children.Length() == d->Current);
-			AddView(Page);
-		}
-
-		Invalidate();
-
-		return true;
+		auto tab = tabs[i];
+		tab->Visible(i == d->Current);
 	}
-	return false;
+
+	if (IsAttached())
+	{
+		auto cur = tabs[d->Current];
+		if (cur && !cur->IsAttached())
+			cur->Attach(this);
+	}
+
+	OnPosChange();
+	Invalidate();
+
+	return true;
 }
 
 LTabPage *LTabView::Append(const char *name, int Where)
@@ -1134,7 +1139,7 @@ void LTabView::OnPosChange()
 		r.Offset(-r.x1, -r.y1);
 		LRegion Rgn(r);
 
-		for (LViewI *c: p->IterateViews())
+		for (auto c: p->IterateViews())
 			c->Pour(Rgn);
 	}
 	else
@@ -1398,10 +1403,7 @@ bool LTabPage::Attach(LViewI *parent)
 		for (auto w: Children)
 		{
 			if (!w->IsAttached())
-			{
 				w->Attach(this);
-				w->SetNotify(TabCtrl->GetParent());
-			}
 		}
 	}
 
@@ -1420,8 +1422,6 @@ void LTabPage::Append(LViewI *Wnd)
 		LgiTrace("%s:%i - no wnd.\n", _FL);
 		return;
 	}
-
-	Wnd->SetNotify(TabCtrl);
 
 	if (IsAttached() && TabCtrl)
 	{

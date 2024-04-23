@@ -1482,7 +1482,9 @@ bool LZoomView::Convert(LPointF &p, int x, int y)
 
 void LZoomView::OnMouseClick(LMouse &m)
 {
-	if (m.Down())
+	if (m.IsContextMenu())
+		SendNotify(LNotifyShowContextMenu);
+	else if (m.Down())
 		Focus(true);
 }
 

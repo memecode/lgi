@@ -99,6 +99,9 @@ enum LNotifyType
 	/// Generic LKey event
 	LNotifyLKey,
 	
+	/// Control needs to show it's (usually right click) context menu.
+	LNotifyShowContextMenu,
+
 	/// User app notification IDs should start with this value:
 	LNotifyUserApp = 0x10000
 	/*
