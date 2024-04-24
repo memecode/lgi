@@ -704,6 +704,8 @@ bool LView::Detach()
 {
 	bool Status = false;
 
+	LAssert(InThread());
+
 	if (_Window)
 	{
 		LWindow *Wnd = dynamic_cast<LWindow*>(_Window);

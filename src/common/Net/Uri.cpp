@@ -155,29 +155,28 @@ bool LUri::Set(const char *uri)
 
 	// Scan ahead and check for protocol...
 	const char *hasProto = NULL;
+	const char *hasAuth = NULL;
 	const char *hasAt = NULL;
 	const char *hasPath = NULL;
 	const char *hasColon = NULL;
 
 	for (auto c = s; *c; c++)
 	{
-		if (c[0] == ':' &&
-			c[1] == '/' &&
-			c[2] == '/')
+		if (c[0] == ':')
 		{
-			if (!hasProto)
-			{
+			if (!hasProto && !hasAt)
 				hasProto = c;
-				c += 2;
-			}
+			else
+				hasColon = c;
+		}
+		else if (c[0] == '/' &&
+				 c[1] == '/')
+		{
+			hasAuth = c++;
 		}
 		else if (c[0] == '@' && !hasAt)
 		{
 			hasAt = c; // keep the first '@'
-		}
-		else if (c[0] == ':')
-		{
-			hasColon = c;
 		}
 		else if ((c[0] == '/' || c[0] == '\\') && !hasPath)
 		{
@@ -189,7 +188,10 @@ bool LUri::Set(const char *uri)
 	if (hasProto)
 	{
 		sProtocol.Set(s, hasProto - s);
-		s = hasProto + 3;
+		if (hasAuth)
+			s = hasAuth + 2;
+		else
+			s = hasProto + 1;
 	}
 	
 	if (hasAt)
@@ -209,7 +211,11 @@ bool LUri::Set(const char *uri)
 
 			s = hasAt + 1;
 		}
-		else LAssert(!"hasAt should be > s");
+		else
+		{
+			LAssert(!"hasAt should be > s");
+			return false;
+		}
 	}
 
 	bool hasHost = hasProto || hasAt || hasColon || !hasPath;
@@ -342,6 +348,7 @@ bool LUri::UnitTests()
 		{"host",                                             LUri(NULL, NULL, NULL, "host", 0, NULL)                            },
 		{"host:1234",                                        LUri(NULL, NULL, NULL, "host", 1234, NULL)                         },
 		{"somePath/seg/file.png",                            LUri(NULL, NULL, NULL, NULL, 0, "somePath/seg/file.png")           },
+		{"mailto:user@host.com",                             LUri("mailto", "user", NULL, "host.com", 0, NULL)                  },
 	};
 
 	for (auto &test: Parse)
@@ -450,5 +457,3 @@ LProxyUri::LProxyUri()
 
 	#endif
 }
-
-
