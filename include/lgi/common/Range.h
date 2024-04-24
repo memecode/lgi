@@ -62,6 +62,14 @@ struct LRange
 		return (Val == Start) || (Val >= Start && Val < End());
 	}
 
+	LRange Union(LRange &in)
+	{
+		LRange out;
+		out.Start = MIN(Start, in.Start);
+		out.Len = MAX(End(), in.End()) - Start;
+		return out;
+	}
+
 	ssize_t End() const
 	{
 		return Start + Len;

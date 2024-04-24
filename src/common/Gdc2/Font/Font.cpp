@@ -576,8 +576,8 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 	#ifndef HAIKU
 	if ((SizeChanging || FaceChanging) && this == LSysFont && ValidInitFaceSize)
 		LgiTrace("Warning: Changing sysfont definition.\n");
-	if (this == LSysFont)
-		printf("Setting sysfont up '%s' %i\n", Face(), PointSize());
+	//if (this == LSysFont)
+	//	printf("Setting sysfont up '%s' %i\n", Face(), PointSize());
 	#endif
 
 	#if LGI_SDL
