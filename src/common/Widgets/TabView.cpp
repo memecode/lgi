@@ -393,7 +393,7 @@ void LTabView::Value(int64 i)
 	{
 		// change tab
 		TabIterator it(Children);
-		LTabPage *Old = it[d->Current];
+		auto Old = it[d->Current];
 		if (Old)
 		{
 			// printf("%s:%i - old[%i] hide.\n", _FL, d->Current);
@@ -404,8 +404,8 @@ void LTabView::Value(int64 i)
 		d->Current = (int)MIN(i, (ssize_t)it.Length()-1);
 		OnPosChange();
 
-		LTabPage *p = it[d->Current];
-		if (p && IsAttached())
+		auto p = it[d->Current];
+		if (p)
 		{
 			if (!p->IsAttached())
 			{
@@ -413,6 +413,7 @@ void LTabView::Value(int64 i)
 				p->Attach(this);
 			}
 			// printf("%s:%i - new[%i] visible %p.\n", _FL, d->Current, p->Handle());
+			p->AttachChildren();
 			p->Visible(true);
 		}
 
@@ -472,7 +473,7 @@ bool LTabView::Append(LTabPage *Page, int Where)
 
 LTabPage *LTabView::Append(const char *name, int Where)
 {
-	LTabPage *Page = new LTabPage(name);
+	auto Page = new LTabPage(name);
 	if (Page)
 	{
 		Page->TabCtrl = this;
@@ -499,8 +500,8 @@ bool LTabView::Delete(LTabPage *Page)
 {
 	bool Status = false;
 
-	TabIterator it(Children);
-	ssize_t Index = it.IndexOf(Page);
+	TabIterator tabs(Children);
+	auto Index = tabs.IndexOf(Page);
 	if (Index >= 0)
 	{
 		if (Index == d->Current)
@@ -547,7 +548,6 @@ LRect &LTabView::GetTabClient()
 		d->TabClient.Inset(2, 2);
 		d->TabClient.y1 += TabY();
 	}
-	
 
 	return d->TabClient;
 }
@@ -1127,8 +1127,8 @@ void LTabView::OnPosChange()
 	if (!Children.Length())
 		return;
 
-	TabIterator it(Children);
-	auto p = it[d->Current];
+	TabIterator tabs(Children);
+	auto p = tabs[d->Current];
 	if (!p)
 		return;
 
@@ -1139,8 +1139,14 @@ void LTabView::OnPosChange()
 		r.Offset(-r.x1, -r.y1);
 		LRegion Rgn(r);
 
+		printf("pouring tabs: %s\n", r.GetStr());
+		
 		for (auto c: p->IterateViews())
+		{
 			c->Pour(Rgn);
+			printf("	c: %s, %i/%i, %s\n",
+				c->GetPos().GetStr(), c->Visible(), c->IsAttached(), c->GetClass());
+		}
 	}
 	else
 	{
