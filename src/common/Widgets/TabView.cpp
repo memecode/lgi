@@ -1138,15 +1138,8 @@ void LTabView::OnPosChange()
 		LRect r = d->TabClient;
 		r.Offset(-r.x1, -r.y1);
 		LRegion Rgn(r);
-
-		printf("pouring tabs: %s\n", r.GetStr());
-		
 		for (auto c: p->IterateViews())
-		{
 			c->Pour(Rgn);
-			printf("	c: %s, %i/%i, %s\n",
-				c->GetPos().GetStr(), c->Visible(), c->IsAttached(), c->GetClass());
-		}
 	}
 	else
 	{

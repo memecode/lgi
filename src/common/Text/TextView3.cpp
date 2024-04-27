@@ -1588,8 +1588,8 @@ bool LTextView3::Insert(size_t At, const char16 *Data, ssize_t Len)
 				// non-wrap mode			
 				if (WrapType == L_WRAP_NONE)
 				{
-					LTextLine *l = *Line.rbegin();
 					#if 0
+					LTextLine *l = *Line.rbegin();
 					printf("%s:%i - Insert error: no cur, At=%i, Size=%i, Lines=%i, WrapType=%i\n",
 						_FL, (int)At, (int)Size, (int)Line.Length(), (int)WrapType);
 					if (l)

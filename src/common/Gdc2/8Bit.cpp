@@ -619,8 +619,6 @@ bool GdcApp8Set::Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha)
 										#undef Case
 									}
 								}
-
-								int asd=0;
 							}
 						}
 						break;

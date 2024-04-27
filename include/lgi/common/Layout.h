@@ -87,7 +87,12 @@ public:
 
 	/// Gets the current scroll bar values.
 	virtual void GetScrollPos(int64 &x, int64 &y);
-	LPoint GetScrollPos();
+	LPoint GetScrollPos()
+	{
+		int64 x, y;
+		GetScrollPos(x, y);
+		return LPoint((int)x, (int)y);
+	}
 	/// Sets the current scroll bar values
 	virtual void SetScrollPos(int64 x, int64 y);
 

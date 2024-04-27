@@ -65,6 +65,12 @@ const char *LVariant::OperatorToString(LOperator op)
 		case OpAnd: return "OpAnd";
 		case OpOr: return "OpOr";
 		case OpNot: return "OpNot";
+		case OpBitwiseAnd: return "OpBitwiseAnd";
+		case OpBitwiseOr: return "OpBitwiseOr";
+		case OpBitwiseNegate: return "OpBitwiseNegate";
+		case OpBitwiseXor: return "OpBitwiseXor";
+		case OpShiftLeft: return "OpShiftLeft";
+		case OpShiftRight: return "OpShiftRight";
 	}
 	return NULL;
 }

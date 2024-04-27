@@ -325,7 +325,7 @@ bool LDateTime::InferTimeZone(bool ConvertTime)
 		
 		auto tz = local->tm_gmtoff / 60;
 		if (ConvertTime)
-			SetTimeZone(tz - _Tz, true);
+			SetTimeZone((int)(tz - _Tz), true);
 		else
 			_Tz = (int16)tz;
 		return true;

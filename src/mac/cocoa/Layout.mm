@@ -67,22 +67,14 @@ bool LLayout::Pour(LRegion &r)
 void LLayout::GetScrollPos(int64 &x, int64 &y)
 {
 	if (HScroll)
-	{
 		x = HScroll->Value();
-	}
 	else
-	{
 		x = 0;
-	}
 
 	if (VScroll)
-	{
 		y = VScroll->Value();
-	}
 	else
-	{
 		y = 0;
-	}
 }
 
 void LLayout::SetScrollPos(int64 x, int64 y)

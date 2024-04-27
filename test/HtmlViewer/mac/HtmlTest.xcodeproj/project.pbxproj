@@ -67,8 +67,8 @@
 /* Begin PBXFileReference section */
 		3416FAD92748AA070062D3B8 /* HomoglyphsTable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HomoglyphsTable.cpp; path = ../../../src/common/Text/Homoglyphs/HomoglyphsTable.cpp; sourceTree = "<group>"; };
 		3416FADA2748AA070062D3B8 /* Homoglyphs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Homoglyphs.cpp; path = ../../../src/common/Text/Homoglyphs/Homoglyphs.cpp; sourceTree = "<group>"; };
-		34319027238DF4A700DDE1F5 /* TestSuite.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TestSuite.cpp; path = ../TestSuite.cpp; sourceTree = "<group>"; };
-		34319028238DF4A700DDE1F5 /* HtmlTestSuite.lr8 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = HtmlTestSuite.lr8; path = ../HtmlTestSuite.lr8; sourceTree = "<group>"; };
+		34319027238DF4A700DDE1F5 /* TestSuite.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TestSuite.cpp; path = ../src/TestSuite.cpp; sourceTree = "<group>"; };
+		34319028238DF4A700DDE1F5 /* HtmlTestSuite.lr8 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = HtmlTestSuite.lr8; path = ../resources/HtmlTestSuite.lr8; sourceTree = "<group>"; };
 		3431902B238DF51B00DDE1F5 /* OpenSSLSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OpenSSLSocket.cpp; path = ../../../src/common/Net/OpenSSLSocket.cpp; sourceTree = "<group>"; };
 		3431902D238DF57C00DDE1F5 /* HtmlCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HtmlCommon.cpp; path = ../../../src/common/Text/HtmlCommon.cpp; sourceTree = "<group>"; };
 		3431902E238DF57C00DDE1F5 /* HtmlParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HtmlParser.cpp; path = ../../../src/common/Text/HtmlParser.cpp; sourceTree = "<group>"; };

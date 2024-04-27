@@ -516,6 +516,7 @@ if (APPLE)
 		src/common/Lgi/DropFiles.cpp
 		src/common/Widgets/Popup.cpp
 		src/common/General/DateTime.cpp
+		src/common/General/TimeZone.cpp
 		src/mac/common/MemDC.cpp
 		src/mac/common/ScreenDC.cpp
 		src/mac/cocoa/General.cpp
