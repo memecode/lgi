@@ -251,8 +251,7 @@ public:
 			if (!BaseUri.sPath.IsEmpty())
 			{
 				LFile::Path p(BaseUri.sPath);
-				p--;
-				SearchPaths.AddAt(0, p.GetFull());
+				SearchPaths.AddAt(0, (p / "..").GetFull());
 			}
 
 			LFile::Path p;
