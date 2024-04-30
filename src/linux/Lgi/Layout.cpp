@@ -72,6 +72,12 @@ void LLayout::SetScrollPos(int64 x, int64 y)
 		VScroll->Value(y);
 }
 
+void LLayout::GetScrollPos(int64 &x, int64 &y)
+{
+	x = HScroll ? HScroll->Value() : 0;
+	y = VScroll ? VScroll->Value() : 0;
+}
+
 bool LLayout::Attach(LViewI *p)
 {
 	bool Status = LView::Attach(p);
