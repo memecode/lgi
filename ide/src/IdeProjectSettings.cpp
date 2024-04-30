@@ -769,7 +769,7 @@ public:
 						LFile::Path Path(d->Project->GetBasePath());
 						LFile::Path Cur(e->Name());
 						Path.Join(Cur.GetFull());
-						Path--;
+						Path.PopLast();
 						if (Path.Exists())
 							s->InitialDir(Path);
 
@@ -782,7 +782,7 @@ public:
 							if (Base)
 							{
 								LFile::Path p = Base;
-								Rel = LMakeRelativePath(--p, s->Name());
+								Rel = LMakeRelativePath(p / "..", s->Name());
 							}
 							e->Name(Rel ? Rel.Get() : s->Name());
 

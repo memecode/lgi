@@ -56,9 +56,7 @@ LString LApp::GetConfigPath()
 		return p.GetFull();
 	}
 	
-	p--;
-	p += ".lgi.json";
-	return p.GetFull();
+	return (p / ".." / ".lgi.json").GetFull();
 }
 
 LString LApp::GetConfig(const char *Variable)
