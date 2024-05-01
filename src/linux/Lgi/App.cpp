@@ -179,8 +179,7 @@ void LgiCrashHandler(int Sig)
 	if (!child)
 	{
 		LFile::Path workingDir = CrashHandlerApp;
-		workingDir--;
-		chdir(workingDir);
+		chdir(workingDir / "..");
 		
 		LString pidArg = "--pid";
 		char * const args[] = { CrashHandlerApp, pidArg, pid, NULL };
@@ -1139,13 +1138,12 @@ LApp::DesktopInfo::DesktopInfo(const char *file)
 
 bool LApp::DesktopInfo::Serialize(bool Write)
 {
-	::LFile f;
+	LFile f;
 	
 	if (Write)
 	{
-		::LFile::Path p(File);
-		p--;
-		if (!p.Exists())
+		LFile::Path p(File);
+		if (!(p / "..").Exists())
 			return false;
 	}
 	else if (!LFileExists(File))	
