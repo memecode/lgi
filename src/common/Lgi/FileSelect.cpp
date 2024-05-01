@@ -774,7 +774,7 @@ class LFileSelectDlg :
 {
 	LRect OldPos;
 	LRect MinSize;
-	LArray<LString> Links;
+	LString::Array Links;
 	LArray<LFolderItem*> Hidden;
 	
 public:
@@ -1024,8 +1024,6 @@ void LFileSelectDlg::OnCreate()
 	RegisterHook(this, LKeyEvents);
 	FileLst->Focus(true);
 	
-	LgiGetUsersLinks(Links);
-
 	auto v = FileDev->GetRootVolume();
 	if (v)
 	{
@@ -1040,22 +1038,20 @@ void LFileSelectDlg::OnCreate()
 		}
 	}
 	
+	LGetUsersLinks(Links);
 	if (Links.Length())
 	{
-		if (auto *ti = new LTreeItem)
+		if (auto ti = new LTreeItem)
 		{
 			ti->SetText("Bookmarks");
 			Bookmarks->Insert(ti);
 			
-			for (unsigned n=0; n<Links.Length(); n++)
+			for (auto &i: Links)
 			{
-				LTreeItem *ci = new LTreeItem;
-				if (ci)
+				if (auto ci = new LTreeItem)
 				{
-					char *p = Links[n];
-					char *leaf = strrchr(p, DIR_CHAR);
-					ci->SetText(leaf?leaf+1:p, 0);
-					ci->SetText(p, 1);
+					ci->SetText(LGetLeaf(i.RStrip("/")), 0);
+					ci->SetText(i, 1);
 					ti->Insert(ci);
 				}
 			}
@@ -2241,15 +2237,15 @@ void LFileSelect::Save(SelectCb Cb)
 #if defined(LINUX)
 #include "lgi/common/Net.h"
 #endif
-bool LgiGetUsersLinks(LArray<LString> &Links)
+bool LGetUsersLinks(LString::Array &Links)
 {
-	LString Folder = LGetSystemPath(LSP_USER_LINKS);
-	if (!Folder)
+	LFile::Path p(LSP_USER_LINKS);
+	if (p.Length() == 0)
 		return false;
 	
 	#if defined(WINDOWS)
 		LDirectory d;
-		for (int b = d.First(Folder); b; b = d.Next())
+		for (int b = d.First(p); b; b = d.Next())
 		{
 			char *s = d.GetName();
 			if (s && stristr(s, ".lnk"))
@@ -2263,15 +2259,12 @@ bool LgiGetUsersLinks(LArray<LString> &Links)
 			}
 		}		
 	#elif defined(LINUX)
-		char p[MAX_PATH_LEN];
-		if (!LMakePath(p, sizeof(p), Folder, "bookmarks"))
+		p += "bookmarks";
+		if (!p.Exists())
 		{
-			LgiTrace("%s:%i - Failed to make path '%s'\n", _FL, Folder.Get());
+			LgiTrace("%s:%i - Bookmark folder '%s' doesn't exist.\n", _FL, p.GetFull().Get());
 			return false;
 		}
-
-		if (!LFileExists(p))
-			return false;
 			
 		auto Txt = LReadFile(p);
 		if (!Txt)
@@ -2279,7 +2272,7 @@ bool LgiGetUsersLinks(LArray<LString> &Links)
 			LgiTrace("%s:%i - failed to read '%s'\n", _FL, p);
 			return false;
 		}
-
+		
 		auto lines = Txt.SplitDelimit("\r\n");
 		for (auto line: lines)
 		{
