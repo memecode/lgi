@@ -895,8 +895,7 @@ int FieldView::OnNotify(LViewI *Ctrl, LNotification n)
 							if (File)
 							{
 								LFile::Path p = File;
-								p--;
-								auto Rel = LMakeRelativePath(p, dlg->Name());
+								auto Rel = LMakeRelativePath(p / "..", dlg->Name());
 								if (Rel)
 									SetCtrlName(c->Id, Rel);
 								else

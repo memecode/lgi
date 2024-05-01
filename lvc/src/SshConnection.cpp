@@ -299,7 +299,7 @@ SSH_LOG("waitPrompt data:", *Data);
 		}
 	}
 
-	if (d->Commits->HasItem(Prog))
+	if (Prog && d->Commits->HasItem(Prog))
 		DeleteObj(Prog); // Something else may delete it before we have a chance to.
 	return true;
 }

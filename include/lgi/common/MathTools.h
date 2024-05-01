@@ -150,27 +150,26 @@ T LAverage(LArray<T> &a)
 	return (T) (sum / a.Length());
 }
 
-template<typename T>
+template<typename T, typename S>
 void LDetectPeaks(
-        LArray<T>       &input,
-        LArray<size_t>  &emi_peaks,      /* emission peaks will be put here */ 
-        LArray<size_t>  &absop_peaks,    /* absorption peaks will be put here */ 
-        double          delta,           /* delta used for distinguishing peaks */
-        bool            emi_first = true /* should we search emission peak first of
-                                            absorption peak first? */
+        LArray<T>	&input,
+        LArray<S>	&emi_peaks,      // emission peaks will be put here
+        LArray<S>	&absop_peaks,    // absorption peaks will be put here
+        double		delta,           // delta used for distinguishing peaks
+        bool        emi_first = true // should we search emission peak first of absorption peak first?
         )
 {
     T       mx;
     T       mn;
-    size_t  mx_pos = 0;
-    size_t  mn_pos = 0;
+    S		mx_pos = 0;
+    S		mn_pos = 0;
     auto    is_detecting_emi = emi_first;
     auto    data = input.AddressOf();
 
     mx = data[0];
     mn = data[0];
 
-    for(size_t i = 1; i < input.Length(); ++i)
+    for (size_t i = 1; i < input.Length(); ++i)
     {
         if (data[i] > mx)
         {

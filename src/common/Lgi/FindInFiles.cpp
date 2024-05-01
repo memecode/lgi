@@ -230,7 +230,7 @@ int LFindInFiles::OnNotify(LViewI *Ctrl, LNotification n)
 				{
 					LFile::Path p = s->Name();
 					if (p.IsFile())
-						p--;
+						p = p / "..";
 					SetCtrlName(IDC_WHERE, p.GetFull());
 				}
 				delete s;

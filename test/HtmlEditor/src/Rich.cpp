@@ -619,8 +619,7 @@ public:
 							{
 								LDocView::ContentMedia &Cm = Media[i];
 								
-								p--;
-								p += Cm.FileName;
+								p = (p / ".." / Cm.FileName);
 								if (f.Open(p, O_WRITE))
 								{
 									f.SetSize(0);

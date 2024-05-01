@@ -428,14 +428,12 @@ public:
 			LFile::Path p(Base);
 			p += MakeFile;
 			MakeFile = p.GetFull();
-			p--;
-			MakeFilePath = p.GetFull();
+			MakeFilePath = (p / "..").GetFull();
 		}
 		else
 		{
 			LFile::Path p(MakeFile);
-			p--;
-			MakeFilePath = p.GetFull();
+			MakeFilePath = (p / "..").GetFull();
 		}
 		
 		// LGI_LIBRARY_EXT
@@ -879,8 +877,7 @@ public:
 					if (true)
 					{
 						// Also add path of file to VPath.
-						p--;
-						AddVPath(p.GetFull());
+						AddVPath((p / "..").GetFull());
 					}
 				}
 			}

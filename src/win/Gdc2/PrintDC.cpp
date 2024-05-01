@@ -45,16 +45,12 @@ LPrintDC::LPrintDC(void *Handle, const char *PrintJobName, const char *PrinterNa
 			stristr(PrinterName, "XPS"))
 		{
 			LFile::Path p(LSP_USER_DOCUMENTS);
-			LString FileName;
-			FileName.Printf("%s.xps", PrintJobName);
-			p += FileName;
+			p += LString::Fmt("%s.xps", PrintJobName);;
 			if (LFileExists(p.GetFull()))
 			{
 				for (unsigned i=1; i<1000; i++)
 				{
-					p--;
-					FileName.Printf("%s%i.xps", PrintJobName, i);
-					p += FileName;
+					p = p / ".." / LString::Fmt("%s%i.xps", PrintJobName, i);
 					if (!LFileExists(p.GetFull()))
 						break;
 				}

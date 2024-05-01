@@ -894,11 +894,10 @@ ImageCompareDlg::ImageCompareDlg(LView *p, const char *OutPath)
 	}
 
 	LFile::Path ResFile(__FILE__);
-	ResFile--;
-	ResFile += "ImageComparison.lr8";
+	ResFile = (ResFile / ".." / "ImageComparison.lr8");
 	if (!ResFile.Exists())
 	{
-		auto r =LFindFile("ImageComparison.lr8");
+		auto r = LFindFile("ImageComparison.lr8");
 		if (r)
 			ResFile = r.Get();
 	}

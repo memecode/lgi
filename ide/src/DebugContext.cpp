@@ -178,8 +178,7 @@ LDebugContext::LDebugContext(AppWnd *App, IdeProject *Proj, const char *Exe, con
 		}
 		else
 		{
-			p = Exe;
-			p--;
+			p = LFile::Path(Exe) / "..";
 		}
 	
 		if (!d->Db->Load(this, Exe, Args, RunAsAdmin, p, Env))

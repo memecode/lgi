@@ -545,7 +545,7 @@ public:
 				if (!_stricmp(s, "."))
 					;
 				else if (!_stricmp(s, ".."))
-					(*this)--;
+					PopLast();
 				else
 					New() = s;
 			}
@@ -576,18 +576,6 @@ public:
 			Path p = *this;
 			p.PopLast();
 			return p;
-		}
-
-		Path &operator --()
-		{
-			PopLast();
-			return *this;
-		}
-
-		Path &operator --(int i)
-		{
-			PopLast();
-			return *this;
 		}
 
 		Path operator / (LString seg)
