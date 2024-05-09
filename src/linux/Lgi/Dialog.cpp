@@ -68,9 +68,9 @@ int LDialog::OnNotify(LViewI *Ctrl, LNotification n)
 	if (b)
 	{
 		d->BtnId = b->GetId();
-		
+
 		if (d->IsModal)
-			EndModal();
+			EndModal(d->BtnId);
 		else if (d->IsModeless)
 			EndModeless();
 	}
