@@ -35,12 +35,6 @@ constexpr const char *LDateTime::MonthsLong[12];
 #if !defined(WINDOWS)
 	#define MIN_YEAR		1800
 #endif
-#if defined(LINUX)
-	#define USE_ZDUMP		1
-#elif defined(HAIKU)
-	#include "lgi/common/TimeZoneInfo.h"
-#endif
-#define DEBUG_DST_INFO		0
 
 //////////////////////////////////////////////////////////////////////////////
 uint16 LDateTime::DefaultFormat = GDTF_DEFAULT;
@@ -469,24 +463,6 @@ static int LDateCmp(LDateTime *a, LDateTime *b)
 	return a->Compare(b);
 }
 
-#elif USE_ZDUMP
-
-static bool ParseValue(char *s, LString &var, LString &val)
-{
-	if (!s)
-		return false;
-	char *e = strchr(s, '=');
-	if (!e)
-		return false;
-	
-	*e++ = 0;
-	var = s;
-	val = e;
-	*e = '=';
-	
-	return var != 0 && val != 0;
-}
-
 #endif
 
 /* Testing code...
@@ -509,20 +485,6 @@ static bool ParseValue(char *s, LString &var, LString &val)
 	LAutoString s(p.NewStr());
 	LgiMsg(0, s, "Test");
 */
-
-struct MonthHash : public LHashTbl<ConstStrKey<char,false>,int>
-{
-	MonthHash()
-	{
-		for (int i=0; i<CountOf(LDateTime::MonthsShort); i++)
-			Add(LDateTime::MonthsShort[i], i + 1);
-
-		for (int i=0; i<CountOf(LDateTime::MonthsLong); i++)
-			Add(LDateTime::MonthsLong[i], i + 1);
-	}
-};
-
-LString::Array Zdump;
 
 int LDateTime::DayOfWeek() const
 {

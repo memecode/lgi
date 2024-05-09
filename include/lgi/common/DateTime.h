@@ -11,6 +11,7 @@
 
 #include <time.h>
 #include "lgi/common/StringClass.h"
+#include "lgi/common/HashTable.h"
 
 #define GDTF_DEFAULT				0
 
@@ -51,6 +52,13 @@
 #define GDTF_MONTH_LEADINGZ			0x200
 
 class LDateTime;
+
+#if defined(LINUX)
+	#define USE_ZDUMP		1
+#elif defined(HAIKU)
+	#include "lgi/common/TimeZoneInfo.h"
+#endif
+#define DEBUG_DST_INFO		0
 
 /// Wrapper around a uint64_t timestamp.
 class LgiClass LTimeStamp
@@ -477,5 +485,17 @@ public:
 #ifdef WINDOWS
 LgiExtern LDateTime ConvertSysTime(SYSTEMTIME &st, int year);
 #endif
+
+struct MonthHash : public LHashTbl<ConstStrKey<char,false>,int>
+{
+	MonthHash()
+	{
+		for (int i=0; i<CountOf(LDateTime::MonthsShort); i++)
+			Add(LDateTime::MonthsShort[i], i + 1);
+
+		for (int i=0; i<CountOf(LDateTime::MonthsLong); i++)
+			Add(LDateTime::MonthsLong[i], i + 1);
+	}
+};
 
 #endif

@@ -1,6 +1,27 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/DateTime.h"
 
+#if USE_ZDUMP
+
+LString::Array Zdump;
+static bool ParseValue(char *s, LString &var, LString &val)
+{
+	if (!s)
+		return false;
+	char *e = strchr(s, '=');
+	if (!e)
+		return false;
+	
+	*e++ = 0;
+	var = s;
+	val = e;
+	*e = '=';
+	
+	return var != 0 && val != 0;
+}
+
+#endif
+
 // From HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Time Zones
 
 static LTimeZone AllTimeZones[] =
@@ -396,7 +417,7 @@ bool LTimeZone::GetDaylightSavingsInfo(LArray<LDstInfo> &Info, LDateTime &Start,
 	
 	#else
 
-		LAssert(!"Not implemented.");
+		#error "Not impl"
 
 	#endif
 
