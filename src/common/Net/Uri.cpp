@@ -101,6 +101,14 @@ LUri::operator bool()
 	return IsFile() ? !sPath.IsEmpty() : !sHost.IsEmpty();
 }
 
+LUri LUri::Sanitize() const
+{
+	LUri u = *this;
+	if (u.sPass)
+		u.sPass = "******";
+	return u;
+}
+
 LString LUri::LocalPath()
 {
 	if (!IsFile())

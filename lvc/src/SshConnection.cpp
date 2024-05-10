@@ -11,6 +11,7 @@
 #define DEBUG_SSH_LOGGING		0
 #if DEBUG_SSH_LOGGING
 	#define SSH_LOG(...)		d->sLog.Log(__VA_ARGS__)
+	// #define SSH_LOG(...)		d->Log->Print(__VA_ARGS__)
 #else
 	#define SSH_LOG(...)
 #endif
@@ -37,6 +38,14 @@ SshConnection::SshConnection(LTextLog *log, const char *uri, const char *prompt)
 		if (Args.GetReturn()->Type == GV_VOID_PTR)
 			d = (AppPriv*) Args.GetReturn()->Value.Ptr;
 	}
+}
+
+SshConnection::~SshConnection()
+{
+	if (LSsh::Cancel)
+		LSsh::Cancel->Cancel();
+	LEventTargetThread::Cancel();
+	WaitForExit();
 }
 
 bool SshConnection::DetectVcs(VcFolder *Fld)

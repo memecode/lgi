@@ -22,6 +22,11 @@ const char *AppName =			"Lvc";
 
 AppPriv::~AppPriv()
 {
+	#if HAS_LIBSSH
+	for (auto p: Connections)
+		DeleteObj(p.value);
+	#endif
+
 	if (CurFolder)
 		CurFolder->Empty();
 }

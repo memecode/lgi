@@ -1970,7 +1970,7 @@ void VcFolder::NoImplementation(const char* file, int line)
 	LString s;
 	s.Printf("%s, uri=%s, type=%s (%s:%i)",
 		LLoadString(IDS_ERR_NO_IMPL_FOR_TYPE),
-		Uri.ToString().Get(),
+		Uri.Sanitize().ToString().Get(),
 		toString(GetType()),
 		file, line);
 	OnCmdError(LString(), s);

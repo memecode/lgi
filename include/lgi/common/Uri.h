@@ -39,6 +39,9 @@ public:
 	LString LocalPath();
 	operator bool();
 
+	// Return a copy of the URI without the password
+	LUri Sanitize() const;
+
 	/// Parse a URI into it's sub fields...
 	bool Set(const char *uri);
 
