@@ -2,7 +2,7 @@
 
 #include <functional>
 
-LgiFunc bool LgiGetUsersLinks(LArray<LString> &Links);
+LgiFunc bool LGetUsersLinks(LString::Array &Links);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // File select dialog
