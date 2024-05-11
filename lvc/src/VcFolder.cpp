@@ -1073,8 +1073,8 @@ void VcFolder::Select(bool b)
 				}
 				case VcHg:
 				{
-					IsLogging = StartCmd("log", &VcFolder::ParseLog);
-					StartCmd("resolve -l", &VcFolder::ParseResolveList);
+					IsLogging = StartCmd(LString::Fmt("%slog", NoPipeOpt()), &VcFolder::ParseLog);
+					StartCmd(LString::Fmt("%sresolve -l", NoPipeOpt()), &VcFolder::ParseResolveList);
 					break;
 				}
 				case VcPending:
@@ -1229,7 +1229,7 @@ void VcFolder::GetCurrentRevision(ParseParams *Params)
 				IsIdent = StatusActive;
 			break;
 		case VcHg:
-			if (StartCmd("id -i -n", &VcFolder::ParseInfo, Params))
+			if (StartCmd(LString::Fmt("%sid -i -n", NoPipeOpt()), &VcFolder::ParseInfo, Params))
 				IsIdent = StatusActive;
 			break;
 		case VcCvs:
@@ -1256,7 +1256,7 @@ bool VcFolder::GetBranches(ParseParams *Params)
 			break;
 		case VcHg:
 		{
-			if (StartCmd("branches", &VcFolder::ParseBranches, Params))
+			if (StartCmd(LString::Fmt("%sbranches", NoPipeOpt()), &VcFolder::ParseBranches, Params))
 				IsBranches = StatusActive;
 			
 			auto p = new ParseParams;
@@ -1264,7 +1264,7 @@ bool VcFolder::GetBranches(ParseParams *Params)
 			{
 				SetCurrentBranch(str.Strip());
 			};
-			StartCmd("branch", NULL, p);
+			StartCmd(LString::Fmt("%sbranch", NoPipeOpt()), NULL, p);
 			break;
 		}
 		case VcCvs:
@@ -2171,6 +2171,19 @@ bool VcFolder::ParseDiff(int Result, LString s, ParseParams *Params)
 	return false;
 }
 
+const char *VcFolder::NoPipeOpt()
+{
+	switch (GetType())
+	{
+		case VcGit:
+			return "-P ";
+		case VcHg:
+			return "--pager none ";
+		default:
+			return "";
+	}
+}
+
 void VcFolder::Diff(VcFile *file)
 {
 	auto Fn = file->GetFileName();
@@ -2179,12 +2192,10 @@ void VcFolder::Diff(VcFile *file)
 		!Stricmp(Fn, ".."))
 		return;
 
-	const char *Prefix = "";
+	const char *Prefix = NoPipeOpt();
 	switch (GetType())
 	{
 		case VcGit:
-			Prefix = "-P ";
-			// fall through
 		case VcHg:
 		{
 			LString a;
@@ -3543,7 +3554,7 @@ void VcFolder::ListWorkingFolder()
 			#endif
 			break;
 		case VcHg:
-			Arg = "status -mard";
+			Arg.Printf("%sstatus -mard", NoPipeOpt());
 			break;
 		default:
 			return;

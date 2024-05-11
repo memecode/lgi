@@ -12,7 +12,7 @@ class LStructuredLog
 	LStructuredIo io;
 	
 	template<typename T>
-	void Store(T &t)
+	void Store(T &&t)
 	{
 		StructIo(io, t);
 	}

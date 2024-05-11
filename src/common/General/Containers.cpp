@@ -151,6 +151,14 @@ void LMemQueue::Empty()
 	Mem.Empty();
 }
 
+int64 LMemQueue::GetSize() const
+{
+	int64 Size = 0;
+	for (unsigned i=0; i<Mem.Length(); i++)
+		Size += Mem.ItemAt(i)->Length();
+	return Size;
+}
+
 int64 LMemQueue::GetSize()
 {
 	int64 Size = 0;
@@ -159,14 +167,15 @@ int64 LMemQueue::GetSize()
 	return Size;
 }
 
-int64 LMemQueue::Peek(uchar *Ptr, ssize_t Size)
+int64 LMemQueue::Peek(uchar *Ptr, ssize_t Size) const
 {
 	int64 Status = 0;
 
 	if (Ptr && Size <= GetSize())
 	{
-		for (auto b: Mem)
+		for (unsigned i=0; i<Mem.Length(); i++)
 		{
+			auto b = Mem.ItemAt(i);
 			if (Size <= 0)
 				break;
 			auto Copy = MIN(Size, b->Length());

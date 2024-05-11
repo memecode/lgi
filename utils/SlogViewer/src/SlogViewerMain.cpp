@@ -436,7 +436,7 @@ public:
 
 		while (file.Read([this, &cur, &items](auto type, auto size, auto ptr, auto name)
 			{
-				if (type == LStructuredIo::EndRow)
+				if (cur && type == LStructuredIo::EndRow)
 				{
 					items.Insert(cur.Release());
 					if (items.Length() > 100)

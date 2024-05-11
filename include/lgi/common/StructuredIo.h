@@ -283,12 +283,11 @@ inline void StructIo(LStructuredIo &io, LString &s)
 		});
 }
 
-inline void StructIo(LStructuredIo &io, LStringPipe &p)
+inline void StructIo(LStructuredIo &io, LStringPipe *p)
 {
-	// auto obj = io.StartObj("LStringPipe");
 	if (io.GetWrite())
 	{
-		p.Iterate([&io](auto ptr, auto bytes)
+		p->Iterate([&io](auto ptr, auto bytes)
 		{
 			io.String(ptr, bytes);
 			return true;
@@ -296,10 +295,10 @@ inline void StructIo(LStructuredIo &io, LStringPipe &p)
 	}
 	else
 	{
-		io.Decode([&p](auto type, auto sz, auto ptr, auto name)
+		io.Decode([p](auto type, auto sz, auto ptr, auto name) mutable
 		{
 			if (type == GV_STRING && ptr && sz > 0)
-				p.Write(ptr, sz);
+				p->Write(ptr, sz);
 		});
 	}
 }

@@ -665,7 +665,7 @@ public:
 		return Status;
 	}
 
-	T *ItemAt(ssize_t i)
+	T *ItemAt(ssize_t i) const
 	{
 		VALIDATE();
 		Iter It = GetIndex(i);
@@ -1056,10 +1056,11 @@ public:
 		uchar *Ptr,
 		/// Bytes to look at
 		ssize_t Size
-	);
+	) const;
 
 	/// Gets the total bytes in the container
 	int64 GetSize() override;
+	int64 GetSize() const;
 	
 	/// Reads bytes off the start of the container
 	ssize_t Read(void *Buffer, ssize_t Size, int Flags = 0) override;

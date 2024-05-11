@@ -340,7 +340,7 @@ public:
 		// printf("EventTargetThread %s, thread=%i\n", LThread::GetName(), LCurrentThreadId());
 		while (!IsCancelled())
 		{
-			int WaitLength = -1;
+			int WaitLength = 100;
 			if (TimerTs != 0)
 			{
 				uint64 Now = LCurrentTime();

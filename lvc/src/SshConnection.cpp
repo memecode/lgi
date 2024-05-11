@@ -8,10 +8,37 @@
 #define PROFILE_WaitPrompt		0
 #define PROFILE_OnEvent			0
 
-#define DEBUG_SSH_LOGGING		0
+#define DEBUG_SSH_LOGGING		1
 #if DEBUG_SSH_LOGGING
 	#define SSH_LOG(...)		d->sLog.Log(__VA_ARGS__)
-	// #define SSH_LOG(...)		d->Log->Print(__VA_ARGS__)
+	/*
+	#define SSH_LOG(...)		ArgExpansion(d->Log, __VA_ARGS__)
+
+	template<typename S>
+	void ArgPrint(S *log, bool a) { log->Print("%i", a); }
+	template<typename S>
+	void ArgPrint(S *log, int a) { log->Print("%i", a); }
+	template<typename S>
+	void ArgPrint(S *log, ssize_t a) { log->Print(LPrintfSSizeT, a); }
+	template<typename S>
+	void ArgPrint(S *log, const char *a) { log->Print("%s", a); }
+	template<typename S>
+	void ArgPrint(S *log, LString &a) { log->Print("%s", a.Get()); }
+	template<typename S>
+	void ArgPrint(S *log, LStringPipe *a)
+	{
+		LString s;
+		s.Length(a->GetSize());
+		a->Peek((uchar*)s.Get(), s.Length());
+		log->Write(s.Get(), s.Length());
+	}
+
+	template<typename S, typename ... A>
+	void ArgExpansion(S *log, A... args)
+	{
+		int dummy[] = { 0, ( (void) ArgPrint(log, std::forward<A>(args)), 0) ... };
+	}
+	*/
 #else
 	#define SSH_LOG(...)
 #endif
@@ -73,7 +100,6 @@ bool SshConnection::Command(VcFolder *Fld, LString Exe, LString Args, ParseFn Pa
 	p->LogType = LogType;
 	p->Path = Fld->GetUri().sPath;
 
-	LgiTrace("PostObject M_RUN_CMD %s\n", Args.Get());
 	return PostObject(GetHandle(), M_RUN_CMD, p);
 }
 
@@ -226,7 +252,7 @@ SSH_LOG("waitPrompt data:", rd, tmp);
 		if (LCurrentTime() - LastReadTs > 4000)
 		{
 			auto sz = out.GetSize();
-SSH_LOG("waitPrompt out:", sz, out);
+SSH_LOG("waitPrompt out:", sz, &out);
 			auto last = LastLine(out);
 
 			// Does the buffer end with a ':' on a line by itself?
@@ -281,7 +307,7 @@ SSH_LOG("waitPrompt result:", result, Prompt, last);
 					while (end > start && end[-1] != '\n')
 						end--;
 
-					Data->Set(start, end - start);
+					*Data = LString(start, end - start).Replace("\r");
 				}
 SSH_LOG("waitPrompt data:", *Data);
 			}
@@ -318,12 +344,12 @@ bool SshConnection::HandleMsg(LMessage *m)
 	if (m->Msg() != M_RESPONSE)
 		return false;
 
-	LAutoPtr<SshParams> u((SshParams*)m->A());
+	auto u = m->AutoA<SshParams>();
 	if (!u || !u->c)
 		return false;
 
-	SshConnection &c = *u->c;
-	AppPriv *d = c.d;
+	auto &c = *u->c;
+	auto d = c.d;
 	if (!d)
 		return false;
 
