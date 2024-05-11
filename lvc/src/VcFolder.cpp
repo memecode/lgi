@@ -448,7 +448,7 @@ bool VcFolder::StartCmd(const char *RawArgs, ParseFn Parser, ParseParams *Params
 	if (Uri.IsFile())
 	{
 		if (d->Log && Logging != LogSilo)
-			d->Log->Print("%s %s\n", Exe, Args);
+			d->Log->Print("%s %s\n", Exe, Args.Get());
 
 		LAutoPtr<LSubProcess> Process(new LSubProcess(Exe, Args));
 		if (!Process)
