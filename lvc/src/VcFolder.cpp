@@ -431,13 +431,19 @@ SshConnection::LoggingType Convert(LoggingType t)
 }
 #endif
 
-bool VcFolder::StartCmd(const char *Args, ParseFn Parser, ParseParams *Params, LoggingType Logging)
+bool VcFolder::StartCmd(const char *RawArgs, ParseFn Parser, ParseParams *Params, LoggingType Logging)
 {
 	const char *Exe = GetVcName();
 	if (!Exe)
 		return false;
 	if (CmdErrors > 2)
 		return false;
+
+	LString Args;
+	if (auto NoPipe = NoPipeOpt())
+		Args.Printf("%s%s", NoPipe, RawArgs);
+	else
+		Args = RawArgs;
 
 	if (Uri.IsFile())
 	{
@@ -913,7 +919,7 @@ bool VcFolder::GetAuthor(bool local, std::function<void(LString name,LString ema
 					callback(target->name, target->email);
 			};
 
-			auto args = LString::Fmt("-P config -l %s", scope);
+			auto args = LString::Fmt("config -l %s", scope);
 			target->InProgress = StartCmd(args, NULL, params);
 			break;
 		}
@@ -1073,8 +1079,8 @@ void VcFolder::Select(bool b)
 				}
 				case VcHg:
 				{
-					IsLogging = StartCmd(LString::Fmt("%slog", NoPipeOpt()), &VcFolder::ParseLog);
-					StartCmd(LString::Fmt("%sresolve -l", NoPipeOpt()), &VcFolder::ParseResolveList);
+					IsLogging = StartCmd("log", &VcFolder::ParseLog);
+					StartCmd("resolve -l", &VcFolder::ParseResolveList);
 					break;
 				}
 				case VcPending:
@@ -1229,7 +1235,7 @@ void VcFolder::GetCurrentRevision(ParseParams *Params)
 				IsIdent = StatusActive;
 			break;
 		case VcHg:
-			if (StartCmd(LString::Fmt("%sid -i -n", NoPipeOpt()), &VcFolder::ParseInfo, Params))
+			if (StartCmd("id -i -n", &VcFolder::ParseInfo, Params))
 				IsIdent = StatusActive;
 			break;
 		case VcCvs:
@@ -1247,7 +1253,7 @@ bool VcFolder::GetBranches(ParseParams *Params)
 	switch (GetType())
 	{
 		case VcGit:
-			if (StartCmd("-P branch -v", &VcFolder::ParseBranches, Params))
+			if (StartCmd("branch -v", &VcFolder::ParseBranches, Params))
 				IsBranches = StatusActive;
 			break;
 		case VcSvn:
@@ -1256,7 +1262,7 @@ bool VcFolder::GetBranches(ParseParams *Params)
 			break;
 		case VcHg:
 		{
-			if (StartCmd(LString::Fmt("%sbranches", NoPipeOpt()), &VcFolder::ParseBranches, Params))
+			if (StartCmd("branches", &VcFolder::ParseBranches, Params))
 				IsBranches = StatusActive;
 			
 			auto p = new ParseParams;
@@ -1264,7 +1270,7 @@ bool VcFolder::GetBranches(ParseParams *Params)
 			{
 				SetCurrentBranch(str.Strip());
 			};
-			StartCmd(LString::Fmt("%sbranch", NoPipeOpt()), NULL, p);
+			StartCmd("branch", NULL, p);
 			break;
 		}
 		case VcCvs:
@@ -1358,7 +1364,7 @@ void VcFolder::LogFilter(const char *Filter)
 		{
 			// See if 'Filter' is a commit id?
 			LString args;
-			args.Printf("-P show %s", Filter);
+			args.Printf("show %s", Filter);
 			ParseParams *params = new ParseParams;
 			params->Callback = [this, Filter=LString(Filter)](auto code, auto str)
 			{
@@ -1402,12 +1408,9 @@ void VcFolder::LogFile(const char *uri)
 		return;
 	}
 
-	const char *Page = "";
 	switch (GetType())
 	{
 		case VcGit:
-			Page = "-P ";
-			// fall through
 		case VcSvn:
 		case VcHg:
 		{
@@ -1421,7 +1424,7 @@ void VcFolder::LogFile(const char *uri)
 			}
 
 			ParseParams *Params = new ParseParams(uri);
-			Args.Printf("%slog \"%s\"", Page, FileToSelect.Get());
+			Args.Printf("log \"%s\"", FileToSelect.Get());
 			IsLogging = StartCmd(Args, &VcFolder::ParseLog, Params, LogNormal);
 			break;
 		}
@@ -2150,7 +2153,7 @@ void VcFolder::DiffRange(const char *FromRev, const char *ToRev)
 			p->Str = LString(FromRev) + ":" + ToRev;
 
 			LString a;
-			a.Printf("-P diff %s..%s", FromRev, ToRev);
+			a.Printf("diff %s..%s", FromRev, ToRev);
 			StartCmd(a, &VcFolder::ParseDiff, p);
 			break;
 		}
@@ -2192,7 +2195,6 @@ void VcFolder::Diff(VcFile *file)
 		!Stricmp(Fn, ".."))
 		return;
 
-	const char *Prefix = NoPipeOpt();
 	switch (GetType())
 	{
 		case VcGit:
@@ -2202,9 +2204,9 @@ void VcFolder::Diff(VcFile *file)
 
 			auto rev = file->GetRevision();
 			if (rev)
-				a.Printf("%sdiff %s \"%s\"", Prefix, rev, Fn);
+				a.Printf("diff %s \"%s\"", rev, Fn);
 			else
-				a.Printf("%sdiff \"%s\"", Prefix, Fn);
+				a.Printf("diff \"%s\"", Fn);
 			
 			StartCmd(a, &VcFolder::ParseDiff);
 			break;
@@ -3061,7 +3063,7 @@ void VcFolder::ListCommit(VcCommit *c)
 		switch (GetType())
 		{
 			case VcGit:
-				Args.Printf("-P show %s^..%s", c->GetRev(), c->GetRev());
+				Args.Printf("show %s^..%s", c->GetRev(), c->GetRev());
 				IsFilesCmd = StartCmd(Args, &VcFolder::ParseFiles, new ParseParams(c->GetRev()));
 				break;
 			case VcSvn:
@@ -3447,9 +3449,9 @@ void VcFolder::FolderStatus(const char *uri, VcLeaf *Notify)
 			// What version did =2 become available? It's definitely not in v2.5.4
 			// Not in v2.7.4 either...
 			if (ToolVersion[VcGit] >= Ver2Int("2.8.0"))
-				Arg = "-P status --porcelain=2";
+				Arg = "status --porcelain=2";
 			else
-				Arg = "-P status --porcelain";
+				Arg = "status --porcelain";
 			break;
 		default:
 			return;
@@ -3548,13 +3550,13 @@ void VcFolder::ListWorkingFolder()
 			break;
 		case VcGit:
 			#if 1
-				Arg = "-P status -vv";
+				Arg = "status -vv";
 			#else
-				Arg = "-P diff --diff-filter=CMRTU --cached";
+				Arg = "diff --diff-filter=CMRTU --cached";
 			#endif
 			break;
 		case VcHg:
-			Arg.Printf("%sstatus -mard", NoPipeOpt());
+			Arg = "status -mard";
 			break;
 		default:
 			return;
@@ -4799,7 +4801,7 @@ bool VcFolder::Blame(const char *Path)
 		case VcGit:
 		{
 			LString a;
-			a.Printf("-P blame \"%s\"", file.Get());
+			a.Printf("blame \"%s\"", file.Get());
 			return StartCmd(a, &VcFolder::ParseBlame, Params.Release());
 			break;
 		}

@@ -139,7 +139,12 @@ protected:
 			if (!channel)
 				return;
 
-			auto rc = ssh_channel_open_session(channel);
+			int rc;
+			do 
+			{
+				rc = ssh_channel_open_session(channel);
+			}
+			while (rc == SSH_AGAIN);
 			if (rc != SSH_OK)
 			{
 				ssh_channel_free(channel);
@@ -147,15 +152,27 @@ protected:
 				return;
 			}
 
-			rc = ssh_channel_request_pty(channel);
+			do
+			{
+				rc = ssh_channel_request_pty(channel);
+			}
+			while (rc == SSH_AGAIN);
 			if (rc != SSH_OK)
 				return;
  
-			rc = ssh_channel_change_pty_size(channel, 240, 50);
+			do
+			{
+				rc = ssh_channel_change_pty_size(channel, 240, 50);
+			}
+			while (rc == SSH_AGAIN);
 			if (rc != SSH_OK)
 				return;
  
-			rc = ssh_channel_request_shell(channel);
+			do
+			{
+				rc = ssh_channel_request_shell(channel);
+			}
+			while (rc == SSH_AGAIN);
 			if (rc != SSH_OK)
 				return;
 		}
@@ -262,13 +279,16 @@ public:
 		// ssh_set_log_level(SSH_LOG_PROTOCOL);
 		auto r = ssh_options_set(Ssh, SSH_OPTIONS_HOST, Host);
 		r = ssh_options_set(Ssh, SSH_OPTIONS_PORT, &Port);
-		r = ssh_options_set(Ssh, SSH_OPTIONS_TIMEOUT, &Timeout);
 
 		if (Cancel)
 		{
 			// If the user can cancel we need to go into non-blocking mode and poll 
 			// the cancel object:
-			ssh_set_blocking(Ssh, true);
+			ssh_set_blocking(Ssh, false);
+		}
+		else
+		{
+			r = ssh_options_set(Ssh, SSH_OPTIONS_TIMEOUT, &Timeout);
 		}
 
 		// Check for a config entry...
@@ -387,7 +407,12 @@ public:
 
 		if (PublicKey)
 		{
-			r = ssh_userauth_publickey_auto(Ssh, Username, Password);
+			do
+			{
+				r = ssh_userauth_publickey_auto(Ssh, Username, Password);
+			}
+			while (r == SSH_AUTH_AGAIN);
+
 			if (r == SSH_AUTH_DENIED)
 			{
 				r = ssh_userauth_password(Ssh, Username, Password);
