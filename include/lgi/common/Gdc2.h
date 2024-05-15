@@ -406,7 +406,6 @@ class LgiClass LSurface : public LRefCount, public LDom
 	friend class LView;
 	friend class LWindow;
 	friend class LVariant;
-	friend class LRegionClipDC;
 	friend class LMemDC;
 
 	void Init();
@@ -572,7 +571,7 @@ public:
 	/// Converts the pixel data between pre-mul alpha or non-pre-mul alpha
 	virtual bool ConvertPreMulAlpha(bool ToPreMul);
 	/// Makes the alpha channel opaque
-	virtual bool MakeOpaque();
+	virtual bool MakeOpaque(LRect *rc = NULL);
 
 	/// Gets the surface origin
 	virtual void GetOrigin(int &x, int &y) { x = OriginX; y = OriginY; }
@@ -858,7 +857,7 @@ public:
 		/// Destination blt x offset
 		int x1,
 		/// Destination blt y offset
-		int y1,
+		int y1,	
 		/// Source surface
 		LSurface *Src,
 		/// [Optional] Crop the source surface first, else whole surface is blt

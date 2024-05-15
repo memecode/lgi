@@ -216,6 +216,10 @@ public:
 		ssize_t CharAt(int x, LPxToIndexType Type = LgiTruncate);
 
 		/// Draws the string onto a device surface
+		///
+		/// Windows note: drawing text on a 32bit memory context will
+		/// not set the alpha correctly (it'll be 0). You can call 
+		/// LSurface::MakeOpaque afterwards to fix that.
 		void Draw
 		(
 			/// The output device

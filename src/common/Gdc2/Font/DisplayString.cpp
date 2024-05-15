@@ -27,7 +27,7 @@
 #endif
 
 #if WINNATIVE
-static OsChar GDisplayStringDots[] = {'.', '.', '.', 0};
+static OsChar LDisplayStringDots[] = {'.', '.', '.', 0};
 #endif
 
 //345678123456781234567812345678
@@ -1086,7 +1086,7 @@ void LDisplayString::TruncateWithDots(int Width)
 				}
 				
 				int DotsX, DotsY;
-				Font->_Measure(DotsX, DotsY, GDisplayStringDots, 3);
+				Font->_Measure(DotsX, DotsY, LDisplayStringDots, 3);
 				x = Width + DotsX;
 			}
 		}
@@ -1845,25 +1845,48 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 			LColour cBack = Font->Back();
 			LColour cWhitespace;
 
+			LAutoPtr<LMemDC> mem24;
+			LPoint drawPos(px, py);
+			auto originalDc = pDC;
+
+			if (!pDC->IsScreen() &&
+				pDC->HasAlpha())
+			{
+				// Win32: if we try and draw on a 32bit memory context, the alpha channel is NOT set
+				// correctly. So to work around that first write to a 24bit memory context and blt
+				if (mem24.Reset(new LMemDC(X(), Y(), System24BitColourSpace)))
+				{
+					mem24->Colour(Rgb24(0, 0, 0), 24);
+					mem24->Rectangle();
+					px = 0;
+					py = 0;
+					pDC = mem24;
+				}
+			}
+
 			if (VisibleTab)
 			{
 				cWhitespace = Font->WhitespaceColour();
 				LAssert(cWhitespace.IsValid());
 			}
 
-			for (int i=0; i<Info.Length(); i++)
+			int i=0;
+			for (auto &inf: Info) // int i=0; i<Info.Length(); i++)
 			{
-				LFont *f = 0;
+				LFont *f = NULL;
 
 				// Get the font for this block of characters
-				if (Info[i].FontId)
+				if (inf.FontId)
 				{
-					f = Sys->Font[Info[i].FontId];
+					f = Sys->Font[inf.FontId];
 
-					f->Colour(cFore, cBack);
+					if (mem24)
+						f->Colour(LColour::White, LColour::Black);
+					else
+						f->Colour(cFore, cBack);
 
 					auto Sz = Font->Size();
-					Sz.Value += Info[i].SizeDelta;
+					Sz.Value += inf.SizeDelta;
 					f->Size(Sz);
 					f->Transparent(Font->Transparent());
 					f->Underline(Font->Underline());
@@ -1875,7 +1898,9 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 				else
 				{
 					f = Font;
-					if (Info[i].Missing)
+					if (mem24)
+						f->Colour(LColour::White, LColour::Black);
+					else if (inf.Missing)
 						f->Colour(LColour::Red.Mix(cFore), cBack);
 					else
 						f->Colour(cFore, cBack);
@@ -1888,23 +1913,23 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 					{
 						b.x1 = i ? px : r->x1;
 						b.y1 = r->y1;
-						b.x2 = i < Info.Length() - 1 ? px + Info[i].X - 1 : r->x2;
+						b.x2 = i < Info.Length() - 1 ? px + inf.X - 1 : r->x2;
 						b.y2 = r->y2;
 					}
 					else
 					{
 						b.x1 = px;
 						b.y1 = py;
-						b.x2 = px + Info[i].X - 1;
+						b.x2 = px + inf.X - 1;
 						b.y2 = py + Y() - 1;
 					}
 					
 					if (b.Valid())
 					{
-						if (IsTabChar(*Info[i].Str))
+						if (IsTabChar(*inf.Str))
 						{
 							// Invisible tab... draw blank space
-							if (!Font->Transparent())
+							if (!mem24 && !Font->Transparent())
 							{
 								pDC->Colour(cBack);
 								pDC->Rectangle(&b);
@@ -1913,7 +1938,7 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 							if (VisibleTab)
 							{
 								int X = px;
-								for (int n=0; n<Info[i].Len; n++)
+								for (int n=0; n<inf.Len; n++)
 								{
 									int Dx = TabSize - ((X - Ox + GetDrawOffset()) % TabSize);
 									LRect r(X, b.y1, X + Dx - 1, b.y2);
@@ -1928,13 +1953,13 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 							// Draw the character(s)
 							LColour Fg = f->Fore();
 							LAssert(Fg.IsValid());
-							f->_Draw(pDC, px, py, Info[i].Str, Info[i].Len, &b, Fg);
+							f->_Draw(pDC, px, py, inf.Str, inf.Len, &b, Fg);
 							
 							if (VisibleTab)
 							{
-								OsChar *start = Info[i].Str;
+								OsChar *start = inf.Str;
 								OsChar *s = start;
-								OsChar *e = s + Info[i].Len;
+								OsChar *e = s + inf.Len;
 								int Sp = -1;
 								while (s < e)
 								{
@@ -1956,13 +1981,14 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 				}
 
 				// Inc my position
-				px += Info[i].X;
+				px += inf.X;
+				i++;
 			}
 			
 			if (AppendDots)
 			{
 				int Sx, Sy;
-				Font->_Measure(Sx, Sy, GDisplayStringDots, 3);
+				Font->_Measure(Sx, Sy, LDisplayStringDots, 3);
 
 				LRect b;
 				if (r)
@@ -1981,7 +2007,48 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 				}
 
 				LColour Fg = Font->Fore();
-				Font->_Draw(pDC, px, py, GDisplayStringDots, 3, &b, Fg);
+				Font->_Draw(pDC, px, py, LDisplayStringDots, 3, &b, Fg);
+			}
+
+			if (mem24)
+			{
+				// Now mem24 is essentially an alpha channel to draw on originalDc
+				LBlitRegions r(originalDc, drawPos.x, drawPos.y, mem24);
+				
+				System32BitPixel fore;
+				fore.r = cFore.r();
+				fore.g = cFore.g();
+				fore.b = cFore.b();
+				fore.a = cFore.a();
+
+				for (int sy = r.SrcClip.y1, dy=r.DstClip.y1; dy<=r.DstClip.y2 && sy<r.SrcClip.y2; dy++, sy++)
+				{
+					switch (originalDc->GetColourSpace())
+					{
+						case System32BitColourSpace:
+						{
+							auto DivLut = Div255Lut;
+							auto d = ((System32BitPixel*)(*originalDc)[dy]) + r.DstClip.x1;
+							auto s = ((System24BitPixel*)(*mem24)[sy]) + r.SrcClip.x1;
+							auto e = d + r.DstClip.X();
+							while (d < e)
+							{
+								// Composite 's over d' using the current foreground colour
+								if (s->r)
+								{
+									auto oma = 255 - s->r;
+									d->r = DivLut[fore.r * s->r] + (d->r * oma);
+								}
+								d++;
+							}
+						}
+						default:
+						{
+							LAssert(!"Impl me");
+							break;
+						}
+					}
+				}
 			}
 
 			pDC->Colour(Old);

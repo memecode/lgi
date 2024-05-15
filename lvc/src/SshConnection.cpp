@@ -8,7 +8,7 @@
 #define PROFILE_WaitPrompt		0
 #define PROFILE_OnEvent			0
 
-#define DEBUG_SSH_LOGGING		1
+#define DEBUG_SSH_LOGGING		0
 #if DEBUG_SSH_LOGGING
 	#define SSH_LOG(...)		d->sLog.Log(__VA_ARGS__)
 	/*

@@ -2169,18 +2169,22 @@ void MakeOpaqueRop64(Px *in, int len)
 	}
 }
 
-bool LSurface::MakeOpaque()
+bool LSurface::MakeOpaque(LRect *rc)
 {
 	if (!pMem || !pMem->Base)
 		return false;
 	
-	for (int y=0; y<pMem->y; y++)
+	LRect r = Bounds();
+	if (rc)
+		r.Intersection(rc);
+
+	for (int y=r.y1; y<=r.y2; y++)
 	{
 		uint8_t *src = pMem->Base + (y * pMem->Line);
 		switch (pMem->Cs)
 		{
 			#define OpaqueCase(px, sz) \
-				case Cs##px: MakeOpaqueRop##sz((L##px*)src, pMem->x); break
+				case Cs##px: MakeOpaqueRop##sz(((L##px*)src)+r.x1, r.X()); break
 			OpaqueCase(Rgba32, 32);
 			OpaqueCase(Bgra32, 32);
 			OpaqueCase(Argb32, 32);

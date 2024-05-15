@@ -1407,7 +1407,7 @@ void LFont::_Draw(LSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, L
 			GetTextExtentPoint32W(hDC, Str, Len, &Size);
 		}
 
-		if (Transparent() && !r)
+		if (IsTransparent && !r)
 		{
 			TextOutW(hDC, x, y, Str, Len);
 		}
@@ -1432,7 +1432,8 @@ void LFont::_Draw(LSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, L
 			auto Addr = (*pDC)[y - _ori.y + 6] + ((x - _ori.x + 4) * pDC->GetBits() / 8);
 			*/
 			
-			ExtTextOutW(hDC, x, y, ETO_CLIPPED | (Transparent()?0:ETO_OPAQUE), &rc, Str, Len, 0);
+			auto result = ExtTextOutW(hDC, x, y, ETO_CLIPPED | (IsTransparent ? 0 : ETO_OPAQUE), &rc, Str, Len, 0);
+			int asd=0;
 		}
 
 		if (GetOwnerUnderline())
