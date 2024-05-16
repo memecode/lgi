@@ -1432,8 +1432,7 @@ void LFont::_Draw(LSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, L
 			auto Addr = (*pDC)[y - _ori.y + 6] + ((x - _ori.x + 4) * pDC->GetBits() / 8);
 			*/
 			
-			auto result = ExtTextOutW(hDC, x, y, ETO_CLIPPED | (IsTransparent ? 0 : ETO_OPAQUE), &rc, Str, Len, 0);
-			int asd=0;
+			ExtTextOutW(hDC, x, y, ETO_CLIPPED | (IsTransparent ? 0 : ETO_OPAQUE), &rc, Str, Len, 0);
 		}
 
 		if (GetOwnerUnderline())

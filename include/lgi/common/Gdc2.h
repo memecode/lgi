@@ -478,7 +478,7 @@ public:
 
 	// Alpha channel	
 	/// Returns true if this Surface has an alpha channel
-	virtual bool HasAlpha() { return pAlphaDC != 0; }
+	virtual bool HasAlpha() { return pAlphaDC != NULL; }
 	/// Creates or destroys the alpha channel for this surface
 	virtual bool HasAlpha(bool b);
 	/// Returns true if we are drawing on the alpha channel
@@ -977,6 +977,8 @@ public:
 	virtual ~LMemDC();
 
 	const char *GetClass() { return "LMemDC"; }
+	bool HasAlpha() override;
+	bool HasAlpha(bool b) override;
 
 	#if WINNATIVE
 	
@@ -1165,7 +1167,12 @@ public:
 		Rgn = Sub ? *Sub : pDC->Bounds();
 		Screen = pDC;
 
-		Valid = pDC && Mem.Create(Rgn.X(), Rgn.Y(), pDC->GetColourSpace());
+		#ifdef WINDOWS
+		auto cs = System24BitColourSpace;
+		#else
+		auto cs = pDC->GetColourSpace();
+		#endif
+		Valid = pDC && Mem.Create(Rgn.X(), Rgn.Y(), cs);
 		if (Valid)
 		{
 			*In = &Mem;
