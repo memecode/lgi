@@ -72,7 +72,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 		ProcessError
 	}	State;
 
-	void OnFileLine(const char *File, int Line, bool CurrentIp)
+	void OnFileLine(const char *File, int Line, bool CurrentIp, const char *SrcFile, int SrcLine)
 	{
 		if (SuppressNextFileLine)
 		{
@@ -86,41 +86,42 @@ class Gdb : public LDebugger, public LThread, public Callback
 				CurLine = Line;
 			
 			if (CurFile && CurLine > 0)
+			{
+				printf("%s:%i calling OnFileLine(%s,%i)\n", SrcFile, SrcLine, CurFile.Get(), CurLine);
 				Events->OnFileLine(CurFile, CurLine, CurrentIp);
+			}
 		}
 	}
 
-	bool ParseLocation(LString::Array &p)
+	bool ParseLocation(LString::Array &lines)
 	{
-		for (size_t i=0; i<p.Length(); i++)
+		for (auto line: lines)
 		{
-			LString::Array a = p[i].SplitDelimit(LWhiteSpace);
-			if (a.Length() > 0)
+			LString::Array a = line.SplitDelimit(LWhiteSpace);
+			if (a.Length() == 0)
+				continue;
+
+			auto parts = line.Split(" at ");			
+			if (parts.Length() == 2) // Found the 'at'
 			{
-				int At = 0;
-				for (; At < a.Length() && stricmp(a[At], "at") != 0; At++)
-					;
-				
-				if (At < a.Length() - 1) // Found the 'at'
+				LString::Array ref = parts.Last().RSplit(":", 1);
+				if (ref.Length() == 2)
 				{
-					LString::Array ref = a[At+1].Split(":");
-					if (ref.Length() == 2)
-					{
-						OnFileLine(NativePath(ref[0]), (int)ref[1].Int(), true);
-						return true;
-					}
+					OnFileLine(NativePath(ref[0]), (int)ref[1].Int(), true, _FL);
+					return true;
 				}
-				else
+			}
+			else
+			{
+				int Line = (int)parts[0].Int();
+				if (Line >= 0)
 				{
-					int Line = (int)a[0].Int();
-					if (Line)
-					{
-						OnFileLine(NULL, Line, true);
-						return true;
-					}
+					OnFileLine(NULL, Line, true, _FL);
+					return true;
 				}
 			}
 		}
+
 		return false;
 	}
 	
@@ -198,7 +199,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 		LString File, Line;
 		LString::Array a = f.Split(" at ");
 
-		#if 0		
+		#if 1		
 		printf("%s:%i - a.len=%i\n", _FL, (int)a.Length());
 		for (unsigned n=0; n<a.Length(); n++)
 			printf("\t[%i]='%s'\n", n, a[n].Get());
@@ -206,7 +207,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 		
 		if (a.Length() == 2)
 		{
-			LString k = a[1].Strip();			
+			LString k = a.Last().Strip();			
 			
 			if (k.Find("0x") == 0)
 			{			
@@ -232,14 +233,17 @@ class Gdb : public LDebugger, public LThread, public Callback
 					e++;
 					while (e < k.Length() && IsDigit(k(e)))
 						e++;
+
 					LString::Array b = k(0, e).RSplit(":", 1);
 					if (b.Length() == 2)
 					{
 						File = b[0];
 						Line = b[1];
-					}					
+						printf("%s:%i - breakpoint %s:%s hit.\n", _FL, File.Get(), Line.Get());
+					}
+					else printf("%s:%i - split file/line failed for '%s'\n", _FL, k.Get());
 				}
-				else printf("Error: no ':' in '%s'. (%s:%i)\n", k.Get(), _FL);
+				else printf("%s:%i - error: no ':' in '%s'.\n", _FL, k.Get());
 			}
 		}
 		else
@@ -266,7 +270,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 		if (File && Line.Int() > 0)
 		{
 			printf("\tBreakpoint.OnFileLine(%s,%s)\n", File.Get(), Line.Get());
-			OnFileLine(NativePath(File), (int)Line.Int(), true);
+			OnFileLine(NativePath(File), (int)Line.Int(), true, _FL);
 		}
 		else
 		{
@@ -276,9 +280,10 @@ class Gdb : public LDebugger, public LThread, public Callback
 	
 	void OnLine(const char *Start, ptrdiff_t Length)
 	{
-		if (DEBUG_SHOW_GDB_IO)
+		// if (DEBUG_SHOW_GDB_IO)
 		{
-			// printf("Receive: '%.*s' ParseState=%i, OutLine=%p, OutStream=%p\n", Length-1, Start, ParseState, OutLines, OutStream);
+			// printf("Receive: '%.*s' ParseState=%i, OutLine=%p, OutStream=%p\n", (int)Length-1, Start, ParseState, OutLines, OutStream);
+			printf("Receive: '%.*s'\n", (int)Length-1, Start);
 		}
 
 		// Send output
@@ -310,10 +315,8 @@ class Gdb : public LDebugger, public LThread, public Callback
 
 		if (ParseState == ParseBreakPoint)
 		{
-			LString s(Start, Length);
-			
-			printf("\tbreak:'%s'\n", s.Get());
-			OnBreakPoint(s);
+			printf("\tbreak:'%s'\n", BreakInfo[0].Get());
+			OnBreakPoint(BreakInfo[0]);
 			ParseState = ParseNone;
 			BreakInfo.Length(0);
 		}
@@ -329,8 +332,6 @@ class Gdb : public LDebugger, public LThread, public Callback
 			{
 				ParseState = ParseBreakPoint;
 				BreakInfo.New().Set(Start, Length);
-				
-				// printf("######## ParseBreakPoint!!!\n");
 			}
 			else if (*Start == '[')
 			{
@@ -377,9 +378,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 				// Untagged file/line?
 				Events->Ungrab();
 				if (ParseLocation(Untagged))
-				{
-					Untagged.Length(0);
-				}
+					Untagged.Empty();
 			}
 		}
 	}
@@ -579,7 +578,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 		return true;
 	}
 
-	#if 0
+	#if 1
 	#define CMD_LOG(...) printf(__VA_ARGS__)
 	#else
 	#define CMD_LOG(...)

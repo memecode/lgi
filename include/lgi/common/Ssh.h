@@ -308,9 +308,14 @@ public:
 			while (!Cancel->IsCancelled())
 			{
 				r = ssh_connect(Ssh);
+				if (r == SSH_AGAIN)
+				{
+					LSleep(10);
+					continue;
+				}
+
 				LgiTrace("ssh_connect=%i\n", r);
-				if (r != SSH_AGAIN)
-					break;
+				break;
 			}
 		}
 		else
@@ -420,7 +425,11 @@ public:
 		}
 		else if (Username && Password)
 		{
-			r = ssh_userauth_password(Ssh, Username, Password);
+			do
+			{
+				r = ssh_userauth_password(Ssh, Username, Password);
+			}
+			while (r == SSH_AUTH_AGAIN);
 		}
 		else
 		{
@@ -550,7 +559,7 @@ public:
 				}
 				else Log->Print("%s:%i - Can't open '%s'.\n", _FL, From);
 			}
-			else Log->Print("%s:%i - ssh_scp_push_file(%s,%" PRIi64 ") failed.\n", _FL, Parts[1].Get(), length);
+			else Log->Print("%s:%i - ssh_scp_push_file(%s,%" PRIi64 ") failed with: %i.\n", _FL, Parts[1].Get(), length, r);
 		}
 		else Log->Print("%s:%i - ssh_scp_init failed with %i\n", _FL, r);
 

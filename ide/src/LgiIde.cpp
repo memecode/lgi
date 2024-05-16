@@ -2946,6 +2946,7 @@ IdeDoc *AppWnd::GetCurrentDoc()
 
 void AppWnd::GotoReference(const char *File, int Line, bool CurIp, bool WithHistory, std::function<void(IdeDoc*)> Callback)
 {
+	printf("%s:%i GotoReference(%s, %i) thread=%i\n", _FL, File, Line, InThread());
 	if (!InThread())
 	{
 		RunCallback

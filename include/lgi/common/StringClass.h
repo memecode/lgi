@@ -979,19 +979,16 @@ public:
 	/// Find a sub-string	
 	ssize_t Find(const char *needle, ssize_t start = 0, ssize_t end = -1)
 	{
-		if (!needle) return -1;
-		char *c = Get();
-		if (!c) return -1;
+		if (!needle)
+			return -1;
 
-		char *pos = c + start;
-		while (c < pos)
-		{
-			if (!*c)
-				return -1;
-			c++;
-		}
-		
-		char *found = (end > 0) ? Strnstr(c, needle, end - start) : strstr(c, needle);
+		char *c = Get();
+		if (!c ||
+			start < 0 ||
+			start > Length())
+			return -1;
+
+		auto found = end > 0 ? Strnstr(c + start, needle, end - start) : strstr(c + start, needle);
 		return (found) ? found - Get() : -1;
 	}
 
@@ -999,16 +996,13 @@ public:
 	ssize_t RFind(const char *needle, int start = 0, ssize_t end = -1)
 	{
 		if (!needle) return -1;
-		char *c = Get();
-		if (!c) return -1;
 
-		char *pos = c + start;
-		while (c < pos)
-		{
-			if (!*c)
-				return -1;
-			c++;
-		}
+		char *c = Get();
+		if (!c ||
+			start < 0 ||
+			start > Length())
+			return -1;
+		c += start;
 		
 		char *found, *prev = NULL;
 		size_t str_len = strlen(needle);
