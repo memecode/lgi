@@ -8,7 +8,13 @@ class LgiClass LPoint
 public:
 	int x, y;
 
-	LPoint(int Ix = 0, int Iy = 0)
+	LPoint()
+	{
+		x = 0;
+		y = 0;
+	}
+
+	LPoint(int Ix, int Iy)
 	{
 		x = Ix;
 		y = Iy;

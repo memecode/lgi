@@ -809,7 +809,7 @@ void LView::OnNcPaint(LSurface *pDC, LRect &r)
 		if (Offset)
 		{
 			r = Pos;
-			r.Offset(Offset);
+			r.Offset(*Offset);
 		}
 		else
 		{
