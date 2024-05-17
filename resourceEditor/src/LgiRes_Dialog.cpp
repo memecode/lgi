@@ -3509,7 +3509,7 @@ void ResDialog::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
 	{
 		#ifndef WIN32
 		LRect p = GetPos();
-		if (Offset) p.Offset(Offset);
+		if (Offset) p.Offset(*Offset);
 		pDC->SetClient(&p);
 		#endif
 		
