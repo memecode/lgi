@@ -457,6 +457,7 @@ public:
 			return false;
 		}
 
+		ssh_set_blocking(Ssh, true); // scp doesn't seem to like non-blocking
 		auto r = ssh_scp_init(Scp);
 		if (r == SSH_OK)
 		{
@@ -514,6 +515,8 @@ public:
 
 		// Write the file...
 		auto Parts = LString(To).RSplit("/", 1);
+		
+		ssh_set_blocking(Ssh, true); // scp doesn't seem to like non-blocking
 		ssh_scp Scp = ssh_scp_new(Ssh, SSH_SCP_WRITE, Parts[0]);
 		if (!Scp)
 		{
