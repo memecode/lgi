@@ -217,7 +217,7 @@ bool LBox::OnViewMouse(LView *v, LMouse &m)
 			Local.x += p.x1;
 			Local.y += p.y1;
 			LViewI *vi = v->GetParent();
-			v = vi ? vi->GetGView() : NULL;
+			v = vi ? vi->GetLView() : NULL;
 		}
 		
 		if (v == (LView*)this)

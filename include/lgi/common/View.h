@@ -239,7 +239,7 @@ public:
 	#endif
 
 	/// Returns the ptr to a LView
-	LView *GetGView() override { return this; }
+	LView *GetLView() override { return this; }
 	
 	/// Returns the OS handle of the top level window
 	OsWindow WindowHandle() override;

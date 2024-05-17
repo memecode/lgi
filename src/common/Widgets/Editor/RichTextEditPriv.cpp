@@ -1964,7 +1964,7 @@ void LRichTextPriv::Paint(LSurface *pDC, LScrollBar *&ScrollY)
 	#endif
 
 	#if defined(WINDOWS) && !DEBUG_NO_DOUBLE_BUF
-	Mem.SetOrigin(0, 0);
+	Mem.SetOrigin(LPoint());
 	pScreen->Blt(Areas[LRichTextEdit::ContentArea].x1, Areas[LRichTextEdit::ContentArea].y1, &Mem);
 	#else
 	pDC->ClipRgn(NULL);

@@ -165,7 +165,7 @@ LRESULT CALLBACK LWindowsClass::Redir(HWND hWnd, UINT m, WPARAM a, LPARAM b)
 		LViewI *ViewI = (LViewI*) Info->lpCreateParams;
 		if (ViewI)
 		{
-			LView *View = ViewI->GetGView();
+			LView *View = ViewI->GetLView();
 			if (View) View->_View = hWnd;
 
 			#if _MSC_VER >= _MSC_VER_VS2005
@@ -203,7 +203,7 @@ LRESULT CALLBACK LWindowsClass::SubClassRedir(HWND hWnd, UINT m, WPARAM a, LPARA
 		{
 			if (ViewI = (LViewI*) Info->lpCreateParams)
 			{
-				LView *View = ViewI->GetGView();
+				LView *View = ViewI->GetLView();
 				if (View)
 					View->_View = hWnd;
 			}
@@ -1024,7 +1024,7 @@ bool LView::Invalidate(LRect *r, bool Repaint, bool Frame)
 		while (p && !p->Handle())
 		{
 			LViewI *Par = p->GetParent();
-			LView *VPar = Par?Par->GetGView():0;
+			LView *VPar = Par?Par->GetLView():0;
 			LRect w = p->GetPos();
 			LRect c = p->GetClient(false);
 			if (Frame && p == this)
@@ -1265,7 +1265,7 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 				HWND hwnd = (HWND)Msg->B();
 
 				LViewI *v = FindControl(hwnd);
-				LView *gv = v ? v->GetGView() : NULL;
+				LView *gv = v ? v->GetLView() : NULL;
 				if (gv)
 				{
 					int Depth = dynamic_cast<LEdit*>(gv) ? 1 : 10;
@@ -1447,7 +1447,7 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 			case M_COMMAND:
 			{
 				// LViewI *Ci = FindControl((HWND) Msg->b);
-				// LView *Ctrl = Ci ? Ci->GetGView() : 0;
+				// LView *Ctrl = Ci ? Ci->GetLView() : 0;
 				LView *Ctrl;
 				if (Msg->b &&
 					CastHwnd(Ctrl, (HWND)Msg->b))

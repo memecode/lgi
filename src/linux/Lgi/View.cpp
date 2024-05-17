@@ -171,7 +171,7 @@ void LView::OnGtkRealize()
 
 	for (auto c : Children)
 	{
-		auto gv = c->GetGView();
+		auto gv = c->GetLView();
 		if (gv)
 			gv->OnGtkRealize();
 	}
@@ -1054,7 +1054,7 @@ void LView::OnGtkDelete()
 	List<LViewI>::I it = Children.begin();
 	for (LViewI *c = *it; c; c = *++it)
 	{
-		LView *v = c->GetGView();
+		LView *v = c->GetLView();
 		if (v)
 			v->OnGtkDelete();
 	}

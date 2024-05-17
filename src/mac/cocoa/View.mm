@@ -354,7 +354,7 @@ void LView::OnDealloc()
 	
 	for (auto c: Children)
 	{
-		auto gv = c->GetGView();
+		auto gv = c->GetLView();
 		if (gv) gv->OnDealloc();
 	}
 }
@@ -419,7 +419,7 @@ bool LView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 		return false;
 
 	#if 0
-	[nsview setNeedsDisplayInRect:v->GetGView()->Flip(r)];
+	[nsview setNeedsDisplayInRect:v->GetLView()->Flip(r)];
 	printf("%s::Inval r=%s\n", GetClass(), r.GetStr());
 	#else
 	nsview.needsDisplay = true;
@@ -538,7 +538,7 @@ bool LView::PointToView(LPoint &p)
 	// Find offset to window
 	while (c && c != c->GetWindow())
 	{
-		LView *gv = c->GetGView();
+		LView *gv = c->GetLView();
 		LRect cli = gv ? gv->LView::GetClient(false) : c->GetClient(false);
 		LRect pos = c->GetPos(); 
 		Ox += pos.x1 + cli.x1;
@@ -574,7 +574,7 @@ bool LView::PointToView(LPoint &p)
 		
 		// Flip back into top down.. in window space
 		#if 1
-		p = c->GetGView()->Flip(p);
+		p = c->GetLView()->Flip(p);
 		#else
 		LRect cli = c->GetClient();
 		p.y = cli.Y() - p.y;
@@ -851,7 +851,7 @@ bool LView::_Attach(LViewI *parent)
 	
 	d->ParentI = parent;
 	d->ParentI2 = parent;
-	d->Parent = d->ParentI ? parent->GetGView() : NULL;
+	d->Parent = d->ParentI ? parent->GetLView() : NULL;
 
 	LAssert(!_InLock);
 	_Window = d->GetParent() ? d->GetParent()->GetWindow() : 0;

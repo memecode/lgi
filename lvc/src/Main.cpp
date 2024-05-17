@@ -1630,7 +1630,7 @@ public:
 							s.AppendItem("Add Local", IDM_ADD_LOCAL);
 							s.AppendItem("Add Remote", IDM_ADD_REMOTE);
 							s.AppendItem("Add Diff File", IDM_ADD_DIFF_FILE);
-							int Cmd = s.Float(c->GetGView(), m);
+							int Cmd = s.Float(c->GetLView(), m);
 							switch (Cmd)
 							{
 								case IDM_ADD_LOCAL:

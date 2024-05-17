@@ -1723,9 +1723,14 @@ struct MemTextBuf : public LMemDC
 	void Paint(LBlitRegions &r, int sy, int dy, System32BitPixel &fore, System32BitPixel &back)
 	{
 		auto DivLut = Div255Lut;
-		auto d = ((Px*)(*oldDc)[dy]) + r.DstClip.x1;
+		auto d = (Px*)(*oldDc)[dy];
+		auto s = (System24BitPixel*)(*this)[sy];
+		if (!d || !s)
+			return;
+		d += r.DstClip.x1;
 		auto end = d + r.DstClip.X();
-		auto s = ((System24BitPixel*)(*this)[sy]) + r.SrcClip.x1;
+		s += r.SrcClip.x1;
+
 		while (d < end)
 		{
 			uint8_t sa = ((int)s->r + s->g + s->b) / 3;
@@ -1743,14 +1748,19 @@ struct MemTextBuf : public LMemDC
 	void PaintAlpha(LBlitRegions &r, int sy, int dy, System32BitPixel &fore, System32BitPixel &back)
 	{
 		auto DivLut = Div255Lut;
-		auto d = ((Px*)(*oldDc)[dy]) + r.DstClip.x1;
+		auto d = (Px*)(*oldDc)[dy];
+		auto s = (System24BitPixel*)(*this)[sy];
+		if (!d || !s)
+			return;
+		d += r.DstClip.x1;
 		auto end = d + r.DstClip.X();
-		auto s = ((System24BitPixel*)(*this)[sy]) + r.SrcClip.x1;
+		s += r.SrcClip.x1;
+
 		while (d < end)
 		{
-			uint8_t sa = 255 - ((int)s->r + s->g + s->b) / 3, da;
+			uint8_t sa = ((int)s->r + s->g + s->b) / 3;
 			auto oma = 255 - sa;
-			#define PAINT(comp) d->comp = (fore.comp * sa) + (back.comp * oma);
+			#define PAINT(comp) d->comp = DivLut[(fore.comp * sa) + (back.comp * oma)];
 			PAINT(r) PAINT(g) PAINT(b)
 			d->a = 255;
 			#undef PAINT
@@ -1764,9 +1774,14 @@ struct MemTextBuf : public LMemDC
 	void Over(LBlitRegions &r, int sy, int dy, System32BitPixel &fore)
 	{
 		auto DivLut = Div255Lut;
-		auto d = ((Px*)(*oldDc)[dy]) + r.DstClip.x1;
+		auto d = (Px*)(*oldDc)[dy];
+		auto s = (System24BitPixel*)(*this)[sy];
+		if (!d || !s)
+			return;
+		d += r.DstClip.x1;
 		auto end = d + r.DstClip.X();
-		auto s = ((System24BitPixel*)(*this)[sy]) + r.SrcClip.x1;
+		s += r.SrcClip.x1;
+
 		while (d < end)
 		{
 			// Composite 's over d' using the current foreground colour
@@ -1788,13 +1803,17 @@ struct MemTextBuf : public LMemDC
 	void OverAlpha(LBlitRegions &r, int sy, int dy, System32BitPixel &fore)
 	{
 		auto DivLut = Div255Lut;
-		auto d = ((Px*)(*oldDc)[dy]) + r.DstClip.x1;
+		auto d = (Px*)(*oldDc)[dy];
+		auto s = (System24BitPixel*)(*this)[sy];
+		if (!d || !s)
+			return;
+		d += r.DstClip.x1;
 		auto end = d + r.DstClip.X();
-		auto s = ((System24BitPixel*)(*this)[sy]) + r.SrcClip.x1;
+		s += r.SrcClip.x1;
 		while (d < end)
 		{
 			// Composite 's over d' using the current foreground colour
-			uint8_t sa = ((int)s->r + s->g + s->b) / 3, da;
+			uint8_t sa = ((int)s->r + s->g + s->b) / 3;
 			if (sa)
 			{
 				auto oma = 255 - sa;
@@ -1812,52 +1831,57 @@ struct MemTextBuf : public LMemDC
 	~MemTextBuf()
 	{
 		// Now mem24 is essentially an alpha channel to draw on originalDc
-		LBlitRegions r(oldDc, pos.x, pos.y, this);
+		auto pt = pos; // - oldDc->GetOrigin();
+		LBlitRegions r(oldDc, pt.x, pt.y, this);
 		auto Font = ds->GetFont();
-		System32BitPixel fore, back;
 		
-		fore.r = cFore.r();
-		fore.g = cFore.g();
-		fore.b = cFore.b();
-		fore.a = cFore.a();
-		
-		back.r = cBack.r();
-		back.g = cBack.g();
-		back.b = cBack.b();
-		back.a = cBack.a();
-
-		for (int sy = r.SrcClip.y1, dy=r.DstClip.y1;
-			dy<=r.DstClip.y2 && sy<r.SrcClip.y2;
-			dy++, sy++)
+		if (r.DstClip.Valid() && r.SrcClip.Valid())
 		{
-			switch (oldDc->GetColourSpace())
+			System32BitPixel fore, back;
+
+			fore.r = cFore.r();
+			fore.g = cFore.g();
+			fore.b = cFore.b();
+			fore.a = cFore.a();
+		
+			back.r = cBack.r();
+			back.g = cBack.g();
+			back.b = cBack.b();
+			back.a = cBack.a();
+
+			for (int sy = r.SrcClip.y1, dy=r.DstClip.y1;
+				dy<=r.DstClip.y2 && sy<r.SrcClip.y2;
+				dy++, sy++)
 			{
-				#define MemTextOverAlpha(Fmt) \
-					case Cs##Fmt: \
-						if (Font->Transparent()) \
-							OverAlpha<L##Fmt>(r, sy, dy, fore); \
-						else \
-							PaintAlpha<L##Fmt>(r, sy, dy, fore, back); \
-						break;
-				MemTextOverAlpha(Rgba32)
-				MemTextOverAlpha(Bgra32)
-
-				#define MemTextOver(Fmt) \
-					case Cs##Fmt: \
-						if (Font->Transparent()) \
-							Over<L##Fmt>(r, sy, dy, fore); \
-						else \
-							Paint<L##Fmt>(r, sy, dy, fore, back); \
-						break;
-				MemTextOver(Rgbx32)
-				MemTextOver(Bgrx32)
-				MemTextOver(Rgb24)
-				MemTextOver(Bgr24)
-
-				default:
+				switch (oldDc->GetColourSpace())
 				{
-					LAssert(!"Impl me");
-					break;
+					#define MemTextOverAlpha(Fmt) \
+						case Cs##Fmt: \
+							if (Font->Transparent()) \
+								OverAlpha<L##Fmt>(r, sy, dy, fore); \
+							else \
+								PaintAlpha<L##Fmt>(r, sy, dy, fore, back); \
+							break;
+					MemTextOverAlpha(Rgba32)
+					MemTextOverAlpha(Bgra32)
+
+					#define MemTextOver(Fmt) \
+						case Cs##Fmt: \
+							if (Font->Transparent()) \
+								Over<L##Fmt>(r, sy, dy, fore); \
+							else \
+								Paint<L##Fmt>(r, sy, dy, fore, back); \
+							break;
+					MemTextOver(Rgbx32)
+					MemTextOver(Bgrx32)
+					MemTextOver(Rgb24)
+					MemTextOver(Bgr24)
+
+					default:
+					{
+						LAssert(!"Impl me");
+						break;
+					}
 				}
 			}
 		}
@@ -2019,9 +2043,15 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 			LColour cBack = Font->Back();
 			LColour cWhitespace;
 
+			if (Stristr(Str, L"Your email address and telephone numbers"))
+			{
+				int asd=0;
+			}
+
 			LAutoPtr<MemTextBuf> mem24;
 			if (!pDC->IsScreen() &&
-				pDC->HasAlpha())
+				pDC->HasAlpha() &&
+				x > 0 && y > 0)
 			{
 				// Win32: if we try and draw on a 32bit memory context, the alpha channel is NOT set
 				// correctly. So to work around that first write to a 24bit memory context and blt

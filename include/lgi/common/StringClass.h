@@ -985,7 +985,7 @@ public:
 		char *c = Get();
 		if (!c ||
 			start < 0 ||
-			start > Length())
+			start > (ssize_t)Length())
 			return -1;
 
 		auto found = end > 0 ? Strnstr(c + start, needle, end - start) : strstr(c + start, needle);

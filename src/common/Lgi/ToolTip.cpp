@@ -326,7 +326,7 @@ bool LToolTip::Attach(LViewI *p)
 {
 	#if LGI_NATIVE_TIPS
 	
-	d->Parent = p->GetGView();
+	d->Parent = p->GetLView();
 	return false;
 
 	#elif WINNATIVE

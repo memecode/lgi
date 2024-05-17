@@ -965,7 +965,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 
 			if (d->Focus)
 			{
-				LView *gv = d->Focus->GetGView();
+				LView *gv = d->Focus->GetLView();
 				if (gv)
 				{
 					#if DEBUG_SETFOCUS
@@ -989,7 +989,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 
 			if (d->Focus)
 			{
-				LView *gv = d->Focus->GetGView();
+				LView *gv = d->Focus->GetLView();
 				if (gv)
 				{
 					#if DEBUG_SETFOCUS

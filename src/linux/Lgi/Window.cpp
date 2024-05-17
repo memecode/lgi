@@ -268,7 +268,7 @@ void LWindow::OnGtkDelete()
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
 		LViewI *c = Children[i];
-		LView *v = c->GetGView();
+		LView *v = c->GetLView();
 		if (v)
 			v->OnGtkDelete();
 	}
@@ -485,7 +485,7 @@ gboolean LWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 			}
 
 			auto v = d->Focus ? d->Focus : this;
-			if (!HandleViewKey(v->GetGView(), k))
+			if (!HandleViewKey(v->GetLView(), k))
 			{
 				if (!k.Down())
 					return false;
@@ -1802,7 +1802,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 
 			if (d->Focus)
 			{
-				LView *gv = d->Focus->GetGView();
+				LView *gv = d->Focus->GetLView();
 				if (gv)
 				{
 					#if DEBUG_SETFOCUS
@@ -1830,7 +1830,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 				static int Count = 0;
 				#endif
 				
-				LView *gv = d->Focus->GetGView();
+				LView *gv = d->Focus->GetLView();
 				if (gv)
 				{
 					#if DEBUG_SETFOCUS

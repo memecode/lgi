@@ -325,7 +325,7 @@ bool LView::Invalidate(LRect *r, bool Repaint, bool Frame)
 			break;
 		}
 		
-		LView *VPar = Par ? Par->GetGView() : 0;
+		LView *VPar = Par ? Par->GetLView() : 0;
 		LRect w = p->GetPos();
 		LRect c = p->GetClient(false);
 		

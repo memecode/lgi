@@ -574,13 +574,13 @@ public:
 	virtual bool MakeOpaque(LRect *rc = NULL);
 
 	/// Gets the surface origin
-	virtual void GetOrigin(int &x, int &y) { x = OriginX; y = OriginY; }
+	virtual LPoint GetOrigin() { return LPoint(OriginX, OriginY); }
 	/// Gets the surface origin
-	LPoint GetOrigin() { int x, y; GetOrigin(x, y); return LPoint(x, y); }
+	void GetOrigin(int &x, int &y) { auto pt = GetOrigin(); x = (int)pt.x; y = (int)pt.y; }
 	/// Sets the surface origin
-	virtual void SetOrigin(int x, int y) { OriginX = x; OriginY = y; }
+	virtual void SetOrigin(LPoint p) { (int)OriginX = p.x; OriginY = (int)p.y; }
 	/// Sets the surface origin
-	void SetOrigin(LPoint p) { SetOrigin(p.x, p.y); }
+	void SetOrigin(int x, int y) { SetOrigin(LPoint(x, y)); }
 	
 	/// Sets a pixel with the current colour
 	virtual void Set(int x, int y);
@@ -795,8 +795,8 @@ public:
 	#ifndef LGI_SDL
 	uchar *operator[](int y) override { return NULL; }
 
-	void GetOrigin(int &x, int &y) override;
-	void SetOrigin(int x, int y) override;
+	LPoint GetOrigin() override;
+	void SetOrigin(LPoint pt) override;
 	LRect ClipRgn() override;
 	LRect ClipRgn(LRect *Rgn) override;
 	COLOUR Colour() override;
@@ -861,7 +861,7 @@ public:
 		/// Source surface
 		LSurface *Src,
 		/// [Optional] Crop the source surface first, else whole surface is blt
-		LRect *SrcRc = 0
+		LRect *SrcRc = NULL
 	)
 	{
 		// Calc full image bounds
@@ -870,9 +870,7 @@ public:
 		if (Dst)
 		{
 			DstBounds = Dst->Bounds();
-			int x = 0, y = 0;
-			Dst->GetOrigin(x, y);
-			DstBounds.Offset(x, y);
+			DstBounds += Dst->GetOrigin();
 		}
 		else DstBounds.ZOff(-1, -1);
 		
@@ -897,6 +895,8 @@ public:
 		SrcClip.y1 += DstClip.y1 - DstBlt.y1;
 		SrcClip.x2 -= DstBlt.x2 - DstClip.x2;
 		SrcClip.y2 -= DstBlt.y2 - DstClip.y2;
+
+		DstClip -= Dst->GetOrigin();
 	}
 
 	/// Returns non-zero if both clipped rectangles are valid.
@@ -1045,7 +1045,7 @@ public:
 	#if !WINNATIVE && !LGI_CARBON && !LGI_COCOA
 	void GetOrigin(int &x, int &y);
 	#endif
-	void SetOrigin(int x, int y);
+	void SetOrigin(LPoint pt);
 	void Empty();
 	bool SupportsAlphaCompositing();
 	bool SwapRedAndBlue();
@@ -1177,7 +1177,7 @@ public:
 		{
 			*In = &Mem;
 			if (Sub)
-				pDC->SetOrigin(Sub->x1, Sub->y1);
+				pDC->SetOrigin(LPoint(Sub->x1, Sub->y1));
 		}
 		else LAssert(!"Failed to create memory context");
 	}
@@ -1190,7 +1190,7 @@ public:
 			if (Mem.Handle())
 				Mem.EndDC();
 			#endif
-			Mem.SetOrigin(0, 0);
+			Mem.SetOrigin(LPoint(0, 0));
 			Screen->Blt(Rgn.x1, Rgn.y1, &Mem);
 		}
 

@@ -282,27 +282,20 @@ bool LScreenDC::CreateFromHandle(HDC hdc)
 	return Status;
 }
 
-void LScreenDC::GetOrigin(int &x, int &y)
+LPoint LScreenDC::GetOrigin()
 {
 	POINT pt;
 	if (GetWindowOrgEx(hDC, &pt))
-	{
-		x = pt.x;
-		y = pt.y;
-	}
+		return LPoint(pt.x, pt.y);
 	else
-	{
-		x = y = 0;
-	}
+		return LPoint();
 }
 
-void LScreenDC::SetOrigin(int x, int y)
+void LScreenDC::SetOrigin(LPoint pt)
 {
-	LSurface::SetOrigin(x, y);
+	LSurface::SetOrigin(pt);
 	if (hDC)
-	{
-		SetWindowOrgEx(hDC, x, y, NULL);
-	}
+		SetWindowOrgEx(hDC, pt.x, pt.y, NULL);
 }
 
 LPalette *LScreenDC::Palette()

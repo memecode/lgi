@@ -53,7 +53,7 @@ protected:
 	}
 
 public:
-	LPopupList(LViewI *edit, PositionType pos, int width = 200, int height = 300) : LPopup(edit->GetGView())
+	LPopupList(LViewI *edit, PositionType pos, int width = 200, int height = 300) : LPopup(edit->GetLView())
 	{
 		Registered = false;
 		PosType = pos;

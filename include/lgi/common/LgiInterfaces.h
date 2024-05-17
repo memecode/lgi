@@ -459,7 +459,7 @@ public:
 	#endif
 	virtual int AddDispatch() = 0;
 	virtual OsWindow WindowHandle() { printf("LViewI::WindowHandle()\n"); return NULL; }
-	virtual LView *GetGView() { return NULL; }
+	virtual LView *GetLView() { return NULL; }
 
 	// Heirarchy
 	virtual bool Attach(LViewI *p) = 0;

@@ -795,7 +795,7 @@ void LTabView::OnPaint(LSurface *pDC)
 	{
 		CalcInset();
 
-		LView *Pv = GetParent() ? GetParent()->GetGView() : NULL;
+		LView *Pv = GetParent() ? GetParent()->GetLView() : NULL;
 		LColour NoPaint = (Pv ? Pv : this)->StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
 		if (!NoPaint.IsTransparent())
 		{

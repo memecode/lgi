@@ -159,7 +159,7 @@ struct DndEvent
 		// Convert co-ords to view local
 		for (LViewI *view = v; view != view->GetWindow(); view = view->GetParent())
 		{
-			LView *gv = view->GetGView();
+			LView *gv = view->GetLView();
 			LRect cli = gv ? gv->LView::GetClient(false) : view->GetClient(false);
 			LRect pos = view->GetPos();
 			Pt.x -= pos.x1 + cli.x1;
@@ -258,7 +258,7 @@ struct DndEvent
 	
 	LMouse m(self.w);
 	m.SetFromEvent(ev, self);
-	m.Target->GetGView()->_Mouse(m, false);
+	m.Target->GetLView()->_Mouse(m, false);
 }
 
 - (void)mouseUp:(NSEvent*)ev
@@ -268,7 +268,7 @@ struct DndEvent
 
 	LMouse m(self.w);
 	m.SetFromEvent(ev, self);
-	m.Target->GetGView()->_Mouse(m, false);
+	m.Target->GetLView()->_Mouse(m, false);
 }
 
 - (void)rightMouseDown:(NSEvent*)ev
@@ -278,7 +278,7 @@ struct DndEvent
 
 	LMouse m(self.w);
 	m.SetFromEvent(ev, self);
-	m.Target->GetGView()->_Mouse(m, false);
+	m.Target->GetLView()->_Mouse(m, false);
 }
 
 - (void)rightMouseUp:(NSEvent*)ev
@@ -288,7 +288,7 @@ struct DndEvent
 
 	LMouse m(self.w);
 	m.SetFromEvent(ev, self);
-	m.Target->GetGView()->_Mouse(m, false);
+	m.Target->GetLView()->_Mouse(m, false);
 }
 
 - (void)mouseMoved:(NSEvent*)ev
@@ -301,7 +301,7 @@ struct DndEvent
 	
 	// m.Trace("moved");
 
-	m.Target->GetGView()->_Mouse(m, true);
+	m.Target->GetLView()->_Mouse(m, true);
 }
 
 - (void)mouseDragged:(NSEvent*)ev
@@ -311,7 +311,7 @@ struct DndEvent
 
 	LMouse m(self.w);
 	m.SetFromEvent(ev, self);
-	m.Target->GetGView()->_Mouse(m, true);
+	m.Target->GetLView()->_Mouse(m, true);
 }
 
 - (void)scrollWheel:(NSEvent*)ev

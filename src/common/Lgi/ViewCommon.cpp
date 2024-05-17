@@ -348,7 +348,7 @@ bool LView::AddView(LViewI *v, int Where)
 	bool Add = Children.Insert(v, Where);
 	if (Add)
 	{
-		LView *gv = v->GetGView();
+		LView *gv = v->GetLView();
 		if (gv && gv->_Window != _Window)
 		{
 			LAssert(!_InLock);
@@ -867,7 +867,7 @@ void LView::OnNcPaint(LSurface *pDC, LRect &r)
 		// Paint all the children...
 		for (auto i : Children)
 		{
-			LView *w = i->GetGView();
+			LView *w = i->GetLView();
 			if (w && w->Visible())
 			{
 				if (!w->Pos.Valid())
@@ -945,7 +945,7 @@ void LView::OnNcPaint(LSurface *pDC, LRect &r)
 		// Paint any virtual children
 		for (auto i : Children)
 		{
-			LView *w = i->GetGView();
+			auto w = i->GetLView();
 			if (w && w->Visible())
 			{
 				#if LGI_VIEW_HANDLE
@@ -982,7 +982,7 @@ LViewI *LView::GetParent()
 void LView::SetParent(LViewI *p)
 {
 	ThreadCheck();
-	d->Parent = p ? p->GetGView() : NULL;
+	d->Parent = p ? p->GetLView() : NULL;
 	d->ParentI = p;
 	d->ParentI2 = p;
 }
@@ -2801,7 +2801,7 @@ void LView::_Dump(int Depth)
 		List<LViewI>::I i = Children.Start();
 		for (LViewI *c = *i; c; c = *++i)
 		{
-			LView *v = c->GetGView();
+			LView *v = c->GetLView();
 			if (v)
 				v->_Dump(Depth+1);
 		}

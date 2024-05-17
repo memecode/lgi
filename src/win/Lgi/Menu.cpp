@@ -1204,18 +1204,17 @@ int LMenu::_OnEvent(LMessage *Msg)
 				// "animated menus" are on the offset starts at -3,-3 and throws
 				// the menu items off. This is a bug in windows, but watcha
 				// gonna do?
-				int x, y;
-				Dc.GetOrigin(x, y);
+				auto origin = Dc.GetOrigin();
 				
 				// Clip and offset so that the menu item draws in client co-ords.
-				Dc.SetOrigin(-r.x1+x, -r.y1+y);
+				Dc.SetOrigin(LPoint(origin.x-r.x1, origin.y-r.y1));
 				Dc.SetSize(r.X(), r.Y());
 
 				// Paint the item...
 				((LMenuItem*)Item->itemData)->_Paint(&Dc, Item->itemState);
 
 				// Set the origin back the original value.
-				Dc.SetOrigin(x, y);
+				Dc.SetOrigin(origin);
 				return true;
 			}
 			break;

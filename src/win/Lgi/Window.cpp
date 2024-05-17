@@ -224,7 +224,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 			{
 				// The main LWindow is getting focus.
 				// Check if we can re-focus the previous child focus...
-				LView *v = d->Focus->GetGView();
+				LView *v = d->Focus->GetLView();
 				if (v && !HasParentPopup(v))
 				{
 					// We should never return focus to a popup, or it's child.
@@ -261,7 +261,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 					
 			if (d->Focus)
 			{
-				LView *v = d->Focus->GetGView();
+				LView *v = d->Focus->GetLView();
 				if (v) v->WndFlags &= ~GWF_FOCUS;
 				d->Focus->OnFocus(false);
 				d->Focus->Invalidate();
@@ -277,7 +277,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 
 			if (d->Focus)
 			{
-				LView *v = d->Focus->GetGView();
+				LView *v = d->Focus->GetLView();
 				if (v) v->WndFlags |= GWF_FOCUS;
 				d->Focus->OnFocus(true);
 				d->Focus->Invalidate();
@@ -295,7 +295,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 		{
 			if (ctrl == d->Focus)
 			{
-				LView *v = d->Focus->GetGView();
+				LView *v = d->Focus->GetLView();
 				if (v)
 				{
 					if (v->WndFlags & GWF_FOCUS)

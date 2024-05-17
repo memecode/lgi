@@ -505,7 +505,7 @@ void LApp::OnSDLEvent(LMessage *m)
 				ms.Middle(m->Event.button.button == SDL_BUTTON_MIDDLE);
 				ms.Down(m->Event.type == SDL_MOUSEBUTTONDOWN);
 
-				LView *gv = ms.Target->GetGView();
+				LView *gv = ms.Target->GetLView();
 				/*
 				if (gv)
 					printf("AppWnd=%s/%p Target=%s/%p\n", AppWnd->GetClass(), AppWnd, ms.Target->GetClass(), ms.Target);
@@ -545,7 +545,7 @@ void LApp::OnSDLEvent(LMessage *m)
 			if (AppWnd)
 			{
 				LViewI *f = AppWnd->GetFocus();
-				AppWnd->HandleViewKey(f ? f->GetGView() : NULL, k);
+				AppWnd->HandleViewKey(f ? f->GetLView() : NULL, k);
 			}
 			break;
 		}

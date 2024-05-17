@@ -109,10 +109,10 @@ public:
 	
 	/// Moves the rectangle by an offset
 	void Offset(int x, int y);
-	void Offset(LPoint *p);
+	void Offset(const LPoint &p);
 	
 	/// Moves the edges by an offset
-	void Offset(LRect *a);
+	void Offset(const LRect &rc);
 
 	LRect Move(int x, int y)
 	{

@@ -467,7 +467,7 @@ LRect ResDialogCtrl::AbsPos()
 		LRect pos = w->GetPos();
 		if (w->GetParent())
 		{
-			// LView *Ctrl = w->GetParent()->GetGView();
+			// LView *Ctrl = w->GetParent()->GetLView();
 
 			LRect client = w->GetParent()->GetClient(false);
 			r.Offset(pos.x1 + client.x1, pos.y1 + client.y1);

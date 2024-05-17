@@ -260,7 +260,7 @@ class GelSkin : public LSkinEngine
 		if (Mem && Mem->Create(Sz ? Sz->X() : 14, Sz ? Sz->Y() : 14, OsDefaultCs))
 		{
 			// blank out background
-			LColour Back = Ctrl->GetGView()->StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
+			LColour Back = Ctrl->GetLView()->StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
 			Mem->Colour(Back);
 			Mem->Rectangle();
 			
@@ -615,7 +615,7 @@ public:
 			auto p = Ctrl->GetParent();
 			NoPaint = LColour(L_MED);
 			if (p) // Use the parent's background?
-				NoPaint = p->GetGView()->StyleColour(LCss::PropBackgroundColor, NoPaint);
+				NoPaint = p->GetLView()->StyleColour(LCss::PropBackgroundColor, NoPaint);
 		}
 		#endif
 		if (NoPaint.IsValid())

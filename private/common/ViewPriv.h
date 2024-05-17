@@ -242,7 +242,7 @@ public:
 				return NULL;
 			}
 			#endif
-			return ParentI->GetGView();
+			return ParentI->GetLView();
 		}
 
 		return NULL;

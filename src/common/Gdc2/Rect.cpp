@@ -148,21 +148,20 @@ void LRect::Offset(int x, int y)
 	y2 += y;
 }
 
-void LRect::Offset(LPoint *p)
+void LRect::Offset(const LPoint &p)
 {
-	if (!p) return;
-	x1 += p->x;
-	y1 += p->y;
-	x2 += p->x;
-	y2 += p->y;
+	x1 += p.x;
+	y1 += p.y;
+	x2 += p.x;
+	y2 += p.y;
 }
 
-void LRect::Offset(LRect *a)
+void LRect::Offset(const LRect &rc)
 {
-	x1 += a->x1;
-	y1 += a->y1;
-	x2 += a->x2;
-	y2 += a->y2;
+	x1 += rc.x1;
+	y1 += rc.y1;
+	x2 += rc.x2;
+	y2 += rc.y2;
 }
 
 void LRect::Inset(int x, int y)

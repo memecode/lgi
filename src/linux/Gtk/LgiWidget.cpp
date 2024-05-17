@@ -29,7 +29,7 @@ static void lgi_widget_class_init(LgiWidgetClass *klass);
 static bool is_debug(LgiWidget *w)
 {
 	#if defined _DEBUG
-	return w->target->GetGView()->_Debug;
+	return w->target->GetLView()->_Debug;
 	#else
 	return false;
 	#endif
@@ -820,7 +820,7 @@ lgi_widget_realize(GtkWidget *widget)
 	);
 	gtk_widget_register_window(widget, w->window);
 
-	auto gv = w->target->GetGView();
+	auto gv = w->target->GetLView();
 	if (gv)
 		gv->OnGtkRealize();
 	else

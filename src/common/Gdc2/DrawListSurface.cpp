@@ -334,9 +334,9 @@ int LDrawListSurface::GetBits()
 	return d->Bits;
 }
 
-void LDrawListSurface::SetOrigin(int x, int y)
+void LDrawListSurface::SetOrigin(LPoint pt)
 {
-	LSurface::SetOrigin(x, y);
+	LSurface::SetOrigin(pt);
 }
 
 void LDrawListSurface::Set(int x, int y)

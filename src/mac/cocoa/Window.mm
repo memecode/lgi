@@ -511,7 +511,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 			
 			if (d->Focus)
 			{
-				LView *v = d->Focus->GetGView();
+				LView *v = d->Focus->GetLView();
 				if (v) v->WndFlags &= ~GWF_FOCUS;
 				d->Focus->OnFocus(false);
 				d->Focus->Invalidate();
@@ -527,7 +527,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 			
 			if (d->Focus)
 			{
-				LView *v = d->Focus->GetGView();
+				LView *v = d->Focus->GetLView();
 				if (v) v->WndFlags |= GWF_FOCUS;
 				d->Focus->OnFocus(true);
 				d->Focus->Invalidate();
@@ -545,7 +545,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 		{
 			if (ctrl == d->Focus)
 			{
-				LView *v = d->Focus->GetGView();
+				LView *v = d->Focus->GetLView();
 				if (v)
 				{
 					if (v->WndFlags & GWF_FOCUS)
@@ -845,7 +845,7 @@ bool LWindow::HandleViewKey(LView *v, LKey &k)
 	bool Status = false;
 	LViewI *Ctrl = NULL;
 	if (!v && d->Focus)
-		v = d->Focus->GetGView();
+		v = d->Focus->GetLView();
 	if (!v)
 	{
 		#if DEBUG_KEYS
