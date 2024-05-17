@@ -33,9 +33,9 @@
 		#elif defined(HAIKU)
 			"libjpeg.so.62"
 		#else
-			"libjpeg9a"
+			"libjpeg"
 			#if defined(WINDOWS)
-				"_"
+				"9a_"
 				#if _MSC_VER >= _MSC_VER_VS2019
 				_MSC_YEAR_STR
 				#else
