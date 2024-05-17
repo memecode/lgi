@@ -976,7 +976,7 @@ public:
 	LMemDC(LSurface *pDC);
 	virtual ~LMemDC();
 
-	const char *GetClass() { return "LMemDC"; }
+	const char *GetClass() override { return "LMemDC"; }
 	bool HasAlpha() override
 	{
 		if (pAlphaDC != NULL)
@@ -998,7 +998,7 @@ public:
 		
 	#else
 
-		LRect ClipRgn() { return Clip; }
+		LRect ClipRgn() override { return Clip; }
 
 		#if defined(__GTK_H__)
 
@@ -1016,7 +1016,7 @@ public:
 
 		#elif defined MAC
 				
-			OsBitmap GetBitmap();
+			OsBitmap GetBitmap() override;
 	
 			#if LGI_COCOA && defined(__OBJC__)
 			LMemDC(NSImage *img);
@@ -1024,7 +1024,7 @@ public:
 			#endif
 	
 			#if !defined(LGI_SDL)
-				CGColorSpaceRef GetColourSpaceRef();
+				CGColorSpaceRef GetColourSpaceRef() override;
 				CGImg *GetImg(LRect *Sub = 0, int Debug = 0);
 			#endif
 		
@@ -1034,14 +1034,14 @@ public:
 
 		#endif
 
-		OsPainter Handle();
+		OsPainter Handle() override;
 		
 	#endif
 
 	// Set new clipping region
-	LRect ClipRgn(LRect *Rgn);
+	LRect ClipRgn(LRect *Rgn) override;
 
-	void SetClient(LRect *c);
+	void SetClient(LRect *c) override;
 
 	/// Locks the bits for access. LMemDC's start in the locked state.
 	bool Lock();
@@ -1054,14 +1054,14 @@ public:
 	#if !WINNATIVE && !LGI_CARBON && !LGI_COCOA
 	LPoint GetOrigin();
 	#endif
-	void SetOrigin(LPoint pt);
+	void SetOrigin(LPoint pt) override;
 	void Empty();
-	bool SupportsAlphaCompositing();
+	bool SupportsAlphaCompositing() override;
 	bool SwapRedAndBlue();
 	
-	bool Create(int x, int y, LColourSpace Cs, int Flags = SurfaceCreateNone);
-	void Blt(int x, int y, LSurface *Src, LRect *a = NULL);
-	void StretchBlt(LRect *d, LSurface *Src, LRect *s = NULL);
+	bool Create(int x, int y, LColourSpace Cs, int Flags = SurfaceCreateNone) override;
+	void Blt(int x, int y, LSurface *Src, LRect *a = NULL) override;
+	void StretchBlt(LRect *d, LSurface *Src, LRect *s = NULL) override;
 
 	void HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b);
 	void VertLine(int x, int y1, int y2, COLOUR a, COLOUR b);

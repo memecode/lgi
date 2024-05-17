@@ -3172,7 +3172,7 @@ bool MailIMap::Search(bool Uids, LArray<LString> &SeqNumbers, const char *Filter
 				if (!s.Equals("Search"))
 					continue;
 
-				while (s = LTok(d))
+				while ((s = LTok(d)))
 				{
 					SeqNumbers.New() = s;
 					Status = true;
