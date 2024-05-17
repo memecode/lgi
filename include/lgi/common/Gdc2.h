@@ -977,8 +977,17 @@ public:
 	virtual ~LMemDC();
 
 	const char *GetClass() { return "LMemDC"; }
-	bool HasAlpha() override;
-	bool HasAlpha(bool b) override;
+	bool HasAlpha() override
+	{
+		if (pAlphaDC != NULL)
+		return true;
+
+		return LColourSpaceHasAlpha(GetColourSpace());
+	}
+	bool HasAlpha(bool b) override
+	{
+		return LSurface::HasAlpha(b);
+	}
 
 	#if WINNATIVE
 	

@@ -275,23 +275,23 @@ OsPainter LScreenDC::Handle()
 	return d->Ctx;
 }
 
-void LScreenDC::GetOrigin(int &x, int &y)
+LPoint LScreenDC::GetOrigin()
 {
-	LSurface::GetOrigin(x, y);
+	return LSurface::GetOrigin();
 }
 
-void LScreenDC::SetOrigin(int x, int y)
+void LScreenDC::SetOrigin(LPoint pt)
 {
 	int Ox = OriginX;
 	int Oy = OriginY;
 
-	LSurface::SetOrigin(x, y);
+	LSurface::SetOrigin(pt);
 
 	if (d->Ctx)
 	{
 		CGContextTranslateCTM(d->Ctx,
-			Ox - x,
-			Oy - y
+			Ox - pt.x,
+			Oy - pt.y
 			);
 	}
 }

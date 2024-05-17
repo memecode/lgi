@@ -83,19 +83,6 @@ LMemDC::~LMemDC()
 	Instances--;
 }
 
-bool LMemDC::HasAlpha()
-{
-	if (pAlphaDC != NULL)
-		return true;
-
-	return LColourSpaceHasAlpha(GetColourSpace());
-}
-
-bool LMemDC::HasAlpha(bool b)
-{
-	return LSurface::HasAlpha(b);
-}
-
 void LMemDC::SetClient(LRect *c)
 {
 	if (c)

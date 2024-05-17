@@ -75,19 +75,6 @@ LMemDC::~LMemDC()
 	DeleteObj(d);
 }
 
-bool LMemDC::HasAlpha()
-{
-	if (pAlphaDC)
-		return true;
-
-	return LColourSpaceHasAlpha(GetColourSpace());
-}
-
-bool LMemDC::HasAlpha(bool b)
-{
-	return LSurface::HasAlpha(b);
-}
-
 cairo_surface_t *LMemDC::GetSurface()
 {
 	return d->Img;

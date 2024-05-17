@@ -722,9 +722,9 @@ void LMemDC::VertLine(int x, int y1, int y2, COLOUR a, COLOUR b)
 	}
 }
 
-void LMemDC::SetOrigin(int x, int y)
+void LMemDC::SetOrigin(LPoint pt)
 {
-	LSurface::SetOrigin(x, y);
+	LSurface::SetOrigin(pt);
 }
 
 void LMemDC::SetClient(LRect *c)
