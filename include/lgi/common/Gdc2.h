@@ -896,7 +896,7 @@ public:
 		SrcClip.x2 -= DstBlt.x2 - DstClip.x2;
 		SrcClip.y2 -= DstBlt.y2 - DstClip.y2;
 
-		DstClip -= Dst->GetOrigin();
+		// DstClip -= Dst->GetOrigin();
 	}
 
 	/// Returns non-zero if both clipped rectangles are valid.
