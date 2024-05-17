@@ -75,6 +75,19 @@ LMemDC::~LMemDC()
 	DeleteObj(d);
 }
 
+bool LMemDC::HasAlpha()
+{
+	if (pAlphaDC)
+		return true;
+
+	return LColourSpaceHasAlpha(GetColourSpace());
+}
+
+bool LMemDC::HasAlpha(bool b)
+{
+	return LSurface::HasAlpha(b);
+}
+
 cairo_surface_t *LMemDC::GetSurface()
 {
 	return d->Img;
@@ -243,22 +256,22 @@ bool LMemDC::Unlock()
 	return false;
 }
 
-void LMemDC::GetOrigin(int &x, int &y)
+LPoint LMemDC::GetOrigin()
 {
-	LSurface::GetOrigin(x, y);
+	return LSurface::GetOrigin();
 }
 
-void LMemDC::SetOrigin(int x, int y)
+void LMemDC::SetOrigin(LPoint pt)
 {
 	Handle();
-	LSurface::SetOrigin(x, y);
+	LSurface::SetOrigin(pt);
 
 	if (d->cr)
 	{		
 		cairo_matrix_t m;
 		cairo_get_matrix(d->cr, &m);
-		m.x0 = -x;
-		m.y0 = -y;
+		m.x0 = -pt.x;
+		m.y0 = -pt.y;
 		cairo_set_matrix(d->cr, &m);
 	}
 }

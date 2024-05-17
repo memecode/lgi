@@ -578,7 +578,7 @@ public:
 	/// Gets the surface origin
 	void GetOrigin(int &x, int &y) { auto pt = GetOrigin(); x = (int)pt.x; y = (int)pt.y; }
 	/// Sets the surface origin
-	virtual void SetOrigin(LPoint p) { (int)OriginX = p.x; OriginY = (int)p.y; }
+	virtual void SetOrigin(LPoint p) { OriginX = p.x; OriginY = p.y; }
 	/// Sets the surface origin
 	void SetOrigin(int x, int y) { SetOrigin(LPoint(x, y)); }
 	
@@ -1043,7 +1043,7 @@ public:
 	bool Unlock();
 	
 	#if !WINNATIVE && !LGI_CARBON && !LGI_COCOA
-	void GetOrigin(int &x, int &y);
+	LPoint GetOrigin();
 	#endif
 	void SetOrigin(LPoint pt);
 	void Empty();

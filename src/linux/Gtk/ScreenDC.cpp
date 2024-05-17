@@ -161,31 +161,28 @@ bool LScreenDC::GetClient(LRect *c)
 	return true;
 }
 
-void LScreenDC::GetOrigin(int &x, int &y)
+LPoint LScreenDC::GetOrigin()
 {
 	if (d->Client.Valid())
 	{
-		x = OriginX + d->Client.x1;
-		y = OriginY + d->Client.y1;
+		return LPoint(OriginX + d->Client.x1,
+					  OriginY + d->Client.y1);
 	}
-	else
-	{
-		x = OriginX;
-		y = OriginY;
-	}
+
+	return LPoint(OriginX, OriginY);
 }
 
-void LScreenDC::SetOrigin(int x, int y)
+void LScreenDC::SetOrigin(LPoint pt)
 {
 	if (d->Client.Valid())
 	{
-		OriginX = x - d->Client.x1;
-		OriginY = y - d->Client.y1;
+		OriginX = pt.x - d->Client.x1;
+		OriginY = pt.y - d->Client.y1;
 	}
 	else
 	{
-		OriginX = x;
-		OriginY = y;
+		OriginX = pt.x;
+		OriginY = pt.y;
 	}
 
 	cairo_matrix_t m;
