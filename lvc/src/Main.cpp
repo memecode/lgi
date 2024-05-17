@@ -1099,7 +1099,7 @@ public:
 
 		auto Tools = new ToolBar;
 
-		ToolsBox->Attach(this);
+		auto result = ToolsBox->Attach(this);
 		Tools->Attach(ToolsBox);
 		FoldersBox->Attach(ToolsBox);
 
@@ -1217,6 +1217,8 @@ public:
             
             // new TestThread();
 		}
+
+		_Dump();
 	}
 	
 	void SaveFolders()

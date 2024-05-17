@@ -28,19 +28,21 @@ makefile
 src/mac/cocoa/DerivedData
 
 */haikuPassword.txt
+ide/lgiide
 ide/makefile
 ide/lgiide.txt
 ide/mac/build
 ide/mac/DerivedData
 
-rvc/Lvc.xml
-rvc/lvc
-rvc/mac/build
+lvc/Lvc.xml
+lvc/lvc
+lvc/mac/build
 lvc/mac/DerivedData
 lvc/mac/build/XCBuildData
 
 resourceEditor/mac/build
 resourceEditor/lgires
+resourceEditor/lgires.xml
 resourceEditor/mac/DerivedData
 
 ScriptingUnitTests/Win32*
@@ -54,6 +56,7 @@ src/mac/cocoa/build
 src/mac/lldb_callback/build
 src/common/INet/libntlm-0.4.2/build-win32/Win32*
 src/common/INet/libntlm-0.4.2/build-win32/x64*
+src/linux/CrashHandler/crash-*
 
 Static_Win32*
 Static_x64*
@@ -73,6 +76,7 @@ test/GuiTest/Lgi Test App.xml
 test/GuiTest/Mac/DerivedData
 test/GuiTest/Mac/build
 test/UnitTests/mac/DerivedData
+test/UnitTests/unittests
 
 utils/SlogViewer/slogviewer
 

@@ -961,13 +961,12 @@ bool LView::Attach(LViewI *parent)
 	
 	bool Status = false;
 
-	LView *Parent = d->GetParent();
+	auto Parent = d->GetParent();
 	LAssert(Parent == NULL || Parent == parent);
 
 	SetParent(parent);
 	Parent = d->GetParent();
 	
-	auto WndNull = _Window == NULL;
 	_Window = Parent ? Parent->_Window : this;
 
 	if (parent)
