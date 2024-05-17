@@ -88,6 +88,19 @@ OsPainter LMemDC::Handle()
 	return d->View;
 }
 
+bool LMemDC::HasAlpha()
+{
+	if (pAlphaDC != NULL)
+		return true;
+
+	return LColourSpaceHasAlpha(GetColourSpace());
+}
+
+bool LMemDC::HasAlpha(bool b)
+{
+	return LSurface::HasAlpha(b);
+}
+
 void LMemDC::SetClient(LRect *c)
 {
 	if (c)
@@ -269,9 +282,9 @@ void LMemDC::StretchBlt(LRect *d, LSurface *Src, LRect *s)
     LAssert(!"Not implemented");
 }
 
-void LMemDC::SetOrigin(int x, int y)
+void LMemDC::SetOrigin(LPoint pt)
 {
-	LSurface::SetOrigin(x, y);
+	LSurface::SetOrigin(pt);
 }
 
 bool LMemDC::SupportsAlphaCompositing()
@@ -279,9 +292,9 @@ bool LMemDC::SupportsAlphaCompositing()
 	return true;
 }
 
-void LMemDC::GetOrigin(int &x, int &y)
+LPoint LMemDC::GetOrigin()
 {
-	LSurface::GetOrigin(x, y);
+	return LSurface::GetOrigin();
 }
 
 LRect LMemDC::ClipRgn(LRect *Rgn)

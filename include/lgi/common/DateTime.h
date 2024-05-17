@@ -55,8 +55,6 @@ class LDateTime;
 
 #if defined(LINUX)
 	#define USE_ZDUMP		1
-#elif defined(HAIKU)
-	#include "lgi/common/TimeZoneInfo.h"
 #endif
 #define DEBUG_DST_INFO		0
 

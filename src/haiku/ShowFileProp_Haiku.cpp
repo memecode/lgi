@@ -44,7 +44,7 @@ bool LBrowseToFile(const char *Filename)
 
     bool isFile = p.IsFile();
     if (isFile)
-        p--;
+        p.PopLast();
 
     BMessage msg(B_REFS_RECEIVED);
     BEntry entry(p.GetFull());

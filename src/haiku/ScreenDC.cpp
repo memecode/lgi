@@ -100,20 +100,21 @@ LString GetClip(BView *v)
 	return lr.GetStr();
 }
 
-void LScreenDC::GetOrigin(int &x, int &y)
+LPoint LScreenDC::GetOrigin()
 {
-	x = OriginX;
-	y = OriginY;
+	LPoint p(OriginX, OriginY);
 
 	#if LOGGING
 	printf("%p.GetOrigin=%i+%i=%i, %i+%i=%i\n",
 		this,
-		OriginX, d->Client.x1, x,
-		OriginY, d->Client.y1, y);
+		OriginX, d->Client.x1, p.x,
+		OriginY, d->Client.y1, p.y);
 	#endif
+
+	return p;
 }
 
-void LScreenDC::SetOrigin(int x, int y)
+void LScreenDC::SetOrigin(LPoint pt)
 {
 	VIEW_CHECK()
 
@@ -124,8 +125,8 @@ void LScreenDC::SetOrigin(int x, int y)
 		d->v->ConstrainClippingRegion(NULL);
 	}
 	
-	OriginX = x;
-	OriginY = y;
+	OriginX = pt.x;
+	OriginY = pt.y;
 
 	#if LOGGING
 	printf("%p.SetOrigin=%i,%i (%i,%i) = %i,%i\n",
