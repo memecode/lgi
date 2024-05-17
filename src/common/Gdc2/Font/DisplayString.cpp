@@ -2055,7 +2055,7 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 			{
 				// Win32: if we try and draw on a 32bit memory context, the alpha channel is NOT set
 				// correctly. So to work around that first write to a 24bit memory context and blt
-				mem24.Reset(new MemTextBuf(this, pDC, px, py));
+				// mem24.Reset(new MemTextBuf(this, pDC, px, py));
 			}
 
 			if (VisibleTab)
