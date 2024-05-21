@@ -1046,7 +1046,7 @@ void VcFolder::Select(bool b)
 				case VcGit:
 				{
 					LVariant Limit;
-					d->Opts.GetValue("git-limit", Limit);
+					d->Opts.GetValue(OPT_GitLimit, Limit);
 
 					LString cmd = "rev-list --all --header --timestamp --author-date-order", s;
 					if (Limit.CastInt32() > 0)
@@ -1061,7 +1061,7 @@ void VcFolder::Select(bool b)
 				case VcSvn:
 				{
 					LVariant Limit;
-					d->Opts.GetValue("svn-limit", Limit);
+					d->Opts.GetValue(OPT_SvnLimit, Limit);
 
 					if (CommitListDirty)
 					{
@@ -1382,8 +1382,15 @@ void VcFolder::LogFilter(const char *Filter)
 				else
 				{
 					// Not a commit ref...?
+					LVariant Limit;
+					if (!d->Opts.GetValue(OPT_GitLimit, Limit) || Limit.CastInt32() <= 0)
+						Limit = 1000;
+
 					LString args;
-					args.Printf("log --grep \"%s\"", Filter.Get());
+					if (Filter.Find("author:") == 0)
+						args.Printf("log -n %i --author \"%s\"", Limit.CastInt32(), Filter.SplitDelimit(":", 1).Last().Get());
+					else
+						args.Printf("log -n %i --grep \"%s\"", Limit.CastInt32(), Filter.Get());
 					IsLogging = StartCmd(args, &VcFolder::ParseLog);
 				}
 			};
@@ -4142,7 +4149,7 @@ bool VcFolder::ParsePull(int Result, LString s, ParseParams *Params)
 			if (Params && Params->Str.Equals("log"))
 			{
 				LVariant Limit;
-				d->Opts.GetValue("svn-limit", Limit);
+				d->Opts.GetValue(OPT_SvnLimit, Limit);
 				
 				LString Args;
 				if (Limit.CastInt32() > 0)

@@ -952,13 +952,13 @@ public:
 	}
 
 	/// Check string is UTF8
-	bool IsUtf8()
+	bool IsUtf8() const
 	{
 		return Str ? LIsUtf8(Str->Str, Str->Len) : true;
 	}
 	
 	/// Reverses all the characters in the string
-	LString Reverse()
+	LString Reverse() const
 	{
 		LString s;
 		
@@ -977,7 +977,7 @@ public:
 	}
 
 	/// Find a sub-string	
-	ssize_t Find(const char *needle, ssize_t start = 0, ssize_t end = -1)
+	ssize_t Find(const char *needle, ssize_t start = 0, ssize_t end = -1) const
 	{
 		if (!needle)
 			return -1;
@@ -993,7 +993,7 @@ public:
 	}
 
 	/// Reverse find a string (starting from the end)
-	ssize_t RFind(const char *needle, int start = 0, ssize_t end = -1)
+	ssize_t RFind(const char *needle, int start = 0, ssize_t end = -1) const
 	{
 		if (!needle) return -1;
 
@@ -1023,7 +1023,7 @@ public:
 	}
 
 	/// Returns a copy of the string with all the characters converted to lower case
-	LString Lower()
+	LString Lower() const
 	{
 		LString s;
 		if (Str && s.Set(Str->Str, Str->Len))
@@ -1032,7 +1032,7 @@ public:
 	}
 	
 	/// Returns a copy of the string with all the characters converted to upper case
-	LString Upper()
+	LString Upper() const
 	{
 		LString s;
 		if (Str && s.Set(Str->Str, Str->Len))

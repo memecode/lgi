@@ -298,17 +298,17 @@ public:
 	{
 		SetParent(Parent);
 
-		Map("svn-path", IDC_SVN, GV_STRING);
-		Map("svn-limit", IDC_SVN_LIMIT);
+		Map(OPT_SvnPath, IDC_SVN, GV_STRING);
+		Map(OPT_SvnLimit, IDC_SVN_LIMIT);
 
-		Map("git-path", IDC_GIT, GV_STRING);
-		Map("git-limit", IDC_GIT_LIMIT);
+		Map(OPT_GitPath, IDC_GIT, GV_STRING);
+		Map(OPT_GitLimit, IDC_GIT_LIMIT);
 
-		Map("hg-path", IDC_HG, GV_STRING);
-		Map("hg-limit", IDC_HG_LIMIT);
+		Map(OPT_HgPath, IDC_HG, GV_STRING);
+		Map(OPT_HgLimit, IDC_HG_LIMIT);
 
-		Map("cvs-path", IDC_CVS, GV_STRING);
-		Map("cvs-limit", IDC_CVS_LIMIT);
+		Map(OPT_CvsPath, IDC_CVS, GV_STRING);
+		Map(OPT_CvsLimit, IDC_CVS_LIMIT);
 
 		if (LoadFromResource(IDD_OPTIONS))
 		{

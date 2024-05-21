@@ -18,6 +18,15 @@
 #define OPT_Folders			"Folders"
 #define OPT_Folder			"Folder"
 
+#define OPT_SvnPath			"svn-path"
+#define OPT_SvnLimit		"svn-limit"
+#define OPT_GitPath			"git-path"
+#define OPT_GitLimit		"git-limit"
+#define OPT_HgPath			"hg-path"
+#define OPT_HgLimit			"hg-limit"
+#define OPT_CvsPath			"cvs-path"
+#define OPT_CvsLimit		"cvs-limit"
+
 #define METHOD_GetContext	"GetContext"
 
 #define APP_VERSION			"0.8"
