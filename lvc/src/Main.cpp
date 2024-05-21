@@ -1217,8 +1217,6 @@ public:
             
             // new TestThread();
 		}
-
-		_Dump();
 	}
 	
 	void SaveFolders()
