@@ -785,8 +785,6 @@ public:
 								Rel = LMakeRelativePath(p / "..", s->Name());
 							}
 							e->Name(Rel ? Rel.Get() : s->Name());
-
-							delete s;
 						};
 						
 						if (BrowseFolder)

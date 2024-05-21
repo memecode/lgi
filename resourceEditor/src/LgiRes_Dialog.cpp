@@ -4096,7 +4096,7 @@ void ResDialog::OnCommand(int Cmd)
 		{
 			auto Select = new LFileSelect(AppWindow);
 			Select->Type("Text", "*.txt");
-			Select->Save([&](auto dlg, auto status)
+			Select->Save([this, Select](auto dlg, auto status)
 			{
 				if (status)
 				{
@@ -4111,7 +4111,6 @@ void ResDialog::OnCommand(int Cmd)
 						LgiMsg(AppWindow, "Couldn't open file for writing.");
 					}
 				}
-				delete dlg;
 			});
 			break;
 		}

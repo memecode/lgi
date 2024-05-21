@@ -233,7 +233,6 @@ int LFindInFiles::OnNotify(LViewI *Ctrl, LNotification n)
 						p = p / "..";
 					SetCtrlName(IDC_WHERE, p.GetFull());
 				}
-				delete s;
 			});
 			break;
 		}

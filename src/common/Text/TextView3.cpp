@@ -2373,7 +2373,6 @@ void LTextView3::ClearDirty(std::function<void(bool)> OnStatus, bool Ask, const 
 						DoSave(ok, s->Name());
 					else
 						DoSave(ok, FileName);
-					delete s;
 				});
 			}
 			else DoSave(true, FileName);

@@ -760,8 +760,6 @@ void LGraph::OnMouseClick(LMouse &m)
 								break;
 						}
 					}
-
-					delete dlg;
 				});
 				break;
 			}

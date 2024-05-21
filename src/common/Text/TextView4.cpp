@@ -2400,7 +2400,6 @@ void LTextView4::ClearDirty(std::function<void(bool)> OnStatus, bool Ask, const 
 						DoSave(ok, Select->Name());
 					else
 						DoSave(ok, FileName);
-					delete Select;
 				});
 			}
 			else DoSave(true, FileName);

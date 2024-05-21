@@ -315,7 +315,6 @@ public:
 				{
 					if (ok)
 						OnReplace(s->Name());
-					delete s;
 				});
 				break;
 			}

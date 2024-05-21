@@ -482,7 +482,7 @@ void ObjTreeItem::OnMouseClick(LMouse &m)
 				{
 					auto Select = new LFileSelect(Obj->App());
 					Select->Type("Text", "*.txt");
-					Select->Open([&](auto dlg, auto status)
+					Select->Open([this, Select](auto dlg, auto status)
 					{
 						if (status)
 						{
@@ -502,7 +502,6 @@ void ObjTreeItem::OnMouseClick(LMouse &m)
 								LgiMsg(Obj->App(), "Couldn't open file for reading.");
 							}
 						}
-						delete dlg;
 					});
 					break;
 				}
@@ -886,7 +885,7 @@ int FieldView::OnNotify(LViewI *Ctrl, LNotification n)
 				else if (c->Id == -Ctrl->GetId())
 				{
 					auto s = new LFileSelect(this);
-					s->Open([&](auto dlg, auto status)
+					s->Open([this, c, s](auto dlg, auto status)
 					{
 						if (status)
 						{
@@ -906,7 +905,6 @@ int FieldView::OnNotify(LViewI *Ctrl, LNotification n)
 							Fields.SetView(this);
 							Source->Serialize(Fields);
 						}
-						delete dlg;
 					});
 				}
 			}
@@ -1407,7 +1405,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 		case IDM_FIND:
 		{
 			auto s = new Search(this);
-			s->DoModal([&](auto dlg, auto id)
+			s->DoModal([this, s](auto dlg, auto id)
 			{
 				if (id)
 					new Results(this, s);
@@ -2313,11 +2311,10 @@ void AppWnd::Compare()
 {
 	auto s = new LFileSelect(this);
 	s->Type("Lgi Resource", "*.lr8");
-	s->Open([&](auto dlg, auto status)
+	s->Open([this, s](auto dlg, auto status)
 	{
 		if (status)
 			new ResCompare(GetCurFile(), dlg->Name());
-		delete dlg;
 	});
 }
 
@@ -2326,7 +2323,7 @@ void AppWnd::ImportLang()
 	// open dialog
 	auto Select = new LFileSelect(this);
 	Select->Type("Lgi Resources", "*.lr8;*.xml");
-	Select->Open([&](auto dlg, auto status)
+	Select->Open([this, Select](auto dlg, auto status)
 	{
 		if (status)
 		{
@@ -2409,7 +2406,7 @@ void AppWnd::ImportLang()
 							}
 
 							auto Dlg = new LangDlg(this, Langs);
-							Dlg->DoModal([&](auto dlg, auto id)
+							Dlg->DoModal([this, Dlg, Groups, Menus](auto dlg, auto id)
 							{
 								if (id == IDOK && Dlg->Lang)
 								{
@@ -2420,8 +2417,9 @@ void AppWnd::ImportLang()
 									int Imported = 0;
 									int Different = 0;
 							
-									for (auto g: Groups)
+									for (unsigned idx = 0; idx < Groups.Length(); idx++)
 									{
+										auto g = Groups.ItemAt(idx);
 										List<ResString>::I Strings = g->GetStrs()->begin();
 										for (ResString *s=*Strings; s; s=*++Strings)
 										{
@@ -2465,8 +2463,10 @@ void AppWnd::ImportLang()
 									List<Resource> Lst;
 									if (ListObjects(Lst))
 									{
-										for (auto m: Menus)
+										for (unsigned idx = 0; idx < Menus.Length(); idx++)
 										{
+											auto m = Menus.ItemAt(idx);
+											
 											// find matching menu in our list
 											ResMenu *Match = 0;
 											for (auto r: Lst)
@@ -2572,8 +2572,6 @@ void AppWnd::ImportLang()
 				}
 			}
 		}
-
-		delete dlg;
 	});
 }
 
@@ -4412,11 +4410,10 @@ void AppWnd::LoadWin32(const char *FileName)
 	{
 		auto Select = new LFileSelect(this);
 		Select->Type("Win32 Resource Script", "*.rc");
-		Select->Open([&](auto dlg, auto status)
+		Select->Open([this, Select, Load=std::move(Load)](auto dlg, auto status)
 		{
 			if (status)
 				Load(dlg->Name());
-			delete dlg;
 		});
 	}
 }

@@ -1147,7 +1147,7 @@ int ResStringGroup::OnCommand(int Cmd, int Event, OsView hWnd)
 
 			// Display the list
 			auto Dlg = new LangDlg(this, l);
-			Dlg->DoModal([&](auto dlg, auto id)
+			Dlg->DoModal([this, Dlg](auto dlg, auto id)
 			{
 				if (id && Dlg->Lang)
 				{
@@ -1170,7 +1170,7 @@ int ResStringGroup::OnCommand(int Cmd, int Event, OsView hWnd)
 
 			// Display the list
 			auto Dlg = new LangDlg(this, l);
-			Dlg->DoModal([&](auto dlg, auto id)
+			Dlg->DoModal([this, Dlg](auto dlg, auto id)
 			{
 				if (id && Dlg->Lang)
 				{
@@ -1473,7 +1473,7 @@ void ResStringGroup::OnCommand(int Cmd)
 		{
 			auto Select = new LFileSelect(AppWindow);
 			Select->Type("Text", "*.txt");
-			Select->Open([&](auto dlg, auto status)
+			Select->Open([this, Select](auto dlg, auto status)
 			{
 				if (status)
 				{
@@ -1493,7 +1493,6 @@ void ResStringGroup::OnCommand(int Cmd)
 						LgiMsg(AppWindow, "Couldn't open file for reading.");
 					}
 				}
-				delete dlg;
 			});
 			break;
 		}
@@ -1501,7 +1500,7 @@ void ResStringGroup::OnCommand(int Cmd)
 		{
 			auto Select = new LFileSelect(AppWindow);
 			Select->Type("Text", "*.txt");
-			Select->Save([&](auto dlg, auto status)
+			Select->Save([Select,this](auto dlg, auto status)
 			{
 				if (status)
 				{
@@ -1516,7 +1515,6 @@ void ResStringGroup::OnCommand(int Cmd)
 						LgiMsg(AppWindow, "Couldn't open file for writing.");
 					}
 				}
-				delete dlg;
 			});
 			break;
 		}

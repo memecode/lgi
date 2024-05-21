@@ -3836,7 +3836,6 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			{
 				if (ok)
 					OpenFile(s->Name());
-				delete s;
 			});
 			break;
 		}
@@ -3866,7 +3865,6 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 						Top->SetFileName(s->Name(), true);
 						d->OnFile(s->Name());
 					}
-					delete s;
 				});
 			}
 			break;
@@ -4205,7 +4203,6 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 						d->Tree->Focus(true);
 					}
 				}
-				delete s;
 			});
 			break;
 		}
@@ -4221,7 +4218,6 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				{
 					if (ok)
 						p->ImportDsp(s->Name());
-					delete s;
 				});
 			}
 			break;

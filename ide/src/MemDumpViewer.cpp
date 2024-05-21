@@ -162,7 +162,6 @@ public:
 				{
 					if (ok)
 						Load(s->Name());
-					delete s;
 				});
 			}
 		}

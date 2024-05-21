@@ -616,7 +616,6 @@ int LControlTree::OnNotify(LViewI *c, LNotification n)
 						LVariant v;
 						i->SetValue(v = dlg->Name());
 					}
-					delete dlg;
 				});
 			}
 			return 0;

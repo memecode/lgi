@@ -771,7 +771,6 @@ protected:
 							else
 								LgiMsg(this, "Can't open '%s' for writing.", "Error", MB_OK, s->Name());
 						}
-						delete s;
 					});
 					break;
 				}

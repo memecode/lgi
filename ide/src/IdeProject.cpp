@@ -3372,8 +3372,6 @@ void IdeProject::SetClean(std::function<void(bool)> OnDone)
 					if (OnDone)
 						OnDone(false);
 				}
-				
-				delete s;
 			});
 			return;
 		}
@@ -3547,7 +3545,6 @@ void IdeProject::OnMouseClick(LMouse &m)
 							SetDirty();
 						}
 					}
-					delete s;
 				});
 				break;
 			}

@@ -312,8 +312,6 @@ void LMru::DoFileDlg(LAutoPtr<LFileSelect> FileSelect, bool Open, std::function<
 		{
 			OnSelect(false);
 		}
-
-		delete s;
 	};
 
 	if (Open)

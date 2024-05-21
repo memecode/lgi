@@ -325,7 +325,6 @@ public:
 		{
 			if (status)
 				SetCtrlName(EditId, s->Name());
-			delete s;
 		});
 	}
 
@@ -1297,7 +1296,6 @@ public:
 				{
 					if (status)
 						OpenDiff(dlg->Name());
-					delete dlg;
 				});
 				break;
 			}
@@ -1444,7 +1442,6 @@ public:
 			{
 				if (status)
 					Load(s->Name());
-				delete s;
 			});
 		}
 		else Load(Fld);
@@ -1646,7 +1643,6 @@ public:
 									{
 										if (status)
 											OpenDiff(dlg->Name());
-										delete dlg;
 									});
 									break;
 								}

@@ -562,8 +562,6 @@ bool SystemFunctions::SelectFolder(LScriptArguments &Args)
 			Ctx.Call(Callback, Args);
 			Args.DeleteObjects();
 		}
-
-		delete s;
 	});
 
 	return true;

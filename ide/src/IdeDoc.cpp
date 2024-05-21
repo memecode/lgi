@@ -1944,13 +1944,9 @@ void IdeDoc::SetClean(std::function<void(bool)> Callback)
 				s->InitialDir(Base);			
 			s->Save([this, OnSave](auto fileSel, auto ok)
 			{
-				// printf("Doc.Save.Cb ok=%i d=%p\n", ok, d);
 				if (ok)
 					d->SetFileName(fileSel->Name());
-				// printf("Doc.Save.Cb onsave\n", ok);
 				OnSave(ok);
-				// printf("Doc.Save.Cb del\n", ok);
-				delete fileSel;
 			});
 		}
 		else OnSave(true);

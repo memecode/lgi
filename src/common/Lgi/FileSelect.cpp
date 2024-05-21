@@ -2181,8 +2181,9 @@ void LFileSelect::Open(SelectCb Cb)
 {
 	auto Dlg = new LFileSelectDlg(d);
 	d->Type = TypeOpenFile;
-	Dlg->DoModal([select=LAutoPtr<LFileSelect>(this), cb=std::move(Cb)](auto dlg, auto code)
+	Dlg->DoModal([this, cb=std::move(Cb)](auto dlg, auto code)
 	{
+		LAutoPtr<LFileSelect> select(this);
 		if (cb)
 			cb(select, code == IDOK);
 	});
@@ -2192,8 +2193,9 @@ void LFileSelect::OpenFolder(SelectCb Cb)
 {
 	auto Dlg = new LFileSelectDlg(d);
 	d->Type = TypeOpenFolder;
-	Dlg->DoModal([select=LAutoPtr<LFileSelect>(this), cb=std::move(Cb)](auto d, auto code)
+	Dlg->DoModal([this, cb=std::move(Cb)](auto d, auto code)
 	{
+		LAutoPtr<LFileSelect> select(this);
 		if (cb)
 			cb(select, code == IDOK);
 	});
@@ -2203,8 +2205,9 @@ void LFileSelect::Save(SelectCb Cb)
 {
 	auto *Dlg = new LFileSelectDlg(d);	
 	d->Type = TypeSaveFile;
-	Dlg->DoModal([select=LAutoPtr<LFileSelect>(this), cb=std::move(Cb)](auto dlg, auto code)
+	Dlg->DoModal([this, cb=std::move(Cb)](auto dlg, auto code)
 	{
+		LAutoPtr<LFileSelect> select(this);
 		if (cb)
 			cb(select, code == IDOK);
 	});

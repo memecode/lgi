@@ -861,7 +861,6 @@ bool LRichTextEdit::ClearDirty(bool Ask, const char *FileName)
 				{
 					if (status)
 						Save(dlg->Name());
-					delete dlg;
 				});
 			}
 		}

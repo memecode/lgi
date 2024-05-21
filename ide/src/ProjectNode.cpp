@@ -777,7 +777,6 @@ bool ProjectNode::Serialize(bool Write)
 												{
 													if (ok)
 														SetFileName(s->Name());
-													delete s;
 												});
 												break;
 											}
@@ -1176,7 +1175,6 @@ void ProjectNode::OnMouseClick(LMouse &m)
 							}
 						}
 					}
-					delete s;
 				});
 				break;
 			}
@@ -1210,8 +1208,6 @@ void ProjectNode::OnMouseClick(LMouse &m)
 							NeedsPulse(true);
 						}
 					}
-
-					delete s;
 				});
 				break;
 			}

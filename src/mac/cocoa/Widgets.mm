@@ -157,14 +157,11 @@ void LDialog::DoModal(OnClose Callback, OsView OverideParent)
 		LWindow::Visible(false);
 	}
 	
+	LAutoPtr<LDialog> owner(this);
 	if (Callback)
 	{
 		// Callback is responsible for deleting 'this'
-		Callback(this, d->ModalStatus);
-	}
-	else
-	{
-		delete this;
+		Callback(owner, d->ModalStatus);
 	}
 }
 

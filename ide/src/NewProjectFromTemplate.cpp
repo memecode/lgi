@@ -52,7 +52,6 @@ public:
 				{
 					if (ok)
 						SetCtrlName(IDC_FOLDER, s->Name());
-					delete s;
 				});
 				break;
 			}

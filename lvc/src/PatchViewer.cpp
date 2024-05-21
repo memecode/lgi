@@ -437,7 +437,6 @@ public:
 						SetCtrlName(IDC_PATCH_FILE, s->Name());
 						Open(s->Name());
 					}
-					delete s;
 				});
 				break;
 			}
@@ -449,7 +448,6 @@ public:
 				{
 					if (status)
 						SetCtrlName(IDC_BASE_DIR, s->Name());
-					delete s;
 				});
 				break;
 			}

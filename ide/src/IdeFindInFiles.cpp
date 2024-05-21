@@ -182,7 +182,6 @@ int FindInFiles::OnNotify(LViewI *v, LNotification n)
 					else
 						SetCtrlName(IDC_DIR, s->Name());
 				}
-				delete s;
 			});
 			break;
 		}
