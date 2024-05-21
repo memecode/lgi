@@ -19,7 +19,6 @@
 /// {
 ///		if (code == IDOK)
 /// 		select->Serialize(Info, true);
-///		delete s;
 /// }
 /// \endcode
 class LFontSelect : public LDialog

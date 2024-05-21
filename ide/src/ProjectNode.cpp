@@ -737,7 +737,6 @@ bool ProjectNode::Serialize(bool Write)
 												break;
 											}
 										}
-										delete dlg;
 									});
 								}
 							}
@@ -783,7 +782,6 @@ bool ProjectNode::Serialize(bool Write)
 												break;
 											}
 										}
-										delete dlg;
 									});
 								}
 							}
@@ -1137,7 +1135,6 @@ void ProjectNode::OnMouseClick(LMouse &m)
 							}
 						}
 					}
-					delete Add;
 				});
 				break;
 			}
@@ -1231,7 +1228,6 @@ void ProjectNode::OnMouseClick(LMouse &m)
 				{
 					if (ok)
 						GetSubFolder(Project, Name->GetStr(), true);
-					delete Name;
 				});
 				break;
 			}
@@ -1246,7 +1242,6 @@ void ProjectNode::OnMouseClick(LMouse &m)
 						Project->SetDirty();
 						Update();
 					}
-					delete Name;
 				});
 				break;
 			}
@@ -1527,7 +1522,6 @@ void ProjectNode::OnProperties()
 				Project->SetDirty();
 				Update();
 			}
-			delete Dlg;
 		});
 	}
 	else if (Type == NodeDir)
@@ -1582,7 +1576,6 @@ void ProjectNode::OnProperties()
 						break;
 					}
 				}
-				delete Dlg;
 			});
 		}
 	}

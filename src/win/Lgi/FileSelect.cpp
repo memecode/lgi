@@ -334,25 +334,15 @@ PROF("GetOpenFileNameW 2");
 PROF("AfterDlg");
 	d->AfterDlg(Info, Status);
 
+	LAutoPtr<LFileSelect> owner(this);
 	if (Cb)
 	{
 PROF("Cb");
-		Cb(this, Status && Length() > 0);
+		Cb(owner, Status && Length() > 0);
 	}
 }
 
 #include "shlobj.h"
-
-int CALLBACK GFileSelectBrowseCallback(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData)
-{
-	char *Name = (char*)lpData;
-	if (uMsg == BFFM_INITIALIZED && Name)
-	{
-        PostMessage(hwnd, BFFM_SETSELECTION, true, (LMessage::Param)Name);
-	}
-
-	return 0;
-}
 
 void LFileSelect::OpenFolder(SelectCb Cb)
 {
@@ -384,8 +374,9 @@ void LFileSelect::OpenFolder(SelectCb Cb)
 		}
 	}
 
+	LAutoPtr<LFileSelect> owner(this);
 	if (Cb)
-		Cb(this, Status && Length() > 0);
+		Cb(owner, Status && Length() > 0);
 }
 
 void LFileSelect::Save(SelectCb Cb)
@@ -399,6 +390,7 @@ void LFileSelect::Save(SelectCb Cb)
 		Status = GetSaveFileNameW(&Info) != 0;		
 	d->AfterDlg(Info, Status);
 
+	LAutoPtr<LFileSelect> owner(this);
 	if (Cb)
-		Cb(this, Status && Length() > 0);
+		Cb(owner, Status && Length() > 0);
 }

@@ -994,8 +994,6 @@ void IdeProjectSettings::Edit(LViewI *parent, std::function<void()> OnChanged)
 			if (OnChanged)
 				OnChanged();
 		}
-		
-		delete dlg;
 	});
 }
 

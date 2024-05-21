@@ -1700,7 +1700,6 @@ void CtrlTabs::OnMouseClick(LMouse &m)
 								{
 									if (id)
 										t->GetStr()->Set(Input->GetStr());
-									delete dlg;
 								});
 							}
 							break;
@@ -1912,7 +1911,6 @@ void CtrlList::OnMouseClick(LMouse &m)
 									{
 										if (id)
 											c->GetStr()->Set(Input->GetStr());
-										delete dlg;
 									});
 								}
 								break;
@@ -4154,10 +4152,7 @@ int ResDialog::OnCommand(int Cmd, int Event, OsView hWnd)
 			if (Top)
 			{
 				auto Dlg = new TabOrder(this, Top);
-				Dlg->DoModal([](auto dlg, auto id)
-				{
-					delete dlg;
-				});
+				Dlg->DoModal(NULL);
 			}
 			break;
 		}

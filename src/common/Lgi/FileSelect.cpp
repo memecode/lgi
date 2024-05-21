@@ -1379,8 +1379,6 @@ int LFileSelectDlg::OnNotify(LViewI *Ctrl, LNotification n)
 
 				FileDev->CreateFolder(New);
 				OnFolder();
-				
-				delete d;
 			});
 			break;
 		}
@@ -1790,8 +1788,6 @@ void LFolderItem::OnRename()
 				LgiMsg(Inp, "Renaming '%s' failed.", Dlg->Name(), MB_OK);
 			}
 		}
-		
-		delete Inp;
 	});
 }
 
@@ -2184,52 +2180,33 @@ CharPropImpl(DefaultExtension, d->DefExt);
 void LFileSelect::Open(SelectCb Cb)
 {
 	auto Dlg = new LFileSelectDlg(d);
-
 	d->Type = TypeOpenFile;
-
-	// printf("LFileSelect domodal.. thread=%p\n", LCurrentThreadHnd());
-	Dlg->DoModal([select=this, cb=Cb](auto dlg, auto code)
+	Dlg->DoModal([select=LAutoPtr<LFileSelect>(this), cb=std::move(Cb)](auto dlg, auto code)
 	{
-		// printf("LFileSelect cb.. thread=%u lock=%u\n", LCurrentThreadId(), dlg->WindowHandle()->LockingThread());
 		if (cb)
 			cb(select, code == IDOK);
-		// printf("LFileSelect deleting.. lock=%u\n", dlg->WindowHandle()->LockingThread());
-		delete dlg;
-		// printf("LFileSelect deleted..\n");
 	});
 }
 
 void LFileSelect::OpenFolder(SelectCb Cb)
 {
 	auto Dlg = new LFileSelectDlg(d);
-
 	d->Type = TypeOpenFolder;
-
-	// printf("LFileSelect::OpenFolder domodal...\n");
-	Dlg->DoModal([this,Cb](auto d, auto code)
+	Dlg->DoModal([select=LAutoPtr<LFileSelect>(this), cb=std::move(Cb)](auto d, auto code)
 	{
-		// printf("LFileSelect::OpenFolder cb, code=%i\n", code);
-		if (Cb)
-			Cb(this, code == IDOK);
-		delete d;
+		if (cb)
+			cb(select, code == IDOK);
 	});
 }
 
 void LFileSelect::Save(SelectCb Cb)
 {
-	auto *Dlg = new LFileSelectDlg(d);
-	
+	auto *Dlg = new LFileSelectDlg(d);	
 	d->Type = TypeSaveFile;
-
-	// printf("LFileSelect domodal.. thread=%u\n", LCurrentThreadId());
-	Dlg->DoModal([this, Cb](auto dlg, auto code)
+	Dlg->DoModal([select=LAutoPtr<LFileSelect>(this), cb=std::move(Cb)](auto dlg, auto code)
 	{
-		// printf("LFileSelect cb.. thread=%u, code=%i\n", LCurrentThreadId(), code); // dlg->WindowHandle()->LockingThread());
-		if (Cb)
-			Cb(this, code == IDOK);
-		// printf("LFileSelect deleting.. lock=%u\n", dlg->WindowHandle()->LockingThread());
-		delete dlg;
-		// printf("LFileSelect deleted..\n");
+		if (cb)
+			cb(select, code == IDOK);
 	});
 }
 

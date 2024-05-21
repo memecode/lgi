@@ -3966,8 +3966,6 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 						}
 						else LgiMsg(this, "Error: No filename.", AppName);
 					}
-					
-					delete dlg;
 				});
 			}
 			break;
@@ -4073,8 +4071,6 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 					
 					if (d->FindParameters->Text)
 						d->Finder->PostEvent(FindInFilesThread::M_START_SEARCH, (LMessage::Param) new FindParams(d->FindParameters));
-					
-					delete Dlg;
 				});
 			}
 			break;
@@ -4110,9 +4106,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			else
 			{
 				auto d = new FindInProject(this);
-				d->DoModal([](auto dlg, auto ctrlId){
-					delete dlg;
-				});
+				d->DoModal(NULL);
 			}
 			break;
 		}
@@ -4512,7 +4506,6 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			{
 				if (ok)
 					Doc->SplitSelection(i->GetStr());
-				delete i;
 			});
 			break;
 		}
@@ -4527,7 +4520,6 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			{
 				if (ok)
 					Doc->JoinSelection(i->GetStr());
-				delete i;
 			});
 			break;
 		}

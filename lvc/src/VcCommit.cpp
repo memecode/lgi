@@ -565,7 +565,6 @@ void VcCommit::OnMouseClick(LMouse &m)
 							auto Revisions = Revs;
 							Fld->RenameBranch(Inp->GetStr(), Revisions);
 						}
-						delete dlg;
 					});
 				}
 				break;

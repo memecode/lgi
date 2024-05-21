@@ -475,7 +475,6 @@ void ObjTreeItem::OnMouseClick(LMouse &m)
 							Update();
 							Obj->App()->SetDirty(true, NULL);
 						}
-						delete dlg;
 					});
 					break;
 				}
@@ -1291,10 +1290,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 		case IDM_SHOW_LANG:
 		{
 			auto Dlg = new ShowLanguagesDlg(this);
-			Dlg->DoModal([](auto dlg, auto ctrlId)
-			{
-				delete dlg;
-			});
+			Dlg->DoModal(NULL);
 			break;
 		}
 		case IDM_NEW_CSS:
@@ -1415,7 +1411,6 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 			{
 				if (id)
 					new Results(this, s);
-				delete dlg;
 			});
 			break;
 		}
@@ -2558,8 +2553,6 @@ void AppWnd::ImportLang()
 											Matches + NotFound,
 											ErrorStr?ErrorStr:(char*)"");
 								}
-
-								delete dlg;
 							});
 						}
 						else

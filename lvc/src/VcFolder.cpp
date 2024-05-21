@@ -2768,7 +2768,6 @@ void VcFolder::OnMouseClick(LMouse &m)
 						Empty();
 						Select(true);
 					}
-					delete dlg;
 				});
 				break;
 			}
@@ -2787,8 +2786,6 @@ void VcFolder::OnMouseClick(LMouse &m)
 								LClipBoard c(GetTree());
 								c.Text(Url);
 							}
-							
-							delete dlg;
 						});
 					}
 				});
@@ -3645,11 +3642,8 @@ bool VcFolder::ParseCommit(int Result, LString s, ParseParams *Params)
 									Args.Printf("config --global user.email \"%s\"", inp->GetStr().Get());
 									StartCmd(Args);
 								}
-								delete dlg;
 							});
 						}
-
-						delete dlg;
 					});
 				}
 				break;

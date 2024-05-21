@@ -350,7 +350,6 @@ void LSoftwareUpdate::CheckForUpdate(UpdateCb callback,
 
 			delete thread;
 			delete this;
-			delete dlg;
 		});
 	}
 }

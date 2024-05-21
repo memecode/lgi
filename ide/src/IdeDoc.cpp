@@ -1548,7 +1548,6 @@ void IdeDoc::EscapeSelection(bool ToEscaped)
 					auto str = LString::Escape(s, -1, Delim);
 					ReplaceSelection(str);
 				}
-				delete d;
 			});
 			return;
 		}

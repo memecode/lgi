@@ -2761,7 +2761,6 @@ void LTextView3::DoGoto(std::function<void(bool)> Callback)
 			SetLine(Dlg->GetStr().Int());
 		if (Callback)
 			Callback(ok);
-		delete Dlg;
 	});
 }
 
@@ -3674,12 +3673,15 @@ void LTextView3::DoContextMenu(LMouse &m)
 			char s[32];
 			sprintf_s(s, sizeof(s), "%i", IndentSize);
 			
-			LInput *i = new LInput(this, s, "Indent Size:", "Text");
+			auto i = new LInput(this, s, "Indent Size:", "Text");
 			i->DoModal([this, i](auto dlg, auto code)
 			{
-				if (code)
-					IndentSize = atoi(i->GetStr());
-				delete i;
+				if (!code)
+					return;
+
+				auto val = i->GetStr().Int();
+				if (val > 0)
+					IndentSize = (uint8_t)val;
 			});
 			break;
 		}
@@ -3688,12 +3690,15 @@ void LTextView3::DoContextMenu(LMouse &m)
 			char s[32];
 			sprintf_s(s, sizeof(s), "%i", TabSize);
 			
-			LInput *i = new LInput(this, s, "Tab Size:", "Text");
+			auto i = new LInput(this, s, "Tab Size:", "Text");
 			i->DoModal([this, i](auto dlg, auto code)
 			{
-				if (code)
-					SetTabSize((uint8_t)Atoi(i->GetStr().Get()));
-				delete i;
+				if (!code)
+					return;
+
+				auto val = i->GetStr().Int();
+				if (val > 0)
+					SetTabSize((uint8_t)val);
 			});
 			break;
 		}

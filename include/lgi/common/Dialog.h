@@ -137,7 +137,6 @@
 ///		{
 /// 		// Do something with Dlg->Str
 ///		}
-///		delete dlg;
 /// });
 /// \endcode
 ///
@@ -167,7 +166,7 @@ private:
     struct LDialogPriv *d;
 
 public:
-    typedef std::function<void(LDialog *dlg, int ctrlId)> OnClose;
+    typedef std::function<void(LAutoPtr<LDialog> dlg, int ctrlId)> OnClose;
 
 	/// Constructor
 	LDialog(LViewI *Parent = NULL);

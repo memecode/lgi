@@ -201,7 +201,6 @@ struct BrowseItem : public LListItem
 					{
 						if (code)
 							d->GotoLine(input->GetStr());
-						delete dlg;
 					});
 					break;
 				}

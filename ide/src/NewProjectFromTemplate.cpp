@@ -182,7 +182,5 @@ void NewProjectFromTemplate(LViewI *parent)
 		
 			CreateProject(Dlg->GetCtrlName(IDC_PROJ_NAME), sel->GetText(1), Dlg->GetCtrlName(IDC_FOLDER));
 		}
-		
-		delete Dlg;
 	});
 }

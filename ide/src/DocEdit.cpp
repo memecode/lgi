@@ -107,8 +107,6 @@ void DocEdit::DoGoto(std::function<void(bool)> Callback)
 
 		if (Callback)
 			Callback(status);
-
-		delete Dlg;
 	});
 }
 

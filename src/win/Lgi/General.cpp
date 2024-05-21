@@ -861,7 +861,6 @@ void LAssertDlg(LString Msg, std::function<void(int)> Callback)
 	{
 		if (Callback)
 			Callback(code);
-		delete d;
 		AssertUiOpen = false;
 	});
 }

@@ -264,10 +264,10 @@ LMessage::Result LDialog::OnEvent(LMessage *Msg)
 
 			d->IsModal = false;
 
+			// Either the callback will delete this object or the owner auto ptr will.
+			LAutoPtr<LDialog> owner(this);
 			if (d->Callback)
-				d->Callback(this, d->ModalResult);
-			else
-				delete this; // default action is to delete the dialog
+				d->Callback(owner, d->ModalResult);
 			return 1;
 		}
 	}

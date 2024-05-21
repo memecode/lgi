@@ -1156,7 +1156,6 @@ int ResStringGroup::OnCommand(int Cmd, int Event, OsView hWnd)
 					// Update the global language list
 					AppWindow->ShowLang(Dlg->Lang->Id, true);
 				}
-				delete dlg;
 			});
 			break;
 		}
@@ -1178,7 +1177,6 @@ int ResStringGroup::OnCommand(int Cmd, int Event, OsView hWnd)
 					DeleteLanguage(Dlg->Lang->Id);
 					// CurrentLang = limit(CurrentLang, 0, Lang.Length()-1);
 				}
-				delete dlg;
 			});
 			break;
 		}

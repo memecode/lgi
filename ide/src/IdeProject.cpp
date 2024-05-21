@@ -3455,7 +3455,6 @@ void IdeProject::OnMouseClick(LMouse &m)
 				{
 					if (code)
 						GetSubFolder(this, Name->GetStr(), true);
-					delete d;
 				});
 				break;
 			}
@@ -3483,7 +3482,6 @@ void IdeProject::OnMouseClick(LMouse &m)
 							f->SetAttr(OPT_Www, Dlg->Www);
 						}
 					}
-					delete Dlg;
 				});
 				break;
 			}

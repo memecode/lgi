@@ -1020,8 +1020,6 @@ void LRichTextEdit::DoGoto(std::function<void(bool)> Callback)
 
 		if (Callback)
 			Callback(false);
-
-		delete dlg;
 	});
 }
 
@@ -1063,8 +1061,6 @@ void LRichTextEdit::DoFind(std::function<void(bool)> Callback)
 			Callback(ctrlId != IDCANCEL);
 		
 		Focus(true);
-
-		delete dlg;
 	});
 }
 
@@ -1467,7 +1463,6 @@ void LRichTextEdit::DoContextMenu(LMouse &m)
 					IndentSize = (uint8_t)i->GetStr().Int();
 					Invalidate();
 				}
-				delete dlg;
 			});
 			break;
 		}
@@ -1480,7 +1475,6 @@ void LRichTextEdit::DoContextMenu(LMouse &m)
 			{
 				if (ok)
 					SetTabSize((uint8_t)i->GetStr().Int());
-				delete dlg;
 			});
 			break;
 		}

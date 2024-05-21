@@ -1306,10 +1306,7 @@ public:
 			case IDM_OPTIONS:
 			{
 				auto Dlg = new OptionsDlg(this, Opts);
-				Dlg->DoModal([](auto dlg, auto ctrlId)
-				{
-					delete dlg;
-				});
+				Dlg->DoModal(NULL);
 				break;
 			}
 			case IDM_FIND:
@@ -1326,7 +1323,6 @@ public:
 						if (GetViewById(IDC_LIST, cl))
 							cl->SelectRevisions(Revs);
 					}
-					delete dlg;
 				});
 				break;
 			}
@@ -1466,7 +1462,6 @@ public:
 				Tree->Insert(new VcFolder(this, Dlg->Uri));
 				SaveFolders();
 			}
-			delete dlg;
 		});
 	}
 	

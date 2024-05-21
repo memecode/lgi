@@ -97,21 +97,19 @@ void LFontType::DoUI(LView *Parent, std::function<void(LFontType*)> Callback)
 	LFontSelect *Dlg = new LFontSelect(Parent, ptr, bytes);
 	Dlg->DoModal([Dlg, this, Callback](auto dlg, auto id)
 	{
-		if (id == IDOK)
-		{
-			#if WINNATIVE
-			Dlg->Serialize(&this->Info, sizeof(this->Info), true);
-			#else
-			if (Dlg->Face)
-				Info.Face(Dlg->Face);
-			Info.PointSize(Dlg->Size);
-			#endif
+		if (id != IDOK)
+			return;
+
+		#if WINNATIVE
+		Dlg->Serialize(&this->Info, sizeof(this->Info), true);
+		#else
+		if (Dlg->Face)
+			Info.Face(Dlg->Face);
+		Info.PointSize(Dlg->Size);
+		#endif
 			
-			if (Callback)
-				Callback(this);
-		}
-		
-		delete Dlg;
+		if (Callback)
+			Callback(this);
 	});
 }
 

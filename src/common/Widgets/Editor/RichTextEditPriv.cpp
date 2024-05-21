@@ -1678,7 +1678,6 @@ bool LRichTextPriv::ClickBtn(LMouse &m, LRichTextEdit::RectType t)
 				{
 					if (ok)
 						a->Param = i->GetStr();
-					delete dlg;
 				});
 			}
 			else if (Selection)
@@ -1701,7 +1700,6 @@ bool LRichTextPriv::ClickBtn(LMouse &m, LRichTextEdit::RectType t)
 									End->Offset - Start->Offset,
 									i->GetStr());
 					}
-					delete dlg;
 				});
 			}
 			break;

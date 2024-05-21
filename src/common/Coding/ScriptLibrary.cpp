@@ -1094,14 +1094,13 @@ bool SystemFunctions::GetInputDlg(LScriptArguments &Args)
 	auto Dlg = new LInput(Parent, InitVal, Msg, Title, Pass);
 	Dlg->DoModal([this, Dlg, Ctx, Callback=LString(Callback)](auto d, auto ok)
 	{
-		if (ok)
-		{
-			LScriptArguments Args(NULL);
-			Args.Add(new LVariant(Dlg->GetStr()));
-			Ctx.Call(Callback, Args);
-			Args.DeleteObjects();
-		}
-		delete Dlg;
+		if (!ok)
+			return;
+
+		LScriptArguments Args(NULL);
+		Args.Add(new LVariant(Dlg->GetStr()));
+		Ctx.Call(Callback, Args);
+		Args.DeleteObjects();
 	});
 
 	// Don't wait here...

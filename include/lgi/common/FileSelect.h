@@ -56,7 +56,7 @@ class LgiClass LFileSelect :
 	class LFileSelectPrivate *d;
 
 public:
-	typedef std::function<void(LFileSelect*, bool)> SelectCb;
+	typedef std::function<void(LAutoPtr<LFileSelect>, bool)> SelectCb;
 
 	LFileSelect(LViewI *Window = NULL);
 	~LFileSelect();

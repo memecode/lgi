@@ -733,7 +733,6 @@ void FindSymbolSystem::OpenSearchDlg(LViewI *Parent, std::function<void(FindSymR
 	{
 		if (Callback)
 			Callback(Dlg->Result);
-		delete Dlg;
 	});
 }
 
