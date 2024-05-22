@@ -4736,6 +4736,10 @@ bool VcFolder::Resolve(const char *Path, LvcResolve Type)
 				{
 					#if defined(MAC)
 						a.Printf("resolve -t vscode \"%s\"", local.Get());
+					#elif defined(WINDOWS)
+						a.Printf("resolve -t winmerge \"%s\"", local.Get());
+					#elif defined(LINUX)
+						a.Printf("resolve -t kdiff3 \"%s\"", local.Get());
 					#else
 						#error "Impl me"
 					#endif
