@@ -1080,7 +1080,7 @@ void VcFolder::Select(bool b)
 				case VcHg:
 				{
 					IsLogging = StartCmd("log", &VcFolder::ParseLog);
-					StartCmd("resolve -l", &VcFolder::ParseResolveList);
+					// StartCmd("resolve -l", &VcFolder::ParseResolveList);
 					break;
 				}
 				case VcPending:
@@ -2093,6 +2093,11 @@ bool VcFolder::ParseWorking(int Result, LString s, ParseParams *Params)
 			if (!Params) Params = &Local;
 			Params->IsWorking = true;
 			ParseStatus(Result, s, Params);
+			
+			#if 1
+			if (GetType() == VcHg)
+				ConflistCheck();
+			#endif
 			break;
 		}
 		case VcCvs:
@@ -3569,6 +3574,66 @@ void VcFolder::ListWorkingFolder()
 	IsListingWorking = StartCmd(Arg, &VcFolder::ParseWorking);
 }
 
+bool VcFolder::ParseConflicts(int Result, LString s, ParseParams *Params)
+{
+	switch (GetType())
+	{
+		case VcHg:
+		{
+			if (Result)
+				break;
+			auto lines = s.SplitDelimit("\n");
+			for (auto line: lines)
+			{
+				auto parts = line.SplitDelimit(" \t", 1);
+				if (parts[0].Equals("U"))
+				{
+					auto f = FindFile(parts.Last());
+					if (!f)
+					{
+						f = new VcFile(d, this, LString(), true);
+						f->SetText(parts[0], COL_STATE);
+						f->SetText(parts[1], COL_FILENAME);
+						f->GetStatus();
+						d->Files->Insert(f);
+					}
+					else
+					{
+						f->SetText(parts[0], COL_STATE);
+						f->SetStatus(VcFile::SConflicted);
+						f->Update();
+					}
+				}
+			}
+			break;
+		}
+		default:
+		{
+			NoImplementation(_FL);
+			break;
+		}
+	}
+	
+	return false;
+}
+
+void VcFolder::ConflistCheck()
+{
+	switch (GetType())
+	{
+		case VcHg:
+		{
+			StartCmd("resolve -l", &VcFolder::ParseConflicts);
+			break;
+		}
+		default:
+		{
+			NoImplementation(_FL);
+			break;
+		}
+	}
+}
+
 void VcFolder::GitAdd()
 {
 	if (!PostAdd)
@@ -4559,11 +4624,14 @@ bool VcFolder::ParseResolveList(int Result, LString s, ParseParams *Params)
 				{
 					if (p[0].Equals("U"))
 					{
-						auto f = new VcFile(d, this, LString(), true);
+						auto f = FindFile(p[1]);
+						if (!f)
+							f = new VcFile(d, this, LString(), true);
 						f->SetText(p[0], COL_STATE);
 						f->SetText(p[1], COL_FILENAME);
 						f->GetStatus();
-						d->Files->Insert(f);
+						if (f->GetList() != d->Files)
+							d->Files->Insert(f);
 					}
 				}
 			}
@@ -4664,7 +4732,17 @@ bool VcFolder::Resolve(const char *Path, LvcResolve Type)
 				case ResolveIncoming:
 					a.Printf("resolve -t internal:other \"%s\"", local.Get());
 					break;
+				case ResolveTool:
+				{
+					#if defined(MAC)
+						a.Printf("resolve -t vscode \"%s\"", local.Get());
+					#else
+						#error "Impl me"
+					#endif
+					break;
+				}
 				default:
+					LAssert(!"Impl me");
 					break;
 			}
 			if (a)

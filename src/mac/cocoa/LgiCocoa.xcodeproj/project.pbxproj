@@ -167,6 +167,9 @@
 		34D28926275B3D9F005961A8 /* DateTime.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D28925275B3D9F005961A8 /* DateTime.h */; };
 		34D28929275B3DB0005961A8 /* Variant.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D28928275B3DB0005961A8 /* Variant.h */; };
 		34D6AA1722D3749A005D739E /* Gdc2.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D6AA1622D3749A005D739E /* Gdc2.h */; };
+		34D795FC2BFD771800904325 /* Colour.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D795F92BFD771800904325 /* Colour.h */; };
+		34D795FD2BFD771800904325 /* CssTools.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D795FA2BFD771800904325 /* CssTools.h */; };
+		34D795FE2BFD771800904325 /* Css.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D795FB2BFD771800904325 /* Css.h */; };
 		34EE8BB12748A55600F12915 /* TextFile.h in Headers */ = {isa = PBXBuildFile; fileRef = 34EE8BB02748A55600F12915 /* TextFile.h */; };
 		34F3EC4329BD374E00BB9B58 /* Rect.h in Headers */ = {isa = PBXBuildFile; fileRef = 34F3EC4229BD374E00BB9B58 /* Rect.h */; };
 		34F6151F27E55C5D00FE5B0C /* Thread.h in Headers */ = {isa = PBXBuildFile; fileRef = 34F6151D27E55C5D00FE5B0C /* Thread.h */; };
@@ -338,6 +341,9 @@
 		34D28925275B3D9F005961A8 /* DateTime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DateTime.h; path = ../../../include/lgi/common/DateTime.h; sourceTree = SOURCE_ROOT; };
 		34D28928275B3DB0005961A8 /* Variant.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Variant.h; path = ../../../include/lgi/common/Variant.h; sourceTree = SOURCE_ROOT; };
 		34D6AA1622D3749A005D739E /* Gdc2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Gdc2.h; path = ../../../include/lgi/common/Gdc2.h; sourceTree = SOURCE_ROOT; };
+		34D795F92BFD771800904325 /* Colour.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Colour.h; path = ../../../include/lgi/common/Colour.h; sourceTree = "<group>"; };
+		34D795FA2BFD771800904325 /* CssTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CssTools.h; path = ../../../include/lgi/common/CssTools.h; sourceTree = "<group>"; };
+		34D795FB2BFD771800904325 /* Css.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Css.h; path = ../../../include/lgi/common/Css.h; sourceTree = "<group>"; };
 		34EE8BB02748A55600F12915 /* TextFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TextFile.h; path = ../../../include/lgi/common/TextFile.h; sourceTree = "<group>"; };
 		34F3EC4229BD374E00BB9B58 /* Rect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Rect.h; path = ../../../include/lgi/common/Rect.h; sourceTree = SOURCE_ROOT; };
 		34F6151D27E55C5D00FE5B0C /* Thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Thread.h; path = ../../../include/lgi/common/Thread.h; sourceTree = SOURCE_ROOT; };
@@ -500,6 +506,9 @@
 		3477C29A1CBF0A700028B84B /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				34D795F92BFD771800904325 /* Colour.h */,
+				34D795FB2BFD771800904325 /* Css.h */,
+				34D795FA2BFD771800904325 /* CssTools.h */,
 				34B6F54F2BA3A81A0095B1C5 /* UnrolledList.h */,
 				348E99CD2876850F0067E92A /* ObjCWrapper.h */,
 				34BF15062871503B001B4CA5 /* DrawListSurface.h */,
@@ -769,6 +778,8 @@
 				34837C4925C677ED00D103B4 /* AppPriv.h in Headers */,
 				34F3EC4329BD374E00BB9B58 /* Rect.h in Headers */,
 				3409C0D0275812CB0050302A /* Profile.h in Headers */,
+				34D795FE2BFD771800904325 /* Css.h in Headers */,
+				34D795FC2BFD771800904325 /* Colour.h in Headers */,
 				3477C2A11CBF0A920028B84B /* Mem.h in Headers */,
 				3477C2D51CC0481B0028B84B /* Array.h in Headers */,
 				3477C5171CC303B70028B84B /* LgiUiBase.h in Headers */,
@@ -792,6 +803,7 @@
 				345920FF1F25649000098DFD /* Font.h in Headers */,
 				3415169426EC32FF007EE35F /* TextView4.h in Headers */,
 				3477C2A81CBF0AAF0028B84B /* Lgi.h in Headers */,
+				34D795FD2BFD771800904325 /* CssTools.h in Headers */,
 				345921001F25649000098DFD /* FontCache.h in Headers */,
 				3409C0CB27580ED60050302A /* List.h in Headers */,
 			);

@@ -28,7 +28,7 @@ VcFile::FileStatus VcFile::GetStatus()
 
 		#define STATE(str, len, sym) \
 			if (!strnicmp(s, str, len)) \
-				Status = sym
+				SetStatus(sym)
 
 		STATE("?", 1, SUntracked);
 		else STATE("Up-To-Date", 10, SClean);
@@ -46,12 +46,21 @@ VcFile::FileStatus VcFile::GetStatus()
 			//LAssert(!"Impl state");
 			d->Log->Print("%s:%i - Unknown status '%s'\n", _FL, s);
 		}
-		
-		if (Status == SConflicted)
-			GetCss(true)->Color("orange");
 	}
 
 	return Status;
+}
+
+void VcFile::SetStatus(FileStatus s)
+{
+	Status = s;
+
+	if (Status == SConflicted)
+		GetCss(true)->Color("orange");
+	else
+		GetCss(true)->Color(LCss::ColorInherit);
+
+	Update();
 }
 
 LString VcFile::GetUri()

@@ -310,6 +310,7 @@ class VcFolder : public LTreeItem
 	bool ParseStartBranch(int Result, LString s, ParseParams *Params);
 	bool ParseSelectCommit(int Result, LString s, ParseParams *Params);
 	bool ParseDelete(int Result, LString s, ParseParams *Params);
+	bool ParseConflicts(int Result, LString s, ParseParams *Params);
 	void DoExpand();
 	
 public:
@@ -341,6 +342,7 @@ public:
 	void Select(bool b);
 	void ListCommit(VcCommit *c);
 	void ListWorkingFolder();
+	void ConflistCheck();
 	void FolderStatus(const char *Path = NULL, VcLeaf *Notify = NULL);
 	void Commit(const char *Msg, const char *Branch, bool AndPush);
 	void StartBranch(const char *BranchName, const char *OnCreated = NULL);

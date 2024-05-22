@@ -43,7 +43,7 @@ public:
 	bool GetStaged() { return Staged; }
 	LString GetUri();
 	void SetUri(LString uri);
-	void SetStatus(FileStatus s) { Status = s; Update(); }
+	void SetStatus(FileStatus s);
 	
 	void SetDiff(LString d);
 	void SetStaged(bool staged) { Staged = staged; }
