@@ -179,10 +179,9 @@ void LDialog::DoModal(OnClose Callback, OsView OverrideParent)
 	SetupDialog(true);
 	LAppInst->Run();
 	
+	LAutoPtr<LDialog> owner(this);
 	if (Callback)
-		Callback(this, d->ModalStatus);
-	else
-		delete this;
+		Callback(owner, d->ModalStatus);
 }
 
 void LDialog::EndModal(int Code)

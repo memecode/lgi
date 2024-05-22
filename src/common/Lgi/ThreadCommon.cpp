@@ -9,11 +9,15 @@ void LThread::WaitForExit(int WarnAfterMs)
 	if (Handle() == InvalidHandle)
 		return;
 
+	bool Warn = true;
 	auto Start = LCurrentTime();
 	while (!IsExited())
 	{
-		if ((LCurrentTime() - Start) >= WarnAfterMs)
+		if (Warn && (LCurrentTime() - Start) >= WarnAfterMs)
+		{
 			LAssert(!"Thread hasn't exited.");
+			Warn = false;
+		}
 
 		LSleep(10);
 	}
