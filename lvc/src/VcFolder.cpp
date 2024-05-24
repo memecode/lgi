@@ -4741,7 +4741,7 @@ bool VcFolder::Resolve(const char *Path, LvcResolve Type)
 					#elif defined(LINUX)
 						a.Printf("resolve -t kdiff3 \"%s\"", local.Get());
 					#else
-						#error "Impl me"
+						#warning "Impl me"
 					#endif
 					break;
 				}

@@ -5,10 +5,11 @@ import paramiko
 import re
 
 ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+print("cwd:", os.getcwd())
 password = open("haikuPassword.txt", "r").read().strip()
 ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-ssh.connect("haiku64", 22, "user", password)
+ssh.connect("192.168.0.205", 22, "user", password)
 
 def cmd(c):
 	global ssh
@@ -21,4 +22,4 @@ def cmd(c):
 		else:
 			break
 
-cmd("cd code/lgi/trunk/ide && make -j7 -f haiku/Makefile.haiku 2>&1")
+cmd("cd code/lgi/trunk/ide && make -j8 -f haiku/Makefile.haiku 2>&1")

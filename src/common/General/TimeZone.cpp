@@ -1,5 +1,6 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/DateTime.h"
+#include "lgi/common/TimeZoneInfo.h"
 
 #if USE_ZDUMP
 
@@ -414,7 +415,6 @@ bool LTimeZone::GetDaylightSavingsInfo(LArray<LDstInfo> &Info, LDateTime &Start,
 			printf("%s:%i - GetDaylightSavingsInfo failed.\n", _FL);
 		#endif
 		
-	
 	#else
 
 		#error "Not impl"

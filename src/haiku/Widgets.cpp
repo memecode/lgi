@@ -251,7 +251,8 @@ void LDialog::EndModal(int Code)
 			[dlg=this, cb=d->ModalCb, code=Code]()
 			{
 				// printf("%s:%i - Calling LDialog callback.. in original thread\n", _FL);
-				cb(dlg, code);
+				LAutoPtr<LDialog> owner(dlg);
+				cb(owner, code);
 				// printf("%s:%i - Calling LDialog callback.. done\n", _FL);
 			}
 		)
