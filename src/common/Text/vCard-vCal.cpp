@@ -8,7 +8,7 @@
 #include "lgi/common/TextConvert.h"
 #include "ScribeDefs.h"
 
-#define DEBUG_LOGGING			0
+#define DEBUG_LOGGING			1
 
 #define Push(s) Write(s, strlen(s))
 
@@ -860,68 +860,80 @@ int StringToWeekDay(const char *s)
 
 bool EvalRule(LDateTime &out, VIo::TimeZoneSection &tz, int yr)
 {
-	LString::Array p = tz.Rule.SplitDelimit(";");
-	VIo::ParamArray Params;
-	for (unsigned i=0; i<p.Length(); i++)
+	if (tz.Rule)
 	{
-		LString::Array v = p[i].SplitDelimit("=", 1);
-		if (v.Length() == 2)
-			Params.New().Set(v[0], v[1]);
-	}
-	
-	auto ByDay = Params.Find("byday");
-	auto ByMonth = Params.Find("bymonth");
-	if (!ByDay || !ByMonth)
-	{
-		#if DEBUG_LOGGING
-		LgiTrace("%s:%i - Missing byday/bymonth\n", _FL);
-		#endif
-		return false;
-	}
-
-	out.Year(yr);
-
-//	RRULE:FREQ=YEARLY;INTERVAL=1;BYDAY=2SU;BYMONTH=3
-	if (!IsDigit(*ByMonth))
-	{
-		#if DEBUG_LOGGING
-		LgiTrace("%s:%i - Unexpected format for ByMonth: %s\n", _FL, ByMonth);
-		#endif
-		return false;
-	}
-
-	out.Month(atoi(ByMonth));
-	
-	if (!IsDigit(*ByDay))
-	{
-		#if DEBUG_LOGGING
-		LgiTrace("%s:%i - Unexpected format for ByDay: %s\n", _FL, ByDay);
-		#endif
-		return false;
-	}
-	
-	auto Idx = atoi(ByDay);
-	while (*ByDay && IsDigit(*ByDay))
-		ByDay++;
-		
-	auto WeekDay = StringToWeekDay(ByDay);
-	if (WeekDay < 0)
-	{
-		#if DEBUG_LOGGING
-		LgiTrace("%s:%i - No week day in ByDay: %s\n", _FL, ByDay);
-		#endif
-		return false;
-	}
-	
-	int Pos = 1;
-	for (int day = 1; day <= out.DaysInMonth(); day++)
-	{
-		out.Day(day);
-		if (out.DayOfWeek() == WeekDay)
+		LString::Array p = tz.Rule.SplitDelimit(";");
+		VIo::ParamArray Params;
+		for (unsigned i=0; i<p.Length(); i++)
 		{
-			if (Idx == Pos)
-				break;
-			Pos++;
+			LString::Array v = p[i].SplitDelimit("=", 1);
+			if (v.Length() == 2)
+				Params.New().Set(v[0], v[1]);
+		}
+		
+		auto ByDay = Params.Find("byday");
+		auto ByMonth = Params.Find("bymonth");
+		if (!ByDay || !ByMonth)
+		{
+			#if DEBUG_LOGGING
+			LgiTrace("%s:%i - Missing byday/bymonth\n", _FL);
+			#endif
+			return false;
+		}
+
+		out.Year(yr);
+
+	//	RRULE:FREQ=YEARLY;INTERVAL=1;BYDAY=2SU;BYMONTH=3
+		if (!IsDigit(*ByMonth))
+		{
+			#if DEBUG_LOGGING
+			LgiTrace("%s:%i - Unexpected format for ByMonth: %s\n", _FL, ByMonth);
+			#endif
+			return false;
+		}
+
+		out.Month(atoi(ByMonth));
+		
+		if (!IsDigit(*ByDay))
+		{
+			#if DEBUG_LOGGING
+			LgiTrace("%s:%i - Unexpected format for ByDay: %s\n", _FL, ByDay);
+			#endif
+			return false;
+		}
+		
+		auto Idx = atoi(ByDay);
+		while (*ByDay && IsDigit(*ByDay))
+			ByDay++;
+			
+		auto WeekDay = StringToWeekDay(ByDay);
+		if (WeekDay < 0)
+		{
+			#if DEBUG_LOGGING
+			LgiTrace("%s:%i - No week day in ByDay: %s\n", _FL, ByDay);
+			#endif
+			return false;
+		}
+		
+		int Pos = 1;
+		for (int day = 1; day <= out.DaysInMonth(); day++)
+		{
+			out.Day(day);
+			if (out.DayOfWeek() == WeekDay)
+			{
+				if (Idx == Pos)
+					break;
+				Pos++;
+			}
+		}
+	}
+	else if (tz.RecurDate)
+	{
+		VIo io;
+		if (!io.ParseDate(out, tz.RecurDate))
+		{
+			LgiTrace("%s:%i - Error parsing date '%s'\n", _FL, tz.RecurDate);
+			return false;
 		}
 	}
 	
@@ -977,7 +989,10 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 	bool Status = false;
 
 	if (!c || !In)
+	{
+		LgiTrace("%s:%i - param error\n", _FL);
 		return false;
+	}
 
 	LString Field, Data;
 	ParamArray Params;
@@ -1001,10 +1016,10 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 	{
 		if (Field.Equals("begin"))
 		{
-			if (!SectionType)
-				SectionType = Field;
-
 			auto Type = ParseCalendarType(Data);
+			if (!SectionType && Type != CalTypeMax)
+				SectionType = Data;
+
 			if (Type != CalTypeMax)
 			{
 				IsEvent = true;
@@ -1030,6 +1045,7 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 		else if (Field.Equals("end"))
 		{
 			auto Type = ParseCalendarType(Data);
+			// LgiTrace("%s:%i - EndData='%s' %i (%s)\n", _FL, Data.Get(), Type, SectionType.Get());
 			if (Type != CalTypeMax)
 			{
 				Status = true;
@@ -1231,7 +1247,9 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 				else if (IsVar(Field, "TZOFFSETTO"))
 					Sect.To = (int)Data.Int();
 				else if (IsVar(Field, "RRULE"))
-					Sect.Rule = Data;				
+					Sect.Rule = Data;
+				else if (IsVar(Field, "RDATE"))
+					Sect.RecurDate = Data;
 			}			
 			else if (IsVar(Field, "TZID"))
 			{
@@ -1264,8 +1282,8 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 		if (Match)
 		{
 			LDateTime Norm, Dst;
-			if (EvalRule(Norm, Match->Normal, EventStart.Year()) &&
-				EvalRule(Dst, Match->Daylight, EventStart.Year()))
+			if (EvalRule(Norm, Match->Normal,   EventStart.Year()) &&
+				EvalRule(Dst,  Match->Daylight, EventStart.Year()) )
 			{
 				bool IsDst = false;
 				if (Dst < Norm)
@@ -1294,7 +1312,13 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 				sTz.Printf("%4.4i,%s", EffectiveTz, StartTz.Get());
 				c->SetStr(FIELD_CAL_TIMEZONE, sTz);
 			}
-			else goto StoreStringTz;
+			else
+			{
+				#if DEBUG_LOGGING
+				LgiTrace("%s:%i vcal import error: failed to evaluate tz=%s\n", _FL, Match->Name.Get());
+				#endif
+				goto StoreStringTz;
+			}
 		}
 		else
 		{

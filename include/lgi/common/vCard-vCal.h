@@ -28,6 +28,7 @@ public:
 		LDateTime Start;
 		LString Rule;
 		LString Name;
+		LString RecurDate;
 	};
 	
 	struct TimeZoneInfo
@@ -85,9 +86,6 @@ public:
 protected:
 	VIoPriv *d;
 
-	bool ParseDate(LDateTime &out, char *in);
-	bool ParseDuration(LDateTime &Out, int &Sign, char *In);
-
 	void Fold(LStreamI &o, const char *i, int pre_chars = 0, const char *encoding = NULL);
 	LString UnMultiLine(char *In);
 
@@ -97,6 +95,9 @@ protected:
 public:
 	VIo();
 	~VIo();
+
+	bool ParseDate(LDateTime &out, char *in);
+	bool ParseDuration(LDateTime &Out, int &Sign, char *In);
 };
 
 class VCard : public VIo

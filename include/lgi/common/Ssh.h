@@ -98,12 +98,12 @@ protected:
 					double Rate = (double)i / Sec;
 					double TotalTime = Length / MAX(Rate, 1);
 					double RemainingTime = TotalTime - Sec;
-					int Remain = (int)RemainingTime;
-					int Hrs = Remain / 3600;
-					Remain -= Hrs * 3600;
-					int Mins = Remain / 60;
-					Remain -= Mins * 60;
-					int Secs = Remain;
+					int DisplayTime = i == Length ? (int)TotalTime : (int)RemainingTime;
+					int Hrs = DisplayTime / 3600;
+					DisplayTime -= Hrs * 3600;
+					int Mins = DisplayTime / 60;
+					DisplayTime -= Mins * 60;
+					int Secs = DisplayTime;
 
 					LString Msg, Time;
 					if (!Hrs)
@@ -111,12 +111,23 @@ protected:
 					else
 						Time.Printf("%ih %im %is", Hrs, Mins, Secs);
 
-					Msg.Printf(	"%s of %s\n"
-								"%.1f%%, %s/s, %s",
-								LFormatSize(i).Get(), LFormatSize(Length).Get(),
-								(double)i * 100.0 / Length,
-								LFormatSize((uint64_t)Rate).Get(),
-								Time.Get());
+					if (i == Length)
+					{
+						Msg.Printf(	"Completed: %s\n"
+									"%s/s in %s",
+									LFormatSize(Length).Get(),
+									LFormatSize((uint64_t)Rate).Get(),
+									Time.Get());
+					}
+					else
+					{
+						Msg.Printf(	"%s of %s\n"
+									"%.1f%%, %s/s, %s",
+									LFormatSize(i).Get(), LFormatSize(Length).Get(),
+									(double)i * 100.0 / Length,
+									LFormatSize((uint64_t)Rate).Get(),
+									Time.Get());
+					}
 					s->TxtLabel->Name(Msg);
 					UpdateTs = Now;
 				}
@@ -557,6 +568,7 @@ public:
 						Meter.Value(i);
 					}
 
+					Meter.Value(i);
 					Status = i==length;
 					Log->Print("%s:%i - Upload: %s.\n", _FL, Status ? "Ok" : "Error");
 				}
