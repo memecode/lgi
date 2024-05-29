@@ -732,7 +732,7 @@ public:
 
 	int ResolveY(LCss::Len l, LTag *t, bool IsMargin)
 	{
-		LFont *f = t->GetFont();
+		auto f = t->GetFont();
 		switch (l.Type)
 		{
 			case LCss::LenInherit:
@@ -4721,7 +4721,8 @@ void LHtmlTableLayout::LayoutTable(LFlowRegion *f, uint16 Depth)
 
 					
 				if (Ht.IsValid() &&
-					Ht.Type != LCss::LenPercent)
+					Ht.Type != LCss::LenPercent &&
+					Ht.Type != LCss::LenMinContent) // Make no sense to resolve that here
 				{
 					int h = f->ResolveY(Ht, t, false);
 					t->Size.y = MAX(h, t->Size.y);
