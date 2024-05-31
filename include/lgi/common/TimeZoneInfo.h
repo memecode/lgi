@@ -10,13 +10,13 @@
 
 class LTimeZoneInfo
 {
-	static int64_t TimeToSeconds(LString t)
+	static int TimeToSeconds(LString t)
 	{
 		auto parts = t.SplitDelimit(":");
 		auto hrs = parts[0].Int();
 		auto min = parts.IdxCheck(1) ? parts[1].Int() : 0;
 		auto sec = parts.IdxCheck(2) ? parts[2].Int() : 0;
-		return (hrs * 3600) + (min * 60) + sec;
+		return (int) ((hrs * 3600) + (min * 60) + sec);
 	}
 
 	struct Header
@@ -117,7 +117,7 @@ class LTimeZoneInfo
 			else LAssert(0);
 
 			if (time)
-				dt.Hours(time.Int());
+				dt.Hours((int)time.Int());
 			else
 				dt.Hours(2);
 
@@ -133,7 +133,7 @@ class LTimeZoneInfo
 
 			if (s(0) == 'J')
 			{
-				JulianIdx = s(1, -1).Int() - 1;
+				JulianIdx = (int) s(1, -1).Int() - 1;
 				return JulianIdx >= 0 && JulianIdx < 365;
 			}
 			else if (s(0) == 'M')
@@ -142,15 +142,15 @@ class LTimeZoneInfo
 				if (parts.Length() != 3)
 					return false;
 				
-				Month = parts[0].Int();
-				Week  = parts[1].Int();
-				Day   = parts[2].Int();
+				Month = (int) parts[0].Int();
+				Week  = (int) parts[1].Int();
+				Day   = (int) parts[2].Int();
 
 				return Month >= 1 && Month <= 12;
 			}
 			else
 			{
-				JulianIdx = s.Int();
+				JulianIdx = (int) s.Int();
 				return JulianIdx >= 0 && JulianIdx < 365;
 			}
 		}
@@ -489,10 +489,10 @@ public:
 			for (int year = Start.Year()-1; year <= (End ? End->Year() : Start.Year()); year++)
 			{
 				// Figure out the start and end DST for 'year'
-				int DstOffset = endTrans.OffsetSeconds(StdOffsetSeconds) / 60;
+				auto DstOffset = endTrans.OffsetSeconds(StdOffsetSeconds) / 60;
 
 				auto startDt = startTrans.Get(year);
-				startDt.SetTimeZone(StdOffsetSeconds / 60, false);
+				startDt.SetTimeZone((int) (StdOffsetSeconds / 60), false);
 				if (InRange(startDt))
 				{
 					auto &s = Info.New();
@@ -501,7 +501,7 @@ public:
 				}
 
 				auto endDt = endTrans.Get(year);
-				endDt.SetTimeZone(StdOffsetSeconds / 60, false);
+				endDt.SetTimeZone((int) (StdOffsetSeconds / 60), false);
 				#if 0
 				printf("\tstart=%s %i, end=%s %i\n",
 					startDt.Get().Get(), InRange(startDt),
@@ -511,7 +511,7 @@ public:
 				{
 					auto &e = Info.New();
 					e.Utc = endDt.Ts();
-					e.Offset = StdOffsetSeconds / 60;
+					e.Offset = (int) (StdOffsetSeconds / 60);
 				}
 			}
 		}

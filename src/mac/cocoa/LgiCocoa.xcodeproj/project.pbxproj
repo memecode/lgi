@@ -148,6 +148,7 @@
 		347AFB9827A0DC5E00BE4ABE /* 15Bit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 347AFB9727A0DC5E00BE4ABE /* 15Bit.cpp */; };
 		348362421F233A77003B2A6D /* Stream.h in Headers */ = {isa = PBXBuildFile; fileRef = 348362411F233A77003B2A6D /* Stream.h */; };
 		34837C4925C677ED00D103B4 /* AppPriv.h in Headers */ = {isa = PBXBuildFile; fileRef = 34837C4825C677ED00D103B4 /* AppPriv.h */; };
+		3485B1CD2C0957C40079218F /* TimeZoneInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 3485B1CC2C0957C40079218F /* TimeZoneInfo.h */; };
 		348CD46A25C63E56001AA32B /* AppCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 348CD46925C63E56001AA32B /* AppCommon.cpp */; };
 		348E99CE2876850F0067E92A /* ObjCWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 348E99CD2876850F0067E92A /* ObjCWrapper.h */; };
 		3491A28523678DB800604C29 /* DropFiles.h in Headers */ = {isa = PBXBuildFile; fileRef = 3491A28423678DB700604C29 /* DropFiles.h */; };
@@ -322,6 +323,7 @@
 		347AFB9727A0DC5E00BE4ABE /* 15Bit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = 15Bit.cpp; path = ../../common/Gdc2/15Bit.cpp; sourceTree = SOURCE_ROOT; };
 		348362411F233A77003B2A6D /* Stream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Stream.h; path = ../../../include/lgi/common/Stream.h; sourceTree = SOURCE_ROOT; };
 		34837C4825C677ED00D103B4 /* AppPriv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppPriv.h; path = ../../../private/mac/AppPriv.h; sourceTree = SOURCE_ROOT; };
+		3485B1CC2C0957C40079218F /* TimeZoneInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TimeZoneInfo.h; path = ../../../../../../lgi/trunk/include/lgi/common/TimeZoneInfo.h; sourceTree = "<group>"; };
 		348CD46925C63E56001AA32B /* AppCommon.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = AppCommon.cpp; path = ../../common/Lgi/AppCommon.cpp; sourceTree = SOURCE_ROOT; };
 		348E99CD2876850F0067E92A /* ObjCWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ObjCWrapper.h; path = ../../../include/lgi/mac/cocoa/ObjCWrapper.h; sourceTree = "<group>"; };
 		3491A28423678DB700604C29 /* DropFiles.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = DropFiles.h; path = ../../../include/lgi/common/DropFiles.h; sourceTree = SOURCE_ROOT; };
@@ -377,6 +379,7 @@
 		3428D91F2BCDD762008E5A2A /* DateTime */ = {
 			isa = PBXGroup;
 			children = (
+				3485B1CC2C0957C40079218F /* TimeZoneInfo.h */,
 				3428D9202BCDD7D7008E5A2A /* TimeZone.cpp */,
 				3477C3401CC0A68E0028B84B /* DateTime.cpp */,
 				34D28925275B3D9F005961A8 /* DateTime.h */,
@@ -778,6 +781,7 @@
 				34837C4925C677ED00D103B4 /* AppPriv.h in Headers */,
 				34F3EC4329BD374E00BB9B58 /* Rect.h in Headers */,
 				3409C0D0275812CB0050302A /* Profile.h in Headers */,
+				3485B1CD2C0957C40079218F /* TimeZoneInfo.h in Headers */,
 				34D795FE2BFD771800904325 /* Css.h in Headers */,
 				34D795FC2BFD771800904325 /* Colour.h in Headers */,
 				3477C2A11CBF0A920028B84B /* Mem.h in Headers */,
