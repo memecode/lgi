@@ -932,7 +932,7 @@ bool EvalRule(LDateTime &out, VIo::TimeZoneSection &tz, int yr)
 		VIo io;
 		if (!io.ParseDate(out, tz.RecurDate))
 		{
-			LgiTrace("%s:%i - Error parsing date '%s'\n", _FL, tz.RecurDate);
+			LgiTrace("%s:%i - Error parsing date '%s'\n", _FL, tz.RecurDate.Get());
 			return false;
 		}
 	}
