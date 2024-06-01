@@ -153,58 +153,26 @@ T LAverage(LArray<T> &a)
 template<typename T, typename S>
 void LDetectPeaks(
         LArray<T>	&input,
-        LArray<S>	&emi_peaks,      // emission peaks will be put here
-        LArray<S>	&absop_peaks,    // absorption peaks will be put here
-        double		delta,           // delta used for distinguishing peaks
-        bool        emi_first = true // should we search emission peak first of absorption peak first?
-        )
+        LArray<S>	&peaks,          // peaks will be put here
+        double		delta)           // delta used for distinguishing peaks
 {
-    T       mx;
-    T       mn;
-    S		mx_pos = 0;
-    S		mn_pos = 0;
-    auto    is_detecting_emi = emi_first;
-    auto    data = input.AddressOf();
+	int prevIdx = -1;
+	for (T i=0; i<input.Length(); i++)
+	{
+		T in = input[i];
+		bool isMax = true;
 
-    mx = data[0];
-    mn = data[0];
-
-    for (size_t i = 1; i < input.Length(); ++i)
-    {
-        if (data[i] > mx)
-        {
-            mx_pos = i;
-            mx = data[i];
-        }
-        if (data[i] < mn)
-        {
-            mn_pos = i;
-            mn = data[i];
-        }
-
-        if (is_detecting_emi &&
-            data[i] < mx - delta)
-        {
-            emi_peaks.Add(mx_pos);
-
-            is_detecting_emi = 0;
-
-            i = mx_pos - 1;
-
-            mn = data[mx_pos];
-            mn_pos = mx_pos;
-        }
-        else if((!is_detecting_emi) &&
-                data[i] > mn + delta)
-        {
-            absop_peaks.Add(mn_pos);
-
-            is_detecting_emi = 1;
-            
-            i = mn_pos - 1;
-
-            mx = data[mn_pos];
-            mx_pos = mn_pos;
-        }
-    }
+		for (T n=-delta; isMax && n<delta; n++)
+		{
+			if (n == 0) continue;
+			if (input.IdxCheck(i+n))
+			{
+				T val = input[i+n];
+				if (val > in)
+					isMax = false;
+			}
+		}
+		if (isMax && (prevIdx < 0 || i - prevIdx > delta))
+			peaks.Add(prevIdx = i);
+	}
 }

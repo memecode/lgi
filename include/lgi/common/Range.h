@@ -70,6 +70,26 @@ struct LRange
 		return out;
 	}
 
+	LRange Union(ssize_t Val)
+	{
+		LRange out(*this);
+		if (out.Len == 0)
+		{
+			out.Start = Val;
+			out.Len = 1;
+		}
+		else if (Val < out.Start)
+		{
+			out.Len += out.Start - Val;
+			out.Start = Val;
+		}
+		else if (Val > End() - 1)
+		{
+			out.Len = Val - out.Start + 1;
+		}
+		return out;
+	}
+
 	ssize_t End() const
 	{
 		return Start + Len;
