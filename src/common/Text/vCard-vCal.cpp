@@ -101,40 +101,34 @@ VIo::~VIo()
 	DeleteObj(d);
 }
 
-bool VIo::ParseDate(LDateTime &Out, char *In)
+bool VIo::ParseDate(LDateTime &Out, bool &localTime, char *In)
 {
+	if (!In)
+		return false;
+
+	auto v = LString(In).SplitDelimit("T");
+	if (v.Length() <= 0)
+		return false;
+
 	bool Status = false;
-
-	if (In)
+	Out.SetTimeZone(0, false);
+	if (v[0].Length() == 8)
 	{
-		Out.SetTimeZone(0, false);
+		auto &t = v[0];
+		Out.Year ((int) t(0, 4).Int());
+		Out.Month((int) t(4, 6).Int());
+		Out.Day  ((int) t(6, 8).Int());
+		Status = true;
+	}
 
-		auto v = LString(In).SplitDelimit("T");
-		if (v.Length() > 0)
-		{
-			if (v[0].Length() == 8)
-			{
-				auto Year  = v[0](0, 4);
-				auto Month = v[0](4, 6);
-				auto Day   = v[0](6, 8);
-				Out.Year ((int)Year.Int());
-				Out.Month((int)Month.Int());
-				Out.Day  ((int)Day.Int());
-				Status = true;
-			}
-
-			char *t = v[1];
-			if (t && strlen(t) >= 6)
-			{
-				char Hour[3]   = {t[0], t[1], 0};
-				char Minute[3] = {t[2], t[3], 0};
-				char Second[3] = {t[4], t[5], 0};
-				Out.Hours(atoi(Hour));
-				Out.Minutes(atoi(Minute));
-				Out.Seconds(atoi(Second));
-				Status = true;
-			}
-		}
+	if (v.Length() > 1 && v[1].Length() >= 6)
+	{
+		auto &t = v[1];
+		Out.Hours(  (int) t(0, 2).Int());
+		Out.Minutes((int) t(2, 4).Int());
+		Out.Seconds((int) t(4, 6).Int());
+		localTime = v[1].Lower().Find("z") < 0;
+		Status = true;
 	}
 
 	return Status;
@@ -930,7 +924,8 @@ bool EvalRule(LDateTime &out, VIo::TimeZoneSection &tz, int yr)
 	else if (tz.RecurDate)
 	{
 		VIo io;
-		if (!io.ParseDate(out, tz.RecurDate))
+		bool isLocal = false;
+		if (!io.ParseDate(out, isLocal, tz.RecurDate))
 		{
 			LgiTrace("%s:%i - Error parsing date '%s'\n", _FL, tz.RecurDate.Get());
 			return false;
@@ -1002,10 +997,9 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 	bool IsAlarm = false;
 	LString SectionType;
 	LDateTime EventStart, EventEnd;
+	bool StartTimeLocal = false, EndTimeLocal = false;
 	
 	LString StartTz, EndTz;
-	LArray<TimeZoneInfo> TzInfos;
-	TimeZoneInfo *TzInfo = NULL;
 	bool IsNormalTz = false, IsDaylightTz = false;
 	LJson To;
 	int Attendee = 0;
@@ -1084,12 +1078,12 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 			}
 			else if (IsVar(Field, "dtstart"))
 			{
-				ParseDate(EventStart, Data);
+				ParseDate(EventStart, StartTimeLocal, Data);
 				StartTz = Params.Find("TZID");
 			}
 			else if (IsVar(Field, "dtend"))
 			{
-				ParseDate(EventEnd, Data);
+				ParseDate(EventEnd, EndTimeLocal, Data);
 				EndTz = Params.Find("TZID");
 			}
 			else if (IsVar(Field, "summary"))
@@ -1238,8 +1232,9 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 			if (IsNormalTz || IsDaylightTz)
 			{
 				TimeZoneSection &Sect = IsNormalTz ? TzInfo->Normal : TzInfo->Daylight;
+				bool isLocal = false;
 				if (IsVar(Field, "DTSTART"))
-					ParseDate(Sect.Start, Data);
+					ParseDate(Sect.Start, isLocal, Data);
 				else if (IsVar(Field, "TZNAME"))
 					Sect.Name = Data;
 				else if (IsVar(Field, "TZOFFSETFROM"))
@@ -1308,9 +1303,7 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 				#endif
 				
 				EffectiveTz = IsDst ? Match->Daylight.To : Match->Normal.To;
-				LString sTz;
-				sTz.Printf("%4.4i,%s", EffectiveTz, StartTz.Get());
-				c->SetStr(FIELD_CAL_TIMEZONE, sTz);
+				c->SetStr(FIELD_CAL_TIMEZONE, LString::Fmt("%4.4i,%s", EffectiveTz, StartTz.Get()));
 			}
 			else
 			{
@@ -1346,19 +1339,22 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 			#if DEBUG_LOGGING
 			LgiTrace("%s:%i - EffectiveTz=%i, Mins=%i\n", _FL, EffectiveTz, Mins);
 			#endif
-			if (EventStart.IsValid())
+			if (EventStart.IsValid() && StartTimeLocal)
 			{
 				#if DEBUG_LOGGING
 				LgiTrace("EventStart=%s\n", EventStart.Get().Get());
 				#endif
-
+				// Convert to UTC
 				EventStart.AddMinutes(-Mins);
 				#if DEBUG_LOGGING
-				LgiTrace("EventStart=%s\n", EventStart.Get().Get());
+				LgiTrace("EventStartUtc=%s\n", EventStart.Get().Get());
 				#endif
 			}
-			if (EventEnd.IsValid())
+			if (EventEnd.IsValid() && EndTimeLocal)
+			{
+				// Convert to UTC
 				EventEnd.AddMinutes(-Mins);
+			}
 		}
 	}
 	

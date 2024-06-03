@@ -96,7 +96,7 @@ public:
 	VIo();
 	~VIo();
 
-	bool ParseDate(LDateTime &out, char *in);
+	bool ParseDate(LDateTime &out, bool &localTime, char *in);
 	bool ParseDuration(LDateTime &Out, int &Sign, char *In);
 };
 
@@ -110,6 +110,8 @@ public:
 class VCal : public VIo
 {
     bool IsCal;
+	LArray<TimeZoneInfo> TzInfos;
+	TimeZoneInfo *TzInfo = NULL;
 
 public:
     VCal()
