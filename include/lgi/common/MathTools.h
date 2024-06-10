@@ -173,7 +173,7 @@ void LDetectPeaks(
 			bool isMax = true;
 			bool isMin = true;
 
-			for (T n=-delta; isMax && n<delta; n++)
+			for (T n=-delta-1; isMax && n<delta; n++)
 			{
 				if (n == -1)
 					continue;
