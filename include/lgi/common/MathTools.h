@@ -154,25 +154,53 @@ template<typename T, typename S>
 void LDetectPeaks(
         LArray<T>	&input,
         LArray<S>	&peaks,          // peaks will be put here
+        LArray<S>	*valleys,        // [optional] valleys will be put here
         double		delta)           // delta used for distinguishing peaks
 {
 	int prevIdx = -1;
-	for (T i=0; i<input.Length(); i++)
+	int trend = 0;
+	T prev = input[0];
+
+	for (T i=1; i<input.Length(); i++)
 	{
 		T in = input[i];
-		bool isMax = true;
-
-		for (T n=-delta; isMax && n<delta; n++)
+		auto diff = in - prev;
+		auto dir = diff > 0 ? 1 : diff < 0 ? -1 : 0;
+		if ((dir < 0 && trend > 0)
+			||
+			(dir > 0 && trend < 0))
 		{
-			if (n == 0) continue;
-			if (input.IdxCheck(i+n))
+			bool isMax = true;
+			bool isMin = true;
+
+			for (T n=-delta; isMax && n<delta; n++)
 			{
-				T val = input[i+n];
-				if (val > in)
-					isMax = false;
+				if (n == -1)
+					continue;
+			
+				if (input.IdxCheck(i+n))
+				{
+					T val = input[i+n];
+					if (val > prev)
+						isMax = false;
+					if (val < prev)
+						isMin = false;
+				}
 			}
+
+			if (isMax &&
+				(prevIdx < 0 || i - prevIdx > delta))
+				peaks.Add(prevIdx = i - 1);
+
+			if (valleys &&
+				isMin &&
+				peaks.Length() > 0 &&
+				(prevIdx < 0 || i - prevIdx > delta))
+				valleys->Add(prevIdx = i - 1);
 		}
-		if (isMax && (prevIdx < 0 || i - prevIdx > delta))
-			peaks.Add(prevIdx = i);
+
+		if (dir)
+			trend = dir;
+		prev = in;
 	}
 }
