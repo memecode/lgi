@@ -957,6 +957,12 @@ bool VcFolder::GetAuthor(bool local, std::function<void(LString name,LString ema
 
 bool VcFolder::SetAuthor(bool local, LString name, LString email)
 {
+	if (!name || !email)
+	{
+		d->Log->Print("%s:%i - No user/email given.\n", _FL);
+		return false;
+	}
+
 	auto scope = local ? "--local" : "--global";
 	auto target = local ? &AuthorLocal : &AuthorGlobal;
 
