@@ -78,13 +78,13 @@ public:
 	}
 };
 
-struct FtpConn
+struct FtpConn : public LCancel
 {
 	LUri *Base;
 	LogSock *Sock;
 	IFtp Ftp;
 
-	FtpConn(char *u)
+	FtpConn(char *u) : Ftp(this)
 	{
 		Base = new LUri(u);
 		Sock = 0;

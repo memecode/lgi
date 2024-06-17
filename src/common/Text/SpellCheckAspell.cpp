@@ -819,7 +819,8 @@ public:
 		}
 		else if (Url.sProtocol && !_stricmp(Url.sProtocol, "ftp"))
 		{
-			IFtp Ftp;
+			LCancel cancel;
+			IFtp Ftp(&cancel);
 			FtpOpenStatus Status = Ftp.Open(Sock.Release(), Url.sHost, Url.Port, NULL, NULL);
 			if (Status != FO_Connected)
 			{
