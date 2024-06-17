@@ -323,7 +323,7 @@ public:
 	bool IsLocal();
 	LString LocalPath();
 	const char *NoPipeOpt();
-	LUri GetUri() { return Uri; }
+	LUri GetUri();
 	VcLeaf *FindLeaf(const char *Path, bool OpenTree);
 	void DefaultFields();
 	void UpdateColumns(LList *lst = NULL);

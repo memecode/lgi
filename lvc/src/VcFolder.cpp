@@ -307,6 +307,16 @@ VersionCtrl VcFolder::GetType()
 	return Type;
 }
 
+LUri VcFolder::GetUri()
+{
+	// Check the path ends in a dir separator, other adding paths to the URI 
+	// won't work correctly.
+	if (Uri.sPath.Length() > 0)
+		LAssert(Uri.sPath(-1) == '/');
+
+	return Uri;
+}
+
 bool VcFolder::IsLocal()
 {
 	return Uri.IsProtocol("file");
@@ -362,6 +372,12 @@ bool VcFolder::Serialize(LXmlTag *t, bool Write)
 			Uri.Set(s);
 		else
 			Uri.SetFile(s);
+
+		if (Uri.sPath.Length() > 0)
+		{
+			if (Uri.sPath(-1) != '/')
+				Uri.sPath += "/";
+		}
 	}
 	return true;
 }
