@@ -770,37 +770,48 @@ bool IFtp::ListDir(LArray<IFtpEntry*> &Dir)
 			WriteLine();
 				
 			// Accept the data connection
-			if (ConnectData())
+			if (!ConnectData())
 			{
-				VerifyRange(ReadLine(), 1);
+				Socket->OnError(0, "Failed to connect data...");
+				return false;
+			}			
 
-				if (Meter)
-				{
-					Meter->SetRange(0);
-					Meter->Value(0);
-				}
+			VerifyRange(ReadLine(), 1);
 
-				// Read the data
-				uchar Buffer[1024];
-				ssize_t Len;
-				
-				while ((Len = d->Data->Read((char*) Buffer, sizeof(Buffer), 0)) > 0)
-				{
-					if (Meter)
-					{
-						Meter->Value(Buf.GetSize());
-					}
-
-					Buf.Write(Buffer, Len);
-				}
-
-				if (Meter)
-				{
-					Meter->Value(0);
-				}
-				
-				Status = true;
+			if (Meter)
+			{
+				Meter->SetRange(0);
+				Meter->Value(0);
 			}
+
+			// Read the data
+			uchar Buffer[1024];
+			ssize_t Len;
+			auto lastTs = LCurrentTime();
+			int64_t totalSize = 0;
+
+			while ((Len = d->Data->Read((char*) Buffer, sizeof(Buffer), 0)) > 0)
+			{
+				if (Meter)
+					Meter->Value(Buf.GetSize());
+
+				Buf.Write(Buffer, Len);
+				totalSize += Len;
+					
+				auto now = LCurrentTime();
+				if (now - lastTs > 1000)
+				{
+					lastTs = now;
+					Socket->OnInformation(LString::Fmt("Read %s...", LFormatSize(totalSize).Get()));
+				}
+			}
+
+			if (Meter)
+			{
+				Meter->Value(0);
+			}
+				
+			Status = true;
 			
 			d->Data.Reset();
 			d->Listen.Reset();
