@@ -21,17 +21,19 @@ LStatusBar::~LStatusBar()
 
 bool LStatusBar::Pour(LRegion &r)
 {
-	LRect *Best = FindLargestEdge(r, GV_EDGE_BOTTOM);
-	if (Best)
+	if (auto Best = FindLargestEdge(r, GV_EDGE_BOTTOM))
 	{
+		auto ht = LSysFont->GetHeight() + 8;
+
 		LRect Take = *Best;
-		if (Take.Y() > 21)
+		if (Take.Y() > ht)
 		{
-			Take.y1 = MAX((Take.y2 - 21), Take.y1);
+			Take.y1 = MAX((Take.y2 - ht), Take.y1);
 			SetPos(Take);
 			return true;
 		}
 	}
+
 	return false;
 }
 
@@ -162,20 +164,18 @@ void LStatusBar::OnPosChange()
 
 LStatusPane *LStatusBar::AppendPane(const char *Text, int WidthPx)
 {
-	LStatusPane *Pane = 0;
-	if (Text)
+	if (!Text)
+		return NULL;
+
+	if (auto Pane = new LStatusPane)
 	{
-		Pane = new LStatusPane;
-		if (Pane)
-		{
-			AddView(Pane);
-			Pane->Name(Text);
-			if (WidthPx)
-				Pane->SetWidth(WidthPx);
-			// else 'auto'
-		}
+		AddView(Pane);
+		Pane->Name(Text);
+		if (WidthPx)
+			Pane->SetWidth(WidthPx);
+		return Pane;
 	}
-	return Pane;
+	return NULL;
 }
 
 bool LStatusBar::AppendPane(LStatusPane *Pane)
@@ -285,11 +285,11 @@ void LStatusPane::OnPaint(LSurface *pDC)
 	LRect r = GetClient();
 	auto css = GetCss();
 	auto fnt = GetFont();
-
 	if (css)
 	{
 		LCssTools tools(css, fnt);
-		r = tools.PaintBorder(pDC, r);
+		// LView::OnNcPaint paints the border for us
+		// r = tools.PaintBorder(pDC, r);
 		tools.PaintContent(pDC, r, t, Icon);
 	}
 	else if (ValidStr(t))
