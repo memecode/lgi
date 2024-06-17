@@ -133,8 +133,15 @@ public:
 /// The remote folder system interface.
 class IFileProtocol
 {
+protected:
+	LCancel *cancel = NULL;
+
 public:
+	IFileProtocol(LCancel *c) : cancel(c) {}
 	virtual ~IFileProtocol() {}
+
+	bool IsCancelled() { return cancel && cancel->IsCancelled(); }
+	LCancel *GetCancel() const { return cancel; }
 
 	// Properties
 	virtual const char *GetCharset() = 0;
@@ -216,7 +223,7 @@ protected:
 
 public:
 	/// Construct an FTP protocol handler.
-	IFtp(IFtpCallback *cb = NULL, bool UseTLS = false);
+	IFtp(LCancel *cancel, IFtpCallback *cb = NULL, bool UseTLS = false);
 	virtual ~IFtp();
 
 	/// \returns the current charset

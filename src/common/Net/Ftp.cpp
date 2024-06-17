@@ -262,7 +262,7 @@ IFtpEntry &IFtpEntry::operator =(const IFtpEntry &e)
 #define Verify(i, ret) { ssize_t Code = i; if (Code != (ret)) throw Code; }
 #define VerifyRange(i, range) { ssize_t Code = i; if ((Code/100) != range) throw Code; }
 
-IFtp::IFtp(IFtpCallback *cb, bool useTLS)
+IFtp::IFtp(LCancel *cancel, IFtpCallback *cb, bool useTLS) : IFileProtocol(cancel)
 {
 	d = new IFtpPrivate(cb);
 	d->UseTLS = useTLS;	

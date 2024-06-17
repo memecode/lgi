@@ -30,20 +30,11 @@ int FontSizes[] = { 8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 32, 48, 72, 100, 0
 
 struct LFontSelectPriv
 {
-	LTableLayout *Tbl;
-	LList *Lst;
-	LBitmap *Bmp;
-	LCombo *PtSizes;
-	bool Running;
-	
-	LFontSelectPriv()
-	{
-		Tbl = NULL;
-		Lst = NULL;
-		Bmp = NULL;
-		PtSizes = NULL;
-		Running = false;
-	}
+	LTableLayout *Tbl = NULL;
+	LList *Lst = NULL;
+	LBitmap *Bmp = NULL;
+	LCombo *PtSizes = NULL;
+	bool Running = false;
 };
 
 LFontSelect::LFontSelect(LView *Parent, void *Init, int InitLen)

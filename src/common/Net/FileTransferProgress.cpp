@@ -411,7 +411,7 @@ FileTransferProgress::FileTransferProgress(	LDom *App,
 	if (StatusInfo[_STATUS_HISTORY]) Status->AppendPane(StatusInfo[_STATUS_HISTORY]);
 
 	// current download position
-	StatusInfo[_STATUS_POSITION]	= Status->AppendPane("", 120);
+	StatusInfo[_STATUS_POSITION]	= Status->AppendPane("", 130);
 	if (StatusInfo[_STATUS_POSITION]) StatusInfo[_STATUS_POSITION]->Sunken(true);
 	
 	// progress meter
