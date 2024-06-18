@@ -246,7 +246,7 @@ LWindow::~LWindow()
 	if (LAppInst->AppWnd == this)
 		LAppInst->AppWnd = NULL;
 
-	LAssert(!Menu);
+	DeleteObj(Menu);
 	WaitThread();
 }
 

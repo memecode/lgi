@@ -20,7 +20,6 @@ LLayout::LLayout()
 
 LLayout::~LLayout()
 {
-	printf("%s:%i - %p::~Layout %p,%p\n", _FL, this, HScroll, VScroll);
 	DeleteObj(HScroll);
 	DeleteObj(VScroll);
 }

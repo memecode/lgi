@@ -71,6 +71,8 @@ if (NOT EXISTS "${ICONV_PATH}/include")
 			find_package(Iconv REQUIRED)
 		endif()
 	elseif (LINUX OR HAIKU)
+		# Haiku: if this fails...
+		# pkgman install libiconv_devel
 		find_package(Iconv REQUIRED)
 	else()
 		message(FATAL_ERROR "Missing iconv at: ${ICONV_PATH}")
