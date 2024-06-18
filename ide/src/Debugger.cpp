@@ -1,3 +1,9 @@
+/*
+	This needs to be migrated to GDB/MI:
+	https://sourceware.org/gdb/current/onlinedocs/gdb.html/GDB_002fMI.html
+
+	The existing implemenation isn't very robust or fast.
+*/
 #ifdef POSIX
 	#include <sys/types.h>
 	#include <signal.h>
