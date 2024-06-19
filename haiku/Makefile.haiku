@@ -179,12 +179,12 @@ Deps       := $(patsubst %.o,%.d,$(Objects))
 
 $(BuildDir)/%.o: %.c
 	mkdir -p $(@D)
-	echo $< [$(Build)]
+	echo $(notdir $<) [$(Build)]
 	$(CC) $(Inc) $(CFlags) $(Defs) -c $(abspath $<) -o $@
 
 $(BuildDir)/%.o: %.cpp
 	mkdir -p $(@D)
-	echo $< [$(Build)]
+	echo $(notdir $<) [$(Build)]
 	$(CPP) $(Inc) $(CppFlags) $(Defs) -c $(abspath $<) -o $@
 
 # Target
@@ -207,7 +207,6 @@ clean :
 	@echo Cleaned $(BuildDir)
 
 VPATH=$(BuildDir) \
-	./src/haiku \
 	./src/common/Net \
 	./src/common/Widgets \
 	./src/common/Hash/md5 \
@@ -222,4 +221,5 @@ VPATH=$(BuildDir) \
 	./src/common/Resource \
 	./src/common/Lgi \
 	./src/common/General \
+	./src/haiku \
 	./src/common/Gdc2/Filters

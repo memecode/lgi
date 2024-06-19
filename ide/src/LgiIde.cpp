@@ -3261,7 +3261,8 @@ IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bo
 
 	GetTree()->Focus(true);
 
-	if (LAppInst->GetOption("projectSettings"))
+	if (!DepParent &&
+		LAppInst->GetOption("projectSettings"))
 	{
 		p->EditSettings();
 	}

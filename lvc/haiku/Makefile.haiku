@@ -30,10 +30,10 @@ ifeq ($(Build),Debug)
 		-llgi$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I../include \
-		-I./resources \
+		-I./src \
 		-I../include/lgi/haiku \
-		-I./src
+		-I./resources \
+		-I../include
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
@@ -45,27 +45,27 @@ else
 		-llgi$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I../include \
-		-I./resources \
+		-I./src \
 		-I../include/lgi/haiku \
-		-I./src
+		-I../include \
+		-I./resources
 endif
 
 # Dependencies
 Source =	../src/common/Lgi/StructuredLog.cpp \
 			../src/common/Gdc2/Filters/Png.cpp \
 			../src/common/Widgets/ControlTree.cpp \
-			src/VcFolder.cpp \
-			src/VcCommit.cpp \
-			src/BrowseUi.cpp \
-			src/VcFile.cpp \
-			src/Main.cpp \
-			src/PatchViewer.cpp \
-			src/DropDownBtn.cpp \
 			src/SshConnection.cpp \
+			src/DropDownBtn.cpp \
+			src/PatchViewer.cpp \
 			../src/common/Text/DeEscape.cpp \
 			../src/common/Text/XmlTreeUi.cpp \
-			../src/common/Lgi/LgiMain.cpp
+			../src/common/Lgi/LgiMain.cpp \
+			src/VcFile.cpp \
+			src/VcCommit.cpp \
+			src/VcFolder.cpp \
+			src/Main.cpp \
+			src/BrowseUi.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -391,7 +391,7 @@ cleanall :
 
 VPATH=$(BuildDir) \
 	../src/common/Text \
-	../src/common/Widgets \
 	../src/common/Lgi \
+	../src/common/Widgets \
 	./src \
 	../src/common/Gdc2/Filters
