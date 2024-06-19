@@ -168,6 +168,7 @@ void LDialog::DoModal(OnClose Cb, OsView OverrideParent)
 		auto Wnd = dynamic_cast<LWindow*>(Parent);
 		if (Wnd)
 		{
+			// printf("%s->SetModalParent(%s)\n", GetClass(), Wnd->GetClass());
 			SetModalParent(Wnd);
 		}
 		else

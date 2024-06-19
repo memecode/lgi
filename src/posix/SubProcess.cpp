@@ -107,7 +107,6 @@ struct LSubProcessPriv
 	LArray<char*> Args;
 	bool NewGroup = false;
 	bool PseudoConsole = false;
-
 	bool EnvironmentChanged = false;
 	LArray<LSubProcess::Variable> Environment;
 	uint32_t ErrorCode = 0;
@@ -168,6 +167,18 @@ LSubProcess::~LSubProcess()
 }
 
 extern char **environ;
+
+LString LSubProcess::FindInPath(const char *exe)
+{
+	for (auto path: LGetPath())
+	{
+		LFile::Path p(path);
+		p = p / exe;
+		if (p.Exists())
+			return p.GetFull();
+	}
+	return LString();
+}
 
 bool LSubProcess::GetNewGroup()
 {
@@ -373,9 +384,8 @@ bool LSubProcess::SetEnvironment(const char *Var, const char *Value)
 	return true;
 }	
 
-bool LSubProcess::GetValue(const char *Var, ::LVariant &Value)
+bool LSubProcess::GetValue(const char *Var, LVariant &Value)
 {
-    /*
 	switch (LStringToDomProp(Var))
 	{
 		case StreamReadable:
@@ -389,7 +399,6 @@ bool LSubProcess::GetValue(const char *Var, ::LVariant &Value)
 		default:
 			return false;
 	}
-	*/
 	
 	return false;
 }
@@ -416,6 +425,23 @@ void LSubProcess::Connect(LSubProcess *child)
 bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdout)
 {
 	bool Status = false;
+
+	#ifdef HAIKU
+	// Haiku has issues when you try and execute something that doesn't exist:
+	//		https://dev.haiku-os.org/ticket/18576
+	// This is to try and work around that issue. I tried just execvp'ing 'ls' but
+	// it doesn't work. The locks are still all messed up.
+	if (!LFileExists(d->Exe))
+	{
+		auto exe = FindInPath(d->Exe);
+		if (!exe)
+		{
+			LgiTrace("%s:%i - '%s' not found.\n", _FL, d->Exe.Get());
+			return false;
+		}
+		d->Exe = exe;
+	}
+	#endif
 
 	#if DEBUG_SUBPROCESS
 	LgiTrace("%s:%i - %p::Start(%i,%i,%i)\n", _FL, this, ReadAccess, WriteAccess, MapStderrToStdout);
@@ -536,7 +562,7 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 		// So by exiting with an error the parent process can handle it.
 		printf("LSUBPROCESS_ERROR\n");
 
-		#ifdef MAC
+		#if defined(MAC) || defined(HAIKU)
 		// While 'exit' would be nice and clean it does cause crashes in free the global InitLibPng object
 		// We HAVE to call exec??? to replace the process... anything will do... 'ls' will just quit quickly
 		char *a= {0};

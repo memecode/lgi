@@ -151,7 +151,9 @@ int SysIncThread::Main()
 
 	// Can't use the async callback mode here, otherwise this thread will exit
 	// before the callback can be processed. Use the blocking form.
-	App->RunCallback<int>([this]()
+	App->RunCallback<int>(
+		_FL,
+		[this]()
 		{
 			if (Callback)
 				Callback(&Headers);
@@ -3019,10 +3021,18 @@ IdeDoc *AppWnd::FindOpenFile(char *FileName)
 
 IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 {
+	if (!InThread())
+	{
+		auto result = RunCallback<IdeDoc*>(_FL,
+			[this, fn=LString(FileName), Src]() -> IdeDoc*
+			{
+				return OpenFile(fn, Src);
+			});
+		return *result.Get();
+	}
+
 	static bool DoingProjectFind = false;
 	IdeDoc *Doc = NULL;
-	
-	THREAD_WARNING
 	
 	const char *File = Src ? Src->GetFileName() : FileName;
 	if (!Src && !ValidStr(File))
@@ -3186,7 +3196,15 @@ LString PlatformFlagsToStr(int flags)
 
 IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bool Create, ProjectNode *DepParent)
 {	
-	THREAD_WARNING
+	if (!InThread())
+	{
+		auto result = RunCallback<IdeProject*>(_FL,
+			[this, fn=LString(FileName), ParentProj, Create, DepParent]() -> IdeProject*
+			{
+				return OpenProject(fn, ParentProj, Create, DepParent);
+			});
+		return *result.Get();
+	}
 
 	if (!FileName)
 	{
@@ -3201,7 +3219,7 @@ IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bo
 	}
 	
 
-	IdeProject *p = new IdeProject(this, DepParent);
+	auto p = new IdeProject(this, DepParent);
 	if (!p)
 	{
 		LgiTrace("%s:%i - Error: mem alloc.\n", _FL);
@@ -3242,6 +3260,11 @@ IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bo
 	}
 
 	GetTree()->Focus(true);
+
+	if (LAppInst->GetOption("projectSettings"))
+	{
+		p->EditSettings();
+	}
 
 	return p;
 }

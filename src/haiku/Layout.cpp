@@ -63,8 +63,6 @@ void LLayout::GetScrollPos(int64 &x, int64 &y)
 {
 	x = HScroll ? HScroll->Value() : 0;
 	y = VScroll ? VScroll->Value() : 0;
-	
-	printf("GetScrollPos=%i,%i\n", (int)x, (int)y);
 }
 
 void LLayout::SetScrollPos(int64 x, int64 y)
@@ -150,7 +148,7 @@ bool LLayout::_SetScrollBars(bool x, bool y)
 {
 	static bool Processing = false;
 
-	// printf("%s:%i - _setScroll %i,%i %i\n", _FL, x, y, Processing);
+	// printf("%s:%i - %s::SetScroll %i,%i %i inthread=%i\n", _FL, GetClass(), x, y, Processing, InThread());
 
 	if (!Processing &&
 		(((HScroll!=0) ^ x ) || ((VScroll!=0) ^ y )) )

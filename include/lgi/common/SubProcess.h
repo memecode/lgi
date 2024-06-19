@@ -95,6 +95,8 @@ public:
 	LSubProcess(const char *exe, const char *args = NULL, bool pseudoConsole = false);
 	~LSubProcess();
 
+	LString FindInPath(const char *exe);
+
 	// Environment
 	void SetInitFolder(const char *f);
 	const char *GetEnvironment(const char *Var);	

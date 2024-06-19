@@ -203,37 +203,73 @@ LView::LView(OsView view)
 }
 
 #if defined(HAIKU) || defined(MAC)
-struct DeletedView
+class LDeletedViews : public LMutex
 {
-	uint64_t ts;
-	LViewI *v;
-};
+	struct DeletedView
+	{
+		uint64_t ts;
+		LViewI *v;
+	};
+	LArray<DeletedView> views;
 
-static LArray<DeletedView> DeletedViews;
+public:
+	LDeletedViews() : LMutex("LDeletedViews")
+	{
+
+	}
+
+	void Add(LViewI *v)
+	{
+		if (!Lock(_FL))
+			return;
+
+		// It is not uncommon for the same pointer to be added twice.
+		// The allocator often reuses the same address when a view is
+		// deleted and a new one created.
+		auto &del = views.New();
+		del.v = v;
+		del.ts = LCurrentTime();
+
+		Unlock();
+	}
+
+	bool Has(LViewI *v)
+	{
+		if (!Lock(_FL))
+			return false;
+
+		auto now = LCurrentTime();
+		bool status = false;
+		for (size_t i = 0; i < views.Length(); i++)
+		{
+			auto &del = views[i];
+			if (v == del.v)
+			{
+				status = true;
+			}
+			if (now >= del.ts + 60000)
+			{
+				// printf("	DeletedViews remove=%p\n", views[i].v);
+				views.DeleteAt(i--);
+			}
+		}
+		
+		Unlock();
+		return status;
+	}
+
+}	DeletedViews;
 
 bool LView::RecentlyDeleted(LViewI *v)
 {
-	auto now = LCurrentTime();
-	bool status = false;
-	for (size_t i = 0; i < DeletedViews.Length(); i++)
-	{
-		auto &del = DeletedViews[i];
-		if (v == del.v)
-			status = true;
-		if (now >= del.ts + 1000)
-			DeletedViews.DeleteAt(i--);
-	}
-	
-	return status;
+	return DeletedViews.Has(v);
 }
 #endif
 
 LView::~LView()
 {
 	#if defined(HAIKU) || defined(MAC)
-		auto &del = DeletedViews.New();
-		del.v = this;
-		del.ts = LCurrentTime();
+		DeletedViews.Add(static_cast<LViewI*>(this));
 	#endif
 
 	if (d->SinkHnd >= 0)
@@ -2290,6 +2326,27 @@ LColour LView::StyleColour(int CssPropType, LColour Default, int Depth)
 	return c;
 }
 
+OsThreadId LView::ViewThread()
+{
+	#if defined(HAIKU)
+
+		auto h = Handle();
+		if (!h)
+			return 0;
+		
+		auto looper = h->Looper();
+		if (!looper)
+			return 0;
+			
+		return looper->Thread();
+	
+	#else
+
+		return LAppInst->GetGuiThreadId();
+
+	#endif
+}
+
 bool LView::InThread()
 {
 	#if WINNATIVE
@@ -2383,7 +2440,7 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64_t tim
 		r = m.AddInt64(LMessage::PropB, b);
 		if (r != B_OK)
 			printf("%s:%i - AddUInt64 failed.\n", _FL);
-		r = m.AddPointer(LMessage::PropView, this);
+		r = m.AddPointer(LMessage::PropView, static_cast<LViewI*>(this));
 		if (r != B_OK)
 			printf("%s:%i - AddPointer failed.\n", _FL);
 

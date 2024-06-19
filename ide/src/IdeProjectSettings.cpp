@@ -506,17 +506,15 @@ public:
 
 class ProjectSettingsDlg : public LDialog
 {
-	IdeProjectSettingsPriv *d;
-	LTree *Tree;
-	LSettingDetail *Detail;
-	uint64 DefLockOut;
+	IdeProjectSettingsPriv *d = NULL;
+	LTree *Tree = NULL;
+	LSettingDetail *Detail = NULL;
+	uint64 DefLockOut = 0;
 
 public:
+	const char *GetClass() override { return "ProjectSettingsDlg"; }
 	ProjectSettingsDlg(LViewI *parent, IdeProjectSettingsPriv *priv)
 	{
-		Tree = NULL;
-		Detail = NULL;
-		DefLockOut = 0;
 		d = priv;
 		SetParent(parent);
 		if (LoadFromResource(IDD_PROJECT_SETTINGS))

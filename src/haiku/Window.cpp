@@ -176,16 +176,12 @@ public:
 		{
 			BWindow::MessageReceived(message);
 
-			LView *view = NULL;
+			LViewI *view = NULL;
 			auto r = message->FindPointer(LMessage::PropView, (void**)&view);
 			if (r == B_OK)
 			{
 				if (!LView::RecentlyDeleted(view))
 					view->OnEvent((LMessage*)message);
-				/*
-				else
-					printf("%s:%i - Dropping message to deleted view.\n", _FL);
-				*/
 			}
 			else
 			{
@@ -268,7 +264,7 @@ bool LWindow::SetModalParent(LWindow *p)
 				p?p->GetClass():NULL,
 				d->ModalParent?d->ModalParent->GetClass():NULL,
 				p->GetModalChild()?p->GetModalChild()->GetClass():NULL);
-			LAssert(!"Already set!");
+			// LAssert(!"Already set!");
 			return false;
 		}
 		

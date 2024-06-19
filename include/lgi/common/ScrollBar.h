@@ -33,7 +33,7 @@ public:
 	/// Call this constructor for embeded scrollbar say in a window
 	LScrollBar();
 	
-	const char *GetClass() { return "LScrollBar"; }
+	const char *GetClass() override { return "LScrollBar"; }
 
 	/// Call this constructor for a control based scrollbar, say in a dialog
 	LScrollBar(int id, int x, int y, int cx, int cy, const char *name);

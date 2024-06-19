@@ -3521,10 +3521,7 @@ void IdeProject::OnMouseClick(LMouse &m)
 			}
 			case IDM_SETTINGS:
 			{
-				d->Settings.Edit(Tree, [this]()
-				{
-					SetDirty();
-				});
+				EditSettings();
 				break;
 			}
 			case IDM_INSERT_DEP:
@@ -3749,6 +3746,14 @@ void IdeProject::ImportDsp(const char *File)
 			}
 		}
 	}
+}
+
+void IdeProject::EditSettings()
+{
+	d->Settings.Edit(Tree, [this]()
+	{
+		SetDirty();
+	});
 }
 
 IdeProjectSettings *IdeProject::GetSettings()

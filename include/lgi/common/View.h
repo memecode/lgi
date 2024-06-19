@@ -408,6 +408,11 @@ public:
 	/// true it's safe to do just about anything.
 	bool InThread() override;
 
+	/// \returns the thread the view runs in.
+	/// On Windows/Linux/Mac this will be the GUI thread, there is only one.
+	/// On Haiku this will be the BWindow's thread, there is one per LWindow.
+	OsThreadId ViewThread();
+
 protected:	
 	class CallbackStore : public LMutex
 	{
@@ -525,13 +530,13 @@ public:
 	///
 	/// So the variables are stored in the CallbackParams object on the heap.
 	template<typename T>
-	LAutoPtr<T> RunCallback(std::function<T()> Callback, int timeoutMs = -1, LCancel *cancel = NULL)
+	LAutoPtr<T> RunCallback(const char *file, int line, std::function<T()> Callback, int timeoutMs = -1, LCancel *cancel = NULL)
 	{
 		LAutoPtr<T> result;
 
 		if (!Callback)
 		{
-			LgiTrace("%s:%i - No callback.\n", _FL);
+			LgiTrace("%s:%i - RunCallback err: No callback.\n", file, line);
 			return result;
 		}
 
@@ -540,10 +545,14 @@ public:
 			result.Reset(new T(Callback()));
 		});
 
-		printf(LPrintfThreadId ": post M_VIEW_RUN_CALLBACK for %i...\n", LCurrentThreadId(), id);
+		auto ref = LString::Fmt("f=%s,ln=%i,cur=" LPrintfThreadId ",view=" LPrintfThreadId,
+			file, line,
+			LCurrentThreadId(),
+			ViewThread());
+		printf("%s: post M_VIEW_RUN_CALLBACK for %i...\n", ref.Get(), id);
 		if (!PostEvent(M_VIEW_RUN_CALLBACK, id))
 		{
-			LgiTrace("%s:%i - RunCallback PostEvent failed.\n", _FL);
+			LgiTrace("%s: RunCallback PostEvent failed.\n", ref.Get());
 			return result;
 		}
 
@@ -556,27 +565,27 @@ public:
 			if (Now - Report > 500)
 			{
 				Report = Now;
-				printf(LPrintfThreadId  ": Waiting for M_VIEW_RUN_CALLBACK %i\n",
-					LCurrentThreadId(),
+				printf("%s: Waiting for M_VIEW_RUN_CALLBACK %i\n",
+					ref.Get(),
 					(int)(Now-StartTs));
 			}
 
 			if (timeoutMs >= 0 && (Now-StartTs) > timeoutMs)
 			{
-				printf(LPrintfThreadId ": RunCallback timed out.\n", LCurrentThreadId());
+				printf("%s: RunCallback timed out.\n", ref.Get());
 				break;
 			}
 
 			if (cancel && cancel->IsCancelled())
 			{
-				printf(LPrintfThreadId ": RunCallback cancelled.\n", LCurrentThreadId());
+				printf("%s: RunCallback cancelled.\n", ref.Get());
 				break;
 			}
 
 			LSleep(10);
 		}
 
-		printf(LPrintfThreadId ": RunCallback finished: %p\n", LCurrentThreadId(), result.Get());
+		printf("%s: RunCallback finished: %p\n", ref.Get(), result.Get());
 		CbStore.Delete(id);
 		return result;
 	}

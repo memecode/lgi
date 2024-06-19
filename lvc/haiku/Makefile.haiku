@@ -22,9 +22,11 @@ ifeq ($(Build),Debug)
 	CFlags += -g
 	CppFlags += -g
 	Tag = d
-	Defs = -D_DEBUG -DHAIKU -D_REENTRANT -D_GNU_SOURCE -D					HAS_LIBSSH=0
+	Defs = -D_DEBUG -DHAIKU -D_REENTRANT -D_GNU_SOURCE -DHAS_LIBSSH=1
 	Libs =  \
 		-lgnu \
+		-lssh \
+		-lbe \
 		-llgi$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
@@ -35,9 +37,11 @@ ifeq ($(Build),Debug)
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
-	Defs = -DHAIKU -D_REENTRANT -D_GNU_SOURCE -D					HAS_LIBSSH=0
+	Defs = -DHAIKU -D_REENTRANT -D_GNU_SOURCE -DHAS_LIBSSH=1
 	Libs =  \
 		-lgnu \
+		-lssh \
+		-lbe \
 		-llgi$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \

@@ -208,6 +208,7 @@ public:
 	
 	// Settings
 	IdeProjectSettings *GetSettings();
+	void EditSettings();
 
 	// Impl
 	const char *GetText(int Col);

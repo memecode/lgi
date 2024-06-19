@@ -139,8 +139,10 @@ class EditAuthor : public LDialog
 public:
 	EditAuthor(VcFolder *f) : folder(f)
 	{
-		SetParent(folder->GetTree());
+		auto wnd = folder->GetTree()->GetWindow();
+		SetParent(wnd);
 		LoadFromResource(IDD_AUTHOR);
+		MoveSameScreen(wnd);
 
 		f->GetAuthor(true, [this](auto name, auto email)
 		{
@@ -842,84 +844,6 @@ public:
 	}
 };
 
-#ifdef HAIKU
-enum PipeIndexes
-{
-	READ_END,
-	WRITE_END,
-};
-
-#include <sys/ioctl.h>
-
-int peekPipe(int fd, char *buf, size_t sz)
-{
-	int bytesAvailable = 0;
-	int r = ioctl(fd, FIONREAD, &bytesAvailable);
-	// printf("ioctl=%i %i\n", r, bytesAvailable);
-	if (r)
-		return 0;
-		
-	// printf("starting read\n");
-	auto rd = read(fd, buf, MIN(bytesAvailable, sz));
-	// printf("read=%i\n", (int)rd);
-	return rd;
-}
-
-LString RunProcess(const char *exe, const char *args)
-{
-	LStringPipe r;
-	
-	int fd[2];
-	pipe(fd);
-
-	printf("Running %s...\n", exe);
-	auto pid = fork();
-	if (pid == 0)
-	{
-		// Child...
-	    dup2(fd[WRITE_END], STDOUT_FILENO);
-	    close(fd[READ_END]);
-	    close(fd[WRITE_END]);
-	    execlp(exe, exe, args, (char*) NULL);
-	    fprintf(stderr, "Failed to execute '%s'\n", exe);
-	    exit(1);
-	}
-	else
-	{
-		// Parent...
-        int status;
-        pid_t result;
-
-		#if 0
-			// More basic...
-	        close(fd[READ_END]);
-	        close(fd[WRITE_END]);
-	        result = waitpid(pid, &status, 0);
-			printf("waitpid=%i\n", result);
-		#else
-			// Read the output
-			do
-			{
-				result = waitpid(pid, &status, WNOHANG);
-				
-				char buf[256];
-				auto rd = peekPipe(fd[READ_END], buf, sizeof(buf));
-				if (rd > 0)
-					r.Write(buf, rd);
-				//printf("waitpid=%i rd=%i\n", result, rd);
-			}
-			while (result == 0);
-
-	        close(fd[READ_END]);
-	        close(fd[WRITE_END]);
-        #endif
-	}
-
-	printf("RunProcess done.\n");
-	return r.NewLStr();
-}
-#endif
-
 class GetVcsVersions : public LThread
 {
 	AppPriv *d = NULL;
@@ -989,11 +913,8 @@ public:
 	int Main()
 	{
 		VersionCtrl types[] = {
-			#ifndef HAIKU
-				// Enabling these causes lock error in the parent process...
-				VcCvs,
-				VcSvn,
-			#endif
+			VcCvs,
+			VcSvn,
 			VcHg,
 			VcGit
 		};
@@ -1001,18 +922,6 @@ public:
 		for (int i=0; i<CountOf(types); i++)
 		{
 			auto Exe = d->GetVcName(types[i]);
-			
-			#ifdef HAIKU
-			
-			// Something funky is going on with launching subprocesses on Haiku...
-			// So lets do an absolute minimal example of fork/exec to test whether it's
-			// something in the LSubProcess classes?
-			
-			auto result = RunProcess(Exe, "--version");
-			ParseVersion(0, types[i], result);
-			
-			#else
-			
 			LSubProcess sub(Exe, "--version");
 			if (sub.Start())
 			{
@@ -1020,8 +929,6 @@ public:
 				auto result = sub.Communicate(&p);
 				ParseVersion(result, types[i], p.NewLStr());
 			}
-			
-			#endif
 		}
 		
 		printf("GetVcsVersions finished.\n");
