@@ -240,7 +240,7 @@ class LTimeZoneInfo
 	{
 		if (elem == 0)
 			return true;
-		size_t bytes = sizeof(T) * elem;
+		ssize_t bytes = sizeof(T) * elem;
 		if (!out.Length(elem))
 			return OnError("alloc failed");
 		if (Remaining() < bytes)
