@@ -45,9 +45,9 @@ public:
 	void SetVertical(bool v);
 	/// Gets the current position of the scrollbar
 	
-	int64 Value();
+	int64 Value() override;
 	/// Sets the position of the scrollbar
-	void Value(int64 p);
+	void Value(int64 p) override;
 
 	// Gets the range of the scoll bar
 	LRange GetRange() const;
@@ -67,18 +67,18 @@ public:
 	void SetParent(LViewI *p);
 	bool Invalidate(LRect *r = NULL, bool Repaint = false, bool NonClient = false);
 	#else
-	bool Attach(LViewI *p);
-	void OnPaint(LSurface *pDC);
-	void OnPosChange();
-	void OnMouseClick(LMouse &m);
-	void OnMouseMove(LMouse &m);
-	bool OnKey(LKey &k);
-	bool OnMouseWheel(double Lines);
-	void OnPulse();
+	bool Attach(LViewI *p) override;
+	void OnPaint(LSurface *pDC) override;
+	void OnPosChange() override;
+	void OnMouseClick(LMouse &m) override;
+	void OnMouseMove(LMouse &m) override;
+	bool OnKey(LKey &k) override;
+	bool OnMouseWheel(double Lines) override;
+	void OnPulse() override;
 	#endif
 	
 	// events
-	LMessage::Result OnEvent(LMessage *Msg);
+	LMessage::Result OnEvent(LMessage *Msg) override;
 
 	/// Called when the value changes
 	virtual void OnChange(int Pos) {}
