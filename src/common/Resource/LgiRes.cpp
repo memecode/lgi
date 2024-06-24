@@ -703,12 +703,12 @@ char *LResources::StringFromRef(int Ref)
 
 class LMissingCtrl : public LLayout, public ResObject
 {
-    LAutoString n;
+    LString n;
 
 public:
     LMissingCtrl(char *name) : ResObject(Res_Custom)
     {
-        n.Reset(NewStr(name));
+        n = name;
     }    
 
     void OnPaint(LSurface *pDC)
@@ -719,7 +719,8 @@ public:
         pDC->Colour(LColour(0xff, 0, 0));
         pDC->Line(c.x1, c.y1, c.x2, c.y2);
         pDC->Line(c.x2, c.y1, c.x1, c.y2);
-        LDisplayString ds(LSysFont, n);
+        
+		LDisplayString ds(LSysFont, n);
         LSysFont->Transparent(true);
         LSysFont->Fore(LColour(L_TEXT));
         ds.Draw(pDC, 3, 0);

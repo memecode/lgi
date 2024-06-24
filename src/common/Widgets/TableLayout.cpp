@@ -33,10 +33,10 @@ enum CellFlag
 };
 
 #define Izza(c)				dynamic_cast<c*>(v)
-// #define DEBUG_LAYOUT		723
+// #define DEBUG_LAYOUT		17
 #define DEBUG_PROFILE		0
 #define DEBUG_DRAW_CELLS	0
-// #define DEBUG_CTRL_ID		105
+// #define DEBUG_CTRL_ID		12
 
 #ifdef DEBUG_CTRL_ID
 static LString Indent(int Depth)
@@ -372,18 +372,18 @@ class LTableLayoutPrivate
 {
 	friend class TableCell;
 
-	bool InLayout;
-	bool DebugLayout;
+	bool InLayout = false;
+	bool DebugLayout = false;
 
 public:
 	LPoint PrevSize, Dpi;
-	bool LayoutDirty;
+	bool LayoutDirty = true;
 	LArray<double> Rows, Cols;
 	LArray<TableCell*> Cells;
-	int BorderSpacing;
+	int BorderSpacing = LTableLayout::CellSpacing;
 	LRect LayoutBounds;
-	int LayoutMinX, LayoutMaxX;
-	LTableLayout *Ctrl;
+	int LayoutMinX = 0, LayoutMaxX = 0;
+	LTableLayout *Ctrl = NULL;
 
 	LStream &Log() { return PrintfLogger; }
 	bool GetDebugLayout() { return DebugLayout; }
@@ -826,10 +826,10 @@ void TableCell::LayoutWidth(int Depth, int &MinX, int &MaxX, CellFlag &Flag)
 
 	if (!Wid.IsValid() || Flag != SizeFixed)
 	{
-		Child *c = Children.AddressOf();
+		auto c = Children.AddressOf();
 		for (int i=0; i<Children.Length(); i++, c++)
 		{
-			LView *v = c->View;
+			auto v = c->View;
 			if (!v)
 				continue;
 
@@ -839,13 +839,8 @@ void TableCell::LayoutWidth(int Depth, int &MinX, int &MaxX, CellFlag &Flag)
 			// Child view CSS size:
 			LCss *Css = v->GetCss();
 			LCss::Len ChildWid;
-			// LCss::Len ChildMin, ChildMax;
 			if (Css)
-			{
 				ChildWid = Css->Width();
-				// ChildMin = Css->MinWidth();
-				// ChildMax = Css->MaxWidth();
-			}
 
 			#ifdef DEBUG_CTRL_ID
 			if (v->GetId() == DEBUG_CTRL_ID)
@@ -1043,7 +1038,7 @@ void TableCell::LayoutHeight(int Depth, int Width, int &MinY, int &MaxY, CellFla
 	Child *c = Children.AddressOf();
 	for (int i=0; i<Children.Length(); i++, c++)
 	{
-		LView *v = c->View;
+		auto v = c->View;
 		if (!v)
 			continue;
 
@@ -1070,7 +1065,7 @@ void TableCell::LayoutHeight(int Depth, int Width, int &MinY, int &MaxY, CellFla
 		
 		LTableLayout *Tbl = NULL;
 
-		LCss *Css = v->GetCss();
+		auto Css = v->GetCss();
 		LCss::Len Ht;
 		if (Css)
 			Ht = Css->Height();
@@ -1149,8 +1144,8 @@ void TableCell::LayoutHeight(int Depth, int Width, int &MinY, int &MaxY, CellFla
 		}
 		else if (Izza(LEdit) || Izza(LCombo))
 		{
-			LFont *f = v->GetFont();
-			int y = (f ? f : LSysFont)->GetHeight() + 8;
+			auto f = v->GetFont();
+			auto y = (f ? f : LSysFont)->GetHeight() + 8;
 			
 			c->r = v->GetPos();
 			c->r.y2 = c->r.y1 + y - 1;
@@ -1165,7 +1160,7 @@ void TableCell::LayoutHeight(int Depth, int Width, int &MinY, int &MaxY, CellFla
 		}
 		else if (Izza(LRadioButton))
 		{
-			int y = v->GetFont()->GetHeight() + 2;
+			auto y = v->GetFont()->GetHeight() + 2;
 			
 			c->r = v->GetPos();
 			c->r.y2 = c->r.y1 + y - 1;
@@ -1177,7 +1172,6 @@ void TableCell::LayoutHeight(int Depth, int Width, int &MinY, int &MaxY, CellFla
 				 Izza(LTabView))
 		{
 			Pos.y2 += v->GetFont()->GetHeight() + 8;
-			// MaxY = MAX(MaxY, 1000);
 			Flags = SizeFill;
 		}
 		else if (Izza(LBitmap))
@@ -1209,7 +1203,7 @@ void TableCell::LayoutHeight(int Depth, int Width, int &MinY, int &MaxY, CellFla
 			Pos.y2 += MinY;
 			
 			c->Inf.Height.Min = MinY;
-			c->Inf.Height.Max = MaxY;
+			c->Inf.Height.Max = Flags == SizeFill ? LViewLayoutInfo::FILL : MaxY;
 		}
 		else
 		{
@@ -1241,7 +1235,7 @@ void TableCell::LayoutPost(int Depth)
 	int Cx = Padding.x1;
 	int Cy = Padding.y1;
 	int MaxY = Padding.y1;
-	int RowStart = 0;
+	size_t RowStart = 0;
 	LArray<LRect> New;
 	int WidthPx = Pos.X() - Padding.x1 - Padding.x2;
 	int HeightPx = Pos.Y() - Padding.y1 - Padding.y2;
@@ -1250,8 +1244,8 @@ void TableCell::LayoutPost(int Depth)
 	bool HasDebugCtrl = false;
 	#endif
 
-	Child *c = Children.AddressOf();
-	for (int i=0; i<Children.Length(); i++, c++)
+	auto *c = Children.AddressOf();
+	for (size_t i=0; i<Children.Length(); i++, c++)
 	{
 		LView *v = c->View;
 		if (!v)
@@ -1272,7 +1266,7 @@ void TableCell::LayoutPost(int Depth)
 		}
 		#endif
 
-		LTableLayout *Tbl = Izza(LTableLayout);
+		auto Tbl = Izza(LTableLayout);
 		
 		if (i > 0 && Cx + c->r.X() > Pos.X())
 		{
@@ -1288,7 +1282,7 @@ void TableCell::LayoutPost(int Depth)
 				OffsetX = Pos.X() - Wid;
 			}
 
-			for (int n=RowStart; n<=i; n++)
+			for (size_t n=RowStart; n<=i; n++)
 			{
 				New[n].Offset(OffsetX, 0);
 			}
@@ -1316,14 +1310,16 @@ void TableCell::LayoutPost(int Depth)
 		if (c->Inf.Height.Max >= HeightPx)
 			c->Inf.Height.Max = HeightPx;
 
-		if (c->r.Y() > HeightPx)
+		if (c->r.Y() > HeightPx ||
+			c->Inf.Height.Max == LViewLayoutInfo::FILL)
 		{
 			c->r.y2 = c->r.y1 + HeightPx - 1;
 		}
 
 		if (Tbl)
 		{
-			c->r.SetSize(Pos.X(), MIN(Pos.Y(), c->Inf.Height.Min));
+			if (c->r.Y() < c->Inf.Height.Min)
+				c->r.SetSize(Pos.X(), c->Inf.Height.Min);
 		}
 		else if
 		(
@@ -1377,7 +1373,7 @@ void TableCell::LayoutPost(int Depth)
 		return;
 	}
 	
-	int n;
+	size_t n;
 	int Wid = Cx - Table->d->BorderSpacing;
 	int OffsetX = 0;
 	if (TextAlign().Type == AlignCenter)
@@ -1391,9 +1387,7 @@ void TableCell::LayoutPost(int Depth)
 	if (OffsetX)
 	{
 		for (n=RowStart; n<Children.Length(); n++)
-		{
 			New[n].Offset(OffsetX, 0);
-		}
 	}
 
 	int OffsetY = 0;
@@ -1473,13 +1467,8 @@ void TableCell::OnPaint(LSurface *pDC)
 LTableLayoutPrivate::LTableLayoutPrivate(LTableLayout *ctrl)
 {
 	PrevSize.Set(-1, -1);
-	LayoutDirty = true;
-	InLayout = false;
-	DebugLayout = false;
 	Ctrl = ctrl;
-	BorderSpacing = LTableLayout::CellSpacing;
 	LayoutBounds.ZOff(-1, -1);
-	LayoutMinX = LayoutMaxX = 0;
 }
 
 LTableLayoutPrivate::~LTableLayoutPrivate()
@@ -1831,6 +1820,8 @@ void LTableLayoutPrivate::LayoutVertical(const LRect Client, int Depth, int *Min
 					int &Max = MaxRow[Cy];
 					CellFlag &Flags = RowFlags[Cy];
 					c->LayoutHeight(Depth, x, Min, Max, Flags);
+
+					int asd=0;
 				}
 
 				Cx += c->Cell.X();
@@ -1864,13 +1855,16 @@ void LTableLayoutPrivate::LayoutVertical(const LRect Client, int Depth, int *Min
 					int WidthPx      = CountRange(MinCol, c->Cell.x1, c->Cell.x2) + ((c->Cell.X() - 1)   * BorderSpacing);					
 					int InitMinY     = CountRange(MinRow, c->Cell.y1, c->Cell.y2) + ((c->Cell.Y() - 1)   * BorderSpacing);
 					int InitMaxY     = CountRange(MaxRow, c->Cell.y1, c->Cell.y2) + ((c->Cell.Y() - 1)   * BorderSpacing);
-					//int AllocY       = CountRange(MinRow, 0,     Rows.Length()-1) + ((Rows.Length() - 1) * BorderSpacing);
 					int MinY         = InitMinY;
 					int MaxY         = InitMaxY;
-					// int RemainingY   = Client.Y() - AllocY;
 					CellFlag RowFlag = SizeUnknown;
 
 					c->LayoutHeight(Depth, WidthPx, MinY, MaxY, RowFlag);
+
+					if (Ctrl->GetId() == 17)
+					{
+						int asd=0;
+					}
 
 					// This code stops the max being set on spanned cells.
 					LArray<int> AddTo;
@@ -1888,6 +1882,7 @@ void LTableLayoutPrivate::LayoutVertical(const LRect Client, int Depth, int *Min
 						)
 							AddTo.Add(y);
 					}
+
 					if (AddTo.Length() == 0)
 					{
 						for (int y=c->Cell.y1; y<=c->Cell.y2; y++)
@@ -1924,7 +1919,18 @@ void LTableLayoutPrivate::LayoutVertical(const LRect Client, int Depth, int *Min
 							}
 						}						
 						
-						if (RowFlag > SizeUnknown)
+						bool hasFill = false;
+						if (RowFlag == SizeFill)
+						{
+							for (int y=c->Cell.y1; y<=c->Cell.y2; y++)
+								if (RowFlags[y] == SizeFill)
+								{
+									hasFill = true;
+									break;
+								}
+						}
+						
+						if (!hasFill && RowFlag > SizeUnknown)
 						{
 							// Apply the size flag somewhere...
 							for (int y=c->Cell.y2; y>=c->Cell.y1; y++)
@@ -2033,8 +2039,7 @@ void LTableLayoutPrivate::LayoutPost(const LRect Client, int Depth)
 		Px = 0;
 		for (Cx=0; Cx<Cols.Length(); )
 		{
-			TableCell *c = GetCellAt(Cx, Cy);
-			if (c)
+			if (auto c = GetCellAt(Cx, Cy))
 			{
 				if (c->Cell.x1 == Cx &&
 					c->Cell.y1 == Cy)
@@ -2224,6 +2229,11 @@ void LTableLayout::OnPosChange()
 	#ifdef DEBUG_LAYOUT
 	// if (GetId() == DEBUG_LAYOUT) LgiTrace("%s:%i - Up=%i for Id=%i\n", _FL, Up, GetId());
 	#endif
+
+	if (GetId() == 12)
+	{
+		int asd=0;
+	}
 
 	if (Up)
 	{

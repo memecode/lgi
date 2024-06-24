@@ -1164,10 +1164,10 @@ LZoomView::~LZoomView()
 
 bool LZoomView::OnLayout(LViewLayoutInfo &Inf)
 {
-	Inf.Width.Min = -1;
-	Inf.Width.Max = -1;
-	Inf.Height.Min = -1;
-	Inf.Height.Max = -1;
+	Inf.Width.Min  = LViewLayoutInfo::FILL;
+	Inf.Width.Max  = LViewLayoutInfo::FILL;
+	Inf.Height.Min = LViewLayoutInfo::FILL;
+	Inf.Height.Max = LViewLayoutInfo::FILL;
 	
 	return true;
 }
