@@ -923,7 +923,7 @@ void LFileSelectDlg::OnCreate()
 	c = Tbl->GetCell(x, y, true, 6, 1);
 	c->Add(Sub = new LBox(IDC_SUB_TBL));
 	Sub->AddView(Bookmarks = new LTree(IDC_BOOKMARKS, 0, 0, -1, -1));
-	Bookmarks->GetCss(true)->Width(LCss::Len(LCss::LenPx, 150.0f));
+	Bookmarks->GetCss(true)->Width(LCss::Len(LCss::LenEm, 8.5f));
 	Bookmarks->SetImageList(d->TreeIcons, false);
 	
 	LTableLayout *t;
