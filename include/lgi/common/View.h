@@ -976,7 +976,8 @@ public:
 	{ \
 		LView *NewView(const char *Name, LRect *Pos, const char *Text) \
 		{ \
-			if (!_stricmp(Name, #CLS)) return new CLS; \
+			if (!_stricmp(Name, #CLS)) \
+				return new CLS; \
 			return NULL; \
 		} \
 	}	CLS ## FactoryInst;
@@ -986,7 +987,8 @@ public:
 	{ \
 		LView *NewView(const char *Name, LRect *Pos, const char *Text) \
 		{ \
-			if (!_stricmp(Name, #CLS)) return new CLS(Param1); \
+			if (!_stricmp(Name, #CLS)) \
+				return new CLS(Param1); \
 			return NULL; \
 		} \
 	}	CLS ## FactoryInst;

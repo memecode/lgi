@@ -625,14 +625,6 @@ bool LView::Attach(LViewI *p)
 		bool hasCaption = (GetStyle() & WS_CAPTION) != 0;
 		int Shadow = WINDOWS_SHADOW_AMOUNT;
 
-		/*
-		LgiTrace("%p/%s::Attach %s\n", this, Name(), Pos.GetStr());
-		LRect r = Pos;
-		r.x2 += Shadow;
-		r.y2 += Shadow;
-		LgiTrace("    %s\n", r.GetStr());
-		*/
-
 		_View = CreateWindowExW(ExStyle,
 								WCls,
 								Text,
