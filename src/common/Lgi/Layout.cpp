@@ -185,9 +185,9 @@ int LLayout::OnNotify(LViewI *c, LNotification n)
 
 void LLayout::OnPosChange()
 {
-	// int Edge = (Sunken() || Raised()) ? _BorderSize : 0;
 	LRect r = LView::GetClient();
 	#ifndef MAC
+	int Edge = (Sunken() || Raised()) ? _BorderSize : 0;
 	r.Offset(Edge, Edge);
 	#endif
 	LRect v(r.x2-LScrollBar::SCROLL_BAR_SIZE+1, r.y1, r.x2, r.y2);

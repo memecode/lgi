@@ -3,7 +3,10 @@
 #if HAS_LIBSSH
 
 // If you don't have libssh.h then you might want to:
+// Linux:
 //		sudo apt-get install libssh-dev
+// Haiku:
+//		pkgman install libssh_devel
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
 

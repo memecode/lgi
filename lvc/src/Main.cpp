@@ -1131,13 +1131,17 @@ public:
 		if (!f)
 			return;
 
-		f->EmptyChildren();
+		if (f)
+			f->EmptyChildren();
 
-		for (auto i: *Tree)
+		if (Tree)
 		{
-			VcFolder *vcf = dynamic_cast<VcFolder*>(i);
-			if (vcf)
-				f->InsertTag(vcf->Save());
+			for (auto i: *Tree)
+			{
+				VcFolder *vcf = dynamic_cast<VcFolder*>(i);
+				if (vcf)
+					f->InsertTag(vcf->Save());
+			}
 		}
 
 		Opts.Unlock();
@@ -1298,8 +1302,11 @@ public:
 
 	void OnPulse()
 	{
-		for (auto i: *Tree)
-			i->OnPulse();
+		if (Tree)
+		{
+			for (auto i: *Tree)
+				i->OnPulse();
+		}
 	}
 
 	void OpenLocalFolder(const char *Fld = NULL)

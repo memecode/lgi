@@ -179,29 +179,6 @@ bool LView::LockHandler(LViewI *v, LView::LockOp Op)
 
 #endif
 
-LView::LView(OsView view)
-{
-	#ifdef _DEBUG
-    _Debug = false;
-	#endif
-
-	d = new LViewPrivate(this);
-	#ifdef LGI_SDL
-	_View = this;
-	#elif LGI_VIEW_HANDLE && !defined(HAIKU)
-	_View = view;
-	#endif
-	Pos.ZOff(-1, -1);
-	WndFlags = GWF_VISIBLE;
-
-    #ifndef LGI_VIEW_HASH
-        #error "LGI_VIEW_HASH needs to be defined"
-    #elif LGI_VIEW_HASH
-	    LockHandler(this, OpCreate);
-	    // printf("Adding %p to hash\n", (LViewI*)this);
-	#endif
-}
-
 #if defined(HAIKU) || defined(MAC)
 class LDeletedViews : public LMutex
 {
@@ -218,14 +195,29 @@ public:
 
 	}
 
-	void Add(LViewI *v)
+	void OnCreate(LViewI *v)
+	{
+		// Haiku:
+		// It is not uncommon for the same pointer to be added twice.
+		// The allocator often reuses the same address when a view is
+		// deleted and a new one created. In that case, make sure a
+		// newly created (and valid) pointer is NOT in the list...
+		for (size_t i = 0; i < views.Length(); i++)
+		{
+			auto &del = views[i];
+			if (v == del.v)
+			{
+				views.DeleteAt(i--);
+				break;
+			}
+		}
+	}
+
+	void OnDelete(LViewI *v)
 	{
 		if (!Lock(_FL))
 			return;
 
-		// It is not uncommon for the same pointer to be added twice.
-		// The allocator often reuses the same address when a view is
-		// deleted and a new one created.
 		auto &del = views.New();
 		del.v = v;
 		del.ts = LCurrentTime();
@@ -266,10 +258,36 @@ bool LView::RecentlyDeleted(LViewI *v)
 }
 #endif
 
+LView::LView(OsView view)
+{
+	#ifdef _DEBUG
+    _Debug = false;
+	#endif
+	#if defined(HAIKU) || defined(MAC)
+		DeletedViews.OnCreate(static_cast<LViewI*>(this));
+	#endif
+
+	d = new LViewPrivate(this);
+	#ifdef LGI_SDL
+	_View = this;
+	#elif LGI_VIEW_HANDLE && !defined(HAIKU)
+	_View = view;
+	#endif
+	Pos.ZOff(-1, -1);
+	WndFlags = GWF_VISIBLE;
+
+    #ifndef LGI_VIEW_HASH
+        #error "LGI_VIEW_HASH needs to be defined"
+    #elif LGI_VIEW_HASH
+	    LockHandler(this, OpCreate);
+	    // printf("Adding %p to hash\n", (LViewI*)this);
+	#endif
+}
+
 LView::~LView()
 {
 	#if defined(HAIKU) || defined(MAC)
-		DeletedViews.Add(static_cast<LViewI*>(this));
+		DeletedViews.OnDelete(static_cast<LViewI*>(this));
 	#endif
 
 	if (d->SinkHnd >= 0)
@@ -2408,7 +2426,7 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64_t tim
 
 		if (!d || !d->Hnd)
 		{
-			// printf("%s:%i - Bad pointers %p %p\n", _FL, d, d ? d->Hnd : NULL);
+			printf("%s:%i - Bad pointers %p %p\n", _FL, d, d ? d->Hnd : NULL);
 			return false;
 		}
 		
@@ -2447,16 +2465,17 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64_t tim
 		if (bWnd)
 		{
 			auto threadId = bWnd->Thread();
-			if (threadId < 0)
+			if (threadId <= 0)
 			{
 				// printf("####### %s:%i warning, BWindow(%s) has no thread for PostEvent!?\n", _FL, GetClass());
 			}
-			
-			r = bWnd->PostMessage(&m);
-			if (r != B_OK)
-				printf("%s:%i - PostMessage failed.\n", _FL);				
-
-			return r == B_OK;
+			else
+			{
+				r = bWnd->PostMessage(&m);
+				if (r != B_OK)
+					printf("%s:%i - PostMessage failed.\n", _FL);
+				return r == B_OK;
+			}
 		}
 
 		// Not attached yet...

@@ -28,6 +28,14 @@
 #define DEBUG_INVALIDATE(...)
 #endif
 
+#define DEBUG_VIEW					0
+#if DEBUG_VIEW
+#define LOG(...)					printf(__VA_ARGS__)
+#else
+#define LOG(...)
+#endif
+
+
 struct CursorInfo
 {
 public:
@@ -103,6 +111,7 @@ bool LgiIsKeyDown(int Key)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+// Wrapper around a BView to redirect various events to the Lgi class methods
 template<typename Parent = BView>
 struct LBView : public Parent
 {
@@ -131,6 +140,7 @@ struct LBView : public Parent
 
 	void AttachedToWindow()
 	{
+		LOG("%s:%i %s d=%p\n", _FL, __FUNCTION__, d);
 		if (!d)
 			return;
 
@@ -138,7 +148,7 @@ struct LBView : public Parent
 		if (wnd)
 		{
 			// Ignore the position of the LWindow root view.
-			// It will track the inside of the BWindow frame.
+			// It will track the inside of the BWindow frame automatically.
 		}
 		else
 		{		
@@ -152,8 +162,13 @@ struct LBView : public Parent
 		}
 		
 		// Run this event handler in the thread of the window itself:
-		d->View->PostEvent(M_ON_CREATE);
-		// d->View->OnCreate();
+		auto result = d->View->PostEvent(M_ON_CREATE);
+		LOG("%s:%i %s wnd=%p PostEvent result=%i view=%s/%s\n",
+			_FL, __FUNCTION__,
+			wnd, result,
+			d->View->GetClass(), d->View->Name());
+		if (!result)
+			printf("%s:%i - Error posting event to view.\n", _FL);
 	}
 	
 	LKey ConvertKey(const char *bytes, int32 numBytes)
@@ -167,9 +182,9 @@ struct LBView : public Parent
 		key_info KeyInfo;
 		if (get_key_info(&KeyInfo) == B_OK)
 		{
-			k.Ctrl(TestFlag(KeyInfo.modifiers, B_CONTROL_KEY));
-			k.Alt(TestFlag(KeyInfo.modifiers, B_MENU_KEY));
-			k.Shift(TestFlag(KeyInfo.modifiers, B_SHIFT_KEY));
+			k.Ctrl(  TestFlag(KeyInfo.modifiers, B_CONTROL_KEY));
+			k.Alt(   TestFlag(KeyInfo.modifiers, B_MENU_KEY   ));
+			k.Shift( TestFlag(KeyInfo.modifiers, B_SHIFT_KEY  ));
 			k.System(TestFlag(KeyInfo.modifiers, B_COMMAND_KEY));
 		}
 
@@ -207,15 +222,15 @@ struct LBView : public Parent
 						// Translate the function keys into the LGI address space...
 						switch (key)
 						{
-							case B_F1_KEY: w = LK_F1; break;
-							case B_F2_KEY: w = LK_F2; break;
-							case B_F3_KEY: w = LK_F3; break;
-							case B_F4_KEY: w = LK_F4; break;
-							case B_F5_KEY: w = LK_F5; break;
-							case B_F6_KEY: w = LK_F6; break;
-							case B_F7_KEY: w = LK_F7; break;
-							case B_F8_KEY: w = LK_F8; break;
-							case B_F9_KEY: w = LK_F9; break;
+							case B_F1_KEY: w = LK_F1;   break;
+							case B_F2_KEY: w = LK_F2;   break;
+							case B_F3_KEY: w = LK_F3;   break;
+							case B_F4_KEY: w = LK_F4;   break;
+							case B_F5_KEY: w = LK_F5;   break;
+							case B_F6_KEY: w = LK_F6;   break;
+							case B_F7_KEY: w = LK_F7;   break;
+							case B_F8_KEY: w = LK_F8;   break;
+							case B_F9_KEY: w = LK_F9;   break;
 							case B_F10_KEY: w = LK_F10; break;
 							case B_F11_KEY: w = LK_F11; break;
 							case B_F12_KEY: w = LK_F12; break;
@@ -838,6 +853,7 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 		}
 		case M_ON_CREATE:
 		{
+			LOG("%s:%i %s got M_ON_CREATE.\n", _FL, __FUNCTION__);
 			OnCreate();
 			break;
 		}

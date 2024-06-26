@@ -18,6 +18,13 @@
 #include "lgi/common/DisplayString.h"
 #include "lgi/common/Button.h"
 
+#define DEBUG_DIALOG	0
+#if DEBUG_DIALOG
+#define LOG(...)		printf(__VA_ARGS__)
+#else
+#define LOG(...)
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 #define GreyBackground()
 
@@ -78,10 +85,9 @@ int LDialog::OnNotify(LViewI *Ctrl, LNotification n)
 
 	return 0;
 }
-
-
 void LDialog::Quit(bool DontDelete)
 {
+	LOG("%s:%i %s modal=%i dontdelete=%i\n", _FL, __FUNCTION__, d->IsModal, DontDelete);
 	if (d->IsModal)
 		EndModal(0);
 	else
@@ -91,6 +97,7 @@ void LDialog::Quit(bool DontDelete)
 void LDialog::OnPosChange()
 {
 	LWindow::OnPosChange();
+	LOG("%s:%i %s children=%i\n", _FL, __FUNCTION__, (int)Children.Length());
     if (Children.Length() == 1)
     {
         auto it = Children.begin();
@@ -114,6 +121,7 @@ bool LDialog::LoadFromResource(int Resource, const char *TagList)
 	LProfile Prof("LDialog::LoadFromResource");
 
 	bool Status = LResourceLoad::LoadFromResource(Resource, this, &p, &n, TagList);
+	LOG("%s:%i %s status=%i\n", _FL, __FUNCTION__, Status);
 	if (Status)
 	{
 		Prof.Add("Name.");
@@ -126,6 +134,7 @@ bool LDialog::LoadFromResource(int Resource, const char *TagList)
 
 bool LDialog::OnRequestClose(bool OsClose)
 {
+	LOG("%s:%i %s IsModal=%i\n", _FL, __FUNCTION__, d->IsModal);
 	if (d->IsModal)
 	{
 		EndModal(0);
@@ -187,6 +196,7 @@ void LDialog::DoModal(OnClose Cb, OsView OverrideParent)
 				LThread::GetThreadName(d->CallingThread),
 				GetClass());
 
+	LOG("%s:%i %s calling attach...\n", _FL, __FUNCTION__);
 	if (Attach(0))
 	{
 		AttachChildren();

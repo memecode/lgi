@@ -19,22 +19,37 @@
 	</Node>
 	<Node File="../../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
 	<Settings>
-		<Advanced />
+		<Advanced>
+			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Haiku />
+			</PostBuildCommands>
+		</Advanced>
 		<General>
 			<Makefile>
 				<Linux>linux/Makefile.linux</Linux>
+				<Haiku>Makefile.haiku</Haiku>
 			</Makefile>
 			<Executable>
 				<Linux>
 					<Debug>unittests</Debug>
 					<Release>unittests</Release>
 				</Linux>
+				<Haiku />
 			</Executable>
+			<Compiler />
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Debug>
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
+			<Environment />
+			<Arguments>
+				<All />
+			</Arguments>
+			<InitialDir />
 		</Debug>
 		<Build>
 			<Defines>
@@ -42,6 +57,7 @@
 					<Debug>LGI_UNIT_TESTS</Debug>
 					<Release>LGI_UNIT_TESTS</Release>
 				</All>
+				<Haiku />
 			</Defines>
 			<IncludePaths>
 				<All>
@@ -54,12 +70,17 @@
 					<Release>../../include/lgi/linux
 ../../include/lgi/linux/Gtk</Release>
 				</Linux>
+				<Haiku>
+					<Debug>../../include/haiku</Debug>
+					<Release>../../include/haiku</Release>
+				</Haiku>
 			</IncludePaths>
 			<SystemIncludes>
 				<Linux>
 					<Debug>`pkg-config --cflags gtk+-3.0`</Debug>
 					<Release>`pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
+				<Haiku />
 			</SystemIncludes>
 			<Libraries>
 				<Linux>
@@ -70,10 +91,24 @@
 `pkg-config --libs gtk+-3.0`
 -static-libgcc</Release>
 				</Linux>
+				<All />
+				<Haiku />
 			</Libraries>
 			<TargetType>
 				<All>Executable</All>
 			</TargetType>
+			<Options>
+				<All />
+				<Haiku />
+			</Options>
+			<LibraryPaths>
+				<All />
+				<Haiku />
+			</LibraryPaths>
+			<TargetName>
+				<Haiku />
+			</TargetName>
+			<ApplicationIcon />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -85,6 +120,13 @@
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
+			<ShowWhiteSpace />
+			<CommentFile />
+			<CommentFunction />
 		</Editor>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
 	</Settings>
 </Project>

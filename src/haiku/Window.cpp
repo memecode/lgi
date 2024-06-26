@@ -22,6 +22,13 @@
 	#define WAIT_LOG(...)
 #endif
 
+#define DEBUG_WINDOW			0
+#if DEBUG_WINDOW
+#define LOG(...)				printf(__VA_ARGS__)
+#else
+#define LOG(...)
+#endif
+
 LString ToString(BRect &r)
 {
 	LString s;
@@ -94,6 +101,11 @@ public:
 
 		// printf("%p::~LWindowPrivate end\n", this);
 	}
+
+	bool HasThread()
+	{
+		return Thread() > 0;
+	}
 	
 	window_look DefaultLook()
 	{
@@ -165,6 +177,8 @@ public:
 
 	void MessageReceived(BMessage *message)
 	{
+		if (message->what == M_ON_CREATE)
+			LOG("%s:%i %s msg=M_ON_CREATE\n", _FL, __FUNCTION__);
 		if (message->what == M_LWINDOW_DELETE)
 		{
 			// printf("Processing M_LWINDOW_DELETE th=%u\n", LCurrentThreadId());
@@ -180,8 +194,14 @@ public:
 			auto r = message->FindPointer(LMessage::PropView, (void**)&view);
 			if (r == B_OK)
 			{
-				if (!LView::RecentlyDeleted(view))
+				if (LView::RecentlyDeleted(view))
+					LOG("%s:%i %s view is RecentlyDeleted\n", _FL, __FUNCTION__, r);
+				else
+				{
+					if (message->what == M_ON_CREATE)
+						LOG("%s:%i %s passing msg to view: %s\n", _FL, __FUNCTION__, r, view->GetClass());
 					view->OnEvent((LMessage*)message);
+				}
 			}
 			else
 			{
@@ -532,15 +552,22 @@ bool LWindow::Attach(LViewI *p)
 {
 	LLocker lck(d, _FL);
 	if (!lck.Lock())
+	{
+		LOG("%s:%i error: failed to lock (%s)\n", _FL, GetClass());
 		return false;
+	}
 
 	auto rootView = Handle();
 	auto wnd = WindowHandle();
-	// printf("%s:%i attach %p to %p\n", _FL, Handle(), WindowHandle());
 	if (rootView && wnd)
 	{
+		LOG("%s:%i attach %p to %p\n", _FL, rootView, wnd);
 		wnd->AddChild(rootView);
 		UpdateRootView();
+	}
+	else
+	{
+		LOG("%s:%i can't attach %p to %p\n", _FL, rootView, wnd);
 	}
 	
 	// Setup default button...
@@ -549,6 +576,26 @@ bool LWindow::Attach(LViewI *p)
 
 	// Do a rough layout of child windows
 	PourAll();
+
+	// Start the thread running...
+	if (!d->HasThread())
+	{
+		d->Run();
+		LOG("%s:%i run thread: %i\n", _FL, d->Thread());
+	}
+	else
+	{
+		LOG("%s:%i thread already running: %i\n", _FL, d->Thread());
+	}
+	if (d->HasThread())
+	{
+		for (auto msg: LView::d->MsgQue)
+		{
+			auto result = d->PostMessage(msg);
+			LOG("%s:%i posting queued message %i = %i\n", _FL, ((LMessage*)msg)->Msg(), result);
+		}
+		LView::d->MsgQue.DeleteObjects();
+	}
 
 	return true;
 }

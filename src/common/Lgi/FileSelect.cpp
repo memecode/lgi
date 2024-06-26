@@ -881,10 +881,14 @@ LFileSelectDlg::LFileSelectDlg(LFileSelectPrivate *select)
 
 	SetPos(d->InitSize);
 	MoveToCenter();
+
+	printf("LFileSelectDlg::LFileSelectDlg..\n");
 }
 
 LFileSelectDlg::~LFileSelectDlg()
 {
+	printf("LFileSelectDlg::~LFileSelectDlg..\n");
+
 	UnregisterHook(this);
 	d->InitShowHiddenFiles = ShowHidden ? ShowHidden->Value() : false;
 	d->InitSize = GetPos();
@@ -896,6 +900,8 @@ LFileSelectDlg::~LFileSelectDlg()
 
 void LFileSelectDlg::OnCreate()
 {
+	printf("LFileSelectDlg::OnCreate..\n");
+	
 	int x = 0, y = 0;
 	AddView(Tbl = new LTableLayout);
 
