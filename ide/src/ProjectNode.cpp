@@ -1007,7 +1007,7 @@ bool ProjectNode::OnKey(LKey &k)
 void ProjectNode::OnPulse()
 {
 	auto StartTs = LCurrentTime();
-	int TimeSlice = 700; //ms
+	int TimeSlice = 500; //ms
 
 	auto Start = strlen(ImportPath) + 1;
 	while (ImportFiles.Length())
@@ -1029,7 +1029,7 @@ void ProjectNode::OnPulse()
 
 			for (auto it:*Insert)
 			{
-				ProjectNode *c = dynamic_cast<ProjectNode *>(it);
+				auto c = dynamic_cast<ProjectNode *>(it);
 				if (!c) break;
 
 				if (c->GetType() == NodeDir &&
@@ -1069,7 +1069,10 @@ void ProjectNode::OnPulse()
 	}
 
 	if (ImportFiles.Length() == 0)
+	{
 		NeedsPulse(false);
+		ImportProg.Reset();
+	}
 }
 
 void ProjectNode::OnMouseClick(LMouse &m)

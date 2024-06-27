@@ -931,7 +931,9 @@ bool EvalRule(LDateTime &out, VIo::TimeZoneSection &tz, int yr)
 			return false;
 		}
 	}
-	
+	else return false;
+
+	LAssert(out.IsValid());	
 	return true;
 }
 
