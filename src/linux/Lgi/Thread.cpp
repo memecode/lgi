@@ -64,6 +64,8 @@ void *ThreadEntryPoint(void *i)
 const OsThread LThread::InvalidHandle = 0;
 const OsThreadId LThread::InvalidId = 0;
 
+LThreadSafeInterface<LArray<LThread::DeletedThreadInfo>,true> LThread::DeletedThreads(new LArray<LThread::DeletedThreadInfo>);
+
 LThread::LThread(const char *ThreadName, int viewHandle)
 {
 	Name = ThreadName;
@@ -75,7 +77,20 @@ LThread::~LThread()
 	// All message processing must complete before the object is deleted.
 	// LView::CommonEvents::M_THREAD_COMPLETED will set it to -1 after it's
 	// called the OnComplete handler.
-	LAssert(ViewHandle < 0);
+	if (ViewHandle != LThread::InvalidViewId)
+	{
+		// Ok this is bad... the M_THREAD_COMPLETED message has been sent and this object
+		// should still be valid when it's processed. But it's just being deleted. So...
+		// The calling code is obviously doing something wrong. To isolate what that is
+		// at least don't crash.
+		if (auto a = DeletedThreads.Lock(_FL))
+		{
+			auto &info = a->New();
+			info.t = this;
+			info.name = Name;
+			info.ts = LCurrentTime();
+		}
+	}
 
 	if (!IsExited())
 		Terminate();

@@ -329,6 +329,22 @@ bool LView::CommonEvents(LMessage::Result &result, LMessage *Msg)
 			if (!Th)
 				break;
 
+			auto a = LThread::DeletedThreads.Lock(_FL);
+			bool deleted = false;
+			for (auto &info: *a.Get())
+			{
+				if (Th == info.t)
+				{
+					// Ah, this is a deleted thread... do not proceed with OnComplete callback!
+					auto msg = LString::Fmt("Thread '%s' has already been deleted.", info.name.Get());
+					LgiTrace("%s:%i - Error: %s\n", _FL, msg.Get());
+					LgiMsg(this, "%s", LAppInst->Name(), MB_OK, msg.Get());
+					return true;
+				}
+				
+				// FIXME: remove old thread infos...
+			}
+
 			Th->OnComplete();
 			Th->ViewHandle = -1; // This tells ~LThread we've processed the event.
 			if (Th->GetDeleteOnExit())
