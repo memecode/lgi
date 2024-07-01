@@ -1585,27 +1585,49 @@ LString BuildThread::FindExe()
 			switch (_MSC_VER)
 			{
 				#ifdef _MSC_VER_VS2013
-				case _MSC_VER_VS2013:
-				{
-					if (Arch == ArchX32)
-						NmakePath = "c:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\VC\\bin\\nmake.exe";
-					else
-						NmakePath = "c:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\VC\\bin\\amd64\\nmake.exe";
-					break;
-				}
+					case _MSC_VER_VS2013:
+					{
+						if (Arch == ArchX32)
+							NmakePath = "c:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\VC\\bin\\nmake.exe";
+						else
+							NmakePath = "c:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\VC\\bin\\amd64\\nmake.exe";
+						break;
+					}
 				#endif
 				#ifdef _MSC_VER_VS2015
-				case _MSC_VER_VS2015:
-				{
-					if (Arch == ArchX32)
-						NmakePath = "c:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\bin\\nmake.exe";
-					else
-						NmakePath = "c:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\bin\\amd64\\nmake.exe";
-					break;
-				}
+					case _MSC_VER_VS2015:
+					{
+						if (Arch == ArchX32)
+							NmakePath = "c:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\bin\\nmake.exe";
+						else
+							NmakePath = "c:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\bin\\amd64\\nmake.exe";
+						break;
+					}
 				#endif
 				default:
 				{
+					#ifdef _MSC_VER_VS2022
+						if (_MSC_VER >= _MSC_VER_VS2022)
+						{
+							if (Arch == ArchX32)
+								NmakePath = "c:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\bin\\Hostx64\\x86\\nmake.exe";
+							else
+								NmakePath = "c:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\bin\\Hostx64\\x64\\nmake.exe";
+							break;
+						}
+					#endif
+					#ifdef _MSC_VER_VS2019
+						if (_MSC_VER >= _MSC_VER_VS2019)
+						{
+							if (Arch == ArchX32)
+								NmakePath = "c:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\Hostx64\\x86\\nmake.exe";
+							else
+								NmakePath = "c:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\Hostx64\\x64\\nmake.exe";
+							break;
+						}
+					#endif
+
+					LgiTrace("%s:%i - _MSC_VER=%i\n", _FL, _MSC_VER);
 					LAssert(!"Impl me.");
 					break;
 				}
@@ -1739,7 +1761,7 @@ LString BuildThread::FindExe()
 			}				
 		}
 		
-		for (int i=0; i<p.Length(); i++)
+		for (size_t i=0; i<p.Length(); i++)
 		{
 			char Exe[MAX_PATH_LEN];
 			LMakePath
@@ -1748,9 +1770,7 @@ LString BuildThread::FindExe()
 				sizeof(Exe),
 				p[i],
 				"make"
-				#ifdef WIN32
-				".exe"
-				#endif
+				LGI_EXECUTABLE_EXT
 			);
 			if (LFileExists(Exe))
 			{

@@ -64,8 +64,6 @@ void *ThreadEntryPoint(void *i)
 const OsThread LThread::InvalidHandle = 0;
 const OsThreadId LThread::InvalidId = 0;
 
-LThreadSafeInterface<LArray<LThread::DeletedThreadInfo>,true> LThread::DeletedThreads(new LArray<LThread::DeletedThreadInfo>);
-
 LThread::LThread(const char *ThreadName, int viewHandle)
 {
 	Name = ThreadName;

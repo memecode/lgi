@@ -1225,6 +1225,9 @@
     <ClInclude Include="..\include\lgi\common\Array.h">
       <Filter>Source Files\Core\Memory Subsystem</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\lgi\win\LgiOsDefs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\src\win\Lgi.natvis">

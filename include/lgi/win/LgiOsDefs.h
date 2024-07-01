@@ -36,8 +36,8 @@
 #include "lgi/common/LgiInc.h"
 #include "lgi/common/LgiDefs.h"
 
-#define _MSC_VER_VS2022	1930 // MSVC++ 17.0 (really all 193x values)
-#define _MSC_VER_VS2019	1920 // MSVC++ 16.0 (really all 192x values)
+#define _MSC_VER_VS2022	1930 // MSVC++ 17.0
+#define _MSC_VER_VS2019	1920 // MSVC++ 16.0
 #define _MSC_VER_VS2017	1910 // MSVC++ 15.0
 #define _MSC_VER_VS2015	1900 // MSVC++ 14.0
 #define _MSC_VER_VS2013	1800 // MSVC++ 12.0

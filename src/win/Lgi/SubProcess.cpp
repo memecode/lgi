@@ -447,13 +447,13 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 	}
 	else
 	{
-		char *Ext = LGetExtension(d->Exe);
-		bool HasExt = Ext && _stricmp(Ext, "exe") == 0;
+		auto Ext = LGetExtension(d->Exe);
+		auto HasExt = Ext && _stricmp(Ext, "exe") == 0;
 			
 		LString::Array p;
 		char *sPath = NULL;
 		size_t sSize;
-		errno_t err = _dupenv_s(&sPath, &sSize, "PATH");
+		auto err = _dupenv_s(&sPath, &sSize, "PATH");
 		if (err == 0)
 			p = LString(sPath).SplitDelimit(LGI_PATH_SEPARATOR);
 		free(sPath);
@@ -499,7 +499,7 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 	LgiTrace("%s:%i - Args='%S'\n", _FL, WArg.Get());
 	#endif
 		
-	bool HasExternIn = d->ExternIn != NULL_PIPE;
+	auto HasExternIn = d->ExternIn != NULL_PIPE;
 
 	#if DEBUG_SUBPROCESS
 	LgiTrace("%s:%i - HasExternIn=%i\n", _FL, HasExternIn);
