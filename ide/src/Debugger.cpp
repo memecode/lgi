@@ -887,6 +887,7 @@ public:
 				if (SetBreakPoint(&bp))
 				{
 					// printf("Set break point for main\n");
+					SuppressNextFileLine = true;
 					if (!Cmd(a))
 						return false;
 					SetState(true, true);
