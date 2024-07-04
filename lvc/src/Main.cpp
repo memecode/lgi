@@ -965,13 +965,18 @@ public:
 			this);
 			
 		auto res = ssh.Open("haiku", "user", NULL, true);
-		d->Log->Print("ssh: Open=%i\n", res);
+		if (!res)
+			d->Log->Print("ssh: Open=%i\n", res);
 		
-		auto c = ssh.CreateConsole();
-		d->Log->Print("ssh: c=%p\n", c.Get());
+		auto c = ssh.CreateConsole(false);
+		if (!c)
+			d->Log->Print("ssh: c=%p\n", c.Get());
 		
 		auto ls = c->Command("ls -l");
 		d->Log->Print("ssh: ls=%s\n", ls.Get());
+
+		auto ls2 = c->Command("ls -l code");
+		d->Log->Print("ssh: ls2=%s\n", ls2.Get());
 		
 		return 0;
 	}
@@ -1023,7 +1028,7 @@ public:
 			DropTarget(true);
 			Visible(true);
 			
-			Test.Reset(new SshTestThread(this));
+			// Test.Reset(new SshTestThread(this));
 		}
 	}
 

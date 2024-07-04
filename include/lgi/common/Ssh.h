@@ -144,52 +144,12 @@ public:
 	struct SshConsole : public LStream
 	{
 		LSsh *s;
-		ssh_channel channel;
+		ssh_channel channel = NULL;
 
-		SshConsole(LSsh *ssh)
+		SshConsole(LSsh *ssh, bool createShell)
 		{
 			s = ssh;
 			
-			channel = ssh_channel_new(s->Ssh);
-			if (!channel)
-				return;
-
-			int rc;
-			do 
-			{
-				rc = ssh_channel_open_session(channel);
-			}
-			while (rc == SSH_AGAIN);
-			if (rc != SSH_OK)
-			{
-				ssh_channel_free(channel);
-				channel = NULL;
-				return;
-			}
-
-			do
-			{
-				rc = ssh_channel_request_pty(channel);
-			}
-			while (rc == SSH_AGAIN);
-			if (rc != SSH_OK)
-				return;
- 
-			do
-			{
-				rc = ssh_channel_change_pty_size(channel, 240, 50);
-			}
-			while (rc == SSH_AGAIN);
-			if (rc != SSH_OK)
-				return;
- 
-			do
-			{
-				rc = ssh_channel_request_shell(channel);
-			}
-			while (rc == SSH_AGAIN);
-			if (rc != SSH_OK)
-				return;
 		}
 
 		~SshConsole()
@@ -199,14 +159,78 @@ public:
 			ssh_channel_free(channel);
 		}
 
+		bool Create(bool createShell)
+		{
+			LAssert(!channel);
+			channel = ssh_channel_new(s->Ssh);
+			if (!channel)
+				return false;
+
+			int rc;
+			do 
+			{
+				rc = ssh_channel_open_session(channel);
+			}
+			while (rc == SSH_AGAIN);
+			if (rc != SSH_OK)
+			{
+				Empty();
+				return false;
+			}
+
+			if (createShell)
+			{
+				do
+				{
+					rc = ssh_channel_request_pty(channel);
+				}
+				while (rc == SSH_AGAIN);
+				if (rc != SSH_OK)
+					return false;
+ 
+				do
+				{
+					rc = ssh_channel_change_pty_size(channel, 240, 50);
+				}
+				while (rc == SSH_AGAIN);
+				if (rc != SSH_OK)
+					return false;
+ 
+				do
+				{
+					rc = ssh_channel_request_shell(channel);
+				}
+				while (rc == SSH_AGAIN);
+				if (rc != SSH_OK)
+					return false;
+			}
+
+			return true;
+		}
+
+		void Empty()
+		{
+			if (channel)
+			{
+				ssh_channel_close(channel);
+				ssh_channel_send_eof(channel);
+				ssh_channel_free(channel);
+				channel = NULL;
+			}
+		}
+
 		ssize_t Read(void *Ptr, ssize_t Size, int Flags = 0) override
 		{
-			return ssh_channel_read_nonblocking(channel, Ptr, (uint32_t)Size, false);
+			if (channel)
+				return ssh_channel_read_nonblocking(channel, Ptr, (uint32_t)Size, false);
+			return 0;
 		}
 
 		ssize_t Write(const void *Ptr, ssize_t Size, int Flags = 0) override
 		{
-			return ssh_channel_write(channel, Ptr, (uint32_t)Size);
+			if (channel)
+				return ssh_channel_write(channel, Ptr, (uint32_t)Size);
+			return 0;
 		}
 
 		bool Command(LString cmd, LStream *out)
@@ -214,6 +238,9 @@ public:
 			if (!out || !cmd)
 				return false;
 				
+			if (!channel && !Create(false))
+				return false;
+
 			char buffer[512];
 			int rc;
 			do
@@ -230,7 +257,8 @@ public:
 			    if (wr < rc)
 			    	break;
 			}
-			
+
+			Empty(); // reset for the next..			
 			return true;
 		}
 
@@ -619,9 +647,9 @@ public:
 		return Status;
 	}
 
-	LAutoPtr<SshConsole> CreateConsole()
+	LAutoPtr<SshConsole> CreateConsole(bool createShell = true)
 	{
-		return LAutoPtr<SshConsole>(new SshConsole(this));
+		return LAutoPtr<SshConsole>(new SshConsole(this, createShell));
 	}
 	
 	bool RunCommands(LStream *Console, const char **Cmds, const char *Prompt = DEFAULT_PROMPT)
