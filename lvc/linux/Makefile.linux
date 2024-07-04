@@ -32,13 +32,13 @@ ifeq ($(Build),Debug)
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I./src \
+		-I../include \
 		-I./resources \
-		`pkg-config --cflags gtk+-3.0` \
 		-I../../../../../../usr/include/gstreamer-1.0 \
-		-I../include/lgi/linux/Gtk \
+		-I./src \
 		-I../include/lgi/linux \
-		-I../include
+		-I../include/lgi/linux/Gtk \
+		`pkg-config --cflags gtk+-3.0`
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
@@ -53,29 +53,29 @@ else
 		-L../$(BuildDir)
 	Inc =  \
 		-I./src \
-		-I./resources \
-		`pkg-config --cflags gtk+-3.0` \
-		-I../../../../../../usr/include/gstreamer-1.0 \
 		-I../include/lgi/linux/Gtk \
+		-I../../../../../../usr/include/gstreamer-1.0 \
 		-I../include/lgi/linux \
-		-I../include
+		-I./resources \
+		-I../include \
+		`pkg-config --cflags gtk+-3.0`
 endif
 
 # Dependencies
-Source =	src/VcFolder.cpp \
+Source =	../src/common/Widgets/ControlTree.cpp \
+			src/PatchViewer.cpp \
 			src/VcFile.cpp \
 			src/VcCommit.cpp \
-			src/SshConnection.cpp \
-			src/PatchViewer.cpp \
-			src/Main.cpp \
-			src/DropDownBtn.cpp \
 			src/BrowseUi.cpp \
-			../src/common/Widgets/ControlTree.cpp \
+			src/DropDownBtn.cpp \
 			../src/common/Text/XmlTreeUi.cpp \
 			../src/common/Text/DeEscape.cpp \
-			../src/common/Lgi/StructuredLog.cpp \
 			../src/common/Lgi/LgiMain.cpp \
-			../src/common/Gdc2/Filters/Png.cpp
+			src/VcFolder.cpp \
+			src/Main.cpp \
+			../src/common/Gdc2/Filters/Png.cpp \
+			../src/common/Lgi/StructuredLog.cpp \
+			src/SshConnection.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -287,6 +287,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/common/General/FileCommon.cpp \
 	../src/common/General/Password.cpp \
 	../src/common/General/Properties.cpp \
+	../src/common/General/TimeZone.cpp \
 	../src/common/Hash/md5/md5.c \
 	../src/common/Hash/md5/md5.h \
 	../src/common/Hash/sha1/sha1.c \
@@ -397,7 +398,7 @@ cleanall :
 
 VPATH=$(BuildDir) \
 	../src/common/Widgets \
-	../src/common/Text \
 	../src/common/Lgi \
 	../src/common/Gdc2/Filters \
-	./src
+	./src \
+	../src/common/Text

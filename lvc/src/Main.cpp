@@ -937,10 +937,51 @@ public:
 	}
 };
 
+class SshTestThread : public LThread, public LCancel
+{
+	AppPriv *d;
+	
+public:
+	SshTestThread(AppPriv *priv) :
+		LThread("SshTestThread"),
+		d(priv)
+	{
+		Run();
+	}
+	
+	~SshTestThread()
+	{
+		Cancel();
+		WaitForExit();
+	}
+	
+	int Main()
+	{
+		LSsh ssh([this](const char *Msg, LSsh::HostType Type)
+			{
+				return LSsh::SshConnect;
+			},
+			d->Log,
+			this);
+			
+		auto res = ssh.Open("haiku", "user", NULL, true);
+		d->Log->Print("ssh: Open=%i\n", res);
+		
+		auto c = ssh.CreateConsole();
+		d->Log->Print("ssh: c=%p\n", c.Get());
+		
+		auto ls = c->Command("ls -l");
+		d->Log->Print("ssh: ls=%s\n", ls.Get());
+		
+		return 0;
+	}
+};
+
 class App : public LWindow, public AppPriv
 {
 	LAutoPtr<LImageList> ImgLst;
 	LBox *FoldersBox = NULL;
+	LAutoPtr<SshTestThread> Test;
 
 	bool CallMethod(const char *MethodName, LScriptArguments &Args)
 	{
@@ -981,11 +1022,14 @@ public:
 			SetPulse(200);
 			DropTarget(true);
 			Visible(true);
+			
+			Test.Reset(new SshTestThread(this));
 		}
 	}
 
 	~App()
 	{
+		Test.Reset();
 		SerializeState(&Opts, "WndPos", false);
 		SaveFolders();
 	}

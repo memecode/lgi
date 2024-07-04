@@ -10,12 +10,13 @@
 	{
 		int GuiHnd;
 		LUri Host;
-		LAutoPtr<LStream> c;
+		LAutoPtr<SshConsole> c;
 		LString Uri, Prompt;
 		AppPriv *d;
 
 		LMessage::Result OnEvent(LMessage *Msg);
-		LStream *GetConsole();
+		LStream *GetStream();
+		SshConsole *GetConsole();
 		bool WaitPrompt(LStream *c, LString *Data = NULL, const char *Debug = NULL);
 
 	public:

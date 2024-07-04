@@ -103,7 +103,15 @@ bool SshConnection::Command(VcFolder *Fld, LString Exe, LString Args, ParseFn Pa
 	return PostObject(GetHandle(), M_RUN_CMD, p);
 }
 
-LStream *SshConnection::GetConsole()
+LStream *SshConnection::GetStream()
+{
+	auto c = GetConsole();
+	if (c)
+		WaitPrompt(c);
+	return c;
+}
+
+LSsh::SshConsole *SshConnection::GetConsole()
 {
 	if (!Connected)
 	{
@@ -111,10 +119,7 @@ LStream *SshConnection::GetConsole()
 		Log->Print("Ssh: %s open: %i\n", Host.sHost.Get(), r);
 	}
 	if (Connected && !c)
-	{
 		c = CreateConsole();
-		WaitPrompt(c);
-	}
 	return c;
 }
 
@@ -416,7 +421,7 @@ LMessage::Result SshConnection::OnEvent(LMessage *Msg)
 			LString::Array lines;
 			VersionCtrl Vcs = VcNone;
 			LString path = PathFilter(*p);
-			LStream *con = GetConsole();
+			LStream *con = GetStream();
 			if (!con)
 			{
 				r->Output = "Error: Failed to get console.";
@@ -472,7 +477,7 @@ LProfile prof("OnEvent");
 			LgiTrace("%s:%i - got M_RUN_CMD\n", _FL);
 PROF("get console");
 			LString path = PathFilter(p->Path);
-			LStream *con = GetConsole();
+			LStream *con = GetStream();
 			if (!con)
 				break;
 

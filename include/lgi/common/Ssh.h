@@ -140,6 +140,7 @@ protected:
 		}
 	};
 
+public:
 	struct SshConsole : public LStream
 	{
 		LSsh *s;
@@ -207,9 +208,40 @@ protected:
 		{
 			return ssh_channel_write(channel, Ptr, (uint32_t)Size);
 		}
+
+		bool Command(LString cmd, LStream *out)
+		{
+			if (!out || !cmd)
+				return false;
+				
+			char buffer[512];
+			int rc;
+			do
+			{
+				rc = ssh_channel_request_exec(channel, cmd);
+			}
+			while (rc == SSH_AGAIN);
+			if (rc != 0)
+				return false;
+			
+			while ((rc = ssh_channel_read(channel, buffer, sizeof(buffer), 0)) > 0)
+			{
+			    auto wr = out->Write(buffer, rc);
+			    if (wr < rc)
+			    	break;
+			}
+			
+			return true;
+		}
+
+		LString Command(LString cmd)
+		{
+			LStringPipe p;
+			Command(cmd, &p);			
+			return p.NewLStr();
+		}
 	};
 
-public:
 	LSsh(	KnownHostCallback hostCb,
 			LTextLog *log,
 			LCancel *cancel = NULL)
@@ -328,7 +360,7 @@ public:
 					continue;
 				}
 
-				LgiTrace("ssh_connect=%i\n", r);
+				// LgiTrace("ssh_connect=%i\n", r);
 				break;
 			}
 		}
@@ -587,12 +619,11 @@ public:
 		return Status;
 	}
 
-	LAutoPtr<LStream> CreateConsole()
+	LAutoPtr<SshConsole> CreateConsole()
 	{
-		LAutoPtr<LStream> con(new SshConsole(this));
-		return con;
+		return LAutoPtr<SshConsole>(new SshConsole(this));
 	}
-
+	
 	bool RunCommands(LStream *Console, const char **Cmds, const char *Prompt = DEFAULT_PROMPT)
 	{
 		LString Buf;
