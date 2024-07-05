@@ -149,7 +149,7 @@ public:
 		SshConsole(LSsh *ssh, bool createShell)
 		{
 			s = ssh;
-			
+			Create(createShell);
 		}
 
 		~SshConsole()
