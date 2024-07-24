@@ -314,8 +314,8 @@ LRichTextPriv::LRichTextPriv(LRichTextEdit *view, LRichTextPriv **Ptr) :
 	SpellDictionaryLoaded = false;
 	HtmlLinkAsCid = false;
 	ScrollLinePx = LSysFont->GetHeight();
-	if (Font.Reset(new LFont))
-		*Font = *LSysFont;
+	if (EditFont.Reset(new LFont))
+		*EditFont = *LSysFont;
 
 	for (unsigned i=0; i<CountOf(Areas); i++)
 	{
@@ -627,7 +627,8 @@ void LRichTextPriv::UpdateStyleUI()
 		
 	if (f)
 	{
-		Values[LRichTextEdit::FontFamilyBtn] = f->Face();
+		auto face = f->Face();
+		Values[LRichTextEdit::FontFamilyBtn] = face;
 		Values[LRichTextEdit::FontSizeBtn] = f->PointSize();
 		Values[LRichTextEdit::FontSizeBtn].CastString();
 		Values[LRichTextEdit::BoldBtn] = f->Bold();
@@ -683,8 +684,7 @@ void LRichTextPriv::InvalidateDoc(LRect *r)
 
 void LRichTextPriv::EmptyDoc()
 {
-	Block *Def = new TextBlock(this);
-	if (Def)
+	if (auto Def = new TextBlock(this))
 	{			
 		Blocks.Add(Def);
 		Cursor.Reset(new BlockCursor(Def, 0, 0));
@@ -1304,7 +1304,7 @@ bool LRichTextPriv::Layout(LScrollBar *&ScrollY)
 	Client.Offset(-Client.x1, -Client.y1);
 	DocumentExtent.x = Client.X();
 
-	LCssTools Ct(this, Font);
+	LCssTools Ct(this, View->GetUiFont());
 	LRect Content = Ct.ApplyPadding(Client);
 	f.Left = Content.x1;
 	f.Right = Content.x2;
@@ -1457,13 +1457,14 @@ bool LRichTextPriv::ChangeSelectionStyle(LCss *Style, bool Add)
 
 void LRichTextPriv::PaintBtn(LSurface *pDC, LRichTextEdit::RectType t)
 {
+	auto UiFont = View->GetUiFont();
 	LRect r = Areas[t];
 	LVariant &v = Values[t];
 	bool Down = (v.Type == GV_BOOL && v.Value.Bool) ||
 				(BtnState[t].IsPress && BtnState[t].Pressed && BtnState[t].MouseOver);
 
-	LSysFont->Colour(L_TEXT, BtnState[t].MouseOver ? L_LIGHT : L_MED);
-	LSysFont->Transparent(false);
+	UiFont->Colour(L_TEXT, BtnState[t].MouseOver ? L_LIGHT : L_MED);
+	UiFont->Transparent(false);
 
 	LColour Low(96, 96, 96);
 	pDC->Colour(Down ? LColour::White : Low);
@@ -1478,7 +1479,7 @@ void LRichTextPriv::PaintBtn(LSurface *pDC, LRichTextEdit::RectType t)
 	{
 		case GV_STRING:
 		{
-			LDisplayString Ds(LSysFont, v.Str());
+			LDisplayString Ds(UiFont, v.Str());
 			Ds.Draw(pDC,
 					r.x1 + ((r.X()-Ds.X())>>1) + Down,
 					r.y1 + ((r.Y()-Ds.Y())>>1) + Down,
@@ -1522,7 +1523,7 @@ void LRichTextPriv::PaintBtn(LSurface *pDC, LRichTextEdit::RectType t)
 					break;
 			}
 			if (!Label) break;
-			LDisplayString Ds(LSysFont, Label);
+			LDisplayString Ds(UiFont, Label);
 			Ds.Draw(pDC,
 					r.x1 + ((r.X()-Ds.X())>>1) + Down,
 					r.y1 + ((r.Y()-Ds.Y())>>1) + Down,
@@ -1820,6 +1821,7 @@ void LRichTextPriv::Paint(LSurface *pDC, LScrollBar *&ScrollY)
 	if (Areas[LRichTextEdit::ToolsArea].Valid())
 	{
 		// Draw tools area...
+		auto UiFont = View->GetUiFont();
 		LRect &t = Areas[LRichTextEdit::ToolsArea];
 		#ifdef WIN32
 		LDoubleBuffer Buf(pDC, &t);
@@ -1844,20 +1846,20 @@ void LRichTextPriv::Paint(LSurface *pDC, LScrollBar *&ScrollY)
 		Areas[LRichTextEdit::BackgroundColourBtn] = AllocPx(r.Y()*1.5, 6);
 
 		{
-			LDisplayString Ds(LSysFont, TEXT_LINK);
+			LDisplayString Ds(UiFont, TEXT_LINK);
 			Areas[LRichTextEdit::MakeLinkBtn] = AllocPx(Ds.X() + 12, 0);
 		}
 		{
-			LDisplayString Ds(LSysFont, TEXT_REMOVE_LINK);
+			LDisplayString Ds(UiFont, TEXT_REMOVE_LINK);
 			Areas[LRichTextEdit::RemoveLinkBtn] = AllocPx(Ds.X() + 12, 6);
 		}
 		{
-			LDisplayString Ds(LSysFont, TEXT_REMOVE_STYLE);
+			LDisplayString Ds(UiFont, TEXT_REMOVE_STYLE);
 			Areas[LRichTextEdit::RemoveStyleBtn] = AllocPx(Ds.X() + 12, 6);
 		}
 		for (unsigned int i=LRichTextEdit::EmojiBtn; i<LRichTextEdit::MaxArea; i++)
 		{
-			LDisplayString Ds(LSysFont, Values[i].Str());
+			LDisplayString Ds(UiFont, Values[i].Str());
 			Areas[i] = AllocPx(Ds.X() + 12, 6);
 		}
 
@@ -1902,7 +1904,7 @@ void LRichTextPriv::Paint(LSurface *pDC, LScrollBar *&ScrollY)
 	#endif
 
 	// Fill the padding...
-	LCssTools ct(this, Font);
+	LCssTools ct(this, View->GetUiFont());
 	r = ct.PaintPadding(pDC, r, &Workspace);
 
 	// Fill the background...

@@ -101,10 +101,16 @@ public:
 	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
 	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
 
-	// Font
-	LFont *GetFont() override;
-	void SetFont(LFont *f, bool OwnIt = false) override;
-	void SetFixedWidthFont(bool i) override;
+	// Fonts
+
+		// This is for the edit window:
+		LFont *GetFont() override;
+		void SetFont(LFont *f, bool OwnIt = false) override;
+		void SetFixedWidthFont(bool i) override;
+
+		// This is the UI elements:
+		LFont *GetUiFont();
+		void SetUiFont(LFont *f, bool OwnId = false);
 
 	// Options
 	void SetTabSize(uint8_t i) override;

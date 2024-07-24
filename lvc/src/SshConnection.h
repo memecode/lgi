@@ -10,7 +10,7 @@
 	{
 		int GuiHnd;
 		LUri Host;
-		LAutoPtr<SshConsole> c;
+		LAutoPtr<SshConsole> console;
 		LString Uri, Prompt;
 		AppPriv *d;
 

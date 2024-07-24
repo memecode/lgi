@@ -287,7 +287,7 @@ protected:
 	mutable LString Buf;
 
 public:
-	LFontType(const char *face = 0, int pointsize = 0);
+	LFontType(const char *face = NULL, int pointsize = 0);
 	LFontType(const LFontType &ft);
 	virtual ~LFontType();
 

@@ -859,6 +859,21 @@ void VcFolder::FilterCurrentFiles()
 	d->Files->ResizeColumnsToContent();
 }
 
+void VcFolder::ShowAuthor()
+{
+	if (!AuthorLocal)
+		GetAuthor(true, [this](auto name, auto email)
+		{
+			UpdateAuthorUi();
+		});
+	if (!AuthorGlobal)
+		GetAuthor(false, [this](auto name, auto email)
+		{
+			UpdateAuthorUi();
+		});
+	UpdateAuthorUi();
+}
+
 void VcFolder::UpdateAuthorUi()
 {
 	if (AuthorLocal)
@@ -1041,17 +1056,14 @@ void VcFolder::Select(bool b)
 		PROF("DefaultFields");
 		DefaultFields();
 
-		if (!AuthorLocal)
-			GetAuthor(true, [this](auto name, auto email)
+		if (GetType() == VcPending)
+		{
+			OnVcsTypeEvents.Add([this]()
 			{
-				UpdateAuthorUi();
+				ShowAuthor();
 			});
-		if (!AuthorGlobal)
-			GetAuthor(false, [this](auto name, auto email)
-			{
-				UpdateAuthorUi();
-			});
-		UpdateAuthorUi();
+		}
+		else ShowAuthor();
 
 		PROF("Type Change");
 		if (GetType() != d->PrevType)
@@ -1409,8 +1421,8 @@ void VcFolder::LogFilter(const char *Filter)
 						Limit = 1000;
 
 					LString args;
-					if (Filter.Find("author:") == 0)
-						args.Printf("log -n %i --author \"%s\"", Limit.CastInt32(), Filter.SplitDelimit(":", 1).Last().Get());
+					if (Filter.Find("@") == 0)
+						args.Printf("log -n %i --author \"%s\"", Limit.CastInt32(), LString(Filter).LStrip("@").Get());
 					else
 						args.Printf("log -n %i --grep \"%s\"", Limit.CastInt32(), Filter.Get());
 					IsLogging = StartCmd(args, &VcFolder::ParseLog);

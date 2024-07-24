@@ -339,7 +339,8 @@ public:
 	LString OriginalText;
 	LAutoWString WideNameCache;
 	LAutoString UtfNameCache;
-	LAutoPtr<LFont> Font;
+	LAutoPtr<LFont> EditFont;
+	LAutoPtr<LFont> UiFont;
 	bool WordSelectMode;
 	bool Dirty;
 	LPoint DocumentExtent; // Px

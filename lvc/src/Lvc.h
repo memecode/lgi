@@ -131,14 +131,19 @@ enum AppMessages
 enum VersionCtrl
 {
 	VcNone,
+	// Pending is when the connection is remote and it's currently unknown
+	// what version control type it is. If something needs to run once the
+	// type is known, add a callback to VcFolder::OnVcsTypeEvents
+	VcPending,
+	VcError,
 	
+	// Supported VCS types:
 	VcCvs,
 	VcSvn,
 	VcGit,
 	VcHg,
 	
-	VcPending,
-	VcError,
+	// Always last
 	VcMax,
 };
 extern const char *toString(VersionCtrl v);

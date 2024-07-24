@@ -337,6 +337,7 @@ public:
 	LString GetConfigFile(bool local);
 	bool GetAuthor(bool local, std::function<void(LString name,LString email)> callback);
 	bool SetAuthor(bool local, LString name, LString email);
+	void ShowAuthor();
 	void UpdateAuthorUi();
 	void Empty();
 	void Select(bool b);

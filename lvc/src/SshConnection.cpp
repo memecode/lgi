@@ -105,10 +105,7 @@ bool SshConnection::Command(VcFolder *Fld, LString Exe, LString Args, ParseFn Pa
 
 LStream *SshConnection::GetStream()
 {
-	auto c = GetConsole();
-	if (c)
-		WaitPrompt(c);
-	return c;
+	return GetConsole();
 }
 
 LSsh::SshConsole *SshConnection::GetConsole()
@@ -118,9 +115,9 @@ LSsh::SshConsole *SshConnection::GetConsole()
 		auto r = Open(Host.sHost, Host.sUser, Host.sPass, true);
 		Log->Print("Ssh: %s open: %i\n", Host.sHost.Get(), r);
 	}
-	if (Connected && !c)
-		c = CreateConsole();
-	return c;
+	if (Connected && !console)
+		console = CreateConsole();
+	return console;
 }
 
 class ProgressListItem : public LListItem

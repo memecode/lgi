@@ -1234,7 +1234,7 @@ bool LRichTextPriv::TextBlock::OnLayout(Flow &flow)
 					CurLine->PosOff.x2 = CurLine->PosOff.x1 + FixedToInt(FixX + Ds->FX()) - 1;
 					CurLine->Strs.Add(Ds.Release());
 
-					CurLine->LayoutOffsets(d->Font->GetHeight());
+					CurLine->LayoutOffsets(d->EditFont->GetHeight());
 					Pos.y2 = MAX(Pos.y2, Pos.y1 + CurLine->PosOff.y2);
 					LayoutSize += CurLine->Length();
 					Layout.Add(CurLine.Release());

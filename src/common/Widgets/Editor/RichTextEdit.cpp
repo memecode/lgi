@@ -183,9 +183,18 @@ void LRichTextEdit::SetWrapType(LDocWrapType i)
 	Invalidate();
 }
 
+LFont *LRichTextEdit::GetUiFont()
+{
+	return LSysFont;
+}
+
+void LRichTextEdit::SetUiFont(LFont *f, bool OwnId)
+{
+}
+
 LFont *LRichTextEdit::GetFont()
 {
-	return d->Font;
+	return d->EditFont;
 }
 
 void LRichTextEdit::SetFont(LFont *f, bool OwnIt)
@@ -195,20 +204,21 @@ void LRichTextEdit::SetFont(LFont *f, bool OwnIt)
 	
 	if (OwnIt)
 	{
-		d->Font.Reset(f);
+		d->EditFont.Reset(f);
 	}
-	else if (d->Font.Reset(new LFont))
+	else if (d->EditFont.Reset(new LFont))
 	{		
-		*d->Font = *f;
-		d->Font->Create(NULL, 0, 0);
+		*d->EditFont = *f;
+		d->EditFont->Create(NULL, 0, 0);
 	}
 	
 	OnFontChange();
+	d->UpdateStyleUI();
 }
 
 void LRichTextEdit::OnFontChange()
 {
-	LgiTrace("%s:%i - LRichTextEdit::OnFontChange not impl.\n", _FL);
+	// LgiTrace("%s:%i - LRichTextEdit::OnFontChange not impl.\n", _FL);
 }
 
 void LRichTextEdit::PourText(ssize_t Start, ssize_t Length /* == 0 means it's a delete */)
@@ -1737,7 +1747,7 @@ bool LRichTextEdit::OnKey(LKey &k)
 						d->Cursor->Blk)
 					{
 						// letter/number etc
-						LRichTextPriv::Block *b = d->Cursor->Blk;
+						auto b = d->Cursor->Blk;
 
 						AutoTrans Trans(new LRichTextPriv::Transaction);						
 						d->DeleteSelection(Trans, NULL);
@@ -1749,8 +1759,7 @@ bool LRichTextEdit::OnKey(LKey &k)
 							if (Mod)
 							{
 								// Get base styles at the cursor..
-								LNamedStyle *Base = b->GetStyle(d->Cursor->Offset);
-								if (Base)
+								if (auto Base = b->GetStyle(d->Cursor->Offset))
 									*Mod = *Base;
 
 								// Apply dirty toolbar styles...
@@ -2529,9 +2538,9 @@ void LRichTextEdit::OnPaint(LSurface *pDC)
 	pDC->Rectangle();
 	#endif
 
-	int FontY = GetFont()->GetHeight();
+	int FontY = GetUiFont()->GetHeight();
 
-	LCssTools ct(d, d->Font);
+	LCssTools ct(d, GetUiFont());
 	r = ct.PaintBorder(pDC, r);
 
 	bool HasSpace = r.Y() > (FontY * 3);
