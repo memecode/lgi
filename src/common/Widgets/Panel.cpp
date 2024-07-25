@@ -18,7 +18,8 @@
 LPanel::LPanel(const char *name, int size, bool open)
 {
 	Ds = 0;
-	if (name) Name(name);
+	if (name)
+		Name(name);
 	IsOpen = open;
 	_IsToolBar = !IsOpen;
 	ClosedSize = LSysFont->GetHeight() + 3;
@@ -56,13 +57,6 @@ void LPanel::Open(bool i)
 		_IsToolBar = !IsOpen;
 		SetChildrenVisibility(IsOpen);
 		RePour();
-
-		/*
-		int ExStyle = GetWindowLong(Handle(), GWL_EXSTYLE);
-		SetWindowLong(	Handle(),
-						GWL_EXSTYLE,
-						(ExStyle & ~WS_EX_CONTROLPARENT) | (IsOpen ? WS_EX_CONTROLPARENT : 0));
-		*/
 	}
 }
 
@@ -106,92 +100,101 @@ bool LPanel::Attach(LViewI *Wnd)
 	return Status;
 }
 
-bool LPanel::Pour(LRegion &r)
+bool LPanel::Pour(LRegion &rgn)
 {
 	int Sx = CalcWidth();
 	LRect *Best = 0;
 	if (Open())
 	{
-		Best = FindLargest(r);
+		Best = FindLargest(rgn);
 	}
 	else
 	{
-		Best = FindSmallestFit(r, Sx, ClosedSize);
+		Best = FindSmallestFit(rgn, Sx, ClosedSize);
+		// LgiTrace("%s:%i - panel %s FindSmallestFit=%s.\n", _FL, Name(), Best ? Best->GetStr() : "(null)");
 		if (!Best)
 		{
-			Best = FindLargest(r);
+			Best = FindLargest(rgn);
+			// LgiTrace("%s:%i - panel %s FindLargest=%s.\n", _FL, Name(), Best ? Best->GetStr() : "(null)");
 		}
 	}
 
-	if (Best)
+	if (!Best)
 	{
-		LRect r = *Best;
-		if (OpenSize > 0)
+		LgiTrace("%s:%i - No best rect.\n", _FL);
+		return false;
+	}
+	
+	LRect rc = *Best;
+	// LgiTrace("%s:%i - open=%i panel %s best=%s, OpenSize=%i, ClosedSize=%i, Align=%x.\n", _FL, Open(), Name(), rc.GetStr(), OpenSize, ClosedSize, Align);
+	if (OpenSize > 0)
+	{
+		int Size = ((Open()) ? OpenSize : ClosedSize);
+		int Limit = 30;
+		if (TestFlag(Align, GV_EDGE_RIGHT) ||
+			TestFlag(Align, GV_EDGE_LEFT))
 		{
-			int Size = ((Open()) ? OpenSize : ClosedSize);
-			int Limit = 30;
-			if (TestFlag(Align, GV_EDGE_RIGHT) ||
-				TestFlag(Align, GV_EDGE_LEFT))
-			{
-				Limit = MIN(Size, r.X()-1);
-			}
-			else /* if (TestFlag(Align, GV_EDGE_BOTTOM) ||
-					 TextFlag(Align, GV_EDGE_TOP)) */
-			{
-				Limit = MIN(Size, r.Y()-1);
-			}
-			
-			if (Align & GV_EDGE_RIGHT)
-			{
-				r.x1 = r.x2 - Limit;
-			}
-			else if (Align & GV_EDGE_BOTTOM)
-			{
-				r.y1 = r.y2 - Limit;
-			}
-			else if (Align & GV_EDGE_LEFT)
-			{
-				r.x2 = r.x1 + Limit;
-			}
-			else // if (Align & GV_EDGE_TOP)
-			{
-				r.y2 = r.y1 + Limit;
-			}
-			
-			if (!Open())
-			{
-				r.x2 = r.x1 + Sx - 1;
-			}
+			Limit = MIN(Size, rc.X()-1);
 		}
-		else
+		else /* if (TestFlag(Align, GV_EDGE_BOTTOM) ||
+				 TextFlag(Align, GV_EDGE_TOP)) */
 		{
-			r.y2 = r.y1 - OpenSize;
+			Limit = MIN(Size, rc.Y()-1);
 		}
-
-		SetPos(r, true);
 		
-		if (IsOpen)
+		if (Limit <= 0)
 		{
-			for (auto v: Children)
-			{
-				auto css = v->GetCss();
-				if (css &&
-					css->Width() == LCss::LenAuto &&
-					css->Height() == LCss::LenAuto)
-				{
-					LRect c = GetClient();
-					LCssTools tools(css, v->GetFont());
-					c = tools.ApplyMargin(c);
-					v->SetPos(c);
-					break;
-				}
-			}
+			LAssert(!"Invalid limit/size");
 		}
-
-		return true;
+		
+		if (Align & GV_EDGE_RIGHT)
+		{
+			rc.x1 = rc.x2 - Limit;
+		}
+		else if (Align & GV_EDGE_BOTTOM)
+		{
+			rc.y1 = rc.y2 - Limit;
+		}
+		else if (Align & GV_EDGE_LEFT)
+		{
+			rc.x2 = rc.x1 + Limit;
+		}
+		else // if (Align & GV_EDGE_TOP)
+		{
+			rc.y2 = rc.y1 + Limit;
+		}
+		
+		if (!Open())
+		{
+			rc.x2 = rc.x1 + Sx - 1;
+		}
+	}
+	else
+	{
+		rc.y2 = rc.y1 - OpenSize;
 	}
 
-	return false;
+	SetPos(rc, true);
+	
+	if (IsOpen)
+	{
+		for (auto v: Children)
+		{
+			auto css = v->GetCss();
+			if (css &&
+				css->Width() == LCss::LenAuto &&
+				css->Height() == LCss::LenAuto)
+			{
+				LRect c = GetClient();
+				LCssTools tools(css, v->GetFont());
+				c = tools.ApplyMargin(c);
+				v->SetPos(c);
+				break;
+			}
+		}
+	}
+
+	return true;
 }
 
 int LPanel::OnNotify(LViewI *Ctrl, LNotification n)

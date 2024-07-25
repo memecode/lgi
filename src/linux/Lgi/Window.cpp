@@ -15,6 +15,13 @@ using namespace Gtk;
 
 #define DEBUG_SETFOCUS			0
 #define DEBUG_HANDLEVIEWKEY		0
+#define DEBUG_POUR				0
+
+#if DEBUG_POUR
+#define LOG_POUR(...)			LgiTrace(__VA_ARGS__)
+#else
+#define LOG_POUR(...)
+#endif
 
 extern Gtk::GdkDragAction EffectToDragAction(int Effect);
 
@@ -1572,10 +1579,14 @@ void LWindow::PourAll()
 		c = GetClient();
 		
 	if (c.X() < 20 || c.Y() < 20)
+	{
+		LOG_POUR("%s:%i - window size too small.\n", _FL);
 		return; // IDK, GTK is weird sometimes... filter out low sizes.
+	}
 
 	LRegion Client(c);
 	LViewI *MenuView = 0;
+	LOG_POUR("%s:%i - PourAll client=%s.\n", _FL, c.GetStr());
 
 	LRegion Update(Client);
 	bool HasTools = false;
@@ -1588,6 +1599,7 @@ void LWindow::PourAll()
 		for (v = *Lst; v; v = *++Lst)
 		{
 			bool IsMenu = MenuView == v;
+			LOG_POUR("\t1) v=%s(%s) menu=%i tool=%i.\n", v->GetClass(), v->Name(), IsMenu, IsTool(v));
 			if (!IsMenu && IsTool(v))
 			{
 				LRect OldPos = v->GetPos();
@@ -1618,12 +1630,12 @@ void LWindow::PourAll()
 							LRect Bar = Client;
 							Bar.y2 = vpos.y2;
 							Client.Subtract(&Bar);
-							// LgiTrace("IncreaseToolbar=%s\n", Bar.GetStr());
+							LOG_POUR("\t\t1) IncreaseToolbar=%s\n", Bar.GetStr());
 						}
 
 						Tools.Subtract(&vpos);
 						Update.Subtract(&vpos);
-						// LgiTrace("vpos=%s\n", vpos.GetStr());
+						LOG_POUR("\t\t1) v=%s(%s) vpos=%s\n", v->GetClass(), v->Name(), vpos.GetStr());
 					}
 				}
 				else
@@ -1643,14 +1655,15 @@ void LWindow::PourAll()
 							v->Invalidate();
 						}
 
-						LRect Bar(v->GetPos());
-						// LgiTrace("%s = %s\n", v->GetClass(), Bar.GetStr());
-						Bar.x2 = GetClient().x2;
+						LRect pos = v->GetPos();
+						LRect bar = pos;
+						bar.x2 = GdcD->X()-1;
+						LOG_POUR("\t\t1) %s(%s) = %s (bar=%s)\n", v->GetClass(), v->Name(), pos.GetStr(), bar.GetStr());
 
-						Tools = Bar;
-						Tools.Subtract(&v->GetPos());
-						Client.Subtract(&Bar);
-						Update.Subtract(&Bar);
+						Tools = bar;
+						Tools.Subtract(&pos);
+						Client.Subtract(&bar);
+						// Update.Subtract(&bar);
 					}
 				}
 			}
