@@ -1080,7 +1080,8 @@ int LDirectory::First(const char *Name, const char *Pattern)
 		{
 			char s[MaxPathLen];
 			LMakePath(s, sizeof(s), d->path, GetName());
-			lstat(s, &d->stat);
+			if (lstat(s, &d->stat))
+				return false;
 
 			if (d->Ignore() && !Next())
 				return false;
@@ -1099,8 +1100,11 @@ int LDirectory::Next()
 		if ((d->entry = readdir(d->dir)))
 		{
 			char s[MaxPathLen];
-			LMakePath(s, sizeof(s), d->path, GetName());			
-			lstat(s, &d->stat);
+			
+			*d->end = 0;
+			LMakePath(s, sizeof(s), d->path, GetName());
+			if (lstat(s, &d->stat))
+				break;
 
 			if (!d->Ignore())
 			{
