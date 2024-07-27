@@ -234,8 +234,11 @@ void LPanel::OnPaint(LSurface *pDC)
 		// Draw thumb
 		auto scale = GetWindow()->GetDpiScale();
 		scale *= 1.2;
-		int gapPx = (int)(scale.x * 2);
-		ThumbPos.ZOff((int)(8 * scale.x), (int)(8 * scale.y));
+		auto sizePx = (int)(8 * scale.x);
+		if (sizePx % 2 == 0)
+			sizePx++;
+		auto gapPx = (int)(scale.x * 2);
+		ThumbPos.ZOff(sizePx-1, sizePx-1);
 		ThumbPos.Offset(r.x1 + 3, r.y1 + 3);
 		
 		pDC->Colour(L_LOW);
