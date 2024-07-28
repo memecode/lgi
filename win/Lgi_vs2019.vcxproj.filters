@@ -500,6 +500,9 @@
     <ClCompile Include="..\src\common\General\TimeZone.cpp">
       <Filter>Source Files\Core\DateTime</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\common\Gdc2\Tools\GdcTools.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\lgi\common\About.h">

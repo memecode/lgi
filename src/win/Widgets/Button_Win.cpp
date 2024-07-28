@@ -9,6 +9,8 @@
 #include "lgi/common/SkinEngine.h"
 #include "lgi/common/Button.h"
 #include "lgi/common/LgiRes.h"
+#include "lgi/common/Uri.h"
+#include "lgi/common/GdcTools.h"
 
 // Size of extra pixels, beyond the size of the text itself.
 LPoint LButton::Overhead =
@@ -18,38 +20,94 @@ LPoint LButton::Overhead =
 static int IsWin7 = -1;
 static int IsWin10 = -1;
 
+enum ImageLoadState
+{
+	TCheckCss,
+	TLoadFailed,
+	TImgReferenced,
+	TImgOwned,
+};
+
 class LButtonPrivate
 {
 public:
-	WNDPROC ButtonClassProc;
-	bool Toggle;
-	bool WantsDefault;
-	int64 Value;
+	LButton *view;
+	WNDPROC ButtonClassProc = NULL;
+	bool Toggle = false;
+	bool WantsDefault = false;
+	int64 Value = 0;
 	
-	LSurface *Img;
-	bool ImgOwned;
+	double scaling = 1.0;
+	LSurface *Img = NULL;
+	ImageLoadState ImgState = TCheckCss;
 
-	LButtonPrivate()
+	LButtonPrivate(LButton *v) : view(v)
 	{
-		Toggle = false;
-		WantsDefault = false;
-		ButtonClassProc = NULL;
-		Value = 0;
-		Img = NULL;
-		ImgOwned = false;
 	}
 
 	~LButtonPrivate()
 	{
-		if (ImgOwned)
+		if (ImgState == TImgOwned)
 			DeleteObj(Img);
+	}
+
+	void CheckImage()
+	{
+		auto css = view->GetCss();
+		if (ImgState != TCheckCss || !css)
+			return;
+
+		auto backgroundImage = css->BackgroundImage();
+		switch (backgroundImage.Type)
+		{
+			case LCss::ImageUri:
+			{
+				// Try and load the image..
+				LUri u(backgroundImage.Uri);
+				if (!u.sProtocol || u.IsProtocol("file"))
+				{
+					LString path = u.sPath ? u.sPath : u.sHost;
+					if (!LFileExists(path))
+						path = LFindFile(path);
+					if (!LFileExists(path))
+					{
+						ImgState = TLoadFailed;
+						return;
+					}
+					Img = GdcD->Load(path);
+					ImgState = Img ? TImgOwned : TLoadFailed;						
+				}
+				else
+				{
+					LAssert(!"impl network fetch?");
+				}
+				break;
+			}
+			case LCss::ImageOwn:
+			{
+				// Take ownership of the image
+				ImgState = TImgOwned;
+				backgroundImage.Type = LCss::ImageRef;
+				Img = backgroundImage.Img;
+				css->BackgroundImage(backgroundImage);
+				break;
+			}
+			case LCss::ImageRef:
+			{
+				ImgState = TImgReferenced;
+				Img = backgroundImage.Img;
+				break;
+			}
+			default:
+				break;
+		}
 	}
 };
 
 LButton::LButton(int id, int x, int y, int cx, int cy, const char *name) :
 	ResObject(Res_Button)
 {
-	d = new LButtonPrivate;
+	d = new LButtonPrivate(this);
 	Name(name);
 	
 	if ((cx < 0 || cy < 0))
@@ -195,6 +253,55 @@ int LButton::SysOnNotify(int Msg, int Code)
 	return 0;
 }
 
+bool LButton::OnLayout(LViewLayoutInfo &Inf)
+{
+	d->CheckImage();
+
+	LPoint sz;
+	auto txt = LView::Name();
+	if (txt)
+	{	
+		auto fnt = GetFont();
+		LDisplayString ds(fnt, txt);
+		sz.x += ds.X();
+		sz.y += ds.Y();
+	}
+	if (d->Img)
+	{
+		sz.x += d->Img->X();
+		sz.y = MAX(sz.y, d->Img->Y());
+	}
+
+	if (auto css = GetCss())
+	{
+		auto height = css->Height();
+		if (height.Type != LCss::LenInherit)
+		{
+			auto dpi = LScreenDpi();
+			auto px = height.ToPx(Y(), GetFont(), dpi.y);
+			if (px > 0 && px != sz.y + LButton::Overhead.y)
+			{
+				d->scaling = (double)(px - LButton::Overhead.y) / sz.y;
+				sz.x = (int)(sz.x * d->scaling);
+				sz.y = (int)(sz.y * d->scaling);
+			}
+		}
+	}
+
+	if (!Inf.Width.Max)
+	{
+		Inf.Width.Min = sz.x + LButton::Overhead.x;
+		Inf.Width.Max = sz.x + LButton::Overhead.x;
+	}
+	else
+	{
+		Inf.Height.Min = sz.y + LButton::Overhead.y;
+		Inf.Height.Max = sz.y + LButton::Overhead.y;
+	}
+
+	return true;
+}
+
 LMessage::Result LButton::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
@@ -228,8 +335,10 @@ LMessage::Result LButton::OnEvent(LMessage *Msg)
 		}
 		case WM_PAINT:
 		{
-			if (!GetCss() && !d->Img)
+			if (!GetCss())
 				break; // Just let the system draw the control
+			
+			d->CheckImage();
 
 			if (IsWin7 < 0)
 			{
@@ -250,8 +359,8 @@ LMessage::Result LButton::OnEvent(LMessage *Msg)
 			LCss::ColorDef bk = GetCss()->NoPaintColor();
 		
 			// If it's not the default...
-			if (!bk.IsValid())
-				break;
+			if (!bk.IsValid() && !d->Img)
+			 	break;
 
 			// Then create a screen device context for painting
 			LScreenDC dc(this);
@@ -262,6 +371,9 @@ LMessage::Result LButton::OnEvent(LMessage *Msg)
 			// Create a HBITMAP in the same size as the control 
 			// and the same bit depth as the screen
 			LMemDC m(c.X(), c.Y(), GdcD->GetColourSpace());
+			m.Colour(LColour::Red);
+			m.Rectangle();
+
 			// Create a HDC for the bitmap
 			HDC hdc = m.StartDC();
 			if (!hdc)
@@ -287,9 +399,23 @@ LMessage::Result LButton::OnEvent(LMessage *Msg)
 			if (d->Img)
 			{
 				m.Op(GDC_ALPHA);
-				int cx = (m.X()-d->Img->X()) >> 1;
-				int cy = (m.Y()-d->Img->Y()) >> 1;
-				m.Blt(cx, cy, d->Img);
+
+				if (d->scaling != 1.0)
+				{
+					LMemDC res(d->Img->X() * d->scaling, d->Img->Y() * d->scaling, System32BitColourSpace);
+					if (ResampleDC(&res, d->Img))
+					{
+						int cx = (m.X()-res.X()) >> 1;
+						int cy = (m.Y()-res.Y()) >> 1;
+						m.Blt(cx, cy, &res);
+					}
+				}
+				else
+				{
+					int cx = (m.X()-d->Img->X()) >> 1;
+					int cy = (m.Y()-d->Img->Y()) >> 1;
+					m.Blt(cx, cy, d->Img);
+				}
 			}
 
 			// Now stick it on the screen
@@ -388,22 +514,6 @@ void LButton::Value(int64 i)
 void LButton::OnClick(const LMouse &m)
 {
 	SendNotify(LNotification(m));
-}
-
-bool LButton::SetImage(const char *FileName)
-{
-	return false;
-}
-
-bool LButton::SetImage(LSurface *Img, bool OwnIt)
-{
-	if (d->ImgOwned)
-		DeleteObj(d->Img);
-	d->Img = Img;
-	d->ImgOwned = OwnIt;
-
-	Invalidate();
-	return true;
 }
 
 void LButton::SetPreferredSize(int x, int y)

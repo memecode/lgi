@@ -1027,6 +1027,8 @@ class ResButton : public ResObjectImpl
 {
 public:
 	ResButton(ResFactory *f, ResObject *o) : ResObjectImpl(f, o) {}
+	SStatus Res_Read(LXmlTag *Tag, ResReadCtx &Ctx);
+	SStatus Res_Write(LXmlTag *t);
 };
 
 class ResGroup : public ResObjectImpl
@@ -1780,6 +1782,30 @@ ResObjectImpl::SStatus ResEditBox::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 }
 
 ResObjectImpl::SStatus ResEditBox::Res_Write(LXmlTag *t)
+{
+	Factory->Res_GetProperties(Object, t);
+	return ResObjectImpl::Res_Write(t);
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+ResObjectImpl::SStatus ResButton::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
+{
+	bool Status = false;
+
+	if (!Stricmp(Tag ? Tag->GetTag() : NULL, Res_Button))
+	{
+		Status = true;
+
+		Res_SetPos(Tag);
+		if (!Res_SetStrRef(Tag, &Ctx))
+			return SExclude;
+		Factory->Res_SetProperties(Object, Tag);
+	}
+
+	return SOk;
+}
+
+ResObjectImpl::SStatus ResButton::Res_Write(LXmlTag *t)
 {
 	Factory->Res_GetProperties(Object, t);
 	return ResObjectImpl::Res_Write(t);

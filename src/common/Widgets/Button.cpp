@@ -152,30 +152,6 @@ void LButton::SetIsToggle(bool toggle)
 	d->Toggle = toggle;
 }
 
-LSurface *LButton::GetImage()
-{
-	return d->Image;
-}
-
-bool LButton::SetImage(const char *FileName)
-{
-	if (d->OwnImage)
-		DeleteObj(d->Image);
-	d->Image = GdcD->Load(FileName);
-	Invalidate();
-	return d->OwnImage = d->Image != NULL;
-}
-
-bool LButton::SetImage(LSurface *Img, bool OwnIt)
-{
-	if (d->OwnImage)
-		DeleteObj(d->Image);
-	d->Image = Img;
-	d->OwnImage = d->Image != NULL && OwnIt;
-	Invalidate();
-	return d->OwnImage;
-}
-
 void LButton::OnStyleChange()
 {
 	SetFont(NULL);

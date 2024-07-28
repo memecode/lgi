@@ -68,12 +68,7 @@ public:
 	/// Set the button's toggle mode
 	void SetIsToggle(bool toggle);
 
-	/// Returns the icon
-	LSurface *GetImage();
-	/// Sets the icon using a filename
-	bool SetImage(const char *FileName);
-	/// Sets the icon
-	bool SetImage(LSurface *Img, bool OwnIt);
+	/// FYI: Icons are managed by setting the background-image CSS property
 
     /// Sets the control to it's preferred size for it's text &| image
     void SetPreferredSize(int x = -1, int y = -1);
@@ -98,11 +93,10 @@ public:
 	bool NameW(const char16 *n) override;
 	void SetFont(LFont *Fnt, bool OwnIt = false) override;
 	int OnNotify(LViewI *Ctrl, LNotification n) override;
+	bool OnLayout(LViewLayoutInfo &Inf) override;
 
 	#if WINNATIVE && !XP_BUTTON
 	int SysOnNotify(int Msg, int Code);
-	#else
-	bool OnLayout(LViewLayoutInfo &Inf) override;
 	#endif
 };
 

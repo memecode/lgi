@@ -243,6 +243,7 @@
     <ClCompile Include="..\src\common\Gdc2\Surface.cpp" />
     <ClCompile Include="..\src\common\Gdc2\Path\Path.cpp" />
     <ClCompile Include="..\src\common\Gdc2\Tools\ColourReduce.cpp" />
+    <ClCompile Include="..\src\common\Gdc2\Tools\GdcTools.cpp" />
     <ClCompile Include="..\src\common\General\Containers.cpp" />
     <ClCompile Include="..\src\common\General\ExeCheck.cpp" />
     <ClCompile Include="..\src\common\General\FileCommon.cpp" />
