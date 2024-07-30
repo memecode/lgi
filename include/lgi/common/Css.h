@@ -668,6 +668,12 @@ public:
 			Type = ImageInherit;
 			*this = o;
 		}
+		
+		ImageDef(LSurface *img, bool own)
+		{
+			Img = img;
+			Type = own ? ImageOwn : ImageRef;
+		}
 
 		~ImageDef();
 

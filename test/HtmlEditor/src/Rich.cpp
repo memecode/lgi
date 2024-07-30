@@ -423,7 +423,7 @@ public:
 					LGetSystemPath(LSP_APP_INSTALL, p, sizeof(p));
 					LMakePath(p, sizeof(p), p, "Test");
 					LMakePath(p, sizeof(p), p, SrcFileName);
-					auto html = LReadTextFile(p);
+					auto html = LReadFile(p);
 					if (html)
 						Edit->Name(html);
 					#endif
