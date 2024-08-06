@@ -672,17 +672,20 @@ void WatchItem::OnExpand(bool b)
 	}
 }
 
-class BuildLog : public LTextLog
+class BuildLog : public LTextLog4
 {
 public:
-	BuildLog(int id) : LTextLog(id)
+	using Parent = LTextLog4;
+	using TextLine = LTextLog4::LTextLine;
+
+	BuildLog(int id) : LTextLog4(id)
 	{
 	}
 
 	void PourStyle(size_t Start, ssize_t Length)
 	{
-		List<LTextLine>::I it = LTextView3::Line.begin();
-		for (LTextLine *ln = *it; ln; ln = *++it)
+		auto it = Parent::Line.begin();
+		for (TextLine *ln = *it; ln; ln = *++it)
 		{
 			if (!ln->c.IsValid())
 			{
@@ -717,7 +720,7 @@ public:
 	LTabPage *Find = NULL;
 	LTabPage *Ftp = NULL;
 	LList *FtpLog = NULL;
-	LTextLog *Txt[AppWnd::Channels::ChannelMax] = {};
+	LTextLog4 *Txt[AppWnd::Channels::ChannelMax] = {};
 	LArray<char> Buf[AppWnd::Channels::ChannelMax];
 	LFont Small;
 	LFont Fixed;
@@ -772,9 +775,9 @@ public:
 		if (Build)
 			Build->Append(Txt[AppWnd::BuildTab] = new BuildLog(IDC_BUILD_LOG));
 		if (Output)
-			Output->Append(Txt[AppWnd::OutputTab] = new LTextLog(IDC_OUTPUT_LOG));
+			Output->Append(Txt[AppWnd::OutputTab] = new LTextLog4(IDC_OUTPUT_LOG));
 		if (Find)
-			Find->Append(Txt[AppWnd::FindTab] = new LTextLog(IDC_FIND_LOG));
+			Find->Append(Txt[AppWnd::FindTab] = new LTextLog4(IDC_FIND_LOG));
 		if (Ftp)
 			Ftp->Append(FtpLog = new LList(104, 0, 0, 100, 100));
 		if (Debug)
@@ -967,7 +970,9 @@ public:
 				{
 					DebugLog->SetVertical(true);
 					DebugBox->AddView(DebugLog);
-					DebugLog->AddView(DebuggerLog = new DebugTextLog(IDC_DEBUGGER_LOG));
+					DebugLog->AddView(	Txt[AppWnd::DebugTab] =
+										DebuggerLog = 
+										new DebugTextLog(IDC_DEBUGGER_LOG));
 					DebuggerLog->SetFont(&Small);
 					DebugLog->AddView(DebugEdit = new LEdit(IDC_DEBUG_EDIT, 0, 0, 60, 20));
 					DebugEdit->GetCss(true)->Height(LCss::Len(LCss::LenPx, (float)(LSysFont->GetHeight() + 8)));
@@ -1452,7 +1457,7 @@ public:
 			return;
 
 		int64 Current = Output->Value();
-		LTextView3 *o = Current < CountOf(Output->Txt) ? Output->Txt[Current] : 0;
+		auto o = Current < CountOf(Output->Txt) ? Output->Txt[Current] : 0;
 		if (!o)
 			return;
 

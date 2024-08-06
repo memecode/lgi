@@ -190,7 +190,7 @@ public:
 	{
 		if (!Db || !Ctx->Threads || !InDebugging)
 		{
-			LgiTrace("%s:%i - No debugger.\n", _FL);
+			LgiTrace("%s:%i - Missing param: %p, %p, %i\n", _FL, Db.Get(), Ctx->Threads, InDebugging);
 			return;
 		}
 		
@@ -295,7 +295,9 @@ LDebugContext::LDebugContext(AppWnd *App, IdeProject *Proj, const char *Exe, con
 	#ifdef HAIKU
 	LAssert(!"No GDB");
 	#else	
-	if (d->Db.Reset(CreateGdbDebugger(App->GetDebugLog())))
+	auto log = App->GetDebugLog();
+	LAssert(log);
+	if (d->Db.Reset(CreateGdbDebugger(log)))
 	{
 		LFile::Path p;
 		if (InitDir)

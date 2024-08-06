@@ -661,7 +661,7 @@ LString LTextView4::LogLines()
 	int Idx = 0;
 	LStringPipe p;
 	p.Print("DocSize: %i\n", (int)Size);
-	for (auto i : Line)
+	for (auto i: Line)
 	{
 		p.Print("  [%i] alloc.ln=%i, %i+%i+%i=%i, %s\n",
 				Idx, i->Line,
@@ -690,6 +690,13 @@ bool LTextView4::ValidateLines(bool CheckBox)
 
 	for (auto l: Line)
 	{
+		if (!l)
+		{
+			LAssert(!"NULL line");
+			d->LastError.Printf("%s:%i - NULL Line.", _FL);
+			goto OnError;
+		}
+	
 		if (l->Start != Pos)
 		{
 			d->LastError.Printf("%s:%i - Incorrect start.", _FL);
@@ -844,6 +851,7 @@ void LTextView4::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 				e = mid - 1; // Search s->Mid
 		}
 	}
+
 	if (Cur && !Cur->r.Valid())
 		Cur = NULL;
 	if (Cur)
@@ -860,7 +868,9 @@ void LTextView4::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 	}
 			
 	if (!Text || !Font || Mx <= 0)
+	{
 		return;
+	}
 
 	// Tracking vars
 	ssize_t e;
@@ -988,6 +998,7 @@ void LTextView4::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 				delete Line[i];
 			Line.Length(Idx);
 			Cur = NULL;
+			ValidateLines();
 		}
 
 		int Cx = 0;
@@ -1435,200 +1446,196 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 
 	LAssert(InThread());
 	
-	if (!ReadOnly && Len > 0)
+	if (ReadOnly || Len <= 0 || !Data)
+		return false;
+
+	// limit input to valid data
+	At = MIN(Size, (ssize_t)At);
+
+	// make sure we have enough memory
+	size_t NewAlloc = Size + Len + 1;
+	NewAlloc += ALLOC_BLOCK - (NewAlloc % ALLOC_BLOCK);
+	if (NewAlloc != Alloc)
 	{
-		if (!Data)
-			return false;
-
-		// limit input to valid data
-		At = MIN(Size, (ssize_t)At);
-
-		// make sure we have enough memory
-		size_t NewAlloc = Size + Len + 1;
-		NewAlloc += ALLOC_BLOCK - (NewAlloc % ALLOC_BLOCK);
-		if (NewAlloc != Alloc)
+		char16 *NewText = new char16[NewAlloc];
+		if (NewText)
 		{
-			char16 *NewText = new char16[NewAlloc];
-			if (NewText)
+			if (Text)
 			{
-				if (Text)
-				{
-					// copy any existing data across
-					memcpy(NewText, Text, (Size + 1) * sizeof(char16));
-				}
+				// copy any existing data across
+				memcpy(NewText, Text, (Size + 1) * sizeof(char16));
+			}
 
-				DeleteArray(Text);
-				Text = NewText;
-				Alloc = NewAlloc;
-			}
-			else
-			{
-				// memory allocation error
-				return false;
-			}
+			DeleteArray(Text);
+			Text = NewText;
+			Alloc = NewAlloc;
 		}
-		
-		PROF("MemChk");
-
-		if (Text)
+		else
 		{
-			// Insert the data
+			// memory allocation error
+			return false;
+		}
+	}
+	
+	PROF("MemChk");
 
-			// Move the section after the insert to make space...
-			auto After = Size - At;
-			if (After > 0)
-				memmove(Text+(At+Len), Text+At, After * sizeof(char16));
+	if (!Text)
+		return false;
 
-			PROF("Cpy");
+	// Insert the data
 
-			// Copy new data in...
-			memcpy(Text+At, Data, Len * sizeof(char16));
-			Size += Len;
-			Text[Size] = 0; // NULL terminate
+	// Move the section after the insert to make space...
+	auto After = Size - At;
+	if (After > 0)
+		memmove(Text+(At+Len), Text+At, After * sizeof(char16));
 
-			PROF("Undo");
+	PROF("Cpy");
+
+	// Copy new data in...
+	memcpy(Text+At, Data, Len * sizeof(char16));
+	Size += Len;
+	Text[Size] = 0; // NULL terminate
+
+	PROF("Undo");
+	
+	// Add the undo object...
+	if (UndoOn)
+	{
+		LAutoPtr<LTextView4Undo> Obj;
+		if (!UndoCur)
+			Obj.Reset(new LTextView4Undo(this));
+		auto u = UndoCur ? UndoCur : Obj;
+		if (u)
+			u->AddChange(At, Len, UndoInsert);
+		else
+			LAssert(!"No undo obj?");
+		if (Obj)
+			UndoQue += Obj.Release();
+	}
+
+	// Clear layout info for the new text
+	ssize_t Idx = -1;
+	LTextLine *Cur = NULL;
+	
+	if (Line.Length() == 0)
+	{
+		// Empty doc... set up the first line
+		Line.Add(Cur = new LTextLine(_FL));
+		Idx = 0;
+		Cur->Start = 0;
+	}
+	else
+	{
+		Cur = GetTextLine(At, &Idx);
+	}
+
+	if (Cur)
+	{
+		if (WrapType == L_WRAP_NONE)
+		{
+			// Clear layout for current line...
+			Cur->r.ZOff(-1, -1);
+
+			PROF("NoWrap add lines");
 			
-			// Add the undo object...
-			if (UndoOn)
+			// LgiTrace("Insert '%S' at %i, size=%i\n", Data, (int)At, (int)Size);
+
+			// Add any new lines that we need...
+			char16 *e = Text + At + Len;
+			char16 *c;
+			for (c = Text + At; c < e; c++)
 			{
-				LAutoPtr<LTextView4Undo> Obj;
-				if (!UndoCur)
-					Obj.Reset(new LTextView4Undo(this));
-				auto u = UndoCur ? UndoCur : Obj;
-				if (u)
-					u->AddChange(At, Len, UndoInsert);
-				else
-					LAssert(!"No undo obj?");
-				if (Obj)
-					UndoQue += Obj.Release();
+				if (*c == '\n')
+				{
+					// Set the size of the current line...
+					size_t Pos = c - Text;
+					Cur->Len = Pos - Cur->Start;
+					Cur->NewLine = true;
+					// LgiTrace("	LF at %i, Idx=%i\n", (int)Pos, (int)Idx);
+
+					if (!*++c)
+					{
+						Cur = NULL;
+						break;
+					}
+
+					// Create a new line...
+					Cur = new LTextLine(_FL);
+					if (!Cur)
+						return false;
+					Cur->Start = c - Text;
+					Line.AddAt(++Idx, Cur);
+
+					// LgiTrace("	newLine at %i, Idx=%i\n", (int)Cur->Start, Idx);
+				}
 			}
 
-			// Clear layout info for the new text
-			ssize_t Idx = -1;
-			LTextLine *Cur = NULL;
-			
-			if (Line.Length() == 0)
-			{
-				// Empty doc... set up the first line
-				Line.Add(Cur = new LTextLine(_FL));
-				Idx = 0;
-				Cur->Start = 0;
-			}
-			else
-			{
-				Cur = GetTextLine(At, &Idx);
-			}
+			PROF("CalcLen");
 
 			if (Cur)
 			{
-				if (WrapType == L_WRAP_NONE)
-				{
-					// Clear layout for current line...
-					Cur->r.ZOff(-1, -1);
-
-					PROF("NoWrap add lines");
-					
-					// LgiTrace("Insert '%S' at %i, size=%i\n", Data, (int)At, (int)Size);
-
-					// Add any new lines that we need...
-					char16 *e = Text + At + Len;
-					char16 *c;
-					for (c = Text + At; c < e; c++)
-					{
-						if (*c == '\n')
-						{
-							// Set the size of the current line...
-							size_t Pos = c - Text;
-							Cur->Len = Pos - Cur->Start;
-							Cur->NewLine = true;
-							// LgiTrace("	LF at %i, Idx=%i\n", (int)Pos, (int)Idx);
-
-							if (!*++c)
-							{
-								Cur = NULL;
-								break;
-							}
-
-							// Create a new line...
-							Cur = new LTextLine(_FL);
-							if (!Cur)
-								return false;
-							Cur->Start = c - Text;
-							Line.AddAt(++Idx, Cur);
-							// LgiTrace("	newLine at %i, Idx=%i\n", (int)Cur->Start, Idx);
-						}
-					}
-
-					PROF("CalcLen");
-
-					if (Cur)
-					{
-						// Make sure the last Line's length is set..
-						Cur->CalcLen(Text);
-						// LgiTrace("	CalcLen, size=%i, start=%i, len=%i\n", (int)Size, (int)Cur->Start, (int)Cur->Len);
-					}
-
-					PROF("UpdatePos");
-	
-					// Now update all the positions of the following lines...
-					for (size_t i = ++Idx; i < Line.Length(); i++)
-						Line[i]->Start += Len;
-				}
-				else
-				{
-					// Clear all lines to the end of the doc...
-					LgiTrace("ClearLines %i\n", (int)Idx+1);
-					for (size_t i = ++Idx; i < Line.Length(); i++)
-						delete Line[i];
-					Line.Length(Idx);
-				}
-			}
-			else
-			{
-				// If wrap is on then this can happen when an Insert happens before the 
-				// OnPulse event has laid out the new text. Probably not a good thing in
-				// non-wrap mode			
-				if (WrapType == L_WRAP_NONE)
-				{
-					#if 0
-					LTextLine *l = *Line.rbegin();
-					printf("%s:%i - Insert error: no cur, At=%i, Size=%i, Lines=%i, WrapType=%i\n",
-						_FL, (int)At, (int)Size, (int)Line.Length(), (int)WrapType);
-					if (l)
-						printf("Last=%i, %i\n", (int)l->Start, (int)l->Len);
-					#endif
-				}
+				// Make sure the last Line's length is set..
+				Cur->CalcLen(Text);
+				// LgiTrace("	CalcLen, size=%i, start=%i, len=%i\n", (int)Size, (int)Cur->Start, (int)Cur->Len);
 			}
 
-			#ifdef _DEBUG
-			PROF("Validate");
-			ValidateLines();
+			PROF("UpdatePos");
+
+			// Now update all the positions of the following lines...
+			for (size_t i = ++Idx; i < Line.Length(); i++)
+				Line[i]->Start += Len;
+		}
+		else
+		{
+			// Clear all lines to the end of the doc...
+			LgiTrace("ClearLines %i\n", (int)Idx+1);
+			for (size_t i = ++Idx; i < Line.Length(); i++)
+				delete Line[i];
+			Line.Length(Idx);
+		}
+	}
+	else
+	{
+		// If wrap is on then this can happen when an Insert happens before the 
+		// OnPulse event has laid out the new text. Probably not a good thing in
+		// non-wrap mode			
+		if (WrapType == L_WRAP_NONE)
+		{
+			#if 0
+			LTextLine *l = *Line.rbegin();
+			printf("%s:%i - Insert error: no cur, At=%i, Size=%i, Lines=%i, WrapType=%i\n",
+				_FL, (int)At, (int)Size, (int)Line.Length(), (int)WrapType);
+			if (l)
+				printf("Last=%i, %i\n", (int)l->Start, (int)l->Len);
 			#endif
-
-			if (AdjustStylePos)
-				AdjustStyles(At, Len);
-
-			Dirty = true;
-			if (PourEnabled)
-			{
-				PROF("PourText");
-				PourText(At, Len);
-				PROF("PourStyle");
-				auto Start = LCurrentTime();
-				PourStyle(At, Len);
-				auto End = LCurrentTime();
-				if (End - Start > 1000)
-				{
-					PourStyle(At, Len);
-				}
-			}
-			SendNotify(LNotifyDocChanged);
-
-			return true;
 		}
 	}
 
-	return false;
+	#ifdef _DEBUG
+	PROF("Validate");
+	ValidateLines();
+	#endif
+
+	if (AdjustStylePos)
+		AdjustStyles(At, Len);
+
+	Dirty = true;
+	if (PourEnabled)
+	{
+		PROF("PourText");
+		PourText(At, Len);
+		PROF("PourStyle");
+		auto Start = LCurrentTime();
+		PourStyle(At, Len);
+		auto End = LCurrentTime();
+		if (End - Start > 1000)
+		{
+			PourStyle(At, Len);
+		}
+	}
+	SendNotify(LNotifyDocChanged);
+
+	return true;
 }
 
 bool LTextView4::Delete(size_t At, ssize_t Len)
@@ -1822,6 +1829,8 @@ LArray<LTextView4::LTextLine*>::I LTextView4::GetTextLineIt(ssize_t Offset, ssiz
 			return Line.begin(mid);
 		}
 	}
+
+	LAssert(Line.IndexOf(NULL) < 0);
 
 	if (!Line[s]->Overlap(Offset))
 		goto OnError;
@@ -3502,7 +3511,11 @@ ssize_t LTextView4::HitText(int x, int y, bool Nearest)
 	while (Y>=0 && Y<(ssize_t)Line.Length())
 	{
 		auto l = Line[Y];
-
+		if (!l)
+		{
+			LgiTrace("%s:%i - invalid NULL line %i of %i\n", _FL, (int)Y, (int)Line.Length());
+			break;
+		}
 		if (l->r.Overlap(x, y))
 		{
 			// Over a line
@@ -3534,7 +3547,10 @@ ssize_t LTextView4::HitText(int x, int y, bool Nearest)
 	{
 		if (Line.Length())
 		{
-			if (y > Line.Last()->r.y2)
+			auto l = Line.Last();
+			if (!l)
+				LgiTrace("%s:%i NULL Line?\n", _FL);
+			else if (y > l->r.y2)
 			{
 				// end of document
 				return Size;
@@ -4974,7 +4990,7 @@ void LTextView4::OnPaint(LSurface *pDC)
 				LRect LeftMargin(0, d->rPadding.y1, d->rPadding.x1-1, r.y2);
 				OnPaintLeftMargin(pDC, LeftMargin, PAINT_BORDER);
 			}
-		
+
 			// draw lines of text
 			int k = ScrollYLine();
 			LTextLine *l = NULL;

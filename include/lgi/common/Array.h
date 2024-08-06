@@ -590,6 +590,7 @@ public:
 				p[old] = a.ItemAt(i);
 		}
 		else return false;
+
 		return true;
 	}
 
@@ -868,7 +869,16 @@ public:
 			return i < 0 || i >= a->Length();
 		}
 		
-		T &operator *() { return (*a)[i]; }
+		T &operator *()
+		{
+			if (In())
+				return (*a)[i];
+
+			printf("%s:%i - deref operator outside of array bounds.\n", _FL);
+			static T null;
+			return null;
+		}
+
 		Iter<T> &operator ++() { i++; return *this; }
 		Iter<T> &operator --() { i--; return *this; }
 		Iter<T> &operator ++(int) { i++; return *this; }

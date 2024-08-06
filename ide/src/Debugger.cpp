@@ -290,7 +290,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 		// if (DEBUG_SHOW_GDB_IO)
 		{
 			// printf("Receive: '%.*s' ParseState=%i, OutLine=%p, OutStream=%p\n", (int)Length-1, Start, ParseState, OutLines, OutStream);
-			printf("Receive: '%.*s'\n", (int)Length-1, Start);
+			printf("Receive(%p): '%.*s'\n", OutStream, (int)Length-1, Start);
 		}
 
 		// Send output
@@ -638,7 +638,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 
 		auto Start = LCurrentTime();
 		auto Wr = Sp->Write(str, ch);
-		CMD_LOG("%s:%i - wr=%i.\n", _FL, (int)Wr);
+		CMD_LOG("%s:%i - wr=%i OutStream=%p.\n", _FL, (int)Wr, OutStream);
 		if (Wr != ch)
 		{
 			CMD_LOG("%s:%i - write failed.\n", _FL);
@@ -660,7 +660,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 			LAssert(OutStream == NULL && OutLines == NULL);
 		}
 		
-		CMD_LOG("%s:%i - cmd success.\n", _FL);
+		CMD_LOG("%s:%i - cmd successm, OutStream=%p\n", _FL, OutStream);
 		return true;
 	}
 	
@@ -1605,7 +1605,8 @@ public:
 	{
 		char c[256];
 		sprintf_s(c, sizeof(c), "%s", cmd);
-		return Cmd(c);
+		printf("UserComand %p\n", Log);
+		return Cmd(c, Log);
 	}
 
 	LString GetResponse(const char *c)

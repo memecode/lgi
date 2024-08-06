@@ -73,6 +73,10 @@
 			<Node File="../src/common/Text/HtmlParser.cpp" Type="2" Platforms="15" />
 			<Node File="../include/lgi/common/HtmlParser.h" Type="3" Platforms="15" />
 		</Node>
+		<Node Name="TextView" Type="1" Platforms="15" Id="1">
+			<Node File="../src/common/Text/TextView4.cpp" Type="2" Platforms="15" />
+			<Node File="../include/lgi/common/TextView4.h" Type="3" Platforms="15" />
+		</Node>
 		<Node File="../src/common/Text/DocView.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Text/Homoglyphs/Homoglyphs.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Text/Homoglyphs/HomoglyphsTable.cpp" Type="2" Platforms="15" />
@@ -86,7 +90,6 @@
 		<Node File="../include/lgi/common/PopupList.h" Type="3" Platforms="15" />
 		<Node File="../src/common/Text/TextConvert.cpp" Type="2" Platforms="15" />
 		<Node File="../include/lgi/common/TextLog.h" Type="3" Platforms="15" />
-		<Node File="../src/common/Text/TextView4.cpp" Type="2" Platforms="15" />
 		<Node File="../include/lgi/common/TrayIcon.h" Type="3" Platforms="15" />
 	</Node>
 	<Node Name="Resources" Type="1" Platforms="15" Open="1" Id="8">
@@ -144,6 +147,8 @@ WINNATIVE</Release>
 					<Debug>/home/matthew/Code/Lgi/trunk/Ide/Code/IdeProjectSettings.cpp</Debug>
 				</All>
 			</Arguments>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -204,6 +209,7 @@ gnu
 network
 be</Release>
 				</Haiku>
+				<All />
 			</Libraries>
 			<Defines>
 				<Haiku>
@@ -212,6 +218,8 @@ _GNU_SOURCE</Debug>
 					<Release>POSIX
 _GNU_SOURCE</Release>
 				</Haiku>
+				<All />
+				<Linux />
 			</Defines>
 			<TargetType>
 				<All>Executable</All>
@@ -236,11 +244,17 @@ _GNU_SOURCE</Release>
 					<Release>`pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
 			</SystemIncludes>
-			<LibraryPaths />
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
 			<ApplicationIcon>
 				<Haiku>./resources/icon.hvif</Haiku>
 			</ApplicationIcon>
-			<Options />
+			<Options>
+				<All />
+				<Linux />
+			</Options>
 		</Build>
 		<Editor>
 			<TabSize>
@@ -255,6 +269,8 @@ _GNU_SOURCE</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
+			<CommentFile />
+			<CommentFunction />
 		</Editor>
 		<Debug>
 			<Environment>
@@ -265,10 +281,18 @@ _GNU_SOURCE</Release>
 					<Debug>/home/matthew/code/lgi/trunk/ide/LgiIdeProj.xml</Debug>
 				</All>
 			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
 		</Debug>
 		<Advanced>
-			<PostBuildCommands />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+			<OtherMakefileRules />
 		</Advanced>
-		<Remote />
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
 	</Settings>
 </Project>
