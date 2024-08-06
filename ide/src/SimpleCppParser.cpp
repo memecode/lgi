@@ -1,4 +1,13 @@
 /*
+
+Future work:
+	https://github.com/ccontavalli/sbexr
+	Uses clang to index the code, should probably look at doing the same.
+	Better quality results.
+	Seems to use various clang libs:
+		-lclangParse \
+		https://clang.llvm.org/doxygen/classclang_1_1Parser.html
+
 Known bugs:
 
 	1) Duplicate brackets in #defines, e.g:
