@@ -8,7 +8,7 @@
 
 class LJson
 {
-	constexpr static const char *EscapeChars = "/\"\\\r\n\t\b";
+	constexpr static const char *EscapeChars = "\"\r\n\t\b";
 
 	struct Key
 	{
@@ -89,7 +89,7 @@ class LJson
 			}
 			if (Str)
 			{
-				LString q = LString::Escape(Str, Str.Length(), EscapeChars, 'u');
+				auto q = LString::Escape(Str, Str.Length(), EscapeChars, 'u');
 				s.Printf("\"%s\"", q.Get());
 				r += s;
 			}

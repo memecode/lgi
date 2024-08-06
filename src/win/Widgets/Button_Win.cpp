@@ -402,7 +402,9 @@ LMessage::Result LButton::OnEvent(LMessage *Msg)
 
 				if (d->scaling != 1.0)
 				{
-					LMemDC res(d->Img->X() * d->scaling, d->Img->Y() * d->scaling, System32BitColourSpace);
+					LMemDC res(	(int)(d->Img->X() * d->scaling),
+								(int)(d->Img->Y() * d->scaling),
+								System32BitColourSpace);
 					if (ResampleDC(&res, d->Img))
 					{
 						int cx = (m.X()-res.X()) >> 1;
