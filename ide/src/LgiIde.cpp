@@ -4355,6 +4355,13 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			break;
 		}
 		case IDM_ATTACH_TO_PROCESS:
+		{
+			if (!d->DbgContext)
+			{
+				// Create an empty context for attaching to a random process:
+				d->DbgContext = new LDebugContext(this, NULL, NULL, NULL, false, NULL, NULL);
+			}
+		}
 		case IDM_PAUSE_DEBUG:
 		case IDM_RESTART_DEBUGGING:
 		case IDM_RUN_TO:

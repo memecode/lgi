@@ -1,6 +1,8 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/TextLog.h"
 #include "lgi/common/List.h"
+#include "lgi/common/TableLayout.h"
+#include "lgi/common/TextLabel.h"
 #include "lgi/common/PopupNotification.h"
 
 #include "LgiIde.h"
@@ -14,10 +16,134 @@ namespace Gtk {
 #endif
 
 
-enum DebugMessages
+enum Ids
 {
+	ID_TBL = 100,
+	ID_PROCESSES,
+	ID_FILTER,
+	
 	M_RUN_STATE = M_USER + 100,
 	M_ON_CRASH,
+};
+
+class AttachToProcess : public LDialog
+{
+	AppWnd *app = NULL;
+	LTableLayout *tbl = NULL;
+	LList *lst = NULL;
+	LStream *log = NULL;
+	LEdit *filter = NULL;
+
+public:
+	int Pid = -1;
+
+	enum Cols {
+		ColPid,
+		ColProcess,
+	};
+	AttachToProcess(AppWnd *parent) : LDialog(parent)
+	{
+		LRect r(0, 0, 1000, 900);
+		SetPos(r);
+		MoveSameScreen(app = parent);
+		log = app->GetOutputLog();
+		Name("Attach to Process");
+
+		AddView(tbl = new LTableLayout(ID_TBL));
+		int y = 0;
+		auto c = tbl->GetCell(0, y);
+			c->Add(new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Select process:"));
+
+		c = tbl->GetCell(1, y++);
+			c->Add(lst = new LList(ID_PROCESSES));
+			lst->AddColumn("Pid", 100);
+			lst->AddColumn("Process", 250);
+
+		c = tbl->GetCell(0, y);
+			c->Add(new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Filter:"));
+
+		c = tbl->GetCell(1, y++);
+			c->Add(filter = new LEdit(ID_FILTER));
+			filter->Focus(true);
+
+		c = tbl->GetCell(0, y++, true, 2, 1);
+			c->TextAlign(LCss::AlignRight);
+			c->Add(new LButton(IDOK, 0, 0, -1, -1, "Attach"));
+			c->Add(new LButton(IDCANCEL, 0, 0, -1, -1, "Cancel"));
+
+		LSubProcess sub("ps", "-A");
+		if (sub.Start())
+		{
+			LStringPipe p;
+			sub.Communicate(&p);
+			
+			auto lines = p.NewLStr().SplitDelimit("\r\n");
+			lines.DeleteAt(0, true);
+			for (auto line: lines)
+			{
+				auto parts = line.SplitDelimit();
+				auto i = new LListItem;
+				i->SetText(parts[0], ColPid);
+				i->SetText(parts.Last(), ColProcess);
+				lst->Insert(i);
+			}			
+		}
+	}
+
+	void Select()
+	{
+		if (auto item = lst->GetSelected())
+		{
+			Pid = Atoi(item->GetText(ColPid));
+			if (Pid > 0)
+				EndModal(true);
+		}
+	}
+	
+	int OnNotify(LViewI *c, LNotification n)
+	{
+		switch (c->GetId())
+		{
+			case ID_FILTER:
+			{
+				LArray<LListItem*> all;
+				if (lst->GetAll(all))
+				{
+					for (auto i: all)
+					{
+						auto process = i->GetText(ColProcess);
+						bool vis = Stristr(process, c->Name());
+						i->GetCss(true)->Display(vis ? LCss::DispBlock : LCss::DispNone);
+					}
+				}
+				break;
+			}
+			case ID_PROCESSES:
+			{
+				switch (n.Type)
+				{
+					case LNotifyItemDoubleClick:
+					{
+						Select();
+						break;
+					}
+				}
+				break;
+			}
+			case IDOK:
+			{
+				Select();
+				break;
+			}
+			case IDCANCEL:
+			{
+				EndModal(false);
+				break;
+			}
+		}
+		
+		return LDialog::OnNotify(c, n);
+	}
 };
 
 class LDebugContextPriv : public LMutex
@@ -181,10 +307,13 @@ LDebugContext::LDebugContext(AppWnd *App, IdeProject *Proj, const char *Exe, con
 			p = LFile::Path(Exe) / "..";
 		}
 	
-		if (!d->Db->Load(this, Exe, Args, RunAsAdmin, p, Env))
+		if (Exe)
 		{
-			d->Log("Failed to load '%s' into debugger.\n", d->Exe.Get());
-			d->Db.Reset();
+			if (!d->Db->Load(this, Exe, Args, RunAsAdmin, p, Env))
+			{
+				d->Log("Failed to load '%s' into debugger.\n", d->Exe.Get());
+				d->Db.Reset();
+			}
 		}
 	}
 	#endif
@@ -346,6 +475,9 @@ bool LDebugContext::UpdateLocals()
 
 bool LDebugContext::UpdateWatches()
 {
+	if (!Watch)
+		return false;
+
 	LArray<LDebugger::Variable> Vars;
 	for (LTreeItem *i = Watch->GetChild(); i; i = i->GetNext())
 	{
@@ -456,6 +588,14 @@ bool LDebugContext::OnCommand(int Cmd)
 		}
 		case IDM_ATTACH_TO_PROCESS:
 		{
+			auto dlg = new AttachToProcess(d->App);
+			dlg->DoModal([this, dlg](auto Dlg, auto Code)
+			{
+				if (Code && dlg->Pid > 0)
+				{
+					d->Db->AttachTo(this, dlg->Pid);
+				}
+			});
 			break;
 		}
 		case IDM_STOP_DEBUG:

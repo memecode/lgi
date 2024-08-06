@@ -2513,10 +2513,10 @@ LDebugContext *IdeProject::Execute(ExeAction Act, LString *ErrMsg)
 		return NULL;
 	}
 
-	const char *Args = d->Settings.GetStr(ProjArgs);
-	const char *Env = d->Settings.GetStr(ProjEnv);
+	auto Args = d->Settings.GetStr(ProjArgs);
+	auto Env = d->Settings.GetStr(ProjEnv);
 	LString InitDir = d->Settings.GetStr(ProjInitDir);
-	int RunAsAdmin = d->Settings.GetInt(ProjDebugAdmin);
+	auto RunAsAdmin = d->Settings.GetInt(ProjDebugAdmin);
 	
 	#ifndef HAIKU
 	if (Act == ExeDebug)

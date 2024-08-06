@@ -37,13 +37,13 @@ public:
 		/// Ctrl's ID
 		int id,
 		/// x coord
-		int x,
+		int x = 0,
 		/// y coord
-		int y,
+		int y = 0,
 		/// width
-		int cx,
+		int cx = -1,
 		/// height
-		int cy,
+		int cy = -1,
 		/// Initial text
 		const char *name = NULL
 	);

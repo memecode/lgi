@@ -120,6 +120,7 @@ public:
 	virtual ~LDebugger() {}
 	
 	virtual bool Load(LDebugEvents *EventHandler, const char *Exe, const char *Args, bool RunAsAdmin, const char *InitDir, const char *Env) = 0;
+	virtual bool AttachTo(LDebugEvents *EventHandler, int Pid) = 0;
 	virtual bool Restart() = 0;
 	virtual bool Unload() = 0;
 	

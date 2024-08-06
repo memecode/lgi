@@ -35,6 +35,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 	LDebugEvents *Events = NULL;
 	LAutoPtr<LSubProcess> Sp;
 	LString Exe, Args, InitDir;
+	int AttachToPid = -1;
 	LString ChildEnv;
 	LString PrettyPrintPy;
 	bool RunAsAdmin = false;
@@ -392,8 +393,8 @@ class Gdb : public LDebugger, public LThread, public Callback
 	void OnRead(const char *Ptr, ssize_t Bytes)
 	{
 		// Parse output into lines
-		const char *p = Ptr;
-		const char *End = p + Bytes;
+		auto p = Ptr;
+		auto End = p + Bytes;
 		char *LineEnd = Line + sizeof(Line) - 2;
 		while (p < End)
 		{
@@ -446,21 +447,32 @@ class Gdb : public LDebugger, public LThread, public Callback
 		const char *Path = "gdb";
 		#endif
 		LString p;
-		if (RunAsAdmin)
-			p.Printf("pkexec %s --args \"%s\"", Path, Exe.Get());
-		else
-			p.Printf("%s --args \"%s\"", Path, Exe.Get());
-		if (Args)
+		
+		if (AttachToPid > 0)
 		{
-			p += " ";
-			p += Args;
+			auto Arg = LString::Fmt("--pid %i", AttachToPid);
+
+			LgiTrace("Attaching Debugger: %s %s\n", Path, Args.Get());
+			if (!Sp.Reset(new LSubProcess(Path, Arg)))
+				return false;
 		}
-		LString::Array a = p.Split(" ", 1);
-
-		printf("Starting Debugger: %s %s\n", a[0].Get(), a[1].Get());
-
-		if (!Sp.Reset(new LSubProcess(a[0], a[1])))
-			return false;
+		else
+		{		
+			if (RunAsAdmin)
+				p.Printf("pkexec %s --args \"%s\"", Path, Exe.Get());
+			else
+				p.Printf("%s --args \"%s\"", Path, Exe.Get());
+			if (Args)
+			{
+				p += " ";
+				p += Args;
+			}
+			LString::Array a = p.Split(" ", 1);
+			
+			LgiTrace("Starting Debugger: %s %s\n", a[0].Get(), a[1].Get());
+			if (!Sp.Reset(new LSubProcess(a[0], a[1])))
+				return false;
+		}
 
 		if (InitDir)
 			Sp->SetInitFolder(InitDir);
@@ -499,6 +511,12 @@ class Gdb : public LDebugger, public LThread, public Callback
 		LgiTrace("Gdb::Main - entering loop...\n");
 		#endif
 		State = Looping;
+		
+		if (AttachToPid > 0)
+		{
+			DebuggingProcess = true;
+			Running = true; // Initial state of process is running
+		}
 
 		char Buf[513];
 		bool IsRun;
@@ -698,6 +716,16 @@ public:
 		Running = false;
 		
 		Run();
+		
+		return true;
+	}
+
+	bool AttachTo(LDebugEvents *EventHandler, int Pid)
+	{
+		Events = EventHandler;
+		AttachToPid = Pid;
+		
+		Run();		
 		
 		return true;
 	}
