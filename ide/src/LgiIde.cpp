@@ -685,8 +685,9 @@ public:
 	void PourStyle(size_t Start, ssize_t Length)
 	{
 		auto it = Parent::Line.begin();
-		for (TextLine *ln = *it; ln; ln = *++it)
+		for (; it; it++)
 		{
+			TextLine *ln = *it;
 			if (!ln->c.IsValid())
 			{
 				char16 *t = Text + ln->Start;
@@ -1567,18 +1568,18 @@ public:
 				RecentFilesMenu->AppendItem(None, 0, false);
 			else
 			{
-				int n=0;
-				char *f;
-				for (auto It = RecentFiles.begin(); (f = *It); f=*(++It))
+				int n = 0, idx = 0;;
+				LArray<int> del;
+				for (auto file: RecentFiles)
 				{
-					for (; f; f=*(++It))
-					{
-						if (LIsUtf8(f))
-							RecentFilesMenu->AppendItem(f, IDM_RECENT_FILE+n++, true);
-						else
-							RecentFiles.Delete(It);
-					}
+					if (LIsUtf8(file))
+						RecentFilesMenu->AppendItem(file, IDM_RECENT_FILE+n++, true);
+					else
+						del.Add(idx);
+					idx++;
 				}
+				for (auto i: del.Reverse())
+					RecentFiles.DeleteAt(i, true);
 			}
 		}
 
@@ -1590,15 +1591,18 @@ public:
 				RecentProjectsMenu->AppendItem(None, 0, false);
 			else
 			{
-				int n=0;
-				char *f;
-				for (auto It = RecentProjects.begin(); (f = *It); f=*(++It))
+				int n = 0, idx = 0;
+				LArray<int> del;
+				for (auto proj: RecentProjects)
 				{
-					if (LIsUtf8(f))
-						RecentProjectsMenu->AppendItem(f, IDM_RECENT_PROJECT+n++, true);
+					if (LIsUtf8(proj))
+						RecentProjectsMenu->AppendItem(proj, IDM_RECENT_PROJECT+n++, true);
 					else
-						RecentProjects.Delete(It);
+						del.Add(idx);
+					idx++;
 				}
+				for (auto i: del.Reverse())
+					RecentProjects.DeleteAt(i, true);
 			}
 		}
 		
