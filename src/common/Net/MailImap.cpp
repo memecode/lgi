@@ -390,7 +390,7 @@ LAutoString ImapBasicTokenize(char *&s)
 
 bool _tokenize(char *&s, std::function<void(char *start, size_t len)> callback)
 {
-	char *Ret = 0;
+	// char *Ret = 0;
 
 	while (*s && strchr(LWhiteSpace, *s))
 		s++;
