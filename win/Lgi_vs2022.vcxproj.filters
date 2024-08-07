@@ -491,11 +491,14 @@
     <ClCompile Include="..\src\common\Net\Uri.cpp">
       <Filter>Source Files\Network</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\win\Lgi\SubProcess.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\common\General\TimeZone.cpp">
       <Filter>Source Files\Core\DateTime</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Gdc2\Tools\GdcTools.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\win\Lgi\SubProcess.cpp">
+      <Filter>Source Files\Core\Process</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

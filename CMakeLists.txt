@@ -148,6 +148,7 @@ set (CommonSource
 	include/lgi/common/Rect.h
 	src/common/Gdc2/Rect.cpp
 	src/common/Gdc2/Surface.cpp
+	src/common/Gdc2/Tools/GdcTools.cpp
 	include/lgi/common/Path.h
 	src/common/Gdc2/Path/Path.cpp
 	src/common/Gdc2/Tools/ColourReduce.cpp
