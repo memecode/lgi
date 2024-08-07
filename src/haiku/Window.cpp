@@ -1277,12 +1277,19 @@ bool LWindow::RegisterHook(LView *Target, LWindowHookType EventType, int Priorit
 
 bool LWindow::UnregisterHook(LView *Target)
 {
-	int i = d->GetHookIndex(Target);
+	if (!d)
+	{
+		printf("%s:%i - error: LWindow already destroyed.\n", _FL);
+		return false;
+	}
+
+	auto i = d->GetHookIndex(Target);
 	if (i >= 0)
 	{
 		d->Hooks.DeleteAt(i);
 		return true;
 	}
+	
 	return false;
 }
 

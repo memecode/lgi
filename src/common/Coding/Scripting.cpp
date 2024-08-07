@@ -5,12 +5,12 @@
 #include <math.h>
 #include <ctype.h>
 
-#include "Lgi.h"
-#include "LToken.h"
-#include "Scripting.h"
-#include "GLexCpp.h"
-#include "GScriptingPriv.h"
-#include "GUtf8.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/Scripting.h"
+#include "lgi/common/LexCpp.h"
+
+#include "ScriptingPriv.h"
 
 extern LHostFunc SystemLibrary[];
 
