@@ -38,9 +38,9 @@ public:
 	};
 
 protected:
-	LList *Lst;
-	LViewI *Edit;
-	bool Registered;
+	LList *Lst = NULL;
+	LViewI *Edit = NULL;
+	bool Registered = false;
 	PositionType PosType;
 
 	LWindow *HookWnd()
@@ -53,9 +53,9 @@ protected:
 	}
 
 public:
-	LPopupList(LViewI *edit, PositionType pos, int width = 200, int height = 300) : LPopup(edit->GetLView())
+	LPopupList(LViewI *edit, PositionType pos, int width = 200, int height = 300) :
+		LPopup(edit->GetLView())
 	{
-		Registered = false;
 		PosType = pos;
 
 		LRect r(width - 1, height - 1);
@@ -68,8 +68,7 @@ public:
 		Lst->MultiSelect(false);
 		
 		// Set default border style...
-		LCss *Css = GetCss(true);
-		if (Css)
+		if (auto Css = GetCss(true))
 		{
 			LCss::BorderDef b(Css, "1px solid #888;");
 			Css->Border(b);
@@ -127,11 +126,10 @@ public:
 		{
 			if (!obj)
 				continue;
-			auto li = new Item(obj);
-			if (li)
+
+			if (auto li = new Item(obj))
 			{
-				LString s = ToString(obj);
-				if (s)
+				if (auto s = ToString(obj))
 				{
 					li->SetText(s);
 					ins.Insert(li);
@@ -166,7 +164,9 @@ public:
 	{
 		if (i)
 			AdjustPosition();
+			
 		LPopup::Visible(i);
+
 		if (i)
 		{
 			AttachChildren();
@@ -180,9 +180,9 @@ public:
 			}
 
 			#ifdef WINNATIVE
-			Edit->Focus(true);
+				Edit->Focus(true);
 			#else
-			Lst->Focus(true);
+				Lst->Focus(true);
 			#endif
 		}
 	}
@@ -197,11 +197,9 @@ public:
 
 			bool Has = ValidStr(Str) && Lst->Length();
 			bool Vis = Visible();
+			// printf("%s:%i - PopupLst, Str=%s, Len=%i, has=%i vis=%i\n", _FL, Str, (int)Lst->Length(), Has, Vis);
 			if (Has ^ Vis)
-			{
-				// printf("%s:%i - PopupLst, has=%i vis=%i\n", _FL, Has, Vis);
 				Visible(Has);
-			}
 		}
 		else if (Ctrl == Lst)
 		{
