@@ -113,23 +113,17 @@ bool LDragDropSource::CreateFileDrop(LDragData *OutputData, LMouse &m, LString::
 	if (!OutputData || !Files.First())
 		return false;
 
-	LStringPipe p;
+	LString::Array a;
 	for (auto f : Files)
-	{
-		char s[256];
-		sprintf_s(s, sizeof(s), "file:%s", f.Get());
-		if (p.GetSize()) p.Push("\n");
-		p.Push(s);
-	}
+		a.New().Printf("file://%s", f.Get());
 
-	LAutoString s(p.NewStr());
-	if (s)
-	{
-		OutputData->Data[0].SetBinary(strlen(s), s);
-		return true;
-	}
+	auto s = LString("\n").Join(a);
+	if (!s)
+		return false;
 
-	return false;
+	// LgiTrace("%s:%i - LDragDropSource::CreateFileDrop=%s\n", _FL, s.Get());
+	OutputData->Data[0].SetBinary(s.Length(), s.Get());
+	return true;
 }
 
 Gtk::GdkDragAction EffectToDragAction(int Effect)
@@ -154,66 +148,74 @@ LgiDragDataGet(GtkWidget        *widget,
                GtkSelectionData *selection_data,
                guint             info,
                guint             time,
-               gpointer          data)
+               gpointer          user_data)
 {
-	LDragDropSource *Src = (LDragDropSource*)data;
+	auto Src = (LDragDropSource*)user_data;
+	if (!Src)
+		return;
 
-	// Iterate over the targets and put their formats into 'dd'
+	// Iterate over the targets and put their formats into 'data'
 	Gtk::GList *targets = gdk_drag_context_list_targets(context);
 	Gtk::GList *node;
-	if (targets)
-	{
-		LArray<LDragData> dd;
-		for (node = g_list_first(targets); node != NULL; node = ((node) ? (((Gtk::GList *)(node))->next) : NULL))
-        {
-			gchar *format = gdk_atom_name((GdkAtom)node->data);
-			dd.New().Format = format;
-        }
+	if (!targets)
+		return;
 		
-		if (Src->GetData(dd))
+	LArray<LDragData> data;
+	for (node = g_list_first(targets); node != NULL; node = ((node) ? (((Gtk::GList *)(node))->next) : NULL))
+    {
+		auto format = gdk_atom_name((GdkAtom)node->data);
+		data.New().Format = format;
+		LgiTrace("%s:%i - fmt=%s\n", _FL, format);
+    }
+		
+	if (!Src->GetData(data))
+		return;
+
+	// For all the formats, set the selection data.
+	for (auto &dd: data)
+	{
+		// Ignore ones with no data..
+		if (!dd.Data.Length())
+			continue;
+
+		LVariant &v = dd.Data[0];
+		auto type_atom = gdk_atom_intern(dd.Format, false);
+		switch (v.Type)
 		{
-			if (dd.Length() > 0 &&
-				dd[0].Data.Length() > 0)
+			case GV_STRING:
 			{
-				::LVariant &v = dd[0].Data[0];
-				switch (v.Type)
+				char *string = v.Str();
+				if (string)
 				{
-					case GV_STRING:
-					{
-						char *string = v.Str();
-						if (string)
-						{
-							gtk_selection_data_set (selection_data,
-													gtk_selection_data_get_target(selection_data),
-													8,
-													(Gtk::guchar*) string,
-													strlen(string) + 1);
-						}
-						else LAssert(0);
-						break;
-					}
-					case GV_BINARY:
-					{
-						if (v.Value.Binary.Data)
-						{
-							gtk_selection_data_set (selection_data,
-													gtk_selection_data_get_target(selection_data),
-													8,
-													(Gtk::guchar*) v.Value.Binary.Data,
-													v.Value.Binary.Length);
-						}
-						else LAssert(0);
-						break;
-					}
-					default:
-					{
-						LAssert(!"Impl this data type?");
-						break;
-					}
+					gtk_selection_data_set (selection_data,
+											type_atom, // gtk_selection_data_get_target(selection_data),
+											8,
+											(Gtk::guchar*) string,
+											strlen(string) + 1);
 				}
+				else LAssert(0);
+				break;
+			}
+			case GV_BINARY:
+			{
+				if (v.Value.Binary.Data)
+				{
+					gtk_selection_data_set (selection_data,
+											type_atom, // gtk_selection_data_get_target(selection_data),
+											8,
+											(Gtk::guchar*) v.Value.Binary.Data,
+											v.Value.Binary.Length);
+				}
+				else LAssert(0);
+				break;
+			}
+			default:
+			{
+				LAssert(!"Impl this data type?");
+				break;
 			}
 		}
-	}	
+	}
 }
 
 gboolean

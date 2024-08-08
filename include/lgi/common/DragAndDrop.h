@@ -62,6 +62,17 @@ struct LgiClass LDragData
 		Data.Swap(o.Data);
 	}
 	
+	LString ToString()
+	{
+		LStringPipe p;
+		p.Print("fmt=%s,len=" LPrintfSizeT "\n", Format.Get(), Data.Length());
+		for (size_t i=0; i<Data.Length(); i++)
+		{
+			p.Print("\n[" LPrintfSizeT "]=%s", i, Data[i].ToString().Get());
+		}
+		return p.NewLStr();
+	}
+	
 	// \sa LDropFiles
 	bool IsFileDrop()
 	{
@@ -107,8 +118,6 @@ struct LgiClass LDragData
 			return NULL;
 		return Data[1].Str();
 	}
-
-
 };
 
 class LgiClass LDragFormats

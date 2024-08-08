@@ -701,20 +701,20 @@ bool DndPointMap(LViewI *&v, LPoint &p, LDragDropTarget *&t, LWindow *Wnd, int x
 	if (t)
 		return true;
 
-	LgiTrace("%s:%i - No target for %s\n", _FL, v->GetClass());
+	// LgiTrace("%s:%i - No target for %s\n", _FL, v->GetClass());
 	return false;
 }
 
 void
 LWindowDragBegin(GtkWidget *widget, GdkDragContext *context, LWindow *Wnd)
 {
-	LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
+	// LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
 }
 
 void
 LWindowDragDataDelete(GtkWidget *widget, GdkDragContext *context, LWindow *Wnd)
 {
-	LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
+	// LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
 }
 
 void
@@ -747,7 +747,7 @@ LWindowDragDataReceived(GtkWidget *widget, GdkDragContext *context, gint x, gint
 			auto ptr = gtk_selection_data_get_data_with_length(data, &length);
 			if (ptr)
 			{
-				LgiTrace("%s:%i - LWindowDragDataReceived got data '%s'.\n", _FL, type);
+				LgiTrace("%s:%i - LWindowDragDataReceived got data '%s': %.*s\n", _FL, type, (int)length, ptr);
 				d.Data[0].SetBinary(length, (void*)ptr, false);
 			}
 			else
@@ -757,10 +757,10 @@ LWindowDragDataReceived(GtkWidget *widget, GdkDragContext *context, gint x, gint
 			break;
 		}
 	}
+
 	if (!matched)
-	{
 		LgiTrace("%s:%i - LWindowDragDataReceived: no matching data '%s'.\n", _FL, type);
-	}
+
 	Wnd->PostEvent(M_DND_DATA_RECEIVED);
 }
 
@@ -776,7 +776,11 @@ int GetAcceptFmts(LString::Array &Formats, GdkDragContext *context, LDragDropTar
 	{
 		auto a = gdk_atom_name((GdkAtom)i->data);
 		if (a)
+		{
+			// LgiTrace("%s:%i - accept fmt: %s\n", _FL, a);
 			Fmts.Supports(a);
+		}
+		// else LgiTrace("%s:%i - accept fmt: (null)", _FL);
 		i = i->next;
 	}
 
@@ -820,6 +824,7 @@ struct LGtkDrop : public LView::ViewEventTarget
 		for (auto f: Formats)
 		{
 			t->Data.New().Format = f;
+			LgiTrace("%s:%i accept fmt: %s\n", _FL, f.Get());
 			gtk_drag_get_data(widget, context, gdk_atom_intern(f, true), time);
 		}
 		
@@ -888,20 +893,20 @@ LWindowDragDataDrop(GtkWidget *widget, GdkDragContext *context, gint x, gint y, 
 void
 LWindowDragEnd(GtkWidget *widget, GdkDragContext *context, LWindow *Wnd)
 {
-	LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
+	// LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
 }
 
 gboolean
 LWindowDragFailed(GtkWidget *widget, GdkDragContext *context, GtkDragResult result, LWindow *Wnd)
 {
-	LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
+	// LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
 	return false;
 }
 
 void
 LWindowDragLeave(GtkWidget *widget, GdkDragContext *context, guint time, LWindow *Wnd)
 {
-	LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
+	// LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
 }
 
 gboolean

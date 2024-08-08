@@ -205,6 +205,14 @@ int LWindow::OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
 				OnReceiveFiles(Files);
 				break;
 			}
+			else
+			{
+				LgiTrace("%s:%i - Error: no files in %s\n", _FL, dd.ToString().Get());
+			}
+		}
+		else
+		{
+			LgiTrace("%s:%i - Unhandled type: %s\n", _FL, dd.Format.Get());
 		}
 	}
 	
