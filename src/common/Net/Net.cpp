@@ -436,42 +436,42 @@ bool LSocket::IsReadable(int TimeoutMs)
 	{
 		#ifdef LINUX
 
-		// Because Linux doesn't return from select() when the socket is
-		// closed elsewhere we have to do something different... damn Linux,
-		// why can't you just like do the right thing?
-		
-		struct pollfd fds;
-		fds.fd = s;
-		fds.events = POLLIN | POLLRDHUP | POLLERR;
-		fds.revents = 0;
+			// Because Linux doesn't return from select() when the socket is
+			// closed elsewhere we have to do something different... damn Linux,
+			// why can't you just like do the right thing?
+			
+			struct pollfd fds;
+			fds.fd = s;
+			fds.events = POLLIN | POLLRDHUP | POLLERR;
+			fds.revents = 0;
 
-		int r = poll(&fds, 1, TimeoutMs);
-		if (r > 0)
-		{
-			return fds.revents != 0;
-		}
-		else if (r < 0)
-		{
-			Error();
-		}
+			int r = poll(&fds, 1, TimeoutMs);
+			if (r > 0)
+			{
+				return fds.revents != 0;
+			}
+			else if (r < 0)
+			{
+				Error();
+			}
 		
 		#else
 		
-		struct timeval t = {TimeoutMs / 1000, (TimeoutMs % 1000) * 1000};
+			struct timeval t = {TimeoutMs / 1000, (TimeoutMs % 1000) * 1000};
 
-		fd_set r;
-		FD_ZERO(&r);
-		FD_SET(s, &r);
-		
-		int v = select((int)s+1, &r, 0, 0, &t);
-		if (v > 0 && FD_ISSET(s, &r))
-		{
-			return true;
-		}
-		else if (v < 0)
-		{
-			Error();
-		}
+			fd_set r;
+			FD_ZERO(&r);
+			FD_SET(s, &r);
+			
+			int v = select((int)s+1, &r, 0, 0, &t);
+			if (v > 0 && FD_ISSET(s, &r))
+			{
+				return true;
+			}
+			else if (v < 0)
+			{
+				Error();
+			}
 		
 		#endif
 	}
@@ -1159,7 +1159,9 @@ ssize_t LSocket::Read(void *Data, ssize_t Len, int Flags)
 
 	ssize_t Status = -1;
 
-	if (d->Timeout < 0 || IsReadable(d->Timeout))
+	if (!d->Blocking ||
+		d->Timeout < 0 ||
+		IsReadable(d->Timeout))
 	{
 		Status = recv(d->Socket, (char*)Data, (int) Len, Flags
 			#ifdef MSG_NOSIGNAL
