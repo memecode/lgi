@@ -14,7 +14,7 @@
 #include "lgi/common/TextLog.h"
 #include "lgi/common/ProgressView.h"
 
-#define DEFAULT_PROMPT		"# "
+#define DEFAULT_PROMPTS		"# \t:~$ "
 
 #define IS_SSH_VER(maj, min)	((LIBSSH_VERSION_MAJOR < maj) \
 								 || \
@@ -652,11 +652,12 @@ public:
 		return LAutoPtr<SshConsole>(new SshConsole(this, createShell));
 	}
 	
-	bool RunCommands(LStream *Console, const char **Cmds, const char *Prompt = DEFAULT_PROMPT)
+	bool RunCommands(LStream *Console, const char **Cmds, const char *PromptList = DEFAULT_PROMPTS)
 	{
 		LString Buf;
 		int CmdIdx = 0;
 		size_t logged = 0;
+		auto Prompts = LString(PromptList).SplitDelimit("\t");
 
 		while (Console && !Cancel->IsCancelled())
 		{
@@ -683,7 +684,13 @@ public:
 
 				// Wait for prompt
 				auto LastNewLine = Buf.RFind("\n");
-				auto PromptPos = Buf.Find(Prompt, LastNewLine >= 0 ? LastNewLine+1 : 0);
+				ssize_t PromptPos = -1;
+				for (auto p: Prompts)
+				{
+					PromptPos = Buf.Find(p, LastNewLine >= 0 ? LastNewLine+1 : 0);
+					if (PromptPos >= 0)
+						break;
+				}
 				if (PromptPos >= 0)
 				{
 					if (Cmds[CmdIdx])
