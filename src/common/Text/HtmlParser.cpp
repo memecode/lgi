@@ -291,10 +291,10 @@ char *LHtmlParser::ParseName(char *s, LAutoString &Name)
 	else
 	{
 		char* Start = s;
-		auto Inc = "!-"; // I'm removing these \"\' because they really aren't appropriate for a name string...
-						 // Also removing ':' because if the CSS leaks into the HTML parsing we should detect that
-						 // and stop parsing the name. e.g.:
-						 //		<td style="width:90%" border-collapse: collapse;">
+		auto Inc = "!-:"; // I'm removing these \"\' because they really aren't appropriate for a name string...
+						  // Also removing ':' because if the CSS leaks into the HTML parsing we should detect that
+						  // and stop parsing the name. e.g.:
+						  //		<td style="width:90%" border-collapse: collapse;">
 		while (*s && (IsAlpha(*s) || strchr(Inc, *s) || IsDigit(*s)))
 			s++;
 
