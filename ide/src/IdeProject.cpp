@@ -2136,6 +2136,8 @@ IdeProject::~IdeProject()
 {
 	d->App->OnProjectDestroy(this);
 	LXmlTag::Empty(true);
+	while (Items.Length())
+		delete Items[0];
 	DeleteObj(d);
 }
 
@@ -3114,22 +3116,35 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 		d->Backend = CreateBackend(d->App, Uri);
 		if (d->Backend)
 		{
-			d->Backend->ReadFolder(".", [this](auto dir)
+			d->Backend->ReadFolder(".", [this](auto d)
 				{
-					for (auto b = dir->First(NULL); b; b = dir->Next())
+					for (auto b = d->First(NULL); b; b = d->Next())
 					{
-						if (dir->IsHidden())
+						if (d->IsHidden())
 							continue;
 
 						LgiTrace("%s: %s, %i bytes\n",	
-							dir->IsDir() ? "dir" : "file",
-							dir->GetName(), (int)dir->GetSize());
+							d->IsDir() ? "dir" : "file",
+							d->GetName(), (int)d->GetSize());
+
+						if (auto n = new ProjectNode(this))
+						{
+							if (n->Serialize(d))
+								Insert(n);
+							else
+								delete n;
+						}
 					}
 				});
 		}
 	}
 
 	return OpenOk;
+}
+
+ProjectBackend *IdeProject::GetBackend()
+{
+	return d->Backend;
 }
 
 bool IdeProject::SaveFile()

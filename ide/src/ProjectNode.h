@@ -28,6 +28,12 @@ class ProjectNode :
 	public FtpCallback,
 	public NodeSource
 {
+	// In projects where the base URI is loaded, all nodes are transient
+	// And don't get saved to the project file.
+	bool Transient = false;
+	LTreeItem *placeholder = NULL;
+	bool childrenReq = false;
+
 	NodeType Type = NodeNone;
 	int NodeId = 0;
 	int Platforms = PLATFORM_ALL;
@@ -104,6 +110,7 @@ public:
 	bool Load(LDocView *Edit, NodeView *Callback) override;
 	bool Save(LDocView *Edit, NodeView *Callback) override;
 	bool Serialize(bool Write) override;
+	bool Serialize(LDirectory *d);
 };
 
 #endif

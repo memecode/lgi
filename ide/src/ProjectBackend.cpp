@@ -217,7 +217,12 @@ public:
 				return entries.ItemAt(pos).name;
 			return LString();
 		}
-		int GetUser(bool Group) const { return 0; }
+		int GetUser(bool Group) const
+		{
+			if (Ok())
+				return Atoi(entries.ItemAt(pos).user.Get());
+			return 0;
+		}
 		uint64 GetCreationTime() const { return 0; }
 		uint64 GetLastAccessTime() const { return 0; }
 		uint64 GetLastWriteTime() const { return 0; }
@@ -270,8 +275,13 @@ public:
 		Auto lck(this, _FL);
 		work.Add( [this, results, path = LString(Path)]()
 		{
-			auto full = LString::Fmt("~%s/%s", uri.sPath.Get(), path.Get());
-			auto ls = Cmd(LString::Fmt("ls -la %s\n", full.Get()));
+			auto pathParts = uri.sPath.SplitDelimit("/\\") + path.SplitDelimit("/\\");
+			for (int i=0; i<pathParts.Length(); i++)
+				if (pathParts[i] == ".")
+					pathParts.DeleteAt(i--, true);
+
+			auto full = LString::Fmt("~/%s", LString("/").Join(pathParts).Get());
+			auto ls = Cmd(LString::Fmt("ls -lan %s\n", full.Get()));
 			auto lines = ls.SplitDelimit("\r\n").Slice(2, -2);
 			app->RunCallback( [dir = new SshDir(path, lines), results]() mutable
 				{

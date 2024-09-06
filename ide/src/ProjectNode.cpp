@@ -12,6 +12,7 @@
 #include "ProjectNode.h"
 #include "AddFtpFile.h"
 #include "WebFldDlg.h"
+#include "ProjectBackend.h"
 
 #define DEBUG_SHOW_NODE_COUNTS		0
 
@@ -605,10 +606,67 @@ const char *ProjectNode::GetText(int c)
 
 void ProjectNode::OnExpand(bool b)
 {
+	if (placeholder && !childrenReq)
+	{
+		childrenReq = true;
+		if (auto be = Project->GetBackend())
+		{
+			be->ReadFolder(sFile, [this](auto d)
+				{
+					DeleteObj(placeholder);
+					for (auto b = d->First(NULL); b; b = d->Next())
+					{
+						if (d->IsHidden())
+							continue;
+
+						if (auto n = new ProjectNode(Project))
+						{
+							if (n->Serialize(d))
+								Insert(n);
+							else
+								delete n;
+						}
+					}
+				});
+		}
+	}
+
 	if (!IgnoreExpand)
 	{
 		Project->SetExpanded(GetId(), b);
 	}
+}
+
+bool ProjectNode::Serialize(LDirectory *d)
+{
+	if (!d)
+		return false;
+
+	Transient = true;
+
+	if (!Write && sFile)
+		Project->OnNode(sFile, this, false);
+
+	sFile = d->FullPath();
+	sName = d->GetName();
+	Charset.Empty();
+	Type = d->IsDir() ? NodeDir : NodeSrc;
+	Platforms = PLATFORM_ALL;
+
+	if (!Write && sFile)
+		Project->OnNode(sFile, this, true);
+
+	if (Type == NodeDir)
+	{
+		// Add placeholder child node to allow user to expand the dir
+		if (placeholder = new LTreeItem)
+		{
+			placeholder->SetText("...loading...");
+			Insert(placeholder);
+		}
+	}
+
+	return true;
 }
 
 bool ProjectNode::Serialize(bool Write)
@@ -654,146 +712,6 @@ bool ProjectNode::Serialize(bool Write)
 			auto Full = GetFullPath();				
 			Dep = Project->GetApp()->OpenProject(Full, Project, false, this);
 		}
-	}
-	else
-	{
-		#if 0
-		if (!Write)
-		{
-			// Check that file exists.
-			auto p = GetFullPath();
-			if (p)
-			{
-				if (LFileExists(p))
-				{
-					if (!LIsRelativePath(File))
-					{
-						// Try and fix up any non-relative paths that have crept in...
-						char Rel[MAX_PATH_LEN];
-						if (Project->RelativePath(Rel, File))
-						{
-							if (File)
-								Project->OnNode(File, this, false);
-
-							DeleteArray(File);
-							File = NewStr(Rel);
-							Project->SetDirty();
-
-							Project->OnNode(File, this, true);
-						}
-					}
-				}
-				else
-				{
-					// File doesn't exist... has it moved???
-					LAutoString Path = Project->GetBasePath();
-					if (Path)
-					{
-						// Find the file.
-						char *d = strrchr(p, DIR_CHAR);
-						LArray<char*> Files;
-						LArray<const char*> Ext;
-						Ext.Add(d ? d + 1 : p.Get());
-						if (LRecursiveFileSearch(Path, &Ext, &Files))
-						{
-							if (Files.Length())
-							{
-								LStringPipe Buf;
-								Buf.Print(	"The file:\n"
-											"\n"
-											"\t%s\n"
-											"\n"
-											"doesn't exist. Is this the right file:\n"
-											"\n"
-											"\t%s",
-											p.Get(),
-											Files[0]);
-								auto Msg = Buf.NewLStr();
-								if (Msg)
-								{
-									auto a = new LAlert(Project->GetApp(), "Missing File", Msg, "Yes", "No", "Browse...");
-									a->DoModal([this](auto dlg, auto code)
-									{
-										switch (code)
-										{
-											case 1: // Yes
-											{
-												SetFileName(Files[0]);
-												break;
-											}
-											case 2: // No
-											{
-												break;
-											}
-											case 3: // Browse
-											{
-												LFileSelect s;
-												s.Parent(Project->GetApp());
-												s.Type("Code", SourcePatterns);
-												if (s.Open())
-												{
-													SetFileName(s.Name());
-												}
-												break;
-											}
-										}
-									});
-								}
-							}
-							else
-							{
-								LStringPipe Buf;
-								Buf.Print(	"The file:\n"
-											"\n"
-											"\t%s\n"
-											"\n"
-											"doesn't exist.",
-											p.Get());
-								auto Msg = Buf.NewLStr();
-								if (Msg)
-								{
-									auto a = new LAlert(Project->GetApp(), "Missing File", Msg, "Skip", "Delete", "Browse...");
-									a->DoModal([this](auto dlg, auto code)
-									{
-										switch (code)
-										{
-											case 1: // Skip
-											{
-												break;
-											}
-											case 2: // Delete
-											{
-												Project->SetDirty();
-												delete this;
-												return false;
-												break;
-											}
-											case 3: // Browse
-											{
-												auto s = new LFileSelect;
-												s->Parent(Project->GetApp());
-												s->Type("Code", SourcePatterns);
-												s->Open([this](auto s, auto ok)
-												{
-													if (ok)
-														SetFileName(s->Name());
-												});
-												break;
-											}
-										}
-									});
-								}
-							}
-						}
-					}
-					else
-					{
-						LgiTrace("%s:%i - Project::GetBasePath failed.\n", _FL);
-					}
-				}
-			}
-		}
-		#endif
 	}
 
 	return true;
