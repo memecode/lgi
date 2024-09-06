@@ -233,6 +233,13 @@ public:
 			return 0;
 		}
 
+		bool Write(LString &s)
+		{
+			if (channel)
+				return ssh_channel_write(channel, s.Get(), (uint32_t)s.Length()) == s.Length();
+			return false;
+		}
+
 		bool Command(LString cmd, LStream *out)
 		{
 			if (!out || !cmd)

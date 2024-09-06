@@ -12,15 +12,15 @@
 #include "ProjectNode.h"
 #include "resdefs.h"
 
-const char TagSettings[] = "Settings";
+const char TagSettings[]   = "Settings";
 
-const char sRemote[] = "Remote";
-const char sGeneral[] = "General";
-const char sBuild[] = "Build";
-const char sEditor[] = "Editor";
-const char sAdvanced[] = "Advanced";
-const char sDebug[] = "Debug";
-const char sRelease[] = "Release";
+const char sRemote[]       = "Remote";
+const char sGeneral[]      = "General";
+const char sBuild[]        = "Build";
+const char sEditor[]       = "Editor";
+const char sAdvanced[]     = "Advanced";
+const char sDebug[]        = "Debug";
+const char sRelease[]      = "Release";
 const char sAllPlatforms[] = "All";
 const char sCurrentPlatform[] =
 	#if defined WIN32
