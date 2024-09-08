@@ -340,7 +340,42 @@ char *LHtmlParser::ParsePropList(char *s, LHtmlElement *Obj, bool &Closed)
 		while (*s && IsWhite(*s))
 			s++;
 
-		if (*s == ':')
+		if (IsQuote(*s))
+		{
+			// This isn't legal but shows up in HTML regularly enough to special case it.
+			// Generally looks like a missing '=' between the attribute name and the value.
+
+			// Have a peek at the content AFTER the quote to see what to do?
+			// - Could be attribute content, CSS etc...
+			// - Could be an end tag marker...
+			// - Even something else entirely?
+			auto after = s + 1;
+			while (IsWhite(*after))
+				after++;
+			
+			if (strchr("/>", *after))
+			{
+				// looks like an end tag, so just ignore the quote...
+				s++;
+			}
+			else if (IsAlpha(*after) || strchr("_-,", *after))
+			{
+				// looks like a name or attribute value...
+				goto ProcessAttrValue;
+			}
+			else if (IsQuote(*after))
+			{
+				// 2 quotes together is an empty string?
+				s = after + 1; // skip
+			}
+			else
+			{
+				// What to do here? IDK
+				LAssert(!"Check what should happen here...");
+				s++;
+			}
+		}
+		else if (*s == ':')
 		{
 			// This happens when CSS leaks into the HTML, e.g.:
 			//	<td style="width:90%" border-collapse: collapse;">
@@ -351,22 +386,15 @@ char *LHtmlParser::ParsePropList(char *s, LHtmlElement *Obj, bool &Closed)
 		{
 			// get value
 			s++;
-			while (*s && IsWhite(*s))
+			ProcessAttrValue:
+			while (IsWhite(*s))
 				s++;
 
 			char16 *Value = 0;
 			s = ParsePropValue(s, Value);
 
 			if (Name && Value && *Value)
-			{
-				#if defined(_DEBUG)
-				if (!_stricmp(Name, "src"))
-				{
-					// printf("%s = %S\n", Name, Value);
-				}
-				#endif
 				Obj->Set(Name, Value);
-			}
 
 			DeleteArray(Value);
 		}

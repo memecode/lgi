@@ -450,6 +450,12 @@ public:
 	~AppWnd()
 	{
 	}
+
+	LString SaveImagePath()
+	{
+		LFile::Path p(LSP_APP_INSTALL);
+		return (p / ".." / "Output").GetFull();
+	}
 	
 	struct SaveImagesState :
 		public LProgressDlg,
@@ -487,7 +493,8 @@ public:
 							"%.4i-%.2i-%.2i_%.2i-%.2i-%.2i",
 							Now.Year(), Now.Month(), Now.Day(),
 							Now.Hours(), Now.Minutes(), Now.Seconds());
-				LFile::Path path(p, "Output");
+				
+				LFile::Path path(App->SaveImagePath());
 				if (!path.Exists())
 					FileDev->CreateFolder(path);
 				path += NowStr;
@@ -571,15 +578,7 @@ public:
 			}
 			case IDM_COMPARE_IMAGES:
 			{
-				char p[MAX_PATH_LEN];
-				LGetSystemPath(LSP_APP_INSTALL, p, sizeof(p));
-				LArray<const char*> Ext;
-				LArray<char*> Files;
-				Ext.Add("*.png");
-				// if (LRecursiveFileSearch(p, &Ext, &Files))
-
-				char OutPath[MAX_PATH_LEN];
-				LMakePath(OutPath, sizeof(OutPath), p, "Output");
+				auto OutPath = SaveImagePath();
 				if (!LDirExists(OutPath))
 				{
 					LgiMsg(this, "No output render folder.", "Html Test Suite");
@@ -600,17 +599,22 @@ public:
 		{
 			case IDC_LIST:
 			{
-				if (Html &&
-					n.Type == LNotifyItemSelect)
+				if (n.Type == LNotifyItemSelect)
 				{
-					if (auto s = Lst->GetSelected())
+					LListItem *s = Lst->GetSelected();
+					if (s)
 					{
 						char p[256];
+
 						LMakePath(p, sizeof(p), Base, s->GetText(0));
 						if (LFileExists(p))
 						{
-							if (auto h = LReadFile(p))
-								Html->Name(h);
+							auto h = LReadFile(p);
+							if (h)
+							{
+								if (Html)
+									Html->Name(h);
+							}
 						}
 					}
 				}
