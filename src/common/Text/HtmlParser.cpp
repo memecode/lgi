@@ -271,6 +271,10 @@ char *LHtmlParser::ParseName(char *s, LAutoString &Name)
 
 	if (*s == '\"' || *s == '\'')
 	{
+		// This is a legal start char for a name string.
+		return s;
+
+		/*
 		char delim = *s++;
 		char* Start = s;
 		while (*s && *s != delim)
@@ -287,6 +291,7 @@ char *LHtmlParser::ParseName(char *s, LAutoString &Name)
 
 		if (*s == delim)
 			s++;
+		*/
 	}
 	else
 	{

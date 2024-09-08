@@ -600,22 +600,17 @@ public:
 		{
 			case IDC_LIST:
 			{
-				if (n.Type == LNotifyItemSelect)
+				if (Html &&
+					n.Type == LNotifyItemSelect)
 				{
-					LListItem *s = Lst->GetSelected();
-					if (s)
+					if (auto s = Lst->GetSelected())
 					{
 						char p[256];
-
 						LMakePath(p, sizeof(p), Base, s->GetText(0));
 						if (LFileExists(p))
 						{
-							auto h = LReadFile(p);
-							if (h)
-							{
-								if (Html)
-									Html->Name(h);
-							}
+							if (auto h = LReadFile(p))
+								Html->Name(h);
 						}
 					}
 				}
