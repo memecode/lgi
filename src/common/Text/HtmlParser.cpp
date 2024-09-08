@@ -212,14 +212,28 @@ char *LHtmlParser::ParsePropValue(char *s, char16 *&Value)
 	Value = 0;
 	if (s)
 	{
-		if (strchr("\"\'", *s))
+		if (IsQuote(*s))
 		{
 			char Delim = *s++;
 			char *Start = s;
 			while (*s && *s != Delim)
+			{
+				if
+				(
+					*s == '>'
+					||
+					(*s == '<' && IsAlpha(s[1]))
+				)
+				{
+					// In the case where there is no closing quote delimiter and the parser starts hitting
+					// elements again... it should exit out of this loop right?
+					break;
+				}
+
 				s++;
+			}
 			Value = DecodeEntities(Start, s - Start);
-			if (*s)
+			if (IsQuote(*s))
 				s++;
 		}
 		else
@@ -353,9 +367,9 @@ char *LHtmlParser::ParsePropList(char *s, LHtmlElement *Obj, bool &Closed)
 			while (IsWhite(*after))
 				after++;
 			
-			if (strchr("/>", *after))
+			if (strchr("</>", *after))
 			{
-				// looks like an end tag, so just ignore the quote...
+				// looks like tag delimiters, so just ignore the quote...
 				s++;
 			}
 			else if (IsAlpha(*after) || strchr("_-,", *after))
