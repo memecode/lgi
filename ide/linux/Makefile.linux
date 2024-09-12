@@ -22,84 +22,87 @@ ifeq ($(Build),Debug)
 	CFlags += -g
 	CppFlags += -g
 	Tag = d
-	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
+	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DHAS_LIBSSH
 	Libs =  \
+		-lssh \
 		-lmagic \
 		-lpthread \
 		`pkg-config --libs gtk+-3.0` \
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		`pkg-config --cflags gtk+-3.0` \
-		-I./src \
 		-I./resources \
+		-I../include \
+		-I./src \
 		-I../private/common \
-		-I../include/lgi/linux/Gtk \
 		-I../include/lgi/linux \
-		-I../include
+		`pkg-config --cflags gtk+-3.0` \
+		-I../include/lgi/linux/Gtk
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
-	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
+	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DHAS_LIBSSH
 	Libs =  \
+		-lssh \
 		-lmagic \
 		-lpthread \
 		`pkg-config --libs gtk+-3.0` \
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		`pkg-config --cflags gtk+-3.0` \
 		-I./src \
-		-I./resources \
-		-I../private/common \
-		-I../include/lgi/linux/Gtk \
+		-I../include \
 		-I../include/lgi/linux \
-		-I../include
+		`pkg-config --cflags gtk+-3.0` \
+		-I../include/lgi/linux/Gtk \
+		-I./resources \
+		-I../private/common
 endif
 
 # Dependencies
-Source =	src/WebFldDlg.cpp \
-			src/SysCharSupport.cpp \
-			src/SpaceTabConv.cpp \
-			src/SimpleCppParser.cpp \
-			src/PythonParser.cpp \
-			src/ProjectNode.cpp \
-			src/NewProjectFromTemplate.cpp \
-			src/MissingFiles.cpp \
-			src/MemDumpViewer.cpp \
-			src/LgiUtils.cpp \
-			src/LgiIde.cpp \
-			src/JavascriptParser.cpp \
-			src/IdeProjectSettings.cpp \
-			src/IdeProject.cpp \
-			src/IdeFindInFiles.cpp \
-			src/IdeDoc.cpp \
-			src/IdeCommon.cpp \
-			src/History.cpp \
-			src/FtpThread.cpp \
-			src/FindSymbol.cpp \
-			src/DocEditStyling.cpp \
-			src/DocEdit.cpp \
+Source =	src/DocEdit.cpp \
 			src/Debugger.cpp \
-			src/DebugContext.cpp \
-			src/AddFtpFile.cpp \
-			../src/common/Text/TextView4.cpp \
-			../src/common/Text/TextConvert.cpp \
-			../src/common/Text/HtmlParser.cpp \
-			../src/common/Text/HtmlCommon.cpp \
-			../src/common/Text/Html.cpp \
-			../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
-			../src/common/Text/Homoglyphs/Homoglyphs.cpp \
-			../src/common/Text/DocView.cpp \
-			../src/common/Net/OpenSSLSocket.cpp \
-			../src/common/Net/Http.cpp \
-			../src/common/Net/Ftp.cpp \
-			../src/common/Lgi/Mdi.cpp \
-			../src/common/Lgi/LgiMain.cpp \
+			src/History.cpp \
+			src/IdeDoc.cpp \
 			../src/common/Lgi/About.cpp \
-			../src/common/Gdc2/Filters/Png.cpp \
+			src/WebFldDlg.cpp \
+			src/FtpThread.cpp \
+			src/IdeProject.cpp \
+			src/DocEditStyling.cpp \
+			src/AddFtpFile.cpp \
+			src/LgiIde.cpp \
+			src/LgiUtils.cpp \
+			src/DebugContext.cpp \
 			../src/common/Coding/ParseCpp.cpp \
-			../src/common/Coding/LexCpp.cpp
+			../src/common/Net/Ftp.cpp \
+			src/IdeProjectSettings.cpp \
+			src/MissingFiles.cpp \
+			src/NewProjectFromTemplate.cpp \
+			src/ProjectBackend.cpp \
+			src/ProjectNode.cpp \
+			src/IdeFindInFiles.cpp \
+			src/FindSymbol.cpp \
+			src/JavascriptParser.cpp \
+			../src/common/Text/HtmlCommon.cpp \
+			src/PythonParser.cpp \
+			src/SimpleCppParser.cpp \
+			src/SysCharSupport.cpp \
+			../src/common/Coding/LexCpp.cpp \
+			../src/common/Net/OpenSSLSocket.cpp \
+			src/IdeCommon.cpp \
+			src/MemDumpViewer.cpp \
+			src/SpaceTabConv.cpp \
+			../src/common/Text/Html.cpp \
+			../src/common/Text/HtmlParser.cpp \
+			../src/common/Text/Homoglyphs/Homoglyphs.cpp \
+			../src/common/Text/TextView4.cpp \
+			../src/common/Text/DocView.cpp \
+			../src/common/Net/Http.cpp \
+			../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
+			../src/common/Lgi/LgiMain.cpp \
+			../src/common/Lgi/Mdi.cpp \
+			../src/common/Text/TextConvert.cpp \
+			../src/common/Gdc2/Filters/Png.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -422,9 +425,9 @@ cleanall :
 
 VPATH=$(BuildDir) \
 	../src/common/Text/Homoglyphs \
-	../src/common/Text \
-	../src/common/Net \
 	../src/common/Lgi \
-	../src/common/Gdc2/Filters \
+	../src/common/Net \
+	./src \
 	../src/common/Coding \
-	./src
+	../src/common/Text \
+	../src/common/Gdc2/Filters

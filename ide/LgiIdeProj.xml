@@ -35,6 +35,8 @@
 			<Node File="./src/IdeProjectSettings.h" Type="3" Platforms="15" />
 			<Node File="./src/MissingFiles.cpp" Type="2" Platforms="15" />
 			<Node File="./src/NewProjectFromTemplate.cpp" Type="2" Platforms="15" />
+			<Node File="./src/ProjectBackend.cpp" Type="2" Platforms="15" />
+			<Node File="./src/ProjectBackend.h" Type="3" Platforms="15" />
 			<Node File="./src/ProjectNode.cpp" Type="2" Platforms="15" />
 			<Node File="./src/ProjectNode.h" Type="3" Platforms="15" />
 		</Node>
@@ -147,8 +149,6 @@ WINNATIVE</Release>
 					<Debug>/home/matthew/Code/Lgi/trunk/Ide/Code/IdeProjectSettings.cpp</Debug>
 				</All>
 			</Arguments>
-			<CCrossCompiler />
-			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -209,7 +209,10 @@ gnu
 network
 be</Release>
 				</Haiku>
-				<All />
+				<All>
+					<Debug>ssh</Debug>
+					<Release>ssh</Release>
+				</All>
 			</Libraries>
 			<Defines>
 				<Haiku>
@@ -218,8 +221,10 @@ _GNU_SOURCE</Debug>
 					<Release>POSIX
 _GNU_SOURCE</Release>
 				</Haiku>
-				<All />
-				<Linux />
+				<All>
+					<Debug>HAS_LIBSSH</Debug>
+					<Release>HAS_LIBSSH</Release>
+				</All>
 			</Defines>
 			<TargetType>
 				<All>Executable</All>
@@ -244,17 +249,11 @@ _GNU_SOURCE</Release>
 					<Release>`pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
 			</SystemIncludes>
-			<LibraryPaths>
-				<All />
-				<Linux />
-			</LibraryPaths>
+			<LibraryPaths />
 			<ApplicationIcon>
 				<Haiku>./resources/icon.hvif</Haiku>
 			</ApplicationIcon>
-			<Options>
-				<All />
-				<Linux />
-			</Options>
+			<Options />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -269,8 +268,6 @@ _GNU_SOURCE</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
-			<CommentFile />
-			<CommentFunction />
 		</Editor>
 		<Debug>
 			<Environment>
@@ -281,18 +278,10 @@ _GNU_SOURCE</Release>
 					<Debug>/home/matthew/code/lgi/trunk/ide/LgiIdeProj.xml</Debug>
 				</All>
 			</Arguments>
-			<DebugAdmin />
-			<InitialDir />
 		</Debug>
 		<Advanced>
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
-			<OtherMakefileRules />
+			<PostBuildCommands />
 		</Advanced>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
+		<Remote />
 	</Settings>
 </Project>
