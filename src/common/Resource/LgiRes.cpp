@@ -756,7 +756,7 @@ ResObject *LResources::CreateObject(LXmlTag *t, ResObject *Parent)
 		}
 		else if (stricmp(t->GetTag(), Res_RadioBox) == 0)
 		{
-			Wnd = new LRadioButton(0, 0, 0, -1, -1, "");
+			Wnd = new LRadioButton(0, "");
 		}
 		else if (stricmp(t->GetTag(), Res_TabView) == 0)
 		{
