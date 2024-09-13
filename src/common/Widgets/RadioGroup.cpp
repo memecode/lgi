@@ -67,13 +67,11 @@ public:
 };
 
 int LRadioGroupPrivate::NextId = 10000;
-LRadioGroup::LRadioGroup(int id, int x, int y, int cx, int cy, const char *name, int Init)
+LRadioGroup::LRadioGroup(int id, const char *name, int Init)
 	: ResObject(Res_Group)
 {
 	d = new LRadioGroupPrivate(this);
 	Name(name);
-	LRect r(x, y, x+cx, y+cy);
-	SetPos(r);
 	SetId(id);
 	d->Val = Init;
 	LResources::StyleElement(this);
