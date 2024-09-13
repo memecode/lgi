@@ -185,13 +185,13 @@ LFindInFiles::LFindInFiles(LViewI *Parent, LAutoString Search, LDom *Store)
 
 	c = d->Tbl->GetCell(0, ++y, true, cols);
 	c->PaddingTop(LCss::Len("0.5em"));
-	c->Add(new LCheckBox(IDC_INC_SUB_FOLDERS, 0, 0, -1, -1, "Include sub-folders"));
+	c->Add(new LCheckBox(IDC_INC_SUB_FOLDERS, "Include sub-folders"));
 
 	c = d->Tbl->GetCell(0, ++y, true, cols);
-	c->Add(new LCheckBox(IDC_MATCH_CASE, 0, 0, -1, -1, "Match case"));
+	c->Add(new LCheckBox(IDC_MATCH_CASE, "Match case"));
 
 	c = d->Tbl->GetCell(0, ++y, true, cols);
-	c->Add(new LCheckBox(IDC_MATCH_WHOLE_WORD, 0, 0, -1, -1, "Match whole word"));
+	c->Add(new LCheckBox(IDC_MATCH_WHOLE_WORD, "Match whole word"));
 
 	c = d->Tbl->GetCell(0, ++y, true, cols);
 	c->PaddingTop(LCss::Len("1em"));

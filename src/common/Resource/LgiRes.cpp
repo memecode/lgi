@@ -744,7 +744,7 @@ ResObject *LResources::CreateObject(LXmlTag *t, ResObject *Parent)
 		}
 		else if (stricmp(t->GetTag(), Res_CheckBox) == 0)
 		{
-			Wnd = new LCheckBox(0, 0, 0, -1, -1, "");
+			Wnd = new LCheckBox(0, "");
 		}
 		else if (stricmp(t->GetTag(), Res_Button) == 0)
 		{
@@ -752,7 +752,7 @@ ResObject *LResources::CreateObject(LXmlTag *t, ResObject *Parent)
 		}
 		else if (stricmp(t->GetTag(), Res_Group) == 0)
 		{
-			Wnd = new LRadioGroup(0, 0, 0, -1, -1, "");
+			Wnd = new LRadioGroup(0);
 		}
 		else if (stricmp(t->GetTag(), Res_RadioBox) == 0)
 		{

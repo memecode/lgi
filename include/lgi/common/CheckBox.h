@@ -29,17 +29,9 @@ public:
 	LCheckBox
 	(
 		/// The control ID
-		int id,
-		/// The left edge x coordinate
-		int x,
-		/// The top edge y coordinate
-		int y,
-		/// The width
-		int cx,
-		/// The height
-		int cy,
+		int id = -1,
 		/// The text of the label
-		const char *name,
+		const char *name = NULL,
 		/// The initial state of the control
 		int InitState = false
 	);

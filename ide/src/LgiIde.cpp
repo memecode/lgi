@@ -964,7 +964,7 @@ public:
 							if (c)
 							{
 								c->VerticalAlign(LCss::VerticalMiddle);
-								c->Add(chk = new LCheckBox(IDC_MEM_HEX, 0, 0, -1, -1, "Show Hex"));
+								c->Add(chk = new LCheckBox(IDC_MEM_HEX, "Show Hex"));
 								chk->SetFont(&Small);
 								chk->Value(true);
 							}

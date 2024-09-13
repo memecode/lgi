@@ -378,7 +378,7 @@ public:
 		}
 		else if (Setting->Type == GV_BOOL)
 		{
-			c->Add(Ctrls[i].Chk  = new LCheckBox(IDC_CHECKBOX_BASE + i, 0, 0, -1, -1, NULL));
+			c->Add(Ctrls[i].Chk  = new LCheckBox(IDC_CHECKBOX_BASE + i));
 			if (t && t->GetContent())
 				Ctrls[i].Chk->Value(atoi(t->GetContent()));
 		}

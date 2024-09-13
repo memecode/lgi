@@ -74,19 +74,19 @@ LFindDlg::LFindDlg(LView *Parent, Callback Cb, const char *Init)
     	c->Add(new LButton(IDOK, 294, 7, 70, 21, LLoadString(L_FR_FIND_NEXT, "Find Next")));
     	
     	c = t->GetCell(0, Row, true, 2, 1);
-    	c->Add(new LCheckBox(IDC_MATCH_WORD, 14, 42, -1, -1, LLoadString(L_FR_MATCH_WORD, "Match &whole word only")));
+    	c->Add(new LCheckBox(IDC_MATCH_WORD, LLoadString(L_FR_MATCH_WORD, "Match &whole word only")));
     	
     	c = t->GetCell(2, Row++);
 	    c->Add(new LButton(IDCANCEL, 294, 35, 70, 21, LLoadString(L_BTN_CANCEL, "Cancel")));
 	    
 	    c = t->GetCell(0, Row++, true, 2, 1);
-	    c->Add(new LCheckBox(IDC_MATCH_CASE, 14, 63, -1, -1, LLoadString(L_FR_MATCH_CASE, "Match &case")));
+	    c->Add(new LCheckBox(IDC_MATCH_CASE, LLoadString(L_FR_MATCH_CASE, "Match &case")));
 	    
 	    c = t->GetCell(0, Row);
-	    c->Add(new LCheckBox(IDC_SELECTION_ONLY, 14, 84, -1, -1, LLoadString(L_FR_SELECTION_ONLY, "&Selection only")));
+	    c->Add(new LCheckBox(IDC_SELECTION_ONLY, LLoadString(L_FR_SELECTION_ONLY, "&Selection only")));
 
 	    c = t->GetCell(1, Row++);
-	    c->Add(new LCheckBox(IDC_SEARCH_UP, 0, 0, -1, -1, "Search &upwards"));
+	    c->Add(new LCheckBox(IDC_SEARCH_UP, "Search &upwards"));
 	    
 	    OnPosChange();
 	    
@@ -228,21 +228,21 @@ LReplaceDlg::LReplaceDlg(LView *Parent, Callback Cb, char *InitFind, char *InitR
     	c->Add(new LButton(IDC_FR_REPLACE, 0, 0, -1, -1, LLoadString(L_FR_REPLACE, "Replace")));
 
         c = t->GetCell(0, Row, true, 2);
-    	c->Add(new LCheckBox(IDC_MATCH_WORD, 14, 70, -1, -1, LLoadString(L_FR_MATCH_WORD, "Match whole &word only")));
+    	c->Add(new LCheckBox(IDC_MATCH_WORD, LLoadString(L_FR_MATCH_WORD, "Match whole &word only")));
 
         c = t->GetCell(2, Row++);	
     	c->Add(new LButton(IDOK, 0, 0, -1, -1, LLoadString(L_FR_REPLACE_ALL, "Replace &All")));
 
         c = t->GetCell(0, Row, true, 2);
-    	c->Add(new LCheckBox(IDC_MATCH_CASE, 14, 91, -1, -1, LLoadString(L_FR_MATCH_CASE, "Match &case")));
+    	c->Add(new LCheckBox(IDC_MATCH_CASE, LLoadString(L_FR_MATCH_CASE, "Match &case")));
 
         c = t->GetCell(2, Row++);	
     	c->Add(new LButton(IDCANCEL, 0, 0, -1, -1, LLoadString(L_BTN_CANCEL, "Cancel")));
 
         c = t->GetCell(0, Row);
-	    c->Add(new LCheckBox(IDC_SELECTION_ONLY, 14, 112, -1, -1, LLoadString(L_FR_SELECTION_ONLY, "&Selection only")));
+	    c->Add(new LCheckBox(IDC_SELECTION_ONLY, LLoadString(L_FR_SELECTION_ONLY, "&Selection only")));
         c = t->GetCell(1, Row);
-    	c->Add(new LCheckBox(IDC_SEARCH_UP, 14, 91, -1, -1, "Search &upwards"));
+    	c->Add(new LCheckBox(IDC_SEARCH_UP, "Search &upwards"));
 
 	
 	    OnPosChange();

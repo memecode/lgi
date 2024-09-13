@@ -76,17 +76,17 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Check box
-LCheckBox::LCheckBox(int id, int x, int y, int cx, int cy, const char *name, int InitState) :
+LCheckBox::LCheckBox(int id, const char *name, int InitState) :
 	ResObject(Res_CheckBox)
 {
 	d = new LCheckBoxPrivate(this);
 	Name(name);
-	LPoint Max = d->GetMax();
-	if (cx < 0) cx = Max.x + PadX1Px + PadX2Px;
-	if (cy < 0) cy = MAX(Max.y, MinYSize) + PadYPx;
+	LDisplayString ds(GetFont(), name);
+	auto cx = ds.X() + PadX1Px + PadX2Px;
+	auto cy = MAX(ds.Y(), MinYSize) + PadYPx;
 
 	d->Val = InitState;
-	LRect r(x, y, x+cx, y+cy);
+	LRect r(0, 0, cx-1, cy-1);
 	SetPos(r);
 	SetId(id);
 	SetTabStop(true);

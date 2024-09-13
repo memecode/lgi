@@ -23,7 +23,7 @@ class LgiClass LRadioGroup :
 	void OnCreate() override;
 
 public:
-	LRadioGroup(int id, int x, int y, int cx, int cy, const char *name, int Init = 0);
+	LRadioGroup(int id = -1, const char *name = NULL, int Init = 0);
 	~LRadioGroup();
 	
 	const char *GetClass() override { return "LRadioGroup"; }
