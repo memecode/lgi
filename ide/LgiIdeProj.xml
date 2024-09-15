@@ -149,6 +149,8 @@ WINNATIVE</Release>
 					<Debug>/home/matthew/Code/Lgi/trunk/Ide/Code/IdeProjectSettings.cpp</Debug>
 				</All>
 			</Arguments>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -248,12 +250,19 @@ _GNU_SOURCE</Release>
 					<Debug>`pkg-config --cflags gtk+-3.0`</Debug>
 					<Release>`pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
+				<Haiku />
 			</SystemIncludes>
-			<LibraryPaths />
+			<LibraryPaths>
+				<All />
+				<Haiku />
+			</LibraryPaths>
 			<ApplicationIcon>
 				<Haiku>./resources/icon.hvif</Haiku>
 			</ApplicationIcon>
-			<Options />
+			<Options>
+				<All />
+				<Haiku />
+			</Options>
 		</Build>
 		<Editor>
 			<TabSize>
@@ -268,6 +277,8 @@ _GNU_SOURCE</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
+			<CommentFile />
+			<CommentFunction />
 		</Editor>
 		<Debug>
 			<Environment>
@@ -278,10 +289,18 @@ _GNU_SOURCE</Release>
 					<Debug>/home/matthew/code/lgi/trunk/ide/LgiIdeProj.xml</Debug>
 				</All>
 			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
 		</Debug>
 		<Advanced>
-			<PostBuildCommands />
+			<PostBuildCommands>
+				<Haiku />
+			</PostBuildCommands>
+			<OtherMakefileRules />
 		</Advanced>
-		<Remote />
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
 	</Settings>
 </Project>

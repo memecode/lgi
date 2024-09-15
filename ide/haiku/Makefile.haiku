@@ -22,8 +22,9 @@ ifeq ($(Build),Debug)
 	CFlags += -g
 	CppFlags += -g
 	Tag = d
-	Defs = -D_DEBUG -DHAIKU -D_REENTRANT -DPOSIX -D_GNU_SOURCE
+	Defs = -D_DEBUG -DHAIKU -D_REENTRANT -DHAS_LIBSSH -DPOSIX -D_GNU_SOURCE
 	Libs =  \
+		-lssh \
 		-static-libgcc \
 		-lgnu \
 		-lnetwork \
@@ -31,16 +32,17 @@ ifeq ($(Build),Debug)
 		-llgi$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I./src \
+		-I../include \
 		-I./resources \
-		-I../private/common \
+		-I./src \
 		-I../include/lgi/haiku \
-		-I../include
+		-I../private/common
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
-	Defs = -DHAIKU -D_REENTRANT -DPOSIX -D_GNU_SOURCE
+	Defs = -DHAIKU -D_REENTRANT -DHAS_LIBSSH -DPOSIX -D_GNU_SOURCE
 	Libs =  \
+		-lssh \
 		-static-libgcc \
 		-lgnu \
 		-lnetwork \
@@ -48,55 +50,56 @@ else
 		-llgi$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I./src \
+		-I../include \
 		-I./resources \
-		-I../private/common \
+		-I./src \
 		-I../include/lgi/haiku \
-		-I../include
+		-I../private/common
 endif
 
 # Dependencies
-Source =	src/WebFldDlg.cpp \
-			src/SysCharSupport.cpp \
-			src/SpaceTabConv.cpp \
-			src/SimpleCppParser.cpp \
-			src/PythonParser.cpp \
-			src/ProjectNode.cpp \
-			src/NewProjectFromTemplate.cpp \
-			src/MissingFiles.cpp \
-			src/MemDumpViewer.cpp \
-			src/LgiUtils.cpp \
-			src/LgiIde.cpp \
-			src/JavascriptParser.cpp \
-			src/IdeProjectSettings.cpp \
-			src/IdeProject.cpp \
-			src/IdeFindInFiles.cpp \
-			src/IdeDoc.cpp \
-			src/IdeCommon.cpp \
-			src/History.cpp \
-			src/FtpThread.cpp \
-			src/FindSymbol.cpp \
-			src/DocEditStyling.cpp \
-			src/DocEdit.cpp \
-			src/DebugContext.cpp \
-			src/AddFtpFile.cpp \
-			../src/common/Text/TextView4.cpp \
-			../src/common/Text/TextConvert.cpp \
-			../src/common/Text/HtmlParser.cpp \
-			../src/common/Text/HtmlCommon.cpp \
-			../src/common/Text/Html.cpp \
-			../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
-			../src/common/Text/Homoglyphs/Homoglyphs.cpp \
-			../src/common/Text/DocView.cpp \
-			../src/common/Net/OpenSSLSocket.cpp \
+Source =	../src/common/Lgi/LgiMain.cpp \
 			../src/common/Net/Http.cpp \
-			../src/common/Net/Ftp.cpp \
+			../src/common/Text/DocView.cpp \
+			../src/common/Text/TextView4.cpp \
+			../src/common/Text/Html.cpp \
+			../src/common/Coding/LexCpp.cpp \
 			../src/common/Lgi/Mdi.cpp \
-			../src/common/Lgi/LgiMain.cpp \
+			src/NewProjectFromTemplate.cpp \
+			../src/common/Net/Ftp.cpp \
 			../src/common/Lgi/About.cpp \
+			src/IdeProjectSettings.cpp \
+			src/LgiUtils.cpp \
+			src/History.cpp \
+			src/DocEdit.cpp \
+			src/LgiIde.cpp \
+			src/IdeDoc.cpp \
 			../src/common/Gdc2/Filters/Png.cpp \
+			../src/common/Text/HtmlParser.cpp \
+			../src/common/Text/Homoglyphs/Homoglyphs.cpp \
+			../src/common/Text/HtmlCommon.cpp \
 			../src/common/Coding/ParseCpp.cpp \
-			../src/common/Coding/LexCpp.cpp
+			../src/common/Text/TextConvert.cpp \
+			../src/common/Net/OpenSSLSocket.cpp \
+			src/SpaceTabConv.cpp \
+			src/MemDumpViewer.cpp \
+			src/SimpleCppParser.cpp \
+			src/IdeCommon.cpp \
+			src/JavascriptParser.cpp \
+			src/SysCharSupport.cpp \
+			src/PythonParser.cpp \
+			src/FindSymbol.cpp \
+			src/IdeFindInFiles.cpp \
+			src/ProjectNode.cpp \
+			src/ProjectBackend.cpp \
+			src/MissingFiles.cpp \
+			src/IdeProject.cpp \
+			src/WebFldDlg.cpp \
+			src/AddFtpFile.cpp \
+			src/FtpThread.cpp \
+			src/DocEditStyling.cpp \
+			src/DebugContext.cpp \
+			../src/common/Text/Homoglyphs/HomoglyphsTable.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -313,6 +316,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	../src/common/General/FileCommon.cpp \
 	../src/common/General/Password.cpp \
 	../src/common/General/Properties.cpp \
+	../src/common/General/TimeZone.cpp \
 	../src/common/Hash/md5/md5.c \
 	../src/common/Hash/md5/md5.h \
 	../src/common/Hash/sha1/sha1.c \
@@ -420,10 +424,10 @@ cleanall :
 	+make -C "../" -f ./haiku/Makefile.haiku clean
 
 VPATH=$(BuildDir) \
-	../src/common/Text/Homoglyphs \
 	../src/common/Text \
 	../src/common/Net \
+	../src/common/Coding \
+	./src \
 	../src/common/Lgi \
 	../src/common/Gdc2/Filters \
-	../src/common/Coding \
-	./src
+	../src/common/Text/Homoglyphs
