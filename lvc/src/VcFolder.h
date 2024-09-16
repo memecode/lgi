@@ -350,7 +350,7 @@ public:
 	void Push(bool NewBranchOk = false);
 	void Pull(int AndUpdate = -1, LoggingType Logging = LogNormal);
 	void Clean();
-	bool Revert(LString::Array &uris, const char *Revision = NULL);
+	bool Revert(LString::Array &uris, const char *Revision = NULL, bool RevertToBefore = false);
 	bool Resolve(const char *Path, LvcResolve Type);
 	bool AddFile(const char *Path, bool AsBinary = true);
 	bool Blame(const char *Path);
