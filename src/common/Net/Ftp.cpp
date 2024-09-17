@@ -1047,7 +1047,7 @@ bool IFtp::TransferFile(const char *Local, const char *Remote, int64 Size, bool 
 											else
 												break;
 
-											LgiTrace("data write %i, %i, %i\n", (int)filePos, (int)Len, (int)WriteLen);
+											// printf("data write %i, %i, %i\n", (int)filePos, (int)Len, (int)WriteLen);
 											
 											if (WriteLen > 0)
 											{
