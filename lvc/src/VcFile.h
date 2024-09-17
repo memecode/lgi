@@ -23,7 +23,7 @@ public:
 private:
 	AppPriv *d = NULL;
 	VcFolder *Owner = NULL;
-	bool LoadDiff;
+	bool LoadDiff = false;
 	LString Diff;
 	LString Revision;
 	LUri Uri;

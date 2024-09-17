@@ -2024,8 +2024,8 @@ void VcFolder::OnCmdError(LString Output, const char *Msg)
 {
 	if (!CmdErrors)
 	{
-		if (Output.Length())
-			d->Log->Write(Output, Output.Length());
+		if (Output)
+			d->Log->Write(Output);
 
 		auto vc_name = GetVcName();
 		if (vc_name)

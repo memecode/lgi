@@ -5,14 +5,10 @@
 VcFile::VcFile(AppPriv *priv, VcFolder *owner, LString revision, bool working)
 {
 	d = priv;
-	LoadDiff = false;
 	Owner = owner;
 	Revision = revision;
-	Status = SUnknown;
 	if (working)
 		Chk = new LListItemCheckBox(this, 0, false);
-	else
-		Chk = NULL;
 }
 
 VcFile::~VcFile()
@@ -203,8 +199,15 @@ void VcFile::OnMouseClick(LMouse &m)
 			s.AppendItem(LLoadString(IDS_LOG), IDM_LOG_FILE);
 			s.AppendItem(LLoadString(IDS_BLAME), IDM_BLAME);
 			s.AppendSeparator();
-			s.AppendItem(LLoadString(IDS_DEL_KEEP_LOCAL), IDM_FORGET);
-			s.AppendItem(LLoadString(IDS_DEL_AND_LOCAL), IDM_REMOVE);
+			if (Status == SMissing)
+			{
+				s.AppendItem("Restore", ID_RESTORE);
+			}
+			else
+			{
+				s.AppendItem(LLoadString(IDS_DEL_KEEP_LOCAL), IDM_FORGET);
+				s.AppendItem(LLoadString(IDS_DEL_AND_LOCAL), IDM_REMOVE);
+			}
 			s.AppendSeparator();
 
 			int CurEol = LocalPath ? GetEol(LocalPath) : 0;
@@ -289,6 +292,11 @@ void VcFile::OnMouseClick(LMouse &m)
 			case IDM_REMOVE:
 			{
 				Owner->Delete(LocalPath, false);
+				break;
+			}
+			case ID_RESTORE:
+			{
+				Owner->Revert(Uris, Revision);
 				break;
 			}
 			case ID_REVERT_TO_REV:
