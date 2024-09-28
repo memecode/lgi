@@ -30,10 +30,10 @@ ifeq ($(Build),Debug)
 		-lbe
 	Inc =  \
 		-I../../../../system/develop/headers \
-		-I./include/lgi/haiku \
 		-I./private/common \
+		-I./include \
 		-I./private/haiku \
-		-I./include
+		-I./include/lgi/haiku
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
@@ -45,10 +45,10 @@ else
 		-lbe
 	Inc =  \
 		-I../../../../system/develop/headers \
-		-I./include/lgi/haiku \
 		-I./private/common \
 		-I./private/haiku \
-		-I./include
+		-I./include \
+		-I./include/lgi/haiku
 endif
 
 # Dependencies
@@ -57,10 +57,10 @@ Source =	src/common/Widgets/TableLayout.cpp \
 			src/common/Net/MDStringToDigest.cpp \
 			src/common/Widgets/ItemContainer.cpp \
 			src/common/Widgets/ProgressDlg.cpp \
+			src/common/Lgi/ClipBoardCommon.cpp \
 			src/common/Gdc2/Filters/Filter.cpp \
 			src/common/Gdc2/Font/FontType.cpp \
 			src/common/Gdc2/Font/TypeFace.cpp \
-			src/common/Lgi/ClipBoardCommon.cpp \
 			src/common/Gdc2/Font/FontSystem.cpp \
 			src/common/Gdc2/Font/StringLayout.cpp \
 			src/common/Gdc2/Tools/GdcTools.cpp \
@@ -68,8 +68,8 @@ Source =	src/common/Widgets/TableLayout.cpp \
 			src/common/Gdc2/Tools/ColourReduce.cpp \
 			src/common/General/Properties.cpp \
 			src/common/General/FileCommon.cpp \
-			src/common/Lgi/DragAndDropCommon.cpp \
 			src/common/General/Containers.cpp \
+			src/common/Lgi/DragAndDropCommon.cpp \
 			src/common/Net/Uri.cpp \
 			src/common/Net/Net.cpp \
 			src/haiku/Widgets.cpp \
@@ -95,10 +95,10 @@ Source =	src/common/Widgets/TableLayout.cpp \
 			src/haiku/View.cpp \
 			src/haiku/Printer.cpp \
 			src/haiku/App.cpp \
-			src/haiku/Window.cpp \
-			src/haiku/Menu.cpp \
 			src/haiku/General.cpp \
+			src/haiku/Menu.cpp \
 			src/haiku/File.cpp \
+			src/haiku/Window.cpp \
 			src/common/Widgets/Splitter.cpp \
 			src/common/Widgets/Box.cpp \
 			src/common/Lgi/CssTools.cpp \
@@ -211,7 +211,6 @@ VPATH=$(BuildDir) \
 	./src/common/Widgets \
 	./src/common/Hash/md5 \
 	./src/common/Hash/sha1 \
-	./src/common/Text \
 	./src/common/Gdc2/Font \
 	./src/common/Gdc2/Tools \
 	./src/common/Gdc2/Path \
@@ -219,7 +218,8 @@ VPATH=$(BuildDir) \
 	./src/common/Skins/Gel \
 	./src/posix \
 	./src/common/Resource \
-	./src/common/General \
 	./src/common/Lgi \
+	./src/common/General \
+	./src/common/Text \
 	./src/haiku \
 	./src/common/Gdc2/Filters

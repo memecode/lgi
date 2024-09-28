@@ -4,6 +4,10 @@
 #include <Application.h>
 #endif
 
+#ifndef kMsgDeleteServerMemoryArea
+#define kMsgDeleteServerMemoryArea '_DSA'
+#endif
+
 #include "lgi/common/Json.h"
 
 typedef LArray<LAppInfo> AppArray;
@@ -74,6 +78,9 @@ public:
 		{
 			case M_HANDLE_IN_THREAD:
 				LView::HandleInThreadMessage(message);
+				break;
+			case kMsgDeleteServerMemoryArea:
+				// What am I supposed to do with this?
 				break;
 			default:
 				printf("%s:%i Unhandled MessageReceived %i (%.4s)\n", _FL, message->what, &message->what);

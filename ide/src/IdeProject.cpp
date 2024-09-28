@@ -27,6 +27,7 @@
 #include "FtpThread.h"
 #include "ProjectNode.h"
 #include "WebFldDlg.h"
+#include "ProjectBackend.h"
 
 extern const char *Untitled;
 const char SourcePatterns[] = "*.c;*.h;*.cpp;*.cc;*.java;*.d;*.php;*.html;*.css;*.js";
@@ -203,15 +204,16 @@ public:
 class IdeProjectPrivate
 {
 public:
-	AppWnd *App;
-	IdeProject *Project;
-	bool Dirty, UserFileDirty;
+	AppWnd *App = NULL;
+	IdeProject *Project = NULL;
+	LAutoPtr<ProjectBackend> Backend;
+	bool Dirty = false, UserFileDirty = false;
 	LString FileName;
-	IdeProject *ParentProject;
+	IdeProject *ParentProject = NULL;
 	IdeProjectSettings Settings;
 	LAutoPtr<BuildThread> Thread;
 	LHashTbl<ConstStrKey<char,false>, ProjectNode*> Nodes;
-	int NextNodeId;
+	int NextNodeId = 1;
 	ProjectNode *DepParent = NULL;
 
 	// Threads
@@ -235,10 +237,6 @@ public:
 		DepParent(depParent)
 	{
 		App = a;
-		Dirty = false;
-		UserFileDirty = false;
-		ParentProject = 0;
-		NextNodeId = 1;
 	}
 
 	void CollectAllFiles(LTreeNode *Base, LArray<ProjectNode*> &Files, bool SubProjects, int Platform);
@@ -2138,6 +2136,8 @@ IdeProject::~IdeProject()
 {
 	d->App->OnProjectDestroy(this);
 	LXmlTag::Empty(true);
+	while (Items.Length())
+		delete Items[0];
 	DeleteObj(d);
 }
 
@@ -3110,7 +3110,41 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 	d->App->GetTree()->Insert(this);
 	Expanded(true);
 
+	auto Uri = d->Settings.GetStr(ProjRemoteUri);
+	if (Uri && !d->Backend)
+	{
+		d->Backend = CreateBackend(d->App, Uri);
+		if (d->Backend)
+		{
+			d->Backend->ReadFolder(".", [this](auto d)
+				{
+					for (auto b = d->First(NULL); b; b = d->Next())
+					{
+						if (d->IsHidden())
+							continue;
+
+						LgiTrace("%s: %s, %i bytes\n",	
+							d->IsDir() ? "dir" : "file",
+							d->GetName(), (int)d->GetSize());
+
+						if (auto n = new ProjectNode(this))
+						{
+							if (n->Serialize(d))
+								Insert(n);
+							else
+								delete n;
+						}
+					}
+				});
+		}
+	}
+
 	return OpenOk;
+}
+
+ProjectBackend *IdeProject::GetBackend()
+{
+	return d->Backend;
 }
 
 bool IdeProject::SaveFile()

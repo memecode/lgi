@@ -23,7 +23,7 @@ class LgiClass LRadioGroup :
 	void OnCreate() override;
 
 public:
-	LRadioGroup(int id, int x, int y, int cx, int cy, const char *name, int Init = 0);
+	LRadioGroup(int id = -1, const char *name = NULL, int Init = 0);
 	~LRadioGroup();
 	
 	const char *GetClass() override { return "LRadioGroup"; }
@@ -33,7 +33,9 @@ public:
 	/// Sets the 'ith' radio button to on.
 	void Value(int64 i) override;
 	/// Adds a radio button to the group.
-	LRadioButton *Append(int x, int y, const char *name);
+	LRadioButton *Append(const char *name);
+	/// Gets the selected radio button
+	LRadioButton *Selected();
 
 	// Impl
 	int OnNotify(LViewI *Ctrl, LNotification n) override;
@@ -64,7 +66,7 @@ class LgiClass LRadioButton :
 	class LRadioButtonPrivate *d;
 
 public:
-	LRadioButton(int id, int x, int y, int cx, int cy, const char *name);
+	LRadioButton(int id, const char *name);
 	~LRadioButton();
 
 	const char *GetClass() override { return "LRadioButton"; }

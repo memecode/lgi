@@ -35,6 +35,8 @@
 			<Node File="./src/IdeProjectSettings.h" Type="3" Platforms="15" />
 			<Node File="./src/MissingFiles.cpp" Type="2" Platforms="15" />
 			<Node File="./src/NewProjectFromTemplate.cpp" Type="2" Platforms="15" />
+			<Node File="./src/ProjectBackend.cpp" Type="2" Platforms="15" />
+			<Node File="./src/ProjectBackend.h" Type="3" Platforms="15" />
 			<Node File="./src/ProjectNode.cpp" Type="2" Platforms="15" />
 			<Node File="./src/ProjectNode.h" Type="3" Platforms="15" />
 		</Node>
@@ -209,7 +211,10 @@ gnu
 network
 be</Release>
 				</Haiku>
-				<All />
+				<All>
+					<Debug>ssh</Debug>
+					<Release>ssh</Release>
+				</All>
 			</Libraries>
 			<Defines>
 				<Haiku>
@@ -218,8 +223,10 @@ _GNU_SOURCE</Debug>
 					<Release>POSIX
 _GNU_SOURCE</Release>
 				</Haiku>
-				<All />
-				<Linux />
+				<All>
+					<Debug>HAS_LIBSSH</Debug>
+					<Release>HAS_LIBSSH</Release>
+				</All>
 			</Defines>
 			<TargetType>
 				<All>Executable</All>
@@ -243,17 +250,18 @@ _GNU_SOURCE</Release>
 					<Debug>`pkg-config --cflags gtk+-3.0`</Debug>
 					<Release>`pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
+				<Haiku />
 			</SystemIncludes>
 			<LibraryPaths>
 				<All />
-				<Linux />
+				<Haiku />
 			</LibraryPaths>
 			<ApplicationIcon>
 				<Haiku>./resources/icon.hvif</Haiku>
 			</ApplicationIcon>
 			<Options>
 				<All />
-				<Linux />
+				<Haiku />
 			</Options>
 		</Build>
 		<Editor>
@@ -286,7 +294,7 @@ _GNU_SOURCE</Release>
 		</Debug>
 		<Advanced>
 			<PostBuildCommands>
-				<Linux />
+				<Haiku />
 			</PostBuildCommands>
 			<OtherMakefileRules />
 		</Advanced>

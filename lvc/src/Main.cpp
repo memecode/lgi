@@ -7,6 +7,7 @@
 #include "lgi/common/FileSelect.h"
 #include "lgi/common/StructuredLog.h"
 #include "lgi/common/PopupNotification.h"
+#include "lgi/common/TextLabel.h"
 
 #include "Lvc.h"
 #include "resdefs.h"
@@ -1074,13 +1075,17 @@ public:
 		CommitsBox->Attach(FoldersBox);
 
 		auto CommitsLayout = new LTableLayout(IDC_COMMITS_TBL);
-		c = CommitsLayout->GetCell(0, 0, true, 2);
+		c = CommitsLayout->GetCell(0, 0, true, 3);
 			Commits = new CommitList(IDC_LIST);
 			c->Add(Commits);
 		c = CommitsLayout->GetCell(0, 1);
 			c->Add(new LEdit(IDC_FILTER_COMMITS, 0, 0, -1, -1));
 		c = CommitsLayout->GetCell(1, 1);
 			c->Add(new LButton(IDC_CLEAR_FILTER_COMMITS, 0, 0, -1, -1, "x"));
+		c = CommitsLayout->GetCell(2, 1);
+			c->VerticalAlign(LCss::VerticalMiddle);
+			c->PaddingRight("2px");
+			c->Add(new LTextLabel(-1, 0, 0, -1, -1, "Note: @author"));
 		CommitsLayout->Attach(CommitsBox);
 		CommitsLayout->GetCss(true)->Height("40%");
 

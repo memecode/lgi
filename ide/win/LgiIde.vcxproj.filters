@@ -126,6 +126,9 @@
     <ClInclude Include="..\src\IdeProjectSettings.h">
       <Filter>Source Files\Projects</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\ProjectBackend.h">
+      <Filter>Source Files\Projects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\common\Lgi\About.cpp">
@@ -235,6 +238,9 @@
     </ClCompile>
     <ClCompile Include="..\src\FindSymbol.cpp">
       <Filter>Source Files\Search\SymbolSearch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ProjectBackend.cpp">
+      <Filter>Source Files\Projects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

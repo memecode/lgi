@@ -339,6 +339,8 @@ void LMemQueue::Iterate(std::function<bool(uint8_t*, size_t)> callback, bool rev
 		LAssert(!"No callback.");
 		return;
 	}
+	if (Mem.Length() == 0)
+		return;
 	
 	if (reverse)
 	{

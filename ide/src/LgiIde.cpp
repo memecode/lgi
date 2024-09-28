@@ -377,6 +377,62 @@ char *dirchar(char *s, bool rev = false)
 	return 0;
 }
 
+void RemoveAnsi(LArray<char> &a)
+{
+	auto newSize = RemoveAnsi(a.AddressOf(), a.Length());
+	a.Length(newSize);
+}
+
+void RemoveAnsi(LString &a)
+{
+	auto newSize = RemoveAnsi(a.Get(), a.Length());
+	a.Length(newSize);
+}
+
+size_t RemoveAnsi(char *in, size_t length)
+{
+	auto *s = in;
+	auto *out = in;
+	auto e = s + length;
+
+	while (s < e)
+	{
+		if (*s == 0x7)
+			s++; // skip
+		else if
+		(
+			*s == 0x1b
+			&&
+			s + 1 < e
+			&&
+			s[1] >= 0x40
+			&&
+			s[1] <= 0x5f
+		)
+		{
+			// ANSI seq
+			if (s[1] == '[' &&
+				s[2] == '0' &&
+				s[3] == ';')
+			{
+				s += 4;
+			}
+			else
+			{
+				s += 2;
+				while (s < e && !IsAlpha(*s))
+					s++;
+				if (s < e)
+					s++;
+			}
+
+		}
+		else *out++ = *s++;
+	}
+
+	return out - in;
+}
+	
 //////////////////////////////////////////////////////////////////////////////////////////
 class AppDependency : public LTreeItem
 {
@@ -908,7 +964,7 @@ public:
 							if (c)
 							{
 								c->VerticalAlign(LCss::VerticalMiddle);
-								c->Add(chk = new LCheckBox(IDC_MEM_HEX, 0, 0, -1, -1, "Show Hex"));
+								c->Add(chk = new LCheckBox(IDC_MEM_HEX, "Show Hex"));
 								chk->SetFont(&Small);
 								chk->Value(true);
 							}
@@ -1041,51 +1097,6 @@ public:
 		AttachChildren();
 	}
 
-	void RemoveAnsi(LArray<char> &a)
-	{
-		char *s = a.AddressOf();
-		char *e = s + a.Length();
-		while (s < e)
-		{
-			if (*s == 0x7)
-			{
-				a.DeleteAt(s - a.AddressOf(), true);
-				s--;
-			}
-			else if
-			(
-				*s == 0x1b
-				&&
-				s[1] >= 0x40
-				&&
-				s[1] <= 0x5f
-			)
-			{
-				// ANSI seq
-				char *end;
-				if (s[1] == '[' &&
-					s[2] == '0' &&
-					s[3] == ';')
-					end = s + 4;
-				else
-				{
-					end = s + 2;
-					while (end < e && !IsAlpha(*end))
-					{
-						end++;
-					}
-					if (*end) end++;
-				}
-
-				auto len = end - s;
-				memmove(s, end, e - end);
-				a.Length(a.Length() - len);
-				s--;
-			}
-			s++;
-		}
-	}
-	
 	void OnPulse()
 	{
 		int Changed = -1;
@@ -3922,58 +3933,47 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		//
 		case IDM_UNDO:
 		{
-			LTextView3 *Doc = FocusEdit();
-			if (Doc)
-			{
+			if (auto Doc = FocusEdit())
 				Doc->Undo();
-			}
-			else LgiTrace("%s:%i - No focus doc.\n", _FL);
+			else
+				LgiTrace("%s:%i - No focus doc.\n", _FL);
 			break;
 		}
 		case IDM_REDO:
 		{
-			LTextView3 *Doc = FocusEdit();
-			if (Doc)
-			{
+			if (auto Doc = FocusEdit())
 				Doc->Redo();
-			}
-			else LgiTrace("%s:%i - No focus doc.\n", _FL);
+			else
+				LgiTrace("%s:%i - No focus doc.\n", _FL);
 			break;
 		}
 		case IDM_FIND:
 		{
-			LTextView3 *Doc = FocusEdit();
-			if (Doc)
-			{
+			if (auto Doc = FocusEdit())
 				Doc->DoFind(NULL);
-			}
-			else LgiTrace("%s:%i - No focus doc.\n", _FL);
+			else
+				LgiTrace("%s:%i - No focus doc.\n", _FL);
 			break;
 		}
 		case IDM_FIND_NEXT:
 		{
-			LTextView3 *Doc = FocusEdit();
-			if (Doc)
-			{
+			if (auto Doc = FocusEdit())
 				Doc->DoFindNext(NULL);
-			}
-			else LgiTrace("%s:%i - No focus doc.\n", _FL);
+			else
+				LgiTrace("%s:%i - No focus doc.\n", _FL);
 			break;
 		}
 		case IDM_REPLACE:
 		{
-			LTextView3 *Doc = FocusEdit();
-			if (Doc)
-			{
+			if (auto Doc = FocusEdit())
 				Doc->DoReplace(NULL);
-			}
-			else LgiTrace("%s:%i - No focus doc.\n", _FL);
+			else
+				LgiTrace("%s:%i - No focus doc.\n", _FL);
 			break;
 		}
 		case IDM_GOTO:
 		{
-			LTextView3 *Doc = FocusEdit();
-			if (Doc)
+			if (auto Doc = FocusEdit())
 				Doc->DoGoto(NULL);
 			else
 			{
@@ -4003,8 +4003,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_CUT:
 		{
-			LTextView3 *Doc = FocusEdit();
-			if (Doc)
+			if (auto Doc = FocusEdit())
 				Doc->PostEvent(M_CUT);
 			break;
 		}

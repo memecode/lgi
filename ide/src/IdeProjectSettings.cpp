@@ -12,15 +12,15 @@
 #include "ProjectNode.h"
 #include "resdefs.h"
 
-const char TagSettings[] = "Settings";
+const char TagSettings[]   = "Settings";
 
-const char sRemote[] = "Remote";
-const char sGeneral[] = "General";
-const char sBuild[] = "Build";
-const char sEditor[] = "Editor";
-const char sAdvanced[] = "Advanced";
-const char sDebug[] = "Debug";
-const char sRelease[] = "Release";
+const char sRemote[]       = "Remote";
+const char sGeneral[]      = "General";
+const char sBuild[]        = "Build";
+const char sEditor[]       = "Editor";
+const char sAdvanced[]     = "Advanced";
+const char sDebug[]        = "Debug";
+const char sRelease[]      = "Release";
 const char sAllPlatforms[] = "All";
 const char sCurrentPlatform[] =
 	#if defined WIN32
@@ -378,7 +378,7 @@ public:
 		}
 		else if (Setting->Type == GV_BOOL)
 		{
-			c->Add(Ctrls[i].Chk  = new LCheckBox(IDC_CHECKBOX_BASE + i, 0, 0, -1, -1, NULL));
+			c->Add(Ctrls[i].Chk  = new LCheckBox(IDC_CHECKBOX_BASE + i));
 			if (t && t->GetContent())
 				Ctrls[i].Chk->Value(atoi(t->GetContent()));
 		}

@@ -170,6 +170,7 @@ public:
 	bool CheckExists(LString &p, bool Debug = false);
 	bool CheckExists(LAutoString &p, bool Debug = false);
 	void OnMakefileCreated();
+	class ProjectBackend *GetBackend();
 
 	// User file settings
 	bool GetExpanded(int Id);

@@ -58,8 +58,8 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\include;..\..\include\lgi\win;..\..\..\..\..\CodeLib\zlib;..\..\..\..\..\CodeLib\libpng;..\..\..\..\..\CodeLib\libpng\win32;..\..\..\..\..\CodeLib\zlib\win32;..\resources;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\include;..\..\include\lgi\win;..\..\..\..\..\CodeLib\zlib;..\..\..\..\..\CodeLib\libpng;..\..\..\..\..\CodeLib\libpng\win32;..\..\..\..\..\codelib\libssh\include;..\..\..\..\..\CodeLib\zlib\win32;..\resources;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>HAS_LIBSSH;WIN32;_DEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -68,9 +68,9 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ssh.lib;imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetFileName)</OutputFile>
-      <AdditionalLibraryDirectories>..\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\lib;..\..\..\..\..\codelib\libssh\build64\src\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -83,8 +83,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\include;..\..\include\lgi\win;..\..\..\..\..\CodeLib\zlib;..\..\..\..\..\CodeLib\libpng;..\..\..\..\..\CodeLib\libpng\win32;..\..\..\..\..\CodeLib\zlib\win32;..\resources;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\include;..\..\include\lgi\win;..\..\..\..\..\CodeLib\zlib;..\..\..\..\..\CodeLib\libpng;..\..\..\..\..\CodeLib\libpng\win32;..\..\..\..\..\codelib\libssh\include;..\..\..\..\..\CodeLib\zlib\win32;..\resources;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>HAS_LIBSSH;WIN32;NDEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -92,9 +92,9 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ssh.lib;imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetFileName)</OutputFile>
-      <AdditionalLibraryDirectories>..\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\lib;..\..\..\..\..\codelib\libssh\build64\src\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -125,6 +125,7 @@
     <ClInclude Include="..\src\IdeProject.h" />
     <ClInclude Include="..\src\IdeProjectSettings.h" />
     <ClInclude Include="..\src\LgiIde.h" />
+    <ClInclude Include="..\src\ProjectBackend.h" />
     <ClInclude Include="..\src\ProjectNode.h" />
     <ClInclude Include="..\src\PythonParser.h" />
     <ClInclude Include="..\src\resdefs.h" />
@@ -163,6 +164,7 @@
     <ClCompile Include="..\src\MemDumpViewer.cpp" />
     <ClCompile Include="..\src\MissingFiles.cpp" />
     <ClCompile Include="..\src\NewProjectFromTemplate.cpp" />
+    <ClCompile Include="..\src\ProjectBackend.cpp" />
     <ClCompile Include="..\src\ProjectNode.cpp" />
     <ClCompile Include="..\src\PythonParser.cpp" />
     <ClCompile Include="..\src\SimpleCppParser.cpp" />

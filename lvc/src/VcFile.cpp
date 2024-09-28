@@ -1,17 +1,14 @@
 #include "Lvc.h"
 #include "lgi/common/ClipBoard.h"
+#include "resdefs.h"
 
 VcFile::VcFile(AppPriv *priv, VcFolder *owner, LString revision, bool working)
 {
 	d = priv;
-	LoadDiff = false;
 	Owner = owner;
 	Revision = revision;
-	Status = SUnknown;
 	if (working)
 		Chk = new LListItemCheckBox(this, 0, false);
-	else
-		Chk = NULL;
 }
 
 VcFile::~VcFile()
@@ -150,10 +147,11 @@ void VcFile::OnMouseClick(LMouse &m)
 		if (Revision)
 		{
 			// Committed changes
-			s.AppendItem("Revert To This Revision", IDM_REVERT_TO_REV, Status != SClean);
-			s.AppendItem("Blame", IDM_BLAME);
-			s.AppendItem("Save As", IDM_SAVE_AS);
-			s.AppendItem("Log", IDM_LOG_FILE);
+			s.AppendItem(LLoadString(IDS_REVERT_THIS), ID_REVERT_TO_REV, Status != SClean);
+			s.AppendItem(LLoadString(IDS_REVERT_BEFORE), ID_REVERT_TO_BEFORE, Status != SClean);
+			s.AppendItem(LLoadString(IDS_BLAME), IDM_BLAME);
+			s.AppendItem(LLoadString(IDS_SAVE_AS), IDM_SAVE_AS);
+			s.AppendItem(LLoadString(IDS_LOG), IDM_LOG_FILE);
 		}
 		else
 		{
@@ -164,7 +162,7 @@ void VcFile::OnMouseClick(LMouse &m)
 				case SAdded:
 				case SDeleted:
 				{
-					LString label = "Revert Changes";
+					LString label = LLoadString(IDS_REVERT_CHANGES);
 					if (Staged > 0)
 						label += LString::Fmt(" (%i)", Staged);
 					s.AppendItem(label, IDM_REVERT);
@@ -172,48 +170,55 @@ void VcFile::OnMouseClick(LMouse &m)
 				}
 				case SConflicted:
 				{
-					auto menu = s.AppendSub("Resolve");
-					menu->AppendItem("Mark", IDM_RESOLVE_MARK);
-					menu->AppendItem("Unmark", IDM_RESOLVE_UNMARK);
+					auto menu = s.AppendSub(LLoadString(IDS_RESOLVE));
+					menu->AppendItem(LLoadString(IDS_MARK), IDM_RESOLVE_MARK);
+					menu->AppendItem(LLoadString(IDS_UNMARK), IDM_RESOLVE_UNMARK);
 					menu->AppendSeparator();
-					menu->AppendItem("Local", IDM_RESOLVE_LOCAL);
-					menu->AppendItem("Incoming", IDM_RESOLVE_INCOMING);
-					menu->AppendItem("Tool", IDM_RESOLVE_TOOL);
+					menu->AppendItem(LLoadString(IDS_LOCAL), IDM_RESOLVE_LOCAL);
+					menu->AppendItem(LLoadString(IDS_INCOMING), IDM_RESOLVE_INCOMING);
+					menu->AppendItem(LLoadString(IDS_TOOL), IDM_RESOLVE_TOOL);
 					break;
 				}
 				case SUntracked:
 				{
 					if (Owner->GetType() == VcCvs)
 					{
-						s.AppendItem("Add Text File", IDM_ADD_FILE);
-						s.AppendItem("Add Binary File", IDM_ADD_BINARY_FILE);
+						s.AppendItem(LLoadString(IDS_ADD_TEXT), IDM_ADD_FILE);
+						s.AppendItem(LLoadString(IDS_ADD_BINARY), IDM_ADD_BINARY_FILE);
 					}
 					else
 					{
-						s.AppendItem("Add File", IDM_ADD_FILE);
+						s.AppendItem(LLoadString(IDS_ADD_FILE), IDM_ADD_FILE);
 					}
 					break;
 				}
 				default:
 					break;
 			}					
-			s.AppendItem("Browse To", IDM_BROWSE, !LocalPath.IsEmpty());
-			s.AppendItem("Log", IDM_LOG_FILE);
-			s.AppendItem("Blame", IDM_BLAME);
+			s.AppendItem(LLoadString(IDS_BROWSE_TO), IDM_BROWSE, !LocalPath.IsEmpty());
+			s.AppendItem(LLoadString(IDS_LOG), IDM_LOG_FILE);
+			s.AppendItem(LLoadString(IDS_BLAME), IDM_BLAME);
 			s.AppendSeparator();
-			s.AppendItem("Delete from repo, keep local", IDM_FORGET);
-			s.AppendItem("Delete from repo and local", IDM_REMOVE);
+			if (Status == SMissing)
+			{
+				s.AppendItem("Restore", ID_RESTORE);
+			}
+			else
+			{
+				s.AppendItem(LLoadString(IDS_DEL_KEEP_LOCAL), IDM_FORGET);
+				s.AppendItem(LLoadString(IDS_DEL_AND_LOCAL), IDM_REMOVE);
+			}
 			s.AppendSeparator();
 
 			int CurEol = LocalPath ? GetEol(LocalPath) : 0;
-			auto Ln = s.AppendSub("Line Endings");
+			auto Ln = s.AppendSub(LLoadString(IDS_LINE_ENDINGS));
 			auto Item = Ln->AppendItem("LF", IDM_EOL_LF);
 			if (Item && CurEol == IDM_EOL_LF)
 				Item->Checked(true);
 			Ln->AppendItem("CRLF", IDM_EOL_CRLF);
 			if (Item && CurEol == IDM_EOL_CRLF)
 				Item->Checked(true);
-			Ln->AppendItem("Auto", IDM_EOL_AUTO);
+			Ln->AppendItem(LLoadString(IDS_AUTO), IDM_EOL_AUTO);
 		}
 
 		s.AppendSeparator();
@@ -221,10 +226,10 @@ void VcFile::OnMouseClick(LMouse &m)
 		auto FileParts = LString(File).SplitDelimit("/\\");
 		if (FileParts.Length() > 1)
 		{
-			Fn.Printf("Copy '%s'", FileParts.Last().Get());
+			Fn.Printf(LLoadString(IDS_COPY_FMT), FileParts.Last().Get());
 			s.AppendItem(Fn, IDM_COPY_LEAF);
 		}
-		Fn.Printf("Copy '%s'", File);
+		Fn.Printf(LLoadString(IDS_COPY_FMT), File);
 		s.AppendItem(Fn, IDM_COPY_PATH);
 
 		int Cmd = s.Float(GetList(), m);
@@ -276,7 +281,7 @@ void VcFile::OnMouseClick(LMouse &m)
 				if (p.Exists())
 					LBrowseToFile(LocalPath);
 				else
-					LgiMsg(GetList(), "Can't find path '%s'.", AppName, MB_OK, LocalPath.Get());
+					LgiMsg(GetList(), LLoadString(IDS_ERR_NO_PATH_FMT), AppName, MB_OK, LocalPath.Get());
 				break;
 			}
 			case IDM_FORGET:
@@ -289,9 +294,19 @@ void VcFile::OnMouseClick(LMouse &m)
 				Owner->Delete(LocalPath, false);
 				break;
 			}
-			case IDM_REVERT_TO_REV:
+			case ID_RESTORE:
 			{
 				Owner->Revert(Uris, Revision);
+				break;
+			}
+			case ID_REVERT_TO_REV:
+			{
+				Owner->Revert(Uris, Revision);
+				break;
+			}
+			case ID_REVERT_TO_BEFORE:
+			{
+				Owner->Revert(Uris, Revision, true);
 				break;
 			}
 			case IDM_BLAME:

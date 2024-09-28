@@ -67,13 +67,11 @@ public:
 };
 
 int LRadioGroupPrivate::NextId = 10000;
-LRadioGroup::LRadioGroup(int id, int x, int y, int cx, int cy, const char *name, int Init)
+LRadioGroup::LRadioGroup(int id, const char *name, int Init)
 	: ResObject(Res_Group)
 {
 	d = new LRadioGroupPrivate(this);
 	Name(name);
-	LRect r(x, y, x+cx, y+cy);
-	SetPos(r);
 	SetId(id);
 	d->Val = Init;
 	LResources::StyleElement(this);
@@ -350,15 +348,29 @@ void LRadioGroup::OnPaint(LSurface *pDC)
 	}
 }
 
-LRadioButton *LRadioGroup::Append(int x, int y, const char *name)
+LRadioButton *LRadioGroup::Append(const char *name)
 {
-	LRadioButton *But = new LRadioButton(d->NextId++, x, y, -1, -1, name);
-	if (But)
+	if (auto But = new LRadioButton(d->NextId++, name))
 	{
 		Children.Insert(But);
+		return But;
+	}
+	
+	return NULL;
+}
+
+LRadioButton *LRadioGroup::Selected()
+{
+	for (auto w: Children)
+	{
+		if (auto btn = dynamic_cast<LRadioButton*>(w))
+		{
+			if (btn->Value())
+				return btn;
+		}
 	}
 
-	return But;
+	return NULL;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -439,15 +451,15 @@ static int PadYPx = 6;
 static int PadYPx = 4;
 #endif
 
-LRadioButton::LRadioButton(int id, int x, int y, int cx, int cy, const char *name)
+LRadioButton::LRadioButton(int id, const char *name)
 	: ResObject(Res_RadioBox)
 {
 	d = new LRadioButtonPrivate(this);
 	Name(name);
-	if (cx < 0) cx = d->GetBounds().X() + PadXPx;
-	if (cy < 0) cy = d->GetBounds().Y() + PadYPx;
+	auto cx = d->GetBounds().X() + PadXPx;
+	auto cy = d->GetBounds().Y() + PadYPx;
 
-	LRect r(x, y, x+cx, y+cy);
+	LRect r(0, 0, cx-1, cy-1);
 	SetPos(r);
 	SetId(id);
 	d->Val = false;

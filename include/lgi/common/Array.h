@@ -597,7 +597,11 @@ public:
 	LArray<Type> operator +(const LArray<Type> &b)
 	{
 		LArray<Type> a = *this;
-		a.Add(b);
+		a.SetFixedLength(false);
+		if (!a.Add(b))
+		{
+			LAssert(!"Add failed");
+		}
 		return a;
 	}
 

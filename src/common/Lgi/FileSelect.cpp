@@ -931,7 +931,7 @@ void LFileSelectDlg::OnCreate()
 	
 	// Filter / search row
 	c = t->GetCell(0, 0);
-	c->Add(new LCheckBox(IDC_FILTER_CLEAR, 0, 0, -1, -1, "Filter items:"));
+	c->Add(new LCheckBox(IDC_FILTER_CLEAR, "Filter items:"));
 	c->VerticalAlign(LCss::Len(LCss::VerticalMiddle));
 	c = t->GetCell(1, 0);
 	c->Add(FilterEdit = new LEdit(IDC_FILTER, 0, 0, 60, 20));
@@ -961,7 +961,7 @@ void LFileSelectDlg::OnCreate()
 	// 5th row
 	x = 0; y++;
 	c = Tbl->GetCell(x++, y, true, 6);
-	c->Add(ShowHidden = new LCheckBox(IDC_SHOWHIDDEN, 14, 326, -1, -1, "Show hidden files."));
+	c->Add(ShowHidden = new LCheckBox(IDC_SHOWHIDDEN, "Show hidden files."));
 
 	// Init
 	if (BackBtn)

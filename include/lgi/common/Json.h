@@ -411,6 +411,11 @@ public:
 				return *this;
 			}
 
+			LString GetJson()
+			{
+				return (*It->a)[Pos].Print(0);
+			}
+
 			LString Get(LString Addr)
 			{
 				auto &Arr = *It->a;
@@ -426,14 +431,17 @@ public:
 
 			Pair Get()
 			{
-				auto &Arr = *It->a;
-				if (Pos >= Arr.Length())
+				auto &a = *It->a;
+				if (!a.IdxCheck(Pos))
 					return Pair();
-				Key &k = Arr[Pos];
+				
+				Key &k = a[Pos];				
 				if (k.Name)
 					return Pair(k.Name, k.Str);
+				
 				if (k.Obj.Length())
 					return Pair(k.Obj[0].Name, k.Obj[0].Str);
+					
 				return Pair();
 			}
 

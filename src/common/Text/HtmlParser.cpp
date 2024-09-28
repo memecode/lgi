@@ -212,14 +212,28 @@ char *LHtmlParser::ParsePropValue(char *s, char16 *&Value)
 	Value = 0;
 	if (s)
 	{
-		if (strchr("\"\'", *s))
+		if (IsQuote(*s))
 		{
 			char Delim = *s++;
 			char *Start = s;
 			while (*s && *s != Delim)
+			{
+				if
+				(
+					*s == '>'
+					||
+					(*s == '<' && IsAlpha(s[1]))
+				)
+				{
+					// In the case where there is no closing quote delimiter and the parser starts hitting
+					// elements again... it should exit out of this loop right?
+					break;
+				}
+
 				s++;
+			}
 			Value = DecodeEntities(Start, s - Start);
-			if (*s)
+			if (IsQuote(*s))
 				s++;
 		}
 		else
@@ -271,6 +285,10 @@ char *LHtmlParser::ParseName(char *s, LAutoString &Name)
 
 	if (*s == '\"' || *s == '\'')
 	{
+		// This is a legal start char for a name string.
+		return s;
+
+		/*
 		char delim = *s++;
 		char* Start = s;
 		while (*s && *s != delim)
@@ -287,14 +305,15 @@ char *LHtmlParser::ParseName(char *s, LAutoString &Name)
 
 		if (*s == delim)
 			s++;
+		*/
 	}
 	else
 	{
 		char* Start = s;
-		auto Inc = "!-"; // I'm removing these \"\' because they really aren't appropriate for a name string...
-						 // Also removing ':' because if the CSS leaks into the HTML parsing we should detect that
-						 // and stop parsing the name. e.g.:
-						 //		<td style="width:90%" border-collapse: collapse;">
+		auto Inc = "!-:"; // I'm removing these \"\' because they really aren't appropriate for a name string...
+						  // Also removing ':' because if the CSS leaks into the HTML parsing we should detect that
+						  // and stop parsing the name. e.g.:
+						  //		<td style="width:90%" border-collapse: collapse;">
 		while (*s && (IsAlpha(*s) || strchr(Inc, *s) || IsDigit(*s)))
 			s++;
 
@@ -335,7 +354,42 @@ char *LHtmlParser::ParsePropList(char *s, LHtmlElement *Obj, bool &Closed)
 		while (*s && IsWhite(*s))
 			s++;
 
-		if (*s == ':')
+		if (IsQuote(*s))
+		{
+			// This isn't legal but shows up in HTML regularly enough to special case it.
+			// Generally looks like a missing '=' between the attribute name and the value.
+
+			// Have a peek at the content AFTER the quote to see what to do?
+			// - Could be attribute content, CSS etc...
+			// - Could be an end tag marker...
+			// - Even something else entirely?
+			auto after = s + 1;
+			while (IsWhite(*after))
+				after++;
+			
+			if (strchr("</>", *after))
+			{
+				// looks like tag delimiters, so just ignore the quote...
+				s++;
+			}
+			else if (IsAlpha(*after) || strchr("_-,", *after))
+			{
+				// looks like a name or attribute value...
+				goto ProcessAttrValue;
+			}
+			else if (IsQuote(*after))
+			{
+				// 2 quotes together is an empty string?
+				s = after + 1; // skip
+			}
+			else
+			{
+				// What to do here? IDK
+				LAssert(!"Check what should happen here...");
+				s++;
+			}
+		}
+		else if (*s == ':')
 		{
 			// This happens when CSS leaks into the HTML, e.g.:
 			//	<td style="width:90%" border-collapse: collapse;">
@@ -346,22 +400,15 @@ char *LHtmlParser::ParsePropList(char *s, LHtmlElement *Obj, bool &Closed)
 		{
 			// get value
 			s++;
-			while (*s && IsWhite(*s))
+			ProcessAttrValue:
+			while (IsWhite(*s))
 				s++;
 
 			char16 *Value = 0;
 			s = ParsePropValue(s, Value);
 
 			if (Name && Value && *Value)
-			{
-				#if defined(_DEBUG)
-				if (!_stricmp(Name, "src"))
-				{
-					// printf("%s = %S\n", Name, Value);
-				}
-				#endif
 				Obj->Set(Name, Value);
-			}
 
 			DeleteArray(Value);
 		}

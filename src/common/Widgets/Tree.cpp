@@ -585,8 +585,8 @@ void LTreeItem::_Remove()
 		}
 	}
 
-	Parent = 0;
-	_SetTreePtr(0);
+	Parent = NULL;
+	_SetTreePtr(NULL);
 }
 
 void LTreeItem::_PourText(LPoint &Size)

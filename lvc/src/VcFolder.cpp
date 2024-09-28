@@ -2024,8 +2024,8 @@ void VcFolder::OnCmdError(LString Output, const char *Msg)
 {
 	if (!CmdErrors)
 	{
-		if (Output.Length())
-			d->Log->Write(Output, Output.Length());
+		if (Output)
+			d->Log->Write(Output);
 
 		auto vc_name = GetVcName();
 		if (vc_name)
@@ -4571,7 +4571,7 @@ bool VcFolder::ParseRevert(int Result, LString s, ParseParams *Params)
 	return false;
 }
 
-bool VcFolder::Revert(LString::Array &Uris, const char *Revision)
+bool VcFolder::Revert(LString::Array &Uris, const char *Revision, bool RevertToBefore)
 {
 	if (Uris.Length() == 0)
 		return false;
@@ -4584,7 +4584,7 @@ bool VcFolder::Revert(LString::Array &Uris, const char *Revision)
 			LAutoPtr<ParseParams> params;
 			if (Revision)
 			{
-				cmd.Print("checkout %s", Revision);
+				cmd.Print("checkout %s%s", Revision, RevertToBefore ? "^" : "");
 			}
 			else
 			{
@@ -4604,10 +4604,10 @@ bool VcFolder::Revert(LString::Array &Uris, const char *Revision)
 			{
 				if (params.Reset(new ParseParams))
 				{
-					params->Callback = [this, p](auto code, auto str)
+					params->Callback = [this, p, RevertToBefore](auto code, auto str)
 					{
 						LString c;
-						c.Printf("checkout %s", p.Get());
+						c.Printf("checkout %s%s", p.Get(), RevertToBefore ? "^" : "");
 						StartCmd(c, &VcFolder::ParseRevert);
 					};
 				}
@@ -4619,6 +4619,8 @@ bool VcFolder::Revert(LString::Array &Uris, const char *Revision)
 		case VcHg:
 		case VcSvn:
 		{
+			LAssert(!RevertToBefore); // Impl me!!
+
 			LStringPipe p;
 			if (Revision)
 				p.Print("up -r %s", Revision);

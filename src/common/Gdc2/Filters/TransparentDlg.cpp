@@ -33,11 +33,11 @@ LTransparentDlg::LTransparentDlg(LView *parent, LVariant *trans)
 	auto tbl = new LTableLayout(IDC_TABLE);
 	AddView(tbl);
 	auto c = tbl->GetCell(0, 0);
-	c->Add(Grp = new LRadioGroup(IDC_GRP, 0, 0, 180, 65, "Transparency"));
+	c->Add(Grp = new LRadioGroup(IDC_GRP, "Transparency"));
 	if (Grp)
 	{
-		Grp->Append(0, 0, "Opaque");
-		Grp->Append(0, 30, "Use background colour");
+		Grp->Append("Opaque");
+		Grp->Append("Use background colour");
 		Grp->Value((Trans) ? 1 : 0);
 	}
 

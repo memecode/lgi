@@ -44,15 +44,13 @@ public:
 
 int LRadioGroupPrivate::NextId = 10000;
 
-LRadioGroup::LRadioGroup(int id, int x, int y, int cx, int cy, const char *name, int Init)
+LRadioGroup::LRadioGroup(int id, const char *name, int Init)
 	: ResObject(Res_Group)
 {
 	d = new LRadioGroupPrivate;
 	d->InitVal = Init;
 
 	Name(name);
-	LRect r(x, y, x+cx, y+cy);
-	SetPos(r);
 	SetId(id);
 	SetTabStop(true);
 	SetStyle(GetStyle() | BS_GROUPBOX | WS_GROUP | WS_CLIPCHILDREN);
@@ -165,6 +163,20 @@ void LRadioGroup::Value(int64 Which)
 	}
 }
 
+LRadioButton *LRadioGroup::Selected()
+{
+	for (auto w: Children)
+	{
+		if (auto btn = dynamic_cast<LRadioButton*>(w))
+		{
+			if (btn->Value())
+				return btn;
+		}
+	}
+
+	return NULL;
+}
+
 int LRadioGroup::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	LViewI *v = GetNotify() ? GetNotify() : GetParent();
@@ -186,9 +198,9 @@ void LRadioGroup::OnPaint(LSurface *pDC)
 {
 }
 
-LRadioButton *LRadioGroup::Append(int x, int y, const char *name)
+LRadioButton *LRadioGroup::Append(const char *name)
 {
-	LRadioButton *But = new LRadioButton(d->NextId++, x, y, -1, -1, name);
+	LRadioButton *But = new LRadioButton(d->NextId++, name);
 	if (But)
 	{
 		Children.Insert(But);
@@ -293,7 +305,7 @@ public:
 	bool InValue = false;
 };
 
-LRadioButton::LRadioButton(int id, int x, int y, int cx, int cy, const char *name)
+LRadioButton::LRadioButton(int id, const char *name)
 	: ResObject(Res_RadioBox)
 {
 	d = new LRadioButtonPrivate;
@@ -301,10 +313,10 @@ LRadioButton::LRadioButton(int id, int x, int y, int cx, int cy, const char *nam
 	Name(name);
 
 	LDisplayString t(LSysFont, name);
-	if (cx < 0) cx = t.X() + 26;
-	if (cy < 0) cy = t.Y() + 4;
+	auto cx = t.X() + 26;
+	auto cy = t.Y() + 4;
 
-	LRect r(x, y, x+cx, y+cy);
+	LRect r(0, 0, cx-1, cy-1);
 	SetPos(r);
 	SetId(id);
 	SetTabStop(true);

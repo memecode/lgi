@@ -224,7 +224,7 @@ void LControlTree::Item::Select(bool b)
 						Browse = new LButton(IDC_BROWSE, 0, 0, -1, CtrlY, "...");
 					break;
 				case GV_BOOL:
-					if ((Ctrl = new LCheckBox(CtrlId, 0, 0, 14, 16, 0)))
+					if ((Ctrl = new LCheckBox(CtrlId)))
 						Ctrl->Value(Value.CastInt32());
 					break;
 				case GV_INT32:

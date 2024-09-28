@@ -85,6 +85,28 @@
 		<String Ref="87" Cid="87" Define="IDS_ERR_NO_VCS_FOUND" en="No version control found." />
 		<String Ref="88" Cid="88" Define="IDS_ERR_ADD_FAILED" en="Add file failed." />
 		<String Ref="89" Cid="89" Define="IDS_ERR_REVERT_FAILED" en="Error reverting changes." />
+		<String Ref="95" Cid="531" Define="IDS_REVERT_THIS" en="Revert To This Revision" />
+		<String Ref="97" Cid="532" Define="IDS_REVERT_BEFORE" en="Revert To Before This" />
+		<String Ref="107" Cid="107" Define="IDS_BLAME" en="Blame" />
+		<String Ref="110" Cid="110" Define="IDS_SAVE_AS" en="Save As" />
+		<String Ref="111" Cid="111" Define="IDS_LOG" en="Log" />
+		<String Ref="112" Cid="112" Define="IDS_REVERT_CHANGES" en="Revert Changes" />
+		<String Ref="113" Cid="113" Define="IDS_RESOLVE" en="Resolve" />
+		<String Ref="114" Cid="114" Define="IDS_MARK" en="Mark" />
+		<String Ref="115" Cid="115" Define="IDS_UNMARK" en="Unmark" />
+		<String Ref="116" Cid="116" Define="IDS_LOCAL" en="Local" />
+		<String Ref="117" Cid="117" Define="IDS_INCOMING" en="Incoming" />
+		<String Ref="118" Cid="118" Define="IDS_TOOL" en="Tool" />
+		<String Ref="119" Cid="119" Define="IDS_ADD_TEXT" en="Add Text File" />
+		<String Ref="120" Cid="120" Define="IDS_ADD_BINARY" en="Add Binary File" />
+		<String Ref="121" Cid="121" Define="IDS_ADD_FILE" en="Add File" />
+		<String Ref="122" Cid="122" Define="IDS_BROWSE_TO" en="Browse To" />
+		<String Ref="123" Cid="123" Define="IDS_DEL_KEEP_LOCAL" en="Delete from repo, keep local" />
+		<String Ref="124" Cid="124" Define="IDS_DEL_AND_LOCAL" en="Delete from repo and local" />
+		<String Ref="125" Cid="125" Define="IDS_LINE_ENDINGS" en="Line Endings" />
+		<String Ref="126" Cid="126" Define="IDS_AUTO" en="Auto" />
+		<String Ref="127" Cid="127" Define="IDS_COPY_FMT" en="Copy &apos;%s&apos;" />
+		<String Ref="128" Cid="128" Define="IDS_ERR_NO_PATH_FMT" en="Can&apos;t find path &apos;%s&apos;." />
 	</string-group>
 	<Dialog pos="8,8,410,217" ref="93">
 		<TableLayout pos="7,7,391,181" ref="94" Style="margin: 1em;" cols="0.333,0.333,0.333" rows="0.143,0.143,0.143,0.143,0.143,0.143,0.143">
@@ -140,8 +162,8 @@
 			</tr>
 			<tr>
 				<td addr="0,6" colspan="3" align="Max">
-					<Button pos="210,140,272,160" ref="100" image="" toggle="0" />
-					<Button pos="281,140,350,160" ref="103" image="" toggle="0" />
+					<Button Pos="210,140,272,160" image="" toggle="0" ref="100" />
+					<Button Pos="281,140,350,160" image="" toggle="0" ref="103" />
 				</td>
 			</tr>
 		</TableLayout>
@@ -159,10 +181,10 @@
 					<Custom pos="189,7,223,27" ref="14" Ctrl="DropDownBtn" />
 				</td>
 				<td addr="3,0">
-					<Button pos="266,7,321,27" ref="3" toggle="0" />
+					<Button Pos="266,7,321,27" toggle="0" ref="3" />
 				</td>
 				<td addr="4,0">
-					<Button pos="357,7,405,27" ref="13" toggle="0" />
+					<Button Pos="357,7,405,27" toggle="0" ref="13" />
 				</td>
 			</tr>
 			<tr>
@@ -173,7 +195,7 @@
 					<EditBox Pos="98,56,307,76" Enabled="0" ref="91" />
 				</td>
 				<td addr="4,1">
-					<Button pos="364,56,391,76" ref="92" image="" toggle="0" />
+					<Button Pos="364,56,391,76" image="" toggle="0" ref="92" />
 				</td>
 			</tr>
 			<tr>
@@ -211,7 +233,7 @@
 					<EditBox Pos="84,42,286,62" ref="25" />
 				</td>
 				<td addr="2,1">
-					<Button pos="327,43,347,63" ref="26" toggle="0" />
+					<Button Pos="327,43,347,63" toggle="0" ref="26" />
 				</td>
 				<td addr="3,1" style="width:100px;">
 					<EditBox Pos="385,42,419,62" ref="79" />
@@ -225,7 +247,7 @@
 					<EditBox Pos="84,84,286,104" ref="28" />
 				</td>
 				<td addr="2,2">
-					<Button pos="327,80,347,100" ref="29" toggle="0" />
+					<Button Pos="327,80,347,100" toggle="0" ref="29" />
 				</td>
 				<td addr="3,2" style="width:100px;">
 					<EditBox Pos="385,77,419,97" ref="80" />
@@ -239,7 +261,7 @@
 					<EditBox Pos="84,119,286,139" ref="32" />
 				</td>
 				<td addr="2,3">
-					<Button pos="327,117,347,137" ref="36" toggle="0" />
+					<Button Pos="327,117,347,137" toggle="0" ref="36" />
 				</td>
 				<td addr="3,3" style="width:100px;">
 					<EditBox Pos="385,119,412,139" ref="81" />
@@ -253,7 +275,7 @@
 					<EditBox Pos="84,154,286,174" ref="33" />
 				</td>
 				<td addr="2,4">
-					<Button pos="327,154,347,174" ref="37" toggle="0" />
+					<Button Pos="327,154,347,174" toggle="0" ref="37" />
 				</td>
 				<td addr="3,4" style="width:100px;">
 					<EditBox Pos="385,154,412,174" ref="82" />
@@ -261,8 +283,8 @@
 			</tr>
 			<tr>
 				<td addr="0,5" colspan="4" align="Max">
-					<Button pos="252,189,314,216" ref="34" image="" toggle="0" />
-					<Button pos="329,189,391,216" ref="35" image="" toggle="0" />
+					<Button Pos="252,189,314,216" image="" toggle="0" ref="34" />
+					<Button Pos="329,189,391,216" image="" toggle="0" ref="35" />
 				</td>
 			</tr>
 		</TableLayout>
@@ -308,7 +330,7 @@
 						<tr>
 							<td addr="0,3" />
 							<td addr="1,3">
-								<Button pos="126,140,188,160" ref="70" image="" toggle="0" />
+								<Button Pos="126,140,188,160" image="" toggle="0" ref="70" />
 							</td>
 						</tr>
 					</TableLayout>
@@ -325,8 +347,8 @@
 			<tr>
 				<td addr="0,3" />
 				<td addr="1,3">
-					<Button pos="217,308,286,328" ref="75" image="" toggle="0" />
-					<Button pos="301,308,370,328" ref="76" image="" toggle="0" />
+					<Button Pos="217,308,286,328" image="" toggle="0" ref="75" />
+					<Button Pos="301,308,370,328" image="" toggle="0" ref="76" />
 				</td>
 			</tr>
 		</TableLayout>
@@ -335,20 +357,20 @@
 		<TableLayout pos="7,7,972,97" ref="2" Style="padding-top: 3px;" cols="0.128,0.133,0.124,0.085,0.063,0.210,0.128,0.128" rows="1.000">
 			<tr>
 				<td addr="0,0" valign="Center" style="padding-left: 4px;&#10;padding-right: 1em;">
-					<Button pos="7,21,71,48" ref="18" toggle="0" />
+					<Button Pos="7,21,71,48" toggle="0" ref="18" />
 				</td>
 				<td addr="1,0" valign="Center">
-					<Button pos="132,14,166,41" ref="5" toggle="0" />
-					<Button pos="167,14,194,41" ref="39" toggle="0" />
+					<Button Pos="132,14,166,41" toggle="0" ref="5" />
+					<Button Pos="167,14,194,41" toggle="0" ref="39" />
 				</td>
 				<td addr="2,0" valign="Center" style="padding-right: 1em;">
 					<CheckBox pos="262,21,296,41" ref="48" />
 				</td>
 				<td addr="3,0" valign="Center" style="padding-right: 1em;">
-					<Button pos="368,14,409,41" ref="6" toggle="0" />
+					<Button Pos="368,14,409,41" toggle="0" ref="6" />
 				</td>
 				<td addr="4,0" valign="Center" style="padding-right: 1em;">
-					<Button pos="446,14,486,41" ref="40" toggle="0" />
+					<Button Pos="446,14,486,41" toggle="0" ref="40" />
 				</td>
 				<td addr="5,0" valign="Center" style="padding-right: 1em;">
 					<CheckBox pos="512,21,574,41" ref="38" />

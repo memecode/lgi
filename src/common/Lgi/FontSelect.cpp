@@ -68,13 +68,13 @@ LFontSelect::LFontSelect(LView *Parent, void *Init, int InitLen)
 		d->Lst->MultiSelect(false);
 	
 	c = d->Tbl->GetCell(1, 0, true, 1, 1);
-		c->Add(rg = new LRadioGroup(IDM_STATIC, 0, 0, 100, 100, LLoadString(L_FONTUI_STYLE, "Style")));
-		rg->AddView(new LCheckBox(IDC_BOLD, 0, 0, -1, -1, LLoadString(L_FONTUI_BOLD, "Bold")));
-		rg->AddView(new LCheckBox(IDC_ITALIC, 0, 0, -1, -1, LLoadString(L_FONTUI_ITALIC, "Italic")));
-		rg->AddView(new LCheckBox(IDC_UNDERLINE, 0, 0, -1, -1, LLoadString(L_FONTUI_UNDERLINE, "Underline")));
+		c->Add(rg = new LRadioGroup(IDM_STATIC, LLoadString(L_FONTUI_STYLE, "Style")));
+		rg->AddView(new LCheckBox(IDC_BOLD, LLoadString(L_FONTUI_BOLD, "Bold")));
+		rg->AddView(new LCheckBox(IDC_ITALIC, LLoadString(L_FONTUI_ITALIC, "Italic")));
+		rg->AddView(new LCheckBox(IDC_UNDERLINE, LLoadString(L_FONTUI_UNDERLINE, "Underline")));
 	
 	c = d->Tbl->GetCell(1, 1, true, 1, 1);
-		c->Add(rg = new LRadioGroup(IDM_STATIC, 0, 0, 100, 100, LLoadString(L_FONTUI_PTSIZE, "Pt Size")));
+		c->Add(rg = new LRadioGroup(IDM_STATIC, LLoadString(L_FONTUI_PTSIZE, "Pt Size")));
 		rg->AddView(new LEdit(IDC_PT_SIZE, 0, 0, 56, 21, ""));
 		rg->AddView(d->PtSizes = new LCombo(IDC_SELECT_SIZE, 0, 0, 20, 20, ""));
 	
