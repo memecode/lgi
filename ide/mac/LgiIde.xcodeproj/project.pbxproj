@@ -11,7 +11,8 @@
 		341C7AC821A752DC0083C9CE /* About.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 341C7AC721A752DC0083C9CE /* About.cpp */; };
 		3432AF732ADFE2F40029F2D7 /* libpng16.16.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3414FDD82ADFE2D00092DA8F /* libpng16.16.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		3432AF762ADFE3120029F2D7 /* libz.1.3.1.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3432AF742ADFE3080029F2D7 /* libz.1.3.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		345B20D42179688E0079E3C9 /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 345B20D1217968820079E3C9 /* LgiCocoa.framework */; };
+		343688C92CA7929E0009E57A /* ProjectBackend.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 343688C82CA7924B0009E57A /* ProjectBackend.cpp */; };
+		343688CB2CA793210009E57A /* libssh.4.9.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 343688CA2CA793210009E57A /* libssh.4.9.6.dylib */; };
 		345B2101217969700079E3C9 /* PythonParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20D52179696B0079E3C9 /* PythonParser.cpp */; };
 		345B2102217969700079E3C9 /* MemDumpViewer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20DA2179696B0079E3C9 /* MemDumpViewer.cpp */; };
 		345B2103217969700079E3C9 /* IdeFindInFiles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20DB2179696B0079E3C9 /* IdeFindInFiles.cpp */; };
@@ -51,6 +52,7 @@
 		34D21CE8217978C4003D1EA6 /* LgiMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D21CE7217978C4003D1EA6 /* LgiMain.cpp */; };
 		34D21CEA217978DA003D1EA6 /* Base64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D21CE9217978DA003D1EA6 /* Base64.cpp */; };
 		34D21CEE21798240003D1EA6 /* Png.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D21CED21798240003D1EA6 /* Png.cpp */; };
+		34D625802CA78EE400FF505C /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 345B20D1217968820079E3C9 /* LgiCocoa.framework */; };
 		34F566AB237BD55F0027133A /* JavascriptParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34F566A0237BD55F0027133A /* JavascriptParser.cpp */; };
 /* End PBXBuildFile section */
 
@@ -105,6 +107,9 @@
 		3414FDD82ADFE2D00092DA8F /* libpng16.16.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng16.16.dylib; path = /opt/local/lib/libpng16.16.dylib; sourceTree = "<absolute>"; };
 		341C7AC721A752DC0083C9CE /* About.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = About.cpp; path = ../../src/common/Lgi/About.cpp; sourceTree = "<group>"; };
 		3432AF742ADFE3080029F2D7 /* libz.1.3.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.3.1.dylib; path = ../../../../../../../opt/local/lib/libz.1.3.1.dylib; sourceTree = "<group>"; };
+		343688C72CA7924B0009E57A /* ProjectBackend.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ProjectBackend.h; path = ../src/ProjectBackend.h; sourceTree = "<group>"; };
+		343688C82CA7924B0009E57A /* ProjectBackend.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ProjectBackend.cpp; path = ../src/ProjectBackend.cpp; sourceTree = "<group>"; };
+		343688CA2CA793210009E57A /* libssh.4.9.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssh.4.9.6.dylib; path = ../../../../../../../opt/local/lib/libssh.4.9.6.dylib; sourceTree = "<group>"; };
 		345B206C217965E80079E3C9 /* LgiIde.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LgiIde.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		345B2077217965EA0079E3C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		345B207A217965EA0079E3C9 /* LgiIde.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LgiIde.entitlements; sourceTree = "<group>"; };
@@ -174,7 +179,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				345B20D42179688E0079E3C9 /* LgiCocoa.framework in Frameworks */,
+				343688CB2CA793210009E57A /* libssh.4.9.6.dylib in Frameworks */,
+				34D625802CA78EE400FF505C /* LgiCocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -221,6 +227,7 @@
 		345B20CB217967B70079E3C9 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				343688CA2CA793210009E57A /* libssh.4.9.6.dylib */,
 				3414FDD82ADFE2D00092DA8F /* libpng16.16.dylib */,
 				3432AF742ADFE3080029F2D7 /* libz.1.3.1.dylib */,
 				345B20C3217967760079E3C9 /* LgiCocoa.xcodeproj */,
@@ -253,6 +260,8 @@
 		345B2121217969F10079E3C9 /* Projects */ = {
 			isa = PBXGroup;
 			children = (
+				343688C82CA7924B0009E57A /* ProjectBackend.cpp */,
+				343688C72CA7924B0009E57A /* ProjectBackend.h */,
 				345B20DD2179696B0079E3C9 /* ProjectNode.cpp */,
 				345B20FA2179696F0079E3C9 /* ProjectNode.h */,
 				345B20D72179696B0079E3C9 /* IdeDocPrivate.h */,
@@ -444,6 +453,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				343688C92CA7929E0009E57A /* ProjectBackend.cpp in Sources */,
 				34D21CD821797815003D1EA6 /* ExeCheck.cpp in Sources */,
 				345B2115217969700079E3C9 /* FtpThread.cpp in Sources */,
 				345B210F217969700079E3C9 /* IdeProject.cpp in Sources */,
@@ -497,7 +507,6 @@
 		345B207B217965EA0079E3C9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -547,7 +556,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
@@ -557,7 +566,6 @@
 		345B207C217965EA0079E3C9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -601,7 +609,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
 			};
@@ -627,8 +635,15 @@
 				);
 				INFOPLIST_FILE = Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/opt/local/lib,
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				OTHER_CFLAGS = "-DNCURSES_UNCTRL_H_incl=1";
+				OTHER_CFLAGS = (
+					"-DNCURSES_UNCTRL_H_incl=1",
+					"-DHAS_LIBSSH",
+				);
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-DMAC",
@@ -639,7 +654,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.memecode.LgiIde;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				VALID_ARCHS = x86_64;
 				WARNING_CFLAGS = "-Wno-nullability-completeness";
 			};
 			name = Debug;
@@ -664,8 +678,15 @@
 				);
 				INFOPLIST_FILE = Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/opt/local/lib,
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				OTHER_CFLAGS = "-DNCURSES_UNCTRL_H_incl=1";
+				OTHER_CFLAGS = (
+					"-DNCURSES_UNCTRL_H_incl=1",
+					"-DHAS_LIBSSH",
+				);
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-DMAC",
@@ -675,7 +696,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.memecode.LgiIde;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				VALID_ARCHS = x86_64;
 				WARNING_CFLAGS = "-Wno-nullability-completeness";
 			};
 			name = Release;

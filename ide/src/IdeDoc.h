@@ -23,7 +23,7 @@ public:
 
 	AppWnd *GetApp();
 		
-	const char *GetClass() { return "IdeDoc"; }
+	const char *GetClass() override { return "IdeDoc"; }
 	void SetProject(IdeProject *p);	
 	IdeProject *GetProject();
 	const char *GetFileName();
