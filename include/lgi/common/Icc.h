@@ -30,7 +30,7 @@ public:
 	bool Convert(LSurface *Dest, LSurface *Src, LIccProfile *Profile = 0);
 
 	// Dom
-	bool GetVariant(const char *Name, LVariant &Value, const char *Array = 0);
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = 0) override;
 };
 
 #endif

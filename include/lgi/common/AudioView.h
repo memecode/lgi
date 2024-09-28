@@ -12,7 +12,7 @@
 #include "lgi/common/DropFiles.h"
 #include "lgi/common/PopupNotification.h"
 
-#include "ao.h"
+#include "ao/ao.h"
 
 #define CC(code) Lgi4CC(code)
 #define ERROR_ZERO_SAMPLE_COUNT 5

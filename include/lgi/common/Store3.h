@@ -195,15 +195,17 @@ public:
 class LDataUserI
 {
 	friend class LDataI;
-	LDataI *Object;
+	LDataI *Object = NULL;
 
 public:
+	/// The code that last set the object...
 	LString SetterRef;
+	/// This asserts if the object is set to NULL.
+	bool ObjectLock = false;
 
-	LDataUserI();
 	virtual ~LDataUserI();
 
-	LDataI *GetObject();
+	LDataI *GetObject() { return Object; }
 	virtual bool SetObject
 	(
 		/// The client side object to link with this object.
@@ -233,7 +235,13 @@ public:
 	virtual ~LDataI()
 	{
 		if (UserData)
+		{
+			if (UserData->ObjectLock)
+			{
+				LAssert(!"Object is locked.");
+			}
 			UserData->Object = NULL;
+		}
 	}
 
 	/// Returns the type of object

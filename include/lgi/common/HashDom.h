@@ -22,7 +22,7 @@ public:
 		DeleteObjects();
 	}
 
-	bool GetVariant(const char *Name, LVariant &Value, const char *Array = 0)
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = 0) override
 	{
 		LVariant *v = Find(Name);
 		if (v)
@@ -34,7 +34,7 @@ public:
 		return false;
 	}
 
-	bool SetVariant(const char *Name, LVariant &Value, const char *Array = 0)
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = 0) override
 	{
 		LVariant *v = Find(Name);
 		if (v)
