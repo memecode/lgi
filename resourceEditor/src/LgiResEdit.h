@@ -26,49 +26,51 @@
 #define APP_VER						"4.1"
 
 // window messages
-#define	IDM_UNDO					201
-#define	IDM_REDO					202
-/*
-#define	IDM_CUT						203
-#define	IDM_COPY					204
-#define	IDM_PASTE					205
-*/
-
-#define	IDM_DELETE					300
-#define	IDM_RENAME					301
-#define	IDM_SETTINGS				302
-#define	IDM_IMPORT					303
-#define	IDM_IMPORT_WIN32			304
-#define	IDM_EXPORT					305
-#define	IDM_EXPORT_WIN32			306
-#define	IDM_NEW_LANG				307
-#define	IDM_DELETE_LANG				308
-#define	IDM_IMPORT_LANG				309
-#define	IDM_PROPERTIES				310
-#define IDM_NEW_SUB					311
-#define IDM_NEW_ITEM				312
-#define IDM_DELETE_ITEM				313
-#define IDM_MOVE_LEFT				314
-#define IDM_MOVE_RIGHT				315
-#define IDM_SET_LANG				316
-#define IDM_TAB_ORDER				317
-#define	IDM_DUMP					318
-#define IDM_COPY_TEXT				319
-#define IDM_PASTE_TEXT				320
-#define IDM_NEW_ID					321
-#define IDM_COMPARE					322
-#define IDM_MOVE_UP					324
-#define IDM_MOVE_DOWN				325
-#define IDM_REF_EQ_ID				326
-#define IDM_ID_EQ_REF				327
-#define IDM_UP						328
-#define IDM_DOWN					329
-#define IDM_SET_OK					330
-#define IDM_SET_CANCEL				331
+enum Ids
+{
+    ID_STATIC = -1,
+	ID_UNDO = 200,
+	ID_REDO,
+	ID_DELETE,
+	ID_RENAME,
+	ID_SETTINGS,
+	ID_IMPORT,
+	ID_IMPORT_WIN32,
+	ID_EXPORT,
+	ID_EXPORT_WIN32,
+	ID_NEW_LANG,
+	ID_DELETE_LANG,
+	ID_IMPORT_LANG,
+	ID_PROPERTIES,
+	ID_NEW_SUB,
+	ID_NEW_ITEM,
+	ID_DELETE_ITEM,
+	ID_MOVE_LEFT,
+	ID_MOVE_RIGHT,
+	ID_SET_LANG,
+	ID_TAB_ORDER,
+	ID_DUMP,
+	ID_COPY_TEXT,
+	ID_PASTE_TEXT,
+	ID_CUT,
+	ID_NEW_ID,
+	ID_COMPARE,
+	ID_MOVE_UP,
+	ID_MOVE_DOWN,
+	ID_REF_EQ_ID,
+	ID_ID_EQ_REF,
+	ID_UP,
+	ID_DOWN,
+	ID_SET_OK,
+	ID_SET_CANCEL,
+	ID_STR_UI,
+	ID_TABLE,
+    ID_NAME,
+    ID_STYLE,
+};
 
 #define IDM_LANG_BASE				2000
 
-#define	IDC_TABLE					999
 #define	IDC_CHAT_MSG				1000
 
 #define	STATUS_NORMAL				0
@@ -220,6 +222,7 @@ public:
 	void SystemObject(bool i) { SysObject = i; }
 	bool IsSelected();
 
+	virtual const char *Name() = 0;
 	virtual LView *Wnd() { return NULL; }
 	virtual bool Attach(LViewI *Parent);
 	virtual int Type() { return ResType; }
@@ -256,6 +259,7 @@ public:
 	ResFolder(AppWnd *w, int t, bool enabled = true);
 	LView *Wnd() { return dynamic_cast<LView*>(this); }
 
+	const char *Name() { return LView::Name(); }
 	void Create(LXmlTag *load, SerialiseContext *ctx) { LAssert(0); }
 	bool Test(ErrorCollection *e) { return false; }
 	bool Read(LXmlTag *t, SerialiseContext &Ctx) { return false; }
@@ -911,6 +915,7 @@ public:
 
 	void Create(LXmlTag *Load, SerialiseContext *Ctx);
 	LView *Wnd() { return dynamic_cast<LView*>(this); }
+	const char *Name() { return LView::Name(); }
 	void OnShowLanguages();
 
 	// Resource

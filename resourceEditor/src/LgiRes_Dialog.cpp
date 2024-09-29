@@ -744,17 +744,17 @@ void ResDialogCtrl::OnMouseClick(LMouse &m)
 			RClick.AppendItem("&Paste", IDM_PASTE, PasteData);
 			RClick.AppendSeparator();
 
-			RClick.AppendItem("Copy Text", IDM_COPY_TEXT, Dlg->Selection.Length()==1);
-			RClick.AppendItem("Paste Text", IDM_PASTE_TEXT, PasteTranslations);
+			RClick.AppendItem("Copy Text", ID_COPY_TEXT, Dlg->Selection.Length()==1);
+			RClick.AppendItem("Paste Text", ID_PASTE_TEXT, PasteTranslations);
 			RClick.AppendSeparator();
 
-			RClick.AppendItem("&Delete", IDM_DELETE, Dlg->Selection.Length()>0);
+			RClick.AppendItem("&Delete", ID_DELETE, Dlg->Selection.Length()>0);
 
 			if (Btn)
 			{
 				RClick.AppendSeparator();
-				RClick.AppendItem("Set 'Ok'", IDM_SET_OK);
-				RClick.AppendItem("Set 'Cancel'", IDM_SET_CANCEL);
+				RClick.AppendItem("Set 'Ok'", ID_SET_OK);
+				RClick.AppendItem("Set 'Cancel'", ID_SET_CANCEL);
 			}
 
 			if (Dlg->GetMouse(m, true))
@@ -762,12 +762,12 @@ void ResDialogCtrl::OnMouseClick(LMouse &m)
 				int Cmd = 0;
 				switch (Cmd = RClick.Float(Dlg, m.x, m.y))
 				{
-					case IDM_DELETE:
+					case ID_DELETE:
 					{
 						Dlg->Delete();
 						break;
 					}
-					case IDM_CUT:
+					case ID_CUT:
 					{
 						Dlg->Copy(true);
 						break;
@@ -782,19 +782,19 @@ void ResDialogCtrl::OnMouseClick(LMouse &m)
 						Dlg->Paste();
 						break;
 					}
-					case IDM_COPY_TEXT:
+					case ID_COPY_TEXT:
 					{
 						ResDialogCtrl *Ctrl = Dlg->Selection[0];
 						if (Ctrl)
 							Ctrl->CopyText();
 						break;
 					}
-					case IDM_PASTE_TEXT:
+					case ID_PASTE_TEXT:
 					{
 						PasteText();
 						break;
 					}
-					case IDM_SET_OK:
+					case ID_SET_OK:
 					{
 						ResString *s = Btn->GetStr();
 						if (s)
@@ -804,7 +804,7 @@ void ResDialogCtrl::OnMouseClick(LMouse &m)
 						}
 						break;
 					}
-					case IDM_SET_CANCEL:
+					case ID_SET_CANCEL:
 					{
 						ResString *s = Btn->GetStr();
 						if (s)
@@ -1647,14 +1647,14 @@ void CtrlTabs::OnMouseClick(LMouse &m)
 				bool HasTab = Tabs.ItemAt(Current);
 
 				RClick->AppendItem("New tab", IDM_NEW, true);
-				RClick->AppendItem("Delete tab", IDM_DELETE, HasTab);
-				RClick->AppendItem("Rename tab", IDM_RENAME, HasTab);
-				RClick->AppendItem("Move tab left", IDM_MOVE_LEFT, HasTab);
-				RClick->AppendItem("Move tab right", IDM_MOVE_RIGHT, HasTab);
+				RClick->AppendItem("Delete tab", ID_DELETE, HasTab);
+				RClick->AppendItem("Rename tab", ID_RENAME, HasTab);
+				RClick->AppendItem("Move tab left", ID_MOVE_LEFT, HasTab);
+				RClick->AppendItem("Move tab right", ID_MOVE_RIGHT, HasTab);
 				RClick->AppendSeparator();
 
-				RClick->AppendItem("Copy Text", IDM_COPY_TEXT, Dlg->Selection.Length()==1);
-				RClick->AppendItem("Paste Text", IDM_PASTE_TEXT, true);
+				RClick->AppendItem("Copy Text", ID_COPY_TEXT, Dlg->Selection.Length()==1);
+				RClick->AppendItem("Paste Text", ID_PASTE_TEXT, true);
 
 				if (GetMouse(m, true))
 				{
@@ -1674,7 +1674,7 @@ void CtrlTabs::OnMouseClick(LMouse &m)
 							}
 							break;
 						}
-						case IDM_DELETE:
+						case ID_DELETE:
 						{
 							CtrlTab *t = Tabs.ItemAt(Current);
 							if (t)
@@ -1686,7 +1686,7 @@ void CtrlTabs::OnMouseClick(LMouse &m)
 							}
 							break;
 						}
-						case IDM_RENAME:
+						case ID_RENAME:
 						{
 							CtrlTab *t = Tabs.ItemAt(Current);
 							if (t)
@@ -1704,7 +1704,7 @@ void CtrlTabs::OnMouseClick(LMouse &m)
 							}
 							break;
 						}
-						case IDM_MOVE_LEFT:
+						case ID_MOVE_LEFT:
 						{
 							CtrlTab *t = Tabs.ItemAt(Current);
 							if (t && Current > 0)
@@ -1714,7 +1714,7 @@ void CtrlTabs::OnMouseClick(LMouse &m)
 							}
 							break;
 						}
-						case IDM_MOVE_RIGHT:
+						case ID_MOVE_RIGHT:
 						{
 							CtrlTab *t = Tabs.ItemAt(Current);
 							if (t && Current < Tabs.Length()-1)
@@ -1724,7 +1724,7 @@ void CtrlTabs::OnMouseClick(LMouse &m)
 							}
 							break;
 						}
-						case IDM_COPY_TEXT:
+						case ID_COPY_TEXT:
 						{
 							CtrlTab *t = Tabs.ItemAt(Current);
 							if (t)
@@ -1733,7 +1733,7 @@ void CtrlTabs::OnMouseClick(LMouse &m)
 							}
 							break;
 						}
-						case IDM_PASTE_TEXT:
+						case ID_PASTE_TEXT:
 						{
 							CtrlTab *t = Tabs.ItemAt(Current);
 							if (t)
@@ -1854,20 +1854,20 @@ void CtrlList::OnMouseClick(LMouse &m)
 				{
 					bool HasCol = c != 0;
 					RClick->AppendItem("New column", IDM_NEW, true);
-					RClick->AppendItem("Delete column", IDM_DELETE, HasCol);
-					RClick->AppendItem("Rename column", IDM_RENAME, HasCol);
-					RClick->AppendItem("Move column left", IDM_MOVE_LEFT, HasCol);
-					RClick->AppendItem("Move column right", IDM_MOVE_RIGHT, HasCol);
+					RClick->AppendItem("Delete column", ID_DELETE, HasCol);
+					RClick->AppendItem("Rename column", ID_RENAME, HasCol);
+					RClick->AppendItem("Move column left", ID_MOVE_LEFT, HasCol);
+					RClick->AppendItem("Move column right", ID_MOVE_RIGHT, HasCol);
 					RClick->AppendSeparator();
 
-					RClick->AppendItem("Copy Text", IDM_COPY_TEXT, HasCol);
-					RClick->AppendItem("Paste Text", IDM_PASTE_TEXT, HasCol);
+					RClick->AppendItem("Copy Text", ID_COPY_TEXT, HasCol);
+					RClick->AppendItem("Paste Text", ID_PASTE_TEXT, HasCol);
 
 					if (GetMouse(m, true))
 					{
 						switch (RClick->Float(this, m.x, m.y, false))
 						{
-							case IDM_COPY_TEXT:
+							case ID_COPY_TEXT:
 							{
 								if (c && c->GetStr())
 								{
@@ -1875,7 +1875,7 @@ void CtrlList::OnMouseClick(LMouse &m)
 								}
 								break;
 							}
-							case IDM_PASTE_TEXT:
+							case ID_PASTE_TEXT:
 							{
 								if (c && c->GetStr())
 								{
@@ -1895,13 +1895,13 @@ void CtrlList::OnMouseClick(LMouse &m)
 								}
 								break;
 							}
-							case IDM_DELETE:
+							case ID_DELETE:
 							{
 								Cols.Delete(c);
 								DeleteObj(c);
 								break;
 							}
-							case IDM_RENAME:
+							case ID_RENAME:
 							{
 								if (c)
 								{
@@ -1915,7 +1915,7 @@ void CtrlList::OnMouseClick(LMouse &m)
 								}
 								break;
 							}
-							case IDM_MOVE_LEFT:
+							case ID_MOVE_LEFT:
 							{
 								auto Current = Cols.IndexOf(c);
 								if (c && Current > 0)
@@ -1925,7 +1925,7 @@ void CtrlList::OnMouseClick(LMouse &m)
 								}
 								break;
 							}
-							case IDM_MOVE_RIGHT:
+							case ID_MOVE_RIGHT:
 							{
 								auto Current = Cols.IndexOf(c);
 								if (c && Current < Cols.Length()-1)
@@ -2400,7 +2400,6 @@ void ResDialog::OnShowLanguages()
 
 void ResDialog::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
-	printf("ResDialog::OnChildrenChanged %p, %i\n", Wnd, Attaching);
 }
 
 const char *ResDialog::Name()
@@ -3847,13 +3846,13 @@ void ResDialog::OnRightClick(LSubMenu *RClick)
 			RClick->AppendSeparator();
 			if (Type() > 0)
 			{
-				RClick->AppendItem("Dump to C++", IDM_DUMP, true);
+				RClick->AppendItem("Dump to C++", ID_DUMP, true);
 
 				auto Export = RClick->AppendSub("Export to...");
 				if (Export)
 				{
-					Export->AppendItem("Lgi File", IDM_EXPORT, true);
-					Export->AppendItem("Win32 Resource Script", IDM_EXPORT_WIN32, false);
+					Export->AppendItem("Lgi File", ID_EXPORT, true);
+					Export->AppendItem("Win32 Resource Script", ID_EXPORT_WIN32, false);
 				}
 			}
 		}
@@ -3985,7 +3984,7 @@ void ResDialog::OnCommand(int Cmd)
 {
 	switch (Cmd)
 	{
-		case IDM_DUMP:
+		case ID_DUMP:
 		{
 			LStringPipe Def, Var, Inst;
 			LStringPipe Buf;
@@ -4092,7 +4091,7 @@ void ResDialog::OnCommand(int Cmd)
 			}
 			break;
 		}
-		case IDM_EXPORT:
+		case ID_EXPORT:
 		{
 			auto Select = new LFileSelect(AppWindow);
 			Select->Type("Text", "*.txt");
@@ -4114,7 +4113,7 @@ void ResDialog::OnCommand(int Cmd)
 			});
 			break;
 		}
-		case IDM_EXPORT_WIN32:
+		case ID_EXPORT_WIN32:
 		{
 			break;
 		}
@@ -4136,7 +4135,7 @@ int ResDialog::OnCommand(int Cmd, int Event, OsView hWnd)
 			break;
 		}
 		*/
-		case IDM_TAB_ORDER:
+		case ID_TAB_ORDER:
 		{
 			ResDialogCtrl *Top = 0;
 			if (Selection.Length() == 1 &&
@@ -4266,7 +4265,7 @@ void ResDialogUi::OnCreate()
 			Tools->AppendSeparator();
 
 			// Tools->AppendButton("Change language", IDM_SET_LANG, TBT_PUSH);
-			Tools->AppendButton("Tab Order", IDM_TAB_ORDER, TBT_PUSH, true, 17);
+			Tools->AppendButton("Tab Order", ID_TAB_ORDER, TBT_PUSH, true, 17);
 		}
 		else
 		{

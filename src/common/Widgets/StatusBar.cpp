@@ -19,11 +19,28 @@ LStatusBar::~LStatusBar()
 {
 }
 
+bool LStatusBar::OnLayout(LViewLayoutInfo &Inf)
+{
+	if (!Inf.Width.Min)
+	{
+		// Width is always 'fill'
+		Inf.Width.Min = Inf.Width.Max = LViewLayoutInfo::FILL;
+	}
+	else
+	{
+		auto fnt = GetFont();
+		Inf.Height.Min = Inf.Height.Max = fnt ? fnt->GetHeight() + 8 : 32;
+	}
+	
+	return true;
+}
+
 bool LStatusBar::Pour(LRegion &r)
 {
 	if (auto Best = FindLargestEdge(r, GV_EDGE_BOTTOM))
 	{
-		auto ht = LSysFont->GetHeight() + 8;
+		auto fnt = GetFont();
+		auto ht = fnt ? fnt->GetHeight() + 8 : 32;
 
 		LRect Take = *Best;
 		if (Take.Y() > ht)

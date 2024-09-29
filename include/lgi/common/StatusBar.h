@@ -16,6 +16,7 @@ public:
 
 	const char *GetClass() { return "LStatusBar"; }
 	bool Pour(LRegion &r);
+	bool OnLayout(LViewLayoutInfo &Inf);
 	void OnPaint(LSurface *pDC);
 	void OnPosChange();
 	int OnNotify(LViewI *Ctrl, LNotification n);

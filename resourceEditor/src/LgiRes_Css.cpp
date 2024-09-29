@@ -6,11 +6,6 @@
 #include "lgi/common/TextView3.h"
 
 /////////////////////////////////////////////////////////////////////////////
-enum Ids {
-    IDC_STATIC = -1,
-    IDC_NAME = 100,
-    IDC_STYLE
-};
 class ResCssUi : public LTableLayout
 {
     ResCss *Css;
@@ -25,20 +20,20 @@ public:
         LLayoutCell *c;
         
         if ((c = GetCell(0, y++)))
-            c->Add(new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Name:"));
+            c->Add(new LTextLabel(ID_STATIC, 0, 0, -1, -1, "Name:"));
 
         if ((c = GetCell(0, y++)))
         {
-            c->Add(Name = new LEdit(IDC_NAME, 0, 0, 80, 20, 0));
+            c->Add(Name = new LEdit(ID_NAME, 0, 0, 80, 20, 0));
             Name->Name(Css->Name());
         }
 
         if ((c = GetCell(0, y++)))
-            c->Add(new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Style:"));
+            c->Add(new LTextLabel(ID_STATIC, 0, 0, -1, -1, "Style:"));
 
         if ((c = GetCell(0, y++)))
         {
-            c->Add(Style = new LTextView3(IDC_STYLE, 0, 0, 80, 20, 0));
+            c->Add(Style = new LTextView3(ID_STYLE, 0, 0, 80, 20, 0));
             Style->Name(Css->Style);
             Style->Sunken(true);
         }

@@ -388,7 +388,7 @@ const char *ObjTreeItem::GetText(int i)
 	{
 		int Type = Obj->Type();
 		if (Type > 0)
-			return Obj->Wnd()->Name();
+			return Obj->Name();
 		else
 			return TypeNames[-Type];
 	}
@@ -417,8 +417,8 @@ void ObjTreeItem::OnMouseClick(LMouse &m)
 			if (Obj->Type() > 0)
 			{
 				// Resource
-				RClick.AppendItem("Delete", IDM_DELETE, !Obj->SystemObject());
-				RClick.AppendItem("Rename", IDM_RENAME, !Obj->SystemObject());
+				RClick.AppendItem("Delete", ID_DELETE, !Obj->SystemObject());
+				RClick.AppendItem("Rename", ID_RENAME, !Obj->SystemObject());
 			}
 			else
 			{
@@ -428,8 +428,8 @@ void ObjTreeItem::OnMouseClick(LMouse &m)
 				auto Insert = RClick.AppendSub("Import from...");
 				if (Insert)
 				{
-					Insert->AppendItem("Lgi File", IDM_IMPORT, true);
-					Insert->AppendItem("Win32 Resource Script", IDM_IMPORT_WIN32, false);
+					Insert->AppendItem("Lgi File", ID_IMPORT, true);
+					Insert->AppendItem("Win32 Resource Script", ID_IMPORT_WIN32, false);
 				}
 			}
 
@@ -455,7 +455,7 @@ void ObjTreeItem::OnMouseClick(LMouse &m)
 					Obj->App()->NewObject(Ctx, 0, -Obj->Type());
 					break;
 				}
-				case IDM_DELETE:
+				case ID_DELETE:
 				{
 					Obj->App()->SetDirty(true, [this](auto ok)
 					{
@@ -464,7 +464,7 @@ void ObjTreeItem::OnMouseClick(LMouse &m)
 					});
 					break;
 				}
-				case IDM_RENAME:
+				case ID_RENAME:
 				{
 					auto Dlg = new LInput(Tree, GetText(), "Enter the name for the object", "Object Name");
 					Dlg->DoModal([this, Dlg](auto dlg, auto id)
@@ -478,7 +478,7 @@ void ObjTreeItem::OnMouseClick(LMouse &m)
 					});
 					break;
 				}
-				case IDM_IMPORT:
+				case ID_IMPORT:
 				{
 					auto Select = new LFileSelect(Obj->App());
 					Select->Type("Text", "*.txt");
@@ -505,7 +505,7 @@ void ObjTreeItem::OnMouseClick(LMouse &m)
 					});
 					break;
 				}
-				case IDM_IMPORT_WIN32:
+				case ID_IMPORT_WIN32:
 				{
 					/*
 					List<ResDialog> l;
@@ -751,7 +751,7 @@ void FieldView::OnSelect(FieldSource *s)
 			LFontType Sys;
 			Sys.GetSystemFont("System");
 
-			LTableLayout *t = new LTableLayout(IDC_TABLE);
+			LTableLayout *t = new LTableLayout(ID_TABLE);
 
 			int Row = 0;
 			LLayoutCell *Cell;
@@ -830,7 +830,7 @@ void FieldView::OnPosChange()
 	c.Inset(6, 6);
 
 	LViewI *v;
-	if (GetViewById(IDC_TABLE, v))
+	if (GetViewById(ID_TABLE, v))
 		v->SetPos(c);
 }
 
@@ -1034,11 +1034,11 @@ void AppWnd::OnCreate()
 		{
 			int n = 6;
 			_FileMenu->AppendSeparator(n++);
-			_FileMenu->AppendItem("Import Win32 Script", IDM_IMPORT_WIN32, true, n++);
-			_FileMenu->AppendItem("Import LgiRes Language", IDM_IMPORT_LANG, true, n++);
-			_FileMenu->AppendItem("Compare To File...", IDM_COMPARE, true, n++);
+			_FileMenu->AppendItem("Import Win32 Script", ID_IMPORT_WIN32, true, n++);
+			_FileMenu->AppendItem("Import LgiRes Language", ID_IMPORT_LANG, true, n++);
+			_FileMenu->AppendItem("Compare To File...", ID_COMPARE, true, n++);
 			_FileMenu->AppendSeparator(n++);
-			_FileMenu->AppendItem("Properties", IDM_PROPERTIES, true, n++);
+			_FileMenu->AppendItem("Properties", ID_PROPERTIES, true, n++);
 		}
 
 		ViewMenu = Menu->FindSubMenu(IDM_VIEW);
@@ -1316,22 +1316,22 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 			Empty();
 			break;
 		}
-		case IDM_IMPORT_WIN32:
+		case ID_IMPORT_WIN32:
 		{
 			LoadWin32();
 			break;
 		}
-		case IDM_IMPORT_LANG:
+		case ID_IMPORT_LANG:
 		{
 			ImportLang();
 			break;
 		}
-		case IDM_COMPARE:
+		case ID_COMPARE:
 		{
 			Compare();
 			break;
 		}
-		case IDM_PROPERTIES:
+		case ID_PROPERTIES:
 		{
 			List<Resource> l;
 			if (Objs->ListObjects(l))

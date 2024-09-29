@@ -138,13 +138,13 @@ public:
 			LSubMenu s;
 			s.AppendItem("New Child", IDM_NEW_CHILD, true);
 			s.AppendItem("New Next", IDM_NEW_NEXT, true);
-			s.AppendItem("Delete", IDM_DELETE, true);
+			s.AppendItem("Delete", ID_DELETE, true);
 			s.AppendSeparator();
-			s.AppendItem("Copy Text", IDM_COPY_TEXT, true);
-			s.AppendItem("Paste Text", IDM_PASTE_TEXT, true);
+			s.AppendItem("Copy Text", ID_COPY_TEXT, true);
+			s.AppendItem("Paste Text", ID_PASTE_TEXT, true);
 			s.AppendSeparator();
-			s.AppendItem("Move Up", IDM_UP, true);
-			s.AppendItem("Move Down", IDM_DOWN, true);
+			s.AppendItem("Move Up", ID_UP, true);
+			s.AppendItem("Move Down", ID_DOWN, true);
 
 			m.ToScreen();
 
@@ -155,12 +155,12 @@ public:
 
 				switch (Cmd)
 				{
-					case IDM_UP:
+					case ID_UP:
 					{
 						Move(-1);
 						break;
 					}
-					case IDM_DOWN:
+					case ID_DOWN:
 					{
 						Move(1);
 						break;
@@ -191,18 +191,18 @@ public:
 						}
 						break;
 					}
-					case IDM_DELETE:
+					case ID_DELETE:
 					{
 						delete this;
 						break;
 					}
-					case IDM_COPY_TEXT:
+					case ID_COPY_TEXT:
 					{
 						if (Str)
 							Str->CopyText();
 						break;
 					}
-					case IDM_PASTE_TEXT:
+					case ID_PASTE_TEXT:
 					{
 						if (Str)
 						{

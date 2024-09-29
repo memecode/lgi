@@ -42,41 +42,30 @@ class LListPrivate
 {
 public:
 	// Mode
-	LListMode Mode;
-	int Columns;
-	int VisibleColumns;
+	LListMode Mode = LListDetails;
+	int Columns = 0;
+	int VisibleColumns = 0;
 
 	// This is a pointer to a flag, that gets set when the object
 	// is deleted. Used to trap events deleting the window. If an
 	// event handler deletes the current window we can't touch any
 	// of the member variables anymore, so we need to know to quit/return
 	// ASAP.
-	bool *DeleteFlag;
+	bool *DeleteFlag = NULL;
 
 	// If this is true the ctrl is selecting lots of things
 	// and we only want to notify once.
-	bool NoSelectEvent;
+	bool NoSelectEvent = false;
 
 	// Drag'n'drop
 	LPoint DragStart;
-	int DragData;
+	int DragData = 0;
 	
 	// Kayboard search
 	uint64 KeyLast;
-	char16 *KeyBuf;
+	char16 *KeyBuf = NULL;
 	
 	// Class
-	LListPrivate()
-	{
-		DragData = 0;
-		KeyBuf = 0;
-		DeleteFlag = 0;
-		Columns = 0;
-		VisibleColumns = 0;
-		Mode = LListDetails;
-		NoSelectEvent = false;
-	}
-	
 	~LListPrivate()
 	{
 		if (DeleteFlag)
@@ -95,10 +84,6 @@ public:
 	LArray<char*> Str;
 	LArray<LDisplayString*> Display;
 	int16 LayoutColumn = -1;
-
-	LListItemPrivate()
-	{
-	}
 
 	~LListItemPrivate()
 	{
@@ -123,13 +108,12 @@ LListItemColumn::LListItemColumn(LListItem *item, int col)
 {
 	_Column = col;
 	_Item = item;
-	_Value = 0;
 	_Item->d->Cols.Insert(this);
 }
 
 LList *LListItemColumn::GetList()
 {
-	return _Item ? _Item->Parent : 0;
+	return _Item ? _Item->Parent : NULL;
 }
 
 LItemContainer *LListItemColumn::GetContainer()
@@ -139,7 +123,7 @@ LItemContainer *LListItemColumn::GetContainer()
 
 LListT *LListItemColumn::GetAllItems()
 {
-	return GetList() ? &GetList()->Items : 0;
+	return GetList() ? &GetList()->Items : NULL;
 }
 
 void LListItemColumn::Value(int64 i)

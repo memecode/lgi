@@ -1820,8 +1820,6 @@ void LTableLayoutPrivate::LayoutVertical(const LRect Client, int Depth, int *Min
 					int &Max = MaxRow[Cy];
 					CellFlag &Flags = RowFlags[Cy];
 					c->LayoutHeight(Depth, x, Min, Max, Flags);
-
-					int asd=0;
 				}
 
 				Cx += c->Cell.X();
@@ -1860,11 +1858,6 @@ void LTableLayoutPrivate::LayoutVertical(const LRect Client, int Depth, int *Min
 					CellFlag RowFlag = SizeUnknown;
 
 					c->LayoutHeight(Depth, WidthPx, MinY, MaxY, RowFlag);
-
-					if (Ctrl->GetId() == 17)
-					{
-						int asd=0;
-					}
 
 					// This code stops the max being set on spanned cells.
 					LArray<int> AddTo;
@@ -2229,11 +2222,6 @@ void LTableLayout::OnPosChange()
 	#ifdef DEBUG_LAYOUT
 	// if (GetId() == DEBUG_LAYOUT) LgiTrace("%s:%i - Up=%i for Id=%i\n", _FL, Up, GetId());
 	#endif
-
-	if (GetId() == 12)
-	{
-		int asd=0;
-	}
 
 	if (Up)
 	{

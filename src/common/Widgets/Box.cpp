@@ -371,9 +371,9 @@ void LBox::OnPosChange()
 	LOG("%s:%i - %i views, %i avail px\n", _FL, (int)views.Length(), AvailablePx);
 
 	// Do first pass over children and find their sizes
-	for (LViewI *c: views)
+	for (auto c: views)
 	{
-		LCss *css = c->GetCss();
+		auto css = c->GetCss();
 		BoxRange &box = Sizes[Idx].Init();
 		auto vi = d->GetInfo(c);
 		
@@ -397,6 +397,32 @@ void LBox::OnPosChange()
 		}
 
 		// Work out some min and max values		
+		if (!box.Size.IsValid())
+		{
+			// Check if the view has layout capabilities...
+			LViewLayoutInfo info;
+			// If this is a horizonal box... call OnLayout in 'pre-layout' mode to get a width...
+			// Else if this is a vertical box... fill out the width and call in 'layout' mode
+			if (IsVertical())
+				info.Width.Min = info.Width.Max = content.X();
+
+			if (c->OnLayout(info))
+			{
+				if (IsVertical())
+				{
+					if (info.Height.Min != LViewLayoutInfo::FILL)
+						// View has given us a height to use...
+						box.Size = LCss::Len(LCss::LenPx, info.Height.Min);
+				}
+				else
+				{
+					if (info.Height.Min != LViewLayoutInfo::FILL)
+						// View has given has a width to use...
+						box.Size = LCss::Len(LCss::LenPx, info.Width.Min);
+				}
+			}
+		}
+		
 		if (box.Size.IsValid())
 		{
 			if (!vi->Size.IsValid())
@@ -426,13 +452,10 @@ void LBox::OnPosChange()
 		{
 			AutoChildren.Add(Idx);
 
-			if (vi)
-			{
-				if (IsVertical())
-					vi->Size = LCss::Len(LCss::LenPx, c->Y());
-				else
-					vi->Size = LCss::Len(LCss::LenPx, c->X());
-			}
+			if (IsVertical())
+				vi->Size = LCss::Len(LCss::LenPx, c->Y());
+			else
+				vi->Size = LCss::Len(LCss::LenPx, c->X());
 		}
 
 		MinPx += box.MinPx;
@@ -453,18 +476,18 @@ void LBox::OnPosChange()
 		FixedChildren.Length(), AutoChildren.Length());
 
 	// Convert all the percentage sizes to px
-	int RemainingPx = AvailablePx - SpacerPx - FixedPx;
+	auto RemainingPx = AvailablePx - SpacerPx - FixedPx;
 	LOG("    RemainingPx=%i (%i - %i - %i)\n", RemainingPx, AvailablePx, SpacerPx, FixedPx);
 	if (RemainingPx < 0)
 	{
 		// De-allocate space from the fixed size views...
-		int FitPx = AvailablePx - SpacerPx - MinPx;
-		double Ratio = (double)FitPx / FixedPx;
+		auto FitPx = AvailablePx - SpacerPx - MinPx;
+		auto Ratio = (double)FitPx / FixedPx;
 		LOG("    Dealloc FitPx=%i Ratio=%.2f\n", FitPx, Ratio);
 		for (size_t i=0; i<views.Length(); i++)
 		{
 			auto c = views[i];
-			LCss *css = c->GetCss();
+			auto css = c->GetCss();
 			BoxRange &box = Sizes[i];
 			if (css)
 			{
@@ -485,9 +508,9 @@ void LBox::OnPosChange()
 	}
 
 	LOG("    RemainingPx=%i (%i - %i - %i)\n", RemainingPx, AvailablePx, SpacerPx, FixedPx);
-	for (int i=0; i<Sizes.Length(); i++)
+	for (size_t i=0; i<Sizes.Length(); i++)
 	{
-		BoxRange &box = Sizes[i];
+		auto &box = Sizes[i];
 		if (box.Size.Type == LCss::LenPercent)
 		{
 			LOG("        PercentSize: %s, %i > %i\n", box.toString().Get(), PercentPx, RemainingPx);
@@ -497,8 +520,8 @@ void LBox::OnPosChange()
 				{
 					// Well... ah... we better leave _some_ space for them.
 					auto AutoPx = 16 * AutoChildren.Length();
-					float Ratio = ((float)RemainingPx - AutoPx) / PercentPx;
-					int Px = (int) (box.MaxPx * Ratio);
+					auto Ratio = ((float)RemainingPx - AutoPx) / PercentPx;
+					auto Px = (int) (box.MaxPx * Ratio);
 					box.Size.Type = LCss::LenPx;
 					box.Size.Value = (float) Px;
 					RemainingPx -= Px;
@@ -876,10 +899,10 @@ LCursor LBox::GetCursor(int x, int y)
 
 bool LBox::OnLayout(LViewLayoutInfo &Inf)
 {
-	Inf.Width.Min = -1;
-	Inf.Width.Max = -1;
-	Inf.Height.Min = -1;
-	Inf.Height.Max = -1;
+	Inf.Width.Min = LViewLayoutInfo::FILL;
+	Inf.Width.Max = LViewLayoutInfo::FILL;
+	Inf.Height.Min = LViewLayoutInfo::FILL;
+	Inf.Height.Max = LViewLayoutInfo::FILL;
 	return true;
 }
 

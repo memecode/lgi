@@ -47,7 +47,7 @@ class LgiClass LListItemColumn : public LBase, public LItem, public LListItemPai
 {
 	LListItem *_Item;
 	int _Column;
-	int64 _Value;
+	int64 _Value = 0;
 
 	void OnPaint(ItemPaintCtx &Ctx) {}
 

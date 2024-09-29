@@ -68,6 +68,8 @@ public:
 
 	void Create(LXmlTag *load, SerialiseContext *Ctx);
 	LView *Wnd() { return dynamic_cast<LView*>(this); }
+	const char *Name() { return LTree::Name(); }
+	bool Name(const char *n) { return LTree::Name(n); }
 	void SetLanguages() { if (Group) Group->SetLanguages(); }
 	List<ResString> *GetStrs() { return (Group)?Group->GetStrs():0; }
 	ResString *GetStringByRef(int Ref);

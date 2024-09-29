@@ -591,14 +591,15 @@ void LTreeItem::_Remove()
 
 void LTreeItem::_PourText(LPoint &Size)
 {
-	LFont *f = Tree ? Tree->GetFont() : LSysFont;
-	auto *Txt = GetText();
+	auto f = Tree ? Tree->GetFont() : LSysFont;
+	auto Txt = GetText();
 	
 	#if defined(_WIN64) && defined(_DEBUG)
 	if ((void*)Txt == (void*)0xfeeefeeefeeefeee ||
 		(void*)Txt == (void*)0xcdcdcdcdcdcdcdcd)
 	{
 		LAssert(!"Yeah nah...");
+		return;
 	}
 	#endif
 	
@@ -609,13 +610,13 @@ void LTreeItem::_PourText(LPoint &Size)
 
 void LTreeItem::_PaintText(LItem::ItemPaintCtx &Ctx)
 {
-	const char *Text = GetText();
+	auto Text = GetText();
 	if (Text)
 	{
-		LDisplayString *Ds = d->GetDs(0, d->Text.X());
-		LFont *f = Tree ? Tree->GetFont() : LSysFont;
+		auto Ds = d->GetDs(0, d->Text.X());
+		auto f = Tree ? Tree->GetFont() : LSysFont;
 
-		int Tab = f->TabSize();
+		auto Tab = f->TabSize();
 		f->TabSize(0);
 		f->Transparent(false);
 		f->Colour(Ctx.Fore, Ctx.TxtBack);

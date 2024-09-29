@@ -9,12 +9,12 @@
 **		fret@memecode.com
 */
 
-#ifndef __LGIRES_STRING_H
-#define __LGIRES_STRING_H
+#pragma once
 
 #include "lgi/common/Res.h"
 #include "lgi/common/List.h"
 #include "lgi/common/Combo.h"
+#include "lgi/common/Box.h"
 
 ////////////////////////////////////////////////////////////////
 class ResString;
@@ -48,7 +48,6 @@ class ResString :
 	public ResourceItem
 {
 	friend class ResStringGroup;
-	friend class ResStringView;
 
 protected:
 	ResStringGroup *Group = NULL;
@@ -105,29 +104,33 @@ public:
 #define RESIZE_X2			0x0004
 #define RESIZE_Y2			0x0008
 
-class ResStringGroup : public Resource, public LList
+class StringGroupList;
+class ResStringGroup : public Resource
 {
 	friend class ResString;
-	friend class ResStringView;
 	friend class ResStringUi;
+	friend class StringGroupList;
 
 protected:
-	ResStringUi *Ui;
+	ResStringUi *Ui = NULL;
+	StringGroupList *Lst = NULL;
 	List<ResString> Strs;
 	LArray<LLanguage*> Lang;
 	LArray<LLanguage*> Visible;
-	int SortCol;
-	int SortAscend;
-
-	void UpdateColumns();
-	void OnColumnClick(int Col, LMouse &m);
+	int SortCol = 0;
+	bool SortAscend = true;
+	LString GrpName;
+	
+	void FillList();
 
 public:
 	ResStringGroup(AppWnd *w, int type = TYPE_STRING);
 	~ResStringGroup();
 
-	LView *Wnd() { return dynamic_cast<LView*>(this); }
-	bool Attach(LViewI *Parent) { return LList::Attach(Parent); }
+	const char *Name();
+	bool Name(const char *n);
+	size_t Length() { return Strs.Length(); }
+	LView *Wnd();
 	ResStringGroup *GetStringGroup() { return this; }
 
 	// Methods
@@ -165,26 +168,32 @@ public:
 	bool Read(LXmlTag *t, SerialiseContext &Ctx);
 	bool Write(LXmlTag *t, SerialiseContext &Ctx);
 	ResStringGroup *IsStringGroup() { return this; }
+};
 
-	// LList
-	void OnItemClick(LListItem *Item, LMouse &m);
+class StringGroupList : public LList
+{
+	ResStringGroup *grp = NULL;
+	
+public:
+	StringGroupList(ResStringGroup *g);
+	~StringGroupList();
+
+	void UpdateColumns();
+	void OnColumnClick(int Col, LMouse &m);
 	void OnItemSelect(LArray<LListItem*> &Items);
 };
 
-class ResStringUi : public LLayout
+class ResStringUi : public LBox
 {
-	LToolBar *Tools;
-	ResStringGroup *StringGrp;
-	LStatusBar *Status;
-	LStatusPane *StatusInfo;
+	LToolBar *Tools = NULL;
+	ResStringGroup *StringGrp = NULL;
+	LStatusBar *Status = NULL;
+	LStatusPane *StatusInfo = NULL;
 
 public:
 	ResStringUi(ResStringGroup *Res);
 	~ResStringUi();
 
-	void OnPaint(LSurface *pDC);
-	void PourAll();
-	void OnPosChange();
 	void OnCreate();
 	LMessage::Result OnEvent(LMessage *Msg);
 };
@@ -200,6 +209,3 @@ public:
 	LangDlg(LView *parent, List<LLanguage> &l, int Init = -1);
 	int OnNotify(LViewI *Ctrl, LNotification n);
 };
-
-////////////////////////////////////////////////////////////////
-#endif

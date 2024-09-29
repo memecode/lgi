@@ -88,26 +88,26 @@ void ResMenuItem::OnMouseClick(LMouse &m)
 				}
 			}
 
-			RClick.AppendItem("Copy Text", IDM_COPY_TEXT, true);
-			RClick.AppendItem("Paste Text", IDM_PASTE_TEXT, PasteTranslations);
+			RClick.AppendItem("Copy Text", ID_COPY_TEXT, true);
+			RClick.AppendItem("Paste Text", ID_PASTE_TEXT, PasteTranslations);
 			RClick.AppendSeparator();
-			RClick.AppendItem("New Id", IDM_NEW_ID, true);
+			RClick.AppendItem("New Id", ID_NEW_ID, true);
 
 			if (Tree->GetMouse(m, true))
 			{
 				switch (RClick.Float(Tree, m.x, m.y))
 				{
-					case IDM_COPY_TEXT:
+					case ID_COPY_TEXT:
 					{
 						Str->CopyText();
 						break;
 					}
-					case IDM_PASTE_TEXT:
+					case ID_PASTE_TEXT:
 					{
 						Str->PasteText();
 						break;
 					}
-					case IDM_NEW_ID:
+					case ID_NEW_ID:
 					{
 						LArray<ResMenuItem*> Sel;
 						if (GetTree() &&
@@ -380,7 +380,7 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 
 	switch (Cmd)
 	{
-		case IDM_NEW_SUB:
+		case ID_NEW_SUB:
 		{
 			ResMenuItem *Item = dynamic_cast<ResMenuItem*>(Selection());
 			LTreeItem *New = 0;
@@ -405,7 +405,7 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 			}
 			break;
 		}
-		case IDM_NEW_ITEM:
+		case ID_NEW_ITEM:
 		{
 			ResMenuItem *Item = dynamic_cast<ResMenuItem*>(Selection());
 			if (Item)
@@ -440,7 +440,7 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 			}
 			break;
 		}
-		case IDM_DELETE_ITEM:
+		case ID_DELETE_ITEM:
 		{
 			ResMenuItem *Item = dynamic_cast<ResMenuItem*>(Selection());
 			if (Item)
@@ -451,7 +451,7 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 			}
 			break;
 		}
-		case IDM_MOVE_UP:
+		case ID_MOVE_UP:
 		{
 			ResMenuItem *Item = dynamic_cast<ResMenuItem*>(Selection());
 			if (Item)
@@ -476,7 +476,7 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 			}
 			break;
 		}
-		case IDM_MOVE_DOWN:
+		case ID_MOVE_DOWN:
 		{
 			ResMenuItem *Item = dynamic_cast<ResMenuItem*>(Selection());
 			if (Item)
@@ -501,21 +501,21 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 			}
 			break;
 		}
-		case IDM_NEW_LANG:
+		case ID_NEW_LANG:
 		{
 			if (Group)
 			{
-				Group->OnCommand(IDM_NEW_LANG, 0, Null);
+				Group->OnCommand(ID_NEW_LANG, 0, Null);
 				Invalidate();
 				AppWindow->SetDirty(true, NULL);
 			}
 			break;
 		}
-		case IDM_DELETE_LANG:
+		case ID_DELETE_LANG:
 		{
 			if (Group)
 			{
-				Group->OnCommand(IDM_DELETE_LANG, 0, Null);
+				Group->OnCommand(ID_DELETE_LANG, 0, Null);
 				Invalidate();
 				AppWindow->SetDirty(true, NULL);
 			}
@@ -752,15 +752,15 @@ void ResMenuUi::OnCreate()
 		{
 			Tools->Attach(this);
 
-			Tools->AppendButton("New child menu", IDM_NEW_SUB);
-			Tools->AppendButton("New menu item", IDM_NEW_ITEM);
-			Tools->AppendButton("Delete menu item", IDM_DELETE_ITEM);
-			Tools->AppendButton("Move item up", IDM_MOVE_UP);
-			Tools->AppendButton("Move item down", IDM_MOVE_DOWN);
+			Tools->AppendButton("New child menu", ID_NEW_SUB);
+			Tools->AppendButton("New menu item", ID_NEW_ITEM);
+			Tools->AppendButton("Delete menu item", ID_DELETE_ITEM);
+			Tools->AppendButton("Move item up", ID_MOVE_UP);
+			Tools->AppendButton("Move item down", ID_MOVE_DOWN);
 			Tools->AppendSeparator();
 
-			Tools->AppendButton("New language", IDM_NEW_LANG, TBT_PUSH, true, 6);
-			Tools->AppendButton("Delete language", IDM_DELETE_LANG, TBT_PUSH, true, 7);
+			Tools->AppendButton("New language", ID_NEW_LANG, TBT_PUSH, true, 6);
+			Tools->AppendButton("Delete language", ID_DELETE_LANG, TBT_PUSH, true, 7);
 		}
 		else
 		{

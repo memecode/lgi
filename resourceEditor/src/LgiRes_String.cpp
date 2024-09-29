@@ -141,9 +141,7 @@ ResString::ResString(ResStringGroup *grp, int init_ref)
 	if (Group)
 	{
 		LAssert(!Group->Strs.HasItem(this));
-
 		Group->Strs.Insert(this);
-		Group->LList::Insert(this);
 	}
 	else
 	{
@@ -161,8 +159,6 @@ ResString::~ResString()
 
 		if (!Group->Strs.Delete(this))
 			LAssert(0);
-
-		Group->LList::Remove(this);
 	}
 
 	for (auto s: Items)
@@ -677,29 +673,29 @@ void ResString::OnMouseClick(LMouse &m)
 					PasteTranslations = strstr(Clip, TranslationStrMagic);
 			}
 
-			RClick->AppendItem("Copy Text", IDM_COPY_TEXT, true);
-			RClick->AppendItem("Paste Text", IDM_PASTE_TEXT, PasteTranslations);
+			RClick->AppendItem("Copy Text", ID_COPY_TEXT, true);
+			RClick->AppendItem("Paste Text", ID_PASTE_TEXT, PasteTranslations);
 			RClick->AppendSeparator();
-			RClick->AppendItem("New Id", IDM_NEW_ID, true);
-			RClick->AppendItem("Make Ref=Id", IDM_REF_EQ_ID, true);
-			RClick->AppendItem("Make Id=Ref", IDM_ID_EQ_REF, true);
+			RClick->AppendItem("New Id", ID_NEW_ID, true);
+			RClick->AppendItem("Make Ref=Id", ID_REF_EQ_ID, true);
+			RClick->AppendItem("Make Id=Ref", ID_ID_EQ_REF, true);
 
 			if (Parent->GetMouse(m, true))
 			{
 				int Cmd = 0;
 				switch (Cmd = RClick->Float(Parent, m.x, m.y))
 				{
-					case IDM_COPY_TEXT:
+					case ID_COPY_TEXT:
 					{
 						CopyText();
 						break;
 					}
-					case IDM_PASTE_TEXT:
+					case ID_PASTE_TEXT:
 					{
 						PasteText();
 						break;
 					}
-					case IDM_NEW_ID:
+					case ID_NEW_ID:
 					{
 						List<ResString> Sel;
 						if (!GetList()->GetSelection(Sel))
@@ -719,7 +715,7 @@ void ResString::OnMouseClick(LMouse &m)
 						}
 						break;
 					}
-					case IDM_REF_EQ_ID:
+					case ID_REF_EQ_ID:
 					{
 						List<ResString> a;
 						if (GetList()->GetSelection(a))
@@ -745,7 +741,7 @@ void ResString::OnMouseClick(LMouse &m)
 						}
 						break;
 					}
-					case IDM_ID_EQ_REF:
+					case ID_ID_EQ_REF:
 					{
 						List<ResString> a;
 						if (GetList()->GetSelection(a))
@@ -870,16 +866,86 @@ void ResString::PasteText()
 }
 
 ////////////////////////////////////////////////////////////////////
-ResStringGroup::ResStringGroup(AppWnd *w, int type) : 
-	Resource(w, type),
-	LList(90, 0, 0, 200, 200)
+int ResStringCompareFunc(LListItem *a, LListItem *b, ssize_t Data)
 {
-	Ui = 0;
-	Wnd()->Name("<untitled>");
+	ResString *A = dynamic_cast<ResString*>(a);
+	if (A)
+	{
+		return A->Compare(dynamic_cast<ResString*>(b), Data);
+	}
+	return -1;
+}
 
+StringGroupList::StringGroupList(ResStringGroup *g) :
+	LList(0, 0, 200, 200),
+	grp(g)
+{
 	Sunken(false);
-	SortAscend = true;
-	SortCol = 0;
+}
+
+StringGroupList::~StringGroupList()
+{
+	RemoveAll(); // This list doesn't own the strings...
+	grp->Lst = NULL;
+}
+
+void StringGroupList::OnColumnClick(int Col, LMouse &m)
+{
+	if (grp->SortCol == Col)
+	{
+		grp->SortAscend = !grp->SortAscend;
+	}
+	else
+	{
+		grp->SortCol = Col;
+		grp->SortAscend = true;
+	}
+
+	LList::Sort<ssize_t>(ResStringCompareFunc, (grp->SortCol + 1) * ((grp->SortAscend) ? 1 : -1));
+
+	LListItem *Sel = GetSelected();
+	if (Sel)
+	{
+		Sel->ScrollTo();
+	}
+}
+
+void StringGroupList::OnItemSelect(LArray<LListItem*> &Items)
+{
+	if (IsAttached())
+	{
+		ResString *s = dynamic_cast<ResString*>(Items[0]);
+		if (s && grp->AppWindow)
+		{
+			grp->AppWindow->OnObjSelect(s);
+		}
+	}
+}
+
+void StringGroupList::UpdateColumns()
+{
+	EmptyColumns();
+	AddColumn("#define", 150);
+	AddColumn("Ref", 70);
+	AddColumn("Id", 70);
+
+	grp->Visible.Length(0);
+	for (int i=0; i<grp->GetLanguages(); i++)
+	{
+		if (grp->App()->ShowLang(grp->Lang[i]->Id))
+		{
+			grp->Visible.Add(grp->Lang[i]);
+			AddColumn(grp->Lang[i]->Name, 100);
+		}
+	}
+}
+
+////////////////////////////////////////////////////////////////////
+ResStringGroup::ResStringGroup(AppWnd *w, int type) : 
+	Resource(w, type)
+{
+	Name("<untitled>");
+
 	AppendLanguage("en");
 	App()->OnLanguagesChange("en", true);
 }
@@ -887,11 +953,33 @@ ResStringGroup::ResStringGroup(AppWnd *w, int type) :
 ResStringGroup::~ResStringGroup()
 {
 	while (Strs.Length())
-	{
 		delete Strs[0];
-	}
-
 	DeleteObj(Ui);
+}
+
+void ResStringGroup::FillList()
+{
+	if (Lst)
+	{
+		auto n = Name();
+		Lst->Name(n);
+		Lst->UpdateColumns();
+		
+		LArray<LListItem*> a;
+		for (auto i: Strs)
+			a.Add(i);
+		Lst->Insert(a);
+	}
+}
+
+LView *ResStringGroup::Wnd()
+{
+	if (!Lst)
+	{
+		Lst = new StringGroupList(this);
+		FillList();
+	}
+	return Lst;
 }
 
 LLanguage *ResStringGroup::GetLanguage(LLanguageId Id)
@@ -959,75 +1047,12 @@ int ResString::Compare(LListItem *li, ssize_t Column)
 	return -1;
 }
 
-int ResStringCompareFunc(LListItem *a, LListItem *b, ssize_t Data)
-{
-	ResString *A = dynamic_cast<ResString*>(a);
-	if (A)
-	{
-		return A->Compare(dynamic_cast<ResString*>(b), Data);
-	}
-	return -1;
-}
-
-void ResStringGroup::OnColumnClick(int Col, LMouse &m)
-{
-	if (SortCol == Col)
-	{
-		SortAscend = !SortAscend;
-	}
-	else
-	{
-		SortCol = Col;
-		SortAscend = true;
-	}
-
-	LList::Sort<ssize_t>(ResStringCompareFunc, (SortCol + 1) * ((SortAscend) ? 1 : -1));
-
-	LListItem *Sel = GetSelected();
-	if (Sel)
-	{
-		Sel->ScrollTo();
-	}
-}
-
-void ResStringGroup::OnItemClick(LListItem *Item, LMouse &m)
-{
-	LList::OnItemClick(Item, m);
-}
-
-void ResStringGroup::OnItemSelect(LArray<LListItem*> &Items)
-{
-	if (IsAttached())
-	{
-		ResString *s = dynamic_cast<ResString*>(Items[0]);
-		if (s && AppWindow)
-		{
-			AppWindow->OnObjSelect(s);
-		}
-	}
-}
-
 void ResStringGroup::OnShowLanguages()
 {
-	UpdateColumns();
-	UpdateAllItems();
-}
-
-void ResStringGroup::UpdateColumns()
-{
-	EmptyColumns();
-	AddColumn("#define", 150);
-	AddColumn("Ref", 70);
-	AddColumn("Id", 70);
-
-	Visible.Length(0);
-	for (int i=0; i<GetLanguages(); i++)
+	if (Lst)
 	{
-		if (App()->ShowLang(Lang[i]->Id))
-		{
-			Visible.Add(Lang[i]);
-			AddColumn(Lang[i]->Name, 100);
-		}
+		Lst->UpdateColumns();
+		Lst->UpdateAllItems();
 	}
 }
 
@@ -1048,7 +1073,8 @@ void ResStringGroup::DeleteLanguage(LLanguageId Id)
 	{
 		// Remove lang
 		Lang.DeleteAt(Index);
-		UpdateColumns();
+		if (Lst)
+			Lst->UpdateColumns();
 	}
 }
 
@@ -1071,7 +1097,8 @@ void ResStringGroup::AppendLanguage(LLanguageId Id)
 		if (n)
 		{
 			Lang[Lang.Length()] = n;
-			UpdateColumns();
+			if (Lst)
+				Lst->UpdateColumns();
 		}
 	}
 }
@@ -1110,10 +1137,11 @@ int ResStringGroup::OnCommand(int Cmd, int Event, OsView hWnd)
 			CreateStr(true);
 			break;
 		}
-		case IDM_DELETE:
+		case ID_DELETE:
 		{
 			List<ResString> l;
-			if (GetSelection(l))
+			if (Lst &&
+				Lst->GetSelection(l))
 			{
 				for (auto s: l)
 				{
@@ -1122,7 +1150,7 @@ int ResStringGroup::OnCommand(int Cmd, int Event, OsView hWnd)
 			}
 			break;
 		}
-		case IDM_NEW_LANG:
+		case ID_NEW_LANG:
 		{
 			// List all the languages minus the ones already
 			// being edited
@@ -1146,7 +1174,7 @@ int ResStringGroup::OnCommand(int Cmd, int Event, OsView hWnd)
 			}
 
 			// Display the list
-			auto Dlg = new LangDlg(this, l);
+			auto Dlg = new LangDlg(Lst, l);
 			Dlg->DoModal([this, Dlg](auto dlg, auto id)
 			{
 				if (id && Dlg->Lang)
@@ -1159,7 +1187,7 @@ int ResStringGroup::OnCommand(int Cmd, int Event, OsView hWnd)
 			});
 			break;
 		}
-		case IDM_DELETE_LANG:
+		case ID_DELETE_LANG:
 		{
 			// List all the languages being edited
 			List<LLanguage> l;
@@ -1169,7 +1197,7 @@ int ResStringGroup::OnCommand(int Cmd, int Event, OsView hWnd)
 			}
 
 			// Display the list
-			auto Dlg = new LangDlg(this, l);
+			auto Dlg = new LangDlg(Lst, l);
 			Dlg->DoModal([this, Dlg](auto dlg, auto id)
 			{
 				if (id && Dlg->Lang)
@@ -1191,6 +1219,8 @@ ResString *ResStringGroup::CreateStr(bool User)
 	if (s)
 	{
 		s->SetId(s->SetRef(NextRef));
+		if (Lst)
+			Lst->Insert(s);
 
 		if (User)
 		{
@@ -1198,11 +1228,14 @@ ResString *ResStringGroup::CreateStr(bool User)
 			snprintf(Str, sizeof(Str), "IDS_%i", s->Ref);
 			s->SetDefine(Str);
 
-			s->GetList()->Select(NULL);
-			s->ScrollTo();
-			s->Select(true);
+			if (Lst)
+			{
+				s->ScrollTo();
+				s->Select(true);
+			}
 		}
 	}
+	
 	return s;
 }
 
@@ -1243,10 +1276,9 @@ ResString *ResStringGroup::FindRef(int Ref)
 int ResStringGroup::UniqueRef()
 {
 	int n = 1;
-	for (auto li: Items)
+	for (auto s: Strs)
 	{
-		auto i = dynamic_cast<ResString*>(li);
-		n = MAX(n, i->Ref);
+		n = MAX(n, s->Ref);
 	}
 
 	return n + 1;
@@ -1256,10 +1288,8 @@ int ResStringGroup::UniqueId(char *Define)
 {
 	int n = 1;
 
-	for (auto li: Items)
+	for (auto i: Strs)
 	{
-		auto i = dynamic_cast<ResString*>(li);
-
 		if (i->Id &&
 			i->Define &&
 			Define &&
@@ -1324,7 +1354,8 @@ void ResStringGroup::SetLanguages()
 		}
 	}
 
-	UpdateColumns();
+	if (Lst)
+		Lst->UpdateColumns();
 }
 
 void ResStringGroup::DeleteSel()
@@ -1337,6 +1368,19 @@ void ResStringGroup::Copy(bool Delete)
 
 void ResStringGroup::Paste()
 {
+}
+
+const char *ResStringGroup::Name()
+{
+	return GrpName;
+}
+
+bool ResStringGroup::Name(const char *n)
+{
+	GrpName = n;
+	if (Lst)
+		Lst->Name(n);
+	return true;
 }
 
 LView *ResStringGroup::CreateUI()
@@ -1363,13 +1407,12 @@ bool ResStringGroup::Read(LXmlTag *t, SerialiseContext &Ctx)
 {
 	bool Status = false;
 
-	char *p = 0;
+	char *p = NULL;
 	if ((p = t->GetAttr("Name")))
 	{
 		if (Ctx.Format == XmlFile)
 		{
-			char *x = DecodeXml(p);
-			if (x)
+			if (auto x = DecodeXml(p))
 			{
 				Name(x);
 				DeleteArray(x);
@@ -1380,7 +1423,8 @@ bool ResStringGroup::Read(LXmlTag *t, SerialiseContext &Ctx)
 			Name(p);
 		}
 		
-		Empty();
+		if (Lst)
+			Lst->Empty();
 
 		LHashTbl<ConstStrKey<char,false>, bool> L;
 		L.Add("en", true);
@@ -1447,20 +1491,17 @@ bool ResStringGroup::Write(LXmlTag *t, SerialiseContext &Ctx)
 
 void ResStringGroup::OnRightClick(LSubMenu *RClick)
 {
-	if (RClick)
+	if (!RClick || (Lst && !Lst->Enabled()))
+		return;
+
+	RClick->AppendSeparator();
+	if (Type() > 0)
 	{
-		if (Enabled())
+		auto Export = RClick->AppendSub("Export to...");
+		if (Export)
 		{
-			RClick->AppendSeparator();
-			if (Type() > 0)
-			{
-				auto Export = RClick->AppendSub("Export to...");
-				if (Export)
-				{
-					Export->AppendItem("Lgi File", IDM_EXPORT, true);
-					Export->AppendItem("Win32 Resource Script", IDM_EXPORT_WIN32, false);
-				}
-			}
+			Export->AppendItem("Lgi File", ID_EXPORT, true);
+			Export->AppendItem("Win32 Resource Script", ID_EXPORT_WIN32, false);
 		}
 	}
 }
@@ -1469,7 +1510,7 @@ void ResStringGroup::OnCommand(int Cmd)
 {
 	switch (Cmd)
 	{
-		case IDM_IMPORT:
+		case ID_IMPORT:
 		{
 			auto Select = new LFileSelect(AppWindow);
 			Select->Type("Text", "*.txt");
@@ -1496,7 +1537,7 @@ void ResStringGroup::OnCommand(int Cmd)
 			});
 			break;
 		}
-		case IDM_EXPORT:
+		case ID_EXPORT:
 		{
 			auto Select = new LFileSelect(AppWindow);
 			Select->Type("Text", "*.txt");
@@ -1533,86 +1574,24 @@ void ResStringGroup::Create(LXmlTag *load, SerialiseContext *ctx)
 }
 
 ////////////////////////////////////////////////////////////////////
-ResStringUi::ResStringUi(ResStringGroup *Res)
+ResStringUi::ResStringUi(ResStringGroup *Res) :
+	LBox(ID_STR_UI, true)
 {
 	StringGrp = Res;
-	Tools = 0;
-	Status = 0;
-	StatusInfo = 0;
 }
 
 ResStringUi::~ResStringUi()
 {
 	if (StringGrp)
 	{
-		StringGrp->Ui = 0;
+		delete StringGrp->Wnd();
+		StringGrp->Ui = NULL;
 	}
-}
-
-void ResStringUi::OnPaint(LSurface *pDC)
-{
-	LRegion Client(0, 0, X()-1, Y()-1);
-	for (auto w: Children)
-	{
-		LRect r = w->GetPos();
-		Client.Subtract(&r);
-	}
-
-	pDC->Colour(L_MED);
-	for (LRect *r = Client.First(); r; r = Client.Next())
-	{
-		pDC->Rectangle(r);
-	}
-}
-
-void ResStringUi::PourAll()
-{
-	LRegion Client(GetClient());
-	LRegion Update;
-
-	for (auto v: Children)
-	{
-		LRect OldPos = v->GetPos();
-		Update.Union(&OldPos);
-
-		if (v->Pour(Client))
-		{
-			if (!v->Visible())
-			{
-				v->Visible(true);
-			}
-
-			if (OldPos != v->GetPos())
-			{
-				// position has changed update...
-				v->Invalidate();
-			}
-
-			Client.Subtract(&v->GetPos());
-			Update.Subtract(&v->GetPos());
-		}
-		else
-		{
-			// make the view not visible
-			v->Visible(false);
-		}
-	}
-
-	for (int i=0; i<Update.Length(); i++)
-	{
-		Invalidate(Update[i]);
-	}
-}
-
-void ResStringUi::OnPosChange()
-{
-	PourAll();
 }
 
 void ResStringUi::OnCreate()
 {
-	Tools = new LToolBar;
-	if (Tools)
+	if ((Tools = new LToolBar))
 	{
 		auto FileName = LFindFile("_StringIcons.gif");
 		if (FileName && Tools->SetBitmap(FileName, 16, 16))
@@ -1620,11 +1599,11 @@ void ResStringUi::OnCreate()
 			Tools->Attach(this);
 
 			Tools->AppendButton("New String", IDM_NEW, TBT_PUSH, !StringGrp->SystemObject());
-			Tools->AppendButton("Delete String", IDM_DELETE, TBT_PUSH, !StringGrp->SystemObject());
+			Tools->AppendButton("Delete String", ID_DELETE, TBT_PUSH, !StringGrp->SystemObject());
 			Tools->AppendSeparator();
 
-			Tools->AppendButton("New Language", IDM_NEW_LANG, TBT_PUSH);
-			Tools->AppendButton("Delete Language", IDM_DELETE_LANG, TBT_PUSH);
+			Tools->AppendButton("New Language", ID_NEW_LANG, TBT_PUSH);
+			Tools->AppendButton("Delete Language", ID_DELETE_LANG, TBT_PUSH);
 		}
 		else
 		{
@@ -1632,17 +1611,16 @@ void ResStringUi::OnCreate()
 		}
 	}
 
-	Status = new LStatusBar;
-	if (Status)
+	if (auto w = StringGrp->Wnd())
+	{
+		StringGrp->FillList();
+		w->Attach(this);
+	}
+
+	if ((Status = new LStatusBar))
 	{
 		Status->Attach(this);
 		StatusInfo = Status->AppendPane("", 2);
-	}
-
-	ResFrame *Frame = new ResFrame(StringGrp);
-	if (Frame)
-	{
-		Frame->Attach(this);
 	}
 }
 

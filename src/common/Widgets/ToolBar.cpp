@@ -1226,6 +1226,11 @@ bool LToolBar::OnLayout(LViewLayoutInfo &Inf)
 	else
 	{
 		// Calc height
+		if (Y() == 0)
+		{
+			LRegion r(0, 0, Inf.Width.Min, 10000);
+			Pour(r);
+		}
 		Inf.Height.Min = Y();
 		Inf.Height.Max = Y();
 	}
