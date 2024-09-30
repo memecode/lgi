@@ -410,15 +410,15 @@ void LBox::OnPosChange()
 			{
 				if (IsVertical())
 				{
-					if (info.Height.Min != LViewLayoutInfo::FILL)
+					if (info.Height.Max != LViewLayoutInfo::FILL)
 						// View has given us a height to use...
-						box.Size = LCss::Len(LCss::LenPx, info.Height.Min);
+						box.Size = LCss::Len(LCss::LenPx, info.Height.Max);
 				}
 				else
 				{
-					if (info.Height.Min != LViewLayoutInfo::FILL)
+					if (info.Height.Max != LViewLayoutInfo::FILL)
 						// View has given has a width to use...
-						box.Size = LCss::Len(LCss::LenPx, info.Width.Min);
+						box.Size = LCss::Len(LCss::LenPx, info.Width.Max);
 				}
 			}
 		}
