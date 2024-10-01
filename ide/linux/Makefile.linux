@@ -31,13 +31,13 @@ ifeq ($(Build),Debug)
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I./resources \
-		-I../include \
-		-I./src \
 		-I../private/common \
 		-I../include/lgi/linux \
 		`pkg-config --cflags gtk+-3.0` \
-		-I../include/lgi/linux/Gtk
+		-I./src \
+		-I../include \
+		-I../include/lgi/linux/Gtk \
+		-I./resources
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
@@ -51,28 +51,21 @@ else
 		-L../$(BuildDir)
 	Inc =  \
 		-I./src \
-		-I../include \
 		-I../include/lgi/linux \
-		`pkg-config --cflags gtk+-3.0` \
 		-I../include/lgi/linux/Gtk \
+		`pkg-config --cflags gtk+-3.0` \
 		-I./resources \
-		-I../private/common
+		-I../private/common \
+		-I../include
 endif
 
 # Dependencies
-Source =	src/DocEdit.cpp \
-			src/Debugger.cpp \
-			src/History.cpp \
-			src/IdeDoc.cpp \
-			../src/common/Lgi/About.cpp \
-			src/WebFldDlg.cpp \
+Source =	../src/common/Lgi/About.cpp \
 			src/FtpThread.cpp \
-			src/IdeProject.cpp \
-			src/DocEditStyling.cpp \
+			src/WebFldDlg.cpp \
 			src/AddFtpFile.cpp \
-			src/LgiIde.cpp \
-			src/LgiUtils.cpp \
-			src/DebugContext.cpp \
+			src/IdeProject.cpp \
+			src/DocEdit.cpp \
 			../src/common/Coding/ParseCpp.cpp \
 			../src/common/Net/Ftp.cpp \
 			src/IdeProjectSettings.cpp \
@@ -102,7 +95,14 @@ Source =	src/DocEdit.cpp \
 			../src/common/Lgi/LgiMain.cpp \
 			../src/common/Lgi/Mdi.cpp \
 			../src/common/Text/TextConvert.cpp \
-			../src/common/Gdc2/Filters/Png.cpp
+			../src/common/Gdc2/Filters/Png.cpp \
+			src/LgiUtils.cpp \
+			src/History.cpp \
+			src/IdeDoc.cpp \
+			src/Debugger.cpp \
+			src/LgiIde.cpp \
+			src/DocEditStyling.cpp \
+			src/DebugContext.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -424,10 +424,10 @@ cleanall :
 	+make -C "../" -f ./linux/Makefile.linux clean
 
 VPATH=$(BuildDir) \
-	../src/common/Text/Homoglyphs \
-	../src/common/Lgi \
-	../src/common/Net \
 	./src \
+	../src/common/Lgi \
 	../src/common/Coding \
 	../src/common/Text \
-	../src/common/Gdc2/Filters
+	../src/common/Gdc2/Filters \
+	../src/common/Text/Homoglyphs \
+	../src/common/Net

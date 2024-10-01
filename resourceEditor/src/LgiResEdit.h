@@ -223,6 +223,8 @@ public:
 	bool IsSelected();
 
 	virtual const char *Name() = 0;
+	virtual bool Name(const char *n) = 0;
+
 	virtual LView *Wnd() { return NULL; }
 	virtual bool Attach(LViewI *Parent);
 	virtual int Type() { return ResType; }
@@ -260,6 +262,8 @@ public:
 	LView *Wnd() { return dynamic_cast<LView*>(this); }
 
 	const char *Name() { return LView::Name(); }
+	bool Name(const char *n) { return LView::Name(n); }
+
 	void Create(LXmlTag *load, SerialiseContext *ctx) { LAssert(0); }
 	bool Test(ErrorCollection *e) { return false; }
 	bool Read(LXmlTag *t, SerialiseContext &Ctx) { return false; }
@@ -916,6 +920,7 @@ public:
 	void Create(LXmlTag *Load, SerialiseContext *Ctx);
 	LView *Wnd() { return dynamic_cast<LView*>(this); }
 	const char *Name() { return LView::Name(); }
+	bool Name(const char *n) { return LView::Name(n); }
 	void OnShowLanguages();
 
 	// Resource
