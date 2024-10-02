@@ -683,6 +683,9 @@ int32 LSubProcess::Communicate(LStreamI *Out, LStreamI *In, LCancel *Cancel)
 
 	while (NOT_CANCELLED)
 	{
+		auto pk = Peek();
+		if (pk <= 0)
+			break;
 		r = Read(Buf, sizeof(Buf));
 		if (r > 0 && Out)
 			Out->Write(Buf, r);
