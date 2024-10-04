@@ -2002,7 +2002,7 @@ void LView::Raised(bool i)
 	else _BorderSize = 0;
 }
 
-int LView::GetId()
+int LView::GetId() const
 {
 	// This is needed by SendNotify function which is thread safe.
 	// So no thread safety check here.
@@ -2144,6 +2144,7 @@ bool LView::AttachChildren()
 		bool a = c->IsAttached();
 		if (!a)
 		{
+			
 			if (!c->Attach(this))
 			{
 				LgiTrace("%s:%i - failed to attach %s\n", _FL, c->GetClass());

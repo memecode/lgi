@@ -527,7 +527,7 @@ public:
 	virtual void SetMinimumSize(LPoint Size) = 0;	
 
 	// Id
-	virtual int GetId() = 0;
+	virtual int GetId() const = 0;
 	virtual void SetId(int i) = 0;
 
 	// Events and notification

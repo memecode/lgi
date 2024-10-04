@@ -410,7 +410,8 @@ public:
 			ssh_free(Ssh);
 			Ssh = NULL;
 
-			Log->Print("%s:%i - ssh_connect failed.\n", _FL);
+			if (Log)
+				Log->Print("%s:%i - ssh_connect failed.\n", _FL);
 			return false;
 		}
 		// Log->Print("%s:%i - ssh_connect ok.\n", _FL);

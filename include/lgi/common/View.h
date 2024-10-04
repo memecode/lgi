@@ -709,7 +709,7 @@ public:
 	///
 	/// The ID of a view is designed to associate controls defined in resource
 	/// files with a object at runtime via a C header file define.
-	int GetId() override;
+	int GetId() const override;
 	/// Sets the view's ID.
 	void SetId(int i) override;
 	/// true if this control is a tab stop.

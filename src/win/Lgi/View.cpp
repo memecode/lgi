@@ -33,6 +33,18 @@
 bool In_SetWindowPos = false;
 HWND LViewPrivate::hPrevCapture = 0;
 
+const char *MsgName(int m)
+{
+	switch (m)
+	{
+		case WM_SYSKEYUP: return "WM_SYSKEYUP";
+		case WM_SYSKEYDOWN: return "WM_SYSKEYDOWN";
+		case WM_KEYDOWN: return "WM_KEYDOWN";
+		case WM_KEYUP: return "WM_KEYUP";
+	}
+	return NULL;
+}
+
 LViewPrivate::LViewPrivate(LView *view) : View(view)
 {
 	WndStyle = WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN;
@@ -1929,9 +1941,9 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 				int KeyFlags = _lgi_get_key_flags();
 				HWND hwnd = _View;
 
+				// LgiTrace("Key Msg=%s %x,%x\n", MsgName(Msg->m), Msg->a, Msg->b);
 				if (SysOnKey(this, Msg))
 				{
-					// LgiTrace("SysOnKey true, Msg=0x%x %x,%x\n", Msg->m, Msg->a, Msg->b);
 					return 0;
 				}
 				else
@@ -1954,15 +1966,26 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 					}
 					else
 					{
-						LWindow *Wnd = GetWindow();
-						if (Wnd)
+						if (auto Wnd = GetWindow())
 						{
+							/*
 							if (Key.Alt() ||
 								Key.Ctrl() ||
-								(Key.c16 < 'A' || Key.c16 > 'Z'))
+								Key.c16 < 'A' ||
+								Key.c16 > 'Z')
 							{
+							*/
 								Wnd->HandleViewKey(this, Key);
+							/*
 							}
+							else
+							{
+								LgiTrace("Unprocessed: %i, %i, %i, %i\n",
+									Key.Alt(), Key.Ctrl(),
+									Key.c16 < 'A',
+									Key.c16 > 'Z');
+							}
+							*/
 						}
 						else
 						{
