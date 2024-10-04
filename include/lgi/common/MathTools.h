@@ -137,8 +137,8 @@ T LMedian(LArray<T> &a)
 	return a[a.Length()>>1];
 }
 
-template<typename T>
-T LAverage(LArray<T> &a)
+template<typename T, typename SUM>
+SUM LAverage(LArray<T> &a)
 {
 	if (a.Length() == 0)
 		return 0;
@@ -147,7 +147,7 @@ T LAverage(LArray<T> &a)
 	for (auto i: a)
 		sum += i;
 
-	return (T) (sum / a.Length());
+	return ((SUM)sum) / a.Length();
 }
 
 template<typename T, typename S>
