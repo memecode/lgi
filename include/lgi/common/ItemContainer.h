@@ -278,6 +278,10 @@ public:
 						drop the item onto existing items. This is
 						more for tree controls where the item is
 						added as a child of the target item.
+
+	   If this flag is enabled the view will manage the drag of items
+	   using `ContainerItemsFormat` and `ContainerItemsDrag`. And
+	   finally the drop will be handled via `OnReorderDrop`.
 	*/
 	enum ItemDragFlags
 	{
@@ -286,7 +290,69 @@ public:
 		ITEM_DRAG_ON_EXISTING	= 1 << 1,
 	};
 	
+	/// This is the drag and drop format that uses `ContainerItemsDrag`
+	/// \sa SetDragItem
+	constexpr static const char *ContainerItemsFormat = "Lgi.ContainerItems";
+
+	/// The data format for `ContainerItemsFormat`
+	/// A list of items being dragged over a container view
+	/// \sa SetDragItem
+	struct ContainerItemsDrag
+	{
+		// Owner view
+		LItemContainer *view;
+		// Count of the items in `item`.
+		uint32_t items;
+		// Array of size `items`
+		LItem *item[1];
+
+		size_t Sizeof() { return Sizeof(items); }
+		static size_t Sizeof(uint32_t items)
+		{
+			return sizeof(ContainerItemsDrag) + (items > 1 ? sizeof(LItem*) * (items - 1) : 0);
+		}
+		static ContainerItemsDrag *New(uint32_t items)
+		{
+			auto obj = (ContainerItemsDrag*) calloc(Sizeof(items), 1);
+			if (obj)
+				obj->items = items;
+			return obj;
+		}
+	};
+
+	/// This struct is the drop format for a reorder operation
+	/// Describes where a `ContainerItemsFormat` is dropped on the view
+	struct ContainerItemDrop
+	{
+		LItem *prev = NULL, *next = NULL;
+		LRect pos = {0, 0, -1, -1};
+
+		operator bool() const
+		{
+			return (prev != nullptr || next != nullptr) && pos.Valid();
+		}
+		bool operator==(const ContainerItemDrop &i)
+		{
+			return prev == i.prev &&
+				next == i.next &&
+				pos == i.pos;
+		}
+		bool operator!=(const ContainerItemDrop &i)
+		{
+			return !(*this == i);
+		}
+	};
+
 protected:
+	/// The handler for re-ordering drops.
+	/// \returns true if the screen should be updated
+	/// \sa SetDragItem
+	virtual bool OnReorderDrop(ContainerItemDrop &dest, ContainerItemsDrag &source) { return false; };
+
+	/// \returns the item drop details for a given point
+	/// \sa SetDragItem
+	virtual ContainerItemDrop GetItemReorderPos(LPoint pt) { return ContainerItemDrop(); }
+
 	ContainerDragMode DragMode = DRAG_NONE;
 	ItemDragFlags DragItem = ITEM_DRAG_USER;
 	
@@ -405,7 +471,16 @@ public:
 	}
 
 	// Drag and drop support:
+	
+	/// Gets the current drag item flags
 	ItemDragFlags GetDragItem() { return DragItem; }
+	/// Sets the drag item flags. This enables the user to organize the items in the container
+	/// via drag and drop. Either just reordering or also changing the heirarchy of the items
+	/// in a tree control.
+	/// 
+	/// The format for the drag and drop is `ContainerItemsFormat` and the data in that
+	/// format is described by `ContainerItemsDrag`. Finally when the user drops the items
+	/// the control handles the drop via `OnReorderDrop`.
 	void SetDragItem(ItemDragFlags flags) { DragItem = flags; }
 };
 
