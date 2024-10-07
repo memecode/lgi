@@ -217,7 +217,7 @@ public:
 	void OnMouseClick(LMouse &m);
 };
 
-class IdeTree : public LTree, public LDragDropTarget
+class IdeTree : public LTree
 {
 	LTreeItem *Hit = NULL;
 

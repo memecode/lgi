@@ -62,7 +62,7 @@ static const char **GetIconNames()
 	return IconName;
 }
 
-class LFilterTree : public LTree, public LDragDropTarget
+class LFilterTree : public LTree
 {
 	friend class LFilterItem;
 
@@ -71,11 +71,6 @@ public:
 	{
 	}
 	
-	void OnCreate()
-	{
-		SetWindow(this);
-	}
-
 	void OnFocus(bool f)
 	{
 		if (f && !Selection())
