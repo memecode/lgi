@@ -123,8 +123,8 @@ struct LgiClass LDragData
 class LgiClass LDragFormats
 {
 	friend class LDragDropSource;
-	friend class LDataObject;
 	friend class LDragDropTarget;
+	friend class LDataObject;
 
 	bool Source;
 	
@@ -166,25 +166,25 @@ class LgiClass LDragDropSource
 	friend class LDataObject;
 
 protected:
-	class LDndSourcePriv *d;
+	class LDndSourcePriv *d = nullptr;
 	
 	#if WINNATIVE
-	int Index;
+		int Index;
 
-	// IUnknown
-	ULONG STDMETHODCALLTYPE AddRef();
-	ULONG STDMETHODCALLTYPE Release();
-	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, void **ppv);
+		// IUnknown
+		ULONG STDMETHODCALLTYPE AddRef();
+		ULONG STDMETHODCALLTYPE Release();
+		HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, void **ppv);
 
-	// IEnumFORMATETC
-	HRESULT STDMETHODCALLTYPE Next(ULONG celt, FORMATETC *rgelt, ULONG *pceltFetched);
-	HRESULT STDMETHODCALLTYPE Skip(ULONG celt);
-	HRESULT STDMETHODCALLTYPE Reset();
-	HRESULT STDMETHODCALLTYPE Clone(IEnumFORMATETC **ppenum);
+		// IEnumFORMATETC
+		HRESULT STDMETHODCALLTYPE Next(ULONG celt, FORMATETC *rgelt, ULONG *pceltFetched);
+		HRESULT STDMETHODCALLTYPE Skip(ULONG celt);
+		HRESULT STDMETHODCALLTYPE Reset();
+		HRESULT STDMETHODCALLTYPE Clone(IEnumFORMATETC **ppenum);
 
-	// IDropSource
-	HRESULT STDMETHODCALLTYPE QueryContinueDrag(BOOL fEscapePressed, DWORD InputState);
-	HRESULT STDMETHODCALLTYPE GiveFeedback(DWORD dwEffect);
+		// IDropSource
+		HRESULT STDMETHODCALLTYPE QueryContinueDrag(BOOL fEscapePressed, DWORD InputState);
+		HRESULT STDMETHODCALLTYPE GiveFeedback(DWORD dwEffect);
 	#endif
 
 public:
@@ -204,7 +204,17 @@ public:
 
 	/// Start a drag operation
 	/// \returns The operation that took effect: #DROPEFFECT_NONE, #DROPEFFECT_COPY etc. 
-	int Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface *Icon = NULL);
+	int Drag
+	(
+		/// The view that initiates the drag operation
+		LView *SourceWnd,
+		/// The original event from the OS
+		OsEvent Event,
+		/// The allowed operations, usually one of DROPEFFECT_COPY or DROPEFFECT_MOVE.
+		int Effect,
+		/// Optional icon for the drag
+		LSurface *Icon = NULL
+	);
 
 	/// Called when window is registered
 	virtual void OnRegister(bool Suc) {}

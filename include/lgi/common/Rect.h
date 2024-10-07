@@ -80,6 +80,7 @@ public:
 		y2 = r->y2;
 	}
 	
+	LPoint Origin() { return LPoint(x1, y1); }
 	LPoint Center() { return LPoint(x1 + (X()/2), y1 + (Y()/2)); }
 	LPoint GetSize() { return LPoint(X(), Y()); }
 

@@ -17,6 +17,26 @@
 #define TreeUpdateNow		false
 #define ForAll(Items)		for (auto c : Items)
 
+struct LTreeItemDragFormat
+{
+	LTree *view;
+	uint32_t items;
+	LTreeItem *item[1];
+
+	size_t Sizeof() { return Sizeof(items); }
+	static size_t Sizeof(uint32_t items)
+	{
+		return sizeof(LTreeItemDragFormat) + (items > 1 ? sizeof(LTreeItem*) * (items - 1) : 0);
+	}
+	static LTreeItemDragFormat *New(uint32_t items)
+	{
+		auto obj = (LTreeItemDragFormat*) calloc(Sizeof(items), 1);
+		if (obj)
+			obj->items = items;
+		return obj;
+	}
+};
+
 struct LTreeLocker
 {
 	LTree *t = NULL;
@@ -54,6 +74,7 @@ public:
     int				LastLayoutPx = -1;
 	LMouse			*CurrentClick = NULL;
 	LTreeItem		*ScrollTo = NULL;
+	LAutoPtr<LTree::DragItemInfo> DragItemStatus;
     
     // Visual style
 	LTree::ThumbStyle Btns = LTree::TreeTriangle;
@@ -654,15 +675,14 @@ void LTreeItem::_Pour(LPoint *Limit, int ColumnPx, int Depth, bool Visible)
 	{
 		LPoint TextSize;
 		_PourText(TextSize);
-		LImageList *ImgLst = Tree->GetImageList();
-		// int IconX = (ImgLst && GetImage() >= 0) ? ImgLst->TileX() + Tree->d->IconTextGap : 0;
+		
+		auto ImgLst = Tree->GetImageList();
 		int IconY = (ImgLst && GetImage() >= 0) ? ImgLst->TileY() : 0;
 		int Height = MAX(TextSize.y, IconY);
 		if (!Height)
 		    Height = 16;
 
-		LDisplayString *Ds = d->GetDs(0, 0);
-
+		auto Ds = d->GetDs(0, 0);
 		d->Pos.ZOff(ColumnPx - 1, (Ds ? MAX(Height, Ds->Y()) : Height) - 1);
 		d->Pos.Offset(0, Limit->y);
 		if (!d->Pos.Valid())
@@ -1610,6 +1630,11 @@ bool LTree::OnMouseWheel(double Lines)
 	return true;
 }
 
+void LTree::OnCreate()
+{
+	LDragDropTarget::SetWindow(this);
+}
+
 void LTree::OnMouseClick(LMouse &m)
 {
 	TREELOCK(this)
@@ -1801,7 +1826,7 @@ void LTree::OnPaint(LSurface *pDC)
 
 	d->IconTextGap = GetFont()->GetHeight() / 6;
 	auto cText = LColour(L_TEXT);
-	auto cWs = LColour(L_WORKSPACE);
+	auto cWs   = LColour(L_WORKSPACE);
 	LColour Fore = Tools.GetFore(&cText);
 	LColour Background = Tools.GetBack(&cWs, 0);
 
@@ -1881,6 +1906,13 @@ void LTree::OnPaint(LSurface *pDC)
 		// paint after items
 		pDC->Colour(Background);
 		pDC->Rectangle(rItems.x1, d->Limit.y - s.y, rItems.x2, rItems.y2);
+	}
+
+	if (d->DragItemStatus)
+	{
+		auto r = d->DragItemStatus->pos;
+		pDC->Colour(LColour::Green);
+		pDC->Rectangle(&r);
 	}
 }
 
@@ -2110,6 +2142,12 @@ void LTree::OnDragExit()
 	InsideDragOp(false);
 	SetPulse();
 	SelectDropTarget(0);
+
+	if (d->DragItemStatus)
+	{
+		d->DragItemStatus.Reset();
+		Invalidate();
+	}
 }
 
 void LTree::SelectDropTarget(LTreeItem *Item)
@@ -2184,15 +2222,6 @@ void LTree::OnItemClick(LTreeItem *Item, LMouse &m)
 		SendNotify(LNotification(m));
 }
 
-void LTree::OnItemBeginDrag(LTreeItem *Item, LMouse &m)
-{
-	if (!Item)
-		return;
-
-	TREELOCK(this)
-	Item->OnBeginDrag(m);
-}
-
 void LTree::OnFocus(bool b)
 {
 	TREELOCK(this)
@@ -2233,3 +2262,190 @@ void LTree::SetVisualStyle(ThumbStyle Btns, bool JoiningLines)
 	Invalidate();
 }
 
+void LTree::OnItemBeginDrag(LTreeItem *Item, LMouse &m)
+{
+	if (!Item)
+		return;
+
+	TREELOCK(this)
+
+	auto clientHandled = Item->OnBeginDrag(m);
+	if (DragItem && !clientHandled)
+	{
+		// Do internal handling of item drag...
+		Drag(this, NULL, DROPEFFECT_MOVE);
+	}
+}
+
+bool LTree::GetFormats(LDragFormats &Formats)
+{
+	if (DragItem)
+	{
+		Formats.Supports(TreeItemListFormat);
+		return true;
+	}
+
+	return false;
+}
+
+bool LTree::GetData(LArray<LDragData> &Data)
+{
+	for (auto &dd: Data)
+	{
+		if (dd.IsFormat(TreeItemListFormat))
+		{
+			LArray<LTreeItem*> sel;
+			if (!GetSelection(sel))
+				return false;
+			
+			if (auto items = LTreeItemDragFormat::New((uint32_t)sel.Length()))
+			{
+				items->view = this;
+				for (size_t i=0; i<sel.Length(); i++)
+					items->item[i] = sel[i];
+
+				dd.Data[0].SetBinary(items->Sizeof(), items, false);
+				free(items);
+			}
+		}
+	}
+
+	return false;
+}
+
+LTree::DragItemInfo LTree::GetItemReorderPos(LPoint pt)
+{
+	LTree::DragItemInfo inf;
+	
+	ssize_t i=0;
+	for (auto item: Items)
+	{
+		auto p = item->GetPos();
+		if (p->Overlap(pt))
+		{
+			inf.pos.x1 = p->x1;
+			inf.pos.x2 = p->x2;
+			if (pt.y >= p->Center().y)
+			{
+				// Bottom half...
+				inf.pos.y1 = p->y2 - 1;
+				inf.pos.y2 = p->y2 + 2;
+				inf.prev = item;
+				inf.next = Items.ItemAt(i + 1);
+			}
+			else
+			{
+				// Top half...
+				inf.pos.y1 = p->y1 - 2;
+				inf.pos.y2 = p->y1 + 1;
+				inf.next = item;
+				inf.prev = Items.ItemAt(i - 1);
+			}
+		}
+		i++;
+	}
+
+	#if 1
+	LgiTrace("reorder %s %s %s\n",
+		inf.prev ? inf.prev->GetText() : "null",
+		inf.next ? inf.next->GetText() : "null",
+		inf.pos.GetStr());
+	#endif
+
+	return inf;
+}
+
+int LTree::WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState)
+{
+	if (DragItem)
+	{
+		if (Formats.HasFormat(TreeItemListFormat))
+		{
+			if (auto pos = GetItemReorderPos(Pt))
+			{
+				if (!d->DragItemStatus ||
+					pos != *d->DragItemStatus.Get())
+				{
+					d->DragItemStatus.Reset(new LTree::DragItemInfo(pos));
+					Invalidate();
+				}
+
+				return DROPEFFECT_MOVE;
+			}
+		}
+	}
+
+	return DROPEFFECT_NONE;
+}
+
+int LTree::OnDragError(const char *Msg, const char *file, int line)
+{
+	LgiTrace("%s:%i - %s\n", file, line, Msg);
+	return DROPEFFECT_NONE;
+}
+
+int LTree::OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
+{
+	bool screenDirty = false;
+
+	for (auto &dd: Data)
+	{
+		if (dd.IsFormat(TreeItemListFormat))
+		{
+			if (dd.Data.Length() != 1)
+				return OnDragError("Wrong item count", _FL);
+			if (!dd.Data[0].IsBinary())
+				return OnDragError("Not binary data", _FL);
+			auto items = (LTreeItemDragFormat*) dd.Data[0].Value.Binary.Data;
+			if (items->view != this)
+				return OnDragError("Not the same tree view", _FL);
+			
+			if (d->DragItemStatus)
+			{
+				if (DragItem & ITEM_DRAG_REORDER)
+				{
+					for (size_t i=0; i<items->items; i++)
+					{
+						auto moveItem = items->item[i];
+						Items.Delete(moveItem);
+
+						if (d->DragItemStatus->prev)
+						{
+							// Insert AFTER the prev item...
+							auto destIdx = Items.IndexOf(d->DragItemStatus->prev);
+							if (destIdx >= 0)
+							{
+								Items.Insert(moveItem, destIdx + 1);
+								screenDirty = true;
+							}
+						}
+						else if (d->DragItemStatus->next)
+						{
+							// Insert BEFORE the next item...
+							auto destIdx = Items.IndexOf(d->DragItemStatus->next);
+							if (destIdx >= 0)
+							{
+								Items.Insert(moveItem, destIdx);
+								screenDirty = true;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (d->DragItemStatus)
+	{
+		d->DragItemStatus.Reset();
+		screenDirty = true;
+	}
+
+	if (screenDirty)
+	{
+		UpdateAllItems();
+		Invalidate();
+	}
+
+	return DROPEFFECT_NONE;
+}

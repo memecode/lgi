@@ -172,12 +172,14 @@ public:
 class LgiClass LTree :
 	public LItemContainer,
 	public ResObject,
-	public LTreeNode
+	public LTreeNode,
+	public LDragDropSource,
+	public LDragDropTarget
 {
 	friend class LTreeItem;
 	friend class LTreeNode;
 
-	class LTreePrivate *d;
+	class LTreePrivate *d = nullptr;
 
 	// Private methods
 	void _Pour();
@@ -198,7 +200,6 @@ protected:
 	
 	LTreeItem *GetAdjacent(LTreeItem *From, bool Down);
 	void OnDragEnter();
-	void OnDragExit();
 	void ClearDs(int Col) override;
 	
 public:
@@ -217,6 +218,7 @@ public:
 	virtual void OnItemSelect(LTreeItem *Item);
 	
 	// Implementation
+	void OnCreate() override;
 	void OnMouseClick(LMouse &m) override;
 	void OnMouseMove(LMouse &m) override;
 	bool OnMouseWheel(double Lines) override;
@@ -299,6 +301,29 @@ public:
 	};
 
 	void SetVisualStyle(ThumbStyle Btns, bool JoiningLines);
+
+	// Drag and drop support:
+	constexpr static const char *TreeItemListFormat = "Lgi.TreeItemList";
+	bool GetFormats(LDragFormats &Formats) override;
+	bool GetData(LArray<LDragData> &Data) override;
+	int WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState) override;
+	int OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState) override;
+	void OnDragExit() override;
+	virtual int OnDragError(const char *Msg, const char *file, int line);
+	struct DragItemInfo
+	{
+		LTreeItem *prev = NULL, *next = NULL;
+		LRect pos = {0, 0, -1, -1};
+		operator bool() const { return (prev != nullptr || next != nullptr) && pos.Valid(); }
+		bool operator==(const DragItemInfo &i)
+		{
+			return prev == i.prev &&
+				next == i.next &&
+				pos == i.pos;
+		}
+		bool operator!=(const DragItemInfo &i) { return !(*this == i); }
+	};
+	DragItemInfo GetItemReorderPos(LPoint ms);
 };
 
 #endif

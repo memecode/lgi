@@ -267,9 +267,28 @@ public:
 		TOGGLE_ITEMS,
 		CLICK_ITEM,
 	};
+
+	/* This defines the default handling of dragging an item.
+	   ITEM_DRAG_USER - Means the application has to define what
+						happens when the user drags and item. Ie
+						there is no default.
+	   ITEM_DRAG_REORDER - The drag handler will allow the user to
+						reorder the items in the container.
+	   ITEM_DRAG_ON_EXISTING - The drag handler allows the user to
+						drop the item onto existing items. This is
+						more for tree controls where the item is
+						added as a child of the target item.
+	*/
+	enum ItemDragFlags
+	{
+		ITEM_DRAG_USER			= 0,
+		ITEM_DRAG_REORDER		= 1 << 0,
+		ITEM_DRAG_ON_EXISTING	= 1 << 1,
+	};
 	
 protected:
 	ContainerDragMode DragMode = DRAG_NONE;
+	ItemDragFlags DragItem = ITEM_DRAG_USER;
 	
 	LRect ColumnHeader;
 	int ColClick = -1;
@@ -299,7 +318,6 @@ public:
 		public: \
 			bool name() { return b##name; } \
 			void name(bool b) { b##name = b; }
-
 
 	// Props
 	DEFINE_FLAG(AskText, false)
@@ -385,6 +403,10 @@ public:
 		LAssert(!"Not impl..");
 		return *this;
 	}
+
+	// Drag and drop support:
+	ItemDragFlags GetDragItem() { return DragItem; }
+	void SetDragItem(ItemDragFlags flags) { DragItem = flags; }
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////

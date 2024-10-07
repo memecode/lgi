@@ -1049,8 +1049,8 @@ public:
 			Menu->Load(this, "IDM_MENU");
 		}
 
-		auto ToolsBox = new LBox(IDC_TOOLS_BOX, true, "ToolsBox");
-		FoldersBox = new LBox(IDC_FOLDERS_BOX, false, "FoldersBox");
+		auto ToolsBox   = new LBox(IDC_TOOLS_BOX, true, "ToolsBox");
+		FoldersBox      = new LBox(IDC_FOLDERS_BOX, false, "FoldersBox");
 		auto CommitsBox = new LBox(IDC_COMMITS_BOX, true, "CommitsBox");
 
 		auto Tools = new ToolBar;
@@ -1066,6 +1066,7 @@ public:
 			Tree->ColumnHeaders(true);
 			Tree->AddColumn("Folder", 250);
 			Tree->AddColumn("Counts", 50);
+			Tree->SetDragItem(LItemContainer::ITEM_DRAG_REORDER);
 			c->Add(Tree);
 		c = FolderLayout->GetCell(0, 1);
 			c->Add(new LEdit(IDC_FILTER_FOLDERS, 0, 0, -1, -1));
