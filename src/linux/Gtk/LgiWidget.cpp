@@ -12,7 +12,6 @@
 #define LOG(...)
 #endif
 
-
 using namespace Gtk;
 #include "LgiWidget.h"
 #include "gdk/gdkkeysyms.h"
@@ -33,6 +32,14 @@ struct _LgiWidget
 	LArray<GtkWidget*> child;
 };
 
+LViewI *LWidgetToView(GtkWidget *widget)
+{
+	if (!LGI_IS_WIDGET(widget))
+		return NULL;
+	auto p = LGI_WIDGET(widget);
+	return p ? p->target : NULL;
+}
+
 static void lgi_widget_class_init(LgiWidgetClass *klass);
 
 static bool is_debug(LgiWidget *w)
@@ -46,7 +53,7 @@ static bool is_debug(LgiWidget *w)
 
 static void
 lgi_widget_forall(	GtkContainer   *container,
-					gboolean	include_internals,
+					gboolean		include_internals,
 					GtkCallback     callback,
 					gpointer        callback_data)
 {
@@ -471,13 +478,13 @@ gboolean lgi_widget_key_event(GtkWidget *wid, GdkEventKey *e)
 static void
 lgi_widget_drag_begin(GtkWidget *widget, GdkDragContext *context)
 {
-	LgiTrace("lgi_widget_drag_begin\n");
+	DND_LOG("lgi_widget_drag_begin\n");
 }
 
 static void
 lgi_widget_drag_end(GtkWidget *widget, GdkDragContext *drag_context)
 {
-	LgiTrace("lgi_widget_drag_end\n");
+	DND_LOG("lgi_widget_drag_end\n");
 }
 
 static void
@@ -516,12 +523,12 @@ lgi_widget_drag_leave(GtkWidget	       *widget,
 	}
 }
 
-static gboolean
-lgi_widget_drag_motion(GtkWidget	   *widget,
-					GdkDragContext     *context,
-					gint                x,
-					gint                y,
-					guint               time_)
+gboolean
+lgi_widget_drag_motion(	GtkWidget		*widget,
+						GdkDragContext	*context,
+						gint			x,
+						gint			y,
+						guint			time_)
 {
 	LgiWidget *v = LGI_WIDGET(widget);
 	if (!v || !v->target)
@@ -533,7 +540,7 @@ lgi_widget_drag_motion(GtkWidget	   *widget,
 	LViewI *view = v->target;
 	DND_LOG("%s:%i - DragMotion %s\n", _FL, view->GetClass());
 
-	LDragDropTarget *Target = view->DropTarget();
+	auto Target = view->DropTarget();
 	while (view && !Target)
 	{
 		view = view->GetParent();
@@ -548,6 +555,12 @@ lgi_widget_drag_motion(GtkWidget	   *widget,
 		DND_ERROR("%s:%i - View '%s' doesn't have drop target.\n", _FL, v->target->GetClass());
 		return false;
 	}
+
+	// Store a handle to the view in LDragDropTarget. When it comes time
+	// for the 'end' event use that to call each target's OnDragExit method.
+	auto hnd = view->AddDispatch();
+	if (LDragDropTarget::Handles.IndexOf(hnd) < 0)
+		LDragDropTarget::Handles.Add(hnd);
 
 	DND_LOG("%s:%i - DragMotion(%s): ", _FL, v->target->GetClass());
 	

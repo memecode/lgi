@@ -149,12 +149,59 @@ public:
 //////////////////////////////////////////////////////////////////////////////
 LTreeNode::LTreeNode()
 {
-	Parent = NULL;
-	Tree = NULL;
 }
 
 LTreeNode::~LTreeNode()
 {
+}
+
+bool LTreeNode::ReorderPos(LItemContainer::ContainerItemDrop &drop, LPoint &pt, int depth)
+{
+	ssize_t i = 0;
+	
+	for (auto item: Items)
+	{
+		auto p = item->GetPos();
+		if (p->Overlap(pt))
+		{
+			drop.pos.x1 = p->x1;
+			drop.pos.x2 = p->x2;
+			if (pt.y >= p->Center().y)
+			{
+				// Bottom half...
+				drop.pos.y1 = p->y2 - 1;
+				drop.pos.y2 = p->y2 + 2;
+				drop.prev = item;
+				drop.next = Items.ItemAt(i + 1);
+				
+				return true;
+			}
+			else
+			{
+				// Top half...
+				drop.pos.y1 = p->y1 - 2;
+				drop.pos.y2 = p->y1 + 1;
+				drop.next = item;
+				drop.prev = Items.ItemAt(i - 1);
+				
+				return true;
+			}
+		}
+		
+		if (item->ReorderPos(drop, pt, depth + 1))
+			return true;
+		
+		i++;
+	}
+
+	#if 0
+	LgiTrace("reorder %s %s %s\n",
+		inf.prev ? inf.prev->GetText() : "null",
+		inf.next ? inf.next->GetText() : "null",
+		inf.pos.GetStr());
+	#endif
+
+	return false;
 }
 
 void LTreeNode::SetLayoutDirty()
@@ -2278,7 +2325,7 @@ bool LTree::GetData(LArray<LDragData> &Data)
 		{
 			LArray<LTreeItem*> sel;
 			if (!GetSelection(sel))
-				return false;
+				continue;
 			
 			if (auto items = ContainerItemsDrag::New((uint32_t)sel.Length()))
 			{
@@ -2286,8 +2333,7 @@ bool LTree::GetData(LArray<LDragData> &Data)
 				for (size_t i=0; i<sel.Length(); i++)
 					items->item[i] = sel[i];
 
-				dd.Data[0].SetBinary(items->Sizeof(), items, false);
-				free(items);
+				dd.Data[0].SetBinary(items->Sizeof(), items.Get(), false);
 				status = true;
 			}
 		}
@@ -2302,31 +2348,47 @@ bool LTree::OnReorderDrop(ContainerItemDrop &dest, ContainerItemsDrag &source)
 
 	if (DragItem & ITEM_DRAG_REORDER)
 	{
+		bool allowDepthChange = TestFlag(DragItem, ITEM_DEPTH_CHANGE);
+		
 		for (size_t i=0; i<source.items; i++)
 		{
 			auto moveItem = dynamic_cast<LTreeItem*>(source.item[i]);
+			if (!moveItem)
+				continue;
+			auto parent = moveItem->GetParent();
 			auto prev = dynamic_cast<LTreeItem*>(dest.prev);
 			auto next = dynamic_cast<LTreeItem*>(dest.next);
+			if (!prev || !next)
+				continue;
 
-			Items.Delete(moveItem);
+			#define DEPTH_CHECK(ptr) \
+				if (ptr->GetTree() != moveItem->GetTree() && \
+					!allowDepthChange) \
+					continue;
 
 			if (prev)
 			{
+				DEPTH_CHECK(prev);
+				
 				// Insert AFTER the prev item...
-				auto destIdx = Items.IndexOf(prev);
+				parent->Items.Delete(moveItem);
+				auto destIdx = parent->Items.IndexOf(prev);
 				if (destIdx >= 0)
 				{
-					Items.Insert(moveItem, destIdx + 1);
+					parent->Items.Insert(moveItem, destIdx + 1);
 					screenDirty = true;
 				}
 			}
 			else if (next)
 			{
+				DEPTH_CHECK(next);
+				
 				// Insert BEFORE the next item...
-				auto destIdx = Items.IndexOf(next);
+				parent->Items.Delete(moveItem);
+				auto destIdx = parent->Items.IndexOf(next);
 				if (destIdx >= 0)
 				{
-					Items.Insert(moveItem, destIdx);
+					parent->Items.Insert(moveItem, destIdx);
 					screenDirty = true;
 				}
 			}
@@ -2339,42 +2401,7 @@ bool LTree::OnReorderDrop(ContainerItemDrop &dest, ContainerItemsDrag &source)
 LItemContainer::ContainerItemDrop LTree::GetItemReorderPos(LPoint pt)
 {
 	LItemContainer::ContainerItemDrop inf;
-	
-	ssize_t i=0;
-	for (auto item: Items)
-	{
-		auto p = item->GetPos();
-		if (p->Overlap(pt))
-		{
-			inf.pos.x1 = p->x1;
-			inf.pos.x2 = p->x2;
-			if (pt.y >= p->Center().y)
-			{
-				// Bottom half...
-				inf.pos.y1 = p->y2 - 1;
-				inf.pos.y2 = p->y2 + 2;
-				inf.prev = item;
-				inf.next = Items.ItemAt(i + 1);
-			}
-			else
-			{
-				// Top half...
-				inf.pos.y1 = p->y1 - 2;
-				inf.pos.y2 = p->y1 + 1;
-				inf.next = item;
-				inf.prev = Items.ItemAt(i - 1);
-			}
-		}
-		i++;
-	}
-
-	#if 0
-	LgiTrace("reorder %s %s %s\n",
-		inf.prev ? inf.prev->GetText() : "null",
-		inf.next ? inf.next->GetText() : "null",
-		inf.pos.GetStr());
-	#endif
-
+	ReorderPos(inf, pt, 0);
 	return inf;
 }
 

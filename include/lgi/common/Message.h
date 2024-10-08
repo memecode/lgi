@@ -52,6 +52,8 @@ enum LgiMessages
 		/// Dnd data received via LWindowDragDataReceived
 		/// /sa 
 		M_DND_DATA_RECEIVED,
+		/// The dnd operation has ended. Call LDragDropTarget::OnDragExit
+		M_DND_END,
 		
 	#elif defined(WINNATIVE)
 

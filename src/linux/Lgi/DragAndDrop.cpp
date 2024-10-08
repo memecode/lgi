@@ -124,7 +124,7 @@ bool LDragDropSource::CreateFileDrop(LDragData *OutputData, LMouse &m, LString::
 	if (!s)
 		return false;
 
-	LOG("%s:%i - LDragDropSource::CreateFileDrop=%s\n", _FL, s.Get());
+	DND_LOG("%s:%i - LDragDropSource::CreateFileDrop=%s\n", _FL, s.Get());
 	OutputData->Data[0].SetBinary(s.Length(), s.Get());
 	return true;
 }
@@ -161,8 +161,7 @@ LgiDragDataGet(GtkWidget        *widget,
 	}
 
 	// Iterate over the targets and put their formats into 'data'
-	Gtk::GList *targets = gdk_drag_context_list_targets(context);
-	Gtk::GList *node;
+	auto targets = gdk_drag_context_list_targets(context);
 	if (!targets)
 	{
 		ERROR("%s:%i - no target.\n", _FL);
@@ -170,11 +169,13 @@ LgiDragDataGet(GtkWidget        *widget,
 	}
 		
 	LArray<LDragData> data;
-	for (node = g_list_first(targets); node != NULL; node = ((node) ? (((Gtk::GList *)(node))->next) : NULL))
+	for (auto node = g_list_first(targets); node != NULL; node = ((node) ? (((Gtk::GList *)(node))->next) : NULL))
     {
-		auto format = gdk_atom_name((GdkAtom)node->data);
-		data.New().Format = format;
-		LOG("%s:%i - fmt=%s\n", _FL, format);
+		if (auto format = gdk_atom_name((GdkAtom)node->data))
+		{
+			data.New().Format = format;
+			LOG("%s:%i - fmt=%s\n", _FL, format);
+		}
     }
 		
 	if (!Src->GetData(data))
@@ -248,11 +249,19 @@ LgiDragDataGet(GtkWidget        *widget,
 }
 
 gboolean
-DragFailed(	GtkWidget      *widget,
+DragEnd(	GtkWidget      *widget,
 			GdkDragContext *context,
 			GtkDragResult   result,
 			gpointer        user_data)
 {
+	auto Src = (LDragDropSource*)user_data;
+	if (!Src)
+	{
+		ERROR("%s:%i - no source.\n", _FL);
+		return false;
+	}
+
+	DND_LOG("%s:%i - %s\n", _FL, __func__);
 	return false;
 }
 
@@ -333,7 +342,7 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 		{
 			auto &Si = ExistingSignals.New();
 			Si.Wnd = d->SignalWnd;
-			Si.Sig = g_signal_connect(G_OBJECT(d->SignalWnd), "drag-failed", G_CALLBACK(DragFailed), this);
+			Si.Sig = g_signal_connect(G_OBJECT(d->SignalWnd), "drag-end", G_CALLBACK(DragEnd), this);
 		}
 	}
 	else ERROR("%s:%i - No signal window?\n", _FL);
@@ -344,26 +353,27 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 	if (m.Left()) btn = 1;
 	else if (m.Middle()) btn = 2;
 	else if (m.Right()) btn = 3;
-	d->Ctx = gtk_drag_begin_with_coordinates (d->SignalWnd, Targets, Action, btn, NULL, m.x, m.y);
+	d->Ctx = gtk_drag_begin_with_coordinates(d->SignalWnd, Targets, Action, btn, NULL, m.x, m.y);
 
 	#if 0 // Not working, who the fuck knows why. GTK is suck.
-	if (!d->Ico && !Icon)
-		d->Ico.Reset(DefIcon.Create());
-	auto MemIco = dynamic_cast<LMemDC*>(Icon ? Icon : d->Ico.Get());
-	if (MemIco)
-	{
-		MemIco->Colour(LColour::Red);
-		MemIco->Line(0, 0, 31, 31);
-		auto Surface = MemIco->GetSurface();
-		gtk_drag_set_icon_surface(d->Ctx, Surface);
-	}
+		if (!d->Ico && !Icon)
+			d->Ico.Reset(DefIcon.Create());
+		auto MemIco = dynamic_cast<LMemDC*>(Icon ? Icon : d->Ico.Get());
+		if (MemIco)
+		{
+			MemIco->Colour(LColour::Red);
+			MemIco->Line(0, 0, 31, 31);
+			auto Surface = MemIco->GetSurface();
+			gtk_drag_set_icon_surface(d->Ctx, Surface);
+		}
 	#endif
 
-	LOG("%s:%i - Drag finished.\n", _FL);
     return -1;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
+LArray<int> LDragDropTarget::Handles;
+
 LDragDropTarget::LDragDropTarget() : Formats(true)
 {
 }

@@ -274,10 +274,13 @@ public:
 						there is no default.
 	   ITEM_DRAG_REORDER - The drag handler will allow the user to
 						reorder the items in the container.
-	   ITEM_DRAG_ON_EXISTING - The drag handler allows the user to
+	   ITEM_DRAG_OVER - The drag handler allows the user to
 						drop the item onto existing items. This is
 						more for tree controls where the item is
 						added as a child of the target item.
+	   ITEM_DEPTH_CHANGE - Allow changes of depth in the tree control.
+	   					If this is on items can change their parent
+	   					during a reorder drop operation.
 
 	   If this flag is enabled the view will manage the drag of items
 	   using `ContainerItemsFormat` and `ContainerItemsDrag`. And
@@ -285,9 +288,10 @@ public:
 	*/
 	enum ItemDragFlags
 	{
-		ITEM_DRAG_USER			= 0,
-		ITEM_DRAG_REORDER		= 1 << 0,
-		ITEM_DRAG_ON_EXISTING	= 1 << 1,
+		ITEM_DRAG_USER		= 0,
+		ITEM_DRAG_REORDER	= 1 << 0,
+		ITEM_DRAG_OVER		= 1 << 1,
+		ITEM_DEPTH_CHANGE	= 1 << 2,
 	};
 	
 	/// This is the drag and drop format that uses `ContainerItemsDrag`
@@ -311,9 +315,11 @@ public:
 		{
 			return sizeof(ContainerItemsDrag) + (items > 1 ? sizeof(LItem*) * (items - 1) : 0);
 		}
-		static ContainerItemsDrag *New(uint32_t items)
+		
+		typedef LAutoPtr<ContainerItemsDrag, false, true> Auto;
+		static Auto New(uint32_t items)
 		{
-			auto obj = (ContainerItemsDrag*) calloc(Sizeof(items), 1);
+			Auto obj((ContainerItemsDrag*) calloc(Sizeof(items), 1));
 			if (obj)
 				obj->items = items;
 			return obj;
@@ -324,7 +330,17 @@ public:
 	/// Describes where a `ContainerItemsFormat` is dropped on the view
 	struct ContainerItemDrop
 	{
-		LItem *prev = NULL, *next = NULL;
+		// One or both of these cases will be true:
+	
+			// 1) Is the pointer is roughly between two other items, `prev` and `next` will be set.
+			// The `ITEM_DRAG_REORDER` flag needs to be set to see this case.
+			LItem *prev = NULL, *next = NULL;
+		
+			// 2) If the point is over an item, and not near the edge, then `over` will be set.
+			// The `ITEM_DRAG_OVER` flag needs to be set to see this case.
+			LItem *over = NULL;
+		
+		// The paint region for case 1
 		LRect pos = {0, 0, -1, -1};
 
 		operator bool() const
@@ -352,6 +368,8 @@ protected:
 	/// \returns the item drop details for a given point
 	/// \sa SetDragItem
 	virtual ContainerItemDrop GetItemReorderPos(LPoint pt) { return ContainerItemDrop(); }
+
+	
 
 	ContainerDragMode DragMode = DRAG_NONE;
 	ItemDragFlags DragItem = ITEM_DRAG_USER;

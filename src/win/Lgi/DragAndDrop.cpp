@@ -100,7 +100,7 @@ LDataObject::~LDataObject()
 {
 	if (Source)
 	{
-		Source->OnEndData();
+	 	Source->OnEndData();
 		Source->d->InDrag = NULL;
 	}
 }

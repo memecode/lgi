@@ -788,6 +788,12 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 		{
 			return OnCommand(Msg->A(), 0, (OsView) Msg->B());
 		}
+		case M_DND_END:
+		{
+			if (auto target = DropTarget())
+				target->OnDragExit();
+			break;
+		}
 	}
 
 	LMessage::Result result;

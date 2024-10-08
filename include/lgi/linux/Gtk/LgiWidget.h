@@ -27,4 +27,6 @@ void BuildTabStops(LViewI *v, LArray<LViewI*> &a);
 
 G_END_DECLS
 
+extern LViewI *LWidgetToView(GtkWidget *widget);
+
 #endif

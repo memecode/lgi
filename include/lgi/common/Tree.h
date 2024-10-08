@@ -16,20 +16,22 @@ enum LTreeItemRect
 	TreeItemIcon
 };
 
+class LTree;
 class LTreeItem;
 
 class LgiClass LTreeNode
 {
 protected:
-	class LTree *Tree;
-	LTreeItem *Parent;
+	LTree *Tree = NULL;
+	LTreeItem *Parent = NULL;
 	List<LTreeItem> Items;
 
-	virtual LTreeItem *Item() { return 0; }
-	virtual LRect *Pos() { return 0; }
+	virtual LTreeItem *Item() { return NULL; }
+	virtual LRect *Pos() { return NULL; }
 	virtual void _ClearDs(int Col);
 	void _Visible(bool v);
 	void SetLayoutDirty();
+	bool ReorderPos(LItemContainer::ContainerItemDrop &drop, LPoint &pt, int depth);
 
 public:
 	LTreeNode();

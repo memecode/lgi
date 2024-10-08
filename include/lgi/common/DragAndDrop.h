@@ -5,7 +5,7 @@
 
 #include "lgi/common/Variant.h"
 
-#define DEBUG_DND	0
+#define DEBUG_DND	1
 #if DEBUG_DND
 #define DND_LOG(...)	printf(__VA_ARGS__)
 #else
@@ -223,7 +223,7 @@ public:
 	);
 
 	/// Called when window is registered
-	virtual void OnRegister(bool Suc) {}
+	virtual void OnRegister(bool Status) {}
 	/// Called on start of drag op
 	virtual void OnStartData() {}
 	/// Called on end of drag op
@@ -277,10 +277,17 @@ private:
 	LDragFormats Formats;
 
 	#ifdef __GTK_H__
-	friend Gtk::gboolean LWindowDragDataDrop(Gtk::GtkWidget *widget, Gtk::GdkDragContext *context, Gtk::gint x, Gtk::gint y, Gtk::guint time, class LWindow *Wnd);
-	friend void LWindowDragDataReceived(Gtk::GtkWidget *widget, Gtk::GdkDragContext *context, Gtk::gint x, Gtk::gint y, Gtk::GtkSelectionData *data, Gtk::guint info, Gtk::guint time, LWindow *Wnd);
-	friend struct LGtkDrop;
-	LArray<LDragData> Data;
+		
+		friend Gtk::gboolean lgi_widget_drag_motion(Gtk::GtkWidget*, Gtk::GdkDragContext*, Gtk::gint, Gtk::gint, Gtk::guint);
+		friend Gtk::gboolean LWindowDragDataDrop(Gtk::GtkWidget *widget, Gtk::GdkDragContext *context, Gtk::gint x, Gtk::gint y, Gtk::guint time, class LWindow *Wnd);
+		friend Gtk::gboolean LWindowDragMotion(Gtk::GtkWidget*, Gtk::GdkDragContext*, Gtk::gint, Gtk::gint, Gtk::guint, LWindow*);
+		friend void LWindowDragDataReceived(Gtk::GtkWidget *widget, Gtk::GdkDragContext *context, Gtk::gint x, Gtk::gint y, Gtk::GtkSelectionData *data, Gtk::guint info, Gtk::guint time, LWindow *Wnd);
+		friend void LWindowDragEnd(Gtk::GtkWidget*, Gtk::GdkDragContext*, LWindow*);
+		friend struct LGtkDrop;
+		
+		static LArray<int> Handles;
+		LArray<LDragData> Data;
+		
 	#endif
 
 	#ifdef WIN32

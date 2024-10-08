@@ -7,6 +7,8 @@
 #include "lgi/common/Panel.h"
 #include "lgi/common/Notifications.h"
 #include "lgi/common/Menu.h"
+#include "lgi/common/EventTargetThread.h"
+
 #include "ViewPriv.h"
 
 using namespace Gtk;
@@ -697,7 +699,10 @@ bool DndPointMap(LViewI *&v, LPoint &p, LDragDropTarget *&t, LWindow *Wnd, int x
 	p.y = y - p.y;
 
 	for (LViewI *view = v; !t && view; view = view->GetParent())
+	{
 		t = view->DropTarget();
+		v = view;
+	}
 	if (t)
 		return true;
 
@@ -708,19 +713,19 @@ bool DndPointMap(LViewI *&v, LPoint &p, LDragDropTarget *&t, LWindow *Wnd, int x
 void
 LWindowDragBegin(GtkWidget *widget, GdkDragContext *context, LWindow *Wnd)
 {
-	// LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
+	DND_LOG("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
 }
 
 void
 LWindowDragDataDelete(GtkWidget *widget, GdkDragContext *context, LWindow *Wnd)
 {
-	// LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
+	DND_LOG("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
 }
 
 void
 LWindowDragDataGet(GtkWidget *widget, GdkDragContext *context, GtkSelectionData *data, guint info, guint time, LWindow *Wnd)
 {
-	LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
+	DND_LOG("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
 }
 
 void
@@ -769,7 +774,7 @@ int GetAcceptFmts(LString::Array &Formats, GdkDragContext *context, LDragDropTar
 	int KeyState = 0;
 	LDragFormats Fmts(true);
 
-	GList *targets = gdk_drag_context_list_targets(context);
+	auto targets = gdk_drag_context_list_targets(context);
 	Gtk::GList *i = targets;
 	while (i)
 	{
@@ -829,7 +834,7 @@ struct LGtkDrop : public LView::ViewEventTarget
 		}
 			
 		t->Data.Length(0);
-
+		
 		// Request the data...
 		Flags = GetAcceptFmts(Formats, context, t, p);
 		if (Formats.Length() == 0)
@@ -889,13 +894,7 @@ struct LGtkDrop : public LView::ViewEventTarget
 	void OnComplete(bool isTimeout)
 	{
 		DND_LOG("%s:%i - OnComplete(%i)\n", _FL, isTimeout);
-
-		auto Result = t->OnDrop(t->Data, p, KeyState);
-
-		// if (Flags != DROPEFFECT_NONE)
-		// 	gdk_drag_status(context, EffectToDragAction(Flags), time);
-		// return Result != DROPEFFECT_NONE;
-		
+		t->OnDrop(t->Data, p, KeyState);
 		delete this;
 	}
 };
@@ -910,20 +909,24 @@ LWindowDragDataDrop(GtkWidget *widget, GdkDragContext *context, gint x, gint y, 
 void
 LWindowDragEnd(GtkWidget *widget, GdkDragContext *context, LWindow *Wnd)
 {
-	// LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
+	DND_LOG("%s:%i - %s (fn=%s, hnds=%i)\n", _FL, Wnd->GetClass(), __func__, (int)LDragDropTarget::Handles.Length());
+
+	for (auto hnd: LDragDropTarget::Handles)
+		PostThreadEvent(hnd, M_DND_END);
+	LDragDropTarget::Handles.Empty();
 }
 
 gboolean
 LWindowDragFailed(GtkWidget *widget, GdkDragContext *context, GtkDragResult result, LWindow *Wnd)
 {
-	// LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
+	DND_LOG("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
 	return false;
 }
 
 void
 LWindowDragLeave(GtkWidget *widget, GdkDragContext *context, guint time, LWindow *Wnd)
 {
-	// LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
+	DND_LOG("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
 }
 
 gboolean
@@ -934,6 +937,12 @@ LWindowDragMotion(GtkWidget *widget, GdkDragContext *context, gint x, gint y, gu
 	LDragDropTarget *t;
 	if (!DndPointMap(v, p, t, Wnd, x, y))
 		return false;
+
+	// Store a handle to the view in LDragDropTarget. When it comes time
+	// for the 'end' event use that to call each target's OnDragExit method.
+	auto hnd = v->AddDispatch();
+	if (LDragDropTarget::Handles.IndexOf(hnd) < 0)
+		LDragDropTarget::Handles.Add(hnd);
 
 	LString::Array Formats;
 	int Flags = GetAcceptFmts(Formats, context, t, p);

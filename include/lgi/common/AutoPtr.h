@@ -19,7 +19,7 @@ public:
 	}
 };
 
-template<class X, bool Arr = false>
+template<class X, bool Arr = false, bool IsHeap = false>
 class LAutoPtr
 {
 	X *Ptr;
@@ -63,7 +63,9 @@ public:
 
 	~LAutoPtr()
 	{
-		if (Arr)
+		if (IsHeap)
+			free(Ptr);
+		else if (Arr)
 			delete [] Ptr;
 		else
 			delete Ptr;
@@ -100,12 +102,14 @@ public:
 		return p;
 	}
 
-	bool Reset(X* p=NULL)
+	bool Reset(X *p = NULL)
 	{
 		if (Ptr == p)
 			return Ptr != NULL;
 
-		if (Arr)
+		if (IsHeap)
+			free(Ptr);
+		else if (Arr)
 			delete [] Ptr;
 		else
 			delete Ptr;
