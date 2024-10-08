@@ -768,29 +768,32 @@ int GetAcceptFmts(LString::Array &Formats, GdkDragContext *context, LDragDropTar
 {
 	int KeyState = 0;
 	LDragFormats Fmts(true);
-	int Flags = DROPEFFECT_NONE;
 
 	GList *targets = gdk_drag_context_list_targets(context);
 	Gtk::GList *i = targets;
 	while (i)
 	{
-		auto a = gdk_atom_name((GdkAtom)i->data);
-		if (a)
+		if (auto a = gdk_atom_name((GdkAtom)i->data))
 		{
-			// LgiTrace("%s:%i - accept fmt: %s\n", _FL, a);
+			// DND_LOG("%s:%i - accept fmt: %s\n", _FL, a);
 			Fmts.Supports(a);
 		}
-		// else LgiTrace("%s:%i - accept fmt: (null)", _FL);
+		else
+		{
+			DND_ERROR("%s:%i - accept fmt: (null)", _FL);
+		}
 		i = i->next;
 	}
 
 	Fmts.SetSource(false);
-	Flags = t->WillAccept(Fmts, p, KeyState);
+	auto Flags = t->WillAccept(Fmts, p, KeyState);
+	auto sup = Fmts.GetSupported();
+	if (sup.Length())
+		Formats += sup;
+	else
+		DND_ERROR("%s:%i - %s no supported formats in '%s'\n",
+			_FL, t->GetClass(), Fmts.ToString().Get());
 	
-	auto Sup = Fmts.GetSupported();
-	for (auto &s: Sup)
-		Formats.New() = s;
-
 	return Flags;
 }
 
@@ -808,34 +811,49 @@ struct LGtkDrop : public LView::ViewEventTarget
 	
 	const char *GetClass() { return "LGtkDrop"; }
 	
-	LGtkDrop(GtkWidget *widget, GdkDragContext *context, gint x, gint y, guint time, LWindow *Wnd) :
-		LView::ViewEventTarget(Wnd, M_DND_DATA_RECEIVED)
+	LGtkDrop(GtkWidget *widget,
+			 GdkDragContext *context,
+			 gint x, gint y,
+			 guint time,
+			 LWindow *Wnd)
+		: LView::ViewEventTarget(Wnd, M_DND_DATA_RECEIVED)
 	{
+		DND_LOG("%s:%i - LGtkDrop created...\n", _FL);
 		Start = LCurrentTime();
 		
 		// Map the point to a view...
 		if (!DndPointMap(v, p, t, Wnd, x, y))
+		{
+			DND_ERROR("%s:%i - DndPointMap failed!\n", _FL);
 			return;
+		}
 			
 		t->Data.Length(0);
 
 		// Request the data...
 		Flags = GetAcceptFmts(Formats, context, t, p);
-		for (auto f: Formats)
+		if (Formats.Length() == 0)
 		{
-			t->Data.New().Format = f;
-			LgiTrace("%s:%i accept fmt: %s\n", _FL, f.Get());
-			gtk_drag_get_data(widget, context, gdk_atom_intern(f, true), time);
+			DND_ERROR("%s:%i - no accept formats!\n", _FL);
+			PostEvent(M_DND_DATA_RECEIVED);
 		}
-		
+		else
+		{
+			for (auto f: Formats)
+			{
+				t->Data.New().Format = f;
+				DND_LOG("%s:%i accept fmt: %s\n", _FL, f.Get());
+				gtk_drag_get_data(widget, context, gdk_atom_intern(f, true), time);
+			}
+		}	
+	
 		// Callbacks should be received by LWindowDragDataReceived
 		// Once they have all arrived or the timeout has been reached we call OnComplete
-		LgiTrace("%s:%i - LGtkDrop created...\n", _FL);
 	}
 	
 	~LGtkDrop()
 	{
-		LgiTrace("%s:%i - LGtkDrop deleted.\n", _FL);
+		DND_LOG("%s:%i - LGtkDrop deleted.\n", _FL);
 	}
 	
 	LMessage::Result OnEvent(LMessage *Msg)
@@ -849,15 +867,10 @@ struct LGtkDrop : public LView::ViewEventTarget
 					if (d.Data.Length() > 0)
 						HasData++;
 
-				LgiTrace("%s:%i - Got M_DND_DATA_RECEIVED %i of %i\n",
+				DND_LOG("%s:%i - Got M_DND_DATA_RECEIVED %i of %i\n",
 					_FL, (int)HasData, (int)Formats.Length());
-				if (HasData >= Formats.Length())
-				{
-					LgiTrace("%s:%i - LWindowDragDataDrop got all the formats.\n", _FL);
-					OnComplete(false);
-					return OBJ_DELETED;
-				}
-				break;
+				OnComplete(false);
+				return OBJ_DELETED;
 			}
 		}
 		return 0;
@@ -866,6 +879,7 @@ struct LGtkDrop : public LView::ViewEventTarget
 	void OnPulse()
 	{
 		auto now = LCurrentTime();
+		DND_LOG("%s:%i - LGtkDrop::OnPulse %i\n", _FL, (int)(now - Start));
 		if (now - Start >= 5000)
 		{
 			OnComplete(true);
@@ -874,7 +888,10 @@ struct LGtkDrop : public LView::ViewEventTarget
 	
 	void OnComplete(bool isTimeout)
 	{
+		DND_LOG("%s:%i - OnComplete(%i)\n", _FL, isTimeout);
+
 		auto Result = t->OnDrop(t->Data, p, KeyState);
+
 		// if (Flags != DROPEFFECT_NONE)
 		// 	gdk_drag_status(context, EffectToDragAction(Flags), time);
 		// return Result != DROPEFFECT_NONE;

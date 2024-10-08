@@ -6,6 +6,12 @@
 #include "lgi/common/Variant.h"
 
 #define DEBUG_DND	0
+#if DEBUG_DND
+#define DND_LOG(...)	printf(__VA_ARGS__)
+#else
+#define DND_LOG(...)
+#endif
+#define DND_ERROR(...)	printf(__VA_ARGS__)
 
 #if WINNATIVE
 
@@ -267,7 +273,7 @@ class LgiClass LDragDropTarget
 #endif
 {
 private:
-	LView *To;
+	LView *To = NULL;
 	LDragFormats Formats;
 
 	#ifdef __GTK_H__
@@ -309,11 +315,13 @@ public:
 
 	/// call this when you have a operating system view handle (e.g. HWND/Window/HIViewRef)
 	void SetWindow(LView *To);
+	
+	const char *GetClass() const;
 
 	// Override these
 
 	/// Initialize event
-	virtual void OnDragInit(bool Suc) {}
+	virtual void OnDragInit(bool Status) {}
 	/// Drag entered this target event
 	virtual void OnDragEnter() {}
 	/// Drag exited this target event

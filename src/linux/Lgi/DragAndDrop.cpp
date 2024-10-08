@@ -13,7 +13,12 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/DragAndDrop.h"
 
-// #define DND_DEBUG_TRACE
+#if DEBUG_DND
+#define LOG(...)	printf(__VA_ARGS__)
+#else
+#define LOG(...)
+#endif
+#define ERROR(...)	printf(__VA_ARGS__)
 
 static int NextDndType = 600;
 static LHashTbl<ConstStrKey<char,false>, int> DndTypes(0, -1);
@@ -55,10 +60,8 @@ const char *GtkGetDndFormat(int Type)
 class LDndSourcePriv
 {
 public:
-	LAutoString CurrentFormat;
 	Gtk::GdkDragContext *Ctx = NULL;
 	LAutoPtr<LSurface> Ico;
-
 	OsView SignalWnd = NULL;
 };
 
@@ -121,7 +124,7 @@ bool LDragDropSource::CreateFileDrop(LDragData *OutputData, LMouse &m, LString::
 	if (!s)
 		return false;
 
-	// LgiTrace("%s:%i - LDragDropSource::CreateFileDrop=%s\n", _FL, s.Get());
+	LOG("%s:%i - LDragDropSource::CreateFileDrop=%s\n", _FL, s.Get());
 	OutputData->Data[0].SetBinary(s.Length(), s.Get());
 	return true;
 }
@@ -152,26 +155,36 @@ LgiDragDataGet(GtkWidget        *widget,
 {
 	auto Src = (LDragDropSource*)user_data;
 	if (!Src)
+	{
+		ERROR("%s:%i - no source.\n", _FL);
 		return;
+	}
 
 	// Iterate over the targets and put their formats into 'data'
 	Gtk::GList *targets = gdk_drag_context_list_targets(context);
 	Gtk::GList *node;
 	if (!targets)
+	{
+		ERROR("%s:%i - no target.\n", _FL);
 		return;
+	}
 		
 	LArray<LDragData> data;
 	for (node = g_list_first(targets); node != NULL; node = ((node) ? (((Gtk::GList *)(node))->next) : NULL))
     {
 		auto format = gdk_atom_name((GdkAtom)node->data);
 		data.New().Format = format;
-		LgiTrace("%s:%i - fmt=%s\n", _FL, format);
+		LOG("%s:%i - fmt=%s\n", _FL, format);
     }
 		
 	if (!Src->GetData(data))
+	{
+		ERROR("%s:%i - source failed to get data.\n", _FL);
 		return;
+	}
 
 	// For all the formats, set the selection data.
+	int count = 0;
 	for (auto &dd: data)
 	{
 		// Ignore ones with no data..
@@ -188,12 +201,17 @@ LgiDragDataGet(GtkWidget        *widget,
 				if (string)
 				{
 					gtk_selection_data_set (selection_data,
-											type_atom, // gtk_selection_data_get_target(selection_data),
+											type_atom,
 											8,
 											(Gtk::guchar*) string,
 											strlen(string) + 1);
+					count++;
 				}
-				else LAssert(0);
+				else
+				{
+					LAssert(0);
+					ERROR("%s:%i - no string?\n", _FL);
+				}
 				break;
 			}
 			case GV_BINARY:
@@ -201,20 +219,31 @@ LgiDragDataGet(GtkWidget        *widget,
 				if (v.Value.Binary.Data)
 				{
 					gtk_selection_data_set (selection_data,
-											type_atom, // gtk_selection_data_get_target(selection_data),
+											type_atom,
 											8,
 											(Gtk::guchar*) v.Value.Binary.Data,
 											v.Value.Binary.Length);
+					count++;
 				}
-				else LAssert(0);
+				else
+				{
+					LAssert(0);
+					ERROR("%s:%i - no binary?\n", _FL);
+				}
 				break;
 			}
 			default:
 			{
 				LAssert(!"Impl this data type?");
+				ERROR("%s:%i - type not implemented.\n", _FL);
 				break;
 			}
 		}
+	}
+
+	if (!count)
+	{
+		ERROR("%s:%i - no data items set.\n", _FL);
 	}
 }
 
@@ -250,48 +279,45 @@ LInlineBmp DefIcon = { 32, 32, 32, DefaultIcon };
 int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface *Icon)
 {
 	LAssert(SourceWnd);
-	if (!SourceWnd)
-		return -1;
-
 	if (!SourceWnd
-		#ifndef __GTK_H__
+		#if LGI_VIEW_HANDLE
 		|| !SourceWnd->Handle()
 		#endif
 		)
 	{
-		LgiTrace("%s:%i - Error: No source window or handle.\n", _FL);
+		ERROR("%s:%i - Error: No source window or handle.\n", _FL);
 		return -1;
 	}
 
 	LDragFormats Formats(true);
 	if (!GetFormats(Formats))
 	{
-		LgiTrace("%s:%i - Error: Failed to get source formats.\n", _FL);
+		ERROR("%s:%i - Error: Failed to get source formats.\n", _FL);
 		return -1;
 	}
 	
 	LArray<GtkTargetEntry> e;
 	for (auto f: Formats.Formats)
 	{
-		Gtk::GtkTargetEntry &entry = e.New();
+		auto &entry = e.New();
 		entry.target = f;
 		entry.flags = 0;
 		entry.info = GtkGetDndType(f);
 	}
 	
-	Gtk::GtkTargetList *Targets = Gtk::gtk_target_list_new(&e[0], e.Length());
-	Gtk::GdkDragAction Action = EffectToDragAction(Effect);
-	auto *w = SourceWnd->GetWindow();
+	auto Targets = Gtk::gtk_target_list_new(&e[0], e.Length());
+	auto Action = EffectToDragAction(Effect);
+	auto w = SourceWnd->GetWindow();
 	if (!w)
 	{
-		LgiTrace("%s:%i - No Window.\n", _FL);
+		ERROR("%s:%i - No Window.\n", _FL);
 		return -1;
 	}
 
 	d->SignalWnd = GTK_WIDGET(w->WindowHandle());
 	if (!d->SignalWnd)
 	{
-		LgiTrace("%s:%i - No GtkWidget.\n", _FL);
+		ERROR("%s:%i - No GtkWidget.\n", _FL);
 		return -1;
 	}
 	
@@ -310,7 +336,7 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 			Si.Sig = g_signal_connect(G_OBJECT(d->SignalWnd), "drag-failed", G_CALLBACK(DragFailed), this);
 		}
 	}
-	else LgiTrace("%s:%i - No signal window?\n", _FL);
+	else ERROR("%s:%i - No signal window?\n", _FL);
 
 	LMouse m;
 	SourceWnd->GetMouse(m);
@@ -333,28 +359,31 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 	}
 	#endif
 
-	LgiTrace("%s:%i - Drag finished.\n", _FL);
+	LOG("%s:%i - Drag finished.\n", _FL);
     return -1;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 LDragDropTarget::LDragDropTarget() : Formats(true)
 {
-	To = 0;
 }
 
 LDragDropTarget::~LDragDropTarget()
 {
 }
 
+const char *LDragDropTarget::GetClass() const
+{
+	return To?To->GetClass():"LDragDropTarget";
+}
+
 void LDragDropTarget::SetWindow(LView *to)
 {
-	bool Status = false;
 	To = to;
 	if (To)
 	{
 		To->DropTarget(this);
-		Status = To->DropTarget(true);
+		auto Status = To->DropTarget(true);
 		
 		if (To->IsAttached())
 		{

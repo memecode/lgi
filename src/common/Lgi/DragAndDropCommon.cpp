@@ -9,12 +9,10 @@ LDragFormats::LDragFormats(bool source)
 
 LString LDragFormats::ToString()
 {
-	LStringPipe p(256);
-	p.Print("{");
+	LString::Array a;
 	for (auto &f: Formats)
-		p.Print("%s,", f.Get());
-	p.Print("}");
-	return p.NewLStr();
+		a.Add(f.Get());
+	return LString(",").Join(a);
 }
 
 void LDragFormats::SupportsFileDrops()

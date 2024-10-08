@@ -2270,6 +2270,8 @@ bool LTree::GetFormats(LDragFormats &Formats)
 
 bool LTree::GetData(LArray<LDragData> &Data)
 {
+	bool status = false;
+	
 	for (auto &dd: Data)
 	{
 		if (dd.IsFormat(ContainerItemsFormat))
@@ -2286,11 +2288,12 @@ bool LTree::GetData(LArray<LDragData> &Data)
 
 				dd.Data[0].SetBinary(items->Sizeof(), items, false);
 				free(items);
+				status = true;
 			}
 		}
 	}
 
-	return false;
+	return status;
 }
 
 bool LTree::OnReorderDrop(ContainerItemDrop &dest, ContainerItemsDrag &source)
@@ -2379,19 +2382,17 @@ int LTree::WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState)
 {
 	if (DragItem)
 	{
-		if (Formats.HasFormat(ContainerItemsFormat))
+		Formats.Supports(ContainerItemsFormat);
+		if (auto pos = GetItemReorderPos(Pt))
 		{
-			if (auto pos = GetItemReorderPos(Pt))
+			if (!d->DropStatus ||
+				pos != *d->DropStatus.Get())
 			{
-				if (!d->DropStatus ||
-					pos != *d->DropStatus.Get())
-				{
-					d->DropStatus.Reset(new LItemContainer::ContainerItemDrop(pos));
-					Invalidate();
-				}
-
-				return DROPEFFECT_MOVE;
+				d->DropStatus.Reset(new LItemContainer::ContainerItemDrop(pos));
+				Invalidate();
 			}
+
+			return DROPEFFECT_MOVE;
 		}
 	}
 

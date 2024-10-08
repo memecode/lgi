@@ -3,6 +3,15 @@
 #include "ViewPriv.h"
 
 #define DEBUG_KEY_EVENT		0
+#define DEBUG_CLICK			0
+
+// Logging macros:
+#if DEBUG_CLICK
+#define LOG(...) printf(__VA_ARGS__)
+#else
+#define LOG(...)
+#endif
+
 
 using namespace Gtk;
 #include "LgiWidget.h"
@@ -144,13 +153,6 @@ LMouse _map_mouse_event(LView *v, int x, int y, bool Motion, bool Debug = false)
 
 	return m;
 }
-
-#define DEBUG_CLICK		0
-#if DEBUG_CLICK
-#define LOG(...) printf(__VA_ARGS__)
-#else
-#define LOG(...)
-#endif
 
 gboolean lgi_widget_click(GtkWidget *widget, GdkEventButton *ev)
 {
@@ -500,22 +502,18 @@ lgi_widget_drag_leave(GtkWidget	       *widget,
 					GdkDragContext     *context,
 					guint               time)
 {
-	LgiWidget *v = LGI_WIDGET(widget);
+	auto v = LGI_WIDGET(widget);
 	if (!v || !v->target)
 	{
 		// printf("%s:%i - LGI_WIDGET failed.\n", _FL);
 		return;
 	}
 	
-	LDragDropTarget *Target = v->target->DropTarget();
-	if (!Target)
+	if (auto Target = v->target->DropTarget())
 	{
-		// printf("%s:%i - View '%s' doesn't have drop target.\n", _FL, v->target->GetClass());
-		return;
+		v->drag_over_widget = false;
+		Target->OnDragExit();
 	}
-
-	v->drag_over_widget = false;
-	Target->OnDragExit();
 }
 
 static gboolean
@@ -528,14 +526,12 @@ lgi_widget_drag_motion(GtkWidget	   *widget,
 	LgiWidget *v = LGI_WIDGET(widget);
 	if (!v || !v->target)
 	{
-		printf("%s:%i - LGI_WIDGET failed.\n", _FL);
+		DND_ERROR("%s:%i - LGI_WIDGET failed.\n", _FL);
 		return false;
 	}
 	
 	LViewI *view = v->target;
-	#if DEBUG_DND
-	printf("%s:%i - DragMotion %s\n", _FL, view->GetClass());
-	#endif
+	DND_LOG("%s:%i - DragMotion %s\n", _FL, view->GetClass());
 
 	LDragDropTarget *Target = view->DropTarget();
 	while (view && !Target)
@@ -544,22 +540,16 @@ lgi_widget_drag_motion(GtkWidget	   *widget,
 		if (!view)
 			break;
 		Target = view->DropTarget();
-		#if DEBUG_DND
-		printf("\t%s = %p\n", view->GetClass(), Target);
-		#endif
+		DND_LOG("\t%s = %p\n", view->GetClass(), Target);
 	}
 	
 	if (!Target)
 	{
-		#if DEBUG_DND
-		printf("%s:%i - View '%s' doesn't have drop target.\n", _FL, v->target->GetClass());
-		#endif
+		DND_ERROR("%s:%i - View '%s' doesn't have drop target.\n", _FL, v->target->GetClass());
 		return false;
 	}
 
-	#if DEBUG_DND
-	// printf("%s:%i - DragMotion(%s): ", _FL, v->target->GetClass());
-	#endif
+	DND_LOG("%s:%i - DragMotion(%s): ", _FL, v->target->GetClass());
 	
 	LDragFormats Formats(true);
 	for (Gtk::GList *Types = gdk_drag_context_list_targets(context); Types; Types = Types->next)
@@ -568,14 +558,10 @@ lgi_widget_drag_motion(GtkWidget	   *widget,
 		if (Type)
 		{
 			Formats.Supports(Type);
-			#if DEBUG_DND
-			// printf("%s, ", Type);
-			#endif
+			DND_LOG("%s, ", Type);
 		}
 	}
-	#if DEBUG_DND
-	// printf("\n");
-	#endif
+	DND_LOG("\n");
 	
 	if (!v->drag_over_widget)
 	{
@@ -603,15 +589,15 @@ lgi_widget_drag_drop(GtkWidget	       *widget,
 					gint                y,
 					guint               time_)
 {
-	LgiWidget *v = LGI_WIDGET(widget);
+	auto v = LGI_WIDGET(widget);
 	if (!v || !v->target)
 	{
-		printf("%s:%i - LGI_WIDGET failed.\n", _FL);
+		DND_ERROR("%s:%i - LGI_WIDGET failed.\n", _FL);
 		return false;
 	}
 	
-	LViewI *view = v->target;
-	LDragDropTarget *Target = view->DropTarget();
+	auto view = v->target;
+	auto Target = view->DropTarget();
 	while (view && !Target)
 	{
 		view = view->GetParent();
@@ -620,9 +606,7 @@ lgi_widget_drag_drop(GtkWidget	       *widget,
 	}
 	if (!Target)
 	{
-		#if DEBUG_DND
-		printf("%s:%i - View '%s' doesn't have drop target.\n", _FL, v->target->GetClass());
-		#endif
+		DND_ERROR("%s:%i - View '%s' doesn't have drop target.\n", _FL, v->target->GetClass());
 		return false;
 	}
 
@@ -642,9 +626,7 @@ lgi_widget_drag_drop(GtkWidget	       *widget,
 		return false;
 
 	LString drop_format = Formats[0];
-	#if DEBUG_DND
-	LgiTrace("lgi_widget_drag_drop, fmt=%s\n", drop_format);
-	#endif
+	DND_LOG("lgi_widget_drag_drop, fmt=%s\n", drop_format.Get());
 
 	// Request the data...
 	gtk_drag_get_data
@@ -667,12 +649,12 @@ lgi_widget_drag_data_received(	GtkWidget			*widget,
 								guint				info,
 								guint				time)
 {
-	// LgiTrace("lgi_widget_drag_data_received\n");
+	DND_LOG("lgi_widget_drag_data_received\n");
 
 	LgiWidget *v = LGI_WIDGET(widget);
 	if (!v || !v->target)
 	{
-		// printf("%s:%i - LGI_WIDGET failed.\n", _FL);
+		DND_ERROR("%s:%i - LGI_WIDGET failed.\n", _FL);
 		return;
 	}
 	
@@ -686,31 +668,21 @@ lgi_widget_drag_data_received(	GtkWidget			*widget,
 	}
 	if (!Target)
 	{
-		#if DEBUG_DND
-		printf("%s:%i - View '%s' doesn't have drop target.\n", _FL, v->target->GetClass());
-		#endif
+		DND_LOG("%s:%i - View '%s' doesn't have drop target.\n", _FL, v->target->GetClass());
 		return;
 	}
 	
 	gchar *Type = gdk_atom_name(gtk_selection_data_get_data_type(data));
-	#if DEBUG_DND
-	printf("%s:%i - Type=%s, Target=%s\n", _FL, Type, v->target->GetClass());
-	#endif
+	DND_LOG("%s:%i - Type=%s, Target=%s\n", _FL, Type, v->target->GetClass());
 	LPoint p(x, y);
 	gint Len = gtk_selection_data_get_length(data);
-	#if DEBUG_DND
-	printf("%s:%i - Len=%i\n", _FL, Len);
-	#endif
+	DND_LOG("%s:%i - Len=%i\n", _FL, Len);
 
 	const guchar *Ptr = gtk_selection_data_get_data(data);
-	#if DEBUG_DND
-	printf("%s:%i - Ptr=%p\n", _FL, Ptr);
-	#endif
+	DND_LOG("%s:%i - Ptr=%p\n", _FL, Ptr);
 	if (!Ptr || Len <= 0)
 	{
-		#if DEBUG_DND
-		printf("%s:%i - gtk_selection_data_get_[data/len] failed.\n", _FL);
-		#endif
+		DND_ERROR("%s:%i - gtk_selection_data_get_[data/len] failed.\n", _FL);
 		return;
 	}
 
