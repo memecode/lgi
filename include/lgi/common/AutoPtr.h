@@ -64,7 +64,7 @@ public:
 	~LAutoPtr()
 	{
 		if (IsHeap)
-			free(Ptr);
+			free((void*) Ptr);
 		else if (Arr)
 			delete [] Ptr;
 		else
