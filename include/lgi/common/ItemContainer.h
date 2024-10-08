@@ -236,7 +236,9 @@ public:
 
 class LgiClass LItemContainer :
 	public LLayout,
-	public LImageListOwner
+	public LImageListOwner,
+	public LDragDropSource,
+	public LDragDropTarget
 {
 	friend class LItemColumn;
 	friend class LItem;
@@ -363,16 +365,15 @@ protected:
 	/// The handler for re-ordering drops.
 	/// \returns true if the screen should be updated
 	/// \sa SetDragItem
-	virtual bool OnReorderDrop(ContainerItemDrop &dest, ContainerItemsDrag &source) { return false; };
+	virtual bool OnReorderDrop(ContainerItemDrop &dest, ContainerItemsDrag &source) { return false; }
 
 	/// \returns the item drop details for a given point
 	/// \sa SetDragItem
 	virtual ContainerItemDrop GetItemReorderPos(LPoint pt) { return ContainerItemDrop(); }
 
-	
-
 	ContainerDragMode DragMode = DRAG_NONE;
 	ItemDragFlags DragItem = ITEM_DRAG_USER;
+	LAutoPtr<ContainerItemDrop> DropStatus;
 	
 	LRect ColumnHeader;
 	int ColClick = -1;
@@ -476,6 +477,7 @@ public:
 
 	virtual void UpdateAllItems() = 0;
 	virtual int GetContentSize(int ColumnIdx) = 0;
+	virtual bool GetItems(LArray<LItem*> &arr, bool selectedOnly = false) = 0;
 
 	/// Resizes all the columns to their content, allowing a little extra space for visual effect
 	virtual void ResizeColumnsToContent(int Border = DEFAULT_COLUMN_SPACING);
@@ -492,6 +494,7 @@ public:
 	
 	/// Gets the current drag item flags
 	ItemDragFlags GetDragItem() { return DragItem; }
+
 	/// Sets the drag item flags. This enables the user to organize the items in the container
 	/// via drag and drop. Either just reordering or also changing the heirarchy of the items
 	/// in a tree control.
@@ -500,6 +503,14 @@ public:
 	/// format is described by `ContainerItemsDrag`. Finally when the user drops the items
 	/// the control handles the drop via `OnReorderDrop`.
 	void SetDragItem(ItemDragFlags flags) { DragItem = flags; }
+
+	bool GetFormats(LDragFormats &Formats) override;
+	bool GetData(LArray<LDragData> &Data) override;
+	int WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState) override;
+	int OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState) override;
+	void OnDragExit() override;
+	void OnCreate() override;
+	virtual int OnDragError(const char *Msg, const char *file, int line);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////

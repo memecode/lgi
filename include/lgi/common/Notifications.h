@@ -42,6 +42,8 @@ enum LNotifyType
 	LNotifyContainerClick,
 	/// Ctrl+F - find
 	LNotifyContainerFind,
+	/// User reorder or moved items using drag and drop
+	LNotifyContainerReorder,
 
 	// Generic value changed
 	LNotifyValueChanged,

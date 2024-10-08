@@ -273,6 +273,7 @@ protected:
 	void UpdateScrollBars();
 	void KeyScroll(int iTo, int iFrom, bool SelectItems);
 	void ClearDs(int Col);
+	ContainerItemDrop GetItemReorderPos(LPoint ms) override;
 
 public:
 	/// Constructor
@@ -358,6 +359,7 @@ public:
 	bool OnMouseWheel(double Lines);
 	void OnFocus(bool b);
 	void OnPulse();
+	bool OnReorderDrop(ContainerItemDrop &dest, ContainerItemsDrag &source) override;
 
 	// Properties
 	
@@ -502,6 +504,14 @@ public:
 
 	// Impl
 	int GetContentSize(int ColumnIdx);
+	bool GetItems(LArray<LItem*> &arr, bool selectedOnly = false)
+	{
+		if (selectedOnly)
+			GetSelection(arr);
+		else
+			GetAll(arr);
+		return arr.Length() > 0;
+	}
 };
 
 #endif

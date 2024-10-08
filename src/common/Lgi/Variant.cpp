@@ -1730,8 +1730,7 @@ bool LDom::GetValue(const char *Var, LVariant &Value)
 	bool Status = false;
 
 	LString Name, Arr;
-	LDom *Object = ResolveObject(Var, Name, Arr);
-	if (Object)
+	if (auto Object = ResolveObject(Var, Name, Arr))
 	{
 		if (Name.IsEmpty())
 			LgiTrace("%s:%i - Warning name parse failed for '%s'\n", _FL, Var);

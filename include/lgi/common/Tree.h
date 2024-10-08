@@ -174,9 +174,7 @@ public:
 class LgiClass LTree :
 	public LItemContainer,
 	public ResObject,
-	public LTreeNode,
-	public LDragDropSource,
-	public LDragDropTarget
+	public LTreeNode
 {
 	friend class LTreeItem;
 	friend class LTreeNode;
@@ -205,6 +203,7 @@ protected:
 	void ClearDs(int Col) override;
 	bool OnReorderDrop(ContainerItemDrop &dest, ContainerItemsDrag &source) override;
 	ContainerItemDrop GetItemReorderPos(LPoint ms) override;
+	void OnDragExit();
 	
 public:
 	LTree(int id, int x = 0, int y = 0, int cx = 100, int cy = 100, const char *name = NULL);
@@ -222,7 +221,6 @@ public:
 	virtual void OnItemSelect(LTreeItem *Item);
 	
 	// Implementation
-	void OnCreate() override;
 	void OnMouseClick(LMouse &m) override;
 	void OnMouseMove(LMouse &m) override;
 	bool OnMouseWheel(double Lines) override;
@@ -252,6 +250,8 @@ public:
 	bool Select(LTreeItem *Obj);
 	/// Returns the first selected item
 	LTreeItem *Selection();
+	/// Get items as an array
+	bool GetItems(LArray<LItem*> &arr, bool selectedOnly = false);
 
 	/// Gets the whole selection and puts it in 'n'
 	template<class T>
@@ -305,14 +305,6 @@ public:
 	};
 
 	void SetVisualStyle(ThumbStyle Btns, bool JoiningLines);
-
-	// Drag and drop support:
-	bool GetFormats(LDragFormats &Formats) override;
-	bool GetData(LArray<LDragData> &Data) override;
-	int WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState) override;
-	int OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState) override;
-	void OnDragExit() override;
-	virtual int OnDragError(const char *Msg, const char *file, int line);
 };
 
 #endif

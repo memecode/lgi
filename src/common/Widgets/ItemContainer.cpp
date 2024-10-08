@@ -126,6 +126,11 @@ LItemContainer::~LItemContainer()
 	Columns.DeleteObjects();
 }
 
+void LItemContainer::OnCreate()
+{
+	LDragDropTarget::SetWindow(this);
+}
+
 void LItemContainer::PaintColumnHeadings(LSurface *pDC)
 {
 	// Draw column headings
@@ -488,6 +493,116 @@ void LItemContainer::ResizeColumnsToContent(int Border)
 	}
 
 	Invalidate();
+}
+
+bool LItemContainer::GetFormats(LDragFormats &Formats)
+{
+	if (DragItem)
+	{
+		Formats.Supports(ContainerItemsFormat);
+		return true;
+	}
+
+	return false;
+}
+
+bool LItemContainer::GetData(LArray<LDragData> &Data)
+{
+	bool status = false;
+	
+	for (auto &dd: Data)
+	{
+		if (dd.IsFormat(ContainerItemsFormat))
+		{
+			LArray<LItem*> sel;
+			if (!GetItems(sel, true))
+				continue;
+			
+			if (auto items = ContainerItemsDrag::New((uint32_t)sel.Length()))
+			{
+				items->view = this;
+				for (size_t i=0; i<sel.Length(); i++)
+					items->item[i] = sel[i];
+
+				dd.Data[0].SetBinary(items->Sizeof(), items.Get(), false);
+				status = true;
+			}
+		}
+	}
+
+	return status;
+}
+
+int LItemContainer::WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState)
+{
+	if (DragItem)
+	{
+		Formats.Supports(ContainerItemsFormat);
+		if (auto pos = GetItemReorderPos(Pt))
+		{
+			if (!DropStatus ||
+				pos != *DropStatus.Get())
+			{
+				DropStatus.Reset(new LItemContainer::ContainerItemDrop(pos));
+				Invalidate();
+			}
+
+			return DROPEFFECT_MOVE;
+		}
+	}
+
+	return DROPEFFECT_NONE;
+}
+
+int LItemContainer::OnDragError(const char *Msg, const char *file, int line)
+{
+	LgiTrace("%s:%i - %s\n", file, line, Msg);
+	return DROPEFFECT_NONE;
+}
+
+int LItemContainer::OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
+{
+	bool screenDirty = false;
+
+	for (auto &dd: Data)
+	{
+		if (dd.IsFormat(ContainerItemsFormat))
+		{
+			if (dd.Data.Length() != 1)
+				return OnDragError("Wrong item count", _FL);
+			if (!dd.Data[0].IsBinary())
+				return OnDragError("Not binary data", _FL);
+			auto items = (ContainerItemsDrag*) dd.Data[0].Value.Binary.Data;
+			if (items->view != this)
+				return OnDragError("Not the same tree view", _FL);
+			
+			if (DropStatus)
+				screenDirty |= OnReorderDrop(*DropStatus, *items);
+		}
+	}
+
+	if (DropStatus)
+	{
+		DropStatus.Reset();
+		screenDirty = true;
+	}
+
+	if (screenDirty)
+	{
+		UpdateAllItems();
+		Invalidate();
+	}
+
+	return DROPEFFECT_NONE;
+}
+
+void LItemContainer::OnDragExit()
+{
+	if (DropStatus)
+	{
+		DropStatus.Reset();
+		Invalidate();
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1313,3 +1428,4 @@ LMessage::Result LItemEdit::OnEvent(LMessage *Msg)
 
 	return LPopup::OnEvent(Msg);
 }
+

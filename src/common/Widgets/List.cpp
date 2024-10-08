@@ -38,6 +38,29 @@
 #define VisibleItems()					CompletelyVisible // (LastVisible - FirstVisible + 1)
 #define MaxScroll()						MAX((int)Items.Length() - CompletelyVisible, 0)
 
+class ScopedLock
+{
+	LView *view = nullptr;
+	bool locked = false;
+
+public:
+	ScopedLock(LView *v, const char *file, int line) : view(v)
+	{
+		locked = view->Lock(file, line);
+	}
+
+	~ScopedLock()
+	{
+		if (locked)
+			view->Unlock();
+	}
+
+	operator bool() const 
+	{
+		return locked;
+	}
+};
+
 class LListPrivate
 {
 public:
@@ -654,8 +677,15 @@ void LList::OnItemClick(LListItem *Item, LMouse &m)
 
 void LList::OnItemBeginDrag(LListItem *Item, LMouse &m)
 {
-	if (Item)
-		Item->OnBeginDrag(m);
+	if (!Item)
+		return;
+
+	auto clientHandled = Item->OnBeginDrag(m);
+	if (DragItem && !clientHandled)
+	{
+		// Do internal handling of item drag...
+		Drag(this, NULL, DROPEFFECT_MOVE);
+	}
 }
 
 void LList::OnItemSelect(LArray<LListItem*> &It)
@@ -1625,9 +1655,111 @@ void LList::OnMouseClick(LMouse &m)
 	}
 }
 
+LItemContainer::ContainerItemDrop LList::GetItemReorderPos(LPoint ms)
+{
+	ContainerItemDrop drop;
+	ScopedLock lock(this, _FL);
+	if (lock)
+	{
+		ssize_t idx = 0;
+		for (auto item: Items)
+		{
+			if (item->Pos.Overlap(ms))
+			{
+				auto center = item->Pos.Center();
+				drop.pos.x1 = item->Pos.x1;
+				drop.pos.x2 = item->Pos.x2;
+				if (ms.y >= center.y)
+				{
+					// bottom half
+					drop.prev = item;
+					drop.next = idx < (ssize_t)Items.Length() - 1 ? Items.ItemAt(idx + 1) : NULL;
+					drop.pos.y1 = item->Pos.y2 - 1;
+					drop.pos.y2 = item->Pos.y2 + 2;
+				}
+				else
+				{
+					// top half
+					drop.prev = idx > 0 ? Items.ItemAt(idx - 1) : NULL;
+					drop.next = item;
+					drop.pos.y1 = item->Pos.y1 - 2;
+					drop.pos.y2 = item->Pos.y1 + 1;
+				}
+			}
+
+			idx++;
+		}
+	}
+	return drop;
+}
+
+bool LList::OnReorderDrop(ContainerItemDrop &dest, ContainerItemsDrag &source)
+{
+	bool screenDirty = false;
+	ScopedLock lock(this, _FL);
+	if (lock &&
+		(DragItem & ITEM_DRAG_REORDER) != ITEM_DRAG_USER)
+	{
+		bool allowDepthChange = TestFlag(DragItem, ITEM_DEPTH_CHANGE);
+		
+		for (size_t i=0; i<source.items; i++)
+		{
+			auto moveItem = dynamic_cast<LListItem*>(source.item[i]);
+			if (!moveItem)
+				continue;
+			auto prev = dynamic_cast<LListItem*>(dest.prev);
+			auto next = dynamic_cast<LListItem*>(dest.next);
+			if (!prev && !next)
+				continue;
+
+			/*
+			for (int n=0; n<Items.Length(); n++)
+				LgiTrace("before[%i]=%s\n", n, Items[n]->GetText());
+			*/
+
+			if (prev)
+			{
+				// Insert AFTER the prev item...
+				Items.Delete(moveItem);
+				auto destIdx = Items.IndexOf(prev);
+				if (destIdx >= 0)
+				{
+					Items.Insert(moveItem, destIdx + 1);
+					screenDirty = true;
+				}
+			}
+			else if (next)
+			{
+				// Insert BEFORE the next item...
+				Items.Delete(moveItem);
+				auto destIdx = Items.IndexOf(next);
+				if (destIdx >= 0)
+				{
+					Items.Insert(moveItem, destIdx);
+					screenDirty = true;
+				}
+			}
+
+			/*
+			for (int n=0; n<Items.Length(); n++)
+				LgiTrace("after[%i]=%s\n", n, Items[n]->GetText());
+			*/
+		}
+
+		if (screenDirty)
+		{
+			UpdateAllItems();
+			SendNotify(LNotifyContainerReorder);
+		}
+	}
+
+	return screenDirty;
+}
+
 void LList::OnPulse()
 {
-	if (!Lock(_FL))
+	ScopedLock lock(this, _FL);
+	if (!lock)
 		return;
 
 	if (IsCapturing())
@@ -1731,13 +1863,12 @@ void LList::OnPulse()
 		DragMode = DRAG_NONE;
 		SetPulse();
 	}
-	
-	Unlock();
 }
 
 void LList::OnMouseMove(LMouse &m)
 {
-	if (!Lock(_FL))
+	ScopedLock lock(this, _FL);
+	if (!lock)
 		return;
 
 	// m.Trace("LList::OnMouseMove");
@@ -1896,8 +2027,6 @@ void LList::OnMouseMove(LMouse &m)
 			break;
 		}
 	}
-
-	Unlock();
 }
 
 int64 LList::Value()
@@ -2594,6 +2723,13 @@ void LList::OnPaint(LSurface *pDC)
 	for (LRect *w=Rgn.First(); w; w=Rgn.Next())
 	{
 		pDC->Rectangle(w);
+	}
+
+	if (DropStatus)
+	{
+		auto r = DropStatus->pos;
+		pDC->Colour(LColour(L_WORKSPACE).Mix(LColour(L_FOCUS_SEL_BACK)));
+		pDC->Rectangle(&r);
 	}
 
 	Unlock();

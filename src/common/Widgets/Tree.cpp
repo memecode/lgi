@@ -54,7 +54,6 @@ public:
     int				LastLayoutPx = -1;
 	LMouse			*CurrentClick = NULL;
 	LTreeItem		*ScrollTo = NULL;
-	LAutoPtr<LTree::ContainerItemDrop> DropStatus;
     
     // Visual style
 	LTree::ThumbStyle Btns = LTree::TreeTriangle;
@@ -1657,11 +1656,6 @@ bool LTree::OnMouseWheel(double Lines)
 	return true;
 }
 
-void LTree::OnCreate()
-{
-	LDragDropTarget::SetWindow(this);
-}
-
 void LTree::OnMouseClick(LMouse &m)
 {
 	TREELOCK(this)
@@ -1935,9 +1929,9 @@ void LTree::OnPaint(LSurface *pDC)
 		pDC->Rectangle(rItems.x1, d->Limit.y - s.y, rItems.x2, rItems.y2);
 	}
 
-	if (d->DropStatus)
+	if (DropStatus)
 	{
-		auto r = d->DropStatus->pos;
+		auto r = DropStatus->pos;
 		pDC->Colour(LColour(L_WORKSPACE).Mix(LColour(L_FOCUS_SEL_BACK)));
 		pDC->Rectangle(&r);
 	}
@@ -2170,11 +2164,7 @@ void LTree::OnDragExit()
 	SetPulse();
 	SelectDropTarget(0);
 
-	if (d->DropStatus)
-	{
-		d->DropStatus.Reset();
-		Invalidate();
-	}
+	LItemContainer::OnDragExit();
 }
 
 void LTree::SelectDropTarget(LTreeItem *Item)
@@ -2229,6 +2219,24 @@ LTreeItem *LTree::Selection()
 {
 	TREELOCK(this)
 	return d->Selection[0];
+}
+
+bool LTree::GetItems(LArray<LItem*> &arr, bool selectedOnly)
+{
+	if (selectedOnly)
+	{
+		for (auto s: d->Selection)
+			arr.Add(s);
+	}
+	else
+	{
+		ForEach([arr](auto i) mutable
+		{
+			arr.Add(i);
+		});
+	}
+
+	return arr.Length() > 0;
 }
 
 bool LTree::ForAllItems(std::function<void(LTreeItem*)> Callback)
@@ -2304,42 +2312,11 @@ void LTree::OnItemBeginDrag(LTreeItem *Item, LMouse &m)
 	}
 }
 
-bool LTree::GetFormats(LDragFormats &Formats)
+LItemContainer::ContainerItemDrop LTree::GetItemReorderPos(LPoint pt)
 {
-	if (DragItem)
-	{
-		Formats.Supports(ContainerItemsFormat);
-		return true;
-	}
-
-	return false;
-}
-
-bool LTree::GetData(LArray<LDragData> &Data)
-{
-	bool status = false;
-	
-	for (auto &dd: Data)
-	{
-		if (dd.IsFormat(ContainerItemsFormat))
-		{
-			LArray<LTreeItem*> sel;
-			if (!GetSelection(sel))
-				continue;
-			
-			if (auto items = ContainerItemsDrag::New((uint32_t)sel.Length()))
-			{
-				items->view = this;
-				for (size_t i=0; i<sel.Length(); i++)
-					items->item[i] = sel[i];
-
-				dd.Data[0].SetBinary(items->Sizeof(), items.Get(), false);
-				status = true;
-			}
-		}
-	}
-
-	return status;
+	LItemContainer::ContainerItemDrop inf;
+	ReorderPos(inf, pt, 0);
+	return inf;
 }
 
 bool LTree::OnReorderDrop(ContainerItemDrop &dest, ContainerItemsDrag &source)
@@ -2358,7 +2335,7 @@ bool LTree::OnReorderDrop(ContainerItemDrop &dest, ContainerItemsDrag &source)
 			auto parent = moveItem->GetParent();
 			auto prev = dynamic_cast<LTreeItem*>(dest.prev);
 			auto next = dynamic_cast<LTreeItem*>(dest.next);
-			if (!prev || !next)
+			if (!prev && !next)
 				continue;
 
 			#define DEPTH_CHECK(ptr) \
@@ -2393,77 +2370,11 @@ bool LTree::OnReorderDrop(ContainerItemDrop &dest, ContainerItemsDrag &source)
 				}
 			}
 		}
+
+		if (screenDirty)
+			SendNotify(LNotifyContainerReorder);
 	}
 
 	return screenDirty;
 }
 
-LItemContainer::ContainerItemDrop LTree::GetItemReorderPos(LPoint pt)
-{
-	LItemContainer::ContainerItemDrop inf;
-	ReorderPos(inf, pt, 0);
-	return inf;
-}
-
-int LTree::WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState)
-{
-	if (DragItem)
-	{
-		Formats.Supports(ContainerItemsFormat);
-		if (auto pos = GetItemReorderPos(Pt))
-		{
-			if (!d->DropStatus ||
-				pos != *d->DropStatus.Get())
-			{
-				d->DropStatus.Reset(new LItemContainer::ContainerItemDrop(pos));
-				Invalidate();
-			}
-
-			return DROPEFFECT_MOVE;
-		}
-	}
-
-	return DROPEFFECT_NONE;
-}
-
-int LTree::OnDragError(const char *Msg, const char *file, int line)
-{
-	LgiTrace("%s:%i - %s\n", file, line, Msg);
-	return DROPEFFECT_NONE;
-}
-
-int LTree::OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
-{
-	bool screenDirty = false;
-
-	for (auto &dd: Data)
-	{
-		if (dd.IsFormat(ContainerItemsFormat))
-		{
-			if (dd.Data.Length() != 1)
-				return OnDragError("Wrong item count", _FL);
-			if (!dd.Data[0].IsBinary())
-				return OnDragError("Not binary data", _FL);
-			auto items = (ContainerItemsDrag*) dd.Data[0].Value.Binary.Data;
-			if (items->view != this)
-				return OnDragError("Not the same tree view", _FL);
-			
-			if (d->DropStatus)
-				screenDirty |= OnReorderDrop(*d->DropStatus, *items);
-		}
-	}
-
-	if (d->DropStatus)
-	{
-		d->DropStatus.Reset();
-		screenDirty = true;
-	}
-
-	if (screenDirty)
-	{
-		UpdateAllItems();
-		Invalidate();
-	}
-
-	return DROPEFFECT_NONE;
-}

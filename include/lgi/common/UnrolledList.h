@@ -295,7 +295,7 @@ protected:
 		return true;
 	}
 
-	bool Insert(LstBlk *i, T p, int Index = -1)
+	bool Insert(LstBlk *i, T p, ssize_t Index = -1)
 	{
 		if (!i)
 			return false;
@@ -572,7 +572,7 @@ public:
 		return Status;
 	}
 
-	bool Insert(T p, int Index = -1)
+	bool Insert(T p, ssize_t Index = -1)
 	{
 		VALIDATE_UL();
 		if (!LastObj)
