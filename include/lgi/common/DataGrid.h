@@ -3,7 +3,7 @@
 #include "lgi/common/List.h"
 #include "lgi/common/DragAndDrop.h"
 
-class LDataGrid : public LList, public LDragDropSource, public LDragDropTarget
+class LDataGrid : public LList
 {
 	struct LDataGridPriv *d;
 
