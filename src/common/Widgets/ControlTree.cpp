@@ -490,8 +490,7 @@ LControlTree::Item *LControlTree::Resolve(bool Create, const char *Path, int Ctr
 					{
 						Cur->Insert(Ci);
 						
-						LTreeItem *p = Ci->GetParent();
-						if (p)
+						if (auto p = Ci->GetParent())
 							p->Expanded(true);
 						return Ci;
 					}

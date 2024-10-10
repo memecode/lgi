@@ -436,8 +436,7 @@ bool VcCommit::SvnParse(LString s)
 
 VcFolder *VcCommit::GetFolder()
 {
-	for (LTreeItem *i = d->Tree->Selection(); i;
-		i = i->GetParent())
+	for (LTreeNode *i = d->Tree->Selection(); i; i = i->GetParent())
 	{
 		auto f = dynamic_cast<VcFolder*>(i);
 		if (f)

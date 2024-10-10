@@ -239,10 +239,10 @@ LTreeItem *LTreeNode::Insert(LTreeItem *Obj, ssize_t Idx)
 	if (Obj && Obj->Tree)
 		Obj->Remove();
 	
-	LTreeItem *NewObj = Obj ? Obj : new LTreeItem;
+	auto NewObj = Obj ? Obj : new LTreeItem;
 	if (NewObj)
 	{
-		NewObj->Parent = Item();
+		NewObj->Parent = this;
 		NewObj->_SetTreePtr(Tree);
 
 		Items.Delete(NewObj);
@@ -263,23 +263,24 @@ LTreeItem *LTreeNode::Insert(LTreeItem *Obj, ssize_t Idx)
 
 void LTreeNode::Detach()
 {
+	auto item = IsItem();
 	if (Parent)
 	{
-		LTreeItem *It = Item();
-		if (It)
+		if (item)
 		{
-			LAssert(Parent->Items.HasItem(It));
-			Parent->Items.Delete(It);
+			LAssert(Parent->Items.HasItem(item));
+			Parent->Items.Delete(item);
 		}
-		Parent = 0;
+		else LAssert(0);
+		Parent = NULL;
 	}
 	if (Tree)
 	{
 		Tree->d->LayoutDirty = true;
 		Tree->Invalidate();
 	}
-	if (Item())
-		Item()->_SetTreePtr(0);
+	if (item)
+		item->_SetTreePtr(NULL);
 }
 
 void LTreeNode::Remove()
@@ -287,30 +288,23 @@ void LTreeNode::Remove()
 	int y = 0;
 	if (Parent)
 	{
-		LTreeItem *i = Item();
-		if (i && i->IsRoot())
+		if (auto p = Parent->IsItem())
 		{
-			LRect *p = Pos();
-			LTreeItem *Prev = GetPrev();
-			if (Prev)
-			{
-				y = Prev->d->Pos.y1;
-			}
-			else
-			{
-				y = p->y1;
-			}
+			// Parent is a tree item..
+			y = p->d->Pos.y1;
 		}
-		else
+		else if (auto item = IsItem())
 		{
-			y = Parent->d->Pos.y1;
+			// Parent is the top level tree view..
+			y = item->d->Pos.y1;
 		}
+		else LAssert(!"Shouldn't happen");
 	}
 
 	LTree *t = Tree;
 
-	if (Item())
-		Item()->_Remove();
+	if (IsItem())
+		IsItem()->_Remove();
 
 	if (t)
 	{
@@ -362,13 +356,7 @@ int LTreeNode::ForEach(std::function<void(LTreeItem*)> Fn)
 ssize_t LTreeNode::IndexOf()
 {
 	if (Parent)
-	{
-		return Parent->Items.IndexOf(Item());
-	}
-	else if (Tree)
-	{
-		return Tree->Items.IndexOf(Item());
-	}
+		return Parent->Items.IndexOf(IsItem());
 
 	return -1;
 }
@@ -380,32 +368,30 @@ LTreeItem *LTreeNode::GetChild()
 
 LTreeItem *LTreeNode::GetPrev()
 {
-	List<LTreeItem> *l = (Parent) ? &Parent->Items : (Tree) ? &Tree->Items : 0;
-	if (l)
+	if (Parent)
 	{
-		ssize_t Index = l->IndexOf(Item());
+		ssize_t Index = Parent->Items.IndexOf(IsItem());
 		if (Index >= 0)
 		{
-			return l->ItemAt(Index-1);
+			return Parent->Items.ItemAt(Index - 1);
 		}
 	}
 
-	return 0;
+	return NULL;
 }
 
 LTreeItem *LTreeNode::GetNext()
 {
-	List<LTreeItem> *l = (Parent) ? &Parent->Items : (Tree) ? &Tree->Items : 0;
-	if (l)
+	if (Parent)
 	{
-		ssize_t Index = l->IndexOf(Item());
+		ssize_t Index = Parent->Items.IndexOf(IsItem());
 		if (Index >= 0)
 		{
-			return l->ItemAt(Index+1);
+			return Parent->Items.ItemAt(Index + 1);
 		}
 	}
 
-	return 0;
+	return NULL;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -432,10 +418,10 @@ LTreeItem::~LTreeItem()
 
 	int y = 0;
 	LTree *t = NULL;
-	if (Parent && (LTreeNode*)Parent != (LTreeNode*)Tree)
+	if (Parent && Parent->IsItem())
 	{
 		t = Tree;
-		y = Parent->d->Pos.y1;
+		y = Parent->IsItem()->d->Pos.y1;
 	}
 	else if ((LTreeNode*)this != (LTreeNode*)Tree)
 	{
@@ -457,6 +443,11 @@ LTreeItem::~LTreeItem()
 
 	if (t)
 		t->_UpdateBelow(y);
+}
+
+bool LTreeItem::Visible()
+{
+	return d->Visible;
 }
 
 int LTreeItem::GetColumnSize(int Col)
@@ -590,49 +581,34 @@ void LTreeItem::_SetTreePtr(LTree *t)
 			d->Selected = false;
 		}
 		if (Tree->d->LastHit == this)
-		{
-			Tree->d->LastHit = 0;
-		}
+			Tree->d->LastHit = NULL;
 		if (Tree->d->DropTarget == this)
-		{
-			Tree->d->DropTarget = 0;
-		}
+			Tree->d->DropTarget = NULL;
 	}
 	Tree = t;
 
-	List<LTreeItem>::I it = Items.begin();
-	for (LTreeItem *i=*it; i; i=*++it)
-	{
+	for (auto i: Items)
 		i->_SetTreePtr(t);
-	}
 }
 
 void LTreeItem::_Remove()
 {
-	if ((LTreeNode*)this != (LTreeNode*)Tree)
+	if (Parent)
 	{
-		if (Parent)
-		{
-			LAssert(Parent->Items.HasItem(this));
-			Parent->Items.Delete(this);
-		}
-		else if (Tree)
-		{
-			LAssert(Tree->Items.HasItem(this));
-			Tree->Items.Delete(this);
-		}
-
-		if (Tree)
-		{
-			LAssert(Tree->d != NULL);
-			Tree->d->LayoutDirty = true;
-			
-			if (Tree->IsCapturing())
-				Tree->Capture(false);
-		}
+		LAssert(Parent->Items.HasItem(this));
+		Parent->Items.Delete(this);
+		Parent = NULL;
 	}
 
-	Parent = NULL;
+	if (Tree)
+	{
+		LAssert(Tree->d != NULL);
+		Tree->d->LayoutDirty = true;
+		
+		if (Tree->IsCapturing())
+			Tree->Capture(false);
+	}
+
 	_SetTreePtr(NULL);
 }
 
@@ -789,7 +765,7 @@ void LTreeItem::Select(bool b)
 		d->Selected = b;
 		if (b)
 		{
-			LTreeItem *p = this;
+			LTreeNode *p = this;
 			while ((p = p->GetParent()))
 			{
 				p->Expanded(true);
@@ -1378,7 +1354,7 @@ LTreeItem *LTree::GetAdjacent(LTreeItem *i, bool Down)
 			{
 				for (n = i; n; )
 				{
-					LTreeItem *p = n->GetParent();
+					auto p = n->GetParent();
 					if (p)
 					{
 						ssize_t Index = n->IndexOf();
@@ -1389,7 +1365,7 @@ LTreeItem *LTree::GetAdjacent(LTreeItem *i, bool Down)
 						}
 						else
 						{
-							n = p;
+							n = p->IsItem();
 						}
 					}
 					else
@@ -1400,15 +1376,14 @@ LTreeItem *LTree::GetAdjacent(LTreeItem *i, bool Down)
 				}
 			}
 
-			Ret = n;
+			Ret = n->IsItem();
 		}
-		else
-		{
-			LTreeItem *p = i->GetParent() ? i->GetParent() : 0;
+		else if (auto p = i->GetParent())
+		{			
 			ssize_t Index = i->IndexOf();
 			if (p)
 			{
-				LTreeItem *n = p;
+				LTreeNode *n = p;
 				if (Index > 0)
 				{
 					n = i->GetPrev();
@@ -1419,7 +1394,7 @@ LTreeItem *LTree::GetAdjacent(LTreeItem *i, bool Down)
 					}
 				}
 
-				Ret = n;
+				Ret = n->IsItem();
 			}
 			else if (Index > 0)
 			{
@@ -1434,7 +1409,7 @@ LTreeItem *LTree::GetAdjacent(LTreeItem *i, bool Down)
 					else break;
 				}
 				
-				Ret = p;
+				Ret = p->IsItem();
 			}
 		}
 	}
@@ -1519,16 +1494,13 @@ bool LTree::OnKey(LKey &k)
 						i->Expanded(false);
 						break;
 					}
-					else
+					else if (auto p = i->GetParent())
 					{
-						LTreeItem *p = i->GetParent();
-						if (p)
-						{
-							p->Select(true);
-							p->Expanded(false);
-							_Pour();
-							break;
-						}
+						if (auto item = p->IsItem())
+							item->Select(true);
+						p->Expanded(false);
+						_Pour();
+						break;
 					}
 				}
 				// fall thru
@@ -2332,7 +2304,7 @@ bool LTree::OnReorderDrop(ContainerItemDrop &dest, ContainerItemsDrag &source)
 			auto moveItem = dynamic_cast<LTreeItem*>(source.item[i]);
 			if (!moveItem)
 				continue;
-			auto parent = moveItem->GetParent();
+			LTreeNode *parent = moveItem->GetParent() ? moveItem->GetParent() : moveItem->GetTree();
 			auto prev = dynamic_cast<LTreeItem*>(dest.prev);
 			auto next = dynamic_cast<LTreeItem*>(dest.next);
 			if (!prev && !next)
@@ -2342,6 +2314,12 @@ bool LTree::OnReorderDrop(ContainerItemDrop &dest, ContainerItemsDrag &source)
 				if (ptr->GetTree() != moveItem->GetTree() && \
 					!allowDepthChange) \
 					continue;
+
+			if (!parent)
+			{
+				LAssert(!"Should always have some parent?");
+				continue;
+			}
 
 			if (prev)
 			{

@@ -701,7 +701,7 @@ void LFilterItem::_PaintText(LItem::ItemPaintCtx &Ctx)
 			Buf.Blt(x, y, d->Data->Icons[IconNewAnd]);
 			x -= 2 + IconSize;
 
-			if (!IsRoot())
+			if (IsItem())
 			{
 				// New Condition
 				d->Btns[IconNewCond].ZOff(IconSize-1, IconSize-1);
@@ -721,7 +721,7 @@ void LFilterItem::_PaintText(LItem::ItemPaintCtx &Ctx)
 			Buf.Blt(x, IconY, d->Data->Icons[IconDelete]);
 			x -= 2 + IconSize;
 			
-			if (!IsRoot())
+			if (IsItem())
 			{
 				// Move down
 				d->Btns[IconMoveDown].ZOff(IconSize-1, IconSize-1);
@@ -952,12 +952,15 @@ bool LFilterItem::OnKey(LKey &k)
 	{
 		if (k.Down() && GetParent() && d->Node != LNODE_NEW)
 		{
-			LTreeItem *p = GetNext();
+			LTreeNode *p = GetNext();
 			if (!p) p = GetPrev();
 			if (!p) p = GetParent();
 			delete this;
 			if (p)
-				p->Select(true);
+			{
+				if (auto item = p->IsItem())
+					item->Select(true);
+			}
 		}
 		return true;
 	}

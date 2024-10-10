@@ -3815,7 +3815,7 @@ bool AppWnd::ShowInProject(const char *Fn)
 		ProjectNode *Node = NULL;
 		if (p->FindFullPath(Fn, &Node))
 		{
-			for (LTreeItem *i = Node->GetParent(); i; i = i->GetParent())
+			for (auto i = Node->GetParent(); i; i = i->GetParent())
 			{
 				i->Expanded(true);
 			}

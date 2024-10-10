@@ -887,9 +887,12 @@ void ProjectNode::Delete()
 {
 	if (Select())
 	{
-		LTreeItem *s = GetNext();
+		LTreeNode *s = GetNext();
 		if (s || (s = GetParent()))
-			s->Select(true);
+		{
+			if (auto item = s->IsItem())
+				item->Select(true);
+		}
 	}
 			
 	if (nView)

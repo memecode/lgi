@@ -21,12 +21,14 @@ class LTreeItem;
 
 class LgiClass LTreeNode
 {
+	friend class LTree;
+	friend class LTreeItem;
+	
 protected:
 	LTree *Tree = NULL;
-	LTreeItem *Parent = NULL;
+	LTreeNode *Parent = NULL;
 	List<LTreeItem> Items;
 
-	virtual LTreeItem *Item() { return NULL; }
 	virtual LRect *Pos() { return NULL; }
 	virtual void _ClearDs(int Col);
 	void _Visible(bool v);
@@ -50,10 +52,10 @@ public:
 	/// Gets the first child node.
 	LTreeItem *GetChild();
 	/// Gets the parent of this node.
-	LTreeItem *GetParent() { return Parent; }
+	LTreeNode *GetParent() { return Parent; }
 	/// Gets the owning tree. May be NULL if not attached to a tree.
 	LTree *GetTree() const { return Tree; }
-	/// Returns true if this is the root node.
+	/// Returns true if this is the root node.	
 	bool IsRoot();
 	/// Returns the index of this node in the list of item owned by it's parent.
 	ssize_t IndexOf();
@@ -87,8 +89,17 @@ public:
 	/// Calls a f(n) for each
 	int ForEach(std::function<void(LTreeItem*)> Fn);
 
+	/// Returns a valid pointer if this is a child tree item.
+	/// NULL for the root Tree.
+	virtual LTreeItem *IsItem() { return NULL; }
+
+	/// Gets the expanced state of the tree item
 	virtual bool Expanded() { return false; }
+
+	/// Sets the expanced state of the tree item
 	virtual void Expanded(bool b) {}
+
+	/// Called to set the visible state of the node
 	virtual void OnVisible(bool v) {}
 };
 
@@ -110,7 +121,7 @@ protected:
 	LTreeItem *_HitTest(int x, int y, bool Debug = false);
 	LRect *_GetRect(LTreeItemRect Which);
 	LPoint _ScrollPos();
-	LTreeItem *Item() override { return this; }
+	LTreeItem *IsItem() override { return this; }
 	LRect *Pos() override;
 
 	virtual void _PourText(LPoint &Size);
@@ -161,6 +172,8 @@ public:
 	LRect *GetPos(int Col = -1) override;
 	/// True if the node is the drop target
 	bool IsDropTarget();
+	/// \returns true if visible
+	bool Visible();
 
 	/// Called when the node expands/contracts to show or hide it's children.
 	virtual void OnExpand(bool b);
