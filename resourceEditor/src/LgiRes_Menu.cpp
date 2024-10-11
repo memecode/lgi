@@ -413,7 +413,7 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 				auto n = Item->IndexOf();
 				if (n >= 0) n++;
 
-				LTreeItem *Parent = Item->GetParent();
+				auto Parent = Item->GetParent();
 				LTreeItem *New = 0;
 				ResMenuItem *NewItem = new ResMenuItem(this);
 				if (NewItem && !NewItem->OnNew())

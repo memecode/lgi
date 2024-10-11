@@ -599,7 +599,7 @@ public:
 		if (f)
 		{
 			f->Select(true);
-			for (LTreeItem *i = f; i; i = i->GetParent())
+			for (LTreeNode *i = f; i; i = i->GetParent())
 				i->Expanded(true);
 			Tree->Focus(true);
 		}

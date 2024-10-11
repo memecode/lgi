@@ -1700,8 +1700,6 @@ bool LList::OnReorderDrop(ContainerItemDrop &dest, ContainerItemsDrag &source)
 	if (lock &&
 		(DragItem & ITEM_DRAG_REORDER) != ITEM_DRAG_USER)
 	{
-		bool allowDepthChange = TestFlag(DragItem, ITEM_DEPTH_CHANGE);
-		
 		for (size_t i=0; i<source.items; i++)
 		{
 			auto moveItem = dynamic_cast<LListItem*>(source.item[i]);
@@ -1711,11 +1709,6 @@ bool LList::OnReorderDrop(ContainerItemDrop &dest, ContainerItemsDrag &source)
 			auto next = dynamic_cast<LListItem*>(dest.next);
 			if (!prev && !next)
 				continue;
-
-			/*
-			for (int n=0; n<Items.Length(); n++)
-				LgiTrace("before[%i]=%s\n", n, Items[n]->GetText());
-			*/
 
 			if (prev)
 			{
@@ -1739,11 +1732,6 @@ bool LList::OnReorderDrop(ContainerItemDrop &dest, ContainerItemsDrag &source)
 					screenDirty = true;
 				}
 			}
-
-			/*
-			for (int n=0; n<Items.Length(); n++)
-				LgiTrace("after[%i]=%s\n", n, Items[n]->GetText());
-			*/
 		}
 
 		if (screenDirty)

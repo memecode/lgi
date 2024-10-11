@@ -1979,7 +1979,7 @@ void AppWnd::GotoObject(ResString *s,
 				}
 				else if (m)
 				{
-					for (LTreeItem *i=m; i; i=i->GetParent())
+					for (LTreeNode *i=m; i; i=i->GetParent())
 					{
 						i->Expanded(true);
 					}
