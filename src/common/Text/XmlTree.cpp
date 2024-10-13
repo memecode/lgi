@@ -836,10 +836,19 @@ int LXmlTag::GetAsInt(const char *n)
 	return a ? atoi(a->Value) : -1;	
 }
 
-int LXmlTag::GetAsDouble(const char *Name, bool Default)
+double LXmlTag::GetAsDouble(const char *Name, double Default)
 {
 	auto a = _Attr(Name, false);
-	return a ? atof(a->Value) : Default;
+	if (!a)
+		return Default;
+	
+	errno = 0;
+	auto val = strtod(a->Value, NULL);
+	if (errno == ERANGE ||
+		errno == EINVAL)
+		return Default;
+	
+	return val;
 }
 
 bool LXmlTag::SetAttr(const char *n, const char *Value)

@@ -140,7 +140,7 @@ public:
 	/// Get the value of a named attribute as an int
 	int GetAsInt(const char *Name);
 	/// Get the value of a named attribute as a double
-	int GetAsDouble(const char *Name, bool Default = 0.0);
+	double GetAsDouble(const char *Name, double Default = 0.0);
 	/// Set the value of a named attribute to a string
 	bool SetAttr(const char *Name, const char *Value);
 	/// Set the value of a named attribute to an int
