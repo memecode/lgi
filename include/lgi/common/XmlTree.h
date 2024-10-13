@@ -139,12 +139,16 @@ public:
 	char *GetAttr(const char *Name);
 	/// Get the value of a named attribute as an int
 	int GetAsInt(const char *Name);
+	/// Get the value of a named attribute as a double
+	int GetAsDouble(const char *Name, bool Default = 0.0);
 	/// Set the value of a named attribute to a string
 	bool SetAttr(const char *Name, const char *Value);
 	/// Set the value of a named attribute to an int
 	bool SetAttr(const char *Name, int Value);
 	/// Set the value of a named attribute to an int64
 	bool SetAttr(const char *Name, int64 Value);
+	/// Set the value of a named attribute to a double
+	bool SetAttr(const char *Name, double Value);
 	/// Deletes an attribute
 	bool DelAttr(const char *Name);
 

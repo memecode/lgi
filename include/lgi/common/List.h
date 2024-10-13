@@ -272,7 +272,7 @@ protected:
 	void PourAll();
 	void UpdateScrollBars();
 	void KeyScroll(int iTo, int iFrom, bool SelectItems);
-	void ClearDs(int Col);
+	void ClearDs(int Col) override;
 	ContainerItemDrop GetItemReorderPos(LPoint ms) override;
 
 public:
@@ -294,7 +294,7 @@ public:
 	);
 	~LList();
 
-	const char *GetClass() { return "LList"; }
+	const char *GetClass() override { return "LList"; }
 
 	// Overridables
 	
@@ -347,18 +347,18 @@ public:
 	
 	// Events
 	
-	void OnPaint(LSurface *pDC);
-	LMessage::Result OnEvent(LMessage *Msg);
+	void OnPaint(LSurface *pDC) override;
+	LMessage::Result OnEvent(LMessage *Msg) override;
 	// int OnHitTest(int x, int y);
-	LCursor GetCursor(int x, int y);
-	void OnMouseClick(LMouse &m);
-	void OnMouseMove(LMouse &m);
-	int OnNotify(LViewI *Ctrl, LNotification n);
-	void OnPosChange();
-	bool OnKey(LKey &k);
-	bool OnMouseWheel(double Lines);
-	void OnFocus(bool b);
-	void OnPulse();
+	LCursor GetCursor(int x, int y) override;
+	void OnMouseClick(LMouse &m) override;
+	void OnMouseMove(LMouse &m) override;
+	int OnNotify(LViewI *Ctrl, LNotification n) override;
+	void OnPosChange() override;
+	bool OnKey(LKey &k) override;
+	bool OnMouseWheel(double Lines) override;
+	void OnFocus(bool b) override;
+	void OnPulse() override;
 	bool OnReorderDrop(ContainerItemDrop &dest, ContainerItemsDrag &source) override;
 
 	// Properties
@@ -382,9 +382,9 @@ public:
 	void SetMode(LListMode m);	
 
 	/// Returns the index of the first selected item
-	int64 Value();
+	int64 Value() override;
 	/// Selects the item at index 'i'
-	void Value(int64 i);
+	void Value(int64 i) override;
 	/// Selects 'obj'
 	bool Select(LListItem *Obj);
 	/// Gets the first selected object
@@ -394,7 +394,7 @@ public:
 	/// Scrolls the view to the first selected item if not in view
 	void ScrollToSelection();
 	/// Clears the text cache for all the items and repaints the screen.
-	void UpdateAllItems();
+	void UpdateAllItems() override;
 	/// Gets the number of items.
 	size_t Length() { return Items.Length(); }
 
@@ -503,8 +503,8 @@ public:
 	virtual void RemoveAll();
 
 	// Impl
-	int GetContentSize(int ColumnIdx);
-	bool GetItems(LArray<LItem*> &arr, bool selectedOnly = false)
+	int GetContentSize(int ColumnIdx) override;
+	bool GetItems(LArray<LItem*> &arr, bool selectedOnly = false) override
 	{
 		if (selectedOnly)
 			GetSelection(arr);

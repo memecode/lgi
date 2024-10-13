@@ -29,6 +29,7 @@
 		343874B7230F46B200CF96B4 /* App.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B3230F46B200CF96B4 /* App.h */; };
 		343874B8230F46B200CF96B4 /* Layout.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B4230F46B200CF96B4 /* Layout.h */; };
 		343BE8C72355D0CE00742E21 /* PopupList.h in Headers */ = {isa = PBXBuildFile; fileRef = 343BE8C62355D0CE00742E21 /* PopupList.h */; };
+		344991912CB1E6D400E96737 /* XmlTree.h in Headers */ = {isa = PBXBuildFile; fileRef = 344991902CB1E6D400E96737 /* XmlTree.h */; };
 		3449B8CE26BBF6B10022A9B8 /* Notifications.h in Headers */ = {isa = PBXBuildFile; fileRef = 3449B8CD26BBF6B10022A9B8 /* Notifications.h */; };
 		344CFBC8237365B800AE6B35 /* ClipBoard.h in Headers */ = {isa = PBXBuildFile; fileRef = 344CFBC7237365B800AE6B35 /* ClipBoard.h */; };
 		345920FF1F25649000098DFD /* Font.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FC1F25649000098DFD /* Font.h */; };
@@ -202,6 +203,7 @@
 		343874B3230F46B200CF96B4 /* App.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = App.h; path = ../../../include/lgi/common/App.h; sourceTree = SOURCE_ROOT; };
 		343874B4230F46B200CF96B4 /* Layout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Layout.h; path = ../../../include/lgi/common/Layout.h; sourceTree = "<group>"; };
 		343BE8C62355D0CE00742E21 /* PopupList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PopupList.h; path = ../../../include/lgi/common/PopupList.h; sourceTree = "<group>"; };
+		344991902CB1E6D400E96737 /* XmlTree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XmlTree.h; path = ../../../include/lgi/common/XmlTree.h; sourceTree = SOURCE_ROOT; };
 		3449B8CD26BBF6B10022A9B8 /* Notifications.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Notifications.h; path = ../../../include/lgi/common/Notifications.h; sourceTree = "<group>"; };
 		344CFBC7237365B800AE6B35 /* ClipBoard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ClipBoard.h; path = ../../../include/lgi/common/ClipBoard.h; sourceTree = "<group>"; };
 		345920FC1F25649000098DFD /* Font.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Font.h; path = ../../../include/lgi/common/Font.h; sourceTree = SOURCE_ROOT; };
@@ -626,6 +628,7 @@
 		3477C2BF1CBF99F00028B84B /* Text */ = {
 			isa = PBXGroup;
 			children = (
+				344991902CB1E6D400E96737 /* XmlTree.h */,
 				349F939D2B92CBAD002410A2 /* TextConvert.cpp */,
 				3477C30E1CC04C790028B84B /* Css.cpp */,
 				3477C30F1CC04C790028B84B /* CssTools.cpp */,
@@ -805,6 +808,7 @@
 				343874B6230F46B200CF96B4 /* View.h in Headers */,
 				34B6F5502BA3A81A0095B1C5 /* UnrolledList.h in Headers */,
 				345920FF1F25649000098DFD /* Font.h in Headers */,
+				344991912CB1E6D400E96737 /* XmlTree.h in Headers */,
 				3415169426EC32FF007EE35F /* TextView4.h in Headers */,
 				3477C2A81CBF0AAF0028B84B /* Lgi.h in Headers */,
 				34D795FD2BFD771800904325 /* CssTools.h in Headers */,

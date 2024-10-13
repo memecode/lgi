@@ -826,19 +826,25 @@ bool LXmlTag::SetContent(const char *s, ssize_t len)
 
 char *LXmlTag::GetAttr(const char *n)
 {
-	LXmlAttr *a = _Attr(n, false);
+	auto a = _Attr(n, false);
 	return a ? a->Value : 0;	
 }
 
 int LXmlTag::GetAsInt(const char *n)
 {
-	LXmlAttr *a = _Attr(n, false);
+	auto a = _Attr(n, false);
 	return a ? atoi(a->Value) : -1;	
+}
+
+int LXmlTag::GetAsDouble(const char *Name, bool Default)
+{
+	auto a = _Attr(Name, false);
+	return a ? atof(a->Value) : Default;
 }
 
 bool LXmlTag::SetAttr(const char *n, const char *Value)
 {
-	LXmlAttr *a = _Attr(n, true);
+	auto a = _Attr(n, true);
 	if (a)
 	{
 		a->Value = Allocator->Alloc(Value);
@@ -854,6 +860,18 @@ bool LXmlTag::SetAttr(const char *n, int Value)
 	{
 		char s[32];
 		sprintf_s(s, sizeof(s), "%i", Value);
+		a->Value = Allocator->Alloc(s);
+		return true;
+	}
+	return false;
+}
+
+bool LXmlTag::SetAttr(const char *Name, double Value)
+{
+	if (auto a = _Attr(Name, true))
+	{
+		char s[32];
+		sprintf_s(s, sizeof(s), "%f", Value);
 		a->Value = Allocator->Alloc(s);
 		return true;
 	}

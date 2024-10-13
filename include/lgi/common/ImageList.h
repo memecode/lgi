@@ -61,17 +61,16 @@ public:
 
 class LgiClass LImageListOwner
 {
-	bool OwnList;
-	LImageList *ImageList;
+	bool OwnList = true;
+	LImageList *ImageList = NULL;
 
 public:
-	LImageListOwner()
+	~LImageListOwner()
 	{
-		OwnList = true;
-		ImageList = NULL;
+		Empty();
 	}
 	
-	~LImageListOwner()
+	void Empty()
 	{
 		if (OwnList)
 			DeleteObj(ImageList);
@@ -81,9 +80,7 @@ public:
 	
 	bool SetImageList(LImageList *List, bool Own = true)
 	{
-		if (OwnList)
-			DeleteObj(ImageList);
-
+		Empty();
 		ImageList = List;
 		OwnList = Own;
 		AskImage(true);
@@ -93,7 +90,8 @@ public:
 	
 	bool LoadImageList(char *File, int x, int y)
 	{
-		LSurface *pDC = GdcD->Load(File);
+		Empty();
+		auto pDC = GdcD->Load(File);
 		if (pDC)
 		{
 			ImageList = new LImageList(x, y, pDC);
@@ -104,9 +102,10 @@ public:
 				#endif
 			}
 		}
-		return pDC != 0;
+		return pDC != NULL;
 	}
 
+	// Set a flag telling the container to display an icon column
 	virtual void AskImage(bool b) {}
 };
 

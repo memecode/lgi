@@ -3,7 +3,7 @@
 
 #ifdef __cplusplus
 
-#include <malloc.h>
+#include <stdlib.h>
 
 template<class X>
 class LAutoPtrRef

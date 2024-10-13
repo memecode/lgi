@@ -212,11 +212,11 @@ protected:
 	LRect rItems;
 	
 	LTreeItem *GetAdjacent(LTreeItem *From, bool Down);
-	void OnDragEnter();
+	void OnDragEnter() override;
 	void ClearDs(int Col) override;
 	bool OnReorderDrop(ContainerItemDrop &dest, ContainerItemsDrag &source) override;
 	ContainerItemDrop GetItemReorderPos(LPoint ms) override;
-	void OnDragExit();
+	void OnDragExit() override;
 	
 public:
 	LTree(int id, int x = 0, int y = 0, int cx = 100, int cy = 100, const char *name = NULL);
@@ -264,7 +264,7 @@ public:
 	/// Returns the first selected item
 	LTreeItem *Selection();
 	/// Get items as an array
-	bool GetItems(LArray<LItem*> &arr, bool selectedOnly = false);
+	bool GetItems(LArray<LItem*> &arr, bool selectedOnly = false) override;
 
 	/// Gets the whole selection and puts it in 'n'
 	template<class T>

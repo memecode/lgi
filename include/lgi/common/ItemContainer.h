@@ -401,7 +401,7 @@ public:
 		private: \
 			bool b##name = default; \
 		public: \
-			bool name() { return b##name; } \
+			bool name() const { return b##name; } \
 			void name(bool b) { b##name = b; }
 
 	// Props
@@ -482,7 +482,7 @@ public:
 	/// Resizes all the columns to their content, allowing a little extra space for visual effect
 	virtual void ResizeColumnsToContent(int Border = DEFAULT_COLUMN_SPACING);
 
-	LMessage::Result OnEvent(LMessage *Msg);
+	LMessage::Result OnEvent(LMessage *Msg) override;
 
 	LItemContainer &operator =(const LItemContainer &i)
 	{
