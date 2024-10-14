@@ -286,7 +286,8 @@ public:
 	void SaveAll(std::function<void(bool)> Callback, bool CloseDirty = false);
 	void CloseAll();
 
-	IdeDoc *OpenFile(const char *FileName, NodeSource *Src = NULL);
+	void OpenFile(const char *FileName, NodeSource *Src, std::function<void(IdeDoc*)> callback);
+	void OnNewDoc(IdeProject *Proj, IdeDoc *Doc);
 	IdeDoc *NewDocWnd(const char *FileName, NodeSource *Src);
 	IdeDoc *GetCurrentDoc();
 	IdeDoc *TopDoc();

@@ -3113,7 +3113,7 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 	auto Uri = d->Settings.GetStr(ProjRemoteUri);
 	if (Uri && !d->Backend)
 	{
-		d->Backend = CreateBackend(d->App, Uri);
+		d->Backend = CreateBackend(d->App, Uri, d->App->GetBuildLog());
 		if (d->Backend)
 		{
 			d->Backend->ReadFolder(".", [this](auto d)
@@ -3123,9 +3123,11 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 						if (d->IsHidden())
 							continue;
 
+						/*
 						LgiTrace("%s: %s, %i bytes\n",	
 							d->IsDir() ? "dir" : "file",
 							d->GetName(), (int)d->GetSize());
+						*/
 
 						if (auto n = new ProjectNode(this))
 						{

@@ -1437,11 +1437,11 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 	#endif
 
 	#if 0
-	LProfile Prof("LTextView4::Insert");
-	Prof.HideResultsIfBelow(1000);
-	#define PROF(s) Prof.Add(s)
+		LProfile Prof("LTextView4::Insert");
+		Prof.HideResultsIfBelow(1000);
+		#define PROF(s) Prof.Add(s)
 	#else
-	#define PROF(s)
+		#define PROF(s)
 	#endif
 
 	LAssert(InThread());
@@ -1457,8 +1457,7 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 	NewAlloc += ALLOC_BLOCK - (NewAlloc % ALLOC_BLOCK);
 	if (NewAlloc != Alloc)
 	{
-		char16 *NewText = new char16[NewAlloc];
-		if (NewText)
+		if (auto NewText = new char16[NewAlloc])
 		{
 			if (Text)
 			{
@@ -1538,12 +1537,10 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 
 			PROF("NoWrap add lines");
 			
-			// LgiTrace("Insert '%S' at %i, size=%i\n", Data, (int)At, (int)Size);
-
 			// Add any new lines that we need...
 			char16 *e = Text + At + Len;
 			char16 *c;
-			for (c = Text + At; c < e; c++)
+			for (c = Text + Cur->Start + Cur->Len; c < e; c++)
 			{
 				if (*c == '\n')
 				{
@@ -1551,7 +1548,6 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 					size_t Pos = c - Text;
 					Cur->Len = Pos - Cur->Start;
 					Cur->NewLine = true;
-					// LgiTrace("	LF at %i, Idx=%i\n", (int)Pos, (int)Idx);
 
 					if (!*++c)
 					{
@@ -1565,8 +1561,6 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 						return false;
 					Cur->Start = c - Text;
 					Line.AddAt(++Idx, Cur);
-
-					// LgiTrace("	newLine at %i, Idx=%i\n", (int)Cur->Start, Idx);
 				}
 			}
 
@@ -1576,7 +1570,6 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 			{
 				// Make sure the last Line's length is set..
 				Cur->CalcLen(Text);
-				// LgiTrace("	CalcLen, size=%i, start=%i, len=%i\n", (int)Size, (int)Cur->Start, (int)Cur->Len);
 			}
 
 			PROF("UpdatePos");

@@ -174,21 +174,23 @@ void ProjectNode::OpenLocalCache(IdeDoc *&Doc)
 {
 	if (sLocalCache)
 	{
-		Doc = Project->GetApp()->OpenFile(sLocalCache, this);
-		if (Doc)
+		Project->GetApp()->OpenFile(sLocalCache, this, [this](auto Doc)
 		{
-			Doc->SetProject(Project);
+			if (Doc)
+			{
+				Doc->SetProject(Project);
 			
-			IdeProjectSettings *Settings = Project->GetSettings();
-			Doc->SetEditorParams(Settings->GetInt(ProjEditorIndentSize),
-								Settings->GetInt(ProjEditorTabSize),
-								Settings->GetInt(ProjEditorUseHardTabs),
-								Settings->GetInt(ProjEditorShowWhiteSpace));
-		}
-		else
-		{
-			LgiMsg(Tree, "Couldn't open file '%s'", AppName, MB_OK, sLocalCache.Get());
-		}
+				IdeProjectSettings *Settings = Project->GetSettings();
+				Doc->SetEditorParams(Settings->GetInt(ProjEditorIndentSize),
+									Settings->GetInt(ProjEditorTabSize),
+									Settings->GetInt(ProjEditorUseHardTabs),
+									Settings->GetInt(ProjEditorShowWhiteSpace));
+			}
+			else
+			{
+				LgiMsg(Tree, "Couldn't open file '%s'", AppName, MB_OK, sLocalCache.Get());
+			}
+		});
 	}
 }
 

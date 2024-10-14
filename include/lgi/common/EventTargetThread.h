@@ -86,6 +86,16 @@ public:
 		return Status;
 	}
 
+	bool IsSink(int Hnd)
+	{
+		if (!Lock(_FL))
+			return false;
+
+		auto status = ToPtr.Find(Hnd) != NULL;
+		Unlock();
+		return status;
+	}
+
 	bool PostEvent(int Hnd, int Cmd, LMessage::Param a = 0, LMessage::Param b = 0)
 	{
 		if (!Hnd)

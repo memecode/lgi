@@ -11,6 +11,8 @@
 #error "Add ssh to this project"
 #endif
 
+#define INFO(...) { if (log) log->Print(__VA_ARGS__); }
+
 class SshBackend :
 	public ProjectBackend,
 	public LCancel,
@@ -19,7 +21,8 @@ class SshBackend :
 {
 	LView *app;
 	LUri uri;
-	LTextLog *log = NULL;
+	LStream *log = NULL;
+	constexpr static const char *separators = "/\\";
 
 	// Lock before use
 	using TWork = std::function<void()>;
@@ -38,8 +41,16 @@ class SshBackend :
 				log,
 				this)))
 			{
-				if (!ssh->Open(uri.sHost, uri.sUser, NULL, true))
+				ssh->SetTimeout(5000);
+				INFO("%s: Connecting to '%s'..\n", GetClass(), uri.sHost.Get())
+				
+				if (ssh->Open(uri.sHost, uri.sUser, NULL, true))
+					INFO("%s: Connected to '%s'\n", GetClass(), uri.sHost.Get())
+				else
+				{
+					INFO("%s: Error connecting to '%s'\n", GetClass(), uri.sHost.Get())
 					return NULL;
+				}
 			}
 		}
 		if (ssh && !console)
@@ -57,7 +68,7 @@ class SshBackend :
 	bool AtPrompt(LStringPipe &p)
 	{
 		bool found = false;
-		const char *prompt = ":~$ ";
+		const char *prompt = "$ ";
 
 		p.Iterate( [this, prompt, &found](auto ptr, auto size)
 			{
@@ -81,7 +92,7 @@ class SshBackend :
 		LStringPipe p;
 		if (auto c = GetConsole())
 		{
-			while (true)
+			while (!IsCancelled())
 			{
 				char buf[1024];
 				auto rd = c->Read(buf, sizeof(buf));
@@ -118,12 +129,14 @@ class SshBackend :
 	}
 
 public:
-	SshBackend(LView *parent, LString u) :
+	SshBackend(LView *parent, LString u, LStream *logger) :
 		LThread("SshBackend.Thread"),
 		LMutex("SshBackend.Lock"),
 		app(parent),
-		uri(u)
-	{		Run();
+		uri(u),
+		log(logger)
+	{
+		Run();
 	}
 
 	~SshBackend()
@@ -131,6 +144,8 @@ public:
 		Cancel();
 		WaitForExit();
 	}
+
+	const char *GetClass() const { return "SshBackend"; }
 
 	class SshDir : public LDirectory
 	{
@@ -267,7 +282,28 @@ public:
 		LVolumeTypes GetType() const { return VT_FOLDER; }
 	};
 
-	bool ReadFolder(const char *Path, std::function<void(LDirectory*)> results)
+	LString RemoteRoot(const char *subFolder = NULL)
+	{
+		auto pathParts = uri.sPath.SplitDelimit(separators);
+		if (subFolder)
+			pathParts += LString(subFolder).SplitDelimit(separators);
+		for (int i=0; i<pathParts.Length(); i++)
+			if (pathParts[i] == ".")
+			{
+				pathParts.DeleteAt(i--, true);
+			}
+			else if (pathParts[i] == "..")
+			{
+				pathParts.DeleteAt(i--, true);
+				pathParts.DeleteAt(i--, true);
+			}
+		pathParts.SetFixedLength(false);
+		pathParts.AddAt(0, "~");
+
+		return LString("/").Join(pathParts);
+	}
+
+	bool ReadFolder(const char *Path, std::function<void(LDirectory*)> results) override
 	{
 		if (!Path || !results)
 			return false;
@@ -275,12 +311,7 @@ public:
 		Auto lck(this, _FL);
 		work.Add( [this, results, path = LString(Path)]()
 		{
-			auto pathParts = uri.sPath.SplitDelimit("/\\") + path.SplitDelimit("/\\");
-			for (int i=0; i<pathParts.Length(); i++)
-				if (pathParts[i] == ".")
-					pathParts.DeleteAt(i--, true);
-
-			auto full = LString::Fmt("~/%s", LString("/").Join(pathParts).Get());
+			auto full = RemoteRoot(path);
 			auto ls = Cmd(LString::Fmt("ls -lan %s\n", full.Get()));
 			auto lines = ls.SplitDelimit("\r\n").Slice(2, -2);
 			app->RunCallback( [dir = new SshDir(path, lines), results]() mutable
@@ -292,9 +323,69 @@ public:
 		return true;
 	}
 
-	bool SearchFileNames(const char *searchTerms, std::function<void(LString::Array&)> results)
+	bool SearchFileNames(const char *searchTerms, std::function<void(LArray<LString>&)> results) override
 	{
-		return false;
+		if (!searchTerms || !results)
+			return false;
+
+		Auto lck(this, _FL);
+		work.Add( [this, results, searchTerms = LString(searchTerms)]()
+		{
+			auto root = RemoteRoot();
+			auto parts = searchTerms.SplitDelimit();
+			auto args = LString::Fmt("cd %s && find .", root.Get());
+			for (size_t i=0; i<parts.Length(); i++)
+				args += LString::Fmt("%s -iname \"*%s*\"", i ? " -and" : "", parts[i].Get());
+
+			auto result = Cmd(args + "\n");
+			LArray<LString> lines = result.SplitDelimit("\r\n").Slice(2, -2);
+			app->RunCallback( [results, lines]() mutable
+				{
+					results(lines);
+				});
+		} );
+
+		return true;
+	}
+
+	LString TrimContent(LString in)
+	{
+		auto first = in.Find("\n");
+		auto last = in.RFind("\n");
+		LString out;
+		if (first >= 0 &&
+			last >= 0)
+		{
+			out = in(first + 1, last).Replace("\r");
+		}
+		return out;
+	}
+
+	bool ReadFile(const char *Path, std::function<void(LError,LString)> result) override
+	{
+		if (!Path)
+			return false;
+
+		Auto lck(this, _FL);
+		work.Add( [this, result, Path = LString(Path)]()
+		{
+			auto root = RemoteRoot(Path);
+			auto args = LString::Fmt("cat %s", root.Get());
+			auto output = Cmd(args + "\n");
+			app->RunCallback( [this, result, output]() mutable
+				{
+					auto data = TrimContent(output);
+					LError err;
+					if (data.Find("No such file or dir") >= 0)
+					{
+						err = LErrorPathNotFound;
+						data.Empty();
+					}						
+					result(err, data);
+				});
+		} );
+
+		return true;
 	}
 
 	int Main()
@@ -322,10 +413,12 @@ class LocalBackend : public ProjectBackend
 {
 	LView *app;
 	LString folder;
+	LStream *log = NULL;
 
 public:
-	LocalBackend(LView *parent, LString uri) :
-		app(parent)
+	LocalBackend(LView *parent, LString uri, LStream *logger) :
+		app(parent),
+		log(logger)
 	{
 		LUri u(uri);
 		folder = u.LocalPath();
@@ -345,7 +438,7 @@ public:
 		return true;
 	}
 
-	bool SearchFileNames(const char *searchTerms, std::function<void(LString::Array&)> results)
+	bool SearchFileNames(const char *searchTerms, std::function<void(LArray<LString>&)> results)
 	{
 		// This could probably be threaded....
 		auto parts = LString(searchTerms).SplitDelimit();
@@ -373,16 +466,30 @@ public:
 		results(matches);
 		return true;
 	}
+
+	bool ReadFile(const char *Path, std::function<void(LError,LString)> result) override
+	{
+		LFile f(Path, O_READ);
+		LError err;
+		LString data;
+		if (f)
+			data = f.Read();
+		else
+			err = f.GetError();
+		if (result)
+			result(err, data);
+		return true;
+	}
 };
 
 
-LAutoPtr<ProjectBackend> CreateBackend(LView *parent, LString uri)
+LAutoPtr<ProjectBackend> CreateBackend(LView *parent, LString uri, LStream *log)
 {
 	LAutoPtr<ProjectBackend> backend;
 	LUri u(uri);
 	if (u.IsProtocol("ssh"))
-		backend.Reset(new SshBackend(parent, uri));
+		backend.Reset(new SshBackend(parent, uri, log));
 	else	
-		backend.Reset(new LocalBackend(parent, uri));
+		backend.Reset(new LocalBackend(parent, uri, log));
 	return backend;
 }

@@ -34,6 +34,7 @@
 #include "Debugger.h"
 #include "ProjectNode.h"
 #include "IdeFindInFiles.h"
+#include "ProjectBackend.h"
 
 #define IDM_RECENT_FILE			1000
 #define IDM_RECENT_PROJECT		1100
@@ -221,8 +222,7 @@ public:
 			{
 				if (k.Down())
 				{
-					LListItem *i = Lst->GetSelected();
-					if (i)
+					if (auto i = Lst->GetSelected())
 					{
 						const char *Ref = i->GetText(0);
 						App->GotoReference(Ref, 1, false, true, NULL);
@@ -255,50 +255,75 @@ public:
 		LArray<ProjectNode*> Matches, Nodes;
 
 		auto Platforms = App->GetPlatform();
-		for (auto p: p->GetAllProjects())
-			p->GetAllNodes(Nodes);
 
-		FilterFiles(Matches, Nodes, s, Platforms);
-
-		Lst->Empty();
-		for (auto m: Matches)
+		if (auto backend = p->GetBackend())
 		{
-			auto li = new LListItem;
-			LString Fn = m->GetFileName();
-			#ifdef WINDOWS
-			Fn = Fn.Replace("/","\\");
-			#else
-			Fn = Fn.Replace("\\","/");
-			#endif
-			m->GetProject()->CheckExists(Fn);
-			li->SetText(Fn);
-			Lst->Insert(li);
-		}
+			if (Strlen(s) < 3)
+				return;
 
-		if (SysHeaders.Length() == 0)
-		{
-			if (!Thread)
-			{
-				Thread.Reset(new SysIncThread(App, App->RootProject(), [this](auto hdrs)
+			backend->SearchFileNames(s, [this, Hnd = AddDispatch()](auto &results)
 				{
-					SysHeaders.Swap(*hdrs);
-					Search(GetCtrlName(IDC_TEXT));
-				}));
-			}
+					// This checks if the window still exists...
+					// It may have been deleted while the search was being done.
+					if (!LEventSinkMap::Dispatch.IsSink(Hnd))
+						return;
+
+					Lst->Empty();
+
+					for (auto result: results)
+						Lst->Insert(new LListItem(result));
+
+					Lst->ResizeColumnsToContent();
+				});
 		}
 		else
 		{
-			auto start = LCurrentTime();
-			for (auto h: SysHeaders)
-			{
-				if (Stristr(h.Get(), s))
-					Lst->Insert(new LListItem(h));
-				if (LCurrentTime() - start >= SYS_HEADER_SEARCH_TIME)
-					break;
-			}
-		}
+			// Old local only iteration of all nodes:
+			for (auto p: p->GetAllProjects())
+				p->GetAllNodes(Nodes);
 
-		Lst->ResizeColumnsToContent();
+			FilterFiles(Matches, Nodes, s, Platforms);
+
+			Lst->Empty();
+			for (auto m: Matches)
+			{
+				auto li = new LListItem;
+				LString Fn = m->GetFileName();
+				#ifdef WINDOWS
+				Fn = Fn.Replace("/","\\");
+				#else
+				Fn = Fn.Replace("\\","/");
+				#endif
+				m->GetProject()->CheckExists(Fn);
+				li->SetText(Fn);
+				Lst->Insert(li);
+			}
+
+			if (SysHeaders.Length() == 0)
+			{
+				if (!Thread)
+				{
+					Thread.Reset(new SysIncThread(App, App->RootProject(), [this](auto hdrs)
+					{
+						SysHeaders.Swap(*hdrs);
+						Search(GetCtrlName(IDC_TEXT));
+					}));
+				}
+			}
+			else
+			{
+				auto start = LCurrentTime();
+				for (auto h: SysHeaders)
+				{
+					if (Stristr(h.Get(), s))
+						Lst->Insert(new LListItem(h));
+					if (LCurrentTime() - start >= SYS_HEADER_SEARCH_TIME)
+						break;
+				}
+			}
+
+			Lst->ResizeColumnsToContent();
+		}
 	}
 
 	int OnNotify(LViewI *c, LNotification n)
@@ -309,8 +334,7 @@ public:
 			{
 				if (n.Type == LNotifyItemDoubleClick)
 				{
-					LListItem *i = Lst->GetSelected();
-					if (i)
+					if (auto i = Lst->GetSelected())
 					{
 						App->GotoReference(i->GetText(0), 1, false, true, NULL);
 						EndModal(1);
@@ -2186,7 +2210,7 @@ void AppWnd::OnReceiveFiles(LArray<const char*> &Files)
 		else if (ext && !stricmp(ext, "xml"))
 		{
 			if (!OpenProject(f, NULL))
-				OpenFile(f);
+				OpenFile(f, NULL, NULL);
 		}
 		else if (LDirExists(f))
 			;
@@ -2211,7 +2235,7 @@ void AppWnd::OnReceiveFiles(LArray<const char*> &Files)
 		}
 		else
 		{
-			OpenFile(f);
+			OpenFile(f, NULL, NULL);
 		}
 	}
 	
@@ -2968,7 +2992,6 @@ IdeDoc *AppWnd::GetCurrentDoc()
 
 void AppWnd::GotoReference(const char *File, int Line, bool CurIp, bool WithHistory, std::function<void(IdeDoc*)> Callback)
 {
-	printf("%s:%i GotoReference(%s, %i) thread=%i\n", _FL, File, Line, InThread());
 	if (!InThread())
 	{
 		RunCallback
@@ -2984,24 +3007,31 @@ void AppWnd::GotoReference(const char *File, int Line, bool CurIp, bool WithHist
 	if (!WithHistory)
 		d->InHistorySeek = true;
 
-	IdeDoc *Doc = File ? OpenFile(File) : GetCurrentDoc();
-	if (Doc)
+	auto OnDoc = [this, File=LString(File), Line, CurIp, Callback, WithHistory](IdeDoc *Doc)
 	{
-		Doc->SetLine(Line, CurIp && d->Debugging);
-		Doc->Focus(true);
-	}
-	else
-	{
-		LString Msg;
-		Msg.Printf("Failed to find '%s'", File);
-		LPopupNotification::Message(this, Msg);
-	}
+		if (Doc)
+		{
+			Doc->SetLine(Line, CurIp && d->Debugging);
+			Doc->Focus(true);
+		}
+		else
+		{
+			LString Msg;
+			Msg.Printf("Failed to find '%s'", File.Get());
+			LPopupNotification::Message(this, Msg);
+		}
 
-	if (!WithHistory)
-		d->InHistorySeek = false;
+		if (!WithHistory)
+			d->InHistorySeek = false;
 
-	if (Callback)
-		Callback(Doc);
+		if (Callback)
+			Callback(Doc);
+	};
+
+	if (File)
+		OpenFile(File, NULL, OnDoc);
+	else if (auto doc = GetCurrentDoc())
+		OnDoc(doc);
 }
 
 IdeDoc *AppWnd::FindOpenFile(char *FileName)
@@ -3039,16 +3069,43 @@ IdeDoc *AppWnd::FindOpenFile(char *FileName)
 	return 0;
 }
 
-IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
+void AppWnd::OnNewDoc(IdeProject *Proj, IdeDoc *Doc)
+{
+	if (!Doc)
+		return;
+
+	int IndentSize = 4;
+	int TabSize = 4;
+	bool HardTabs = true;
+	bool ShowWhiteSpace = false;
+
+	if (Proj)
+	{
+		IndentSize = Proj->GetSettings()->GetInt(ProjEditorIndentSize, 4);
+		TabSize = Proj->GetSettings()->GetInt(ProjEditorTabSize, 4);
+		ShowWhiteSpace = Proj->GetSettings()->GetInt(ProjEditorShowWhiteSpace, false);
+		HardTabs = Proj->GetSettings()->GetInt(ProjEditorUseHardTabs, true);
+	}
+
+	Doc->SetEditorParams(IndentSize, TabSize, HardTabs, ShowWhiteSpace);
+	if (!Doc->IsAttached())
+	{
+		Doc->Attach(d->Mdi);
+	}
+
+	Doc->Focus(true);
+	Doc->Raise();
+}
+
+void AppWnd::OpenFile(const char *FileName, NodeSource *Src, std::function<void(IdeDoc*)> callback)
 {
 	if (!InThread())
 	{
-		auto result = RunCallback<IdeDoc*>(_FL,
-			[this, fn=LString(FileName), Src]() -> IdeDoc*
-			{
-				return OpenFile(fn, Src);
-			});
-		return *result.Get();
+		RunCallback( [this, callback, fn=LString(FileName), Src]()
+		{
+			OpenFile(fn, Src, callback);
+		});
+		return;
 	}
 
 	static bool DoingProjectFind = false;
@@ -3058,32 +3115,30 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 	if (!Src && !ValidStr(File))
 	{
 		LgiTrace("%s:%i - No source or file?\n", _FL);
-		return NULL;
+		return;
 	}
-	
-	LString FullPath;
-	if (LIsRelativePath(File))
-	{
-		auto Proj = Src && Src->GetProject() ? Src->GetProject() : RootProject();
-		if (Proj)
-		{
-			LArray<IdeProject*> Projs;
-			Projs.Add(Proj);
-			Proj->CollectAllSubProjects(Projs);
 
-			for (auto p: Projs)
-			{
-				auto ProjPath = p->GetBasePath();
-				char s[MAX_PATH_LEN];
-				LMakePath(s, sizeof(s), ProjPath, File);
+	auto Proj = Src && Src->GetProject() ? Src->GetProject() : RootProject();
+	LString FullPath;
+	if (LIsRelativePath(File) && Proj)
+	{
+		// Use project info to make the path absolute
+		LArray<IdeProject*> Projs;
+		Projs.Add(Proj);
+		Proj->CollectAllSubProjects(Projs);
+
+		for (auto p: Projs)
+		{
+			auto ProjPath = p->GetBasePath();
+			char s[MAX_PATH_LEN];
+			LMakePath(s, sizeof(s), ProjPath, File);
 				
-				LString Path = s;
-				if (p->CheckExists(Path))
-				{
-					FullPath = Path;
-					File = FullPath;
-					break;
-				}
+			LString Path = s;
+			if (p->CheckExists(Path))
+			{
+				FullPath = Path;
+				File = FullPath;
+				break;
 			}
 		}
 	}
@@ -3107,7 +3162,7 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 		CloseAll();
 		if (OpenProject(File, NULL))
 		{
-			return NULL;
+			return;
 		}
 		// else lets just open it as text...
 	}
@@ -3133,33 +3188,58 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 		}
 	}
 
-	if (!Doc && LFileExists(File))
+	if (!Doc)
 	{
-		Doc = new IdeDoc(this, 0, File);
-		if (Doc)
+		if (auto backend = Proj ? Proj->GetBackend() : NULL)
 		{
-			Doc->OpenFile(File);
+			backend->ReadFile(File, [this, Proj, File=LString(File), callback](auto err, auto data)
+			{
+				if (err)
+				{
+					LgiMsg(this, "Error opening '%s': %s", AppName, MB_OK, File.Get(), err.ToString().Get());
+				}
+				else if (data)
+				{
+					auto Doc = new IdeDoc(this, 0, File);
+					if (Doc)
+					{
+						Doc->OpenData(data);
 
-			LRect p = d->Mdi->NewPos();
-			Doc->LView::SetPos(p);
-			d->Docs.Insert(Doc);
-			d->OnFile(File);
+						LRect p = d->Mdi->NewPos();
+						Doc->LView::SetPos(p);
+						d->Docs.Insert(Doc);
+						d->OnFile(File);
+
+						OnNewDoc(Proj, Doc);
+
+						if (callback)
+							callback(Doc);
+					}
+				}
+				else LAssert(!"one of these needs to be set");
+			});
+		}
+		else if (LFileExists(File))
+		{
+			Doc = new IdeDoc(this, 0, File);
+			if (Doc)
+			{
+				Doc->OpenFile(File);
+
+				LRect p = d->Mdi->NewPos();
+				Doc->LView::SetPos(p);
+				d->Docs.Insert(Doc);
+				d->OnFile(File);
+			}
 		}
 	}
 
 	if (Doc)
 	{
-		Doc->SetEditorParams(4, 4, true, false);
-		if (!Doc->IsAttached())
-		{
-			Doc->Attach(d->Mdi);
-		}
-
-		Doc->Focus(true);
-		Doc->Raise();
+		OnNewDoc(Proj, Doc);	
+		if (callback)
+			callback(Doc);
 	}
-	
-	return Doc;
 }
 
 IdeProject *AppWnd::RootProject()
@@ -3879,7 +3959,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			s->Open([this](auto s, auto ok)
 			{
 				if (ok)
-					OpenFile(s->Name());
+					OpenFile(s->Name(), NULL, NULL);
 			});
 			break;
 		}
@@ -4601,7 +4681,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				if (f)
 					f->Raise();
 				else
-					OpenFile(r);
+					OpenFile(r, NULL, NULL);
 			}
 
 			index = Cmd - IDM_RECENT_PROJECT;

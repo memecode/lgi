@@ -295,7 +295,7 @@ void EditTray::OnHeaderList(LMouse &m)
 					if (File)
 					{
 						// Open the selected file
-						Doc->GetProject()->GetApp()->OpenFile(File);
+						Doc->GetProject()->GetApp()->OpenFile(File, NULL, NULL);
 					}
 				}
 				
@@ -452,17 +452,13 @@ void EditTray::OnSymbolList(LMouse &m)
 							Doc->GetProject()->GetApp())
 						{
 							AppWnd *App = Doc->GetProject()->GetApp();
-							IdeDoc *Doc = App->OpenFile(Def->File);
-
-							if (Doc)
+							App->OpenFile(Def->File, NULL, [this, File=LString(Def->File), Line=Def->Line](auto Doc)
 							{
-								Doc->SetLine(Def->Line, false);
-							}
-							else
-							{
-								char *f = Def->File;
-								LgiTrace("%s:%i - Couldn't open doc '%s'\n", _FL, f);
-							}
+								if (Doc)
+									Doc->SetLine(Line, false);
+								else
+									LgiTrace("%s:%i - Couldn't open doc '%s'\n", _FL, File.Get());
+							});
 						}
 						else
 						{
@@ -896,7 +892,7 @@ void IdeDocPrivate::UpdateName()
 	if (Dir) File = Dir + 1;
 	#endif
 	
-	strcpy_s(n, sizeof(n), File ? File : Untitled);
+	strcpy_s(n, sizeof(n), File ? LGetLeaf(File) : Untitled);
 	if (Edit->IsDirty())
 	{
 		strcat(n, " (changed)");
@@ -1243,9 +1239,9 @@ void IdeDoc::OnTitleClick(LMouse &m)
 					LMakePath(Full, sizeof(Full), Base, Fn);
 			}
 			
-			Dir = strrchr(Full, DIR_CHAR);
-			if (Dir)
-				sprintf_s(sFile, sizeof(sFile), "Copy '%s'", Dir + 1);
+			auto leaf = LGetLeaf(Full);
+			if (leaf != Full)
+				sprintf_s(sFile, sizeof(sFile), "Copy '%s'", Dir = leaf);
 			sprintf_s(sFull, sizeof(sFull), "Copy '%.500s'", Full);
 			sprintf_s(sBrowse, sizeof(sBrowse), "Browse to '%s'", Dir ? Dir + 1 : Full);			
 		}
@@ -1457,6 +1453,20 @@ bool IdeDoc::OpenFile(const char *File)
 	auto Cs = d->GetSrc() ? d->GetSrc()->GetCharset() : NULL;
 
 	return d->Edit->Open(File, Cs);
+}
+
+bool IdeDoc::OpenData(LString Data)
+{
+	if (!d->Edit)
+		return false;
+
+	auto Cs = d->GetSrc() ? d->GetSrc()->GetCharset() : NULL;
+	if (Cs)
+	{
+		LAssert(!"Impl me");
+	}
+
+	return d->Edit->Name(Data);
 }
 
 void IdeDoc::SetEditorParams(int IndentSize, int TabSize, bool HardTabs, bool ShowWhiteSpace)

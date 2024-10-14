@@ -13,7 +13,6 @@ protected:
 	// This strips out '\r' characters in the input.
 	// And also removes previous input when receiving '\b' backspace chars.
 	bool ProcessInput = true;
-	size_t Pos = 0;
 	
 	LMutex Sem;
 	LArray<char16> Txt;
@@ -85,54 +84,33 @@ public:
 		
 		if (ProcessInput)
 		{
-			auto *s = w, *prev = w, *end = w + Len;
+			auto *in = w, *out = w, *end = w + Len;
 			
-			auto Ins = [this](char16 *s, ssize_t len)
+			while (in < end)
 			{
-				if (len > 0)
+				if (*in == '\b')
 				{
-					auto del = MIN(TView::Size - (ssize_t)Pos, len);
-					if (del > 0)
-						TView::Delete(Pos, del);
-					TView::Insert(Pos, s, len);
-					Pos += len;
+					// Backspace: Remove previous character
+					if (out > w)
+						out--;
+					else
+						LAssert(!"can we delete a character from the document?");
 				}
-			};			
-			
-			for (; s < end; s++)
-			{
-				if (*s == '\b')
-				{
-					// Remove previous character
-					if (Pos > 0)
-					{
-						Ins(prev, s - prev);
-						Pos--;
-						prev = s + 1;
-					}
-				}
-				else if (*s == '\r')
-				{
-					// Insert processed text
-					Ins(prev, s - prev);
-					prev = s + 1;
-					while (Pos > 0 && TView::Text[Pos-1] != '\n')
-						Pos--;
-				}
-				else if (*s == '\n')
-				{
-					Pos = TView::Size;
-				}
+				else if (*in == '\r')
+					// Strip returns
+					;
+				else
+					*out++ = *in;
+
+				in++;
 			}
-			
-			Ins(prev, s - prev);
+
+			Len = out - w;
 		}
-		else
-		{
-			TView::Insert(TView::Size, w, Len);
-		}
-		
+
+		TView::Insert(TView::Size, w, Len);
 		TView::Invalidate();
+
 		if (AtEnd)
 			TView::SetCaret(TView::Size, false);
 	}

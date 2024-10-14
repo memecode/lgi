@@ -44,19 +44,25 @@ public:
 		SshConnect
 	};
 	
+	constexpr static int NO_TIMEOUT = -1;
 	typedef std::function<CallbackResponse(const char *Msg, HostType Type)> KnownHostCallback;
 
 protected:
 	LCancel *Cancel = NULL;
-
-protected:
-	LTextLog *Log = NULL;
+	LStream *Log = NULL;
 	ssh_session Ssh = NULL;
 	LViewI *TxtLabel = NULL;
 	LProgressView *Prog = NULL;
 	bool Connected = false;
 	bool OverideUnknownHost = false;
 	KnownHostCallback HostCb;
+	int timeoutMs = NO_TIMEOUT;
+
+	bool TimedOut(uint64_t startTs)
+	{
+		return	timeoutMs != NO_TIMEOUT &&
+				(LCurrentTime() - startTs) > timeoutMs;
+	}
 
 	struct IoProgress
 	{
@@ -278,7 +284,7 @@ public:
 	};
 
 	LSsh(	KnownHostCallback hostCb,
-			LTextLog *log,
+			LStream *log,
 			LCancel *cancel = NULL)
 	{
 		Cancel = cancel ? cancel : &LocalCancel;
@@ -295,6 +301,16 @@ public:
 	void SetLog(LTextLog *log)
 	{
 		Log = log;
+	}
+
+	int GetTimeout() const
+	{
+		return timeoutMs;
+	}
+
+	void SetTimeout(int ms)
+	{
+		timeoutMs = ms;
 	}
 	
 	struct ConfigHost
@@ -353,7 +369,7 @@ public:
 
 	bool Open(const char *Host, const char *Username, const char *Password, bool PublicKey)
 	{
-		int Port = 22, Timeout = 60;
+		int Port = 22;
 		Ssh = ssh_new();
 		ssh_set_log_userdata(this);
 		// ssh_set_log_callback(logging_callback);
@@ -367,9 +383,10 @@ public:
 			// the cancel object:
 			ssh_set_blocking(Ssh, false);
 		}
-		else
+		else if (timeoutMs != NO_TIMEOUT)
 		{
-			r = ssh_options_set(Ssh, SSH_OPTIONS_TIMEOUT, &Timeout);
+			int timeout = timeoutMs / 1000;
+			r = ssh_options_set(Ssh, SSH_OPTIONS_TIMEOUT, &timeout);
 		}
 
 		// Check for a config entry...
@@ -386,16 +403,18 @@ public:
 
 		if (Cancel)
 		{
+			auto startTs = LCurrentTime();
 			while (!Cancel->IsCancelled())
 			{
 				r = ssh_connect(Ssh);
 				if (r == SSH_AGAIN)
 				{
+					if (TimedOut(startTs))
+						break;
+
 					LSleep(10);
 					continue;
 				}
-
-				// LgiTrace("ssh_connect=%i\n", r);
 				break;
 			}
 		}

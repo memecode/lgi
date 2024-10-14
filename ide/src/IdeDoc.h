@@ -40,6 +40,7 @@ public:
 	bool AddBreakPoint(LDebugger::BreakPoint &bp, bool Add);
 	
 	bool OpenFile(const char *File);
+	bool OpenData(LString Data);
 	void SetEditorParams(int IndentSize, int TabSize, bool HardTabs, bool ShowWhiteSpace);
 	bool HasFocus(int Set = -1);
 	void ConvertWhiteSpace(bool ToTabs);

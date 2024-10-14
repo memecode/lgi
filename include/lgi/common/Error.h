@@ -46,7 +46,7 @@ LgiExtern LString LErrorCodeToString(uint32_t ErrorCode);
 class LgiClass LError
 {
 	// This error code is defined by the operating system
-	int Code;
+	int Code = 0;
 	LString Msg;
 	
 public:
@@ -61,6 +61,11 @@ public:
 	{
 		Code = code;
 		return *this;
+	}
+
+	operator bool() const
+	{
+		return Code != 0;
 	}
 
 	void Set(int code, const char *msg = NULL)
