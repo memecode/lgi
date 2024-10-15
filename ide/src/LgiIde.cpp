@@ -799,8 +799,7 @@ public:
 	LTabPage *Output = NULL;
 	LTabPage *Debug = NULL;
 	LTabPage *Find = NULL;
-	LTabPage *Ftp = NULL;
-	LList *FtpLog = NULL;
+	LTabPage *Network = NULL;
 	LTextLog4 *Txt[AppWnd::Channels::ChannelMax] = {};
 	LArray<char> Buf[AppWnd::Channels::ChannelMax];
 	LFont Small;
@@ -843,14 +842,14 @@ public:
 		Build = Append("Build");
 		Output = Append("Output");
 		Find = Append("Find");
-		Ftp = Append("Ftp");
+		Network = Append("Network");
 		Debug = Append("Debug");
 
 		SetFont(&Small);
 		Build->SetFont(&Small);
 		Output->SetFont(&Small);
 		Find->SetFont(&Small);
-		Ftp->SetFont(&Small);
+		Network->SetFont(&Small);
 		Debug->SetFont(&Small);
 			
 		if (Build)
@@ -859,8 +858,8 @@ public:
 			Output->Append(Txt[AppWnd::OutputTab] = new LTextLog4(IDC_OUTPUT_LOG));
 		if (Find)
 			Find->Append(Txt[AppWnd::FindTab] = new LTextLog4(IDC_FIND_LOG));
-		if (Ftp)
-			Ftp->Append(FtpLog = new LList(104, 0, 0, 100, 100));
+		if (Network)
+			Network->Append(Txt[AppWnd::NetworkTab] = new LTextLog4(IDC_NETWORK_LOG));
 		if (Debug)
 		{
 			Debug->Append(DebugBox = new LBox);
@@ -1059,14 +1058,6 @@ public:
 					DebugEdit->GetCss(true)->Height(LCss::Len(LCss::LenPx, (float)(LSysFont->GetHeight() + 8)));
 				}
 			}
-		}
-
-		if (FtpLog)
-		{
-			FtpLog->SetPourLargest(true);
-			FtpLog->Sunken(true);
-			FtpLog->AddColumn("Entry", 1000);
-			FtpLog->ColumnHeaders(false);
 		}
 
 		for (int n=0; n<CountOf(Txt); n++)
@@ -3192,7 +3183,7 @@ void AppWnd::OpenFile(const char *FileName, NodeSource *Src, std::function<void(
 	{
 		if (auto backend = Proj ? Proj->GetBackend() : NULL)
 		{
-			backend->ReadFile(File, [this, Proj, File=LString(File), callback](auto err, auto data)
+			backend->Read(File, [this, Proj, File=LString(File), callback](auto err, auto data)
 			{
 				if (err)
 				{
@@ -3203,6 +3194,7 @@ void AppWnd::OpenFile(const char *FileName, NodeSource *Src, std::function<void(
 					auto Doc = new IdeDoc(this, 0, File);
 					if (Doc)
 					{
+						Doc->SetProject(Proj);
 						Doc->OpenData(data);
 
 						LRect p = d->Mdi->NewPos();
@@ -4818,9 +4810,9 @@ BuildConfig AppWnd::GetBuildMode()
 	return BuildDebug;
 }
 
-LList *AppWnd::GetFtpLog()
+LStream *AppWnd::GetNetworkLog()
 {
-	return d->Output->FtpLog;
+	return d->Output->Txt[AppWnd::NetworkTab];
 }
 
 LStream *AppWnd::GetOutputLog()

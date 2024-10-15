@@ -274,7 +274,7 @@ bool ProjectNode::Save(LDocView *Edit, NodeView *Callback)
 					if (c)
 					{
 						c->View = Callback;
-						c->Watch = Project->GetApp()->GetFtpLog();
+						// c->Watch = Project->GetApp()->GetFtpLog();
 						c->Uri = NewStr(sFile);
 						c->File = NewStr(sLocalCache);
 						t->Post(c);
@@ -773,7 +773,7 @@ IdeDoc *ProjectNode::Open()
 						FtpCmd *c = new FtpCmd(FtpRead, this);
 						if (c)
 						{
-							c->Watch = Project->GetApp()->GetFtpLog();
+							// c->Watch = Project->GetApp()->GetFtpLog();
 							c->Uri = NewStr(sFile);
 							t->Post(c);
 						}

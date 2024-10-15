@@ -105,6 +105,7 @@ enum IdeControls
 	IDC_BUILD_LOG,
 	IDC_OUTPUT_LOG,
 	IDC_FIND_LOG,
+	IDC_NETWORK_LOG,
 	IDC_CALL_STACK,
 	IDC_DEBUG_TAB,
 	IDC_OBJECT_DUMP,
@@ -256,7 +257,7 @@ public:
 		BuildTab,
 		OutputTab,
 		FindTab,
-		FtpTab,
+		NetworkTab,
 		DebugTab,
 		
 		ChannelMax,
@@ -308,7 +309,7 @@ public:
 	BuildConfig GetBuildMode();
 	LTree *GetTree();
 	LOptionsFile *GetOptions();
-	LList *GetFtpLog();
+	LStream *GetNetworkLog();
 	LStream *GetOutputLog();
 	LStream *GetBuildLog();
 	LStream *GetDebugLog();

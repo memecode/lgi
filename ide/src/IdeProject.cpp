@@ -3113,7 +3113,7 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 	auto Uri = d->Settings.GetStr(ProjRemoteUri);
 	if (Uri && !d->Backend)
 	{
-		d->Backend = CreateBackend(d->App, Uri, d->App->GetBuildLog());
+		d->Backend = CreateBackend(d->App, Uri, d->App->GetNetworkLog());
 		if (d->Backend)
 		{
 			d->Backend->ReadFolder(".", [this](auto d)

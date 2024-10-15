@@ -24,6 +24,7 @@
 #include "SpaceTabConv.h"
 #include "DocEdit.h"
 #include "IdeDocPrivate.h"
+#include "ProjectBackend.h"
 
 const char *Untitled = "[untitled]";
 // static const char *White = " \r\t\n";
@@ -1927,39 +1928,55 @@ void IdeDoc::SetClean(std::function<void(bool)> Callback)
 	{
 		Processing = true;
 
+		auto proj = GetProject();
 		LAutoString Base;
-		if (GetProject())
-			Base = GetProject()->GetBasePath();
+		if (proj)
+			Base = proj->GetBasePath();
 		LString LocalPath = GetFullPath();
 
-		// printf("OnSave setup d=%p\n", d);
 		auto OnSave = [this, Callback](bool ok)
 		{
-			// printf("OnSave %i d=%p\n", ok, d);
 			if (ok)
 				d->Save();
-			// printf("OnSave cb\n");
 			if (Callback)
 				Callback(ok);
-			// printf("OnSave done\n");
 		};		
 		
-		if (d->Edit->IsDirty() &&
-			!LFileExists(LocalPath))
+		if (!d->Edit->IsDirty())
 		{
-			// We need a valid filename to save to...			
-			auto s = new LFileSelect;
-			s->Parent(this);
-			if (Base)
-				s->InitialDir(Base);			
-			s->Save([this, OnSave](auto fileSel, auto ok)
-			{
-				if (ok)
-					d->SetFileName(fileSel->Name());
-				OnSave(ok);
-			});
+			if (Callback)
+				Callback(true);
 		}
-		else OnSave(true);
+		else if (auto backend = proj ? proj->GetBackend() : NULL)
+		{
+			LString Content = d->Edit->Name();
+			backend->Write(LocalPath,
+				Content,
+				[this, Callback](auto err)
+				{
+					d->OnSaveComplete(!err);
+					if (Callback)
+						Callback(!err);
+				});
+		}
+		else
+		{
+			if (!LFileExists(LocalPath))
+			{
+				// We need a valid filename to save to...			
+				auto s = new LFileSelect;
+				s->Parent(this);
+				if (Base)
+					s->InitialDir(Base);			
+				s->Save([this, OnSave=std::move(OnSave)](auto fileSel, auto ok)
+				{
+					if (ok)
+						d->SetFileName(fileSel->Name());
+					OnSave(ok);
+				});
+			}
+			else OnSave(true);
+		}
 		
 		Processing = false;
 	}

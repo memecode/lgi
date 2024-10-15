@@ -361,7 +361,7 @@ public:
 		return out;
 	}
 
-	bool ReadFile(const char *Path, std::function<void(LError,LString)> result) override
+	bool Read(const char *Path, std::function<void(LError,LString)> result) override
 	{
 		if (!Path)
 			return false;
@@ -372,16 +372,19 @@ public:
 			auto root = RemoteRoot(Path);			
 			LStringPipe buf;
 			auto err = ssh->DownloadFile(&buf, root);
-			app->RunCallback( [this, err, result, data=buf.NewLStr()]() mutable
-				{
-					result(err, data);
-				});
+			if (result)
+			{
+				app->RunCallback( [this, err, result, data=buf.NewLStr()]() mutable
+					{
+						result(err, data);
+					});
+			}
 		} );
 
 		return true;
 	}
 
-	bool WriteFile(const char *Path, LString Data, std::function<void(LError)> result)
+	bool Write(const char *Path, LString Data, std::function<void(LError)> result)
 	{
 		if (!Path)
 			return false;
@@ -391,10 +394,13 @@ public:
 		{
 			LMemStream stream(Data.Get(), Data.Length(), false);
 			auto err = ssh->UploadFile(Path, &stream);
-			app->RunCallback( [this, err, result]() mutable
-				{
-					result(err);
-				});
+			if (result)
+			{
+				app->RunCallback( [this, err, result]() mutable
+					{
+						result(err);
+					});
+			}
 		} );
 
 		return true;
@@ -479,7 +485,7 @@ public:
 		return true;
 	}
 
-	bool ReadFile(const char *Path, std::function<void(LError,LString)> result) override
+	bool Read(const char *Path, std::function<void(LError,LString)> result) override
 	{
 		if (!Path)
 		{
@@ -500,7 +506,7 @@ public:
 		return true;
 	}
 
-	bool WriteFile(const char *Path, LString Data, std::function<void(LError)> result)
+	bool Write(const char *Path, LString Data, std::function<void(LError)> result)
 	{
 		if (!Path)
 		{
