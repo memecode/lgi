@@ -549,70 +549,95 @@ public:
 		Connected = false;
 	}
 
-	bool DownloadFile(const char *To, const char *From)
+	LError DownloadFile(const char *To, const char *From)
 	{
+		LFile local(To, O_WRITE);
+		if (!local.IsOpen())
+		{
+			Log->Print("%s:%i - Can't open '%s'.\n", _FL, To);
+			return LError(local.GetError());
+		}
+
+		local.SetSize(0);
+		return DownloadFile(&local, From);
+	}
+
+	LError DownloadFile(LStream *To, const char *From)
+	{
+		if (!To || !From)
+			return LError(LErrorInvalidParam);
+
 		ssh_scp Scp = ssh_scp_new(Ssh, SSH_SCP_READ, From);
 		if (!Scp)
 		{
 			Log->Print("%s:%i - ssh_scp_new failed.\n", _FL);
-			return false;
+			return LError(LErrorNoMem);
 		}
 
 		ssh_set_blocking(Ssh, true); // scp doesn't seem to like non-blocking
 		auto r = ssh_scp_init(Scp);
 		if (r == SSH_OK)
 		{
-			LFile local(To, O_WRITE);
-			if (local.IsOpen())
+			size_t BufLen = 1 << 20;
+			LArray<char> Buf(BufLen);
+			uint64_t i = 0;
+			IoProgress Meter(this);
+
+			r = ssh_scp_pull_request(Scp);
+			if (r == SSH_SCP_REQUEST_NEWFILE)
 			{
-				size_t BufLen = 1 << 20;
-				LArray<char> Buf(BufLen);
-				uint64_t i = 0;
-				IoProgress Meter(this);
+				auto Len = ssh_scp_request_get_size64(Scp);
+				ssh_scp_accept_request(Scp);
 
-				r = ssh_scp_pull_request(Scp);
-				if (r == SSH_SCP_REQUEST_NEWFILE)
+				Log->Print("%s:%i - Downloading %s...\n", _FL, From);
+				Meter.SetLength(Len);
+
+				while (!Cancel->IsCancelled() && i < Len)
 				{
-					auto Len = ssh_scp_request_get_size64(Scp);
-					ssh_scp_accept_request(Scp);
-
-					local.SetSize(0);
-					Log->Print("%s:%i - Downloading %s to %s.\n", _FL, From, To);
-					Meter.SetLength(Len);
-
-					while (!Cancel->IsCancelled() && i < Len)
+					auto rd = ssh_scp_read(Scp, Buf.AddressOf(), Buf.Length());
+					if (rd <= 0)
+						break;
+					auto wr = To->Write(Buf.AddressOf(), rd);
+					if (wr < rd)
 					{
-						auto rd = ssh_scp_read(Scp, Buf.AddressOf(), Buf.Length());
-						if (rd <= 0)
-							break;
-						auto wr = local.Write(Buf.AddressOf(), rd);
-						if (wr < rd)
-						{
-							Log->Print("%s:%i - Write failed.\n", _FL);
-							break;
-						}
-
-						i += rd;
-						Meter.Value(i);
+						Log->Print("%s:%i - Write failed.\n", _FL);
+						break;
 					}
 
-					bool status = i == Len;
-					Log->Print("%s:%i - Download %s.\n", _FL, status ? "Successful" : "Error");
+					i += rd;
+					Meter.Value(i);
 				}
+
+				bool status = i == Len;
+				Log->Print("%s:%i - Download %s.\n", _FL, status ? "Successful" : "Error");
 			}
-			else Log->Print("%s:%i - Can't open '%s'.\n", _FL, To);
 		}
 		else Log->Print("%s:%i - ssh_scp_init failed with %i\n", _FL, r);
 
 		ssh_scp_close(Scp);
 		ssh_scp_free(Scp);
 
-		return true;
+		return LError(LErrorNone);
 	}
 
-	bool UploadFile(const char *To, const char *From)
+	LError UploadFile(const char *To, const char *From)
 	{
-		bool Status = false;
+		if (!To || !From)
+			return LError(LErrorInvalidParam);
+
+		LFile in(From, O_READ);
+		if (!in)
+			return LError(in.GetError());
+
+		return UploadFile(To, &in);
+	}
+
+	LError UploadFile(const char *To, LStream *From)
+	{
+		LError Err(LErrorFuncFailed);
+
+		if (!To || !From)
+			return LError(LErrorInvalidParam);
 
 		// Write the file...
 		auto Parts = LString(To).RSplit("/", 1);
@@ -622,47 +647,42 @@ public:
 		if (!Scp)
 		{
 			Log->Print("%s:%i - ssh_scp_new failed.\n", _FL);
-			return false;
+			return LError(LErrorNoMem);
 		}
 
 		auto r = ssh_scp_init(Scp);
 		if (r == SSH_OK)
 		{
-			auto length = LFileSize(From);
+			auto length = From->GetSize();
 			r = ssh_scp_push_file(Scp, Parts[1], length, 0644);
 			if (r == SSH_OK)
 			{
-				LFile in(From, O_READ);
-				if (in.IsOpen())
+				size_t BufLen = 128<<10;
+				LArray<char> Buf(BufLen);
+				int64_t i = 0;
+				IoProgress Meter(this);
+				Meter.SetLength(length);
+
+				Log->Print("%s:%i - Writing %s.\n", _FL, LFormatSize(length).Get());
+				for (i=0; !Cancel->IsCancelled() && i<length; )
 				{
-					size_t BufLen = 128<<10;
-					LArray<char> Buf(BufLen);
-					int64_t i = 0;
-					IoProgress Meter(this);
-					Meter.SetLength(length);
-
-					Log->Print("%s:%i - Writing %s.\n", _FL, LFormatSize(length).Get());
-					for (i=0; !Cancel->IsCancelled() && i<length; )
+					auto rd = From->Read(Buf.AddressOf(), Buf.Length());
+					if (rd <= 0)
+						break;
+					r = ssh_scp_write(Scp, Buf.AddressOf(), rd);
+					if (r != S_OK)
 					{
-						auto rd = in.Read(Buf.AddressOf(), Buf.Length());
-						if (rd <= 0)
-							break;
-						r = ssh_scp_write(Scp, Buf.AddressOf(), rd);
-						if (r != S_OK)
-						{
-							Log->Print("%s:%i - ssh_scp_write failed.\n", _FL);
-							break;
-						}
-
-						i += rd;
-						Meter.Value(i);
+						Log->Print("%s:%i - ssh_scp_write failed.\n", _FL);
+						break;
 					}
 
+					i += rd;
 					Meter.Value(i);
-					Status = i==length;
-					Log->Print("%s:%i - Upload: %s.\n", _FL, Status ? "Ok" : "Error");
 				}
-				else Log->Print("%s:%i - Can't open '%s'.\n", _FL, From);
+
+				Meter.Value(i);
+				Err = i == length ? LErrorNone : LErrorIoFailed;
+				Log->Print("%s:%i - Upload: %s.\n", _FL, Err ? "Error" : "Ok");
 			}
 			else Log->Print("%s:%i - ssh_scp_push_file(%s,%" PRIi64 ") failed with: %i.\n", _FL, Parts[1].Get(), length, r);
 		}
@@ -671,7 +691,7 @@ public:
 		ssh_scp_close(Scp);
 		ssh_scp_free(Scp);
 
-		return Status;
+		return Err;
 	}
 
 	LAutoPtr<SshConsole> CreateConsole(bool createShell = true)

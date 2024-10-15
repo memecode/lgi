@@ -369,19 +369,31 @@ public:
 		Auto lck(this, _FL);
 		work.Add( [this, result, Path = LString(Path)]()
 		{
-			auto root = RemoteRoot(Path);
-			auto args = LString::Fmt("cat %s", root.Get());
-			auto output = Cmd(args + "\n");
-			app->RunCallback( [this, result, output]() mutable
+			auto root = RemoteRoot(Path);			
+			LStringPipe buf;
+			auto err = ssh->DownloadFile(&buf, root);
+			app->RunCallback( [this, err, result, data=buf.NewLStr()]() mutable
 				{
-					auto data = TrimContent(output);
-					LError err;
-					if (data.Find("No such file or dir") >= 0)
-					{
-						err = LErrorPathNotFound;
-						data.Empty();
-					}						
 					result(err, data);
+				});
+		} );
+
+		return true;
+	}
+
+	bool WriteFile(const char *Path, LString Data, std::function<void(LError)> result)
+	{
+		if (!Path)
+			return false;
+
+		Auto lck(this, _FL);
+		work.Add( [this, result, Path = RemoteRoot(Path), Data]()
+		{
+			LMemStream stream(Data.Get(), Data.Length(), false);
+			auto err = ssh->UploadFile(Path, &stream);
+			app->RunCallback( [this, err, result]() mutable
+				{
+					result(err);
 				});
 		} );
 
@@ -469,6 +481,13 @@ public:
 
 	bool ReadFile(const char *Path, std::function<void(LError,LString)> result) override
 	{
+		if (!Path)
+		{
+			if (result)
+				result(LErrorInvalidParam, LString());
+			return false;
+		}
+
 		LFile f(Path, O_READ);
 		LError err;
 		LString data;
@@ -479,6 +498,28 @@ public:
 		if (result)
 			result(err, data);
 		return true;
+	}
+
+	bool WriteFile(const char *Path, LString Data, std::function<void(LError)> result)
+	{
+		if (!Path)
+		{
+			if (result)
+				result(LErrorInvalidParam);
+			return false;
+		}
+		LFile out(Path, O_WRITE);
+		if (!out)
+		{
+			if (result)
+				result(out.GetError());
+			return false;
+		}
+		out.SetSize(0);
+		auto status = out.Write(Data);
+		if (result)
+			result(status ? LErrorNone : LErrorIoFailed);
+		return status;
 	}
 };
 
