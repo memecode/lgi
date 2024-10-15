@@ -33,6 +33,9 @@ public:
 	
 	/// \brief Formats a string and then writes it.
 	virtual ssize_t Print(const char *Format, ...);
+
+	/// Helper method to write an LString to the stream
+	bool Write(LString &s) { return Write(s.Get(), s.Length()) == s.Length(); }
 };
 
 /// Defines an API for terminating a stream. 
