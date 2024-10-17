@@ -122,7 +122,6 @@ class SshBackend :
 			if (!c->Write(cmd))
 				return LString();
 
-			LgiTrace("Cmd: reading:\n");
 			return ReadToPrompt();
 		}
 		return LString();
@@ -338,7 +337,7 @@ public:
 				args += LString::Fmt("%s -iname \"*%s*\"", i ? " -and" : "", parts[i].Get());
 
 			auto result = Cmd(args + "\n");
-			LArray<LString> lines = result.SplitDelimit("\r\n").Slice(2, -2);
+			LArray<LString> lines = result.SplitDelimit("\r\n").Slice(1, -2);
 			app->RunCallback( [results, lines]() mutable
 				{
 					results(lines);

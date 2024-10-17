@@ -202,8 +202,12 @@ protected:
 	bool HandleCapture(LView *Wnd, bool c);
 
 	
+	/// \sa LWindow::RegisterHook and LWindowHookType::LMouseEvents
 	virtual bool OnViewMouse(LView *v, LMouse &m) override { return true; }
+
+	/// \sa LWindow::RegisterHook and LWindowHookType::LKeyEvents
 	virtual bool OnViewKey(LView *v, LKey &k) override { return false; }
+	
 	virtual void OnNcPaint(LSurface *pDC, LRect &r);
 
 	/// List of children views.

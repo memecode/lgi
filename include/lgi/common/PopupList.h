@@ -187,19 +187,23 @@ public:
 		}
 	}
 	
+	void OnChange()
+	{
+		auto Str = Edit->Name();
+		bool Has = ValidStr(Str) && Lst->Length();
+		bool Vis = Visible();
+		// printf("%s:%i - PopupLst, Str=%s, Len=%i, has=%i vis=%i\n", _FL, Str, (int)Lst->Length(), Has, Vis);
+		if (Has ^ Vis)
+			Visible(Has);
+	}
+
 	int OnNotify(LViewI *Ctrl, LNotification n)
 	{
 		if (Lst &&
 			Ctrl == Edit &&
 			(n.Type == LNotifyValueChanged || n.Type == LNotifyDocChanged))
 		{
-			auto Str = Edit->Name();
-
-			bool Has = ValidStr(Str) && Lst->Length();
-			bool Vis = Visible();
-			// printf("%s:%i - PopupLst, Str=%s, Len=%i, has=%i vis=%i\n", _FL, Str, (int)Lst->Length(), Has, Vis);
-			if (Has ^ Vis)
-				Visible(Has);
+			OnChange();
 		}
 		else if (Ctrl == Lst)
 		{

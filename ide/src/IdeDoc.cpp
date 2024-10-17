@@ -808,22 +808,49 @@ public:
 	void Update(LString InputStr)
 	{
 		auto Start = LCurrentTime();
-		
-		LArray<ProjectNode*> Matches;
-		FilterFiles(Matches, Nodes, InputStr, App->GetPlatform());
-		SetItems(Matches);		
-		
-		List<LListItem> Items;
-		for (auto &hdr: SysHeaders)
-		{
-			if (Lst && hdr.Find(InputStr) >= 0)
-				Items.Insert(new LListItem(hdr));
+		auto Proj = App->RootProject();
 
-			if (Items.Length() % 50 == 0 &&
-				LCurrentTime() - Start > 500)
-				break;
-		}		
-		Lst->Insert(Items);
+		if (auto backend = Proj ? Proj->GetBackend() : NULL)
+		{
+			if (InputStr.Length() < 3)
+				return;
+
+			backend->SearchFileNames(InputStr, [this, hnd=Lst->AddDispatch()](auto &results)
+				{
+					if (!LEventSinkMap::Dispatch.IsSink(hnd))
+						return;
+
+					List<LListItem> Items;
+					for (auto r: results)
+					{
+						Items.Insert(new LListItem(r));
+						if (Items.Length() > 200)
+							break;
+					}
+					Lst->Empty();
+					Lst->Insert(Items);
+					OnChange();
+				});
+		}
+		else
+		{
+			// Local only project....
+			LArray<ProjectNode*> Matches;
+			FilterFiles(Matches, Nodes, InputStr, App->GetPlatform());
+			SetItems(Matches);		
+		
+			List<LListItem> Items;
+			for (auto &hdr: SysHeaders)
+			{
+				if (Lst && hdr.Find(InputStr) >= 0)
+					Items.Insert(new LListItem(hdr));
+
+				if (Items.Length() % 50 == 0 &&
+					LCurrentTime() - Start > 500)
+					break;
+			}		
+			Lst->Insert(Items);
+		}
 	}
 	
 	int OnNotify(LViewI *Ctrl, LNotification n)
