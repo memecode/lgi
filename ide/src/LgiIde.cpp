@@ -35,6 +35,7 @@
 #include "ProjectNode.h"
 #include "IdeFindInFiles.h"
 #include "ProjectBackend.h"
+#include "RemoteFileSelect.h"
 
 #define IDM_RECENT_FILE			1000
 #define IDM_RECENT_PROJECT		1100
@@ -3308,8 +3309,7 @@ IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bo
 	{
 		LgiTrace("%s:%i - Warning: Project already open.\n", _FL);
 		return NULL;
-	}
-	
+	}	
 
 	auto p = new IdeProject(this, DepParent);
 	if (!p)
@@ -3358,6 +3358,11 @@ IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bo
 	{
 		p->EditSettings();
 	}
+
+	RemoteFileSelect(this, p->GetBackend(), [this](auto fn)
+		{
+			GetBuildLog()->Print("Fn selected: %s\n", fn.Get());
+		});
 
 	return p;
 }

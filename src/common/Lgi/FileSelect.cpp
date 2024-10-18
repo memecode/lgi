@@ -2,7 +2,7 @@
 **      FILE:           LFileSelect.cpp
 **      AUTHOR:         Matthew Allen
 **      DATE:           20/5/2002
-**      DESCRIPTION:    Common file/directory selection dialog
+**      DESCRIPTION:    Cross platform file/directory selection dialog
 **
 **      Copyright (C) 1998-2002, Matthew Allen
 **              fret@memecode.com
@@ -26,16 +26,34 @@
 #include "lgi/common/Menu.h"
 #include "lgi/common/Uri.h"
 
-#define FSI_FILE			0
-#define FSI_DIRECTORY		1
-#define FSI_BACK			2
-#define FSI_UPDIR			3
-#define FSI_NEWDIR			4
-#define FSI_DESKTOP			5
-#define FSI_HARDDISK		6
-#define FSI_CDROM			7
-#define FSI_FLOPPY			8
-#define FSI_NETWORK			9
+enum IconIndexes {
+	FSI_FILE,
+	FSI_DIRECTORY,
+	FSI_BACK,
+	FSI_UPDIR,
+	FSI_NEWDIR,
+	FSI_DESKTOP,
+	FSI_HARDDISK,
+	FSI_CDROM,
+	FSI_FLOPPY,
+	FSI_NETWORK,
+};
+
+enum Icons2Idx
+{
+	IcoApps,
+	IcoHome,
+	IcoDesktop,
+	IcoDocuments,
+	IcoDownloads,
+	IcoMovies,
+	IcoMusic,
+	IcoPhotos,
+	IcoFolder,
+	IcoComputer,
+	IcoCDROM,
+	IcoDrive,	
+};
 
 enum DlgType
 {
@@ -43,6 +61,25 @@ enum DlgType
 	TypeOpenFile,
 	TypeOpenFolder,
 	TypeSaveFile
+};
+
+enum Ctrls
+{
+	IDC_STATIC = -1,
+	IDD_FILE_SELECT = 1000,
+	IDC_PATH,
+	IDC_DROP,
+	IDC_BACK,
+	IDC_UP,
+	IDC_NEW,
+	IDC_VIEW,
+	IDC_FILE,
+	IDC_TYPE,
+	IDC_SHOWHIDDEN,
+	IDC_SUB_TBL,
+	IDC_BOOKMARKS,
+	IDC_FILTER,
+	IDC_FILTER_CLEAR,
 };
 
 class LFileSelectDlg;
@@ -72,22 +109,6 @@ uint32_t IconBits[] = {
 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F};
 
 LInlineBmp FileSelectIcons = { 160, 16, 16, IconBits };
-
-enum Icons2Idx
-{
-	IcoApps,
-	IcoHome,
-	IcoDesktop,
-	IcoDocuments,
-	IcoDownloads,
-	IcoMovies,
-	IcoMusic,
-	IcoPhotos,
-	IcoFolder,
-	IcoComputer,
-	IcoCDROM,
-	IcoDrive,	
-};
 
 uint32_t Icons2[] = {
 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF,
@@ -120,22 +141,15 @@ uint32_t Icons2[] = {
 
 LInlineBmp TreeIconsImg = { 308, 22, 8, Icons2 };
 
-
 //////////////////////////////////////////////////////////////////////////
-char *LFileType::DefaultExtension()
+LString LFileType::DefaultExtension()
 {
-	char *Status = 0;
+	LString Status;
 	auto T = LString(Extension()).SplitDelimit(";");
 	if (T.Length())
 	{
-		char s[256];
-		strcpy(s, T[0]);
-		char *Dir = strchr(s, '.');
-		if (Dir)
-		{
-			Status = NewStr(Dir+1);
-			if (Status) strlwr(Status);
-		}
+		auto parts = T[0].SplitDelimit(".");
+		Status = parts.Last().Lower();
 	}
 	return Status;
 }
@@ -147,8 +161,8 @@ class LFolderItem : public LListItem
 	LString Path;
 
 public:
-	char *File;
-	bool IsDir;
+	char *File; // We don't own this string
+	bool IsDir = false;
 
 	LFolderItem(LFileSelectDlg *dlg, char *FullPath, LDirectory *Dir);
 	~LFolderItem();
@@ -162,7 +176,6 @@ public:
 	void OnMouseClick(LMouse &m);
 };
 
-
 //////////////////////////////////////////////////////////////////////////
 // This is just a private data container to make it easier to change the
 // implementation of this class without effecting headers and applications.
@@ -172,6 +185,7 @@ class LFileSelectPrivate
 	friend class LFileSelectDlg;
 	friend class LFolderList;
 
+	LAutoPtr<IFileSelectSystem> System;
 	LView *Parent = NULL;
 	LFileSelect *Select = NULL;
 
@@ -193,9 +207,11 @@ public:
 	static bool InitShowHiddenFiles;
 	static LRect InitSize;
 
-	LFileSelectPrivate(LFileSelect *select)
+	LFileSelectPrivate(LFileSelect *select, IFileSelectSystem *sys)
+		: Select(select)
 	{
-		Select = select;
+		if (sys)
+			System.Reset(sys);
 
 		if (!BtnIcons)
 			BtnIcons = new LImageList(16, 16, FileSelectIcons.Create(0xF81F));
@@ -402,28 +418,10 @@ public:
 
 	const char *GetClass() override { return "LFolderList"; }
 
+	void OnDir(LDirectory &Dir);
 	void OnFolder() override;
 	bool OnKey(LKey &k) override;
 	void SetFilterKey(LString s) { FilterKey = s; OnFolder(); }
-};
-
-enum Ctrls
-{
-	IDC_STATIC = -1,
-	IDD_FILE_SELECT = 1000,
-	IDC_PATH,
-	IDC_DROP,
-	IDC_BACK,
-	IDC_UP,
-	IDC_NEW,
-	IDC_VIEW,
-	IDC_FILE,
-	IDC_TYPE,
-	IDC_SHOWHIDDEN,
-	IDC_SUB_TBL,
-	IDC_BOOKMARKS,
-	IDC_FILTER,
-	IDC_FILTER_CLEAR,
 };
 
 #if 1
@@ -545,7 +543,7 @@ public:
 		
 		Over = NULL;
 		LString Nm(n);
-		LString::Array a = Nm.SplitDelimit(DIR_STR);
+		LString::Array a = Nm.SplitDelimit("/\\");
 		p.Length(0);
 		for (size_t i=0; i<a.Length(); i++)
 		{
@@ -818,6 +816,7 @@ public:
 	void OnFile(char *f);
 	void OnFilter(const char *Key);
 	void OnCreate() override;
+	void OnRootVolume(LVolume *v);
 
 	bool OnViewKey(LView *v, LKey &k) override
 	{
@@ -976,8 +975,7 @@ void LFileSelectDlg::OnCreate()
 	// Load types
 	if (!d->Types.Length())
 	{
-		LFileType *t = new LFileType;
-		if (t)
+		if (auto t = new LFileType)
 		{
 			t->Description("All Files");
 			t->Extension(LGI_ALL_FILES);
@@ -1011,12 +1009,21 @@ void LFileSelectDlg::OnCreate()
 	if (d->InitPath)
 	{
 		SetFolder(d->InitPath);
+		OnFolder();
+	}
+	else if (d->System)
+	{
+		d->System->GetInitialPath([this](auto path)
+		{
+			SetFolder(path);
+			OnFolder();
+		});
 	}
 	else
 	{
 		SetFolder(LGetExePath());
+		OnFolder();
 	}
-	OnFolder();
 
 	// Size/layout
 	AttachChildren();
@@ -1024,20 +1031,18 @@ void LFileSelectDlg::OnCreate()
 	RegisterHook(this, LKeyEvents);
 	FileLst->Focus(true);
 	
-	auto v = FileDev->GetRootVolume();
-	if (v)
+	if (d->System)
 	{
-		for (auto vol = v; vol; vol = vol->Next())
-		{
-			if (auto *ti = new LTreeItem)
+		d->System->GetRootVolume([this](auto v)
 			{
-				Bookmarks->Insert(ti);
-				Add(ti, vol);
-				ti->Expanded(true);
-			}
-		}
+				OnRootVolume(v);
+			});
 	}
-	
+	else if (auto v = FileDev->GetRootVolume())
+	{
+		OnRootVolume(v);
+	}
+
 	LGetUsersLinks(Links);
 	if (Links.Length())
 	{
@@ -1088,6 +1093,22 @@ void LFileSelectDlg::OnCreate()
 		{
 			LAssert(!"Impl me.");
 			break;
+		}
+	}
+}
+
+void LFileSelectDlg::OnRootVolume(LVolume *v)
+{
+	if (!v)
+		return;
+
+	for (auto vol = v; vol; vol = vol->Next())
+	{
+		if (auto *ti = new LTreeItem)
+		{
+			Bookmarks->Insert(ti);
+			Add(ti, vol);
+			ti->Expanded(true);
 		}
 	}
 }
@@ -1391,6 +1412,7 @@ int LFileSelectDlg::OnNotify(LViewI *Ctrl, LNotification n)
 				break;
 			}
 			
+			auto DirChar = d->System ? d->System->GetDirChar() : DIR_CHAR;
 			auto Path = GetCtrlName(IDC_PATH);
 			auto File = GetCtrlName(IDC_FILE);
 			if (Path)
@@ -1418,11 +1440,21 @@ int LFileSelectDlg::OnNotify(LViewI *Ctrl, LNotification n)
 					}
 					else if (ValidStr(File))
 					{
-						if (strchr(File, DIR_CHAR))
-							strcpy_s(f, sizeof(f), File);
+						if (d->System)
+						{
+							if (auto joined = d->System->PathJoin(Path, File))
+							{
+								d->Files.Insert(NewStr(joined));
+							}
+						}
 						else
-							LMakePath(f, sizeof(f), Path, File);
-						d->Files.Insert(NewStr(f));
+						{
+							if (strchr(File, DirChar))
+								strcpy_s(f, sizeof(f), File);
+							else
+								LMakePath(f, sizeof(f), Path, File);
+							d->Files.Insert(NewStr(f));
+						}
 					}
 				}
 			}
@@ -1712,7 +1744,10 @@ LFolderItem::LFolderItem(LFileSelectDlg *dlg, char *FullPath, LDirectory *Dir)
 	Dlg = dlg;
 	Path = FullPath;
 	File = strrchr(Path, DIR_CHAR);
-	if (File) File++;
+	if (File)
+		File++;
+	else
+		File = Path;
 	IsDir = Dir->IsDir();
 }
 
@@ -1799,7 +1834,8 @@ void LFolderItem::OnActivate()
 		{
 			char Dir[256];
 			strcpy(Dir, Dlg->GetCtrlName(IDC_PATH));
-			if (Dir[strlen(Dir)-1] != DIR_CHAR) strcat(Dir, DIR_STR);
+			if (Dir[strlen(Dir)-1] != DIR_CHAR)
+				strcat(Dir, DIR_STR);
 			strcat(Dir, File);
 			Dlg->SetFolder(Dir);
 			Dlg->OnFolder();
@@ -2000,15 +2036,12 @@ bool LFolderList::OnKey(LKey &k)
 	return Status;
 }
 
-void LFolderList::OnFolder()
+void LFolderList::OnDir(LDirectory &Dir)
 {
-	Empty();
-
-	LDirectory Dir;
 	List<LListItem> New;
 
 	// Get current type
-	LFileType *Type = Dlg->d->Types.ItemAt(Dlg->d->CurrentType);
+	auto Type = Dlg->d->Types.ItemAt(Dlg->d->CurrentType);
 	List<char> Ext;
 	if (Type)
 	{
@@ -2017,12 +2050,9 @@ void LFolderList::OnFolder()
 			Ext.Insert(NewStr(T[i]));
 	}
 
-	// Get items
-	if (!Dlg->Ctrl2)
-		return;
-		
+	// Get items		
 	bool ShowHiddenFiles = Dlg->ShowHidden ? Dlg->ShowHidden->Value() : false;
-	for (auto Found = Dir.First(Dlg->Ctrl2->Name()); Found; Found = Dir.Next())
+	for (auto Found = true; Found; Found = Dir.Next())
 	{
 		char Name[LDirectory::MaxPathLen];
 		Dir.Path(Name, sizeof(Name));
@@ -2061,10 +2091,34 @@ void LFolderList::OnFolder()
 	Insert(New);
 }
 
-//////////////////////////////////////////////////////////////////////////
-LFileSelect::LFileSelect(LViewI *Window)
+void LFolderList::OnFolder()
 {
-	d = new LFileSelectPrivate(this);
+	Empty();
+
+	if (!Dlg->Ctrl2)
+		return;
+
+	auto Path = Dlg->Ctrl2->Name();
+	if (Dlg->d->System)
+	{
+		Dlg->d->System->ReadDir(Path, [this](auto &dir)
+			{
+				OnDir(dir);
+			});
+	}
+	else // Local file system...
+	{
+		LDirectory Dir;
+		if (Dir.First(Path))
+			OnDir(Dir);
+	}	
+	
+}
+
+//////////////////////////////////////////////////////////////////////////
+LFileSelect::LFileSelect(LViewI *Window, IFileSelectSystem *System)
+{
+	d = new LFileSelectPrivate(this, System);
 	if (Window)
 		Parent(Window);
 }
@@ -2227,7 +2281,7 @@ bool LGetUsersLinks(LString::Array &Links)
 		LDirectory d;
 		for (int b = d.First(p); b; b = d.Next())
 		{
-			char *s = d.GetName();
+			auto s = d.GetName();
 			if (s && stristr(s, ".lnk"))
 			{
 				char lnk[MAX_PATH_LEN];

@@ -2,35 +2,44 @@
 
 #include <functional>
 
-LgiFunc bool LGetUsersLinks(LString::Array &Links);
+#ifndef FILE_SELECT_CLS
+#define FILE_SELECT_CLS LgiClass
+#endif
+#ifndef FILE_SELECT_FN
+#define FILE_SELECT_FN LgiFunc
+#endif
+
+FILE_SELECT_FN bool LGetUsersLinks(LString::Array &Links);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // File select dialog
-class LgiClass LFileType : public LBase
+class FILE_SELECT_CLS LFileType : public LBase
 {
-	char *Ext;
-	int _Data;
+	LString ext;
+	int data = 0;
 
 public:
-	LFileType()
-	{
-		Ext = 0;
-		_Data = 0;
-	}
-
-	~LFileType()
-	{
-		DeleteArray(Ext);
-	}
-
-	char *Extension() { return Ext; }
-	bool Extension(const char *e) { return (Ext = NewStr(e)) != 0; }
+	const char *Extension() { return ext; }
+	bool Extension(const char *e) { ext = e; return ext != NULL; }
 	const char *Description() { return Name(); }
 	bool Description(const char *d) { return Name(d); }
-	int Data() { return _Data; }
-	void Data(int i) { _Data = i; }
+	int Data() { return data; }
+	void Data(int i) { data = i; }
 
-	char *DefaultExtension();
+	LString DefaultExtension();
+};
+
+/// Optional file system interface class:
+class IFileSelectSystem
+{
+public:
+	virtual ~IFileSelectSystem() {}
+
+	virtual char GetDirChar() = 0;
+	virtual LString PathJoin(LString base, LString leaf) = 0;
+	virtual void GetInitialPath(std::function<void(LString)> cb) = 0;
+	virtual void GetRootVolume(std::function<void(LVolume*)> cb) = 0;
+	virtual void ReadDir(LString path, std::function<void(LDirectory&)> cb) = 0;
 };
 
 /// \brief File selector dialog
@@ -50,7 +59,7 @@ public:
 ///		delete s;
 /// });
 /// \endcode
-class LgiClass LFileSelect :
+class FILE_SELECT_CLS LFileSelect :
 	public LBase
 {
 	class LFileSelectPrivate *d;
@@ -58,7 +67,7 @@ class LgiClass LFileSelect :
 public:
 	typedef std::function<void(LAutoPtr<LFileSelect>, bool)> SelectCb;
 
-	LFileSelect(LViewI *Window = NULL);
+	LFileSelect(LViewI *Window = NULL, IFileSelectSystem *System = NULL);
 	~LFileSelect();
 
 	// Properties

@@ -145,6 +145,7 @@ public:
 	}
 
 	const char *GetClass() const { return "SshBackend"; }
+	LString GetBasePath() override { return RemoteRoot(); }
 
 	class SshDir : public LDirectory
 	{
@@ -310,8 +311,7 @@ public:
 		Auto lck(this, _FL);
 		work.Add( [this, results, path = LString(Path)]()
 		{
-			auto full = RemoteRoot(path);
-			auto ls = Cmd(LString::Fmt("ls -lan %s\n", full.Get()));
+			auto ls = Cmd(LString::Fmt("ls -lan %s\n", path.Get()));
 			auto lines = ls.SplitDelimit("\r\n").Slice(2, -2);
 			app->RunCallback( [dir = new SshDir(path, lines), results]() mutable
 				{
@@ -337,10 +337,35 @@ public:
 				args += LString::Fmt("%s -iname \"*%s*\"", i ? " -and" : "", parts[i].Get());
 
 			auto result = Cmd(args + "\n");
-			LArray<LString> lines = result.SplitDelimit("\r\n").Slice(1, -2);
+			LArray<LString> lines = TrimContent(result).SplitDelimit("\r\n");
 			app->RunCallback( [results, lines]() mutable
 				{
 					results(lines);
+				});
+		} );
+
+		return true;
+	}
+
+	bool FindInFiles(FindParams &params, std::function<void(LArray<Result>&)> results)
+	{
+		if (!params.term || !results)
+			return false;
+
+		Auto lck(this, _FL);
+		work.Add( [this, results, params]()
+		{
+			auto root = RemoteRoot(params.subFolder);
+			auto args = LString::Fmt("grep -R \"%s\" \"%s\"",
+				params.term.Get(),
+				root.Get());
+
+			auto result = Cmd(args + "\n");
+			LArray<LString> lines = TrimContent(result).SplitDelimit("\r\n");
+			app->RunCallback( [results, lines]() mutable
+				{
+					// Parse lines into Result structs
+					LAssert(!"impl me");
 				});
 		} );
 
@@ -445,6 +470,8 @@ public:
 	{
 	}
 
+	LString GetBasePath() override { return folder; }
+
 	bool ReadFolder(const char *Path, std::function<void(LDirectory*)> results)
 	{
 		LDirectory dir;
@@ -482,6 +509,11 @@ public:
 		files.DeleteArrays();
 		results(matches);
 		return true;
+	}
+
+	bool FindInFiles(FindParams &params, std::function<void(LArray<Result>&)> results)
+	{
+		return false;
 	}
 
 	bool Read(const char *Path, std::function<void(LError,LString)> result) override

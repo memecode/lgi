@@ -3116,7 +3116,8 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 		d->Backend = CreateBackend(d->App, Uri, d->App->GetNetworkLog());
 		if (d->Backend)
 		{
-			d->Backend->ReadFolder(".", [this](auto d)
+			auto path = d->Backend->GetBasePath();
+			d->Backend->ReadFolder(path, [this](auto d)
 				{
 					for (auto b = d->First(NULL); b; b = d->Next())
 					{

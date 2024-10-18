@@ -25,15 +25,13 @@ bool BuildPyDefnList(const char *FileName, char16 *Source, LArray<DefnInfo> &Def
 
 	for (auto Ln : Lines)
 	{
-		if (Depth)
+		if (Depth && Ln)
 		{
 			const char *s = Ln, *e = s;
 			while (iswhite(*e))
 				e++;
 			if ((e - s) < Depth && *e && *e != '#')
-			{
 				Depth = 0;
-			}
 		}
 
 		if (Ln.Find("def ") == Depth)

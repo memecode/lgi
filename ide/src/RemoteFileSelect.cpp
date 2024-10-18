@@ -1,0 +1,96 @@
+#include "lgi/common/Lgi.h"
+
+#include "RemoteFileSelect.h"
+
+#ifdef WINDOWS
+	// Use the cross platform file select dialog
+	#include <algorithm>
+	#include <lgi/common/Menu.h>
+	#include <lgi/common/Layout.h>
+	#include <lgi/common/Popup.h>
+	#include <lgi/common/Tree.h>
+	#include <lgi/common/List.h>
+	#include <lgi/common/TextLabel.h>
+	#include <lgi/common/Button.h>
+	#include <lgi/common/CheckBox.h>
+	#include <lgi/common/Combo.h>
+	#include <lgi/common/TableLayout.h>
+	#include <lgi/common/Box.h>
+	
+	// But in a new namespace:
+	namespace RemoteFs {
+		#define FILE_SELECT_CLS
+		#define FILE_SELECT_FN
+		#include "lgi/common/FileSelect.h"
+		#include "../../src/common/Lgi/FileSelect.cpp"
+	}
+#else
+#endif
+
+class RemoteFileSelectSystem : public RemoteFs::IFileSelectSystem
+{
+	ProjectBackend *backend = NULL;
+
+	LString ConvertPath(LString p)
+	{
+		char pathStr[2] = { GetDirChar(), 0 };
+		return p.Replace("\\", pathStr);
+	}
+
+public:
+	RemoteFileSelectSystem(ProjectBackend *be) :
+		backend(be)
+	{
+	}
+
+	char GetDirChar() override
+	{
+		return '/';
+	}
+
+	LString PathJoin(LString base, LString leaf) override
+	{
+		LString p = ConvertPath(base);
+		if (leaf)
+		{
+			if (p(-1) != GetDirChar())
+			{
+				char dirStr[2] = { GetDirChar(), 0 };
+				p += dirStr;
+			}
+			p += leaf;
+		}
+		return p;
+	}
+
+	void GetInitialPath(std::function<void(LString)> cb) override
+	{
+		if (!cb) return;
+		if (auto p = backend->GetBasePath())
+			cb(p);
+	}
+
+	void GetRootVolume(std::function<void(LVolume*)> cb) override
+	{
+		// Impl me
+	}
+
+	void ReadDir(LString path, std::function<void(LDirectory&)> cb) override
+	{
+		if (!cb) return;
+		backend->ReadFolder(ConvertPath(path), [this, cb](auto dir)
+		{
+			cb(*dir);
+		});
+	}
+};
+
+void RemoteFileSelect(LViewI *parent, ProjectBackend *backend, std::function<void(LString)> callback)
+{
+	auto dlg = new RemoteFs::LFileSelect(parent, new RemoteFileSelectSystem(backend));
+	dlg->Open([callback](auto selectDlg, auto ok)
+		{
+			if (ok && callback)
+				callback(selectDlg->Name());
+		});
+}

@@ -2,7 +2,7 @@
 **      FILE:           LFileSelect.cpp
 **      AUTHOR:         Matthew Allen
 **      DATE:           26/9/2001
-**      DESCRIPTION:    Common file/directory selection dialog
+**      DESCRIPTION:    Windows specific file/directory selection dialog
 **
 **      Copyright (C) 1998-2001, Matthew Allen
 **              fret@memecode.com
@@ -18,19 +18,19 @@ class LFileSelectPrivate
 {
 	friend class LFileSelect;
 
-	bool			CanMultiSelect;
-	bool			MultiSelected;
+	bool			CanMultiSelect = false;
+	bool			MultiSelected = false;
 
 	LString			InitDir;
 	LString			DefExt;
 	LString			TitleStr;
-	bool			WaitForMessage;
-	int				SelectedType;
-	LViewI			*ParentWnd;
+	bool			WaitForMessage = false;
+	int				SelectedType = 0;
+	LViewI			*ParentWnd = NULL;
 	List<LFileType> TypeList;
 	LString::Array	Files;
-	bool			ShowReadOnly;
-	bool			ReadOnly;
+	bool			ShowReadOnly = false;
+	bool			ReadOnly = false;
 
 	char16 *TypeStrW()
 	{
@@ -162,15 +162,6 @@ class LFileSelectPrivate
 
 	LFileSelectPrivate()
 	{
-		CanMultiSelect = false;
-		MultiSelected = false;
-		InitDir = 0;
-		DefExt = 0;
-		TitleStr = 0;
-		SelectedType = 0;
-		ParentWnd = 0;
-		ReadOnly = false;
-		ShowReadOnly = false;
 	}
 
 	~LFileSelectPrivate()
@@ -179,7 +170,7 @@ class LFileSelectPrivate
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-LFileSelect::LFileSelect(LViewI *Window)
+LFileSelect::LFileSelect(LViewI *Window, IFileSelectSystem *System)
 {
 	d = new LFileSelectPrivate;
 	if (Window)

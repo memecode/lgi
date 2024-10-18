@@ -55,6 +55,9 @@
     <Filter Include="Source Files\Search\SymbolSearch">
       <UniqueIdentifier>{0cab67ca-75a0-425c-b4ad-375006afd28d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\RemoteFileSelect">
+      <UniqueIdentifier>{f761efb0-c45f-46cf-99d0-67022566f91b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Debugger.h">
@@ -128,6 +131,9 @@
     </ClInclude>
     <ClInclude Include="..\src\ProjectBackend.h">
       <Filter>Source Files\Projects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\RemoteFileSelect.h">
+      <Filter>Source Files\RemoteFileSelect</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -241,6 +247,9 @@
     </ClCompile>
     <ClCompile Include="..\src\ProjectBackend.cpp">
       <Filter>Source Files\Projects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\RemoteFileSelect.cpp">
+      <Filter>Source Files\RemoteFileSelect</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

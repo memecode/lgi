@@ -817,6 +817,8 @@ public:
 
 			backend->SearchFileNames(InputStr, [this, hnd=Lst->AddDispatch()](auto &results)
 				{
+					// This prevents the callback crashing if the list has been deleted 
+					// between the SearchFileNames and the results coming back.
 					if (!LEventSinkMap::Dispatch.IsSink(hnd))
 						return;
 
