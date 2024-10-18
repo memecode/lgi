@@ -41,10 +41,10 @@ class LFileSelectPrivate
 			char16 *d = Utf8ToWide(Type->Description());
 			char16 *e = Utf8ToWide(Type->Extension());
 			
-			p.Write((uchar*)d, sizeof(char16)*StrlenW(d));
-			p.Write((uchar*)L"", sizeof(char16));
-			p.Write((uchar*)e, sizeof(char16)*StrlenW(e));
-			p.Write((uchar*)L"", sizeof(char16));
+			p.Write(d, sizeof(char16)*StrlenW(d));
+			p.Write(L"", sizeof(char16));
+			p.Write(e, sizeof(char16)*StrlenW(e));
+			p.Write(L"", sizeof(char16));
 
 			DeleteArray(d);
 			DeleteArray(e);

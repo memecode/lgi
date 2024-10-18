@@ -114,15 +114,40 @@ class SshBackend :
 		return s;
 	}
 
-	LString Cmd(LString cmd)
+	LString Cmd(LString cmd, int32_t *exitCode = NULL)
 	{
 		if (auto c = GetConsole())
 		{
-			LgiTrace("Cmd: write '%s'\n", cmd.Strip().Get());
+			// log->Print("Cmd: write '%s'\n", cmd.Strip().Get());
 			if (!c->Write(cmd))
+			{
+				if (exitCode)
+					*exitCode = -1;
 				return LString();
+			}
 
-			return ReadToPrompt();
+			auto output = ReadToPrompt();
+			
+			if (exitCode)
+			{
+				LString echo = "echo $?\n";
+				if (c->Write(echo))
+				{
+					auto val = ReadToPrompt();
+					// log->Print("echo output: %s", val.Get());
+
+					auto lines = val.SplitDelimit("\r\n");
+					if (lines.Length() > 1)
+						*exitCode = (int32_t) lines[1].Int();
+					else
+						*exitCode = -1;
+
+					if (*exitCode)
+						log->Print("Cmd failed: %s\n", output.Get());
+				}
+			}
+
+			return output;
 		}
 		return LString();
 	}
@@ -385,6 +410,11 @@ public:
 		return out;
 	}
 
+	LString Quote(LString s)
+	{
+		return s.Replace(" ", "\\ ");
+	}
+
 	bool Read(const char *Path, std::function<void(LError,LString)> result) override
 	{
 		if (!Path)
@@ -429,6 +459,52 @@ public:
 
 		return true;
 	}
+
+	bool CreateFolder(const char *path, bool createParents, std::function<void(bool)> cb) override
+	{
+		if (!path || !cb)
+			return false;
+
+		Auto lck(this, _FL);
+		work.Add( [this, cb, createParents, Path = Quote(path)]()
+		{
+			auto args = LString::Fmt("mkdir%s %s", createParents ? " -p" : "", Path.Get());
+			int32_t exitVal;
+			auto result = Cmd(args + "\n", &exitVal);
+			if (cb)
+			{
+				app->RunCallback( [exitVal, cb]() mutable
+					{
+						cb(exitVal == 0);
+					});
+			}
+		} );
+
+		return true;
+	}
+
+	bool Delete(const char *path, bool recursiveForce, std::function<void(bool)> cb) override
+	{
+		if (!path || !cb)
+			return false;
+
+		Auto lck(this, _FL);
+		work.Add( [this, cb, recursiveForce, Path = Quote(path)]()
+		{
+			auto args = LString::Fmt("rm%s %s", recursiveForce ? " -rf" : "", Path.Get());
+			int32_t exitVal;
+			auto result = Cmd(args + "\n", &exitVal);
+			if (cb)
+			{
+				app->RunCallback( [exitVal, cb]() mutable
+					{
+						cb(exitVal == 0);
+					});
+			}
+		} );
+
+		return true;
+	};
 
 	int Main()
 	{
@@ -557,6 +633,34 @@ public:
 		if (result)
 			result(status ? LErrorNone : LErrorIoFailed);
 		return status;
+	}
+
+	bool CreateFolder(const char *path, bool createParents, std::function<void(bool)> cb)
+	{
+		LError err(LErrorNone);
+		auto result = FileDev->CreateFolder(path, false, &err);
+		if (cb)
+			cb(!err);
+		return result;
+	}
+
+	bool Delete(const char *path, bool recursiveForce, std::function<void(bool)> cb)
+	{
+		if (!path)
+			return false;
+		if (LDirExists(path))
+		{
+			auto status = FileDev->RemoveFolder(path, recursiveForce);
+			if (cb)
+				cb(status);
+		}
+		else
+		{
+			auto status = FileDev->Delete(path);
+			if (cb)
+				cb(status);
+		}
+		return true;
 	}
 };
 

@@ -83,6 +83,33 @@ public:
 			cb(*dir);
 		});
 	}
+
+	void CreateFolder(LString path, bool createParents, std::function<void(bool)> cb) override
+	{
+		backend->CreateFolder(ConvertPath(path), createParents, [this, cb](auto status)
+			{
+				if (cb)
+					cb(status);
+			});
+	}
+
+	void DeleteFolder(LString path, std::function<void(bool)> cb) override
+	{
+		backend->Delete(ConvertPath(path), true, [this, cb](auto status)
+			{
+				if (cb)
+					cb(status);
+			});
+	}
+
+	void DeleteFile(LString path, std::function<void(bool)> cb) override
+	{
+		backend->Delete(ConvertPath(path), false, [this, cb](auto status)
+			{
+				if (cb)
+					cb(status);
+			});
+	}
 };
 
 void RemoteFileSelect(LViewI *parent, ProjectBackend *backend, std::function<void(LString)> callback)

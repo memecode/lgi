@@ -29,7 +29,7 @@ public:
 	LString DefaultExtension();
 };
 
-/// Optional file system interface class:
+/// Optional asyncronous file system interface class:
 class IFileSelectSystem
 {
 public:
@@ -40,6 +40,9 @@ public:
 	virtual void GetInitialPath(std::function<void(LString)> cb) = 0;
 	virtual void GetRootVolume(std::function<void(LVolume*)> cb) = 0;
 	virtual void ReadDir(LString path, std::function<void(LDirectory&)> cb) = 0;
+	virtual void CreateFolder(LString path, bool createParents, std::function<void(bool)> cb) = 0;
+	virtual void DeleteFolder(LString path, std::function<void(bool)> cb) = 0;
+	virtual void DeleteFile(LString path, std::function<void(bool)> cb) = 0;
 };
 
 /// \brief File selector dialog

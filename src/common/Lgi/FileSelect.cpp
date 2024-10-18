@@ -184,6 +184,7 @@ class LFileSelectPrivate
 	friend class LFileSelect;
 	friend class LFileSelectDlg;
 	friend class LFolderList;
+	friend class LFolderItem;
 
 	LAutoPtr<IFileSelectSystem> System;
 	LView *Parent = NULL;
@@ -295,8 +296,8 @@ public:
 class LIconButton : public LLayout
 {
 	LImageList *Icons;
-	int Icon;
-	bool Down;
+	int Icon = -1;
+	bool Down = false;
 
 public:
 	LIconButton(int Id, int x, int y, int cx, int cy, LImageList *icons, int icon)
@@ -306,7 +307,6 @@ public:
 		SetId(Id);
 		LRect r(x, y, x+cx, y+cy);
 		SetPos(r);
-		Down = false;
 		SetTabStop(true);
 	}
 	
@@ -765,7 +765,6 @@ public:
 #else
 #define USE_FOLDER_CTRL				0
 #endif
-
 
 class LFileSelectDlg :
 	public LDialog
@@ -1391,15 +1390,26 @@ int LFileSelectDlg::OnNotify(LViewI *Ctrl, LNotification n)
 		case IDC_NEW:
 		{
 			auto Dlg = new LInput(this, "", "Create new folder:", "New Folder");
-			Dlg->DoModal([this, Dlg](auto d, auto code)
+			Dlg->DoModal([this, Dlg](auto dlg, auto code)
 			{
 				char New[MAX_PATH_LEN];
 				strcpy(New, GetCtrlName(IDC_PATH));
 				if (New[strlen(New)-1] != DIR_CHAR) strcat(New, DIR_STR);
 				strcat(New, Dlg->GetStr());
 
-				FileDev->CreateFolder(New);
-				OnFolder();
+				if (d->System)
+				{
+					d->System->CreateFolder(New, false, [this](auto status)
+						{
+							if (status)
+								OnFolder();
+						});
+				}
+				else
+				{
+					FileDev->CreateFolder(New);
+					OnFolder();
+				}
 			});
 			break;
 		}
@@ -1779,19 +1789,40 @@ void LFolderItem::OnDelete(bool Ask)
 	{
 		bool Status = false;
 
-		if (IsDir)
+		auto priv = Dlg->d;
+		if (priv->System)
 		{
-			Status = FileDev->RemoveFolder(Path, true);
+			if (IsDir)
+				priv->System->DeleteFolder(Path, [this](auto status)
+				{
+					if (status)
+					{
+						Parent->Remove(this);
+						delete this;
+					}
+				});
+			else
+				priv->System->DeleteFile(Path, [this](auto status)
+				{
+					if (status)
+					{
+						Parent->Remove(this);
+						delete this;
+					}
+				});
 		}
 		else
 		{
-			Status = FileDev->Delete(Path);
-		}
+			if (IsDir)
+				Status = FileDev->RemoveFolder(Path, true);
+			else
+				Status = FileDev->Delete(Path);
 
-		if (Status)
-		{
-			Parent->Remove(this);
-			delete this;
+			if (Status)
+			{
+				Parent->Remove(this);
+				delete this;
+			}
 		}
 	}
 }
