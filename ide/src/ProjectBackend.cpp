@@ -506,6 +506,29 @@ public:
 		return true;
 	};
 
+	bool Rename(LString oldPath, LString newPath, std::function<void(bool)> cb) override
+	{
+		if (!oldPath || !newPath)
+			return false;
+
+		Auto lck(this, _FL);
+		work.Add( [this, cb, from = Quote(oldPath), to = Quote(newPath)]()
+		{
+			auto args = LString::Fmt("mv %s %s", from.Get(), to.Get());
+			int32_t exitVal;
+			auto result = Cmd(args + "\n", &exitVal);
+			if (cb)
+			{
+				app->RunCallback( [exitVal, cb]() mutable
+					{
+						cb(exitVal == 0);
+					});
+			}
+		} );
+
+		return true;
+	}
+
 	int Main()
 	{
 		while (!IsCancelled())
@@ -661,6 +684,18 @@ public:
 				cb(status);
 		}
 		return true;
+	}
+
+	bool Rename(LString oldPath, LString newPath, std::function<void(bool)> cb) override
+	{
+		if (!oldPath || !newPath)
+			return false;
+
+		auto status = FileDev->Move(oldPath, newPath);
+		if (cb)
+			cb(status);
+
+		return status;
 	}
 };
 

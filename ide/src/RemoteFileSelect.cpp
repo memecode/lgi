@@ -110,6 +110,15 @@ public:
 					cb(status);
 			});
 	}
+
+	void Rename(LString oldPath, LString newPath, std::function<void(bool)> cb) override
+	{
+		backend->Rename(ConvertPath(oldPath), ConvertPath(newPath), [this, cb](auto status)
+			{
+				if (cb)
+					cb(status);
+			});
+	}
 };
 
 void RemoteFileSelect(LViewI *parent, ProjectBackend *backend, std::function<void(LString)> callback)

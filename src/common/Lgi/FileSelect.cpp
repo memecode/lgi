@@ -160,6 +160,9 @@ class LFolderItem : public LListItem
 	LFileSelectDlg *Dlg;
 	LString Path;
 
+	void PostDelete(bool status);
+	void PostRename(bool status, LString newName);
+
 public:
 	char *File; // We don't own this string
 	bool IsDir = false;
@@ -250,6 +253,8 @@ public:
 		Files.DeleteArrays();
 		History.DeleteArrays();
 	}
+
+	IFileSelectSystem *GetSystem() { return System; }
 };
 
 LImageList *LFileSelectPrivate::BtnIcons = NULL;
@@ -1505,9 +1510,23 @@ class LFileSystemPopup : public LPopup
 {
 	friend class LFileSystemItem;
 
-	LFileSelectDlg *Dlg;
-	LTree *Tree;
-	LFileSystemItem *Root;
+	LFileSelectDlg *Dlg = NULL;
+	LTree *Tree = NULL;
+	LFileSystemItem *Root = NULL;
+
+	void OnVolume(LVolume *v)
+	{
+		if (!v)
+			return;
+
+		Tree->SetImageList(Dlg->d->BtnIcons, false);
+		Tree->Insert(Root = new LFileSystemItem(this, v));				
+		for (auto next = v->Next(); next; next = next->Next())
+		{
+			Tree->SetImageList(Dlg->d->BtnIcons, false);
+			Tree->Insert(Root = new LFileSystemItem(this, next));
+		}
+	}
 
 public:
 	LFileSystemPopup(LView *owner, LFileSelectDlg *dlg, int x) : LPopup(owner)
@@ -1520,17 +1539,16 @@ public:
 		{
 			Tree->Sunken(false);
 
-			LVolume *v = FileDev->GetRootVolume();
-			if (v)
+			if (auto sys = Dlg->d->GetSystem())
 			{
-				Tree->SetImageList(Dlg->d->BtnIcons, false);
-				Tree->Insert(Root = new LFileSystemItem(this, v));
-				
-				for (auto next = v->Next(); next; next = next->Next())
+				sys->GetRootVolume([this](auto vol)
 				{
-					Tree->SetImageList(Dlg->d->BtnIcons, false);
-					Tree->Insert(Root = new LFileSystemItem(this, next));
-				}
+					OnVolume(vol);
+				});	
+			}
+			else if (auto v = FileDev->GetRootVolume())
+			{
+				OnVolume(v);
 			}
 		}
 	}
@@ -1783,54 +1801,65 @@ void LFolderItem::OnSelect()
 	}
 }
 
+void LFolderItem::PostDelete(bool status)
+{
+	if (status)
+	{
+		Parent->Remove(this);
+		delete this;
+	}
+}
+
 void LFolderItem::OnDelete(bool Ask)
 {
 	if (!Ask || LgiMsg(Parent, "Do you want to delete '%s'?", ModuleName, MB_YESNO, Path.Get()) == IDYES)
 	{
-		bool Status = false;
-
 		auto priv = Dlg->d;
 		if (priv->System)
 		{
 			if (IsDir)
 				priv->System->DeleteFolder(Path, [this](auto status)
 				{
-					if (status)
-					{
-						Parent->Remove(this);
-						delete this;
-					}
+					PostDelete(status);
 				});
 			else
 				priv->System->DeleteFile(Path, [this](auto status)
 				{
-					if (status)
-					{
-						Parent->Remove(this);
-						delete this;
-					}
+					PostDelete(status);
 				});
 		}
 		else
 		{
+			bool Status = false;
 			if (IsDir)
 				Status = FileDev->RemoveFolder(Path, true);
 			else
 				Status = FileDev->Delete(Path);
-
-			if (Status)
-			{
-				Parent->Remove(this);
-				delete this;
-			}
+			PostDelete(Status);
 		}
+	}
+}
+
+void LFolderItem::PostRename(bool status, LString newName)
+{
+	if (status)
+	{
+		Path = newName;
+		File = strrchr(Path, DIR_CHAR);
+		if (File)
+			File++;
+		Update();
+	}
+	else
+	{
+		LgiMsg(GetList(), "Renaming '%s' failed.", Dlg->Name(), MB_OK);
 	}
 }
 
 void LFolderItem::OnRename()
 {
 	auto Inp = new LInput(Dlg, File, "New name:", Dlg->Name());
-	Inp->DoModal([this, Inp](auto d, auto code)
+	Inp->DoModal([this, Inp](auto dlg, auto code)
 	{
 		if (code)
 		{			
@@ -1841,17 +1870,20 @@ void LFolderItem::OnRename()
 			File[0] = 0;
 			LMakePath(New, sizeof(New), Path, Inp->GetStr());
 			
-			if (FileDev->Move(Old, New))
+			dlg.Reset();
+
+			auto priv = Dlg->d;
+			if (priv->System)
 			{
-				Path = New;
-				File = strrchr(Path, DIR_CHAR);
-				if (File)
-					File++;
-				Update();
+				priv->System->Rename(Old, New, [this, New = LString(New)](auto status)
+				{
+					PostRename(status, New);
+				});
 			}
 			else
 			{
-				LgiMsg(Inp, "Renaming '%s' failed.", Dlg->Name(), MB_OK);
+				bool status = FileDev->Move(Old, New);
+				PostRename(status, New);
 			}
 		}
 	});

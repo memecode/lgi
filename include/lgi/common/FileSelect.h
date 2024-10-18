@@ -43,6 +43,7 @@ public:
 	virtual void CreateFolder(LString path, bool createParents, std::function<void(bool)> cb) = 0;
 	virtual void DeleteFolder(LString path, std::function<void(bool)> cb) = 0;
 	virtual void DeleteFile(LString path, std::function<void(bool)> cb) = 0;
+	virtual void Rename(LString oldPath, LString newPath, std::function<void(bool)> cb) = 0;
 };
 
 /// \brief File selector dialog
