@@ -110,7 +110,6 @@
   <ItemGroup>
     <ClInclude Include="..\..\include\lgi\common\EventTargetThread.h" />
     <ClInclude Include="..\..\include\lgi\common\Scripting.h" />
-    <ClInclude Include="..\..\include\lgi\common\SubProcess.h" />
     <ClInclude Include="..\..\include\lgi\common\TimeZoneInfo.h" />
     <ClInclude Include="..\..\src\common\Coding\ScriptingPriv.h" />
     <ClInclude Include="..\src\AddFtpFile.h" />

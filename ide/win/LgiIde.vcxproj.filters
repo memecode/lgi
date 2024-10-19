@@ -11,9 +11,6 @@
     <Filter Include="Source Files\Search\Simple Cpp Parser">
       <UniqueIdentifier>{b327086f-7d0e-4840-ac95-7dc18a89fe19}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Process">
-      <UniqueIdentifier>{3cefce7e-26bb-4e9e-8711-c7fa5c51373d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Debugger">
       <UniqueIdentifier>{63c6319b-3755-4b59-95f2-1e7b5b2c1a75}</UniqueIdentifier>
     </Filter>
@@ -107,9 +104,6 @@
     </ClInclude>
     <ClInclude Include="..\src\SpaceTabConv.h">
       <Filter>Source Files\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\lgi\common\SubProcess.h">
-      <Filter>Source Files\Process</Filter>
     </ClInclude>
     <ClInclude Include="..\src\WebFldDlg.h">
       <Filter>Source Files\Dialogs</Filter>

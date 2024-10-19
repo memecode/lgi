@@ -187,7 +187,6 @@ class LFileSelectPrivate
 	friend class LFileSelect;
 	friend class LFileSelectDlg;
 	friend class LFolderList;
-	friend class LFolderItem;
 
 	LAutoPtr<IFileSelectSystem> System;
 	LView *Parent = NULL;
@@ -1346,15 +1345,13 @@ int LFileSelectDlg::OnNotify(LViewI *Ctrl, LNotification n)
 			if (d->Type == TypeSaveFile)
 			{
 				// change extension of current file
-				LFileType *Type = d->Types.ItemAt(d->CurrentType);
+				auto Type = d->Types.ItemAt(d->CurrentType);
 				auto File = FileNameEdit->Name();
 				if (Type && File)
 				{
-					char *Ext = strchr(File, '.');
-					if (Ext)
+					if (auto Ext = strchr(File, '.'))
 					{
-						char *DefExt = Type->DefaultExtension();
-						if (DefExt)
+						if (auto DefExt = Type->DefaultExtension())
 						{
 							Ext++;
 							char s[256];
@@ -1363,8 +1360,6 @@ int LFileSelectDlg::OnNotify(LViewI *Ctrl, LNotification n)
 							strcat(s, DefExt);
 
 							OnFile(s);
-
-							DeleteArray(DefExt);
 						}
 					}
 				}
@@ -1814,16 +1809,15 @@ void LFolderItem::OnDelete(bool Ask)
 {
 	if (!Ask || LgiMsg(Parent, "Do you want to delete '%s'?", ModuleName, MB_YESNO, Path.Get()) == IDYES)
 	{
-		auto priv = Dlg->d;
-		if (priv->System)
+		if (auto sys = Dlg->d->GetSystem())
 		{
 			if (IsDir)
-				priv->System->DeleteFolder(Path, [this](auto status)
+				sys->DeleteFolder(Path, [this](auto status)
 				{
 					PostDelete(status);
 				});
 			else
-				priv->System->DeleteFile(Path, [this](auto status)
+				sys->DeleteFile(Path, [this](auto status)
 				{
 					PostDelete(status);
 				});
@@ -1872,10 +1866,9 @@ void LFolderItem::OnRename()
 			
 			dlg.Reset();
 
-			auto priv = Dlg->d;
-			if (priv->System)
+			if (auto sys = Dlg->d->GetSystem())
 			{
-				priv->System->Rename(Old, New, [this, New = LString(New)](auto status)
+				sys->Rename(Old, New, [this, New = LString(New)](auto status)
 				{
 					PostRename(status, New);
 				});
