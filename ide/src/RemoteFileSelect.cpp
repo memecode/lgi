@@ -65,7 +65,8 @@ public:
 
 	void GetInitialPath(std::function<void(LString)> cb) override
 	{
-		if (!cb) return;
+		if (!cb || !backend)
+			return;
 		if (auto p = backend->GetBasePath())
 			cb(p);
 	}

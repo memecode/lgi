@@ -19,9 +19,20 @@ class SshBackend :
 	public LThread,
 	public LMutex
 {
-	LView *app;
+	enum RemoteSystemType
+	{
+		SysUnknown,
+		SysLinux,
+		SysWindows,
+		SysMac,
+		SysHaiku,
+	};
+
+	LView *app = NULL;
 	LUri uri;
 	LStream *log = NULL;
+	LString prompt;
+	RemoteSystemType sysType = SysUnknown;
 	constexpr static const char *separators = "/\\";
 
 	// Lock before use
@@ -45,7 +56,10 @@ class SshBackend :
 				INFO("%s: Connecting to '%s'..\n", GetClass(), uri.sHost.Get())
 				
 				if (ssh->Open(uri.sHost, uri.sUser, NULL, true))
+				{
 					INFO("%s: Connected to '%s'\n", GetClass(), uri.sHost.Get())
+					OnConnected();
+				}
 				else
 				{
 					INFO("%s: Error connecting to '%s'\n", GetClass(), uri.sHost.Get())
@@ -65,22 +79,57 @@ class SshBackend :
 		return console;
 	}
 
+	uint64_t promptDetect = 0;
+
 	bool AtPrompt(LStringPipe &p)
 	{
 		bool found = false;
-		const char *prompt = "$ ";
 
-		p.Iterate( [this, prompt, &found](auto ptr, auto size)
+		p.Iterate( [this, &found](auto ptr, auto size)
 			{
-				auto promptLen = Strlen(prompt);
-				if (size >= promptLen)
+				if (!prompt)
 				{
-					auto p = ptr + size - promptLen;
-					auto cmp = memcmp(p, prompt, promptLen);
-					if (cmp == 0)
-						found = true;
+					// Detect the prompt characters
+					auto now = LCurrentTime();
+					if (!promptDetect)
+					{
+						promptDetect = now;
+					}
+					else if (now - promptDetect >= 300)
+					{
+						LString last2((char*)ptr + size - 2, 2);
+						if (last2 == "> " ||
+							last2 == "$ " ||
+							last2 == "# ")
+						{
+							// Unix like system
+							prompt = last2;
+							return true;
+						}
+						else if (size > 0 && ptr[size-1] == '>')
+						{
+							// Windows hopefully?
+							prompt = ">";
+							return true;
+						}
+
+						LAssert(!"Doesn't look like a prompt?");
+					}
+
+					return false;
 				}
-				return false;
+				else
+				{
+					auto promptLen = prompt.Length();
+					if (size >= promptLen)
+					{
+						auto p = ptr + size - promptLen;
+						auto cmp = memcmp(p, prompt, promptLen);
+						if (cmp == 0)
+							found = true;
+					}
+					return false;
+				}
 			},
 			true);
 
@@ -172,6 +221,51 @@ public:
 	const char *GetClass() const { return "SshBackend"; }
 	LString GetBasePath() override { return RemoteRoot(); }
 
+	void OnConnected()
+	{
+		GetSysType(NULL);
+	}
+
+	void GetSysType(std::function<void(RemoteSystemType)> cb)
+	{
+		if (sysType != SysUnknown)
+		{
+			if (cb)
+				cb(sysType);
+			return;
+		}
+
+		Auto lck(this, _FL);
+		work.Add( [this, cb]()
+		{
+			if (auto output = Cmd("uname -a\n"))
+			{
+				auto parts = TrimContent(output).SplitDelimit();
+				auto sys = parts[0].Lower();
+				if (sys.Find("haiku") >= 0)
+					sysType = SysHaiku;
+				else if (sys.Find("linux") >= 0)
+					sysType = SysLinux;
+				else if (sys.Find("darwin") >= 0)
+					sysType = SysMac;
+				else if (sys.Find("windows") >= 0)
+					sysType = SysWindows;
+				else
+					LAssert(!"unknown system type?");
+
+				log->Print("System is: %s\n", sys.Get());
+
+				if (cb)
+				{
+					app->RunCallback( [this, cb]() mutable
+						{
+							cb(sysType);
+						});
+				}
+			}
+		} );
+	}
+
 	class SshDir : public LDirectory
 	{
 		struct TEntry
@@ -225,7 +319,11 @@ public:
 				e.month = COL(5);
 				e.day   = COL(6);
 				e.time  = COL(7);
-				e.name  = line(cols[7].End() + 1, -1);
+				if (e.name = line(cols[7].End() + 1, -1).LStrip(" "))
+				{
+					if (e.name(0) == '\'')
+						e.name = e.name.Strip("\'");
+				}
 			}
 		}
 
@@ -360,6 +458,7 @@ public:
 			auto args = LString::Fmt("cd %s && find .", root.Get());
 			for (size_t i=0; i<parts.Length(); i++)
 				args += LString::Fmt("%s -iname \"*%s*\"", i ? " -and" : "", parts[i].Get());
+			args += " -and -not -path \"*/.hg/*\"";
 
 			auto result = Cmd(args + "\n");
 			LArray<LString> lines = TrimContent(result).SplitDelimit("\r\n");

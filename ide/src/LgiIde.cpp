@@ -3359,10 +3359,12 @@ IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bo
 		p->EditSettings();
 	}
 
+	#if 0 // for testing...
 	RemoteFileSelect(this, p->GetBackend(), [this](auto fn)
 		{
 			GetBuildLog()->Print("Fn selected: %s\n", fn.Get());
 		});
+	#endif
 
 	return p;
 }
