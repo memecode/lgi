@@ -58,6 +58,7 @@ class ProjectNode :
 	void OnCmdComplete(FtpCmd *Cmd) override;
 	int64 CountNodes();
 	void NeedsPulse(bool yes);
+	void OnDocOpen(IdeDoc *Doc, bool open);
 
 public:
 	ProjectNode(IdeProject *p);

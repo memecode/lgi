@@ -24,6 +24,7 @@ class SshBackend :
 	LStream *log = NULL;
 	LString prompt;
 	IdePlatform sysType = PlatformUnknown;
+	LString remoteSep;
 	constexpr static const char *separators = "/\\";
 
 	// Lock before use
@@ -245,6 +246,7 @@ public:
 					LAssert(!"unknown system type?");
 
 				log->Print("System is: %s\n", sys.Get());
+				remoteSep = sysType == PlatformWin ? "\\" : "/";
 
 				if (cb)
 				{
@@ -503,9 +505,19 @@ public:
 		return out;
 	}
 
-	LString Quote(LString s)
+	LString PreparePath(LString s)
 	{
-		return s.Replace(" ", "\\ ");
+		auto quoted = s.Replace(" ", "\\ ");
+
+		if (remoteSep)
+		{
+			auto sep = remoteSep(0);
+			for (char *c = quoted.Get(); *c; c++)
+				if (Strchr(separators, *c))
+					*c = sep;
+		}
+
+		return quoted;
 	}
 
 	bool Read(const char *Path, std::function<void(LError,LString)> result) override
@@ -514,11 +526,10 @@ public:
 			return false;
 
 		Auto lck(this, _FL);
-		work.Add( [this, result, Path = LString(Path)]()
+		work.Add( [this, result, Path = PreparePath(Path)]()
 		{
-			auto root = RemoteRoot(Path);			
 			LStringPipe buf;
-			auto err = ssh->DownloadFile(&buf, root);
+			auto err = ssh->DownloadFile(&buf, Path);
 			if (result)
 			{
 				app->RunCallback( [this, err, result, data=buf.NewLStr()]() mutable
@@ -559,7 +570,7 @@ public:
 			return false;
 
 		Auto lck(this, _FL);
-		work.Add( [this, cb, createParents, Path = Quote(path)]()
+		work.Add( [this, cb, createParents, Path = PreparePath(path)]()
 		{
 			auto args = LString::Fmt("mkdir%s %s", createParents ? " -p" : "", Path.Get());
 			int32_t exitVal;
@@ -582,7 +593,7 @@ public:
 			return false;
 
 		Auto lck(this, _FL);
-		work.Add( [this, cb, recursiveForce, Path = Quote(path)]()
+		work.Add( [this, cb, recursiveForce, Path = PreparePath(path)]()
 		{
 			auto args = LString::Fmt("rm%s %s", recursiveForce ? " -rf" : "", Path.Get());
 			int32_t exitVal;
@@ -605,7 +616,7 @@ public:
 			return false;
 
 		Auto lck(this, _FL);
-		work.Add( [this, cb, from = Quote(oldPath), to = Quote(newPath)]()
+		work.Add( [this, cb, from = PreparePath(oldPath), to = PreparePath(newPath)]()
 		{
 			auto args = LString::Fmt("mv %s %s", from.Get(), to.Get());
 			int32_t exitVal;

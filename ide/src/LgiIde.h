@@ -15,7 +15,6 @@
 #include "lgi/common/Tree.h"
 #include "lgi/common/SubProcess.h"
 
-#include "resdefs.h"
 #include "FindSymbol.h"
 #include "Debugger.h"
 #ifdef WIN32

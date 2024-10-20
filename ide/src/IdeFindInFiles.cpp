@@ -12,6 +12,7 @@
 #include "LgiIde.h"
 #include "IdeFindInFiles.h"
 #include "RemoteFileSelect.h"
+#include "resdefs.h"
 
 #define DEBUG_HIST		0
 #define DEBUG_SEARCH	0

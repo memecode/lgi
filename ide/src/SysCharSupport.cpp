@@ -4,6 +4,7 @@
 #include "lgi/common/List.h"
 #include "lgi/common/DisplayString.h"
 #include "LgiIde.h"
+#include "resdefs.h"
 
 class CharItem : public LListItem
 {

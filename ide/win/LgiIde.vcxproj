@@ -112,6 +112,7 @@
     <ClInclude Include="..\..\include\lgi\common\Scripting.h" />
     <ClInclude Include="..\..\include\lgi\common\TimeZoneInfo.h" />
     <ClInclude Include="..\..\src\common\Coding\ScriptingPriv.h" />
+    <ClInclude Include="..\resources\resdefs.h" />
     <ClInclude Include="..\src\AddFtpFile.h" />
     <ClInclude Include="..\src\DebugContext.h" />
     <ClInclude Include="..\src\IdeFindInFiles.h" />
@@ -128,8 +129,6 @@
     <ClInclude Include="..\src\ProjectNode.h" />
     <ClInclude Include="..\src\PythonParser.h" />
     <ClInclude Include="..\src\RemoteFileSelect.h" />
-    <ClInclude Include="..\src\resdefs.h" />
-    <ClInclude Include="..\src\resource.h" />
     <ClInclude Include="..\src\SpaceTabConv.h" />
     <ClInclude Include="..\src\WebFldDlg.h" />
   </ItemGroup>

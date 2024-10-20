@@ -562,6 +562,13 @@ public:
 		return DownloadFile(&local, From);
 	}
 
+	#define ERR_MSG(...)                              \
+		{                                             \
+			auto msg = LString::Fmt(__VA_ARGS__);     \
+			LgiTrace("%s:%i - %s\n", _FL, msg.Get()); \
+			ret.Set(LErrorFuncFailed, msg);           \
+		}
+
 	LError DownloadFile(LStream *To, const char *From)
 	{
 		if (!To || !From)
@@ -571,12 +578,17 @@ public:
 		if (!Scp)
 		{
 			Log->Print("%s:%i - ssh_scp_new failed.\n", _FL);
-			return LError(LErrorNoMem);
+			return LError(LErrorNoMem, "ssh_scp_new failed");
 		}
 
+		LError ret(LErrorNone);
 		ssh_set_blocking(Ssh, true); // scp doesn't seem to like non-blocking
 		auto r = ssh_scp_init(Scp);
-		if (r == SSH_OK)
+		if (r != SSH_OK)
+		{
+			ERR_MSG("ssh_scp_init failed with %i", r);
+		}
+		else
 		{
 			size_t BufLen = 1 << 20;
 			LArray<char> Buf(BufLen);
@@ -584,7 +596,16 @@ public:
 			IoProgress Meter(this);
 
 			r = ssh_scp_pull_request(Scp);
-			if (r == SSH_SCP_REQUEST_NEWFILE)
+			if (r == SSH_SCP_REQUEST_WARNING)
+			{
+				auto warn = ssh_scp_request_get_warning(Scp);
+				ret.Set(LErrorPathNotFound, warn);
+			}
+			else if (r != SSH_SCP_REQUEST_NEWFILE)
+			{
+				ERR_MSG("ssh_scp_pull_request failed: %i", r);
+			}
+			else
 			{
 				auto Len = ssh_scp_request_get_size64(Scp);
 				ssh_scp_accept_request(Scp);
@@ -612,12 +633,11 @@ public:
 				Log->Print("%s:%i - Download %s.\n", _FL, status ? "Successful" : "Error");
 			}
 		}
-		else Log->Print("%s:%i - ssh_scp_init failed with %i\n", _FL, r);
 
 		ssh_scp_close(Scp);
 		ssh_scp_free(Scp);
 
-		return LError(LErrorNone);
+		return ret;
 	}
 
 	LError UploadFile(const char *To, const char *From)

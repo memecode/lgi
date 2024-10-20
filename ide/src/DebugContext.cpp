@@ -7,6 +7,7 @@
 
 #include "LgiIde.h"
 #include "IdeProject.h"
+#include "resdefs.h"
 
 #ifdef LINUX
 namespace Gtk {

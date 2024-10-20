@@ -5,7 +5,7 @@
 
 #ifdef WINDOWS
 	// Use the cross platform file select dialog
-	#include <algorithm>
+	// #include <algorithm>
 	#include <lgi/common/Menu.h>
 	#include <lgi/common/Layout.h>
 	#include <lgi/common/Popup.h>

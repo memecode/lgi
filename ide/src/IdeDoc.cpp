@@ -25,6 +25,7 @@
 #include "DocEdit.h"
 #include "IdeDocPrivate.h"
 #include "ProjectBackend.h"
+#include "resdefs.h"
 
 const char *Untitled = "[untitled]";
 // static const char *White = " \r\t\n";

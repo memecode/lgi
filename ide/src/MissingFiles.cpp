@@ -4,6 +4,7 @@
 
 #include "LgiIde.h"
 #include "ProjectNode.h"
+#include "resdefs.h"
 
 enum Msgs
 {

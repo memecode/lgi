@@ -3362,16 +3362,32 @@ bool CheckExists(LAutoString Base, T &p, Fn Setter, bool Debug)
 
 bool IdeProject::CheckExists(LString &p, bool Debug)
 {
-	return ::CheckExists(GetBasePath(), p, [](LString &o, const char *i) {
-			o = i;
-		}, Debug);
+	if (auto backend = GetBackend())
+	{
+		// Fixme...
+		return true;
+	}
+	else
+	{
+		return ::CheckExists(GetBasePath(), p, [](LString &o, const char *i) {
+				o = i;
+			}, Debug);
+	}
 }
 
 bool IdeProject::CheckExists(LAutoString &p, bool Debug)
 {
-	return ::CheckExists(GetBasePath(), p, [](LAutoString &o, const char *i) {
-			o.Reset(NewStr(i));
-		}, Debug);
+	if (auto backend = GetBackend())
+	{
+		// Fixme...
+		return true;
+	}
+	else
+	{
+		return ::CheckExists(GetBasePath(), p, [](LAutoString &o, const char *i) {
+				o.Reset(NewStr(i));
+			}, Debug);
+	}
 }
 
 bool IdeProject::GetClean()

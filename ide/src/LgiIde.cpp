@@ -36,6 +36,7 @@
 #include "IdeFindInFiles.h"
 #include "ProjectBackend.h"
 #include "RemoteFileSelect.h"
+#include "resdefs.h"
 
 #define IDM_RECENT_FILE			1000
 #define IDM_RECENT_PROJECT		1100

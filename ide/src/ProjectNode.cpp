@@ -14,6 +14,7 @@
 #include "AddFtpFile.h"
 #include "WebFldDlg.h"
 #include "ProjectBackend.h"
+#include "resdefs.h"
 
 #define DEBUG_SHOW_NODE_COUNTS		0
 
@@ -758,120 +759,111 @@ IdeDoc *ProjectNode::Open()
 	{
 		Processing = true;
 
-		auto proj = GetProject();
-		if (auto backend = proj ? proj->GetBackend() : NULL)
+		switch (Type)
 		{
-			backend->Read(GetFullPath(),
-				[this](auto err, auto data)
-				{
-					if (err)
-					{
-						LPopupNotification::Message(GetTree()->GetWindow(),
-							LString::Fmt("Error openning '%s'\n%s",
-								GetFullPath().Get(),
-								err.ToString().Get()) );
-					}
-					else if (data)
-					{
-						
-					}
-				});
-		}
-		else
-		{		
-			switch (Type)
+			case NodeDir:
 			{
-				case NodeDir:
+				Expanded(true);
+				break;
+			}
+			case NodeResources:
+			{
+				auto FullPath = GetFullPath();
+				if (FullPath)
 				{
-					Expanded(true);
-					break;
-				}
-				case NodeResources:
-				{
-					auto FullPath = GetFullPath();
-					if (FullPath)
-					{
-						char Exe[MAX_PATH_LEN];
-						LMakePath(Exe, sizeof(Exe), LGetExePath(), "..");
-						#if defined(WIN32)
-							LMakePath(Exe, sizeof(Exe), Exe, "Debug\\LgiRes.exe");
-						#elif defined(LINUX) || defined(HAIKU)
-							LMakePath(Exe, sizeof(Exe), Exe, "resourceEditor/lgires");
-						#elif defined(MAC)
-							// Of course it's there! Lol
-							LMakePath(Exe, sizeof(Exe), Exe, "resourceEditor/mac/build/Debug/LgiRes.app/Contents/MacOS/LgiRes");
-						#else
-							#error "Impl me?"
-						#endif
+					char Exe[MAX_PATH_LEN];
+					LMakePath(Exe, sizeof(Exe), LGetExePath(), "..");
+					#if defined(WIN32)
+						LMakePath(Exe, sizeof(Exe), Exe, "Debug\\LgiRes.exe");
+					#elif defined(LINUX) || defined(HAIKU)
+						LMakePath(Exe, sizeof(Exe), Exe, "resourceEditor/lgires");
+					#elif defined(MAC)
+						// Of course it's there! Lol
+						LMakePath(Exe, sizeof(Exe), Exe, "resourceEditor/mac/build/Debug/LgiRes.app/Contents/MacOS/LgiRes");
+					#else
+						#error "Impl me?"
+					#endif
 						
-						if (LFileExists(Exe))
-						{
-							if (!LExecute(Exe, FullPath))
-								LgiMsg(Tree, "Failed to execute '%s' with '%s'", AppName, MB_OK, Exe, FullPath.Get());
-						}
-						else
-						{
-							LgiMsg(Tree, "No resource editor '%s'", AppName, MB_OK, Exe);
-						}
+					if (LFileExists(Exe))
+					{
+						if (!LExecute(Exe, FullPath))
+							LgiMsg(Tree, "Failed to execute '%s' with '%s'", AppName, MB_OK, Exe, FullPath.Get());
 					}
 					else
 					{
-						LgiMsg(Tree, "No Path", AppName);
+						LgiMsg(Tree, "No resource editor '%s'", AppName, MB_OK, Exe);
 					}
-					break;
 				}
-				case NodeGraphic:
+				else
 				{
-					auto FullPath = GetFullPath();
-					if (FullPath)
-					{
-						LExecute(FullPath);
-					}
-					else
-					{
-						LgiMsg(Tree, "No Path", AppName);
-					}
-					break;
+					LgiMsg(Tree, "No Path", AppName);
 				}
-				default:
+				break;
+			}
+			case NodeGraphic:
+			{
+				auto FullPath = GetFullPath();
+				if (FullPath)
 				{
-					auto FullPath = GetFullPath();
-					if (Project->CheckExists(FullPath))
-					{
-						Doc = Project->GetApp()->FindOpenFile(FullPath);
-						if (!Doc)
-						{
-							Doc = Project->GetApp()->NewDocWnd(0, this);
-							if (Doc)
-							{
-								if (Doc->OpenFile(FullPath))
-								{
-									IdeProjectSettings *Settings = Project->GetSettings();
+					LExecute(FullPath);
+				}
+				else
+				{
+					LgiMsg(Tree, "No Path", AppName);
+				}
+				break;
+			}
+			default:
+			{
+				auto FullPath = GetFullPath();
+				if (!FullPath)
+					break;
 
-									Doc->SetProject(Project);
-									Doc->SetEditorParams(Settings->GetInt(ProjEditorIndentSize),
-														Settings->GetInt(ProjEditorTabSize),
-														Settings->GetInt(ProjEditorUseHardTabs),
-														Settings->GetInt(ProjEditorShowWhiteSpace));
-								}
-								else
-								{
-									LgiMsg(Tree, "Couldn't open file '%s'", AppName, MB_OK, FullPath.Get());
-								}
-							}
-						}
-						else
-						{
-							Doc->Raise();
-							Doc->Focus(true);
-						}
-					}
-					else
-					{
-						LgiMsg(Tree, "No Path", AppName);
-					}
+				if (!Project->CheckExists(FullPath))
+				{
+					auto msg = LString::Fmt("The path '%s' doesn't exist.", FullPath.Get());
+					LPopupNotification::Message(GetTree()->GetWindow(), msg);
 					break;
 				}
+
+				Doc = Project->GetApp()->FindOpenFile(FullPath);
+				if (Doc)
+				{
+					Doc->Raise();
+					Doc->Focus(true);
+					break;
+				}
+					
+				Doc = Project->GetApp()->NewDocWnd(0, this);
+				if (!Doc)
+					break;
+
+				Doc->SetProject(Project);
+
+				if (auto backend = Project ? Project->GetBackend() : NULL)
+				{
+					auto path = GetFullPath();
+					backend->Read(path,
+						[this, Doc](auto err, auto data)
+						{
+							if (err)
+							{
+								LPopupNotification::Message(GetTree()->GetWindow(),
+									LString::Fmt("Error opening '%s'\n%s",
+										GetFullPath().Get(),
+										err.ToString().Get()) );
+							}
+							else if (data)
+							{
+								OnDocOpen(Doc, Doc->OpenData(data));
+							}
+						});
+				}
+				else
+				{
+					OnDocOpen(Doc, Doc->OpenFile(FullPath));
+				}
+				break;
 			}
 		}
 
@@ -879,6 +871,24 @@ IdeDoc *ProjectNode::Open()
 	}
 	
 	return Doc;
+}
+
+void ProjectNode::OnDocOpen(IdeDoc *Doc, bool open)
+{
+	if (open)
+	{
+		if (auto Settings = Project->GetSettings())
+		{
+			Doc->SetEditorParams(Settings->GetInt(ProjEditorIndentSize),
+								Settings->GetInt(ProjEditorTabSize),
+								Settings->GetInt(ProjEditorUseHardTabs),
+								Settings->GetInt(ProjEditorShowWhiteSpace));
+		}
+	}
+	else
+	{
+		LgiMsg(Tree, "Couldn't open file '%s'", AppName, MB_OK, Doc->GetFullPath().Get());
+	}
 }
 
 void ProjectNode::Delete()
