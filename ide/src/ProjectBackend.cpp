@@ -19,20 +19,11 @@ class SshBackend :
 	public LThread,
 	public LMutex
 {
-	enum RemoteSystemType
-	{
-		SysUnknown,
-		SysLinux,
-		SysWindows,
-		SysMac,
-		SysHaiku,
-	};
-
 	LView *app = NULL;
 	LUri uri;
 	LStream *log = NULL;
 	LString prompt;
-	RemoteSystemType sysType = SysUnknown;
+	IdePlatform sysType = PlatformUnknown;
 	constexpr static const char *separators = "/\\";
 
 	// Lock before use
@@ -69,7 +60,7 @@ class SshBackend :
 		}
 		if (ssh && !console)
 		{
-			if (console = ssh->CreateConsole())
+			if ((console = ssh->CreateConsole()))
 			{
 				LgiTrace("Created console... reading to prompt:\n");
 				ReadToPrompt();
@@ -226,9 +217,9 @@ public:
 		GetSysType(NULL);
 	}
 
-	void GetSysType(std::function<void(RemoteSystemType)> cb)
+	void GetSysType(std::function<void(IdePlatform)> cb) override
 	{
-		if (sysType != SysUnknown)
+		if (sysType != PlatformUnknown)
 		{
 			if (cb)
 				cb(sysType);
@@ -243,13 +234,13 @@ public:
 				auto parts = TrimContent(output).SplitDelimit();
 				auto sys = parts[0].Lower();
 				if (sys.Find("haiku") >= 0)
-					sysType = SysHaiku;
+					sysType = PlatformHaiku;
 				else if (sys.Find("linux") >= 0)
-					sysType = SysLinux;
+					sysType = PlatformLinux;
 				else if (sys.Find("darwin") >= 0)
-					sysType = SysMac;
+					sysType = PlatformMac;
 				else if (sys.Find("windows") >= 0)
-					sysType = SysWindows;
+					sysType = PlatformWin;
 				else
 					LAssert(!"unknown system type?");
 
@@ -319,7 +310,7 @@ public:
 				e.month = COL(5);
 				e.day   = COL(6);
 				e.time  = COL(7);
-				if (e.name = line(cols[7].End() + 1, -1).LStrip(" "))
+				if ((e.name = line(cols[7].End() + 1, -1).LStrip(" ")))
 				{
 					if (e.name(0) == '\'')
 						e.name = e.name.Strip("\'");
@@ -358,7 +349,7 @@ public:
 		int GetUser(bool Group) const
 		{
 			if (Ok())
-				return Atoi(entries.ItemAt(pos).user.Get());
+				return (int) Atoi(entries.ItemAt(pos).user.Get());
 			return 0;
 		}
 		uint64 GetCreationTime() const { return 0; }
@@ -407,10 +398,15 @@ public:
 
 	LString RemoteRoot(const char *subFolder = NULL)
 	{
+		LString sep("/");
 		auto pathParts = uri.sPath.SplitDelimit(separators);
+		pathParts.SetFixedLength(false);
+		pathParts.AddAt(0, "~");
+
 		if (subFolder)
 			pathParts += LString(subFolder).SplitDelimit(separators);
 		for (int i=0; i<pathParts.Length(); i++)
+		{
 			if (pathParts[i] == ".")
 			{
 				pathParts.DeleteAt(i--, true);
@@ -420,10 +416,13 @@ public:
 				pathParts.DeleteAt(i--, true);
 				pathParts.DeleteAt(i--, true);
 			}
-		pathParts.SetFixedLength(false);
-		pathParts.AddAt(0, "~");
-
-		return LString("/").Join(pathParts);
+			// printf("cur=%s\n", sep.Join(pathParts).Get());
+		}
+		
+		LString prefix = pathParts[0] == "~" ? LString() : sep;
+		auto finalPath = prefix + sep.Join(pathParts);
+		printf("RemoteRoot=%s\n", finalPath.Get());
+		return finalPath;
 	}
 
 	bool ReadFolder(const char *Path, std::function<void(LDirectory*)> results) override
@@ -471,7 +470,7 @@ public:
 		return true;
 	}
 
-	bool FindInFiles(FindParams *params, LStream *results)
+	bool FindInFiles(FindParams *params, LStream *results) override
 	{
 		if (!params || !results)
 			return false;
@@ -532,7 +531,7 @@ public:
 		return true;
 	}
 
-	bool Write(const char *Path, LString Data, std::function<void(LError)> result)
+	bool Write(const char *Path, LString Data, std::function<void(LError)> result) override
 	{
 		if (!Path)
 			return false;
@@ -623,7 +622,7 @@ public:
 		return true;
 	}
 
-	int Main()
+	int Main() override
 	{
 		while (!IsCancelled())
 		{
@@ -665,7 +664,7 @@ public:
 
 	LString GetBasePath() override { return folder; }
 
-	bool ReadFolder(const char *Path, std::function<void(LDirectory*)> results)
+	bool ReadFolder(const char *Path, std::function<void(LDirectory*)> results) override
 	{
 		LDirectory dir;
 		if (!dir.First(Path))
@@ -675,7 +674,7 @@ public:
 		return true;
 	}
 
-	bool SearchFileNames(const char *searchTerms, std::function<void(LArray<LString>&)> results)
+	bool SearchFileNames(const char *searchTerms, std::function<void(LArray<LString>&)> results) override
 	{
 		// This could probably be threaded....
 		auto parts = LString(searchTerms).SplitDelimit();
@@ -704,7 +703,7 @@ public:
 		return true;
 	}
 
-	bool FindInFiles(FindParams *params, LStream *results)
+	bool FindInFiles(FindParams *params, LStream *results) override
 	{
 		LAssert(!"impl me");
 		return false;
@@ -731,7 +730,7 @@ public:
 		return true;
 	}
 
-	bool Write(const char *Path, LString Data, std::function<void(LError)> result)
+	bool Write(const char *Path, LString Data, std::function<void(LError)> result) override
 	{
 		if (!Path)
 		{
@@ -753,7 +752,7 @@ public:
 		return status;
 	}
 
-	bool CreateFolder(const char *path, bool createParents, std::function<void(bool)> cb)
+	bool CreateFolder(const char *path, bool createParents, std::function<void(bool)> cb) override
 	{
 		LError err(LErrorNone);
 		auto result = FileDev->CreateFolder(path, false, &err);
@@ -762,7 +761,7 @@ public:
 		return result;
 	}
 
-	bool Delete(const char *path, bool recursiveForce, std::function<void(bool)> cb)
+	bool Delete(const char *path, bool recursiveForce, std::function<void(bool)> cb) override
 	{
 		if (!path)
 			return false;
@@ -791,6 +790,24 @@ public:
 			cb(status);
 
 		return status;
+	}
+
+	void GetSysType(std::function<void(IdePlatform)> cb) override
+	{
+		if (!cb)
+			return;
+		#if defined(WINDOWS)
+			cb(PlatformWin);
+		#elif defined(MAC)
+			cb(PlatformMac);
+		#elif defined(LINUX)
+			cb(PlatformLinux);
+		#elif defined(HAIKU)
+			cb(PlatformHaiku);
+		#else
+			#error "No platform defined"
+			cb(PlatformCurrent);
+		#endif
 	}
 };
 

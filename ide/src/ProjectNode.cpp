@@ -6,6 +6,7 @@
 #include "lgi/common/Menu.h"
 #include "lgi/common/FileSelect.h"
 #include "lgi/common/Charset.h"
+#include "lgi/common/PopupNotification.h"
 
 #include "LgiIde.h"
 #include "IdeProject.h"
@@ -757,29 +758,24 @@ IdeDoc *ProjectNode::Open()
 	{
 		Processing = true;
 
-		if (IsWeb())
+		auto proj = GetProject();
+		if (auto backend = proj ? proj->GetBackend() : NULL)
 		{
-			if (sFile)
-			{
-				if (sLocalCache)
+			backend->Read(GetFullPath(),
+				[this](auto err, auto data)
 				{
-					OpenLocalCache(Doc);
-				}
-				else
-				{
-					FtpThread *t = GetFtpThread();
-					if (t)
+					if (err)
 					{
-						FtpCmd *c = new FtpCmd(FtpRead, this);
-						if (c)
-						{
-							// c->Watch = Project->GetApp()->GetFtpLog();
-							c->Uri = NewStr(sFile);
-							t->Post(c);
-						}
+						LPopupNotification::Message(GetTree()->GetWindow(),
+							LString::Fmt("Error openning '%s'\n%s",
+								GetFullPath().Get(),
+								err.ToString().Get()) );
 					}
-				}
-			}
+					else if (data)
+					{
+						
+					}
+				});
 		}
 		else
 		{		

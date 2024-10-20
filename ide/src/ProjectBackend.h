@@ -7,6 +7,8 @@ class ProjectBackend
 public:
 	virtual ~ProjectBackend() {}
 
+	virtual void GetSysType(std::function<void(IdePlatform)> cb) = 0;
+
 	// Path:
 	virtual LString GetBasePath() = 0;
 

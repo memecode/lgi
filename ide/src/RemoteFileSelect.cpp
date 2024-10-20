@@ -1,5 +1,6 @@
 #include "lgi/common/Lgi.h"
 
+#include "LgiIde.h"
 #include "RemoteFileSelect.h"
 
 #ifdef WINDOWS
@@ -18,17 +19,21 @@
 	#include <lgi/common/Box.h>
 	
 	// But in a new namespace:
-	namespace RemoteFs {
+	#define FS_NAMESPACE RemoteFs
+	namespace FS_NAMESPACE {
 		#define FILE_SELECT_CLS
 		#define FILE_SELECT_FN
 		#include "lgi/common/FileSelect.h"
 		#include "../../src/common/Lgi/FileSelect.cpp"
 	}
 #else
+	#define FS_NAMESPACE
+	#include "lgi/common/FileSelect.h"
 #endif
 
-class RemoteFileSelectSystem : public RemoteFs::IFileSelectSystem
+class RemoteFileSelectSystem : public FS_NAMESPACE::IFileSelectSystem
 {
+	char dirChar = '/';
 	ProjectBackend *backend = NULL;
 
 	LString ConvertPath(LString p)
@@ -41,6 +46,10 @@ public:
 	RemoteFileSelectSystem(ProjectBackend *be) :
 		backend(be)
 	{
+		backend->GetSysType([this](auto sys)
+		{
+			dirChar = sys == PlatformWin ? '\\' : '/';
+		});
 	}
 
 	char GetDirChar() override
@@ -78,7 +87,8 @@ public:
 
 	void ReadDir(LString path, std::function<void(LDirectory&)> cb) override
 	{
-		if (!cb) return;
+		if (!cb)
+			return;
 		backend->ReadFolder(ConvertPath(path), [this, cb](auto dir)
 		{
 			cb(*dir);
@@ -124,7 +134,7 @@ public:
 
 void RemoteFileSelect(LViewI *parent, ProjectBackend *backend, FileSelectType type, std::function<void(LString)> callback)
 {
-	auto dlg = new RemoteFs::LFileSelect(parent, new RemoteFileSelectSystem(backend));
+	auto dlg = new FS_NAMESPACE::LFileSelect(parent, new RemoteFileSelectSystem(backend));
 	
 	switch (type)
 	{

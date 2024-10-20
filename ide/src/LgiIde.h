@@ -155,6 +155,7 @@ inline const char *toString(BuildConfig c)
 // Platform stuff
 enum IdePlatform
 {
+	PlatformUnknown = -2,
 	PlatformCurrent = -1,
 	PlatformWin = 0,		// 0x1
 	PlatformLinux,			// 0x2
