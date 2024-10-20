@@ -1,6 +1,7 @@
 #ifndef _FIND_IN_FILES_H_
 #define _FIND_IN_FILES_H_
 
+#include "lgi/common/EventTargetThread.h"
 #include "History.h"
 
 enum FifSearchType
@@ -16,9 +17,9 @@ public:
 	LString Text;
 	LString Ext;
 	LString Dir;
-	bool MatchWord;
-	bool MatchCase;
-	bool SubDirs;
+	bool MatchWord = false;
+	bool MatchCase = false;
+	bool SubDirs = true;
 	LString::Array ProjectFiles;
 	
 	FindParams(const FindParams *Set = NULL)
@@ -30,10 +31,6 @@ public:
 		char Exe[MAX_PATH_LEN];
 		LMakePath(Exe, sizeof(Exe), LGetExePath(), "..");
 		Dir = Exe;
-		
-		MatchWord = false;
-		MatchCase = false;
-		SubDirs = true;
 		
 		if (Set)
 			*this = *Set;
@@ -62,13 +59,13 @@ public:
 
 class FindInFiles : public LDialog
 {
-	AppWnd *App;
-	LHistory *TypeHistory;
-	LHistory *FolderHistory;
-	bool OwnParams;
+	class AppWnd *App = NULL;
+	LHistory *TypeHistory = NULL;
+	LHistory *FolderHistory = NULL;
+	bool OwnParams = false;
 
 public:
-	FindParams *Params;
+	FindParams *Params = NULL;
 	
 	FindInFiles(AppWnd *app, FindParams *params = NULL);
 	~FindInFiles();

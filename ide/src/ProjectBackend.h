@@ -1,23 +1,10 @@
 #pragma once
 
+#include "IdeFindInFiles.h"
+
 class ProjectBackend
 {
 public:
-	struct FindParams
-	{
-		LString term;
-		LString::Array fileTypes;
-		LString subFolder;
-		bool matchWord = false;
-		bool matchCase = false;
-	};
-	struct Result
-	{
-		LString file;
-		int line;
-		LString preview;
-	};
-
 	virtual ~ProjectBackend() {}
 
 	// Path:
@@ -33,7 +20,7 @@ public:
 
 	// Seaching:
 	virtual bool SearchFileNames(const char *searchTerms, std::function<void(LArray<LString>&)> results) = 0;
-	virtual bool FindInFiles(FindParams &params, std::function<void(LArray<Result>&)> results) = 0;
+	virtual bool FindInFiles(FindParams *params, LStream *results) = 0;
 };
 
 extern LAutoPtr<ProjectBackend> CreateBackend(LView *parent, LString uri, LStream *log);

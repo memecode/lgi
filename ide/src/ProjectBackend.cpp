@@ -471,26 +471,21 @@ public:
 		return true;
 	}
 
-	bool FindInFiles(FindParams &params, std::function<void(LArray<Result>&)> results)
+	bool FindInFiles(FindParams *params, LStream *results)
 	{
-		if (!params.term || !results)
+		if (!params || !results)
 			return false;
 
 		Auto lck(this, _FL);
-		work.Add( [this, results, params]()
+		work.Add( [this, results, params = new FindParams(params)]()
 		{
-			auto root = RemoteRoot(params.subFolder);
 			auto args = LString::Fmt("grep -R \"%s\" \"%s\"",
-				params.term.Get(),
-				root.Get());
-
+				params->Text.Get(),
+				params->Dir.Get());
+			results->Print("%s\n", args.Get());
 			auto result = Cmd(args + "\n");
-			LArray<LString> lines = TrimContent(result).SplitDelimit("\r\n");
-			app->RunCallback( [results, lines]() mutable
-				{
-					// Parse lines into Result structs
-					LAssert(!"impl me");
-				});
+			auto output = TrimContent(result);
+			results->Write(output);
 		} );
 
 		return true;
@@ -709,8 +704,9 @@ public:
 		return true;
 	}
 
-	bool FindInFiles(FindParams &params, std::function<void(LArray<Result>&)> results)
+	bool FindInFiles(FindParams *params, LStream *results)
 	{
+		LAssert(!"impl me");
 		return false;
 	}
 

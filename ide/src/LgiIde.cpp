@@ -4150,7 +4150,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				auto p = RootProject();
 				if (p)
 				{
-					LAutoString Base = p->GetBasePath();
+					auto Base = p->GetBasePath();
 					if (Base)
 						Dlg->Params->Dir = Base;
 				}
@@ -4179,7 +4179,17 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 					d->Finder->Stop();
 					
 					if (d->FindParameters->Text)
-						d->Finder->PostEvent(FindInFilesThread::M_START_SEARCH, (LMessage::Param) new FindParams(d->FindParameters));
+					{
+						if (auto backend = p->GetBackend())
+						{
+							backend->FindInFiles(d->FindParameters, GetFindLog());
+							PostThreadEvent(d->AppHnd, M_SELECT_TAB, AppWnd::FindTab);
+						}
+						else // local find in the files:
+						{
+							d->Finder->PostEvent(FindInFilesThread::M_START_SEARCH, (LMessage::Param) new FindParams(d->FindParameters));
+						}
+					}
 				});
 			}
 			break;
@@ -4830,6 +4840,11 @@ LStream *AppWnd::GetOutputLog()
 LStream *AppWnd::GetBuildLog()
 {
 	return d->Output->Txt[AppWnd::BuildTab];
+}
+
+LStream *AppWnd::GetFindLog()
+{
+	return d->Output->Txt[AppWnd::FindTab];
 }
 
 LStream *AppWnd::GetDebugLog()

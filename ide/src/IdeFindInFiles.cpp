@@ -11,6 +11,7 @@
 
 #include "LgiIde.h"
 #include "IdeFindInFiles.h"
+#include "RemoteFileSelect.h"
 
 #define DEBUG_HIST		0
 #define DEBUG_SEARCH	0
@@ -18,9 +19,6 @@
 /////////////////////////////////////////////////////////////////////////////////////
 FindInFiles::FindInFiles(AppWnd *app, FindParams *params)
 {
-	TypeHistory = 0;
-	FolderHistory = 0;
-
 	SetParent(App = app);
 	
 	if (params)
@@ -138,28 +136,28 @@ void SerializeHistory(LHistory *h, const char *opt, LOptionsFile *p, bool Write)
 
 void FindInFiles::OnCreate()
 {
-	if (Params)
+	if (!Params)
+		return;
+
+	SetCtrlValue(IDC_ENTIRE_SOLUTION, Params->Type == FifSearchSolution);
+	SetCtrlValue(IDC_SEARCH_DIR, Params->Type == FifSearchDirectory);
+
+	SetCtrlName(IDC_LOOK_FOR, Params->Text);
+	SetCtrlName(IDC_FILE_TYPES, Params->Ext);
+	SetCtrlName(IDC_DIR, Params->Dir);
+		
+	SetCtrlValue(IDC_WHOLE_WORD, Params->MatchWord);
+	SetCtrlValue(IDC_CASE, Params->MatchCase);
+	SetCtrlValue(IDC_SUB_DIRS, Params->SubDirs);
+		
+	SerializeHistory(TypeHistory,   "TypeHist",   App->GetOptions(), false);
+	SerializeHistory(FolderHistory, "FolderHist", App->GetOptions(), false);
+
+	LEdit *v;
+	if (GetViewById(IDC_LOOK_FOR, v))
 	{
-		SetCtrlValue(IDC_ENTIRE_SOLUTION, Params->Type == FifSearchSolution);
-		SetCtrlValue(IDC_SEARCH_DIR, Params->Type == FifSearchDirectory);
-
-		SetCtrlName(IDC_LOOK_FOR, Params->Text);
-		SetCtrlName(IDC_FILE_TYPES, Params->Ext);
-		SetCtrlName(IDC_DIR, Params->Dir);
-		
-		SetCtrlValue(IDC_WHOLE_WORD, Params->MatchWord);
-		SetCtrlValue(IDC_CASE, Params->MatchCase);
-		SetCtrlValue(IDC_SUB_DIRS, Params->SubDirs);
-		
-		SerializeHistory(TypeHistory,   "TypeHist",   App->GetOptions(), false);
-		SerializeHistory(FolderHistory, "FolderHist", App->GetOptions(), false);
-
-		LEdit *v;
-		if (GetViewById(IDC_LOOK_FOR, v))
-		{
-			v->Focus(true);
-			v->SelectAll();
-		}
+		v->Focus(true);
+		v->SelectAll();
 	}
 }
 
@@ -169,20 +167,35 @@ int FindInFiles::OnNotify(LViewI *v, LNotification n)
 	{
 		case IDC_SET_DIR:
 		{
-			auto s = new LFileSelect;
-			s->Parent(this);
-			s->InitialDir(GetCtrlName(IDC_DIR));
-			s->OpenFolder([this](auto s, auto ok)
+			auto proj = App->RootProject();
+			if (auto backend = proj ? proj->GetBackend() : NULL)
 			{
-				if (ok)
+				RemoteFileSelect(this, backend, SelectOpenFolder, [this](auto fn)
+					{
+						int Idx = FolderHistory->Add(fn);
+						if (Idx >= 0)
+							FolderHistory->Value(Idx);
+						else
+							SetCtrlName(IDC_DIR, fn);
+					});
+			}
+			else
+			{
+				auto s = new LFileSelect;
+				s->Parent(this);
+				s->InitialDir(GetCtrlName(IDC_DIR));
+				s->OpenFolder([this](auto s, auto ok)
 				{
-					int Idx = FolderHistory->Add(s->Name());
-					if (Idx >= 0)
-						FolderHistory->Value(Idx);
-					else
-						SetCtrlName(IDC_DIR, s->Name());
-				}
-			});
+					if (ok)
+					{
+						int Idx = FolderHistory->Add(s->Name());
+						if (Idx >= 0)
+							FolderHistory->Value(Idx);
+						else
+							SetCtrlName(IDC_DIR, s->Name());
+					}
+				});
+			}
 			break;
 		}
 		case IDC_ENTIRE_SOLUTION:
@@ -207,9 +220,11 @@ int FindInFiles::OnNotify(LViewI *v, LNotification n)
 			Params->MatchCase = GetCtrlValue(IDC_CASE);
 			Params->SubDirs = GetCtrlValue(IDC_SUB_DIRS);
 		
-			if (TypeHistory) TypeHistory->Add(Params->Ext);
+			if (TypeHistory)
+				TypeHistory->Add(Params->Ext);
 			SerializeHistory(TypeHistory,   "TypeHist",   App->GetOptions(), true);
-			if (FolderHistory) FolderHistory->Add(Params->Dir);
+			if (FolderHistory)
+				FolderHistory->Add(Params->Dir);
 			SerializeHistory(FolderHistory, "FolderHist", App->GetOptions(), true);
 			
 			EndModal(v->GetId() == IDOK);
@@ -226,18 +241,15 @@ class FindInFilesThreadPrivate
 public:
 	int AppHnd;
 	LAutoPtr<FindParams> Params;
-	bool Loop, Busy;
+	bool Loop = true, Busy = false;
 	LStringPipe Pipe;
-	int64 Last;
+	int64 Last = 0;
 };
 
 FindInFilesThread::FindInFilesThread(int AppHnd) : LEventTargetThread("FindInFiles")
 {
 	d = new FindInFilesThreadPrivate;
 	d->AppHnd = AppHnd;
-	d->Loop = true;
-	d->Busy = false;
-	d->Last = 0;
 }
 
 FindInFilesThread::~FindInFilesThread()

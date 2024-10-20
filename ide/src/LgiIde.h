@@ -312,6 +312,7 @@ public:
 	LStream *GetNetworkLog();
 	LStream *GetOutputLog();
 	LStream *GetBuildLog();
+	LStream *GetFindLog();
 	LStream *GetDebugLog();
 	void GotoReference(const char *File, int Line, bool CurIp, bool WithHistory, std::function<void(IdeDoc*)> Callback);
 	void FindSymbol(int ResultsSinkHnd, const char *Sym);

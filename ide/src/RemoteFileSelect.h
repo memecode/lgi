@@ -2,4 +2,14 @@
 
 #include "ProjectBackend.h"
 
-extern void RemoteFileSelect(LViewI *parent, ProjectBackend *backend, std::function<void(LString)> callback);
+enum FileSelectType
+{
+	SelectOpen,
+	SelectOpenFolder,
+	SelectSave,
+};
+
+extern void RemoteFileSelect(LViewI *parent,
+							ProjectBackend *backend,
+							FileSelectType type,
+							std::function<void(LString)> callback);

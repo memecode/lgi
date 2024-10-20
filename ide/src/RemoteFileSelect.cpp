@@ -122,12 +122,33 @@ public:
 	}
 };
 
-void RemoteFileSelect(LViewI *parent, ProjectBackend *backend, std::function<void(LString)> callback)
+void RemoteFileSelect(LViewI *parent, ProjectBackend *backend, FileSelectType type, std::function<void(LString)> callback)
 {
 	auto dlg = new RemoteFs::LFileSelect(parent, new RemoteFileSelectSystem(backend));
-	dlg->Open([callback](auto selectDlg, auto ok)
-		{
-			if (ok && callback)
-				callback(selectDlg->Name());
-		});
+	
+	switch (type)
+	{
+		default:
+		case SelectOpen:
+			dlg->Open([callback](auto selectDlg, auto ok)
+				{
+					if (ok && callback)
+						callback(selectDlg->Name());
+				});
+			break;
+		case SelectOpenFolder:
+			dlg->OpenFolder([callback](auto selectDlg, auto ok)
+				{
+					if (ok && callback)
+						callback(selectDlg->Name());
+				});
+			break;
+		case SelectSave:
+			dlg->Save([callback](auto selectDlg, auto ok)
+				{
+					if (ok && callback)
+						callback(selectDlg->Name());
+				});
+			break;
+	}
 }
