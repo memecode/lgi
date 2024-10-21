@@ -10,7 +10,10 @@
 #include "LgiIde.h"
 #include "IdeProject.h"
 #include "ProjectNode.h"
+#include "RemoteFileSelect.h"
 #include "resdefs.h"
+
+class ProjectSettingsDlg;
 
 const char TagSettings[]   = "Settings";
 
@@ -178,9 +181,9 @@ struct IdeProjectSettingsPriv
 	char PathBuf[MAX_PATH_LEN];
 
 public:
-	IdeProject *Project;
+	IdeProject *Project = NULL;
 	LHashTbl<IntKey<int>, SettingInfo*> Map;
-	IdeProjectSettings *Parent;
+	IdeProjectSettings *Parent = NULL;
 	LXmlTag Active;
 	LXmlTag Editing;
 	LString CurConfig;
@@ -192,7 +195,6 @@ public:
 		Active(TagSettings)
 	{
 		Parent = parent;
-		Project = NULL;
 		
 		for (SettingInfo *i = AllSettings; i->Setting; i++)
 		{
@@ -264,6 +266,7 @@ public:
 class LSettingDetail : public LLayout, public ResObject
 {
 	LTableLayout *Tbl = NULL;
+	ProjectSettingsDlg *dlg = NULL;
 	IdeProjectSettingsPriv *d = NULL;
 	SettingInfo *Setting = NULL;
 	int Flags = 0;
@@ -312,19 +315,20 @@ public:
 		return true;
 	}
 	
-	void SetPriv(IdeProjectSettingsPriv *priv)
+	void SetContext(ProjectSettingsDlg *dialog, IdeProjectSettingsPriv *priv)
 	{
+		dlg = dialog;
 		d = priv;
 	}
 	
-	void AddLine(int i, int Config)
+	void AddLine(int i, int Config, IdePlatform platform)
 	{
 		char *Path;
 		int CellY = i * 2;
 		
 		// Do label cell
 		auto *c = Tbl->GetCell(0, CellY);
-		c->Add(Ctrls[i].Text = new LTextLabel(IDC_TEXT_BASE + i, 0, 0, -1, -1, Path = d->BuildPath(Setting->Setting, Flags, PlatformCurrent, Config)));
+		c->Add(Ctrls[i].Text = new LTextLabel(IDC_TEXT_BASE + i, 0, 0, -1, -1, Path = d->BuildPath(Setting->Setting, Flags, platform, Config)));
 		
 		// Do value cell
 		c = Tbl->GetCell(0, CellY + 1);
@@ -385,7 +389,7 @@ public:
 		else LAssert(!"Unknown type?");
 	}
 	
-	void SetSetting(SettingInfo *setting, int flags)
+	void SetSetting(SettingInfo *setting, int flags, IdePlatform platform)
 	{
 		if (Setting)
 		{
@@ -441,21 +445,16 @@ public:
 			if (Setting->Flag.ConfigSpecific)
 			{
 				for (int i=0; i<d->Configs.Length(); i++)
-					AddLine(i, i);
+					AddLine(i, i, platform);
 			}
 			else
 			{
-				AddLine(0, -1);
+				AddLine(0, -1, platform);
 			}
 			
 			Tbl->InvalidateLayout();
 			Tbl->AttachChildren();
 			auto c = GetClient();
-
-			/*
-			LRect r = Tbl->Handle()->Frame();
-			printf("SettingDetail SetSetting %s id=%i r=%s\n", c.GetStr(), Tbl->GetId(), r.GetStr());
-			*/
 
 			Tbl->SetPos(c);
 			Invalidate();
@@ -464,26 +463,11 @@ public:
 	
 	void OnPosChange()
 	{
-		auto c = GetClient();
-		// printf("SettingDetail OnPosChange %s\n", c.GetStr());
-		Tbl->SetPos(c);
+		Tbl->SetPos(GetClient());
 	}
 };
 
-class LSettingDetailFactory : public LViewFactory
-{
-	LView *NewView
-	(
-		const char *Class,
-		LRect *Pos,
-		const char *Text
-	)
-	{
-		if (!stricmp(Class, "LSettingDetail"))
-			return new LSettingDetail;
-		return NULL;
-	}
-} SettingDetailFactory;
+DeclFactory(LSettingDetail)
 
 class ProjectSettingsDlg;
 class SettingItem : public LTreeItem
@@ -493,12 +477,14 @@ class SettingItem : public LTreeItem
 public:
 	SettingInfo *Setting;
 	int Flags;
+	IdePlatform platform;
 
-	SettingItem(SettingInfo *setting, int flags, ProjectSettingsDlg *dlg)
+	SettingItem(SettingInfo *setting, int flags, ProjectSettingsDlg *dlg, IdePlatform plat)
 	{
 		Setting = setting;
 		Dlg = dlg;
 		Flags = flags;
+		platform = plat;
 	}
 	
 	void Select(bool b);
@@ -510,12 +496,15 @@ class ProjectSettingsDlg : public LDialog
 	LTree *Tree = NULL;
 	LSettingDetail *Detail = NULL;
 	uint64 DefLockOut = 0;
+	int platformFlags = 0;
 
 public:
 	const char *GetClass() override { return "ProjectSettingsDlg"; }
-	ProjectSettingsDlg(LViewI *parent, IdeProjectSettingsPriv *priv)
+	
+	ProjectSettingsDlg(LViewI *parent, IdeProjectSettingsPriv *priv, int platforms)
 	{
 		d = priv;
+		platformFlags = platforms;
 		SetParent(parent);
 		if (LoadFromResource(IDD_PROJECT_SETTINGS))
 		{
@@ -541,30 +530,37 @@ public:
 						Tree->Insert(SectionItem);
 					}
 					
-					LTreeItem *Item = new LTreeItem();
+					auto Item = new LTreeItem();
 					Item->SetText(i->Name);
 					SectionItem->Insert(Item);
 					SectionItem->Expanded(true);
 
 					if (!i->Flag.PlatformSpecific)
 					{
-						SettingItem *All = new SettingItem(i, 0, this);
+						SettingItem *All = new SettingItem(i, 0, this, PlatformUnknown);
 						All->SetText(sAllPlatforms);
 						Item->Insert(All);
 					}
 
 					if (!i->Flag.CrossPlatform)
 					{
-						SettingItem *Platform = new SettingItem(i, SF_PLATFORM_SPECIFC, this);
-						Platform->SetText(sCurrentPlatform);
-						Item->Insert(Platform);
+						for (int n=PlatformWin; n<PlatformMax; n++)
+						{
+							if (platformFlags & (1<<n))
+							{
+								auto plat = (IdePlatform)n;
+								auto item = new SettingItem(i, SF_PLATFORM_SPECIFC, this, plat);
+								item->SetText(ToString(plat));
+								Item->Insert(item);
+							}
+						}
 					}
 				}
 			}
 			
 			if (GetViewById(IDC_DETAIL, Detail))
 			{
-				Detail->SetPriv(d);
+				Detail->SetContext(this, d);
 			}
 			
 			LView *Search;
@@ -661,8 +657,6 @@ public:
 			}
 		}
 		
-		printf("SetDefaults() %p\n", LgiProj);
-	
 		#ifdef LINUX
 		
 		if (LgiProj)
@@ -696,8 +690,7 @@ public:
 		{
 			case IDC_BROWSE:
 			{
-				const char *s = GetCtrlName(IDC_PATH);
-				if (s)
+				if (auto s = GetCtrlName(IDC_PATH))
 					LBrowseToFile(s);
 				break;
 			}
@@ -724,7 +717,10 @@ public:
 			{
 				if (LCurrentTime() - DefLockOut < 500)
 					break;
-				Detail->SetSetting(NULL, 0);
+
+				// Save any changes
+				Detail->SetSetting(NULL, 0, PlatformCurrent);
+				
 				EndModal(1);
 				break;
 			}
@@ -761,34 +757,49 @@ public:
 					LEdit *e;
 					if (GetViewById(IDC_EDIT_BASE + BrowseIdx, e))
 					{
-						LFileSelect *s = new LFileSelect;
-						s->Parent(this);
-
-						LFile::Path Path(d->Project->GetBasePath());
-						LFile::Path Cur(e->Name());
-						Path.Join(Cur.GetFull());
-						Path.PopLast();
-						if (Path.Exists())
-							s->InitialDir(Path);
-
-						auto Process = [this, e](LFileSelect *s, bool ok)
+						if (auto backend = d->Project->GetBackend())
 						{
-							if (!ok)
-								return;
-							const char *Base = GetCtrlName(IDC_PATH);
-							LString Rel;
-							if (Base)
-							{
-								LFile::Path p = Base;
-								Rel = LMakeRelativePath(p / "..", s->Name());
-							}
-							e->Name(Rel ? Rel.Get() : s->Name());
-						};
-						
-						if (BrowseFolder)
-							s->OpenFolder(Process);
+							// Show remote file selector
+							RemoteFileSelect(this,
+											backend,
+											BrowseFolder ? SelectOpenFolder : SelectOpen,
+											[this, e, backend](auto fn)
+											{
+												auto rel = backend->MakeRelative(fn);
+												e->Name(rel ? rel : fn);
+											});
+						}
 						else
-							s->Open(Process);
+						{
+							LFileSelect *s = new LFileSelect;
+							s->Parent(this);
+
+							LFile::Path Path(d->Project->GetBasePath());
+							LFile::Path Cur(e->Name());
+							Path.Join(Cur.GetFull());
+							Path.PopLast();
+							if (Path.Exists())
+								s->InitialDir(Path);
+
+							auto Process = [this, e](LFileSelect *s, bool ok)
+							{
+								if (!ok)
+									return;
+								const char *Base = GetCtrlName(IDC_PATH);
+								LString Rel;
+								if (Base)
+								{
+									LFile::Path p = Base;
+									Rel = LMakeRelativePath(p / "..", s->Name());
+								}
+								e->Name(Rel ? Rel.Get() : s->Name());
+							};
+						
+							if (BrowseFolder)
+								s->OpenFolder(Process);
+							else
+								s->Open(Process);
+						}
 
 						return 0; // no default btn handling.
 					}
@@ -802,7 +813,7 @@ public:
 	
 	void OnSelect(SettingItem *si)
 	{
-		Detail->SetSetting(si->Setting, si->Flags);
+		Detail->SetSetting(si->Setting, si->Flags, si->platform);
 	}
 };
 
@@ -971,13 +982,13 @@ void IdeProjectSettings::InitAllSettings(bool ClearCurrent)
 	}
 }
 
-void IdeProjectSettings::Edit(LViewI *parent, std::function<void()> OnChanged)
+void IdeProjectSettings::Edit(LViewI *parent, int platformFlags, std::function<void()> OnChanged)
 {
 	// Copy all the settings to the edit tag...
 	d->Editing.Copy(d->Active, true);
 	
 	// Show the dialog...
-	auto *Dlg = new ProjectSettingsDlg(parent, d);
+	auto *Dlg = new ProjectSettingsDlg(parent, d, platformFlags);
 	Dlg->DoModal([this,OnChanged](auto dlg, auto code)
 	{
 		if (code)

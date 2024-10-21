@@ -981,7 +981,7 @@ void LFileSelectDlg::OnCreate()
 		if (auto t = new LFileType)
 		{
 			t->Description("All Files");
-			t->Extension(LGI_ALL_FILES);
+			t->Extension("*");
 			d->Types.Insert(t);
 		}
 	}
@@ -2014,31 +2014,38 @@ bool LFolderList::OnKey(LKey &k)
 		{
 			if (k.Down() && GetWindow())
 			{
-				LFolderItem *Sel = dynamic_cast<LFolderItem*>(GetSelected());
-				if (Sel)
+				if (auto Sel = dynamic_cast<LFolderItem*>(GetSelected()))
 				{
 					if (Sel->IsDir)
 					{
-						auto Cur = GetWindow()->GetCtrlName(IDC_PATH);
-						if (Cur)
+						// Enter the directory and display the content
+						if (auto Cur = GetWindow()->GetCtrlName(IDC_PATH))
 						{
-							char Path[256];
-							LMakePath(Path, sizeof(Path), Cur, Sel->GetText(0));
-							if (LDirExists(Path))
+							auto Leaf = Sel->GetText(0);
+							if (auto sys = Dlg->d->GetSystem())
 							{
-								GetWindow()->SetCtrlName(IDC_PATH, Path);
-								Dlg->OnFolder();
+								if (auto Path = sys->PathJoin(Cur, Leaf))
+								{
+									GetWindow()->SetCtrlName(IDC_PATH, Path);
+									Dlg->OnFolder();
+								}
+							}
+							else
+							{
+								char Path[MAX_PATH_LEN];
+								LMakePath(Path, sizeof(Path), Cur, Leaf);
+								if (LDirExists(Path))
+								{
+									GetWindow()->SetCtrlName(IDC_PATH, Path);
+									Dlg->OnFolder();
+								}
 							}
 						}
 					}
-					else
+					else if (auto Ok = GetWindow()->FindControl(IDOK))
 					{
-						LViewI *Ok = GetWindow()->FindControl(IDOK);
-						if (Ok)
-						{
-							GetWindow()->SetCtrlName(IDC_FILE, Sel->GetText(0));
-							GetWindow()->OnNotify(Ok, LNotification(k));
-						}
+						GetWindow()->SetCtrlName(IDC_FILE, Sel->GetText(0));
+						GetWindow()->OnNotify(Ok, LNotification(k));
 					}
 				}
 			}
@@ -2155,9 +2162,9 @@ void LFolderList::OnFolder()
 		return;
 
 	auto Path = Dlg->Ctrl2->Name();
-	if (Dlg->d->System)
+	if (auto sys = Dlg->d->GetSystem())
 	{
-		Dlg->d->System->ReadDir(Path, [this](auto &dir)
+		sys->ReadDir(Path, [this](auto &dir)
 			{
 				OnDir(dir);
 			});

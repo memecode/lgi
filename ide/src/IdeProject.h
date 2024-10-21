@@ -209,7 +209,7 @@ public:
 	
 	// Settings
 	IdeProjectSettings *GetSettings();
-	void EditSettings();
+	void EditSettings(int platformFlags);
 
 	// Impl
 	const char *GetText(int Col);

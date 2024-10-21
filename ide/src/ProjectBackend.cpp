@@ -213,6 +213,14 @@ public:
 	const char *GetClass() const { return "SshBackend"; }
 	LString GetBasePath() override { return RemoteRoot(); }
 
+	LString MakeRelative(LString absPath)
+	{
+		auto base = RemoteRoot();
+		if (absPath.Find(base) == 0)
+			return LString(".") + absPath(base.Length(), -1);
+		return LString();
+	}
+
 	void OnConnected()
 	{
 		GetSysType(NULL);
@@ -273,14 +281,16 @@ public:
 			bool IsHidden()   const { return name(0)  == '.'; }
 		};
 		LArray<TEntry> entries;
-		size_t pos = 0;
+		ssize_t pos = 0;
 		LString BasePath;
 		LString Cache;
+		LStream *Log = NULL;
 
-		bool Ok() const { return pos < entries.Length(); }
+		bool Ok() const { return pos < (ssize_t)entries.Length(); }
 
 	public:
-		SshDir(const char *basePath, LArray<LString> &lines)
+		SshDir(const char *basePath, LArray<LString> &lines, LStream *log) :
+			Log(log)
 		{
 			BasePath = basePath;
 
@@ -302,6 +312,15 @@ public:
 			}
 			for (auto &line: lines)
 			{
+				if (Log)
+				{
+					if (line.Find("13462126") > 0)
+					{
+						int asd=0;
+					}
+					Log->Print("Line: %s\n", line.Get());
+				}
+
 				#define COL(idx) line(cols[idx].Start, cols[idx].End())
 				auto &e = entries.New();
 				e.perms = COL(0);
@@ -437,7 +456,12 @@ public:
 		{
 			auto ls = Cmd(LString::Fmt("ls -lan %s\n", path.Get()));
 			auto lines = ls.SplitDelimit("\r\n").Slice(2, -2);
-			app->RunCallback( [dir = new SshDir(path, lines), results]() mutable
+			
+			bool debug = path.Equals("~/code/lgi/trunk/ide/");
+			if (debug)
+				log->Print("ReadFolder %s\n", path.Get());
+			
+			app->RunCallback( [dir = new SshDir(path, lines, debug ? log : NULL), results]() mutable
 				{
 					results(dir);
 					delete dir;
@@ -674,6 +698,11 @@ public:
 	}
 
 	LString GetBasePath() override { return folder; }
+
+	LString MakeRelative(LString absPath)
+	{
+		return LMakeRelativePath(folder, absPath);
+	}
 
 	bool ReadFolder(const char *Path, std::function<void(LDirectory*)> results) override
 	{

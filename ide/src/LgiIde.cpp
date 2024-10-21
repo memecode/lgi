@@ -3357,7 +3357,7 @@ IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bo
 	if (!DepParent &&
 		LAppInst->GetOption("projectSettings"))
 	{
-		p->EditSettings();
+		p->EditSettings(GetPlatform());
 	}
 
 	#if 0 // for testing...

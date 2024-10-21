@@ -52,6 +52,13 @@ const char *PlatformNames[] =
 	0
 };
 
+extern const char *ToString(IdePlatform p)
+{
+	if (p < PlatformWin || p >= PlatformMax)
+		return NULL;
+	return PlatformNames[p];
+}
+
 int PlatformCtrlId[] =
 {
 	IDC_WIN32,
@@ -3594,7 +3601,7 @@ void IdeProject::OnMouseClick(LMouse &m)
 			}
 			case IDM_SETTINGS:
 			{
-				EditSettings();
+				EditSettings(d->App->GetPlatform());
 				break;
 			}
 			case IDM_INSERT_DEP:
@@ -3821,9 +3828,9 @@ void IdeProject::ImportDsp(const char *File)
 	}
 }
 
-void IdeProject::EditSettings()
+void IdeProject::EditSettings(int platformFlags)
 {
-	d->Settings.Edit(Tree, [this]()
+	d->Settings.Edit(Tree, platformFlags, [this]()
 	{
 		SetDirty();
 	});

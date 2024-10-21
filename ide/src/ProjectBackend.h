@@ -11,6 +11,7 @@ public:
 
 	// Path:
 	virtual LString GetBasePath() = 0;
+	virtual LString MakeRelative(LString absPath) = 0;
 
 	// Reading and writing:
 	virtual bool ReadFolder(const char *Path, std::function<void(LDirectory*)> results) = 0;

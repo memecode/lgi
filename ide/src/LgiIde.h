@@ -169,6 +169,7 @@ enum IdePlatform
 #define PLATFORM_ALL			(PLATFORM_WIN32|PLATFORM_LINUX|PLATFORM_MAC|PLATFORM_HAIKU)
 extern IdePlatform PlatformFlagsToEnum(int flags);
 extern LString PlatformFlagsToStr(int flags);
+extern const char *ToString(IdePlatform p);
 
 #if defined(_WIN32)
 #define PLATFORM_CURRENT		PLATFORM_WIN32

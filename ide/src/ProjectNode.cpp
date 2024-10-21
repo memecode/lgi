@@ -840,7 +840,7 @@ IdeDoc *ProjectNode::Open()
 
 				Doc->SetProject(Project);
 
-				if (auto backend = Project ? Project->GetBackend() : NULL)
+				if (auto backend = Project->GetBackend())
 				{
 					auto path = GetFullPath();
 					backend->Read(path,
@@ -857,6 +857,7 @@ IdeDoc *ProjectNode::Open()
 							{
 								OnDocOpen(Doc, Doc->OpenData(data));
 							}
+							else LAssert(0);
 						});
 				}
 				else

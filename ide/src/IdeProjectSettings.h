@@ -53,7 +53,7 @@ public:
 	bool DeleteConfig(const char *Config);
 	
 	// UI
-	void Edit(LViewI *parent, std::function<void()> OnChanged);
+	void Edit(LViewI *parent, int platformFlags, std::function<void()> OnChanged);
 
 	// Serialization
 	bool Serialize(LXmlTag *Parent, bool Write);
