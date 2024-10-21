@@ -31,11 +31,11 @@ ifeq ($(Build),Debug)
 		`pkg-config --libs gtk+-3.0`
 	Inc =  \
 		-I./include/lgi/linux/Gtk \
-		-I./include \
-		-I./private/common \
 		-I./private/linux \
+		-I./private/common \
 		-I../../../../../usr/include/libayatana-appindicator3-0.1 \
 		`pkg-config --cflags gstreamer-1.0` \
+		-I./include \
 		`pkg-config --cflags gtk+-3.0` \
 		-I./include/lgi/linux
 else
@@ -50,28 +50,30 @@ else
 		`pkg-config --libs gtk+-3.0`
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
+		-I./private/common \
 		-I./include \
 		`pkg-config --cflags gstreamer-1.0` \
-		-I./private/common \
 		-I../../../../../usr/include/libayatana-appindicator3-0.1 \
 		-I./include/lgi/linux/Gtk \
-		-I./private/linux \
-		-I./include/lgi/linux
+		-I./include/lgi/linux \
+		-I./private/linux
 endif
 
 # Dependencies
-Source =	src/linux/Lgi/App.cpp \
-			src/linux/General/ShowFileProp_Linux.cpp \
+Source =	src/linux/General/File.cpp \
+			src/common/Lgi/MenuCommon.cpp \
+			src/posix/SubProcess.cpp \
+			src/common/Resource/LgiRes.cpp \
+			src/common/Text/TextConvert.cpp \
+			src/common/Widgets/ProgressDlg.cpp \
 			src/common/Lgi/DragAndDropCommon.cpp \
-			src/common/General/DateTime.cpp \
+			src/linux/Lgi/DragAndDrop.cpp \
+			src/linux/General/ShowFileProp_Linux.cpp \
+			src/common/Resource/Res.cpp \
 			src/common/General/Containers.cpp \
 			src/common/General/Properties.cpp \
 			src/common/General/FileCommon.cpp \
-			src/common/General/ExeCheck.cpp \
-			src/linux/General/File.cpp \
 			src/linux/Lgi/General.cpp \
-			src/linux/Lgi/DragAndDrop.cpp \
-			src/common/General/TimeZone.cpp \
 			src/linux/Lgi/View.cpp \
 			src/linux/Lgi/Window.cpp \
 			src/linux/Gtk/LgiWidget.cpp \
@@ -82,10 +84,10 @@ Source =	src/linux/Lgi/App.cpp \
 			src/linux/General/Mem.cpp \
 			src/linux/Lgi/Menu.cpp \
 			src/common/Gdc2/Tools/ColourReduce.cpp \
-			src/common/Lgi/MenuCommon.cpp \
-			src/posix/SubProcess.cpp \
-			src/common/Resource/LgiRes.cpp \
-			src/common/Resource/Res.cpp \
+			src/common/General/ExeCheck.cpp \
+			src/common/General/TimeZone.cpp \
+			src/common/General/DateTime.cpp \
+			src/linux/Lgi/App.cpp \
 			src/common/Skins/Gel/Gel.cpp \
 			src/common/Gdc2/Path/Path.cpp \
 			src/common/Lgi/MemStream.cpp \
@@ -142,8 +144,6 @@ Source =	src/linux/Lgi/App.cpp \
 			src/common/Lgi/Rand.cpp \
 			src/common/Text/String.cpp \
 			src/common/Text/Token.cpp \
-			src/common/Text/TextConvert.cpp \
-			src/common/Widgets/ProgressDlg.cpp \
 			src/common/Text/Unicode.cpp \
 			src/common/Text/Utf8.cpp \
 			src/common/Text/XmlTree.cpp \
@@ -216,19 +216,19 @@ clean :
 	@echo Cleaned $(BuildDir)
 
 VPATH=$(BuildDir) \
-	./src/common/Gdc2/Font \
-	./src/common/Lgi \
+	./src/common/Gdc2/Tools \
 	./src/common/General \
+	./src/common/Skins/Gel \
 	./src/linux/Lgi \
 	./src/linux/General \
-	./src/common/Gdc2/Tools \
-	./src/common/Gdc2/Path \
-	./src/common/Skins/Gel \
-	./src/linux/Gtk \
-	./src/common/Resource \
-	./src/posix \
-	./src/common/Gdc2 \
 	./src/common/Hash/sha1 \
+	./src/common/Resource \
+	./src/common/Lgi \
+	./src/linux/Gtk \
+	./src/posix \
+	./src/common/Gdc2/Path \
+	./src/common/Gdc2/Font \
+	./src/common/Gdc2 \
 	./src/common/Net \
 	./src/common/Gdc2/Filters \
 	./src/common/Widgets \
