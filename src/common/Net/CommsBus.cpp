@@ -6,7 +6,7 @@
 #define DEFAULT_COMMS_PORT	45454
 #define RETRY_SERVER		-2
 
-#if 0
+#if 1
 #define LOG(...)			printf(__VA_ARGS__)
 #else
 #define LOG(...)			if (log) log->Print(__VA_ARGS__)
@@ -166,15 +166,17 @@ struct LCommsBusPriv :
 {
 	bool isServer = false;
 	LSocket listen;
+	int uid = -1;
 	LStream *log = NULL;
 	
 	// Lock before using
 	LArray< Block::Auto > writeQue;
 	LArray< Endpoint > endpoints;
 	
-	LCommsBusPriv(LStream *Log) :
+	LCommsBusPriv(int Uid, LStream *Log) :
 		LThread("LCommsBusPriv.Thread"),
 		LMutex("LCommsBusPriv.Lock"),
+		uid(Uid),
 		log(Log)
 	{
 		Run();
@@ -450,14 +452,19 @@ struct LCommsBusPriv :
 	}
 };
 	
-LCommsBus::LCommsBus(LStream *log)
+LCommsBus::LCommsBus(int uid, LStream *log)
 {
-	d = new LCommsBusPriv(log);
+	d = new LCommsBusPriv(uid, log);
 }
 
 LCommsBus::~LCommsBus()
 {
 	delete d;
+}
+
+bool LCommsBus::IsServer() const
+{
+	return d->isServer;
 }
 
 bool LCommsBus::SendMsg(LString endPoint, LString data)
@@ -505,4 +512,80 @@ bool LCommsBus::Listen(LString endPoint, std::function<void(LString)> cb)
 			d->Que(blk);
 	}
 	return true;
+}
+
+// Unit testing:
+static LAutoPtr<LCommsBus> CreateBus(int uid, bool waitServer = false)
+{
+	LAutoPtr<LCommsBus> bus(new LCommsBus(uid));
+	while (waitServer && !bus->IsServer())
+		LSleep(1);
+	return bus;
+}
+
+static void WaitResult(bool &result, int timeMs)
+{
+	auto start = LCurrentTime();
+	while (!result)
+	{
+		auto now = LCurrentTime();
+		if (now - start > timeMs)
+			break;
+		LSleep(10);
+	}
+}
+
+static bool ClientToServer()
+{
+	auto srv = CreateBus(1, true);
+	auto cli = CreateBus(2);
+	bool result = false;
+
+	if (srv && cli)
+	{
+		auto ep = "Test.ClientToServer";
+		auto testData = "testData";
+		
+		cli->Listen(ep, [&](auto data)
+		{
+			if (data.Equals(testData))
+				result = true;
+		});
+		
+		srv->SendMsg(ep, testData);
+		WaitResult(result, 1000);
+	}
+
+	return result;
+}
+
+static bool ServerToClient()
+{
+	auto srv = CreateBus(1, true);
+	auto cli = CreateBus(2);
+	bool result = false;
+
+	if (srv && cli)
+	{
+		auto ep = "Test.ServerToClient";
+		auto testData = "testData";
+		
+		srv->Listen(ep, [&](auto data)
+		{
+			if (data.Equals(testData))
+				result = true;
+		});
+		
+		cli->SendMsg(ep, testData);
+		WaitResult(result, 1000);
+	}
+
+	return result;
+}
+
+bool LCommsBus::UnitTests()
+{
+	bool status = ClientToServer();	
+	status &= ServerToClient();
+	return status;
 }
