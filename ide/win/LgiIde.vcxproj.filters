@@ -55,6 +55,9 @@
     <Filter Include="Source Files\RemoteFileSelect">
       <UniqueIdentifier>{f761efb0-c45f-46cf-99d0-67022566f91b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Lgi\CommsBus">
+      <UniqueIdentifier>{f6ebf06e-cd5f-4b7c-b6a6-aff5a8735d4c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Debugger.h">
@@ -125,6 +128,9 @@
     </ClInclude>
     <ClInclude Include="..\resources\resdefs.h">
       <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\lgi\common\CommsBus.h">
+      <Filter>Lgi\CommsBus</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -241,6 +247,9 @@
     </ClCompile>
     <ClCompile Include="..\src\RemoteFileSelect.cpp">
       <Filter>Source Files\RemoteFileSelect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\Net\CommsBus.cpp">
+      <Filter>Lgi\CommsBus</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

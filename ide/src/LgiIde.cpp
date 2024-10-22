@@ -1924,7 +1924,7 @@ AppWnd::AppWnd()
 	LFinishXWindowsStartup(this);
 	#endif
 	
-	LCommsBus::UnitTests();
+	LCommsBus::UnitTests(GetBuildLog());
 }
 
 AppWnd::~AppWnd()

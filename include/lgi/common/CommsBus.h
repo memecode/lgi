@@ -5,12 +5,13 @@ class LCommsBus
 	struct LCommsBusPriv *d;
 	
 public:
-	LCommsBus(int Uid, LStream *log = NULL);
+	LCommsBus(LStream *log = NULL);
 	~LCommsBus();
 	
 	bool IsServer() const;
+	bool IsRunning() const;
 	bool SendMsg(LString endPoint, LString msg);
 	bool Listen(LString endPoint, std::function<void(LString)> cb);
 
-	static bool UnitTests();
+	static void UnitTests(LStream *log);
 };

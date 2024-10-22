@@ -108,6 +108,7 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\include\lgi\common\CommsBus.h" />
     <ClInclude Include="..\..\include\lgi\common\EventTargetThread.h" />
     <ClInclude Include="..\..\include\lgi\common\Scripting.h" />
     <ClInclude Include="..\..\include\lgi\common\TimeZoneInfo.h" />
@@ -138,6 +139,7 @@
     <ClCompile Include="..\..\src\common\Coding\ScriptLibrary.cpp" />
     <ClCompile Include="..\..\src\common\Coding\ScriptVM.cpp" />
     <ClCompile Include="..\..\src\common\Gdc2\Filters\Png.cpp" />
+    <ClCompile Include="..\..\src\common\Net\CommsBus.cpp" />
     <ClCompile Include="..\..\src\common\Net\Ftp.cpp" />
     <ClCompile Include="..\..\src\common\Net\Http.cpp" />
     <ClCompile Include="..\..\src\common\Net\OpenSSLSocket.cpp" />
