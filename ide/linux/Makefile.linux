@@ -31,13 +31,13 @@ ifeq ($(Build),Debug)
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I../private/common \
-		-I../include/lgi/linux \
-		`pkg-config --cflags gtk+-3.0` \
 		-I./src \
-		-I../include/lgi/linux/Gtk \
+		-I../include \
 		-I./resources \
-		-I../include
+		-I../include/lgi/linux/Gtk \
+		`pkg-config --cflags gtk+-3.0` \
+		-I../private/common \
+		-I../include/lgi/linux
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
@@ -50,60 +50,61 @@ else
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I../include/lgi/linux \
-		-I../include/lgi/linux/Gtk \
+		-I./src \
 		-I./resources \
 		`pkg-config --cflags gtk+-3.0` \
-		-I./src \
-		-I../private/common \
-		-I../include
+		-I../include \
+		-I../include/lgi/linux \
+		-I../include/lgi/linux/Gtk \
+		-I../private/common
 endif
 
 # Dependencies
-Source =	../src/common/Lgi/About.cpp \
-			src/DocEditStyling.cpp \
-			src/FtpThread.cpp \
-			src/WebFldDlg.cpp \
-			../src/common/Coding/ParseCpp.cpp \
-			../src/common/Net/Ftp.cpp \
-			src/IdeProjectSettings.cpp \
-			src/MissingFiles.cpp \
-			src/NewProjectFromTemplate.cpp \
-			src/ProjectBackend.cpp \
-			src/ProjectNode.cpp \
+Source =	src/IdeDoc.cpp \
+			../src/common/Text/TextConvert.cpp \
 			src/RemoteFileSelect.cpp \
 			src/IdeFindInFiles.cpp \
 			src/FindSymbol.cpp \
-			src/JavascriptParser.cpp \
-			../src/common/Text/HtmlCommon.cpp \
-			src/PythonParser.cpp \
-			src/SimpleCppParser.cpp \
-			src/SysCharSupport.cpp \
-			../src/common/Coding/LexCpp.cpp \
-			../src/common/Net/OpenSSLSocket.cpp \
-			src/IdeCommon.cpp \
-			src/MemDumpViewer.cpp \
-			src/SpaceTabConv.cpp \
+			../src/common/Net/CommsBus.cpp \
 			../src/common/Text/Html.cpp \
-			../src/common/Text/HtmlParser.cpp \
-			../src/common/Text/Homoglyphs/Homoglyphs.cpp \
 			../src/common/Text/TextView4.cpp \
 			../src/common/Text/DocView.cpp \
 			../src/common/Net/Http.cpp \
 			../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
 			../src/common/Lgi/LgiMain.cpp \
 			../src/common/Lgi/Mdi.cpp \
-			../src/common/Text/TextConvert.cpp \
 			../src/common/Gdc2/Filters/Png.cpp \
+			src/IdeCommon.cpp \
+			src/MemDumpViewer.cpp \
+			src/SpaceTabConv.cpp \
 			src/LgiUtils.cpp \
-			src/History.cpp \
-			src/LgiIde.cpp \
-			src/AddFtpFile.cpp \
-			src/Debugger.cpp \
-			src/IdeDoc.cpp \
 			src/DocEdit.cpp \
+			src/DocEditStyling.cpp \
 			src/DebugContext.cpp \
-			src/IdeProject.cpp
+			src/JavascriptParser.cpp \
+			src/PythonParser.cpp \
+			src/SimpleCppParser.cpp \
+			src/LgiIde.cpp \
+			../src/common/Text/HtmlCommon.cpp \
+			src/NewProjectFromTemplate.cpp \
+			src/ProjectNode.cpp \
+			src/IdeProject.cpp \
+			src/FtpThread.cpp \
+			src/MissingFiles.cpp \
+			src/SysCharSupport.cpp \
+			../src/common/Coding/LexCpp.cpp \
+			../src/common/Net/OpenSSLSocket.cpp \
+			../src/common/Text/HtmlParser.cpp \
+			../src/common/Text/Homoglyphs/Homoglyphs.cpp \
+			src/History.cpp \
+			src/AddFtpFile.cpp \
+			../src/common/Coding/ParseCpp.cpp \
+			src/ProjectBackend.cpp \
+			../src/common/Lgi/About.cpp \
+			src/Debugger.cpp \
+			src/WebFldDlg.cpp \
+			src/IdeProjectSettings.cpp \
+			../src/common/Net/Ftp.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -425,10 +426,10 @@ cleanall :
 	+make -C "../" -f ./linux/Makefile.linux clean
 
 VPATH=$(BuildDir) \
-	./src \
-	../src/common/Lgi \
-	../src/common/Coding \
-	../src/common/Text \
 	../src/common/Gdc2/Filters \
+	./src \
+	../src/common/Text \
+	../src/common/Lgi \
 	../src/common/Text/Homoglyphs \
-	../src/common/Net
+	../src/common/Net \
+	../src/common/Coding

@@ -27,6 +27,7 @@
 #include "lgi/common/FileSelect.h"
 #include "lgi/common/SubProcess.h"
 #include "lgi/common/PopupNotification.h"
+#include "lgi/common/CommsBus.h"
 
 #include "LgiIde.h"
 #include "FtpThread.h"
@@ -1227,6 +1228,7 @@ public:
 	LAutoPtr<FindSymbolSystem> FindSym;
 	LArray<LAutoString> SystemIncludePaths;
 	// LArray<LDebugger::BreakPoint> BreakPoints;
+	LAutoPtr<LCommsBus> CommsBus;
 	
 	// Debugging
 	LDebugContext *DbgContext = NULL;
@@ -1922,6 +1924,15 @@ AppWnd::AppWnd()
 	#ifdef LINUX
 	LFinishXWindowsStartup(this);
 	#endif
+	
+	if (d->CommsBus.Reset(new LCommsBus(GetBuildLog())))
+	{
+		auto ep = "my.endpoint";
+		d->CommsBus->Listen(ep, [ep = LString(ep), log = GetBuildLog()](auto msg)
+			{
+				log->Print("Got comms bus msg on '%s': %s\n", ep.Get(), msg.Get());
+			});
+	}
 }
 
 AppWnd::~AppWnd()

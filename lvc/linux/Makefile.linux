@@ -32,11 +32,11 @@ ifeq ($(Build),Debug)
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I../include \
 		-I./resources \
-		-I../../../../../../usr/include/gstreamer-1.0 \
 		-I./src \
 		-I../include/lgi/linux \
+		-I../include \
+		-I../../../../../../usr/include/gstreamer-1.0 \
 		-I../include/lgi/linux/Gtk \
 		`pkg-config --cflags gtk+-3.0`
 else
@@ -52,8 +52,8 @@ else
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I./src \
 		-I../include/lgi/linux/Gtk \
+		-I./src \
 		-I../../../../../../usr/include/gstreamer-1.0 \
 		-I../include/lgi/linux \
 		-I./resources \
@@ -63,19 +63,20 @@ endif
 
 # Dependencies
 Source =	../src/common/Widgets/ControlTree.cpp \
-			src/PatchViewer.cpp \
-			src/VcFile.cpp \
-			src/VcCommit.cpp \
 			src/BrowseUi.cpp \
 			src/DropDownBtn.cpp \
 			../src/common/Text/XmlTreeUi.cpp \
-			../src/common/Text/DeEscape.cpp \
 			../src/common/Lgi/LgiMain.cpp \
+			../src/common/Text/DeEscape.cpp \
+			src/SshConnection.cpp \
+			src/VcCommit.cpp \
+			src/VcFile.cpp \
 			src/VcFolder.cpp \
 			src/Main.cpp \
 			../src/common/Gdc2/Filters/Png.cpp \
 			../src/common/Lgi/StructuredLog.cpp \
-			src/SshConnection.cpp
+			src/PatchViewer.cpp \
+			../src/common/Net/CommsBus.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -397,8 +398,9 @@ cleanall :
 	+make -C "../" -f ./linux/Makefile.linux clean
 
 VPATH=$(BuildDir) \
+	../src/common/Gdc2/Filters \
 	../src/common/Widgets \
 	../src/common/Lgi \
-	../src/common/Gdc2/Filters \
-	./src \
-	../src/common/Text
+	../src/common/Net \
+	../src/common/Text \
+	./src

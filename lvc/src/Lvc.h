@@ -14,6 +14,7 @@
 #include "lgi/common/Ssh.h"
 #include "lgi/common/EventTargetThread.h"
 #include "lgi/common/StructuredLog.h"
+#include "lgi/common/CommsBus.h"
 
 #define OPT_Folders			"Folders"
 #define OPT_Folder			"Folder"
@@ -181,6 +182,7 @@ struct AppPriv
 	LOptionsFile	Opts;
 	LStructuredLog	sLog;
 	int				Resort = -1;
+	LAutoPtr<LCommsBus> CommsBus;
 
 	// Filtering
 	LString			FolderFilter, CommitFilter, FileFilter;
