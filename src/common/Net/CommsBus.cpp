@@ -13,6 +13,7 @@
 #define LOG(...)			if (log) log->Print(__VA_ARGS__)
 #endif
 
+// All the types of messages the system uses
 enum MsgIds
 {
 	MUid			= Lgi4CC("uuid"),
@@ -20,15 +21,26 @@ enum MsgIds
 	MSendMsg		= Lgi4CC("send"),
 };
 
-struct Block
+// A malloc'd block of memory for messages.
+class Block
 {
+	// The message ID in network byte order
 	uint32_t id;
+	// The payload size, not including header, in network byte order
 	uint32_t size;
+
+public:
+	// This is the start of the payload, the actual size in bytes is
+	// GetSize()+nullSz for NULL termination.
 	char data[1];
 	
+	// The size of the NULL terminator
 	constexpr static int nullSz = 1;
+
+	// An auto pointer to manage a Block reference
 	using Auto = LAutoPtr<Block, false, true>;
 	
+	// Creates a new block of the given size
 	static Auto New(uint32_t msgId, uint32_t bytes)
 	{
 		Auto b((Block*) malloc(sizeof(Block) + bytes));
@@ -41,6 +53,7 @@ struct Block
 		return b;
 	}
 	
+	// Creates a new block with a LString for the payload
 	static Auto New(uint32_t msgId, LString s)
 	{
 		auto blk = New(msgId, s.Length());
@@ -49,14 +62,31 @@ struct Block
 		return blk;
 	}
 
+	// Creates a copy of an exist block
+	Auto Clone()
+	{
+		Auto b;
+		auto bytes = sizeof(Block) + GetSize();
+		if (b.Reset((Block*) malloc(bytes)))
+		{
+			memcpy(b.Get(), this, bytes);
+		}
+		return b;
+	}
+
+	// Describes the block for logging
 	LString ToString()
 	{
 		return LString::Fmt("id='%4.4s' sz=%i", &id, GetSize());
 	}
 
+	// Get the ID in host byte order
 	uint32_t GetId() const { return ntohl(id); }
+
+	// Get the payload size in host byte order
 	uint32_t GetSize() const { return ntohl(size); }
 	
+	// Return the first line as a string
 	LString FirstLine() const
 	{
 		auto nl = Strnchr(data, '\n', GetSize());
@@ -65,6 +95,7 @@ struct Block
 		return LString();
 	}
 
+	// Return the second part of the message as a string
 	LString SecondLine() const
 	{
 		auto nl = Strnchr(data, '\n', GetSize());
@@ -181,11 +212,31 @@ struct Connection
 	}
 };
 
+// Info about known endpoints.
+//
+// An endpoint can either be local or remote, not both.
+//
+// The server should know about all endpoints, both local and remote.
+// The clients should know about only their local endpoints.
+// 
 struct Endpoint
 {
+	// Each end point is referenced by a string name 'addr'
+	// All comparisons should be case insensitive
+	// Style wise endpoints should be "$app.$description"
 	LString addr;
+	
+	// The UID of the remote entity that owns the endpoint
 	LString remote;	
+	// The callback of the local code that wants endpoint messages
 	std::function< void(LString) > local;
+
+	// Create an end point message
+	Block::Auto MakeMsg(const char *Uid)
+	{
+		auto data = LString::Fmt("%s\n%s", addr.Get(), Uid);
+		return Block::New(MCreateEndpoint, data);		
+	}
 };
 
 struct CommsClient : public Connection
@@ -203,9 +254,13 @@ struct CommsClient : public Connection
 	}
 };
 
+// A block owned by the writeQue.
 struct BlockInfo
 {
+	// Timestamp of the last attempt to send
 	uint64_t sendTs = 0;
+
+	// A block ptr owned by this object
 	Block *blk = NULL;
 
 	~BlockInfo()
@@ -230,6 +285,7 @@ struct LCommsBusPriv :
 	LArray< Endpoint > endpoints;
 
 	// Server only:
+	uint64_t trySendTs = 0;
 	LArray<CommsClient*> clients;
 		
 	LCommsBusPriv(LStream *Log) :
@@ -274,59 +330,62 @@ struct LCommsBusPriv :
 	{
 		bool status = false;
 
-		if (auto nl = Strnchr(blk->data, '\n', blk->GetSize()))
+		if (blk->GetId() != MSendMsg)
 		{
-			LString ep(blk->data, nl - blk->data);
-			auto payload = nl + 1;
-			auto end = blk->data + blk->GetSize();
+			LAssert(!"wrong msg type");
+			return false;
+		}
+
+		if (auto dest = blk->FirstLine())
+		{
 			if (Lock(_FL))
 			{
 				bool foundEndpoint = false;
 				for (auto &e: endpoints)
 				{
-					if (e.addr == ep)
+					if (!e.addr.Equals(dest))
+						continue;
+
+					foundEndpoint = true;
+					if (e.local)
 					{
-						foundEndpoint = true;
-						if (e.local)
-						{
-							e.local(LString(payload, end - payload));
-							status = true;
-						}
-						else if (e.remote)
-						{
-							// Find the matching connection and send to the remote end
-							bool foundClient = false;
-							for (auto &c: clients)
-							{
-								if (c->uid == e.remote)
-								{
-									foundClient = true;
-										
-									status = c->Write(blk);
-									if (!status)
-									{
-										LOG("%s error: write failed.\n", Describe().Get(), _FL);
-									}
-									break;
-								}
-							}
-							if (!foundClient)
-							{
-								LOG("%s error: no client for endpoint='%s' procid=" LPrintfInt64 "\n",
-									Describe().Get(),
-									ep.Get(),
-									e.remote);
-							}
-						}
-						break;
+						e.local(blk->SecondLine());
+						status = true;
 					}
+					else if (e.remote)
+					{
+						// Find the matching connection and send to the remote end
+						bool foundClient = false;
+						for (auto &c: clients)
+						{
+							if (c->uid == e.remote)
+							{
+								foundClient = true;
+										
+								status = c->Write(blk);
+								if (!status)
+								{
+									LOG("%s error: write failed.\n", Describe().Get(), _FL);
+								}
+								break;
+							}
+						}
+						if (!foundClient)
+						{
+							LOG("%s error: no client for endpoint='%s' remote=%s\n",
+								Describe().Get(),
+								dest.Get(),
+								e.remote.Get());
+						}
+					}
+					break;
 				}
 				Unlock();
 				if (!foundEndpoint)
 				{
 					LOG("%s error: no endpoint '%s'\n",
 						Describe().Get(),
-						ep.Get());
+						dest.Get());
 				}
 			}
 		}
@@ -338,9 +397,47 @@ struct LCommsBusPriv :
 		return status;
 	}
 	
+	void ServerTrySend()
+	{
+		if (Lock(_FL))
+		{
+			for (size_t i=0; i<writeQue.Length(); i++)
+			{
+				auto &info = writeQue[i];
+				switch (info.blk->GetId())
+				{
+					case MSendMsg:
+					{
+						if (!info.sendTs || (LCurrentTime() - info.sendTs >= RESEND_TIMEOUT))
+						{
+							if (ServerSend(info.blk))
+								writeQue.DeleteAt(i--, true);
+							else
+								info.sendTs = LCurrentTime();
+						}
+						break;
+					}
+					default:
+					{
+						// What to do here?
+						LOG("%s error: can't send msg type %s\n", Describe().Get(), info.blk->ToString().Get());
+						writeQue.DeleteAt(i--, true);
+						break;
+					}
+				}
+			}
+
+			Unlock();
+		}
+
+		if (writeQue.Length() > 0)
+		{
+			LOG("%s warning: " LPrintfSizeT " msgs still queued on the server\n", Describe().Get(), writeQue.Length());
+		}
+	}
+
 	int Server()
 	{
-
 		// Wait for incoming connections and handle them...
 		while (!IsCancelled())
 		{
@@ -419,7 +516,14 @@ struct LCommsBusPriv :
 							}
 							case MSendMsg:
 							{
-								ServerSend(blk);
+								if (!ServerSend(blk))
+								{
+									// This can happen when the server doesn't know about the endpoint yet...
+									// So put the message in the writeQue and hopefully the endpoint will
+									// turn up soon.
+									auto copy = blk->Clone();
+									Que(copy);
+								}
 								break;
 							}
 							default:
@@ -431,35 +535,11 @@ struct LCommsBusPriv :
 				}
 
 				// Check writeQue for outgoing data...
-				if (Lock(_FL))
+				auto now = LCurrentTime();
+				if (now - trySendTs >= 100)
 				{
-					for (size_t i=0; i<writeQue.Length(); i++)
-					{
-						auto &info = writeQue[i];
-						switch (info.blk->GetId())
-						{
-							case MSendMsg:
-							{
-								if (!info.sendTs || (LCurrentTime() - info.sendTs >= RESEND_TIMEOUT))
-								{
-									if (ServerSend(info.blk))
-										writeQue.DeleteAt(i--, true);
-									else
-										info.sendTs = LCurrentTime();
-								}
-								break;
-							}
-							default:
-							{
-								// What to do here?
-								LOG("%s error: can't send msg type %s\n", Describe().Get(), info.blk->ToString().Get());
-								writeQue.DeleteAt(i--, true);
-								break;
-							}
-						}
-					}
-
-					Unlock();
+					trySendTs = now;
+					ServerTrySend();
 				}
 
 				LSleep(10);
@@ -477,8 +557,11 @@ struct LCommsBusPriv :
 			e.addr.Get(),
 			e.remote.Get(),
 			(bool)e.local);
+
+		// Seeing as a new endpoint turned up... try and send any queued messages
+		ServerTrySend();
 	}
-	
+
 	int Client()
 	{
 		Connection c(log);
@@ -504,15 +587,14 @@ struct LCommsBusPriv :
 					}
 					else
 					{
-						// Also tell the server about our endpoints
+						// Also tell the server about our local endpoints
 						if (Lock(_FL))
 						{
 							for (auto &ep: endpoints)
 							{
 								if (ep.local)
 								{
-									auto epData = LString::Fmt("%s\n%s", ep.addr.Get(), GetUid());
-									if (blk = Block::New(MCreateEndpoint, epData))
+									if (auto blk = ep.MakeMsg(GetUid()))
 									{
 										auto sent = c.Write(blk);
 										LOG("%s send endpoint %s = %i.\n", Describe().Get(), ep.addr.Get(), sent);
@@ -527,6 +609,11 @@ struct LCommsBusPriv :
 				{
 					LSleep(1000);
 					if (connectErrs++ > 5)
+						// If there enough errors connecting to the server, maybe this object should be the server?
+						// Back out of the client code and restart as the server.
+						//
+						// Linux: this often happens when the OS is locking out listening on the port after a dirty 
+						// shutdown.
 						return RETRY_SERVER;
 				}
 			}
@@ -574,12 +661,12 @@ struct LCommsBusPriv :
 						{
 							if (c.Write(info.blk))
 							{
-								LOG("%s wrote msg '%4.4s'\n", Describe().Get(), &info.blk->id);
+								LOG("%s wrote msg %s\n", Describe().Get(), info.blk->ToString().Get());
 								writeQue.DeleteAt(i--, true);
 							}
 							else
 							{
-								LOG("%s error: writing msg '%4.4s'\n", Describe().Get(), &info.blk->id);
+								LOG("%s error: writing msg %s\n", Describe().Get(), info.blk->ToString().Get());
 								info.sendTs = LCurrentTime();
 							}
 						}
@@ -604,7 +691,7 @@ struct LCommsBusPriv :
 		while (!IsCancelled())
 		{
 			isServer = listen.Listen(DEFAULT_COMMS_PORT);
-			LOG("CommsBus %s=%s\n", isServer ? "server" : "client", GetUid());
+			LOG("%s created\n", Describe().Get());
 			
 			if (isServer)
 				return Server();
@@ -672,8 +759,10 @@ bool LCommsBus::Listen(LString endPoint, std::function<void(LString)> cb)
 	{
 		if (e.addr == endPoint)
 		{
+			 // update existing
 			exists = true;
-			e.local = cb; // update existing
+			e.local = cb;
+			e.remote.Empty();
 			msg.Printf("%s\n%s", endPoint.Get(), d->GetUid());
 			d->OnEndpoint(e);
 		}
@@ -689,8 +778,9 @@ bool LCommsBus::Listen(LString endPoint, std::function<void(LString)> cb)
 	}
 	d->Unlock();
 
-	if (msg)
-	{
+	if (msg &&
+		!d->isServer) // The server doesn't need to tell anyone else about endpoints
+	{		
 		if (auto blk = Block::New(MCreateEndpoint, msg))
 			d->Que(blk);
 	}
@@ -802,15 +892,60 @@ struct CommsBusUnitTests : public LThread
 		return result;
 	}
 
+	bool ClientToClient()
+	{
+		log->Print("---- ServerToClient...\n");
+		auto srv = CreateBus(true);
+		auto cli1 = CreateBus();
+		auto cli2 = CreateBus();
+		bool result = false;
+
+		if (srv && cli1 && cli2)
+		{
+			auto ep = "Test.ClientToClient";
+			auto testData = "testData";
+		
+			log->Print("---- Starting listen..\n");
+			LAssert(!cli2->IsServer());
+			cli2->Listen(ep, [&](auto data)
+			{
+				if (data.Equals(testData))
+					result = true;
+			});
+		
+			log->Print("---- Sending..\n");
+			LAssert(!cli1->IsServer());
+			cli1->SendMsg(ep, testData);
+
+			log->Print("---- Waiting..\n");
+			WaitResult(result);
+			log->Print("---- %s\n", result ? "SUCCESS" : "FAIL");
+		}
+		else log->Print("%s:%i - error: missing obj.\n", _FL);
+
+		return result;
+	}
+
 	int Main()
 	{
-		auto status = ClientToServer();
+		bool status;
+		
+		#if 1
+		status = ClientToServer();
 		LAssert(status);
+		#endif
 
+		#if 1
 		log->Print("\n\n");
-
 		status = ServerToClient();
 		LAssert(status);
+		#endif
+
+		#if 1
+		log->Print("\n\n");
+		status = ClientToClient();
+		LAssert(status);
+		#endif
 
 		return 0;
 	}
