@@ -23,6 +23,9 @@
     <Filter Include="Source Files\Browse">
       <UniqueIdentifier>{96f59874-2e83-4564-9706-35afdc3494e2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Lgi\CommsBus">
+      <UniqueIdentifier>{6dd97128-b823-40bb-89ef-8d6a0dafdbfb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Src\Main.cpp">
@@ -61,6 +64,9 @@
     <ClCompile Include="..\Src\SshConnection.cpp">
       <Filter>Source Files\Ssh</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\common\Net\CommsBus.cpp">
+      <Filter>Source Files\Lgi\CommsBus</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Src\SshConnection.h">
@@ -86,6 +92,9 @@
     </ClInclude>
     <ClInclude Include="..\..\include\lgi\common\IniFile.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\lgi\common\CommsBus.h">
+      <Filter>Source Files\Lgi\CommsBus</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -21,6 +21,11 @@ enum MsgIds
 	MSendMsg		= Lgi4CC("send"),
 };
 
+#ifdef WIN32
+#pragma pack(push, before_pack)
+#pragma pack(1)
+#endif
+
 // A malloc'd block of memory for messages.
 class Block
 {
@@ -38,7 +43,7 @@ public:
 	constexpr static int nullSz = 1;
 
 	// An auto pointer to manage a Block reference
-	using Auto = LAutoPtr<Block, false, true>;
+	using Auto = LAutoPtr<Block, false, true /* use 'free' instead of 'delete' */>;
 	
 	// Creates a new block of the given size
 	static Auto New(uint32_t msgId, uint32_t bytes)
@@ -56,7 +61,7 @@ public:
 	// Creates a new block with a LString for the payload
 	static Auto New(uint32_t msgId, LString s)
 	{
-		auto blk = New(msgId, s.Length());
+		auto blk = New(msgId, (uint32_t)s.Length());
 		if (blk)
 			memcpy(blk->data, s.Get(), s.Length() + nullSz);
 		return blk;
@@ -108,6 +113,10 @@ public:
 		return LString();
 	}
 };
+
+#ifdef WIN32
+#pragma pack(pop, before_pack)
+#endif
 
 struct Connection
 {
@@ -397,7 +406,7 @@ struct LCommsBusPriv :
 		return status;
 	}
 	
-	void ServerTrySend()
+	void ServerTrySend(bool firstAttempt)
 	{
 		if (Lock(_FL))
 		{
@@ -408,12 +417,30 @@ struct LCommsBusPriv :
 				{
 					case MSendMsg:
 					{
-						if (!info.sendTs || (LCurrentTime() - info.sendTs >= RESEND_TIMEOUT))
+						bool timedOut = info.sendTs && ((LCurrentTime() - info.sendTs) >= RESEND_TIMEOUT);
+						if (timedOut)
+						{
+							writeQue.DeleteAt(i--, true);
+						}
+						else if (!firstAttempt || info.sendTs == 0)
 						{
 							if (ServerSend(info.blk))
+							{	
+								// LOG("%s sent %s to %s\n", Describe().Get(), info.blk->ToString().Get(), info.blk->FirstLine().Get());
+								auto bytes = info.blk->GetSize() + 9;
+								LString::Array b;
+								b.SetFixedLength(false);
+								auto ptr = (uint8_t*)info.blk;
+								for (unsigned i=0; i<bytes; i++)
+									b.New().Printf("%i", ptr[i]);
+								LOG("%s write %s\n", Describe().Get(), LString(",").Join(b).Get());
+
 								writeQue.DeleteAt(i--, true);
+							}
 							else
+							{
 								info.sendTs = LCurrentTime();
+							}
 						}
 						break;
 					}
@@ -430,10 +457,10 @@ struct LCommsBusPriv :
 			Unlock();
 		}
 
+		#if 0
 		if (writeQue.Length() > 0)
-		{
 			LOG("%s warning: " LPrintfSizeT " msgs still queued on the server\n", Describe().Get(), writeQue.Length());
-		}
+		#endif
 	}
 
 	int Server()
@@ -539,7 +566,7 @@ struct LCommsBusPriv :
 				if (now - trySendTs >= 100)
 				{
 					trySendTs = now;
-					ServerTrySend();
+					ServerTrySend(true);
 				}
 
 				LSleep(10);
@@ -559,7 +586,7 @@ struct LCommsBusPriv :
 			(bool)e.local);
 
 		// Seeing as a new endpoint turned up... try and send any queued messages
-		ServerTrySend();
+		ServerTrySend(false);
 	}
 
 	int Client()
@@ -729,7 +756,7 @@ bool LCommsBus::IsRunning() const
 
 bool LCommsBus::SendMsg(LString endPoint, LString data)
 {
-	size_t bytes = endPoint.Length() + data.Length() + 1;
+	auto bytes = (uint32_t) (endPoint.Length() + data.Length() + 1);
 	if (auto msg = Block::New(MSendMsg, bytes))
 	{
 		char *c = msg->data;
