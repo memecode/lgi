@@ -1030,12 +1030,6 @@ public:
 			Visible(true);
 			
 			// Test.Reset(new SshTestThread(this));
-			
-			if (CommsBus.Reset(new LCommsBus(Log)))
-			{
-				auto ep = "my.endpoint";
-				CommsBus->SendMsg(ep, "this is a test");
-			}
 		}
 	}
 
