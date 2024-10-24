@@ -128,7 +128,7 @@ class SshBackend :
 		return found;
 	}
 
-	LString ReadToPrompt()
+	LString ReadToPrompt(LStream *output = NULL)
 	{
 		LStringPipe p;
 		if (auto c = GetConsole())
@@ -141,6 +141,8 @@ class SshBackend :
 				{
 					// LgiTrace("ReadToPrompt got %i: %.16s\n", (int)rd, buf);
 					p.Write(buf, rd);
+					if (output)
+						output->Write(buf, rd);
 				}
 				else if (AtPrompt(p))
 					break;
@@ -155,7 +157,7 @@ class SshBackend :
 		return s;
 	}
 
-	LString Cmd(LString cmd, int32_t *exitCode = NULL)
+	LString Cmd(LString cmd, int32_t *exitCode = NULL, LStream *outputStream = NULL)
 	{
 		if (auto c = GetConsole())
 		{
@@ -167,7 +169,7 @@ class SshBackend :
 				return LString();
 			}
 
-			auto output = ReadToPrompt();
+			auto output = ReadToPrompt(outputStream);
 			
 			if (exitCode)
 			{
@@ -190,6 +192,7 @@ class SshBackend :
 
 			return output;
 		}
+
 		return LString();
 	}
 
@@ -657,6 +660,30 @@ public:
 		return true;
 	}
 
+	bool RunProcess(const char *initDir, const char *cmdLine, LStream *output, std::function<void(int)> cb)
+	{
+		if (!cmdLine)
+			return false;
+
+		Auto lck(this, _FL);
+		work.Add( [this, cb, initDir = LString(initDir), cmdLine = LString(cmdLine), output]()
+		{
+			auto args = LString::Fmt("cd %s && %s", initDir.Get(), cmdLine.Get());
+
+			int32_t exitVal;
+			Cmd(args + "\n", &exitVal, output);
+			if (cb)
+			{
+				app->RunCallback( [exitVal, cb]()
+					{
+						cb(exitVal);
+					});
+			}
+		} );
+
+		return true;
+	}
+
 	int Main() override
 	{
 		while (!IsCancelled())
@@ -848,6 +875,11 @@ public:
 			#error "No platform defined"
 			cb(PlatformCurrent);
 		#endif
+	}
+
+	bool RunProcess(const char *initDir, const char *cmdLine, LStream *output, std::function<void(int)> cb)
+	{
+		return false;
 	}
 };
 

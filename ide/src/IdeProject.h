@@ -151,8 +151,10 @@ public:
 	bool GetExePath(char *Path, int Len);
 	bool RelativePath(LString &Out, const char *In, bool Debug = false);
 	void Build(bool All, BuildConfig Config);
+	void BuildForPlatform(bool All, BuildConfig Config, IdePlatform Platform);
 	void StopBuild();
 	void Clean(bool All, BuildConfig Config);
+	void CleanForPlatform(bool All, BuildConfig Config, IdePlatform Platform);
 	LDebugContext *Execute(ExeAction Act = ExeRun, LString *ErrMsg = NULL);
 	bool FixMissingFiles();
 	bool FindDuplicateSymbols();

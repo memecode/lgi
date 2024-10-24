@@ -662,13 +662,22 @@ bool LTrimDir(char *Path)
 	if (!Path)
 		return false;
 
-	char *p = strrchr(Path, DIR_CHAR);
+	auto lastSep = [](char *p)
+	{
+		char *last = NULL;
+		for (char *c = p; *c; c++)
+			if (*c == '\\' || *c == '/')
+				last = c;
+		return last;
+	};
+
+	char *p = lastSep(Path);
 	if (!p)
 		return false;
 	if (p[1] == 0) // Trailing DIR_CHAR doesn't count... do it again.
 	{
 		*p = 0;
-		p = strrchr(Path, DIR_CHAR);
+		p = lastSep(Path);
 		if (!p)
 			return false;
 	}

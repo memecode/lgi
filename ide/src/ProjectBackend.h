@@ -21,9 +21,12 @@ public:
 	virtual bool Delete(const char *path, bool recursiveForce, std::function<void(bool)> cb) = 0;
 	virtual bool Rename(LString oldPath, LString newPath, std::function<void(bool)> cb) = 0;
 
-	// Seaching:
+	// Searching:
 	virtual bool SearchFileNames(const char *searchTerms, std::function<void(LArray<LString>&)> results) = 0;
 	virtual bool FindInFiles(FindParams *params, LStream *results) = 0;
+
+	// Process:
+	virtual bool RunProcess(const char *initDir, const char *cmdLine, LStream *output, std::function<void(int)> cb) = 0;
 };
 
 extern LAutoPtr<ProjectBackend> CreateBackend(LView *parent, LString uri, LStream *log);

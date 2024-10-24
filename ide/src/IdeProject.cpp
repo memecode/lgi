@@ -161,12 +161,13 @@ int StrSort(char **a, char **b)
 //////////////////////////////////////////////////////////////////////////////////
 class ProjectNode;
 
-class BuildThread : public LThread, public LStream
+class BuildThread : public LThread, public LStream, public LCancel
 {
-	IdeProject *Proj;
+	IdeProject *Proj = NULL;
 	LString Makefile, CygwinPath;
 	bool Clean, All;
 	BuildConfig Config;
+	IdePlatform Platform;
 	int WordSize;
 	LAutoPtr<LSubProcess> SubProc;
 	LString::Array BuildConfigs;
@@ -198,8 +199,45 @@ class BuildThread : public LThread, public LStream
 	}
 		Arch;
 
+	// Convert a stream to log messages, minus the ANSI stuff...
+	struct StreamToLog : public LStream
+	{
+		LViewI *target;
+	public:
+		StreamToLog(LViewI *t)
+		{
+			target = t;
+		}
+		ssize_t Write(const void *Ptr, ssize_t Size, int Flags = 0) override
+		{
+			// Remove ansi
+			LAutoString s(NewStr((char*)Ptr, Size));
+			auto newSize = RemoveAnsi(s.Get(), Size);
+			if (newSize >= 0 && newSize < Size)
+				s.Get()[newSize] = 0; // null terminate the string...
+
+			// Send the string to the log...
+			target->PostEvent(M_APPEND_TEXT, (LMessage::Param)s.Release(), AppWnd::BuildTab);
+			return Size;
+		}
+	};
+
+	// Remote backend state
+	LString backendArgs;
+	LString::Array backendPaths;	// Step 1, look through parent folders for a project file..
+	LString backendProjectFolder;	// Step 2, once found, rewrite the initDir and makefile path
+	LString backendInitFolder;		// Step 3, run the make process with the given details...
+	LString backendMakeFile; 
+	LAutoPtr<int> backendExitCode;
+	LAutoPtr<StreamToLog> buildLogger;
+
+	bool stepReady = true;
+	int backendCalls = 0;
+
+	void BackendStep();
+
 public:
-	BuildThread(IdeProject *proj, char *makefile, bool clean, BuildConfig config, bool all, int wordsize);
+	BuildThread(IdeProject *proj, char *makefile, bool clean, BuildConfig config, IdePlatform platform, bool all, int wordsize);
 	~BuildThread();
 	
 	ssize_t Write(const void *Buffer, ssize_t Size, int Flags = 0) override;
@@ -1296,12 +1334,20 @@ bool ReadVsProjFile(LString File, LString &Ver, LString::Array &Configs)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-BuildThread::BuildThread(IdeProject *proj, char *makefile, bool clean, BuildConfig config, bool all, int wordsize) : LThread("BuildThread")
+BuildThread::BuildThread(IdeProject *proj,
+						char *makefile,
+						bool clean,
+						BuildConfig config,
+						IdePlatform platform,
+						bool all,
+						int wordsize)
+	: LThread("BuildThread")
 {
 	Proj = proj;
 	Makefile = makefile;
 	Clean = clean;
 	Config = config;
+	Platform = platform == PlatformCurrent ? GetCurrentPlatform() : platform;
 	All = all;
 	WordSize = wordsize;
 	Arch = DefaultArch;
@@ -1321,7 +1367,7 @@ BuildThread::BuildThread(IdeProject *proj, char *makefile, bool clean, BuildConf
 		Compiler = Xcode;
 	else
 	{
-		auto Comp = Proj->GetSettings()->GetStr(ProjCompiler);
+		auto Comp = Proj->GetSettings()->GetStr(ProjCompiler, NULL, Platform);
 		if (Comp)
 		{
 			// Use the specified compiler...
@@ -1348,11 +1394,12 @@ BuildThread::BuildThread(IdeProject *proj, char *makefile, bool clean, BuildConf
 	if (Compiler == DefaultCompiler)
 	{
 		// Use default compiler for platform...
-		#ifdef WIN32
-		Compiler = VisualStudio;
-		#else
-		Compiler = Gcc;
-		#endif
+		if (Platform == PlatformWin)
+			Compiler = VisualStudio;
+		else if (Platform == PlatformMac)
+			Compiler = Xcode;
+		else
+			Compiler = Gcc;
 	}
 
 	Run();
@@ -1360,6 +1407,8 @@ BuildThread::BuildThread(IdeProject *proj, char *makefile, bool clean, BuildConf
 
 BuildThread::~BuildThread()
 {
+	Cancel();
+
 	if (SubProc)
 	{
 		bool b = SubProc->Interrupt();
@@ -1754,8 +1803,14 @@ LString BuildThread::FindExe()
 			return p.GetFull();
 		#endif
 	}
+	else if (auto backend = Proj->GetBackend())
+	{
+		// Assume the remote system has make...
+		return "make";
+	}
 	else
 	{
+		// Look up local make to build with gcc
 		if (Compiler == MingW)
 		{
 			// Have a look in the default spot first...
@@ -1805,6 +1860,117 @@ LAutoString BuildThread::WinToMingWPath(const char *path)
 	return LAutoString(a.NewStr());
 }
 
+void BuildThread::BackendStep()
+{
+	auto backend = Proj->GetBackend();
+	if (!backend)
+		return;
+
+	if (backendMakeFile)
+	{
+		// Step 3, run the build...
+		if (buildLogger.Reset(new StreamToLog(Proj->GetApp()))) // Create a persistant logger, to outlive the build process...
+		{
+			buildLogger->Print("%s: building in '%s'\n", __FUNCTION__, backendInitFolder.Get());
+			backendCalls++;
+			backend->RunProcess(backendInitFolder, LString("make ") + backendArgs, buildLogger, [this](auto val)
+				{
+					backendCalls--;
+					backendExitCode.Reset(new int(val));
+				});
+		}
+		else Cancel();
+	}
+	else if (backendProjectFolder)
+	{
+		// Step 2, rewrite the init dir and makefile path
+		backendInitFolder = backendProjectFolder.Get();
+		LTrimDir(backendInitFolder);
+
+		LArray<char*> parts;
+		const char *s = backendArgs;
+		while (auto part = LTokStr(s))
+			parts.Add(part);
+
+		auto &last = parts.Last();
+		backendMakeFile = LString(last).Strip("\"\'");
+		auto pos = backendMakeFile.Find(backendInitFolder);
+		if (pos == 0)
+		{
+			// Remove the leading path...
+			backendMakeFile = backendMakeFile.Replace(backendInitFolder).LStrip("\\/");
+		}
+
+		delete [] last;
+		last = NewStr(backendMakeFile);
+
+		LStringPipe p;
+		for (auto part: parts)
+			p.Print("%s%s", p.GetSize() ? " " : "", part);
+
+		backendArgs = p.NewLStr();
+		parts.DeleteArrays();
+		stepReady = true;
+
+		StreamToLog log(Proj->GetApp());
+		log.Print("%s: rewrote args '%s'\n", __FUNCTION__, backendArgs.Get());
+	}
+	else if (backendPaths.Length())
+	{
+		// Step 1, check the path for a project file...
+		auto p = backendPaths.Last();
+		backendPaths.PopLast();
+
+		StreamToLog log(Proj->GetApp());
+		// log.Print("%s: readdir '%s'\n", __FUNCTION__, p.Get());
+		backendCalls++;
+		backend->ReadFolder(p, [this, backend](auto d)
+			{
+				StreamToLog log(Proj->GetApp());
+
+				for (int i=true; i; i=d->Next())
+				{
+					if (d->IsDir())
+						continue;
+					auto nm = d->GetName();
+					auto ext = LGetExtension(nm);
+					if (!Stricmp(ext, "xml"))
+					{
+						// log.Print("%s: got xml '%s'\n", __FUNCTION__, nm);
+
+						// Could be a project file?
+						backendCalls++;
+						backend->Read(	d->FullPath(),
+										[this, full=LString(d->FullPath())](auto err, auto data)
+										{
+											StreamToLog log(Proj->GetApp());
+											// log.Print("%s: got content '%s'\n", __FUNCTION__, full.Get());
+
+											// If has project data..
+											if (data.Find("<Project") > 0)
+											{
+												backendProjectFolder = full;
+												backendPaths.Empty();
+												stepReady = true;
+											}
+
+											backendCalls--;
+										});
+					}
+				}
+
+				if (backendPaths.Length() > 0)
+					stepReady = true;
+
+				backendCalls--;
+			});
+	}
+	else
+	{
+		LAssert(!"no work to do?");
+	}
+}
+
 int BuildThread::Main()
 {
 	const char *Err = 0;
@@ -1815,8 +1981,12 @@ int BuildThread::Main()
 	{
 		bool Status = false;
 		LString MakePath = Makefile.Get();
-		auto InitFolder = Proj->GetBasePath();
-		LString InitDir = InitFolder.Get();
+		LString InitDir;
+		if (Proj->GetBackend())
+			InitDir = Proj->GetBackend()->GetBasePath();
+		else if (auto path = Proj->GetBasePath())
+			InitDir = path.Get();
+
 		LVariant Jobs;
 		if (!Proj->GetApp()->GetOptions()->GetValue(OPT_Jobs, Jobs) || Jobs.CastInt32() < 1)
 			Jobs = 2;
@@ -2026,90 +2196,137 @@ int BuildThread::Main()
 		PostThreadEvent(AppHnd, M_SELECT_TAB, AppWnd::BuildTab);
 
 		LString Msg;
-		// Msg.Printf("InitDir: %s\n", InitDir.Get());
 		Proj->GetApp()->PostEvent(M_APPEND_TEXT, (LMessage::Param)NewStr(Msg), AppWnd::BuildTab);
 
 		Print("Making: %s (%s)\n", MakePath.Get(), TmpArgs.Get());
-		if (SubProc.Reset(new LSubProcess(Exe, TmpArgs)))
+		if (auto backend = Proj->GetBackend())
 		{
-			SubProc->SetNewGroup(false);
-			SubProc->SetInitFolder(InitDir);
-			if (Include)
-				SubProc->SetEnvironment("INCLUDE", Include);
-			if (Lib)
-				SubProc->SetEnvironment("LIB", Lib);
-			if (LibPath)
-				SubProc->SetEnvironment("LIBPATHS", LibPath);
-			if (Path)
+			LString sep = MakePath.Find("\\") >= 0 ? "\\" : "/";
+			auto parts = MakePath.SplitDelimit(sep);
+			backendPaths.SetFixedLength(false);
+			for (int i = 2; i < parts.Length(); i++)
+				backendPaths.New() = sep.Join(parts.Slice(0, i));
+			backendArgs = TmpArgs;
+			
+			StreamToLog log(Proj->GetApp());
+			uint64_t msgTs = LCurrentTime();
+			while (!backendExitCode && !IsCancelled())
 			{
-				LString Cur = getenv("PATH");
-				LString New = Cur + LGI_PATH_SEPARATOR + Path;
-				SubProc->SetEnvironment("PATH", New);
-			}
-			// SubProc->SetEnvironment("DLL", "1");
-
-			if (Compiler == MingW)
-				SubProc->SetEnvironment("PATH", "c:\\MingW\\bin;C:\\MinGW\\msys\\1.0\\bin;%PATH%");
-				
-			if ((Status = SubProc->Start(true, false)))
-			{
-				// Read all the output					
-				char Buf[256];
-				ssize_t rd;
-
-				while ( (rd = SubProc->Read(Buf, sizeof(Buf))) > 0 )
+				if (stepReady && backendCalls == 0)
 				{
-					Write(Buf, rd);
+					stepReady = false;
+					BackendStep();
 				}
-					
-				uint32_t ex = SubProc->Wait();
-				Print("Make exited with %i (0x%x)\n", ex, ex);
 
-				if (Compiler == IAR &&
-					ex == 0 &&
-					PostBuild.Length())
+				LSleep(10);
+
+				uint64_t now = LCurrentTime();
+				if (now - msgTs > 1000)
 				{
-					for (auto Cmd : PostBuild)
+					msgTs = now;
+					// log.Print("%s: backendCalls=%i\n", __FUNCTION__, backendCalls);
+				}
+			}
+
+			// log.Print("%s: finished step loop!!!\n", __FUNCTION__);
+			while (backendCalls > 0)
+			{
+				LSleep(10);
+
+				uint64_t now = LCurrentTime();
+				if (now - msgTs > 1000)
+				{
+					msgTs = now;
+					log.Print("%s: waiting for backendCalls=%i\n", __FUNCTION__, backendCalls);
+				}
+			}
+
+			log.Print("%s: build exit code: %i\n", __FUNCTION__, backendExitCode ? *backendExitCode : -1);
+		}
+		else 
+		{
+			// local build...
+			if (SubProc.Reset(new LSubProcess(Exe, TmpArgs)))
+			{
+				SubProc->SetNewGroup(false);
+				SubProc->SetInitFolder(InitDir);
+				if (Include)
+					SubProc->SetEnvironment("INCLUDE", Include);
+				if (Lib)
+					SubProc->SetEnvironment("LIB", Lib);
+				if (LibPath)
+					SubProc->SetEnvironment("LIBPATHS", LibPath);
+				if (Path)
+				{
+					LString Cur = getenv("PATH");
+					LString New = Cur + LGI_PATH_SEPARATOR + Path;
+					SubProc->SetEnvironment("PATH", New);
+				}
+				// SubProc->SetEnvironment("DLL", "1");
+
+				if (Compiler == MingW)
+					SubProc->SetEnvironment("PATH", "c:\\MingW\\bin;C:\\MinGW\\msys\\1.0\\bin;%PATH%");
+				
+				if ((Status = SubProc->Start(true, false)))
+				{
+					// Read all the output					
+					char Buf[256];
+					ssize_t rd;
+
+					while ( (rd = SubProc->Read(Buf, sizeof(Buf))) > 0 )
 					{
-						auto p = Cmd.Split(" ", 1);
-						if (p[0].Equals("cd"))
+						Write(Buf, rd);
+					}
+					
+					uint32_t ex = SubProc->Wait();
+					Print("Make exited with %i (0x%x)\n", ex, ex);
+
+					if (Compiler == IAR &&
+						ex == 0 &&
+						PostBuild.Length())
+					{
+						for (auto Cmd : PostBuild)
 						{
-							if (p.Length() > 1)
-								FileDev->SetCurrentFolder(p[1]);
-							else
-								LAssert(!"No folder for cd?");
-						}
-						else
-						{
-							LSubProcess PostCmd(p[0], p.Length() > 1 ? p[1] : LString());
-							if (PostCmd.Start(true, false))
+							auto p = Cmd.Split(" ", 1);
+							if (p[0].Equals("cd"))
 							{
-								char Buf[256];
-								ssize_t rd;
-								while ( (rd = PostCmd.Read(Buf, sizeof(Buf))) > 0 )
+								if (p.Length() > 1)
+									FileDev->SetCurrentFolder(p[1]);
+								else
+									LAssert(!"No folder for cd?");
+							}
+							else
+							{
+								LSubProcess PostCmd(p[0], p.Length() > 1 ? p[1] : LString());
+								if (PostCmd.Start(true, false))
 								{
-									Write(Buf, rd);
+									char Buf[256];
+									ssize_t rd;
+									while ( (rd = PostCmd.Read(Buf, sizeof(Buf))) > 0 )
+									{
+										Write(Buf, rd);
+									}
 								}
 							}
 						}
 					}
 				}
-			}
-			else
-			{
-				// Create a nice error message.
-				LString ErrStr = LErrorCodeToString(SubProc->GetErrorCode());
-				if (ErrStr)
+				else
 				{
-					char *e = ErrStr.Get() + ErrStr.Length();
-					while (e > ErrStr && strchr(" \t\r\n.", e[-1]))
-						*(--e) = 0;
-				}
+					// Create a nice error message.
+					LString ErrStr = LErrorCodeToString(SubProc->GetErrorCode());
+					if (ErrStr)
+					{
+						char *e = ErrStr.Get() + ErrStr.Length();
+						while (e > ErrStr && strchr(" \t\r\n.", e[-1]))
+							*(--e) = 0;
+					}
 					
-				sprintf_s(ErrBuf, sizeof(ErrBuf), "Running make failed with %i (%s)\n",
-					SubProc->GetErrorCode(),
-					ErrStr.Get());
-				Err = ErrBuf;
+					sprintf_s(ErrBuf, sizeof(ErrBuf), "Running make failed with %i (%s)\n",
+						SubProc->GetErrorCode(),
+						ErrStr.Get());
+					Err = ErrBuf;
+				}
 			}
 		}
 	}
@@ -2333,19 +2550,39 @@ LString IdeProject::GetMakefile(IdePlatform Platform)
 		return LString();
 	
 	LString Path;
-	if (LIsRelativePath(PMakefile))
+	if (d->Backend)
 	{
-		auto Base = GetBasePath();
-		if (Base)
+		auto base = d->Backend->GetBasePath();
+		if (base)
 		{
-			char p[MAX_PATH_LEN];
-			LMakePath(p, sizeof(p), Base, PMakefile);
-			Path = p;
+			auto sep = strchr(base, '\\') ? "\\" : "/";
+			auto joinParts = base(-1) == sep[0] ? "" : sep;
+			Path = base + joinParts + PMakefile;
+
+			auto cur = LString(sep) + "." + sep;
+			Path = Path.Replace(cur, sep);
+		}
+		else
+		{
+			Path = PMakefile;
 		}
 	}
 	else
 	{
-		Path = PMakefile;
+		if (LIsRelativePath(PMakefile))
+		{
+			auto Base = GetBasePath();
+			if (Base)
+			{
+				char p[MAX_PATH_LEN];
+				LMakePath(p, sizeof(p), Base, PMakefile);
+				Path = p;
+			}
+		}
+		else
+		{
+			Path = PMakefile;
+		}
 	}
 	
 	return Path;
@@ -2353,14 +2590,25 @@ LString IdeProject::GetMakefile(IdePlatform Platform)
 
 void IdeProject::Clean(bool All, BuildConfig Config)
 {
-	if (!d->Thread &&
-		d->Settings.GetStr(ProjMakefile))
+	if (d->Backend)
 	{
-		auto m = GetMakefile(PlatformCurrent);
-		if (m)		
+		d->Backend->GetSysType([this, All, Config](auto Platform)
+		{
+			CleanForPlatform(All, Config, Platform);
+		});
+	}
+	else CleanForPlatform(All, Config, PlatformCurrent);
+}
+
+void IdeProject::CleanForPlatform(bool All, BuildConfig Config, IdePlatform Platform)
+{
+	if (!d->Thread &&
+		d->Settings.GetStr(ProjMakefile, NULL, Platform))
+	{
+		if (auto m = GetMakefile(Platform))
 		{
 			CheckExists(m);
-			d->Thread.Reset(new BuildThread(this, m, true, Config, All, sizeof(ssize_t)*8));
+			d->Thread.Reset(new BuildThread(this, m, true, Config, Platform, All, sizeof(ssize_t)*8));
 		}
 	}
 }
@@ -2718,25 +2966,38 @@ void IdeProject::Build(bool All, BuildConfig Config)
 		return;
 	}
 
-	auto m = GetMakefile(PlatformCurrent);
+	if (d->Backend)
+	{
+		d->Backend->GetSysType([this, All, Config](auto platform)
+		{
+			BuildForPlatform(All, Config, platform);
+		});
+	}
+	else BuildForPlatform(All, Config, PlatformCurrent);
+}
+
+void IdeProject::BuildForPlatform(bool All, BuildConfig Config, IdePlatform Platform)
+{
+	auto m = GetMakefile(Platform);
 	CheckExists(m);
 	if (!m)
-	{		
+	{
 		d->App->GetBuildLog()->Print("Error: no makefile? (%s:%i)\n", _FL);
 		return;
 	}
 
+	// Clear the build tab log...
 	if (GetApp())
-		GetApp()->PostEvent(M_APPEND_TEXT, 0, 0);
+		GetApp()->PostEvent(M_APPEND_TEXT, NULL, AppWnd::BuildTab);
 
-	SetClean([this, m, All, Config](bool ok)
+	SetClean([this, m, All, Config, Platform](bool ok)
 	{
 		if (!ok)
 			return;
 
 		if (!IsMakefileUpToDate())
 		{
-			CreateMakefile(GetCurrentPlatform(), true);
+			CreateMakefile(Platform, true);
 		}
 		else
 		{
@@ -2749,6 +3010,7 @@ void IdeProject::Build(bool All, BuildConfig Config)
 					m,
 					false,
 					Config,
+					Platform,
 					All,
 					sizeof(size_t)*8
 				)
