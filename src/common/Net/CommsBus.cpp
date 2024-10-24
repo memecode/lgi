@@ -166,7 +166,7 @@ struct Connection
 		auto rd = sock.Read(readBuf.AddressOf() + used, readBuf.Length() - used);
 		if (rd <= 0)
 		{
-			printf("read disconnected: %i\n", (int)rd);
+			// printf("read disconnected: %i\n", (int)rd);
 			sock.Close();
 			connected = false;
 			return false;
@@ -608,6 +608,10 @@ struct LCommsBusPriv :
 		}
 		
 		clients.DeleteObjects();
+
+		LOG("%s closing listen port: " LPrintfSock "\n", Describe().Get(), listen.Handle());
+		listen.Close();
+
 		return 0;
 	}
 	
