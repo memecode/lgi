@@ -24,6 +24,8 @@ enum MsgIds
 #ifdef WIN32
 #pragma pack(push, before_pack)
 #pragma pack(1)
+#else
+#pragma pack(push,1)
 #endif
 
 // A malloc'd block of memory for messages.
@@ -116,6 +118,8 @@ public:
 
 #ifdef WIN32
 #pragma pack(pop, before_pack)
+#else
+#pragma pack(pop)
 #endif
 
 struct Connection
@@ -136,6 +140,21 @@ struct Connection
 	{
 		return ValidSocket(sock.Handle());
 	}
+	
+	 LString Dump(uint8_t *ptr, int len)
+	 {
+	 	LStringPipe p;
+	 	for (int i=0; i<len; i++)
+	 	{
+	 		char e = i % 16 == 15 ? '\n' : ' ';
+	 		if ((ptr[i] >= 'a' && ptr[i] <= 'z') ||
+	 			(ptr[i] >= 'A' && ptr[i] <= 'Z'))
+		 		p.Print(" %c%c", ptr[i], e);
+		 	else	 		
+	 			p.Print("%2.2x%c", ptr[i], e);
+	 	}
+	 	return p.NewLStr();
+	 }
 
 	bool Read(std::function<void(Block*)> cb)
 	{
@@ -153,6 +172,7 @@ struct Connection
 			return false;
 		}
 		used += rd;
+		// LOG("read: got %i bytes, used=%i\n", (int)rd, (int)used);
 		
 		// Check if there is a full msg
 		bool status = false;
@@ -163,7 +183,7 @@ struct Connection
 				ssize_t bytes = b->GetSize() + sizeof(Block);
 				if (used >= bytes)
 				{
-					// LOG("%u read bytes=%i\n", LCurrentThreadId(), bytes);
+					// LOG("read: got msg %i bytes\n", (int)bytes);
 
 					// Call the callback
 					cb(b);
@@ -173,18 +193,20 @@ struct Connection
 					if (remaining > 0)
 						memmove(readBuf.AddressOf(), readBuf.AddressOf(bytes), remaining);
 					used -= bytes;
+					// LOG("read: consume msg used=%i\n", (int)used);
 
 					status = true;
 				}
 				else
 				{
-					// LOG("read: not enough bytes for msg\n");
+					LOG("read: not enough bytes for msg %i < %i, sizeof(Block)=%i\n", (int)used, (int)bytes, (int)sizeof(Block));
+					LOG("read:\n%s\n", Dump((uint8_t*) readBuf.AddressOf(), used).Get());
 					break;
 				}
 			}
 			else
 			{
-				LOG("read: readbuf null\n");
+				// LOG("read: readbuf null\n");
 				break;
 			}
 		}
@@ -302,6 +324,7 @@ struct LCommsBusPriv :
 		LMutex("LCommsBusPriv.Lock"),
 		log(Log)
 	{
+		LAssert(sizeof(Block) == 9);
 		Run();
 	}
 	
@@ -425,15 +448,18 @@ struct LCommsBusPriv :
 						else if (!firstAttempt || info.sendTs == 0)
 						{
 							if (ServerSend(info.blk))
-							{	
-								// LOG("%s sent %s to %s\n", Describe().Get(), info.blk->ToString().Get(), info.blk->FirstLine().Get());
-								auto bytes = info.blk->GetSize() + 9;
-								LString::Array b;
-								b.SetFixedLength(false);
-								auto ptr = (uint8_t*)info.blk;
-								for (unsigned i=0; i<bytes; i++)
-									b.New().Printf("%i", ptr[i]);
-								LOG("%s write %s\n", Describe().Get(), LString(",").Join(b).Get());
+							{
+								#if 1
+									// LOG("%s sent %s to %s\n", Describe().Get(), info.blk->ToString().Get(), info.blk->FirstLine().Get());
+								#else
+									auto bytes = info.blk->GetSize() + 9;
+									LString::Array b;
+									b.SetFixedLength(false);
+									auto ptr = (uint8_t*)info.blk;
+									for (unsigned i=0; i<bytes; i++)
+										b.New().Printf("%i", ptr[i]);
+									LOG("%s write %s\n", Describe().Get(), LString(",").Join(b).Get());
+								#endif
 
 								writeQue.DeleteAt(i--, true);
 							}
@@ -492,10 +518,10 @@ struct LCommsBusPriv :
 				{
 					if (!ValidSocket(c->sock.Handle()))
 					{
-						LOG("%s client disconnected...\n", Describe().Get());
-
 						clients.Delete(c);
 						delete c;
+
+						LOG("%s client disconnected... (len=%i)\n", Describe().Get(), (int)clients.Length());
 						break;
 					}
 
@@ -507,12 +533,17 @@ struct LCommsBusPriv :
 							case MUid:
 							{
 								c->uid = blk->data;
+								LOG("%s set client uid=%s\n", Describe().Get(), c->uid.Get());
 								break;
 							}
 							case MCreateEndpoint:
 							{
 								auto lines = LString(blk->data).SplitDelimit("\r\n");
-								if (lines.Length() == 2)
+								if (lines.Length() != 2)
+								{
+									LOG("%s error in ep fmt=%s\n", Describe().Get(), blk->data);
+								}
+								else
 								{
 									auto ep = lines[0];
 									auto remoteUid = lines[1];
@@ -554,7 +585,10 @@ struct LCommsBusPriv :
 								break;
 							}
 							default:
+							{
+								LOG("%s error unknown msg %s\n", Describe().Get(), blk->ToString().Get());
 								break;
+							}
 						}
 						
 						c->lastSeen = LCurrentTime();
