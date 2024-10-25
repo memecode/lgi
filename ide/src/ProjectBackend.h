@@ -26,7 +26,7 @@ public:
 	virtual bool FindInFiles(FindParams *params, LStream *results) = 0;
 
 	// Process:
-	virtual bool RunProcess(const char *initDir, const char *cmdLine, LStream *output, std::function<void(int)> cb) = 0;
+	virtual bool RunProcess(const char *initDir, const char *cmdLine, LStream *output, LCancel *cancel, std::function<void(int)> cb) = 0;
 };
 
 extern LAutoPtr<ProjectBackend> CreateBackend(LView *parent, LString uri, LStream *log);

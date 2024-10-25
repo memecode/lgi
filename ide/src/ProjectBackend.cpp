@@ -128,13 +128,18 @@ class SshBackend :
 		return found;
 	}
 
-	LString ReadToPrompt(LStream *output = NULL)
+	LString ReadToPrompt(LStream *output = NULL, LCancel *cancel = NULL)
 	{
 		LStringPipe p;
 		if (auto c = GetConsole())
 		{
 			while (!IsCancelled())
 			{
+				if (cancel && cancel->IsCancelled())
+				{
+					break;
+				}
+
 				char buf[1024];
 				auto rd = c->Read(buf, sizeof(buf));
 				if (rd > 0)
@@ -157,7 +162,7 @@ class SshBackend :
 		return s;
 	}
 
-	LString Cmd(LString cmd, int32_t *exitCode = NULL, LStream *outputStream = NULL)
+	LString Cmd(LString cmd, int32_t *exitCode = NULL, LStream *outputStream = NULL, LCancel *cancel = NULL)
 	{
 		if (auto c = GetConsole())
 		{
@@ -169,9 +174,14 @@ class SshBackend :
 				return LString();
 			}
 
-			auto output = ReadToPrompt(outputStream);
+			auto output = ReadToPrompt(outputStream, cancel);
 			
-			if (exitCode)
+			if (cancel && cancel->IsCancelled())
+			{
+				if (exitCode)
+					*exitCode = -1;
+			}
+			else if (exitCode)
 			{
 				LString echo = "echo $?\n";
 				if (c->Write(echo))
@@ -455,9 +465,10 @@ public:
 			return false;
 
 		Auto lck(this, _FL);
-		work.Add( [this, results, path = LString(Path)]()
+		work.Add( [this, results, path = PreparePath(Path)]()
 		{
-			auto ls = Cmd(LString::Fmt("ls -lan %s\n", path.Get()));
+			auto cmd = LString::Fmt("ls -lan %s\n", path.Get());
+			auto ls = Cmd(cmd);
 			auto lines = ls.SplitDelimit("\r\n").Slice(2, -2);
 			
 			bool debug = path.Equals("~/code/lgi/trunk/ide/");
@@ -660,18 +671,18 @@ public:
 		return true;
 	}
 
-	bool RunProcess(const char *initDir, const char *cmdLine, LStream *output, std::function<void(int)> cb)
+	bool RunProcess(const char *initDir, const char *cmdLine, LStream *output, LCancel *cancel, std::function<void(int)> cb)
 	{
 		if (!cmdLine)
 			return false;
 
 		Auto lck(this, _FL);
-		work.Add( [this, cb, initDir = LString(initDir), cmdLine = LString(cmdLine), output]()
+		work.Add( [this, cb, initDir = LString(initDir), cmdLine = LString(cmdLine), output, cancel]()
 		{
 			auto args = LString::Fmt("cd %s && %s", initDir.Get(), cmdLine.Get());
 
 			int32_t exitVal;
-			Cmd(args + "\n", &exitVal, output);
+			Cmd(args + "\n", &exitVal, output, cancel);
 			if (cb)
 			{
 				app->RunCallback( [exitVal, cb]()
@@ -877,7 +888,7 @@ public:
 		#endif
 	}
 
-	bool RunProcess(const char *initDir, const char *cmdLine, LStream *output, std::function<void(int)> cb)
+	bool RunProcess(const char *initDir, const char *cmdLine, LStream *output, LCancel *cancel, std::function<void(int)> cb)
 	{
 		return false;
 	}

@@ -153,6 +153,7 @@ public:
 	void Build(bool All, BuildConfig Config);
 	void BuildForPlatform(bool All, BuildConfig Config, IdePlatform Platform);
 	void StopBuild();
+	void BuildThreadFinished();
 	void Clean(bool All, BuildConfig Config);
 	void CleanForPlatform(bool All, BuildConfig Config, IdePlatform Platform);
 	LDebugContext *Execute(ExeAction Act = ExeRun, LString *ErrMsg = NULL);

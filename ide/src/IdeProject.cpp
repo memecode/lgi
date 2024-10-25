@@ -223,18 +223,35 @@ class BuildThread : public LThread, public LStream, public LCancel
 	};
 
 	// Remote backend state
+	LMutex backendLock;
+	int backendCalls = 0;
+	LArray<std::function<void()>> backendWork;
+	void AddWork(std::function<void()> cb)
+	{
+		LMutex::Auto lck(&backendLock, _FL);
+		backendWork.Add(std::move(cb));
+	}
+	void AdjustCalls(int offset)
+	{
+		LMutex::Auto lck(&backendLock, _FL);
+		backendCalls += offset;
+	}
+
+	// Step 1, look through parent folders for a project file..
+	LString::Array backendPaths;
+	void Step1();
+
+	// Step 2, once found, rewrite the initDir and makefile path
+	LString backendProjectFolder;
+	void Step2();
+
+	// Step 3, run the make process with the given details...
 	LString backendArgs;
-	LString::Array backendPaths;	// Step 1, look through parent folders for a project file..
-	LString backendProjectFolder;	// Step 2, once found, rewrite the initDir and makefile path
-	LString backendInitFolder;		// Step 3, run the make process with the given details...
+	LString backendInitFolder;		
 	LString backendMakeFile; 
 	LAutoPtr<int> backendExitCode;
 	LAutoPtr<StreamToLog> buildLogger;
-
-	bool stepReady = true;
-	int backendCalls = 0;
-
-	void BackendStep();
+	void Step3();
 
 public:
 	BuildThread(IdeProject *proj, char *makefile, bool clean, BuildConfig config, IdePlatform platform, bool all, int wordsize);
@@ -244,6 +261,7 @@ public:
 	LString FindExe();
 	LAutoString WinToMingWPath(const char *path);
 	int Main() override;
+	void OnAfterMain() override;
 };
 
 class IdeProjectPrivate
@@ -1341,7 +1359,7 @@ BuildThread::BuildThread(IdeProject *proj,
 						IdePlatform platform,
 						bool all,
 						int wordsize)
-	: LThread("BuildThread")
+	: LThread("BuildThread"), backendLock("BuildThread.Lock")
 {
 	Proj = proj;
 	Makefile = makefile;
@@ -1405,10 +1423,20 @@ BuildThread::BuildThread(IdeProject *proj,
 	Run();
 }
 
+void BuildThread::OnAfterMain()
+{
+	auto p = Proj;
+	p->GetApp()->RunCallback([p]()
+	{
+		p->BuildThreadFinished();
+	});
+}
+
 BuildThread::~BuildThread()
 {
 	Cancel();
 
+	/*
 	if (SubProc)
 	{
 		bool b = SubProc->Interrupt();
@@ -1443,6 +1471,7 @@ BuildThread::~BuildThread()
 			}
 		}
 	}
+	*/
 }
 
 ssize_t BuildThread::Write(const void *Buffer, ssize_t Size, int Flags)
@@ -1860,115 +1889,127 @@ LAutoString BuildThread::WinToMingWPath(const char *path)
 	return LAutoString(a.NewStr());
 }
 
-void BuildThread::BackendStep()
+void BuildThread::Step1()
 {
 	auto backend = Proj->GetBackend();
-	if (!backend)
-		return;
+	if (!backend || backendPaths.Length() == 0)
+		return; // nothing to do...
 
-	if (backendMakeFile)
-	{
-		// Step 3, run the build...
-		if (buildLogger.Reset(new StreamToLog(Proj->GetApp()))) // Create a persistant logger, to outlive the build process...
+	// Step 1, check the path for a project file...
+	auto p = backendPaths.Last();
+	backendPaths.PopLast();
+
+	StreamToLog log(Proj->GetApp());
+	// log.Print("%s: readdir '%s'\n", __FUNCTION__, p.Get());
+	AdjustCalls(1);
+	backend->ReadFolder(
+		p,
+		[this, backend](auto d)
 		{
-			buildLogger->Print("%s: building in '%s'\n", __FUNCTION__, backendInitFolder.Get());
-			backendCalls++;
-			backend->RunProcess(backendInitFolder, LString("make ") + backendArgs, buildLogger, [this](auto val)
-				{
-					backendCalls--;
-					backendExitCode.Reset(new int(val));
-				});
-		}
-		else Cancel();
-	}
-	else if (backendProjectFolder)
-	{
-		// Step 2, rewrite the init dir and makefile path
-		backendInitFolder = backendProjectFolder.Get();
-		LTrimDir(backendInitFolder);
+			StreamToLog log(Proj->GetApp());
 
-		LArray<char*> parts;
-		const char *s = backendArgs;
-		while (auto part = LTokStr(s))
-			parts.Add(part);
-
-		auto &last = parts.Last();
-		backendMakeFile = LString(last).Strip("\"\'");
-		auto pos = backendMakeFile.Find(backendInitFolder);
-		if (pos == 0)
-		{
-			// Remove the leading path...
-			backendMakeFile = backendMakeFile.Replace(backendInitFolder).LStrip("\\/");
-		}
-
-		delete [] last;
-		last = NewStr(backendMakeFile);
-
-		LStringPipe p;
-		for (auto part: parts)
-			p.Print("%s%s", p.GetSize() ? " " : "", part);
-
-		backendArgs = p.NewLStr();
-		parts.DeleteArrays();
-		stepReady = true;
-
-		StreamToLog log(Proj->GetApp());
-		log.Print("%s: rewrote args '%s'\n", __FUNCTION__, backendArgs.Get());
-	}
-	else if (backendPaths.Length())
-	{
-		// Step 1, check the path for a project file...
-		auto p = backendPaths.Last();
-		backendPaths.PopLast();
-
-		StreamToLog log(Proj->GetApp());
-		// log.Print("%s: readdir '%s'\n", __FUNCTION__, p.Get());
-		backendCalls++;
-		backend->ReadFolder(p, [this, backend](auto d)
+			for (int i=true; i; i=d->Next())
 			{
-				StreamToLog log(Proj->GetApp());
-
-				for (int i=true; i; i=d->Next())
+				if (d->IsDir())
+					continue;
+				auto nm = d->GetName();
+				auto ext = LGetExtension(nm);
+				if (!Stricmp(ext, "xml"))
 				{
-					if (d->IsDir())
-						continue;
-					auto nm = d->GetName();
-					auto ext = LGetExtension(nm);
-					if (!Stricmp(ext, "xml"))
-					{
-						// log.Print("%s: got xml '%s'\n", __FUNCTION__, nm);
+					// log.Print("%s: got xml '%s'\n", __FUNCTION__, nm);
 
-						// Could be a project file?
-						backendCalls++;
-						backend->Read(	d->FullPath(),
-										[this, full=LString(d->FullPath())](auto err, auto data)
+					// Could be a project file?
+					AdjustCalls(1);
+					backend->Read(
+						d->FullPath(),
+						[this, full=LString(d->FullPath())](auto err, auto data)
+						{
+							StreamToLog log(Proj->GetApp());
+							// log.Print("%s: got content '%s'\n", __FUNCTION__, full.Get());
+
+							// If has project data..
+							if (data.Find("<Project") > 0)
+							{
+								if (!backendProjectFolder)
+								{
+									backendProjectFolder = full;
+									backendPaths.Empty();
+
+									AddWork([this]()
 										{
-											StreamToLog log(Proj->GetApp());
-											// log.Print("%s: got content '%s'\n", __FUNCTION__, full.Get());
-
-											// If has project data..
-											if (data.Find("<Project") > 0)
-											{
-												backendProjectFolder = full;
-												backendPaths.Empty();
-												stepReady = true;
-											}
-
-											backendCalls--;
-										});
-					}
+											Step2();
+										}); // Go to step2...
+								}
+							}
+							AdjustCalls(-1);
+						});
 				}
+			}
 
-				if (backendPaths.Length() > 0)
-					stepReady = true;
+			if (backendPaths.Length() > 0)
+				AddWork([this]() { Step1(); }); // Look at the next path...
+			AdjustCalls(-1);
+		});
+}
 
-				backendCalls--;
+void BuildThread::Step2()
+{
+	auto backend = Proj->GetBackend();
+	if (!backend || !backendProjectFolder)
+		return; // nothing to do...
+
+	// Step 2, rewrite the init dir and makefile path
+	backendInitFolder = backendProjectFolder.Get();
+	LTrimDir(backendInitFolder);
+
+	LArray<char*> parts;
+	const char *s = backendArgs;
+	while (auto part = LTokStr(s))
+		parts.Add(part);
+
+	auto &last = parts.Last();
+	backendMakeFile = LString(last).Strip("\"\'");
+	auto pos = backendMakeFile.Find(backendInitFolder);
+	if (pos == 0)
+	{
+		// Remove the leading path...
+		backendMakeFile = backendMakeFile.Replace(backendInitFolder).LStrip("\\/");
+	}
+
+	delete [] last;
+	last = NewStr(backendMakeFile);
+
+	LStringPipe p;
+	for (auto part: parts)
+		p.Print("%s%s", p.GetSize() ? " " : "", part);
+
+	backendArgs = p.NewLStr();
+	parts.DeleteArrays();
+
+	StreamToLog log(Proj->GetApp());
+	log.Print("%s: rewrote args '%s'\n", __FUNCTION__, backendArgs.Get());
+
+	AddWork([this]() { Step3(); }); // Move onto the build itself...
+}
+
+void BuildThread::Step3()
+{
+	auto backend = Proj->GetBackend();
+	if (!backend || !backendMakeFile)
+		return; // nothing to do...
+
+	// Step 3, run the build...
+	if (buildLogger.Reset(new StreamToLog(Proj->GetApp()))) // Create a persistent logger, to outlive the build process...
+	{
+		buildLogger->Print("%s: building in '%s'\n", __FUNCTION__, backendInitFolder.Get());
+		AdjustCalls(1);
+		backend->RunProcess(backendInitFolder, LString("make ") + backendArgs, buildLogger, this, [this](auto val)
+			{
+				backendExitCode.Reset(new int(val));
+				AdjustCalls(-1);
 			});
 	}
-	else
-	{
-		LAssert(!"no work to do?");
-	}
+	else Cancel();
 }
 
 int BuildThread::Main()
@@ -2207,15 +2248,30 @@ int BuildThread::Main()
 			for (int i = 2; i < parts.Length(); i++)
 				backendPaths.New() = sep.Join(parts.Slice(0, i));
 			backendArgs = TmpArgs;
+			AddWork([this]() { Step1(); });
 			
 			StreamToLog log(Proj->GetApp());
 			uint64_t msgTs = LCurrentTime();
-			while (!backendExitCode && !IsCancelled())
+			int calls = 0;
+			while
+			(
+				(!backendExitCode && !IsCancelled())
+				||
+				calls > 0 // Don't exit till the backend has finished it's callbacks
+			)
 			{
-				if (stepReady && backendCalls == 0)
+				if (backendLock.LockWithTimeout(100, _FL))
 				{
-					stepReady = false;
-					BackendStep();
+					std::function<void()> cb;
+					calls = backendCalls;
+					if (backendWork.Length() > 0)
+					{
+						cb.swap(backendWork[0]);
+						backendWork.DeleteAt(0);
+					}
+					backendLock.Unlock();
+					if (cb)
+						cb();
 				}
 
 				LSleep(10);
@@ -2225,19 +2281,6 @@ int BuildThread::Main()
 				{
 					msgTs = now;
 					// log.Print("%s: backendCalls=%i\n", __FUNCTION__, backendCalls);
-				}
-			}
-
-			// log.Print("%s: finished step loop!!!\n", __FUNCTION__);
-			while (backendCalls > 0)
-			{
-				LSleep(10);
-
-				uint64_t now = LCurrentTime();
-				if (now - msgTs > 1000)
-				{
-					msgTs = now;
-					log.Print("%s: waiting for backendCalls=%i\n", __FUNCTION__, backendCalls);
 				}
 			}
 
@@ -2273,8 +2316,14 @@ int BuildThread::Main()
 					char Buf[256];
 					ssize_t rd;
 
-					while ( (rd = SubProc->Read(Buf, sizeof(Buf))) > 0 )
+					while ((rd = SubProc->Read(Buf, sizeof(Buf))) > 0 )
 					{
+						if (IsCancelled())
+						{
+							SubProc->Interrupt();
+							break;
+						}
+
 						Write(Buf, rd);
 					}
 					
@@ -3019,9 +3068,22 @@ void IdeProject::BuildForPlatform(bool All, BuildConfig Config, IdePlatform Plat
 	});
 }
 
+void IdeProject::BuildThreadFinished()
+{
+	// Now clean up the thread..
+	d->Thread.Reset();
+}
+
 void IdeProject::StopBuild()
 {
-	d->Thread.Reset();
+	if (d->Thread && !d->Thread->IsCancelled())
+	{
+		// When canceling the build thread, we should keep the message loop 
+		// running at all times... and not block
+		//
+		// Tell it we want to finish:
+		d->Thread->Cancel();
+	}
 }
 
 bool IdeProject::Serialize(bool Write)
