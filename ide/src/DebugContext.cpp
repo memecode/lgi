@@ -150,30 +150,27 @@ public:
 class LDebugContextPriv : public LMutex
 {
 public:
-	LDebugContext *Ctx;
-	AppWnd *App;
-	IdeProject *Proj;
-	bool InDebugging;
+	LDebugContext *Ctx = NULL;
+	AppWnd *App = NULL;
+	IdeProject *Proj = NULL;
+	bool InDebugging = false;
 	LAutoPtr<LDebugger> Db;
 	LString Exe, Args;
+	IdePlatform Platform;
 	
 	LString SeekFile;
-	int SeekLine;
-	bool SeekCurrentIp;
+	int SeekLine = 0;
+	bool SeekCurrentIp = false;
 	
 	LString MemDumpAddr;
 	NativeInt MemDumpStart;
 	LArray<uint8_t> MemDump;
 
-	LDebugContextPriv(LDebugContext *ctx) : LMutex("LDebugContextPriv")
+	LDebugContextPriv(LDebugContext *ctx, IdePlatform platform) :
+		LMutex("LDebugContextPriv"),
+		Platform(platform)
 	{
 		Ctx = ctx;
-		MemDumpStart = 0;
-		App = NULL;
-		Proj = NULL;
-		InDebugging = false;
-		SeekLine = 0;
-		SeekCurrentIp = false;
 	}
 	
 	~LDebugContextPriv()
@@ -197,45 +194,42 @@ public:
 		
 		LArray<LString> Threads;
 		int CurrentThread = -1;
-		if (!Db->GetThreads(Threads, &CurrentThread))
-		{
-			LgiTrace("%s:%i - Failed to get threads from debugger.\n", _FL);
-			return;
-		}
-		
-		Ctx->Threads->Empty();
-		for (unsigned i=0; i<Threads.Length(); i++)
-		{
-			char *f = Threads[i];
-			if (IsDigit(*f))
+		Db->GetThreads([this](auto threads, auto cur)
 			{
-				char *Sp = f;
-				while (*Sp && IsDigit(*Sp))
-					Sp++;
-				if (*Sp)
+				Ctx->Threads->Empty();
+				for (unsigned i=0; i<threads.Length(); i++)
 				{
-					*Sp++ = 0;
-					LListItem *it = new LListItem;
+					auto &f = threads[i];
+					if (IsDigit(*f))
+					{
+						char *Sp = f;
+						while (*Sp && IsDigit(*Sp))
+							Sp++;
+						if (*Sp)
+						{
+							*Sp++ = 0;
+							LListItem *it = new LListItem;
 					
-					int ThreadId = atoi(f);
-					it->SetText(f, 0);
-					it->SetText(Sp, 1);
+							int ThreadId = atoi(f);
+							it->SetText(f, 0);
+							it->SetText(Sp, 1);
 					
-					Ctx->Threads->Insert(it);
-					it->Select(ThreadId == CurrentThread);
+							Ctx->Threads->Insert(it);
+							it->Select(ThreadId == cur);
+						}
+					}			
 				}
-			}			
-		}
 		
-		Ctx->Threads->SendNotify();
+				Ctx->Threads->SendNotify();
+			});
 	}
 
 	void UpdateCallStack()
 	{
-		if (Db && Ctx->CallStack && InDebugging)
-		{
-			LArray<LAutoString> Stack;
-			if (Db->GetCallStack(Stack))
+		if (!Db || !Ctx->CallStack || !InDebugging)
+			return;
+
+		Db->GetCallStack([this](auto Stack)
 			{
 				Ctx->CallStack->Empty();
 				for (int i=0; i<Stack.Length(); i++)
@@ -265,8 +259,7 @@ public:
 				}
 				
 				Ctx->CallStack->SendNotify();
-			}
-		}
+			});
 	}
 	
 	void Log(const char *Fmt, ...)
@@ -286,29 +279,22 @@ public:
 	}
 };
 
-LDebugContext::LDebugContext(AppWnd *App, IdeProject *Proj, const char *Exe, const char *Args, bool RunAsAdmin, const char *Env, const char *InitDir)
+LDebugContext::LDebugContext(AppWnd *App, IdeProject *Proj, IdePlatform Platform, const char *Exe, const char *Args, bool RunAsAdmin, const char *Env, const char *InitDir)
 {
-	d = new LDebugContextPriv(this);
+	d = new LDebugContextPriv(this, Platform);
 	d->App = App;
 	d->Proj = Proj;
 	d->Exe = Exe;
 
-	#ifdef HAIKU
-	LAssert(!"No GDB");
-	#else	
 	auto log = App->GetDebugLog();
 	LAssert(log);
-	if (d->Db.Reset(CreateGdbDebugger(log)))
+	if (d->Db.Reset(CreateGdbDebugger(log, Proj->GetBackend(), Platform, d->App->GetNetworkLog())))
 	{
 		LFile::Path p;
 		if (InitDir)
-		{
 			p = InitDir;
-		}
 		else
-		{
 			p = LFile::Path(Exe) / "..";
-		}
 	
 		if (Exe)
 		{
@@ -319,7 +305,6 @@ LDebugContext::LDebugContext(AppWnd *App, IdeProject *Proj, const char *Exe, con
 			}
 		}
 	}
-	#endif
 }
 
 LDebugContext::~LDebugContext()
@@ -362,124 +347,133 @@ bool LDebugContext::DumpObject(const char *Var, const char *Val)
 	return true;	
 }
 
-bool LDebugContext::UpdateRegisters()
+void LDebugContext::UpdateRegisters()
 {
 	if (!d->Db || !Registers || !d->InDebugging)
-		return false;
+		return;
 	
-	return d->Db->GetRegisters(Registers);
+	d->Db->GetRegisters([this](auto &lines)
+		{
+			Registers->Write(LString("\n").Join(lines));
+		});
 }
 
-bool LDebugContext::UpdateLocals()
+void LDebugContext::UpdateLocals()
 {
 	if (!Locals || !d->Db || !d->InDebugging)
-		return false;
+		return;
 
 	if (d->Db->GetRunning())
 	{
 		printf("%s:%i - Debugger is running... can't update locals.\n", _FL);
-		return false;
+		return;
 	}
 
-	LArray<LDebugger::Variable> Vars;
-	if (!d->Db->GetVariables(true, Vars, false))
-		return false;
-	
-	Locals->Empty();
-	for (int i=0; i<Vars.Length(); i++)
-	{
-		LDebugger::Variable &v = Vars[i];
-		LListItem *it = new LListItem;
-		if (it)
+	d->Db->GetVariables(
+		true,
+		false,
+		nullptr,
+		[this](auto &err, auto &Vars)
 		{
-			switch (v.Scope)
+			if (err)
 			{
-				default:
-				case LDebugger::Variable::Local:
-					it->SetText("local", 0);
-					break;
-				case LDebugger::Variable::Global:
-					it->SetText("global", 0);
-					break;
-				case LDebugger::Variable::Arg:
-					it->SetText("arg", 0);
-					break;
+				return;
 			}
 
-			char s[256];
-			switch (v.Value.Type)
+			Locals->Empty();
+			for (int i=0; i<Vars.Length(); i++)
 			{
-				case GV_BOOL:
+				LDebugger::Variable &v = Vars[i];
+				LListItem *it = new LListItem;
+				if (it)
 				{
-					it->SetText(v.Type ? v.Type.Get() : "bool", 1);
-					sprintf_s(s, sizeof(s), "%s", v.Value.Value.Bool ? "true" : "false");
-					break;
-				}
-				case GV_INT32:
-				{
-					it->SetText(v.Type ? v.Type.Get() : "int32", 1);
-					sprintf_s(s, sizeof(s), "%i (0x%x)", v.Value.Value.Int, v.Value.Value.Int);
-					break;
-				}
-				case GV_INT64:
-				{
-					it->SetText(v.Type ? v.Type.Get() : "int64", 1);
-					sprintf_s(s, sizeof(s), LPrintfInt64, v.Value.Value.Int64);
-					break;
-				}
-				case GV_DOUBLE:
-				{
-					it->SetText(v.Type ? v.Type.Get() : "double", 1);
-					sprintf_s(s, sizeof(s), "%g", v.Value.Value.Dbl);
-					break;
-				}
-				case GV_STRING:
-				{
-					it->SetText(v.Type ? v.Type.Get() : "string", 1);
-					sprintf_s(s, sizeof(s), "%s", v.Value.Value.String);
-					break;
-				}
-				case GV_WSTRING:
-				{
-					it->SetText(v.Type ? v.Type.Get() : "wstring", 1);
-					#ifdef MAC
-					LAutoString tmp(WideToUtf8(v.Value.Value.WString));
-					sprintf_s(s, sizeof(s), "%s", tmp.Get());
-					#else
-					sprintf_s(s, sizeof(s), "%S", v.Value.Value.WString);
-					#endif
-					break;
-				}
-				case GV_VOID_PTR:
-				{
-					it->SetText(v.Type ? v.Type.Get() : "void*", 1);
-					sprintf_s(s, sizeof(s), "%p", v.Value.Value.Ptr);
-					break;
-				}
-				default:
-				{
-					sprintf_s(s, sizeof(s), "notimp(%s)", LVariant::TypeToString(v.Value.Type));
-					it->SetText(v.Type ? v.Type : s, 1);
-					s[0] = 0;
-					break;
+					switch (v.Scope)
+					{
+						default:
+						case LDebugger::Local:
+							it->SetText("local", 0);
+							break;
+						case LDebugger::Global:
+							it->SetText("global", 0);
+							break;
+						case LDebugger::Arg:
+							it->SetText("arg", 0);
+							break;
+					}
+
+					char s[256];
+					switch (v.Value.Type)
+					{
+						case GV_BOOL:
+						{
+							it->SetText(v.Type ? v.Type.Get() : "bool", 1);
+							sprintf_s(s, sizeof(s), "%s", v.Value.Value.Bool ? "true" : "false");
+							break;
+						}
+						case GV_INT32:
+						{
+							it->SetText(v.Type ? v.Type.Get() : "int32", 1);
+							sprintf_s(s, sizeof(s), "%i (0x%x)", v.Value.Value.Int, v.Value.Value.Int);
+							break;
+						}
+						case GV_INT64:
+						{
+							it->SetText(v.Type ? v.Type.Get() : "int64", 1);
+							sprintf_s(s, sizeof(s), LPrintfInt64, v.Value.Value.Int64);
+							break;
+						}
+						case GV_DOUBLE:
+						{
+							it->SetText(v.Type ? v.Type.Get() : "double", 1);
+							snprintf(s, sizeof(s), "%g", v.Value.Value.Dbl);
+							break;
+						}
+						case GV_STRING:
+						{
+							it->SetText(v.Type ? v.Type.Get() : "string", 1);
+							snprintf(s, sizeof(s), "%s", v.Value.Value.String);
+							break;
+						}
+						case GV_WSTRING:
+						{
+							it->SetText(v.Type ? v.Type.Get() : "wstring", 1);
+							#ifdef MAC
+							LAutoString tmp(WideToUtf8(v.Value.Value.WString));
+							sprintf_s(s, sizeof(s), "%s", tmp.Get());
+							#else
+							sprintf_s(s, sizeof(s), "%S", v.Value.Value.WString);
+							#endif
+							break;
+						}
+						case GV_VOID_PTR:
+						{
+							it->SetText(v.Type ? v.Type.Get() : "void*", 1);
+							sprintf_s(s, sizeof(s), "%p", v.Value.Value.Ptr);
+							break;
+						}
+						default:
+						{
+							sprintf_s(s, sizeof(s), "notimp(%s)", LVariant::TypeToString(v.Value.Type));
+							it->SetText(v.Type ? v.Type : s, 1);
+							s[0] = 0;
+							break;
+						}
+					}
+
+					it->SetText(v.Name, 2);
+					it->SetText(s, 3);
+					Locals->Insert(it);
 				}
 			}
-
-			it->SetText(v.Name, 2);
-			it->SetText(s, 3);
-			Locals->Insert(it);
-		}
-	}
 	
-	Locals->ResizeColumnsToContent();
-	
-	return true;
+			Locals->ResizeColumnsToContent();
+		});
 }
 
-bool LDebugContext::UpdateWatches()
+void LDebugContext::UpdateWatches()
 {
 	if (!Watch)
-		return false;
+		return;
 
 	LArray<LDebugger::Variable> Vars;
 	for (LTreeItem *i = Watch->GetChild(); i; i = i->GetNext())
@@ -489,32 +483,33 @@ bool LDebugContext::UpdateWatches()
 		v.Type = i->GetText(1);
 	}
 	
-	printf("Update watches %i\n", (int)Vars.Length());
-	if (!d->Db->GetVariables(false, Vars, false))
-		return false;
-	
-	int Idx = 0;
-	for (LTreeItem *i = Watch->GetChild(); i; i = i->GetNext(), Idx++)
-	{
-		LDebugger::Variable &v = Vars[Idx];
-		WatchItem *wi = dynamic_cast<WatchItem*>(i);
-		if (!wi)
+	d->Db->GetVariables(
+		false,
+		false,
+		&Vars,
+		[this](auto &err, auto &Vars)
 		{
-			LgiTrace("%s:%i - Error: not watch item.\n", _FL);
-			continue;
-		}
-		if (v.Name == (const char*)i->GetText(0))
-		{
-			i->SetText(v.Type, 1);
-			wi->SetValue(v.Value);
-		}
-		else
-		{
-			LgiTrace("%s:%i - Error: Not the same name.\n", _FL);
-		}
-	}
-
-	return true;
+			int Idx = 0;
+			for (LTreeItem *i = Watch->GetChild(); i; i = i->GetNext(), Idx++)
+			{
+				LDebugger::Variable &v = Vars[Idx];
+				WatchItem *wi = dynamic_cast<WatchItem*>(i);
+				if (!wi)
+				{
+					LgiTrace("%s:%i - Error: not watch item.\n", _FL);
+					continue;
+				}
+				if (v.Name == (const char*)i->GetText(0))
+				{
+					i->SetText(v.Type, 1);
+					wi->SetValue(v.Value);
+				}
+				else
+				{
+					LgiTrace("%s:%i - Error: Not the same name.\n", _FL);
+				}
+			}
+		});
 }
 
 void LDebugContext::UpdateCallStack()
@@ -527,15 +522,17 @@ void LDebugContext::UpdateThreads()
 	d->UpdateThreads();
 }
 
-bool LDebugContext::SelectThread(int ThreadId)
+void LDebugContext::SelectThread(int ThreadId, LDebugger::TStatusCb cb)
 {
 	if (!d->Db)
 	{
 		LgiTrace("%s:%i - No debugger.\n", _FL);
-		return false;
+		if (cb)
+			cb(false);
+		return;
 	}
 	
-	return d->Db->SetCurrentThread(ThreadId);
+	d->Db->SetCurrentThread(ThreadId, cb);
 }
 
 bool LDebugContext::ParseFrameReference(const char *Frame, LAutoString &File, int &Line)
@@ -579,14 +576,14 @@ bool LDebugContext::OnCommand(int Cmd)
 			if (d->Db)
 			{
 				d->App->LoadBreakPoints(d->Db);
-				d->Db->SetRunning(true);
+				d->Db->SetRunning(true, nullptr);
 			}
 			break;
 		}
 		case IDM_CONTINUE:
 		{
 			if (d->Db)
-				d->Db->SetRunning(true);
+				d->Db->SetRunning(true, nullptr);
 			break;
 		}
 		case IDM_ATTACH_TO_PROCESS:
@@ -603,22 +600,22 @@ bool LDebugContext::OnCommand(int Cmd)
 		}
 		case IDM_STOP_DEBUG:
 		{
-			if (d->Db)
-				return d->Db->Unload();
-			else
-				return false;				
-			break;
+			if (!d->Db)
+				return false;
+
+			d->Db->Unload(nullptr);
+			return true;
 		}
 		case IDM_PAUSE_DEBUG:
 		{
 			if (d->Db)
-				d->Db->SetRunning(false);
+				d->Db->SetRunning(false, nullptr);
 			break;
 		}
 		case IDM_RESTART_DEBUGGING:
 		{
 			if (d->Db)
-				d->Db->Restart();
+				d->Db->Restart(nullptr);
 			break;
 		}
 		case IDM_RUN_TO:
@@ -629,19 +626,19 @@ bool LDebugContext::OnCommand(int Cmd)
 		{
 			printf("debugger IDM_STEP_INTO\n");
 			if (d->Db)
-				d->Db->StepInto();
+				d->Db->StepInto(nullptr);
 			break;
 		}
 		case IDM_STEP_OVER:
 		{
 			if (d->Db)
-				d->Db->StepOver();
+				d->Db->StepOver(nullptr);
 			break;
 		}
 		case IDM_STEP_OUT:
 		{
 			if (d->Db)
-				d->Db->StepOut();
+				d->Db->StepOut(nullptr);
 			break;
 		}
 		case IDM_TOGGLE_BREAKPOINT:
@@ -658,7 +655,7 @@ bool LDebugContext::OnCommand(int Cmd)
 void LDebugContext::OnUserCommand(const char *Cmd)
 {
 	if (d->Db)
-		d->Db->UserCommand(Cmd);
+		d->Db->UserCommand(Cmd, nullptr);
 }
 
 void NonPrintable(uint64 ch, uint8_t *&out, ssize_t &len)
@@ -891,16 +888,16 @@ void LDebugContext::Ungrab()
 	// printf("LDebugContext::Ungrab: noop\n");
 }
 
-bool LDebugContext::OnBreakPoint(LDebugger::BreakPoint &b, bool Add)
+void LDebugContext::OnBreakPoint(LDebugger::BreakPoint &b, bool Add)
 {
 	if (!d->Db)
 	{
 		LgiTrace("%s:%i - No debugger loaded.\n", _FL);
-		return false;
+		return;
 	}
 	
 	if (Add)
-		return d->Db->SetBreakPoint(&b);
+		d->Db->SetBreakPoint(&b, nullptr);
 	else
-		return d->Db->RemoveBreakPoint(&b);
+		d->Db->RemoveBreakPoint(&b, nullptr);
 }

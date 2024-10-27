@@ -5,39 +5,98 @@
 #ifndef _STRUCTURED_IO_H_
 #include "lgi/common/StructuredIo.h"
 #endif
+#include "lgi/common/CommsBus.h"
 
 class LStructuredLog
 {
-	LFile f;
 	LStructuredIo io;
-	
+
+	LAutoPtr<LFile> file;
+	LAutoPtr<LCommsBus> bus;
+	LString endPoint;
+	LStream *log = NULL;
+
 	template<typename T>
 	void Store(T &&t)
 	{
 		StructIo(io, t);
 	}
 
-public:
-	LStructuredLog(const char *FileName, bool write = true) : io(write)
+	void Process()
 	{
-		LString fn;
-		if (LIsRelativePath(FileName))
+		if (file)
 		{
-			LFile::Path p(LSP_APP_INSTALL);
-			p += FileName;
-			fn = p.GetFull();
+			io.ToStream(file);
 		}
-		else fn = FileName;
+		else if (bus)
+		{
+			LStringPipe p;
+			if (io.ToStream(&p))
+				bus->SendMsg(endPoint, p.NewLStr());
+		}
+	}
 
-		if (f.Open(fn, write ? O_WRITE : O_READ) && write)
-			f.SetSize(0);
+public:
+	enum TTargetType
+	{
+		TFile, // Param is a file name
+		TData, // Param is literal data
+		TNetworkEndpoint, // Param is a network endpoint
+	};
+
+	constexpr static const char *sDefaultEndpoint = "struct.log";
+
+	LStructuredLog(TTargetType target, LString param, bool write = true, LStream *logger = NULL) :
+		io(write),
+		log(logger)
+	{
+		switch (target)
+		{
+			case TFile:
+			{
+				LString fn;
+				if (LIsRelativePath(param))
+				{
+					LFile::Path p(LSP_APP_INSTALL);
+					p += param;
+					fn = p.GetFull();
+				}
+				else fn = param;
+
+				if (file.Reset(new LFile) &&
+					file->Open(fn, write ? O_WRITE : O_READ) && write)
+					file->SetSize(0);
+				break;
+			}
+			case TData:
+			{
+				io.FromString(param);
+				break;
+			}
+			case TNetworkEndpoint:
+			{
+				endPoint = param;
+				bus.Reset(new LCommsBus(log));
+
+				if (bus && !write)
+				{
+					bus->Listen(endPoint,
+						[this](auto msg)
+						{
+							io.FromString(msg);
+						});
+				}
+				break;
+			}
+		}
 	}
 
 	virtual ~LStructuredLog()
 	{
-		io.Flush(&f);
+		Process();
 	}
 
+	LStream *GetLog() const { return log; }
 	LStructuredIo &GetIo() { return io; }
 
 	// Write objects to the log. Custom types will need to have a StructIo implementation
@@ -49,8 +108,8 @@ public:
 			LAssert(!"Not open for writing.");
 			return;
 		}
-		int dummy[] = { 0, ( (void) Store(std::forward<Args>(args)), 0) ... };
-		io.Flush(&f);
+		int dummy[] = { 0, ( (void) Store(std::forward<Args>(args)), 0) ... };		
+		Process();
 	}
 
 	// Read and decode to string objects.
@@ -62,25 +121,32 @@ public:
 			return false;
 		}
 
-		if (io.GetPos() >= io.Length())
+		if (bus)
 		{
-			if (!io.Length(f.GetSize()))
-				return false;
-
-			if (prog)
-				prog->SetRange(f.GetSize());
-
-			for (int64_t i=0; i<f.GetSize(); )
+			LAssert(!"impl me");
+		}
+		else if (file)
+		{
+			if (io.GetPos() >= io.Length())
 			{
-				size_t blk = MIN(f.GetSize() - i, 128 << 20);
-				if (f.Read(io.AddressOf(i), blk) != blk)
+				if (!io.Length(file->GetSize()))
 					return false;
-				i += blk;
+
 				if (prog)
+					prog->SetRange(file->GetSize());
+
+				for (int64_t i=0; i<file->GetSize(); )
 				{
-					prog->Value(i);
-					if (prog->IsCancelled())
+					size_t blk = MIN(file->GetSize() - i, 128 << 20);
+					if (file->Read(io.AddressOf(i), blk) != blk)
 						return false;
+					i += blk;
+					if (prog)
+					{
+						prog->Value(i);
+						if (prog->IsCancelled())
+							return false;
+					}
 				}
 			}
 		}
@@ -185,14 +251,14 @@ public:
 	{
 		auto fn = "my-test-log.struct";
 		{
-			LStructuredLog Log(fn);
+			LStructuredLog Log(TFile, fn);
 			LString asd = LString("1234568,");
 			int ert = 123;
 			LRect rc(10, 10, 200, 100);
 			Log.Log("asd:", asd, rc, ert);
 		}
 		{
-			LStructuredLog Rd(fn, false);
+			LStructuredLog Rd(TFile, fn, false);
 			LString s;
 			if (Rd.Read(s))
 				LgiTrace("%s\n", s.Get());

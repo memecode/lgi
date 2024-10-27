@@ -17,20 +17,20 @@ public:
 	LTextLog *Registers = NULL;
 
 	// Object
-	LDebugContext(AppWnd *App, class IdeProject *Proj, const char *Exe, const char *Args, bool RunAsAdmin, const char *Env, const char *InitDir);
+	LDebugContext(AppWnd *App, class IdeProject *Proj, IdePlatform Platform, const char *Exe, const char *Args, bool RunAsAdmin, const char *Env, const char *InitDir);
 	virtual ~LDebugContext();
 
 	// Impl
 	bool ParseFrameReference(const char *Frame, LAutoString &File, int &Line);
 	bool SetFrame(int Frame);
-	bool UpdateLocals();
-	bool UpdateWatches();
-	bool UpdateRegisters();
+	void UpdateLocals();
+	void UpdateWatches();
+	void UpdateRegisters();
 	void UpdateCallStack();
 	void UpdateThreads();
-	bool SelectThread(int ThreadId);
+	void SelectThread(int ThreadId, LDebugger::TStatusCb cb);
 	bool DumpObject(const char *Var, const char *Val);
-	bool OnBreakPoint(LDebugger::BreakPoint &b, bool Add);
+	void OnBreakPoint(LDebugger::BreakPoint &b, bool Add);
 	
 	// Ui events...
 	bool OnCommand(int Cmd);

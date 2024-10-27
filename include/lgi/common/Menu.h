@@ -297,9 +297,9 @@ public:
 	LMenu *GetMenu() { return Menu; }
 
 	// Dom impl
-	bool GetVariant(const char *Name, LVariant &Value, const char *Arr = NULL);
-	bool SetVariant(const char *Name, LVariant &Value, const char *Arr = NULL);
-	bool CallMethod(const char *MethodName, LScriptArguments &Args);
+	bool GetVariant(const char *Name, LVariant &Value, const char *Arr = NULL) override;
+	bool SetVariant(const char *Name, LVariant &Value, const char *Arr = NULL) override;
+	bool CallMethod(const char *MethodName, LScriptArguments &Args) override;
 };
 
 /// An item an a menu

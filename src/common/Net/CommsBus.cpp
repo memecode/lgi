@@ -141,7 +141,7 @@ struct Connection
 		return ValidSocket(sock.Handle());
 	}
 	
-	 LString Dump(uint8_t *ptr, int len)
+	 LString Dump(uint8_t *ptr, ssize_t len)
 	 {
 	 	LStringPipe p;
 	 	for (int i=0; i<len; i++)
@@ -470,9 +470,15 @@ struct LCommsBusPriv :
 						}
 						break;
 					}
+					case MCreateEndpoint:
+					{
+						// This can happen when a new comms bus, which starts in client mode, listens on an endpoint
+						// but then becomes a server. So it's ok to discard the message.
+						writeQue.DeleteAt(i--, true);
+						break;
+					}
 					default:
 					{
-						// What to do here?
 						LOG("%s error: can't send msg type %s\n", Describe().Get(), info.blk->ToString().Get());
 						writeQue.DeleteAt(i--, true);
 						break;

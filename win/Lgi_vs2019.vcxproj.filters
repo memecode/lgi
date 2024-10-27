@@ -117,6 +117,9 @@
       <UniqueIdentifier>{5fe450b8-5fa9-440e-9fb0-03860b3548d0}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
     </Filter>
+    <Filter Include="Source Files\Network\CommsBus">
+      <UniqueIdentifier>{51517e04-fa30-4233-978d-658a547f17b2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\win\Lgi\App.cpp">
@@ -502,6 +505,9 @@
     </ClCompile>
     <ClCompile Include="..\src\common\Gdc2\Tools\GdcTools.cpp">
       <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Net\CommsBus.cpp">
+      <Filter>Source Files\Network\CommsBus</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1230,6 +1236,9 @@
     </ClInclude>
     <ClInclude Include="..\include\lgi\win\LgiOsDefs.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\CommsBus.h">
+      <Filter>Source Files\Network\CommsBus</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

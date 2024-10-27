@@ -4,6 +4,13 @@
 
 	The existing implemenation isn't very robust or fast.
 */
+
+#define DEBUG_STOP_ON_GTK_ERROR	0
+#define DEBUG_STRUCT_LOGGING	1
+static bool DEBUG_SHOW_GDB_IO = false;
+#define ECHO_GDB_OUTPUT			0
+
+#include <atomic>
 #ifdef POSIX
 	#include <sys/types.h>
 	#include <signal.h>
@@ -16,24 +23,38 @@
 #include "lgi/common/StringClass.h"
 #include "lgi/common/LgiString.h"
 #include "lgi/common/Token.h"
-#include "Debugger.h"
+#if DEBUG_STRUCT_LOGGING
+#include "lgi/common/StructuredLog.h"
+#endif
 
-#define DEBUG_STOP_ON_GTK_ERROR	0
-static bool DEBUG_SHOW_GDB_IO = false;
-#define ECHO_GDB_OUTPUT			0
+#include "Debugger.h"
+#include "LgiIde.h"
+#include "ProjectBackend.h"
 
 const char sPrompt[] = "(gdb) ";
 
 class Callback
 {
 public:
-	virtual LString GetResponse(const char *c) = 0;
+	virtual void GetResponse(const char *c, LDebugger::TStringCb cb) = 0;
 };
 
-class Gdb : public LDebugger, public LThread, public Callback
+class Gdb :
+	public LDebugger,
+	public LThread,
+	public Callback,
+	public LCancel,
+	public LMutex
 {
 	LDebugEvents *Events = NULL;
-	LAutoPtr<LSubProcess> Sp;
+	ProjectBackend *backend = NULL;
+	IdePlatform platform = PlatformCurrent;
+	
+	// Either one of these should non-NULL
+	LAutoPtr<LSubProcess> LocalGdb;
+	LStream *RemoteGdb = NULL;
+	ProjectBackend::ProcessIo RemoteIo;
+	
 	LString Exe, Args, InitDir;
 	int AttachToPid = -1;
 	LString ChildEnv;
@@ -46,13 +67,66 @@ class Gdb : public LDebugger, public LThread, public Callback
 	bool SetPendingOn = false;
 	LArray<BreakPoint> BreakPoints;
 	int BreakPointIdx = -1;
-	int ProcessId = -1;
+	int ProcessId = -1; // of gdb itself, if known.
+	bool SuppressEchoLine = false;
 	bool SuppressNextFileLine = false;
+	#if DEBUG_STRUCT_LOGGING
+	LAutoPtr<LStructuredLog> Log;
+	#else
 	LStream *Log = NULL;
+	#endif
 
-	LMutex StateMutex;
-	bool DebuggingProcess = false;
-	bool Running = false;
+	// These things need locking:
+		struct Command
+		{
+			LString cmd;
+
+			// Some commands will cause the program to run
+			// In which case after the command is written to gdb
+			// the running state should be set...
+			bool setRunning = false;
+
+			// Various data output
+			LStringPipe pipe;
+			LString::Array strArr;
+			LError err;
+
+			// One of these should be non-null
+			std::function<void(LError&)> statucCb;
+			std::function<void(LError&,LStringPipe*)> pipeCb;
+			std::function<void(LError&,LString::Array*)> arrayCb;
+
+			// Methods
+			Command(const char *c, bool setRun)
+			{
+				cmd = c;
+				setRunning = setRun;
+			}
+
+			void OnError(LError e)
+			{
+				err = e;
+				Finish();
+			}
+
+			void Finish()
+			{
+				if (arrayCb)
+					arrayCb(err, &strArr);
+				else if (pipeCb)
+					pipeCb(err, &pipe);
+				else if (statucCb)
+					statucCb(err);
+				// else no callback, which is ok...
+			}
+		};
+
+		bool DebuggingProcess = false;
+		bool Running = false;
+		LArray<Command*> commands;
+		
+	// This should only be accessed by the worker thread...
+	LAutoPtr<Command> curCmd;
 
 	// Current location tracking
 	LString CurFile;
@@ -67,10 +141,6 @@ class Gdb : public LDebugger, public LThread, public Callback
 	}	ParseState = ParseNone;
 	LString::Array BreakInfo;
 
-	// Various output modes.
-	LStream *OutStream = NULL;
-	LString::Array *OutLines = NULL;
-	
 	enum ThreadState
 	{
 		Init,
@@ -134,14 +204,19 @@ class Gdb : public LDebugger, public LThread, public Callback
 	
 	void SetState(bool is_debug, bool is_run)
 	{
-		if (StateMutex.Lock(_FL))
+		if (Lock(_FL))
 		{
 			if (is_debug != DebuggingProcess ||
 				is_run != Running)
 			{
 				DebuggingProcess = is_debug;
 				Running = is_run;
-				StateMutex.Unlock();
+				Unlock();
+
+				#if DEBUG_STRUCT_LOGGING
+				#else
+				Log->Print("SetState(%i,%i) changed\n", DebuggingProcess, Running);
+				#endif
 
 				if (Events)
 				{
@@ -156,26 +231,31 @@ class Gdb : public LDebugger, public LThread, public Callback
 			}
 			else
 			{
-				StateMutex.Unlock();
+				Unlock();
+
+				#if DEBUG_STRUCT_LOGGING
+				#else
+				Log->Print("SetState(%i,%i) no change\n", DebuggingProcess, Running);
+				#endif
 			}
 		}
 	}
 
 	void LogMsg(const char *Fmt, ...)
 	{
-		if (Events)
-		{
-			va_list Arg;
-			va_start(Arg, Fmt);
-			char Buf[512];
-			int Ch = vsprintf_s(Buf, sizeof(Buf), Fmt, Arg);
-			va_end(Arg);
-			
-			Events->Write(Buf, Ch);
+		if (!Events)
+			return;
 
-			if (DEBUG_SHOW_GDB_IO)
-				printf("LogMsg:%s", Buf);
-		}
+		va_list Arg;
+		va_start(Arg, Fmt);
+		char Buf[512];
+		int Ch = vsprintf_s(Buf, sizeof(Buf), Fmt, Arg);
+		va_end(Arg);
+			
+		Events->Write(Buf, Ch);
+
+		if (DEBUG_SHOW_GDB_IO)
+			printf("LogMsg:%s", Buf);
 	}
 	
 	void OnExit()
@@ -185,10 +265,12 @@ class Gdb : public LDebugger, public LThread, public Callback
 	
 	char *NativePath(char *p)
 	{
+		char dirChar = platform == PlatformWin ? '\\' : '/';
+
 		for (char *c = p; *c; c++)
 		{
 			if (*c == '/' || *c == '\\')
-				*c = DIR_CHAR;
+				*c = dirChar;
 		}
 		return p;
 	}
@@ -287,34 +369,45 @@ class Gdb : public LDebugger, public LThread, public Callback
 	
 	void OnLine(const char *Start, ptrdiff_t Length)
 	{
+		if (SuppressEchoLine)
+		{
+			SuppressEchoLine = false;
+			return;
+		}
+
 		// if (DEBUG_SHOW_GDB_IO)
 		{
-			// printf("Receive: '%.*s' ParseState=%i, OutLine=%p, OutStream=%p\n", (int)Length-1, Start, ParseState, OutLines, OutStream);
-			printf("Receive(%p): '%.*s'\n", OutStream, (int)Length-1, Start);
+			if (Strnstr(Start, "Breakpoint 1 at", Length))
+			{
+				int asd=0;
+			}
+			// Log->Print("OnLine: '%.*s'\n", (int)Length-1, Start);
 		}
 
 		// Send output
-		if (OutLines)
+		if (curCmd)
 		{
-			if (Length <= 1)
+			// If the current command wants the data in a particular format:
+			if (curCmd->arrayCb)
 			{
-				printf("%s:%i - Warning: OnLine str='%.*s' len=%i\n", _FL, (int)Length, Start, (int)Length);
+				if (Length <= 1)
+				{
+					printf("%s:%i - Warning: OnLine str='%.*s' len=%i\n", _FL, (int)Length, Start, (int)Length);
+				}
+				curCmd->strArr.New().Set(Start, Length - 1);
+				return;
 			}
-			OutLines->New().Set(Start, Length - 1);
-			return;
+			else if (curCmd->pipeCb)
+			{
+				curCmd->pipe.Write(Start, Length);
+				return;
+			}
 		}
-		else if (OutStream)
-		{
-			OutStream->Write(Start, Length);
-			return;
-		}
-		else
-		{
-			Untagged.New().Set(Start, Length);
-			#if !ECHO_GDB_OUTPUT
-			Events->Write(Start, Length);
-			#endif
-		}
+
+		Untagged.New().Set(Start, Length);
+		#if !ECHO_GDB_OUTPUT
+		Events->Write(Start, Length);
+		#endif
 
 		#if ECHO_GDB_OUTPUT
 		Events->Write(Start, Length);
@@ -389,16 +482,76 @@ class Gdb : public LDebugger, public LThread, public Callback
 			}
 		}
 	}
+
+	void ProcessCommands()
+	{
+		// We're at a gdb prompt, check for a command to run...
+		if (curCmd)
+		{
+			// Finish up the current command
+			// Log->Print("\nError: fin curcmd %s\n", curCmd->cmd.Get());
+			curCmd->Finish();
+			curCmd.Reset();
+		}
+		// else Log->Print("\nError: no curcmd\n");
+
+		while (commands.Length())
+		{
+			// Pop the next command off the queue
+			{
+				LMutex::Auto lck(this, _FL);
+				curCmd.Reset(commands[0]);
+				commands.DeleteAt(0, true);
+			}
+			if (curCmd)
+			{
+				// Write the command to the stream
+				auto str = LString::Fmt("%s\n", curCmd->cmd.Get());
+				bool wr = false;
+				if (LocalGdb)
+					wr = LocalGdb->Write(str);
+				else if (RemoteGdb)
+					SuppressEchoLine = wr = RemoteGdb->Write(str);
+				else LAssert(!"one of these needs to valid?");
+						
+				if (wr)
+				{
+					if (curCmd->setRunning)
+						SetState(DebuggingProcess, true);
+
+					#if DEBUG_STRUCT_LOGGING
+					if (RemoteGdb)
+						Log->Log("Write:", str);
+					#else
+					if (RemoteGdb)
+						Log->Write(str);
+					#endif
+					break;
+				}
+
+				curCmd->OnError(LError(LErrorIoFailed, "cmd write failed"));
+				curCmd.Reset();
+				// loop around and get another command...
+			}
+			else break;
+		}
+	}
 	
 	void OnRead(const char *Ptr, ssize_t Bytes)
 	{
+		#if DEBUG_STRUCT_LOGGING
+		Log->Log("OnRead:", LString(Ptr, Bytes));
+		#endif
+
 		// Parse output into lines
 		auto p = Ptr;
 		auto End = p + Bytes;
 		char *LineEnd = Line + sizeof(Line) - 2;
 		while (p < End)
 		{
-			if (*p == '\n')
+			if (*p == '\r')
+				;
+			else if (*p == '\n')
 			{
 				*LinePtr++ = *p;
 				*LinePtr = 0;
@@ -419,33 +572,32 @@ class Gdb : public LDebugger, public LThread, public Callback
 		if (bytes == 6)
 		{
 			AtPrompt = !_strnicmp(Line, sPrompt, bytes);
-			// LgiTrace("AtPrompt=%i Running=%i\n", AtPrompt, Running);
+
+			#if DEBUG_STRUCT_LOGGING
+			#else
+			Log->Print("\nAtPrompt=%i Running=%i\n", AtPrompt, Running);
+			#endif
+			if (Running ^ !AtPrompt)
+				SetState(DebuggingProcess, !AtPrompt);
+
 			if (AtPrompt)
 			{
-				if (Running ^ !AtPrompt)
-				{
-					// printf("Running=%i -> %i\n", Running, !AtPrompt);
-					SetState(DebuggingProcess, !AtPrompt);
-				}
-				
-				if (OutStream)
-					OutStream = NULL;
-				if (OutLines)
-					OutLines = NULL;
-
 				Events->Write(Line, bytes);
+				ProcessCommands();
 			}
 		}
 	}
 	
 	int Main()
 	{
-		#ifdef WIN32
-		const char *Shell = "C:\\Windows\\System32\\cmd.exe";
-		const char *Path = "C:\\MinGW\\bin\\gdb.exe";
-		#else
 		const char *Path = "gdb";
-		#endif
+		const char *Shell = "bash";
+		if (platform == PlatformWin)
+		{
+			Shell = "C:\\Windows\\System32\\cmd.exe";
+			Path = "C:\\MinGW\\bin\\gdb.exe";
+		}
+
 		LString p;
 		
 		if (AttachToPid > 0)
@@ -453,15 +605,22 @@ class Gdb : public LDebugger, public LThread, public Callback
 			auto Arg = LString::Fmt("--pid %i", AttachToPid);
 
 			LgiTrace("Attaching Debugger: %s %s\n", Path, Args.Get());
-			if (!Sp.Reset(new LSubProcess(Path, Arg)))
-				return false;
+			if (backend)
+			{
+				LAssert(!"impl me");
+			}
+			else
+			{
+				if (!LocalGdb.Reset(new LSubProcess(Path, Arg)))
+					return false;
+			}
 		}
 		else
-		{		
+		{
 			if (RunAsAdmin)
 				p.Printf("pkexec %s --args \"%s\"", Path, Exe.Get());
 			else
-				p.Printf("%s --args \"%s\"", Path, Exe.Get());
+				p.Printf("%s --args %s", Path, Exe.Get());
 			if (Args)
 			{
 				p += " ";
@@ -470,41 +629,76 @@ class Gdb : public LDebugger, public LThread, public Callback
 			LString::Array a = p.Split(" ", 1);
 			
 			LgiTrace("Starting Debugger: %s %s\n", a[0].Get(), a[1].Get());
-			if (!Sp.Reset(new LSubProcess(a[0], a[1])))
-				return false;
-		}
-
-		if (InitDir)
-			Sp->SetInitFolder(InitDir);
-		if (ChildEnv)
-		{
-			auto p = ChildEnv.Split("\n");
-			for (auto &v: p)
+			if (backend)
 			{
-				auto a = v.Strip().Split("=", 1);
-				if (a.Length() == 2)
-				{
-					LogMsg("%s:%i - env %s=%s\n", _FL, a[0].Get(), a[1].Get());					
-					Sp->SetEnvironment(a[0], a[1]);
-				}
-				else LogMsg("%s:%i - Wrong parts %s.", _FL, v.Get());
+				// Don't need to do anything yet...
+			}
+			else
+			{
+				if (!LocalGdb.Reset(new LSubProcess(a[0], a[1])))
+					return false;
 			}
 		}
-		else LogMsg("%s:%i - No env.", _FL);
+
+		if (LocalGdb)
+		{
+			if (InitDir)
+				LocalGdb->SetInitFolder(InitDir);
+			if (ChildEnv)
+			{
+				auto p = ChildEnv.Split("\n");
+				for (auto &v: p)
+				{
+					auto a = v.Strip().Split("=", 1);
+					if (a.Length() == 2)
+					{
+						LogMsg("%s:%i - env %s=%s\n", _FL, a[0].Get(), a[1].Get());					
+						LocalGdb->SetEnvironment(a[0], a[1]);
+					}
+					else LogMsg("%s:%i - Wrong parts %s.", _FL, v.Get());
+				}
+			}
+			else LogMsg("%s:%i - No env.", _FL);
+		}
 
 		#if DEBUG_STOP_ON_GTK_ERROR
 		Sp->SetEnvironment("G_DEBUG", "fatal-criticals");
 		#endif
 					
 		LgiTrace("Starting gdb subprocess...\n");
-		if (!Sp->Start(true, true, false))
+		if (backend)
 		{
-			State = ProcessError;
-			auto ErrMsg = LErrorCodeToString(Sp->GetErrorCode());
-			char s[256];
-			sprintf_s(s, sizeof(s), "Failed to start gdb, error: 0x%x (%s)\n", Sp->GetErrorCode(), ErrMsg.Get());
-			Events->OnError(Sp->GetErrorCode(), s);
-			return -1;
+			RemoteIo.ioCallback = [this](auto stream)
+			{
+				RemoteGdb = stream;
+				if (!RemoteGdb)
+					State = Exiting;
+			};
+
+			if (!backend->RunProcess(NativePath(InitDir), p, &RemoteIo, this, [this](auto exitCode)
+				{
+					#if DEBUG_STRUCT_LOGGING
+					#else
+					Log->Print("RemoteGdb exit code: %i\n", exitCode);
+					#endif
+				}))
+			{
+				State = ProcessError;
+				Events->OnError(LErrorFuncFailed, "Remote gdb failed to start");
+				return -1;
+			}
+		}
+		else if (LocalGdb)
+		{
+			if (!LocalGdb->Start(true, true, false))
+			{
+				State = ProcessError;
+				auto ErrMsg = LErrorCodeToString(LocalGdb->GetErrorCode());
+				char s[256];
+				sprintf_s(s, sizeof(s), "Failed to start gdb, error: 0x%x (%s)\n", LocalGdb->GetErrorCode(), ErrMsg.Get());
+				Events->OnError(LocalGdb->GetErrorCode(), s);
+				return -1;
+			}
 		}
 
 		#if DEBUG_SESSION_LOGGING
@@ -521,19 +715,40 @@ class Gdb : public LDebugger, public LThread, public Callback
 		char Buf[513];
 		bool IsRun;
 		auto PrevTs = LCurrentTime();
-		while (State == Looping && (IsRun = Sp->IsRunning()))
+		while (State == Looping)
 		{
 			#ifdef _DEBUG
 			ZeroObj(Buf);
 			#endif
-			auto Rd = Sp->Read(Buf, sizeof(Buf)-1, 50);
-			if (Rd > 0)
+
+			ssize_t Rd = 0;
+			if (LocalGdb)
 			{
-				#if 0 // DEBUG_SESSION_LOGGING
-				printf("GDB: %.*s\n", Rd, Buf);
-				#endif
-				OnRead(Buf, Rd);
+				if (!(IsRun = LocalGdb->IsRunning()))
+					break;
+				Rd = LocalGdb->Read(Buf, sizeof(Buf)-1, 50);
 			}
+			else if (RemoteGdb)
+			{
+				Rd = RemoteGdb->Read(Buf, sizeof(Buf)-1);
+				if (Rd > 0)
+				{
+					Rd = RemoveAnsi(Buf, Rd);
+					Buf[Rd] = 0;
+					// Log->Print("RemoteRd=" LPrintfSSizeT "\n", Rd);
+				}
+				else if (AtPrompt && !curCmd && commands.Length())
+				{
+					ProcessCommands();
+				}
+				else
+				{
+					LSleep(10);
+				}
+			}
+
+			if (Rd > 0)
+				OnRead(Buf, Rd);
 			
 			auto Now = LCurrentTime();
 			if (Now - PrevTs >= 1000)
@@ -542,65 +757,57 @@ class Gdb : public LDebugger, public LThread, public Callback
 			}
 		}
 
-		Break();
-		Cmd("q");
+		/*
+		Break(	[this](auto status)
+				{
+					Cmd("q",
+						[this](LError &err)
+						{
+							#if DEBUG_SESSION_LOGGING
+							LgiTrace("Gdb::Main - exited loop.\n");
+							#endif
+							SetState(false, false);
 
-		#if DEBUG_SESSION_LOGGING
-		LgiTrace("Gdb::Main - exited loop.\n");
-		#endif
-		SetState(false, false);
-
-		LogMsg("Debugger exited.\n");
+							LogMsg("Debugger exited.\n");
+						});
+				});
+		*/		
 		return 0;
 	}
 
-	bool WaitPrompt(const char *file, int line)
+	/*
+	void WaitPrompt(const char *file, int line, TStatusCb cb)
 	{
-		if (State == Init)
+		if (!cb)
+			return;
+
+		auto Start = LCurrentTime();
+		while (State == Init)
 		{
-			uint64 Start = LCurrentTime();
-			while (State == Init)
+			auto Now = LCurrentTime();
+			if (Now - Start < 5000)
 			{
-				uint64 Now = LCurrentTime();
-				if (Now - Start < 5000)
-				{
-					LSleep(10);
-				}
-				else
-				{
-					LgiTrace("%s:%i - WaitPrompt init wait failed.\n", _FL);
-					return false;
-				}
+				LSleep(10);
+			}
+			else
+			{
+				LgiTrace("%s:%i - WaitPrompt init wait failed.\n", _FL);
+				cb(false);
+				return;
 			}
 		}
 
-		uint64 Start = LCurrentTime();
-		uint64 Now = Start;
-		while (!AtPrompt &&
-				Now - Start < 5000 &&
-				State == Looping)
+		if (AtPrompt)
 		{
-			Now = LCurrentTime();
-			LSleep(50);
-			uint64 After = LCurrentTime();
-			// printf("...wait=%i\n", (int)(After-Start));
-
-			/*
-			if (After - Now > 65)
-			{
-				printf("Sleep took=%i\n", (int)(After - Now));
-			}
-			*/
+			cb(true);
 		}
-
-		if (!AtPrompt)
+		else
 		{
-			LogMsg("Error: Not at prompt (caller=%s:%i)\n", file, line);
-			return false;
+			LMutex::Auto lck(this, _FL);
+			LAssert(!"Fix.");
 		}
-
-		return true;
 	}
+	*/
 
 	#if 1
 	#define CMD_LOG(...) printf(__VA_ARGS__)
@@ -608,64 +815,124 @@ class Gdb : public LDebugger, public LThread, public Callback
 	#define CMD_LOG(...)
 	#endif
 
-	
-	bool Cmd(const char *c, LStream *Output = NULL, LString::Array *Arr = NULL)
+	void Cmd(const char *c,
+			bool setRun,
+			std::function<void(LError&,LString::Array*)> cb)
+	{
+		if (!ValidStr(c))
+		{
+			if (cb)
+				cb(LError(LErrorInvalidParam, "Not a valid command."), NULL);
+		}
+		else if (auto cmd = new Command(c, setRun))
+		{
+			cmd->arrayCb = cb;
+			LMutex::Auto lck(this, _FL);
+			commands.Add(cmd);
+		}
+	}
+
+	void Cmd(const char *c,
+			bool setRun,
+			std::function<void(LError&,LStringPipe*)> cb)
+	{
+		if (!ValidStr(c))
+		{
+			if (cb)
+				cb(LError(LErrorInvalidParam, "Not a valid command."), NULL);
+		}
+		else if (auto cmd = new Command(c, setRun))
+		{
+			cmd->pipeCb = cb;
+			LMutex::Auto lck(this, _FL);
+			commands.Add(cmd);
+		}
+	}
+
+	void Cmd(const char *c,
+			bool setRun,
+			std::function<void(LError&)> cb = nullptr)
 	{
 		if (!ValidStr(c))
 		{
 			CMD_LOG("%s:%i - Null cmd.\n", _FL);
-			LAssert(!"Not a valid command.");
-			return false;
-		}
-		
-		if (!WaitPrompt(_FL))
-		{
-			CMD_LOG("%s:%i - WaitPrompt failed.\n", _FL);
-			return false;
+			LError err(LErrorInvalidParam, "Not a valid command.");
+			if (cb)
+				cb(err);
+			return;
 		}
 
-		char str[256];
-		int ch = sprintf_s(str, sizeof(str), "%s\n", c);
-
-		// if (DEBUG_SHOW_GDB_IO) LgiTrace("Send: '%s'\n", c);
-		CMD_LOG("%s:%i - send '%s'.\n", _FL, c);
-
-		Events->Write(str, ch);
-		LinePtr = Line;
-		OutStream = Output;
-		OutLines = Arr;		
-		AtPrompt = false;
-
-		auto Start = LCurrentTime();
-		auto Wr = Sp->Write(str, ch);
-		CMD_LOG("%s:%i - wr=%i OutStream=%p.\n", _FL, (int)Wr, OutStream);
-		if (Wr != ch)
-		{
-			CMD_LOG("%s:%i - write failed.\n", _FL);
-			return false;
-		}
-
-		if (OutStream || OutLines)
-		{	
-			auto Wait0 = LCurrentTime();
-
-			WaitPrompt(_FL);
-
-			auto Wait1 = LCurrentTime();
-			CMD_LOG("%s:%i - Cmd timing " LPrintfInt64 " " LPrintfInt64 "\n",
+		#if 1
+			if (auto cmd = new Command(c, setRun))
+			{
+				cmd->statucCb = cb;
+				LMutex::Auto lck(this, _FL);
+				commands.Add(cmd);
+			}
+		#else		
+			WaitPrompt(
 				_FL,
-				Wait0 - Start,
-				Wait1 - Wait0);
+				[this, c = LString(c), cb](auto status)
+				{
+					if (!status)
+					{
+						if (cb)
+						{
+							LError err(LErrorFuncFailed, "no prompt");
+							cb(err);
+						}
+						return;
+					}
+				
+					char str[256];
+					int ch = sprintf_s(str, sizeof(str), "%s\n", c.Get());
 
-			LAssert(OutStream == NULL && OutLines == NULL);
-		}
-		
-		CMD_LOG("%s:%i - cmd successm, OutStream=%p\n", _FL, OutStream);
-		return true;
+					// if (DEBUG_SHOW_GDB_IO) LgiTrace("Send: '%s'\n", c);
+					CMD_LOG("%s:%i - send '%s'.\n", _FL, c.Get());
+
+					Events->Write(str, ch);
+					LinePtr = Line;
+					AtPrompt = false;
+
+					auto Start = LCurrentTime();
+					ssize_t Wr = 0;
+					if (LocalGdb)
+						Wr = LocalGdb->Write(str, ch);
+					else if (RemoteGdb)
+						Wr = RemoteGdb->Write(str, ch);
+					else
+						LAssert(0);
+
+					CMD_LOG("%s:%i - wr=%i.\n", _FL, (int)Wr);
+					if (Wr != ch)
+					{
+						CMD_LOG("%s:%i - write failed.\n", _FL);					
+						LError err(LErrorIoFailed, "cmd write failed");
+						if (cb)
+							cb(err);
+						return;
+					}
+				 
+					if (cb)
+					{
+						LError err;
+						cb(err);
+					}
+				});
+		#endif
 	}
 	
 public:
-	Gdb(LStream *log) : LThread("Gdb"), Log(log), StateMutex("Gdb.StateMutex")
+	Gdb(LStream *log, ProjectBackend *be, IdePlatform plat, LStream *netLog) :
+		LThread("Gdb.Thread"),
+		LMutex("Gdb.Lock"),
+		#if DEBUG_STRUCT_LOGGING
+			Log(new LStructuredLog(LStructuredLog::TNetworkEndpoint, LStructuredLog::sDefaultEndpoint, true, netLog)),
+		#else
+			Log(log),
+		#endif
+		backend(be),
+		platform(plat)		
 	{
 		State = Init;
 		LinePtr = Line;
@@ -730,104 +997,110 @@ public:
 		return true;
 	}
 	
-	bool SetCurrentThread(int ThreadId)
+	void SetCurrentThread(int ThreadId, TStatusCb cb) override
 	{
 		if (ThreadId < 1)
-			return false;
-		
-		LString c;
-		c.Printf("thread %i", ThreadId);
-		if (!Cmd(c))
-			return false;
-		
-		return true;
+		{
+			if (cb) cb(false);
+		}
+		else
+		{		
+			Cmd(LString::Fmt("thread %i", ThreadId), false, cb);
+		}
 	}
 
-	bool GetThreads(LArray<LString> &Threads, int *pCurrentThread)
+	void GetThreads(std::function<void(LArray<LString>&, int)> cb) override
 	{
-		LString::Array t;
-		if (!Cmd("info threads", NULL, &t))
-			return false;
-		
-		LString *Cur = NULL;
-		for (int i=0; i<t.Length(); i++)
-		{
-			char *l = t[i];			
-			if (i == 0)
-				continue;
-			
-			while (*l && IsWhite(*l))
-				l++;
-			
-			bool Current = *l == '*';
-			if (Current)
+		Cmd("info threads",
+			false,
+			[this, cb](LError &err, LString::Array *t)
 			{
-				l++;
-				while (*l && IsWhite(*l))
-					l++;
-			}
-			
-			if (IsDigit(*l))
-			{
-				if (Current && pCurrentThread != NULL)
+				LArray<LString> Threads;
+				int CurrentThreadId = -1;
+
+				LString *Cur = NULL;
+				for (int i=0; t && i<t->Length(); i++)
 				{
-					int ThreadId = atoi(l);
-					*pCurrentThread = ThreadId;
+					char *l = (*t)[i];
+					if (i == 0)
+						continue;
+			
+					while (*l && IsWhite(*l))
+						l++;
+			
+					bool Current = *l == '*';
+					if (Current)
+					{
+						l++;
+						while (*l && IsWhite(*l))
+							l++;
+					}
+			
+					if (IsDigit(*l))
+					{
+						if (Current)
+							CurrentThreadId = atoi(l);
+				
+						Cur = &Threads.New();
+						*Cur = l;
+					}
+					else if (Cur)
+					{
+						LString s;
+						s.Printf("%s %s", Cur->Get(), l);
+						*Cur = s;
+					}
 				}
-				
-				Cur = &Threads.New();
-				*Cur = l;
-			}
-			else if (Cur)
-			{
-				LString s;
-				s.Printf("%s %s", Cur->Get(), l);
-				*Cur = s;
-			}
-		}
-		
-		return true;
+			});
 	}
 
-	bool GetCallStack(LArray<LAutoString> &Stack)
+	void GetCallStack(TStringsCb cb)
 	{
-		LString::Array Bt;
-		if (!Cmd("bt", NULL, &Bt))
-			return false;
+		LAssert((bool)cb);
 
-		for (int i=0; i<Bt.Length(); i++)
-		{
-			char *l = Bt[i];
-			if (!l)
-				continue;
-			if (*l == '#')
+		Cmd("bt",
+			false,
+			[this, cb](LError &err, LString::Array *Bt)
 			{
-				Stack.New().Reset(NewStr(l));
-			}
-			else if (Stack.Length() > 0)
-			{
-				// Append to the last line..
-				LAutoString &Prev = Stack.Last();
-				char *End = Prev + strlen(Prev);
-				while (End > Prev && strchr(LWhiteSpace, End[-1]))
-					*(--End) = 0;
+				if (err)
+					return;
+
+				LString::Array Stack;
+				Stack.SetFixedLength(false);
+				for (int i=0; i<Bt->Length(); i++)
+				{
+					auto &l = (*Bt)[i];
+					if (!l)
+						continue;
+					if (*l == '#')
+					{
+						Stack.New() = l;
+					}
+					else if (Stack.Length() > 0)
+					{
+						// Append to the last line..
+						auto &Prev = Stack.Last();
+						auto End = Prev.Get() + Prev.Length();
+						while (End > Prev && strchr(LWhiteSpace, End[-1]))
+							*(--End) = 0;
 				
-				LString s;
-				s.Printf("%s%s", Prev.Get(), l);
-				Prev.Reset(NewStr(s));
-			}
-		}
-		
-		return true;
+						LString s;
+						s.Printf("%s%s", Prev.Get(), l);
+						Prev = s;
+					}
+				}
+
+				cb(Stack);
+			});
 	}
 
-	bool GetFrame(int &Frame, LAutoString &File, int &Line)
+	bool GetFrame(int &Frame, LString &File, int &Line) override
 	{
 		LAssert(0);
 		return false;
 	}
 	
-	bool SetFrame(int Frame)
+	bool SetFrame(int Frame) override
 	{
 		if (CurFrame != Frame)
 		{
@@ -835,17 +1108,16 @@ public:
 			
 			char c[256];
 			sprintf_s(c, sizeof(c), "frame %i", Frame);
-			return Cmd(c);
+			Cmd(c, false, [this](auto err)
+			{
+			});
 		}
 		
 		return true;
 	}
 
-	bool Restart()
+	void RestartInternal(TStatusCb cb)
 	{
-		if (Running)
-			Break(true);
-		
 		ProcessId = -1;
 
 		LString a;
@@ -854,25 +1126,58 @@ public:
 		else
 			a = "r";
 
-		bool Status = Cmd(a);
-		if (Status)
-		{
-			SetState(true, false);
-		}
-		
-		return Status;
+		Cmd(a,
+			true,
+			[this, cb](auto &err)
+			{
+				if (!err)
+					SetState(true, false);
+
+				if (cb)
+					cb(!err);
+			});
 	}
 
-	bool Unload()
+	void Restart(TStatusCb cb) override
 	{
 		if (Running)
-			Break(true);
-		
-		Cmd("q");
-		SetState(false, false);
-		State = Exiting;
-		
-		return false;
+			Break([this, cb](auto status)
+				{
+					if (status)
+						RestartInternal(cb);
+					else if (cb)
+						cb(false);
+				},
+				true);
+		else
+			RestartInternal(cb);
+	}
+
+	void UnloadInternal(TStatusCb cb)
+	{
+		Cmd("q", false, [this, cb](auto &err)
+		{
+			SetState(false, false);
+			State = Exiting;
+
+			if (cb)
+				cb(!err);
+		});
+	}
+
+	void Unload(TStatusCb cb) override
+	{
+		if (Running)
+			Break([this, cb](auto status)
+				{
+					if (status)
+						UnloadInternal(cb);
+					else if (cb)
+						cb(false);
+				},
+				true);
+		else
+			UnloadInternal(cb);
 	}
 	
 	bool GetRunning()
@@ -880,24 +1185,20 @@ public:
 		return Running;
 	}
 	
-	bool SetRunning(bool Run)
+	void SetRunning(bool Run, TStatusCb cb) override
 	{
 		if (Run)
 		{
 			if (!SetAsmType)
 			{
 				SetAsmType = true;
-				Cmd("set disassembly-flavor intel");
-				Cmd("handle SIGTTIN nostop");
-				Cmd("handle SIGTTOU ignore nostop");
-				Cmd("handle SIG34 ignore nostop");
-				Cmd("handle SIGPIPE nostop");
+				Cmd("set disassembly-flavor intel", false);
+				Cmd("handle SIGTTIN nostop", false);
+				Cmd("handle SIGTTOU ignore nostop", false);
+				Cmd("handle SIG34 ignore nostop", false);
+				Cmd("handle SIGPIPE nostop", false);
 				if (PrettyPrintPy)
-				{
-					LString c;
-					c.Printf("python exec(open(\"%s\").read())", PrettyPrintPy.Get());
-					Cmd(c);
-				}
+					Cmd(LString::Fmt("python exec(open(\"%s\").read())", PrettyPrintPy.Get()), false);
 			}
 			
 			LString a;
@@ -910,153 +1211,190 @@ public:
 
 			if (a(0) == 'r' && ProcessId < 0)
 			{
-				BreakPoint bp;
-				bp.Symbol = "main";
-				if (SetBreakPoint(&bp))
-				{
-					// printf("Set break point for main\n");
-					SuppressNextFileLine = true;
-					if (!Cmd(a))
-						return false;
-					SetState(true, true);
-					
-					// printf("Waiting for prompt\n");
-					if (!WaitPrompt(_FL))
-						return false;
-
-					// printf("Removing temp bp\n");
-					RemoveBreakPoint(&bp);
-					
-					LStringPipe p;
-
-					#if 0 // For some reason this is returning the wrong PID... WTH gdb... WTH.
-					// Get process info
-					if (Cmd("info inferiors", &p))
+				auto bp = new BreakPoint("main");
+				SetBreakPoint(bp,
+					[this, a, bp, cb](auto status) mutable
 					{
-						auto s = p.NewLStr();
-						// LogMsg("%s\n", s.Get());
-						
-						auto Ln = s.SplitDelimit("\r\n");
-						if (Ln.Length() >= 2)
+						if (!status)
 						{
-							LString::Array a = Ln[1].SplitDelimit(" \t");
-							for (unsigned i=0; i<a.Length()-1; i++)
-							{
-								if (!a[i].Equals("process"))
-									continue;
-
-								int Id = (int)a[i+1].Int();
-								if (Id >= 0)
-								{
-									LogMsg("%s:%i - ProcessId was %i, now %i (%s)\n", _FL, ProcessId, Id, Ln[1].Get());
-									ProcessId = Id;
-								}
-								break;
-							}
+							DeleteObj(bp);
+							if (cb) cb(false);
+							return;
 						}
-					}
-					#endif
-					
-					// Redetect the process id from the new threads...
-					ProcessId = -1;
 
-					printf("Continue...\n");					
-					bool Status = Cmd("c"); // Continue
-					if (Status)
-						SetState(true, true);
+						SuppressNextFileLine = true;
+						Cmd(a,
+							true,
+							[this, bp, cb](auto &err) mutable
+							{
+								if (err)
+								{
+									DeleteObj(bp);
+									if (cb) cb(false);
+									return;
+								}
 
-					LogMsg("[ProcessId=%i]\n", ProcessId);
-					return Status;					
-				}
+								RemoveBreakPoint(bp,
+									[this, cb, bp](auto status) mutable
+									{
+										DeleteObj(bp);
+
+										if (!status)
+										{
+											if (cb) cb(false);
+											return;
+										}
+
+										ProcessId = -1;
+
+										SetState(true, Running);
+
+										// Call the callback, just before we start running... if we've gotten this
+										// far it's fair to say it's ok. Otherwise the cb will be called after the
+										// prompt returns, probably not what the caller wants.
+										if (cb)
+											cb(true);
+
+										Cmd("c",
+											true,
+											[this, cb](auto &err)
+											{
+												if (err)
+													// But if it doesn't immediately unset the running status...
+													SetState(true, false);
+
+												if (LocalGdb)													
+													LogMsg("[ProcessId=%i]\n", ProcessId);
+
+											});
+									});
+							});
+					});
 			}
-
-			if (Cmd(a))
+			else
 			{
-				SetState(true, true);
-				return true;
+				SetState(true, Running);
+
+				Cmd(a,
+					true,
+					[this, cb](auto &err)
+					{
+						if (cb)
+							cb(!err);
+					});
 			}
 		}
 		else
 		{
-			if (Break())
-			{
-				return true;
-			}
+			Break(cb);
 		}
-		
-		return false;
 	}
 
-	bool AddBp(BreakPoint &bp)
+	void AddBpInternal(BreakPoint *bp, TStatusCb cb)
 	{
-		bool Ret = false;
-		if (!bp.Added)
+		char cmd[MAX_PATH_LEN];
+		if (bp->File)
 		{
-			if (!SetPendingOn)
-			{
-				Cmd("set breakpoint pending on");
-				SetPendingOn = true;
-			}
+			char *Last = strrchr(bp->File, DIR_CHAR);
+			sprintf_s(cmd, sizeof(cmd), "break %s:" LPrintfSSizeT, Last ? Last + 1 : bp->File.Get(), bp->Line);
+		}
+		else if (bp->Symbol)
+		{
+			sprintf_s(cmd, sizeof(cmd), "break %s", bp->Symbol.Get());
+		}
+		else
+		{
+			if (cb)
+				cb(false);
+			return;
+		}
 			
-			char cmd[MAX_PATH_LEN];
-			char *File = bp.File.Get();
-			if (File)
-			{
-				char *Last = strrchr(File, DIR_CHAR);
-				sprintf_s(cmd, sizeof(cmd), "break %s:" LPrintfSSizeT, Last ? Last + 1 : File, bp.Line);
-			}
-			else if (bp.Symbol)
-			{
-				sprintf_s(cmd, sizeof(cmd), "break %s", bp.Symbol.Get());
-			}
-			else return false;
+		BreakPointIdx = 0;
 			
-			BreakPointIdx = 0;
-			
-			LString::Array Lines;
-			Ret = Cmd(cmd, NULL, &Lines);
-			WaitPrompt(_FL);
-			
-			for (unsigned i=0; i<Lines.Length(); i++)
+		Cmd(cmd,
+			false,
+			[this, cb, bp](auto &err, LString::Array *Lines)
 			{
-				LString s;
-				s = Lines[i];
-				LString::Array p = s.Split(" ");
-				if (p.Length() >= 2 &&
-					!_stricmp(p[0], "breakpoint"))
+				if (err)
 				{
-					int Idx = (int)p[1].Int();
-					if (Idx)
+					if (cb)
+						cb(false);
+					return;
+				}
+
+				for (unsigned i=0; i<Lines->Length(); i++)
+				{
+					LString s = (*Lines)[i];
+					LString::Array p = s.Split(" ");
+					if (p.Length() >= 2 &&
+						!_stricmp(p[0], "breakpoint"))
 					{
-						bp.Index = Idx;
+						auto Idx = p[1].Int();
+						if (Idx > 0)
+						{
+							bp->Index = (int)Idx;
+						}
 					}
 				}
-			}
 			
-			BreakPointIdx = -1;
-			if (Ret)
-				bp.Added = true;
-		}
-		return Ret;
+				BreakPointIdx = -1;
+				bp->Added = true;
+
+				if (cb)
+					cb(true);
+			});
 	}
-	
-	bool SetBreakPoint(BreakPoint *bp)
+
+	void AddBp(BreakPoint *bp, TStatusCb cb)
 	{
 		if (!bp)
 		{
-			LgiTrace("%s:%i - SetBreakPoint failed, param error.\n", _FL);
-			return false;
+			if (cb)
+				cb(false);
+			return;
 		}
-		
+		if (bp->Added)
+		{
+			if (cb)
+				cb(true);
+			return;
+		}
+		if (!SetPendingOn)
+		{
+			Cmd("set breakpoint pending on",
+				false,
+				[this, bp, cb](auto &err)
+				{
+					if (err)
+					{
+						if (cb)
+							cb(false);
+						return;
+					}
+
+					SetPendingOn = true;
+					AddBpInternal(bp, cb);
+				});
+		}
+		else
+		{
+			AddBpInternal(bp, cb);
+		}			
+	}
+	
+	void SetBreakPoint(BreakPoint *bp, TStatusCb cb) override
+	{
 		// Make sure the child 'gdb' is running...
-		uint64 Start = LCurrentTime();
+		auto Start = LCurrentTime();
 		while (State == Init)
 		{
 			LSleep(5);
 			if (LCurrentTime()-Start > 3000)
 			{
 				LgiTrace("%s:%i - SetBreakPoint init wait failed...\n", _FL);
-				return false;
+				if (cb)
+					cb(false);
+				return;
 			}
 		}
 
@@ -1064,24 +1402,32 @@ public:
 		if (Running)
 		{
 			LgiTrace("%s:%i - Can't add break point while running.\n", _FL);
-			return false;
+			if (cb)
+				cb(false);
+			return;
 		}
 		else
 		{
-			if (AddBp(*bp))
-			{
-				BreakPoint &n = BreakPoints.New();
-				n = *bp;
-			}
+			AddBp(bp,
+				[this, bp, cb](auto status)
+				{
+					BreakPoint &n = BreakPoints.New();
+					n = *bp;
+
+					if (cb)
+						cb(status);
+				});
 		}
-		
-		return true;
 	}
 
-	bool RemoveBreakPoint(BreakPoint *bp)
+	void RemoveBreakPoint(BreakPoint *bp, TStatusCb cb) override
 	{
 		if (!bp)
-			return false;
+		{
+			if (cb)
+				cb(false);
+			return;
+		}
 
 		// Make sure the child 'gdb' is running...
 		uint64 Start = LCurrentTime();
@@ -1091,14 +1437,17 @@ public:
 			if (LCurrentTime()-Start > 3000)
 			{
 				LgiTrace("%s:%i - SetBreakPoint init wait failed...\n", _FL);
-				return false;
+				if (cb)
+					cb(false);
+				return;
 			}
 		}
 
 		if (Running)
 		{
 			LgiTrace("%s:%i - Can't add break point while running.\n", _FL);
-			return false;
+			if (cb)
+				cb(false);
 		}
 		else
 		{
@@ -1115,16 +1464,18 @@ public:
 			{
 				char c[256];
 				sprintf_s(c, sizeof(c), "delete %i", BreakPoints[i].Index);
-				bool Status = Cmd(c);
-				if (Status)
-				{				
-					BreakPoints.DeleteAt(i);
-				}
-				else
-				{
-					LgiTrace("%s:%i - The cmd '%s' failed.\n", _FL, c);
-					return false;
-				}
+				
+				Cmd(c,
+					false,
+					[this, i, cb, c = LString(c)](auto &err)
+					{
+						if (err)
+							LgiTrace("%s:%i - The cmd '%s' failed.\n", _FL, c.Get());
+						else
+							BreakPoints.DeleteAt(i);
+						if (cb)
+							cb(!err);
+					});
 			}
 			else
 			{
@@ -1132,11 +1483,11 @@ public:
 					_FL,
 					bp->File.Get(),
 					bp->Line);
-				return false;
+				
+				if (cb)
+					cb(false);
 			}
 		}
-		
-		return true;
 	}
 	
 	bool GetBreakPoints(LArray<BreakPoint> &bps)
@@ -1145,205 +1496,249 @@ public:
 		return false;
 	}
 	
-	void ParseVariables(const char *a, LArray<Variable> &vars, LDebugger::Variable::ScopeType scope, bool Detailed)
+	struct VariableParseState
 	{
-		auto t = LString(a).SplitDelimit("\r\n");
-		LString CurLine;
-		for (unsigned i=0; i<t.Length(); i++)
-		{
-			CurLine = t[i];
-			while (	i < t.Length() - 1 &&
-					strchr(LWhiteSpace, t[i+1][0]))
-			{
-				CurLine += t[++i];
-				continue;
-			}
+		Gdb *gdb = NULL;
+		LStream *log = NULL;
+		LArray<Variable> vars;
+		bool Detailed;
+		TVarsCb cb;
+		LError err;
+		std::atomic<int> calls{ 0 };
 
-			auto EqPos = CurLine.Find("=");
-			if (EqPos > 0)
+		VariableParseState(Gdb *obj, bool detail) :
+			gdb(obj),
+			Detailed(detail)
+		{			
+			#if DEBUG_STRUCT_LOGGING
+			log = gdb->Log->GetLog();
+			#else
+			log = gdb->Log;
+			#endif
+		}
+
+		void Finish(const char *optionalErr = nullptr)
+		{
+			if (optionalErr)
+				err.Set(LErrorFuncFailed, optionalErr);
+
+			log->Print("%s cb=%i\n", __FUNCTION__, (bool)cb);
+			if (cb)
+				cb(err, vars);
+
+			delete this;
+		}
+
+		void Calls(int offset)
+		{
+			auto old = calls.load();
+			calls += offset;
+			log->Print("%s(%i)=%i\n", __FUNCTION__, offset, calls.load());
+			if (calls.load() == 0 && old > 0)
 			{
-				char *end = NULL;
-				char *val = CurLine.Get() + EqPos + 1;
-				while (*val && strchr(LWhiteSpace, *val)) val++;
-				
-				Variable &v = vars.New();
-				v.Scope = scope;
-				v.Name = CurLine(0, EqPos).Strip();
-				if (!strnicmp(val, "0x", 2))
+				Finish();
+			}
+		}
+
+		// Calling this should always delete the object at some point...
+		void Process(LString::Array *input, LDebugger::TScope scope)
+		{
+			if (input)
+			{
+				// Parse the input:
+				for (ssize_t i=0; i<input->Length(); i++)
 				{
-					v.Value.Type = GV_VOID_PTR;
-					v.Value.Value.Ptr = (void*) htoi64(val);
-				}
-				else if (IsDigit(*val) || strchr(".-", *val))
-				{
-					// Is it floating point?
-					auto isFloat = strchr(val, '.') != NULL;
-					// printf("isFloat for '%s' is %i\n", val, isFloat);
-					if (isFloat)
+					LString line = (*input)[i];
+
+					// Append any following lines that start with whitespace...
+					while (	i < input->Length() - 1 &&
+							strchr(LWhiteSpace, (*input)[i+1][0]))
 					{
-						double tmp = atof(val);
-						v.Value = tmp;
+						line += (*input)[i+1];
+						input->DeleteAt(i+1, true);
 					}
-					else
-					{					
-						int64 tmp = atoi64(val);
-						if (tmp & 0xffffffff00000000L)
+
+					auto EqPos = line.Find("=");
+					if (EqPos <= 0)
+						return;
+
+					char *end = NULL;
+					char *val = line.Get() + EqPos + 1;
+					while (*val && strchr(LWhiteSpace, *val))
+						val++;
+				
+					Variable &v = vars.New();
+					v.Scope = scope;
+					v.Name = line(0, EqPos).Strip();
+					if (!strnicmp(val, "0x", 2))
+					{
+						v.Value.Type = GV_VOID_PTR;
+						v.Value.Value.Ptr = (void*) htoi64(val);
+					}
+					else if (IsDigit(*val) || strchr(".-", *val))
+					{
+						// Is it floating point?
+						auto isFloat = strchr(val, '.') != NULL;
+						// printf("isFloat for '%s' is %i\n", val, isFloat);
+						if (isFloat)
+						{
+							double tmp = atof(val);
 							v.Value = tmp;
+						}
 						else
-							v.Value = (int)tmp;
-					}
-				}
-				else if (*val == '(' && (end = strchr(val + 1, ')')))
-				{
-					val++;
-					v.Type.Set(val, end - val);
-					v.Value.OwnStr(TrimStr(end + 1));
-				}
-				else
-				{
-					v.Value.OwnStr(TrimStr(val));
-				}
-				
-				if (Detailed)
-				{
-					LStringPipe typePipe, valPipe;
-					LString c;					
-
-					// Get the type...
-					c.Printf("whatis %s", v.Name.Get());
-					Cmd(c, &typePipe);
-					auto type = typePipe.NewLStr();
-					printf("Type='%s'\n", type.Get());
-
-					c.Printf("p %s", v.Name.Get());
-					Cmd(c, &valPipe);
-					auto val = valPipe.NewLStr();					
-					if (val)
-					{
-						for (char *s = val; s && *s; )
-						{
-							if (*s == '\"')
-							{
-								char *e = strchr(++s, '\"');
-								if (!e)
-									break;
-								
-								v.Value.OwnStr(NewStr(s, e - s));
-								break;
-							}
-							else if (*s == '(' && !v.Type)
-							{
-								char *e = strchr(++s, ')');
-								if (!e)
-									break;
-
-								if (strnicmp(s, "gdb", 3))
-									v.Type.Set(s, e - s);
-								s = e + 1;
-								continue;
-							}						
-							
-							s = LSkipDelim(s, LWhiteSpace, true);
-							s = LSkipDelim(s, LWhiteSpace);						
+						{					
+							int64 tmp = atoi64(val);
+							if (tmp & 0xffffffff00000000L)
+								v.Value = tmp;
+							else
+								v.Value = (int)tmp;
 						}
 					}
+					else if (*val == '(' && (end = strchr(val + 1, ')')))
+					{
+						val++;
+						v.Type.Set(val, end - val);
+						v.Value.OwnStr(TrimStr(end + 1));
+					}
+					else
+					{
+						v.Value.OwnStr(TrimStr(val));
+					}				
 				}
 			}
-		}
-	}
-	
-	bool GetVariables(bool Locals, LArray<Variable> &vars, bool Detailed)
-	{
-		LStringPipe p(512);
 
-		if (vars.Length())
-		{
-			LString c;
-
-			for (unsigned i=0; i<vars.Length(); i++)
+			if (Detailed)
 			{
-				Variable &v = vars[i];
-
-				c.Printf("whatis %s", v.Name.Get());
-				if (Cmd(c, &p))
+				for (auto &v: vars)
 				{
-					auto a = p.NewLStr();
-					if (a.Find("=") >= 0)
-					{
-						auto tmp = a.Split("=", 1);
-						v.Type = tmp[1].Strip().Replace("\n", " ");
-					}
-					else
-					{
-						v.Type = a.Get();
-					}
-				}
-				else LgiTrace("%s:%i - Cmd failed '%s'\n", _FL, c.Get());
-				
-				c.Printf("p %s", v.Name.Get());
-				if (Cmd(c, &p))
-				{
-					LString a = p.NewLStr();
-					LString Val;
-					if (a.Find("=") >= 0)
-					{
-						LString::Array tmp = a.Split("=", 1);
-						Val = tmp[1].Strip().Replace("\n", " ").Get();
-					}
-					else
-					{
-						Val = a.Get();
-					}
-					
-					/*
-					unsigned i;
-					for (i=0; i<Vis.Length(); i++)
-					{
-						Visualizer *vs = Vis[i];
-						if (vs->Match(v.Type))
+					// Get the type...
+					Calls(1);
+					gdb->Cmd(
+						LString::Fmt("whatis %s", v.Name.Get()),
+						false,
+						[this, var = &v](auto &err, LStringPipe *typePipe)
 						{
-							if (vs->Transform(v.Name, Val, this, v.Value, v.Detail))
-								break;
-						}
-					}
-					if (i >= Vis.Length())
-					*/
-					
-					v.Value = Val.Get();
+							if (err)
+							{
+								Calls(-1);
+								LAssert(!"handler err.");
+								return;
+							}
+
+							var->Type = typePipe->NewLStr();
+						
+							Calls(1);
+							gdb->Cmd(
+								LString::Fmt("p %s", var->Name.Get()),
+								false,
+								[this, var](auto &err, LStringPipe *valPipe) mutable
+								{
+									if (err)
+									{
+										Calls(-1);
+										LAssert(!"handle err");
+										return;
+									}
+
+									auto val = valPipe->NewLStr();
+									if (val)
+									{
+										for (char *s = val; s && *s; )
+										{
+											if (*s == '\"')
+											{
+												char *e = strchr(++s, '\"');
+												if (!e)
+													break;
+								
+												var->Value.OwnStr(NewStr(s, e - s));
+												break;
+											}
+											else if (*s == '(' && !var->Type)
+											{
+												char *e = strchr(++s, ')');
+												if (!e)
+													break;
+
+												if (strnicmp(s, "gdb", 3))
+													var->Type.Set(s, e - s);
+												s = e + 1;
+												continue;
+											}						
+							
+											s = LSkipDelim(s, LWhiteSpace, true);
+											s = LSkipDelim(s, LWhiteSpace);						
+										}
+									}
+
+									Calls(-1);
+								});
+						});
 				}
-				else printf("%s:%i - Cmd failed '%s'\n", _FL, c.Get());
 			}
-			
-			return true;
 		}
-		else
+	};
+
+	void GetVariables(bool Locals, bool Detailed, TVarArray *init, TVarsCb cb)
+	{
+		#if DEBUG_STRUCT_LOGGING
+		#else
+		Log->Print("GetVariables init=%p\n", init);
+		#endif
+		if (auto state = new VariableParseState(this, Detailed))
 		{
-			if (!Cmd("info args", &p))
-				return false;
-			
-			auto a = p.NewLStr();
-			ParseVariables(a, vars, Variable::Arg, Detailed);
+			state->cb = cb;
 
-			if (!Cmd("info locals", &p))
-				return false;
+			if (init)
+			{
+				state->cb = std::move(cb);
+				state->vars = *init;
+				state->Process(nullptr, LDebugger::Local);
+			}
+			else
+			{
+				state->Calls(1);
+				Cmd("info args",
+					false,
+					[this, state, cb](auto &err, LString::Array *out)
+					{
+						if (err)
+							state->err = err;
+						else if (out)
+							state->Process(out, LDebugger::Arg);
+						state->Calls(-1);
+					});
 
-			a = p.NewLStr();
-			ParseVariables(a, vars, Variable::Local, Detailed);
+				state->Calls(1);
+				Cmd("info locals",
+					false,
+					[this, state, cb](auto &err, LString::Array *out)
+					{
+						if (err)
+							state->err = err;
+						else if (out)
+							state->Process(out, LDebugger::Local);
+						state->Calls(-1);
+					});
+			}
 		}
-		
-		return true;
 	}
 
-	bool GetRegisters(LStream *Out)
+	void GetRegisters(TStringsCb cb)
 	{
-		if (!Out)
-			return false;
-		
-		return Cmd("info registers", Out);
+		if (cb)
+			Cmd("info registers",	
+				false,
+				[this, cb](auto &err, LStringPipe *out)
+				{
+					if (out)
+						cb(out->NewLStr().SplitDelimit("\r\n"));
+				});
 	}
 
 	bool PrintObject(const char *Var, LStream *Output)
 	{
+		#if 0
 		if (!Var || !Output)
 			return false;
 	
@@ -1436,12 +1831,14 @@ public:
 				}
 			}
 		}
+		#endif
 	
 		return true;
 	}
 
 	bool ReadMemory(LString &BaseAddr, int Length, LArray<uint8_t> &OutBuf, LString *ErrorMsg)
 	{
+		#if 0
 		if (!BaseAddr)
 		{
 			if (ErrorMsg) *ErrorMsg = "No base address supplied.";
@@ -1533,93 +1930,181 @@ public:
 			}
 		}
 		
-		OutBuf.Length((ptr - buf) << 2);		
+		OutBuf.Length((ptr - buf) << 2);
+		#endif
 		return true;
 	}
 	
-	bool GetLocation(LAutoString &File, int &Line)
+	bool GetLocation(LString &File, int &Line) override
 	{
 		LAssert(0);
 		return false;
 	}
 	
-	bool SetLocation(const char *File, int Line)
+	bool SetLocation(const char *File, int Line) override
 	{
 		LAssert(0);
 		return false;
 	}
 
-	bool StepInto()
+	void StepInto(TStatusCb cb) override
 	{
-		bool Status = Cmd("step");
-		if (Status)
-			SetState(DebuggingProcess, true);
-		return Status;
+		Cmd("step",
+			true,
+			[this, cb](auto &err)
+			{
+				if (!err)
+					SetState(DebuggingProcess, true);
+				if (cb)
+					cb(!err);
+			});
 	}
 
-	bool StepOver()
+	void StepOver(TStatusCb cb) override
 	{
-		bool Status = Cmd("next");
-		if (Status)
-			SetState(DebuggingProcess, true);
-		return Status;
+		Cmd("next",
+			true,
+			[this, cb](auto &err)
+			{
+				if (!err)
+					SetState(DebuggingProcess, true);
+				if (cb)
+					cb(!err);
+			});
 	}
 
-	bool StepOut()
+	void StepOut(TStatusCb cb) override
 	{
-		bool Status = Cmd("finish");
-		if (Status)
-			SetState(DebuggingProcess, true);
-		return Status;
+		Cmd("finish",
+			true,
+			[this, cb](auto &err)
+			{
+				if (!err)
+					SetState(DebuggingProcess, true);
+				if (cb)
+					cb(!err);
+			});
 	}
 
-	bool Break(bool SuppressFL = false)
+	void BreakInternal(TStatusCb cb, bool SuppressFL)
 	{
-		#ifdef POSIX
-		if (ProcessId < 0)
+		if (backend)
 		{
-			LogMsg("%s:%i - No process ID (yet?).\n", _FL);
-			return false;
+			LAssert(ProcessId > 0);
+			auto cmd = LString::Fmt("kill -s SIGINT %i", ProcessId);
+			backend->ProcessOutput(cmd,
+				[this, cb](auto exitVal, auto out)
+				{
+					if (cb)
+						cb(exitVal == 0);
+				});
 		}
-		
-		SuppressNextFileLine = SuppressFL;
-		// LogMsg("Break: Sending SIGINT to %i(0x%x)...\n", ProcessId, ProcessId);
-		int result = kill(ProcessId, SIGINT);
-		auto ErrNo = errno;
-		// LogMsg("Break: result=%i\n", result);
-		if (!result)
+		else
 		{
-			// LogMsg("%s:%i - success... waiting prompt\n", _FL);
-			return WaitPrompt(_FL);
+			LAssert(!"impl me");
 		}
+	}
+
+	void Break(TStatusCb cb, bool SuppressFL = false) override
+	{
+		if (backend)
+		{
+			if (ProcessId < 0)
+			{
+				// need to get the process id to send it a signal
+				backend->ProcessOutput(
+					"ps",
+					[this, cb=std::move(cb), SuppressFL](auto exitCode, auto output)
+					{
+						RemoveAnsi(output);
+						LString header;
+						for (auto ln: output.SplitDelimit("\r\n"))
+						{
+							if (header)
+							{
+								auto parts = ln.SplitDelimit();
+								if (parts.Length() > 4 &&
+									parts[0].Find("gdb") >= 0)
+								{
+									auto s = parts[parts.Length()-4];
+									auto pid = s.Int();
+									if (pid > 0)
+										ProcessId = (int)pid; // keep the last one?
+								}
+							}
+							else header = ln;
+						}
+
+						if (ProcessId < 0)
+						{
+							if (cb)
+								cb(false);
+						}
+						else
+						{
+							BreakInternal(std::move(cb), SuppressFL);
+						}
+					});
+			}
+			else
+			{
+				BreakInternal(std::move(cb), SuppressFL);
+			}
+		}
+		else
+		{
+			#ifdef POSIX
+				if (ProcessId < 0)
+				{
+					LogMsg("%s:%i - No process ID (yet?).\n", _FL);
+					return false;
+				}
 		
-		LogMsg("%s:%i - SIGINT failed with %i(0x%x): %s (pid=%i)\n", _FL, ErrNo, ErrNo, LErrorCodeToString(ErrNo).Get(), ProcessId);
-		return false;
-		#else
-		LAssert(!"Impl me");
-		return false;
-		#endif		
+				SuppressNextFileLine = SuppressFL;
+				// LogMsg("Break: Sending SIGINT to %i(0x%x)...\n", ProcessId, ProcessId);
+				int result = kill(ProcessId, SIGINT);
+				auto ErrNo = errno;
+				// LogMsg("Break: result=%i\n", result);
+				if (!result)
+				{
+					// LogMsg("%s:%i - success... waiting prompt\n", _FL);
+					return WaitPrompt(_FL);
+				}
+		
+				LogMsg("%s:%i - SIGINT failed with %i(0x%x): %s (pid=%i)\n", _FL, ErrNo, ErrNo, LErrorCodeToString(ErrNo).Get(), ProcessId);
+				return false;
+			#else
+				LAssert(!"Impl me");
+			#endif		
+		}
 	}
 
-	bool UserCommand(const char *cmd)
+	void UserCommand(const char *cmd, TStatusCb cb)
 	{
-		char c[256];
-		sprintf_s(c, sizeof(c), "%s", cmd);
-		printf("UserComand %p\n", Log);
-		return Cmd(c, Log);
+		Cmd(cmd,
+			false,
+			[this, cb](auto &err)
+			{
+				if (cb)
+					cb(!err);
+			});
 	}
 
-	LString GetResponse(const char *c)
+	void GetResponse(const char *c, TStringCb cb)
 	{
-		LString r;
-		LStringPipe p;
-		if (Cmd(c, &p))
-			r = p.NewLStr();
-		return r;
+		Cmd(c,
+			false,
+			[this, cb](auto &err, LStringPipe *p)
+			{
+				LString data;
+				if (p) data = p->NewLStr();
+				if (cb)
+					cb(data);
+			});
 	}
 };
 
-LDebugger *CreateGdbDebugger(LStream *Log)
+LDebugger *CreateGdbDebugger(LStream *Log, ProjectBackend *Backend, IdePlatform platform, LStream *networkLog)
 {
-	return new Gdb(Log);
+	return new Gdb(Log, Backend, platform, networkLog);
 }

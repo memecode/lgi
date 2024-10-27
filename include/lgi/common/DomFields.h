@@ -11,6 +11,7 @@ _(ObjField, "Field")
 _(ObjDebug, "Debug")
 _(ObjTextContent, "textContent")
 _(ObjInnerHtml, "innerHTML")
+_(ObjCancel, "Cancel")
 
 // Types
 _(TypeList, "List")

@@ -236,7 +236,8 @@ LgiTrace("Decode(%i @ %i,%i sz=%i) after=%i\n", type, (int)type_addr, (int)data_
 		return true;
 	}
 
-	bool Flush(LStream *s)
+	// Exports the data in the buffer to the stream 's'
+	bool ToStream(LStream *s)
 	{
 		if (!s || !Write || Length() == 0)
 			return false;
@@ -247,6 +248,24 @@ LgiTrace("Decode(%i @ %i,%i sz=%i) after=%i\n", type, (int)type_addr, (int)data_
 		Pos = 0;
 		
 		return Status;
+	}
+
+	// Sets the data in the buffer from a string
+	bool FromString(LString &s)
+	{
+		if (s.Length() > Length())
+		{
+			if (!Length(s.Length()))
+			{
+				LAssert(!"alloc failed");
+				return false;
+			}
+		}
+
+		memcpy(AddressOf(), s.Get(), s.Length());
+		Pos = 0;
+
+		return true;
 	}
 };
 

@@ -19,12 +19,115 @@ class SshBackend :
 	public LThread,
 	public LMutex
 {
+	class Process :
+		public LThread,
+		public LSsh
+	{
+		SshBackend *backend;
+		LString dir, cmd;
+		LStream *log = NULL;
+		ProcessIo *out = NULL;
+		LCancel *cancel = NULL;
+		std::function<void(int)> exitcodeCb;
+		int32_t exitCode = -1;
+
+	public:
+		Process(SshBackend *be,
+				LString initDir,
+				LString cmdLine,
+				ProcessIo *output,
+				LStream *logger,
+				LCancel *cancelObj,
+				std::function<void(int)> cb) :
+			LThread("Ssh.Process.Thread"),
+			LSsh([this](auto Msg, auto Type)
+				{
+					return SshConnect;
+				},
+				logger,
+				cancelObj),
+			backend(be),
+			dir(initDir),
+			cmd(cmdLine),
+			log(logger),
+			out(output),
+			cancel(cancelObj),
+			exitcodeCb(cb)
+		{
+			Run();
+		}
+
+		~Process()
+		{
+			cancel->Cancel();
+			WaitForExit();
+
+			if (exitcodeCb)
+				exitcodeCb(exitCode);
+		}
+
+		int Main()
+		{
+			SetTimeout(5000);
+
+			if (!Open(backend->uri.sHost, backend->uri.sUser, NULL, true))
+			{
+				log->Print("Error: connecting to ssh server %s\n", backend->uri.sHost.Get());
+				return -1;
+			}
+				
+			if (auto console = CreateConsole())
+			{
+				backend->ReadToPrompt(console, NULL, cancel);
+				auto args = LString::Fmt("cd %s && %s\n", dir.Get(), cmd.Get());				
+
+				LStream *output = NULL;
+				if (out)
+				{
+					if (out->ioCallback)
+						out->ioCallback(console);
+					else
+						output = out->output;
+				}
+
+				if (out && out->ioCallback)
+				{
+					console->Write(args);
+
+					// Wait for process to finish...
+					// Client code needs to call CallMethod(ObjCancel...) to quit this loop
+					while (!console->IsCancelled())
+					{
+						LSleep(100);
+					}
+
+					out->ioCallback(NULL);
+				}
+				else
+				{
+					auto result = backend->Cmd(console, args, &exitCode, output, cancel);
+					log->Print("SshProcess finished with %i\n", exitCode);
+				}
+			}
+			else
+			{
+				log->Print("Error: creating ssh console\n");
+				return -1;
+			}
+			
+			backend->OnProcessComplete();
+			return 0;
+		}
+	};
+
+
 	LView *app = NULL;
 	LUri uri;
 	LStream *log = NULL;
 	LString prompt;
 	IdePlatform sysType = PlatformUnknown;
 	LString remoteSep;
+	LArray<Process*> processes;
 	constexpr static const char *separators = "/\\";
 
 	// Lock before use
@@ -32,6 +135,24 @@ class SshBackend :
 	LAutoPtr<LSsh> ssh;
 	LAutoPtr<LSsh::SshConsole> console;
 	LArray<TWork> work;
+
+	void OnProcessComplete()
+	{
+		Auto lck(this, _FL);
+		work.Add( [this]()
+		{
+			// Clean up all exited processes:
+			for (unsigned i=0; i<processes.Length(); i++)
+			{
+				auto p = processes[i];
+				if (p->IsExited())
+				{
+					processes.DeleteAt(i--);
+					delete p;
+				}
+			}
+		});
+	}
 
 	LSsh::SshConsole *GetConsole()
 	{
@@ -64,7 +185,7 @@ class SshBackend :
 			if ((console = ssh->CreateConsole()))
 			{
 				LgiTrace("Created console... reading to prompt:\n");
-				ReadToPrompt();
+				ReadToPrompt(GetConsole());
 				LgiTrace("got login prompt\n");
 			}
 		}
@@ -128,10 +249,10 @@ class SshBackend :
 		return found;
 	}
 
-	LString ReadToPrompt(LStream *output = NULL, LCancel *cancel = NULL)
+	LString ReadToPrompt(LSsh::SshConsole *c, LStream *output = NULL, LCancel *cancel = NULL)
 	{
 		LStringPipe p;
-		if (auto c = GetConsole())
+		if (c)
 		{
 			while (!IsCancelled())
 			{
@@ -162,9 +283,9 @@ class SshBackend :
 		return s;
 	}
 
-	LString Cmd(LString cmd, int32_t *exitCode = NULL, LStream *outputStream = NULL, LCancel *cancel = NULL)
+	LString Cmd(LSsh::SshConsole *c, LString cmd, int32_t *exitCode = NULL, LStream *outputStream = NULL, LCancel *cancel = NULL)
 	{
-		if (auto c = GetConsole())
+		if (c)
 		{
 			// log->Print("Cmd: write '%s'\n", cmd.Strip().Get());
 			if (!c->Write(cmd))
@@ -174,7 +295,7 @@ class SshBackend :
 				return LString();
 			}
 
-			auto output = ReadToPrompt(outputStream, cancel);
+			auto output = ReadToPrompt(c, outputStream, cancel);
 			
 			if (cancel && cancel->IsCancelled())
 			{
@@ -186,7 +307,7 @@ class SshBackend :
 				LString echo = "echo $?\n";
 				if (c->Write(echo))
 				{
-					auto val = ReadToPrompt();
+					auto val = ReadToPrompt(c);
 					// log->Print("echo output: %s", val.Get());
 
 					auto lines = val.SplitDelimit("\r\n");
@@ -220,6 +341,11 @@ public:
 	~SshBackend()
 	{
 		Cancel();
+		{
+			Auto lck(this, _FL);
+			for (auto p: processes)
+				delete p;
+		}
 		WaitForExit();
 	}
 
@@ -232,6 +358,25 @@ public:
 		if (absPath.Find(base) == 0)
 			return LString(".") + absPath(base.Length(), -1);
 		return LString();
+	}
+
+	LString JoinPath(LString base, LString leaf)
+	{
+		LString::Array a;
+		a.SetFixedLength(false);
+		a += base.SplitDelimit("\\/");
+		a += leaf.SplitDelimit("\\/");
+		for (ssize_t i = 0; i < a.Length(); i++)
+		{
+			if (a[i] == ".")
+				a.DeleteAt(i--, true);
+			else if (a[i] == "..")
+			{
+				a.DeleteAt(i--, true);
+				a.DeleteAt(i--, true);
+			}
+		}
+		return remoteSep.Join(a);
 	}
 
 	void OnConnected()
@@ -251,7 +396,7 @@ public:
 		Auto lck(this, _FL);
 		work.Add( [this, cb]()
 		{
-			if (auto output = Cmd("uname -a\n"))
+			if (auto output = Cmd(GetConsole(), "uname -a\n"))
 			{
 				auto parts = TrimContent(output).SplitDelimit();
 				auto sys = parts[0].Lower();
@@ -468,7 +613,7 @@ public:
 		work.Add( [this, results, path = PreparePath(Path)]()
 		{
 			auto cmd = LString::Fmt("ls -lan %s\n", path.Get());
-			auto ls = Cmd(cmd);
+			auto ls = Cmd(GetConsole(), cmd);
 			auto lines = ls.SplitDelimit("\r\n").Slice(2, -2);
 			
 			bool debug = path.Equals("~/code/lgi/trunk/ide/");
@@ -499,7 +644,7 @@ public:
 				args += LString::Fmt("%s -iname \"*%s*\"", i ? " -and" : "", parts[i].Get());
 			args += " -and -not -path \"*/.hg/*\"";
 
-			auto result = Cmd(args + "\n");
+			auto result = Cmd(GetConsole(), args + "\n");
 			LArray<LString> lines = TrimContent(result).SplitDelimit("\r\n");
 			app->RunCallback( [results, lines]() mutable
 				{
@@ -522,7 +667,7 @@ public:
 				params->Text.Get(),
 				params->Dir.Get());
 			results->Print("%s\n", args.Get());
-			auto result = Cmd(args + "\n");
+			auto result = Cmd(GetConsole(), args + "\n");
 			auto output = TrimContent(result);
 			results->Write(output);
 		} );
@@ -612,7 +757,7 @@ public:
 		{
 			auto args = LString::Fmt("mkdir%s %s", createParents ? " -p" : "", Path.Get());
 			int32_t exitVal;
-			auto result = Cmd(args + "\n", &exitVal);
+			auto result = Cmd(GetConsole(), args + "\n", &exitVal);
 			if (cb)
 			{
 				app->RunCallback( [exitVal, cb]() mutable
@@ -635,7 +780,7 @@ public:
 		{
 			auto args = LString::Fmt("rm%s %s", recursiveForce ? " -rf" : "", Path.Get());
 			int32_t exitVal;
-			auto result = Cmd(args + "\n", &exitVal);
+			auto result = Cmd(GetConsole(), args + "\n", &exitVal);
 			if (cb)
 			{
 				app->RunCallback( [exitVal, cb]() mutable
@@ -658,7 +803,7 @@ public:
 		{
 			auto args = LString::Fmt("mv %s %s", from.Get(), to.Get());
 			int32_t exitVal;
-			auto result = Cmd(args + "\n", &exitVal);
+			auto result = Cmd(GetConsole(), args + "\n", &exitVal);
 			if (cb)
 			{
 				app->RunCallback( [exitVal, cb]() mutable
@@ -671,23 +816,33 @@ public:
 		return true;
 	}
 
-	bool RunProcess(const char *initDir, const char *cmdLine, LStream *output, LCancel *cancel, std::function<void(int)> cb)
+	bool RunProcess(const char *initDir, const char *cmdLine, ProcessIo *output, LCancel *cancel, std::function<void(int)> cb)
 	{
 		if (!cmdLine)
 			return false;
 
 		Auto lck(this, _FL);
-		work.Add( [this, cb, initDir = LString(initDir), cmdLine = LString(cmdLine), output, cancel]()
-		{
-			auto args = LString::Fmt("cd %s && %s", initDir.Get(), cmdLine.Get());
+		// Use a long running thread / separate SSH console to stop this main connection from responding quickly.
+		processes.Add(new Process(this, initDir, cmdLine, output, log, cancel, cb));
+		return true;
+	}
 
+	bool ProcessOutput(const char *cmdLine, std::function<void(int32_t,LString)> cb) override
+	{
+		if (!cmdLine || !cb)
+			return false;
+
+		Auto lck(this, _FL);
+		work.Add( [this, cb, cmd=LString::Fmt("%s\n", cmdLine)]()
+		{
 			int32_t exitVal;
-			Cmd(args + "\n", &exitVal, output, cancel);
+			LStringPipe out;
+			auto result = Cmd(GetConsole(), cmd, &exitVal, &out);
 			if (cb)
 			{
-				app->RunCallback( [exitVal, cb]()
+				app->RunCallback( [exitVal, cb, out=TrimContent(out.NewLStr())]() mutable
 					{
-						cb(exitVal);
+						cb(exitVal, out);
 					});
 			}
 		} );
@@ -740,6 +895,13 @@ public:
 	LString MakeRelative(LString absPath)
 	{
 		return LMakeRelativePath(folder, absPath);
+	}
+
+	LString JoinPath(LString base, LString leaf)
+	{
+		LFile::Path p(base);
+		p += leaf;
+		return p.GetFull();
 	}
 
 	bool ReadFolder(const char *Path, std::function<void(LDirectory*)> results) override
@@ -888,7 +1050,12 @@ public:
 		#endif
 	}
 
-	bool RunProcess(const char *initDir, const char *cmdLine, LStream *output, LCancel *cancel, std::function<void(int)> cb)
+	bool RunProcess(const char *initDir, const char *cmdLine, ProcessIo *output, LCancel *cancel, std::function<void(int)> cb)
+	{
+		return false;
+	}
+
+	bool ProcessOutput(const char *cmdLine, std::function<void(int32_t,LString)> cb) override
 	{
 		return false;
 	}

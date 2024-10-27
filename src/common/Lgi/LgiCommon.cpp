@@ -746,7 +746,7 @@ bool LIsRelativePath(const char *Path)
 		return false;
 	#endif
 
-	if (*Path == DIR_CHAR || *Path == '`')
+	if (*Path == '/' || *Path == '\\' || *Path == '`')
 		return false;
 
 	if (strstr(Path, "://")) // Protocol def

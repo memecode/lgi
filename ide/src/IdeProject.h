@@ -148,7 +148,8 @@ public:
 	LXmlTag *Create(char *Tag);
 	void Empty();
 	LString GetMakefile(IdePlatform Platform);
-	bool GetExePath(char *Path, int Len);
+	[[deprecated]] bool GetExePath(char *Path, int Len);
+	void GetExePath(std::function<void(LString,IdePlatform)> cb);
 	bool RelativePath(LString &Out, const char *In, bool Debug = false);
 	void Build(bool All, BuildConfig Config);
 	void BuildForPlatform(bool All, BuildConfig Config, IdePlatform Platform);
@@ -156,7 +157,7 @@ public:
 	void BuildThreadFinished();
 	void Clean(bool All, BuildConfig Config);
 	void CleanForPlatform(bool All, BuildConfig Config, IdePlatform Platform);
-	LDebugContext *Execute(ExeAction Act = ExeRun, LString *ErrMsg = NULL);
+	void Execute(ExeAction Act = ExeRun, std::function<void(LError&, LDebugContext*)> contextCb = NULL);
 	bool FixMissingFiles();
 	bool FindDuplicateSymbols();
 	bool InProject(bool FuzzyMatch, const char *Path, bool Open, class IdeDoc **Doc = 0);

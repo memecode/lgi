@@ -5556,7 +5556,7 @@ void LTextView4::SaveLog(const char *File)
 	if (!FirstErrorLog)
 		return;
 
-	LStructuredLog log(File, true);
+	LStructuredLog log(LStructuredLog::TFile, File, true);
 	auto &io = log.GetIo();
 	auto lines = LogLines();
 
@@ -5575,7 +5575,7 @@ void LTextView4::SaveLog(const char *File)
 
 void LTextView4::LoadLog(const char *File)
 {
-	LStructuredLog log(File, false);
+	LStructuredLog log(LStructuredLog::TFile, File, false);
 	Edits.DeleteObjects();
 	log.Read([this](auto type, auto size, auto ptr, auto msg)
 		{

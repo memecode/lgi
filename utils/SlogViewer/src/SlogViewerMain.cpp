@@ -8,6 +8,7 @@
 #include "lgi/common/TabView.h"
 #include "lgi/common/StructuredLog.h"
 #include "lgi/common/StatusBar.h"
+#include "lgi/common/TextLog.h"
 
 #include "resdefs.h"
 
@@ -22,20 +23,22 @@ enum DisplayMode
 
 enum Ctrls 
 {
-	IDC_BOX = 100,
-	IDC_LOG,
-	IDC_HEX,
-	IDC_ESCAPED,
-	IDC_TABS,
-	IDC_STATUS,
+	ID_BOX = 100,
+	ID_LIST,
+	ID_HEX,
+	ID_ESCAPED,
+	ID_TABS,
+	ID_STATUS,
+	ID_LOG,
 };
 
 struct Context
 {
-	LList *log = NULL;
+	LList *lst = NULL;
 	LTabView *tabs = NULL;
 	LTextView3 *hex = NULL;
 	LTextView3 *escaped = NULL;
+	LTextLog *log = NULL;
 };
 
 class Entry : public LListItem
@@ -429,7 +432,7 @@ public:
 
 	int Main()
 	{
-		LStructuredLog file(FileName, false);
+		LStructuredLog file(LStructuredLog::TFile, FileName, false);
 
 		LAutoPtr<Entry> cur;
 		List<LListItem> items;
@@ -466,6 +469,7 @@ class App : public LDocApp<LOptionsFile>, public Context
 	LAutoPtr<ReaderThread> Reader;
 	LStatusBar *Status = NULL;
 	LProgressStatus *Prog = NULL;
+	LAutoPtr<LCommsBus> bus;
 
 public:
     App() : LDocApp<LOptionsFile>(AppName)
@@ -480,32 +484,84 @@ public:
         {
 			_LoadMenu();
 
-			AddView(Status = new LStatusBar(IDC_STATUS));
+			AddView(Status = new LStatusBar(ID_STATUS));
 			Status->AppendPane("Some text");
 			Status->AppendPane(Prog = new LProgressStatus());
 			Prog->GetCss(true)->Width("200px");
 			Prog->GetCss()->TextAlign(LCss::AlignRight);
 
-			AddView(box = new LBox(IDC_BOX));
-			box->AddView(log = new LList(IDC_LOG, 0, 0, 200, 200));
-			log->GetCss(true)->Width("40%");
-			log->ColumnHeaders(false);
-			log->AddColumn("Items", 1000);
+			AddView(box = new LBox(ID_BOX));
+			box->AddView(lst = new LList(ID_LIST, 0, 0, 200, 200));
+			lst->GetCss(true)->Width("40%");
+			lst->ColumnHeaders(false);
+			lst->AddColumn("Items", 1000);
 
-			box->AddView(tabs = new LTabView(IDC_TABS));
+			box->AddView(tabs = new LTabView(ID_TABS));
 
-			auto tab = tabs->Append("Hex");
-			tab->Append(hex = new LTextView3(IDC_HEX));
-			hex->Sunken(true);
-			hex->SetPourLargest(true);
+			if (auto tab = tabs->Append("Hex"))
+			{
+				tab->Append(hex = new LTextView3(ID_HEX));
+				hex->Sunken(true);
+				hex->SetPourLargest(true);
+			}
 
-			tab = tabs->Append("Escaped");
-			tab->Append(escaped = new LTextView3(IDC_ESCAPED));
-			escaped->Sunken(true);
-			escaped->SetPourLargest(true);
+			if (auto tab = tabs->Append("Escaped"))
+			{
+				tab->Append(escaped = new LTextView3(ID_ESCAPED));
+				escaped->Sunken(true);
+				escaped->SetPourLargest(true);
+			}
+
+			if (auto tab = tabs->Append("Log"))
+			{
+				tab->Append(log = new LTextLog(ID_LOG));
+			}
 
 			AttachChildren();
             Visible(true);
+
+			if (bus.Reset(new LCommsBus(log))
+			)
+			{
+				bus->Listen(
+					LStructuredLog::sDefaultEndpoint,
+					[this](auto msg)
+					{
+						// Incoming comms message, parse and show in the UI
+						LStructuredLog log(LStructuredLog::TData, msg, false);
+
+						LAutoPtr<Entry> cur;
+						List<LListItem> items;
+
+						while
+						(
+							log.Read
+							(
+								[this, &cur, &items](auto type, auto size, auto ptr, auto name)
+								{
+									if (cur && type == LStructuredIo::EndRow)
+									{
+										items.Insert(cur.Release());
+										if (items.Length() > 100)
+										{
+											lst->Insert(items);
+											items.Empty();
+										}
+										return;
+									}
+									
+									if (!cur && !cur.Reset(new Entry(this)))
+										return;
+
+									cur->add(type, size, ptr, name);
+								},
+								Prog
+							)
+						);
+
+						lst->Insert(items);
+					});
+			}
         }
     }
 
@@ -517,7 +573,7 @@ public:
 
 	void OpenFile(const char *FileName, bool ReadOnly, std::function<void(bool status)> Callback)
 	{
-		auto ok = Reader.Reset(new ReaderThread(this, FileName, log, Prog));
+		auto ok = Reader.Reset(new ReaderThread(this, FileName, lst, Prog));
 		if (Callback)
 			Callback(ok);
 	}
@@ -530,9 +586,9 @@ public:
 
 	int OnNotify(LViewI *Ctrl, LNotification n)
 	{
-		if (Ctrl->GetId() == IDC_TABS)
+		if (Ctrl->GetId() == ID_TABS)
 		{
-			auto item = log->GetSelected();
+			auto item = lst->GetSelected();
 			if (item)
 				item->Select(true);
 		}

@@ -200,14 +200,19 @@ class BuildThread : public LThread, public LStream, public LCancel
 		Arch;
 
 	// Convert a stream to log messages, minus the ANSI stuff...
-	struct StreamToLog : public LStream
+	struct StreamToLog :
+		public LStream,
+		public ProjectBackend::ProcessIo
 	{
 		LViewI *target;
+	
 	public:
 		StreamToLog(LViewI *t)
 		{
 			target = t;
+			output = this;
 		}
+
 		ssize_t Write(const void *Ptr, ssize_t Size, int Flags = 0) override
 		{
 			// Remove ansi
@@ -223,18 +228,41 @@ class BuildThread : public LThread, public LStream, public LCancel
 	};
 
 	// Remote backend state
+	struct CallRef
+	{
+		const char *file = NULL;
+		int line = 0;
+		operator bool() const { return line != 0; }
+		CallRef(int i = 0) { file = NULL; line = 0; }
+		CallRef(const char *f, int ln) { file = f; line = ln; }
+	};
 	LMutex backendLock;
-	int backendCalls = 0;
+	LHashTbl<IntKey<int>,CallRef> backendCalls;
 	LArray<std::function<void()>> backendWork;
 	void AddWork(std::function<void()> cb)
 	{
 		LMutex::Auto lck(&backendLock, _FL);
 		backendWork.Add(std::move(cb));
 	}
-	void AdjustCalls(int offset)
+	int AddCall(const char *file, int line)
 	{
 		LMutex::Auto lck(&backendLock, _FL);
-		backendCalls += offset;
+		CallRef ref(file, line);
+		int id;
+		while (backendCalls.Find(id = LRand(10000)))
+			;
+		backendCalls.Add(id, ref);
+		#if 0
+			StreamToLog log(Proj->GetApp());
+			log.Print("AddCall %u=%s:%i\n", id, file, line);
+		#endif
+		return id;
+	}
+	void RemoveCall(int id)
+	{
+		LMutex::Auto lck(&backendLock, _FL);
+		LAssert(backendCalls.Find(id));
+		backendCalls.Delete(id);
 	}
 
 	// Step 1, look through parent folders for a project file..
@@ -1435,43 +1463,6 @@ void BuildThread::OnAfterMain()
 BuildThread::~BuildThread()
 {
 	Cancel();
-
-	/*
-	if (SubProc)
-	{
-		bool b = SubProc->Interrupt();
-		LgiTrace("%s:%i - Sub process interrupt = %i.\n", _FL, b);
-	}
-	else LgiTrace("%s:%i - No sub process to interrupt.\n", _FL);
-
-	uint64 Start = LCurrentTime();
-	bool Killed = false;
-	while (!IsExited())
-	{
-		LSleep(10);
-
-		if (LCurrentTime() - Start > STOP_BUILD_TIMEOUT &&
-			SubProc)
-		{
-			if (Killed)
-			{
-				// Thread is stuck as well... ok kill that too!!! Argh - kill all the things!!!!
-				Terminate();
-				LgiTrace("%s:%i - Thread killed.\n", _FL);
-				Proj->GetApp()->PostEvent(M_BUILD_DONE);
-				break;
-			}
-			else
-			{
-				// Kill the sub-process...
-				bool b = SubProc->Kill();
-				Killed = true;
-				LgiTrace("%s:%i - Sub process killed.\n", _FL, b);
-				Start = LCurrentTime();
-			}
-		}
-	}
-	*/
 }
 
 ssize_t BuildThread::Write(const void *Buffer, ssize_t Size, int Flags)
@@ -1901,10 +1892,10 @@ void BuildThread::Step1()
 
 	StreamToLog log(Proj->GetApp());
 	// log.Print("%s: readdir '%s'\n", __FUNCTION__, p.Get());
-	AdjustCalls(1);
+	auto callId = AddCall(_FL);
 	backend->ReadFolder(
 		p,
-		[this, backend](auto d)
+		[this, backend, callId](auto d)
 		{
 			StreamToLog log(Proj->GetApp());
 
@@ -1919,10 +1910,10 @@ void BuildThread::Step1()
 					// log.Print("%s: got xml '%s'\n", __FUNCTION__, nm);
 
 					// Could be a project file?
-					AdjustCalls(1);
+					auto readId = AddCall(_FL);
 					backend->Read(
 						d->FullPath(),
-						[this, full=LString(d->FullPath())](auto err, auto data)
+						[this, full=LString(d->FullPath()), readId](auto err, auto data)
 						{
 							StreamToLog log(Proj->GetApp());
 							// log.Print("%s: got content '%s'\n", __FUNCTION__, full.Get());
@@ -1941,14 +1932,15 @@ void BuildThread::Step1()
 										}); // Go to step2...
 								}
 							}
-							AdjustCalls(-1);
+							
+							RemoveCall(readId);
 						});
 				}
 			}
 
 			if (backendPaths.Length() > 0)
 				AddWork([this]() { Step1(); }); // Look at the next path...
-			AdjustCalls(-1);
+			RemoveCall(callId);
 		});
 }
 
@@ -2002,11 +1994,11 @@ void BuildThread::Step3()
 	if (buildLogger.Reset(new StreamToLog(Proj->GetApp()))) // Create a persistent logger, to outlive the build process...
 	{
 		buildLogger->Print("%s: building in '%s'\n", __FUNCTION__, backendInitFolder.Get());
-		AdjustCalls(1);
-		backend->RunProcess(backendInitFolder, LString("make ") + backendArgs, buildLogger, this, [this](auto val)
+		auto buildId = AddCall(_FL);
+		backend->RunProcess(backendInitFolder, LString("make ") + backendArgs, buildLogger, this, [this, buildId](auto val)
 			{
 				backendExitCode.Reset(new int(val));
-				AdjustCalls(-1);
+				RemoveCall(buildId);
 			});
 	}
 	else Cancel();
@@ -2263,7 +2255,7 @@ int BuildThread::Main()
 				if (backendLock.LockWithTimeout(100, _FL))
 				{
 					std::function<void()> cb;
-					calls = backendCalls;
+					calls = backendCalls.Length();
 					if (backendWork.Length() > 0)
 					{
 						cb.swap(backendWork[0]);
@@ -2280,6 +2272,16 @@ int BuildThread::Main()
 				if (now - msgTs > 1000)
 				{
 					msgTs = now;
+
+					if (calls > 0 && backendExitCode)
+					{
+						// This state shouldn't persist for long right?
+						LMutex::Auto lck(&backendLock, _FL);
+						log.Print("Have exit code but still outstanding calls:\n");
+						for (auto p: backendCalls)
+							log.Print("\tcall: %s:%i\n", p.value.file, p.value.line);
+					}
+
 					// log.Print("%s: backendCalls=%i\n", __FUNCTION__, backendCalls);
 				}
 			}
@@ -2558,6 +2560,55 @@ if (Debug) LgiTrace("Back=%i\n", (int)Back);
 	return true;
 }
 
+void IdeProject::GetExePath(std::function<void(LString,IdePlatform)> cb)
+{
+	if (!cb)
+		return;
+	if (d->Backend)
+	{
+		d->Backend->GetSysType(
+			[this, cb](auto Platform)
+			{
+				LString exe = d->Settings.GetStr(ProjExe, NULL, Platform);
+
+				if (LIsRelativePath(exe))
+				{
+					auto base = d->Backend->GetBasePath();
+					exe = d->Backend->JoinPath(base, exe);
+				}
+
+				if (cb)
+					cb(exe, Platform);
+			});
+		return;
+	}
+
+	auto platform = GetCurrentPlatform();
+	auto PExe = d->Settings.GetStr(ProjExe, NULL, platform);
+	if (!PExe)
+	{
+		// Use the default exe name?
+		if (auto Exe = GetExecutable(platform))
+			PExe = Exe;
+	}	
+	if (!PExe)
+		return;
+
+	if (LIsRelativePath(PExe))
+	{
+		auto Base = GetBasePath();
+		if (!Base)
+			return;
+
+		LFile::Path p(Base);
+		cb((p / PExe).GetFull(), platform);
+	}
+	else
+	{
+		cb(PExe, platform);
+	}
+}
+
 bool IdeProject::GetExePath(char *Path, int Len)
 {
 	auto PExe = d->Settings.GetStr(ProjExe);
@@ -2679,16 +2730,16 @@ char *QuoteStr(char *s)
 
 class ExecuteThread : public LThread, public LStream, public LCancel
 {
-	IdeProject *Proj;
+	IdeProject *Proj = NULL;
 	LString Exe, Args, Path;
-	int Len;
+	int Len = 32 << 10;
 	ExeAction Act;
 	int AppHnd;
 
 public:
-	ExecuteThread(IdeProject *proj, const char *exe, const char *args, char *path, ExeAction act) : LThread("ExecuteThread")
+	ExecuteThread(IdeProject *proj, const char *exe, const char *args, char *path, ExeAction act) :
+		LThread("ExecuteThread")
 	{
-		Len = 32 << 10;
 		Proj = proj;
 		Act = act;
 		Exe = exe;
@@ -2794,59 +2845,71 @@ public:
 	}
 };
 
-LDebugContext *IdeProject::Execute(ExeAction Act, LString *ErrMsg)
+void IdeProject::Execute(ExeAction Act, std::function<void(LError&, LDebugContext*)> cb)
 {
-	auto Base = GetBasePath();
-	
+	LString Base;
+	if (d->Backend)
+		Base = d->Backend->GetBasePath();
+	else if (auto s = GetBasePath())
+		Base = s.Get();
 	if (!Base)
-	{
-		if (ErrMsg) *ErrMsg = "No base path for project.";
-		return NULL;		
-	}
-	
-	char e[MAX_PATH_LEN];
-	if (!GetExePath(e, sizeof(e)))
-	{
-		if (ErrMsg) *ErrMsg = "GetExePath failed.";
-		return NULL;		
-	}
-	
-	if (!LFileExists(e))
-	{
-		if (ErrMsg) ErrMsg->Printf("Executable '%s' doesn't exist.\n", e);
-		return NULL;
-	}
-
-	auto Args = d->Settings.GetStr(ProjArgs);
-	auto Env = d->Settings.GetStr(ProjEnv);
-	LString InitDir = d->Settings.GetStr(ProjInitDir);
-	auto RunAsAdmin = d->Settings.GetInt(ProjDebugAdmin);
-	
-	#ifndef HAIKU
-	if (Act == ExeDebug)
-	{
-		if (InitDir && LIsRelativePath(InitDir))
+ 	{
+		if (cb)
 		{
-			LFile::Path p(Base);
-			p += InitDir;
-			InitDir = p.GetFull();
+			LError err(LErrorPathNotFound, "No base path for project.");
+			cb(err, NULL);
 		}
-			
-		return new LDebugContext(d->App, this, e, Args, RunAsAdmin != 0, Env, InitDir);
+		return;
 	}
-	#endif
+	
+	GetExePath([this, Act, Base, cb](auto e, auto platform)
+	{
+		LAssert(d->App->InThread());
 
-	new ExecuteThread(	this,
-						e,
-						Args,
-						Base,
-						#if defined(HAIKU) || defined(WINDOWS)
-							ExeRun // No gdb or valgrind
-						#else
-							Act
-						#endif
-						);
-	return NULL;
+		if (!d->Backend && !LFileExists(e))
+		{
+			if (cb)
+			{
+				LError err(LErrorPathNotFound, LString::Fmt("Executable '%s' doesn't exist.\n", e));
+				cb(err, NULL);
+			}
+			return;
+		}
+
+		auto Args = d->Settings.GetStr(ProjArgs, NULL, platform);
+		auto Env = d->Settings.GetStr(ProjEnv, NULL, platform);
+		LString InitDir = d->Settings.GetStr(ProjInitDir, NULL, platform);
+		auto RunAsAdmin = d->Settings.GetInt(ProjDebugAdmin, 0, platform);
+	
+		if (Act == ExeDebug)
+		{
+			if (InitDir && LIsRelativePath(InitDir))
+			{
+				LFile::Path p(Base);
+				p += InitDir;
+				InitDir = p.GetFull();
+			}
+			
+			if (cb)
+			{
+				LError err(LErrorNone);
+				cb(err, new LDebugContext(d->App, this, platform, e, Args, RunAsAdmin != 0, Env, InitDir));
+			}
+		}
+		else
+		{
+			new ExecuteThread(	this,
+								e,
+								Args,
+								Base,
+								#if defined(HAIKU) || defined(WINDOWS)
+									ExeRun // No gdb or valgrind
+								#else
+									Act
+								#endif
+								);
+		}
+	});
 }
 
 bool IdeProject::IsMakefileAScript()
@@ -3550,7 +3613,7 @@ bool IdeProject::LoadBreakPoints(LDebugger *db)
 		return false;
 		
 	for (auto &bp: d->UserBreakpoints)
-		db->SetBreakPoint(&bp);
+		db->SetBreakPoint(&bp, nullptr);
 		
 	return true;
 }

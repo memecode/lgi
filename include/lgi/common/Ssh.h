@@ -48,7 +48,7 @@ public:
 	typedef std::function<CallbackResponse(const char *Msg, HostType Type)> KnownHostCallback;
 
 protected:
-	LCancel *Cancel = NULL;
+	LCancel *CancelObj = NULL;
 	LStream *Log = NULL;
 	ssh_session Ssh = NULL;
 	LViewI *TxtLabel = NULL;
@@ -147,7 +147,7 @@ protected:
 	};
 
 public:
-	struct SshConsole : public LStream
+	struct SshConsole : public LStream, public LCancel
 	{
 		LSsh *s;
 		ssh_channel channel = NULL;
@@ -163,6 +163,21 @@ public:
 			ssh_channel_close(channel);
 			ssh_channel_send_eof(channel);
 			ssh_channel_free(channel);
+		}
+
+		bool CallMethod(const char *MethodName, LScriptArguments &Args) override
+		{
+			auto id = LStringToDomProp(MethodName);
+			switch (id)
+			{
+				case ObjCancel:
+				{
+					Cancel();
+					return true;
+				}
+			}
+
+			return false;
 		}
 
 		bool Create(bool createShell)
@@ -287,7 +302,7 @@ public:
 			LStream *log,
 			LCancel *cancel = NULL)
 	{
-		Cancel = cancel ? cancel : &LocalCancel;
+		CancelObj = cancel ? cancel : &LocalCancel;
 		Log = log;
 		HostCb = hostCb;
 	}
@@ -377,7 +392,7 @@ public:
 		auto r = ssh_options_set(Ssh, SSH_OPTIONS_HOST, Host);
 		r = ssh_options_set(Ssh, SSH_OPTIONS_PORT, &Port);
 
-		if (Cancel)
+		if (CancelObj)
 		{
 			// If the user can cancel we need to go into non-blocking mode and poll 
 			// the cancel object:
@@ -401,10 +416,10 @@ public:
 				Username = c.User;
 		}
 
-		if (Cancel)
+		if (CancelObj)
 		{
 			auto startTs = LCurrentTime();
-			while (!Cancel->IsCancelled())
+			while (!CancelObj->IsCancelled())
 			{
 				r = ssh_connect(Ssh);
 				if (r == SSH_AGAIN)
@@ -613,7 +628,7 @@ public:
 				Log->Print("%s:%i - Downloading %s...\n", _FL, From);
 				Meter.SetLength(Len);
 
-				while (!Cancel->IsCancelled() && i < Len)
+				while (!CancelObj->IsCancelled() && i < Len)
 				{
 					auto rd = ssh_scp_read(Scp, Buf.AddressOf(), Buf.Length());
 					if (rd <= 0)
@@ -684,7 +699,7 @@ public:
 				Meter.SetLength(length);
 
 				Log->Print("%s:%i - Writing %s.\n", _FL, LFormatSize(length).Get());
-				for (i=0; !Cancel->IsCancelled() && i<length; )
+				for (i=0; !CancelObj->IsCancelled() && i<length; )
 				{
 					auto rd = From->Read(Buf.AddressOf(), Buf.Length());
 					if (rd <= 0)
@@ -726,7 +741,7 @@ public:
 		size_t logged = 0;
 		auto Prompts = LString(PromptList).SplitDelimit("\t");
 
-		while (Console && !Cancel->IsCancelled())
+		while (Console && !CancelObj->IsCancelled())
 		{
 			char Bytes[512];
 			auto Rd = Console->Read(Bytes, sizeof(Bytes)-1);

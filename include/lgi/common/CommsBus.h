@@ -1,6 +1,6 @@
 #pragma once
 
-class LCommsBus
+class LgiClass LCommsBus
 {
 	struct LCommsBusPriv *d;
 	

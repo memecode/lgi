@@ -12,6 +12,7 @@ public:
 	// Path:
 	virtual LString GetBasePath() = 0;
 	virtual LString MakeRelative(LString absPath) = 0;
+	virtual LString JoinPath(LString base, LString leaf) = 0;
 
 	// Reading and writing:
 	virtual bool ReadFolder(const char *Path, std::function<void(LDirectory*)> results) = 0;
@@ -26,7 +27,21 @@ public:
 	virtual bool FindInFiles(FindParams *params, LStream *results) = 0;
 
 	// Process:
-	virtual bool RunProcess(const char *initDir, const char *cmdLine, LStream *output, LCancel *cancel, std::function<void(int)> cb) = 0;
+	struct ProcessIo // Various options for process input/output
+	{
+		// Just get the output in a stream:
+		LStream *output;
+		
+		// Alternatively, get the console stream ptr as a callback
+		// However once the client code is done with the stream/console
+		// It will need to exit the process thread with a call to CallMethod(ObjCancel)
+		// on the stream itself.
+		std::function<void(LStream*)> ioCallback;
+	};
+	// Start a long running process independent of the main SSH connect.
+	virtual bool RunProcess(const char *initDir, const char *cmdLine, ProcessIo *io, LCancel *cancel, std::function<void(int)> cb) = 0;
+	// Run a short process and get the output
+	virtual bool ProcessOutput(const char *cmdLine, std::function<void(int32_t,LString)> cb) = 0;
 };
 
 extern LAutoPtr<ProjectBackend> CreateBackend(LView *parent, LString uri, LStream *log);

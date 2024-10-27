@@ -3789,7 +3789,7 @@ int AppWnd::OnNotify(LViewI *Ctrl, LNotification n)
 						int ThreadId = (int)sId.Int();
 						if (ThreadId > 0)
 						{
-							d->DbgContext->SelectThread(ThreadId);
+							d->DbgContext->SelectThread(ThreadId, NULL);
 						}
 					}
 				}
@@ -4413,7 +4413,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 					return;
 				}
 				
-				IdeProject *p = RootProject();
+				auto p = RootProject();
 				if (!p)
 				{
 					LgiMsg(this, "No project loaded.", "Error");
@@ -4425,25 +4425,33 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				{
 					d->DbgContext->OnCommand(IDM_CONTINUE);
 				}
-				else if ((d->DbgContext = p->Execute(ExeDebug, &ErrMsg)))
+				else
 				{
-					d->DbgContext->DebuggerLog = d->Output->DebuggerLog;
-					d->DbgContext->Watch = d->Output->Watch;
-					d->DbgContext->Locals = d->Output->Locals;
-					d->DbgContext->CallStack = d->Output->CallStack;
-					d->DbgContext->Threads = d->Output->Threads;
-					d->DbgContext->ObjectDump = d->Output->ObjectDump;
-					d->DbgContext->Registers = d->Output->Registers;
-					d->DbgContext->MemoryDump = d->Output->MemoryDump;
+					p->Execute(ExeDebug, [this](auto err, auto ctx)
+					{
+						if (err)
+						{
+							LgiMsg(this, "Error: %s", AppName, MB_OK, err.ToString().Get());
+						}
+						else if (ctx)
+						{
+							d->DbgContext = ctx;
+							d->DbgContext->DebuggerLog = d->Output->DebuggerLog;
+							d->DbgContext->Watch = d->Output->Watch;
+							d->DbgContext->Locals = d->Output->Locals;
+							d->DbgContext->CallStack = d->Output->CallStack;
+							d->DbgContext->Threads = d->Output->Threads;
+							d->DbgContext->ObjectDump = d->Output->ObjectDump;
+							d->DbgContext->Registers = d->Output->Registers;
+							d->DbgContext->MemoryDump = d->Output->MemoryDump;
 				
-					d->DbgContext->OnCommand(IDM_START_DEBUG);
+							d->DbgContext->OnCommand(IDM_START_DEBUG);
 				
-					d->Output->Value(AppWnd::DebugTab);
-					d->Output->DebugEdit->Focus(true);
-				}
-				else if (ErrMsg)
-				{
-					LgiMsg(this, "Error: %s", AppName, MB_OK, ErrMsg.Get());
+							d->Output->Value(AppWnd::DebugTab);
+							d->Output->DebugEdit->Focus(true);
+						}
+						else LAssert(0);
+					});
 				}
 			});
 			break;
@@ -4460,7 +4468,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			if (!d->DbgContext)
 			{
 				// Create an empty context for attaching to a random process:
-				d->DbgContext = new LDebugContext(this, NULL, NULL, NULL, false, NULL, NULL);
+				d->DbgContext = new LDebugContext(this, NULL, GetCurrentPlatform(), NULL, NULL, false, NULL, NULL);
 			}
 		}
 		case IDM_PAUSE_DEBUG:

@@ -255,6 +255,7 @@
     <ClCompile Include="..\src\common\Hash\sha1\sha1.c" />
     <ClCompile Include="..\src\common\Lgi\ClipBoardCommon.cpp" />
     <ClCompile Include="..\src\common\Net\Base64.cpp" />
+    <ClCompile Include="..\src\common\Net\CommsBus.cpp" />
     <ClCompile Include="..\src\common\Net\Uri.cpp" />
     <ClCompile Include="..\src\common\Net\Net.cpp" />
     <ClCompile Include="..\src\common\Net\MDStringToDigest.cpp" />
@@ -379,6 +380,7 @@
     <ClCompile Include="..\src\win\Widgets\Slider_Win.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\lgi\common\CommsBus.h" />
     <ClInclude Include="..\include\lgi\common\Gdc2.h" />
     <ClInclude Include="..\include\lgi\common\GdiLeak.h" />
     <ClInclude Include="..\include\lgi\common\LgiRes.h" />
