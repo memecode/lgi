@@ -3100,7 +3100,7 @@ void IdeProject::BuildForPlatform(bool All, BuildConfig Config, IdePlatform Plat
 
 	// Clear the build tab log...
 	if (GetApp())
-		GetApp()->PostEvent(M_APPEND_TEXT, NULL, AppWnd::BuildTab);
+		GetApp()->PostEvent(M_APPEND_TEXT, 0, AppWnd::BuildTab);
 
 	SetClean([this, m, All, Config, Platform](bool ok)
 	{

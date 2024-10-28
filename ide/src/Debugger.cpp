@@ -601,7 +601,8 @@ class Gdb :
 		else if (Strnistr(Line, "Quit anyway? (y or n)", bytes))
 		{
 			// It's asking us if we want to quit.
-			Write(LString("y\n"));
+			LString yes("y\n");
+			Write(yes);
 		}
 		else if (RemoteGdb && bytes > 2)
 		{
@@ -799,7 +800,10 @@ class Gdb :
 		if (!ValidStr(c))
 		{
 			if (cb)
-				cb(LError(LErrorInvalidParam, "Not a valid command."), NULL);
+			{
+				LError err(LErrorInvalidParam, "Not a valid command.");
+				cb(err, NULL);
+			}
 		}
 		else if (auto cmd = new Command(c, setRun))
 		{
@@ -816,7 +820,10 @@ class Gdb :
 		if (!ValidStr(c))
 		{
 			if (cb)
-				cb(LError(LErrorInvalidParam, "Not a valid command."), NULL);
+			{
+				LError err(LErrorInvalidParam, "Not a valid command.");
+				cb(err, NULL);
+			}
 		}
 		else if (auto cmd = new Command(c, setRun))
 		{
@@ -1712,7 +1719,10 @@ public:
 				[this, cb](auto &err, LStringPipe *out)
 				{
 					if (out)
-						cb(out->NewLStr().SplitDelimit("\r\n"));
+					{
+						auto arr = out->NewLStr().SplitDelimit("\r\n");
+						cb(arr);
+					}
 				});
 	}
 
@@ -2037,22 +2047,20 @@ public:
 				if (ProcessId < 0)
 				{
 					LogMsg("%s:%i - No process ID (yet?).\n", _FL);
-					return false;
+					return;
 				}
 		
 				SuppressNextFileLine = SuppressFL;
-				// LogMsg("Break: Sending SIGINT to %i(0x%x)...\n", ProcessId, ProcessId);
 				int result = kill(ProcessId, SIGINT);
 				auto ErrNo = errno;
-				// LogMsg("Break: result=%i\n", result);
 				if (!result)
 				{
 					// LogMsg("%s:%i - success... waiting prompt\n", _FL);
-					return WaitPrompt(_FL);
+					LAssert(!"fixme");
+					// return WaitPrompt(_FL);
 				}
 		
 				LogMsg("%s:%i - SIGINT failed with %i(0x%x): %s (pid=%i)\n", _FL, ErrNo, ErrNo, LErrorCodeToString(ErrNo).Get(), ProcessId);
-				return false;
 			#else
 				LAssert(!"Impl me");
 			#endif		

@@ -201,13 +201,13 @@
 				<Node File=".\src\common\Lgi\FileSelect.cpp" Type="2" Platforms="14" />
 				<Node File=".\include\lgi\common\FileSelect.h" Type="3" Platforms="15" />
 			</Node>
-			<Node File=".\src\common\Lgi\Alert.cpp" Type="2" Platforms="15" />
-			<Node File=".\src\common\Lgi\FindReplace.cpp" Type="2" Platforms="15" />
-			<Node File=".\include\lgi\common\FindReplaceDlg.h" Type="3" Platforms="15" />
-			<Node File=".\src\common\Lgi\FontSelect.cpp" Type="2" Platforms="15" />
-			<Node File=".\include\lgi\common\FontSelect.h" Type="3" Platforms="15" />
-			<Node File=".\src\common\Lgi\Input.cpp" Type="2" Platforms="15" />
-			<Node File=".\include\lgi\common\Input.h" Type="3" Platforms="15" />
+			<Node File="./src/common/Lgi/Alert.cpp" Type="2" Platforms="15" />
+			<Node File="./src/common/Lgi/FindReplace.cpp" Type="2" Platforms="15" />
+			<Node File="./include/lgi/common/FindReplaceDlg.h" Type="3" Platforms="15" />
+			<Node File="./src/common/Lgi/FontSelect.cpp" Type="2" Platforms="15" />
+			<Node File="./include/lgi/common/FontSelect.h" Type="3" Platforms="15" />
+			<Node File="./src/common/Lgi/Input.cpp" Type="2" Platforms="15" />
+			<Node File="./include/lgi/common/Input.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Graphics" Type="1" Platforms="15" Open="0" Id="39">
 			<Node Name="_Core" Type="1" Platforms="15" Open="0" Id="40">
@@ -246,12 +246,12 @@
 				<Node File="./src/common/Gdc2/Font/FontType.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Applicators" Type="1" Platforms="15" Open="0" Id="45">
-				<Node File=".\src\common\Gdc2\15Bit.cpp" Type="2" Platforms="15" />
-				<Node File=".\src\common\Gdc2\16Bit.cpp" Type="2" Platforms="15" />
-				<Node File=".\src\common\Gdc2\24Bit.cpp" Type="2" Platforms="15" />
-				<Node File=".\src\common\Gdc2\32Bit.cpp" Type="2" Platforms="15" />
-				<Node File=".\src\common\Gdc2\8Bit.cpp" Type="2" Platforms="15" />
-				<Node File=".\src\common\Gdc2\Alpha.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/15Bit.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/16Bit.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/24Bit.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/32Bit.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/8Bit.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/Alpha.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Filters" Type="1" Platforms="15" Open="0" Id="46">
 				<Node File=".\src\common\Gdc2\Filters\Filter.cpp" Type="2" Platforms="15" />
@@ -382,6 +382,8 @@
 				<Node File="./include/lgi/common/TextLabel.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Text/TextView3.cpp" Type="2" Platforms="14" />
 				<Node File="./include/lgi/common/TextView3.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Text/TextView4.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/TextView4.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Widgets/ToolBar.cpp" Type="2" Platforms="15" />
 				<Node File="./include/lgi/common/ToolBar.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Widgets/Tree.cpp" Type="2" Platforms="15" />
@@ -420,58 +422,62 @@
 			<Node File="./include/lgi/common/DocView.h" Type="3" Platforms="15" />
 			<Node File="./include/lgi/common/ImageList.h" Type="3" Platforms="15" />
 		</Node>
-	</Node>
-	<Node Name="LgiNet" Type="1" Platforms="15" Open="0" Id="69">
-		<Node Name="Mime Message" Type="1" Platforms="15" Open="0" Id="72">
-			<Node File=".\include\lgi\common\Mime.h" Type="3" Platforms="15" />
-		</Node>
-		<Node File="./src/common/Net/MDStringToDigest.cpp" Type="2" Platforms="15" />
-		<Node File="./src/win/INet/MibAccess.cpp" Type="2" Platforms="1" />
-		<Node File="./src/common/Net/Net.cpp" Type="2" Platforms="15" />
-		<Node File="./include/lgi/common/Net.h" Type="3" Platforms="15" />
-		<Node File="./src/common/Net/Uri.cpp" Type="2" Platforms="15" />
-		<Node File="./include/lgi/common/Uri.h" Type="3" Platforms="15" />
-		<Node Name="Headers" Type="1" Platforms="15" Open="0" Id="73">
-			<Node Name="Haiku" Type="1" Platforms="15" Id="1">
-				<Node File=".\include\lgi\haiku\LgiOsClasses.h" Type="3" Platforms="8" />
-				<Node File=".\include\lgi\haiku\LgiOsDefs.h" Type="3" Platforms="8" />
+		<Node Name="Network" Type="1" Platforms="15" Open="0" Id="69">
+			<Node Name="CommsBus" Type="1" Platforms="15" Id="1">
+				<Node File="./src/common/Net/CommsBus.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/CommsBus.h" Type="3" Platforms="15" />
 			</Node>
-			<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="75">
-				<Node File=".\include\lgi\linux\Gtk\LgiOsDefs.h" Type="3" Platforms="2" />
+			<Node Name="Headers" Type="1" Platforms="15" Open="0" Id="73">
+				<Node Name="Haiku" Type="1" Platforms="15" Id="1">
+					<Node File=".\include\lgi\haiku\LgiOsClasses.h" Type="3" Platforms="8" />
+					<Node File=".\include\lgi\haiku\LgiOsDefs.h" Type="3" Platforms="8" />
+				</Node>
+				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="75">
+					<Node File=".\include\lgi\linux\Gtk\LgiOsDefs.h" Type="3" Platforms="2" />
+				</Node>
+				<Node Name="Mac" Type="1" Platforms="15" Id="1">
+					<Node File=".\include\lgi\mac\cocoa\LCocoaView.h" Type="3" Platforms="15" />
+					<Node File=".\include\lgi\mac\cocoa\LgiMac.h" Type="3" Platforms="15" />
+					<Node File=".\include\lgi\mac\cocoa\LgiOs.h" Type="3" Platforms="15" />
+					<Node File=".\include\lgi\mac\cocoa\LgiOsClasses.h" Type="3" Platforms="15" />
+					<Node File=".\include\lgi\mac\cocoa\LgiOsDefs.h" Type="3" Platforms="15" />
+					<Node File=".\include\lgi\mac\cocoa\ObjCWrapper.h" Type="3" Platforms="15" />
+					<Node File=".\include\lgi\mac\cocoa\SymLookup.h" Type="3" Platforms="15" />
+				</Node>
+				<Node Name="Win" Type="1" Platforms="15" Open="0" Id="76">
+					<Node File=".\include\lgi\win\LgiOsDefs.h" Type="3" Platforms="1" />
+				</Node>
+				<Node File="./include/lgi/common/AutoPtr.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/Cancel.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/Error.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/Json.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/Lgi.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/LgiClasses.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/LgiCommon.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/LgiDefs.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/LgiInc.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/LgiInterfaces.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/LgiMsgs.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/LgiUiBase.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/Notifications.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/Point.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/PopupNotification.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/Range.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/RefCount.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/Stat.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/TextLog.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/TimeZoneInfo.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/Token.h" Type="3" Platforms="15" />
 			</Node>
-			<Node Name="Mac" Type="1" Platforms="15" Id="1">
-				<Node File=".\include\lgi\mac\cocoa\LCocoaView.h" Type="3" Platforms="15" />
-				<Node File=".\include\lgi\mac\cocoa\LgiMac.h" Type="3" Platforms="15" />
-				<Node File=".\include\lgi\mac\cocoa\LgiOs.h" Type="3" Platforms="15" />
-				<Node File=".\include\lgi\mac\cocoa\LgiOsClasses.h" Type="3" Platforms="15" />
-				<Node File=".\include\lgi\mac\cocoa\LgiOsDefs.h" Type="3" Platforms="15" />
-				<Node File=".\include\lgi\mac\cocoa\ObjCWrapper.h" Type="3" Platforms="15" />
-				<Node File=".\include\lgi\mac\cocoa\SymLookup.h" Type="3" Platforms="15" />
+			<Node Name="Mime Message" Type="1" Platforms="15" Open="0" Id="72">
+				<Node File=".\include\lgi\common\Mime.h" Type="3" Platforms="15" />
 			</Node>
-			<Node Name="Win" Type="1" Platforms="15" Open="0" Id="76">
-				<Node File=".\include\lgi\win\LgiOsDefs.h" Type="3" Platforms="1" />
-			</Node>
-			<Node File="./include/lgi/common/AutoPtr.h" Type="3" Platforms="15" />
-			<Node File="./include/lgi/common/Cancel.h" Type="3" Platforms="15" />
-			<Node File="./include/lgi/common/Error.h" Type="3" Platforms="15" />
-			<Node File="./include/lgi/common/Json.h" Type="3" Platforms="15" />
-			<Node File="./include/lgi/common/Lgi.h" Type="3" Platforms="15" />
-			<Node File="./include/lgi/common/LgiClasses.h" Type="3" Platforms="15" />
-			<Node File="./include/lgi/common/LgiCommon.h" Type="3" Platforms="15" />
-			<Node File="./include/lgi/common/LgiDefs.h" Type="3" Platforms="15" />
-			<Node File="./include/lgi/common/LgiInc.h" Type="3" Platforms="15" />
-			<Node File="./include/lgi/common/LgiInterfaces.h" Type="3" Platforms="15" />
-			<Node File="./include/lgi/common/LgiMsgs.h" Type="3" Platforms="15" />
-			<Node File="./include/lgi/common/LgiUiBase.h" Type="3" Platforms="15" />
-			<Node File="./include/lgi/common/Notifications.h" Type="3" Platforms="15" />
-			<Node File="./include/lgi/common/Point.h" Type="3" Platforms="15" />
-			<Node File="./include/lgi/common/PopupNotification.h" Type="3" Platforms="15" />
-			<Node File="./include/lgi/common/Range.h" Type="3" Platforms="15" />
-			<Node File="./include/lgi/common/RefCount.h" Type="3" Platforms="15" />
-			<Node File="./include/lgi/common/Stat.h" Type="3" Platforms="15" />
-			<Node File="./include/lgi/common/TextLog.h" Type="3" Platforms="15" />
-			<Node File="./include/lgi/common/TimeZoneInfo.h" Type="3" Platforms="15" />
-			<Node File="./include/lgi/common/Token.h" Type="3" Platforms="15" />
+			<Node File="./src/common/Net/MDStringToDigest.cpp" Type="2" Platforms="15" />
+			<Node File="./src/win/INet/MibAccess.cpp" Type="2" Platforms="1" />
+			<Node File="./src/common/Net/Net.cpp" Type="2" Platforms="15" />
+			<Node File="./include/lgi/common/Net.h" Type="3" Platforms="15" />
+			<Node File="./src/common/Net/Uri.cpp" Type="2" Platforms="15" />
+			<Node File="./include/lgi/common/Uri.h" Type="3" Platforms="15" />
 		</Node>
 	</Node>
 	<Node Name="Build" Type="1" Platforms="15" Id="1">
@@ -493,11 +499,6 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
-			<Executable>
-				<Linux />
-			</Executable>
-			<CCrossCompiler />
-			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -567,7 +568,6 @@ gnu
 network
 be</Release>
 				</Haiku>
-				<All />
 			</Libraries>
 			<TargetName>
 				<Linux>
@@ -591,46 +591,15 @@ _GNU_SOURCE</Debug>
 					<Release>POSIX
 _GNU_SOURCE</Release>
 				</Haiku>
-				<Linux />
 			</Defines>
 			<Options>
 				<Linux>
 					<Debug>-Wno-format-truncation</Debug>
 					<Release>-Wno-format-truncation</Release>
 				</Linux>
-				<All />
 			</Options>
-			<LibraryPaths>
-				<All />
-				<Linux />
-			</LibraryPaths>
-			<ApplicationIcon />
 		</Build>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
-		<Debug>
-			<Environment />
-			<Arguments>
-				<All />
-			</Arguments>
-			<DebugAdmin />
-			<InitialDir />
-		</Debug>
-		<Editor>
-			<TabSize />
-			<IndentSize />
-			<ShowWhiteSpace />
-			<UseHardTabs />
-			<CommentFile />
-			<CommentFunction />
-		</Editor>
-		<Advanced>
-			<OtherMakefileRules />
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
-		</Advanced>
+		<Advanced />
+		<Debug />
 	</Settings>
 </Project>
