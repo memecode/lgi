@@ -61,7 +61,7 @@ class Gdb :
 	LString PrettyPrintPy;
 	bool RunAsAdmin = false;
 	bool AtPrompt = false;
-	char Line[256], *LinePtr = NULL;
+	char Line[512], *LinePtr = NULL;
 	int CurFrame = 0;
 	bool SetAsmType = false;
 	bool SetPendingOn = false;
@@ -214,6 +214,7 @@ class Gdb :
 				Unlock();
 
 				#if DEBUG_STRUCT_LOGGING
+				Log->Log("SetState.change:", DebuggingProcess, Running);
 				#else
 				Log->Print("SetState(%i,%i) changed\n", DebuggingProcess, Running);
 				#endif
@@ -234,6 +235,7 @@ class Gdb :
 				Unlock();
 
 				#if DEBUG_STRUCT_LOGGING
+				// Log->Log("SetState.nochange:", DebuggingProcess, Running);
 				#else
 				Log->Print("SetState(%i,%i) no change\n", DebuggingProcess, Running);
 				#endif
@@ -483,6 +485,19 @@ class Gdb :
 		}
 	}
 
+	bool Write(LString &s)
+	{
+		if (LocalGdb)
+			return LocalGdb->Write(s);
+		else if (RemoteGdb)
+			return RemoteGdb->Write(s);
+		else
+		{
+			LAssert(!"one of these needs to valid?");
+			return false;
+		}
+	}
+	
 	void ProcessCommands()
 	{
 		// We're at a gdb prompt, check for a command to run...
@@ -507,13 +522,9 @@ class Gdb :
 			{
 				// Write the command to the stream
 				auto str = LString::Fmt("%s\n", curCmd->cmd.Get());
-				bool wr = false;
-				if (LocalGdb)
-					wr = LocalGdb->Write(str);
-				else if (RemoteGdb)
-					SuppressEchoLine = wr = RemoteGdb->Write(str);
-				else LAssert(!"one of these needs to valid?");
-						
+				auto wr = Write(str);
+				if (RemoteGdb)
+					SuppressEchoLine = wr;						
 				if (wr)
 				{
 					if (curCmd->setRunning)
@@ -573,17 +584,33 @@ class Gdb :
 		{
 			AtPrompt = !_strnicmp(Line, sPrompt, bytes);
 
-			#if DEBUG_STRUCT_LOGGING
-			#else
-			Log->Print("\nAtPrompt=%i Running=%i\n", AtPrompt, Running);
-			#endif
 			if (Running ^ !AtPrompt)
+			{
+				#if DEBUG_STRUCT_LOGGING
+				// Log->Log("AtPrompt:", AtPrompt);
+				#endif
 				SetState(DebuggingProcess, !AtPrompt);
+			}
 
 			if (AtPrompt)
 			{
 				Events->Write(Line, bytes);
 				ProcessCommands();
+			}
+		}
+		else if (Strnistr(Line, "Quit anyway? (y or n)", bytes))
+		{
+			// It's asking us if we want to quit.
+			Write(LString("y\n"));
+		}
+		else if (RemoteGdb && bytes > 2)
+		{
+			// Check for something that might be a prompt, and cancel the process if found.
+			auto last = Line + bytes - 2;
+			if (!Strncmp(last, "> ", 2))
+			{
+				LScriptArguments args(nullptr);
+				RemoteGdb->CallMethod(LDomPropToString(ObjCancel), args);
 			}
 		}
 	}
@@ -678,6 +705,7 @@ class Gdb :
 			if (!backend->RunProcess(NativePath(InitDir), p, &RemoteIo, this, [this](auto exitCode)
 				{
 					#if DEBUG_STRUCT_LOGGING
+					Log->Log("RemoteGdb exit code:", exitCode);
 					#else
 					Log->Print("RemoteGdb exit code: %i\n", exitCode);
 					#endif
@@ -735,7 +763,6 @@ class Gdb :
 				{
 					Rd = RemoveAnsi(Buf, Rd);
 					Buf[Rd] = 0;
-					// Log->Print("RemoteRd=" LPrintfSSizeT "\n", Rd);
 				}
 				else if (AtPrompt && !curCmd && commands.Length())
 				{
@@ -752,62 +779,12 @@ class Gdb :
 			
 			auto Now = LCurrentTime();
 			if (Now - PrevTs >= 1000)
-			{
 				PrevTs = Now;
-			}
 		}
 
-		/*
-		Break(	[this](auto status)
-				{
-					Cmd("q",
-						[this](LError &err)
-						{
-							#if DEBUG_SESSION_LOGGING
-							LgiTrace("Gdb::Main - exited loop.\n");
-							#endif
-							SetState(false, false);
-
-							LogMsg("Debugger exited.\n");
-						});
-				});
-		*/		
+		SetState(false, false);
 		return 0;
 	}
-
-	/*
-	void WaitPrompt(const char *file, int line, TStatusCb cb)
-	{
-		if (!cb)
-			return;
-
-		auto Start = LCurrentTime();
-		while (State == Init)
-		{
-			auto Now = LCurrentTime();
-			if (Now - Start < 5000)
-			{
-				LSleep(10);
-			}
-			else
-			{
-				LgiTrace("%s:%i - WaitPrompt init wait failed.\n", _FL);
-				cb(false);
-				return;
-			}
-		}
-
-		if (AtPrompt)
-		{
-			cb(true);
-		}
-		else
-		{
-			LMutex::Auto lck(this, _FL);
-			LAssert(!"Fix.");
-		}
-	}
-	*/
 
 	#if 1
 	#define CMD_LOG(...) printf(__VA_ARGS__)

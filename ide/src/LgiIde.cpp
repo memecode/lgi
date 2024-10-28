@@ -1227,7 +1227,6 @@ public:
 	LSubMenu *CreateMakefileMenu = NULL;
 	LAutoPtr<FindSymbolSystem> FindSym;
 	LArray<LAutoString> SystemIncludePaths;
-	// LArray<LDebugger::BreakPoint> BreakPoints;
 	
 	// Debugging
 	LDebugContext *DbgContext = NULL;
@@ -4444,6 +4443,11 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 							d->DbgContext->ObjectDump = d->Output->ObjectDump;
 							d->DbgContext->Registers = d->Output->Registers;
 							d->DbgContext->MemoryDump = d->Output->MemoryDump;
+
+							d->DbgContext->onFinished = [this]()
+							{
+								DeleteObj(d->DbgContext);
+							};
 				
 							d->DbgContext->OnCommand(IDM_START_DEBUG);
 				
@@ -4477,17 +4481,10 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		case IDM_STEP_INTO:
 		case IDM_STEP_OVER:
 		case IDM_STEP_OUT:
+		case IDM_STOP_DEBUG:
 		{
 			if (d->DbgContext)
 				d->DbgContext->OnCommand(Cmd);
-			break;
-		}
-		case IDM_STOP_DEBUG:
-		{
-			if (d->DbgContext && d->DbgContext->OnCommand(Cmd))
-			{
-				DeleteObj(d->DbgContext);
-			}
 			break;
 		}
 		case IDM_BUILD:

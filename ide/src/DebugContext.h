@@ -15,6 +15,7 @@ public:
 	LTextLog *MemoryDump = NULL;
 	LStream *DebuggerLog = NULL;
 	LTextLog *Registers = NULL;
+	std::function<void()> onFinished;
 
 	// Object
 	LDebugContext(AppWnd *App, class IdeProject *Proj, IdePlatform Platform, const char *Exe, const char *Args, bool RunAsAdmin, const char *Env, const char *InitDir);

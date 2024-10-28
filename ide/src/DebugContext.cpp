@@ -603,7 +603,19 @@ bool LDebugContext::OnCommand(int Cmd)
 			if (!d->Db)
 				return false;
 
-			d->Db->Unload(nullptr);
+			d->Db->Unload([this](auto status)
+			{
+				LAssert(d->App->InThread());
+				if (status)
+				{
+					d->Db.Reset();
+					if (onFinished)
+					{
+						onFinished();
+						onFinished = nullptr;
+					}
+				}
+			});
 			return true;
 		}
 		case IDM_PAUSE_DEBUG:

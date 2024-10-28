@@ -9,6 +9,7 @@
 #include "lgi/common/StructuredLog.h"
 #include "lgi/common/StatusBar.h"
 #include "lgi/common/TextLog.h"
+#include "lgi/common/Menu.h"
 
 #include "resdefs.h"
 
@@ -30,6 +31,7 @@ enum Ctrls
 	ID_TABS,
 	ID_STATUS,
 	ID_LOG,
+	ID_CLEAR,
 };
 
 struct Context
@@ -483,6 +485,13 @@ public:
         if (_Create())
         {
 			_LoadMenu();
+			if (Menu)
+			{
+				if (auto sub = Menu->AppendSub("&Actions"))
+				{
+					sub->AppendItem("Clear", ID_CLEAR, true, -1, "F5");
+				}
+			}
 
 			AddView(Status = new LStatusBar(ID_STATUS));
 			Status->AppendPane("Some text");
@@ -520,8 +529,7 @@ public:
 			AttachChildren();
             Visible(true);
 
-			if (bus.Reset(new LCommsBus(log))
-			)
+			if (bus.Reset(new LCommsBus(log)))
 			{
 				bus->Listen(
 					LStructuredLog::sDefaultEndpoint,
@@ -564,6 +572,25 @@ public:
 			}
         }
     }
+
+	int OnCommand(int Cmd, int Event, OsView Wnd) override
+	{
+		switch (Cmd)
+		{
+			case ID_CLEAR:
+			{
+				if (lst)
+					lst->Empty();
+				if (hex)
+					hex->Name(NULL);
+				if (escaped)
+					escaped->Name(NULL);
+				break;
+			}
+		}
+
+		return 0;
+	}
 
 	void OnReceiveFiles(LArray<const char*> &Files)
 	{
