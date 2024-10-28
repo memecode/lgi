@@ -45,6 +45,7 @@ public:
 	};
 
 	constexpr static const char *sDefaultEndpoint = "struct.log";
+	constexpr static const char *sClearEndpoint   = "struct.clearLogs";
 
 	LStructuredLog(TTargetType target, LString param, bool write = true, LStream *logger = NULL) :
 		io(write),
@@ -98,6 +99,12 @@ public:
 
 	LStream *GetLog() const { return log; }
 	LStructuredIo &GetIo() { return io; }
+
+	void Clear()
+	{
+		if (bus)
+			bus->SendMsg(sClearEndpoint, LString());
+	}
 
 	// Write objects to the log. Custom types will need to have a StructIo implementation
 	template<typename... Args>

@@ -532,6 +532,13 @@ public:
 			if (bus.Reset(new LCommsBus(log)))
 			{
 				bus->Listen(
+					LStructuredLog::sClearEndpoint,
+					[this](auto msg)
+					{
+						ClearLogs();
+					});
+
+				bus->Listen(
 					LStructuredLog::sDefaultEndpoint,
 					[this](auto msg)
 					{
@@ -573,18 +580,23 @@ public:
         }
     }
 
+	void ClearLogs()
+	{
+		if (lst)
+			lst->Empty();
+		if (hex)
+			hex->Name(NULL);
+		if (escaped)
+			escaped->Name(NULL);
+	}
+
 	int OnCommand(int Cmd, int Event, OsView Wnd) override
 	{
 		switch (Cmd)
 		{
 			case ID_CLEAR:
 			{
-				if (lst)
-					lst->Empty();
-				if (hex)
-					hex->Name(NULL);
-				if (escaped)
-					escaped->Name(NULL);
+				ClearLogs();
 				break;
 			}
 		}

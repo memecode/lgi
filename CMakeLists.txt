@@ -170,6 +170,7 @@ set (CommonSource
 	include/lgi/common/Net.h
 	src/common/Net/Net.cpp
 	src/common/Net/MDStringToDigest.cpp
+	src/common/Net/CommsBus.cpp
 	src/common/Lgi/Alert.cpp
 	include/lgi/common/Css.h
 	src/common/Lgi/Css.cpp

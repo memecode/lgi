@@ -1166,6 +1166,9 @@ public:
 	{
 		if (Run)
 		{
+			if (Log)
+				Log->Clear();
+
 			if (!SetAsmType)
 			{
 				SetAsmType = true;

@@ -193,7 +193,7 @@ struct AppPriv
 	
 	AppPriv() :
 		Opts(LOptionsFile::DesktopMode, AppName),
-		sLog("Lvc.slog")
+		sLog(LStructuredLog::TFile, "Lvc.slog")
 	{		
 	}	
 	~AppPriv();

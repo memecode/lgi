@@ -174,7 +174,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\common\Gdc2\Filters\Png.cpp" />
     <ClCompile Include="..\..\src\common\Lgi\LgiMain.cpp" />
-    <ClCompile Include="..\..\src\common\Net\CommsBus.cpp" />
     <ClCompile Include="..\..\src\common\Text\DeEscape.cpp" />
     <ClCompile Include="..\..\src\common\Text\XmlTreeUi.cpp" />
     <ClCompile Include="..\Src\BrowseUi.cpp" />
@@ -190,7 +189,6 @@
     <Manifest Include="..\..\src\win\General\Lgi.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\lgi\common\CommsBus.h" />
     <ClInclude Include="..\..\include\lgi\common\IniFile.h" />
     <ClInclude Include="..\..\include\lgi\common\StructuredIo.h" />
     <ClInclude Include="..\..\include\lgi\common\StructuredLog.h" />

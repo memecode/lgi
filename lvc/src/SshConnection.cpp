@@ -69,8 +69,8 @@ SshConnection::SshConnection(LTextLog *log, const char *uri, const char *prompt)
 
 SshConnection::~SshConnection()
 {
-	if (LSsh::Cancel)
-		LSsh::Cancel->Cancel();
+	if (CancelObj)
+		CancelObj->Cancel();
 	LEventTargetThread::Cancel();
 	WaitForExit();
 }
@@ -217,7 +217,7 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data, const char *Debug)
 	size_t BytesRead = 0;
 	bool CheckLast = true;
 
-	while (!LSsh::Cancel->IsCancelled())
+	while (!CancelObj || !CancelObj->IsCancelled())
 	{
 		PROFILE("read");
 		
