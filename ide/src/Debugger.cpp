@@ -487,10 +487,19 @@ class Gdb :
 
 	bool Write(LString &s)
 	{
+		#if DEBUG_STRUCT_LOGGING
+		Log->Log("Write:", s);
+		#endif	
+
 		if (LocalGdb)
+		{
+			LinePtr = Line;
 			return LocalGdb->Write(s);
+		}
 		else if (RemoteGdb)
+		{
 			return RemoteGdb->Write(s);
+		}
 		else
 		{
 			LAssert(!"one of these needs to valid?");
@@ -501,6 +510,9 @@ class Gdb :
 	void ProcessCommands()
 	{
 		// We're at a gdb prompt, check for a command to run...
+		#if DEBUG_STRUCT_LOGGING
+		Log->Log(LString::Fmt("ProcessCommands: cur=%p(%s), %i", curCmd, curCmd.Get() ? curCmd->cmd.Get() : "none", (int)commands.Length()));
+		#endif
 		if (curCmd)
 		{
 			// Finish up the current command
@@ -580,9 +592,17 @@ class Gdb :
 
 		// Check for prompt
 		auto bytes = LinePtr - Line;
+		if (bytes == 0)
+			return;
+		#if DEBUG_STRUCT_LOGGING
+		Log->Log("bytes:", bytes);
+		#endif
 		if (bytes == 6)
 		{
 			AtPrompt = !_strnicmp(Line, sPrompt, bytes);
+			#if DEBUG_STRUCT_LOGGING
+			Log->Log("AtPrompt:", AtPrompt, "Running:", Running);
+			#endif
 
 			if (Running ^ !AtPrompt)
 			{
@@ -734,10 +754,12 @@ class Gdb :
 			if (!processStart)
 			{
 				State = ProcessError;
-				auto ErrMsg = LErrorCodeToString(LocalGdb->GetErrorCode());
-				char s[256];
-				sprintf_s(s, sizeof(s), "Failed to start gdb, error: 0x%x (%s)\n", LocalGdb->GetErrorCode(), ErrMsg.Get());
-				Events->OnError(LocalGdb->GetErrorCode(), s);
+				LError err(LocalGdb->GetErrorCode());				
+				auto msg = LString::Fmt("Failed to start gdb, error: 0x%x (%s)\n", LocalGdb->GetErrorCode(), err.ToString().Get());
+				#if DEBUG_STRUCT_LOGGING
+				Log->Log("Error:", msg);
+				#endif
+				Events->OnError(err.GetCode(), msg);
 				return -1;
 			}
 		}
@@ -753,9 +775,8 @@ class Gdb :
 			Running = true; // Initial state of process is running
 		}
 
-		char Buf[513];
-		bool IsRun;
-		auto PrevTs = LCurrentTime();
+		char Buf[513] = "";
+		bool IsRun = false;
 		while (State == Looping)
 		{
 			#ifdef _DEBUG
@@ -766,7 +787,12 @@ class Gdb :
 			if (LocalGdb)
 			{
 				if (!(IsRun = LocalGdb->IsRunning()))
+				{
+					#if DEBUG_STRUCT_LOGGING
+					Log->Log("main: no longer IsRunning");
+					#endif
 					break;
+				}
 				Rd = LocalGdb->Read(Buf, sizeof(Buf)-1, 50);
 			}
 			else if (RemoteGdb)
@@ -777,22 +803,14 @@ class Gdb :
 					Rd = RemoveAnsi(Buf, Rd);
 					Buf[Rd] = 0;
 				}
-				else if (AtPrompt && !curCmd && commands.Length())
-				{
-					ProcessCommands();
-				}
-				else
-				{
-					LSleep(10);
-				}
 			}
 
 			if (Rd > 0)
-				OnRead(Buf, Rd);
-			
-			auto Now = LCurrentTime();
-			if (Now - PrevTs >= 1000)
-				PrevTs = Now;
+				OnRead(Buf, Rd); // Process new data...
+			else if (AtPrompt && !curCmd && commands.Length())
+				ProcessCommands(); // Do the next command
+			else
+				LSleep(10); // don't eat CPU
 		}
 
 		SetState(false, false);
@@ -807,8 +825,37 @@ class Gdb :
 
 	void Cmd(const char *c,
 			bool setRun,
+			std::function<void(LError&)> cb = nullptr)
+	{
+		#if DEBUG_STRUCT_LOGGING
+		printf("cmd reg: %s, %i\n", c, setRun);
+		Log->Log("cmd reg:", c, setRun);
+		#endif
+
+		if (!ValidStr(c))
+		{
+			CMD_LOG("%s:%i - Null cmd.\n", _FL);
+			LError err(LErrorInvalidParam, "Not a valid command.");
+			if (cb)
+				cb(err);
+			return;
+		}
+		else if (auto cmd = new Command(c, setRun))
+		{
+			cmd->statucCb = cb;
+			LMutex::Auto lck(this, _FL);
+			commands.Add(cmd);
+		}
+	}
+	
+	void Cmd(const char *c,
+			bool setRun,
 			std::function<void(LError&,LString::Array*)> cb)
 	{
+		#if DEBUG_STRUCT_LOGGING
+		Log->Log("cmd str array:", c, setRun, (bool)cb);
+		#endif
+
 		if (!ValidStr(c))
 		{
 			if (cb)
@@ -829,6 +876,10 @@ class Gdb :
 			bool setRun,
 			std::function<void(LError&,LStringPipe*)> cb)
 	{
+		#if DEBUG_STRUCT_LOGGING
+		Log->Log("cmd str pipe:", c, setRun, (bool)cb);
+		#endif
+
 		if (!ValidStr(c))
 		{
 			if (cb)
@@ -845,79 +896,6 @@ class Gdb :
 		}
 	}
 
-	void Cmd(const char *c,
-			bool setRun,
-			std::function<void(LError&)> cb = nullptr)
-	{
-		if (!ValidStr(c))
-		{
-			CMD_LOG("%s:%i - Null cmd.\n", _FL);
-			LError err(LErrorInvalidParam, "Not a valid command.");
-			if (cb)
-				cb(err);
-			return;
-		}
-
-		#if 1
-			if (auto cmd = new Command(c, setRun))
-			{
-				cmd->statucCb = cb;
-				LMutex::Auto lck(this, _FL);
-				commands.Add(cmd);
-			}
-		#else		
-			WaitPrompt(
-				_FL,
-				[this, c = LString(c), cb](auto status)
-				{
-					if (!status)
-					{
-						if (cb)
-						{
-							LError err(LErrorFuncFailed, "no prompt");
-							cb(err);
-						}
-						return;
-					}
-				
-					char str[256];
-					int ch = sprintf_s(str, sizeof(str), "%s\n", c.Get());
-
-					// if (DEBUG_SHOW_GDB_IO) LgiTrace("Send: '%s'\n", c);
-					CMD_LOG("%s:%i - send '%s'.\n", _FL, c.Get());
-
-					Events->Write(str, ch);
-					LinePtr = Line;
-					AtPrompt = false;
-
-					auto Start = LCurrentTime();
-					ssize_t Wr = 0;
-					if (LocalGdb)
-						Wr = LocalGdb->Write(str, ch);
-					else if (RemoteGdb)
-						Wr = RemoteGdb->Write(str, ch);
-					else
-						LAssert(0);
-
-					CMD_LOG("%s:%i - wr=%i.\n", _FL, (int)Wr);
-					if (Wr != ch)
-					{
-						CMD_LOG("%s:%i - write failed.\n", _FL);					
-						LError err(LErrorIoFailed, "cmd write failed");
-						if (cb)
-							cb(err);
-						return;
-					}
-				 
-					if (cb)
-					{
-						LError err;
-						cb(err);
-					}
-				});
-		#endif
-	}
-	
 public:
 	Gdb(LStream *log, ProjectBackend *be, IdePlatform plat, LStream *netLog) :
 		LThread("Gdb.Thread"),
@@ -1183,6 +1161,10 @@ public:
 	
 	void SetRunning(bool Run, TStatusCb cb) override
 	{
+		#if DEBUG_STRUCT_LOGGING
+		Log->Log("SetRunning:", Run);
+		#endif	
+
 		if (Run)
 		{
 			if (Log)
@@ -1310,6 +1292,10 @@ public:
 			
 		BreakPointIdx = 0;
 			
+		#if DEBUG_STRUCT_LOGGING
+		Log->Log("AddBpInternal:", cmd);
+		#endif
+
 		Cmd(cmd,
 			false,
 			[this, cb, bp](auto &err, LString::Array *Lines)
@@ -1364,6 +1350,10 @@ public:
 				false,
 				[this, bp, cb](auto &err)
 				{
+					#if DEBUG_STRUCT_LOGGING
+					Log->Log("PendingBreakCb:", err);
+					#endif
+
 					if (err)
 					{
 						if (cb)

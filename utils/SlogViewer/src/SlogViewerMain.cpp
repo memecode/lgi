@@ -34,6 +34,11 @@ enum Ctrls
 	ID_CLEAR,
 };
 
+enum Messages
+{
+	M_ENTRY_SELECTED = M_USER,
+};
+
 struct Context
 {
 	LList *lst = NULL;
@@ -214,10 +219,7 @@ public:
 		if (!GetList()->InThread())
 		{
 			// Make sure to call this in the right thread...
-			GetList()->RunCallback([this, b]()
-			{
-				Select(b);
-			});
+			GetList()->GetWindow()->PostEvent(M_ENTRY_SELECTED);
 			return;
 		}
 
@@ -595,6 +597,27 @@ public:
         }
     }
 
+	LMessage::Result OnEvent(LMessage *m)
+	{
+		switch (m->Msg())
+		{
+			case M_ENTRY_SELECTED:
+			{
+				if (!lst)
+					break;
+
+				LArray<Entry*> sel;
+				if (lst->GetSelection(sel))
+				{
+					sel[0]->Select(true);
+				}
+				break;
+			}
+		}
+
+		return LDocApp<LOptionsFile>::OnEvent(m);
+	}
+
 	void ClearLogs()
 	{
 		if (!InThread())
@@ -613,6 +636,8 @@ public:
 			hex->Name(NULL);
 		if (escaped)
 			escaped->Name(NULL);
+		if (log)
+			log->Name(NULL);
 	}
 
 	int OnCommand(int Cmd, int Event, OsView Wnd) override

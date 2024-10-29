@@ -147,6 +147,15 @@ bool LLayout::_SetScrollBars(bool x, bool y)
 {
 	static bool Processing = false;
 
+	if (!InThread())
+	{
+		RunCallback([this, x, y]()
+		{
+			_SetScrollBars(x, y);
+		});
+		return false;
+	};
+
 	if (!Processing)
 	{
 		if (

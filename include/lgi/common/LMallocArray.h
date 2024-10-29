@@ -30,7 +30,8 @@ public:
 	{
 		if (!s)
 		{
-			DeleteArray(Data);
+			free(Data);
+			Data = nullptr;
 			Len = s;
 			return true;
 		}
