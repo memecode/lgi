@@ -31,13 +31,14 @@ ifeq ($(Build),Debug)
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I./src \
-		-I../include \
+		-I../include/lgi/linux \
 		-I./resources \
 		-I../include/lgi/linux/Gtk \
-		`pkg-config --cflags gtk+-3.0` \
+		-I../include \
 		-I../private/common \
-		-I../include/lgi/linux
+		`pkg-config --cflags gtk+-3.0` \
+		-I../../../../codelib/openssl/include \
+		-I./src
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
@@ -50,61 +51,61 @@ else
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
+		`pkg-config --cflags gtk+-3.0` \
+		-I../include/lgi/linux \
 		-I./src \
 		-I./resources \
-		`pkg-config --cflags gtk+-3.0` \
-		-I../include \
-		-I../include/lgi/linux \
 		-I../include/lgi/linux/Gtk \
-		-I../private/common
+		-I../private/common \
+		-I../include \
+		-I../../../../codelib/openssl/include
 endif
 
 # Dependencies
-Source =	src/IdeDoc.cpp \
-			../src/common/Text/TextConvert.cpp \
-			src/RemoteFileSelect.cpp \
-			src/IdeFindInFiles.cpp \
-			src/FindSymbol.cpp \
-			../src/common/Net/CommsBus.cpp \
-			../src/common/Text/Html.cpp \
-			../src/common/Text/TextView4.cpp \
-			../src/common/Text/DocView.cpp \
-			../src/common/Net/Http.cpp \
-			../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
-			../src/common/Lgi/LgiMain.cpp \
-			../src/common/Lgi/Mdi.cpp \
-			../src/common/Gdc2/Filters/Png.cpp \
-			src/IdeCommon.cpp \
-			src/MemDumpViewer.cpp \
-			src/SpaceTabConv.cpp \
-			src/LgiUtils.cpp \
-			src/DocEdit.cpp \
-			src/DocEditStyling.cpp \
+Source =	src/IdeProject.cpp \
+			src/Debugger.cpp \
+			../src/common/Lgi/About.cpp \
+			src/WebFldDlg.cpp \
+			src/LgiIde.cpp \
+			src/AddFtpFile.cpp \
 			src/DebugContext.cpp \
-			src/JavascriptParser.cpp \
+			src/FtpThread.cpp \
+			../src/common/Net/Ftp.cpp \
+			../src/common/Coding/ParseCpp.cpp \
+			src/DocEditStyling.cpp \
+			src/DocEdit.cpp \
+			src/LgiUtils.cpp \
+			src/IdeDoc.cpp \
+			../src/common/Text/HtmlCommon.cpp \
 			src/PythonParser.cpp \
 			src/SimpleCppParser.cpp \
-			src/LgiIde.cpp \
-			../src/common/Text/HtmlCommon.cpp \
-			src/NewProjectFromTemplate.cpp \
-			src/ProjectNode.cpp \
-			src/IdeProject.cpp \
-			src/FtpThread.cpp \
-			src/MissingFiles.cpp \
 			src/SysCharSupport.cpp \
 			../src/common/Coding/LexCpp.cpp \
 			../src/common/Net/OpenSSLSocket.cpp \
+			src/IdeCommon.cpp \
+			src/MemDumpViewer.cpp \
+			src/SpaceTabConv.cpp \
+			../src/common/Text/Html.cpp \
 			../src/common/Text/HtmlParser.cpp \
 			../src/common/Text/Homoglyphs/Homoglyphs.cpp \
-			src/History.cpp \
-			src/AddFtpFile.cpp \
-			../src/common/Coding/ParseCpp.cpp \
+			../src/common/Text/TextView4.cpp \
+			../src/common/Text/DocView.cpp \
+			../src/common/Net/Http.cpp \
+			../src/common/Lgi/LgiMain.cpp \
+			../src/common/Lgi/Mdi.cpp \
+			../src/common/Text/TextConvert.cpp \
+			../src/common/Gdc2/Filters/Png.cpp \
+			../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
+			src/NewProjectFromTemplate.cpp \
 			src/ProjectBackend.cpp \
-			../src/common/Lgi/About.cpp \
-			src/Debugger.cpp \
-			src/WebFldDlg.cpp \
+			src/ProjectNode.cpp \
+			src/History.cpp \
+			src/RemoteFileSelect.cpp \
+			src/IdeFindInFiles.cpp \
+			src/FindSymbol.cpp \
+			src/JavascriptParser.cpp \
 			src/IdeProjectSettings.cpp \
-			../src/common/Net/Ftp.cpp
+			src/MissingFiles.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -150,6 +151,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/ColourSpace.h \
 	../include/lgi/common/Com.h \
 	../include/lgi/common/Combo.h \
+	../include/lgi/common/CommsBus.h \
 	../include/lgi/common/Containers.h \
 	../include/lgi/common/Core.h \
 	../include/lgi/common/Css.h \
@@ -255,6 +257,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/TextLabel.h \
 	../include/lgi/common/TextLog.h \
 	../include/lgi/common/TextView3.h \
+	../include/lgi/common/TextView4.h \
 	../include/lgi/common/Thread.h \
 	../include/lgi/common/ThreadEvent.h \
 	../include/lgi/common/TimeZoneInfo.h \
@@ -352,6 +355,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/common/Lgi/ViewCommon.cpp \
 	../src/common/Lgi/WindowCommon.cpp \
 	../src/common/Net/Base64.cpp \
+	../src/common/Net/CommsBus.cpp \
 	../src/common/Net/MDStringToDigest.cpp \
 	../src/common/Net/Net.cpp \
 	../src/common/Net/Uri.cpp \
@@ -362,6 +366,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/common/Text/String.cpp \
 	../src/common/Text/TextConvert.cpp \
 	../src/common/Text/TextView3.cpp \
+	../src/common/Text/TextView4.cpp \
 	../src/common/Text/Token.cpp \
 	../src/common/Text/Unicode.cpp \
 	../src/common/Text/Utf8.cpp \
@@ -426,10 +431,10 @@ cleanall :
 	+make -C "../" -f ./linux/Makefile.linux clean
 
 VPATH=$(BuildDir) \
-	../src/common/Gdc2/Filters \
-	./src \
-	../src/common/Text \
-	../src/common/Lgi \
+	../src/common/Coding \
 	../src/common/Text/Homoglyphs \
-	../src/common/Net \
-	../src/common/Coding
+	./src \
+	../src/common/Lgi \
+	../src/common/Text \
+	../src/common/Gdc2/Filters \
+	../src/common/Net

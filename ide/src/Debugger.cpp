@@ -79,6 +79,7 @@ class Gdb :
 	// These things need locking:
 		struct Command
 		{
+			Gdb *gdb = nullptr;
 			LString cmd;
 
 			// Some commands will cause the program to run
@@ -92,12 +93,13 @@ class Gdb :
 			LError err;
 
 			// One of these should be non-null
-			std::function<void(LError&)> statucCb;
+			std::function<void(LError&)> statusCb;
 			std::function<void(LError&,LStringPipe*)> pipeCb;
 			std::function<void(LError&,LString::Array*)> arrayCb;
 
 			// Methods
-			Command(const char *c, bool setRun)
+			Command(Gdb *db, const char *c, bool setRun) :
+				gdb(db)
 			{
 				cmd = c;
 				setRunning = setRun;
@@ -111,13 +113,35 @@ class Gdb :
 
 			void Finish()
 			{
+				// printf("%s: %s - %i,%i,%i\n", __FUNCTION__, cmd.Get(), (bool)statusCb, (bool)pipeCb, (bool)arrayCb);
 				if (arrayCb)
+				{
+					#if DEBUG_STRUCT_LOGGING
+					gdb->Log->Log("Command.Finish: calling arrayCb");
+					#endif
 					arrayCb(err, &strArr);
+				}
 				else if (pipeCb)
+				{
+					#if DEBUG_STRUCT_LOGGING
+					gdb->Log->Log("Command.Finish: calling pipeCb");
+					#endif
 					pipeCb(err, &pipe);
-				else if (statucCb)
-					statucCb(err);
-				// else no callback, which is ok...
+				}
+				else if (statusCb)
+				{
+					#if DEBUG_STRUCT_LOGGING
+					gdb->Log->Log("Command.Finish: calling statusCb");
+					#endif
+					statusCb(err);
+				}
+				else
+				{
+					// else no callback, which is ok...
+					#if DEBUG_STRUCT_LOGGING
+					gdb->Log->Log("Command.Finish: no cb");
+					#endif
+				}
 			}
 		};
 
@@ -511,16 +535,17 @@ class Gdb :
 	{
 		// We're at a gdb prompt, check for a command to run...
 		#if DEBUG_STRUCT_LOGGING
-		Log->Log(LString::Fmt("ProcessCommands: cur=%p(%s), %i", curCmd, curCmd.Get() ? curCmd->cmd.Get() : "none", (int)commands.Length()));
+		Log->Log(LString::Fmt("ProcessCommands: cur=%p(%s), %i", curCmd.Get(), curCmd.Get() ? curCmd->cmd.Get() : "none", (int)commands.Length()));
 		#endif
+		//  printf("ProcessCommands curCmd=%p: %s\n", curCmd.Get(), curCmd ? curCmd->cmd.Get() : "null");
 		if (curCmd)
 		{
+			// printf("Calling cmd finish: %s\n", curCmd->cmd.Get());
+			
 			// Finish up the current command
-			// Log->Print("\nError: fin curcmd %s\n", curCmd->cmd.Get());
 			curCmd->Finish();
 			curCmd.Reset();
 		}
-		// else Log->Print("\nError: no curcmd\n");
 
 		while (commands.Length())
 		{
@@ -828,7 +853,6 @@ class Gdb :
 			std::function<void(LError&)> cb = nullptr)
 	{
 		#if DEBUG_STRUCT_LOGGING
-		printf("cmd reg: %s, %i\n", c, setRun);
 		Log->Log("cmd reg:", c, setRun);
 		#endif
 
@@ -840,9 +864,9 @@ class Gdb :
 				cb(err);
 			return;
 		}
-		else if (auto cmd = new Command(c, setRun))
+		else if (auto cmd = new Command(this, c, setRun))
 		{
-			cmd->statucCb = cb;
+			cmd->statusCb = cb;
 			LMutex::Auto lck(this, _FL);
 			commands.Add(cmd);
 		}
@@ -864,7 +888,7 @@ class Gdb :
 				cb(err, NULL);
 			}
 		}
-		else if (auto cmd = new Command(c, setRun))
+		else if (auto cmd = new Command(this, c, setRun))
 		{
 			cmd->arrayCb = cb;
 			LMutex::Auto lck(this, _FL);
@@ -888,7 +912,7 @@ class Gdb :
 				cb(err, NULL);
 			}
 		}
-		else if (auto cmd = new Command(c, setRun))
+		else if (auto cmd = new Command(this, c, setRun))
 		{
 			cmd->pipeCb = cb;
 			LMutex::Auto lck(this, _FL);

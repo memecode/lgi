@@ -1376,7 +1376,7 @@ LTreeItem *LTree::GetAdjacent(LTreeItem *i, bool Down)
 				}
 			}
 
-			Ret = n->IsItem();
+			Ret = n ? n->IsItem() : nullptr;
 		}
 		else if (auto p = i->GetParent())
 		{			
@@ -1394,7 +1394,7 @@ LTreeItem *LTree::GetAdjacent(LTreeItem *i, bool Down)
 					}
 				}
 
-				Ret = n->IsItem();
+				Ret = n ? n->IsItem() : nullptr;
 			}
 			else if (Index > 0)
 			{
@@ -1409,7 +1409,7 @@ LTreeItem *LTree::GetAdjacent(LTreeItem *i, bool Down)
 					else break;
 				}
 				
-				Ret = p->IsItem();
+				Ret = p ? p->IsItem() : nullptr;
 			}
 		}
 	}
