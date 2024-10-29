@@ -23,7 +23,7 @@ public:
 
 	// Impl
 	bool ParseFrameReference(const char *Frame, LAutoString &File, int &Line);
-	bool SetFrame(int Frame);
+	void SetFrame(int Frame);
 	void UpdateLocals();
 	void UpdateWatches();
 	void UpdateRegisters();

@@ -329,9 +329,12 @@ LMessage::Param LDebugContext::OnEvent(LMessage *m)
 	return 0;
 }
 
-bool LDebugContext::SetFrame(int Frame)
+void LDebugContext::SetFrame(int Frame)
 {
-	return d->Db ? d->Db->SetFrame(Frame) : false;
+	if (!d->Db)
+		return;
+	
+	d->Db->SetFrame(Frame, nullptr);
 }
 
 bool LDebugContext::DumpObject(const char *Var, const char *Val)

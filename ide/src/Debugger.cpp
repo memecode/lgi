@@ -1092,26 +1092,20 @@ public:
 			});
 	}
 
-	bool GetFrame(int &Frame, LString &File, int &Line) override
+	void SetFrame(int Frame, TStatusCb cb) override
 	{
-		LAssert(0);
-		return false;
-	}
-	
-	bool SetFrame(int Frame) override
-	{
-		if (CurFrame != Frame)
-		{
-			CurFrame = Frame;
-			
-			char c[256];
-			sprintf_s(c, sizeof(c), "frame %i", Frame);
-			Cmd(c, false, [this](auto err)
+		if (CurFrame == Frame)
+			return;
+
+		Cmd(LString::Fmt("frame %i", Frame),
+			false,
+			[this, cb, Frame](auto err)
 			{
+				if (cb)
+					cb(!err);
+				if (!err)
+					CurFrame = Frame;
 			});
-		}
-		
-		return true;
 	}
 
 	void RestartInternal(TStatusCb cb)

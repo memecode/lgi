@@ -141,8 +141,7 @@ public:
 	virtual void GetCallStack(TStringsCb cb) = 0;
 	virtual void GetThreads(std::function<void(LArray<LString>&, int)> cb) = 0;
 	virtual void SetCurrentThread(int ThreadId, TStatusCb cb) = 0;
-	virtual bool GetFrame(int &Frame, LString &File, int &Line) = 0;
-	virtual bool SetFrame(int Frame) = 0;
+	virtual void SetFrame(int Frame, TStatusCb cb) = 0;
 
 	virtual void SetBreakPoint(BreakPoint *bp, TStatusCb cb) = 0;
 	virtual void RemoveBreakPoint(BreakPoint *bp, TStatusCb cb) = 0;

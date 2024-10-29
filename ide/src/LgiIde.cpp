@@ -3115,25 +3115,35 @@ void AppWnd::OpenFile(const char *FileName, NodeSource *Src, std::function<void(
 
 	auto Proj = Src && Src->GetProject() ? Src->GetProject() : RootProject();
 	LString FullPath;
-	if (LIsRelativePath(File) && Proj)
+	if (Proj)
 	{
-		// Use project info to make the path absolute
-		LArray<IdeProject*> Projs;
-		Projs.Add(Proj);
-		Proj->CollectAllSubProjects(Projs);
-
-		for (auto p: Projs)
+		if (auto backend = Proj->GetBackend())
 		{
-			auto ProjPath = p->GetBasePath();
-			char s[MAX_PATH_LEN];
-			LMakePath(s, sizeof(s), ProjPath, File);
-				
-			LString Path = s;
-			if (p->CheckExists(Path))
+			if (LIsRelativePath(File))
+				FullPath = backend->JoinPath(backend->GetBasePath(), File);
+			else
+				FullPath = File;
+		}
+		else if (LIsRelativePath(File))
+		{
+			// Use project info to make the path absolute
+			LArray<IdeProject*> Projs;
+			Projs.Add(Proj);
+			Proj->CollectAllSubProjects(Projs);
+
+			for (auto p: Projs)
 			{
-				FullPath = Path;
-				File = FullPath;
-				break;
+				auto ProjPath = p->GetBasePath();
+				char s[MAX_PATH_LEN];
+				LMakePath(s, sizeof(s), ProjPath, File);
+				
+				LString Path = s;
+				if (p->CheckExists(Path))
+				{
+					FullPath = Path;
+					File = FullPath;
+					break;
+				}
 			}
 		}
 	}
@@ -3187,15 +3197,15 @@ void AppWnd::OpenFile(const char *FileName, NodeSource *Src, std::function<void(
 	{
 		if (auto backend = Proj ? Proj->GetBackend() : NULL)
 		{
-			backend->Read(File, [this, Proj, File=LString(File), callback](auto err, auto data)
+			backend->Read(FullPath, [this, Proj, FullPath, callback](auto err, auto data)
 			{
 				if (err)
 				{
-					LgiMsg(this, "Error opening '%s': %s", AppName, MB_OK, File.Get(), err.ToString().Get());
+					LgiMsg(this, "Error opening '%s': %s", AppName, MB_OK, FullPath.Get(), err.ToString().Get());
 				}
 				else if (data)
 				{
-					auto Doc = new IdeDoc(this, 0, File);
+					auto Doc = new IdeDoc(this, 0, FullPath);
 					if (Doc)
 					{
 						Doc->SetProject(Proj);
@@ -3204,7 +3214,7 @@ void AppWnd::OpenFile(const char *FileName, NodeSource *Src, std::function<void(
 						LRect p = d->Mdi->NewPos();
 						Doc->LView::SetPos(p);
 						d->Docs.Insert(Doc);
-						d->OnFile(File);
+						d->OnFile(FullPath);
 
 						OnNewDoc(Proj, Doc);
 

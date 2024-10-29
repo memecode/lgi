@@ -731,7 +731,7 @@ public:
 			return false;
 
 		Auto lck(this, _FL);
-		work.Add( [this, result, Path = RemoteRoot(Path), Data]()
+		work.Add( [this, result, Path = PreparePath(Path), Data]()
 		{
 			LMemStream stream(Data.Get(), Data.Length(), false);
 			auto err = ssh->UploadFile(Path, &stream);
