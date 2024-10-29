@@ -127,6 +127,7 @@ Source =	src/common/Widgets/TableLayout.cpp \
 			src/common/Text/String.cpp \
 			src/common/Lgi/OptionsFile.cpp \
 			src/common/Net/Base64.cpp \
+			src/common/Net/CommsBus.cpp \
 			src/common/Hash/sha1/sha1.c \
 			src/common/General/Password.cpp \
 			src/common/Hash/md5/md5.c \

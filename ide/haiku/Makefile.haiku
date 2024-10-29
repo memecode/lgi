@@ -86,6 +86,8 @@ Source =	../src/common/Lgi/LgiMain.cpp \
 			src/SimpleCppParser.cpp \
 			src/IdeCommon.cpp \
 			src/JavascriptParser.cpp \
+			src/RemoteFileSelect.cpp \
+			src/Debugger.cpp \
 			src/SysCharSupport.cpp \
 			src/PythonParser.cpp \
 			src/FindSymbol.cpp \
