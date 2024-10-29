@@ -211,6 +211,18 @@ public:
 
 	void Select(bool b) override
 	{
+		if (!GetList()->InThread())
+		{
+			// Make sure to call this in the right thread...
+			GetList()->RunCallback([this, b]()
+			{
+				Select(b);
+			});
+			return;
+		}
+
+		LAssert(GetList()->InThread());
+
 		LListItem::Select(b);
 
 		auto mode = (DisplayMode)c->tabs->Value();
@@ -542,6 +554,9 @@ public:
 					LStructuredLog::sDefaultEndpoint,
 					[this](auto msg)
 					{
+						// Note: as the list control is thread safe, this does NOT need to be
+						// running in the window's thread.
+
 						// Incoming comms message, parse and show in the UI
 						LStructuredLog log(LStructuredLog::TData, msg, false);
 
@@ -582,6 +597,16 @@ public:
 
 	void ClearLogs()
 	{
+		if (!InThread())
+		{
+			// Make sure this is running in the window's thread
+			RunCallback([this]()
+			{
+				ClearLogs();
+			});
+			return;
+		}
+
 		if (lst)
 			lst->Empty();
 		if (hex)

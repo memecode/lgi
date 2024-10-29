@@ -663,6 +663,9 @@ class Gdb :
 			}
 			else
 			{
+				#if DEBUG_STRUCT_LOGGING
+				Log->Log("Starting gdb:", a[0], a[1]);
+				#endif
 				if (!LocalGdb.Reset(new LSubProcess(a[0], a[1])))
 					return false;
 			}
@@ -671,7 +674,12 @@ class Gdb :
 		if (LocalGdb)
 		{
 			if (InitDir)
+			{
+				#if DEBUG_STRUCT_LOGGING
+				Log->Log("InitDir:", InitDir);
+				#endif
 				LocalGdb->SetInitFolder(InitDir);
+			}
 			if (ChildEnv)
 			{
 				auto p = ChildEnv.Split("\n");
@@ -719,7 +727,11 @@ class Gdb :
 		}
 		else if (LocalGdb)
 		{
-			if (!LocalGdb->Start(true, true, false))
+			bool processStart = LocalGdb->Start(true, true, false);
+			#if DEBUG_STRUCT_LOGGING
+			Log->Log("processStart:", processStart);
+			#endif
+			if (!processStart)
 			{
 				State = ProcessError;
 				auto ErrMsg = LErrorCodeToString(LocalGdb->GetErrorCode());
