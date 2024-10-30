@@ -385,9 +385,19 @@ public:
 
 	LString MakeAbsolute(LString relPath) override
 	{
+		if (relPath(0) == remoteSep(0))
+		{
+			LAssert(!"this doesn't look like a relative path bro?");
+		}
+
 		auto native = MakeNative(relPath);
-		if (native(0) == '~' && homePath)
-			native = native.Replace("~", homePath);
+		if (native(0) == '~')
+		{
+			if (homePath)
+				native = native.Replace("~", homePath);
+			else
+				LAssert(!"no home path available?");
+		}
 		return native;
 	}
 
