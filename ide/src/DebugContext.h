@@ -31,7 +31,8 @@ public:
 	void UpdateThreads();
 	void SelectThread(int ThreadId, LDebugger::TStatusCb cb);
 	bool DumpObject(const char *Var, const char *Val);
-	void OnBreakPoint(LDebugger::BreakPoint &b, bool Add);
+	void AddBreakPoint(LDebugger::BreakPoint &b, LDebugger::TStatusIntCb cb = nullptr);
+	void RemoveBreakPoint(int token, LDebugger::TStatusCb cb = nullptr);
 	
 	// Ui events...
 	bool OnCommand(int Cmd);

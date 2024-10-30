@@ -12,6 +12,7 @@ public:
 	// Path:
 	virtual LString GetBasePath() = 0;
 	virtual LString MakeRelative(LString absPath) = 0;
+	virtual LString MakeAbsolute(LString relPath) = 0;
 	virtual LString JoinPath(LString base, LString leaf) = 0;
 
 	// Reading and writing:

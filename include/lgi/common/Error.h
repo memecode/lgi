@@ -108,7 +108,7 @@ public:
 		DevNotes.New().Printf("%s:%i - %s", File, Line, buffer);
 	}
 	
-	LString GetNotes()
+	LString GetNotes() const
 	{
 		return LString("\n").Join(DevNotes);
 	}

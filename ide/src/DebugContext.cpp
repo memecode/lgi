@@ -903,16 +903,24 @@ void LDebugContext::Ungrab()
 	// printf("LDebugContext::Ungrab: noop\n");
 }
 
-void LDebugContext::OnBreakPoint(LDebugger::BreakPoint &b, bool Add)
+void LDebugContext::AddBreakPoint(LDebugger::BreakPoint &b, LDebugger::TStatusIntCb cb)
 {
 	if (!d->Db)
-	{
 		LgiTrace("%s:%i - No debugger loaded.\n", _FL);
-		return;
-	}
-	
-	if (Add)
-		d->Db->SetBreakPoint(&b, nullptr);
 	else
-		d->Db->RemoveBreakPoint(&b, nullptr);
+	{
+		if (!cb)
+		{
+			int asd=0;
+		}
+		d->Db->SetBreakPoint(&b, cb);
+	}
+}
+
+void LDebugContext::RemoveBreakPoint(int token, LDebugger::TStatusCb cb)
+{
+	if (!d->Db)
+		LgiTrace("%s:%i - No debugger loaded.\n", _FL);
+	else
+		d->Db->RemoveBreakPoint(token, cb);
 }

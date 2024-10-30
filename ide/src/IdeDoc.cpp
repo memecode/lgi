@@ -1370,8 +1370,6 @@ bool IdeDoc::AddBreakPoint(LDebugger::BreakPoint &bp, bool Add)
 			proj->AddBreakpoint(bp);
 		else
 			proj->DeleteBreakpoint(bp);
-		
-		// LgiTrace("%s:%i %s bp %s\n", _FL, Add?"add":"del", bp.Save().Get());
 	}
 	else LgiTrace("%s:%i no project for this doc?\n", _FL);
 

@@ -59,7 +59,6 @@ class SshBackend :
 
 		~Process()
 		{
-			cancel->Cancel();
 			WaitForExit();
 
 			if (exitcodeCb)
@@ -127,6 +126,7 @@ class SshBackend :
 	LString prompt;
 	IdePlatform sysType = PlatformUnknown;
 	LString remoteSep;
+	LString homePath;
 	LArray<Process*> processes;
 	constexpr static const char *separators = "/\\";
 
@@ -352,12 +352,43 @@ public:
 	const char *GetClass() const { return "SshBackend"; }
 	LString GetBasePath() override { return RemoteRoot(); }
 
-	LString MakeRelative(LString absPath)
+	LString MakeNative(LString path)
 	{
+		if (remoteSep(0) == '/')
+			return path.Replace("\\", remoteSep);
+		else
+			return path.Replace("/", remoteSep);
+	}
+
+	LString MakeRelative(LString absPath) override
+	{
+		absPath = MakeNative(absPath);
+
+		// Strip off the boot part...
+		auto boot = "/boot";
+		if (absPath.Find(boot) == 0)
+			absPath = absPath.Replace(boot);
+			
+		// Is it in the home folder?
+		auto home = "/home";
+		if (absPath.Find(home) == 0)
+			absPath = absPath.Replace(home, "~");
+
+		// Convert to relative from the base folder:
 		auto base = RemoteRoot();
 		if (absPath.Find(base) == 0)
+			// Seems to based off the same root, so remove that...
 			return LString(".") + absPath(base.Length(), -1);
+
 		return LString();
+	}
+
+	LString MakeAbsolute(LString relPath) override
+	{
+		auto native = MakeNative(relPath);
+		if (native(0) == '~' && homePath)
+			native = native.Replace("~", homePath);
+		return native;
 	}
 
 	LString JoinPath(LString base, LString leaf)
@@ -381,7 +412,19 @@ public:
 
 	void OnConnected()
 	{
-		GetSysType(NULL);
+		GetSysType(
+			[this](auto sys)
+			{
+				ProcessOutput("echo $HOME",
+					[this](auto exitCode, auto str)
+					{
+						if (!exitCode)
+						{
+							RemoveAnsi(str);
+							homePath = str;
+						}
+					});
+			});
 	}
 
 	void GetSysType(std::function<void(IdePlatform)> cb) override
@@ -895,6 +938,12 @@ public:
 	LString MakeRelative(LString absPath)
 	{
 		return LMakeRelativePath(folder, absPath);
+	}
+
+	LString MakeAbsolute(LString relPath) override
+	{
+		LAssert(!"impl me");
+		return relPath;
 	}
 
 	LString JoinPath(LString base, LString leaf)

@@ -65,8 +65,6 @@ class Gdb :
 	int CurFrame = 0;
 	bool SetAsmType = false;
 	bool SetPendingOn = false;
-	LArray<BreakPoint> BreakPoints;
-	int BreakPointIdx = -1;
 	int ProcessId = -1; // of gdb itself, if known.
 	bool SuppressEchoLine = false;
 	bool SuppressNextFileLine = false;
@@ -75,6 +73,25 @@ class Gdb :
 	#else
 	LStream *Log = NULL;
 	#endif
+
+	// Break points:
+	struct BpInfo
+	{
+		int64_t index = 0;
+		bool added = false;
+		BreakPoint bp;
+	};
+	LHashTbl<IntKey<int>, BpInfo*> BreakPoints;
+	int BreakPointIdx = -1;
+	int AllocBpToken()
+	{
+		while (true)
+		{
+			auto t = LRand(10000);
+			if (!BreakPoints.Find(t))
+				return t;
+		}
+	}	
 
 	// These things need locking:
 		struct Command
@@ -566,14 +583,6 @@ class Gdb :
 				{
 					if (curCmd->setRunning)
 						SetState(DebuggingProcess, true);
-
-					#if DEBUG_STRUCT_LOGGING
-					if (RemoteGdb)
-						Log->Log("Write:", str);
-					#else
-					if (RemoteGdb)
-						Log->Write(str);
-					#endif
 					break;
 				}
 
@@ -839,6 +848,14 @@ class Gdb :
 		}
 
 		SetState(false, false);
+
+		if (RemoteGdb)
+		{
+			LScriptArguments args(nullptr);
+			RemoteGdb->CallMethod(LDomPropToString(ObjCancel), args);
+
+			delete RemoteGdb;
+		}
 		return 0;
 	}
 
@@ -961,10 +978,7 @@ public:
 		LgiTrace("Gdb::~Gdb - waiting for thread to exit...\n");
 		#endif
 		State = Exiting;
-		while (!IsExited())
-		{
-			LSleep(1);
-		}
+		WaitForExit(5000);
 		#if DEBUG_SESSION_LOGGING
 		LgiTrace("Gdb::~Gdb - thread has exited.\n");
 		#endif
@@ -1212,11 +1226,11 @@ public:
 			{
 				auto bp = new BreakPoint("main");
 				SetBreakPoint(bp,
-					[this, a, bp, cb](auto status) mutable
+					[this, a, bp, cb](auto err, auto token) mutable
 					{
-						if (!status)
+						DeleteObj(bp);
+						if (err)
 						{
-							DeleteObj(bp);
 							if (cb) cb(false);
 							return;
 						}
@@ -1224,20 +1238,17 @@ public:
 						SuppressNextFileLine = true;
 						Cmd(a,
 							true,
-							[this, bp, cb](auto &err) mutable
+							[this, token, cb](auto &err) mutable
 							{
 								if (err)
 								{
-									DeleteObj(bp);
 									if (cb) cb(false);
 									return;
 								}
 
-								RemoveBreakPoint(bp,
-									[this, cb, bp](auto status) mutable
+								RemoveBreakPoint(token,
+									[this, cb](auto status) mutable
 									{
-										DeleteObj(bp);
-
 										if (!status)
 										{
 											if (cb) cb(false);
@@ -1289,22 +1300,23 @@ public:
 		}
 	}
 
-	void AddBpInternal(BreakPoint *bp, TStatusCb cb)
+	void AddBpInternal(BpInfo *bpInfo, TStatusIntCb cb)
 	{
 		char cmd[MAX_PATH_LEN];
-		if (bp->File)
+		if (bpInfo->bp.File)
 		{
-			char *Last = strrchr(bp->File, DIR_CHAR);
-			sprintf_s(cmd, sizeof(cmd), "break %s:" LPrintfSSizeT, Last ? Last + 1 : bp->File.Get(), bp->Line);
+			char *Last = strrchr(bpInfo->bp.File, DIR_CHAR);
+			sprintf_s(cmd, sizeof(cmd), "break %s:" LPrintfSSizeT, Last ? Last + 1 : bpInfo->bp.File.Get(), bpInfo->bp.Line);
 		}
-		else if (bp->Symbol)
+		else if (bpInfo->bp.Symbol)
 		{
-			sprintf_s(cmd, sizeof(cmd), "break %s", bp->Symbol.Get());
+			sprintf_s(cmd, sizeof(cmd), "break %s", bpInfo->bp.Symbol.Get());
 		}
 		else
 		{
+			LError err(LErrorInvalidParam, "Breakpoint should be file:line -or- symbol");
 			if (cb)
-				cb(false);
+				cb(err, INVALID_TOKEN);
 			return;
 		}
 			
@@ -1316,57 +1328,69 @@ public:
 
 		Cmd(cmd,
 			false,
-			[this, cb, bp](auto &err, LString::Array *Lines)
+			[this, cb, bpInfo](auto &err, LString::Array *Lines)
 			{
 				if (err)
 				{
 					if (cb)
-						cb(false);
+						cb(err, INVALID_TOKEN);
 					return;
 				}
 
-				for (unsigned i=0; i<Lines->Length(); i++)
+				for (auto ln: *Lines)
 				{
-					LString s = (*Lines)[i];
-					LString::Array p = s.Split(" ");
-					if (p.Length() >= 2 &&
-						!_stricmp(p[0], "breakpoint"))
+					auto parts = ln.SplitDelimit();
+					
+					if (ln.Find("No source file") >= 0)
 					{
-						auto Idx = p[1].Int();
+						LError err(LErrorFuncFailed, ln.Strip());
+						if (cb)
+							cb(err, INVALID_TOKEN);
+						return;						
+					}
+					else if (parts.Length() >= 2 &&
+						parts[0].Equals("breakpoint"))
+					{
+						auto Idx = parts[1].Int();
 						if (Idx > 0)
 						{
-							bp->Index = (int)Idx;
+							bpInfo->added = true;
+							bpInfo->index = Idx;
 						}
 					}
 				}
 			
 				BreakPointIdx = -1;
-				bp->Added = true;
 
 				if (cb)
-					cb(true);
+				{
+					LError none;
+					cb(none, bpInfo->bp.Token);
+				}
 			});
 	}
 
-	void AddBp(BreakPoint *bp, TStatusCb cb)
+	void AddBp(BpInfo *inf, TStatusIntCb cb)
 	{
-		if (!bp)
+		if (!inf)
 		{
+			LError err(LErrorInvalidParam, "missing inf ptr");
 			if (cb)
-				cb(false);
+				cb(err, INVALID_TOKEN);
 			return;
 		}
-		if (bp->Added)
+		if (inf->added)
 		{
+			LError err(LErrorInvalidParam, "bp already added");
 			if (cb)
-				cb(true);
+				cb(err, INVALID_TOKEN);
 			return;
 		}
 		if (!SetPendingOn)
 		{
 			Cmd("set breakpoint pending on",
 				false,
-				[this, bp, cb](auto &err)
+				[this, inf, cb](auto &err)
 				{
 					#if DEBUG_STRUCT_LOGGING
 					Log->Log("PendingBreakCb:", err);
@@ -1375,21 +1399,21 @@ public:
 					if (err)
 					{
 						if (cb)
-							cb(false);
+							cb(err, INVALID_TOKEN);
 						return;
 					}
 
 					SetPendingOn = true;
-					AddBpInternal(bp, cb);
+					AddBpInternal(inf, cb);
 				});
 		}
 		else
 		{
-			AddBpInternal(bp, cb);
+			AddBpInternal(inf, cb);
 		}			
 	}
 	
-	void SetBreakPoint(BreakPoint *bp, TStatusCb cb) override
+	void SetBreakPoint(BreakPoint *bp, TStatusIntCb cb) override
 	{
 		// Make sure the child 'gdb' is running...
 		auto Start = LCurrentTime();
@@ -1398,44 +1422,41 @@ public:
 			LSleep(5);
 			if (LCurrentTime()-Start > 3000)
 			{
-				LgiTrace("%s:%i - SetBreakPoint init wait failed...\n", _FL);
+				LError err(LErrorTimerExpired, "SetBreakPoint init wait failed");
 				if (cb)
-					cb(false);
+					cb(err, INVALID_TOKEN);
 				return;
 			}
 		}
 
-		bp->Added = false;
 		if (Running)
 		{
-			LgiTrace("%s:%i - Can't add break point while running.\n", _FL);
+			LError err(LErrorFuncFailed, "Can't add break point while running");
 			if (cb)
-				cb(false);
+				cb(err, INVALID_TOKEN);
 			return;
 		}
-		else
-		{
-			AddBp(bp,
-				[this, bp, cb](auto status)
-				{
-					BreakPoint &n = BreakPoints.New();
-					n = *bp;
 
-					if (cb)
-						cb(status);
-				});
+		if (!cb)
+		{
+			int asd=0;
+		}
+
+		auto tok = AllocBpToken();
+		if (auto inf = new BpInfo)
+		{
+			inf->bp = *bp;
+			inf->bp.Token = tok;
+			inf->added = false;
+			inf->index = 0;
+			BreakPoints.Add(tok, inf);
+
+			AddBp(inf, cb);
 		}
 	}
 
-	void RemoveBreakPoint(BreakPoint *bp, TStatusCb cb) override
+	void RemoveBreakPoint(int token, TStatusCb cb) override
 	{
-		if (!bp)
-		{
-			if (cb)
-				cb(false);
-			return;
-		}
-
 		// Make sure the child 'gdb' is running...
 		uint64 Start = LCurrentTime();
 		while (State == Init)
@@ -1452,55 +1473,53 @@ public:
 
 		if (Running)
 		{
-			LgiTrace("%s:%i - Can't add break point while running.\n", _FL);
+			LgiTrace("%s:%i - Can't remove break point while running.\n", _FL);
 			if (cb)
 				cb(false);
 		}
+		else if (auto inf = BreakPoints.Find(token))
+		{
+			char c[256];
+			sprintf_s(c, sizeof(c), "delete " LPrintfInt64, inf->index);
+				
+			Cmd(c,
+				false,
+				[this, cb, c = LString(c), token](auto &err)
+				{
+					if (!err)
+					{
+						auto inf = BreakPoints.Find(token);
+						if (!inf)
+						{
+							if (cb)
+								cb(false);
+							return;
+						}
+						else
+						{
+							delete inf;
+							BreakPoints.Delete(token);
+						}
+					}
+
+					if (cb)
+						cb(!err);
+				});
+		}
 		else
 		{
-			unsigned i;
-			for (i=0; i<BreakPoints.Length(); i++)
-			{
-				if (*bp == BreakPoints[i])
-				{
-					break;
-				}
-			}
-			
-			if (i < BreakPoints.Length())
-			{
-				char c[256];
-				sprintf_s(c, sizeof(c), "delete %i", BreakPoints[i].Index);
-				
-				Cmd(c,
-					false,
-					[this, i, cb, c = LString(c)](auto &err)
-					{
-						if (err)
-							LgiTrace("%s:%i - The cmd '%s' failed.\n", _FL, c.Get());
-						else
-							BreakPoints.DeleteAt(i);
-						if (cb)
-							cb(!err);
-					});
-			}
-			else
-			{
-				LgiTrace("%s:%i - Failed to find break point '%s:%i'\n",
-					_FL,
-					bp->File.Get(),
-					bp->Line);
-				
-				if (cb)
-					cb(false);
-			}
+			if (cb)
+				cb(false);
 		}
 	}
 	
 	bool GetBreakPoints(LArray<BreakPoint> &bps)
 	{
-		bps = BreakPoints;
-		return false;
+		for (auto i: BreakPoints)
+		{
+			bps.New() = i.value->bp;
+		}
+		return true;
 	}
 	
 	struct VariableParseState

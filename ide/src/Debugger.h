@@ -33,15 +33,15 @@ public:
 
 	struct BreakPoint
 	{
-		int Index = 0;
-		bool Added = false;
+		// This is used to refer to a breakpoint without a pointer
+		int Token = 0;
 
 		// Use File:Line
-		LString File;
-		ssize_t Line = 0;
+			LString File;
+			ssize_t Line = 0;
 		// -or-
-		// A symbol reference
-		LString Symbol;
+			// A symbol reference
+			LString Symbol;
 		
 		BreakPoint()
 		{
@@ -60,10 +60,13 @@ public:
 		
 		BreakPoint &operator =(const BreakPoint &b)
 		{
-			Index = b.Index;
+			Token = b.Token;
+
 			File = b.File;
 			Line = b.Line;
+			
 			Symbol = b.Symbol;
+			
 			return *this;
 		}
 		
@@ -125,11 +128,13 @@ public:
 		LString Detail;
 	};
 
+	using TVarArray = LArray<Variable>;
+
 	using TStatusCb = std::function<void(bool)>;
 	using TStringCb = std::function<void(LString)>;
 	using TStringsCb = std::function<void(LString::Array&)>;
-	using TVarArray = LArray<Variable>;
 	using TVarsCb = std::function<void(LError&,TVarArray&)>;
+	using TStatusIntCb = std::function<void(LError&,int)>;
 	
 	virtual ~LDebugger() {}
 	
@@ -143,8 +148,9 @@ public:
 	virtual void SetCurrentThread(int ThreadId, TStatusCb cb) = 0;
 	virtual void SetFrame(int Frame, TStatusCb cb) = 0;
 
-	virtual void SetBreakPoint(BreakPoint *bp, TStatusCb cb) = 0;
-	virtual void RemoveBreakPoint(BreakPoint *bp, TStatusCb cb) = 0;
+	constexpr static int INVALID_TOKEN = -1;
+	virtual void SetBreakPoint(BreakPoint *bp, TStatusIntCb cb) = 0;
+	virtual void RemoveBreakPoint(int Token, TStatusCb cb) = 0;
 	virtual bool GetBreakPoints(LArray<BreakPoint> &bps) = 0;
 
 	virtual void GetVariables(bool Locals, bool Detailed, TVarArray *init, TVarsCb cb) = 0;

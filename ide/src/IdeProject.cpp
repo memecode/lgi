@@ -21,6 +21,7 @@
 #include "lgi/common/RegKey.h"
 #include "lgi/common/FileSelect.h"
 #include "lgi/common/Menu.h"
+#include "lgi/common/PopupNotification.h"
 
 #include "LgiIde.h"
 #include "resdefs.h"
@@ -2424,14 +2425,12 @@ bool IdeProject::OnNode(const char *Path, ProjectNode *Node, bool Add)
 		return false;
 	}
 
-	char Full[MAX_PATH_LEN];
+	char Full[MAX_PATH_LEN] = "";
 	if (LIsRelativePath(Path))
 	{
-		LAutoString Base = GetBasePath();
+		auto Base = GetBasePath();
 		if (LMakePath(Full, sizeof(Full), Base, Path))
-		{
 			Path = Full;
-		}
 	}
 
 	bool Status = false;
@@ -2450,6 +2449,7 @@ bool IdeProject::OnNode(const char *Path, ProjectNode *Node, bool Add)
 void IdeProject::ShowFileProperties(const char *File)
 {
 	ProjectNode *Node = NULL;
+	auto full = FindFullPath(File, &Node);
 	if (Node)
 		Node->OnProperties();
 }
@@ -3597,14 +3597,47 @@ bool IdeProject::LoadBreakPoints(IdeDoc *doc)
 	if (!doc)
 		return false;
 
-	auto fn = doc->GetFileName();
-	for (auto &bp: d->UserBreakpoints)
+	LString fn = doc->GetFileName();
+	if (d->Backend && !LIsRelativePath(fn))
 	{
-		if (bp.File.Equals(fn))
-			doc->AddBreakPoint(bp, true);
+		// Convert the path to a relative one
+		auto base = d->Backend->GetBasePath();
+		if (auto rel = d->Backend->MakeRelative(fn))
+			fn = rel.Replace("\\", "/");
 	}
 
-	return true;
+	auto fnLeaf = LGetLeaf(fn);
+	LString::Array msg;
+	msg.SetFixedLength(false);
+
+	for (auto &bp: d->UserBreakpoints)
+	{
+		bool sameLeaf = !Stricmp(LGetLeaf(bp.File), fnLeaf);
+		LString normalized = bp.File.Replace("\\", "/");
+
+		if (d->Backend)
+		{
+			if (auto rel = d->Backend->MakeRelative(normalized))
+				normalized = rel;
+		}
+
+		if (normalized.Equals(fn))
+		{
+			doc->AddBreakPoint(bp, true);
+			return true;
+		}
+
+		if (sameLeaf)
+			msg.New().Printf("LoadBreakPoints: matching leaf: bp.File=%s, fn=%s\n", normalized.Get(), fn.Get());
+	}
+
+	if (msg.Length())
+	{
+		for (auto m: msg)
+			LgiTrace("%s", m.Get());
+		LAssert(!"Failed to add break point with matching leaf?");
+	}
+	return false;
 }
 
 bool IdeProject::LoadBreakPoints(LDebugger *db)
@@ -3613,7 +3646,29 @@ bool IdeProject::LoadBreakPoints(LDebugger *db)
 		return false;
 		
 	for (auto &bp: d->UserBreakpoints)
-		db->SetBreakPoint(&bp, nullptr);
+	{
+		if (d->Backend)
+		{
+			if (auto rel = d->Backend->MakeAbsolute(bp.File))
+				bp.File = rel;
+		}
+		db->SetBreakPoint(&bp,
+			[this, pbreak = &bp](auto err, auto token)
+			{
+				if (err)
+				{
+					d->App->RunCallback([this, err]() mutable
+					{
+						auto e = err.ToString();
+						LPopupNotification::Message(d->App, LString::Fmt("SetBreakPoint error: %s", e.Get()) );
+					});
+				}
+				else
+				{
+					pbreak->Token = token;
+				}
+			});
+	}
 		
 	return true;
 }
@@ -3681,7 +3736,29 @@ bool IdeProject::DeleteBreakpoint(LDebugger::BreakPoint &bp)
 
 bool IdeProject::HasBreakpoint(LDebugger::BreakPoint &bp)
 {
-	return d->UserBreakpoints.IndexOf(bp) >= 0;
+	LDebugger::BreakPoint breakpoint = bp;
+
+	if (d->Backend)
+	{
+		if (auto rel = d->Backend->MakeRelative(breakpoint.File))
+			breakpoint.File = rel;
+	}
+
+	// LgiTrace("HasBreakpoint '%s:%i' in:\n", local.File.Get(), local.Line);
+	for (auto &i: d->UserBreakpoints)
+	{
+		// LgiTrace("\t'%s:%i'\n", i.File.Get(), i.Line);
+		LDebugger::BreakPoint user = i;
+		if (d->Backend)
+		{
+			if (auto rel = d->Backend->MakeRelative(user.File))
+				user.File = rel;
+		}
+		if (user == breakpoint)
+			return true;
+	}
+
+	return false;
 }
 
 template<typename T, typename Fn>

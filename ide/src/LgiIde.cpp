@@ -811,7 +811,7 @@ public:
 	LTabView *DebugTab = NULL;
 	LBox *DebugBox = NULL;
 	LBox *DebugLog = NULL;
-	LList *Locals = NULL, *CallStack = NULL, *Threads = NULL;
+	LList *Locals = NULL, *CallStack = NULL, *Threads = NULL, *BreakPoints = NULL;
 	LTree *Watch = NULL;
 	LTextLog *ObjectDump = NULL, *MemoryDump = NULL, *Registers = NULL;
 	LTableLayout *MemTable = NULL;
@@ -1020,6 +1020,20 @@ public:
 							Threads->MultiSelect(false);
 
 							Page->Append(Threads);
+						}
+					}
+					if ((Page = DebugTab->Append("Break Points")))
+					{
+						Page->SetFont(&Small);
+						if ((BreakPoints = new LList(IDC_BREAK_POINTS, 0, 0, 100, 100, "BreakPoints")))
+						{
+							BreakPoints->SetFont(&Small);
+							BreakPoints->AddColumn("File/Line", 500);
+							BreakPoints->AddColumn("Enabled", 50);
+							BreakPoints->SetPourLargest(true);
+							BreakPoints->MultiSelect(false);
+
+							Page->Append(BreakPoints);
 						}
 					}
 					if ((Page = DebugTab->Append("Call Stack")))
@@ -1724,18 +1738,16 @@ public:
 
 	IdeProject *IsProjectOpen(const char *File)
 	{
-		if (File)
+		if (!File)
+			return nullptr;
+
+		for (auto p: Projects)
 		{
-			for (auto p: Projects)
-			{
-				if (p->GetFileName() && stricmp(p->GetFileName(), File) == 0)
-				{
-					return p;
-				}
-			}
+			if (!Stricmp(p->GetFileName(), File))
+				return p;
 		}
 
-		return 0;
+		return nullptr;
 	}
 
 	void SerializeStringList(const char *Opt, LString::Array *Lst, bool Write)
@@ -2846,7 +2858,28 @@ bool AppWnd::OnBreakPoint(LDebugger::BreakPoint &b, bool Add)
 	if (!found)
 		LAssert(!"Document not found?");
 	else if (d->DbgContext)
-		d->DbgContext->OnBreakPoint(b, Add);
+	{
+		if (Add)
+		{
+			d->DbgContext->AddBreakPoint(b,
+				[this, pbreak = &b](auto err, auto token)
+				{
+					if (err)
+					{
+						LAssert(InThread());
+						LgiMsg(this, "Error: %s", AppName, MB_OK, err.ToString().Get());
+					}
+					else
+					{
+						pbreak->Token = token;
+					}
+				});
+		}
+		else
+		{
+			d->DbgContext->RemoveBreakPoint(b.Token, nullptr);
+		}
+	}
 	
 	return found;
 }
@@ -2866,6 +2899,7 @@ bool AppWnd::LoadBreakPoints(LDebugger *db)
 bool AppWnd::ToggleBreakpoint(const char *File, ssize_t Line)
 {
 	bool has = false;
+
 	LDebugger::BreakPoint bp(File, Line);
 	auto projects = AllProjects();
 	for (auto p: projects)
@@ -4436,44 +4470,45 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				}
 				else
 				{
-					p->Execute(ExeDebug, [this](auto err, auto ctx)
-					{
-						if (err)
+					p->Execute(
+						ExeDebug,
+						[this](auto err, auto ctx)
 						{
-							LgiMsg(this, "Error: %s", AppName, MB_OK, err.ToString().Get());
-						}
-						else if (ctx)
-						{
-							d->DbgContext = ctx;
-							d->DbgContext->DebuggerLog = d->Output->DebuggerLog;
-							d->DbgContext->Watch = d->Output->Watch;
-							d->DbgContext->Locals = d->Output->Locals;
-							d->DbgContext->CallStack = d->Output->CallStack;
-							d->DbgContext->Threads = d->Output->Threads;
-							d->DbgContext->ObjectDump = d->Output->ObjectDump;
-							d->DbgContext->Registers = d->Output->Registers;
-							d->DbgContext->MemoryDump = d->Output->MemoryDump;
-
-							d->DbgContext->onFinished = [this]()
+							if (err)
 							{
-								DeleteObj(d->DbgContext);
-							};
+								LgiMsg(this, "Error: %s", AppName, MB_OK, err.ToString().Get());
+							}
+							else if (ctx)
+							{
+								d->DbgContext = ctx;
+								d->DbgContext->DebuggerLog = d->Output->DebuggerLog;
+								d->DbgContext->Watch       = d->Output->Watch;
+								d->DbgContext->Locals      = d->Output->Locals;
+								d->DbgContext->CallStack   = d->Output->CallStack;
+								d->DbgContext->Threads     = d->Output->Threads;
+								d->DbgContext->ObjectDump  = d->Output->ObjectDump;
+								d->DbgContext->Registers   = d->Output->Registers;
+								d->DbgContext->MemoryDump  = d->Output->MemoryDump;
+
+								d->DbgContext->onFinished = [this]()
+								{
+									DeleteObj(d->DbgContext);
+								};
 				
-							d->DbgContext->OnCommand(IDM_START_DEBUG);
+								d->DbgContext->OnCommand(IDM_START_DEBUG);
 				
-							d->Output->Value(AppWnd::DebugTab);
-							d->Output->DebugEdit->Focus(true);
-						}
-						else LAssert(0);
-					});
+								d->Output->Value(AppWnd::DebugTab);
+								d->Output->DebugEdit->Focus(true);
+							}
+							else LAssert(0);
+						});
 				}
 			});
 			break;
 		}
 		case IDM_TOGGLE_BREAKPOINT:
 		{
-			IdeDoc *Cur = GetCurrentDoc();
-			if (Cur)
+			if (auto Cur = GetCurrentDoc())
 				ToggleBreakpoint(Cur->GetFileName(), Cur->GetLine());
 			break;
 		}
