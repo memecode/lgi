@@ -179,11 +179,10 @@ public:
 	// User file settings
 	bool GetExpanded(int Id);
 	void SetExpanded(int Id, bool Exp);
-	void AddBreakpoint(LDebugger::BreakPoint &bp);
-	bool DeleteBreakpoint(LDebugger::BreakPoint &bp);
-	bool HasBreakpoint(LDebugger::BreakPoint &bp);
+	void AddBreakpoint(BreakPoint &bp);
+	bool DeleteBreakpoint(int id);
+	bool HasBreakpoint(int id);
 	bool LoadBreakPoints(IdeDoc *doc);
-	bool LoadBreakPoints(LDebugger *db);
 	
 	// Nodes
 	char *FindFullPath(const char *File, class ProjectNode **Node = NULL);

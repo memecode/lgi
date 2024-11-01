@@ -1354,7 +1354,7 @@ bool IdeDoc::IsFile(const char *File)
 	return File ? d->IsFile(File) : false;
 }
 
-bool IdeDoc::AddBreakPoint(LDebugger::BreakPoint &bp, bool Add)
+bool IdeDoc::AddBreakPoint(BreakPoint &bp, bool Add)
 {
 	if (Add)
 		d->BreakPoints.Add(bp.Line, true);
@@ -1368,8 +1368,8 @@ bool IdeDoc::AddBreakPoint(LDebugger::BreakPoint &bp, bool Add)
 	{
 		if (Add)
 			proj->AddBreakpoint(bp);
-		else
-			proj->DeleteBreakpoint(bp);
+		
+		// else proj->DeleteBreakpoint(bp);
 	}
 	else LgiTrace("%s:%i no project for this doc?\n", _FL);
 

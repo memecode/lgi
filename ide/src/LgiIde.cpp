@@ -1241,6 +1241,7 @@ public:
 	LSubMenu *CreateMakefileMenu = NULL;
 	LAutoPtr<FindSymbolSystem> FindSym;
 	LArray<LAutoString> SystemIncludePaths;
+	BreakPointStore BreakPoints;
 	
 	// Debugging
 	LDebugContext *DbgContext = NULL;
@@ -1890,6 +1891,10 @@ AppWnd::AppWnd()
 	d->HBox = new LBox;
 	d->VBox->AddView(d->HBox);
 	d->VBox->AddView(d->Output = new IdeOutput(this));
+	if (d->Output)
+	{
+		d->BreakPoints.SetUi(d->Output->BreakPoints);
+	}
 
 	d->HBox->AddView(d->Tree = new IdeTree);
 	if (d->Tree)
@@ -2812,14 +2817,16 @@ void AppWnd::CloseAll()
 		while (d->Docs[0])
 			delete d->Docs[0];
 		
-		IdeProject *p = RootProject();
-		if (p)
+		if (auto p = RootProject())
 			DeleteObj(p);
 		
 		while (d->Projects[0])
 			delete d->Projects[0];	
 
 		DeleteObj(d->DbgContext);
+
+		if (d->Output->BreakPoints)
+			d->Output->BreakPoints->Empty();
 	});
 }
 
@@ -2840,75 +2847,16 @@ bool AppWnd::OnRequestClose(bool IsOsQuit)
 	}
 }
 
-bool AppWnd::OnBreakPoint(LDebugger::BreakPoint &b, bool Add)
-{
-	List<IdeDoc>::I it = d->Docs.begin();
-
-	bool found = false;
-	for (IdeDoc *doc = *it; doc; doc = *++it)
-	{
-		auto fn = doc->GetFileName();
-		bool Match = !Stricmp(fn, b.File.Get());
-		if (Match)
-		{
-			doc->AddBreakPoint(b, Add);
-			found = true;
-		}
-	}
-	if (!found)
-		LAssert(!"Document not found?");
-	else if (d->DbgContext)
-	{
-		if (Add)
-		{
-			d->DbgContext->AddBreakPoint(b,
-				[this, pbreak = &b](auto err, auto token)
-				{
-					if (err)
-					{
-						LAssert(InThread());
-						LgiMsg(this, "Error: %s", AppName, MB_OK, err.ToString().Get());
-					}
-					else
-					{
-						pbreak->Token = token;
-					}
-				});
-		}
-		else
-		{
-			d->DbgContext->RemoveBreakPoint(b.Token, nullptr);
-		}
-	}
-	
-	return found;
-}
-
-bool AppWnd::LoadBreakPoints(LDebugger *db)
-{
-	if (!db)
-		return false;
-
-	auto projects = AllProjects();
-	for (auto p: projects)
-		p->LoadBreakPoints(db);
-		
-	return true;
-}
-
 bool AppWnd::ToggleBreakpoint(const char *File, ssize_t Line)
 {
 	bool has = false;
 
-	LDebugger::BreakPoint bp(File, Line);
-	auto projects = AllProjects();
-	for (auto p: projects)
-	{
-		if (has = p->HasBreakpoint(bp))
-			break;
-	}
+	BreakPoint bp(File, Line);
+	if (auto id = d->BreakPoints.Has(bp))
+		d->BreakPoints.Delete(id);
+	else
+		d->BreakPoints.Add(bp);
 
-	OnBreakPoint(bp, !has);
 	return true;
 }
 
@@ -3305,6 +3253,10 @@ LArray<IdeProject*> AppWnd::AllProjects()
 	return projects;
 }
 
+BreakPointStore *AppWnd::GetBreakPointStore()
+{
+	return &d->BreakPoints;
+}
 
 FindSymbolSystem *AppWnd::GetFindSym()
 {
@@ -3356,7 +3308,7 @@ IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bo
 	{
 		LgiTrace("%s:%i - Warning: Project already open.\n", _FL);
 		return NULL;
-	}	
+	}
 
 	auto p = new IdeProject(this, DepParent);
 	if (!p)

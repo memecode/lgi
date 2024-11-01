@@ -11,10 +11,10 @@
 #include "lgi/common/OptionsFile.h"
 #include "lgi/common/StringClass.h"
 #include "lgi/common/TextView3.h"
-#include "lgi/common/List.h"
 #include "lgi/common/Tree.h"
 #include "lgi/common/SubProcess.h"
 
+#include "BreakPointStore.h"
 #include "FindSymbol.h"
 #include "Debugger.h"
 #ifdef WIN32
@@ -267,6 +267,7 @@ public:
 	IdeProject *RootProject();
 	LArray<IdeProject*> AllProjects();
 
+	BreakPointStore *GetBreakPointStore();
 	FindSymbolSystem *GetFindSym();
 	LTextView3 *FocusEdit();
 	void AppendOutput(char *Txt, Channels Channel);
@@ -305,8 +306,6 @@ public:
 	// Debugging support
 	class LDebugContext *GetDebugContext();
 	bool ToggleBreakpoint(const char *File, ssize_t Line);
-	bool OnBreakPoint(LDebugger::BreakPoint &b, bool Add);
-	bool LoadBreakPoints(LDebugger *db);
 	void OnDebugState(bool Debugging, bool Running);
 };
 

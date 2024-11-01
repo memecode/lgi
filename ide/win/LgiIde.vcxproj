@@ -114,6 +114,7 @@
     <ClInclude Include="..\..\src\common\Coding\ScriptingPriv.h" />
     <ClInclude Include="..\resources\resdefs.h" />
     <ClInclude Include="..\src\AddFtpFile.h" />
+    <ClInclude Include="..\src\BreakPointStore.h" />
     <ClInclude Include="..\src\DebugContext.h" />
     <ClInclude Include="..\src\IdeFindInFiles.h" />
     <ClInclude Include="..\src\FindSymbol.h" />

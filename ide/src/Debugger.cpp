@@ -9,6 +9,7 @@
 #define DEBUG_STRUCT_LOGGING	1
 static bool DEBUG_SHOW_GDB_IO = false;
 #define ECHO_GDB_OUTPUT			0
+#define ERR_CTX					__FUNCTION__, _FL
 
 #include <atomic>
 #ifdef POSIX
@@ -46,9 +47,13 @@ class Gdb :
 	public LCancel,
 	public LMutex
 {
-	LDebugEvents *Events = NULL;
-	ProjectBackend *backend = NULL;
+	LDebugEvents *Events = nullptr;
+	ProjectBackend *backend = nullptr;
+	BreakPointStore *bpStore = nullptr;
+	int bpStoreCallbackId = BreakPointStore::INVALID_ID;
 	IdePlatform platform = PlatformCurrent;
+	constexpr static int INVALID_ID = BreakPointStore::INVALID_ID;
+	using TLock = LMutex::Auto;
 	
 	// Either one of these should non-NULL
 	LAutoPtr<LSubProcess> LocalGdb;
@@ -77,21 +82,15 @@ class Gdb :
 	// Break points:
 	struct BpInfo
 	{
-		int64_t index = 0;
+		int64_t gdbIndex = 0;
 		bool added = false;
-		BreakPoint bp;
+
+		std::function<void(int,BpInfo*)> onIndex;	// the gdbIndex is assigned
+		std::function<void(int)> onDelete;			// the bp is deleted from gdb
 	};
-	LHashTbl<IntKey<int>, BpInfo*> BreakPoints;
-	int BreakPointIdx = -1;
-	int AllocBpToken()
-	{
-		while (true)
-		{
-			auto t = LRand(10000);
-			if (!BreakPoints.Find(t))
-				return t;
-		}
-	}	
+	LHashTbl<IntKey<int>, BpInfo*> BreakPoints; // requires locking
+	BreakPoint mainBreakPoint;
+	LString mainBreakPointCmd;
 
 	// These things need locking:
 		struct Command
@@ -162,7 +161,7 @@ class Gdb :
 			}
 		};
 
-		bool DebuggingProcess = false;
+		bool DebuggingProcess = false; // have we started the debugging session with 'r' yet?
 		bool Running = false;
 		LArray<Command*> commands;
 		
@@ -189,6 +188,25 @@ class Gdb :
 		Exiting,
 		ProcessError
 	}	State;
+
+	void BreakPointEvent(BreakPointStore::TEvent type, int id)
+	{
+		switch (type)
+		{
+			case BreakPointStore::TBreakPointAdded:
+			{
+				if (!Running)
+					AddBp(id, nullptr);
+				break;
+			}
+			case BreakPointStore::TBreakPointDeleted:
+			{
+				if (!Running)
+					DelBp(id, nullptr);
+				break;
+			}
+		}
+	}
 
 	void OnFileLine(const char *File, int Line, bool CurrentIp, const char *SrcFile, int SrcLine)
 	{
@@ -261,25 +279,11 @@ class Gdb :
 				#endif
 
 				if (Events)
-				{
-					#if DEBUG_SESSION_LOGGING
-					// LgiTrace("Gdb::SetRunState(%i,%i) calling OnState...\n", is_debug, is_run);
-					#endif
 					Events->OnState(DebuggingProcess, Running);
-					#if DEBUG_SESSION_LOGGING
-					// LgiTrace("Gdb::SetRunState(%i,%i) OnState returned.\n", is_debug, is_run);
-					#endif
-				}
 			}
 			else
 			{
 				Unlock();
-
-				#if DEBUG_STRUCT_LOGGING
-				// Log->Log("SetState.nochange:", DebuggingProcess, Running);
-				#else
-				Log->Print("SetState(%i,%i) no change\n", DebuggingProcess, Running);
-				#endif
 			}
 		}
 	}
@@ -938,9 +942,10 @@ class Gdb :
 	}
 
 public:
-	Gdb(LStream *log, ProjectBackend *be, IdePlatform plat, LStream *netLog) :
+	Gdb(BreakPointStore *BpStore, LStream *log, ProjectBackend *be, IdePlatform plat, LStream *netLog) :
 		LThread("Gdb.Thread"),
 		LMutex("Gdb.Lock"),
+		bpStore(BpStore),
 		#if DEBUG_STRUCT_LOGGING
 			Log(new LStructuredLog(LStructuredLog::TNetworkEndpoint, LStructuredLog::sDefaultEndpoint, true, netLog)),
 		#else
@@ -970,10 +975,20 @@ public:
 		{
 			LgiTrace("%s:%i - Didn't find Gdb.Print='%s'\n", _FL, pp.GetFull().Get());
 		}
+
+		// Register to hear about break point changes
+		bpStoreCallbackId = bpStore->AddCallback([this](auto type, int id)
+		{
+			BreakPointEvent(type, id);
+		});
+
+		// Also setup the exist break points:
 	}
 	
 	~Gdb()
 	{
+		bpStore->DeleteCallback(bpStoreCallbackId);
+
 		#if DEBUG_SESSION_LOGGING
 		LgiTrace("Gdb::~Gdb - waiting for thread to exit...\n");
 		#endif
@@ -1074,19 +1089,18 @@ public:
 			false,
 			[this, cb](LError &err, LString::Array *Bt)
 			{
-				if (err)
+				if (err || !Bt)
 					return;
 
 				LString::Array Stack;
 				Stack.SetFixedLength(false);
-				for (int i=0; i<Bt->Length(); i++)
+				for (auto ln: *Bt)
 				{
-					auto &l = (*Bt)[i];
-					if (!l)
+					if (!ln)
 						continue;
-					if (*l == '#')
+					if (*ln == '#')
 					{
-						Stack.New() = l;
+						Stack.New() = ln;
 					}
 					else if (Stack.Length() > 0)
 					{
@@ -1096,8 +1110,7 @@ public:
 						while (End > Prev && strchr(LWhiteSpace, End[-1]))
 							*(--End) = 0;
 				
-						LString s;
-						s.Printf("%s%s", Prev.Get(), l);
+						LString s = Prev.RStrip() + ln;
 						Prev = s;
 					}
 				}
@@ -1224,62 +1237,9 @@ public:
 
 			if (a(0) == 'r' && ProcessId < 0)
 			{
-				auto bp = new BreakPoint("main");
-				SetBreakPoint(bp,
-					[this, a, bp, cb](auto err, auto token) mutable
-					{
-						DeleteObj(bp);
-						if (err)
-						{
-							if (cb) cb(false);
-							return;
-						}
-
-						SuppressNextFileLine = true;
-						Cmd(a,
-							true,
-							[this, token, cb](auto &err) mutable
-							{
-								if (err)
-								{
-									if (cb) cb(false);
-									return;
-								}
-
-								RemoveBreakPoint(token,
-									[this, cb](auto status) mutable
-									{
-										if (!status)
-										{
-											if (cb) cb(false);
-											return;
-										}
-
-										ProcessId = -1;
-
-										SetState(true, Running);
-
-										// Call the callback, just before we start running... if we've gotten this
-										// far it's fair to say it's ok. Otherwise the cb will be called after the
-										// prompt returns, probably not what the caller wants.
-										if (cb)
-											cb(true);
-
-										Cmd("c",
-											true,
-											[this, cb](auto &err)
-											{
-												if (err)
-													// But if it doesn't immediately unset the running status...
-													SetState(true, false);
-
-												if (LocalGdb)													
-													LogMsg("[ProcessId=%i]\n", ProcessId);
-
-											});
-									});
-							});
-					});
+				mainBreakPoint.Symbol = "main";
+				mainBreakPointCmd = a;
+				bpStore->Add(mainBreakPoint);
 			}
 			else
 			{
@@ -1300,40 +1260,52 @@ public:
 		}
 	}
 
-	void AddBpInternal(BpInfo *bpInfo, TStatusIntCb cb)
+	void OnError(LString msg, const char *fn, const char *file, int line)
 	{
-		char cmd[MAX_PATH_LEN];
-		if (bpInfo->bp.File)
+		LAssert(!"impl me");
+	}
+
+	void AddBpInternal(int id, TStatusCb cb)
+	{
+		char cmd[MAX_PATH_LEN];		
+		auto bp = bpStore->Get(id);
+		if (bp.File)
 		{
-			char *Last = strrchr(bpInfo->bp.File, DIR_CHAR);
-			sprintf_s(cmd, sizeof(cmd), "break %s:" LPrintfSSizeT, Last ? Last + 1 : bpInfo->bp.File.Get(), bpInfo->bp.Line);
+			char *Last = strrchr(bp.File, DIR_CHAR);
+			sprintf_s(cmd, sizeof(cmd), "break %s:" LPrintfSSizeT, Last ? Last + 1 : bp.File.Get(), bp.Line);
 		}
-		else if (bpInfo->bp.Symbol)
+		else if (bp.Symbol)
 		{
-			sprintf_s(cmd, sizeof(cmd), "break %s", bpInfo->bp.Symbol.Get());
+			sprintf_s(cmd, sizeof(cmd), "break %s", bp.Symbol.Get());
 		}
 		else
 		{
-			LError err(LErrorInvalidParam, "Breakpoint should be file:line -or- symbol");
 			if (cb)
-				cb(err, INVALID_TOKEN);
+				cb(false);
 			return;
 		}
-			
-		BreakPointIdx = 0;
-			
+
 		#if DEBUG_STRUCT_LOGGING
 		Log->Log("AddBpInternal:", cmd);
 		#endif
 
 		Cmd(cmd,
 			false,
-			[this, cb, bpInfo](auto &err, LString::Array *Lines)
+			[this, cb, id](auto &err, LString::Array *Lines)
 			{
+				TLock lck(this, _FL);
+				auto inf = BreakPoints.Find(id);
+				if (!inf)
+				{
+					if (cb)
+						cb(false);
+					return;
+				}
+
 				if (err)
 				{
 					if (cb)
-						cb(err, INVALID_TOKEN);
+						cb(false);
 					return;
 				}
 
@@ -1343,185 +1315,172 @@ public:
 					
 					if (ln.Find("No source file") >= 0)
 					{
-						LError err(LErrorFuncFailed, ln.Strip());
+						OnError(ln.Strip(), ERR_CTX);
 						if (cb)
-							cb(err, INVALID_TOKEN);
+							cb(false);
 						return;						
 					}
 					else if (parts.Length() >= 2 &&
-						parts[0].Equals("breakpoint"))
+							 parts[0].Equals("breakpoint"))
 					{
 						auto Idx = parts[1].Int();
 						if (Idx > 0)
 						{
-							bpInfo->added = true;
-							bpInfo->index = Idx;
+							inf->added = true;
+							inf->gdbIndex = Idx;
+							OnBreakPointIndex(id, inf);
+							if (inf->onIndex)
+								inf->onIndex(id, inf);
+
+							if (cb)
+								cb(true);
+							return;
 						}
 					}
 				}
 			
-				BreakPointIdx = -1;
-
 				if (cb)
-				{
-					LError none;
-					cb(none, bpInfo->bp.Token);
-				}
+					cb(false);
 			});
 	}
 
-	void AddBp(BpInfo *inf, TStatusIntCb cb)
+	// Called when the gdb break point index is assigned
+	void OnBreakPointIndex(int id, BpInfo *inf)
 	{
-		if (!inf)
-		{
-			LError err(LErrorInvalidParam, "missing inf ptr");
-			if (cb)
-				cb(err, INVALID_TOKEN);
+		if (!mainBreakPoint || !mainBreakPointCmd)
 			return;
-		}
-		if (inf->added)
+
+		auto bp = bpStore->Get(id);
+		if (bp == mainBreakPoint)
 		{
-			LError err(LErrorInvalidParam, "bp already added");
-			if (cb)
-				cb(err, INVALID_TOKEN);
-			return;
-		}
-		if (!SetPendingOn)
-		{
-			Cmd("set breakpoint pending on",
-				false,
-				[this, inf, cb](auto &err)
+			// Get the process id?
+
+			// Install a callback for the 
+			inf->onDelete = [this](auto id)
 				{
-					#if DEBUG_STRUCT_LOGGING
-					Log->Log("PendingBreakCb:", err);
-					#endif
+					// sub process has started...
+					SetState(true, Running);
+					Cmd(mainBreakPointCmd, true, [this](auto err)
+						{
+							// Clean up the state...
+							mainBreakPoint.Empty();
+							mainBreakPointCmd.Empty();
+						});
+				};
 
-					if (err)
-					{
-						if (cb)
-							cb(err, INVALID_TOKEN);
-						return;
-					}
-
-					SetPendingOn = true;
-					AddBpInternal(inf, cb);
-				});
-		}
-		else
-		{
-			AddBpInternal(inf, cb);
-		}			
-	}
-	
-	void SetBreakPoint(BreakPoint *bp, TStatusIntCb cb) override
-	{
-		// Make sure the child 'gdb' is running...
-		auto Start = LCurrentTime();
-		while (State == Init)
-		{
-			LSleep(5);
-			if (LCurrentTime()-Start > 3000)
-			{
-				LError err(LErrorTimerExpired, "SetBreakPoint init wait failed");
-				if (cb)
-					cb(err, INVALID_TOKEN);
-				return;
-			}
-		}
-
-		if (Running)
-		{
-			LError err(LErrorFuncFailed, "Can't add break point while running");
-			if (cb)
-				cb(err, INVALID_TOKEN);
-			return;
-		}
-
-		if (!cb)
-		{
-			int asd=0;
-		}
-
-		auto tok = AllocBpToken();
-		if (auto inf = new BpInfo)
-		{
-			inf->bp = *bp;
-			inf->bp.Token = tok;
-			inf->added = false;
-			inf->index = 0;
-			BreakPoints.Add(tok, inf);
-
-			AddBp(inf, cb);
+			// Delete the temporary main breakpoint...
+			bpStore->Delete(id);
 		}
 	}
 
-	void RemoveBreakPoint(int token, TStatusCb cb) override
+	void AddBp(int id, TStatusCb cb)
 	{
-		// Make sure the child 'gdb' is running...
-		uint64 Start = LCurrentTime();
-		while (State == Init)
+		if (id == INVALID_ID)
 		{
-			LSleep(5);
-			if (LCurrentTime()-Start > 3000)
-			{
-				LgiTrace("%s:%i - SetBreakPoint init wait failed...\n", _FL);
-				if (cb)
-					cb(false);
-				return;
-			}
-		}
-
-		if (Running)
-		{
-			LgiTrace("%s:%i - Can't remove break point while running.\n", _FL);
 			if (cb)
 				cb(false);
+			return;
 		}
-		else if (auto inf = BreakPoints.Find(token))
+
+		TLock lck(this, _FL);
+		auto inf = BreakPoints.Find(id);
+		if (!inf)
+			BreakPoints.Add(id, inf = new BpInfo);
+		if (inf)
 		{
-			char c[256];
-			sprintf_s(c, sizeof(c), "delete " LPrintfInt64, inf->index);
-				
-			Cmd(c,
-				false,
-				[this, cb, c = LString(c), token](auto &err)
-				{
-					if (!err)
+			if (inf->added)
+			{
+				if (cb)
+					cb(true);
+				return;
+			}
+			if (!SetPendingOn)
+			{
+				Cmd("set breakpoint pending on",
+					false,
+					[this, id, cb](auto &err)
 					{
-						auto inf = BreakPoints.Find(token);
-						if (!inf)
+						#if DEBUG_STRUCT_LOGGING
+						Log->Log("PendingBreakCb:", err);
+						#endif
+						if (err)
 						{
 							if (cb)
 								cb(false);
 							return;
 						}
-						else
-						{
-							delete inf;
-							BreakPoints.Delete(token);
-						}
-					}
 
-					if (cb)
-						cb(!err);
-				});
+						SetPendingOn = true;
+						AddBpInternal(id, cb);
+					});
+			}
+			else
+			{
+				AddBpInternal(id, cb);
+			}
 		}
-		else
+	}
+
+	// Delete a break point
+	void DelBp(int id, TStatusCb cb)
+	{
+		// Handle bad id error:
+		if (id == INVALID_ID)
 		{
 			if (cb)
 				cb(false);
+			return;
 		}
-	}
-	
-	bool GetBreakPoints(LArray<BreakPoint> &bps)
-	{
-		for (auto i: BreakPoints)
+
+		TLock lck(this, _FL);
+		auto inf = BreakPoints.Find(id);
+		
+		// Handle no info error:
+		if (!inf)
 		{
-			bps.New() = i.value->bp;
+			if (cb)
+				cb(false);
+			return;
 		}
-		return true;
+
+		// Not added, just remove the info...
+		if (!inf->added || inf->gdbIndex <= 0)
+		{
+			if (inf->onDelete)
+				inf->onDelete(id);
+
+			delete inf;
+			BreakPoints.Delete(id);
+			if (cb)
+				cb(true);
+			return;
+		}
+
+		// Actually tell gdb to remove the error.
+		auto c = LString::Fmt("del " LPrintfInt64, inf->gdbIndex);
+		Cmd(c,
+			false,
+			[this, id, cb](auto err, LStringPipe *response)
+			{
+				auto out = response->NewLStr();
+				auto status = out.IsEmpty();
+				if (status)
+				{
+					TLock lck(this, _FL);
+					auto inf = BreakPoints.Find(id);
+					if (inf)
+					{
+						if (inf->onDelete)
+							inf->onDelete(id);
+						delete inf;
+					}
+					BreakPoints.Delete(id);
+				}
+				if (cb)
+					cb(status);
+			});
 	}
-	
+
 	struct VariableParseState
 	{
 		Gdb *gdb = NULL;
@@ -2131,7 +2090,7 @@ public:
 	}
 };
 
-LDebugger *CreateGdbDebugger(LStream *Log, ProjectBackend *Backend, IdePlatform platform, LStream *networkLog)
+LDebugger *CreateGdbDebugger(BreakPointStore *bpStore, LStream *Log, ProjectBackend *Backend, IdePlatform platform, LStream *networkLog)
 {
-	return new Gdb(Log, Backend, platform, networkLog);
+	return new Gdb(bpStore, Log, Backend, platform, networkLog);
 }

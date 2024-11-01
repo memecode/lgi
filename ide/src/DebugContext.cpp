@@ -224,42 +224,53 @@ public:
 			});
 	}
 
+	void OnCallStack(LString::Array &stack)
+	{
+		LAssert(Ctx->CallStack->InThread());
+
+		Ctx->CallStack->Empty();
+		for (auto frame: stack)
+		{
+			LListItem *it = new LListItem;
+					
+			auto f = frame.Get();
+			if (f && *f == '#')
+			{
+				auto Sp = strchr(++f, ' ');
+				if (Sp)
+				{
+					*Sp++ = 0;
+					it->SetText(f, 0);
+					it->SetText(Sp, 1);
+				}
+				else
+				{
+					it->SetText(frame, 1);
+				}
+			}
+			else
+			{					
+				it->SetText(frame, 1);
+			}
+					
+			Ctx->CallStack->Insert(it);
+		}
+				
+		Ctx->CallStack->SendNotify();
+	}
+
 	void UpdateCallStack()
 	{
 		if (!Db || !Ctx->CallStack || !InDebugging)
 			return;
 
 		Db->GetCallStack([this](auto Stack)
+		{
+			Ctx->CallStack->RunCallback([this, Stack]() mutable
 			{
-				Ctx->CallStack->Empty();
-				for (int i=0; i<Stack.Length(); i++)
-				{
-					LListItem *it = new LListItem;
-					char *f = Stack[i];
-					if (*f == '#')
-					{
-						char *Sp = strchr(++f, ' ');
-						if (Sp)
-						{
-							*Sp++ = 0;
-							it->SetText(f, 0);
-							it->SetText(Sp, 1);
-						}
-						else
-						{
-							it->SetText(Stack[i], 1);
-						}
-					}
-					else
-					{					
-						it->SetText(Stack[i], 1);
-					}
-					
-					Ctx->CallStack->Insert(it);
-				}
-				
-				Ctx->CallStack->SendNotify();
+				OnCallStack(Stack);
 			});
+		});
 	}
 	
 	void Log(const char *Fmt, ...)
@@ -279,7 +290,14 @@ public:
 	}
 };
 
-LDebugContext::LDebugContext(AppWnd *App, IdeProject *Proj, IdePlatform Platform, const char *Exe, const char *Args, bool RunAsAdmin, const char *Env, const char *InitDir)
+LDebugContext::LDebugContext(AppWnd *App,
+							IdeProject *Proj,
+							IdePlatform Platform,
+							const char *Exe,
+							const char *Args,
+							bool RunAsAdmin,
+							const char *Env,
+							const char *InitDir)
 {
 	d = new LDebugContextPriv(this, Platform);
 	d->App = App;
@@ -288,7 +306,7 @@ LDebugContext::LDebugContext(AppWnd *App, IdeProject *Proj, IdePlatform Platform
 
 	auto log = App->GetDebugLog();
 	LAssert(log);
-	if (d->Db.Reset(CreateGdbDebugger(log, Proj->GetBackend(), Platform, d->App->GetNetworkLog())))
+	if (d->Db.Reset(CreateGdbDebugger(App->GetBreakPointStore(), log, Proj->GetBackend(), Platform, d->App->GetNetworkLog())))
 	{
 		LFile::Path p;
 		if (InitDir)
@@ -578,7 +596,6 @@ bool LDebugContext::OnCommand(int Cmd)
 		{
 			if (d->Db)
 			{
-				d->App->LoadBreakPoints(d->Db);
 				d->Db->SetRunning(true, nullptr);
 			}
 			break;
@@ -901,26 +918,4 @@ void LDebugContext::OnWarning(LString str)
 void LDebugContext::Ungrab()
 {
 	// printf("LDebugContext::Ungrab: noop\n");
-}
-
-void LDebugContext::AddBreakPoint(LDebugger::BreakPoint &b, LDebugger::TStatusIntCb cb)
-{
-	if (!d->Db)
-		LgiTrace("%s:%i - No debugger loaded.\n", _FL);
-	else
-	{
-		if (!cb)
-		{
-			int asd=0;
-		}
-		d->Db->SetBreakPoint(&b, cb);
-	}
-}
-
-void LDebugContext::RemoveBreakPoint(int token, LDebugger::TStatusCb cb)
-{
-	if (!d->Db)
-		LgiTrace("%s:%i - No debugger loaded.\n", _FL);
-	else
-		d->Db->RemoveBreakPoint(token, cb);
 }

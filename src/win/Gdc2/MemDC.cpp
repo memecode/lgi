@@ -179,11 +179,7 @@ HDC LMemDC::StartDC()
 	if (!hBmp)
 		return NULL;
 		
-	if (hDC)
-	{
-		LgiTrace("%s:%i - MemDC already started?\n", _FL);
-	}
-	else
+	if (!hDC)
 	{
 		hDC = CreateCompatibleDC(NULL);
 		if (hDC)

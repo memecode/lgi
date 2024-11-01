@@ -314,7 +314,7 @@ public:
 	// User info file
 	LString UserFile;
 	LHashTbl<IntKey<int>,int> UserNodeFlags;
-	LArray<LDebugger::BreakPoint> UserBreakpoints;
+	LArray<int> UserBreakpoints;
 
 	void EmptyUserData()
 	{
@@ -3453,7 +3453,20 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 				}
 				else if (var.Equals(OPT_Breakpoint))
 				{
-					d->UserBreakpoints.New().Load(value);
+					BreakPoint bp;
+					if (bp.Load(value))
+					{
+						if (auto store = d->App->GetBreakPointStore())
+						{
+							if (auto id = store->Add(bp))
+							{
+								d->UserBreakpoints.Add(id);
+							}
+							else LAssert(0);
+						}
+						else LAssert(0);
+					}
+					else LAssert(0);
 				}
 				else LgiTrace("%s:%i - Unknown user file line: '%s'\n", _FL, ln.Get());
 			}
@@ -3577,8 +3590,16 @@ bool IdeProject::SaveFile()
 			// Save user file details..
 			for (auto i: d->UserNodeFlags)
 				f.Print("%s:%i,%x\n", OPT_NodeFlags, i.key, i.value);
-			for (auto bp: d->UserBreakpoints)
-				f.Print("%s:%s\n", OPT_Breakpoint, bp.Save().Get());
+			
+			if (auto store = d->App->GetBreakPointStore())
+			{
+				for (auto id: d->UserBreakpoints)
+				{
+					auto bp = store->Get(id);
+					f.Print("%s:%s\n", OPT_Breakpoint, bp.Save().Get());
+				}
+			}
+			else LAssert(0);
 
 			d->UserFileDirty = false;
 			#if 0
@@ -3598,7 +3619,7 @@ bool IdeProject::LoadBreakPoints(IdeDoc *doc)
 		return false;
 
 	LString fn = doc->GetFileName();
-	if (d->Backend && !LIsRelativePath(fn))
+	if (d->Backend && (!LIsRelativePath(fn) || fn(0) == '~'))
 	{
 		// Convert the path to a relative one
 		auto base = d->Backend->GetBasePath();
@@ -3610,25 +3631,29 @@ bool IdeProject::LoadBreakPoints(IdeDoc *doc)
 	LString::Array msg;
 	msg.SetFixedLength(false);
 
-	for (auto &bp: d->UserBreakpoints)
+	if (auto store = d->App->GetBreakPointStore())
 	{
-		bool sameLeaf = !Stricmp(LGetLeaf(bp.File), fnLeaf);
-		LString normalized = bp.File.Replace("\\", "/");
-
-		if (d->Backend)
+		for (auto id: d->UserBreakpoints)
 		{
-			if (auto rel = d->Backend->MakeRelative(normalized))
-				normalized = rel;
-		}
+			auto bp = store->Get(id);
+			bool sameLeaf = !Stricmp(LGetLeaf(bp.File), fnLeaf);
+			LString normalized = bp.File;
 
-		if (normalized.Equals(fn))
-		{
-			doc->AddBreakPoint(bp, true);
-			return true;
-		}
+			if (d->Backend)
+			{
+				if (auto rel = d->Backend->MakeRelative(normalized))
+					normalized = rel;
+			}
 
-		if (sameLeaf)
-			msg.New().Printf("LoadBreakPoints: matching leaf: bp.File=%s, fn=%s\n", normalized.Get(), fn.Get());
+			if (normalized.Equals(fn))
+			{
+				doc->AddBreakPoint(bp, true);
+				return true;
+			}
+
+			if (sameLeaf)
+				msg.New().Printf("LoadBreakPoints: matching leaf: bp.File=%s, fn=%s\n", normalized.Get(), fn.Get());
+		}
 	}
 
 	if (msg.Length())
@@ -3638,39 +3663,6 @@ bool IdeProject::LoadBreakPoints(IdeDoc *doc)
 		LAssert(!"Failed to add break point with matching leaf?");
 	}
 	return false;
-}
-
-bool IdeProject::LoadBreakPoints(LDebugger *db)
-{
-	if (!db)
-		return false;
-		
-	for (auto &bp: d->UserBreakpoints)
-	{
-		if (d->Backend)
-		{
-			if (auto rel = d->Backend->MakeAbsolute(bp.File))
-				bp.File = rel;
-		}
-		db->SetBreakPoint(&bp,
-			[this, pbreak = &bp](auto err, auto token)
-			{
-				if (err)
-				{
-					d->App->RunCallback([this, err]() mutable
-					{
-						auto e = err.ToString();
-						LPopupNotification::Message(d->App, LString::Fmt("SetBreakPoint error: %s", e.Get()) );
-					});
-				}
-				else
-				{
-					pbreak->Token = token;
-				}
-			});
-	}
-		
-	return true;
 }
 
 void IdeProject::SetDirty()
@@ -3708,7 +3700,7 @@ int IdeProject::AllocateId()
 	return d->NextNodeId++;
 }
 
-void IdeProject::AddBreakpoint(LDebugger::BreakPoint &bp)
+void IdeProject::AddBreakpoint(BreakPoint &bp)
 {
 	auto idx = d->UserBreakpoints.IndexOf(bp);
 	if (idx >= 0)
@@ -3721,12 +3713,12 @@ void IdeProject::AddBreakpoint(LDebugger::BreakPoint &bp)
 	SetUserFileDirty();
 }
 
-bool IdeProject::DeleteBreakpoint(LDebugger::BreakPoint &bp)
+bool IdeProject::DeleteBreakpoint(int id)
 {
-	auto idx = d->UserBreakpoints.IndexOf(bp);
+	auto idx = d->UserBreakpoints.IndexOf(id);
 	if (idx < 0)
 	{
-		LgiTrace("%s:%i bp doesn't exist: %s\n", _FL, bp.Save().Get());
+		LgiTrace("%s:%i bp doesn't exist: %i\n", _FL, id);
 		return false;
 	}
 	
@@ -3734,31 +3726,9 @@ bool IdeProject::DeleteBreakpoint(LDebugger::BreakPoint &bp)
 	return d->UserBreakpoints.DeleteAt(idx);
 }
 
-bool IdeProject::HasBreakpoint(LDebugger::BreakPoint &bp)
+bool IdeProject::HasBreakpoint(int id)
 {
-	LDebugger::BreakPoint breakpoint = bp;
-
-	if (d->Backend)
-	{
-		if (auto rel = d->Backend->MakeRelative(breakpoint.File))
-			breakpoint.File = rel;
-	}
-
-	// LgiTrace("HasBreakpoint '%s:%i' in:\n", local.File.Get(), local.Line);
-	for (auto &i: d->UserBreakpoints)
-	{
-		// LgiTrace("\t'%s:%i'\n", i.File.Get(), i.Line);
-		LDebugger::BreakPoint user = i;
-		if (d->Backend)
-		{
-			if (auto rel = d->Backend->MakeRelative(user.File))
-				user.File = rel;
-		}
-		if (user == breakpoint)
-			return true;
-	}
-
-	return false;
+	return d->UserBreakpoints.HasItem(id);
 }
 
 template<typename T, typename Fn>

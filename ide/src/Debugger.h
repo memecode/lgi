@@ -4,6 +4,7 @@
 #include "lgi/common/Variant.h"
 #include "lgi/common/StringClass.h"
 
+#include "BreakPointStore.h"
 #include "IdePlatform.h"
 
 #define DEBUG_SESSION_LOGGING		0
@@ -29,94 +30,6 @@ public:
 		Local,
 		Arg,
 		Global
-	};
-
-	struct BreakPoint
-	{
-		// This is used to refer to a breakpoint without a pointer
-		int Token = 0;
-
-		// Use File:Line
-			LString File;
-			ssize_t Line = 0;
-		// -or-
-			// A symbol reference
-			LString Symbol;
-		
-		BreakPoint()
-		{
-		}
-
-		BreakPoint(const char *sym)
-		{
-			Symbol = sym;
-		}
-		
-		BreakPoint(const char *file, ssize_t line)
-		{
-			File = file;
-			Line = line;
-		}
-		
-		BreakPoint &operator =(const BreakPoint &b)
-		{
-			Token = b.Token;
-
-			File = b.File;
-			Line = b.Line;
-			
-			Symbol = b.Symbol;
-			
-			return *this;
-		}
-		
-		bool operator ==(const BreakPoint &b)
-		{
-			if (File == b.File &&
-				Line == b.Line &&
-				Symbol == b.Symbol)
-				return true;
-			
-			return false;
-		}
-		
-		LString Save()
-		{
-			if (File && Line > 0)
-				return LString::Fmt("file://%s:" LPrintfSSizeT, File.Get(), Line);
-			else if (Symbol)
-				return LString::Fmt("symbol://%s", Symbol.Get());
-			
-			LAssert(!"Invalid breakpoint");
-			return LString();
-		}
-		
-		bool Load(LString s)
-		{
-			auto sep = s.Find("://");
-			if (sep < 0)
-				return false;
-			auto var = s(0, sep);
-			auto value = s(sep+3, -1);
-			if (var.Equals("file"))
-			{
-				auto p = value.SplitDelimit(":");
-				LAssert(p.Length() == 2);
-				File = p[0];
-				Line = p[1].Int();
-			}
-			else if (var.Equals("symbol"))
-			{
-				Symbol = value;
-			}
-			else
-			{
-				LAssert(!"Invalid type");
-				return false;
-			}
-			
-			return true;			
-		}
 	};
 
 	struct Variable
@@ -148,11 +61,6 @@ public:
 	virtual void SetCurrentThread(int ThreadId, TStatusCb cb) = 0;
 	virtual void SetFrame(int Frame, TStatusCb cb) = 0;
 
-	constexpr static int INVALID_TOKEN = -1;
-	virtual void SetBreakPoint(BreakPoint *bp, TStatusIntCb cb) = 0;
-	virtual void RemoveBreakPoint(int Token, TStatusCb cb) = 0;
-	virtual bool GetBreakPoints(LArray<BreakPoint> &bps) = 0;
-
 	virtual void GetVariables(bool Locals, bool Detailed, TVarArray *init, TVarsCb cb) = 0;
 	virtual bool PrintObject(const char *Var, LStream *Output) = 0;
 	virtual bool ReadMemory(LString &BaseAddr, int Length, LArray<uint8_t> &OutBuf, LString *ErrorMsg = NULL) = 0;
@@ -171,7 +79,8 @@ public:
 	virtual void UserCommand(const char *Cmd, TStatusCb cb) = 0;
 };
 
-extern LDebugger *CreateGdbDebugger(LStream *Log,
+extern LDebugger *CreateGdbDebugger(BreakPointStore *bpStore,
+									LStream *Log,
 									class ProjectBackend *Backend,
 									IdePlatform platform,
 									LStream *networkLog);
