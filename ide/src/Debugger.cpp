@@ -80,10 +80,17 @@ class Gdb :
 	#endif
 
 	// Break points:
+	enum TBpState
+	{
+		TInit,
+		TError,
+		TAdding,
+		TAdded,
+	};
 	struct BpInfo
 	{
 		int64_t gdbIndex = 0;
-		bool added = false;
+		TBpState state = TInit;
 
 		std::function<void(int,BpInfo*)> onIndex;	// the gdbIndex is assigned
 		std::function<void(int)> onDelete;			// the bp is deleted from gdb
@@ -132,22 +139,25 @@ class Gdb :
 				// printf("%s: %s - %i,%i,%i\n", __FUNCTION__, cmd.Get(), (bool)statusCb, (bool)pipeCb, (bool)arrayCb);
 				if (arrayCb)
 				{
+					auto s = pipe.NewLStr();
+					RemoveAnsi(s);
+					strArr = s.SplitDelimit("\r\n");
 					#if DEBUG_STRUCT_LOGGING
-					gdb->Log->Log("Command.Finish: calling arrayCb");
+					// gdb->Log->Log("Command.Finish: calling arrayCb");
 					#endif
 					arrayCb(err, &strArr);
 				}
 				else if (pipeCb)
 				{
 					#if DEBUG_STRUCT_LOGGING
-					gdb->Log->Log("Command.Finish: calling pipeCb");
+					// gdb->Log->Log("Command.Finish: calling pipeCb");
 					#endif
 					pipeCb(err, &pipe);
 				}
 				else if (statusCb)
 				{
 					#if DEBUG_STRUCT_LOGGING
-					gdb->Log->Log("Command.Finish: calling statusCb");
+					// gdb->Log->Log("Command.Finish: calling statusCb");
 					#endif
 					statusCb(err);
 				}
@@ -155,7 +165,7 @@ class Gdb :
 				{
 					// else no callback, which is ok...
 					#if DEBUG_STRUCT_LOGGING
-					gdb->Log->Log("Command.Finish: no cb");
+					// gdb->Log->Log("Command.Finish: no cb");
 					#endif
 				}
 			}
@@ -435,16 +445,8 @@ class Gdb :
 		if (curCmd)
 		{
 			// If the current command wants the data in a particular format:
-			if (curCmd->arrayCb)
-			{
-				if (Length <= 1)
-				{
-					printf("%s:%i - Warning: OnLine str='%.*s' len=%i\n", _FL, (int)Length, Start, (int)Length);
-				}
-				curCmd->strArr.New().Set(Start, Length - 1);
-				return;
-			}
-			else if (curCmd->pipeCb)
+			if (curCmd->arrayCb ||
+				curCmd->pipeCb)
 			{
 				curCmd->pipe.Write(Start, Length);
 				return;
@@ -779,7 +781,7 @@ class Gdb :
 				}))
 			{
 				State = ProcessError;
-				Events->OnError(LErrorFuncFailed, "Remote gdb failed to start");
+				OnError("Remote gdb failed to start", ERR_CTX);
 				return -1;
 			}
 		}
@@ -797,7 +799,7 @@ class Gdb :
 				#if DEBUG_STRUCT_LOGGING
 				Log->Log("Error:", msg);
 				#endif
-				Events->OnError(err.GetCode(), msg);
+				OnError(msg, ERR_CTX);
 				return -1;
 			}
 		}
@@ -1038,14 +1040,15 @@ public:
 
 	void GetThreads(std::function<void(LArray<LString>&, int)> cb) override
 	{
+		if (!cb)
+			return;
+
 		Cmd("info threads",
 			false,
 			[this, cb](LError &err, LString::Array *t)
 			{
 				LArray<LString> Threads;
 				int CurrentThreadId = -1;
-
-				LString *Cur = NULL;
 				for (int i=0; t && i<t->Length(); i++)
 				{
 					char *l = (*t)[i];
@@ -1068,16 +1071,15 @@ public:
 						if (Current)
 							CurrentThreadId = atoi(l);
 				
-						Cur = &Threads.New();
-						*Cur = l;
+						Threads.New() = l;
 					}
-					else if (Cur)
+					else
 					{
-						LString s;
-						s.Printf("%s %s", Cur->Get(), l);
-						*Cur = s;
+						Threads.Last() += LString(" ") + l;
 					}
 				}
+
+				cb(Threads, CurrentThreadId);
 			});
 	}
 
@@ -1106,12 +1108,7 @@ public:
 					{
 						// Append to the last line..
 						auto &Prev = Stack.Last();
-						auto End = Prev.Get() + Prev.Length();
-						while (End > Prev && strchr(LWhiteSpace, End[-1]))
-							*(--End) = 0;
-				
-						LString s = Prev.RStrip() + ln;
-						Prev = s;
+						Prev = Prev.RStrip() + ln;
 					}
 				}
 
@@ -1226,7 +1223,26 @@ public:
 				if (PrettyPrintPy)
 					Cmd(LString::Fmt("python exec(open(\"%s\").read())", PrettyPrintPy.Get()), false);
 			}
+
+			// Check we have BpInfo structures for all the break points
+			// Then add all the break points into gdb...
+			{
+				auto ids = bpStore->GetAll();
+				TLock lck(this, _FL);
+				for (auto id: ids)
+				{
+					auto inf = BreakPoints.Find(id);
+					if (!inf)
+						BreakPoints.Add(id, inf = new BpInfo);
+				}
+				for (auto p: BreakPoints)
+				{
+					if (p.value->state < TAdding)
+						AddBp(p.key);
+				}
+			}
 			
+			// Create the command to start things:
 			LString a;
 			if (DebuggingProcess)
 				a = "c";
@@ -1235,7 +1251,7 @@ public:
 			else
 				a = "r";
 
-			if (a(0) == 'r' && ProcessId < 0)
+			if (a(0) == 'r' && (ProcessId < 0 || bpStore->Length() > 0))
 			{
 				mainBreakPoint.Symbol = "main";
 				mainBreakPointCmd = a;
@@ -1262,7 +1278,8 @@ public:
 
 	void OnError(LString msg, const char *fn, const char *file, int line)
 	{
-		LAssert(!"impl me");
+		if (Events)
+			Events->OnError(LString::Fmt("%s (%f %f:%i)", msg.Get(), fn, file, line));
 	}
 
 	void AddBpInternal(int id, TStatusCb cb)
@@ -1271,8 +1288,13 @@ public:
 		auto bp = bpStore->Get(id);
 		if (bp.File)
 		{
-			char *Last = strrchr(bp.File, DIR_CHAR);
-			sprintf_s(cmd, sizeof(cmd), "break %s:" LPrintfSSizeT, Last ? Last + 1 : bp.File.Get(), bp.Line);
+			LString file = bp.File;
+			if (!Strncmp(file.Get(), InitDir.Get(), InitDir.Length()))
+			{
+				// We can remove the init dir from the start of file
+				file = file(InitDir.Length(),-1).LStrip("\\/");
+			}
+			sprintf_s(cmd, sizeof(cmd), "break %s:" LPrintfSSizeT, file.Get(), bp.Line);
 		}
 		else if (bp.Symbol)
 		{
@@ -1289,6 +1311,19 @@ public:
 		Log->Log("AddBpInternal:", cmd);
 		#endif
 
+		{
+			TLock lck(this, _FL);
+			if (auto inf = BreakPoints.Find(id))
+			{
+				if (inf->state != TInit)
+				{
+					int asd=0;
+				}
+				
+				inf->state = TAdding;
+			}
+		}
+
 		Cmd(cmd,
 			false,
 			[this, cb, id](auto &err, LString::Array *Lines)
@@ -1304,6 +1339,7 @@ public:
 
 				if (err)
 				{
+					inf->state = TError;
 					if (cb)
 						cb(false);
 					return;
@@ -1326,7 +1362,7 @@ public:
 						auto Idx = parts[1].Int();
 						if (Idx > 0)
 						{
-							inf->added = true;
+							inf->state = TAdded;
 							inf->gdbIndex = Idx;
 							OnBreakPointIndex(id, inf);
 							if (inf->onIndex)
@@ -1337,6 +1373,13 @@ public:
 							return;
 						}
 					}
+				}
+
+				if (inf->state == TAdding)
+				{
+					// Didn't find the index?
+					inf->state = TError;
+					OnError("Couldn't find index of break point.", ERR_CTX);
 				}
 			
 				if (cb)
@@ -1354,6 +1397,8 @@ public:
 		if (bp == mainBreakPoint)
 		{
 			// Get the process id?
+
+			// Install various breakpoints
 
 			// Install a callback for the 
 			inf->onDelete = [this](auto id)
@@ -1373,7 +1418,7 @@ public:
 		}
 	}
 
-	void AddBp(int id, TStatusCb cb)
+	void AddBp(int id, TStatusCb cb = nullptr)
 	{
 		if (id == INVALID_ID)
 		{
@@ -1388,14 +1433,20 @@ public:
 			BreakPoints.Add(id, inf = new BpInfo);
 		if (inf)
 		{
-			if (inf->added)
+			if (inf->state == TAdded)
 			{
 				if (cb)
 					cb(true);
 				return;
 			}
+			else if (inf->state == TAdding)
+			{
+				return;
+			}
+
 			if (!SetPendingOn)
 			{
+				SetPendingOn = true;
 				Cmd("set breakpoint pending on",
 					false,
 					[this, id, cb](auto &err)
@@ -1410,7 +1461,6 @@ public:
 							return;
 						}
 
-						SetPendingOn = true;
 						AddBpInternal(id, cb);
 					});
 			}
@@ -1444,7 +1494,7 @@ public:
 		}
 
 		// Not added, just remove the info...
-		if (!inf->added || inf->gdbIndex <= 0)
+		if (inf->state != TAdded || inf->gdbIndex <= 0)
 		{
 			if (inf->onDelete)
 				inf->onDelete(id);
@@ -1724,104 +1774,113 @@ public:
 				});
 	}
 
-	bool PrintObject(const char *Var, LStream *Output)
+	void PrintObject(const char *Var, TStringCb cb) override
 	{
-		#if 0
-		if (!Var || !Output)
-			return false;
+		if (!cb)
+			return;
+		if (!Var)
+		{
+			if (cb)
+				cb(LString());
+			return;
+		}
 	
-		LStringPipe q;
-		char c[256];
-		
 		// Get type...
-		sprintf_s(c, sizeof(c), "whatis %s", Var);
-		if (!Cmd(c, &q))
-			return false;
-		auto Type = q.NewLStr().SplitDelimit("=").Last().Strip();
-		bool IsPtr = Type.Find("*") >= 0;
-		bool IsChar = Type.Find("const char") == 0 || Type.Find("char") == 0;
-
-		#if 1		
-		Output->Print("Type: %s\n", Type.Get());
-		#else // Debugging
-		Output->Print("Type: %s (IsPtr=%i, IsGString=%i)\n", Type.Get(), IsPtr, IsGString);
-		#endif
-
-		// Get value...
-		sprintf_s(c, sizeof(c), "p %s%s", IsPtr && !IsChar ? "*" : "", Var);
-		if (!Cmd(c, &q))
-		{
-			Output->Print("%s:%i - Can't get value.\n", _FL);
-			return false;
-		}
-		
-		auto val = q.NewLStr();
-		if (!val)
-		{
-			Output->Print("%s:%i - No value.\n", _FL);
-			return false;
-		}
-		// Output->Print("val=%s\n", val.Get());
-		
-		auto Eq = Strchr(val.Get(), '=');
-		if (Eq)
-		{
-			Eq++;
-			while (Strchr(" \t\r\n", *Eq))
-				Eq++;
-		}
-		
-		if (Eq && *Eq != '{')
-		{
-			auto s = val.SplitDelimit("=").Last().Strip();
-			Output->Print("%s\n", s.Get());
-		}
-		else // Parse object format.
-		{			
-			int Depth = 0;
-			char *Start = NULL;
-			char Spaces[256];
-			memset(Spaces, ' ', sizeof(Spaces));
-			int IndentShift = 2;
-
-			#define Emit() \
-				if (Start) \
-				{ \
-					auto bytes = s - Start; \
-					char *last = s-1; while (last > Start && strchr(LWhiteSpace, *last)) last--; \
-					Output->Print("%.*s%.*s%s\n", Depth<<IndentShift, Spaces, bytes, Start, *last == '=' ? "" : ";"); \
-					Start = NULL; \
-				}
-			
-			Output->Print("Parsed:\n");
-			for (char *s = Eq ? Eq : val.Get(); *s; s++)
+		auto c = LString::Fmt("whatis %s", Var);
+		Cmd
+		(
+			c,
+			false,
+			[this, cb, Var=LString(Var)](auto err, LStringPipe *pipe)
 			{
-				if (*s == '{')
+				if (err)
 				{
-					Emit();
-					Output->Print("%.*s%c\n", Depth<<IndentShift, Spaces, *s);
-					Depth++;
+					cb(LString());
+					return;
 				}
-				else if (*s == '}')
-				{
-					Emit();
-					Depth--;
-					Output->Print("%.*s%c\n", Depth<<IndentShift, Spaces, *s);
-				}
-				else if (*s == ',')
-				{
-					Emit();
-				}
-				else if (!strchr(LWhiteSpace, *s))
-				{
-					if (Start == NULL)
-						Start = s;
-				}
+
+				auto Type = pipe->NewLStr().SplitDelimit("=").Last().Strip();
+				bool IsPtr = Type.Find("*") >= 0;
+				bool IsChar = Type.Find("const char") == 0 || Type.Find("char") == 0;
+
+				// Get value...
+				auto c = LString::Fmt("p %s%s", IsPtr && !IsChar ? "*" : "", Var.Get());
+				Cmd
+				(
+					c,
+					false,
+					[this, cb, Type](auto err, LStringPipe *pipe)
+					{
+						auto val = pipe->NewLStr();
+						if (!val)
+						{
+							cb(LString());
+							return;
+						}
+		
+						auto Eq = Strchr(val.Get(), '=');
+						if (Eq)
+						{
+							Eq++;
+							while (Strchr(" \t\r\n", *Eq))
+								Eq++;
+						}
+		
+						LStringPipe out;
+						if (Eq && *Eq != '{')
+						{
+							auto s = val.SplitDelimit("=").Last().Strip();
+							out.Print("%s\n", s.Get());
+						}
+						else // Parse object format.
+						{			
+							int Depth = 0;
+							char *Start = NULL;
+							char Spaces[256];
+							memset(Spaces, ' ', sizeof(Spaces));
+							int IndentShift = 2;
+
+							#define Emit() \
+								if (Start) \
+								{ \
+									auto bytes = s - Start; \
+									char *last = s-1; while (last > Start && strchr(LWhiteSpace, *last)) last--; \
+									out.Print("%.*s%.*s%s\n", Depth<<IndentShift, Spaces, bytes, Start, *last == '=' ? "" : ";"); \
+									Start = NULL; \
+								}
+			
+							out.Print("Parsed:\n");
+							for (char *s = Eq ? Eq : val.Get(); *s; s++)
+							{
+								if (*s == '{')
+								{
+									Emit();
+									out.Print("%.*s%c\n", Depth<<IndentShift, Spaces, *s);
+									Depth++;
+								}
+								else if (*s == '}')
+								{
+									Emit();
+									Depth--;
+									out.Print("%.*s%c\n", Depth<<IndentShift, Spaces, *s);
+								}
+								else if (*s == ',')
+								{
+									Emit();
+								}
+								else if (!strchr(LWhiteSpace, *s))
+								{
+									if (Start == NULL)
+										Start = s;
+								}
+							}
+						}
+
+						cb(out.NewLStr());
+					}
+				);
 			}
-		}
-		#endif
-	
-		return true;
+		);
 	}
 
 	bool ReadMemory(LString &BaseAddr, int Length, LArray<uint8_t> &OutBuf, LString *ErrorMsg)

@@ -236,6 +236,7 @@ public:
 		LocalsTab,
 		ObjectTab,
 		WatchTab,
+		BreakPointsTab,
 		MemoryTab,
 		ThreadsTab,
 		CallStackTab,

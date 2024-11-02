@@ -208,6 +208,9 @@ public:
 						if (*Sp)
 						{
 							*Sp++ = 0;
+							while (*Sp && IsWhite(*Sp))
+								Sp++;
+
 							LListItem *it = new LListItem;
 					
 							int ThreadId = atoi(f);
@@ -361,11 +364,22 @@ bool LDebugContext::DumpObject(const char *Var, const char *Val)
 		return false;
 	
 	ObjectDump->Name(NULL);
-	if (!d->Db->PrintObject(Var, ObjectDump))
-		return false;
-		
-	ObjectDump->SetCaret(0);
-	return true;	
+	d->Db->PrintObject
+	(
+		Var,
+		[this](auto txt)
+		{
+			ObjectDump->RunCallback
+			(
+				[this, txt]()
+				{
+					ObjectDump->Name(txt);
+				}
+			);
+		}
+	);
+
+	return true;
 }
 
 void LDebugContext::UpdateRegisters()
@@ -899,10 +913,12 @@ ssize_t LDebugContext::Write(const void *Ptr, ssize_t Size, int Flags)
 	return -1;
 }
 
-void LDebugContext::OnError(int Code, const char *Str)
+void LDebugContext::OnError(LString Str)
 {
 	if (DebuggerLog)
-		DebuggerLog->Print("Error(%i): %s\n", Code, Str);
+		DebuggerLog->Print("Error: %s\n", Str);
+
+	LPopupNotification::Message(d->App, Str);
 }
 
 void LDebugContext::OnCrash(int Code)

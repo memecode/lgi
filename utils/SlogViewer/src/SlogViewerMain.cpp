@@ -37,6 +37,7 @@ enum Ctrls
 enum Messages
 {
 	M_ENTRY_SELECTED = M_USER,
+	M_COMMS_STATE,
 };
 
 struct Context
@@ -486,6 +487,7 @@ class App : public LDocApp<LOptionsFile>, public Context
 	LStatusBar *Status = NULL;
 	LProgressStatus *Prog = NULL;
 	LAutoPtr<LCommsBus> bus;
+	LTabPage *logTab = nullptr;
 
 public:
     App() : LDocApp<LOptionsFile>(AppName)
@@ -535,9 +537,9 @@ public:
 				escaped->SetPourLargest(true);
 			}
 
-			if (auto tab = tabs->Append("Log"))
+			if (logTab = tabs->Append("Log"))
 			{
-				tab->Append(log = new LTextLog(ID_LOG));
+				logTab->Append(log = new LTextLog(ID_LOG));
 			}
 
 			AttachChildren();
@@ -545,6 +547,11 @@ public:
 
 			if (bus.Reset(new LCommsBus(log)))
 			{
+				bus->SetCallback([this](auto state)
+					{
+						PostEvent(M_COMMS_STATE, (LMessage::Param)state);
+					});
+
 				bus->Listen(
 					LStructuredLog::sClearEndpoint,
 					[this](auto msg)
@@ -610,6 +617,33 @@ public:
 				if (lst->GetSelection(sel))
 				{
 					sel[0]->Select(true);
+				}
+				break;
+			}
+			case M_COMMS_STATE:
+			{
+				auto state = (LCommsBus::TState)m->A();
+				if (logTab)
+				{
+					LCss::ColorDef c;
+					switch (state)
+					{
+						case LCommsBus::TDisconnectedClient:
+							c = LCss::ColorDef(LColour::Red);
+							log->Print("Disconnected client...\n");
+							break;
+						case LCommsBus::TDisconnectedServer:
+							c = LCss::ColorDef(LColour(255, 128, 0));
+							log->Print("Disconnected server...\n");
+							break;
+						case LCommsBus::TConnectedClient:
+						case LCommsBus::TConnectedServer:
+							c = LCss::ColorDef(LColour::Green);
+							log->Print("Connected...\n");
+							break;
+					}
+					logTab->GetCss(true)->Color(c);
+					tabs->Invalidate();
 				}
 				break;
 			}

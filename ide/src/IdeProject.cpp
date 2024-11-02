@@ -3596,7 +3596,8 @@ bool IdeProject::SaveFile()
 				for (auto id: d->UserBreakpoints)
 				{
 					auto bp = store->Get(id);
-					f.Print("%s:%s\n", OPT_Breakpoint, bp.Save().Get());
+					if (bp)
+						f.Print("%s:%s\n", OPT_Breakpoint, bp.Save().Get());
 				}
 			}
 			else LAssert(0);

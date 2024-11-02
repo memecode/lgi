@@ -16,7 +16,7 @@ public:
 	
 	virtual void OnState(bool Debugging, bool Running) = 0;
 	virtual void OnFileLine(const char *File, int Line, bool CurrentIp) = 0;
-	virtual void OnError(int Code, const char *Str) = 0;
+	virtual void OnError(LString Str) = 0;
 	virtual void OnCrash(int Code) = 0;
 	virtual void Ungrab() = 0;
 	virtual void OnWarning(LString str) = 0;
@@ -62,7 +62,7 @@ public:
 	virtual void SetFrame(int Frame, TStatusCb cb) = 0;
 
 	virtual void GetVariables(bool Locals, bool Detailed, TVarArray *init, TVarsCb cb) = 0;
-	virtual bool PrintObject(const char *Var, LStream *Output) = 0;
+	virtual void PrintObject(const char *Var, TStringCb cb) = 0;
 	virtual bool ReadMemory(LString &BaseAddr, int Length, LArray<uint8_t> &OutBuf, LString *ErrorMsg = NULL) = 0;
 	virtual void GetRegisters(TStringsCb cb) = 0;
 

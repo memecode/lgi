@@ -876,7 +876,9 @@ public:
 					DebugTab->SetFont(&Small);
 					DebugBox->AddView(DebugTab);
 
+					int debugTagIdx = 0;
 					LTabPage *Page;
+					LAssert(AppWnd::LocalsTab == debugTagIdx++);
 					if ((Page = DebugTab->Append("Locals")))
 					{
 						Page->SetFont(&Small);
@@ -892,6 +894,8 @@ public:
 							Page->Append(Locals);
 						}
 					}
+
+					LAssert(AppWnd::ObjectTab == debugTagIdx++);
 					if ((Page = DebugTab->Append("Object")))
 					{
 						Page->SetFont(&Small);
@@ -902,6 +906,8 @@ public:
 							Page->Append(ObjectDump);
 						}
 					}
+
+					LAssert(AppWnd::WatchTab == debugTagIdx++);
 					if ((Page = DebugTab->Append("Watch")))
 					{
 						Page->SetFont(&Small);
@@ -934,6 +940,24 @@ public:
 							}
 						}
 					}
+
+					LAssert(AppWnd::BreakPointsTab == debugTagIdx++);
+					if ((Page = DebugTab->Append("Break Points")))
+					{
+						Page->SetFont(&Small);
+						if ((BreakPoints = new LList(IDC_BREAK_POINTS, 0, 0, 100, 100, "BreakPoints")))
+						{
+							BreakPoints->SetFont(&Small);
+							BreakPoints->AddColumn("File/Line", 500);
+							BreakPoints->AddColumn("Enabled", 50);
+							BreakPoints->SetPourLargest(true);
+							BreakPoints->MultiSelect(false);
+
+							Page->Append(BreakPoints);
+						}
+					}
+
+					LAssert(AppWnd::MemoryTab == debugTagIdx++);
 					if ((Page = DebugTab->Append("Memory")))
 					{
 						Page->SetFont(&Small);
@@ -1008,6 +1032,8 @@ public:
 							Page->Append(MemTable);
 						}
 					}
+
+					LAssert(AppWnd::ThreadsTab == debugTagIdx++);
 					if ((Page = DebugTab->Append("Threads")))
 					{
 						Page->SetFont(&Small);
@@ -1022,20 +1048,8 @@ public:
 							Page->Append(Threads);
 						}
 					}
-					if ((Page = DebugTab->Append("Break Points")))
-					{
-						Page->SetFont(&Small);
-						if ((BreakPoints = new LList(IDC_BREAK_POINTS, 0, 0, 100, 100, "BreakPoints")))
-						{
-							BreakPoints->SetFont(&Small);
-							BreakPoints->AddColumn("File/Line", 500);
-							BreakPoints->AddColumn("Enabled", 50);
-							BreakPoints->SetPourLargest(true);
-							BreakPoints->MultiSelect(false);
 
-							Page->Append(BreakPoints);
-						}
-					}
+					LAssert(AppWnd::CallStackTab == debugTagIdx++);
 					if ((Page = DebugTab->Append("Call Stack")))
 					{
 						Page->SetFont(&Small);
@@ -1051,6 +1065,7 @@ public:
 						}
 					}
 
+					LAssert(AppWnd::RegistersTab == debugTagIdx++);
 					if ((Page = DebugTab->Append("Registers")))
 					{
 						Page->SetFont(&Small);
@@ -3777,15 +3792,12 @@ int AppWnd::OnNotify(LViewI *Ctrl, LNotification n)
 				// This takes the user to a given thread
 				if (d->Output->Threads && d->DbgContext)
 				{
-					LListItem *item = d->Output->Threads->GetSelected();
-					if (item)
+					if (auto item = d->Output->Threads->GetSelected())
 					{
 						LString sId = item->GetText(0);
-						int ThreadId = (int)sId.Int();
+						auto ThreadId = sId.Int();
 						if (ThreadId > 0)
-						{
-							d->DbgContext->SelectThread(ThreadId, NULL);
-						}
+							d->DbgContext->SelectThread((int)ThreadId, NULL);
 					}
 				}
 			}

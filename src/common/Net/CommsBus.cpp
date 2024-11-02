@@ -314,6 +314,7 @@ struct LCommsBusPriv :
 	// Lock before using
 	LArray< BlockInfo > writeQue;
 	LArray< Endpoint > endpoints;
+	LCommsBus::TCallback callback;
 
 	// Server only:
 	uint64_t trySendTs = 0;
@@ -334,6 +335,13 @@ struct LCommsBusPriv :
 		WaitForExit();
 	}
 	
+	void NotifyState(LCommsBus::TState state)
+	{
+		LMutex::Auto lck(this, _FL);
+		if (callback)
+			callback(state);
+	}
+
 	const char *GetUid()
 	{
 		return Uid;
@@ -498,6 +506,9 @@ struct LCommsBusPriv :
 	int Server()
 	{
 		// Wait for incoming connections and handle them...
+		bool hasConnections = false;
+		NotifyState(LCommsBus::TDisconnectedServer);
+
 		while (!IsCancelled())
 		{
 			if (listen.IsReadable())
@@ -611,6 +622,21 @@ struct LCommsBusPriv :
 
 				LSleep(10);
 			}
+
+			bool connected = false;
+			for (auto &c: clients)
+			{
+				if (c->connected)
+				{
+					connected = true;
+					break;
+				}
+			}
+			if (hasConnections ^ connected)
+			{
+				hasConnections = connected;
+				NotifyState(hasConnections ? LCommsBus::TConnectedServer : LCommsBus::TDisconnectedServer);
+			}
 		}
 		
 		clients.DeleteObjects();
@@ -637,7 +663,9 @@ struct LCommsBusPriv :
 	{
 		Connection c(log);
 		int connectErrs = 0;
-		
+		bool hasConnection = false;
+		NotifyState(LCommsBus::TDisconnectedClient);
+
 		while (!IsCancelled())
 		{
 			if (!c.connected)
@@ -746,6 +774,12 @@ struct LCommsBusPriv :
 				}
 				
 				LSleep(10);
+			}
+
+			if (c.connected ^ hasConnection)
+			{
+				hasConnection = c.connected;
+				NotifyState(hasConnection ? LCommsBus::TConnectedClient : LCommsBus::TDisconnectedClient);
 			}
 		}		
 
@@ -856,6 +890,12 @@ bool LCommsBus::Listen(LString endPoint, std::function<void(LString)> cb)
 			d->Que(blk);
 	}
 	return true;
+}
+
+void LCommsBus::SetCallback(TCallback cb)
+{
+	LMutex::Auto lck(d, _FL);
+	d->callback = std::move(cb);	
 }
 
 // Unit testing:
