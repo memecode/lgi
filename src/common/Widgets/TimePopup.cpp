@@ -17,7 +17,7 @@ LTimeDropDown::LTimeDropDown() :
 	SetPopup(Drop = new LTimePopup(this));
 }
 
-int LTimeDropDown::OnNotify(LViewI *Ctrl, LNotification n)
+int LTimeDropDown::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	LViewI *DateSrc = GetNotify();
 	if (Ctrl == (LViewI*)Drop && DateSrc)
@@ -88,7 +88,7 @@ void LTimeDropDown::SetDate(char *d)
 
 		LViewI *Nn = n->GetNotify() ? n->GetNotify() : n->GetParent();
 		if (Nn)
-			Nn->OnNotify(n, LNotifyValueChanged);
+			Nn->OnNotify(n, LNotification(LNotifyValueChanged));
 	}
 }
 
@@ -266,7 +266,7 @@ void LTimePopup::OnPaint(LSurface *pDC)
 	}
 }
 
-int LTimePopup::OnNotify(LViewI *c, LNotification n)
+int LTimePopup::OnNotify(LViewI *c, LNotification &n)
 {
 	if (c->GetId() == 100 && !Ignore)
 	{
@@ -282,7 +282,7 @@ int LTimePopup::OnNotify(LViewI *c, LNotification n)
 					if (v)
 					{
 						v->Name(t);
-						v->OnNotify(this, LNotifyValueChanged);
+						v->OnNotify(this, LNotification(LNotifyValueChanged));
 						
 						if (Times->Mouse || n.Type == LNotifyReturnKey)
 						{

@@ -141,7 +141,7 @@ public:
 	LCursor GetCursor(int x, int y) override;
 	bool OnMouseWheel(double Lines) override;
 	bool OnKey(LKey &k) override;
-	int OnNotify(LViewI *c, LNotification n) override;
+	int OnNotify(LViewI *c, LNotification &n) override;
 	void OnPosChange() override;
 	void OnPulse() override;
 	LMessage::Result OnEvent(LMessage *Msg) override;

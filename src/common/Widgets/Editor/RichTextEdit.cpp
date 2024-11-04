@@ -2743,7 +2743,7 @@ LMessage::Result LRichTextEdit::OnEvent(LMessage *Msg)
 	return LLayout::OnEvent(Msg);
 }
 
-int LRichTextEdit::OnNotify(LViewI *Ctrl, LNotification n)
+int LRichTextEdit::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	if (Ctrl->GetId() == IDC_VSCROLL && VScroll)
 	{

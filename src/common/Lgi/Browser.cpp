@@ -535,7 +535,7 @@ bool LBrowser::SetHtml(const char *Html)
 	return true;
 }
 
-int LBrowser::OnNotify(LViewI *c, LNotification n)
+int LBrowser::OnNotify(LViewI *c, LNotification &n)
 {
 	switch (c->GetId())
 	{

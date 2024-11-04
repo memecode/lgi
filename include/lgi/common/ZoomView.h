@@ -111,7 +111,7 @@ public:
 	bool OnMouseWheel(double Lines);
 	void OnPulse();
 	void OnPaint(LSurface *pDC);
-	int OnNotify(LViewI *v, LNotification n);
+	int OnNotify(LViewI *v, LNotification &n) override;
 	LMessage::Param OnEvent(LMessage *m);
 	bool OnLayout(LViewLayoutInfo &Inf);
 	void UpdateScrollBars(LPoint *MaxScroll = NULL, bool ResetPos = false);

@@ -238,7 +238,7 @@ struct LSoftwareUpdatePriv
 			}
 		}
 
-		int OnNotify(LViewI *c, LNotification n)
+		int OnNotify(LViewI *c, LNotification &n) override
 		{
 			switch (c->GetId())
 			{

@@ -135,7 +135,7 @@ void LColourSelect::Value(int64 i)
 		LViewI *n = GetNotify() ? GetNotify() : GetParent();
 		if (n)
 		{
-			n->OnNotify(this, LNotifyValueChanged);
+			n->OnNotify(this, LNotification(LNotifyValueChanged));
 		}
 	}
 }

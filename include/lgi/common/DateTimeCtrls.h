@@ -24,7 +24,7 @@ public:
 
 	void OnCreate();
 	void OnPaint(LSurface *pDC);
-	int OnNotify(LViewI *c, LNotification n);
+	int OnNotify(LViewI *c, LNotification &n) override;
 };
 
 /// This class is a little button to pull down the list of times...
@@ -45,7 +45,7 @@ public:
 	void SetDate(char *d);
 	void OnMouseClick(LMouse &m);
 	bool OnLayout(LViewLayoutInfo &Inf);
-	int OnNotify(LViewI *Ctrl, LNotification n);
+	int OnNotify(LViewI *Ctrl, LNotification &n) override;
 	void OnChildrenChanged(LViewI *Wnd, bool Attaching);
 };
 
@@ -97,7 +97,7 @@ public:
 	void SetDate(char *d);
 	void OnMouseClick(LMouse &m);
 	bool OnLayout(LViewLayoutInfo &Inf);
-	int OnNotify(LViewI *Ctrl, LNotification n);
+	int OnNotify(LViewI *Ctrl, LNotification &n) override;
 	void OnChildrenChanged(LViewI *Wnd, bool Attaching);
 };
 
