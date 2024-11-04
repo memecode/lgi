@@ -71,7 +71,7 @@ public:
 
 	int64 Value();
 	void Value(int64 val);
-	int OnNotify(LViewI *c, LNotification &n) override;
+	int OnNotify(LViewI *c, const LNotification &n) override;
 };
 
 extern IdePlatform GetCurrentPlatform();

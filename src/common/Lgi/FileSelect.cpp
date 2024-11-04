@@ -692,7 +692,7 @@ public:
 		}
 	}
 
-	int OnNotify(LViewI *c, LNotification &n) override
+	int OnNotify(LViewI *c, const LNotification &n) override
 	{
 		if (e != NULL &&
 			c->GetId() == e->GetId())
@@ -812,7 +812,7 @@ public:
 
 	const char *GetClass() override { return "LFileSelectDlg"; }
 
-	int OnNotify(LViewI *Ctrl, LNotification &n) override;
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
 	void OnUpFolder();
 	void SetFolder(char *f);
 	void OnFolder();
@@ -1175,7 +1175,7 @@ void LFileSelectDlg::OnFilter(const char *Key)
 		FileLst->SetFilterKey(Key);
 }
 
-int LFileSelectDlg::OnNotify(LViewI *Ctrl, LNotification &n)
+int LFileSelectDlg::OnNotify(LViewI *Ctrl, const LNotification &n)
 {
 	switch (Ctrl->GetId())
 	{

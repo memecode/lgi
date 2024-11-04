@@ -274,7 +274,7 @@ void LReplaceDlg::OnCreate()
 	SetCtrlValue(IDC_SEARCH_UP, SearchUpwards);
 }
 
-int LReplaceDlg::OnNotify(LViewI *Ctrl, LNotification &n)
+int LReplaceDlg::OnNotify(LViewI *Ctrl, const LNotification &n)
 {
 	switch (Ctrl->GetId())
 	{

@@ -353,7 +353,7 @@ public:
 	LCursor GetCursor(int x, int y) override;
 	void OnMouseClick(LMouse &m) override;
 	void OnMouseMove(LMouse &m) override;
-	int OnNotify(LViewI *Ctrl, LNotification &n) override;
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
 	void OnPosChange() override;
 	bool OnKey(LKey &k) override;
 	bool OnMouseWheel(double Lines) override;

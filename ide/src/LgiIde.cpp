@@ -329,7 +329,7 @@ public:
 		}
 	}
 
-	int OnNotify(LViewI *c, LNotification &n) override
+	int OnNotify(LViewI *c, const LNotification &n) override
 	{
 		switch (c->GetId())
 		{
@@ -633,7 +633,7 @@ public:
 		DoModal(NULL);
 	}
 	
-	int OnNotify(LViewI *c, LNotification &n) override
+	int OnNotify(LViewI *c, const LNotification &n) override
 	{
 		switch (c->GetId())
 		{
@@ -3547,7 +3547,7 @@ public:
 		}
 	}
 	
-	int OnNotify(LViewI *c, LNotification &n) override
+	int OnNotify(LViewI *c, const LNotification &n) override
 	{
 		switch (c->GetId())
 		{
@@ -3589,7 +3589,7 @@ void AppWnd::UpdateMemoryDump()
 	}
 }
 
-int AppWnd::OnNotify(LViewI *Ctrl, LNotification &n)
+int AppWnd::OnNotify(LViewI *Ctrl, const LNotification &n)
 {
 	THREAD_WARNING
 
@@ -3867,7 +3867,7 @@ public:
 		Inst = NULL;
 	}
 
-	int OnNotify(LViewI *c, LNotification &n) override
+	int OnNotify(LViewI *c, const LNotification &n) override
 	{
 		switch (c->GetId())
 		{

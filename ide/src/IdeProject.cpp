@@ -4961,7 +4961,7 @@ void AddFilesProgress::Value(int64 val)
 	}
 }
 
-int AddFilesProgress::OnNotify(LViewI *c, LNotification &n)
+int AddFilesProgress::OnNotify(LViewI *c, const LNotification &n)
 {
 	if (c->GetId() == IDCANCEL)
 		Cancel = true;

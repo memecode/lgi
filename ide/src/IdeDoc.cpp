@@ -555,7 +555,7 @@ public:
 		return SetItems(Matching);
 	}
 	
-	int OnNotify(LViewI *Ctrl, LNotification &n) override
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override
 	{
 		if (Lst &&
 			Ctrl == Edit &&
@@ -637,7 +637,7 @@ public:
 		App->GotoReference(Obj->File, Obj->Line, false, true, NULL);
 	}
 	
-	int OnNotify(LViewI *Ctrl, LNotification &n) override
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override
 	{
 		if (Lst &&
 			Ctrl == Edit &&
@@ -856,7 +856,7 @@ public:
 		}
 	}
 	
-	int OnNotify(LViewI *Ctrl, LNotification &n) override
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override
 	{
 		if (Lst &&
 			Ctrl == Edit &&
@@ -1760,7 +1760,7 @@ void IdeDoc::OnProjectChange()
 	DeleteObj(d->SymPopup);
 }
 
-int IdeDoc::OnNotify(LViewI *v, LNotification &n)
+int IdeDoc::OnNotify(LViewI *v, const LNotification &n)
 {
 	// printf("IdeDoc::OnNotify(%i, %i)\n", v->GetId(), f);
 	

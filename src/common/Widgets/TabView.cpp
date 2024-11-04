@@ -432,7 +432,7 @@ LMessage::Result LTabView::OnEvent(LMessage *Msg)
 	return LView::OnEvent(Msg);
 }
 
-int LTabView::OnNotify(LViewI *Ctrl, LNotification &n)
+int LTabView::OnNotify(LViewI *Ctrl, const LNotification &n)
 {
 	if (GetParent())
 	{

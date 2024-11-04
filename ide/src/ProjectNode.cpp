@@ -98,7 +98,7 @@ public:
 		}
 	}
 	
-	int OnNotify(LViewI *c, LNotification &n) override
+	int OnNotify(LViewI *c, const LNotification &n) override
 	{
 		switch (c->GetId())
 		{
@@ -1411,7 +1411,7 @@ struct DepDlg : public LDialog
 		}
 	}
 	
-	int OnNotify(LViewI *Ctrl, LNotification &n) override
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override
 	{
 		switch (Ctrl->GetId())
 		{

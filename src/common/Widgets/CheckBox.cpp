@@ -128,7 +128,7 @@ void LCheckBox::OnStyleChange()
 	}
 }
 
-int LCheckBox::OnNotify(LViewI *Ctrl, LNotification &n)
+int LCheckBox::OnNotify(LViewI *Ctrl, const LNotification &n)
 {
 	if (Ctrl == (LViewI*)this && n.Type == LNotifyActivate)
 	{

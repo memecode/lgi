@@ -340,7 +340,7 @@ bool LFontSelect::Serialize(void *Data, int DataLen, bool Write)
 	return true;
 }
 
-int LFontSelect::OnNotify(LViewI *Ctrl, LNotification &n)
+int LFontSelect::OnNotify(LViewI *Ctrl, const LNotification &n)
 {
 	switch (Ctrl->GetId())
 	{

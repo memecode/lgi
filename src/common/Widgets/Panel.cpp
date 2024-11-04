@@ -197,7 +197,7 @@ bool LPanel::Pour(LRegion &rgn)
 	return true;
 }
 
-int LPanel::OnNotify(LViewI *Ctrl, LNotification &n)
+int LPanel::OnNotify(LViewI *Ctrl, const LNotification &n)
 {
 	if (GetParent())
 	{

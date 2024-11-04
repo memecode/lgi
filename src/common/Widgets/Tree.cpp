@@ -1909,7 +1909,7 @@ void LTree::OnPaint(LSurface *pDC)
 	}
 }
 
-int LTree::OnNotify(LViewI *Ctrl, LNotification &n)
+int LTree::OnNotify(LViewI *Ctrl, const LNotification &n)
 {
 	switch (Ctrl->GetId())
 	{

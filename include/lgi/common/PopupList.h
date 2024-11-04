@@ -197,7 +197,7 @@ public:
 			Visible(Has);
 	}
 
-	int OnNotify(LViewI *Ctrl, LNotification &n) override
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override
 	{
 		if (Lst &&
 			Ctrl == Edit &&

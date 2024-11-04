@@ -455,11 +455,8 @@ public:
 			Value = i;
 
 			CalcRegions();
-			Widget->Invalidate();
-			
-			LViewI *n = Widget->GetNotify() ? Widget->GetNotify() : Widget->GetParent();
-			if (n)
-				n->OnNotify(Widget, LNotifyValueChanged);
+			Widget->Invalidate();			
+			Widget->SendNotify(LNotification(LNotifyValueChanged));
 		}
 	}
 };
@@ -487,7 +484,7 @@ LScrollBar::LScrollBar(int id, int x, int y, int cx, int cy, const char *name)
 
 LScrollBar::~LScrollBar()
 {
-	// printf("%s:%i - %p::~LScrollBar\n", _FL, this);
+	LStackTrace("%i ~LScrollBar\n", LCurrentThreadId());
 	DeleteObj(d);
 }
 

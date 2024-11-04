@@ -774,7 +774,7 @@ void LView::OnPaint(LSurface *pDC)
 	Tools.PaintContent(pDC, c);
 }
 
-int LView::OnNotify(LViewI *Ctrl, LNotification &Data)
+int LView::OnNotify(LViewI *Ctrl, const LNotification &Data)
 {
 	if (!Ctrl)
 		return 0;

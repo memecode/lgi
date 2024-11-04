@@ -11,7 +11,7 @@ public:
 
 	WebFldDlg(LViewI *p, char *name, char *ftp, char *www);
 	~WebFldDlg();
-	int OnNotify(LViewI *v, LNotification &n) override;
+	int OnNotify(LViewI *v, const LNotification &n) override;
 };
 
 #endif

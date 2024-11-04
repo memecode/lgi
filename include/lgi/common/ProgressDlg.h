@@ -42,7 +42,7 @@ public:
 	LProgressPane &operator--(int);
 
 	void OnCreate() override;
-	int OnNotify(LViewI *Ctrl, LNotification &n) override;
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
 	void OnPaint(LSurface *pDC) override;
 	void OnPosChange() override;
 };
@@ -107,7 +107,7 @@ public:
 	LProgressDlg &operator++(int);
 	LProgressDlg &operator--(int);
 
-	int OnNotify(LViewI *Ctrl, LNotification &n) override;
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
 	LMessage::Result OnEvent(LMessage *Msg) override;
 	void OnPaint(LSurface *pDC) override;
 	void OnCreate() override;

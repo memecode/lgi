@@ -92,7 +92,7 @@ public:
 	bool Name(const char *n) override;
 	bool NameW(const char16 *n) override;
 	void SetFont(LFont *Fnt, bool OwnIt = false) override;
-	int OnNotify(LViewI *Ctrl, LNotification &n) override;
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
 	bool OnLayout(LViewLayoutInfo &Inf) override;
 
 	#if WINNATIVE && !XP_BUTTON

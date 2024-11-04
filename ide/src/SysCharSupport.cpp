@@ -147,7 +147,7 @@ void SysCharSupport::OnPosChange()
 	*/
 }
 
-int SysCharSupport::OnNotify(LViewI *v, LNotification &n)
+int SysCharSupport::OnNotify(LViewI *v, const LNotification &n)
 {
 	switch (v->GetId())
 	{

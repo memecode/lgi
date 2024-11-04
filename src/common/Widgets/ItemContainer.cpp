@@ -1335,7 +1335,7 @@ void LItemEdit::OnPaint(LSurface *pDC)
 	pDC->Rectangle();
 }
 
-int LItemEdit::OnNotify(LViewI *v, LNotification &n)
+int LItemEdit::OnNotify(LViewI *v, const LNotification &n)
 {
 	switch (v->GetId())
 	{

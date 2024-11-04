@@ -439,7 +439,7 @@ public:
 	void OnError(const char *Msg);
 	void OnRun(bool Running);
 	void SetSource(const char *Mixed);
-	int OnNotify(LViewI *Ctrl, LNotification &n) override;
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
 	int OnCommand(int Cmd, int Event, OsView Wnd);
 	bool OnRequestClose(bool OsShuttingDown);
 	LMessage::Param OnEvent(LMessage *Msg);

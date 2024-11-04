@@ -7459,7 +7459,7 @@ LMessage::Result LHtml::OnEvent(LMessage *Msg)
 	return LDocView::OnEvent(Msg);
 }
 
-int LHtml::OnNotify(LViewI *c, LNotification &n)
+int LHtml::OnNotify(LViewI *c, const LNotification &n)
 {
 	switch (c->GetId())
 	{

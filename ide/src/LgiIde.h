@@ -299,7 +299,7 @@ public:
 	void OnProjectChange();
 	void OnFile(char *File, bool IsProject = false);
 	bool OnRequestClose(bool IsClose) override;
-	int OnNotify(LViewI *Ctrl, LNotification &n) override;
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
 	LMessage::Result OnEvent(LMessage *m) override;
 	bool OnNode(const char *Path, class ProjectNode *Node, FindSymbolSystem::SymAction Action);
 	void OnPulse() override;
@@ -324,7 +324,7 @@ public:
 	SysCharSupport(AppWnd *app);
 	~SysCharSupport();
 
-	int OnNotify(LViewI *v, LNotification &n) override;
+	int OnNotify(LViewI *v, const LNotification &n) override;
 	void OnPosChange();
 };
 

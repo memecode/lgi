@@ -19,7 +19,7 @@ public:
 	bool OnLayout(LViewLayoutInfo &Inf);
 	void OnPaint(LSurface *pDC);
 	void OnPosChange();
-	int OnNotify(LViewI *Ctrl, LNotification &n) override;
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
 
 	LStatusPane *AppendPane(const char *Text, int WidthPx = 0);
 	bool AppendPane(LStatusPane *Pane);

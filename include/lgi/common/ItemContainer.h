@@ -124,7 +124,7 @@ public:
 	bool OnRequestClose(bool OsShuttingDown) { return false; }
 	int OnHitTest(int x, int y) { return 0; }
 	void OnChildrenChanged(LViewI *Wnd, bool Attaching) {}
-	int OnNotify(LViewI *Ctrl, LNotification &n) override { return 0; }
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override { return 0; }
 	int OnCommand(int Cmd, int Event, OsView Wnd) { return 0; }
 	void OnPaint(LSurface *pDC) { LAssert(0); }
 
@@ -147,7 +147,7 @@ public:
 	
 	LItem *GetItem();
 	void OnPaint(LSurface *pDC);
-	int OnNotify(LViewI *v, LNotification &n) override;
+	int OnNotify(LViewI *v, const LNotification &n) override;
 	void Visible(bool i);
 	LMessage::Result OnEvent(LMessage *Msg);
 

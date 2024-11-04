@@ -81,7 +81,7 @@ public:
 
 	/// \returns DoModal will return one of #IDC_FR_FIND,
 	/// #IDC_FR_REPLACE, #IDCANCEL or #IDOK (which means 'Replace All', the default action)
-	int OnNotify(LViewI *Ctrl, LNotification &n) override;
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
 };
 
 
