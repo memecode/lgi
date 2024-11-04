@@ -14,6 +14,7 @@ public:
 	virtual LString MakeRelative(LString absPath) = 0;
 	virtual LString MakeAbsolute(LString relPath) = 0;
 	virtual LString JoinPath(LString base, LString leaf) = 0;
+	virtual void ResolvePath(LString path, LString::Array hints, std::function<void(LError&,LString)> cb) = 0;
 
 	// Reading and writing:
 	virtual bool ReadFolder(const char *Path, std::function<void(LDirectory*)> results) = 0;

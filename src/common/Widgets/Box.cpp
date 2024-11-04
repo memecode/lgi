@@ -828,7 +828,7 @@ void LBox::OnMouseMove(LMouse &m)
 	Invalidate((LRect*)NULL, true);
 }
 
-int LBox::OnNotify(LViewI *Ctrl, LNotification &n)
+int LBox::OnNotify(LViewI *Ctrl, const LNotification &n)
 {
 	if (n.Type == LNotifyTableLayoutRefresh)
 	{

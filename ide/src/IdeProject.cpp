@@ -308,6 +308,9 @@ public:
 	int NextNodeId = 1;
 	ProjectNode *DepParent = NULL;
 
+	// The build root folder:
+	LString BuildFolder;
+
 	// Threads
 	LAutoPtr<class MakefileThread> CreateMakefile;
 
@@ -1926,6 +1929,10 @@ void BuildThread::Step1()
 								{
 									backendProjectFolder = full;
 									backendPaths.Empty();
+
+									LString cpy = backendProjectFolder.Get();
+									LTrimDir(cpy);
+									Proj->SetBuildFolder(cpy.Get());
 
 									AddWork([this]()
 										{
@@ -3555,6 +3562,16 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 ProjectBackend *IdeProject::GetBackend()
 {
 	return d->Backend;
+}
+
+LString IdeProject::GetBuildFolder() const
+{
+	return d->BuildFolder;
+}
+
+void IdeProject::SetBuildFolder(LString folder)
+{
+	d->BuildFolder = folder;
 }
 
 bool IdeProject::SaveFile()

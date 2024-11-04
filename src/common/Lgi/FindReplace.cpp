@@ -136,7 +136,7 @@ void LFindDlg::OnCreate()
 	}
 }
 
-int LFindDlg::OnNotify(LViewI *Ctrl, LNotification &n)
+int LFindDlg::OnNotify(LViewI *Ctrl, const LNotification &n)
 {
 	switch (Ctrl->GetId())
 	{

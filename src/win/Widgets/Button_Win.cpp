@@ -228,7 +228,7 @@ void LButton::SetFont(LFont *Fnt, bool OwnIt)
 	LView::SetFont(Fnt, OwnIt);
 }
 
-int LButton::OnNotify(LViewI *Ctrl, LNotification &n)
+int LButton::OnNotify(LViewI *Ctrl, const LNotification &n)
 {
 	if (Ctrl == (LViewI*)this && n.Type == LNotifyActivate)
 	{

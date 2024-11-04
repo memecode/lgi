@@ -46,7 +46,7 @@ public:
 
 	void OnCreate();
 	void OnPosChange();
-	int OnNotify(LViewI *Ctrl, LNotification &n);
+	int OnNotify(LViewI *Ctrl, const LNotification &n);
 };
 
 /// The find command on the Replace dialog

@@ -367,7 +367,7 @@ void BrowseUi::ParseLog(LArray<VcCommit*> &commits, LString raw)
 		e->Focus(true);
 }
 
-int BrowseUi::OnNotify(LViewI *Ctrl, LNotification &n)
+int BrowseUi::OnNotify(LViewI *Ctrl, const LNotification &n)
 {
 	switch (Ctrl->GetId())
 	{

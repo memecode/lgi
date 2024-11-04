@@ -175,6 +175,8 @@ public:
 	bool CheckExists(LAutoString &p, bool Debug = false);
 	void OnMakefileCreated();
 	class ProjectBackend *GetBackend();
+	LString GetBuildFolder() const;
+	void SetBuildFolder(LString folder);
 
 	// User file settings
 	bool GetExpanded(int Id);

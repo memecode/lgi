@@ -420,6 +420,77 @@ public:
 		return remoteSep.Join(a);
 	}
 
+	LString::Array ParentsOf(LString path)
+	{
+		LString::Array p;
+		auto parts = path.SplitDelimit(remoteSep);
+		for (size_t i = parts.Length()-1; i > 0; i--)
+			p.Add( remoteSep.Join(parts.Slice(0, i)) );
+		return p;
+	}
+
+	void ResolvePath(LString path, LString::Array hints, std::function<void(LError&,LString)> cb)
+	{
+		if (!cb)
+			return;
+
+		Auto lck(this, _FL);
+		work.Add( [this, path = PreparePath(path), hints, cb]() mutable
+		{
+			LString found;
+			if (path(0) == remoteSep(0))
+			{
+				// Absolute?
+				auto abs = PreparePath(path);
+				auto p = LString::Fmt("stat %s\n", abs.Get());
+				int32_t code;
+				Cmd(GetConsole(), p, &code);
+				if (code == 0)
+					found = abs;
+			}
+			else
+			{
+				// Relative path?
+				for (auto hint: hints)
+				{
+					auto rel = JoinPath(hint, path);
+					auto p = LString::Fmt("stat %s\n", rel.Get());
+					int32_t code;
+					Cmd(GetConsole(), p, &code);
+					if (code == 0)
+						found = rel;
+				}
+
+				if (!found)
+				{
+					// Maybe it's relative to one of the parent folders in the hints?
+					for (auto hint: hints)
+					{
+						auto parents = ParentsOf(hint);
+						for (auto parent: parents)
+						{
+							auto rel = JoinPath(parent, path);
+							auto p = LString::Fmt("stat %s\n", rel.Get());
+							int32_t code;
+							Cmd(GetConsole(), p, &code);
+							if (code == 0)
+							{
+								found = rel;
+								break;
+							}
+						}
+					}
+				}
+			}
+
+			app->RunCallback( [this, cb, found]() mutable
+				{
+					LError err(found ? LErrorPathNotFound : LErrorNone, found ? nullptr : "path not found");
+					cb(err, found);
+				});
+		} );
+	}
+
 	void OnConnected()
 	{
 		GetSysType(
@@ -961,6 +1032,11 @@ public:
 		LFile::Path p(base);
 		p += leaf;
 		return p.GetFull();
+	}
+
+	void ResolvePath(LString path, LString::Array hints, std::function<void(LError&,LString)> cb)
+	{
+		LAssert(!"impl me");
 	}
 
 	bool ReadFolder(const char *Path, std::function<void(LDirectory*)> results) override

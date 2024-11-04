@@ -801,8 +801,7 @@ public:
 			return ret;
 
 		char *Sep = Get();
-		size_t SepLen = Sep ? strlen(Sep) : 0;
-		size_t Bytes = SepLen * (a.Length() - 1);
+		size_t Bytes = Length() * (a.Length() - 1);
 		LArray<size_t> ALen;
 		for (unsigned i=0; i<a.Length(); i++)
 		{
@@ -818,8 +817,8 @@ public:
 			{
 				if (i && Sep)
 				{
-					memcpy(ptr, Sep, SepLen);
-					ptr += SepLen;
+					memcpy(ptr, Sep, Length());
+					ptr += Length();
 				}
 				memcpy(ptr, a.ItemAt(i).Get(), ALen[i]);
 				ptr += ALen[i];

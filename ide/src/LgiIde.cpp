@@ -1342,17 +1342,19 @@ public:
 	bool FindSource(LAutoString &Full, char *File, char *Context)
 	{
 		if (!LIsRelativePath(File))
-		{
 			Full.Reset(NewStr(File));
-		}
 
 		char *ContextPath = 0;
 		if (Context && !Full)
 		{
-			char *Dir = strrchr(Context, DIR_CHAR);
+			LString leaf = LGetLeaf(Context);
+			auto pos = leaf.RFind(":");
+			if (pos > 0)
+				leaf.Length(pos);
+
 			for (auto p: Projects)
 			{
-				ContextPath = p->FindFullPath(Dir?Dir+1:Context);
+				ContextPath = p->FindFullPath(leaf);
 				if (ContextPath)
 					break;
 			}
@@ -1395,20 +1397,23 @@ public:
 		
 		if (!Full)
 		{
-			char *Dir = dirchar(File, true);
+			auto leaf = LGetLeaf(File);
 			for (auto p: Projects)
 			{
-				if (Full.Reset(p->FindFullPath(Dir?Dir+1:File)))
+				if (Full.Reset(p->FindFullPath(leaf ? leaf : File)))
 					break;
 			}
 			
-			if (!Full)
+			if (auto proj = App->RootProject())
 			{
-				if (LFileExists(File))
+				if (auto be = proj->GetBackend())
 				{
 					Full.Reset(NewStr(File));
 				}
 			}
+
+			if (!Full && LFileExists(File))
+				Full.Reset(NewStr(File));
 		}
 		
 		return ValidStr(Full);
@@ -3117,10 +3122,7 @@ void AppWnd::OpenFile(const char *FileName, NodeSource *Src, std::function<void(
 	{
 		if (auto backend = Proj->GetBackend())
 		{
-			if (LIsRelativePath(File))
-				FullPath = backend->JoinPath(backend->GetBasePath(), File);
-			else
-				FullPath = File;
+			// Can't assume the full path here...
 		}
 		else if (LIsRelativePath(File))
 		{
@@ -3195,32 +3197,38 @@ void AppWnd::OpenFile(const char *FileName, NodeSource *Src, std::function<void(
 	{
 		if (auto backend = Proj ? Proj->GetBackend() : NULL)
 		{
-			backend->Read(FullPath, [this, Proj, FullPath, callback](auto err, auto data)
+			LString::Array pathHints;
+			pathHints.Add(Proj->GetBuildFolder());
+			pathHints.Add(backend->GetBasePath());
+			backend->ResolvePath(File, pathHints, [this, backend, Proj, Doc, callback](auto err, auto FullPath)
 			{
-				if (err)
+				backend->Read(FullPath, [this, Proj, Doc, callback, FullPath](auto err, auto data)
 				{
-					LgiMsg(this, "Error opening '%s': %s", AppName, MB_OK, FullPath.Get(), err.ToString().Get());
-				}
-				else if (data)
-				{
-					auto Doc = new IdeDoc(this, 0, FullPath);
-					if (Doc)
+					if (err)
 					{
-						Doc->SetProject(Proj);
-						Doc->OpenData(data);
-
-						LRect p = d->Mdi->NewPos();
-						Doc->LView::SetPos(p);
-						d->Docs.Insert(Doc);
-						d->OnFile(FullPath);
-
-						OnNewDoc(Proj, Doc);
-
-						if (callback)
-							callback(Doc);
+						LgiMsg(this, "Error opening '%s': %s", AppName, MB_OK, FullPath.Get(), err.ToString().Get());
 					}
-				}
-				else LAssert(!"one of these needs to be set");
+					else if (data)
+					{
+						auto Doc = new IdeDoc(this, 0, FullPath);
+						if (Doc)
+						{
+							Doc->SetProject(Proj);
+							Doc->OpenData(data);
+
+							LRect p = d->Mdi->NewPos();
+							Doc->LView::SetPos(p);
+							d->Docs.Insert(Doc);
+							d->OnFile(FullPath);
+
+							OnNewDoc(Proj, Doc);
+
+							if (callback)
+								callback(Doc);
+						}
+					}
+					else LAssert(!"one of these needs to be set");
+				});
 			});
 		}
 		else if (LFileExists(File))

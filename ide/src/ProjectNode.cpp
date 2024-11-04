@@ -1347,7 +1347,7 @@ ProjectNode *ProjectNode::FindFile(const char *In, char **Full)
 			{
 				if (sFile(0) == '.')
 				{
-					LAutoString Base = Project->GetBasePath();
+					auto Base = Project->GetBasePath();
 					if (Base)
 					{
 						char f[256];
@@ -1365,19 +1365,12 @@ ProjectNode *ProjectNode::FindFile(const char *In, char **Full)
 		}
 	}
 	
-	for (auto i:*this)
+	for (auto i: *this)
 	{
-		ProjectNode *c = dynamic_cast<ProjectNode*>(i);
-		if (!c)
+		if (auto c = dynamic_cast<ProjectNode*>(i))
 		{
-			LAssert(!"Not a node?");
-			break;
-		}
-
-		ProjectNode *n = c->FindFile(In, Full);
-		if (n)
-		{
-			return n;
+			if (auto n = c->FindFile(In, Full))
+				return n;
 		}
 	}
 	
