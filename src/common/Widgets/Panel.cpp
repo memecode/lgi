@@ -197,7 +197,7 @@ bool LPanel::Pour(LRegion &rgn)
 	return true;
 }
 
-int LPanel::OnNotify(LViewI *Ctrl, LNotification n)
+int LPanel::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	if (GetParent())
 	{
@@ -273,7 +273,7 @@ void LPanel::OnMouseClick(LMouse &m)
 		{
 			Open(!IsOpen);
 			if (GetParent())
-				OnNotify(this, LNotifyItemClick);
+				OnNotify(this, LNotification(LNotifyItemClick));
 		}
 		else LgiTrace("%s:%i - Not over %i,%i - %s\n", _FL, m.x, m.y, ThumbPos.GetStr());
 	}

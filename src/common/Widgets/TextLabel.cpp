@@ -256,7 +256,7 @@ LMessage::Result LTextLabel::OnEvent(LMessage *Msg)
 	return LView::OnEvent(Msg);
 }
 
-int LTextLabel::OnNotify(LViewI *Ctrl, LNotification n)
+int LTextLabel::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	if (Ctrl == (LViewI*)this &&
 		n.Type == LNotifyActivate &&

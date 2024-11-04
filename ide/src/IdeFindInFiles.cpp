@@ -162,7 +162,7 @@ void FindInFiles::OnCreate()
 	}
 }
 
-int FindInFiles::OnNotify(LViewI *v, LNotification n)
+int FindInFiles::OnNotify(LViewI *v, LNotification &n)
 {
 	switch (v->GetId())
 	{

@@ -393,7 +393,7 @@ public:
 				if (!Down)
 				{
 					LViewI *n=GetNotify()?GetNotify():GetParent();
-					if (n) n->OnNotify(this, LNotifyActivate);
+					if (n) n->OnNotify(this, LNotification(LNotifyActivate));
 				}
 			}
 			
@@ -692,7 +692,7 @@ public:
 		}
 	}
 
-	int OnNotify(LViewI *c, LNotification n)
+	int OnNotify(LViewI *c, LNotification &n) override
 	{
 		if (e != NULL &&
 			c->GetId() == e->GetId())
@@ -812,7 +812,7 @@ public:
 
 	const char *GetClass() override { return "LFileSelectDlg"; }
 
-	int OnNotify(LViewI *Ctrl, LNotification n) override;
+	int OnNotify(LViewI *Ctrl, LNotification &n) override;
 	void OnUpFolder();
 	void SetFolder(char *f);
 	void OnFolder();
@@ -1175,7 +1175,7 @@ void LFileSelectDlg::OnFilter(const char *Key)
 		FileLst->SetFilterKey(Key);
 }
 
-int LFileSelectDlg::OnNotify(LViewI *Ctrl, LNotification n)
+int LFileSelectDlg::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	switch (Ctrl->GetId())
 	{
@@ -1898,7 +1898,7 @@ void LFolderItem::OnActivate()
 		}
 		else // Is file
 		{
-			Dlg->OnNotify(Dlg->SaveBtn, LNotifyActivate);
+			Dlg->OnNotify(Dlg->SaveBtn, LNotification(LNotifyActivate));
 		}
 	}
 }
@@ -2001,7 +2001,7 @@ bool LFolderList::OnKey(LKey &k)
 				LViewI *v = GetWindow()->FindControl(IDC_UP);
 				if (v)
 				{
-					GetWindow()->OnNotify(v, LNotifyBackspaceKey);
+					GetWindow()->OnNotify(v, LNotification(LNotifyBackspaceKey));
 				}
 			}
 			Status = true;

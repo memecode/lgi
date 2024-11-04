@@ -67,7 +67,7 @@ public:
 	bool Attach(LViewI *parent);
 	LMessage::Result OnEvent(LMessage *Msg);
 	LViewI *FindControl(int Id);
-	int OnNotify(LViewI *Ctrl, LNotification n);
+	int OnNotify(LViewI *Ctrl, LNotification &n) override;
 	void OnChildrenChanged(LViewI *Wnd, bool Attaching);
 	LRect &GetTabClient();
 

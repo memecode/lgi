@@ -422,7 +422,7 @@ public:
 	virtual void OnChildrenChanged(LViewI *Wnd, bool Attaching) = 0;
 	virtual void OnPaint(LSurface *pDC) = 0;
 	virtual int OnCommand(int Cmd, int Event, OsView Wnd) = 0;
-	virtual int OnNotify(LViewI *Ctrl, LNotification Data) = 0;
+	virtual int OnNotify(LViewI *ctrl, LNotification &notification) = 0;
 };
 
 class LViewLayoutInfo

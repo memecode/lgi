@@ -136,7 +136,7 @@ void LFindDlg::OnCreate()
 	}
 }
 
-int LFindDlg::OnNotify(LViewI *Ctrl, LNotification n)
+int LFindDlg::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	switch (Ctrl->GetId())
 	{
@@ -274,7 +274,7 @@ void LReplaceDlg::OnCreate()
 	SetCtrlValue(IDC_SEARCH_UP, SearchUpwards);
 }
 
-int LReplaceDlg::OnNotify(LViewI *Ctrl, LNotification n)
+int LReplaceDlg::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	switch (Ctrl->GetId())
 	{

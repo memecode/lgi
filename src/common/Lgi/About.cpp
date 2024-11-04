@@ -97,7 +97,7 @@ LAbout::LAbout(	LView *parent,
 	MoveSameScreen(parent);
 }
 
-int LAbout::OnNotify(LViewI *Ctrl, LNotification n)
+int LAbout::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	if (!Ctrl) return 0;
 	

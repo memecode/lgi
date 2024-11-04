@@ -60,7 +60,7 @@ void LStatusBar::OnPaint(LSurface *pDC)
 	pDC->Rectangle();
 }
 
-int LStatusBar::OnNotify(LViewI *Ctrl, LNotification n)
+int LStatusBar::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	switch (n.Type)
 	{

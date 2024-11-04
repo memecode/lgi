@@ -329,7 +329,7 @@ public:
 		}
 	}
 
-	int OnNotify(LViewI *c, LNotification n)
+	int OnNotify(LViewI *c, LNotification &n) override
 	{
 		switch (c->GetId())
 		{
@@ -633,7 +633,7 @@ public:
 		DoModal(NULL);
 	}
 	
-	int OnNotify(LViewI *c, LNotification n)
+	int OnNotify(LViewI *c, LNotification &n) override
 	{
 		switch (c->GetId())
 		{
@@ -2867,7 +2867,8 @@ bool AppWnd::ToggleBreakpoint(const char *File, ssize_t Line)
 	bool has = false;
 
 	BreakPoint bp(File, Line);
-	if (auto id = d->BreakPoints.Has(bp))
+	auto id = d->BreakPoints.Has(bp);
+	if (id != BreakPointStore::INVALID_ID)
 		d->BreakPoints.Delete(id);
 	else
 		d->BreakPoints.Add(bp);
@@ -3546,7 +3547,7 @@ public:
 		}
 	}
 	
-	int OnNotify(LViewI *c, LNotification n)
+	int OnNotify(LViewI *c, LNotification &n) override
 	{
 		switch (c->GetId())
 		{
@@ -3588,7 +3589,7 @@ void AppWnd::UpdateMemoryDump()
 	}
 }
 
-int AppWnd::OnNotify(LViewI *Ctrl, LNotification n)
+int AppWnd::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	THREAD_WARNING
 
@@ -3866,7 +3867,7 @@ public:
 		Inst = NULL;
 	}
 
-	int OnNotify(LViewI *c, LNotification n)
+	int OnNotify(LViewI *c, LNotification &n) override
 	{
 		switch (c->GetId())
 		{

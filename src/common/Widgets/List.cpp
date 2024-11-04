@@ -767,7 +767,7 @@ LMessage::Result LList::OnEvent(LMessage *Msg)
 	return LItemContainer::OnEvent(Msg);
 }
 
-int LList::OnNotify(LViewI *Ctrl, LNotification n)
+int LList::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	if
 	(
@@ -2238,18 +2238,19 @@ bool LList::Remove(LListItem *i)
 			}
 
 			// Notify
-			LViewI *Note = GetNotify() ? GetNotify() : GetParent();
-			if (Note)
+			if (Selected)
 			{
-				if (Selected)
-				{
-					LArray<LListItem*> s;
-					OnItemSelect(s);
-				}
-
-				LNotification n(LNotifyItemDelete);
-				Note->OnNotify(this, n);
+				LArray<LListItem*> s;
+				OnItemSelect(s);
 			}
+
+			if (!InThread())
+			{
+				int asd=0;
+			}
+
+			LNotification n(LNotifyItemDelete);
+			SendNotify(n);
 
 			Status = true;
 		}

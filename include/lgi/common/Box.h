@@ -43,7 +43,7 @@ public:
 	bool Pour(LRegion &r);
 	LCursor GetCursor(int x, int y);
 	bool OnLayout(LViewLayoutInfo &Inf);
-	int OnNotify(LViewI *Ctrl, LNotification n);
+	int OnNotify(LViewI *Ctrl, LNotification &n);
 
 	bool Serialize(LDom *Dom, const char *OptName, bool Write);	
 	bool SetSize(int ViewIndex, LCss::Len Size);

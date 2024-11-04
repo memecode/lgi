@@ -18,7 +18,7 @@ public:
 	~AddFtpFile();
 
 	void OnCmdComplete(FtpCmd *Cmd);
-	int OnNotify(LViewI *c, LNotification n);
+	int OnNotify(LViewI *c, LNotification &n) override;
 };
 
 #endif

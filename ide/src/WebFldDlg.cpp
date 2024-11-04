@@ -33,7 +33,7 @@ WebFldDlg::~WebFldDlg()
 	DeleteArray(Www);
 }
 
-int WebFldDlg::OnNotify(LViewI *v, LNotification n)
+int WebFldDlg::OnNotify(LViewI *v, LNotification &n)
 {
 	switch (v->GetId())
 	{

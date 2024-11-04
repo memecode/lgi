@@ -1467,7 +1467,7 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 						case CBN_EDITCHANGE: // COMBO
 						{
 							Ctrl->SysOnNotify(Msg->Msg(), Code);
-							OnNotify(Ctrl, LNotifyValueChanged);
+							OnNotify(Ctrl, LNotification(LNotifyValueChanged));
 							break;
 						}
 						/*

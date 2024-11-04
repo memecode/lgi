@@ -70,7 +70,7 @@ public:
 	FindInFiles(AppWnd *app, FindParams *params = NULL);
 	~FindInFiles();
 	
-	int OnNotify(LViewI *v, LNotification n) override;
+	int OnNotify(LViewI *v, LNotification &n) override;
 	void OnCreate() override;
 };
 

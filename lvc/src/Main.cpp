@@ -158,7 +158,7 @@ public:
 		});
 	}
 
-	int OnNotify(LViewI *Ctrl, LNotification n)
+	int OnNotify(LViewI *Ctrl, LNotification &n) override
 	{
 		switch (Ctrl->GetId())
 		{
@@ -371,7 +371,7 @@ public:
 		}
 	}
 
-	int OnNotify(LViewI *Ctrl, LNotification n)
+	int OnNotify(LViewI *Ctrl, LNotification &n) override
 	{
 		switch (Ctrl->GetId())
 		{
@@ -665,7 +665,7 @@ public:
 	RemoteFolderDlg(App *application);
 	~RemoteFolderDlg();
 
-	int OnNotify(LViewI *Ctrl, LNotification n);
+	int OnNotify(LViewI *Ctrl, LNotification &n) override;
 };
 
 class VcDiffFile : public LTreeItem
@@ -1483,7 +1483,7 @@ public:
 		return dynamic_cast<VcFolder*>(Tree->Selection());
 	}
 
-	int OnNotify(LViewI *c, LNotification n)
+	int OnNotify(LViewI *c, LNotification &n) override
 	{
 		switch (c->GetId())
 		{
@@ -1844,7 +1844,7 @@ RemoteFolderDlg::~RemoteFolderDlg()
 {
 }
 
-int RemoteFolderDlg::OnNotify(LViewI *Ctrl, LNotification n)
+int RemoteFolderDlg::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	SshHost *cur = tree ? dynamic_cast<SshHost*>(tree->Selection()) : NULL;
 

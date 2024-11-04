@@ -219,7 +219,7 @@ public:
 
 	/// By default the dialog will finish when a button is pressed. To override this
 	/// behavior you'll have to subclass LDialog and handle the OnNotify yourself.
-	int OnNotify(LViewI *Ctrl, LNotification n) override;
+	int OnNotify(LViewI *Ctrl, LNotification &n) override;
 
 	/// This returns the ID of the button pressed to close the dialog.
 	int GetButtonId();

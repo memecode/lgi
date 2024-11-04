@@ -52,7 +52,7 @@ public:
 		}
 	}
 	
-	int OnNotify(LViewI *Ctrl, LNotification n)
+	int OnNotify(LViewI *Ctrl, LNotification &n) override
 	{
 		if (Lst && Ctrl->GetId() == 1)
 		{

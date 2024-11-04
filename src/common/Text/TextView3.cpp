@@ -5410,7 +5410,7 @@ LMessage::Result LTextView3::OnEvent(LMessage *Msg)
 	return LLayout::OnEvent(Msg);
 }
 
-int LTextView3::OnNotify(LViewI *Ctrl, LNotification n)
+int LTextView3::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	if (Ctrl->GetId() == IDC_VSCROLL && VScroll)
 	{

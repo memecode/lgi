@@ -774,7 +774,7 @@ void LView::OnPaint(LSurface *pDC)
 	Tools.PaintContent(pDC, c);
 }
 
-int LView::OnNotify(LViewI *Ctrl, LNotification Data)
+int LView::OnNotify(LViewI *Ctrl, LNotification &Data)
 {
 	if (!Ctrl)
 		return 0;
@@ -806,7 +806,7 @@ int LView::OnNotify(LViewI *Ctrl, LNotification Data)
 		}
 		#endif
 
-		// default behaviour is just to pass the 
+		// default behavior is just to pass the 
 		// notification up to the parent
 
 		// FIXME: eventually we need to call the 'LNotification' parent fn...
@@ -1060,65 +1060,65 @@ void LView::SetParent(LViewI *p)
 void LView::SendNotify(LNotification note)
 {
 	LViewI *n = d->Notify ? d->Notify : d->Parent;
-	if (n)
-	{
-		if (
-			#if LGI_VIEW_HANDLE && !defined(HAIKU)
-			!_View ||
-			#endif
-			InThread())
-		{
-			n->OnNotify(this, note);
-		}
-		else
-		{
-			// We are not in the same thread as the target window. So we post a message
-			// across to the view.
-			if (GetId() <= 0)
-			{
-				// We are going to generate a control Id to help the receiver of the
-				// M_CHANGE message find out view later on. The reason for doing this
-				// instead of sending a pointer to the object, is that the object 
-				// _could_ be deleted between the message being sent and being received.
-				// Which would result in an invalid memory access on that object.
-				LViewI *p = GetWindow();
-				if (!p)
-				{
-					// No window? Find the top most parent we can...
-					p = this;
-					while (p->GetParent())
-						p = p->GetParent();
-				}
-				if (p)
-				{
-					// Give the control a valid ID
-					int i;
+	if (!n)
+		return;
 
-					for (i=10; i<1000; i++)
+	if (
+		#if LGI_VIEW_HANDLE && !defined(HAIKU)
+		!_View ||
+		#endif
+		InThread())
+	{
+		n->OnNotify(this, note);
+	}
+	else
+	{
+		// We are not in the same thread as the target window. So we post a message
+		// across to the view.
+		if (GetId() <= 0)
+		{
+			// We are going to generate a control Id to help the receiver of the
+			// M_CHANGE message find out view later on. The reason for doing this
+			// instead of sending a pointer to the object, is that the object 
+			// _could_ be deleted between the message being sent and being received.
+			// Which would result in an invalid memory access on that object.
+			LViewI *p = GetWindow();
+			if (!p)
+			{
+				// No window? Find the top most parent we can...
+				p = this;
+				while (p->GetParent())
+					p = p->GetParent();
+			}
+			if (p)
+			{
+				// Give the control a valid ID
+				int i;
+
+				for (i=10; i<1000; i++)
+				{
+					if (!p->FindControl(i))
 					{
-						if (!p->FindControl(i))
-						{
-							printf("Giving the ctrl '%s' the id '%i' for SendNotify\n",
-								GetClass(),
-								i);
-							SetId(i);
-							break;
-						}
+						printf("Giving the ctrl '%s' the id '%i' for SendNotify\n",
+							GetClass(),
+							i);
+						SetId(i);
+						break;
 					}
 				}
-				else
-				{
-					// Ok this is really bad... go random (better than nothing)
-					SetId(5000 + LRand(2000));
-				}
 			}
-			
-            LAssert(GetId() > 0); // We must have a valid ctrl ID at this point, otherwise
-									// the receiver will never be able to find our object.
-            
-            // printf("Post M_CHANGE %i %i\n", GetId(), Data);
-            n->PostEvent(M_CHANGE, (LMessage::Param) GetId(), (LMessage::Param) new LNotification(note));
+			else
+			{
+				// Ok this is really bad... go random (better than nothing)
+				SetId(5000 + LRand(2000));
+			}
 		}
+			
+        LAssert(GetId() > 0); // We must have a valid ctrl ID at this point, otherwise
+								// the receiver will never be able to find our object.
+            
+        // printf("Post M_CHANGE %i %i\n", GetId(), Data);
+        n->PostEvent(M_CHANGE, (LMessage::Param) GetId(), (LMessage::Param) new LNotification(note));
 	}
 }
 

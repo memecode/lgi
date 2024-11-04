@@ -70,7 +70,7 @@ public:
 	void OnAttach() override;
 	void OnStyleChange();
 	LMessage::Result OnEvent(LMessage *Msg) override;
-	int OnNotify(LViewI *Ctrl, LNotification n) override;
+	int OnNotify(LViewI *Ctrl, LNotification &n) override;
 
 	#if defined(WINNATIVE)
 		int SysOnNotify(int Msg, int Code);

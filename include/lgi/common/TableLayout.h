@@ -76,7 +76,7 @@ public:
 	void OnChildrenChanged(LViewI *Wnd, bool Attaching) override;
 	int64 Value() override;
 	void Value(int64 v) override;
-	int OnNotify(LViewI *c, LNotification n) override;
+	int OnNotify(LViewI *c, LNotification &n) override;
 	LMessage::Result OnEvent(LMessage *m) override;
 };
 

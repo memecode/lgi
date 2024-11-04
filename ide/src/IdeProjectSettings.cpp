@@ -684,7 +684,7 @@ public:
 		#endif
 	}
 	
-	int OnNotify(LViewI *Ctrl, LNotification n)
+	int OnNotify(LViewI *Ctrl, LNotification &n) override
 	{
 		switch (Ctrl->GetId())
 		{

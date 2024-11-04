@@ -28,7 +28,7 @@
 
 #define OptFileSeparator		"\n"
 
-#define THREAD_WARNING			if (!InThread()) { LgiTrace("#### %s:%i out of thread call.\n", __FUNCTION__, __LINE__); }
+#define THREAD_WARNING			if (!InThread()) { LgiTrace("#### %s:%i out of thread call.\n", __FUNCTION__, __LINE__); LAssert(0); }
 
 enum IdeMessages
 {
@@ -299,7 +299,7 @@ public:
 	void OnProjectChange();
 	void OnFile(char *File, bool IsProject = false);
 	bool OnRequestClose(bool IsClose) override;
-	int OnNotify(LViewI *Ctrl, LNotification n) override;
+	int OnNotify(LViewI *Ctrl, LNotification &n) override;
 	LMessage::Result OnEvent(LMessage *m) override;
 	bool OnNode(const char *Path, class ProjectNode *Node, FindSymbolSystem::SymAction Action);
 	void OnPulse() override;
@@ -324,7 +324,7 @@ public:
 	SysCharSupport(AppWnd *app);
 	~SysCharSupport();
 
-	int OnNotify(LViewI *v, LNotification n);
+	int OnNotify(LViewI *v, LNotification &n) override;
 	void OnPosChange();
 };
 

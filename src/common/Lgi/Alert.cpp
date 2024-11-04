@@ -85,7 +85,7 @@ void LAlert::SetButtonCallback(int ButtonIdx, std::function<void(int)> Callback)
 	Callbacks[ButtonIdx] = Callback;
 }
 
-int LAlert::OnNotify(LViewI *Ctrl, LNotification n)
+int LAlert::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	switch (Ctrl->GetId())
 	{
