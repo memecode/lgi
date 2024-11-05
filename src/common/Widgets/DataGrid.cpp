@@ -496,7 +496,7 @@ LMessage::Result LDataGrid::OnEvent(LMessage *Msg)
 	return LList::OnEvent(Msg);
 }
 
-int LDataGrid::OnNotify(LViewI *c, LNotification n)
+int LDataGrid::OnNotify(LViewI *c, const LNotification &n)
 {
 	switch (c->GetId())
 	{

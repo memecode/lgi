@@ -217,7 +217,7 @@ LFindInFiles::~LFindInFiles()
 	DeleteObj(d);
 }
 
-int LFindInFiles::OnNotify(LViewI *Ctrl, LNotification n)
+int LFindInFiles::OnNotify(LViewI *Ctrl, const LNotification &n)
 {
 	switch (Ctrl->GetId())
 	{

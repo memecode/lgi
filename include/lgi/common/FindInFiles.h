@@ -13,7 +13,7 @@ public:
 	LFindInFiles(LViewI *Parent, LAutoString Search, LDom *Store);
 	~LFindInFiles();
 	
-	int OnNotify(LViewI *Ctrl, LNotification n);
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
 };
 
 #endif
