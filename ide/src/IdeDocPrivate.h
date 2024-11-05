@@ -51,12 +51,12 @@ public:
 	LDateTime ModTs;
 	class DocEdit *Edit = NULL;
 	EditTray *Tray = NULL;
-	LHashTbl<IntKey<ssize_t>, bool> BreakPoints;
 	class ProjFilePopup *FilePopup = NULL;
 	class ProjMethodPopup *MethodPopup = NULL;
 	class ProjSymPopup *SymPopup = NULL;
 	LString::Array WriteBuf;
 	LAutoPtr<LThread> Build;
+	LHashTbl<IntKey<ssize_t>, int> BreakPoints;
 	
 	IdeDocPrivate(IdeDoc *d, AppWnd *a, NodeSource *src, const char *file);
 	void OnDelete();
@@ -85,6 +85,7 @@ public:
 	}
 
 	void CheckModTime();
+	void LoadBreakPoints();
 };
 
 #endif

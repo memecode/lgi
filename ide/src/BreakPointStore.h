@@ -384,4 +384,10 @@ public:
 
 		return INVALID_ID;
 	}
+
+	bool Has(int id)
+	{
+		TLock lck(this, _FL);
+		return BreakPoints.Find(id);
+	}
 };

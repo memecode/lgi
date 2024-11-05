@@ -173,7 +173,7 @@ void DocEdit::OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour)
 	int DocOffset = (*it)->r.y1;
 	for (LTextLine *l = *it; l; l = *++it, Y++)
 	{
-		if (Doc->d->BreakPoints.Find(Y+1))
+		if (Doc->d->BreakPoints.Find(Y+1) != BreakPointStore::INVALID_ID)
 		{
 			int r = l->r.Y() >> 1;
 			pDC->FilledCircle(8, l->r.y1 + r + TopPaddingPx - DocOffset, r - 1);

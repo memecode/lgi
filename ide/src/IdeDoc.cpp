@@ -890,7 +890,10 @@ public:
 }	StyleThread;
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-IdeDocPrivate::IdeDocPrivate(IdeDoc *d, AppWnd *a, NodeSource *src, const char *file) : NodeView(src), LMutex("IdeDocPrivate.Lock")
+IdeDocPrivate::IdeDocPrivate(IdeDoc *d, AppWnd *a, NodeSource *src, const char *file) :
+	NodeView(src),
+	LMutex("IdeDocPrivate.Lock"),
+	BreakPoints(0, BreakPointStore::INVALID_ID)
 {
 	App = a;
 	Doc = d;
@@ -1098,6 +1101,43 @@ void IdeDocPrivate::OnSaveComplete(bool Status)
 	}
 }
 
+void IdeDocPrivate::LoadBreakPoints()
+{
+	if (auto store = App->GetBreakPointStore())
+	{
+		for (auto id: store->GetAll())
+		{
+			auto bp = store->Get(id);
+			bool match = false;
+
+			if (Project)
+			{
+				if (auto be = Project->GetBackend())
+				{
+					if (auto abs = be->MakeAbsolute(bp.File))
+					{
+						if (abs == FileName)
+							match = true;
+					}
+					if (auto rel = be->MakeRelative(bp.File))
+					{
+						if (rel == FileName)
+							match = true;
+					}
+				}
+			}
+			if (!match)	
+				match = bp.File == FileName;
+
+			// Fuzzy match 'bp.File' against 'FileName'
+			if (match)
+			{
+				BreakPoints.Add(bp.Line, id);
+			}
+		}
+	}
+}
+
 void IdeDocPrivate::CheckModTime()
 {
 	if (!ModTs.IsValid())
@@ -1247,8 +1287,21 @@ void IdeDoc::OnLineChange(int Line)
 
 void IdeDoc::OnMarginClick(int Line)
 {
-	LString Dn = d->GetDisplayName();
-	d->App->ToggleBreakpoint(Dn, Line);
+	auto id = d->BreakPoints.Find(Line);	
+	if (auto store = d->App->GetBreakPointStore())
+	{
+		if (id != BreakPointStore::INVALID_ID)
+		{
+			d->BreakPoints.Delete(Line);
+			store->Delete(id);
+			d->Edit->Invalidate();
+		}
+		else
+		{
+			BreakPoint bp(d->GetDisplayName(), Line);
+			d->BreakPoints.Add(Line, store->Add(bp));
+		}
+	}
 }
 
 void IdeDoc::OnTitleClick(LMouse &m)
@@ -1354,10 +1407,14 @@ bool IdeDoc::IsFile(const char *File)
 	return File ? d->IsFile(File) : false;
 }
 
-bool IdeDoc::AddBreakPoint(BreakPoint &bp, bool Add)
+bool IdeDoc::AddBreakPoint(int id, bool Add)
 {
+	auto bp = d->App->GetBreakPointStore()->Get(id);
+	if (!bp)
+		return false;
+
 	if (Add)
-		d->BreakPoints.Add(bp.Line, true);
+		d->BreakPoints.Add(bp.Line, id);
 	else
 		d->BreakPoints.Delete(bp.Line);
 	
@@ -1480,7 +1537,7 @@ bool IdeDoc::OpenFile(const char *File)
 		return false;
 
 	auto Cs = d->GetSrc() ? d->GetSrc()->GetCharset() : NULL;
-
+	d->LoadBreakPoints();
 	return d->Edit->Open(File, Cs);
 }
 
@@ -1495,6 +1552,7 @@ bool IdeDoc::OpenData(LString Data)
 		LAssert(!"Impl me");
 	}
 
+	d->LoadBreakPoints();
 	return d->Edit->Name(Data);
 }
 

@@ -2894,7 +2894,7 @@ struct SaveState
 
 void AppWnd::SaveAll(std::function<void(bool)> Callback, bool CloseDirty)
 {
-	THREAD_WARNING
+	THREAD_WARNING()
 
 	auto ss = new SaveState;	
 	ss->d = d;
@@ -2915,7 +2915,7 @@ void AppWnd::SaveAll(std::function<void(bool)> Callback, bool CloseDirty)
 
 void AppWnd::CloseAll()
 {
-	THREAD_WARNING
+	THREAD_WARNING()
 
 	SaveAll([this](auto status)
 	{	
@@ -2956,20 +2956,6 @@ bool AppWnd::OnRequestClose(bool IsOsQuit)
 	{
 		return LWindow::OnRequestClose(IsOsQuit);
 	}
-}
-
-bool AppWnd::ToggleBreakpoint(const char *File, ssize_t Line)
-{
-	bool has = false;
-
-	BreakPoint bp(File, Line);
-	auto id = d->BreakPoints.Has(bp);
-	if (id != BreakPointStore::INVALID_ID)
-		d->BreakPoints.Delete(id);
-	else
-		d->BreakPoints.Add(bp);
-
-	return true;
 }
 
 void AppWnd::DumpHistory()
@@ -3045,14 +3031,14 @@ void AppWnd::OnLocationChange(const char *File, int Line)
 
 void AppWnd::OnFile(char *File, bool IsProject)
 {
-	THREAD_WARNING
+	THREAD_WARNING()
 
 	d->OnFile(File, IsProject);
 }
 
 IdeDoc *AppWnd::NewDocWnd(const char *FileName, NodeSource *Src)
 {
-	THREAD_WARNING
+	THREAD_WARNING(nullptr)
 
 	IdeDoc *Doc = new IdeDoc(this, Src, 0);
 	if (Doc)
@@ -3690,7 +3676,7 @@ void AppWnd::UpdateMemoryDump()
 
 int AppWnd::OnNotify(LViewI *Ctrl, const LNotification &n)
 {
-	THREAD_WARNING
+	THREAD_WARNING(0)
 
 	switch (Ctrl->GetId())
 	{
@@ -4572,8 +4558,11 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_TOGGLE_BREAKPOINT:
 		{
+			LAssert(!"Fixme");
+			/*
 			if (auto Cur = GetCurrentDoc())
 				ToggleBreakpoint(Cur->GetFileName(), Cur->GetLine());
+			*/
 			break;
 		}
 		case IDM_ATTACH_TO_PROCESS:

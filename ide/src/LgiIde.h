@@ -28,7 +28,7 @@
 
 #define OptFileSeparator		"\n"
 
-#define THREAD_WARNING			if (!InThread()) { LgiTrace("#### %s:%i out of thread call.\n", __FUNCTION__, __LINE__); LAssert(0); }
+#define THREAD_WARNING(...)		if (!InThread()) { LgiTrace("#### %s:%i out of thread call.\n", __FUNCTION__, __LINE__); return __VA_ARGS__; }
 
 enum IdeMessages
 {
@@ -306,7 +306,6 @@ public:
 
 	// Debugging support
 	class LDebugContext *GetDebugContext();
-	bool ToggleBreakpoint(const char *File, ssize_t Line);
 	void OnDebugState(bool Debugging, bool Running);
 };
 
