@@ -2640,8 +2640,8 @@ int AppWnd::OnFixBuildErrors()
 
 				if (OldReplacements == Replacements)
 				{
-					printf("NoReplacement: %s\n", Ln.Get());
-					printf("Ref: %s:%i\n", Full.Get(), (int)LineNo);
+					// printf("NoReplacement: %s\n", Ln.Get());
+					// printf("Ref: %s:%i\n", Full.Get(), (int)LineNo);
 					auto &code = Fi->Lines[LineNo-1];
 					printf("OldCode: '%s'\n", code.Strip().Get());
 					if (Ln.Find("no declaration matches") >= 0 ||
@@ -2649,13 +2649,13 @@ int AppWnd::OnFixBuildErrors()
 					{
 						LString key = "LNotification ";
 						auto note = code.Find(key);
-						printf("note=%i\n", (int)note);
+						// printf("note=%i\n", (int)note);
 						if (note > 0)
 						{
 							auto before = GetToken(code, note-1, -1);
 							auto after  = GetToken(code, note+key.Length(), 1);
 							bool changed = false;
-							printf("tokens: '%s' and '%s'\n", before.Get(), after.Get());
+							// printf("tokens: '%s' and '%s'\n", before.Get(), after.Get());
 							if (!before.Equals("const"))
 							{
 								// add the const
@@ -2670,7 +2670,6 @@ int AppWnd::OnFixBuildErrors()
 								InsertString(code, note+key.Length(), amp);
 								changed = true;
 							}
-
 							if (changed)
 							{
 								printf("newCode: '%s'\n", code.Strip().Get());
