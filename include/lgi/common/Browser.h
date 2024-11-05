@@ -31,6 +31,6 @@ public:
 	void AddPath(const char *Path);
 
 	void OnPosChange();
-	int OnNotify(LViewI *c, LNotification &n) override;
+	int OnNotify(LViewI *c, const LNotification &n) override;
 	LMessage::Result OnEvent(LMessage *m);
 };

@@ -484,7 +484,9 @@ LScrollBar::LScrollBar(int id, int x, int y, int cx, int cy, const char *name)
 
 LScrollBar::~LScrollBar()
 {
+	#ifdef HAIKU
 	LStackTrace("%i ~LScrollBar\n", LCurrentThreadId());
+	#endif
 	DeleteObj(d);
 }
 

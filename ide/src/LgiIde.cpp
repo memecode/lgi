@@ -1583,9 +1583,7 @@ public:
 		// Scan back to the start of the filename
 		auto Line = i;
 		while (Line > 0 && !strchr("\n>", Txt[Line-1]))
-		{
 			Line--;
-		}
 						
 		// Store the filename
 		LString File(Txt+Line, i-Line);
@@ -1601,7 +1599,7 @@ public:
 		auto NumIndex = ++i;
 		while (isdigit(Txt[NumIndex]))
 			NumIndex++;
-							
+			
 		// Store the line number
 		LString NumStr(Txt + i, NumIndex - i);
 		if (!NumStr)
@@ -1611,8 +1609,14 @@ public:
 		auto LineNumber = (int)NumStr.Int();
 		o->SetCaret(Line, false);
 		o->SetCaret(NumIndex + 1, true);
-								
+
+		auto Eol = i;
+		while (Txt[Eol] && Txt[Eol] != '\n')
+			Eol++;
+		LString WholeLine(Txt+Line, Eol-Line);
 		LString Context8 = Context;
+
+		printf("ViewMsg: %s,%i %s\n", File.Get(), LineNumber, WholeLine.Get());
 		ViewMsg(File, LineNumber, Context8);
 	}
 
@@ -2355,6 +2359,62 @@ struct LFileInfo
 	}
 };
 
+LString GetToken(LString &s, int pos, int dir)
+{
+	LString token;
+	bool leadingWs = true;
+	
+	enum TTokenType
+	{
+		TUnknown,
+		TNumber,
+		TSymbol,
+		TDelim,
+	}	curType = TUnknown;	
+
+	auto charType = [](char ch) -> TTokenType
+	{
+		if (IsDigit(ch) || strchr("-.",ch))
+			return TNumber;
+		else if (IsAlpha(ch) || strchr("_",ch))
+			return TSymbol;
+		return TDelim;
+	};
+	
+	for (int i=pos; i>=0 && i<s.Length(); i+=dir)
+	{
+		char ch = s(i);
+		// printf("%i=%c\n", i, ch>=' '?ch:'.');
+		if (ch == ' ' || ch == '\t')
+		{
+			if (leadingWs)
+				continue;
+			else
+				break;
+		}
+		else
+		{
+			leadingWs = false;
+			auto type = charType(ch);
+			// printf("type=%i cur=%i\n", type, curType);
+			if (curType == TUnknown)
+				curType = type;
+			else if (curType != type)
+				break;
+				
+			char add[2] = {ch, 0};
+			token += add;
+		}
+	}
+	
+	return dir > 0 ? token : token.Reverse();
+}
+
+void InsertString(LString &s, int pos, const char *txt)
+{
+	auto newStr = s(0, pos) + txt + s(pos,-1);
+	s = newStr;
+}
 
 int AppWnd::OnFixBuildErrors()
 {
@@ -2373,7 +2433,7 @@ int AppWnd::OnFixBuildErrors()
 
 	LString Raw = d->Output->Txt[AppWnd::BuildTab]->Name();
 	LString::Array Lines = Raw.Split("\n");
-	auto *Log = d->Output->Txt[AppWnd::OutputTab];
+	auto Log = d->Output->Txt[AppWnd::OutputTab];
 
 	Log->Name(NULL);
 	Log->Print("Parsing errors...\n");
@@ -2384,21 +2444,18 @@ int AppWnd::OnFixBuildErrors()
 	for (int Idx=0; Idx<Lines.Length(); Idx++)
 	{
 		auto Ln = Lines[Idx];
-		auto ErrPos = Ln.Find("error");
+		auto ErrPos = Ln.Find("error:");
 		if (ErrPos >= 0)
 		{
 			#ifdef WINDOWS
-			LString::Array p = Ln.SplitDelimit(">()");
+				auto p = Ln.SplitDelimit(">()");
 			#else
-			LString::Array p = Ln(0, ErrPos).Strip().SplitDelimit(":");
+				auto p = Ln(0, ErrPos).Strip().SplitDelimit(":");
 			#endif
 			if (p.Length() <= 2)
-			{
-				Log->Print("Error: Only %i parts? '%s'\n", (int)p.Length(), Ln.Get());
-			}
-			else
-			{
-				#ifdef WINDOWS
+				continue;
+
+			#ifdef WINDOWS
 				int Base = p[0].IsNumeric() ? 1 : 0;
 				LString Fn = p[Base];
 				if (Fn.Find("Program Files") >= 0)
@@ -2408,186 +2465,221 @@ int AppWnd::OnFixBuildErrors()
 				}
 				auto LineNo = p[Base+1].Int();
 				bool FileNotFound = Ln.Find("Cannot open include file:") > 0;
-				#else
+			#else
 				LString Fn = p[0];
 				auto LineNo = p[1].Int();
 				bool FileNotFound = false; // fixme
-				#endif
+			#endif
 
-				LAutoString Full;
-				if (!d->FindSource(Full, Fn, NULL))
+			LAutoString Full;
+			if (!d->FindSource(Full, Fn, NULL))
+			{
+				Log->Print("Error: Can't find Fn='%s' Line=%i\n", Fn.Get(), (int)LineNo);
+				continue;
+			}
+
+			LFileInfo *Fi = NULL;
+			for (auto &i: Files)
+			{
+				if (i.Path.Equals(Full))
 				{
-					Log->Print("Error: Can't find Fn='%s' Line=%i\n", Fn.Get(), (int)LineNo);
-					continue;
+					Fi = &i;
+					break;
 				}
-
-				LFileInfo *Fi = NULL;
-				for (auto &i: Files)
+			}
+			if (!Fi)
+			{
+				LFile f(Full, O_READ);
+				if (f.IsOpen())
 				{
-					if (i.Path.Equals(Full))
-					{
-						Fi = &i;
-						break;
-					}
-				}
-				if (!Fi)
-				{
-					LFile f(Full, O_READ);
-					if (f.IsOpen())
-					{
-						Fi = &Files.New();
-						Fi->Path = Full.Get();
-						auto OldFile = f.Read();
-						Fi->Lines = OldFile.SplitDelimit("\n", -1, false);
-					}
-					else
-					{
-						Log->Print("Error: Can't open '%s'\n", Full.Get());
-					}
-				}
-
-				if (Fi)
-				{
-					LString Loc;
-					Loc.Printf("%s:%i", Full.Get(), (int)LineNo);
-					if (FixHistory.Find(Loc))
-					{
-						// Log->Print("Already fixed %s\n", Loc.Get());
-					}
-					else if (LineNo <= Fi->Lines.Length())
-					{
-						FixHistory.Add(Loc, true);
-
-						if (FileNotFound)
-						{
-							auto n = p.Last().SplitDelimit("\'");
-							auto wrongName = n[1];
-							LFile f(Full, O_READ);
-							auto Lines = f.Read().SplitDelimit("\n", -1, false);
-							f.Close();
-							if (LineNo <= Lines.Length())
-							{
-								auto &errLine = Lines[LineNo-1];
-								auto Pos = errLine.Find(wrongName);
-								
-								/*
-								if (Pos < 0)
-								{
-									for (int i=0; i<Lines.Length(); i++)
-										Log->Print("[%i]=%s\n", i, Lines[i].Get());
-								}
-								*/
-
-								if (Pos > 0)
-								{
-									// Find where it went...
-									LString newPath;
-									for (auto p: d->Projects)
-									{
-										const char *SubStr[] = { ".", "lgi/common" };
-
-										LString::Array IncPaths;
-										if (p->BuildIncludePaths(IncPaths, NULL, true, false, PlatformCurrent))
-										{
-											for (auto &inc: IncPaths)
-											{
-												for (int sub=0; !newPath && sub<CountOf(SubStr); sub++)
-												{
-													char path[MAX_PATH_LEN];
-													LMakePath(path, sizeof(path), inc, SubStr[sub]);
-													LMakePath(path, sizeof(path), path, wrongName);
-													if (LFileExists(path))
-													{
-														newPath = path + inc.Length() + 1;
-													}
-													else
-													{
-														LString minusFirst = wrongName(1,-1);
-														LMakePath(path, sizeof(path), inc, SubStr[sub]);
-														LMakePath(path, sizeof(path), path, minusFirst);
-														if (LFileExists(path))
-														{
-															newPath = path + inc.Length() + 1;
-														}
-													}
-												}
-											}
-										}
-									}
-
-									if (newPath)
-									{
-										newPath = newPath.Replace("\\", "/"); // Use unix dir chars
-										LString newLine = errLine(0, Pos) + newPath + errLine(Pos + wrongName.Length(), -1);
-										if (newLine == errLine)
-										{
-											Log->Print("Already changed '%s'.\n", wrongName.Get()); 
-										}
-										else
-										{
-											LString backup = LString(Full.Get()) + ".orig";
-											if (LFileExists(backup))
-												FileDev->Delete(backup);
-											LError Err;
-											if (FileDev->Move(Full, backup, &Err))
-											{
-												errLine = newLine;
-												LString newLines = LString("\n").Join(Lines);
-												LFile out(Full, O_WRITE);
-												out.Write(newLines);
-												Log->Print("Fixed '%s'->'%s' on ln %i in %s\n",
-													wrongName.Get(), newPath.Get(),
-													(int)LineNo, Full.Get());
-												Replacements++;
-											}
-											else Log->Print("Error: moving '%s' to backup (%s).\n", Full.Get(), Err.GetMsg().Get());
-										}
-									}
-									else Log->Print("Error: Missing header '%s'.\n", wrongName.Get()); 
-								}
-								else
-								{
-									Log->Print("Error: '%s' not found in line %i of '%s' -> '%s'\n",
-										wrongName.Get(), (int)LineNo,
-										Fn.Get(), Full.Get());
-									// return;
-								}
-							}
-							else Log->Print("Error: Line %i is beyond file lines: %i\n", (int)LineNo, (int)Lines.Length());
-						}
-						else
-						{
-							auto OldReplacements = Replacements;
-							for (auto i: Map)
-							{
-								for (int Offset = 0; (LineNo + Offset >= 1) && Offset >= -1; Offset--)
-								{
-									LString &s = Fi->Lines[LineNo+Offset-1];
-									if (ReplaceWholeWord(s, i.key, i.value))
-									{
-										Log->Print("Renamed '%s' -> '%s' at %s:%i\n", i.key, i.value.Get(), Full.Get(), LineNo+Offset);
-										Fi->Dirty = true;
-										Replacements++;
-										Offset = -2;
-									}
-								}
-							}
-
-							if (OldReplacements == Replacements &&
-								Ln.Find("syntax error: id") > 0)
-							{
-								Log->Print("Unhandled: %s\n", Ln.Get());
-							}
-						}
-					}
-					else
-					{
-						Log->Print("Error: Invalid line %i\n", (int)LineNo);
-					}
+					Fi = &Files.New();
+					Fi->Path = Full.Get();
+					auto OldFile = f.Read();
+					Fi->Lines = OldFile.SplitDelimit("\n", -1, false);
 				}
 				else
 				{
-					Log->Print("Error: Fi is NULL\n");
+					Log->Print("Error: Can't open '%s'\n", Full.Get());
+				}
+			}
+
+			if (!Fi)
+			{
+				Log->Print("Error: Fi is NULL\n");
+				continue;
+			}
+
+			LString Loc;
+			Loc.Printf("%s:%i", Full.Get(), (int)LineNo);
+			if (FixHistory.Find(Loc))
+			{
+				// Log->Print("Already fixed %s\n", Loc.Get());
+			}
+			else if (LineNo > Fi->Lines.Length())
+			{
+				Log->Print("Error: Invalid line %i\n", (int)LineNo);
+				continue;
+			}
+
+			FixHistory.Add(Loc, true);
+
+			if (FileNotFound)
+			{
+				auto n = p.Last().SplitDelimit("\'");
+				auto wrongName = n[1];
+				LFile f(Full, O_READ);
+				auto Lines = f.Read().SplitDelimit("\n", -1, false);
+				f.Close();
+				if (LineNo <= Lines.Length())
+				{
+					auto &errLine = Lines[LineNo-1];
+					auto Pos = errLine.Find(wrongName);
+					
+					/*
+					if (Pos < 0)
+					{
+						for (int i=0; i<Lines.Length(); i++)
+							Log->Print("[%i]=%s\n", i, Lines[i].Get());
+					}
+					*/
+
+					if (Pos > 0)
+					{
+						// Find where it went...
+						LString newPath;
+						for (auto p: d->Projects)
+						{
+							const char *SubStr[] = { ".", "lgi/common" };
+
+							LString::Array IncPaths;
+							if (p->BuildIncludePaths(IncPaths, NULL, true, false, PlatformCurrent))
+							{
+								for (auto &inc: IncPaths)
+								{
+									for (int sub=0; !newPath && sub<CountOf(SubStr); sub++)
+									{
+										char path[MAX_PATH_LEN];
+										LMakePath(path, sizeof(path), inc, SubStr[sub]);
+										LMakePath(path, sizeof(path), path, wrongName);
+										if (LFileExists(path))
+										{
+											newPath = path + inc.Length() + 1;
+										}
+										else
+										{
+											LString minusFirst = wrongName(1,-1);
+											LMakePath(path, sizeof(path), inc, SubStr[sub]);
+											LMakePath(path, sizeof(path), path, minusFirst);
+											if (LFileExists(path))
+											{
+												newPath = path + inc.Length() + 1;
+											}
+										}
+									}
+								}
+							}
+						}
+
+						if (newPath)
+						{
+							newPath = newPath.Replace("\\", "/"); // Use unix dir chars
+							LString newLine = errLine(0, Pos) + newPath + errLine(Pos + wrongName.Length(), -1);
+							if (newLine == errLine)
+							{
+								Log->Print("Already changed '%s'.\n", wrongName.Get()); 
+							}
+							else
+							{
+								LString backup = LString(Full.Get()) + ".orig";
+								if (LFileExists(backup))
+									FileDev->Delete(backup);
+								LError Err;
+								if (FileDev->Move(Full, backup, &Err))
+								{
+									errLine = newLine;
+									LString newLines = LString("\n").Join(Lines);
+									LFile out(Full, O_WRITE);
+									out.Write(newLines);
+									Log->Print("Fixed '%s'->'%s' on ln %i in %s\n",
+										wrongName.Get(), newPath.Get(),
+										(int)LineNo, Full.Get());
+									Replacements++;
+								}
+								else Log->Print("Error: moving '%s' to backup (%s).\n", Full.Get(), Err.GetMsg().Get());
+							}
+						}
+						else Log->Print("Error: Missing header '%s'.\n", wrongName.Get()); 
+					}
+					else
+					{
+						Log->Print("Error: '%s' not found in line %i of '%s' -> '%s'\n",
+							wrongName.Get(), (int)LineNo,
+							Fn.Get(), Full.Get());
+						// return;
+					}
+				}
+				else Log->Print("Error: Line %i is beyond file lines: %i\n", (int)LineNo, (int)Lines.Length());
+			}
+			else
+			{
+				auto OldReplacements = Replacements;
+				for (auto i: Map)
+				{
+					for (int Offset = 0; (LineNo + Offset >= 1) && Offset >= -1; Offset--)
+					{
+						LString &s = Fi->Lines[LineNo+Offset-1];
+						if (ReplaceWholeWord(s, i.key, i.value))
+						{
+							Log->Print("Renamed '%s' -> '%s' at %s:%i\n", i.key, i.value.Get(), Full.Get(), LineNo+Offset);
+							Fi->Dirty = true;
+							Replacements++;
+							Offset = -2;
+						}
+					}
+				}
+
+				if (OldReplacements == Replacements)
+				{
+					printf("NoReplacement: %s\n", Ln.Get());
+					printf("Ref: %s:%i\n", Full.Get(), (int)LineNo);
+					auto &code = Fi->Lines[LineNo-1];
+					printf("OldCode: '%s'\n", code.Strip().Get());
+					if (Ln.Find("no declaration matches") >= 0 ||
+						Ln.Find("marked ‘override’, but does not override") >= 0)
+					{
+						LString key = "LNotification ";
+						auto note = code.Find(key);
+						printf("note=%i\n", (int)note);
+						if (note > 0)
+						{
+							auto before = GetToken(code, note-1, -1);
+							auto after  = GetToken(code, note+key.Length(), 1);
+							bool changed = false;
+							printf("tokens: '%s' and '%s'\n", before.Get(), after.Get());
+							if (!before.Equals("const"))
+							{
+								// add the const
+								LString constStr = "const ";
+								InsertString(code, note, constStr);
+								note += constStr.Length();
+								changed = true;
+							}
+							if (!after.Equals("&"))
+							{
+								LString amp = "&";
+								InsertString(code, note+key.Length(), amp);
+								changed = true;
+							}
+
+							if (changed)
+							{
+								printf("newCode: '%s'\n", code.Strip().Get());
+								Fi->Dirty = true;
+							}
+						}
+					}
+					
+					Log->Print("Unhandled error: %s\n", Ln.Get());					
 				}
 			}
 		}

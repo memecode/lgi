@@ -597,7 +597,7 @@ bool LControlTree::SetVariant(const char *Name, LVariant &Value, const char *Arr
 	return true;
 }
 
-int LControlTree::OnNotify(LViewI *c, LNotification &n)
+int LControlTree::OnNotify(LViewI *c, const LNotification &n)
 {
 	switch (c->GetId())
 	{

@@ -62,7 +62,7 @@ int LDialog::GetButtonId()
 	return d->BtnId;
 }
 
-int LDialog::OnNotify(LViewI *Ctrl, LNotification n)
+int LDialog::OnNotify(LViewI *Ctrl, const LNotification &n)
 {
 	auto b = dynamic_cast<LButton*>(Ctrl);
 	if (b)

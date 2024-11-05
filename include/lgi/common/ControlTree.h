@@ -72,7 +72,7 @@ public:
 	LTreeItem *Insert(const char *DomPath, int CtrlId, LVariantType Type, LVariant *Value = 0, LArray<EnumValue> *Enum = 0);
 	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
 	bool Serialize(LDom *Store, bool Write);
-	int OnNotify(LViewI *c, LNotification &n) override;
+	int OnNotify(LViewI *c, const LNotification &n) override;
 	bool CallMethod(const char *MethodName, LScriptArguments &Args) override;
 };
 

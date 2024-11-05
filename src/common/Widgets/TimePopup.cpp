@@ -17,7 +17,7 @@ LTimeDropDown::LTimeDropDown() :
 	SetPopup(Drop = new LTimePopup(this));
 }
 
-int LTimeDropDown::OnNotify(LViewI *Ctrl, LNotification &n)
+int LTimeDropDown::OnNotify(LViewI *Ctrl, const LNotification &n)
 {
 	LViewI *DateSrc = GetNotify();
 	if (Ctrl == (LViewI*)Drop && DateSrc)
@@ -266,7 +266,7 @@ void LTimePopup::OnPaint(LSurface *pDC)
 	}
 }
 
-int LTimePopup::OnNotify(LViewI *c, LNotification &n)
+int LTimePopup::OnNotify(LViewI *c, const LNotification &n)
 {
 	if (c->GetId() == 100 && !Ignore)
 	{

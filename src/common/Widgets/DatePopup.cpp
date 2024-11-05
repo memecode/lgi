@@ -256,7 +256,7 @@ LDateDropDown::LDateDropDown() :
 	SetPopup(Drop = new LDatePopup(this));
 }
 
-int LDateDropDown::OnNotify(LViewI *Wnd, LNotification &n)
+int LDateDropDown::OnNotify(LViewI *Wnd, const LNotification &n)
 {
 	if (Wnd == (LViewI*)Drop)
 	{

@@ -2076,7 +2076,7 @@ int LVmDebuggerWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 	return LWindow::OnCommand(Cmd, Event, Wnd);
 }
 
-int LVmDebuggerWnd::OnNotify(LViewI *Ctrl, LNotification &n)
+int LVmDebuggerWnd::OnNotify(LViewI *Ctrl, const LNotification &n)
 {
 	if (!d->AcceptNotify)
 		return 0;
