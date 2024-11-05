@@ -2877,7 +2877,7 @@ void IdeProject::Execute(ExeAction Act, std::function<void(LError&, LDebugContex
 		{
 			if (cb)
 			{
-				LError err(LErrorPathNotFound, LString::Fmt("Executable '%s' doesn't exist.\n", e));
+				LError err(LErrorPathNotFound, LString::Fmt("Executable '%s' doesn't exist.\n", e.Get()));
 				cb(err, NULL);
 			}
 			return;

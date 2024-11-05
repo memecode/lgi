@@ -103,6 +103,7 @@ LgiFunc void LSleep(uint32_t i);
 #define LPrintfHex64				"%llx"
 #define LPrintfSizeT				"%zu"
 #define LPrintfSSizeT				"%zi"
+#define LPrintfSock					"%i"
 #define atoi64						atoll
 #define sprintf_s					snprintf
 #define vsprintf_s					vsnprintf

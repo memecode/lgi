@@ -916,7 +916,7 @@ ssize_t LDebugContext::Write(const void *Ptr, ssize_t Size, int Flags)
 void LDebugContext::OnError(LString Str)
 {
 	if (DebuggerLog)
-		DebuggerLog->Print("Error: %s\n", Str);
+		DebuggerLog->Print("Error: %s\n", Str.Get());
 
 	LPopupNotification::Message(d->App, Str);
 }
