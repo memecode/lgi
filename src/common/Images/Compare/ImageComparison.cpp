@@ -489,7 +489,7 @@ public:
 		}
 	}
 	
-	int OnNotify(LViewI *Ctrl, LNotification n)
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override
 	{
 		switch (Ctrl->GetId())
 		{
@@ -953,7 +953,7 @@ ImageCompareDlg::~ImageCompareDlg()
 	DeleteObj(d);
 }
 
-int ImageCompareDlg::OnNotify(LViewI *Ctrl, LNotification n)
+int ImageCompareDlg::OnNotify(LViewI *Ctrl, const LNotification &n)
 {
 	switch (Ctrl->GetId())
 	{

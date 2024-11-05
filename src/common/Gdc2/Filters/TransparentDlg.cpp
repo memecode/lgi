@@ -46,7 +46,7 @@ LTransparentDlg::LTransparentDlg(LView *parent, LVariant *trans)
 	c->Add(new LButton(IDOK, 0, 0, -1, -1, "Ok"));
 }
 
-int LTransparentDlg::OnNotify(LViewI *Ctrl, LNotification n)
+int LTransparentDlg::OnNotify(LViewI *Ctrl, const LNotification &n)
 {
 	switch (Ctrl->GetId())
 	{

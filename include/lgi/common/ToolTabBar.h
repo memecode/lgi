@@ -72,7 +72,7 @@ public:
 	void OnPaint(LSurface *pDC);
 	void OnCreate();
 	void OnMouseClick(LMouse &m);
-	int OnNotify(LViewI *c, LNotification n);
+	int OnNotify(LViewI *c, const LNotification &n) override;
 	void OnPosChange();
 };
 

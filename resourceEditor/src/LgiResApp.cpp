@@ -855,7 +855,7 @@ LMessage::Result FieldView::OnEvent(LMessage *m)
 	return LLayout::OnEvent(m);
 }
 
-int FieldView::OnNotify(LViewI *Ctrl, LNotification n)
+int FieldView::OnNotify(LViewI *Ctrl, const LNotification &n)
 {
 	if (!Ignore)
 	{
@@ -1555,7 +1555,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 	return LDocApp<LOptionsFile>::OnCommand(Cmd, Event, Handle);
 }
 
-int AppWnd::OnNotify(LViewI *Ctrl, LNotification n)
+int AppWnd::OnNotify(LViewI *Ctrl, const LNotification &n)
 {
 	switch (Ctrl->GetId())
 	{
@@ -4671,7 +4671,7 @@ void FindShortCuts(LList *Out, LViewI *In)
 	}
 }
 
-int ShortCutView::OnNotify(LViewI *Ctrl, LNotification n)
+int ShortCutView::OnNotify(LViewI *Ctrl, const LNotification &n)
 {
 	if (Ctrl->GetId() == Lst->GetId())
 	{

@@ -1491,7 +1491,7 @@ public:
 	~TableLayoutTest();
 	
 	void OnDialog(LDialogRes *Dlg);
-	int OnNotify(LViewI *Ctrl, LNotification n);
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
     LMessage::Param OnEvent(LMessage *m);
 };
 
@@ -1705,7 +1705,7 @@ void TableLayoutTest::OnDialog(LDialogRes *Dlg)
         View->OnDialog(Dlg);
 }
 
-int TableLayoutTest::OnNotify(LViewI *Ctrl, LNotification n)
+int TableLayoutTest::OnNotify(LViewI *Ctrl, const LNotification &n)
 {
 	switch (Ctrl->GetId())
 	{

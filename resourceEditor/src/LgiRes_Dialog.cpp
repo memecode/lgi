@@ -153,7 +153,7 @@ public:
 		}
 	}
 
-	int OnNotify(LViewI *Ctrl, LNotification n)
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override
 	{
 		int MoveDir = 1;
 		switch (Ctrl->GetId())

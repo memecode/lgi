@@ -59,7 +59,7 @@ LangDlg::LangDlg(LView *parent, List<LLanguage> &l, int Init)
 	Children.Insert(new LButton(IDCANCEL, 180, 30, 60, 20, "Cancel"));
 }
 
-int LangDlg::OnNotify(LViewI *Ctrl, LNotification n)
+int LangDlg::OnNotify(LViewI *Ctrl, const LNotification &n)
 {
 	switch (Ctrl->GetId())
 	{

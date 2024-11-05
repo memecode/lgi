@@ -14,7 +14,7 @@ class LTransparentDlg : public LDialog
 
 public:
 	LTransparentDlg(LView *parent, LVariant *trans);
-	int OnNotify(LViewI *Ctrl, LNotification n);
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
 };
 #endif
 

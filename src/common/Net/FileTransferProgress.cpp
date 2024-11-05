@@ -74,7 +74,7 @@ class LPaneThrottle : public LStatusPane
 public:
 	LPaneThrottle(LDom *app);
 
-	int OnNotify(LViewI *Ctrl, LNotification n);
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
 	void OnPaint(LSurface *pDC);
 	int64 Value();
 	void OnMouseClick(LMouse &m);
@@ -88,7 +88,7 @@ LPaneThrottle::LPaneThrottle(LDom *app)
 	Slider = new LSlider(SLIDER_ID, 0, 0, 100, 20, "Throttle", false);
 }
 
-int LPaneThrottle::OnNotify(LViewI *Ctrl, LNotification n)
+int LPaneThrottle::OnNotify(LViewI *Ctrl, const LNotification &n)
 {
 	if (Ctrl && Ctrl->GetId() == SLIDER_ID)
 	{

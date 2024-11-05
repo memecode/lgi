@@ -9,7 +9,7 @@ public:
 	ImageCompareDlg(LView *p, const char *OutPath);
 	~ImageCompareDlg();
 	
-	int OnNotify(LViewI *Ctrl, LNotification n);
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
 };
 
 #endif

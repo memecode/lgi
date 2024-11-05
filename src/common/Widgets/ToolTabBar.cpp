@@ -106,7 +106,7 @@ void LToolTabBar::OnButtonClick(LToolButton *Btn)
 		OnChange(Btn);
 }
 
-int LToolTabBar::OnNotify(LViewI *c, LNotification n)
+int LToolTabBar::OnNotify(LViewI *c, const LNotification &n)
 {
 	if (n.Type == LNotifyValueChanged)
 	{

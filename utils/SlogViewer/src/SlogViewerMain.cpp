@@ -707,7 +707,7 @@ public:
 			Callback(FileName, false);
 	}
 
-	int OnNotify(LViewI *Ctrl, LNotification n)
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override
 	{
 		if (Ctrl->GetId() == ID_TABS)
 		{

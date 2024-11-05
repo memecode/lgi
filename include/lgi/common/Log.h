@@ -52,7 +52,7 @@ public:
 	// void OnNcCalcClient(long &x1, long &y1, long & x2, long &y2);
 	LMessage::Result OnEvent(LMessage *Msg);
 	void OnPosChange();
-	int OnNotify(LViewI *Ctrl, LNotification n);
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
 
 	bool Border() { return HasBorder; }
 	void Border(bool i) { HasBorder = i; }
