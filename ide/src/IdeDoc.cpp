@@ -1844,7 +1844,17 @@ int IdeDoc::OnNotify(LViewI *v, const LNotification &n)
 						d->FilePopup->SetSysInc(SysInc);
 					
 					// Update list elements...
-					d->FilePopup->OnNotify(v, n);
+					if (d->FilePopup->InThread())
+					{
+						d->FilePopup->OnNotify(v, n);
+					}
+					else
+					{
+						d->FilePopup->RunCallback([popup=d->FilePopup, v, n]()
+							{
+								popup->OnNotify(v, n);
+							});
+					}
 				}
 			}
 			else if (d->FilePopup)
@@ -1874,7 +1884,17 @@ int IdeDoc::OnNotify(LViewI *v, const LNotification &n)
 					BuildDefnList(GetFileName(), (char16*)d->Edit->NameW(), d->MethodPopup->All, DefnFunc);
 
 					// Update list elements...
-					d->MethodPopup->OnNotify(v, n);
+					if (d->MethodPopup->InThread())
+					{
+						d->MethodPopup->OnNotify(v, n);
+					}
+					else
+					{
+						d->MethodPopup->RunCallback([popup=d->MethodPopup, v, n]()
+							{
+								popup->OnNotify(v, n);
+							});
+					}
 				}
 			}
 			else if (d->MethodPopup)
@@ -1898,7 +1918,19 @@ int IdeDoc::OnNotify(LViewI *v, const LNotification &n)
 				if (!d->SymPopup)
 					d->SymPopup = new ProjSymPopup(d->App, this, v);
 				if (d->SymPopup)
-					d->SymPopup->OnNotify(v, n);
+				{
+					if (d->SymPopup->InThread())
+					{
+						d->SymPopup->OnNotify(v, n);
+					}
+					else
+					{
+						d->SymPopup->RunCallback([popup=d->SymPopup, v, n]()
+							{
+								popup->OnNotify(v, n);
+							});
+					}
+				}
 			}
 			else if (d->SymPopup)
 			{
