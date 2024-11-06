@@ -59,10 +59,16 @@ class SshBackend :
 
 		~Process()
 		{
+			LStackTrace("%i ~Process 0\n", LCurrentThreadId());
+
 			WaitForExit();
+
+			LStackTrace("%i ~Process 1\n", LCurrentThreadId());
 
 			if (exitcodeCb)
 				exitcodeCb(exitCode);
+
+			LStackTrace("%i ~Process 2\n", LCurrentThreadId());
 		}
 
 		int Main()

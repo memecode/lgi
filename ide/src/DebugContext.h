@@ -38,6 +38,7 @@ public:
 	LMessage::Param OnEvent(LMessage *m);
 	void OnMemoryDump(const char *Addr, int WordSize, int Width, bool IsHex);
 	void FormatMemoryDump(int WordSize, int Width, bool InHex);
+	void Quit();
 	
 	// Debugger events...
 	ssize_t Write(const void *Ptr, ssize_t Size, int Flags = 0) override;

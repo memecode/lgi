@@ -843,6 +843,11 @@ class Gdb :
 					Rd = RemoveAnsi(Buf, Rd);
 					Buf[Rd] = 0;
 				}
+				else if (Rd < 0)
+				{
+					// Remote process quit?
+					int asd=0;
+				}
 			}
 
 			if (Rd > 0)
@@ -861,6 +866,11 @@ class Gdb :
 			RemoteGdb->CallMethod(LDomPropToString(ObjCancel), args);
 
 			delete RemoteGdb;
+		}
+		if (curCmd)
+		{
+			curCmd->Finish();
+			curCmd.Reset();
 		}
 		return 0;
 	}
@@ -991,14 +1001,9 @@ public:
 	{
 		bpStore->DeleteCallback(bpStoreCallbackId);
 
-		#if DEBUG_SESSION_LOGGING
-		LgiTrace("Gdb::~Gdb - waiting for thread to exit...\n");
-		#endif
 		State = Exiting;
-		WaitForExit(5000);
-		#if DEBUG_SESSION_LOGGING
-		LgiTrace("Gdb::~Gdb - thread has exited.\n");
-		#endif
+		WaitForExit(10000);
+		LStackTrace("%i ~Gdb\n", LCurrentThreadId());
 	}
 
 	bool Load(LDebugEvents *EventHandler, const char *exe, const char *args, bool runAsAdmin, const char *initDir, const char *Env)

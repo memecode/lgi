@@ -598,6 +598,27 @@ bool LDebugContext::ParseFrameReference(const char *Frame, LAutoString &File, in
 	return Line > 0;
 }
 
+void LDebugContext::Quit()
+{
+	if (d->Db)
+		d->Db->Unload([this](auto status)
+			{
+				if (!status)
+					return;
+
+				d->App->RunCallback([this]()
+					{
+						d->Db.Reset();
+						if (onFinished)
+						{
+							auto finished = std::move(onFinished);
+							// Calling 'finished' will delete 'this'
+							finished();
+						}
+					});
+			});
+}
+
 bool LDebugContext::OnCommand(int Cmd)
 {
 	#if DEBUG_SESSION_LOGGING
@@ -637,19 +658,7 @@ bool LDebugContext::OnCommand(int Cmd)
 			if (!d->Db)
 				return false;
 
-			d->Db->Unload([this](auto status)
-			{
-				LAssert(d->App->InThread());
-				if (status)
-				{
-					d->Db.Reset();
-					if (onFinished)
-					{
-						onFinished();
-						onFinished = nullptr;
-					}
-				}
-			});
+			Quit();
 			return true;
 		}
 		case IDM_PAUSE_DEBUG:

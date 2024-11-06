@@ -3562,8 +3562,8 @@ LMessage::Result AppWnd::OnEvent(LMessage *m)
 					if (CurIpDoc)
 						CurIpDoc->UpdateControl();
 						
-					// Shutdown the debug context and free the memory
-					DeleteObj(d->DbgContext);
+					// Ask the debugger context to shutdown cleanly...
+					d->DbgContext->Quit();
 				}
 			}
 			
