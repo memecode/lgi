@@ -12,7 +12,7 @@
 #define ACTIVE_SPACER_SIZE_PX		9
 
 #if 0 //def _DEBUG
-#define LOG(...)		if (_Debug) LgiTrace(__VA_ARGS__)
+#define LOG(...)		LgiTrace(__VA_ARGS__)
 #else
 #define LOG(...)
 #endif
@@ -401,7 +401,8 @@ void LBox::OnPosChange()
 		{
 			// Check if the view has layout capabilities...
 			LViewLayoutInfo info;
-			// If this is a horizonal box... call OnLayout in 'pre-layout' mode to get a width...
+			
+			// If this is a horizontal box... call OnLayout in 'pre-layout' mode to get a width...
 			// Else if this is a vertical box... fill out the width and call in 'layout' mode
 			if (IsVertical())
 				info.Width.Min = info.Width.Max = content.X();
@@ -416,7 +417,7 @@ void LBox::OnPosChange()
 				}
 				else
 				{
-					if (info.Height.Max != LViewLayoutInfo::FILL)
+					if (info.Width.Max != LViewLayoutInfo::FILL)
 						// View has given has a width to use...
 						box.Size = LCss::Len(LCss::LenPx, info.Width.Max);
 				}
@@ -460,7 +461,7 @@ void LBox::OnPosChange()
 
 		MinPx += box.MinPx;
 
-		LOG("        %s\n", box.toString().Get());
+		LOG("	[%i]=%s\n", Idx, box.toString().Get());
 
 		// Allocate area for spacers in the Fixed portion
 		if (Idx < Children.Length() - 1)

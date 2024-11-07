@@ -134,6 +134,9 @@
     <None Include="..\Files\Secrets.html">
       <Filter>Test cases</Filter>
     </None>
+    <None Include="..\Files\maya-grad.html">
+      <Filter>Test cases</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <MASM Include="..\..\..\src\common\Coding\ExternCall.asm">
@@ -141,8 +144,6 @@
     </MASM>
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="..\..\src\win\General\Lgi.manifest">
-      <Filter>Source Files\Lgi</Filter>
-    </Manifest>
+    <Manifest Include="..\..\..\src\win\General\Lgi.manifest" />
   </ItemGroup>
 </Project>

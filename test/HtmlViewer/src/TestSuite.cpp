@@ -33,18 +33,8 @@ enum Controls
 class FileInf
 {
 public:
-	char *File;
+	LString File;
 	LDateTime Date;
-
-	FileInf()
-	{
-		File = 0;
-	}
-
-	~FileInf()
-	{
-		DeleteArray(File);
-	}
 };
 
 int InfCmp(FileInf *a, FileInf *b, NativeInt d)
@@ -263,7 +253,7 @@ class AppWnd :
 	LList *Lst = NULL;
     HtmlScriptContext *Html = NULL;
     LTextView3 *Text = NULL;
-	char Base[256] = "";
+	LString FilesFolder;
 	LAutoPtr<LScriptEngine> Script;
 	LAutoPtr<HtmlImageLoader> Worker;
 	LAutoPtr<LEmojiFont> Emoji;
@@ -274,7 +264,7 @@ class AppWnd :
 		if (!u.sProtocol)
 		{
 			char p[MAX_PATH_LEN];
-			if (LMakePath(p, sizeof(p), Base, j->Uri) &&
+			if (LMakePath(p, sizeof(p), FilesFolder, j->Uri) &&
 				LFileExists(p))
 			{
 				LString Ext = LGetExtension(p);
@@ -339,40 +329,39 @@ public:
 				Menu->Load(this, "IDM_MENU");
 			}
 			
-			LBox *s = new LBox;
-			if (s)
+			if (auto box = new LBox)
 			{
-				AddView(s);
-				s->AddView(Lst = new LList(IDC_LIST, 0, 0, 100, 100));
+				AddView(box);
+				box->AddView(Lst = new LList(IDC_LIST, 0, 0, 100, 100));
 				Lst->Sunken(false);
 				Lst->AddColumn("File", 400);
 				Lst->CssStyles("width: 200px;");
-				s->Value(200);
+				box->Value(200);
 
 				#if HAS_LOG_VIEW
-				LBox *vert = new LBox;
-				vert->SetVertical(true);
-				s->AddView(vert);
+					LBox *vert = new LBox;
+					vert->SetVertical(true);
+					s->AddView(vert);
 
-				vert->AddView(Html = new HtmlScriptContext(IDC_HTML, this));
-				Html->SetCssStyle("height: 70%;");
+					vert->AddView(Html = new HtmlScriptContext(IDC_HTML, this));
+					Html->SetCssStyle("height: 70%;");
 
-				vert->AddView(Text = new LTextView3(IDC_LOG, 0, 0, 100, 100));
+					vert->AddView(Text = new LTextView3(IDC_LOG, 0, 0, 100, 100));
 				
-				LBox::Spacer *sp = s->GetSpacer(0);
-				if (sp)
-				{
-					sp->Colour.Rgb(64, 64, 64);
-					sp->SizePx = 2;
-				}
-				sp = vert->GetSpacer(0);
-				if (sp)
-				{
-					sp->Colour.Rgb(64, 64, 64);
-					sp->SizePx = 2;
-				}
+					LBox::Spacer *sp = s->GetSpacer(0);
+					if (sp)
+					{
+						sp->Colour.Rgb(64, 64, 64);
+						sp->SizePx = 2;
+					}
+					sp = vert->GetSpacer(0);
+					if (sp)
+					{
+						sp->Colour.Rgb(64, 64, 64);
+						sp->SizePx = 2;
+					}
 				#else
-				s->AddView(Html = new HtmlScriptContext(IDC_HTML, this));
+					box->AddView(Html = new HtmlScriptContext(IDC_HTML, this));
 				#endif
 
 				Script.Reset(new LScriptEngine(this, Html, NULL));
@@ -380,58 +369,48 @@ public:
 				if (Html)
 					Html->SetEnv(this);
 				#if HAS_IMAGE_LOADER
-				Html->SetLoadImages(true);
+					Html->SetLoadImages(true);
 				#endif
 				
-				if (sprintf_s(Base, sizeof(Base), "%s", LGetExePath().Get()) > 0)
+				LFile::Path files(LSP_APP_INSTALL);
+				files += "../files";
+				if (files.Exists())
 				{
-					#if defined(WIN32)
-					if (stristr(Base, "Release") || stristr(Base, "Debug"))
-						LTrimDir(Base);
-					#endif
-					LTrimDir(Base);
-					#if defined(MAC) && defined(__GTK_H__)
-					LMakePath(Base, sizeof(Base), Base, "../../../..");
-					#endif
+					FilesFolder = files.GetFull();
 
 					List<FileInf> Files;
-					LDirectory *d = new LDirectory;
-					if (d)
+					LDirectory d;
+					for (auto b = d.First(FilesFolder); b; b = d.Next())
 					{
-						LMakePath(Base, sizeof(Base), Base, "Files");
-						for (bool b = d->First(Base); b; b = d->Next())
+						if (!d.IsDir() && MatchStr("*.html", d.GetName()))
 						{
-							if (!d->IsDir() && MatchStr("*.html", d->GetName()))
+							char p[256];
+							if (d.Path(p, sizeof(p)))
 							{
-								char p[256];
-								if (d->Path(p, sizeof(p)))
+								FileInf *f = new FileInf;
+								if (f)
 								{
-									FileInf *f = new FileInf;
-									if (f)
-									{
-										f->File = NewStr(p);
-										f->Date.Set(d->GetLastWriteTime());
-										Files.Insert(f);
-									}
+									f->File = p;
+									f->Date.Set(d.GetLastWriteTime());
+									Files.Insert(f);
 								}
 							}
 						}
-						DeleteObj(d);
-						Files.Sort(InfCmp);
-
-						for (auto f: Files)
-						{
-							char *d = strrchr(f->File, DIR_CHAR);
-							if (d)
-							{
-								HtmlItem *i = new HtmlItem(Base, d + 1);
-								if (i)
-									Lst->Insert(i);
-							}
-						}
-
-						Files.DeleteObjects();
 					}
+					Files.Sort(InfCmp);
+
+					for (auto f: Files)
+					{
+						char *d = strrchr(f->File, DIR_CHAR);
+						if (d)
+						{
+							HtmlItem *i = new HtmlItem(FilesFolder, d + 1);
+							if (i)
+								Lst->Insert(i);
+						}
+					}
+
+					Files.DeleteObjects();
 				}
 			}
 			
@@ -601,21 +580,21 @@ public:
 			{
 				if (n.Type == LNotifyItemSelect)
 				{
-					LListItem *s = Lst->GetSelected();
-					if (s)
+					if (auto s = Lst->GetSelected())
 					{
-						char p[256];
-
-						LMakePath(p, sizeof(p), Base, s->GetText(0));
-						if (LFileExists(p))
+						LFile::Path p(FilesFolder, s->GetText(0));
+						if (p.Exists())
 						{
-							auto h = LReadFile(p);
-							if (h)
+							if (auto h = LReadFile(p))
 							{
 								if (Html)
 									Html->Name(h);
 							}
+							else LPopupNotification::Message(this,
+								LString::Fmt("Failed to read '%s'", p.GetFull().Get()));
 						}
+						else LPopupNotification::Message(this,
+							LString::Fmt("The path '%s' doesn't exist", p.GetFull().Get()));
 					}
 				}
 				break;
