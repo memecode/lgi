@@ -132,10 +132,13 @@ public:
 	}
 };
 
-void RemoteFileSelect(LViewI *parent, ProjectBackend *backend, FileSelectType type, std::function<void(LString)> callback)
+void RemoteFileSelect(LViewI *parent, ProjectBackend *backend, FileSelectType type, LString initialPath, std::function<void(LString)> callback)
 {
 	auto dlg = new FS_NAMESPACE::LFileSelect(parent, new RemoteFileSelectSystem(backend));
-	
+
+	if (initialPath)
+		dlg->InitialDir(initialPath);
+
 	switch (type)
 	{
 		default:

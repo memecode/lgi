@@ -49,6 +49,7 @@ class Gdb :
 {
 	LDebugEvents *Events = nullptr;
 	ProjectBackend *backend = nullptr;
+	bool backendProcessRunning = false;
 	BreakPointStore *bpStore = nullptr;
 	int bpStoreCallbackId = BreakPointStore::INVALID_ID;
 	IdePlatform platform = PlatformCurrent;
@@ -767,19 +768,22 @@ class Gdb :
 			RemoteIo.ioCallback = [this](auto stream)
 			{
 				RemoteGdb = stream;
-				if (!RemoteGdb)
-					State = Exiting;
 			};
 
+			backendProcessRunning = true;
 			if (!backend->RunProcess(NativePath(InitDir), p, &RemoteIo, this, [this](auto exitCode)
 				{
+					backendProcessRunning = false;
 					#if DEBUG_STRUCT_LOGGING
 					Log->Log("RemoteGdb exit code:", exitCode);
 					#else
 					Log->Print("RemoteGdb exit code: %i\n", exitCode);
 					#endif
+					if (!RemoteGdb)
+						State = Exiting;
 				}))
 			{
+				backendProcessRunning = false;
 				State = ProcessError;
 				OnError("Remote gdb failed to start", ERR_CTX);
 				return -1;
@@ -872,6 +876,8 @@ class Gdb :
 			curCmd->Finish();
 			curCmd.Reset();
 		}
+
+		LAssert(backendProcessRunning == false);
 		return 0;
 	}
 
@@ -999,6 +1005,9 @@ public:
 	
 	~Gdb()
 	{
+		// The backend process should be exited cleanly before deleting the gdb object.
+		LAssert(backendProcessRunning == false);
+
 		bpStore->DeleteCallback(bpStoreCallbackId);
 
 		State = Exiting;

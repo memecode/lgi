@@ -59,16 +59,9 @@ class SshBackend :
 
 		~Process()
 		{
-			LStackTrace("%i ~Process 0\n", LCurrentThreadId());
-
 			WaitForExit();
-
-			LStackTrace("%i ~Process 1\n", LCurrentThreadId());
-
 			if (exitcodeCb)
 				exitcodeCb(exitCode);
-
-			LStackTrace("%i ~Process 2\n", LCurrentThreadId());
 		}
 
 		int Main()
@@ -559,7 +552,7 @@ public:
 	{
 		struct TEntry
 		{
-			LString perms, user, grp, name;
+			LString perms, user, grp, name, linkTarget;
 			LString month, day, time;
 			int64_t size;
 
@@ -623,8 +616,29 @@ public:
 				{
 					if (e.name(0) == '\'')
 						e.name = e.name.Strip("\'");
+
+					if (e.IsSymLink())
+					{
+						const char *key = " -> ";
+						auto pos = e.name.Find(key);
+						if (pos > 0)
+						{
+							auto parts = e.name.Split(key);
+							if (parts.Length() == 2)
+							{
+								e.name = parts[0];
+								e.linkTarget = parts[1];
+							}
+							else LAssert(!"wrong parts count?");
+						}
+					}
 				}
 			}
+		}
+
+		~SshDir()
+		{
+			int asd=0;
 		}
 
 		int First(const char *Name, const char *Pattern = LGI_ALL_FILES) { pos = 0; return Ok(); }	
@@ -746,11 +760,7 @@ public:
 			auto ls = Cmd(GetConsole(), cmd);
 			auto lines = ls.SplitDelimit("\r\n").Slice(2, -2);
 			
-			bool debug = path.Equals("~/code/lgi/trunk/ide/");
-			if (debug)
-				log->Print("ReadFolder %s\n", path.Get());
-			
-			app->RunCallback( [dir = new SshDir(path, lines, debug ? log : NULL), results]() mutable
+			app->RunCallback( [dir = new SshDir(path, lines, NULL), results]() mutable
 				{
 					results(dir);
 					delete dir;

@@ -168,10 +168,12 @@ int FindInFiles::OnNotify(LViewI *v, const LNotification &n)
 	{
 		case IDC_SET_DIR:
 		{
+			auto initDir = GetCtrlName(IDC_DIR);
 			auto proj = App->RootProject();
 			if (auto backend = proj ? proj->GetBackend() : NULL)
 			{
-				RemoteFileSelect(this, backend, SelectOpenFolder, [this](auto fn)
+				RemoteFileSelect(this, backend, SelectOpenFolder, initDir,
+					[this](auto fn)
 					{
 						int Idx = FolderHistory->Add(fn);
 						if (Idx >= 0)
@@ -184,7 +186,7 @@ int FindInFiles::OnNotify(LViewI *v, const LNotification &n)
 			{
 				auto s = new LFileSelect;
 				s->Parent(this);
-				s->InitialDir(GetCtrlName(IDC_DIR));
+				s->InitialDir(initDir);
 				s->OpenFolder([this](auto s, auto ok)
 				{
 					if (ok)

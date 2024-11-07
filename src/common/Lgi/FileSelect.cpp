@@ -1997,12 +1997,14 @@ bool LFolderList::OnKey(LKey &k)
 		{
 			if (k.Down() && GetWindow())
 			{
+				#ifdef WINDOWS
+				if (k.IsChar)
+					break;
+				#endif
+				
 				// Go up a directory
-				LViewI *v = GetWindow()->FindControl(IDC_UP);
-				if (v)
-				{
+				if (auto v = GetWindow()->FindControl(IDC_UP))
 					GetWindow()->OnNotify(v, LNotification(LNotifyBackspaceKey));
-				}
 			}
 			Status = true;
 			break;
@@ -2118,7 +2120,8 @@ void LFolderList::OnDir(LDirectory &Dir)
 	for (auto Found = true; Found; Found = Dir.Next())
 	{
 		char Name[LDirectory::MaxPathLen];
-		Dir.Path(Name, sizeof(Name));
+		if (!Dir.Path(Name, sizeof(Name)))
+			continue;
 		
 		bool Match = true;
 		if (!ShowHiddenFiles && Dir.IsHidden())

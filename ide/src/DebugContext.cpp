@@ -875,15 +875,10 @@ void LDebugContext::OnState(bool Debugging, bool Running)
 	#endif
 	
 	if (d->InDebugging != Debugging && d->Db)
-	{
 		d->InDebugging = Debugging;
-	}
 
 	if (d->App)
-	{
 		d->App->OnDebugState(Debugging, Running);
-
-	}
 	
 	#if DEBUG_SESSION_LOGGING
 	LgiTrace("LDebugContext::OnState(%i, %i) ###ENDED###\n", Debugging, Running);

@@ -759,10 +759,17 @@ public:
 					{
 						if (auto backend = d->Project->GetBackend())
 						{
+							auto path = backend->JoinPath(backend->GetBasePath(), e->Name());
+							if (path)
+							{
+								path = backend->JoinPath(path, "..");
+							}
+
 							// Show remote file selector
 							RemoteFileSelect(this,
 											backend,
 											BrowseFolder ? SelectOpenFolder : SelectOpen,
+											path,
 											[this, e, backend](auto fn)
 											{
 												auto rel = backend->MakeRelative(fn);
