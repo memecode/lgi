@@ -5872,9 +5872,22 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 			int MarginR = Flow->ResolveX(MarginRight(), this, true);
 			int MarginB = Flow->ResolveX(MarginBottom(), this, true);
 
+			// Detect when there is not enough space for the inline element and
+			// start a new line....
+			if (Flow->cx + Size.x > Flow->x2)
+			{
+				Local.EndBlock();
+				Pos.x = Local.x1;
+				Pos.y = Local.y2;
+			}
+
 			Flow->x1 = Local.x1 - Pos.x;
 			Flow->cx = Local.cx + Size.x + MarginR - Pos.x;
 			Flow->x2 = Local.x2 - Pos.x;
+
+			if (!IsTableTag())
+				Flow->Inline--;
+
 
 			if (Height().IsValid())
 			{
@@ -5890,9 +5903,6 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 
 			Flow->y1 = Local.y1 - Pos.y;
 			Flow->y2 = MAX(Local.y2, Flow->y1+Size.y-1);
-			
-			if (!IsTableTag())
-				Flow->Inline--;
 		}
 
 		// Can't do alignment here because pos is used to
