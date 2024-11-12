@@ -2433,11 +2433,18 @@ bool IdeProject::OnNode(const char *Path, ProjectNode *Node, bool Add)
 	}
 
 	char Full[MAX_PATH_LEN] = "";
+	LString absPath;
 	if (LIsRelativePath(Path))
 	{
-		auto Base = GetBasePath();
-		if (LMakePath(Full, sizeof(Full), Base, Path))
-			Path = Full;
+		if (d->Backend)
+		{
+		}
+		else
+		{
+			auto Base = GetBasePath();
+			if (LMakePath(Full, sizeof(Full), Base, Path))
+				Path = Full;
+		}
 	}
 
 	bool Status = false;

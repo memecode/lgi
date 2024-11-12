@@ -6,21 +6,21 @@
 #include "lgi/common/Token.h"
 #include "lgi/common/EventTargetThread.h"
 #include "lgi/common/TextFile.h"
+#include "lgi/common/ParseCpp.h"
+#include "lgi/common/Uri.h"
+
 #include "LgiIde.h"
 #include "FindSymbol.h"
 #include "ParserCommon.h"
-
-#if 1
-#include "lgi/common/ParseCpp.h"
-#endif
-
 #include "resdefs.h"
 
 #define MSG_TIME_MS				1000
 
 #define DEBUG_FIND_SYMBOL		0
 #define DEBUG_NO_THREAD			1
-// #define DEBUG_FILE				"PopupNotification.h"
+#define DEBUG_FILE				"View.h"
+#define KNOWN_EXT				"c,cpp,cxx,h,hpp,hxx,py,js"
+#define INDEX_EXT				"idx"
 
 int SYM_FILE_SENT = 0;
 
@@ -98,12 +98,63 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 
 			return Status;
 		}
+
+		bool Serialize(LString cacheFile, bool write)
+		{
+			auto tab = "\t";
+			LFile f(cacheFile, write ? O_WRITE : O_READ);
+			if (write)
+			{
+				f.SetSize(0);
+				for (auto &def: Defs)
+				{
+					auto safe = def.Name.Replace(tab, " ").Replace("\n");
+					f.Print("%i%s" "%s%s" "%i%s" LPrintfSSizeT "%s" LPrintfSSizeT "\n",
+						def.Type, tab,
+						safe.Get(), tab,
+						def.Line, tab,
+						def.FnName.Start, tab,
+						def.FnName.Len);
+				}
+			}
+			else
+			{
+				Defs.Length(0);
+				auto lines = f.Read().SplitDelimit("\r\n");
+				for (auto &line: lines)
+				{
+					auto parts = line.SplitDelimit(tab);
+					if (parts.Length() == 5)
+					{
+						auto &def = Defs.New();
+						def.File = Path;
+						def.Type = (DefnType)parts[0].Int();
+						def.Name = parts[1];
+						def.Line = parts[2].Int();
+						def.FnName.Start = parts[3].Int();
+						def.FnName.Len = parts[4].Int();
+					}
+					else
+					{
+						// Regenerate corrupt file:
+						f.Close();
+						FileDev->Delete(cacheFile);
+						return false;
+					}
+				}
+			}
+
+			return true;
+		}
 	};
 
 	int hApp = 0;
 	int MissingFiles = 0;
 	LHashTbl<ConstStrKey<char, false>, LString> HdrMap;
+	LHashTbl<ConstStrKey<char, false>, bool> KnownExt;
 	LString::Array IncPaths, SysIncPaths;
+	ProjectBackend *backend = nullptr;
+	LString projectCache;
 	
 	#if USE_HASH
 	LHashTbl<ConstStrKey<char,false>, FileSyms*> Files;
@@ -119,6 +170,8 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		LEventTargetThread("FindSymbolSystemPriv"),
 		hApp(appSinkHnd)	
 	{
+		for (auto &e: LString(KNOWN_EXT).SplitDelimit(","))
+			KnownExt.Add(e, true);
 	}
 
 	~FindSymbolSystemPriv()
@@ -161,7 +214,30 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 	#define PROF(...)
 	#endif
 
-	bool AddFile(LString Path, int Platforms)
+	LString CachePath(LString path)
+	{
+		if (!projectCache)
+			return LString();
+
+		LString p = path;
+
+		if (backend)
+		{
+			if (auto rel = backend->MakeRelative(p))
+			{
+				if (rel.Find("./") == 0)
+					p = rel(2, -1);
+				else
+					p = rel;
+			}
+		}
+
+		auto leaf = LUri::EncodeStr(p, "/~") + "." + INDEX_EXT;
+		LFile::Path out(projectCache);
+		return (out / leaf).GetFull();
+	}
+
+	void AddFile(LString Path, int Platforms)
 	{
 		#if PROFILE_ADDFILE
 		LProfile prof("AddFile");
@@ -179,7 +255,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			{
 				if (Platforms && f->Platforms == 0)
 					f->Platforms = Platforms;
-				return true;
+				return;
 			}
 		#else
 			int Idx = GetFileIndex(Path);
@@ -195,18 +271,22 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		#endif
 
 		PROF("exists");
-		if (!LFileExists(Path))
+		if (!backend)
 		{
-			Log("Missing '%s'\n", Path.Get());
-			MissingFiles++;
-			return false;
+			if (!LFileExists(Path))
+			{
+				Log("Missing '%s'\n", Path.Get());
+				MissingFiles++;
+				return;
+			}
+
+			LAssert(!LIsRelativePath(Path));
 		}
-			
-		LAssert(!LIsRelativePath(Path));
 
 		// Setup the file sym data...
 		f = new FileSyms;
-		if (!f) return false;	
+		if (!f)
+			return;	
 		f->Path = Path;
 		f->Platforms = Platforms;
 		f->HdrMap = &HdrMap;
@@ -219,21 +299,49 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		
 		PROF("open");
 
-		// Parse for headers...
-		LTextFile Tf;
-		if (!Tf.Open(Path, O_READ)  ||
-			Tf.GetSize() < 4)
+		if (backend)
 		{
-			// LgiTrace("%s:%i - Error: LTextFile.Open(%s) failed.\n", _FL, Path.Get());
-			return false;
+			auto cacheFile = CachePath(Path);
+			if (LFileExists(cacheFile))
+			{
+				// Load from the cache...
+				f->Serialize(cacheFile, false);
+			}
+			else
+			{
+				backend->Read(Path, [this, f, Debug](auto err, auto data) mutable
+				{
+					if (err)
+					{
+						Log("Backend.Read.Err: %s\n", err.ToString().Get());
+					}
+					else AddFileData(f, data, Debug);
+				});
+			}
 		}
+		else
+		{
+			// Parse for headers...
+			LTextFile Tf;
+			if (!Tf.Open(Path, O_READ)  ||
+				Tf.GetSize() < 4)
+			{
+				// LgiTrace("%s:%i - Error: LTextFile.Open(%s) failed.\n", _FL, Path.Get());
+				return;
+			}
 
-		PROF("build hdr");
+			PROF("build hdr");
 
-		LAutoString Source = Tf.Read();
+			if (auto Source = Tf.Read())
+				AddFileData(f, Source, Debug);
+		}
+	}
+
+	void AddFileData(FileSyms *f, const char *data, bool Debug = false)
+	{
 		LString::Array Headers;
 		auto *Map = &HdrMap;
-		if (BuildHeaderList(Source,
+		if (BuildHeaderList(data,
 							Headers,
 							false,
 							[Map](auto Name)
@@ -251,10 +359,31 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		if (Debug)
 			LgiTrace("%s:%i - About to parse '%s'.\n", _FL, f->Path.Get());
 		#endif
-		return f->Parse(LAutoWString(Utf8ToWide(Source)), Debug);
+		
+		if (f->Path.Find("can_have_error.cpp") > 0)
+		{
+			int asd=0;
+		}
+
+		LAutoWString w(Utf8ToWide(data));
+		if (f->Parse(w, Debug))
+		{
+			if (backend)
+			{
+				if (auto cacheFile = CachePath(f->Path))
+				{
+					// Write the cache file..
+					f->Serialize(cacheFile, true);
+				}
+			}
+		}
+		else
+		{
+			Log("AddFileData.error: parse failed for '%s'\n", f->Path.Get());
+		}
 	}
 	
-	bool ReparseFile(LString Path)
+	void ReparseFile(LString Path)
 	{
 		#if USE_HASH
 			FileSyms *f = Files.Find(Path);
@@ -265,9 +394,9 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		#endif
 		
 		if (!RemoveFile(Path))
-			return false;
+			return;
 
-		return AddFile(Path, Platform);
+		AddFile(Path, Platform);
 	}
 
 	void AddPaths(LString::Array &out, LString::Array &in, int Platforms)
@@ -322,6 +451,32 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		return true;
 	}
 
+	int folderReads = 0;
+	bool gettingCacheFolder = false;
+
+	void OnPulse()
+	{
+		if (!backend)
+			return;
+
+		if (backend->IsReady())
+		{
+			if (!projectCache)
+			{
+				if (!gettingCacheFolder)
+				{
+					PostThreadEvent(hApp, M_GET_PROJECT_CACHE);
+					gettingCacheFolder = true;
+				}
+			}
+			else
+			{
+				SetPulse();
+				PostEvent(M_SCAN_FOLDER, (LMessage::Param)new LString(backend->GetBasePath()));
+			}
+		}
+	}
+
 	LMessage::Result OnEvent(LMessage *Msg)
 	{
 		if (IsCancelled())
@@ -329,6 +484,104 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		
 		switch (Msg->Msg())
 		{
+			case M_FIND_SYM_BACKEND:
+			{
+				if ((backend = (ProjectBackend*)Msg->A()))
+				{
+					SetPulse(1000);
+				}
+				break;
+			}
+			case M_GET_PROJECT_CACHE:
+			{
+				if (auto folder = Msg->AutoA<LString>())
+				{
+					projectCache = *folder;
+				}
+				break;
+			}
+			case M_CLEAR_PROJECT_CACHE:
+			{
+				if (projectCache)
+				{
+					LDirectory dir;
+					int cleared = 0, errors = 0;
+					for (auto i=dir.First(projectCache); i; dir.Next())
+					{
+						if (dir.IsDir())
+							continue;
+
+						auto ext = LGetExtension(dir.GetName());
+						if (!Stricmp(ext, INDEX_EXT))
+						{
+							if (FileDev->Delete(dir.FullPath()))
+								cleared++;
+							else
+								errors++;
+						}
+					}
+					Log("FindSymbolSystemPriv.clearCache: cleared %i files (%i errors).\n", cleared, errors);
+				}
+				else Log("FindSymbolSystemPriv.error: no project cache dir set.\n");
+				break;
+			}
+			case M_SCAN_FOLDER:
+			{
+				if (auto path = Msg->AutoA<LString>())
+				{
+					// Log("Scanning '%s'..\n", path->Get());
+
+					folderReads++;
+					backend->ReadFolder(*path, [this, path = LString(*path)](LDirectory *dir)
+						{
+							folderReads--;
+							// Log("Results for '%s' folderReads=%i\n", path.Get(), folderReads);
+							for (int i=true; i; i=dir->Next())
+							{
+								auto nm = dir->GetName();
+								auto full = dir->FullPath();
+								if (dir->IsDir())
+								{
+									if (!stricmp(nm, ".") ||
+										!stricmp(nm, "..") ||
+										!stricmp(nm, ".hg") ||
+										!stricmp(nm, ".git") ||
+										!stricmp(nm, ".svn"))
+										continue;
+								
+									// Log("\tdir: %s\n", full);
+									PostEvent(M_SCAN_FOLDER, (LMessage::Param)new LString(full));
+								}
+								else if (dir->GetSize() > 0)
+								{
+									auto ext = LGetExtension(nm);
+									if (!ext)
+										continue;
+									if (!stricmp(ext, "cpp") ||
+										!stricmp(ext, "h"))
+									{
+										#if 1
+										if (auto add = new FindSymbolSystem::SymFileParams)
+										{
+											add->Action = FindSymbolSystem::FileAdd;
+											add->File = full;
+											add->Platforms = 0;
+
+											if (!Stricmp(nm, "idisk"))
+											{
+												int asd=0;
+											}
+
+											PostEvent(M_FIND_SYM_FILE, (LMessage::Param)add);
+										}
+										#endif
+									}
+								}
+							}
+						});
+				}
+				break;
+			}
 			case M_FIND_SYM_REQUEST:
 			{
 				auto Req = Msg->AutoA<FindSymRequest>();
@@ -367,7 +620,8 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 					#endif
 
 					// Check platforms...
-					if (fs->Platforms != 0 &&
+					if (!backend && 
+						fs->Platforms != 0 &&
 						(fs->Platforms & Platforms) == 0)
 					{
 						#ifdef DEBUG_FILE
@@ -465,9 +719,14 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 				if (!Params)
 					break;
 
-				auto MimeType = LGetFileMimeType(Params->File);
-				LString::Array Parts = MimeType.Split("/");
-				if (!Parts[0].Equals("image"))
+				bool isImage = false;
+				if (!backend)
+				{
+					auto MimeType = LGetFileMimeType(Params->File);
+					LString::Array Parts = MimeType.Split("/");
+					isImage = Parts[0].Equals("image");
+				}
+				if (!isImage)
 				{
 					if (Params->Action == FindSymbolSystem::FileAdd)
 						AddFile(Params->File, Params->Platforms);
@@ -736,6 +995,21 @@ void FindSymbolSystem::OpenSearchDlg(LViewI *Parent, std::function<void(FindSymR
 	});
 }
 
+bool FindSymbolSystem::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64_t TimeoutMs)
+{
+	return d->PostEvent(Cmd, a, b, TimeoutMs);
+}
+
+void FindSymbolSystem::ClearCache()
+{
+	d->PostEvent(M_CLEAR_PROJECT_CACHE);
+}
+
+void FindSymbolSystem::SetBackend(ProjectBackend *backend)
+{
+	d->PostEvent(M_FIND_SYM_BACKEND, (LMessage::Param)backend);
+}
+
 int FindSymbolSystem::GetAppHnd()
 {
 	return d->hApp;
@@ -760,11 +1034,25 @@ bool FindSymbolSystem::SetIncludePaths(LString::Array &Paths, LString::Array &Sy
 
 bool FindSymbolSystem::OnFile(const char *Path, SymAction Action, int Platforms)
 {
+	if (!Path)
+		return false;
 	if (Platforms == 0)
 	{
 		printf("%s:%i - Can't add '%s' with no platforms.\n", _FL, Path);
 		return false;
 	}
+
+	if (Stristr(Path, "/fileteepee"))
+	{
+		int asd=0;
+	}
+
+	if (auto ext = LGetExtension(Path))
+	{
+		if (!d->KnownExt.Find(ext))
+			return false;
+	}
+	else return false;
 
 	if (d->Tasks == 0)
 		d->MsgTs = LCurrentTime();

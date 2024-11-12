@@ -42,18 +42,6 @@ enum IdeMessages
 	M_LAST_MAKEFILE_CREATED,
 	M_SELECT_TAB, // A=(int)tabIndex
 	
-	/// Find symbol results message:
-	/// LAutoPtr<FindSymRequest> Req((FindSymRequest*)Msg->A());
-	M_FIND_SYM_REQUEST,
-	
-	/// Send a file to the worker thread...
-	/// FindSymbolSystem::SymFileParams *Params = (FindSymbolSystem::SymFileParams*)Msg->A();
-	M_FIND_SYM_FILE,
-
-	/// Send a file to the worker thread...
-	/// LAutoPtr<LString::Array> Paths((LString::Array*)Msg->A());
-	M_FIND_SYM_INC_PATHS,
-
 	/// Styling is finished
 	M_STYLING_DONE,
 

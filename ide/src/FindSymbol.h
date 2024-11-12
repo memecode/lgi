@@ -1,7 +1,36 @@
-#ifndef _FIND_SYMBOL_H_
-#define _FIND_SYMBOL_H_
+#pragma once
 
 #include "lgi/common/EventTargetThread.h"
+#include "ProjectBackend.h"
+
+enum FindSymMessages
+{
+	/// Find symbol results message:
+	/// A=FindSymRequest*
+	M_FIND_SYM_REQUEST = M_USER + 1000,
+	
+	/// Send a file to the worker thread...
+	/// A=FindSymbolSystem::SymFileParams*
+	M_FIND_SYM_FILE,
+
+	/// Send a file to the worker thread...
+	/// A=LString::Array*
+	M_FIND_SYM_INC_PATHS,
+
+	// Set the backend
+	// A=ProjectBackend*
+	M_FIND_SYM_BACKEND, 
+
+	// Scan a backend folder:
+	// A=LString *path
+	M_SCAN_FOLDER,
+
+	// Sent from the find syms to the app to get the project cache folder
+	M_GET_PROJECT_CACHE,
+
+	// Clear the cached symbols and reparse
+	M_CLEAR_PROJECT_CACHE,
+};
 
 struct FindSymResult
 {
@@ -87,7 +116,7 @@ struct FindSymRequest
 	}
 };
 
-class FindSymbolSystem
+class FindSymbolSystem : public LEventSinkI
 {
 	struct FindSymbolSystemPriv *d;
 
@@ -117,14 +146,15 @@ public:
 	FindSymbolSystem(int AppHnd);
 	~FindSymbolSystem();
 	
+	void SetBackend(ProjectBackend *backend);
 	int GetAppHnd();
 	bool SetIncludePaths(LString::Array &Paths, LString::Array &SysPaths, int Platforms);
 	bool OnFile(const char *Path, SymAction Action, int Platforms);
 	void OpenSearchDlg(LViewI *Parent, std::function<void(FindSymResult&)> Callback);
+	bool PostEvent(int Cmd, LMessage::Param a = 0, LMessage::Param b = 0, int64_t TimeoutMs = -1);
+	void ClearCache();
 	
 	/// This function searches the database for symbols and returns
 	/// the results as a M_FIND_SYM_REQUEST message.
 	void Search(int ResultsSinkHnd, const char *SearchStr, int Platforms);
 };
-
-#endif

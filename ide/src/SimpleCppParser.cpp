@@ -1015,5 +1015,5 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 		}
 	}
 	
-	return Defns.Length() > 0;
+	return true;
 }

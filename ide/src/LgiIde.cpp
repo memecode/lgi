@@ -3459,6 +3459,12 @@ IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bo
 		p->EditSettings(GetPlatform());
 	}
 
+	if (auto be = p->GetBackend())
+	{
+		if (d->FindSym)
+			d->FindSym->SetBackend(be);
+	}
+
 	#if 0 // for testing...
 	RemoteFileSelect(this, p->GetBackend(), [this](auto fn)
 		{
@@ -3473,6 +3479,25 @@ LMessage::Result AppWnd::OnEvent(LMessage *m)
 {
 	switch (m->Msg())
 	{
+		case M_GET_PROJECT_CACHE:
+		{
+			auto proj = RootProject();
+			if (d->FindSym && proj)
+			{
+				if (auto full = proj->GetFullPath())
+				{
+					LFile::Path path(full);
+					path = path / ".." / "cache";
+					if (!path.Exists())
+						FileDev->CreateFolder(path);
+					if (path.Exists())
+						d->FindSym->PostEvent(M_GET_PROJECT_CACHE, (LMessage::Param)new LString(path.GetFull()));
+					else
+						LAssert(!"Failed to create cache folder.");
+				}
+			}
+			break;
+		}
 		case M_GET_PLATFORM_FLAGS:
 		{
 			PostThreadEvent(m->A(), M_GET_PLATFORM_FLAGS, 0, GetPlatform());
@@ -4438,6 +4463,12 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 						p->ImportDsp(s->Name());
 				});
 			}
+			break;
+		}
+		case ID_REFRESH_SYM_CACHE:
+		{
+			if (d->FindSym)
+				d->FindSym->ClearCache();
 			break;
 		}
 		case IDM_RUN:

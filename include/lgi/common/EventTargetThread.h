@@ -232,10 +232,10 @@ class LgiClass LEventTargetThread :
 	}
 
 protected:
-	int PostTimeout;
-	size_t Processing;
-	uint32_t TimerMs; // Milliseconds between timer ticks.
-	uint64 TimerTs; // Time for next tick
+	int PostTimeout = 1000;
+	size_t Processing = 0;
+	uint32_t TimerMs = 0; // Milliseconds between timer ticks.
+	uint64 TimerTs = 0; // Time for next tick
 
 public:
 	LEventTargetThread(LString Name, bool RunImmediately = true) :
@@ -243,11 +243,6 @@ public:
 		LMutex(Name + ".Mutex"),
 		Event(ProcessName(Name, "Event"))
 	{
-		PostTimeout = 1000;
-		Processing = 0;
-		TimerMs = 0;
-		TimerTs = 0;
-
 		if (RunImmediately)
 			Run();
 	}
@@ -351,9 +346,9 @@ public:
 		while (!IsCancelled())
 		{
 			int WaitLength = 100;
-			if (TimerTs != 0)
+			if (TimerTs)
 			{
-				uint64 Now = LCurrentTime();
+				auto Now = LCurrentTime();
 				if (TimerTs > Now)
 				{
 					WaitLength = (int) (TimerTs - Now);
@@ -364,9 +359,8 @@ public:
 					if (TimerMs)
 					{
 						TimerTs = Now + TimerMs;
-						WaitLength = (int) TimerTs;
+						WaitLength = TimerMs;
 					}
-					else WaitLength = -1;
 				}
 			}
 			

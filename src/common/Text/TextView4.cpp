@@ -3429,8 +3429,7 @@ int LTextView4::OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
 			bool FoundTarget = false;
 			for (LViewI *p = GetParent(); p; p = p->GetParent())
 			{
-				LDragDropTarget *t = p->DropTarget();
-				if (t)
+				if (auto t = p->DropTarget())
 				{
 					Status = t->OnDrop(Data, Pt, KeyState);
 					if (Status != DROPEFFECT_NONE)

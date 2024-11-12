@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IdeFindInFiles.h"
+#include "IdePlatform.h"
 
 class ProjectBackend
 {
@@ -8,6 +9,7 @@ public:
 	virtual ~ProjectBackend() {}
 
 	virtual void GetSysType(std::function<void(IdePlatform)> cb) = 0;
+	virtual bool IsReady() { return true; }
 
 	// Path:
 	virtual LString GetBasePath() = 0;

@@ -99,7 +99,7 @@ public:
 		auto Slen = strlen(Str);
 		LString Src;
 
-		if (Type == DefnFunc)
+		if (Type == DefnFunc && FnName.Len > 0)
 			Src = Name(FnName.Start, FnName.End());
 		else
 			Src = Name;

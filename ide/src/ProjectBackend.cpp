@@ -118,7 +118,6 @@ class SshBackend :
 		}
 	};
 
-
 	LView *app = NULL;
 	LUri uri;
 	LStream *log = NULL;
@@ -196,8 +195,9 @@ class SshBackend :
 	bool AtPrompt(LStringPipe &p)
 	{
 		bool found = false;
+		ssize_t promptChar = -1;
 
-		p.Iterate( [this, &found](auto ptr, auto size)
+		p.Iterate( [this, &found, &promptChar](auto ptr, auto size)
 			{
 				if (!prompt)
 				{
@@ -232,15 +232,28 @@ class SshBackend :
 				}
 				else
 				{
-					auto promptLen = prompt.Length();
-					if (size >= promptLen)
+					if (promptChar < 0)
 					{
-						auto p = ptr + size - promptLen;
-						auto cmp = memcmp(p, prompt, promptLen);
-						if (cmp == 0)
-							found = true;
+						LAssert(prompt.Length() > 0);
+						promptChar = prompt.Length() - 1;
 					}
-					return false;
+
+					// This has to compare over memory block boundaries:
+					for (int i=size-1; i>=0; i--)
+					{
+						if (prompt[promptChar] != ptr[i])
+							// Not found...
+							return true;
+						
+						promptChar--;
+						if (promptChar < 0)
+						{
+							found = true;
+							return true;
+						}
+					}
+
+					return true;
 				}
 			},
 			true);
@@ -350,9 +363,15 @@ public:
 
 	const char *GetClass() const { return "SshBackend"; }
 	LString GetBasePath() override { return RemoteRoot(); }
+	bool IsReady() override
+	{
+		return remoteSep && prompt && homePath;
+	}
 
 	LString MakeNative(LString path)
 	{
+		LAssert(remoteSep);
+
 		if (remoteSep(0) == '/')
 			return path.Replace("\\", remoteSep);
 		else
@@ -617,6 +636,13 @@ public:
 					if (e.name(0) == '\'')
 						e.name = e.name.Strip("\'");
 
+					if (e.name.Equals(".") ||
+						e.name.Equals(".."))
+					{
+						entries.PopLast();
+						continue;
+					}
+					
 					if (e.IsSymLink())
 					{
 						const char *key = " -> ";
@@ -748,21 +774,21 @@ public:
 		return finalPath;
 	}
 
-	bool ReadFolder(const char *Path, std::function<void(LDirectory*)> results) override
+	bool ReadFolder(const char *Path, std::function<void(LDirectory*)> cb) override
 	{
-		if (!Path || !results)
+		if (!Path || !cb)
 			return false;
 
 		Auto lck(this, _FL);
-		work.Add( [this, results, path = PreparePath(Path)]()
+		work.Add( [this, cb, path = PreparePath(Path)]()
 		{
 			auto cmd = LString::Fmt("ls -lan %s\n", path.Get());
 			auto ls = Cmd(GetConsole(), cmd);
 			auto lines = ls.SplitDelimit("\r\n").Slice(2, -2);
-			
-			app->RunCallback( [dir = new SshDir(path, lines, NULL), results]() mutable
+
+			app->RunCallback( [dir = new SshDir(path, lines, NULL), cb]() mutable
 				{
-					results(dir);
+					cb(dir);
 					delete dir;
 				});
 		} );
@@ -1001,10 +1027,11 @@ public:
 			}
 			if (todo.Length())
 			{
+				log->Print("backend processing: %i\n", (int)todo.Length());
 				for (auto &t: todo)
 					t();
 			}
-			else LSleep(100);
+			else LSleep(30);
 		}
 
 		return 0;

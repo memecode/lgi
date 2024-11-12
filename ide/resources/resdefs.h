@@ -179,3 +179,4 @@
 #define IDM_HAIKU								594
 #define IDM_ALL_OS								595
 #define IDC_TEXT								596
+#define ID_REFRESH_SYM_CACHE					597

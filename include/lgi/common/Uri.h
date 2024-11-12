@@ -52,7 +52,7 @@ public:
 	void Empty();
 
 	/// URL encode
-	LString EncodeStr
+	static LString EncodeStr
 	(
 		/// The string to encode
 		const char *s,
@@ -61,7 +61,7 @@ public:
 	);
 
 	/// URL decode
-	LString DecodeStr(const char *s);
+	static LString DecodeStr(const char *s);
 
 	/// Separate args into map
 	typedef LHashTbl<ConstStrKey<char,false>,LString> StrMap;

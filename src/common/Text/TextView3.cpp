@@ -150,6 +150,8 @@ public:
 	LAutoPtr<LFontType> InitFontType;
 	uint64_t ActionTs = 0;
 	
+	std::function<void()> OnPourText;
+
 	// If the scroll position is set before we get a scroll bar, store the index
 	// here and set it when the LNotifyScrollBarCreate arrives.
 	ssize_t VScrollCache = -1;
@@ -1227,6 +1229,12 @@ void LTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 	}
 	UpdateScrollBars();
 	
+	if (d->OnPourText)
+	{
+		auto cb = std::move(d->OnPourText);
+		cb();
+	}
+
 	#if 0 // def _DEBUG
 	if (GetWindow())
 	{
@@ -2741,12 +2749,19 @@ ssize_t LTextView3::GetLine()
 
 void LTextView3::SetLine(int64_t i, bool select)
 {
-	LTextLine *l = Line.ItemAt(i - 1);
-	if (l)
+	if (auto l = Line.ItemAt(i - 1))
 	{
 		d->CenterCursor = true;
 		SetCaret(l->Start, select);
 		d->CenterCursor = false;
+	}
+	else if (!d->OnPourText)
+	{
+		// This can happen when PourText hasn't been called yet...
+		d->OnPourText = [this, i, select]()
+		{
+			SetLine(i, select);
+		};
 	}
 }
 
