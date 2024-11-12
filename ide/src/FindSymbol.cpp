@@ -529,13 +529,10 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			{
 				if (auto path = Msg->AutoA<LString>())
 				{
-					// Log("Scanning '%s'..\n", path->Get());
-
 					folderReads++;
 					backend->ReadFolder(*path, [this, path = LString(*path)](LDirectory *dir)
 						{
 							folderReads--;
-							// Log("Results for '%s' folderReads=%i\n", path.Get(), folderReads);
 							for (int i=true; i; i=dir->Next())
 							{
 								auto nm = dir->GetName();
@@ -549,7 +546,6 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 										!stricmp(nm, ".svn"))
 										continue;
 								
-									// Log("\tdir: %s\n", full);
 									PostEvent(M_SCAN_FOLDER, (LMessage::Param)new LString(full));
 								}
 								else if (dir->GetSize() > 0)
@@ -560,21 +556,14 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 									if (!stricmp(ext, "cpp") ||
 										!stricmp(ext, "h"))
 									{
-										#if 1
 										if (auto add = new FindSymbolSystem::SymFileParams)
 										{
 											add->Action = FindSymbolSystem::FileAdd;
 											add->File = full;
 											add->Platforms = 0;
 
-											if (!Stricmp(nm, "idisk"))
-											{
-												int asd=0;
-											}
-
 											PostEvent(M_FIND_SYM_FILE, (LMessage::Param)add);
 										}
-										#endif
 									}
 								}
 							}

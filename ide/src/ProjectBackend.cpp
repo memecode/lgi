@@ -856,17 +856,17 @@ public:
 
 	LString PreparePath(LString s)
 	{
-		auto quoted = s.Replace(" ", "\\ ");
+		LString cp = s.Get();;
 
 		if (remoteSep)
 		{
 			auto sep = remoteSep(0);
-			for (char *c = quoted.Get(); *c; c++)
+			for (char *c = cp.Get(); *c; c++)
 				if (Strchr(separators, *c))
 					*c = sep;
 		}
 
-		return quoted;
+		return cp.Replace(" ", "\\ ");
 	}
 
 	bool Read(const char *Path, std::function<void(LError,LString)> result) override

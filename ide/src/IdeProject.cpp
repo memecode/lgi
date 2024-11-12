@@ -1987,7 +1987,7 @@ void BuildThread::Step2()
 	parts.DeleteArrays();
 
 	StreamToLog log(Proj->GetApp());
-	log.Print("%s: rewrote args '%s'\n", __FUNCTION__, backendArgs.Get());
+	//  log.Print("%s: rewrote args '%s'\n", __FUNCTION__, backendArgs.Get());
 
 	AddWork([this]() { Step3(); }); // Move onto the build itself...
 }
@@ -2001,7 +2001,7 @@ void BuildThread::Step3()
 	// Step 3, run the build...
 	if (buildLogger.Reset(new StreamToLog(Proj->GetApp()))) // Create a persistent logger, to outlive the build process...
 	{
-		buildLogger->Print("%s: building in '%s'\n", __FUNCTION__, backendInitFolder.Get());
+		// buildLogger->Print("%s: building in '%s'\n", __FUNCTION__, backendInitFolder.Get());
 		auto buildId = AddCall(_FL);
 		backend->RunProcess(backendInitFolder, LString("make ") + backendArgs, buildLogger, this, [this, buildId](auto val)
 			{
