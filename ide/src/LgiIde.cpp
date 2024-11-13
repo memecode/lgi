@@ -3111,6 +3111,9 @@ void AppWnd::GotoReference(const char *File, int Line, bool CurIp, bool WithHist
 
 IdeDoc *AppWnd::FindOpenFile(char *FileName)
 {
+	if (!FileName)
+		return NULL;
+
 	List<IdeDoc>::I it = d->Docs.begin();
 	for (IdeDoc *i=*it; i; i=*++it)
 	{

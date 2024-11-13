@@ -539,7 +539,11 @@ void LTextView3::SetReadOnly(bool i)
 
 void LTextView3::SetCrLf(bool crlf)
 {
-	CrLf = crlf;
+	if (CrLf != crlf)
+	{
+		CrLf = crlf;
+		Dirty = true;
+	}
 }
 
 void LTextView3::SetTabSize(uint8_t i)
@@ -1826,10 +1830,8 @@ LString LTextView3::operator[](ssize_t LineIdx)
 
 const char *LTextView3::Name()
 {
-	UndoQue.Empty();
 	DeleteArray(TextCache);
 	TextCache = WideToUtf8(Text);
-
 	return TextCache;
 }
 
@@ -2503,7 +2505,7 @@ bool LTextView3::Open(const char *Name, const char *CharSet)
 }
 
 template<typename T>
-bool WriteToStream(LFile &out, T *in, size_t len, bool CrLf)
+bool WriteToStream(LStream &out, T *in, size_t len, bool CrLf)
 {
 	if (!in)
 		return false;
@@ -2554,6 +2556,60 @@ bool WriteToStream(LFile &out, T *in, size_t len, bool CrLf)
 	return true;
 }
 
+bool LTextView3::Save(LStream *f, const char *CharSet)
+{
+	if (!f)
+		return false;
+
+	bool Status = false;
+
+	if (Text)
+	{
+		auto saveBytes = Size * sizeof(char16);
+		if (CharSet && !Stricmp(CharSet, "utf-16"))
+		{
+			if (sizeof(*Text) == 2)
+			{
+				// No conversion needed...
+				Status = WriteToStream(*f, Text, Size, CrLf);
+			}
+			else
+			{
+				// 32->16 convert
+				LAutoPtr<uint16_t,true> c16((uint16_t*)LNewConvertCp(CharSet, Text, LGI_WideCharset, saveBytes));
+				if (c16)
+					Status = WriteToStream(*f, c16.Get(), Strlen(c16.Get()), CrLf);
+			}
+		}
+		else if (CharSet && !Stricmp(CharSet, "utf-32"))
+		{
+			if (sizeof(*Text) == 4)
+			{
+				// No conversion needed...
+				Status = WriteToStream(*f, Text, Size, CrLf);
+			}
+			else
+			{
+				// 16->32 convert
+				LAutoPtr<uint32_t,true> c32((uint32_t*)LNewConvertCp(CharSet, Text, LGI_WideCharset, saveBytes));
+				if (c32)
+					Status = WriteToStream(*f, c32.Get(), Strlen(c32.Get()), CrLf);
+			}
+		}
+		else
+		{
+			LAutoString c8((char*)LNewConvertCp(CharSet ? CharSet : DefaultCharset, Text, LGI_WideCharset, saveBytes));
+			if (c8)
+				Status = WriteToStream(*f, c8.Get(), strlen(c8), CrLf);
+		}
+
+		if (Status)
+			Dirty = false;
+	}
+
+	return true;
+}
+
 bool LTextView3::Save(const char *Name, const char *CharSet)
 {
 	LFile f;
@@ -2584,49 +2640,7 @@ bool LTextView3::Save(const char *Name, const char *CharSet)
 			}
 		}
 
-		if (Text)
-		{
-			auto InSize = Size * sizeof(char16);
-			if (CharSet && !Stricmp(CharSet, "utf-16"))
-			{
-				if (sizeof(*Text) == 2)
-				{
-					// No conversion needed...
-					Status = WriteToStream(f, Text, Size, CrLf);
-				}
-				else
-				{
-					// 32->16 convert
-					LAutoPtr<uint16_t,true> c16((uint16_t*)LNewConvertCp(CharSet, Text, LGI_WideCharset, InSize));
-					if (c16)
-						Status = WriteToStream(f, c16.Get(), Strlen(c16.Get()), CrLf);
-				}
-			}
-			else if (CharSet && !Stricmp(CharSet, "utf-32"))
-			{
-				if (sizeof(*Text) == 4)
-				{
-					// No conversion needed...
-					Status = WriteToStream(f, Text, Size, CrLf);
-				}
-				else
-				{
-					// 16->32 convert
-					LAutoPtr<uint32_t,true> c32((uint32_t*)LNewConvertCp(CharSet, Text, LGI_WideCharset, InSize));
-					if (c32)
-						Status = WriteToStream(f, c32.Get(), Strlen(c32.Get()), CrLf);
-				}
-			}
-			else
-			{
-				LAutoString c8((char*)LNewConvertCp(CharSet ? CharSet : DefaultCharset, Text, LGI_WideCharset, InSize));
-				if (c8)
-					Status = WriteToStream(f, c8.Get(), strlen(c8), CrLf);
-			}
-
-			if (Status)
-				Dirty = false;
-		}
+		Status = Save(&f, CharSet);
 	}
 	else
 	{

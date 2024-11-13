@@ -66,7 +66,7 @@ public:
 	const char *GetLocalFile();
 	void SetFileName(const char *f);
 	bool Load();
-	bool Save();
+	bool Save(LStream *out);
 	void OnSaveComplete(bool Status);
 
 	LDateTime GetModTime()

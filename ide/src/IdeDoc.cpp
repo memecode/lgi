@@ -1055,7 +1055,7 @@ bool IdeDocPrivate::Load()
 	return Status;
 }
 
-bool IdeDocPrivate::Save()
+bool IdeDocPrivate::Save(LStream *out)
 {
 	bool Status = false;
 	
@@ -1065,7 +1065,10 @@ bool IdeDocPrivate::Save()
 	}
 	else if (FileName)
 	{
-		Status = Edit->Save(FileName);
+		if (out)
+			Status = Edit->Save(out);
+		else
+			Status = Edit->Save(FileName);
 		if (!Status)
 		{
 			const char *Err = Edit->GetLastError();
@@ -1528,7 +1531,11 @@ void IdeDoc::ClearCurrentIp()
 void IdeDoc::SetCrLf(bool CrLf)
 {
 	if (d->Edit)
+	{
 		d->Edit->SetCrLf(CrLf);
+		if (d->Edit->IsDirty())
+			SetDirty();
+	}
 }
 
 bool IdeDoc::OpenFile(const char *File)
@@ -2055,7 +2062,7 @@ void IdeDoc::SetClean(std::function<void(bool)> Callback)
 		auto OnSave = [this, Callback](bool ok)
 		{
 			if (ok)
-				d->Save();
+				d->Save(nullptr);
 			if (Callback)
 				Callback(ok);
 		};		
@@ -2067,9 +2074,10 @@ void IdeDoc::SetClean(std::function<void(bool)> Callback)
 		}
 		else if (auto backend = proj ? proj->GetBackend() : NULL)
 		{
-			LString Content = d->Edit->Name();
+			LStringPipe content(1024);
+			d->Save(&content);
 			backend->Write(LocalPath,
-				Content,
+				content.NewLStr(),
 				[this, Callback](auto err)
 				{
 					d->OnSaveComplete(!err);

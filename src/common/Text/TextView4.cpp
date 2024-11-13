@@ -2524,7 +2524,7 @@ bool LTextView4::Open(const char *Name, const char *CharSet)
 }
 
 template<typename T>
-bool WriteToStream(LFile &out, T *in, size_t len, bool CrLf)
+bool WriteToStream(LStream &out, T *in, size_t len, bool CrLf)
 {
 	if (!in)
 		return false;
