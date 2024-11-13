@@ -117,6 +117,8 @@ void VcCommit::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 		#define MAP(col) ((col) * Px + Half)
 
 		LMemDC Mem(Ctx.X(), Ctx.Y(), System32BitColourSpace);
+		Mem.Colour(0, 32);
+		Mem.Rectangle();
 
 		#ifdef LINUX
 		{
@@ -135,8 +137,10 @@ void VcCommit::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 		Mem.Colour(LColour::Black);
 		
 		VcCommit *Prev = NULL, *Next = NULL;
-		Prev = Folder->Log.IdxCheck(Idx - 1) ? Folder->Log[Idx - 1] : NULL;
-		Next = Folder->Log.IdxCheck(Idx + 1) ? Folder->Log[Idx + 1] : NULL;
+		if (Folder->Log.IdxCheck(Idx - 1))
+			Prev = Folder->Log[Idx - 1];
+		if (Folder->Log.IdxCheck(Idx + 1))
+			Next = Folder->Log[Idx + 1];
 		
 		for (auto it: Pos)
 		{

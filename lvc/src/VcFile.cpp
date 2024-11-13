@@ -109,7 +109,14 @@ void VcFile::Select(bool b)
 			}
 		}
 		else
-			d->Diff->Name(Diff);
+		{
+			#ifdef HAIKU
+			if (Diff.Length() > (16 << 10))
+				d->Diff->Name(Diff(0, 16 << 10));
+			else
+			#endif
+				d->Diff->Name(Diff);
+		}
 	}
 }
 

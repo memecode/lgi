@@ -2206,8 +2206,11 @@ void VcFolder::DiffRange(const char *FromRev, const char *ToRev)
 		case VcCvs:
 		case VcHg:
 		default:
-			LAssert(!"Impl me.");
+		{
+			auto sType = toString(GetType());
+			d->Log->Print("%s:%i - 'DiffRange' for %s not implemented.\n", _FL, sType);
 			break;
+		}
 	}
 }
 
@@ -4774,10 +4777,8 @@ bool VcFolder::Resolve(const char *Path, LvcResolve Type)
 						a.Printf("resolve -t vscode \"%s\"", local.Get());
 					#elif defined(WINDOWS)
 						a.Printf("resolve -t winmerge \"%s\"", local.Get());
-					#elif defined(LINUX)
-						a.Printf("resolve -t kdiff3 \"%s\"", local.Get());
 					#else
-						#warning "Impl me"
+						a.Printf("resolve -t kdiff3 \"%s\"", local.Get());
 					#endif
 					break;
 				}
