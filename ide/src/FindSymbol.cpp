@@ -8,6 +8,7 @@
 #include "lgi/common/TextFile.h"
 #include "lgi/common/ParseCpp.h"
 #include "lgi/common/Uri.h"
+#include "lgi/common/Stat.h"
 
 #include "LgiIde.h"
 #include "FindSymbol.h"
@@ -93,6 +94,8 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 					Status = BuildJsDefnList(Path, Source, Defs, DefnNone, Debug);
 				else if (IsPython)
 					Status = BuildPyDefnList(Path, Source, Defs, DefnNone, Debug);
+				else
+					LAssert(!"Unknown type");
 			}
 			else printf("%s:%i - No extension for '%s'\n", _FL, Path.Get());
 
@@ -237,7 +240,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		return (out / leaf).GetFull();
 	}
 
-	void AddFile(LString Path, int Platforms)
+	void AddFile(LString Path, int Platforms, bool cacheDirty = false)
 	{
 		#if PROFILE_ADDFILE
 		LProfile prof("AddFile");
@@ -302,7 +305,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		if (backend)
 		{
 			auto cacheFile = CachePath(Path);
-			if (LFileExists(cacheFile))
+			if (!cacheDirty && LFileExists(cacheFile))
 			{
 				// Load from the cache...
 				f->Serialize(cacheFile, false);
@@ -487,17 +490,13 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			case M_FIND_SYM_BACKEND:
 			{
 				if ((backend = (ProjectBackend*)Msg->A()))
-				{
-					SetPulse(1000);
-				}
+					SetPulse(500);
 				break;
 			}
 			case M_GET_PROJECT_CACHE:
 			{
 				if (auto folder = Msg->AutoA<LString>())
-				{
 					projectCache = *folder;
-				}
 				break;
 			}
 			case M_CLEAR_PROJECT_CACHE:
@@ -553,14 +552,29 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 									auto ext = LGetExtension(nm);
 									if (!ext)
 										continue;
-									if (!stricmp(ext, "cpp") ||
-										!stricmp(ext, "h"))
+									if (KnownExt.Find(ext))
 									{
+										// Check the date against the cache?
+										auto cache = CachePath(full);
+										bool cacheDirty = false;
+										LStat st(cache);
+										if (st)
+										{
+											auto writeTm = dir->GetLastWriteTime();
+											auto remoteModified = dir->TsToUnix(writeTm);
+											auto cacheModified = st.GetLastWriteTime();
+											if (remoteModified > cacheModified)
+											{
+												cacheDirty = true;
+											}
+										}
+
 										if (auto add = new FindSymbolSystem::SymFileParams)
 										{
 											add->Action = FindSymbolSystem::FileAdd;
 											add->File = full;
 											add->Platforms = 0;
+											add->cacheDirty = cacheDirty;
 
 											PostEvent(M_FIND_SYM_FILE, (LMessage::Param)add);
 										}
@@ -718,7 +732,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 				if (!isImage)
 				{
 					if (Params->Action == FindSymbolSystem::FileAdd)
-						AddFile(Params->File, Params->Platforms);
+						AddFile(Params->File, Params->Platforms, Params->cacheDirty);
 					else if (Params->Action == FindSymbolSystem::FileRemove)
 						RemoveFile(Params->File);
 					else if (Params->Action == FindSymbolSystem::FileReparse)

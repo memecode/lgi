@@ -133,7 +133,8 @@ public:
 	{
 		SymAction Action;
 		LString File;
-		int Platforms;
+		int Platforms = 0;
+		bool cacheDirty = false;
 	};
 
 	struct SymPathParams

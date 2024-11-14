@@ -903,7 +903,7 @@ public:
 	}
 
 	/// Convert to integer
-	int64 Int(int Base = 10, int64 Default = -1)
+	int64 Int(int Base = 10, int64 Default = -1) const
 	{
 		if (!Str)
 			return Default;

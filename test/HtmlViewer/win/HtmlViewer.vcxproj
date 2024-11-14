@@ -112,7 +112,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\src;..\resources;..\..\..\private\common;..\..\..\include\lgi\win;..\..\..\include;..\..\..\..\..\..\codelib\libjpeg-9a;..\..\..\..\..\..\codelib\libpng\build32\zlib_dir;..\..\..\..\..\..\codelib\libpng\build32;..\..\..\..\..\..\codelib\zlib;..\..\..\..\..\..\codelib\libpng;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\src;..\resources;..\..\..\private\common;..\..\..\include\lgi\win;..\..\..\include;..\..\..\..\..\..\codelib\zlib\build;..\..\..\..\..\..\codelib\zlib;..\..\..\..\..\..\codelib\libjpeg-9a;..\..\..\..\..\..\codelib\libpng\build32;..\..\..\..\..\..\codelib\libpng;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -154,7 +154,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\src;..\resources;..\..\..\private\common;..\..\..\include\lgi\win;..\..\..\include;..\..\..\..\..\..\codelib\libjpeg-9a;..\..\..\..\..\..\codelib\libpng\build32\zlib_dir;..\..\..\..\..\..\codelib\libpng\build32;..\..\..\..\..\..\codelib\zlib;..\..\..\..\..\..\codelib\libpng;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\src;..\resources;..\..\..\private\common;..\..\..\include\lgi\win;..\..\..\include;..\..\..\..\..\..\codelib\zlib\build;..\..\..\..\..\..\codelib\zlib;..\..\..\..\..\..\codelib\libjpeg-9a;..\..\..\..\..\..\codelib\libpng\build32;..\..\..\..\..\..\codelib\libpng;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>

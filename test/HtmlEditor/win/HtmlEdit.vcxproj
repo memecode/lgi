@@ -150,7 +150,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\src;..\resources;..\..\..\include;..\..\..\private\common;..\..\..\include\lgi\win;..\..\..\..\..\..\CodeLib\libjpeg-9a;..\..\..\..\..\..\CodeLib\libpng;..\..\..\..\..\..\CodeLib\zlib;..\..\..\..\..\..\CodeLib\libpng\build64;..\..\..\..\..\..\CodeLib\libpng\build64\zlib_dir;c:\Program Files\OpenSSL-win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\src;..\resources;..\..\..\include;..\..\..\private\common;..\..\..\include\lgi\win;..\..\..\..\..\..\CodeLib\zlib;..\..\..\..\..\..\CodeLib\zlib\build;..\..\..\..\..\..\CodeLib\libjpeg-9a;..\..\..\..\..\..\CodeLib\libpng;..\..\..\..\..\..\CodeLib\libpng\build64;c:\Program Files\OpenSSL-win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -238,7 +238,7 @@
     <ClCompile>
       <Optimization>MinSpace</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\src;..\resources;..\..\..\include;..\..\..\private\common;..\..\..\include\lgi\win;..\..\..\..\..\..\CodeLib\libjpeg-9a;..\..\..\..\..\..\CodeLib\libpng;..\..\..\..\..\..\CodeLib\zlib;..\..\..\..\..\..\CodeLib\libpng\build64;..\..\..\..\..\..\CodeLib\libpng\build64\zlib_dir;c:\Program Files\OpenSSL-win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\src;..\resources;..\..\..\include;..\..\..\private\common;..\..\..\include\lgi\win;..\..\..\..\..\..\CodeLib\zlib;..\..\..\..\..\..\CodeLib\zlib\build;..\..\..\..\..\..\CodeLib\libjpeg-9a;..\..\..\..\..\..\CodeLib\libpng;..\..\..\..\..\..\CodeLib\libpng\build64;c:\Program Files\OpenSSL-win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>

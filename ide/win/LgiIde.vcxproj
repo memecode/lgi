@@ -145,6 +145,7 @@
     <ClCompile Include="..\..\src\common\Lgi\About.cpp" />
     <ClCompile Include="..\..\src\common\Lgi\Mdi.cpp" />
     <ClCompile Include="..\..\src\common\Lgi\LgiMain.cpp" />
+    <ClCompile Include="..\..\src\common\Text\RemoveAnsi.cpp" />
     <ClCompile Include="..\src\AddFtpFile.cpp" />
     <ClCompile Include="..\src\DocEdit.cpp" />
     <ClCompile Include="..\src\DocEditStyling.cpp" />

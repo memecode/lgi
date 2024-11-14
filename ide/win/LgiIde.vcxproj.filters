@@ -245,6 +245,9 @@
     <ClCompile Include="..\src\RemoteFileSelect.cpp">
       <Filter>Source Files\RemoteFileSelect</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\common\Text\RemoveAnsi.cpp">
+      <Filter>Lgi</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="..\..\src\win\General\Lgi.manifest" />

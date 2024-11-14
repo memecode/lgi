@@ -22,6 +22,7 @@
 #include "lgi/common/FileSelect.h"
 #include "lgi/common/Menu.h"
 #include "lgi/common/PopupNotification.h"
+#include "lgi/common/RemoveAnsi.h"
 
 #include "LgiIde.h"
 #include "resdefs.h"

@@ -58,6 +58,10 @@ protected:
 	KnownHostCallback HostCb;
 	int timeoutMs = NO_TIMEOUT;
 
+	// Prompt detection
+	LString prompt;
+	uint64_t promptDetect = 0;
+
 	bool TimedOut(uint64_t startTs)
 	{
 		return	timeoutMs != NO_TIMEOUT &&
@@ -689,7 +693,7 @@ public:
 		if (r == SSH_OK)
 		{
 			auto length = From->GetSize();
-			r = ssh_scp_push_file(Scp, Parts[1], length, 0644);
+			r = ssh_scp_push_file(Scp, To, length, 0644);
 			if (r == SSH_OK)
 			{
 				size_t BufLen = 128<<10;
@@ -719,7 +723,10 @@ public:
 				Err = i == length ? LErrorNone : LErrorIoFailed;
 				Log->Print("%s:%i - Upload: %s.\n", _FL, Err ? "Error" : "Ok");
 			}
-			else Log->Print("%s:%i - ssh_scp_push_file(%s,%" PRIi64 ") failed with: %i.\n", _FL, Parts[1].Get(), length, r);
+			else
+			{
+				Log->Print("%s:%i - ssh_scp_push_file(%s,%" PRIi64 ") failed with: %i.\n", _FL, To, length, r);
+			}
 		}
 		else Log->Print("%s:%i - ssh_scp_init failed with %i\n", _FL, r);
 
@@ -734,6 +741,107 @@ public:
 		return LAutoPtr<SshConsole>(new SshConsole(this, createShell));
 	}
 	
+	LString GetPrompt()
+	{
+		return prompt;
+	}
+
+	bool AtPrompt(LStringPipe &p)
+	{
+		bool found = false;
+		ssize_t promptChar = -1;
+
+		p.Iterate( [this, &found, &promptChar](auto ptr, auto size)
+			{
+				if (!prompt)
+				{
+					// Detect the prompt characters
+					auto now = LCurrentTime();
+					if (!promptDetect)
+					{
+						promptDetect = now;
+					}
+					else if (now - promptDetect >= 300)
+					{
+						LString last2((char*)ptr + size - 2, 2);
+						if (last2 == "> " ||
+							last2 == "$ " ||
+							last2 == "# ")
+						{
+							// Unix like system
+							prompt = last2;
+							return true;
+						}
+						else if (size > 0 && ptr[size-1] == '>')
+						{
+							// Windows hopefully?
+							prompt = ">";
+							return true;
+						}
+
+						LAssert(!"Doesn't look like a prompt?");
+					}
+
+					return false;
+				}
+				else
+				{
+					if (promptChar < 0)
+					{
+						LAssert(prompt.Length() > 0);
+						promptChar = prompt.Length() - 1;
+					}
+
+					// This has to compare over memory block boundaries:
+					for (auto i=size-1; i>=0; i--)
+					{
+						if (prompt[promptChar] != ptr[i])
+							// Not found...
+							return true;
+						
+						promptChar--;
+						if (promptChar < 0)
+						{
+							found = true;
+							return true;
+						}
+					}
+
+					return true;
+				}
+			},
+			true);
+
+		return found;
+	}
+
+	LString ReadToPrompt(LSsh::SshConsole *c, LStream *output = NULL, LCancel *cancel = NULL)
+	{
+		LStringPipe p(1024);
+		if (c)
+		{
+			char buf[1024];
+			while (!CancelObj->IsCancelled())
+			{
+				auto rd = c->Read(buf, sizeof(buf));
+				if (rd > 0)
+				{
+					// LgiTrace("ReadToPrompt got %i: %.16s\n", (int)rd, buf);
+					p.Write(buf, rd);
+					if (output)
+						output->Write(buf, rd);
+				}
+				else if (AtPrompt(p))
+					break;
+				else
+					LSleep(1);
+			}
+		}
+		else LgiTrace("ReadToPrompt: no console.\n");
+
+		return p.NewLStr();
+	}
+
 	bool RunCommands(LStream *Console, const char **Cmds, const char *PromptList = DEFAULT_PROMPTS)
 	{
 		LString Buf;

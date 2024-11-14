@@ -60,6 +60,6 @@ bool BuildPyDefnList(const char *FileName, char16 *Source, LArray<DefnInfo> &Def
 		Line++;
 	}
 
-	return Defns.Length() > 0;
+	return true;
 }
 

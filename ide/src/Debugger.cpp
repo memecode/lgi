@@ -24,6 +24,7 @@ static bool DEBUG_SHOW_GDB_IO = false;
 #include "lgi/common/StringClass.h"
 #include "lgi/common/LgiString.h"
 #include "lgi/common/Token.h"
+#include "lgi/common/RemoveAnsi.h"
 #if DEBUG_STRUCT_LOGGING
 #include "lgi/common/StructuredLog.h"
 #endif

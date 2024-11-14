@@ -853,11 +853,10 @@ IdeDoc *ProjectNode::Open()
 										GetFullPath().Get(),
 										err.ToString().Get()) );
 							}
-							else if (data)
+							else
 							{
 								OnDocOpen(Doc, Doc->OpenData(data));
 							}
-							else LAssert(0);
 						});
 				}
 				else

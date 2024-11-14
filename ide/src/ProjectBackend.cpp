@@ -3,6 +3,7 @@
 #include "lgi/common/Thread.h"
 #include "lgi/common/Ssh.h"
 #include "lgi/common/Mutex.h"
+#include "lgi/common/RemoveAnsi.h"
 
 #include "LgiIde.h"
 #include "ProjectBackend.h"
@@ -121,7 +122,6 @@ class SshBackend :
 	LView *app = NULL;
 	LUri uri;
 	LStream *log = NULL;
-	LString prompt;
 	IdePlatform sysType = PlatformUnknown;
 	LString remoteSep;
 	LString homePath;
@@ -190,107 +190,9 @@ class SshBackend :
 		return console;
 	}
 
-	uint64_t promptDetect = 0;
-
-	bool AtPrompt(LStringPipe &p)
-	{
-		bool found = false;
-		ssize_t promptChar = -1;
-
-		p.Iterate( [this, &found, &promptChar](auto ptr, auto size)
-			{
-				if (!prompt)
-				{
-					// Detect the prompt characters
-					auto now = LCurrentTime();
-					if (!promptDetect)
-					{
-						promptDetect = now;
-					}
-					else if (now - promptDetect >= 300)
-					{
-						LString last2((char*)ptr + size - 2, 2);
-						if (last2 == "> " ||
-							last2 == "$ " ||
-							last2 == "# ")
-						{
-							// Unix like system
-							prompt = last2;
-							return true;
-						}
-						else if (size > 0 && ptr[size-1] == '>')
-						{
-							// Windows hopefully?
-							prompt = ">";
-							return true;
-						}
-
-						LAssert(!"Doesn't look like a prompt?");
-					}
-
-					return false;
-				}
-				else
-				{
-					if (promptChar < 0)
-					{
-						LAssert(prompt.Length() > 0);
-						promptChar = prompt.Length() - 1;
-					}
-
-					// This has to compare over memory block boundaries:
-					for (int i=size-1; i>=0; i--)
-					{
-						if (prompt[promptChar] != ptr[i])
-							// Not found...
-							return true;
-						
-						promptChar--;
-						if (promptChar < 0)
-						{
-							found = true;
-							return true;
-						}
-					}
-
-					return true;
-				}
-			},
-			true);
-
-		return found;
-	}
-
 	LString ReadToPrompt(LSsh::SshConsole *c, LStream *output = NULL, LCancel *cancel = NULL)
 	{
-		LStringPipe p;
-		if (c)
-		{
-			while (!IsCancelled())
-			{
-				if (cancel && cancel->IsCancelled())
-				{
-					break;
-				}
-
-				char buf[1024];
-				auto rd = c->Read(buf, sizeof(buf));
-				if (rd > 0)
-				{
-					// LgiTrace("ReadToPrompt got %i: %.16s\n", (int)rd, buf);
-					p.Write(buf, rd);
-					if (output)
-						output->Write(buf, rd);
-				}
-				else if (AtPrompt(p))
-					break;
-				else
-					LSleep(1);
-			}
-		}
-		else LgiTrace("ReadToPrompt: no console.\n");
-
-		auto s = p.NewLStr();
+		auto s = ssh->ReadToPrompt(c, output, cancel);
 		RemoveAnsi(s);
 		return s;
 	}
@@ -365,7 +267,7 @@ public:
 	LString GetBasePath() override { return RemoteRoot(); }
 	bool IsReady() override
 	{
-		return remoteSep && prompt && homePath;
+		return remoteSep && ssh->GetPrompt() && homePath;
 	}
 
 	LString MakeNative(LString path)
@@ -465,6 +367,20 @@ public:
 				Cmd(GetConsole(), p, &code);
 				if (code == 0)
 					found = abs;
+			}
+			else if (path(0) == '~')
+			{
+				// Uses home path notation?
+				if (homePath)
+				{
+					path = path.Replace("~", homePath);
+					auto p = LString::Fmt("stat %s\n", path.Get());
+					int32_t code;
+					Cmd(GetConsole(), p, &code);
+					if (code == 0)
+						found = path;
+				}
+				else LAssert(!"no home folder?");
 			}
 			else
 			{
@@ -572,7 +488,7 @@ public:
 		struct TEntry
 		{
 			LString perms, user, grp, name, linkTarget;
-			LString month, day, time;
+			LString month, day, timeOrYear;
 			int64_t size;
 
 			bool IsDir()      const { return perms(0) == 'd'; }
@@ -629,8 +545,8 @@ public:
 				auto sz = COL(4);
 				e.size = sz.Strip().Int();
 				e.month = COL(5);
-				e.day   = COL(6);
-				e.time  = COL(7);
+				e.day   = COL(6).Strip();
+				e.timeOrYear = COL(7);
 				if ((e.name = line(cols[7].End() + 1, -1).LStrip(" ")))
 				{
 					if (e.name(0) == '\'')
@@ -701,9 +617,31 @@ public:
 				return (int) Atoi(entries.ItemAt(pos).user.Get());
 			return 0;
 		}
+		uint64 GetLastWriteTime() const
+		{
+			if (!Ok())
+				return 0;
+			
+			auto &e = entries.ItemAt(pos);
+			
+			LDateTime dt;
+			dt.SetNow();
+
+			auto month = LDateTime::IsMonth(e.month);
+			if (month < 0)
+				return 0;
+
+			dt.Month(month + 1);
+			dt.Day(e.day.Int());
+			if (e.timeOrYear.Find(":") > 0)
+				dt.SetTime(e.timeOrYear);
+			else
+				dt.Year(e.timeOrYear.Int());
+
+			return dt.Ts().Get();
+		}
 		uint64 GetCreationTime() const { return 0; }
 		uint64 GetLastAccessTime() const { return 0; }
-		uint64 GetLastWriteTime() const { return 0; }
 		uint64 GetSize() const
 		{
 			if (Ok())
@@ -875,9 +813,13 @@ public:
 			return false;
 
 		Auto lck(this, _FL);
-		work.Add( [this, result, Path = PreparePath(Path)]()
+		work.Add( [this, result, Path = PreparePath(Path)]() mutable
 		{
 			LStringPipe buf;
+
+			if (Path.Find("~") == 0 && homePath)
+				Path = Path.Replace("~", homePath);
+
 			auto err = ssh->DownloadFile(&buf, Path);
 			if (result)
 			{
@@ -897,9 +839,13 @@ public:
 			return false;
 
 		Auto lck(this, _FL);
-		work.Add( [this, result, Path = PreparePath(Path), Data]()
+		work.Add( [this, result, Path = PreparePath(Path), Data]() mutable
 		{
 			LMemStream stream(Data.Get(), Data.Length(), false);
+
+			if (Path.Find("~") == 0 && homePath)
+				Path = Path.Replace("~", homePath);
+
 			auto err = ssh->UploadFile(Path, &stream);
 			if (result)
 			{
