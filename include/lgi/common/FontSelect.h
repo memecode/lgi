@@ -28,7 +28,7 @@ class LFontSelect : public LDialog
 	const char *GetSelectedFace();
 	void InsertFont(const char *Face);
 	void EnumerateFonts();
-	void OnCreate();
+	void OnCreate() override;
 	void UpdatePreview();
 	void UiToThis();
 

@@ -13,6 +13,7 @@
 		3432AF762ADFE3120029F2D7 /* libz.1.3.1.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3432AF742ADFE3080029F2D7 /* libz.1.3.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		343688C92CA7929E0009E57A /* ProjectBackend.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 343688C82CA7924B0009E57A /* ProjectBackend.cpp */; };
 		343688CB2CA793210009E57A /* libssh.4.9.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 343688CA2CA793210009E57A /* libssh.4.9.6.dylib */; };
+		3458E51E2CE7EDBB00039176 /* RemoveAnsi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3458E51D2CE7EDBB00039176 /* RemoveAnsi.cpp */; };
 		345B2101217969700079E3C9 /* PythonParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20D52179696B0079E3C9 /* PythonParser.cpp */; };
 		345B2102217969700079E3C9 /* MemDumpViewer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20DA2179696B0079E3C9 /* MemDumpViewer.cpp */; };
 		345B2103217969700079E3C9 /* IdeFindInFiles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20DB2179696B0079E3C9 /* IdeFindInFiles.cpp */; };
@@ -111,6 +112,7 @@
 		343688C72CA7924B0009E57A /* ProjectBackend.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ProjectBackend.h; path = ../src/ProjectBackend.h; sourceTree = "<group>"; };
 		343688C82CA7924B0009E57A /* ProjectBackend.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ProjectBackend.cpp; path = ../src/ProjectBackend.cpp; sourceTree = "<group>"; };
 		343688CA2CA793210009E57A /* libssh.4.9.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssh.4.9.6.dylib; path = ../../../../../../../opt/local/lib/libssh.4.9.6.dylib; sourceTree = "<group>"; };
+		3458E51D2CE7EDBB00039176 /* RemoveAnsi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RemoveAnsi.cpp; path = ../../src/common/Text/RemoveAnsi.cpp; sourceTree = "<group>"; };
 		345B206C217965E80079E3C9 /* LgiIde.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LgiIde.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		345B2077217965EA0079E3C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		345B207A217965EA0079E3C9 /* LgiIde.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LgiIde.entitlements; sourceTree = "<group>"; };
@@ -350,6 +352,7 @@
 		34D21CD621797809003D1EA6 /* Lgi */ = {
 			isa = PBXGroup;
 			children = (
+				3458E51D2CE7EDBB00039176 /* RemoveAnsi.cpp */,
 				341C7AC721A752DC0083C9CE /* About.cpp */,
 				34D21CED21798240003D1EA6 /* Png.cpp */,
 				34D21CE9217978DA003D1EA6 /* Base64.cpp */,
@@ -466,6 +469,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3458E51E2CE7EDBB00039176 /* RemoveAnsi.cpp in Sources */,
 				343688C92CA7929E0009E57A /* ProjectBackend.cpp in Sources */,
 				34D21CD821797815003D1EA6 /* ExeCheck.cpp in Sources */,
 				345B2115217969700079E3C9 /* FtpThread.cpp in Sources */,

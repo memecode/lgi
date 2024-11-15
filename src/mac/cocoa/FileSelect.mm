@@ -50,7 +50,7 @@ public:
 LString LFileSelectPrivate::InitPath;
 
 //////////////////////////////////////////////////////////////////////////
-LFileSelect::LFileSelect(LViewI *Window)
+LFileSelect::LFileSelect(LViewI *Window, IFileSelectSystem *System)
 {
 	d = new LFileSelectPrivate(this);
 }

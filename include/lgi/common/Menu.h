@@ -146,7 +146,7 @@ public:
 	);
 	virtual ~LSubMenu();
 
-	const char *GetClass() { return "LSubMenu"; }
+	const char *GetClass() override { return "LSubMenu"; }
 
 	/// Returns the OS handle
 	OsSubMenu Handle() { return Info; }
@@ -202,7 +202,7 @@ public:
 		/// - Shift+Modifier+F
 		/// - Alt+Left
 		const char *Shortcut = NULL
-	);
+	) override;
 	
 	/// Add a submenu
 	LSubMenu *AppendSub
@@ -211,10 +211,10 @@ public:
 		const char *Str,
 		/// The index to insert the item, or -1 to insert on the end
 		int Where = -1
-	);
+	) override;
 	
 	/// Add a separator
-	LMenuItem *AppendSeparator(int Where = -1);
+	LMenuItem *AppendSeparator(int Where = -1) override;
 	
 	/// Delete all items
 	void Empty();

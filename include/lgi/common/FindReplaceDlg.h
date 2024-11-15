@@ -76,8 +76,8 @@ public:
 	);
 	~LReplaceDlg();
 
-	void OnCreate();
-	void OnPosChange();
+	void OnCreate() override;
+	void OnPosChange() override;
 
 	/// \returns DoModal will return one of #IDC_FR_FIND,
 	/// #IDC_FR_REPLACE, #IDCANCEL or #IDOK (which means 'Replace All', the default action)

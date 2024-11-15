@@ -39,12 +39,12 @@ public:
 				int Init = 0);
 	~LTabView();
 	
-	const char *GetClass() { return "LTabView"; }
+	const char *GetClass() override { return "LTabView"; }
 
 	/// Gets the selected tab
-	int64 Value();
+	int64 Value() override;
 	/// Sets the selected tab
-	void Value(int64 i);
+	void Value(int64 i) override;
 	
 	bool GetPourChildren();
 	void SetPourChildren(bool b);
@@ -64,11 +64,11 @@ public:
 	size_t GetTabs();
 	
 	// Impl
-	bool Attach(LViewI *parent);
-	LMessage::Result OnEvent(LMessage *Msg);
-	LViewI *FindControl(int Id);
+	bool Attach(LViewI *parent) override;
+	LMessage::Result OnEvent(LMessage *Msg) override;
+	LViewI *FindControl(int Id) override;
 	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
-	void OnChildrenChanged(LViewI *Wnd, bool Attaching);
+	void OnChildrenChanged(LViewI *Wnd, bool Attaching) override;
 	LRect &GetTabClient();
 
 	#if defined(WINNATIVE) && !defined(LGI_SDL)
@@ -76,13 +76,13 @@ public:
 	#endif
 
 	int HitTest(LMouse &m);
-	void OnMouseClick(LMouse &m);
-	void OnPosChange();
-	void OnPaint(LSurface *pDC);
-	bool OnKey(LKey &k);
-	void OnFocus(bool f);
-	void OnCreate();
-	void OnAttach();
+	void OnMouseClick(LMouse &m) override;
+	void OnPosChange() override;
+	void OnPaint(LSurface *pDC) override;
+	bool OnKey(LKey &k) override;
+	void OnFocus(bool f) override;
+	void OnCreate() override;
+	void OnAttach() override;
 	void OnStyleChange();
 };
 

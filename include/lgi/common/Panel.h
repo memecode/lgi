@@ -32,7 +32,7 @@ public:
 	LPanel(const char *name, int size, bool open = true);
 	~LPanel();
 
-	const char *GetClass() { return "LPanel"; }
+	const char *GetClass() override { return "LPanel"; }
 
 	bool Open();
 	virtual void Open(bool i);
@@ -43,11 +43,11 @@ public:
 	int Alignment(); // GV_EDGE_TOP | GV_EDGE_RIGHT | GV_EDGE_BOTTOM | GV_EDGE_LEFT
 	void Alignment(int i);
 
-	bool Attach(LViewI *Wnd);
-	bool Pour(LRegion &r);
+	bool Attach(LViewI *Wnd) override;
+	bool Pour(LRegion &r) override;
 	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
-	void OnPaint(LSurface *pDC);
-	void OnMouseClick(LMouse &m);
+	void OnPaint(LSurface *pDC) override;
+	void OnMouseClick(LMouse &m) override;
 };
 
 #endif

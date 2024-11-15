@@ -14,11 +14,11 @@ public:
 	LStatusBar(int id = -1);
 	~LStatusBar();
 
-	const char *GetClass() { return "LStatusBar"; }
-	bool Pour(LRegion &r);
-	bool OnLayout(LViewLayoutInfo &Inf);
-	void OnPaint(LSurface *pDC);
-	void OnPosChange();
+	const char *GetClass() override { return "LStatusBar"; }
+	bool Pour(LRegion &r) override;
+	bool OnLayout(LViewLayoutInfo &Inf) override;
+	void OnPaint(LSurface *pDC) override;
+	void OnPosChange() override;
 	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
 
 	LStatusPane *AppendPane(const char *Text, int WidthPx = 0);
