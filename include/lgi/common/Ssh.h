@@ -258,7 +258,7 @@ public:
 			return 0;
 		}
 
-		bool Write(LString &s)
+		bool Write(const LString &s)
 		{
 			if (channel)
 				return ssh_channel_write(channel, s.Get(), (uint32_t)s.Length()) == s.Length();
