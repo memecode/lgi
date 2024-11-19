@@ -168,16 +168,16 @@ public:
 		Set(str);
 	}
 
+	#if WINDOWS
+	using Char16 = wchar_t;
+	using Char32 = uint32_t;
+	#else
+	using Char16 = uint16_t;
+	using Char32 = wchar_t;
+	#endif
+
 	/// Utf-16 constructor
-	LString
-	(
-		#if WINDOWS
-		const wchar_t *utf16,
-		#else
-		const uint16_t *utf16,
-		#endif
-		ptrdiff_t wchars = -1
-	)
+	LString(const Char16 *utf16, ptrdiff_t wchars = -1)
 	{
 		Str = NULL;
 		if (sizeof(*utf16) == sizeof(char16))
@@ -202,7 +202,7 @@ public:
 				uint8_t *out = utf8;
 				ssize_t inSize = *utf16 ? 2 : 1;
 				ssize_t outSize = sizeof(utf8);
-				if (!LgiUtf16To8(utf16, inSize, out, outSize))
+				if (!LgiUtf16To8( (const uint16*&) utf16, inSize, out, outSize))
 					break;
 				bytes += out - utf8;
 			}
@@ -221,7 +221,7 @@ public:
 			{
 				ssize_t outSize = end - p;
 				ssize_t inSize = *utf16 ? 2 : 1;
-				if (!LgiUtf16To8(utf16, inSize, p, outSize))
+				if (!LgiUtf16To8( (const uint16*&) utf16, inSize, p, outSize))
 					break;
 			}
 			assert((char*)p == Str->End());
@@ -231,15 +231,7 @@ public:
 	}
 
 	/// Utf32 constructor
-	LString
-	(
-		#if WINDOWS
-		const uint32_t *utf32,
-		#else
-		const wchar_t *utf32,
-		#endif
-		ptrdiff_t wchars = -1
-	)
+	LString(const Char32 *utf32, ptrdiff_t wchars = -1)
 	{
 		Str = NULL;
 		if (sizeof(*utf32) == sizeof(char16))

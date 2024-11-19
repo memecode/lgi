@@ -746,6 +746,19 @@ public:
 		return prompt;
 	}
 
+	void SetPrompt(const char *p)
+	{
+		if (p)
+		{
+			prompt = p;
+		}
+		else
+		{
+			promptDetect = 0;
+			prompt.Empty();
+		}
+	}
+
 	bool AtPrompt(LStringPipe &p)
 	{
 		bool found = false;
@@ -770,12 +783,14 @@ public:
 						{
 							// Unix like system
 							prompt = last2;
+							found = true;
 							return true;
 						}
 						else if (size > 0 && ptr[size-1] == '>')
 						{
 							// Windows hopefully?
 							prompt = ">";
+							found = true;
 							return true;
 						}
 

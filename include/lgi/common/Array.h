@@ -326,8 +326,6 @@ public:
 	/// it will grow to make it valid.
 	Type &operator [](size_t i)
 	{
-		static Type t;
-
 		if
 		(
 			fixed && ((uint32_t)i >= len)
@@ -337,7 +335,8 @@ public:
 			if (warnResize)
 				LStackTrace("%s:%i - Attempt to enlarged fixed array.", _FL);
 			#endif
-			return t;
+			static Type empty;
+			return empty;
 		}
 		
 		if (i >= (int)alloc)
@@ -451,12 +450,28 @@ public:
 		return IndexOf(n) >= 0;
 	}
 
-	/// Removes last element	
-	bool PopLast()
+	/// Removes first element	
+	Type PopFirst()
 	{
 		if (len <= 0)
-			return false;
-		return Length(len - 1);
+			return Type();
+		
+		Type ret = std::move(p[0]);
+		DeleteAt(0, true);
+		return ret;
+	}
+
+	/// Removes last element	
+	Type PopLast()
+	{
+		if (len <= 0)
+		{
+			return Type();
+		}
+		
+		Type ret = std::move(p[len - 1]);
+		Length(len - 1);
+		return ret;
 	}
 	
 	/// Deletes an entry

@@ -894,9 +894,10 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 					if (LAppInst->InThread())
 					{
 						// We are in the GUI thread, show the dialog inline
-						LAssertDlg(Msg, [](auto Result)
+						int Result = -1;
+						LAssertDlg(Msg, [&](auto result)
 						{
-							switch (Result)
+							switch (Result = result)
 							{
 								case 1:
 								{
@@ -920,6 +921,16 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 								}
 							}			
 						});
+
+						#if WINDOWS
+						MSG Msg = {0};
+						while (	Result < 1 &&
+								GetMessage(&Msg, NULL, 0, 0) > 0)
+						{
+							TranslateMessage(&Msg);
+							DispatchMessage(&Msg);
+						}
+						#endif
 					}
 					else
 					{

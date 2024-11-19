@@ -819,9 +819,9 @@ int64 Atoi(const T *s, int Base = 10, int64 DefaultValue = -1)
 			int d;
 			if (*s >= '0' && *s <= '9')
 				d = *s - '0';
-			else if (*s >= 'a' && *s <= 'a' + ValidChars)
+			else if (*s >= 'a' && (int)*s <= 'a' + ValidChars)
 				d = *s - 'a' + 10;
-			else if (*s >= 'A' && *s <= 'A' + ValidChars)
+			else if (*s >= 'A' && (int)*s <= 'A' + ValidChars)
 				d = *s - 'A' + 10;
 			else
 				break;

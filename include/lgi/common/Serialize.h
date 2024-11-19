@@ -86,7 +86,11 @@ class LSerialize
 						return false;
 					return true;
 				case LFloat:
-					return Size() == sizeof(float);
+					if (Size() == sizeof(float))
+						return true;
+					if (Size() == sizeof(double))
+						return true;
+					return false;
 				case LObject:
 					return true;
 			}
@@ -321,15 +325,17 @@ public:
 				break;
 			case LStr:
 				if (f->Size() == 1)
+				{
 					return (float)atof((const char*)f->Array8());
+				}
 				else if (f->Size() == 2)
 				{
-					LString s(f->Array16());
+					LString s( (LString::Char16*) f->Array16());
 					return (float)s.Float();
 				}
 				else if (f->Size() == 4)
 				{
-					LString s((wchar_t*) f->Array32());
+					LString s( (LString::Char32*) f->Array32());
 					return (float)s.Float();
 				}
 				else
@@ -358,32 +364,45 @@ public:
 		return Default;
 	}
 
-	const char16 *GetStrW(int Id, const char16 *Default = NULL)
+	template<typename T>
+	const T *GetStrT(int Id, const T *Default = NULL)
 	{
 		auto f = GetField(Id);
 		if (!f || f->Type() != LStr)
 			return Default;
 		
-		if (f->Size() == 2)
+		switch (f->Size())
 		{
-			if (sizeof(wchar_t) == 2)
-				return (const char16*)f->Array16();
-			else
+			case 1:
 			{
-				// FIXME: Convert utf-16 to utf-32 (wchar_t)
+				if (sizeof(T) == 1)
+					return (const T*) f->Array8();
+				else
+					LAssert(!"FIXME: Convert utf-8");
+				break;
+			}
+			case 2:
+			{
+				if (sizeof(T) == 2)
+					return (const T*) f->Array16();
+				else
+					LAssert(!"FIXME: Convert utf-16");
+				break;
+			}
+			case 4:
+			{
+				if (sizeof(T) == 4)
+					return (const T*) f->Array32();
+				else
+					LAssert(!"FIXME: Convert utf-32");
+				break;
+			}
+			default:
+			{
+				LAssert(!"Unknown word size");
+				break;
 			}
 		}
-		else if (f->Size() == 4)
-		{
-			if (sizeof(wchar_t) == 4)
-				return (const char16*) f->Array32();
-			else
-			{
-				// FIXME: Convert utf-32 to utf-16 (wchar_t)
-			}
-		}
-		else
-			LAssert(!"Request for wrong string width");
 
 		return Default;
 	}
@@ -547,6 +566,7 @@ public:
 				Field *fld = (Field*)s;
 				if (!fld->IsValid())
 				{
+					fld->IsValid();
 					LAssert(!"Invalid field");
 					return false;
 				}
@@ -565,7 +585,7 @@ public:
 	{
 		enum Ids {
 			idNone,
-			idInt8,
+			idInt8 = 100,
 			idInt16,
 			idInt32,
 			idInt64,
@@ -579,6 +599,7 @@ public:
 		
 		LSerialize wr;
 		
+		// Write all the different types
 		uint8_t i8 = 20;
 		wr.SetInt(idInt8, i8);
 		
@@ -600,12 +621,13 @@ public:
 		char s8[] = "26";
 		wr.SetStr(idStr8, s8);
 
-		uint16_t s16[] = { '2', '7', 0 };
+		LString::Char16 s16[] = { '2', '7', 0 };
 		wr.SetStr(idStr16, s16);
 
-		uint32_t s32[] = { '2', '8', 0 };
+		LString::Char32 s32[] = { '2', '8', 0 };
 		wr.SetStr(idStr32, s32);
 
+		// Serialize them
 		LStringPipe p;
 		wr.Serialize(&p, true);
 		
@@ -614,6 +636,61 @@ public:
 		if (!rd.Serialize(&p, false))
 			return false;
 		
+		// Read out the results on the other side and see if they match?
+		if (rd.GetInt(idInt8) != i8)
+		{
+			LAssert(!"int8 failed");
+			return false;
+		}
+
+		if (rd.GetInt(idInt16) != i16)
+		{
+			LAssert(!"int16 failed");
+			return false;
+		}
+
+		if (rd.GetInt(idInt32) != i32)
+		{
+			LAssert(!"int32 failed");
+			return false;
+		}
+
+		if (rd.GetInt(idInt64) != i64)
+		{
+			LAssert(!"int64 failed");
+			return false;
+		}
+
+		if (rd.GetFloat(idFloat) != f)
+		{
+			LAssert(!"float failed");
+			return false;
+		}
+
+		if (rd.GetFloat(idDouble) != d)
+		{
+			LAssert(!"double failed");
+			return false;
+		}
+
+		if (Strcmp(rd.GetStr(idStr8), s8))
+		{
+			LAssert(!"str8 failed");
+			return false;
+		}
+
+		if (Strcmp(rd.GetStrT<LString::Char16>(idStr16), s16))
+		{
+			LAssert(!"str16 failed");
+			return false;
+		}
+
+		if (Strcmp(rd.GetStrT<LString::Char32>(idStr32), s32))
+		{
+			LAssert(!"str32 failed");
+			return false;
+		}
+
 		return true;
 	}
 };
