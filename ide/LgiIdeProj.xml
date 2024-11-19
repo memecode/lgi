@@ -2,6 +2,7 @@
 <Project TabSize="4" IndentSize="4" UseTabs="1" Makefile="./Makefile.linux" Exe="./lgiide" ShowWhitespace="0" BuildType="0" TargetType="0" TargetName="lgiide" Compiler="0">
 	<Node Name="Source Files" Type="1" Platforms="15" Open="1" Id="1">
 		<Node Name="Debugger" Type="1" Platforms="15" Open="0" Id="2">
+			<Node File="./src/BreakPointStore.h" Type="3" Platforms="15" />
 			<Node File="./src/DebugContext.cpp" Type="2" Platforms="15" />
 			<Node File="./src/DebugContext.h" Type="3" Platforms="15" />
 			<Node File="./src/Debugger.cpp" Type="2" Platforms="7" />
@@ -154,6 +155,8 @@ WINNATIVE</Release>
 					<Debug>/home/matthew/Code/Lgi/trunk/Ide/Code/IdeProjectSettings.cpp</Debug>
 				</All>
 			</Arguments>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -230,6 +233,7 @@ _GNU_SOURCE</Release>
 					<Debug>HAS_LIBSSH</Debug>
 					<Release>HAS_LIBSSH</Release>
 				</All>
+				<Linux />
 			</Defines>
 			<TargetType>
 				<All>Executable</All>
@@ -254,11 +258,17 @@ _GNU_SOURCE</Release>
 					<Release>`pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
 			</SystemIncludes>
-			<LibraryPaths />
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
 			<ApplicationIcon>
 				<Haiku>./resources/icon.hvif</Haiku>
 			</ApplicationIcon>
-			<Options />
+			<Options>
+				<All />
+				<Linux />
+			</Options>
 		</Build>
 		<Editor>
 			<TabSize>
@@ -273,6 +283,8 @@ _GNU_SOURCE</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
+			<CommentFile />
+			<CommentFunction />
 		</Editor>
 		<Debug>
 			<Environment>
@@ -283,10 +295,18 @@ _GNU_SOURCE</Release>
 					<Debug>/home/matthew/code/lgi/trunk/ide/LgiIdeProj.xml</Debug>
 				</All>
 			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
 		</Debug>
 		<Advanced>
-			<PostBuildCommands />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+			<OtherMakefileRules />
 		</Advanced>
-		<Remote />
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
 	</Settings>
 </Project>

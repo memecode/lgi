@@ -124,6 +124,7 @@ class IdeProject : public LXmlFactory, public IdeCommon
 	friend class ProjectNode;
 	friend class BuildThread;
 	class IdeProjectPrivate *d;
+	int bpStoreCb = 0;
 
 	bool OnNode(const char *Path, class ProjectNode *Node, bool Add);
 

@@ -2,20 +2,20 @@
 
 #include "lgi/common/StringClass.h"
 
-enum LSTypes
-{
-	// Primitive types (no array size)
-	LInt,
-	LFloat,
-
-	// Array types (has array size)
-	LStr,
-	LObject,
-	LBinary,
-};
-
 class LSerialize
 {
+	enum Types
+	{
+		// Primitive types (no array size)
+		LInt,
+		LFloat,
+
+		// Array types (has array size)
+		LStr,
+		LObject,
+		LBinary,
+	};
+
 	union Field
 	{
 		/*
@@ -34,8 +34,8 @@ class LSerialize
 
 	public:
 		// Field type
-		LSTypes Type() { return (LSTypes) u8[0]; }
-		void Type(LSTypes t) { u8[0] = (uint8_t)t; }
+		Types Type() { return (Types) u8[0]; }
+		void Type(Types t) { u8[0] = (uint8_t)t; }
 
 		// Size of individual element
 		uint8_t Size() { return u8[1]; }
@@ -447,24 +447,8 @@ public:
 		return true;
 	}
 
-	bool SetStr(int Id, const char *u)
-	{
-		if (!u)
-			return false;
-
-		size_t len = strlen(u);
-		Field *f = Alloc(Id, 8 + len + 1);
-		if (!f)
-			return false;
-
-		f->Type(LStr);
-		f->Size(1);
-		f->ArraySize() = (uint32_t)len;
-		memcpy(f->Array8(), u, len);
-		return true;
-	}
-
-	bool SetStr(int Id, const char16 *w)
+	template<typename T>
+	bool SetStr(int Id, const T *w)
 	{
 		if (!w)
 			return false;
@@ -479,6 +463,19 @@ public:
 		f->Size(sizeof(*w));
 		f->ArraySize() = (uint32_t)chars;
 		memcpy(f->Array8(), w, bytes);
+		return true;
+	}
+	
+	bool SetStr(int id, LString s)
+	{
+		auto f = Alloc(id, 8 + s.Length() + 1);
+		if (!f)
+			return false;
+
+		f->Type(LStr);
+		f->Size(1);
+		f->ArraySize() = (uint32_t)s.Length();
+		memcpy(f->Array8(), s.Get(), s.Length() + 1);
 		return true;
 	}
 
@@ -562,6 +559,61 @@ public:
 		return true;
 	}
 
+
+	// Unit test
+	static bool UnitTest()
+	{
+		enum Ids {
+			idNone,
+			idInt8,
+			idInt16,
+			idInt32,
+			idInt64,
+			idFloat,
+			idDouble,
+			idStr8,
+			idStr16,
+			idStr32,
+			idBinary
+		};
+		
+		LSerialize wr;
+		
+		uint8_t i8 = 20;
+		wr.SetInt(idInt8, i8);
+		
+		uint16_t i16 = 21;
+		wr.SetInt(idInt16, i16);
+
+		uint32_t i32 = 22;
+		wr.SetInt(idInt32, i32);
+
+		uint64_t i64 = 23;
+		wr.SetInt(idInt64, i64);
+		
+		float f = 24.0f;
+		wr.SetFloat(idFloat, f);
+
+		double d = 25.0f;
+		wr.SetFloat(idDouble, d);
+	
+		char s8[] = "26";
+		wr.SetStr(idStr8, s8);
+
+		uint16_t s16[] = { '2', '7', 0 };
+		wr.SetStr(idStr16, s16);
+
+		uint32_t s32[] = { '2', '8', 0 };
+		wr.SetStr(idStr32, s32);
+
+		LStringPipe p;
+		wr.Serialize(&p, true);
+		
+		LSerialize rd;
+		p.SetPos(0);
+		if (!rd.Serialize(&p, false))
+			return false;
+		
+		return true;
+	}
 };
-
-

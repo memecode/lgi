@@ -3751,6 +3751,18 @@ int AppWnd::OnNotify(LViewI *Ctrl, const LNotification &n)
 			}
 			break;
 		}
+		case IDC_BREAK_POINTS:
+		{
+			switch (n.Type)
+			{
+				case LNotifyDeleteKey:
+				{
+					d->BreakPoints.DeleteSelection();
+					break;
+				}
+			}
+			break;
+		}
 		case IDC_LOCALS_LIST:
 		{
 			if (d->Output->Locals &&
@@ -4537,11 +4549,15 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_TOGGLE_BREAKPOINT:
 		{
-			LAssert(!"Fixme");
-			/*
 			if (auto Cur = GetCurrentDoc())
-				ToggleBreakpoint(Cur->GetFileName(), Cur->GetLine());
-			*/
+			{
+				BreakPoint bp(Cur->GetFileName(), Cur->GetLine());
+				auto existing = d->BreakPoints.Has(bp);
+				if (existing != BreakPointStore::INVALID_ID)
+					d->BreakPoints.Delete(existing);
+				else
+					d->BreakPoints.Add(bp);
+			}
 			break;
 		}
 		case IDM_ATTACH_TO_PROCESS:

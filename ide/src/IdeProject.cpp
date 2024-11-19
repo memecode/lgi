@@ -2414,10 +2414,17 @@ IdeProject::IdeProject(AppWnd *App, ProjectNode *DepParent) : IdeCommon(NULL)
 	Project = this;
 	d = new IdeProjectPrivate(App, this, DepParent);
 	Tag = NewStr("Project");
+
+	bpStoreCb = App->GetBreakPointStore()->AddCallback([this](auto event, auto id)
+		{
+			SetUserFileDirty();
+		});
 }
 
 IdeProject::~IdeProject()
 {
+	d->App->GetBreakPointStore()->DeleteCallback(bpStoreCb);
+
 	d->App->OnProjectDestroy(this);
 	LXmlTag::Empty(true);
 	while (Items.Length())

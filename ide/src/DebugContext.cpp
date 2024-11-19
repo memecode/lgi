@@ -922,7 +922,10 @@ void LDebugContext::OnError(LString Str)
 	if (DebuggerLog)
 		DebuggerLog->Print("Error: %s\n", Str.Get());
 
-	LPopupNotification::Message(d->App, Str);
+	d->App->RunCallback([this, Str]()
+		{
+			LPopupNotification::Message(d->App, Str);
+		});
 }
 
 void LDebugContext::OnCrash(int Code)

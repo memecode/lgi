@@ -318,6 +318,26 @@ public:
 		LAssert(!"bp doesn't exist!?");
 		return false;
 	}
+	
+	bool DeleteSelection()
+	{
+		TLock lck(this, _FL);
+		if (!ui)
+			return false;
+		
+		LArray<BpItem*> sel;
+		if (!ui->GetSelection(sel))
+			return false;
+			
+		for (auto i: sel)
+		{
+			printf("deleting bp id=%i\n", i->id);
+			Delete(i->id);
+		}
+
+		printf("BreakPoints.len=%i\n", (int)BreakPoints.Length());
+		return true;
+	}
 
 	void SetEnable(int id, bool enabled)
 	{

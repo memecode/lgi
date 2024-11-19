@@ -95,7 +95,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 				else if (IsPython)
 					Status = BuildPyDefnList(Path, Source, Defs, DefnNone, Debug);
 				else
-					LAssert(!"Unknown type");
+					LgiTrace("%s:%i error: unknown file type '%s'\n", _FL, Ext);
 			}
 			else printf("%s:%i - No extension for '%s'\n", _FL, Path.Get());
 
