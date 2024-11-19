@@ -292,8 +292,7 @@ LgiFunc char16 *StrncpyW(char16 *a, const char16 *b, ssize_t n);
 LgiFunc ssize_t StrlenW(const char16 *a);
 /// Append a wide string to another
 LgiFunc void StrcatW(char16 *a, const char16 *b);
-/// Convert a wide string to an integer
-LgiFunc int AtoiW(const char16 *a);
+
 /// Convert a wide hex string to an integer
 LgiFunc int HtoiW(const char16 *a);
 /// Convert a wide hex string to an 64bit integer

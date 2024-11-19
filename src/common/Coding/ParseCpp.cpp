@@ -1046,7 +1046,7 @@ int LCppParserWorker::Evaluate(LArray<char16*> &Exp)
 		}
 		else if (IsDigit(*t))
 		{
-			Values.New() = AtoiW(t);
+			Values.New() = Atoi(t);
 		}
 		else
 		{

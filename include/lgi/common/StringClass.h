@@ -168,15 +168,78 @@ public:
 		Set(str);
 	}
 
-	/// const char16* constructor
-	LString(const wchar_t *str, ptrdiff_t wchars = -1)
+	/// Utf-16 constructor
+	LString
+	(
+		#if WINDOWS
+		const wchar_t *utf16,
+		#else
+		const uint16_t *utf16,
+		#endif
+		ptrdiff_t wchars = -1
+	)
 	{
 		Str = NULL;
-		SetW(str, wchars);
+		if (sizeof(*utf16) == sizeof(char16))
+		{
+			// 1:1 mapping (windows)
+			SetW((char16*)utf16, wchars);
+		}
+		else if (sizeof(char16) == 4) // Ie linux/haiku/mac
+		{
+			// Convert utf-16 to utf-8
+			if (!utf16)
+				return;
+			
+			// Measure size:
+			ptrdiff_t bytes = 0;
+			uint8_t utf8[6];
+			for (ptrdiff_t i=0;
+				(wchars >= 0 && i < wchars) ||
+				(wchars < 0 && utf16[i]);
+				i++)
+			{
+				uint8_t *out = utf8;
+				ssize_t inSize = *utf16 ? 2 : 1;
+				ssize_t outSize = sizeof(utf8);
+				if (!LgiUtf16To8(utf16, inSize, out, outSize))
+					break;
+				bytes += out - utf8;
+			}
+			
+			// Create memory buffer:
+			if (!Length(bytes))
+				return;
+				
+			// Convert string:
+			uint8_t *p = (uint8_t*) Str->Str;
+			auto end = p + Str->Len;
+			for (ptrdiff_t i=0;
+				(wchars >= 0 && i < wchars) ||
+				(wchars < 0 && utf16[i]);
+				i++)
+			{
+				ssize_t outSize = end - p;
+				ssize_t inSize = *utf16 ? 2 : 1;
+				if (!LgiUtf16To8(utf16, inSize, p, outSize))
+					break;
+			}
+			assert((char*)p == Str->End());
+			*p = 0; // NULL terminate string
+		}
+		else assert(!"No valid mapping for UTF16?");
 	}
 
 	/// Utf32 constructor
-	LString(const uint32_t *utf32, ptrdiff_t wchars = -1)
+	LString
+	(
+		#if WINDOWS
+		const uint32_t *utf32,
+		#else
+		const wchar_t *utf32,
+		#endif
+		ptrdiff_t wchars = -1
+	)
 	{
 		Str = NULL;
 		if (sizeof(*utf32) == sizeof(char16))
@@ -226,44 +289,6 @@ public:
 		}
 		else assert(!"No valid mapping for UTF32 to char16?");
 	}
-
-	/*
-	#if defined(_WIN32) || defined(MAC)
-	/// const uint32* constructor
-	LString(const uint32_t *str, ptrdiff_t chars = -1)
-	{
-		Str = NULL;
-
-		if (chars < 0)
-			chars = Strlen(str);
-		
-		ptrdiff_t utf_len = 0;
-		const uint32_t *end = str + chars;
-		const uint32_t *c = str;
-		while (c < end)
-		{
-			uint8_t utf[6], *u = utf;
-			ssize_t len = sizeof(utf);
-			if (!LgiUtf32To8(*c++, u, len))
-				break;
-			utf_len += u - utf;
-		}
-
-		if (Length((uint32_t)utf_len))
-		{
-			c = str;
-			uint8_t *u = (uint8_t*)Str->Str;
-			ssize_t len = Str->Len;
-			while (c < end)
-			{
-				if (!LgiUtf32To8(*c++, u, len))
-					break;
-			}
-			*u++ = 0;
-		}
-	}
-	#endif
-	*/
 
 	/// LString constructor
 	LString(const LString &s)

@@ -4,49 +4,67 @@
 
 enum LSTypes
 {
+	// Primitive types (no array size)
 	LInt,
-	LStr,
 	LFloat,
+
+	// Array types (has array size)
+	LStr,
 	LObject,
 	LBinary,
 };
 
 class LSerialize
 {
-	#ifdef WIN32
-	#pragma pack(push, before_pack)
-	#pragma pack(1)
-	#endif
-	struct Str
+	union Field
 	{
-		uint32_t Length;
-		union {
-			char u[1];
-			char16 w[1];
-		};
-	};
-	struct Field
-	{
-		uint8_t Type;
-		uint8_t Size;
-		uint16 Id;
-		union {
-			char bytes[1];
-			Str s;
-			uint8_t u8;
-			uint16 u16;
-			uint32_t u32;
-			uint64 u64;
-			float f;
-			double d;
-		};
+		/*
+		Data format:
+			uint8_t ObjectType;	 // LSTypes
+			uint8_t ElementSize; // in bytes
+			uint16_t Id;
+			if ObjectType == LStr || LObject || LBinary
+				uint32_t ArraySize
+			...PayloadBytes
+		*/
+		
+		uint8_t u8[8];
+		uint16_t u16[4];
+		uint32_t u32[2]; // At least have enough data for the headers and the array size...
+
+	public:
+		// Field type
+		LSTypes Type() { return (LSTypes) u8[0]; }
+		void Type(LSTypes t) { u8[0] = (uint8_t)t; }
+
+		// Size of individual element
+		uint8_t Size() { return u8[1]; }
+		void Size(uint8_t sz) { u8[1] = sz; }
+
+		// Field ID
+		uint16_t Id() { return u16[1]; }
+		void Id(uint16_t f) { u16[1] = f; }
+
+		// For atomic types... int, float etc
+		uint8_t  *Payload8()  { return (uint8_t*)  (u32 + 1); }
+		uint16_t *Payload16() { return (uint16_t*) (u32 + 1); }
+		uint32_t *Payload32() { return (uint32_t*) (u32 + 1); }
+		uint64_t *Payload64() { return (uint64_t*) (u32 + 1); }
+		float    *PayloadF()  { return (float*)    (u32 + 1); }
+		double   *PayloadD()  { return (double*)   (u32 + 1); }
+
+		// For array based string, object and binary types...
+		uint32_t &ArraySize() { return u32[1]; }
+		uint8_t  *Array8()    { return (uint8_t*)  (u32 + 2); }
+		uint16_t *Array16()   { return (uint16_t*) (u32 + 2); }
+		uint32_t *Array32()   { return (uint32_t*) (u32 + 2); }
 
 		bool IsValid()
 		{
-			switch (Type)
+			switch (Type())
 			{
 				case LInt:
-					switch (Size)
+					switch (Size())
 					{
 						case 1:
 						case 2:
@@ -56,17 +74,19 @@ class LSerialize
 					}
 					return false;
 				case LStr:
-					if (Size == 1)
-						return s.u[s.Length] == 0;
-					else if (Size == sizeof(char16))
-						return s.w[s.Length] == 0;
+					if (Size() == 1)
+						return Array8()[ArraySize()] == 0;
+					else if (Size() == 2)
+						return Array16()[ArraySize()] == 0;
+					else if (Size() == 4)
+						return Array32()[ArraySize()] == 0;
 					return false;
 				case LBinary:
-					if (Size != 1)
+					if (Size() != 1)
 						return false;
 					return true;
 				case LFloat:
-					return Size == sizeof(f);
+					return Size() == sizeof(float);
 				case LObject:
 					return true;
 			}
@@ -76,29 +96,22 @@ class LSerialize
 
 		uint32_t Sizeof()
 		{
-			switch (Type)
+			switch (Type())
 			{
 				case LInt:
 				case LFloat:
-					return 4 + Size;
+					return 4 + Size();
 				case LStr:
-					return 8 + (Size * (s.Length + 1));
+					return 8 + (Size() * (ArraySize() + 1));
 				case LObject:
-					return 4 + u32;
+					return 4 + Size();
 				case LBinary:
-					return 8 + s.Length;
+					return 8 + ArraySize();
 			}
 
 			return sizeof(*this);
 		}
-	}
-	#ifndef WIN32
-	__attribute__((packed))
-	#endif
-		;
-	#ifdef WIN32
-	#pragma pack(pop, before_pack)
-	#endif
+	};
 
 	uint16 ObjectId;
 	bool ToStream;
@@ -106,6 +119,7 @@ class LSerialize
 	LArray<char> FieldMem;
 	LHashTbl<IntKey<int>, ssize_t> Fields;
 	uint32_t Bytes;
+	LAutoWString wideCache;
 
 protected:
 	Field *GetField(int Id)
@@ -122,12 +136,12 @@ protected:
 		if (ToStream)
 		{
 			Field f;
-			f.Type = LInt;
-			f.Id = Id;
-			f.Size = sizeof(i);
-			int Bytes = 4 + f.Size;
-			memcpy(f.bytes, &i, sizeof(i));
+			f.Type(LInt);
+			f.Id(Id);
+			f.Size(sizeof(i));
+			memcpy(f.Payload8(), &i, sizeof(i));
 
+			int Bytes = f.Sizeof();
 			if (Stream->Write(&f, Bytes) != Bytes)
 				return false;
 		}
@@ -139,10 +153,10 @@ protected:
 
 			switch (f->Size)
 			{
-				case 1: i = (T)f->u8; break;
-				case 2: i = (T)f->u16; break;
-				case 4: i = (T)f->u32; break;
-				case 8: i = (T)f->u64; break;
+				case 1: i = (T)*f->Payload8();  break;
+				case 2: i = (T)*f->Payload16(); break;
+				case 4: i = (T)*f->Payload32(); break;
+				case 8: i = (T)*f->Payload64(); break;
 				default: return false;
 			}
 		}
@@ -155,22 +169,32 @@ protected:
 		if (ToStream)
 		{
 			Field f;
-			f.Type = LStr;
-			f.Size = 1;
-			f.Id = Id;
-			f.s.Length = (uint32_t)s.Length();
-			ssize_t bytes = (char*)&f.s.u - (char*)&f;
-			if (Stream->Write(&f, bytes) != bytes)
+			f.Type(LStr);
+			f.Size(1);
+			f.Id(Id);
+			f.ArraySize() = (uint32_t)s.Length();
+			
+			ssize_t hdrBytes = 8;
+			ssize_t payloadBytes = s.Length() + 1/*null*/;
+			if (Stream->Write(&f, hdrBytes) != hdrBytes)
 				return false;
-			if (Stream->Write(s.Get(), s.Length()) != s.Length())
+			if (Stream->Write(s.Get(), payloadBytes) != payloadBytes)
 				return false;
 		}
 		else
 		{
-			Field *f = GetField(Id);
-			if (!f || f->Type != LStr)
+			auto f = GetField(Id);
+			if (!f || f->Type() != LStr)
 				return false;
-			return s.Set(f->s.u, f->s.Length);
+			
+			if (f->Size() != 1)
+			{
+				// FIXME: add conversion here?
+				LAssert(!"wrong char size");
+				return false;
+			}
+			
+			return s.Set((char*)f->Payload8(), f->ArraySize());
 		}
 
 		return false;
@@ -178,14 +202,15 @@ protected:
 
 	Field *Alloc(int Id, size_t Sz)
 	{
-		Field *f = GetField(Id);
+		auto f = GetField(Id);
 		if (f && f->Sizeof() >= Sz)
 			return f;
 
 		size_t Off = FieldMem.Length();
 		FieldMem.Length(Off + Sz);
+
 		f = (Field*) FieldMem.AddressOf(Off);
-		f->Id = Id;
+		f->Id(Id);
 		Fields.Add(Id, Off);
 		return f;		
 	}
@@ -211,10 +236,9 @@ public:
 	{
 		size_t Sz = 0;
 		
-		// for (ssize_t o = Fields.First(); o >= 0; o = Fields.Next())
 		for (auto o : Fields)
 		{
-			Field *i = (Field*)FieldMem.AddressOf(o.value);
+			auto i = (Field*)FieldMem.AddressOf(o.value);
 			Sz += i->Sizeof();
 		}
 
@@ -230,31 +254,33 @@ public:
 
 	int64 GetInt(int Id, int Default = -1)
 	{
-		Field *f = GetField(Id);
-		if (!f || f->Type == LObject)
+		auto f = GetField(Id);
+		if (!f || f->Type() == LObject)
 			return Default;
 
-		switch (f->Type)
+		switch (f->Type())
 		{
 			case LInt:
-				switch (f->Size)
+				switch (f->Size())
 				{
 					case 1:
-						return f->u8;
+						return *f->Payload8();
 					case 2:
-						return f->u16;
+						return *f->Payload16();
 					case 4:
-						return f->u32;
+						return *f->Payload32();
 					case 8:
-						return f->u64;
+						return *f->Payload64();
 				}
 			case LFloat:
-				return (int)f->f;
+				return (int)*f->PayloadF();
 			case LStr:
-				if (f->Size == 1)
-					return atoi(f->s.u);
-				else if (f->Size == 2)
-					return AtoiW(f->s.w);
+				if (f->Size() == 1)
+					return Atoi(f->Array8());
+				else if (f->Size() == 2)
+					return Atoi(f->Array16());
+				else if (f->Size() == 4)
+					return Atoi(f->Array32());
 				else
 					LAssert(!"Invalid string size");
 				break;
@@ -268,37 +294,42 @@ public:
 	float GetFloat(int Id, float Default = 0.0)
 	{
 		Field *f = GetField(Id);
-		if (!f || f->Type == LObject)
+		if (!f || f->Type() == LObject)
 			return Default;
 
-		switch (f->Type)
+		switch (f->Type())
 		{
 			case LInt:
-				switch (f->Size)
+				switch (f->Size())
 				{
 					case 1:
-						return (float)f->u8;
+						return (float)*f->Payload8();
 					case 2:
-						return (float)f->u16;
+						return (float)*f->Payload16();
 					case 4:
-						return (float)f->u32;
+						return (float)*f->Payload32();
 					case 8:
-						return (float)f->u64;
+						return (float)*f->Payload64();
 				}
 			case LFloat:
-				if (f->Size == sizeof(float))
-					return f->f;
-				else if (f->Size == sizeof(double))
-					return (float)f->d;
+				if (f->Size() == sizeof(float))
+					return *f->PayloadF();
+				else if (f->Size() == sizeof(double))
+					return (float)*f->PayloadD();
 				else
 					LAssert(!"Invalid size.");
 				break;
 			case LStr:
-				if (f->Size == 1)
-					return (float)atof(f->s.u);
-				else if (f->Size == 2)
+				if (f->Size() == 1)
+					return (float)atof((const char*)f->Array8());
+				else if (f->Size() == 2)
 				{
-					LString s(f->s.w);
+					LString s(f->Array16());
+					return (float)s.Float();
+				}
+				else if (f->Size() == 4)
+				{
+					LString s((wchar_t*) f->Array32());
 					return (float)s.Float();
 				}
 				else
@@ -315,12 +346,12 @@ public:
 
 	const char *GetStr(int Id, const char *Default = NULL)
 	{
-		Field *f = GetField(Id);
-		if (!f || f->Type != LStr)
+		auto f = GetField(Id);
+		if (!f || f->Type() != LStr)
 			return Default;
 		
-		if (f->Size == 1)
-			return f->s.u;
+		if (f->Size() == 1)
+			return (const char*) f->Array8();
 		else
 			LAssert(!"Request for wrong string width");
 
@@ -329,12 +360,28 @@ public:
 
 	const char16 *GetStrW(int Id, const char16 *Default = NULL)
 	{
-		Field *f = GetField(Id);
-		if (!f || f->Type != LStr)
+		auto f = GetField(Id);
+		if (!f || f->Type() != LStr)
 			return Default;
 		
-		if (f->Size == 2)
-			return f->s.w;
+		if (f->Size() == 2)
+		{
+			if (sizeof(wchar_t) == 2)
+				return (const char16*)f->Array16();
+			else
+			{
+				// FIXME: Convert utf-16 to utf-32 (wchar_t)
+			}
+		}
+		else if (f->Size() == 4)
+		{
+			if (sizeof(wchar_t) == 4)
+				return (const char16*) f->Array32();
+			else
+			{
+				// FIXME: Convert utf-32 to utf-16 (wchar_t)
+			}
+		}
 		else
 			LAssert(!"Request for wrong string width");
 
@@ -343,27 +390,27 @@ public:
 
 	bool SetBinary(int Id, void *Ptr, ssize_t Size)
 	{
-		Field *f = Alloc(Id, 8 + Size);
+		auto f = Alloc(Id, 8 + Size);
 		if (!f)
 			return false;
 		
-		f->Type = LBinary;
-		f->Size = 1;
-		f->s.Length = (uint32_t) Size;
+		f->Type(LBinary);
+		f->Size(1);
+		f->ArraySize() = (uint32_t) Size;
 		if (Ptr && Size > 0)
-			memcpy(f->s.u, Ptr, Size);
+			memcpy(f->Array8(), Ptr, Size);
 		
 		return true;
 	}
 
 	bool GetBinary(int Id, uint8_t *&Ptr, uint32_t &Size)
 	{
-		Field *f = GetField(Id);
-		if (!f || f->Type != LBinary)
+		auto f = GetField(Id);
+		if (!f || f->Type() != LBinary)
 			return false;
 		
-		Ptr = (uint8_t*) f->s.u;
-		Size = f->s.Length;
+		Ptr = (uint8_t*) f->Array8();
+		Size = f->ArraySize();
 
 		#ifdef _DEBUG
 		uint8_t *End = Ptr + Size;
@@ -377,26 +424,26 @@ public:
 	template<typename T>
 	bool SetInt(int Id, T i)
 	{
-		Field *f = Alloc(Id, 4 + sizeof(i));
+		auto f = Alloc(Id, 4 + sizeof(i));
 		if (!f)
 			return false;
 
-		f->Type = LInt;
-		f->Size = sizeof(i);
-		memcpy(f->bytes, &i, sizeof(i));
+		f->Type(LInt);
+		f->Size(sizeof(i));
+		memcpy(f->Payload8(), &i, sizeof(i));
 		return true;
 	}
 
 	template<typename T>
 	bool SetFloat(int Id, T i)
 	{
-		Field *f = Alloc(Id, 4 + sizeof(i));
+		auto f = Alloc(Id, 4 + sizeof(i));
 		if (!f)
 			return false;
 
-		f->Type = LFloat;
-		f->Size = sizeof(i);
-		memcpy(f->bytes, &i, sizeof(i));
+		f->Type(LFloat);
+		f->Size(sizeof(i));
+		memcpy(f->Payload8(), &i, sizeof(i));
 		return true;
 	}
 
@@ -405,15 +452,15 @@ public:
 		if (!u)
 			return false;
 
-		size_t len = strlen(u) + 1;
-		Field *f = Alloc(Id, 8 + len);
+		size_t len = strlen(u);
+		Field *f = Alloc(Id, 8 + len + 1);
 		if (!f)
 			return false;
 
-		f->Type = LStr;
-		f->Size = 1;
-		f->s.Length = (uint32_t) (len - 1);
-		memcpy(f->s.u, u, len);
+		f->Type(LStr);
+		f->Size(1);
+		f->ArraySize() = (uint32_t)len;
+		memcpy(f->Array8(), u, len);
 		return true;
 	}
 
@@ -422,15 +469,16 @@ public:
 		if (!w)
 			return false;
 
-		size_t len = Strlen(w) + 1;
-		Field *f = Alloc(Id, 8 + len);
+		ssize_t chars = Strlen(w);
+		ssize_t bytes = (chars + 1) * sizeof(*w);
+		Field *f = Alloc(Id, 8 + bytes);
 		if (!f)
 			return false;
 
-		f->Type = LStr;
-		f->Size = sizeof(*w);
-		f->s.Length = (uint32_t) (len - 1);
-		memcpy(f->s.u, w, len * sizeof(*w));
+		f->Type(LStr);
+		f->Size(sizeof(*w));
+		f->ArraySize() = (uint32_t)chars;
+		memcpy(f->Array8(), w, bytes);
 		return true;
 	}
 
@@ -439,11 +487,11 @@ public:
 		if (!ptr || size < 8)
 			return false;
 
-		Field *f = (Field*)ptr;
-		if (f->Type != LObject)
+		auto f = (Field*)ptr;
+		if (f->Type() != LObject)
 			return false;
 
-		if (f->u32 > size)
+		if (f->Sizeof() > size)
 			return false;
 
 		return true;
@@ -462,18 +510,17 @@ public:
 			}
 
 			Field f;
-			f.Size = 0;
-			f.Type = LObject;
-			f.Id = GetObjectId();
-			f.u32 = Size;
+			f.Type(LObject);
+			f.Size(1);
+			f.Id(GetObjectId());
+			f.ArraySize() = Size;
 			
 			if (stream->Write(&f, 8) != 8)
 				return false;
 
-			// for (ssize_t o = Fields.First(); o >= 0; o = Fields.Next())
-			for (auto o : Fields)
+			for (auto o: Fields)
 			{
-				Field *i = (Field*)FieldMem.AddressOf(o.value);
+				auto i = (Field*)FieldMem.AddressOf(o.value);
 				int bytes = i->Sizeof();
 				if (stream->Write(i, bytes) != bytes)
 					return false;
@@ -487,12 +534,12 @@ public:
 			if (stream->Read(&f, 8) != 8)
 				return false;
 
-			if (f.Type != LObject)
+			if (f.Type() != LObject)
 				return false;
-			ObjectId = f.Id;
+			ObjectId = f.Id();
 
-			FieldMem.Length(f.u32);
-			if (stream->Read(FieldMem.AddressOf(), f.u32) != f.u32)
+			FieldMem.Length(f.ArraySize());
+			if (stream->Read(FieldMem.AddressOf(), f.ArraySize()) != f.ArraySize())
 				return false;
 
 			// Parse all the fields into a hash table for O(1) access.
@@ -507,7 +554,7 @@ public:
 					return false;
 				}
 
-				Fields.Add(fld->Id, s - FieldMem.AddressOf(0));
+				Fields.Add(fld->Id(), s - FieldMem.AddressOf(0));
 				s += fld->Sizeof();
 			}
 		}
