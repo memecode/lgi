@@ -352,6 +352,7 @@
     <ClCompile Include="..\src\win\General\Mem.cpp" />
     <ClCompile Include="..\src\win\General\ShowFileProp_Win.cpp" />
     <ClCompile Include="..\src\win\INet\MibAccess.cpp" />
+    <ClCompile Include="..\src\win\Lgi\Roster.cpp" />
     <ClCompile Include="..\src\win\Lgi\SubProcess.cpp" />
     <ClCompile Include="..\src\win\Lgi\App.cpp" />
     <ClCompile Include="..\src\win\Lgi\ClipBoard.cpp" />
@@ -546,6 +547,7 @@
     <ClInclude Include="..\include\lgi\common\RegKey.h" />
     <ClInclude Include="..\include\lgi\common\RichTextEdit.h" />
     <ClInclude Include="..\include\lgi\common\Rops.h" />
+    <ClInclude Include="..\include\lgi\common\Roster.h" />
     <ClInclude Include="..\include\lgi\common\RtfHtml.h" />
     <ClInclude Include="..\include\lgi\common\Scp.h" />
     <ClInclude Include="..\include\lgi\common\Scripting.h" />

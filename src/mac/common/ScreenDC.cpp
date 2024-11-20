@@ -256,8 +256,7 @@ void LScreenDC::SetClient(LRect *c)
 		}
 		else
 		{
-			d->Rc = d->Stack.Last();
-			d->Stack.PopLast();
+			d->Rc = d->Stack.PopLast();
 			CGContextRestoreGState(d->Ctx);
 		}
 		

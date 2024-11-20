@@ -1892,8 +1892,7 @@ void BuildThread::Step1()
 		return; // nothing to do...
 
 	// Step 1, check the path for a project file...
-	auto p = backendPaths.Last();
-	backendPaths.PopLast();
+	auto p = backendPaths.PopLast();
 
 	StreamToLog log(Proj->GetApp());
 	// log.Print("%s: readdir '%s'\n", __FUNCTION__, p.Get());

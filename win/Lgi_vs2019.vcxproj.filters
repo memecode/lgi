@@ -509,6 +509,9 @@
     <ClCompile Include="..\src\common\Net\CommsBus.cpp">
       <Filter>Source Files\Network\CommsBus</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\win\Lgi\Roster.cpp">
+      <Filter>Source Files\Core\Process</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\lgi\common\About.h">
@@ -1239,6 +1242,9 @@
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\CommsBus.h">
       <Filter>Source Files\Network\CommsBus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Roster.h">
+      <Filter>Source Files\Core\Process</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

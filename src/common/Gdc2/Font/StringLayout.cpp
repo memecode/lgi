@@ -434,10 +434,7 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 
 								// So we want to keep 'StartLine' to 'k-1' as is...
 								while (Strs.Length() > k)
-								{
-									delete Strs.Last();
-									Strs.PopLast();
-								}
+									delete Strs.PopLast();
 
 								if (Broken)
 								{

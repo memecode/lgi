@@ -4823,8 +4823,7 @@ bool BlameLine::Parse(VersionCtrl type, LArray<BlameLine> &out, LString in)
 					
 					auto &o = out.New();
 					o.ref = eRef;
-					o.line = parts.Last();
-					parts.PopLast();
+					o.line = parts.PopLast();
 
 					LString::Array name;
 					LDateTime dt;
