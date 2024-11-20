@@ -133,12 +133,15 @@
 			</Node>
 			<Node Name="Process" Type="1" Platforms="15" Open="0" Id="27">
 				<Node Name="Posix" Type="1" Platforms="15" Id="1">
-					<Node File=".\src\posix\SubProcess.cpp" Type="2" Platforms="14" />
+					<Node File="./src/posix/Roster.cpp" Type="2" Platforms="14" />
+					<Node File="./src/posix/SubProcess.cpp" Type="2" Platforms="14" />
 				</Node>
-				<Node File="./include/lgi/common/SubProcess.h" Type="3" Platforms="15" />
 				<Node Name="Win" Type="1" Platforms="15" Id="2">
+					<Node File="./src/win/Lgi/Roster.cpp" Type="2" Platforms="1" />
 					<Node File="./src/win/Lgi/SubProcess.cpp" Type="2" Platforms="1" />
 				</Node>
+				<Node File="./include/lgi/common/Roster.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/SubProcess.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Resources" Type="1" Platforms="15" Open="0" Id="28">
 				<Node File="./src/common/Resource/LgiRes.cpp" Type="2" Platforms="15" />
@@ -499,6 +502,11 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
+			<Executable>
+				<Linux />
+			</Executable>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -568,6 +576,7 @@ gnu
 network
 be</Release>
 				</Haiku>
+				<All />
 			</Libraries>
 			<TargetName>
 				<Linux>
@@ -591,15 +600,46 @@ _GNU_SOURCE</Debug>
 					<Release>POSIX
 _GNU_SOURCE</Release>
 				</Haiku>
+				<Linux />
 			</Defines>
 			<Options>
 				<Linux>
 					<Debug>-Wno-format-truncation</Debug>
 					<Release>-Wno-format-truncation</Release>
 				</Linux>
+				<All />
 			</Options>
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
+			<ApplicationIcon />
 		</Build>
-		<Advanced />
-		<Debug />
+		<Advanced>
+			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+		</Advanced>
+		<Debug>
+			<Environment />
+			<Arguments>
+				<All />
+			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
+		</Debug>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
+		<Editor>
+			<TabSize />
+			<IndentSize />
+			<ShowWhiteSpace />
+			<UseHardTabs />
+			<CommentFile />
+			<CommentFunction />
+		</Editor>
 	</Settings>
 </Project>

@@ -1044,10 +1044,15 @@ LDirectory *LDirectory::Clone()
 
 int LDirectory::First(const char *Name, const char *Pattern)
 {
+	printf("%s:%i - first %s %s\n", _FL, Name, Pattern);
+
 	Close();
 
 	if (!Name)
-		return 0;
+	{
+		printf("%s:%i - needs name arg\n", _FL);
+		return false;
+	}
 
 	strcpy_s(d->path, sizeof(d->path), Name);
 	if (!Pattern || stricmp(Pattern, LGI_ALL_FILES) == 0)
@@ -1073,18 +1078,29 @@ int LDirectory::First(const char *Name, const char *Pattern)
 	
 	d->end = d->path + strlen(d->path);	
 	d->dir = opendir(d->path);
-	if (d->dir)
+	if (!d->dir)
+		printf("%s:%i - opendir failed: %i\n", _FL, errno);
+	else
 	{
 		d->entry = readdir(d->dir);
-		if (d->entry)
+		if (!d->entry)
+			printf("%s:%i - readdir failed: %i\n", _FL, errno);
+		else
 		{
 			char s[MaxPathLen];
 			LMakePath(s, sizeof(s), d->path, GetName());
 			if (lstat(s, &d->stat))
+			{
+				printf("%s:%i - lstat failed: %i\n", _FL, errno);
 				return false;
+			}
 
-			if (d->Ignore() && !Next())
+			if (d->Ignore())
+			{
+				if (Next())
+					return true;
 				return false;
+			}
 		}
 	}
 
@@ -1093,28 +1109,29 @@ int LDirectory::First(const char *Name, const char *Pattern)
 
 int LDirectory::Next()
 {
-	int Status = false;
-
 	while (d->dir && d->entry)
 	{
 		if ((d->entry = readdir(d->dir)))
 		{
-			char s[MaxPathLen];
+			if (d->Ignore())
+				continue;
+			
+			char s[MaxPathLen] = "";
 			
 			*d->end = 0;
 			LMakePath(s, sizeof(s), d->path, GetName());
+			// printf("%s:%i - next '%s' + '%s' = '%s'\n", _FL, d->path, GetName(), s);
 			if (lstat(s, &d->stat))
-				break;
-
-			if (!d->Ignore())
 			{
-				Status = true;
+				printf("%s:%i - lstat failed %i\n", _FL, errno);
 				break;
 			}
+
+			return true;
 		}
 	}
 
-	return Status;
+	return false;
 }
 
 int LDirectory::Close()

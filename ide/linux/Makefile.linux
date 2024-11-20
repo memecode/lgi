@@ -31,13 +31,13 @@ ifeq ($(Build),Debug)
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I../include \
+		-I./resources \
+		-I./src \
 		-I../private/common \
 		-I../include/lgi/linux \
 		`pkg-config --cflags gtk+-3.0` \
-		-I./resources \
-		-I../include/lgi/linux/Gtk \
-		-I./src
+		-I../include \
+		-I../include/lgi/linux/Gtk
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
@@ -50,26 +50,37 @@ else
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I../include \
-		-I../include/lgi/linux \
-		-I../include/lgi/linux/Gtk \
 		-I./src \
+		-I../include \
 		-I./resources \
-		-I../private/common \
-		`pkg-config --cflags gtk+-3.0`
+		-I../include/lgi/linux \
+		`pkg-config --cflags gtk+-3.0` \
+		-I../include/lgi/linux/Gtk \
+		-I../private/common
 endif
 
 # Dependencies
-Source =	src/LgiUtils.cpp \
-			../src/common/Lgi/About.cpp \
-			src/IdeProject.cpp \
-			src/WebFldDlg.cpp \
-			src/FtpThread.cpp \
-			src/DocEdit.cpp \
-			src/DocEditStyling.cpp \
-			src/AddFtpFile.cpp \
+Source =	../src/common/Net/Http.cpp \
+			../src/common/Text/HtmlCommon.cpp \
+			src/History.cpp \
+			../src/common/Text/TextView4.cpp \
+			../src/common/Text/Html.cpp \
+			../src/common/Text/DocView.cpp \
+			../src/common/Lgi/Mdi.cpp \
+			../src/common/Net/OpenSSLSocket.cpp \
 			src/DebugContext.cpp \
+			../src/common/Text/HtmlParser.cpp \
+			../src/common/Text/Homoglyphs/Homoglyphs.cpp \
+			../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
 			../src/common/Coding/ParseCpp.cpp \
+			../src/common/Text/RemoveAnsi.cpp \
+			../src/common/Gdc2/Filters/Png.cpp \
+			../src/common/Text/TextConvert.cpp \
+			src/WebFldDlg.cpp \
+			../src/common/Lgi/About.cpp \
+			src/DocEditStyling.cpp \
+			src/FtpThread.cpp \
+			src/IdeProject.cpp \
 			../src/common/Net/Ftp.cpp \
 			src/IdeProjectSettings.cpp \
 			src/MissingFiles.cpp \
@@ -80,31 +91,20 @@ Source =	src/LgiUtils.cpp \
 			src/IdeFindInFiles.cpp \
 			src/FindSymbol.cpp \
 			src/JavascriptParser.cpp \
-			../src/common/Text/HtmlCommon.cpp \
 			src/PythonParser.cpp \
 			src/SimpleCppParser.cpp \
 			src/SysCharSupport.cpp \
 			../src/common/Coding/LexCpp.cpp \
-			../src/common/Net/OpenSSLSocket.cpp \
 			src/IdeCommon.cpp \
 			src/MemDumpViewer.cpp \
 			src/SpaceTabConv.cpp \
-			../src/common/Text/Html.cpp \
-			../src/common/Text/HtmlParser.cpp \
-			../src/common/Text/Homoglyphs/Homoglyphs.cpp \
-			../src/common/Text/TextView4.cpp \
-			../src/common/Text/DocView.cpp \
-			../src/common/Net/Http.cpp \
-			../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
+			src/LgiUtils.cpp \
+			src/DocEdit.cpp \
 			../src/common/Lgi/LgiMain.cpp \
-			../src/common/Lgi/Mdi.cpp \
-			../src/common/Text/RemoveAnsi.cpp \
-			../src/common/Gdc2/Filters/Png.cpp \
-			../src/common/Text/TextConvert.cpp \
-			src/LgiIde.cpp \
+			src/Debugger.cpp \
 			src/IdeDoc.cpp \
-			src/History.cpp \
-			src/Debugger.cpp
+			src/LgiIde.cpp \
+			src/AddFtpFile.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -236,6 +236,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/RegKey.h \
 	../include/lgi/common/Res.h \
 	../include/lgi/common/Rops.h \
+	../include/lgi/common/Roster.h \
 	../include/lgi/common/ScrollBar.h \
 	../include/lgi/common/SkinEngine.h \
 	../include/lgi/common/Slider.h \
@@ -411,6 +412,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/linux/Lgi/Thread.cpp \
 	../src/linux/Lgi/View.cpp \
 	../src/linux/Lgi/Window.cpp \
+	../src/posix/Roster.cpp \
 	../src/posix/SubProcess.cpp \
 	../../../../../../usr/include/libayatana-appindicator3-0.1/libayatana-appindicator/app-indicator.h
 	export Build=$(Build); \
@@ -430,10 +432,10 @@ cleanall :
 	+make -C "../" -f ./linux/Makefile.linux clean
 
 VPATH=$(BuildDir) \
-	../src/common/Lgi \
-	../src/common/Net \
-	./src \
-	../src/common/Coding \
+	../src/common/Text/Homoglyphs \
 	../src/common/Text \
+	../src/common/Net \
 	../src/common/Gdc2/Filters \
-	../src/common/Text/Homoglyphs
+	../src/common/Lgi \
+	../src/common/Coding \
+	./src
