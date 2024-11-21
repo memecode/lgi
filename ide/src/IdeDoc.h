@@ -37,7 +37,7 @@ public:
 	void OnPosChange() override;
 	void OnPaint(LSurface *pDC) override;
 	bool IsFile(const char *File);
-	bool AddBreakPoint(int id, bool Add);
+	bool OnBreakPoint(int id, bool Add);
 	
 	bool OpenFile(const char *File);
 	bool OpenData(LString Data);

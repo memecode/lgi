@@ -1410,7 +1410,7 @@ bool IdeDoc::IsFile(const char *File)
 	return File ? d->IsFile(File) : false;
 }
 
-bool IdeDoc::AddBreakPoint(int id, bool Add)
+bool IdeDoc::OnBreakPoint(int id, bool Add)
 {
 	auto bp = d->App->GetBreakPointStore()->Get(id);
 	if (!bp)

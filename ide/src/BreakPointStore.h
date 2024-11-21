@@ -308,10 +308,12 @@ public:
 		TLock lck(this, _FL);
 		if (auto bp = BreakPoints.Find(id))
 		{
+			// Do the event first so that the clients can know which breakpoint 'id' refers to.
+			Notify(TBreakPointDeleted, id);
+
+			// Now actually remove it...
 			delete bp;
 			BreakPoints.Delete(id);
-
-			Notify(TBreakPointDeleted, id);
 			return true;
 		}
 

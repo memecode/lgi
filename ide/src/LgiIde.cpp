@@ -1202,6 +1202,7 @@ public:
 	LAutoPtr<FindSymbolSystem> FindSym;
 	LArray<LAutoString> SystemIncludePaths;
 	BreakPointStore BreakPoints;
+	int DocBpCallback = BreakPointStore::INVALID_ID;
 	
 	// Debugging
 	LDebugContext *DbgContext = NULL;
@@ -1909,11 +1910,31 @@ AppWnd::AppWnd()
 	LFinishXWindowsStartup(this);
 	#endif
 	
-	// LCommsBus::UnitTests(GetBuildLog());
+	d->DocBpCallback = d->BreakPoints.AddCallback([this](auto event, auto id)
+		{
+			if (event == BreakPointStore::TBreakPointAdded ||
+				event == BreakPointStore::TBreakPointDeleted)
+			{
+				auto bp = d->BreakPoints.Get(id);
+				if (bp.File)
+				{
+					// Tell the document about the break point...
+					if (auto doc = FindOpenFile(bp.File))
+					{
+						auto added = event == BreakPointStore::TBreakPointAdded;
+						// GetBuildLog()->Print("OnBreakPoint(%s, %i)\n", bp.File.Get(), added);
+						doc->OnBreakPoint(id, added);
+					}
+					else GetBuildLog()->Print("%s:%i - no file '%s'\n", _FL, bp.File.Get());					
+				}
+			}
+		});
 }
 
 AppWnd::~AppWnd()
 {
+	d->BreakPoints.DeleteCallback(d->DocBpCallback);
+
 	// Everything needs to be clean BEFORE we get here... because we can't show
 	// any async UI to select save locations or anything.
 	LAssert(IsClean());

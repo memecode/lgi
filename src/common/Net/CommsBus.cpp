@@ -7,8 +7,9 @@
 #define RETRY_SERVER		-2
 #define RESEND_TIMEOUT		1000
 
-#if 0
-#define LOG(...)			printf(__VA_ARGS__)
+#if 1
+#define LOG(...)			
+// #define LOG(...)			printf(__VA_ARGS__)
 #else
 #define LOG(...)			if (log) log->Print(__VA_ARGS__)
 #endif
@@ -405,7 +406,7 @@ struct LCommsBusPriv :
 								status = c->Write(blk);
 								if (!status)
 								{
-									LOG("%s error: write failed.\n", Describe().Get(), _FL);
+									LOG("%s error: write failed.\n", Describe().Get());
 								}
 								break;
 							}

@@ -3679,7 +3679,7 @@ bool IdeProject::LoadBreakPoints(IdeDoc *doc)
 
 			if (normalized.Equals(fn))
 			{
-				doc->AddBreakPoint(bp, true);
+				doc->OnBreakPoint(bp, true);
 				return true;
 			}
 
