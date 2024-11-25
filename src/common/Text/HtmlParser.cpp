@@ -367,7 +367,7 @@ char *LHtmlParser::ParsePropList(char *s, LHtmlElement *Obj, bool &Closed)
 			while (IsWhite(*after))
 				after++;
 			
-			if (strchr("</>", *after))
+			if (strchr("</>=", *after))
 			{
 				// looks like tag delimiters, so just ignore the quote...
 				s++;
