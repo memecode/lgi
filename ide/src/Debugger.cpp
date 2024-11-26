@@ -88,6 +88,10 @@ class Gdb :
 		TError,
 		TAdding,
 		TAdded,
+		TDeleting,
+		
+		TPendingAdd,
+		TPendingDelete,
 	};
 	struct BpInfo
 	{
@@ -203,18 +207,53 @@ class Gdb :
 
 	void BreakPointEvent(BreakPointStore::TEvent type, int id)
 	{
+		printf("%s:%i - BreakPointEvent(%i, %i)\n", _FL, type, id);
 		switch (type)
 		{
 			case BreakPointStore::TBreakPointAdded:
 			{
-				if (!Running)
+				if (Running)
+				{
+					TLock lck(this, _FL);
+					auto inf = BreakPoints.Find(id);
+					if (!inf)
+					{
+						inf = new BpInfo;
+						BreakPoints.Add(id, inf);
+					}
+					if (inf)
+					{
+						printf("%s:%i - added pending add for %i\n", _FL, id);
+						inf->state = TPendingAdd;
+					}
+				}
+				else
+				{
 					AddBp(id, nullptr);
+				}
 				break;
 			}
 			case BreakPointStore::TBreakPointDeleted:
 			{
-				if (!Running)
+				if (Running)
+				{
+					TLock lck(this, _FL);
+					auto inf = BreakPoints.Find(id);
+					if (!inf)
+					{
+						inf = new BpInfo;
+						BreakPoints.Add(id, inf);
+					}
+					if (inf)
+					{
+						printf("%s:%i - added pending delete for %i\n", _FL, id);
+						inf->state = TPendingDelete;
+					}
+				}
+				else
+				{
 					DelBp(id, nullptr);
+				}
 				break;
 			}
 		}
@@ -540,20 +579,24 @@ class Gdb :
 		Log->Log("Write:", s);
 		#endif	
 
+		bool status = false;
 		if (LocalGdb)
 		{
 			LinePtr = Line;
-			return LocalGdb->Write(s);
+			status = LocalGdb->Write(s);
 		}
 		else if (RemoteGdb)
 		{
-			return RemoteGdb->Write(s);
+			status = RemoteGdb->Write(s);
 		}
 		else
 		{
 			LAssert(!"one of these needs to valid?");
 			return false;
 		}
+		
+		LogMsg("%s", s.Get());
+		return status;
 	}
 	
 	void ProcessCommands()
@@ -562,6 +605,27 @@ class Gdb :
 		#if DEBUG_STRUCT_LOGGING
 		Log->Log(LString::Fmt("ProcessCommands: cur=%p(%s), %i", curCmd.Get(), curCmd.Get() ? curCmd->cmd.Get() : "none", (int)commands.Length()));
 		#endif
+
+		if (BreakPoints.Length() > 0)
+		{
+			TLock lck(this, _FL);
+			printf("BreakPoints.Length()=%i\n", (int)BreakPoints.Length());
+			for (auto p: BreakPoints)
+			{
+				if (p.value->state == TPendingAdd)
+				{
+					printf("%s:%i - processing pending Add: %i\n", _FL, p.key);
+					p.value->state = TInit;
+					AddBp(p.key);
+				}
+				else if (p.value->state == TPendingDelete)
+				{
+					printf("%s:%i - processing pending Delete: %i\n", _FL, p.key);
+					DelBp(p.key);
+				}
+			}
+		}
+
 		//  printf("ProcessCommands curCmd=%p: %s\n", curCmd.Get(), curCmd ? curCmd->cmd.Get() : "null");
 		if (curCmd)
 		{
@@ -1330,11 +1394,6 @@ public:
 			TLock lck(this, _FL);
 			if (auto inf = BreakPoints.Find(id))
 			{
-				if (inf->state != TInit)
-				{
-					int asd=0;
-				}
-				
 				inf->state = TAdding;
 			}
 		}
@@ -1487,7 +1546,7 @@ public:
 	}
 
 	// Delete a break point
-	void DelBp(int id, TStatusCb cb)
+	void DelBp(int id, TStatusCb cb = nullptr)
 	{
 		// Handle bad id error:
 		if (id == INVALID_ID)
@@ -2125,14 +2184,8 @@ public:
 				SuppressNextFileLine = SuppressFL;
 				int result = kill(ProcessId, SIGINT);
 				auto ErrNo = errno;
-				if (!result)
-				{
-					// LogMsg("%s:%i - success... waiting prompt\n", _FL);
-					LAssert(!"fixme");
-					// return WaitPrompt(_FL);
-				}
-		
-				LogMsg("%s:%i - SIGINT failed with %i(0x%x): %s (pid=%i)\n", _FL, ErrNo, ErrNo, LErrorCodeToString(ErrNo).Get(), ProcessId);
+				if (result)
+					LogMsg("%s:%i - SIGINT failed with %i(0x%x): %s (pid=%i)\n", _FL, ErrNo, ErrNo, LErrorCodeToString(ErrNo).Get(), ProcessId);
 			#else
 				LAssert(!"Impl me");
 			#endif		

@@ -1490,28 +1490,24 @@ void LFile::ChangeThread()
 
 ssize_t LFile::Read(void *Buffer, ssize_t Size, int Flags)
 {
-	int Red = 0;
+	ssize_t rd = 0;
 
 	if (Buffer && Size > 0)
-	{
-		Red = read(d->hFile, Buffer, Size);
-	}
-	d->Status = Red == Size;
+		rd = read(d->hFile, Buffer, Size);
+	d->Status = rd == Size;
 
-	return MAX(Red, 0);
+	return rd;
 }
 
 ssize_t LFile::Write(const void *Buffer, ssize_t Size, int Flags)
 {
-	int Written = 0;
+	ssize_t wr = 0;
 
 	if (Buffer && Size > 0)
-	{
-		Written = write(d->hFile, Buffer, Size);
-	}
-	d->Status = Written == Size;
+		wr = write(d->hFile, Buffer, Size);
+	d->Status = wr == Size;
 
-	return MAX(Written, 0);
+	return wr;
 }
 
 #ifdef LINUX

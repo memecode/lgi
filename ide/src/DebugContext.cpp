@@ -196,34 +196,37 @@ public:
 		int CurrentThread = -1;
 		Db->GetThreads([this](auto threads, auto cur)
 			{
-				Ctx->Threads->Empty();
-				for (unsigned i=0; i<threads.Length(); i++)
+				App->RunCallback([this, threads, cur]() mutable
 				{
-					auto &f = threads[i];
-					if (IsDigit(*f))
+					Ctx->Threads->Empty();
+					for (unsigned i=0; i<threads.Length(); i++)
 					{
-						char *Sp = f;
-						while (*Sp && IsDigit(*Sp))
-							Sp++;
-						if (*Sp)
+						auto &f = threads[i];
+						if (IsDigit(*f))
 						{
-							*Sp++ = 0;
-							while (*Sp && IsWhite(*Sp))
+							char *Sp = f;
+							while (*Sp && IsDigit(*Sp))
 								Sp++;
+							if (*Sp)
+							{
+								*Sp++ = 0;
+								while (*Sp && IsWhite(*Sp))
+									Sp++;
 
-							LListItem *it = new LListItem;
-					
-							int ThreadId = atoi(f);
-							it->SetText(f, 0);
-							it->SetText(Sp, 1);
-					
-							Ctx->Threads->Insert(it);
-							it->Select(ThreadId == cur);
-						}
-					}			
-				}
-		
-				Ctx->Threads->SendNotify();
+								LListItem *it = new LListItem;
+						
+								int ThreadId = atoi(f);
+								it->SetText(f, 0);
+								it->SetText(Sp, 1);
+						
+								Ctx->Threads->Insert(it);
+								it->Select(ThreadId == cur);
+							}
+						}			
+					}
+			
+					Ctx->Threads->SendNotify();
+				});
 			});
 	}
 
