@@ -621,7 +621,7 @@ public:
 template <typename TPub, typename TPriv, typename TStore>
 class DIterator : public LDataIterator<TPub*>
 {
-	int Cur;
+	ssize_t Cur;
 
 public:
 	LArray<TPriv*> a;

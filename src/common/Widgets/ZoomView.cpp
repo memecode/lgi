@@ -35,7 +35,7 @@ struct ZoomTile : public LMemDC
 {
 	bool Dirty;
 	
-	ZoomTile(int Size, LColourSpace Cs) : LMemDC(Size, Size, Cs)
+	ZoomTile(int Size, LColourSpace Cs) : LMemDC(_FL, Size, Size, Cs)
 	{
 		Dirty = true;
 	}
@@ -747,7 +747,7 @@ public:
 			{
 				if (Callback && (!TileCache || TileCache->X() != TileSize || TileCache->Y() != TileSize))
 				{
-					TileCache.Reset(new LMemDC(TileSize, TileSize, System32BitColourSpace));
+					TileCache.Reset(new LMemDC(_FL, TileSize, TileSize, System32BitColourSpace));
 				}
 				
 				if (TileCache)

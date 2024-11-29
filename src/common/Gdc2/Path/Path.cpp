@@ -641,6 +641,9 @@ void FlattenCubic(LPointF *&Out, LPointF &p1, LPointF &p2, LPointF &p3, LPointF 
 
 ///////////////////////////////////////////////////////////
 LPath::LPath(bool aa)
+	#ifdef _DEBUG
+	: DbgDsp(_FL)
+	#endif
 {
 	Aa = aa;
 	Points = 0;

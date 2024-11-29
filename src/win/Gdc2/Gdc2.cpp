@@ -655,7 +655,7 @@ bool LGlobalColour::AddBitmap(LSurface *pDC)
 {
 	if (pDC)
 	{
-		LSurface *s = new LMemDC(pDC);
+		LSurface *s = new LMemDC(_FL, pDC);
 		if (s)
 		{
 			d->Cache.Insert(s);
@@ -689,14 +689,14 @@ bool LGlobalColour::AddBitmap(LImageList *il)
 {
 	if (il)
 	{
-		LSurface *s = new LMemDC(il);
+		LSurface *s = new LMemDC(_FL, il);
 		if (s)
 		{
 			// Cache the full colour bitmap
 			d->Cache.Insert(s);
 
 			// Cache the disabled alpha blending bitmap
-			s = new LMemDC(il->X(), il->Y(), System24BitColourSpace);
+			s = new LMemDC(_FL, il->X(), il->Y(), System24BitColourSpace);
 			if (s)
 			{
 				s->Op(GDC_ALPHA);

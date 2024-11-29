@@ -1701,7 +1701,7 @@ struct MemTextBuf : public LMemDC
 	LColour cFore, cBack;
 
 	MemTextBuf(LDisplayString *dspStr, LSurface *&pDC, int &px, int &py) :
-		LMemDC(dspStr->X(), dspStr->Y(), System24BitColourSpace),
+		LMemDC(_FL, dspStr->X(), dspStr->Y(), System24BitColourSpace),
 		dcRef(pDC),
 		ds(dspStr),
 		pos(px, py)

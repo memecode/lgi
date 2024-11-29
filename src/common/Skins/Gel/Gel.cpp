@@ -256,7 +256,7 @@ class GelSkin : public LSkinEngine
 
 	LMemDC *DrawCtrl(LViewI *Ctrl, LRect *Sz, int Flags, bool Round)
 	{
-		LMemDC *Mem = new LMemDC;
+		LMemDC *Mem = new LMemDC(_FL);
 		if (Mem && Mem->Create(Sz ? Sz->X() : 14, Sz ? Sz->Y() : 14, OsDefaultCs))
 		{
 			// blank out background
@@ -583,7 +583,7 @@ public:
 	
 	void OnPaint_LButton(LButton *Ctrl, LSkinState *State)
 	{
-		LMemDC Mem;
+		LMemDC Mem(_FL);
 		if (!Mem.Create(Ctrl->X(), Ctrl->Y(), OsDefaultCs))
 		{
 			State->pScreen->Colour(Rgb24(255, 0, 255), 24);
@@ -707,7 +707,7 @@ public:
 	{
 		// Setup memory context
 		LRect r = State->Rect;
-		LMemDC Mem(r.X(), r.Y(), OsDefaultCs);
+		LMemDC Mem(_FL, r.X(), r.Y(), OsDefaultCs);
 		if (!Mem[0])
 			return;
 
@@ -738,7 +738,7 @@ public:
 
 	void OnPaint_LCombo(LCombo *Ctrl, LSkinState *State)
 	{
-		LMemDC Mem;
+		LMemDC Mem(_FL);
 		if (Mem.Create(Ctrl->X(), Ctrl->Y(), OsDefaultCs))
 		{
 			// Font

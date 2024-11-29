@@ -117,7 +117,7 @@ public:
 
 		double r = 7.0;
 		int x = (int)(r * 2.0);
-		if (!Dc.Reset(new LMemDC(x, x, System32BitColourSpace)))
+		if (!Dc.Reset(new LMemDC(_FL, x, x, System32BitColourSpace)))
 			return false;
 
 		Dc->Colour(0, 32);
@@ -879,7 +879,7 @@ void LTabView::OnPaint(LSurface *pDC)
 				LRect b = r;
 
 				#if MAC_DBL_BUF
-				LMemDC Mem;
+				LMemDC Mem(_FL);
 				if (First || Last)
 				{
 					if (Mem.Create(r.X(), r.Y(), System32BitColourSpace))

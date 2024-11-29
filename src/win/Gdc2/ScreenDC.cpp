@@ -769,7 +769,7 @@ void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 
 		HDC hDestDC = StartDC();
 		HDC hSrcDC = Src->StartDC();
-		LMemDC Tmp;
+		LMemDC Tmp(_FL);
 		if (!hSrcDC)
 		{
 			LColourSpace Cs = GdcD->GetColourSpace();

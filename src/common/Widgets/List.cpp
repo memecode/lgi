@@ -614,12 +614,12 @@ void LListItem::OnPaint(LItem::ItemPaintCtx &Ctx)
 LList::LList(int id, int x, int y, int cx, int cy, const char *name)
 	: ResObject(Res_ListView)
 {
+	LStackTrace("%p::LList\n", this);
 	d = new LListPrivate;
 	SetId(id);
 	Name(name);
 	
 	ItemsPos.ZOff(-1, -1);
-	Buf = 0;
 	GridLines = false;
 	FirstVisible = -1;
 	LastVisible = -1;
@@ -644,7 +644,7 @@ LList::LList(int id, int x, int y, int cx, int cy, const char *name)
 
 LList::~LList()
 {
-	DeleteObj(Buf);
+	LStackTrace("%p::~LList\n", this);
 	Empty();
 	EmptyColumns();
 	DeleteObj(d);
@@ -2651,7 +2651,7 @@ void LList::OnPaint(LSurface *pDC)
 
 	// Draw items
 	if (!Buf)
-		Buf = new LMemDC;
+		Buf.Reset(new LMemDC(_FL));
 	
 	LRect r = ItemsPos;
 	int n = FirstVisible;

@@ -2561,7 +2561,7 @@ void LTag::SetImage(const char *Uri, LAutoPtr<LSurface> Img)
 		{
 			if (Img->GetColourSpace() == CsIndex8)
 			{
-				if (Image.Reset(new LMemDC(Img->X(), Img->Y(), System32BitColourSpace)))
+				if (Image.Reset(new LMemDC(_FL, Img->X(), Img->Y(), System32BitColourSpace)))
 				{
 					Image->Colour(0, 32);
 					Image->Rectangle();
@@ -2574,7 +2574,7 @@ void LTag::SetImage(const char *Uri, LAutoPtr<LSurface> Img)
 			LRect r = XSubRect();
 			if (r.Valid())
 			{
-				LAutoPtr<LSurface> t(new LMemDC(r.X(), r.Y(), Image->GetColourSpace()));
+				LAutoPtr<LSurface> t(new LMemDC(_FL, r.X(), r.Y(), Image->GetColourSpace()));
 				if (t)
 				{
 					t->Blt(0, 0, Image, &r);
@@ -2644,7 +2644,7 @@ void LTag::LoadImage(const char *Uri)
 		ConvertBase64ToBinary((uint8_t*)bin.GetBasePtr(), blen, s, slen);
 		
 		bin.SetPos(0);
-		if (!Image.Reset(new LMemDC))
+		if (!Image.Reset(new LMemDC(_FL)))
 			return;
 		auto result = Filter->ReadImage(Image, &bin);
 		if (result != LFilter::IoSuccess)
@@ -2708,7 +2708,7 @@ void LTag::ImageLoaded(char *uri, LAutoPtr<LSurface> Img, int &Used)
 			}
 			else
 			{
-				LAutoPtr<LSurface> Copy(new LMemDC(Img));
+				LAutoPtr<LSurface> Copy(new LMemDC(_FL, Img));
 				SetImage(Uri, Copy);
 			}
 			Used++;
@@ -6187,11 +6187,13 @@ class CornersImg : public LMemDC
 public:
 	int Px, Px2;
 
-	CornersImg(	float RadPx,
+	CornersImg(	const char *file, int line,
+				float RadPx,
 				LRect *BorderPx,
 				LCss::BorderDef **defs,
 				LColour &Back,
 				bool DrawBackground)
+		: LMemDC(file, line)
 	{
 		Px = 0;
 		Px2 = 0;
@@ -6395,7 +6397,7 @@ void LTag::PaintBorderAndBackground(LSurface *pDC, LColour &Back, LRect *BorderP
 				}			
 				if (!Corners || Corners->Px2 != Px2)
 				{
-					Corners.Reset(new CornersImg((float)Px, BorderPx, defs, Back, DrawBackground));
+					Corners.Reset(new CornersImg(_FL, (float)Px, BorderPx, defs, Back, DrawBackground));
 				}
 			
 				// top left
@@ -6654,7 +6656,7 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 						Image->AlphaDC())
 						Cs = System32BitColourSpace;
 					
-					LAutoPtr<LSurface> r(new LMemDC(Size.x, Size.y, Cs));
+					LAutoPtr<LSurface> r(new LMemDC(_FL, Size.x, Size.y, Cs));
 					if (r)
 					{
 						if (Cs == CsIndex8)
@@ -7607,7 +7609,7 @@ void LHtml::OnPaint(LSurface *ScreenDC)
 		if (!MemDC ||
 			(MemDC->X() < Client.X() || MemDC->Y() < Client.Y()))
 		{
-			if (MemDC.Reset(new LMemDC))
+			if (MemDC.Reset(new LMemDC(_FL)))
 			{
 				int Sx = Client.X() + 10;
 				int Sy = Client.Y() + 10;

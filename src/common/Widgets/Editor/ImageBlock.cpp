@@ -99,7 +99,7 @@ public:
 					return PostSink(M_IMAGE_ERROR);
 				}
 
-				if (!(Img = new LMemDC))
+				if (!(Img = new LMemDC(_FL)))
 				{
 					LOADER_LOG("%s:%i - Thread.Send(M_IMAGE_ERROR): alloc err\n", _FL);
 					return PostSink(M_IMAGE_ERROR);
@@ -152,7 +152,7 @@ public:
 					return PostSink(M_IMAGE_ERROR);
 				}
 
-				if (!(Img = new LMemDC))
+				if (!(Img = new LMemDC(_FL)))
 				{
 					LOADER_LOG("%s:%i - Thread.Send(M_IMAGE_ERROR): alloc err\n", _FL);
 					return PostSink(M_IMAGE_ERROR);
@@ -229,7 +229,7 @@ public:
 				if (img->X() != si->Sz.x ||
 					img->Y() != si->Sz.y)
 				{
-					if (!scaled.Reset(new LMemDC(si->Sz.x, si->Sz.y, img->GetColourSpace())))
+					if (!scaled.Reset(new LMemDC(_FL, si->Sz.x, si->Sz.y, img->GetColourSpace())))
 						break;
 					ResampleDC(scaled, img, NULL, NULL);
 					img = scaled;
@@ -311,7 +311,7 @@ LRichTextPriv::ImageBlock::ImageBlock(LRichTextPriv *priv) : Block(priv)
 LRichTextPriv::ImageBlock::ImageBlock(const ImageBlock *Copy) : Block(Copy->d)
 {
 	LayoutDirty = true;
-	SourceImg.Reset(new LMemDC(Copy->SourceImg));
+	SourceImg.Reset(new LMemDC(_FL, Copy->SourceImg));
 	Size = Copy->Size;
 
 	Margin = Copy->Margin;
@@ -772,7 +772,7 @@ void LRichTextPriv::ImageBlock::OnPaint(PaintContext &Ctx)
 			if (Ctx.Type == LRichTextPriv::Selected)
 			{
 				if (!SelectImg &&
-					SelectImg.Reset(new LMemDC(Src->X(), Src->Y(), System32BitColourSpace)))
+					SelectImg.Reset(new LMemDC(_FL, Src->X(), Src->Y(), System32BitColourSpace)))
 				{
 					SelectImg->Blt(0, 0, Src);
 
@@ -1086,7 +1086,7 @@ void LRichTextPriv::ImageBlock::UpdateDisplayImg()
 
 			Size.x = (int)ceil((double)SourceImg->X() / Scale);
 			Size.y = (int)ceil((double)SourceImg->Y() / Scale);
-			if (DisplayImg.Reset(new LMemDC(Size.x, Size.y, SourceImg->GetColourSpace())))
+			if (DisplayImg.Reset(new LMemDC(_FL, Size.x, Size.y, SourceImg->GetColourSpace())))
 			{
 				DisplayImg->Colour(L_MED);
 				DisplayImg->Rectangle();

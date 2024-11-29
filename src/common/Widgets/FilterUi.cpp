@@ -427,7 +427,7 @@ public:
 		int IconSize = (int) (Scale.x * BaseIconSize);
 		for (int i=0; i<IconMax; i++)
 		{
-			Icons[i] = new LMemDC;
+			Icons[i] = new LMemDC(_FL);
 			if (Icons[i] && Icons[i]->Create(IconSize, IconSize, System32BitColourSpace))
 			{
 				Draw(Icons[i], 0, IconColour[i], (FilterIcon)i, IconSize);
@@ -620,7 +620,7 @@ void LFilterItem::_PaintText(LItem::ItemPaintCtx &Ctx)
 	LRect *Pos = _GetRect(TreeItemText);
 
 	// Create a memory context
-	LMemDC Buf(Pos->X(), Pos->Y(), System32BitColourSpace);
+	LMemDC Buf(_FL, Pos->X(), Pos->Y(), System32BitColourSpace);
 	Buf.Colour(L_WORKSPACE);
 	Buf.Rectangle(0);
 
@@ -1226,7 +1226,7 @@ void LFilterView::OnPaint(LSurface *pDC)
 
 	if (d->ShowLegend)
 	{
-		LMemDC Buf(d->Info.X(), d->Info.Y(), System32BitColourSpace);
+		LMemDC Buf(_FL, d->Info.X(), d->Info.Y(), System32BitColourSpace);
 
 		Buf.Colour(L_MED);
 		Buf.Rectangle(0, 0, Buf.X()-1, Buf.Y()-2);
@@ -1275,7 +1275,7 @@ LAutoPtr<LImageList> LFilterView::CreateIcons(LWindow *wnd)
 {
 	LPointF scale = wnd->GetDpiScale();
 	auto Px = (int)(scale.x * BaseIconSize + 0.5);
-	LAutoPtr<LImageList> icons(new LImageList(Px, Px));
+	LAutoPtr<LImageList> icons(new LImageList(_FL, Px, Px));
 
 	if (icons->Create(IconMax * Px, Px, System32BitColourSpace))
 	{

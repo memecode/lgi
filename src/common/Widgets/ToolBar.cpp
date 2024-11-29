@@ -91,7 +91,7 @@ LImageList *LLoadImageList(const char *File, int x, int y)
 		return NULL;
 	}
 
-	return new LImageList(x, y, pDC);
+	return new LImageList(_FL, x, y, pDC);
 }
 
 LToolBar *LgiLoadToolbar(LViewI *Parent, const char *File, int x, int y)
@@ -142,6 +142,11 @@ public:
 	{
 		bool Disabled;
 		LColour Back;
+
+		CacheDC(const char *file, int line)
+			: LMemDC(file, line)
+		{
+		}
 	};
 
 	LArray<CacheDC*> Cache;
@@ -160,7 +165,7 @@ public:
 				return dc;
 		}
 		
-		CacheDC *dc = new CacheDC;
+		CacheDC *dc = new CacheDC(_FL);
 		if (dc)
 		{
 			dc->Disabled = Disabled;
@@ -175,7 +180,7 @@ public:
 				
 				if (Disabled)
 				{
-					LMemDC tmp(ImgLst->X(), ImgLst->Y(), System32BitColourSpace, LSurface::SurfaceRequireExactCs);
+					LMemDC tmp(_FL, ImgLst->X(), ImgLst->Y(), System32BitColourSpace, LSurface::SurfaceRequireExactCs);
 					tmp.Colour(0, 32);
 					tmp.Rectangle();
 					tmp.Op(GDC_ALPHA);
@@ -225,7 +230,8 @@ static bool HasPad(LColourSpace cs)
 	return false;
 }
 
-LImageList::LImageList(int x, int y, LSurface *pDC)
+LImageList::LImageList(const char *file, int line, int x, int y, LSurface *pDC) :
+	LMemDC(file, line)
 {
 	d = new LImageListPriv(this, x, y);
 
@@ -652,7 +658,7 @@ void LToolButton::OnPaint(LSurface *pDC)
 
 		if (BackImg)
 		{
-			LDoubleBuffer Buf(pDC);
+			LDoubleBuffer Buf(_FL, pDC);
 			Tools.PaintContent(pDC, p);
 			if (Hilight)
 			{
@@ -1493,7 +1499,7 @@ bool LToolBar::SetDC(LSurface *pNewDC, int bx, int by)
 
 	if (pNewDC)
 	{
-		d->ImgList = new LImageList(bx, by, pNewDC);
+		d->ImgList = new LImageList(_FL, bx, by, pNewDC);
 		if (d->ImgList)
 		{
 			d->OwnImgList = true;

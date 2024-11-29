@@ -410,7 +410,7 @@ void LFillGradient(LSurface *pDC, LRect &r, bool Vert, LArray<LColourStop> &Stop
 // Other Gdc Stuff
 LSurface *ConvertDC(LSurface *pDC, int Bits)
 {
-	LSurface *pNew = new LMemDC;
+	LSurface *pNew = new LMemDC(_FL);
 	if (pNew && pNew->Create(pDC->X(), pDC->Y(), LBitsToColourSpace(Bits)))
 	{
 		pNew->Blt(0, 0, pDC);
@@ -948,7 +948,7 @@ bool LColourSpaceTest()
 ////////////////////////////////////////////////////////////////////////
 LSurface *LInlineBmp::Create(uint32_t TransparentPx)
 {
-	LSurface *pDC = new LMemDC;
+	LSurface *pDC = new LMemDC(_FL);
 	if (pDC->Create(X, Y, System32BitColourSpace, LSurface::SurfaceRequireExactCs))
 	{
 		LBmpMem Src, Dst;

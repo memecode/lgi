@@ -370,7 +370,7 @@ LMessage::Result LButton::OnEvent(LMessage *Msg)
 			
 			// Create a HBITMAP in the same size as the control 
 			// and the same bit depth as the screen
-			LMemDC m(c.X(), c.Y(), GdcD->GetColourSpace());
+			LMemDC m(_FL, c.X(), c.Y(), GdcD->GetColourSpace());
 			m.Colour(LColour::Red);
 			m.Rectangle();
 
@@ -402,7 +402,8 @@ LMessage::Result LButton::OnEvent(LMessage *Msg)
 
 				if (d->scaling != 1.0)
 				{
-					LMemDC res(	(int)(d->Img->X() * d->scaling),
+					LMemDC res(	_FL,
+								(int)(d->Img->X() * d->scaling),
 								(int)(d->Img->Y() * d->scaling),
 								System32BitColourSpace);
 					if (ResampleDC(&res, d->Img))

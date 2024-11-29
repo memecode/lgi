@@ -1205,7 +1205,7 @@ LFilter::IoStatus GdcPng::WriteImage(LStream *Out, LSurface *pDC)
 				LMemDC *pTemp = 0;
 				if (pDC->AlphaDC() && HasTransparency)
 				{
-					pTemp = new LMemDC(pDC->X(), pDC->Y(), System32BitColourSpace);
+					pTemp = new LMemDC(_FL, pDC->X(), pDC->Y(), System32BitColourSpace);
 					if (pTemp)
 					{
 						pTemp->Colour(0);

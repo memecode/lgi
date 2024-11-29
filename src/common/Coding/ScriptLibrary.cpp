@@ -715,7 +715,7 @@ bool SystemFunctions::New(LScriptArguments &Args)
 		{
 			Ret->Empty();
 			Ret->Type = GV_LSURFACE;
-			if ((Ret->Value.Surface.Ptr = new LMemDC))
+			if ((Ret->Value.Surface.Ptr = new LMemDC(_FL)))
 			{
 				Ret->Value.Surface.Ptr->IncRef();
 				Ret->Value.Surface.Own = true;
@@ -1006,7 +1006,7 @@ bool SystemFunctions::CreateSurface(LScriptArguments &Args)
 		Cs = GdcD->GetColourSpace();
 
 	auto r = Args.GetReturn();
-	if ((r->Value.Surface.Ptr = new LMemDC(x, y, Cs)))
+	if ((r->Value.Surface.Ptr = new LMemDC(_FL, x, y, Cs)))
 	{
 		r->Type = GV_LSURFACE;
 		r->Value.Surface.Own = true;

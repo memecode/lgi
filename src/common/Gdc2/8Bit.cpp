@@ -711,7 +711,7 @@ bool GdcApp8Set::Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha)
 
 						if (!Pal) break;
 
-						LSurface *pBuf = new LMemDC;
+						LSurface *pBuf = new LMemDC(_FL);
 						if (pBuf && pBuf->Create(Src->x+2, 2, System24BitColourSpace))
 						{
 							// Clear buffer

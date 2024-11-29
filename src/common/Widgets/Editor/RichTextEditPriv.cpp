@@ -1824,7 +1824,7 @@ void LRichTextPriv::Paint(LSurface *pDC, LScrollBar *&ScrollY)
 		auto UiFont = View->GetUiFont();
 		LRect &t = Areas[LRichTextEdit::ToolsArea];
 		#ifdef WIN32
-		LDoubleBuffer Buf(pDC, &t);
+		LDoubleBuffer Buf(_FL, pDC, &t);
 		#endif
 		LColour ToolBar = LColour(L_FOCUS_SEL_BACK).Mix(LColour(L_LOW));
 		pDC->Colour(ToolBar);
@@ -1873,7 +1873,7 @@ void LRichTextPriv::Paint(LSurface *pDC, LScrollBar *&ScrollY)
 	
 	LRect r = Areas[LRichTextEdit::ContentArea];
 	#if defined(WINDOWS) && !DEBUG_NO_DOUBLE_BUF
-		LMemDC Mem;
+		LMemDC Mem(_FL);
 		if (!Mem.Create(r.X(), r.Y(), pDC->GetColourSpace()))
 		{
 			LAssert(!"MemDC creation failed.");

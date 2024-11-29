@@ -116,7 +116,7 @@ void VcCommit::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 		double Half = 5.5;
 		#define MAP(col) ((col) * Px + Half)
 
-		LMemDC Mem(Ctx.X(), Ctx.Y(), System32BitColourSpace);
+		LMemDC Mem(_FL, Ctx.X(), Ctx.Y(), System32BitColourSpace);
 		Mem.Colour(0, 32);
 		Mem.Rectangle();
 

@@ -3014,7 +3014,7 @@ void EmojiMenu::OnPaint(LSurface *pDC)
 {
 	LAutoPtr<LDoubleBuffer> DblBuf;
 	if (!pDC->SupportsAlphaCompositing())
-		DblBuf.Reset(new LDoubleBuffer(pDC));
+		DblBuf.Reset(new LDoubleBuffer(_FL, pDC));
 
 	pDC->Colour(L_MED);
 	pDC->Rectangle();

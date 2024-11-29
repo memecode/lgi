@@ -256,7 +256,7 @@ protected:
 	bool GridLines;
 
 	// Double buffered
-	LSurface *Buf;
+	LAutoPtr<LSurface> Buf;
 
 	// Drawing locations
 	LRect ItemsPos;

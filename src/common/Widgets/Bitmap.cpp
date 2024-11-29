@@ -165,7 +165,7 @@ void LBitmap::SetDC(LSurface *pNewDC, bool owndc)
 	{
 		if (ownDC)
 		{		
-			pDC = new LMemDC;
+			pDC = new LMemDC(_FL);
 			if (pDC && pDC->Create(pNewDC->X(), pNewDC->Y(), GdcD->GetColourSpace()))
 			{
 				LColour Bk = LColour(L_WORKSPACE);

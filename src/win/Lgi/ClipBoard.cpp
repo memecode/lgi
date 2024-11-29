@@ -785,7 +785,7 @@ LAutoPtr<LSurface> LClipBoard::ConvertFromPtr(void *Ptr)
 	if
 	(
 		Info &&
-		pDC.Reset(new LMemDC) &&
+		pDC.Reset(new LMemDC(_FL)) &&
 		(Info->bmiHeader.biCompression == BI_RGB ||
 		Info->bmiHeader.biCompression == BI_BITFIELDS)
 	)

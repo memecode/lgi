@@ -1611,7 +1611,7 @@ bool LSurface::HasAlpha(bool b)
 	{
 		if (!pAlphaDC)
 		{
-			pAlphaDC = new LMemDC;
+			pAlphaDC = new LMemDC(_FL);
 		}
 
 		if (pAlphaDC && pMem)

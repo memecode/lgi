@@ -42,20 +42,28 @@ public:
 	}
 };
 
-size_t LMemDC::Instances = 0;
+LArray<LMemDC*> LMemDC::Instances;
 
-LMemDC::LMemDC(int x, int y, LColourSpace cs, int Flags)
+LMemDC::LMemDC(const char *file, int line, int x, int y, LColourSpace cs, int Flags)
 {
-	Instances++;
+	#ifdef _DEBUG
+	AllocRef.Printf("%s:%i", file, line);
+	Instances.Add(this);
+	#endif
+
 	d = new LMemDCPrivate;
 
 	if (x > 0 && y > 0)
 		Create(x, y, cs, Flags);
 }
 
-LMemDC::LMemDC(LSurface *pDC)
+LMemDC::LMemDC(const char *file, int line, LSurface *pDC)
 {
-	Instances++;
+	#ifdef _DEBUG
+	AllocRef.Printf("%s:%i", file, line);
+	Instances.Add(this);
+	#endif
+
 	d = new LMemDCPrivate;
 
 	if (pDC &&
@@ -80,7 +88,10 @@ LMemDC::~LMemDC()
 {
 	Empty();
 	DeleteObj(d);
-	Instances--;
+
+	#ifdef _DEBUG
+	Instances.Delete(this);
+	#endif
 }
 
 void LMemDC::SetClient(LRect *c)

@@ -206,7 +206,7 @@ bool LEmojiFont::Create(const char *Face, LCss::Len Sz, LSurface *pSurface)
 		(
 			NewCell != EMOJI_CELL_SIZE &&
 			!priv->Scaled &&
-			priv->Scaled.Reset(new LMemDC(Nx, Ny, priv->Img->GetColourSpace()))
+			priv->Scaled.Reset(new LMemDC(_FL, Nx, Ny, priv->Img->GetColourSpace()))
 		)
 		{
 			priv->Scaled->Colour(0, 32);

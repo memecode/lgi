@@ -958,11 +958,14 @@ protected:
 	virtual void OnCaptureScreen() {}
 
 public:
-	static size_t Instances;
+	LString AllocRef;
+	static LArray<LMemDC*> Instances;
 
 	/// Creates a memory bitmap
 	LMemDC
 	(
+		const char *file,
+		int line,
 		/// The width
 		int x = 0,
 		/// The height
@@ -973,7 +976,7 @@ public:
 		/// Optional creation flags
 		int Flags = SurfaceCreateNone
 	);
-	LMemDC(LSurface *pDC);
+	LMemDC(const char *file, int line, LSurface *pDC);
 	virtual ~LMemDC();
 
 	const char *GetClass() override { return "LMemDC"; }
@@ -1171,7 +1174,9 @@ class LDoubleBuffer
 	bool Valid;
 
 public:
-	LDoubleBuffer(LSurface *&pDC, LRect *Sub = NULL) : In(&pDC)
+	LDoubleBuffer(const char *file, int line, LSurface *&pDC, LRect *Sub = NULL) :
+		In(&pDC),
+		Mem(file, line)
 	{
 		Rgn = Sub ? *Sub : pDC->Bounds();
 		Screen = pDC;

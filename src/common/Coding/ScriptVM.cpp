@@ -1623,7 +1623,7 @@ LVmDebuggerWnd::LVmDebuggerWnd(LView *Parent, LVmCallback *Callback, LAutoPtr<LV
 		AddView(d->Tools = new LToolBar);
 		
 		uint16 *Px = (uint16*) DbgIcons.Data;
-		LImageList *il = new LImageList(16, 16, DbgIcons.Create(*Px));
+		LImageList *il = new LImageList(_FL, 16, 16, DbgIcons.Create(*Px));
 		if (il)
 			d->Tools->SetImageList(il, 16, 16, true);
 

@@ -13,6 +13,7 @@ public:
 	/// Create the image list
 	LImageList
 	(
+		const char *file, int line,
 		/// The width of each tile
 		int TileX,
 		/// The height of each tile
@@ -94,7 +95,7 @@ public:
 		auto pDC = GdcD->Load(File);
 		if (pDC)
 		{
-			ImageList = new LImageList(x, y, pDC);
+			ImageList = new LImageList(_FL, x, y, pDC);
 			if (ImageList)
 			{
 				#ifdef WIN32

@@ -518,7 +518,7 @@ bool LReduceBitDepth(LSurface *pDC, int Bits, LPalette *Pal, LReduceOptions *Red
 {
 	bool Status = false;
 
-	LSurface *pTemp = new LMemDC;
+	LSurface *pTemp = new LMemDC(_FL);
 	if (pDC &&
 		pTemp &&
 		pTemp->Create(pDC->X(), pDC->Y(), LBitsToColourSpace(Bits)))

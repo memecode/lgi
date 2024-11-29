@@ -8,7 +8,7 @@
 #include "lgi/common/TextConvert.h"
 #include "ScribeDefs.h"
 
-#define DEBUG_LOGGING			1
+#define DEBUG_LOGGING			0
 
 #define Push(s) Write(s, strlen(s))
 

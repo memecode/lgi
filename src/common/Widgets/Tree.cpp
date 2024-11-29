@@ -1829,7 +1829,7 @@ void LTree::OnPaint(LSurface *pDC)
 	{
 		int CacheHeight = MAX(LSysFont->GetHeight(), GetImageList()->Y());
 		
-		if (d->IconCache.Reset(new LMemDC) &&
+		if (d->IconCache.Reset(new LMemDC(_FL)) &&
 			d->IconCache->Create(GetImageList()->X(), CacheHeight, GdcD->GetColourSpace()))
 		{
 			if (d->IconCache->GetColourSpace() == CsIndex8)

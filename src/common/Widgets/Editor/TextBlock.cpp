@@ -152,7 +152,7 @@ void LRichTextPriv::EmojiDisplayStr::Paint(LSurface *pDC, int &FixX, int FixY, L
 	{
 		if (CharPx != EMOJI_CELL_SIZE)
 		{
-			LMemDC mem(CharPx, CharPx, System32BitColourSpace);
+			LMemDC mem(_FL, CharPx, CharPx, System32BitColourSpace);
 			ResampleDC(&mem, Img, &SrcRect[i]);
 			pDC->Blt(f.x1, f.y1, &mem);
 		}

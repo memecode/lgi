@@ -3103,7 +3103,7 @@ public:
 			else if (IsDigit(*t))
 			{
 				if (InArray)
-					Type.ArrayLen = Atoi(t);
+					Type.ArrayLen = (int)Atoi(t);
 			}
 			else
 			{
@@ -3235,7 +3235,7 @@ public:
 				}
 				else if (IsDigit(*t))
 				{
-					p.New().Value = Atoi(t);
+					p.New().Value = (int)Atoi(t);
 				}
 				else
 				{

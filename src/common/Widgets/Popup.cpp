@@ -1094,7 +1094,7 @@ void LDropDown::OnPaint(LSurface *pDC)
 	if (LApp::SkinEngine &&
 		TestFlag(LApp::SkinEngine->GetFeatures(), GSKIN_BUTTON))
 	{
-		LMemDC Mem(r.X(), r.Y(), System24BitColourSpace);
+		LMemDC Mem(_FL, r.X(), r.Y(), System24BitColourSpace);
 
 		LCss::ColorDef f;
 		if (GetCss())

@@ -1450,7 +1450,7 @@ LSurface *GdcDevice::Load(LStream *In, const char *Name, bool UseOSLoader)
 	auto Filter = LFilterFactory::New(Name, FILTER_CAP_READ, Hint);
 	LAutoPtr<LSurface> pDC;
 	if (Filter &&
-		pDC.Reset(new LMemDC))
+		pDC.Reset(new LMemDC(_FL)))
 	{
 		Filter->Props = &Props;
 
@@ -1574,7 +1574,7 @@ LSurface *GdcDevice::Load(LStream *In, const char *Name, bool UseOSLoader)
 
 					if (Size.cx > 0 &&
 						Size.cy > 0 &&
-						pDC.Reset(new LMemDC))
+						pDC.Reset(new LMemDC(_FL)))
 					{
 						if (pDC->Create(Size.cx, Size.cy, System24BitColourSpace))
 						{
