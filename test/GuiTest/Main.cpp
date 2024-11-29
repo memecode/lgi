@@ -80,6 +80,10 @@ class BltTest : public LWindow
 		LColourSpace Src, Dst;
 		LMemDC Result;
 		
+		Test() : Result(_FL)
+		{
+		}
+
 		void Create()
 		{
 			if (!Result.Create(16, 16, Dst))
@@ -93,7 +97,7 @@ class BltTest : public LWindow
 				}
 			}
 			
-			LMemDC SrcDC;
+			LMemDC SrcDC(_FL);
 			if (!SrcDC.Create(16, 16, Src))
 				return;
 			

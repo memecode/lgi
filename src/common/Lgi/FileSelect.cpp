@@ -217,11 +217,11 @@ public:
 			System.Reset(sys);
 
 		if (!BtnIcons)
-			BtnIcons = new LImageList(16, 16, FileSelectIcons.Create(0xF81F));
+			BtnIcons = new LImageList(_FL, 16, 16, FileSelectIcons.Create(0xF81F));
 		if (!TreeIcons)
 		{
 			LAutoPtr<LSurface> a(TreeIconsImg.Create(0xF81F));
-			LAutoPtr<LMemDC> m(new LMemDC(a->X(), a->Y(), System32BitColourSpace));
+			LAutoPtr<LMemDC> m(new LMemDC(_FL, a->X(), a->Y(), System32BitColourSpace));
 			if (a && m)
 			{
 				LColour fore(128, 128, 128);
@@ -241,7 +241,7 @@ public:
 					}
 				}
 				
-				TreeIcons = new LImageList(22, 22, m.Release());
+				TreeIcons = new LImageList(_FL, 22, 22, m.Release());
 			}
 		}
 	}

@@ -80,7 +80,7 @@ public:
 							{
 								LList *m = _HasUnicodeGlyph(Fnt->GetGlyphMap(), c) ? Match : NonMatch;
 
-								LMemDC *pDC = new LMemDC;
+								LAutoPtr<LMemDC> pDC(new LMemDC(_FL));
 								if (pDC)
 								{
 									char16 Str[] = { (char16)c, 0 };

@@ -1174,9 +1174,9 @@ class LDoubleBuffer
 	bool Valid;
 
 public:
-	LDoubleBuffer(const char *file, int line, LSurface *&pDC, LRect *Sub = NULL) :
+	LDoubleBuffer(LSurface *&pDC, LRect *Sub = NULL) :
 		In(&pDC),
-		Mem(file, line)
+		Mem(_FL)
 	{
 		Rgn = Sub ? *Sub : pDC->Bounds();
 		Screen = pDC;

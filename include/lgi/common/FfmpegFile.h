@@ -164,7 +164,7 @@ public:
 			return Frame;
 		}
 
-		if (Frame.Reset(new LMemDC(Sx, Sy, System32BitColourSpace)))
+		if (Frame.Reset(new LMemDC(_FL, Sx, Sy, System32BitColourSpace)))
 		{	
 			for (int y=0; y<Sy; y++)
 			{

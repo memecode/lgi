@@ -1304,7 +1304,7 @@ uint32_t RadioBmp[] = {
 CtrlRadio::CtrlRadio(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_RadioBox, load)
 {
-	Bmp = new LMemDC;
+	Bmp = new LMemDC(_FL);
 	if (Bmp && Bmp->Create(12, 12, GdcD->GetColourSpace()))
 	{
 		int Len = ((Bmp->X()*24)+31)/32*4;

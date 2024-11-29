@@ -131,7 +131,7 @@ LAutoPtr<LMemDC> CreateDiff(LViewI *Parent, LSurface *A, LSurface *B)
 		LAutoString a(p.NewStr());
 		LgiMsg(Parent, "%s", "Image Compare", MB_OK, a.Get());
 	}
-	else if (C.Reset(new LMemDC(Cx, Cy, CsIndex8)) &&
+	else if (C.Reset(new LMemDC(_FL, Cx, Cy, CsIndex8)) &&
 			(*C)[0])
 	{
 		uchar Pal[] = {0, 0, 0, 0xc0, 0xc0, 0xc0, 0xff, 0, 0};

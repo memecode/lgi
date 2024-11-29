@@ -288,7 +288,7 @@ void LPaneHistory::OnPaint(LSurface *pDC)
 		(r.X() != pMemDC->X()))
 	{
 		DeleteObj(pMemDC);
-		pMemDC = new LMemDC;
+		pMemDC = new LMemDC(_FL);
 		if (pMemDC)
 		{
 			if (pMemDC->Create(r.X(), r.Y(), GdcD->GetColourSpace()))

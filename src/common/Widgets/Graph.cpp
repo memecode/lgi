@@ -868,7 +868,7 @@ void LGraph::OnPaint(LSurface *pDC)
 {
 	LAutoPtr<LDoubleBuffer> DoubleBuf;
 	if (d->ShowCursor)
-		DoubleBuf.Reset(new LDoubleBuffer(_FL, pDC));
+		DoubleBuf.Reset(new LDoubleBuffer(pDC));
 
 	pDC->Colour(L_WORKSPACE);
 	pDC->Rectangle();

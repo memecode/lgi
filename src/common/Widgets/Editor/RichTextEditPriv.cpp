@@ -1824,7 +1824,7 @@ void LRichTextPriv::Paint(LSurface *pDC, LScrollBar *&ScrollY)
 		auto UiFont = View->GetUiFont();
 		LRect &t = Areas[LRichTextEdit::ToolsArea];
 		#ifdef WIN32
-		LDoubleBuffer Buf(_FL, pDC, &t);
+		LDoubleBuffer Buf(pDC, &t);
 		#endif
 		LColour ToolBar = LColour(L_FOCUS_SEL_BACK).Mix(LColour(L_LOW));
 		pDC->Colour(ToolBar);

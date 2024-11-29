@@ -4907,7 +4907,7 @@ void LTextView3::OnPaint(LSurface *pDC)
 	#endif
 
 	#if DOUBLE_BUFFER_PAINT
-	LDoubleBuffer MemBuf(_FL, pDC);
+	LDoubleBuffer MemBuf(pDC);
 	#endif
 
 	#if PROFILE_PAINT

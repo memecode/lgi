@@ -11,7 +11,7 @@ class App : public LWindow
 	LMemDC img;
 
 public:
-    App()
+    App() : img(_FL)
     {
         Name(AppName);
         LRect r(0, 0, 1000, 800);

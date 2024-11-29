@@ -215,7 +215,7 @@ public:
 						auto Filter = LFilterFactory::New(u.sPath, FILTER_CAP_READ, Hint);
 						if (Filter)
 						{
-							LAutoPtr<LSurface> Img(new LMemDC);
+							LAutoPtr<LSurface> Img(new LMemDC(_FL));
 							LFilter::IoStatus Rd = Filter->ReadImage(Img, &p);
 							if (Rd == LFilter::IoSuccess)
 							{
@@ -529,7 +529,7 @@ public:
 				Html1::LHtml Html(100, 0, 0, PageSize.x, PageSize.y, App);
 				Html.Name(Content);
 
-				LMemDC Screen(PageSize.x, PageSize.y, System24BitColourSpace);
+				LMemDC Screen(_FL, PageSize.x, PageSize.y, System24BitColourSpace);
 				Screen.Colour(LColour(255, 255, 255));
 				Screen.Rectangle();
 				Html.OnPaint(&Screen);

@@ -658,7 +658,7 @@ void LToolButton::OnPaint(LSurface *pDC)
 
 		if (BackImg)
 		{
-			LDoubleBuffer Buf(_FL, pDC);
+			LDoubleBuffer Buf(pDC);
 			Tools.PaintContent(pDC, p);
 			if (Hilight)
 			{
