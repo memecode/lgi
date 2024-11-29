@@ -82,10 +82,10 @@ public:
 	LPopup *GetPopup();
 
 	// Window events
-	void OnFocus(bool f);
-	void OnPaint(LSurface *pDC);
-	bool OnKey(LKey &k);
-	void OnMouseClick(LMouse &m);
+	void OnFocus(bool f) override;
+	void OnPaint(LSurface *pDC) override;
+	bool OnKey(LKey &k) override;
+	void OnMouseClick(LMouse &m) override;
 	int OnNotify(LViewI *c, const LNotification &n) override;
 
 	// Override

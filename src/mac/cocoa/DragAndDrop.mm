@@ -100,7 +100,9 @@ public:
 	LMemDC Icon;
 	LDragFormats Formats;
 
-	LDndSourcePriv() : Formats(true)
+	LDndSourcePriv() :
+		Formats(true),
+		Icon(_FL)
 	{
 		Effect = 0;
 		ExternImg = NULL;
@@ -343,7 +345,7 @@ static NSArray* BuildImageComponentsForItem(NSPasteboardItem *_item)
 	#if 0
 		img = [NSImage imageNamed:NSImageNameApplicationIcon]; // test it works..
 	#else
-		LMemDC Mem(32, 32, System32BitColourSpace);
+		LMemDC Mem(_FL, 32, 32, System32BitColourSpace);
 		Mem.Colour(0, 32);
 		Mem.Rectangle();
 	

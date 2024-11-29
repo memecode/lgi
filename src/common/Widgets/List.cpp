@@ -2244,11 +2244,6 @@ bool LList::Remove(LListItem *i)
 				OnItemSelect(s);
 			}
 
-			if (!InThread())
-			{
-				int asd=0;
-			}
-
 			LNotification n(LNotifyItemDelete);
 			SendNotify(n);
 

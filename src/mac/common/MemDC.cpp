@@ -236,9 +236,9 @@ public:
 	}
 };
 
-size_t LMemDC::Instances = 0;
+LArray<LMemDC*> LMemDC::Instances;
 
-LMemDC::LMemDC(int x, int y, LColourSpace cs, int flags)
+LMemDC::LMemDC(const char *file, int line, int x, int y, LColourSpace cs, int flags)
 {
 	d = new LMemDCPrivate;
 	pMem = 0;
@@ -249,7 +249,7 @@ LMemDC::LMemDC(int x, int y, LColourSpace cs, int flags)
 	}
 }
 
-LMemDC::LMemDC(LSurface *pDC)
+LMemDC::LMemDC(const char *file, int line, LSurface *pDC)
 {
 	d = new LMemDCPrivate;
 	pMem = 0;

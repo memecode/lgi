@@ -224,12 +224,12 @@ struct LSoftwareUpdatePriv
 			}
 		}
 
-		void OnCreate()
+		void OnCreate() override
 		{
 			SetPulse(100);
 		}
 
-		void OnPulse()
+		void OnPulse() override
 		{
 			if (Watch->IsExited())
 			{

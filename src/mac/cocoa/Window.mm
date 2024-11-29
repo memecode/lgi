@@ -385,7 +385,11 @@ public:
 #error "NO ARC!"
 #endif
 
-LWindow::LWindow(OsWindow wnd) : LView(NULL)
+LWindow::LWindow(OsWindow wnd) :
+	LView(NULL)
+	#ifdef _DEBUG
+	, DebugDC(_FL)
+	#endif	
 {
 	d = new LWindowPrivate(this);
 	_QuitOnClose = false;

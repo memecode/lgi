@@ -61,7 +61,7 @@ public:
 	/// Called when the item is selected
 	virtual void OnSelect() {}
 	/// Called when the item is clicked
-	virtual void OnMouseClick(LMouse &m) {}
+	virtual void OnMouseClick(LMouse &m) override {}
 	/// Called when the item needs painting
 	virtual void OnPaint(ItemPaintCtx &Ctx) = 0;
 	/// Called when the item is dragged
@@ -109,24 +109,24 @@ public:
 	virtual bool XmlIo(class LXmlTag *Tag, bool Write) { return false; }
 
 	bool OnScriptEvent(LViewI *Ctrl) { return false; }
-	LMessage::Result OnEvent(LMessage *Msg) { return 0; }
-	void OnMouseEnter(LMouse &m) {}
-	void OnMouseExit(LMouse &m) {}
-	void OnMouseMove(LMouse &m) {}
-	bool OnMouseWheel(double Lines) { return false; }
-	bool OnKey(LKey &k) { return false; }
-	void OnAttach() {}
-	void OnCreate() {}
-	void OnDestroy() {}
-	void OnFocus(bool f) {}
-	void OnPulse() {}
-	void OnPosChange() {}
-	bool OnRequestClose(bool OsShuttingDown) { return false; }
-	int OnHitTest(int x, int y) { return 0; }
-	void OnChildrenChanged(LViewI *Wnd, bool Attaching) {}
+	LMessage::Result OnEvent(LMessage *Msg) override { return 0; }
+	void OnMouseEnter(LMouse &m) override {}
+	void OnMouseExit(LMouse &m) override {}
+	void OnMouseMove(LMouse &m) override {}
+	bool OnMouseWheel(double Lines) override { return false; }
+	bool OnKey(LKey &k) override { return false; }
+	void OnAttach() override {}
+	void OnCreate() override {}
+	void OnDestroy() override {}
+	void OnFocus(bool f) override {}
+	void OnPulse() override {}
+	void OnPosChange() override {}
+	bool OnRequestClose(bool OsShuttingDown) override { return false; }
+	int OnHitTest(int x, int y) override { return 0; }
+	void OnChildrenChanged(LViewI *Wnd, bool Attaching) override {}
 	int OnNotify(LViewI *Ctrl, const LNotification &n) override { return 0; }
-	int OnCommand(int Cmd, int Event, OsView Wnd) { return 0; }
-	void OnPaint(LSurface *pDC) { LAssert(0); }
+	int OnCommand(int Cmd, int Event, OsView Wnd) override { return 0; }
+	void OnPaint(LSurface *pDC) override { LAssert(0); }
 
 	// Style access
 	LCss *GetCss(bool Create = false)
@@ -146,13 +146,13 @@ public:
 	~LItemEdit();
 	
 	LItem *GetItem();
-	void OnPaint(LSurface *pDC);
+	void OnPaint(LSurface *pDC) override;
 	int OnNotify(LViewI *v, const LNotification &n) override;
-	void Visible(bool i);
-	LMessage::Result OnEvent(LMessage *Msg);
+	void Visible(bool i) override;
+	LMessage::Result OnEvent(LMessage *Msg) override;
 
-	bool OnKey(LKey &k);
-	void OnFocus(bool f);
+	bool OnKey(LKey &k) override;
+	void OnFocus(bool f) override;
 };
 
 /// Item container column

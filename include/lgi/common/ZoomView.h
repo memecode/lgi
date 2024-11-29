@@ -107,15 +107,15 @@ public:
 	int GetBlockSize();
 
 	// Events and Impl
-	void OnMouseClick(LMouse &m);
-	bool OnMouseWheel(double Lines);
-	void OnPulse();
-	void OnPaint(LSurface *pDC);
+	void OnMouseClick(LMouse &m) override;
+	bool OnMouseWheel(double Lines) override;
+	void OnPulse() override;
+	void OnPaint(LSurface *pDC) override;
 	int OnNotify(LViewI *v, const LNotification &n) override;
-	LMessage::Param OnEvent(LMessage *m);
-	bool OnLayout(LViewLayoutInfo &Inf);
+	LMessage::Param OnEvent(LMessage *m) override;
+	bool OnLayout(LViewLayoutInfo &Inf) override;
 	void UpdateScrollBars(LPoint *MaxScroll = NULL, bool ResetPos = false);
-	void OnPosChange();
+	void OnPosChange() override;
 };
 
 #endif

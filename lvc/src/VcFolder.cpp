@@ -3174,11 +3174,7 @@ LString ConvertUPlus(LString s)
 	}
 	
 	c.Add(0);
-	#ifdef LINUX
-	return LString((char16*)c.AddressOf());
-	#else
-	return LString(c.AddressOf());
-	#endif
+	return LString((LString::Char32*)c.AddressOf());
 }
 
 bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)

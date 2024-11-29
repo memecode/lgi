@@ -499,9 +499,9 @@ public:
 	{
 	}
 	
-	const char *GetClass() { return "FolderCtrl"; }
+	const char *GetClass() override { return "FolderCtrl"; }
 	
-	bool OnLayout(LViewLayoutInfo &Inf)
+	bool OnLayout(LViewLayoutInfo &Inf) override
 	{
 		if (Inf.Width.Min == 0)
 		{
@@ -531,14 +531,14 @@ public:
 		return n;		
 	}
 
-	const char *Name()
+	const char *Name() override
 	{
 		LString n = NameAt(Cursor);
 		LBase::Name(n);
 		return LBase::Name();
 	}
 	
-	bool Name(const char *n)
+	bool Name(const char *n) override
 	{
 		if (n && LView::Name() && !strcmp(n, LView::Name()))
 			return true;
@@ -560,7 +560,7 @@ public:
 		return b;
 	}
 	
-	void OnPaint(LSurface *pDC)
+	void OnPaint(LSurface *pDC) override
 	{
 		LRect c = GetClient();
 		LThinBorder(pDC, c, EdgeWin7Sunken);
@@ -632,7 +632,7 @@ public:
 		}
 	}
 
-	void OnMouseClick(LMouse &m)
+	void OnMouseClick(LMouse &m) override
 	{
 		if (m.IsContextMenu())
 		{
@@ -675,7 +675,7 @@ public:
 		}
 	}
 
-	void OnMouseMove(LMouse &m)
+	void OnMouseMove(LMouse &m) override
 	{
 		Part *o = Over;
 		Over = HitPart(m.x, m.y);
@@ -683,7 +683,7 @@ public:
 			Invalidate();
 	}
 	
-	void OnMouseExit(LMouse &m)
+	void OnMouseExit(LMouse &m) override
 	{
 		if (Over)
 		{
@@ -706,7 +706,7 @@ public:
 		return 0;
 	}
 
-	LMessage::Result OnEvent(LMessage *m)
+	LMessage::Result OnEvent(LMessage *m) override
 	{
 		switch (m->Msg())
 		{

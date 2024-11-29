@@ -84,7 +84,7 @@ public:
 			Wnd->UnregisterHook(this);
 	}
 
-	const char *GetClass() { return "LPopupList"; }
+	const char *GetClass() override { return "LPopupList"; }
 
 	// Events:
 	// ------------------------------------------------------------------------
@@ -142,7 +142,7 @@ public:
 		return Lst->Insert(ins);
 	}
 	
-	void OnPaint(LSurface *pDC)
+	void OnPaint(LSurface *pDC) override
 	{
 		// Draw the CSS border... (the default value is set in the constructor)
 		LCssTools t(GetCss(true), GetFont());
@@ -155,12 +155,12 @@ public:
 			Lst->SetPos(c);
 	}
 
-	bool Visible()
+	bool Visible() override
 	{
 		return LPopup::Visible();
 	}
 
-	void Visible(bool i)
+	void Visible(bool i) override
 	{
 		if (i)
 			AdjustPosition();
@@ -224,7 +224,7 @@ public:
 		return 0;
 	}
 
-	bool OnViewKey(LView *v, LKey &k)
+	bool OnViewKey(LView *v, LKey &k) override
 	{
 		if (!Visible())
 			return false;

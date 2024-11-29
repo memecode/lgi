@@ -1069,7 +1069,6 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MODULEMAP_FILE = module.modulemap;
 				MTL_ENABLE_DEBUG_INFO = YES;
-				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -1134,6 +1133,10 @@
 		3477C2711CBF020F0028B84B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					arm64,
+					x86_64,
+				);
 				CLANG_ANALYZER_NONNULL = YES_NONAGGRESSIVE;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_IDENTITY = "-";
@@ -1185,6 +1188,10 @@
 		3477C2721CBF020F0028B84B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					arm64,
+					x86_64,
+				);
 				CLANG_ANALYZER_NONNULL = YES_NONAGGRESSIVE;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_IDENTITY = "-";

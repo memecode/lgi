@@ -1853,7 +1853,7 @@ void LRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, LRange
 			Rgn.Len++;
 		}
 
-		LString s(Text.AddressOf(Rgn.Start), Rgn.Len);
+		LString s((LString::Char32*)Text.AddressOf(Rgn.Start), Rgn.Len);
 		LArray<LVariant> Params;
 		Params[SpellBlockPtr] = (Block*)this;
 
@@ -1909,7 +1909,7 @@ void LRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, LRange
 		LRange w = Words[i];
 
 		// Check there is a URL at the location
-		bool IsUrl = DetectUrl(Text.AddressOf(w.Start), w.Len);
+		bool IsUrl = DetectUrl((LString::Char32*)Text.AddressOf(w.Start), w.Len);
 		
 		#if 0
 		{
@@ -1928,7 +1928,7 @@ void LRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, LRange
 			}
 			
 			// Make it a link...
-			LString Link(Text.AddressOf(w.Start), w.Len);
+			LString Link((LString::Char32*)Text.AddressOf(w.Start), w.Len);
 			d->MakeLink(this, w.Start, w.Len, Link);
 			
 			// Also unlink any of the word after the URL

@@ -17,13 +17,13 @@ public:
 	LTimePopup(LView *owner);
 	~LTimePopup();
 
-	const char *GetClass() { return "LTimePopup"; }
+	const char *GetClass() override { return "LTimePopup"; }
 
 	void SetTime(LDateTime *t);
 	LString GetTime();
 
-	void OnCreate();
-	void OnPaint(LSurface *pDC);
+	void OnCreate() override;
+	void OnPaint(LSurface *pDC) override;
 	int OnNotify(LViewI *c, const LNotification &n) override;
 };
 
@@ -43,10 +43,10 @@ public:
 
 	/// This sets the date source control is the notify control is empty.
 	void SetDate(char *d);
-	void OnMouseClick(LMouse &m);
-	bool OnLayout(LViewLayoutInfo &Inf);
+	void OnMouseClick(LMouse &m) override;
+	bool OnLayout(LViewLayoutInfo &Inf) override;
 	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
-	void OnChildrenChanged(LViewI *Wnd, bool Attaching);
+	void OnChildrenChanged(LViewI *Wnd, bool Attaching) override;
 };
 
 /// Popup window used to select a date.
@@ -95,10 +95,10 @@ public:
 	/// to select an appropriate starting point if the Notify control is
 	/// empty.
 	void SetDate(char *d);
-	void OnMouseClick(LMouse &m);
-	bool OnLayout(LViewLayoutInfo &Inf);
+	void OnMouseClick(LMouse &m) override;
+	bool OnLayout(LViewLayoutInfo &Inf) override;
 	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
-	void OnChildrenChanged(LViewI *Wnd, bool Attaching);
+	void OnChildrenChanged(LViewI *Wnd, bool Attaching) override;
 };
 
 #endif

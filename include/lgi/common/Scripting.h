@@ -435,20 +435,20 @@ public:
 	LVmDebuggerWnd(LView *Parent, LVmCallback *Callback, LAutoPtr<LVirtualMachine> Vm, LAutoPtr<LCompiledCode> Code, const char *Assembly);
 	~LVmDebuggerWnd();
 
-	void OnAddress(size_t Addr);
-	void OnError(const char *Msg);
-	void OnRun(bool Running);
-	void SetSource(const char *Mixed);
+	void OnAddress(size_t Addr) override;
+	void OnError(const char *Msg) override;
+	void OnRun(bool Running) override;
+	void SetSource(const char *Mixed) override;
 	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
-	int OnCommand(int Cmd, int Event, OsView Wnd);
-	bool OnRequestClose(bool OsShuttingDown);
-	LMessage::Param OnEvent(LMessage *Msg);
+	int OnCommand(int Cmd, int Event, OsView Wnd) override;
+	bool OnRequestClose(bool OsShuttingDown) override;
+	LMessage::Param OnEvent(LMessage *Msg) override;
 	void LoadFile(const char *File);
 	LStream *GetLog();
-	void SetCode(LAutoPtr<LCompiledCode> Cc);
-	LCompiledCode *GetCode();
+	void SetCode(LAutoPtr<LCompiledCode> Cc) override;
+	LCompiledCode *GetCode() override;
 	
-	void Run();
+	void Run() override;
 };
 
 #endif

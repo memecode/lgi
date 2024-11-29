@@ -9,7 +9,7 @@ class LBrowser : public LWindow
 {
 	class LBrowserPriv *d;
 
-	bool OnViewKey(LView *v, LKey &k);
+	bool OnViewKey(LView *v, LKey &k) override;
 
 public:
 	class LBrowserEvents
@@ -30,7 +30,7 @@ public:
 	/// Adds optional local file system paths to search for resources.
 	void AddPath(const char *Path);
 
-	void OnPosChange();
+	void OnPosChange() override;
 	int OnNotify(LViewI *c, const LNotification &n) override;
-	LMessage::Result OnEvent(LMessage *m);
+	LMessage::Result OnEvent(LMessage *m) override;
 };
