@@ -156,7 +156,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 	LHashTbl<ConstStrKey<char, false>, LString> HdrMap;
 	LHashTbl<ConstStrKey<char, false>, bool> KnownExt;
 	LString::Array IncPaths, SysIncPaths;
-	ProjectBackend *backend = nullptr;
+	SystemIntf *backend = nullptr;
 	LString projectCache;
 	
 	#if USE_HASH
@@ -489,7 +489,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		{
 			case M_FIND_SYM_BACKEND:
 			{
-				if ((backend = (ProjectBackend*)Msg->A()))
+				if ((backend = (SystemIntf*)Msg->A()))
 					SetPulse(500);
 				break;
 			}
@@ -1008,7 +1008,7 @@ void FindSymbolSystem::ClearCache()
 	d->PostEvent(M_CLEAR_PROJECT_CACHE);
 }
 
-void FindSymbolSystem::SetBackend(ProjectBackend *backend)
+void FindSymbolSystem::SetBackend(SystemIntf *backend)
 {
 	d->PostEvent(M_FIND_SYM_BACKEND, (LMessage::Param)backend);
 }

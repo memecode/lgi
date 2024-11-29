@@ -28,10 +28,10 @@ static bool DEBUG_SHOW_GDB_IO = false;
 #if DEBUG_STRUCT_LOGGING
 #include "lgi/common/StructuredLog.h"
 #endif
+#include "lgi/common/SystemIntf.h"
 
 #include "Debugger.h"
 #include "LgiIde.h"
-#include "ProjectBackend.h"
 
 const char sPrompt[] = "(gdb) ";
 
@@ -49,18 +49,18 @@ class Gdb :
 	public LMutex
 {
 	LDebugEvents *Events = nullptr;
-	ProjectBackend *backend = nullptr;
+	SystemIntf *backend = nullptr;
 	bool backendProcessRunning = false;
 	BreakPointStore *bpStore = nullptr;
 	int bpStoreCallbackId = BreakPointStore::INVALID_ID;
-	IdePlatform platform = PlatformCurrent;
+	SysPlatform platform = PlatformCurrent;
 	constexpr static int INVALID_ID = BreakPointStore::INVALID_ID;
 	using TLock = LMutex::Auto;
 	
 	// Either one of these should non-NULL
 	LAutoPtr<LSubProcess> LocalGdb;
 	LStream *RemoteGdb = NULL;
-	ProjectBackend::ProcessIo RemoteIo;
+	SystemIntf::ProcessIo RemoteIo;
 	
 	LString Exe, Args, InitDir;
 	int AttachToPid = -1;
@@ -1025,7 +1025,7 @@ class Gdb :
 	}
 
 public:
-	Gdb(BreakPointStore *BpStore, LStream *log, ProjectBackend *be, IdePlatform plat, LStream *netLog) :
+	Gdb(BreakPointStore *BpStore, LStream *log, SystemIntf *be, SysPlatform plat, LStream *netLog) :
 		LThread("Gdb.Thread"),
 		LMutex("Gdb.Lock"),
 		bpStore(BpStore),
@@ -2217,7 +2217,7 @@ public:
 	}
 };
 
-LDebugger *CreateGdbDebugger(BreakPointStore *bpStore, LStream *Log, ProjectBackend *Backend, IdePlatform platform, LStream *networkLog)
+LDebugger *CreateGdbDebugger(BreakPointStore *bpStore, LStream *Log, SystemIntf *Backend, SysPlatform platform, LStream *networkLog)
 {
 	return new Gdb(bpStore, Log, Backend, platform, networkLog);
 }

@@ -8,10 +8,10 @@
 #include "lgi/common/CheckBox.h"
 #include "lgi/common/TextLabel.h"
 #include "lgi/common/FileSelect.h"
+#include "lgi/common/RemoteFileSelect.h"
 
 #include "LgiIde.h"
 #include "IdeFindInFiles.h"
-#include "RemoteFileSelect.h"
 #include "resdefs.h"
 
 #define DEBUG_HIST		0
@@ -140,8 +140,8 @@ void FindInFiles::OnCreate()
 	if (!Params)
 		return;
 
-	SetCtrlValue(IDC_ENTIRE_SOLUTION, Params->Type == FifSearchSolution);
-	SetCtrlValue(IDC_SEARCH_DIR, Params->Type == FifSearchDirectory);
+	SetCtrlValue(IDC_ENTIRE_SOLUTION, Params->Type == SystemIntf::FindParams::SearchPaths);
+	SetCtrlValue(IDC_SEARCH_DIR, Params->Type == SystemIntf::FindParams::SearchDirectory);
 
 	SetCtrlName(IDC_LOOK_FOR, Params->Text);
 	SetCtrlName(IDC_FILE_TYPES, Params->Ext);
@@ -214,7 +214,7 @@ int FindInFiles::OnNotify(LViewI *v, const LNotification &n)
 		case IDOK:
 		case IDCANCEL:
 		{
-			Params->Type = GetCtrlValue(IDC_ENTIRE_SOLUTION) != 0 ? FifSearchSolution :  FifSearchDirectory;
+			Params->Type = GetCtrlValue(IDC_ENTIRE_SOLUTION) != 0 ? SystemIntf::FindParams::SearchPaths :  SystemIntf::FindParams::SearchDirectory;
 			Params->Text = GetCtrlName(IDC_LOOK_FOR);
 			Params->Ext = GetCtrlName(IDC_FILE_TYPES);
 			Params->Dir = GetCtrlName(IDC_DIR);
@@ -392,10 +392,10 @@ LMessage::Result FindInFilesThread::OnEvent(LMessage *Msg)
 			}
 	
 			LArray<char*> Files;
-			if (d->Params->Type == FifSearchSolution)
+			if (d->Params->Type == SystemIntf::FindParams::SearchPaths)
 			{
 				// Do the extension filtering...
-				for (auto p: d->Params->ProjectFiles)
+				for (auto p: d->Params->Paths)
 				{
 					if (p)
 					{

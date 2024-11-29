@@ -24,7 +24,6 @@
 #include "SpaceTabConv.h"
 #include "DocEdit.h"
 #include "IdeDocPrivate.h"
-#include "ProjectBackend.h"
 #include "resdefs.h"
 
 const char *Untitled = "[untitled]";
@@ -2164,7 +2163,7 @@ LTextView3 *IdeDoc::GetEdit()
 }
 */
 
-bool IdeDoc::BuildIncludePaths(LString::Array &Paths, IdePlatform Platform, bool IncludeSysPaths)
+bool IdeDoc::BuildIncludePaths(LString::Array &Paths, SysPlatform Platform, bool IncludeSysPaths)
 {
 	if (!GetProject())
 	{

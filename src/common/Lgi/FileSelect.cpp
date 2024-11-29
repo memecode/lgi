@@ -988,7 +988,7 @@ void LFileSelectDlg::OnCreate()
 	for (auto t: d->Types)
 	{
 		char s[256];
-		snprintf(s, sizeof(s), "%s (%s)", t->Description(), t->Extension());
+		sprintf_s(s, sizeof(s), "%s (%s)", t->Description(), t->Extension());
 		if (FileTypeCbo)
 			FileTypeCbo->Insert(s);
 	}
@@ -1155,7 +1155,7 @@ void LFileSelectDlg::OnUpFolder()
 	if (Cur)
 	{
 		char Dir[MAX_PATH_LEN];
-		strcpy(Dir, Cur);
+		strcpy_s(Dir, sizeof(Dir), Cur);
 		if (strlen(Dir) > 3)
 		{
 			LTrimDir(Dir);
@@ -1393,7 +1393,7 @@ int LFileSelectDlg::OnNotify(LViewI *Ctrl, const LNotification &n)
 			Dlg->DoModal([this, Dlg](auto dlg, auto code)
 			{
 				char New[MAX_PATH_LEN];
-				strcpy(New, GetCtrlName(IDC_PATH));
+				strcpy_s(New, sizeof(New), GetCtrlName(IDC_PATH));
 				if (New[strlen(New)-1] != DIR_CHAR) strcat(New, DIR_STR);
 				strcat(New, Dlg->GetStr());
 
@@ -1682,7 +1682,7 @@ void LFileSystemItem::OnPath(const char *p)
 				if (Start)
 				{
 					char s[256];
-					strcpy(s, Path);
+					strcpy_s(s, sizeof(s), Path);
 
 					auto T = LString(Start).SplitDelimit(DIR_STR);
 					for (int i=0; i<T.Length(); i++)
@@ -1889,7 +1889,7 @@ void LFolderItem::OnActivate()
 		if (IsDir)
 		{
 			char Dir[256];
-			strcpy(Dir, Dlg->GetCtrlName(IDC_PATH));
+			strcpy_s(Dir, sizeof(Dir), Dlg->GetCtrlName(IDC_PATH));
 			if (Dir[strlen(Dir)-1] != DIR_CHAR)
 				strcat(Dir, DIR_STR);
 			strcat(Dir, File);

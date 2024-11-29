@@ -59,10 +59,10 @@ public:
 	bool Serialize(LXmlTag *Parent, bool Write);
 
 	// Accessors
-	const char *GetStr(ProjSetting Setting, const char *Default = NULL, IdePlatform Platform = PlatformCurrent);
-	int GetInt(ProjSetting Setting, int Default = 0, IdePlatform Platform = PlatformCurrent);
-	bool Set(ProjSetting Setting, const char *Value, IdePlatform Platform = PlatformCurrent, bool PlatformSpecific = false);
-	bool Set(ProjSetting Setting, int Value, IdePlatform Platform = PlatformCurrent, bool PlatformSpecific = false);
+	const char *GetStr(ProjSetting Setting, const char *Default = NULL, SysPlatform Platform = PlatformCurrent);
+	int GetInt(ProjSetting Setting, int Default = 0, SysPlatform Platform = PlatformCurrent);
+	bool Set(ProjSetting Setting, const char *Value, SysPlatform Platform = PlatformCurrent, bool PlatformSpecific = false);
+	bool Set(ProjSetting Setting, int Value, SysPlatform Platform = PlatformCurrent, bool PlatformSpecific = false);
 };
 
 #endif

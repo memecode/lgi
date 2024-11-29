@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ProjectBackend.h"
+#include "lgi/common/SystemIntf.h"
 
 enum FileSelectType
 {
@@ -10,7 +10,7 @@ enum FileSelectType
 };
 
 extern void RemoteFileSelect(LViewI *parent,
-							ProjectBackend *backend,
+							SystemIntf *systemIntf,
 							FileSelectType type,
 							LString initialPath,
 							std::function<void(LString)> callback);

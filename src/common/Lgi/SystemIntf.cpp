@@ -4,9 +4,7 @@
 #include "lgi/common/Ssh.h"
 #include "lgi/common/Mutex.h"
 #include "lgi/common/RemoveAnsi.h"
-
-#include "LgiIde.h"
-#include "ProjectBackend.h"
+#include "lgi/common/SystemIntf.h"
 
 #ifndef HAS_LIBSSH
 #error "Add ssh to this project"
@@ -14,8 +12,24 @@
 
 #define INFO(...) { if (log) log->Print(__VA_ARGS__); }
 
+const char *PlatformNames[] =
+{
+	"Windows",
+	"Linux",
+	"Mac",
+	"Haiku",
+	0
+};
+
+extern const char *ToString(SysPlatform p)
+{
+	if (p < PlatformWin || p >= PlatformMax)
+		return NULL;
+	return PlatformNames[p];
+}
+
 class SshBackend :
-	public ProjectBackend,
+	public SystemIntf,
 	public LCancel,
 	public LThread,
 	public LMutex
@@ -122,7 +136,7 @@ class SshBackend :
 	LView *app = NULL;
 	LUri uri;
 	LStream *log = NULL;
-	IdePlatform sysType = PlatformUnknown;
+	SysPlatform sysType = PlatformUnknown;
 	LString remoteSep;
 	LString homePath;
 	LArray<Process*> processes;
@@ -327,7 +341,7 @@ public:
 		a.SetFixedLength(false);
 		a += base.SplitDelimit("\\/");
 		a += leaf.SplitDelimit("\\/");
-		for (ssize_t i = 0; i < a.Length(); i++)
+		for (size_t i = 0; i < a.Length(); i++)
 		{
 			if (a[i] == ".")
 				a.DeleteAt(i--, true);
@@ -442,7 +456,7 @@ public:
 			});
 	}
 
-	void GetSysType(std::function<void(IdePlatform)> cb) override
+	void GetSysType(std::function<void(SysPlatform)> cb) override
 	{
 		if (sysType != PlatformUnknown)
 		{
@@ -632,11 +646,11 @@ public:
 				return 0;
 
 			dt.Month(month + 1);
-			dt.Day(e.day.Int());
+			dt.Day((int) e.day.Int());
 			if (e.timeOrYear.Find(":") > 0)
 				dt.SetTime(e.timeOrYear);
 			else
-				dt.Year(e.timeOrYear.Int());
+				dt.Year((int) e.timeOrYear.Int());
 
 			return dt.Ts().Get();
 		}
@@ -765,7 +779,7 @@ public:
 			return false;
 
 		Auto lck(this, _FL);
-		work.Add( [this, results, params = new FindParams(params)]()
+		work.Add( [this, results, params = new FindParams(*params)]()
 		{
 			auto args = LString::Fmt("grep -R \"%s\" \"%s\"",
 				params->Text.Get(),
@@ -984,7 +998,7 @@ public:
 	}
 };
 
-class LocalBackend : public ProjectBackend
+class LocalBackend : public SystemIntf
 {
 	LView *app;
 	LString folder;
@@ -1156,7 +1170,7 @@ public:
 		return status;
 	}
 
-	void GetSysType(std::function<void(IdePlatform)> cb) override
+	void GetSysType(std::function<void(SysPlatform)> cb) override
 	{
 		if (!cb)
 			return;
@@ -1186,9 +1200,9 @@ public:
 };
 
 
-LAutoPtr<ProjectBackend> CreateBackend(LView *parent, LString uri, LStream *log)
+LAutoPtr<SystemIntf> CreateSystemInterface(LView *parent, LString uri, LStream *log)
 {
-	LAutoPtr<ProjectBackend> backend;
+	LAutoPtr<SystemIntf> backend;
 	LUri u(uri);
 	if (u.IsProtocol("ssh"))
 		backend.Reset(new SshBackend(parent, uri, log));

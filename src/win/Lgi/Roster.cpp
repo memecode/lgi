@@ -26,14 +26,16 @@ bool LRoster::GetRunningAppInfo(PID process, AppInfo *info, LError *err) const
     HMODULE hMod;
     DWORD needed;
     TCHAR szProcessName[MAX_PATH] = TEXT("");
-    if (EnumProcessModules(hProcess, &hMod, sizeof(hMod), &needed))
+    auto status = EnumProcessModules(hProcess, &hMod, sizeof(hMod), &needed);
+    if (status)
     {
         GetModuleBaseName(hProcess, hMod, szProcessName, sizeof(szProcessName)/sizeof(TCHAR) );
         info->name = szProcessName;
+        LAssert(info->name);
     }
 
     CloseHandle(hProcess);
-    return true;
+    return status;
 }
 
 bool LRoster::Terminate(PID process, LError *err) const

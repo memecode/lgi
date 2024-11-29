@@ -1,7 +1,5 @@
 #include "lgi/common/Lgi.h"
-
-#include "LgiIde.h"
-#include "RemoteFileSelect.h"
+#include "lgi/common/RemoteFileSelect.h"
 
 #ifdef WINDOWS
 	// Use the cross platform file select dialog
@@ -34,7 +32,7 @@
 class RemoteFileSelectSystem : public FS_NAMESPACE::IFileSelectSystem
 {
 	char dirChar = '/';
-	ProjectBackend *backend = NULL;
+	SystemIntf *systemIntf = NULL;
 
 	LString ConvertPath(LString p)
 	{
@@ -43,10 +41,10 @@ class RemoteFileSelectSystem : public FS_NAMESPACE::IFileSelectSystem
 	}
 
 public:
-	RemoteFileSelectSystem(ProjectBackend *be) :
-		backend(be)
+	RemoteFileSelectSystem(SystemIntf *intf) :
+		systemIntf(intf)
 	{
-		backend->GetSysType([this](auto sys)
+		systemIntf->GetSysType([this](auto sys)
 		{
 			dirChar = sys == PlatformWin ? '\\' : '/';
 		});
@@ -74,9 +72,9 @@ public:
 
 	void GetInitialPath(std::function<void(LString)> cb) override
 	{
-		if (!cb || !backend)
+		if (!cb || !systemIntf)
 			return;
-		if (auto p = backend->GetBasePath())
+		if (auto p = systemIntf->GetBasePath())
 			cb(p);
 	}
 
@@ -89,7 +87,7 @@ public:
 	{
 		if (!cb)
 			return;
-		backend->ReadFolder(ConvertPath(path), [this, cb](auto dir)
+		systemIntf->ReadFolder(ConvertPath(path), [this, cb](auto dir)
 		{
 			cb(*dir);
 		});
@@ -97,7 +95,7 @@ public:
 
 	void CreateFolder(LString path, bool createParents, std::function<void(bool)> cb) override
 	{
-		backend->CreateFolder(ConvertPath(path), createParents, [this, cb](auto status)
+		systemIntf->CreateFolder(ConvertPath(path), createParents, [this, cb](auto status)
 			{
 				if (cb)
 					cb(status);
@@ -106,7 +104,7 @@ public:
 
 	void DeleteFolder(LString path, std::function<void(bool)> cb) override
 	{
-		backend->Delete(ConvertPath(path), true, [this, cb](auto status)
+		systemIntf->Delete(ConvertPath(path), true, [this, cb](auto status)
 			{
 				if (cb)
 					cb(status);
@@ -115,7 +113,7 @@ public:
 
 	void DeleteFile(LString path, std::function<void(bool)> cb) override
 	{
-		backend->Delete(ConvertPath(path), false, [this, cb](auto status)
+		systemIntf->Delete(ConvertPath(path), false, [this, cb](auto status)
 			{
 				if (cb)
 					cb(status);
@@ -124,7 +122,7 @@ public:
 
 	void Rename(LString oldPath, LString newPath, std::function<void(bool)> cb) override
 	{
-		backend->Rename(ConvertPath(oldPath), ConvertPath(newPath), [this, cb](auto status)
+		systemIntf->Rename(ConvertPath(oldPath), ConvertPath(newPath), [this, cb](auto status)
 			{
 				if (cb)
 					cb(status);
@@ -132,9 +130,9 @@ public:
 	}
 };
 
-void RemoteFileSelect(LViewI *parent, ProjectBackend *backend, FileSelectType type, LString initialPath, std::function<void(LString)> callback)
+void RemoteFileSelect(LViewI *parent, SystemIntf *systemIntf, FileSelectType type, LString initialPath, std::function<void(LString)> callback)
 {
-	auto dlg = new FS_NAMESPACE::LFileSelect(parent, new RemoteFileSelectSystem(backend));
+	auto dlg = new FS_NAMESPACE::LFileSelect(parent, new RemoteFileSelectSystem(systemIntf));
 
 	if (initialPath)
 		dlg->InitialDir(initialPath);

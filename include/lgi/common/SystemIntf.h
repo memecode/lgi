@@ -1,14 +1,44 @@
 #pragma once
 
-#include "IdeFindInFiles.h"
-#include "IdePlatform.h"
+//////////////////////////////////////////////////////////////////////
+// Platform stuff
+enum SysPlatform
+{
+	PlatformUnknown = -2,
+	PlatformCurrent = -1,
+	PlatformWin = 0,		// 0x1
+	PlatformLinux,			// 0x2
+	PlatformMac,			// 0x4
+	PlatformHaiku,			// 0x8
+	PlatformMax,
+};
+#define PLATFORM_WIN32			(1 << PlatformWin)
+#define PLATFORM_LINUX			(1 << PlatformLinux)
+#define PLATFORM_MAC			(1 << PlatformMac)
+#define PLATFORM_HAIKU			(1 << PlatformHaiku)
+#define PLATFORM_ALL			(PLATFORM_WIN32|PLATFORM_LINUX|PLATFORM_MAC|PLATFORM_HAIKU)
+extern SysPlatform PlatformFlagsToEnum(int flags);
+extern LString PlatformFlagsToStr(int flags);
+extern const char *ToString(SysPlatform p);
+extern const char *PlatformNames[];
 
-class ProjectBackend
+#if defined(_WIN32)
+#define PLATFORM_CURRENT		PLATFORM_WIN32
+#elif defined(MAC)
+#define PLATFORM_CURRENT		PLATFORM_MAC
+#elif defined(LINUX)
+#define PLATFORM_CURRENT		PLATFORM_LINUX
+#elif defined(HAIKU)
+#define PLATFORM_CURRENT		PLATFORM_HAIKU
+#endif
+
+
+class SystemIntf
 {
 public:
-	virtual ~ProjectBackend() {}
+	virtual ~SystemIntf() {}
 
-	virtual void GetSysType(std::function<void(IdePlatform)> cb) = 0;
+	virtual void GetSysType(std::function<void(SysPlatform)> cb) = 0;
 	virtual bool IsReady() { return true; }
 
 	// Path:
@@ -28,6 +58,24 @@ public:
 
 	// Searching:
 	virtual bool SearchFileNames(const char *searchTerms, std::function<void(LArray<LString>&)> results) = 0;
+
+	struct FindParams
+	{
+		enum TType
+		{
+			SearchPaths,		// Scan only paths in 'Paths'
+			SearchDirectory,	// Scan recursively under 'Dir'
+		}	Type;
+
+		LString Dir;
+		LString::Array Paths;
+
+		LString Text;
+		LString Ext;
+		bool MatchWord = false;
+		bool MatchCase = false;
+		bool SubDirs = true;
+	};
 	virtual bool FindInFiles(FindParams *params, LStream *results) = 0;
 
 	// Process:
@@ -48,4 +96,4 @@ public:
 	virtual bool ProcessOutput(const char *cmdLine, std::function<void(int32_t,LString)> cb) = 0;
 };
 
-extern LAutoPtr<ProjectBackend> CreateBackend(LView *parent, LString uri, LStream *log);
+extern LAutoPtr<SystemIntf> CreateSystemInterface(LView *parent, LString uri, LStream *log);

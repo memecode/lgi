@@ -2,29 +2,15 @@
 #define _FIND_IN_FILES_H_
 
 #include "lgi/common/EventTargetThread.h"
+#include "lgi/common/SystemIntf.h"
 #include "History.h"
 
-enum FifSearchType
-{
-	FifSearchSolution,
-	FifSearchDirectory,
-};
-
-class FindParams
+class FindParams : public SystemIntf::FindParams
 {
 public:
-	FifSearchType Type;
-	LString Text;
-	LString Ext;
-	LString Dir;
-	bool MatchWord = false;
-	bool MatchCase = false;
-	bool SubDirs = true;
-	LString::Array ProjectFiles;
-	
 	FindParams(const FindParams *Set = NULL)
 	{
-		Type = FifSearchDirectory;
+		Type = SearchDirectory;
 
 		Ext = "*.c* *.h *.java";
 
@@ -45,9 +31,9 @@ public:
 		Ext = p->Ext.Get();
 		Dir = p->Dir.Get();
 		
-		ProjectFiles.Length(p->ProjectFiles.Length());
-		for (unsigned i=0; i<ProjectFiles.Length(); i++)
-			ProjectFiles[i] = p->ProjectFiles.ItemAt(i).Get();
+		Paths.Length(p->Paths.Length());
+		for (unsigned i=0; i<Paths.Length(); i++)
+			Paths[i] = p->Paths.ItemAt(i).Get();
 		
 		MatchWord = p->MatchWord;
 		MatchCase = p->MatchCase;

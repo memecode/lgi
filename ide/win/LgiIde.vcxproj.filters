@@ -117,17 +117,17 @@
     <ClInclude Include="..\src\IdeProjectSettings.h">
       <Filter>Source Files\Projects</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\ProjectBackend.h">
-      <Filter>Source Files\Projects</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\RemoteFileSelect.h">
-      <Filter>Source Files\RemoteFileSelect</Filter>
-    </ClInclude>
     <ClInclude Include="..\resources\resdefs.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\BreakPointStore.h">
       <Filter>Source Files\Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\lgi\common\SystemIntf.h">
+      <Filter>Source Files\RemoteFileSelect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\lgi\common\RemoteFileSelect.h">
+      <Filter>Source Files\RemoteFileSelect</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -239,14 +239,14 @@
     <ClCompile Include="..\src\FindSymbol.cpp">
       <Filter>Source Files\Search\SymbolSearch</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\ProjectBackend.cpp">
-      <Filter>Source Files\Projects</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\RemoteFileSelect.cpp">
-      <Filter>Source Files\RemoteFileSelect</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\common\Text\RemoveAnsi.cpp">
       <Filter>Lgi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\Lgi\RemoteFileSelect.cpp">
+      <Filter>Source Files\RemoteFileSelect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\Lgi\SystemIntf.cpp">
+      <Filter>Source Files\RemoteFileSelect</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "lgi/common/EventTargetThread.h"
-#include "ProjectBackend.h"
+#include "lgi/common/SystemIntf.h"
 
 enum FindSymMessages
 {
@@ -147,7 +147,7 @@ public:
 	FindSymbolSystem(int AppHnd);
 	~FindSymbolSystem();
 	
-	void SetBackend(ProjectBackend *backend);
+	void SetBackend(SystemIntf *backend);
 	int GetAppHnd();
 	bool SetIncludePaths(LString::Array &Paths, LString::Array &SysPaths, int Platforms);
 	bool OnFile(const char *Path, SymAction Action, int Platforms);

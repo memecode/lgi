@@ -29,7 +29,6 @@
 #include "FtpThread.h"
 #include "ProjectNode.h"
 #include "WebFldDlg.h"
-#include "ProjectBackend.h"
 
 extern const char *Untitled;
 const char SourcePatterns[] = "*.c;*.h;*.cpp;*.cc;*.java;*.d;*.php;*.html;*.css;*.js";
@@ -45,22 +44,6 @@ const char *VsBinaries[] = {"devenv.com", "WDExpress.exe"};
 #define LGI_STATIC_LIBRARY_EXT		"a"
 #endif
 
-const char *PlatformNames[] =
-{
-	"Windows",
-	"Linux",
-	"Mac",
-	"Haiku",
-	0
-};
-
-extern const char *ToString(IdePlatform p)
-{
-	if (p < PlatformWin || p >= PlatformMax)
-		return NULL;
-	return PlatformNames[p];
-}
-
 int PlatformCtrlId[] =
 {
 	IDC_WIN32,
@@ -70,7 +53,7 @@ int PlatformCtrlId[] =
 	0
 };
 
-const char *PlatformDynamicLibraryExt(IdePlatform Platform)
+const char *PlatformDynamicLibraryExt(SysPlatform Platform)
 {
 	if (Platform == PlatformWin)
 		return "dll";
@@ -80,7 +63,7 @@ const char *PlatformDynamicLibraryExt(IdePlatform Platform)
 	return "so";
 }
 
-const char *PlatformSharedLibraryExt(IdePlatform Platform)
+const char *PlatformSharedLibraryExt(SysPlatform Platform)
 {
 	if (Platform == PlatformWin)
 		return "lib";
@@ -88,7 +71,7 @@ const char *PlatformSharedLibraryExt(IdePlatform Platform)
 	return "a";
 }
 
-const char *PlatformExecutableExt(IdePlatform Platform)
+const char *PlatformExecutableExt(SysPlatform Platform)
 {
 	if (Platform == PlatformWin)
 		return ".exe";
@@ -169,7 +152,7 @@ class BuildThread : public LThread, public LStream, public LCancel
 	LString Makefile, CygwinPath;
 	bool Clean, All;
 	BuildConfig Config;
-	IdePlatform Platform;
+	SysPlatform Platform;
 	int WordSize;
 	LAutoPtr<LSubProcess> SubProc;
 	LString::Array BuildConfigs;
@@ -204,7 +187,7 @@ class BuildThread : public LThread, public LStream, public LCancel
 	// Convert a stream to log messages, minus the ANSI stuff...
 	struct StreamToLog :
 		public LStream,
-		public ProjectBackend::ProcessIo
+		public SystemIntf::ProcessIo
 	{
 		LViewI *target;
 	
@@ -284,7 +267,7 @@ class BuildThread : public LThread, public LStream, public LCancel
 	void Step3();
 
 public:
-	BuildThread(IdeProject *proj, char *makefile, bool clean, BuildConfig config, IdePlatform platform, bool all, int wordsize);
+	BuildThread(IdeProject *proj, char *makefile, bool clean, BuildConfig config, SysPlatform platform, bool all, int wordsize);
 	~BuildThread();
 	
 	ssize_t Write(const void *Buffer, ssize_t Size, int Flags = 0) override;
@@ -299,7 +282,7 @@ class IdeProjectPrivate
 public:
 	AppWnd *App = NULL;
 	IdeProject *Project = NULL;
-	LAutoPtr<ProjectBackend> Backend;
+	LAutoPtr<SystemIntf> Backend;
 	bool Dirty = false, UserFileDirty = false;
 	LString FileName;
 	IdeProject *ParentProject = NULL;
@@ -338,7 +321,7 @@ public:
 	void CollectAllFiles(LTreeNode *Base, LArray<ProjectNode*> &Files, bool SubProjects, int Platform);
 };
 
-LString ToPlatformPath(const char *s, IdePlatform platform)
+LString ToPlatformPath(const char *s, SysPlatform platform)
 {
 	LString p = s;
 	if (platform == PlatformWin)
@@ -351,7 +334,7 @@ class MakefileThread : public LThread, public LCancel
 {
 	IdeProjectPrivate *d;
 	IdeProject *Proj;
-	IdePlatform Platform;
+	SysPlatform Platform;
 	LStream *Log;
 	bool BuildAfterwards;
 	bool HasError;
@@ -374,7 +357,7 @@ class MakefileThread : public LThread, public LCancel
 public:
 	static int Instances;
 
-	MakefileThread(IdeProjectPrivate *priv, IdePlatform platform, bool Build) : LThread("MakefileThread")
+	MakefileThread(IdeProjectPrivate *priv, SysPlatform platform, bool Build) : LThread("MakefileThread")
 	{
 		Instances++;
 
@@ -473,7 +456,7 @@ public:
 	
 	int Main()
 	{
-		const char *PlatformName = PlatformNames[Platform];
+		const char *PlatformName = ToString(Platform);
 		const char *PlatformLibraryExt = NULL;
 		const char *PlatformStaticLibExt = NULL;
 		const char *PlatformExeExt = "";
@@ -1389,7 +1372,7 @@ BuildThread::BuildThread(IdeProject *proj,
 						char *makefile,
 						bool clean,
 						BuildConfig config,
-						IdePlatform platform,
+						SysPlatform platform,
 						bool all,
 						int wordsize)
 	: LThread("BuildThread"), backendLock("BuildThread.Lock")
@@ -2581,7 +2564,7 @@ if (Debug) LgiTrace("Back=%i\n", (int)Back);
 	return true;
 }
 
-void IdeProject::GetExePath(std::function<void(LString,IdePlatform)> cb)
+void IdeProject::GetExePath(std::function<void(LString,SysPlatform)> cb)
 {
 	if (!cb)
 		return;
@@ -2664,7 +2647,7 @@ bool IdeProject::GetExePath(char *Path, int Len)
 	return true;
 }
 
-LString IdeProject::GetMakefile(IdePlatform Platform)
+LString IdeProject::GetMakefile(SysPlatform Platform)
 {
 	const char *PMakefile = d->Settings.GetStr(ProjMakefile, NULL, Platform);
 	if (!PMakefile)
@@ -2721,7 +2704,7 @@ void IdeProject::Clean(bool All, BuildConfig Config)
 	else CleanForPlatform(All, Config, PlatformCurrent);
 }
 
-void IdeProject::CleanForPlatform(bool All, BuildConfig Config, IdePlatform Platform)
+void IdeProject::CleanForPlatform(bool All, BuildConfig Config, SysPlatform Platform)
 {
 	if (!d->Thread &&
 		d->Settings.GetStr(ProjMakefile, NULL, Platform))
@@ -3109,7 +3092,7 @@ void IdeProject::Build(bool All, BuildConfig Config)
 	else BuildForPlatform(All, Config, PlatformCurrent);
 }
 
-void IdeProject::BuildForPlatform(bool All, BuildConfig Config, IdePlatform Platform)
+void IdeProject::BuildForPlatform(bool All, BuildConfig Config, SysPlatform Platform)
 {
 	auto m = GetMakefile(Platform);
 	CheckExists(m);
@@ -3200,7 +3183,7 @@ const char *IdeProject::GetExeArgs()
 	return d->Settings.GetStr(ProjArgs);
 }
 
-LString IdeProject::GetExecutable(IdePlatform Platform)
+LString IdeProject::GetExecutable(SysPlatform Platform)
 {
 	LString Bin = d->Settings.GetStr(ProjExe, NULL, Platform);
 	auto TargetType = d->Settings.GetStr(ProjTargetType, NULL, Platform);
@@ -3541,7 +3524,7 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 	auto Uri = d->Settings.GetStr(ProjRemoteUri);
 	if (Uri && !d->Backend)
 	{
-		d->Backend = CreateBackend(d->App, Uri, d->App->GetNetworkLog());
+		d->Backend = CreateSystemInterface(d->App, Uri, d->App->GetNetworkLog());
 		if (d->Backend)
 		{
 			auto path = d->Backend->GetBasePath();
@@ -3573,7 +3556,7 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 	return OpenOk;
 }
 
-ProjectBackend *IdeProject::GetBackend()
+SystemIntf *IdeProject::GetBackend()
 {
 	return d->Backend;
 }
@@ -4363,7 +4346,7 @@ bool PkgConfigPaths(LString::Array &out, LString in)
 	return true;
 }
 
-bool IdeProject::BuildIncludePaths(LString::Array &Paths, LString::Array *SysPaths, bool Recurse, bool IncludeSystem, IdePlatform Platform)
+bool IdeProject::BuildIncludePaths(LString::Array &Paths, LString::Array *SysPaths, bool Recurse, bool IncludeSystem, SysPlatform Platform)
 {
 	LArray<IdeProject*> Projects;
 	if (Recurse)
@@ -4543,7 +4526,7 @@ void IdeProjectPrivate::CollectAllFiles(LTreeNode *Base, LArray<ProjectNode*> &F
 	}
 }
 
-LString IdeProject::GetTargetName(IdePlatform Platform)
+LString IdeProject::GetTargetName(SysPlatform Platform)
 {
 	LString Status;
 	const char *t = d->Settings.GetStr(ProjTargetName, NULL, Platform);
@@ -4579,7 +4562,7 @@ LString IdeProject::GetTargetName(IdePlatform Platform)
 	return Status;
 }
 
-LString IdeProject::GetTargetFile(IdePlatform Platform)
+LString IdeProject::GetTargetFile(SysPlatform Platform)
 {
 	LString Target = GetTargetName(PlatformCurrent);
 	if (!Target)
@@ -4635,7 +4618,7 @@ struct ProjDependency
 	}
 };
 
-bool IdeProject::GetAllDependencies(LArray<char*> &Files, IdePlatform Platform)
+bool IdeProject::GetAllDependencies(LArray<char*> &Files, SysPlatform Platform)
 {
 	if (!GetTree()->Lock(_FL))
 		return false;
@@ -4721,7 +4704,7 @@ bool IdeProject::GetAllDependencies(LArray<char*> &Files, IdePlatform Platform)
 	return true;
 }
 
-bool IdeProject::GetDependencies(const char *InSourceFile, LString::Array &IncPaths, LArray<char*> &Files, IdePlatform Platform)
+bool IdeProject::GetDependencies(const char *InSourceFile, LString::Array &IncPaths, LArray<char*> &Files, SysPlatform Platform)
 {
 	LString SourceFile = InSourceFile;
 	if (!CheckExists(SourceFile))
@@ -4761,7 +4744,7 @@ bool IdeProject::GetDependencies(const char *InSourceFile, LString::Array &IncPa
 
 int MakefileThread::Instances = 0;
 
-bool IdeProject::CreateMakefile(IdePlatform Platform, bool BuildAfterwards)
+bool IdeProject::CreateMakefile(SysPlatform Platform, bool BuildAfterwards)
 {
 	if (d->CreateMakefile)
 	{

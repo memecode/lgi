@@ -6,11 +6,11 @@
 #include "lgi/common/Combo.h"
 #include "lgi/common/Button.h"
 #include "lgi/common/FileSelect.h"
+#include "lgi/common/RemoteFileSelect.h"
 
 #include "LgiIde.h"
 #include "IdeProject.h"
 #include "ProjectNode.h"
-#include "RemoteFileSelect.h"
 #include "resdefs.h"
 
 class ProjectSettingsDlg;
@@ -225,13 +225,13 @@ public:
 		return FindConfig(CurConfig);
 	}
 
-	const char *PlatformToString(int Flags, IdePlatform Platform)
+	const char *PlatformToString(int Flags, SysPlatform Platform)
 	{
 		if (Flags & SF_PLATFORM_SPECIFC)
 		{
 			if (Platform >= 0 && Platform < PlatformMax)
 			{
-				return PlatformNames[Platform];
+				return ToString(Platform);
 			}
 			
 			return sCurrentPlatform;
@@ -240,7 +240,7 @@ public:
 		return sAllPlatforms;
 	}
 
-	char *BuildPath(ProjSetting s, int Flags, IdePlatform Platform, int Config = -1)
+	char *BuildPath(ProjSetting s, int Flags, SysPlatform Platform, int Config = -1)
 	{
 		SettingInfo *i = Map.Find(s);
 		LAssert(i);
@@ -321,7 +321,7 @@ public:
 		d = priv;
 	}
 	
-	void AddLine(int i, int Config, IdePlatform platform)
+	void AddLine(int i, int Config, SysPlatform platform)
 	{
 		char *Path;
 		int CellY = i * 2;
@@ -389,7 +389,7 @@ public:
 		else LAssert(!"Unknown type?");
 	}
 	
-	void SetSetting(SettingInfo *setting, int flags, IdePlatform platform)
+	void SetSetting(SettingInfo *setting, int flags, SysPlatform platform)
 	{
 		if (Setting)
 		{
@@ -477,9 +477,9 @@ class SettingItem : public LTreeItem
 public:
 	SettingInfo *Setting;
 	int Flags;
-	IdePlatform platform;
+	SysPlatform platform;
 
-	SettingItem(SettingInfo *setting, int flags, ProjectSettingsDlg *dlg, IdePlatform plat)
+	SettingItem(SettingInfo *setting, int flags, ProjectSettingsDlg *dlg, SysPlatform plat)
 	{
 		Setting = setting;
 		Dlg = dlg;
@@ -548,7 +548,7 @@ public:
 						{
 							if (platformFlags & (1<<n))
 							{
-								auto plat = (IdePlatform)n;
+								auto plat = (SysPlatform)n;
 								auto item = new SettingItem(i, SF_PLATFORM_SPECIFC, this, plat);
 								item->SetText(ToString(plat));
 								Item->Insert(item);
@@ -601,7 +601,7 @@ public:
 		}
 	}
 
-	bool InsertPath(ProjSetting setting, IdePlatform platform, bool PlatformSpecific, LString newPath)
+	bool InsertPath(ProjSetting setting, SysPlatform platform, bool PlatformSpecific, LString newPath)
 	{
 		for (int Cfg = 0; Cfg < 2; Cfg++)
 		{
@@ -1043,7 +1043,7 @@ bool IdeProjectSettings::Serialize(LXmlTag *Parent, bool Write)
 	return false;
 }
 
-const char *IdeProjectSettings::GetStr(ProjSetting Setting, const char *Default, IdePlatform Platform)
+const char *IdeProjectSettings::GetStr(ProjSetting Setting, const char *Default, SysPlatform Platform)
 {
 	auto s = d->Map.Find(Setting);
 	LAssert(s);
@@ -1096,7 +1096,7 @@ const char *IdeProjectSettings::GetStr(ProjSetting Setting, const char *Default,
 	return d->StrBuf;
 }
 
-int IdeProjectSettings::GetInt(ProjSetting Setting, int Default, IdePlatform Platform)
+int IdeProjectSettings::GetInt(ProjSetting Setting, int Default, SysPlatform Platform)
 {
 	int Status = Default;
 
@@ -1124,7 +1124,7 @@ int IdeProjectSettings::GetInt(ProjSetting Setting, int Default, IdePlatform Pla
 	return Status;
 }
 
-bool IdeProjectSettings::Set(ProjSetting Setting, const char *Value, IdePlatform Platform, bool PlatformSpecific)
+bool IdeProjectSettings::Set(ProjSetting Setting, const char *Value, SysPlatform Platform, bool PlatformSpecific)
 {
 	bool Status = false;
 	char *path = d->BuildPath(Setting, PlatformSpecific ? SF_PLATFORM_SPECIFC : 0, Platform);
@@ -1138,7 +1138,7 @@ bool IdeProjectSettings::Set(ProjSetting Setting, const char *Value, IdePlatform
 	return Status;
 }
 
-bool IdeProjectSettings::Set(ProjSetting Setting, int Value, IdePlatform Platform, bool PlatformSpecific)
+bool IdeProjectSettings::Set(ProjSetting Setting, int Value, SysPlatform Platform, bool PlatformSpecific)
 {
 	bool Status = false;
 	char *path = d->BuildPath(Setting, PlatformSpecific ? SF_PLATFORM_SPECIFC : 0, Platform);

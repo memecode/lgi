@@ -3,9 +3,9 @@
 
 #include "lgi/common/Variant.h"
 #include "lgi/common/StringClass.h"
+#include "lgi/common/SystemIntf.h"
 
 #include "BreakPointStore.h"
-#include "IdePlatform.h"
 
 #define DEBUG_SESSION_LOGGING		0
 
@@ -81,8 +81,8 @@ public:
 
 extern LDebugger *CreateGdbDebugger(BreakPointStore *bpStore,
 									LStream *Log,
-									class ProjectBackend *Backend,
-									IdePlatform platform,
+									class SystemIntf *Backend,
+									SysPlatform platform,
 									LStream *networkLog);
 
 #endif

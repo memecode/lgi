@@ -18,7 +18,7 @@ public:
 	std::function<void()> onFinished;
 
 	// Object
-	LDebugContext(AppWnd *App, class IdeProject *Proj, IdePlatform Platform, const char *Exe, const char *Args, bool RunAsAdmin, const char *Env, const char *InitDir);
+	LDebugContext(AppWnd *App, class IdeProject *Proj, SysPlatform Platform, const char *Exe, const char *Args, bool RunAsAdmin, const char *Env, const char *InitDir);
 	virtual ~LDebugContext();
 
 	// Impl

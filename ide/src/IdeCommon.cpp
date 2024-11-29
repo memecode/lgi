@@ -61,7 +61,7 @@ void IdeCommon::CollectAllSubProjects(LArray<IdeProject*> &c)
 	}
 }
 
-IdePlatform GetCurrentPlatform()
+SysPlatform GetCurrentPlatform()
 {
 	#if defined(WIN32)
 	return PlatformWin;
@@ -76,7 +76,7 @@ IdePlatform GetCurrentPlatform()
 	#endif
 }
 
-void IdeCommon::CollectAllSource(LArray<LString> &c, IdePlatform Platform)
+void IdeCommon::CollectAllSource(LArray<LString> &c, SysPlatform Platform)
 {
 	for (auto i:*this)
 	{

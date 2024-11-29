@@ -13,7 +13,6 @@
 #include "ProjectNode.h"
 #include "AddFtpFile.h"
 #include "WebFldDlg.h"
-#include "ProjectBackend.h"
 #include "resdefs.h"
 
 #define DEBUG_SHOW_NODE_COUNTS		0

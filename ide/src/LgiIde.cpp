@@ -29,6 +29,7 @@
 #include "lgi/common/PopupNotification.h"
 #include "lgi/common/CommsBus.h"
 #include "lgi/common/RemoveAnsi.h"
+#include "lgi/common/RemoteFileSelect.h"
 
 #include "LgiIde.h"
 #include "FtpThread.h"
@@ -36,8 +37,6 @@
 #include "Debugger.h"
 #include "ProjectNode.h"
 #include "IdeFindInFiles.h"
-#include "ProjectBackend.h"
-#include "RemoteFileSelect.h"
 #include "resdefs.h"
 
 #define IDM_RECENT_FILE			1000
@@ -3333,7 +3332,7 @@ FindSymbolSystem *AppWnd::GetFindSym()
 	return d->FindSym;
 }
 
-IdePlatform PlatformFlagsToEnum(int flags)
+SysPlatform PlatformFlagsToEnum(int flags)
 {
 	if (flags == PLATFORM_WIN32)
 		return PlatformWin;
@@ -4234,7 +4233,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				{
 					LVariant var;
 					if (GetOptions()->GetValue(OPT_ENTIRE_SOLUTION, var))
-						d->FindParameters->Type = var.CastInt32() ? FifSearchSolution : FifSearchDirectory;
+						d->FindParameters->Type = var.CastInt32() ? SystemIntf::FindParams::SearchPaths : SystemIntf::FindParams::SearchDirectory;
 				}		
 
 				auto Dlg = new FindInFiles(this, d->FindParameters);
@@ -4260,9 +4259,9 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 
 				Dlg->DoModal([this, Dlg, p](auto dlg, auto code)
 				{
-					if (p && Dlg->Params->Type == FifSearchSolution)
+					if (p && Dlg->Params->Type == SystemIntf::FindParams::SearchPaths)
 					{
-						Dlg->Params->ProjectFiles.Length(0);
+						Dlg->Params->Paths.Length(0);
 						
 						LArray<ProjectNode*> Nodes;
 						for (auto p: p->GetAllProjects())
@@ -4272,11 +4271,11 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 						{
 							LString s = Nodes[i]->GetFullPath();
 							if (s)
-								Dlg->Params->ProjectFiles.Add(s);
+								Dlg->Params->Paths.Add(s);
 						}
 					}
 
-					LVariant var = d->FindParameters->Type == FifSearchSolution;
+					LVariant var = d->FindParameters->Type == SystemIntf::FindParams::SearchPaths;
 					GetOptions()->SetValue(OPT_ENTIRE_SOLUTION, var);
 
 					d->Finder->Stop();
@@ -4370,11 +4369,11 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				proj->GetAllNodes(Nodes);
 
 			LAutoPtr<FindParams> Params(new FindParams);
-			Params->Type = FifSearchSolution;
+			Params->Type = SystemIntf::FindParams::SearchPaths;
 			Params->MatchWord = true;
 			Params->Text = Word;
 			for (auto n: Nodes)
-				Params->ProjectFiles.New() = n->GetFullPath();
+				Params->Paths.New() = n->GetFullPath();
 
 			d->Finder->Stop();
 			d->Finder->PostEvent(FindInFilesThread::M_START_SEARCH, (LMessage::Param) Params.Release());
@@ -4841,7 +4840,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				Doc->Raise();
 			}
 			
-			IdePlatform PlatIdx = (IdePlatform) (Cmd - IDM_MAKEFILE_BASE);
+			SysPlatform PlatIdx = (SysPlatform) (Cmd - IDM_MAKEFILE_BASE);
 			const char *Platform =	PlatIdx >= 0 && PlatIdx < PlatformMax
 									?
 									PlatformNames[Cmd - IDM_MAKEFILE_BASE]

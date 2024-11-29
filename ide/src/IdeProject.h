@@ -74,7 +74,7 @@ public:
 	int OnNotify(LViewI *c, const LNotification &n) override;
 };
 
-extern IdePlatform GetCurrentPlatform();
+extern SysPlatform GetCurrentPlatform();
 
 class AppWnd;
 class IdeProject;
@@ -92,7 +92,7 @@ public:
 	IdeProject *GetProject() { return Project; }
 	bool OnOpen(LProgressDlg *Prog, LXmlTag *Src);	
 	void CollectAllSubProjects(LArray<IdeProject*> &c);
-	void CollectAllSource(LArray<LString> &c, IdePlatform Platform);
+	void CollectAllSource(LArray<LString> &c, SysPlatform Platform);
 	void SortChildren();
 	void InsertTag(LXmlTag *t) override;
 	bool RemoveTag() override;
@@ -140,7 +140,7 @@ public:
 	LAutoString GetBasePath(); // A non-relative path to the folder containing the project
 
 	AppWnd *GetApp();
-	LString GetExecutable(IdePlatform Platform);
+	LString GetExecutable(SysPlatform Platform);
 	const char *GetExeArgs();
 	const char *GetIncludePaths();
 	const char *GetPreDefinedValues();
@@ -148,16 +148,16 @@ public:
 
 	LXmlTag *Create(char *Tag);
 	void Empty();
-	LString GetMakefile(IdePlatform Platform);
+	LString GetMakefile(SysPlatform Platform);
 	[[deprecated]] bool GetExePath(char *Path, int Len);
-	void GetExePath(std::function<void(LString,IdePlatform)> cb);
+	void GetExePath(std::function<void(LString,SysPlatform)> cb);
 	bool RelativePath(LString &Out, const char *In, bool Debug = false);
 	void Build(bool All, BuildConfig Config);
-	void BuildForPlatform(bool All, BuildConfig Config, IdePlatform Platform);
+	void BuildForPlatform(bool All, BuildConfig Config, SysPlatform Platform);
 	void StopBuild();
 	void BuildThreadFinished();
 	void Clean(bool All, BuildConfig Config);
-	void CleanForPlatform(bool All, BuildConfig Config, IdePlatform Platform);
+	void CleanForPlatform(bool All, BuildConfig Config, SysPlatform Platform);
 	void Execute(ExeAction Act = ExeRun, std::function<void(LError&, LDebugContext*)> contextCb = NULL);
 	bool FixMissingFiles();
 	bool FindDuplicateSymbols();
@@ -166,16 +166,16 @@ public:
 	const char *GetFunctionComment();
 	bool IsMakefileUpToDate();
 	bool IsMakefileAScript();
-	bool CreateMakefile(IdePlatform Platform, bool BuildAfterwards);
-	LString GetTargetName(IdePlatform Platform);
-	LString GetTargetFile(IdePlatform Platform);
-	bool BuildIncludePaths(LString::Array &Paths, LString::Array *SysPaths, bool Recurse, bool IncludeSystem, IdePlatform Platform);
+	bool CreateMakefile(SysPlatform Platform, bool BuildAfterwards);
+	LString GetTargetName(SysPlatform Platform);
+	LString GetTargetFile(SysPlatform Platform);
+	bool BuildIncludePaths(LString::Array &Paths, LString::Array *SysPaths, bool Recurse, bool IncludeSystem, SysPlatform Platform);
 	void ShowFileProperties(const char *File);
 	int AllocateId();
 	bool CheckExists(LString &p, bool Debug = false);
 	bool CheckExists(LAutoString &p, bool Debug = false);
 	void OnMakefileCreated();
-	class ProjectBackend *GetBackend();
+	class SystemIntf *GetBackend();
 	LString GetBuildFolder() const;
 	void SetBuildFolder(LString folder);
 
@@ -210,8 +210,8 @@ public:
 	void ImportDsp(const char *File);
 
 	// Dependency calculation
-	bool GetAllDependencies(LArray<char*> &Files, IdePlatform Platform);
-	bool GetDependencies(const char *SourceFile, LString::Array &IncPaths, LArray<char*> &Files, IdePlatform Platform);
+	bool GetAllDependencies(LArray<char*> &Files, SysPlatform Platform);
+	bool GetDependencies(const char *SourceFile, LString::Array &IncPaths, LArray<char*> &Files, SysPlatform Platform);
 	
 	// Settings
 	IdeProjectSettings *GetSettings();

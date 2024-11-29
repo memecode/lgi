@@ -60,7 +60,7 @@ public:
 	bool Build();
 
 	// Source tools
-	bool BuildIncludePaths(LString::Array &Paths, IdePlatform Platform, bool IncludeSysPaths);
+	bool BuildIncludePaths(LString::Array &Paths, SysPlatform Platform, bool IncludeSysPaths);
 	bool BuildHeaderList(const char16 *Cpp, LString::Array &Headers, LString::Array &IncPaths);
 	bool FindDefn(char16 *Def, const char16 *Source, List<DefnInfo> &Matches);
 

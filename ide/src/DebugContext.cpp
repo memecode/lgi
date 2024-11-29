@@ -156,7 +156,7 @@ public:
 	bool InDebugging = false;
 	LAutoPtr<LDebugger> Db;
 	LString Exe, Args;
-	IdePlatform Platform;
+	SysPlatform Platform;
 	
 	LString SeekFile;
 	int SeekLine = 0;
@@ -166,7 +166,7 @@ public:
 	NativeInt MemDumpStart;
 	LArray<uint8_t> MemDump;
 
-	LDebugContextPriv(LDebugContext *ctx, IdePlatform platform) :
+	LDebugContextPriv(LDebugContext *ctx, SysPlatform platform) :
 		LMutex("LDebugContextPriv"),
 		Platform(platform)
 	{
@@ -298,7 +298,7 @@ public:
 
 LDebugContext::LDebugContext(AppWnd *App,
 							IdeProject *Proj,
-							IdePlatform Platform,
+							SysPlatform Platform,
 							const char *Exe,
 							const char *Args,
 							bool RunAsAdmin,

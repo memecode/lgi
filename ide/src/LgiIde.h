@@ -139,8 +139,6 @@ inline const char *toString(BuildConfig c)
 #define OPT_Jobs				"Jobs"
 #define OPT_SearchSysInc		"SearchSysInc"
 
-#include "IdePlatform.h"
-
 //////////////////////////////////////////////////////////////////////
 class IdeDoc;
 class IdeProject;
@@ -338,3 +336,6 @@ struct SysIncThread : public LThread, public LCancel
 	int Main() override;
 };
 
+extern const char sCurrentPlatform[];
+extern const char *Untitled;
+extern const char SourcePatterns[];
