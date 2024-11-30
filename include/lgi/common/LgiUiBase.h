@@ -31,7 +31,6 @@ class LMenuItem;
 class LMenu;
 class LToolBar;
 class LToolButton;
-class LSplitter;
 class LStatusPane;
 class LStatusBar;
 class LScrollBar;
