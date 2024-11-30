@@ -246,7 +246,12 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////
-LWindow::LWindow() : LView(0)
+LWindow::LWindow() :
+	LView(0)
+	#ifdef _DEBUG
+	, DebugDC(_FL)
+	
+	#endif
 {
 	d = new LWindowPrivate(this);
 	_QuitOnClose = false;

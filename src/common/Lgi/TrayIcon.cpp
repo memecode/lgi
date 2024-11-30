@@ -339,8 +339,7 @@ bool LTrayIcon::Load(const TCHAR *Str)
 			{
 				if (GdcD->GetBits() != i->GetBits())
 				{
-					LSurface *n = new LMemDC(i->X(), i->Y(), GdcD->GetColourSpace());
-					if (n)
+					if (auto n = new LMemDC(_FL, i->X(), i->Y(), GdcD->GetColourSpace()))
 					{
 						n->Colour(0);
 						n->Rectangle();
