@@ -614,7 +614,6 @@ void LListItem::OnPaint(LItem::ItemPaintCtx &Ctx)
 LList::LList(int id, int x, int y, int cx, int cy, const char *name)
 	: ResObject(Res_ListView)
 {
-	LStackTrace("%p::LList\n", this);
 	d = new LListPrivate;
 	SetId(id);
 	Name(name);
@@ -644,7 +643,6 @@ LList::LList(int id, int x, int y, int cx, int cy, const char *name)
 
 LList::~LList()
 {
-	LStackTrace("%p::~LList\n", this);
 	Empty();
 	EmptyColumns();
 	DeleteObj(d);
