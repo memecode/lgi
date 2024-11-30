@@ -17,6 +17,8 @@
 #define LOG(...)
 #endif
 
+#define DEFAULT_BACKGROUND			LColour(L_MED)
+
 static int DefaultSpacerPx()
 {
 	static int px = -1;
@@ -258,7 +260,7 @@ void LBox::OnPaint(LSurface *pDC)
 	LCssTools tools(GetCss(), GetFont());
 	cli = tools.PaintBorderAndPadding(pDC, cli);
 
-	LColour cBack = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
+	LColour cBack = StyleColour(LCss::PropBackgroundColor, DEFAULT_BACKGROUND);
 
 	size_t ChildViews = Children.Length();
 	if (ChildViews == 0)

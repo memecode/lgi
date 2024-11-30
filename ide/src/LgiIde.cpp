@@ -1954,6 +1954,17 @@ AppWnd::~AppWnd()
 	DeleteObj(d);
 }
 
+void AppWnd::DocIsCrlf(bool crlf)
+{
+	if (Menu)
+	{
+		if (auto item = Menu->FindItem(IDM_EOL_LF))
+			item->Checked(!crlf);
+		if (auto item = Menu->FindItem(IDM_EOL_CRLF))
+			item->Checked(crlf);
+	}
+}
+
 void AppWnd::OnPulse()
 {
 	IdeDoc *Top = TopDoc();

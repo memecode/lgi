@@ -1,5 +1,4 @@
-#ifndef _GSPLITTER_H_
-#define _GSPLITTER_H_
+#if 0
 
 #include "lgi/common/Layout.h"
 

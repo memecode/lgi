@@ -4,11 +4,12 @@
 #include "lgi/common/Edit.h"
 #include "lgi/common/ProgressDlg.h"
 #include "lgi/common/List.h"
-#include "lgi/common/Splitter.h"
+#include "lgi/common/Box.h"
 #include "lgi/common/FileSelect.h"
 #include "LgiIde.h"
 
-#define IDC_LIST 100
+#define ID_LIST		100
+#define ID_BOX		101
 
 class DumpItem : public LListItem
 {
@@ -133,17 +134,16 @@ public:
 		MoveToCenter();
 		if (Attach(0))
 		{
-			LSplitter *Split;
-			Children.Insert(Split = new LSplitter);
+			LBox *Split;
+			Children.Insert(Split = new LBox(ID_BOX, true));
 			Split->Value(400);
-			Split->IsVertical(false);
 
-			Split->SetViewA(Lst = new LList(IDC_LIST, 0, 0, 100, 100), false);
+			Split->AddView(Lst = new LList(ID_LIST, 0, 0, 100, 100));
 			Lst->AddColumn("Size", 200);
 			Lst->AddColumn("Location", 300);
 			Lst->AddColumn("Count", 100);
 
-			Split->SetViewB(Ed = new LEdit(101, 0, 0, 100, 100, ""), false);
+			Split->AddView(Ed = new LEdit(101, 0, 0, 100, 100, ""));
 			Ed->Enabled(false);
 			Ed->MultiLine(true);
 
@@ -152,9 +152,8 @@ public:
 
 			if (file)
 				Load(file);
-			else
+			else if (auto s = new LFileSelect)
 			{
-				LFileSelect *s = new LFileSelect;
 				s->Parent(this);
 				s->Type("Dump", "*.mem");
 				s->Type("All Files", LGI_ALL_FILES);
@@ -171,7 +170,7 @@ public:
 	{
 		switch (c->GetId())
 		{
-			case IDC_LIST:
+			case ID_LIST:
 			{
 				switch (n.Type)
 				{

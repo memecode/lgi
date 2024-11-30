@@ -660,6 +660,17 @@ struct LCommsBusPriv :
 		ServerTrySend(false);
 	}
 
+	void Sleep(int ms)
+	{
+		auto end = LCurrentTime() + ms;
+		while (!IsCancelled())
+		{
+			if (LCurrentTime() >= end)
+				break;
+			LSleep(10);
+		}
+	}
+
 	int Client()
 	{
 		Connection c(log);
@@ -707,7 +718,7 @@ struct LCommsBusPriv :
 				}
 				else
 				{
-					LSleep(1000);
+					Sleep(1000);
 					if (connectErrs++ > 5)
 						// If there enough errors connecting to the server, maybe this object should be the server?
 						// Back out of the client code and restart as the server.
@@ -774,7 +785,7 @@ struct LCommsBusPriv :
 					Unlock();
 				}
 				
-				LSleep(10);
+				Sleep(10);
 			}
 
 			if (c.connected ^ hasConnection)

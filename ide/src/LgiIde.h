@@ -289,6 +289,7 @@ public:
 	LMessage::Result OnEvent(LMessage *m) override;
 	bool OnNode(const char *Path, class ProjectNode *Node, FindSymbolSystem::SymAction Action);
 	void OnPulse() override;
+	void DocIsCrlf(bool crlf);
 
 	// Debugging support
 	class LDebugContext *GetDebugContext();

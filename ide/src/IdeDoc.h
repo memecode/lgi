@@ -68,6 +68,7 @@ public:
 	void OnLineChange(int Line);
 	void OnMarginClick(int Line);
 	void OnProjectChange();
+	void Raise() override;
 	
 	// Impl
 	void OnTitleClick(LMouse &m) override;

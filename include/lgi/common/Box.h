@@ -1,5 +1,4 @@
-#ifndef _GBOX_H_
-#define _GBOX_H_
+#pragma once
 
 #include "lgi/common/Css.h"
 
@@ -48,5 +47,3 @@ public:
 	bool Serialize(LDom *Dom, const char *OptName, bool Write);	
 	bool SetSize(int ViewIndex, LCss::Len Size);
 };
-
-#endif

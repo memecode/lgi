@@ -759,15 +759,19 @@ public:
 			auto parts = searchTerms.SplitDelimit();
 			auto args = LString::Fmt("cd %s && find .", root.Get());
 			for (size_t i=0; i<parts.Length(); i++)
-				args += LString::Fmt("%s -iname \"*%s*\"", i ? " -and" : "", parts[i].Get());
+				args += LString::Fmt("%s -iname \"*%s*\"", i ? " -and" : "", LGetLeaf(parts[i]));
 			args += " -and -not -path \"*/.hg/*\"";
 
-			auto result = Cmd(GetConsole(), args + "\n");
-			LArray<LString> lines = TrimContent(result).SplitDelimit("\r\n");
-			app->RunCallback( [results, lines]() mutable
-				{
-					results(lines);
-				});
+			int32_t exitCode = 0;
+			auto result = Cmd(GetConsole(), args + "\n", &exitCode);
+			if (!exitCode)
+			{
+				LArray<LString> lines = TrimContent(result).SplitDelimit("\r\n");
+				app->RunCallback( [results, lines]() mutable
+					{
+						results(lines);
+					});
+			}
 		} );
 
 		return true;
@@ -785,9 +789,13 @@ public:
 				params->Text.Get(),
 				params->Dir.Get());
 			results->Print("%s\n", args.Get());
-			auto result = Cmd(GetConsole(), args + "\n");
-			auto output = TrimContent(result);
-			results->Write(output);
+			int32_t exitCode = 0;
+			auto result = Cmd(GetConsole(), args + "\n", &exitCode);
+			if (!exitCode)
+			{
+				auto output = TrimContent(result);
+				results->Write(output);
+			}
 		} );
 
 		return true;

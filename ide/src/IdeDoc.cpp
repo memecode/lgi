@@ -1817,6 +1817,14 @@ ssize_t IdeDoc::Write(const void *Ptr, ssize_t Size, int Flags)
 	return 0;
 }
 
+void IdeDoc::Raise()
+{
+	LMdiChild::Raise();
+
+	if (d->Edit)
+		d->App->DocIsCrlf(d->Edit->GetCrLf());
+}
+
 void IdeDoc::OnProjectChange()
 {
 	DeleteObj(d->FilePopup);

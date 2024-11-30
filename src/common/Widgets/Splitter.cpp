@@ -1,3 +1,5 @@
+#if 0
+
 #include "lgi/common/Lgi.h"
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/CssTools.h"
@@ -535,3 +537,5 @@ void LSplitter::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 		}
 	}
 }
+
+#endif
