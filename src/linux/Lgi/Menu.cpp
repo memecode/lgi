@@ -1099,7 +1099,7 @@ void LMenuItem::PaintIcon(Gtk::cairo_t *cr)
 
 	#if 1
 
-		LMemDC Buf(a.width, a.height, System32BitColourSpace);
+		LMemDC Buf(_FL, a.width, a.height, System32BitColourSpace);
 
 		if (auto StyleCtx = gtk_widget_get_style_context(wid))
 		{

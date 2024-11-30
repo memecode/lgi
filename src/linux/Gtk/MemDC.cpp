@@ -49,16 +49,16 @@ public:
 	}
 };
 
-size_t LMemDC::Instances = 0;
+LArray<LMemDC*> LMemDC::Instances;
 
-LMemDC::LMemDC(int x, int y, LColourSpace cs, int flags)
+LMemDC::LMemDC(const char *file, int line, int x, int y, LColourSpace cs, int flags)
 {
 	d = new LMemDCPrivate;
 	if (cs != CsNone)
 		Create(x, y, cs, flags);
 }
 
-LMemDC::LMemDC(LSurface *pDC)
+LMemDC::LMemDC(const char *file, int line, LSurface *pDC)
 {
 	d = new LMemDCPrivate;
 	
@@ -122,7 +122,7 @@ void FreeMemDC(guchar *pixels, LMemDC *data)
 
 GdkPixbuf *LMemDC::CreatePixBuf()
 {
-	LMemDC *Tmp = new LMemDC(X(), Y(), CsRgba32, SurfaceRequireExactCs);
+	LMemDC *Tmp = new LMemDC(_FL, X(), Y(), CsRgba32, SurfaceRequireExactCs);
 	if (!Tmp)
 		return NULL;
 

@@ -103,7 +103,11 @@ public:
 ///////////////////////////////////////////////////////////////////////
 #define GWND_CREATE		0x0010000
 
-LWindow::LWindow(GtkWidget *w) : LView(0)
+LWindow::LWindow(GtkWidget *w) :
+	LView(0)
+	#ifdef _DEBUG
+	, DebugDC(_FL)
+	#endif
 {
 	d = new LWindowPrivate;
 	_QuitOnClose = false;

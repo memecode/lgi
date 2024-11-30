@@ -74,14 +74,14 @@
 			<Node File="./src/IdeProjectSettings.h" Type="3" Platforms="15" />
 			<Node File="./src/MissingFiles.cpp" Type="2" Platforms="15" />
 			<Node File="./src/NewProjectFromTemplate.cpp" Type="2" Platforms="15" />
-			<Node File="./src/ProjectBackend.cpp" Type="2" Platforms="15" />
-			<Node File="./src/ProjectBackend.h" Type="3" Platforms="15" />
+			<Node File="../src/common/Lgi/SystemIntf.cpp" Type="2" Platforms="15" />
+			<Node File="../include/lgi/common/SystemIntf.h" Type="3" Platforms="15" />
 			<Node File="./src/ProjectNode.cpp" Type="2" Platforms="15" />
 			<Node File="./src/ProjectNode.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="RemoteFileSelect" Type="1" Platforms="15" Id="1">
-			<Node File="./src/RemoteFileSelect.cpp" Type="2" Platforms="15" />
-			<Node File="./src/RemoteFileSelect.h" Type="3" Platforms="15" />
+			<Node File="../src/common/Lgi/RemoteFileSelect.cpp" Type="2" Platforms="15" />
+			<Node File="../include/lgi/common/RemoteFileSelect.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Search" Type="1" Platforms="15" Open="1" Id="5">
 			<Node File="./src/IdeFindInFiles.cpp" Type="2" Platforms="15" />

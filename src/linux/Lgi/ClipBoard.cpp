@@ -195,7 +195,7 @@ bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 		return false;
 	}
 	
-	if (!Img.Reset(new LMemDC))
+	if (!Img.Reset(new LMemDC(_FL)))
 	{
 		LAssert(!"Can't create surface...");
 		return false;
@@ -274,7 +274,7 @@ static void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LCli
 	}
 
 	auto x = gdk_pixbuf_get_width(Img), y = gdk_pixbuf_get_height(Img);
-	LAutoPtr<LMemDC> m(new LMemDC(x, y, cs));
+	LAutoPtr<LMemDC> m(new LMemDC(_FL, x, y, cs));
 	if (!m)
 	{
 		(*Cb)(Out, "Alloc failed");

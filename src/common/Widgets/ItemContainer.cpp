@@ -141,7 +141,7 @@ void LItemContainer::PaintColumnHeadings(LSurface *pDC)
 	LRect cr;
 
 	#if DOUBLE_BUFFER_COLUMN_DRAWING
-	LMemDC Bmp;
+	LMemDC Bmp(_FL);
 	if (!pDC->SupportsAlphaCompositing() &&
 		Bmp.Create(ColumnHeader.X(), ColumnHeader.Y(), System32BitColourSpace))
 	{
