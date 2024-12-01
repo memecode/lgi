@@ -63,7 +63,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		bool IsPython;
 		bool IsJavascript;
 		
-		bool Parse(LAutoWString Source, bool Debug)
+		bool Parse(LAutoWString Source, LError &err, bool Debug)
 		{
 			IsSource = false;
 			IsHeader = false;
@@ -89,15 +89,15 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 				IsJavascript = !_stricmp(Ext, "js");
 
 				if (IsSource || IsHeader)
-					Status = BuildCppDefnList(Path, Source, Defs, DefnNone, Debug);
+					Status = BuildCppDefnList(Path, Source, Defs, DefnNone, err, Debug);
 				else if (IsJavascript)
-					Status = BuildJsDefnList(Path, Source, Defs, DefnNone, Debug);
+					Status = BuildJsDefnList(Path, Source, Defs, DefnNone, err, Debug);
 				else if (IsPython)
-					Status = BuildPyDefnList(Path, Source, Defs, DefnNone, Debug);
+					Status = BuildPyDefnList(Path, Source, Defs, DefnNone, err, Debug);
 				else
-					LgiTrace("%s:%i error: unknown file type '%s'\n", _FL, Ext);
+					err.Set(LErrorInvalidParam, LString::Fmt("Unknown file type '%s'\n", Ext));
 			}
-			else printf("%s:%i - No extension for '%s'\n", _FL, Path.Get());
+			else err.Set(LErrorInvalidParam, LString::Fmt("No extension for '%s'\n", Path.Get()));
 
 			return Status;
 		}
@@ -369,7 +369,8 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		}
 
 		LAutoWString w(Utf8ToWide(data));
-		if (f->Parse(w, Debug))
+		LError err;
+		if (f->Parse(w, err, Debug))
 		{
 			if (backend)
 			{
@@ -382,7 +383,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		}
 		else
 		{
-			Log("AddFileData.error: parse failed for '%s'\n", f->Path.Get());
+			Log("AddFileData.error: Parse(%s) failed: %s\n", f->Path.Get(), err.ToString().Get());
 		}
 	}
 	

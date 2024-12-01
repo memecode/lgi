@@ -2,7 +2,6 @@
 #include <ctype.h>
 
 #include "lgi/common/Lgi.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/Net.h"
 #include "lgi/common/ClipBoard.h"
 #include "lgi/common/DisplayString.h"
@@ -316,8 +315,8 @@ void EditTray::OnHeaderList(LMouse &m)
 void EditTray::OnFunctionList(LMouse &m)
 {
 	LArray<DefnInfo> Funcs;
-
-	if (BuildDefnList(Doc->GetFileName(), (char16*)Ctrl->NameW(), Funcs, DefnNone /*DefnFunc | DefnClass*/))
+	LError err;
+	if (BuildDefnList(Doc->GetFileName(), (char16*)Ctrl->NameW(), Funcs, DefnNone /*DefnFunc | DefnClass*/, err))
 	{
 		LSubMenu s;
 		LArray<DefnInfo*> a;					
@@ -661,12 +660,8 @@ public:
 
 void FilterFiles(LArray<ProjectNode*> &Perfect, LArray<ProjectNode*> &Nodes, LString InputStr, int Platforms)
 {
-	LString::Array p = InputStr.SplitDelimit(" \t");
+	LString::Array terms = InputStr.SplitDelimit(" \t");
 		
-	auto InputLen = InputStr.RFind(".");
-	if (InputLen < 0)
-		InputLen = InputStr.Length();
-
 	LOG("%s:%i - InputStr='%s'\n", _FL, InputStr.Get());
 
 	LArray<ProjectNode*> Partial;
@@ -693,41 +688,45 @@ void FilterFiles(LArray<ProjectNode*> &Perfect, LArray<ProjectNode*> &Nodes, LSt
 		}
 		else
 		{
-			const char *Dir = strrchr(Fn, '/');
-			auto Leaf = Dir ? Dir : Fn.Get();
-
-			bool Match = true;
-			for (unsigned n=0; n<p.Length(); n++)
+			auto nodeLeaf = LGetLeaf(Fn);
+			
+			bool Match = false;
+			LString matchingTerm;
+			for (auto term: terms)
 			{
-				auto s = stristr(Leaf, p[n]);
+				auto termLeaf = LGetLeaf(term);
+				auto s = stristr(nodeLeaf, termLeaf);
 				
 				if (debug)
 				{
-					LOG("....'%s' '%s' = %p\n", Leaf, p[n].Get(), s);
+					LOG("....'%s' '%s' = %p\n", Leaf, term.Get(), s);
 				}
 			
-				if (!s)
+				if (s)
 				{
-					Match = false;
+					Match = true;
+					matchingTerm = term;
 					break;
 				}
 			}
 			if (Match)
 			{
 				bool PerfectMatch = false;
-				auto Leaf = LGetLeaf(Fn);
-				if (Leaf)
+				auto matchingLeaf = LGetLeaf(matchingTerm);
+				if (nodeLeaf && matchingLeaf)
 				{
-					auto Dot = strrchr(Leaf, '.');
-					if (Dot)
+					auto nodeDot = strrchr(nodeLeaf, '.');
+					auto termDot = strrchr(matchingLeaf, '.');
+					if (nodeDot && termDot)
 					{
-						auto Len = Dot - Leaf;
-						PerfectMatch =	Len == InputLen &&
-										strncmp(InputStr, Leaf, Len) == 0;
+						auto nodeLen = nodeDot - nodeLeaf;
+						auto termLen = termDot - matchingLeaf;
+						PerfectMatch =	nodeLen == termLen &&
+										strncmp(matchingLeaf, nodeLeaf, nodeLen) == 0;
 					}
 					else
 					{
-						PerfectMatch = stricmp(InputStr, Leaf);
+						PerfectMatch = stricmp(matchingLeaf, nodeLeaf);
 					}
 				}
 
@@ -980,8 +979,8 @@ bool IdeDocPrivate::IsFile(const char *File)
 	if (!f)
 		return false;
 
-	LToken doc(f, DIR_STR);
-	LToken in(File, DIR_STR);
+	auto doc = LString(f).SplitDelimit(ALL_FOLDER_SEP);
+	auto in = LString(File).SplitDelimit(ALL_FOLDER_SEP);
 	ssize_t in_pos = (ssize_t)in.Length() - 1;
 	ssize_t doc_pos = (ssize_t)doc.Length() - 1;
 	while (in_pos >= 0 && doc_pos >= 0)
@@ -1953,7 +1952,9 @@ int IdeDoc::OnNotify(LViewI *v, const LNotification &n)
 				{
 					// Populate with symbols
 					d->MethodPopup->All.Length(0);
-					BuildDefnList(GetFileName(), (char16*)d->Edit->NameW(), d->MethodPopup->All, DefnFunc);
+
+					LError err;
+					BuildDefnList(GetFileName(), (char16*)d->Edit->NameW(), d->MethodPopup->All, DefnFunc, err);
 
 					// Update list elements...
 					if (d->MethodPopup->InThread())
@@ -2289,7 +2290,8 @@ bool IdeDoc::FindDefn(char16 *Symbol, const char16 *Source, List<DefnInfo> &Matc
 				if (c16)
 				{
 					LArray<DefnInfo> Defns;
-					if (BuildDefnList(h, c16, Defns, DefnNone, false ))
+					LError err;
+					if (BuildDefnList(h, c16, Defns, DefnNone, err, false))
 					{
 						bool Found = false;
 						for (unsigned n=0; n<Defns.Length(); n++)
@@ -2312,7 +2314,8 @@ bool IdeDoc::FindDefn(char16 *Symbol, const char16 *Source, List<DefnInfo> &Matc
 		}
 
 		auto FileName = GetFileName();
-		if (BuildDefnList(FileName, (char16*)Source, Defns, DefnNone))
+		LError err;
+		if (BuildDefnList(FileName, (char16*)Source, Defns, DefnNone, err))
 		{
 			#if DEBUG_FIND_DEFN
 			bool Found = false;

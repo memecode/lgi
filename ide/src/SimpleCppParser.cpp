@@ -199,10 +199,11 @@ DefnType GuessDefnType(char16 *def, bool debug)
 	return equalsAtZero ? DefnVariable : DefnFunc;
 }
 
-bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns, int LimitTo, bool Debug)
+bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns, int LimitTo, LError &err, bool Debug)
 {
 	if (!Cpp)
-		return false;
+		// An empty file isn't an error, but it has no symbols.
+		return true;
 
 	static char16 StrClass[]		= {'c', 'l', 'a', 's', 's', 0};
 	static char16 StrStruct[]		= {'s', 't', 'r', 'u', 'c', 't', 0};

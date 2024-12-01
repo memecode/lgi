@@ -27,6 +27,7 @@
 #define DEBUG_FIND_DEFN			0
 
 #define OptFileSeparator		"\n"
+#define ALL_FOLDER_SEP			"/\\"
 
 #define THREAD_WARNING(...)		if (!InThread()) { LgiTrace("#### %s:%i out of thread call.\n", __FUNCTION__, __LINE__); return __VA_ARGS__; }
 

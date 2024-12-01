@@ -142,13 +142,14 @@ extern bool BuildCppDefnList
 	LArray<DefnInfo> &Funcs,
 	/// Use DefnType bits
 	int LimitTo,
+	LError &err,
 	bool Debug = false
 );
 
-extern bool BuildPyDefnList(const char *FileName, char16 *Source, LArray<DefnInfo> &Defns, int LimitTo, bool Debug = false);
-extern bool BuildJsDefnList(const char *FileName, char16 *Source, LArray<DefnInfo> &Defns, int LimitTo, bool Debug = false);
+extern bool BuildPyDefnList(const char *FileName, char16 *Source, LArray<DefnInfo> &Defns, int LimitTo, LError &err, bool Debug = false);
+extern bool BuildJsDefnList(const char *FileName, char16 *Source, LArray<DefnInfo> &Defns, int LimitTo, LError &err, bool Debug = false);
 
-inline bool BuildDefnList(const char *FileName, char16 *Source, LArray<DefnInfo> &Funcs, int LimitTo, bool Debug = false)
+inline bool BuildDefnList(const char *FileName, char16 *Source, LArray<DefnInfo> &Funcs, int LimitTo, LError &err, bool Debug = false)
 {
 	auto Ext = LGetExtension(FileName);
 	auto Fn = BuildCppDefnList;
@@ -161,7 +162,7 @@ inline bool BuildDefnList(const char *FileName, char16 *Source, LArray<DefnInfo>
 			Fn = BuildJsDefnList;
 	}
 		
-	return Fn(FileName, Source, Funcs, LimitTo, Debug);
+	return Fn(FileName, Source, Funcs, LimitTo, err, Debug);
 }
 
 #endif
