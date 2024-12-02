@@ -24,9 +24,15 @@ size_t RemoveAnsi(char *in, size_t length)
 
 	while (s < e)
 	{
-		if (*s == 0x7)
+		if
+		(
+			*s == 0x7
+			||
+			(*s == 0x9c && echoChars == false) // I'm not sure if this is correct...
+		)
 		{
 			s++; // skip
+			echoChars = true;
 		}
 		else if
 		(
@@ -37,6 +43,8 @@ size_t RemoveAnsi(char *in, size_t length)
 		{
 			if (s[1] == '[' || s[1] == 0x9B)
 			{
+				s += 2;
+
 				// Control Sequence Introducer
 				while (s < e && !FunctionChar(*s))
 					s++; // skip the param chars
@@ -60,8 +68,7 @@ size_t RemoveAnsi(char *in, size_t length)
 				||
 				(s[1] == '_') // App command
 			)
-			{
-				
+			{				
 				echoChars = false;
 				s += 2;
 			}

@@ -794,7 +794,7 @@ public:
 							return true;
 						}
 
-						LAssert(!"Doesn't look like a prompt?");
+						// LAssert(!"Doesn't look like a prompt?");
 					}
 
 					return false;
