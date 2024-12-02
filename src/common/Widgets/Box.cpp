@@ -11,8 +11,8 @@
 #define DEFAULT_MINIMUM_SIZE_PX		5
 #define ACTIVE_SPACER_SIZE_PX		9
 
-#if 0 //def _DEBUG
-#define LOG(...)		LgiTrace(__VA_ARGS__)
+#if 1 //def _DEBUG
+#define LOG(...)					LgiTrace(__VA_ARGS__)
 #else
 #define LOG(...)
 #endif
@@ -681,26 +681,29 @@ void LBox::OnMouseMove(LMouse &m)
 	if (!m.Down())
 	{
 		// Something else got the up click?
-		printf("No button down... so uncapturing..\n");
+		LOG("No button down... so uncapturing..\n");
 		Capture(false);
 		return;
 	}
 
 	int DragIndex = (int) (d->Dragging - &d->Spacers[0]);
+	LOG("%s: DragIndex=%i\n", __FUNCTION__, DragIndex);
 	if (DragIndex < 0 || DragIndex >= d->Spacers.Length())
 	{
 		LAssert(0);
 		return;
 	}
 
-	LViewI *Prev = Children[DragIndex];
+	auto Prev = Children[DragIndex];
+	LOG("%s: Prev=%p,%s\n", __FUNCTION__, Prev, Prev?Prev->GetClass():"");
 	if (!Prev)
 	{
 		LAssert(0);
 		return;
 	}
 
-	LViewI *Next = DragIndex < Children.Length() ? Children[DragIndex+1] : NULL;
+	auto Next = DragIndex < Children.Length() ? Children[DragIndex+1] : NULL;
+	LOG("%s: Next=%p,%s\n", __FUNCTION__, Next, Next?Next->GetClass():"");
 
 	LCssTools tools(GetCss(), GetFont());
 	LRect Content = tools.ApplyMargin(GetClient());
@@ -708,13 +711,13 @@ void LBox::OnMouseMove(LMouse &m)
 
 	LRect SplitPos = d->Dragging->Pos;
 
-	LCss *PrevStyle = Prev->GetCss();
-	LCss::PropType Style = d->Vertical ? LCss::PropHeight : LCss::PropWidth;
+	auto PrevStyle = Prev->GetCss();
+	auto Style = d->Vertical ? LCss::PropHeight : LCss::PropWidth;
 	bool EditPrev = !Next || IsValidLen(PrevStyle, Style);
-	LViewI *Edit = EditPrev ? Prev : Next;
+	auto Edit = EditPrev ? Prev : Next;
 	LAssert(Edit != NULL);
-	LRect ViewPos = Edit->GetPos();
-	auto *EditCss = Edit->GetCss(true);
+	auto ViewPos = Edit->GetPos();
+	auto EditCss = Edit->GetCss(true);
 
 	if (d->Vertical)
 	{
@@ -773,10 +776,10 @@ void LBox::OnMouseMove(LMouse &m)
 	else
 	{
 		// Work out the minimum width of the view
-		LCss::Len MinWidth = EditCss->MinWidth();
-		int MinPx = MinWidth.IsValid() ? MinWidth.ToPx(ViewPos.X(), Edit->GetFont()) : DEFAULT_MINIMUM_SIZE_PX;
+		auto MinWidth = EditCss->MinWidth();
+		auto MinPx = MinWidth.IsValid() ? MinWidth.ToPx(ViewPos.X(), Edit->GetFont()) : DEFAULT_MINIMUM_SIZE_PX;
 
-		int Offset = m.x - d->DragOffset.x - SplitPos.x1;
+		auto Offset = m.x - d->DragOffset.x - SplitPos.x1;
 		if (Offset)
 		{
 			// Slide along the X axis
