@@ -30,14 +30,14 @@ ifeq ($(Build),Debug)
 		-lgstreamer-1.0 \
 		`pkg-config --libs gtk+-3.0`
 	Inc =  \
-		-I./include/lgi/linux/Gtk \
 		-I./private/common \
-		-I./include \
+		-I./include/lgi/linux \
 		-I../../../../../usr/include/libayatana-appindicator3-0.1 \
-		-I./private/linux \
+		-I./include \
 		`pkg-config --cflags gstreamer-1.0` \
-		`pkg-config --cflags gtk+-3.0` \
-		-I./include/lgi/linux
+		-I./private/linux \
+		-I./include/lgi/linux/Gtk \
+		`pkg-config --cflags gtk+-3.0`
 else
 	CFlags += -s -Os -Wno-format-truncation
 	CppFlags += -s -Os -Wno-format-truncation
@@ -49,30 +49,22 @@ else
 		-lgstreamer-1.0 \
 		`pkg-config --libs gtk+-3.0`
 	Inc =  \
-		`pkg-config --cflags gtk+-3.0` \
 		-I./private/common \
-		-I./private/linux \
+		`pkg-config --cflags gtk+-3.0` \
+		-I./include \
 		`pkg-config --cflags gstreamer-1.0` \
 		-I../../../../../usr/include/libayatana-appindicator3-0.1 \
-		-I./include/lgi/linux/Gtk \
 		-I./include/lgi/linux \
-		-I./include
+		-I./private/linux \
+		-I./include/lgi/linux/Gtk
 endif
 
 # Dependencies
-Source =	src/linux/General/File.cpp \
-			src/common/Lgi/DragAndDropCommon.cpp \
-			src/linux/Lgi/DragAndDrop.cpp \
-			src/linux/General/ShowFileProp_Linux.cpp \
-			src/linux/Lgi/General.cpp \
-			src/common/General/ExeCheck.cpp \
-			src/common/General/TimeZone.cpp \
-			src/common/General/DateTime.cpp \
-			src/common/General/Containers.cpp \
-			src/common/General/Properties.cpp \
-			src/linux/Lgi/View.cpp \
-			src/linux/Lgi/App.cpp \
+Source =	src/common/General/Containers.cpp \
 			src/common/General/FileCommon.cpp \
+			src/common/General/Properties.cpp \
+			src/linux/Lgi/General.cpp \
+			src/linux/Lgi/View.cpp \
 			src/linux/Lgi/Window.cpp \
 			src/linux/Gtk/LgiWidget.cpp \
 			src/common/Lgi/AppCommon.cpp \
@@ -110,6 +102,8 @@ Source =	src/linux/General/File.cpp \
 			src/linux/Gtk/Gdc2.cpp \
 			src/common/Gdc2/Colour.cpp \
 			src/common/Gdc2/GdcCommon.cpp \
+			src/linux/General/File.cpp \
+			src/linux/Gtk/MemDC.cpp \
 			src/common/Gdc2/Font/DisplayString.cpp \
 			src/common/Gdc2/Font/Font.cpp \
 			src/common/Gdc2/Tools/GdcTools.cpp \
@@ -126,8 +120,6 @@ Source =	src/linux/General/File.cpp \
 			src/common/Gdc2/8Bit.cpp \
 			src/common/Gdc2/Alpha.cpp \
 			src/common/Gdc2/Rect.cpp \
-			src/linux/Gtk/MemDC.cpp \
-			src/common/Lgi/ClipBoardCommon.cpp \
 			src/linux/Gtk/PrintDC.cpp \
 			src/linux/Gtk/ScreenDC.cpp \
 			src/linux/Lgi/Printer.cpp \
@@ -154,6 +146,14 @@ Source =	src/linux/General/File.cpp \
 			src/common/Widgets/ItemContainer.cpp \
 			src/common/Widgets/CheckBox.cpp \
 			src/common/Text/DocView.cpp \
+			src/linux/Lgi/App.cpp \
+			src/common/General/TimeZone.cpp \
+			src/common/Lgi/ClipBoardCommon.cpp \
+			src/common/General/ExeCheck.cpp \
+			src/linux/General/ShowFileProp_Linux.cpp \
+			src/linux/Lgi/DragAndDrop.cpp \
+			src/common/Lgi/DragAndDropCommon.cpp \
+			src/common/General/DateTime.cpp \
 			src/common/Widgets/Edit.cpp \
 			src/common/Widgets/List.cpp \
 			src/common/Widgets/Panel.cpp \
@@ -219,21 +219,21 @@ clean :
 	@echo Cleaned $(BuildDir)
 
 VPATH=$(BuildDir) \
-	./src/common/Gdc2/Font \
-	./src/common/General \
-	./src/linux/Lgi \
-	./src/linux/General \
-	./src/common/Gdc2/Tools \
-	./src/common/Gdc2/Path \
-	./src/common/Skins/Gel \
 	./src/common/Lgi \
+	./src/common/Gdc2/Filters \
 	./src/linux/Gtk \
 	./src/common/Resource \
 	./src/posix \
 	./src/common/Gdc2 \
 	./src/common/Hash/sha1 \
+	./src/common/Gdc2/Path \
 	./src/common/Net \
-	./src/common/Gdc2/Filters \
 	./src/common/Widgets \
 	./src/common/Hash/md5 \
-	./src/common/Text
+	./src/common/Text \
+	./src/common/General \
+	./src/linux/General \
+	./src/linux/Lgi \
+	./src/common/Gdc2/Tools \
+	./src/common/Gdc2/Font \
+	./src/common/Skins/Gel

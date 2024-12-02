@@ -1,5 +1,4 @@
-#ifndef _GLAYOUT_H_
-#define _GLAYOUT_H_
+#pragma once
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Control or View window
@@ -38,7 +37,7 @@
 /// with the control ID of the scrollbar, which is either #IDC_VSCROLL or #IDC_HSCROLL.
 class LgiClass LLayout : public LView
 {
-	friend class LScroll;
+	friend class LScrollBar;
 	friend class LView;
 
 	// Private variables
@@ -146,4 +145,3 @@ public:
 	#endif
 };
 
-#endif
