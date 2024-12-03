@@ -86,6 +86,7 @@ Source =	../src/common/Coding/LexCpp.cpp \
 			src/FtpThread.cpp \
 			src/WebFldDlg.cpp \
 			src/AddFtpFile.cpp \
+			src/Debugger.cpp \
 			src/DebugContext.cpp \
 			src/DocEditStyling.cpp \
 			../src/common/Lgi/RemoteFileSelect.cpp \
