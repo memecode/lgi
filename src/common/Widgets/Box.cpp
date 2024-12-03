@@ -11,7 +11,7 @@
 #define DEFAULT_MINIMUM_SIZE_PX		5
 #define ACTIVE_SPACER_SIZE_PX		9
 
-#if 1 //def _DEBUG
+#if 0 //def _DEBUG
 #define LOG(...)					LgiTrace(__VA_ARGS__)
 #else
 #define LOG(...)
