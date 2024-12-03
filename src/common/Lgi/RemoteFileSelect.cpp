@@ -83,6 +83,16 @@ public:
 		// Impl me
 	}
 
+	void Stat(LString path, std::function<void(struct stat*, LString, LError)> cb)
+	{
+		if (!path || !cb)
+			return;
+		systemIntf->Stat(ConvertPath(path), [this, cb](auto s, auto path, auto err)
+			{
+				cb(s, path, err);
+			});
+	}
+
 	void ReadDir(LString path, std::function<void(LDirectory&)> cb) override
 	{
 		if (!cb)

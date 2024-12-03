@@ -49,6 +49,7 @@ public:
 	virtual void ResolvePath(LString path, LString::Array hints, std::function<void(LError&,LString)> cb) = 0;
 
 	// Reading and writing:
+	virtual bool Stat(LString path, std::function<void(struct stat*, LString, LError)> cb) = 0;
 	virtual bool ReadFolder(const char *Path, std::function<void(LDirectory*)> results) = 0;
 	virtual bool Read(const char *Path, std::function<void(LError,LString)> result) = 0;
 	virtual bool Write(const char *Path, LString Data, std::function<void(LError)> result) = 0;

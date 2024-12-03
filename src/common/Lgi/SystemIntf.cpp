@@ -726,6 +726,81 @@ public:
 		return finalPath;
 	}
 
+	bool Stat(LString path, std::function<void(struct stat*, LString, LError)> cb) override
+	{
+		if (!path || !cb)
+			return false;
+		
+		Auto lck(this, _FL);
+		work.Add( [this, cb, path = PreparePath(path)]()
+		{
+			auto cmd = LString::Fmt("stat %s\n", path.Get());
+			int32_t exitCode = 0;
+			auto out = Cmd(GetConsole(), cmd, &exitCode);
+			auto lines = out.SplitDelimit("\r\n").Slice(1, -2);
+
+			app->RunCallback(
+				[cb, exitCode, lines]() mutable
+				{
+					LError err;
+					if (exitCode)
+					{
+						err.Set(LErrorPathNotFound, lines[0]);
+						cb(nullptr, LString(), err);
+					}
+					else
+					{
+						struct stat s = {};
+						LDateTime dt;
+						LString file;
+						for (auto ln: lines)
+						{
+							auto p = ln.Strip().SplitDelimit(":", 1);
+							if (p.Length() != 2) continue;
+							auto var = p[0].Strip();
+							auto val = p[1].Strip();
+							if (var.Equals("file"))
+							{
+								file = val;
+							}
+							else if (var.Equals("size"))
+							{
+								auto parts = val.SplitDelimit();
+								s.st_size = parts[0].Int();
+							}
+							else if (var.Equals("access"))
+							{
+								auto parts = val.SplitDelimit("(/) ");
+								if (parts[0].Length() == 4 && parts[0](0) == '0')
+								{
+									// access mode...
+									s.st_mode = Atoi(parts[0].Get(), 8);
+								}
+								else
+								{
+									// access time...
+									if (dt.Set(val))
+										s.st_atime = dt.GetUnix();
+								}
+							}
+							else if (var.Equals("modify"))
+							{
+								if (dt.Set(val))
+									s.st_mtime = dt.GetUnix();
+							}
+							else if (var.Equals("change"))
+							{
+								if (dt.Set(val))
+									s.st_ctime = dt.GetUnix();
+							}
+						}
+						cb(&s, file, err);
+					}
+				});
+		} );
+		return true;
+	}
+
 	bool ReadFolder(const char *Path, std::function<void(LDirectory*)> cb) override
 	{
 		if (!Path || !cb)
@@ -785,7 +860,7 @@ public:
 		Auto lck(this, _FL);
 		work.Add( [this, results, params = new FindParams(*params)]()
 		{
-			auto args = LString::Fmt("grep -R \"%s\" \"%s\"",
+			auto args = LString::Fmt("grep -Rn \"%s\" %s",
 				params->Text.Get(),
 				params->Dir.Get());
 			results->Print("%s\n", args.Get());
@@ -859,6 +934,11 @@ public:
 	{
 		if (!Path)
 			return false;
+		if (!Data)
+		{
+			LAssert(!"should be some data?");
+			return false;
+		}
 
 		Auto lck(this, _FL);
 		work.Add( [this, result, Path = PreparePath(Path), Data]() mutable
@@ -1048,6 +1128,18 @@ public:
 	void ResolvePath(LString path, LString::Array hints, std::function<void(LError&,LString)> cb)
 	{
 		LAssert(!"impl me");
+	}
+
+	bool Stat(LString path, std::function<void(struct stat*, LString, LError)> cb) override
+	{
+		if (!path || !cb)
+			return false;
+		struct stat s;
+		LError err;
+		if (stat(path, &s))
+			err = errno;
+		cb(&s, path, err);
+		return true;
 	}
 
 	bool ReadFolder(const char *Path, std::function<void(LDirectory*)> results) override

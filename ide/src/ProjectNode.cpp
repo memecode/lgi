@@ -242,49 +242,31 @@ bool ProjectNode::Load(LDocView *Edit, NodeView *Callback)
 {
 	bool Status = false;
 
-	if (IsWeb())
-	{
-		if (sLocalCache)
-			Status = Edit->Open(sLocalCache);
-		else
-			LAssert(!"No LocalCache");
-	}
-	else
-	{
-		auto Full = GetFullPath();
-		Status = Edit->Open(Full, Charset);
-	}
+	auto Full = GetFullPath();
+	Status = Edit->Open(Full, Charset);
 	
 	return Status;
 }
 
-bool ProjectNode::Save(LDocView *Edit, NodeView *Callback)
+bool ProjectNode::OnError(LString s)
+{
+	if (Project)
+	{
+		if (auto app = Project->GetApp())
+		{
+			LPopupNotification::Message(app, s);
+		}
+	}
+	return false;
+}
+
+bool ProjectNode::Save(LDocView *Edit, NodeView *Callback, LStream *Out)
 {
 	bool Status = false;
 
-	if (IsWeb())
+	if (Out)
 	{
-		if (sLocalCache)
-		{
-			if (Edit->Save(sLocalCache))
-			{
-				FtpThread *t = GetFtpThread();
-				if (t)
-				{
-					FtpCmd *c = new FtpCmd(FtpWrite, this);
-					if (c)
-					{
-						c->View = Callback;
-						// c->Watch = Project->GetApp()->GetFtpLog();
-						c->Uri = NewStr(sFile);
-						c->File = NewStr(sLocalCache);
-						t->Post(c);
-					}
-				}
-			}
-			else LAssert(!"Editbox save failed.");
-		}
-		else LAssert(!"No LocalCache");
+		Status = Edit->Save(Out, Charset);
 	}
 	else
 	{
@@ -292,12 +274,11 @@ bool ProjectNode::Save(LDocView *Edit, NodeView *Callback)
 		if (Project)
 			Project->CheckExists(f);
 		Status = Edit->Save(f, Charset);
-
-		if (Callback)
-			Callback->OnSaveComplete(Status);
 	}
 	
-	
+	if (Callback)
+		Callback->OnSaveComplete(Status);
+
 	return Status;
 }
 
@@ -307,22 +288,6 @@ int ProjectNode::GetId()
 		NodeId = Project->AllocateId();
 
 	return NodeId;
-}
-
-bool ProjectNode::IsWeb()
-{
-	char *Www = GetAttr(OPT_Www);
-	char *Ftp = GetAttr(OPT_Ftp);
-
-	if
-	(
-		Www ||
-		Ftp ||
-		(sFile && strnicmp(sFile, "ftp://", 6) == 0)
-	)
-		return true;
-
-	return false;
 }
 
 bool ProjectNode::HasNode(ProjectNode *Node)
@@ -540,11 +505,6 @@ void ProjectNode::SetType(NodeType t)
 
 int ProjectNode::GetImage(int f)
 {
-	if (IsWeb())
-	{
-		return sFile ? ICON_SOURCE : ICON_WEB;
-	}
-
 	switch (Type)
 	{
 		default:
@@ -570,25 +530,18 @@ const char *ProjectNode::GetText(int c)
 	{
 		char *d = 0;
 
-		if (IsWeb())
+		#ifdef WIN32
+		char Other = '/';
+		#else
+		char Other = '\\';
+		#endif
+		char *s;
+		while ((s = strchr(sFile, Other)))
 		{
-			d = sFile ? strrchr(sFile, '/') : 0;
+			*s = DIR_CHAR;
 		}
-		else
-		{
-			#ifdef WIN32
-			char Other = '/';
-			#else
-			char Other = '\\';
-			#endif
-			char *s;
-			while ((s = strchr(sFile, Other)))
-			{
-				*s = DIR_CHAR;
-			}
 			
-			d = strrchr(sFile, DIR_CHAR);
-		}
+		d = strrchr(sFile, DIR_CHAR);
 		
 		if (d) return d + 1;
 		else return sFile;
@@ -1015,23 +968,11 @@ void ProjectNode::OnMouseClick(LMouse &m)
 
 		if (Type == NodeDir)
 		{
-			if (IsWeb())
-			{
-				Sub.AppendItem("Insert FTP File", IDM_INSERT_FTP, true);
-			}
-			else
-			{
-				Sub.AppendItem("Insert File", IDM_INSERT, true);
-			}
-			
+			Sub.AppendItem("Insert File", IDM_INSERT, true);
 			Sub.AppendItem("New Folder", IDM_NEW_FOLDER, true);
 			Sub.AppendItem("Import Folder", IDM_IMPORT_FOLDER, true);
 			Sub.AppendSeparator();
-
-			if (!IsWeb())
-			{
-				Sub.AppendItem("Rename", IDM_RENAME, true);
-			}
+			Sub.AppendItem("Rename", IDM_RENAME, true);
 		}
 		Sub.AppendItem("Remove", IDM_DELETE, true);
 		Sub.AppendItem("Sort", IDM_SORT_CHILDREN, true);
@@ -1255,11 +1196,7 @@ void ProjectNode::OnMouseClick(LMouse &m)
 		{
 			if
 			(
-				(
-					IsWeb()
-					||
-					Type != NodeDir
-				)
+				Type != NodeDir
 				&&
 				ValidStr(sFile)
 			)
@@ -1288,11 +1225,7 @@ ProjectNode *ProjectNode::FindFile(const char *In, char **Full)
 		bool Match = false;
 		const char *AnyDir = "\\/";
 
-		if (IsWeb())
-		{
-			Match = sFile ? stricmp(In, sFile) == 0 : false;
-		}
-		else if (strchr(In, DIR_CHAR))
+		if (strchr(In, DIR_CHAR))
 		{
 			// Match partial or full path
 			char Full[MAX_PATH_LEN] = "";
@@ -1419,32 +1352,7 @@ struct DepDlg : public LDialog
 
 void ProjectNode::OnProperties()
 {
-	if (IsWeb())
-	{
-		bool IsFolder = sFile.IsEmpty();
-
-		WebFldDlg *Dlg = new WebFldDlg(Tree, sName, IsFolder ? GetAttr(OPT_Ftp) : sFile.Get(), GetAttr(OPT_Www));
-		Dlg->DoModal([this, IsFolder, Dlg](auto dlg, auto ok)
-		{
-			if (ok)
-			{
-				if (IsFolder)
-				{
-					SetName(Dlg->Name);
-					SetAttr(OPT_Ftp, Dlg->Ftp);
-					SetAttr(OPT_Www, Dlg->Www);
-				}
-				else
-				{
-					sFile = Dlg->Ftp;
-				}
-
-				Project->SetDirty();
-				Update();
-			}
-		});
-	}
-	else if (Type == NodeDir)
+	if (Type == NodeDir)
 	{
 	}
 	else if (Type == NodeDependancy)

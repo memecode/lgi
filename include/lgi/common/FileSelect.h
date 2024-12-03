@@ -1,6 +1,8 @@
 #pragma once
 
 #include <functional>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #ifndef FILE_SELECT_CLS
 #define FILE_SELECT_CLS LgiClass
@@ -29,7 +31,7 @@ public:
 	LString DefaultExtension();
 };
 
-/// Optional asyncronous file system interface class:
+/// Optional asynchronous file system interface class:
 class IFileSelectSystem
 {
 public:
@@ -37,6 +39,7 @@ public:
 
 	virtual char GetDirChar() = 0;
 	virtual LString PathJoin(LString base, LString leaf) = 0;
+	virtual void Stat(LString path, std::function<void(struct stat*, LString, LError)> cb) = 0;
 	virtual void GetInitialPath(std::function<void(LString)> cb) = 0;
 	virtual void GetRootVolume(std::function<void(LVolume*)> cb) = 0;
 	virtual void ReadDir(LString path, std::function<void(LDirectory&)> cb) = 0;

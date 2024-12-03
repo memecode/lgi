@@ -59,6 +59,7 @@ class ProjectNode :
 	int64 CountNodes();
 	void NeedsPulse(bool yes);
 	void OnDocOpen(IdeDoc *Doc, bool open);
+	bool OnError(LString s);
 
 public:
 	ProjectNode(IdeProject *p);
@@ -76,7 +77,6 @@ public:
 	int GetId();
 	int GetLinkAgainst() { return LinkAgainst; }
 	void SetLinkAgainst(bool b) { LinkAgainst = b; }
-	bool IsWeb() override;
 	IdeProject *GetDep();
 	IdeProject *GetProject() override;
 	const char *GetFileName() override;
@@ -109,7 +109,7 @@ public:
 
 	// Serialization
 	bool Load(LDocView *Edit, NodeView *Callback) override;
-	bool Save(LDocView *Edit, NodeView *Callback) override;
+	bool Save(LDocView *Edit, NodeView *Callback, LStream *Out) override;
 	bool Serialize(bool Write) override;
 	bool Serialize(LDirectory *d);
 };

@@ -1011,9 +1011,6 @@ const char *IdeDocPrivate::GetLocalFile()
 {
 	if (nSrc)
 	{
-		if (nSrc->IsWeb())
-			return nSrc->GetLocalCache();
-		
 		auto fp = nSrc->GetFullPath();
 		if (_stricmp(fp.Get()?fp.Get():"", Buffer.Get()?Buffer.Get():""))
 			Buffer = fp;
@@ -1059,7 +1056,7 @@ bool IdeDocPrivate::Save(LStream *out)
 	
 	if (nSrc)
 	{
-		Status = nSrc->Save(Edit, this);
+		Status = nSrc->Save(Edit, this, out);
 	}
 	else if (FileName)
 	{

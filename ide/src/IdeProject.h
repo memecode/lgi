@@ -96,7 +96,6 @@ public:
 	void SortChildren();
 	void InsertTag(LXmlTag *t) override;
 	bool RemoveTag() override;
-	virtual bool IsWeb() = 0;	
 	virtual int GetPlatforms() = 0;
 	bool AddFiles(AddFilesProgress *Prog, const char *Path);
 	IdeCommon *GetSubFolder(IdeProject *Project, char *Name, bool Create = false);
@@ -132,7 +131,6 @@ public:
 	IdeProject(AppWnd *App, ProjectNode *DepParent = NULL);
 	~IdeProject();
 
-	bool IsWeb() { return false; }
 	int GetPlatforms();
 
 	const char *GetFileName(); // Can be a relative path

@@ -199,7 +199,7 @@ class LFileSelectPrivate
 	List<char> Files;
 	int CurrentType = -1;
 	List<LFileType> Types;
-	List<char> History;
+	LString::Array History;
 	bool ShowReadOnly = false;
 	bool ReadOnly = false;	
 	bool EatClose = false;
@@ -250,7 +250,6 @@ public:
 	{
 		Types.DeleteObjects();
 		Files.DeleteArrays();
-		History.DeleteArrays();
 	}
 
 	IFileSelectSystem *GetSystem() { return System; }
@@ -1009,23 +1008,49 @@ void LFileSelectDlg::OnCreate()
 		}
 	}
 	
-	if (d->InitPath)
+	if (d->System)
 	{
-		SetFolder(d->InitPath);
-		OnFolder();
-	}
-	else if (d->System)
-	{
-		d->System->GetInitialPath([this](auto path)
+		if (d->InitPath)
 		{
-			SetFolder(path);
-			OnFolder();
-		});
+			// Check it's a valid path first...
+			d->System->Stat(d->InitPath, [this](auto st, auto fullPath, auto err)
+				{
+					if (err)
+					{
+						d->System->GetInitialPath([this](auto path)
+							{
+								SetFolder(path);
+								OnFolder();
+							});
+					}
+					else
+					{
+						SetFolder(d->InitPath);
+						OnFolder();
+					}
+				});
+		}
+		else
+		{
+			d->System->GetInitialPath([this](auto path)
+				{
+					SetFolder(path);
+					OnFolder();
+				});
+		}
 	}
 	else
 	{
-		SetFolder(LGetExePath());
-		OnFolder();
+		if (d->InitPath)
+		{
+			SetFolder(d->InitPath);
+			OnFolder();
+		}
+		else
+		{
+			SetFolder(LGetExePath());
+			OnFolder();
+		}
 	}
 
 	// Size/layout
@@ -1130,7 +1155,7 @@ void LFileSelectDlg::SetFolder(char *f)
 	auto CurPath = GetCtrlName(IDC_PATH);
 	if (CurPath)
 	{
-		d->History.Insert(NewStr(CurPath));
+		d->History.New() = CurPath;
 		SetCtrlEnabled(IDC_BACK, true);
 	}
 	
@@ -1317,18 +1342,14 @@ int LFileSelectDlg::OnNotify(LViewI *Ctrl, const LNotification &n)
 		case IDC_BACK:
 		{
 			auto It = d->History.rbegin();
-			char *Dir = *It;
-			if (Dir)
+			if (It != d->History.end())
 			{
-				d->History.Delete(Dir);
+				LString Dir = *It;
+				d->History.Delete(It);				
 				SetCtrlName(IDC_PATH, Dir);
 				OnFolder();
-				DeleteArray(Dir);
-
-				if (!d->History[0])
-				{
+				if (!d->History.Length())
 					SetCtrlEnabled(IDC_BACK, false);
-				}
 			}
 			break;
 		}
@@ -1432,7 +1453,16 @@ int LFileSelectDlg::OnNotify(LViewI *Ctrl, const LNotification &n)
 
 				if (d->Type == TypeOpenFolder)
 				{
-					d->Files.Insert(NewStr(Path));
+					if (d->System)
+					{
+						char sep[] = { d->System->GetDirChar(), 0 };
+						auto p = LString(Path).Replace(DIR_STR, sep);
+						d->Files.Insert(NewStr(p));
+					}
+					else
+					{
+						d->Files.Insert(NewStr(Path));
+					}
 				}
 				else
 				{

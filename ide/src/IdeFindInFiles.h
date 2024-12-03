@@ -50,6 +50,8 @@ class FindInFiles : public LDialog
 	LHistory *FolderHistory = NULL;
 	bool OwnParams = false;
 
+	void OnFolderSelected(LString fld);
+
 public:
 	FindParams *Params = NULL;
 	

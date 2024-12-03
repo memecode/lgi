@@ -57,80 +57,89 @@ FindInFiles::~FindInFiles()
 		DeleteObj(Params);
 }
 
-void SerializeHistory(LHistory *h, const char *opt, LOptionsFile *p, bool Write)
+void SerializeHistory(LHistory *h, const char *opt, LOptionsFile *options, bool Write)
 {
-	if (h && p)
+	if (!h || !options || !opt)
 	{
-		LString last;
-		last.Printf("%sSelect", opt);
-		LViewI *Edit = NULL;
-		h->GetWindow()->GetViewById(h->GetTargetId(), Edit);
+		LAssert(!"param err");
+		return;
+	}
+
+	LString last;
+	last.Printf("%sSelect", opt);
+	LViewI *Edit = NULL;
+	h->GetWindow()->GetViewById(h->GetTargetId(), Edit);
 		
-		#if DEBUG_HIST
-		LgiTrace("%s:%i - SerializeHistory '%s', Write=%i\n", _FL, last.Get(), Write);
-		#endif
+	#if DEBUG_HIST
+	LgiTrace("%s:%i - SerializeHistory '%s', Write=%i\n", _FL, last.Get(), Write);
+	#endif
 
-		LVariant v;
-		if (Write)
+	LVariant v;
+	if (Write)
+	{
+		LString::Array a;
+		a.SetFixedLength(false);
+		int64 i = 0;
+		int64 Selected = h->Value();
+		LString EdTxt;
+		if (Edit)
+			EdTxt = Edit->Name();
+
+		for (auto s: *h)
 		{
-			LString::Array a;
-			a.SetFixedLength(false);
-			int64 i = 0;
-			int64 Selected = h->Value();
-			LString EdTxt;
-			if (Edit)
-				EdTxt = Edit->Name();
-
-			for (auto s: *h)
+			if (EdTxt && EdTxt.Equals(s))
 			{
-				if (EdTxt && EdTxt.Equals(s))
-				{
-					Selected = i;
-				}
-
-				a.Add(s);
-				#if DEBUG_HIST
-				LgiTrace("\t[%i]='%s'\n", i, s);
-				#endif
-				i++;
+				Selected = i;
 			}
 
-			LString strs = LString(OptFileSeparator).Join(a);
-			p->SetValue(opt, v = strs.Get());
+			a.Add(s);
 			#if DEBUG_HIST
-			LgiTrace("\tstrs='%s'\n", strs.Get());
+			LgiTrace("\t[%i]='%s'\n", i, s);
 			#endif
-			
-			p->SetValue(last, v = Selected);
-			#if DEBUG_HIST
-			LgiTrace("\tv=%i\n", v.CastInt32());
-			#endif
+			i++;
 		}
-		else
+
+		LString strs = LString(OptFileSeparator).Join(a);
+		options->SetValue(opt, v = strs.Get());
+		#if DEBUG_HIST
+		LgiTrace("\tstrs='%s'\n", strs.Get());
+		#endif
+			
+		options->SetValue(last, v = Selected);
+		#if DEBUG_HIST
+		LgiTrace("\tv=%i\n", v.CastInt32());
+		#endif
+	}
+	else
+	{
+		if (options->GetValue(opt, v))
 		{
-			if (p->GetValue(opt, v))
+			LString raw(v.Str());
+			LString::Array lines = raw.Split(OptFileSeparator);
+			LHashTbl<ConstStrKey<char>, bool> added;
+			
+			h->DeleteArrays();
+			for (auto ln: lines)
 			{
-				LString raw(v.Str());
-				LString::Array t = raw.Split("|");
-				h->DeleteArrays();
-				for (unsigned i=0; i<t.Length(); i++)
+				if (!added.Find(ln)) // Remove duplicates
 				{
-					h->Insert(NewStr(t[i]));
+					added.Add(ln, true);
+					h->Insert(NewStr(ln));
 					#if DEBUG_HIST
-					LgiTrace("\t[%i]='%s'\n", i, t[i].Get());
+					LgiTrace("\t[%i]='%s'\n", i, ln.Get());
 					#endif
 				}
-				h->Update();
-				
-				if (p->GetValue(last, v))
-				{
-					h->Value(v.CastInt64());
-					#if DEBUG_HIST
-					LgiTrace("\tValue=%i\n", v.CastInt32());
-					#endif
-				}
-				else LgiTrace("%s:%i - No option '%s'\n", _FL, last.Get());
 			}
+			h->Update();
+				
+			if (options->GetValue(last, v))
+			{
+				h->Value(v.CastInt64());
+				#if DEBUG_HIST
+				LgiTrace("\tValue=%i\n", v.CastInt32());
+				#endif
+			}
+			else LgiTrace("%s:%i - No option '%s'\n", _FL, last.Get());
 		}
 	}
 }
@@ -162,6 +171,15 @@ void FindInFiles::OnCreate()
 	}
 }
 
+void FindInFiles::OnFolderSelected(LString fld)
+{
+	auto Idx = FolderHistory->Add(fld);
+	if (Idx >= 0)
+		FolderHistory->Value(Idx);
+	else
+		SetCtrlName(IDC_DIR, fld);
+}
+
 int FindInFiles::OnNotify(LViewI *v, const LNotification &n)
 {
 	switch (v->GetId())
@@ -175,28 +193,17 @@ int FindInFiles::OnNotify(LViewI *v, const LNotification &n)
 				RemoteFileSelect(this, backend, SelectOpenFolder, initDir,
 					[this](auto fn)
 					{
-						int Idx = FolderHistory->Add(fn);
-						if (Idx >= 0)
-							FolderHistory->Value(Idx);
-						else
-							SetCtrlName(IDC_DIR, fn);
+						OnFolderSelected(fn);
 					});
 			}
 			else
 			{
-				auto s = new LFileSelect;
-				s->Parent(this);
+				auto s = new LFileSelect(this);
 				s->InitialDir(initDir);
 				s->OpenFolder([this](auto s, auto ok)
 				{
 					if (ok)
-					{
-						int Idx = FolderHistory->Add(s->Name());
-						if (Idx >= 0)
-							FolderHistory->Value(Idx);
-						else
-							SetCtrlName(IDC_DIR, s->Name());
-					}
+						OnFolderSelected(s->Name());
 				});
 			}
 			break;
