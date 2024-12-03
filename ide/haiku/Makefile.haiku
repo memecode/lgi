@@ -32,11 +32,11 @@ ifeq ($(Build),Debug)
 		-llgi$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I../include \
-		-I./resources \
-		-I./src \
 		-I../include/lgi/haiku \
-		-I../private/common
+		-I../private/common \
+		-I./src \
+		-I../include \
+		-I./resources
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
@@ -50,58 +50,59 @@ else
 		-llgi$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I../include \
-		-I./resources \
-		-I./src \
 		-I../include/lgi/haiku \
-		-I../private/common
+		-I../private/common \
+		-I./src \
+		-I../include \
+		-I./resources
 endif
 
 # Dependencies
-Source =	../src/common/Lgi/LgiMain.cpp \
-			../src/common/Net/Http.cpp \
-			../src/common/Text/DocView.cpp \
-			../src/common/Text/TextView4.cpp \
-			../src/common/Text/Html.cpp \
-			../src/common/Coding/LexCpp.cpp \
-			../src/common/Lgi/Mdi.cpp \
+Source =	../src/common/Coding/LexCpp.cpp \
+			../src/common/Lgi/SystemIntf.cpp \
 			src/NewProjectFromTemplate.cpp \
 			../src/common/Net/Ftp.cpp \
 			../src/common/Lgi/About.cpp \
+			../src/common/Lgi/Mdi.cpp \
+			../src/common/Lgi/LgiMain.cpp \
+			../src/common/Net/Http.cpp \
+			../src/common/Text/DocView.cpp \
+			../src/common/Text/Html.cpp \
 			src/IdeProjectSettings.cpp \
-			src/LgiUtils.cpp \
-			src/History.cpp \
-			src/DocEdit.cpp \
-			src/LgiIde.cpp \
-			src/IdeDoc.cpp \
-			../src/common/Gdc2/Filters/Png.cpp \
-			../src/common/Text/HtmlParser.cpp \
-			../src/common/Text/Homoglyphs/Homoglyphs.cpp \
-			../src/common/Text/HtmlCommon.cpp \
-			../src/common/Coding/ParseCpp.cpp \
-			../src/common/Text/TextConvert.cpp \
-			../src/common/Net/OpenSSLSocket.cpp \
+			../src/common/Text/TextView4.cpp \
+			../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
 			src/SpaceTabConv.cpp \
 			src/MemDumpViewer.cpp \
 			src/SimpleCppParser.cpp \
 			src/IdeCommon.cpp \
 			src/JavascriptParser.cpp \
-			src/RemoteFileSelect.cpp \
-			src/Debugger.cpp \
 			src/SysCharSupport.cpp \
 			src/PythonParser.cpp \
 			src/FindSymbol.cpp \
 			src/IdeFindInFiles.cpp \
 			src/ProjectNode.cpp \
-			src/ProjectBackend.cpp \
 			src/MissingFiles.cpp \
 			src/IdeProject.cpp \
+			src/FtpThread.cpp \
 			src/WebFldDlg.cpp \
 			src/AddFtpFile.cpp \
-			src/FtpThread.cpp \
-			src/DocEditStyling.cpp \
+			src/Debugger.cpp \
 			src/DebugContext.cpp \
-			../src/common/Text/Homoglyphs/HomoglyphsTable.cpp
+			src/DocEditStyling.cpp \
+			../src/common/Lgi/RemoteFileSelect.cpp \
+			../src/common/Coding/ParseCpp.cpp \
+			../src/common/Text/TextConvert.cpp \
+			../src/common/Gdc2/Filters/Png.cpp \
+			../src/common/Net/OpenSSLSocket.cpp \
+			../src/common/Text/Homoglyphs/Homoglyphs.cpp \
+			../src/common/Text/HtmlCommon.cpp \
+			../src/common/Text/RemoveAnsi.cpp \
+			../src/common/Text/HtmlParser.cpp \
+			src/LgiUtils.cpp \
+			src/History.cpp \
+			src/DocEdit.cpp \
+			src/IdeDoc.cpp \
+			src/LgiIde.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -151,6 +152,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	../include/lgi/common/ColourSpace.h \
 	../include/lgi/common/Com.h \
 	../include/lgi/common/Combo.h \
+	../include/lgi/common/CommsBus.h \
 	../include/lgi/common/Containers.h \
 	../include/lgi/common/Core.h \
 	../include/lgi/common/Css.h \
@@ -236,6 +238,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	../include/lgi/common/RegKey.h \
 	../include/lgi/common/Res.h \
 	../include/lgi/common/Rops.h \
+	../include/lgi/common/Roster.h \
 	../include/lgi/common/ScrollBar.h \
 	../include/lgi/common/SkinEngine.h \
 	../include/lgi/common/Slider.h \
@@ -256,6 +259,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	../include/lgi/common/TextLabel.h \
 	../include/lgi/common/TextLog.h \
 	../include/lgi/common/TextView3.h \
+	../include/lgi/common/TextView4.h \
 	../include/lgi/common/Thread.h \
 	../include/lgi/common/ThreadEvent.h \
 	../include/lgi/common/TimeZoneInfo.h \
@@ -354,6 +358,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	../src/common/Lgi/ViewCommon.cpp \
 	../src/common/Lgi/WindowCommon.cpp \
 	../src/common/Net/Base64.cpp \
+	../src/common/Net/CommsBus.cpp \
 	../src/common/Net/MDStringToDigest.cpp \
 	../src/common/Net/Net.cpp \
 	../src/common/Net/Uri.cpp \
@@ -364,6 +369,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	../src/common/Text/String.cpp \
 	../src/common/Text/TextConvert.cpp \
 	../src/common/Text/TextView3.cpp \
+	../src/common/Text/TextView4.cpp \
 	../src/common/Text/Token.cpp \
 	../src/common/Text/Unicode.cpp \
 	../src/common/Text/Utf8.cpp \
@@ -408,6 +414,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	../src/haiku/View.cpp \
 	../src/haiku/Widgets.cpp \
 	../src/haiku/Window.cpp \
+	../src/posix/Roster.cpp \
 	../src/posix/SubProcess.cpp
 	export Build=$(Build); \
 	$(MAKE) -C ../ -f ./haiku/Makefile.haiku
@@ -426,10 +433,10 @@ cleanall :
 	+make -C "../" -f ./haiku/Makefile.haiku clean
 
 VPATH=$(BuildDir) \
-	../src/common/Text \
-	../src/common/Net \
+	../src/common/Gdc2/Filters \
+	../src/common/Text/Homoglyphs \
 	../src/common/Coding \
 	./src \
 	../src/common/Lgi \
-	../src/common/Gdc2/Filters \
-	../src/common/Text/Homoglyphs
+	../src/common/Net \
+	../src/common/Text

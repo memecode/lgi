@@ -30,10 +30,10 @@ ifeq ($(Build),Debug)
 		-llgi$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I./src \
-		-I../include/lgi/haiku \
+		-I../include \
 		-I./resources \
-		-I../include
+		-I../include/lgi/haiku \
+		-I./src
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
@@ -45,27 +45,27 @@ else
 		-llgi$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I./src \
-		-I../include/lgi/haiku \
 		-I../include \
-		-I./resources
+		-I./resources \
+		-I../include/lgi/haiku \
+		-I./src
 endif
 
 # Dependencies
 Source =	../src/common/Lgi/StructuredLog.cpp \
 			../src/common/Gdc2/Filters/Png.cpp \
 			../src/common/Widgets/ControlTree.cpp \
-			src/SshConnection.cpp \
+			src/VcFolder.cpp \
+			src/VcCommit.cpp \
+			src/BrowseUi.cpp \
+			src/VcFile.cpp \
+			src/Main.cpp \
 			src/DropDownBtn.cpp \
 			src/PatchViewer.cpp \
+			src/SshConnection.cpp \
 			../src/common/Text/DeEscape.cpp \
 			../src/common/Text/XmlTreeUi.cpp \
-			../src/common/Lgi/LgiMain.cpp \
-			src/VcFile.cpp \
-			src/VcCommit.cpp \
-			src/VcFolder.cpp \
-			src/Main.cpp \
-			src/BrowseUi.cpp
+			../src/common/Lgi/LgiMain.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -115,6 +115,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	../include/lgi/common/ColourSpace.h \
 	../include/lgi/common/Com.h \
 	../include/lgi/common/Combo.h \
+	../include/lgi/common/CommsBus.h \
 	../include/lgi/common/Containers.h \
 	../include/lgi/common/Core.h \
 	../include/lgi/common/Css.h \
@@ -200,6 +201,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	../include/lgi/common/RegKey.h \
 	../include/lgi/common/Res.h \
 	../include/lgi/common/Rops.h \
+	../include/lgi/common/Roster.h \
 	../include/lgi/common/ScrollBar.h \
 	../include/lgi/common/SkinEngine.h \
 	../include/lgi/common/Slider.h \
@@ -220,6 +222,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	../include/lgi/common/TextLabel.h \
 	../include/lgi/common/TextLog.h \
 	../include/lgi/common/TextView3.h \
+	../include/lgi/common/TextView4.h \
 	../include/lgi/common/Thread.h \
 	../include/lgi/common/ThreadEvent.h \
 	../include/lgi/common/TimeZoneInfo.h \
@@ -318,6 +321,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	../src/common/Lgi/ViewCommon.cpp \
 	../src/common/Lgi/WindowCommon.cpp \
 	../src/common/Net/Base64.cpp \
+	../src/common/Net/CommsBus.cpp \
 	../src/common/Net/MDStringToDigest.cpp \
 	../src/common/Net/Net.cpp \
 	../src/common/Net/Uri.cpp \
@@ -328,6 +332,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	../src/common/Text/String.cpp \
 	../src/common/Text/TextConvert.cpp \
 	../src/common/Text/TextView3.cpp \
+	../src/common/Text/TextView4.cpp \
 	../src/common/Text/Token.cpp \
 	../src/common/Text/Unicode.cpp \
 	../src/common/Text/Utf8.cpp \
@@ -372,6 +377,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	../src/haiku/View.cpp \
 	../src/haiku/Widgets.cpp \
 	../src/haiku/Window.cpp \
+	../src/posix/Roster.cpp \
 	../src/posix/SubProcess.cpp
 	export Build=$(Build); \
 	$(MAKE) -C ../ -f ./haiku/Makefile.haiku
@@ -391,7 +397,7 @@ cleanall :
 
 VPATH=$(BuildDir) \
 	../src/common/Text \
-	../src/common/Lgi \
 	../src/common/Widgets \
+	../src/common/Lgi \
 	./src \
 	../src/common/Gdc2/Filters
