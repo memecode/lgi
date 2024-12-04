@@ -201,7 +201,7 @@ LString LastLine(LStringPipe &input)
 	// if (!ln.Get())
 	// 	ln = s;
 	LAssert(ln.Find("\n") < 0);
-	DeEscape(ln);
+	RemoveAnsi(ln);
 	return ln;
 }
 
@@ -296,7 +296,7 @@ SSH_LOG("waitPrompt result:", result, Prompt, last);
 				auto response = out.NewLStr();
 				if (response)
 				{
-					DeEscape(response);
+					RemoveAnsi(response);
 
 					// Strip first line off the start.. it's the command...
 					// And the last line... it's the prompt

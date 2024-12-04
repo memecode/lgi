@@ -256,6 +256,13 @@ class SshBackend :
 	}
 
 public:
+	#ifdef WINDOWS
+	using TOffset = _off_t;
+	#else
+	using TOffset = __off_t;
+	#endif
+
+
 	SshBackend(LView *parent, LString u, LStream *logger) :
 		LThread("SshBackend.Thread"),
 		LMutex("SshBackend.Lock"),
@@ -766,7 +773,7 @@ public:
 							else if (var.Equals("size"))
 							{
 								auto parts = val.SplitDelimit();
-								s.st_size = (_off_t) parts[0].Int();
+								s.st_size = (TOffset) parts[0].Int();
 							}
 							else if (var.Equals("access"))
 							{
