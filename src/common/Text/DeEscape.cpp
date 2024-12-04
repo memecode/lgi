@@ -64,6 +64,7 @@ void DeEscape(LString &s)
 {
 	if (!s.Length())
 		return;
+
 	char *c = s, *out = s, *end = s.Get() + s.Length();
 	bool echo = true;
 	while (c < end)

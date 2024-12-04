@@ -766,7 +766,7 @@ public:
 							else if (var.Equals("size"))
 							{
 								auto parts = val.SplitDelimit();
-								s.st_size = parts[0].Int();
+								s.st_size = (_off_t) parts[0].Int();
 							}
 							else if (var.Equals("access"))
 							{
@@ -774,7 +774,7 @@ public:
 								if (parts[0].Length() == 4 && parts[0](0) == '0')
 								{
 									// access mode...
-									s.st_mode = Atoi(parts[0].Get(), 8);
+									s.st_mode = (unsigned short) Atoi(parts[0].Get(), 8);
 								}
 								else
 								{

@@ -10,7 +10,7 @@
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
 
-#include "DeEscape.h"
+#include "lgi/common/RemoveAnsi.h"
 #include "lgi/common/TextLog.h"
 #include "lgi/common/ProgressView.h"
 
@@ -149,6 +149,69 @@ protected:
 				s->Prog->Value(i);
 		}
 	};
+
+	template<typename TChar>
+	bool PromptDetect(bool &found, ssize_t &promptChar, TChar *ptr, size_t size)
+	{
+		if (!prompt)
+		{
+			// Detect the prompt characters
+			auto now = LCurrentTime();
+			if (!promptDetect)
+			{
+				promptDetect = now;
+			}
+			else if (now - promptDetect >= 300)
+			{
+				LString last2((char*)ptr + size - 2, 2);
+				if (last2 == "> " ||
+					last2 == "$ " ||
+					last2 == "# ")
+				{
+					// Unix like system
+					prompt = last2;
+					found = true;
+					return true;
+				}
+				else if (size > 0 && ptr[size-1] == '>')
+				{
+					// Windows hopefully?
+					prompt = ">";
+					found = true;
+					return true;
+				}
+
+				// LAssert(!"Doesn't look like a prompt?");
+			}
+
+			return false;
+		}
+		else
+		{
+			if (promptChar < 0)
+			{
+				LAssert(prompt.Length() > 0);
+				promptChar = prompt.Length() - 1;
+			}
+
+			// This has to compare over memory block boundaries:
+			for (auto i=size-1; i>=0; i--)
+			{
+				if (prompt[promptChar] != ptr[i])
+					// Not found...
+					return true;
+						
+				promptChar--;
+				if (promptChar < 0)
+				{
+					found = true;
+					return false;
+				}
+			}
+
+			return true;
+		}
+	}
 
 public:
 	struct SshConsole : public LStream, public LCancel
@@ -759,6 +822,14 @@ public:
 		}
 	}
 
+	bool AtPrompt(LString &s)
+	{
+		bool found = false;
+		ssize_t promptChar = -1;
+		PromptDetect(found, promptChar, s.Get(), s.Length());
+		return found;
+	}
+
 	bool AtPrompt(LStringPipe &p)
 	{
 		bool found = false;
@@ -766,64 +837,7 @@ public:
 
 		p.Iterate( [this, &found, &promptChar](auto ptr, auto size)
 			{
-				if (!prompt)
-				{
-					// Detect the prompt characters
-					auto now = LCurrentTime();
-					if (!promptDetect)
-					{
-						promptDetect = now;
-					}
-					else if (now - promptDetect >= 300)
-					{
-						LString last2((char*)ptr + size - 2, 2);
-						if (last2 == "> " ||
-							last2 == "$ " ||
-							last2 == "# ")
-						{
-							// Unix like system
-							prompt = last2;
-							found = true;
-							return true;
-						}
-						else if (size > 0 && ptr[size-1] == '>')
-						{
-							// Windows hopefully?
-							prompt = ">";
-							found = true;
-							return true;
-						}
-
-						// LAssert(!"Doesn't look like a prompt?");
-					}
-
-					return false;
-				}
-				else
-				{
-					if (promptChar < 0)
-					{
-						LAssert(prompt.Length() > 0);
-						promptChar = prompt.Length() - 1;
-					}
-
-					// This has to compare over memory block boundaries:
-					for (auto i=size-1; i>=0; i--)
-					{
-						if (prompt[promptChar] != ptr[i])
-							// Not found...
-							return true;
-						
-						promptChar--;
-						if (promptChar < 0)
-						{
-							found = true;
-							return true;
-						}
-					}
-
-					return true;
-				}
+				return PromptDetect(found, promptChar, ptr, size);
 			},
 			true);
 
@@ -872,7 +886,7 @@ public:
 			{
 				Bytes[Rd] = 0;
 				Buf += LString(Bytes, Rd);
-				DeEscape(Buf);
+				RemoveAnsi(Buf);
 
 				auto end = Buf.Find("\x1B");
 				if (end < 0)
