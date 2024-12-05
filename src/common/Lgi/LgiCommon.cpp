@@ -594,7 +594,6 @@ void LgiTrace(const char *Msg, ...)
 		}
 	#endif
 
-
 	#if defined WIN32
 		OutputDebugStringA(Buffer);
 		if (locked)

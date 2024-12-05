@@ -1296,7 +1296,9 @@ public:
         /// The full path of the file
         const char *FileName,
     	/// [Optional] Enable OS based loaders
-        bool UseOSLoader = true
+        bool UseOSLoader = true,
+        /// [Optional] Dom object for options
+        LDom *Options = nullptr
     );
 
 	/// The stream version of the file loader...
@@ -1307,7 +1309,9 @@ public:
         /// [Optional] File name hint for selecting a filter
         const char *Name = NULL,
     	/// [Optional] Enable OS based loaders
-        bool UseOSLoader = true
+        bool UseOSLoader = true,
+        /// [Optional] Dom object for options
+        LDom *Options = nullptr
     );
     
     /// Save an image to a stream.

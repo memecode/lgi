@@ -24,6 +24,7 @@
 #define LGI_FILTER_INFO			"Info"
 #define LGI_FILTER_DPI_X		"DpiX"
 #define LGI_FILTER_DPI_Y		"DpiY"
+#define LGI_FILTER_SIZE_REQ		"SizeRequest" // in the form "$width,$height"
 
 // These must be returned by a LFilter's GetVariant method
 /// A descriptive name for a LFilter
@@ -52,7 +53,7 @@ protected:
 	LRect *GetClip(LSurface *pDC) { return &pDC->Clip; }
 	ssize_t GetLineLength(LSurface *pDC) { return (pDC->pMem) ? pDC->pMem->Line : 0; }
 
-	Progress *Meter;
+	Progress *Meter = nullptr;
 
 	inline void Swap(uint8_t *out, const void *in, ssize_t len)
 	{
@@ -93,7 +94,7 @@ protected:
 	}
 
 public:
-	LDom *Props;
+	LDom *Props = nullptr;
 
 	enum Format
 	{
@@ -106,6 +107,7 @@ public:
 		FmtPcx,
 		FmtSpi,
 		FmtTga,
+		FmtSvg,
 	};
 	
 	enum IoStatus
@@ -117,13 +119,7 @@ public:
 	    IoCancel
 	};
 
-	LFilter()
-	{
-		Meter = 0;
-		Props = 0;
-	}
-	
-	virtual ~LFilter() { }
+	virtual ~LFilter() {}
 	virtual Format GetFormat() = 0;
 
 	/// Get the progress meter

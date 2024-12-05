@@ -115,7 +115,7 @@ public:
 	}
 	\endcode
 */
-class LgiClass LToolBar : public LLayout
+class LgiClass LToolBar : public LLayout, public LDom
 {
 	friend class LToolButton;
 
@@ -125,11 +125,12 @@ protected:
 	// Local
 	int GetBx();
 	int GetBy();
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array) override;
 
 	// Overridable
 	virtual void ContextMenu(LMouse &m);	
 	virtual int PostDescription(LView *Ctrl, const char *Text);
-	
+
 	#if defined(LGI_CARBON)
 	HIToolbarRef ToolbarRef;
 	#endif

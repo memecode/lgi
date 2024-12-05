@@ -96,11 +96,11 @@ LImageList *LLoadImageList(const char *File, int x, int y)
 
 LToolBar *LgiLoadToolbar(LViewI *Parent, const char *File, int x, int y)
 {
-	LToolBar *Toolbar = new LToolBar;
+	auto Toolbar = new LToolBar;
 	if (!Toolbar)
 		return NULL;
 
-	LString FileName = LFindFile(File);
+	auto FileName = LFindFile(File);
 	if (FileName)
 	{
 		bool Success = FileName && Toolbar->SetBitmap(FileName, x, y);
@@ -1481,9 +1481,24 @@ void LToolBar::OnMouseMove(LMouse &m)
 {
 }
 
+bool LToolBar::GetVariant(const char *Name, LVariant &Value, const char *Array)
+{
+	if (!Stricmp(Name, LGI_FILTER_SIZE_REQ))
+	{
+		auto req = LString::Fmt("-1,%i", d->By);
+		Value = req.Get();
+		return true;
+	}
+	
+	return false;
+}
+
 bool LToolBar::SetBitmap(char *File, int bx, int by)
 {
-	LAutoPtr<LSurface> pDC(GdcD->Load(File));
+	d->Bx = bx;
+	d->By = by;
+
+	LAutoPtr<LSurface> pDC(GdcD->Load(File, false, this));
 	return pDC ? SetDC(pDC, bx, by) : false;
 }
 

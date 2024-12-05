@@ -1374,37 +1374,39 @@ int LFilterFactory::GetItems()
 
 //////////////////////////////////////////////////////////////////////////
 
+/*
 /// Legacy wrapper that calls the new method
-LSurface *LoadDC(const char *Name, bool UseOSLoader)
+LSurface *LoadDC(const char *Name, bool UseOSLoader, LDom *Options)
 {
-    return GdcD->Load(Name, UseOSLoader);
+    return GdcD->Load(Name, UseOSLoader, Options);
 }
+*/
 
-LSurface *GdcDevice::Load(const char *Name, bool UseOSLoader)
+LSurface *GdcDevice::Load(const char *Name, bool UseOSLoader, LDom *Options)
 {
 	if (!LFileExists(Name))
 	{
 		// Loading non-file resource...
 		#if WINNATIVE
-		LAutoWString WName(Utf8ToWide(Name));
-		// a resource... lock and load gentlemen
-		HRSRC hRsrc = FindResource(NULL, WName, RT_BITMAP);
-		if (hRsrc)
-		{
-			int Size = SizeofResource(NULL, hRsrc);
-			HGLOBAL hMem = LoadResource(NULL, hRsrc);
-			if (hMem)
-			{
-				uchar *Ptr = (uchar*) LockResource(hMem);
-				if (Ptr)
-				{
-					LClipBoard Clip(NULL);
-					LSurface *pDC = Clip.ConvertFromPtr(Ptr);
-					GlobalUnlock(hMem);
-					return pDC;
-				}
-			}
-		}
+    		LAutoWString WName(Utf8ToWide(Name));
+    		// a resource... lock and load gentlemen
+    		HRSRC hRsrc = FindResource(NULL, WName, RT_BITMAP);
+    		if (hRsrc)
+    		{
+    			int Size = SizeofResource(NULL, hRsrc);
+    			HGLOBAL hMem = LoadResource(NULL, hRsrc);
+    			if (hMem)
+    			{
+    				uchar *Ptr = (uchar*) LockResource(hMem);
+    				if (Ptr)
+    				{
+    					LClipBoard Clip(NULL);
+    					LSurface *pDC = Clip.ConvertFromPtr(Ptr);
+    					GlobalUnlock(hMem);
+    					return pDC;
+    				}
+    			}
+    		}
 		#endif
 		return NULL;
 	}
@@ -1416,10 +1418,10 @@ LSurface *GdcDevice::Load(const char *Name, bool UseOSLoader)
 		return NULL;
 	}
 
-	return Load(&File, Name, UseOSLoader);
+	return Load(&File, Name, UseOSLoader, Options);
 }
 
-LSurface *GdcDevice::Load(LStream *In, const char *Name, bool UseOSLoader)
+LSurface *GdcDevice::Load(LStream *In, const char *Name, bool UseOSLoader, LDom *Options)
 {
 	if (!In)
 		return NULL;
@@ -1452,7 +1454,7 @@ LSurface *GdcDevice::Load(LStream *In, const char *Name, bool UseOSLoader)
 	if (Filter &&
 		pDC.Reset(new LMemDC(_FL)))
 	{
-		Filter->Props = &Props;
+		Filter->Props = Options ? Options : &Props;
 
 		FilterStatus = Filter->ReadImage(pDC, In);
 		if (FilterStatus != LFilter::IoSuccess)
