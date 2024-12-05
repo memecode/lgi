@@ -1805,13 +1805,7 @@ AppWnd::AppWnd()
 		}
 	}
 
-	LToolBar *Tools = NULL;
-	if (GdcD->Y() > 1200)
-		Tools = LgiLoadToolbar(this, "cmds-32px.png", 32, 32);
-	else
-		Tools = LgiLoadToolbar(this, "cmds-16px.png", 16, 16);
-	
-	if (Tools)
+	if (auto Tools = LgiLoadToolbar(this, "commands.svg", 32, 32))
 	{
 		Tools->AppendButton("New", IDM_NEW, TBT_PUSH, true, CMD_NEW);
 		Tools->AppendButton("Open", IDM_OPEN, TBT_PUSH, true, CMD_OPEN);

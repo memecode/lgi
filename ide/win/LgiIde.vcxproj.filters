@@ -248,6 +248,9 @@
     <ClCompile Include="..\..\src\common\Lgi\SystemIntf.cpp">
       <Filter>Source Files\RemoteFileSelect</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\common\Gdc2\Filters\Svg.cpp">
+      <Filter>Lgi</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="..\..\src\win\General\Lgi.manifest" />

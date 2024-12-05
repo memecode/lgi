@@ -58,8 +58,8 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\resources;..\..\include;..\..\include\lgi\win;..\..\..\..\..\CodeLib\zlib;..\..\..\..\..\CodeLib\libpng;..\..\..\..\..\CodeLib\libpng\win32;..\..\..\..\..\codelib\libssh\include;..\..\..\..\..\codelib\libssh\build\include;..\..\..\..\..\codelib\libssh\build\zlib;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>HAS_LIBSSH;WIN32;_DEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\resources;..\..\include;..\..\include\lgi\win;..\..\..\..\..\CodeLib\zlib;..\..\..\..\..\CodeLib\libpng;..\..\..\..\..\CodeLib\libpng\win32;..\..\..\..\..\codelib\libssh\include;..\..\..\..\..\codelib\libssh\build\include;..\..\..\..\..\codelib\libssh\build\zlib;..\..\..\..\..\codelib\lunasvg\include;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>LUNASVG_BUILD_STATIC;HAS_LIBSSH;WIN32;_DEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -68,9 +68,9 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>ssh.lib;imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>lunasvg.lib;plutovg.lib;ssh.lib;imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetFileName)</OutputFile>
-      <AdditionalLibraryDirectories>..\lib;..\..\..\..\..\codelib\libssh\build\src\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\lib;..\..\..\..\..\codelib\libssh\build\src\Debug;..\..\..\..\..\codelib\lunasvg\build\Debug;..\..\..\..\..\codelib\lunasvg\build\_deps\plutovg-build\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -83,8 +83,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\resources;..\..\include;..\..\include\lgi\win;..\..\..\..\..\CodeLib\zlib;..\..\..\..\..\CodeLib\libpng;..\..\..\..\..\CodeLib\libpng\win32;..\..\..\..\..\codelib\libssh\include;..\..\..\..\..\codelib\libssh\build\include;..\..\..\..\..\codelib\libssh\build\zlib;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>HAS_LIBSSH;WIN32;NDEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\resources;..\..\include;..\..\include\lgi\win;..\..\..\..\..\CodeLib\zlib;..\..\..\..\..\CodeLib\libpng;..\..\..\..\..\CodeLib\libpng\win32;..\..\..\..\..\codelib\libssh\include;..\..\..\..\..\codelib\libssh\build\include;..\..\..\..\..\codelib\libssh\build\zlib;..\..\..\..\..\codelib\lunasvg\include;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>LUNASVG_BUILD_STATIC;HAS_LIBSSH;WIN32;NDEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -92,9 +92,9 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>ssh.lib;imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>lunasvg.lib;plutovg.lib;ssh.lib;imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetFileName)</OutputFile>
-      <AdditionalLibraryDirectories>..\lib;..\..\..\..\..\codelib\libssh\build\src\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\lib;..\..\..\..\..\codelib\libssh\build\src\Release;..\..\..\..\..\codelib\lunasvg\build\Release;..\..\..\..\..\codelib\lunasvg\build\_deps\plutovg-build\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -139,6 +139,7 @@
     <ClCompile Include="..\..\src\common\Coding\ScriptLibrary.cpp" />
     <ClCompile Include="..\..\src\common\Coding\ScriptVM.cpp" />
     <ClCompile Include="..\..\src\common\Gdc2\Filters\Png.cpp" />
+    <ClCompile Include="..\..\src\common\Gdc2\Filters\Svg.cpp" />
     <ClCompile Include="..\..\src\common\Lgi\RemoteFileSelect.cpp" />
     <ClCompile Include="..\..\src\common\Lgi\SystemIntf.cpp" />
     <ClCompile Include="..\..\src\common\Net\Ftp.cpp" />
