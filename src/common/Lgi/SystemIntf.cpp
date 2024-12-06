@@ -256,12 +256,13 @@ class SshBackend :
 	}
 
 public:
-	#ifdef WINDOWS
+	#ifdef HAIKU
+	using TOffset = off_t;
+	#elif defined(WINDOWS)
 	using TOffset = _off_t;
 	#else
 	using TOffset = __off_t;
 	#endif
-
 
 	SshBackend(LView *parent, LString u, LStream *logger) :
 		LThread("SshBackend.Thread"),

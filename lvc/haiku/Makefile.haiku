@@ -65,7 +65,8 @@ Source =	../src/common/Lgi/StructuredLog.cpp \
 			src/SshConnection.cpp \
 			../src/common/Text/DeEscape.cpp \
 			../src/common/Text/XmlTreeUi.cpp \
-			../src/common/Lgi/LgiMain.cpp
+			../src/common/Lgi/LgiMain.cpp \
+			../src/common/Text/RemoveAnsi.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
