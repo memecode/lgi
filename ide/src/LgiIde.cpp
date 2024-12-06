@@ -1805,7 +1805,9 @@ AppWnd::AppWnd()
 		}
 	}
 
-	if (auto Tools = LgiLoadToolbar(this, "commands.svg", 32, 32))
+	auto scale = GetDpiScale();
+	int px = (int)(scale.x * 24.0);
+	if (auto Tools = LgiLoadToolbar(this, "commands.svg", px, px))
 	{
 		Tools->AppendButton("New", IDM_NEW, TBT_PUSH, true, CMD_NEW);
 		Tools->AppendButton("Open", IDM_OPEN, TBT_PUSH, true, CMD_OPEN);
