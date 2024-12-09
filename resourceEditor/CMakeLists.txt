@@ -33,9 +33,6 @@ add_executable(LgiRes ${APP_TYPE}
 	src/Search.cpp
 	src/ShowLanguages.cpp
 
-	${LGI_DIR}/src/common/Gdc2/Filters/Gif.cpp
-	${LGI_DIR}/src/common/Gdc2/Filters/Lzw.cpp
-	${LGI_DIR}/src/common/Gdc2/Filters/Png.cpp
 	${LGI_DIR}/src/common/Lgi/About.cpp
 	${LGI_DIR}/src/common/Lgi/DocApp.cpp
 	${LGI_DIR}/src/common/Lgi/LgiMain.cpp

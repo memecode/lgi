@@ -48,16 +48,7 @@
     <ClCompile Include="..\src\ShowLanguages.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\common\Gdc2\Filters\Gif.cpp">
-      <Filter>Lgi</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\common\Lgi\LgiMain.cpp">
-      <Filter>Lgi</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\common\Gdc2\Filters\Lzw.cpp">
-      <Filter>Lgi</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\common\Gdc2\Filters\Png.cpp">
       <Filter>Lgi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\common\Lgi\About.cpp">

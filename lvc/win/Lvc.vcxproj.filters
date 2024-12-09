@@ -46,9 +46,6 @@
     <ClCompile Include="..\Src\PatchViewer.cpp">
       <Filter>Source Files\PatchViewer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\common\Gdc2\Filters\Png.cpp">
-      <Filter>Source Files\Lgi</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\common\Text\XmlTreeUi.cpp">
       <Filter>Source Files\Lgi</Filter>
     </ClCompile>

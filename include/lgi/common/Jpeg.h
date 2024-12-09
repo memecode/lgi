@@ -1,7 +1,7 @@
 #if !defined(_GJPEG_H_) && HAS_LIBJPEG
 #define _GJPEG_H_
 
-class GdcJpeg : public LFilter
+class LgiClass GdcJpeg : public LFilter
 {
 public:
     enum SubSampleMode

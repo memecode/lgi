@@ -78,7 +78,6 @@ set (CommonSource
 	../src/common/Net/OpenSSLSocket.cpp
 	../src/common/Net/Http.cpp
 	../src/common/Net/Ftp.cpp
-	../src/common/Gdc2/Filters/Png.cpp
 	../src/common/Lgi/About.cpp
 	../src/common/Lgi/Mdi.cpp
 	../src/common/Lgi/LgiMain.cpp

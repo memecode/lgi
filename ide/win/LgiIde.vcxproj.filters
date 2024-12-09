@@ -203,9 +203,6 @@
     <ClCompile Include="..\..\src\common\Net\OpenSSLSocket.cpp">
       <Filter>Lgi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\common\Gdc2\Filters\Png.cpp">
-      <Filter>Lgi</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\ProjectNode.cpp">
       <Filter>Source Files\Projects</Filter>
     </ClCompile>
@@ -247,9 +244,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\common\Lgi\SystemIntf.cpp">
       <Filter>Source Files\RemoteFileSelect</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\common\Gdc2\Filters\Svg.cpp">
-      <Filter>Lgi</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

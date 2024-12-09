@@ -11,9 +11,7 @@ set(SRC
     ../../src/common/LiteHtml/LiteHtmlView.cpp
     ../../src/common/Net/Http.cpp
     ../../src/common/Net/OpenSSLSocket.cpp
-    ../../src/common/Lgi/LgiMain.cpp
-    ../../src/common/Gdc2/Filters/Png.cpp
-    ../../src/common/Gdc2/Filters/Jpeg.cpp)
+    ../../src/common/Lgi/LgiMain.cpp)
 
 if(WIN32)
     set(APP_TYPE WIN32)

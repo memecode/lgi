@@ -37,7 +37,6 @@ if (NOT TARGET ssh_shared)
 endif()
 
 add_executable(Lvc ${APP_TYPE}
-    ../src/common/Gdc2/Filters/Png.cpp
     ../src/common/Lgi/LgiMain.cpp
     ../src/common/Text/DeEscape.cpp
     ../src/common/Text/XmlTreeUi.cpp

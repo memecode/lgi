@@ -11,9 +11,6 @@
     <Filter Include="Source Files\Lgi">
       <UniqueIdentifier>{fad3bc3b-8d20-447a-a9b9-a444576ab494}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Filters">
-      <UniqueIdentifier>{8025dd39-791a-4373-a2c2-5168b37eab5d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Scripting">
       <UniqueIdentifier>{7154936b-7d0a-484e-bfb6-44d914346391}</UniqueIdentifier>
     </Filter>
@@ -37,9 +34,6 @@
     <ClCompile Include="..\..\..\src\common\Gdc2\Tools\GdcTools.cpp">
       <Filter>Source Files\Lgi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\common\Gdc2\Filters\Gif.cpp">
-      <Filter>Source Files\Filters</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\common\Text\Homoglyphs\Homoglyphs.cpp">
       <Filter>Source Files\Lgi</Filter>
     </ClCompile>
@@ -61,23 +55,14 @@
     <ClCompile Include="..\..\..\src\common\Images\Compare\ImageComparison.cpp">
       <Filter>Source Files\Image Comparison</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\common\Gdc2\Filters\Jpeg.cpp">
-      <Filter>Source Files\Filters</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\common\Coding\LexCpp.cpp">
       <Filter>Source Files\Scripting</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\common\Lgi\LgiMain.cpp">
       <Filter>Source Files\Lgi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\common\Gdc2\Filters\Lzw.cpp">
-      <Filter>Source Files\Filters</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\common\Net\OpenSSLSocket.cpp">
       <Filter>Source Files\Lgi</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\common\Gdc2\Filters\Png.cpp">
-      <Filter>Source Files\Filters</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\common\Coding\ScriptCompiler.cpp">
       <Filter>Source Files\Scripting</Filter>

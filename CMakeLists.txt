@@ -128,6 +128,12 @@ set (CommonSource
 	src/common/Gdc2/Alpha.cpp
 	include/lgi/common/Filter.h
 	src/common/Gdc2/Filters/Filter.cpp
+	src/common/Gdc2/Filters/Gif.cpp
+	src/common/Gdc2/Filters/Lzw.cpp
+	src/common/Gdc2/Filters/Jpeg.cpp
+	src/common/Gdc2/Filters/Tiff.cpp
+	src/common/Gdc2/Filters/Png.cpp
+	src/common/Gdc2/Filters/Svg.cpp
 	include/lgi/common/DisplayString.h
 	src/common/Gdc2/Font/DisplayString.cpp
 	include/lgi/common/StringLayout.h
@@ -652,13 +658,17 @@ endif()
 
 target_link_libraries(lgi
 	PUBLIC
-		${PUBLIC_LIBS})
+		${PUBLIC_LIBS}
+	PRIVATE
+		lunasvg
+		plutovg)
 
 target_compile_definitions(lgi
 	PUBLIC
 		LGI_RES
 	PRIVATE
 		LGI_LIBRARY
+		LUNASVG_BUILD_STATIC
 	)
 
 target_include_directories(lgi
@@ -668,7 +678,17 @@ target_include_directories(lgi
 		private/common
 		${PNGLIB_INCLUDE_DIR}
 		${ICONV_PATH}/include
+		${CODELIB}/libjpeg-9a
+		${CODELIB}/zlib
+		${CODELIB}/libpng
+		${CODELIB}/libpng/build64
+		${CODELIB}/libpng/build64/zlib_dir
+		${CODELIB}/lunasvg/include
 	)
+target_link_directories(lgi
+	PRIVATE
+		${CODELIB}/lunasvg/build/${CONFIG}/$<CONFIG>
+		${CODELIB}/lunasvg/build/_deps/plutovg-build/$<CONFIG>)
 
 set_target_properties(lgi PROPERTIES LINKER_LANGUAGE CXX)
 

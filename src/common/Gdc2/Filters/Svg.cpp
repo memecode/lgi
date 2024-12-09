@@ -43,7 +43,7 @@ public:
 			
 			if (Out->Create(bmp.width(), bmp.height(), System32BitColourSpace))
 			{
-				int bytes = MIN(bmp.stride(), Out->GetRowStep());
+				auto bytes = MIN(bmp.stride(), Out->GetRowStep());
 				LgiTrace("%s:%i - strides: %i, %i\n", _FL, bmp.stride(), Out->GetRowStep());
 				for (int y=0; y<Out->Y(); y++)
 				{

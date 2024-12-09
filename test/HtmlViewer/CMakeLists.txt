@@ -25,10 +25,6 @@ add_executable(HtmlTest ${APP_TYPE}
     ${LGI_DIR}/src/common/Coding/ScriptVM.cpp
     ${LGI_DIR}/src/common/Coding/ScriptingPriv.h
 
-    ${LGI_DIR}/src/common/Gdc2/Filters/Gif.cpp
-    ${LGI_DIR}/src/common/Gdc2/Filters/Jpeg.cpp
-    ${LGI_DIR}/src/common/Gdc2/Filters/Lzw.cpp
-    ${LGI_DIR}/src/common/Gdc2/Filters/Png.cpp
     ${LGI_DIR}/src/common/Gdc2/Font/EmojiFont.cpp
     ${LGI_DIR}/src/common/Gdc2/Tools/GdcTools.cpp
 

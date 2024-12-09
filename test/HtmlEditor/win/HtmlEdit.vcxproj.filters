@@ -32,12 +32,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\common\Gdc2\Filters\Jpeg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\common\Gdc2\Filters\Png.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\common\Gdc2\Tools\GdcTools.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

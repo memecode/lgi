@@ -110,7 +110,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\src;..\resources;..\..\include;..\..\include\lgi\win;..\..\..\..\..\CodeLib\libssh\build\zlib;..\..\..\..\..\CodeLib\libssh\build\include;..\..\..\..\..\CodeLib\libssh\include;..\..\..\..\..\CodeLib\libpng;..\..\..\..\..\CodeLib\libpng\build64;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\src;..\resources;..\..\include;..\..\include\lgi\win;..\..\..\..\..\CodeLib\libssh\build\zlib;..\..\..\..\..\CodeLib\libssh\build\include;..\..\..\..\..\CodeLib\libssh\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>HAS_LIBSSH=1;WIN32;_DEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -151,7 +151,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\src;..\resources;..\..\include;..\..\include\lgi\win;..\..\..\..\..\CodeLib\libssh\build\zlib;..\..\..\..\..\CodeLib\libssh\build\include;..\..\..\..\..\CodeLib\libssh\include;..\..\..\..\..\CodeLib\libpng;..\..\..\..\..\CodeLib\libpng\build64;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\src;..\resources;..\..\include;..\..\include\lgi\win;..\..\..\..\..\CodeLib\libssh\build\zlib;..\..\..\..\..\CodeLib\libssh\build\include;..\..\..\..\..\CodeLib\libssh\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>HAS_LIBSSH=1;WIN32;NDEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -172,7 +172,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\common\Gdc2\Filters\Png.cpp" />
     <ClCompile Include="..\..\src\common\Lgi\LgiMain.cpp" />
     <ClCompile Include="..\..\src\common\Text\DeEscape.cpp" />
     <ClCompile Include="..\..\src\common\Text\RemoveAnsi.cpp" />

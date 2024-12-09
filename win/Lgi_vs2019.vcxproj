@@ -90,8 +90,8 @@
     <ClCompile>
       <Optimization>MinSpace</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\include;..\include\lgi\win;..\private\common;..\private\win;..\..\..\..\CodeLib\libiconv\include;..\..\..\scribe\libs\build-x64\libiconv-1.17\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN64;NDEBUG;WINDOWS;LGI_RES;LGI_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\include;..\include\lgi\win;..\private\common;..\private\win;..\..\..\..\codelib\libjpeg-9a;..\..\..\..\codelib\libiconv\include;..\..\..\..\codelib\libpng;..\..\..\..\codelib\libpng\build64;..\..\..\..\codelib\lunasvg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>LUNASVG_BUILD_STATIC;WIN64;NDEBUG;WINDOWS;LGI_RES;LGI_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -113,7 +113,7 @@
       <Culture>0x0c09</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>ComCtl32.lib;Ws2_32.lib;UxTheme.lib;imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>plutovg.lib;lunasvg.lib;ComCtl32.lib;Ws2_32.lib;UxTheme.lib;imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetFileName)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -124,6 +124,7 @@
       <DataExecutionPrevention />
       <ImportLibrary>$(OutDir)$(TargetName).lib</ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
+      <AdditionalLibraryDirectories>..\..\..\..\codelib\lunasvg\build\$(Configuration);..\..\..\..\codelib\lunasvg\build\_deps\plutovg-build\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -136,8 +137,8 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\include;..\include\lgi\win;..\private\common;..\private\win;..\..\..\..\CodeLib\libiconv\include;..\..\..\scribe\libs\build-x64\libiconv-1.17\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN64;LGI_LIBRARY;_DEBUG;WINDOWS;LGI_RES;LGI_UNIT_TESTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\include;..\include\lgi\win;..\private\common;..\private\win;..\..\..\..\codelib\libjpeg-9a;..\..\..\..\codelib\libiconv\include;..\..\..\..\codelib\libpng;..\..\..\..\codelib\libpng\build64;..\..\..\..\codelib\lunasvg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>LUNASVG_BUILD_STATIC;WIN64;LGI_LIBRARY;_DEBUG;WINDOWS;LGI_RES;LGI_UNIT_TESTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -159,7 +160,7 @@
       <Culture>0x0c09</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>ComCtl32.lib;Ws2_32.lib;UxTheme.lib;imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>plutovg.lib;lunasvg.lib;ComCtl32.lib;Ws2_32.lib;UxTheme.lib;imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <OutputFile>$(OutDir)$(TargetFileName)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -170,6 +171,7 @@
       <DataExecutionPrevention />
       <ImportLibrary>$(OutDir)$(TargetName).lib</ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
+      <AdditionalLibraryDirectories>..\..\..\..\codelib\lunasvg\build\$(Configuration);..\..\..\..\codelib\lunasvg\build\_deps\plutovg-build\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|x64'">
@@ -183,8 +185,8 @@
     <ClCompile>
       <Optimization>MinSpace</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\include;..\include\lgi\win;..\private\common;..\private\win;..\..\..\..\CodeLib\libiconv\include;..\..\..\scribe\libs\build-x64\libiconv-1.17\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN64;NDEBUG;WINDOWS;LGI_RES;LGI_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\include;..\include\lgi\win;..\private\common;..\private\win;..\..\..\..\codelib\libjpeg-9a;..\..\..\..\codelib\libiconv\include;..\..\..\..\codelib\libpng;..\..\..\..\codelib\libpng\build64;..\..\..\..\codelib\lunasvg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>LUNASVG_BUILD_STATIC;WIN64;NDEBUG;WINDOWS;LGI_RES;LGI_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -207,7 +209,7 @@
       <Culture>0x0c09</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>ComCtl32.lib;Ws2_32.lib;UxTheme.lib;imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>plutovg.lib;lunasvg.lib;ComCtl32.lib;Ws2_32.lib;UxTheme.lib;imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetFileName)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -218,6 +220,7 @@
       <DataExecutionPrevention />
       <ImportLibrary>$(OutDir)$(TargetName).lib</ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
+      <AdditionalLibraryDirectories>..\..\..\..\codelib\lunasvg\build\Release;..\..\..\..\codelib\lunasvg\build\_deps\plutovg-build\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -230,6 +233,12 @@
     <ClCompile Include="..\src\common\Gdc2\8Bit.cpp" />
     <ClCompile Include="..\src\common\Gdc2\Alpha.cpp" />
     <ClCompile Include="..\src\common\Gdc2\Filters\Filter.cpp" />
+    <ClCompile Include="..\src\common\Gdc2\Filters\Gif.cpp" />
+    <ClCompile Include="..\src\common\Gdc2\Filters\Jpeg.cpp" />
+    <ClCompile Include="..\src\common\Gdc2\Filters\Lzw.cpp" />
+    <ClCompile Include="..\src\common\Gdc2\Filters\Png.cpp" />
+    <ClCompile Include="..\src\common\Gdc2\Filters\Svg.cpp" />
+    <ClCompile Include="..\src\common\Gdc2\Filters\Tiff.cpp" />
     <ClCompile Include="..\src\common\Gdc2\Font\DisplayString.cpp" />
     <ClCompile Include="..\src\common\Gdc2\Font\Font.cpp" />
     <ClCompile Include="..\src\common\Gdc2\Font\Charset.cpp" />

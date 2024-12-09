@@ -17,8 +17,6 @@ endif()
 add_executable(HtmlEdit ${APP_TYPE}
 
     src/Rich.cpp
-    ${LGI_DIR}/src/common/Gdc2/Filters/Jpeg.cpp
-    ${LGI_DIR}/src/common/Gdc2/Filters/Png.cpp
     ${LGI_DIR}/src/common/Gdc2/Tools/GdcTools.cpp
     ${LGI_DIR}/src/common/Net/Http.cpp
     ${LGI_DIR}/src/common/Net/OpenSSLSocket.cpp

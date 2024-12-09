@@ -512,6 +512,24 @@
     <ClCompile Include="..\src\win\Lgi\Roster.cpp">
       <Filter>Source Files\Core\Process</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\common\Gdc2\Filters\Gif.cpp">
+      <Filter>Source Files\Graphics\Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Gdc2\Filters\Jpeg.cpp">
+      <Filter>Source Files\Graphics\Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Gdc2\Filters\Png.cpp">
+      <Filter>Source Files\Graphics\Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Gdc2\Filters\Svg.cpp">
+      <Filter>Source Files\Graphics\Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Gdc2\Filters\Lzw.cpp">
+      <Filter>Source Files\Graphics\Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Gdc2\Filters\Tiff.cpp">
+      <Filter>Source Files\Graphics\Filters</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\lgi\common\About.h">
