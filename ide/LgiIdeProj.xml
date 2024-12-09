@@ -22,14 +22,12 @@
 		<Node File="../include/lgi/common/Mdi.h" Type="3" Platforms="15" />
 		<Node File="../src/common/Net/OpenSSLSocket.cpp" Type="2" Platforms="15" />
 		<Node File="../include/lgi/common/OpenSSLSocket.h" Type="3" Platforms="15" />
-		<Node File="../src/common/Gdc2/Filters/Png.cpp" Type="2" Platforms="15" />
+		<Node File="../include/lgi/common/TrayIcon.h" Type="3" Platforms="15" />
 		<Node File="../include/lgi/common/PopupList.h" Type="3" Platforms="15" />
 		<Node File="../src/common/Text/RemoveAnsi.cpp" Type="2" Platforms="15" />
 		<Node File="../include/lgi/common/RemoveAnsi.h" Type="3" Platforms="15" />
-		<Node File="../src/common/Gdc2/Filters/Svg.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Text/TextConvert.cpp" Type="2" Platforms="15" />
 		<Node File="../include/lgi/common/TextLog.h" Type="3" Platforms="15" />
-		<Node File="../include/lgi/common/TrayIcon.h" Type="3" Platforms="15" />
 	</Node>
 	<Node Name="Resources" Type="1" Platforms="15" Open="1" Id="8">
 		<Node File="./resources/resource.h" Type="3" Platforms="15" />
@@ -44,7 +42,7 @@
 			<Node File="./src/BreakPointStore.h" Type="3" Platforms="15" />
 			<Node File="./src/DebugContext.cpp" Type="2" Platforms="15" />
 			<Node File="./src/DebugContext.h" Type="3" Platforms="15" />
-			<Node File="./src/Debugger.cpp" Type="2" Platforms="15" />
+			<Node File="./src/Debugger.cpp" Type="2" Platforms="7" />
 			<Node File="./src/Debugger.h" Type="3" Platforms="7" />
 		</Node>
 		<Node Name="Dialogs" Type="1" Platforms="15" Open="0" Id="3">
@@ -165,13 +163,11 @@ WINNATIVE</Release>
 					<Debug>./src
 ./resources
 ../include
-../private/common
-../../../../codelib/lunasvg/include</Debug>
+../private/common</Debug>
 					<Release>./src
 ./resources
 ../include
-../private/common
-../../../../codelib/lunasvg/include</Release>
+../private/common</Release>
 				</All>
 				<Windows>
 					<Debug>..\include\lgi\win
@@ -221,12 +217,8 @@ network
 be</Release>
 				</Haiku>
 				<All>
-					<Debug>ssh
-lunasvg
-plutovg</Debug>
-					<Release>ssh
-lunasvg
-plutovg</Release>
+					<Debug>ssh</Debug>
+					<Release>ssh</Release>
 				</All>
 			</Libraries>
 			<Defines>
@@ -240,6 +232,7 @@ _GNU_SOURCE</Release>
 					<Debug>HAS_LIBSSH</Debug>
 					<Release>HAS_LIBSSH</Release>
 				</All>
+				<Linux />
 			</Defines>
 			<TargetType>
 				<All>Executable</All>
@@ -263,23 +256,17 @@ _GNU_SOURCE</Release>
 					<Debug>`pkg-config --cflags gtk+-3.0`</Debug>
 					<Release>`pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
-				<Haiku />
 			</SystemIncludes>
 			<LibraryPaths>
-				<All>
-					<Debug>../../../../codelib/lunasvg/build
-../../../../codelib/lunasvg/build/_deps/plutovg-build</Debug>
-					<Release>../../../../codelib/lunasvg/build
-../../../../codelib/lunasvg/build/_deps/plutovg-build</Release>
-				</All>
-				<Haiku />
+				<All />
+				<Linux />
 			</LibraryPaths>
 			<ApplicationIcon>
 				<Haiku>./resources/icon.hvif</Haiku>
 			</ApplicationIcon>
 			<Options>
 				<All />
-				<Haiku />
+				<Linux />
 			</Options>
 		</Build>
 		<Editor>
@@ -312,7 +299,7 @@ _GNU_SOURCE</Release>
 		</Debug>
 		<Advanced>
 			<PostBuildCommands>
-				<Haiku />
+				<Linux />
 			</PostBuildCommands>
 			<OtherMakefileRules />
 		</Advanced>

@@ -16,12 +16,11 @@
 		<Node Name="Lgi" Type="1" Platforms="15" Id="2">
 			<Node File="../src/common/Widgets/ControlTree.cpp" Type="2" Platforms="15" />
 			<Node File="../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Gdc2/Filters/Png.cpp" Type="2" Platforms="15" />
+			<Node File="../src/common/Text/XmlTreeUi.cpp" Type="2" Platforms="15" />
 			<Node File="../src/common/Text/RemoveAnsi.cpp" Type="2" Platforms="15" />
 			<Node File="../include/lgi/common/RemoveAnsi.h" Type="3" Platforms="15" />
 			<Node File="../src/common/Lgi/StructuredLog.cpp" Type="2" Platforms="15" />
 			<Node File="../include/lgi/common/StructuredLog.h" Type="3" Platforms="15" />
-			<Node File="../src/common/Text/XmlTreeUi.cpp" Type="2" Platforms="15" />
 		</Node>
 		<Node Name="Ssh" Type="1" Platforms="15" Id="1">
 			<Node File="../include/lgi/common/Ssh.h" Type="3" Platforms="15" />
@@ -68,8 +67,6 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
-			<CCrossCompiler />
-			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -127,7 +124,6 @@ be</Debug>
 ssh
 be</Release>
 				</Haiku>
-				<All />
 			</Libraries>
 			<TargetType>
 				<All>Executable</All>
@@ -143,22 +139,13 @@ HAS_LIBSSH=1</Debug>
 					<Release>_GNU_SOURCE
 HAS_LIBSSH=1</Release>
 				</Haiku>
-				<All />
 			</Defines>
-			<LibraryPaths>
-				<All />
-				<Linux />
-			</LibraryPaths>
-			<TargetName>
-				<Linux />
-			</TargetName>
+			<LibraryPaths />
+			<TargetName />
 			<ApplicationIcon>
 				<Haiku>./resources/icon.hvif</Haiku>
 			</ApplicationIcon>
-			<Options>
-				<All />
-				<Linux />
-			</Options>
+			<Options />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -170,27 +157,13 @@ HAS_LIBSSH=1</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
-			<ShowWhiteSpace />
-			<CommentFile />
-			<CommentFunction />
 		</Editor>
 		<Advanced>
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
-			<OtherMakefileRules />
+			<PostBuildCommands />
 		</Advanced>
 		<Debug>
-			<Arguments>
-				<All />
-			</Arguments>
-			<Environment />
-			<DebugAdmin />
-			<InitialDir />
+			<Arguments />
 		</Debug>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
+		<Remote />
 	</Settings>
 </Project>

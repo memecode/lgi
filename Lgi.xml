@@ -257,7 +257,12 @@
 				<Node File="./src/common/Gdc2/Alpha.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Filters" Type="1" Platforms="15" Open="0" Id="46">
-				<Node File=".\src\common\Gdc2\Filters\Filter.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/Filters/Filter.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/Filters/Gif.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/Filters/Jpeg.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/Filters/Lzw.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/Filters/Png.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/Filters/Svg.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Rect/Region" Type="1" Platforms="15" Open="0" Id="47">
 				<Node File=".\src\common\Gdc2\Rect.cpp" Type="2" Platforms="15" />
@@ -502,19 +507,22 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
-			<Executable>
-				<Linux />
-			</Executable>
-			<CCrossCompiler />
-			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
 				<All>
 					<Debug>./include
-./private/common</Debug>
+./private/common
+../../../codelib/lunasvg/include
+../../../codelib/zlib
+../../../codelib/libpng
+../../../codelib/libjpeg-9a</Debug>
 					<Release>./include
-./private/common</Release>
+./private/common
+../../../codelib/lunasvg/include
+../../../codelib/zlib
+../../../codelib/libpng
+../../../codelib/libjpeg-9a</Release>
 				</All>
 				<Linux>
 					<Debug>./include/lgi/linux
@@ -576,7 +584,12 @@ gnu
 network
 be</Release>
 				</Haiku>
-				<All />
+				<All>
+					<Debug>lunasvg
+plutovg</Debug>
+					<Release>lunasvg
+plutovg</Release>
+				</All>
 			</Libraries>
 			<TargetName>
 				<Linux>
@@ -600,46 +613,21 @@ _GNU_SOURCE</Debug>
 					<Release>POSIX
 _GNU_SOURCE</Release>
 				</Haiku>
-				<Linux />
 			</Defines>
 			<Options>
 				<Linux>
 					<Debug>-Wno-format-truncation</Debug>
 					<Release>-Wno-format-truncation</Release>
 				</Linux>
-				<All />
 			</Options>
 			<LibraryPaths>
-				<All />
-				<Linux />
+				<All>
+					<Debug>../../../codelib/lunasvg/build
+../../../codelib/lunasvg/build/_deps/plutovg-build</Debug>
+					<Release>../../../codelib/lunasvg/build
+../../../codelib/lunasvg/build/_deps/plutovg-build</Release>
+				</All>
 			</LibraryPaths>
-			<ApplicationIcon />
 		</Build>
-		<Advanced>
-			<OtherMakefileRules />
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
-		</Advanced>
-		<Debug>
-			<Environment />
-			<Arguments>
-				<All />
-			</Arguments>
-			<DebugAdmin />
-			<InitialDir />
-		</Debug>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
-		<Editor>
-			<TabSize />
-			<IndentSize />
-			<ShowWhiteSpace />
-			<UseHardTabs />
-			<CommentFile />
-			<CommentFunction />
-		</Editor>
 	</Settings>
 </Project>

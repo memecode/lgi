@@ -25,15 +25,11 @@
 		</Node>
 		<Node Name="Lgi" Type="1" Platforms="15" Id="1">
 			<Node File="../../src/common/Gdc2/Tools/GdcTools.cpp" Type="2" Platforms="15" />
-			<Node File="../../src/common/Gdc2/Filters/Gif.cpp" Type="2" Platforms="15" />
 			<Node File="../../src/common/Text/Homoglyphs/Homoglyphs.cpp" Type="2" Platforms="15" />
 			<Node File="../../src/common/Text/Homoglyphs/HomoglyphsTable.cpp" Type="2" Platforms="15" />
 			<Node File="../../src/common/Net/Http.cpp" Type="2" Platforms="15" />
-			<Node File="../../src/common/Gdc2/Filters/Jpeg.cpp" Type="2" Platforms="15" />
 			<Node File="../../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="7" />
-			<Node File="../../src/common/Gdc2/Filters/Lzw.cpp" Type="2" Platforms="15" />
 			<Node File="../../src/common/Net/OpenSSLSocket.cpp" Type="2" Platforms="15" />
-			<Node File="../../src/common/Gdc2/Filters/Png.cpp" Type="2" Platforms="15" />
 		</Node>
 	</Node>
 	<Node File="../../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
