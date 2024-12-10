@@ -177,12 +177,29 @@ public:
 	
 	// File
 	virtual bool DeleteFile(const char *Remote) = 0;
-	virtual bool DownloadFile(const char *Local, IFtpEntry *Remote, bool Binary = true) = 0;
-	virtual bool UploadFile(const char *Local, const char *Remote, bool Binary = true) = 0;
+	virtual bool DownloadFile(LStream *out, IFtpEntry *Remote, bool Binary = true) = 0;
+	virtual bool DownloadFile(const char *Local, IFtpEntry *Remote, bool Binary = true)
+	{
+		LFile f(Local, O_WRITE);
+		if (!f)
+			return OnFileError(Local, true);
+		f.SetSize(0);
+		return DownloadFile(&f, Remote, Binary);
+	}
+	virtual bool UploadFile(LStream *in, const char *Remote, bool Binary = true) = 0;
+	virtual bool UploadFile(const char *Local, const char *Remote, bool Binary = true)
+	{
+		LFile f(Local, O_READ);
+		if (!f)
+			return OnFileError(Local, false);
+		return UploadFile(&f, Remote, Binary);
+	}
 	virtual bool RenameFile(const char *From, const char *To) = 0;
 	virtual bool SetPerms(const char *File, LPermissions Perms) = 0;
 	virtual bool ResumeAt(int64 Pos) = 0;
 	virtual void Abort() = 0;
+
+	virtual bool OnFileError(const char *path, bool write) = 0;
 };
 
 /// An implementation of the remote file system interface for FTP connections
@@ -196,7 +213,7 @@ protected:
 
 	ssize_t WriteLine(char *Msg = 0);
 	ssize_t ReadLine(char *Msg = 0, ssize_t MsgSize = 0);
-	bool TransferFile(const char *Local, const char *Remote, int64 RemoteSize, bool Upload, bool Binary);
+	bool TransferFile(LStream *stream, const char *Remote, int64 RemoteSize, bool Upload, bool Binary);
 
 	// Data connections
 	char Ip[64] = "";
@@ -220,6 +237,14 @@ protected:
 	bool ConnectData();
 	LAutoString ToFtpCs(const char *s);
 	LAutoString FromFtpCs(const char *s);
+
+	bool OnFileError(const char *path, bool write) override
+	{
+		// couldn't open file...
+		if (Socket)
+			Socket->OnInformation(LString::Fmt("Error: Couldn't open '%s' for %s", path, write?"writing":"reading"));
+		return false;
+	}
 
 public:
 	/// Construct an FTP protocol handler.
@@ -275,9 +300,9 @@ public:
 	/// Delete a file in the current remote folder
 	bool DeleteFile(const char *Remote);
 	/// Download a file from the current remote folder
-	bool DownloadFile(const char *Local, IFtpEntry *Remote, bool Binary = true);
+	bool DownloadFile(LStream *out, IFtpEntry *Remote, bool Binary = true);
 	/// Upload a local file to the current remote folder
-	bool UploadFile(const char *Local, const char *Remote, bool Binary = true);
+	bool UploadFile(LStream *in, const char *Remote, bool Binary = true);
 	/// Rename a file or folder in the current remote folder
 	bool RenameFile(const char *From, const char *To);
 	/// Set the permissions on a file in the current remote folder

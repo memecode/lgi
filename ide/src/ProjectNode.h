@@ -1,8 +1,6 @@
 #ifndef _PROJECT_NODE_H_
 #define _PROJECT_NODE_H_
 
-#include "FtpThread.h"
-
 // Linked to 'TypeNames' global variable, update that too.
 enum NodeType
 {
@@ -25,7 +23,6 @@ extern int NodeSort(LTreeItem *a, LTreeItem *b, NativeInt d = 0);
 class ProjectNode :
 	public IdeCommon,
 	public LDragDropSource,
-	public FtpCallback,
 	public NodeSource
 {
 	// In projects where the base URI is loaded, all nodes are transient
@@ -55,7 +52,6 @@ class ProjectNode :
 	LAutoPtr<LProgressDlg> ImportProg;
 
 	void OpenLocalCache(IdeDoc *&Doc);
-	void OnCmdComplete(FtpCmd *Cmd) override;
 	int64 CountNodes();
 	void NeedsPulse(bool yes);
 	void OnDocOpen(IdeDoc *Doc, bool open);

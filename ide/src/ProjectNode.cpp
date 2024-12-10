@@ -11,7 +11,6 @@
 #include "LgiIde.h"
 #include "IdeProject.h"
 #include "ProjectNode.h"
-#include "AddFtpFile.h"
 #include "WebFldDlg.h"
 #include "resdefs.h"
 
@@ -206,26 +205,6 @@ int64 ProjectNode::CountNodes()
 		n += c->CountNodes();
 	}
 	return n;
-}
-
-void ProjectNode::OnCmdComplete(FtpCmd *Cmd)
-{
-	if (!Cmd)
-		return;
-
-	if (Cmd->Status && Cmd->File)
-	{
-		if (Cmd->Cmd == FtpRead)
-		{
-			sLocalCache = Cmd->File;
-			IdeDoc *Doc;
-			OpenLocalCache(Doc);
-		}
-		else if (Cmd->Cmd == FtpWrite)
-		{
-			Cmd->View->OnSaveComplete(Cmd->Status);
-		}
-	}
 }
 
 int ProjectNode::GetPlatforms()
@@ -567,7 +546,7 @@ void ProjectNode::OnExpand(bool b)
 		childrenReq = true;
 		if (auto be = Project->GetBackend())
 		{
-			be->ReadFolder(sFile, [this](auto d)
+			be->ReadFolder(SystemIntf::TForeground, sFile, [this](auto d)
 				{
 					DeleteObj(placeholder);
 					for (auto b = d->First(NULL); b; b = d->Next())
@@ -675,26 +654,18 @@ bool ProjectNode::Serialize(bool Write)
 
 LString ProjectNode::GetFullPath()
 {
-	LString FullPath;
-	
-	if (LIsRelativePath(sFile))
+	if (!Project->GetBackend() && LIsRelativePath(sFile))
 	{
 		// Relative path
-		auto Path = Project->GetBasePath();
-		if (Path)
+		if (auto Path = Project->GetBasePath())
 		{
 			char p[MAX_PATH_LEN];
 			LMakePath(p, sizeof(p), Path, sFile);
-			FullPath = p;
+			return p;
 		}
 	}
-	else
-	{
-		// Absolute path
-		FullPath = sFile;
-	}
 	
-	return FullPath;
+	return sFile;
 }
 
 IdeDoc *ProjectNode::Open()
@@ -767,18 +738,26 @@ IdeDoc *ProjectNode::Open()
 			}
 			default:
 			{
-				auto FullPath = GetFullPath();
-				if (!FullPath)
-					break;
-
-				if (!Project->CheckExists(FullPath))
+				LString path;
+				if (auto backend = Project->GetBackend())
 				{
-					auto msg = LString::Fmt("The path '%s' doesn't exist.", FullPath.Get());
-					LPopupNotification::Message(GetTree()->GetWindow(), msg);
-					break;
+					path = sFile;
+				}
+				else
+				{
+					path = GetFullPath();
+					if (!path)
+						break;
+
+					if (!Project->CheckExists(path))
+					{
+						auto msg = LString::Fmt("The path '%s' doesn't exist.", path.Get());
+						LPopupNotification::Message(GetTree()->GetWindow(), msg);
+						break;
+					}
 				}
 
-				Doc = Project->GetApp()->FindOpenFile(FullPath);
+				Doc = Project->GetApp()->FindOpenFile(path);
 				if (Doc)
 				{
 					Doc->Raise();
@@ -795,14 +774,16 @@ IdeDoc *ProjectNode::Open()
 				if (auto backend = Project->GetBackend())
 				{
 					auto path = GetFullPath();
-					backend->Read(path,
-						[this, Doc](auto err, auto data)
+					backend->Read(
+						SystemIntf::TForeground,
+						path,
+						[this, Doc, path](auto err, auto data)
 						{
 							if (err)
 							{
 								LPopupNotification::Message(GetTree()->GetWindow(),
 									LString::Fmt("Error opening '%s'\n%s",
-										GetFullPath().Get(),
+										path.Get(),
 										err.ToString().Get()) );
 							}
 							else
@@ -813,7 +794,7 @@ IdeDoc *ProjectNode::Open()
 				}
 				else
 				{
-					OnDocOpen(Doc, Doc->OpenFile(FullPath));
+					OnDocOpen(Doc, Doc->OpenFile(path));
 				}
 				break;
 			}
@@ -987,28 +968,6 @@ void ProjectNode::OnMouseClick(LMouse &m)
 		m.y -= c.y;
 		switch (Sub.Float(Tree, m.x, m.y))
 		{
-			case IDM_INSERT_FTP:
-			{
-				AddFtpFile *Add = new AddFtpFile(Tree, GetAttr(OPT_Ftp));
-				Add->DoModal([this, Add](auto dlg, auto code)
-				{
-					if (code)
-					{
-						for (int i=0; i<Add->Uris.Length(); i++)
-						{
-							ProjectNode *New = new ProjectNode(Project);
-							if (New)
-							{
-								New->SetFileName(Add->Uris[i]);
-								InsertTag(New);
-								SortChildren();
-								Project->SetDirty();
-							}
-						}
-					}
-				});
-				break;
-			}
 			case IDM_INSERT:
 			{
 				LFileSelect *s = new LFileSelect;

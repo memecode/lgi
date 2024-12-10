@@ -32,7 +32,6 @@
 #include "lgi/common/RemoteFileSelect.h"
 
 #include "LgiIde.h"
-#include "FtpThread.h"
 #include "FindSymbol.h"
 #include "Debugger.h"
 #include "ProjectNode.h"
@@ -1944,8 +1943,6 @@ AppWnd::~AppWnd()
 		d->Options.SetValue(OPT_OUTPUT_PX, v = d->Output->Y());
 	d->Options.SetValue(OPT_PLATFORM, v = d->Platform);
 
-	ShutdownFtpThread();
-
 	LAppInst->AppWnd = NULL;
 	DeleteObj(d);
 }
@@ -3254,7 +3251,7 @@ void AppWnd::OpenFile(const char *FileName, NodeSource *Src, std::function<void(
 			pathHints.Add(backend->GetBasePath());
 			backend->ResolvePath(File, pathHints, [this, backend, Proj, Doc, callback](auto err, auto FullPath)
 			{
-				backend->Read(FullPath, [this, Proj, Doc, callback, FullPath](auto err, auto data)
+				backend->Read(SystemIntf::TForeground, FullPath, [this, Proj, Doc, callback, FullPath](auto err, auto data)
 				{
 					if (err)
 					{

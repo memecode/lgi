@@ -55,6 +55,9 @@
     <Filter Include="Source Files\RemoteFileSelect">
       <UniqueIdentifier>{f761efb0-c45f-46cf-99d0-67022566f91b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\System Backends">
+      <UniqueIdentifier>{eb3d3d29-2142-4573-98f2-a3f15886490f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Debugger.h">
@@ -65,12 +68,6 @@
     </ClInclude>
     <ClInclude Include="..\src\IdeFindInFiles.h">
       <Filter>Source Files\Search</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\FtpFile.h">
-      <Filter>Source Files\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\FtpThread.h">
-      <Filter>Source Files\Utils</Filter>
     </ClInclude>
     <ClInclude Include="..\src\IdeDoc.h">
       <Filter>Source Files\Docs</Filter>
@@ -102,9 +99,6 @@
     <ClInclude Include="..\src\WebFldDlg.h">
       <Filter>Source Files\Dialogs</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\AddFtpFile.h">
-      <Filter>Source Files\Dialogs</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\DebugContext.h">
       <Filter>Source Files\Debugger</Filter>
     </ClInclude>
@@ -123,11 +117,14 @@
     <ClInclude Include="..\src\BreakPointStore.h">
       <Filter>Source Files\Debugger</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\lgi\common\SystemIntf.h">
-      <Filter>Source Files\RemoteFileSelect</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\lgi\common\RemoteFileSelect.h">
       <Filter>Source Files\RemoteFileSelect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\lgi\common\SystemIntf.h">
+      <Filter>Source Files\System Backends</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\lgi\common\Ftp.h">
+      <Filter>Source Files\System Backends</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -148,12 +145,6 @@
     </ClCompile>
     <ClCompile Include="..\src\IdeFindInFiles.cpp">
       <Filter>Source Files\Search</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\common\Net\Ftp.cpp">
-      <Filter>Source Files\Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\FtpThread.cpp">
-      <Filter>Source Files\Utils</Filter>
     </ClCompile>
     <ClCompile Include="..\src\History.cpp">
       <Filter>Source Files\Utils</Filter>
@@ -230,9 +221,6 @@
     <ClCompile Include="..\src\WebFldDlg.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\AddFtpFile.cpp">
-      <Filter>Source Files\Dialogs</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\FindSymbol.cpp">
       <Filter>Source Files\Search\SymbolSearch</Filter>
     </ClCompile>
@@ -243,7 +231,10 @@
       <Filter>Source Files\RemoteFileSelect</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\common\Lgi\SystemIntf.cpp">
-      <Filter>Source Files\RemoteFileSelect</Filter>
+      <Filter>Source Files\System Backends</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\Net\Ftp.cpp">
+      <Filter>Source Files\System Backends</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

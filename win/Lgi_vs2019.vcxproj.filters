@@ -646,9 +646,6 @@
     <ClInclude Include="..\include\lgi\common\FindInFiles.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Ftp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\Graph.h">
       <Filter>Header Files</Filter>
     </ClInclude>

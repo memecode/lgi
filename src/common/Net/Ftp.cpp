@@ -939,18 +939,20 @@ bool IFtp::DeleteFile(const char *Remote)
 	return Status;
 }
 
-bool IFtp::DownloadFile(const char *Local, IFtpEntry *Remote, bool Binary)
+bool IFtp::DownloadFile(LStream *out, IFtpEntry *Remote, bool Binary)
 {
-	if (Remote && Remote->Name)
-	{
-		return TransferFile(Local, Remote->Name, Remote->Size, false, Binary);
-	}
-	return false;
+	if (!out || !Remote || !Remote->Name)
+		return false;
+
+	return TransferFile(out, Remote->Name, Remote->Size, false, Binary);
 }
 
-bool IFtp::UploadFile(const char *Local, const char *Remote, bool Binary)
+bool IFtp::UploadFile(LStream *in, const char *Remote, bool Binary)
 {
-	return TransferFile(Local, Remote, LFileSize(Local), true, Binary);
+	if (!in || !Remote)
+		return false;
+
+	return TransferFile(in, Remote, in->GetSize(), true, Binary);
 }
 
 bool IFtp::ResumeAt(int64 Pos)
@@ -964,18 +966,15 @@ bool IFtp::ResumeAt(int64 Pos)
 	return Status;
 }
 
-bool IFtp::TransferFile(const char *Local, const char *Remote, int64 Size, bool Upload, bool Binary)
+bool IFtp::TransferFile(LStream *Stream, const char *Remote, int64 Size, bool Upload, bool Binary)
 {
 	bool Status = false;
 	bool Aborted = false;
 
-	d->F.Reset(new LFile);
-	
 	try
 	{
-		if (d->F &&
-			Socket &&
-			Local &&
+		if (Socket &&
+			Stream &&
 			Remote)
 		{
 			if (SetupData(Binary, true))
@@ -993,154 +992,144 @@ bool IFtp::TransferFile(const char *Local, const char *Remote, int64 Size, bool 
 					if (Range != 1 && Range != 2)
 						throw Result;
 
-					if (!d->F->Open(Local, (Upload)?O_READ:O_WRITE))
+					// do the transfer
+					int TempLen = 64 << 10;
+					uchar *Temp = new uchar[TempLen];
+					if (Temp)
 					{
-						// couldn't open file...
-						char Str[256];
-						sprintf_s(Str, sizeof(Str), "Error: Couldn't open '%s' for %s", Local, (Upload)?"reading":"writing");
-						Socket->OnInformation(Str);
-					}
-					else
-					{
-						// do the transfer
-						int TempLen = 64 << 10;
-						uchar *Temp = new uchar[TempLen];
-						if (Temp)
+						int64 Processed = 0;
+						ssize_t Len = 0;
+
+						if (Meter)
+							Meter->SetRange(Size);
+
+						if (!Upload)
+							Size -= RestorePos;
+						AbortTransfer = false;
+
+						bool Error = false;
+						while (	Socket &&
+								d->Data &&
+								(Size < 0 || Processed < Size) &&
+								!Error &&
+								!AbortTransfer &&
+								(!Meter || !Meter->IsCancelled()))
 						{
-							int64 Processed = 0;
-							ssize_t Len = 0;
-
 							if (Meter)
-								Meter->SetRange(Size);
-
-							if (!Upload)
-								Size -= RestorePos;
-							AbortTransfer = false;
-
-							bool Error = false;
-							while (	Socket &&
-									d->Data &&
-									(Size < 0 || Processed < Size) &&
-									!Error &&
-									!AbortTransfer &&
-									(!Meter || !Meter->IsCancelled()))
 							{
-								if (Meter)
-								{
-									Meter->Value(0);
-								}
-
-								if (Upload)
-								{
-									// upload loop
-									d->Data->SetTimeout(15 * 1000);
-									do
-									{
-										auto filePos = d->F->GetPos();
-										Len = d->F->Read(Temp, TempLen);
-										for (ssize_t i=0; i<Len; )
-										{
-											ssize_t WriteLen = 0;
-											
-											if (d->Data)
-												WriteLen = d->Data->Write((char*) Temp, Len, 0);
-											else
-												break;
-
-											// printf("data write %i, %i, %i\n", (int)filePos, (int)Len, (int)WriteLen);
-											
-											if (WriteLen > 0)
-											{
-												Processed += WriteLen;
-												i += WriteLen;
-												if (Meter)
-													Meter->Value(Meter->Value() + WriteLen);
-											}
-											else
-											{
-												printf("%s:%i - Data->Write failed, %i of %i bytes written.\n",
-													_FL, (int)WriteLen, (int)Len);
-												Error = true;
-												break;
-											}
-										}
-
-										if (Meter && Meter->IsCancelled())
-										{
-											printf("%s:%i - Upload canceled.\n", _FL);
-											break;
-										}
-									}
-									while (Len > 0 && !AbortTransfer && !Error);
-								}
-								else
-								{
-									// restore support
-									d->F->Seek(RestorePos, SEEK_SET);
-									if (Meter && RestorePos > 0)
-									{
-										// Meter->SetParameter(10, (int)RestorePos);
-										LVariant v;
-										Meter->SetValue("RestorePos", v = RestorePos);
-									}
-									RestorePos = 0;
-
-									// download loop
-									while (d->Data)
-									{
-										if (d->Data)
-										{
-											Len = d->Data->Read((char*) Temp, TempLen, 0);
-										}
-
-										if (Len <= 0 || AbortTransfer)
-										{
-											break;
-										}
-
-										d->F->Write(Temp, Len);
-										Processed += Len;
-										if (Meter)
-										{
-											Meter->Value(Meter->Value() + Len);
-
-											if (Meter->IsCancelled())
-												break;
-										}
-									}
-
-									if (Len <= 0)
-										Error = true;
-								}
-							}
-							
-							if (AbortTransfer || (Meter && Meter->IsCancelled()))
-							{
-								// send abort command
-								sprintf_s(d->OutBuf, sizeof(d->OutBuf), "ABOR\r\n");
-								WriteLine();
-								if ((ReadLine()/100) == 4) // temp msg
-								{
-									// response... we don't care just read it
-									ReadLine();
-								}
-
-								Aborted = true;
-							}
-
-							if (d->Data)
-								d->Data->Close();
-
-							if (Size < 0)
-								Status = true;
-							else
-								Status = Size == Processed;
-
-							if (Meter)
 								Meter->Value(0);
+							}
 
-							DeleteArray(Temp);
+							if (Upload)
+							{
+								// upload loop
+								d->Data->SetTimeout(15 * 1000);
+								do
+								{
+									auto filePos = Stream->GetPos();
+									Len = Stream->Read(Temp, TempLen);
+									for (ssize_t i=0; i<Len; )
+									{
+										ssize_t WriteLen = 0;
+											
+										if (d->Data)
+											WriteLen = d->Data->Write((char*) Temp, Len, 0);
+										else
+											break;
+
+										// printf("data write %i, %i, %i\n", (int)filePos, (int)Len, (int)WriteLen);
+											
+										if (WriteLen > 0)
+										{
+											Processed += WriteLen;
+											i += WriteLen;
+											if (Meter)
+												Meter->Value(Meter->Value() + WriteLen);
+										}
+										else
+										{
+											printf("%s:%i - Data->Write failed, %i of %i bytes written.\n",
+												_FL, (int)WriteLen, (int)Len);
+											Error = true;
+											break;
+										}
+									}
+
+									if (Meter && Meter->IsCancelled())
+									{
+										printf("%s:%i - Upload canceled.\n", _FL);
+										break;
+									}
+								}
+								while (Len > 0 && !AbortTransfer && !Error);
+							}
+							else
+							{
+								// restore support
+								Stream->SetPos(RestorePos);
+								if (Meter && RestorePos > 0)
+								{
+									// Meter->SetParameter(10, (int)RestorePos);
+									LVariant v;
+									Meter->SetValue("RestorePos", v = RestorePos);
+								}
+								RestorePos = 0;
+
+								// download loop
+								while (d->Data)
+								{
+									if (d->Data)
+									{
+										Len = d->Data->Read((char*) Temp, TempLen, 0);
+									}
+
+									if (Len <= 0 || AbortTransfer)
+									{
+										break;
+									}
+
+									Stream->Write(Temp, Len);
+									Processed += Len;
+									if (Meter)
+									{
+										Meter->Value(Meter->Value() + Len);
+
+										if (Meter->IsCancelled())
+											break;
+									}
+								}
+
+								if (Len <= 0)
+									Error = true;
+							}
 						}
+							
+						if (AbortTransfer || (Meter && Meter->IsCancelled()))
+						{
+							// send abort command
+							sprintf_s(d->OutBuf, sizeof(d->OutBuf), "ABOR\r\n");
+							WriteLine();
+							if ((ReadLine()/100) == 4) // temp msg
+							{
+								// response... we don't care just read it
+								ReadLine();
+							}
+
+							Aborted = true;
+						}
+
+						if (d->Data)
+							d->Data->Close();
+
+						if (Size < 0)
+							Status = true;
+						else
+							Status = Size == Processed;
+
+						if (Meter)
+							Meter->Value(0);
+
+						DeleteArray(Temp);
 
 						// read eof response
 						if (!Aborted)
@@ -1159,16 +1148,14 @@ bool IFtp::TransferFile(const char *Local, const char *Remote, int64 Size, bool 
 	{
 		if (IsOpen())
 		{
-			d->ErrBuf.Printf("%s:%i - TransferFile(%s) error: " LPrintfSSizeT "\n",
+			d->ErrBuf.Printf("%s:%i - TransferFile error: " LPrintfSSizeT "\n",
 				_FL,
-				Local,
 				Error);			
 		}
 
 		Status = false;
 	}
 
-	d->F.Reset();
 	return Status;
 }
 

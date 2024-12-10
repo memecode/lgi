@@ -951,7 +951,8 @@ LString IdeDocPrivate::GetDisplayName()
 			}
 			else if (*Fn == '.')
 			{
-				return nSrc->GetFullPath();
+				return LGetLeaf(Fn);
+				// return nSrc->GetFullPath();
 			}
 		}
 
@@ -2081,7 +2082,7 @@ void IdeDoc::SetClean(std::function<void(bool)> Callback)
 		{
 			LStringPipe content(1024);
 			d->Save(&content);
-			backend->Write(LocalPath,
+			backend->Write(SystemIntf::TForeground, LocalPath,
 				content.NewLStr(),
 				[this, Callback](auto err)
 				{

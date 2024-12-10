@@ -809,7 +809,7 @@ public:
 		return true;
 	}
 
-	bool ReadFolder(const char *Path, std::function<void(LDirectory*)> cb) override
+	bool ReadFolder(TPriority priority, const char *Path, std::function<void(LDirectory*)> cb) override
 	{
 		if (!Path || !cb)
 			return false;
@@ -912,7 +912,7 @@ public:
 		return cp.Replace(" ", "\\ ");
 	}
 
-	bool Read(const char *Path, std::function<void(LError,LString)> result) override
+	bool Read(TPriority priority, const char *Path, std::function<void(LError,LString)> result) override
 	{
 		if (!Path)
 			return false;
@@ -938,7 +938,7 @@ public:
 		return true;
 	}
 
-	bool Write(const char *Path, LString Data, std::function<void(LError)> result) override
+	bool Write(TPriority priority, const char *Path, LString Data, std::function<void(LError)> result) override
 	{
 		if (!Path)
 			return false;
@@ -1150,7 +1150,7 @@ public:
 		return true;
 	}
 
-	bool ReadFolder(const char *Path, std::function<void(LDirectory*)> results) override
+	bool ReadFolder(TPriority priority, const char *Path, std::function<void(LDirectory*)> results) override
 	{
 		LDirectory dir;
 		if (!dir.First(Path))
@@ -1195,7 +1195,7 @@ public:
 		return false;
 	}
 
-	bool Read(const char *Path, std::function<void(LError,LString)> result) override
+	bool Read(TPriority priority, const char *Path, std::function<void(LError,LString)> result) override
 	{
 		if (!Path)
 		{
@@ -1216,7 +1216,7 @@ public:
 		return true;
 	}
 
-	bool Write(const char *Path, LString Data, std::function<void(LError)> result) override
+	bool Write(TPriority priority, const char *Path, LString Data, std::function<void(LError)> result) override
 	{
 		if (!Path)
 		{
@@ -1307,6 +1307,465 @@ public:
 	}
 };
 
+#include "lgi/common/Ftp.h"
+#include "lgi/common/OpenSSLSocket.h"
+
+class FtpBackend :
+	public SystemIntf,
+	public LCancel,
+	public LThread,
+	public LMutex,
+	public IFtpCallback
+{
+	LUri uri;
+	LStream *log = nullptr;
+	bool Connected = false;
+
+	using TWork = std::function<void()>;
+	LArray<TWork> foregroundWork, backgroundWork;
+	LAutoPtr<IFtp> ftp;
+
+	bool GetReady(int timeout = 6000)
+	{
+		auto start = LCurrentTime();
+		while (!IsCancelled() && !Connected)
+		{
+			auto now = LCurrentTime();
+			if (now - start > timeout)
+				return false;
+			LSleep(10);
+		}
+
+		return true;
+	}
+
+	class FtpDir : public LArray<IFtpEntry*>, public LDirectory
+	{
+		ssize_t pos = -1;
+		LString base;
+		LString curEntry;
+		LString sep = "/";
+
+		bool Ok() const
+		{
+			return IdxCheck(pos);
+		}
+
+	public:
+		FtpDir(LString path)
+		{
+			base = path;
+		}
+
+		IFtpEntry *Find(const char *name)
+		{
+			for (auto e: *this)
+			{
+				if (e->Name.Equals(name))
+					return e;
+			}
+			return nullptr;
+		}
+
+		int First(const char *Name, const char *Pattern) override
+		{
+			pos = 0;
+			return Ok();
+		}
+	
+		int Next() override
+		{
+			pos++;
+			return Ok();
+		}
+
+		int Close() override
+		{
+			pos = -1;
+			return true;
+		}
+
+		bool Path(char *s, int BufSize)	const override
+		{
+			return false;
+		}
+
+		const char *FullPath() override
+		{
+			if (!Ok())
+				return nullptr;
+
+			auto e = ItemAt(pos);
+			LString::Array a;
+			a.SetFixedLength(false);
+			a.Add(base);
+			a.Add(e->Name);
+			curEntry = sep.Join(a);
+			return curEntry;
+		}
+
+		long GetAttributes() const override
+		{
+			return 0;
+		}
+	
+		const char *GetName() const override
+		{
+			if (!Ok())
+				return nullptr;
+
+			auto e = ItemAt(pos);
+			return e->Name;
+		}
+
+		LString FileName() const override
+		{
+			return LString();
+		}
+	
+		int GetUser(bool Group) const override
+		{
+			return 0;
+		}
+	
+		uint64 GetCreationTime() const override
+		{
+			return 0;
+		}
+
+		uint64 GetLastAccessTime() const override
+		{
+			return 0;
+		}
+
+		uint64 GetLastWriteTime() const override
+		{
+			return 0;
+		}
+
+		uint64 GetSize() const override
+		{
+			if (!Ok())
+				return false;
+
+			auto e = ItemAt(pos);
+			return e->Size;
+		}
+	
+		int64 GetSizeOnDisk() override
+		{
+			return GetSize();
+		}
+
+		bool IsDir() const override
+		{
+			if (!Ok())
+				return false;
+
+			auto e = ItemAt(pos);
+			return e->IsDir();
+		}
+	
+		bool IsSymLink() const override
+		{
+			return 0;
+		}
+	
+		bool IsReadOnly() const override
+		{
+			return 0;
+		}
+
+		bool IsHidden() const override
+		{
+			if (!Ok())
+				return false;
+
+			auto e = ItemAt(pos);
+			return e->IsHidden();
+		}
+
+		LDirectory *Clone() override
+		{
+			return nullptr;
+		}
+	
+		LVolumeTypes GetType() const override
+		{
+			return VT_NONE;
+		}
+	};
+
+	LAutoPtr<FtpDir> curDir;
+
+public:
+	FtpBackend(LView *parent, LString addr, LStream *logger) :
+		LThread("FtpBackend.Thread"),
+		LMutex("FtpBackend.Lock"),
+		uri(addr),
+		log(logger)
+	{
+		Run();
+	}
+
+	~FtpBackend()
+	{
+		Cancel();
+		WaitForExit(5000);
+	}
+
+	void GetSysType(std::function<void(SysPlatform)> cb) override
+	{
+		if (cb) cb(PlatformLinux);
+	}
+
+	bool IsReady() override
+	{
+		return Connected;
+	}
+
+	LString GetBasePath() override
+	{
+		return ".";
+	}
+
+	LString MakeRelative(LString absPath) override
+	{
+		return absPath;
+	}
+
+	LString MakeAbsolute(LString relPath) override
+	{
+		LAssert(0);
+		return LString();
+	}
+
+	LString JoinPath(LString base, LString leaf) override
+	{
+		LAssert(0);
+		return LString();
+	}
+
+	void ResolvePath(LString path, LString::Array hints, std::function<void(LError&,LString)> cb) override
+	{
+		LAssert(0);
+	}
+
+	// Reading and writing:
+	bool Stat(LString path, std::function<void(struct stat*, LString, LError)> cb) override
+	{
+		LAssert(0);
+		return false;
+	}
+
+	void AddWork(TPriority priority, TWork &&job)
+	{
+		if (priority == SystemIntf::TForeground)
+			foregroundWork.Add(std::move(job));
+		else
+			backgroundWork.Add(std::move(job));
+	}
+
+	LString ConvertPath(LString s)
+	{
+		return s.Replace("\\", "/");
+	}
+
+	bool ReadFolder(TPriority priority, const char *Path, std::function<void(LDirectory*)> results) override
+	{
+		if (!Path || !results)
+			return false;
+
+		Auto lck(this, _FL);
+		AddWork(priority, [this, Path = ConvertPath(Path), results]() mutable
+			{
+				if (!GetReady())
+					return;
+
+				LString remote;
+				if (Path(0, 2) == "./")
+					remote = Path(1, -1);
+				else
+					remote = Path;
+				if (!ftp->SetDir(remote))
+				{
+					log->Print("SetDir(%s) failed.\n", remote.Get());
+					return;
+				}
+
+				curDir.Reset(new FtpDir(Path));
+				if (ftp->ListDir(*curDir))
+				{
+					results(curDir);
+				}
+			});
+
+		return true;
+	}
+
+	bool Read(TPriority priority, const char *Path, std::function<void(LError,LString)> result) override
+	{
+		if (!Path || !result)
+			return false;
+
+		Auto lck(this, _FL);
+		AddWork(priority, [this, Path = LString(Path), result]()
+			{
+				LError err;
+				if (!GetReady())
+				{
+					err.Set(LErrorFuncFailed, "connection not ready.");
+					result(err, LString());
+					return;
+				}
+				if (!curDir)
+				{
+					err.Set(LErrorFuncFailed, "no current dir listing.");
+					result(err, LString());
+					return;
+				}
+
+				auto e = curDir->Find(LGetLeaf(Path));
+				if (!e)
+				{
+					err.Set(LErrorFuncFailed, "entry not found.");
+					result(err, LString());
+					return;
+				}
+
+				LStringPipe data(16 << 10);
+				if (ftp->DownloadFile(&data, e))
+				{
+					result(err, data.NewLStr());
+				}
+				else
+				{
+					err.Set(LErrorIoFailed, "download failed.");
+					result(err, LString());
+				}
+			});
+
+		return true;
+	}
+
+	bool Write(TPriority priority, const char *Path, LString Data, std::function<void(LError)> result) override
+	{
+		LAssert(0);
+		return false;
+	}
+
+	bool CreateFolder(const char *path, bool createParents, std::function<void(bool)> cb) override
+	{
+		LAssert(0);
+		return false;
+	}
+
+	bool Delete(const char *path, bool recursiveForce, std::function<void(bool)> cb) override
+	{
+		LAssert(0);
+		return false;
+	}
+
+	bool Rename(LString oldPath, LString newPath, std::function<void(bool)> cb) override
+	{
+		LAssert(0);
+		return false;
+	}
+
+	bool SearchFileNames(const char *searchTerms, std::function<void(LArray<LString>&)> results) override
+	{
+		LAssert(0);
+		return false;
+	}
+
+	bool FindInFiles(FindParams *params, LStream *results) override
+	{
+		LAssert(0);
+		return false;
+	}
+
+	bool RunProcess(const char *initDir, const char *cmdLine, ProcessIo *io, LCancel *cancel, std::function<void(int)> cb) override
+	{
+		// No process support
+		return false;
+	}
+
+	bool ProcessOutput(const char *cmdLine, std::function<void(int32_t,LString)> cb) override
+	{
+		// No process support
+		return false;
+	}
+
+	void OnSocketConnect() override
+	{
+		log->Print("Connected to '%s'\n", uri.sHost.Get());
+		Connected = true;
+	}
+
+	int MsgBox(const char *Msg, const char *Title, int Btn = MB_OK) override
+	{
+		LAssert(0);
+		return -1;
+	}
+
+	int Alert(const char *Title, const char *Text, const char *Btn1, const char *Btn2 = 0, const char *Btn3 = 0)
+	{
+		LAssert(0);
+		return -1;
+	}
+
+	void Disconnect() override
+	{
+		log->Print("Disconnected from '%s'\n", uri.sHost.Get());
+		Connected = false;
+	}
+
+	int Main() override
+	{
+		int WAIT_MS = 50;
+		bool Tls = true;
+		uint64_t lastConnect = 0;
+
+		ftp.Reset(new IFtp(this, this, Tls));
+
+		while (!IsCancelled())
+		{
+			if (!Connected)
+			{
+				auto now = LCurrentTime();
+				if (now - lastConnect > 5000)
+				{
+					lastConnect = now;
+					auto res = ftp->Open(new SslSocket(log), uri.sHost, uri.Port, uri.sUser, uri.sPass);
+					log->Print("Open=%i Conn=%i\n", res, Connected);
+				}
+				else LSleep(WAIT_MS);
+			}
+			else
+			{
+				// Is there work to do?
+				TWork curWork;
+				{
+					Auto lck(this, _FL);
+					if (foregroundWork.Length())
+						curWork = std::move(foregroundWork.PopFirst());
+					else if (backgroundWork.Length())
+						curWork = std::move(backgroundWork.PopFirst());
+				}
+
+				if (curWork)
+				{
+					curWork();
+					log->Print("ftp: foreground %i, background %i\n", (int)foregroundWork.Length(), (int)backgroundWork.Length());
+				}
+				else
+					LSleep(WAIT_MS);
+			}
+		}
+
+		return 0;
+	}
+};
 
 LAutoPtr<SystemIntf> CreateSystemInterface(LView *parent, LString uri, LStream *log)
 {
@@ -1314,6 +1773,8 @@ LAutoPtr<SystemIntf> CreateSystemInterface(LView *parent, LString uri, LStream *
 	LUri u(uri);
 	if (u.IsProtocol("ssh"))
 		backend.Reset(new SshBackend(parent, uri, log));
+	else if (u.IsProtocol("ftp"))
+		backend.Reset(new FtpBackend(parent, uri, log));
 	else	
 		backend.Reset(new LocalBackend(parent, uri, log));
 	return backend;

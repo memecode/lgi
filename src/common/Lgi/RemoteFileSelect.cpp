@@ -97,7 +97,7 @@ public:
 	{
 		if (!cb)
 			return;
-		systemIntf->ReadFolder(ConvertPath(path), [this, cb](auto dir)
+		systemIntf->ReadFolder(SystemIntf::TForeground, ConvertPath(path), [this, cb](auto dir)
 		{
 			cb(*dir);
 		});

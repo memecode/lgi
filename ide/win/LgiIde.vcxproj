@@ -109,19 +109,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\lgi\common\EventTargetThread.h" />
+    <ClInclude Include="..\..\include\lgi\common\Ftp.h" />
     <ClInclude Include="..\..\include\lgi\common\RemoteFileSelect.h" />
     <ClInclude Include="..\..\include\lgi\common\Scripting.h" />
     <ClInclude Include="..\..\include\lgi\common\SystemIntf.h" />
     <ClInclude Include="..\..\include\lgi\common\TimeZoneInfo.h" />
     <ClInclude Include="..\..\src\common\Coding\ScriptingPriv.h" />
     <ClInclude Include="..\resources\resdefs.h" />
-    <ClInclude Include="..\src\AddFtpFile.h" />
     <ClInclude Include="..\src\BreakPointStore.h" />
     <ClInclude Include="..\src\DebugContext.h" />
     <ClInclude Include="..\src\IdeFindInFiles.h" />
     <ClInclude Include="..\src\FindSymbol.h" />
-    <ClInclude Include="..\src\FtpFile.h" />
-    <ClInclude Include="..\src\FtpThread.h" />
     <ClInclude Include="..\src\Debugger.h" />
     <ClInclude Include="..\src\IdeDoc.h" />
     <ClInclude Include="..\src\IdeDocPrivate.h" />
@@ -147,12 +145,10 @@
     <ClCompile Include="..\..\src\common\Lgi\Mdi.cpp" />
     <ClCompile Include="..\..\src\common\Lgi\LgiMain.cpp" />
     <ClCompile Include="..\..\src\common\Text\RemoveAnsi.cpp" />
-    <ClCompile Include="..\src\AddFtpFile.cpp" />
     <ClCompile Include="..\src\DocEdit.cpp" />
     <ClCompile Include="..\src\DocEditStyling.cpp" />
     <ClCompile Include="..\src\IdeFindInFiles.cpp" />
     <ClCompile Include="..\src\FindSymbol.cpp" />
-    <ClCompile Include="..\src\FtpThread.cpp" />
     <ClCompile Include="..\src\DebugContext.cpp" />
     <ClCompile Include="..\src\Debugger.cpp" />
     <ClCompile Include="..\src\History.cpp" />

@@ -23,10 +23,10 @@
 #include "lgi/common/Menu.h"
 #include "lgi/common/PopupNotification.h"
 #include "lgi/common/RemoveAnsi.h"
+#include "lgi/common/Uri.h"
 
 #include "LgiIde.h"
 #include "resdefs.h"
-#include "FtpThread.h"
 #include "ProjectNode.h"
 #include "WebFldDlg.h"
 
@@ -1880,7 +1880,7 @@ void BuildThread::Step1()
 	StreamToLog log(Proj->GetApp());
 	// log.Print("%s: readdir '%s'\n", __FUNCTION__, p.Get());
 	auto callId = AddCall(_FL);
-	backend->ReadFolder(
+	backend->ReadFolder(SystemIntf::TForeground,
 		p,
 		[this, backend, callId](auto d)
 		{
@@ -1898,7 +1898,7 @@ void BuildThread::Step1()
 
 					// Could be a project file?
 					auto readId = AddCall(_FL);
-					backend->Read(
+					backend->Read(SystemIntf::TForeground,
 						d->FullPath(),
 						[this, full=LString(d->FullPath()), readId](auto err, auto data)
 						{
@@ -3522,13 +3522,23 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 	Expanded(true);
 
 	auto Uri = d->Settings.GetStr(ProjRemoteUri);
+	auto Pass = d->Settings.GetStr(ProjRemotePass);
 	if (Uri && !d->Backend)
 	{
+		LString cache;
+		if (Pass)
+		{
+			// Rewrite the URI to include the password
+			LUri u(Uri);
+			u.sPass = Pass;
+			Uri = cache = u.ToString();
+		}
+
 		d->Backend = CreateSystemInterface(d->App, Uri, d->App->GetNetworkLog());
 		if (d->Backend)
 		{
 			auto path = d->Backend->GetBasePath();
-			d->Backend->ReadFolder(path, [this](auto d)
+			d->Backend->ReadFolder(SystemIntf::TForeground, path, [this](auto d)
 				{
 					for (auto b = d->First(NULL); b; b = d->Next())
 					{

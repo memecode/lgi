@@ -459,7 +459,6 @@
     <ClInclude Include="..\include\lgi\common\Font.h" />
     <ClInclude Include="..\include\lgi\common\FontCache.h" />
     <ClInclude Include="..\include\lgi\common\FontSelect.h" />
-    <ClInclude Include="..\include\lgi\common\Ftp.h" />
     <ClInclude Include="..\include\lgi\common\GdcTools.h" />
     <ClInclude Include="..\include\lgi\common\Graph.h" />
     <ClInclude Include="..\include\lgi\common\Growl.h" />
