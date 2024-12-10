@@ -34,15 +34,15 @@ ifeq ($(Build),Debug)
 		-lgstreamer-1.0 \
 		`pkg-config --libs gtk+-3.0`
 	Inc =  \
-		-I./include \
-		-I./private/linux \
-		`pkg-config --cflags gstreamer-1.0` \
 		-I../../../codelib/libpng \
+		-I./include \
+		`pkg-config --cflags gstreamer-1.0` \
 		-I../../../codelib/lunasvg/include \
 		-I../../../codelib/zlib \
-		-I./private/common \
-		-I../../../../../usr/include/libayatana-appindicator3-0.1 \
 		-I./include/lgi/linux/Gtk \
+		-I./private/common \
+		-I./private/linux \
+		-I../../../../../usr/include/libayatana-appindicator3-0.1 \
 		-I./include/lgi/linux \
 		-I../../../codelib/libjpeg-9a \
 		`pkg-config --cflags gtk+-3.0`
@@ -61,34 +61,65 @@ else
 		-lgstreamer-1.0 \
 		`pkg-config --libs gtk+-3.0`
 	Inc =  \
-		`pkg-config --cflags gtk+-3.0` \
-		-I./include \
-		-I../../../../../usr/include/libayatana-appindicator3-0.1 \
-		-I./private/common \
-		-I../../../codelib/zlib \
 		-I../../../codelib/lunasvg/include \
+		-I./include \
+		-I./private/common \
+		-I../../../../../usr/include/libayatana-appindicator3-0.1 \
 		-I../../../codelib/libpng \
+		-I../../../codelib/libjpeg-9a \
+		`pkg-config --cflags gtk+-3.0` \
 		`pkg-config --cflags gstreamer-1.0` \
-		-I./private/linux \
-		-I./include/lgi/linux \
 		-I./include/lgi/linux/Gtk \
-		-I../../../codelib/libjpeg-9a
+		-I./include/lgi/linux \
+		-I../../../codelib/zlib \
+		-I./private/linux
 endif
 
 # Dependencies
 Source =	src/linux/General/File.cpp \
-			src/common/Gdc2/Filters/Png.cpp \
-			src/common/Gdc2/Filters/Jpeg.cpp \
-			src/linux/General/ShowFileProp_Linux.cpp \
-			src/common/General/ExeCheck.cpp \
-			src/common/General/TimeZone.cpp \
-			src/common/General/DateTime.cpp \
-			src/linux/Lgi/DragAndDrop.cpp \
-			src/common/Gdc2/Filters/Gif.cpp \
-			src/linux/Lgi/View.cpp \
-			src/common/General/Containers.cpp \
 			src/common/General/Properties.cpp \
+			src/common/Lgi/DragAndDropCommon.cpp \
+			src/common/General/TimeZone.cpp \
+			src/linux/Gtk/LgiWidget.cpp \
+			src/common/General/DateTime.cpp \
+			src/common/Gdc2/15Bit.cpp \
+			src/common/Gdc2/Font/FontSystem.cpp \
+			src/common/Gdc2/Font/StringLayout.cpp \
+			src/common/Gdc2/Font/Charset.cpp \
+			src/common/Gdc2/Font/TypeFace.cpp \
+			src/common/Gdc2/Font/FontType.cpp \
+			src/common/Gdc2/Filters/Filter.cpp \
+			src/common/Gdc2/16Bit.cpp \
+			src/common/Gdc2/24Bit.cpp \
+			src/common/Gdc2/32Bit.cpp \
+			src/common/Gdc2/8Bit.cpp \
+			src/common/Gdc2/Alpha.cpp \
+			src/common/Gdc2/Rect.cpp \
+			src/common/Gdc2/Filters/Gif.cpp \
+			src/common/Gdc2/Filters/Jpeg.cpp \
+			src/common/Gdc2/Filters/Lzw.cpp \
+			src/common/Gdc2/Filters/Png.cpp \
+			src/common/Gdc2/Filters/Svg.cpp \
+			src/linux/Gtk/MemDC.cpp \
+			src/common/Lgi/ClipBoardCommon.cpp \
+			src/linux/Gtk/PrintDC.cpp \
+			src/linux/Gtk/ScreenDC.cpp \
+			src/linux/Lgi/Printer.cpp \
+			src/common/Gdc2/Surface.cpp \
+			src/linux/Lgi/ClipBoard.cpp \
+			src/common/Lgi/DataDlg.cpp \
+			src/common/Hash/md5/md5.c \
+			src/common/General/Password.cpp \
+			src/linux/Lgi/App.cpp \
+			src/linux/Lgi/DragAndDrop.cpp \
+			src/linux/Lgi/General.cpp \
+			src/linux/Lgi/View.cpp \
+			src/common/General/ExeCheck.cpp \
+			src/linux/Lgi/Window.cpp \
+			src/common/General/Containers.cpp \
+			src/linux/General/ShowFileProp_Linux.cpp \
 			src/common/General/FileCommon.cpp \
+			src/common/Lgi/AppCommon.cpp \
 			src/common/Lgi/ViewCommon.cpp \
 			src/common/Lgi/Library.cpp \
 			src/common/Lgi/WindowCommon.cpp \
@@ -115,13 +146,6 @@ Source =	src/linux/General/File.cpp \
 			src/common/Lgi/Object.cpp \
 			src/common/Lgi/ToolTip.cpp \
 			src/common/Lgi/TrayIcon.cpp \
-			src/linux/Lgi/App.cpp \
-			src/linux/Lgi/Window.cpp \
-			src/common/Lgi/DragAndDropCommon.cpp \
-			src/linux/Lgi/General.cpp \
-			src/common/Gdc2/Filters/Lzw.cpp \
-			src/linux/Gtk/LgiWidget.cpp \
-			src/common/Lgi/AppCommon.cpp \
 			src/common/Lgi/FileSelect.cpp \
 			src/common/Lgi/Alert.cpp \
 			src/common/Lgi/FindReplace.cpp \
@@ -133,30 +157,6 @@ Source =	src/linux/General/File.cpp \
 			src/common/Gdc2/Font/DisplayString.cpp \
 			src/common/Gdc2/Font/Font.cpp \
 			src/common/Gdc2/Tools/GdcTools.cpp \
-			src/common/Gdc2/15Bit.cpp \
-			src/common/Gdc2/Font/FontSystem.cpp \
-			src/common/Gdc2/Font/StringLayout.cpp \
-			src/common/Gdc2/Font/Charset.cpp \
-			src/common/Gdc2/Font/TypeFace.cpp \
-			src/common/Gdc2/Font/FontType.cpp \
-			src/common/Gdc2/Filters/Filter.cpp \
-			src/common/Gdc2/16Bit.cpp \
-			src/common/Gdc2/24Bit.cpp \
-			src/common/Gdc2/32Bit.cpp \
-			src/common/Gdc2/8Bit.cpp \
-			src/common/Gdc2/Alpha.cpp \
-			src/common/Gdc2/Rect.cpp \
-			src/common/Gdc2/Filters/Svg.cpp \
-			src/linux/Gtk/MemDC.cpp \
-			src/common/Lgi/ClipBoardCommon.cpp \
-			src/linux/Gtk/PrintDC.cpp \
-			src/linux/Gtk/ScreenDC.cpp \
-			src/linux/Lgi/Printer.cpp \
-			src/common/Gdc2/Surface.cpp \
-			src/linux/Lgi/ClipBoard.cpp \
-			src/common/Lgi/DataDlg.cpp \
-			src/common/Hash/md5/md5.c \
-			src/common/General/Password.cpp \
 			src/common/Hash/sha1/sha1.c \
 			src/common/Lgi/Mru.cpp \
 			src/common/Net/Base64.cpp \
@@ -240,21 +240,21 @@ clean :
 	@echo Cleaned $(BuildDir)
 
 VPATH=$(BuildDir) \
-	./src/common/Skins/Gel \
+	./src/common/Gdc2/Tools \
+	./src/linux/Gtk \
+	./src/common/Hash/sha1 \
 	./src/common/General \
 	./src/linux/Lgi \
-	./src/common/Gdc2/Tools \
-	./src/common/Gdc2/Path \
-	./src/common/Hash/sha1 \
+	./src/common/Skins/Gel \
 	./src/common/Gdc2/Filters \
+	./src/common/Gdc2/Path \
 	./src/common/Gdc2/Font \
-	./src/linux/General \
 	./src/common/Lgi \
-	./src/linux/Gtk \
+	./src/common/Net \
+	./src/linux/General \
 	./src/common/Resource \
 	./src/posix \
 	./src/common/Gdc2 \
-	./src/common/Net \
 	./src/common/Widgets \
 	./src/common/Hash/md5 \
 	./src/common/Text
