@@ -1325,7 +1325,7 @@ void IdeDoc::OnTitleClick(LMouse &m)
 			if (leaf != Full)
 				sprintf_s(sFile, sizeof(sFile), "Copy '%s'", Dir = leaf);
 			sprintf_s(sFull, sizeof(sFull), "Copy '%.500s'", Full);
-			sprintf_s(sBrowse, sizeof(sBrowse), "Browse to '%s'", Dir ? Dir + 1 : Full);			
+			sprintf_s(sBrowse, sizeof(sBrowse), "Browse to '%s'", Dir ? Dir : Full);			
 		}
 		
 		LSubMenu s;
