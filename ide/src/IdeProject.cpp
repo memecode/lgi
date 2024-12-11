@@ -4141,7 +4141,7 @@ bool IdeProject::InProject(bool FuzzyMatch, const char *Path, bool Open, IdeDoc 
 
 	// Search complete path first...
 	auto PlatformFlags = d->App->GetPlatform();
-	ProjectNode *n = d->Nodes.Find(Path);	
+	auto n = d->Nodes.Find(Path);	
 	if (!n && FuzzyMatch)
 	{
 		// No match, do partial matching.
@@ -4156,6 +4156,7 @@ bool IdeProject::InProject(bool FuzzyMatch, const char *Path, bool Open, IdeDoc 
 			int NodePlatforms = Cur.value->GetPlatforms();
 			uint32_t Score = 0;
 
+			LgiTrace("node:%s\n", Cur.key);
 			if (stristr(Cur.key, Path))
 			{
 				Score += PathLen;

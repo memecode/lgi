@@ -1563,13 +1563,13 @@ ssize_t SslSocket::Write(const void *Data, ssize_t Len, int Flags)
 	else if (Ssl)
 	{	
 		auto Err = Library->SSL_get_error(Ssl, wr);
-		if (Err == SSL_ERROR_ZERO_RETURN)
+		if (Err == SSL_ERROR_ZERO_RETURN ||
+			Err == SSL_ERROR_SYSCALL)
 		{
 			DebugTrace("%s:%i - ::Write closing %i\n", _FL, wr);
 			Close();
 		}
-		else if (Err != SSL_ERROR_WANT_WRITE &&
-				 Err != SSL_ERROR_SYSCALL)
+		else if (Err != SSL_ERROR_WANT_WRITE)
 		{
 			char Buf[256] = "";
 			char *e = Library->ERR_error_string(Err, Buf);

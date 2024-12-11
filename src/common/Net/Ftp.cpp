@@ -977,7 +977,7 @@ bool IFtp::TransferFile(LStream *Stream, const char *Remote, int64 Size, bool Up
 			Stream &&
 			Remote)
 		{
-			if (SetupData(Binary, true))
+			if (SetupData(Binary))
 			{
 				// Data command
 				auto f = ToFtpCs(Remote);

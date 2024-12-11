@@ -1330,7 +1330,13 @@ class FtpBackend :
 		LString data;
 		IFtpEntry entry;
 	};
+	struct TTimedWork
+	{
+		uint64_t ts;
+		TWork work;
+	};
 	LArray<TWork> foregroundWork, backgroundWork;
+	LArray<TTimedWork> timedWork;
 	LAutoPtr<IFtp> ftp;
 	LHashTbl<StrKey<char>, TCache*> cache;
 
@@ -1411,6 +1417,7 @@ class FtpBackend :
 			a.Add(base);
 			a.Add(e->Name);
 			curEntry = sep.Join(a);
+
 			return curEntry;
 		}
 
@@ -1574,7 +1581,11 @@ public:
 
 	void ResolvePath(LString path, LString::Array hints, std::function<void(LError&,LString)> cb) override
 	{
-		LAssert(0);
+		if (path && cb)
+		{
+			LError err;
+			cb(err, path);
+		}
 	}
 
 	// Reading and writing:
@@ -1704,26 +1715,36 @@ public:
 					// Make sure we're in the right folder...
 					if (!err)
 					{
-						if (!SetRemote(path, true))
+						try
 						{
-							err.Set(LErrorFuncFailed, "failed to set dir.");
-						}
-						else if (entry.Name)
-						{
-							LStringPipe data(16 << 10);
-							if (ftp->DownloadStream(&data, &entry))
+							if (!SetRemote(path, true))
 							{
-								fileData = data.NewLStr();
-								{
-									// Store the data in the cache
-									Auto lck(this, _FL);
-									auto c = cache.Find(path);
-									LAssert(c);
-									if (c)
-										c->data = fileData;
-								}
+								err.Set(LErrorFuncFailed, "failed to set dir.");
 							}
-							else err.Set(LErrorIoFailed, "download failed.");
+							else if (entry.Name)
+							{
+								LStringPipe data(16 << 10);
+
+								if (ftp->DownloadStream(&data, &entry))
+								{
+									fileData = data.NewLStr();
+									{
+										// Store the data in the cache
+										Auto lck(this, _FL);
+										auto c = cache.Find(path);
+										LAssert(c);
+										if (c)
+											c->data = fileData;
+									}
+								}
+								else err.Set(LErrorIoFailed, "download failed.");
+							}
+						}
+						catch (ssize_t result)
+						{
+							auto msg = LString::Fmt("Ftp cmd failed with " LPrintfSSizeT "\n", result);
+							err.Set(LErrorFuncFailed, msg);
+							log->Print(msg);
 						}
 					}
 				}
@@ -1831,9 +1852,147 @@ public:
 		return true;
 	}
 
+	struct TFindInFiles
+	{
+		enum TState
+		{
+			TNone,
+			TReading,
+			TChecked,
+		};
+
+		FindParams params;
+		FtpBackend *owner = nullptr;
+		LStream *results = nullptr;
+		LHashTbl<ConstStrKey<char>, TState> states;
+
+		TFindInFiles(FtpBackend *o) : owner(o)
+		{
+			// Do an initial iterate to see what's there...
+			Post(0);
+		}
+
+		void Post(int addMilliseconds)
+		{
+			LMutex::Auto lck(owner, _FL);
+			auto &w = owner->timedWork.New();
+			w.ts = LCurrentTime() + addMilliseconds;
+			w.work = [this]() { Iterate(); };
+		}
+
+		void Read(const char *file)
+		{
+			LMutex::Auto lck(owner, _FL);
+			states.Add(file, TReading);
+			owner->Read(SystemIntf::TBackground, file, [this](auto err, auto data)
+				{
+				});
+		}
+
+		void Scan(const char *fileName, LString &data)
+		{
+			LAssert(data);
+			states.Add(fileName, TChecked);
+			auto terms = params.Text.SplitDelimit();
+			auto lines = data.SplitDelimit("\n");
+
+			for (size_t i=0; i<lines.Length(); i++)
+			{
+				auto &ln = lines[i];
+				for (auto &t: terms)
+				{
+					if (ln.Find(t) >= 0)
+					{
+						results->Print("%s:%i %s\n", fileName+1, (int)(i+1), ln.Get());
+						break;
+					}
+				}
+			}
+		}
+
+		bool MatchExtension(const char *file)
+		{
+			if (!params.Ext)
+				return true; // match all
+
+			auto leaf = LGetLeaf(file);
+			auto parts = params.Ext.SplitDelimit(", \t");
+			for (auto p: parts)
+			{
+				if (MatchStr(p, leaf))
+					return true;
+			}
+			return false;
+		}
+
+		void Iterate()
+		{
+			LMutex::Auto lck(owner, _FL);
+
+			int done = 0, reading = 0;
+			for (auto p: owner->cache)
+			{
+				if (!MatchExtension(p.key))
+				{
+					done++;
+					continue;
+				}
+
+				auto state = states.Find(p.key);
+				switch (state)
+				{
+				case FtpBackend::TFindInFiles::TNone:
+					if (p.value->data)
+					{
+						Scan(p.key, p.value->data);
+						done++;
+					}
+					else
+					{
+						Read(p.key);
+						reading++;
+					}
+					break;
+				case FtpBackend::TFindInFiles::TReading:
+					if (p.value->data)
+					{
+						Scan(p.key, p.value->data);
+						done++;
+					}
+					else reading++;
+					break;
+				case FtpBackend::TFindInFiles::TChecked:
+					done++;
+					break;
+				default:
+					break;
+				}
+			}
+
+			owner->log->Print("findinfiles: reading=%i, done=%i of %i\n", reading, done, (int)owner->cache.Length());
+			if (done < owner->cache.Length())
+			{
+				Post(1000); // have another look in 1 second...
+			}
+			else
+			{
+				delete this;
+			}
+		}
+	};
+
 	bool FindInFiles(FindParams *params, LStream *results) override
 	{
-		LAssert(0);
+		if (!params || !results)
+			return false;
+
+		if (auto fif = new TFindInFiles(this))
+		{
+			fif->params = *params;
+			fif->results = results;
+			return true;
+		}
+
 		return false;
 	}
 
@@ -1889,25 +2048,48 @@ public:
 		{
 			log->Print("   < %.*s", (int)Len, Data);
 		}
+
+		void OnDisconnect() override
+		{
+			log->Print("   disconnected\n");
+		}
+
+		void OnError(int ErrorCode, const char *ErrorDescription) override
+		{
+			log->Print("   error: %i, %s\n", ErrorCode, ErrorDescription);
+		}
+		
+		void OnInformation(const char *Str)
+		{
+			log->Print("   info: %s\n", Str);
+		}
 	};
 
 	int Main() override
 	{
 		int WAIT_MS = 50;
 		bool Tls = true;
+		bool LoggingSock = false;
 		uint64_t lastConnect = 0;
 
-		ftp.Reset(new IFtp(this, this, Tls));
-
-		while (ftp && !IsCancelled())
+		while (!IsCancelled())
 		{
-			if (!Connected)
+			if (!ftp || !Connected)
 			{
 				auto now = LCurrentTime();
+
+				if (!ftp)
+					ftp.Reset(new IFtp(this, this, Tls));
+
 				if (now - lastConnect > 5000)
 				{
 					lastConnect = now;
-					if (auto sock = new SslLoggingSocket(log))
+					SslSocket *sock = nullptr;
+					if (LoggingSock)
+						sock = new SslLoggingSocket(log);
+					else
+						sock = new SslSocket(log);
+					if (sock)
 					{
 						sock->SetCancel(this);
 						auto res = ftp->Open(sock, uri.sHost, uri.Port, uri.sUser, uri.sPass);
@@ -1917,16 +2099,43 @@ public:
 				}
 				else LSleep(WAIT_MS);
 			}
+			else if (ftp && !ftp->IsOpen())
+			{
+				// Disconnected?
+				ftp.Reset();
+				// LoggingSock = true;
+				LSleep(1000);
+				log->Print("ftp: resetting connection...\n");
+			}
 			else
 			{
 				// Is there work to do?
+				auto now = LCurrentTime();
 				TWork curWork;
 				{
 					Auto lck(this, _FL);
-					if (foregroundWork.Length())
-						curWork = std::move(foregroundWork.PopFirst());
-					else if (backgroundWork.Length())
-						curWork = std::move(backgroundWork.PopFirst());
+					if (timedWork.Length())
+					{
+						// Is there any timed work to do?
+						for (auto &w: timedWork)
+						{
+							if (w.ts <= now)
+							{
+								// Yes!
+								curWork = std::move(w.work);
+								timedWork.PopFirst();
+								break;
+							}
+						}
+					}
+					if (!curWork)
+					{
+						// Check the regular queues:
+						if (foregroundWork.Length())
+							curWork = std::move(foregroundWork.PopFirst());
+						else if (backgroundWork.Length())
+							curWork = std::move(backgroundWork.PopFirst());
+					}
 				}
 
 				if (curWork)

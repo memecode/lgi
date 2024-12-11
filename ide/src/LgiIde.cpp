@@ -3231,10 +3231,11 @@ void AppWnd::OpenFile(const char *FileName, NodeSource *Src, std::function<void(
 		else if (!DoingProjectFind)
 		{
 			DoingProjectFind = true;
-			List<IdeProject>::I Proj = d->Projects.begin();
-			for (IdeProject *p=*Proj; p && !Doc; p=*++Proj)
+			for (auto p: d->Projects)
 			{
-				p->InProject(LIsRelativePath(File), File, true, &Doc);				
+				p->InProject(LIsRelativePath(File), File, true, &Doc);
+				if (Doc)
+					break;
 			}
 			DoingProjectFind = false;
 
