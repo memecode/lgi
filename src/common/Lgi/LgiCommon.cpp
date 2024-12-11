@@ -2110,18 +2110,18 @@ LString LGetExePath()
 	return LGetSystemPath(LSP_EXE);
 }
 
-char *LGetExtension(const char *File)
+const char *LGetExtension(const char *File)
 {
 	if (File)
 	{
-		char *Dot = strrchr((char*)File, '.');
+		auto Dot = strrchr(File, '.');
 		if (Dot && !strchr(Dot, DIR_CHAR))
 		{
 			return Dot + 1;
 		}
 	}
 
-	return 0;
+	return nullptr;
 }
 
 #define DEBUG_FIND_FILE		0

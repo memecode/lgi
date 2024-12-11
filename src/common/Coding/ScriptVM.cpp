@@ -742,9 +742,9 @@ public:
 				LMakePath(Obj, sizeof(Obj), Obj, SourceFileName);
 			}
 
-			char *Ext = LGetExtension(Obj);
+			auto Ext = LGetExtension(Obj);
 			if (Ext)
-				strcpy_s(Ext, sizeof(Obj)-(Ext-Obj), "asm");
+				strcpy_s((char*)Ext, sizeof(Obj)-(Ext-Obj), "asm");
 			else
 				strcat_s(Obj, sizeof(Obj), ".asm");
 		}

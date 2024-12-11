@@ -59,7 +59,7 @@ const char *TypeNames[] = {
 ResFileFormat GetFormat(const char *File)
 {
 	ResFileFormat Format = Lr8File;
-	char *Ext = LGetExtension(File);
+	auto Ext = LGetExtension(File);
 	if (Ext)
 	{
 		if (stricmp(Ext, "lr") == 0) Format = CodepageFile;
@@ -3142,7 +3142,7 @@ bool AppWnd::SaveLgi(const char *FileName)
 	{
 		char Bak[MAX_PATH_LEN];
 		strcpy_s(Bak, sizeof(Bak), FileName);
-		char *e = LGetExtension(Bak);
+		auto e = (char*)LGetExtension(Bak);
 		if (e)
 		{
 			strcpy(e, "bak");

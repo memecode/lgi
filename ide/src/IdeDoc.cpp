@@ -1555,6 +1555,15 @@ bool IdeDoc::OpenData(LString Data)
 		LAssert(!"Impl me");
 	}
 
+	auto ext = LGetExtension(GetFileName());
+	static LString imageExt = "png,jpeg,jpg,bmp,gif";
+	for (auto e: imageExt.SplitDelimit(","))
+		if (e == ext)
+		{
+			d->Edit->Name("(not displaying image)");
+			return true;
+		}
+
 	d->LoadBreakPoints();
 	return d->Edit->Name(Data);
 }

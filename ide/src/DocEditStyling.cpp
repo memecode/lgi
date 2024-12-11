@@ -1148,7 +1148,7 @@ void DocEdit::PourStyle(size_t Start, ssize_t EditSize)
 {
 	if (FileType == SrcUnknown)
 	{
-		char *Ext = LGetExtension(Doc->GetFileName());
+		auto Ext = LGetExtension(Doc->GetFileName());
 		if (!Ext)
 			FileType = SrcPlainText;
 		else if (!stricmp(Ext, "c") ||

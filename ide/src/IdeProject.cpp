@@ -4600,11 +4600,11 @@ LString IdeProject::GetTargetFile(SysPlatform Platform)
 		strcpy_s(t, sizeof(t), Target);
 
 		auto tCh = strlen(t);
-		char *ext = LGetExtension(t);
+		auto ext = LGetExtension(t);
 		if (!ext)
 			snprintf(t+tCh, sizeof(t)-tCh, ".%s", DefExt);
 		else if (stricmp(ext, DefExt))
-			strcpy(ext, DefExt);
+			strcpy((char*)ext, DefExt);
 		return t;
 	}
 	else if (!stricmp(TargetType, "StaticLibrary"))

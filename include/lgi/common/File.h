@@ -717,7 +717,7 @@ LgiClass LString LMakeRelativePath(const char *Base, const char *Path);
 LgiFunc bool LMakePath(char *Str, int StrBufLen, const char *Dir, const char *File);
 
 /// Gets the file name's extension.
-LgiFunc char *LGetExtension(const char *File);
+LgiFunc const char *LGetExtension(const char *File);
 
 /// \returns true if 'FileName' is an executable of some kind (looks at file name only).
 LgiFunc bool LIsFileNameExecutable(const char *FileName);

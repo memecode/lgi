@@ -537,7 +537,7 @@ bool LResources::Load(const char *FileName)
 
 	d->File = FileName;
 	d->Format = Lr8File;
-	char *Ext = LGetExtension(FileName);
+	auto Ext = LGetExtension(FileName);
 	if (Ext && stricmp(Ext, "lr") == 0)
 	{
 		d->Format = CodepageFile;

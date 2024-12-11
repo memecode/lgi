@@ -1356,7 +1356,7 @@ class FtpBackend :
 
 	class FtpDir : public LArray<IFtpEntry*>, public LDirectory
 	{
-		ssize_t pos = -1;
+		ssize_t pos = 0;
 		LString base;
 		LString curEntry;
 		LString sep = "/";
@@ -1369,7 +1369,17 @@ class FtpBackend :
 	public:
 		FtpDir(LString path)
 		{
+			if (path.Find("directory is ") >= 0)
+			{
+				int asd=0;
+			}
+
 			base = path;
+		}
+
+		~FtpDir()
+		{
+			DeleteObjects();
 		}
 
 		IFtpEntry *Find(const char *name)
@@ -1646,6 +1656,9 @@ public:
 				LAutoPtr<FtpDir> curDir(new FtpDir(Path));
 				if (ftp->ListDir(*curDir))
 				{
+					if (curDir->Length() == 0)
+						return;
+
 					{
 						// Store the names in the cache
 						Auto lck(this, _FL);

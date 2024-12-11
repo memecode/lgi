@@ -2991,7 +2991,7 @@ bool VcFolder::ParseRemoteFind(int Result, LString s, ParseParams *Params)
 		}
 		else if (!Dir.IsHidden())
 		{
-			char *Ext = LGetExtension(Dir.GetName());
+			auto Ext = LGetExtension(Dir.GetName());
 			if (!Ext) continue;
 			if (!stricmp(Ext, "c") ||
 				!stricmp(Ext, "cpp") ||

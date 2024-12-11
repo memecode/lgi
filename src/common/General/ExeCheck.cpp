@@ -189,7 +189,7 @@ class LExecuteCheck
 	{
 		if (Name)
 		{
-			char *Ext = LGetExtension(Name);
+			auto Ext = LGetExtension(Name);
 			if (Ext)
 			{
 				#ifdef WIN32

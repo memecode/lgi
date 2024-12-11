@@ -880,7 +880,7 @@ public:
 	bool Decompress(LString &File)
 	{
 	    LgiTrace("%s:%i - Decompressing '%s'\n", _FL, File.Get());
-		char *Ext = LGetExtension(File);
+		auto Ext = LGetExtension(File);
 		if (Ext)
 		{
 			if (!_stricmp(Ext, "bz2"))

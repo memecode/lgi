@@ -391,7 +391,7 @@ void ProjectNode::AutoDetectType()
 		
 	if (!Type)
 	{
-		char *Ext = LGetExtension(sFile);
+		auto Ext = LGetExtension(sFile);
 
 		if (stristr(sFile, "makefile") ||
 			!stricmp(sFile, "CMakeLists.txt"))
@@ -774,6 +774,7 @@ IdeDoc *ProjectNode::Open()
 				if (auto backend = Project->GetBackend())
 				{
 					auto path = GetFullPath();
+
 					backend->Read(
 						SystemIntf::TForeground,
 						path,

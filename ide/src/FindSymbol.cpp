@@ -530,7 +530,10 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 				if (auto path = Msg->AutoA<LString>())
 				{
 					folderReads++;
-					backend->ReadFolder(SystemIntf::TBackground, *path, [this, path = LString(*path)](LDirectory *dir)
+					backend->ReadFolder(
+						SystemIntf::TBackground,
+						*path,
+						[this, path = LString(*path)](LDirectory *dir)
 						{
 							folderReads--;
 							for (int i=true; i; i=dir->Next())

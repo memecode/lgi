@@ -64,7 +64,7 @@ struct FindSymResult
 		if (Score > 0)
 			return 0;
 
-		char *e = LGetExtension(File);
+		auto e = LGetExtension(File);
 		if (!e)
 			return 3;
 		

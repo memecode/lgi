@@ -464,7 +464,7 @@ public:
 
 		if (!DownloadOnly)
 		{
-			char *Ext = LGetExtension(Tmp);
+			auto Ext = LGetExtension(Tmp);
 			if (Ext)
 			{
 				if (!_stricmp(Ext, "exe"))
