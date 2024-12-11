@@ -1321,6 +1321,7 @@ class FtpBackend :
 	LUri uri;
 	LStream *log = nullptr;
 	bool Connected = false;
+	LString remote;
 
 	// Lock before using
 	using TWork = std::function<void()>;
@@ -1457,8 +1458,11 @@ class FtpBackend :
 
 		uint64 GetLastWriteTime() const override
 		{
-			LAssert(0);
-			return 0;
+			if (!Ok())
+				return false;
+
+			auto e = ItemAt(pos);
+			return e->Date.GetUnix();
 		}
 
 		uint64 GetSize() const override
@@ -1590,7 +1594,25 @@ public:
 
 	LString ConvertPath(LString s)
 	{
-		return s.Replace("\\", "/");
+		LString unix = s.Replace("\\", "/");
+		if (unix(0) == '.')
+			return unix(1, -1);
+		return unix;
+	}
+
+	bool SetRemote(LString s, bool stripLeaf)
+	{
+		if (stripLeaf)
+		{
+			auto lastSep = s.RFind("/");
+			if (lastSep >= 0)
+				s = s(0, lastSep ? lastSep : 1);
+		}
+
+		if (remote == s)
+			return true;
+
+		return ftp->SetDir(remote = s);
 	}
 
 	bool ReadFolder(TPriority priority, const char *Path, std::function<void(LDirectory*)> results) override
@@ -1604,14 +1626,9 @@ public:
 				if (!GetReady())
 					return;
 
-				LString remote;
-				if (Path(0, 2) == "./")
-					remote = Path(1, -1);
-				else
-					remote = Path;
-				if (!ftp->SetDir(remote))
+				if (!SetRemote(Path, false))
 				{
-					log->Print("SetDir(%s) failed.\n", remote.Get());
+					log->Print("SetDir(%s) failed.\n", Path.Get());
 					return;
 				}
 
@@ -1625,7 +1642,7 @@ public:
 						{
 							if (!e->IsDir())
 							{
-								auto full = LString::Fmt("%s/%s", Path.Get(), e->Name.Get());
+								auto full = LString::Fmt("%s/%s", Path ? Path.Get() : "", e->Name.Get());
 								auto c = cache.Find(full);
 								if (!c)
 									cache.Add(full, c = new TCache);
@@ -1664,7 +1681,7 @@ public:
 			}
 		}
 
-		AddWork(priority, [this, path, result]()
+		AddWork(priority, [this, path, result]() mutable
 			{
 				LError err;
 				LString fileData;
@@ -1679,33 +1696,34 @@ public:
 					{
 						Auto lck(this, _FL);
 						if (auto c = cache.Find(path))
-						{
 							entry = c->entry;
-						}
 						else
-						{
 							err.Set(LErrorFuncFailed, "entry not found.");
-						}
 					}
 
-					if (entry.Name)
+					// Make sure we're in the right folder...
+					if (!err)
 					{
-						LStringPipe data(16 << 10);
-						if (ftp->DownloadStream(&data, &entry))
+						if (!SetRemote(path, true))
 						{
-							fileData = data.NewLStr();
-							{
-								// Store the data in the cache
-								Auto lck(this, _FL);
-								auto c = cache.Find(path);
-								LAssert(c);
-								if (c)
-									c->data = fileData;
-							}
+							err.Set(LErrorFuncFailed, "failed to set dir.");
 						}
-						else
+						else if (entry.Name)
 						{
-							err.Set(LErrorIoFailed, "download failed.");
+							LStringPipe data(16 << 10);
+							if (ftp->DownloadStream(&data, &entry))
+							{
+								fileData = data.NewLStr();
+								{
+									// Store the data in the cache
+									Auto lck(this, _FL);
+									auto c = cache.Find(path);
+									LAssert(c);
+									if (c)
+										c->data = fileData;
+								}
+							}
+							else err.Set(LErrorIoFailed, "download failed.");
 						}
 					}
 				}
@@ -1719,10 +1737,56 @@ public:
 		return true;
 	}
 
-	bool Write(TPriority priority, const char *Path, LString Data, std::function<void(LError)> result) override
+	bool Write(TPriority priority, const char *outPath, LString Data, std::function<void(LError)> result) override
 	{
-		LAssert(0);
-		return false;
+		if (!outPath || !result)
+			return false;
+
+		auto path = ConvertPath(outPath);
+		Auto lck(this, _FL);
+		AddWork(priority, [this, path, result, Data]() mutable
+			{
+				LError err;
+
+				if (!GetReady())
+				{
+					err.Set(LErrorFuncFailed, "connection not ready.");
+				}
+				else
+				{
+					{
+						Auto lck(this, _FL);
+
+						// Update the cache
+						if (auto c = cache.Find(path))
+							c->data = Data;
+						else
+							err.Set(LErrorFuncFailed, "cache obj not found.");
+					}
+
+					if (!err)
+					{
+						// Make sure we're in the right folder...
+						if (!SetRemote(path, true))
+						{
+							err.Set(LErrorFuncFailed, "failed to set dir.");
+						}
+						else
+						{
+							LMemStream wrapper(Data.Get(), Data.Length(), false);
+							if (!ftp->UploadStream(&wrapper, path))
+								err.Set(LErrorIoFailed, "upload failed.");
+						}
+					}
+				}
+
+				parent->RunCallback([this, err, result]()
+				{
+					result(err);
+				});
+			});
+
+		return true;
 	}
 
 	bool CreateFolder(const char *path, bool createParents, std::function<void(bool)> cb) override
@@ -1809,6 +1873,24 @@ public:
 		Connected = false;
 	}
 
+	struct SslLoggingSocket : public SslSocket
+	{
+	public:
+		SslLoggingSocket(LStream *log) : SslSocket(log)
+		{
+		}
+
+		void OnRead(char *Data, ssize_t Len) override
+		{
+			log->Print("   > %.*s", (int)Len, Data);
+		}
+
+		void OnWrite(const char *Data, ssize_t Len) override
+		{
+			log->Print("   < %.*s", (int)Len, Data);
+		}
+	};
+
 	int Main() override
 	{
 		int WAIT_MS = 50;
@@ -1825,7 +1907,7 @@ public:
 				if (now - lastConnect > 5000)
 				{
 					lastConnect = now;
-					if (auto sock = new SslSocket(log))
+					if (auto sock = new SslLoggingSocket(log))
 					{
 						sock->SetCancel(this);
 						auto res = ftp->Open(sock, uri.sHost, uri.Port, uri.sUser, uri.sPass);

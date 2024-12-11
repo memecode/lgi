@@ -611,9 +611,6 @@ struct SslSocketPriv : public LCancel
 	LString KeyFile;
 	OsSocket ListenSocket = INVALID_SOCKET;
 
-	// This is just for the UI.
-	LStreamI *Logger = NULL;
-
 	// This is for the connection logging.
 	LString LogFile;
 	bool LogFileError = false;
@@ -626,14 +623,14 @@ struct SslSocketPriv : public LCancel
 	}
 };
 
-SslSocket::SslSocket(LStreamI *logger, LCapabilityClient *caps, bool sslonconnect, bool RawLFCheck, bool banner) :
+SslSocket::SslSocket(LStream *logger, LCapabilityClient *caps, bool sslonconnect, bool RawLFCheck, bool banner) :
 	Lock("SslSocket")
 {
 	d = new SslSocketPriv;
+	log = logger;
 	d->RawLFCheck = RawLFCheck;
 	d->SslOnConnect = sslonconnect;
 	d->Caps = caps;
-	d->Logger = logger;
 	d->Banner = banner;
 	
 	LString ErrMsg;
@@ -682,7 +679,7 @@ SslSocket::~SslSocket()
 
 LStreamI *SslSocket::Clone()
 {
-	return new SslSocket(d->Logger, d->Caps, true, false, false);
+	return new SslSocket(log, d->Caps, true, false, false);
 }
 
 LCancel *SslSocket::GetCancel()
@@ -705,14 +702,14 @@ void SslSocket::SetTimeout(int ms)
 	d->Timeout = ms;
 }
 
-void SslSocket::SetLogger(LStreamI *logger)
+void SslSocket::SetLog(LStream *logger)
 {
-	d->Logger = logger;
+	log = logger;
 }
 
 LStreamI *SslSocket::GetLog()
 {
-	return d->Logger;
+	return log;
 }
 
 bool SslSocket::GetRemoteIp(char *IpAddr)
@@ -815,8 +812,8 @@ void SslSocket::Log(const char *Str, ssize_t Bytes, SocketMsgType Type)
 	if (!ValidStr(Str))
 		return;
 
-	if (d->Logger)
-		d->Logger->Write(Str, Bytes<0?(int)strlen(Str):Bytes, Type);
+	if (log)
+		log->Write(Str, Bytes<0?(int)strlen(Str):Bytes, Type);
 	else if (Type == SocketMsgError)
 		LgiTrace("%.*s", Bytes, Str);
 }

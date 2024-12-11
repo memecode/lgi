@@ -28,10 +28,12 @@ class SslSocket :
 	friend class OpenSSL;
 	struct SslSocketPriv *d;
 	
+protected:
 	LMutex Lock;
 	BIO *Bio = NULL;
 	SSL *Ssl = NULL;
 	LString ErrMsg;
+	LStream *log = NULL;
 	bool DebugLogging = false;
 
 	// Local stuff
@@ -43,12 +45,12 @@ class SslSocket :
 public:
 	static LString Random(int Len);
 
-	SslSocket(LStreamI *logger = NULL, LCapabilityClient *caps = NULL, bool SslOnConnect = false, bool RawLFCheck = false, bool banner = true);
+	SslSocket(LStream *logger = NULL, LCapabilityClient *caps = NULL, bool SslOnConnect = false, bool RawLFCheck = false, bool banner = true);
 	~SslSocket();
 
 	const char *GetClass() override { return "SslSocket"; }
 
-	void SetLogger(LStreamI *logger);
+	void SetLog(LStream *logger);
 	LStreamI *GetLog() override;
 	void SetSslOnConnect(bool b);
 	LCancel *GetCancel() override;
