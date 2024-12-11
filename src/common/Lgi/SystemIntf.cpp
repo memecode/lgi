@@ -1663,9 +1663,10 @@ public:
 						}
 					}
 
-					parent->RunCallback([this, results, curDir=std::move(curDir)]()
+					parent->RunCallback([this, results, curDir=curDir.Release()]()
 					{
 						results(curDir);
+						delete curDir;
 					});
 				}
 			});

@@ -80,7 +80,6 @@ Source =	src/LgiIde.cpp \
 			src/WebFldDlg.cpp \
 			../src/common/Lgi/About.cpp \
 			src/DocEditStyling.cpp \
-			src/FtpThread.cpp \
 			src/IdeProject.cpp \
 			../src/common/Net/Ftp.cpp \
 			src/IdeProjectSettings.cpp \
@@ -102,7 +101,6 @@ Source =	src/LgiIde.cpp \
 			../src/common/Net/Http.cpp \
 			../src/common/Lgi/Mdi.cpp \
 			src/DebugContext.cpp \
-			src/AddFtpFile.cpp \
 			../src/common/Text/DocView.cpp
 
 SourceC    := $(filter %.c,$(Source))
