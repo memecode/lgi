@@ -1317,13 +1317,21 @@ class FtpBackend :
 	public LMutex,
 	public IFtpCallback
 {
+	LView *parent = nullptr;
 	LUri uri;
 	LStream *log = nullptr;
 	bool Connected = false;
 
+	// Lock before using
 	using TWork = std::function<void()>;
+	struct TCache
+	{
+		LString data;
+		IFtpEntry entry;
+	};
 	LArray<TWork> foregroundWork, backgroundWork;
 	LAutoPtr<IFtp> ftp;
+	LHashTbl<StrKey<char>, TCache*> cache;
 
 	bool GetReady(int timeout = 6000)
 	{
@@ -1387,6 +1395,7 @@ class FtpBackend :
 
 		bool Path(char *s, int BufSize)	const override
 		{
+			LAssert(0);
 			return false;
 		}
 
@@ -1406,6 +1415,7 @@ class FtpBackend :
 
 		long GetAttributes() const override
 		{
+			LAssert(0);
 			return 0;
 		}
 	
@@ -1420,26 +1430,34 @@ class FtpBackend :
 
 		LString FileName() const override
 		{
-			return LString();
+			if (!Ok())
+				return false;
+
+			auto e = ItemAt(pos);
+			return e->Name;
 		}
 	
 		int GetUser(bool Group) const override
 		{
+			LAssert(0);
 			return 0;
 		}
 	
 		uint64 GetCreationTime() const override
 		{
+			LAssert(0);
 			return 0;
 		}
 
 		uint64 GetLastAccessTime() const override
 		{
+			LAssert(0);
 			return 0;
 		}
 
 		uint64 GetLastWriteTime() const override
 		{
+			LAssert(0);
 			return 0;
 		}
 
@@ -1468,11 +1486,13 @@ class FtpBackend :
 	
 		bool IsSymLink() const override
 		{
+			LAssert(0);
 			return 0;
 		}
 	
 		bool IsReadOnly() const override
 		{
+			LAssert(0);
 			return 0;
 		}
 
@@ -1487,21 +1507,22 @@ class FtpBackend :
 
 		LDirectory *Clone() override
 		{
+			LAssert(0);
 			return nullptr;
 		}
 	
 		LVolumeTypes GetType() const override
 		{
+			LAssert(0);
 			return VT_NONE;
 		}
 	};
 
-	LAutoPtr<FtpDir> curDir;
-
 public:
-	FtpBackend(LView *parent, LString addr, LStream *logger) :
+	FtpBackend(LView *view, LString addr, LStream *logger) :
 		LThread("FtpBackend.Thread"),
 		LMutex("FtpBackend.Lock"),
+		parent(view),
 		uri(addr),
 		log(logger)
 	{
@@ -1512,6 +1533,7 @@ public:
 	{
 		Cancel();
 		WaitForExit(5000);
+		cache.DeleteObjects();
 	}
 
 	void GetSysType(std::function<void(SysPlatform)> cb) override
@@ -1593,56 +1615,105 @@ public:
 					return;
 				}
 
-				curDir.Reset(new FtpDir(Path));
+				LAutoPtr<FtpDir> curDir(new FtpDir(Path));
 				if (ftp->ListDir(*curDir))
 				{
-					results(curDir);
+					{
+						// Store the names in the cache
+						Auto lck(this, _FL);
+						for (auto e: *curDir)
+						{
+							if (!e->IsDir())
+							{
+								auto full = LString::Fmt("%s/%s", Path.Get(), e->Name.Get());
+								auto c = cache.Find(full);
+								if (!c)
+									cache.Add(full, c = new TCache);
+								if (c)
+									c->entry = *e;
+							}
+						}
+					}
+
+					parent->RunCallback([this, results, curDir=std::move(curDir)]()
+					{
+						results(curDir);
+					});
 				}
 			});
 
 		return true;
 	}
 
-	bool Read(TPriority priority, const char *Path, std::function<void(LError,LString)> result) override
+	bool Read(TPriority priority, const char *inPath, std::function<void(LError,LString)> result) override
 	{
-		if (!Path || !result)
+		if (!inPath || !result)
 			return false;
 
+		auto path = ConvertPath(inPath);
 		Auto lck(this, _FL);
-		AddWork(priority, [this, Path = LString(Path), result]()
+
+		// Check if we have the data in the cache first...
+		if (auto c = cache.Find(path))
+		{
+			if (c->data)
 			{
 				LError err;
+				result(err, c->data);
+				return true;
+			}
+		}
+
+		AddWork(priority, [this, path, result]()
+			{
+				LError err;
+				LString fileData;
+
 				if (!GetReady())
 				{
 					err.Set(LErrorFuncFailed, "connection not ready.");
-					result(err, LString());
-					return;
-				}
-				if (!curDir)
-				{
-					err.Set(LErrorFuncFailed, "no current dir listing.");
-					result(err, LString());
-					return;
-				}
-
-				auto e = curDir->Find(LGetLeaf(Path));
-				if (!e)
-				{
-					err.Set(LErrorFuncFailed, "entry not found.");
-					result(err, LString());
-					return;
-				}
-
-				LStringPipe data(16 << 10);
-				if (ftp->DownloadFile(&data, e))
-				{
-					result(err, data.NewLStr());
 				}
 				else
 				{
-					err.Set(LErrorIoFailed, "download failed.");
-					result(err, LString());
+					IFtpEntry entry;
+					{
+						Auto lck(this, _FL);
+						if (auto c = cache.Find(path))
+						{
+							entry = c->entry;
+						}
+						else
+						{
+							err.Set(LErrorFuncFailed, "entry not found.");
+						}
+					}
+
+					if (entry.Name)
+					{
+						LStringPipe data(16 << 10);
+						if (ftp->DownloadStream(&data, &entry))
+						{
+							fileData = data.NewLStr();
+							{
+								// Store the data in the cache
+								Auto lck(this, _FL);
+								auto c = cache.Find(path);
+								LAssert(c);
+								if (c)
+									c->data = fileData;
+							}
+						}
+						else
+						{
+							err.Set(LErrorIoFailed, "download failed.");
+						}
+					}
 				}
+
+				parent->RunCallback([this, err, fileData, result]()
+				{
+					result(err, fileData);
+				});
 			});
 
 		return true;
@@ -1674,8 +1745,26 @@ public:
 
 	bool SearchFileNames(const char *searchTerms, std::function<void(LArray<LString>&)> results) override
 	{
-		LAssert(0);
-		return false;
+		if (!searchTerms || !results)
+			return false;
+
+		LArray<LString> matches;
+		auto terms = LString(searchTerms).SplitDelimit();
+		Auto lck(this, _FL);
+		for (auto p: cache)
+		{
+			int match = 0;
+			for (auto t: terms)
+			{
+				if (Strstr(p.key, t.Get()))
+					match++;
+			}
+			if (match == terms.Length())
+				matches.Add(p.key);
+		}
+
+		results(matches);
+		return true;
 	}
 
 	bool FindInFiles(FindParams *params, LStream *results) override
@@ -1728,7 +1817,7 @@ public:
 
 		ftp.Reset(new IFtp(this, this, Tls));
 
-		while (!IsCancelled())
+		while (ftp && !IsCancelled())
 		{
 			if (!Connected)
 			{
@@ -1736,8 +1825,13 @@ public:
 				if (now - lastConnect > 5000)
 				{
 					lastConnect = now;
-					auto res = ftp->Open(new SslSocket(log), uri.sHost, uri.Port, uri.sUser, uri.sPass);
-					log->Print("Open=%i Conn=%i\n", res, Connected);
+					if (auto sock = new SslSocket(log))
+					{
+						sock->SetCancel(this);
+						auto res = ftp->Open(sock, uri.sHost, uri.Port, uri.sUser, uri.sPass);
+						log->Print("Open=%i Conn=%i\n", res, Connected);
+					}
+					else log->Print("alloc err.\n");
 				}
 				else LSleep(WAIT_MS);
 			}

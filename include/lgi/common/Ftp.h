@@ -177,22 +177,22 @@ public:
 	
 	// File
 	virtual bool DeleteFile(const char *Remote) = 0;
-	virtual bool DownloadFile(LStream *out, IFtpEntry *Remote, bool Binary = true) = 0;
+	virtual bool DownloadStream(LStream *out, IFtpEntry *Remote, bool Binary = true) = 0;
 	virtual bool DownloadFile(const char *Local, IFtpEntry *Remote, bool Binary = true)
 	{
 		LFile f(Local, O_WRITE);
 		if (!f)
 			return OnFileError(Local, true);
 		f.SetSize(0);
-		return DownloadFile(&f, Remote, Binary);
+		return DownloadStream(&f, Remote, Binary);
 	}
-	virtual bool UploadFile(LStream *in, const char *Remote, bool Binary = true) = 0;
+	virtual bool UploadStream(LStream *in, const char *Remote, bool Binary = true) = 0;
 	virtual bool UploadFile(const char *Local, const char *Remote, bool Binary = true)
 	{
 		LFile f(Local, O_READ);
 		if (!f)
 			return OnFileError(Local, false);
-		return UploadFile(&f, Remote, Binary);
+		return UploadStream(&f, Remote, Binary);
 	}
 	virtual bool RenameFile(const char *From, const char *To) = 0;
 	virtual bool SetPerms(const char *File, LPermissions Perms) = 0;
@@ -300,9 +300,9 @@ public:
 	/// Delete a file in the current remote folder
 	bool DeleteFile(const char *Remote);
 	/// Download a file from the current remote folder
-	bool DownloadFile(LStream *out, IFtpEntry *Remote, bool Binary = true);
+	bool DownloadStream(LStream *out, IFtpEntry *Remote, bool Binary = true);
 	/// Upload a local file to the current remote folder
-	bool UploadFile(LStream *in, const char *Remote, bool Binary = true);
+	bool UploadStream(LStream *in, const char *Remote, bool Binary = true);
 	/// Rename a file or folder in the current remote folder
 	bool RenameFile(const char *From, const char *To);
 	/// Set the permissions on a file in the current remote folder

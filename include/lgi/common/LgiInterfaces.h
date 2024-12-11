@@ -66,6 +66,8 @@ public:
 class LgiClass LStreamI : virtual public LDomI
 {
 public:
+	constexpr static int INVALID = -1;
+
 	/// Open a connection
 	/// \returns > zero on success
 	virtual int Open
@@ -86,19 +88,19 @@ public:
 
 	/// \brief Gets the size of the stream
 	/// \return The size or -1 on error (e.g. the information is not available)
-	virtual int64 GetSize() { return -1; }
+	virtual int64 GetSize() { return INVALID; }
 
 	/// \brief Sets the size of the stream
 	/// \return The new size or -1 on error (e.g. the size is not set-able)
-	virtual int64 SetSize(int64 Size) { return -1; }
+	virtual int64 SetSize(int64 Size) { return INVALID; }
 
 	/// \brief Gets the current position of the stream
 	/// \return Current position or -1 on error (e.g. the position is not known)
-	virtual int64 GetPos() { return -1; }
+	virtual int64 GetPos() { return INVALID; }
 
 	/// \brief Sets the current position of the stream
 	/// \return The new current position or -1 on error (e.g. the position can't be set)
-	virtual int64 SetPos(int64 Pos) { return -1; }
+	virtual int64 SetPos(int64 Pos) { return INVALID; }
 
 	/// \brief Read bytes out of the stream
 	/// \return > 0 on succes, which indicates the number of bytes read
@@ -111,12 +113,12 @@ public:
 	/// \brief Creates a dynamically allocated copy of the same type of stream.
 	/// This new stream is not connected to anything.
 	/// \return The new stream or NULL on error.
-	virtual LStreamI *Clone() { return 0; }
+	virtual LStreamI *Clone() { return nullptr; }
 
 	virtual void ChangeThread() {}
 
 	/// Utility: Read as LString.
-	LString Read(ssize_t bufLen = -1)
+	LString Read(ssize_t bufLen = INVALID)
 	{
 		LString s;
 

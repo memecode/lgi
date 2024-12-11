@@ -939,7 +939,7 @@ bool IFtp::DeleteFile(const char *Remote)
 	return Status;
 }
 
-bool IFtp::DownloadFile(LStream *out, IFtpEntry *Remote, bool Binary)
+bool IFtp::DownloadStream(LStream *out, IFtpEntry *Remote, bool Binary)
 {
 	if (!out || !Remote || !Remote->Name)
 		return false;
@@ -947,7 +947,7 @@ bool IFtp::DownloadFile(LStream *out, IFtpEntry *Remote, bool Binary)
 	return TransferFile(out, Remote->Name, Remote->Size, false, Binary);
 }
 
-bool IFtp::UploadFile(LStream *in, const char *Remote, bool Binary)
+bool IFtp::UploadStream(LStream *in, const char *Remote, bool Binary)
 {
 	if (!in || !Remote)
 		return false;
@@ -1177,8 +1177,7 @@ bool IFtp::SetupData(bool Binary, bool Debug)
 			}
 			else
 			{
-				if (d->Data.Reset(new LSocket()))
-					d->Data->SetCancel(Socket->GetCancel());
+				d->Data.Reset(new LSocket());
 			}
 		}
 
@@ -1191,6 +1190,7 @@ bool IFtp::SetupData(bool Binary, bool Debug)
 		{
 			PassiveMode = false;
 
+			d->Data->SetCancel(Socket->GetCancel());
 			if (Debug)
 			{
 				LVariant True = true;
