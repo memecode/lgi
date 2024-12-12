@@ -1556,7 +1556,7 @@ bool IdeDoc::OpenData(LString Data)
 	}
 
 	auto ext = LGetExtension(GetFileName());
-	static LString imageExt = "png,jpeg,jpg,bmp,gif";
+	static LString imageExt = "png,jpeg,jpg,bmp,gif,ico";
 	for (auto e: imageExt.SplitDelimit(","))
 		if (e == ext)
 		{
