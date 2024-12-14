@@ -41,13 +41,13 @@ class LHtml :
 
 protected:	
 	// Data
-	LFontCache			*FontCache;
-	LTag				*Tag;				// Tree root
-	LTag				*Cursor;			// Cursor location..
-	LTag				*Selection;			// Edge of selection or NULL
-	char				IsHtml;
-	int					ViewWidth;
-	uint64_t			PaintStart;
+	LFontCache			*FontCache = nullptr;
+	LTag				*Tag = nullptr;			// Tree root
+	LTag				*Cursor = nullptr;		// Cursor location..
+	LTag				*Selection = nullptr;	// Edge of selection or NULL
+	char				IsHtml = false;
+	int					ViewWidth = -1;
+	uint64_t			PaintStart = 0;
 	LToolTip			Tip;
 	LCss::Store			CssStore;
 	LHashTbl<ConstStrKey<char,false>, bool> CssHref;
@@ -80,6 +80,7 @@ protected:
 	LTag *PrevTag(LTag *t);
 	LTag *NextTag(LTag *t);
 	LTag *GetLastChild(LTag *t);
+	void _SelectAll(LTag *t, LTag *&last);
 
 public:
 	LHtml(int Id, int x, int y, int cx, int cy, LDocumentEnv *system = 0);

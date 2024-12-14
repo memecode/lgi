@@ -7021,12 +7021,9 @@ LHtml::LHtml(int id, int x, int y, int cx, int cy, LDocumentEnv *e) :
 	View = this;
 	d = new LHtmlPrivate;
 	SetReadOnly(true);
-	ViewWidth = -1;
 	SetId(id);
 	LRect r(x, y, x+cx, y+cy);
 	SetPos(r);
-	Cursor = 0;
-	Selection = 0;
 	DocumentUid = 0;
 
 	_New();
@@ -7734,8 +7731,53 @@ void LHtml::UnSelectAll()
 	}
 }
 
+void LHtml::_SelectAll(LTag *t, LTag *&last)
+{
+	if (auto txt = t->GetText())
+	{
+		if (!Selection)
+		{
+			Selection = t;
+			Selection->Selection = 0;
+		}
+		else
+		{
+			last = t;
+		}
+	}
+
+	for (auto c: t->Children)
+		_SelectAll(ToTag(c), last);
+}
+
 void LHtml::SelectAll()
 {
+	if (!Tag)
+		return;
+
+	UnSelectAll();
+
+	LArray<LTag*> results;
+	Tag->Find(TAG_BODY, results);
+	if (results.Length() == 0)
+		return;
+
+	if (auto body = results[0])
+	{
+		LTag *last = nullptr;
+		_SelectAll(body, last);
+
+		if (last)
+		{
+			Cursor = last;
+			Cursor->Cursor = Strlen(Cursor->GetText());
+		}
+
+		LgiTrace("%p.%i - %p.%i\n", Selection, Selection->Selection, Cursor, Cursor->Cursor);
+
+
+		Invalidate();
+	}
 }
 
 LTag *LHtml::GetLastChild(LTag *t)
@@ -8134,6 +8176,8 @@ bool LHtml::OnKey(LKey &k)
 {
 	bool Status = false;
 
+	k.Trace("LHtml::OnKey");
+
 	if (k.Down())
 	{
 		int Dy = 0;
@@ -8216,6 +8260,13 @@ bool LHtml::OnKey(LKey &k)
 							Copy();
 							Status = true;
 						}
+						break;
+					}
+					case 'a':
+					case 'A':
+					{
+						if (k.CtrlCmd())
+							SelectAll();
 						break;
 					}
 				}

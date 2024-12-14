@@ -1324,19 +1324,32 @@ class FtpBackend :
 	LString remote;
 
 	// Lock before using
-	using TWork = std::function<void()>;
+	struct TWork;
+	using TCallback = std::function<void(LAutoPtr<TWork>&)>;
+	struct TWork
+	{
+		LString context;
+		TCallback fp;
+
+		TWork(LString &ctx, TCallback &&call)
+		{
+			context = ctx;
+			fp = std::move(call);
+		}
+	};
+	struct TTimedWork : public TWork
+	{
+		uint64_t ts;
+
+		TTimedWork(LString &ctx, TCallback &&call) : TWork(ctx, std::move(call)) {}
+	};
 	struct TCache
 	{
 		LString data;
 		IFtpEntry entry;
 	};
-	struct TTimedWork
-	{
-		uint64_t ts;
-		TWork work;
-	};
-	LArray<TWork> foregroundWork, backgroundWork;
-	LArray<TTimedWork> timedWork;
+	LArray<TWork*> foregroundWork, backgroundWork;
+	LArray<TTimedWork*> timedWork;
 	LAutoPtr<IFtp> ftp;
 	LHashTbl<StrKey<char>, TCache*> cache;
 
@@ -1380,6 +1393,13 @@ class FtpBackend :
 		~FtpDir()
 		{
 			DeleteObjects();
+		}
+
+		bool Valid()
+		{
+			if (base.Str && (base.Str->Len > 1000 || base.Str->Refs > 100 || base.Str->Refs < 0))
+				return false;
+			return true;
 		}
 
 		IFtpEntry *Find(const char *name)
@@ -1605,12 +1625,13 @@ public:
 		return false;
 	}
 
-	void AddWork(TPriority priority, TWork &&job)
+	void AddWork(LString ctx, TPriority priority, TCallback &&job)
 	{
+		auto w = new TWork(ctx, std::move(job));
 		if (priority == SystemIntf::TForeground)
-			foregroundWork.Add(std::move(job));
+			foregroundWork.Add(w);
 		else
-			backgroundWork.Add(std::move(job));
+			backgroundWork.Add(w);
 	}
 
 	LString ConvertPath(LString s)
@@ -1636,13 +1657,18 @@ public:
 		return ftp->SetDir(remote = s);
 	}
 
+	LString MakeContext(const char *file, int line, LString data)
+	{
+		return LString::Fmt("%s:%i %s", file, line, data.Get());
+	}
+
 	bool ReadFolder(TPriority priority, const char *Path, std::function<void(LDirectory*)> results) override
 	{
 		if (!Path || !results)
 			return false;
 
 		Auto lck(this, _FL);
-		AddWork(priority, [this, Path = ConvertPath(Path), results]() mutable
+		AddWork(MakeContext(_FL, Path), priority, [this, Path = ConvertPath(Path), results](auto curWork) mutable
 			{
 				if (!GetReady())
 					return;
@@ -1656,9 +1682,6 @@ public:
 				LAutoPtr<FtpDir> curDir(new FtpDir(Path));
 				if (ftp->ListDir(*curDir))
 				{
-					if (curDir->Length() == 0)
-						return;
-
 					{
 						// Store the names in the cache
 						Auto lck(this, _FL);
@@ -1676,10 +1699,14 @@ public:
 						}
 					}
 
-					parent->RunCallback([this, results, curDir=curDir.Release()]()
+					curDir->Valid();
+					parent->RunCallback([this, results, curDir=curDir.Release(), curWork=curWork.Release()]()
 					{
+						curDir->Valid();
 						results(curDir);
+						curDir->Valid();
 						delete curDir;
+						delete curWork;
 					});
 				}
 			});
@@ -1706,7 +1733,7 @@ public:
 			}
 		}
 
-		AddWork(priority, [this, path, result]() mutable
+		AddWork(MakeContext(_FL, path), priority, [this, path, result](auto workPtr) mutable
 			{
 				LError err;
 				LString fileData;
@@ -1779,7 +1806,7 @@ public:
 
 		auto path = ConvertPath(outPath);
 		Auto lck(this, _FL);
-		AddWork(priority, [this, path, result, Data]() mutable
+		AddWork(MakeContext(_FL, path), priority, [this, path, result, Data](auto workPtr) mutable
 			{
 				LError err;
 
@@ -1883,15 +1910,17 @@ public:
 		TFindInFiles(FtpBackend *o) : owner(o)
 		{
 			// Do an initial iterate to see what's there...
-			Post(0);
+			Post(owner->MakeContext(_FL, "FindInFiles"), 0);
 		}
 
-		void Post(int addMilliseconds)
+		void Post(LString ctx, int addMilliseconds)
 		{
 			LMutex::Auto lck(owner, _FL);
-			auto &w = owner->timedWork.New();
-			w.ts = LCurrentTime() + addMilliseconds;
-			w.work = [this]() { Iterate(); };
+			if (auto w = new TTimedWork(ctx, [this](auto workPtr) { Iterate(); }))
+			{
+				w->ts = LCurrentTime() + addMilliseconds;
+				owner->timedWork.Add(w);
+			}
 		}
 
 		void Read(const char *file)
@@ -1986,7 +2015,7 @@ public:
 			owner->log->Print("findinfiles: reading=%i, done=%i of %i\n", reading, done, (int)owner->cache.Length());
 			if (done < owner->cache.Length())
 			{
-				Post(1000); // have another look in 1 second...
+				Post(owner->MakeContext(_FL, "FindInFiles.Pulse"), 1000); // have another look in 1 second...
 			}
 			else
 			{
@@ -2125,18 +2154,18 @@ public:
 			{
 				// Is there work to do?
 				auto now = LCurrentTime();
-				TWork curWork;
+				LAutoPtr<TWork> curWork;
 				{
 					Auto lck(this, _FL);
 					if (timedWork.Length())
 					{
 						// Is there any timed work to do?
-						for (auto &w: timedWork)
+						for (auto w: timedWork)
 						{
-							if (w.ts <= now)
+							if (w->ts <= now)
 							{
 								// Yes!
-								curWork = std::move(w.work);
+								curWork.Reset(w);
 								timedWork.PopFirst();
 								break;
 							}
@@ -2146,19 +2175,18 @@ public:
 					{
 						// Check the regular queues:
 						if (foregroundWork.Length())
-							curWork = std::move(foregroundWork.PopFirst());
+							curWork.Reset(foregroundWork.PopFirst());
 						else if (backgroundWork.Length())
-							curWork = std::move(backgroundWork.PopFirst());
+							curWork.Reset(backgroundWork.PopFirst());
 					}
 				}
 
 				if (curWork)
 				{
-					curWork();
+					curWork->fp(curWork);
 					log->Print("ftp: foreground %i, background %i\n", (int)foregroundWork.Length(), (int)backgroundWork.Length());
 				}
-				else
-					LSleep(WAIT_MS);
+				else LSleep(WAIT_MS);
 			}
 		}
 
