@@ -1397,8 +1397,10 @@ class FtpBackend :
 
 		bool Valid()
 		{
+			/*
 			if (base.Str && (base.Str->Len > 1000 || base.Str->Refs > 100 || base.Str->Refs < 0))
 				return false;
+			*/
 			return true;
 		}
 
