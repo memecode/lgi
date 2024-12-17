@@ -340,6 +340,8 @@ public:
 	void ShowAuthor();
 	void UpdateAuthorUi();
 	void Empty();
+	void OnSelectWithType();
+	void OnSelectUpdateItems();
 	void Select(bool b);
 	void ListCommit(VcCommit *c);
 	void ListWorkingFolder();

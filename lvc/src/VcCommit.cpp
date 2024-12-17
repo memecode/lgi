@@ -275,7 +275,8 @@ const char *VcCommit::GetText(int Col)
 		return "#nofield";
 	}
 
-	return (char*)GetFieldText(Folder->Fields[Col]);
+	auto f = Folder->Fields[Col];
+	return GetFieldText(f);
 }
 
 bool VcCommit::GitParse(LString s, bool RevList)

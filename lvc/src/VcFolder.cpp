@@ -1034,6 +1034,47 @@ bool VcFolder::SetAuthor(bool local, LString name, LString email)
 	return true;
 }
 
+void VcFolder::OnSelectWithType()
+{
+	DefaultFields();
+	ShowAuthor();
+	auto curType = GetType();
+	if (curType != d->PrevType)
+	{
+		d->PrevType = curType;
+		UpdateColumns();
+	}
+}
+
+void VcFolder::OnSelectUpdateItems()
+{
+	if (d->Commits->Length() > MAX_AUTO_RESIZE_ITEMS)
+	{
+		int i = 0;
+		if (GetType() == VcHg && d->Commits->GetColumns() >= 7)
+		{
+			d->Commits->ColumnAt(i++)->Width(60);  // LGraph
+			d->Commits->ColumnAt(i++)->Width(40);  // LIndex
+			d->Commits->ColumnAt(i++)->Width(100); // LRevision
+			d->Commits->ColumnAt(i++)->Width(60);  // LBranch
+			d->Commits->ColumnAt(i++)->Width(240); // LAuthor
+			d->Commits->ColumnAt(i++)->Width(130); // LTimeStamp
+			d->Commits->ColumnAt(i++)->Width(400); // LMessage
+		}
+		else if (d->Commits->GetColumns() >= 5)
+		{
+			d->Commits->ColumnAt(i++)->Width(40);  // LGraph
+			d->Commits->ColumnAt(i++)->Width(270); // LRevision
+			d->Commits->ColumnAt(i++)->Width(240); // LAuthor
+			d->Commits->ColumnAt(i++)->Width(130); // LTimeStamp
+			d->Commits->ColumnAt(i++)->Width(400); // LMessage
+		}
+	}
+	else d->Commits->ResizeColumnsToContent();
+
+	d->Commits->UpdateAllItems();
+}
+
 void VcFolder::Select(bool b)
 {
 	#if PROFILE_FN
@@ -1053,24 +1094,14 @@ void VcFolder::Select(bool b)
 		if (Uri.IsFile() && !LDirExists(LocalPath()))
 			return;
 
-		PROF("DefaultFields");
-		DefaultFields();
-
 		if (GetType() == VcPending)
-		{
 			OnVcsTypeEvents.Add([this]()
-			{
-				ShowAuthor();
-			});
-		}
-		else ShowAuthor();
-
-		PROF("Type Change");
-		if (GetType() != d->PrevType)
-		{
-			d->PrevType = GetType();			
-			UpdateColumns();
-		}
+				{
+					OnSelectWithType();
+					OnSelectUpdateItems();
+				});
+		else
+			OnSelectWithType();
 
 		PROF("UpdateCommitList");
 		if ((Log.Length() == 0 || CommitListDirty) && !IsLogging)
@@ -1191,33 +1222,8 @@ void VcFolder::Select(bool b)
 			d->Resort = -1;
 		}
 
-		PROF("ColSizing");
-		if (d->Commits->Length() > MAX_AUTO_RESIZE_ITEMS)
-		{
-			int i = 0;
-			if (GetType() == VcHg && d->Commits->GetColumns() >= 7)
-			{
-				d->Commits->ColumnAt(i++)->Width(60);  // LGraph
-				d->Commits->ColumnAt(i++)->Width(40);  // LIndex
-				d->Commits->ColumnAt(i++)->Width(100); // LRevision
-				d->Commits->ColumnAt(i++)->Width(60);  // LBranch
-				d->Commits->ColumnAt(i++)->Width(240); // LAuthor
-				d->Commits->ColumnAt(i++)->Width(130); // LTimeStamp
-				d->Commits->ColumnAt(i++)->Width(400); // LMessage
-			}
-			else if (d->Commits->GetColumns() >= 5)
-			{
-				d->Commits->ColumnAt(i++)->Width(40);  // LGraph
-				d->Commits->ColumnAt(i++)->Width(270); // LRevision
-				d->Commits->ColumnAt(i++)->Width(240); // LAuthor
-				d->Commits->ColumnAt(i++)->Width(130); // LTimeStamp
-				d->Commits->ColumnAt(i++)->Width(400); // LMessage
-			}
-		}
-		else d->Commits->ResizeColumnsToContent();
-
-		PROF("UpdateAll");
-		d->Commits->UpdateAllItems();
+		if (GetType() != VcPending)
+			OnSelectUpdateItems();
 
 		PROF("GetCur");
 		GetCurrentRevision();
