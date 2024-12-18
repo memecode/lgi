@@ -878,7 +878,7 @@ LString LApp::GetFileMimeType(const char *File)
 				return Status;
 				
 			// So gnome has no clue... lets try 'file'
-			::LString args;
+			LString args;
 			args.Printf("--mime-type \"%s\"", File);
 			LSubProcess sub("file", args);
 			if (sub.Start())
@@ -1146,7 +1146,7 @@ bool LApp::DesktopInfo::Serialize(bool Write)
 		if (!(p / "..").Exists())
 			return false;
 	}
-	else if (!LFileExists(File))	
+	else if (!LFileExists(File))
 		return false;
 	
 	if (!f.Open(File, Write?O_WRITE:O_READ))
@@ -1171,6 +1171,13 @@ bool LApp::DesktopInfo::Serialize(bool Write)
 			f.Print("\n");
 		}
 		Dirty = false;
+		
+		f.Close();
+		
+		// Make the file executable... cause... "reasons"
+		int result = chmod(File, 0755);
+		if (result)
+			LgiTrace("%s:%i - Failed to make '%s' executable.\n", _FL, File);
 	}
 	else
 	{
@@ -1315,7 +1322,7 @@ bool LApp::SetApplicationIcon(const char *FileName)
 	if (!di)
 		return false;
 	
-	::LString IcoPath = di->Get("Icon");
+	LString IcoPath = di->Get("Icon");
 	if (IcoPath == FileName)
 		return true;
 	

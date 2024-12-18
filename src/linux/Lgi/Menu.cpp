@@ -537,7 +537,7 @@ static void MenuItemDestroy(GtkWidget *widget, LMenuItem *Item)
 	Item->OnGtkEvent("destroy");
 }
 
-void LMenuItem::OnGtkEvent(::LString Event)
+void LMenuItem::OnGtkEvent(LString Event)
 {
 	if (Event.Equals("activate"))
 	{

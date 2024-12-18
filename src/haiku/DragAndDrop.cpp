@@ -57,7 +57,7 @@ bool LDragDropSource::SetIcon(LSurface *Img, LRect *SubRgn)
 	return false;
 }
 
-bool LDragDropSource::CreateFileDrop(LDragData *OutputData, LMouse &m, ::LString::Array &Files)
+bool LDragDropSource::CreateFileDrop(LDragData *OutputData, LMouse &m, LString::Array &Files)
 {
 	if (!OutputData || !Files.First())
 		return false;

@@ -41,7 +41,7 @@ bool LPrinter::Browse(LView *Parent)
 	return false;
 }
 
-bool LPrinter::Serialize(::LString &Str, bool Write)
+bool LPrinter::Serialize(LString &Str, bool Write)
 {
 	if (Write)
 		Str = d->Printer;

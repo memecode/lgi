@@ -1475,15 +1475,34 @@ LSurface *GdcDevice::Load(LStream *In, const char *Name, bool UseOSLoader, LDom 
 		
 		#elif defined MAC && !LGI_COCOA
 		
-		CGImageRef Img = NULL;
-		if (LFileExists(Name))
-		{
-			CFURLRef FileUrl = CFURLCreateFromFileSystemRepresentation(0, (const UInt8*)Name, strlen(Name), false);
-			if (!FileUrl)
-				LgiTrace("%s:%i - CFURLCreateFromFileSystemRepresentation failed.\n", _FL);
+			CGImageRef Img = NULL;
+			if (LFileExists(Name))
+			{
+				CFURLRef FileUrl = CFURLCreateFromFileSystemRepresentation(0, (const UInt8*)Name, strlen(Name), false);
+				if (!FileUrl)
+					LgiTrace("%s:%i - CFURLCreateFromFileSystemRepresentation failed.\n", _FL);
+				else
+				{
+					CGImageSourceRef Src = CGImageSourceCreateWithURL(FileUrl, 0);
+					if (!Src)
+						LgiTrace("%s:%i - CGImageSourceCreateWithURL failed.\n", _FL);
+					else
+					{
+						Img = CGImageSourceCreateImageAtIndex(Src, 0, 0);
+						if (!Img)
+							LgiTrace("%s:%i - CGImageSourceCreateImageAtIndex failed.\n", _FL);
+						
+						CFRelease(Src);
+					}
+
+					CFRelease(FileUrl);
+				}
+			}
 			else
 			{
-				CGImageSourceRef Src = CGImageSourceCreateWithURL(FileUrl, 0);
+				LMemStream ms(In, 0, -1);
+				CFDataRef data = CFDataCreate(NULL, (const UInt8 *)ms.GetBasePtr(), ms.GetSize());
+				CGImageSourceRef Src = CGImageSourceCreateWithData(data, NULL);
 				if (!Src)
 					LgiTrace("%s:%i - CGImageSourceCreateWithURL failed.\n", _FL);
 				else
@@ -1494,116 +1513,93 @@ LSurface *GdcDevice::Load(LStream *In, const char *Name, bool UseOSLoader, LDom 
 					
 					CFRelease(Src);
 				}
+			}
 
-				CFRelease(FileUrl);
-			}
-		}
-		else
-		{
-			LMemStream ms(In, 0, -1);
-			CFDataRef data = CFDataCreate(NULL, (const UInt8 *)ms.GetBasePtr(), ms.GetSize());
-			CGImageSourceRef Src = CGImageSourceCreateWithData(data, NULL);
-			if (!Src)
-				LgiTrace("%s:%i - CGImageSourceCreateWithURL failed.\n", _FL);
-			else
+			if (Img)
 			{
-				Img = CGImageSourceCreateImageAtIndex(Src, 0, 0);
-				if (!Img)
-					LgiTrace("%s:%i - CGImageSourceCreateImageAtIndex failed.\n", _FL);
+				size_t x = CGImageGetWidth(Img);
+				size_t y = CGImageGetHeight(Img);
+				// size_t bits = CGImageGetBitsPerPixel(Img);
 				
-				CFRelease(Src);
-			}
-		}
-
-		if (Img)
-		{
-			size_t x = CGImageGetWidth(Img);
-			size_t y = CGImageGetHeight(Img);
-			// size_t bits = CGImageGetBitsPerPixel(Img);
-			
-			if (pDC.Reset(new LMemDC) &&
-				pDC->Create(x, y, System32BitColourSpace))
-			{
-				pDC->Colour(0);
-				pDC->Rectangle();
+				if (pDC.Reset(new LMemDC) &&
+					pDC->Create(x, y, System32BitColourSpace))
+				{
+					pDC->Colour(0);
+					pDC->Rectangle();
+					
+					CGRect r = {{0, 0}, {(CGFloat)x, (CGFloat)y}};
+					CGContextDrawImage(pDC->Handle(), r, Img);
+				}
+				else
+				{
+					LgiTrace("%s:%i - pMemDC->Create failed.\n", _FL);
+					pDC.Reset();
+				}
 				
-				CGRect r = {{0, 0}, {(CGFloat)x, (CGFloat)y}};
-				CGContextDrawImage(pDC->Handle(), r, Img);
+				CGImageRelease(Img);
 			}
-			else
-			{
-				LgiTrace("%s:%i - pMemDC->Create failed.\n", _FL);
-				pDC.Reset();
-			}
-			
-			CGImageRelease(Img);
-		}
 
 		#elif WINNATIVE && defined(_MSC_VER)
 		
-		/*
-		char *Ext = LGetExtension((char*)Name);
-		if (Ext && stricmp(Ext, "gif") && stricmp(Ext, "png"))
-		*/
-		{
-			IImgCtx *Ctx = 0;
-			HRESULT hr = CoCreateInstance(CLSID_IImgCtx, NULL, CLSCTX_INPROC_SERVER, IID_IImgCtx, (LPVOID*)&Ctx);
-			if (SUCCEEDED(hr))
 			{
-				LVariant Fn = Name;
-				hr = Ctx->Load(Fn.WStr(), 0);
+				IImgCtx *Ctx = 0;
+				HRESULT hr = CoCreateInstance(CLSID_IImgCtx, NULL, CLSCTX_INPROC_SERVER, IID_IImgCtx, (LPVOID*)&Ctx);
 				if (SUCCEEDED(hr))
 				{
-					SIZE  Size = { -1, -1 };
-					ULONG State = 0;
-					int64 Start = LCurrentTime();
-					while (LCurrentTime() - Start < 3000) // just in case it gets stuck....
+					LVariant Fn = Name;
+					hr = Ctx->Load(Fn.WStr(), 0);
+					if (SUCCEEDED(hr))
 					{
-						hr = Ctx->GetStateInfo(&State, &Size, false);
-						if (SUCCEEDED(hr))
+						SIZE  Size = { -1, -1 };
+						ULONG State = 0;
+						int64 Start = LCurrentTime();
+						while (LCurrentTime() - Start < 3000) // just in case it gets stuck....
 						{
-							if ((State & IMGLOAD_COMPLETE) || (State & IMGLOAD_STOPPED) || (State & IMGLOAD_ERROR))
+							hr = Ctx->GetStateInfo(&State, &Size, false);
+							if (SUCCEEDED(hr))
 							{
-								break;
+								if ((State & IMGLOAD_COMPLETE) || (State & IMGLOAD_STOPPED) || (State & IMGLOAD_ERROR))
+								{
+									break;
+								}
+								else
+								{
+									LSleep(10);
+								}
 							}
-							else
-							{
-								LSleep(10);
-							}
+							else break;
 						}
-						else break;
+
+						if (Size.cx > 0 &&
+							Size.cy > 0 &&
+							pDC.Reset(new LMemDC(_FL)))
+						{
+							if (pDC->Create(Size.cx, Size.cy, System24BitColourSpace))
+							{
+								HDC hDC = pDC->StartDC();
+								if (hDC)
+								{
+									RECT rc = { 0, 0, pDC->X(), pDC->Y() };
+									Ctx->Draw(hDC, &rc);
+									pDC->EndDC();
+								}
+
+								if (pDC->GetBits() == 32)
+								{
+									// Make opaque
+									int Op = pDC->Op(GDC_OR);
+									pDC->Colour(Rgba32(0, 0, 0, 255), 32);
+									pDC->Rectangle();
+									pDC->Op(GDC_SET);
+								}
+							}
+							else pDC.Reset();
+						}
 					}
 
-					if (Size.cx > 0 &&
-						Size.cy > 0 &&
-						pDC.Reset(new LMemDC(_FL)))
-					{
-						if (pDC->Create(Size.cx, Size.cy, System24BitColourSpace))
-						{
-							HDC hDC = pDC->StartDC();
-							if (hDC)
-							{
-								RECT rc = { 0, 0, pDC->X(), pDC->Y() };
-								Ctx->Draw(hDC, &rc);
-								pDC->EndDC();
-							}
-
-							if (pDC->GetBits() == 32)
-							{
-								// Make opaque
-								int Op = pDC->Op(GDC_OR);
-								pDC->Colour(Rgba32(0, 0, 0, 255), 32);
-								pDC->Rectangle();
-								pDC->Op(GDC_SET);
-							}
-						}
-						else pDC.Reset();
-					}
+					Ctx->Release();
 				}
-
-				Ctx->Release();
 			}
-		}
 
 		#endif
 

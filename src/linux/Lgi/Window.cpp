@@ -195,7 +195,7 @@ bool LWindow::SetIcon(const char *FileName)
 				return true;
 			#else
 			// On windows this is giving a red for blue channel swap error...
-			if (d->IconImg.Reset(GdcD->Load(a)))
+			if (d->IconImg.Reset(GdcD->Load(FileName)))
 				gtk_window_set_icon(Wnd, d->IconImg->CreatePixBuf());
 			#endif
 		}

@@ -46,11 +46,9 @@
 			<Node File="./src/Debugger.h" Type="3" Platforms="7" />
 		</Node>
 		<Node Name="Dialogs" Type="1" Platforms="15" Open="0" Id="3">
-			<Node File="./src/AddFtpFile.cpp" Type="2" Platforms="15" />
-			<Node File="./src/AddFtpFile.h" Type="3" Platforms="15" />
-			<Node File="../src/common/Lgi/About.cpp" Type="2" Platforms="15" />
-			<Node File="./src/WebFldDlg.cpp" Type="2" Platforms="15" />
 			<Node File="./src/WebFldDlg.h" Type="3" Platforms="15" />
+			<Node File="./src/WebFldDlg.cpp" Type="2" Platforms="15" />
+			<Node File="../src/common/Lgi/About.cpp" Type="2" Platforms="15" />
 		</Node>
 		<Node Name="Docs" Type="1" Platforms="15" Id="1">
 			<Node File="./src/DocEdit.cpp" Type="2" Platforms="15" />
@@ -61,10 +59,8 @@
 			<Node File="./src/IdeDocPrivate.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Ftp" Type="1" Platforms="15" Open="0" Id="4">
-			<Node File="./src/FtpThread.cpp" Type="2" Platforms="15" />
-			<Node File="./src/FtpThread.h" Type="3" Platforms="15" />
-			<Node File="../src/common/Net/Ftp.cpp" Type="2" Platforms="15" />
 			<Node File="../include/lgi/common/Ftp.h" Type="3" Platforms="15" />
+			<Node File="../src/common/Net/Ftp.cpp" Type="2" Platforms="15" />
 		</Node>
 		<Node Name="Projects" Type="1" Platforms="15" Id="1">
 			<Node File="./src/IdeProject.cpp" Type="2" Platforms="15" />
