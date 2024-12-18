@@ -1044,8 +1044,6 @@ LDirectory *LDirectory::Clone()
 
 int LDirectory::First(const char *Name, const char *Pattern)
 {
-	printf("%s:%i - first %s %s\n", _FL, Name, Pattern);
-
 	Close();
 
 	if (!Name)
