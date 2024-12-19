@@ -154,15 +154,25 @@ extern const char *toString(VersionCtrl v);
 class VcFolder;
 struct ParseParams
 {
+	using TCallback = std::function<void(int32_t, LString)>;
+
 	LString Str;
 	LString AltInitPath;
-	class VcLeaf *Leaf = NULL;
-	bool IsWorking = false;;
-	std::function<void(int32_t, LString)> Callback;
+	class VcLeaf *Leaf = nullptr;
+	bool IsWorking = false;
 
-	ParseParams(const char *str = NULL)
+	// This callback is called AFTER the parsing function... you
+	// can have both or just one of them.
+	TCallback Callback;
+
+	ParseParams(const char *str = nullptr)
 	{
 		Str = str;
+	}
+
+	ParseParams(TCallback &&cb)
+	{
+		Callback = std::move(cb);
 	}
 };
 

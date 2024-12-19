@@ -192,6 +192,7 @@
     <ClInclude Include="..\..\include\lgi\common\IniFile.h" />
     <ClInclude Include="..\..\include\lgi\common\StructuredIo.h" />
     <ClInclude Include="..\..\include\lgi\common\StructuredLog.h" />
+    <ClInclude Include="..\src\BranchEditDlg.h" />
     <ClInclude Include="..\Src\Lvc.h" />
     <ClInclude Include="..\Src\SshConnection.h" />
     <ClInclude Include="..\Src\VcCommit.h" />

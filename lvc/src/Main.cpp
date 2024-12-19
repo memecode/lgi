@@ -11,6 +11,7 @@
 
 #include "Lvc.h"
 #include "resdefs.h"
+#include "BranchEditDlg.h"
 #ifdef WINDOWS
 #include "resource.h"
 #endif
@@ -203,7 +204,7 @@ public:
 		LRect Cli = GetClient();
 
 		LTableLayout *v;
-		if (GetViewById(IDC_TABLE, v))
+		if (GetViewById(ID_TABLE, v))
 		{
 			v->SetPos(Cli);
 				
@@ -1016,9 +1017,9 @@ public:
 		SerializeState(&Opts, "WndPos", true);
 
 		#ifdef WINDOWS
-		SetIcon(MAKEINTRESOURCEA(IDI_ICON1));
+			SetIcon(MAKEINTRESOURCEA(IDI_ICON1));
 		#else
-		SetIcon("icon32.png");
+			SetIcon("icon32.png");
 		#endif
 
 		ImgLst.Reset(LLoadImageList("image-list.png", 16, 16));
@@ -1049,9 +1050,9 @@ public:
 			Menu->Load(this, "IDM_MENU");
 		}
 
-		auto ToolsBox   = new LBox(IDC_TOOLS_BOX, true, "ToolsBox");
+		auto ToolsBox   = new LBox(IDC_TOOLS_BOX,   true,  "ToolsBox");
 		FoldersBox      = new LBox(IDC_FOLDERS_BOX, false, "FoldersBox");
-		auto CommitsBox = new LBox(IDC_COMMITS_BOX, true, "CommitsBox");
+		auto CommitsBox = new LBox(IDC_COMMITS_BOX, true,  "CommitsBox");
 
 		auto Tools = new ToolBar;
 
@@ -1090,7 +1091,7 @@ public:
 		CommitsLayout->Attach(CommitsBox);
 		CommitsLayout->GetCss(true)->Height("40%");
 
-		LBox *FilesBox = new LBox(IDC_FILES_BOX, false);
+		auto FilesBox = new LBox(IDC_FILES_BOX, false);
 		FilesBox->Attach(CommitsBox);
 
 		auto FilesLayout = new LTableLayout(IDC_FILES_TBL);
@@ -1139,7 +1140,7 @@ public:
 		// Log->Sunken(true);
 		Log->SetWrapType(L_WRAP_NONE);
 		
-		SetCtrlValue(IDC_UPDATE, true);
+		SetCtrlValue(ID_UPDATE, true);
 
 		AttachChildren();
 
@@ -1572,7 +1573,7 @@ public:
 				}
 				break;
 			}
-			case IDC_OPEN:
+			case ID_OPEN:
 			{
 				OpenLocalFolder();
 				break;
@@ -1621,16 +1622,16 @@ public:
 					}
 					case (LNotifyType)LvcCommandStart:
 					{
-						SetCtrlEnabled(IDC_PUSH, false);
-						SetCtrlEnabled(IDC_PULL, false);
-						SetCtrlEnabled(IDC_PULL_ALL, false);
+						SetCtrlEnabled(ID_PUSH, false);
+						SetCtrlEnabled(ID_PULL, false);
+						SetCtrlEnabled(ID_PULL_ALL, false);
 						break;
 					}
 					case (LNotifyType)LvcCommandEnd:
 					{
-						SetCtrlEnabled(IDC_PUSH, true);
-						SetCtrlEnabled(IDC_PULL, true);
-						SetCtrlEnabled(IDC_PULL_ALL, true);
+						SetCtrlEnabled(ID_PUSH, true);
+						SetCtrlEnabled(ID_PULL, true);
+						SetCtrlEnabled(ID_PULL_ALL, true);
 						break;
 					}
 					default:
@@ -1678,23 +1679,23 @@ public:
 				}
 				break;
 			}
-			case IDC_PUSH:
+			case ID_PUSH:
 			{
 				if (auto f = GetCurrent())
 					f->Push();
 				break;
 			}
-			case IDC_PULL:
+			case ID_PULL:
 			{
 				if (auto f = GetCurrent())
 					f->Pull();
 				break;
 			}
-			case IDC_PULL_ALL:
+			case ID_PULL_ALL:
 			{
 				LArray<VcFolder*> Folders;
 				Tree->GetAll(Folders);
-				bool AndUpdate = GetCtrlValue(IDC_UPDATE) != 0;
+				bool AndUpdate = GetCtrlValue(ID_UPDATE) != 0;
 				
 				for (auto f : Folders)
 				{
@@ -1702,7 +1703,7 @@ public:
 				}
 				break;
 			}
-			case IDC_STATUS:
+			case ID_STATUS:
 			{
 				LArray<VcFolder*> Folders;
 				Tree->GetAll(Folders);
@@ -1712,7 +1713,7 @@ public:
 				}
 				break;
 			}
-			case IDC_BRANCHES:
+			case ID_BRANCHES:
 			{
 				if (n.Type == LNotifyValueChanged)
 				{
@@ -1726,6 +1727,19 @@ public:
 					
 					if (f->GetCurrentBranch() != branch)
 						f->Checkout(branch, true);
+				}
+				break;
+			}
+			case ID_BRANCH_EDIT:
+			{
+				if (n.Type == LNotifyItemClick)
+				{
+					LArray<VcFolder*> sel;
+					if (Tree->GetSelection(sel))
+					{
+						auto dlg = new BranchEditDlg(sel.First());
+						dlg->DoModal(nullptr);
+					}
 				}
 				break;
 			}

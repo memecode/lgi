@@ -550,15 +550,17 @@ LString VcFolder::GetGitNames(LString Hash)
 
 bool VcFolder::ParseBranches(int Result, LString s, ParseParams *Params)
 {
+	Branches.DeleteObjects();
+
 	switch (GetType())
 	{
 		case VcGit:
 		{
-			LString::Array a = s.SplitDelimit("\r\n");
+			auto a = s.SplitDelimit("\r\n");
 			for (auto &l: a)
 			{
 				LString::Array c;
-				char *s = l.Get();
+				auto s = l.Get();
 				while (*s && IsWhite(*s))
 					s++;
 				bool IsCur = *s == '*';
@@ -629,10 +631,9 @@ bool VcFolder::ParseBranches(int Result, LString s, ParseParams *Params)
 	return false;
 }
 
-void VcFolder::GetRemoteUrl(std::function<void(int32_t, LString)> Callback)
+void VcFolder::GetRemoteUrl(ParseParams::TCallback Callback)
 {
-	LAutoPtr<ParseParams> p(new ParseParams);
-	p->Callback = Callback;
+	LAutoPtr<ParseParams> p(new ParseParams(std::move(Callback)));
 
 	switch (GetType())
 	{
@@ -1163,7 +1164,7 @@ void VcFolder::Select(bool b)
 		}
 
 		PROF("GetBranches");
-		if (GetBranches())
+		if (GetBranches(false))
 			OnBranchesChange();
 
 		if (d->CurFolder != this)
@@ -1285,9 +1286,9 @@ void VcFolder::GetCurrentRevision(ParseParams *Params)
 	}
 }
 
-bool VcFolder::GetBranches(ParseParams *Params)
+bool VcFolder::GetBranches(bool refresh, ParseParams *Params)
 {
-	if (Branches.Length() > 0 || IsBranches != StatusNone)
+	if ((!refresh && Branches.Length() > 0) || IsBranches != StatusNone)
 		return true;
 
 	switch (GetType())
@@ -1305,11 +1306,10 @@ bool VcFolder::GetBranches(ParseParams *Params)
 			if (StartCmd("branches", &VcFolder::ParseBranches, Params))
 				IsBranches = StatusActive;
 			
-			auto p = new ParseParams;
-			p->Callback = [this](auto code, auto str)
-			{
-				SetCurrentBranch(str.Strip());
-			};
+			auto p = new ParseParams([this](auto code, auto str)
+				{
+					SetCurrentBranch(str.Strip());
+				});
 			StartCmd("branch", NULL, p);
 			break;
 		}
@@ -1970,7 +1970,7 @@ void VcFolder::UpdateBranchUi()
 	}
 
 	LCombo *Cbo;
-	if (w->GetViewById(IDC_BRANCHES, Cbo))
+	if (w->GetViewById(ID_BRANCHES, Cbo))
 	{
 		Cbo->Empty();
 
@@ -2582,34 +2582,32 @@ void VcFolder::OnPulse()
 		Processing = true;	// Lock out processing, if it puts up a dialog or something...
 							// bad things happen if we try and re-process something.	
 
-		// printf("Cmds.Len=%i\n", (int)Cmds.Length());
 		for (unsigned i=0; i<Cmds.Length(); i++)
 		{
-			Cmd *c = Cmds[i];
+			auto c = Cmds[i];
 			if (!c)
 			{
 				Cmds.DeleteAt(i--, true);
 				continue;
 			}
 
-			// printf("[%i] GetState()=%i\n", i, c->Rd->GetState());
 			if (c->Rd->GetState() == LThread::THREAD_INIT)
 			{
 				if (CmdActiveThreads < CmdMaxThreads)
 				{
+					// Start ready thread...
 					c->Rd->Run();
 					CmdActiveThreads++;
-					// printf("CmdActiveThreads++ = %i\n", CmdActiveThreads);
 				}
-				// else printf("Too many active threads.\n");
 			}
 			else if (c->Rd->IsExited())
 			{
+				// Thread is finished...
 				CmdActiveThreads--;
-				// printf("CmdActiveThreads-- = %i\n", CmdActiveThreads);
 
-				LString s = c->GetBuf();
-				int Result = c->Rd->ExitCode();
+				auto s = c->GetBuf();
+				auto Result = c->Rd->ExitCode();
+
 				if (Result == ErrSubProcessFailed)
 				{
 					if (!CmdErrors)
@@ -2639,7 +2637,6 @@ void VcFolder::OnPulse()
 				delete c;
 				CmdsChanged = true;
 			}
-			// else printf("Not exited.\n");
 		}
 
 		Processing = false;
@@ -2891,20 +2888,6 @@ void VcFolder::Checkout(const char *Rev, bool isBranch)
 	}
 }
 
-bool VcFolder::ParseDelete(int Result, LString s, ParseParams *Params)
-{
-	switch (GetType())
-	{
-		case VcHg:
-		{
-			
-			break;
-		}
-	}
-
-	return true;
-}
-
 void VcFolder::Delete(const char *Path, bool KeepLocal)
 {
 	switch (GetType())
@@ -2918,6 +2901,97 @@ void VcFolder::Delete(const char *Path, bool KeepLocal)
 				args.Printf("remove \"%s\"", Path);
 
 			StartCmd(args, &VcFolder::ParseDelete);
+			break;
+		}
+		default:
+		{
+			NoImplementation(_FL);
+			break;
+		}
+	}
+}
+
+bool VcFolder::ParseDelete(int Result, LString s, ParseParams *Params)
+{
+	switch (GetType())
+	{
+		case VcHg:
+		{			
+			break;
+		}
+	}
+
+	return true;
+}
+
+void VcFolder::DeleteBranch(const char *Name, ParseParams::TCallback cb)
+{
+	if (!Name)
+		return OnCmdError(LString(), "No name specified.");
+
+	switch (GetType())
+	{
+		case VcGit:
+		{
+			LString args;
+			args.Printf("branch -D \"%s\"", Name);
+
+			ParseParams *params = nullptr;
+			if (cb)
+				params = new ParseParams(std::move(cb));
+			StartCmd(args, nullptr, params);
+			break;
+		}
+		default:
+		{
+			NoImplementation(_FL);
+			break;
+		}
+	}
+}
+
+void VcFolder::MergeBranch(const char *Name, ParseParams::TCallback cb)
+{
+	if (!Name)
+		return OnCmdError(LString(), "No name specified.");
+
+	switch (GetType())
+	{
+		case VcGit:
+		{
+			LString args;
+			args.Printf("merge \"%s\"", Name);
+
+			ParseParams *params = nullptr;
+			if (cb)
+				params = new ParseParams(std::move(cb));
+			StartCmd(args, nullptr, params);
+			break;
+		}
+		default:
+		{
+			NoImplementation(_FL);
+			break;
+		}
+	}
+}
+
+void VcFolder::CreateBranch(const char *Name, ParseParams::TCallback cb)
+{
+	if (!Name)
+		return OnCmdError(LString(), "No name specified.");
+
+	switch (GetType())
+	{
+		case VcGit:
+		{
+			LString args;
+			args.Printf("checkout -b \"%s\"", Name);
+
+			ParseParams *params = nullptr;
+			if (cb)
+				params = new ParseParams(std::move(cb));
+			StartCmd(args, nullptr, params);
 			break;
 		}
 		default:
@@ -3185,7 +3259,7 @@ LString ConvertUPlus(LString s)
 
 bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 {
-	bool ShowUntracked = d->Wnd()->GetCtrlValue(IDC_UNTRACKED) != 0;
+	bool ShowUntracked = d->Wnd()->GetCtrlValue(ID_UNTRACKED) != 0;
 	bool IsWorking = Params ? Params->IsWorking : false;
 	List<LListItem> Ins;
 
@@ -4144,7 +4218,7 @@ void VcFolder::Pull(int AndUpdate, LoggingType Logging)
 	bool Status = false;
 
 	if (AndUpdate < 0)
-		AndUpdate = GetTree()->GetWindow()->GetCtrlValue(IDC_UPDATE) != 0;
+		AndUpdate = GetTree()->GetWindow()->GetCtrlValue(ID_UPDATE) != 0;
 
 	switch (GetType())
 	{

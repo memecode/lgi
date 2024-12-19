@@ -2,10 +2,10 @@
 <resources Offset="1">
 	<string-group Name="_Dialog Symbols_">
 		<String Ref="1" Cid="508" Define="IDD_TOOLBAR" en="Toolbar" />
-		<String Ref="2" Cid="500" Define="IDC_TABLE" />
+		<String Ref="2" Cid="500" Define="ID_TABLE" />
 		<String Ref="3" Cid="501" Define="IDC_COMMIT" en="Commit" />
-		<String Ref="5" Cid="502" Define="IDC_PULL" en="Pull" />
-		<String Ref="6" Cid="503" Define="IDC_PUSH" en="Push" />
+		<String Ref="5" Cid="502" Define="ID_PULL" en="Pull" />
+		<String Ref="6" Cid="503" Define="ID_PUSH" en="Push" />
 		<String Ref="9" Cid="507" Define="IDD_COMMIT" en="Commit" />
 		<String Ref="10" Cid="504" Define="IDC_COMMIT_TABLE" />
 		<String Ref="11" Cid="11" Define="IDC_BRANCH" />
@@ -14,7 +14,7 @@
 		<String Ref="14" Cid="14" Define="IDC_BRANCH_DROPDOWN" />
 		<String Ref="15" Cid="-1" Define="IDC_STATIC" en="Commit message:" />
 		<String Ref="16" Cid="16" Define="IDC_MSG" />
-		<String Ref="18" Cid="509" Define="IDC_OPEN" en="Open Folder" />
+		<String Ref="18" Cid="509" Define="ID_OPEN" en="Open Folder" />
 		<String Ref="22" Cid="22" Define="IDD_OPTIONS" en="Options" />
 		<String Ref="23" Cid="23" Define="IDC_OPTIONS_TABLE" />
 		<String Ref="24" Cid="-1" Define="IDC_STATIC" en="Svn binary:" />
@@ -31,12 +31,12 @@
 		<String Ref="35" Cid="2" Define="IDCANCEL" en="Cancel" />
 		<String Ref="36" Cid="36" Define="IDC_HG_BROWSE" en="..." />
 		<String Ref="37" Cid="37" Define="IDC_CVS_BROWSE" en="..." />
-		<String Ref="38" Cid="38" Define="IDC_UNTRACKED" en="Show untracked files" />
-		<String Ref="39" Cid="39" Define="IDC_PULL_ALL" en="*" />
-		<String Ref="40" Cid="40" Define="IDC_STATUS" en="Status" />
-		<String Ref="44" Cid="-1" Define="IDC_STATIC" en="Branches:" />
-		<String Ref="45" Cid="45" Define="IDC_BRANCHES" />
-		<String Ref="48" Cid="41" Define="IDC_UPDATE" en="Update" />
+		<String Ref="38" Cid="38" Define="ID_UNTRACKED" en="Show untracked files" />
+		<String Ref="39" Cid="39" Define="ID_PULL_ALL" en="*" />
+		<String Ref="40" Cid="40" Define="ID_STATUS" en="Status" />
+		<String Ref="44" Cid="-1" Define="ID_STATIC" en="Branches:" />
+		<String Ref="45" Cid="45" Define="ID_BRANCHES" />
+		<String Ref="48" Cid="41" Define="ID_UPDATE" en="Update" />
 		<String Ref="50" Cid="47" Define="IDC_BUILD_FIX" en="BuildFix" />
 		<String Ref="61" Cid="61" Define="IDD_REMOTE_FOLDER" en="Remote Folder" />
 		<String Ref="62" Cid="62" Define="IDC_62" />
@@ -77,6 +77,15 @@
 		<String Ref="106" Cid="106" Define="IDC_GLOBAL_EMAIL" />
 		<String Ref="108" Cid="-1" Define="IDC_STATIC" en="Global:" />
 		<String Ref="109" Cid="-1" Define="IDC_STATIC" en="Local:" />
+		<String Ref="129" Cid="129" Define="ID_BRANCH_EDIT" en="..." />
+		<String Ref="130" Cid="130" Define="IDD_BRANCHES" en="Branches" />
+		<String Ref="131" Cid="500" Define="ID_TABLE" />
+		<String Ref="132" Cid="132" Define="ID_LIST" />
+		<String Ref="133" Cid="133" Define="ID_DELETE" en="Delete" />
+		<String Ref="134" Cid="134" Define="ID_MERGE" en="Merge From" />
+		<String Ref="136" Cid="136" Define="ID_NAME" />
+		<String Ref="137" Cid="135" Define="ID_CLOSE" en="Close" />
+		<String Ref="138" Cid="138" Define="ID_CREATE" en="Create" />
 	</string-group>
 	<string-group Name="General">
 		<String Ref="84" Cid="84" Define="IDS_CREATE_NEW_BRANCH" en="Push will create a new remote branch. Is that ok?" />
@@ -164,6 +173,40 @@
 				<td addr="0,6" colspan="3" align="Max">
 					<Button Pos="210,140,272,160" image="" toggle="0" ref="100" />
 					<Button Pos="281,140,350,160" image="" toggle="0" ref="103" />
+				</td>
+			</tr>
+		</TableLayout>
+	</Dialog>
+	<Dialog pos="8,8,498,399" ref="130">
+		<TableLayout pos="7,7,475,349" ref="131" cols="0.500,0.500" rows="0.200,0.200,0.200,0.200,0.200">
+			<tr>
+				<td addr="0,0" rowspan="3">
+					<ListView pos="14,0,202,196" ref="132" />
+				</td>
+				<td addr="1,0">
+					<Button Pos="259,21,349,48" image="" toggle="0" ref="133" />
+				</td>
+			</tr>
+			<tr>
+				<td addr="1,1">
+					<Button Pos="273,87,356,114" image="" toggle="1" ref="134" />
+				</td>
+			</tr>
+			<tr>
+				<td addr="1,2" />
+			</tr>
+			<tr>
+				<td addr="0,3">
+					<EditBox Pos="14,210,195,237" ref="136" />
+				</td>
+				<td addr="1,3">
+					<Button Pos="266,210,335,230" image="" toggle="0" ref="138" />
+				</td>
+			</tr>
+			<tr>
+				<td addr="0,4" />
+				<td addr="1,4">
+					<Button Pos="273,280,342,307" image="" toggle="0" ref="137" />
 				</td>
 			</tr>
 		</TableLayout>
@@ -354,32 +397,35 @@
 		</TableLayout>
 	</Dialog>
 	<Dialog pos="7,7,998,136" ref="1">
-		<TableLayout pos="7,7,972,97" ref="2" Style="padding-top: 3px;" cols="0.128,0.133,0.124,0.085,0.063,0.210,0.128,0.128" rows="1.000">
+		<TableLayout pos="7,7,972,97" ref="2" Style="padding-top: 3px;" cols="0.114,0.118,0.110,0.075,0.056,0.186,0.114,0.114,0.114" rows="1.000">
 			<tr>
 				<td addr="0,0" valign="Center" style="padding-left: 4px;&#10;padding-right: 1em;">
-					<Button Pos="7,21,71,48" toggle="0" ref="18" />
+					<Button Pos="7,21,83,48" image="" toggle="0" ref="18" />
 				</td>
 				<td addr="1,0" valign="Center">
-					<Button Pos="132,14,166,41" toggle="0" ref="5" />
-					<Button Pos="167,14,194,41" toggle="0" ref="39" />
+					<Button Pos="118,14,152,41" image="" toggle="0" ref="5" />
+					<Button Pos="153,14,180,41" image="" toggle="0" ref="39" />
 				</td>
 				<td addr="2,0" valign="Center" style="padding-right: 1em;">
-					<CheckBox pos="262,21,296,41" ref="48" />
+					<CheckBox pos="233,21,267,41" ref="48" />
 				</td>
 				<td addr="3,0" valign="Center" style="padding-right: 1em;">
-					<Button Pos="368,14,409,41" toggle="0" ref="6" />
+					<Button Pos="329,14,370,41" image="" toggle="0" ref="6" />
 				</td>
 				<td addr="4,0" valign="Center" style="padding-right: 1em;">
-					<Button Pos="446,14,486,41" toggle="0" ref="40" />
+					<Button Pos="399,14,439,41" image="" toggle="0" ref="40" />
 				</td>
 				<td addr="5,0" valign="Center" style="padding-right: 1em;">
-					<CheckBox pos="512,21,574,41" ref="38" />
+					<CheckBox pos="452,21,514,41" ref="38" />
 				</td>
 				<td addr="6,0" valign="Center">
-					<StaticText pos="714,21,790,48" ref="44" />
+					<StaticText pos="631,21,707,48" ref="44" />
 				</td>
 				<td addr="7,0">
-					<ComboBox pos="835,21,918,41" ref="45" />
+					<ComboBox pos="738,21,821,41" ref="45" />
+				</td>
+				<td addr="8,0">
+					<Button Pos="854,28,874,48" image="" toggle="0" ref="129" />
 				</td>
 			</tr>
 		</TableLayout>

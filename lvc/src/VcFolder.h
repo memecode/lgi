@@ -131,6 +131,10 @@ class VcFolder : public LTreeItem
 {
 	friend class VcCommit;
 
+public:
+	using TBranchHash = LHashTbl<ConstStrKey<char>,VcBranch*>;
+
+protected:
 	struct Author
 	{
 		bool InProgress = false;
@@ -216,7 +220,7 @@ class VcFolder : public LTreeItem
 	int64 CurrentCommitIdx = -1;
 	LArray<VcCommit*> Log;
 	LString CurrentBranch;
-	LHashTbl<ConstStrKey<char>,VcBranch*> Branches;
+	TBranchHash Branches;
 	LAutoPtr<UncommitedItem> Uncommit;
 	LString Cache, NewRev;
 	bool CommitListDirty = false;
@@ -333,6 +337,7 @@ public:
 	bool Serialize(LXmlTag *t, bool Write);
 	LString &GetCurrentBranch();
 	void SetCurrentBranch(LString name);
+	TBranchHash &GetBranchCache() { return Branches; }
 	LXmlTag *Save();
 	LString GetConfigFile(bool local);
 	bool GetAuthor(bool local, std::function<void(LString name,LString email)> callback);
@@ -363,9 +368,7 @@ public:
 	void Diff(VcFile *file);
 	void DiffRange(const char *FromRev, const char *ToRev);
 	void MergeToLocal(LString Rev);
-	bool RenameBranch(LString NewName, LArray<VcCommit*> &Revs);
 	void Refresh();
-	bool GetBranches(ParseParams *Params = NULL);
 	void GetCurrentRevision(ParseParams *Params = NULL);
 	void CountToTip();
 	bool UpdateSubs(); // Clone/checkout any sub-repositories.
@@ -374,10 +377,17 @@ public:
 	void ClearLog();
 	LString GetFilePart(const char *uri);
 	void FilterCurrentFiles();
-	void GetRemoteUrl(std::function<void(int32_t, LString)> Callback);
+	void GetRemoteUrl(ParseParams::TCallback Callback);
 	void SelectCommit(LWindow *Parent, LString Commit, LString Path);
 	void Checkout(const char *Rev, bool isBranch);
 	void Delete(const char *Path, bool KeepLocal = true);
+	
+	// Branch commands
+	bool GetBranches(bool refresh, ParseParams *Params = NULL);
+	bool RenameBranch(LString NewName, LArray<VcCommit*> &Revs);
+	void DeleteBranch(const char *Name, ParseParams::TCallback cb = nullptr);
+	void MergeBranch(const char *Name, ParseParams::TCallback cb = nullptr);
+	void CreateBranch(const char *Name, ParseParams::TCallback cb = nullptr);
 
 	void OnPulse();
 	void OnMouseClick(LMouse &m);

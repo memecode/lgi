@@ -87,6 +87,9 @@
     <ClInclude Include="..\..\include\lgi\common\IniFile.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\BranchEditDlg.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resources\Lvc.rc">

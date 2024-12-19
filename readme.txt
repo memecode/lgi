@@ -19,37 +19,27 @@ can be improved.
 Compiling LGI
 -------------
 
-    Open '[lgi]/include/common/Lgi.h' and check through any compile time
+    Open 'include/common/Lgi.h' and check through any compile time
     options there. You may want to switch things on or off to get it to
     compile.
 
     Win32:
-    	Load  [lgi]/Lgi_vc9.sln into Visual C++ 2008 and build it.
+    	Load  win/Lgi_vs2019.sln into Visual Studio 2019 and build it.
     
     Linux:
-    	make -f [lgi]/Makefile.linux
-    		-or-
-    	make -f [lgi]/LgiIde/Makefile.linux (builds both Lgi and the IDE)
-    
-    Cygwin:
-    	make -f [lgi]/Makefile.win32
-    		-or-
-    	make -f [lgi]/LgiIde/Makefile.win32 (builds both Lgi and the IDE)
+    	ln -s linux/Makefile.linux Makefile
+		make -j $THREADS
     
     Mac:
-    	Open [lgi]/src/mac/carbon/Lgi.xcode in XCode and run the build command. 
-
+    	Open src/mac/cocoa/LgiCocoa.xcodeproj in XCode and then build.
 	
 	Add build folders so the OS can find the shared libraries:
 
 		* For Windows add these to your path:
-			- [lgi]/lib
-		* For Cygwin add these to your path:
-			- [lgi]/DebugX
-			- [lgi]/ReleaseX
+			- ./lib
 		* On Linux, create symlinks in /usr/lib to the files:
-			- [lgi]/DebugX/liblgid.so
-			- [lgi]/ReleaseX/liblgi.so
+			- ./Debug/liblgid.so
+			- ./Release/liblgi.so
 
 Building Your App
 -----------------
@@ -63,30 +53,30 @@ Building Your App
 			    - [Release] Run time library: Multithreaded DLL
 			- Preprocessor
 			    - Define: LGI_STATIC (if your using LgiStatic version)
-			    - Include path: [Lgi]/include/common
-			    - Include path: [Lgi]/include/win32
+			    - Include path: include/common
+			    - Include path: include/win32
 		* Link tab
 			- Object/library modules:
 				- Add 'imm32.lib' (if you use GTextView3.cpp)
 
     Linux/Cygwin:
     	* Add to your library string:
-    		- [Debug] '-L[Lgi]/DebugX -llgid'
-    		- [Release] '-L[Lgi]/ReleaseX -llgi'
+    		- [Debug] '-L[Lgi]/Debug -llgid'
+    		- [Release] '-L[Lgi]/Release -llgi'
     	* Add to your compile flags:
-    		- '-i[Lgi]/include/common -i[Lgi]/include/linux/X'
+    		- '-i./include/common -i./include/linux/X'
 
 	Mac:
 		* Include the lgi.framework into your app
 		* Add the these folders to your include path:
-			- [Lgi]/include/common
-			- [Lgi]/include/mac
+			- include/common
+			- include/mac
 
 Usage
 -----
     In most cases just:
 
-	#include "Lgi.h"
+	#include "lgi/common/Lgi.h"
 
     But you can also include "Gdc2.h" for just graphics support without all
     the GUI stuff.
@@ -98,7 +88,7 @@ Usage
 Documentation
 -------------
     
-    See: [Lgi]/docs/html/index.html.
+    See: docs/html/index.html.
 
 	Which you may have to generate with doxygen if you are building from the
 	repository.
