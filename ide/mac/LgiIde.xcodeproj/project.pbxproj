@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		340BE2312D14B622007003B5 /* commands.svg in CopyFiles */ = {isa = PBXBuildFile; fileRef = 340BE2302D14B5FB007003B5 /* commands.svg */; };
 		34148AFC2349ECA200D5E495 /* LgiCocoa.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B20D1217968820079E3C9 /* LgiCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		341C7AC821A752DC0083C9CE /* About.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 341C7AC721A752DC0083C9CE /* About.cpp */; };
 		3432AF732ADFE2F40029F2D7 /* libpng16.16.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3414FDD82ADFE2D00092DA8F /* libpng16.16.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -26,13 +27,11 @@
 		345B210A217969700079E3C9 /* WebFldDlg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20E42179696C0079E3C9 /* WebFldDlg.cpp */; };
 		345B210B217969700079E3C9 /* SimpleCppParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20E52179696C0079E3C9 /* SimpleCppParser.cpp */; };
 		345B210C217969700079E3C9 /* DocEdit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20E72179696C0079E3C9 /* DocEdit.cpp */; };
-		345B210D217969700079E3C9 /* AddFtpFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20EA2179696D0079E3C9 /* AddFtpFile.cpp */; };
 		345B210E217969700079E3C9 /* History.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20EE2179696D0079E3C9 /* History.cpp */; };
 		345B210F217969700079E3C9 /* IdeProject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20EF2179696E0079E3C9 /* IdeProject.cpp */; };
 		345B2112217969700079E3C9 /* LgiUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20F52179696E0079E3C9 /* LgiUtils.cpp */; };
 		345B2113217969700079E3C9 /* LgiIde.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20F62179696E0079E3C9 /* LgiIde.cpp */; };
 		345B2114217969700079E3C9 /* IdeCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20F72179696F0079E3C9 /* IdeCommon.cpp */; };
-		345B2115217969700079E3C9 /* FtpThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FB2179696F0079E3C9 /* FtpThread.cpp */; };
 		345B2116217969700079E3C9 /* Debugger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FC2179696F0079E3C9 /* Debugger.cpp */; };
 		345B2117217969700079E3C9 /* DebugContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FD2179696F0079E3C9 /* DebugContext.cpp */; };
 		345B2118217969700079E3C9 /* IdeProjectSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FE217969700079E3C9 /* IdeProjectSettings.cpp */; };
@@ -41,8 +40,6 @@
 		34C4FD2A22FD7EB800C4BECB /* icons.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211D217969D30079E3C9 /* icons.png */; };
 		34C4FD2B22FD7EC100C4BECB /* LgiIde.lr8 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211C217969D30079E3C9 /* LgiIde.lr8 */; };
 		34C4FD2C22FD7EC700C4BECB /* mac-icon.icns in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211B217969D30079E3C9 /* mac-icon.icns */; };
-		34C4FD3422FDB58B00C4BECB /* cmds-16px.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34C4FD3222FDB50D00C4BECB /* cmds-16px.png */; };
-		34C4FD3522FDB58B00C4BECB /* cmds-32px.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34C4FD3322FDB50D00C4BECB /* cmds-32px.png */; };
 		34C75D9323A0D89A006DE6D1 /* NewProjectFromTemplate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C75D9223A0D89A006DE6D1 /* NewProjectFromTemplate.cpp */; };
 		34D21CD821797815003D1EA6 /* ExeCheck.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D21CD721797815003D1EA6 /* ExeCheck.cpp */; };
 		34D21CDA21797833003D1EA6 /* LexCpp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D21CD921797833003D1EA6 /* LexCpp.cpp */; };
@@ -94,8 +91,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 7;
 			files = (
-				34C4FD3422FDB58B00C4BECB /* cmds-16px.png in CopyFiles */,
-				34C4FD3522FDB58B00C4BECB /* cmds-32px.png in CopyFiles */,
+				340BE2312D14B622007003B5 /* commands.svg in CopyFiles */,
 				34C4FD2C22FD7EC700C4BECB /* mac-icon.icns in CopyFiles */,
 				34C4FD2B22FD7EC100C4BECB /* LgiIde.lr8 in CopyFiles */,
 				34C4FD2A22FD7EB800C4BECB /* icons.png in CopyFiles */,
@@ -105,6 +101,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		340BE2302D14B5FB007003B5 /* commands.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = commands.svg; path = ../resources/commands.svg; sourceTree = "<group>"; };
 		3411DB712AB86D6700CB3837 /* PostBuildStep.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = PostBuildStep.py; sourceTree = "<group>"; };
 		3414FDD82ADFE2D00092DA8F /* libpng16.16.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng16.16.dylib; path = /opt/local/lib/libpng16.16.dylib; sourceTree = "<absolute>"; };
 		341C7AC721A752DC0083C9CE /* About.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = About.cpp; path = ../../src/common/Lgi/About.cpp; sourceTree = "<group>"; };
@@ -120,7 +117,6 @@
 		345B20D52179696B0079E3C9 /* PythonParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PythonParser.cpp; path = ../src/PythonParser.cpp; sourceTree = "<group>"; };
 		345B20D62179696B0079E3C9 /* SpaceTabConv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SpaceTabConv.h; path = ../src/SpaceTabConv.h; sourceTree = "<group>"; };
 		345B20D72179696B0079E3C9 /* IdeDocPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IdeDocPrivate.h; path = ../src/IdeDocPrivate.h; sourceTree = "<group>"; };
-		345B20D82179696B0079E3C9 /* FtpThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FtpThread.h; path = ../src/FtpThread.h; sourceTree = "<group>"; };
 		345B20D92179696B0079E3C9 /* WebFldDlg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WebFldDlg.h; path = ../src/WebFldDlg.h; sourceTree = "<group>"; };
 		345B20DA2179696B0079E3C9 /* MemDumpViewer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MemDumpViewer.cpp; path = ../src/MemDumpViewer.cpp; sourceTree = "<group>"; };
 		345B20DB2179696B0079E3C9 /* IdeFindInFiles.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IdeFindInFiles.cpp; path = ../src/IdeFindInFiles.cpp; sourceTree = "<group>"; };
@@ -138,9 +134,6 @@
 		345B20E72179696C0079E3C9 /* DocEdit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DocEdit.cpp; path = ../src/DocEdit.cpp; sourceTree = "<group>"; };
 		345B20E82179696C0079E3C9 /* DocEdit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DocEdit.h; path = ../src/DocEdit.h; sourceTree = "<group>"; };
 		345B20E92179696D0079E3C9 /* IdeFindInFiles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IdeFindInFiles.h; path = ../src/IdeFindInFiles.h; sourceTree = "<group>"; };
-		345B20EA2179696D0079E3C9 /* AddFtpFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AddFtpFile.cpp; path = ../src/AddFtpFile.cpp; sourceTree = "<group>"; };
-		345B20EB2179696D0079E3C9 /* AddFtpFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AddFtpFile.h; path = ../src/AddFtpFile.h; sourceTree = "<group>"; };
-		345B20EC2179696D0079E3C9 /* FtpFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FtpFile.h; path = ../src/FtpFile.h; sourceTree = "<group>"; };
 		345B20ED2179696D0079E3C9 /* Debugger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Debugger.h; path = ../src/Debugger.h; sourceTree = "<group>"; };
 		345B20EE2179696D0079E3C9 /* History.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = History.cpp; path = ../src/History.cpp; sourceTree = "<group>"; };
 		345B20EF2179696E0079E3C9 /* IdeProject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IdeProject.cpp; path = ../src/IdeProject.cpp; sourceTree = "<group>"; };
@@ -152,7 +145,6 @@
 		345B20F82179696F0079E3C9 /* IdeProject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IdeProject.h; path = ../src/IdeProject.h; sourceTree = "<group>"; };
 		345B20F92179696F0079E3C9 /* LgiIde.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiIde.h; path = ../src/LgiIde.h; sourceTree = "<group>"; };
 		345B20FA2179696F0079E3C9 /* ProjectNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ProjectNode.h; path = ../src/ProjectNode.h; sourceTree = "<group>"; };
-		345B20FB2179696F0079E3C9 /* FtpThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FtpThread.cpp; path = ../src/FtpThread.cpp; sourceTree = "<group>"; };
 		345B20FC2179696F0079E3C9 /* Debugger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Debugger.cpp; path = ../src/Debugger.cpp; sourceTree = "<group>"; };
 		345B20FD2179696F0079E3C9 /* DebugContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DebugContext.cpp; path = ../src/DebugContext.cpp; sourceTree = "<group>"; };
 		345B20FE217969700079E3C9 /* IdeProjectSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IdeProjectSettings.cpp; path = ../src/IdeProjectSettings.cpp; sourceTree = "<group>"; };
@@ -163,8 +155,6 @@
 		345B211D217969D30079E3C9 /* icons.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icons.png; path = ../Resources/icons.png; sourceTree = "<group>"; };
 		348341382CC4B5E6002AF938 /* RemoteFileSelect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RemoteFileSelect.h; path = ../../include/lgi/common/RemoteFileSelect.h; sourceTree = "<group>"; };
 		348341392CC4B5E6002AF938 /* RemoteFileSelect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RemoteFileSelect.cpp; path = ../../src/common/Lgi/RemoteFileSelect.cpp; sourceTree = "<group>"; };
-		34C4FD3222FDB50D00C4BECB /* cmds-16px.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cmds-16px.png"; sourceTree = "<group>"; };
-		34C4FD3322FDB50D00C4BECB /* cmds-32px.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cmds-32px.png"; sourceTree = "<group>"; };
 		34C75D9223A0D89A006DE6D1 /* NewProjectFromTemplate.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = NewProjectFromTemplate.cpp; path = ../src/NewProjectFromTemplate.cpp; sourceTree = "<group>"; };
 		34D21CD721797815003D1EA6 /* ExeCheck.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ExeCheck.cpp; path = ../../src/common/General/ExeCheck.cpp; sourceTree = "<group>"; };
 		34D21CD921797833003D1EA6 /* LexCpp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexCpp.cpp; path = ../../src/common/Coding/LexCpp.cpp; sourceTree = "<group>"; };
@@ -252,9 +242,8 @@
 		345B211A217969C50079E3C9 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				340BE2302D14B5FB007003B5 /* commands.svg */,
 				345B207A217965EA0079E3C9 /* LgiIde.entitlements */,
-				34C4FD3222FDB50D00C4BECB /* cmds-16px.png */,
-				34C4FD3322FDB50D00C4BECB /* cmds-32px.png */,
 				345B211D217969D30079E3C9 /* icons.png */,
 				345B211C217969D30079E3C9 /* LgiIde.lr8 */,
 				345B211B217969D30079E3C9 /* mac-icon.icns */,
@@ -266,8 +255,6 @@
 		345B2121217969F10079E3C9 /* Projects */ = {
 			isa = PBXGroup;
 			children = (
-				343688C82CA7924B0009E57A /* SystemIntf.cpp */,
-				343688C72CA7924B0009E57A /* SystemIntf.h */,
 				345B20DD2179696B0079E3C9 /* ProjectNode.cpp */,
 				345B20FA2179696F0079E3C9 /* ProjectNode.h */,
 				345B20D72179696B0079E3C9 /* IdeDocPrivate.h */,
@@ -299,16 +286,11 @@
 				345B20DE2179696B0079E3C9 /* SysCharSupport.cpp */,
 				345B20E22179696C0079E3C9 /* SpaceTabConv.cpp */,
 				345B20D62179696B0079E3C9 /* SpaceTabConv.h */,
-				345B20EC2179696D0079E3C9 /* FtpFile.h */,
-				345B20FB2179696F0079E3C9 /* FtpThread.cpp */,
-				345B20D82179696B0079E3C9 /* FtpThread.h */,
 				345B20EE2179696D0079E3C9 /* History.cpp */,
 				345B20F22179696E0079E3C9 /* History.h */,
 				345B20F72179696F0079E3C9 /* IdeCommon.cpp */,
 				345B20DA2179696B0079E3C9 /* MemDumpViewer.cpp */,
 				345B20FF217969700079E3C9 /* MissingFiles.cpp */,
-				345B20EA2179696D0079E3C9 /* AddFtpFile.cpp */,
-				345B20EB2179696D0079E3C9 /* AddFtpFile.h */,
 			);
 			name = Ui;
 			sourceTree = "<group>";
@@ -343,6 +325,9 @@
 		348341372CC4B5CE002AF938 /* RemoteFileSelect */ = {
 			isa = PBXGroup;
 			children = (
+				34D21CE12179788B003D1EA6 /* Ftp.cpp */,
+				343688C82CA7924B0009E57A /* SystemIntf.cpp */,
+				343688C72CA7924B0009E57A /* SystemIntf.h */,
 				348341392CC4B5E6002AF938 /* RemoteFileSelect.cpp */,
 				348341382CC4B5E6002AF938 /* RemoteFileSelect.h */,
 			);
@@ -357,7 +342,6 @@
 				34D21CED21798240003D1EA6 /* Png.cpp */,
 				34D21CE9217978DA003D1EA6 /* Base64.cpp */,
 				34D21CE7217978C4003D1EA6 /* LgiMain.cpp */,
-				34D21CE12179788B003D1EA6 /* Ftp.cpp */,
 				34D21CE32179788B003D1EA6 /* Http.cpp */,
 				34D21CE22179788B003D1EA6 /* OpenSSLSocket.cpp */,
 				34D21CDD21797856003D1EA6 /* Mdi.cpp */,
@@ -472,7 +456,6 @@
 				3458E51E2CE7EDBB00039176 /* RemoveAnsi.cpp in Sources */,
 				343688C92CA7929E0009E57A /* SystemIntf.cpp in Sources */,
 				34D21CD821797815003D1EA6 /* ExeCheck.cpp in Sources */,
-				345B2115217969700079E3C9 /* FtpThread.cpp in Sources */,
 				345B210F217969700079E3C9 /* IdeProject.cpp in Sources */,
 				34D21CE62179788B003D1EA6 /* Http.cpp in Sources */,
 				345B210C217969700079E3C9 /* DocEdit.cpp in Sources */,
@@ -505,7 +488,6 @@
 				345B2105217969700079E3C9 /* ProjectNode.cpp in Sources */,
 				34D21CDE21797856003D1EA6 /* OptionsFile.cpp in Sources */,
 				34D21CE52179788B003D1EA6 /* OpenSSLSocket.cpp in Sources */,
-				345B210D217969700079E3C9 /* AddFtpFile.cpp in Sources */,
 				345B210A217969700079E3C9 /* WebFldDlg.cpp in Sources */,
 				345B2117217969700079E3C9 /* DebugContext.cpp in Sources */,
 			);

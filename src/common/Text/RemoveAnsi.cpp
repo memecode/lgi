@@ -17,7 +17,7 @@ void RemoveAnsi(LString &a)
 
 size_t RemoveAnsi(char *in, size_t length)
 {
-	auto *s = in;
+	auto s = (uint8_t*) in;
 	auto *out = in;
 	auto e = s + length;
 	bool echoChars = true;

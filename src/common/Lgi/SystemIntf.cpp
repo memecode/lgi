@@ -256,12 +256,12 @@ class SshBackend :
 	}
 
 public:
-	#ifdef HAIKU
-	using TOffset = off_t;
+	#if defined(HAIKU) || defined(MAC)
+		using TOffset = off_t;
 	#elif defined(WINDOWS)
-	using TOffset = _off_t;
+		using TOffset = _off_t;
 	#else
-	using TOffset = __off_t;
+		using TOffset = __off_t;
 	#endif
 
 	SshBackend(LView *parent, LString u, LStream *logger) :

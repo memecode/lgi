@@ -139,7 +139,7 @@ public:
 	LToolBar();
 	~LToolBar();
 
-	const char *GetClass() { return "LToolBar"; }
+	const char *GetClass() override { return "LToolBar"; }
 
 	/// Called when a button is clicked
 	virtual void OnButtonClick(LToolButton *Btn);
@@ -171,7 +171,7 @@ public:
 	/// Sets the image list to use
 	bool SetImageList(LImageList *l, int Bx, int By, bool Own = true);
 	/// Gets the font used to draw the text below the buttons
-	LFont *GetFont();
+	LFont *GetFont() override;
 
 	/// Adds a button to the toolbar
 	LToolButton *AppendButton
@@ -205,18 +205,18 @@ public:
 	size_t Length() { return Children.Length(); }
 
 	// Events
-	LMessage::Result OnEvent(LMessage *Msg);
-	void OnPaint(LSurface *pDC);
-	void OnMouseClick(LMouse &m);
-	void OnMouseEnter(LMouse &m);
-	void OnMouseExit(LMouse &m);
-	void OnMouseMove(LMouse &m);
-	bool Pour(LRegion &r);
-	bool OnLayout(LViewLayoutInfo &Inf);
-	void OnCreate();
+	LMessage::Result OnEvent(LMessage *Msg) override;
+	void OnPaint(LSurface *pDC) override;
+	void OnMouseClick(LMouse &m) override;
+	void OnMouseEnter(LMouse &m) override;
+	void OnMouseExit(LMouse &m) override;
+	void OnMouseMove(LMouse &m) override;
+	bool Pour(LRegion &r) override;
+	bool OnLayout(LViewLayoutInfo &Inf) override;
+	void OnCreate() override;
 
 	#ifdef MAC
-	bool Attach(LViewI *parent);
+	bool Attach(LViewI *parent) override;
 	
 	class Custom : public LView
 	{

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		342D52A50F0CBA2F002A1C7C /* LgiMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 342D52A40F0CBA2F002A1C7C /* LgiMain.cpp */; };
+		343B7EE22D14B846006C250F /* RemoveAnsi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 343B7EE12D14B846006C250F /* RemoveAnsi.cpp */; };
 		3448F8C62081D2500038AE76 /* mac-icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 3448F8C52081D2500038AE76 /* mac-icon.icns */; };
 		3449AB5828B96C8A00F8AAD4 /* SshConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3449AB5728B96C8A00F8AAD4 /* SshConnection.cpp */; };
 		3457FE492081CB3D00014BE4 /* BrowseUi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE3E2081CB3D00014BE4 /* BrowseUi.cpp */; };
@@ -71,6 +72,7 @@
 
 /* Begin PBXFileReference section */
 		342D52A40F0CBA2F002A1C7C /* LgiMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiMain.cpp; path = ../../src/common/Lgi/LgiMain.cpp; sourceTree = SOURCE_ROOT; };
+		343B7EE12D14B846006C250F /* RemoveAnsi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RemoveAnsi.cpp; path = ../../src/common/Text/RemoveAnsi.cpp; sourceTree = "<group>"; };
 		3448F8C52081D2500038AE76 /* mac-icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = "mac-icon.icns"; path = "../Resources/mac-icon.icns"; sourceTree = "<group>"; };
 		3449AB5628B96C8A00F8AAD4 /* SshConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SshConnection.h; path = ../Src/SshConnection.h; sourceTree = "<group>"; };
 		3449AB5728B96C8A00F8AAD4 /* SshConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SshConnection.cpp; path = ../Src/SshConnection.cpp; sourceTree = "<group>"; };
@@ -186,6 +188,7 @@
 		342D52A30F0CBA07002A1C7C /* Lgi */ = {
 			isa = PBXGroup;
 			children = (
+				343B7EE12D14B846006C250F /* RemoveAnsi.cpp */,
 				347D1488252D453300422DA9 /* DeEscape.cpp */,
 				34CE070F2327B3B100807DCB /* Png.cpp */,
 				34C032BC2319CEC100470DF2 /* OptionsFile.cpp */,
@@ -362,6 +365,7 @@
 				3485E7F5294F13F70020C14D /* PatchViewer.cpp in Sources */,
 				3457FE4A2081CB3D00014BE4 /* DropDownBtn.cpp in Sources */,
 				3457FE4D2081CB3D00014BE4 /* VcFile.cpp in Sources */,
+				343B7EE22D14B846006C250F /* RemoveAnsi.cpp in Sources */,
 				34C032BD2319CEC100470DF2 /* OptionsFile.cpp in Sources */,
 				3457FE492081CB3D00014BE4 /* BrowseUi.cpp in Sources */,
 				342D52A50F0CBA2F002A1C7C /* LgiMain.cpp in Sources */,

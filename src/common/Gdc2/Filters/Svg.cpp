@@ -43,14 +43,27 @@ public:
 			
 			if (Out->Create(bmp.width(), bmp.height(), System32BitColourSpace))
 			{
+				#ifndef MAC
 				auto bytes = MIN(bmp.stride(), Out->GetRowStep());
+				#endif
 				LgiTrace("%s:%i - strides: %i, %i\n", _FL, bmp.stride(), Out->GetRowStep());
 				for (int y=0; y<Out->Y(); y++)
 				{
 					auto in = bmp.data() + (y * bmp.stride());
 					if (auto out = (*Out)[y])
 					{
-						memcpy(out, in, bytes);
+						#ifdef MAC
+							auto i = (LBgra32*)in;
+							auto o = (System32BitPixel*)out;
+							auto e = i + Out->X();
+							while (i < e)
+							{
+								o->r = i->r; o->g = i->g; o->b = i->b; o->a = i->a;
+								o++; i++;
+							}
+						#else
+							memcpy(out, in, bytes);
+						#endif
 					}
 				}
 			}

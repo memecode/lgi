@@ -362,7 +362,7 @@ public:
 	// File IO
 	bool Open(const char *Name, const char *Cs = NULL) override;
 	bool Save(const char *Name, const char *Cs = NULL) override;
-	bool Save(LStream *Out, const char *Cs = NULL);
+	bool Save(LStream *Out, const char *Cs = NULL) override;
 	const char *GetLastError();
 
 	// Clipboard IO

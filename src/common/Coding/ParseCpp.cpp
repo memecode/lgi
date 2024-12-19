@@ -438,7 +438,7 @@ struct LSourceFile
 		char *Leaf = strrchr(Path, DIR_CHAR);
 		char Out[MAX_PATH_LEN];
 		LMakePath(Out, sizeof(Out), "c:\\temp", Leaf + 1);
-		char *Ext = LGetExtension(Out);
+		auto Ext = (char*)LGetExtension(Out);
 		strcpy(Ext, "xml");
 		if (f.Open(Out, O_WRITE))
 		{
@@ -685,7 +685,7 @@ char *LCppParserWorker::FindInclude(char *File)
 				auto Leaf = dir.GetName();
 				if (!dir.IsDir())
 				{
-					char *ext = LGetExtension(Leaf);
+					auto ext = LGetExtension(Leaf);
 					if (ext && ext[0] == 'h' && !ext[1])
 					{
 						if (dir.Path(p, sizeof(p)))
@@ -2259,7 +2259,7 @@ void LCppParserWorker::DoWork(WorkUnit *wk)
 		// Parse source code...
 		for (int i=0; i<w->Source.Length(); i++)
 		{
-			char *ext = LGetExtension(w->Source[i]);
+			auto ext = LGetExtension(w->Source[i]);
 			if (!ext)
 				continue;
 			
