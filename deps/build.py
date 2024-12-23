@@ -54,7 +54,7 @@ for n in range(len(subfolders)):
         if (first or singleConfig or clean) and os.path.exists(path):
             if clean:
                 print("removing:", path)
-            shutil.rmtree(path)
+            # shutil.rmtree(path)
         if clean:
             continue
 

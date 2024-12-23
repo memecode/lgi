@@ -29,11 +29,10 @@ endif()
 
 function(GitProject NAME URI BRANCH)
 
-    set(BASE "${DEPS}/${NAME}")
-    set(SRC "${BASE}/src")
-    message(STATUS "${NAME} = ${SRC}")
-    if(NOT EXISTS ${SRC})
-        execute_process(COMMAND git clone -b ${BRANCH} ${URI} ${SRC}
+    set(DIR "${DEPS}/${NAME}")
+    message(STATUS "${NAME} = ${DIR}")
+    if(NOT EXISTS ${DIR})
+        execute_process(COMMAND git clone -b ${BRANCH} ${URI} ${DIR}
             RESULT_VARIABLE clone_result
             OUTPUT_VARIABLE clone_out)
         if(${clone_result})
@@ -41,39 +40,44 @@ function(GitProject NAME URI BRANCH)
         endif()
     endif()
 
-    add_subdirectory(${SRC} ${NAME})
+    set(LISTS "${DIR}/CMakeLists.txt")
+    if(EXISTS ${LISTS})
+        add_subdirectory(${DIR} ${NAME})
+    else()
+        message(STATUS "${NAME} is not a cmake project")
+    endif()
 
 endfunction()
 
+# libjpeg
 GitProject(libjpeg "https://github.com/memecode/libjpeg.git" "memecode")
 install(TARGETS jpeg
         DESTINATION ${CMAKE_BINARY_DIR}/lib)
 
+# zlib
 GitProject(zlib    "https://github.com/madler/zlib.git" "develop")
 install(TARGETS zlib
         DESTINATION ${CMAKE_BINARY_DIR}/lib)
 
+# libpng
 set(PNG_ARM_NEON OFF)
 set(PNG_STATIC OFF)
 set(PNG_SHARED ON)
 set(PNG_BUILD_ZLIB OFF)
 set(ZLIB_INCLUDE_DIR
-    ${DEPS}/zlib/src
+    ${DEPS}/zlib
     ${CMAKE_BINARY_DIR}/zlib)
-
 GitProject(libpng  "https://github.com/memecode/libpng.git" "libpng16")
 install(TARGETS png_shared
         DESTINATION ${CMAKE_BINARY_DIR}/lib)
 
+# lunasvg
+GitProject(lunasvg "https://github.com/sammycage/lunasvg.git" "master")
 
-#    INSTALL_COMMAND mkdir -p ${CMAKE_BINARY_DIR}/lib
-#        COMMAND cp ${LIBJPEG_OUT} ${CMAKE_BINARY_DIR}/lib/${LIBJPEG_OUT}
-#        COMMAND ln -sf ./${LIBJPEG_OUT} ${CMAKE_BINARY_DIR}/lib/libjpeg.1.dylib
-#        COMMAND ln -sf ./libjpeg.1.dylib ${CMAKE_BINARY_DIR}/lib/libjpeg.dylib)
-# add install rules for libjpeg
+# libiconv
+GitProject(libiconv "https://github.com/winlibs/libiconv.git" "master")
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/libiconv)
 
-# FIXME: lunasvg
-
-# FIXME: libiconv
-
-# FIXME: libntlm
+# libntlm
+GitProject(libntlm "https://gitlab.com/gsasl/libntlm.git" "master")
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/libntlm)
