@@ -28,7 +28,7 @@
 #if GPL_COMPATIBLE
 #include "AuthNtlm/Ntlm.h"
 #else
-#include "../src/common/Net/libntlm-0.4.2/ntlm.h"
+#include "ntlm.h"
 #endif
 #if HAS_LIBGSASL
 #include "gsasl.h"
