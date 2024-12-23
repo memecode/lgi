@@ -58,7 +58,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\src;..\resources;..\..\include;..\..\include\lgi\win;C:\Program Files\OpenSSL-Win64\include;..\..\..\..\..\codelib\libssh\include;..\..\..\..\..\codelib\libssh\build\include;..\..\..\..\..\codelib\zlib;..\..\..\..\..\codelib\zlib\build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\src;..\resources;..\..\include;..\..\include\lgi\win;..\..\..\deps\build-x64\include;C:\Program Files\OpenSSL-Win64\include;..\..\..\..\..\codelib\libssh\include;..\..\..\..\..\codelib\libssh\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>LUNASVG_BUILD_STATIC;HAS_LIBSSH;WIN32;_DEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -83,7 +83,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\src;..\resources;..\..\include;..\..\include\lgi\win;C:\Program Files\OpenSSL-Win64\include;..\..\..\..\..\codelib\libssh\include;..\..\..\..\..\codelib\libssh\build\include;..\..\..\..\..\codelib\zlib;..\..\..\..\..\codelib\zlib\build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\src;..\resources;..\..\include;..\..\include\lgi\win;..\..\..\deps\build-x64\include;C:\Program Files\OpenSSL-Win64\include;..\..\..\..\..\codelib\libssh\include;..\..\..\..\..\codelib\libssh\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>LUNASVG_BUILD_STATIC;HAS_LIBSSH;WIN32;NDEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>

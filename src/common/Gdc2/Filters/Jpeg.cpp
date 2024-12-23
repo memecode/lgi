@@ -33,23 +33,7 @@
 		#elif defined(HAIKU)
 			"libjpeg.so.62"
 		#else
-			"libjpeg"
-			#if defined(WINDOWS)
-				"9a_"
-				#if _MSC_VER >= _MSC_VER_VS2019
-				_MSC_YEAR_STR
-				#else
-				_MSC_VER_STR
-				#endif
-				#ifdef LGI_64BIT
-				"x64"
-				#else
-				"x32"
-				#endif
-				#ifdef _DEBUG
-				"d"
-				#endif
-			#endif
+			"jpeg62"
 		#endif
 		;
 #else

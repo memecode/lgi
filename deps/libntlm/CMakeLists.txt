@@ -19,18 +19,18 @@ endforeach()
 configure_file(${SRC}/ntlm.h.in ${CMAKE_CURRENT_BINARY_DIR}/ntlm.h)
 
 # create the library
-add_library(ntlm SHARED
+add_library(libntlm SHARED
     ${SRC}/smbutil.c
     ${SRC}/smbencrypt.c
     ${CMAKE_CURRENT_BINARY_DIR}/md4.c
     ${CMAKE_CURRENT_BINARY_DIR}/des.c)
-target_include_directories(ntlm
+target_include_directories(libntlm
     PRIVATE
         ${CMAKE_CURRENT_BINARY_DIR})
-target_compile_definitions(ntlm PRIVATE PACKAGE_STRING="1.14")
+target_compile_definitions(libntlm PRIVATE PACKAGE_STRING="1.14")
 
 # installation
-install(TARGETS ntlm
+install(TARGETS libntlm
     DESTINATION ${CMAKE_BINARY_DIR}/lib)
 install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/ntlm.h
