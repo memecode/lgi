@@ -1467,3 +1467,10 @@
 # define DLL_VARIABLE
 #endif
 
+#ifdef __HAIKU__
+   // Haiku specific:
+   #define O_BINARY 1
+   // #include <fcntl.h>
+   #include <stdint.h>
+   typedef int32_t __int32;
+#endif
