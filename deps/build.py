@@ -4,6 +4,7 @@ import sys
 import subprocess
 import shutil
 import platform
+import stat
 
 arch = []
 gen = ["Ninja"] # the default is ninja, except for Windows, which uses Visual Studio
@@ -40,6 +41,10 @@ if not os.path.exists(depsFolder):
 print("depsFolder:", depsFolder)
 print("curFolder:", curFolder)
 
+def remove_readonly(func, path, excinfo):
+    os.chmod(path, stat.S_IWRITE)
+    func(path)
+
 for n in range(len(subfolders)):
     for config in configs:
         path = os.path.abspath(os.path.join(depsFolder, subfolders[n]))
@@ -54,7 +59,7 @@ for n in range(len(subfolders)):
         if (first or singleConfig or clean) and os.path.exists(path):
             if clean:
                 print("removing:", path)
-            # shutil.rmtree(path)
+            shutil.rmtree(path, onerror=remove_readonly)
         if clean:
             continue
 
