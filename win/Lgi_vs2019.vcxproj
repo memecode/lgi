@@ -90,7 +90,7 @@
     <ClCompile>
       <Optimization>MinSpace</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\include;..\include\lgi\win;..\private\common;..\private\win;..\..\..\..\codelib\libjpeg-9a;..\..\..\..\codelib\libiconv\include;..\..\..\..\codelib\libpng;..\..\..\..\codelib\libpng\build64;..\..\..\..\codelib\libpng\build64\zlib_dir;..\..\..\..\codelib\lunasvg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include;..\include\lgi\win;..\private\common;..\private\win;..\..\deps\build-x64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>LUNASVG_BUILD_STATIC;WIN64;NDEBUG;WINDOWS;LGI_RES;LGI_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -137,7 +137,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\include;..\include\lgi\win;..\private\common;..\private\win;..\..\..\..\codelib\libjpeg-9a;..\..\..\..\codelib\libiconv\include;..\..\..\..\codelib\libpng;..\..\..\..\codelib\libpng\build64;..\..\..\..\codelib\libpng\build64\zlib_dir;..\..\..\..\codelib\lunasvg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include;..\include\lgi\win;..\private\common;..\private\win;..\..\deps\build-x64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>LUNASVG_BUILD_STATIC;WIN64;LGI_LIBRARY;_DEBUG;WINDOWS;LGI_RES;LGI_UNIT_TESTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -185,7 +185,7 @@
     <ClCompile>
       <Optimization>MinSpace</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\include;..\include\lgi\win;..\private\common;..\private\win;..\..\..\..\codelib\libjpeg-9a;..\..\..\..\codelib\libiconv\include;..\..\..\..\codelib\libpng;..\..\..\..\codelib\libpng\build64;..\..\..\..\codelib\libpng\build64\zlib_dir;..\..\..\..\codelib\lunasvg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include;..\include\lgi\win;..\private\common;..\private\win;..\..\deps\build-x64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>LUNASVG_BUILD_STATIC;WIN64;NDEBUG;WINDOWS;LGI_RES;LGI_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
