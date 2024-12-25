@@ -6,18 +6,6 @@ if(NOT EXISTS ${SRC})
 endif()
 message("libiconv SRC=${SRC}")
 
-# include: .\..\..\source;.\..\..\source\lib;.\..\..\source\include
-# defs: BUILDING_LIBICONV;BUILDING_DLL;PIC;HAVE_CONFIG_H;ENABLE_RELOCATABLE=1;
-#   IN_LIBRARY;INSTALLPREFIX="c:\\\\program files\\iconv";
-#   INSTALLDIR="c:\\\\program files\\iconv";
-#   NO_XMALLOC;set_relocation_prefix=libiconv_set_relocation_prefix;
-#   relocate=libiconv_relocate;
-#   LIBDIR="c:\\\\program files\\iconv";
-#   _CRT_SECURE_NO_WARNINGS
-# source\lib\iconv.c
-# source\libcharset\lib\localcharset.c
-# source\lib\relocatable.c
-
 # common headers and defs
 configure_file(${SRC}/source/srclib/uniwidth.in.h ${CMAKE_CURRENT_BINARY_DIR}/include/uniwidth.h)
 configure_file(${SRC}/source/srclib/unitypes.in.h ${CMAKE_CURRENT_BINARY_DIR}/include/unitypes.h)
@@ -28,46 +16,58 @@ set(USE_MBSTATE_T "0")
 set(BROKEN_WCHAR_H "0")
 set(HAVE_WCHAR_T "1")
 
-# library
-configure_file(${CMAKE_CURRENT_LIST_DIR}/source_config.h ${CMAKE_CURRENT_BINARY_DIR}/lib/config.h)
-configure_file(${SRC}/source/include/iconv.h.in ${CMAKE_CURRENT_BINARY_DIR}/lib/iconv.h)
 if(WIN32)
-    configure_file(${CMAKE_CURRENT_LIST_DIR}/unistd.h ${CMAKE_CURRENT_BINARY_DIR}/lib/unistd.h)
+    set(PUBLIC_DEFS BUILDING_DLL)
+    set(PRIVATE_DEFS _CRT_SECURE_NO_WARNINGS)
+else()
+    set(PUBLIC_DEFS)
+    set(PRIVATE_DEFS)
 endif()
-add_library(libiconv SHARED
+
+# library
+configure_file(${CMAKE_CURRENT_LIST_DIR}/source_config.h ${CMAKE_CURRENT_BINARY_DIR}/include/config.h)
+configure_file(${SRC}/source/include/iconv.h.in ${CMAKE_CURRENT_BINARY_DIR}/include/iconv.h)
+if(WIN32)
+    configure_file(${CMAKE_CURRENT_LIST_DIR}/unistd.h ${CMAKE_CURRENT_BINARY_DIR}/include/unistd.h)
+    set(LIBNAME libiconv)
+else()    
+    set(LIBNAME iconv)
+endif()
+add_library(${LIBNAME} SHARED
     ${SRC}/source/lib/iconv.c
     ${SRC}/source/libcharset/lib/localcharset.c
     ${SRC}/source/lib/relocatable.c
     )
-target_include_directories(libiconv
+target_include_directories(${LIBNAME}
+    BEFORE PRIVATE
+        ${CMAKE_CURRENT_BINARY_DIR}/include)
+target_include_directories(${LIBNAME}
     PUBLIC
         ${SRC}/source
         ${SRC}/source/lib
-        ${SRC}/source/include
-    PRIVATE
-        ${CMAKE_CURRENT_BINARY_DIR}/lib
-        ${CMAKE_CURRENT_BINARY_DIR}/include)
-target_compile_definitions(libiconv
+        # ${SRC}/source/include
+        )
+target_compile_definitions(${LIBNAME}
     PUBLIC
-        BUILDING_DLL
+        ${PUBLIC_DEFS}
     PRIVATE
         BUILDING_LIBICONV
         PIC
         HAVE_CONFIG_H
         ENABLE_RELOCATABLE=1
         IN_LIBRARY
-        NO_XMALLOC
-        _CRT_SECURE_NO_WARNINGS
+        NO_XMALLOC        
         set_relocation_prefix=libiconv_set_relocation_prefix
-        relocate=libiconv_relocate)
+        relocate=libiconv_relocate
+        ${PRIVATE_DEFS})
 if(HAIKU)
-    target_compile_options(iconv_srclib
+    target_compile_options(${LIBNAME}
         PRIVATE
             -Wno-pointer-to-int-cast)
 endif()
     
 
-install(TARGETS libiconv
+install(TARGETS ${LIBNAME}
     DESTINATION ${CMAKE_BINARY_DIR}/lib)
 install(FILES
     ${SRC}/source/include/iconv.h

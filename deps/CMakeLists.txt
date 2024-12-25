@@ -4,7 +4,7 @@ set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 project(lgiDeps)
 
 get_filename_component(DEPS "${CMAKE_CURRENT_LIST_DIR}/../../deps" ABSOLUTE)
-if(HAIKU)
+if(HAIKU OR APPLE)
     # I'm not sure why this needs to be here, but it gets libjpeg to build... so... 'eh'
     set(WITH_SIMD FALSE)
 endif()
@@ -20,7 +20,7 @@ if (APPLE)
     separate_arguments(XcodeParts UNIX_COMMAND ${XcodeOut})
     list(GET XcodeParts 1 XCODE_VER)
     if (${XCODE_VER} VERSION_GREATER_EQUAL "13.0")
-	    set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
+	    set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
     else()
 	    set(CMAKE_OSX_ARCHITECTURES "x86_64")
     endif()
@@ -54,7 +54,14 @@ function(GitProject NAME URI BRANCH)
 endfunction()
 
 # libjpeg
+if(APPLE)
+    set(OSX_ARCHITECTURES ${CMAKE_OSX_ARCHITECTURES})
+    set(CMAKE_OSX_ARCHITECTURES "x86_64")
+endif()
 GitProject(libjpeg "https://github.com/memecode/libjpeg.git" "memecode")
+if(APPLE)
+    set(CMAKE_OSX_ARCHITECTURES ${OSX_ARCHITECTURES})
+endif()
 install(TARGETS jpeg
         DESTINATION ${CMAKE_BINARY_DIR}/lib)
 
@@ -64,9 +71,10 @@ install(TARGETS zlib
         DESTINATION ${CMAKE_BINARY_DIR}/lib)
 
 # libpng
-set(PNG_ARM_NEON OFF)
-set(PNG_STATIC OFF)
-set(PNG_SHARED ON)
+set(PNG_HARDWARE_OPTIMIZATIONS 0)
+set(PNG_ARM_NEON off)
+set(PNG_STATIC off)
+set(PNG_SHARED on)
 set(PNG_BUILD_ZLIB OFF)
 set(ZLIB_INCLUDE_DIR
     ${DEPS}/zlib

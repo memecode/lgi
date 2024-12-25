@@ -1471,6 +1471,10 @@
    // Haiku specific:
    #define O_BINARY 1
    // #include <fcntl.h>
+#endif
+
+
+#if defined(__HAIKU__) || defined(__APPLE__)
    #include <stdint.h>
    typedef int32_t __int32;
 #endif

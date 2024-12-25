@@ -19,9 +19,11 @@ if platform.system() == "Windows":
     singleConfig = False
 elif platform.system() == "Darwin":    
     subfolders = ["build"]
-    universalCheck.append("libiconv-1.17/libiconv.dylib")
-    universalCheck.append("lib/libjpeg.1.58.dylib")
-    universalCheck.append("lib/libpng16.16.dylib")
+    universalCheck.append("lib/libiconv.dylib")
+    # universalCheck.append("lib/libjpeg.62.4.0.dylib")
+    universalCheck.append("lib/libpng16$tag.dylib")
+    universalCheck.append("lib/libz.dylib")
+    universalCheck.append("lib/liblunasvg.a")
     universalArchs.append('x86_64')
     universalArchs.append('arm64')
 elif platform.system() == "Linux":    
@@ -45,6 +47,10 @@ def remove_readonly(func, path, excinfo):
     os.chmod(path, stat.S_IWRITE)
     func(path)
 
+if clean:
+    shutil.rmtree(depsFolder, onerror=remove_readonly)
+    sys.exit(0)
+
 for n in range(len(subfolders)):
     for config in configs:
         path = os.path.abspath(os.path.join(depsFolder, subfolders[n]))
@@ -57,9 +63,7 @@ for n in range(len(subfolders)):
             tag = ""
         
         if (first or singleConfig or clean) and os.path.exists(path):
-            if clean:
-                print("removing:", path)
-            # shutil.rmtree(path, onerror=remove_readonly)
+            shutil.rmtree(path, onerror=remove_readonly)
         if clean:
             continue
 
@@ -106,14 +110,18 @@ for n in range(len(subfolders)):
                 fileName = file.replace("$tag", tag);
                 check = os.path.join(path, fileName)
                 p = subprocess.run(["file", check], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-                parts = p.stdout.decode().split()
+                output = p.stdout.decode()
                 found = []
-                for p in parts:
-                    if p in universalArchs:
-                        found.append(p)
+                for p in output.split("\n"):
+                    parts = p.split("(for architecture")
+                    if len(parts) > 1:
+                        a = parts[1].strip().split(")")[0]
+                        if a in universalArchs:
+                            found.append(a)
                 if len(found) == len(universalArchs):
                     print("Universal check:", check, "ok")
                 else:
                     print("Universal check:", check, "ERROR: missing architectures, found:", found)
+                    print("output:", output)
                     sys.exit(-1)
 
