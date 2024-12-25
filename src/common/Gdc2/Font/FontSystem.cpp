@@ -298,11 +298,7 @@ bool LFontSystem::HasIconv(bool Quiet)
 	{
 		d->LibCheck = true;
 		
-		#ifdef WINDOWS
-		auto LibName = "iconv-2." LGI_LIBRARY_EXT;
-		#else
 		auto LibName = "libiconv." LGI_LIBRARY_EXT;
-		#endif
 		Status = d->Load(LibName);
 		if (!Status && !Quiet)
 		{

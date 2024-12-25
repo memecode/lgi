@@ -75,6 +75,7 @@ for n in range(len(subfolders)):
             args += ["-DCMAKE_INSTALL_PREFIX="+path]
             args += ["-DBUILD_SHARED_LIBS=OFF"]
             args += ["-DCMAKE_INSTALL_MANDIR="+path]
+            args += ["-DCMAKE_INSTALL_DOCDIR="+path]
             args += [curFolder]
 
             print("args:", " ".join(args))

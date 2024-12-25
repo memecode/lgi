@@ -13,8 +13,8 @@
 // Generic shared library loader
 class LgiClass LLibrary
 {
-	char *FileName;
-	OsLibHandle hLib;
+	char *FileName = nullptr;
+	OsLibHandle hLib = nullptr;
 
 public:
 	LLibrary(const char *File = 0, bool Quiet = false);

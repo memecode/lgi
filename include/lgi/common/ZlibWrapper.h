@@ -15,22 +15,9 @@ public:
 	{
 		return
 				#ifdef WINDOWS
-                    "zlib_"
-					#if _MSC_VER >= _MSC_VER_VS2015
-					"14"
-					#elif _MSC_VER >= _MSC_VER_VS2013
-					"12"
-					#elif _MSC_VER >= _MSC_VER_VS2012
-					"11"
-					#elif _MSC_VER >= _MSC_VER_VS2010
-					"10"
-					#else
-					"9"
-					#endif
-					#if WIN64
-					"x64"
-					#else
-					"x32"
+                    "zlib"
+					#ifdef _DEBUG
+					"d"
 					#endif
                 #else
                     "libz"
@@ -41,7 +28,7 @@ public:
 	Zlib() : LLibrary(Name()) {}
 	bool Reload() { return Load(Name()); }
 
-	DynFunc0(const char *, zlibVersion);
+	DynFunc0(const char*, zlibVersion);
 	DynFunc2(int, deflate, z_streamp, strm, int, flush);
 	DynFunc2(int, inflate, z_streamp, strm, int, flush);
 
@@ -91,8 +78,8 @@ public:
 	DynFunc1(int, gzeof, gzFile, file);
 	DynFunc1(int, gzdirect, gzFile, file);
 	DynFunc1(int, gzclose, gzFile, file);
-	DynFunc2(const char *, gzerror, gzFile, file, int *,errnum);
-	DynFunc1(int, gzclearerr,gzFile, file);
+	DynFunc2(const char*, gzerror, gzFile, file, int *,errnum);
+	DynFunc1(int, gzclearerr, gzFile, file);
 };
 
 class LZlibFile : public LStream
@@ -117,7 +104,13 @@ public:
 	{
 		Close();
 
-		f = z->gzopen(Str, Mode == O_WRITE ? "wb" : "rb");
+		auto m = Mode == O_WRITE ? "wb" : "rb";
+		f = z->gzopen(Str, m);
+		if (!f)
+		{
+			auto full = z->GetFullPath();
+			LgiTrace("%s:%i - ZlibFile failed to open (%s)\n", _FL, full.Get());
+		}
 		
 		return IsOpen();
 	}
@@ -166,6 +159,16 @@ public:
 			return -1;
 
 		return z->gzread(f, Buffer, (unsigned)Size);
+	}
+
+	LString Read()
+	{
+		LStringPipe p;
+		char buf[1024];
+		ssize_t rd;
+		while ((rd = Read(buf, sizeof(buf))) > 0)
+			p.Write(buf, rd);
+		return p.NewLStr();
 	}
 	
 	ssize_t Write(const void *Buffer, ssize_t Size, int Flags = 0)

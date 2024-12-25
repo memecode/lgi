@@ -1,7 +1,7 @@
 #define __USE_GNU
 #include <stdio.h>
 
-#define DEBUG_LIB_MSGS		0
+#define DEBUG_LIB_MSGS		1
 #define ALLOW_FALLBACK_PATH	0
 
 #include "lgi/common/Lgi.h"
@@ -11,8 +11,6 @@
 
 LLibrary::LLibrary(const char *File, bool Quiet)
 {
-	FileName = 0;
-	hLib = 0;
 	if (File)
 		Load(File, Quiet);	
 }

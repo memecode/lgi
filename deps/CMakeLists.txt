@@ -4,7 +4,6 @@ set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 project(lgiDeps)
 
 get_filename_component(DEPS "${CMAKE_CURRENT_LIST_DIR}/../../deps" ABSOLUTE)
-set(CMAKE_INSTALL_DOCDIR ${CMAKE_BINARY_DIR})
 if(HAIKU)
     # I'm not sure why this needs to be here, but it gets libjpeg to build... so... 'eh'
     set(WITH_SIMD FALSE)
