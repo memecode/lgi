@@ -15,10 +15,13 @@ def makeLink(target, hasMajorVer):
 
 	parts = target.split(".")
 	target = "./" + target
+	first = parts[0]
+	if first[-1] == "d":
+		first = first[0:-1]
 	if hasMajorVer:
-		link = os.path.join(frameworks, parts[0] + "." + parts[1] + ".dylib")
+		link = os.path.join(frameworks, first + "." + parts[1] + ".dylib")
 	else:
-		link = os.path.join(frameworks, parts[0] + ".dylib")
+		link = os.path.join(frameworks, first + ".dylib")
 	print("link", link, "exists:", os.path.exists(link))
 	if os.path.islink(link):
 		os.unlink(link)

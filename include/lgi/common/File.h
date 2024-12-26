@@ -589,7 +589,7 @@ public:
 		{
 			return GetFull();
 		}
-
+		
 		LString GetFull()
 		{
 			#if !defined(WINDOWS)

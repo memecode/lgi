@@ -1,7 +1,7 @@
 #define __USE_GNU
 #include <stdio.h>
 
-#define DEBUG_LIB_MSGS		1
+#define DEBUG_LIB_MSGS		0
 #define ALLOW_FALLBACK_PATH	0
 
 #include "lgi/common/Lgi.h"
@@ -225,9 +225,6 @@ void *LLibrary::GetAddress(const char *Resource)
 		#if defined WIN32
 			p = (void*) GetProcAddress(hLib, Resource);
 		#elif defined(POSIX)
-			#if DEBUG_LIB_MSGS
-			printf("%s:%i - dlsym(%p,%s)\n", _FL, hLib, Resource);
-			#endif
 			p = dlsym(hLib, Resource);
 		#else
 			LAssert(0);

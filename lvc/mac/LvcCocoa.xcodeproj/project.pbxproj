@@ -23,15 +23,13 @@
 		346F5AC72BA507C000D64829 /* libssh.4.9.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 34DB96442BA5060A0058A51D /* libssh.4.9.6.dylib */; };
 		347D1489252D453300422DA9 /* DeEscape.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 347D1488252D453300422DA9 /* DeEscape.cpp */; };
 		3485E7F5294F13F70020C14D /* PatchViewer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3485E7F4294F13F70020C14D /* PatchViewer.cpp */; };
-		34A3CCB92B64647E000AD22F /* libpng16.16.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34A3CCB52B646469000AD22F /* libpng16.16.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		34A3CCBA2B646487000AD22F /* libz.1.3.1.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34A3CCB72B646472000AD22F /* libz.1.3.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		3492DE852D1CC7340003BE0F /* libpng16d.16.45.git.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3492DE832D1CC7260003BE0F /* libpng16d.16.45.git.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34BD35B120C5484A0001838A /* ControlTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34BD35B020C5484A0001838A /* ControlTree.cpp */; };
 		34BD35B320C548710001838A /* XmlTreeUi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34BD35B220C548710001838A /* XmlTreeUi.cpp */; };
 		34C032B32319CDE900470DF2 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C032B22319CDE900470DF2 /* Cocoa.framework */; };
 		34C032BB2319CE8C00470DF2 /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C032B92319CDFE00470DF2 /* LgiCocoa.framework */; };
 		34C032BD2319CEC100470DF2 /* OptionsFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C032BC2319CEC100470DF2 /* OptionsFile.cpp */; };
 		34C032BE2319CEF200470DF2 /* LgiCocoa.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34C032B92319CDFE00470DF2 /* LgiCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		34CE07102327B3B100807DCB /* Png.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CE070F2327B3B100807DCB /* Png.cpp */; };
 		34DB96462BA5061E0058A51D /* libssh.4.9.6.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34DB96442BA5060A0058A51D /* libssh.4.9.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34E1910C20B1898E00005243 /* image-list.png in Resources */ = {isa = PBXBuildFile; fileRef = 34E1910B20B1898E00005243 /* image-list.png */; };
 		8D0C4E8D0486CD37000505A6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0867D6AAFE840B52C02AAC07 /* InfoPlist.strings */; };
@@ -61,9 +59,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				3492DE852D1CC7340003BE0F /* libpng16d.16.45.git.dylib in CopyFiles */,
 				34DB96462BA5061E0058A51D /* libssh.4.9.6.dylib in CopyFiles */,
-				34A3CCBA2B646487000AD22F /* libz.1.3.1.dylib in CopyFiles */,
-				34A3CCB92B64647E000AD22F /* libpng16.16.dylib in CopyFiles */,
 				34C032BE2319CEF200470DF2 /* LgiCocoa.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -93,14 +90,12 @@
 		347D1488252D453300422DA9 /* DeEscape.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DeEscape.cpp; path = ../../src/common/Text/DeEscape.cpp; sourceTree = "<group>"; };
 		3485E7F4294F13F70020C14D /* PatchViewer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PatchViewer.cpp; path = ../Src/PatchViewer.cpp; sourceTree = "<group>"; };
 		3488EE99233C16AF00756838 /* en */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		34A3CCB52B646469000AD22F /* libpng16.16.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng16.16.dylib; path = /opt/local/lib/libpng16.16.dylib; sourceTree = "<absolute>"; };
-		34A3CCB72B646472000AD22F /* libz.1.3.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.3.1.dylib; path = /opt/local/lib/libz.1.3.1.dylib; sourceTree = "<absolute>"; };
+		3492DE832D1CC7260003BE0F /* libpng16d.16.45.git.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng16d.16.45.git.dylib; path = "../../../deps/build-debug/lib/libpng16d.16.45.git.dylib"; sourceTree = "<group>"; };
 		34BD35B020C5484A0001838A /* ControlTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ControlTree.cpp; path = ../../src/common/Widgets/ControlTree.cpp; sourceTree = "<group>"; };
 		34BD35B220C548710001838A /* XmlTreeUi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XmlTreeUi.cpp; path = ../../src/common/Text/XmlTreeUi.cpp; sourceTree = "<group>"; };
 		34C032B22319CDE900470DF2 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = ../../../../../../../System/Library/Frameworks/Cocoa.framework; sourceTree = "<group>"; };
 		34C032B42319CDFE00470DF2 /* LgiCocoa.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LgiCocoa.xcodeproj; path = ../../src/mac/cocoa/LgiCocoa.xcodeproj; sourceTree = "<group>"; };
 		34C032BC2319CEC100470DF2 /* OptionsFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OptionsFile.cpp; path = ../../src/common/Lgi/OptionsFile.cpp; sourceTree = "<group>"; };
-		34CE070F2327B3B100807DCB /* Png.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Png.cpp; path = ../../src/common/Gdc2/Filters/Png.cpp; sourceTree = "<group>"; };
 		34DB96442BA5060A0058A51D /* libssh.4.9.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssh.4.9.6.dylib; path = /opt/local/lib/libssh.4.9.6.dylib; sourceTree = "<absolute>"; };
 		34E1910B20B1898E00005243 /* image-list.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "image-list.png"; path = "../Resources/image-list.png"; sourceTree = "<group>"; };
 		8D0C4E960486CD37000505A6 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -176,9 +171,8 @@
 		20286C32FDCF999611CA2CEA /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				3492DE832D1CC7260003BE0F /* libpng16d.16.45.git.dylib */,
 				34DB96442BA5060A0058A51D /* libssh.4.9.6.dylib */,
-				34A3CCB52B646469000AD22F /* libpng16.16.dylib */,
-				34A3CCB72B646472000AD22F /* libz.1.3.1.dylib */,
 				34C032B42319CDFE00470DF2 /* LgiCocoa.xcodeproj */,
 				34C032B22319CDE900470DF2 /* Cocoa.framework */,
 			);
@@ -190,7 +184,6 @@
 			children = (
 				343B7EE12D14B846006C250F /* RemoveAnsi.cpp */,
 				347D1488252D453300422DA9 /* DeEscape.cpp */,
-				34CE070F2327B3B100807DCB /* Png.cpp */,
 				34C032BC2319CEC100470DF2 /* OptionsFile.cpp */,
 				34BD35B220C548710001838A /* XmlTreeUi.cpp */,
 				34BD35B020C5484A0001838A /* ControlTree.cpp */,
@@ -369,7 +362,6 @@
 				34C032BD2319CEC100470DF2 /* OptionsFile.cpp in Sources */,
 				3457FE492081CB3D00014BE4 /* BrowseUi.cpp in Sources */,
 				342D52A50F0CBA2F002A1C7C /* LgiMain.cpp in Sources */,
-				34CE07102327B3B100807DCB /* Png.cpp in Sources */,
 				34BD35B120C5484A0001838A /* ControlTree.cpp in Sources */,
 				3449AB5828B96C8A00F8AAD4 /* SshConnection.cpp in Sources */,
 				3457FE4B2081CB3D00014BE4 /* Main.cpp in Sources */,
@@ -411,9 +403,9 @@
 				HEADER_SEARCH_PATHS = (
 					../../include,
 					../../include/lgi/mac/cocoa,
+					"../../../deps/build-debug",
 					../../../../../codelib/libssh/include,
 					/opt/local/include,
-					/opt/local/include/libpng16,
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
@@ -446,9 +438,9 @@
 				HEADER_SEARCH_PATHS = (
 					../../include,
 					../../include/lgi/mac/cocoa,
+					"../../../deps/build-debug",
 					../../../../../codelib/libssh/include,
 					/opt/local/include,
-					/opt/local/include/libpng16,
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";

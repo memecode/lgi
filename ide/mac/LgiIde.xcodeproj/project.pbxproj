@@ -10,8 +10,6 @@
 		340BE2312D14B622007003B5 /* commands.svg in CopyFiles */ = {isa = PBXBuildFile; fileRef = 340BE2302D14B5FB007003B5 /* commands.svg */; };
 		34148AFC2349ECA200D5E495 /* LgiCocoa.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B20D1217968820079E3C9 /* LgiCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		341C7AC821A752DC0083C9CE /* About.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 341C7AC721A752DC0083C9CE /* About.cpp */; };
-		3432AF732ADFE2F40029F2D7 /* libpng16.16.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3414FDD82ADFE2D00092DA8F /* libpng16.16.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		3432AF762ADFE3120029F2D7 /* libz.1.3.1.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3432AF742ADFE3080029F2D7 /* libz.1.3.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		343688C92CA7929E0009E57A /* SystemIntf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 343688C82CA7924B0009E57A /* SystemIntf.cpp */; };
 		343688CB2CA793210009E57A /* libssh.4.9.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 343688CA2CA793210009E57A /* libssh.4.9.6.dylib */; };
 		3458E51E2CE7EDBB00039176 /* RemoveAnsi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3458E51D2CE7EDBB00039176 /* RemoveAnsi.cpp */; };
@@ -50,7 +48,6 @@
 		34D21CE62179788B003D1EA6 /* Http.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D21CE32179788B003D1EA6 /* Http.cpp */; };
 		34D21CE8217978C4003D1EA6 /* LgiMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D21CE7217978C4003D1EA6 /* LgiMain.cpp */; };
 		34D21CEA217978DA003D1EA6 /* Base64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D21CE9217978DA003D1EA6 /* Base64.cpp */; };
-		34D21CEE21798240003D1EA6 /* Png.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D21CED21798240003D1EA6 /* Png.cpp */; };
 		34D625802CA78EE400FF505C /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 345B20D1217968820079E3C9 /* LgiCocoa.framework */; };
 		34F566AB237BD55F0027133A /* JavascriptParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34F566A0237BD55F0027133A /* JavascriptParser.cpp */; };
 /* End PBXBuildFile section */
@@ -79,8 +76,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				3432AF762ADFE3120029F2D7 /* libz.1.3.1.dylib in CopyFiles */,
-				3432AF732ADFE2F40029F2D7 /* libpng16.16.dylib in CopyFiles */,
 				34148AFC2349ECA200D5E495 /* LgiCocoa.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -103,9 +98,7 @@
 /* Begin PBXFileReference section */
 		340BE2302D14B5FB007003B5 /* commands.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = commands.svg; path = ../resources/commands.svg; sourceTree = "<group>"; };
 		3411DB712AB86D6700CB3837 /* PostBuildStep.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = PostBuildStep.py; sourceTree = "<group>"; };
-		3414FDD82ADFE2D00092DA8F /* libpng16.16.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng16.16.dylib; path = /opt/local/lib/libpng16.16.dylib; sourceTree = "<absolute>"; };
 		341C7AC721A752DC0083C9CE /* About.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = About.cpp; path = ../../src/common/Lgi/About.cpp; sourceTree = "<group>"; };
-		3432AF742ADFE3080029F2D7 /* libz.1.3.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.3.1.dylib; path = ../../../../../../../opt/local/lib/libz.1.3.1.dylib; sourceTree = "<group>"; };
 		343688C72CA7924B0009E57A /* SystemIntf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SystemIntf.h; path = ../../include/lgi/common/SystemIntf.h; sourceTree = "<group>"; };
 		343688C82CA7924B0009E57A /* SystemIntf.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SystemIntf.cpp; path = ../../src/common/Lgi/SystemIntf.cpp; sourceTree = "<group>"; };
 		343688CA2CA793210009E57A /* libssh.4.9.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssh.4.9.6.dylib; path = ../../../../../../../opt/local/lib/libssh.4.9.6.dylib; sourceTree = "<group>"; };
@@ -165,7 +158,6 @@
 		34D21CE32179788B003D1EA6 /* Http.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Http.cpp; path = ../../src/common/Net/Http.cpp; sourceTree = "<group>"; };
 		34D21CE7217978C4003D1EA6 /* LgiMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiMain.cpp; path = ../../src/common/Lgi/LgiMain.cpp; sourceTree = "<group>"; };
 		34D21CE9217978DA003D1EA6 /* Base64.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Base64.cpp; path = ../../src/common/Net/Base64.cpp; sourceTree = "<group>"; };
-		34D21CED21798240003D1EA6 /* Png.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Png.cpp; path = ../../src/common/Gdc2/Filters/Png.cpp; sourceTree = "<group>"; };
 		34F566A0237BD55F0027133A /* JavascriptParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JavascriptParser.cpp; path = ../src/JavascriptParser.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -224,8 +216,6 @@
 			isa = PBXGroup;
 			children = (
 				343688CA2CA793210009E57A /* libssh.4.9.6.dylib */,
-				3414FDD82ADFE2D00092DA8F /* libpng16.16.dylib */,
-				3432AF742ADFE3080029F2D7 /* libz.1.3.1.dylib */,
 				345B20C3217967760079E3C9 /* LgiCocoa.xcodeproj */,
 			);
 			name = Frameworks;
@@ -339,7 +329,6 @@
 			children = (
 				3458E51D2CE7EDBB00039176 /* RemoveAnsi.cpp */,
 				341C7AC721A752DC0083C9CE /* About.cpp */,
-				34D21CED21798240003D1EA6 /* Png.cpp */,
 				34D21CE9217978DA003D1EA6 /* Base64.cpp */,
 				34D21CE7217978C4003D1EA6 /* LgiMain.cpp */,
 				34D21CE32179788B003D1EA6 /* Http.cpp */,
@@ -461,7 +450,6 @@
 				345B210C217969700079E3C9 /* DocEdit.cpp in Sources */,
 				345B2107217969700079E3C9 /* IdeDoc.cpp in Sources */,
 				3483413A2CC4B5E6002AF938 /* RemoteFileSelect.cpp in Sources */,
-				34D21CEE21798240003D1EA6 /* Png.cpp in Sources */,
 				345B2101217969700079E3C9 /* PythonParser.cpp in Sources */,
 				345B2119217969700079E3C9 /* MissingFiles.cpp in Sources */,
 				345B2114217969700079E3C9 /* IdeCommon.cpp in Sources */,

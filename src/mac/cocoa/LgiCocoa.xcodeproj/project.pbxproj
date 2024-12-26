@@ -1343,9 +1343,7 @@
 					../../../include/lgi/mac/cocoa,
 					../../../private/mac,
 					../../../private/common,
-					../../../../../../codelib/lunasvg/include,
-					/opt/local/include/libpng16,
-					/opt/local/include,
+					"../../../../deps/build-debug/include",
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
@@ -1406,9 +1404,7 @@
 					../../../include/lgi/mac/cocoa,
 					../../../private/mac,
 					../../../private/common,
-					../../../../../../codelib/lunasvg/include,
-					/opt/local/include/libpng16,
-					/opt/local/include,
+					"../../../../deps/build-debug/include",
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
