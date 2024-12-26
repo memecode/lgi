@@ -1474,7 +1474,7 @@
 #endif
 
 
-#if defined(__HAIKU__) || defined(__APPLE__)
+#if 1 //defined(__HAIKU__) || defined(__APPLE__)
    #include <stdint.h>
    typedef int32_t __int32;
 #endif

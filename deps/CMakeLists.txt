@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 project(lgiDeps)
+enable_language( C CXX ASM )
 
 get_filename_component(DEPS "${CMAKE_CURRENT_LIST_DIR}/../../deps" ABSOLUTE)
 if(HAIKU OR APPLE)
