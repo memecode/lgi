@@ -48,6 +48,10 @@ for file in files:
 		print("error: the library", file, "is not universal")
 		sys.exit(1)
 		
+	# these don't need linka...
+	if file.find("libiconv") >= 0 or file.find("libntml") >= 0:
+		continue
+		
 	# then create some symlinks
 	isLibZ = file.find("libz") >= 0
 	makeLink(full, isLibZ)

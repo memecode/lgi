@@ -38,14 +38,6 @@
 		345598CC2D08DA7C00680A5F /* Svg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345598C72D08DA7B00680A5F /* Svg.cpp */; };
 		345598CD2D08DA7C00680A5F /* Jpeg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345598C82D08DA7C00680A5F /* Jpeg.cpp */; };
 		345598CF2D08DBCD00680A5F /* Lzw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345598CE2D08DBCD00680A5F /* Lzw.cpp */; };
-		345598EC2D08DD5500680A5F /* liblunasvg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 345598E12D08DCFC00680A5F /* liblunasvg.a */; };
-		345598ED2D08DD5C00680A5F /* libplutovg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 345598E32D08DCFC00680A5F /* libplutovg.a */; };
-		345598FF2D08E56300680A5F /* libjpeg.8.3.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 345598FE2D08E56300680A5F /* libjpeg.8.3.2.dylib */; };
-		345599012D08E57700680A5F /* libpng16.16.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 345599002D08E57700680A5F /* libpng16.16.dylib */; };
-		345599032D08E5A200680A5F /* libz.1.3.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 345599022D08E5A200680A5F /* libz.1.3.1.dylib */; };
-		345599052D08E5BA00680A5F /* libz.1.3.1.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345599022D08E5A200680A5F /* libz.1.3.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		345599062D08E5C000680A5F /* libjpeg.8.3.2.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345598FE2D08E56300680A5F /* libjpeg.8.3.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		345599072D08E5C600680A5F /* libpng16.16.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345599002D08E57700680A5F /* libpng16.16.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		345920FF1F25649000098DFD /* Font.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FC1F25649000098DFD /* Font.h */; };
 		345921001F25649000098DFD /* FontCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FD1F25649000098DFD /* FontCache.h */; };
 		345921011F25649000098DFD /* FontSelect.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FE1F25649000098DFD /* FontSelect.h */; };
@@ -187,57 +179,18 @@
 		34D795FC2BFD771800904325 /* Colour.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D795F92BFD771800904325 /* Colour.h */; };
 		34D795FD2BFD771800904325 /* CssTools.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D795FA2BFD771800904325 /* CssTools.h */; };
 		34D795FE2BFD771800904325 /* Css.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D795FB2BFD771800904325 /* Css.h */; };
+		34E75B052D1E1C3600AC2107 /* liblunasvg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 34E75AFF2D1E1C3600AC2107 /* liblunasvg.a */; };
+		34E75B0A2D1E1C3600AC2107 /* libplutovg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 34E75B042D1E1C3600AC2107 /* libplutovg.a */; };
+		34E75B0D2D1E1C7300AC2107 /* libpng16.16.45.git.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34E75B002D1E1C3600AC2107 /* libpng16.16.45.git.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		34E75B0E2D1E1C7A00AC2107 /* libjpeg.62.4.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34E75B0B2D1E1C5800AC2107 /* libjpeg.62.4.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		34E75B0F2D1E1C8400AC2107 /* libz.1.3.1.1-motley.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34E75B032D1E1C3600AC2107 /* libz.1.3.1.1-motley.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		34E75B102D1E1C8C00AC2107 /* libiconv.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34E75B012D1E1C3600AC2107 /* libiconv.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34EE8BB12748A55600F12915 /* TextFile.h in Headers */ = {isa = PBXBuildFile; fileRef = 34EE8BB02748A55600F12915 /* TextFile.h */; };
 		34F3EC4329BD374E00BB9B58 /* Rect.h in Headers */ = {isa = PBXBuildFile; fileRef = 34F3EC4229BD374E00BB9B58 /* Rect.h */; };
 		34F6151F27E55C5D00FE5B0C /* Thread.h in Headers */ = {isa = PBXBuildFile; fileRef = 34F6151D27E55C5D00FE5B0C /* Thread.h */; };
 		34F6152027E55C5D00FE5B0C /* ThreadEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = 34F6151E27E55C5D00FE5B0C /* ThreadEvent.h */; };
 		34F6153E27E5628600FE5B0C /* Token.h in Headers */ = {isa = PBXBuildFile; fileRef = 34F6153D27E5628600FE5B0C /* Token.h */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		345598E02D08DCFC00680A5F /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 345598D62D08DCFC00680A5F /* lunasvg.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = B251651FF29B4160A8FEA1D1;
-			remoteInfo = lunasvg;
-		};
-		345598E22D08DCFC00680A5F /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 345598D62D08DCFC00680A5F /* lunasvg.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 173E7B57E7554E2E8A18ED1C;
-			remoteInfo = plutovg;
-		};
-		345598E42D08DCFC00680A5F /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 345598D62D08DCFC00680A5F /* lunasvg.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 0B8C4B09522F418CA9461AF1;
-			remoteInfo = smiley;
-		};
-		345598E62D08DCFC00680A5F /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 345598D62D08DCFC00680A5F /* lunasvg.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 64B03C69B43347749B87D6A4;
-			remoteInfo = svg2png;
-		};
-		345598E82D08DD4800680A5F /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 345598D62D08DCFC00680A5F /* lunasvg.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = FDF87F6F4B254B008029C580;
-			remoteInfo = lunasvg;
-		};
-		345598EA2D08DD4C00680A5F /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 345598D62D08DCFC00680A5F /* lunasvg.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = AD8D8C40B294473AAD9B22C9;
-			remoteInfo = plutovg;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		345599042D08E5AC00680A5F /* CopyFiles */ = {
@@ -246,9 +199,10 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				345599072D08E5C600680A5F /* libpng16.16.dylib in CopyFiles */,
-				345599062D08E5C000680A5F /* libjpeg.8.3.2.dylib in CopyFiles */,
-				345599052D08E5BA00680A5F /* libz.1.3.1.dylib in CopyFiles */,
+				34E75B102D1E1C8C00AC2107 /* libiconv.dylib in CopyFiles */,
+				34E75B0F2D1E1C8400AC2107 /* libz.1.3.1.1-motley.dylib in CopyFiles */,
+				34E75B0E2D1E1C7A00AC2107 /* libjpeg.62.4.0.dylib in CopyFiles */,
+				34E75B0D2D1E1C7300AC2107 /* libpng16.16.45.git.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -287,11 +241,7 @@
 		345598C72D08DA7B00680A5F /* Svg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Svg.cpp; path = ../../common/Gdc2/Filters/Svg.cpp; sourceTree = SOURCE_ROOT; };
 		345598C82D08DA7C00680A5F /* Jpeg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Jpeg.cpp; path = ../../common/Gdc2/Filters/Jpeg.cpp; sourceTree = SOURCE_ROOT; };
 		345598CE2D08DBCD00680A5F /* Lzw.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Lzw.cpp; path = ../../../common/Gdc2/Filters/Lzw.cpp; sourceTree = "<group>"; };
-		345598D62D08DCFC00680A5F /* lunasvg.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = lunasvg.xcodeproj; path = ../../../../../../codelib/lunasvg/build/lunasvg.xcodeproj; sourceTree = "<group>"; };
 		345598FA2D08E3B100680A5F /* PostBuild.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = PostBuild.py; sourceTree = "<group>"; };
-		345598FE2D08E56300680A5F /* libjpeg.8.3.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libjpeg.8.3.2.dylib; path = ../../../../../../../../opt/local/lib/libjpeg.8.3.2.dylib; sourceTree = "<group>"; };
-		345599002D08E57700680A5F /* libpng16.16.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng16.16.dylib; path = ../../../../../../../../opt/local/lib/libpng16.16.dylib; sourceTree = "<group>"; };
-		345599022D08E5A200680A5F /* libz.1.3.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.3.1.dylib; path = ../../../../../../../../opt/local/lib/libz.1.3.1.dylib; sourceTree = "<group>"; };
 		345920FC1F25649000098DFD /* Font.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Font.h; path = ../../../include/lgi/common/Font.h; sourceTree = SOURCE_ROOT; };
 		345920FD1F25649000098DFD /* FontCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FontCache.h; path = ../../../include/lgi/common/FontCache.h; sourceTree = SOURCE_ROOT; };
 		345920FE1F25649000098DFD /* FontSelect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FontSelect.h; path = ../../../include/lgi/common/FontSelect.h; sourceTree = SOURCE_ROOT; };
@@ -435,6 +385,13 @@
 		34D795F92BFD771800904325 /* Colour.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Colour.h; path = ../../../include/lgi/common/Colour.h; sourceTree = "<group>"; };
 		34D795FA2BFD771800904325 /* CssTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CssTools.h; path = ../../../include/lgi/common/CssTools.h; sourceTree = "<group>"; };
 		34D795FB2BFD771800904325 /* Css.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Css.h; path = ../../../include/lgi/common/Css.h; sourceTree = "<group>"; };
+		34E75AFF2D1E1C3600AC2107 /* liblunasvg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblunasvg.a; path = "../../../../deps/build-release/lib/liblunasvg.a"; sourceTree = "<group>"; };
+		34E75B002D1E1C3600AC2107 /* libpng16.16.45.git.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng16.16.45.git.dylib; path = "../../../../deps/build-release/lib/libpng16.16.45.git.dylib"; sourceTree = "<group>"; };
+		34E75B012D1E1C3600AC2107 /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = "../../../../deps/build-release/lib/libiconv.dylib"; sourceTree = "<group>"; };
+		34E75B032D1E1C3600AC2107 /* libz.1.3.1.1-motley.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libz.1.3.1.1-motley.dylib"; path = "../../../../deps/build-release/lib/libz.1.3.1.1-motley.dylib"; sourceTree = "<group>"; };
+		34E75B042D1E1C3600AC2107 /* libplutovg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libplutovg.a; path = "../../../../deps/build-release/lib/libplutovg.a"; sourceTree = "<group>"; };
+		34E75B0B2D1E1C5800AC2107 /* libjpeg.62.4.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libjpeg.62.4.0.dylib; path = "../../../../deps/build-release/lib/libjpeg.62.4.0.dylib"; sourceTree = "<group>"; };
+		34E75B112D1E1FAC00AC2107 /* libntlm.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libntlm.dylib; path = "../../../../deps/build-release/lib/libntlm.dylib"; sourceTree = "<group>"; };
 		34EE8BB02748A55600F12915 /* TextFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TextFile.h; path = ../../../include/lgi/common/TextFile.h; sourceTree = "<group>"; };
 		34F3EC4229BD374E00BB9B58 /* Rect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Rect.h; path = ../../../include/lgi/common/Rect.h; sourceTree = SOURCE_ROOT; };
 		34F6151D27E55C5D00FE5B0C /* Thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Thread.h; path = ../../../include/lgi/common/Thread.h; sourceTree = SOURCE_ROOT; };
@@ -447,11 +404,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				345599012D08E57700680A5F /* libpng16.16.dylib in Frameworks */,
-				345598ED2D08DD5C00680A5F /* libplutovg.a in Frameworks */,
-				345599032D08E5A200680A5F /* libz.1.3.1.dylib in Frameworks */,
-				345598FF2D08E56300680A5F /* libjpeg.8.3.2.dylib in Frameworks */,
-				345598EC2D08DD5500680A5F /* liblunasvg.a in Frameworks */,
+				34E75B0A2D1E1C3600AC2107 /* libplutovg.a in Frameworks */,
+				34E75B052D1E1C3600AC2107 /* liblunasvg.a in Frameworks */,
 				3477C3501CC0C3D60028B84B /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -493,17 +447,6 @@
 				3477C2EA1CC04B890028B84B /* Filter.cpp */,
 			);
 			name = Filters;
-			sourceTree = "<group>";
-		};
-		345598D72D08DCFC00680A5F /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				345598E12D08DCFC00680A5F /* liblunasvg.a */,
-				345598E32D08DCFC00680A5F /* libplutovg.a */,
-				345598E52D08DCFC00680A5F /* smiley */,
-				345598E72D08DCFC00680A5F /* svg2png */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 		345BABCE2B78952D005795A0 /* Frameworks */ = {
@@ -854,11 +797,14 @@
 		3477C34E1CC0C3A30028B84B /* Link */ = {
 			isa = PBXGroup;
 			children = (
-				345599022D08E5A200680A5F /* libz.1.3.1.dylib */,
-				345599002D08E57700680A5F /* libpng16.16.dylib */,
-				345598FE2D08E56300680A5F /* libjpeg.8.3.2.dylib */,
+				34E75B112D1E1FAC00AC2107 /* libntlm.dylib */,
+				34E75B0B2D1E1C5800AC2107 /* libjpeg.62.4.0.dylib */,
+				34E75B012D1E1C3600AC2107 /* libiconv.dylib */,
+				34E75AFF2D1E1C3600AC2107 /* liblunasvg.a */,
+				34E75B042D1E1C3600AC2107 /* libplutovg.a */,
+				34E75B002D1E1C3600AC2107 /* libpng16.16.45.git.dylib */,
+				34E75B032D1E1C3600AC2107 /* libz.1.3.1.1-motley.dylib */,
 				345598FA2D08E3B100680A5F /* PostBuild.py */,
-				345598D62D08DCFC00680A5F /* lunasvg.xcodeproj */,
 				3477C34F1CC0C3D60028B84B /* Cocoa.framework */,
 			);
 			name = Link;
@@ -965,8 +911,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				345598EB2D08DD4C00680A5F /* PBXTargetDependency */,
-				345598E92D08DD4800680A5F /* PBXTargetDependency */,
 			);
 			name = LgiCocoa;
 			productName = Lgi;
@@ -998,49 +942,12 @@
 			mainGroup = 3477C25E1CBF020F0028B84B;
 			productRefGroup = 3477C2691CBF020F0028B84B /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = 345598D72D08DCFC00680A5F /* Products */;
-					ProjectRef = 345598D62D08DCFC00680A5F /* lunasvg.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				3477C2671CBF020F0028B84B /* LgiCocoa */,
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXReferenceProxy section */
-		345598E12D08DCFC00680A5F /* liblunasvg.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = liblunasvg.a;
-			remoteRef = 345598E02D08DCFC00680A5F /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		345598E32D08DCFC00680A5F /* libplutovg.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libplutovg.a;
-			remoteRef = 345598E22D08DCFC00680A5F /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		345598E52D08DCFC00680A5F /* smiley */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = smiley;
-			remoteRef = 345598E42D08DCFC00680A5F /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		345598E72D08DCFC00680A5F /* svg2png */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = svg2png;
-			remoteRef = 345598E62D08DCFC00680A5F /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-/* End PBXReferenceProxy section */
 
 /* Begin PBXShellScriptBuildPhase section */
 		345598F92D08E2EA00680A5F /* ShellScript */ = {
@@ -1188,19 +1095,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		345598E92D08DD4800680A5F /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = lunasvg;
-			targetProxy = 345598E82D08DD4800680A5F /* PBXContainerItemProxy */;
-		};
-		345598EB2D08DD4C00680A5F /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = plutovg;
-			targetProxy = 345598EA2D08DD4C00680A5F /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		3477C26E1CBF020F0028B84B /* Debug */ = {
