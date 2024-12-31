@@ -343,8 +343,7 @@ endif ()
 
 target_include_directories (Lgi PUBLIC
 							"${ROOT}/include/common"
-							${PNGLIB_INCLUDE_DIR}
-							"${CODELIB}/libiconv-1.14/include")
+							${PNGLIB_INCLUDE_DIR})
 
 
 

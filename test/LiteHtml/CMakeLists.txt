@@ -24,10 +24,5 @@ target_link_libraries(LgiLiteHtml PUBLIC lgi litehtml)
 if(WIN32)
     target_include_directories(LgiLiteHtml
         PRIVATE
-            "c:/Program Files/OpenSSL-Win64/include"
-            ${CODELIB}/zlib
-            ${CODELIB}/zlib/build64
-            ${CODELIB}/libpng
-            ${CODELIB}/libpng/build64
-            ${CODELIB}/libjpeg-9a)
+            "c:/Program Files/OpenSSL-Win64/include")
 endif()

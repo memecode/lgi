@@ -1247,9 +1247,8 @@
 					"@loader_path/Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = (
-					../../../../../../codelib/lunasvg/build,
-					"../../../../../../codelib/lunasvg/build/_deps/plutovg-build",
 					/opt/local/lib,
+					"../../../../deps/build-release/lib",
 				);
 				OTHER_CFLAGS = (
 					"-DMAC",
@@ -1308,9 +1307,8 @@
 					"@loader_path/Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = (
-					../../../../../../codelib/lunasvg/build,
-					"../../../../../../codelib/lunasvg/build/_deps/plutovg-build",
 					/opt/local/lib,
+					"../../../../deps/build-release/lib",
 				);
 				OTHER_CFLAGS = (
 					"-DMAC",

@@ -52,53 +52,17 @@ set(LGI_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
 # External libs:
 get_filename_component(CODE ../.. ABSOLUTE)
-get_filename_component(CODELIB ${CODE}/../codelib ABSOLUTE)
-if (NOT EXISTS "${CODELIB}")
-	message(WARNING "Expecting external libraries in: ${CODELIB}")
-else()
-	message("CODELIB=${CODELIB}")
+get_filename_component(DEPS ${CMAKE_CURRENT_LIST_DIR}/../deps ABSOLUTE)
+set(DEPS_DEBUG "${DEPS}/build-debug")
+if (NOT EXISTS "${DEPS_DEBUG}")
+	message(WARNING "Expecting debug external libraries in: ${DEPS_DEBUG}")
+endif()
+set(DEPS_RELEASE "${DEPS}/build-release")
+if (NOT EXISTS "${DEPS_RELEASE}")
+	message(WARNING "Expecting release external libraries in: ${DEPS_RELEASE}")
 endif()
 if(hasParent)
-	set(CODELIB "${CODELIB}" PARENT_SCOPE)
-endif()
-
-set(ICONV_PATH "${CODELIB}/libiconv")
-if (NOT EXISTS "${ICONV_PATH}/include")
-	if (APPLE)
-		if (EXISTS "/opt/local/include/iconv.h")
-			set(ICONV_PATH "/opt/local")
-		else()
-			find_package(Iconv REQUIRED)
-		endif()
-	elseif (LINUX OR HAIKU)
-		# Haiku: if this fails...
-		# pkgman install libiconv_devel
-		find_package(Iconv REQUIRED)
-	else()
-		message(FATAL_ERROR "Missing iconv at: ${ICONV_PATH}")
-	endif()
-endif()
-
-if (NOT LGI_LIB_ONLY)
-	if (HAIKU)
-		find_package(PNG REQUIRED)
-		set(LIBPNG_TARGET PNG::PNG)
-	else()
-		get_filename_component(PNG_LIBRARY "${CODELIB}/libpng" ABSOLUTE)
-		if (EXISTS ${PNG_LIBRARY} AND NOT TARGET libpng16)
-			add_subdirectory(${PNG_LIBRARY} libpng)
-			set(LIBPNG_TARGET libpng16)
-		endif()
-	endif()
-
-	if (HAIKU)
-		find_package(JPEG REQUIRED)
-	else()
-		get_filename_component(JPEG_LIBRARY "${CODELIB}/libjpeg-9a" ABSOLUTE)
-		if (NOT TARGET libjpeg9a)
-			add_subdirectory(${CODELIB}/libjpeg-9a libjpeg)
-		endif()
-	endif()
+	set(DEPS "${DEPS}" PARENT_SCOPE)
 endif()
 
 if (APPLE)
@@ -663,6 +627,10 @@ target_link_libraries(lgi
 		lunasvg
 		plutovg)
 
+target_link_directories(lgi
+	PRIVATE
+		$<IF:$<CONFIG:Debug>,${DEPS_DEBUG}/lib,${DEPS_RELEASE}/lib>)
+
 target_compile_definitions(lgi
 	PUBLIC
 		LGI_RES
@@ -676,19 +644,9 @@ target_include_directories(lgi
 		include
 	PRIVATE
 		private/common
-		${PNGLIB_INCLUDE_DIR}
-		${ICONV_PATH}/include
-		${CODELIB}/libjpeg-9a
-		${CODELIB}/zlib
-		${CODELIB}/libpng
-		${CODELIB}/libpng/build64
-		${CODELIB}/libpng/build64/zlib_dir
-		${CODELIB}/lunasvg/include
+		$<IF:$<CONFIG:Debug>,${DEPS_DEBUG}/include,${DEPS_RELEASE}/include>
 	)
-target_link_directories(lgi
-	PRIVATE
-		${CODELIB}/lunasvg/build/${CONFIG}/$<CONFIG>
-		${CODELIB}/lunasvg/build/_deps/plutovg-build/$<CONFIG>)
+
 
 set_target_properties(lgi PROPERTIES LINKER_LANGUAGE CXX)
 

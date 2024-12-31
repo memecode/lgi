@@ -28,9 +28,6 @@ elseif (MSVC)
 	if (NOT EXISTS ${OPENSSL_INCLUDE_DIR})
 		message(FATAL_ERROR "OpenSSL not found: '${OPENSSL_INCLUDE_DIR}'")
 	endif()
-	if (NOT EXISTS ${CODELIB})
-		message(FATAL_ERROR "Codelib not found: '${CODELIB}'")
-	endif()
 	
 	if (${MSVC_VERSION} GREATER_EQUAL 1900)
 		set(VS_VER 14)
@@ -153,7 +150,6 @@ target_include_directories (LgiIde PUBLIC
 							Code
 							"Resources"
 							${PNG_INCLUDE_DIR}
-							${OPENSSL_INCLUDE_DIR}
-							"${CODELIB}/libiconv-1.14/include")
+							${OPENSSL_INCLUDE_DIR})
 
 set_target_properties(LgiIde PROPERTIES EXCLUDE_FROM_ALL TRUE)
