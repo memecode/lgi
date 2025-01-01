@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.20)
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 project(lgiDeps)
 enable_language( C CXX ASM )
+if(UNIX AND NOT APPLE)
+    set(LINUX TRUE)
+endif()
 
 get_filename_component(DEPS "${CMAKE_CURRENT_LIST_DIR}/../../deps" ABSOLUTE)
 if(HAIKU OR APPLE)
@@ -67,7 +70,7 @@ install(TARGETS jpeg
         DESTINATION ${CMAKE_BINARY_DIR}/lib)
 
 # zlib
-GitProject(zlib    "https://github.com/madler/zlib.git" "develop")
+GitProject(zlib "https://github.com/madler/zlib.git" "develop")
 install(TARGETS zlib
         DESTINATION ${CMAKE_BINARY_DIR}/lib)
 
@@ -86,6 +89,10 @@ install(TARGETS png_shared
 
 # lunasvg
 GitProject(lunasvg "https://github.com/sammycage/lunasvg.git" "master")
+if(LINUX)
+    target_compile_options(lunasvg PRIVATE -fPIC)
+    target_compile_options(plutovg PRIVATE -fPIC)
+endif()
 
 # libiconv
 GitProject(libiconv "https://github.com/winlibs/libiconv.git" "master")

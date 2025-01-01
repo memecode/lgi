@@ -12,6 +12,7 @@ configs = ["Debug", "Release"]
 singleConfig = True
 universalCheck = []
 universalArchs = []
+extraCmakeArgs = []
 if platform.system() == "Windows":
     subfolders = ["build-x64"]
     gen = ["Visual Studio 16 2019"]
@@ -30,6 +31,7 @@ elif platform.system() == "Linux":
     subfolders = ["build-x64"]
 elif platform.system() == "Haiku":
     subfolders = ["build-x64"]
+    # extraCmakeArgs += ["-DCMAKE_POSITION_INDEPENDENT_CODE=ON"]
 else:
     print("Unsupported os:", os.name, platform.system())
     sys.exit(-1)
@@ -80,6 +82,8 @@ for n in range(len(subfolders)):
             args += ["-DBUILD_SHARED_LIBS=OFF"]
             args += ["-DCMAKE_INSTALL_MANDIR="+path]
             args += ["-DCMAKE_INSTALL_DOCDIR="+path]
+            if len(extraCmakeArgs) > 0:
+                args += extraCmakeArgs
             args += [curFolder]
 
             print("args:", " ".join(args))

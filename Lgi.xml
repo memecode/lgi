@@ -513,16 +513,10 @@
 				<All>
 					<Debug>./include
 ./private/common
-../../../codelib/lunasvg/include
-../../../codelib/zlib
-../../../codelib/libpng
-../../../codelib/libjpeg-9a</Debug>
+../deps/build-x64-debug/include</Debug>
 					<Release>./include
 ./private/common
-../../../codelib/lunasvg/include
-../../../codelib/zlib
-../../../codelib/libpng
-../../../codelib/libjpeg-9a</Release>
+../deps/build-x64-release/include</Release>
 				</All>
 				<Linux>
 					<Debug>./include/lgi/linux
@@ -586,9 +580,11 @@ be</Release>
 				</Haiku>
 				<All>
 					<Debug>lunasvg
-plutovg</Debug>
+plutovg
+iconv</Debug>
 					<Release>lunasvg
-plutovg</Release>
+plutovg
+iconv</Release>
 				</All>
 			</Libraries>
 			<TargetName>
@@ -622,12 +618,12 @@ _GNU_SOURCE</Release>
 			</Options>
 			<LibraryPaths>
 				<All>
-					<Debug>../../../codelib/lunasvg/build
-../../../codelib/lunasvg/build/_deps/plutovg-build</Debug>
-					<Release>../../../codelib/lunasvg/build
-../../../codelib/lunasvg/build/_deps/plutovg-build</Release>
+					<Debug>../deps/build-x64-debug/lib</Debug>
+					<Release>../deps/build-x64-release/lib</Release>
 				</All>
 			</LibraryPaths>
 		</Build>
+		<Advanced />
+		<Debug />
 	</Settings>
 </Project>
