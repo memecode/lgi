@@ -53,16 +53,28 @@ set(LGI_DIR "${CMAKE_CURRENT_LIST_DIR}")
 # External libs:
 get_filename_component(CODE ../.. ABSOLUTE)
 get_filename_component(DEPS ${CMAKE_CURRENT_LIST_DIR}/../deps ABSOLUTE)
-set(DEPS_DEBUG "${DEPS}/build-debug")
-if (NOT EXISTS "${DEPS_DEBUG}")
-	message(WARNING "Expecting debug external libraries in: ${DEPS_DEBUG}")
-endif()
-set(DEPS_RELEASE "${DEPS}/build-release")
-if (NOT EXISTS "${DEPS_RELEASE}")
-	message(WARNING "Expecting release external libraries in: ${DEPS_RELEASE}")
-endif()
+get_filename_component(CODELIB ${CODE}/../codelib ABSOLUTE)
 if(hasParent)
-	set(DEPS "${DEPS}" PARENT_SCOPE)
+	set(CODELIB "${CODELIB}" PARENT_SCOPE)
+endif()
+
+if(WIN32)
+	set(DEPS_BUILD "${DEPS}/build-x64")
+	if (NOT EXISTS "${DEPS_BUILD}")
+		message(WARNING "Expecting external libraries in: ${DEPS_BUILD}")
+	endif()
+else()
+	set(DEPS_DEBUG "${DEPS}/build-debug")
+	if (NOT EXISTS "${DEPS_DEBUG}")
+		message(WARNING "Expecting debug external libraries in: ${DEPS_DEBUG}")
+	endif()
+	set(DEPS_RELEASE "${DEPS}/build-release")
+	if (NOT EXISTS "${DEPS_RELEASE}")
+		message(WARNING "Expecting release external libraries in: ${DEPS_RELEASE}")
+	endif()
+	if(hasParent)
+		set(DEPS "${DEPS}" PARENT_SCOPE)
+	endif()
 endif()
 
 if (APPLE)
@@ -627,10 +639,6 @@ target_link_libraries(lgi
 		lunasvg
 		plutovg)
 
-target_link_directories(lgi
-	PRIVATE
-		$<IF:$<CONFIG:Debug>,${DEPS_DEBUG}/lib,${DEPS_RELEASE}/lib>)
-
 target_compile_definitions(lgi
 	PUBLIC
 		LGI_RES
@@ -643,10 +651,25 @@ target_include_directories(lgi
 	PUBLIC
 		include
 	PRIVATE
-		private/common
-		$<IF:$<CONFIG:Debug>,${DEPS_DEBUG}/include,${DEPS_RELEASE}/include>
-	)
+		private/common)
 
+if(WIN32)
+	target_link_directories(lgi
+		PRIVATE
+			${DEPS_BUILD}/lunasvg/$<IF:$<CONFIG:Debug>,Debug,Release>
+			${DEPS_BUILD}/lib)
+	target_include_directories(lgi
+		PRIVATE
+			${DEPS_BUILD}/include)
+else()
+	# config specific dependency include and lib folders
+	target_link_directories(lgi
+		PRIVATE
+			$<IF:$<CONFIG:Debug>,${DEPS_DEBUG}/lib,${DEPS_RELEASE}/lib>)
+	target_include_directories(lgi
+		PRIVATE
+			$<IF:$<CONFIG:Debug>,${DEPS_DEBUG}/include,${DEPS_RELEASE}/include>)
+endif()
 
 set_target_properties(lgi PROPERTIES LINKER_LANGUAGE CXX)
 
