@@ -389,9 +389,11 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 	}
 
 	auto Wnd = SourceWnd->GetWindow();
-	if (!Wnd) return DROPEFFECT_NONE;
+	if (!Wnd)
+		return DROPEFFECT_NONE;
 	auto h = Wnd->WindowHandle();
-	if (!h) return DROPEFFECT_NONE;
+	if (!h)
+		return DROPEFFECT_NONE;
 
 	NSImage *img = nil;
 	auto Mem = dynamic_cast<LMemDC*>(Icon);

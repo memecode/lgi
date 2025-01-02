@@ -111,22 +111,19 @@ static NSDragOperation LgiToCocoaDragOp(int op)
 
 struct DndEvent
 {
-	LCocoaView *cv;
-	LViewI *v;
-	LDragDropTarget *target;
+	LCocoaView *cv = nullptr;
+	LViewI *v = nullptr;
+	LDragDropTarget *target = nullptr;
 	LDragFormats InputFmts, AcceptedFmts;
 	LPoint Pt;
-	int Keys;
+	int Keys = 0;
 
-	int result;
+	int result = 0;
 	
 	DndEvent(LCocoaView *Cv, id <NSDraggingInfo> sender) :
 		cv(Cv), InputFmts(true), AcceptedFmts(false)
 	{
 		v = cv.w;
-		target = NULL;
-		Keys = 0;
-		result = 0;
 
 		setPoint(sender.draggingLocation);
 		
@@ -141,7 +138,7 @@ struct DndEvent
 			{
 				auto f = [type UTF8String];
 				InputFmts.Supports(f);
-				// printf("Drop has type '%s'\n", f);
+				printf("%s:%i Drop has type '%s'\n", _FL, f);
 			}
 		}
 	}
@@ -555,13 +552,12 @@ void UpdateAccepted(DndEvent &e, id <NSDraggingInfo> sender)
 	{
 		auto &dd = Data.New();
 		dd.Format = f;
-		printf("Got drop format '%s'..\n", dd.Format.Get());
+		printf("%s:%i Got drop format '%s'..\n", _FL, dd.Format.Get());
 
-		NSString *NsFmt = dd.Format.NsStr();
-		
+		auto NsFmt = dd.Format.NsStr();
 		for (NSPasteboardItem *item in [pb pasteboardItems])
 		{
-			NSData *d = [item dataForType:NsFmt];
+			auto d = [item dataForType:NsFmt];
 			if (d)
 			{
 				// System type...
