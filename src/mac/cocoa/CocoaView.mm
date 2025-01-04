@@ -485,35 +485,46 @@ void UpdateAccepted(DndEvent &e, id <NSDraggingInfo> sender)
 	DeleteObj(self->dnd);
 	self->dnd = new DndEvent(self, sender);
 	if (!self->dnd)
+	{
+		DND_ERROR("LCocoaView::draggingEntered: failed to alloc event\n");
 		return NSDragOperationNone;
+	}
 	DndEvent &e = *self->dnd;
 	if (!e.target)
+	{
+		DND_ERROR("LCocoaView::draggingEntered: no target for event\n");
 		return NSDragOperationNone;
+	}
 
 	UpdateAccepted(e, sender);
 	
 	e.result = e.target->WillAccept(e.AcceptedFmts, e.Pt, e.Keys);
 	auto ret = LgiToCocoaDragOp(e.result);
-	// printf("draggingEntered ret=%i\n", (int)ret);
+	DND_LOG("LCocoaView::draggingEntered, ret=%u\n", (unsigned)ret);
 	return ret;
 }
 
 - (NSDragOperation)draggingUpdated:(id <NSDraggingInfo>)sender
 {
 	if (!self->dnd)
+	{
+		DND_ERROR("LCocoaView::draggingUpdated: no event object\n");
 		return NSDragOperationNone;
+	}
 
 	DndEvent &e = *self->dnd;
 	e.setPoint(sender.draggingLocation);
 	if (!e.target)
+	{
+		DND_ERROR("LCocoaView::draggingUpdated: no target for event\n");
 		return NSDragOperationNone;
+	}
 
 	UpdateAccepted(e, sender);
 
 	e.result = e.target->WillAccept(e.AcceptedFmts, e.Pt, e.Keys);
 	auto ret = LgiToCocoaDragOp(self->dnd->result);
-	
-	// printf("draggingUpdated pt=%i,%i len=%i ret=%i\n", e.Pt.x, e.Pt.y, (int)e.AcceptedFmts.Length(), (int)ret);
+	DND_LOG("LCocoaView::draggingUpdated, pt=%i,%i, len=%i, ret=%i\n", e.Pt.x, e.Pt.y, (int)e.AcceptedFmts.Length(), (int)ret);
 	return ret;
 }
 
@@ -521,6 +532,7 @@ void UpdateAccepted(DndEvent &e, id <NSDraggingInfo> sender)
 {
 	if (self->dnd)
 	{
+		DND_LOG("LCocoaView::draggingExited, target=%p\n", self->dnd->target);
 		if (self->dnd->target)
 			self->dnd->target->OnDragExit();
 		DeleteObj(self->dnd);
@@ -529,6 +541,7 @@ void UpdateAccepted(DndEvent &e, id <NSDraggingInfo> sender)
 
 - (BOOL)prepareForDragOperation:(id <NSDraggingInfo>)sender
 {
+	DND_LOG("LCocoaView::prepareForDragOperation\n");
 	return true;
 }
 
@@ -536,13 +549,16 @@ void UpdateAccepted(DndEvent &e, id <NSDraggingInfo> sender)
 {
 	if (!self->dnd)
 	{
-		printf("%s:%i - No DND.\n", _FL);
+		DND_ERROR("%s:%i performDragOperation: No event.\n", _FL);
 		return NSDragOperationNone;
 	}
 	DndEvent &e = *self->dnd;
 	e.setPoint(sender.draggingLocation);
 	if (!e.target)
+	{
+		DND_ERROR("%s:%i performDragOperation: No target.\n", _FL);
 		return NSDragOperationNone;
+	}
 
 	LArray<LDragData> Data;
 	auto pb = sender.draggingPasteboard;
@@ -552,7 +568,7 @@ void UpdateAccepted(DndEvent &e, id <NSDraggingInfo> sender)
 	{
 		auto &dd = Data.New();
 		dd.Format = f;
-		printf("%s:%i Got drop format '%s'..\n", _FL, dd.Format.Get());
+		DND_LOG("%s:%i performDragOperation: Got drop format '%s'..\n", _FL, dd.Format.Get());
 
 		auto NsFmt = dd.Format.NsStr();
 		for (NSPasteboardItem *item in [pb pasteboardItems])
@@ -594,15 +610,18 @@ void UpdateAccepted(DndEvent &e, id <NSDraggingInfo> sender)
 	}
 	
 	auto drop = e.target->OnDrop(Data, e.Pt, e.Keys);
+	DND_LOG("%s:%i performDragOperation: drop=%i\n", _FL, drop);
 	return drop != 0;
 }
 
 - (void)concludeDragOperation:(nullable id <NSDraggingInfo>)sender
 {
+	DND_LOG("%s:%i concludeDragOperation\n", _FL);
 }
 
 - (void)draggingEnded:(nullable id <NSDraggingInfo>)sender
 {
+	DND_LOG("%s:%i draggingEnded\n", _FL);
 }
 
 - (BOOL) acceptsFirstResponder

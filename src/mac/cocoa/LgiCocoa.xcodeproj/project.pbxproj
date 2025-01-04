@@ -14,6 +14,7 @@
 		3409C0CB27580ED60050302A /* List.h in Headers */ = {isa = PBXBuildFile; fileRef = 3409C0C827580ED60050302A /* List.h */; };
 		3409C0CC27580ED60050302A /* ListItemCheckBox.h in Headers */ = {isa = PBXBuildFile; fileRef = 3409C0C927580ED60050302A /* ListItemCheckBox.h */; };
 		3409C0D0275812CB0050302A /* Profile.h in Headers */ = {isa = PBXBuildFile; fileRef = 3409C0CF275812CB0050302A /* Profile.h */; };
+		340C58BE2D29EE680056D654 /* DragAndDrop.h in Headers */ = {isa = PBXBuildFile; fileRef = 340C58BD2D29EE680056D654 /* DragAndDrop.h */; };
 		34109857217A9805007020CE /* LCocoaView.h in Sources */ = {isa = PBXBuildFile; fileRef = 34109856217A9805007020CE /* LCocoaView.h */; };
 		34114C8B23091E6E00F342B1 /* LgiClasses.h in Headers */ = {isa = PBXBuildFile; fileRef = 34114C8A23091E6E00F342B1 /* LgiClasses.h */; };
 		3413170E23068FFE008CE982 /* FileSelect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3413170D23068FFE008CE982 /* FileSelect.cpp */; };
@@ -216,6 +217,7 @@
 		3409C0C827580ED60050302A /* List.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = List.h; path = ../../../include/lgi/common/List.h; sourceTree = SOURCE_ROOT; };
 		3409C0C927580ED60050302A /* ListItemCheckBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ListItemCheckBox.h; path = ../../../include/lgi/common/ListItemCheckBox.h; sourceTree = SOURCE_ROOT; };
 		3409C0CF275812CB0050302A /* Profile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Profile.h; path = ../../../include/lgi/common/Profile.h; sourceTree = "<group>"; };
+		340C58BD2D29EE680056D654 /* DragAndDrop.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DragAndDrop.h; path = ../../../include/lgi/common/DragAndDrop.h; sourceTree = SOURCE_ROOT; };
 		34109853217A975E007020CE /* View.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = View.h; path = ../../../include/lgi/common/View.h; sourceTree = SOURCE_ROOT; };
 		34109856217A9805007020CE /* LCocoaView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LCocoaView.h; path = ../../../include/lgi/mac/cocoa/LCocoaView.h; sourceTree = SOURCE_ROOT; };
 		34114C8A23091E6E00F342B1 /* LgiClasses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiClasses.h; path = ../../../include/lgi/common/LgiClasses.h; sourceTree = "<group>"; };
@@ -511,6 +513,7 @@
 		3477C2731CBF07410028B84B /* Interface_Cocoa */ = {
 			isa = PBXGroup;
 			children = (
+				340C58BD2D29EE680056D654 /* DragAndDrop.h */,
 				343874B3230F46B200CF96B4 /* App.h */,
 				3477C2741CBF07DD0028B84B /* App.mm */,
 				344CFBC7237365B800AE6B35 /* ClipBoard.h */,
@@ -882,6 +885,7 @@
 				345921011F25649000098DFD /* FontSelect.h in Headers */,
 				346FACE71D3C720B00FFEBCE /* Message.h in Headers */,
 				3477C2A31CBF0A920028B84B /* LgiMac.h in Headers */,
+				340C58BE2D29EE680056D654 /* DragAndDrop.h in Headers */,
 				3418EBD125D9FEF500EA168A /* ProgressDlg.h in Headers */,
 				343874B6230F46B200CF96B4 /* View.h in Headers */,
 				34B6F5502BA3A81A0095B1C5 /* UnrolledList.h in Headers */,

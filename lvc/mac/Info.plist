@@ -24,5 +24,27 @@
 	<true/>
 	<key>NSPrincipalClass</key>
 	<string>LNsApplication</string>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.item</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Lgi.ContainerItems</string>
+			<key>UTTypeIcons</key>
+			<dict/>
+			<key>UTTypeIdentifier</key>
+			<string>Lgi.ContainerItems</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.mime-type</key>
+				<array>
+					<string>application/lgi-container-items</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
 </dict>
 </plist>
