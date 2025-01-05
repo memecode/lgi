@@ -136,11 +136,7 @@ class LgiClass LDragFormats
 	
 	struct Fmt : public LString
 	{
-		bool Val;
-		Fmt()
-		{
-			Val = false;
-		}
+		bool Val = false;
 	};
 	
 	LArray<Fmt> Formats;
@@ -161,6 +157,10 @@ public:
 	void SupportsFileStreams();
 	void Supports(LString Fmt);
 	LString::Array GetSupported();
+	
+	#ifdef MAC
+	bool CheckUti(const char *uti);
+	#endif
 };
 
 /// A drag source class

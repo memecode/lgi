@@ -500,6 +500,12 @@ bool LItemContainer::GetFormats(LDragFormats &Formats)
 	if (DragItem)
 	{
 		Formats.Supports(ContainerItemsFormat);
+		
+		#ifdef MAC
+		auto reg = Formats.CheckUti(ContainerItemsFormat);
+		LAssert(reg);
+		#endif
+		
 		return true;
 	}
 

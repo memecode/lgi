@@ -415,6 +415,7 @@
 					"../../../../../codelib/libssh/build/**",
 					/opt/local/lib,
 				);
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-Wno-nullability-completeness",
@@ -450,6 +451,7 @@
 					"../../../../../codelib/libssh/build/**",
 					/opt/local/lib,
 				);
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-Wno-nullability-completeness",

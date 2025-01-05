@@ -1254,6 +1254,7 @@
 					/opt/local/lib,
 					"../../../../deps/build-release/lib",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = (
 					"-DMAC",
 					"-DLGI_COCOA=1",
@@ -1314,6 +1315,7 @@
 					/opt/local/lib,
 					"../../../../deps/build-release/lib",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CFLAGS = (
 					"-DMAC",
 					"-DLGI_COCOA=1",

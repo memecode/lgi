@@ -579,3 +579,16 @@ void LDragDropTarget::SetWindow(LView *to)
 	}
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+#import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
+bool LDragFormats::CheckUti(const char *uti)
+{
+	/*
+	auto nsUri = LString(uti).NsStr();
+	auto t = [UTType identifier:nsUri];
+	[t release];
+	[nsUri release];
+	*/
+	return false;
+}
