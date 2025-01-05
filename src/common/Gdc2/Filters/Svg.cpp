@@ -37,16 +37,16 @@ public:
 				}
 			}
 		
-			LgiTrace("%s:%i - sz=%i,%i.\n", _FL, sx, sy);
+			// LgiTrace("%s:%i - sz=%i,%i.\n", _FL, sx, sy);
 		    auto bmp = doc->renderToBitmap(sx, sy);
-			LgiTrace("%s:%i - bmp=%i,%i.\n", _FL, bmp.width(), bmp.height());
+			// LgiTrace("%s:%i - bmp=%i,%i.\n", _FL, bmp.width(), bmp.height());
 			
 			if (Out->Create(bmp.width(), bmp.height(), System32BitColourSpace))
 			{
 				#ifndef MAC
 				auto bytes = MIN(bmp.stride(), Out->GetRowStep());
 				#endif
-				LgiTrace("%s:%i - strides: %i, %i\n", _FL, bmp.stride(), Out->GetRowStep());
+				// LgiTrace("%s:%i - strides: %i, %i\n", _FL, bmp.stride(), Out->GetRowStep());
 				for (int y=0; y<Out->Y(); y++)
 				{
 					auto in = bmp.data() + (y * bmp.stride());

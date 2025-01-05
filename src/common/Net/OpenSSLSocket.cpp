@@ -108,7 +108,10 @@ public:
 					auto result = Load(p);
 					LgiTrace("%s:%i - Local SSL '%s' = %i\n", _FL, p, result);
 				}
-				else LgiTrace("%s:%i - No local SSL library '%s'\n", _FL, p);
+				else
+				{
+					// LgiTrace("%s:%i - No local SSL library '%s'\n", _FL, p);
+				}
 			}
 		#endif
 

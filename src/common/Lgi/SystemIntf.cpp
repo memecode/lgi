@@ -1434,8 +1434,14 @@ class FtpBackend :
 
 		bool Path(char *s, int BufSize)	const override
 		{
-			LAssert(0);
-			return false;
+			if (!base)
+				return false;
+
+			auto e = ItemAt(pos);
+			if (!e)
+				return false;
+
+			return LMakePath(s, BufSize, base, e->Name);
 		}
 
 		const char *FullPath() override
@@ -1621,14 +1627,9 @@ public:
 	}
 
 	// Reading and writing:
-	bool Stat(LString path, std::function<void(struct stat*, LString, LError)> cb) override
-	{
-		LAssert(0);
-		return false;
-	}
-
 	void AddWork(LString ctx, TPriority priority, TCallback &&job)
 	{
+		Auto lck(this, _FL);
 		auto w = new TWork(ctx, std::move(job));
 		if (priority == SystemIntf::TForeground)
 			foregroundWork.Add(w);
@@ -1664,12 +1665,64 @@ public:
 		return LString::Fmt("%s:%i %s", file, line, data.Get());
 	}
 
+	bool Stat(LString path, std::function<void(struct stat*, LString, LError)> cb) override
+	{
+		if (!path || !cb)
+			return false;
+
+		printf("%s:%i - stat(%s)\n", _FL, path.Get());
+
+		AddWork(MakeContext(_FL, path),
+			TForeground,
+			[this, path, cb=std::move(cb)](auto curWork)
+			{
+				LArray<IFtpEntry*> dir;
+				LError err;
+				struct stat s = {};
+
+				if (!SetRemote(path, true))
+				{
+					err.Set(LErrorPathNotFound);
+				}
+				else if (!ftp->ListDir(dir))
+				{
+					err.Set(LErrorFuncFailed);
+				}
+				else // look through 'dir' 
+				{
+					auto leaf = LGetLeaf(path);
+					for (auto e: dir)
+					{
+						if (e->Path.Equals(leaf))
+						{
+							// found the entry
+							timespec unixTime = { e->Date.GetUnix(), 0 };
+							s.st_size = e->Size;
+							s.st_mode = 0644;
+							s.st_atim = unixTime;
+							s.st_mtim = unixTime;
+							s.st_ctim = unixTime;
+						}
+					}
+				}
+
+				parent->RunCallback([this, s, err, path, cb=std::move(cb)]() mutable
+					{
+						if (err)
+							cb(nullptr, LString(), err);
+						else
+							cb(&s, path, err);
+					});
+			});
+
+		return true;
+	}
+
 	bool ReadFolder(TPriority priority, const char *Path, std::function<void(LDirectory*)> results) override
 	{
 		if (!Path || !results)
 			return false;
 
-		Auto lck(this, _FL);
 		AddWork(MakeContext(_FL, Path), priority, [this, Path = ConvertPath(Path), results](auto curWork) mutable
 			{
 				if (!GetReady())
@@ -1722,16 +1775,18 @@ public:
 			return false;
 
 		auto path = ConvertPath(inPath);
-		Auto lck(this, _FL);
-
-		// Check if we have the data in the cache first...
-		if (auto c = cache.Find(path))
 		{
-			if (c->data)
+			Auto lck(this, _FL);
+
+			// Check if we have the data in the cache first...
+			if (auto c = cache.Find(path))
 			{
-				LError err;
-				result(err, c->data);
-				return true;
+				if (c->data)
+				{
+					LError err;
+					result(err, c->data);
+					return true;
+				}
 			}
 		}
 
@@ -1807,7 +1862,6 @@ public:
 			return false;
 
 		auto path = ConvertPath(outPath);
-		Auto lck(this, _FL);
 		AddWork(MakeContext(_FL, path), priority, [this, path, result, Data](auto workPtr) mutable
 			{
 				LError err;
