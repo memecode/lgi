@@ -778,19 +778,25 @@ IdeDoc *ProjectNode::Open()
 					backend->Read(
 						SystemIntf::TForeground,
 						path,
-						[this, Doc, path](auto err, auto data)
+						[this, DocHnd = Doc->AddDispatch(), Doc, path](auto err, auto data)
 						{
-							if (err)
+							LString errMsg;
+
+							if (!LEventSinkMap::Dispatch.IsSink(DocHnd))
 							{
-								LPopupNotification::Message(GetTree()->GetWindow(),
-									LString::Fmt("Error opening '%s'\n%s",
-										path.Get(),
-										err.ToString().Get()) );
+								errMsg = "Document no longer open.";
+							}
+							else if (err)
+							{
+								errMsg.Printf("Error opening '%s'\n%s", path.Get(), err.ToString().Get());
 							}
 							else
 							{
 								OnDocOpen(Doc, Doc->OpenData(data));
 							}
+
+							if (errMsg)
+								LPopupNotification::Message(GetTree()->GetWindow(), errMsg );
 						});
 				}
 				else
