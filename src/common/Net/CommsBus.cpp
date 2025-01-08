@@ -3,13 +3,13 @@
 #include "lgi/common/CommsBus.h"
 #include "lgi/common/Net.h"
 
+#define COMMBUS_MULTICAST	"230.6.6.10"
 #define DEFAULT_COMMS_PORT	45454
 #define RETRY_SERVER		-2
 #define RESEND_TIMEOUT		1000
 
 #if 0
 #define LOG(...)			
-// #define LOG(...)			printf(__VA_ARGS__)
 #else
 #define LOG(...)			if (log) log->Print(__VA_ARGS__)
 #endif
@@ -506,15 +506,69 @@ struct LCommsBusPriv :
 
 	int Server()
 	{
+		// For inter-server connection discovery, get a list of interfaces to broadcast to
+		LArray<LSocket::Interface> interfaces;
+		LSocket::EnumInterfaces(interfaces);
+		for (int i=0; i<interfaces.Length(); i++)
+		{
+			if (interfaces[i].IsLinkLocal()) // We don't care about the local
+				interfaces.DeleteAt(i--);
+		}
+		LArray<uint32_t> interface_ips;
+		for (auto &intf: interfaces)
+		{
+			interface_ips.Add(intf.Ip4);
+			LOG("interface: %s %s\n", intf.Name.Get(), LIpToStr(intf.Ip4).Get());
+		}
+
+		// Create a UDP listener
+		uint32_t broadcastIp = LIpToInt(COMMBUS_MULTICAST);
+		LUdpListener listener(interface_ips, broadcastIp, DEFAULT_COMMS_PORT, log);
+		uint64_t broadcastTime = 0;
+
 		// Wait for incoming connections and handle them...
 		bool hasConnections = false;
 		NotifyState(LCommsBus::TDisconnectedServer);
 
 		while (!IsCancelled())
 		{
+			{
+				// Inter-server discovery...
+				
+				// Listen for packets...
+				LString discoverPkt;
+				uint32_t discoverIp = 0;
+				uint16_t discoverPort = 0;
+				if (listener.ReadPacket(discoverPkt, discoverIp, discoverPort))
+				{
+					bool ourIp = false;
+					for (auto &i: interfaces)
+						if (i.Ip4 == discoverIp)
+							ourIp = true;
+					if (!ourIp)
+						LOG("got discover packet: %i bytes, %s:%i\n", (int)discoverPkt.Length(), LIpToStr(discoverIp).Get(), discoverPort);
+				}
+
+				auto now = LCurrentTime();
+				if (now - broadcastTime >= 10000)
+				{
+					broadcastTime = now;
+
+					// And then broadcast packets...
+					for (auto &intf: interfaces)
+					{
+						LUdpBroadcast bc(intf.Ip4);
+						LString pkt = "PING";
+						auto result = bc.BroadcastPacket(pkt, broadcastIp, DEFAULT_COMMS_PORT);
+						if (!result)
+							LOG("broadcast to %s = %i\n", LIpToStr(intf.Ip4).Get(), result);
+					}
+				}
+			}
+
 			if (listen.IsReadable())
 			{
-				// Setup a new incoming client connection
+				// Setup a new incoming TCP client connection
 				auto conn = new CommsClient(log);
 				if (listen.Accept(&conn->sock))
 				{
