@@ -96,8 +96,10 @@ public:
 	}
 };
 
-class GdcBmpFactory : public LFilterFactory
+struct LBmpFactory : public LFilterFactory
 {
+	LBmpFactory() : LFilterFactory("LBmpFactory") {}
+
 	bool CheckFile(const char *File, int Access, const uchar *Hint)
 	{
 		if (File)
@@ -122,7 +124,7 @@ class GdcBmpFactory : public LFilterFactory
 		return new GdcBmp;
 	}
 
-} BmpFactory;
+}	BmpFactory;
 
 #define BMP_ID			0x4D42
 
@@ -866,8 +868,10 @@ public:
 	bool GetVariant(const char *n, LVariant &v, const char *a) override;
 };
 
-class GdcIcoFactory : public LFilterFactory
+struct LIcoFactory : public LFilterFactory
 {
+	LIcoFactory() : LFilterFactory("LIcoFactory") {}
+
 	bool CheckFile(const char *File, int Access, const uchar *Hint)
 	{
 		return (File) ? stristr(File, ".ico") != 0 : false;
@@ -878,7 +882,7 @@ class GdcIcoFactory : public LFilterFactory
 		return new GdcIco;
 	}
 
-} IcoFactory;
+}	IcoFactory;
 
 GdcIco::GdcIco()
 {
@@ -1294,12 +1298,38 @@ LFilter::IoStatus GdcIco::WriteImage(LStream *Out, LSurface *pDC)
 }
 
 ////////////////////////////////////////////////////////////////////
-LFilterFactory *LFilterFactory::First = 0;
-LFilterFactory::LFilterFactory()
+LFilterFactory *LFilterFactory::First = nullptr;
+
+LFilterFactory::LFilterFactory(const char *name) : Name(name)
 {
-	// add this filter to the global list
-	Next = First;
-	First = this;
+	// Is this already in the list?
+	bool inList = false;
+	for (auto p = First; p; p = p->Next)
+	{
+		if (this == p)
+		{
+			printf("%s already in list?\n", name);
+			inList = true;
+			break;
+		}
+	}
+
+	if (!inList)
+	{
+		// add this filter to the global list
+		Next = First;
+		First = this;
+
+		// logging:
+		printf("Adding '%s'..\n", name);
+		int idx = 0;
+		for (auto p = First; p; p = p->Next)
+		{
+			printf("\t[%i]=%s\n", idx, p->Name.Get());
+			if (idx++ > LFilter::MAX_FILTERS)
+				break;
+		}
+	}	
 }
 
 LFilterFactory::~LFilterFactory()
@@ -1312,9 +1342,16 @@ LFilterFactory::~LFilterFactory()
 	else
 	{
 		LFilterFactory *i = First;
+		int idx = 0;
 		while (i->Next && i->Next != this)
 		{
 			i = i->Next;
+			if (idx++ > LFilter::MAX_FILTERS)
+			{
+				// The list probably has a loop in it.
+				LgiTrace("%s:%i - reached max filters, list is looped?\n", _FL);
+				break;
+			}
 		}
 		if (i->Next == this)
 		{
@@ -1324,7 +1361,7 @@ LFilterFactory::~LFilterFactory()
 		{
 			// we aren't in the list
 			// thats bad
-			LAssert(0);
+			// LAssert(0);
 		}
 	}
 }

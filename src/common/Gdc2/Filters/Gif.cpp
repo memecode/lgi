@@ -87,8 +87,10 @@ public:
 // Filter factory
 // tells the application we're here
 
-class GdcGifFactory : public LFilterFactory
+struct LGifFactory : public LFilterFactory
 {
+	LGifFactory() : LFilterFactory("LGifFactory") {}
+	
 	bool CheckFile(const char *File, int Access, const uchar *Hint)
 	{
 		if (Hint)
@@ -110,8 +112,7 @@ class GdcGifFactory : public LFilterFactory
 	{
 		return new GdcGif;
 	}
-}
-GifFactory;
+}	GifFactory;
 
 // gif error codes
 #define OUT_OF_MEMORY			-10

@@ -128,7 +128,7 @@ public:
 	}
 };
 
-class GdcTgaFactory : public LFilterFactory
+struct LTgaFactory : public LFilterFactory
 {
 	bool CheckFile(const char *File, int Access, const uchar *Hint)
 	{
@@ -139,5 +139,7 @@ class GdcTgaFactory : public LFilterFactory
 	{
 		return new GdcTga;
 	}
+	
+	LTgaFactory() : LFilterFactory("LTgaFactory") {}
 
-} TgaFactory;
+}	TgaFactory;

@@ -43,8 +43,10 @@ public:
 };
 
 // Object Factory
-class GdcPcxFactory : public LFilterFactory
+struct LPcxFactory : public LFilterFactory
 {
+	LPcxFactory() : LFilterFactory("LPcxFactory") {}
+	
 	bool CheckFile(const char *File, int Access, const uchar *Hint)
 	{
 		return (File) ? stristr(File, ".pcx") != 0 : false;
@@ -54,7 +56,8 @@ class GdcPcxFactory : public LFilterFactory
 	{
 		return new GdcPcx;
 	}
-} PcxFactory;
+
+}	PcxFactory;
 
 // PCX
 #define swapb(i)		((i>>8) | ((i&0x00FF)<<8))

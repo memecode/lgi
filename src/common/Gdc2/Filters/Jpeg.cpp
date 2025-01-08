@@ -109,8 +109,10 @@ LAutoPtr<LibJpeg> JpegLibrary;
 #define IJG_JFIF_ICC_HEADER_LENGTH      14
 
 /////////////////////////////////////////////////////////////////////
-class GdcJpegFactory : public LFilterFactory
+struct LJpegFactory : public LFilterFactory
 {
+	LJpegFactory() : LFilterFactory("LJpegFactory") {}
+
 	bool CheckFile(const char *File, int Access, const uchar *Hint)
 	{
 		if (Hint)
@@ -145,7 +147,7 @@ class GdcJpegFactory : public LFilterFactory
 		return new GdcJpeg;
 	}
 
-} JpegFactory;
+}	JpegFactory;
 
 /////////////////////////////////////////////////////////////////////
 struct my_error_mgr {

@@ -83,8 +83,10 @@ public:
 	}
 };
 
-class SvgFactory : public LFilterFactory
+struct LSvgFactory : public LFilterFactory
 {
+	LSvgFactory() : LFilterFactory("LSvgFactory") {}
+
 	bool CheckFile(const char *File, int Access, const uchar *Hint)
 	{
 		auto ext = LGetExtension(File);

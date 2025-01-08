@@ -372,8 +372,10 @@ public:
 };
 
 // Object Factory
-class GdcPngFactory : public LFilterFactory
+struct LPngFactory : public LFilterFactory
 {
+	LPngFactory() : LFilterFactory("LPngFactory") {}
+
 	bool CheckFile(const char *File, int Access, const uchar *Hint)
 	{
 		if (Hint)
@@ -398,7 +400,7 @@ class GdcPngFactory : public LFilterFactory
 		);
 	}
 	
-} PngFactory;
+}	PngFactory;
 
 // Class impl
 char GdcPng::PngSig[] = { (char)137, 'P', 'N', 'G', '\r', '\n', (char)26, '\n', 0 };

@@ -34,13 +34,13 @@ ifeq ($(Build),Debug)
 		-lgstreamer-1.0 \
 		`pkg-config --libs gtk+-3.0`
 	Inc =  \
+		-I./include \
 		-I./private/linux \
 		-I./private/common \
 		`pkg-config --cflags gstreamer-1.0` \
 		-I./include/lgi/linux \
 		-I../deps/build-x64-debug/include \
 		-I./include/lgi/linux/Gtk \
-		-I./include \
 		-I../../../../../usr/include/libayatana-appindicator3-0.1 \
 		`pkg-config --cflags gtk+-3.0`
 else
@@ -63,28 +63,25 @@ else
 		-I./private/linux \
 		-I./include/lgi/linux/Gtk \
 		`pkg-config --cflags gtk+-3.0` \
+		-I../../../../../usr/include/libayatana-appindicator3-0.1 \
 		-I./private/common \
 		`pkg-config --cflags gstreamer-1.0` \
-		-I../../../../../usr/include/libayatana-appindicator3-0.1 \
 		-I./include/lgi/linux
 endif
 
 # Dependencies
 Source =	src/common/General/ExeCheck.cpp \
+			src/common/Lgi/DragAndDropCommon.cpp \
+			src/linux/Lgi/App.cpp \
+			src/linux/General/File.cpp \
+			src/common/General/DateTime.cpp \
+			src/linux/General/ShowFileProp_Linux.cpp \
 			src/common/General/Containers.cpp \
 			src/common/General/Properties.cpp \
-			src/common/Lgi/DragAndDropCommon.cpp \
-			src/linux/General/File.cpp \
-			src/common/General/TimeZone.cpp \
-			src/linux/Lgi/DragAndDrop.cpp \
 			src/common/General/FileCommon.cpp \
-			src/linux/Gtk/LgiWidget.cpp \
-			src/linux/Lgi/Window.cpp \
-			src/linux/Lgi/General.cpp \
-			src/linux/General/ShowFileProp_Linux.cpp \
-			src/linux/Lgi/App.cpp \
-			src/common/General/DateTime.cpp \
 			src/linux/Lgi/View.cpp \
+			src/linux/Lgi/Window.cpp \
+			src/linux/Gtk/LgiWidget.cpp \
 			src/common/Lgi/AppCommon.cpp \
 			src/common/Lgi/ViewCommon.cpp \
 			src/common/Lgi/Library.cpp \
@@ -114,6 +111,9 @@ Source =	src/common/General/ExeCheck.cpp \
 			src/common/Lgi/TrayIcon.cpp \
 			src/common/Lgi/FileSelect.cpp \
 			src/common/Lgi/Alert.cpp \
+			src/linux/Lgi/DragAndDrop.cpp \
+			src/linux/Lgi/General.cpp \
+			src/common/General/TimeZone.cpp \
 			src/common/Lgi/FindReplace.cpp \
 			src/common/Lgi/FontSelect.cpp \
 			src/common/Lgi/Input.cpp \
@@ -234,18 +234,18 @@ clean :
 	@echo Cleaned $(BuildDir)
 
 VPATH=$(BuildDir) \
-	./src/common/Gdc2/Tools \
-	./src/common/General \
-	./src/linux/Lgi \
-	./src/linux/General \
 	./src/common/Gdc2/Font \
-	./src/linux/Gtk \
+	./src/linux/General \
+	./src/common/General \
 	./src/common/Gdc2/Path \
+	./src/common/Gdc2/Tools \
 	./src/common/Lgi \
-	./src/common/Skins/Gel \
+	./src/linux/Gtk \
 	./src/common/Resource \
 	./src/posix \
 	./src/common/Gdc2 \
+	./src/common/Skins/Gel \
+	./src/linux/Lgi \
 	./src/common/Hash/sha1 \
 	./src/common/Net \
 	./src/common/Gdc2/Filters \

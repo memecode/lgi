@@ -96,6 +96,8 @@ protected:
 public:
 	LDom *Props = nullptr;
 
+	constexpr static int MAX_FILTERS = 50;
+
 	enum Format
 	{
 		FmtJpeg,
@@ -151,6 +153,7 @@ class LgiClass LFilterFactory
 {
 	static class LFilterFactory *First;
 	class LFilterFactory *Next;
+	LString Name;
 
 	/// Override this to detect whether you can handle openning a file.
 	/// \returns true if this filter can handle a given file.
@@ -169,7 +172,7 @@ class LgiClass LFilterFactory
 	virtual LFilter *NewObject() = 0;
 	
 public:
-	LFilterFactory();
+	LFilterFactory(const char *name);
 	virtual ~LFilterFactory();
 
 	static LAutoPtr<LFilter> New(const char *File, int Access, const uchar *Hint);

@@ -118,8 +118,10 @@ public:
 };
 
 // Object Factory
-class GdcTiffFactory : public LFilterFactory
+struct LTiffFactory : public LFilterFactory
 {
+	LTiffFactory() : LFilterFactory("LTiffFactory") {}
+
 	bool CheckFile(const char *File, int Access, const uchar *Hint)
 	{
 		if (Access == FILTER_CAP_READ)
@@ -136,7 +138,7 @@ class GdcTiffFactory : public LFilterFactory
 		return new GdcTiff;
 	}
 
-} TiffFactory;
+}	TiffFactory;
 
 // Tiff tag numbers
 #define TAG_ImageX						0x100
