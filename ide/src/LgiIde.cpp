@@ -1201,6 +1201,7 @@ public:
 	LArray<LAutoString> SystemIncludePaths;
 	BreakPointStore BreakPoints;
 	int DocBpCallback = BreakPointStore::INVALID_ID;
+	LAutoPtr<LCommsBus> CommsBus;
 	
 	// Debugging
 	LDebugContext *DbgContext = NULL;
@@ -1923,6 +1924,11 @@ AppWnd::AppWnd()
 				}
 			}
 		});
+
+	if (auto log = GetNetworkLog())
+		d->CommsBus.Reset(new LCommsBus(log));
+	else
+		LAssert(!"Log object missing.");
 }
 
 AppWnd::~AppWnd()

@@ -7,7 +7,7 @@
 #define RETRY_SERVER		-2
 #define RESEND_TIMEOUT		1000
 
-#if 1
+#if 0
 #define LOG(...)			
 // #define LOG(...)			printf(__VA_ARGS__)
 #else
