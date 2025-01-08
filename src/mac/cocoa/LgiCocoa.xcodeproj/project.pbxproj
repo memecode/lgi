@@ -242,7 +242,7 @@
 		345598C52D08DA7B00680A5F /* Png.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Png.cpp; path = ../../common/Gdc2/Filters/Png.cpp; sourceTree = SOURCE_ROOT; };
 		345598C72D08DA7B00680A5F /* Svg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Svg.cpp; path = ../../common/Gdc2/Filters/Svg.cpp; sourceTree = SOURCE_ROOT; };
 		345598C82D08DA7C00680A5F /* Jpeg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Jpeg.cpp; path = ../../common/Gdc2/Filters/Jpeg.cpp; sourceTree = SOURCE_ROOT; };
-		345598CE2D08DBCD00680A5F /* Lzw.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Lzw.cpp; path = ../../../common/Gdc2/Filters/Lzw.cpp; sourceTree = "<group>"; };
+		345598CE2D08DBCD00680A5F /* Lzw.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Lzw.cpp; path = ../../../../../lgi/trunk/src/common/Gdc2/Filters/Lzw.cpp; sourceTree = SOURCE_ROOT; };
 		345598FA2D08E3B100680A5F /* PostBuild.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = PostBuild.py; sourceTree = "<group>"; };
 		345920FC1F25649000098DFD /* Font.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Font.h; path = ../../../include/lgi/common/Font.h; sourceTree = SOURCE_ROOT; };
 		345920FD1F25649000098DFD /* FontCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FontCache.h; path = ../../../include/lgi/common/FontCache.h; sourceTree = SOURCE_ROOT; };
@@ -306,7 +306,7 @@
 		3477C2E41CC04A7F0028B84B /* ViewCommon.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = ViewCommon.cpp; path = ../../common/Lgi/ViewCommon.cpp; sourceTree = SOURCE_ROOT; };
 		3477C2E61CC04B1E0028B84B /* Surface.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Surface.cpp; path = ../../common/Gdc2/Surface.cpp; sourceTree = SOURCE_ROOT; };
 		3477C2E81CC04B5D0028B84B /* Rand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Rand.cpp; path = ../../common/Lgi/Rand.cpp; sourceTree = SOURCE_ROOT; };
-		3477C2EA1CC04B890028B84B /* Filter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Filter.cpp; sourceTree = SOURCE_ROOT; };
+		3477C2EA1CC04B890028B84B /* Filter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Filter.cpp; path = ../../../../../lgi/trunk/src/common/Gdc2/Filters/Filter.cpp; sourceTree = SOURCE_ROOT; };
 		3477C2EC1CC04BBB0028B84B /* ItemContainer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ItemContainer.cpp; path = ../../common/Widgets/ItemContainer.cpp; sourceTree = SOURCE_ROOT; };
 		3477C2ED1CC04BBB0028B84B /* List.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = List.cpp; path = ../../common/Widgets/List.cpp; sourceTree = SOURCE_ROOT; };
 		3477C2EE1CC04BBB0028B84B /* Tree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Tree.cpp; path = ../../common/Widgets/Tree.cpp; sourceTree = SOURCE_ROOT; };
