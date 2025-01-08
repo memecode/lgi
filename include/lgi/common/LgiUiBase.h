@@ -154,13 +154,8 @@ void LSort(T *v, ssize_t left, ssize_t right, std::function<ssize_t(T, T)> comp)
 class LgiClass LUiEvent
 {
 public:
-	int Flags;
-	OsEvent Event;
-
-	LUiEvent()
-	{
-		Flags = 0;
-	}
+	int Flags = 0;
+	OsEvent Event = nullptr;
 
 	virtual ~LUiEvent() {}
 	virtual void Trace(const char *Msg) const {}

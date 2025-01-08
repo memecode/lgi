@@ -256,14 +256,6 @@ class SshBackend :
 	}
 
 public:
-	#if defined(HAIKU) || defined(MAC)
-		using TOffset = off_t;
-	#elif defined(WINDOWS)
-		using TOffset = _off_t;
-	#else
-		using TOffset = __off_t;
-	#endif
-
 	SshBackend(LView *parent, LString u, LStream *logger) :
 		LThread("SshBackend.Thread"),
 		LMutex("SshBackend.Lock"),
@@ -1336,6 +1328,11 @@ class FtpBackend :
 			context = ctx;
 			fp = std::move(call);
 		}
+
+		~TWork()
+		{
+			LStackTrace("%p::~TWork", this);
+		}
 	};
 	struct TTimedWork : public TWork
 	{
@@ -1441,7 +1438,16 @@ class FtpBackend :
 			if (!e)
 				return false;
 
-			return LMakePath(s, BufSize, base, e->Name);
+			auto ok = LMakePath(s, BufSize, base, e->Name);
+			if (ok)
+			{
+				#ifdef WINDOWS
+				for (char *c = s; *c; c++)
+					if (*c == '/')
+						*c = '\\';
+				#endif
+			}
+			return ok;
 		}
 
 		const char *FullPath() override
@@ -1696,12 +1702,22 @@ public:
 						if (e->Path.Equals(leaf))
 						{
 							// found the entry
+							#ifdef WINDOWS
+							auto unixTime = e->Date.GetUnix();
+							#else
 							timespec unixTime = { e->Date.GetUnix(), 0 };
-							s.st_size = e->Size;
+							#endif
+							s.st_size = (TOffset) e->Size;
 							s.st_mode = 0644;
-							s.st_atim = unixTime;
-							s.st_mtim = unixTime;
-							s.st_ctim = unixTime;
+							#ifdef WINDOWS
+								s.st_atime = unixTime;
+								s.st_mtime = unixTime;
+								s.st_ctime = unixTime;
+							#else
+								s.st_atim = unixTime;
+								s.st_mtim = unixTime;
+								s.st_ctim = unixTime;
+							#endif
 						}
 					}
 				}
