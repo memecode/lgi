@@ -1534,11 +1534,13 @@ public:
 		LString File(Txt+Line, i-Line);
 		if (!File)
 			return;
+		/*
 		#if DIR_CHAR == '\\'
 		File = File.Replace("/", "\\");
 		#else
 		File = File.Replace("\\", "/");
 		#endif
+		*/
 
 		// Scan over the line number..
 		auto NumIndex = ++i;

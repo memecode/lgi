@@ -44,6 +44,12 @@ const char *VsBinaries[] = {"devenv.com", "WDExpress.exe"};
 #define LGI_STATIC_LIBRARY_EXT		"a"
 #endif
 
+#if 1
+#define LOG(...)					log.Print(__VA_ARGS__)
+#else
+#define LOG(...)
+#endif
+
 int PlatformCtrlId[] =
 {
 	IDC_WIN32,
@@ -1880,12 +1886,13 @@ void BuildThread::Step1()
 	StreamToLog log(Proj->GetApp());
 	// log.Print("%s: readdir '%s'\n", __FUNCTION__, p.Get());
 	auto callId = AddCall(_FL);
+	LOG("Step1 reading folder..\n");
 	backend->ReadFolder(SystemIntf::TForeground,
 		p,
 		[this, backend, callId](auto d)
 		{
 			StreamToLog log(Proj->GetApp());
-
+			LOG("Step1 got folder..\n");
 			for (int i=true; i; i=d->Next())
 			{
 				if (d->IsDir())
@@ -1970,8 +1977,7 @@ void BuildThread::Step2()
 	parts.DeleteArrays();
 
 	StreamToLog log(Proj->GetApp());
-	//  log.Print("%s: rewrote args '%s'\n", __FUNCTION__, backendArgs.Get());
-
+	LOG("Step2 add 3..\n");
 	AddWork([this]() { Step3(); }); // Move onto the build itself...
 }
 
@@ -1982,15 +1988,18 @@ void BuildThread::Step3()
 		return; // nothing to do...
 
 	// Step 3, run the build...
+	StreamToLog log(Proj->GetApp());
 	if (buildLogger.Reset(new StreamToLog(Proj->GetApp()))) // Create a persistent logger, to outlive the build process...
 	{
 		// buildLogger->Print("%s: building in '%s'\n", __FUNCTION__, backendInitFolder.Get());
 		auto buildId = AddCall(_FL);
+		LOG("Step3 run process..\n");
 		backend->RunProcess(backendInitFolder, LString("make ") + backendArgs, buildLogger, this, [this, buildId](auto val)
 			{
 				backendExitCode.Reset(new int(val));
 				RemoveCall(buildId);
-			});
+			},
+			Proj->GetApp()->GetBuildLog());
 	}
 	else Cancel();
 }

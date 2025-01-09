@@ -28,11 +28,72 @@ extern const char *ToString(SysPlatform p)
 	return PlatformNames[p];
 }
 
+#if 1
+#define LOG(...) log->Print(__VA_ARGS__)
+#else
+#define LOG(...)
+#endif
+
+// General SystemIntf work handling:
+void SystemIntf::AddWork(LString ctx, TPriority priority, TCallback &&job)
+{
+	Auto lck(this, _FL);
+	auto w = new TWork(ctx, std::move(job));
+	if (priority == SystemIntf::TForeground)
+		foregroundWork.Add(w);
+	else
+		backgroundWork.Add(w);
+}
+
+void SystemIntf::DoWork()
+{
+	// Is there work to do?
+	auto now = LCurrentTime();
+	LAutoPtr<TWork> curWork;
+	{
+		Auto lck(this, _FL);
+		if (timedWork.Length())
+		{
+			// Is there any timed work to do?
+			for (auto w: timedWork)
+			{
+				if (w->ts <= now)
+				{
+					// Yes!
+					curWork.Reset(w);
+					timedWork.PopFirst();
+					break;
+				}
+			}
+		}
+		if (!curWork)
+		{
+			// Check the regular queues:
+			if (foregroundWork.Length())
+				curWork.Reset(foregroundWork.PopFirst());
+			else if (backgroundWork.Length())
+				curWork.Reset(backgroundWork.PopFirst());
+		}
+	}
+
+	if (curWork)
+	{
+		curWork->fp();
+
+		auto now = LCurrentTime();
+		if (now - lastLogTs >= 500)
+		{
+			lastLogTs = now;
+			log->Print("foreground %i, background %i\n", (int)foregroundWork.Length(), (int)backgroundWork.Length());
+		}
+	}
+	else LSleep(WAIT_MS);
+}
+
 class SshBackend :
 	public SystemIntf,
 	public LCancel,
-	public LThread,
-	public LMutex
+	public LThread
 {
 	class Process :
 		public LThread,
@@ -69,6 +130,7 @@ class SshBackend :
 			cancel(cancelObj),
 			exitcodeCb(cb)
 		{
+			LOG("Process: about to run..\n");
 			Run();
 		}
 
@@ -81,16 +143,20 @@ class SshBackend :
 
 		int Main()
 		{
+			LOG("Process: in main..\n");
 			SetTimeout(5000);
 
+			LOG("Process: open..\n");
 			if (!Open(backend->uri.sHost, backend->uri.sUser, NULL, true))
 			{
 				log->Print("Error: connecting to ssh server %s\n", backend->uri.sHost.Get());
 				return -1;
 			}
 				
+			LOG("Process: create console..\n");
 			if (auto console = CreateConsole())
 			{
+				LOG("Process: ReadToPrompt..\n");
 				backend->ReadToPrompt(console, NULL, cancel);
 				auto args = LString::Fmt("cd %s && %s\n", dir.Get(), cmd.Get());				
 
@@ -105,6 +171,7 @@ class SshBackend :
 
 				if (out && out->ioCallback)
 				{
+					LOG("Process: write args..\n");
 					console->Write(args);
 
 					// Wait for process to finish...
@@ -118,6 +185,7 @@ class SshBackend :
 				}
 				else
 				{
+					LOG("Process: Cmd..\n");
 					auto result = backend->Cmd(console, args, &exitCode, output, cancel);
 					log->Print("SshProcess finished with %i\n", exitCode);
 				}
@@ -146,24 +214,25 @@ class SshBackend :
 	using TWork = std::function<void()>;
 	LAutoPtr<LSsh> ssh;
 	LAutoPtr<LSsh::SshConsole> console;
-	LArray<TWork> work;
+	LArray<TWork> foregroundWork, backgroundWork;
 
 	void OnProcessComplete()
 	{
-		Auto lck(this, _FL);
-		work.Add( [this]()
-		{
-			// Clean up all exited processes:
-			for (unsigned i=0; i<processes.Length(); i++)
+		AddWork(MakeContext(_FL, "OnProcessComplete"),
+			SystemIntf::TForeground,
+			[this]()
 			{
-				auto p = processes[i];
-				if (p->IsExited())
+				// Clean up all exited processes:
+				for (unsigned i=0; i<processes.Length(); i++)
 				{
-					processes.DeleteAt(i--);
-					delete p;
+					auto p = processes[i];
+					if (p->IsExited())
+					{
+						processes.DeleteAt(i--);
+						delete p;
+					}
 				}
-			}
-		});
+			});
 	}
 
 	LSsh::SshConsole *GetConsole()
@@ -257,8 +326,8 @@ class SshBackend :
 
 public:
 	SshBackend(LView *parent, LString u, LStream *logger) :
+		SystemIntf(logger, "SshBackend"),
 		LThread("SshBackend.Thread"),
-		LMutex("SshBackend.Lock"),
 		app(parent),
 		uri(u),
 		log(logger)
@@ -368,75 +437,78 @@ public:
 		if (!cb)
 			return;
 
-		Auto lck(this, _FL);
-		work.Add( [this, path = PreparePath(path), hints, cb]() mutable
-		{
-			LString found;
-			if (path(0) == remoteSep(0))
+		AddWork(
+			MakeContext(_FL, path),
+			TForeground,
+			[this, path = PreparePath(path), hints, cb]() mutable
 			{
-				// Absolute?
-				auto abs = PreparePath(path);
-				auto p = LString::Fmt("stat %s\n", abs.Get());
-				int32_t code;
-				Cmd(GetConsole(), p, &code);
-				if (code == 0)
-					found = abs;
-			}
-			else if (path(0) == '~')
-			{
-				// Uses home path notation?
-				if (homePath)
+				LString found;
+				if (path(0) == remoteSep(0))
 				{
-					path = path.Replace("~", homePath);
-					auto p = LString::Fmt("stat %s\n", path.Get());
+					// Absolute?
+					auto abs = PreparePath(path);
+					auto p = LString::Fmt("stat %s\n", abs.Get());
 					int32_t code;
 					Cmd(GetConsole(), p, &code);
 					if (code == 0)
-						found = path;
+						found = abs;
 				}
-				else LAssert(!"no home folder?");
-			}
-			else
-			{
-				// Relative path?
-				for (auto hint: hints)
+				else if (path(0) == '~')
 				{
-					auto rel = JoinPath(hint, path);
-					auto p = LString::Fmt("stat %s\n", rel.Get());
-					int32_t code;
-					Cmd(GetConsole(), p, &code);
-					if (code == 0)
-						found = rel;
+					// Uses home path notation?
+					if (homePath)
+					{
+						path = path.Replace("~", homePath);
+						auto p = LString::Fmt("stat %s\n", path.Get());
+						int32_t code;
+						Cmd(GetConsole(), p, &code);
+						if (code == 0)
+							found = path;
+					}
+					else LAssert(!"no home folder?");
 				}
-
-				if (!found)
+				else
 				{
-					// Maybe it's relative to one of the parent folders in the hints?
+					// Relative path?
 					for (auto hint: hints)
 					{
-						auto parents = ParentsOf(hint);
-						for (auto parent: parents)
+						auto rel = JoinPath(hint, path);
+						auto p = LString::Fmt("stat %s\n", rel.Get());
+						int32_t code;
+						Cmd(GetConsole(), p, &code);
+						if (code == 0)
+							found = rel;
+					}
+
+					if (!found)
+					{
+						// Maybe it's relative to one of the parent folders in the hints?
+						for (auto hint: hints)
 						{
-							auto rel = JoinPath(parent, path);
-							auto p = LString::Fmt("stat %s\n", rel.Get());
-							int32_t code;
-							Cmd(GetConsole(), p, &code);
-							if (code == 0)
+							auto parents = ParentsOf(hint);
+							for (auto parent: parents)
 							{
-								found = rel;
-								break;
+								auto rel = JoinPath(parent, path);
+								auto p = LString::Fmt("stat %s\n", rel.Get());
+								int32_t code;
+								Cmd(GetConsole(), p, &code);
+								if (code == 0)
+								{
+									found = rel;
+									break;
+								}
 							}
 						}
 					}
 				}
-			}
 
-			app->RunCallback( [this, cb, found]() mutable
-				{
-					LError err(found ? LErrorPathNotFound : LErrorNone, found ? nullptr : "path not found");
-					cb(err, found);
-				});
-		} );
+				app->RunCallback( [this, cb, found]() mutable
+					{
+						LError err(found ? LErrorPathNotFound : LErrorNone, found ? nullptr : "path not found");
+						cb(err, found);
+					});
+			}
+		);
 	}
 
 	void OnConnected()
@@ -465,36 +537,39 @@ public:
 			return;
 		}
 
-		Auto lck(this, _FL);
-		work.Add( [this, cb]()
-		{
-			if (auto output = Cmd(GetConsole(), "uname -a\n"))
+		AddWork(
+			MakeContext(_FL, "GetSysType"),
+			SystemIntf::TForeground,
+			[this, cb]()
 			{
-				auto parts = TrimContent(output).SplitDelimit();
-				auto sys = parts[0].Lower();
-				if (sys.Find("haiku") >= 0)
-					sysType = PlatformHaiku;
-				else if (sys.Find("linux") >= 0)
-					sysType = PlatformLinux;
-				else if (sys.Find("darwin") >= 0)
-					sysType = PlatformMac;
-				else if (sys.Find("windows") >= 0)
-					sysType = PlatformWin;
-				else
-					LAssert(!"unknown system type?");
-
-				log->Print("System is: %s\n", sys.Get());
-				remoteSep = sysType == PlatformWin ? "\\" : "/";
-
-				if (cb)
+				if (auto output = Cmd(GetConsole(), "uname -a\n"))
 				{
-					app->RunCallback( [this, cb]() mutable
-						{
-							cb(sysType);
-						});
+					auto parts = TrimContent(output).SplitDelimit();
+					auto sys = parts[0].Lower();
+					if (sys.Find("haiku") >= 0)
+						sysType = PlatformHaiku;
+					else if (sys.Find("linux") >= 0)
+						sysType = PlatformLinux;
+					else if (sys.Find("darwin") >= 0)
+						sysType = PlatformMac;
+					else if (sys.Find("windows") >= 0)
+						sysType = PlatformWin;
+					else
+						LAssert(!"unknown system type?");
+
+					log->Print("System is: %s\n", sys.Get());
+					remoteSep = sysType == PlatformWin ? "\\" : "/";
+
+					if (cb)
+					{
+						app->RunCallback( [this, cb]() mutable
+							{
+								cb(sysType);
+							});
+					}
 				}
 			}
-		} );
+		);
 	}
 
 	class SshDir : public LDirectory
@@ -731,73 +806,76 @@ public:
 		if (!path || !cb)
 			return false;
 		
-		Auto lck(this, _FL);
-		work.Add( [this, cb, path = PreparePath(path)]()
-		{
-			auto cmd = LString::Fmt("stat %s\n", path.Get());
-			int32_t exitCode = 0;
-			auto out = Cmd(GetConsole(), cmd, &exitCode);
-			auto lines = out.SplitDelimit("\r\n").Slice(1, -2);
+		AddWork(
+			MakeContext(_FL, path),
+			SystemIntf::TForeground,
+			[this, cb, path = PreparePath(path)]()
+			{
+				auto cmd = LString::Fmt("stat %s\n", path.Get());
+				int32_t exitCode = 0;
+				auto out = Cmd(GetConsole(), cmd, &exitCode);
+				auto lines = out.SplitDelimit("\r\n").Slice(1, -2);
 
-			app->RunCallback(
-				[cb, exitCode, lines]() mutable
-				{
-					LError err;
-					if (exitCode)
+				app->RunCallback(
+					[cb, exitCode, lines]() mutable
 					{
-						err.Set(LErrorPathNotFound, lines[0]);
-						cb(nullptr, LString(), err);
-					}
-					else
-					{
-						struct stat s = {};
-						LDateTime dt;
-						LString file;
-						for (auto ln: lines)
+						LError err;
+						if (exitCode)
 						{
-							auto p = ln.Strip().SplitDelimit(":", 1);
-							if (p.Length() != 2) continue;
-							auto var = p[0].Strip();
-							auto val = p[1].Strip();
-							if (var.Equals("file"))
-							{
-								file = val;
-							}
-							else if (var.Equals("size"))
-							{
-								auto parts = val.SplitDelimit();
-								s.st_size = (TOffset) parts[0].Int();
-							}
-							else if (var.Equals("access"))
-							{
-								auto parts = val.SplitDelimit("(/) ");
-								if (parts[0].Length() == 4 && parts[0](0) == '0')
-								{
-									// access mode...
-									s.st_mode = (unsigned short) Atoi(parts[0].Get(), 8);
-								}
-								else
-								{
-									// access time...
-									if (dt.Set(val))
-										s.st_atime = dt.GetUnix();
-								}
-							}
-							else if (var.Equals("modify"))
-							{
-								if (dt.Set(val))
-									s.st_mtime = dt.GetUnix();
-							}
-							else if (var.Equals("change"))
-							{
-								if (dt.Set(val))
-									s.st_ctime = dt.GetUnix();
-							}
+							err.Set(LErrorPathNotFound, lines[0]);
+							cb(nullptr, LString(), err);
 						}
-						cb(&s, file, err);
-					}
-				});
-		} );
+						else
+						{
+							struct stat s = {};
+							LDateTime dt;
+							LString file;
+							for (auto ln: lines)
+							{
+								auto p = ln.Strip().SplitDelimit(":", 1);
+								if (p.Length() != 2) continue;
+								auto var = p[0].Strip();
+								auto val = p[1].Strip();
+								if (var.Equals("file"))
+								{
+									file = val;
+								}
+								else if (var.Equals("size"))
+								{
+									auto parts = val.SplitDelimit();
+									s.st_size = (TOffset) parts[0].Int();
+								}
+								else if (var.Equals("access"))
+								{
+									auto parts = val.SplitDelimit("(/) ");
+									if (parts[0].Length() == 4 && parts[0](0) == '0')
+									{
+										// access mode...
+										s.st_mode = (unsigned short) Atoi(parts[0].Get(), 8);
+									}
+									else
+									{
+										// access time...
+										if (dt.Set(val))
+											s.st_atime = dt.GetUnix();
+									}
+								}
+								else if (var.Equals("modify"))
+								{
+									if (dt.Set(val))
+										s.st_mtime = dt.GetUnix();
+								}
+								else if (var.Equals("change"))
+								{
+									if (dt.Set(val))
+										s.st_ctime = dt.GetUnix();
+								}
+							}
+							cb(&s, file, err);
+						}
+					});
+			}
+		);
 		return true;
 	}
 
@@ -806,19 +884,21 @@ public:
 		if (!Path || !cb)
 			return false;
 
-		Auto lck(this, _FL);
-		work.Add( [this, cb, path = PreparePath(Path)]()
-		{
-			auto cmd = LString::Fmt("ls -lan %s\n", path.Get());
-			auto ls = Cmd(GetConsole(), cmd);
-			auto lines = ls.SplitDelimit("\r\n").Slice(2, -2);
+		AddWork(
+			MakeContext(_FL, Path),
+			priority,
+			[this, cb, path = PreparePath(Path)]()
+			{
+				auto cmd = LString::Fmt("ls -lan %s\n", path.Get());
+				auto ls = Cmd(GetConsole(), cmd);
+				auto lines = ls.SplitDelimit("\r\n").Slice(2, -2);
 
-			app->RunCallback( [dir = new SshDir(path, lines, NULL), cb]() mutable
-				{
-					cb(dir);
-					delete dir;
-				});
-		} );
+				app->RunCallback( [dir = new SshDir(path, lines, NULL), cb]() mutable
+					{
+						cb(dir);
+						delete dir;
+					});
+			} );
 		return true;
 	}
 
@@ -827,27 +907,29 @@ public:
 		if (!searchTerms || !results)
 			return false;
 
-		Auto lck(this, _FL);
-		work.Add( [this, results, searchTerms = LString(searchTerms)]()
-		{
-			auto root = RemoteRoot();
-			auto parts = searchTerms.SplitDelimit();
-			auto args = LString::Fmt("cd %s && find .", root.Get());
-			for (size_t i=0; i<parts.Length(); i++)
-				args += LString::Fmt("%s -iname \"*%s*\"", i ? " -and" : "", LGetLeaf(parts[i]));
-			args += " -and -not -path \"*/.hg/*\"";
-
-			int32_t exitCode = 0;
-			auto result = Cmd(GetConsole(), args + "\n", &exitCode);
-			if (!exitCode)
+		AddWork(
+			MakeContext(_FL, searchTerms),
+			SystemIntf::TForeground,
+			[this, results, searchTerms = LString(searchTerms)]()
 			{
-				LArray<LString> lines = TrimContent(result).SplitDelimit("\r\n");
-				app->RunCallback( [results, lines]() mutable
-					{
-						results(lines);
-					});
-			}
-		} );
+				auto root = RemoteRoot();
+				auto parts = searchTerms.SplitDelimit();
+				auto args = LString::Fmt("cd %s && find .", root.Get());
+				for (size_t i=0; i<parts.Length(); i++)
+					args += LString::Fmt("%s -iname \"*%s*\"", i ? " -and" : "", LGetLeaf(parts[i]));
+				args += " -and -not -path \"*/.hg/*\"";
+
+				int32_t exitCode = 0;
+				auto result = Cmd(GetConsole(), args + "\n", &exitCode);
+				if (!exitCode)
+				{
+					LArray<LString> lines = TrimContent(result).SplitDelimit("\r\n");
+					app->RunCallback( [results, lines]() mutable
+						{
+							results(lines);
+						});
+				}
+			} );
 
 		return true;
 	}
@@ -857,21 +939,23 @@ public:
 		if (!params || !results)
 			return false;
 
-		Auto lck(this, _FL);
-		work.Add( [this, results, params = new FindParams(*params)]()
-		{
-			auto args = LString::Fmt("grep -Rn \"%s\" %s",
-				params->Text.Get(),
-				params->Dir.Get());
-			results->Print("%s\n", args.Get());
-			int32_t exitCode = 0;
-			auto result = Cmd(GetConsole(), args + "\n", &exitCode);
-			if (!exitCode)
+		AddWork(
+			MakeContext(_FL, "FindInFiles"),
+			SystemIntf::TForeground,
+			[this, results, params = new FindParams(*params)]()
 			{
-				auto output = TrimContent(result);
-				results->Write(output);
-			}
-		} );
+				auto args = LString::Fmt("grep -Rn \"%s\" %s",
+					params->Text.Get(),
+					params->Dir.Get());
+				results->Print("%s\n", args.Get());
+				int32_t exitCode = 0;
+				auto result = Cmd(GetConsole(), args + "\n", &exitCode);
+				if (!exitCode)
+				{
+					auto output = TrimContent(result);
+					results->Write(output);
+				}
+			} );
 
 		return true;
 	}
@@ -909,23 +993,25 @@ public:
 		if (!Path)
 			return false;
 
-		Auto lck(this, _FL);
-		work.Add( [this, result, Path = PreparePath(Path)]() mutable
-		{
-			LStringPipe buf;
-
-			if (Path.Find("~") == 0 && homePath)
-				Path = Path.Replace("~", homePath);
-
-			auto err = ssh->DownloadFile(&buf, Path);
-			if (result)
+		AddWork(
+			MakeContext(_FL, Path),
+			priority,
+			[this, result, Path = PreparePath(Path)]() mutable
 			{
-				app->RunCallback( [this, err, result, data=buf.NewLStr()]() mutable
-					{
-						result(err, data);
-					});
-			}
-		} );
+				LStringPipe buf;
+
+				if (Path.Find("~") == 0 && homePath)
+					Path = Path.Replace("~", homePath);
+
+				auto err = ssh->DownloadFile(&buf, Path);
+				if (result)
+				{
+					app->RunCallback( [this, err, result, data=buf.NewLStr()]() mutable
+						{
+							result(err, data);
+						});
+				}
+			} );
 
 		return true;
 	}
@@ -940,23 +1026,25 @@ public:
 			return false;
 		}
 
-		Auto lck(this, _FL);
-		work.Add( [this, result, Path = PreparePath(Path), Data]() mutable
-		{
-			LMemStream stream(Data.Get(), Data.Length(), false);
-
-			if (Path.Find("~") == 0 && homePath)
-				Path = Path.Replace("~", homePath);
-
-			auto err = ssh->UploadFile(Path, &stream);
-			if (result)
+		AddWork(
+			MakeContext(_FL, Path),
+			priority,
+			[this, result, Path = PreparePath(Path), Data]() mutable
 			{
-				app->RunCallback( [this, err, result]() mutable
-					{
-						result(err);
-					});
-			}
-		} );
+				LMemStream stream(Data.Get(), Data.Length(), false);
+
+				if (Path.Find("~") == 0 && homePath)
+					Path = Path.Replace("~", homePath);
+
+				auto err = ssh->UploadFile(Path, &stream);
+				if (result)
+				{
+					app->RunCallback( [this, err, result]() mutable
+						{
+							result(err);
+						});
+				}
+			} );
 
 		return true;
 	}
@@ -966,20 +1054,22 @@ public:
 		if (!path || !cb)
 			return false;
 
-		Auto lck(this, _FL);
-		work.Add( [this, cb, createParents, Path = PreparePath(path)]()
-		{
-			auto args = LString::Fmt("mkdir%s %s", createParents ? " -p" : "", Path.Get());
-			int32_t exitVal;
-			auto result = Cmd(GetConsole(), args + "\n", &exitVal);
-			if (cb)
+		AddWork(
+			MakeContext(_FL, path),
+			SystemIntf::TForeground,
+			[this, cb, createParents, Path = PreparePath(path)]()
 			{
-				app->RunCallback( [exitVal, cb]() mutable
-					{
-						cb(exitVal == 0);
-					});
-			}
-		} );
+				auto args = LString::Fmt("mkdir%s %s", createParents ? " -p" : "", Path.Get());
+				int32_t exitVal;
+				auto result = Cmd(GetConsole(), args + "\n", &exitVal);
+				if (cb)
+				{
+					app->RunCallback( [exitVal, cb]() mutable
+						{
+							cb(exitVal == 0);
+						});
+				}
+			} );
 
 		return true;
 	}
@@ -989,20 +1079,22 @@ public:
 		if (!path || !cb)
 			return false;
 
-		Auto lck(this, _FL);
-		work.Add( [this, cb, recursiveForce, Path = PreparePath(path)]()
-		{
-			auto args = LString::Fmt("rm%s %s", recursiveForce ? " -rf" : "", Path.Get());
-			int32_t exitVal;
-			auto result = Cmd(GetConsole(), args + "\n", &exitVal);
-			if (cb)
+		AddWork(
+			MakeContext(_FL, path),
+			TForeground,
+			[this, cb, recursiveForce, Path = PreparePath(path)]()
 			{
-				app->RunCallback( [exitVal, cb]() mutable
-					{
-						cb(exitVal == 0);
-					});
-			}
-		} );
+				auto args = LString::Fmt("rm%s %s", recursiveForce ? " -rf" : "", Path.Get());
+				int32_t exitVal;
+				auto result = Cmd(GetConsole(), args + "\n", &exitVal);
+				if (cb)
+				{
+					app->RunCallback( [exitVal, cb]() mutable
+						{
+							cb(exitVal == 0);
+						});
+				}
+			} );
 
 		return true;
 	};
@@ -1012,32 +1104,34 @@ public:
 		if (!oldPath || !newPath)
 			return false;
 
-		Auto lck(this, _FL);
-		work.Add( [this, cb, from = PreparePath(oldPath), to = PreparePath(newPath)]()
-		{
-			auto args = LString::Fmt("mv %s %s", from.Get(), to.Get());
-			int32_t exitVal;
-			auto result = Cmd(GetConsole(), args + "\n", &exitVal);
-			if (cb)
+		AddWork(
+			MakeContext(_FL, newPath),
+			TForeground,
+			[this, cb, from = PreparePath(oldPath), to = PreparePath(newPath)]()
 			{
-				app->RunCallback( [exitVal, cb]() mutable
-					{
-						cb(exitVal == 0);
-					});
-			}
-		} );
+				auto args = LString::Fmt("mv %s %s", from.Get(), to.Get());
+				int32_t exitVal;
+				auto result = Cmd(GetConsole(), args + "\n", &exitVal);
+				if (cb)
+				{
+					app->RunCallback( [exitVal, cb]() mutable
+						{
+							cb(exitVal == 0);
+						});
+				}
+			} );
 
 		return true;
 	}
 
-	bool RunProcess(const char *initDir, const char *cmdLine, ProcessIo *output, LCancel *cancel, std::function<void(int)> cb)
+	bool RunProcess(const char *initDir, const char *cmdLine, ProcessIo *output, LCancel *cancel, std::function<void(int)> cb, LStream *alt_log)
 	{
 		if (!cmdLine)
 			return false;
 
 		Auto lck(this, _FL);
 		// Use a long running thread / separate SSH console to stop this main connection from responding quickly.
-		processes.Add(new Process(this, initDir, cmdLine, output, log, cancel, cb));
+		processes.Add(new Process(this, initDir, cmdLine, output, alt_log ? alt_log : log, cancel, cb));
 		return true;
 	}
 
@@ -1046,20 +1140,22 @@ public:
 		if (!cmdLine || !cb)
 			return false;
 
-		Auto lck(this, _FL);
-		work.Add( [this, cb, cmd=LString::Fmt("%s\n", cmdLine)]()
-		{
-			int32_t exitVal;
-			LStringPipe out;
-			auto result = Cmd(GetConsole(), cmd, &exitVal, &out);
-			if (cb)
+		AddWork(
+			MakeContext(_FL, cmdLine),
+			TBackground,
+			[this, cb, cmd=LString::Fmt("%s\n", cmdLine)]()
 			{
-				app->RunCallback( [exitVal, cb, out=TrimContent(out.NewLStr())]() mutable
-					{
-						cb(exitVal, out);
-					});
-			}
-		} );
+				int32_t exitVal;
+				LStringPipe out;
+				auto result = Cmd(GetConsole(), cmd, &exitVal, &out);
+				if (cb)
+				{
+					app->RunCallback( [exitVal, cb, out=TrimContent(out.NewLStr())]() mutable
+						{
+							cb(exitVal, out);
+						});
+				}
+			} );
 
 		return true;
 	}
@@ -1067,20 +1163,7 @@ public:
 	int Main() override
 	{
 		while (!IsCancelled())
-		{
-			LArray<TWork> todo;			
-			{
-				Auto lck(this, _FL);
-				todo.Swap(work);
-			}
-			if (todo.Length())
-			{
-				log->Print("backend processing: %i\n", (int)todo.Length());
-				for (auto &t: todo)
-					t();
-			}
-			else LSleep(30);
-		}
+			DoWork();
 
 		return 0;
 	}
@@ -1094,6 +1177,7 @@ class LocalBackend : public SystemIntf
 
 public:
 	LocalBackend(LView *parent, LString uri, LStream *logger) :
+		SystemIntf(logger, "LocalBackend"),
 		app(parent),
 		log(logger)
 	{
@@ -1288,7 +1372,7 @@ public:
 		#endif
 	}
 
-	bool RunProcess(const char *initDir, const char *cmdLine, ProcessIo *output, LCancel *cancel, std::function<void(int)> cb)
+	bool RunProcess(const char *initDir, const char *cmdLine, ProcessIo *output, LCancel *cancel, std::function<void(int)> cb, LStream *alt_log)
 	{
 		return false;
 	}
@@ -1306,7 +1390,6 @@ class FtpBackend :
 	public SystemIntf,
 	public LCancel,
 	public LThread,
-	public LMutex,
 	public IFtpCallback
 {
 	LView *parent = nullptr;
@@ -1315,38 +1398,12 @@ class FtpBackend :
 	bool Connected = false;
 	LString remote;
 
-	// Lock before using
-	struct TWork;
-	using TCallback = std::function<void(LAutoPtr<TWork>&)>;
-	struct TWork
-	{
-		LString context;
-		TCallback fp;
-
-		TWork(LString &ctx, TCallback &&call)
-		{
-			context = ctx;
-			fp = std::move(call);
-		}
-
-		~TWork()
-		{
-			LStackTrace("%p::~TWork", this);
-		}
-	};
-	struct TTimedWork : public TWork
-	{
-		uint64_t ts;
-
-		TTimedWork(LString &ctx, TCallback &&call) : TWork(ctx, std::move(call)) {}
-	};
+	// Lock before using:
 	struct TCache
 	{
 		LString data;
 		IFtpEntry entry;
 	};
-	LArray<TWork*> foregroundWork, backgroundWork;
-	LArray<TTimedWork*> timedWork;
 	LAutoPtr<IFtp> ftp;
 	LHashTbl<StrKey<char>, TCache*> cache;
 
@@ -1575,8 +1632,8 @@ class FtpBackend :
 
 public:
 	FtpBackend(LView *view, LString addr, LStream *logger) :
+		SystemIntf(logger, "FtpBackend"),
 		LThread("FtpBackend.Thread"),
-		LMutex("FtpBackend.Lock"),
 		parent(view),
 		uri(addr),
 		log(logger)
@@ -1633,16 +1690,6 @@ public:
 	}
 
 	// Reading and writing:
-	void AddWork(LString ctx, TPriority priority, TCallback &&job)
-	{
-		Auto lck(this, _FL);
-		auto w = new TWork(ctx, std::move(job));
-		if (priority == SystemIntf::TForeground)
-			foregroundWork.Add(w);
-		else
-			backgroundWork.Add(w);
-	}
-
 	LString ConvertPath(LString s)
 	{
 		LString unix = s.Replace("\\", "/");
@@ -1666,11 +1713,6 @@ public:
 		return ftp->SetDir(remote = s);
 	}
 
-	LString MakeContext(const char *file, int line, LString data)
-	{
-		return LString::Fmt("%s:%i %s", file, line, data.Get());
-	}
-
 	bool Stat(LString path, std::function<void(struct stat*, LString, LError)> cb) override
 	{
 		if (!path || !cb)
@@ -1680,7 +1722,7 @@ public:
 
 		AddWork(MakeContext(_FL, path),
 			TForeground,
-			[this, path, cb=std::move(cb)](auto curWork)
+			[this, path, cb=std::move(cb)]()
 			{
 				LArray<IFtpEntry*> dir;
 				LError err;
@@ -1739,7 +1781,9 @@ public:
 		if (!Path || !results)
 			return false;
 
-		AddWork(MakeContext(_FL, Path), priority, [this, Path = ConvertPath(Path), results](auto curWork) mutable
+		AddWork(MakeContext(_FL, Path),
+			priority,
+			[this, Path = ConvertPath(Path), results]() mutable
 			{
 				if (!GetReady())
 					return;
@@ -1771,13 +1815,12 @@ public:
 					}
 
 					curDir->Valid();
-					parent->RunCallback([this, results, curDir=curDir.Release(), curWork=curWork.Release()]()
+					parent->RunCallback([this, results, curDir=curDir.Release()]()
 					{
 						curDir->Valid();
 						results(curDir);
 						curDir->Valid();
 						delete curDir;
-						delete curWork;
 					});
 				}
 			});
@@ -1806,7 +1849,10 @@ public:
 			}
 		}
 
-		AddWork(MakeContext(_FL, path), priority, [this, path, result](auto workPtr) mutable
+		AddWork(
+			MakeContext(_FL, path),
+			priority,
+			[this, path, result]() mutable
 			{
 				LError err;
 				LString fileData;
@@ -1878,7 +1924,10 @@ public:
 			return false;
 
 		auto path = ConvertPath(outPath);
-		AddWork(MakeContext(_FL, path), priority, [this, path, result, Data](auto workPtr) mutable
+		AddWork(
+			MakeContext(_FL, path),
+			priority,
+			[this, path, result, Data]() mutable
 			{
 				LError err;
 
@@ -1988,7 +2037,7 @@ public:
 		void Post(LString ctx, int addMilliseconds)
 		{
 			LMutex::Auto lck(owner, _FL);
-			if (auto w = new TTimedWork(ctx, [this](auto workPtr) { Iterate(); }))
+			if (auto w = new TTimedWork(ctx, [this]() { Iterate(); }))
 			{
 				w->ts = LCurrentTime() + addMilliseconds;
 				owner->timedWork.Add(w);
@@ -2111,7 +2160,7 @@ public:
 		return false;
 	}
 
-	bool RunProcess(const char *initDir, const char *cmdLine, ProcessIo *io, LCancel *cancel, std::function<void(int)> cb) override
+	bool RunProcess(const char *initDir, const char *cmdLine, ProcessIo *io, LCancel *cancel, std::function<void(int)> cb, LStream *alt_log) override
 	{
 		// No process support
 		return false;
@@ -2182,7 +2231,6 @@ public:
 
 	int Main() override
 	{
-		int WAIT_MS = 50;
 		bool Tls = true;
 		bool LoggingSock = false;
 		uint64_t lastConnect = 0;
@@ -2224,41 +2272,7 @@ public:
 			}
 			else
 			{
-				// Is there work to do?
-				auto now = LCurrentTime();
-				LAutoPtr<TWork> curWork;
-				{
-					Auto lck(this, _FL);
-					if (timedWork.Length())
-					{
-						// Is there any timed work to do?
-						for (auto w: timedWork)
-						{
-							if (w->ts <= now)
-							{
-								// Yes!
-								curWork.Reset(w);
-								timedWork.PopFirst();
-								break;
-							}
-						}
-					}
-					if (!curWork)
-					{
-						// Check the regular queues:
-						if (foregroundWork.Length())
-							curWork.Reset(foregroundWork.PopFirst());
-						else if (backgroundWork.Length())
-							curWork.Reset(backgroundWork.PopFirst());
-					}
-				}
-
-				if (curWork)
-				{
-					curWork->fp(curWork);
-					log->Print("ftp: foreground %i, background %i\n", (int)foregroundWork.Length(), (int)backgroundWork.Length());
-				}
-				else LSleep(WAIT_MS);
+				DoWork();
 			}
 		}
 

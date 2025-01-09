@@ -692,7 +692,7 @@ public:
 				auto Len = ssh_scp_request_get_size64(Scp);
 				ssh_scp_accept_request(Scp);
 
-				Log->Print("%s:%i - Downloading %s...\n", _FL, From);
+				// Log->Print("%s:%i - Downloading %s...\n", _FL, From);
 				Meter.SetLength(Len);
 
 				while (!CancelObj->IsCancelled() && i < Len)

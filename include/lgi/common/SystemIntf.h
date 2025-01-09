@@ -33,7 +33,7 @@ extern const char *PlatformNames[];
 #endif
 
 
-class SystemIntf
+class SystemIntf : public LMutex
 {
 public:
 	enum TPriority
@@ -42,6 +42,49 @@ public:
 		TForeground
 	};
 
+	constexpr static int WAIT_MS = 50;
+	LStream *log = NULL;
+
+	LString MakeContext(const char *file, int line, LString data)
+	{
+		return LString::Fmt("%s:%i %s", file, line, data.Get());
+	}
+
+protected:
+	// Lock before using
+	struct TWork;
+	using TCallback = std::function<void()>;
+	struct TWork
+	{
+		LString context;
+		TCallback fp;
+
+		TWork(LString &ctx, TCallback &&call)
+		{
+			context = ctx;
+			fp = std::move(call);
+		}
+
+		~TWork()
+		{
+			LStackTrace("%p::~TWork", this);
+		}
+	};
+	struct TTimedWork : public TWork
+	{
+		uint64_t ts;
+		TTimedWork(LString &ctx, TCallback &&call) : TWork(ctx, std::move(call)) {}
+	};
+	LArray<TWork*> foregroundWork, backgroundWork;
+	LArray<TTimedWork*> timedWork;
+	uint64_t lastLogTs = 0;
+
+	// This adds work to the queue:
+	void AddWork(LString ctx, TPriority priority, TCallback &&job);	
+	// Call this in the main function of the sub-class:
+	void DoWork();
+
+public:
 	#if defined(HAIKU) || defined(MAC)
 		using TOffset = off_t;
 	#elif defined(WINDOWS)
@@ -50,6 +93,11 @@ public:
 		using TOffset = __off_t;
 	#endif
 
+	SystemIntf(LStream *logger, LString name) :
+		LMutex(name + ".lock"),
+		log(logger)
+	{
+	}
 	virtual ~SystemIntf() {}
 
 	virtual void GetSysType(std::function<void(SysPlatform)> cb) = 0;
@@ -106,7 +154,12 @@ public:
 		std::function<void(LStream*)> ioCallback;
 	};
 	// Start a long running process independent of the main SSH connect.
-	virtual bool RunProcess(const char *initDir, const char *cmdLine, ProcessIo *io, LCancel *cancel, std::function<void(int)> cb) = 0;
+	virtual bool RunProcess(const char *initDir,
+							const char *cmdLine,
+							ProcessIo *io,
+							LCancel *cancel,
+							std::function<void(int)> cb,
+							LStream *alt_log = nullptr) = 0;
 	// Run a short process and get the output
 	virtual bool ProcessOutput(const char *cmdLine, std::function<void(int32_t,LString)> cb) = 0;
 };
