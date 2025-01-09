@@ -63,8 +63,9 @@ typedef int SOCKET;
 #define LSocket_SetDelete		"SetDelete"
 
 // Functions
-LgiFunc bool HaveNetConnection();
-LgiFunc bool WhatsMyIp(LAutoString &Ip);
+LgiFunc bool LHaveNetConnection();
+LgiExtern LArray<uint32_t> LWhatsMyIp();
+LgiExtern LString LHostName();
 LgiExtern LString LIpToStr(uint32_t ip);
 LgiExtern uint32_t LIpToInt(LString str); // Convert IP as string to host order int
 LgiExtern uint32_t LHostnameToIp(const char *HostName); // Hostname lookup (DNS), returns IP in host order or 0 on error

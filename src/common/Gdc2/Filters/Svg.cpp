@@ -4,7 +4,6 @@
 class SvgRender : public LFilter
 {
 public:
-
 	const char *GetClass() override { return "SvgRender"; }
 	Format GetFormat() override { return FmtSvg; }
 

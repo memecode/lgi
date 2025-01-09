@@ -290,10 +290,10 @@ public:
 	LString GetConfigPath();
 	
 	/// Gets the application conf stored in lgi.conf
-	LString GetConfig(const char *Variable);
+	LString GetConfig(const char *Variable) override;
 
 	/// Sets a single tag in the config. (Not written to disk)
-	void SetConfig(const char *Variable, const char *Value);
+	bool SetConfig(const char *Variable, const char *Value) override;
 
 	/// Gets the control with the keyboard focus
 	LViewI *GetFocus();

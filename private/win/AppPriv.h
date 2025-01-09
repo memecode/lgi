@@ -45,7 +45,7 @@ public:
 		DeleteObj(SymLookup);
 	}
 
-	LJson *GetConfig();
+	LJson *GetConfigJson();
 	bool SaveConfig();
 };
 

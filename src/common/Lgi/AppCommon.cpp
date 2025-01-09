@@ -61,26 +61,34 @@ LString LApp::GetConfigPath()
 
 LString LApp::GetConfig(const char *Variable)
 {
-	auto c = d->GetConfig();
-	return c ? c->Get(Variable) : LString();
+	if (auto c = d->GetConfigJson())
+		return c->Get(Variable);
+	
+	return LString();
 }
 
-void LApp::SetConfig(const char *Variable, const char *Value)
+bool LApp::SetConfig(const char *Variable, const char *Value)
 {
-	auto c = d->GetConfig();
-	if (c && c->Set(Variable, Value))
-		d->SaveConfig();
+	if (auto c = d->GetConfigJson())
+	{
+		if (!c->Set(Variable, Value))
+			return false;
+
+		return d->SaveConfig();
+	}
+
+	return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
-LJson *LAppPrivate::GetConfig()
+LJson *LAppPrivate::GetConfigJson()
 {
 	if (!Config)
 	{
 		auto Path = Owner->GetConfigPath();
 		if (Config.Reset(new LJson()))
 		{
-			::LFile f;
+			LFile f;
 			if (f.Open(Path, O_READ))
 				Config->SetJson(f.Read());
 				
@@ -161,7 +169,7 @@ bool LAppPrivate::SaveConfig()
 	if (!Path || !Config)
 		return false;
 			
-	::LFile f;
+	LFile f;
 	if (!f.Open(Path, O_WRITE))
 		return false;
 			

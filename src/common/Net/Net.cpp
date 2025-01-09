@@ -1915,39 +1915,40 @@ uint32_t LHostnameToIp(const char *Host)
 	return ip;
 }
 
-bool WhatsMyIp(LAutoString &Ip)
+LString LHostName()
 {
-	bool Status = false;
+	char hostname[256];
+	if (gethostname(hostname, sizeof(hostname)) != SOCKET_ERROR)
+		return hostname;
+	return LString();
+}
+
+LArray<uint32_t> LWhatsMyIp()
+{
+	LArray<uint32_t> addr = 0;
 
 	StartNetworkStack();
 
 	#if defined WIN32
-	char hostname[256];
-	HostEnt *e = NULL;
-	if (gethostname(hostname, sizeof(hostname)) != SOCKET_ERROR)
-	{
-		e = gethostbyname(hostname);
-	}
-
-	if (e)
-	{
-		int Which = 0;
-		for (; e->h_addr_list[Which]; Which++);
-		Which--;
-
-		char IpAddr[32];
-		sprintf_s(IpAddr, sizeof(IpAddr),
-					"%i.%i.%i.%i",
-					(uchar)e->h_addr_list[Which][0],
-					(uchar)e->h_addr_list[Which][1],
-					(uchar)e->h_addr_list[Which][2],
-					(uchar)e->h_addr_list[Which][3]);
-		Status = Ip.Reset(NewStr(IpAddr));
-	}
+		
+		char hostname[256];
+		HostEnt *e = NULL;
+		if (gethostname(hostname, sizeof(hostname)) != SOCKET_ERROR)
+		{
+			if (auto e = gethostbyname(hostname))
+			{
+				for (int i=0; e->h_addr_list[i]; i++)
+					addr.Add(htonl(*(uint32_t*)e->h_addr_list[i]));
+			}
+		}
 	
+	#else
+
+		#warning "Impl LWhatsMyIp for this platform"
+
 	#endif
 
-	return Status;
+	return addr;
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -358,7 +358,7 @@ public:
 	virtual LString GetConfig(const char *Tag) = 0;
 
 	/// Sets a single tag in the config. (Not written to disk)
-	virtual void SetConfig(const char *Var, const char *Val) = 0;
+	virtual bool SetConfig(const char *Var, const char *Val) = 0;
 	
 	/// Gets the control with the keyboard focus
 	virtual LViewI *GetFocus() = 0;
