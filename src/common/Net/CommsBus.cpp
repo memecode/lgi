@@ -629,9 +629,6 @@ struct LCommsBusPriv :
 	{
 		ServerPeers peers(this);
 
-		auto myIp = LIpToStr(LWhatsMyIp().Last());
-		auto hostName = LHostName();
-
 		// Wait for incoming connections and handle them...
 		bool hasConnections = false;
 		NotifyState(LCommsBus::TDisconnectedServer);

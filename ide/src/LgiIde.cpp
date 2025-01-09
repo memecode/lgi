@@ -5250,6 +5250,10 @@ int LgiMain(OsAppArguments &AppArgs)
 
 		// TimeZoneInfoTest();
 
+		auto myIp = LIpToStr(LWhatsMyIp().Last());
+		auto hostName = LHostName();
+		printf("ip=%s, hostname=%s\n", myIp.Get(), hostName.Get());
+
 		a.Run();
 	}
 
