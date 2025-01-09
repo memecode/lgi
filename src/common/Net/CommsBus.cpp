@@ -7,6 +7,7 @@
 #define DEFAULT_COMMS_PORT	45454
 #define RETRY_SERVER		-2
 #define RESEND_TIMEOUT		1000
+#define SECONDS(s)			((s)*1000)
 
 #if 0
 #define LOG(...)			
@@ -504,27 +505,129 @@ struct LCommsBusPriv :
 		#endif
 	}
 
-	int Server()
+	struct ServerPeers
 	{
-		// For inter-server connection discovery, get a list of interfaces to broadcast to
+		LCommsBusPriv *d = nullptr;
+		LStream *log = nullptr;
 		LArray<LSocket::Interface> interfaces;
-		LSocket::EnumInterfaces(interfaces);
-		for (int i=0; i<interfaces.Length(); i++)
+		uint32_t broadcastIp = LIpToInt(COMMBUS_MULTICAST);
+		LAutoPtr<LUdpListener> listener;
+		uint64_t broadcastTime = 0;
+
+		// This is the last seen time of the peer
+		LHashTbl<IntKey<uint32_t>, uint64_t> peers;
+
+		ServerPeers(LCommsBusPriv *priv) : d(priv)
 		{
-			if (interfaces[i].IsLoopBack()) // We don't care about the local
-				interfaces.DeleteAt(i--);
-		}
-		LArray<uint32_t> interface_ips;
-		for (auto &intf: interfaces)
-		{
-			interface_ips.Add(intf.Ip4);
-			LOG("interface: %s %s\n", intf.Name.Get(), LIpToStr(intf.Ip4).Get());
+			log = d->log;
 		}
 
-		// Create a UDP listener
-		uint32_t broadcastIp = LIpToInt(COMMBUS_MULTICAST);
-		LUdpListener listener(interface_ips, broadcastIp, DEFAULT_COMMS_PORT, log);
-		uint64_t broadcastTime = 0;
+		LArray<uint32_t> GetIps(LArray<LSocket::Interface> &arr)
+		{
+			LArray<uint32_t> ips;
+			for (auto &intf: arr)
+				ips.Add(intf.Ip4);
+			return ips;
+		}
+
+		void OnInterfacesChange()
+		{
+			auto interface_ips = GetIps(interfaces);
+			for (auto &intf: interfaces)
+				LOG("interfaceChange: %s %s\n", intf.Name.Get(), LIpToStr(intf.Ip4).Get());
+
+			// Create a UDP listener on current interfaces...
+			listener.Reset(new LUdpListener(interface_ips, broadcastIp, DEFAULT_COMMS_PORT, d->log));
+		}
+
+		void OnNewPeer(uint32_t ip4)
+		{
+			LOG("newPeer: %s\n", LIpToStr(ip4).Get());
+		}
+
+		void OnDeletePeer(uint32_t ip4)
+		{
+			LOG("deletePeer: %s\n", LIpToStr(ip4).Get());
+		}
+
+		void Timeslice()		
+		{
+			// Inter-server discovery...
+
+			// For inter-server connection discovery, get a list of interfaces to broadcast to
+			LArray<LSocket::Interface> curIntf;
+			LSocket::EnumInterfaces(curIntf);
+			for (int i=0; i<curIntf.Length(); i++)
+			{
+				if (curIntf[i].IsLoopBack()) // We don't care about the local
+					curIntf.DeleteAt(i--);
+			}
+			// sort so we can compare properly:
+			curIntf.Sort([](auto *a, auto *b) { return a->Ip4 - b->Ip4; });
+			if (GetIps(curIntf) != GetIps(interfaces))
+			{
+				interfaces = curIntf;
+				OnInterfacesChange();
+			}			
+			
+			if (listener)
+			{
+				// Listen for packets...
+				LString discoverPkt;
+				uint32_t discoverIp = 0;
+				uint16_t discoverPort = 0;
+				if (listener->ReadPacket(discoverPkt, discoverIp, discoverPort))
+				{
+					bool ourIp = false;
+					for (auto &i: interfaces)
+						if (i.Ip4 == discoverIp)
+							ourIp = true;
+					if (!ourIp)
+					{
+						if (!peers.Find(discoverIp))
+							OnNewPeer(discoverIp);
+						peers.Add(discoverIp, LCurrentTime());
+						// LOG("got discover packet: %i bytes, %s:%i\n", (int)discoverPkt.Length(), LIpToStr(discoverIp).Get(), discoverPort);
+					}
+				}
+			}
+
+			// Check for peers that we haven't seen in a while
+			auto now = LCurrentTime();
+			LArray<uint32_t> deletedPeers;
+			for (auto p: peers)
+			{
+				if (now - p.value > SECONDS(60))
+				{
+					OnDeletePeer(p.key);
+					deletedPeers.Add(p.key);
+				}
+			}
+			for (auto ip: deletedPeers)
+				peers.Delete(ip);
+
+			now = LCurrentTime();
+			if (now - broadcastTime >= 10000)
+			{
+				broadcastTime = now;
+
+				// And then broadcast packets...
+				for (auto &intf: interfaces)
+				{
+					LUdpBroadcast bc(intf.Ip4);
+					LString pkt = "PING";
+					auto result = bc.BroadcastPacket(pkt, broadcastIp, DEFAULT_COMMS_PORT);
+					if (!result)
+						LOG("broadcast to %s = %i\n", LIpToStr(intf.Ip4).Get(), result);
+				}
+			}
+		}
+		
+	};
+
+	int Server()
+	{
+		ServerPeers peers(this);
 
 		// Wait for incoming connections and handle them...
 		bool hasConnections = false;
@@ -532,39 +635,7 @@ struct LCommsBusPriv :
 
 		while (!IsCancelled())
 		{
-			{
-				// Inter-server discovery...
-				
-				// Listen for packets...
-				LString discoverPkt;
-				uint32_t discoverIp = 0;
-				uint16_t discoverPort = 0;
-				if (listener.ReadPacket(discoverPkt, discoverIp, discoverPort))
-				{
-					bool ourIp = false;
-					for (auto &i: interfaces)
-						if (i.Ip4 == discoverIp)
-							ourIp = true;
-					if (!ourIp)
-						LOG("got discover packet: %i bytes, %s:%i\n", (int)discoverPkt.Length(), LIpToStr(discoverIp).Get(), discoverPort);
-				}
-
-				auto now = LCurrentTime();
-				if (now - broadcastTime >= 10000)
-				{
-					broadcastTime = now;
-
-					// And then broadcast packets...
-					for (auto &intf: interfaces)
-					{
-						LUdpBroadcast bc(intf.Ip4);
-						LString pkt = "PING";
-						auto result = bc.BroadcastPacket(pkt, broadcastIp, DEFAULT_COMMS_PORT);
-						if (!result)
-							LOG("broadcast to %s = %i\n", LIpToStr(intf.Ip4).Get(), result);
-					}
-				}
-			}
+			peers.Timeslice();
 
 			if (listen.IsReadable())
 			{
