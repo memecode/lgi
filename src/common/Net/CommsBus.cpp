@@ -511,7 +511,7 @@ struct LCommsBusPriv :
 		LSocket::EnumInterfaces(interfaces);
 		for (int i=0; i<interfaces.Length(); i++)
 		{
-			if (interfaces[i].IsLinkLocal()) // We don't care about the local
+			if (interfaces[i].IsLoopBack()) // We don't care about the local
 				interfaces.DeleteAt(i--);
 		}
 		LArray<uint32_t> interface_ips;
