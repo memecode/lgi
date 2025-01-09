@@ -507,6 +507,11 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
+			<Executable>
+				<Haiku />
+			</Executable>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -592,6 +597,7 @@ iconv</Release>
 					<Debug>lgi-gtk3</Debug>
 					<Release>lgi-gtk3</Release>
 				</Linux>
+				<Haiku />
 			</TargetName>
 			<TargetType>
 				<All>DynamicLibrary</All>
@@ -615,15 +621,43 @@ _GNU_SOURCE</Release>
 					<Debug>-Wno-format-truncation</Debug>
 					<Release>-Wno-format-truncation</Release>
 				</Linux>
+				<All />
+				<Haiku />
 			</Options>
 			<LibraryPaths>
 				<All>
 					<Debug>../deps/build-x64-debug/lib</Debug>
 					<Release>../deps/build-x64-release/lib</Release>
 				</All>
+				<Haiku />
 			</LibraryPaths>
+			<ApplicationIcon />
 		</Build>
-		<Advanced />
-		<Debug />
+		<Advanced>
+			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Haiku />
+			</PostBuildCommands>
+		</Advanced>
+		<Debug>
+			<Environment />
+			<Arguments>
+				<All />
+			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
+		</Debug>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
+		<Editor>
+			<TabSize />
+			<IndentSize />
+			<ShowWhiteSpace />
+			<UseHardTabs />
+			<CommentFile />
+			<CommentFunction />
+		</Editor>
 	</Settings>
 </Project>

@@ -42,7 +42,7 @@
 			<Node File="./src/BreakPointStore.h" Type="3" Platforms="15" />
 			<Node File="./src/DebugContext.cpp" Type="2" Platforms="15" />
 			<Node File="./src/DebugContext.h" Type="3" Platforms="15" />
-			<Node File="./src/Debugger.cpp" Type="2" Platforms="7" />
+			<Node File="./src/Debugger.cpp" Type="2" Platforms="15" />
 			<Node File="./src/Debugger.h" Type="3" Platforms="7" />
 		</Node>
 		<Node Name="Dialogs" Type="1" Platforms="15" Open="0" Id="3">
@@ -228,7 +228,6 @@ _GNU_SOURCE</Release>
 					<Debug>HAS_LIBSSH</Debug>
 					<Release>HAS_LIBSSH</Release>
 				</All>
-				<Linux />
 			</Defines>
 			<TargetType>
 				<All>Executable</All>
@@ -252,17 +251,18 @@ _GNU_SOURCE</Release>
 					<Debug>`pkg-config --cflags gtk+-3.0`</Debug>
 					<Release>`pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
+				<Haiku />
 			</SystemIncludes>
 			<LibraryPaths>
 				<All />
-				<Linux />
+				<Haiku />
 			</LibraryPaths>
 			<ApplicationIcon>
 				<Haiku>./resources/icon.hvif</Haiku>
 			</ApplicationIcon>
 			<Options>
 				<All />
-				<Linux />
+				<Haiku />
 			</Options>
 		</Build>
 		<Editor>
@@ -295,7 +295,7 @@ _GNU_SOURCE</Release>
 		</Debug>
 		<Advanced>
 			<PostBuildCommands>
-				<Linux />
+				<Haiku />
 			</PostBuildCommands>
 			<OtherMakefileRules />
 		</Advanced>

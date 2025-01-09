@@ -24,11 +24,7 @@ ifeq ($(Build),Debug)
 	Tag = d
 	Defs = -D_DEBUG -DHAIKU -D_REENTRANT -DHAS_LIBSSH -DPOSIX -D_GNU_SOURCE
 	Libs =  \
-		-L../../../../codelib/lunasvg/build \
-		-L../../../../codelib/lunasvg/build/_deps/plutovg-build \
 		-lssh \
-		-llunasvg \
-		-lplutovg \
 		-static-libgcc \
 		-lgnu \
 		-lnetwork \
@@ -36,22 +32,17 @@ ifeq ($(Build),Debug)
 		-llgi$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I../../../../codelib/lunasvg/include \
-		-I./resources \
-		-I../include \
 		-I../include/lgi/haiku \
 		-I../private/common \
-		-I./src
+		-I./src \
+		-I../include \
+		-I./resources
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
 	Defs = -DHAIKU -D_REENTRANT -DHAS_LIBSSH -DPOSIX -D_GNU_SOURCE
 	Libs =  \
-		-L../../../../codelib/lunasvg/build \
-		-L../../../../codelib/lunasvg/build/_deps/plutovg-build \
 		-lssh \
-		-llunasvg \
-		-lplutovg \
 		-static-libgcc \
 		-lgnu \
 		-lnetwork \
@@ -59,60 +50,55 @@ else
 		-llgi$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I../../../../codelib/lunasvg/include \
-		-I./resources \
-		-I../include \
 		-I../include/lgi/haiku \
 		-I../private/common \
-		-I./src
+		-I./src \
+		-I../include \
+		-I./resources
 endif
 
 # Dependencies
-Source =	../src/common/Lgi/RemoteFileSelect.cpp \
+Source =	../src/common/Text/HtmlCommon.cpp \
 			../src/common/Coding/ParseCpp.cpp \
-			../src/common/Gdc2/Filters/Svg.cpp \
 			../src/common/Text/TextConvert.cpp \
-			../src/common/Gdc2/Filters/Png.cpp \
-			../src/common/Net/OpenSSLSocket.cpp \
 			../src/common/Text/Homoglyphs/Homoglyphs.cpp \
 			../src/common/Text/HtmlParser.cpp \
-			../src/common/Text/HtmlCommon.cpp \
 			../src/common/Text/RemoveAnsi.cpp \
-			src/LgiUtils.cpp \
-			src/History.cpp \
-			src/Debugger.cpp \
-			src/DocEdit.cpp \
-			src/IdeDoc.cpp \
-			src/LgiIde.cpp \
-			src/SpaceTabConv.cpp \
-			src/MemDumpViewer.cpp \
-			src/SimpleCppParser.cpp \
-			src/IdeCommon.cpp \
-			src/JavascriptParser.cpp \
-			src/SysCharSupport.cpp \
-			src/PythonParser.cpp \
-			src/FindSymbol.cpp \
-			src/IdeFindInFiles.cpp \
-			src/ProjectNode.cpp \
-			src/MissingFiles.cpp \
-			src/IdeProject.cpp \
-			src/WebFldDlg.cpp \
-			src/AddFtpFile.cpp \
-			src/FtpThread.cpp \
-			src/DocEditStyling.cpp \
-			src/DebugContext.cpp \
+			../src/common/Net/OpenSSLSocket.cpp \
+			../src/common/Lgi/RemoteFileSelect.cpp \
 			../src/common/Coding/LexCpp.cpp \
 			../src/common/Lgi/SystemIntf.cpp \
 			src/NewProjectFromTemplate.cpp \
+			../src/common/Text/TextView4.cpp \
+			src/IdeProjectSettings.cpp \
+			../src/common/Text/Html.cpp \
+			../src/common/Text/DocView.cpp \
+			../src/common/Net/Http.cpp \
+			../src/common/Lgi/LgiMain.cpp \
+			../src/common/Lgi/Mdi.cpp \
 			../src/common/Net/Ftp.cpp \
 			../src/common/Lgi/About.cpp \
-			../src/common/Lgi/Mdi.cpp \
-			../src/common/Lgi/LgiMain.cpp \
-			../src/common/Text/Html.cpp \
-			src/IdeProjectSettings.cpp \
-			../src/common/Text/DocView.cpp \
-			../src/common/Text/TextView4.cpp \
-			../src/common/Net/Http.cpp \
+			src/MissingFiles.cpp \
+			src/IdeFindInFiles.cpp \
+			src/ProjectNode.cpp \
+			src/WebFldDlg.cpp \
+			src/PythonParser.cpp \
+			src/FindSymbol.cpp \
+			src/SpaceTabConv.cpp \
+			src/SysCharSupport.cpp \
+			src/JavascriptParser.cpp \
+			src/DocEditStyling.cpp \
+			src/IdeProject.cpp \
+			src/DebugContext.cpp \
+			src/IdeCommon.cpp \
+			src/SimpleCppParser.cpp \
+			src/MemDumpViewer.cpp \
+			src/DocEdit.cpp \
+			src/Debugger.cpp \
+			src/IdeDoc.cpp \
+			src/History.cpp \
+			src/LgiUtils.cpp \
+			src/LgiIde.cpp \
 			../src/common/Text/Homoglyphs/HomoglyphsTable.cpp
 
 SourceC    := $(filter %.c,$(Source))
@@ -146,7 +132,14 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	xres -o $(Target) $(Build)/lgiide.rsrc
 	@echo Done.
 
-../$(BuildDir)/liblgi$(Tag).so : ../include/lgi/common/App.h \
+../$(BuildDir)/liblgi$(Tag).so : ../../deps/build-x64-release/include/iconv.h \
+	../../deps/build-x64-release/include/jconfig.h \
+	../../deps/build-x64-release/include/jerror.h \
+	../../deps/build-x64-release/include/jmorecfg.h \
+	../../deps/build-x64-release/include/jpeglib.h \
+	../../deps/build-x64-release/include/lunasvg/lunasvg.h \
+	../../deps/build-x64-release/include/png.h \
+	../include/lgi/common/App.h \
 	../include/lgi/common/Array.h \
 	../include/lgi/common/AutoPtr.h \
 	../include/lgi/common/Base64.h \
@@ -196,6 +189,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	../include/lgi/common/ImageList.h \
 	../include/lgi/common/Input.h \
 	../include/lgi/common/ItemContainer.h \
+	../include/lgi/common/Jpeg.h \
 	../include/lgi/common/Json.h \
 	../include/lgi/common/Layout.h \
 	../include/lgi/common/Lgi.h \
@@ -214,6 +208,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	../include/lgi/common/ListItemCheckBox.h \
 	../include/lgi/common/ListItemRadioBtn.h \
 	../include/lgi/common/LMallocArray.h \
+	../include/lgi/common/Lzw.h \
 	../include/lgi/common/Mail.h \
 	../include/lgi/common/Matrix.h \
 	../include/lgi/common/Mem.h \
@@ -313,6 +308,11 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	../src/common/Gdc2/Alpha.cpp \
 	../src/common/Gdc2/Colour.cpp \
 	../src/common/Gdc2/Filters/Filter.cpp \
+	../src/common/Gdc2/Filters/Gif.cpp \
+	../src/common/Gdc2/Filters/Jpeg.cpp \
+	../src/common/Gdc2/Filters/Lzw.cpp \
+	../src/common/Gdc2/Filters/Png.cpp \
+	../src/common/Gdc2/Filters/Svg.cpp \
 	../src/common/Gdc2/Font/Charset.cpp \
 	../src/common/Gdc2/Font/DisplayString.cpp \
 	../src/common/Gdc2/Font/Font.cpp \
@@ -444,10 +444,9 @@ cleanall :
 	+make -C "../" -f ./haiku/Makefile.haiku clean
 
 VPATH=$(BuildDir) \
-	../src/common/Coding \
+	../src/common/Text \
 	./src \
 	../src/common/Lgi \
+	../src/common/Coding \
 	../src/common/Net \
-	../src/common/Text \
-	../src/common/Gdc2/Filters \
 	../src/common/Text/Homoglyphs
