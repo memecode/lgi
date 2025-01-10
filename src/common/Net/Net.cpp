@@ -1507,7 +1507,7 @@ int LSocket::WriteUdp(void *Buffer, int Size, int Flags, uint32_t Ip, uint16_t P
 }
 
 //////////////////////////////////////////////////////////////////////////////
-bool HaveNetConnection()
+bool LHaveNetConnection()
 {
 	bool Status = false;
 
