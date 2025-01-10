@@ -1321,11 +1321,11 @@ LFilterFactory::LFilterFactory(const char *name) : Name(name)
 		First = this;
 
 		// logging:
-		printf("Adding '%s'..\n", name);
+		// printf("Adding '%s'..\n", name);
 		int idx = 0;
 		for (auto p = First; p; p = p->Next)
 		{
-			printf("\t[%i]=%s\n", idx, p->Name.Get());
+			// printf("\t[%i]=%s\n", idx, p->Name.Get());
 			if (idx++ > LFilter::MAX_FILTERS)
 				break;
 		}
