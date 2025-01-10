@@ -1424,7 +1424,10 @@ public:
 		{
 			if (status)
 			{
-				Tree->Insert(new VcFolder(this, Dlg->Uri));
+				auto u = Dlg->Uri;
+				if (u(-1) != '/')
+					u += "/";
+				Tree->Insert(new VcFolder(this, u));
 				SaveFolders();
 			}
 		});
