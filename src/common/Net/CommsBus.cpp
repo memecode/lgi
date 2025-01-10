@@ -568,7 +568,8 @@ struct LCommsBusPriv :
 
 			bool FromString(LString s)
 			{
-				FromVars(s.SplitDelimit("\n"));
+				auto vars = s.SplitDelimit("\n");
+				FromVars(vars);
 				return true;
 			}
 
