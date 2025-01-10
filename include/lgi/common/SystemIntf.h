@@ -67,7 +67,7 @@ protected:
 
 		~TWork()
 		{
-			LStackTrace("%p::~TWork", this);
+			// LStackTrace("%p::~TWork", this);
 		}
 	};
 	struct TTimedWork : public TWork
