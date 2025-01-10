@@ -527,13 +527,37 @@ struct LCommsBusPriv :
 			LString hostName;
 			LArray<LPeer> peers;
 
+			void FromVars(LString::Array &vars)
+			{
+				for (auto &var: vars)
+				{
+					auto v = var.SplitDelimit(":", 1);
+					if (v.Length() != 2)
+						continue;
+					if (v[0].Equals("hostname"))
+					{
+						hostName = v[1];
+					}
+					else if (v[0].Equals("ip"))
+					{
+						ip4 = LIpToInt(v[1]);
+					}
+					else if (v[0].Equals("hostname"))
+					{
+						LPeer p;
+						auto vars = v[1].SplitDelimit(",");
+						p.FromVars(vars);
+					}
+					else
+					{						
+						int asd=0;
+					}
+				}
+			}
+
 			bool FromString(LString s)
 			{
-				for (auto ln: s.SplitDelimit("\n"))
-				{
-					auto v = ln.SplitDelimit(":", 1);
-					int asd=0;
-				}
+				FromVars(s.SplitDelimit("\n"));
 				return true;
 			}
 
@@ -544,7 +568,7 @@ struct LCommsBusPriv :
 				a.New().Printf("ip:%s", LIpToStr(ip4).Get());
 				a.New().Printf("host:%s", hostName.Get());
 				for (auto &p: peers)
-					a.New().Printf("peer:%s/%s", LIpToStr(p.ip4).Get(), p.hostName.Get());
+					a.New().Printf("peer:ip:%s,hostname:%s", LIpToStr(p.ip4).Get(), p.hostName.Get());
 				return LString(",").Join(a);
 			}
 		};
@@ -633,6 +657,7 @@ struct LCommsBusPriv :
 
 						if (auto p = new LPeer)
 						{
+							p->ip4 = discoverIp;
 							p->seen = LCurrentTime();
 							p->FromString(discoverPkt);
 							peers.Add(discoverIp, p);
