@@ -1937,9 +1937,13 @@ const char *SocketFamilyToString(int fam)
 		#ifdef AF_ROUTE
 		case AF_ROUTE: return "AF_ROUTE";
 		#endif
+		#ifdef AF_LINK
 		case AF_LINK: return "AF_LINK";
+		#endif
 		case AF_INET6: return "AF_INET6";
+		#ifdef AF_DLI
 		case AF_DLI: return "AF_DLI";
+		#endif
 		case AF_IPX: return "AF_IPX";
 		#ifdef AF_NOTIFY
 		case AF_NOTIFY: return "AF_NOTIFY";

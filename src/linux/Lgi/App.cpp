@@ -352,7 +352,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 		}
 	}
 
-	d->GetConfig();
+	d->GetConfigJson();
 
 	// System font setup
 	LFontType SysFontType;

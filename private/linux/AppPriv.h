@@ -158,7 +158,7 @@ public:
 		return ModFlags;
 	}
 
-	LJson *GetConfig();
+	LJson *GetConfigJson();
 	bool SaveConfig();
 };
 
