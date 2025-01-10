@@ -509,13 +509,46 @@ struct LCommsBusPriv :
 	{
 		LCommsBusPriv *d = nullptr;
 		LStream *log = nullptr;
-		LArray<LSocket::Interface> interfaces;
-		uint32_t broadcastIp = LIpToInt(COMMBUS_MULTICAST);
-		LAutoPtr<LUdpListener> listener;
-		uint64_t broadcastTime = 0;
 
-		// This is the last seen time of the peer
-		LHashTbl<IntKey<uint32_t>, uint64_t> peers;
+		// Interface info
+		LArray<LSocket::Interface> interfaces;
+
+		// Server discovery info
+		uint32_t broadcastIp = LIpToInt(COMMBUS_MULTICAST);
+		uint64_t broadcastTime = 0;
+		LAutoPtr<LUdpListener> listener;
+
+		// Peer info
+		struct LPeer
+		{
+			bool direct = true;
+			uint32_t ip4 = 0;
+			uint64_t seen = 0;
+			LString hostName;
+			LArray<LPeer> peers;
+
+			bool FromString(LString s)
+			{
+				for (auto ln: s.SplitDelimit("\n"))
+				{
+					auto v = ln.SplitDelimit(":", 1);
+					int asd=0;
+				}
+				return true;
+			}
+
+			LString ToString()
+			{
+				LString::Array a;
+				a.New().Printf("dir:%i", direct);
+				a.New().Printf("ip:%s", LIpToStr(ip4).Get());
+				a.New().Printf("host:%s", hostName.Get());
+				for (auto &p: peers)
+					a.New().Printf("peer:%s/%s", LIpToStr(p.ip4).Get(), p.hostName.Get());
+				return LString(",").Join(a);
+			}
+		};
+		LHashTbl<IntKey<uint32_t>, LPeer*> peers;
 
 		ServerPeers(LCommsBusPriv *priv) : d(priv)
 		{
@@ -548,6 +581,17 @@ struct LCommsBusPriv :
 		void OnDeletePeer(uint32_t ip4)
 		{
 			LOG("deletePeer: %s\n", LIpToStr(ip4).Get());
+		}
+
+		LString CreatePingData()
+		{
+			LString::Array lines;
+			
+			lines.New().Printf("hostname:%s", LHostName().Get());
+			for (auto p: peers)
+				lines.New().Printf("peer:%s", p.value->ToString().Get());			
+
+			return LString("\n").Join(lines);
 		}
 
 		void Timeslice()		
@@ -586,8 +630,14 @@ struct LCommsBusPriv :
 					{
 						if (!peers.Find(discoverIp))
 							OnNewPeer(discoverIp);
-						peers.Add(discoverIp, LCurrentTime());
-						// LOG("got discover packet: %i bytes, %s:%i\n", (int)discoverPkt.Length(), LIpToStr(discoverIp).Get(), discoverPort);
+
+						if (auto p = new LPeer)
+						{
+							p->seen = LCurrentTime();
+							p->FromString(discoverPkt);
+							peers.Add(discoverIp, p);
+							// LOG("got discover packet: %i bytes, %s:%i\n", (int)discoverPkt.Length(), LIpToStr(discoverIp).Get(), discoverPort);
+						}
 					}
 				}
 			}
@@ -597,10 +647,11 @@ struct LCommsBusPriv :
 			LArray<uint32_t> deletedPeers;
 			for (auto p: peers)
 			{
-				if (now - p.value > SECONDS(60))
+				if (now - p.value->seen > SECONDS(60))
 				{
 					OnDeletePeer(p.key);
-					deletedPeers.Add(p.key);
+					deletedPeers.Delete(p.key);
+					delete p.value;
 				}
 			}
 			for (auto ip: deletedPeers)
@@ -615,7 +666,7 @@ struct LCommsBusPriv :
 				for (auto &intf: interfaces)
 				{
 					LUdpBroadcast bc(intf.Ip4);
-					LString pkt = "PING";
+					LString pkt = CreatePingData();
 					auto result = bc.BroadcastPacket(pkt, broadcastIp, DEFAULT_COMMS_PORT);
 					if (!result)
 						LOG("broadcast to %s = %i\n", LIpToStr(intf.Ip4).Get(), result);
