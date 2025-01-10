@@ -1934,14 +1934,20 @@ const char *SocketFamilyToString(int fam)
 		case AF_UNSPEC: return "AF_UNSPEC";
 		case AF_INET: return "AF_INET";
 		case AF_APPLETALK: return "AF_APPLETALK";
+		#ifdef AF_ROUTE
 		case AF_ROUTE: return "AF_ROUTE";
+		#endif
 		case AF_LINK: return "AF_LINK";
 		case AF_INET6: return "AF_INET6";
 		case AF_DLI: return "AF_DLI";
 		case AF_IPX: return "AF_IPX";
+		#ifdef AF_NOTIFY
 		case AF_NOTIFY: return "AF_NOTIFY";
+		#endif
 		case AF_UNIX: return "AF_UNIX";
+		#ifdef AF_BLUETOOTH
 		case AF_BLUETOOTH: return "AF_BLUETOOTH";
+		#endif
 	}
 	
 	static char num[16];
@@ -2304,8 +2310,22 @@ int LSelect::Select(LArray<LSocketI*> &Results, bool Rd, bool Wr, int TimeoutMs)
 	int v = select(	(int)Max+1,
 					Rd ? &r : NULL,
 					Wr ? &r : NULL,
-					NULLdefault
-                                                                                                                                                                                                                             
+					NULL, TimeoutMs >= 0 ? &t : NULL);
+	if (v > 0)
+	{
+		for (auto Sock : s)
+		{
+			if (FD_ISSET(Sock->Handle(), &r))
+				Results.Add(Sock);
+		}
+	}
+
+	return v;
+
+	#endif
+}
+
+LArray<LSocketI*> LSelect::Readable(int TimeoutMs)
 {
 	LArray<LSocketI*> r;
 	Select(r, true, false, TimeoutMs);
