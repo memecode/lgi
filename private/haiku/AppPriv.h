@@ -69,7 +69,7 @@ public:
 		*/
 	}
 
-	LJson *GetConfig();
+	LJson *GetConfigJson();
 	bool SaveConfig();
 	
 	void MessageReceived(BMessage* message)

@@ -21,6 +21,10 @@
 	#include <sys/socket.h>
 	#include <ifaddrs.h>
 #endif
+#if !defined(WINDOWS)
+	#include <sys/types.h>
+	#include <ifaddrs.h>
+#endif
 #include <ctype.h>
 
 #include "lgi/common/File.h"
@@ -1923,6 +1927,28 @@ LString LHostName()
 	return LString();
 }
 
+const char *SocketFamilyToString(int fam)
+{
+	switch (fam)
+	{
+		case AF_UNSPEC: return "AF_UNSPEC";
+		case AF_INET: return "AF_INET";
+		case AF_APPLETALK: return "AF_APPLETALK";
+		case AF_ROUTE: return "AF_ROUTE";
+		case AF_LINK: return "AF_LINK";
+		case AF_INET6: return "AF_INET6";
+		case AF_DLI: return "AF_DLI";
+		case AF_IPX: return "AF_IPX";
+		case AF_NOTIFY: return "AF_NOTIFY";
+		case AF_UNIX: return "AF_UNIX";
+		case AF_BLUETOOTH: return "AF_BLUETOOTH";
+	}
+	
+	static char num[16];
+	sprintf_s(num, sizeof(num), "%i", fam);
+	return num;
+}
+
 LArray<uint32_t> LWhatsMyIp()
 {
 	LArray<uint32_t> addr = 0;
@@ -1942,9 +1968,34 @@ LArray<uint32_t> LWhatsMyIp()
 			}
 		}
 	
-	#else
+	#else // unixy interfaces?
 
-		#warning "Impl LWhatsMyIp for this platform"
+		struct ifaddrs *ifap = nullptr;
+		int r = getifaddrs(&ifap);
+		if (!r && ifap)
+		{
+			auto local_host = 0x7f000001;
+			for (auto p = ifap; p; p = p->ifa_next)
+			{
+				if (!p->ifa_addr)
+					continue;
+				if (p->ifa_addr->sa_family == AF_INET)
+				{
+					auto in = (sockaddr_in*)p->ifa_addr;
+					auto ip = htonl(in->sin_addr.s_addr);
+					if (ip)
+					{
+						if (ip == local_host)
+							addr.AddAt(0, ip);
+						else
+							addr.Add(ip);
+						// printf("name=%s ip.addr=%x, %s\n", p->ifa_name, ip, LIpToStr(ip).Get());
+					}
+				}
+			}
+		}
+		if (ifap)
+       		freeifaddrs(ifap);
 
 	#endif
 
@@ -2253,22 +2304,8 @@ int LSelect::Select(LArray<LSocketI*> &Results, bool Rd, bool Wr, int TimeoutMs)
 	int v = select(	(int)Max+1,
 					Rd ? &r : NULL,
 					Wr ? &r : NULL,
-					NULL, TimeoutMs >= 0 ? &t : NULL);
-	if (v > 0)
-	{
-		for (auto Sock : s)
-		{
-			if (FD_ISSET(Sock->Handle(), &r))
-				Results.Add(Sock);
-		}
-	}
-
-	return v;
-
-	#endif
-}
-
-LArray<LSocketI*> LSelect::Readable(int TimeoutMs)
+					NULLdefault
+                                                                                                                                                                                                                             
 {
 	LArray<LSocketI*> r;
 	Select(r, true, false, TimeoutMs);

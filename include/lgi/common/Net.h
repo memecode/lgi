@@ -64,7 +64,7 @@ typedef int SOCKET;
 
 // Functions
 LgiFunc bool LHaveNetConnection();
-LgiExtern LArray<uint32_t> LWhatsMyIp();
+LgiExtern LArray<uint32_t> LWhatsMyIp(); // will attempt to put the public ip last..
 LgiExtern LString LHostName();
 LgiExtern LString LIpToStr(uint32_t ip);
 LgiExtern uint32_t LIpToInt(LString str); // Convert IP as string to host order int

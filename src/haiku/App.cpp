@@ -187,7 +187,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 
 	MouseHook = new LMouseHook;
 
-	d->GetConfig();
+	d->GetConfigJson();
 
 	if (!GetOption("noskin"))
 	{
