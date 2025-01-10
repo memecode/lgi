@@ -527,8 +527,10 @@ struct LCommsBusPriv :
 			LString hostName;
 			LArray<LPeer> peers;
 
-			void FromVars(LString::Array &vars)
+			bool FromVars(LString::Array &vars)
 			{
+				int status = 0;
+
 				for (auto &var: vars)
 				{
 					auto v = var.SplitDelimit(":", 1);
@@ -537,22 +539,31 @@ struct LCommsBusPriv :
 					if (v[0].Equals("hostname"))
 					{
 						hostName = v[1];
+						status++;
 					}
 					else if (v[0].Equals("ip"))
 					{
 						ip4 = LIpToInt(v[1]);
+						status++;
 					}
-					else if (v[0].Equals("hostname"))
+					else if (v[0].Equals("dir"))
+					{
+						direct = v[1].Int() != 0;
+					}
+					else if (v[0].Equals("peer"))
 					{
 						LPeer p;
 						auto vars = v[1].SplitDelimit(",");
-						p.FromVars(vars);
+						if (p.FromVars(vars))
+							peers.Add(p);
 					}
 					else
 					{						
 						int asd=0;
 					}
 				}
+
+				return status >= 2;
 			}
 
 			bool FromString(LString s)
@@ -566,7 +577,7 @@ struct LCommsBusPriv :
 				LString::Array a;
 				a.New().Printf("dir:%i", direct);
 				a.New().Printf("ip:%s", LIpToStr(ip4).Get());
-				a.New().Printf("host:%s", hostName.Get());
+				a.New().Printf("hostname:%s", hostName.Get());
 				for (auto &p: peers)
 					a.New().Printf("peer:ip:%s,hostname:%s", LIpToStr(p.ip4).Get(), p.hostName.Get());
 				return LString(",").Join(a);
