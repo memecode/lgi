@@ -12,7 +12,7 @@
 #if 0
 #define LOG(...)			
 #else
-#define LOG(...)			if (log) log->Print(__VA_ARGS__)
+#define LOG(...)			if (log) { log->Print(__VA_ARGS__); } printf(__VA_ARGS__)
 #endif
 
 // All the types of messages the system uses
@@ -603,7 +603,9 @@ struct LCommsBusPriv :
 		{
 			auto interface_ips = GetIps(interfaces);
 			for (auto &intf: interfaces)
+			{
 				LOG("interfaceChange: %s %s\n", intf.Name.Get(), LIpToStr(intf.Ip4).Get());
+			}
 
 			// Create a UDP listener on current interfaces...
 			listener.Reset(new LUdpListener(interface_ips, broadcastIp, DEFAULT_COMMS_PORT, d->log));
@@ -614,9 +616,10 @@ struct LCommsBusPriv :
 			LOG("newPeer: %s\n", LIpToStr(ip4).Get());
 		}
 
-		void OnDeletePeer(uint32_t ip4)
+		void OnDeletePeer(uint32_t ip4, LPeer *peer)
 		{
-			LOG("deletePeer: %s\n", LIpToStr(ip4).Get());
+			LOG("deletePeer: %s (%p)\n", LIpToStr(ip4).Get(), peer);
+			delete peer;
 		}
 
 		LString CreatePingData()
@@ -630,6 +633,20 @@ struct LCommsBusPriv :
 			return LString("\n").Join(lines);
 		}
 
+		LString DumpState()
+		{
+			LStringPipe p;
+			p.Print("\tintf: {");
+			for (auto i: interfaces)
+				p.Print("{%s %s} ", i.Name.Get(), LIpToStr(i.Ip4).Get());
+			p.Print("}\n\tpeers: {");
+			for (auto peer: peers)
+				p.Print("{%s} ", LIpToStr(peer.key).Get());
+			p.Print("}");
+			return p.NewLStr();
+		}
+
+		uint64_t logTs = 0;
 		void Timeslice()		
 		{
 			// Inter-server discovery...
@@ -644,7 +661,16 @@ struct LCommsBusPriv :
 			}
 			// sort so we can compare properly:
 			curIntf.Sort([](auto *a, auto *b) { return a->Ip4 - b->Ip4; });
-			if (GetIps(curIntf) != GetIps(interfaces))
+			
+			auto diff = GetIps(curIntf) != GetIps(interfaces);
+			bool debug = false;
+			if (LCurrentTime() - logTs >= 5000)
+			{
+				logTs = LCurrentTime();
+				debug = true;
+			}
+
+			if (diff)
 			{
 				interfaces = curIntf;
 				OnInterfacesChange();
@@ -662,6 +688,12 @@ struct LCommsBusPriv :
 					for (auto &i: interfaces)
 						if (i.Ip4 == discoverIp)
 							ourIp = true;
+					
+					if (debug)
+					{
+						// LOG("readpkt: %s\n%s\n", LIpToStr(discoverIp).Get(), discoverPkt.Get());
+					}
+					
 					if (!ourIp)
 					{
 						if (!peers.Find(discoverIp))
@@ -686,9 +718,8 @@ struct LCommsBusPriv :
 			{
 				if (now - p.value->seen > SECONDS(60))
 				{
-					OnDeletePeer(p.key);
-					deletedPeers.Delete(p.key);
-					delete p.value;
+					OnDeletePeer(p.key, p.value);
+					deletedPeers.Add(p.key);
 				}
 			}
 			for (auto ip: deletedPeers)
@@ -700,17 +731,35 @@ struct LCommsBusPriv :
 				broadcastTime = now;
 
 				// And then broadcast packets...
+				LString pkt = CreatePingData();
 				for (auto &intf: interfaces)
 				{
 					LUdpBroadcast bc(intf.Ip4);
-					LString pkt = CreatePingData();
 					auto result = bc.BroadcastPacket(pkt, broadcastIp, DEFAULT_COMMS_PORT);
+					/*
 					if (!result)
 						LOG("broadcast to %s = %i\n", LIpToStr(intf.Ip4).Get(), result);
+					*/
+				}
+
+				// Also unicast them... in case the broadcast is only one way...
+				LSocket udp;
+				udp.SetUdp(true);
+				for (auto &p: peers)
+				{
+					int wr = udp.WriteUdp(pkt.Get(), (int)pkt.Length(), 0, p.key, DEFAULT_COMMS_PORT);
+					if (wr != pkt.Length())
+					{
+						LOG("udp %s wr=%i\n", LIpToStr(p.key).Get(), wr);
+					}
 				}
 			}
+
+			if (debug)
+			{
+				LOG("state:\n%s\n", DumpState().Get());
+			}
 		}
-		
 	};
 
 	int Server()

@@ -1308,7 +1308,7 @@ LFilterFactory::LFilterFactory(const char *name) : Name(name)
 	{
 		if (this == p)
 		{
-			printf("%s already in list?\n", name);
+			LgiTrace("%s:%i - %s already in list?\n", _FL, name);
 			inList = true;
 			break;
 		}
