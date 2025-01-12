@@ -52,7 +52,7 @@ public:
 		}
 	}
 	
-	LJson *GetConfig();
+	LJson *GetConfigJson();
 	bool SaveConfig();
 };
 

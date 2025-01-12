@@ -1751,7 +1751,11 @@ public:
 							#endif
 							s.st_size = (TOffset) e->Size;
 							s.st_mode = 0644;
-							#ifdef WINDOWS
+							#ifdef MAC
+								s.st_atimespec = unixTime;
+								s.st_mtimespec = unixTime;
+								s.st_ctimespec = unixTime;
+							#elif !defined WINDOWS
 								s.st_atime = unixTime;
 								s.st_mtime = unixTime;
 								s.st_ctime = unixTime;
