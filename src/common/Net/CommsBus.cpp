@@ -30,6 +30,47 @@ enum MsgIds
 #pragma pack(push,1)
 #endif
 
+struct IpList : public LArray<uint32_t>
+{
+	constexpr static const char *sep = "|";
+
+	LString ToString()
+	{
+		LString::Array ips;
+		for (auto &ip: *this)
+			ips.New() = LIpToStr(ip);
+		return LString(sep).Join(ips);
+	}
+
+	bool operator =(LString &s)
+	{
+		Length(0);
+		for (auto &ip: s.SplitDelimit(sep))
+		{
+			if (auto i = LIpToInt(ip))
+				Add(i);
+		}
+		return true;
+	}
+};
+
+static bool GatewayIp(uint32_t ip)
+{
+	uint8_t lsb = ip & 0xff;
+	uint8_t msb = (ip >> 24) & 0xff;
+	return lsb == 1;
+}
+
+static LString Indent(LString s, int depth = 4)
+{
+	LStringPipe p;
+	auto lines = s.SplitDelimit("\n");
+	auto indent = LString(" ") * depth;
+	for (auto ln: lines)
+		p.Print("%s%s\n", indent.Get(), ln.Get());
+	return p.NewLStr();
+}
+
 // A malloc'd block of memory for messages.
 class Block
 {
@@ -521,11 +562,12 @@ struct LCommsBusPriv :
 		// Peer info
 		struct LPeer
 		{
-			bool direct = true;
-			uint32_t ip4 = 0;
-			uint64_t seen = 0;
 			LString hostName;
+			IpList ip4;
+			uint32_t effectiveIp = 0;
+			uint64_t seen = 0;
 			LArray<LPeer> peers;
+			bool direct = false;
 
 			bool FromVars(LString::Array &vars)
 			{
@@ -543,7 +585,7 @@ struct LCommsBusPriv :
 					}
 					else if (v[0].Equals("ip"))
 					{
-						ip4 = LIpToInt(v[1]);
+						ip4 = v[1];
 						status++;
 					}
 					else if (v[0].Equals("dir"))
@@ -555,7 +597,21 @@ struct LCommsBusPriv :
 						LPeer p;
 						auto vars = v[1].SplitDelimit(",");
 						if (p.FromVars(vars))
-							peers.Add(p);
+						{
+							int idx = -1;
+							for (int i=0; i<peers.Length(); i++)
+							{
+								if (peers[i].ip4 == p.ip4)
+								{
+									idx = i;
+									peers[i] = p;
+									break;
+								}
+							}
+
+							if (idx < 0)
+								peers.Add(p);
+						}
 					}
 					else
 					{						
@@ -577,23 +633,29 @@ struct LCommsBusPriv :
 			{
 				LString::Array a;
 				a.New().Printf("dir:%i", direct);
-				a.New().Printf("ip:%s", LIpToStr(ip4).Get());
+				a.New().Printf("ip:%s", ip4.ToString().Get());
 				a.New().Printf("hostname:%s", hostName.Get());
 				for (auto &p: peers)
-					a.New().Printf("peer:ip:%s,hostname:%s", LIpToStr(p.ip4).Get(), p.hostName.Get());
+					a.New().Printf("peer:ip:%s,hostname:%s", p.ip4.ToString().Get(), p.hostName.Get());
 				return LString(",").Join(a);
 			}
 		};
-		LHashTbl<IntKey<uint32_t>, LPeer*> peers;
+		LHashTbl<ConstStrKey<char,false>, LPeer*> peers;
+
+		void SetDirty()
+		{
+			// This forces a re-broadcast of state
+			broadcastTime = 0;
+		}
 
 		ServerPeers(LCommsBusPriv *priv) : d(priv)
 		{
 			log = d->log;
 		}
 
-		LArray<uint32_t> GetIps(LArray<LSocket::Interface> &arr)
+		IpList GetIps(LArray<LSocket::Interface> &arr)
 		{
-			LArray<uint32_t> ips;
+			IpList ips;
 			for (auto &intf: arr)
 				ips.Add(intf.Ip4);
 			return ips;
@@ -609,23 +671,31 @@ struct LCommsBusPriv :
 
 			// Create a UDP listener on current interfaces...
 			listener.Reset(new LUdpListener(interface_ips, broadcastIp, DEFAULT_COMMS_PORT, d->log));
+			SetDirty();
 		}
 
-		void OnNewPeer(uint32_t ip4)
+		void OnNewPeer(LPeer *newPeer)
 		{
-			LOG("newPeer: %s\n", LIpToStr(ip4).Get());
+			if (newPeer)
+			{
+				LOG("newPeer: %s\n", newPeer->hostName.Get());
+				peers.Add(newPeer->hostName, newPeer);
+				SetDirty();
+			}
 		}
 
-		void OnDeletePeer(uint32_t ip4, LPeer *peer)
+		void OnDeletePeer(LPeer *peer)
 		{
-			LOG("deletePeer: %s (%p)\n", LIpToStr(ip4).Get(), peer);
+			LOG("deletePeer: %s (%p)\n", peer->hostName.Get(), peer);
 			delete peer;
+			SetDirty();
 		}
 
 		LString CreatePingData()
 		{
-			LString::Array lines;
-			
+			LString::Array lines;			
+
+			lines.New().Printf("ip:%s", GetIps(interfaces).ToString().Get());
 			lines.New().Printf("hostname:%s", LHostName().Get());
 			for (auto p: peers)
 				lines.New().Printf("peer:%s", p.value->ToString().Get());			
@@ -636,12 +706,12 @@ struct LCommsBusPriv :
 		LString DumpState()
 		{
 			LStringPipe p;
-			p.Print("\tintf: {");
+			p.Print("intf: {");
 			for (auto i: interfaces)
 				p.Print("{%s %s} ", i.Name.Get(), LIpToStr(i.Ip4).Get());
-			p.Print("}\n\tpeers: {");
-			for (auto peer: peers)
-				p.Print("{%s} ", LIpToStr(peer.key).Get());
+			p.Print("}\npeers: {");
+			for (auto i: peers)
+				p.Print("{%s,%s} ", i.key, LIpToStr(i.value->effectiveIp).Get());
 			p.Print("}");
 			return p.NewLStr();
 		}
@@ -689,23 +759,69 @@ struct LCommsBusPriv :
 						if (i.Ip4 == discoverIp)
 							ourIp = true;
 					
-					if (debug)
-					{
-						// LOG("readpkt: %s\n%s\n", LIpToStr(discoverIp).Get(), discoverPkt.Get());
-					}
-					
 					if (!ourIp)
 					{
-						if (!peers.Find(discoverIp))
-							OnNewPeer(discoverIp);
-
-						if (auto p = new LPeer)
+						LPeer p;
+						if (!p.FromString(discoverPkt))
 						{
-							p->ip4 = discoverIp;
-							p->seen = LCurrentTime();
-							p->FromString(discoverPkt);
-							peers.Add(discoverIp, p);
-							// LOG("got discover packet: %i bytes, %s:%i\n", (int)discoverPkt.Length(), LIpToStr(discoverIp).Get(), discoverPort);
+							LOG("error: failed to decode pkt\n");
+						}
+						else
+						{
+							if (p.hostName.Equals("win10c"))
+							{
+								int asd=0;
+							}
+
+							auto peer = peers.Find(p.hostName);
+							if (!peer)
+							{
+								OnNewPeer(peer = new LPeer(p));
+							}
+							if (peer)
+							{
+								peer->direct = true;
+								peer->seen = LCurrentTime();
+
+								// Figure out the effective ip address
+								if (!peer->effectiveIp)
+								{
+									uint32_t mask = 0xffffff00;
+									for (auto ip: peer->ip4)
+									{
+										if ( (ip & mask) == (discoverIp & mask) )
+										{
+											peer->effectiveIp = ip;
+											LOG("effectiveIp for %s is %s\n", peer->hostName.Get(), LIpToStr(peer->effectiveIp).Get());
+											break;
+										}
+									}
+									if (!peer->effectiveIp)
+									{
+										LOG("error: no effectiveIp for %s in %s, for ip %s\n",
+											peer->hostName.Get(),
+											peer->ip4.ToString().Get(),
+											LIpToStr(discoverIp).Get());
+									}
+								}
+
+								auto host = LHostName();
+								for (auto &other: peer->peers)
+								{
+									if (!peers.Find(other.hostName))
+									{
+										if (!other.hostName.Equals(host))
+										{
+											if (auto *n = new LPeer)
+											{
+												n->ip4 = other.ip4;
+												n->hostName = other.hostName;
+												peers.Add(other.hostName, n);
+											}
+										}
+									}
+								}
+							}
 						}
 					}
 				}
@@ -713,17 +829,19 @@ struct LCommsBusPriv :
 
 			// Check for peers that we haven't seen in a while
 			auto now = LCurrentTime();
-			LArray<uint32_t> deletedPeers;
+			LString::Array deletedPeers;
 			for (auto p: peers)
 			{
-				if (now - p.value->seen > SECONDS(60))
+				if (p.value->direct &&
+					now - p.value->seen > SECONDS(60))
 				{
-					OnDeletePeer(p.key, p.value);
-					deletedPeers.Add(p.key);
+					LString hostName = p.key;
+					OnDeletePeer(p.value);
+					deletedPeers.Add(hostName);
 				}
 			}
-			for (auto ip: deletedPeers)
-				peers.Delete(ip);
+			for (auto host: deletedPeers)
+				peers.Delete(host);
 
 			now = LCurrentTime();
 			if (now - broadcastTime >= 10000)
@@ -732,6 +850,8 @@ struct LCommsBusPriv :
 
 				// And then broadcast packets...
 				LString pkt = CreatePingData();
+				// LOG("out pkt:\n%s", Indent(pkt).Get());
+
 				for (auto &intf: interfaces)
 				{
 					LUdpBroadcast bc(intf.Ip4);
@@ -742,22 +862,30 @@ struct LCommsBusPriv :
 					*/
 				}
 
-				// Also unicast them... in case the broadcast is only one way...
+				// Also unicast them... in case the broadcast is only working in one direction...
 				LSocket udp;
 				udp.SetUdp(true);
-				for (auto &p: peers)
+				for (auto &i: peers)
 				{
-					int wr = udp.WriteUdp(pkt.Get(), (int)pkt.Length(), 0, p.key, DEFAULT_COMMS_PORT);
-					if (wr != pkt.Length())
+					auto p = i.value;					
+					if (p->effectiveIp)
 					{
-						LOG("udp %s wr=%i\n", LIpToStr(p.key).Get(), wr);
+						int wr = udp.WriteUdp(pkt.Get(), (int)pkt.Length(), 0, p->effectiveIp, DEFAULT_COMMS_PORT);
+						if (wr != pkt.Length())
+						{
+							LOG("udp %s wr=%i\n", LIpToStr(p->effectiveIp).Get(), wr);
+						}
+					}
+					else
+					{
+						LOG("no effective ip for: %s %s\n", p->hostName.Get(), p->ip4.ToString().Get());
 					}
 				}
 			}
 
 			if (debug)
 			{
-				LOG("state:\n%s\n", DumpState().Get());
+				LOG("state:\n%s", Indent(DumpState()).Get());
 			}
 		}
 	};
