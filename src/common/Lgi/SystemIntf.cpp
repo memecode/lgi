@@ -1755,7 +1755,7 @@ public:
 								s.st_atimespec = unixTime;
 								s.st_mtimespec = unixTime;
 								s.st_ctimespec = unixTime;
-							#elif !defined WINDOWS
+							#elif defined WINDOWS
 								s.st_atime = unixTime;
 								s.st_mtime = unixTime;
 								s.st_ctime = unixTime;

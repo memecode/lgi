@@ -632,11 +632,13 @@ struct LCommsBusPriv :
 			LString ToString()
 			{
 				LString::Array a;
-				a.New().Printf("dir:%i", direct);
+				a.New().Printf("direct:%i", direct);
 				a.New().Printf("ip:%s", ip4.ToString().Get());
 				a.New().Printf("hostname:%s", hostName.Get());
+				/*
 				for (auto &p: peers)
 					a.New().Printf("peer:ip:%s,hostname:%s", p.ip4.ToString().Get(), p.hostName.Get());
+				*/
 				return LString(",").Join(a);
 			}
 		};
@@ -711,7 +713,10 @@ struct LCommsBusPriv :
 				p.Print("{%s %s} ", i.Name.Get(), LIpToStr(i.Ip4).Get());
 			p.Print("}\npeers: {");
 			for (auto i: peers)
-				p.Print("{%s,%s} ", i.key, LIpToStr(i.value->effectiveIp).Get());
+				p.Print("{%s:%s,%s} ",
+					i.value->direct ? "direct:" : "indirect:",
+					i.key,
+					i.value->ip4.ToString().Get());
 			p.Print("}");
 			return p.NewLStr();
 		}
@@ -768,15 +773,16 @@ struct LCommsBusPriv :
 						}
 						else
 						{
-							if (p.hostName.Equals("win10c"))
-							{
-								int asd=0;
-							}
-
 							auto peer = peers.Find(p.hostName);
 							if (!peer)
 							{
 								OnNewPeer(peer = new LPeer(p));
+							}
+							else
+							{
+								// update the existing peer
+								peer->ip4 = p.ip4;
+								peer->peers = p.peers;
 							}
 							if (peer)
 							{
@@ -796,6 +802,8 @@ struct LCommsBusPriv :
 											break;
 										}
 									}
+
+									/*
 									if (!peer->effectiveIp)
 									{
 										LOG("error: no effectiveIp for %s in %s, for ip %s\n",
@@ -803,21 +811,22 @@ struct LCommsBusPriv :
 											peer->ip4.ToString().Get(),
 											LIpToStr(discoverIp).Get());
 									}
+									*/
 								}
 
 								auto host = LHostName();
-								for (auto &other: peer->peers)
+								for (auto &other: p.peers)
 								{
+									if (other.hostName.Equals(host))
+										continue; // don't care about this node
+
 									if (!peers.Find(other.hostName))
 									{
-										if (!other.hostName.Equals(host))
+										if (auto *n = new LPeer)
 										{
-											if (auto *n = new LPeer)
-											{
-												n->ip4 = other.ip4;
-												n->hostName = other.hostName;
-												peers.Add(other.hostName, n);
-											}
+											n->ip4 = other.ip4;
+											n->hostName = other.hostName;
+											peers.Add(other.hostName, n);
 										}
 									}
 								}
@@ -876,7 +885,7 @@ struct LCommsBusPriv :
 							LOG("udp %s wr=%i\n", LIpToStr(p->effectiveIp).Get(), wr);
 						}
 					}
-					else
+					else if (p->direct)
 					{
 						LOG("no effective ip for: %s %s\n", p->hostName.Get(), p->ip4.ToString().Get());
 					}
