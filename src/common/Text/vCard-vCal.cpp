@@ -526,21 +526,20 @@ bool VIo::ReadField(LStreamI &s, LString &Name, ParamArray *Params, LString &Dat
 			}
 			else if (*c == '\n')
 			{
-				char Next;
-				r = d->Buf.Peek((uchar*) &Next, 1);
-				if (r == 0)
+				auto next = d->Buf.Peek(1);
+				if (next.Length() == 0)
 				{
 					r = s.Read(Temp, sizeof(Temp));
 					if (r <= 0)
 						break;
 
 					d->Buf.Write(Temp, (int)r);
-					r = d->Buf.Peek((uchar*) &Next, 1);
+					next = d->Buf.Peek(1);
 				}
 				
-				if (r == 1)
+				if (next.Length() == 1)
 				{
-					if (Next == ' ' || Next == '\t')
+					if (next(0) == ' ' || next(0) == '\t')
 					{
 						// Wrapped, do nothing
 						EatNext = true;
