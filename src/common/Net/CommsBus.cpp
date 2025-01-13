@@ -548,6 +548,8 @@ struct LCommsBusPriv :
 
 	struct ServerPeers
 	{
+		constexpr static int UNSEEN_TIMEOUT = SECONDS(30);
+
 		LCommsBusPriv *d = nullptr;
 		LStream *log = nullptr;
 
@@ -739,11 +741,13 @@ struct LCommsBusPriv :
 			
 			auto diff = GetIps(curIntf) != GetIps(interfaces);
 			bool debug = false;
-			if (LCurrentTime() - logTs >= 5000)
+			/*
+			if (LCurrentTime() - logTs >= 10000)
 			{
 				logTs = LCurrentTime();
 				debug = true;
 			}
+			*/
 
 			if (diff)
 			{
@@ -827,6 +831,7 @@ struct LCommsBusPriv :
 											n->ip4 = other.ip4;
 											n->hostName = other.hostName;
 											peers.Add(other.hostName, n);
+											SetDirty();
 										}
 									}
 								}
@@ -842,7 +847,7 @@ struct LCommsBusPriv :
 			for (auto p: peers)
 			{
 				if (p.value->direct &&
-					now - p.value->seen > SECONDS(60))
+					now - p.value->seen > UNSEEN_TIMEOUT)
 				{
 					LString hostName = p.key;
 					OnDeletePeer(p.value);
@@ -856,6 +861,7 @@ struct LCommsBusPriv :
 			if (now - broadcastTime >= 10000)
 			{
 				broadcastTime = now;
+				debug = true;
 
 				// And then broadcast packets...
 				LString pkt = CreatePingData();
