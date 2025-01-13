@@ -13,6 +13,7 @@
 #include "lgi/common/RemoveAnsi.h"
 #include "lgi/common/TextLog.h"
 #include "lgi/common/ProgressView.h"
+#include "lgi/common/StructuredLog.h"
 
 #define DEFAULT_PROMPTS		"# \t:~$ "
 
@@ -49,10 +50,7 @@ public:
 
 protected:
 	LCancel *CancelObj = NULL;
-	LStream *Log = NULL;
 	ssh_session Ssh = NULL;
-	LViewI *TxtLabel = NULL;
-	LProgressView *Prog = NULL;
 	bool Connected = false;
 	bool OverideUnknownHost = false;
 	KnownHostCallback HostCb;
@@ -61,6 +59,12 @@ protected:
 	// Prompt detection
 	LString prompt;
 	uint64_t promptDetect = 0;
+
+	// Logging and UI:
+	LAutoPtr<LStructuredLog> sLog;
+	LStream *Log = NULL;
+	LViewI *TxtLabel = NULL;
+	LProgressView *Prog = NULL;
 
 	bool TimedOut(uint64_t startTs)
 	{
@@ -242,6 +246,8 @@ public:
 					Cancel();
 					return true;
 				}
+				default:
+					break;
 			}
 
 			return false;
@@ -452,6 +458,10 @@ public:
 	bool Open(const char *Host, const char *Username, const char *Password, bool PublicKey)
 	{
 		int Port = 22;
+		
+		if (sLog)
+			sLog->Clear();		
+		
 		Ssh = ssh_new();
 		ssh_set_log_userdata(this);
 		// ssh_set_log_callback(logging_callback);
@@ -932,6 +942,16 @@ public:
 
 		return false;
 	}
+	
+	LStructuredLog *GetStructLog() const
+	{
+		return sLog.Get();
+	}
+	
+	void SetStructLog(LAutoPtr<LStructuredLog> slog)
+	{
+		sLog = slog;
+	}	
 };
 
 #endif

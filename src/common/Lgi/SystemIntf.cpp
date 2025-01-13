@@ -246,8 +246,17 @@ class SshBackend :
 				log,
 				this)))
 			{
+				// Set up initial ssh object
 				ssh->SetTimeout(5000);
 				INFO("%s: Connecting to '%s'..\n", GetClass(), uri.sHost.Get())
+				
+				#if 1
+					// Give it a structured log to write to
+					LAutoPtr<LStructuredLog> slog(new LStructuredLog(LStructuredLog::TNetworkEndpoint,
+																	 LStructuredLog::sDefaultEndpoint,
+																	 true, log));
+					ssh->SetStructLog(slog);
+				#endif
 				
 				if (ssh->Open(uri.sHost, uri.sUser, NULL, true))
 				{
