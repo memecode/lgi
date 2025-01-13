@@ -5,6 +5,12 @@ import subprocess
 import shutil
 import platform
 import stat
+import multiprocessing
+
+cores = multiprocessing.cpu_count()
+jobs = 2 if cores <= 4 else cores - 1
+print("cores:", cores, "jobs:", jobs);
+# sys.exit(0)
 
 arch = []
 gen = ["Ninja"] # the default is ninja, except for Windows, which uses Visual Studio
@@ -94,6 +100,7 @@ for n in range(len(subfolders)):
 
         print(config, "Build:", path)
         args = ["cmake", "--build", ".", "--target", "install"]
+        args += ["-j" + str(jobs)]
         if not singleConfig:
             args += ["--config", config]
         if 1:
