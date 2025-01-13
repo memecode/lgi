@@ -12,7 +12,7 @@
 #if 0
 #define LOG(...)			
 #else
-#define LOG(...)			if (log) { log->Print(__VA_ARGS__); } printf(__VA_ARGS__)
+#define LOG(...)			if (log) { log->Print(__VA_ARGS__); } // printf(__VA_ARGS__)
 #endif
 
 // All the types of messages the system uses
