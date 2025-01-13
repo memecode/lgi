@@ -63,7 +63,7 @@ protected:
 
 	}	*Str;
 
-	inline void _strip(LString &ret, const char *set, bool left, bool right)
+	inline void _strip(LString &ret, const char *set, bool left, bool right) const
 	{
 		if (!Str)
 			return;
@@ -1099,7 +1099,7 @@ public:
 	}
 
 	/// Strip off any leading and trailing characters from 'set' (or whitespace if NULL)	
-	LString Strip(const char *set = NULL)
+	LString Strip(const char *set = NULL) const
 	{
 		LString ret;
 		_strip(ret, set, true, true);
@@ -1107,7 +1107,7 @@ public:
 	}
 
 	/// Strip off any leading characters from 'set' (or whitespace if NULL)	
-	LString LStrip(const char *set = NULL)
+	LString LStrip(const char *set = NULL) const
 	{
 		LString ret;
 		_strip(ret, set, true, false);
@@ -1115,7 +1115,7 @@ public:
 	}	
 
 	/// Strip off any trailing characters from 'set' (or whitespace if NULL)	
-	LString RStrip(const char *set = NULL)
+	LString RStrip(const char *set = NULL) const
 	{
 		LString ret;
 		_strip(ret, set, false, true);

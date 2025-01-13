@@ -1048,15 +1048,18 @@ public:
 		ssize_t AddBytes = 0
 	);
 	
-	/// Reads data from the start of the container without removing it from
-	/// the que. Returns the bytes copied.
-	virtual int64 Peek
+	/// Reads data from one end of the container without removing it from
+	/// the queue. Returns the bytes copied.
+	virtual LString Peek
 	(
-		/// Buffer for output
-		uchar *Ptr,
-		/// Bytes to look at
-		ssize_t Size
-	) const;
+		/// Size of bytes to return
+		ssize_t bytes,
+		/// Which end to return
+		bool start = true
+	)	const;
+
+	/// Reads a line of data (delimited by '\n') from either end of the queue
+	virtual LString PeekLine(bool start) const;
 
 	/// Gets the total bytes in the container
 	int64 GetSize() override;
@@ -1075,7 +1078,7 @@ public:
 
 	/// Iterate over the data in the container
 	/// Callback should return true to keep iterating...
-	void Iterate(std::function<bool(uint8_t*, size_t)> callback, bool reverse = false);
+	void Iterate(std::function<bool(uint8_t*, size_t)> callback, bool reverse = false) const;
 
 	/// For processes that read from one source and then write into this container, it is better
 	/// to not have to copy the data into some local buffer and then again into the mem queue.

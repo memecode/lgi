@@ -21,6 +21,13 @@
 								 || \
 								 ((LIBSSH_VERSION_MAJOR == maj) && (LIBSSH_VERSION_MINOR >= min)))
 
+
+#if 1
+	#define SLOG(...)			if (sLog) sLog->Log(__VA_ARGS__)
+#else
+	#define SLOG(...)
+#endif
+
 class LSsh
 {
 	friend struct IoProgress;
@@ -175,6 +182,8 @@ protected:
 					// Unix like system
 					prompt = last2;
 					found = true;
+
+					SLOG("PromptDetect: got unix prompt");
 					return true;
 				}
 				else if (size > 0 && ptr[size-1] == '>')
@@ -182,10 +191,12 @@ protected:
 					// Windows hopefully?
 					prompt = ">";
 					found = true;
+
+					SLOG("PromptDetect: got windows prompt");
 					return true;
 				}
 
-				// LAssert(!"Doesn't look like a prompt?");
+				// SLOG("PromptDetect not a prompt:", last2);
 			}
 
 			return false;
@@ -844,12 +855,10 @@ public:
 	{
 		bool found = false;
 		ssize_t promptChar = -1;
+		auto lastLn = p.PeekLine(false);
 
-		p.Iterate( [this, &found, &promptChar](auto ptr, auto size)
-			{
-				return PromptDetect(found, promptChar, ptr, size);
-			},
-			true);
+		RemoveAnsi(lastLn);
+		PromptDetect(found, promptChar, lastLn.Get(), lastLn.Length());
 
 		return found;
 	}
@@ -859,24 +868,42 @@ public:
 		LStringPipe p(1024);
 		if (c)
 		{
+			auto startTs = LCurrentTime();
 			char buf[1024];
 			while (!CancelObj->IsCancelled())
 			{
 				auto rd = c->Read(buf, sizeof(buf));
 				if (rd > 0)
 				{
-					// LgiTrace("ReadToPrompt got %i: %.16s\n", (int)rd, buf);
+					SLOG("ReadToPrompt read:", rd, LString(buf, rd));
+
 					p.Write(buf, rd);
 					if (output)
 						output->Write(buf, rd);
 				}
 				else if (AtPrompt(p))
+				{
 					break;
+				}
 				else
+				{
+					auto now = LCurrentTime();
+					if (now - startTs > 2000)
+					{
+						auto lastLn = p.PeekLine(false);
+						RemoveAnsi(lastLn);
+						SLOG("ReadToPrompt not at prompt:", now - startTs, lastLn);
+						startTs = now;
+					}
+
 					LSleep(1);
+				}
 			}
 		}
-		else LgiTrace("ReadToPrompt: no console.\n");
+		else
+		{
+			SLOG("ReadToPrompt: no console.\n");
+		}
 
 		return p.NewLStr();
 	}

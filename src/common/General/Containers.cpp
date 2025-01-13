@@ -167,30 +167,70 @@ int64 LMemQueue::GetSize()
 	return Size;
 }
 
-int64 LMemQueue::Peek(uchar *Ptr, ssize_t Size) const
+LString LMemQueue::PeekLine(bool start) const
 {
-	int64 Status = 0;
+	LString out;
 
-	if (Ptr && Size <= GetSize())
-	{
-		for (unsigned i=0; i<Mem.Length(); i++)
+	Iterate([&](auto ptr, auto sz)
 		{
-			auto b = Mem.ItemAt(i);
-			if (Size <= 0)
-				break;
-			auto Copy = MIN(Size, b->Length());
-			if (Copy > 0)
+			auto p = (char*)ptr;
+			size_t cp = 0;
+			
+			// Look for '\n' chars:
+			if (start)
 			{
-				memcpy(Ptr, b->Start(), Copy);
+				while (cp < sz && p[cp] != '\n')
+					cp++;
 
-				Ptr += Copy;
-				Size -= Copy;
-				Status += Copy;
+				out += LString(p, cp);
+				return cp == sz;
 			}
-		}
+			else
+			{
+				for (ssize_t i=sz; i > 0 && p[i-1] != '\n'; i--)
+					cp++;
+
+				auto offset = sz - cp;
+				out = LString(p + offset, cp) + out;
+				return offset == 0;
+			}
+		},
+		!start);
+
+	return out;
+}
+
+LString LMemQueue::Peek(ssize_t bytes, bool start) const
+{
+	LString out;
+
+	if (bytes > 0)
+	{
+		Iterate([&](auto ptr, auto sz)
+			{
+				auto cp = MIN(bytes, (ssize_t)sz);
+				if (cp <= 0)
+					return false;
+
+				if (start)
+				{
+					// append the start of this block
+					out += LString((char*)ptr, cp);
+				}
+				else
+				{
+					// prepend the end of this block
+					auto offset = sz - cp;
+					out = LString((char*)ptr + offset, cp) + out;
+				}
+				bytes -= cp;
+
+				return bytes > 0;
+			},
+			!start);
 	}
 
-	return Status;
+	return out;
 }
 
 void *LMemQueue::New(ssize_t AddBytes)
@@ -332,7 +372,7 @@ ssize_t LMemQueue::Find(LString str, bool caseSensitive)
 	return -1;
 }
 
-void LMemQueue::Iterate(std::function<bool(uint8_t*, size_t)> callback, bool reverse)
+void LMemQueue::Iterate(std::function<bool(uint8_t*, size_t)> callback, bool reverse) const
 {
 	if (!callback)
 	{
@@ -344,17 +384,18 @@ void LMemQueue::Iterate(std::function<bool(uint8_t*, size_t)> callback, bool rev
 	
 	if (reverse)
 	{
-		for (auto it = Mem.rbegin(); it >= Mem.begin(); --it)
+		for (ssize_t i=Mem.Length()-1; i>=0; i--)
 		{
-			auto b = (*it);
+			auto b = Mem.ItemAt(i);
 			if (!callback(b->Start(), b->Length()))
 				break;
 		}
 	}
 	else
 	{
-		for (auto b: Mem)
+		for (ssize_t i=0; i<(ssize_t)Mem.Length(); i++)
 		{
+			auto b = Mem.ItemAt(i);
 			Q_TRACE("Iter b=%p, blk:%p,%i,%i,%i, start=%p, len=%i\n",
 				b, b->Ptr(), b->Next, b->Used, b->Size,
 				b->Start(), b->Length());

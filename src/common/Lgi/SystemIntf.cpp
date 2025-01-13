@@ -10,7 +10,8 @@
 #error "Add ssh to this project"
 #endif
 
-#define INFO(...) { if (log) log->Print(__VA_ARGS__); }
+#define STRUCT_LOGGING		0
+#define INFO(...)			{ if (log) log->Print(__VA_ARGS__); }
 
 const char *PlatformNames[] =
 {
@@ -250,7 +251,7 @@ class SshBackend :
 				ssh->SetTimeout(5000);
 				INFO("%s: Connecting to '%s'..\n", GetClass(), uri.sHost.Get())
 				
-				#if 1
+				#if STRUCT_LOGGING
 					// Give it a structured log to write to
 					LAutoPtr<LStructuredLog> slog(new LStructuredLog(LStructuredLog::TNetworkEndpoint,
 																	 LStructuredLog::sDefaultEndpoint,
@@ -734,9 +735,9 @@ public:
 			if (e.timeOrYear.Find(":") > 0)
 				dt.SetTime(e.timeOrYear);
 			else
-				dt.Year((int) e.timeOrYear.Int());
+				dt.Year((int) e.timeOrYear.Strip().Int());
 
-			return dt.Ts().Get();
+			return dt.IsValid() ? dt.Ts().Get() : 0;
 		}
 		uint64 GetCreationTime() const { return 0; }
 		uint64 GetLastAccessTime() const { return 0; }
