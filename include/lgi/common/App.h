@@ -224,7 +224,7 @@ public:
 		/// The application's name.
 		const char *AppName,
 		/// Optional args
-		LAppArguments *ObjArgs = 0
+		LAppArguments *ObjArgs = nullptr
 	);
 
 	/// Destroys the object

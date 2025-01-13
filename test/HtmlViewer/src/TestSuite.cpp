@@ -210,9 +210,8 @@ public:
 					auto r = LgiGetUri(this, &p, &Err, Job->Uri);
 					if (r)
 					{
-						uchar Hint[16];
-						p.Peek(Hint, sizeof(Hint));
-						auto Filter = LFilterFactory::New(u.sPath, FILTER_CAP_READ, Hint);
+						auto Hint = p.Peek(16);
+						auto Filter = LFilterFactory::New(u.sPath, FILTER_CAP_READ, (uchar*)Hint.Get());
 						if (Filter)
 						{
 							LAutoPtr<LSurface> Img(new LMemDC(_FL));
