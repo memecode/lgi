@@ -894,7 +894,7 @@ struct LCommsBusPriv :
 
 			if (debug)
 			{
-				LOG("state:\n%s", Indent(DumpState()).Get());
+				// LOG("state:\n%s", Indent(DumpState()).Get());
 			}
 		}
 	};

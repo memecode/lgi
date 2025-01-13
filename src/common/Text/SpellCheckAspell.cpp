@@ -374,12 +374,18 @@ public:
 				s += "Aspell/data";
 				if (s.Exists())
 					Sources.Add(s.GetFull());
+				else
+					LgiTrace("%s:%i - Primary location '%s' doesn't exist.\n",
+						_FL, s.GetFull().Get());
 			}
 			{	// Check debug time install location
 				LFile::Path s = AppInstall;
-				s += "../../libs/aspell-0.60.6.1/data";
+				s += "../libs/aspell-0.60.6.1/data";
 				if (s.Exists())
 					Sources.Add(s.GetFull());
+				else
+					LgiTrace("%s:%i - Fall back '%s' doesn't exist.\n",
+						_FL, s.GetFull().Get());
 			}
 			
 			if (Sources.Length() == 0)
