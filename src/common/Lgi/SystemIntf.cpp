@@ -807,7 +807,9 @@ public:
 		
 		LString prefix = pathParts[0] == "~" ? LString() : sep;
 		auto finalPath = prefix + sep.Join(pathParts);
-		printf("RemoteRoot=%s\n", finalPath.Get());
+		
+		// printf("RemoteRoot=%s\n", finalPath.Get());
+		
 		return finalPath;
 	}
 

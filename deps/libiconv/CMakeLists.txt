@@ -69,6 +69,3 @@ endif()
 
 install(TARGETS ${LIBNAME}
     DESTINATION ${CMAKE_BINARY_DIR}/lib)
-install(FILES
-    ${SRC}/source/include/iconv.h
-    DESTINATION ${CMAKE_BINARY_DIR}/include)
