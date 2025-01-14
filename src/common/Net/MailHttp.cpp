@@ -278,14 +278,10 @@ bool MailPhp::Get(LSocketI *S, char *Uri, LStream &Out, bool MailTransfer)
 				LHttp::ContentEncoding Enc;
 				if (Http.Get(Uri, 0, &Code, &Buf, &Enc))
 				{
-					char Start[256];
-					if (Buf.Peek((uchar*)Start, sizeof(Start)))
+					auto Start = Buf.Peek(256);
+					if (Start.Find("Error:") == 0)
 					{
-						Start[sizeof(Start)-1] = 0;
-						if (_stricmp(Start, "Error:") == 0)
-						{
-							return false;
-						}
+						return false;
 					}
 					
 					LCopyStreamer s;
