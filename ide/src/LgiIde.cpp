@@ -3260,6 +3260,12 @@ void AppWnd::OpenFile(const char *FileName, NodeSource *Src, std::function<void(
 			pathHints.Add(backend->GetBasePath());
 			backend->ResolvePath(File, pathHints, [this, backend, Proj, Doc, callback](auto err, auto FullPath)
 			{
+				if (err)
+				{
+					GetBuildLog()->Print("error: %s (%s)\n", err.ToString().Get(), FullPath.Get());
+					return;
+				}
+
 				backend->Read(SystemIntf::TForeground, FullPath, [this, Proj, Doc, callback, FullPath](auto err, auto data)
 				{
 					if (err)

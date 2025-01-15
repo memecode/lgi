@@ -450,8 +450,14 @@ public:
 		AddWork(
 			MakeContext(_FL, path),
 			TForeground,
-			[this, path = PreparePath(path), hints, cb]() mutable
+			[this, path = PreparePath(path), hints, cb, startTs = LCurrentTime()]() mutable
 			{
+				auto now = LCurrentTime();
+				if (now - startTs > 1000)
+				{
+					log->Print("%s:%i - took %i ms to run work.\n", _FL, (int)(now - startTs));
+				}
+
 				LString found;
 				if (path(0) == remoteSep(0))
 				{
@@ -514,7 +520,7 @@ public:
 
 				app->RunCallback( [this, cb, found]() mutable
 					{
-						LError err(found ? LErrorPathNotFound : LErrorNone, found ? nullptr : "path not found");
+						LError err(found ? LErrorNone : LErrorPathNotFound, found ? nullptr : "path not found");
 						cb(err, found);
 					});
 			}
