@@ -1886,7 +1886,7 @@ void BuildThread::Step1()
 	StreamToLog log(Proj->GetApp());
 	// log.Print("%s: readdir '%s'\n", __FUNCTION__, p.Get());
 	auto callId = AddCall(_FL);
-	LOG("Step1 reading folder..\n");
+	LOG("Step1 reading folder '%s'\n", p.Get());
 	backend->ReadFolder(SystemIntf::TForeground,
 		p,
 		[this, backend, callId](auto d)
@@ -1994,7 +1994,17 @@ void BuildThread::Step3()
 		// buildLogger->Print("%s: building in '%s'\n", __FUNCTION__, backendInitFolder.Get());
 		auto buildId = AddCall(_FL);
 		LOG("Step3 run process..\n");
-		backend->RunProcess(backendInitFolder, LString("make ") + backendArgs, buildLogger, this, [this, buildId](auto val)
+
+		LString gen = "make ";
+		auto isNinja = Makefile.Find(".ninja") >= 0;
+		if (isNinja)
+		{
+			gen = "ninja ";
+			backendInitFolder = Makefile;
+			LTrimDir(backendInitFolder);
+		}
+
+		backend->RunProcess(backendInitFolder, gen + backendArgs, buildLogger, this, [this, buildId](auto val)
 			{
 				backendExitCode.Reset(new int(val));
 				RemoveCall(buildId);
@@ -2172,6 +2182,11 @@ int BuildThread::Main()
 			
 			auto Config = Configs.Length() > 0 ? Configs[0] : LString("Debug");
 			TmpArgs.Printf("-project \"%s\" -configuration %s", Makefile.Get(), Config.Get());
+		}
+		else if (MakePath.Find(".ninja"))
+		{
+			if (Jobs.CastInt32())
+				TmpArgs.Printf("-j %i", Jobs.CastInt32());
 		}
 		else
 		{
@@ -2773,11 +2788,37 @@ public:
 	
 	int Main() override
 	{
+		if (!Exe)
+			return -1;
+
+		// Setup log:
 		PostThreadEvent(AppHnd, M_SELECT_TAB, AppWnd::OutputTab);
 		PostThreadEvent(AppHnd, M_APPEND_TEXT, 0, AppWnd::OutputTab);
 		
-		if (Exe)
+		if (auto backend = Proj->GetBackend())
 		{
+			// Remote execute:
+			auto sep = Exe.Find("\\") >= 0 ? "\\" : "/";
+			auto sepPos = Exe.RFind(sep);
+			auto dir = Exe(0, sepPos);
+			auto exe = LString("./") + Exe(sepPos+1, -1);
+
+			bool exited = false;
+			SystemIntf::ProcessIo io;
+			StripAnsiStream removeAnsi(Proj->GetApp()->GetOutputLog());
+			io.output = &removeAnsi;
+			backend->RunProcess(dir, exe + " " + Args, &io, this, [this, log=io.output, &exited](auto code)
+				{
+					log->Print("Exit code: %i\n", code);
+					exited = true;
+				});
+
+			while (!exited)
+				LSleep(100);
+		}
+		else
+		{
+			// Local execute:
 			if (Act == ExeDebug)
 			{
 				LSubProcess sub("kdbg", Exe);

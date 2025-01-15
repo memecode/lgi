@@ -956,17 +956,13 @@ public:
 			SystemIntf::TForeground,
 			[this, results, params = new FindParams(*params)]()
 			{
-				auto args = LString::Fmt("grep -Rn \"%s\" %s",
+				auto args = LString::Fmt("grep -I -R -Hn \"%s\" %s\n",
 					params->Text.Get(),
 					params->Dir.Get());
-				results->Print("%s\n", args.Get());
 				int32_t exitCode = 0;
-				auto result = Cmd(GetConsole(), args + "\n", &exitCode);
-				if (!exitCode)
-				{
-					auto output = TrimContent(result);
-					results->Write(output);
-				}
+				StripAnsiStream map(results);
+				auto result = Cmd(GetConsole(), args, &exitCode, &map);
+
 			} );
 
 		return true;
@@ -985,7 +981,7 @@ public:
 		return out;
 	}
 
-	LString PreparePath(LString s)
+	LString PreparePath(LString s, bool quoteSpaces = true)
 	{
 		LString cp = s.Get();;
 
@@ -997,18 +993,21 @@ public:
 					*c = sep;
 		}
 
-		return cp.Replace(" ", "\\ ");
+		if (quoteSpaces)
+			return cp.Replace(" ", "\\ ");
+
+		return cp;
 	}
 
-	bool Read(TPriority priority, const char *Path, std::function<void(LError,LString)> result) override
+	bool Read(TPriority priority, const char *Path, std::function<void(LError,LString)> cb) override
 	{
-		if (!Path)
+		if (!Path && cb)
 			return false;
 
 		AddWork(
 			MakeContext(_FL, Path),
 			priority,
-			[this, result, Path = PreparePath(Path)]() mutable
+			[this, cb, Path = PreparePath(Path, false)]() mutable
 			{
 				LStringPipe buf;
 
@@ -1016,13 +1015,10 @@ public:
 					Path = Path.Replace("~", homePath);
 
 				auto err = ssh->DownloadFile(&buf, Path);
-				if (result)
-				{
-					app->RunCallback( [this, err, result, data=buf.NewLStr()]() mutable
-						{
-							result(err, data);
-						});
-				}
+				app->RunCallback( [this, err, cb, data=buf.NewLStr()]() mutable
+					{
+						cb(err, data);
+					});
 			} );
 
 		return true;
@@ -1041,7 +1037,7 @@ public:
 		AddWork(
 			MakeContext(_FL, Path),
 			priority,
-			[this, result, Path = PreparePath(Path), Data]() mutable
+			[this, result, Path = PreparePath(Path, false), Data]() mutable
 			{
 				LMemStream stream(Data.Get(), Data.Length(), false);
 
