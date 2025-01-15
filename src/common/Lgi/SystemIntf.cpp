@@ -38,7 +38,12 @@ extern const char *ToString(SysPlatform p)
 // General SystemIntf work handling:
 void SystemIntf::AddWork(LString ctx, TPriority priority, TCallback &&job)
 {
+	auto start = LCurrentTime();
 	Auto lck(this, _FL);
+	auto now = LCurrentTime();
+	if (now - start > 100)
+		log->Print("AddWork lock took %i\n", _FL, (int)(now-start));
+
 	auto w = new TWork(ctx, std::move(job));
 	if (priority == SystemIntf::TForeground)
 		foregroundWork.Add(w);
@@ -144,6 +149,8 @@ class SshBackend :
 
 		int Main()
 		{
+			int status = 0;
+
 			LOG("Process: in main..\n");
 			SetTimeout(5000);
 
@@ -151,54 +158,56 @@ class SshBackend :
 			if (!Open(backend->uri.sHost, backend->uri.sUser, NULL, true))
 			{
 				log->Print("Error: connecting to ssh server %s\n", backend->uri.sHost.Get());
-				return -1;
+				status = -1;
 			}
-				
-			LOG("Process: create console..\n");
-			if (auto console = CreateConsole())
-			{
-				LOG("Process: ReadToPrompt..\n");
-				backend->ReadToPrompt(console, NULL, cancel);
-				auto args = LString::Fmt("cd %s && %s\n", dir.Get(), cmd.Get());				
-
-				LStream *output = NULL;
-				if (out)
+			else
+			{				
+				LOG("Process: create console..\n");
+				if (auto console = CreateConsole())
 				{
-					if (out->ioCallback)
-						out->ioCallback(console);
-					else
-						output = out->output;
-				}
+					LOG("Process: ReadToPrompt..\n");
+					backend->ReadToPrompt(console, NULL, cancel);
+					auto args = LString::Fmt("cd %s && %s\n", dir.Get(), cmd.Get());				
 
-				if (out && out->ioCallback)
-				{
-					LOG("Process: write args..\n");
-					console->Write(args);
-
-					// Wait for process to finish...
-					// Client code needs to call CallMethod(ObjCancel...) to quit this loop
-					while (!console->IsCancelled())
+					LStream *output = NULL;
+					if (out)
 					{
-						LSleep(100);
+						if (out->ioCallback)
+							out->ioCallback(console);
+						else
+							output = out->output;
 					}
 
-					out->ioCallback(NULL);
+					if (out && out->ioCallback)
+					{
+						LOG("Process: write args..\n");
+						console->Write(args);
+
+						// Wait for process to finish...
+						// Client code needs to call CallMethod(ObjCancel...) to quit this loop
+						while (!console->IsCancelled())
+						{
+							LSleep(100);
+						}
+
+						out->ioCallback(NULL);
+					}
+					else
+					{
+						LOG("Process: Cmd..\n");
+						auto result = backend->Cmd(console, args, &exitCode, output, cancel);
+						log->Print("SshProcess finished with %i\n", exitCode);
+					}
 				}
 				else
 				{
-					LOG("Process: Cmd..\n");
-					auto result = backend->Cmd(console, args, &exitCode, output, cancel);
-					log->Print("SshProcess finished with %i\n", exitCode);
+					log->Print("Error: creating ssh console\n");
+					status = -1;
 				}
-			}
-			else
-			{
-				log->Print("Error: creating ssh console\n");
-				return -1;
 			}
 			
 			backend->OnProcessComplete();
-			return 0;
+			return status;
 		}
 	};
 
@@ -349,9 +358,19 @@ public:
 	{
 		Cancel();
 		{
-			Auto lck(this, _FL);
-			for (auto p: processes)
-				delete p;
+			// Setting cancel should cause all the processes to exit automatically given enough time...
+			// But DON'T hold the lock, because ~Process will need to add the clean up task to the work to do.
+			auto startTs = LCurrentTime();
+			while (processes.Length())
+			{
+				LSleep(10);
+				auto now = LCurrentTime();
+				if (now - startTs > 10000)
+				{
+					// Ok something went wrong?!
+					LAssert(!"sub processes not exiting in a reasonable timeframe.");
+				}
+			}
 		}
 		WaitForExit();
 	}
@@ -952,26 +971,42 @@ public:
 		return true;
 	}
 
+	struct FindInFilesProcess
+	{
+		LString args;
+		ProcessIo io;
+		StripAnsiStream strip;
+
+		FindInFilesProcess(LStream *out) : strip(out)
+		{
+			io.output = &strip;
+		}
+
+		void OnComplete(int code)
+		{
+			delete this;
+		}
+	};
+
 	bool FindInFiles(FindParams *params, LStream *results) override
 	{
 		if (!params || !results)
 			return false;
 
-		AddWork(
-			MakeContext(_FL, "FindInFiles"),
-			SystemIntf::TForeground,
-			[this, results, params = new FindParams(*params)]()
-			{
-				auto args = LString::Fmt("grep -I -R -Hn \"%s\" %s\n",
-					params->Text.Get(),
-					params->Dir.Get());
-				int32_t exitCode = 0;
-				StripAnsiStream map(results);
-				auto result = Cmd(GetConsole(), args, &exitCode, &map);
-
-			} );
-
-		return true;
+		// Use run process not to block the core work loop:
+		if (auto p = new FindInFilesProcess(results))
+		{
+			p->args = LString::Fmt(	"grep -I -R -Hn \"%s\" %s\n",
+									params->Text.Get(),
+									params->Dir.Get());
+			return RunProcess(params->Dir, p->args, &p->io, this,
+				[p](auto code)
+				{
+					p->OnComplete(code); // clean up the memory.
+				});
+		}
+		
+		return false;
 	}
 
 	LString TrimContent(LString in)
@@ -1138,7 +1173,7 @@ public:
 		return true;
 	}
 
-	bool RunProcess(const char *initDir, const char *cmdLine, ProcessIo *output, LCancel *cancel, std::function<void(int)> cb, LStream *alt_log)
+	bool RunProcess(const char *initDir, const char *cmdLine, ProcessIo *output, LCancel *cancel, std::function<void(int)> cb, LStream *alt_log = nullptr)
 	{
 		if (!cmdLine)
 			return false;
@@ -1178,6 +1213,14 @@ public:
 	{
 		while (!IsCancelled())
 			DoWork();
+
+		if (processes.Length())
+		{
+			log->Print("Waiting for subprocesses...\n");
+			while (processes.Length() > 0)
+				DoWork();
+			log->Print("Subprocesses done!\n");
+		}
 
 		return 0;
 	}
