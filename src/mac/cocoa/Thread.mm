@@ -80,6 +80,11 @@ LThread::~LThread()
 	}
 }
 
+bool LThread::InThread() const
+{
+	return LCurrentThreadId() == GetId();
+}
+
 int LThread::ExitCode()
 {
 	return ReturnValue;

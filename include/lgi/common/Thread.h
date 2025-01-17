@@ -65,11 +65,12 @@ public:
 	virtual ~LThread();
 
 	// Properties
-	OsThread Handle() { return hThread; }
-	const char *GetName() { return Name; }
-	OsThreadId GetId() { return ThreadId; }
-	ThreadState GetState() { return State; } // Volatile at best... only use for 'debug'
-	bool GetDeleteOnExit() { return DeleteOnExit; }
+	OsThread Handle() const { return hThread; }
+	const char *GetName() const { return Name; }
+	OsThreadId GetId() const { return ThreadId; }
+	bool InThread() const;
+	ThreadState GetState() const { return State; } // Volatile at best... only use for 'debug'
+	bool GetDeleteOnExit() const { return DeleteOnExit; }
 	virtual int ExitCode();
 	virtual bool IsExited();
 
