@@ -136,7 +136,7 @@ class SshBackend :
 			cancel(cancelObj),
 			exitcodeCb(cb)
 		{
-			LOG("Process: about to run..\n");
+			// LOG("Process: about to run..\n");
 			Run();
 		}
 

@@ -316,9 +316,7 @@ DumpTime("priv");
 		if (ProductName && ProductVer)
 			d->ProductId.Printf("%s-%s", ProductName.Get(), ProductVer.Get());
 
-		#if !defined(_DEBUG)
 		_PrevExceptionHandler = SetUnhandledExceptionFilter(_ExceptionFilter_Redir);
-		#endif
 		_set_invalid_parameter_handler(LInvalidParam);
 	}
 	

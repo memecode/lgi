@@ -157,7 +157,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 	LHashTbl<ConstStrKey<char, false>, bool> KnownExt;
 	LString::Array IncPaths, SysIncPaths;
 	SystemIntf *backend = nullptr;
-	LString projectCache;
+	LString projectCache; // lock before using?
 	
 	#if USE_HASH
 	LHashTbl<ConstStrKey<char,false>, FileSyms*> Files;
@@ -219,7 +219,8 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 
 	LString CachePath(LString path)
 	{
-		LAssert(InThread());
+		Auto lck(this, _FL);
+		// LAssert(InThread());
 		
 		if (!projectCache)
 			return LString();
@@ -467,6 +468,8 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 
 		if (backend->IsReady())
 		{
+			Auto lck(this, _FL);
+
 			if (!projectCache)
 			{
 				if (!gettingCacheFolder)
@@ -498,12 +501,14 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			}
 			case M_GET_PROJECT_CACHE:
 			{
+				Auto lck(this, _FL);
 				if (auto folder = Msg->AutoA<LString>())
 					projectCache = *folder;
 				break;
 			}
 			case M_CLEAR_PROJECT_CACHE:
 			{
+				Auto lck(this, _FL);
 				if (projectCache)
 				{
 					LDirectory dir;

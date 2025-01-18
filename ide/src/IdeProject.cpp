@@ -1886,13 +1886,13 @@ void BuildThread::Step1()
 	StreamToLog log(Proj->GetApp());
 	// log.Print("%s: readdir '%s'\n", __FUNCTION__, p.Get());
 	auto callId = AddCall(_FL);
-	LOG("Step1 reading folder '%s'\n", p.Get());
+	// LOG("Step1 reading folder '%s'\n", p.Get());
 	backend->ReadFolder(SystemIntf::TForeground,
 		p,
 		[this, backend, callId](auto d)
 		{
 			StreamToLog log(Proj->GetApp());
-			LOG("Step1 got folder..\n");
+			// LOG("Step1 got folder..\n");
 			for (int i=true; i; i=d->Next())
 			{
 				if (d->IsDir())
