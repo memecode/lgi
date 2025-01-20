@@ -1977,7 +1977,7 @@ void BuildThread::Step2()
 	parts.DeleteArrays();
 
 	StreamToLog log(Proj->GetApp());
-	LOG("Step2 add 3..\n");
+	// LOG("Step2 add 3..\n");
 	AddWork([this]() { Step3(); }); // Move onto the build itself...
 }
 
@@ -1993,7 +1993,7 @@ void BuildThread::Step3()
 	{
 		// buildLogger->Print("%s: building in '%s'\n", __FUNCTION__, backendInitFolder.Get());
 		auto buildId = AddCall(_FL);
-		LOG("Step3 run process..\n");
+		// LOG("Step3 run process..\n");
 
 		LString gen = "make ";
 		auto isNinja = Makefile.Find(".ninja") >= 0;

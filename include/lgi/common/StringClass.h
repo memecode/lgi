@@ -1070,10 +1070,13 @@ public:
 		char *c = Str->Str;
 		if (index < 0)
 		{
-			size_t idx = Str->Len + index;
-			return c[idx];
+			ssize_t idx = (ssize_t)Str->Len + index;
+			if (idx >= 0)
+			{
+				return c[idx];
+			}
 		}
-		else if (index < (int)Str->Len)
+		else if (index < (ssize_t)Str->Len)
 		{
 			return c[index];
 		}

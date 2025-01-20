@@ -151,10 +151,10 @@ class SshBackend :
 		{
 			int status = 0;
 
-			LOG("Process: in main..\n");
+			// LOG("Process: in main..\n");
 			SetTimeout(5000);
 
-			LOG("Process: open..\n");
+			// LOG("Process: open..\n");
 			if (!Open(backend->uri.sHost, backend->uri.sUser, NULL, true))
 			{
 				log->Print("Error: connecting to ssh server %s\n", backend->uri.sHost.Get());
@@ -162,10 +162,10 @@ class SshBackend :
 			}
 			else
 			{				
-				LOG("Process: create console..\n");
+				// LOG("Process: create console..\n");
 				if (auto console = CreateConsole())
 				{
-					LOG("Process: ReadToPrompt..\n");
+					// LOG("Process: ReadToPrompt..\n");
 					backend->ReadToPrompt(console, NULL, cancel);
 					auto args = LString::Fmt("cd %s && %s\n", dir.Get(), cmd.Get());				
 
@@ -194,7 +194,7 @@ class SshBackend :
 					}
 					else
 					{
-						LOG("Process: Cmd..\n");
+						// LOG("Process: Cmd..\n");
 						auto result = backend->Cmd(console, args, &exitCode, output, cancel);
 						log->Print("SshProcess finished with %i\n", exitCode);
 					}

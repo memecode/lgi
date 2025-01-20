@@ -23,9 +23,9 @@
 
 
 #if 1
-	#define SLOG(...)			if (sLog) sLog->Log(__VA_ARGS__)
+	#define SSH_SLOG(...)			if (sLog) sLog->Log(__VA_ARGS__)
 #else
-	#define SLOG(...)
+	#define SSH_SLOG(...)
 #endif
 
 class LSsh
@@ -183,7 +183,7 @@ protected:
 					prompt = last2;
 					found = true;
 
-					SLOG("PromptDetect: got unix prompt");
+					SSH_SLOG("PromptDetect: got unix prompt");
 					return true;
 				}
 				else if (size > 0 && ptr[size-1] == '>')
@@ -192,11 +192,11 @@ protected:
 					prompt = ">";
 					found = true;
 
-					SLOG("PromptDetect: got windows prompt");
+					SSH_SLOG("PromptDetect: got windows prompt");
 					return true;
 				}
 
-				// SLOG("PromptDetect not a prompt:", last2);
+				// SSH_SLOG("PromptDetect not a prompt:", last2);
 			}
 
 			return false;
@@ -875,7 +875,7 @@ public:
 				auto rd = c->Read(buf, sizeof(buf));
 				if (rd > 0)
 				{
-					SLOG("ReadToPrompt read:", rd, LString(buf, rd));
+					SSH_SLOG("ReadToPrompt read:", rd, LString(buf, rd));
 
 					p.Write(buf, rd);
 					if (output)
@@ -892,7 +892,7 @@ public:
 					{
 						auto lastLn = p.PeekLine(false);
 						RemoveAnsi(lastLn);
-						SLOG("ReadToPrompt not at prompt:", now - startTs, lastLn);
+						SSH_SLOG("ReadToPrompt not at prompt:", now - startTs, lastLn);
 						startTs = now;
 					}
 
@@ -902,7 +902,7 @@ public:
 		}
 		else
 		{
-			SLOG("ReadToPrompt: no console.\n");
+			SSH_SLOG("ReadToPrompt: no console.\n");
 		}
 
 		return p.NewLStr();
