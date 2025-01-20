@@ -1143,9 +1143,16 @@ LPoint LScreenDpi()
 
 		if (!Dpi.x)
 		{
-			auto dpi = Gtk::gdk_screen_get_resolution(Gtk::gdk_screen_get_default());
-			if (dpi > 0)
-				Dpi.Set((int)dpi, (int)dpi);
+			if (LApp::IsGui())
+			{
+				auto dpi = Gtk::gdk_screen_get_resolution(Gtk::gdk_screen_get_default());
+				if (dpi > 0)
+					Dpi.Set((int)dpi, (int)dpi);
+			}
+			else
+			{
+				Dpi.Set(96, 96);
+			}
 		}
 
 	#elif defined(HAIKU)

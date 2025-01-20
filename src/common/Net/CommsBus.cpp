@@ -184,20 +184,20 @@ struct Connection
 		return ValidSocket(sock.Handle());
 	}
 	
-	 LString Dump(uint8_t *ptr, ssize_t len)
-	 {
-	 	LStringPipe p;
-	 	for (int i=0; i<len; i++)
-	 	{
-	 		char e = i % 16 == 15 ? '\n' : ' ';
-	 		if ((ptr[i] >= 'a' && ptr[i] <= 'z') ||
-	 			(ptr[i] >= 'A' && ptr[i] <= 'Z'))
-		 		p.Print(" %c%c", ptr[i], e);
-		 	else	 		
-	 			p.Print("%2.2x%c", ptr[i], e);
-	 	}
-	 	return p.NewLStr();
-	 }
+	LString Dump(uint8_t *ptr, ssize_t len)
+	{
+		LStringPipe p;
+		for (int i=0; i<len; i++)
+		{
+			char e = i % 16 == 15 ? '\n' : ' ';
+			if ((ptr[i] >= 'a' && ptr[i] <= 'z') ||
+				(ptr[i] >= 'A' && ptr[i] <= 'Z'))
+				p.Print(" %c%c", ptr[i], e);
+			else	 		
+				p.Print("%2.2x%c", ptr[i], e);
+		}
+		return p.NewLStr();
+	}
 
 	bool Read(std::function<void(Block*)> cb)
 	{
@@ -221,9 +221,10 @@ struct Connection
 		bool status = false;
 		while (used >= sizeof(Block))
 		{
+			// ie there is at least enough data to check the Block size
 			if (auto b = (Block*) readBuf.AddressOf())
 			{
-				ssize_t bytes = b->GetSize() + sizeof(Block);
+				ssize_t bytes = b->GetSize() + sizeof(Block); // Total message size
 				if (used >= bytes)
 				{
 					// LOG("read: got msg %i bytes\n", (int)bytes);
@@ -242,8 +243,26 @@ struct Connection
 				}
 				else
 				{
-					LOG("read: not enough bytes for msg %i < %i, sizeof(Block)=%i\n", (int)used, (int)bytes, (int)sizeof(Block));
-					LOG("read:\n%s\n", Dump((uint8_t*) readBuf.AddressOf(), used).Get());
+					if (bytes > readBuf.Length())
+					{
+						ssize_t blk = 1 << 20; // 1 MiB
+						ssize_t newSz = bytes;
+						if (newSz % blk)
+							newSz += blk - (newSz % blk);
+						
+						// Not enough storage for this message, try to increase the size to fit it
+						if (readBuf.Length(newSz))
+						{
+							LOG("read: increased buf size to %s\n", LFormatSize(newSz).Get());
+						}
+						else
+						{					
+							LOG("read: not enough bytes for msg %i < %i, sizeof(Block)=%i\n", (int)used, (int)bytes, (int)sizeof(Block));
+							LOG("read:\n%s\n", Dump((uint8_t*) readBuf.AddressOf(), used).Get());
+						}
+					}	
+				
+					// Otherwise... wait for more data
 					break;
 				}
 			}

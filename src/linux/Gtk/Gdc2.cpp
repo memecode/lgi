@@ -438,28 +438,31 @@ public:
 		// Palette information
 		GammaCorrection = 1.0;
 
-		// Get mode stuff
-		auto Dsp = Gtk::gdk_display_get_default();
-		for (Gtk::gint i=0; i<gdk_display_get_n_monitors(Dsp); i++)
+		if (LApp::IsGui())
 		{
-			auto Monitor = gdk_display_get_monitor(Dsp, i);
-			if (!Monitor)
-				continue;
-				
-			Gtk::GdkRectangle workarea = {0};
-			gdk_monitor_get_workarea(Monitor, &workarea);
-			ScrX = workarea.width;
-			ScrY = workarea.height;
-		}
-
-		auto Scr = Gtk::gdk_display_get_default_screen(Dsp);
-		if (Scr)
-		{
-			Gtk::GdkVisual *Vis = Gtk::gdk_screen_get_system_visual(Scr);
-			if (Vis)
+			// Get mode stuff
+			auto Dsp = Gtk::gdk_display_get_default();
+			for (Gtk::gint i=0; i<gdk_display_get_n_monitors(Dsp); i++)
 			{
-				ScrBits = gdk_visual_get_depth(Vis);
-				ScrColourSpace = GdkVisualToColourSpace(Vis, ScrBits);
+				auto Monitor = gdk_display_get_monitor(Dsp, i);
+				if (!Monitor)
+					continue;
+					
+				Gtk::GdkRectangle workarea = {0};
+				gdk_monitor_get_workarea(Monitor, &workarea);
+				ScrX = workarea.width;
+				ScrY = workarea.height;
+			}
+
+			auto Scr = Gtk::gdk_display_get_default_screen(Dsp);
+			if (Scr)
+			{
+				Gtk::GdkVisual *Vis = Gtk::gdk_screen_get_system_visual(Scr);
+				if (Vis)
+				{
+					ScrBits = gdk_visual_get_depth(Vis);
+					ScrColourSpace = GdkVisualToColourSpace(Vis, ScrBits);
+				}
 			}
 		}
 		

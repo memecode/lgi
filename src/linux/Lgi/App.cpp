@@ -266,6 +266,11 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 {
 	TheApp = this;
 	d = new LAppPrivate(this);
+
+	auto Display = LGetEnv("DISPLAY");
+	if (!Display)
+		d->GuiEnv = false;
+
 	Name(name);
 	LgiArgsAppPath = AppArgs.Arg[0];
 	if (LIsRelativePath(LgiArgsAppPath))
@@ -307,8 +312,9 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	Gtk::gchar id[256];
 	LAssert(strchr(name, '/') == NULL); // name can't have slashes in it.
 	sprintf_s(id, sizeof(id), "com.memecode.%s", name);
-	d->App = Gtk::gtk_application_new(id, Gtk::G_APPLICATION_FLAGS_NONE); 
-	LAssert(d->App != NULL);
+	
+	if (d->GuiEnv)
+		d->App = Gtk::gtk_application_new(id, Gtk::G_APPLICATION_FLAGS_NONE); 
 
 	MouseHook = new LMouseHook;
 
@@ -1328,6 +1334,11 @@ bool LApp::SetApplicationIcon(const char *FileName)
 	
 	di->Set("Icon", FileName);
 	return di->Update();
+}
+
+bool LApp::IsGui()
+{
+	return LAppInst->d->GuiEnv;
 }
 
 ////////////////////////////////////////////////////////////////

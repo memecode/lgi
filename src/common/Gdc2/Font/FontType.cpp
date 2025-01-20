@@ -364,9 +364,9 @@ bool LFontType::GetSystemFont(const char *Which)
 				}
 			}
 			
-			if (!ConfigFontUsed)
+			if (!ConfigFontUsed && LApp::IsGui())
 			{	
-				Gtk::GtkStyle *s = Gtk::gtk_style_new();
+				auto s = Gtk::gtk_style_new();
 				if (s)
 				{
 					const char *fam = Gtk::pango_font_description_get_family(s->font_desc);

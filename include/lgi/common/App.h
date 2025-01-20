@@ -410,6 +410,7 @@ public:
 
 		DesktopInfo *GetDesktopInfo();
 		bool SetApplicationIcon(const char *FileName);
+		static bool IsGui();
 	
 	#elif LGI_COCOA && defined(__OBJC__)
 	

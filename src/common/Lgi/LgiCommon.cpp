@@ -2490,7 +2490,7 @@ LString LGetEnv(const char *Var)
 	free(s);
 	return ret;
 #else
-	return getenv("PATH");
+	return getenv(Var);
 #endif
 }
 

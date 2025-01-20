@@ -45,6 +45,7 @@ public:
 	LMouse LastMove;
 	LAutoString Name;
 	LArray<Gtk::guint> IdleId;
+	bool GuiEnv = true; // else command line
 	
 	#if defined(LINUX)
 	/// Desktop info
