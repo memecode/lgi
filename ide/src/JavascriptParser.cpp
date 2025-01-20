@@ -32,7 +32,10 @@ Known bugs:
 bool BuildJsDefnList(const char *FileName, char16 *Source, LArray<DefnInfo> &Defns, int LimitTo, LError &err, bool Debug)
 {
 	if (!Source)
+	{
+		err.Set(LErrorPathNotFound, "No source data");
 		return false;
+	}
 
 	int Depth = 0;
 	int Line = 1;
@@ -181,6 +184,6 @@ bool BuildJsDefnList(const char *FileName, char16 *Source, LArray<DefnInfo> &Def
 		}
 	}
 
-	return Defns.Length() > 0;
+	return true;
 }
 

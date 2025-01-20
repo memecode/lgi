@@ -15,6 +15,8 @@
 		3409C0CC27580ED60050302A /* ListItemCheckBox.h in Headers */ = {isa = PBXBuildFile; fileRef = 3409C0C927580ED60050302A /* ListItemCheckBox.h */; };
 		3409C0D0275812CB0050302A /* Profile.h in Headers */ = {isa = PBXBuildFile; fileRef = 3409C0CF275812CB0050302A /* Profile.h */; };
 		340C58BE2D29EE680056D654 /* DragAndDrop.h in Headers */ = {isa = PBXBuildFile; fileRef = 340C58BD2D29EE680056D654 /* DragAndDrop.h */; };
+		340FADE32D3A684400465C2A /* AutoPtr.h in Headers */ = {isa = PBXBuildFile; fileRef = 340FADE22D3A684400465C2A /* AutoPtr.h */; };
+		340FADE52D3A688500465C2A /* StringClass.h in Headers */ = {isa = PBXBuildFile; fileRef = 340FADE42D3A688500465C2A /* StringClass.h */; };
 		34109857217A9805007020CE /* LCocoaView.h in Sources */ = {isa = PBXBuildFile; fileRef = 34109856217A9805007020CE /* LCocoaView.h */; };
 		34114C8B23091E6E00F342B1 /* LgiClasses.h in Headers */ = {isa = PBXBuildFile; fileRef = 34114C8A23091E6E00F342B1 /* LgiClasses.h */; };
 		3413170E23068FFE008CE982 /* FileSelect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3413170D23068FFE008CE982 /* FileSelect.cpp */; };
@@ -218,6 +220,8 @@
 		3409C0C927580ED60050302A /* ListItemCheckBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ListItemCheckBox.h; path = ../../../include/lgi/common/ListItemCheckBox.h; sourceTree = SOURCE_ROOT; };
 		3409C0CF275812CB0050302A /* Profile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Profile.h; path = ../../../include/lgi/common/Profile.h; sourceTree = "<group>"; };
 		340C58BD2D29EE680056D654 /* DragAndDrop.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DragAndDrop.h; path = ../../../include/lgi/common/DragAndDrop.h; sourceTree = SOURCE_ROOT; };
+		340FADE22D3A684400465C2A /* AutoPtr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AutoPtr.h; path = ../../../include/lgi/common/AutoPtr.h; sourceTree = "<group>"; };
+		340FADE42D3A688500465C2A /* StringClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StringClass.h; path = ../../../include/lgi/common/StringClass.h; sourceTree = "<group>"; };
 		34109853217A975E007020CE /* View.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = View.h; path = ../../../include/lgi/common/View.h; sourceTree = SOURCE_ROOT; };
 		34109856217A9805007020CE /* LCocoaView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LCocoaView.h; path = ../../../include/lgi/mac/cocoa/LCocoaView.h; sourceTree = SOURCE_ROOT; };
 		34114C8A23091E6E00F342B1 /* LgiClasses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiClasses.h; path = ../../../include/lgi/common/LgiClasses.h; sourceTree = "<group>"; };
@@ -574,6 +578,8 @@
 		3477C29A1CBF0A700028B84B /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				340FADE42D3A688500465C2A /* StringClass.h */,
+				340FADE22D3A684400465C2A /* AutoPtr.h */,
 				34D795F92BFD771800904325 /* Colour.h */,
 				34D795FB2BFD771800904325 /* Css.h */,
 				34D795FA2BFD771800904325 /* CssTools.h */,
@@ -843,6 +849,7 @@
 				3409C0CA27580ED60050302A /* ListItemRadioBtn.h in Headers */,
 				3477C35D1CC2253E0028B84B /* LgiInterfaces.h in Headers */,
 				34F6153E27E5628600FE5B0C /* Token.h in Headers */,
+				340FADE32D3A684400465C2A /* AutoPtr.h in Headers */,
 				3477C2A51CBF0A920028B84B /* LgiOsClasses.h in Headers */,
 				3491A28523678DB800604C29 /* DropFiles.h in Headers */,
 				3415169326EC32FF007EE35F /* TextView3.h in Headers */,
@@ -873,6 +880,7 @@
 				3477C5171CC303B70028B84B /* LgiUiBase.h in Headers */,
 				3477C2AA1CBF22A00028B84B /* File.h in Headers */,
 				343874B5230F46B200CF96B4 /* Window.h in Headers */,
+				340FADE52D3A688500465C2A /* StringClass.h in Headers */,
 				34D28929275B3DB0005961A8 /* Variant.h in Headers */,
 				348E99CE2876850F0067E92A /* ObjCWrapper.h in Headers */,
 				3477C2A21CBF0A920028B84B /* SymLookup.h in Headers */,

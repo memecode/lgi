@@ -1,5 +1,7 @@
 #pragma once
 
+#include "lgi/common/RemoveAnsi.h"
+
 //////////////////////////////////////////////////////////////////////
 // Platform stuff
 enum SysPlatform
@@ -32,6 +34,27 @@ extern const char *PlatformNames[];
 #define PLATFORM_CURRENT		PLATFORM_HAIKU
 #endif
 
+// This class can take ANSI code input and emit non-ANSI code output
+struct StripAnsiStream : public LStream
+{
+	LStream *out = nullptr;
+	LStringPipe p;
+
+	StripAnsiStream(LStream *str) : out(str) {}
+	ssize_t Write(const void *Ptr, ssize_t Size, int Flags = 0) override
+	{
+		auto wr = p.Write(Ptr, Size);
+
+		while (auto ln = p.Pop())
+		{
+			RemoveAnsi(ln);
+			out->Write(ln);
+			out->Write("\n", 1);
+		}
+
+		return wr;
+	}
+};
 
 class SystemIntf : public LMutex
 {
@@ -145,7 +168,7 @@ public:
 	struct ProcessIo // Various options for process input/output
 	{
 		// Just get the output in a stream:
-		LStream *output;
+		LStream *output = nullptr;
 		
 		// Alternatively, get the console stream ptr as a callback
 		// However once the client code is done with the stream/console

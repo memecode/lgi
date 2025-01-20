@@ -131,6 +131,11 @@ LThread::~LThread()
 	}
 }
 
+bool LThread::InThread() const
+{
+	return LCurrentThreadId() == GetId();
+}
+
 void LThread::Create(LThread *Thread, OsThread &hThread, OsThreadId &ThreadId)
 {
 #if defined(_MT) || defined(__MINGW32__)

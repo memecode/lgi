@@ -38,9 +38,9 @@ public:
 	~FindSymbolDlg();
 	
 	int OnNotify(LViewI *v, const LNotification &n) override;
-	void OnCreate();
-	bool OnViewKey(LView *v, LKey &k);
-	LMessage::Result OnEvent(LMessage *m);
+	void OnCreate() override;
+	bool OnViewKey(LView *v, LKey &k) override;
+	LMessage::Result OnEvent(LMessage *m) override;
 };
 
 int ScoreCmp(FindSymResult **a, FindSymResult **b)
@@ -58,10 +58,10 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		int Platforms;
 		LHashTbl<ConstStrKey<char, false>, LString> *HdrMap = NULL;
 		LArray<DefnInfo> Defs;
-		bool IsSource;
-		bool IsHeader;
-		bool IsPython;
-		bool IsJavascript;
+		bool IsSource = false;
+		bool IsHeader = false;
+		bool IsPython = false;
+		bool IsJavascript = false;
 		
 		bool Parse(LAutoWString Source, LError &err, bool Debug)
 		{
@@ -133,7 +133,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 						def.File = Path;
 						def.Type = (DefnType)parts[0].Int();
 						def.Name = parts[1];
-						def.Line = parts[2].Int();
+						def.Line = (int) parts[2].Int();
 						def.FnName.Start = parts[3].Int();
 						def.FnName.Len = parts[4].Int();
 					}
@@ -157,7 +157,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 	LHashTbl<ConstStrKey<char, false>, bool> KnownExt;
 	LString::Array IncPaths, SysIncPaths;
 	SystemIntf *backend = nullptr;
-	LString projectCache;
+	LString projectCache; // lock before using?
 	
 	#if USE_HASH
 	LHashTbl<ConstStrKey<char,false>, FileSyms*> Files;
@@ -212,13 +212,16 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 	
 	#define PROFILE_ADDFILE 0
 	#if PROFILE_ADDFILE
-	#define PROF(...) prof.Add(__VA_ARGS__)
+		#define PROF(...) prof.Add(__VA_ARGS__)
 	#else
-	#define PROF(...)
+		#define PROF(...)
 	#endif
 
 	LString CachePath(LString path)
 	{
+		Auto lck(this, _FL);
+		// LAssert(InThread());
+		
 		if (!projectCache)
 			return LString();
 
@@ -465,6 +468,8 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 
 		if (backend->IsReady())
 		{
+			Auto lck(this, _FL);
+
 			if (!projectCache)
 			{
 				if (!gettingCacheFolder)
@@ -496,12 +501,14 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			}
 			case M_GET_PROJECT_CACHE:
 			{
+				Auto lck(this, _FL);
 				if (auto folder = Msg->AutoA<LString>())
 					projectCache = *folder;
 				break;
 			}
 			case M_CLEAR_PROJECT_CACHE:
 			{
+				Auto lck(this, _FL);
 				if (projectCache)
 				{
 					LDirectory dir;

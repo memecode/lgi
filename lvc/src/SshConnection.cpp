@@ -471,7 +471,6 @@ SSH_LOG("detectVcs:", ls);
 LProfile prof("OnEvent");
 #endif
 			auto p = Msg->AutoA<SshParams>();
-			LgiTrace("%s:%i - got M_RUN_CMD\n", _FL);
 PROF("get console");
 			LString path = PathFilter(p->Path);
 			LStream *con = GetStream();
@@ -514,7 +513,6 @@ PROF("result wait");
 				Log->Print("... result=failed\n");
 
 			PostObject(GuiHnd, M_RESPONSE, p);
-			LgiTrace("%s:%i - post M_RESPONSE\n", _FL);
 			break;
 		}
 		default:

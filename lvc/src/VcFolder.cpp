@@ -5,6 +5,7 @@
 #include "lgi/common/Json.h"
 #include "lgi/common/ProgressDlg.h"
 #include "lgi/common/IniFile.h"
+#include "lgi/common/PopupNotification.h"
 
 #include "resdefs.h"
 
@@ -3050,6 +3051,13 @@ bool VcFolder::ParseRemoteFind(int Result, LString s, ParseParams *Params)
 	LUri u(Params->Str);
 
 	auto Lines = s.SplitDelimit("\r\n");
+	if (Result)
+	{
+		d->Log->Print("%s:%i - error: %s\n", _FL, s.Get());
+		LPopupNotification::Message(GetTree()->GetWindow(), LString::Fmt("Error: %s", Lines.Last().Get()));
+		return false;
+	}
+
 	LArray<SshFindEntry> Entries;
 	for (size_t i=1; i<Lines.Length(); i++)
 	{
@@ -3113,11 +3121,15 @@ void VcFolder::ReadDir(LTreeItem *Parent, const char *ReadUri)
 		if (!c)
 			return;
 		
+		LString uri = ReadUri;
+		if (uri(-1) != '/')
+			uri += "/";
+
 		LString Path = u.sPath(Uri.sPath.Length(), -1).LStrip("/");
 		LString Args;
 		Args.Printf("\"%s\" -maxdepth 1 -printf \"%%M/%%g/%%u/%%A@/%%T@/%%s/%%P\n\"", Path ? Path.Get() : ".");
 
-		auto *Params = new ParseParams(ReadUri);
+		auto *Params = new ParseParams(uri);
 		Params->Leaf = dynamic_cast<VcLeaf*>(Parent);
 
 		c->Command(this, "find", Args, &VcFolder::ParseRemoteFind, Params, SshConnection::LogNone);
@@ -5150,6 +5162,7 @@ VcLeaf::VcLeaf(VcFolder *parent, LTreeItem *Item, LString uri, LString leaf, boo
 	Parent = parent;
 	d = Parent->GetPriv();
 	LAssert(uri.Find("://") >= 0); // Is URI
+	LAssert(uri(-1) == '/'); // has trailing folder sep
 	Uri.Set(uri);
 	LAssert(Uri);
 	Leaf = leaf;
@@ -5181,27 +5194,37 @@ LString VcLeaf::Full()
 
 void VcLeaf::OnBrowse()
 {
-	LUri full(Full());
+	auto sFull = Full();
+	LUri full(sFull);
 
 	LList *Files = d->Files;
 	Files->Empty();
-	LDirectory Dir;
-	for (int b = Dir.First(full.LocalPath()); b; b = Dir.Next())
-	{
-		if (Dir.IsDir())
-			continue;
 
-		VcFile *f = new VcFile(d, Parent, LString(), true);
-		if (f)
+	if (full.IsFile())
+	{
+		LDirectory Dir;
+		for (int b = Dir.First(full.LocalPath()); b; b = Dir.Next())
 		{
-			f->SetUri(LString("file://") + full);
-			f->SetText(Dir.GetName(), COL_FILENAME);
-			Files->Insert(f);
+			if (Dir.IsDir())
+				continue;
+
+			VcFile *f = new VcFile(d, Parent, LString(), true);
+			if (f)
+			{
+				f->SetUri(LString("file://") + full);
+				f->SetText(Dir.GetName(), COL_FILENAME);
+				Files->Insert(f);
+			}
 		}
+		Files->ResizeColumnsToContent();
+		if (Folder)
+			Parent->FolderStatus(full.ToString(), this);
 	}
-	Files->ResizeColumnsToContent();
-	if (Folder)
-		Parent->FolderStatus(full.ToString(), this);
+	else
+	{
+		// FIXME: add ssh support:
+		Parent->ReadDir(this, sFull);
+	}
 }
 
 void VcLeaf::AfterBrowse()

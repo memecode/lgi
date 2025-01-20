@@ -701,7 +701,7 @@ LMessage::Result LPopup::OnEvent(LMessage *Msg)
 		case M_SET_VISIBLE:
 		{
 			Visible(Msg->A() != 0);
-			break;
+			return true; // Seems to delete 'this' sometimes?
 		}
 	}
 	
