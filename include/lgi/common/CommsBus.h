@@ -15,7 +15,7 @@ public:
 
 	using TCallback = std::function<void(TState)>;
 
-	LCommsBus(LStream *log = NULL);
+	LCommsBus(LStream *log = NULL, LView *commsState = nullptr);
 	~LCommsBus();
 	
 	bool IsServer() const;

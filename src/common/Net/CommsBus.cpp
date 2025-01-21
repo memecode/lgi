@@ -2,6 +2,7 @@
 #include "lgi/common/Thread.h"
 #include "lgi/common/CommsBus.h"
 #include "lgi/common/Net.h"
+#include "lgi/common/Json.h"
 
 #define COMMBUS_MULTICAST	"230.6.6.10"
 #define DEFAULT_COMMS_PORT	45454
@@ -51,6 +52,14 @@ struct IpList : public LArray<uint32_t>
 				Add(i);
 		}
 		return true;
+	}
+
+	operator LArray<LString>()
+	{
+		LArray<LString> a;
+		for (auto ip: *this)
+			a.Add(LIpToStr(ip));
+		return a;
 	}
 };
 
@@ -330,6 +339,16 @@ struct Endpoint
 		auto data = LString::Fmt("%s\n%s", addr.Get(), Uid);
 		return Block::New(MCreateEndpoint, data);		
 	}
+
+	// Convert to json
+	LJson ToJson() const
+	{
+		LJson j;
+		j.Set("addr", addr);
+		if (remote)
+			j.Set("remote", remote);
+		return j;
+	}
 };
 
 struct CommsClient : public Connection
@@ -371,6 +390,7 @@ struct LCommsBusPriv :
 	bool isServer = false;
 	LSocket listen;
 	LStream *log = NULL;
+	LView *commsState = nullptr;
 	LString Uid;
 	
 	// Lock before using
@@ -378,14 +398,18 @@ struct LCommsBusPriv :
 	LArray< Endpoint > endpoints;
 	LCommsBus::TCallback callback;
 
+	// Events
+	std::function<void()> onEndpointChange;
+
 	// Server only:
 	uint64_t trySendTs = 0;
 	LArray<CommsClient*> clients;
 		
-	LCommsBusPriv(LStream *Log) :
+	LCommsBusPriv(LStream *Log, LView *commsstate) :
 		LThread("LCommsBusPriv.Thread"),
 		LMutex("LCommsBusPriv.Lock"),
-		log(Log)
+		log(Log),
+		commsState(commsstate)
 	{
 		LAssert(sizeof(Block) == 9);
 		Run();
@@ -590,77 +614,41 @@ struct LCommsBusPriv :
 			LArray<LPeer> peers;
 			bool direct = false;
 
-			bool FromVars(LString::Array &vars)
+			LJson ToJson()
 			{
-				int status = 0;
-
-				for (auto &var: vars)
-				{
-					auto v = var.SplitDelimit(":", 1);
-					if (v.Length() != 2)
-						continue;
-					if (v[0].Equals("hostname"))
-					{
-						hostName = v[1];
-						status++;
-					}
-					else if (v[0].Equals("ip"))
-					{
-						ip4 = v[1];
-						status++;
-					}
-					else if (v[0].Equals("dir"))
-					{
-						direct = v[1].Int() != 0;
-					}
-					else if (v[0].Equals("peer"))
-					{
-						LPeer p;
-						auto vars = v[1].SplitDelimit(",");
-						if (p.FromVars(vars))
-						{
-							int idx = -1;
-							for (int i=0; i<peers.Length(); i++)
-							{
-								if (peers[i].ip4 == p.ip4)
-								{
-									idx = i;
-									peers[i] = p;
-									break;
-								}
-							}
-
-							if (idx < 0)
-								peers.Add(p);
-						}
-					}
-					else
-					{						
-						int asd=0;
-					}
-				}
-
-				return status >= 2;
-			}
-
-			bool FromString(LString s)
-			{
-				auto vars = s.SplitDelimit("\n");
-				FromVars(vars);
-				return true;
-			}
-
-			LString ToString()
-			{
-				LString::Array a;
-				a.New().Printf("direct:%i", direct);
-				a.New().Printf("ip:%s", ip4.ToString().Get());
-				a.New().Printf("hostname:%s", hostName.Get());
-				/*
+				LJson j;
+				
+				j.Set("hostname", hostName);
+				j.Set("ip", ip4);
+				LArray<LJson> peerArr;
 				for (auto &p: peers)
-					a.New().Printf("peer:ip:%s,hostname:%s", p.ip4.ToString().Get(), p.hostName.Get());
-				*/
-				return LString(",").Join(a);
+					peerArr.Add(p.ToJson());
+				j.Set("peers", peerArr);
+				j.Set("direct", (int64_t)direct);				
+				return j;
+			}
+
+			template<typename J>
+			bool FromJson(J &j, LStream *log)
+			{
+				hostName = j.Get("hostname");
+				ip4.Empty();
+				for (auto ip: j.GetArray("ip"))
+					ip4.Add(LIpToInt(ip));
+				peers.Empty();
+				for (LJson::Iter::IterPos it: j.GetArray("peers"))
+				{
+					if (!peers.New().FromJson(it, log))
+						peers.PopLast();
+				}
+				
+				return hostName && ip4.Length() > 0;
+			}
+
+			bool FromString(LString &data, LStream *log)
+			{
+				LJson j(data);
+				return FromJson(j, log);
 			}
 		};
 		LHashTbl<ConstStrKey<char,false>, LPeer*> peers;
@@ -674,6 +662,18 @@ struct LCommsBusPriv :
 		ServerPeers(LCommsBusPriv *priv) : d(priv)
 		{
 			log = d->log;
+			
+			d->onEndpointChange = [this]()
+			{
+				// Re-broadcast the new endpoints to peers
+				LOG("ServerPeers.onEndpointChange called.\n");
+				SetDirty();
+			};
+		}
+		
+		~ServerPeers()
+		{
+			d->onEndpointChange = nullptr;
 		}
 
 		IpList GetIps(LArray<LSocket::Interface> &arr)
@@ -714,32 +714,33 @@ struct LCommsBusPriv :
 			SetDirty();
 		}
 
-		LString CreatePingData()
+		LArray<LJson> PeersToJson()
 		{
-			LString::Array lines;			
-
-			lines.New().Printf("ip:%s", GetIps(interfaces).ToString().Get());
-			lines.New().Printf("hostname:%s", LHostName().Get());
+			LArray<LJson> a;
 			for (auto p: peers)
-				lines.New().Printf("peer:%s", p.value->ToString().Get());			
-
-			return LString("\n").Join(lines);
+				a.Add(p.value->ToJson());
+			return a;
 		}
 
-		LString DumpState()
+		LArray<LJson> EndpointsToJson()
 		{
-			LStringPipe p;
-			p.Print("intf: {");
-			for (auto i: interfaces)
-				p.Print("{%s %s} ", i.Name.Get(), LIpToStr(i.Ip4).Get());
-			p.Print("}\npeers: {");
-			for (auto i: peers)
-				p.Print("{%s:%s,%s} ",
-					i.value->direct ? "direct:" : "indirect:",
-					i.key,
-					i.value->ip4.ToString().Get());
-			p.Print("}");
-			return p.NewLStr();
+			LMutex::Auto lck(d, _FL);
+			LArray<LJson> a;
+			for (auto ep: d->endpoints)
+				a.Add(ep.ToJson());
+			return a;
+		}
+
+		LString CreatePingData()
+		{
+			LJson j;
+
+			j.Set("ip", GetIps(interfaces));
+			j.Set("hostname", LHostName());
+			j.Set("peers", PeersToJson());
+			j.Set("endpoints", EndpointsToJson());
+
+			return j.GetJson();
 		}
 
 		uint64_t logTs = 0;
@@ -790,7 +791,7 @@ struct LCommsBusPriv :
 					if (!ourIp)
 					{
 						LPeer p;
-						if (!p.FromString(discoverPkt))
+						if (!p.FromString(discoverPkt, log))
 						{
 							LOG("error: failed to decode pkt\n");
 						}
@@ -919,7 +920,13 @@ struct LCommsBusPriv :
 
 			if (debug)
 			{
-				// LOG("state:\n%s", Indent(DumpState()).Get());
+				if (d->commsState)
+					d->commsState->RunCallback([view=d->commsState, state=CreatePingData()]()
+					{
+						view->Name(state);
+					});
+				else
+					LOG("state:\n%s", Indent(CreatePingData()).Get());
 			}
 		}
 	};
@@ -1082,6 +1089,10 @@ struct LCommsBusPriv :
 
 		// Seeing as a new endpoint turned up... try and send any queued messages
 		ServerTrySend(false);
+		
+		// Send the change event if configured:
+		if (onEndpointChange)
+			onEndpointChange();
 	}
 
 	void Sleep(int ms)
@@ -1248,9 +1259,9 @@ struct LCommsBusPriv :
 	}
 };
 	
-LCommsBus::LCommsBus(LStream *log)
+LCommsBus::LCommsBus(LStream *log, LView *commsState)
 {
-	d = new LCommsBusPriv(log);
+	d = new LCommsBusPriv(log, commsState);
 }
 
 LCommsBus::~LCommsBus()

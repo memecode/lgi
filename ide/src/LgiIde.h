@@ -111,7 +111,8 @@ enum IdeControls
 	IDC_METHOD_SEARCH,
 	IDC_SYMBOL_SEARCH,
 	IDC_PROJECT_TREE,
-	IDC_DETAIL_TABLE
+	IDC_DETAIL_TABLE,
+	ID_COMMS_STATE_LOG
 };
 
 enum IdeMenuCmds
@@ -212,6 +213,7 @@ public:
 		OutputTab,
 		FindTab,
 		NetworkTab,
+		CommsStateTab,
 		DebugTab,
 		
 		ChannelMax,
@@ -270,6 +272,7 @@ public:
 	LStream *GetBuildLog();
 	LStream *GetFindLog();
 	LStream *GetDebugLog();
+	LStream *GetCommsStateLog();
 	void GotoReference(const char *File, int Line, bool CurIp, bool WithHistory, std::function<void(IdeDoc*)> Callback);
 	void FindSymbol(int ResultsSinkHnd, const char *Sym);
 	bool GetSystemIncludePaths(LArray<LString> &Paths);

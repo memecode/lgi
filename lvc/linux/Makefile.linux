@@ -34,11 +34,11 @@ ifeq ($(Build),Debug)
 	Inc =  \
 		-I../../../../../../usr/include/gstreamer-1.0 \
 		-I../include \
+		-I./resources \
 		-I../include/lgi/linux \
 		-I../include/lgi/linux/Gtk \
-		`pkg-config --cflags gtk+-3.0` \
 		-I./src \
-		-I./resources
+		`pkg-config --cflags gtk+-3.0`
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
@@ -52,30 +52,30 @@ else
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
+		-I./src \
 		-I../include/lgi/linux/Gtk \
 		-I../../../../../../usr/include/gstreamer-1.0 \
-		`pkg-config --cflags gtk+-3.0` \
-		-I../include \
-		-I./src \
 		-I../include/lgi/linux \
-		-I./resources
+		`pkg-config --cflags gtk+-3.0` \
+		-I./resources \
+		-I../include
 endif
 
 # Dependencies
 Source =	../src/common/Widgets/ControlTree.cpp \
 			src/PatchViewer.cpp \
+			src/VcCommit.cpp \
 			src/VcFolder.cpp \
-			../src/common/Text/RemoveAnsi.cpp \
 			src/DropDownBtn.cpp \
 			../src/common/Text/XmlTreeUi.cpp \
-			../src/common/Lgi/LgiMain.cpp \
-			src/BrowseUi.cpp \
-			src/Main.cpp \
-			src/VcFile.cpp \
 			../src/common/Text/DeEscape.cpp \
+			../src/common/Lgi/LgiMain.cpp \
+			../src/common/Text/RemoveAnsi.cpp \
+			../src/common/Lgi/StructuredLog.cpp \
 			src/SshConnection.cpp \
-			src/VcCommit.cpp \
-			../src/common/Lgi/StructuredLog.cpp
+			src/VcFile.cpp \
+			src/Main.cpp \
+			src/BrowseUi.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -104,7 +104,13 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 		$(Target) $(Objects) $(Libs)
 	@echo Done.
 
-../$(BuildDir)/liblgi-gtk3$(Tag).so : ../include/lgi/common/App.h \
+../$(BuildDir)/liblgi-gtk3$(Tag).so : ../../deps/build-x64-release/include/jconfig.h \
+	../../deps/build-x64-release/include/jerror.h \
+	../../deps/build-x64-release/include/jmorecfg.h \
+	../../deps/build-x64-release/include/jpeglib.h \
+	../../deps/build-x64-release/include/lunasvg/lunasvg.h \
+	../../deps/build-x64-release/include/png.h \
+	../include/lgi/common/App.h \
 	../include/lgi/common/Array.h \
 	../include/lgi/common/AutoPtr.h \
 	../include/lgi/common/Base64.h \
@@ -392,13 +398,6 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/linux/Lgi/Window.cpp \
 	../src/posix/Roster.cpp \
 	../src/posix/SubProcess.cpp \
-	../../../../codelib/libjpeg-9a/jconfig.h \
-	../../../../codelib/libjpeg-9a/jerror.h \
-	../../../../codelib/libjpeg-9a/jmorecfg.h \
-	../../../../codelib/libjpeg-9a/jpegint.h \
-	../../../../codelib/libjpeg-9a/jpeglib.h \
-	../../../../codelib/libpng/png.h \
-	../../../../codelib/lunasvg/include/lunasvg.h \
 	../../../../../../usr/include/libayatana-appindicator3-0.1/libayatana-appindicator/app-indicator.h
 	export Build=$(Build); \
 	$(MAKE) -C ../ -f ./linux/Makefile.linux
@@ -419,5 +418,5 @@ cleanall :
 VPATH=$(BuildDir) \
 	../src/common/Widgets \
 	../src/common/Lgi \
-	./src \
-	../src/common/Text
+	../src/common/Text \
+	./src

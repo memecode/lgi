@@ -72,69 +72,46 @@ class LJson
 		LString Print(int Depth = 0)
 		{
 			LStringPipe r(512);
-			LString s;
-			LString d("");
-			if (Depth)
-			{
-				int bytes = Depth << 2;
-				d.Length(bytes);
-				memset(d.Get(), ' ', bytes);
-				d.Get()[bytes] = 0;
-			}
+			LString indent = LString(" ") * (Depth << 2);
 
 			if (Name)
 			{
-				s.Printf("%s\"%s\": ", d.Get(), Name.Get());
-				r += s;
+				r.Print("%s\"%s\": ", indent.Get(), Name.Get());
 			}
 			if (Str)
 			{
 				auto q = LString::Escape(Str, Str.Length(), EscapeChars, 'u');
-				s.Printf("\"%s\"", q.Get());
-				r += s;
+				r.Print("\"%s\"", q.Get());
 			}
 
 			if (Obj.Length())
 			{
-				// if (Name)
-				{
-					s.Printf("{\n");
-					Depth++;
-				}
+				r.Write("{\n", 2);
+				Depth++;
 				
 				for (unsigned i=0; i<Obj.Length(); i++)
 				{
 					if (i)
-						s += ",\n";
+						r.Print(",\n%s", indent.Get());
 					Key &c = Obj[i];
-					s += c.Print(Depth);
+					r.Write(c.Print(Depth));
 				}
-				r += s;
 				
-				// if (Name)
-				{
-					s.Printf("\n%s}", d.Get());
-					r += s;
-					Depth--;
-				}
+				r.Print("\n%s}", indent.Get());
+				Depth--;
 			}
 			else if (!Str)
 			{
-				r += "[ ";
+				r.Write("[ ", 2);
 				for (unsigned i=0; i<Array.Length(); i++)
 				{
 					Key &k = Array[i];
 					if (i)
-						r += ", ";
-					/*
-					if (k.Obj.Length())
-						s = LString("{") + k.Print() + "}";
-					else
-					*/
-						s = k.Print();
-					r += s;
+						r.Write(", ", 2);
+
+					r.Write(k.Print(Depth));
 				}
-				r += " ]";
+				r.Write(" ]", 2);
 			}
 
 			return r.NewLStr();
@@ -525,25 +502,25 @@ public:
 		return Set(Addr, s);
 	}
 
-	bool Set(LString Addr, LArray<LString> &Array)
+	bool Set(LString Addr, const LArray<LString> &Array)
 	{
 		Key *k = Deref(Addr, true);
 		if (!k)
 			return false;
-		for (auto &a : Array)
-			k->Array.New().Str = a;
+		for (size_t i=0; i<Array.Length(); i++)
+			k->Array.New().Str = Array.ItemAt(i);
 		return true;
 	}
 
-	bool Set(LString Addr, LArray<LJson> &Array)
+	bool Set(LString Addr, const LArray<LJson> &Array)
 	{
 		Key *k = Deref(Addr, true);
 		if (!k)
 			return false;
-		for (auto &in : Array)
+		for (size_t i=0; i<Array.Length(); i++)
 		{
 			auto &out = k->Array.New();
-			out = in.Root;
+			out = Array.ItemAt(i).Root;
 		}
 		return true;
 	}

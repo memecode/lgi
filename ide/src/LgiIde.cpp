@@ -746,6 +746,7 @@ public:
 	LTabPage *Debug = NULL;
 	LTabPage *Find = NULL;
 	LTabPage *Network = NULL;
+	LTabPage *CommsState = NULL;
 	LTextLog4 *Txt[AppWnd::Channels::ChannelMax] = {};
 	LArray<char> Buf[AppWnd::Channels::ChannelMax];
 	LFont Small;
@@ -789,6 +790,7 @@ public:
 		Output = Append("Output");
 		Find = Append("Find");
 		Network = Append("Network");
+		CommsState = Append("CommsState");
 		Debug = Append("Debug");
 
 		SetFont(&Small);
@@ -796,6 +798,7 @@ public:
 		Output->SetFont(&Small);
 		Find->SetFont(&Small);
 		Network->SetFont(&Small);
+		CommsState->SetFont(&Small);
 		Debug->SetFont(&Small);
 			
 		if (Build)
@@ -806,6 +809,8 @@ public:
 			Find->Append(Txt[AppWnd::FindTab] = new LTextLog4(IDC_FIND_LOG));
 		if (Network)
 			Network->Append(Txt[AppWnd::NetworkTab] = new LTextLog4(IDC_NETWORK_LOG));
+		if (CommsState)
+			CommsState->Append(Txt[AppWnd::CommsStateTab] = new LTextLog4(ID_COMMS_STATE_LOG));
 		if (Debug)
 		{
 			Debug->Append(DebugBox = new LBox);
@@ -1928,7 +1933,20 @@ AppWnd::AppWnd()
 		});
 
 	if (auto log = GetNetworkLog())
-		d->CommsBus.Reset(new LCommsBus(log));
+	{
+		auto commsState = dynamic_cast<LTextLog4*>(GetCommsStateLog());
+		LAssert(commsState);
+		if (d->CommsBus.Reset(new LCommsBus(log, commsState)))
+		{		
+			d->CommsBus->Listen("lgi.ide.test", [this](auto data)
+				{
+					GetNetworkLog()->Print("Got test comms msg...\n");
+					LDateTime dt;
+					dt.SetNow();
+					d->CommsBus->SendMsg(data, dt.Get());
+				});
+		}
+	}
 	else
 		LAssert(!"Log object missing.");
 }
@@ -4966,6 +4984,11 @@ BuildConfig AppWnd::GetBuildMode()
 	}
 
 	return BuildDebug;
+}
+
+LStream *AppWnd::GetCommsStateLog()
+{
+	return d->Output->Txt[AppWnd::CommsStateTab];
 }
 
 LStream *AppWnd::GetNetworkLog()
