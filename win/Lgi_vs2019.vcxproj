@@ -609,6 +609,7 @@
     <ClInclude Include="..\include\lgi\common\ToolTip.h" />
     <ClInclude Include="..\include\lgi\common\TrayIcon.h" />
     <ClInclude Include="..\include\lgi\common\Tree.h" />
+    <ClInclude Include="..\include\lgi\common\UdpTransport.h" />
     <ClInclude Include="..\include\lgi\common\Undo.h" />
     <ClInclude Include="..\include\lgi\common\Unicode.h" />
     <ClInclude Include="..\include\lgi\common\UnicodeString.h" />

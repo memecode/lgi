@@ -373,24 +373,24 @@ public:
 
 class LUdpListener : public LSocket
 {
-	LStream *Log;
+protected:
+	LStream *Log = nullptr;
 	LString Context;
+	uint16_t Port = 0;
 
 public:
 	bool Status = false;
 
-	/*
-	
-	If this isn't working on Linux, most likely it's a firewall issue.
-	
+	/*	
+	If this isn't working on Linux, most likely it's a firewall issue.	
 	For instance if you are running 'ufw' as your firewall you could allow packets through with:
 	
-		sudo ufw allow ${port}/udp
-	
+		sudo ufw allow ${port}/udp	
 	*/
 	LUdpListener(LArray<uint32_t> interface_ips, uint32_t mc_ip, uint16_t port, LStream *log = NULL) : Log(log)
 	{
 		SetUdp(true);
+		Port = port;
 
 		struct sockaddr_in addr;
 		ZeroObj(addr);
@@ -409,9 +409,9 @@ public:
 		if (!Status)
 		{
 			#ifdef WIN32
-			int err = WSAGetLastError();
+				auto err = WSAGetLastError();
 			#else
-			int err = errno;
+				auto err = errno;
 			#endif
 			OnError(err, LErrorCodeToString(err));
 
@@ -456,7 +456,6 @@ public:
 
 class LUdpBroadcast : public LSocket
 {
-	// LArray<Interface> Intf;
 	uint32_t SelectIf;
 
 public:

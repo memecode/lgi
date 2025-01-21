@@ -59,7 +59,7 @@ bool OsAppArguments::Get(const char *Name, const char **Val)
 	if (!Name)
 		return false;
 		
-	for (int i=0; i<Args; i++)
+	for (int i=1; i<Args; i++)
 	{
 		auto a = Arg[i];
 		if (a[0] == '-' || a[0] == '/')

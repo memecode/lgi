@@ -3,12 +3,12 @@
 #include "lgi/common/CommsBus.h"
 #include "lgi/common/Net.h"
 #include "lgi/common/Json.h"
+#include "lgi/common/UdpTransport.h"
 
 #define COMMBUS_MULTICAST	"230.6.6.10"
 #define DEFAULT_COMMS_PORT	45454
 #define RETRY_SERVER		-2
 #define RESEND_TIMEOUT		1000
-#define SECONDS(s)			((s)*1000)
 
 #if 0
 #define LOG(...)			
@@ -252,7 +252,7 @@ struct Connection
 				}
 				else
 				{
-					if (bytes > readBuf.Length())
+					if (bytes > (ssize_t) readBuf.Length())
 					{
 						ssize_t blk = 1 << 20; // 1 MiB
 						ssize_t newSz = bytes;
@@ -602,7 +602,7 @@ struct LCommsBusPriv :
 		// Server discovery info
 		uint32_t broadcastIp = LIpToInt(COMMBUS_MULTICAST);
 		uint64_t broadcastTime = 0;
-		LAutoPtr<LUdpListener> listener;
+		LAutoPtr<LUdpTransport> listener;
 
 		// Peer info
 		struct LPeer
@@ -693,7 +693,7 @@ struct LCommsBusPriv :
 			}
 
 			// Create a UDP listener on current interfaces...
-			listener.Reset(new LUdpListener(interface_ips, broadcastIp, DEFAULT_COMMS_PORT, d->log));
+			listener.Reset(new LUdpTransport(interface_ips, broadcastIp, DEFAULT_COMMS_PORT, d->log));
 			SetDirty();
 		}
 
@@ -778,6 +778,9 @@ struct LCommsBusPriv :
 			if (listener)
 			{
 				// Listen for packets...
+				listener->TimeSlice();
+
+				/*
 				LString discoverPkt;
 				uint32_t discoverIp = 0;
 				uint16_t discoverPort = 0;
@@ -826,16 +829,6 @@ struct LCommsBusPriv :
 											break;
 										}
 									}
-
-									/*
-									if (!peer->effectiveIp)
-									{
-										LOG("error: no effectiveIp for %s in %s, for ip %s\n",
-											peer->hostName.Get(),
-											peer->ip4.ToString().Get(),
-											LIpToStr(discoverIp).Get());
-									}
-									*/
 								}
 
 								auto host = LHostName();
@@ -859,6 +852,7 @@ struct LCommsBusPriv :
 						}
 					}
 				}
+				*/
 			}
 
 			// Check for peers that we haven't seen in a while

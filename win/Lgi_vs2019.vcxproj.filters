@@ -1261,6 +1261,9 @@
     <ClInclude Include="..\include\lgi\common\Roster.h">
       <Filter>Source Files\Core\Process</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\lgi\common\UdpTransport.h">
+      <Filter>Source Files\Network\CommsBus</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\src\win\Lgi.natvis">
