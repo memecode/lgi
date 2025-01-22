@@ -71,63 +71,34 @@ endif
 
 # Dependencies
 Source =	src/common/General/ExeCheck.cpp \
-			src/common/Gdc2/Font/FontType.cpp \
-			src/common/Gdc2/Filters/Filter.cpp \
-			src/common/Gdc2/16Bit.cpp \
-			src/common/Gdc2/24Bit.cpp \
-			src/common/Gdc2/32Bit.cpp \
-			src/common/Gdc2/8Bit.cpp \
-			src/common/General/Containers.cpp \
-			src/common/General/Properties.cpp \
+			src/posix/SubProcess.cpp \
+			src/common/Resource/LgiRes.cpp \
+			src/common/Resource/Res.cpp \
 			src/common/Lgi/DragAndDropCommon.cpp \
 			src/linux/General/File.cpp \
 			src/common/General/TimeZone.cpp \
 			src/linux/Lgi/DragAndDrop.cpp \
-			src/common/Gdc2/Alpha.cpp \
-			src/common/Gdc2/Rect.cpp \
-			src/common/Gdc2/Filters/Gif.cpp \
-			src/common/Gdc2/Filters/Jpeg.cpp \
-			src/common/Gdc2/Filters/Lzw.cpp \
-			src/common/Gdc2/Filters/Png.cpp \
-			src/common/Gdc2/Filters/Svg.cpp \
-			src/linux/Gtk/MemDC.cpp \
-			src/common/Lgi/ClipBoardCommon.cpp \
-			src/linux/Gtk/PrintDC.cpp \
-			src/linux/Gtk/ScreenDC.cpp \
-			src/linux/Lgi/Printer.cpp \
-			src/common/Gdc2/Surface.cpp \
-			src/linux/Lgi/ClipBoard.cpp \
-			src/common/Lgi/DataDlg.cpp \
-			src/common/Hash/md5/md5.c \
-			src/common/General/Password.cpp \
-			src/common/Hash/sha1/sha1.c \
-			src/common/Lgi/Mru.cpp \
-			src/common/Net/Base64.cpp \
-			src/common/Lgi/OptionsFile.cpp \
-			src/common/Lgi/Rand.cpp \
-			src/common/Text/String.cpp \
-			src/common/Text/Token.cpp \
 			src/common/Text/TextConvert.cpp \
+			src/common/Widgets/ProgressDlg.cpp \
+			src/common/General/Containers.cpp \
+			src/common/General/Properties.cpp \
 			src/common/General/FileCommon.cpp \
 			src/linux/Gtk/LgiWidget.cpp \
-			src/linux/Lgi/Window.cpp \
-			src/linux/Lgi/General.cpp \
-			src/linux/General/ShowFileProp_Linux.cpp \
-			src/linux/Lgi/App.cpp \
-			src/common/General/DateTime.cpp \
-			src/linux/Lgi/View.cpp \
 			src/common/Lgi/AppCommon.cpp \
 			src/common/Lgi/ViewCommon.cpp \
 			src/common/Lgi/Library.cpp \
 			src/common/Lgi/WindowCommon.cpp \
 			src/linux/General/Mem.cpp \
 			src/linux/Lgi/Menu.cpp \
-			src/common/Gdc2/Tools/ColourReduce.cpp \
-			src/common/Lgi/MenuCommon.cpp \
 			src/posix/Roster.cpp \
-			src/posix/SubProcess.cpp \
-			src/common/Resource/LgiRes.cpp \
-			src/common/Resource/Res.cpp \
+			src/linux/Lgi/View.cpp \
+			src/linux/Lgi/General.cpp \
+			src/linux/General/ShowFileProp_Linux.cpp \
+			src/linux/Lgi/App.cpp \
+			src/common/General/DateTime.cpp \
+			src/linux/Lgi/Window.cpp \
+			src/common/Lgi/MenuCommon.cpp \
+			src/common/Gdc2/Tools/ColourReduce.cpp \
 			src/common/Skins/Gel/Gel.cpp \
 			src/common/Gdc2/Path/Path.cpp \
 			src/common/Lgi/MemStream.cpp \
@@ -159,7 +130,36 @@ Source =	src/common/General/ExeCheck.cpp \
 			src/common/Gdc2/Font/StringLayout.cpp \
 			src/common/Gdc2/Font/Charset.cpp \
 			src/common/Gdc2/Font/TypeFace.cpp \
-			src/common/Widgets/ProgressDlg.cpp \
+			src/common/Gdc2/Font/FontType.cpp \
+			src/common/Gdc2/Filters/Filter.cpp \
+			src/common/Gdc2/16Bit.cpp \
+			src/common/Gdc2/24Bit.cpp \
+			src/common/Gdc2/32Bit.cpp \
+			src/common/Gdc2/8Bit.cpp \
+			src/common/Gdc2/Alpha.cpp \
+			src/common/Gdc2/Rect.cpp \
+			src/common/Gdc2/Filters/Gif.cpp \
+			src/common/Gdc2/Filters/Jpeg.cpp \
+			src/common/Gdc2/Filters/Lzw.cpp \
+			src/common/Gdc2/Filters/Png.cpp \
+			src/common/Gdc2/Filters/Svg.cpp \
+			src/linux/Gtk/MemDC.cpp \
+			src/common/Lgi/ClipBoardCommon.cpp \
+			src/linux/Gtk/PrintDC.cpp \
+			src/linux/Gtk/ScreenDC.cpp \
+			src/linux/Lgi/Printer.cpp \
+			src/common/Gdc2/Surface.cpp \
+			src/linux/Lgi/ClipBoard.cpp \
+			src/common/Lgi/DataDlg.cpp \
+			src/common/Hash/md5/md5.c \
+			src/common/General/Password.cpp \
+			src/common/Hash/sha1/sha1.c \
+			src/common/Lgi/Mru.cpp \
+			src/common/Net/Base64.cpp \
+			src/common/Lgi/OptionsFile.cpp \
+			src/common/Lgi/Rand.cpp \
+			src/common/Text/String.cpp \
+			src/common/Text/Token.cpp \
 			src/common/Text/Unicode.cpp \
 			src/common/Text/Utf8.cpp \
 			src/common/Text/XmlTree.cpp \
@@ -234,21 +234,21 @@ clean :
 	@echo Cleaned $(BuildDir)
 
 VPATH=$(BuildDir) \
-	./src/common/Net \
-	./src/common/Gdc2/Tools \
 	./src/common/General \
 	./src/linux/Lgi \
 	./src/linux/General \
+	./src/common/Gdc2/Tools \
+	./src/common/Lgi \
+	./src/linux/Gtk \
+	./src/posix \
+	./src/common/Resource \
+	./src/common/Hash/sha1 \
+	./src/common/Gdc2/Path \
 	./src/common/Gdc2/Font \
+	./src/common/Skins/Gel \
+	./src/common/Gdc2 \
+	./src/common/Net \
 	./src/common/Gdc2/Filters \
 	./src/common/Widgets \
 	./src/common/Hash/md5 \
-	./src/common/Text \
-	./src/linux/Gtk \
-	./src/common/Gdc2/Path \
-	./src/common/Lgi \
-	./src/common/Skins/Gel \
-	./src/common/Resource \
-	./src/posix \
-	./src/common/Gdc2 \
-	./src/common/Hash/sha1
+	./src/common/Text

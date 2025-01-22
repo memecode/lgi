@@ -434,6 +434,7 @@
 			<Node Name="CommsBus" Type="1" Platforms="15" Id="1">
 				<Node File="./src/common/Net/CommsBus.cpp" Type="2" Platforms="15" />
 				<Node File="./include/lgi/common/CommsBus.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/UdpTransport.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Headers" Type="1" Platforms="15" Open="0" Id="73">
 				<Node Name="Haiku" Type="1" Platforms="15" Id="1">
@@ -508,7 +509,7 @@
 				<All>0</All>
 			</DebugAdmin>
 			<Executable>
-				<Haiku />
+				<Linux />
 			</Executable>
 			<CCrossCompiler />
 			<CppCrossCompiler />
@@ -597,7 +598,6 @@ iconv</Release>
 					<Debug>lgi-gtk3</Debug>
 					<Release>lgi-gtk3</Release>
 				</Linux>
-				<Haiku />
 			</TargetName>
 			<TargetType>
 				<All>DynamicLibrary</All>
@@ -615,6 +615,7 @@ _GNU_SOURCE</Debug>
 					<Release>POSIX
 _GNU_SOURCE</Release>
 				</Haiku>
+				<Linux />
 			</Defines>
 			<Options>
 				<Linux>
@@ -622,21 +623,20 @@ _GNU_SOURCE</Release>
 					<Release>-Wno-format-truncation</Release>
 				</Linux>
 				<All />
-				<Haiku />
 			</Options>
 			<LibraryPaths>
 				<All>
 					<Debug>../deps/build-x64-debug/lib</Debug>
 					<Release>../deps/build-x64-release/lib</Release>
 				</All>
-				<Haiku />
+				<Linux />
 			</LibraryPaths>
 			<ApplicationIcon />
 		</Build>
 		<Advanced>
 			<OtherMakefileRules />
 			<PostBuildCommands>
-				<Haiku />
+				<Linux />
 			</PostBuildCommands>
 		</Advanced>
 		<Debug>

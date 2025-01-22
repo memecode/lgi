@@ -614,16 +614,19 @@ struct LCommsBusPriv :
 			LArray<LPeer> peers;
 			bool direct = false;
 
-			LJson ToJson()
+			LJson ToJson(bool deep = true)
 			{
 				LJson j;
 				
 				j.Set("hostname", hostName);
 				j.Set("ip", ip4);
-				LArray<LJson> peerArr;
-				for (auto &p: peers)
-					peerArr.Add(p.ToJson());
-				j.Set("peers", peerArr);
+				if (deep)
+				{
+					LArray<LJson> peerArr;
+					for (auto &p: peers)
+						peerArr.Add(p.ToJson(false));
+					j.Set("peers", peerArr);
+				}
 				j.Set("direct", (int64_t)direct);				
 				return j;
 			}

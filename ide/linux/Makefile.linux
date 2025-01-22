@@ -33,11 +33,11 @@ ifeq ($(Build),Debug)
 	Inc =  \
 		-I../include/lgi/linux/Gtk \
 		-I./resources \
-		-I../include \
 		-I../private/common \
 		-I../include/lgi/linux \
 		`pkg-config --cflags gtk+-3.0` \
-		-I./src
+		-I./src \
+		-I../include
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
@@ -50,29 +50,24 @@ else
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		`pkg-config --cflags gtk+-3.0` \
 		-I../include/lgi/linux \
-		-I./resources \
+		-I./src \
 		-I../include/lgi/linux/Gtk \
 		-I../private/common \
 		-I../include \
-		-I./src
+		-I./resources \
+		`pkg-config --cflags gtk+-3.0`
 endif
 
 # Dependencies
-Source =	src/LgiIde.cpp \
-			../src/common/Text/DocView.cpp \
-			../src/common/Text/TextView4.cpp \
-			src/Debugger.cpp \
-			src/IdeDoc.cpp \
-			src/History.cpp \
+Source =	../src/common/Text/DocView.cpp \
 			../src/common/Net/OpenSSLSocket.cpp \
+			../src/common/Net/Http.cpp \
+			../src/common/Text/TextView4.cpp \
+			../src/common/Text/Html.cpp \
+			../src/common/Lgi/Mdi.cpp \
 			../src/common/Text/HtmlCommon.cpp \
 			../src/common/Lgi/LgiMain.cpp \
-			../src/common/Text/Html.cpp \
-			src/DebugContext.cpp \
-			../src/common/Lgi/Mdi.cpp \
-			../src/common/Net/Http.cpp \
 			../src/common/Text/HtmlParser.cpp \
 			../src/common/Text/Homoglyphs/Homoglyphs.cpp \
 			../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
@@ -100,8 +95,13 @@ Source =	src/LgiIde.cpp \
 			src/IdeCommon.cpp \
 			src/MemDumpViewer.cpp \
 			src/SpaceTabConv.cpp \
+			src/History.cpp \
 			src/DocEdit.cpp \
-			src/LgiUtils.cpp
+			src/LgiIde.cpp \
+			src/LgiUtils.cpp \
+			src/IdeDoc.cpp \
+			src/Debugger.cpp \
+			src/DebugContext.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -130,12 +130,12 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 		$(Target) $(Objects) $(Libs)
 	@echo Done.
 
-../$(BuildDir)/liblgi-gtk3$(Tag).so : ../../deps/build-x64-debug/include/jconfig.h \
-	../../deps/build-x64-debug/include/jerror.h \
-	../../deps/build-x64-debug/include/jmorecfg.h \
-	../../deps/build-x64-debug/include/jpeglib.h \
-	../../deps/build-x64-debug/include/lunasvg/lunasvg.h \
-	../../deps/build-x64-debug/include/png.h \
+../$(BuildDir)/liblgi-gtk3$(Tag).so : ../../deps/build-x64-release/include/jconfig.h \
+	../../deps/build-x64-release/include/jerror.h \
+	../../deps/build-x64-release/include/jmorecfg.h \
+	../../deps/build-x64-release/include/jpeglib.h \
+	../../deps/build-x64-release/include/lunasvg/lunasvg.h \
+	../../deps/build-x64-release/include/png.h \
 	../include/lgi/common/App.h \
 	../include/lgi/common/Array.h \
 	../include/lgi/common/AutoPtr.h \
@@ -272,6 +272,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/TrayIcon.h \
 	../include/lgi/common/Tree.h \
 	../include/lgi/common/TypeToString.h \
+	../include/lgi/common/UdpTransport.h \
 	../include/lgi/common/Undo.h \
 	../include/lgi/common/Unicode.h \
 	../include/lgi/common/UnicodeString.h \
