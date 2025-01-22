@@ -141,7 +141,7 @@ class LUdpTransport : public LUdpListener
 		{ \
 			if (!Log) return; \
 			va_list arg; va_start(arg, fmt); \
-			LStreamPrint(Log, 0, fmt, arg); \
+			LStreamPrintf(Log, 0, fmt, arg); \
 			va_end(arg); \
 		}
 	LOGGER(ERR)
@@ -402,6 +402,7 @@ public:
 				loop = false;
 			};
 
+		t.INFO("Waiting for message...\n");
 		while (loop)
 		{
 			t.TimeSlice();
@@ -417,13 +418,9 @@ public:
 		auto startTs = LCurrentTime();
 		auto msg = UnitTestMsg();
 		auto sum = CheckSum((uint16_t*)msg.Get(), msg.Length());
+		uint16_t stream_id = 0;
 
 		LUdpTransport t(GetInterfaceIPs(), LIpToInt(UNITTEST_MULTICAST), UNITTEST_PORT, log);
-
-		auto stream_id = t.Send(destIp, msg);
-		if (stream_id < 0)
-			return false;
-		
 		t.onSend = [&](auto id, bool ok)
 			{
 				status = id == stream_id && ok;
@@ -434,6 +431,12 @@ public:
 				loop = false;
 			};
 
+		t.INFO("Sending message...\n");
+		stream_id = t.Send(destIp, msg);
+		if (stream_id < 0)
+			return false;
+		
+		t.INFO("Waiting for response...\n");
 		while (loop)
 		{
 			t.TimeSlice();
