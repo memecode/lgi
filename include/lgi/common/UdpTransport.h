@@ -136,21 +136,22 @@ class LUdpTransport : public LUdpListener
 		return s;
 	}
 
-	#define LOGGER(name) \
+	#define LOGGER(name, enable) \
 		void name(const char *fmt, ...) \
 		{ \
-			if (!Log) return; \
+			if (!Log || !enable) return; \
 			va_list arg; va_start(arg, fmt); \
 			LStreamPrintf(Log, 0, fmt, arg); \
 			va_end(arg); \
 		}
-	LOGGER(ERR)
-	LOGGER(INFO)
-	LOGGER(DEBUG)
+	LOGGER(ERR, true)
+	LOGGER(INFO, true)
+	LOGGER(DEBUG, false)
 
 public:
 	#define SECONDS(sec) ((sec) * 1000)
 	constexpr static int TIMEOUT_SEND = SECONDS(5);
+	constexpr static int INVALID_STREAM = -1;
 
 	/// callback for when a packet is received
 	std::function<void(LString)> onReceive;
@@ -190,112 +191,120 @@ public:
 			}
 
 			LAssert(total_parts == s->parts.Length());
-			return true;
+			return s->stream_id;
 		}
 		
-		return false;
+		return INVALID_STREAM;
 	}
 
 	bool TimeSlice()
 	{
-		if (!IsReadable(10))
-			return false;
-
-		auto startTs = LCurrentTime();
-
-		// Do reading:
-		char data[MAX_UDP_SIZE];
-		uint32_t ip = 0;
-		uint16_t port = 0;
-		int rd = ReadUdp(data, MAX_UDP_SIZE, 0, &ip, &port);
-		if (rd > 0)
+		if (IsReadable(10))
 		{
-			Hdr *hdr = (Hdr*)data;
-			if (auto s = GetStream(ip, hdr->stream_id))
+			// Do reading:
+			char data[MAX_UDP_SIZE];
+			uint32_t ip = 0;
+			uint16_t port = 0;
+			int rd = ReadUdp(data, MAX_UDP_SIZE, 0, &ip, &port);
+			if (rd > 0)
 			{
-				switch (hdr->cmd)
+				// INFO("%s:%i got %i bytes..\n", _FL, rd);
+				Hdr *hdr = (Hdr*)data;
+				if (auto s = GetStream(ip, hdr->stream_id))
 				{
-					case TData:
+					switch (hdr->cmd)
 					{
-						Part &part = s->parts[hdr->index];
-						LAssert(rd <= sizeof(part.data));
-						part.state = TReceived;
-						part.size = rd;
-						memcpy(part.data, data, rd);
-						DEBUG("%s:%i - received %x:%i.\n", _FL, s->stream_id, hdr->index);
-
-						if (++s->count == hdr->total)
+						case TData:
 						{
-							// Fully received?
-							if (s->Complete())
-							{
-								// Send ack
-								Part ack;
-								ack.state = TUnsent;
-								ack.size = HEADER_SZ;
-								ack.get()->cmd = TAck;
-								ack.get()->index = hdr->total;
-								ack.get()->total = hdr->total;
-								ack.get()->stream_id = hdr->stream_id;
-								if (WriteUdp(ack.data, ack.size, 0, ip, port))
-								{
-									DEBUG("%s:%i - acked stream %x.\n", _FL, s->stream_id);
-									ack.size = TSent;
-								}
+							Part &part = s->parts[hdr->index];
+							LAssert(rd <= sizeof(part.data));
+							part.state = TReceived;
+							part.size = rd;
+							memcpy(part.data, data, rd);
+							DEBUG("%s:%i - received %x:%i.\n", _FL, s->stream_id, hdr->index);
 
-								// Call the handler with the message
-								if (auto msg = s->Assemble())
-								{
-									if (onReceive)
-										onReceive(msg);
-									else
-										ERR("%s:%i - no receive handler\n", _FL);
-								}
-								else ERR("%s:%i - assemble failed\n", _FL);
-							}
-							else ERR("%s:%i - not complete?", _FL);
-
-							map.Delete(key(ip, hdr->stream_id));
-							delete s;
-						}
-						break;
-					}
-					case TAck:
-					{
-						// Look through the written streams for matching one
-						bool found = false;
-						for (auto p: map)
-						{
-							Stream *s = p.value;
-							if (s->writing &&
-								s->stream_id == hdr->stream_id)
+							if (++s->count == hdr->total)
 							{
-								found = true;
+								// Fully received?
 								if (s->Complete())
 								{
-									DEBUG("%s:%i - stream %x acked.\n", _FL, s->stream_id);
-									if (onSend)
-										onSend(s->stream_id, true);
-								}
-								else ERR("%s:%i - not complete?\n", _FL);
+									// Send ack
+									Part ack;
+									ack.state = TUnsent;
+									ack.size = HEADER_SZ;
+									ack.get()->cmd = TAck;
+									ack.get()->index = hdr->total;
+									ack.get()->total = hdr->total;
+									ack.get()->stream_id = hdr->stream_id;
+									if (WriteUdp(ack.data, ack.size, 0, ip, port))
+									{
+										DEBUG("%s:%i - acked stream %x.\n", _FL, s->stream_id);
+										ack.size = TSent;
+									}
 
-								auto k = key(s->ip, s->stream_id);
-								LAssert(map.Find(k) == s);
-								map.Delete(k);
+									// Call the handler with the message
+									if (auto msg = s->Assemble())
+									{
+										if (onReceive)
+											onReceive(msg);
+										else
+											ERR("%s:%i - no receive handler\n", _FL);
+									}
+									else ERR("%s:%i - assemble failed\n", _FL);
+								}
+								else ERR("%s:%i - not complete?", _FL);
+
+								map.Delete(key(ip, hdr->stream_id));
 								delete s;
 							}
+							break;
 						}
-						if (!found)
+						case TAck:
 						{
-							ERR("%s:%i - failed to find acked stream: %x\n", _FL, hdr->stream_id);
+							// Look through the written streams for matching one
+							bool found = false;
+							LArray<uint64_t> delStreams;
+							for (auto p: map)
+							{
+								Stream *s = p.value;
+								if (s->writing &&
+									s->stream_id == hdr->stream_id)
+								{
+									found = true;
+									if (s->Complete())
+									{
+										DEBUG("%s:%i - stream %x acked.\n", _FL, s->stream_id);
+										if (onSend)
+											onSend(s->stream_id, true);
+									}
+									else ERR("%s:%i - not complete?\n", _FL);
+
+									auto k = key(s->ip, s->stream_id);
+									delStreams.Add(k);
+								}
+							}
+							if (!found)
+							{
+								ERR("%s:%i - failed to find acked stream: %x\n", _FL, hdr->stream_id);
+							}
+							for (auto key: delStreams)
+							{
+								if (auto s = map.Find(key))
+								{
+									map.Delete(key);
+									delete s;
+								}
+								else ERR("%s:%i - stream doesn't exist?\n", _FL);
+							}
+							break;
 						}
-						break;
 					}
 				}
 			}
 		}
 
 		// Do writing:
+		auto startTs = LCurrentTime();
 		for (auto p: map)
 		{
 			Stream *s = p.value;
@@ -342,7 +351,7 @@ public:
 		return true;
 	}
 
-	static uint32_t CheckSum(uint16_t *addr, size_t count)
+	static uint16_t CheckSum(uint16_t *addr, size_t count)
 	{
 		uint32_t sum = 0;
 		while (count > 1)
@@ -357,7 +366,12 @@ public:
 		while (sum>>16)
 			sum = (sum & 0xffff) + (sum >> 16);
 		//one's complement
-		return ((unsigned short)~sum);
+		return ((uint16_t)~sum);
+	}
+
+	static uint16_t CheckSum(LString &s)
+	{
+		return CheckSum((uint16_t*)s.Get(), s.Length());
 	}
 
 	// Unit testing:
@@ -390,19 +404,23 @@ public:
 		auto startTs = LCurrentTime();
 		auto msg = UnitTestMsg();
 		auto sum = CheckSum((uint16_t*)msg.Get(), msg.Length());
+		auto ips = GetInterfaceIPs();
 
-		LUdpTransport t(GetInterfaceIPs(), LIpToInt(UNITTEST_MULTICAST), UNITTEST_PORT, log);
+		LUdpTransport t(ips, LIpToInt(UNITTEST_MULTICAST), UNITTEST_PORT, log);
 		t.onReceive = [&](auto receivedMsg)
 			{
 				status = receivedMsg == msg;
 				if (status)
-					t.INFO("%s:%i - received msg ok.\n", _FL);
+					t.INFO("%s:%i - received msg ok: chk=%4.4x\n", _FL, CheckSum(receivedMsg));
 				else
 					t.ERR("%s:%i - received incorrect msg!\n", _FL);
 				loop = false;
 			};
 
-		t.INFO("Waiting for message...\n");
+		LString::Array strIp;
+		for (auto ip: ips)
+			strIp.New() = LIpToStr(ip);
+		t.INFO("Waiting for message on {%s}...\n", LString(", ").Join(strIp).Get());
 		while (loop)
 		{
 			t.TimeSlice();
@@ -417,7 +435,7 @@ public:
 		bool loop = true, status = false;
 		auto startTs = LCurrentTime();
 		auto msg = UnitTestMsg();
-		auto sum = CheckSum((uint16_t*)msg.Get(), msg.Length());
+		auto sum = CheckSum(msg);
 		uint16_t stream_id = 0;
 
 		LUdpTransport t(GetInterfaceIPs(), LIpToInt(UNITTEST_MULTICAST), UNITTEST_PORT, log);
@@ -425,9 +443,9 @@ public:
 			{
 				status = id == stream_id && ok;
 				if (status)
-					t.INFO("%s:%i - wrote msg ok.\n", _FL);
+					t.INFO("%s:%i - wrote msg ok, chk=%4.4x.\n", _FL, sum);
 				else
-					t.ERR("%s:%i - failed to write msg.\n", _FL);
+					t.ERR("%s:%i - failed to write msg: id=%x stream_id=%x, ok=%i\n", _FL, id, stream_id, ok);
 				loop = false;
 			};
 

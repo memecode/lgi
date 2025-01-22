@@ -26,11 +26,20 @@ int main(int args, const char **arg)
     
     const char *val = nullptr;
     if (appArgs.Get("read"))
+    {
         return !Test(0, false);
-    else if (appArgs.Get("write") && val)
-        return !Test(LIpToInt(val), true);
+    }
+    else if (appArgs.Get("write", &val))
+    {
+        if (val)
+            return !Test(LIpToInt(val), true);
+        
+        printf("Error: missing IP value.\n");
+    }
     else
-        printf("Usage: %s [-read][-write $ipAddr]\n", arg[0]);        
+    {
+        printf("Usage: %s [-read][-write $ipAddr]\n", arg[0]);
+    }
 
     return 0;
 }
