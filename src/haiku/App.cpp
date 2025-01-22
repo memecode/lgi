@@ -56,15 +56,27 @@ bool OsAppArguments::Get(const char *Name, const char **Val)
 	if (!Name)
 		return false;
 		
-	for (int i=0; i<Args; i++)
+	for (int i=1; i<Args; i++)
 	{
 		auto a = Arg[i];
 		if (a[0] == '-' || a[0] == '/')
 		{
 			if (Stricmp(a+1, Name) == 0)
 			{
-				if (i < Args - 1 && Val)
-					*Val = Arg[i + 1];
+				// printf("Info: got arg '%s'..\n", a);
+				if (Val)
+				{
+					if ((i + i) < Args)
+					{
+						*Val = Arg[i + 1];
+						// printf("Info: returning val='%s'\n", *Val);
+					}
+					else
+					{
+						printf("%s:%i error: no arg for '%s'\n", _FL, a);
+						return false;
+					}
+				}				
 				return true;
 			}
 		}
