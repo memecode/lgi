@@ -687,6 +687,75 @@ struct LCommsBusPriv :
 			return ips;
 		}
 
+		void OnPeerMsg(uint32_t ip, LString &msg)
+		{
+			// Check if it's from ourselves...
+			for (auto &i: interfaces)
+				if (i.Ip4 == ip)
+					return;
+				
+			// Parse the message:
+			LPeer p;
+			if (!p.FromString(msg, log))
+			{
+				LOG("error: failed to decode pkt\n");
+				return;
+			}
+
+			auto peer = peers.Find(p.hostName);
+			if (!peer)
+			{
+				OnNewPeer(peer = new LPeer(p));
+			}
+			else
+			{
+				// update the existing peer
+				peer->ip4 = p.ip4;
+				peer->peers = p.peers;
+			}
+			if (!peer)
+			{
+				LOG("error: no peer ptr.\n");
+				return;
+			}
+
+			peer->direct = true;
+			peer->seen = LCurrentTime();
+
+			// Figure out the effective ip address
+			if (!peer->effectiveIp)
+			{
+				uint32_t mask = 0xffffff00;
+				for (auto peerIp: peer->ip4)
+				{
+					if ( (peerIp & mask) == (ip & mask) )
+					{
+						peer->effectiveIp = peerIp;
+						LOG("effectiveIp for %s is %s\n", peer->hostName.Get(), LIpToStr(peer->effectiveIp).Get());
+						break;
+					}
+				}
+			}
+
+			auto host = LHostName();
+			for (auto &other: p.peers)
+			{
+				if (other.hostName.Equals(host))
+					continue; // don't care about this node
+
+				if (!peers.Find(other.hostName))
+				{
+					if (auto *n = new LPeer)
+					{
+						n->ip4 = other.ip4;
+						n->hostName = other.hostName;
+						peers.Add(other.hostName, n);
+						SetDirty();
+					}
+				}
+			}
+		}
+
 		void OnInterfacesChange()
 		{
 			auto interface_ips = GetIps(interfaces);
@@ -696,7 +765,11 @@ struct LCommsBusPriv :
 			}
 
 			// Create a UDP listener on current interfaces...
-			listener.Reset(new LUdpTransport(interface_ips, broadcastIp, DEFAULT_COMMS_PORT, d->log));
+			if (listener.Reset(new LUdpTransport(interface_ips, broadcastIp, DEFAULT_COMMS_PORT, d->log)))
+			{
+				listener->onReceive = [this](auto ip, auto msg) { OnPeerMsg(ip, msg); };
+			}
+			
 			SetDirty();
 		}
 
@@ -782,80 +855,6 @@ struct LCommsBusPriv :
 			{
 				// Listen for packets...
 				listener->TimeSlice();
-
-				/*
-				LString discoverPkt;
-				uint32_t discoverIp = 0;
-				uint16_t discoverPort = 0;
-				if (listener->ReadPacket(discoverPkt, discoverIp, discoverPort))
-				{
-					bool ourIp = false;
-					for (auto &i: interfaces)
-						if (i.Ip4 == discoverIp)
-							ourIp = true;
-					
-					if (!ourIp)
-					{
-						LPeer p;
-						if (!p.FromString(discoverPkt, log))
-						{
-							LOG("error: failed to decode pkt\n");
-						}
-						else
-						{
-							auto peer = peers.Find(p.hostName);
-							if (!peer)
-							{
-								OnNewPeer(peer = new LPeer(p));
-							}
-							else
-							{
-								// update the existing peer
-								peer->ip4 = p.ip4;
-								peer->peers = p.peers;
-							}
-							if (peer)
-							{
-								peer->direct = true;
-								peer->seen = LCurrentTime();
-
-								// Figure out the effective ip address
-								if (!peer->effectiveIp)
-								{
-									uint32_t mask = 0xffffff00;
-									for (auto ip: peer->ip4)
-									{
-										if ( (ip & mask) == (discoverIp & mask) )
-										{
-											peer->effectiveIp = ip;
-											LOG("effectiveIp for %s is %s\n", peer->hostName.Get(), LIpToStr(peer->effectiveIp).Get());
-											break;
-										}
-									}
-								}
-
-								auto host = LHostName();
-								for (auto &other: p.peers)
-								{
-									if (other.hostName.Equals(host))
-										continue; // don't care about this node
-
-									if (!peers.Find(other.hostName))
-									{
-										if (auto *n = new LPeer)
-										{
-											n->ip4 = other.ip4;
-											n->hostName = other.hostName;
-											peers.Add(other.hostName, n);
-											SetDirty();
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-				*/
 			}
 
 			// Check for peers that we haven't seen in a while

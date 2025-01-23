@@ -374,9 +374,12 @@ public:
 class LUdpListener : public LSocket
 {
 protected:
-	LStream *Log = nullptr;
-	LString Context;
+	LArray<uint32_t> IntfIps;
+	uint32_t MulticastIp = 0;
 	uint16_t Port = 0;
+	LStream *Log = nullptr;
+
+	LString Context;
 
 public:
 	bool Status = false;
@@ -387,10 +390,13 @@ public:
 	
 		sudo ufw allow ${port}/udp	
 	*/
-	LUdpListener(LArray<uint32_t> interface_ips, uint32_t mc_ip, uint16_t port, LStream *log = NULL) : Log(log)
+	LUdpListener(LArray<uint32_t> interface_ips, uint32_t mc_ip, uint16_t port, LStream *log = NULL) :
+		IntfIps(interface_ips),
+		MulticastIp(mc_ip),
+		Port(port),
+		Log(log)
 	{
 		SetUdp(true);
-		Port = port;
 
 		struct sockaddr_in addr;
 		ZeroObj(addr);

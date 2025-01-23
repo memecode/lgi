@@ -38,6 +38,7 @@ class LUdpTransport : public LUdpListener
 	struct Stream
 	{
 		bool writing = false;
+		bool broadcast = false;
 		uint32_t ip = 0;
 		uint16_t stream_id = 0;
 		int count = 0;
@@ -147,31 +148,13 @@ class LUdpTransport : public LUdpListener
 	LOGGER(ERR, true)
 	LOGGER(INFO, true)
 	LOGGER(DEBUG, false)
-
-public:
-	#define SECONDS(sec) ((sec) * 1000)
-	constexpr static int TIMEOUT_SEND = SECONDS(5);
-	constexpr static int INVALID_STREAM = -1;
-
-	/// callback for when a packet is received
-	std::function<void(LString)> onReceive;
-
-	/// [optional] callback for when a packet is sent.
-	std::function<void(int, bool)> onSend;
-
-	LUdpTransport(LArray<uint32_t> interface_ips, uint32_t mc_ip, uint16_t port, LStream *log = NULL)
-		: LUdpListener(interface_ips, mc_ip, port, log)
-	{
-		int sz = sizeof(Hdr);
-		LAssert(sz == MAX_UDP_SIZE);
-	}
-
-	/// \returns the stream ID
-	int Send(uint32_t ip, LString msg)
+	
+	int PrepareWrite(bool broadcast, uint32_t ip, LString &msg)
 	{
 		if (auto s = GetStream(ip))
 		{
 			s->writing = true;
+			s->broadcast = broadcast;
 
 			uint16_t index = 0;
 			uint16_t total_parts = (uint16_t) (msg.Length() + (PAYLOAD-1)) / PAYLOAD;
@@ -195,6 +178,35 @@ public:
 		}
 		
 		return INVALID_STREAM;
+	}
+
+public:
+	#define SECONDS(sec) ((sec) * 1000)
+	constexpr static int TIMEOUT_SEND = SECONDS(5);
+	constexpr static int INVALID_STREAM = -1;
+
+	/// callback for when a packet is received
+	std::function<void(uint32_t ip, LString msg)> onReceive;
+
+	/// [optional] callback for when a packet is sent.
+	std::function<void(int stream_id, bool status)> onSend;
+
+	LUdpTransport(LArray<uint32_t> interface_ips, uint32_t mc_ip, uint16_t port, LStream *log = NULL)
+		: LUdpListener(interface_ips, mc_ip, port, log)
+	{
+		int sz = sizeof(Hdr);
+		LAssert(sz == MAX_UDP_SIZE);
+	}
+
+	/// \returns the stream ID
+	int UnicastSend(uint32_t ip, LString msg)
+	{
+		return PrepareWrite(false, ip, msg);
+	}
+	
+	int BroadcastSend(uint32_t interfaceIp, LString msg)
+	{
+		return PrepareWrite(true, interfaceIp, msg);
 	}
 
 	bool TimeSlice()
@@ -246,7 +258,7 @@ public:
 									if (auto msg = s->Assemble())
 									{
 										if (onReceive)
-											onReceive(msg);
+											onReceive(s->ip, msg);
 										else
 											ERR("%s:%i - no receive handler\n", _FL);
 									}
@@ -324,6 +336,7 @@ public:
 				continue; // waiting for ack
 			}
 
+			LUdpBroadcast broadcast(s->ip);
 			for (int i=0; i<s->parts.Length(); i++)
 			{
 				auto &part = s->parts[i];
@@ -333,8 +346,16 @@ public:
 				
 				if (part.state == TUnsent)
 				{
-					if (!WriteUdp(part.data, part.size, 0, s->ip, Port))
-						continue;
+					if (s->broadcast)
+					{
+						if (!broadcast.BroadcastPacket(part.data, part.size, MulticastIp, Port))
+							continue;						
+					}
+					else
+					{
+						if (!WriteUdp(part.data, part.size, 0, s->ip, Port))
+							continue;
+					}
 
 					part.state = TSent;
 					DEBUG("%s:%i - send %x:%i.\n", _FL, s->stream_id, i);
@@ -407,7 +428,7 @@ public:
 		auto ips = GetInterfaceIPs();
 
 		LUdpTransport t(ips, LIpToInt(UNITTEST_MULTICAST), UNITTEST_PORT, log);
-		t.onReceive = [&](auto receivedMsg)
+		t.onReceive = [&](auto ip, auto receivedMsg)
 			{
 				status = receivedMsg == msg;
 				if (status)
@@ -450,7 +471,7 @@ public:
 			};
 
 		t.INFO("Sending message...\n");
-		stream_id = t.Send(destIp, msg);
+		stream_id = t.UnicastSend(destIp, msg);
 		if (stream_id < 0)
 			return false;
 		
