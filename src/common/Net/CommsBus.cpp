@@ -9,6 +9,7 @@
 #define DEFAULT_COMMS_PORT	45454
 #define RETRY_SERVER		-2
 #define RESEND_TIMEOUT		1000
+#define USE_TRANSPORT		0
 
 #if 0
 #define LOG(...)			
@@ -22,6 +23,7 @@ enum MsgIds
 	MUid			= Lgi4CC("uuid"),
 	MCreateEndpoint	= Lgi4CC("mkep"),
 	MSendMsg		= Lgi4CC("send"),
+	MServerState	= Lgi4CC("srvr"),
 };
 
 #ifdef WIN32
@@ -176,7 +178,7 @@ public:
 
 struct Connection
 {
-	LSocket sock;
+	LAutoPtr<LSocket> sock;
 	LArray<char> readBuf;
 	ssize_t used = 0;
 	bool connected = false;
@@ -188,9 +190,16 @@ struct Connection
 	{
 	}
 
+	Connection(LStream *l, LAutoPtr<LSocket> socket) :
+		sock(socket),
+		readBuf(8 << 10),
+		log(l)
+	{
+	}
+
 	bool Valid()
 	{
-		return ValidSocket(sock.Handle());
+		return sock && ValidSocket(sock->Handle());
 	}
 	
 	LString Dump(uint8_t *ptr, ssize_t len)
@@ -211,15 +220,16 @@ struct Connection
 	bool Read(std::function<void(Block*)> cb)
 	{
 		// Check for data
-		if (!sock.IsReadable())
+		if (!sock ||
+			!sock->IsReadable())
 			return false;
 
 		// Read some data:
-		auto rd = sock.Read(readBuf.AddressOf() + used, readBuf.Length() - used);
+		auto rd = sock->Read(readBuf.AddressOf() + used, readBuf.Length() - used);
 		if (rd <= 0)
 		{
 			// printf("read disconnected: %i\n", (int)rd);
-			sock.Close();
+			sock->Close();
 			connected = false;
 			return false;
 		}
@@ -296,7 +306,7 @@ struct Connection
 
 		while (i < bytes)
 		{
-			auto wr = sock.Write(ptr, bytes - i);
+			auto wr = sock->Write(ptr, bytes - i);
 			if (wr > 0)
 			{
 				i += wr;
@@ -356,7 +366,7 @@ struct CommsClient : public Connection
 	LString uid;
 	uint64_t lastSeen = 0;
 		
-	CommsClient(LStream *l) : Connection(l)
+	CommsClient(LStream *l, LAutoPtr<LSocket> sock) : Connection(l, sock)
 	{
 	}
 
@@ -592,6 +602,7 @@ struct LCommsBusPriv :
 	struct ServerPeers
 	{
 		constexpr static int UNSEEN_TIMEOUT = SECONDS(30);
+		constexpr static int CONNECT_ATTEMPT = SECONDS(1);
 
 		LCommsBusPriv *d = nullptr;
 		LStream *log = nullptr;
@@ -602,37 +613,77 @@ struct LCommsBusPriv :
 		// Server discovery info
 		uint32_t broadcastIp = LIpToInt(COMMBUS_MULTICAST);
 		uint64_t broadcastTime = 0;
+
+		#if USE_TRANSPORT
 		LAutoPtr<LUdpTransport> listener;
+		#else
+		LAutoPtr<LUdpListener> listener;
+		#endif
 
 		// Peer info
-		struct LPeer
+		struct LPeer : public Connection
 		{
+			// replicated state
 			LString hostName;
 			IpList ip4;
 			uint32_t effectiveIp = 0;
-			uint64_t seen = 0;
-			LArray<LPeer> peers;
+			LArray<LPeer*> peers;
+
+			// local state
+			uint64_t seenTs = 0; // last time we saw a broadcast UDP msg
+			uint64_t connectTs = 0; // last time we trying to connect on TCP
 			bool direct = false;
 
-			LJson ToJson(bool deep = true)
+			LPeer(LStream *log) : Connection(log)
+			{
+			}
+
+			LPeer(LPeer &p) : Connection(p.log)
+			{
+				*this = p;
+			}
+
+			~LPeer()
+			{
+				peers.DeleteObjects();
+			}
+
+			LPeer &operator =(const LPeer &p)
+			{
+				hostName = p.hostName;
+				ip4 = p.ip4;
+				effectiveIp = p.effectiveIp;
+
+				peers = p.peers;
+
+				return *this;
+			}
+
+			bool IsConnected()
+			{
+				return sock && sock->IsOpen();
+			}
+
+			LJson ToJson(int depth = 0)
 			{
 				LJson j;
 				
 				j.Set("hostname", hostName);
 				j.Set("ip", ip4);
-				if (deep)
+				if (depth < 2)
 				{
 					LArray<LJson> peerArr;
-					for (auto &p: peers)
-						peerArr.Add(p.ToJson(false));
+					for (auto p: peers)
+						peerArr.Add(p->ToJson(depth+1));
 					j.Set("peers", peerArr);
 				}
-				j.Set("direct", (int64_t)direct);				
+				j.Set("direct", direct);
+				j.Set("sock", IsConnected());
 				return j;
 			}
 
 			template<typename J>
-			bool FromJson(J &j, LStream *log)
+			bool FromJson(J &j)
 			{
 				hostName = j.Get("hostname");
 				ip4.Empty();
@@ -641,17 +692,20 @@ struct LCommsBusPriv :
 				peers.Empty();
 				for (LJson::Iter::IterPos it: j.GetArray("peers"))
 				{
-					if (!peers.New().FromJson(it, log))
-						peers.PopLast();
+					auto newPeer = new LPeer(log);
+					if (newPeer->FromJson(it))
+						peers.Add(newPeer);
+					else
+						delete newPeer;
 				}
 				
 				return hostName && ip4.Length() > 0;
 			}
 
-			bool FromString(LString &data, LStream *log)
+			bool FromString(LString &data)
 			{
 				LJson j(data);
-				return FromJson(j, log);
+				return FromJson(j);
 			}
 		};
 		LHashTbl<ConstStrKey<char,false>, LPeer*> peers;
@@ -687,16 +741,27 @@ struct LCommsBusPriv :
 			return ips;
 		}
 
+		bool IsLocalIp(uint32_t ip)
+		{
+			if (ip == 0x7f000001)
+				return true;
+
+			for (auto &i: interfaces)
+				if (i.Ip4 == ip)
+					return true;
+			
+			return false;
+		}
+
 		void OnPeerMsg(uint32_t ip, LString &msg)
 		{
 			// Check if it's from ourselves...
-			for (auto &i: interfaces)
-				if (i.Ip4 == ip)
-					return;
+			if (IsLocalIp(ip))
+				return;
 				
 			// Parse the message:
-			LPeer p;
-			if (!p.FromString(msg, log))
+			LPeer p(log);
+			if (!p.FromString(msg))
 			{
 				LOG("error: failed to decode pkt\n");
 				return;
@@ -720,7 +785,7 @@ struct LCommsBusPriv :
 			}
 
 			peer->direct = true;
-			peer->seen = LCurrentTime();
+			peer->seenTs = LCurrentTime();
 
 			// Figure out the effective ip address
 			if (!peer->effectiveIp)
@@ -738,18 +803,18 @@ struct LCommsBusPriv :
 			}
 
 			auto host = LHostName();
-			for (auto &other: p.peers)
+			for (auto other: p.peers)
 			{
-				if (other.hostName.Equals(host))
+				if (other->hostName.Equals(host))
 					continue; // don't care about this node
 
-				if (!peers.Find(other.hostName))
+				if (!peers.Find(other->hostName))
 				{
-					if (auto *n = new LPeer)
+					if (auto *n = new LPeer(log))
 					{
-						n->ip4 = other.ip4;
-						n->hostName = other.hostName;
-						peers.Add(other.hostName, n);
+						n->ip4 = other->ip4;
+						n->hostName = other->hostName;
+						peers.Add(other->hostName, n);
 						SetDirty();
 					}
 				}
@@ -765,10 +830,12 @@ struct LCommsBusPriv :
 			}
 
 			// Create a UDP listener on current interfaces...
-			if (listener.Reset(new LUdpTransport(interface_ips, broadcastIp, DEFAULT_COMMS_PORT, d->log)))
-			{
-				listener->onReceive = [this](auto ip, auto msg) { OnPeerMsg(ip, msg); };
-			}
+			#if USE_TRANSPORT
+				if (listener.Reset(new LUdpTransport(interface_ips, broadcastIp, DEFAULT_COMMS_PORT, d->log)))
+					listener->onReceive = [this](auto ip, auto msg) { OnPeerMsg(ip, msg); };
+			#else
+				listener.Reset(new LUdpListener(interface_ips, broadcastIp, DEFAULT_COMMS_PORT, d->log));
+			#endif
 			
 			SetDirty();
 		}
@@ -807,7 +874,19 @@ struct LCommsBusPriv :
 			return a;
 		}
 
+		// This is sent via UDP broadcast to peers during discovery
 		LString CreatePingData()
+		{
+			LJson j;
+
+			j.Set("ip", GetIps(interfaces));
+			j.Set("hostname", LHostName());
+
+			return j.GetJson();
+		}
+
+		// This is sent via TCP to peers when state changes
+		LString ServerStateData()
 		{
 			LJson j;
 
@@ -837,13 +916,6 @@ struct LCommsBusPriv :
 			
 			auto diff = GetIps(curIntf) != GetIps(interfaces);
 			bool debug = false;
-			/*
-			if (LCurrentTime() - logTs >= 10000)
-			{
-				logTs = LCurrentTime();
-				debug = true;
-			}
-			*/
 
 			if (diff)
 			{
@@ -851,10 +923,19 @@ struct LCommsBusPriv :
 				OnInterfacesChange();
 			}			
 			
+			// Check for incoming broadcasts:
 			if (listener)
 			{
 				// Listen for packets...
-				listener->TimeSlice();
+				#if USE_TRANSPORT
+					listener->TimeSlice();
+				#else
+					uint32_t ip;
+					uint16_t port;
+					LString msg;
+					if (listener->ReadPacket(msg, ip, port))
+						OnPeerMsg(ip, msg);
+				#endif
 			}
 
 			// Check for peers that we haven't seen in a while
@@ -863,7 +944,7 @@ struct LCommsBusPriv :
 			for (auto p: peers)
 			{
 				if (p.value->direct &&
-					now - p.value->seen > UNSEEN_TIMEOUT)
+					now - p.value->seenTs > UNSEEN_TIMEOUT)
 				{
 					LString hostName = p.key;
 					OnDeletePeer(p.value);
@@ -872,6 +953,35 @@ struct LCommsBusPriv :
 			}
 			for (auto host: deletedPeers)
 				peers.Delete(host);
+
+			// Check peers for connections and data
+			for (auto it: peers)
+			{
+				LPeer *p = it.value;
+				if (p->IsConnected())
+				{
+					// Check for data on the connection:
+					p->Read([this](auto blk)
+						{
+							// Got message from server peer
+							LOG("Got message from server peer.\n");
+						});
+				}
+				else if (now - p->connectTs >= CONNECT_ATTEMPT)
+				{
+					// Try and setup a connection:
+					p->connectTs = now;
+					if (!p->sock)
+						p->sock.Reset(new LSocket);
+					if (p->sock)
+					{
+						auto addr = LIpToStr(p->effectiveIp);
+						LOG("peer connecting: %s/%s\n", addr.Get(), p->hostName.Get());
+						auto result = p->sock->Open(addr, DEFAULT_COMMS_PORT);
+						LOG("\tconnected: %i\n", result);
+					}
+				}
+			}
 
 			now = LCurrentTime();
 			if (now - broadcastTime >= 10000)
@@ -886,6 +996,7 @@ struct LCommsBusPriv :
 				for (auto &intf: interfaces)
 				{
 					LUdpBroadcast bc(intf.Ip4);
+					LOG("broadcast to %s\n", LIpToStr(intf.Ip4).Get());
 					auto result = bc.BroadcastPacket(pkt, broadcastIp, DEFAULT_COMMS_PORT);
 					/*
 					if (!result)
@@ -917,12 +1028,12 @@ struct LCommsBusPriv :
 			if (debug)
 			{
 				if (d->commsState)
-					d->commsState->RunCallback([view=d->commsState, state=CreatePingData()]()
+					d->commsState->RunCallback([view=d->commsState, state=ServerStateData()]()
 					{
 						view->Name(state);
 					});
 				else
-					LOG("state:\n%s", Indent(CreatePingData()).Get());
+					LOG("state:\n%s", Indent(ServerStateData()).Get());
 			}
 		}
 	};
@@ -941,19 +1052,49 @@ struct LCommsBusPriv :
 
 			if (listen.IsReadable())
 			{
-				// Setup a new incoming TCP client connection
-				auto conn = new CommsClient(log);
-				if (listen.Accept(&conn->sock))
+				// Setup a new incoming TCP connection. Connections
+				// start off as a client, but may in fact be a server
+				// on a different host
+				LAutoPtr<LSocket> sock(new LSocket(log));
+				if (sock && listen.Accept(sock))
 				{
-					clients.Add(conn);
-					conn->OnConnect();
-					LOG("%s got new connection, sock=" LPrintfSock "\n",
-						Describe().Get(),
-						conn->sock.Handle());
-				}
-				else
-				{
-					DeleteObj(conn);
+					uint32_t remoteIp = 0;
+					if (!sock->GetRemoteIp(&remoteIp))
+					{
+						LOG("Error: GetRemoteIp failed.\n");
+					}
+					else if (!peers.IsLocalIp(remoteIp))
+					{
+						// server connection..
+						bool found = false;
+						for (auto it: peers.peers)
+						{
+							ServerPeers::LPeer *p = it.value;
+							LOG("ip check %s - %s\n", LIpToStr(remoteIp).Get(), p->ip4.ToString().Get());
+							if (p->ip4.HasItem(remoteIp))
+							{
+								// found matching..
+								p->sock = sock;
+								found = true;
+	
+								LOG("Incomming server connection existing peer: %s/%s\n",
+									LIpToStr(remoteIp).Get(),
+									p->hostName.Get());
+							}
+						}
+						if (!found)
+						{
+							LOG("Incomming server connection, new peer: '%s'\n", LIpToStr(remoteIp).Get());
+						}
+					}
+					else if (auto conn = new CommsClient(log, sock))
+					{
+						clients.Add(conn);
+						conn->OnConnect();
+						LOG("%s got new client connection, sock=" LPrintfSock "\n",
+							Describe().Get(),
+							conn->sock->Handle());
+					}
 				}
 			}
 			else
@@ -961,7 +1102,7 @@ struct LCommsBusPriv :
 				// Check connections for incoming data:
 				for (auto c: clients)
 				{
-					if (!ValidSocket(c->sock.Handle()))
+					if (!ValidSocket(c->sock->Handle()))
 					{
 						clients.Delete(c);
 						delete c;
@@ -1104,7 +1245,8 @@ struct LCommsBusPriv :
 
 	int Client()
 	{
-		Connection c(log);
+		LAutoPtr<LSocket> initSocket(new LSocket);
+		Connection c(log, initSocket);
 		int connectErrs = 0;
 		bool hasConnection = false;
 		NotifyState(LCommsBus::TDisconnectedClient);
@@ -1114,7 +1256,7 @@ struct LCommsBusPriv :
 			if (!c.connected)
 			{
 				// Connect to the server...
-				c.connected = c.sock.Open("localhost", DEFAULT_COMMS_PORT);
+				c.connected = c.sock->Open("localhost", DEFAULT_COMMS_PORT);
 				LOG("%s connected=%i, que=%i, ep=%i\n",
 					Describe().Get(),
 					c.connected,

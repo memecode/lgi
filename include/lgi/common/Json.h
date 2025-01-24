@@ -488,6 +488,13 @@ public:
 		return true;
 	}
 
+	bool Set(LString Addr, bool b)
+	{
+		char s[32];
+		sprintf_s(s, sizeof(s), "%i", b);
+		return Set(Addr, s);
+	}
+
 	bool Set(LString Addr, int64_t Int)
 	{
 		char s[32];
