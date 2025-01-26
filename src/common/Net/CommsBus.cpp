@@ -350,14 +350,25 @@ struct Endpoint
 		return Block::New(MCreateEndpoint, data);		
 	}
 
-	// Convert to json
+	// Json IO
+	constexpr static const char *sAddr = "addr";
+	constexpr static const char *sRemote = "remote";
+
 	LJson ToJson() const
 	{
 		LJson j;
-		j.Set("addr", addr);
+		j.Set(sAddr, addr);
 		if (remote)
-			j.Set("remote", remote);
+			j.Set(sRemote, remote);
 		return j;
+	}
+
+	template<typename J>
+	bool FromJson(J &j)
+	{
+		addr = j.Get(sAddr);
+		remote = j.Get(sRemote);
+		return true;
 	}
 };
 
@@ -628,6 +639,7 @@ struct LCommsBusPriv :
 			IpList ip4;
 			uint32_t effectiveIp = 0;
 			LArray<LPeer*> peers;
+			LArray<Endpoint*> endpoints;
 
 			// local state
 			uint64_t seenTs = 0; // last time we saw a broadcast UDP msg
@@ -689,6 +701,7 @@ struct LCommsBusPriv :
 				ip4.Empty();
 				for (auto ip: j.GetArray("ip"))
 					ip4.Add(LIpToInt(ip));
+				
 				peers.Empty();
 				for (LJson::Iter::IterPos it: j.GetArray("peers"))
 				{
@@ -697,6 +710,14 @@ struct LCommsBusPriv :
 						peers.Add(newPeer);
 					else
 						delete newPeer;
+				}
+
+				endpoints.Empty();
+				for (auto it: j.GetArray("endpoints"))
+				{
+					LAutoPtr<Endpoint> ep(new Endpoint);
+					if (ep && ep->FromJson(it))
+						endpoints.Add(ep.Release());
 				}
 				
 				return hostName && ip4.Length() > 0;
@@ -753,7 +774,29 @@ struct LCommsBusPriv :
 			return false;
 		}
 
-		void OnPeerMsg(uint32_t ip, LString &msg)
+		void OnPeerTcp(LPeer *p, Block *blk)
+		{
+			switch (blk->GetId())
+			{
+				case MServerState:
+				{
+					LJson j(blk->data);
+
+					// find matching host and replicate state:
+					if (auto host = j.Get("hostname"))
+					{
+						if (auto p = peers.Find(host))
+						{
+							// copy state
+							p->FromJson(j);
+						}
+					}
+					break;
+				}
+			}
+		}
+
+		void OnPeerUdp(uint32_t ip, LString &msg)
 		{
 			// Check if it's from ourselves...
 			if (IsLocalIp(ip))
@@ -898,6 +941,59 @@ struct LCommsBusPriv :
 			return j.GetJson();
 		}
 
+		void UpdatePeerState()
+		{
+			auto state = ServerStateData();
+			for (auto it: peers)
+			{
+				LPeer *p = it.value;
+				if (p->IsConnected())
+				{
+					// LOG("Sending MServerState to %s\n", p->hostName.Get());
+					if (auto blk = Block::New(MServerState, (uint32_t) state.Length()))
+					{
+						memcpy(blk->data, state.Get(), blk->GetSize());
+						p->Write(blk);
+					}
+				}
+			}
+		}
+
+		void BroadcastUdp()
+		{
+			broadcastTime = LCurrentTime();
+
+			// And then broadcast packets...
+			LString pkt = CreatePingData();
+
+			for (auto &intf: interfaces)
+			{
+				LUdpBroadcast bc(intf.Ip4);
+				// LOG("broadcast to %s\n", LIpToStr(intf.Ip4).Get());
+				bc.BroadcastPacket(pkt, broadcastIp, DEFAULT_COMMS_PORT);
+			}
+
+			// Also unicast them... in case the broadcast is only working in one direction...
+			LSocket udp;
+			udp.SetUdp(true);
+			for (auto &i: peers)
+			{
+				auto p = i.value;					
+				if (p->effectiveIp)
+				{
+					int wr = udp.WriteUdp(pkt.Get(), (int)pkt.Length(), 0, p->effectiveIp, DEFAULT_COMMS_PORT);
+					if (wr != pkt.Length())
+					{
+						LOG("udp %s wr=%i\n", LIpToStr(p->effectiveIp).Get(), wr);
+					}
+				}
+				else if (p->direct)
+				{
+					LOG("no effective ip for: %s %s\n", p->hostName.Get(), p->ip4.ToString().Get());
+				}
+			}
+		}
+
 		uint64_t logTs = 0;
 		void Timeslice()		
 		{
@@ -934,7 +1030,7 @@ struct LCommsBusPriv :
 					uint16_t port;
 					LString msg;
 					if (listener->ReadPacket(msg, ip, port))
-						OnPeerMsg(ip, msg);
+						OnPeerUdp(ip, msg);
 				#endif
 			}
 
@@ -961,10 +1057,9 @@ struct LCommsBusPriv :
 				if (p->IsConnected())
 				{
 					// Check for data on the connection:
-					p->Read([this](auto blk)
+					p->Read([this, p](Block *blk)
 						{
-							// Got message from server peer
-							LOG("Got message from server peer.\n");
+							OnPeerTcp(p, blk);
 						});
 				}
 				else if (now - p->connectTs >= CONNECT_ATTEMPT)
@@ -986,43 +1081,9 @@ struct LCommsBusPriv :
 			now = LCurrentTime();
 			if (now - broadcastTime >= 10000)
 			{
-				broadcastTime = now;
 				debug = true;
-
-				// And then broadcast packets...
-				LString pkt = CreatePingData();
-				// LOG("out pkt:\n%s", Indent(pkt).Get());
-
-				for (auto &intf: interfaces)
-				{
-					LUdpBroadcast bc(intf.Ip4);
-					LOG("broadcast to %s\n", LIpToStr(intf.Ip4).Get());
-					auto result = bc.BroadcastPacket(pkt, broadcastIp, DEFAULT_COMMS_PORT);
-					/*
-					if (!result)
-						LOG("broadcast to %s = %i\n", LIpToStr(intf.Ip4).Get(), result);
-					*/
-				}
-
-				// Also unicast them... in case the broadcast is only working in one direction...
-				LSocket udp;
-				udp.SetUdp(true);
-				for (auto &i: peers)
-				{
-					auto p = i.value;					
-					if (p->effectiveIp)
-					{
-						int wr = udp.WriteUdp(pkt.Get(), (int)pkt.Length(), 0, p->effectiveIp, DEFAULT_COMMS_PORT);
-						if (wr != pkt.Length())
-						{
-							LOG("udp %s wr=%i\n", LIpToStr(p->effectiveIp).Get(), wr);
-						}
-					}
-					else if (p->direct)
-					{
-						LOG("no effective ip for: %s %s\n", p->hostName.Get(), p->ip4.ToString().Get());
-					}
-				}
+				BroadcastUdp();
+				UpdatePeerState();
 			}
 
 			if (debug)

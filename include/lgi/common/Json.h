@@ -12,11 +12,17 @@ class LJson
 
 	struct Key
 	{
+		// Option name for value
 		LString Name;
-		
-		LString Str;
-		LArray<Key> Obj;
-		LArray<Key> Array;
+
+		// One of these should be valid:			
+			// 1) A string value
+			LString Str;
+			// 2) An object definition
+			LArray<Key> Obj;
+			// 3) An array of something
+			LArray<Key> Array;
+		// end
 
 		Key *Get(const char *name, bool create = false)
 		{
@@ -66,13 +72,19 @@ class LJson
 		{
 			Name.Empty();
 			Str.Empty();
-			Obj.Length(0);
+			Obj.Empty();
+			Array.Empty();
 		}
 
+		LString MakeIndent(int d)
+		{
+			return LString(" ") * (d<<1);
+		}
+		
 		LString Print(int Depth = 0)
 		{
 			LStringPipe r(512);
-			LString indent = LString(" ") * (Depth << 2);
+			LString indent = MakeIndent(Depth);
 
 			if (Name)
 			{
@@ -86,15 +98,16 @@ class LJson
 
 			if (Obj.Length())
 			{
-				r.Write("{\n", 2);
+				r.Print("%s{\n", indent.Get());
 				Depth++;
 				
-				for (unsigned i=0; i<Obj.Length(); i++)
+				for (size_t i=0; i<Obj.Length(); i++)
 				{
 					if (i)
-						r.Print(",\n%s", indent.Get());
-					Key &c = Obj[i];
-					r.Write(c.Print(Depth));
+						r.Print(",\n");
+
+					auto &e = Obj[i];
+					r.Write(e.Print(Depth));
 				}
 				
 				r.Print("\n%s}", indent.Get());
@@ -102,16 +115,43 @@ class LJson
 			}
 			else if (!Str)
 			{
-				r.Write("[ ", 2);
-				for (unsigned i=0; i<Array.Length(); i++)
-				{
-					Key &k = Array[i];
-					if (i)
-						r.Write(", ", 2);
+				bool isObjArray = Array.Length() ? Array[0].Obj.Length() > 0 : false;
 
-					r.Write(k.Print(Depth));
+				if (Array.Length() == 0)
+				{
+					r.Write("[]", 2);
 				}
-				r.Write(" ]", 2);
+				else if (Array[0].Obj.Length())
+				{
+					// Print array of objects
+					r.Print("[\n");
+					for (size_t i=0; i<Array.Length(); i++)
+					{
+						if (i) r.Print(",\n");
+						r.Write(Array[i].Print(Depth+1));
+					}
+					r.Print("\n%s]", indent.Get());
+				}
+				else if (Array.Length() == 1)
+				{
+					// Print single string
+					r.Print("[ ");
+					r.Write(Array[0].Print(0));
+					r.Print(" ]");
+				}
+				else
+				{
+					// Pring multiple strings, each on their own line.
+ 					r.Write("[", 1);
+					auto arrIndent = MakeIndent(Depth + 1);
+					for (unsigned i=0; i<Array.Length(); i++)
+					{
+						r.Print("\n%s", arrIndent.Get());
+						auto &e = Array[i];
+						r.Write(e.Print(Depth));
+					}
+					r.Print("\n%s]", indent.Get());
+				}
 			}
 
 			return r.NewLStr();
@@ -540,6 +580,32 @@ public:
 			for (auto &i : k->Obj)
 				a.Add(i.Name);
 		return a;
+	}
+
+	// Testing 
+	static LString PrintTest()
+	{
+		LJson j;
+
+		LArray<LJson> a;
+		j.Set("noElem", a);
+			a[0] = "one";
+		j.Set("oneStr", a);
+			a.Add("two");
+			a.Add("three");
+		j.Set("threeStr", a);
+
+		LArray<LJson> objs;
+		auto &first = objs.New();
+			first.Set("field", "val");
+			first.Set("field2", "val2");
+		j.Set("oneObj", objs);
+			auto &second = objs.New();
+			second.Set("field", "val");
+			second.Set("field2", "val2");
+		j.Set("twoObj", objs);
+
+		return j.GetJson();
 	}
 };
 
