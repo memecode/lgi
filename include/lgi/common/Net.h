@@ -450,9 +450,9 @@ public:
 	{
 		LString s;
 		if (Context)
-			s.Printf("Error: %s - %i, %s\n", Context.Get(), ErrorCode, ErrorDescription);
+			s.Printf("Error: %s - 0x%x, %s\n", Context.Get(), ErrorCode, ErrorDescription);
 		else
-			s.Printf("Error: %i, %s\n", ErrorCode, ErrorDescription);
+			s.Printf("Error: 0x%x, %s\n", ErrorCode, ErrorDescription);
 		if (Log)
 			Log->Print("%s", s.Get());
 		else
@@ -469,7 +469,6 @@ public:
 	{
         SetBroadcast();
 		SetUdp(true);
-		// EnumInterfaces(Intf);
 	}
 
 	bool BroadcastPacket(LString Data, uint32_t Ip, uint16_t Port)

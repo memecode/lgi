@@ -1406,7 +1406,7 @@ bool LSocket::AddMulticastMember(uint32_t MulticastIp, uint32_t LocalInterface)
 	int r = setsockopt(Handle(), IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char*) &mreq, sizeof(mreq));
 	if (!r)
 	{
-		LgiTrace("AddMulticastMember(%s, %s)\n", LIpToStr(MulticastIp).Get(), LIpToStr(LocalInterface).Get());
+		// LgiTrace("AddMulticastMember(%s, %s)\n", LIpToStr(MulticastIp).Get(), LIpToStr(LocalInterface).Get());
 		return true;
 	}
 
