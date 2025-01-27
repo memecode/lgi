@@ -614,6 +614,7 @@ struct LCommsBusPriv :
 	{
 		constexpr static int UNSEEN_TIMEOUT = SECONDS(30);
 		constexpr static int CONNECT_ATTEMPT = SECONDS(1);
+		constexpr static int PEER_TIMEOUT = SECONDS(5);
 
 		LCommsBusPriv *d = nullptr;
 		LStream *log = nullptr;
@@ -634,6 +635,12 @@ struct LCommsBusPriv :
 		// Peer info
 		struct LPeer : public Connection
 		{
+			constexpr static const char *sHostname = "hostname";
+			constexpr static const char *sIp = "ip";
+			constexpr static const char *sPeers = "peers";
+			constexpr static const char *sDirect = "direct";
+			constexpr static const char *sEndpoints = "endpoints";
+
 			// replicated state
 			LString hostName;
 			IpList ip4;
@@ -680,16 +687,21 @@ struct LCommsBusPriv :
 			{
 				LJson j;
 				
-				j.Set("hostname", hostName);
-				j.Set("ip", ip4);
+				j.Set(sHostname, hostName);
+				j.Set(sIp, ip4);
 				if (depth < 2)
 				{
 					LArray<LJson> peerArr;
 					for (auto p: peers)
 						peerArr.Add(p->ToJson(depth+1));
-					j.Set("peers", peerArr);
+					j.Set(sPeers, peerArr);
+
+					LArray<LJson> epArr;
+					for (auto ep: endpoints)
+						epArr.Add(ep->ToJson());
+					j.Set(sEndpoints, epArr);
 				}
-				j.Set("direct", direct);
+				j.Set(sDirect, direct);
 				j.Set("sock", IsConnected());
 				return j;
 			}
@@ -697,13 +709,13 @@ struct LCommsBusPriv :
 			template<typename J>
 			bool FromJson(J &j)
 			{
-				hostName = j.Get("hostname");
+				hostName = j.Get(sHostname);
 				ip4.Empty();
-				for (auto ip: j.GetArray("ip"))
+				for (auto ip: j.GetArray(sIp))
 					ip4.Add(LIpToInt(ip));
 				
 				peers.Empty();
-				for (LJson::Iter::IterPos it: j.GetArray("peers"))
+				for (LJson::Iter::IterPos it: j.GetArray(sPeers))
 				{
 					auto newPeer = new LPeer(log);
 					if (newPeer->FromJson(it))
@@ -713,7 +725,7 @@ struct LCommsBusPriv :
 				}
 
 				endpoints.Empty();
-				for (auto it: j.GetArray("endpoints"))
+				for (auto it: j.GetArray(sEndpoints))
 				{
 					LAutoPtr<Endpoint> ep(new Endpoint);
 					if (ep && ep->FromJson(it))
@@ -1064,12 +1076,13 @@ struct LCommsBusPriv :
 				}
 				else if (now - p->connectTs >= CONNECT_ATTEMPT)
 				{
-					// Try and setup a connection:
+					// Try and setup a TCP connection:
 					p->connectTs = now;
 					if (!p->sock)
 						p->sock.Reset(new LSocket);
 					if (p->sock)
 					{
+						p->sock->SetTimeout(PEER_TIMEOUT);
 						auto addr = LIpToStr(p->effectiveIp);
 						LOG("peer connecting: %s/%s\n", addr.Get(), p->hostName.Get());
 						auto result = p->sock->Open(addr, DEFAULT_COMMS_PORT);
@@ -1094,7 +1107,7 @@ struct LCommsBusPriv :
 						view->Name(state);
 					});
 				else
-					LOG("state:\n%s", Indent(ServerStateData()).Get());
+					LOG("state:\n%s\n", ServerStateData().Get());
 			}
 		}
 	};
