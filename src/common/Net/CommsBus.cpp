@@ -8,7 +8,6 @@
 #define COMMBUS_MULTICAST	"230.6.6.10"
 #define DEFAULT_COMMS_PORT	45454
 #define RETRY_SERVER		-2
-#define RESEND_TIMEOUT		1000
 #define USE_TRANSPORT		0
 
 #if 0
@@ -338,7 +337,7 @@ struct Endpoint
 	// Style wise endpoints should be "$app.$description"
 	LString addr;
 	
-	// The UID of the remote entity that owns the endpoint
+	// The UID of the separate process that owns the endpoint
 	LString remote;	
 	// The callback of the local code that wants endpoint messages
 	std::function< void(LString) > local;
@@ -390,8 +389,11 @@ struct CommsClient : public Connection
 // A block owned by the writeQue.
 struct BlockInfo
 {
-	// Timestamp of the last attempt to send
-	uint64_t sendTs = 0;
+	// Timestamp of the first attempt to send
+	uint64_t firstSendTs = 0;
+
+	// Timestamp of the first attempt to send
+	uint64_t recentSendTs = 0;
 
 	// A block ptr owned by this object
 	Block *blk = NULL;
@@ -408,213 +410,14 @@ struct LCommsBusPriv :
 	public LCancel,
 	public LMutex
 {
-	bool isServer = false;
-	LSocket listen;
-	LStream *log = NULL;
-	LView *commsState = nullptr;
-	LString Uid;
-	
-	// Lock before using
-	LArray< BlockInfo > writeQue;
-	LArray< Endpoint > endpoints;
-	LCommsBus::TCallback callback;
-
-	// Events
-	std::function<void()> onEndpointChange;
-
-	// Server only:
-	uint64_t trySendTs = 0;
-	LArray<CommsClient*> clients;
-		
-	LCommsBusPriv(LStream *Log, LView *commsstate) :
-		LThread("LCommsBusPriv.Thread"),
-		LMutex("LCommsBusPriv.Lock"),
-		log(Log),
-		commsState(commsstate)
-	{
-		LAssert(sizeof(Block) == 9);
-		Run();
-	}
-	
-	~LCommsBusPriv()
-	{
-		Cancel();
-		WaitForExit();
-	}
-	
-	void NotifyState(LCommsBus::TState state)
-	{
-		LMutex::Auto lck(this, _FL);
-		if (callback)
-			callback(state);
-	}
-
-	const char *GetUid()
-	{
-		return Uid;
-	}
-
-	LString Describe()
-	{
-		return LString::Fmt("%s:%s", isServer ? "server" : "client", GetUid());
-	}
-
-	void Que(Block::Auto &blk)
-	{
-		if (!Lock(_FL))
-			return;
-
-		LOG("%s que msg %s\n", Describe().Get(), blk->ToString().Get());
-
-		auto &info = writeQue.New();
-		info.sendTs = 0;
-		info.blk = blk.Release();
-
-		Unlock();
-	}
-
-	bool ServerSend(Block *blk)
-	{
-		bool status = false;
-
-		if (blk->GetId() != MSendMsg)
-		{
-			LAssert(!"wrong msg type");
-			return false;
-		}
-
-		if (auto dest = blk->FirstLine())
-		{
-			if (Lock(_FL))
-			{
-				bool foundEndpoint = false;
-				for (auto &e: endpoints)
-				{
-					if (!e.addr.Equals(dest))
-						continue;
-
-					foundEndpoint = true;
-					if (e.local)
-					{
-						e.local(blk->SecondLine());
-						status = true;
-					}
-					else if (e.remote)
-					{
-						// Find the matching connection and send to the remote end
-						bool foundClient = false;
-						for (auto &c: clients)
-						{
-							if (c->uid == e.remote)
-							{
-								foundClient = true;
-										
-								status = c->Write(blk);
-								if (!status)
-								{
-									LOG("%s error: write failed.\n", Describe().Get());
-								}
-								break;
-							}
-						}
-						if (!foundClient)
-						{
-							LOG("%s error: no client for endpoint='%s' remote=%s\n",
-								Describe().Get(),
-								dest.Get(),
-								e.remote.Get());
-						}
-					}
-					break;
-				}
-				Unlock();
-				if (!foundEndpoint)
-				{
-					LOG("%s error: no endpoint '%s'\n",
-						Describe().Get(),
-						dest.Get());
-				}
-			}
-		}
-		else
-		{
-			LOG("%s No separator?\n", Describe().Get());
-		}
-
-		return status;
-	}
-	
-	void ServerTrySend(bool firstAttempt)
-	{
-		if (Lock(_FL))
-		{
-			for (size_t i=0; i<writeQue.Length(); i++)
-			{
-				auto &info = writeQue[i];
-				switch (info.blk->GetId())
-				{
-					case MSendMsg:
-					{
-						bool timedOut = info.sendTs && ((LCurrentTime() - info.sendTs) >= RESEND_TIMEOUT);
-						if (timedOut)
-						{
-							writeQue.DeleteAt(i--, true);
-						}
-						else if (!firstAttempt || info.sendTs == 0)
-						{
-							if (ServerSend(info.blk))
-							{
-								#if 1
-									// LOG("%s sent %s to %s\n", Describe().Get(), info.blk->ToString().Get(), info.blk->FirstLine().Get());
-								#else
-									auto bytes = info.blk->GetSize() + 9;
-									LString::Array b;
-									b.SetFixedLength(false);
-									auto ptr = (uint8_t*)info.blk;
-									for (unsigned i=0; i<bytes; i++)
-										b.New().Printf("%i", ptr[i]);
-									LOG("%s write %s\n", Describe().Get(), LString(",").Join(b).Get());
-								#endif
-
-								writeQue.DeleteAt(i--, true);
-							}
-							else
-							{
-								info.sendTs = LCurrentTime();
-							}
-						}
-						break;
-					}
-					case MCreateEndpoint:
-					{
-						// This can happen when a new comms bus, which starts in client mode, listens on an endpoint
-						// but then becomes a server. So it's ok to discard the message.
-						writeQue.DeleteAt(i--, true);
-						break;
-					}
-					default:
-					{
-						LOG("%s error: can't send msg type %s\n", Describe().Get(), info.blk->ToString().Get());
-						writeQue.DeleteAt(i--, true);
-						break;
-					}
-				}
-			}
-
-			Unlock();
-		}
-
-		#if 0
-		if (writeQue.Length() > 0)
-			LOG("%s warning: " LPrintfSizeT " msgs still queued on the server\n", Describe().Get(), writeQue.Length());
-		#endif
-	}
+	constexpr static int SEND_TIMEOUT		= SECONDS(30);	// message expires from queue after this
+	constexpr static int RESEND_TIMEOUT		= SECONDS(1);	// retry failed messages in the quueu this often
+	constexpr static int UNSEEN_TIMEOUT		= SECONDS(30);
+	constexpr static int CONNECT_ATTEMPT	= SECONDS(1);
+	constexpr static int PEER_TIMEOUT		= SECONDS(5);
 
 	struct ServerPeers
 	{
-		constexpr static int UNSEEN_TIMEOUT = SECONDS(30);
-		constexpr static int CONNECT_ATTEMPT = SECONDS(1);
-		constexpr static int PEER_TIMEOUT = SECONDS(5);
 
 		LCommsBusPriv *d = nullptr;
 		LStream *log = nullptr;
@@ -665,6 +468,7 @@ struct LCommsBusPriv :
 			~LPeer()
 			{
 				peers.DeleteObjects();
+				endpoints.DeleteObjects();
 			}
 
 			LPeer &operator =(const LPeer &p)
@@ -714,17 +518,15 @@ struct LCommsBusPriv :
 				for (auto ip: j.GetArray(sIp))
 					ip4.Add(LIpToInt(ip));
 				
-				peers.Empty();
+				peers.DeleteObjects();
 				for (LJson::Iter::IterPos it: j.GetArray(sPeers))
 				{
-					auto newPeer = new LPeer(log);
+					LAutoPtr<LPeer> newPeer(new LPeer(log));
 					if (newPeer->FromJson(it))
-						peers.Add(newPeer);
-					else
-						delete newPeer;
+						peers.Add(newPeer.Release());
 				}
 
-				endpoints.Empty();
+				endpoints.DeleteObjects();
 				for (auto it: j.GetArray(sEndpoints))
 				{
 					LAutoPtr<Endpoint> ep(new Endpoint);
@@ -803,6 +605,13 @@ struct LCommsBusPriv :
 							p->FromJson(j);
 						}
 					}
+					break;
+				}
+				case MSendMsg:
+				{
+					// Message from remote host server, deliver to any local processes
+					LOG("Got msg sent from remote machine...\n");
+					d->ServerSend(blk, true /* don't allow loops back and forth between servers */);
 					break;
 				}
 			}
@@ -1079,10 +888,15 @@ struct LCommsBusPriv :
 					// Try and setup a TCP connection:
 					p->connectTs = now;
 					if (!p->sock)
-						p->sock.Reset(new LSocket);
+					{
+						if (p->sock.Reset(new LSocket))
+						{
+							p->sock->SetTimeout(PEER_TIMEOUT);
+							p->sock->IsBlocking(false);
+						}
+					}
 					if (p->sock)
 					{
-						p->sock->SetTimeout(PEER_TIMEOUT);
 						auto addr = LIpToStr(p->effectiveIp);
 						LOG("peer connecting: %s/%s\n", addr.Get(), p->hostName.Get());
 						auto result = p->sock->Open(addr, DEFAULT_COMMS_PORT);
@@ -1107,14 +921,255 @@ struct LCommsBusPriv :
 						view->Name(state);
 					});
 				else
-					LOG("state:\n%s\n", ServerStateData().Get());
+					LOG("state: writeQue=%i\n%s\n",
+						(int)d->writeQue.Length(),
+						ServerStateData().Get());
 			}
 		}
 	};
 
+	LAutoPtr<ServerPeers> peers;
+
+	bool isServer = false;
+	LSocket listen;
+	LStream *log = NULL;
+	LView *commsState = nullptr;
+	LString Uid;
+	
+	// Lock before using
+	LArray< BlockInfo > writeQue;
+	LArray< Endpoint > endpoints;
+	LCommsBus::TCallback callback;
+
+	// Events
+	std::function<void()> onEndpointChange;
+
+	// Server only:
+	uint64_t trySendTs = 0;
+	LArray<CommsClient*> clients;
+		
+	LCommsBusPriv(LStream *Log, LView *commsstate) :
+		LThread("LCommsBusPriv.Thread"),
+		LMutex("LCommsBusPriv.Lock"),
+		log(Log),
+		commsState(commsstate)
+	{
+		LAssert(sizeof(Block) == 9);
+		Run();
+	}
+	
+	~LCommsBusPriv()
+	{
+		Cancel();
+		WaitForExit();
+	}
+	
+	void NotifyState(LCommsBus::TState state)
+	{
+		LMutex::Auto lck(this, _FL);
+		if (callback)
+			callback(state);
+	}
+
+	const char *GetUid()
+	{
+		return Uid;
+	}
+
+	LString Describe()
+	{
+		return LString::Fmt("%s:%s", isServer ? "server" : "client", GetUid());
+	}
+
+	void Que(Block::Auto &blk)
+	{
+		if (!Lock(_FL))
+			return;
+
+		LOG("%s que msg %s\n", Describe().Get(), blk->ToString().Get());
+
+		auto &info = writeQue.New();
+		info.firstSendTs = 0;
+		info.recentSendTs = 0;
+		info.blk = blk.Release();
+
+		Unlock();
+	}
+
+	bool ServerSend(Block *blk, bool localOnly)
+	{
+		bool status = false;
+
+		if (blk->GetId() != MSendMsg)
+		{
+			LAssert(!"wrong msg type");
+			return false;
+		}
+
+		if (auto dest = blk->FirstLine())
+		{
+			if (Lock(_FL))
+			{
+				bool foundEndpoint = false;
+
+				// Look through any localhost endpoints...
+				for (auto &e: endpoints)
+				{
+					if (!e.addr.Equals(dest))
+						continue;
+
+					foundEndpoint = true;
+					if (e.local) // local process endpoint
+					{
+						e.local(blk->SecondLine());
+						status = true;
+					}
+					else if (e.remote) // separate process... not remote host
+					{
+						// Find the matching connection and send to the remote end
+						bool foundClient = false;
+						for (auto &c: clients)
+						{
+							if (c->uid == e.remote)
+							{
+								foundClient = true;
+										
+								status = c->Write(blk);
+								if (!status)
+								{
+									LOG("%s error: write failed.\n", Describe().Get());
+								}
+								break;
+							}
+						}
+						if (!foundClient)
+						{
+							LOG("%s error: no client for endpoint='%s' remote=%s\n",
+								Describe().Get(),
+								dest.Get(),
+								e.remote.Get());
+						}
+					}
+					break;
+				}
+
+				// Now check through any remote server (other machines)
+				if (!localOnly && !foundEndpoint && peers)
+				{
+					for (auto it: peers->peers)
+					{
+						ServerPeers::LPeer *p = it.value;
+						for (auto ep: p->endpoints)
+						{
+							if (ep->addr.Equals(dest))
+							{
+								foundEndpoint = true;
+
+								bool conn = p->IsConnected();
+								LOG("Found remote server endpoint: %s, conn=%i\n", ep->addr.Get(), conn);
+								if (conn)
+								{
+									status = p->Write(blk);
+									LOG("Write to remote server: %s = %i\n", ep->addr.Get(), status);
+								}
+							}
+						}
+						if (status)
+							break;
+					}
+				}
+
+				Unlock();
+
+				/*
+				if (!foundEndpoint)
+				{
+					LOG("%s error: no endpoint '%s'\n",
+						Describe().Get(),
+						dest.Get());
+				}
+				*/
+			}
+		}
+		else
+		{
+			LOG("%s No separator?\n", Describe().Get());
+		}
+
+		return status;
+	}
+	
+	void ServerTrySend(bool firstAttempt)
+	{
+		if (Lock(_FL))
+		{
+			for (size_t i=0; i<writeQue.Length(); i++)
+			{
+				auto &info = writeQue[i];
+				switch (info.blk->GetId())
+				{
+					case MSendMsg:
+					{
+						auto now = LCurrentTime();
+						bool timedOut = info.firstSendTs && ((now - info.firstSendTs) >= SEND_TIMEOUT);
+						if (timedOut)
+						{
+							LOG("Deleting expired msg: %s\n", info.blk->FirstLine().Get());
+							writeQue.DeleteAt(i--, true);
+						}
+						else if (!info.firstSendTs || (now - info.recentSendTs) > RESEND_TIMEOUT)
+						{
+							if (!info.firstSendTs)
+								info.firstSendTs = now;
+							info.recentSendTs = now;
+							if (ServerSend(info.blk, false))
+							{
+								#if 1
+									// LOG("%s sent %s to %s\n", Describe().Get(), info.blk->ToString().Get(), info.blk->FirstLine().Get());
+								#else
+									auto bytes = info.blk->GetSize() + 9;
+									LString::Array b;
+									b.SetFixedLength(false);
+									auto ptr = (uint8_t*)info.blk;
+									for (unsigned i=0; i<bytes; i++)
+										b.New().Printf("%i", ptr[i]);
+									LOG("%s write %s\n", Describe().Get(), LString(",").Join(b).Get());
+								#endif
+
+								writeQue.DeleteAt(i--, true);
+							}
+						}
+						break;
+					}
+					case MCreateEndpoint:
+					{
+						// This can happen when a new comms bus, which starts in client mode, listens on an endpoint
+						// but then becomes a server. So it's ok to discard the message.
+						writeQue.DeleteAt(i--, true);
+						break;
+					}
+					default:
+					{
+						LOG("%s error: can't send msg type %s\n", Describe().Get(), info.blk->ToString().Get());
+						writeQue.DeleteAt(i--, true);
+						break;
+					}
+				}
+			}
+
+			Unlock();
+		}
+
+		#if 0
+		if (writeQue.Length() > 0)
+			LOG("%s warning: " LPrintfSizeT " msgs still queued on the server\n", Describe().Get(), writeQue.Length());
+		#endif
+	}
+
 	int Server()
 	{
-		ServerPeers peers(this);
+		if (!peers.Reset(new ServerPeers(this)))
+			return -1;
 
 		// Wait for incoming connections and handle them...
 		bool hasConnections = false;
@@ -1122,7 +1177,7 @@ struct LCommsBusPriv :
 
 		while (!IsCancelled())
 		{
-			peers.Timeslice();
+			peers->Timeslice();
 
 			if (listen.IsReadable())
 			{
@@ -1137,23 +1192,32 @@ struct LCommsBusPriv :
 					{
 						LOG("Error: GetRemoteIp failed.\n");
 					}
-					else if (!peers.IsLocalIp(remoteIp))
+					else if (!peers->IsLocalIp(remoteIp))
 					{
 						// server connection..
 						bool found = false;
-						for (auto it: peers.peers)
+						for (auto it: peers->peers)
 						{
 							ServerPeers::LPeer *p = it.value;
 							LOG("ip check %s - %s\n", LIpToStr(remoteIp).Get(), p->ip4.ToString().Get());
 							if (p->ip4.HasItem(remoteIp))
 							{
 								// found matching..
-								p->sock = sock;
-								found = true;
+								if (p->IsConnected())
+								{
+									LOG("Ignoring new accept for existing connection for: %s/%i\n",
+										LIpToStr(remoteIp).Get(),
+										p->hostName.Get());
+								}
+								else
+								{
+									p->sock = sock;
+									found = true;
 	
-								LOG("Incomming server connection existing peer: %s/%s\n",
-									LIpToStr(remoteIp).Get(),
-									p->hostName.Get());
+									LOG("Incomming server connection existing peer: %s/%s\n",
+										LIpToStr(remoteIp).Get(),
+										p->hostName.Get());
+								}
 							}
 						}
 						if (!found)
@@ -1234,7 +1298,7 @@ struct LCommsBusPriv :
 							}
 							case MSendMsg:
 							{
-								if (!ServerSend(blk))
+								if (!ServerSend(blk, false))
 								{
 									// This can happen when the server doesn't know about the endpoint yet...
 									// So put the message in the writeQue and hopefully the endpoint will
@@ -1414,8 +1478,9 @@ struct LCommsBusPriv :
 					// Write any outgoing messages
 					for (size_t i=0; i<writeQue.Length(); i++)
 					{
+						auto now = LCurrentTime();
 						auto &info = writeQue[i];
-						if (!info.sendTs || (LCurrentTime() - info.sendTs >= RESEND_TIMEOUT))
+						if (!info.firstSendTs || (now - info.recentSendTs >= SEND_TIMEOUT))
 						{
 							if (c.Write(info.blk))
 							{
@@ -1425,7 +1490,10 @@ struct LCommsBusPriv :
 							else
 							{
 								LOG("%s error: writing msg %s\n", Describe().Get(), info.blk->ToString().Get());
-								info.sendTs = LCurrentTime();
+								now = LCurrentTime();
+								if (info.firstSendTs)
+									info.firstSendTs = now;
+								info.recentSendTs = now;
 							}
 						}
 					}
