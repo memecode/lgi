@@ -22,7 +22,7 @@ else:
     while p.poll() == None:
         out = p.stdout.read()
         if out != None:
-            print("out:", out.decode())
+            print("out:", out.decode(), end='')
     print("ssh-fs loop done")
 
 # copy the code across
@@ -43,8 +43,6 @@ output = stdout.read()
 print(str(output, 'utf8'))
 
 # run the software in the VM
-print("running...")
-(stdin, stdout, stderr) = client.exec_command("cd " + buildDir + " && ./commsBusTest")
-print("reading...")
-while True:
-    print(stdout.read(1).decode(), end='')
+cmd = "ssh user@haiku \"cd " + buildDir + " && commsBusTest\""
+print("cmd:", cmd)
+os.system(cmd)

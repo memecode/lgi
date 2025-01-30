@@ -545,9 +545,10 @@ struct LCommsBusPriv :
 		};
 		LHashTbl<ConstStrKey<char,false>, LPeer*> peers;
 
-		void SetDirty()
+		void SetDirty(const char *context)
 		{
 			// This forces a re-broadcast of state
+			LOG("SetDirty(%s)\n", context);
 			broadcastTime = 0;
 		}
 
@@ -559,7 +560,7 @@ struct LCommsBusPriv :
 			{
 				// Re-broadcast the new endpoints to peers
 				LOG("ServerPeers.onEndpointChange called.\n");
-				SetDirty();
+				SetDirty("onEndpointChange");
 			};
 		}
 		
@@ -603,8 +604,16 @@ struct LCommsBusPriv :
 						{
 							// copy state
 							p->FromJson(j);
+
+							#if 0
+							LOG("MServerState %s, endpoints=%i\n", host.Get(), (int)p->endpoints.Length());
+							for (auto ep: p->endpoints)
+								LOG("MServerState %s, ep=%s\n", host.Get(), ep->addr.Get());
+							#endif
 						}
+						else LOG("%s: no host '%s'\n", __FUNCTION__, host.Get());
 					}
+					else LOG("%s: no host key\n", __FUNCTION__);
 					break;
 				}
 				case MSendMsg:
@@ -679,7 +688,7 @@ struct LCommsBusPriv :
 						n->ip4 = other->ip4;
 						n->hostName = other->hostName;
 						peers.Add(other->hostName, n);
-						SetDirty();
+						SetDirty("addPeer");
 					}
 				}
 			}
@@ -701,7 +710,7 @@ struct LCommsBusPriv :
 				listener.Reset(new LUdpListener(interface_ips, broadcastIp, DEFAULT_COMMS_PORT, d->log));
 			#endif
 			
-			SetDirty();
+			SetDirty("OnInterfacesChange");
 		}
 
 		void OnNewPeer(LPeer *newPeer)
@@ -710,7 +719,7 @@ struct LCommsBusPriv :
 			{
 				LOG("newPeer: %s\n", newPeer->hostName.Get());
 				peers.Add(newPeer->hostName, newPeer);
-				SetDirty();
+				SetDirty("onNewPeer");
 			}
 		}
 
@@ -718,7 +727,7 @@ struct LCommsBusPriv :
 		{
 			LOG("deletePeer: %s (%p)\n", peer->hostName.Get(), peer);
 			delete peer;
-			SetDirty();
+			SetDirty("onDeletePeer");
 		}
 
 		LArray<LJson> PeersToJson()
@@ -770,7 +779,7 @@ struct LCommsBusPriv :
 				LPeer *p = it.value;
 				if (p->IsConnected())
 				{
-					// LOG("Sending MServerState to %s\n", p->hostName.Get());
+					// LOG("Sending MServerState to %s\n%s\n", p->hostName.Get(), state.Get());
 					if (auto blk = Block::New(MServerState, (uint32_t) state.Length()))
 					{
 						memcpy(blk->data, state.Get(), blk->GetSize());
@@ -901,6 +910,8 @@ struct LCommsBusPriv :
 						LOG("peer connecting: %s/%s\n", addr.Get(), p->hostName.Get());
 						auto result = p->sock->Open(addr, DEFAULT_COMMS_PORT);
 						LOG("\tconnected: %i\n", result);
+						if (result)
+							SetDirty("newPeerTcpConnection");
 					}
 				}
 			}
@@ -920,10 +931,12 @@ struct LCommsBusPriv :
 					{
 						view->Name(state);
 					});
+				/*
 				else
 					LOG("state: writeQue=%i\n%s\n",
 						(int)d->writeQue.Length(),
 						ServerStateData().Get());
+				*/
 			}
 		}
 	};
@@ -1138,6 +1151,15 @@ struct LCommsBusPriv :
 
 								writeQue.DeleteAt(i--, true);
 							}
+							#if 0
+							else
+							{
+								LOG("%s: failed to write to %s\n%s\n",
+									__FUNCTION__,
+									info.blk->FirstLine().Get(),
+									peers->ServerStateData().Get());
+							}
+							#endif
 						}
 						break;
 					}
@@ -1213,6 +1235,7 @@ struct LCommsBusPriv :
 								{
 									p->sock = sock;
 									found = true;
+									peers->SetDirty("acceptedServerTcp");
 	
 									LOG("Incomming server connection existing peer: %s/%s\n",
 										LIpToStr(remoteIp).Get(),
