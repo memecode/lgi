@@ -4714,7 +4714,7 @@ bool VcFolder::Revert(LString::Array &Uris, const char *Revision, bool RevertToB
 
 			LStringPipe p;
 			if (Revision)
-				p.Print("up -r %s", Revision);
+				p.Print("revert -r %s", Revision);
 			else
 				p.Print("revert");
 			for (auto u: Uris)
