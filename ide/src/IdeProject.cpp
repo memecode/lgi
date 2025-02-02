@@ -1300,7 +1300,7 @@ NodeSource::~NodeSource()
 {
 	if (nView)
 	{
-		nView->nSrc = 0;
+		nView->nSrc = nullptr;
 	}
 }
 
@@ -1308,7 +1308,7 @@ NodeView::~NodeView()
 {
 	if (nSrc)
 	{
-		nSrc->nView = 0;
+		nSrc->nView = nullptr;
 	}
 }
 
@@ -1356,8 +1356,8 @@ bool ReadVsProjFile(LString File, LString &Ver, LString::Array &Configs)
 	{
 		Ver = r.GetAttr("ToolsVersion");
 
-		LXmlTag *ItemGroup = r.GetChildTag("ItemGroup");
-		if (ItemGroup)
+		if (auto ItemGroup = r.GetChildTag("ItemGroup"))
+		{
 			for (auto c: ItemGroup->Children)
 			{
 				if (c->IsTag("ProjectConfiguration"))
@@ -1367,6 +1367,7 @@ bool ReadVsProjFile(LString File, LString &Ver, LString::Array &Configs)
 						Configs.New() = s;
 				}
 			}
+		}
 	}
 	else return false;
 
@@ -3586,31 +3587,7 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 
 		d->Backend = CreateSystemInterface(d->App, Uri, d->App->GetNetworkLog());
 		if (d->Backend)
-		{
-			auto path = d->Backend->GetBasePath();
-			d->Backend->ReadFolder(SystemIntf::TForeground, path, [this](auto d)
-				{
-					for (auto b = d->First(NULL); b; b = d->Next())
-					{
-						if (d->IsHidden())
-							continue;
-
-						/*
-						LgiTrace("%s: %s, %i bytes\n",	
-							d->IsDir() ? "dir" : "file",
-							d->GetName(), (int)d->GetSize());
-						*/
-
-						if (auto n = new ProjectNode(this))
-						{
-							if (n->Serialize(d))
-								Insert(n);
-							else
-								delete n;
-						}
-					}
-				});
-		}
+			Refresh();
 	}
 
 	return OpenOk;
@@ -3629,6 +3606,59 @@ LString IdeProject::GetBuildFolder() const
 void IdeProject::SetBuildFolder(LString folder)
 {
 	d->BuildFolder = folder;
+}
+
+void IdeProject::Refresh()
+{
+	if (!d->Backend)
+		return;
+
+	auto path = d->Backend->GetBasePath();
+	d->Backend->ReadFolder(SystemIntf::TForeground, path, [this](auto d)
+		{
+			LHashTbl<ConstStrKey<char,false>, ProjectNode*> existing;
+
+			// Make a map of the existing child nodes
+			for (auto c = GetChild(); c; c = c->GetNext())
+			{
+				if (auto pn = dynamic_cast<ProjectNode*>(c))
+					existing.Add(c->GetText(), pn);
+			}
+
+			for (auto b = d->First(NULL); b; b = d->Next())
+			{
+				if (d->IsHidden())
+					continue;
+
+				// Check if an existing node exists...
+				auto name = d->GetName();
+				if (auto e = existing.Find(name))
+				{
+					// It does... so remove it from the map, so that the remain entries are
+					// just what's no longer there on the remote end.
+					existing.Delete(name);
+								
+					// But then continue to the next entry...
+					continue;
+				}
+							
+				// Else it's a new entry and we should create a new node for it...
+
+				if (auto n = new ProjectNode(this))
+				{
+					if (n->Serialize(d))
+						Insert(n);
+					else
+						delete n;
+				}
+			}
+
+			for (auto p: existing)
+			{
+				// Anything left now is no longer on the server...
+				delete p.value;
+			}
+		});
 }
 
 bool IdeProject::SaveFile()

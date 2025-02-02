@@ -17,6 +17,7 @@
 #include "lgi/common/Menu.h"
 #include "lgi/common/FileSelect.h"
 #include "lgi/common/PopupNotification.h"
+#include "lgi/common/RemoteFileSelect.h"
 
 #include "LgiIde.h"
 #include "ProjectNode.h"
@@ -2074,14 +2075,6 @@ void IdeDoc::SetClean(std::function<void(bool)> Callback)
 			Base = proj->GetBasePath();
 		LString LocalPath = GetFullPath();
 
-		auto OnSave = [this, Callback](bool ok)
-		{
-			if (ok)
-				d->Save(nullptr);
-			if (Callback)
-				Callback(ok);
-		};		
-		
 		if (!d->Edit->IsDirty())
 		{
 			if (Callback)
@@ -2089,19 +2082,73 @@ void IdeDoc::SetClean(std::function<void(bool)> Callback)
 		}
 		else if (auto backend = proj ? proj->GetBackend() : NULL)
 		{
-			LStringPipe content(1024);
-			d->Save(&content);
-			backend->Write(SystemIntf::TForeground, LocalPath,
-				content.NewLStr(),
-				[this, Callback](auto err)
+			auto RemoteSave = [this, backend, cb=std::move(Callback)](bool ok)
 				{
-					d->OnSaveComplete(!err);
-					if (Callback)
-						Callback(!err);
-				});
+					if (ok)
+					{
+						// Save the file remotely...
+						auto path = GetFullPath();
+						LStringPipe content(1024);
+						d->Save(&content);
+						backend->Write(
+							SystemIntf::TForeground,
+							path,
+							content.NewLStr(),
+							[this, cb=std::move(cb)](auto err)
+							{
+								d->OnSaveComplete(!err);
+								if (cb)
+									cb(!err);
+							});
+					}
+					else if (cb)
+					{
+						cb(false);
+					}
+				};
+
+			if (!LocalPath)
+			{
+				// Ask for a file name...
+				RemoteFileSelect(
+					this,
+					backend,
+					FileSelectType::SelectSave,
+					backend->GetBasePath(),
+					[this, backend, RemoteSave=std::move(RemoteSave)](auto fn)
+					{
+						if (fn)
+						{
+							// Set path... such that GetFullPath returns the right thing
+							d->SetFileName(fn);
+							auto path = GetFullPath();
+							LAssert(path == fn);
+
+							// Save the file...
+							RemoteSave(true);
+						}
+						else
+						{
+							RemoteSave(false);
+						}
+					});
+			}
+			else
+			{
+				// Already have a path...
+				RemoteSave(true);
+			}
 		}
 		else
 		{
+			auto OnSave = [this, Callback](bool ok)
+				{
+					if (ok)
+						d->Save(nullptr);
+					if (Callback)
+						Callback(ok);
+				};
+		
 			if (!LFileExists(LocalPath))
 			{
 				// We need a valid filename to save to...			

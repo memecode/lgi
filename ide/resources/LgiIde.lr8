@@ -727,6 +727,7 @@
 			<String Ref="247" Cid="594" Define="IDM_HAIKU" en="Haiku" />
 			<String Ref="248" Cid="595" Define="IDM_ALL_OS" en="All OS" />
 			<String Ref="244" Cid="597" Define="ID_REFRESH_SYM_CACHE" en="Refresh Symbol Cache" />
+			<String Ref="251" Cid="598" Define="ID_REFRESH" en="Refresh" />
 		</string-group>
 		<submenu Ref="175">
 			<menuitem Ref="174" Shortcut="CtrlCmd+N" />
@@ -736,6 +737,7 @@
 			<menuitem Ref="171" Shortcut="CtrlCmd+Shift+A" />
 			<menuitem Ref="170" Shortcut="CtrlCmd+W" />
 			<menuitem Ref="169" />
+			<menuitem Ref="251" Shortcut="CtrlCmd+R" />
 			<menuitem Sep="1" />
 			<menuitem Ref="168" Shortcut="CtrlCmd+," />
 			<menuitem Sep="1" />

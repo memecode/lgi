@@ -539,20 +539,62 @@ const char *ProjectNode::GetText(int c)
 	return sName ? sName.Get() : Untitled;
 }
 
+void ProjectNode::Refresh()
+{
+	childrenReq = false;
+	OnExpand(true);
+}
+
 void ProjectNode::OnExpand(bool b)
 {
-	if (placeholder && !childrenReq)
+	if (Type == NodeDir &&
+		!childrenReq &&
+		b)
 	{
 		childrenReq = true;
 		if (auto be = Project->GetBackend())
 		{
+			// This could be either:
+			// a) the first time the folder node is expanded
+			// b) the user is refreshing the listing
 			be->ReadFolder(SystemIntf::TForeground, sFile, [this](auto d)
 				{
+					bool first = placeholder != nullptr;
+					
 					DeleteObj(placeholder);
+
+					LHashTbl<ConstStrKey<char,false>, ProjectNode*> existing;
+					if (!first)
+					{
+						// Make a map of the existing child nodes
+						for (auto c = GetChild(); c; c = c->GetNext())
+						{
+							if (auto pn = dynamic_cast<ProjectNode*>(c))
+								existing.Add(c->GetText(), pn);
+						}
+					}
+
 					for (auto b = d->First(NULL); b; b = d->Next())
 					{
 						if (d->IsHidden())
 							continue;
+
+						if (!first)
+						{
+							// Check if an existing node exists...
+							auto name = d->GetName();
+							if (auto e = existing.Find(name))
+							{
+								// It does... so remove it from the map, so that the remain entries are
+								// just what's no longer there on the remote end.
+								existing.Delete(name);
+								
+								// But then continue to the next entry...
+								continue;
+							}
+							
+							// Else it's a new entry and we should create a new node for it...
+						}
 
 						if (auto n = new ProjectNode(Project))
 						{
@@ -561,6 +603,12 @@ void ProjectNode::OnExpand(bool b)
 							else
 								delete n;
 						}
+					}
+
+					for (auto p: existing)
+					{
+						// Anything left now is no longer on the server...
+						delete p.value;
 					}
 				});
 		}

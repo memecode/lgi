@@ -4079,10 +4079,15 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_NEW:
 		{
+			if (!d->Mdi)
+				break;
+
 			IdeDoc *Doc;
 			d->Docs.Insert(Doc = new IdeDoc(this, 0, 0));
-			if (Doc && d->Mdi)
+			if (Doc)
 			{
+				Doc->SetProject(RootProject());
+
 				LRect p = d->Mdi->NewPos();
 				Doc->LView::SetPos(p);
 				Doc->Attach(d->Mdi);
@@ -4108,9 +4113,8 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_SAVE:
 		{
-			IdeDoc *Top = TopDoc();
-			if (Top)
-				Top->SetClean(NULL);
+			if (auto Top = TopDoc())
+				Top->SetClean(nullptr);
 			break;
 		}
 		case IDM_SAVEAS:
@@ -4144,7 +4148,20 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			Name(AppName);
 			break;
 		}
-		
+		case ID_REFRESH:
+		{
+			if (auto ti = d->Tree->Selection())
+			{
+				if (auto node = dynamic_cast<ProjectNode*>(ti))
+					node->Refresh();					
+				else if (auto proj = dynamic_cast<IdeProject*>(ti))
+					proj->Refresh();
+				else
+					GetBuildLog()->Print("%s:%i - not a project or node.\n", _FL);
+			}
+			else GetBuildLog()->Print("%s:%i - no selection.\n", _FL);
+			break;
+		}
 		
 		//
 		// Editor

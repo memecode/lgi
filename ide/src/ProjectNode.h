@@ -68,6 +68,7 @@ public:
 	void SetClean();
 	void AddNodes(LArray<ProjectNode*> &Nodes);
 	bool HasNode(ProjectNode *Node);
+	void Refresh();
 	
 	// Props
 	int GetId();

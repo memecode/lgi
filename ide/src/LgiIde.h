@@ -157,13 +157,9 @@ class NodeSource
 	friend class NodeView;
 
 protected:
-	NodeView *nView;
+	NodeView *nView = nullptr;
 
 public:
-	NodeSource()
-	{
-		nView = 0;
-	}
 	virtual ~NodeSource();
 
 	virtual LString GetFullPath() = 0;
@@ -180,7 +176,7 @@ class NodeView
 	friend class NodeSource;
 
 protected:
-	NodeSource *nSrc;
+	NodeSource *nSrc = nullptr;
 
 public:
 	NodeView(NodeSource *s)

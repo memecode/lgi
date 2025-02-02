@@ -175,6 +175,7 @@ public:
 	class SystemIntf *GetBackend();
 	LString GetBuildFolder() const;
 	void SetBuildFolder(LString folder);
+	void Refresh();
 
 	// User file settings
 	bool GetExpanded(int Id);
