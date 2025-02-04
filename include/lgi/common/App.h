@@ -202,19 +202,19 @@ public:
 	LWindow *AppWnd = NULL;
 
 	/// Returns true if the LApp object initialized correctly
-	bool IsOk() const;
+	bool IsOk() const override;
 	operator bool() const { return IsOk(); }
 	
 	/// Returns this processes ID
-	OsProcessId GetProcessId();
+	OsProcessId GetProcessId() override;
 	
 	/// Returns the thread currently running the active message loop
 	OsThread _GetGuiThread();
-	OsThreadId GetGuiThreadId();
-	bool InThread();
+	OsThreadId GetGuiThreadId() override;
+	bool InThread() override;
 	
 	/// Returns the number of CPU cores the machine has
-	int GetCpuCount();
+	int GetCpuCount() override;
 
 	/// Construct the object
 	LApp
@@ -231,13 +231,13 @@ public:
 	virtual ~LApp();
 
 	/// Resets the arguments
-	void SetAppArgs(OsAppArguments &AppArgs);
+	void SetAppArgs(OsAppArguments &AppArgs) override;
 	
 	/// Returns the arguemnts
-	OsAppArguments *GetAppArgs();
+	OsAppArguments *GetAppArgs() override;
 
 	/// Returns the n'th argument as a heap string. Free with DeleteArray(...).
-	const char *GetArgumentAt(int n);
+	const char *GetArgumentAt(int n) override;
 	
 	/// Enters the message loop.
 	bool Run
@@ -246,23 +246,23 @@ public:
 		OnIdleProc IdleCallback = NULL,
 		/// Param for IdleCallback
 		void *IdleParam = NULL
-	);
+	) override;
 	
 	/// Event called to process the command line
-	void OnCommandLine();
+	void OnCommandLine() override;
 	
 	/// Event called to process files dropped on the application
-	void OnReceiveFiles(LArray<const char*> &Files);
+	void OnReceiveFiles(LArray<const char*> &Files) override;
 
 	/// Event called to process URLs given to the application
-	void OnUrl(const char *Url);
+	void OnUrl(const char *Url) override;
 	
 	/// Exits the event loop with the code specified
 	void Exit
 	(
 		/// The application exit code.
 		int Code = 0
-	);
+	) override;
 	
 	/// \brief Parses the command line for a switch
 	/// \return true if the option exists.
@@ -272,7 +272,7 @@ public:
 		const char *Option,
 		/// String to receive the value (if any) of the option
 		LString &Value
-	);
+	) override;
 
 	/// \brief Parses the command line for a switch
 	/// \return true if the option exists.
@@ -284,7 +284,7 @@ public:
 		char *Dst = NULL,
 		/// The buffer size in bytes
 		int DstSize = 0
-	);
+	) override;
 
 	/// Return the path to the Lgi config file... (not the same as the application options, more global Lgi apps settings)
 	LString GetConfigPath();
@@ -296,7 +296,7 @@ public:
 	bool SetConfig(const char *Variable, const char *Value) override;
 
 	/// Gets the control with the keyboard focus
-	LViewI *GetFocus();
+	LViewI *GetFocus() override;
 	
 	/// Gets the MIME type of a file
 	/// \returns the mime type or NULL if unknown.
@@ -304,7 +304,7 @@ public:
 	(
 		/// The file to identify
 		const char *File
-	);
+	) override;
 
     /// Gets the applications that can handle a file of a certain mime type
 	bool GetAppsForMimeType(const char *Mime, LArray<LAppInfo> &Apps);
@@ -314,10 +314,10 @@ public:
 	(
 		/// One of #LGI_MET_DECOR_X, #LGI_MET_DECOR_Y
 		LSystemMetric Metric
-	);
+	) override;
 
 	/// Get the mouse hook instance
-	LMouseHook *GetMouseHook();
+	LMouseHook *GetMouseHook() override;
 
 	/// Gets the singleton symbol lookup class
 	class LSymLookup *GetSymLookup();
@@ -326,7 +326,7 @@ public:
 	bool IsElevated();
 
 	/// Gets the font cache
-	class LFontCache *GetFontCache();
+	class LFontCache *GetFontCache() override;
 
 	// OS Specific
 	#if defined(LGI_SDL)

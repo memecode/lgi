@@ -252,65 +252,65 @@ public:
 	virtual ~IFtp();
 
 	/// \returns the current charset
-	const char *GetCharset();
+	const char *GetCharset() override;
 	/// Set the charset used for converting ftp listings to local utf
-	void SetCharset(const char *cs);
+	void SetCharset(const char *cs) override;
 	/// \returns the active connections only setting.
-	bool IsForceActive() { return ForceActive; }
+	bool IsForceActive() override { return ForceActive; }
 	/// Set the active connections only option
-	void IsForceActive(bool i) { ForceActive = i; }
-	bool IsLongList() { return LongList; }
-	void IsLongList(bool i) { LongList = i; }
-	bool IsShowHidden() { return ShowHidden; }
-	void IsShowHidden(bool i) { ShowHidden = i; }
-	Progress *GetMeter() { return Meter; }
-	void SetMeter(Progress *m) { Meter = m; }
-	bool GetAuthed() { return Authenticated; }
-	const char *GetError();
+	void IsForceActive(bool i) override { ForceActive = i; }
+	bool IsLongList() override { return LongList; }
+	void IsLongList(bool i) override { LongList = i; }
+	bool IsShowHidden() override { return ShowHidden; }
+	void IsShowHidden(bool i) override { ShowHidden = i; }
+	Progress *GetMeter() override { return Meter; }
+	void SetMeter(Progress *m) override { Meter = m; }
+	bool GetAuthed() override { return Authenticated; }
+	const char *GetError() override;
 	bool GetUseTLS();
 	void SetUseTLS(bool b);
 
 	/// Returns the socket used for the command connection.
-	LSocketI *Handle() { return Socket; }
+	LSocketI *Handle() override { return Socket; }
 	
 	/// Opens a new command connection to a remote server
-	FtpOpenStatus Open(LSocketI *S, char *RemoteHost, int Port, char *User, char *Password);
+	FtpOpenStatus Open(LSocketI *S, char *RemoteHost, int Port, char *User, char *Password) override;
 	/// Returns the host and port
-	void GetHost(LString *Host, int *Port);
+	void GetHost(LString *Host, int *Port) override;
 	/// Closes the currently active connection
-	bool Close();
+	bool Close() override;
 	/// \returns true if the connection is open and active
-	bool IsOpen();
-	void Noop();
+	bool IsOpen() override;
+	void Noop() override;
 
 	/// \returns the current remote folder.
-	LString GetDir();
+	LString GetDir() override;
 	/// Sets the current remote folder.
-	bool SetDir(const char *Dir);
+	bool SetDir(const char *Dir) override;
 	/// Create a new sub-folder under the current remote folder.
-	bool CreateDir(const char *Dir);
+	bool CreateDir(const char *Dir) override;
 	/// Delete a sub-folder under the current folder.
-	bool DeleteDir(const char *Dir);
+	bool DeleteDir(const char *Dir) override;
 	/// List the current remote folder contents.
 	/// Caller is responsible for freeing the objects in Dir (e.g. use LArray::DeleteObjects).
-	bool ListDir(LArray<IFtpEntry*> &Dir);
+	bool ListDir(LArray<IFtpEntry*> &Dir) override;
 	/// Move up to the parent remote folder.
-	bool UpDir();
+	bool UpDir() override;
 	
 	/// Delete a file in the current remote folder
-	bool DeleteFile(const char *Remote);
+	bool DeleteFile(const char *Remote) override;
 	/// Download a file from the current remote folder
-	bool DownloadStream(LStream *out, IFtpEntry *Remote, bool Binary = true);
+	bool DownloadStream(LStream *out, IFtpEntry *Remote, bool Binary = true) override;
 	/// Upload a local file to the current remote folder
-	bool UploadStream(LStream *in, const char *Remote, bool Binary = true);
+	bool UploadStream(LStream *in, const char *Remote, bool Binary = true) override;
 	/// Rename a file or folder in the current remote folder
-	bool RenameFile(const char *From, const char *To);
+	bool RenameFile(const char *From, const char *To) override;
 	/// Set the permissions on a file in the current remote folder
-	bool SetPerms(const char *File, LPermissions Perms);
+	bool SetPerms(const char *File, LPermissions Perms) override;
 	/// Set the resume point before downloading a file
-	bool ResumeAt(int64 Pos);
+	bool ResumeAt(int64 Pos) override;
 	/// Abort the current transfer
-	void Abort() { AbortTransfer = true; }
+	void Abort() override { AbortTransfer = true; }
 };
 
 #endif
