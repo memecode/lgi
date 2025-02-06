@@ -216,7 +216,7 @@ struct Connection
 		return p.NewLStr();
 	}
 
-	bool Read(std::function<void(Block*)> cb)
+	bool Read(std::function<void(Block*)> onMsg, std::function<void()> onDisconnect)
 	{
 		// Check for data
 		if (!sock ||
@@ -230,6 +230,8 @@ struct Connection
 			// printf("read disconnected: %i\n", (int)rd);
 			sock->Close();
 			connected = false;
+			if (onDisconnect)
+				onDisconnect();
 			return false;
 		}
 		used += rd;
@@ -248,7 +250,8 @@ struct Connection
 					// LOG("read: got msg %i bytes\n", (int)bytes);
 
 					// Call the callback
-					cb(b);
+					if (onMsg)
+						onMsg(b);
 
 					// Remove the message from the buffer
 					auto remaining = used - bytes;
@@ -887,10 +890,19 @@ struct LCommsBusPriv :
 				if (p->IsConnected())
 				{
 					// Check for data on the connection:
-					p->Read([this, p](Block *blk)
+					p->Read
+					(
+						// On message:
+						[this, p](Block *blk)
 						{
 							OnPeerTcp(p, blk);
-						});
+						},
+						// On disconnect:
+						[this, p]()
+						{
+							LOG("Peer disconnected: %s\n", p->hostName.Get());
+						}
+					);
 				}
 				else if (now - p->connectTs >= CONNECT_ATTEMPT)
 				{
@@ -996,8 +1008,7 @@ struct LCommsBusPriv :
 
 	void Que(Block::Auto &blk)
 	{
-		if (!Lock(_FL))
-			return;
+		Auto lck(this, _FL);
 
 		LOG("%s que msg %s\n", Describe().Get(), blk->ToString().Get());
 
@@ -1006,7 +1017,10 @@ struct LCommsBusPriv :
 		info.recentSendTs = 0;
 		info.blk = blk.Release();
 
-		Unlock();
+		for (auto &i: writeQue)
+		{
+			LOG("	writeque: %s\n", i.blk->ToString().Get());
+		}
 	}
 
 	bool ServerSend(Block *blk, bool localOnly)
@@ -1114,6 +1128,8 @@ struct LCommsBusPriv :
 	
 	void ServerTrySend(bool firstAttempt)
 	{
+		LAssert(isServer);
+
 		if (Lock(_FL))
 		{
 			for (size_t i=0; i<writeQue.Length(); i++)
@@ -1188,6 +1204,30 @@ struct LCommsBusPriv :
 		if (writeQue.Length() > 0)
 			LOG("%s warning: " LPrintfSizeT " msgs still queued on the server\n", Describe().Get(), writeQue.Length());
 		#endif
+	}
+
+	void OnClientDisconnect(CommsClient *c)
+	{
+		// Clear out any endpoints that belonged to the disconnecting client:
+		Auto lck(this, _FL);
+		LAssert(isServer);
+		bool changed = false;
+		for (unsigned i=0; i<endpoints.Length(); i++)
+		{
+			auto &ep = endpoints[i];
+			bool match = ep.remote == c->uid;
+			if (match)
+			{
+				LOG("%s: removing endpoint %s for client %s\n", __FUNCTION__, ep.addr.Get(), c->uid.Get());
+				endpoints.DeleteAt(i--);
+				changed = true;
+			}
+		}
+		if (changed &&
+			onEndpointChange)
+		{
+			onEndpointChange();
+		}
 	}
 
 	int Server()
@@ -1274,74 +1314,84 @@ struct LCommsBusPriv :
 						break;
 					}
 
-					c->Read([this, c](auto blk) mutable
-					{
-						LOG("%s received msg %s\n", Describe().Get(), blk->ToString().Get());
-						switch (blk->GetId())
+					c->Read
+					(
+						// On message:
+						[this, c](auto blk) mutable
 						{
-							case MUid:
+							LOG("%s received msg %s\n", Describe().Get(), blk->ToString().Get());
+							switch (blk->GetId())
 							{
-								c->uid = blk->data;
-								LOG("%s set client uid=%s\n", Describe().Get(), c->uid.Get());
-								break;
-							}
-							case MCreateEndpoint:
-							{
-								auto lines = LString(blk->data).SplitDelimit("\r\n");
-								if (lines.Length() != 2)
+								case MUid:
 								{
-									LOG("%s error in ep fmt=%s\n", Describe().Get(), blk->data);
+									c->uid = blk->data;
+									LOG("%s set client uid=%s\n", Describe().Get(), c->uid.Get());
+									break;
 								}
-								else
+								case MCreateEndpoint:
 								{
-									auto ep = lines[0];
-									auto remoteUid = lines[1];
-									if (Lock(_FL))
+									auto lines = LString(blk->data).SplitDelimit("\r\n");
+									if (lines.Length() != 2)
 									{
-										bool found = false;
-										for (auto &e: endpoints)
+										LOG("%s error in ep fmt=%s\n", Describe().Get(), blk->data);
+									}
+									else
+									{
+										auto ep = lines[0];
+										auto remoteUid = lines[1];
+										if (Lock(_FL))
 										{
-											if (e.addr == ep)
+											bool found = false;
+											for (auto &e: endpoints)
 											{
-												found = true;
+												if (e.addr == ep)
+												{
+													found = true;
+													e.remote = remoteUid;
+													OnEndpoint(e);
+													break;
+												}
+											}
+											if (!found)
+											{
+												auto &e = endpoints.New();
+												e.addr = ep;
 												e.remote = remoteUid;
 												OnEndpoint(e);
-												break;
 											}
+											Unlock();
 										}
-										if (!found)
-										{
-											auto &e = endpoints.New();
-											e.addr = ep;
-											e.remote = remoteUid;
-											OnEndpoint(e);
-										}
-										Unlock();
 									}
+									break;
 								}
-								break;
-							}
-							case MSendMsg:
-							{
-								if (!ServerSend(blk, false))
+								case MSendMsg:
 								{
-									// This can happen when the server doesn't know about the endpoint yet...
-									// So put the message in the writeQue and hopefully the endpoint will
-									// turn up soon.
-									auto copy = blk->Clone();
-									Que(copy);
+									if (!ServerSend(blk, false))
+									{
+										// This can happen when the server doesn't know about the endpoint yet...
+										// So put the message in the writeQue and hopefully the endpoint will
+										// turn up soon.
+										auto copy = blk->Clone();
+										Que(copy);
+									}
+									break;
 								}
-								break;
+								default:
+								{
+									LOG("%s error unknown msg %s\n", Describe().Get(), blk->ToString().Get());
+									break;
+								}
 							}
-							default:
-							{
-								LOG("%s error unknown msg %s\n", Describe().Get(), blk->ToString().Get());
-								break;
-							}
-						}
 						
-						c->lastSeen = LCurrentTime();
-					});
+							c->lastSeen = LCurrentTime();
+						},
+						// On disconnect:
+						[this, c]()
+						{
+							// Remove any end points that the client has:
+							OnClientDisconnect(c);
+						}
+					);
 				}
 
 				// Check writeQue for outgoing data...
@@ -1387,8 +1437,11 @@ struct LCommsBusPriv :
 			e.remote.Get(),
 			(bool)e.local);
 
-		// Seeing as a new endpoint turned up... try and send any queued messages
-		ServerTrySend(false);
+		if (isServer)
+		{
+			// Seeing as a new endpoint turned up... try and send any queued messages
+			ServerTrySend(false);
+		}
 		
 		// Send the change event if configured:
 		if (onEndpointChange)
@@ -1437,10 +1490,12 @@ struct LCommsBusPriv :
 						// Also tell the server about our local endpoints
 						if (Lock(_FL))
 						{
+							LOG("clientConnect: has %i endpoints\n", (int)endpoints.Length());
 							for (auto &ep: endpoints)
 							{
 								if (ep.local)
 								{
+									LOG("clientConnect: send local ep %s\n", ep.addr.Get());
 									if (auto blk = ep.MakeMsg(GetUid()))
 									{
 										auto sent = c.Write(blk);
@@ -1466,37 +1521,44 @@ struct LCommsBusPriv :
 			}
 			else
 			{
-				c.Read([this](auto blk)
-				{
-					LOG("%s received msg %s\n", Describe().Get(), blk->ToString().Get());
-
-					switch (blk->GetId())
+				c.Read
+				(
+					// On message:
+					[this](auto blk)
 					{
-						case MSendMsg:
-						{
-							if (Lock(_FL))
-							{
-								auto to = blk->FirstLine();
-								for (auto &ep: endpoints)
-								{
-									if (ep.addr.Equals(to))
-									{
-										if (ep.local)
-											ep.local(blk->SecondLine());
-										else
-											LOG("%s error: not local ep %s\n", Describe().Get(), to.Get());
-										break;
-									}
-								}
+						LOG("%s received msg %s\n", Describe().Get(), blk->ToString().Get());
 
-								Unlock();
+						switch (blk->GetId())
+						{
+							case MSendMsg:
+							{
+								if (Lock(_FL))
+								{
+									auto to = blk->FirstLine();
+									for (auto &ep: endpoints)
+									{
+										if (ep.addr.Equals(to))
+										{
+											if (ep.local)
+												ep.local(blk->SecondLine());
+											else
+												LOG("%s error: not local ep %s\n", Describe().Get(), to.Get());
+											break;
+										}
+									}
+
+									Unlock();
+								}
+								break;
 							}
-							break;
+							default:
+								break;
 						}
-						default:
-							break;
-					}
-				});
+					},
+					// On disconnect, do nothing...
+					// the above code will reconnect when it can.
+					nullptr
+				);
 				
 				if (Lock(_FL))
 				{
@@ -1563,10 +1625,11 @@ struct LCommsBusPriv :
 		return 0;
 	}
 };
-	
-LCommsBus::LCommsBus(LStream *log, LView *commsState)
+
+LCommsBus::LCommsBus(LStream *logger, LView *commsState) :
+	log(logger)
 {
-	d = new LCommsBusPriv(log, commsState);
+	d = new LCommsBusPriv(logger, commsState);
 }
 
 LCommsBus::~LCommsBus()
@@ -1630,8 +1693,8 @@ bool LCommsBus::Listen(LString endPoint, std::function<void(LString)> cb)
 		auto &e = d->endpoints.New();
 		e.addr = endPoint;
 		e.local = cb;
-		d->OnEndpoint(e);
 		msg.Printf("%s\n%s", endPoint.Get(), d->GetUid());
+		d->OnEndpoint(e);
 	}
 	d->Unlock();
 
@@ -1639,8 +1702,20 @@ bool LCommsBus::Listen(LString endPoint, std::function<void(LString)> cb)
 		!d->isServer) // The server doesn't need to tell anyone else about endpoints
 	{		
 		if (auto blk = Block::New(MCreateEndpoint, msg))
+		{
+			LOG("%s: queuing MCreateEndpoint\n", __FUNCTION__);
 			d->Que(blk);
+		}
+		else
+		{
+			LOG("%s: Block::New failed\n", __FUNCTION__);
+		}
 	}
+	else
+	{
+		LOG("%s: is server\n", __FUNCTION__);
+	}
+
 	return true;
 }
 

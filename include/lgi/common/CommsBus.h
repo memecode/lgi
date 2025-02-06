@@ -3,7 +3,8 @@
 class LgiClass LCommsBus
 {
 	struct LCommsBusPriv *d;
-	
+	LStream *log = nullptr;
+
 public:
 	enum TState
 	{
@@ -15,7 +16,7 @@ public:
 
 	using TCallback = std::function<void(TState)>;
 
-	LCommsBus(LStream *log = NULL, LView *commsState = nullptr);
+	LCommsBus(LStream *logger = NULL, LView *commsState = nullptr);
 	~LCommsBus();
 	
 	bool IsServer() const;
