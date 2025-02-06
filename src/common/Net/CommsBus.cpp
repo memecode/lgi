@@ -1127,7 +1127,9 @@ struct LCommsBusPriv :
 						bool timedOut = info.firstSendTs && ((now - info.firstSendTs) >= SEND_TIMEOUT);
 						if (timedOut)
 						{
-							LOG("Deleting expired msg: %s\n", info.blk->FirstLine().Get());
+							LOG("Deleting expired msg: %s\n%s\n",
+								info.blk->FirstLine().Get(),
+								peers->ServerStateData().Get());
 							writeQue.DeleteAt(i--, true);
 						}
 						else if (!info.firstSendTs || (now - info.recentSendTs) > RESEND_TIMEOUT)
