@@ -3047,9 +3047,6 @@ bool VcFolder::ParseRemoteFind(int Result, LString s, ParseParams *Params)
 	if (!Params || !s)
 		return false;
 
-	auto Parent = Params->Leaf ? static_cast<LTreeItem*>(Params->Leaf) : static_cast<LTreeItem*>(this);
-	LUri u(Params->Str);
-
 	auto Lines = s.SplitDelimit("\r\n");
 	if (Result)
 	{
@@ -3058,6 +3055,10 @@ bool VcFolder::ParseRemoteFind(int Result, LString s, ParseParams *Params)
 		return false;
 	}
 
+	auto Parent = Params->Leaf ? static_cast<LTreeItem*>(Params->Leaf) : static_cast<LTreeItem*>(this);
+	LUri u(Params->Str);
+
+	// Parse the output
 	LArray<SshFindEntry> Entries;
 	for (size_t i=1; i<Lines.Length(); i++)
 	{
@@ -3068,8 +3069,20 @@ bool VcFolder::ParseRemoteFind(int Result, LString s, ParseParams *Params)
 	}
 	Entries.Sort(SshFindEntry::Compare);
 
+	// Get a map of existing entries:
+	LHashTbl<ConstStrKey<char,false>, LTreeItem*> existing;
+	for (auto i = Parent->GetChild(); i; i = i->GetNext())
+	{
+		auto txt = i->GetText();
+		existing.Add(txt, i);
+	}
+
 	for (auto &Dir: Entries)
 	{
+		auto name = Dir.GetName();
+		if (existing.Find(name))
+			continue;
+
 		if (Dir.IsDir())
 		{
 			if (Dir.GetName()[0] != '.')
