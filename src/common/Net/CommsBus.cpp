@@ -1010,7 +1010,7 @@ struct LCommsBusPriv :
 	{
 		Auto lck(this, _FL);
 
-		LOG("%s que msg %s\n", Describe().Get(), blk->ToString().Get());
+		LOG("%s que msg '%s'\n", Describe().Get(), blk->ToString().Get());
 
 		auto &info = writeQue.New();
 		info.firstSendTs = 0;
