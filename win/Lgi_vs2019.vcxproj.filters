@@ -530,6 +530,9 @@
     <ClCompile Include="..\src\common\Gdc2\Filters\Tiff.cpp">
       <Filter>Source Files\Graphics\Filters</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\posix\SubProcess.cpp">
+      <Filter>Source Files\Core\Process</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\lgi\common\About.h">

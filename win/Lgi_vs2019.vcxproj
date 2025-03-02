@@ -352,6 +352,11 @@
     <ClCompile Include="..\src\common\Widgets\ToolBar.cpp" />
     <ClCompile Include="..\src\common\Widgets\Tree.cpp" />
     <ClCompile Include="..\src\common\Widgets\List.cpp" />
+    <ClCompile Include="..\src\posix\SubProcess.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\src\win\Gdc2\Gdc2.cpp" />
     <ClCompile Include="..\src\win\Gdc2\GdiLeak.cpp" />
     <ClCompile Include="..\src\win\Gdc2\MemDC.cpp" />

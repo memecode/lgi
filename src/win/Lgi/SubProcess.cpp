@@ -676,6 +676,20 @@ int32 LSubProcess::Communicate(LStreamI *Out, LStreamI *In, LCancel *Cancel)
 
 	while (IsRunning() && NOT_CANCELLED)
 	{
+		if (Cancel)
+		{
+			// If there is the possibility of cancelling the operation,
+			// We should peek the input stream and check for input.
+			// Otherwise the Read could hang and the Cancel object wouldn't
+			// be checked for some time.
+			if (!Peek())
+			{
+				// Try not to use 100% of a CPU core.
+				LSleep(1);
+				continue;
+			}
+		}
+		
 		r = Read(Buf, sizeof(Buf));
 		if (r > 0 && Out)
 			Out->Write(Buf, r);
