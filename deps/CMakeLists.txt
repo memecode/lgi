@@ -40,7 +40,7 @@ function(GitProject NAME URI BRANCH)
     set(DIR "${DEPS}/${NAME}")
     message(STATUS "${NAME} = ${DIR}")
     if(NOT EXISTS ${DIR})
-        execute_process(COMMAND git clone -b ${BRANCH} ${URI} ${DIR}
+        execute_process(COMMAND git clone --recurse-submodules -b ${BRANCH} ${URI} ${DIR}
             RESULT_VARIABLE clone_result
             OUTPUT_VARIABLE clone_out)
         if(${clone_result})
