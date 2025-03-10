@@ -14,6 +14,16 @@ IdeCommon::~IdeCommon()
 	Remove();
 }
 
+LStream *IdeCommon::GetLog()
+{
+	if (Project)
+	{
+		if (auto app = Project->GetApp())
+			return app->GetBuildLog();
+	}
+	return nullptr;
+}
+
 bool IdeCommon::OnOpen(LProgressDlg *Prog, LXmlTag *Src)
 {
 	if (Prog)
@@ -226,31 +236,66 @@ bool IdeCommon::AddFiles(AddFilesProgress *Prog, const char *Path)
 
 IdeCommon *IdeCommon::GetSubFolder(IdeProject *Project, char *Name, bool Create)
 {
-	if (Name)
+	if (!Name)
+		return nullptr;
+
+	for (auto i: *this)
 	{
-		for (auto i:*this)
+		auto c = dynamic_cast<ProjectNode*>(i);
+		if (c &&
+			c->GetType() == NodeDir &&
+			!Stricmp(c->GetName(), Name))
 		{
-			ProjectNode *c = dynamic_cast<ProjectNode*>(i);
-			if (!c) break;
-
-			if (c->GetType() == NodeDir)
-			{
-				if (c->GetName() && stricmp(c->GetName(), Name) == 0)
-				{
-					return c;
-				}
-			}
-		}
-
-		ProjectNode *New = new ProjectNode(Project);
-		if (New)
-		{
-			New->SetName(Name);
-			InsertTag(New);
-			Project->SetDirty();
-			return New;
+			return c;
 		}
 	}
 
-	return 0;
+	if (!Create)
+		return nullptr;
+	
+	if (auto backend = Project ? Project->GetBackend() : nullptr)
+	{
+		LString base;
+		ProjectNode *node;
+		if (node = dynamic_cast<ProjectNode*>(this))
+		{
+			// sub folder
+			base = node->GetFullPath();
+		}
+		else
+		{
+			// child of the root folder
+			base = backend->GetBasePath();
+		}
+
+		if (base)
+		{
+			if (auto newPath = backend->JoinPath(base, Name))
+			{
+				backend->CreateFolder(newPath, false, [this, Project, node](auto status)
+					{
+						auto log = GetLog();
+						if (!status)
+						{
+							if (log) log->Print("%s:%i - Failed to create folder.\n", _FL);
+							return;
+						}
+
+						if (node)
+							node->Refresh();
+						else if (Project)
+							Project->Refresh();
+					});
+			}
+		}
+	}
+	else if (auto New = new ProjectNode(Project))
+	{
+		New->SetName(Name);
+		InsertTag(New);
+		Project->SetDirty();
+		return New;
+	}
+
+	return nullptr;
 }

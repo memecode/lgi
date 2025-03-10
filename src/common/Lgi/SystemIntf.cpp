@@ -435,10 +435,11 @@ public:
 
 	LString JoinPath(LString base, LString leaf)
 	{
+		LString allSep("\\/");
 		LString::Array a;
 		a.SetFixedLength(false);
-		a += base.SplitDelimit("\\/");
-		a += leaf.SplitDelimit("\\/");
+		a += base.SplitDelimit(allSep);
+		a += leaf.SplitDelimit(allSep);
 		for (size_t i = 0; i < a.Length(); i++)
 		{
 			if (a[i] == ".")
@@ -449,6 +450,10 @@ public:
 				a.DeleteAt(i--, true);
 			}
 		}
+
+		if (strchr(allSep, base(0)))
+			return remoteSep + remoteSep.Join(a);
+
 		return remoteSep.Join(a);
 	}
 

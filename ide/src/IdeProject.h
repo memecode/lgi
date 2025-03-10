@@ -89,6 +89,7 @@ public:
 	~IdeCommon();
 
 	IdeProject *GetProject() { return Project; }
+	LStream *GetLog();
 	bool OnOpen(LProgressDlg *Prog, LXmlTag *Src);	
 	void CollectAllSubProjects(LArray<IdeProject*> &c);
 	void CollectAllSource(LArray<LString> &c, SysPlatform Platform);
