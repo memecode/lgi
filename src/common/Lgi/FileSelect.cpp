@@ -2374,6 +2374,7 @@ bool LGetUsersLinks(LString::Array &Links)
 		return false;
 	
 	#if defined(WINDOWS)
+	
 		LDirectory d;
 		for (int b = d.First(p); b; b = d.Next())
 		{
@@ -2388,31 +2389,50 @@ bool LGetUsersLinks(LString::Array &Links)
 				}
 			}
 		}		
+		
 	#elif defined(LINUX)
-		p += "bookmarks";
-		if (!p.Exists())
+	
+		auto gtk3bookmarks = p / "bookmarks";
+		auto kdeUserPlaces = p / "user-places.xbel";
+		
+		if (gtk3bookmarks.Exists())
 		{
-			LgiTrace("%s:%i - Bookmark folder '%s' doesn't exist.\n", _FL, p.GetFull().Get());
+			auto Txt = LReadFile(gtk3bookmarks);
+			if (!Txt)
+			{
+				LgiTrace("%s:%i - failed to read '%s'\n", _FL, gtk3bookmarks.GetFull().Get());
+				return false;
+			}
+			
+			auto lines = Txt.SplitDelimit("\r\n");
+			for (auto line: lines)
+			{
+				LUri u(line);
+				if (u.sProtocol.Equals("file"))
+					Links.New() = u.sPath;
+			}
+		}
+		else if (kdeUserPlaces.Exists())
+		{
+			
+		}
+		else
+		{
+			LgiTrace("%s:%i - bookmark files not found:\n"
+					"	%s\n"
+					"	%s\n",
+					_FL,
+					gtk3bookmarks.GetFull().Get(),
+					kdeUserPlaces.GetFull().Get());
 			return false;
 		}
 			
-		auto Txt = LReadFile(p);
-		if (!Txt)
-		{
-			LgiTrace("%s:%i - failed to read '%s'\n", _FL, p);
-			return false;
-		}
 		
-		auto lines = Txt.SplitDelimit("\r\n");
-		for (auto line: lines)
-		{
-			LUri u(line);
-			if (u.sProtocol.Equals("file"))
-				Links.New() = u.sPath;
-		}
 	#else
+	
 		LAssert(!"Not impl yet.");
 		return false;
+		
 	#endif
 	
 	return true;

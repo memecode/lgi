@@ -1122,8 +1122,16 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			#elif defined(LINUX)
 
 				char p[MAX_PATH_LEN];
-				if (LMakePath(p, sizeof(p), Home, ".config/gtk-3.0"))
+				if (LMakePath(p, sizeof(p), Home, ".config/gtk-3.0") &&
+					LDirExists(p))
+				{
 					Path = p;
+				}
+				else if (LMakePath(p, sizeof(p), Home, ".local/share") &&
+						 LDirExists(p))
+				{
+					Path = p;
+				}
 			
 			#endif
 			break;

@@ -73,31 +73,38 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			
 			bool Status = false;
 			auto Ext = LGetExtension(Path);
-			if (Ext)
+			if (!Ext)
 			{
-				IsSource =	!_stricmp(Ext, "c")
-							||
-							!_stricmp(Ext, "cpp")
-							||
-							!_stricmp(Ext, "cxx");
-				IsHeader =	!_stricmp(Ext, "h")
-							||
-							!_stricmp(Ext, "hpp")
-							||
-							!_stricmp(Ext, "hxx");
-				IsPython =	!_stricmp(Ext, "py");
-				IsJavascript = !_stricmp(Ext, "js");
-
-				if (IsSource || IsHeader)
-					Status = BuildCppDefnList(Path, Source, Defs, DefnNone, err, Debug);
-				else if (IsJavascript)
-					Status = BuildJsDefnList(Path, Source, Defs, DefnNone, err, Debug);
-				else if (IsPython)
-					Status = BuildPyDefnList(Path, Source, Defs, DefnNone, err, Debug);
-				else
-					err.Set(LErrorInvalidParam, LString::Fmt("Unknown file type '%s'\n", Ext));
+				err.Set(LErrorInvalidParam, LString::Fmt("No extension for '%s'\n", Path.Get()));
+				return false;
 			}
-			else err.Set(LErrorInvalidParam, LString::Fmt("No extension for '%s'\n", Path.Get()));
+
+			IsSource =	!_stricmp(Ext, "c")
+						||
+						!_stricmp(Ext, "cpp")
+						||
+						!_stricmp(Ext, "cxx");
+			IsHeader =	!_stricmp(Ext, "h")
+						||
+						!_stricmp(Ext, "hpp")
+						||
+						!_stricmp(Ext, "hxx");
+			IsPython =	!_stricmp(Ext, "py");
+			IsJavascript = !_stricmp(Ext, "js");
+
+			if (IsSource || IsHeader)
+				Status = BuildCppDefnList(Path, Source, Defs, DefnNone, err, Debug);
+			else if (IsJavascript)
+				Status = BuildJsDefnList(Path, Source, Defs, DefnNone, err, Debug);
+			else if (IsPython)
+				Status = BuildPyDefnList(Path, Source, Defs, DefnNone, err, Debug);
+			else if (
+				!Stricmp(Ext, "html") ||
+				!Stricmp(Ext, "css") ||
+				!Stricmp(Ext, "hvif"))
+				return true; // These are fine... no need to print an error if they show up.
+			else
+				err.Set(LErrorInvalidParam, LString::Fmt("Unknown file type '%s'\n", Ext));
 
 			return Status;
 		}
