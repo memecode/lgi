@@ -136,9 +136,9 @@ public:
 	// Reading and writing:
 	virtual bool Stat(LString path, std::function<void(struct stat*, LString, LError)> cb) = 0;
 	virtual bool ReadFolder(TPriority priority, const char *Path, std::function<void(LDirectory*)> results) = 0;
+	virtual bool CreateFolder(const char *path, bool createParents, std::function<void(bool)> cb) = 0;
 	virtual bool Read(TPriority priority, const char *Path, std::function<void(LError,LString)> result) = 0;
 	virtual bool Write(TPriority priority, const char *Path, LString Data, std::function<void(LError)> result) = 0;
-	virtual bool CreateFolder(const char *path, bool createParents, std::function<void(bool)> cb) = 0;
 	virtual bool Delete(const char *path, bool recursiveForce, std::function<void(bool)> cb) = 0;
 	virtual bool Rename(LString oldPath, LString newPath, std::function<void(bool)> cb) = 0;
 

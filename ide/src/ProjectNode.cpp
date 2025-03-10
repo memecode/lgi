@@ -897,9 +897,28 @@ void ProjectNode::Delete()
 		nView = NULL;
 	}
 
-	Project->SetDirty();
-	LXmlTag::RemoveTag();							
-	delete this;
+	if (auto backend = Project ? Project->GetBackend() : nullptr)
+	{
+		backend->Delete(GetFullPath(), GetType() == NodeDir, [this](auto status)
+			{
+				if (status)
+				{
+					Project->SetDirty();
+					LXmlTag::RemoveTag();
+					delete this;
+				}
+				else if (auto log = GetLog())
+				{
+					log->Print("%s:%i - delete failed.\n", _FL);
+				}
+			});
+	}
+	else
+	{
+		Project->SetDirty();
+		LXmlTag::RemoveTag();
+		delete this;
+	}
 }
 
 bool ProjectNode::OnKey(LKey &k)
