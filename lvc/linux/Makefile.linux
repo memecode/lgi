@@ -397,8 +397,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/linux/Lgi/View.cpp \
 	../src/linux/Lgi/Window.cpp \
 	../src/posix/Roster.cpp \
-	../src/posix/SubProcess.cpp \
-	../../../../../../usr/include/libayatana-appindicator3-0.1/libayatana-appindicator/app-indicator.h
+	../src/posix/SubProcess.cpp
 	export Build=$(Build); \
 	$(MAKE) -C ../ -f ./linux/Makefile.linux
 

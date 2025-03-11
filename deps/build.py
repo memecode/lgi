@@ -12,6 +12,19 @@ jobs = 2 if cores <= 4 else cores - 1
 print("cores:", cores, "jobs:", jobs);
 # sys.exit(0)
 
+def checkPackage(pkg):
+    p = subprocess.run(["dpkg", "-l", pkg], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    return p.returncode == 0
+
+def hasPackage(pkg):
+    p = subprocess.run(["apt-cache", "search", pkg], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    if not p.stdout:
+        return False
+    for ln in p.stdout.decode().split("\n"):
+        if ln.find(pkg):
+            return True
+    return False
+
 arch = []
 gen = ["Ninja"] # the default is ninja, except for Windows, which uses Visual Studio
 configs = ["Debug", "Release"]
@@ -35,6 +48,29 @@ elif platform.system() == "Darwin":
     universalArchs.append('arm64')
 elif platform.system() == "Linux":    
     subfolders = ["build-x64"]
+    packages = ["build-essential",
+                "mercurial",
+                "libmagic-dev", 
+                "libgtk3.0-dev",
+                "libgtk-3-dev",
+                "libgstreamer1.0-dev",
+                "libappindicator3-dev",
+                "libssh-dev",
+                "cmake",
+                "ninja-build" ]
+    needs = []
+    print("Checking required packages:")
+    for pkg in packages:
+        c = checkPackage(pkg)
+        #print("  check", pkg, c)
+        if not c:
+            h = hasPackage(pkg)
+            #print("    has", pkg, h)
+            if h:
+                needs.append(pkg)
+    if len(needs) > 0:
+        print("    sudo apt install", " ".join(needs))
+        sys.exit(-1)
 elif platform.system() == "Haiku":
     subfolders = ["build-x64"]
     # extraCmakeArgs += ["-DCMAKE_POSITION_INDEPENDENT_CODE=ON"]
