@@ -1122,16 +1122,21 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			#elif defined(LINUX)
 
 				char p[MAX_PATH_LEN];
-				if (LMakePath(p, sizeof(p), Home, ".config/gtk-3.0") &&
-					LDirExists(p))
+				if (LMakePath(p, sizeof(p), Home, ".config/gtk-3.0/bookmarks") &&
+					LFileExists(p))
 				{
+					LTrimDir(p);
 					Path = p;
+					// LgiTrace("%s:%i - GTK user links found: %s\n", _FL, p);
 				}
-				else if (LMakePath(p, sizeof(p), Home, ".local/share") &&
-						 LDirExists(p))
+				else if (LMakePath(p, sizeof(p), Home, ".local/share/user-places.xbel") &&
+						 LFileExists(p))
 				{
+					LTrimDir(p);
 					Path = p;
+					// LgiTrace("%s:%i - KDE user links found: %s\n", _FL, p);
 				}
+				else LgiTrace("%s:%i - no user links found.\n", _FL);
 			
 			#endif
 			break;

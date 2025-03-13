@@ -2392,6 +2392,8 @@ bool LGetUsersLinks(LString::Array &Links)
 		
 	#elif defined(LINUX)
 	
+		printf("p=%s\n", p.GetFull().Get());
+
 		auto gtk3bookmarks = p / "bookmarks";
 		auto kdeUserPlaces = p / "user-places.xbel";
 		
@@ -2414,7 +2416,32 @@ bool LGetUsersLinks(LString::Array &Links)
 		}
 		else if (kdeUserPlaces.Exists())
 		{
-			
+			printf("kdeUserPlaces=%s\n", kdeUserPlaces.GetFull().Get());
+			LFile in(kdeUserPlaces);
+			LXmlTag root;
+			LXmlTree t;
+			if (!t.Read(&root, &in))
+			{
+				LgiTrace("%s:%i - Failed to parse '%s'\n", _FL, kdeUserPlaces.GetFull().Get());
+				return false;
+			}
+
+			for (auto c: root.Children)
+			{
+				if (c->IsTag("bookmark"))
+				{
+					auto href = c->GetAttr("href");
+					LUri u(href);
+					if (u.IsProtocol("file"))
+					{
+						auto titleTag = c->GetChildTag("title");
+						auto title = titleTag ? titleTag->GetContent() : nullptr;
+						// printf("tag: %s = %s\n", title, href);
+
+						Links.New() = u.sPath;
+					}
+				}
+			}
 		}
 		else
 		{
