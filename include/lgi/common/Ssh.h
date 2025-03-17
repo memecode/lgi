@@ -622,7 +622,7 @@ public:
 			}
 			while (r == SSH_AUTH_AGAIN);
 
-			if (r == SSH_AUTH_DENIED)
+			if (r == SSH_AUTH_DENIED && Password)
 			{
 				r = ssh_userauth_password(Ssh, Username, Password);
 			}
