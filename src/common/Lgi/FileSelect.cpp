@@ -776,7 +776,9 @@ class LFileSelectDlg :
 	LRect MinSize;
 	LString::Array Links;
 	LArray<LFolderItem*> Hidden;
-	
+	LHashTbl<ConstStrKey<char,false>, bool> pathsAdded;
+
+
 public:
 	LFileSelectPrivate *d = NULL;
 
@@ -841,6 +843,14 @@ public:
 			return;
 		
 		auto Path = v->Path();
+		if (Path)
+		{
+			if (auto p = LString(Path).RStrip("/"))
+			{
+				pathsAdded.Add(p, true);
+				printf("Adding vol path: %s\n", Path);
+			}
+		}
 		i->SetText(v->Name());
 		i->SetText(Path, 1);
 		
@@ -1081,11 +1091,17 @@ void LFileSelectDlg::OnCreate()
 			
 			for (auto &i: Links)
 			{
-				if (auto ci = new LTreeItem)
+				// This removes any paths already added by the LVolume tree...
+				if (i &&
+					!pathsAdded.Find(i.RStrip("/")))
 				{
-					ci->SetText(LGetLeaf(i.RStrip("/")), 0);
-					ci->SetText(i, 1);
-					ti->Insert(ci);
+					printf("notAdded: %s\n", i.Get());
+					if (auto ci = new LTreeItem)
+					{
+						ci->SetText(LGetLeaf(i.RStrip("/")), 0);
+						ci->SetText(i, 1);
+						ti->Insert(ci);
+					}
 				}
 			}
 
@@ -2416,7 +2432,6 @@ bool LGetUsersLinks(LString::Array &Links)
 		}
 		else if (kdeUserPlaces.Exists())
 		{
-			printf("kdeUserPlaces=%s\n", kdeUserPlaces.GetFull().Get());
 			LFile in(kdeUserPlaces);
 			LXmlTag root;
 			LXmlTree t;
