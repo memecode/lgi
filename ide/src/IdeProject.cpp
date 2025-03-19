@@ -2345,7 +2345,7 @@ int BuildThread::Main()
 						Write(Buf, rd);
 					}
 					
-					uint32_t ex = SubProc->Wait();
+					auto ex = SubProc->Wait();
 					Print("Make exited with %i (0x%x)\n", ex, ex);
 
 					if (Compiler == IAR &&

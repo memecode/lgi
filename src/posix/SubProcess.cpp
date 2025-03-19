@@ -647,7 +647,6 @@ int LSubProcess::Wait()
 
 	if (d->ChildPid != INVALID_PID)
 	{
-		int Status = 0;
 		pid_t r = waitpid(d->ChildPid, &Status, 0);
 		if (r == d->ChildPid)
 		{
@@ -659,7 +658,7 @@ int LSubProcess::Wait()
 		}
 	}
 
-	return Status;
+	return d->ExitValue;
 }
 
 bool LSubProcess::Interrupt()
