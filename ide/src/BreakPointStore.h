@@ -7,6 +7,8 @@ struct BreakPoint
 {
 	// User has enabled the break point in the UI
 	bool Enabled = true;
+	// Debugger backend knows about the breakpoint
+	bool Active = false;
 
 	// Use File:Line
 		LString File;

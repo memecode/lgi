@@ -30,6 +30,7 @@
 #include "lgi/common/CommsBus.h"
 #include "lgi/common/RemoveAnsi.h"
 #include "lgi/common/RemoteFileSelect.h"
+#include "lgi/common/Uri.h"
 
 #include "LgiIde.h"
 #include "FindSymbol.h"
@@ -5282,6 +5283,8 @@ int LgiMain(OsAppArguments &AppArgs)
 	LApp a(AppArgs, "LgiIde");
 	if (a.IsOk())
 	{
+		LUri::UnitTests();
+
 		a.AppWnd = new AppWnd;
 
 		// LPlaySound("~/code/mixkit-happy-bells-notification-937.wav");

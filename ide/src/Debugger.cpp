@@ -35,6 +35,29 @@ static bool DEBUG_SHOW_GDB_IO = false;
 
 const char sPrompt[] = "(gdb) ";
 
+
+// General logging
+#if 0
+#define LOG(...)	printf(__VA_ARGS__)
+#else
+#define LOG(...)
+#endif
+
+// Breakpoint logging
+#if 1
+#define BP_LOG(...)	printf(__VA_ARGS__)
+#else
+#define BP_LOG(...)
+#endif
+
+// Command loggins
+#if 0
+#define CMD_LOG(...) printf(__VA_ARGS__)
+#else
+#define CMD_LOG(...)
+#endif
+
+
 class Callback
 {
 public:
@@ -142,7 +165,7 @@ class Gdb :
 
 			void Finish()
 			{
-				// printf("%s: %s - %i,%i,%i\n", __FUNCTION__, cmd.Get(), (bool)statusCb, (bool)pipeCb, (bool)arrayCb);
+				// LOG("%s: %s - %i,%i,%i\n", __FUNCTION__, cmd.Get(), (bool)statusCb, (bool)pipeCb, (bool)arrayCb);
 				if (arrayCb)
 				{
 					auto s = pipe.NewLStr();
@@ -207,7 +230,7 @@ class Gdb :
 
 	void BreakPointEvent(BreakPointStore::TEvent type, int id)
 	{
-		printf("%s:%i - BreakPointEvent(%i, %i)\n", _FL, type, id);
+		BP_LOG("%s:%i - BreakPointEvent(%i, %i)\n", _FL, type, id);
 		switch (type)
 		{
 			case BreakPointStore::TBreakPointAdded:
@@ -223,7 +246,7 @@ class Gdb :
 					}
 					if (inf)
 					{
-						printf("%s:%i - added pending add for %i\n", _FL, id);
+						BP_LOG("%s:%i - added pending add for %i\n", _FL, id);
 						inf->state = TPendingAdd;
 					}
 				}
@@ -246,7 +269,7 @@ class Gdb :
 					}
 					if (inf)
 					{
-						printf("%s:%i - added pending delete for %i\n", _FL, id);
+						BP_LOG("%s:%i - added pending delete for %i\n", _FL, id);
 						inf->state = TPendingDelete;
 					}
 				}
@@ -274,7 +297,7 @@ class Gdb :
 			
 			if (CurFile && CurLine > 0)
 			{
-				printf("%s:%i calling OnFileLine(%s,%i)\n", SrcFile, SrcLine, CurFile.Get(), CurLine);
+				LOG("%s:%i calling OnFileLine(%s,%i)\n", SrcFile, SrcLine, CurFile.Get(), CurLine);
 				Events->OnFileLine(CurFile, CurLine, CurrentIp);
 			}
 		}
@@ -353,7 +376,7 @@ class Gdb :
 		Events->Write(Buf, Ch);
 
 		if (DEBUG_SHOW_GDB_IO)
-			printf("LogMsg:%s", Buf);
+			LOG("LogMsg:%s", Buf);
 	}
 	
 	void OnExit()
@@ -379,7 +402,7 @@ class Gdb :
 		
 		if (!f.Get() || ProcessId < 0)
 		{
-			printf("Error: Param error: %s, %i (%s:%i)\n", f.Get(), ProcessId, _FL);
+			BP_LOG("Error: Param error: %s, %i (%s:%i)\n", f.Get(), ProcessId, _FL);
 			return;
 		}
 		
@@ -387,9 +410,9 @@ class Gdb :
 		LString::Array a = f.Split(" at ");
 
 		#if 1		
-		printf("%s:%i - a.len=%i\n", _FL, (int)a.Length());
+		BP_LOG("%s:%i - a.len=%i\n", _FL, (int)a.Length());
 		for (unsigned n=0; n<a.Length(); n++)
-			printf("\t[%i]='%s'\n", n, a[n].Get());
+			BP_LOG("\t[%i]='%s'\n", n, a[n].Get());
 		#endif
 		
 		if (a.Length() == 2)
@@ -426,11 +449,11 @@ class Gdb :
 					{
 						File = b[0];
 						Line = b[1];
-						printf("%s:%i - breakpoint %s:%s hit.\n", _FL, File.Get(), Line.Get());
+						BP_LOG("%s:%i - breakpoint %s:%s hit.\n", _FL, File.Get(), Line.Get());
 					}
-					else printf("%s:%i - split file/line failed for '%s'\n", _FL, k.Get());
+					else BP_LOG("%s:%i - split file/line failed for '%s'\n", _FL, k.Get());
 				}
-				else printf("%s:%i - error: no ':' in '%s'.\n", _FL, k.Get());
+				else BP_LOG("%s:%i - error: no ':' in '%s'.\n", _FL, k.Get());
 			}
 		}
 		else
@@ -447,7 +470,7 @@ class Gdb :
 				if (Events && f.Find("warning:") == 0)
 					Events->OnWarning(f.Strip());
 				else
-					printf("%s:%i Unhandled line: '%s'\n", _FL, f.Get());
+					BP_LOG("%s:%i Unhandled line: '%s'\n", _FL, f.Get());
 			}
 		}
 
@@ -456,12 +479,12 @@ class Gdb :
 
 		if (File && Line.Int() > 0)
 		{
-			printf("\tBreakpoint.OnFileLine(%s,%s)\n", File.Get(), Line.Get());
+			BP_LOG("\tBreakpoint.OnFileLine(%s,%s)\n", File.Get(), Line.Get());
 			OnFileLine(NativePath(File), (int)Line.Int(), true, _FL);
 		}
 		else
 		{
-			printf("%s:%i - No file='%s' or line='%s'\n%s\n", _FL, File.Get(), Line.Get(), f.Get());
+			BP_LOG("%s:%i - No file='%s' or line='%s'\n%s\n", _FL, File.Get(), Line.Get(), f.Get());
 		}
 	}
 	
@@ -505,7 +528,7 @@ class Gdb :
 
 		if (ParseState == ParseBreakPoint)
 		{
-			printf("\tbreak:'%s'\n", BreakInfo[0].Get());
+			LOG("\tbreak:'%s'\n", BreakInfo[0].Get());
 			OnBreakPoint(BreakInfo[0]);
 			ParseState = ParseNone;
 			BreakInfo.Length(0);
@@ -609,27 +632,27 @@ class Gdb :
 		if (BreakPoints.Length() > 0)
 		{
 			TLock lck(this, _FL);
-			printf("BreakPoints.Length()=%i\n", (int)BreakPoints.Length());
+			BP_LOG("BreakPoints.Length()=%i\n", (int)BreakPoints.Length());
 			for (auto p: BreakPoints)
 			{
 				if (p.value->state == TPendingAdd)
 				{
-					printf("%s:%i - processing pending Add: %i\n", _FL, p.key);
+					BP_LOG("%s:%i - processing pending Add: %i\n", _FL, p.key);
 					p.value->state = TInit;
 					AddBp(p.key);
 				}
 				else if (p.value->state == TPendingDelete)
 				{
-					printf("%s:%i - processing pending Delete: %i\n", _FL, p.key);
+					BP_LOG("%s:%i - processing pending Delete: %i\n", _FL, p.key);
 					DelBp(p.key);
 				}
 			}
 		}
 
-		//  printf("ProcessCommands curCmd=%p: %s\n", curCmd.Get(), curCmd ? curCmd->cmd.Get() : "null");
+		//  LOG("ProcessCommands curCmd=%p: %s\n", curCmd.Get(), curCmd ? curCmd->cmd.Get() : "null");
 		if (curCmd)
 		{
-			// printf("Calling cmd finish: %s\n", curCmd->cmd.Get());
+			// LOG("Calling cmd finish: %s\n", curCmd->cmd.Get());
 			
 			// Finish up the current command
 			curCmd->Finish();
@@ -946,12 +969,6 @@ class Gdb :
 		return 0;
 	}
 
-	#if 1
-	#define CMD_LOG(...) printf(__VA_ARGS__)
-	#else
-	#define CMD_LOG(...)
-	#endif
-
 	void Cmd(const char *c,
 			bool setRun,
 			std::function<void(LError&)> cb = nullptr)
@@ -1044,7 +1061,7 @@ public:
 		if (LAppInst->GetOption("gdb", Val))
 		{
 			DEBUG_SHOW_GDB_IO = Val.Int() != 0;
-			printf("DEBUG_SHOW_GDB_IO=%i\n", DEBUG_SHOW_GDB_IO);
+			LOG("DEBUG_SHOW_GDB_IO=%i\n", DEBUG_SHOW_GDB_IO);
 		}
 		
 		LFile::Path pp(LSP_APP_INSTALL);
@@ -1688,7 +1705,7 @@ public:
 					{
 						// Is it floating point?
 						auto isFloat = strchr(val, '.') != NULL;
-						// printf("isFloat for '%s' is %i\n", val, isFloat);
+						// LOG("isFloat for '%s' is %i\n", val, isFloat);
 						if (isFloat)
 						{
 							double tmp = atof(val);

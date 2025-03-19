@@ -172,7 +172,10 @@ bool LUri::Set(const char *uri)
 	{
 		if (c[0] == ':')
 		{
-			if (!hasProto && !hasAt)
+			if (!hasProto &&
+				!hasAt &&
+				c[1] == '/' &&
+				c[2] == '/')
 				hasProto = c;
 			else
 				hasColon = c;
@@ -206,15 +209,17 @@ bool LUri::Set(const char *uri)
 	{
 		if (hasAt >= s)
 		{
-			auto p = LString(s, hasAt - s).SplitDelimit(":", 1);
-			if (p.Length() == 2)
+			LString p(s, hasAt - s);
+			char *colon = strchr(p, ':');
+			if (colon)
 			{
-				sUser = DecodeStr(p[0]);
-				sPass = DecodeStr(p[1]);
+				*colon++ = 0;
+				sUser = DecodeStr(p);
+				sPass = DecodeStr(colon);
 			}
-			else if (p.Length() == 1)
+			else
 			{
-				sUser = DecodeStr(p[0]);
+				sUser = DecodeStr(s);
 			}
 
 			s = hasAt + 1;
@@ -353,6 +358,7 @@ bool LUri::UnitTests()
 		{"user@host:1234/somePath/seg/file.png",             LUri(NULL, "user", NULL, "host", 1234, "somePath/seg/file.png")    },
 		{"user@host/somePath/seg/file.png",                  LUri(NULL, "user", NULL, "host", 0, "somePath/seg/file.png")       },
 		{"user@host",                                        LUri(NULL, "user", NULL, "host", 0, NULL)                          },
+		{"ssh://:pass@host",                                 LUri("ssh", NULL, "pass", "host", 0, NULL)                         },
 		{"host",                                             LUri(NULL, NULL, NULL, "host", 0, NULL)                            },
 		{"host:1234",                                        LUri(NULL, NULL, NULL, "host", 1234, NULL)                         },
 		{"somePath/seg/file.png",                            LUri(NULL, NULL, NULL, NULL, 0, "somePath/seg/file.png")           },
