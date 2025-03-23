@@ -15,12 +15,16 @@
 
 #define M_SET_SCROLL		(M_USER + 0x2000)
 
+#if 0
+#define LOG(...)			LgiTrace(__VA_ARGS__)
+#else
+#define LOG(...)
+#endif
+
 //////////////////////////////////////////////////////////////////////////////
 LLayout::LLayout()
 {
 	_PourLargest = false;
-	VScroll = 0;
-	HScroll = 0;
 }
 
 LLayout::~LLayout()
@@ -80,14 +84,10 @@ void LLayout::GetScrollPos(int64 &x, int64 &y)
 void LLayout::SetScrollPos(int64 x, int64 y)
 {
 	if (HScroll)
-	{
 		HScroll->Value(x);
-	}
 
 	if (VScroll)
-	{
 		VScroll->Value(y);
-	}
 }
 
 bool LLayout::Attach(LViewI *p)
@@ -110,49 +110,42 @@ void LLayout::OnCreate()
 
 void LLayout::AttachScrollBars()
 {
-	if (HScroll && !HScroll->IsAttached())
+	if (HScroll)
 	{
-		HScroll->Attach(this);
-		HScroll->SetNotify(this);
-		HScroll->SendNotify(LNotifyScrollBarCreate);
+		if (!HScroll->IsAttached())
+		{
+			HScroll->Attach(this);
+			HScroll->SetNotify(this);
+			HScroll->SendNotify(LNotifyScrollBarCreate);
+			LOG("%s:%i - HScroll attaching\n", _FL);
+		}
+		else LOG("%s:%i - HScroll already attached\n", _FL);
 	}
 
-	if (VScroll && !VScroll->IsAttached())
+	if (VScroll)
 	{
-		VScroll->Attach(this);
-		VScroll->SetNotify(this);
-		VScroll->SendNotify(LNotifyScrollBarCreate);
+		if (!VScroll->IsAttached())
+		{
+			VScroll->Attach(this);
+			VScroll->SetNotify(this);
+			VScroll->SendNotify(LNotifyScrollBarCreate);
+			LOG("%s:%i - VScroll attaching\n", _FL);
+		}
+		else LOG("%s:%i - VScroll already attached\n", _FL);
 	}
 }
 
 bool LLayout::SetScrollBars(bool x, bool y)
 {
 	#ifdef M_SET_SCROLL
-	/*
-	if (_Debug)
-		printf("%s/%p::SetScrollBars %i-%i %i-%i\n", GetClass(), this,
-			x, (HScroll != NULL),
-			y, (VScroll != NULL));
-	*/
 
-	#if 0
-	if (x ^ (HScroll != NULL)
-		||
-		y ^ (VScroll != NULL))
-	#endif
-	{
-		/*
-		if (_Debug)
-			printf("%s/%p::SetScrollBars Sending M_SET_SCROLL\n", GetClass(), this);
-		*/
-		
 		if (!PostEvent(M_SET_SCROLL, x, y))
-		{
 			return false;
-		}
-	}
+
 	#else
-	_SetScrollBars(x, y);
+
+		_SetScrollBars(x, y);
+
 	#endif
 
 	return true;
@@ -162,8 +155,15 @@ bool LLayout::_SetScrollBars(bool x, bool y)
 {
 	static bool Processing = false;
 
-	if (!Processing &&
-		(((HScroll!=0) ^ x ) || ((VScroll!=0) ^ y )) )
+	if
+	(
+		!Processing &&
+		(
+			( (HScroll != nullptr) ^ x )
+			||
+			( (VScroll != nullptr) ^ y )
+		)
+	)
 	{
 		Processing = true;
 
@@ -171,32 +171,37 @@ bool LLayout::_SetScrollBars(bool x, bool y)
 		{
 			if (!HScroll)
 			{
-				HScroll = new LScrollBar(IDC_HSCROLL, 0, 0, 100, 10, "LLayout->HScroll");
-				if (HScroll)
+				if ((HScroll = new LScrollBar(IDC_HSCROLL, 0, 0, 100, 10, "LLayout->HScroll")))
 				{
 					HScroll->SetVertical(false);
 					HScroll->Visible(false);
+					LOG("%s:%i - %s: created hscroll\n", _FL, __FUNCTION__);
 				}
+				else LOG("%s:%i - alloc failed.\n", _FL);
 			}
 		}
 		else
 		{
 			DeleteObj(HScroll);
+			LOG("%s:%i - %s: deleted hscroll\n", _FL, __FUNCTION__);
 		}
+
 		if (y)
 		{
 			if (!VScroll)
 			{
-				VScroll = new LScrollBar(IDC_VSCROLL, 0, 0, 10, 100, "LLayout->VScroll");
-				if (VScroll)
+				if ((VScroll = new LScrollBar(IDC_VSCROLL, 0, 0, 10, 100, "LLayout->VScroll")))
 				{
 					VScroll->Visible(false);
+					LOG("%s:%i - %s: created vscroll\n", _FL, __FUNCTION__);
 				}
+				else LOG("%s:%i - alloc failed.\n", _FL);
 			}
 		}
 		else if (VScroll)
 		{
 			DeleteObj(VScroll);
+			LOG("%s:%i - %s: deleted vscroll\n", _FL, __FUNCTION__);
 		}
 
 		AttachScrollBars();
@@ -204,6 +209,13 @@ bool LLayout::_SetScrollBars(bool x, bool y)
 		Invalidate();
 
 		Processing = false;
+	}
+	else
+	{
+		LOG("%s:%i - %s: nothing to do %i,%i,%i\n",
+			_FL,
+			__FUNCTION__,
+			Processing, x, y);
 	}
 	
 	return true;
@@ -217,8 +229,9 @@ int LLayout::OnNotify(LViewI *c, const LNotification &n)
 void LLayout::OnPosChange()
 {
 	auto r = LView::GetClient();
-	LRect v(r.x2-LScrollBar::SCROLL_BAR_SIZE+1, r.y1, r.x2, r.y2);
-	LRect h(r.x1, r.y2-LScrollBar::SCROLL_BAR_SIZE+1, r.x2, r.y2);
+	int px = LScrollBar::GetScrollSize();
+	LRect v(r.x2 - px + 1, r.y1, r.x2, r.y2);
+	LRect h(r.x1, r.y2 - px + 1, r.x2, r.y2);
 	if (VScroll && HScroll)
 	{
 		h.x2 = v.x1 - 1;
@@ -229,11 +242,13 @@ void LLayout::OnPosChange()
 	{
 		VScroll->Visible(true);
 		VScroll->SetPos(v, true);
+		LOG("%s:%i - %s: vscroll=%s\n", _FL, __FUNCTION__, v.GetStr());
 	}
 	if (HScroll)
 	{
 		HScroll->Visible(true);
 		HScroll->SetPos(h, true);
+		LOG("%s:%i - %s: hscroll=%s\n", _FL, __FUNCTION__, h.GetStr());
 	}
 }
 
@@ -285,18 +300,12 @@ LMessage::Param LLayout::OnEvent(LMessage *Msg)
 	#ifdef M_SET_SCROLL
 	if (Msg->Msg() == M_SET_SCROLL)
 	{
-		_SetScrollBars(Msg->A(), Msg->B());
-		/*
-		printf("%s/%p::M_SET_SCROLL %i-%i %i-%i\n", GetClass(), this,
-			(int)Msg->A(), (HScroll != NULL),
-			(int)Msg->B(), (VScroll != NULL));
-		*/
+		LOG("%s:%i - got M_SET_SCROLL(%i,%i)\n", _FL, (int)Msg->A(), (int)Msg->B());
+		_SetScrollBars(Msg->A()!=0, Msg->B()!=0);
 		return 0;
 	}
 	#endif
 
-	// if (VScroll) VScroll->OnEvent(Msg);
-	// if (HScroll) HScroll->OnEvent(Msg);
 	auto Status = LView::OnEvent(Msg);
 	if (Msg->Msg() == M_CHANGE &&
 		Status == -1 &&

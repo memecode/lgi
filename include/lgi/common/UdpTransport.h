@@ -147,6 +147,9 @@ class LUdpTransport : public LUdpListener
 		}
 	LOGGER(ERR, true)
 	LOGGER(INFO, true)
+	#ifdef DEBUG
+	#undef DEBUG
+	#endif
 	LOGGER(DEBUG, false)
 	
 	int PrepareWrite(bool broadcast, uint32_t ip, LString &msg)
