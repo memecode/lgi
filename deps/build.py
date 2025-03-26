@@ -40,7 +40,7 @@ if platform.system() == "Windows":
 elif platform.system() == "Darwin":    
     subfolders = ["build"]
     universalCheck.append("lib/libiconv.dylib")
-    # universalCheck.append("lib/libjpeg.62.4.0.dylib")
+    universalCheck.append("lib/libjpeg.62.4.0.dylib")
     universalCheck.append("lib/libpng16$tag.dylib")
     universalCheck.append("lib/libz.dylib")
     universalCheck.append("lib/liblunasvg.a")
@@ -84,8 +84,6 @@ curFolder = os.path.abspath(os.path.join(os.path.realpath(__file__), ".."))
 depsFolder = os.path.abspath(os.path.join(curFolder, "..", "..", "deps"))
 if not os.path.exists(depsFolder):
     os.mkdir(depsFolder)
-print("depsFolder:", depsFolder)
-print("curFolder:", curFolder)
 
 def remove_readonly(func, path, excinfo):
     os.chmod(path, stat.S_IWRITE)
@@ -93,8 +91,10 @@ def remove_readonly(func, path, excinfo):
 
 if clean:
     shutil.rmtree(depsFolder, onerror=remove_readonly)
+    print("deleted:", depsFolder)
     sys.exit(0)
 
+print("depsFolder:", depsFolder)
 for n in range(len(subfolders)):
     for config in configs:
         path = os.path.abspath(os.path.join(depsFolder, subfolders[n]))
