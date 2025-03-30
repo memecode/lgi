@@ -182,6 +182,7 @@ enum LgiMessages
 	M_TABLE_LAYOUT,
 	M_URL,
 	M_LOG_TEXT,
+	M_LOG_EMPTY,
 	M_ASSERT_UI, // A=(LString*)Msg
 	M_INVALIDATE,			// A=(LRect*)Rectangle, B=(LView*)this
 	M_RESIZE_TO_CONTENT,	// A=(int)Border (used by LItemContainer)

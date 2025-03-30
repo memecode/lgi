@@ -209,13 +209,14 @@ char16 *LHtmlParser::DecodeEntities(const char *s, ssize_t len)
 
 char *LHtmlParser::ParsePropValue(char *s, char16 *&Value)
 {
-	Value = 0;
+	Value = nullptr;
 	if (s)
 	{
 		if (IsQuote(*s))
 		{
 			char Delim = *s++;
 			char *Start = s;
+
 			while (*s && *s != Delim)
 			{
 				if
@@ -227,7 +228,8 @@ char *LHtmlParser::ParsePropValue(char *s, char16 *&Value)
 				{
 					// In the case where there is no closing quote delimiter and the parser starts hitting
 					// elements again... it should exit out of this loop right?
-					break;
+					LgiTrace("%s:%i - stray bracket at %i\n", _FL, (int)(s - Start));
+					// break;
 				}
 
 				s++;
@@ -350,6 +352,11 @@ char *LHtmlParser::ParsePropList(char *s, LHtmlElement *Obj, bool &Closed)
 			s = ++n;
 		else
 			s = n;
+
+		if (!Stricmp(Name, "Debug"))
+		{
+			int asd=0;
+		}
 
 		while (*s && IsWhite(*s))
 			s++;

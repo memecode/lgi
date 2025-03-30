@@ -121,6 +121,11 @@ public:
 		return 0;
 	}
 
+	void Empty()
+	{
+		TView::PostEvent(M_LOG_EMPTY);
+	}
+
 	bool Write(const LString &s)
 	{
 		return Write(s.Get(), s.Length()) == s.Length();
@@ -153,9 +158,18 @@ public:
 
 	LMessage::Result OnEvent(LMessage *m) override
 	{
-		if (m->Msg() == M_LOG_TEXT)
+		switch (m->Msg())
 		{
-			ProcessTxt();
+			case M_LOG_TEXT:
+			{
+				ProcessTxt();
+				break;
+			}
+			case M_LOG_EMPTY:
+			{
+				Name(nullptr);
+				break;
+			}
 		}
 
 		return TView::OnEvent(m);
