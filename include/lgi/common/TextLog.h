@@ -167,7 +167,7 @@ public:
 			}
 			case M_LOG_EMPTY:
 			{
-				Name(nullptr);
+				TView::Name(nullptr);
 				break;
 			}
 		}

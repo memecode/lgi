@@ -1094,7 +1094,7 @@ public:
 
 		State = Exiting;
 		WaitForExit(10000);
-		LStackTrace("%i ~Gdb\n", LCurrentThreadId());
+		// LStackTrace("%i ~Gdb\n", LCurrentThreadId());
 	}
 
 	bool Load(LDebugEvents *EventHandler, const char *exe, const char *args, bool runAsAdmin, const char *initDir, const char *Env)

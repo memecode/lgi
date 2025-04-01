@@ -623,7 +623,7 @@ public:
 		auto Ts = LCurrentTime();
 		TextLogCls::PourText(Start, Len);
 		auto Dur = LCurrentTime() - Ts;
-		if (Dur > 1500)
+		if (Dur > 300)
 		{
 			// Yo homes, too much text bro...
 			Name(NULL);

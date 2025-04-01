@@ -19,7 +19,7 @@
 
 #define DEBUG_FIND_SYMBOL		0
 #define DEBUG_NO_THREAD			1
-#define DEBUG_FILE				"View.h"
+// #define DEBUG_FILE				"View.h"
 #define KNOWN_EXT				"c,cpp,cxx,h,hpp,hxx,py,js"
 #define INDEX_EXT				"idx"
 

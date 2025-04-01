@@ -508,11 +508,7 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
-			<Executable>
-				<Linux />
-			</Executable>
-			<CCrossCompiler />
-			<CppCrossCompiler />
+			<Executable />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -527,12 +523,10 @@
 				<Linux>
 					<Debug>./include/lgi/linux
 ./include/lgi/linux/Gtk
-./private/linux
-/usr/include/libayatana-appindicator3-0.1</Debug>
+./private/linux</Debug>
 					<Release>./include/lgi/linux
 ./include/lgi/linux/Gtk
-./private/linux
-/usr/include/libayatana-appindicator3-0.1</Release>
+./private/linux</Release>
 				</Linux>
 				<Windows>
 					<Debug>./include/lgi/win
@@ -549,11 +543,9 @@
 			</IncludePaths>
 			<SystemIncludes>
 				<Linux>
-					<Debug>libappindicator3-0.1
-`pkg-config --cflags gtk+-3.0`
+					<Debug>`pkg-config --cflags gtk+-3.0`
 `pkg-config --cflags gstreamer-1.0`</Debug>
-					<Release>libappindicator3-0.1
-`pkg-config --cflags gtk+-3.0`
+					<Release>`pkg-config --cflags gtk+-3.0`
 `pkg-config --cflags gstreamer-1.0`</Release>
 				</Linux>
 				<Haiku>
@@ -615,49 +607,27 @@ _GNU_SOURCE</Debug>
 					<Release>POSIX
 _GNU_SOURCE</Release>
 				</Haiku>
-				<Linux />
 			</Defines>
 			<Options>
 				<Linux>
 					<Debug>-Wno-format-truncation</Debug>
 					<Release>-Wno-format-truncation</Release>
 				</Linux>
-				<All />
 			</Options>
 			<LibraryPaths>
 				<All>
 					<Debug>../deps/build-x64-debug/lib</Debug>
 					<Release>../deps/build-x64-release/lib</Release>
 				</All>
-				<Linux />
 			</LibraryPaths>
-			<ApplicationIcon />
 		</Build>
 		<Advanced>
-			<OtherMakefileRules />
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
+			<PostBuildCommands />
 		</Advanced>
 		<Debug>
-			<Environment />
-			<Arguments>
-				<All />
-			</Arguments>
-			<DebugAdmin />
-			<InitialDir />
+			<Arguments />
 		</Debug>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
-		<Editor>
-			<TabSize />
-			<IndentSize />
-			<ShowWhiteSpace />
-			<UseHardTabs />
-			<CommentFile />
-			<CommentFunction />
-		</Editor>
+		<Remote />
+		<Editor />
 	</Settings>
 </Project>
