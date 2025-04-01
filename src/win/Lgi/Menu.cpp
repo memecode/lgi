@@ -155,7 +155,7 @@ LMenuItem *LSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where
 {
 	int Pos = (int) (Where < 0 ? Items.Length() : min(Where, Items.Length()));
 
-	LMenuItem *Item = new LMenuItem(Menu, this, Str, Id, Pos, Shortcut);
+	auto Item = new LMenuItem(Menu, this, Str, Id, Pos, Shortcut);
 	if (Item)
 	{
 		Item->Enabled(Enabled);
@@ -670,24 +670,25 @@ void LMenuItem::_Paint(LSurface *pDC, int Flags)
 
 bool LMenuItem::ScanForAccel()
 {
-	LString Accel;
+	LString Raw;
 
 	if (d->Shortcut)
 	{
-		Accel = d->Shortcut;
+		Raw = d->Shortcut;
 	}
-	else
+	else if (auto n = LBase::Name())
 	{
-		auto n = LBase::Name();
-		if (n)
+		auto Tab = strchr(n, '\t');
+		if (Tab)
 		{
-			auto Tab = strchr(n, '\t');
-			if (Tab)
-				Accel = Tab + 1;
+			// Deprecated way of storing shortcut in the name:
+			Raw = Tab + 1;
+			LAssert(!"Fix this");
 		}
 	}
 
-	if (Accel)
+	auto Shortcuts = Raw.Strip().SplitDelimit("\t");
+	for (auto Accel: Shortcuts)
 	{
 		auto Keys = Accel.SplitDelimit("-+");
 		if (Keys.Length() > 0)
@@ -697,7 +698,7 @@ bool LMenuItem::ScanForAccel()
 			int Chr = 0;
 			bool AccelDirty = false;
 			
-			for (int i=0; i<Keys.Length(); i++)
+			for (size_t i=0; i<Keys.Length(); i++)
 			{
 				auto &k = Keys[i];
 
