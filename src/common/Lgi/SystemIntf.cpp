@@ -245,7 +245,7 @@ class SshBackend :
 			});
 	}
 
-	LSsh::SshConsole *GetConsole()
+	LSsh *GetSsh()
 	{
 		if (!ssh)
 		{
@@ -280,7 +280,13 @@ class SshBackend :
 				}
 			}
 		}
-		if (ssh && !console)
+
+		return ssh;
+	}
+
+	LSsh::SshConsole *GetConsole()
+	{
+		if (GetSsh() && !console)
 		{
 			if ((console = ssh->CreateConsole()))
 			{
@@ -386,7 +392,7 @@ public:
 	{
 		LAssert(remoteSep);
 
-		if (remoteSep(0) == '/')
+		if (remoteSep && remoteSep(0) == '/')
 			return path.Replace("\\", remoteSep);
 		else
 			return path.Replace("/", remoteSep);
@@ -1060,11 +1066,19 @@ public:
 				if (Path.Find("~") == 0 && homePath)
 					Path = Path.Replace("~", homePath);
 
-				auto err = ssh->DownloadFile(&buf, Path);
-				app->RunCallback( [this, err, cb, data=buf.NewLStr()]() mutable
-					{
-						cb(err, data);
-					});
+				if (!GetSsh())
+				{
+					LError err(LErrorFuncFailed, "No ssh object.");
+					cb(err, LString());
+				}
+				else
+				{
+					auto err = ssh->DownloadFile(&buf, Path);
+					app->RunCallback( [this, err, cb, data=buf.NewLStr()]() mutable
+						{
+							cb(err, data);
+						});
+				}
 			} );
 
 		return true;

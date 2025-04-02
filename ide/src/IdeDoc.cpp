@@ -1735,7 +1735,7 @@ void IdeDoc::SetProject(IdeProject *p)
 {
 	d->Project = p;
 	
-	if (d->Project->GetApp() &&
+	if (d->Project &&
 		d->BreakPoints.Length() == 0)
 		d->Project->LoadBreakPoints(this);
 }
