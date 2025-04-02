@@ -794,93 +794,94 @@ bool LMenuItem::ScanForAccel()
 	if (!d->Shortcut)
 		return false;
 	
-	// printf("d->Shortcut=%s\n", d->Shortcut.Get());
-	auto Keys = d->Shortcut.SplitDelimit("+-");
-	if (Keys.Length() > 0)
+	auto shortCuts = d->Shortcut.SplitDelimit("\t");
+	for (auto sc: shortCuts)
 	{
-		int Flags = 0;
-		int Vkey = 0;
-		int Chr = 0;
-		
-		for (int i=0; i<Keys.Length(); i++)
+		auto Keys = sc.SplitDelimit("+-");
+		if (Keys.Length() > 0)
 		{
-			const char *k = Keys[i];
+			int Flags = 0;
+			int Vkey = 0;
+			int Chr = 0;
+			
+			for (int i=0; i<Keys.Length(); i++)
+			{
+				const char *k = Keys[i];
 
-			if (!stricmp(k, "CtrlCmd"))
-				Flags |= LGI_EF_SYSTEM;
-			else if (!stricmp(k, "AltCmd"))
-				Flags |= LGI_EF_SYSTEM;
-			else if (stricmp(k, "Ctrl") == 0)
-				Flags |= LGI_EF_CTRL;
-			else if (stricmp(k, "Alt") == 0)
-				Flags |= LGI_EF_ALT;
-			else if (stricmp(k, "Shift") == 0)
-				Flags |= LGI_EF_SHIFT;
-			else if (stricmp(k, "Del") == 0 ||
-					 stricmp(k, "Delete") == 0)
-				Vkey = LK_DELETE;
-			else if (stricmp(k, "Ins") == 0 ||
-					 stricmp(k, "Insert") == 0)
-				Vkey = LK_INSERT;
-			else if (stricmp(k, "Home") == 0)
-				Vkey = LK_HOME;
-			else if (stricmp(k, "End") == 0)
-				Vkey = LK_END;
-			else if (stricmp(k, "PageUp") == 0)
-				Vkey = LK_PAGEUP;
-			else if (stricmp(k, "PageDown") == 0)
-				Vkey = LK_PAGEDOWN;
-			else if (stricmp(k, "Backspace") == 0)
-				Vkey = LK_BACKSPACE;
-			else if (stricmp(k, "Left") == 0)
-				Vkey = LK_LEFT;
-			else if (stricmp(k, "Up") == 0)
-				Vkey = LK_UP;
-			else if (stricmp(k, "Right") == 0)
-				Vkey = LK_RIGHT;
-			else if (stricmp(k, "Down") == 0)
-				Vkey = LK_DOWN;
-			else if (!stricmp(k, "Esc") || !stricmp(k, "Escape"))
-				Vkey = LK_ESCAPE;
-			else if (stricmp(k, "Space") == 0)
-				Chr = ' ';
-			else if (k[0] == 'F' && isdigit(k[1]))
-			{
-				int Idx = atoi(k+1);
-				Vkey = LK_F1 + Idx - 1;
+				if (!stricmp(k, "CtrlCmd"))
+					Flags |= LGI_EF_SYSTEM;
+				else if (!stricmp(k, "AltCmd"))
+					Flags |= LGI_EF_SYSTEM;
+				else if (stricmp(k, "Ctrl") == 0)
+					Flags |= LGI_EF_CTRL;
+				else if (stricmp(k, "Alt") == 0)
+					Flags |= LGI_EF_ALT;
+				else if (stricmp(k, "Shift") == 0)
+					Flags |= LGI_EF_SHIFT;
+				else if (stricmp(k, "Del") == 0 ||
+						 stricmp(k, "Delete") == 0)
+					Vkey = LK_DELETE;
+				else if (stricmp(k, "Ins") == 0 ||
+						 stricmp(k, "Insert") == 0)
+					Vkey = LK_INSERT;
+				else if (stricmp(k, "Home") == 0)
+					Vkey = LK_HOME;
+				else if (stricmp(k, "End") == 0)
+					Vkey = LK_END;
+				else if (stricmp(k, "PageUp") == 0)
+					Vkey = LK_PAGEUP;
+				else if (stricmp(k, "PageDown") == 0)
+					Vkey = LK_PAGEDOWN;
+				else if (stricmp(k, "Backspace") == 0)
+					Vkey = LK_BACKSPACE;
+				else if (stricmp(k, "Left") == 0)
+					Vkey = LK_LEFT;
+				else if (stricmp(k, "Up") == 0)
+					Vkey = LK_UP;
+				else if (stricmp(k, "Right") == 0)
+					Vkey = LK_RIGHT;
+				else if (stricmp(k, "Down") == 0)
+					Vkey = LK_DOWN;
+				else if (!stricmp(k, "Esc") || !stricmp(k, "Escape"))
+					Vkey = LK_ESCAPE;
+				else if (stricmp(k, "Space") == 0)
+					Chr = ' ';
+				else if (k[0] == 'F' && isdigit(k[1]))
+				{
+					int Idx = atoi(k+1);
+					Vkey = LK_F1 + Idx - 1;
+				}
+				else if (isalpha(k[0]))
+					Chr = toupper(k[0]);
+				else if (isdigit(k[0]) || strchr(",", k[0]))
+					Chr = k[0];
+				else
+					LgiTrace("%s:%i - Unknown part '%s' in shortcut '%s'\n", _FL, k, d->Shortcut.Get());
 			}
-			else if (isalpha(k[0]))
-				Chr = toupper(k[0]);
-			else if (isdigit(k[0]) || strchr(",", k[0]))
-				Chr = k[0];
-			else
-				LgiTrace("%s:%i - Unknown part '%s' in shortcut '%s'\n", _FL, k, d->Shortcut.Get());
-		}
-		
-		if (Vkey || Chr)
-		{
-			if
-			(
+			
+			if (Vkey || Chr)
+			{
+				if
 				(
-					(Flags & LGI_EF_ALT) != 0 &&
-					(Flags & LGI_EF_SYSTEM) == 0
+					(
+						(Flags & LGI_EF_ALT) != 0 &&
+						(Flags & LGI_EF_SYSTEM) == 0
+					)
+					||
+					Vkey == LK_BACKSPACE
 				)
-				||
-				Vkey == LK_BACKSPACE
-			)
-			{
-				auto Ident = Id();
-				LAssert(Ident > 0);
-				Menu->Accel.Insert( new LAccelerator(Flags, Vkey, Chr, Ident) );
+				{
+					auto Ident = Id();
+					LAssert(Ident > 0);
+					Menu->Accel.Insert( new LAccelerator(Flags, Vkey, Chr, Ident) );
+				}
 			}
-		}
-		else
-		{
-			printf("%s:%i - Accel scan failed, str='%s'\n", _FL, d->Shortcut.Get());
-			return false;
+			else
+			{
+				printf("%s:%i - Accel scan failed, str='%s'\n", _FL, d->Shortcut.Get());
+			}
 		}
 	}
-
 	
 	return true;
 }
