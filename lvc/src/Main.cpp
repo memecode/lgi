@@ -1519,12 +1519,12 @@ public:
 				if (n.Type == LNotifyEscapeKey)
 					SetCtrlName(IDC_FILTER_COMMITS, NULL);
 
-				LString n = GetCtrlName(IDC_FILTER_COMMITS);
-				if (n != CommitFilter)
-				{
-					CommitFilter = n;
+				LString txt = GetCtrlName(IDC_FILTER_COMMITS);
+				if (txt != CommitFilter)
+					CommitFilter = txt;
+
+				if (n.Type == LNotifyReturnKey)
 					OnFilterCommits();
-				}
 				break;
 			}
 			case IDC_CLEAR_FILTER_FILES:
