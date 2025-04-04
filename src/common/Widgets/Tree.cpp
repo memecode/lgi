@@ -1804,8 +1804,12 @@ void LTree::OnPaint(LSurface *pDC)
 	pDC->Rectangle();
 	#endif
 
+	auto  s = ScrollPxPos();
+	int Ox, Oy;
+	pDC->GetOrigin(Ox, Oy);
+
 	rItems = GetClient();
-	LFont *f = GetFont();
+	auto f = GetFont();
 	if (ColumnHeaders())
 	{
 		ColumnHeader.ZOff(rItems.X()-1, f->GetHeight() + 4);
@@ -1820,8 +1824,8 @@ void LTree::OnPaint(LSurface *pDC)
 	d->IconTextGap = GetFont()->GetHeight() / 6;
 	auto cText = LColour(L_TEXT);
 	auto cWs   = LColour(L_WORKSPACE);
-	LColour Fore = Tools.GetFore(&cText);
-	LColour Background = Tools.GetBack(&cWs, 0);
+	auto Fore = Tools.GetFore(&cText);
+	auto Background = Tools.GetBack(&cWs, 0);
 
 	// icon cache
 	if (GetImageList() &&
@@ -1854,9 +1858,7 @@ void LTree::OnPaint(LSurface *pDC)
 	}
 
 	// scroll
-	LPoint s = ScrollPxPos();
-	int Ox, Oy;
-	pDC->GetOrigin(Ox, Oy);
+	pDC->ClipRgn(&rItems);
 	pDC->SetOrigin(Ox + s.x, Oy + s.y);
 
 	// selection colour
@@ -1900,6 +1902,7 @@ void LTree::OnPaint(LSurface *pDC)
 		pDC->Colour(Background);
 		pDC->Rectangle(rItems.x1, d->Limit.y - s.y, rItems.x2, rItems.y2);
 	}
+	pDC->ClipRgn(nullptr);
 
 	if (DropStatus)
 	{
