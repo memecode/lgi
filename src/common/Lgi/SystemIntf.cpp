@@ -96,6 +96,12 @@ void SystemIntf::DoWork()
 	else LSleep(WAIT_MS);
 }
 
+#if 0
+#define PROCESS_LOG(...) log->Print(__VA_ARGS__)
+#else
+#define PROCESS_LOG(...)
+#endif
+
 class SshBackend :
 	public SystemIntf,
 	public LCancel,
@@ -136,7 +142,7 @@ class SshBackend :
 			cancel(cancelObj),
 			exitcodeCb(cb)
 		{
-			// LOG("Process: about to run..\n");
+			PROCESS_LOG("Process: about to run..\n");
 			Run();
 		}
 
@@ -151,10 +157,10 @@ class SshBackend :
 		{
 			int status = 0;
 
-			// LOG("Process: in main..\n");
+			PROCESS_LOG("Process: in main..\n");
 			SetTimeout(5000);
 
-			// LOG("Process: open..\n");
+			PROCESS_LOG("Process: open..\n");
 			if (!Open(backend->uri.sHost, backend->uri.sUser, NULL, true))
 			{
 				log->Print("Error: connecting to ssh server %s\n", backend->uri.sHost.Get());
@@ -162,10 +168,10 @@ class SshBackend :
 			}
 			else
 			{				
-				// LOG("Process: create console..\n");
+				PROCESS_LOG("Process: create console..\n");
 				if (auto console = CreateConsole())
 				{
-					// LOG("Process: ReadToPrompt..\n");
+					PROCESS_LOG("Process: ReadToPrompt..\n");
 					backend->ReadToPrompt(console, NULL, cancel);
 					auto args = LString::Fmt("cd %s && %s\n", dir.Get(), cmd.Get());				
 
@@ -180,21 +186,23 @@ class SshBackend :
 
 					if (out && out->ioCallback)
 					{
-						LOG("Process: write args..\n");
+						PROCESS_LOG("Process: write args..\n");
 						console->Write(args);
 
 						// Wait for process to finish...
 						// Client code needs to call CallMethod(ObjCancel...) to quit this loop
+						PROCESS_LOG("Process: waiting for console to cancel...\n");
 						while (!console->IsCancelled())
 						{
 							LSleep(100);
 						}
 
+						PROCESS_LOG("Process: calling ioCallback...\n");
 						out->ioCallback(NULL);
 					}
 					else
 					{
-						// LOG("Process: Cmd..\n");
+						PROCESS_LOG("Process: Cmd..\n");
 						auto result = backend->Cmd(console, args, &exitCode, output, cancel);
 						log->Print("SshProcess finished with %i\n", exitCode);
 					}
@@ -206,6 +214,7 @@ class SshBackend :
 				}
 			}
 			
+			PROCESS_LOG("Error: OnProcessComplete\n");
 			backend->OnProcessComplete();
 			return status;
 		}

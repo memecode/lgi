@@ -258,6 +258,7 @@ class BuildThread : public LThread, public LStream, public LCancel
 
 	// Step 1, look through parent folders for a project file..
 	LString::Array backendPaths;
+	bool backendProjFound = false;
 	void Step1();
 
 	// Step 2, once found, rewrite the initDir and makefile path
@@ -1458,6 +1459,7 @@ void BuildThread::OnAfterMain()
 BuildThread::~BuildThread()
 {
 	Cancel();
+	WaitForExit();
 }
 
 ssize_t BuildThread::Write(const void *Buffer, ssize_t Size, int Flags)
@@ -1919,6 +1921,7 @@ void BuildThread::Step1()
 								if (!backendProjectFolder)
 								{
 									backendProjectFolder = full;
+									backendProjFound = true;
 									backendPaths.Empty();
 
 									LString cpy = backendProjectFolder.Get();
@@ -1939,6 +1942,12 @@ void BuildThread::Step1()
 
 			if (backendPaths.Length() > 0)
 				AddWork([this]() { Step1(); }); // Look at the next path...
+			else if (!backendProjFound)
+			{
+				LOG("Error: no project xml found.\n");
+				backendExitCode.Reset(new int(-1));
+			}
+				
 			RemoveCall(callId);
 		});
 }
@@ -2017,6 +2026,7 @@ void BuildThread::Step3()
 
 int BuildThread::Main()
 {
+	StreamToLog log(Proj->GetApp());
 	const char *Err = 0;
 	char ErrBuf[256];
 
@@ -2254,9 +2264,23 @@ int BuildThread::Main()
 			auto parts = MakePath.SplitDelimit(sep);
 			backendPaths.SetFixedLength(false);
 			for (int i = 2; i < parts.Length(); i++)
-				backendPaths.New() = sep.Join(parts.Slice(0, i));
+			{
+				auto path = sep.Join(parts.Slice(0, i));
+				backendPaths.New() = path;
+				#if 0
+				LOG("backendPath:%s\n", path.Get());
+				#endif
+			}
 			backendArgs = TmpArgs;
-			AddWork([this]() { Step1(); });
+			if (Makefile.Find(".ninja") > 0)
+			{
+				backendMakeFile = Makefile;
+				AddWork([this]() { Step3(); });
+			}
+			else
+			{
+				AddWork([this]() { Step1(); });
+			}
 			
 			StreamToLog log(Proj->GetApp());
 			uint64_t msgTs = LCurrentTime();

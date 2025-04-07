@@ -176,14 +176,12 @@ bool LUri::Set(const char *uri)
 				!hasAt &&
 				c[1] == '/' &&
 				c[2] == '/')
+			{
 				hasProto = c;
+				c += 2;
+			}
 			else
-				hasColon = c;
-		}
-		else if (c[0] == '/' &&
-				 c[1] == '/')
-		{
-			hasAuth = c++;
+				hasColon = c; // port number or user/pass separator?
 		}
 		else if (c[0] == '@' && !hasAt)
 		{
@@ -199,10 +197,7 @@ bool LUri::Set(const char *uri)
 	if (hasProto)
 	{
 		sProtocol.Set(s, hasProto - s);
-		if (hasAuth)
-			s = hasAuth + 2;
-		else
-			s = hasProto + 1;
+		s = hasProto + 3;
 	}
 	
 	if (hasAt)
@@ -219,7 +214,7 @@ bool LUri::Set(const char *uri)
 			}
 			else
 			{
-				sUser = DecodeStr(s);
+				sUser = DecodeStr(p);
 			}
 
 			s = hasAt + 1;

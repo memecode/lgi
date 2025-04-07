@@ -621,6 +621,7 @@ public:
 				r = ssh_userauth_publickey_auto(Ssh, Username, Password);
 			}
 			while (r == SSH_AUTH_AGAIN);
+			Log->Print("ssh_userauth_publickey_auto=%i\n", r);
 
 			if (r == SSH_AUTH_DENIED && Password)
 			{
