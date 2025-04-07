@@ -1,7 +1,6 @@
-#include "Lgi.h"
-#include "GHttpUi.h"
-#include "INet.h"
-#include "INetTools.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/HttpUi.h"
+#include "lgi/common/Net.h"
 
 struct LHttpServerPriv;
 
@@ -37,7 +36,8 @@ struct LHttpServerPriv : public LThread
 	LHttpServer_TraceSocket Listen;
 	int Port;
 
-	LHttpServerPriv(LHttpCallback *cb, int port)
+	LHttpServerPriv(LHttpCallback *cb, int port) :
+		LThread("LHttpServerPriv")
 	{
 		Callback = cb;
 		Port = port;
@@ -86,7 +86,8 @@ struct LHttpServerPriv : public LThread
 	}
 };
 
-LHttpThread::LHttpThread(LSocket *sock, LHttpServerPriv *priv)
+LHttpThread::LHttpThread(LSocket *sock, LHttpServerPriv *priv) :
+	LThread("LHttpThread")
 {
 	s = sock;
 	p = priv;
@@ -150,8 +151,8 @@ int LHttpThread::Main()
 	LgiTrace("%s:%i - got headers\n", _FL);
 	#endif
 
-	char *Action = &Buf[0];
-	char *Eol = strnstr(Action, "\r\n", Used);
+	auto Action = &Buf[0];
+	auto Eol = Strnstr(Action, "\r\n", Used);
 	#if LOG_HTTP
 	LgiTrace("%s:%i - eol=%p\n", _FL, Eol);
 	#endif
@@ -183,24 +184,23 @@ int LHttpThread::Main()
 					if (Eoh)
 						*Eoh = 0;
 
-					LVariant Out;
-					int Code = p->Callback->OnRequest(Action, Uri, Eol, Eoh + 4, Out);
+					LStringPipe RespHeaders(256), RespBody(1024);
+					auto Code = p->Callback->OnRequest(Action, Uri, Eol, Eoh + 4, &RespHeaders, &RespBody);
 					#if LOG_HTTP
 					LgiTrace("%s:%i - Code=%i\n", _FL, Code);
 					#endif
 
-					s->Print("HTTP/1.0 %i Ok\r\n\r\n", Code);
-					char *Response = Out.Str();
-					#if LOG_HTTP
-					LgiTrace("%s:%i - Response=%p\n", _FL, Response);
-					#endif
-					if (Response)
+					s->Print("HTTP/1.0 %i Ok\r\n", Code);
+					if (auto hdrs = RespHeaders.NewLStr().Strip())
+						s->Print("%s\r\n", hdrs.Get());
+					s->Print("\r\n");
+					
+					if (auto body = RespBody.NewLStr())
 					{
-						int Len = strlen(Out.Str());
-					    #if LOG_HTTP
-						LgiTrace("%s:%i - Len=%p\n", _FL, Len);
+						#if LOG_HTTP
+						LgiTrace("%s:%i - Response(%i)=%p\n", _FL, (int)body.Length(), body.Get());
 						#endif
-						s->Write(Out.Str(), Len);
+						s->Write(body);
 					}
 				}
 			}
@@ -223,9 +223,9 @@ LHttpServer::~LHttpServer()
 	DeleteObj(d);
 }
 
-char *LHttpCallback::FormDecode(const char *s)
+char *LHttpCallback::FormDecode(char *s)
 {
-	const char *i = s, *o = s;
+	char *i = s, *o = s;
 	while (*i)
 	{
 		if (*i == '+')

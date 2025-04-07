@@ -1,18 +1,25 @@
 #ifndef _HTTP_UI_H_
 #define _HTTP_UI_H_
 
-#include "LOptionsFile.h"
+#include "lgi/common/OptionsFile.h"
 
 class LHttpCallback
 {
 public:
 	virtual ~LHttpCallback() {}
 
-	char *FormDecode(const char *s);
+	char *FormDecode(char *s);
 	char *HtmlEncode(const char *s);
 	bool ParseHtmlWithDom(LVariant &Out, LDom *Dom, const char *Html);
 
-	virtual int OnRequest(const char *Action, constchar *Uri, constchar *Headers, constchar *Body, LVariant &Out) = 0;
+	virtual int OnRequest(	// [In] Request vars:
+							LString ReqAction,
+							LString ReqUri,
+							LString ReqHeaders,
+							LString ReqBody,
+							// [Out] Response vars:
+							LStream *RespHeaders,
+							LStream *RespBody) = 0;
 };
 
 class LHttpServer
