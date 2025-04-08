@@ -33,9 +33,9 @@ enum CellFlag
 };
 
 #define Izza(c)				dynamic_cast<c*>(v)
-// #define DEBUG_LAYOUT		17
+// #define DEBUG_LAYOUT		55
 #define DEBUG_PROFILE		0
-#define DEBUG_DRAW_CELLS	0
+// #define DEBUG_DRAW_CELLS	1
 // #define DEBUG_CTRL_ID		12
 
 #ifdef DEBUG_CTRL_ID
@@ -868,7 +868,7 @@ void TableCell::LayoutWidth(int Depth, int &MinX, int &MaxX, CellFlag &Flag)
 				else if (Max)
 					Max += c->Inf.Width.Max + LTableLayout::CellSpacing;
 				else
-					Max = c->Inf.Width.Max;
+					Max = c->Inf.Width.Max + 1;
 
 				if (c->Inf.Width.Min)
 				{
@@ -888,10 +888,12 @@ void TableCell::LayoutWidth(int Depth, int &MinX, int &MaxX, CellFlag &Flag)
 				c->Inf.Height.Min = c->Inf.Height.Max = ds.Y() + Pad.y;
 
 				MaxBtnX = MAX(MaxBtnX, c->Inf.Width.Min);
-				TotalBtnX = TotalBtnX ?
-							TotalBtnX + LTableLayout::CellSpacing + c->Inf.Width.Min :
+				TotalBtnX = TotalBtnX
+							?
+							TotalBtnX + LTableLayout::CellSpacing + c->Inf.Width.Min
+							:
 							c->Inf.Width.Min;
-				
+
 				if (Flag < SizeFixed)
 					Flag = SizeFixed;
 			}

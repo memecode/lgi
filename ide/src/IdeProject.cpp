@@ -2194,10 +2194,18 @@ int BuildThread::Main()
 			auto Config = Configs.Length() > 0 ? Configs[0] : LString("Debug");
 			TmpArgs.Printf("-project \"%s\" -configuration %s", Makefile.Get(), Config.Get());
 		}
-		else if (MakePath.Find(".ninja"))
+		else if (MakePath.Find(".ninja") >= 0)
 		{
+			Exe = "ninja";
 			if (Jobs.CastInt32())
 				TmpArgs.Printf("-j %i", Jobs.CastInt32());
+				
+			InitDir.Swap(MakePath);
+			MakePath.Empty();
+			LTrimDir(InitDir);
+			printf("TmpArgs='%s'\n", TmpArgs.Get());
+			printf("InitDir='%s'\n", InitDir.Get());
+			printf("MakePath='%s'\n", MakePath.Get());
 		}
 		else
 		{
@@ -2257,7 +2265,7 @@ int BuildThread::Main()
 		LString Msg;
 		Proj->GetApp()->PostEvent(M_APPEND_TEXT, (LMessage::Param)NewStr(Msg), AppWnd::BuildTab);
 
-		Print("Making: %s (%s)\n", MakePath.Get(), TmpArgs.Get());
+		printf("Making: %s %s\n", Exe.Get(), TmpArgs.Get());
 		if (auto backend = Proj->GetBackend())
 		{
 			LString sep = MakePath.Find("\\") >= 0 ? "\\" : "/";
