@@ -10,6 +10,12 @@ struct LHttpServerPriv;
 #define LOG_HTTP(...)
 #endif
 
+enum Msgs
+{
+	M_ADD_WEBSOCKET = M_USER,
+	M_SEND_WEBSOCKET,
+};
+
 class LHttpThread : public LThread
 {
 	LAutoPtr<LSocketI> s;
@@ -34,17 +40,27 @@ public:
 	}
 };
 
-struct LHttpServerPriv : public LThread
+struct LHttpServerPriv :
+	public LThread,
+	public LMutex,
+	public LEventTargetI
 {
+private:
+	LArray<LWebSocket*> webSockets;
+
+public:
 	LHttpServer::Callback *callback;
 	LHttpServer_TraceSocket Listen;
 	int port;
 	LCancel *cancel = nullptr;
 	LCancel localCancel;
-	LArray<LWebSocket*> webSockets;
+	
+	// Lock before using
+	LArray<LMessage*> messages;
 
 	LHttpServerPriv(LHttpServer::Callback *cb, int portVal, LCancel *cancelObj) :
-		LThread("LHttpServerPriv"),
+		LThread("LHttpServerPriv.Thread"),
+		LMutex("LHttpServerPriv.Lock"),
 		callback(cb),
 		port(portVal),
 		cancel(cancelObj ? cancelObj : &localCancel)
@@ -57,6 +73,40 @@ struct LHttpServerPriv : public LThread
 		Listen.Close();
 		cancel->Cancel();
 		WaitForExit();
+	}
+
+	LMessage::Result OnEvent(LMessage *Msg)
+	{
+		switch (Msg->m)
+		{
+			case M_ADD_WEBSOCKET:
+			{
+				auto ws = Msg->AutoA<LWebSocket>();
+				if (ws)
+				{
+					webSockets.Add(ws.Release());
+				}
+				else printf("Error: no ws to add.\n");
+				break;
+			}
+			case M_SEND_WEBSOCKET:
+			{
+				LWebSocket *ws = Msg->A();
+				auto msg = Msg->AutoB<LString>();
+				if (ws && msg)
+				{
+					if (webSockets.HasItem(ws))
+					{
+						ws->SendMessage(*msg);
+					}
+					else printf("Error: ws not in list.\n");
+				}
+				else printf("Error: no ws or msg to send.\n");
+				break;
+			}
+		}
+		
+		return 0;
 	}
 
 	int Main()
@@ -77,7 +127,7 @@ struct LHttpServerPriv : public LThread
 		LgiTrace("Listening on port %i.\n", port);
 		while (!cancel->IsCancelled())
 		{
-			if (Listen.IsReadable(1000))
+			if (Listen.IsReadable(1))
 			{
 				LAutoPtr<LSocketI> s(new LSocket);
 				if (s)
@@ -92,11 +142,16 @@ struct LHttpServerPriv : public LThread
 			}
 
 			for (auto ws: webSockets)
-			{
 				ws->Read();
-			}
+
+			Auto lck(this, _FL);
+			for (auto m: messages)
+				OnEvent(m);
+			messages.DeleteObjects();
 		}
 
+		printf("Closing listen socket: %i\n", Listen.Handle());
+		Listen.Close();
 		return 0;
 	}
 };
@@ -235,7 +290,6 @@ int LHttpThread::Main()
 							stream->Write(body);
 						}
 					}
-					else printf("Warn: no sock..\n");
 				}
 			}
 		}
@@ -262,6 +316,11 @@ bool LHttpServer::IsExited()
 	return d->IsExited();
 }
 
+void LHttpServer::WebsocketSend(LWebSocket *ws, LString msg)
+{
+	PostEvent(M_SEND_WEBSOCKET, (LMessage::Param)ws, (LMessage::Param)new LString(msg));
+}
+
 bool LHttpServer::WebsocketUpgrade(LHttpServer::Request *req, LWebSocketBase::OnMsg onMsg)
 {
 	if (!req || !onMsg)
@@ -273,7 +332,7 @@ bool LHttpServer::WebsocketUpgrade(LHttpServer::Request *req, LWebSocketBase::On
 		if (ws->Upgrade(req->headers))
 		{
 			printf("Adding ws...\n");
-			d->webSockets.Add(ws);
+			PostEvent(M_ADD_WEBSOCKET, (LMessage::Param)ws);
 			return true;
 		}
 		else
@@ -284,6 +343,27 @@ bool LHttpServer::WebsocketUpgrade(LHttpServer::Request *req, LWebSocketBase::On
 	}
 
 	return false;
+}
+
+bool LHttpServer::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64_t TimeoutMs)
+{
+	if (TimeoutMs > 0)
+	{
+		if (!d->LockWithTimeout(_FL, TimeoutMs))
+		{
+			printf("Error: couldn't lock.\n");
+			return false;
+		}
+	}
+	else if (!d->Lock(_FL))
+	{
+		printf("Error: couldn't lock.\n");
+		return false;
+	}
+
+	d->messages.Add(new LMessage(Cmd, a, b));	
+	d->Unlock();
+	return true;
 }
 
 char *LHttpServer::Callback::FormDecode(char *s)

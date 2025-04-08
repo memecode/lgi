@@ -2,7 +2,8 @@
 
 #include <lgi/common/WebSocket.h>
 
-class LHttpServer
+class LHttpServer :
+	public LEventSinkI
 {
 	struct LHttpServerPriv *d;
 
@@ -18,6 +19,7 @@ public:
 		LString headers;
 		LString body;
 	};
+	
 	struct Response
 	{
 		LStream *headers = nullptr;
@@ -39,5 +41,9 @@ public:
 	~LHttpServer();
 
 	bool IsExited();
+	bool PostEvent(int Cmd, LMessage::Param a = 0, LMessage::Param b = 0, int64_t TimeoutMs = -1) override;
+
+	// Websocket support:
 	bool WebsocketUpgrade(Request *req, LWebSocketBase::OnMsg onMsg);
+	void WebsocketSend(LWebSocket *ws, LString msg);
 };
