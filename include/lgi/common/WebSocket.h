@@ -5,6 +5,7 @@
 
 typedef LAutoPtr<LSocketI> LAutoSocket;
 
+class LWebSocket;
 class LWebSocketBase
 {
 public:
@@ -24,7 +25,7 @@ public:
 	LString ToString(uint64 i);
 	LString TimestampString(uint64 i);
 
-	typedef std::function<bool(WsOpCode op, char *ptr, ssize_t len)> OnMsg;
+	typedef std::function<bool(LWebSocket *ws, WsOpCode op, char *ptr, ssize_t len)> OnMsg;
 	typedef std::function<void()> OnClose;
 	typedef std::function<LAutoSocket()> CreateSocket;
 
@@ -58,6 +59,7 @@ public:
 	bool Close();
 	bool Read();
 	bool IsConnected(); // Ready to send/receive messages
+	bool Upgrade(LString inHeaders, int status = 101);
 	
 	virtual void OnHeaders() {};
 };

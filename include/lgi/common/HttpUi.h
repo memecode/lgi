@@ -1,7 +1,6 @@
-#ifndef _HTTP_UI_H_
-#define _HTTP_UI_H_
+#pragma once
 
-#include "lgi/common/OptionsFile.h"
+#include <lgi/common/WebSocket.h>
 
 class LHttpServer
 {
@@ -10,6 +9,8 @@ class LHttpServer
 public:
 	struct Request
 	{
+		LAutoPtr<LSocketI> sock;
+		
 		LString action;
 		LString uri;
 		LString protocol;
@@ -38,6 +39,5 @@ public:
 	~LHttpServer();
 
 	bool IsExited();
+	bool WebsocketUpgrade(Request *req, LWebSocketBase::OnMsg onMsg);
 };
-
-#endif

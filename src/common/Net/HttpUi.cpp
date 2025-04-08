@@ -4,7 +4,7 @@
 
 struct LHttpServerPriv;
 
-#if false
+#if 0
 #define LOG_HTTP(...)	printf(__VA_ARGS__)
 #else
 #define LOG_HTTP(...)
@@ -12,11 +12,11 @@ struct LHttpServerPriv;
 
 class LHttpThread : public LThread
 {
-	LSocket *s;
+	LAutoPtr<LSocketI> s;
 	LHttpServerPriv *p;
 
 public:
-	LHttpThread(LSocket *sock, LHttpServerPriv *priv);
+	LHttpThread(LAutoPtr<LSocketI> sock, LHttpServerPriv *priv);
 	int Main();
 };
 
@@ -41,6 +41,7 @@ struct LHttpServerPriv : public LThread
 	int port;
 	LCancel *cancel = nullptr;
 	LCancel localCancel;
+	LArray<LWebSocket*> webSockets;
 
 	LHttpServerPriv(LHttpServer::Callback *cb, int portVal, LCancel *cancelObj) :
 		LThread("LHttpServerPriv"),
@@ -73,12 +74,13 @@ struct LHttpServerPriv : public LThread
 			}
 		}
 
-		LOG_HTTP("Listening on port %i.\n", port);
+		LgiTrace("Listening on port %i.\n", port);
 		while (!cancel->IsCancelled())
 		{
-			if (Listen.IsReadable(100))
+			if (Listen.IsReadable(1000))
 			{
-				if (auto s = new LSocket)
+				LAutoPtr<LSocketI> s(new LSocket);
+				if (s)
 				{
 					LOG_HTTP("Accepting...\n");
 					if (Listen.Accept(s))
@@ -88,13 +90,18 @@ struct LHttpServerPriv : public LThread
 					}
 				}
 			}
+
+			for (auto ws: webSockets)
+			{
+				ws->Read();
+			}
 		}
 
 		return 0;
 	}
 };
 
-LHttpThread::LHttpThread(LSocket *sock, LHttpServerPriv *priv) :
+LHttpThread::LHttpThread(LAutoPtr<LSocketI> sock, LHttpServerPriv *priv) :
 	LThread("LHttpThread")
 {
 	s = sock;
@@ -112,15 +119,17 @@ int LHttpThread::Main()
 	Buf.Length(Block);
 	const int NullSz = 1;
 
+	req.sock = s;
+
 	// Read headers...
-	while (s->IsOpen())
+	while (req.sock->IsOpen())
 	{
 		// Extend the block to fit...
 		if (Buf.Length() - Used < 1)
 			Buf.Length(Buf.Length() + Block);
 
 		// Read more data...
-		auto r = s->Read(Buf.AddressOf(Used), Buf.Length()-Used-NullSz, 0);
+		auto r = req.sock->Read(Buf.AddressOf(Used), Buf.Length()-Used-NullSz, 0);
 		LOG_HTTP("%s:%i - read=%i\n", _FL, (int)r);
 		if (r > 0)
 			Used += r;
@@ -128,13 +137,16 @@ int LHttpThread::Main()
 		if (!ReqEnd &&
 			(ReqEnd = strnistr(Buf.AddressOf(), "\r\n", Used)))
 		{
-			auto parts = LString(Buf.AddressOf(), ReqEnd - Buf.AddressOf()).SplitDelimit();
+			LString line(Buf.AddressOf(), ReqEnd - Buf.AddressOf());
+			auto parts = line.SplitDelimit();
 			if (parts.Length() > 0)
 				req.action = parts[0];
 			if (parts.Length() > 1)
 				req.uri = parts[1];
 			if (parts.Length() > 2)
 				req.protocol = parts[2];
+
+			LOG_HTTP("%s:%i - Action=%s\n", _FL, line.Get());
 		}
 
 		if (ReqEnd &&
@@ -145,11 +157,11 @@ int LHttpThread::Main()
 			HeadersEnd += 4;
 			req.headers.Set(ReqEnd, HeadersEnd - ReqEnd);
 
-			LOG_HTTP("%s:%i - HeaderLen=%i\n", _FL, (int)req.headers.Length());
-			auto s = LGetHeaderField(req.headers, "Content-Length");
-			if (s)
+			// LOG_HTTP("%s:%i - Headers=%i\n%s\n", _FL, (int)req.headers.Length(), req.headers.Get());
+			auto len = LGetHeaderField(req.headers, "Content-Length");
+			if (len)
 			{
-				ContentLen = s.Int();
+				ContentLen = len.Int();
 				LOG_HTTP("%s:%i - ContentLen=%i\n", _FL, (int)ContentLen);
 			}
 			else break;
@@ -207,25 +219,30 @@ int LHttpThread::Main()
 					resp.headers = &RespHeaders;
 					resp.body = &RespBody;
 					auto Code = p->callback->OnRequest(&req, &resp);
-					LOG_HTTP("%s:%i - Code=%i\n", _FL, Code);
-
-					s->Print("HTTP/1.0 %i Ok\r\n", Code);
-					if (auto hdrs = RespHeaders.NewLStr().Strip())
-						s->Print("%s\r\n", hdrs.Get());
-					s->Print("\r\n");
-					
-					if (auto body = RespBody.NewLStr())
+					if (req.sock)
 					{
-						LOG_HTTP("%s:%i - Response(%i)=%p\n", _FL, (int)body.Length(), body.Get());
-						s->Write(body);
+						LOG_HTTP("%s:%i - Code=%i\n", _FL, Code);
+
+						auto stream = dynamic_cast<LSocket*>(req.sock.Get());
+						stream->Print("HTTP/1.0 %i Ok\r\n", Code);
+						if (auto hdrs = RespHeaders.NewLStr().Strip())
+							stream->Print("%s\r\n", hdrs.Get());
+						stream->Print("\r\n");
+						
+						if (auto body = RespBody.NewLStr())
+						{
+							LOG_HTTP("%s:%i - Response(%i)=%p\n", _FL, (int)body.Length(), body.Get());
+							stream->Write(body);
+						}
 					}
+					else printf("Warn: no sock..\n");
 				}
 			}
 		}
 	}
 
-	s->Close();
-	DeleteObj(s);
+	if (req.sock)
+		req.sock->Close();
 
 	return 0;
 }
@@ -243,6 +260,30 @@ LHttpServer::~LHttpServer()
 bool LHttpServer::IsExited()
 {
 	return d->IsExited();
+}
+
+bool LHttpServer::WebsocketUpgrade(LHttpServer::Request *req, LWebSocketBase::OnMsg onMsg)
+{
+	if (!req || !onMsg)
+		return false;
+
+	if (auto ws = new LWebSocket(req->sock, true, onMsg))
+	{
+		printf("Upgrading ws...\n");
+		if (ws->Upgrade(req->headers))
+		{
+			printf("Adding ws...\n");
+			d->webSockets.Add(ws);
+			return true;
+		}
+		else
+		{
+			printf("Error: upgrade failed...\n");
+			delete ws;
+		}
+	}
+
+	return false;
 }
 
 char *LHttpServer::Callback::FormDecode(char *s)

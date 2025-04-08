@@ -124,10 +124,17 @@ struct LWebSocketPriv : public LWebSocketBase
 				return -1;
 		}
 
+		// Check if there's data:
+		if (!Sock->IsReadable())
+		{
+			// printf("ws: not readable, used=%i\n", (int)Used);
+			return 0;
+		}
+
 		// Read data
 		auto base = Data.AddressOf();
 		auto rd = Sock->Read(base + Used, Data.Length() - Used);
-		// LgiTrace("%s:%i - Got %i bytes\n", _FL, (int)rd);
+		printf("%s:%i - Got %i bytes\n", _FL, (int)rd);
 		if (rd <= 0)
 		{
 			Close();
@@ -275,7 +282,7 @@ struct LWebSocketPriv : public LWebSocketBase
 			{
 				// Process the message
 				if (Ws->MsgCb)
-					Ws->MsgCb(OpCode, (char*)p, Len);
+					Ws->MsgCb(Ws, OpCode, (char*)p, Len);
 				p += Len;
 				Status = true;
 
@@ -303,6 +310,7 @@ struct LWebSocketPriv : public LWebSocketBase
 
 	bool Error(const char *Msg)
 	{
+		printf("error: %s\n", Msg);
 		return false;
 	}
 
@@ -313,7 +321,7 @@ struct LWebSocketPriv : public LWebSocketBase
 		// Create the response hdr and send it...
 		auto Upgrade = LGetHeaderField(InHdr, "Upgrade");
 		if (Upgrade != "websocket")
-			return false;
+			return Error("No websocket hdr.");
 
 		auto SecWebSocketKey = LGetHeaderField(InHdr, "Sec-WebSocket-Key");
 		if (!SecWebSocketKey)
@@ -347,7 +355,9 @@ struct LWebSocketPriv : public LWebSocketBase
 			return Error("Writing HTTP response failed.");
 
 		State = WsMessages;
-		return CheckMsg();
+		printf("Websocket upgraded.\n");
+		CheckMsg();
+		return true;
 	}
 };
 
@@ -443,6 +453,12 @@ bool LWebSocket::Open(const char *uri, int port)
 bool LWebSocket::IsConnected()
 {
 	return d->State == WsMessages;
+}
+
+bool LWebSocket::Upgrade(LString inHeaders, int status)
+{
+	d->InHdr = inHeaders;
+	return d->SendResponse(status);
 }
 
 LSocketI *LWebSocket::GetSocket()
