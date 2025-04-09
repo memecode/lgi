@@ -2889,9 +2889,10 @@ void VcFolder::PathSeek()
 			break;
 	}
 
-	if (item && item != this)
+	if (item && item != (LTreeItem*)this)
 	{
-		item->Select(true);
+		if (!item->Select())
+			item->Select(true);
 		item->ScrollTo();
 	}
 }
