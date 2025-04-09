@@ -664,6 +664,8 @@ if(WIN32)
 			${DEPS_BUILD}/lunasvg/$<IF:$<CONFIG:Debug>,Debug,Release>
 			${DEPS_BUILD}/lib)
 	target_include_directories(lgi
+		PUBLIC
+			${OPENSSL_INCLUDE_DIR}
 		PRIVATE
 			${DEPS_BUILD}/include)
 else()

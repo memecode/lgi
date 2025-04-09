@@ -1,6 +1,7 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/HttpServer.h"
 #include "lgi/common/Net.h"
+#include "lgi/common/Thread.h"
 
 struct LHttpServerPriv;
 
@@ -29,7 +30,7 @@ public:
 class LHttpServer_TraceSocket : public LSocket
 {
 public:
-	void OnInformation(char *Str)
+	void OnInformation(const char *Str) override
 	{
 		LgiTrace("SocketInfo: %s\n", Str);
 	}
@@ -91,7 +92,7 @@ public:
 			}
 			case M_SEND_WEBSOCKET:
 			{
-				LWebSocket *ws = Msg->A();
+				auto ws = (LWebSocket*)Msg->A();
 				auto msg = Msg->AutoB<LString>();
 				if (ws && msg)
 				{
@@ -150,7 +151,7 @@ public:
 			messages.DeleteObjects();
 		}
 
-		printf("Closing listen socket: %i\n", Listen.Handle());
+		printf("Closing listen socket: %i\n", (int)Listen.Handle());
 		Listen.Close();
 		return 0;
 	}
@@ -349,7 +350,7 @@ bool LHttpServer::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64
 {
 	if (TimeoutMs > 0)
 	{
-		if (!d->LockWithTimeout(_FL, TimeoutMs))
+		if (!d->LockWithTimeout(TimeoutMs, _FL))
 		{
 			printf("Error: couldn't lock.\n");
 			return false;
@@ -398,7 +399,7 @@ char *LHttpServer::Callback::HtmlEncode(const char *s)
 
 	while (s && *s)
 	{
-		char *b = s;
+		auto b = s;
 		while (*s && !strchr(e, *s)) s++;
 		
 		if (s > b)
@@ -421,7 +422,7 @@ bool LHttpServer::Callback::ParseHtmlWithDom(LVariant &Out, LDom *Dom, const cha
 		return false;
 
 	LStringPipe p;
-	for (char *s = Html; s && *s; )
+	for (auto s = Html; s && *s; )
 	{
 		char *e = stristr(s, "<?");
 		if (e)
@@ -429,7 +430,7 @@ bool LHttpServer::Callback::ParseHtmlWithDom(LVariant &Out, LDom *Dom, const cha
 			p.Write(s, e - s);
 			s = e + 2;
 			while (*s && strchr(" \t\r\n", *s)) s++;
-			char *v = s;
+			auto v = s;
 			while (*s && (isdigit(*s) || isalpha(*s) || strchr(".[]", *s)) ) s++;
 			char *Var = NewStr(v, s - v);
 			while (*s && strchr(" \t\r\n", *s)) s++;
