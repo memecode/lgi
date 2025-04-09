@@ -120,7 +120,8 @@ enum AppIds
 	IDC_BLAME,
 	IDC_RAW,
 	IDM_FORGET,
-	ID_RESTORE
+	ID_RESTORE,
+	ID_GOTO_ITEM,
 };
 
 enum AppMessages

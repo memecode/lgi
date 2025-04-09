@@ -240,6 +240,10 @@ protected:
 	LString FileToSelect;
 	void InsertFiles(List<LListItem> &files);
 
+	// Support for seeking to a child tree element (ID_GOTO_ITEM)
+	LString::Array pathParts;
+	void PathSeek();
+
 	// Git specific
 	LHashTbl<ConstStrKey<char>,LString> GitNames;
 	void AddGitName(LString Hash, LString Name);

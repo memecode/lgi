@@ -2748,6 +2748,7 @@ void VcFolder::OnMouseClick(LMouse &m)
 		s.AppendItem("Status", IDM_STATUS);
 		s.AppendItem("Push", IDM_PUSH);
 		s.AppendItem("Update Subs", IDM_UPDATE_SUBS, GetType() == VcGit);
+		s.AppendItem("Goto Item", ID_GOTO_ITEM);
 		s.AppendSeparator();
 		s.AppendItem("Remove", IDM_REMOVE);
 		s.AppendItem("Remote URL", IDM_REMOTE_URL);
@@ -2837,9 +2838,61 @@ void VcFolder::OnMouseClick(LMouse &m)
 				});
 				break;
 			}
+			case ID_GOTO_ITEM:
+			{
+				LClipBoard clip(GetTree());
+				auto txt = clip.Text();
+
+				if (auto inp = new LInput(GetTree(), txt, "Item path:", "Goto Item"))
+					inp->DoModal([this, inp](auto dlg, auto status)
+					{
+						if (!status)
+							return;
+
+						if (auto path = inp->GetStr())
+						{
+							pathParts = path.SplitDelimit("\\/");
+							PathSeek();
+						}
+					});
+				break;
+			}
 			default:
 				break;
 		}
+	}
+}
+
+void VcFolder::PathSeek()
+{
+	LTreeItem *item = this;
+	for (size_t i=0; i<pathParts.Length(); i++)
+	{
+		auto p = pathParts[i];
+		if (!item->Expanded())
+			item->Expanded(true);
+
+		LTreeItem *match = nullptr;
+		for (auto c = item->GetChild(); c; c = c->GetNext())
+		{
+			auto txt = c->GetText();
+			if (p.Equals(txt))
+			{
+				match = c;
+				break;
+			}
+		}
+
+		if (match)
+			item = match;
+		else
+			break;
+	}
+
+	if (item && item != this)
+	{
+		item->Select(true);
+		item->ScrollTo();
 	}
 }
 
@@ -3105,6 +3158,7 @@ bool VcFolder::ParseRemoteFind(int Result, LString s, ParseParams *Params)
 		}
 	}
 
+	PathSeek();
 	return false;
 }
 
@@ -3126,6 +3180,8 @@ void VcFolder::ReadDir(LTreeItem *Parent, const char *ReadUri)
 			Path += name;
 			new VcLeaf(this, Parent, u.ToString(), name, Dir.IsDir());
 		}
+
+		PathSeek();
 	}
 	#if HAS_LIBSSH
 	else
