@@ -1017,10 +1017,12 @@ struct LCommsBusPriv :
 		info.recentSendTs = 0;
 		info.blk = blk.Release();
 
+		/*
 		for (auto &i: writeQue)
 		{
 			LOG("	writeque: %s\n", i.blk->ToString().Get());
 		}
+		*/
 	}
 
 	bool ServerSend(Block *blk, bool localOnly)

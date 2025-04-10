@@ -1077,7 +1077,7 @@ int LDirectory::First(const char *Name, const char *Pattern)
 	d->end = d->path + strlen(d->path);	
 	d->dir = opendir(d->path);
 	if (!d->dir)
-		printf("%s:%i - opendir failed: %i\n", _FL, errno);
+		printf("%s:%i - opendir(%s) failed: %i\n", _FL, Name, errno);
 	else
 	{
 		d->entry = readdir(d->dir);

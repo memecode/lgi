@@ -265,18 +265,33 @@ public:
 		Ctx->CallStack->SendNotify();
 	}
 
+	uint64_t updateStackTs = 0;
+	int updateStackCnt = 0;
 	void UpdateCallStack()
 	{
 		if (!Db || !Ctx->CallStack || !InDebugging)
 			return;
 
-		Db->GetCallStack([this](auto Stack)
+		updateStackCnt++;
+		auto now = LCurrentTime();
+		if (now - updateStackTs > 1000)
 		{
-			Ctx->CallStack->RunCallback([this, Stack]() mutable
+			updateStackTs = now;
+
+			printf("Db->GetCallStack...\n");
+			Db->GetCallStack([this](auto Stack)
 			{
-				OnCallStack(Stack);
+				Ctx->CallStack->RunCallback([this, Stack]() mutable
+				{
+					OnCallStack(Stack);
+				});
 			});
-		});
+		}
+		else
+		{
+			printf("UpdateCallStack rate limit: %i\n", updateStackCnt);
+			updateStackCnt = 0;
+		}
 	}
 	
 	void Log(const char *Fmt, ...)

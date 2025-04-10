@@ -114,13 +114,17 @@ LString LUri::LocalPath()
 	if (!IsFile())
 		return LString();
 
+	LString p;
+
 	#ifdef WINDOWS
 	if (sPath.Length() > 0 &&
 		sPath(0) == '/')
-		return sPath(1, -1).Replace("/", DIR_STR);
+		p = DecodeStr(sPath(1, -1));
+	else
 	#endif
+		p = DecodeStr(sPath);
 
-	return sPath.Replace("/", DIR_STR);
+	return p.Replace("/", DIR_STR);
 }
 
 LString LUri::ToString()
