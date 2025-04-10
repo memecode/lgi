@@ -1774,6 +1774,65 @@ public:
 				}
 				break;
 			}
+			case IDC_TXT:
+			{
+				if (n.Type == LNotifyItemDoubleClick)
+				{
+					printf("IDC_TXT: dbl click\n");
+					auto txt = Diff->NameW();
+					auto pos = Diff->GetCaret();
+					
+					auto lnStart = [&]()
+					{
+						while (	pos > 0 &&
+								txt[pos-1] != '\n')
+							pos--;
+						return txt + pos;
+					};
+					
+					LString ref;
+					int add = 2;
+					while (auto s = lnStart())
+					{
+						if (s[0] == '@' && s[1] == '@')
+						{
+							auto e = Strchr(s, '\n');
+							ref = LString(s, e - s);
+							break;
+						}
+						
+						if (s == txt)
+							break;
+						else
+							pos--;
+						add++;
+					}
+					
+					if (ref)
+					{
+						auto parts = ref.Strip("@ ").SplitDelimit(" ,-+");
+						int ln = (parts[2].Int() + add);
+
+						// Get currently select file...
+						if (auto curFile = Files->GetSelected())
+						{
+							auto fileLn = LString::Fmt("%s:%i", curFile->GetText(COL_FILENAME), ln);
+							LPopupNotification::Message(this, fileLn);
+
+							if (!CommsBus)
+							{
+								CommsBus.Reset(new LCommsBus(Log));
+							}
+							if (CommsBus)
+							{
+								Log->Print("Sending vscode the file/line: %s\n", fileLn.Get());
+								CommsBus->SendMsg("vscode.goto", fileLn);
+							}
+						}
+					}
+				}
+				break;
+			}
 		}
 
 		return 0;

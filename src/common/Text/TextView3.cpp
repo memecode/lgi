@@ -3860,6 +3860,7 @@ void LTextView3::OnMouseClick(LMouse &m)
 			{
 				d->WordSelectMode = Cursor;
 				SelectWord(Cursor);
+				SendNotify(LNotifyItemDoubleClick);
 			}
 			else
 			{
