@@ -117,7 +117,7 @@ public:
 	static Auto New(uint32_t msgId, LString s)
 	{
 		auto blk = New(msgId, (uint32_t)s.Length());
-		if (blk)
+		if (blk && s.Get())
 			memcpy(blk->data, s.Get(), s.Length() + nullSz);
 		return blk;
 	}
@@ -145,6 +145,12 @@ public:
 
 	// Get the payload size in host byte order
 	uint32_t GetSize() const { return ntohl(size); }
+	
+	// Return the body as a string
+	LString GetBody() const
+	{
+		return LString(data, GetSize());
+	}
 	
 	// Return the first line as a string
 	LString FirstLine() const
@@ -1332,7 +1338,8 @@ struct LCommsBusPriv :
 								}
 								case MCreateEndpoint:
 								{
-									auto lines = LString(blk->data).SplitDelimit("\r\n");
+								    auto body = blk->GetBody();
+									auto lines = body.SplitDelimit("\r\n");
 									if (lines.Length() != 2)
 									{
 										LOG("%s error in ep fmt=%s\n", Describe().Get(), blk->data);
@@ -1341,6 +1348,10 @@ struct LCommsBusPriv :
 									{
 										auto ep = lines[0];
 										auto remoteUid = lines[1];
+										
+										LOG("%s: create ep: %s, %s\n'%s'\n",
+										    Describe().Get(), ep.Get(), remoteUid.Get(), body.Get());
+										
 										if (Lock(_FL))
 										{
 											bool found = false;
@@ -1501,7 +1512,8 @@ struct LCommsBusPriv :
 									if (auto blk = ep.MakeMsg(GetUid()))
 									{
 										auto sent = c.Write(blk);
-										LOG("%s send endpoint %s = %i.\n", Describe().Get(), ep.addr.Get(), sent);
+										LOG("%s:%i - %s sent endpoint %s, %i bytes\n'%s'\n",
+											_FL, Describe().Get(), ep.addr.Get(), blk->GetSize(), blk->GetBody().Get());
 									}
 								}
 							}
@@ -1702,7 +1714,8 @@ bool LCommsBus::Listen(LString endPoint, std::function<void(LString)> cb)
 
 	if (msg &&
 		!d->isServer) // The server doesn't need to tell anyone else about endpoints
-	{		
+	{
+	    LOG("%s:%i - MCreateEndpoint queued: '%s'\n", _FL, msg.Get());
 		if (auto blk = Block::New(MCreateEndpoint, msg))
 		{
 			LOG("%s: queuing MCreateEndpoint\n", __FUNCTION__);
