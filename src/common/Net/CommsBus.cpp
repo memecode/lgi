@@ -1004,6 +1004,9 @@ struct LCommsBusPriv :
 
 	const char *GetUid()
 	{
+		// Make sure the thread has run far enough to create the UID
+		while (!Uid.Get())
+			LSleep(1);
 		return Uid;
 	}
 
@@ -1512,8 +1515,9 @@ struct LCommsBusPriv :
 									if (auto blk = ep.MakeMsg(GetUid()))
 									{
 										auto sent = c.Write(blk);
-										LOG("%s:%i - %s sent endpoint %s, %i bytes\n'%s'\n",
-											_FL, Describe().Get(), ep.addr.Get(), blk->GetSize(), blk->GetBody().Get());
+										if (!sent)
+											LOG("%s:%i - %s error sending endpoint %s, %i bytes\n'%s'\n",
+												_FL, Describe().Get(), ep.addr.Get(), blk->GetSize(), blk->GetBody().Get());
 									}
 								}
 							}
@@ -1585,7 +1589,10 @@ struct LCommsBusPriv :
 						{
 							if (c.Write(info.blk))
 							{
-								LOG("%s wrote msg %s\n", Describe().Get(), info.blk->ToString().Get());
+								#if 0
+								LOG("%s wrote msg %s\n'%s'\n", Describe().Get(),
+									info.blk->ToString().Get(), info.blk->GetBody().Get());
+								#endif
 								writeQue.DeleteAt(i--, true);
 							}
 							else
