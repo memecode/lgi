@@ -18,7 +18,8 @@ public:
 
 	LCommsBus(LStream *logger = NULL, LView *commsState = nullptr);
 	~LCommsBus();
-	
+
+	LString GetHostName() const;	
 	bool IsServer() const;
 	bool IsRunning() const;
 	bool SendMsg(LString endPoint, LString msg);

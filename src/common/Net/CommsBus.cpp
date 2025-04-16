@@ -427,7 +427,6 @@ struct LCommsBusPriv :
 
 	struct ServerPeers
 	{
-
 		LCommsBusPriv *d = nullptr;
 		LStream *log = nullptr;
 
@@ -607,7 +606,7 @@ struct LCommsBusPriv :
 					LJson j(blk->data);
 
 					// find matching host and replicate state:
-					if (auto host = j.Get("hostname"))
+					if (auto host = j.Get(LPeer::sHostname))
 					{
 						if (auto p = peers.Find(host))
 						{
@@ -684,10 +683,9 @@ struct LCommsBusPriv :
 				}
 			}
 
-			auto host = LHostName();
 			for (auto other: p.peers)
 			{
-				if (other->hostName.Equals(host))
+				if (other->hostName.Equals(d->hostName))
 					continue; // don't care about this node
 
 				if (!peers.Find(other->hostName))
@@ -761,8 +759,8 @@ struct LCommsBusPriv :
 		{
 			LJson j;
 
-			j.Set("ip", GetIps(interfaces));
-			j.Set("hostname", LHostName());
+			j.Set(LPeer::sIp, GetIps(interfaces));
+			j.Set(LPeer::sHostname, LHostName());
 
 			return j.GetJson();
 		}
@@ -772,10 +770,10 @@ struct LCommsBusPriv :
 		{
 			LJson j;
 
-			j.Set("ip", GetIps(interfaces));
-			j.Set("hostname", LHostName());
-			j.Set("peers", PeersToJson());
-			j.Set("endpoints", EndpointsToJson());
+			j.Set(LPeer::sIp, GetIps(interfaces));
+			j.Set(LPeer::sHostname, LHostName());
+			j.Set(LPeer::sPeers, PeersToJson());
+			j.Set(LPeer::sEndpoints, EndpointsToJson());
 
 			return j.GetJson();
 		}
@@ -963,9 +961,10 @@ struct LCommsBusPriv :
 
 	bool isServer = false;
 	LSocket listen;
-	LStream *log = NULL;
+	LStream *log = nullptr;
 	LView *commsState = nullptr;
 	LString Uid;
+	LString hostName;
 	
 	// Lock before using
 	LArray< BlockInfo > writeQue;
@@ -986,6 +985,7 @@ struct LCommsBusPriv :
 		commsState(commsstate)
 	{
 		LAssert(sizeof(Block) == 9);
+		hostName = LHostName();
 		Run();
 	}
 	
@@ -1007,6 +1007,7 @@ struct LCommsBusPriv :
 		// Make sure the thread has run far enough to create the UID
 		while (!Uid.Get())
 			LSleep(1);
+
 		return Uid;
 	}
 
@@ -1658,6 +1659,11 @@ LCommsBus::~LCommsBus()
 	delete d;
 }
 
+LString LCommsBus::GetHostName() const
+{
+	return d->hostName;
+}
+
 bool LCommsBus::IsServer() const
 {
 	return d->isServer;
@@ -1670,6 +1676,8 @@ bool LCommsBus::IsRunning() const
 
 bool LCommsBus::SendMsg(LString endPoint, LString data)
 {
+	LAssert(endPoint);
+
 	auto bytes = (uint32_t) (endPoint.Length() + data.Length() + 1);
 	if (auto msg = Block::New(MSendMsg, bytes))
 	{

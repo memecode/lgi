@@ -378,7 +378,7 @@ public:
 		/// The path of the file to open
 		const char *Name,
 		/// The mode to open the file with. One of O_READ, O_WRITE or O_READWRITE.
-		int Attrib
+		int Attrib = O_READ
 	)	override;
 	
 	/// Returns non zero if the class is associated with an open file handle.
