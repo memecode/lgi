@@ -15,6 +15,7 @@ enum Msgs
 {
 	M_ADD_WEBSOCKET = M_USER,
 	M_SEND_WEBSOCKET,
+	M_BROADCAST_WEBSOCKET
 };
 
 class LHttpThread : public LThread
@@ -82,16 +83,17 @@ public:
 		{
 			case M_ADD_WEBSOCKET:
 			{
+				Auto lck(this, _FL);
 				auto ws = Msg->AutoA<LWebSocket>();
 				if (ws)
-				{
 					webSockets.Add(ws.Release());
-				}
-				else printf("Error: no ws to add.\n");
+				else
+					printf("%s:%i error: no ws to add.\n", _FL);
 				break;
 			}
 			case M_SEND_WEBSOCKET:
 			{
+				Auto lck(this, _FL);
 				auto ws = (LWebSocket*)Msg->A();
 				auto msg = Msg->AutoB<LString>();
 				if (ws && msg)
@@ -100,9 +102,22 @@ public:
 					{
 						ws->SendMessage(*msg);
 					}
-					else printf("Error: ws not in list.\n");
+					else printf("%s:%i error: ws not in list.\n", _FL);
 				}
-				else printf("Error: no ws or msg to send.\n");
+				else printf("%s:%i error: no ws or msg to send.\n", _FL);
+				break;
+			}
+			case M_BROADCAST_WEBSOCKET:
+			{
+				Auto lck(this, _FL);
+				if (auto msg = Msg->AutoA<LString>())
+				{
+					for (auto ws: webSockets)
+					{
+						ws->SendMessage(*msg);
+					}
+				}
+				else printf("%s:%i error: no msg param.\n", _FL);
 				break;
 			}
 		}
@@ -320,6 +335,11 @@ bool LHttpServer::IsExited()
 void LHttpServer::WebsocketSend(LWebSocket *ws, LString msg)
 {
 	PostEvent(M_SEND_WEBSOCKET, (LMessage::Param)ws, (LMessage::Param)new LString(msg));
+}
+
+void LHttpServer::WebsocketBroadcast(LString msg)
+{
+	PostEvent(M_BROADCAST_WEBSOCKET, (LMessage::Param)new LString(msg));
 }
 
 bool LHttpServer::WebsocketUpgrade(LHttpServer::Request *req, LWebSocketBase::OnMsg onMsg)

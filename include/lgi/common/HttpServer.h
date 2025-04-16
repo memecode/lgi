@@ -45,5 +45,6 @@ public:
 
 	// Websocket support:
 	bool WebsocketUpgrade(Request *req, LWebSocketBase::OnMsg onMsg);
-	void WebsocketSend(LWebSocket *ws, LString msg);
+	void WebsocketSend(LWebSocket *ws, LString msg); // send to a specific websocket
+	void WebsocketBroadcast(LString msg); // send to ALL connected websockets
 };

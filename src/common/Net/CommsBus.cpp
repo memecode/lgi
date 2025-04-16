@@ -1020,7 +1020,7 @@ struct LCommsBusPriv :
 	{
 		Auto lck(this, _FL);
 
-		LOG("%s que msg '%s'\n", Describe().Get(), blk->ToString().Get());
+		// LOG("%s que msg '%s'\n", Describe().Get(), blk->ToString().Get());
 
 		auto &info = writeQue.New();
 		info.firstSendTs = 0;
@@ -1331,7 +1331,7 @@ struct LCommsBusPriv :
 						// On message:
 						[this, c](auto blk) mutable
 						{
-							LOG("%s received msg %s\n", Describe().Get(), blk->ToString().Get());
+							// LOG("%s received msg %s\n", Describe().Get(), blk->ToString().Get());
 							switch (blk->GetId())
 							{
 								case MUid:
@@ -1545,8 +1545,7 @@ struct LCommsBusPriv :
 					// On message:
 					[this](auto blk)
 					{
-						LOG("%s received msg %s\n", Describe().Get(), blk->ToString().Get());
-
+						// LOG("%s received msg %s\n", Describe().Get(), blk->ToString().Get());
 						switch (blk->GetId())
 						{
 							case MSendMsg:
