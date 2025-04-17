@@ -202,7 +202,7 @@ int main(int Args, const char **Arg)
 
 		#endif
 
-		Gtk::gtk_init(&Args, (char***)&Arg);
+		Gtk::gtk_init_check(&Args, (char***)&Arg);
 
 	#endif
 
