@@ -115,7 +115,7 @@ class LJson
 			}
 			else if (!Str)
 			{
-				bool isObjArray = Array.Length() ? Array[0].Obj.Length() > 0 : false;
+				// bool isObjArray = Array.Length() ? Array[0].Obj.Length() > 0 : false;
 
 				if (Array.Length() == 0)
 				{

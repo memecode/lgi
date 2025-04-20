@@ -158,4 +158,10 @@ public:
 	/// This function searches the database for symbols and returns
 	/// the results as a M_FIND_SYM_REQUEST message.
 	void Search(int ResultsSinkHnd, const char *SearchStr, int Platforms);
+	
+	// If the find sym system is using a backend there could be multiple
+	// outstanding requests that will get processed via callbacks. These
+	// need to settle before the object can be deleted... this starts
+	// that process and then calls the callback when safe to delete:
+	void Shutdown(std::function<void()> callback);
 };

@@ -1170,7 +1170,7 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 						auto FileName = Params.Find("X-FILENAME");
 						auto MimeType = Params.Find("FMTTYPE");
 						auto Encoding = Params.Find("ENCODING");
-						auto Value    = Params.Find("VALUE");
+						// auto Value    = Params.Find("VALUE");
 						auto Now	  = LDateTime::Now();
 						
 						if (FileName)

@@ -397,16 +397,16 @@ public:
 	LItemContainer();
 	virtual ~LItemContainer();
 
-	#define DEFINE_FLAG(name, default) \
+	#define DEFINE_FLAG(name, default, ...) \
 		private: \
 			bool b##name = default; \
 		public: \
 			bool name() const { return b##name; } \
-			void name(bool b) { b##name = b; }
+			void name(bool b) __VA_ARGS__ { b##name = b; }
 
 	// Props
 	DEFINE_FLAG(AskText, false)
-	DEFINE_FLAG(AskImage, false)
+	DEFINE_FLAG(AskImage, false, override)
 	DEFINE_FLAG(OwnList, false)
 	DEFINE_FLAG(InDragOp, false)
 	DEFINE_FLAG(MultiSelect, false)

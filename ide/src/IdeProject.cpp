@@ -324,7 +324,12 @@ public:
 	{
 		App = a;
 	}
-
+	
+	~IdeProjectPrivate()
+	{
+		Backend.Reset();
+	}
+	
 	void CollectAllFiles(LTreeNode *Base, LArray<ProjectNode*> &Files, bool SubProjects, int Platform);
 };
 

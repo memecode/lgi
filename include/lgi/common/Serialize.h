@@ -155,7 +155,7 @@ protected:
             if (!f)
                 return false;
 
-			switch (f->Size)
+			switch (f->Size())
 			{
 				case 1: i = (T)*f->Payload8();  break;
 				case 2: i = (T)*f->Payload16(); break;

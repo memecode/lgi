@@ -166,6 +166,26 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 	SystemIntf *backend = nullptr;
 	LString projectCache; // lock before using?
 	
+	// Backend call handling:
+	int backendCalls = 0;
+	std::function<void()> onShutdown;
+	bool IncCalls()
+	{
+		if (onShutdown)
+			return false;
+		backendCalls++;
+		printf("inc backendCalls=%i\n", backendCalls);
+		return true;
+	}
+	void DecCalls()
+	{
+		LAssert(backendCalls > 0);
+		backendCalls--;
+		printf("dec backendCalls=%i\n", backendCalls);
+		if (!backendCalls)
+			onShutdown();
+	}
+	
 	#if USE_HASH
 	LHashTbl<ConstStrKey<char,false>, FileSyms*> Files;
 	#else
@@ -186,6 +206,8 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 
 	~FindSymbolSystemPriv()
 	{
+		LAssert(backendCalls == 0);
+
 		// End the thread...
 		EndThread();
 
@@ -320,15 +342,16 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 				// Load from the cache...
 				f->Serialize(cacheFile, false);
 			}
-			else
+			else if (IncCalls())
 			{
 				backend->Read(SystemIntf::TBackground, Path, [this, f, Debug](auto err, auto data) mutable
 				{
 					if (err)
-					{
 						Log("Backend.Read.Err: %s\n", err.ToString().Get());
-					}
-					else AddFileData(f, data, Debug);
+					else
+						AddFileData(f, data, Debug);
+
+					DecCalls();
 				});
 			}
 		}
@@ -465,7 +488,6 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		return true;
 	}
 
-	int folderReads = 0;
 	bool gettingCacheFolder = false;
 
 	void OnPulse()
@@ -543,63 +565,66 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			{
 				if (auto path = Msg->AutoA<LString>())
 				{
-					folderReads++;
-					backend->ReadFolder(
-						SystemIntf::TBackground,
-						*path,
-						[this, path = LString(*path)](LDirectory *dir)
-						{
-							folderReads--;
-							for (int i=true; i; i=dir->Next())
+					if (IncCalls())
+					{
+						backend->ReadFolder(
+							SystemIntf::TBackground,
+							*path,
+							[this, path = LString(*path)](LDirectory *dir)
 							{
-								auto nm = dir->GetName();
-								auto full = dir->FullPath();
-								if (dir->IsDir())
+								for (int i=true; i; i=dir->Next())
 								{
-									if (!stricmp(nm, ".") ||
-										!stricmp(nm, "..") ||
-										!stricmp(nm, ".hg") ||
-										!stricmp(nm, ".git") ||
-										!stricmp(nm, ".svn"))
-										continue;
-								
-									PostEvent(M_SCAN_FOLDER, (LMessage::Param)new LString(full));
-								}
-								else if (dir->GetSize() > 0)
-								{
-									auto ext = LGetExtension(nm);
-									if (!ext)
-										continue;
-									if (KnownExt.Find(ext))
+									auto nm = dir->GetName();
+									auto full = dir->FullPath();
+									if (dir->IsDir())
 									{
-										// Check the date against the cache?
-										auto cache = CachePath(full);
-										bool cacheDirty = false;
-										LStat st(cache);
-										if (st)
+										if (!stricmp(nm, ".") ||
+											!stricmp(nm, "..") ||
+											!stricmp(nm, ".hg") ||
+											!stricmp(nm, ".git") ||
+											!stricmp(nm, ".svn"))
+											continue;
+									
+										PostEvent(M_SCAN_FOLDER, (LMessage::Param)new LString(full));
+									}
+									else if (dir->GetSize() > 0)
+									{
+										auto ext = LGetExtension(nm);
+										if (!ext)
+											continue;
+										if (KnownExt.Find(ext))
 										{
-											auto writeTm = dir->GetLastWriteTime();
-											auto remoteModified = dir->TsToUnix(writeTm);
-											auto cacheModified = st.GetLastWriteTime();
-											if (remoteModified > cacheModified)
+											// Check the date against the cache?
+											auto cache = CachePath(full);
+											bool cacheDirty = false;
+											LStat st(cache);
+											if (st)
 											{
-												cacheDirty = true;
+												auto writeTm = dir->GetLastWriteTime();
+												auto remoteModified = dir->TsToUnix(writeTm);
+												auto cacheModified = st.GetLastWriteTime();
+												if (remoteModified > cacheModified)
+												{
+													cacheDirty = true;
+												}
 											}
-										}
 
-										if (auto add = new FindSymbolSystem::SymFileParams)
-										{
-											add->Action = FindSymbolSystem::FileAdd;
-											add->File = full;
-											add->Platforms = 0;
-											add->cacheDirty = cacheDirty;
+											if (auto add = new FindSymbolSystem::SymFileParams)
+											{
+												add->Action = FindSymbolSystem::FileAdd;
+												add->File = full;
+												add->Platforms = 0;
+												add->cacheDirty = cacheDirty;
 
-											PostEvent(M_FIND_SYM_FILE, (LMessage::Param)add);
+												PostEvent(M_FIND_SYM_FILE, (LMessage::Param)add);
+											}
 										}
 									}
 								}
-							}
-						});
+
+								DecCalls();
+							});
+					}
 				}
 				break;
 			}
@@ -1004,6 +1029,20 @@ FindSymbolSystem::FindSymbolSystem(int AppHnd)
 FindSymbolSystem::~FindSymbolSystem()
 {
 	delete d;
+}
+
+void FindSymbolSystem::Shutdown(std::function<void()> callback)
+{
+	if (!callback)
+	{
+		LAssert(!"No callback");
+		return;
+	}
+		
+	if (d->backendCalls)
+		d->onShutdown = callback;
+	else
+		callback();
 }
 
 void FindSymbolSystem::OpenSearchDlg(LViewI *Parent, std::function<void(FindSymResult&)> Callback)

@@ -1026,7 +1026,7 @@ bool IFtp::TransferFile(LStream *Stream, const char *Remote, int64 Size, bool Up
 								d->Data->SetTimeout(15 * 1000);
 								do
 								{
-									auto filePos = Stream->GetPos();
+									// auto filePos = Stream->GetPos();
 									Len = Stream->Read(Temp, TempLen);
 									for (ssize_t i=0; i<Len; )
 									{

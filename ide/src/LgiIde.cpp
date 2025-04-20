@@ -2913,28 +2913,36 @@ void AppWnd::CloseAll()
 {
 	THREAD_WARNING()
 
-	SaveAll([this](auto status)
-	{	
-		if (!status)
+	// This may be using the project's backend... so
+	// free it now so that it doesn't crash.
+	d->FindSym->Shutdown
+	(
+		[this]()
 		{
-			LgiTrace("%s:%i - status=%i\n", _FL, status);
-			return;
+			SaveAll([this](auto status)
+			{
+				if (!status)
+				{
+					LgiTrace("%s:%i - status=%i\n", _FL, status);
+					return;
+				}
+				
+				while (d->Docs[0])
+					delete d->Docs[0];
+				
+				if (auto p = RootProject())
+					DeleteObj(p);
+				
+				while (d->Projects[0])
+					delete d->Projects[0];
+
+				DeleteObj(d->DbgContext);
+
+				if (d->Output->BreakPoints)
+					d->Output->BreakPoints->Empty();
+			});
 		}
-			
-		while (d->Docs[0])
-			delete d->Docs[0];
-		
-		if (auto p = RootProject())
-			DeleteObj(p);
-		
-		while (d->Projects[0])
-			delete d->Projects[0];	
-
-		DeleteObj(d->DbgContext);
-
-		if (d->Output->BreakPoints)
-			d->Output->BreakPoints->Empty();
-	});
+	);
 }
 
 bool AppWnd::OnRequestClose(bool IsOsQuit)

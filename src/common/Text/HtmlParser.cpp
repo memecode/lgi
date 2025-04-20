@@ -353,11 +353,6 @@ char *LHtmlParser::ParsePropList(char *s, LHtmlElement *Obj, bool &Closed)
 		else
 			s = n;
 
-		if (!Stricmp(Name, "Debug"))
-		{
-			int asd=0;
-		}
-
 		while (*s && IsWhite(*s))
 			s++;
 
