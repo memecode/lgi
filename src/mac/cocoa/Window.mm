@@ -402,7 +402,7 @@ LWindow::LWindow(OsWindow wnd) :
 	
 	_Lock = new LMutex("LWindow");
 	
-	LRect pos(200, 200, 200, 200);
+	LRect pos(20, 20, 200, 200);
 	NSRect frame = pos;
 	if (wnd)
 		Wnd = wnd;
@@ -423,7 +423,7 @@ LWindow::~LWindow()
 {
 	LOG("LWindow::~LWindow %p\n", this);
 	if (LAppInst->AppWnd == this)
-		LAppInst->AppWnd = 0;
+		LAppInst->AppWnd = nullptr;
 	
 	_Delete();
 	d->DeleteOnClose = false; // We're already in the destructor, don't redelete.

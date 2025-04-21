@@ -2085,7 +2085,18 @@ LString LGetExeFile()
 		char Dest[MAX_PATH_LEN];
 		if (LFileExists(LgiArgsAppPath))
 		{
-			LMakePath(Dest, sizeof(Dest), LgiArgsAppPath, "../../..");
+			auto parts = LgiArgsAppPath.SplitDelimit("/");
+			if (parts[-2].Equals("MacOS") &&
+				parts[-3].Equals("Contents"))
+			{
+				// App bundle:
+				LMakePath(Dest, sizeof(Dest), LgiArgsAppPath, "../../..");
+			}
+			else
+			{
+				// else cmake or something?
+				strcpy_s(Dest, sizeof(Dest), LgiArgsAppPath);
+			}
 			return Dest;
 		}
 		else printf("%s:%i - No executable path: %s\n", _FL, LgiArgsAppPath.Get());
@@ -2518,47 +2529,43 @@ LString::Array LGetPath()
 		// At least in 10.12. And I don't know how to make them the same. This works around
 		// that for the time being.
 		
-		#if 1
-		
 		LFile EctPaths("/etc/paths", O_READ);
 		Paths = EctPaths.Read().Split("\n");
-		
-		#else
-		
-		LFile::Path Home(LSP_HOME);
-		Home += ".profile";
-		if (!Home.Exists())
+
+		LFile::Path home(LSP_HOME);
+		auto profile = home / ".profile";
+		auto zprofile = home / ".zprofile";
+		auto path = profile.Exists() ?
+						profile.GetFull() :
+						zprofile.Exists() ? zprofile.GetFull() : LString();
+		if (path)
 		{
-			Home--;
-			Home += ".zprofile";
-		}
-		auto Profile = LFile(Home, O_READ).Read().Split("\n");
-		for (auto Ln : Profile)
-		{
-			auto p = Ln.SplitDelimit(" =", 2);
-			if (p.Length() == 3 &&
-				p[0].Equals("export") &&
-				p[1].Equals("PATH"))
+			auto lines = LReadFile(path).Split("\n");
+			printf("path: reading '%s' got %i lines\n", path.Get(), (int)lines.Length());
+			for (auto Ln: lines)
 			{
-				Paths = p[2].Strip("\"").SplitDelimit(LGI_PATH_SEPARATOR);
-				Paths.SetFixedLength(false);
-				for (auto &p : Paths)
+				auto p = Ln.SplitDelimit(" =", 2);
+				if (p.Length() == 3 &&
+					p[0].Equals("export") &&
+					p[1].Equals("PATH"))
 				{
-					if (p.Equals("$PATH"))
+					LString::Array existing;
+					existing.Swap(Paths);
+					Paths.SetFixedLength(false);
+					
+					auto parts = p.Last().Strip("\"").SplitDelimit(LGI_PATH_SEPARATOR);
+					for (auto &p: parts)
 					{
-						auto SysPath = LGetEnv("PATH").SplitDelimit(LGI_PATH_SEPARATOR);
-						for (unsigned i=0; i<SysPath.Length(); i++)
-						{
-							if (i) Paths.New() = SysPath[i];
-							else p = SysPath[i];
-						}
+						printf("part='%s'\n", p.Get());
+						if (p.Equals("$PATH"))
+							Paths += existing;
+						else
+							Paths.Add(p);
 					}
+					break;
 				}
-				break;
 			}
 		}
-		
-		#endif
 		
 	#else
 		auto Path = LGetEnv("PATH");
