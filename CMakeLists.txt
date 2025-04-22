@@ -17,7 +17,7 @@ endif()
 
 include(build.cmake)
 
-set(CMAKE_OSX_ARCHITECTURES "x86_64")
+# set(CMAKE_OSX_ARCHITECTURES "x86_64")
 set(CMAKE_CXX_STANDARD 14)
 set(LGI_VERSION_MAJOR 1)
 set(LGI_VERSION_MINOR 0)
