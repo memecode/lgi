@@ -2556,11 +2556,16 @@ LString::Array LGetPath()
 					auto parts = p.Last().Strip("\"").SplitDelimit(LGI_PATH_SEPARATOR);
 					for (auto &p: parts)
 					{
-						printf("part='%s'\n", p.Get());
 						if (p.Equals("$PATH"))
+						{
+							// printf("existing paths='%s'\n", LString(",").Join(existing).Get());
 							Paths += existing;
+						}
 						else
+						{
+							// printf("literal path='%s'\n", p.Get());
 							Paths.Add(p);
+						}
 					}
 					break;
 				}
