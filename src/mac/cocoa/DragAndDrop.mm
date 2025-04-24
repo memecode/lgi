@@ -471,11 +471,11 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 
 					[drag_items addObject:drag_item];
 			
-					#if 1
-					__weak LDragItem *weak_pb_item = item;
-					drag_item.imageComponentsProvider = ^{
-						return BuildImageComponentsForItem(weak_pb_item);
-					};
+					#if 0
+						__weak LDragItem *weak_pb_item = item;
+						drag_item.imageComponentsProvider = ^{
+							return BuildImageComponentsForItem(weak_pb_item);
+						};
 					#endif
 				}
 			}
@@ -498,11 +498,11 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 
 					printf("Adding string '%s' to drag...\n", dd.Format.Get());
 
-					#if 1
-					__weak NSPasteboardItem *weak_pb_item = item;
-					drag_item.imageComponentsProvider = ^{
-						return BuildImageComponentsForItem(weak_pb_item);
-					};
+					#if 0
+						__weak NSPasteboardItem *weak_pb_item = item;
+						drag_item.imageComponentsProvider = ^{
+							return BuildImageComponentsForItem(weak_pb_item);
+						};
 					#endif
 					break;
 				}
@@ -517,13 +517,13 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 					drag_item.draggingFrame = NSMakeRect(floor(position.x), floor(position.y), 32, 32);
 					[drag_items addObject:drag_item];
 
-					// printf("Adding binary '%s' to drag...\n", dd.Format.Get());
+					DND_LOG("Adding binary '%s' to drag...\n", dd.Format.Get());
 					
-					#if 1
-					__weak NSPasteboardItem *weak_pb_item = item;
-					drag_item.imageComponentsProvider = ^{
-						return BuildImageComponentsForItem(weak_pb_item);
-					};
+					#if 0
+						__weak NSPasteboardItem *weak_pb_item = item;
+						drag_item.imageComponentsProvider = ^{
+							return BuildImageComponentsForItem(weak_pb_item);
+						};
 					#endif
 					break;
 				}
@@ -537,15 +537,19 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 		else printf("%s:%i - Impl multiple data handling for %s.\n", _FL, dd.Format.Get());
 	}
 	
-	NSDraggingSession *session = [h.p.contentView	beginDraggingSessionWithItems:drag_items
-													event:Event.p
-													source:DragSrc];
+	auto session = [h.p.contentView	beginDraggingSessionWithItems:drag_items
+									event:Event.p
+									source:DragSrc];
 	if (session)
 	{
 		//[d->Wrapper writeURLsPBoard:session.draggingPasteboard];
+		DND_LOG("%s:%i beginDraggingSessionWithItems started session\n", _FL);
 		return DROPEFFECT_COPY;
 	}
-
+	else
+	{
+		DND_ERROR("%s:%i error: beginDraggingSessionWithItems failed.\n", _FL);
+	}
 
 	return DROPEFFECT_NONE;
 }
@@ -584,11 +588,11 @@ void LDragDropTarget::SetWindow(LView *to)
 #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 bool LDragFormats::CheckUti(const char *uti)
 {
-	/*
 	auto nsUri = LString(uti).NsStr();
-	auto t = [UTType identifier:nsUri];
-	[t release];
+	// auto t = [UTType typeWithIdentifier:nsUri];
+
+	// [t release];
 	[nsUri release];
-	*/
+
 	return false;
 }

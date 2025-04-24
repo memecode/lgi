@@ -21,8 +21,27 @@
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2024 Memecode. All rights reserved.</string>
+	<string>Copyright © 2025 Memecode. All rights reserved.</string>
 	<key>NSPrincipalClass</key>
 	<string></string>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.memecode.lgi-item</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Lgi Container Item</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+				</array>
+			</dict>
+		</dict>
+	</array>
 </dict>
 </plist>

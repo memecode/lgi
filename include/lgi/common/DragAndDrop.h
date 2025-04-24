@@ -156,6 +156,7 @@ public:
 	void SupportsFileDrops();
 	void SupportsFileStreams();
 	void Supports(LString Fmt);
+	LString::Array GetAll();
 	LString::Array GetSupported();
 	
 	#ifdef MAC

@@ -682,7 +682,7 @@ void LList::OnItemBeginDrag(LListItem *Item, LMouse &m)
 	if (DragItem && !clientHandled)
 	{
 		// Do internal handling of item drag...
-		Drag(this, NULL, DROPEFFECT_MOVE);
+		Drag(this, m.Event, DROPEFFECT_MOVE);
 	}
 }
 

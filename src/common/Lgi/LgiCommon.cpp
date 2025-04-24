@@ -2086,8 +2086,10 @@ LString LGetExeFile()
 		if (LFileExists(LgiArgsAppPath))
 		{
 			auto parts = LgiArgsAppPath.SplitDelimit("/");
-			if (parts[-2].Equals("MacOS") &&
-				parts[-3].Equals("Contents"))
+			auto macos = parts[parts.Length()-2];
+			auto contents = parts[parts.Length()-3];
+			if (macos.Equals("MacOS") &&
+				contents.Equals("Contents"))
 			{
 				// App bundle:
 				LMakePath(Dest, sizeof(Dest), LgiArgsAppPath, "../../..");

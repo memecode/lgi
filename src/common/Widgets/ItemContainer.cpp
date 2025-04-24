@@ -128,6 +128,7 @@ LItemContainer::~LItemContainer()
 
 void LItemContainer::OnCreate()
 {
+	DropSource(this);
 	LDragDropTarget::SetWindow(this);
 }
 
@@ -502,8 +503,8 @@ bool LItemContainer::GetFormats(LDragFormats &Formats)
 		Formats.Supports(ContainerItemsFormat);
 		
 		#ifdef MAC
-		auto reg = Formats.CheckUti(ContainerItemsFormat);
-		LAssert(reg);
+		Formats.CheckUti(ContainerItemsFormat);
+		// LAssert(reg);
 		#endif
 		
 		return true;

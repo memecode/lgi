@@ -298,7 +298,7 @@ public:
 	
 	/// This is the drag and drop format that uses `ContainerItemsDrag`
 	/// \sa SetDragItem
-	constexpr static const char *ContainerItemsFormat = "Lgi.ContainerItems";
+	constexpr static const char *ContainerItemsFormat = "com.memecode.lgi-item";
 
 	/// The data format for `ContainerItemsFormat`
 	/// A list of items being dragged over a container view

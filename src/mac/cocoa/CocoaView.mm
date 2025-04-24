@@ -200,7 +200,8 @@ struct DndEvent
 		self->tracking = [[NSTrackingArea alloc] initWithRect:r
                                      options:NSTrackingMouseEnteredAndExited |
                                              NSTrackingActiveAlways |
-                                             NSTrackingMouseMoved
+                                             NSTrackingMouseMoved |
+                                             NSTrackingEnabledDuringMouseDrag
                                        owner:self
                                     userInfo:nil];
 	

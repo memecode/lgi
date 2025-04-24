@@ -58,6 +58,15 @@ void LDragFormats::Supports(LString Fmt)
 	}
 }
 
+LString::Array LDragFormats::GetAll()
+{
+	LString::Array a;
+	a.SetFixedLength(false);
+	for (auto &f: Formats)
+		a.Add(f);
+	return a;
+}
+
 LString::Array LDragFormats::GetSupported()
 {
 	LString::Array a;

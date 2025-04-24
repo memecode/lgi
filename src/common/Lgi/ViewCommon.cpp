@@ -13,6 +13,7 @@
 #include "lgi/common/EventTargetThread.h"
 #include "lgi/common/Popup.h"
 #include "lgi/common/CssTools.h"
+
 #include "ViewPriv.h"
 
 #if 0
@@ -1843,7 +1844,7 @@ bool LView::DropTarget(bool t)
 
 	#elif defined MAC && !defined(LGI_SDL)
 
-		LWindow *Wnd = dynamic_cast<LWindow*>(GetWindow());
+		auto Wnd = dynamic_cast<LWindow*>(GetWindow());
 		if (Wnd)
 		{
 			Wnd->SetDragHandlers(t);
@@ -1853,18 +1854,39 @@ bool LView::DropTarget(bool t)
 
 		#if LGI_COCOA
 
-			LWindow *w = GetWindow();
-			if (w)
+			if (auto w = GetWindow())
 			{
-				OsWindow h = w->WindowHandle();
-				if (h)
+				if (auto h = w->WindowHandle())
 				{
-					NSMutableArray<NSString*> *a = [[NSMutableArray<NSString*> alloc] init];
-					if (a)
+					if (auto a = [[NSMutableArray<NSString*> alloc] init])
 					{
+						// Receive generic file items:
 						[a addObject:(NSString*)kUTTypeItem];
+						
+						// Receive file promises:
 						for (id item in NSFilePromiseReceiver.readableDraggedTypes)
 							[a addObject:item];
+							
+						if (auto source = DropSource())
+						{
+							// Receive things the target knows about:
+							LDragFormats formats(true);
+							if (source->GetFormats(formats))
+							{
+								for (auto f: formats.GetAll())
+								{
+									auto str = f.NsStr();
+									[a addObject:str];
+									[str release];
+								}
+							}
+						}
+						
+						#if 0 // print the registered formats:
+						printf("DropTarget for %s:\n", GetClass());
+						for (id str: a)
+							printf("	type:%s\n", [str UTF8String]);
+						#endif
 						
 						[h.p.contentView registerForDraggedTypes:a];
 						[a release];
