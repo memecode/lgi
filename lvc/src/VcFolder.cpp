@@ -504,7 +504,8 @@ bool VcFolder::StartCmd(const char *RawArgs, ParseFn Parser, ParseParams *Params
 		if (!c)
 			return false;
 		
-		if (!c->Command(this, Exe, Args, Parser, Params, Convert(Logging)))
+		LString exeLeaf = LGetLeaf(Exe);
+		if (!c->Command(this, exeLeaf, Args, Parser, Params, Convert(Logging)))
 			return false;
 		#endif
 	}

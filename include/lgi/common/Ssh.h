@@ -466,10 +466,8 @@ public:
 		OverideUnknownHost = b;
 	}
 
-	bool Open(const char *Host, const char *Username, const char *Password, bool PublicKey)
+	bool Open(const char *Host, const char *Username, const char *Password, bool PublicKey, int Port = 22)
 	{
-		int Port = 22;
-		
 		if (sLog)
 			sLog->Clear();		
 		

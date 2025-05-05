@@ -11,34 +11,6 @@
 #define DEBUG_SSH_LOGGING		0
 #if DEBUG_SSH_LOGGING
 	#define SSH_LOG(...)		d->sLog.Log(__VA_ARGS__)
-	/*
-	#define SSH_LOG(...)		ArgExpansion(d->Log, __VA_ARGS__)
-
-	template<typename S>
-	void ArgPrint(S *log, bool a) { log->Print("%i", a); }
-	template<typename S>
-	void ArgPrint(S *log, int a) { log->Print("%i", a); }
-	template<typename S>
-	void ArgPrint(S *log, ssize_t a) { log->Print(LPrintfSSizeT, a); }
-	template<typename S>
-	void ArgPrint(S *log, const char *a) { log->Print("%s", a); }
-	template<typename S>
-	void ArgPrint(S *log, LString &a) { log->Print("%s", a.Get()); }
-	template<typename S>
-	void ArgPrint(S *log, LStringPipe *a)
-	{
-		LString s;
-		s.Length(a->GetSize());
-		a->Peek((uchar*)s.Get(), s.Length());
-		log->Write(s.Get(), s.Length());
-	}
-
-	template<typename S, typename ... A>
-	void ArgExpansion(S *log, A... args)
-	{
-		int dummy[] = { 0, ( (void) ArgPrint(log, std::forward<A>(args)), 0) ... };
-	}
-	*/
 #else
 	#define SSH_LOG(...)
 #endif
@@ -112,11 +84,16 @@ LSsh::SshConsole *SshConnection::GetConsole()
 {
 	if (!Connected)
 	{
-		auto r = Open(Host.sHost, Host.sUser, Host.sPass, true);
+		auto r = Open(Host.sHost, Host.sUser, Host.sPass, true, Host.Port);
 		Log->Print("Ssh: %s open: %i\n", Host.sHost.Get(), r);
 	}
 	if (Connected && !console)
+	{
 		console = CreateConsole();
+		
+		// Get log in preamble
+		WaitPrompt(console);
+	}
 	return console;
 }
 
@@ -418,7 +395,7 @@ LMessage::Result SshConnection::OnEvent(LMessage *Msg)
 			LString::Array lines;
 			VersionCtrl Vcs = VcNone;
 			LString path = PathFilter(*p);
-			LStream *con = GetStream();
+			auto con = GetStream();
 			if (!con)
 			{
 				r->Output = "Error: Failed to get console.";
@@ -434,6 +411,7 @@ SSH_LOG("detectVcs:", ls);
 
 				for (auto ln: lines)
 				{
+					// Log->Print("Ln:%s\n", ln.Get());
 					if (ln.Equals(".svn"))
 						Vcs = VcSvn;
 					else if (ln.Equals("CVS"))

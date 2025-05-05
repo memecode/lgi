@@ -122,7 +122,7 @@ class LUdpTransport : public LUdpListener
 		auto s = map.Find(k);
 		if (!s)
 		{
-			if (s = new Stream)
+			if ((s = new Stream))
 			{
 				s->ip = ip;
 				s->stream_id = stream_id;
