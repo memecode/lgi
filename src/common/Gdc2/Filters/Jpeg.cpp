@@ -32,6 +32,8 @@
 			"libjpeg"
 		#elif defined(HAIKU)
 			"libjpeg.so.62"
+		#elif defined(MAC)
+			"libjpeg.62"
 		#else
 			"jpeg62"
 		#endif

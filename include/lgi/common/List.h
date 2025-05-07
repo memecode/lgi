@@ -249,7 +249,7 @@ protected:
 	class LListPrivate *d;
 
 	// Contents
-	int Keyboard; // index of the item with keyboard focus
+	ssize_t Keyboard; // index of the item with keyboard focus
 
 	// Flags
 	bool EditLabels;
@@ -454,6 +454,7 @@ public:
 
 	/// Sort the list
 	template<typename User>
+	[[deprecated]]
 	void Sort
 	(
 		/// The comparison function. Should return a integer greater then > 0 if the first item item is greater in value.
@@ -465,7 +466,7 @@ public:
 		if (!Compare || !Lock(_FL))
 			return;
 
-		LListItem *Kb = Keyboard >= 0 && Keyboard < (int)Items.Length() ? Items[Keyboard] : NULL;
+		LListItem *Kb = Keyboard >= 0 && Keyboard < Items.Length() ? Items[Keyboard] : NULL;
 		Items.Sort([Compare, Data](auto a, auto b)
 		{
 			return Compare(a, b, Data);
@@ -475,6 +476,23 @@ public:
 		Invalidate(&ItemsPos);
 	}
 
+	/// Sort the list
+	void Sort
+	(
+		/// The comparison function. Should return a integer greater then > 0 if the first item item is greater in value.
+		std::function<int(LListItem*, LListItem*)> compare
+	)
+	{
+		if (!compare || !Lock(_FL))
+			return;
+
+		LListItem *Kb = Keyboard >= 0 && Keyboard < Items.Length() ? Items[Keyboard] : NULL;
+		Items.Sort(compare);
+		Keyboard = Kb ? Items.IndexOf(Kb) : -1;
+		Unlock();
+		Invalidate(&ItemsPos);
+	}
+	
 	void Sort(int Column)
 	{
 		if (Items.Length() == 0)

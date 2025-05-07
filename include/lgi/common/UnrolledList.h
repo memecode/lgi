@@ -889,7 +889,8 @@ public:
 			Start, End,
 			[Compare](auto &a, auto &b)->bool
 			{
-				return Compare(a, b) < 0;
+				auto c = Compare(a, b);
+				return c ? c < 0 : &a < &b;
 			}
 		);
 	}

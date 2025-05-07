@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		34063DA32DCBF865007CB2C2 /* TimeZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34063DA22DCBF865007CB2C2 /* TimeZone.cpp */; };
 		340833152698F8FF0028012F /* FontPriv.h in Headers */ = {isa = PBXBuildFile; fileRef = 340833122698F8FE0028012F /* FontPriv.h */; };
 		340833162698F8FF0028012F /* FontType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 340833132698F8FE0028012F /* FontType.cpp */; };
 		340833172698F8FF0028012F /* TypeFace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 340833142698F8FE0028012F /* TypeFace.cpp */; };
@@ -171,7 +172,6 @@
 		34B6F5502BA3A81A0095B1C5 /* UnrolledList.h in Headers */ = {isa = PBXBuildFile; fileRef = 34B6F54F2BA3A81A0095B1C5 /* UnrolledList.h */; };
 		34BF15072871503B001B4CA5 /* DrawListSurface.h in Headers */ = {isa = PBXBuildFile; fileRef = 34BF15062871503B001B4CA5 /* DrawListSurface.h */; };
 		34C072C12369878100E1E222 /* DropFiles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C072C02369878100E1E222 /* DropFiles.cpp */; };
-		34C607092C636E8B00CD4420 /* TimeZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C607082C636E8B00CD4420 /* TimeZone.cpp */; };
 		34C81A5A25DA0AA10053F93A /* Base64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C81A5925DA0AA10053F93A /* Base64.cpp */; };
 		34CD9F7223D5768B0039F259 /* Unicode.h in Headers */ = {isa = PBXBuildFile; fileRef = 34CD9F7123D5768B0039F259 /* Unicode.h */; };
 		34D1B3C121748A2800BC6B58 /* Path.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D1B3C021748A2800BC6B58 /* Path.cpp */; };
@@ -212,6 +212,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		34063DA22DCBF865007CB2C2 /* TimeZone.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; name = TimeZone.cpp; path = ../../../../../lgi/trunk/src/common/General/TimeZone.cpp; sourceTree = SOURCE_ROOT; };
 		340833122698F8FE0028012F /* FontPriv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FontPriv.h; path = ../../../private/common/FontPriv.h; sourceTree = SOURCE_ROOT; };
 		340833132698F8FE0028012F /* FontType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FontType.cpp; path = ../../common/Gdc2/Font/FontType.cpp; sourceTree = SOURCE_ROOT; };
 		340833142698F8FE0028012F /* TypeFace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TypeFace.cpp; path = ../../common/Gdc2/Font/TypeFace.cpp; sourceTree = SOURCE_ROOT; };
@@ -380,7 +381,6 @@
 		34B6F54F2BA3A81A0095B1C5 /* UnrolledList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UnrolledList.h; path = ../../../include/lgi/common/UnrolledList.h; sourceTree = "<group>"; };
 		34BF15062871503B001B4CA5 /* DrawListSurface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DrawListSurface.h; path = ../../../../../lgi/trunk/include/lgi/common/DrawListSurface.h; sourceTree = "<group>"; };
 		34C072C02369878100E1E222 /* DropFiles.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = DropFiles.cpp; path = ../../common/Lgi/DropFiles.cpp; sourceTree = SOURCE_ROOT; };
-		34C607082C636E8B00CD4420 /* TimeZone.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = TimeZone.cpp; path = ../../../../../../lgi/trunk/src/common/General/TimeZone.cpp; sourceTree = "<group>"; };
 		34C81A5925DA0AA10053F93A /* Base64.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Base64.cpp; path = ../../common/Net/Base64.cpp; sourceTree = SOURCE_ROOT; };
 		34CD9F7123D5768B0039F259 /* Unicode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Unicode.h; path = ../../../include/lgi/common/Unicode.h; sourceTree = SOURCE_ROOT; };
 		34D1B3C021748A2800BC6B58 /* Path.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Path.cpp; path = ../../common/Gdc2/Path/Path.cpp; sourceTree = SOURCE_ROOT; };
@@ -433,7 +433,7 @@
 		3428D91F2BCDD762008E5A2A /* DateTime */ = {
 			isa = PBXGroup;
 			children = (
-				34C607082C636E8B00CD4420 /* TimeZone.cpp */,
+				34063DA22DCBF865007CB2C2 /* TimeZone.cpp */,
 				3485B1CC2C0957C40079218F /* TimeZoneInfo.h */,
 				3477C3401CC0A68E0028B84B /* DateTime.cpp */,
 				34D28925275B3D9F005961A8 /* DateTime.h */,
@@ -964,6 +964,7 @@
 /* Begin PBXShellScriptBuildPhase section */
 		345598F92D08E2EA00680A5F /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -1027,6 +1028,7 @@
 				3477C2AF1CBF96B90028B84B /* LgiRes.cpp in Sources */,
 				3471868823A9AF8900F8C952 /* SubProcess.cpp in Sources */,
 				3477C3161CC04CCB0028B84B /* Library.cpp in Sources */,
+				34063DA32DCBF865007CB2C2 /* TimeZone.cpp in Sources */,
 				3477C3051CC04BF00028B84B /* Panel.cpp in Sources */,
 				3477C2901CBF08C10028B84B /* MemDC.cpp in Sources */,
 				34C072C12369878100E1E222 /* DropFiles.cpp in Sources */,
@@ -1092,7 +1094,6 @@
 				3477C2DD1CC048F90028B84B /* FontSystem.cpp in Sources */,
 				3477C3101CC04C790028B84B /* Css.cpp in Sources */,
 				3477C2C91CC046310028B84B /* Unicode.cpp in Sources */,
-				34C607092C636E8B00CD4420 /* TimeZone.cpp in Sources */,
 				3477C3221CC04DA00028B84B /* Colour.cpp in Sources */,
 				345598CD2D08DA7C00680A5F /* Jpeg.cpp in Sources */,
 				3477C2D31CC048100028B84B /* Containers.cpp in Sources */,

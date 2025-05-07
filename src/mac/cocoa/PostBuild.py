@@ -30,7 +30,7 @@ def makeLink(target, hasMajorVer):
 		link = os.path.join(frameWorks, parts[0] + "." + parts[1] + ".dylib")
 	else:
 		link = os.path.join(frameWorks, parts[0] + ".dylib")
-	print("link", link, "exists:", os.path.exists(link))
+	print("makeLink:", link, "exists:", os.path.exists(link), "hasMajorVer:", hasMajorVer, "parts:", parts)
 	if os.path.islink(link):
 		os.unlink(link)
 	os.symlink(target, link)
@@ -48,12 +48,13 @@ for file in files:
 		print("error: the library", file, "is not universal")
 		sys.exit(1)
 		
-	# these don't need linka...
+	# these don't need links...
 	if file.find("libiconv") >= 0 or file.find("libntml") >= 0:
 		continue
 		
 	# then create some symlinks
 	isLibZ = file.find("libz") >= 0
-	makeLink(full, isLibZ)
+	isJpeg = file.find("libjpeg") >= 0
+	makeLink(full, isLibZ or isJpeg)
 
 sys.exit(0)
