@@ -834,7 +834,7 @@ void LList::ClearDs(int Col)
 	}
 }
 
-void LList::KeyScroll(int iTo, int iFrom, bool SelectItems)
+void LList::KeyScroll(ssize_t iTo, ssize_t iFrom, bool SelectItems)
 {
 	int Start = -1, End = -1, i = 0;
 	{
@@ -874,8 +874,8 @@ void LList::KeyScroll(int iTo, int iFrom, bool SelectItems)
 		if (SelectItems)
 		{
 			int OtherEnd = Keyboard == End ? Start : End;
-			int Min = MIN(OtherEnd, iTo);
-			int Max = MAX(OtherEnd, iTo);
+			auto Min = MIN(OtherEnd, iTo);
+			auto Max = MAX(OtherEnd, iTo);
 			i = 0;
 
 			d->NoSelectEvent = true;
@@ -1422,8 +1422,8 @@ void LList::OnMouseClick(LMouse &m)
 					if (m.Shift() && MultiSelect())
 					{
 						int n = 0;
-						int a = MIN(ItemIndex, Keyboard);
-						int b = MAX(ItemIndex, Keyboard);
+						auto a = MIN(ItemIndex, Keyboard);
+						auto b = MAX(ItemIndex, Keyboard);
 						LArray<LListItem*> Sel;
 
 						ForAllItems(i)

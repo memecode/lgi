@@ -611,7 +611,7 @@ public:
 		return Insert(p);
 	}
 	
-	T operator [](int Index)
+	T operator [](size_t Index)
 	{
 		VALIDATE_UL();
 		auto i = GetIndex(Index);

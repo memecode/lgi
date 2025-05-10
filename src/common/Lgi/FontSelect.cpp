@@ -142,11 +142,6 @@ void LFontSelect::InsertFont(const char *f)
 	}
 }
 
-int SortFunc(LListItem *a, LListItem *b, NativeInt Data)
-{
-	return Stricmp(a->GetText(0), b->GetText(0));
-}
-
 void LFontSelect::EnumerateFonts()
 {
 	LString::Array Fonts;
@@ -155,7 +150,10 @@ void LFontSelect::EnumerateFonts()
 		for (auto &n : Fonts)
 			InsertFont(n);
 
-		d->Lst->Sort(SortFunc);
+		d->Lst->Sort([](auto a, auto b)
+			{
+				return Stricmp(a->GetText(0), b->GetText(0));
+			});
 		d->Lst->ResizeColumnsToContent();
 	}
 }
