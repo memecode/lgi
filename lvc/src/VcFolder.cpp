@@ -364,7 +364,10 @@ const char *VcFolder::GetText(int Col)
 bool VcFolder::Serialize(LXmlTag *t, bool Write)
 {
 	if (Write)
+	{
 		t->SetContent(Uri.ToString());
+		t->SetAttr(OPT_RemotePrompt, RemotePrompt);
+	}
 	else
 	{
 		LString s = t->GetContent();
@@ -379,6 +382,11 @@ bool VcFolder::Serialize(LXmlTag *t, bool Write)
 			if (Uri.sPath(-1) != '/')
 				Uri.sPath += "/";
 		}
+
+		if (auto s = t->GetAttr(OPT_RemotePrompt))
+			RemotePrompt = s;
+		else
+			RemotePrompt.Empty();
 	}
 	return true;
 }
@@ -500,7 +508,7 @@ bool VcFolder::StartCmd(const char *RawArgs, ParseFn Parser, ParseParams *Params
 	else
 	{
 		#if HAS_LIBSSH
-		auto c = d->GetConnection(Uri.ToString());
+		auto c = d->GetConnection(Uri.ToString(), RemotePrompt);
 		if (!c)
 			return false;
 		
@@ -3188,7 +3196,7 @@ void VcFolder::ReadDir(LTreeItem *Parent, const char *ReadUri)
 	#if HAS_LIBSSH
 	else
 	{
-		auto c = d->GetConnection(ReadUri);
+		auto c = d->GetConnection(ReadUri, RemotePrompt);
 		if (!c)
 			return;
 		

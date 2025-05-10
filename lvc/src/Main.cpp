@@ -34,14 +34,18 @@ AppPriv::~AppPriv()
 }
 	
 #if HAS_LIBSSH
-SshConnection *AppPriv::GetConnection(const char *Uri, bool Create)
+SshConnection *AppPriv::GetConnection(const char *Uri, const char *Prompt, bool Create)
 {
 	LUri u(Uri);
 	u.sPath.Empty();
 	auto s = u.ToString();
 	auto Conn = Connections.Find(s);
 	if (!Conn && Create)
-		Connections.Add(s, Conn = new SshConnection(Log, s, "matthew@*$ "));
+	{
+		if (!Prompt)
+			Log->Print("Warning: No remote prompt defined for '%s'\n", Uri);
+		Connections.Add(s, Conn = new SshConnection(Log, s, Prompt ? Prompt : "*$ "));
+	}
 	return Conn;
 }
 #endif
@@ -98,7 +102,7 @@ VersionCtrl AppPriv::DetectVcs(VcFolder *Fld)
 	if (!u.IsFile() || !u.sPath)
 	{
 		#if HAS_LIBSSH
-			auto c = GetConnection(u.ToString());
+			auto c = GetConnection(u.ToString(), Fld->GetRemotePrompt());
 			if (!c)
 				return VcError;
 			
@@ -706,6 +710,7 @@ class RemoteFolderDlg : public LDialog
 
 public:
 	LString Uri;
+	LString RemotePrompt;
 
 	RemoteFolderDlg(App *application);
 	~RemoteFolderDlg();
@@ -1227,7 +1232,7 @@ public:
 	
 	void SaveFolders()
 	{
-		LXmlTag *f = Opts.LockTag(OPT_Folders, _FL);
+		auto f = Opts.LockTag(OPT_Folders, _FL);
 		if (!f)
 			return;
 
@@ -1238,7 +1243,7 @@ public:
 		{
 			for (auto i: *Tree)
 			{
-				VcFolder *vcf = dynamic_cast<VcFolder*>(i);
+				auto vcf = dynamic_cast<VcFolder*>(i);
 				if (vcf)
 					f->InsertTag(vcf->Save());
 			}
@@ -1471,8 +1476,13 @@ public:
 				auto u = Dlg->Uri;
 				if (u(-1) != '/')
 					u += "/";
-				Tree->Insert(new VcFolder(this, u));
-				SaveFolders();
+
+				if (auto f = new VcFolder(this, u))
+				{
+					f->SetRemotePrompt(Dlg->RemotePrompt);
+					Tree->Insert(f);
+					SaveFolders();
+				}
 			}
 		});
 	}
@@ -1886,7 +1896,7 @@ public:
 struct SshHost : public LTreeItem
 {
 	LXmlTag *t;
-	LString Host, User, Pass;
+	LString Host, User, Pass, RemotePrompt;
 
 	SshHost(LXmlTag *tag = NULL)
 	{
@@ -1908,6 +1918,7 @@ struct SshHost : public LTreeItem
 			u.sUser = User;
 			u.sPass = Pass;
 			t->SetContent(u.ToString());
+			t->SetAttr(OPT_RemotePrompt, RemotePrompt);
 		}
 		else
 		{
@@ -1918,6 +1929,11 @@ struct SshHost : public LTreeItem
 				User = u.sUser;
 				Pass = u.sPass;
 			}
+
+			if (auto s = t->GetAttr(OPT_RemotePrompt))
+				RemotePrompt = s;
+			else
+				RemotePrompt.Empty();
 		}
 	}
 };
@@ -1927,7 +1943,7 @@ RemoteFolderDlg::RemoteFolderDlg(App *application) : app(application), root(NULL
 	SetParent(app);
 	LoadFromResource(IDD_REMOTE_FOLDER);
 
-	if (GetViewById(IDC_HOSTS, tree))
+	if (GetViewById(ID_HOSTS, tree))
 	{
 		printf("tree=%p\n", tree);
 
@@ -1937,12 +1953,12 @@ RemoteFolderDlg::RemoteFolderDlg(App *application) : app(application), root(NULL
 	else return;
 	
 	LViewI *v;
-	if (GetViewById(IDC_HOSTNAME, v))
+	if (GetViewById(ID_HOSTNAME, v))
 		v->Focus(true);
 
-	Ui.Map("Host", IDC_HOSTNAME);
-	Ui.Map("User", IDC_USER);
-	Ui.Map("Password", IDC_PASS);
+	Ui.Map("Host", ID_HOSTNAME);
+	Ui.Map("User", ID_USER);
+	Ui.Map("Password", ID_PASS);
 
 	LXmlTag *hosts = app->Opts.LockTag(OPT_Hosts, _FL);
 	if (hosts)
@@ -1979,21 +1995,22 @@ int RemoteFolderDlg::OnNotify(LViewI *Ctrl, const LNotification &n)
 
 	switch (Ctrl->GetId())
 	{
-		case IDC_HOSTS:
+		case ID_HOSTS:
 		{
 			switch (n.Type)
 			{
 				case LNotifyItemSelect:
 				{
 					bool isRoot = cur == root;
-					SetCtrlEnabled(IDC_HOSTNAME, !isRoot);
-					SetCtrlEnabled(IDC_USER, !isRoot);
-					SetCtrlEnabled(IDC_PASS, !isRoot);
-					SetCtrlEnabled(IDC_DELETE, !isRoot && !(cur == newhost));
+					SetCtrlEnabled(ID_HOSTNAME, !isRoot);
+					SetCtrlEnabled(ID_USER, !isRoot);
+					SetCtrlEnabled(ID_PASS, !isRoot);
+					SetCtrlEnabled(ID_DELETE, !isRoot && !(cur == newhost));
 					
-					SetCtrlName(IDC_HOSTNAME, cur ? cur->Host.Get() : NULL);
-					SetCtrlName(IDC_USER, cur ? cur->User.Get() : NULL);
-					SetCtrlName(IDC_PASS, cur ? cur->Pass.Get() : NULL);
+					SetCtrlName(ID_HOSTNAME, cur ? cur->Host.Get() : NULL);
+					SetCtrlName(ID_USER, cur ? cur->User.Get() : NULL);
+					SetCtrlName(ID_PASS, cur ? cur->Pass.Get() : NULL);
+					SetCtrlName(ID_REMOTE_PROMPT, cur ? cur->RemotePrompt.Get() : NULL);
 					break;
 				}
 				default:
@@ -2001,7 +2018,7 @@ int RemoteFolderDlg::OnNotify(LViewI *Ctrl, const LNotification &n)
 			}			
 			break;
 		}
-		case IDC_HOSTNAME:
+		case ID_HOSTNAME:
 		{
 			CHECK_SPECIAL()
 			if (cur)
@@ -2034,18 +2051,25 @@ int RemoteFolderDlg::OnNotify(LViewI *Ctrl, const LNotification &n)
 			app->Opts.Unlock();
 			break;
 		}
-		case IDC_USER:
+		case ID_USER:
 		{
 			CHECK_SPECIAL()
 			if (cur)
 				cur->User = Ctrl->Name();
 			break;
 		}
-		case IDC_PASS:
+		case ID_PASS:
 		{
 			CHECK_SPECIAL()
 			if (cur)
 				cur->Pass = Ctrl->Name();
+			break;
+		}
+		case ID_REMOTE_PROMPT:
+		{
+			CHECK_SPECIAL()
+			if (cur)
+				cur->RemotePrompt = Ctrl->Name();
 			break;
 		}
 		case IDOK:
@@ -2078,11 +2102,12 @@ int RemoteFolderDlg::OnNotify(LViewI *Ctrl, const LNotification &n)
 
 			LUri u;
 			u.sProtocol = "ssh";
-			u.sHost = GetCtrlName(IDC_HOSTNAME);
-			u.sUser = GetCtrlName(IDC_USER);
-			u.sPass = GetCtrlName(IDC_PASS);
-			u.sPath = GetCtrlName(IDC_REMOTE_PATH);
+			u.sHost = GetCtrlName(ID_HOSTNAME);
+			u.sUser = GetCtrlName(ID_USER);
+			u.sPass = GetCtrlName(ID_PASS);
+			u.sPath = GetCtrlName(ID_REMOTE_PATH);
 			Uri = u.ToString();
+			RemotePrompt = GetCtrlName(ID_REMOTE_PROMPT);
 
 			// Fall through
 		}

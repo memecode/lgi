@@ -27,6 +27,7 @@
 #define OPT_HgLimit			"hg-limit"
 #define OPT_CvsPath			"cvs-path"
 #define OPT_CvsLimit		"cvs-limit"
+#define OPT_RemotePrompt	"remotePrompt"
 
 #define METHOD_GetContext	"GetContext"
 
@@ -210,7 +211,7 @@ struct AppPriv
 	~AppPriv();
 
 	#if HAS_LIBSSH
-	SshConnection *GetConnection(const char *Uri, bool Create = true);
+	SshConnection *GetConnection(const char *Uri, const char *Prompt, bool Create = true);
 	#endif
 	auto Wnd() { return Commits ? Commits->GetWindow() : LAppInst->AppWnd; }
 	

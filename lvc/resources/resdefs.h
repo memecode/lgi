@@ -25,13 +25,13 @@
 #define IDC_BUILD_FIX							47
 #define IDD_REMOTE_FOLDER						61
 #define IDC_62									62
-#define IDC_HOSTS								64
+#define ID_HOSTS								64
 #define IDC_65									65
-#define IDC_HOSTNAME							67
-#define IDC_USER								68
-#define IDC_PASS								69
+#define ID_HOSTNAME								67
+#define ID_USER									68
+#define ID_PASS									69
 #define IDC_DELETE								70
-#define IDC_REMOTE_PATH							74
+#define ID_REMOTE_PATH							74
 #define IDC_SVN_LIMIT							79
 #define IDC_GIT_LIMIT							80
 #define IDC_HG_LIMIT							81
@@ -78,6 +78,7 @@
 #define ID_CLOSE								135
 #define ID_NAME									136
 #define ID_CREATE								138
+#define ID_REMOTE_PROMPT						141
 #define ID_TABLE								500
 #define IDC_COMMIT								501
 #define ID_PULL									502

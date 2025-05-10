@@ -215,6 +215,7 @@ protected:
 	AppPriv *d;
 	VersionCtrl Type = VcNone;
 	LUri Uri;
+	LString RemotePrompt;
 	LString CurrentCommit, RepoUrl, VcCmd;
 	int64 CurrentCommitIdx = -1;
 	LArray<VcCommit*> Log;
@@ -343,6 +344,8 @@ public:
 	TBranchHash &GetBranchCache() { return Branches; }
 	LXmlTag *Save();
 	LString GetConfigFile(bool local);
+	LString GetRemotePrompt() { return RemotePrompt; }
+	void SetRemotePrompt(LString p) { RemotePrompt = p; }
 	bool GetAuthor(bool local, std::function<void(LString name,LString email)> callback);
 	bool SetAuthor(bool local, LString name, LString email);
 	void ShowAuthor();

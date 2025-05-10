@@ -27,6 +27,7 @@ SshConnection::SshConnection(LTextLog *log, const char *uri, const char *prompt)
 {
 	auto Wnd = log->GetWindow();
 	GuiHnd = Wnd->AddDispatch();
+	LAssert(prompt);
 	Prompt = prompt;
 	Host.Set(Uri = uri);
 	d = NULL;
