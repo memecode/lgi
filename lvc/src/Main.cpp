@@ -46,6 +46,50 @@ SshConnection *AppPriv::GetConnection(const char *Uri, bool Create)
 }
 #endif
 
+void AppPriv::SortCommits(int col)
+{
+	Commits->Sort([this, col](auto a, auto b)
+		{
+			auto A = dynamic_cast<VcCommit*>(a);
+			auto B = dynamic_cast<VcCommit*>(b);
+
+			if (A == NULL || B == NULL)
+			{
+				return (A ? 1 : -1) - (B ? 1 : -1);
+			}
+
+			auto f = A->GetFolder();
+			auto flds = f->GetFields();
+			if (!flds.Length())
+			{
+				LgiTrace("%s:%i - No fields?\n", _FL);
+				return 0;
+			}
+		
+			auto fld = flds[col];
+			switch (fld)
+			{
+				case LGraph:
+				case LIndex:
+				case LParents:
+				case LRevision:
+				default:
+					return (int) (B->GetIndex() - A->GetIndex());
+
+				case LBranch:
+				case LAuthor:
+				case LMessageTxt:
+					return Stricmp(A->GetFieldText(fld), B->GetFieldText(fld));
+
+				case LTime:
+					return B->GetTs().Compare(&A->GetTs());
+			}
+
+			return 0;
+		}
+	);
+}
+
 VersionCtrl AppPriv::DetectVcs(VcFolder *Fld)
 {
 	char p[MAX_PATH_LEN];
@@ -586,7 +630,7 @@ public:
 	}
 };
 
-int LstCmp(LListItem *a, LListItem *b, int Col)
+int _LstCmp(LListItem *a, LListItem *b, int Col)
 {
 	VcCommit *A = dynamic_cast<VcCommit*>(a);
 	VcCommit *B = dynamic_cast<VcCommit*>(b);
@@ -1755,7 +1799,7 @@ public:
 						int Col = -1;
 						LMouse Ms;
 						Commits->GetColumnClickInfo(Col, Ms);
-						Commits->Sort(LstCmp, Col);
+						SortCommits(Col);
 						break;
 					}
 					case LNotifyItemDoubleClick:
@@ -1811,7 +1855,7 @@ public:
 					if (ref)
 					{
 						auto parts = ref.Strip("@ ").SplitDelimit(" ,-+");
-						int ln = (parts[2].Int() + add);
+						auto ln = (parts[2].Int() + add);
 
 						// Get currently select file...
 						if (auto curFile = Files->GetSelected())

@@ -1221,7 +1221,7 @@ void VcFolder::Select(bool b)
 		if (d->Resort >= 0)
 		{
 			PROF("Resort");
-			d->Commits->Sort(LstCmp, d->Resort);
+			d->SortCommits(d->Resort);
 			d->Resort = -1;
 		}
 

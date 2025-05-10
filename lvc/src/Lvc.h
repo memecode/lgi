@@ -268,6 +268,8 @@ struct AppPriv
 
 		return VcCmd;
 	}
+
+	void SortCommits(int col);
 };
 
 #include "SshConnection.h"
