@@ -9,6 +9,7 @@
 #include "lgi/common/Menu.h"
 
 #include "ViewPriv.h"
+#include "AppPriv.h"
 #include "MenuBar.h"
 
 #define DEBUG_SETFOCUS			0
@@ -139,46 +140,49 @@ public:
 
 	void FrameMoved(BPoint newPosition)
 	{
-		auto Pos = Frame();
-
-		if (Pos != Wnd->Pos)
-		{
-			Wnd->Pos = Pos;
-			Wnd->OnPosChange();
-		}
-
+		BMessage m(M_WND_EVENT);
+		m.AddInt32(LMessage::PropEvent, LAppPrivate::FrameMoved);
+		m.AddPoint("pos", newPosition);
+		m.AddPointer(LMessage::PropWindow, (void*)this);
+		LAppPrivate::Post(&m);		
+		
 		BWindow::FrameMoved(newPosition);
 	}
 
-	void FrameResized(float newWidth, float newHeight)
+	void FrameResized(float width, float height)
 	{
-		auto Pos = Frame();
-		if (Pos != Wnd->Pos)
-		{
-			Wnd->Pos.SetSize(newWidth, newHeight);
-			Wnd->OnPosChange();
-		}
-		BWindow::FrameResized(newWidth, newHeight);
+		BMessage m(M_WND_EVENT);
+		m.AddInt32(LMessage::PropEvent, LAppPrivate::FrameResized);
+		m.AddFloat("width", width);
+		m.AddFloat("height", height);
+		m.AddPointer(LMessage::PropWindow, (void*)this);
+		LAppPrivate::Post(&m);		
+
+		BWindow::FrameResized(width, height);
 	}
 
 	bool QuitRequested()
 	{
-		/*
-		printf("%p::QuitRequested() starting.. pos=%s cls=%s\n",
-			Wnd,
-			Wnd->Pos.GetStr(),
-			Wnd->GetClass());
-		*/
-			
-		auto r = Wnd->OnRequestClose(false);
-		// printf("%s::QuitRequested()=%i\n", Wnd->GetClass(), r);
-		return r;
+		int result = -1;
+		
+		BMessage m(M_WND_EVENT);
+		m.AddInt32(LMessage::PropEvent, LAppPrivate::QuitRequested);
+		m.AddPointer("result", (void*)&result);
+		m.AddPointer(LMessage::PropWindow, (void*)this);
+		LAppPrivate::Post(&m);
+		
+		// Wait for the GUI thread to respond:
+		while (result < 0)
+			LSleep(1);
+		
+		return result > 0;
 	}
 
 	void MessageReceived(BMessage *message)
 	{
 		if (message->what == M_ON_CREATE)
 			LOG("%s:%i %s msg=M_ON_CREATE\n", _FL, __FUNCTION__);
+
 		if (message->what == M_LWINDOW_DELETE)
 		{
 			// printf("Processing M_LWINDOW_DELETE th=%u\n", LCurrentThreadId());
@@ -190,6 +194,12 @@ public:
 		{
 			BWindow::MessageReceived(message);
 
+			// Redirect the message to the app loop:
+			message->AddInt32(LMessage::PropEvent, LAppPrivate::QuitRequested);
+			message->AddPointer(LMessage::PropWindow, (void*)this);
+			LAppPrivate::Post(message);
+
+			/*
 			LViewI *view = NULL;
 			auto r = message->FindPointer(LMessage::PropView, (void**)&view);
 			if (r == B_OK)
@@ -207,6 +217,7 @@ public:
 			{
 				Wnd->OnEvent((LMessage*)message);
 			}
+			*/
 		}
 	}
 	
@@ -250,7 +261,6 @@ LWindow::LWindow() :
 	LView(0)
 	#ifdef _DEBUG
 	, DebugDC(_FL)
-	
 	#endif
 {
 	d = new LWindowPrivate(this);
@@ -972,7 +982,7 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 
 	if (Load)
 	{
-		::LVariant v;
+		LVariant v;
 		if (Store->GetValue(FieldName, v) && v.Str())
 		{
 			LRect Position(0, 0, -1, -1);

@@ -18,6 +18,7 @@
 #include "lgi/common/Css.h"
 
 #include "ViewPriv.h"
+#include "AppPriv.h"
 #include <Cursor.h>
 
 #define DEBUG_MOUSE_EVENTS			0
@@ -160,7 +161,13 @@ struct LBView : public Parent
 			// printf("%s:%i - %s::MoveTo %i,%i\n", _FL, d->View->GetClass(), Pos.x1, Pos.y1);
 			Parent::MoveTo(Pos.x1, Pos.y1);
 		}
+
+		BMessage m(M_VIEW_EVENT);
+		m.AddInt32(LMessage::PropEvent, LAppPrivate::AttachedToWindow);
+		m.AddPointer(LMessage::PropView, (void*)d->View);
+		LAppPrivate::Post(&m);
 		
+		/*
 		// Run this event handler in the thread of the window itself:
 		auto result = d->View->PostEvent(M_ON_CREATE);
 		LOG("%s:%i %s wnd=%p PostEvent result=%i view=%s/%s\n",
@@ -169,6 +176,7 @@ struct LBView : public Parent
 			d->View->GetClass(), d->View->Name());
 		if (!result)
 			printf("%s:%i - Error posting event to view.\n", _FL);
+		*/
 	}
 	
 	LKey ConvertKey(const char *bytes, int32 numBytes)
@@ -271,7 +279,14 @@ struct LBView : public Parent
 	void KeyDown(const char *bytes, int32 numBytes)
 	{
 		if (!d) return;
-		
+
+		BMessage m(M_VIEW_EVENT);
+		m.AddInt32(LMessage::PropEvent, LAppPrivate::KeyDown);
+		m.AddString("bytes", BString(bytes, numBytes));
+		m.AddPointer(LMessage::PropView, (void*)d->View);
+		LAppPrivate::Post(&m);
+
+		/*
 		auto k = ConvertKey(bytes, numBytes);
 		k.Down(true);
 
@@ -280,18 +295,27 @@ struct LBView : public Parent
 			wnd->HandleViewKey(d->View, k);
 		else
 			d->View->OnKey(k);
+		*/
 	}
 	
 	void KeyUp(const char *bytes, int32 numBytes)
 	{
 		if (!d) return;
 
+		BMessage m(M_VIEW_EVENT);
+		m.AddInt32(LMessage::PropEvent, LAppPrivate::KeyUp);
+		m.AddString("bytes", BString(bytes, numBytes));
+		m.AddPointer(LMessage::PropView, (void*)d->View);
+		LAppPrivate::Post(&m);
+
+		/*
 		auto k = ConvertKey(bytes, numBytes);
 		auto wnd = d->View->GetWindow();
 		if (wnd)
 			wnd->HandleViewKey(d->View, k);
 		else
 			d->View->OnKey(k);
+		*/
 	}
 
 	// LWindow's get their events from their LWindowPrivate
@@ -299,21 +323,48 @@ struct LBView : public Parent
 
 	void FrameMoved(BPoint p)
 	{
-		if (!d || IsLWindow) return;
+		if (!d || IsLWindow)
+			return;
+		
+		BMessage m(M_WND_EVENT);
+		m.AddInt32(LMessage::PropEvent, LAppPrivate::FrameMoved);
+		m.AddPoint("pos", p);
+		m.AddPointer(LMessage::PropView, (void*)d->View);
+		LAppPrivate::Post(&m);		
+			
+		/*
 		d->View->Pos.Offset(p.x - d->View->Pos.x1, p.y - d->View->Pos.y1);
 		d->View->OnPosChange();
+		*/
 	}
 
-	void FrameResized(float newWidth, float newHeight)
+	void FrameResized(float width, float height)
 	{
-		if (!d || IsLWindow) return;
-		d->View->Pos.SetSize(newWidth, newHeight);
+		if (!d || IsLWindow)
+			return;
+			
+		BMessage m(M_WND_EVENT);
+		m.AddInt32(LMessage::PropEvent, LAppPrivate::FrameResized);
+		m.AddFloat("width", width);
+		m.AddFloat("height", height);
+		m.AddPointer(LMessage::PropView, (void*)d->View);
+		LAppPrivate::Post(&m);		
+
+		/*
+		d->View->Pos.SetSize(width, height);
 		d->View->OnPosChange();
+		*/
 	}
 
 	void MessageReceived(BMessage *message)
 	{
 		if (!d) return;
+
+		message->AddInt32(LMessage::PropEvent, LAppPrivate::General);
+		message->AddPointer(LMessage::PropView, (void*)d->View);
+		LAppPrivate::Post(message);		
+		
+		/*
 		void *v = NULL;
 		if (message->FindPointer(LMessage::PropView, &v) == B_OK)
 		{
@@ -334,16 +385,27 @@ struct LBView : public Parent
 		{
 			return;
 		}
+		*/
 		
 		Parent::MessageReceived(message);
 	}
 
 	void Draw(BRect updateRect)
 	{
-		if (!d) return;
+		if (!d)
+			return;
+			
+		BMessage m(M_WND_EVENT);
+		m.AddInt32(LMessage::PropEvent, LAppPrivate::Draw);
+		m.AddRect("update", updateRect);
+		m.AddPointer(LMessage::PropView, (void*)d->View);
+		LAppPrivate::Post(&m);		
+
+		/*
 		LScreenDC dc(d->View);
 		LPoint off(0,0);
 		d->View->_Paint(&dc, &off, NULL);
+		*/
 	}
 
 	LMouse ConvertMouse(BPoint where, bool down = false)

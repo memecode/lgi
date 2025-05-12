@@ -124,11 +124,13 @@ enum LgiMessages
 		M_CLOSE,
 
 		#if defined(HAIKU)
-		M_HANDLE_IN_THREAD, // A = (LMessage::InThreadCb*)Cb;
-		M_LWINDOW_DELETE,
-		M_LMENUITEM_ENABLE,
-		M_LSUBMENU_APPENDITEM,
-		M_ON_CREATE,
+			M_HANDLE_IN_THREAD, // A = (LMessage::InThreadCb*)Cb;
+			M_LWINDOW_DELETE,
+			M_LMENUITEM_ENABLE,
+			M_LSUBMENU_APPENDITEM,
+			M_ON_CREATE,
+			M_WND_EVENT,
+			M_VIEW_EVENT,
 		#endif
 	
 	#elif defined(MAC)
@@ -255,6 +257,8 @@ public:
 	static constexpr const char *PropA = "lgiA";
 	static constexpr const char *PropB = "lgiB";
 	static constexpr const char *PropView = "lgiView";
+	static constexpr const char *PropWindow = "lgiWnd";
+	static constexpr const char *PropEvent = "lgiEvent";
 	static constexpr const char *PropCallback = "lgiCallback";
 	static constexpr const char *PropNames[2] = {"lgi_a", "lgi_b"};
 	typedef std::function<void()> InThreadCb;

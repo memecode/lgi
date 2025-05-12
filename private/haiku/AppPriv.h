@@ -14,7 +14,22 @@ typedef LArray<LAppInfo> AppArray;
 
 class LAppPrivate : public BApplication
 {
+	static LAppPrivate *Inst;
+
 public:
+	enum Events
+	{
+		None,
+		General,
+		FrameMoved,
+		FrameResized,
+		QuitRequested,
+		AttachedToWindow,
+		KeyDown,
+		KeyUp,
+		Draw
+	};
+
 	// Common
 	LApp *Owner = NULL;
 	LAutoPtr<LJson> Config;
@@ -37,6 +52,7 @@ public:
 		Args(0, 0),
 		Owner(a)
 	{
+		Inst = this;
 		GuiThread = LCurrentThreadHnd();
 		GuiThreadId = LCurrentThreadId();
 	}
@@ -67,6 +83,8 @@ public:
 		printf("~LAppPrivate: CountLockRequests()=%i\n", CountLockRequests());
 		printf("~LAppPrivate: GuiThreadId=%i LockingThread()=%i\n", GuiThreadId, LockingThread());
 		*/
+		
+		Inst = nullptr;
 	}
 
 	LJson *GetConfigJson();
@@ -74,20 +92,52 @@ public:
 	
 	void MessageReceived(BMessage* message)
 	{
-		switch (message->what)
+		LViewI *view = nullptr;
+		message->FindPointer(LMessage::PropView, (void**)&view);
+		
+		LWindow *wnd = nullptr;
+		message->FindPointer(LMessage::PropWindow, (void**)&wnd);
+		
+		int32_t event = -1;
+		if (message->FindInt32(LMessage::PropEvent, &event) == B_OK)
 		{
-			case M_HANDLE_IN_THREAD:
-				LView::HandleInThreadMessage(message);
-				break;
-			case kMsgDeleteServerMemoryArea:
-				// What am I supposed to do with this?
-				break;
-			default:
-				printf("%s:%i Unhandled MessageReceived %i (%.4s)\n", _FL, message->what, &message->what);
-				break;
+			switch (event)
+			{
+				case Events::QuitRequested:
+				{
+					int *result = nullptr;
+					if (message->FindPointer("result", (void**)&result) != B_OK)
+					{
+						printf("%s:%i - error: no result ptr.\n", _FL);
+						return;
+					}
+					if (wnd)
+						*result = wnd->OnRequestClose(false);
+					else if (view)
+						*result = view->OnRequestClose(false);
+					else
+						*result = true;					
+					break;
+				}
+			}
 		}
+		else
+		{	
+			switch (message->what)
+			{
+				case M_HANDLE_IN_THREAD:
+					LView::HandleInThreadMessage(message);
+					break;
+				case kMsgDeleteServerMemoryArea:
+					// What am I supposed to do with this?
+					break;
+				default:
+					printf("%s:%i Unhandled MessageReceived %i (%.4s)\n", _FL, message->what, &message->what);
+					break;
+			}
 	
-		BApplication::MessageReceived(message);
+			BApplication::MessageReceived(message);
+		}
 	}
 	
 	void RefsReceived(BMessage* message)
@@ -102,6 +152,17 @@ public:
 		printf("%s:%i AboutRequested called... impl me!\n");
 	
 		BApplication::AboutRequested();
+	}
+
+	static bool Post(BMessage *msg)
+	{
+		if (!Inst)
+			return false;		
+		if (!Inst->Lock())
+			return false;		
+		auto r = Inst->PostMessage(msg);
+		Inst->Unlock();
+		return r == B_OK;
 	}
 };
 

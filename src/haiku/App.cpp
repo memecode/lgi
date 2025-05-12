@@ -158,6 +158,7 @@ void LgiCrashHandler(int Sig)
 
 /////////////////////////////////////////////////////////////////////////////
 LApp *TheApp = NULL;
+LAppPrivate *LAppPrivate::Inst = nullptr;
 LSkinEngine *LApp::SkinEngine = NULL;
 LMouseHook *LApp::MouseHook = NULL;
 
