@@ -204,7 +204,8 @@ class SshBackend :
 					{
 						PROCESS_LOG("Process: Cmd..\n");
 						auto result = backend->Cmd(console, args, &exitCode, output, cancel);
-						log->Print("SshProcess finished with %i\n", exitCode);
+						if (exitCode)
+							log->Print("SshProcess finished with %i\n", exitCode);
 					}
 				}
 				else

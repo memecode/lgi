@@ -49,9 +49,10 @@ const char *sCompilers[] =
 	#elif defined MAC
 		"XCode",
 	#else
-		"gcc",
 		"cross",
 	#endif
+	"gcc",
+	"clang",
 	NULL
 };
 

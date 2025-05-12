@@ -389,7 +389,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 				AddFile(h, 0);
 		}
 
-		Log("AddFileData %s\n", f->Path.Get());
+		// Log("AddFileData %s\n", f->Path.Get());
 		
 		// Parse for symbols...
 		PROF("parse");
