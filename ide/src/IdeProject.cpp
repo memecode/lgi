@@ -3580,6 +3580,31 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 
 	d->Settings.Serialize(&r, false /* read */);
 
+	// Setup backend:
+	auto Uri = d->Settings.GetStr(ProjRemoteUri);
+	auto Pass = d->Settings.GetStr(ProjRemotePass);
+	if (Uri && !d->Backend)
+	{
+		LString cache;
+		if (Pass)
+		{
+			// Rewrite the URI to include the password
+			LUri u(Uri);
+			u.sPass = Pass;
+			Uri = cache = u.ToString();
+		}
+
+		d->Backend = CreateSystemInterface(d->App, Uri, d->App->GetNetworkLog());
+		if (d->Backend)
+			Refresh();
+	}
+
+	if (auto be = GetBackend())
+	{
+		if (auto fs = d->App->GetFindSym())
+			fs->SetBackend(be);
+	}
+
 	Prof.Add("IncludePathProcessing");
 
 	LString::Array Inc, Sys;
@@ -3608,24 +3633,6 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 
 	d->App->GetTree()->Insert(this);
 	Expanded(true);
-
-	auto Uri = d->Settings.GetStr(ProjRemoteUri);
-	auto Pass = d->Settings.GetStr(ProjRemotePass);
-	if (Uri && !d->Backend)
-	{
-		LString cache;
-		if (Pass)
-		{
-			// Rewrite the URI to include the password
-			LUri u(Uri);
-			u.sPass = Pass;
-			Uri = cache = u.ToString();
-		}
-
-		d->Backend = CreateSystemInterface(d->App, Uri, d->App->GetNetworkLog());
-		if (d->Backend)
-			Refresh();
-	}
 
 	return OpenOk;
 }

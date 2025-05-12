@@ -182,7 +182,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		LAssert(backendCalls > 0);
 		backendCalls--;
 		printf("dec backendCalls=%i\n", backendCalls);
-		if (!backendCalls)
+		if (!backendCalls && onShutdown)
 			onShutdown();
 	}
 	
@@ -285,7 +285,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		
 		// Already added?
 		#if USE_HASH
-			FileSyms *f = Files.Find(Path);
+			auto f = Files.Find(Path);
 			if (f)
 			{
 				if (Platforms && f->Platforms == 0)
@@ -388,6 +388,8 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			for (auto h: Headers)
 				AddFile(h, 0);
 		}
+
+		Log("AddFileData %s\n", f->Path.Get());
 		
 		// Parse for symbols...
 		PROF("parse");
@@ -436,12 +438,30 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		AddFile(Path, Platform);
 	}
 
-	void AddPaths(LString::Array &out, LString::Array &in, int Platforms)
+	void AddDirectoryEntry(LDirectory &dir, int Platforms)
+	{
+		bool willAdd = !dir.IsDir() &&
+						MatchStr("*.h*", dir.GetName());
+						
+		#ifdef DEBUG_FILE
+		if (!Stricmp(dir.GetName(), DEBUG_FILE))
+			LgiTrace("!!!GOT %s willAdd=%i !!!\n", dir.FullPath(), willAdd);
+		#endif
+					
+		if (willAdd)
+		{
+			HdrMap.Add(dir.GetName(), dir.FullPath());
+			AddFile(dir.FullPath(), Platforms);
+		}
+	}
+
+	void AddPaths(LString::Array &out, LString::Array &in, int Platforms, bool recurse = false)
 	{
 		LHashTbl<StrKey<char>, bool> map; // of existing scanned folders
 		for (auto p: out)
 			map.Add(p, true);
 
+		LString::Array subFolders;
 		for (auto p: in)
 		{
 			if (!map.Find(p))
@@ -450,25 +470,38 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 				out.Add(p);
 				map.Add(p, true);
 
-				LDirectory dir;
-				for (auto b=dir.First(p); b; b=dir.Next())
+				if (backend)
 				{
-					bool willAdd = !dir.IsDir() &&
-									MatchStr("*.h*", dir.GetName());
-						
-					#ifdef DEBUG_FILE
-					if (!Stricmp(dir.GetName(), DEBUG_FILE))
-						LgiTrace("!!!GOT %s willAdd=%i !!!\n", dir.FullPath(), willAdd);
-					#endif
-					
-					if (willAdd)
+					backend->ReadFolder(SystemIntf::TBackground, p, [this, Platforms, recurse, out = &out](LDirectory *dir)
+						{
+							LString::Array subFolders;
+							for (int b = true; b; b = dir->Next())
+							{
+								if (recurse && dir->IsDir())
+									subFolders.Add(dir->FullPath());
+								else
+									AddDirectoryEntry(*dir, Platforms);
+							}
+							if (subFolders.Length())
+								AddPaths(*out, subFolders, Platforms, recurse);
+						});
+				}
+				else // local folder:
+				{
+					LDirectory dir;
+					for (auto b=dir.First(p); b; b=dir.Next())
 					{
-						HdrMap.Add(dir.GetName(), dir.FullPath());
-						AddFile(dir.FullPath(), Platforms);
+						if (recurse && dir.IsDir())
+							subFolders.Add(dir.FullPath());
+						else
+							AddDirectoryEntry(dir, Platforms);
 					}
 				}
 			}
 		}
+
+		if (subFolders.Length())
+			AddPaths(out, in, Platforms, recurse);
 	}
 	
 	bool RemoveFile(LString Path)
@@ -791,7 +824,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 				if (!Params)
 					break;
 				AddPaths(IncPaths, Params->Paths, Params->Platforms);
-				AddPaths(SysIncPaths, Params->SysPaths, Params->Platforms);
+				AddPaths(SysIncPaths, Params->SysPaths, Params->Platforms, true);
 				break;
 			}
 			default:
@@ -1079,17 +1112,21 @@ bool FindSymbolSystem::SetIncludePaths(LString::Array &Paths, LString::Array &Sy
 {
 	#if 0
 	for (auto p: SysPaths)
-		printf("SysPath:%s\n", p.Get());
+		LgiTrace("SysPath:%s\n", p.Get());
 	if (SysPaths.Length() == 0)
-		printf("NoSysPath\n");
+		LgiTrace("NoSysPath\n");
 	#endif
 
-	auto *params = new FindSymbolSystem::SymPathParams;
-	params->Paths = Paths;
-	params->SysPaths = SysPaths;
-	params->Platforms = Platforms;
-	return d->PostEvent(M_FIND_SYM_INC_PATHS,
-						(LMessage::Param)params);
+	if (auto params = new FindSymbolSystem::SymPathParams)
+	{
+		params->Paths = Paths;
+		params->SysPaths = SysPaths;
+		params->Platforms = Platforms;
+		return d->PostEvent(M_FIND_SYM_INC_PATHS,
+							(LMessage::Param)params);
+	}
+
+	return false;
 }
 
 bool FindSymbolSystem::OnFile(const char *Path, SymAction Action, int Platforms)

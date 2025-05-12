@@ -3473,12 +3473,6 @@ IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bo
 		p->EditSettings(GetPlatform());
 	}
 
-	if (auto be = p->GetBackend())
-	{
-		if (d->FindSym)
-			d->FindSym->SetBackend(be);
-	}
-
 	#if 0 // for testing...
 	RemoteFileSelect(this, p->GetBackend(), [this](auto fn)
 		{

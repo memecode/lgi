@@ -733,13 +733,16 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 		else
 			Cs = ANSI_CHARSET;
 
+		auto isCourierNew  = !Stricmp(Face(), "Courier New");
+		auto isCambriaMath = !Stricmp(Face(), "Cambria Math"); // The text metrics are all broken.
+
 		d->OwnerUnderline = Face() &&
 							stricmp(Face(), "Courier New") == 0 &&
 							Size().Type == LCss::LenPt &&
 							(PointSize() == 8 || PointSize() == 9) &&
 							LTypeFace::d->_Underline;
 
-		LAutoWString wFace(Utf8ToWide(LTypeFace::d->_Face));
+		LAutoWString wFace(Utf8ToWide(isCambriaMath ? "Cambria" : LTypeFace::d->_Face));
 		if (Win32Height)
 			d->hFont = ::CreateFont(Win32Height,
 									0,
@@ -759,6 +762,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 		if (d->hFont)
 		{
 			HFONT hFnt = (HFONT) SelectObject(hDC, d->hFont);
+			auto logPxY = GetDeviceCaps(hDC, LOGPIXELSY);
 
 			TEXTMETRIC tm;
 			ZeroObj(tm);
