@@ -195,9 +195,11 @@ public:
 			BWindow::MessageReceived(message);
 
 			// Redirect the message to the app loop:
-			message->AddInt32(LMessage::PropEvent, LAppPrivate::QuitRequested);
-			message->AddPointer(LMessage::PropWindow, (void*)this);
-			LAppPrivate::Post(message);
+			BMessage m(M_WND_EVENT);
+			m.AddInt32(LMessage::PropEvent, LAppPrivate::General);
+			m.AddPointer(LMessage::PropWindow, (void*)this);
+			m.AddPointer("message", message);
+			LAppPrivate::Post(&m);
 
 			/*
 			LViewI *view = NULL;

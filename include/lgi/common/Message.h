@@ -254,11 +254,11 @@ public:
 	#endif
 
 	#if defined(HAIKU)
-	static constexpr const char *PropA = "lgiA";
-	static constexpr const char *PropB = "lgiB";
-	static constexpr const char *PropView = "lgiView";
-	static constexpr const char *PropWindow = "lgiWnd";
-	static constexpr const char *PropEvent = "lgiEvent";
+	static constexpr const char *PropA = "lgiA"; // (LMessage::Param)
+	static constexpr const char *PropB = "lgiB"; // (LMessage::Param)
+	static constexpr const char *PropView = "lgiView"; // (LView*)
+	static constexpr const char *PropWindow = "lgiWnd"; // (LWindow*)
+	static constexpr const char *PropEvent = "lgiEvent"; // LAppPrivate::Events as Int32
 	static constexpr const char *PropCallback = "lgiCallback";
 	static constexpr const char *PropNames[2] = {"lgi_a", "lgi_b"};
 	typedef std::function<void()> InThreadCb;

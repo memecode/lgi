@@ -2497,7 +2497,7 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64_t tim
 		r = m.AddInt64(LMessage::PropB, b);
 		if (r != B_OK)
 			printf("%s:%i - AddUInt64 failed.\n", _FL);
-		r = m.AddPointer(LMessage::PropView, static_cast<LViewI*>(this));
+		r = m.AddPointer(LMessage::PropView, static_cast<LView*>(this));
 		if (r != B_OK)
 			printf("%s:%i - AddPointer failed.\n", _FL);
 

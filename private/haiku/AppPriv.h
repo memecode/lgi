@@ -12,23 +12,55 @@
 
 typedef LArray<LAppInfo> AppArray;
 
+// This list of events are send from the BWindow threads over
+// to the application thread for processing.
+#define APP_PRIV_EVENTS() \
+	_(None) \
+	_(QuitRequested) \
+	_(General) \
+	_(FrameMoved) \
+	_(FrameResized) \
+	_(AttachedToWindow) \
+	_(KeyDown) \
+	_(KeyUp) \
+	_(Draw) \
+	_(MouseDown) \
+	_(MouseUp) \
+	_(MouseMoved) \
+	_(MakeFocus)
+
 class LAppPrivate : public BApplication
 {
 	static LAppPrivate *Inst;
 
 public:
+	// Event processing
 	enum Events
 	{
-		None,
-		General,
-		FrameMoved,
-		FrameResized,
-		QuitRequested,
-		AttachedToWindow,
-		KeyDown,
-		KeyUp,
-		Draw
+		#define _(name) name,
+		APP_PRIV_EVENTS()
+		#undef _
 	};
+	const char *ToString(Events e)
+	{
+		switch (e)
+		{
+			#define _(name) case name: return #name;
+			APP_PRIV_EVENTS()
+			#undef _
+		}
+		return NULL;
+	}
+	static bool Post(BMessage *msg)
+	{
+		if (!Inst)
+			return false;		
+		if (!Inst->Lock())
+			return false;		
+		auto r = Inst->PostMessage(msg);
+		Inst->Unlock();
+		return r == B_OK;
+	}
 
 	// Common
 	LApp *Owner = NULL;
@@ -89,55 +121,145 @@ public:
 
 	LJson *GetConfigJson();
 	bool SaveConfig();
+
+	void OnMessage(BMessage *m)
+	{
+		LView *view = nullptr;
+		m->FindPointer(LMessage::PropView, (void**)&view);
+		LWindow *wnd = nullptr;
+		m->FindPointer(LMessage::PropWindow, (void**)&wnd);
+		if (!view && !wnd)
+		{
+			printf("%s:%i - no view/wnd in msg.\n", _FL);
+			return;
+		}
+		if (!view)
+			view = wnd;
+		
+		int32_t event = -1;
+		if (m->FindInt32(LMessage::PropEvent, &event) != B_OK)
+		{
+			printf("%s:%i - no event in msg.\n", _FL);
+			return;
+		}
+		
+		switch (event)
+		{
+			case Events::QuitRequested:
+			{
+				int *result = nullptr;
+				if (m->FindPointer("result", (void**)&result) != B_OK)
+				{
+					printf("%s:%i - error: no result ptr.\n", _FL);
+					return;
+				}
+				if (wnd)
+					*result = wnd->OnRequestClose(false);
+				else if (view)
+					*result = view->OnRequestClose(false);
+				else
+					*result = true;					
+				break;
+			}
+			case Events::General:
+			{
+				BMessage msg;
+				if (m->FindMessage("message", &msg) != B_OK)
+				{
+					printf("%s:%i - no message.\n", _FL);
+					return;
+				}
+				
+				view->OnEvent((LMessage*) &msg);
+				break;
+			}
+			case Events::FrameMoved:
+			{
+				BPoint pos;
+				if (m->FindPoint("pos", &pos) != B_OK)
+				{
+					printf("%s:%i - no pos.\n", _FL);
+					return;
+				}
+				
+				view->Pos.Offset(pos.x - view->Pos.x1,
+								 pos.y - view->Pos.y1);
+				view->OnPosChange();
+				break;
+			}
+			case Events::FrameResized:
+			{
+				float width = 0.0f, height = 0.0f;
+				if (m->FindFloat("width", &width) != B_OK ||
+					m->FindFloat("height", &height) != B_OK)
+				{
+					printf("%s:%i - missing width/height param.\n", _FL);
+					return;
+				}
+
+				view->Pos.SetSize(width, height);
+				view->OnPosChange();
+				break;
+			}
+			case Events::AttachedToWindow:
+			{
+				view->OnCreate();
+				break;
+			}
+			case Events::KeyDown:
+			{
+				break;
+			}
+			case Events::KeyUp:
+			{
+				break;
+			}
+			case Events::Draw:
+			{
+				LScreenDC dc(view);
+				LPoint off(0, 0);
+				view->_Paint(&dc, &off, NULL);
+				break;
+			}
+			case Events::MouseDown:
+			{
+			}
+			case Events::MouseUp:
+			{
+			}
+			case Events::MouseMoved:
+			{
+			}
+			case Events::MakeFocus:
+			{
+			}
+			default:
+			{
+				printf("%s:%i - unhandled event '%s'\n", _FL, ToString((Events)event));
+				break;
+			}
+		}
+	}
 	
 	void MessageReceived(BMessage* message)
 	{
-		LViewI *view = nullptr;
-		message->FindPointer(LMessage::PropView, (void**)&view);
-		
-		LWindow *wnd = nullptr;
-		message->FindPointer(LMessage::PropWindow, (void**)&wnd);
-		
-		int32_t event = -1;
-		if (message->FindInt32(LMessage::PropEvent, &event) == B_OK)
+		switch (message->what)
 		{
-			switch (event)
-			{
-				case Events::QuitRequested:
-				{
-					int *result = nullptr;
-					if (message->FindPointer("result", (void**)&result) != B_OK)
-					{
-						printf("%s:%i - error: no result ptr.\n", _FL);
-						return;
-					}
-					if (wnd)
-						*result = wnd->OnRequestClose(false);
-					else if (view)
-						*result = view->OnRequestClose(false);
-					else
-						*result = true;					
-					break;
-				}
-			}
+			case M_WND_EVENT:
+				OnMessage(message);
+				break;
+			case M_HANDLE_IN_THREAD:
+				LView::HandleInThreadMessage(message);
+				break;
+			case kMsgDeleteServerMemoryArea:
+				// What am I supposed to do with this?
+				break;
+			default:
+				printf("%s:%i Unhandled MessageReceived %i (%.4s)\n", _FL, message->what, &message->what);
+				break;
 		}
-		else
-		{	
-			switch (message->what)
-			{
-				case M_HANDLE_IN_THREAD:
-					LView::HandleInThreadMessage(message);
-					break;
-				case kMsgDeleteServerMemoryArea:
-					// What am I supposed to do with this?
-					break;
-				default:
-					printf("%s:%i Unhandled MessageReceived %i (%.4s)\n", _FL, message->what, &message->what);
-					break;
-			}
-	
-			BApplication::MessageReceived(message);
-		}
+
+		BApplication::MessageReceived(message);
 	}
 	
 	void RefsReceived(BMessage* message)
@@ -152,17 +274,6 @@ public:
 		printf("%s:%i AboutRequested called... impl me!\n");
 	
 		BApplication::AboutRequested();
-	}
-
-	static bool Post(BMessage *msg)
-	{
-		if (!Inst)
-			return false;		
-		if (!Inst->Lock())
-			return false;		
-		auto r = Inst->PostMessage(msg);
-		Inst->Unlock();
-		return r == B_OK;
 	}
 };
 
