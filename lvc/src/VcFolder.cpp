@@ -3228,7 +3228,7 @@ void VcFolder::OnVcsType(LString errorMsg)
 	}
 
 	#if HAS_LIBSSH
-	auto c = d->GetConnection(Uri.ToString(), false);
+	auto c = d->GetConnection(Uri.ToString(), RemotePrompt, false);
 	if (c)
 	{
 		auto NewType = c->Types.Find(Uri.sPath);
