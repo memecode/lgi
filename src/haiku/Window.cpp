@@ -143,7 +143,7 @@ public:
 		BMessage m(M_WND_EVENT);
 		m.AddInt32(LMessage::PropEvent, LAppPrivate::FrameMoved);
 		m.AddPoint("pos", newPosition);
-		m.AddPointer(LMessage::PropWindow, (void*)this);
+		m.AddPointer(LMessage::PropWindow, (void*)Wnd);
 		LAppPrivate::Post(&m);		
 		
 		BWindow::FrameMoved(newPosition);
@@ -155,7 +155,7 @@ public:
 		m.AddInt32(LMessage::PropEvent, LAppPrivate::FrameResized);
 		m.AddFloat("width", width);
 		m.AddFloat("height", height);
-		m.AddPointer(LMessage::PropWindow, (void*)this);
+		m.AddPointer(LMessage::PropWindow, (void*)Wnd);
 		LAppPrivate::Post(&m);		
 
 		BWindow::FrameResized(width, height);
@@ -168,7 +168,7 @@ public:
 		BMessage m(M_WND_EVENT);
 		m.AddInt32(LMessage::PropEvent, LAppPrivate::QuitRequested);
 		m.AddPointer("result", (void*)&result);
-		m.AddPointer(LMessage::PropWindow, (void*)this);
+		m.AddPointer(LMessage::PropWindow, (void*)Wnd);
 		LAppPrivate::Post(&m);
 		
 		// Wait for the GUI thread to respond:
@@ -197,8 +197,8 @@ public:
 			// Redirect the message to the app loop:
 			BMessage m(M_WND_EVENT);
 			m.AddInt32(LMessage::PropEvent, LAppPrivate::General);
-			m.AddPointer(LMessage::PropWindow, (void*)this);
-			m.AddPointer("message", message);
+			m.AddPointer(LMessage::PropWindow, (void*)Wnd);
+			m.AddMessage("message", message);
 			LAppPrivate::Post(&m);
 
 			/*

@@ -55,10 +55,9 @@ public:
 	{
 		if (!Inst)
 			return false;		
-		if (!Inst->Lock())
-			return false;		
+		// if (!Inst->Lock()) return false;		
 		auto r = Inst->PostMessage(msg);
-		Inst->Unlock();
+		// Inst->Unlock();
 		return r == B_OK;
 	}
 
@@ -130,11 +129,10 @@ public:
 		m->FindPointer(LMessage::PropWindow, (void**)&wnd);
 		if (!view && !wnd)
 		{
+			LAssert(0);
 			printf("%s:%i - no view/wnd in msg.\n", _FL);
 			return;
 		}
-		if (!view)
-			view = wnd;
 		
 		int32_t event = -1;
 		if (m->FindInt32(LMessage::PropEvent, &event) != B_OK)
@@ -170,7 +168,10 @@ public:
 					return;
 				}
 				
-				view->OnEvent((LMessage*) &msg);
+				if (view)
+					view->OnEvent((LMessage*) &msg);
+				else if (wnd)
+					wnd->OnEvent((LMessage*) &msg);
 				break;
 			}
 			case Events::FrameMoved:
@@ -182,9 +183,16 @@ public:
 					return;
 				}
 				
-				view->Pos.Offset(pos.x - view->Pos.x1,
-								 pos.y - view->Pos.y1);
-				view->OnPosChange();
+				if (view)
+				{
+					view->Pos.Offset(pos.x - view->Pos.x1, pos.y - view->Pos.y1);
+					view->OnPosChange();
+				}
+				else if (wnd)
+				{
+					wnd->Pos.Offset(pos.x - wnd->Pos.x1, pos.y - wnd->Pos.y1);
+					wnd->OnPosChange();
+				}
 				break;
 			}
 			case Events::FrameResized:
@@ -197,8 +205,16 @@ public:
 					return;
 				}
 
-				view->Pos.SetSize(width, height);
-				view->OnPosChange();
+				if (view)
+				{
+					view->Pos.SetSize(width, height);
+					view->OnPosChange();
+				}
+				else if (wnd)
+				{
+					wnd->Pos.SetSize(width, height);
+					wnd->OnPosChange();
+				}
 				break;
 			}
 			case Events::AttachedToWindow:
@@ -206,33 +222,47 @@ public:
 				view->OnCreate();
 				break;
 			}
-			case Events::KeyDown:
-			{
-				break;
-			}
-			case Events::KeyUp:
-			{
-				break;
-			}
 			case Events::Draw:
 			{
-				LScreenDC dc(view);
 				LPoint off(0, 0);
-				view->_Paint(&dc, &off, NULL);
+				if (view)
+				{
+					LLocker lck(view->Handle(), _FL);
+					if (lck.Lock())
+					{
+						LScreenDC dc(view);
+						view->_Paint(&dc, &off, NULL);
+					}
+				}
+				else if (wnd)
+				{
+					LLocker lck(wnd->WindowHandle(), _FL);
+					if (lck.Lock())
+					{
+						LScreenDC dc(wnd);
+						wnd->_Paint(&dc, &off, NULL);
+					}
+				}
 				break;
-			}
-			case Events::MouseDown:
-			{
-			}
-			case Events::MouseUp:
-			{
 			}
 			case Events::MouseMoved:
 			{
+				BPoint where;
+				uint32_t code;
+				m->FindPoint("pos", &where);
+				m->FindUInt32("code", &code);
+				
+				if (view)
+				{
+					
+				}
+				break;
 			}
+			case Events::MouseDown:
+			case Events::MouseUp:
 			case Events::MakeFocus:
-			{
-			}
+			case Events::KeyDown:
+			case Events::KeyUp:
 			default:
 			{
 				printf("%s:%i - unhandled event '%s'\n", _FL, ToString((Events)event));
@@ -246,6 +276,7 @@ public:
 		switch (message->what)
 		{
 			case M_WND_EVENT:
+			case M_VIEW_EVENT:
 				OnMessage(message);
 				break;
 			case M_HANDLE_IN_THREAD:

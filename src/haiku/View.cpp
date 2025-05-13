@@ -344,7 +344,7 @@ struct LBView : public Parent
 		BMessage m(M_WND_EVENT);
 		m.AddInt32(LMessage::PropEvent, LAppPrivate::General);
 		m.AddPointer(LMessage::PropView, (void*)d->View);
-		m.AddPointer("message", message);
+		m.AddMessage("message", message);
 		LAppPrivate::Post(&m);
 		
 		/*

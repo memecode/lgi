@@ -2419,16 +2419,10 @@ bool LView::InThread()
 	
 	#elif defined(HAIKU)
 
-		auto h = Handle();
-		if (!h)
-			return true;
-		
-		auto looper = h->Looper();
-		if (!looper)
-			return true;
-			
+		// All events should be handled in the app thread...
+		// Anything in a BWindow should be forwarded to the app thread.
 		auto CurThreadId = LCurrentThreadId();
-		return CurThreadId == looper->Thread();
+		return CurThreadId == LAppInst->GetGuiThreadId();
 		
 	#else
 

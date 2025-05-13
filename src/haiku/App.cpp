@@ -727,7 +727,7 @@ bool LLocker::Lock(bool debug)
 			auto locking = hnd->Looper()->LockingThread();
 			
 			printf("%s:%i - Warning: can't lock. cur=%i locking=%i\n",
-				_FL,
+				file, line,
 				cur,
 				locking);
 		}
