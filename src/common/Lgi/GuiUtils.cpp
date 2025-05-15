@@ -43,6 +43,7 @@ LKey::LKey(BMessage *m)
 	if (m->what == M_KEY_MSG)
 	{
 		m->FindInt32("flags", &Flags);
+		m->FindBool("isChar", &IsChar);
 		uint32_t i = 0;
 		vkey = m->FindUInt32("vkey", &i) == B_OK ? i : 0;
 		c16  = m->FindUInt32("c16", &i)  == B_OK ? i : 0;
@@ -56,6 +57,7 @@ BMessage LKey::Archive() const
 	BMessage m(M_KEY_MSG);
 
 	m.AddInt32("flags", Flags);
+	m.AddBool("isChar", IsChar);
 	m.AddUInt32("vkey", vkey);
 	m.AddUInt32("c16", c16);
 	m.AddUInt32("data", Data);

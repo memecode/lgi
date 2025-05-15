@@ -55,10 +55,7 @@ public:
 	{
 		if (!Inst)
 			return false;		
-		// if (!Inst->Lock()) return false;		
-		auto r = Inst->PostMessage(msg);
-		// Inst->Unlock();
-		return r == B_OK;
+		return Inst->PostMessage(msg) == B_OK;
 	}
 
 	// Common
@@ -289,6 +286,20 @@ public:
 				break;
 			}
 			case Events::MakeFocus:
+			{
+				bool focus = true;
+				if (m->FindBool("focus", &focus) != B_OK)
+				{
+					printf("%s:%i - no focus param.\n", _FL);
+					return;
+				}
+				
+				if (view)
+					view->OnFocus(focus);
+				else if (wnd)
+					wnd->OnFocus(focus);
+				break;
+			}
 			default:
 			{
 				printf("%s:%i - unhandled event '%s'\n", _FL, ToString((Events)event));
