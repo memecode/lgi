@@ -246,20 +246,23 @@ public:
 				break;
 			}
 			case Events::MouseMoved:
-			{
-				BPoint where;
-				uint32_t code;
-				m->FindPoint("pos", &where);
-				m->FindUInt32("code", &code);
-				
-				if (view)
-				{
-					
-				}
-				break;
-			}
 			case Events::MouseDown:
 			case Events::MouseUp:
+			{
+				LMessage msg;
+				if (m->FindMessage("mouse", &msg) != B_OK)
+				{
+					printf("%s:%i - no mouse message.\n", _FL);
+					return;
+				}
+				
+				LMouse ms(&msg);
+				if (view)
+					view->_Mouse(ms, event == Events::MouseMoved);
+				else if (wnd)
+					wnd->_Mouse(ms, event == Events::MouseMoved);
+				break;
+			}
 			case Events::MakeFocus:
 			case Events::KeyDown:
 			case Events::KeyUp:

@@ -420,18 +420,11 @@ struct LBView : public Parent
 		return m;
 	}
 	
-	void MouseDown(BPoint where)
+ 	void MouseDown(BPoint where)
 	{		
 		if (!d)
 			return;
 	
-		BMessage m(M_WND_EVENT);
-		m.AddInt32(LMessage::PropEvent, LAppPrivate::MouseDown);
-		m.AddPointer(LMessage::PropView, (void*)d->View);
-		m.AddPoint("pos", where);
-		LAppPrivate::Post(&m);
-			
-		/*
 		static uint64_t lastClick = 0;
 		bigtime_t interval = 0;
 		status_t r = get_click_speed(&interval);
@@ -439,10 +432,15 @@ struct LBView : public Parent
 		bool doubleClick = now-lastClick < (interval/1000);
 		lastClick = now;
 		
-		LMouse m = ConvertMouse(where, true);
-		m.Double(doubleClick);
-		d->View->_Mouse(m, false);
-		*/
+		auto ms = ConvertMouse(where, true);
+		ms.Double(doubleClick);
+		auto msg = ms.Archive();
+
+		BMessage m(M_WND_EVENT);
+		m.AddInt32(LMessage::PropEvent, LAppPrivate::MouseDown);
+		m.AddPointer(LMessage::PropView, d->View);
+		m.AddMessage("mouse", &msg);
+		LAppPrivate::Post(&m);
 	}
 	
 	void MouseUp(BPoint where) 
@@ -450,17 +448,15 @@ struct LBView : public Parent
 		if (!d)
 			return;
 
+		LMouse ms = ConvertMouse(where);
+		ms.Down(false);
+		auto msg = ms.Archive();
+
 		BMessage m(M_WND_EVENT);
 		m.AddInt32(LMessage::PropEvent, LAppPrivate::MouseUp);
-		m.AddPointer(LMessage::PropView, (void*)d->View);
-		m.AddPoint("pos", where);
+		m.AddPointer(LMessage::PropView, d->View);
+		m.AddMessage("mouse", &msg);
 		LAppPrivate::Post(&m);
-			
-		/*
-		LMouse m = ConvertMouse(where);
-		m.Down(false);
-		d->View->_Mouse(m, false);
-		*/
 	}
 	
 	void MouseMoved(BPoint where, uint32 code, const BMessage *dragMessage)
@@ -468,21 +464,18 @@ struct LBView : public Parent
 		if (!d)
 			return;
 
+		LMouse ms = ConvertMouse(where);
+		ms.Down(ms.Left() ||
+				ms.Middle() ||
+				ms.Right());
+		ms.IsMove(true);
+		auto msg = ms.Archive();
+
 		BMessage m(M_WND_EVENT);
 		m.AddInt32(LMessage::PropEvent, LAppPrivate::MouseMoved);
-		m.AddPointer(LMessage::PropView, (void*)d->View);
-		m.AddPoint("pos", where);
-		m.AddUInt32("code", code);
+		m.AddPointer(LMessage::PropView, d->View);
+		m.AddMessage("mouse", &msg);
 		LAppPrivate::Post(&m);
-			
-		/*
-		LMouse m = ConvertMouse(where);
-		m.Down(	m.Left() ||
-				m.Middle() ||
-				m.Right());
-		m.IsMove(true);
-		d->View->_Mouse(m, true);
-		*/
 	}
 
 	void MakeFocus(bool focus=true)

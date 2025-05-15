@@ -256,6 +256,13 @@ public:
 	LKey() {}
 	LKey(int vkey, uint32_t flags);
 
+	#ifdef HAIKU
+	// Initialize from a message
+	LKey(BMessage *m);
+	// Convert to a message
+	BMessage Archive() const;
+	#endif
+
 	void Trace(const char *Msg) const
 	{
 		LgiTrace("%s LKey vkey=%i(0x%x) c16=%i(%c) IsChar=%i down=%i ctrl=%i alt=%i sh=%i sys=%i\n",
@@ -310,6 +317,13 @@ public:
 		Target = target;
 		ViewCoords = true;
 	}
+	
+	#ifdef HAIKU
+	// Initialize from a message
+	LMouse(BMessage *m);
+	// Convert to a message
+	BMessage Archive() const;
+	#endif
 
 	LMouse operator -(LPoint p)
 	{

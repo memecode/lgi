@@ -36,7 +36,37 @@ bool LKey::IsContextMenu() const
 	return !IsChar && vkey == LK_CONTEXTKEY;
 }
 
+#ifdef HAIKU
+
+LKey::LKey(BMessage *m)
+{
+	if (m->what == M_KEY_MSG)
+	{
+		m->FindInt32("flags", &Flags);
+		uint32_t i = 0;
+		vkey = m->FindUInt32("vkey", &i) == B_OK ? i : 0;
+		c16  = m->FindUInt32("c16", &i)  == B_OK ? i : 0;
+		m->FindUInt32("data", &Data);
+	}
+	else LAssert(!"wrong msg");
+}
+
+BMessage LKey::Archive() const
+{
+	BMessage m(M_KEY_MSG);
+
+	m.AddInt32("flags", Flags);
+	m.AddUInt32("vkey", vkey);
+	m.AddUInt32("c16", c16);
+	m.AddUInt32("data", Data);
+
+	return m;
+}
+
+#endif
+
 //////////////////////////////////////////////////////////////////////////////////
+
 LString LMouse::ToString() const
 {
 	LString s;
@@ -107,6 +137,35 @@ bool LMouse::ToView()
 	return true;
 }
 
+#ifdef HAIKU
+
+LMouse::LMouse(BMessage *m)
+{
+	if (m->what == M_MOUSE_MSG)
+	{
+		m->FindPointer("target", (void**)&Target);
+		m->FindBool("viewcoords", &ViewCoords);
+		m->FindInt32("flags", &Flags);
+		m->FindInt32("x", &x);
+		m->FindInt32("y", &y);
+	}
+	else LAssert(!"wrong msg");
+}
+
+BMessage LMouse::Archive() const
+{
+	BMessage m(M_MOUSE_MSG);
+	m.AddPointer("target", Target);
+	m.AddBool("viewcoords", ViewCoords);
+	m.AddInt32("flags", Flags);
+	m.AddInt32("x", x);
+	m.AddInt32("y", y);
+	return m;
+}
+
+#endif
+
+///////////////////////////////////////////////////////////////////////////
 #if WINNATIVE
 
 	#if !defined(DM_POSITION)

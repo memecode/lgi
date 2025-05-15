@@ -131,6 +131,8 @@ enum LgiMessages
 			M_ON_CREATE,
 			M_WND_EVENT,
 			M_VIEW_EVENT,
+			M_MOUSE_MSG,
+			M_KEY_MSG,
 		#endif
 	
 	#elif defined(MAC)
