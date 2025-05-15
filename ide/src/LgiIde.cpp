@@ -4279,78 +4279,73 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_FIND_IN_FILES:
 		{
-			if (!d->Finder)
+			if (!d->FindParameters &&
+				d->FindParameters.Reset(new FindParams))
 			{
-				d->Finder.Reset(new FindInFilesThread(d->AppHnd));
+				LVariant var;
+				if (GetOptions()->GetValue(OPT_ENTIRE_SOLUTION, var))
+					d->FindParameters->Type = var.CastInt32() ? SystemIntf::FindParams::SearchPaths : SystemIntf::FindParams::SearchDirectory;
+			}		
+
+			auto Dlg = new FindInFiles(this, d->FindParameters);
+
+			if (auto Focus = GetFocus())
+			{
+				auto Edit = dynamic_cast<LTextView3*>(Focus);
+				if (Edit && Edit->HasSelection())
+				{
+					LAutoString a(Edit->GetSelection());
+					Dlg->Params->Text = a;
+				}
 			}
-			if (d->Finder)
+			
+			auto p = RootProject();
+			if (p)
 			{
-				if (!d->FindParameters &&
-					d->FindParameters.Reset(new FindParams))
+				if (auto Base = p->GetBasePath())
+					Dlg->Params->Dir = Base;
+			}
+
+			Dlg->DoModal([this, Dlg, p](auto dlg, auto code)
+			{
+				if (p && Dlg->Params->Type == SystemIntf::FindParams::SearchPaths)
 				{
-					LVariant var;
-					if (GetOptions()->GetValue(OPT_ENTIRE_SOLUTION, var))
-						d->FindParameters->Type = var.CastInt32() ? SystemIntf::FindParams::SearchPaths : SystemIntf::FindParams::SearchDirectory;
-				}		
-
-				auto Dlg = new FindInFiles(this, d->FindParameters);
-
-				LViewI *Focus = GetFocus();
-				if (Focus)
-				{
-					LTextView3 *Edit = dynamic_cast<LTextView3*>(Focus);
-					if (Edit && Edit->HasSelection())
-					{
-						LAutoString a(Edit->GetSelection());
-						Dlg->Params->Text = a;
-					}
-				}
-				
-				auto p = RootProject();
-				if (p)
-				{
-					auto Base = p->GetBasePath();
-					if (Base)
-						Dlg->Params->Dir = Base;
-				}
-
-				Dlg->DoModal([this, Dlg, p](auto dlg, auto code)
-				{
-					if (p && Dlg->Params->Type == SystemIntf::FindParams::SearchPaths)
-					{
-						Dlg->Params->Paths.Length(0);
-						
-						LArray<ProjectNode*> Nodes;
-						for (auto p: p->GetAllProjects())
-							p->GetAllNodes(Nodes);
-
-						for (unsigned i=0; i<Nodes.Length(); i++)
-						{
-							LString s = Nodes[i]->GetFullPath();
-							if (s)
-								Dlg->Params->Paths.Add(s);
-						}
-					}
-
-					LVariant var = d->FindParameters->Type == SystemIntf::FindParams::SearchPaths;
-					GetOptions()->SetValue(OPT_ENTIRE_SOLUTION, var);
-
-					d->Finder->Stop();
+					Dlg->Params->Paths.Length(0);
 					
-					if (d->FindParameters->Text)
+					LArray<ProjectNode*> Nodes;
+					for (auto p: p->GetAllProjects())
+						p->GetAllNodes(Nodes);
+
+					for (unsigned i=0; i<Nodes.Length(); i++)
 					{
-						if (auto backend = p->GetBackend())
+						LString s = Nodes[i]->GetFullPath();
+						if (s)
+							Dlg->Params->Paths.Add(s);
+					}
+				}
+
+				LVariant var = d->FindParameters->Type == SystemIntf::FindParams::SearchPaths;
+				GetOptions()->SetValue(OPT_ENTIRE_SOLUTION, var);
+				
+				if (d->FindParameters->Text)
+				{
+					if (auto backend = p->GetBackend())
+					{
+						backend->FindInFiles(d->FindParameters, GetFindLog());
+						PostThreadEvent(d->AppHnd, M_SELECT_TAB, AppWnd::FindTab);
+					}
+					else // local find in the files:
+					{
+						if (!d->Finder)
+							d->Finder.Reset(new FindInFilesThread(d->AppHnd));
+						if (d->Finder)
 						{
-							backend->FindInFiles(d->FindParameters, GetFindLog());
-							PostThreadEvent(d->AppHnd, M_SELECT_TAB, AppWnd::FindTab);
-						}
-						else // local find in the files:
-						{
+							d->Finder->Stop();
 							d->Finder->PostEvent(FindInFilesThread::M_START_SEARCH, (LMessage::Param) new FindParams(d->FindParameters));
 						}
 					}
-				});
-			}
+				}
+			});
 			break;
 		}
 		case IDM_FIND_SYMBOL:

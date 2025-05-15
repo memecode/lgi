@@ -1017,10 +1017,14 @@ public:
 		// Use run process not to block the core work loop:
 		if (auto p = new FindInFilesProcess(results))
 		{
+			LString dir = params->Dir;
+			if (params->Type == FindParams::SearchPaths)
+				dir = RemoteRoot();
+		
 			p->args = LString::Fmt(	"grep -I -R -Hn \"%s\" %s\n",
 									params->Text.Get(),
-									params->Dir.Get());
-			return RunProcess(params->Dir, p->args, &p->io, this,
+									dir.Get());
+			return RunProcess(dir, p->args, &p->io, this,
 				[p](auto code)
 				{
 					p->OnComplete(code); // clean up the memory.
