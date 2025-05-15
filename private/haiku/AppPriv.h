@@ -263,9 +263,32 @@ public:
 					wnd->_Mouse(ms, event == Events::MouseMoved);
 				break;
 			}
-			case Events::MakeFocus:
-			case Events::KeyDown:
 			case Events::KeyUp:
+			case Events::KeyDown:
+			{
+				BMessage msg;
+				if (m->FindMessage("key", &msg) != B_OK)
+				{
+					printf("%s:%i - no key param.\n", _FL);
+					return;
+				}
+				
+				LKey k(&msg);
+
+				if (view)
+				{
+					if (auto wnd = view->GetWindow())
+						wnd->HandleViewKey(view, k);
+					else
+						view->OnKey(k);
+				}
+				else if (wnd)
+				{
+					wnd->OnKey(k);
+				}
+				break;
+			}
+			case Events::MakeFocus:
 			default:
 			{
 				printf("%s:%i - unhandled event '%s'\n", _FL, ToString((Events)event));

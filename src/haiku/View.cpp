@@ -269,42 +269,30 @@ struct LBView : public Parent
 	{
 		if (!d) return;
 
-		BMessage m(M_VIEW_EVENT);
-		m.AddInt32(LMessage::PropEvent, LAppPrivate::KeyDown);
-		m.AddString("bytes", BString(bytes, numBytes));
-		m.AddPointer(LMessage::PropView, (void*)d->View);
-		LAppPrivate::Post(&m);
-
-		/*
 		auto k = ConvertKey(bytes, numBytes);
 		k.Down(true);
 
-		auto wnd = d->View->GetWindow();
-		if (wnd)
-			wnd->HandleViewKey(d->View, k);
-		else
-			d->View->OnKey(k);
-		*/
+		BMessage m(M_VIEW_EVENT);
+		m.AddInt32(LMessage::PropEvent, LAppPrivate::KeyDown);
+		m.AddPointer(LMessage::PropView, d->View);
+		auto keyMsg = k.Archive();
+		m.AddMessage("key", &keyMsg);
+		LAppPrivate::Post(&m);
 	}
 	
 	void KeyUp(const char *bytes, int32 numBytes)
 	{
 		if (!d) return;
 
-		BMessage m(M_VIEW_EVENT);
-		m.AddInt32(LMessage::PropEvent, LAppPrivate::KeyUp);
-		m.AddString("bytes", BString(bytes, numBytes));
-		m.AddPointer(LMessage::PropView, (void*)d->View);
-		LAppPrivate::Post(&m);
-
-		/*
 		auto k = ConvertKey(bytes, numBytes);
-		auto wnd = d->View->GetWindow();
-		if (wnd)
-			wnd->HandleViewKey(d->View, k);
-		else
-			d->View->OnKey(k);
-		*/
+		k.Down(false);
+
+		BMessage m(M_VIEW_EVENT);
+		m.AddInt32(LMessage::PropEvent, LAppPrivate::KeyDown);
+		m.AddPointer(LMessage::PropView, d->View);
+		auto keyMsg = k.Archive();
+		m.AddMessage("key", &keyMsg);
+		LAppPrivate::Post(&m);
 	}
 
 	// LWindow's get their events from their LWindowPrivate
