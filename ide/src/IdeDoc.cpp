@@ -1548,12 +1548,16 @@ bool IdeDoc::OpenFile(const char *File)
 bool IdeDoc::OpenData(LString Data)
 {
 	if (!d->Edit)
+	{
+		printf("%s:%i - no edit object?\n", _FL);
 		return false;
+	}
 
 	auto Cs = d->GetSrc() ? d->GetSrc()->GetCharset() : NULL;
 	if (Cs)
 	{
 		LAssert(!"Impl me");
+		printf("%s:%i - handle the charset properly?\n", _FL);
 	}
 
 	auto ext = LGetExtension(GetFileName());
@@ -1566,6 +1570,8 @@ bool IdeDoc::OpenData(LString Data)
 		}
 
 	d->LoadBreakPoints();
+
+	printf("%s:%i - OpenData setting name..\n", _FL);
 	return d->Edit->Name(Data);
 }
 
@@ -1828,8 +1834,16 @@ void IdeDoc::Raise()
 {
 	LMdiChild::Raise();
 
+	auto log = d->App->GetBuildLog();
 	if (d->Edit)
+	{
+		log->Print("d->Edit->GetCrLf()=%i\n", d->Edit->GetCrLf());
 		d->App->DocIsCrlf(d->Edit->GetCrLf());
+	}
+	else
+	{
+		log->Print("%s:%i - no edit\n", _FL);
+	}
 }
 
 void IdeDoc::OnProjectChange()

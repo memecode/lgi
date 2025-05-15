@@ -174,14 +174,14 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		if (onShutdown)
 			return false;
 		backendCalls++;
-		printf("inc backendCalls=%i\n", backendCalls);
+		// printf("inc backendCalls=%i\n", backendCalls);
 		return true;
 	}
 	void DecCalls()
 	{
 		LAssert(backendCalls > 0);
 		backendCalls--;
-		printf("dec backendCalls=%i\n", backendCalls);
+		// printf("dec backendCalls=%i\n", backendCalls);
 		if (!backendCalls && onShutdown)
 			onShutdown();
 	}
