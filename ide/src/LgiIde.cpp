@@ -3526,8 +3526,7 @@ LMessage::Result AppWnd::OnEvent(LMessage *m)
 		}
 		case M_START_BUILD:
 		{
-			IdeProject *p = RootProject();
-			if (p)
+			if (auto p = RootProject())
 				p->Build(true, GetBuildMode());
 			else
 				printf("%s:%i - No root project.\n", _FL);
@@ -3537,19 +3536,14 @@ LMessage::Result AppWnd::OnEvent(LMessage *m)
 		{
 			UpdateState(-1, false);
 			
-			IdeProject *p = RootProject();
-			if (p)
+			if (auto p = RootProject())
 				p->StopBuild();
 			break;
 		}
 		case M_BUILD_ERR:
 		{
-			char *Msg = (char*)m->B();
-			if (Msg)
-			{
-				d->Output->Txt[AppWnd::BuildTab]->Print("Build Error: %s\n", Msg);
-				DeleteArray(Msg);
-			}
+			if (auto msg = m->AutoB<LString>())
+				d->Output->Txt[AppWnd::BuildTab]->Print("Build Error: %s\n", msg->Get());
 			break;
 		}
 		case M_APPEND_TEXT:
