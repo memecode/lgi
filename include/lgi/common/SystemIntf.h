@@ -143,7 +143,7 @@ public:
 	virtual bool Rename(LString oldPath, LString newPath, std::function<void(bool)> cb) = 0;
 
 	// Searching:
-	virtual bool SearchFileNames(const char *searchTerms, std::function<void(LArray<LString>&)> results) = 0;
+	virtual bool SearchFileNames(const char *searchTerms, LString::Array paths, std::function<void(LArray<LString>&)> results) = 0;
 
 	struct FindParams
 	{

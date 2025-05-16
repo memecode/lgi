@@ -53,19 +53,12 @@
 
 #define IsSymbolChar(c)			( IsDigit(c) || IsAlpha(c) || strchr("-_", c) )
 
-////////////////////////////////////////////////////////////////////////
-SysIncThread::SysIncThread(	AppWnd* app,
-							IdeProject* proj,
-							std::function<void(LString::Array*)> callback) :
-	LThread("SysIncThread"),
-	App(app),
-	Callback(callback)
+LString::Array CollectAllSystemIncludePaths(IdeProject* proj, SysPlatform Platform)
 {
-	auto Platform = PlatformFlagsToEnum(App->GetPlatform());
-	App->GetOptions()->GetValue(OPT_SearchSysInc, SearchSysInc);
-	if (SearchSysInc.CastInt32())
+	LString::Array Paths;
+	if (proj)
 	{
-		IdeProject* p = proj;
+		// IdeProject* p = proj;
 		while (proj && proj->GetParentProject())
 			proj = proj->GetParentProject();
 		if (proj)
@@ -92,6 +85,22 @@ SysIncThread::SysIncThread(	AppWnd* app,
 			}
 		}
 	}
+
+	return Paths;
+}
+
+////////////////////////////////////////////////////////////////////////
+SysIncThread::SysIncThread(	AppWnd* app,
+							IdeProject* proj,
+							std::function<void(LString::Array*)> callback) :
+	LThread("SysIncThread"),
+	App(app),
+	Callback(callback)
+{
+	auto Platform = PlatformFlagsToEnum(App->GetPlatform());
+	App->GetOptions()->GetValue(OPT_SearchSysInc, SearchSysInc);
+	if (SearchSysInc.CastInt32())
+		Paths = CollectAllSystemIncludePaths(proj, Platform);
 
 	Run();
 }
@@ -264,7 +273,15 @@ public:
 			if (Strlen(s) < 3)
 				return;
 
-			backend->SearchFileNames(s, [this, Hnd = AddDispatch()](auto &results)
+			LString::Array paths;
+			paths.SetFixedLength(false);
+			paths.Add(".");
+			if (SearchSysInc)
+			{
+				paths += CollectAllSystemIncludePaths(App->RootProject(), PlatformFlagsToEnum(Platforms));
+			}
+
+			backend->SearchFileNames(s, paths, [this, Hnd = AddDispatch()](auto &results)
 				{
 					// This checks if the window still exists...
 					// It may have been deleted while the search was being done.

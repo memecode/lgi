@@ -299,7 +299,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			{
 				if (Platforms && Files[Idx]->Platforms == 0)
 					Files[Idx]->Platforms = Platforms;
-				return true;
+				return;
 			}
 
 			FileSyms *f;
@@ -466,7 +466,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		{
 			if (!map.Find(p))
 			{
-				// LgiTrace("add path: %s\n", p.Get());
+				// Log("add path: %s %i\n", p.Get(), recurse);
 				out.Add(p);
 				map.Add(p, true);
 

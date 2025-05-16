@@ -815,7 +815,18 @@ public:
 			if (InputStr.Length() < 3)
 				return;
 
-			backend->SearchFileNames(InputStr, [this, hnd=Lst->AddDispatch()](auto &results)
+			LString::Array paths;
+			paths.SetFixedLength(false);
+			paths.Add(".");
+
+			LVariant s = false;
+			App->GetOptions()->GetValue(OPT_SearchSysInc, s);
+			if (s.CastInt32())
+			{
+				paths += CollectAllSystemIncludePaths(Proj, PlatformFlagsToEnum(App->GetPlatform()));
+			}
+
+			backend->SearchFileNames(InputStr, paths, [this, hnd=Lst->AddDispatch()](auto &results)
 				{
 					// This prevents the callback crashing if the list has been deleted 
 					// between the SearchFileNames and the results coming back.

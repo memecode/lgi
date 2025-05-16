@@ -960,33 +960,49 @@ public:
 		return true;
 	}
 
-	bool SearchFileNames(const char *searchTerms, std::function<void(LArray<LString>&)> results) override
+	bool SearchFileNames(const char *searchTerms, LString::Array inputPaths, std::function<void(LArray<LString>&)> callback) override
 	{
-		if (!searchTerms || !results)
+		if (!searchTerms || !callback)
 			return false;
 
 		AddWork(
 			MakeContext(_FL, searchTerms),
 			SystemIntf::TForeground,
-			[this, results, searchTerms = LString(searchTerms)]()
+			[this, inputPaths, callback, searchTerms = LString(searchTerms)]() mutable
 			{
-				auto root = RemoteRoot();
-				auto parts = searchTerms.SplitDelimit();
-				auto args = LString::Fmt("cd %s && find .", root.Get());
-				for (size_t i=0; i<parts.Length(); i++)
-					args += LString::Fmt("%s -iname \"*%s*\"", i ? " -and" : "", LGetLeaf(parts[i]));
-				args += " -and -not -path \"*/.hg/*\"";
+				LArray<LString> paths;
+				paths.SetFixedLength(false);
 
-				int32_t exitCode = 0;
-				auto result = Cmd(GetConsole(), args + "\n", &exitCode);
-				if (!exitCode)
+				for (auto path: inputPaths)
 				{
-					LArray<LString> lines = TrimContent(result).SplitDelimit("\r\n");
-					app->RunCallback( [results, lines]() mutable
-						{
-							results(lines);
-						});
+					LString absPath;
+					if (LIsRelativePath(path))
+						absPath = JoinPath(RemoteRoot(), path);
+					else
+						absPath = path;
+
+					auto parts = searchTerms.SplitDelimit();
+					auto args = LString::Fmt("cd %s && find .", absPath.Get());
+					for (size_t i=0; i<parts.Length(); i++)
+						args += LString::Fmt("%s -iname \"*%s*\"", i ? " -and" : "", LGetLeaf(parts[i]));
+					args += " -and -not -path \"*/.hg/*\"";
+
+					int32_t exitCode = 0;
+					auto result = Cmd(GetConsole(), args + "\n", &exitCode);
+					if (!exitCode)
+					{
+						auto lines = TrimContent(result).SplitDelimit("\r\n");
+						
+						// Turn the results back into absolute paths...
+						for (auto ln: lines)
+							paths.Add(JoinPath(absPath, ln));
+					}
 				}
+
+				app->RunCallback( [callback, paths]() mutable
+					{
+						callback(paths);
+					});
 			} );
 
 		return true;
@@ -1326,7 +1342,7 @@ public:
 		return true;
 	}
 
-	bool SearchFileNames(const char *searchTerms, std::function<void(LArray<LString>&)> results) override
+	bool SearchFileNames(const char *searchTerms, LString::Array paths, std::function<void(LArray<LString>&)> results) override
 	{
 		// This could probably be threaded....
 		auto parts = LString(searchTerms).SplitDelimit();
@@ -2084,7 +2100,7 @@ public:
 		return false;
 	}
 
-	bool SearchFileNames(const char *searchTerms, std::function<void(LArray<LString>&)> results) override
+	bool SearchFileNames(const char *searchTerms, LString::Array paths, std::function<void(LArray<LString>&)> results) override
 	{
 		if (!searchTerms || !results)
 			return false;
