@@ -383,12 +383,9 @@ LMessage::Result SshConnection::OnEvent(LMessage *Msg)
 	{
 		case M_DETECT_VCS:
 		{
-			LAutoPtr<LString> p;
-			if (!ReceiveA(p, Msg))
-			{
-				LAssert(!"Incorrect param.");
+			auto p = Msg->AutoA<LString>();
+			if (!p)
 				break;
-			}
 
 			LAutoPtr<SshParams> r(new SshParams(this));
 

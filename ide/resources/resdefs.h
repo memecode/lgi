@@ -181,3 +181,4 @@
 #define IDC_TEXT								596
 #define ID_REFRESH_SYM_CACHE					597
 #define ID_REFRESH								598
+#define ID_REPARSE_SYMS							599

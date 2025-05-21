@@ -19,7 +19,7 @@
 
 #define DEBUG_FIND_SYMBOL		0
 #define DEBUG_NO_THREAD			1
-// #define DEBUG_FILE				"View.h"
+#define DEBUG_FILE				"os/interface/View.h"
 #define KNOWN_EXT				"c,cpp,cxx,h,hpp,hxx,py,js"
 #define INDEX_EXT				"idx"
 
@@ -337,7 +337,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		if (backend)
 		{
 			auto cacheFile = CachePath(Path);
-			if (!cacheDirty && LFileExists(cacheFile))
+			if (!Debug && !cacheDirty && LFileExists(cacheFile))
 			{
 				// Load from the cache...
 				f->Serialize(cacheFile, false);
@@ -398,11 +398,6 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			LgiTrace("%s:%i - About to parse '%s'.\n", _FL, f->Path.Get());
 		#endif
 		
-		if (f->Path.Find("can_have_error.cpp") > 0)
-		{
-			int asd=0;
-		}
-
 		LAutoWString w(Utf8ToWide(data));
 		LError err;
 		if (f->Parse(w, err, Debug))

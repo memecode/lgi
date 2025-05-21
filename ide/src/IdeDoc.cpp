@@ -1847,14 +1847,9 @@ void IdeDoc::Raise()
 
 	auto log = d->App->GetBuildLog();
 	if (d->Edit)
-	{
-		log->Print("d->Edit->GetCrLf()=%i\n", d->Edit->GetCrLf());
 		d->App->DocIsCrlf(d->Edit->GetCrLf());
-	}
 	else
-	{
 		log->Print("%s:%i - no edit\n", _FL);
-	}
 }
 
 void IdeDoc::OnProjectChange()

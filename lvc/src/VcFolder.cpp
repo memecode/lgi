@@ -2178,6 +2178,7 @@ bool VcFolder::ParseWorking(int Result, LString s, ParseParams *Params)
 		}
 	}
 	
+	d->Log->Print("FilterCurrentFiles: %s\n", __FUNCTION__);
 	FilterCurrentFiles();
 	d->Files->ResizeColumnsToContent();
 
@@ -2535,7 +2536,10 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 		}
 	}
 
-	FilterCurrentFiles();
+	// I don't feel this is necessary? There is no change to sort order,
+	// visibility or anything, just displaying the diff?
+	// d->Log->Print("FilterCurrentFiles: %s\n", __FUNCTION__);
+	// FilterCurrentFiles();
 	return true;
 }
 
@@ -2544,6 +2548,7 @@ bool VcFolder::ParseFiles(int Result, LString s, ParseParams *Params)
 	d->ClearFiles();
 	ParseDiffs(s, Params->Str, false);
 	IsFilesCmd = false;
+	d->Log->Print("FilterCurrentFiles: %s\n", __FUNCTION__);
 	FilterCurrentFiles();
 
 	return false;
@@ -3299,6 +3304,7 @@ void VcFolder::ListCommit(VcCommit *c)
 						d->Files->Insert(f);
 					}
 				}
+				d->Log->Print("FilterCurrentFiles: %s\n", __FUNCTION__);
 				FilterCurrentFiles();
 				break;
 			}
@@ -3581,6 +3587,7 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 	if (LTreeItem::Select())
 	{
 		d->Files->Insert(Ins);
+		d->Log->Print("FilterCurrentFiles: %s\n", __FUNCTION__);
 		FilterCurrentFiles();
 	}
 	else
