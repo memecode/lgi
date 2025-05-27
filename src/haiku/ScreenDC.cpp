@@ -24,6 +24,7 @@ public:
 	int x = 0, y = 0, Bits = 32;
 	bool Own = false;
 	LColour Col;
+	LRect Update;
 	LRect Client;
 	int Rop = GDC_SET;
 	NativeInt Alpha = -1;
@@ -59,10 +60,24 @@ LScreenDC::LScreenDC(LView *view, void *param)
 
 	d->Bits = GdcD->GetBits();
 
-	if (d->v)
-		d->Client = ((LRect)d->v->Frame()).ZeroTranslate();
-	else
+	if (!d->v)
+	{
 		LgiTrace("%s:%i - LScreenDC::LScreenDC - No view?\n", _FL);
+		LAssert(0);
+		return;
+	}
+	
+	d->Client = ((LRect)d->v->Frame()).ZeroTranslate();
+
+	if (auto update = (BRect*)param)
+		d->Update = *update;
+	else
+		d->Update = d->Client;
+		
+	LRect clip = d->Client;
+	printf("	LScreenDC init clip=%s\n", clip.GetStr());
+	clip.Intersection(&d->Update);
+	d->v->ClipToRect(clip);
 }
 
 LScreenDC::~LScreenDC()

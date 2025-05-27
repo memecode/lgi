@@ -133,6 +133,7 @@ enum LgiMessages
 			M_VIEW_EVENT,
 			M_MOUSE_MSG,
 			M_KEY_MSG,
+			M_SET_ROOT_VIEW,
 		#endif
 	
 	#elif defined(MAC)

@@ -131,6 +131,12 @@ public:
 			return;
 		}
 		
+		if (view && LView::RecentlyDeleted(view))
+		{
+			printf("%s:%i - view is recently deleted.\n", _FL);
+			return;
+		}
+		
 		int32_t event = -1;
 		if (m->FindInt32(LMessage::PropEvent, &event) != B_OK)
 		{
@@ -221,13 +227,17 @@ public:
 			}
 			case Events::Draw:
 			{
+				BRect updateRect;
+				m->FindRect("update", &updateRect);
+				
 				LPoint off(0, 0);
+				printf("	ReceiveDraw %s %p,%p\n", LRect(updateRect).GetStr(), view, wnd);
 				if (view)
 				{
 					LLocker lck(view->Handle(), _FL);
 					if (lck.Lock())
 					{
-						LScreenDC dc(view);
+						LScreenDC dc(view, &updateRect);
 						view->_Paint(&dc, &off, NULL);
 					}
 				}
@@ -236,7 +246,7 @@ public:
 					LLocker lck(wnd->WindowHandle(), _FL);
 					if (lck.Lock())
 					{
-						LScreenDC dc(wnd);
+						LScreenDC dc(wnd, &updateRect);
 						wnd->_Paint(&dc, &off, NULL);
 					}
 				}

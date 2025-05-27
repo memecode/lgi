@@ -23,7 +23,7 @@
 	#define WAIT_LOG(...)
 #endif
 
-#define DEBUG_WINDOW			0
+#define DEBUG_WINDOW			1
 #if DEBUG_WINDOW
 #define LOG(...)				printf(__VA_ARGS__)
 #else
@@ -272,6 +272,10 @@ LWindow::LWindow() :
 	_Default = 0;
 	_Window = this;
 	ClearFlag(WndFlags, GWF_VISIBLE);
+	
+	BMessage msg(M_SET_ROOT_VIEW);
+	msg.AddPointer("window", this);
+	Handle()->MessageReceived(&msg);
 }
 
 LWindow::~LWindow()

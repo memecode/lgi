@@ -117,6 +117,7 @@ template<typename Parent = BView>
 struct LBView : public Parent
 {
 	LViewPrivate *d = NULL;
+	LWindow *wnd = nullptr;
 	static uint32 MouseButtons;
 
 	LBView(LViewPrivate *priv) :
@@ -127,10 +128,12 @@ struct LBView : public Parent
 			B_FULL_UPDATE_ON_RESIZE | 
 			B_WILL_DRAW |
 			B_NAVIGABLE |
-			B_FRAME_EVENTS
+			B_FRAME_EVENTS |
+			B_TRANSPARENT_BACKGROUND
 		)
 	{
 		Parent::SetName(d->View->GetClass());
+		Parent::SetViewColor(B_TRANSPARENT_COLOR);
 	}
 	
 	~LBView()
@@ -328,6 +331,13 @@ struct LBView : public Parent
 		if (!d)
 			return;
 
+		if (message->what == M_SET_ROOT_VIEW)
+		{
+			if (B_OK != message->FindPointer("window", (void**)&wnd) ||!wnd)
+				printf("%s:%i - no window in M_SET_ROOT_VIEW\n", _FL);
+			return;
+		}
+
 		// Redirect the message to the app loop:
 		BMessage m(M_WND_EVENT);
 		m.AddInt32(LMessage::PropEvent, LAppPrivate::General);
@@ -368,9 +378,13 @@ struct LBView : public Parent
 			
 		BMessage m(M_WND_EVENT);
 		m.AddInt32(LMessage::PropEvent, LAppPrivate::Draw);
-		m.AddRect("update", updateRect);
-		m.AddPointer(LMessage::PropView, (void*)d->View);
-		LAppPrivate::Post(&m);		
+		m.AddRect("update", updateRect);		
+		if (wnd) // it's the root view of a LWindow
+			m.AddPointer(LMessage::PropWindow, (void*)wnd);
+		else // it's a regular LView
+			m.AddPointer(LMessage::PropView, (void*)d->View);
+		printf("SendingDraw %s\n", LRect(updateRect).GetStr());
+		LAppPrivate::Post(&m);
 	}
 
 	LMouse ConvertMouse(BPoint where, bool down = false)
