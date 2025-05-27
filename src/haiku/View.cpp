@@ -142,6 +142,14 @@ struct LBView : public Parent
 			d->Hnd = NULL;
 	}		
 
+	BMessage MakeMessage(LAppPrivate::Event e)
+	{
+		BMessage m(M_HAIKU_VIEW_EVENT);
+		m.AddPointer(LMessage::PropView, (void*)d->View);
+		m.AddInt32(LMessage::PropEvent, e);
+		return m;
+	}
+
 	void AttachedToWindow()
 	{
 		LOG("%s:%i %s d=%p\n", _FL, __FUNCTION__, d);
@@ -165,9 +173,7 @@ struct LBView : public Parent
 			Parent::MoveTo(Pos.x1, Pos.y1);
 		}
 
-		BMessage m(M_VIEW_EVENT);
-		m.AddInt32(LMessage::PropEvent, LAppPrivate::AttachedToWindow);
-		m.AddPointer(LMessage::PropView, (void*)d->View);
+		auto m = MakeMessage(LAppPrivate::AttachedToWindow);
 		LAppPrivate::Post(&m);
 	}
 	
@@ -275,9 +281,7 @@ struct LBView : public Parent
 		auto k = ConvertKey(bytes, numBytes);
 		k.Down(true);
 
-		BMessage m(M_VIEW_EVENT);
-		m.AddInt32(LMessage::PropEvent, LAppPrivate::KeyDown);
-		m.AddPointer(LMessage::PropView, d->View);
+		auto m = MakeMessage(LAppPrivate::KeyDown);
 		auto keyMsg = k.Archive();
 		m.AddMessage("key", &keyMsg);
 		LAppPrivate::Post(&m);
@@ -290,9 +294,7 @@ struct LBView : public Parent
 		auto k = ConvertKey(bytes, numBytes);
 		k.Down(false);
 
-		BMessage m(M_VIEW_EVENT);
-		m.AddInt32(LMessage::PropEvent, LAppPrivate::KeyDown);
-		m.AddPointer(LMessage::PropView, d->View);
+		auto m = MakeMessage(LAppPrivate::KeyUp);
 		auto keyMsg = k.Archive();
 		m.AddMessage("key", &keyMsg);
 		LAppPrivate::Post(&m);
@@ -306,10 +308,8 @@ struct LBView : public Parent
 		if (!d || IsLWindow)
 			return;
 		
-		BMessage m(M_WND_EVENT);
-		m.AddInt32(LMessage::PropEvent, LAppPrivate::FrameMoved);
+		auto m = MakeMessage(LAppPrivate::FrameMoved);
 		m.AddPoint("pos", p);
-		m.AddPointer(LMessage::PropView, (void*)d->View);
 		LAppPrivate::Post(&m);		
 	}
 
@@ -318,11 +318,9 @@ struct LBView : public Parent
 		if (!d || IsLWindow)
 			return;
 			
-		BMessage m(M_WND_EVENT);
-		m.AddInt32(LMessage::PropEvent, LAppPrivate::FrameResized);
+		auto m = MakeMessage(LAppPrivate::FrameResized);
 		m.AddFloat("width", width);
 		m.AddFloat("height", height);
-		m.AddPointer(LMessage::PropView, (void*)d->View);
 		LAppPrivate::Post(&m);		
 	}
 
@@ -339,9 +337,7 @@ struct LBView : public Parent
 		}
 
 		// Redirect the message to the app loop:
-		BMessage m(M_WND_EVENT);
-		m.AddInt32(LMessage::PropEvent, LAppPrivate::General);
-		m.AddPointer(LMessage::PropView, (void*)d->View);
+		auto m = MakeMessage(LAppPrivate::General);
 		m.AddMessage("message", message);
 		LAppPrivate::Post(&m);
 		
@@ -376,15 +372,23 @@ struct LBView : public Parent
 		if (!d)
 			return;
 			
-		BMessage m(M_WND_EVENT);
-		m.AddInt32(LMessage::PropEvent, LAppPrivate::Draw);
-		m.AddRect("update", updateRect);		
-		if (wnd) // it's the root view of a LWindow
-			m.AddPointer(LMessage::PropWindow, (void*)wnd);
-		else // it's a regular LView
-			m.AddPointer(LMessage::PropView, (void*)d->View);
-		printf("SendingDraw %s\n", LRect(updateRect).GetStr());
-		LAppPrivate::Post(&m);
+		if (wnd)
+		{
+			// it's the root view of a LWindow
+			BMessage m(M_HAIKU_WND_EVENT);
+			m.AddPointer(LMessage::PropWindow, wnd);
+			m.AddInt32(LMessage::PropEvent, LAppPrivate::Draw);
+			m.AddRect("update", updateRect);
+			LAppPrivate::Post(&m);
+		}
+		else
+		{
+			// it's a regular LView
+			auto m = MakeMessage(LAppPrivate::Draw);
+			m.AddRect("update", updateRect);
+			printf("SendingDraw %s\n", LRect(updateRect).GetStr());
+			LAppPrivate::Post(&m);
+		}
 	}
 
 	LMouse ConvertMouse(BPoint where, bool down = false)
@@ -438,9 +442,7 @@ struct LBView : public Parent
 		ms.Double(doubleClick);
 		auto msg = ms.Archive();
 
-		BMessage m(M_WND_EVENT);
-		m.AddInt32(LMessage::PropEvent, LAppPrivate::MouseDown);
-		m.AddPointer(LMessage::PropView, d->View);
+		auto m = MakeMessage(LAppPrivate::MouseDown);
 		m.AddMessage("mouse", &msg);
 		LAppPrivate::Post(&m);
 	}
@@ -454,9 +456,7 @@ struct LBView : public Parent
 		ms.Down(false);
 		auto msg = ms.Archive();
 
-		BMessage m(M_WND_EVENT);
-		m.AddInt32(LMessage::PropEvent, LAppPrivate::MouseUp);
-		m.AddPointer(LMessage::PropView, d->View);
+		auto m = MakeMessage(LAppPrivate::MouseUp);
 		m.AddMessage("mouse", &msg);
 		LAppPrivate::Post(&m);
 	}
@@ -473,9 +473,7 @@ struct LBView : public Parent
 		ms.IsMove(true);
 		auto msg = ms.Archive();
 
-		BMessage m(M_WND_EVENT);
-		m.AddInt32(LMessage::PropEvent, LAppPrivate::MouseMoved);
-		m.AddPointer(LMessage::PropView, d->View);
+		auto m = MakeMessage(LAppPrivate::MouseMoved);
 		m.AddMessage("mouse", &msg);
 		LAppPrivate::Post(&m);
 	}
@@ -489,9 +487,7 @@ struct LBView : public Parent
 		{
 			Parent::MakeFocus(focus);
 
-			BMessage m(M_WND_EVENT);
-			m.AddInt32(LMessage::PropEvent, LAppPrivate::MakeFocus);
-			m.AddPointer(LMessage::PropView, (void*)d->View);
+			auto m = MakeMessage(LAppPrivate::MakeFocus);
 			m.AddBool("focus", focus);
 			LAppPrivate::Post(&m);
 		}

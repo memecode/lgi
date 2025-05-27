@@ -124,16 +124,16 @@ enum LgiMessages
 		M_CLOSE,
 
 		#if defined(HAIKU)
-			M_HANDLE_IN_THREAD, // A = (LMessage::InThreadCb*)Cb;
+			M_HANDLE_IN_THREAD,		// A = (LMessage::InThreadCb*)Cb;
 			M_LWINDOW_DELETE,
 			M_LMENUITEM_ENABLE,
 			M_LSUBMENU_APPENDITEM,
-			M_ON_CREATE,
-			M_WND_EVENT,
-			M_VIEW_EVENT,
-			M_MOUSE_MSG,
-			M_KEY_MSG,
-			M_SET_ROOT_VIEW,
+			M_HAIKU_WND_EVENT,		// PropWindow=LWindow*, PropEvent=LAppPriv::Event
+			M_HAIKU_VIEW_EVENT,		// PropView=LView*, PropEvent=LAppPriv::Event
+			M_MOUSE_MSG,			// Archived LMouse object
+			M_KEY_MSG,				// Archived LKey object
+			M_SET_ROOT_VIEW,		// Sent from a LWindow to it's root LView to redirect
+									// paint calls to LWindow::OnPaint
 		#endif
 	
 	#elif defined(MAC)

@@ -322,10 +322,54 @@ public:
 	{
 		switch (message->what)
 		{
-			case M_WND_EVENT:
-			case M_VIEW_EVENT:
-				OnMessage(message);
+			case M_HAIKU_WND_EVENT:
+			{
+				LWindow *wnd = nullptr;
+				if (B_OK != m->FindPointer(LMessage::PropWindow, (void**)&wnd) ||
+					!wnd)
+				{
+					LAssert(0);
+					printf("%s:%i - no view/wnd in msg.\n", _FL);
+					break;
+				}
+				
+				int32_t event = -1;
+				if (m->FindInt32(LMessage::PropEvent, &event) != B_OK)
+				{
+					printf("%s:%i - no event in msg.\n", _FL);
+					return;
+				}
+				
+				wnd->HaikuEvent((Event)event, message);
 				break;
+			}
+			case M_HAIKU_VIEW_EVENT:
+			{
+				LView *view = nullptr;
+				if (B_OK != m->FindPointer(LMessage::PropView, (void**)&view) ||
+					!view)
+				{
+					LAssert(0);
+					printf("%s:%i - no view/wnd in msg.\n", _FL);
+					break;
+				}
+				
+				if (LView::RecentlyDeleted(view))
+				{
+					printf("%s:%i - view is recently deleted.\n", _FL);
+					break;
+				}
+				
+				int32_t event = -1;
+				if (m->FindInt32(LMessage::PropEvent, &event) != B_OK)
+				{
+					printf("%s:%i - no event in msg.\n", _FL);
+					return;
+				}
+				
+				vuew->HaikuEvent((Event)event, message);
+				break;
+			}
 			case M_HANDLE_IN_THREAD:
 				LView::HandleInThreadMessage(message);
 				break;

@@ -137,13 +137,19 @@ public:
 		
 		return -1;
 	}
+	
+	BMessage MakeMessage(LAppPrivate::Event e)
+	{
+		BMessage m(M_HAIKU_WND_EVENT);
+		m.AddPointer(LMessage::PropWindow, (void*)Wnd);
+		m.AddInt32(LMessage::PropEvent, e);
+		return m;
+	}
 
 	void FrameMoved(BPoint newPosition)
 	{
-		BMessage m(M_WND_EVENT);
-		m.AddInt32(LMessage::PropEvent, LAppPrivate::FrameMoved);
+		auto m = MakeMessage(LAppPrivate::FrameMoved);
 		m.AddPoint("pos", newPosition);
-		m.AddPointer(LMessage::PropWindow, (void*)Wnd);
 		LAppPrivate::Post(&m);		
 		
 		BWindow::FrameMoved(newPosition);
@@ -151,11 +157,9 @@ public:
 
 	void FrameResized(float width, float height)
 	{
-		BMessage m(M_WND_EVENT);
-		m.AddInt32(LMessage::PropEvent, LAppPrivate::FrameResized);
+		auto m = MakeMessage(LAppPrivate::FrameResized);
 		m.AddFloat("width", width);
 		m.AddFloat("height", height);
-		m.AddPointer(LMessage::PropWindow, (void*)Wnd);
 		LAppPrivate::Post(&m);		
 
 		BWindow::FrameResized(width, height);
@@ -165,10 +169,8 @@ public:
 	{
 		int result = -1;
 		
-		BMessage m(M_WND_EVENT);
-		m.AddInt32(LMessage::PropEvent, LAppPrivate::QuitRequested);
+		auto m = MakeMessage(LAppPrivate::QuitRequested);
 		m.AddPointer("result", (void*)&result);
-		m.AddPointer(LMessage::PropWindow, (void*)Wnd);
 		LAppPrivate::Post(&m);
 		
 		// Wait for the GUI thread to respond:
@@ -185,41 +187,17 @@ public:
 
 		if (message->what == M_LWINDOW_DELETE)
 		{
-			// printf("Processing M_LWINDOW_DELETE th=%u\n", LCurrentThreadId());
 			Wnd->Handle()->RemoveSelf();			
 			Quit();
-			// printf("Processed M_LWINDOW_DELETE\n");
 		}
 		else
 		{
 			BWindow::MessageReceived(message);
 
 			// Redirect the message to the app loop:
-			BMessage m(M_WND_EVENT);
-			m.AddInt32(LMessage::PropEvent, LAppPrivate::General);
-			m.AddPointer(LMessage::PropWindow, (void*)Wnd);
+			auto m = MakeMessage(LAppPrivate::General);
 			m.AddMessage("message", message);
 			LAppPrivate::Post(&m);
-
-			/*
-			LViewI *view = NULL;
-			auto r = message->FindPointer(LMessage::PropView, (void**)&view);
-			if (r == B_OK)
-			{
-				if (LView::RecentlyDeleted(view))
-					LOG("%s:%i %s view is RecentlyDeleted\n", _FL, __FUNCTION__, r);
-				else
-				{
-					if (message->what == M_ON_CREATE)
-						LOG("%s:%i %s passing msg to view: %s\n", _FL, __FUNCTION__, r, view->GetClass());
-					view->OnEvent((LMessage*)message);
-				}
-			}
-			else
-			{
-				Wnd->OnEvent((LMessage*)message);
-			}
-			*/
 		}
 	}
 	
