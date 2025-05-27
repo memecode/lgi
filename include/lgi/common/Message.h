@@ -3,7 +3,26 @@
 #define _GMESSAGE_H_
 
 #ifdef HAIKU
+
 #include <functional>
+
+// This list of events are send from the BWindow threads over
+// to the application thread for processing.
+#define L_APP_PRIV_EVENTS() \
+	_(None) \
+	_(QuitRequested) \
+	_(General) \
+	_(FrameMoved) \
+	_(FrameResized) \
+	_(AttachedToWindow) \
+	_(KeyDown) \
+	_(KeyUp) \
+	_(Draw) \
+	_(MouseDown) \
+	_(MouseUp) \
+	_(MouseMoved) \
+	_(MakeFocus)
+
 #endif
 
 enum LgiMessages
@@ -243,7 +262,28 @@ public:
 		HWND hWnd;
 		WPARAM a;
 		LPARAM b;
-	#elif !defined(HAIKU)
+	#elif defined(HAIKU)
+		// Event processing
+		enum Events
+		{
+			#define _(name) name,
+			L_APP_PRIV_EVENTS()
+			#undef _
+		};
+		static const char *ToString(Events e)
+		{
+			switch (e)
+			{
+				#define _(name) case name: return #name;
+				L_APP_PRIV_EVENTS()
+				#undef _
+			}
+			return NULL;
+		}
+
+		Param a;
+		Param b;
+	#else	
 		Param a;
 		Param b;
 	#endif

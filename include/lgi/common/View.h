@@ -5,7 +5,7 @@ LgiFunc void DumpHnd(HIViewRef v, int depth = 0);
 #elif LGI_COCOA && defined(__OBJC__)
 #include "LCocoaView.h"
 #endif
-
+#include "lgi/common/Message.h"
 
 /// \brief The base class for all windows in the GUI.
 ///
@@ -60,6 +60,9 @@ private:
 	#elif defined HAIKU
 
 		friend class LAppPrivate;
+		
+		// This is called in the app thread.. lock the view before using
+		virtual void HaikuEvent(LMessage::Events event, BMessage *m);
 
 	#endif
 	

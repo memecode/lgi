@@ -142,7 +142,7 @@ struct LBView : public Parent
 			d->Hnd = NULL;
 	}		
 
-	BMessage MakeMessage(LAppPrivate::Event e)
+	BMessage MakeMessage(LMessage::Events e)
 	{
 		BMessage m(M_HAIKU_VIEW_EVENT);
 		m.AddPointer(LMessage::PropView, (void*)d->View);
@@ -173,7 +173,7 @@ struct LBView : public Parent
 			Parent::MoveTo(Pos.x1, Pos.y1);
 		}
 
-		auto m = MakeMessage(LAppPrivate::AttachedToWindow);
+		auto m = MakeMessage(LMessage::AttachedToWindow);
 		LAppPrivate::Post(&m);
 	}
 	
@@ -281,7 +281,7 @@ struct LBView : public Parent
 		auto k = ConvertKey(bytes, numBytes);
 		k.Down(true);
 
-		auto m = MakeMessage(LAppPrivate::KeyDown);
+		auto m = MakeMessage(LMessage::KeyDown);
 		auto keyMsg = k.Archive();
 		m.AddMessage("key", &keyMsg);
 		LAppPrivate::Post(&m);
@@ -294,7 +294,7 @@ struct LBView : public Parent
 		auto k = ConvertKey(bytes, numBytes);
 		k.Down(false);
 
-		auto m = MakeMessage(LAppPrivate::KeyUp);
+		auto m = MakeMessage(LMessage::KeyUp);
 		auto keyMsg = k.Archive();
 		m.AddMessage("key", &keyMsg);
 		LAppPrivate::Post(&m);
@@ -308,7 +308,7 @@ struct LBView : public Parent
 		if (!d || IsLWindow)
 			return;
 		
-		auto m = MakeMessage(LAppPrivate::FrameMoved);
+		auto m = MakeMessage(LMessage::FrameMoved);
 		m.AddPoint("pos", p);
 		LAppPrivate::Post(&m);		
 	}
@@ -318,7 +318,7 @@ struct LBView : public Parent
 		if (!d || IsLWindow)
 			return;
 			
-		auto m = MakeMessage(LAppPrivate::FrameResized);
+		auto m = MakeMessage(LMessage::FrameResized);
 		m.AddFloat("width", width);
 		m.AddFloat("height", height);
 		LAppPrivate::Post(&m);		
@@ -337,7 +337,7 @@ struct LBView : public Parent
 		}
 
 		// Redirect the message to the app loop:
-		auto m = MakeMessage(LAppPrivate::General);
+		auto m = MakeMessage(LMessage::General);
 		m.AddMessage("message", message);
 		LAppPrivate::Post(&m);
 		
@@ -377,14 +377,14 @@ struct LBView : public Parent
 			// it's the root view of a LWindow
 			BMessage m(M_HAIKU_WND_EVENT);
 			m.AddPointer(LMessage::PropWindow, wnd);
-			m.AddInt32(LMessage::PropEvent, LAppPrivate::Draw);
+			m.AddInt32(LMessage::PropEvent, LMessage::Draw);
 			m.AddRect("update", updateRect);
 			LAppPrivate::Post(&m);
 		}
 		else
 		{
 			// it's a regular LView
-			auto m = MakeMessage(LAppPrivate::Draw);
+			auto m = MakeMessage(LMessage::Draw);
 			m.AddRect("update", updateRect);
 			printf("SendingDraw %s\n", LRect(updateRect).GetStr());
 			LAppPrivate::Post(&m);
@@ -442,7 +442,7 @@ struct LBView : public Parent
 		ms.Double(doubleClick);
 		auto msg = ms.Archive();
 
-		auto m = MakeMessage(LAppPrivate::MouseDown);
+		auto m = MakeMessage(LMessage::MouseDown);
 		m.AddMessage("mouse", &msg);
 		LAppPrivate::Post(&m);
 	}
@@ -456,7 +456,7 @@ struct LBView : public Parent
 		ms.Down(false);
 		auto msg = ms.Archive();
 
-		auto m = MakeMessage(LAppPrivate::MouseUp);
+		auto m = MakeMessage(LMessage::MouseUp);
 		m.AddMessage("mouse", &msg);
 		LAppPrivate::Post(&m);
 	}
@@ -473,7 +473,7 @@ struct LBView : public Parent
 		ms.IsMove(true);
 		auto msg = ms.Archive();
 
-		auto m = MakeMessage(LAppPrivate::MouseMoved);
+		auto m = MakeMessage(LMessage::MouseMoved);
 		m.AddMessage("mouse", &msg);
 		LAppPrivate::Post(&m);
 	}
@@ -487,7 +487,7 @@ struct LBView : public Parent
 		{
 			Parent::MakeFocus(focus);
 
-			auto m = MakeMessage(LAppPrivate::MakeFocus);
+			auto m = MakeMessage(LMessage::MakeFocus);
 			m.AddBool("focus", focus);
 			LAppPrivate::Post(&m);
 		}
@@ -549,6 +549,132 @@ LViewPrivate::~LViewPrivate()
 
 		if (Wnd && locked)
 			Wnd->UnlockLooper();
+	}
+}
+
+// This is called in the app thread.. lock the view before using
+void LView::HaikuEvent(LMessage::Events event, BMessage *m)
+{
+	if (!m)
+		return;
+		
+	switch (event)
+	{
+		case LMessage::QuitRequested:
+		{
+			int *result = nullptr;
+			if (m->FindPointer("result", (void**)&result) != B_OK)
+			{
+				printf("%s:%i - error: no result ptr.\n", _FL);
+				return;
+			}
+			*result = OnRequestClose(false);
+			break;
+		}
+		case LMessage::General:
+		{
+			BMessage msg;
+			if (m->FindMessage("message", &msg) != B_OK)
+			{
+				printf("%s:%i - no message.\n", _FL);
+				return;
+			}
+			
+			OnEvent((LMessage*) &msg);
+			break;
+		}
+		case LMessage::FrameMoved:
+		{
+			BPoint pos;
+			if (m->FindPoint("pos", &pos) != B_OK)
+			{
+				printf("%s:%i - no pos.\n", _FL);
+				return;
+			}
+			
+			Pos.Offset(pos.x - Pos.x1, pos.y - Pos.y1);
+			OnPosChange();
+			break;
+		}
+		case LMessage::FrameResized:
+		{
+			float width = 0.0f, height = 0.0f;
+			if (m->FindFloat("width", &width) != B_OK ||
+				m->FindFloat("height", &height) != B_OK)
+			{
+				printf("%s:%i - missing width/height param.\n", _FL);
+				return;
+			}
+
+			Pos.SetSize(width, height);
+			OnPosChange();
+			break;
+		}
+		case LMessage::AttachedToWindow:
+		{
+			OnCreate();
+			break;
+		}
+		case LMessage::Draw:
+		{
+			BRect updateRect;
+			m->FindRect("update", &updateRect);
+			
+			LPoint off(0, 0);
+			printf("	View.ReceiveDraw %s\n", LRect(updateRect).GetStr());
+
+			LLocker lck(Handle(), _FL);
+			if (lck.Lock())
+			{
+				LScreenDC dc(this, &updateRect);
+				_Paint(&dc, &off, NULL);
+			}
+			break;
+		}
+		case LMessage::MouseMoved:
+		case LMessage::MouseDown:
+		case LMessage::MouseUp:
+		{
+			LMessage msg;
+			if (m->FindMessage("mouse", &msg) != B_OK)
+			{
+				printf("%s:%i - no mouse message.\n", _FL);
+				return;
+			}
+			
+			LMouse ms(&msg);
+			_Mouse(ms, event == LMessage::MouseMoved);
+			break;
+		}
+		case LMessage::KeyUp:
+		case LMessage::KeyDown:
+		{
+			BMessage msg;
+			if (m->FindMessage("key", &msg) != B_OK)
+			{
+				printf("%s:%i - no key param.\n", _FL);
+				return;
+			}
+			
+			LKey k(&msg);
+			if (auto wnd = GetWindow())
+				wnd->HandleViewKey(this, k);
+			else
+				OnKey(k);
+			break;
+		}
+		case LMessage::MakeFocus:
+		{
+			bool focus = true;
+			if (m->FindBool("focus", &focus) != B_OK)
+			{
+				printf("%s:%i - no focus param.\n", _FL);
+				return;
+			}
+			
+			OnFocus(focus);
+			break;
+		}
 	}
 }
 
@@ -915,12 +1041,6 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 		case M_HANDLE_IN_THREAD:
 		{
 			HandleInThreadMessage(Msg);
-			break;
-		}
-		case M_ON_CREATE:
-		{
-			LOG("%s:%i %s got M_ON_CREATE.\n", _FL, __FUNCTION__);
-			OnCreate();
 			break;
 		}
 		case M_INVALIDATE:

@@ -53,6 +53,9 @@ protected:
 
 	#elif defined(HAIKU)
 		
+		friend class LAppPrivate;
+		// This is called in the app thread.. lock the window before using
+		void HaikuEvent(LMessage::Events event, BMessage *m) override;
 		LWindowZoom _PrevZoom = LZoomNormal;
 	
 	#else

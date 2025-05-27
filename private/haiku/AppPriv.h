@@ -12,45 +12,11 @@
 
 typedef LArray<LAppInfo> AppArray;
 
-// This list of events are send from the BWindow threads over
-// to the application thread for processing.
-#define APP_PRIV_EVENTS() \
-	_(None) \
-	_(QuitRequested) \
-	_(General) \
-	_(FrameMoved) \
-	_(FrameResized) \
-	_(AttachedToWindow) \
-	_(KeyDown) \
-	_(KeyUp) \
-	_(Draw) \
-	_(MouseDown) \
-	_(MouseUp) \
-	_(MouseMoved) \
-	_(MakeFocus)
-
 class LAppPrivate : public BApplication
 {
 	static LAppPrivate *Inst;
 
 public:
-	// Event processing
-	enum Events
-	{
-		#define _(name) name,
-		APP_PRIV_EVENTS()
-		#undef _
-	};
-	const char *ToString(Events e)
-	{
-		switch (e)
-		{
-			#define _(name) case name: return #name;
-			APP_PRIV_EVENTS()
-			#undef _
-		}
-		return NULL;
-	}
 	static bool Post(BMessage *msg)
 	{
 		if (!Inst)
@@ -144,175 +110,12 @@ public:
 			return;
 		}
 		
+		using Events = LMessage::Events;
 		switch (event)
 		{
-			case Events::QuitRequested:
-			{
-				int *result = nullptr;
-				if (m->FindPointer("result", (void**)&result) != B_OK)
-				{
-					printf("%s:%i - error: no result ptr.\n", _FL);
-					return;
-				}
-				if (wnd)
-					*result = wnd->OnRequestClose(false);
-				else if (view)
-					*result = view->OnRequestClose(false);
-				else
-					*result = true;					
-				break;
-			}
-			case Events::General:
-			{
-				BMessage msg;
-				if (m->FindMessage("message", &msg) != B_OK)
-				{
-					printf("%s:%i - no message.\n", _FL);
-					return;
-				}
-				
-				if (view)
-					view->OnEvent((LMessage*) &msg);
-				else if (wnd)
-					wnd->OnEvent((LMessage*) &msg);
-				break;
-			}
-			case Events::FrameMoved:
-			{
-				BPoint pos;
-				if (m->FindPoint("pos", &pos) != B_OK)
-				{
-					printf("%s:%i - no pos.\n", _FL);
-					return;
-				}
-				
-				if (view)
-				{
-					view->Pos.Offset(pos.x - view->Pos.x1, pos.y - view->Pos.y1);
-					view->OnPosChange();
-				}
-				else if (wnd)
-				{
-					wnd->Pos.Offset(pos.x - wnd->Pos.x1, pos.y - wnd->Pos.y1);
-					wnd->OnPosChange();
-				}
-				break;
-			}
-			case Events::FrameResized:
-			{
-				float width = 0.0f, height = 0.0f;
-				if (m->FindFloat("width", &width) != B_OK ||
-					m->FindFloat("height", &height) != B_OK)
-				{
-					printf("%s:%i - missing width/height param.\n", _FL);
-					return;
-				}
-
-				if (view)
-				{
-					view->Pos.SetSize(width, height);
-					view->OnPosChange();
-				}
-				else if (wnd)
-				{
-					wnd->Pos.SetSize(width, height);
-					wnd->OnPosChange();
-				}
-				break;
-			}
-			case Events::AttachedToWindow:
-			{
-				view->OnCreate();
-				break;
-			}
-			case Events::Draw:
-			{
-				BRect updateRect;
-				m->FindRect("update", &updateRect);
-				
-				LPoint off(0, 0);
-				printf("	ReceiveDraw %s %p,%p\n", LRect(updateRect).GetStr(), view, wnd);
-				if (view)
-				{
-					LLocker lck(view->Handle(), _FL);
-					if (lck.Lock())
-					{
-						LScreenDC dc(view, &updateRect);
-						view->_Paint(&dc, &off, NULL);
-					}
-				}
-				else if (wnd)
-				{
-					LLocker lck(wnd->WindowHandle(), _FL);
-					if (lck.Lock())
-					{
-						LScreenDC dc(wnd, &updateRect);
-						wnd->_Paint(&dc, &off, NULL);
-					}
-				}
-				break;
-			}
-			case Events::MouseMoved:
-			case Events::MouseDown:
-			case Events::MouseUp:
-			{
-				LMessage msg;
-				if (m->FindMessage("mouse", &msg) != B_OK)
-				{
-					printf("%s:%i - no mouse message.\n", _FL);
-					return;
-				}
-				
-				LMouse ms(&msg);
-				if (view)
-					view->_Mouse(ms, event == Events::MouseMoved);
-				else if (wnd)
-					wnd->_Mouse(ms, event == Events::MouseMoved);
-				break;
-			}
-			case Events::KeyUp:
-			case Events::KeyDown:
-			{
-				BMessage msg;
-				if (m->FindMessage("key", &msg) != B_OK)
-				{
-					printf("%s:%i - no key param.\n", _FL);
-					return;
-				}
-				
-				LKey k(&msg);
-
-				if (view)
-				{
-					if (auto wnd = view->GetWindow())
-						wnd->HandleViewKey(view, k);
-					else
-						view->OnKey(k);
-				}
-				else if (wnd)
-				{
-					wnd->OnKey(k);
-				}
-				break;
-			}
-			case Events::MakeFocus:
-			{
-				bool focus = true;
-				if (m->FindBool("focus", &focus) != B_OK)
-				{
-					printf("%s:%i - no focus param.\n", _FL);
-					return;
-				}
-				
-				if (view)
-					view->OnFocus(focus);
-				else if (wnd)
-					wnd->OnFocus(focus);
-				break;
-			}
 			default:
 			{
-				printf("%s:%i - unhandled event '%s'\n", _FL, ToString((Events)event));
+				printf("%s:%i - unhandled event '%s'\n", _FL, LMessage::ToString((Events)event));
 				break;
 			}
 		}
@@ -325,7 +128,7 @@ public:
 			case M_HAIKU_WND_EVENT:
 			{
 				LWindow *wnd = nullptr;
-				if (B_OK != m->FindPointer(LMessage::PropWindow, (void**)&wnd) ||
+				if (B_OK != message->FindPointer(LMessage::PropWindow, (void**)&wnd) ||
 					!wnd)
 				{
 					LAssert(0);
@@ -334,19 +137,19 @@ public:
 				}
 				
 				int32_t event = -1;
-				if (m->FindInt32(LMessage::PropEvent, &event) != B_OK)
+				if (message->FindInt32(LMessage::PropEvent, &event) != B_OK)
 				{
 					printf("%s:%i - no event in msg.\n", _FL);
 					return;
 				}
 				
-				wnd->HaikuEvent((Event)event, message);
+				wnd->HaikuEvent((LMessage::Events)event, message);
 				break;
 			}
 			case M_HAIKU_VIEW_EVENT:
 			{
 				LView *view = nullptr;
-				if (B_OK != m->FindPointer(LMessage::PropView, (void**)&view) ||
+				if (B_OK != message->FindPointer(LMessage::PropView, (void**)&view) ||
 					!view)
 				{
 					LAssert(0);
@@ -361,13 +164,13 @@ public:
 				}
 				
 				int32_t event = -1;
-				if (m->FindInt32(LMessage::PropEvent, &event) != B_OK)
+				if (message->FindInt32(LMessage::PropEvent, &event) != B_OK)
 				{
 					printf("%s:%i - no event in msg.\n", _FL);
 					return;
 				}
 				
-				vuew->HaikuEvent((Event)event, message);
+				view->HaikuEvent((LMessage::Events)event, message);
 				break;
 			}
 			case M_HANDLE_IN_THREAD:

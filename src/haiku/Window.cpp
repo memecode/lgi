@@ -138,7 +138,7 @@ public:
 		return -1;
 	}
 	
-	BMessage MakeMessage(LAppPrivate::Event e)
+	BMessage MakeMessage(LMessage::Events e)
 	{
 		BMessage m(M_HAIKU_WND_EVENT);
 		m.AddPointer(LMessage::PropWindow, (void*)Wnd);
@@ -148,7 +148,7 @@ public:
 
 	void FrameMoved(BPoint newPosition)
 	{
-		auto m = MakeMessage(LAppPrivate::FrameMoved);
+		auto m = MakeMessage(LMessage::FrameMoved);
 		m.AddPoint("pos", newPosition);
 		LAppPrivate::Post(&m);		
 		
@@ -157,7 +157,7 @@ public:
 
 	void FrameResized(float width, float height)
 	{
-		auto m = MakeMessage(LAppPrivate::FrameResized);
+		auto m = MakeMessage(LMessage::FrameResized);
 		m.AddFloat("width", width);
 		m.AddFloat("height", height);
 		LAppPrivate::Post(&m);		
@@ -169,7 +169,7 @@ public:
 	{
 		int result = -1;
 		
-		auto m = MakeMessage(LAppPrivate::QuitRequested);
+		auto m = MakeMessage(LMessage::QuitRequested);
 		m.AddPointer("result", (void*)&result);
 		LAppPrivate::Post(&m);
 		
@@ -182,9 +182,6 @@ public:
 
 	void MessageReceived(BMessage *message)
 	{
-		if (message->what == M_ON_CREATE)
-			LOG("%s:%i %s msg=M_ON_CREATE\n", _FL, __FUNCTION__);
-
 		if (message->what == M_LWINDOW_DELETE)
 		{
 			Wnd->Handle()->RemoveSelf();			
@@ -195,7 +192,7 @@ public:
 			BWindow::MessageReceived(message);
 
 			// Redirect the message to the app loop:
-			auto m = MakeMessage(LAppPrivate::General);
+			auto m = MakeMessage(LMessage::General);
 			m.AddMessage("message", message);
 			LAppPrivate::Post(&m);
 		}
@@ -263,6 +260,16 @@ LWindow::~LWindow()
 
 	DeleteObj(Menu);
 	WaitThread();
+}
+
+// This is called in the app thread.. lock the window before using
+void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
+{
+	if (!m)
+		return;
+		
+	// Common view handling...
+	LView::HaikuEvent(event, m);
 }
 
 LWindow *LWindow::GetModalParent()
