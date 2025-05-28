@@ -985,7 +985,7 @@ public:
 					auto args = LString::Fmt("cd %s && find .", absPath.Get());
 					for (size_t i=0; i<parts.Length(); i++)
 						args += LString::Fmt("%s -iname \"*%s*\"", i ? " -and" : "", LGetLeaf(parts[i]));
-					args += " -and -not -path \"*/.hg/*\"";
+					args += " -and -not -path \"*/.hg/*\" -and -not -iname \"*.d\"";
 
 					int32_t exitCode = 0;
 					auto result = Cmd(GetConsole(), args + "\n", &exitCode);
