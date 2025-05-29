@@ -75,9 +75,11 @@ LScreenDC::LScreenDC(LView *view, void *param)
 		d->Update = d->Client;
 		
 	LRect clip = d->Client;
+	/*
 	printf("	LScreenDC init clip=%s\n", clip.GetStr());
 	clip.Intersection(&d->Update);
 	d->v->ClipToRect(clip);
+	*/
 }
 
 LScreenDC::~LScreenDC()

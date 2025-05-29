@@ -606,6 +606,7 @@ void LView::HaikuEvent(LMessage::Events event, BMessage *m)
 				return;
 			}
 
+			printf("LMessage::FrameResized: %g,%g\n", width, height);
 			Pos.SetSize(width, height);
 			OnPosChange();
 			break;

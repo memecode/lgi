@@ -73,11 +73,12 @@ public:
 	}
 	
 	LWindowPrivate(LWindow *wnd) :
-		BWindow(BRect(100,100,400,400),
-				MakeName(wnd),
-				B_DOCUMENT_WINDOW_LOOK,
-				B_NORMAL_WINDOW_FEEL,
-				0),
+		BWindow(
+			/* frame: */ BRect(100,100,400,400),
+			/* title: */ MakeName(wnd),
+			/* look:  */ B_DOCUMENT_WINDOW_LOOK,
+			/* feel:  */ B_NORMAL_WINDOW_FEEL,
+			/* flags: */ B_WILL_ACCEPT_FIRST_CLICK),
 		Wnd(wnd)
 	{
 	}
@@ -241,10 +242,6 @@ LWindow::LWindow() :
 	#endif
 {
 	d = new LWindowPrivate(this);
-	_QuitOnClose = false;
-	Menu = NULL;
-	
-	_Default = 0;
 	_Window = this;
 	ClearFlag(WndFlags, GWF_VISIBLE);
 	
@@ -552,6 +549,7 @@ void LWindow::UpdateRootView()
 	if (menu)
 		rootView->MoveTo(0, menuPos.Height());
 	rootView->SetResizingMode(B_FOLLOW_ALL_SIDES);
+	printf("rootView set resize mode follow all sides\n");
 }
 
 bool LWindow::Attach(LViewI *p)
