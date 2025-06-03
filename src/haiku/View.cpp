@@ -133,7 +133,6 @@ struct LBView : public Parent
 		)
 	{
 		Parent::SetName(d->View->GetClass());
-		Parent::SetViewColor(B_TRANSPARENT_COLOR);
 	}
 	
 	~LBView()
@@ -155,6 +154,8 @@ struct LBView : public Parent
 		LOG("%s:%i %s d=%p\n", _FL, __FUNCTION__, d);
 		if (!d)
 			return;
+
+		Parent::SetViewColor(B_TRANSPARENT_COLOR);
 
 		auto wnd = dynamic_cast<LWindow*>(d->View);
 		if (wnd)
@@ -371,7 +372,10 @@ struct LBView : public Parent
 	{
 		if (!d)
 			return;
+		
+		Parent::UnlockLooper();
 			
+		bool done = false;
 		if (wnd)
 		{
 			// it's the root view of a LWindow
@@ -379,6 +383,7 @@ struct LBView : public Parent
 			m.AddPointer(LMessage::PropWindow, wnd);
 			m.AddInt32(LMessage::PropEvent, LMessage::Draw);
 			m.AddRect("update", updateRect);
+			m.AddPointer("done", &done);
 			LAppPrivate::Post(&m);
 		}
 		else
@@ -386,9 +391,14 @@ struct LBView : public Parent
 			// it's a regular LView
 			auto m = MakeMessage(LMessage::Draw);
 			m.AddRect("update", updateRect);
-			printf("SendingDraw %s\n", LRect(updateRect).GetStr());
+			m.AddPointer("done", &done);
 			LAppPrivate::Post(&m);
 		}
+		
+		while (!done)
+			LSleep(1);
+
+		Parent::LockLooper();
 	}
 
 	LMouse ConvertMouse(BPoint where, bool down = false)
@@ -620,6 +630,8 @@ void LView::HaikuEvent(LMessage::Events event, BMessage *m)
 		{
 			BRect updateRect;
 			m->FindRect("update", &updateRect);
+			bool *done = nullptr;
+			m->FindPointer("done", (void**)&done);
 			
 			LPoint off(0, 0);
 			printf("	View.ReceiveDraw %s\n", LRect(updateRect).GetStr());
@@ -630,6 +642,8 @@ void LView::HaikuEvent(LMessage::Events event, BMessage *m)
 				LScreenDC dc(this, &updateRect);
 				_Paint(&dc, &off, NULL);
 			}
+			
+			*done = true;
 			break;
 		}
 		case LMessage::MouseMoved:
