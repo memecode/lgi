@@ -469,6 +469,7 @@ public:
 	class LgiClass Path : public LString::Array
 	{
 		LString Full;
+		static LString TmpPath;
 		
 	public:
 		enum State
@@ -634,6 +635,7 @@ public:
 		bool IsFile() { return Exists() == TypeFile; }
 		bool IsFolder() { return Exists() == TypeFolder; }
 		static LString GetSystem(LSystemPath Which, int WordSize = 0);
+		static bool SetSystem(LSystemPath Which, LString Path, int WordSize = 0);
 		static LString PrintAll();
 	};
 

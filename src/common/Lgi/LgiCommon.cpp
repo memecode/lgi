@@ -858,6 +858,12 @@ LString LGetSystemPath(LSystemPath Which, int WordSize)
 	return p.GetSystem(Which, WordSize);
 }
 
+bool LSetSystemPath(LSystemPath Which, LString Path, int WordSize)
+{
+	LFile::Path p;
+	return p.SetSystem(Which, Path, WordSize);
+}
+
 LFile::Path::State LFile::Path::Exists()
 {
 	if (Length() == 0)
@@ -1573,6 +1579,12 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 		}
 		case LSP_TEMP:
 		{
+			if (TmpPath)
+			{
+				Path = TmpPath;
+				break;
+			}
+			
 			#if defined WIN32
 
 				char16 t[MAX_PATH_LEN];
@@ -1947,6 +1959,31 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 	}
 
 	return Path;
+}
+
+LString LFile::Path::TmpPath;
+
+bool LFile::Path::SetSystem(LSystemPath Which, LString Path, int WordSize)
+{
+	switch (Which)
+	{
+		case LSP_TEMP:
+		{
+			if (!LDirExists(Path))
+			{
+				LgiTrace("%s:%i - path '%s' doesn't exist.\n", _FL, Path.Get());
+				return false;
+			}
+			
+			TmpPath = Path;
+			return true;
+		}
+		default:
+		{
+			LgiTrace("%s:%i - unsupported system path %i.\n", _FL, Which);
+			return false;
+		}
+	}
 }
 
 LString LGetExeFile()
