@@ -851,7 +851,7 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 								// Um no...
 								if (BackOut)
 								{
-									LHtmlElement *l = OpenTags.Last();
+									auto l = OpenTags.Length() ? OpenTags.Last() : nullptr;
 									if (l && l->TagId == TAG_TABLE)
 										CloseTag(l);
 
