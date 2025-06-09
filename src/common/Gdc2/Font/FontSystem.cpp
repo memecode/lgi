@@ -35,64 +35,69 @@ typedef char IconvChar;
 #endif
 
 /////////////////////////////////////////////////////////////////////
-// Private growable class for binary compatability
-class LFontSystemPrivate : public LLibrary
+class LFontSystemPrivate :
+	public LLibrary,
+	public LMutex
 {
 public:
 	bool DefaultGlyphSub;
-	int Used, Refs;
-	bool FontTableLoaded;
+	int Used = 1, Refs = 0;
+	bool FontTableLoaded = false;
 	bool SubSupport;
-	bool CheckedConfig;
-	bool LibCheck;
+	bool CheckedConfig = false;
+	bool LibCheck = false;
 	
 	#ifdef __GTK_H__
-	Gtk::PangoFontMap *Map;
-	Gtk::PangoContext *Ctx;
+		Gtk::PangoFontMap *Map;
+		Gtk::PangoContext *Ctx;
 	
-	LFontSystemPrivate()
-	{
-		Map = Gtk::pango_cairo_font_map_get_default();
-		if (!Map)
-			LAssert(!"pango_cairo_font_map_get_default failed.\n");
+		LFontSystemPrivate() : LMutex("LFontSystemPrivate.Lock")
+		{
+			Map = Gtk::pango_cairo_font_map_get_default();
+			if (!Map)
+				LAssert(!"pango_cairo_font_map_get_default failed.\n");
 		
-		Ctx = Gtk::pango_cairo_font_map_create_context((Gtk::PangoCairoFontMap*)Map);
-		if (!Ctx)
-			LAssert(!"pango_cairo_font_map_create_context failed.\n");
-	}
+			Ctx = Gtk::pango_cairo_font_map_create_context((Gtk::PangoCairoFontMap*)Map);
+			if (!Ctx)
+				LAssert(!"pango_cairo_font_map_create_context failed.\n");
+		}
+	#else
+		LFontSystemPrivate() : LMutex("LFontSystemPrivate.Lock")
+		{
+		}
 	#endif
 
 	#if HAS_ICONV
-	#ifdef WIN32
+		#ifdef WIN32
 
-	DynFunc2(iconv_t,	libiconv_open, const char*, tocode, const char*, fromcode);
-	DynFunc5(size_t,	libiconv, iconv_t, cd, IconvChar**, inbuf, size_t*, inbytesleft, char**, outbuf, size_t*, outbytesleft);
-	DynFunc1(int,		libiconv_close, iconv_t, cd);
+			DynFunc2(iconv_t,	libiconv_open, const char*, tocode, const char*, fromcode);
+			DynFunc5(size_t,	libiconv, iconv_t, cd, IconvChar**, inbuf, size_t*, inbytesleft, char**, outbuf, size_t*, outbytesleft);
+			DynFunc1(int,		libiconv_close, iconv_t, cd);
 
-	#elif !defined(MAC)
+		#elif !defined(MAC)
 
-	// Use glibc I guess
-	iconv_t libiconv_open(const char *tocode, const char *fromcode)
-	{
-		return ::iconv_open(tocode, fromcode);
-	}
+			// Use glibc I guess
+			iconv_t libiconv_open(const char *tocode, const char *fromcode)
+			{
+				return ::iconv_open(tocode, fromcode);
+			}
 
-	size_t libiconv(iconv_t cd, IconvChar** inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft)
-	{
-		return ::iconv(cd, inbuf, inbytesleft, outbuf, outbytesleft);
-	}
+			size_t libiconv(iconv_t cd, IconvChar** inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft)
+			{
+				return ::iconv(cd, inbuf, inbytesleft, outbuf, outbytesleft);
+			}
 
-	int libiconv_close(iconv_t cd)
-	{
-		return ::iconv_close(cd);
-	}
+			int libiconv_close(iconv_t cd)
+			{
+				return ::iconv_close(cd);
+			}
 
-	bool IsLoaded()
-	{
-		return true;
-	}
+			bool IsLoaded()
+			{
+				return true;
+			}
 
-	#endif
+		#endif
 	#endif // HAS_ICONV
 };
 
@@ -123,13 +128,9 @@ LFontSystem::LFontSystem()
 					#endif
 					; //  && Rev == 0);  // WinXP does it's own glyph substitution
 	d->DefaultGlyphSub = d->SubSupport;
-	d->CheckedConfig = false;
-	d->FontTableLoaded = false;
-	d->Used = 1;		// the '0th' font spot isn't used
+	d->Used;		// the '0th' font spot isn't used
 						// because Lut[Char] == 0 means no font
 						// available
-	d->Refs = 0;
-	d->LibCheck = false;
 	ZeroObj(Lut);		// Clear the table to 'no font'
 	ZeroObj(Font);		// Initialize the list of fonts to empty
 }
@@ -205,6 +206,13 @@ int StringSort(LString *a, LString *b)
 bool LFontSystem::EnumerateFonts(LString::Array &Fonts)
 {
 	Fonts.SetFixedLength(false);
+
+	if (!LAppInst->InThread())
+	{
+		int asd=0;
+	}
+
+	LMutex::Auto lck(d, _FL);
 	if (!AllFonts.Length())
 	{
 		#if defined WINNATIVE
@@ -279,7 +287,10 @@ bool LFontSystem::EnumerateFonts(LString::Array &Fonts)
 		AllFonts.Sort(StringSort);
 	}
 
-	Fonts = AllFonts;
+	// Make a deep copy for thread safety:
+	for (auto f: AllFonts)
+		Fonts.Add(f.Get());
+
 	return true;
 }
 
