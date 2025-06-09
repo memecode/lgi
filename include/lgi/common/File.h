@@ -368,7 +368,15 @@ public:
 
 	std::function<void(LError&)> onErrorCb;
 	OsFile Handle();
+	
+	// By default the class will warn if you use an instance in multiple threads.
+	// There are cases where a file object is passed between threads, and calling
+	// this in the new thread changes the ID for valid use.
 	void ChangeThread() override;
+	// Alternatively SetThreadWarn can turned off the warn if the caller is doing it's own
+	// locking to prevent multi-threaded use causing corruption.
+	void SetThreadWarn(bool warn);
+	
 	operator bool() { return IsOpen(); }
 
 	/// \brief Opens a file
