@@ -70,6 +70,15 @@ LgiExtern LString LIpToStr(uint32_t ip);
 LgiExtern uint32_t LIpToInt(LString str); // Convert IP as string to host order int
 LgiExtern uint32_t LHostnameToIp(const char *HostName); // Hostname lookup (DNS), returns IP in host order or 0 on error
 
+class LgiClass LHostnameAsync
+{
+	struct LHostnameAsyncPriv *d;
+public:
+	typedef std::function<void(uint32_t, LError&)> TCallback;
+	LHostnameAsync(const char *host, TCallback callback);
+	~LHostnameAsync();
+};
+
 /// Get a specific value from a list of headers (as a dynamic string)
 LgiFunc char *InetGetHeaderField(const char *Headers, const char *Field, ssize_t Len = -1);
 LgiExtern LString LGetHeaderField(LString Headers, const char *Field);

@@ -14,6 +14,7 @@
 	#include <unistd.h>
 	#include <poll.h>
 	#include <errno.h>
+	#include <netdb.h>
 #elif defined(MAC)
 	#include <SystemConfiguration/SCDynamicStoreCopySpecific.h>
 	#include <SystemConfiguration/SCSchemaDefinitions.h>
@@ -1917,6 +1918,77 @@ uint32_t LHostnameToIp(const char *Host)
 	freeaddrinfo(res);
 	
 	return ip;
+}
+
+struct LHostnameAsyncPriv : public LRefCount
+{
+	LHostnameAsync::TCallback callback;
+	struct gaicb req = {};
+	struct addrinfo out = {};
+	struct sigevent event = {};
+	uint64_t startTs = 0;
+	
+	void Complete()
+	{
+		uint32_t ip = 0;
+		if (out.ai_addr)
+		{
+			auto fam = out.ai_addr->sa_family;
+			if (fam == AF_INET)
+			{
+				auto a = (sockaddr_in*)out.ai_addr;
+				ip = ntohl(a->sin_addr.s_addr);
+
+				printf("%s:%i - complete called: %s (after %i ms)\n",
+					_FL, LIpToStr(ip).Get(),
+					(int)(LCurrentTime()-startTs));
+			}
+			else printf("%s:%i - not AF_INET.\n", _FL);
+		}
+		else printf("%s:%i - no ai_addr.\n", _FL);
+
+		DecRef();
+	}
+};
+
+LHostnameAsync::LHostnameAsync(const char *host, TCallback callback)
+{
+	if (d = new LHostnameAsyncPriv)
+	{
+		d->IncRef();
+		d->callback = callback;
+
+		d->out.ai_family = AF_INET;
+		
+		struct gaicb *reqs[1] = {&d->req};
+		d->req.ar_name = host;
+		d->req.ar_service = nullptr;
+		d->req.ar_request = nullptr;
+		d->req.ar_result = &d->out;	
+
+		d->event.sigev_notify = Gtk::SIGEV_THREAD;
+		d->event.sigev_value.sival_ptr = d;
+		d->event.sigev_notify_function = [](auto param)
+			{
+				if (auto obj = (LHostnameAsyncPriv*)param.sival_ptr)
+					obj->Complete();
+				else
+					printf("%s:%i - Invalid param.\n", _FL);
+			};
+
+		d->startTs = LCurrentTime();
+		int r = getaddrinfo_a(GAI_NOWAIT, reqs, 1, &d->event);
+		d->IncRef();
+		printf("%s:%i - getaddrinfo_a=%i\n", _FL, r);
+		if (r)
+			d->DecRef();
+	}
+}
+
+LHostnameAsync::~LHostnameAsync()
+{
+	printf("%s:%i - ~LHostnameAsync called.\n", _FL);
+	d->DecRef();
 }
 
 LString LHostName()

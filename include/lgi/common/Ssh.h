@@ -504,6 +504,7 @@ public:
 
 		if (CancelObj)
 		{
+			// Non-blocking connect:
 			auto startTs = LCurrentTime();
 			while (!CancelObj->IsCancelled())
 			{
