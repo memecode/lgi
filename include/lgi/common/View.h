@@ -6,6 +6,10 @@ LgiFunc void DumpHnd(HIViewRef v, int depth = 0);
 #include "LCocoaView.h"
 #endif
 #include "lgi/common/Message.h"
+#include "lgi/common/Rect.h"
+#include "lgi/common/Mutex.h"
+#include "lgi/common/DragAndDrop.h"
+#include "lgi/common/Gdc2.h"
 
 /// \brief The base class for all windows in the GUI.
 ///

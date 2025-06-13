@@ -8,7 +8,6 @@
 **              fret@memecode.com
 */
 
-#define _WINSOCK_DEPRECATED_NO_WARNINGS 1
 #if defined(LINUX)
 	#include <netinet/tcp.h>
 	#include <unistd.h>
@@ -22,31 +21,14 @@
 	#include <sys/socket.h>
 	#include <ifaddrs.h>
 #endif
-#if !defined(WINDOWS)
-	#include <sys/types.h>
-	#include <ifaddrs.h>
-#endif
-#include <ctype.h>
 
-#include "lgi/common/File.h"
-#include "lgi/common/Net.h"
-#include "lgi/common/LgiString.h"
-#include "lgi/common/LgiCommon.h"
-#include "LgiOsClasses.h"
-#include "lgi/common/RegKey.h"
-
-#define USE_BSD_SOCKETS			1
-#define DEBUG_CONNECT			0
-#define ETIMEOUT				400
-#define PROTO_UDP				0x100
-#define PROTO_BROADCAST			0x200
-
-#if defined WIN32
-
+#if defined(WINDOWS)
+	#define _WINSOCK_DEPRECATED_NO_WARNINGS 1
+	#include <winsock2.h>
+	#include <ws2tcpip.h>
  	#include <stdio.h>
 	#include <stdlib.h>
 	#include <ras.h>
-	#include <Ws2tcpip.h>
 
 	typedef HOSTENT HostEnt;
 	typedef int socklen_t;
@@ -63,8 +45,27 @@
 	#endif
 
 	#define OsAddr				S_un.S_addr
+#else
+	#include <sys/types.h>
+	#include <ifaddrs.h>
+#endif
+#include <ctype.h>
 
-#elif defined POSIX
+#include "lgi/common/File.h"
+#include "lgi/common/Net.h"
+#include "lgi/common/LgiString.h"
+#include "lgi/common/LgiCommon.h"
+#include "lgi/common/RegKey.h"
+#include "lgi/common/Window.h"
+#include "LgiOsClasses.h"
+
+#define USE_BSD_SOCKETS			1
+#define DEBUG_CONNECT			0
+#define ETIMEOUT				400
+#define PROTO_UDP				0x100
+#define PROTO_BROADCAST			0x200
+
+#if defined POSIX
 
 	#include <stdio.h>
 	#include <sys/types.h>
@@ -1920,74 +1921,181 @@ uint32_t LHostnameToIp(const char *Host)
 	return ip;
 }
 
+#if WINDOWS
+#define M_ASYNC_HOSTNAME		M_USER + 200
+LRESULT CALLBACK LHostnameAsyncPriv_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+#endif
+
 struct LHostnameAsyncPriv : public LRefCount
 {
 	LHostnameAsync::TCallback callback;
-	struct gaicb req = {};
-	struct addrinfo out = {};
-	struct sigevent event = {};
+
+	#if WINDOWS
+		LError		err;
+		PADDRINFOEX	addrInfo = nullptr;
+		OVERLAPPED	overlapped = {};
+		HANDLE		completeEvent = nullptr;
+		HANDLE      cancelHandle = nullptr;
+		LHostnameAsyncPriv()
+		{
+			completeEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+		}
+		~LHostnameAsyncPriv()
+		{
+		}
+	#else // posixy?
+		struct gaicb req = {};
+		struct addrinfo out = {};
+		struct sigevent event = {};
+	#endif
 	uint64_t startTs = 0;
 	
 	void Complete()
 	{
-		uint32_t ip = 0;
-		if (out.ai_addr)
-		{
-			auto fam = out.ai_addr->sa_family;
-			if (fam == AF_INET)
-			{
-				auto a = (sockaddr_in*)out.ai_addr;
-				ip = ntohl(a->sin_addr.s_addr);
+		#if WINDOWS
+			uint32_t ip = 0;
 
-				printf("%s:%i - complete called: %s (after %i ms)\n",
-					_FL, LIpToStr(ip).Get(),
-					(int)(LCurrentTime()-startTs));
+			if (!err)
+			{
+				if (addrInfo)
+				{
+					if (addrInfo->ai_addr->sa_family == AF_INET)
+					{
+						auto a = (sockaddr_in*)addrInfo->ai_addr;
+						ip = ntohl(a->sin_addr.s_addr);					
+						// LgiTrace("%s:%i - complete called: %s (after %i ms)\n", _FL, LIpToStr(ip).Get(), (int)(LCurrentTime()-startTs));
+					}
+					else err.Set(LErrorInvalidParam, "not AF_INET family");
+				}
+				else
+				{
+					err.Set(LErrorInvalidParam, "no addrInfo");
+				}
 			}
-			else printf("%s:%i - not AF_INET.\n", _FL);
-		}
-		else printf("%s:%i - no ai_addr.\n", _FL);
+
+			if (callback)
+				callback(ip, err, LCurrentTime() - startTs);
+
+			if (completeEvent)
+			{
+				CloseHandle(completeEvent);
+				completeEvent = nullptr;
+			}
+		#else
+			uint32_t ip = 0;
+			if (out.ai_addr)
+			{
+				auto fam = out.ai_addr->sa_family;
+				if (fam == AF_INET)
+				{
+					auto a = (sockaddr_in*)out.ai_addr;
+					ip = ntohl(a->sin_addr.s_addr);
+
+					LgiTrace("%s:%i - complete called: %s (after %i ms)\n",
+						_FL, LIpToStr(ip).Get(),
+						(int)(LCurrentTime()-startTs));
+				}
+				else printf("%s:%i - not AF_INET.\n", _FL);
+			}
+			else printf("%s:%i - no ai_addr.\n", _FL);
+		#endif
 
 		DecRef();
 	}
+
+	void Cancel()
+	{
+		#if WINDOWS
+			if (completeEvent)
+			{
+				// It didn't finish yet, so cancel it...
+				GetAddrInfoExCancel(&cancelHandle);
+				
+				// And wait...
+				WaitForSingleObject(completeEvent, INFINITE);
+				
+				// And cleanup
+				CloseHandle(completeEvent);
+			}
+		#else
+		#endif
+	}
 };
 
-LHostnameAsync::LHostnameAsync(const char *host, TCallback callback)
+LHostnameAsync::LHostnameAsync(const char *host, TCallback callback, int timeoutMs)
 {
 	if (d = new LHostnameAsyncPriv)
 	{
 		d->IncRef();
 		d->callback = callback;
-
-		d->out.ai_family = AF_INET;
-		
-		struct gaicb *reqs[1] = {&d->req};
-		d->req.ar_name = host;
-		d->req.ar_service = nullptr;
-		d->req.ar_request = nullptr;
-		d->req.ar_result = &d->out;	
-
-		d->event.sigev_notify = Gtk::SIGEV_THREAD;
-		d->event.sigev_value.sival_ptr = d;
-		d->event.sigev_notify_function = [](auto param)
-			{
-				if (auto obj = (LHostnameAsyncPriv*)param.sival_ptr)
-					obj->Complete();
-				else
-					printf("%s:%i - Invalid param.\n", _FL);
-			};
-
 		d->startTs = LCurrentTime();
-		int r = getaddrinfo_a(GAI_NOWAIT, reqs, 1, &d->event);
-		d->IncRef();
-		printf("%s:%i - getaddrinfo_a=%i\n", _FL, r);
-		if (r)
-			d->DecRef();
+
+		#if WINDOWS
+			// LAssert(d->hwnd);
+			LAutoWString wHost(Utf8ToWide(host));
+			d->IncRef();
+			struct timeval timeout = {};
+			if (timeoutMs >= 0)
+			{
+				timeout.tv_sec = timeoutMs / 1000;
+				timeout.tv_usec = (timeoutMs % 1000) * 1000;
+			}
+			auto result = GetAddrInfoEx(wHost,
+										nullptr, // service name
+										NS_DNS,
+										nullptr, // nspid
+										nullptr, // hints
+										&d->addrInfo,
+										timeoutMs >= 0 ? &timeout : nullptr,
+										&d->overlapped,
+										[](auto error, auto bytes, auto overlapped)
+										{
+											auto ctx = CONTAINING_RECORD(overlapped, LHostnameAsyncPriv, overlapped);
+											if (error != ERROR_SUCCESS)
+												ctx->err.Set(error);
+											ctx->Complete();
+										},
+										&d->cancelHandle);
+			if (result != NO_ERROR &&
+				result != WSA_IO_PENDING)
+			{
+				LError err(result);
+				LgiTrace("%s:%i - GetAddrInfoExA err: %s\n", _FL, err.ToString().Get());
+				if (callback)
+					callback(0, err, LCurrentTime() - d->startTs);
+				d->DecRef();
+			}
+		#else
+			d->out.ai_family = AF_INET;
+		
+			struct gaicb *reqs[1] = {&d->req};
+			d->req.ar_name = host;
+			d->req.ar_service = nullptr;
+			d->req.ar_request = nullptr;
+			d->req.ar_result = &d->out;	
+
+			d->event.sigev_notify = Gtk::SIGEV_THREAD;
+			d->event.sigev_value.sival_ptr = d;
+			d->event.sigev_notify_function = [](auto param)
+				{
+					if (auto obj = (LHostnameAsyncPriv*)param.sival_ptr)
+						obj->Complete();
+					else
+						printf("%s:%i - Invalid param.\n", _FL);
+				};
+			int r = getaddrinfo_a(GAI_NOWAIT, reqs, 1, &d->event);
+
+			d->IncRef();
+			printf("%s:%i - getaddrinfo_a=%i\n", _FL, r);
+			if (r)
+				d->DecRef();
+		#endif
 	}
 }
 
 LHostnameAsync::~LHostnameAsync()
 {
-	printf("%s:%i - ~LHostnameAsync called.\n", _FL);
+	d->Cancel();
 	d->DecRef();
 }
 
