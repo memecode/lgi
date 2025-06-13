@@ -1943,6 +1943,8 @@ struct LHostnameAsyncPriv : public LRefCount
 		~LHostnameAsyncPriv()
 		{
 		}
+	#elif defined(MAC)
+		#warning "Not implemented"
 	#else // posixy?
 		struct gaicb req = {};
 		struct addrinfo out = {};
@@ -1981,7 +1983,9 @@ struct LHostnameAsyncPriv : public LRefCount
 				CloseHandle(completeEvent);
 				completeEvent = nullptr;
 			}
-		#else
+	#elif defined(MAC)
+		#warning "Not implemented"
+	#else
 			uint32_t ip = 0;
 			if (out.ai_addr)
 			{
@@ -2024,7 +2028,7 @@ struct LHostnameAsyncPriv : public LRefCount
 
 LHostnameAsync::LHostnameAsync(const char *host, TCallback callback, int timeoutMs)
 {
-	if (d = new LHostnameAsyncPriv)
+	if ((d = new LHostnameAsyncPriv))
 	{
 		d->IncRef();
 		d->callback = callback;
@@ -2065,6 +2069,8 @@ LHostnameAsync::LHostnameAsync(const char *host, TCallback callback, int timeout
 					callback(0, err, LCurrentTime() - d->startTs);
 				d->DecRef();
 			}
+		#elif defined(MAC)
+			#warning "Not implemented"
 		#else
 			d->out.ai_family = AF_INET;
 		

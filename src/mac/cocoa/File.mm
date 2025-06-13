@@ -1469,6 +1469,10 @@ LFile::~LFile()
 	DeleteObj(d);
 }
 
+void LFile::SetThreadWarn(<#bool warn#>)
+{
+}
+
 int LFile::GetError()
 {
 	return d->LastError;
