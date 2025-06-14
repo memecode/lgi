@@ -285,10 +285,11 @@ int LHttpThread::Main()
 					req.headers = Eol;
 					req.body = Eoh + 4;
 
+		
 					LHttpServer::Response resp;
-					LStringPipe RespHeaders(256), RespBody(1024);
-					resp.headers = &RespHeaders;
-					resp.body = &RespBody;
+					LStringPipe *RespHeaders = nullptr, *RespBody = nullptr;
+					resp.headers.Reset(RespHeaders = new LStringPipe(256));
+					resp.body.Reset(RespBody = new LStringPipe(256));
 					auto Code = p->callback->OnRequest(&req, &resp);
 					if (req.sock)
 					{
@@ -296,14 +297,19 @@ int LHttpThread::Main()
 
 						auto stream = dynamic_cast<LSocket*>(req.sock.Get());
 						stream->Print("HTTP/1.0 %i Ok\r\n", Code);
-						if (auto hdrs = RespHeaders.NewLStr().Strip())
+						if (auto hdrs = RespHeaders->NewLStr().Strip())
 							stream->Print("%s\r\n", hdrs.Get());
 						stream->Print("\r\n");
 						
-						if (auto body = RespBody.NewLStr())
+						if (resp.body)
 						{
-							LOG_HTTP("%s:%i - Response(%i)=%p\n", _FL, (int)body.Length(), body.Get());
-							stream->Write(body);
+							auto bytes = resp.body->GetSize();
+							LOG_HTTP("%s:%i - Response len=%i\n", _FL, (int)bytes);
+							
+							LCopyStreamer cp(256 << 10);
+							auto copied = cp.Copy(resp.body, stream);
+							if (copied != bytes)
+								LOG_HTTP("%s:%i - body copy failed! " LPrintfSizeT " -> " LPrintfSSizeT "\n", bytes, copied);
 						}
 					}
 				}

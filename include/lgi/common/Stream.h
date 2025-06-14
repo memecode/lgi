@@ -98,9 +98,9 @@ public:
 class LgiClass LStreamOp
 {
 protected:
-	uint64 StartTime;
-	uint64 EndTime;
-	uint64 Total;
+	uint64 StartTime = 0;
+	uint64 EndTime = 0;
+	uint64 Total = 0;
 	LArray<char> Buffer;
 
 public:
