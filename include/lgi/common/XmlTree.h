@@ -49,8 +49,8 @@ class LgiClass LXmlAttr
 public:
 	LXmlAttr()
 	{
-		Name = 0;
-		Value = 0;
+		Name = nullptr;
+		Value = nullptr;
 	}
 	
 	char *GetName() { return Name; }
