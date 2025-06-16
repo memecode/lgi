@@ -162,6 +162,10 @@ protected:
 	LListT Items;
 
 public:
+	LListItems() : Items(nullptr)
+	{
+	}
+
 	template<class T>
 	bool GetSelection(List<T> &n)
 	{

@@ -378,8 +378,9 @@ void LTextView3::LStyle::RefreshLayout(size_t Start, ssize_t Len)
 //////////////////////////////////////////////////////////////////////
 LTextView3::LTextView3(	int Id,
 						int x, int y, int cx, int cy,
-						LFontType *FontType)
-	: ResObject(Res_Custom)
+						LFontType *FontType) :
+	ResObject(Res_Custom),
+	Style(LStyle())
 {
 	// init vars
 	LView::d->Css.Reset(d = new LTextView3Private(this));

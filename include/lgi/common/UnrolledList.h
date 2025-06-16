@@ -14,22 +14,18 @@ class LUnrolledList
 {
 	struct LstBlk
 	{
-		LstBlk *Next, *Prev;
-		int Count;
+		LstBlk *Next = nullptr, *Prev = nullptr;
+		int Count = 0;
 		T Obj[BlockSize];
 
 		LstBlk()
 		{
-			Next = Prev = NULL;
-			Count = 0;
 		}
 
 		~LstBlk()
 		{
 			for (int n=0; n<Count; n++)
-			{
 				Obj[n].~T();
-			}
 		}
 
 		bool Full()
@@ -50,15 +46,13 @@ public:
 
 	public:
 		LUnrolledList<T,BlockSize> *Lst;
-		LstBlk *i;
-		int Cur;
+		LstBlk *i = nullptr;
+		int Cur = 0;
 
 		Iter(LUnrolledList<T,BlockSize> *lst)
 		{
 			Lst = lst;
 			Version = Lst->Version;
-			i = 0;
-			Cur = 0;
 		}
 
 		Iter(LUnrolledList<T,BlockSize> *lst, LstBlk *item, int c)
@@ -107,9 +101,8 @@ public:
 			if (In())
 				return i->Obj[Cur];
 
-			LAssert(!"Invalid iterator.");			
-			static T empty;
-			return empty;
+			LAssert(!"Invalid iterator.");
+			return Lst->emptyValue;
 		}
 
 		T *operator ->()
@@ -209,8 +202,9 @@ public:
 	// typedef int (*CompareFn)(T *a, T *b, NativeInt data);
 
 protected:
-	size_t Items;
-	LstBlk *FirstObj, *LastObj;
+	size_t Items = 0;
+	LstBlk *FirstObj = nullptr, *LastObj = nullptr;
+	T emptyValue;
 
 	// This is used to warn iterators that the block list has changed and they
 	// need to re-validate if their block pointer is still part of the list.
@@ -218,7 +212,7 @@ protected:
 	//
 	// New blocks don't bump this because they don't invalidate iterator's 
 	// block pointer.
-	int Version;
+	int Version = 0;
 	
 	LstBlk *NewBlock(LstBlk *Where)
 	{
@@ -404,11 +398,9 @@ protected:
 	};
 
 public:
-	LUnrolledList<T,BlockSize>()
+	LUnrolledList<T,BlockSize>(T empty)
 	{
-		FirstObj = LastObj = NULL;
-		Items = 0;
-		Version = 0;
+		emptyValue = empty;
 	}
 
 	~LUnrolledList<T,BlockSize>()
@@ -533,6 +525,38 @@ public:
 		return Status;
 	}
 
+	T PopFirst()
+	{
+		VALIDATE_UL();
+		
+		auto it = GetIndex(0);
+		if (it.In())
+		{
+			LAssert(it.i->Count > 0);
+			auto result = *it;
+			Delete(it);
+			return result;
+		}
+
+		return emptyValue;
+	}
+
+	T PopLast()
+	{
+		VALIDATE_UL();
+
+		auto it = rbegin();
+		if (it.In())
+		{
+			LAssert(it.i->Count > 0);
+			auto result = *it;
+			Delete(it);
+			return result;
+		}
+
+		return emptyValue;
+	}
+
 	T &New()
 	{
 		VALIDATE_UL();
@@ -543,8 +567,7 @@ public:
 		if (LastObj->Count >= BlockSize)
 		{
 			LAssert(!"No block for new object.");
-			static T empty;
-			return empty;
+			return emptyValue;
 		}
 
 		T &Ref = LastObj->Obj[LastObj->Count++];
@@ -711,11 +734,12 @@ public:
 		*/
 	}
 
-	void Swap(LUnrolledList<T> &other)
+	void Swap(LUnrolledList<T,BlockSize> &other)
 	{
 		LSwap(Items, other.Items);
 		LSwap(FirstObj, other.FirstObj);
-		LSwap(LastObj, other.LastObj);		
+		LSwap(LastObj, other.LastObj);
+		LSwap(emptyValue, other.emptyValue);		
 	}
 
 	class RandomAccessIter
@@ -961,9 +985,28 @@ public:
 		return *this;
 	}
 
-	Iter begin(int At = 0) { return GetIndex(At); }
-	Iter rbegin(int At = 0) { return GetIndex(Length()-1); }
-	Iter end() { return Iter(this, NULL, -1); }
+	Iter begin(int At = 0)
+	{
+		return GetIndex(At);
+	}
+	
+	Iter rbegin(int At = 0)
+	{
+		if (LastObj)
+		{
+			if (LastObj->Count > 0)
+				return Iter(this, LastObj, LastObj->Count - 1);
+
+			LAssert(!"no items in last block?");
+		}
+
+		return Iter(this);
+	}
+	
+	Iter end()
+	{
+		return Iter(this, NULL, -1);
+	}
 
 	bool Validate() const
 	{

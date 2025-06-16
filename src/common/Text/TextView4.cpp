@@ -325,8 +325,9 @@ void LTextView4::LStyle::RefreshLayout(size_t Start, ssize_t Len)
 //////////////////////////////////////////////////////////////////////
 LTextView4::LTextView4(	int Id,
 						int x, int y, int cx, int cy,
-						LFontType *FontType)
-	: ResObject(Res_Custom)
+						LFontType *FontType) :
+	ResObject(Res_Custom),
+	Style( LStyle() )
 {
 	// init vars
 	LView::d->Css.Reset(d = new LTextView4Private(this));
