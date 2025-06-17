@@ -397,6 +397,11 @@ public:
 		Ssh = NULL;
 	}
 
+	LCancel *GetCancel() const
+	{
+		return CancelObj;
+	}
+
 	void SetLog(LTextLog *log)
 	{
 		Log = log;
@@ -870,7 +875,8 @@ public:
 		{
 			auto startTs = LCurrentTime();
 			char buf[1024];
-			while (!CancelObj->IsCancelled())
+			while (	!CancelObj->IsCancelled() &&
+					(!cancel || !cancel->IsCancelled()))
 			{
 				auto rd = c->Read(buf, sizeof(buf));
 				if (rd > 0)
