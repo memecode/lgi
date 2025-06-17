@@ -324,7 +324,6 @@ ssize_t IFtp::WriteLine(char *Msg)
 
 ssize_t IFtp::ReadLine(char *Msg, ssize_t MsgSize)
 {
-	ssize_t Status = 0;
 	while (Socket)
 	{
 		// look through the input list for result codes
@@ -406,7 +405,7 @@ ssize_t IFtp::ReadLine(char *Msg, ssize_t MsgSize)
 
 	} // loop around to check results
 
-	return Status;
+	return 0;
 }
 
 bool IFtp::IsOpen()
@@ -920,20 +919,36 @@ bool IFtp::RenameFile(const char *From, const char *To)
 	return Status;
 }
 
-bool IFtp::DeleteFile(const char *Remote)
+bool IFtp::DeleteFile(const char *Remote, LError *Error)
 {
 	bool Status = false;
 
-	if (IsOpen() && Remote)
+	if (!IsOpen())
 	{
-		auto f = ToFtpCs(Remote);
-		if (f)
-		{
-			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "DELE %s\r\n", f.Get());
-			WriteLine();
-			VerifyRange(ReadLine(), 2);
+		if (Error)
+			Error->Set(LErrorIoFailed, "not connected");
+	}
+	else if (!Remote)
+	{
+		if (Error)
+			Error->Set(LErrorInvalidParam, "no path");
+	}
+	else if (auto f = ToFtpCs(Remote))
+	{
+		sprintf_s(d->OutBuf, sizeof(d->OutBuf), "DELE %s\r\n", f.Get());
+		WriteLine();
+
+		char msg[256] = "not set";
+		auto code = ReadLine(msg, sizeof(msg));
+		if (code / 100 == 2)
 			Status = true;
-		}
+		else if (Error)
+			Error->Set(LErrorFuncFailed, LString::Fmt("ftp error %i: %s", code, msg));
+	}
+	else
+	{
+		if (Error)
+			Error->Set(LErrorInvalidParam, "ToFtpCs failed");
 	}
 
 	return Status;

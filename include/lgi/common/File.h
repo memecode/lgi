@@ -294,7 +294,9 @@ public:
 		/// The path to remove
 		const char *PathName,
 		/// True if you want this function to recursively delete all contents of the path passing in.
-		bool Recurse = false
+		bool Recurse = false,
+		/// Optional error information
+		LError *err = nullptr
 	)	override;
 	
 	LString GetCurrentFolder() override;

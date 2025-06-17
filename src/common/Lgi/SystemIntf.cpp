@@ -1172,7 +1172,7 @@ public:
 		return true;
 	}
 
-	bool Delete(const char *path, bool recursiveForce, std::function<void(bool)> cb) override
+	bool Delete(const char *path, bool recursiveForce, std::function<void(LError)> cb) override
 	{
 		if (!path || !cb)
 			return false;
@@ -1184,12 +1184,16 @@ public:
 			{
 				auto args = LString::Fmt("rm%s %s", recursiveForce ? " -rf" : "", Path.Get());
 				int32_t exitVal;
+				
 				auto result = Cmd(GetConsole(), args + "\n", &exitVal);
 				if (cb)
 				{
 					app->RunCallback( [exitVal, cb]() mutable
 						{
-							cb(exitVal == 0);
+							LError err;
+							if (exitVal)
+								err.Set(LErrorFuncFailed, LString::Fmt("cmd returned %i", exitVal));
+							cb(err);
 						});
 				}
 			} );
@@ -1429,21 +1433,23 @@ public:
 		return result;
 	}
 
-	bool Delete(const char *path, bool recursiveForce, std::function<void(bool)> cb) override
+	bool Delete(const char *path, bool recursiveForce, std::function<void(LError)> cb) override
 	{
 		if (!path)
 			return false;
+
+		LError err;
 		if (LDirExists(path))
 		{
-			auto status = FileDev->RemoveFolder(path, recursiveForce);
+			FileDev->RemoveFolder(path, recursiveForce, &err);
 			if (cb)
-				cb(status);
+				cb(err);
 		}
 		else
 		{
-			auto status = FileDev->Delete(path);
+			auto status = FileDev->Delete(path, &err);
 			if (cb)
-				cb(status);
+				cb(err);
 		}
 		return true;
 	}
@@ -1794,7 +1800,7 @@ public:
 			cb(err, path);
 		}
 	}
-
+	
 	// Reading and writing:
 	LString ConvertPath(LString s)
 	{
@@ -2088,9 +2094,32 @@ public:
 		return false;
 	}
 
-	bool Delete(const char *path, bool recursiveForce, std::function<void(bool)> cb) override
+	bool Delete(const char *delPath, bool recursiveForce, std::function<void(LError)> cb) override
 	{
-		LAssert(0);
+		auto path = ConvertPath(delPath);
+		AddWork(
+			MakeContext(_FL, path),
+			TForeground,
+			[this, path, cb]() mutable
+			{
+				LError err;
+
+				if (!GetReady())
+					err.Set(LErrorFuncFailed, "connection not ready.");
+				else if (!SetRemote(path, true))
+					// Make sure we're in the right folder...
+					err.Set(LErrorFuncFailed, "failed to set dir.");
+				else if (ftp)
+					ftp->DeleteFile(LGetLeaf(path), &err);
+				else
+					err.Set(LErrorFuncFailed, "no FTP obj.");
+
+				parent->RunCallback([this, err, cb]()
+				{
+					cb(err);
+				});
+			});
+
 		return false;
 	}
 

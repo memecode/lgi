@@ -615,7 +615,7 @@ public:
 	virtual bool Delete(const char *FileName, LError *err = NULL, bool ToTrash = true) = 0;
 	virtual bool Delete(LArray<const char*> &Files, LArray<LError> *Status = NULL, bool ToTrash = true) = 0;
 	virtual bool CreateFolder(const char *PathName, bool CreateParentFoldersIfNeeded = false, LError *Err = NULL) = 0;
-	virtual bool RemoveFolder(const char *PathName, bool Recurse = false) = 0;
+	virtual bool RemoveFolder(const char *PathName, bool Recurse = false, LError *err = nullptr) = 0;
 	virtual LString GetCurrentFolder() = 0;
 	virtual bool SetCurrentFolder(const char *PathName) = 0;
 	virtual bool Move(const char *OldName, const char *NewName, LError *Err = NULL) = 0;

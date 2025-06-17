@@ -176,7 +176,7 @@ public:
 	virtual bool UpDir() = 0;
 	
 	// File
-	virtual bool DeleteFile(const char *Remote) = 0;
+	virtual bool DeleteFile(const char *Remote, LError *Error) = 0;
 	virtual bool DownloadStream(LStream *out, IFtpEntry *Remote, bool Binary = true) = 0;
 	virtual bool DownloadFile(const char *Local, IFtpEntry *Remote, bool Binary = true)
 	{
@@ -298,7 +298,7 @@ public:
 	bool UpDir() override;
 	
 	/// Delete a file in the current remote folder
-	bool DeleteFile(const char *Remote) override;
+	bool DeleteFile(const char *Remote, LError *Error = nullptr) override;
 	/// Download a file from the current remote folder
 	bool DownloadStream(LStream *out, IFtpEntry *Remote, bool Binary = true) override;
 	/// Upload a local file to the current remote folder
