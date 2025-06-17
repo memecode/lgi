@@ -65,7 +65,11 @@ LAutoPtr<LDirectory> LFileSystem::GetDir(const char *Path)
 bool LFileSystem::Delete(const char *FileName, LError *Error, bool ToTrash)
 {
 	if (!FileName)
+	{
+		if (Error)
+			Error->Set(LErrorInvalidParam);
 		return false;
+	}
 		
 	LArray<const char*> f;
 	LArray<LError> err;

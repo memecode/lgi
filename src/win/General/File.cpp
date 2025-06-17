@@ -818,7 +818,7 @@ bool LFileSystem::CreateFolder(const char *PathName, bool CreateParentFoldersIfN
 	return Status;
 }
 
-bool LFileSystem::RemoveFolder(const char *PathName, bool Recurse)
+bool LFileSystem::RemoveFolder(const char *PathName, bool Recurse, LError *err)
 {
 	if (Recurse)
 	{
@@ -832,11 +832,11 @@ bool LFileSystem::RemoveFolder(const char *PathName, bool Recurse)
 				{
 					if (Dir.IsDir())
 					{
-						RemoveFolder(Str, Recurse);
+						RemoveFolder(Str, Recurse, err);
 					}
 					else
 					{
-						Delete(Str, false);
+						Delete(Str, err, false);
 					}
 				}
 			}
@@ -851,9 +851,8 @@ bool LFileSystem::RemoveFolder(const char *PathName, bool Recurse)
 	if (!::RemoveDirectory(PathName))
 	#endif
 	{
-		#ifdef _DEBUG
-		DWORD e = GetLastError();
-		#endif
+		if (err)
+			err->Set(GetLastError());
 
 		return false;
 	}
