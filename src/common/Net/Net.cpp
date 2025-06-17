@@ -1,11 +1,11 @@
 /*hdr
-**      FILE:           INet.cpp
-**      AUTHOR:         Matthew Allen
-**      DATE:           28/5/98
-**      DESCRIPTION:    Internet sockets
+**		FILE:			INet.cpp
+**		AUTHOR:			Matthew Allen
+**		DATE:			28/5/98
+**		DESCRIPTION:	Internet sockets
 **
-**      Copyright (C) 1998, Matthew Allen
-**              fret@memecode.com
+**		Copyright (C) 1998, Matthew Allen
+**				fret@memecode.com
 */
 
 #if defined(LINUX)
@@ -1501,10 +1501,10 @@ int LSocket::WriteUdp(void *Buffer, int Size, int Flags, uint32_t Ip, uint16_t P
 	{
 		OnWrite((char*)Buffer, (int)b);
 	}
-    else
-    {
-        printf("%s:%i - sendto failed with %i.\n", _FL, errno);
-    }
+	else
+	{
+		printf("%s:%i - sendto failed with %i.\n", _FL, errno);
+	}
 	return (int)b;
 }
 
@@ -1685,18 +1685,18 @@ char *InetGetHeaderField(	// Returns an allocated string or NULL on failure
 					s++;
 					while (*s)
 					{
-					    if (strchr(" \t\r", *s))
-					    {
-						    s++;
+						if (strchr(" \t\r", *s))
+						{
+							s++;
 						}
 						else if (*s == '\n')
 						{
-						    if (strchr(" \r\n\t", s[1]))
-						        s += 2;
-						    else
-						        break;
+							if (strchr(" \r\n\t", s[1]))
+								s += 2;
+							else
+								break;
 						}
-						else break;						    
+						else break;							
 					}
 					
 					char *value = NULL;
@@ -1752,7 +1752,7 @@ LString LGetHeaderField(LString Headers, const char *Field)
 					else
 						break;
 				}
-				else break;						    
+				else break;							
 			}
 					
 			LString value;
@@ -1935,7 +1935,7 @@ struct LHostnameAsyncPriv : public LRefCount
 		PADDRINFOEX	addrInfo = nullptr;
 		OVERLAPPED	overlapped = {};
 		HANDLE		completeEvent = nullptr;
-		HANDLE      cancelHandle = nullptr;
+		HANDLE		cancelHandle = nullptr;
 		LHostnameAsyncPriv()
 		{
 			completeEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
@@ -1947,8 +1947,8 @@ struct LHostnameAsyncPriv : public LRefCount
 		#warning "Not implemented"
 	#else // posixy?
 		struct gaicb req = {};
-		struct addrinfo out = {};
 		struct sigevent event = {};
+		bool done = false;
 	#endif
 	uint64_t startTs = 0;
 	
@@ -1986,22 +1986,55 @@ struct LHostnameAsyncPriv : public LRefCount
 	#elif defined(MAC)
 		#warning "Not implemented"
 	#else
-			uint32_t ip = 0;
-			if (out.ai_addr)
+			done = true;
+			auto result = gai_error(&req);
+			LError err;
+			if (result)
 			{
-				auto fam = out.ai_addr->sa_family;
-				if (fam == AF_INET)
-				{
-					auto a = (sockaddr_in*)out.ai_addr;
-					ip = ntohl(a->sin_addr.s_addr);
-
-					LgiTrace("%s:%i - complete called: %s (after %i ms)\n",
-						_FL, LIpToStr(ip).Get(),
-						(int)(LCurrentTime()-startTs));
-				}
-				else printf("%s:%i - not AF_INET.\n", _FL);
+				err.Set(result, "gai_error failed");
+				if (callback)
+					callback(0, err, LCurrentTime() - startTs);
 			}
-			else printf("%s:%i - no ai_addr.\n", _FL);
+			else
+			{			
+				auto out = req.ar_result;
+				uint32_t ip = 0;
+			
+				#if 0
+				printf(	"out:\n"
+						"	ai_flags=%x\n"
+						"	ai_family=%i\n"
+						"	ai_socktype=%i\n"
+						"	ai_protocol=%i\n"
+						" 	ai_addrlen=%i\n"
+						"	ai_addr=%p\n"
+						"	ai_canonname='%s'\n"
+						"	ai_next=%p\n",
+						out->ai_flags,
+						out->ai_family,
+						out->ai_socktype,
+						out->ai_protocol,
+						(int)out->ai_addrlen,
+						out->ai_addr,
+						out->ai_canonname,
+						out->ai_next);
+				#endif
+			
+				if (out->ai_addr)
+				{
+					auto fam = out->ai_addr->sa_family;
+					if (fam == AF_INET)
+					{
+						auto a = (sockaddr_in*)out->ai_addr;
+						ip = ntohl(a->sin_addr.s_addr);
+					}
+					else err.Set(LErrorInvalidParam, "Not AF_INET.");
+				}
+				else err.Set(LErrorInvalidParam, "No ai_addr.");
+
+				if (callback)
+					callback(ip, err, LCurrentTime() - startTs);
+			}
 		#endif
 
 		DecRef();
@@ -2021,7 +2054,14 @@ struct LHostnameAsyncPriv : public LRefCount
 				// And cleanup
 				CloseHandle(completeEvent);
 			}
+		#elif defined(MAC)
+			#warning "not impl"
 		#else
+			if (!done)
+			{
+				done = true;
+				gai_cancel(&req);
+			}
 		#endif
 	}
 };
@@ -2035,7 +2075,6 @@ LHostnameAsync::LHostnameAsync(const char *host, TCallback callback, int timeout
 		d->startTs = LCurrentTime();
 
 		#if WINDOWS
-			// LAssert(d->hwnd);
 			LAutoWString wHost(Utf8ToWide(host));
 			d->IncRef();
 			struct timeval timeout = {};
@@ -2072,18 +2111,14 @@ LHostnameAsync::LHostnameAsync(const char *host, TCallback callback, int timeout
 		#elif defined(MAC)
 			#warning "Not implemented"
 		#else
-			d->out.ai_family = AF_INET;
-		
 			struct gaicb *reqs[1] = {&d->req};
 			d->req.ar_name = host;
-			d->req.ar_service = nullptr;
-			d->req.ar_request = nullptr;
-			d->req.ar_result = &d->out;	
 
 			d->event.sigev_notify = Gtk::SIGEV_THREAD;
 			d->event.sigev_value.sival_ptr = d;
 			d->event.sigev_notify_function = [](auto param)
 				{
+					printf("%s:%i - sigev_notify_function called.\n", _FL);
 					if (auto obj = (LHostnameAsyncPriv*)param.sival_ptr)
 						obj->Complete();
 					else
@@ -2191,7 +2226,7 @@ LArray<uint32_t> LWhatsMyIp()
 			}
 		}
 		if (ifap)
-       		freeifaddrs(ifap);
+	   		freeifaddrs(ifap);
 
 	#endif
 
