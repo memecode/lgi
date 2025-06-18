@@ -7,6 +7,7 @@
 #include "lgi/common/Thread.h"
 #include "lgi/common/SubProcess.h"
 #include "lgi/common/TextLog.h"
+#include "lgi/common/DisplayString.h"
 
 #include "resdefs.h"
 
@@ -27,15 +28,30 @@ enum Ctrls
 class Graph : public LView, public LMutex
 {
 	struct Sample {
-		unsigned long time;
-		uint32_t value;
+		time_t time;
+		int32_t value;
 	};
 	LArray<Sample> samples; // lock before using
+
+	LString logPath;
+	LFile logFile;
 
 public:
 	Graph(int id) : LMutex("Graph")
 	{
 		SetId(id);
+
+		LFile::Path p(LSP_APP_INSTALL);
+		logPath = p / "log.dat";
+		if (logFile.Open(logPath, O_READWRITE))
+		{
+			auto sz = sizeof(Sample);
+			auto count = logFile.GetSize() / sz;
+			if (samples.Length(count))
+			{
+				auto rd = logFile.Read(samples.AddressOf(), samples.Length() * sz);
+			}
+		}
 	}
 
 	void AddSample(int32_t ms)
@@ -43,8 +59,11 @@ public:
 		{
 			Auto lck(this, _FL);
 			auto &s = samples.New();
-			s.time = (unsigned long)time(NULL);
+			s.time = time(NULL);
 			s.value = ms;
+
+			if (logFile)
+				logFile.Write(&s, sizeof(s));
 		}
 		Invalidate();
 	}
@@ -58,19 +77,76 @@ public:
 		if (samples.Length() == 0)
 			return;
 
+		auto fnt = GetFont();
+		int markPx = 3;
 		int scale = 5000; // ms
 		auto client = GetClient();
-		unsigned long first = samples[0].time;
-		pDC->Colour(LColour::Blue);
-		LPoint prev(0, client.y2-1);
-		for (auto &s: samples)
+		auto draw = client;
+		draw.Inset(5, fnt->GetHeight());
+		draw.y2 -= fnt->GetHeight() + (markPx * 2);
+		LDisplayString ds(fnt, "5000ms");
+		draw.x1 += (markPx * 2) + ds.X();
+		
+		LColour cGraph(222, 222, 222);
+		pDC->Colour(cGraph);
+		pDC->Line(draw.x1, draw.y1, draw.x1, draw.y2);
+		pDC->Line(draw.x1, draw.y2, draw.x2, draw.y2);
+		pDC->Line(draw.x2, draw.y1, draw.x2, draw.y2);
+		
+		LPoint prev;
+		auto now = time(NULL);
+		size_t i = 0;
+		for (ssize_t n=samples.Length()-1; n > 0; n--)
 		{
-			int x = s.time - first;
-			int y = s.value * client.Y() / scale;
-			LPoint pt(client.x1 + x,
-					  client.y2 - 1 - y);
-			pDC->Line(prev.x, prev.y, pt.x, pt.y);
+			if (now - samples[n].time >= draw.X())
+			{
+				i = n + 1;
+				break;
+			}
+		}
+		auto first = samples[i].time;
+		auto prev_time = first;
+
+		// Draw y axis
+		pDC->Colour(cGraph);
+		fnt->Fore(cGraph);
+		fnt->Transparent(true);
+		for (int k = 0; k <= scale; k += 1000)
+		{
+			auto str = LString::Fmt("%ims", k);
+			LDisplayString ds(fnt, str);
+			int y = draw.y2 - (k * draw.Y() / scale);
+			ds.Draw(pDC, draw.x1 - (markPx * 2) - ds.X(), y - (ds.Y()/2));
+			pDC->Line(draw.x1, y, draw.x1 - markPx, y);
+		}
+
+		// Draw x axis
+		for (int x = draw.x1; x <= draw.x2; x++)
+		{
+			time_t unix = x + samples[i].time;
+			struct tm *local = localtime(&unix);
+			if (local && local->tm_sec == 0)
+			{
+				auto str = LString::Fmt("%i:%2.2i", local->tm_hour, local->tm_min);
+				LDisplayString ds(fnt, str);
+				ds.Draw(pDC, x - (ds.X()/2), draw.y2 + (markPx*2));
+				pDC->Line(x, draw.y2, x, draw.y2+markPx);
+			}
+		}
+
+		// Draw samples
+		pDC->Colour(LColour::Blue);		
+		for (; i<samples.Length(); i++)
+		{
+			auto &s = samples[i];
+			int x = (int) (s.time - first);
+			int y = s.value >= 0 ? s.value * draw.Y() / scale : draw.Y();
+			LPoint pt(draw.x1 + x,
+					  draw.y2 - y);
+			if (prev.x && s.time - prev_time < 10)			
+				pDC->Line(prev.x, prev.y, pt.x, pt.y);
 			prev = pt;
+			prev_time = s.time;
 		}
 	}
 };
