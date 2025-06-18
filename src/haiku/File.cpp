@@ -656,7 +656,7 @@ bool LFileSystem::CreateFolder(const char *PathName, bool CreateParentTree, LErr
 	return r == 0;
 }
 
-bool LFileSystem::RemoveFolder(const char *PathName, bool Recurse)
+bool LFileSystem::RemoveFolder(const char *PathName, bool Recurse, LError *error)
 {
 	if (Recurse)
 	{
@@ -669,15 +669,18 @@ bool LFileSystem::RemoveFolder(const char *PathName, bool Recurse)
 				Dir.Path(Str, sizeof(Str));
 
 				if (Dir.IsDir())
-					RemoveFolder(Str, Recurse);
+					RemoveFolder(Str, Recurse, error);
 				else
-					Delete(Str, NULL, false);
+					Delete(Str, error, false);
 			}
 			while (Dir.Next());
 		}
 	}
 
-	return rmdir(PathName) == 0;
+	auto result = rmdir(PathName);
+	if (result && error)
+		error->Set(errno);
+	return result == 0;
 }
 
 bool LFileSystem::Move(const char *OldName, const char *NewName, LError *Err)

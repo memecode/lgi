@@ -1943,7 +1943,7 @@ struct LHostnameAsyncPriv : public LRefCount
 		~LHostnameAsyncPriv()
 		{
 		}
-	#elif defined(MAC)
+	#elif defined(MAC) || defined(HAIKU)
 		#warning "Not implemented"
 	#else // posixy?
 		struct gaicb req = {};
@@ -1983,7 +1983,7 @@ struct LHostnameAsyncPriv : public LRefCount
 				CloseHandle(completeEvent);
 				completeEvent = nullptr;
 			}
-	#elif defined(MAC)
+	#elif defined(MAC) || defined(HAIKU)
 		#warning "Not implemented"
 	#else
 			done = true;
@@ -2054,7 +2054,7 @@ struct LHostnameAsyncPriv : public LRefCount
 				// And cleanup
 				CloseHandle(completeEvent);
 			}
-		#elif defined(MAC)
+		#elif defined(MAC) || defined(HAIKU)
 			#warning "not impl"
 		#else
 			if (!done)
@@ -2108,7 +2108,7 @@ LHostnameAsync::LHostnameAsync(const char *host, TCallback callback, int timeout
 					callback(0, err, LCurrentTime() - d->startTs);
 				d->DecRef();
 			}
-		#elif defined(MAC)
+		#elif defined(MAC) || defined(HAIKU)
 			#warning "Not implemented"
 		#else
 			struct gaicb *reqs[1] = {&d->req};
