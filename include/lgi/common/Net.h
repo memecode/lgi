@@ -419,18 +419,20 @@ public:
 			addr.sin_addr.s_addr = INADDR_ANY;
 		#endif
 
+		SetReuseAddress(true);
+
 		Context = "LUdpListener.bind";
 		Status = bind(Handle(), (struct sockaddr*)&addr, sizeof(addr)) == 0;
 		if (!Status)
 		{
-			#ifdef WIN32
-				auto err = WSAGetLastError();
-			#else
-				auto err = errno;
-			#endif
-			OnError(err, LErrorCodeToString(err));
-
-			LgiTrace("Error: Bind on %s:%i\n", LIpToStr(ntohl(addr.sin_addr.s_addr)).Get(), port);
+			LError err(
+				#ifdef WIN32
+				WSAGetLastError());
+				#else
+				errno);
+				#endif
+			OnError(err.GetCode(), err.GetMsg());
+			LgiTrace("Error: bindinf on %s:%i - %s\n", LIpToStr(ntohl(addr.sin_addr.s_addr)).Get(), port, err.ToString().Get());
 		}
 
 		if (mc_ip)
@@ -443,10 +445,12 @@ public:
 
 	bool ReadPacket(LString &d, uint32_t &Ip, uint16_t &Port)
 	{
+		/* Don't force non blocking here...
 		if (!IsReadable(10))
 			return false;
+		*/
 
-		char Data[MAX_UDP_SIZE];
+		char Data[2048];
 		int Rd = ReadUdp(Data, sizeof(Data), 0, &Ip, &Port);
 		if (Rd <= 0)
 			return false;

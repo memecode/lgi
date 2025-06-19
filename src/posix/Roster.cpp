@@ -87,6 +87,6 @@ bool LRoster::GetAppList(LArray<LRoster::PID> &processes, LError *err) const
 		// else printf("%s:%i - not numeric '%s'.\n", _FL, nm);
 	}
 	
-	printf("%s:%i - LRoster::GetAppList done.\n", _FL);
+	// printf("%s:%i - LRoster::GetAppList done.\n", _FL);
 	return true;
 }

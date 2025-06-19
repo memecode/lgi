@@ -2118,7 +2118,6 @@ LHostnameAsync::LHostnameAsync(const char *host, TCallback callback, int timeout
 			d->event.sigev_value.sival_ptr = d;
 			d->event.sigev_notify_function = [](auto param)
 				{
-					printf("%s:%i - sigev_notify_function called.\n", _FL);
 					if (auto obj = (LHostnameAsyncPriv*)param.sival_ptr)
 						obj->Complete();
 					else
@@ -2127,7 +2126,6 @@ LHostnameAsync::LHostnameAsync(const char *host, TCallback callback, int timeout
 			int r = getaddrinfo_a(GAI_NOWAIT, reqs, 1, &d->event);
 
 			d->IncRef();
-			printf("%s:%i - getaddrinfo_a=%i\n", _FL, r);
 			if (r)
 				d->DecRef();
 		#endif

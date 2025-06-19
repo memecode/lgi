@@ -181,6 +181,8 @@ public:
 	virtual bool RemoveTag();
 	/// Counts all this and all child tags
 	int64 CountTags();
+	/// Get content of child tag...
+	const char *ChildContent(const char *childName);
 
 	/// Copy operator, doesn't effect children.
 	LXmlTag &operator =(LXmlTag &t);

@@ -408,8 +408,9 @@ void LXmlTag::EmptyChildren()
 void LXmlTag::Empty(bool Deep)
 {
 	EmptyAttributes();
-	Allocator->Free(Content);
-	Content = NULL;
+	if (Allocator && Content)
+		Allocator->Free(Content);
+	Content = nullptr;
 	SetTag(NULL);
 	
 	if (Deep)
@@ -497,12 +498,11 @@ const char *LXmlTag::GetTag()
 
 void LXmlTag::SetTag(const char *Str, ssize_t Len)
 {
-	Allocator->Free(Tag);
-	Tag = NULL;
-	if (Str)
-	{
+	if (Allocator)
+		Allocator->Free(Tag);
+	Tag = nullptr;
+	if (Str && Allocator)
 		Tag = Allocator->Alloc(Str, Len);
-	}
 }
 
 LXmlTag *LXmlTag::GetChildTag(const char *Name, bool Create, const char *TagSeparator)
@@ -713,6 +713,14 @@ int64 LXmlTag::CountTags()
 		c += t->CountTags();
 
 	return c;
+}
+
+const char *LXmlTag::ChildContent(const char *childName)
+{
+	if (auto c = GetChildTag(childName))
+		return c->GetContent();
+	
+	return nullptr;
 }
 
 bool LXmlTag::Dump(int Depth)
@@ -1403,6 +1411,7 @@ bool LXmlTree::Read(LXmlTag *Root, LStreamI *File, LXmlFactory *Factory)
 	
 	LString t = Root->Tag;
 	Root->Empty(true);
+	
 	LAutoRefPtr<LXmlAlloc> Allocator(new XmlPoolAlloc);
 	Root->Allocator = Allocator;
 	Root->SetTag(t);
