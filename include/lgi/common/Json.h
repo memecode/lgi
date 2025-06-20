@@ -428,22 +428,25 @@ public:
 				return *this;
 			}
 
+			Key *Deref(LString &addr, bool create)
+			{
+				if (!It->a->IdxCheck(Pos))
+					return nullptr;
+				return (*It->a)[Pos].Deref(addr, create);
+			}
+
 			LString GetJson()
 			{
+				if (!It->a->IdxCheck(Pos))
+					return LString();
 				return (*It->a)[Pos].Print(0);
 			}
 
 			LString Get(LString Addr)
 			{
-				auto &Arr = *It->a;
-				if (Pos >= Arr.Length())
-					return LString();
-				Key &k = Arr[Pos];
-				Key *v = k.Deref(Addr, false);
-				if (!v)
-					return LString();
-
-				return v->Str;
+				if (auto k = Deref(Addr, false))
+					return k->Str;
+				return LString();
 			}
 
 			Pair Get()
@@ -475,6 +478,62 @@ public:
 				}
 
 				return a;
+			}
+
+			bool Set(LString Addr, const char *Val)
+			{
+				if (auto k = Deref(Addr, true))
+				{
+					k->Str = Val;
+					return true;
+				}
+				return false;
+			}
+
+			bool Set(LString Addr, bool b)
+			{
+				if (auto k = Deref(Addr, true))
+					return k->Str.Printf("%i", b) > 0;
+				return false;
+			}
+
+			bool Set(LString Addr, int64_t Int)
+			{
+				if (auto k = Deref(Addr, true))
+					return k->Str.Printf(LPrintfInt64, Int) > 0;
+				return false;
+			}
+
+			bool Set(LString Addr, double Dbl)
+			{
+				if (auto k = Deref(Addr, true))
+					return k->Str.Printf("%f", Dbl) > 0;
+				return false;
+			}
+
+			bool Set(LString Addr, const LArray<LString> &Array)
+			{
+				if (auto k = Deref(Addr, true))
+				{
+					for (size_t i=0; i<Array.Length(); i++)
+						k->Array.New().Str = Array.ItemAt(i);
+					return true;
+				}
+				return false;
+			}
+
+			bool Set(LString Addr, const LArray<LJson> &Array)
+			{
+				if (auto k = Deref(Addr, true))
+				{
+					for (size_t i=0; i<Array.Length(); i++)
+					{
+						auto &out = k->Array.New();
+						out = Array.ItemAt(i).Root;
+					}
+					return true;
+				}
+				return false;
 			}
 		};
 
