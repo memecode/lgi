@@ -35,6 +35,7 @@ class Graph : public LView, public LMutex
 
 	LString logPath;
 	LFile logFile;
+	int groupX = 1;
 
 public:
 	Graph(int id) : LMutex("Graph")
@@ -52,6 +53,21 @@ public:
 				auto rd = logFile.Read(samples.AddressOf(), samples.Length() * sz);
 			}
 		}
+	}
+
+	bool OnMouseWheel(double Lines)
+	{
+		int add = (int)(Lines / 3.0);
+		int newGrp = groupX + add;
+		if (newGrp < 1)
+			newGrp = 1;
+		if (newGrp != groupX)
+		{
+			groupX = newGrp;
+			Invalidate();
+		}
+
+		return true;
 	}
 
 	void AddSample(int32_t ms)
@@ -94,11 +110,23 @@ public:
 		pDC->Line(draw.x2, draw.y1, draw.x2, draw.y2);
 		
 		LPoint prev;
-		auto now = time(NULL);
+		auto now = time(NULL); // time at draw.x2
 		size_t i = 0;
+		auto XtoTime = [&](int x)
+			{
+				int dx = draw.x2 - x;
+				return now - (dx * groupX);
+			};
+		auto TimeToX = [&](time_t time)
+			{
+				int64_t sec = now - time;
+				return (int) (draw.x2 - (sec / groupX));
+			};
+
+		auto startTime = XtoTime(draw.x1);
 		for (ssize_t n=samples.Length()-1; n > 0; n--)
 		{
-			if (now - samples[n].time >= draw.X())
+			if (TimeToX(samples[n].time) < draw.x1)
 			{
 				i = n + 1;
 				break;
@@ -121,32 +149,79 @@ public:
 		}
 
 		// Draw x axis
+		int nextX = 0;
+		int prevMin = 0;
 		for (int x = draw.x1; x <= draw.x2; x++)
 		{
-			time_t unix = x + samples[i].time;
+			time_t unix = XtoTime(x);
 			struct tm *local = localtime(&unix);
-			if (local && local->tm_sec == 0)
+			if (local && local->tm_min != prevMin)
 			{
 				auto str = LString::Fmt("%i:%2.2i", local->tm_hour, local->tm_min);
 				LDisplayString ds(fnt, str);
-				ds.Draw(pDC, x - (ds.X()/2), draw.y2 + (markPx*2));
-				pDC->Line(x, draw.y2, x, draw.y2+markPx);
+				auto drawX = x - (ds.X()/2);
+				if (!nextX || drawX >= nextX)
+				{
+					ds.Draw(pDC, x - (ds.X()/2), draw.y2 + (markPx*2));
+					nextX = x + ds.X();
+					pDC->Line(x, draw.y2, x, draw.y2+markPx);
+				}
+				prevMin = local->tm_min;
 			}
 		}
 
-		// Draw samples
-		pDC->Colour(LColour::Blue);		
-		for (; i<samples.Length(); i++)
 		{
-			auto &s = samples[i];
-			int x = (int) (s.time - first);
-			int y = s.value >= 0 ? s.value * draw.Y() / scale : draw.Y();
-			LPoint pt(draw.x1 + x,
-					  draw.y2 - y);
-			if (prev.x && s.time - prev_time < 10)			
-				pDC->Line(prev.x, prev.y, pt.x, pt.y);
-			prev = pt;
-			prev_time = s.time;
+			LDisplayString ds(fnt, LString::Fmt("groupX=%i", groupX));
+			ds.Draw(pDC, draw.x2 - 5 - ds.X(), draw.y1);
+		}
+
+		// Draw samples
+		if (groupX == 1)
+		{
+			pDC->Colour(LColour::Blue);		
+			for (; i<samples.Length(); i++)
+			{
+				auto &s = samples[i];
+				int x = TimeToX(s.time);
+				int y = s.value >= 0 ? s.value * draw.Y() / scale : draw.Y();
+				LPoint pt(x,
+						  draw.y2 - y);
+				if (prev.x && s.time - prev_time < 10)			
+					pDC->Line(prev.x, prev.y, pt.x, pt.y);
+				prev = pt;
+				prev_time = s.time;
+			}
+		}
+		else
+		{
+			pDC->Colour(LColour::Blue);		
+			for (int x=draw.x1; x<=draw.x2; x++)
+			{
+				int min = scale;
+				int max = 0;
+				int count = 0;
+
+				while (i < samples.Length())
+				{
+					auto &s = samples[i];
+					auto sx = TimeToX(s.time);
+					if (sx == x)
+					{
+						// add sample to grouping
+						int sy = s.value >= 0 ? s.value * draw.Y() / scale : draw.Y();
+						min = MIN(min, sy);
+						max = MAX(max, sy);
+						count++;
+					}
+					else if (sx > x)
+						break;
+
+					i++;
+				}
+
+				if (count)
+					pDC->Line(x, draw.y2 - min, x, draw.y2 - max);
+			}
 		}
 	}
 };
