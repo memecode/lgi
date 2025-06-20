@@ -279,7 +279,7 @@ public:
 	/// Read UPD packet
 	int ReadUdp(void *Buffer, int Size, int Flags, uint32_t *Ip = 0, uint16_t *Port = 0) override;
 	/// Write UPD packet
-	int WriteUdp(void *Buffer, int Size, int Flags, uint32_t Ip, uint16_t Port) override;
+	int WriteUdp(void *Buffer, int Size, int Flags, uint32_t Ip, uint16_t Port, int Ttl = 0) override;
 	
 	bool AddMulticastMember(uint32_t MulticastIp, uint32_t LocalInterface);
 	bool SetMulticastInterface(uint32_t Interface);
@@ -399,7 +399,7 @@ public:
 	
 		sudo ufw allow ${port}/udp	
 	*/
-	LUdpListener(LArray<uint32_t> interface_ips, uint32_t mc_ip, uint16_t port, LStream *log = NULL) :
+	LUdpListener(LArray<uint32_t> &interface_ips, uint32_t mc_ip, uint16_t port, LStream *log = NULL) :
 		IntfIps(interface_ips),
 		MulticastIp(mc_ip),
 		Port(port),
@@ -432,7 +432,7 @@ public:
 				errno);
 				#endif
 			OnError(err.GetCode(), err.GetMsg());
-			LgiTrace("Error: bindinf on %s:%i - %s\n", LIpToStr(ntohl(addr.sin_addr.s_addr)).Get(), port, err.ToString().Get());
+			LgiTrace("Error: bind on %s:%i - %s\n", LIpToStr(ntohl(addr.sin_addr.s_addr)).Get(), port, err.ToString().Get());
 		}
 
 		if (mc_ip)
@@ -445,11 +445,6 @@ public:
 
 	bool ReadPacket(LString &d, uint32_t &Ip, uint16_t &Port)
 	{
-		/* Don't force non blocking here...
-		if (!IsReadable(10))
-			return false;
-		*/
-
 		char Data[2048];
 		int Rd = ReadUdp(Data, sizeof(Data), 0, &Ip, &Port);
 		if (Rd <= 0)

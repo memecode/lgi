@@ -1407,10 +1407,7 @@ bool LSocket::AddMulticastMember(uint32_t MulticastIp, uint32_t LocalInterface)
 	mreq.imr_interface.s_addr = htonl(LocalInterface);	// your incoming interface IP
 	int r = setsockopt(Handle(), IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char*) &mreq, sizeof(mreq));
 	if (!r)
-	{
-		// LgiTrace("AddMulticastMember(%s, %s)\n", LIpToStr(MulticastIp).Get(), LIpToStr(LocalInterface).Get());
 		return true;
-	}
 
 	Error();
 	return false;
@@ -1484,18 +1481,21 @@ int LSocket::ReadUdp(void *Buffer, int Size, int Flags, uint32_t *Ip, uint16_t *
 	return (int)b;
 }
 
-int LSocket::WriteUdp(void *Buffer, int Size, int Flags, uint32_t Ip, uint16_t Port)
+int LSocket::WriteUdp(void *Buffer, int Size, int Flags, uint32_t Ip, uint16_t Port, int ttl)
 {
 	if (!Buffer || Size < 0)
 		return -1;
 
 	CreateUdpSocket();
 
+	if (ttl > 0)
+		setsockopt(d->Socket, IPPROTO_IP, IP_TTL, (const char*)&ttl, sizeof(ttl));
+
 	sockaddr_in a;
 	ZeroObj(a);
 	a.sin_family = AF_INET;
 	a.sin_port = htons(Port);
-	a.sin_addr.OsAddr = htonl(Ip);
+	a.sin_addr.OsAddr = Ip == 0xffffffff ? INADDR_ANY : htonl(Ip);
 	ssize_t b = sendto(d->Socket, (char*)Buffer, Size, Flags, (sockaddr*)&a, sizeof(a));
 	if (b > 0)
 	{
