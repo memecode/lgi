@@ -1010,7 +1010,7 @@ bool LFileSystem::CreateFolder(const char *PathName, bool CreateParentFolders, L
 	return r == 0;
 }
 
-bool LFileSystem::RemoveFolder(const char *PathName, bool Recurse)
+bool LFileSystem::RemoveFolder(const char *PathName, bool Recurse, LError *err)
 {
 	if (Recurse)
 	{
@@ -1019,23 +1019,26 @@ bool LFileSystem::RemoveFolder(const char *PathName, bool Recurse)
 		{
 			do
 			{
-				char Str[256];
+				char Str[MAX_PATH_LEN];
 				Dir.Path(Str, sizeof(Str));
 				
 				if (Dir.IsDir())
-				{
-					RemoveFolder(Str, Recurse);
-				}
+					RemoveFolder(Str, Recurse, err);
 				else
-				{
-					Delete(Str, NULL, false);
-				}
+					Delete(Str, err, false);
 			}
 			while (Dir.Next());
 		}
 	}
 	
-	return rmdir(PathName) == 0;
+	auto result = rmdir(PathName);
+	if (result)
+	{
+		if (err && !*err)
+			err->Set(errno);
+	}
+	
+	return result == 0;
 }
 
 bool LFileSystem::Move(const char *OldName, const char *NewName, LError *Err)
@@ -1469,7 +1472,7 @@ LFile::~LFile()
 	DeleteObj(d);
 }
 
-void LFile::SetThreadWarn(<#bool warn#>)
+void LFile::SetThreadWarn(bool warn)
 {
 }
 
