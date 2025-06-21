@@ -55,7 +55,7 @@ public:
 		int btnWid = 0;
 		for (auto &a: actions)
 			btnWid += a.btn->X();
-		int x = client.X() - (actions.Length() * space) - btnWid;
+		int x = (int) (client.X() - (actions.Length() * space) - btnWid);
 		for (auto &a: actions)
 		{
 			LRect r(x, 1, x + a.btn->X() - 1, client.Y() - 2);
