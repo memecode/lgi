@@ -17,7 +17,7 @@
 		LMessage::Result OnEvent(LMessage *Msg);
 		LStream *GetStream();
 		SshConsole *GetConsole();
-		bool WaitPrompt(LStream *c, LString *Data = NULL, const char *Debug = NULL);
+		bool WaitPrompt(LStream *c, LString *Data = NULL, const char *Debug = NULL, int timeoutMs = 0);
 
 	public:
 		enum LoggingType
