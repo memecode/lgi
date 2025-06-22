@@ -1447,6 +1447,13 @@ void VcFolder::LogFilter(const char *Filter)
 			StartCmd(args, NULL, params);
 			break;
 		}
+		case VcHg:
+		{
+			auto args = LString::Fmt("log %s", Filter);
+			ClearLog();
+			StartCmd(args, &VcFolder::ParseLog);
+			break;
+		}
 		default:
 		{
 			NoImplementation(_FL);
@@ -2051,7 +2058,8 @@ void VcFolder::OnCmdError(LString Output, const char *Msg)
 			for (auto Bin : a)
 				d->Log->Print("    %s\n", Bin.Get());
 		}
-		else if (Msg)
+		
+		if (Msg)
 		{
 			d->Log->Print("%s\n", Msg);
 		}
@@ -3185,15 +3193,25 @@ void VcFolder::ReadDir(LTreeItem *Parent, const char *ReadUri)
 	{
 		// Read child items
 		LDirectory Dir;
-		for (int b = Dir.First(u.LocalPath()); b; b = Dir.Next())
+		LString parentUri = ReadUri;
+		if (parentUri(-1) != '/')
+			parentUri += "/";
+
+		auto localPath = u.LocalPath();
+		auto debug = "C:\\code\\lgi\\trunk\\.hg\\store\\data\\templates\\mac\\basic__gui\\"; //%name%.xcodeproj
+		if (!Stricmp(localPath.Get(), debug))
+		{
+			int asd=0;
+		}
+		LgiTrace("localPath: %s\n", localPath.Get());
+
+		for (int b = Dir.First(localPath); b; b = Dir.Next())
 		{
 			auto name = Dir.GetName();
 			if (Dir.IsHidden())
 				continue;
 				
-			LUri Path = u;
-			Path += name;
-			new VcLeaf(this, Parent, u.ToString(), name, Dir.IsDir());
+			new VcLeaf(this, Parent, parentUri, name, Dir.IsDir());
 		}
 
 		PathSeek();
@@ -5243,13 +5261,13 @@ void VcFolder::UncommitedItem::OnPaint(LItem::ItemPaintCtx &Ctx)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-VcLeaf::VcLeaf(VcFolder *parent, LTreeItem *Item, LString uri, LString leaf, bool folder)
+VcLeaf::VcLeaf(VcFolder *parent, LTreeItem *Item, LString folderUri, LString leaf, bool folder)
 {
 	Parent = parent;
 	d = Parent->GetPriv();
-	LAssert(uri.Find("://") >= 0); // Is URI
-	LAssert(uri(-1) == '/'); // has trailing folder sep
-	Uri.Set(uri);
+	LAssert(folderUri.Find("://") >= 0); // Is URI
+	LAssert(folderUri(-1)  == '/'); // has trailing folder sep
+	Uri.Set(folderUri);
 	LAssert(Uri);
 	Leaf = leaf;
 	Folder = folder;
@@ -5317,23 +5335,31 @@ void VcLeaf::AfterBrowse()
 {
 }
 
-VcLeaf *VcLeaf::FindLeaf(const char *Path, bool OpenTree)
+VcLeaf *VcLeaf::FindLeaf(const char *Path, bool OpenTree, int depth)
 {
-	if (!Stricmp(Path, Full().Get()))
+	if (depth > 32)
+	{
+		LAssert(!"hit recursion limit.");
+		return nullptr;
+	}
+
+	auto full = Full();
+	if (!Stricmp(Path, full.Get()))
 		return this;
 
 	if (OpenTree)
 		DoExpand();
 
-	VcLeaf *r = NULL;	
-	for (auto n = GetChild(); !r && n; n = n->GetNext())
+	for (auto n = GetChild(); n; n = n->GetNext())
 	{
-		auto l = dynamic_cast<VcLeaf*>(n);
-		if (l)
-			r = l->FindLeaf(Path, OpenTree);
+		if (auto l = dynamic_cast<VcLeaf*>(n))
+		{
+			if (auto r = l->FindLeaf(Path, OpenTree, depth + 1))
+				return r;
+		}
 	}
 	
-	return r;
+	return nullptr;
 }
 
 void VcLeaf::DoExpand()

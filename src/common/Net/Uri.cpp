@@ -65,7 +65,7 @@ LUri &LUri::operator +=(const char *s)
 		else if (p.Equals("."))
 			;
 		else
-			parts.Add(p);
+			parts.Add(EncodeStr(p, "%"));
 	}
 
 	sPath = LString("/").Join(parts);
