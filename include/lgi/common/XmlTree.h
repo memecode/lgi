@@ -278,6 +278,7 @@ public:
 	
 	/// Encode a string to use entities
 	char *EncodeEntities(const char *s, ssize_t len = -1, const char *extra_characters = NULL);
+	LString EncodeEntities(LString &str, const char *extra_characters = NULL);
 	
 	/// Encode a string to use entities
 	bool EncodeEntities(LStreamI *out, const char *s, ssize_t len, const char *extra_characters = NULL);
