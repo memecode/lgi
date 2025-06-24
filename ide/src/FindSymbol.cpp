@@ -19,7 +19,7 @@
 
 #define DEBUG_FIND_SYMBOL		0
 #define DEBUG_NO_THREAD			1
-// #define DEBUG_FILE				"View.h"
+#define DEBUG_FILE				"os/interface/View.h"
 #define KNOWN_EXT				"c,cpp,cxx,h,hpp,hxx,py,js"
 #define INDEX_EXT				"idx"
 
@@ -169,19 +169,23 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 	// Backend call handling:
 	int backendCalls = 0;
 	std::function<void()> onShutdown;
-	bool IncCalls()
+	bool IncCalls(const char *file, int line)
 	{
 		if (onShutdown)
 			return false;
 		backendCalls++;
-		printf("inc backendCalls=%i\n", backendCalls);
+		
+		LgiTrace("inc backendCalls=%i %s:%i\n", backendCalls, file, line);
+		
 		return true;
 	}
-	void DecCalls()
+	void DecCalls(const char *file, int line)
 	{
 		LAssert(backendCalls > 0);
 		backendCalls--;
-		printf("dec backendCalls=%i\n", backendCalls);
+		
+		LgiTrace("dec backendCalls=%i %s:%i\n", backendCalls, file, line);
+		
 		if (!backendCalls && onShutdown)
 			onShutdown();
 	}
@@ -299,7 +303,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			{
 				if (Platforms && Files[Idx]->Platforms == 0)
 					Files[Idx]->Platforms = Platforms;
-				return true;
+				return;
 			}
 
 			FileSyms *f;
@@ -337,12 +341,12 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		if (backend)
 		{
 			auto cacheFile = CachePath(Path);
-			if (!cacheDirty && LFileExists(cacheFile))
+			if (!Debug && !cacheDirty && LFileExists(cacheFile))
 			{
 				// Load from the cache...
 				f->Serialize(cacheFile, false);
 			}
-			else if (IncCalls())
+			else if (IncCalls(_FL))
 			{
 				backend->Read(SystemIntf::TBackground, Path, [this, f, Debug](auto err, auto data) mutable
 				{
@@ -351,7 +355,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 					else
 						AddFileData(f, data, Debug);
 
-					DecCalls();
+					DecCalls(_FL);
 				});
 			}
 		}
@@ -398,11 +402,6 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			LgiTrace("%s:%i - About to parse '%s'.\n", _FL, f->Path.Get());
 		#endif
 		
-		if (f->Path.Find("can_have_error.cpp") > 0)
-		{
-			int asd=0;
-		}
-
 		LAutoWString w(Utf8ToWide(data));
 		LError err;
 		if (f->Parse(w, err, Debug))
@@ -466,7 +465,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		{
 			if (!map.Find(p))
 			{
-				// LgiTrace("add path: %s\n", p.Get());
+				// Log("add path: %s %i\n", p.Get(), recurse);
 				out.Add(p);
 				map.Add(p, true);
 
@@ -598,7 +597,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			{
 				if (auto path = Msg->AutoA<LString>())
 				{
-					if (IncCalls())
+					if (IncCalls(_FL))
 					{
 						backend->ReadFolder(
 							SystemIntf::TBackground,
@@ -655,7 +654,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 									}
 								}
 
-								DecCalls();
+								DecCalls(_FL);
 							});
 					}
 				}

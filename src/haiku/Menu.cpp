@@ -180,15 +180,14 @@ LSubMenu *LSubMenu::AppendSub(const char *Str, int Where)
 {
 	LBase::Name(Str);
 	
-	LMenuItem *i = new LMenuItem(Menu, this, Str, ItemId_Submenu, Where < 0 ? Items.Length() : Where, NULL);
+	auto i = new LMenuItem(Menu, this, Str, ItemId_Submenu, Where < 0 ? Items.Length() : Where, NULL);
 	if (!i)
 		return NULL;
-
-	Items.Insert(i, Where);
 
 	MenuLock lck(this, _FL);
 	if (lck)
 	{
+		Items.Insert(i, Where);
 		Info->AddItem(i->Info);
 	}
 	else

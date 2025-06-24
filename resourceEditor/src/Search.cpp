@@ -208,8 +208,7 @@ LMessage::Result SearchThread::OnEvent(LMessage *Msg)
 	{
 		case M_SEARCH:
 		{
-			LAutoPtr<SearchParams> p;
-			if (ReceiveA(p, Msg))
+			if (auto p = Msg->AutoA<SearchParams>())
 				Params = *p;
 			else
 				return 0;

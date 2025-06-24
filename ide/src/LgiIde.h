@@ -1,6 +1,5 @@
 #pragma once
 
-
 //
 // Compiler specific macros:
 //
@@ -340,3 +339,4 @@ struct SysIncThread : public LThread, public LCancel
 extern const char sCurrentPlatform[];
 extern const char *Untitled;
 extern const char SourcePatterns[];
+extern LString::Array CollectAllSystemIncludePaths(IdeProject* proj, SysPlatform Platform);

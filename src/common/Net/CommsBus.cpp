@@ -863,11 +863,14 @@ struct LCommsBusPriv :
 				#if USE_TRANSPORT
 					listener->TimeSlice();
 				#else
-					uint32_t ip;
-					uint16_t port;
-					LString msg;
-					if (listener->ReadPacket(msg, ip, port))
-						OnPeerUdp(ip, msg);
+					if (listener->IsReadable(10))
+					{
+						uint32_t ip;
+						uint16_t port;
+						LString msg;
+						if (listener->ReadPacket(msg, ip, port))
+							OnPeerUdp(ip, msg);
+					}
 				#endif
 			}
 

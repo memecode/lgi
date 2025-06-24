@@ -1529,9 +1529,11 @@ public:
 
 	void OnFilterFiles()
 	{
-		VcFolder *f = dynamic_cast<VcFolder*>(Tree->Selection());
-		if (f)
+		if (auto f = dynamic_cast<VcFolder*>(Tree->Selection()))
+		{
+			Log->Print("FilterCurrentFiles: %s\n", __FUNCTION__);
 			f->FilterCurrentFiles();
+		}
 	}
 
 	VcFolder *GetCurrent()

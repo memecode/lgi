@@ -49,8 +49,8 @@ class LgiClass LXmlAttr
 public:
 	LXmlAttr()
 	{
-		Name = 0;
-		Value = 0;
+		Name = nullptr;
+		Value = nullptr;
 	}
 	
 	char *GetName() { return Name; }
@@ -181,6 +181,8 @@ public:
 	virtual bool RemoveTag();
 	/// Counts all this and all child tags
 	int64 CountTags();
+	/// Get content of child tag...
+	const char *ChildContent(const char *childName);
 
 	/// Copy operator, doesn't effect children.
 	LXmlTag &operator =(LXmlTag &t);
@@ -276,6 +278,7 @@ public:
 	
 	/// Encode a string to use entities
 	char *EncodeEntities(const char *s, ssize_t len = -1, const char *extra_characters = NULL);
+	LString EncodeEntities(LString &str, const char *extra_characters = NULL);
 	
 	/// Encode a string to use entities
 	bool EncodeEntities(LStreamI *out, const char *s, ssize_t len, const char *extra_characters = NULL);

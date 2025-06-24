@@ -899,18 +899,20 @@ void ProjectNode::Delete()
 
 	if (auto backend = Project ? Project->GetBackend() : nullptr)
 	{
-		backend->Delete(GetFullPath(), GetType() == NodeDir, [this](auto status)
+		backend->Delete(GetFullPath(), GetType() == NodeDir, [this](auto error)
 			{
-				if (status)
+				if (error)
+				{
+					if (auto log = GetLog())
+						log->Print("%s:%i - delete failed: %s\n", _FL, error.ToString().Get());
+				}
+				else
 				{
 					Project->SetDirty();
 					LXmlTag::RemoveTag();
 					delete this;
 				}
-				else if (auto log = GetLog())
-				{
-					log->Print("%s:%i - delete failed.\n", _FL);
-				}
+				
 			});
 	}
 	else

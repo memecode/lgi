@@ -818,7 +818,7 @@ bool LFileSystem::CreateFolder(const char *PathName, bool CreateParentFoldersIfN
 	return Status;
 }
 
-bool LFileSystem::RemoveFolder(const char *PathName, bool Recurse)
+bool LFileSystem::RemoveFolder(const char *PathName, bool Recurse, LError *err)
 {
 	if (Recurse)
 	{
@@ -832,11 +832,11 @@ bool LFileSystem::RemoveFolder(const char *PathName, bool Recurse)
 				{
 					if (Dir.IsDir())
 					{
-						RemoveFolder(Str, Recurse);
+						RemoveFolder(Str, Recurse, err);
 					}
 					else
 					{
-						Delete(Str, false);
+						Delete(Str, err, false);
 					}
 				}
 			}
@@ -851,9 +851,8 @@ bool LFileSystem::RemoveFolder(const char *PathName, bool Recurse)
 	if (!::RemoveDirectory(PathName))
 	#endif
 	{
-		#ifdef _DEBUG
-		DWORD e = GetLastError();
-		#endif
+		if (err)
+			err->Set(GetLastError());
 
 		return false;
 	}
@@ -1423,29 +1422,17 @@ int64 LDirectory::GetSizeOnDisk()
 class LFilePrivate
 {
 public:
-	OsFile		hFile;
+	OsFile		hFile = INVALID_HANDLE;
 	LString		Name;
-	int			Attributes;
-	bool		Swap;
-	bool		Status;
-	DWORD		LastError;
+	int			Attributes = 0;
+	bool		Swap = false;
+	bool		Status = false;
+	DWORD		LastError = 0;
 
 	// Threading check stuff
-	OsThreadId	CreateId, UseId;
-	bool ThreadWarn;
-
-	LFilePrivate()
-	{
-		hFile = INVALID_HANDLE;
-		Attributes = 0;
-		Swap = false;
-		Status = false;
-		LastError = 0;
-
-		ThreadWarn = true;
-		CreateId = LThread::InvalidId;
-		UseId = LThread::InvalidId;
-	}
+	OsThreadId	CreateId = LThread::InvalidId;
+	OsThreadId	UseId = LThread::InvalidId;
+	bool ThreadWarn = true;
 
 	bool UseThreadCheck()
 	{
@@ -1496,6 +1483,11 @@ LFile::~LFile()
 OsFile LFile::Handle()
 {
 	return d->hFile;
+}
+
+void LFile::SetThreadWarn(bool warn)
+{
+	d->ThreadWarn = warn;
 }
 
 void LFile::ChangeThread()

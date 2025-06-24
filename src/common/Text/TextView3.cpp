@@ -378,8 +378,9 @@ void LTextView3::LStyle::RefreshLayout(size_t Start, ssize_t Len)
 //////////////////////////////////////////////////////////////////////
 LTextView3::LTextView3(	int Id,
 						int x, int y, int cx, int cy,
-						LFontType *FontType)
-	: ResObject(Res_Custom)
+						LFontType *FontType) :
+	ResObject(Res_Custom),
+	Style(LStyle())
 {
 	// init vars
 	LView::d->Css.Reset(d = new LTextView3Private(this));
@@ -542,6 +543,7 @@ void LTextView3::SetCrLf(bool crlf)
 	if (CrLf != crlf)
 	{
 		CrLf = crlf;
+		// printf("%s:%i - LTextView3::SetCrLf crlf=%i\n", _FL, CrLf);
 		Dirty = true;
 	}
 }
@@ -1860,16 +1862,23 @@ bool LTextView3::Name(const char *s)
 		{
 			// Remove '\r's
 			char16 *o = Text;
+			CrLf = false;
 			for (char16 *i=Text; *i; i++)
 			{
 				if (*i != '\r')
 				{
 					*o++ = *i;
 				}
-				else Size--;
+				else
+				{
+					Size--;
+					CrLf = true;
+				}
 			}
 			*o++ = 0;
 		}
+		
+		// printf("%s:%i - TextView3::Name crlf=%i\n", _FL, CrLf);
 		
 		// update everything else
 		d->SetDirty(0, Size);
@@ -1933,8 +1942,9 @@ bool LTextView3::NameW(const char16 *s)
 		}
 		Size = Out;
 		Text[Size] = 0;
-
 	}
+
+	// printf("%s:%i - LTextView3::NameW crlf=%i\n", _FL, CrLf);
 
 	// update everything else
 	Line.DeleteObjects();
@@ -2473,6 +2483,8 @@ bool LTextView3::Open(const char *Name, const char *CharSet)
 					}
 					Size = (int) (Out - Text);
 					*Out = 0;
+
+					// printf("%s:%i - LTextView3::Open crlf=%i\n", _FL, CrLf);
 
 					Alloc = Size + 1;
 					Dirty = false;

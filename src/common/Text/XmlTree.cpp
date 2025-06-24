@@ -170,6 +170,13 @@ char *LXmlTree::EncodeEntities(const char *s, ssize_t len, const char *extra_cha
 	return 0;
 }
 
+LString LXmlTree::EncodeEntities(LString &str, const char *extra_characters)
+{
+	LStringPipe p;
+	EncodeEntities(&p, str.Get(), str.Length(), extra_characters);
+	return p.NewLStr();
+}
+
 bool LXmlTree::EncodeEntities(LStreamI *to, const char *start, ssize_t len, const char *extra_characters)
 {
 	if (!start || !to)
@@ -408,8 +415,9 @@ void LXmlTag::EmptyChildren()
 void LXmlTag::Empty(bool Deep)
 {
 	EmptyAttributes();
-	Allocator->Free(Content);
-	Content = NULL;
+	if (Allocator && Content)
+		Allocator->Free(Content);
+	Content = nullptr;
 	SetTag(NULL);
 	
 	if (Deep)
@@ -497,12 +505,11 @@ const char *LXmlTag::GetTag()
 
 void LXmlTag::SetTag(const char *Str, ssize_t Len)
 {
-	Allocator->Free(Tag);
-	Tag = NULL;
-	if (Str)
-	{
+	if (Allocator)
+		Allocator->Free(Tag);
+	Tag = nullptr;
+	if (Str && Allocator)
 		Tag = Allocator->Alloc(Str, Len);
-	}
 }
 
 LXmlTag *LXmlTag::GetChildTag(const char *Name, bool Create, const char *TagSeparator)
@@ -713,6 +720,14 @@ int64 LXmlTag::CountTags()
 		c += t->CountTags();
 
 	return c;
+}
+
+const char *LXmlTag::ChildContent(const char *childName)
+{
+	if (auto c = GetChildTag(childName))
+		return c->GetContent();
+	
+	return nullptr;
 }
 
 bool LXmlTag::Dump(int Depth)
@@ -1403,6 +1418,7 @@ bool LXmlTree::Read(LXmlTag *Root, LStreamI *File, LXmlFactory *Factory)
 	
 	LString t = Root->Tag;
 	Root->Empty(true);
+	
 	LAutoRefPtr<LXmlAlloc> Allocator(new XmlPoolAlloc);
 	Root->Allocator = Allocator;
 	Root->SetTag(t);
@@ -1527,12 +1543,14 @@ bool LXmlTree::Output(LXmlTag *t, int Depth)
 	bool HasContent = false;
 	bool HasChildren = false;
 	bool ValidTag = false;
+	bool outputWs = !TestFlag(d->Flags, GXT_NO_PRETTY_WHITESPACE);
+	const char *Eol = outputWs ? "\n" : "";
 	
 	#define OutputWrite(buf, size) \
 		if (d->File->Write(buf, size) != size) \
 			goto WriteError;
 
-	#define Tabs if (!TestFlag(d->Flags, GXT_NO_PRETTY_WHITESPACE)) \
+	#define Tabs if (outputWs) \
 		{ for (int i=0; i<Depth; i++) OutputWrite((void*)"\t", 1); }
 
 	if (d->Prog)
@@ -1578,12 +1596,12 @@ bool LXmlTree::Output(LXmlTag *t, int Depth)
 		if (HasContent || HasChildren)
 		{
 			OutputWrite(">", 1);
-			endTag.Printf("</%s>\n", t->Tag);
+			endTag.Printf("</%s>%s", t->Tag, Eol);
 		}
 		else if (d->NoDom())
-			endTag = ">\n";
+			endTag.Printf(">%s", Eol);
 		else
-			endTag = " />\n";
+			endTag.Printf(" />%s", Eol);
 	}
 	else
 	{
@@ -1598,7 +1616,7 @@ bool LXmlTree::Output(LXmlTag *t, int Depth)
 		if (!EncodeEntities(d->File, t->Content, -1, EncodeEntitiesContent))
 			goto EncoderEntitiesError;
 
-		if (HasChildren)
+		if (HasChildren && outputWs)
 		{
 			OutputWrite((char*)"\n", 1);
 			Tabs
@@ -1613,7 +1631,7 @@ bool LXmlTree::Output(LXmlTag *t, int Depth)
 		
 		if (c)
 		{
-			if (!HasContent)
+			if (!HasContent && outputWs)
 			{
 				OutputWrite((char*)"\n", 1);
 			}

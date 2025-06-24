@@ -345,7 +345,7 @@ class LgiClass LFontSystem : public LCapabilityClient
 	static LFontSystem *Me;
 
 private:
-	// System Font List
+	// System Font List (lock 'd' before using)
 	LString::Array AllFonts;
 	LString::Array SubFonts; // Fonts yet to be scanned for substitution
 
@@ -362,7 +362,7 @@ public:
 	LFontSystem();
 	~LFontSystem();
 
-	/// Enumerate all installed fonts
+	/// Enumerate all installed fonts (thread safe)
 	bool EnumerateFonts(LString::Array &Fonts);
 
 	/// Returns whether the current Lgi implementation supports glyph sub

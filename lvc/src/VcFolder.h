@@ -419,11 +419,11 @@ class VcLeaf : public LTreeItem
 public:
 	LArray<VcCommit*> Log;
 
-	VcLeaf(VcFolder *parent, LTreeItem *Item, LString uri, LString leaf, bool folder);
+	VcLeaf(VcFolder *parent, LTreeItem *Item, LString folderUri, LString leaf, bool folder);
 	~VcLeaf();
 
 	LString Full();
-	VcLeaf *FindLeaf(const char *Path, bool OpenTree);
+	VcLeaf *FindLeaf(const char *Path, bool OpenTree, int depth = 0);
 	void OnBrowse();
 	void AfterBrowse();
 	void OnExpand(bool b);

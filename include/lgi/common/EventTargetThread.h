@@ -249,7 +249,6 @@ public:
 	
 	virtual ~LEventTargetThread()
 	{
-		// printf("~LEventTargetThread %s\n", LThread::GetName());
 		EndThread();
 	}
 	
@@ -336,13 +335,11 @@ public:
 			Msgs.Add(Msg);
 		Unlock();
 		
-		// printf("%x: PostEvent and sig %i\n", LCurrentThreadId(), (int)Msgs.Length());
 		return Event.Signal();
 	}
 	
 	int Main()
 	{
-		// printf("EventTargetThread %s, thread=%i\n", LThread::GetName(), LCurrentThreadId());
 		while (!IsCancelled())
 		{
 			int WaitLength = 100;
@@ -446,17 +443,22 @@ public:
 		return Status;
 	}
 
+	/* Use LMessage::AutoA
 	template<typename T>
 	bool ReceiveA(LAutoPtr<T> &Obj, LMessage *m)
 	{
 		return Obj.Reset((T*)m->A());
 	}
+	*/
 
+	
+	/* Use LMessage::AutoB
 	template<typename T>
 	bool ReceiveB(LAutoPtr<T> &Obj, LMessage *m)
 	{
 		return Obj.Reset((T*)m->B());
 	}
+	*/
 };
 
 

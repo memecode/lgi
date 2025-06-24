@@ -294,7 +294,9 @@ public:
 		/// The path to remove
 		const char *PathName,
 		/// True if you want this function to recursively delete all contents of the path passing in.
-		bool Recurse = false
+		bool Recurse = false,
+		/// Optional error information
+		LError *err = nullptr
 	)	override;
 	
 	LString GetCurrentFolder() override;
@@ -368,7 +370,15 @@ public:
 
 	std::function<void(LError&)> onErrorCb;
 	OsFile Handle();
+	
+	// By default the class will warn if you use an instance in multiple threads.
+	// There are cases where a file object is passed between threads, and calling
+	// this in the new thread changes the ID for valid use.
 	void ChangeThread() override;
+	// Alternatively SetThreadWarn can turned off the warn if the caller is doing it's own
+	// locking to prevent multi-threaded use causing corruption.
+	void SetThreadWarn(bool warn);
+	
 	operator bool() { return IsOpen(); }
 
 	/// \brief Opens a file
@@ -469,6 +479,7 @@ public:
 	class LgiClass Path : public LString::Array
 	{
 		LString Full;
+		static LString TmpPath;
 		
 	public:
 		enum State
@@ -634,6 +645,7 @@ public:
 		bool IsFile() { return Exists() == TypeFile; }
 		bool IsFolder() { return Exists() == TypeFolder; }
 		static LString GetSystem(LSystemPath Which, int WordSize = 0);
+		static bool SetSystem(LSystemPath Which, LString Path, int WordSize = 0);
 		static LString PrintAll();
 	};
 

@@ -260,6 +260,8 @@ class App : public LWindow
 	LTableLayout *Tbl = NULL;
 
 public:
+	const char *GetClass() override { return "App"; }
+
 	App() : Opts(LOptionsFile::PortableMode, AppName)
 	{
 		LRect r(0, 0, 1000, 800);
@@ -275,8 +277,8 @@ public:
 		{
 			#if 1
 
-				AddView(new OriginTest(10, 10, 0));
-				AddView(new OriginTest(120, 10, 10));
+				// AddView(new OriginTest(10, 10, 0));
+				// AddView(new OriginTest(120, 10, 10));
 
 			#elif 0
 
@@ -335,10 +337,10 @@ public:
 		Opts.SerializeFile(true);
 	}
 
-	void OnPaint(LSurface *pDC)
+	void OnPaint(LSurface *pDC) override
 	{
 		auto c = GetClient();
-		
+		printf("	LWindow::OnPaint %s %i,%i\n", c.GetStr(), pDC->X(), pDC->Y());
 		pDC->Colour(L_MED);
 		pDC->Rectangle();
 		

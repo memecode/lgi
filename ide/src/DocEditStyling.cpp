@@ -93,7 +93,8 @@ DocEditStyling::DocEditStyling(DocEdit *view) :
 	Event("DocEditStyling.Event"),
 	ParentState(KWaiting),
 	WorkerState(KWaiting),
-	Params(view)
+	Params(view),
+	PrevStyle(LTextView3::LStyle())
 {
 }
 
@@ -238,7 +239,8 @@ void DocEditStyling::StyleCpp(StylingParams &p)
 	char16 *e = s + p.Text.Length();
 		
 	PROF("Scan");
-	LUnrolledList<LTextView3::LStyle> Out;
+	LTextView3::LStyle empty;
+	LUnrolledList<LTextView3::LStyle> Out(empty);
 	for (; ParentState != KCancel && s < e; s++)
 	{
 		switch (*s)

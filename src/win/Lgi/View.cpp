@@ -943,8 +943,8 @@ bool LView::SetPos(LRect &p, bool Repaint)
 		Pos = p;
 		if (_View)
 		{
-			HWND hOld = GetFocus();
-			bool WasVis = IsWindowVisible(_View) != 0;
+			auto hOld = GetFocus();
+			auto WasVis = IsWindowVisible(_View) != 0;
 			int Shadow = WINDOWS_SHADOW_AMOUNT;
 
 			In_SetWindowPos = true;

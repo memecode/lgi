@@ -183,11 +183,12 @@ LString LastLine(LStringPipe &input)
 	return ln;
 }
 
-bool SshConnection::WaitPrompt(LStream *con, LString *Data, const char *Debug)
+bool SshConnection::WaitPrompt(LStream *con, LString *Data, const char *Debug, int timeoutMs)
 {
 	LStringPipe out(4 << 10);
-	auto Ts = LCurrentTime();
-	auto LastReadTs = Ts;
+	auto startTs = LCurrentTime();
+	auto Ts = startTs;
+	auto LastReadTs = startTs;
 	ProgressListItem *Prog = NULL;
 	#if PROFILE_WaitPrompt
 	LProfile prof("WaitPrompt", 100);
@@ -229,14 +230,15 @@ SSH_LOG("waitPrompt data:", rd, tmp);
 			continue;
 		}
 
-		if (LCurrentTime() - LastReadTs > 4000)
+		auto now = LCurrentTime();
+		if (now - LastReadTs > 4000)
 		{
 			auto sz = out.GetSize();
 SSH_LOG("waitPrompt out:", sz, &out);
 			auto last = LastLine(out);
 
 			// Does the buffer end with a ':' on a line by itself?
-			// Various version control CLI's do that to pageinate data.
+			// Various version control CLI's do that to paginate data.
 			// Obviously we're not going to deal with that directly, 
 			// but the developer will need to know that's happened.
 			if (out.GetSize() > 2)
@@ -245,6 +247,10 @@ SSH_LOG("waitPrompt out:", sz, &out);
 				if (last == ":")
 					return false;
 			}
+		}
+		if (timeoutMs > 0 && now - startTs >= timeoutMs)
+		{
+			return false;
 		}
 
 		if (!CheckLast)
@@ -383,12 +389,9 @@ LMessage::Result SshConnection::OnEvent(LMessage *Msg)
 	{
 		case M_DETECT_VCS:
 		{
-			LAutoPtr<LString> p;
-			if (!ReceiveA(p, Msg))
-			{
-				LAssert(!"Incorrect param.");
+			auto p = Msg->AutoA<LString>();
+			if (!p)
 				break;
-			}
 
 			LAutoPtr<SshParams> r(new SshParams(this));
 
@@ -407,7 +410,7 @@ LMessage::Result SshConnection::OnEvent(LMessage *Msg)
 				ls.Printf("find %s -maxdepth 1 -printf \"%%f\n\"\n", path.Get());
 SSH_LOG("detectVcs:", ls);
 				con->Write(ls, ls.Length());
-				auto pr = WaitPrompt(con, &out);
+				auto pr = WaitPrompt(con, &out, nullptr, 3000);
 				lines = out.SplitDelimit("\r\n");
 
 				for (auto ln: lines)

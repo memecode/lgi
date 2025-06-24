@@ -70,6 +70,15 @@ LgiExtern LString LIpToStr(uint32_t ip);
 LgiExtern uint32_t LIpToInt(LString str); // Convert IP as string to host order int
 LgiExtern uint32_t LHostnameToIp(const char *HostName); // Hostname lookup (DNS), returns IP in host order or 0 on error
 
+class LgiClass LHostnameAsync
+{
+	struct LHostnameAsyncPriv *d;
+public:
+	typedef std::function<void(uint32_t ip4, LError &err, uint64_t timeMs)> TCallback;
+	LHostnameAsync(const char *host, TCallback callback, int timeoutMs = -1);
+	~LHostnameAsync();
+};
+
 /// Get a specific value from a list of headers (as a dynamic string)
 LgiFunc char *InetGetHeaderField(const char *Headers, const char *Field, ssize_t Len = -1);
 LgiExtern LString LGetHeaderField(LString Headers, const char *Field);
@@ -270,7 +279,7 @@ public:
 	/// Read UPD packet
 	int ReadUdp(void *Buffer, int Size, int Flags, uint32_t *Ip = 0, uint16_t *Port = 0) override;
 	/// Write UPD packet
-	int WriteUdp(void *Buffer, int Size, int Flags, uint32_t Ip, uint16_t Port) override;
+	int WriteUdp(void *Buffer, int Size, int Flags, uint32_t Ip, uint16_t Port, int Ttl = 0) override;
 	
 	bool AddMulticastMember(uint32_t MulticastIp, uint32_t LocalInterface);
 	bool SetMulticastInterface(uint32_t Interface);
@@ -390,7 +399,7 @@ public:
 	
 		sudo ufw allow ${port}/udp	
 	*/
-	LUdpListener(LArray<uint32_t> interface_ips, uint32_t mc_ip, uint16_t port, LStream *log = NULL) :
+	LUdpListener(LArray<uint32_t> &interface_ips, uint32_t mc_ip, uint16_t port, LStream *log = NULL) :
 		IntfIps(interface_ips),
 		MulticastIp(mc_ip),
 		Port(port),
@@ -410,18 +419,20 @@ public:
 			addr.sin_addr.s_addr = INADDR_ANY;
 		#endif
 
+		SetReuseAddress(true);
+
 		Context = "LUdpListener.bind";
 		Status = bind(Handle(), (struct sockaddr*)&addr, sizeof(addr)) == 0;
 		if (!Status)
 		{
-			#ifdef WIN32
-				auto err = WSAGetLastError();
-			#else
-				auto err = errno;
-			#endif
-			OnError(err, LErrorCodeToString(err));
-
-			LgiTrace("Error: Bind on %s:%i\n", LIpToStr(ntohl(addr.sin_addr.s_addr)).Get(), port);
+			LError err(
+				#ifdef WIN32
+				WSAGetLastError());
+				#else
+				errno);
+				#endif
+			OnError(err.GetCode(), err.GetMsg());
+			LgiTrace("Error: bind on %s:%i - %s\n", LIpToStr(ntohl(addr.sin_addr.s_addr)).Get(), port, err.ToString().Get());
 		}
 
 		if (mc_ip)
@@ -434,10 +445,7 @@ public:
 
 	bool ReadPacket(LString &d, uint32_t &Ip, uint16_t &Port)
 	{
-		if (!IsReadable(10))
-			return false;
-
-		char Data[MAX_UDP_SIZE];
+		char Data[2048];
 		int Rd = ReadUdp(Data, sizeof(Data), 0, &Ip, &Port);
 		if (Rd <= 0)
 			return false;

@@ -396,7 +396,6 @@ void LTabView::Value(int64 i)
 		auto Old = it[d->Current];
 		if (Old)
 		{
-			// printf("%s:%i - old[%i] hide.\n", _FL, d->Current);
 			Old->Visible(false);
 		}
 		else printf("%s:%i - no old.\n", _FL);
@@ -404,26 +403,25 @@ void LTabView::Value(int64 i)
 		d->Current = (int)MIN(i, (ssize_t)it.Length()-1);
 		OnPosChange();
 
-		auto p = it[d->Current];
-		if (p)
+		if (IsAttached())
 		{
-			if (!p->IsAttached())
+			auto p = it[d->Current];
+			if (p)
 			{
-				// printf("%s:%i - new[%i] attach %p.\n", _FL, d->Current, p->Handle());
-				p->Attach(this);
+				if (!p->IsAttached())
+				{
+					p->Attach(this);
+				}
+				p->AttachChildren();
+				p->Visible(true);
 			}
-			// printf("%s:%i - new[%i] visible %p.\n", _FL, d->Current, p->Handle());
-			p->AttachChildren();
-			p->Visible(true);
-		}
 
-		Invalidate();
+			Invalidate();
+		}
 
 		LNotification n(LNotifyValueChanged, _FL);
 		n.Int[0] = d->Current;
 		SendNotify(n);
-		
-		// GetWindow()->_Dump();
 	}
 }
 

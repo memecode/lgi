@@ -477,8 +477,13 @@ struct LTracingSupport : public LMutex
 			return true;
 		if (f.IsOpen())
 			return true;
+		if (!LogPath)
+			GetFilePath();
 		if (!f.Open(LogPath, O_WRITE))
 			return false;
+
+		// LgiTrace will do the locking
+		f.SetThreadWarn(false);
 		f.Seek(0, SEEK_END);
 		return true;
 	}
@@ -503,7 +508,7 @@ struct LTracingSupport : public LMutex
 		auto Exe = LGetExeFile();
 		if (!Exe)
 			// Well what to do now? I give up
-			return LString("trace.txt");
+			return LogPath = "trace.txt";
 
 		#ifdef MAC
 		auto Dir = strrchr(Exe, DIR_CHAR);
@@ -558,6 +563,12 @@ LString LTraceGetFilePath()
 	return Trace.GetFilePath();
 }
 
+#if defined(WINDOWS) || defined(LGI_TRACE_TO_FILE)
+#define L_TRACE_LOCKING		1
+#else
+#define L_TRACE_LOCKING		0
+#endif
+
 void LgiTrace(const char *Msg, ...)
 {
 	#if defined _INC_MALLOC && WINNATIVE
@@ -567,10 +578,6 @@ void LgiTrace(const char *Msg, ...)
 
 	if (!Msg)
 		return;
-
-	#ifdef WIN32
-		bool locked = Trace.Lock(_FL, true);
-	#endif
 
 	char Buffer[2049] = "";
 
@@ -582,24 +589,30 @@ void LgiTrace(const char *Msg, ...)
 	vsnprintf(Buffer, sizeof(Buffer)-1, Msg, Arg);
 	va_end(Arg);
 
+	#if L_TRACE_LOCKING
+		bool locked = Trace.Lock(_FL, true);
+	#endif
+
 	#ifdef LGI_TRACE_TO_FILE
-		LStreamI *Output = Trace.GetStream();
-		if (Output &&
-			Ch > 0 &&
-			Trace.Open())
+		if (Ch > 0)
 		{
-			Output->ChangeThread();
-			Output->Write(Buffer, Ch);
-			Trace.Close();
+			auto Output = Trace.GetStream();
+			if (Output && Trace.Open())
+			{
+				Output->Write(Buffer, Ch);
+				Trace.Close();
+			}
 		}
 	#endif
 
 	#if defined WIN32
 		OutputDebugStringA(Buffer);
-		if (locked)
-			Trace.Unlock();
 	#else
 		printf("%s", Buffer);
+	#endif
+	#if L_TRACE_LOCKING
+		if (locked)
+			Trace.Unlock();
 	#endif
 }
 
@@ -856,6 +869,12 @@ LString LGetSystemPath(LSystemPath Which, int WordSize)
 {
 	LFile::Path p;
 	return p.GetSystem(Which, WordSize);
+}
+
+bool LSetSystemPath(LSystemPath Which, LString Path, int WordSize)
+{
+	LFile::Path p;
+	return p.SetSystem(Which, Path, WordSize);
 }
 
 LFile::Path::State LFile::Path::Exists()
@@ -1573,6 +1592,12 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 		}
 		case LSP_TEMP:
 		{
+			if (TmpPath)
+			{
+				Path = TmpPath;
+				break;
+			}
+			
 			#if defined WIN32
 
 				char16 t[MAX_PATH_LEN];
@@ -1947,6 +1972,31 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 	}
 
 	return Path;
+}
+
+LString LFile::Path::TmpPath;
+
+bool LFile::Path::SetSystem(LSystemPath Which, LString Path, int WordSize)
+{
+	switch (Which)
+	{
+		case LSP_TEMP:
+		{
+			if (!LDirExists(Path))
+			{
+				LgiTrace("%s:%i - path '%s' doesn't exist.\n", _FL, Path.Get());
+				return false;
+			}
+			
+			TmpPath = Path;
+			return true;
+		}
+		default:
+		{
+			LgiTrace("%s:%i - unsupported system path %i.\n", _FL, Which);
+			return false;
+		}
+	}
 }
 
 LString LGetExeFile()

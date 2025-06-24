@@ -22,8 +22,11 @@ public:
 	
 	struct Response
 	{
-		LStream *headers = nullptr;
-		LStream *body = nullptr;
+		// By default these are both LStringPipe's allocated by LHttpThread::Main,
+		// However the LHttpServer::Callback::OnRequest can swap out the object for
+		// something more suitable if needed. E.g. body -> LFile or something.
+		LAutoPtr<LStream> headers;
+		LAutoPtr<LStream> body;
 	};
 
 	struct Callback

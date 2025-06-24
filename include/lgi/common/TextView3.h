@@ -61,25 +61,25 @@ public:
 
 	public:
 		/// The view the style is for
-		LTextView3 *View;
+		LTextView3 *View = nullptr;
 		/// When you write several bits of code to do styling assign them
 		/// different owner id's so that they can manage the lifespan of their
 		/// own styles. LTextView3::PourStyle is owner '0', anything else it
 		/// will leave alone.
-		StyleOwners Owner;
+		StyleOwners Owner = STYLE_NONE;
 		/// The start index into the text buffer of the region to style.
-		ssize_t Start;
+		ssize_t Start = 0;
 		/// The length of the styled region
-		ssize_t Len;
+		ssize_t Len = 0;
 		/// The font to draw the styled text in
-		LFont *Font;
+		LFont *Font = nullptr;
 		/// The colour to draw with. If transparent, then the default 
 		/// line colour is used.
 		LColour Fore, Back;
 		/// Cursor
-		LCursor Cursor;		
+		LCursor Cursor = LCUR_Normal;
 		/// Optional extra decor not supported by the fonts
-		LCss::TextDecorType Decor;
+		LCss::TextDecorType Decor = LCss::TextDecorNone;
 		/// Colour for the optional decor.
 		LColour DecorColour;
 
@@ -89,11 +89,7 @@ public:
 		LStyle(StyleOwners owner = STYLE_NONE)
 		{
 			Owner = owner;
-			View = NULL;
-			Font = NULL;
 			Empty();
-			Cursor = LCUR_Normal;
-			Decor = LCss::TextDecorNone;
 		}
 
 		LStyle(const LStyle &s)
@@ -249,7 +245,7 @@ protected:
 	bool AdjustStylePos = true;	// Insert/Delete moved styles automatically to match (default: true)
 
 	List<LTextLine> Line;
-	LUnrolledList<LStyle> Style;		// sorted in 'Start' order
+	LUnrolledList<LStyle> Style; // sorted in 'Start' order
 	typedef LUnrolledList<LStyle>::Iter StyleIter;
 
 	// For ::Name(...)

@@ -37,6 +37,13 @@ LgiExtern LString LGetSystemPath(
 	int WordSize = 0
 );
 
+/// Configure a non-default system path
+/// \ingroup Base
+LgiExtern bool LSetSystemPath(
+	LSystemPath Which,
+	LString Path,
+	int WordSize = 0);
+
 /// Gets the path of the currently running executable
 /// \ingroup Base
 LgiExtern LString LGetExePath();

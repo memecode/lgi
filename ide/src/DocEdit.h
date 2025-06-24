@@ -97,7 +97,8 @@ protected:
 		LTextView3::LStyle Dirty;
 
 		StylingParams(LTextView3 *view) :
-			Dirty(LTextView3::STYLE_NONE)
+			Dirty(LTextView3::STYLE_NONE),
+			Styles(LTextView3::LStyle())
 		{
 			View = view;
 		}

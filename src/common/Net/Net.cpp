@@ -1,19 +1,19 @@
 /*hdr
-**      FILE:           INet.cpp
-**      AUTHOR:         Matthew Allen
-**      DATE:           28/5/98
-**      DESCRIPTION:    Internet sockets
+**		FILE:			INet.cpp
+**		AUTHOR:			Matthew Allen
+**		DATE:			28/5/98
+**		DESCRIPTION:	Internet sockets
 **
-**      Copyright (C) 1998, Matthew Allen
-**              fret@memecode.com
+**		Copyright (C) 1998, Matthew Allen
+**				fret@memecode.com
 */
 
-#define _WINSOCK_DEPRECATED_NO_WARNINGS 1
 #if defined(LINUX)
 	#include <netinet/tcp.h>
 	#include <unistd.h>
 	#include <poll.h>
 	#include <errno.h>
+	#include <netdb.h>
 #elif defined(MAC)
 	#include <SystemConfiguration/SCDynamicStoreCopySpecific.h>
 	#include <SystemConfiguration/SCSchemaDefinitions.h>
@@ -21,31 +21,14 @@
 	#include <sys/socket.h>
 	#include <ifaddrs.h>
 #endif
-#if !defined(WINDOWS)
-	#include <sys/types.h>
-	#include <ifaddrs.h>
-#endif
-#include <ctype.h>
 
-#include "lgi/common/File.h"
-#include "lgi/common/Net.h"
-#include "lgi/common/LgiString.h"
-#include "lgi/common/LgiCommon.h"
-#include "LgiOsClasses.h"
-#include "lgi/common/RegKey.h"
-
-#define USE_BSD_SOCKETS			1
-#define DEBUG_CONNECT			0
-#define ETIMEOUT				400
-#define PROTO_UDP				0x100
-#define PROTO_BROADCAST			0x200
-
-#if defined WIN32
-
+#if defined(WINDOWS)
+	#define _WINSOCK_DEPRECATED_NO_WARNINGS 1
+	#include <winsock2.h>
+	#include <ws2tcpip.h>
  	#include <stdio.h>
 	#include <stdlib.h>
 	#include <ras.h>
-	#include <Ws2tcpip.h>
 
 	typedef HOSTENT HostEnt;
 	typedef int socklen_t;
@@ -62,8 +45,27 @@
 	#endif
 
 	#define OsAddr				S_un.S_addr
+#else
+	#include <sys/types.h>
+	#include <ifaddrs.h>
+#endif
+#include <ctype.h>
 
-#elif defined POSIX
+#include "lgi/common/File.h"
+#include "lgi/common/Net.h"
+#include "lgi/common/LgiString.h"
+#include "lgi/common/LgiCommon.h"
+#include "lgi/common/RegKey.h"
+#include "lgi/common/Window.h"
+#include "LgiOsClasses.h"
+
+#define USE_BSD_SOCKETS			1
+#define DEBUG_CONNECT			0
+#define ETIMEOUT				400
+#define PROTO_UDP				0x100
+#define PROTO_BROADCAST			0x200
+
+#if defined POSIX
 
 	#include <stdio.h>
 	#include <sys/types.h>
@@ -1405,10 +1407,7 @@ bool LSocket::AddMulticastMember(uint32_t MulticastIp, uint32_t LocalInterface)
 	mreq.imr_interface.s_addr = htonl(LocalInterface);	// your incoming interface IP
 	int r = setsockopt(Handle(), IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char*) &mreq, sizeof(mreq));
 	if (!r)
-	{
-		// LgiTrace("AddMulticastMember(%s, %s)\n", LIpToStr(MulticastIp).Get(), LIpToStr(LocalInterface).Get());
 		return true;
-	}
 
 	Error();
 	return false;
@@ -1482,27 +1481,30 @@ int LSocket::ReadUdp(void *Buffer, int Size, int Flags, uint32_t *Ip, uint16_t *
 	return (int)b;
 }
 
-int LSocket::WriteUdp(void *Buffer, int Size, int Flags, uint32_t Ip, uint16_t Port)
+int LSocket::WriteUdp(void *Buffer, int Size, int Flags, uint32_t Ip, uint16_t Port, int ttl)
 {
 	if (!Buffer || Size < 0)
 		return -1;
 
 	CreateUdpSocket();
 
+	if (ttl > 0)
+		setsockopt(d->Socket, IPPROTO_IP, IP_TTL, (const char*)&ttl, sizeof(ttl));
+
 	sockaddr_in a;
 	ZeroObj(a);
 	a.sin_family = AF_INET;
 	a.sin_port = htons(Port);
-	a.sin_addr.OsAddr = htonl(Ip);
+	a.sin_addr.OsAddr = Ip == 0xffffffff ? INADDR_ANY : htonl(Ip);
 	ssize_t b = sendto(d->Socket, (char*)Buffer, Size, Flags, (sockaddr*)&a, sizeof(a));
 	if (b > 0)
 	{
 		OnWrite((char*)Buffer, (int)b);
 	}
-    else
-    {
-        printf("%s:%i - sendto failed with %i.\n", _FL, errno);
-    }
+	else
+	{
+		printf("%s:%i - sendto failed with %i.\n", _FL, errno);
+	}
 	return (int)b;
 }
 
@@ -1683,18 +1685,18 @@ char *InetGetHeaderField(	// Returns an allocated string or NULL on failure
 					s++;
 					while (*s)
 					{
-					    if (strchr(" \t\r", *s))
-					    {
-						    s++;
+						if (strchr(" \t\r", *s))
+						{
+							s++;
 						}
 						else if (*s == '\n')
 						{
-						    if (strchr(" \r\n\t", s[1]))
-						        s += 2;
-						    else
-						        break;
+							if (strchr(" \r\n\t", s[1]))
+								s += 2;
+							else
+								break;
 						}
-						else break;						    
+						else break;							
 					}
 					
 					char *value = NULL;
@@ -1750,7 +1752,7 @@ LString LGetHeaderField(LString Headers, const char *Field)
 					else
 						break;
 				}
-				else break;						    
+				else break;							
 			}
 					
 			LString value;
@@ -1919,6 +1921,223 @@ uint32_t LHostnameToIp(const char *Host)
 	return ip;
 }
 
+#if WINDOWS
+#define M_ASYNC_HOSTNAME		M_USER + 200
+LRESULT CALLBACK LHostnameAsyncPriv_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+#endif
+
+struct LHostnameAsyncPriv : public LRefCount
+{
+	LHostnameAsync::TCallback callback;
+
+	#if WINDOWS
+		LError		err;
+		PADDRINFOEX	addrInfo = nullptr;
+		OVERLAPPED	overlapped = {};
+		HANDLE		completeEvent = nullptr;
+		HANDLE		cancelHandle = nullptr;
+		LHostnameAsyncPriv()
+		{
+			completeEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+		}
+		~LHostnameAsyncPriv()
+		{
+		}
+	#elif defined(MAC) || defined(HAIKU)
+		#warning "Not implemented"
+	#else // posixy?
+		struct gaicb req = {};
+		struct sigevent event = {};
+		bool done = false;
+	#endif
+	uint64_t startTs = 0;
+	
+	void Complete()
+	{
+		#if WINDOWS
+			uint32_t ip = 0;
+
+			if (!err)
+			{
+				if (addrInfo)
+				{
+					if (addrInfo->ai_addr->sa_family == AF_INET)
+					{
+						auto a = (sockaddr_in*)addrInfo->ai_addr;
+						ip = ntohl(a->sin_addr.s_addr);					
+						// LgiTrace("%s:%i - complete called: %s (after %i ms)\n", _FL, LIpToStr(ip).Get(), (int)(LCurrentTime()-startTs));
+					}
+					else err.Set(LErrorInvalidParam, "not AF_INET family");
+				}
+				else
+				{
+					err.Set(LErrorInvalidParam, "no addrInfo");
+				}
+			}
+
+			if (callback)
+				callback(ip, err, LCurrentTime() - startTs);
+
+			if (completeEvent)
+			{
+				CloseHandle(completeEvent);
+				completeEvent = nullptr;
+			}
+	#elif defined(MAC) || defined(HAIKU)
+		#warning "Not implemented"
+	#else
+			done = true;
+			auto result = gai_error(&req);
+			LError err;
+			if (result)
+			{
+				err.Set(result, "gai_error failed");
+				if (callback)
+					callback(0, err, LCurrentTime() - startTs);
+			}
+			else
+			{			
+				auto out = req.ar_result;
+				uint32_t ip = 0;
+			
+				#if 0
+				printf(	"out:\n"
+						"	ai_flags=%x\n"
+						"	ai_family=%i\n"
+						"	ai_socktype=%i\n"
+						"	ai_protocol=%i\n"
+						" 	ai_addrlen=%i\n"
+						"	ai_addr=%p\n"
+						"	ai_canonname='%s'\n"
+						"	ai_next=%p\n",
+						out->ai_flags,
+						out->ai_family,
+						out->ai_socktype,
+						out->ai_protocol,
+						(int)out->ai_addrlen,
+						out->ai_addr,
+						out->ai_canonname,
+						out->ai_next);
+				#endif
+			
+				if (out->ai_addr)
+				{
+					auto fam = out->ai_addr->sa_family;
+					if (fam == AF_INET)
+					{
+						auto a = (sockaddr_in*)out->ai_addr;
+						ip = ntohl(a->sin_addr.s_addr);
+					}
+					else err.Set(LErrorInvalidParam, "Not AF_INET.");
+				}
+				else err.Set(LErrorInvalidParam, "No ai_addr.");
+
+				if (callback)
+					callback(ip, err, LCurrentTime() - startTs);
+			}
+		#endif
+
+		DecRef();
+	}
+
+	void Cancel()
+	{
+		#if WINDOWS
+			if (completeEvent)
+			{
+				// It didn't finish yet, so cancel it...
+				GetAddrInfoExCancel(&cancelHandle);
+				
+				// And wait...
+				WaitForSingleObject(completeEvent, INFINITE);
+				
+				// And cleanup
+				CloseHandle(completeEvent);
+			}
+		#elif defined(MAC) || defined(HAIKU)
+			#warning "not impl"
+		#else
+			if (!done)
+			{
+				done = true;
+				gai_cancel(&req);
+			}
+		#endif
+	}
+};
+
+LHostnameAsync::LHostnameAsync(const char *host, TCallback callback, int timeoutMs)
+{
+	if ((d = new LHostnameAsyncPriv))
+	{
+		d->IncRef();
+		d->callback = callback;
+		d->startTs = LCurrentTime();
+
+		#if WINDOWS
+			LAutoWString wHost(Utf8ToWide(host));
+			d->IncRef();
+			struct timeval timeout = {};
+			if (timeoutMs >= 0)
+			{
+				timeout.tv_sec = timeoutMs / 1000;
+				timeout.tv_usec = (timeoutMs % 1000) * 1000;
+			}
+			auto result = GetAddrInfoEx(wHost,
+										nullptr, // service name
+										NS_DNS,
+										nullptr, // nspid
+										nullptr, // hints
+										&d->addrInfo,
+										timeoutMs >= 0 ? &timeout : nullptr,
+										&d->overlapped,
+										[](auto error, auto bytes, auto overlapped)
+										{
+											auto ctx = CONTAINING_RECORD(overlapped, LHostnameAsyncPriv, overlapped);
+											if (error != ERROR_SUCCESS)
+												ctx->err.Set(error);
+											ctx->Complete();
+										},
+										&d->cancelHandle);
+			if (result != NO_ERROR &&
+				result != WSA_IO_PENDING)
+			{
+				LError err(result);
+				LgiTrace("%s:%i - GetAddrInfoExA err: %s\n", _FL, err.ToString().Get());
+				if (callback)
+					callback(0, err, LCurrentTime() - d->startTs);
+				d->DecRef();
+			}
+		#elif defined(MAC) || defined(HAIKU)
+			#warning "Not implemented"
+		#else
+			struct gaicb *reqs[1] = {&d->req};
+			d->req.ar_name = host;
+
+			d->event.sigev_notify = Gtk::SIGEV_THREAD;
+			d->event.sigev_value.sival_ptr = d;
+			d->event.sigev_notify_function = [](auto param)
+				{
+					if (auto obj = (LHostnameAsyncPriv*)param.sival_ptr)
+						obj->Complete();
+					else
+						printf("%s:%i - Invalid param.\n", _FL);
+				};
+			int r = getaddrinfo_a(GAI_NOWAIT, reqs, 1, &d->event);
+
+			d->IncRef();
+			if (r)
+				d->DecRef();
+		#endif
+	}
+}
+
+LHostnameAsync::~LHostnameAsync()
+{
+	d->Cancel();
+	d->DecRef();
+}
+
 LString LHostName()
 {
 	char hostname[256];
@@ -2005,7 +2224,7 @@ LArray<uint32_t> LWhatsMyIp()
 			}
 		}
 		if (ifap)
-       		freeifaddrs(ifap);
+	   		freeifaddrs(ifap);
 
 	#endif
 

@@ -960,33 +960,49 @@ public:
 		return true;
 	}
 
-	bool SearchFileNames(const char *searchTerms, std::function<void(LArray<LString>&)> results) override
+	bool SearchFileNames(const char *searchTerms, LString::Array inputPaths, std::function<void(LArray<LString>&)> callback) override
 	{
-		if (!searchTerms || !results)
+		if (!searchTerms || !callback)
 			return false;
 
 		AddWork(
 			MakeContext(_FL, searchTerms),
 			SystemIntf::TForeground,
-			[this, results, searchTerms = LString(searchTerms)]()
+			[this, inputPaths, callback, searchTerms = LString(searchTerms)]() mutable
 			{
-				auto root = RemoteRoot();
-				auto parts = searchTerms.SplitDelimit();
-				auto args = LString::Fmt("cd %s && find .", root.Get());
-				for (size_t i=0; i<parts.Length(); i++)
-					args += LString::Fmt("%s -iname \"*%s*\"", i ? " -and" : "", LGetLeaf(parts[i]));
-				args += " -and -not -path \"*/.hg/*\"";
+				LArray<LString> paths;
+				paths.SetFixedLength(false);
 
-				int32_t exitCode = 0;
-				auto result = Cmd(GetConsole(), args + "\n", &exitCode);
-				if (!exitCode)
+				for (auto path: inputPaths)
 				{
-					LArray<LString> lines = TrimContent(result).SplitDelimit("\r\n");
-					app->RunCallback( [results, lines]() mutable
-						{
-							results(lines);
-						});
+					LString absPath;
+					if (LIsRelativePath(path))
+						absPath = JoinPath(RemoteRoot(), path);
+					else
+						absPath = path;
+
+					auto parts = searchTerms.SplitDelimit();
+					auto args = LString::Fmt("cd %s && find .", absPath.Get());
+					for (size_t i=0; i<parts.Length(); i++)
+						args += LString::Fmt("%s -iname \"*%s*\"", i ? " -and" : "", LGetLeaf(parts[i]));
+					args += " -and -not -path \"*/.hg/*\" -and -not -iname \"*.d\"";
+
+					int32_t exitCode = 0;
+					auto result = Cmd(GetConsole(), args + "\n", &exitCode);
+					if (!exitCode)
+					{
+						auto lines = TrimContent(result).SplitDelimit("\r\n");
+						
+						// Turn the results back into absolute paths...
+						for (auto ln: lines)
+							paths.Add(JoinPath(absPath, ln));
+					}
 				}
+
+				app->RunCallback( [callback, paths]() mutable
+					{
+						callback(paths);
+					});
 			} );
 
 		return true;
@@ -1017,10 +1033,14 @@ public:
 		// Use run process not to block the core work loop:
 		if (auto p = new FindInFilesProcess(results))
 		{
+			LString dir = params->Dir;
+			if (params->Type == FindParams::SearchPaths)
+				dir = RemoteRoot();
+		
 			p->args = LString::Fmt(	"grep -I -R -Hn \"%s\" %s\n",
 									params->Text.Get(),
-									params->Dir.Get());
-			return RunProcess(params->Dir, p->args, &p->io, this,
+									dir.Get());
+			return RunProcess(dir, p->args, &p->io, this,
 				[p](auto code)
 				{
 					p->OnComplete(code); // clean up the memory.
@@ -1152,7 +1172,7 @@ public:
 		return true;
 	}
 
-	bool Delete(const char *path, bool recursiveForce, std::function<void(bool)> cb) override
+	bool Delete(const char *path, bool recursiveForce, std::function<void(LError)> cb) override
 	{
 		if (!path || !cb)
 			return false;
@@ -1164,12 +1184,16 @@ public:
 			{
 				auto args = LString::Fmt("rm%s %s", recursiveForce ? " -rf" : "", Path.Get());
 				int32_t exitVal;
+				
 				auto result = Cmd(GetConsole(), args + "\n", &exitVal);
 				if (cb)
 				{
 					app->RunCallback( [exitVal, cb]() mutable
 						{
-							cb(exitVal == 0);
+							LError err;
+							if (exitVal)
+								err.Set(LErrorFuncFailed, LString::Fmt("cmd returned %i", exitVal));
+							cb(err);
 						});
 				}
 			} );
@@ -1322,7 +1346,7 @@ public:
 		return true;
 	}
 
-	bool SearchFileNames(const char *searchTerms, std::function<void(LArray<LString>&)> results) override
+	bool SearchFileNames(const char *searchTerms, LString::Array paths, std::function<void(LArray<LString>&)> results) override
 	{
 		// This could probably be threaded....
 		auto parts = LString(searchTerms).SplitDelimit();
@@ -1409,21 +1433,23 @@ public:
 		return result;
 	}
 
-	bool Delete(const char *path, bool recursiveForce, std::function<void(bool)> cb) override
+	bool Delete(const char *path, bool recursiveForce, std::function<void(LError)> cb) override
 	{
 		if (!path)
 			return false;
+
+		LError err;
 		if (LDirExists(path))
 		{
-			auto status = FileDev->RemoveFolder(path, recursiveForce);
+			FileDev->RemoveFolder(path, recursiveForce, &err);
 			if (cb)
-				cb(status);
+				cb(err);
 		}
 		else
 		{
-			auto status = FileDev->Delete(path);
+			auto status = FileDev->Delete(path, &err);
 			if (cb)
-				cb(status);
+				cb(err);
 		}
 		return true;
 	}
@@ -1774,7 +1800,7 @@ public:
 			cb(err, path);
 		}
 	}
-
+	
 	// Reading and writing:
 	LString ConvertPath(LString s)
 	{
@@ -2068,9 +2094,32 @@ public:
 		return false;
 	}
 
-	bool Delete(const char *path, bool recursiveForce, std::function<void(bool)> cb) override
+	bool Delete(const char *delPath, bool recursiveForce, std::function<void(LError)> cb) override
 	{
-		LAssert(0);
+		auto path = ConvertPath(delPath);
+		AddWork(
+			MakeContext(_FL, path),
+			TForeground,
+			[this, path, cb]() mutable
+			{
+				LError err;
+
+				if (!GetReady())
+					err.Set(LErrorFuncFailed, "connection not ready.");
+				else if (!SetRemote(path, true))
+					// Make sure we're in the right folder...
+					err.Set(LErrorFuncFailed, "failed to set dir.");
+				else if (ftp)
+					ftp->DeleteFile(LGetLeaf(path), &err);
+				else
+					err.Set(LErrorFuncFailed, "no FTP obj.");
+
+				parent->RunCallback([this, err, cb]()
+				{
+					cb(err);
+				});
+			});
+
 		return false;
 	}
 
@@ -2080,7 +2129,7 @@ public:
 		return false;
 	}
 
-	bool SearchFileNames(const char *searchTerms, std::function<void(LArray<LString>&)> results) override
+	bool SearchFileNames(const char *searchTerms, LString::Array paths, std::function<void(LArray<LString>&)> results) override
 	{
 		if (!searchTerms || !results)
 			return false;

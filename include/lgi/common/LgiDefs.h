@@ -488,6 +488,8 @@ enum LSystemPath
 	///		[Win32] = ~\Local Settings\Temp
 	///		[Mac] = ~/Library/Caches/TemporaryItems
 	///		[Linux] = /tmp
+	///			However you can configure a per user temp folder with
+	///			
 	LSP_TEMP,
 
 	/// System wide application data

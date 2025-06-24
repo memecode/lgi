@@ -214,6 +214,8 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 	static char16 StrDefine[]		= {'d', 'e', 'f', 'i', 'n', 'e', 0};
 	static char16 StrExtern[]		= {'e', 'x', 't', 'e', 'r', 'n', 0};
 	static char16 StrTypedef[]		= {'t', 'y', 'p', 'e', 'd', 'e', 'f', 0};
+	static char16 StrConst[]		= {'c', 'o', 'n', 's', 't', 0};
+	static char16 StrConstExpr[]	= {'c', 'o', 'n', 's', 't', 'e', 'x', 'p', 'r', 0};
 	static char16 StrC[]			= {'\"', 'C', '\"', 0};
 	static char16 StrHash[]			= {'#', 0};
 
@@ -689,13 +691,54 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 						}
 						DeleteArray(t);
 					}
+					else if ((TokLen == 5 && !StrncmpW(StrConst, Start, 5)) ||
+							 (TokLen == 9 && !StrncmpW(StrConstExpr, Start, 9)))
+					{
+						// const/constexpr
+						skipws(s);
+
+						auto n = s;
+						LArray<char16*> parts;
+						ssize_t equals = -1;
+						while (auto t = LexCpp(n, LexStrdup))
+						{
+							if (!Stricmp(t, L";"))
+							{
+								DeleteArray(t);
+								break;
+							}
+
+							if (!Stricmp(t, L"="))
+								equals = parts.Length();
+							parts.Add(t);
+						}
+
+						if (equals > 0 && parts.Length() > 0)
+						{
+							auto var = parts[equals-1];
+
+							if (CurClassDecl)
+							{
+								// Class scope var?
+								auto full = LString::Fmt("%S::%S", CurClassDecl, var);
+								Defns.New().Set(DefnVariable, FileName, full, Line + 1);
+							}
+							else
+							{
+								// Global scope var?
+								Defns.New().Set(DefnVariable, FileName, var, Line + 1);
+							}
+						}
+
+						parts.DeleteArrays();
+					}
 					else if (TokLen == 7 && StrncmpW(StrTypedef, Start, 7) == 0)
 					{
 						// Typedef
 						skipws(s);
 						
 						IsStruct = !Strnicmp(StrStruct, s, StrlenW(StrStruct));
-						IsClass = !Strnicmp(StrClass, s, StrlenW(StrClass));
+						IsClass  = !Strnicmp(StrClass,  s, StrlenW(StrClass));
 						if (IsStruct || IsClass)
 						{
 							Start = s;
@@ -780,8 +823,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 							}
 						}
 						
-						char16 *Typedef = p.NewStrW();
-						if (Typedef)
+						if (auto Typedef = p.NewStrW())
 						{
 							if (LimitTo == DefnNone || (LimitTo & DefnTypedef) != 0)
 							{

@@ -815,7 +815,18 @@ public:
 			if (InputStr.Length() < 3)
 				return;
 
-			backend->SearchFileNames(InputStr, [this, hnd=Lst->AddDispatch()](auto &results)
+			LString::Array paths;
+			paths.SetFixedLength(false);
+			paths.Add(".");
+
+			LVariant s = false;
+			App->GetOptions()->GetValue(OPT_SearchSysInc, s);
+			if (s.CastInt32())
+			{
+				paths += CollectAllSystemIncludePaths(Proj, PlatformFlagsToEnum(App->GetPlatform()));
+			}
+
+			backend->SearchFileNames(InputStr, paths, [this, hnd=Lst->AddDispatch()](auto &results)
 				{
 					// This prevents the callback crashing if the list has been deleted 
 					// between the SearchFileNames and the results coming back.
@@ -1548,12 +1559,16 @@ bool IdeDoc::OpenFile(const char *File)
 bool IdeDoc::OpenData(LString Data)
 {
 	if (!d->Edit)
+	{
+		printf("%s:%i - no edit object?\n", _FL);
 		return false;
+	}
 
 	auto Cs = d->GetSrc() ? d->GetSrc()->GetCharset() : NULL;
 	if (Cs)
 	{
 		LAssert(!"Impl me");
+		printf("%s:%i - handle the charset properly?\n", _FL);
 	}
 
 	auto ext = LGetExtension(GetFileName());
@@ -1566,6 +1581,8 @@ bool IdeDoc::OpenData(LString Data)
 		}
 
 	d->LoadBreakPoints();
+
+	printf("%s:%i - OpenData setting name..\n", _FL);
 	return d->Edit->Name(Data);
 }
 
@@ -1828,8 +1845,11 @@ void IdeDoc::Raise()
 {
 	LMdiChild::Raise();
 
+	auto log = d->App->GetBuildLog();
 	if (d->Edit)
 		d->App->DocIsCrlf(d->Edit->GetCrLf());
+	else
+		log->Print("%s:%i - no edit\n", _FL);
 }
 
 void IdeDoc::OnProjectChange()

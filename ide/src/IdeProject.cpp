@@ -2032,8 +2032,7 @@ void BuildThread::Step3()
 int BuildThread::Main()
 {
 	StreamToLog log(Proj->GetApp());
-	const char *Err = 0;
-	char ErrBuf[256];
+	LString Err;
 
 	auto Exe = FindExe();
 	if (Exe)
@@ -2426,10 +2425,7 @@ int BuildThread::Main()
 							*(--e) = 0;
 					}
 					
-					sprintf_s(ErrBuf, sizeof(ErrBuf), "Running make failed with %i (%s)\n",
-						SubProc->GetErrorCode(),
-						ErrStr.Get());
-					Err = ErrBuf;
+					Err.Printf("Running make failed with %i (%s)\n", SubProc->GetErrorCode(), ErrStr.Get());
 				}
 			}
 		}
@@ -2437,15 +2433,14 @@ int BuildThread::Main()
 	else
 	{
 		Err = "Couldn't find program to build makefile.";
-		LgiTrace("%s,%i - %s.\n", _FL, Err);
+		LgiTrace("%s,%i - %s.\n", _FL, Err.Get());
 	}
 
-	AppWnd *w = Proj->GetApp();
-	if (w)
+	if (auto w = Proj->GetApp())
 	{
 		w->PostEvent(M_BUILD_DONE);
 		if (Err)
-			Proj->GetApp()->PostEvent(M_BUILD_ERR, 0, (LMessage::Param)NewStr(Err));
+			Proj->GetApp()->PostEvent(M_BUILD_ERR, 0, (LMessage::Param)new LString(Err));
 	}
 	else LAssert(0);
 	

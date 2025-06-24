@@ -161,10 +161,23 @@ bool LContainers::Run()
 	#endif
 
 	{
-		LUnrolledList<int> IntLst;
+		LUnrolledList<int> IntLst(0);
 		IntLst.Add(123);
+		IntLst.Add(87);
+		IntLst.Add(13);
+		IntLst.Add(345);
+		IntLst.Add(66);
 
-		LUnrolledList<LString> StrLst;
+		auto first = IntLst.PopFirst();
+		if (first != 123)
+			return FAIL(_FL, "PopFirst wrong val");
+		auto last = IntLst.PopLast();
+		if (last != 66)
+			return FAIL(_FL, "PopLast wrong val");
+		if (IntLst.Length() != 3)
+			return FAIL(_FL, "Length wrong val");
+
+		LUnrolledList<LString> StrLst{ LString() };
 		StrLst.Add("Hello");
 		for (auto i : StrLst)
 		{
@@ -187,7 +200,7 @@ bool LContainers::Run()
 		StrLst.Delete("Tyertw");
 
 		// Compact test
-		LUnrolledList<int,16> Comp;
+		LUnrolledList<int,16> Comp(0);
 		for (int i=0; i<20; i++)
 			Comp.Add(i+1);
 		for (int i=0; i<8; i++)

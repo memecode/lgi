@@ -82,9 +82,6 @@ ssize_t LStream::Print(const char *Format, ...)
 /////////////////////////////////////////////////////////////////
 LStreamOp::LStreamOp(int64 BufSz)
 {
-	StartTime = 0;
-	EndTime = 0;
-	Total = 0;
 	if (BufSz > 0)
 		Buffer.Length(BufSz);
 }

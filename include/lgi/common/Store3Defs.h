@@ -453,6 +453,7 @@ enum Store3Fields
 	FIELD_FOLDER_ITEMS = 171,			// (int64) Number of items in a folder..
 	FIELD_PARENT = 172,					// (LDataFolderI*) Parent of store3 item
 	FIELD_URI = 173,					// (char*)
+	FIELD_FOLDER_PATH = 174,			// (char*)
 
 	FIELD_MAX,
 };
