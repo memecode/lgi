@@ -8,6 +8,7 @@
 #include "lgi/common/SubProcess.h"
 #include "lgi/common/TextLog.h"
 #include "lgi/common/DisplayString.h"
+#include "lgi/common/OptionsFile.h"
 
 #include "resdefs.h"
 
@@ -24,6 +25,8 @@ enum Ctrls
 	ID_START,
 	ID_LOG,
 };
+
+#define OptHostName "hostName"
 
 class Graph : public LView, public LMutex
 {
@@ -154,8 +157,14 @@ public:
 		for (int x = draw.x1; x <= draw.x2; x++)
 		{
 			time_t unix = XtoTime(x);
+			#if WINDOWS
+			struct tm localMem, *local = &localMem;
+			auto localTimeErr = localtime_s(&localMem, &unix);
+			if (!localTimeErr && local->tm_min != prevMin)
+			#else
 			struct tm *local = localtime(&unix);
 			if (local && local->tm_min != prevMin)
+			#endif
 			{
 				auto str = LString::Fmt("%i:%2.2i", local->tm_hour, local->tm_min);
 				LDisplayString ds(fnt, str);
@@ -323,15 +332,18 @@ class App : public LWindow
 	LTextLog *log = nullptr;
 	Graph *graph = nullptr;
 	LAutoPtr<Worker> worker;
+	LOptionsFile options;
 
 public:
-	App()
+	App() : options(LOptionsFile::PortableMode, AppName)
 	{
 		Name(AppName);
 		LRect r(0, 0, 1000, 800);
 		SetPos(r);
 		MoveToCenter();
 		SetQuitOnClose(true);
+
+		options.SerializeFile(false);
 
 		if (Attach(0))
 		{
@@ -354,10 +366,59 @@ public:
 			AttachChildren();            
 			Visible(true);
 
-			worker.Reset(new Worker(this, "work", log, graph));
+			LVariant v;
+			if (options.GetValue(OptHostName, v))
+			{
+				if (auto s = v.Str())
+				{
+					hostname->Name(s);
+					worker.Reset(new Worker(this, s, log, graph));
+				}
+			}
 		}
 	}
+
+	~App()
+	{
+	}
+
+	void Start(const char *host)
+	{
+		if (host)
+			worker.Reset(new Worker(this, host, log, graph));
+		else
+			worker.Reset();
+	}
+
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override
+	{
+		switch (Ctrl->GetId())
+		{
+			case ID_HOSTNAME:
+			{
+				if (n.Type == LNotifyReturnKey)
+				{
+					Start(Ctrl->Name());
+				}
+				else if (n.Type == LNotifyValueChanged)
+				{
+					LVariant v;
+					options.SetValue(OptHostName, v = Ctrl->Name());
+					options.SerializeFile(true);
+				}
+				break;
+			}
+			case ID_START:
+			{
+				Start(GetCtrlName(ID_HOSTNAME));
+				break;
+			}
+		}
+		
+		return LWindow::OnNotify(Ctrl, n);
+	}
 };
+
 
 //////////////////////////////////////////////////////////////////
 int LgiMain(OsAppArguments &AppArgs)
