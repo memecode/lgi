@@ -2,6 +2,8 @@
 #define _LWINDOW_H_
 
 #include "lgi/common/View.h"
+#include "lgi/common/DragAndDrop.h"
+#include "lgi/common/Gdc2.h"
 
 /// The available states for a top level window
 enum LWindowZoom

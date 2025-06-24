@@ -1041,6 +1041,10 @@ LFile::~LFile()
 	DeleteObj(d);
 }
 
+void LFile::SetThreadWarn(bool warn)
+{
+}
+
 OsFile LFile::Handle()
 {
 	return d->hFile;

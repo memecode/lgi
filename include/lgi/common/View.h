@@ -1,5 +1,8 @@
 #pragma once
 
+#include "lgi/common/Rect.h"
+#include "lgi/common/Mutex.h"
+
 #if defined(LGI_CARBON)
 LgiFunc void DumpHnd(HIViewRef v, int depth = 0);
 #elif LGI_COCOA && defined(__OBJC__)
