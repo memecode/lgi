@@ -89,6 +89,10 @@ public:
 
 	void OnPaint(LSurface *pDC) override
 	{
+		#if WINDOWS
+		LDoubleBuffer dblBuf(pDC);
+		#endif
+
 		Auto lck(this, _FL);
 		pDC->Colour(L_WORKSPACE);
 		pDC->Rectangle();
@@ -106,7 +110,7 @@ public:
 		LDisplayString ds(fnt, "5000ms");
 		draw.x1 += (markPx * 2) + ds.X();
 		
-		LColour cGraph(222, 222, 222);
+		LColour cGraph(200, 200, 200);
 		pDC->Colour(cGraph);
 		pDC->Line(draw.x1, draw.y1, draw.x1, draw.y2);
 		pDC->Line(draw.x1, draw.y2, draw.x2, draw.y2);
@@ -229,7 +233,7 @@ public:
 				}
 
 				if (count)
-					pDC->Line(x, draw.y2 - min, x, draw.y2 - max);
+					pDC->Line(x, draw.y2, x, draw.y2 - max);
 			}
 		}
 	}
@@ -350,6 +354,7 @@ public:
 			AddView(vbox = new LBox(ID_BOX, true));
 			vbox->AddView(tbl = new LTableLayout(ID_TABLE));
 			vbox->AddView(log = new LTextLog(ID_LOG));
+			log->GetCss(true)->Height("4em");
 			vbox->AddView(graph = new Graph(ID_GRAPH));
 			tbl->GetCss(true)->Padding("0.5em");
 			tbl->GetCss()->Height("2.8em");
