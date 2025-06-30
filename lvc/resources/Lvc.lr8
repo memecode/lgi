@@ -83,11 +83,23 @@
 		<String Ref="132" Cid="132" Define="ID_LIST" />
 		<String Ref="133" Cid="133" Define="ID_DELETE" en="Delete" />
 		<String Ref="134" Cid="134" Define="ID_MERGE" en="Merge From" />
+		<String Ref="135" Cid="135" Define="ID_REWRITE_AUTHOR" en="Rewrite Author" />
 		<String Ref="136" Cid="136" Define="ID_NAME" />
-		<String Ref="137" Cid="135" Define="ID_CLOSE" en="Close" />
+		<String Ref="137" Cid="533" Define="ID_CLOSE" en="Close" />
 		<String Ref="138" Cid="138" Define="ID_CREATE" en="Create" />
+		<String Ref="139" Cid="500" Define="ID_TABLE" />
 		<String Ref="140" Cid="-1" Define="IDC_STATIC" en="Remote prompt:" />
 		<String Ref="141" Cid="141" Define="ID_REMOTE_PROMPT" />
+		<String Ref="143" Cid="-1" Define="IDC_STATIC" en="Old" />
+		<String Ref="144" Cid="-1" Define="IDC_STATIC" en="New" />
+		<String Ref="145" Cid="-1" Define="IDC_STATIC" en="Name:" />
+		<String Ref="146" Cid="-1" Define="IDC_STATIC" en="Email:" />
+		<String Ref="147" Cid="147" Define="ID_OLD_NAME" />
+		<String Ref="148" Cid="148" Define="ID_NEW_NAME" />
+		<String Ref="149" Cid="149" Define="ID_OLD_EMAIL" />
+		<String Ref="150" Cid="150" Define="ID_NEW_EMAIL" />
+		<String Ref="151" Cid="1" Define="IDOK" en="Ok" />
+		<String Ref="152" Cid="2" Define="IDCANCEL" en="Cancel" />
 	</string-group>
 	<string-group Name="General">
 		<String Ref="84" Cid="84" Define="IDS_CREATE_NEW_BRANCH" en="Push will create a new remote branch. Is that ok?" />
@@ -436,6 +448,47 @@
 				</td>
 				<td addr="8,0">
 					<Button Pos="854,28,874,48" image="" toggle="0" ref="129" />
+				</td>
+			</tr>
+		</TableLayout>
+	</Dialog>
+	<Dialog pos="8,8,458,210" ref="135">
+		<TableLayout pos="14,14,440,167" ref="139" cols="0.333,0.333,0.333" rows="0.250,0.250,0.250,0.250">
+			<tr>
+				<td addr="0,0" />
+				<td addr="1,0">
+					<StaticText pos="145,14,200,27" ref="143" />
+				</td>
+				<td addr="2,0">
+					<StaticText pos="290,7,352,27" ref="144" />
+				</td>
+			</tr>
+			<tr>
+				<td addr="0,1">
+					<StaticText pos="14,48,69,68" ref="145" />
+				</td>
+				<td addr="1,1">
+					<EditBox Pos="147,42,216,62" ref="147" />
+				</td>
+				<td addr="2,1">
+					<EditBox Pos="287,42,363,62" ref="148" />
+				</td>
+			</tr>
+			<tr>
+				<td addr="0,2">
+					<StaticText pos="7,81,90,101" ref="146" />
+				</td>
+				<td addr="1,2">
+					<EditBox Pos="147,77,216,97" ref="149" />
+				</td>
+				<td addr="2,2">
+					<EditBox Pos="287,77,363,97" ref="150" />
+				</td>
+			</tr>
+			<tr>
+				<td addr="0,3" colspan="3" align="Max">
+					<Button Pos="252,112,307,132" image="" toggle="0" ref="151" />
+					<Button Pos="322,112,391,132" image="" toggle="0" ref="152" />
 				</td>
 			</tr>
 		</TableLayout>

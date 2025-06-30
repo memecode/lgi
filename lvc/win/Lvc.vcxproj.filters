@@ -61,6 +61,12 @@
     <ClCompile Include="..\..\src\common\Text\RemoveAnsi.cpp">
       <Filter>Source Files\Lgi</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\common\Net\Http.cpp">
+      <Filter>Source Files\Lgi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\Net\OpenSSLSocket.cpp">
+      <Filter>Source Files\Lgi</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Src\SshConnection.h">

@@ -94,7 +94,13 @@ public:
 		#endif
 
 		Auto lck(this, _FL);
-		pDC->Colour(L_WORKSPACE);
+
+		LColour cGraph(200, 200, 200);
+		LColour cSamples = LColour::Blue;
+		LColour cBack = LColour(L_WORKSPACE);
+		LColour cHalf = cBack.Mix(cSamples);
+
+		pDC->Colour(cBack);
 		pDC->Rectangle();
 
 		if (samples.Length() == 0)
@@ -110,7 +116,6 @@ public:
 		LDisplayString ds(fnt, "5000ms");
 		draw.x1 += (markPx * 2) + ds.X();
 		
-		LColour cGraph(200, 200, 200);
 		pDC->Colour(cGraph);
 		pDC->Line(draw.x1, draw.y1, draw.x1, draw.y2);
 		pDC->Line(draw.x1, draw.y2, draw.x2, draw.y2);
@@ -191,7 +196,7 @@ public:
 		// Draw samples
 		if (groupX == 1)
 		{
-			pDC->Colour(LColour::Blue);		
+			pDC->Colour(cSamples);
 			for (; i<samples.Length(); i++)
 			{
 				auto &s = samples[i];
@@ -207,11 +212,11 @@ public:
 		}
 		else
 		{
-			pDC->Colour(LColour::Blue);		
 			for (int x=draw.x1; x<=draw.x2; x++)
 			{
-				int min = scale;
+				int total = 0;
 				int max = 0;
+				int min = draw.Y();
 				int count = 0;
 
 				while (i < samples.Length())
@@ -222,18 +227,27 @@ public:
 					{
 						// add sample to grouping
 						int sy = s.value >= 0 ? s.value * draw.Y() / scale : draw.Y();
+						total += sy;
 						min = MIN(min, sy);
 						max = MAX(max, sy);
 						count++;
 					}
 					else if (sx > x)
+					{
 						break;
+					}
 
 					i++;
 				}
 
 				if (count)
-					pDC->Line(x, draw.y2, x, draw.y2 - max);
+				{
+					int avg = total / count;
+					pDC->Colour(cSamples);
+					pDC->Line(x, draw.y2, x, draw.y2 - min);
+					pDC->Colour(cHalf);
+					pDC->Line(x, draw.y2 - min, x, draw.y2 - max);
+				}
 			}
 		}
 	}

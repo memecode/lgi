@@ -6,6 +6,7 @@
 #include "lgi/common/ProgressDlg.h"
 #include "lgi/common/IniFile.h"
 #include "lgi/common/PopupNotification.h"
+#include "lgi/common/Http.h"
 
 #include "resdefs.h"
 
@@ -2751,6 +2752,34 @@ void VcFolder::Empty()
 		GetCss(true)->Color(LColour::Blue);
 }
 
+class LRewriteAuthor : public LDialog, public RewriteInfo
+{
+public:
+	LRewriteAuthor(LView *parent)
+	{
+		SetParent(parent);
+		LoadFromResource(ID_REWRITE_AUTHOR);
+		MoveSameScreen(parent);
+	}
+
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override
+	{
+		switch (Ctrl->GetId())
+		{
+			case IDOK:
+				oldAuthor.name = GetCtrlName(ID_OLD_NAME);
+				oldAuthor.email = GetCtrlName(ID_OLD_EMAIL);
+				newAuthor.name = GetCtrlName(ID_NEW_NAME);
+				newAuthor.email = GetCtrlName(ID_NEW_EMAIL);
+			case IDCANCEL:
+				EndModal(Ctrl->GetId() == IDOK);
+				break;
+		}
+
+		return 0;
+	}
+};
+
 void VcFolder::OnMouseClick(LMouse &m)
 {
 	if (m.IsContextMenu())
@@ -2778,6 +2807,10 @@ void VcFolder::OnMouseClick(LMouse &m)
 		{
 			s.AppendSeparator();
 			s.AppendItem("Edit Location", IDM_EDIT);
+		}
+		if (GetType() == VcGit)
+		{
+			s.AppendItem("Rewrite Author", ID_REWRITE_AUTHOR);
 		}
 		
 		m -= GetTree()->ScrollPxPos();
@@ -2879,6 +2912,17 @@ void VcFolder::OnMouseClick(LMouse &m)
 					});
 				break;
 			}
+			case ID_REWRITE_AUTHOR:
+			{
+				if (auto dlg = new LRewriteAuthor(GetTree()))
+					dlg->DoModal([this, dlg](auto dialog, auto code)
+						{
+							if (code)
+								RewriteAuthor(*dlg);
+						});
+
+				break;
+			}
 			default:
 				break;
 		}
@@ -2978,6 +3022,114 @@ void VcFolder::Delete(const char *Path, bool KeepLocal)
 				args.Printf("remove \"%s\"", Path);
 
 			StartCmd(args, &VcFolder::ParseDelete);
+			break;
+		}
+		default:
+		{
+			NoImplementation(_FL);
+			break;
+		}
+	}
+}
+
+struct GitRewriteThread :
+	public LThread,
+	public LCancel
+{
+	using TCallback = std::function<void(bool)>;
+	RewriteInfo info;
+	LString path;
+	TCallback callback;
+	LStream *log;
+	constexpr static const char *tool = "https://raw.githubusercontent.com/newren/git-filter-repo/main/git-filter-repo";
+
+	GitRewriteThread(RewriteInfo inf, LString localPath, LStream *logger, TCallback cb) :
+		LThread("GitRewriteThread"),
+		info(inf),
+		path(localPath),
+		log(logger),
+		callback(cb)
+	{		
+		Run();
+	}
+
+	~GitRewriteThread()
+	{
+		Cancel();
+		WaitForExit();
+	}
+
+	int Error(const char *msg)
+	{
+		log->Print("GitRewriteThread error: %s\n", msg);
+		return -1;
+	}
+
+	int Main()
+	{
+		const char *toolLeaf = "git-filter-repo.py";
+		auto toolPath = LFile::Path(path) / toolLeaf;
+
+		// Is the tool installed?
+		if (LFileExists(toolPath))
+		{
+			// Not installed so...
+			LStringPipe out;
+			LString outErr;
+			if (!LGetUri(this, &out, &outErr, tool))
+				return Error("failed to download tool");
+
+			LFile outFile(toolPath, O_WRITE);
+			if (outFile)
+			{
+				outFile.SetSize(0);
+				outFile.Write(out.NewLStr());
+				outFile.Close();
+			}
+		}
+		
+		// Now construct cmd line and run the tool:
+		LString args = LString::Fmt("%s --force --commit-callback '\n"
+			"old_email = b\\\"%s\\\"\n"
+			"correct_name = b\\\"%s\\\"\n"
+			"correct_email = b\\\"%s\\\"\n"
+			"\n"
+			"if commit.committer_email == old_email:\n"
+			"	commit.committer_name = correct_name\n"
+			"	commit.committer_email = correct_email\n"
+			"\n"
+			"if commit.author_email == old_email:\n"
+			"	commit.author_name = correct_name\n"
+			"	commit.author_email = correct_email\n"
+			"'",
+			toolLeaf,
+			info.oldAuthor.email.Get(),
+			info.newAuthor.name.Get(),
+			info.newAuthor.email.Get());
+		LSubProcess sub("python", args);
+		sub.SetInitFolder(path);
+		if (sub.Start())
+		{
+			sub.Communicate(log);
+		}
+
+		log->Print("GitRewriteThread finished: %i\n", sub.GetExitValue());
+		return 0;
+	}
+};
+
+void VcFolder::RewriteAuthor(RewriteInfo info)
+{
+	switch (GetType())
+	{
+		case VcGit:
+		{
+			rewriteThread.Reset(new GitRewriteThread(info, LocalPath(), d->Log,
+				[this](auto status)
+				{
+					if (status)
+						Refresh();
+				}));
 			break;
 		}
 		default:

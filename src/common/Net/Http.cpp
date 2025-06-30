@@ -719,7 +719,7 @@ void ZLibFree(voidpf opaque, voidpf address)
 	// Do nothing... the memory is owned by an autoptr
 }
 
-bool LgiGetUri(LCancel *Cancel, LStreamI *Out, LString *OutError, const char *InUri, const char *InHeaders, LUri *InProxy)
+bool LGetUri(LCancel *Cancel, LStreamI *Out, LString *OutError, const char *InUri, const char *InHeaders, LUri *InProxy)
 {
 	if (!InUri || !Out)
 	{

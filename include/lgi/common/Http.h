@@ -98,7 +98,7 @@ public:
 };
 
 /// This method will download a URI.
-bool LgiGetUri
+bool LGetUri
 (
 	/// Method for cancelling the call...
 	LCancel *Cancel,
