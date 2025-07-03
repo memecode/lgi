@@ -1229,7 +1229,7 @@ public:
 		// Download the file...
 		LStringPipe Out;
 		LString Error;
-		bool r = LgiGetUri(&Cancel, &Out, &Error, Uri, NULL/*InHdrs*/, NULL/*Proxy*/);
+		bool r = LGetUri(&Cancel, &Out, &Error, Uri, NULL/*InHdrs*/, NULL/*Proxy*/);
 		if (r)
 		{
 			// Parse through it and extract any errors...
