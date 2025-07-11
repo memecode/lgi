@@ -134,7 +134,7 @@ struct LWebSocketPriv : public LWebSocketBase
 		// Read data
 		auto base = Data.AddressOf();
 		auto rd = Sock->Read(base + Used, Data.Length() - Used);
-		printf("%s:%i - Got %i bytes\n", _FL, (int)rd);
+		// printf("%s:%i - Got %i bytes\n", _FL, (int)rd);
 		if (rd <= 0)
 		{
 			Close();
@@ -355,7 +355,7 @@ struct LWebSocketPriv : public LWebSocketBase
 			return Error("Writing HTTP response failed.");
 
 		State = WsMessages;
-		printf("Websocket upgraded.\n");
+		// printf("Websocket upgraded.\n");
 		CheckMsg();
 		return true;
 	}

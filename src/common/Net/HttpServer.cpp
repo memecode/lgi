@@ -355,10 +355,10 @@ bool LHttpServer::WebsocketUpgrade(LHttpServer::Request *req, LWebSocketBase::On
 
 	if (auto ws = new LWebSocket(req->sock, true, onMsg))
 	{
-		printf("Upgrading ws...\n");
+		// printf("Upgrading ws...\n");
 		if (ws->Upgrade(req->headers))
 		{
-			printf("Adding ws...\n");
+			// printf("Adding ws...\n");
 			PostEvent(M_ADD_WEBSOCKET, (LMessage::Param)ws);
 			return true;
 		}
