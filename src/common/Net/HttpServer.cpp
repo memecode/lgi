@@ -157,10 +157,9 @@ public:
 				}
 			}
 
+			Auto lck(this, _FL);
 			for (auto ws: webSockets)
 				ws->Read();
-
-			Auto lck(this, _FL);
 			for (auto m: messages)
 				OnEvent(m);
 			messages.DeleteObjects();

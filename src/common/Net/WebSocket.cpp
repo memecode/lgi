@@ -115,13 +115,19 @@ struct LWebSocketPriv : public LWebSocketBase
 	ssize_t Read()
 	{
 		if (!Sock)
+		{
+			Close();
 			return -1;
+		}
 		
 		// Check there is space to read into
 		if (Data.Length() - Used < 1024)
 		{
 			if (!Data.Length(Data.Length() ? Data.Length() << 1 : 1024))
+			{
+				Close();
 				return -1;
+			}
 		}
 
 		// Check if there's data:
@@ -217,8 +223,11 @@ struct LWebSocketPriv : public LWebSocketBase
 		{
 			Sock->Close();
 			Sock.Reset();
-			if (Ws->CloseCb)
-				Ws->CloseCb();
+		}
+		if (Ws->CloseCb)
+		{
+			Ws->CloseCb();
+			Ws->CloseCb = nullptr;
 		}
 	}
 
