@@ -1897,7 +1897,7 @@ void BuildThread::Step1()
 	// LOG("Step1 reading folder '%s'\n", p.Get());
 	backend->ReadFolder(SystemIntf::TForeground,
 		p,
-		[this, backend, callId](auto d)
+		[this, backend, callId](auto d, auto err)
 		{
 			StreamToLog log(Proj->GetApp());
 			// LOG("Step1 got folder..\n");
@@ -1915,7 +1915,7 @@ void BuildThread::Step1()
 					auto readId = AddCall(_FL);
 					backend->Read(SystemIntf::TForeground,
 						d->FullPath(),
-						[this, full=LString(d->FullPath()), readId](auto err, auto data)
+						[this, full=LString(d->FullPath()), readId](auto data, auto err)
 						{
 							StreamToLog log(Proj->GetApp());
 							// log.Print("%s: got content '%s'\n", __FUNCTION__, full.Get());
@@ -3653,7 +3653,7 @@ void IdeProject::Refresh()
 		return;
 
 	auto path = d->Backend->GetBasePath();
-	d->Backend->ReadFolder(SystemIntf::TForeground, path, [this](auto d)
+	d->Backend->ReadFolder(SystemIntf::TForeground, path, [this](auto d, auto err)
 		{
 			LHashTbl<ConstStrKey<char,false>, ProjectNode*> existing;
 

@@ -557,7 +557,7 @@ void ProjectNode::OnExpand(bool b)
 			// This could be either:
 			// a) the first time the folder node is expanded
 			// b) the user is refreshing the listing
-			be->ReadFolder(SystemIntf::TForeground, sFile, [this](auto d)
+			be->ReadFolder(SystemIntf::TForeground, sFile, [this](auto d, auto err)
 				{
 					bool first = placeholder != nullptr;
 					
@@ -826,7 +826,7 @@ IdeDoc *ProjectNode::Open()
 					backend->Read(
 						SystemIntf::TForeground,
 						path,
-						[this, DocHnd = Doc->AddDispatch(), Doc, path](auto err, auto data)
+						[this, DocHnd = Doc->AddDispatch(), Doc, path](auto data, auto err)
 						{
 							LString errMsg;
 

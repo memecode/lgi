@@ -1,5 +1,6 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/RemoteFileSelect.h"
+#include "lgi/common/PopupNotification.h"
 
 #ifdef WINDOWS
 	// Use the cross platform file select dialog
@@ -32,7 +33,8 @@
 class RemoteFileSelectSystem : public FS_NAMESPACE::IFileSelectSystem
 {
 	char dirChar = '/';
-	SystemIntf *systemIntf = NULL;
+	SystemIntf *systemIntf = nullptr;
+	LViewI *view = nullptr;
 
 	LString ConvertPath(LString p)
 	{
@@ -48,6 +50,11 @@ public:
 		{
 			dirChar = sys == PlatformWin ? '\\' : '/';
 		});
+	}
+
+	void SetUi(LViewI *ui) override
+	{
+		view = ui;
 	}
 
 	char GetDirChar() override
@@ -98,12 +105,16 @@ public:
 		if (!cb)
 			return;
 			
-		printf("RemoteFileSel: readdir start...\n");
-		systemIntf->ReadFolder(SystemIntf::TDebugLogging, ConvertPath(path), [this, cb](auto dir)
-		{
-			printf("RemoteFileSel: readdir result.\n");
-			cb(*dir);
-		});
+		LgiTrace("RemoteFileSel: readdir start...\n");
+		systemIntf->ReadFolder(SystemIntf::TDebugLogging,
+			ConvertPath(path),
+			[this, cb](auto dir, auto err)
+			{
+				if (err)
+					LPopupNotification::Message(view ? view->GetWindow() : nullptr, err.ToString());
+				else
+					cb(*dir);
+			});
 	}
 
 	void CreateFolder(LString path, bool createParents, std::function<void(bool)> cb) override
@@ -145,34 +156,37 @@ public:
 
 void RemoteFileSelect(LViewI *parent, SystemIntf *systemIntf, FileSelectType type, LString initialPath, std::function<void(LString)> callback)
 {
-	auto dlg = new FS_NAMESPACE::LFileSelect(parent, new RemoteFileSelectSystem(systemIntf));
-
-	if (initialPath)
-		dlg->InitialDir(initialPath);
-
-	switch (type)
+	if (auto remoteSys = new RemoteFileSelectSystem(systemIntf))
 	{
-		default:
-		case SelectOpen:
-			dlg->Open([callback](auto selectDlg, auto ok)
-				{
-					if (ok && callback)
-						callback(selectDlg->Name());
-				});
-			break;
-		case SelectOpenFolder:
-			dlg->OpenFolder([callback](auto selectDlg, auto ok)
-				{
-					if (ok && callback)
-						callback(selectDlg->Name());
-				});
-			break;
-		case SelectSave:
-			dlg->Save([callback](auto selectDlg, auto ok)
-				{
-					if (ok && callback)
-						callback(selectDlg->Name());
-				});
-			break;
+		auto dlg = new FS_NAMESPACE::LFileSelect(parent, remoteSys);
+		
+		if (initialPath)
+			dlg->InitialDir(initialPath);
+
+		switch (type)
+		{
+			default:
+			case SelectOpen:
+				dlg->Open([callback](auto selectDlg, auto ok)
+					{
+						if (ok && callback)
+							callback(selectDlg->Name());
+					});
+				break;
+			case SelectOpenFolder:
+				dlg->OpenFolder([callback](auto selectDlg, auto ok)
+					{
+						if (ok && callback)
+							callback(selectDlg->Name());
+					});
+				break;
+			case SelectSave:
+				dlg->Save([callback](auto selectDlg, auto ok)
+					{
+						if (ok && callback)
+							callback(selectDlg->Name());
+					});
+				break;
+		}
 	}
 }

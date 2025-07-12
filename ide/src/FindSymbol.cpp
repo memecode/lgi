@@ -348,7 +348,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			}
 			else if (IncCalls(_FL))
 			{
-				backend->Read(SystemIntf::TBackground, Path, [this, f, Debug](auto err, auto data) mutable
+				backend->Read(SystemIntf::TBackground, Path, [this, f, Debug](auto data, auto err) mutable
 				{
 					if (err)
 						Log("Backend.Read.Err: %s\n", err.ToString().Get());
@@ -471,7 +471,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 
 				if (backend)
 				{
-					backend->ReadFolder(SystemIntf::TBackground, p, [this, Platforms, recurse, out = &out](LDirectory *dir)
+					backend->ReadFolder(SystemIntf::TBackground, p, [this, Platforms, recurse, out = &out](auto dir, auto err)
 						{
 							LString::Array subFolders;
 							for (int b = true; b; b = dir->Next())
@@ -602,7 +602,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 						backend->ReadFolder(
 							SystemIntf::TBackground,
 							*path,
-							[this, path = LString(*path)](LDirectory *dir)
+							[this, path = LString(*path)](auto dir, auto err)
 							{
 								for (int i=true; i; i=dir->Next())
 								{

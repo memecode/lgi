@@ -883,6 +883,9 @@ LFileSelectDlg::LFileSelectDlg(LFileSelectPrivate *select)
 	SetParent(d->Parent);
 	MinSize.ZOff(450, 300);
 
+	if (d->System)
+		d->System->SetUi(this);
+
 	if (!d->InitSize.Valid())
 	{
 		auto Dpi = LScreenDpi();

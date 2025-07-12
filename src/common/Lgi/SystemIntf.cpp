@@ -482,7 +482,7 @@ public:
 		return p;
 	}
 
-	void ResolvePath(LString path, LString::Array hints, std::function<void(LError&,LString)> cb) override
+	void ResolvePath(LString path, LString::Array hints, SystemIntf::TStringCallback cb) override
 	{
 		if (!cb)
 			return;
@@ -561,7 +561,7 @@ public:
 				app->RunCallback( [this, cb, found]() mutable
 					{
 						LError err(found ? LErrorNone : LErrorPathNotFound, found ? nullptr : "path not found");
-						cb(err, found);
+						cb(found, err);
 					});
 			}
 		);
@@ -948,7 +948,7 @@ public:
 		return true;
 	}
 
-	bool ReadFolder(TPriority priority, const char *Path, std::function<void(LDirectory*)> cb) override
+	bool ReadFolder(TPriority priority, const char *Path, std::function<void(LDirectory*, LError)> cb) override
 	{
 		if (!Path || !cb)
 			return false;
@@ -961,18 +961,27 @@ public:
 				path = PreparePath(Path),
 				logger = priority == TDebugLogging ? log : nullptr]()
 			{
+				int32_t exitCode = 0;
 				auto cmd = LString::Fmt("ls -lan %s\n", path.Get());
-				auto ls = Cmd(GetConsole(), cmd);
-				auto lines = ls.SplitDelimit("\r\n").Slice(2, -2);
-				
-				if (logger)
+				auto ls = Cmd(GetConsole(), cmd, &exitCode);
+				LArray<LString> lines;
+				LError err;
+
+				if (exitCode)
 				{
-					printf("cmd='%s'\nls='%s'\n", cmd.Get(), ls.Get());
+					lines = ls.SplitDelimit("\r\n").Slice(1, -2);
+					auto msg = lines.Last().SplitDelimit(":", 1).Last().Strip();
+					err.Set(LErrorFuncFailed, msg);
+					LgiTrace("cmd='%s'\nls='%s'\nerr='%s'\n", cmd.Get(), ls.Get(), msg.Get());
+				}
+				else
+				{
+					lines = ls.SplitDelimit("\r\n").Slice(2, -2);
 				}
 
-				app->RunCallback( [dir = new SshDir(path, lines, logger), cb]() mutable
+				app->RunCallback( [dir = new SshDir(path, lines, logger), err, cb]() mutable
 					{
-						cb(dir);
+						cb(dir, err);
 						delete dir;
 					});
 			} );
@@ -1100,7 +1109,7 @@ public:
 		return cp;
 	}
 
-	bool Read(TPriority priority, const char *Path, std::function<void(LError,LString)> cb) override
+	bool Read(TPriority priority, const char *Path, SystemIntf::TStringCallback cb) override
 	{
 		if (!Path && cb)
 			return false;
@@ -1118,14 +1127,14 @@ public:
 				if (!GetSsh())
 				{
 					LError err(LErrorFuncFailed, "No ssh object.");
-					cb(err, LString());
+					cb(LString(), err);
 				}
 				else
 				{
 					auto err = ssh->DownloadFile(&buf, Path);
 					app->RunCallback( [this, err, cb, data=buf.NewLStr()]() mutable
 						{
-							cb(err, data);
+							cb(data, err);
 						});
 				}
 			} );
@@ -1338,7 +1347,7 @@ public:
 		return p.GetFull();
 	}
 
-	void ResolvePath(LString path, LString::Array hints, std::function<void(LError&,LString)> cb) override
+	void ResolvePath(LString path, LString::Array hints, SystemIntf::TStringCallback cb) override
 	{
 		LAssert(!"impl me");
 	}
@@ -1355,13 +1364,14 @@ public:
 		return true;
 	}
 
-	bool ReadFolder(TPriority priority, const char *Path, std::function<void(LDirectory*)> results) override
+	bool ReadFolder(TPriority priority, const char *Path, std::function<void(LDirectory*, LError)> results) override
 	{
 		LDirectory dir;
 		if (!dir.First(Path))
 			return false;
 
-		results(&dir);
+		LError err;
+		results(&dir, err);
 		return true;
 	}
 
@@ -1400,12 +1410,12 @@ public:
 		return false;
 	}
 
-	bool Read(TPriority priority, const char *Path, std::function<void(LError,LString)> result) override
+	bool Read(TPriority priority, const char *Path, SystemIntf::TStringCallback result) override
 	{
 		if (!Path)
 		{
 			if (result)
-				result(LErrorInvalidParam, LString());
+				result(LString(), LErrorInvalidParam);
 			return false;
 		}
 
@@ -1417,7 +1427,7 @@ public:
 		else
 			err = f.GetError();
 		if (result)
-			result(err, data);
+			result(data, err);
 		return true;
 	}
 
@@ -1811,12 +1821,12 @@ public:
 		return LString();
 	}
 
-	void ResolvePath(LString path, LString::Array hints, std::function<void(LError&,LString)> cb) override
+	void ResolvePath(LString path, LString::Array hints, SystemIntf::TStringCallback cb) override
 	{
 		if (path && cb)
 		{
 			LError err;
-			cb(err, path);
+			cb(path, err);
 		}
 	}
 	
@@ -1911,7 +1921,7 @@ public:
 		return true;
 	}
 
-	bool ReadFolder(TPriority priority, const char *Path, std::function<void(LDirectory*)> results) override
+	bool ReadFolder(TPriority priority, const char *Path, std::function<void(LDirectory*, LError)> results) override
 	{
 		if (!Path || !results)
 			return false;
@@ -1953,7 +1963,8 @@ public:
 					parent->RunCallback([this, results, curDir=curDir.Release()]()
 					{
 						curDir->Valid();
-						results(curDir);
+						LError err;
+						results(curDir, err);
 						curDir->Valid();
 						delete curDir;
 					});
@@ -1963,7 +1974,7 @@ public:
 		return true;
 	}
 
-	bool Read(TPriority priority, const char *inPath, std::function<void(LError,LString)> result) override
+	bool Read(TPriority priority, const char *inPath, SystemIntf::TStringCallback result) override
 	{
 		if (!inPath || !result)
 			return false;
@@ -1978,7 +1989,7 @@ public:
 				if (c->data)
 				{
 					LError err;
-					result(err, c->data);
+					result(c->data, err);
 					return true;
 				}
 			}
@@ -2046,7 +2057,7 @@ public:
 
 				parent->RunCallback([this, err, fileData, result]()
 				{
-					result(err, fileData);
+					result(fileData, err);
 				});
 			});
 
@@ -2206,7 +2217,7 @@ public:
 		{
 			LMutex::Auto lck(owner, _FL);
 			states.Add(file, TReading);
-			owner->Read(SystemIntf::TBackground, file, [this](auto err, auto data)
+			owner->Read(SystemIntf::TBackground, file, [this](auto data, auto err)
 				{
 				});
 		}

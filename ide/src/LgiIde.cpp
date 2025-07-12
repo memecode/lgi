@@ -3315,7 +3315,7 @@ void AppWnd::OpenFile(const char *FileName, NodeSource *Src, std::function<void(
 			LString::Array pathHints;
 			pathHints.Add(Proj->GetBuildFolder());
 			pathHints.Add(backend->GetBasePath());
-			backend->ResolvePath(File, pathHints, [this, backend, Proj, Doc, callback](auto err, auto FullPath)
+			backend->ResolvePath(File, pathHints, [this, backend, Proj, Doc, callback](auto FullPath, auto err)
 			{
 				if (err)
 				{
@@ -3323,7 +3323,7 @@ void AppWnd::OpenFile(const char *FileName, NodeSource *Src, std::function<void(
 					return;
 				}
 
-				backend->Read(SystemIntf::TForeground, FullPath, [this, Proj, Doc, callback, FullPath](auto err, auto data)
+				backend->Read(SystemIntf::TForeground, FullPath, [this, Proj, Doc, callback, FullPath](auto data, auto err)
 				{
 					if (err)
 					{
