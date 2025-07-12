@@ -517,17 +517,17 @@ public:
 
 	LString NameAt(ssize_t Level)
 	{
-		LString n;
-		#ifndef WINDOWS
-		n += "/";
-		#endif
+		LString::Array a;
 		for (unsigned i=0; i<=Level && i<p.Length(); i++)
-		{
-			n += (const char16*) *(p[i].ds.Get());
-			n += DIR_STR;
-		}
+			a.Add((const char16*) *(p[i].ds.Get()));
 
-		return n;		
+		LString n, sep(DIR_STR);
+		#ifndef WINDOWS
+		if (a.Length() == 0 || a[0] != "~")
+			n += sep;
+		#endif
+
+		return n + sep.Join(a) + sep;
 	}
 
 	const char *Name() override
