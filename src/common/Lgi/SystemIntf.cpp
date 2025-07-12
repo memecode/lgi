@@ -51,6 +51,12 @@ void SystemIntf::AddWork(LString ctx, TPriority priority, TCallback &&job)
 		backgroundWork.Add(w);
 }
 
+bool SystemIntf::HasWork()
+{
+	return foregroundWork.Length() > 0 ||
+		backgroundWork.Length() > 0;
+}
+
 void SystemIntf::DoWork()
 {
 	// Is there work to do?
@@ -316,46 +322,48 @@ class SshBackend :
 
 	LString Cmd(LSsh::SshConsole *c, LString cmd, int32_t *exitCode = NULL, LStream *outputStream = NULL, LCancel *cancel = NULL)
 	{
-		if (c)
+		if (!c || IsCancelled() || (cancel && cancel->IsCancelled()))
 		{
-			// log->Print("Cmd: write '%s'\n", cmd.Strip().Get());
-			if (!c->Write(cmd))
-			{
-				if (exitCode)
-					*exitCode = -1;
-				return LString();
-			}
-
-			auto output = ReadToPrompt(c, outputStream, cancel);
-			
-			if (cancel && cancel->IsCancelled())
-			{
-				if (exitCode)
-					*exitCode = -1;
-			}
-			else if (exitCode)
-			{
-				LString echo = "echo $?\n";
-				if (c->Write(echo))
-				{
-					auto val = ReadToPrompt(c);
-					// log->Print("echo output: %s", val.Get());
-
-					auto lines = val.SplitDelimit("\r\n");
-					if (lines.Length() > 1)
-						*exitCode = (int32_t) lines[1].Int();
-					else
-						*exitCode = -1;
-
-					if (*exitCode)
-						log->Print("Cmd failed: %s\n", output.Get());
-				}
-			}
-
-			return output;
+			if (exitCode)
+				*exitCode = -1;
+			return LString();
 		}
 
-		return LString();
+		// log->Print("Cmd: write '%s'\n", cmd.Strip().Get());
+		if (!c->Write(cmd))
+		{
+			if (exitCode)
+				*exitCode = -1;
+			return LString();
+		}
+
+		auto output = ReadToPrompt(c, outputStream, cancel);
+			
+		if (cancel && cancel->IsCancelled())
+		{
+			if (exitCode)
+				*exitCode = -1;
+		}
+		else if (exitCode)
+		{
+			LString echo = "echo $?\n";
+			if (c->Write(echo))
+			{
+				auto val = ReadToPrompt(c);
+				// log->Print("echo output: %s", val.Get());
+
+				auto lines = val.SplitDelimit("\r\n");
+				if (lines.Length() > 1)
+					*exitCode = (int32_t) lines[1].Int();
+				else
+					*exitCode = -1;
+
+				if (*exitCode)
+					log->Print("Cmd failed: %s\n", output.Get());
+			}
+		}
+
+		return output;
 	}
 
 public:
@@ -392,8 +400,13 @@ public:
 
 	int Main() override
 	{
-		while (!IsCancelled())
+		while (true)
+		{
 			DoWork();
+
+			if (IsCancelled() && !HasWork())
+				break;
+		}
 
 		if (processes.Length())
 		{
@@ -981,7 +994,13 @@ public:
 				if (exitCode)
 				{
 					lines = ls.SplitDelimit("\r\n").Slice(1, -2);
-					auto msg = lines.Last().SplitDelimit(":", 1).Last().Strip();
+					LString msg = "cmd failed";
+					if (lines.Length())
+					{
+						auto parts = lines.Last().SplitDelimit(":", 1);
+						if (parts.Length())
+							msg = parts.Last().Strip();
+					}
 					err.Set(LErrorFuncFailed, msg);
 					LgiTrace("cmd='%s'\nls='%s'\nerr='%s'\n", cmd.Get(), ls.Get(), msg.Get());
 				}

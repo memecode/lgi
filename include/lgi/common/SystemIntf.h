@@ -115,6 +115,8 @@ protected:
 	void AddWork(LString ctx, TPriority priority, TCallback &&job);	
 	// Call this in the main function of the sub-class:
 	void DoWork();
+	// True if there is work to do
+	bool HasWork();
 
 public:
 	#if defined(HAIKU) || defined(MAC)
