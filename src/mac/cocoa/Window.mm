@@ -475,12 +475,24 @@ bool LWindow::SetIcon(const char *FileName)
 	return false;
 }
 
+bool LWindow::GetWillFocus()
+{
+	if (!Wnd.p)
+		return true;
+	
+	auto w = objc_dynamic_cast(LNsWindow, Wnd.p);
+	if (!w)
+		return true;
+		
+	return w.canFocus;
+}
+
 bool LWindow::SetWillFocus(bool f)
 {
 	if (!Wnd.p)
 		return false;
 	
-	LNsWindow *w = objc_dynamic_cast(LNsWindow, Wnd.p);
+	auto w = objc_dynamic_cast(LNsWindow, Wnd.p);
 	if (!w)
 		return false;
 		
@@ -703,7 +715,13 @@ void LWindow::Visible(bool i)
 		d->InitVisible = true;
 		PourAll();
 
-		[Wnd.p makeKeyAndOrderFront:NULL];
+		if (GetWillFocus())
+			[Wnd.p makeKeyAndOrderFront:NULL];
+		else
+		{
+			[Wnd.p setLevel:NSScreenSaverWindowLevel + 1];
+			[Wnd.p orderFront:NULL];
+		}
 		[NSApp activateIgnoringOtherApps:YES];
 
 		SetDefaultFocus(this);

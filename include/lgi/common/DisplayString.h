@@ -179,11 +179,6 @@ public:
 	/// Returns the words (not chars) in the OsChar string
 	ssize_t Length();
 	
-	/*
-	/// Sets the number of words in the OsChar string
-	void Length(int NewLen);
-	*/
-
 	/// Returns the pointer to the native string
 	operator const char16*()
 	{

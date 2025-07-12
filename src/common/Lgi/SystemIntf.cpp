@@ -966,6 +966,7 @@ public:
 				auto ls = Cmd(GetConsole(), cmd, &exitCode);
 				LArray<LString> lines;
 				LError err;
+				SshDir *dir = nullptr;
 
 				if (exitCode)
 				{
@@ -977,9 +978,10 @@ public:
 				else
 				{
 					lines = ls.SplitDelimit("\r\n").Slice(2, -2);
+					dir = new SshDir(path, lines, logger);
 				}
 
-				app->RunCallback( [dir = new SshDir(path, lines, logger), err, cb]() mutable
+				app->RunCallback( [dir, err, cb]() mutable
 					{
 						cb(dir, err);
 						delete dir;
@@ -1468,18 +1470,15 @@ public:
 			return false;
 
 		LError err;
+
 		if (LDirExists(path))
-		{
 			FileDev->RemoveFolder(path, recursiveForce, &err);
-			if (cb)
-				cb(err);
-		}
 		else
-		{
-			auto status = FileDev->Delete(path, &err);
-			if (cb)
-				cb(err);
-		}
+			FileDev->Delete(path, &err);
+
+		if (cb)
+			cb(err);
+
 		return true;
 	}
 

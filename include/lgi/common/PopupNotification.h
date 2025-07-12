@@ -25,5 +25,6 @@ public:
 	void Add(LWindow *ref, LString msg);
 	void OnPaint(LSurface *pDC);
 	void OnPulse();
+	LString GetMsgs();
 };
 

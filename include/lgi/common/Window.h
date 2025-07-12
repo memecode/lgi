@@ -179,6 +179,9 @@ public:
 		ViewDelete
 	};
 	void SetFocus(LViewI *ctrl, FocusType type);
+	
+	
+	bool GetWillFocus();
 	/// This setting can turn of taking focus when the window is shown. Useful for popups that
 	/// don't want to steal focus from an underlying window.
 	/// The default value is 'true'

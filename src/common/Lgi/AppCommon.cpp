@@ -248,6 +248,14 @@ LPoint LPopupNotification::CalcSize()
 	return p;
 }
 
+LString LPopupNotification::GetMsgs()
+{
+	LString::Array a;
+	for (auto m: Msgs)
+		a.Add((const char16*)*m);
+	return LString("\n").Join(a);
+}
+
 void LPopupNotification::Init()
 {
 	if (!RefWnd)
@@ -269,6 +277,9 @@ void LPopupNotification::Init()
 	if (!IsAttached())
 		Attach(0);
 	Visible(true);
+	
+	printf("%s:%i - showing pop note at %s: %s\n",
+		_FL, pos.GetStr(), GetMsgs().Get());
 }
 
 void LPopupNotification::Add(LWindow *ref, LString msg)

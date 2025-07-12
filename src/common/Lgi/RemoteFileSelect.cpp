@@ -105,7 +105,6 @@ public:
 		if (!cb)
 			return;
 			
-		LgiTrace("RemoteFileSel: readdir start...\n");
 		systemIntf->ReadFolder(SystemIntf::TDebugLogging,
 			ConvertPath(path),
 			[this, cb](auto dir, auto err)
