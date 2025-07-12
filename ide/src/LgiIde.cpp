@@ -1217,6 +1217,7 @@ public:
 	bool Running = false;
 	bool Building = false;
 	bool FixBuildWait = false;
+	bool InShutdown = false;
 	int RebuildWait = 0;
 	LSubMenu *WindowsMenu = NULL;
 	LSubMenu *CreateMakefileMenu = NULL;
@@ -2966,8 +2967,9 @@ bool AppWnd::SaveAllAndQuit()
 {
 	if (!IsClean())
 	{
-		SaveAll([](bool status)
+		SaveAll([this](bool status)
 			{
+				d->InShutdown = false;
 				LCloseApp();
 			},
 			true);
@@ -2979,16 +2981,29 @@ bool AppWnd::SaveAllAndQuit()
 
 bool AppWnd::OnRequestClose(bool IsOsQuit)
 {
+	if (d->InShutdown)
+		return false;
+		
+	d->InShutdown = true;
 	if (d->FindSym)
 	{
+		printf("Calling find sym shutdown...\n");
 		d->FindSym->Shutdown([this]()
 			{
+				printf("Find sym shutdown cb\n");
 				if (SaveAllAndQuit())
+				{
+					printf("SaveAllAndQuit ret true\n");
+					d->InShutdown = false;
 					LCloseApp();
+				}
 			});
+
+		printf("Find sym return false\n");
 		return false;
 	}
 
+	printf("Call SaveAllAndQuit\n");
 	return SaveAllAndQuit();
 }
 

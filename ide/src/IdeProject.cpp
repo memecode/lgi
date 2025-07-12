@@ -2510,7 +2510,7 @@ bool IdeProject::OnNode(const char *Path, ProjectNode *Node, bool Add)
 void IdeProject::ShowFileProperties(const char *File)
 {
 	ProjectNode *Node = NULL;
-	auto full = FindFullPath(File, &Node);
+	FindFullPath(File, &Node);
 	if (Node)
 		Node->OnProperties();
 }

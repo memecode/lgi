@@ -1072,9 +1072,15 @@ void FindSymbolSystem::Shutdown(std::function<void()> callback)
 	}
 		
 	if (d->backendCalls)
+	{
 		d->onShutdown = callback;
+		if (d->backend)
+			d->backend->Cancel();
+	}
 	else
+	{
 		callback();
+	}
 }
 
 void FindSymbolSystem::OpenSearchDlg(LViewI *Parent, std::function<void(FindSymResult&)> Callback)

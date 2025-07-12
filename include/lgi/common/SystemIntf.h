@@ -56,7 +56,9 @@ struct StripAnsiStream : public LStream
 	}
 };
 
-class SystemIntf : public LMutex
+class SystemIntf :
+	public LMutex,
+	public LCancel
 {
 public:
 	enum TPriority

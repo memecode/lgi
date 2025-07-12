@@ -104,7 +104,6 @@ void SystemIntf::DoWork()
 
 class SshBackend :
 	public SystemIntf,
-	public LCancel,
 	public LThread
 {
 	class Process :
@@ -391,6 +390,22 @@ public:
 		WaitForExit();
 	}
 
+	int Main() override
+	{
+		while (!IsCancelled())
+			DoWork();
+
+		if (processes.Length())
+		{
+			log->Print("Waiting for subprocesses...\n");
+			while (processes.Length() > 0)
+				DoWork();
+			log->Print("Subprocesses done!\n");
+		}
+
+		return 0;
+	}
+
 	const char *GetClass() const { return "SshBackend"; }
 	LString GetBasePath() override { return RemoteRoot(); }
 	bool IsReady() override
@@ -657,11 +672,6 @@ public:
 			Log(log)
 		{
 			BasePath = basePath;
-
-			if (log)
-			{
-				int asd=0;
-			}
 
 			//0.........10........20........30........40........50........60
 			//drwxrwxr-x   2 matthew matthew    4096 Mar 12 12:46  .redhat
@@ -1291,22 +1301,6 @@ public:
 
 		return true;
 	}
-
-	int Main() override
-	{
-		while (!IsCancelled())
-			DoWork();
-
-		if (processes.Length())
-		{
-			log->Print("Waiting for subprocesses...\n");
-			while (processes.Length() > 0)
-				DoWork();
-			log->Print("Subprocesses done!\n");
-		}
-
-		return 0;
-	}
 };
 
 class LocalBackend : public SystemIntf
@@ -1528,7 +1522,6 @@ public:
 
 class FtpBackend :
 	public SystemIntf,
-	public LCancel,
 	public LThread,
 	public IFtpCallback
 {
