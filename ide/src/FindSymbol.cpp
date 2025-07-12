@@ -175,7 +175,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			return false;
 		backendCalls++;
 		
-		LgiTrace("inc backendCalls=%i %s:%i\n", backendCalls, file, line);
+		// LgiTrace("inc backendCalls=%i %s:%i\n", backendCalls, file, line);
 		
 		return true;
 	}
@@ -184,7 +184,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		LAssert(backendCalls > 0);
 		backendCalls--;
 		
-		LgiTrace("dec backendCalls=%i %s:%i\n", backendCalls, file, line);
+		// LgiTrace("dec backendCalls=%i %s:%i\n", backendCalls, file, line);
 		
 		if (!backendCalls && onShutdown)
 			onShutdown();

@@ -45,7 +45,7 @@ void SystemIntf::AddWork(LString ctx, TPriority priority, TCallback &&job)
 		log->Print("AddWork lock took %i\n", _FL, (int)(now-start));
 
 	auto w = new TWork(ctx, std::move(job));
-	if (priority == SystemIntf::TForeground)
+	if (priority != SystemIntf::TBackground)
 		foregroundWork.Add(w);
 	else
 		backgroundWork.Add(w);
@@ -449,7 +449,7 @@ public:
 		return native;
 	}
 
-	LString JoinPath(LString base, LString leaf)
+	LString JoinPath(LString base, LString leaf) override
 	{
 		LString allSep("\\/");
 		LString::Array a;
@@ -482,7 +482,7 @@ public:
 		return p;
 	}
 
-	void ResolvePath(LString path, LString::Array hints, std::function<void(LError&,LString)> cb)
+	void ResolvePath(LString path, LString::Array hints, std::function<void(LError&,LString)> cb) override
 	{
 		if (!cb)
 			return;
@@ -650,18 +650,30 @@ public:
 		bool Ok() const { return pos < (ssize_t)entries.Length(); }
 
 	public:
+		constexpr static bool Debug = true;
+		#define DEBUG_LOG(...) { if (Debug && log) printf(__VA_ARGS__); }
+		
 		SshDir(const char *basePath, LArray<LString> &lines, LStream *log) :
 			Log(log)
 		{
 			BasePath = basePath;
 
+			if (log)
+			{
+				int asd=0;
+			}
+
 			//0.........10........20........30........40........50........60
 			//drwxrwxr-x   2 matthew matthew    4096 Mar 12 12:46  .redhat
 			LArray<bool> non;
 			for (auto &line: lines)
+			{
 				for (int i=0; i<line.Length(); i++)
 					if (!IsWhite(line[i]))
 						non[i] = true;
+
+				DEBUG_LOG("ln='%s'\n", line.Get());
+			}
 			LArray<LRange> cols;
 			for (int i=0; i<non.Length();)
 			{
@@ -669,20 +681,15 @@ public:
 				while (i<non.Length() && !non[i]) i++;
 				auto start = i;
 				while (i<non.Length() && non[i]) i++;
-				cols.New().Set(start, i - start);
+				auto &c = cols.New();
+				c.Set(start, i - start);
+				DEBUG_LOG("col=%s\n", c.GetStr());
 			}
+			
 			for (auto &line: lines)
 			{
-				if (Log)
-				{
-					if (line.Find("13462126") > 0)
-					{
-						int asd=0;
-					}
-					Log->Print("Line: %s\n", line.Get());
-				}
-
 				#define COL(idx) line(cols[idx].Start, cols[idx].End())
+
 				auto &e = entries.New();
 				e.perms = COL(0);
 				e.user  = COL(2);
@@ -692,6 +699,11 @@ public:
 				e.month = COL(5);
 				e.day   = COL(6).Strip();
 				e.timeOrYear = COL(7);
+
+				DEBUG_LOG("perms=%s user=%s grp=%s sz=" LPrintfInt64 " mth=%s day=%s yr=%s\n",
+					e.perms.Get(), e.user.Get(), e.grp.Get(), e.size,
+					e.month.Get(), e.day.Get(), e.timeOrYear.Get());
+
 				if ((e.name = line(cols[7].End() + 1, -1).LStrip(" ")))
 				{
 					if (e.name(0) == '\'')
@@ -725,7 +737,6 @@ public:
 
 		~SshDir()
 		{
-			int asd=0;
 		}
 
 		int First(const char *Name, const char *Pattern = LGI_ALL_FILES) { pos = 0; return Ok(); }	
@@ -945,13 +956,21 @@ public:
 		AddWork(
 			MakeContext(_FL, Path),
 			priority,
-			[this, cb, path = PreparePath(Path)]()
+			[	this,
+				cb,
+				path = PreparePath(Path),
+				logger = priority == TDebugLogging ? log : nullptr]()
 			{
 				auto cmd = LString::Fmt("ls -lan %s\n", path.Get());
 				auto ls = Cmd(GetConsole(), cmd);
 				auto lines = ls.SplitDelimit("\r\n").Slice(2, -2);
+				
+				if (logger)
+				{
+					printf("cmd='%s'\nls='%s'\n", cmd.Get(), ls.Get());
+				}
 
-				app->RunCallback( [dir = new SshDir(path, lines, NULL), cb]() mutable
+				app->RunCallback( [dir = new SshDir(path, lines, logger), cb]() mutable
 					{
 						cb(dir);
 						delete dir;
@@ -1226,7 +1245,7 @@ public:
 		return true;
 	}
 
-	bool RunProcess(const char *initDir, const char *cmdLine, ProcessIo *output, LCancel *cancel, std::function<void(int)> cb, LStream *alt_log = nullptr)
+	bool RunProcess(const char *initDir, const char *cmdLine, ProcessIo *output, LCancel *cancel, std::function<void(int)> cb, LStream *alt_log = nullptr) override
 	{
 		if (!cmdLine)
 			return false;
@@ -1301,7 +1320,7 @@ public:
 
 	LString GetBasePath() override { return folder; }
 
-	LString MakeRelative(LString absPath)
+	LString MakeRelative(LString absPath) override
 	{
 		return LMakeRelativePath(folder, absPath);
 	}
@@ -1312,14 +1331,14 @@ public:
 		return relPath;
 	}
 
-	LString JoinPath(LString base, LString leaf)
+	LString JoinPath(LString base, LString leaf) override
 	{
 		LFile::Path p(base);
 		p += leaf;
 		return p.GetFull();
 	}
 
-	void ResolvePath(LString path, LString::Array hints, std::function<void(LError&,LString)> cb)
+	void ResolvePath(LString path, LString::Array hints, std::function<void(LError&,LString)> cb) override
 	{
 		LAssert(!"impl me");
 	}
@@ -1484,7 +1503,7 @@ public:
 		#endif
 	}
 
-	bool RunProcess(const char *initDir, const char *cmdLine, ProcessIo *output, LCancel *cancel, std::function<void(int)> cb, LStream *alt_log)
+	bool RunProcess(const char *initDir, const char *cmdLine, ProcessIo *output, LCancel *cancel, std::function<void(int)> cb, LStream *alt_log) override
 	{
 		return false;
 	}
@@ -2323,7 +2342,7 @@ public:
 		return -1;
 	}
 
-	int Alert(const char *Title, const char *Text, const char *Btn1, const char *Btn2 = 0, const char *Btn3 = 0)
+	int Alert(const char *Title, const char *Text, const char *Btn1, const char *Btn2 = 0, const char *Btn3 = 0) override
 	{
 		LAssert(0);
 		return -1;
@@ -2362,7 +2381,7 @@ public:
 			log->Print("   error: %i, %s\n", ErrorCode, ErrorDescription);
 		}
 		
-		void OnInformation(const char *Str)
+		void OnInformation(const char *Str) override
 		{
 			log->Print("   info: %s\n", Str);
 		}

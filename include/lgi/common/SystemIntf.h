@@ -62,7 +62,8 @@ public:
 	enum TPriority
 	{
 		TBackground,
-		TForeground
+		TForeground,
+		TDebugLogging,
 	};
 
 	constexpr static int WAIT_MS = 50;

@@ -27,7 +27,7 @@ public:
 		}
 	}
 	
-	void OnPaint(LSurface *pDC)
+	void OnPaint(LSurface *pDC) override
 	{
 		if (Lst)
 		{
@@ -42,7 +42,7 @@ public:
 		pDC->Box();
 	}
 	
-	void OnPosChange()
+	void OnPosChange() override
 	{
 		if (Lst)
 		{

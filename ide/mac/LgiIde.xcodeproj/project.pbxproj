@@ -49,6 +49,8 @@
 		34D21CE8217978C4003D1EA6 /* LgiMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D21CE7217978C4003D1EA6 /* LgiMain.cpp */; };
 		34D21CEA217978DA003D1EA6 /* Base64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D21CE9217978DA003D1EA6 /* Base64.cpp */; };
 		34D625802CA78EE400FF505C /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 345B20D1217968820079E3C9 /* LgiCocoa.framework */; };
+		34F442F22DFC3D13001DBEF5 /* libpng16.16.45.git.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34F442EE2DFC3C05001DBEF5 /* libpng16.16.45.git.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		34F442F32DFC3D13001DBEF5 /* libz.1.4.1.1.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34F442F02DFC3C14001DBEF5 /* libz.1.4.1.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34F566AB237BD55F0027133A /* JavascriptParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34F566A0237BD55F0027133A /* JavascriptParser.cpp */; };
 /* End PBXBuildFile section */
 
@@ -76,6 +78,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				34F442F22DFC3D13001DBEF5 /* libpng16.16.45.git.dylib in CopyFiles */,
+				34F442F32DFC3D13001DBEF5 /* libz.1.4.1.1.dylib in CopyFiles */,
 				34148AFC2349ECA200D5E495 /* LgiCocoa.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -160,6 +164,8 @@
 		34D21CE32179788B003D1EA6 /* Http.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Http.cpp; path = ../../src/common/Net/Http.cpp; sourceTree = "<group>"; };
 		34D21CE7217978C4003D1EA6 /* LgiMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiMain.cpp; path = ../../src/common/Lgi/LgiMain.cpp; sourceTree = "<group>"; };
 		34D21CE9217978DA003D1EA6 /* Base64.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Base64.cpp; path = ../../src/common/Net/Base64.cpp; sourceTree = "<group>"; };
+		34F442EE2DFC3C05001DBEF5 /* libpng16.16.45.git.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libpng16.16.45.git.dylib; sourceTree = "<group>"; };
+		34F442F02DFC3C14001DBEF5 /* libz.1.4.1.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libz.1.4.1.1.dylib; sourceTree = "<group>"; };
 		34F566A0237BD55F0027133A /* JavascriptParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JavascriptParser.cpp; path = ../src/JavascriptParser.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -217,6 +223,8 @@
 		345B20CB217967B70079E3C9 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				34F442EE2DFC3C05001DBEF5 /* libpng16.16.45.git.dylib */,
+				34F442F02DFC3C14001DBEF5 /* libz.1.4.1.1.dylib */,
 				343688CA2CA793210009E57A /* libssh.4.9.6.dylib */,
 				345B20C3217967760079E3C9 /* LgiCocoa.xcodeproj */,
 			);
@@ -630,6 +638,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					/opt/local/lib,
+					"$(PROJECT_DIR)",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				OTHER_CFLAGS = (
@@ -673,6 +682,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					/opt/local/lib,
+					"$(PROJECT_DIR)",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				OTHER_CFLAGS = (

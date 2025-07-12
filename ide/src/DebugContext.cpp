@@ -128,6 +128,8 @@ public:
 						Select();
 						break;
 					}
+					default:
+						break;
 				}
 				break;
 			}

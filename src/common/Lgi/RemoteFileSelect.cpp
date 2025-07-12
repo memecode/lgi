@@ -83,7 +83,7 @@ public:
 		// Impl me
 	}
 
-	void Stat(LString path, std::function<void(struct stat*, LString, LError)> cb)
+	void Stat(LString path, std::function<void(struct stat*, LString, LError)> cb) override
 	{
 		if (!path || !cb)
 			return;
@@ -97,8 +97,11 @@ public:
 	{
 		if (!cb)
 			return;
-		systemIntf->ReadFolder(SystemIntf::TForeground, ConvertPath(path), [this, cb](auto dir)
+			
+		printf("RemoteFileSel: readdir start...\n");
+		systemIntf->ReadFolder(SystemIntf::TDebugLogging, ConvertPath(path), [this, cb](auto dir)
 		{
+			printf("RemoteFileSel: readdir result.\n");
 			cb(*dir);
 		});
 	}

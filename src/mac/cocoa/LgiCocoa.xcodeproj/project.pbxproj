@@ -365,7 +365,7 @@
 		3477C4EC1CC27F1C0028B84B /* TrayIcon.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = TrayIcon.cpp; path = ../../common/Lgi/TrayIcon.cpp; sourceTree = SOURCE_ROOT; };
 		3477C5161CC303B70028B84B /* LgiUiBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiUiBase.h; path = ../../../include/lgi/common/LgiUiBase.h; sourceTree = "<group>"; };
 		347AFB9727A0DC5E00BE4ABE /* 15Bit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = 15Bit.cpp; path = ../../common/Gdc2/15Bit.cpp; sourceTree = SOURCE_ROOT; };
-		3483413C2CDAB9F3002AF938 /* CommsBus.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CommsBus.cpp; path = ../../../common/Net/CommsBus.cpp; sourceTree = "<group>"; };
+		3483413C2CDAB9F3002AF938 /* CommsBus.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CommsBus.cpp; path = ../../common/Net/CommsBus.cpp; sourceTree = SOURCE_ROOT; };
 		348362411F233A77003B2A6D /* Stream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Stream.h; path = ../../../include/lgi/common/Stream.h; sourceTree = SOURCE_ROOT; };
 		34837C4825C677ED00D103B4 /* AppPriv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppPriv.h; path = ../../../private/mac/AppPriv.h; sourceTree = SOURCE_ROOT; };
 		3485B1CC2C0957C40079218F /* TimeZoneInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TimeZoneInfo.h; path = ../../../../../lgi/trunk/include/lgi/common/TimeZoneInfo.h; sourceTree = SOURCE_ROOT; };

@@ -642,7 +642,7 @@ bool ProjectNode::Serialize(LDirectory *d)
 	if (Type == NodeDir)
 	{
 		// Add placeholder child node to allow user to expand the dir
-		if (placeholder = new LTreeItem)
+		if ((placeholder = new LTreeItem))
 		{
 			placeholder->SetText("...loading...");
 			Insert(placeholder);

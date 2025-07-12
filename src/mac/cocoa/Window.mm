@@ -165,12 +165,10 @@ public:
 		if (!osw)
 			return;
 
-		LCocoaView *cv = objc_dynamic_cast(LCocoaView, osw.p.contentView);
-		if (cv)
+		if (auto cv = objc_dynamic_cast(LCocoaView, osw.p.contentView))
 			cv.w = NULL;
 
-		LNsWindow *w = objc_dynamic_cast(LNsWindow, osw.p);
-		if (w)
+		if (auto w = objc_dynamic_cast(LNsWindow, osw.p))
 			[w onDelete:Ctx];
 
 		osw.p.delegate = nil;

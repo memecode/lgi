@@ -517,17 +517,17 @@ public:
 		App = app;
 	}
 
-	LString ToString(DefnInfo *Obj)
+	LString ToString(DefnInfo *Obj) override
 	{
 		return Obj->Name;
 	}
 	
-	void OnSelect(DefnInfo *Obj)
+	void OnSelect(DefnInfo *Obj) override
 	{
 		App->GotoReference(Obj->File, Obj->Line, false, true, NULL);
 	}
 	
-	bool Name(const char *s)
+	bool Name(const char *s) override
 	{
 		LString InputStr = s;
 		LString::Array p = InputStr.SplitDelimit(" \t");
@@ -617,7 +617,7 @@ public:
 		}
 	}
 
-	LString ToString(FindSymResult *Obj)
+	LString ToString(FindSymResult *Obj) override
 	{
 		LString s;
 		s.Printf("%s:%i - %s",
@@ -631,7 +631,7 @@ public:
 		return s;
 	}
 	
-	void OnSelect(FindSymResult *Obj)
+	void OnSelect(FindSymResult *Obj) override
 	{
 		App->GotoReference(Obj->File, Obj->Line, false, true, NULL);
 	}
@@ -757,7 +757,7 @@ public:
 		App = app;
 	}
 
-	LString ToString(ProjectNode *Obj)
+	LString ToString(ProjectNode *Obj) override
 	{
 		LString s(Obj->GetFileName());
 		#ifdef WINDOWS
@@ -783,7 +783,7 @@ public:
 		}));
 	}
 	
-	void OnSelect(ProjectNode *Obj)
+	void OnSelect(ProjectNode *Obj) override
 	{
 		auto Fn = Obj->GetFileName();
 		if (LIsRelativePath(Fn))
@@ -800,7 +800,7 @@ public:
 		}
 	}
 	
-	void OnSelect(LListItem *Item)
+	void OnSelect(LListItem *Item) override
 	{
 		App->GotoReference(Item->GetText(), 1, false, true, NULL);
 	}

@@ -218,7 +218,7 @@ public:
 		Thread.Reset();
 	}
 
-	bool OnViewKey(LView *v, LKey &k)
+	bool OnViewKey(LView *v, LKey &k) override
 	{
 		switch (k.vkey)
 		{
@@ -2665,22 +2665,22 @@ int AppWnd::OnFixBuildErrors()
 						// printf("note=%i\n", (int)note);
 						if (note > 0)
 						{
-							auto before = GetToken(code, note-1, -1);
-							auto after  = GetToken(code, note+key.Length(), 1);
+							auto before = GetToken(code, (int)note-1, -1);
+							auto after  = GetToken(code, (int)(note+key.Length()), 1);
 							bool changed = false;
 							// printf("tokens: '%s' and '%s'\n", before.Get(), after.Get());
 							if (!before.Equals("const"))
 							{
 								// add the const
 								LString constStr = "const ";
-								InsertString(code, note, constStr);
+								InsertString(code, (int)note, constStr);
 								note += constStr.Length();
 								changed = true;
 							}
 							if (!after.Equals("&"))
 							{
 								LString amp = "&";
-								InsertString(code, note+key.Length(), amp);
+								InsertString(code, (int)(note+key.Length()), amp);
 								changed = true;
 							}
 							if (changed)
@@ -2962,21 +2962,34 @@ void AppWnd::CloseAll()
 	);
 }
 
-bool AppWnd::OnRequestClose(bool IsOsQuit)
+bool AppWnd::SaveAllAndQuit()
 {
 	if (!IsClean())
 	{
 		SaveAll([](bool status)
-		{
-			LCloseApp();
-		},	true);	
-	
+			{
+				LCloseApp();
+			},
+			true);
 		return false;
 	}
-	else
+	
+	return true;
+}
+
+bool AppWnd::OnRequestClose(bool IsOsQuit)
+{
+	if (d->FindSym)
 	{
-		return LWindow::OnRequestClose(IsOsQuit);
+		d->FindSym->Shutdown([this]()
+			{
+				if (SaveAllAndQuit())
+					LCloseApp();
+			});
+		return false;
 	}
+
+	return SaveAllAndQuit();
 }
 
 void AppWnd::DumpHistory()
@@ -3525,7 +3538,7 @@ LMessage::Result AppWnd::OnEvent(LMessage *m)
 		}
 		case M_GET_PLATFORM_FLAGS:
 		{
-			PostThreadEvent(m->A(), M_GET_PLATFORM_FLAGS, 0, GetPlatform());
+			PostThreadEvent((int)m->A(), M_GET_PLATFORM_FLAGS, 0, GetPlatform());
 			break;
 		}
 		case M_MAKEFILES_CREATED:
@@ -3831,6 +3844,8 @@ int AppWnd::OnNotify(LViewI *Ctrl, const LNotification &n)
 					d->BreakPoints.DeleteSelection();
 					break;
 				}
+				default:
+					break;
 			}
 			break;
 		}

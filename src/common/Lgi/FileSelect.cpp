@@ -2165,7 +2165,7 @@ void LFolderList::OnDir(LDirectory &Dir)
 	bool ShowHiddenFiles = Dlg->ShowHidden ? Dlg->ShowHidden->Value() : false;
 	for (auto Found = true; Found; Found = Dir.Next())
 	{
-		char Name[LDirectory::MaxPathLen];
+		char Name[LDirectory::MaxPathLen] = "";
 		if (!Dir.Path(Name, sizeof(Name)))
 			continue;
 		
@@ -2175,7 +2175,7 @@ void LFolderList::OnDir(LDirectory &Dir)
 			Match = false;
 		}
 		else if (!Dir.IsDir() &&
-				Ext.Length() > 0)
+				  Ext.Length() > 0)
 		{
 			Match = false;
 			for (auto e: Ext)
