@@ -38,6 +38,9 @@ extern const char *ToString(SysPlatform p)
 // General SystemIntf work handling:
 void SystemIntf::AddWork(LString ctx, TPriority priority, TCallback &&job)
 {
+	if (IsCancelled())
+		return;
+		
 	auto start = LCurrentTime();
 	Auto lck(this, _FL);
 	auto now = LCurrentTime();
@@ -53,8 +56,8 @@ void SystemIntf::AddWork(LString ctx, TPriority priority, TCallback &&job)
 
 bool SystemIntf::HasWork()
 {
-	return foregroundWork.Length() > 0 ||
-		backgroundWork.Length() > 0;
+	return	foregroundWork.Length() > 0 ||
+			backgroundWork.Length() > 0;
 }
 
 void SystemIntf::DoWork()
@@ -402,10 +405,15 @@ public:
 	{
 		while (true)
 		{
+			auto startTs = LCurrentTime();
 			DoWork();
 
-			if (IsCancelled() && !HasWork())
-				break;
+			if (IsCancelled())
+			{
+				printf("work took: " LPrintfInt64 "\n", LCurrentTime()-startTs);
+				if (!HasWork())
+					break;
+			}
 		}
 
 		if (processes.Length())
@@ -1002,7 +1010,7 @@ public:
 							msg = parts.Last().Strip();
 					}
 					err.Set(LErrorFuncFailed, msg);
-					LgiTrace("cmd='%s'\nls='%s'\nerr='%s'\n", cmd.Get(), ls.Get(), msg.Get());
+					// LgiTrace("cmd='%s'\nls='%s'\nerr='%s'\n", cmd.Get(), ls.Get(), msg.Get());
 				}
 				else
 				{
@@ -1155,7 +1163,12 @@ public:
 				if (Path.Find("~") == 0 && homePath)
 					Path = Path.Replace("~", homePath);
 
-				if (!GetSsh())
+				if (IsCancelled())
+				{
+					LError err(LErrorTimerExpired, "Cancelled.");
+					cb(LString(), err);
+				}
+				else if (!GetSsh())
 				{
 					LError err(LErrorFuncFailed, "No ssh object.");
 					cb(LString(), err);

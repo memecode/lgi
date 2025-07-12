@@ -236,18 +236,28 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		Files.DeleteObjects();
 	}
 
-	void Log(const char *Fmt, ...)
+	void LogBuild(const char *Fmt, ...)
 	{
 		va_list Arg;
 		va_start(Arg, Fmt);
 		LString s;
 		s.Printf(Arg, Fmt);
 		va_end(Arg);
-		
 		if (s.Length())
 			PostThreadEvent(hApp, M_APPEND_TEXT, (LMessage::Param)NewStr(s), AppWnd::BuildTab);
 	}
-	
+
+	void LogNetwork(const char *Fmt, ...)
+	{
+		va_list Arg;
+		va_start(Arg, Fmt);
+		LString s;
+		s.Printf(Arg, Fmt);
+		va_end(Arg);
+		if (s.Length())
+			PostThreadEvent(hApp, M_APPEND_TEXT, (LMessage::Param)NewStr(s), AppWnd::NetworkTab);
+	}
+
 	#if !USE_HASH
 	int GetFileIndex(LString &Path)
 	{
@@ -331,7 +341,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		{
 			if (!LFileExists(Path))
 			{
-				Log("Missing '%s'\n", Path.Get());
+				LogBuild("Missing '%s'\n", Path.Get());
 				MissingFiles++;
 				return;
 			}
@@ -369,7 +379,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 				backend->Read(SystemIntf::TBackground, Path, [this, f, Debug, line](auto data, auto err) mutable
 				{
 					if (err)
-						Log("Backend.Read.Err: %s\n", err.ToString().Get());
+						LogBuild("Backend.Read.Err: %s\n", err.ToString().Get());
 					else
 						AddFileData(f, data, Debug);
 
@@ -435,7 +445,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		}
 		else
 		{
-			Log("AddFileData.error: Parse(%s) failed: %s\n", f->Path.Get(), err.ToString().Get());
+			LogBuild("AddFileData.error: Parse(%s) failed: %s\n", f->Path.Get(), err.ToString().Get());
 		}
 	}
 	
@@ -544,9 +554,9 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 	{
 		if (onShutdown)
 		{
-			Log("Shutdown callers active:\n");
+			LogNetwork("Shutdown callers active:\n");
 			for (auto p: backendCallers)
-				Log("	%s = %i\n", p.key, p.value);
+				LogNetwork("	%s = %i\n", p.key, p.value);
 		}
 		else if (waitBackendReady &&
 				backend &&
@@ -615,9 +625,9 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 								errors++;
 						}
 					}
-					Log("FindSymbolSystemPriv.clearCache: cleared %i files (%i errors).\n", cleared, errors);
+					LogBuild("FindSymbolSystemPriv.clearCache: cleared %i files (%i errors).\n", cleared, errors);
 				}
-				else Log("FindSymbolSystemPriv.error: no project cache dir set.\n");
+				else LogBuild("FindSymbolSystemPriv.error: no project cache dir set.\n");
 				break;
 			}
 			case M_SCAN_FOLDER:
@@ -634,7 +644,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 							{
 								if (err || !dir)
 								{
-									Log("ReadFolder failed: %s\n", err.ToString().Get());
+									LogBuild("ReadFolder failed: %s\n", err.ToString().Get());
 								}
 								else
 								{
@@ -876,7 +886,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			DoingProgress = true;
 			int Remaining = (int)(Tasks - GetQueueSize());
 			if (Remaining > 0)
-				Log("FindSym: %i of %i (%.1f%%)\n", Remaining, Tasks, (double)Remaining * 100.0 / MAX(Tasks, 1));
+				LogBuild("FindSym: %i of %i (%.1f%%)\n", Remaining, Tasks, (double)Remaining * 100.0 / MAX(Tasks, 1));
 		}
 		else if (GetQueueSize() == 0 && MsgTs)
 		{
@@ -887,7 +897,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			}
 			if (MissingFiles > 0)
 			{
-				Log("(%i files are missing)\n", MissingFiles);
+				LogBuild("(%i files are missing)\n", MissingFiles);
 			}
 			
 			MsgTs = 0;
