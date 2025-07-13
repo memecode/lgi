@@ -843,7 +843,7 @@ IdeDoc *ProjectNode::Open()
 								OnDocOpen(Doc, Doc->OpenData(data));
 							}
 
-							if (errMsg)
+							if (errMsg && GetTree())
 								LPopupNotification::Message(GetTree()->GetWindow(), errMsg );
 						});
 				}

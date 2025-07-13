@@ -513,7 +513,7 @@ public:
 	{
 		LString::Array p;
 		auto parts = path.SplitDelimit(remoteSep);
-		for (size_t i = parts.Length()-1; i > 0; i--)
+		for (auto i = (ssize_t)parts.Length()-1; i > 0; i--)
 			p.Add( remoteSep.Join(parts.Slice(0, i)) );
 		return p;
 	}
