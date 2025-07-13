@@ -58,14 +58,16 @@ public:
 	LCancel localCancel;
 	
 	// Lock before using
-	LArray<LMessage*> messages;
+	using LMsgArray = LArray<LMessage*>;
+	LThreadSafeInterface<LMsgArray> messages;
 
 	LHttpServerPriv(LHttpServer::Callback *cb, int portVal, LCancel *cancelObj) :
 		LThread("LHttpServerPriv.Thread"),
 		LMutex("LHttpServerPriv.Lock"),
 		callback(cb),
 		port(portVal),
-		cancel(cancelObj ? cancelObj : &localCancel)
+		cancel(cancelObj ? cancelObj : &localCancel),
+		messages(new LMsgArray, "messages.lock")
 	{
 		Run();
 	}
@@ -160,9 +162,13 @@ public:
 			Auto lck(this, _FL);
 			for (auto ws: webSockets)
 				ws->Read();
-			for (auto m: messages)
-				OnEvent(m);
-			messages.DeleteObjects();
+				
+			{
+				auto msgs = messages.Lock(_FL);
+				for (auto m: *msgs.Get())
+					OnEvent(m);
+				msgs->DeleteObjects();
+			}
 		}
 
 		printf("Closing listen socket: %i\n", (int)Listen.Handle());
@@ -373,22 +379,11 @@ bool LHttpServer::WebsocketUpgrade(LHttpServer::Request *req, LWebSocketBase::On
 
 bool LHttpServer::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64_t TimeoutMs)
 {
-	if (TimeoutMs > 0)
-	{
-		if (!d->LockWithTimeout(TimeoutMs, _FL))
-		{
-			printf("Error: couldn't lock.\n");
-			return false;
-		}
-	}
-	else if (!d->Lock(_FL))
-	{
-		printf("Error: couldn't lock.\n");
+	auto msgs = d->messages.Lock(_FL);
+	if (!msgs)
 		return false;
-	}
 
-	d->messages.Add(new LMessage(Cmd, a, b));	
-	d->Unlock();
+	msgs->Add(new LMessage(Cmd, a, b));	
 	return true;
 }
 

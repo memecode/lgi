@@ -648,6 +648,7 @@ int LSubProcess::Wait()
 	if (d->ChildPid != INVALID_PID)
 	{
 		pid_t r = waitpid(d->ChildPid, &Status, 0);
+		printf("%s:%i - waitpid=%i pid=%i\n", _FL, r, d->ChildPid);
 		if (r == d->ChildPid)
 		{
 			d->ChildPid = INVALID_PID;
@@ -655,8 +656,10 @@ int LSubProcess::Wait()
 				d->ExitValue = WEXITSTATUS(Status);
 			else
 				d->ExitValue = 255;
+			printf("%s:%i - wait, ExitValue=%i\n", _FL, r, d->ExitValue);
 		}
 	}
+	else printf("%s:%i - wait: invalid PID.\n", _FL);
 
 	return d->ExitValue;
 }
@@ -681,8 +684,10 @@ bool LSubProcess::Signal(int which)
 	}
 
 	printf("%s:%i - kill(%i, %i).\n", _FL, d->ChildPid, which);
+	/*
 	if (which == SIGTERM)
 		d->ChildPid = INVALID_PID;
+	*/
 
 	return true;
 }

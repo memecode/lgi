@@ -137,8 +137,10 @@ public:
 		LThreadSafeInterface *tsi;
 	
 	public:
-		Locked(LThreadSafeInterface *i, const char *file, int line) : LMutex::Auto(i, -1, file, line), tsi(i)
-		{			
+		Locked(LThreadSafeInterface *i, const char *file, int line, int timeout = -1) :
+			LMutex::Auto(i, timeout, file, line),
+			tsi(i)
+		{
 		}
 
 		operator bool()
@@ -174,6 +176,11 @@ public:
 	Locked Lock(const char *file, int line)
 	{
 		return Locked(this, file, line);
+	}
+	
+	Locked LockWithTimeout(const char *file, int line, int timeout)
+	{
+		return Locked(this, file, line, timeout);
 	}
 };
 
