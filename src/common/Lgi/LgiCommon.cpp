@@ -750,7 +750,7 @@ bool LIsRelativePath(const char *Path)
 	if (*Path == '.')
 		return true;
 	
-	if (*Path == '~' && (!Path[1] || Path[1] == DIR_CHAR))
+	if (*Path == '~' && (!Path[1] || strchr("\\/", Path[1]) != nullptr))
 		return false;
 
 	#ifdef WIN32

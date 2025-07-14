@@ -228,8 +228,7 @@ void EditTray::OnHeaderList(LMouse &m)
 
 							char Title[256];
 							sprintf_s(Title, sizeof(Title), "%s - %s", First, Last);
-							LSubMenu *sub = s->AppendSub(Title);
-							if (sub)
+							if (auto sub = s->AppendSub(Title))
 							{
 								for (int n=0; n<Letters[i].Length(); n++)
 								{
@@ -802,7 +801,8 @@ public:
 	
 	void OnSelect(LListItem *Item) override
 	{
-		App->GotoReference(Item->GetText(), 1, false, true, NULL);
+		auto fn = Item->GetText();
+		App->GotoReference(fn, 1, false, true, NULL);
 	}
 	
 	void Update(LString InputStr)
@@ -1379,7 +1379,7 @@ void IdeDoc::OnTitleClick(LMouse &m)
 				if (Dir)
 				{
 					LClipBoard c(this);
-					c.Text(Dir + 1);
+					c.Text(Dir);
 				}
 				break;
 			}
@@ -1949,10 +1949,12 @@ int IdeDoc::OnNotify(LViewI *v, const LNotification &n)
 					}
 					else
 					{
-						d->FilePopup->RunCallback([popup=d->FilePopup, v, n]()
+						d->FilePopup->RunCallback(
+							[popup=d->FilePopup, v, n]()
 							{
 								popup->OnNotify(v, n);
-							});
+							}
+						);
 					}
 				}
 			}

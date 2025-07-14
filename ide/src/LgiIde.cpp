@@ -3251,7 +3251,28 @@ void AppWnd::OpenFile(const char *FileName, NodeSource *Src, std::function<void(
 	{
 		if (auto backend = Proj->GetBackend())
 		{
-			// Can't assume the full path here...
+			if (LIsRelativePath(FileName) ||
+				*FileName == '~')
+			{
+				// Can't assume the full path here...
+				LString::Array hints;
+				hints.Add(Proj->GetBuildFolder());
+				hints.Add(backend->GetBasePath());
+
+				backend->ResolvePath(FileName, hints,
+					[this, Src, callback](auto str, auto err)
+					{
+						if (err)
+							GetBuildLog()->Print("%s:%i - ResolvePath failed: %s\n", _FL, err.ToString().Get());
+						else
+							OpenFile(str, Src, callback);
+					});
+				return;
+			}
+			else
+			{
+				FullPath = FileName;
+			}
 		}
 		else if (LIsRelativePath(File))
 		{
@@ -3327,44 +3348,32 @@ void AppWnd::OpenFile(const char *FileName, NodeSource *Src, std::function<void(
 	{
 		if (auto backend = Proj ? Proj->GetBackend() : NULL)
 		{
-			LString::Array pathHints;
-			pathHints.Add(Proj->GetBuildFolder());
-			pathHints.Add(backend->GetBasePath());
-			backend->ResolvePath(File, pathHints, [this, backend, Proj, Doc, callback](auto FullPath, auto err)
+			backend->Read(SystemIntf::TForeground, FullPath, [this, Proj, Doc, callback, FullPath](auto data, auto err)
 			{
 				if (err)
 				{
-					GetBuildLog()->Print("error: %s (%s)\n", err.ToString().Get(), FullPath.Get());
-					return;
+					LgiMsg(this, "Error opening '%s': %s", AppName, MB_OK, FullPath.Get(), err.ToString().Get());
 				}
-
-				backend->Read(SystemIntf::TForeground, FullPath, [this, Proj, Doc, callback, FullPath](auto data, auto err)
+				else if (data)
 				{
-					if (err)
+					auto Doc = new IdeDoc(this, 0, FullPath);
+					if (Doc)
 					{
-						LgiMsg(this, "Error opening '%s': %s", AppName, MB_OK, FullPath.Get(), err.ToString().Get());
+						Doc->SetProject(Proj);
+						Doc->OpenData(data);
+
+						LRect p = d->Mdi->NewPos();
+						Doc->LView::SetPos(p);
+						d->Docs.Insert(Doc);
+						d->OnFile(FullPath);
+
+						OnNewDoc(Proj, Doc);
+
+						if (callback)
+							callback(Doc);
 					}
-					else if (data)
-					{
-						auto Doc = new IdeDoc(this, 0, FullPath);
-						if (Doc)
-						{
-							Doc->SetProject(Proj);
-							Doc->OpenData(data);
-
-							LRect p = d->Mdi->NewPos();
-							Doc->LView::SetPos(p);
-							d->Docs.Insert(Doc);
-							d->OnFile(FullPath);
-
-							OnNewDoc(Proj, Doc);
-
-							if (callback)
-								callback(Doc);
-						}
-					}
-					else LAssert(!"one of these needs to be set");
-				});
+				}
+				else LAssert(!"one of these needs to be set");
 			});
 		}
 		else if (LFileExists(File))
