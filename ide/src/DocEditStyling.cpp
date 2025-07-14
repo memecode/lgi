@@ -268,21 +268,35 @@ void DocEditStyling::StyleCpp(StylingParams &p)
 					st.Font = View->GetFont();
 							
 					char LastNonWhite = 0;
+					char16 *strConst = nullptr;
 					while (s < e)
 					{
-						if
+						if (*s == '\"')
+						{
+							if (!strConst)
+								strConst = s;
+							else
+								strConst = nullptr;
+						}
+						else if (strConst && *s == '\\')
+						{
+							s++;
+						}
+						else if
 						(
 							// Break at end of line
 							(*s == '\n' && LastNonWhite != '\\')
 							||
 							// Or the start of a comment
-							(*s == '/' && s[1] == '/')
+							(!strConst && *s == '/' && s[1] == '/')
 							||
-							(*s == '/' && s[1] == '*')
+							(!strConst && *s == '/' && s[1] == '*')
 						)
 							break;
+
 						if (!IsWhite(*s))
 							LastNonWhite = *s;
+
 						s++;
 					}
 							

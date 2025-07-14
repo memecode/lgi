@@ -196,9 +196,8 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			backendCallers.Add(ref, calls - 1);
 		else if (calls == 1)
 			backendCallers.Delete(ref);
-		// else
-		//	LAssert(!"Incorrect count");
-		// LgiTrace("dec backendCalls=%i %s:%i\n", backendCalls, file, line);
+		else
+			LgiTrace("dec backendCalls=%i %s:%i\n", backendCalls, file, line);
 		
 		if (!backendCalls && onShutdown)
 		{
