@@ -49,6 +49,8 @@ extern const char *sTextPlain;
 extern const char *sTextHtml;
 extern const char *sTextXml;
 extern const char *sApplicationInternetExplorer;
+extern const char *sApplicationPgpSignature;
+extern const char *sApplicationPgpEncrypted;
 extern const char sMultipartMixed[];
 extern const char sMultipartEncrypted[];
 extern const char sMultipartSigned[];
