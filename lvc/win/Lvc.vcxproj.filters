@@ -49,9 +49,6 @@
     <ClCompile Include="..\..\src\common\Text\XmlTreeUi.cpp">
       <Filter>Source Files\Lgi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\common\Text\DeEscape.cpp">
-      <Filter>Source Files\Lgi</Filter>
-    </ClCompile>
     <ClCompile Include="..\Src\BrowseUi.cpp">
       <Filter>Source Files\Browse</Filter>
     </ClCompile>

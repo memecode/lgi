@@ -175,7 +175,6 @@
     <ClCompile Include="..\..\src\common\Lgi\LgiMain.cpp" />
     <ClCompile Include="..\..\src\common\Net\Http.cpp" />
     <ClCompile Include="..\..\src\common\Net\OpenSSLSocket.cpp" />
-    <ClCompile Include="..\..\src\common\Text\DeEscape.cpp" />
     <ClCompile Include="..\..\src\common\Text\RemoveAnsi.cpp" />
     <ClCompile Include="..\..\src\common\Text\XmlTreeUi.cpp" />
     <ClCompile Include="..\Src\BrowseUi.cpp" />
