@@ -401,6 +401,11 @@ public:
 		WaitForExit();
 	}
 
+	bool IsFinished() override
+	{
+		return IsExited();
+	}
+
 	int Main() override
 	{
 		while (true)
@@ -1355,6 +1360,11 @@ public:
 	{
 	}
 
+	bool IsFinished() override
+	{
+		return true; // no thread... so can quit anytime
+	}
+
 	LString GetBasePath() override { return folder; }
 
 	LString MakeRelative(LString absPath) override
@@ -1959,7 +1969,10 @@ public:
 
 				if (!SetRemote(Path, false))
 				{
-					log->Print("SetDir(%s) failed.\n", Path.Get());
+					auto msg = LString::Fmt("SetDir(%s) failed.", Path.Get());
+					LError err(LErrorFuncFailed, msg);
+					log->Print("%s\n", msg.Get());
+					results(nullptr, err);
 					return;
 				}
 
@@ -2422,15 +2435,20 @@ public:
 		}
 	};
 
+	bool IsFinished() override
+	{
+		return IsExited();
+	}
+
 	int Main() override
 	{
 		bool Tls = true;
 		bool LoggingSock = false;
 		uint64_t lastConnect = 0;
 
-		while (!IsCancelled())
+		while (true)
 		{
-			if (!ftp || !Connected)
+			if (!IsCancelled() && (!ftp || !Connected))
 			{
 				auto now = LCurrentTime();
 
@@ -2455,7 +2473,7 @@ public:
 				}
 				else LSleep(WAIT_MS);
 			}
-			else if (ftp && !ftp->IsOpen())
+			else if (!IsCancelled() && ftp && !ftp->IsOpen())
 			{
 				// Disconnected?
 				ftp.Reset();
@@ -2465,7 +2483,14 @@ public:
 			}
 			else
 			{
+				auto startTs = LCurrentTime();
 				DoWork();
+				if (IsCancelled())
+				{
+					printf("work took: " LPrintfInt64 "\n", LCurrentTime()-startTs);
+					if (!HasWork())
+						break;
+				}
 			}
 		}
 

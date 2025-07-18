@@ -135,6 +135,7 @@ public:
 	virtual ~SystemIntf() {}
 
 	virtual void GetSysType(std::function<void(SysPlatform)> cb) = 0;
+	virtual bool IsFinished() = 0;
 	virtual bool IsReady() { return true; }
 
 	// Path:

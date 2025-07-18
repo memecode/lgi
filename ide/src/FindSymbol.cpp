@@ -226,8 +226,6 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 
 	~FindSymbolSystemPriv()
 	{
-		LAssert(backendCalls == 0);
-
 		// End the thread...
 		EndThread();
 
@@ -553,9 +551,20 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 	{
 		if (onShutdown)
 		{
-			LogNetwork("Shutdown callers active:\n");
+			LogNetwork("Shutdown callers active: %i\n", backendCalls);
 			for (auto p: backendCallers)
 				LogNetwork("	%s = %i\n", p.key, p.value);
+
+			if (backend->IsFinished())
+			{
+				SetPulse();
+				LogNetwork("Backend is finished\n");
+				if (onShutdown)
+				{
+					onShutdown();
+					onShutdown = nullptr;
+				}
+			}
 		}
 		else if (waitBackendReady &&
 				backend &&

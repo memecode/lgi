@@ -2995,7 +2995,11 @@ bool AppWnd::OnRequestClose(bool IsOsQuit)
 				{
 					printf("SaveAllAndQuit ret true\n");
 					d->InShutdown = false;
-					LCloseApp();
+
+					RunCallback([]()
+						{
+							LCloseApp();
+						});
 				}
 			});
 
