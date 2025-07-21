@@ -187,8 +187,11 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 	}
 	void DecCalls(const char *file, int line)
 	{
-		LAssert(backendCalls > 0);
-		backendCalls--;
+		//LAssert(backendCalls > 0);
+		if (backendCalls > 0)
+			backendCalls--;
+		else
+			LgiTrace("%s:%i - backendCalls mismatched.\n", _FL);
 		
 		auto ref = LString::Fmt("%s:%i", file, line);
 		int calls = backendCallers.Find(ref);
