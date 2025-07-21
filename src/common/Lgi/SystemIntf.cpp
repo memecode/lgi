@@ -704,6 +704,9 @@ public:
 			LArray<bool> non;
 			for (auto &line: lines)
 			{
+				if (line(0) == '[')
+					continue;
+
 				for (int i=0; i<line.Length(); i++)
 					if (!IsWhite(line[i]))
 						non[i] = true;
