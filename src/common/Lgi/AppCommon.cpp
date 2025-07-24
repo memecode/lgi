@@ -90,12 +90,17 @@ LJson *LAppPrivate::GetConfigJson()
 		{
 			LFile f;
 			if (f.Open(Path, O_READ))
+			{
 				Config->SetJson(f.Read());
+				f.Close();
+			}
 				
 			bool Dirty = false;				
 			#define DEFAULT(var, val) \
 				if (Config->Get(var).Length() == 0) \
 					Dirty |= Config->Set(var, val);
+
+			DEFAULT(LApp::CfgHelpLink, "https://www.memecode.com/lgi/config-file.php")
 
 			#if defined(LINUX)
 
@@ -124,16 +129,14 @@ LJson *LAppPrivate::GetConfigJson()
 				DEFAULT(LApp::CfgLinuxMouseRight,   str(Gtk::GDK_RIGHT_BTN));
 				DEFAULT(LApp::CfgLinuxMouseBack,    str(Gtk::GDK_BACK_BTN));
 				DEFAULT(LApp::CfgLinuxMouseForward, str(Gtk::GDK_FORWARD_BTN));
-				
-			#elif defined(HAIKU)
-
-				DEFAULT(LApp::CfgNetworkHttpProxy,   "");
-				DEFAULT(LApp::CfgNetworkHttpsProxy,  "");
-				DEFAULT(LApp::CfgNetworkSocks5Proxy, "");
 
 			#endif
 
-			DEFAULT("Language", "-");
+			DEFAULT(LApp::CfgNetworkHttpProxy,   "");
+			DEFAULT(LApp::CfgNetworkHttpsProxy,  "");
+			DEFAULT(LApp::CfgNetworkSocks5Proxy, "");
+
+			DEFAULT(LApp::CfgLanguage, "-");
 
 			DEFAULT("Fonts.Comment", "Fonts are specified in the <face>:<pointSize> format.");
 			DEFAULT(LApp::CfgFontsGlyphSub, "1");
@@ -171,7 +174,12 @@ bool LAppPrivate::SaveConfig()
 			
 	LFile f;
 	if (!f.Open(Path, O_WRITE))
+	{
+		LError err(f.GetError());
+		LgiTrace("%s:%i - error writing LGI config: %s\n", _FL, err.ToString().Get());
+		LAssert(!"error writing config");
 		return false;
+	}
 			
 	f.SetSize(0);
 	return f.Write(Config->GetJson());		
