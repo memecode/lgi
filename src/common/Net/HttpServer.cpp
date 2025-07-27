@@ -36,7 +36,7 @@ public:
 		LgiTrace("SocketInfo: %s\n", Str);
 	}
 
-	void OnError(int ErrorCode, const char *ErrorDescription)
+	void OnError(int ErrorCode, const char *ErrorDescription) override
 	{
 		LgiTrace("SocketError %i: %s\n", ErrorCode, ErrorDescription);
 	}
@@ -263,7 +263,7 @@ int LHttpThread::Main()
 	{
 		*Eol = 0;
 		Eol += 2;
-		int FirstLine = Eol - Action;
+		int FirstLine = (int) (Eol - Action);
 
 		char *Uri = strchr(Action, ' ');
 		if (Uri)
