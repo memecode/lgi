@@ -295,7 +295,7 @@ void EditTray::OnHeaderList(LMouse &m)
 					if (File)
 					{
 						// Open the selected file
-						Doc->GetProject()->GetApp()->OpenFile(File, NULL, NULL);
+						Doc->GetProject()->GetApp()->OpenFile(File, NULL, false, NULL);
 					}
 				}
 				
@@ -452,13 +452,14 @@ void EditTray::OnSymbolList(LMouse &m)
 							Doc->GetProject()->GetApp())
 						{
 							AppWnd *App = Doc->GetProject()->GetApp();
-							App->OpenFile(Def->File, NULL, [this, File=LString(Def->File), Line=Def->Line](auto Doc)
-							{
-								if (Doc)
-									Doc->SetLine(Line, false);
-								else
-									LgiTrace("%s:%i - Couldn't open doc '%s'\n", _FL, File.Get());
-							});
+							App->OpenFile(Def->File, NULL, false,
+								[this, File=LString(Def->File), Line=Def->Line](auto Doc)
+								{
+									if (Doc)
+										Doc->SetLine(Line, false);
+									else
+										LgiTrace("%s:%i - Couldn't open doc '%s'\n", _FL, File.Get());
+								});
 						}
 						else
 						{

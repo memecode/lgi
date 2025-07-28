@@ -2260,7 +2260,7 @@ void AppWnd::OnReceiveFiles(LArray<const char*> &Files)
 		else if (ext && !stricmp(ext, "xml"))
 		{
 			if (!OpenProject(f, NULL))
-				OpenFile(f, NULL, NULL);
+				OpenFile(f, NULL, false, NULL);
 		}
 		else if (LDirExists(f))
 			;
@@ -2285,7 +2285,7 @@ void AppWnd::OnReceiveFiles(LArray<const char*> &Files)
 		}
 		else
 		{
-			OpenFile(f, NULL, NULL);
+			OpenFile(f, NULL, false, NULL);
 		}
 	}
 	
@@ -3157,7 +3157,7 @@ void AppWnd::GotoReference(const char *File, int Line, bool CurIp, bool WithHist
 	};
 
 	if (File)
-		OpenFile(File, NULL, OnDoc);
+		OpenFile(File, NULL, false, OnDoc);
 	else if (auto doc = GetCurrentDoc())
 		OnDoc(doc);
 }
@@ -3228,13 +3228,13 @@ void AppWnd::OnNewDoc(IdeProject *Proj, IdeDoc *Doc)
 	Doc->Raise();
 }
 
-void AppWnd::OpenFile(const char *FileName, NodeSource *Src, std::function<void(IdeDoc*)> callback)
+void AppWnd::OpenFile(const char *FileName, NodeSource *Src, bool canonical, std::function<void(IdeDoc*)> callback)
 {
 	if (!InThread())
 	{
-		RunCallback( [this, callback, fn=LString(FileName), Src]()
+		RunCallback( [this, canonical, callback, fn=LString(FileName), Src]()
 		{
-			OpenFile(fn, Src, callback);
+			OpenFile(fn, Src, canonical, callback);
 		});
 		return;
 	}
@@ -3255,8 +3255,8 @@ void AppWnd::OpenFile(const char *FileName, NodeSource *Src, std::function<void(
 	{
 		if (auto backend = Proj->GetBackend())
 		{
-			if (LIsRelativePath(FileName) ||
-				*FileName == '~')
+			if (!canonical &&
+				(LIsRelativePath(FileName) || *FileName == '~'))
 			{
 				// Can't assume the full path here...
 				LString::Array hints;
@@ -3269,7 +3269,7 @@ void AppWnd::OpenFile(const char *FileName, NodeSource *Src, std::function<void(
 						if (err)
 							GetBuildLog()->Print("%s:%i - ResolvePath failed: %s\n", _FL, err.ToString().Get());
 						else
-							OpenFile(str, Src, callback);
+							OpenFile(str, Src, true, callback);
 					});
 				return;
 			}
@@ -4159,7 +4159,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			s->Open([this](auto s, auto ok)
 			{
 				if (ok)
-					OpenFile(s->Name(), NULL, NULL);
+					OpenFile(s->Name(), NULL, false, NULL);
 			});
 			break;
 		}
@@ -4918,7 +4918,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				if (f)
 					f->Raise();
 				else
-					OpenFile(r, NULL, NULL);
+					OpenFile(r, NULL, false, NULL);
 			}
 
 			index = Cmd - IDM_RECENT_PROJECT;

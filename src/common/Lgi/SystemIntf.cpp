@@ -105,6 +105,31 @@ void SystemIntf::DoWork()
 	else LSleep(WAIT_MS);
 }
 
+SystemIntf::PathParts SystemIntf::SplitPath(LString path)
+{
+	SystemIntf::PathParts parts;
+	if (path)
+	{
+		char *last = nullptr;
+		for (auto s = path.Get(); s && *s; s++)
+		{
+			if (*s == '/' || *s == '\\')
+				last = s;
+		}
+		if (last)
+		{
+			auto pos = ++last - path.Get();
+			parts.folder = path(0, pos);
+			parts.leaf = path(pos, -1);
+		}
+		else
+		{
+			parts.leaf = path;
+		}
+	}
+	return parts;
+}
+
 #if 0
 #define PROCESS_LOG(...) log->Print(__VA_ARGS__)
 #else
@@ -1616,7 +1641,7 @@ class FtpBackend :
 		{
 			if (path.Find("directory is ") >= 0)
 			{
-				int asd=0;
+				LAssert(!"Weird?");
 			}
 
 			base = path;
@@ -1876,19 +1901,28 @@ public:
 		return unix;
 	}
 
-	bool SetRemote(LString s, bool stripLeaf)
+	bool SetRemote(LString s, bool stripLeaf, LError *err)
 	{
 		if (stripLeaf)
 		{
-			auto lastSep = s.RFind("/");
-			if (lastSep >= 0)
-				s = s(0, lastSep ? lastSep : 1);
+			auto parts = SplitPath(s);
+			if (parts.folder)
+				s = parts.folder;
 		}
+
+		if (s.Length() > 1)
+			s = s.RStrip("/");
+		if (s(0) != '/')
+			s = LString("/") + s;
 
 		if (remote == s)
 			return true;
 
-		return ftp->SetDir(remote = s);
+		bool result = ftp->SetDir(remote = s);
+		if (!result && err)
+			*err = ftp->GetError();
+
+		return result;
 	}
 
 	bool Stat(LString path, std::function<void(struct stat*, LString, LError)> cb) override
@@ -1906,13 +1940,16 @@ public:
 				LError err;
 				struct stat s = {};
 
-				if (!SetRemote(path, true))
+				if (!SetRemote(path, true, &err))
 				{
-					err.Set(LErrorPathNotFound);
+					if (!err)
+						err.Set(LErrorPathNotFound, path);
 				}
 				else if (!ftp->ListDir(dir))
 				{
-					err.Set(LErrorFuncFailed);
+					err = ftp->GetError();
+					if (!err)
+						err.Set(LErrorFuncFailed, "ListDir failed");
 				}
 				else // look through 'dir' 
 				{
@@ -1958,6 +1995,57 @@ public:
 		return true;
 	}
 
+	LAutoPtr<FtpDir> internal_ReadFolder(LString Path, LError &err)
+	{
+		LAutoPtr<FtpDir> curDir;
+
+		while (auto f = GetFtp())
+		{
+			if (!SetRemote(Path, false, &err))
+			{
+				if (!err)
+					err.Set(LErrorFuncFailed, LString::Fmt("SetDir(%s) failed.", Path.Get()));
+				log->Print("internal_ReadFolder failed: %s\n", err.ToString().Get());
+			}
+		
+			if (!curDir.Reset(new FtpDir(Path)))
+			{
+				err.Set(LErrorNoMem, "alloc failed");
+				return curDir;
+			}
+		
+			if (f->ListDir(*curDir))
+				break;
+			else
+				err = f->GetError();
+		}
+
+		if (!err)
+		{
+			// Store the names in the cache
+			Auto lck(this, _FL);
+			for (auto e: *curDir)
+			{
+				if (!e->IsDir())
+				{
+					auto sep = Path(-1) == '/' ? "" : "/";
+					auto full = LString::Fmt("%s%s%s", Path ? Path.Get() : "", sep, e->Name.Get());
+					auto c = cache.Find(full);
+					if (!c)
+					{
+						cache.Add(full, c = new TCache);
+						LgiTrace("Adding cache '%s'\n", full.Get());
+					}
+					if (c)
+						c->entry = *e;
+				}
+			}
+		}
+
+		curDir->Valid();
+		return curDir;
+	}
+
 	bool ReadFolder(TPriority priority, const char *Path, std::function<void(LDirectory*, LError)> results) override
 	{
 		if (!Path || !results)
@@ -1970,45 +2058,25 @@ public:
 				if (!GetReady())
 					return;
 
-				if (!SetRemote(Path, false))
+				LError err;
+				LAutoPtr<FtpDir> curDir = internal_ReadFolder(Path, err);
+				if (!curDir)
 				{
-					auto msg = LString::Fmt("SetDir(%s) failed.", Path.Get());
-					LError err(LErrorFuncFailed, msg);
-					log->Print("%s\n", msg.Get());
 					results(nullptr, err);
-					return;
 				}
 
-				LAutoPtr<FtpDir> curDir(new FtpDir(Path));
-				if (ftp->ListDir(*curDir))
+				parent->RunCallback([this, results, curDir=curDir.Release()]()
 				{
-					{
-						// Store the names in the cache
-						Auto lck(this, _FL);
-						for (auto e: *curDir)
-						{
-							if (!e->IsDir())
-							{
-								auto full = LString::Fmt("%s/%s", Path ? Path.Get() : "", e->Name.Get());
-								auto c = cache.Find(full);
-								if (!c)
-									cache.Add(full, c = new TCache);
-								if (c)
-									c->entry = *e;
-							}
-						}
-					}
-
-					curDir->Valid();
-					parent->RunCallback([this, results, curDir=curDir.Release()]()
-					{
+					if (curDir)
 						curDir->Valid();
-						LError err;
-						results(curDir, err);
+					LError err;
+					results(curDir, err);
+					if (curDir)
+					{
 						curDir->Valid();
 						delete curDir;
-					});
-				}
+					}
+				});
 			});
 
 		return true;
@@ -2050,12 +2118,24 @@ public:
 				else
 				{
 					IFtpEntry entry;
+
 					{
 						Auto lck(this, _FL);
 						if (auto c = cache.Find(path))
+						{
 							entry = c->entry;
+						}
 						else
-							err.Set(LErrorFuncFailed, "entry not found.");
+						{
+							// Haven't read that folder yet:
+							auto p = SplitPath(path);
+							auto cur = internal_ReadFolder(p.folder ? p.folder : "/", err);
+							if (!err)
+							{
+								if (auto c = cache.Find(path))
+									entry = c->entry;
+							}
+						}
 					}
 
 					// Make sure we're in the right folder...
@@ -2063,15 +2143,16 @@ public:
 					{
 						try
 						{
-							if (!SetRemote(path, true))
+							if (!SetRemote(path, true, &err))
 							{
-								err.Set(LErrorFuncFailed, "failed to set dir.");
+								if (!err)
+									err.Set(LErrorFuncFailed, "failed to set dir.");
 							}
 							else if (entry.Name)
 							{
 								LStringPipe data(16 << 10);
 
-								if (ftp->DownloadStream(&data, &entry))
+								if (ftp->DownloadStream(&data, &entry, true))
 								{
 									fileData = data.NewLStr();
 									{
@@ -2083,7 +2164,13 @@ public:
 											c->data = fileData;
 									}
 								}
-								else err.Set(LErrorIoFailed, "download failed.");
+								else
+								{
+									if (ftp)
+										err = ftp->GetError();
+									if (!err)
+										err.Set(LErrorIoFailed, "download failed.");
+								}
 							}
 						}
 						catch (ssize_t result)
@@ -2136,9 +2223,10 @@ public:
 					if (!err)
 					{
 						// Make sure we're in the right folder...
-						if (!SetRemote(path, true))
+						if (!SetRemote(path, true, &err))
 						{
-							err.Set(LErrorFuncFailed, "failed to set dir.");
+							if (!err)
+								err.Set(LErrorFuncFailed, "failed to set dir.");
 						}
 						else
 						{
@@ -2175,14 +2263,24 @@ public:
 				LError err;
 
 				if (!GetReady())
+				{
 					err.Set(LErrorFuncFailed, "connection not ready.");
-				else if (!SetRemote(path, true))
+				}
+				else if (!SetRemote(path, true, &err))
+				{
 					// Make sure we're in the right folder...
-					err.Set(LErrorFuncFailed, "failed to set dir.");
+					if (!err)
+						err.Set(LErrorFuncFailed, "failed to set dir.");
+				}
 				else if (ftp)
-					ftp->DeleteFile(LGetLeaf(path), &err);
+				{
+					if (!ftp->DeleteFile(LGetLeaf(path), &err))
+						err = ftp->GetError();
+				}
 				else
+				{
 					err.Set(LErrorFuncFailed, "no FTP obj.");
+				}
 
 				parent->RunCallback([this, err, cb]()
 				{
@@ -2443,10 +2541,45 @@ public:
 		return IsExited();
 	}
 
+	bool Tls = true;
+	bool LoggingSock = false;
+
+	IFtp *GetFtp()
+	{
+		while (!IsCancelled())
+		{
+			if (!ftp)
+			{
+				if (!ftp.Reset(new IFtp(this, this, Tls)))
+					return nullptr;
+			}
+
+			SslSocket *sock = nullptr;
+			if (LoggingSock)
+				sock = new SslLoggingSocket(log);
+			else
+				sock = new SslSocket(log);
+			if (!sock)
+			{
+				log->Print("alloc err.\n");
+				return nullptr;
+			}
+
+			sock->SetCancel(this);
+			auto res = ftp->Open(sock, uri.sHost, uri.Port, uri.sUser, uri.sPass);
+			log->Print("Open=%i Conn=%i\n", res, Connected);
+			if (res == FO_Connected)
+				return ftp;
+
+			ftp.Reset();
+			LSleep(5000);
+		}
+
+		return ftp;
+	}
+
 	int Main() override
 	{
-		bool Tls = true;
-		bool LoggingSock = false;
 		uint64_t lastConnect = 0;
 
 		while (true)
@@ -2454,25 +2587,10 @@ public:
 			if (!IsCancelled() && (!ftp || !Connected))
 			{
 				auto now = LCurrentTime();
-
-				if (!ftp)
-					ftp.Reset(new IFtp(this, this, Tls));
-
 				if (now - lastConnect > 5000)
 				{
 					lastConnect = now;
-					SslSocket *sock = nullptr;
-					if (LoggingSock)
-						sock = new SslLoggingSocket(log);
-					else
-						sock = new SslSocket(log);
-					if (sock)
-					{
-						sock->SetCancel(this);
-						auto res = ftp->Open(sock, uri.sHost, uri.Port, uri.sUser, uri.sPass);
-						log->Print("Open=%i Conn=%i\n", res, Connected);
-					}
-					else log->Print("alloc err.\n");
+					GetFtp();
 				}
 				else LSleep(WAIT_MS);
 			}

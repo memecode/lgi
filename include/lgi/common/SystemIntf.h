@@ -68,6 +68,11 @@ public:
 		TDebugLogging,
 	};
 
+	struct PathParts
+	{
+		LString folder, leaf;
+	};
+
 	constexpr static int WAIT_MS = 50;
 	LStream *log = NULL;
 
@@ -143,6 +148,7 @@ public:
 	virtual LString MakeRelative(LString absPath) = 0;
 	virtual LString MakeAbsolute(LString relPath) = 0;
 	virtual LString JoinPath(LString base, LString leaf) = 0;
+	virtual PathParts SplitPath(LString path);
 	virtual void ResolvePath(LString path, LString::Array hints, TStringCallback cb) = 0;
 
 	// Reading and writing:

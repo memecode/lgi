@@ -174,7 +174,7 @@ void ProjectNode::OpenLocalCache(IdeDoc *&Doc)
 {
 	if (sLocalCache)
 	{
-		Project->GetApp()->OpenFile(sLocalCache, this, [this](auto Doc)
+		Project->GetApp()->OpenFile(sLocalCache, this, false, [this](auto Doc)
 		{
 			if (Doc)
 			{
