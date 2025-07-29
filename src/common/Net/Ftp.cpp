@@ -56,14 +56,10 @@ int LookupMonth(char *m)
 ///////////////////////////////////////////////////////////////////
 IFtpEntry::IFtpEntry()
 {
-	Attributes = 0;
-	Size = 0;
-	UserData = NULL;
 }
 
 IFtpEntry::IFtpEntry(IFtpEntry *Entry)
 {
-	UserData = NULL;
 	if (Entry)
 		*this = *Entry;
 }
@@ -137,9 +133,6 @@ IFtpEntry::IFtpEntry(struct ftpparse *Fp, const char *Cs)
 
 IFtpEntry::IFtpEntry(char *Entry, const char *Cs)
 {
-	UserData = NULL;
-	Attributes = 0;
-	Size = 0;
 	if (Entry)
 	{
 		const char *Ws = " \t";
@@ -373,6 +366,8 @@ ssize_t IFtp::ReadLine(char *Msg, ssize_t MsgSize)
 
 		if (Read <= 0)
 		{
+			if (!d->Err)
+				d->Err.Set(LErrorIoFailed, LString::Fmt("Read returned " LPrintfSSizeT, Read));
 			Close();
 			break;
 		}
@@ -1324,7 +1319,9 @@ bool IFtp::SetupData(bool Binary, bool Debug)
 	}
 	catch (ssize_t Error)
 	{
-		LgiTrace("%s:%i - error: " LPrintfSSizeT "\n", _FL, Error);
+		if (!d->Err)
+			d->Err.Set(LErrorFuncFailed, LString::Fmt("Ftp cmd err " LPrintfSSizeT, Error));
+		LgiTrace("%s:%i - error: %s\n", _FL, d->Err.ToString().Get());
 	}
 
 	return Status;
@@ -1334,7 +1331,12 @@ bool IFtp::ConnectData()
 {
 	if (PassiveMode)
 	{
-		return d->Data->Open(Ip, Port) != 0;
+		auto result = d->Data->Open(Ip, Port);
+		if (result)
+			return true;
+		
+		if (!d->Err)
+			d->Err.Set(LErrorFuncFailed, LString::Fmt("Failed to open socket to '%s:%i'", Ip, Port));
 	}
 	else
 	{

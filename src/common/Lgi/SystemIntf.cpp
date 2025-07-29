@@ -124,6 +124,7 @@ SystemIntf::PathParts SystemIntf::SplitPath(LString path)
 		}
 		else
 		{
+			parts.folder = "/";
 			parts.leaf = path;
 		}
 	}
@@ -1610,20 +1611,6 @@ class FtpBackend :
 	LAutoPtr<IFtp> ftp;
 	LHashTbl<StrKey<char>, TCache*> cache;
 
-	bool GetReady(int timeout = 6000)
-	{
-		auto start = LCurrentTime();
-		while (!IsCancelled() && !Connected)
-		{
-			auto now = LCurrentTime();
-			if (now - start > timeout)
-				return false;
-			LSleep(10);
-		}
-
-		return true;
-	}
-
 	class FtpDir : public LArray<IFtpEntry*>, public LDirectory
 	{
 		ssize_t pos = 0;
@@ -1834,6 +1821,8 @@ class FtpBackend :
 	};
 
 public:
+	constexpr static int MAX_ATTEMPTS = 5;
+
 	FtpBackend(LView *view, LString addr, LStream *logger) :
 		SystemIntf(logger, "FtpBackend"),
 		LThread("FtpBackend.Thread"),
@@ -1896,20 +1885,13 @@ public:
 	LString ConvertPath(LString s)
 	{
 		LString unix = s.Replace("\\", "/");
-		if (unix(0) == '.')
+		if (unix(0) == '.' && unix.Length() > 1)
 			return unix(1, -1);
 		return unix;
 	}
 
-	bool SetRemote(LString s, bool stripLeaf, LError *err)
+	bool SetRemote(LString s, LError *err)
 	{
-		if (stripLeaf)
-		{
-			auto parts = SplitPath(s);
-			if (parts.folder)
-				s = parts.folder;
-		}
-
 		if (s.Length() > 1)
 			s = s.RStrip("/");
 		if (s(0) != '/')
@@ -1936,33 +1918,23 @@ public:
 			TForeground,
 			[this, path, cb=std::move(cb)]()
 			{
-				LArray<IFtpEntry*> dir;
 				LError err;
 				struct stat s = {};
 
-				if (!SetRemote(path, true, &err))
+				auto parts = SplitPath(path);
+				auto dir = FtpListDir(parts.folder, err);
+				if (dir)
 				{
-					if (!err)
-						err.Set(LErrorPathNotFound, path);
-				}
-				else if (!ftp->ListDir(dir))
-				{
-					err = ftp->GetError();
-					if (!err)
-						err.Set(LErrorFuncFailed, "ListDir failed");
-				}
-				else // look through 'dir' 
-				{
-					auto leaf = LGetLeaf(path);
-					for (auto e: dir)
+					// look through 'dir' 
+					for (auto e: *dir)
 					{
-						if (e->Path.Equals(leaf))
+						if (e->Path.Equals(parts.leaf))
 						{
 							// found the entry
 							#ifdef WINDOWS
-							auto unixTime = e->Date.GetUnix();
+								auto unixTime = e->Date.GetUnix();
 							#else
-							timespec unixTime = { e->Date.GetUnix(), 0 };
+								timespec unixTime = { e->Date.GetUnix(), 0 };
 							#endif
 							s.st_size = (TOffset) e->Size;
 							s.st_mode = 0644;
@@ -1995,32 +1967,72 @@ public:
 		return true;
 	}
 
-	LAutoPtr<FtpDir> internal_ReadFolder(LString Path, LError &err)
+	enum TResult
+	{
+		EFatal,
+		EError,
+		EOk
+	};
+
+	bool WithFtp(LString folder, LError &err, std::function<TResult(IFtp*)> cb)
+	{
+		if (!cb || !folder)
+		{
+			err.Set(LErrorInvalidParam, "missing param");
+			return false;
+		}
+
+		int attempts = 0;
+		while (auto f = GetFtp())
+		{
+			try
+			{
+				if (SetRemote(folder, &err))
+				{
+					auto r = cb(f);
+					if (r == EOk)
+						return true;
+					if (r == EFatal)
+						return false;
+
+				}
+			}
+			catch (ssize_t result)
+			{
+				if (!err)
+					err = f->GetError();
+				if (!err)
+					err.Set(LErrorFuncFailed, LString::Fmt("Ftp cmd failed with " LPrintfSSizeT "\n", result));
+			}
+
+			if (err)
+				log->Print("%s:%i - err: %s\n", _FL, err.ToString().Get());
+			if (++attempts >= MAX_ATTEMPTS || IsCancelled())
+				return false;
+		}
+
+		return false;
+	}
+
+	LAutoPtr<FtpDir> FtpListDir(LString Path, LError &err)
 	{
 		LAutoPtr<FtpDir> curDir;
 
-		while (auto f = GetFtp())
-		{
-			if (!SetRemote(Path, false, &err))
+		WithFtp(Path, err, [&](auto f)
 			{
-				if (!err)
-					err.Set(LErrorFuncFailed, LString::Fmt("SetDir(%s) failed.", Path.Get()));
-				log->Print("internal_ReadFolder failed: %s\n", err.ToString().Get());
-			}
+				if (!curDir.Reset(new FtpDir(Path)))
+				{
+					err.Set(LErrorNoMem, "alloc failed");
+					return EFatal;
+				}
 		
-			if (!curDir.Reset(new FtpDir(Path)))
-			{
-				err.Set(LErrorNoMem, "alloc failed");
-				return curDir;
-			}
-		
-			if (f->ListDir(*curDir))
-				break;
-			else
-				err = f->GetError();
-		}
+				auto result = f->ListDir(*curDir);
+				if (!result)
+					err = f->GetError();
+				return result ? EOk : EError;
+			});
 
-		if (!err)
+		if (!err && curDir)
 		{
 			// Store the names in the cache
 			Auto lck(this, _FL);
@@ -2042,7 +2054,8 @@ public:
 			}
 		}
 
-		curDir->Valid();
+		if (curDir)
+			curDir->Valid();
 		return curDir;
 	}
 
@@ -2055,16 +2068,8 @@ public:
 			priority,
 			[this, Path = ConvertPath(Path), results]() mutable
 			{
-				if (!GetReady())
-					return;
-
 				LError err;
-				LAutoPtr<FtpDir> curDir = internal_ReadFolder(Path, err);
-				if (!curDir)
-				{
-					results(nullptr, err);
-				}
-
+				LAutoPtr<FtpDir> curDir = FtpListDir(Path, err);
 				parent->RunCallback([this, results, curDir=curDir.Release()]()
 				{
 					if (curDir)
@@ -2110,76 +2115,56 @@ public:
 			{
 				LError err;
 				LString fileData;
+				IFtpEntry entry;
+				auto parts = SplitPath(path);
 
-				if (!GetReady())
 				{
-					err.Set(LErrorFuncFailed, "connection not ready.");
+					Auto lck(this, _FL);
+					if (auto c = cache.Find(path))
+					{
+						entry = c->entry;
+						fileData = c->data;
+					}
+					else
+					{
+						// Haven't read that folder yet:
+						auto cur = FtpListDir(parts.folder, err);
+						if (!err)
+						{
+							if (auto c = cache.Find(path))
+							{
+								entry = c->entry;
+								fileData = c->data;
+							}
+						}
+					}
 				}
-				else
+
+				if (!fileData && entry)
 				{
-					IFtpEntry entry;
+					WithFtp(parts.folder, err, [&](auto f)
+						{
+							LStringPipe data(16 << 10);
+							if (ftp->DownloadStream(&data, &entry, true))
+							{
+								fileData = data.NewLStr();
+								{
+									// Store the data in the cache
+									Auto lck(this, _FL);
+									auto c = cache.Find(path);
+									LAssert(c);
+									if (c)
+										c->data = fileData;
+								}
+								return EOk;
+							}
 
-					{
-						Auto lck(this, _FL);
-						if (auto c = cache.Find(path))
-						{
-							entry = c->entry;
-						}
-						else
-						{
-							// Haven't read that folder yet:
-							auto p = SplitPath(path);
-							auto cur = internal_ReadFolder(p.folder ? p.folder : "/", err);
+							if (ftp)
+								err = ftp->GetError();
 							if (!err)
-							{
-								if (auto c = cache.Find(path))
-									entry = c->entry;
-							}
-						}
-					}
-
-					// Make sure we're in the right folder...
-					if (!err)
-					{
-						try
-						{
-							if (!SetRemote(path, true, &err))
-							{
-								if (!err)
-									err.Set(LErrorFuncFailed, "failed to set dir.");
-							}
-							else if (entry.Name)
-							{
-								LStringPipe data(16 << 10);
-
-								if (ftp->DownloadStream(&data, &entry, true))
-								{
-									fileData = data.NewLStr();
-									{
-										// Store the data in the cache
-										Auto lck(this, _FL);
-										auto c = cache.Find(path);
-										LAssert(c);
-										if (c)
-											c->data = fileData;
-									}
-								}
-								else
-								{
-									if (ftp)
-										err = ftp->GetError();
-									if (!err)
-										err.Set(LErrorIoFailed, "download failed.");
-								}
-							}
-						}
-						catch (ssize_t result)
-						{
-							auto msg = LString::Fmt("Ftp cmd failed with " LPrintfSSizeT "\n", result);
-							err.Set(LErrorFuncFailed, msg);
-							log->Print(msg);
-						}
-					}
+								err.Set(LErrorIoFailed, "download failed.");
+							return EError;
+						});
 				}
 
 				parent->RunCallback([this, err, fileData, result]()
@@ -2203,39 +2188,31 @@ public:
 			[this, path, result, Data]() mutable
 			{
 				LError err;
+				auto parts = SplitPath(path);
 
-				if (!GetReady())
 				{
-					err.Set(LErrorFuncFailed, "connection not ready.");
+					Auto lck(this, _FL);
+
+					// Update the cache
+					if (auto c = cache.Find(path))
+						c->data = Data;
+					else
+						err.Set(LErrorFuncFailed, "cache obj not found.");
 				}
-				else
-				{
-					{
-						Auto lck(this, _FL);
 
-						// Update the cache
-						if (auto c = cache.Find(path))
-							c->data = Data;
-						else
-							err.Set(LErrorFuncFailed, "cache obj not found.");
-					}
-
-					if (!err)
+				WithFtp(parts.folder, err, [&](auto f)
 					{
-						// Make sure we're in the right folder...
-						if (!SetRemote(path, true, &err))
+						LMemStream wrapper(Data.Get(), Data.Length(), false);
+						if (!ftp->UploadStream(&wrapper, parts.leaf))
 						{
+							err = ftp->GetError();
 							if (!err)
-								err.Set(LErrorFuncFailed, "failed to set dir.");
+								err.Set(LErrorIoFailed, "UploadStream failed.");
+							return EError;
 						}
-						else
-						{
-							LMemStream wrapper(Data.Get(), Data.Length(), false);
-							if (!ftp->UploadStream(&wrapper, path))
-								err.Set(LErrorIoFailed, "upload failed.");
-						}
-					}
-				}
+
+						return EOk;
+					});
 
 				parent->RunCallback([this, err, result]()
 				{
@@ -2261,26 +2238,12 @@ public:
 			[this, path, cb]() mutable
 			{
 				LError err;
+				auto parts = SplitPath(path);
 
-				if (!GetReady())
-				{
-					err.Set(LErrorFuncFailed, "connection not ready.");
-				}
-				else if (!SetRemote(path, true, &err))
-				{
-					// Make sure we're in the right folder...
-					if (!err)
-						err.Set(LErrorFuncFailed, "failed to set dir.");
-				}
-				else if (ftp)
-				{
-					if (!ftp->DeleteFile(LGetLeaf(path), &err))
-						err = ftp->GetError();
-				}
-				else
-				{
-					err.Set(LErrorFuncFailed, "no FTP obj.");
-				}
+				WithFtp(parts.folder, err, [&](auto f)
+					{
+						return f->DeleteFile(parts.leaf, &err) ? EOk : EError;
+					});
 
 				parent->RunCallback([this, err, cb]()
 				{
@@ -2546,6 +2509,10 @@ public:
 
 	IFtp *GetFtp()
 	{
+		if (ftp && ftp->IsOpen())
+			return ftp;
+
+		// Otherwise try and create the connection:
 		while (!IsCancelled())
 		{
 			if (!ftp)
@@ -2584,34 +2551,13 @@ public:
 
 		while (true)
 		{
-			if (!IsCancelled() && (!ftp || !Connected))
+			auto startTs = LCurrentTime();
+			DoWork();
+			if (IsCancelled())
 			{
-				auto now = LCurrentTime();
-				if (now - lastConnect > 5000)
-				{
-					lastConnect = now;
-					GetFtp();
-				}
-				else LSleep(WAIT_MS);
-			}
-			else if (!IsCancelled() && ftp && !ftp->IsOpen())
-			{
-				// Disconnected?
-				ftp.Reset();
-				// LoggingSock = true;
-				LSleep(1000);
-				log->Print("ftp: resetting connection...\n");
-			}
-			else
-			{
-				auto startTs = LCurrentTime();
-				DoWork();
-				if (IsCancelled())
-				{
-					printf("work took: " LPrintfInt64 "\n", LCurrentTime()-startTs);
-					if (!HasWork())
-						break;
-				}
+				printf("work took: " LPrintfInt64 "\n", LCurrentTime()-startTs);
+				if (!HasWork())
+					break;
 			}
 		}
 

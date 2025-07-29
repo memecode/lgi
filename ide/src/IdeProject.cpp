@@ -3653,7 +3653,7 @@ void IdeProject::Refresh()
 		return;
 
 	auto path = d->Backend->GetBasePath();
-	d->Backend->ReadFolder(SystemIntf::TForeground, path, [this](auto d, auto err)
+	d->Backend->ReadFolder(SystemIntf::TForeground, path, [this](auto dir, auto err)
 		{
 			LHashTbl<ConstStrKey<char,false>, ProjectNode*> existing;
 
@@ -3664,13 +3664,13 @@ void IdeProject::Refresh()
 					existing.Add(c->GetText(), pn);
 			}
 
-			for (auto b = d->First(NULL); b; b = d->Next())
+			for (auto b = dir ? dir->First(NULL) : false; b; b = dir->Next())
 			{
-				if (d->IsHidden())
+				if (dir->IsHidden())
 					continue;
 
 				// Check if an existing node exists...
-				auto name = d->GetName();
+				auto name = dir->GetName();
 				if (auto e = existing.Find(name))
 				{
 					// It does... so remove it from the map, so that the remain entries are

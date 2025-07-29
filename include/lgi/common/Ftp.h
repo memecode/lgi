@@ -86,9 +86,9 @@ public:
 class IFtpEntry
 {
 public:
-	int Attributes;
-	LPermissions Perms;
-	int64 Size;
+	int Attributes = 0;
+	LPermissions Perms = {};
+	int64 Size = 0;
 	LString Name;
 	LString Path;
 	LString User;
@@ -96,7 +96,7 @@ public:
 	LDateTime Date;
 
 	// App specific fields
-	void *UserData;
+	void *UserData = nullptr;
 	uint8_t Updated : 1;
 	uint8_t Added : 1;
 	uint8_t Deleted: 1;
@@ -110,6 +110,11 @@ public:
 	virtual ~IFtpEntry();
 
 	IFtpEntry &operator =(const IFtpEntry &e);
+
+	operator bool() const
+	{
+		return Name.Get() != nullptr;
+	}
 
 	bool IsDir()
 	{

@@ -389,7 +389,7 @@ void ProjectNode::AutoDetectType()
 		}
 	}
 		
-	if (!Type)
+	if (!Type && sFile)
 	{
 		auto Ext = LGetExtension(sFile);
 
