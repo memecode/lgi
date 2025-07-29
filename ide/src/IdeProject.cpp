@@ -3685,7 +3685,7 @@ void IdeProject::Refresh()
 
 				if (auto n = new ProjectNode(this))
 				{
-					if (n->Serialize(d))
+					if (n->Serialize(dir))
 						Insert(n);
 					else
 						delete n;
