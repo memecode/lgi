@@ -159,12 +159,14 @@ public:
 				}
 			}
 
-			Auto lck(this, _FL);
-			for (auto ws: webSockets)
-				ws->Read();
-				
 			{
-				auto msgs = messages.Lock(_FL);
+				Auto lck(this, _FL);
+				for (auto ws: webSockets)
+					ws->Read();
+			}
+				
+			if (auto msgs = messages.Lock(_FL))
+			{
 				for (auto m: *msgs.Get())
 					OnEvent(m);
 				msgs->DeleteObjects();
