@@ -125,6 +125,9 @@ install(TARGETS zlib
 set_target_properties(
     zlib
     PROPERTIES OUTPUT_NAME zlib)
+if(LINUX)
+    target_compile_options(zlibstatic PRIVATE -fPIC)
+endif()
 
 # libpng
 set(PNG_HARDWARE_OPTIMIZATIONS 0)
