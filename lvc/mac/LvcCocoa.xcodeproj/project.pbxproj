@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		342BC3C32E4C07600090FD81 /* Http.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 342BC3C22E4C07600090FD81 /* Http.cpp */; };
+		342BC3C72E4C077D0090FD81 /* OpenSSLSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 342BC3C62E4C077D0090FD81 /* OpenSSLSocket.cpp */; };
 		342D52A50F0CBA2F002A1C7C /* LgiMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 342D52A40F0CBA2F002A1C7C /* LgiMain.cpp */; };
 		343B7EE22D14B846006C250F /* RemoveAnsi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 343B7EE12D14B846006C250F /* RemoveAnsi.cpp */; };
 		3448F8C62081D2500038AE76 /* mac-icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 3448F8C52081D2500038AE76 /* mac-icon.icns */; };
@@ -20,7 +22,7 @@
 		3457FE502081CBE500014BE4 /* SubProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE4F2081CBE500014BE4 /* SubProcess.cpp */; };
 		3457FE522081CC4800014BE4 /* Lvc.lr8 in Resources */ = {isa = PBXBuildFile; fileRef = 3457FE512081CC4800014BE4 /* Lvc.lr8 */; };
 		3465A7E32B2AB1BF00084F66 /* PostBuildStep.py in Resources */ = {isa = PBXBuildFile; fileRef = 3465A7E22B2AB1BF00084F66 /* PostBuildStep.py */; };
-		346F5AC72BA507C000D64829 /* libssh.4.9.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 34DB96442BA5060A0058A51D /* libssh.4.9.6.dylib */; };
+		346F5AC72BA507C000D64829 /* libssh.4.10.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 34DB96442BA5060A0058A51D /* libssh.4.10.1.dylib */; };
 		347D1489252D453300422DA9 /* DeEscape.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 347D1488252D453300422DA9 /* DeEscape.cpp */; };
 		3485E7F5294F13F70020C14D /* PatchViewer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3485E7F4294F13F70020C14D /* PatchViewer.cpp */; };
 		3492DE852D1CC7340003BE0F /* libpng16d.16.45.git.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3492DE832D1CC7260003BE0F /* libpng16d.16.45.git.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -30,7 +32,7 @@
 		34C032BB2319CE8C00470DF2 /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C032B92319CDFE00470DF2 /* LgiCocoa.framework */; };
 		34C032BD2319CEC100470DF2 /* OptionsFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C032BC2319CEC100470DF2 /* OptionsFile.cpp */; };
 		34C032BE2319CEF200470DF2 /* LgiCocoa.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34C032B92319CDFE00470DF2 /* LgiCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		34DB96462BA5061E0058A51D /* libssh.4.9.6.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34DB96442BA5060A0058A51D /* libssh.4.9.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		34DB96462BA5061E0058A51D /* libssh.4.10.1.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34DB96442BA5060A0058A51D /* libssh.4.10.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34E1910C20B1898E00005243 /* image-list.png in Resources */ = {isa = PBXBuildFile; fileRef = 34E1910B20B1898E00005243 /* image-list.png */; };
 		8D0C4E8D0486CD37000505A6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0867D6AAFE840B52C02AAC07 /* InfoPlist.strings */; };
 /* End PBXBuildFile section */
@@ -60,7 +62,7 @@
 			dstSubfolderSpec = 10;
 			files = (
 				3492DE852D1CC7340003BE0F /* libpng16d.16.45.git.dylib in CopyFiles */,
-				34DB96462BA5061E0058A51D /* libssh.4.9.6.dylib in CopyFiles */,
+				34DB96462BA5061E0058A51D /* libssh.4.10.1.dylib in CopyFiles */,
 				34C032BE2319CEF200470DF2 /* LgiCocoa.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -68,6 +70,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		342BC3C22E4C07600090FD81 /* Http.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Http.cpp; path = ../../src/common/Net/Http.cpp; sourceTree = "<group>"; };
+		342BC3C62E4C077D0090FD81 /* OpenSSLSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OpenSSLSocket.cpp; path = ../../src/common/Net/OpenSSLSocket.cpp; sourceTree = "<group>"; };
 		342D52A40F0CBA2F002A1C7C /* LgiMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiMain.cpp; path = ../../src/common/Lgi/LgiMain.cpp; sourceTree = SOURCE_ROOT; };
 		343B7EE12D14B846006C250F /* RemoveAnsi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RemoveAnsi.cpp; path = ../../src/common/Text/RemoveAnsi.cpp; sourceTree = "<group>"; };
 		3448F8C52081D2500038AE76 /* mac-icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = "mac-icon.icns"; path = "../Resources/mac-icon.icns"; sourceTree = "<group>"; };
@@ -96,7 +100,7 @@
 		34C032B22319CDE900470DF2 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = ../../../../../../../System/Library/Frameworks/Cocoa.framework; sourceTree = "<group>"; };
 		34C032B42319CDFE00470DF2 /* LgiCocoa.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LgiCocoa.xcodeproj; path = ../../src/mac/cocoa/LgiCocoa.xcodeproj; sourceTree = "<group>"; };
 		34C032BC2319CEC100470DF2 /* OptionsFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OptionsFile.cpp; path = ../../src/common/Lgi/OptionsFile.cpp; sourceTree = "<group>"; };
-		34DB96442BA5060A0058A51D /* libssh.4.9.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssh.4.9.6.dylib; path = /opt/local/lib/libssh.4.9.6.dylib; sourceTree = "<absolute>"; };
+		34DB96442BA5060A0058A51D /* libssh.4.10.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssh.4.10.1.dylib; path = /opt/local/lib/libssh.4.10.1.dylib; sourceTree = "<absolute>"; };
 		34E1910B20B1898E00005243 /* image-list.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "image-list.png"; path = "../Resources/image-list.png"; sourceTree = "<group>"; };
 		8D0C4E960486CD37000505A6 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D0C4E970486CD37000505A6 /* Lvc.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Lvc.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -109,7 +113,7 @@
 			files = (
 				34C032BB2319CE8C00470DF2 /* LgiCocoa.framework in Frameworks */,
 				34C032B32319CDE900470DF2 /* Cocoa.framework in Frameworks */,
-				346F5AC72BA507C000D64829 /* libssh.4.9.6.dylib in Frameworks */,
+				346F5AC72BA507C000D64829 /* libssh.4.10.1.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -172,7 +176,7 @@
 			isa = PBXGroup;
 			children = (
 				3492DE832D1CC7260003BE0F /* libpng16d.16.45.git.dylib */,
-				34DB96442BA5060A0058A51D /* libssh.4.9.6.dylib */,
+				34DB96442BA5060A0058A51D /* libssh.4.10.1.dylib */,
 				34C032B42319CDFE00470DF2 /* LgiCocoa.xcodeproj */,
 				34C032B22319CDE900470DF2 /* Cocoa.framework */,
 			);
@@ -182,6 +186,8 @@
 		342D52A30F0CBA07002A1C7C /* Lgi */ = {
 			isa = PBXGroup;
 			children = (
+				342BC3C62E4C077D0090FD81 /* OpenSSLSocket.cpp */,
+				342BC3C22E4C07600090FD81 /* Http.cpp */,
 				343B7EE12D14B846006C250F /* RemoveAnsi.cpp */,
 				347D1488252D453300422DA9 /* DeEscape.cpp */,
 				34C032BC2319CEC100470DF2 /* OptionsFile.cpp */,
@@ -359,8 +365,10 @@
 				3457FE4A2081CB3D00014BE4 /* DropDownBtn.cpp in Sources */,
 				3457FE4D2081CB3D00014BE4 /* VcFile.cpp in Sources */,
 				343B7EE22D14B846006C250F /* RemoveAnsi.cpp in Sources */,
+				342BC3C32E4C07600090FD81 /* Http.cpp in Sources */,
 				34C032BD2319CEC100470DF2 /* OptionsFile.cpp in Sources */,
 				3457FE492081CB3D00014BE4 /* BrowseUi.cpp in Sources */,
+				342BC3C72E4C077D0090FD81 /* OpenSSLSocket.cpp in Sources */,
 				342D52A50F0CBA2F002A1C7C /* LgiMain.cpp in Sources */,
 				34BD35B120C5484A0001838A /* ControlTree.cpp in Sources */,
 				3449AB5828B96C8A00F8AAD4 /* SshConnection.cpp in Sources */,
