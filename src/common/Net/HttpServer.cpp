@@ -145,7 +145,7 @@ public:
 		LgiTrace("Listening on port %i.\n", port);
 		while (!cancel->IsCancelled())
 		{
-			if (Listen.IsReadable(1))
+			if (Listen.IsReadable(10))
 			{
 				LAutoPtr<LSocketI> s(new LSocket);
 				if (s)
@@ -164,13 +164,16 @@ public:
 				for (auto ws: webSockets)
 					ws->Read();
 			}
-				
-			if (auto msgs = messages.Lock(_FL))
+			
+			LHttpServerPriv::LMsgArray msgArr;
 			{
-				for (auto m: *msgs.Get())
-					OnEvent(m);
-				msgs->DeleteObjects();
+				if (auto msgs = messages.Lock(_FL))
+					msgArr.Swap(*msgs.Get());
 			}
+			for (auto m: msgArr)
+				OnEvent(m);
+			msgArr.DeleteObjects();
+			
 		}
 
 		printf("Closing listen socket: %i\n", (int)Listen.Handle());
