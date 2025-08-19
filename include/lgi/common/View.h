@@ -60,20 +60,11 @@ private:
 		friend		LRESULT CALLBACK DlgRedir(OsView hWnd, UINT m, WPARAM a, LPARAM b);
 		static		void CALLBACK TimerProc(OsView hwnd, UINT uMsg, UINT_PTR idEvent, uint32_t dwTime);
 
-	#elif defined MAC
+	#elif defined HAIKU
 	
-		#if LGI_COCOA
-
-		#elif LGI_CARBON
-
-			friend OSStatus LgiWindowProc(EventHandlerCallRef, EventRef, void *);
-			friend OSStatus LgiRootCtrlProc(EventHandlerCallRef, EventRef, void *);
-			friend OSStatus CarbonControlProc(EventHandlerCallRef, EventRef, void *);
-			friend OSStatus GViewProc(EventHandlerCallRef, EventRef, void *);
-			friend OSStatus LgiViewDndHandler(EventHandlerCallRef inHandlerCallRef, EventRef inEvent, void *inUserData);
-
-		#endif
-
+		friend class LAppPrivate;
+		virtual void HaikuEvent(LMessage::Events event, BMessage *m);
+	
 	#endif
 	
 	#if defined(HAIKU) || defined(MAC)
