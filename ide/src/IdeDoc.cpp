@@ -228,8 +228,7 @@ void EditTray::OnHeaderList(LMouse &m)
 
 							char Title[256];
 							sprintf_s(Title, sizeof(Title), "%s - %s", First, Last);
-							LSubMenu *sub = s->AppendSub(Title);
-							if (sub)
+							if (auto sub = s->AppendSub(Title))
 							{
 								for (int n=0; n<Letters[i].Length(); n++)
 								{
@@ -296,7 +295,7 @@ void EditTray::OnHeaderList(LMouse &m)
 					if (File)
 					{
 						// Open the selected file
-						Doc->GetProject()->GetApp()->OpenFile(File, NULL, NULL);
+						Doc->GetProject()->GetApp()->OpenFile(File, NULL, false, NULL);
 					}
 				}
 				
@@ -453,13 +452,14 @@ void EditTray::OnSymbolList(LMouse &m)
 							Doc->GetProject()->GetApp())
 						{
 							AppWnd *App = Doc->GetProject()->GetApp();
-							App->OpenFile(Def->File, NULL, [this, File=LString(Def->File), Line=Def->Line](auto Doc)
-							{
-								if (Doc)
-									Doc->SetLine(Line, false);
-								else
-									LgiTrace("%s:%i - Couldn't open doc '%s'\n", _FL, File.Get());
-							});
+							App->OpenFile(Def->File, NULL, false,
+								[this, File=LString(Def->File), Line=Def->Line](auto Doc)
+								{
+									if (Doc)
+										Doc->SetLine(Line, false);
+									else
+										LgiTrace("%s:%i - Couldn't open doc '%s'\n", _FL, File.Get());
+								});
 						}
 						else
 						{
@@ -517,17 +517,17 @@ public:
 		App = app;
 	}
 
-	LString ToString(DefnInfo *Obj)
+	LString ToString(DefnInfo *Obj) override
 	{
 		return Obj->Name;
 	}
 	
-	void OnSelect(DefnInfo *Obj)
+	void OnSelect(DefnInfo *Obj) override
 	{
 		App->GotoReference(Obj->File, Obj->Line, false, true, NULL);
 	}
 	
-	bool Name(const char *s)
+	bool Name(const char *s) override
 	{
 		LString InputStr = s;
 		LString::Array p = InputStr.SplitDelimit(" \t");
@@ -617,7 +617,7 @@ public:
 		}
 	}
 
-	LString ToString(FindSymResult *Obj)
+	LString ToString(FindSymResult *Obj) override
 	{
 		LString s;
 		s.Printf("%s:%i - %s",
@@ -631,7 +631,7 @@ public:
 		return s;
 	}
 	
-	void OnSelect(FindSymResult *Obj)
+	void OnSelect(FindSymResult *Obj) override
 	{
 		App->GotoReference(Obj->File, Obj->Line, false, true, NULL);
 	}
@@ -757,7 +757,7 @@ public:
 		App = app;
 	}
 
-	LString ToString(ProjectNode *Obj)
+	LString ToString(ProjectNode *Obj) override
 	{
 		LString s(Obj->GetFileName());
 		#ifdef WINDOWS
@@ -783,7 +783,7 @@ public:
 		}));
 	}
 	
-	void OnSelect(ProjectNode *Obj)
+	void OnSelect(ProjectNode *Obj) override
 	{
 		auto Fn = Obj->GetFileName();
 		if (LIsRelativePath(Fn))
@@ -800,9 +800,10 @@ public:
 		}
 	}
 	
-	void OnSelect(LListItem *Item)
+	void OnSelect(LListItem *Item) override
 	{
-		App->GotoReference(Item->GetText(), 1, false, true, NULL);
+		auto fn = Item->GetText();
+		App->GotoReference(fn, 1, false, true, NULL);
 	}
 	
 	void Update(LString InputStr)
@@ -1229,7 +1230,7 @@ public:
 		// Download the file...
 		LStringPipe Out;
 		LString Error;
-		bool r = LgiGetUri(&Cancel, &Out, &Error, Uri, NULL/*InHdrs*/, NULL/*Proxy*/);
+		bool r = LGetUri(&Cancel, &Out, &Error, Uri, NULL/*InHdrs*/, NULL/*Proxy*/);
 		if (r)
 		{
 			// Parse through it and extract any errors...
@@ -1379,7 +1380,7 @@ void IdeDoc::OnTitleClick(LMouse &m)
 				if (Dir)
 				{
 					LClipBoard c(this);
-					c.Text(Dir + 1);
+					c.Text(Dir);
 				}
 				break;
 			}
@@ -1949,10 +1950,12 @@ int IdeDoc::OnNotify(LViewI *v, const LNotification &n)
 					}
 					else
 					{
-						d->FilePopup->RunCallback([popup=d->FilePopup, v, n]()
+						d->FilePopup->RunCallback(
+							[popup=d->FilePopup, v, n]()
 							{
 								popup->OnNotify(v, n);
-							});
+							}
+						);
 					}
 				}
 			}

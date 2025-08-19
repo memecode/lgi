@@ -9,8 +9,17 @@ import multiprocessing
 
 cores = multiprocessing.cpu_count()
 jobs = 2 if cores <= 4 else cores - 1
+print("usage: build.py [clean] [installPaths]")
 print("cores:", cores, "jobs:", jobs);
-# sys.exit(0)
+
+first = True
+clean = False
+installPaths = False
+for arg in sys.argv:
+    if arg.lower() == 'clean':
+        clean = True
+    elif arg.lower() == 'installpaths':
+        installPaths = True
 
 def checkPackage(pkg):
     p = subprocess.run(["dpkg", "-l", pkg], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -37,7 +46,7 @@ if platform.system() == "Windows":
     gen = ["Visual Studio 16 2019"]
     arch = ["-A", "x64"]
     singleConfig = False
-elif platform.system() == "Darwin":    
+elif platform.system() == "Darwin":
     subfolders = ["build"]
     universalCheck.append("lib/libiconv.dylib")
     universalCheck.append("lib/libjpeg.62.4.0.dylib")
@@ -46,7 +55,7 @@ elif platform.system() == "Darwin":
     universalCheck.append("lib/liblunasvg.a")
     universalArchs.append('x86_64')
     universalArchs.append('arm64')
-elif platform.system() == "Linux":    
+elif platform.system() == "Linux":
     subfolders = ["build-x64"]
     packages = ["build-essential",
                 "mercurial",
@@ -78,8 +87,6 @@ else:
     print("Unsupported os:", os.name, platform.system())
     sys.exit(-1)
 
-first = True
-clean = len(sys.argv) > 1 and sys.argv[1].lower() == 'clean'
 curFolder = os.path.abspath(os.path.join(os.path.realpath(__file__), ".."))
 depsFolder = os.path.abspath(os.path.join(curFolder, "..", "..", "deps"))
 if not os.path.exists(depsFolder):
@@ -92,6 +99,16 @@ def remove_readonly(func, path, excinfo):
 if clean:
     shutil.rmtree(depsFolder, onerror=remove_readonly)
     print("deleted:", depsFolder)
+    sys.exit(0)
+
+if installPaths:
+    if platform.system() == "Linux":
+        print("Add paths to: /etc/ld.so.conf.d/lgi.conf")
+        print("Debug:", os.path.join(depsFolder, "build-x64-debug/lib"))
+        print("Release:", os.path.join(depsFolder, "build-x64-release/lib"))
+        print("Then: sudo ldconfig")
+    else:
+        print("Add impl for", platform.system(), "here")
     sys.exit(0)
 
 print("depsFolder:", depsFolder)

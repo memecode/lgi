@@ -601,6 +601,13 @@ public:
 		return Set(Addr, s);
 	}
 
+	bool Set(LString Addr, uint64_t Int)
+	{
+		char s[32];
+		sprintf_s(s, sizeof(s), LPrintfUInt64, Int);
+		return Set(Addr, s);
+	}
+	
 	bool Set(LString Addr, double Dbl)
 	{
 		char s[32];

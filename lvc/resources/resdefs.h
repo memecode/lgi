@@ -75,10 +75,14 @@
 #define ID_LIST									132
 #define ID_DELETE								133
 #define ID_MERGE								134
-#define ID_CLOSE								135
+#define ID_REWRITE_AUTHOR						135
 #define ID_NAME									136
 #define ID_CREATE								138
 #define ID_REMOTE_PROMPT						141
+#define ID_OLD_NAME								147
+#define ID_NEW_NAME								148
+#define ID_OLD_EMAIL							149
+#define ID_NEW_EMAIL							150
 #define ID_TABLE								500
 #define IDC_COMMIT								501
 #define ID_PULL									502
@@ -112,3 +116,4 @@
 #define IDM_OPEN_DIFF							530
 #define IDS_REVERT_THIS							531
 #define IDS_REVERT_BEFORE						532
+#define ID_CLOSE								533

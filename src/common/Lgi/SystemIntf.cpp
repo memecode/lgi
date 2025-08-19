@@ -38,6 +38,9 @@ extern const char *ToString(SysPlatform p)
 // General SystemIntf work handling:
 void SystemIntf::AddWork(LString ctx, TPriority priority, TCallback &&job)
 {
+	if (IsCancelled())
+		return;
+		
 	auto start = LCurrentTime();
 	Auto lck(this, _FL);
 	auto now = LCurrentTime();
@@ -45,10 +48,16 @@ void SystemIntf::AddWork(LString ctx, TPriority priority, TCallback &&job)
 		log->Print("AddWork lock took %i\n", _FL, (int)(now-start));
 
 	auto w = new TWork(ctx, std::move(job));
-	if (priority == SystemIntf::TForeground)
+	if (priority != SystemIntf::TBackground)
 		foregroundWork.Add(w);
 	else
 		backgroundWork.Add(w);
+}
+
+bool SystemIntf::HasWork()
+{
+	return	foregroundWork.Length() > 0 ||
+			backgroundWork.Length() > 0;
 }
 
 void SystemIntf::DoWork()
@@ -96,6 +105,32 @@ void SystemIntf::DoWork()
 	else LSleep(WAIT_MS);
 }
 
+SystemIntf::PathParts SystemIntf::SplitPath(LString path)
+{
+	SystemIntf::PathParts parts;
+	if (path)
+	{
+		char *last = nullptr;
+		for (auto s = path.Get(); s && *s; s++)
+		{
+			if (*s == '/' || *s == '\\')
+				last = s;
+		}
+		if (last)
+		{
+			auto pos = ++last - path.Get();
+			parts.folder = path(0, pos);
+			parts.leaf = path(pos, -1);
+		}
+		else
+		{
+			parts.folder = "/";
+			parts.leaf = path;
+		}
+	}
+	return parts;
+}
+
 #if 0
 #define PROCESS_LOG(...) log->Print(__VA_ARGS__)
 #else
@@ -104,7 +139,6 @@ void SystemIntf::DoWork()
 
 class SshBackend :
 	public SystemIntf,
-	public LCancel,
 	public LThread
 {
 	class Process :
@@ -317,46 +351,48 @@ class SshBackend :
 
 	LString Cmd(LSsh::SshConsole *c, LString cmd, int32_t *exitCode = NULL, LStream *outputStream = NULL, LCancel *cancel = NULL)
 	{
-		if (c)
+		if (!c || IsCancelled() || (cancel && cancel->IsCancelled()))
 		{
-			// log->Print("Cmd: write '%s'\n", cmd.Strip().Get());
-			if (!c->Write(cmd))
-			{
-				if (exitCode)
-					*exitCode = -1;
-				return LString();
-			}
-
-			auto output = ReadToPrompt(c, outputStream, cancel);
-			
-			if (cancel && cancel->IsCancelled())
-			{
-				if (exitCode)
-					*exitCode = -1;
-			}
-			else if (exitCode)
-			{
-				LString echo = "echo $?\n";
-				if (c->Write(echo))
-				{
-					auto val = ReadToPrompt(c);
-					// log->Print("echo output: %s", val.Get());
-
-					auto lines = val.SplitDelimit("\r\n");
-					if (lines.Length() > 1)
-						*exitCode = (int32_t) lines[1].Int();
-					else
-						*exitCode = -1;
-
-					if (*exitCode)
-						log->Print("Cmd failed: %s\n", output.Get());
-				}
-			}
-
-			return output;
+			if (exitCode)
+				*exitCode = -1;
+			return LString();
 		}
 
-		return LString();
+		// log->Print("Cmd: write '%s'\n", cmd.Strip().Get());
+		if (!c->Write(cmd))
+		{
+			if (exitCode)
+				*exitCode = -1;
+			return LString();
+		}
+
+		auto output = ReadToPrompt(c, outputStream, cancel);
+			
+		if (cancel && cancel->IsCancelled())
+		{
+			if (exitCode)
+				*exitCode = -1;
+		}
+		else if (exitCode)
+		{
+			LString echo = "echo $?\n";
+			if (c->Write(echo))
+			{
+				auto val = ReadToPrompt(c);
+				// log->Print("echo output: %s", val.Get());
+
+				auto lines = val.SplitDelimit("\r\n");
+				if (lines.Length() > 1)
+					*exitCode = (int32_t) lines[1].Int();
+				else
+					*exitCode = -1;
+
+				if (*exitCode)
+					log->Print("Cmd failed: %s\n", output.Get());
+			}
+		}
+
+		return output;
 	}
 
 public:
@@ -389,6 +425,37 @@ public:
 			}
 		}
 		WaitForExit();
+	}
+
+	bool IsFinished() override
+	{
+		return IsExited();
+	}
+
+	int Main() override
+	{
+		while (true)
+		{
+			auto startTs = LCurrentTime();
+			DoWork();
+
+			if (IsCancelled())
+			{
+				printf("work took: " LPrintfInt64 "\n", LCurrentTime()-startTs);
+				if (!HasWork())
+					break;
+			}
+		}
+
+		if (processes.Length())
+		{
+			log->Print("Waiting for subprocesses...\n");
+			while (processes.Length() > 0)
+				DoWork();
+			log->Print("Subprocesses done!\n");
+		}
+
+		return 0;
 	}
 
 	const char *GetClass() const { return "SshBackend"; }
@@ -449,7 +516,7 @@ public:
 		return native;
 	}
 
-	LString JoinPath(LString base, LString leaf)
+	LString JoinPath(LString base, LString leaf) override
 	{
 		LString allSep("\\/");
 		LString::Array a;
@@ -477,12 +544,12 @@ public:
 	{
 		LString::Array p;
 		auto parts = path.SplitDelimit(remoteSep);
-		for (size_t i = parts.Length()-1; i > 0; i--)
+		for (auto i = (ssize_t)parts.Length()-1; i > 0; i--)
 			p.Add( remoteSep.Join(parts.Slice(0, i)) );
 		return p;
 	}
 
-	void ResolvePath(LString path, LString::Array hints, std::function<void(LError&,LString)> cb)
+	void ResolvePath(LString path, LString::Array hints, SystemIntf::TStringCallback cb) override
 	{
 		if (!cb)
 			return;
@@ -561,7 +628,7 @@ public:
 				app->RunCallback( [this, cb, found]() mutable
 					{
 						LError err(found ? LErrorNone : LErrorPathNotFound, found ? nullptr : "path not found");
-						cb(err, found);
+						cb(found, err);
 					});
 			}
 		);
@@ -650,6 +717,9 @@ public:
 		bool Ok() const { return pos < (ssize_t)entries.Length(); }
 
 	public:
+		constexpr static bool Debug = true;
+		#define DEBUG_LOG(...) { if (Debug && log) printf(__VA_ARGS__); }
+		
 		SshDir(const char *basePath, LArray<LString> &lines, LStream *log) :
 			Log(log)
 		{
@@ -659,9 +729,16 @@ public:
 			//drwxrwxr-x   2 matthew matthew    4096 Mar 12 12:46  .redhat
 			LArray<bool> non;
 			for (auto &line: lines)
+			{
+				if (line(0) == '[')
+					continue;
+
 				for (int i=0; i<line.Length(); i++)
 					if (!IsWhite(line[i]))
 						non[i] = true;
+
+				DEBUG_LOG("ln='%s'\n", line.Get());
+			}
 			LArray<LRange> cols;
 			for (int i=0; i<non.Length();)
 			{
@@ -669,20 +746,15 @@ public:
 				while (i<non.Length() && !non[i]) i++;
 				auto start = i;
 				while (i<non.Length() && non[i]) i++;
-				cols.New().Set(start, i - start);
+				auto &c = cols.New();
+				c.Set(start, i - start);
+				DEBUG_LOG("col=%s\n", c.GetStr());
 			}
+			
 			for (auto &line: lines)
 			{
-				if (Log)
-				{
-					if (line.Find("13462126") > 0)
-					{
-						int asd=0;
-					}
-					Log->Print("Line: %s\n", line.Get());
-				}
-
 				#define COL(idx) line(cols[idx].Start, cols[idx].End())
+
 				auto &e = entries.New();
 				e.perms = COL(0);
 				e.user  = COL(2);
@@ -692,6 +764,11 @@ public:
 				e.month = COL(5);
 				e.day   = COL(6).Strip();
 				e.timeOrYear = COL(7);
+
+				DEBUG_LOG("perms=%s user=%s grp=%s sz=" LPrintfInt64 " mth=%s day=%s yr=%s\n",
+					e.perms.Get(), e.user.Get(), e.grp.Get(), e.size,
+					e.month.Get(), e.day.Get(), e.timeOrYear.Get());
+
 				if ((e.name = line(cols[7].End() + 1, -1).LStrip(" ")))
 				{
 					if (e.name(0) == '\'')
@@ -725,7 +802,6 @@ public:
 
 		~SshDir()
 		{
-			int asd=0;
 		}
 
 		int First(const char *Name, const char *Pattern = LGI_ALL_FILES) { pos = 0; return Ok(); }	
@@ -937,7 +1013,7 @@ public:
 		return true;
 	}
 
-	bool ReadFolder(TPriority priority, const char *Path, std::function<void(LDirectory*)> cb) override
+	bool ReadFolder(TPriority priority, const char *Path, std::function<void(LDirectory*, LError)> cb) override
 	{
 		if (!Path || !cb)
 			return false;
@@ -945,15 +1021,40 @@ public:
 		AddWork(
 			MakeContext(_FL, Path),
 			priority,
-			[this, cb, path = PreparePath(Path)]()
+			[	this,
+				cb,
+				path = PreparePath(Path),
+				logger = priority == TDebugLogging ? log : nullptr]()
 			{
+				int32_t exitCode = 0;
 				auto cmd = LString::Fmt("ls -lan %s\n", path.Get());
-				auto ls = Cmd(GetConsole(), cmd);
-				auto lines = ls.SplitDelimit("\r\n").Slice(2, -2);
+				auto ls = Cmd(GetConsole(), cmd, &exitCode);
+				LArray<LString> lines;
+				LError err;
+				SshDir *dir = nullptr;
 
-				app->RunCallback( [dir = new SshDir(path, lines, NULL), cb]() mutable
+				if (exitCode)
+				{
+					lines = ls.SplitDelimit("\r\n").Slice(1, -2);
+					LString msg = "cmd failed";
+					if (lines.Length())
 					{
-						cb(dir);
+						auto parts = lines.Last().SplitDelimit(":", 1);
+						if (parts.Length())
+							msg = parts.Last().Strip();
+					}
+					err.Set(LErrorFuncFailed, msg);
+					// LgiTrace("cmd='%s'\nls='%s'\nerr='%s'\n", cmd.Get(), ls.Get(), msg.Get());
+				}
+				else
+				{
+					lines = ls.SplitDelimit("\r\n").Slice(2, -2);
+					dir = new SshDir(path, lines, logger);
+				}
+
+				app->RunCallback( [dir, err, cb]() mutable
+					{
+						cb(dir, err);
 						delete dir;
 					});
 			} );
@@ -1081,7 +1182,7 @@ public:
 		return cp;
 	}
 
-	bool Read(TPriority priority, const char *Path, std::function<void(LError,LString)> cb) override
+	bool Read(TPriority priority, const char *Path, SystemIntf::TStringCallback cb) override
 	{
 		if (!Path && cb)
 			return false;
@@ -1096,17 +1197,22 @@ public:
 				if (Path.Find("~") == 0 && homePath)
 					Path = Path.Replace("~", homePath);
 
-				if (!GetSsh())
+				if (IsCancelled())
+				{
+					LError err(LErrorTimerExpired, "Cancelled.");
+					cb(LString(), err);
+				}
+				else if (!GetSsh())
 				{
 					LError err(LErrorFuncFailed, "No ssh object.");
-					cb(err, LString());
+					cb(LString(), err);
 				}
 				else
 				{
 					auto err = ssh->DownloadFile(&buf, Path);
 					app->RunCallback( [this, err, cb, data=buf.NewLStr()]() mutable
 						{
-							cb(err, data);
+							cb(data, err);
 						});
 				}
 			} );
@@ -1226,7 +1332,7 @@ public:
 		return true;
 	}
 
-	bool RunProcess(const char *initDir, const char *cmdLine, ProcessIo *output, LCancel *cancel, std::function<void(int)> cb, LStream *alt_log = nullptr)
+	bool RunProcess(const char *initDir, const char *cmdLine, ProcessIo *output, LCancel *cancel, std::function<void(int)> cb, LStream *alt_log = nullptr) override
 	{
 		if (!cmdLine)
 			return false;
@@ -1261,22 +1367,6 @@ public:
 
 		return true;
 	}
-
-	int Main() override
-	{
-		while (!IsCancelled())
-			DoWork();
-
-		if (processes.Length())
-		{
-			log->Print("Waiting for subprocesses...\n");
-			while (processes.Length() > 0)
-				DoWork();
-			log->Print("Subprocesses done!\n");
-		}
-
-		return 0;
-	}
 };
 
 class LocalBackend : public SystemIntf
@@ -1299,9 +1389,14 @@ public:
 	{
 	}
 
+	bool IsFinished() override
+	{
+		return true; // no thread... so can quit anytime
+	}
+
 	LString GetBasePath() override { return folder; }
 
-	LString MakeRelative(LString absPath)
+	LString MakeRelative(LString absPath) override
 	{
 		return LMakeRelativePath(folder, absPath);
 	}
@@ -1312,14 +1407,14 @@ public:
 		return relPath;
 	}
 
-	LString JoinPath(LString base, LString leaf)
+	LString JoinPath(LString base, LString leaf) override
 	{
 		LFile::Path p(base);
 		p += leaf;
 		return p.GetFull();
 	}
 
-	void ResolvePath(LString path, LString::Array hints, std::function<void(LError&,LString)> cb)
+	void ResolvePath(LString path, LString::Array hints, SystemIntf::TStringCallback cb) override
 	{
 		LAssert(!"impl me");
 	}
@@ -1336,13 +1431,14 @@ public:
 		return true;
 	}
 
-	bool ReadFolder(TPriority priority, const char *Path, std::function<void(LDirectory*)> results) override
+	bool ReadFolder(TPriority priority, const char *Path, std::function<void(LDirectory*, LError)> results) override
 	{
 		LDirectory dir;
 		if (!dir.First(Path))
 			return false;
 
-		results(&dir);
+		LError err;
+		results(&dir, err);
 		return true;
 	}
 
@@ -1381,12 +1477,12 @@ public:
 		return false;
 	}
 
-	bool Read(TPriority priority, const char *Path, std::function<void(LError,LString)> result) override
+	bool Read(TPriority priority, const char *Path, SystemIntf::TStringCallback result) override
 	{
 		if (!Path)
 		{
 			if (result)
-				result(LErrorInvalidParam, LString());
+				result(LString(), LErrorInvalidParam);
 			return false;
 		}
 
@@ -1398,7 +1494,7 @@ public:
 		else
 			err = f.GetError();
 		if (result)
-			result(err, data);
+			result(data, err);
 		return true;
 	}
 
@@ -1439,18 +1535,15 @@ public:
 			return false;
 
 		LError err;
+
 		if (LDirExists(path))
-		{
 			FileDev->RemoveFolder(path, recursiveForce, &err);
-			if (cb)
-				cb(err);
-		}
 		else
-		{
-			auto status = FileDev->Delete(path, &err);
-			if (cb)
-				cb(err);
-		}
+			FileDev->Delete(path, &err);
+
+		if (cb)
+			cb(err);
+
 		return true;
 	}
 
@@ -1484,7 +1577,7 @@ public:
 		#endif
 	}
 
-	bool RunProcess(const char *initDir, const char *cmdLine, ProcessIo *output, LCancel *cancel, std::function<void(int)> cb, LStream *alt_log)
+	bool RunProcess(const char *initDir, const char *cmdLine, ProcessIo *output, LCancel *cancel, std::function<void(int)> cb, LStream *alt_log) override
 	{
 		return false;
 	}
@@ -1500,7 +1593,6 @@ public:
 
 class FtpBackend :
 	public SystemIntf,
-	public LCancel,
 	public LThread,
 	public IFtpCallback
 {
@@ -1519,20 +1611,6 @@ class FtpBackend :
 	LAutoPtr<IFtp> ftp;
 	LHashTbl<StrKey<char>, TCache*> cache;
 
-	bool GetReady(int timeout = 6000)
-	{
-		auto start = LCurrentTime();
-		while (!IsCancelled() && !Connected)
-		{
-			auto now = LCurrentTime();
-			if (now - start > timeout)
-				return false;
-			LSleep(10);
-		}
-
-		return true;
-	}
-
 	class FtpDir : public LArray<IFtpEntry*>, public LDirectory
 	{
 		ssize_t pos = 0;
@@ -1550,7 +1628,7 @@ class FtpBackend :
 		{
 			if (path.Find("directory is ") >= 0)
 			{
-				int asd=0;
+				LAssert(!"Weird?");
 			}
 
 			base = path;
@@ -1743,6 +1821,8 @@ class FtpBackend :
 	};
 
 public:
+	constexpr static int MAX_ATTEMPTS = 5;
+
 	FtpBackend(LView *view, LString addr, LStream *logger) :
 		SystemIntf(logger, "FtpBackend"),
 		LThread("FtpBackend.Thread"),
@@ -1792,12 +1872,12 @@ public:
 		return LString();
 	}
 
-	void ResolvePath(LString path, LString::Array hints, std::function<void(LError&,LString)> cb) override
+	void ResolvePath(LString path, LString::Array hints, SystemIntf::TStringCallback cb) override
 	{
 		if (path && cb)
 		{
 			LError err;
-			cb(err, path);
+			cb(path, err);
 		}
 	}
 	
@@ -1805,24 +1885,26 @@ public:
 	LString ConvertPath(LString s)
 	{
 		LString unix = s.Replace("\\", "/");
-		if (unix(0) == '.')
+		if (unix(0) == '.' && unix.Length() > 1)
 			return unix(1, -1);
 		return unix;
 	}
 
-	bool SetRemote(LString s, bool stripLeaf)
+	bool SetRemote(LString s, LError *err)
 	{
-		if (stripLeaf)
-		{
-			auto lastSep = s.RFind("/");
-			if (lastSep >= 0)
-				s = s(0, lastSep ? lastSep : 1);
-		}
+		if (s.Length() > 1)
+			s = s.RStrip("/");
+		if (s(0) != '/')
+			s = LString("/") + s;
 
 		if (remote == s)
 			return true;
 
-		return ftp->SetDir(remote = s);
+		bool result = ftp->SetDir(remote = s);
+		if (!result && err)
+			*err = ftp->GetError();
+
+		return result;
 	}
 
 	bool Stat(LString path, std::function<void(struct stat*, LString, LError)> cb) override
@@ -1836,30 +1918,23 @@ public:
 			TForeground,
 			[this, path, cb=std::move(cb)]()
 			{
-				LArray<IFtpEntry*> dir;
 				LError err;
 				struct stat s = {};
 
-				if (!SetRemote(path, true))
+				auto parts = SplitPath(path);
+				auto dir = FtpListDir(parts.folder, err);
+				if (dir)
 				{
-					err.Set(LErrorPathNotFound);
-				}
-				else if (!ftp->ListDir(dir))
-				{
-					err.Set(LErrorFuncFailed);
-				}
-				else // look through 'dir' 
-				{
-					auto leaf = LGetLeaf(path);
-					for (auto e: dir)
+					// look through 'dir' 
+					for (auto e: *dir)
 					{
-						if (e->Path.Equals(leaf))
+						if (e->Path.Equals(parts.leaf))
 						{
 							// found the entry
 							#ifdef WINDOWS
-							auto unixTime = e->Date.GetUnix();
+								auto unixTime = e->Date.GetUnix();
 							#else
-							timespec unixTime = { e->Date.GetUnix(), 0 };
+								timespec unixTime = { e->Date.GetUnix(), 0 };
 							#endif
 							s.st_size = (TOffset) e->Size;
 							s.st_mode = 0644;
@@ -1892,7 +1967,99 @@ public:
 		return true;
 	}
 
-	bool ReadFolder(TPriority priority, const char *Path, std::function<void(LDirectory*)> results) override
+	enum TResult
+	{
+		EFatal,
+		EError,
+		EOk
+	};
+
+	bool WithFtp(LString folder, LError &err, std::function<TResult(IFtp*)> cb)
+	{
+		if (!cb || !folder)
+		{
+			err.Set(LErrorInvalidParam, "missing param");
+			return false;
+		}
+
+		int attempts = 0;
+		while (auto f = GetFtp())
+		{
+			try
+			{
+				if (SetRemote(folder, &err))
+				{
+					auto r = cb(f);
+					if (r == EOk)
+						return true;
+					if (r == EFatal)
+						return false;
+
+				}
+			}
+			catch (ssize_t result)
+			{
+				if (!err)
+					err = f->GetError();
+				if (!err)
+					err.Set(LErrorFuncFailed, LString::Fmt("Ftp cmd failed with " LPrintfSSizeT "\n", result));
+			}
+
+			if (err)
+				log->Print("%s:%i - err: %s\n", _FL, err.ToString().Get());
+			if (++attempts >= MAX_ATTEMPTS || IsCancelled())
+				return false;
+		}
+
+		return false;
+	}
+
+	LAutoPtr<FtpDir> FtpListDir(LString Path, LError &err)
+	{
+		LAutoPtr<FtpDir> curDir;
+
+		WithFtp(Path, err, [&](auto f)
+			{
+				if (!curDir.Reset(new FtpDir(Path)))
+				{
+					err.Set(LErrorNoMem, "alloc failed");
+					return EFatal;
+				}
+		
+				auto result = f->ListDir(*curDir);
+				if (!result)
+					err = f->GetError();
+				return result ? EOk : EError;
+			});
+
+		if (!err && curDir)
+		{
+			// Store the names in the cache
+			Auto lck(this, _FL);
+			for (auto e: *curDir)
+			{
+				if (!e->IsDir())
+				{
+					auto sep = Path(-1) == '/' ? "" : "/";
+					auto full = LString::Fmt("%s%s%s", Path ? Path.Get() : "", sep, e->Name.Get());
+					auto c = cache.Find(full);
+					if (!c)
+					{
+						cache.Add(full, c = new TCache);
+						LgiTrace("Adding cache '%s'\n", full.Get());
+					}
+					if (c)
+						c->entry = *e;
+				}
+			}
+		}
+
+		if (curDir)
+			curDir->Valid();
+		return curDir;
+	}
+
+	bool ReadFolder(TPriority priority, const char *Path, std::function<void(LDirectory*, LError)> results) override
 	{
 		if (!Path || !results)
 			return false;
@@ -1901,50 +2068,26 @@ public:
 			priority,
 			[this, Path = ConvertPath(Path), results]() mutable
 			{
-				if (!GetReady())
-					return;
-
-				if (!SetRemote(Path, false))
+				LError err;
+				LAutoPtr<FtpDir> curDir = FtpListDir(Path, err);
+				parent->RunCallback([this, results, curDir=curDir.Release()]()
 				{
-					log->Print("SetDir(%s) failed.\n", Path.Get());
-					return;
-				}
-
-				LAutoPtr<FtpDir> curDir(new FtpDir(Path));
-				if (ftp->ListDir(*curDir))
-				{
-					{
-						// Store the names in the cache
-						Auto lck(this, _FL);
-						for (auto e: *curDir)
-						{
-							if (!e->IsDir())
-							{
-								auto full = LString::Fmt("%s/%s", Path ? Path.Get() : "", e->Name.Get());
-								auto c = cache.Find(full);
-								if (!c)
-									cache.Add(full, c = new TCache);
-								if (c)
-									c->entry = *e;
-							}
-						}
-					}
-
-					curDir->Valid();
-					parent->RunCallback([this, results, curDir=curDir.Release()]()
-					{
+					if (curDir)
 						curDir->Valid();
-						results(curDir);
+					LError err;
+					results(curDir, err);
+					if (curDir)
+					{
 						curDir->Valid();
 						delete curDir;
-					});
-				}
+					}
+				});
 			});
 
 		return true;
 	}
 
-	bool Read(TPriority priority, const char *inPath, std::function<void(LError,LString)> result) override
+	bool Read(TPriority priority, const char *inPath, SystemIntf::TStringCallback result) override
 	{
 		if (!inPath || !result)
 			return false;
@@ -1959,7 +2102,7 @@ public:
 				if (c->data)
 				{
 					LError err;
-					result(err, c->data);
+					result(c->data, err);
 					return true;
 				}
 			}
@@ -1972,62 +2115,61 @@ public:
 			{
 				LError err;
 				LString fileData;
+				IFtpEntry entry;
+				auto parts = SplitPath(path);
 
-				if (!GetReady())
 				{
-					err.Set(LErrorFuncFailed, "connection not ready.");
+					Auto lck(this, _FL);
+					if (auto c = cache.Find(path))
+					{
+						entry = c->entry;
+						fileData = c->data;
+					}
+					else
+					{
+						// Haven't read that folder yet:
+						auto cur = FtpListDir(parts.folder, err);
+						if (!err)
+						{
+							if (auto c = cache.Find(path))
+							{
+								entry = c->entry;
+								fileData = c->data;
+							}
+						}
+					}
 				}
-				else
+
+				if (!fileData && entry)
 				{
-					IFtpEntry entry;
-					{
-						Auto lck(this, _FL);
-						if (auto c = cache.Find(path))
-							entry = c->entry;
-						else
-							err.Set(LErrorFuncFailed, "entry not found.");
-					}
-
-					// Make sure we're in the right folder...
-					if (!err)
-					{
-						try
+					WithFtp(parts.folder, err, [&](auto f)
 						{
-							if (!SetRemote(path, true))
+							LStringPipe data(16 << 10);
+							if (ftp->DownloadStream(&data, &entry, true))
 							{
-								err.Set(LErrorFuncFailed, "failed to set dir.");
-							}
-							else if (entry.Name)
-							{
-								LStringPipe data(16 << 10);
-
-								if (ftp->DownloadStream(&data, &entry))
+								fileData = data.NewLStr();
 								{
-									fileData = data.NewLStr();
-									{
-										// Store the data in the cache
-										Auto lck(this, _FL);
-										auto c = cache.Find(path);
-										LAssert(c);
-										if (c)
-											c->data = fileData;
-									}
+									// Store the data in the cache
+									Auto lck(this, _FL);
+									auto c = cache.Find(path);
+									LAssert(c);
+									if (c)
+										c->data = fileData;
 								}
-								else err.Set(LErrorIoFailed, "download failed.");
+								return EOk;
 							}
-						}
-						catch (ssize_t result)
-						{
-							auto msg = LString::Fmt("Ftp cmd failed with " LPrintfSSizeT "\n", result);
-							err.Set(LErrorFuncFailed, msg);
-							log->Print(msg);
-						}
-					}
+
+							if (ftp)
+								err = ftp->GetError();
+							if (!err)
+								err.Set(LErrorIoFailed, "download failed.");
+							return EError;
+						});
 				}
 
 				parent->RunCallback([this, err, fileData, result]()
 				{
-					result(err, fileData);
+					result(fileData, err);
 				});
 			});
 
@@ -2046,38 +2188,31 @@ public:
 			[this, path, result, Data]() mutable
 			{
 				LError err;
+				auto parts = SplitPath(path);
 
-				if (!GetReady())
 				{
-					err.Set(LErrorFuncFailed, "connection not ready.");
-				}
-				else
-				{
-					{
-						Auto lck(this, _FL);
+					Auto lck(this, _FL);
 
-						// Update the cache
-						if (auto c = cache.Find(path))
-							c->data = Data;
-						else
-							err.Set(LErrorFuncFailed, "cache obj not found.");
-					}
-
-					if (!err)
-					{
-						// Make sure we're in the right folder...
-						if (!SetRemote(path, true))
-						{
-							err.Set(LErrorFuncFailed, "failed to set dir.");
-						}
-						else
-						{
-							LMemStream wrapper(Data.Get(), Data.Length(), false);
-							if (!ftp->UploadStream(&wrapper, path))
-								err.Set(LErrorIoFailed, "upload failed.");
-						}
-					}
+					// Update the cache
+					if (auto c = cache.Find(path))
+						c->data = Data;
+					else
+						err.Set(LErrorFuncFailed, "cache obj not found.");
 				}
+
+				WithFtp(parts.folder, err, [&](auto f)
+					{
+						LMemStream wrapper(Data.Get(), Data.Length(), false);
+						if (!ftp->UploadStream(&wrapper, parts.leaf))
+						{
+							err = ftp->GetError();
+							if (!err)
+								err.Set(LErrorIoFailed, "UploadStream failed.");
+							return EError;
+						}
+
+						return EOk;
+					});
 
 				parent->RunCallback([this, err, result]()
 				{
@@ -2103,16 +2238,12 @@ public:
 			[this, path, cb]() mutable
 			{
 				LError err;
+				auto parts = SplitPath(path);
 
-				if (!GetReady())
-					err.Set(LErrorFuncFailed, "connection not ready.");
-				else if (!SetRemote(path, true))
-					// Make sure we're in the right folder...
-					err.Set(LErrorFuncFailed, "failed to set dir.");
-				else if (ftp)
-					ftp->DeleteFile(LGetLeaf(path), &err);
-				else
-					err.Set(LErrorFuncFailed, "no FTP obj.");
+				WithFtp(parts.folder, err, [&](auto f)
+					{
+						return f->DeleteFile(parts.leaf, &err) ? EOk : EError;
+					});
 
 				parent->RunCallback([this, err, cb]()
 				{
@@ -2187,7 +2318,7 @@ public:
 		{
 			LMutex::Auto lck(owner, _FL);
 			states.Add(file, TReading);
-			owner->Read(SystemIntf::TBackground, file, [this](auto err, auto data)
+			owner->Read(SystemIntf::TBackground, file, [this](auto data, auto err)
 				{
 				});
 		}
@@ -2323,7 +2454,7 @@ public:
 		return -1;
 	}
 
-	int Alert(const char *Title, const char *Text, const char *Btn1, const char *Btn2 = 0, const char *Btn3 = 0)
+	int Alert(const char *Title, const char *Text, const char *Btn1, const char *Btn2 = 0, const char *Btn3 = 0) override
 	{
 		LAssert(0);
 		return -1;
@@ -2362,56 +2493,71 @@ public:
 			log->Print("   error: %i, %s\n", ErrorCode, ErrorDescription);
 		}
 		
-		void OnInformation(const char *Str)
+		void OnInformation(const char *Str) override
 		{
 			log->Print("   info: %s\n", Str);
 		}
 	};
 
-	int Main() override
+	bool IsFinished() override
 	{
-		bool Tls = true;
-		bool LoggingSock = false;
-		uint64_t lastConnect = 0;
+		return IsExited();
+	}
 
+	bool Tls = true;
+	bool LoggingSock = false;
+
+	IFtp *GetFtp()
+	{
+		if (ftp && ftp->IsOpen())
+			return ftp;
+
+		// Otherwise try and create the connection:
 		while (!IsCancelled())
 		{
-			if (!ftp || !Connected)
+			if (!ftp)
 			{
-				auto now = LCurrentTime();
-
-				if (!ftp)
-					ftp.Reset(new IFtp(this, this, Tls));
-
-				if (now - lastConnect > 5000)
-				{
-					lastConnect = now;
-					SslSocket *sock = nullptr;
-					if (LoggingSock)
-						sock = new SslLoggingSocket(log);
-					else
-						sock = new SslSocket(log);
-					if (sock)
-					{
-						sock->SetCancel(this);
-						auto res = ftp->Open(sock, uri.sHost, uri.Port, uri.sUser, uri.sPass);
-						log->Print("Open=%i Conn=%i\n", res, Connected);
-					}
-					else log->Print("alloc err.\n");
-				}
-				else LSleep(WAIT_MS);
+				if (!ftp.Reset(new IFtp(this, this, Tls)))
+					return nullptr;
 			}
-			else if (ftp && !ftp->IsOpen())
-			{
-				// Disconnected?
-				ftp.Reset();
-				// LoggingSock = true;
-				LSleep(1000);
-				log->Print("ftp: resetting connection...\n");
-			}
+
+			SslSocket *sock = nullptr;
+			if (LoggingSock)
+				sock = new SslLoggingSocket(log);
 			else
+				sock = new SslSocket(log);
+			if (!sock)
 			{
-				DoWork();
+				log->Print("alloc err.\n");
+				return nullptr;
+			}
+
+			sock->SetCancel(this);
+			auto res = ftp->Open(sock, uri.sHost, uri.Port, uri.sUser, uri.sPass);
+			log->Print("Open=%i Conn=%i\n", res, Connected);
+			if (res == FO_Connected)
+				return ftp;
+
+			ftp.Reset();
+			LSleep(5000);
+		}
+
+		return ftp;
+	}
+
+	int Main() override
+	{
+		uint64_t lastConnect = 0;
+
+		while (true)
+		{
+			auto startTs = LCurrentTime();
+			DoWork();
+			if (IsCancelled())
+			{
+				printf("work took: " LPrintfInt64 "\n", LCurrentTime()-startTs);
+				if (!HasWork())
+					break;
 			}
 		}
 

@@ -163,13 +163,15 @@ public:
 		constexpr static const char *CfgLinuxMouseBack       = "Linux.Mouse.Back";
 		constexpr static const char *CfgLinuxMouseForward    = "Linux.Mouse.Forward";
 
-	#elif defined(HAIKU)
-
-		constexpr static const char *CfgNetworkHttpProxy     = "Network.HttpProxy";
-		constexpr static const char *CfgNetworkHttpsProxy    = "Network.HttpsProxy";
-		constexpr static const char *CfgNetworkSocks5Proxy   = "Network.Socks5Proxy";
-
 	#endif
+
+	constexpr static const char *CfgHelpLink                 = "Help";
+
+	constexpr static const char *CfgLanguage                 = "Language";
+
+	constexpr static const char *CfgNetworkHttpProxy         = "Network.HttpProxy";
+	constexpr static const char *CfgNetworkHttpsProxy        = "Network.HttpsProxy";
+	constexpr static const char *CfgNetworkSocks5Proxy       = "Network.Socks5Proxy";
 
 	constexpr static const char *CfgFontsGlyphSub            = "Fonts.GlyphSub";
 	constexpr static const char *CfgFontsPointSizeOffset     = "Fonts.PointSizeOffset";

@@ -9,6 +9,7 @@
 #include "lgi/common/Menu.h"
 
 #include "ViewPriv.h"
+#include "AppPriv.h"
 #include "MenuBar.h"
 
 #define DEBUG_SETFOCUS			0
@@ -22,7 +23,7 @@
 	#define WAIT_LOG(...)
 #endif
 
-#define DEBUG_WINDOW			0
+#define DEBUG_WINDOW			1
 #if DEBUG_WINDOW
 #define LOG(...)				printf(__VA_ARGS__)
 #else
@@ -72,11 +73,12 @@ public:
 	}
 	
 	LWindowPrivate(LWindow *wnd) :
-		BWindow(BRect(100,100,400,400),
-				MakeName(wnd),
-				B_DOCUMENT_WINDOW_LOOK,
-				B_NORMAL_WINDOW_FEEL,
-				0),
+		BWindow(
+			/* frame: */ BRect(100,100,400,400),
+			/* title: */ MakeName(wnd),
+			/* look:  */ B_DOCUMENT_WINDOW_LOOK,
+			/* feel:  */ B_NORMAL_WINDOW_FEEL,
+			/* flags: */ B_WILL_ACCEPT_FIRST_CLICK),
 		Wnd(wnd)
 	{
 	}
@@ -136,77 +138,64 @@ public:
 		
 		return -1;
 	}
+	
+	BMessage MakeMessage(LMessage::Events e)
+	{
+		BMessage m(M_HAIKU_WND_EVENT);
+		m.AddPointer(LMessage::PropWindow, (void*)Wnd);
+		m.AddInt32(LMessage::PropEvent, e);
+		return m;
+	}
 
 	void FrameMoved(BPoint newPosition)
 	{
-		auto Pos = Frame();
-
-		if (Pos != Wnd->Pos)
-		{
-			Wnd->Pos = Pos;
-			Wnd->OnPosChange();
-		}
-
+		auto m = MakeMessage(LMessage::FrameMoved);
+		m.AddPoint("pos", newPosition);
+		LAppPrivate::Post(&m);		
+		
 		BWindow::FrameMoved(newPosition);
 	}
 
-	void FrameResized(float newWidth, float newHeight)
+	void FrameResized(float width, float height)
 	{
-		auto Pos = Frame();
-		if (Pos != Wnd->Pos)
-		{
-			Wnd->Pos.SetSize(newWidth, newHeight);
-			Wnd->OnPosChange();
-		}
-		BWindow::FrameResized(newWidth, newHeight);
+		auto m = MakeMessage(LMessage::FrameResized);
+		m.AddFloat("width", width);
+		m.AddFloat("height", height);
+		LAppPrivate::Post(&m);		
+
+		BWindow::FrameResized(width, height);
 	}
 
 	bool QuitRequested()
 	{
-		/*
-		printf("%p::QuitRequested() starting.. pos=%s cls=%s\n",
-			Wnd,
-			Wnd->Pos.GetStr(),
-			Wnd->GetClass());
-		*/
-			
-		auto r = Wnd->OnRequestClose(false);
-		// printf("%s::QuitRequested()=%i\n", Wnd->GetClass(), r);
-		return r;
+		int result = -1;
+		
+		auto m = MakeMessage(LMessage::QuitRequested);
+		m.AddPointer("result", (void*)&result);
+		LAppPrivate::Post(&m);
+		
+		// Wait for the GUI thread to respond:
+		while (result < 0)
+			LSleep(1);
+		
+		return result > 0;
 	}
 
 	void MessageReceived(BMessage *message)
 	{
-		if (message->what == M_ON_CREATE)
-			LOG("%s:%i %s msg=M_ON_CREATE\n", _FL, __FUNCTION__);
 		if (message->what == M_LWINDOW_DELETE)
 		{
-			// printf("Processing M_LWINDOW_DELETE th=%u\n", LCurrentThreadId());
 			Wnd->Handle()->RemoveSelf();			
 			Quit();
-			// printf("Processed M_LWINDOW_DELETE\n");
 		}
 		else
 		{
 			BWindow::MessageReceived(message);
 
-			LViewI *view = NULL;
-			auto r = message->FindPointer(LMessage::PropView, (void**)&view);
-			if (r == B_OK)
-			{
-				if (LView::RecentlyDeleted(view))
-					LOG("%s:%i %s view is RecentlyDeleted\n", _FL, __FUNCTION__, r);
-				else
-				{
-					if (message->what == M_ON_CREATE)
-						LOG("%s:%i %s passing msg to view: %s\n", _FL, __FUNCTION__, r, view->GetClass());
-					view->OnEvent((LMessage*)message);
-				}
-			}
-			else
-			{
-				Wnd->OnEvent((LMessage*)message);
-			}
+			// Redirect the message to the app loop:
+			auto m = MakeMessage(LMessage::General);
+			m.AddMessage("message", message);
+			LAppPrivate::Post(&m);
 		}
 	}
 	
@@ -250,16 +239,15 @@ LWindow::LWindow() :
 	LView(0)
 	#ifdef _DEBUG
 	, DebugDC(_FL)
-	
 	#endif
 {
 	d = new LWindowPrivate(this);
-	_QuitOnClose = false;
-	Menu = NULL;
-	
-	_Default = 0;
 	_Window = this;
 	ClearFlag(WndFlags, GWF_VISIBLE);
+	
+	BMessage msg(M_SET_ROOT_VIEW);
+	msg.AddPointer("window", this);
+	Handle()->MessageReceived(&msg);
 }
 
 LWindow::~LWindow()
@@ -269,6 +257,16 @@ LWindow::~LWindow()
 
 	DeleteObj(Menu);
 	WaitThread();
+}
+
+// This is called in the app thread.. lock the window before using
+void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
+{
+	if (!m)
+		return;
+		
+	// Common view handling...
+	LView::HaikuEvent(event, m);
 }
 
 LWindow *LWindow::GetModalParent()
@@ -551,6 +549,7 @@ void LWindow::UpdateRootView()
 	if (menu)
 		rootView->MoveTo(0, menuPos.Height());
 	rootView->SetResizingMode(B_FOLLOW_ALL_SIDES);
+	printf("rootView set resize mode follow all sides\n");
 }
 
 bool LWindow::Attach(LViewI *p)
@@ -972,7 +971,7 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 
 	if (Load)
 	{
-		::LVariant v;
+		LVariant v;
 		if (Store->GetValue(FieldName, v) && v.Str())
 		{
 			LRect Position(0, 0, -1, -1);

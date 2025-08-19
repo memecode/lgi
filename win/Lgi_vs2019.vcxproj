@@ -124,7 +124,7 @@
       <DataExecutionPrevention />
       <ImportLibrary>$(OutDir)$(TargetName).lib</ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalLibraryDirectories>..\..\..\..\codelib\lunasvg\build\$(Configuration);..\..\..\..\codelib\lunasvg\build\_deps\plutovg-build\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\deps\build-x64\lunasvg\$(Configuration);..\..\deps\build-x64\lunasvg\plutovg\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -171,7 +171,7 @@
       <DataExecutionPrevention />
       <ImportLibrary>$(OutDir)$(TargetName).lib</ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalLibraryDirectories>..\..\..\..\codelib\lunasvg\build\$(Configuration);..\..\..\..\codelib\lunasvg\build\_deps\plutovg-build\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\deps\build-x64\lunasvg\$(Configuration);..\..\deps\build-x64\lunasvg\plutovg\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|x64'">
@@ -220,7 +220,7 @@
       <DataExecutionPrevention />
       <ImportLibrary>$(OutDir)$(TargetName).lib</ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalLibraryDirectories>..\..\..\..\codelib\lunasvg\build\Release;..\..\..\..\codelib\lunasvg\build\_deps\plutovg-build\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\deps\build-x64\lunasvg\Release;..\..\deps\build-x64\lunasvg\plutovg\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

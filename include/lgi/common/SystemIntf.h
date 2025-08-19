@@ -56,17 +56,31 @@ struct StripAnsiStream : public LStream
 	}
 };
 
-class SystemIntf : public LMutex
+class SystemIntf :
+	public LMutex,
+	public LCancel
 {
 public:
 	enum TPriority
 	{
 		TBackground,
-		TForeground
+		TForeground,
+		TDebugLogging,
+	};
+
+	struct PathParts
+	{
+		LString folder, leaf;
 	};
 
 	constexpr static int WAIT_MS = 50;
 	LStream *log = NULL;
+
+	using TBoolCallback = std::function<void(bool)>;
+	using TErrorCallback = std::function<void(LError)>;
+	using TStringCallback = std::function<void(LString, LError)>;
+	using TStatCallback = std::function<void(struct stat*, LString, LError)>;
+	using TDirCallback = std::function<void(LDirectory*, LError)>;
 
 	LString MakeContext(const char *file, int line, LString data)
 	{
@@ -106,6 +120,8 @@ protected:
 	void AddWork(LString ctx, TPriority priority, TCallback &&job);	
 	// Call this in the main function of the sub-class:
 	void DoWork();
+	// True if there is work to do
+	bool HasWork();
 
 public:
 	#if defined(HAIKU) || defined(MAC)
@@ -124,6 +140,7 @@ public:
 	virtual ~SystemIntf() {}
 
 	virtual void GetSysType(std::function<void(SysPlatform)> cb) = 0;
+	virtual bool IsFinished() = 0;
 	virtual bool IsReady() { return true; }
 
 	// Path:
@@ -131,16 +148,17 @@ public:
 	virtual LString MakeRelative(LString absPath) = 0;
 	virtual LString MakeAbsolute(LString relPath) = 0;
 	virtual LString JoinPath(LString base, LString leaf) = 0;
-	virtual void ResolvePath(LString path, LString::Array hints, std::function<void(LError&,LString)> cb) = 0;
+	virtual PathParts SplitPath(LString path);
+	virtual void ResolvePath(LString path, LString::Array hints, TStringCallback cb) = 0;
 
 	// Reading and writing:
-	virtual bool Stat(LString path, std::function<void(struct stat*, LString, LError)> cb) = 0;
-	virtual bool ReadFolder(TPriority priority, const char *Path, std::function<void(LDirectory*)> results) = 0;
-	virtual bool CreateFolder(const char *path, bool createParents, std::function<void(bool)> cb) = 0;
-	virtual bool Read(TPriority priority, const char *Path, std::function<void(LError,LString)> result) = 0;
-	virtual bool Write(TPriority priority, const char *Path, LString Data, std::function<void(LError)> result) = 0;
-	virtual bool Delete(const char *path, bool recursiveForce, std::function<void(LError)> cb) = 0;
-	virtual bool Rename(LString oldPath, LString newPath, std::function<void(bool)> cb) = 0;
+	virtual bool Stat(LString path, TStatCallback cb) = 0;
+	virtual bool ReadFolder(TPriority priority, const char *Path, TDirCallback results) = 0;
+	virtual bool CreateFolder(const char *path, bool createParents, TBoolCallback cb) = 0;
+	virtual bool Read(TPriority priority, const char *Path, TStringCallback result) = 0;
+	virtual bool Write(TPriority priority, const char *Path, LString Data, TErrorCallback result) = 0;
+	virtual bool Delete(const char *path, bool recursiveForce, TErrorCallback cb) = 0;
+	virtual bool Rename(LString oldPath, LString newPath, TBoolCallback cb) = 0;
 
 	// Searching:
 	virtual bool SearchFileNames(const char *searchTerms, LString::Array paths, std::function<void(LArray<LString>&)> results) = 0;

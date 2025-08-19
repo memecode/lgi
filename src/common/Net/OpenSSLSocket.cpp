@@ -327,7 +327,8 @@ class OpenSSL :
 	#ifdef WINDOWS
 	public LibEAY,
 	#endif
-	public LibSSL
+	public LibSSL,
+	public LMutex
 {
 	SSL_CTX *Server;
 
@@ -441,7 +442,7 @@ public:
 		return false;
     }
 
-	OpenSSL()
+	OpenSSL() : LMutex("OpenSSL")
 	{
 		Client = NULL;
 		Server = NULL;
@@ -967,6 +968,11 @@ DebugTrace("%s:%i - SSL_get_error=%i\n", _FL, err);
 
 								try
 								{
+									#ifdef MAC
+									// OpenSSL on mac seems to not be thread safe... at least for this
+									// call. Really guys? Really?
+									LMutex::Auto lck(Library, _FL);
+									#endif
 									r = Library->SSL_connect(Ssl);
 								}
 								catch (...)

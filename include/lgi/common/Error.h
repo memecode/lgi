@@ -30,9 +30,13 @@ enum LErrorCodes
 	LErrorTryAgain      = ERROR_RETRY,
 	LErrorFuncFailed    = ERROR_FUNCTION_FAILED,
 	LErrorTimerExpired  = ERROR_SEM_TIMEOUT,
+	LErrorIoFailed      = ERROR_WRITE_FAULT,
+	LErrorTimedOut      = ERROR_TIMEOUT,
+
 	LErrorAddrInUse     = WSAEADDRINUSE,
 	LErrorAddrNotAvail  = WSAEADDRNOTAVAIL,
-	LErrorIoFailed      = ERROR_WRITE_FAULT,
+	LErrorConnectRefused = WSAECONNREFUSED,
+	LErrorNetUnreachable = WSAENETUNREACH,
 #elif defined(POSIX)
 	LErrorNone			= 0,
 	LErrorAccessDenied	= EACCES,
@@ -46,9 +50,13 @@ enum LErrorCodes
 	LErrorTryAgain      = EAGAIN,
 	LErrorFuncFailed    = EFAULT,
 	LErrorTimerExpired  = ETIME,
+	LErrorIoFailed      = EIO,
+	LErrorTimedOut      = ETIMEDOUT,
+
 	LErrorAddrInUse     = EADDRINUSE,
 	LErrorAddrNotAvail  = EADDRNOTAVAIL,
-	LErrorIoFailed      = EIO,
+	LErrorConnectRefused = ECONNREFUSED,
+	LErrorNetUnreachable = ENETUNREACH,
 #else
 	#warning "Impl me."
 #endif
@@ -86,6 +94,12 @@ public:
 	{
 		Code = code;
 		Msg = msg;
+	}
+
+	void Empty()
+	{
+		Code = 0;
+		Msg.Empty();
 	}
 
 	int GetCode() { return Code; }

@@ -191,7 +191,7 @@ public:
 				LMemStream o(1024);
 				LString err;
 				int Installed = 0;
-				if (!LgiGetUri(this, &o, &err, s))
+				if (!LGetUri(this, &o, &err, s))
 				{
 					LgiTrace("%s:%i - Get URI failed.\n", _FL);
 					break;
@@ -218,7 +218,7 @@ public:
 					{
 						const char *Link = c->GetContent();
 						LMemStream File(1024);
-						if (LgiGetUri(this, &File, &err, Link))
+						if (LGetUri(this, &File, &err, Link))
 						{
 							char p[MAX_PATH_LEN];
 							LMakePath(p, sizeof(p), LGetExeFile(), "..");

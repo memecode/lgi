@@ -157,7 +157,7 @@ bool LMutex::Lock(const char *file, int line, bool NoTrace)
 		auto Now = LCurrentTime();
 		if (Warn && Now > Start + 5000 && !NoTrace)
 		{
-			LgiTrace("LMutex=%p(%s): Can't lock after %ims... LockingThread=%i ThisThread=%x Count=%x Locker=%s:%i.\n",
+			LgiTrace("LMutex=%p(%s): Can't lock after %ims... LockingThread=%i ThisThread=%i Count=%i Locker=%s:%i.\n",
 					this,
 					_Name,
 					(int)(Now - Start),

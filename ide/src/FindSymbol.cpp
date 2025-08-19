@@ -166,28 +166,48 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 	SystemIntf *backend = nullptr;
 	LString projectCache; // lock before using?
 	
-	// Backend call handling:
+	// Back end call handling:
+	bool waitBackendReady = false;
 	int backendCalls = 0;
+	LHashTbl<ConstStrKey<char,false>,int> backendCallers;
+
 	std::function<void()> onShutdown;
 	bool IncCalls(const char *file, int line)
 	{
 		if (onShutdown)
 			return false;
-		backendCalls++;
 		
-		LgiTrace("inc backendCalls=%i %s:%i\n", backendCalls, file, line);
+		backendCalls++;
+
+		auto ref = LString::Fmt("%s:%i", file, line);
+		int calls = backendCallers.Find(ref);
+		backendCallers.Add(ref, calls + 1);
+		// LgiTrace("inc backendCalls=%i %s:%i\n", backendCalls, file, line);
 		
 		return true;
 	}
 	void DecCalls(const char *file, int line)
 	{
-		LAssert(backendCalls > 0);
-		backendCalls--;
+		//LAssert(backendCalls > 0);
+		if (backendCalls > 0)
+			backendCalls--;
+		else
+			LgiTrace("%s:%i - backendCalls mismatched.\n", _FL);
 		
-		LgiTrace("dec backendCalls=%i %s:%i\n", backendCalls, file, line);
+		auto ref = LString::Fmt("%s:%i", file, line);
+		int calls = backendCallers.Find(ref);
+		if (calls > 1)
+			backendCallers.Add(ref, calls - 1);
+		else if (calls == 1)
+			backendCallers.Delete(ref);
+		else
+			LgiTrace("dec backendCalls=%i %s:%i\n", backendCalls, file, line);
 		
 		if (!backendCalls && onShutdown)
+		{
 			onShutdown();
+			onShutdown = nullptr;
+		}
 	}
 	
 	#if USE_HASH
@@ -210,8 +230,6 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 
 	~FindSymbolSystemPriv()
 	{
-		LAssert(backendCalls == 0);
-
 		// End the thread...
 		EndThread();
 
@@ -219,18 +237,28 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		Files.DeleteObjects();
 	}
 
-	void Log(const char *Fmt, ...)
+	void LogBuild(const char *Fmt, ...)
 	{
 		va_list Arg;
 		va_start(Arg, Fmt);
 		LString s;
 		s.Printf(Arg, Fmt);
 		va_end(Arg);
-		
 		if (s.Length())
 			PostThreadEvent(hApp, M_APPEND_TEXT, (LMessage::Param)NewStr(s), AppWnd::BuildTab);
 	}
-	
+
+	void LogNetwork(const char *Fmt, ...)
+	{
+		va_list Arg;
+		va_start(Arg, Fmt);
+		LString s;
+		s.Printf(Arg, Fmt);
+		va_end(Arg);
+		if (s.Length())
+			PostThreadEvent(hApp, M_APPEND_TEXT, (LMessage::Param)NewStr(s), AppWnd::NetworkTab);
+	}
+
 	#if !USE_HASH
 	int GetFileIndex(LString &Path)
 	{
@@ -314,7 +342,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		{
 			if (!LFileExists(Path))
 			{
-				Log("Missing '%s'\n", Path.Get());
+				LogBuild("Missing '%s'\n", Path.Get());
 				MissingFiles++;
 				return;
 			}
@@ -341,21 +369,22 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		if (backend)
 		{
 			auto cacheFile = CachePath(Path);
+			int line;
 			if (!Debug && !cacheDirty && LFileExists(cacheFile))
 			{
 				// Load from the cache...
 				f->Serialize(cacheFile, false);
 			}
-			else if (IncCalls(_FL))
+			else if (IncCalls(__FILE__, line=__LINE__))
 			{
-				backend->Read(SystemIntf::TBackground, Path, [this, f, Debug](auto err, auto data) mutable
+				backend->Read(SystemIntf::TBackground, Path, [this, f, Debug, line](auto data, auto err) mutable
 				{
 					if (err)
-						Log("Backend.Read.Err: %s\n", err.ToString().Get());
+						LogBuild("Backend.Read.Err: %s\n", err.ToString().Get());
 					else
 						AddFileData(f, data, Debug);
 
-					DecCalls(_FL);
+					DecCalls(__FILE__, line);
 				});
 			}
 		}
@@ -417,7 +446,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		}
 		else
 		{
-			Log("AddFileData.error: Parse(%s) failed: %s\n", f->Path.Get(), err.ToString().Get());
+			LogBuild("AddFileData.error: Parse(%s) failed: %s\n", f->Path.Get(), err.ToString().Get());
 		}
 	}
 	
@@ -471,7 +500,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 
 				if (backend)
 				{
-					backend->ReadFolder(SystemIntf::TBackground, p, [this, Platforms, recurse, out = &out](LDirectory *dir)
+					backend->ReadFolder(SystemIntf::TBackground, p, [this, Platforms, recurse, out = &out](auto dir, auto err)
 						{
 							LString::Array subFolders;
 							for (int b = true; b; b = dir->Next())
@@ -524,10 +553,26 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 
 	void OnPulse()
 	{
-		if (!backend)
-			return;
+		if (onShutdown)
+		{
+			LogNetwork("Shutdown callers active: %i\n", backendCalls);
+			for (auto p: backendCallers)
+				LogNetwork("	%s = %i\n", p.key, p.value);
 
-		if (backend->IsReady())
+			if (backend->IsFinished())
+			{
+				SetPulse();
+				LogNetwork("Backend is finished\n");
+				if (onShutdown)
+				{
+					onShutdown();
+					onShutdown = nullptr;
+				}
+			}
+		}
+		else if (waitBackendReady &&
+				backend &&
+				backend->IsReady())
 		{
 			Auto lck(this, _FL);
 
@@ -542,6 +587,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			else
 			{
 				SetPulse();
+				waitBackendReady = false;
 				PostEvent(M_SCAN_FOLDER, (LMessage::Param)new LString(backend->GetBasePath()));
 			}
 		}
@@ -557,7 +603,10 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			case M_FIND_SYM_BACKEND:
 			{
 				if ((backend = (SystemIntf*)Msg->A()))
+				{
+					waitBackendReady = true;
 					SetPulse(500);
+				}
 				break;
 			}
 			case M_GET_PROJECT_CACHE:
@@ -588,73 +637,81 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 								errors++;
 						}
 					}
-					Log("FindSymbolSystemPriv.clearCache: cleared %i files (%i errors).\n", cleared, errors);
+					LogBuild("FindSymbolSystemPriv.clearCache: cleared %i files (%i errors).\n", cleared, errors);
 				}
-				else Log("FindSymbolSystemPriv.error: no project cache dir set.\n");
+				else LogBuild("FindSymbolSystemPriv.error: no project cache dir set.\n");
 				break;
 			}
 			case M_SCAN_FOLDER:
 			{
 				if (auto path = Msg->AutoA<LString>())
 				{
-					if (IncCalls(_FL))
+					int line;
+					if (IncCalls(__FILE__, line=__LINE__))
 					{
 						backend->ReadFolder(
 							SystemIntf::TBackground,
 							*path,
-							[this, path = LString(*path)](LDirectory *dir)
+							[this, path = LString(*path), line](auto dir, auto err)
 							{
-								for (int i=true; i; i=dir->Next())
+								if (err || !dir)
 								{
-									auto nm = dir->GetName();
-									auto full = dir->FullPath();
-									if (dir->IsDir())
+									LogBuild("ReadFolder failed: %s\n", err.ToString().Get());
+								}
+								else
+								{
+									for (int i=true; i; i=dir->Next())
 									{
-										if (!stricmp(nm, ".") ||
-											!stricmp(nm, "..") ||
-											!stricmp(nm, ".hg") ||
-											!stricmp(nm, ".git") ||
-											!stricmp(nm, ".svn"))
-											continue;
-									
-										PostEvent(M_SCAN_FOLDER, (LMessage::Param)new LString(full));
-									}
-									else if (dir->GetSize() > 0)
-									{
-										auto ext = LGetExtension(nm);
-										if (!ext)
-											continue;
-										if (KnownExt.Find(ext))
+										auto nm = dir->GetName();
+										auto full = dir->FullPath();
+										if (dir->IsDir())
 										{
-											// Check the date against the cache?
-											auto cache = CachePath(full);
-											bool cacheDirty = false;
-											LStat st(cache);
-											if (st)
+											if (!stricmp(nm, ".") ||
+												!stricmp(nm, "..") ||
+												!stricmp(nm, ".hg") ||
+												!stricmp(nm, ".git") ||
+												!stricmp(nm, ".svn"))
+												continue;
+									
+											PostEvent(M_SCAN_FOLDER, (LMessage::Param)new LString(full));
+										}
+										else if (dir->GetSize() > 0)
+										{
+											auto ext = LGetExtension(nm);
+											if (!ext)
+												continue;
+											if (KnownExt.Find(ext))
 											{
-												auto writeTm = dir->GetLastWriteTime();
-												auto remoteModified = dir->TsToUnix(writeTm);
-												auto cacheModified = st.GetLastWriteTime();
-												if (remoteModified > cacheModified)
+												// Check the date against the cache?
+												auto cache = CachePath(full);
+												bool cacheDirty = false;
+												LStat st(cache);
+												if (st)
 												{
-													cacheDirty = true;
+													auto writeTm = dir->GetLastWriteTime();
+													auto remoteModified = dir->TsToUnix(writeTm);
+													auto cacheModified = st.GetLastWriteTime();
+													if (remoteModified > cacheModified)
+													{
+														cacheDirty = true;
+													}
 												}
-											}
 
-											if (auto add = new FindSymbolSystem::SymFileParams)
-											{
-												add->Action = FindSymbolSystem::FileAdd;
-												add->File = full;
-												add->Platforms = 0;
-												add->cacheDirty = cacheDirty;
+												if (auto add = new FindSymbolSystem::SymFileParams)
+												{
+													add->Action = FindSymbolSystem::FileAdd;
+													add->File = full;
+													add->Platforms = 0;
+													add->cacheDirty = cacheDirty;
 
-												PostEvent(M_FIND_SYM_FILE, (LMessage::Param)add);
+													PostEvent(M_FIND_SYM_FILE, (LMessage::Param)add);
+												}
 											}
 										}
 									}
 								}
 
-								DecCalls(_FL);
+								DecCalls(__FILE__, line);
 							});
 					}
 				}
@@ -841,7 +898,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			DoingProgress = true;
 			int Remaining = (int)(Tasks - GetQueueSize());
 			if (Remaining > 0)
-				Log("FindSym: %i of %i (%.1f%%)\n", Remaining, Tasks, (double)Remaining * 100.0 / MAX(Tasks, 1));
+				LogBuild("FindSym: %i of %i (%.1f%%)\n", Remaining, Tasks, (double)Remaining * 100.0 / MAX(Tasks, 1));
 		}
 		else if (GetQueueSize() == 0 && MsgTs)
 		{
@@ -852,7 +909,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			}
 			if (MissingFiles > 0)
 			{
-				Log("(%i files are missing)\n", MissingFiles);
+				LogBuild("(%i files are missing)\n", MissingFiles);
 			}
 			
 			MsgTs = 0;
@@ -1072,9 +1129,16 @@ void FindSymbolSystem::Shutdown(std::function<void()> callback)
 	}
 		
 	if (d->backendCalls)
+	{
 		d->onShutdown = callback;
+		if (d->backend)
+			d->backend->Cancel();
+		d->SetPulse(1000);
+	}
 	else
+	{
 		callback();
+	}
 }
 
 void FindSymbolSystem::OpenSearchDlg(LViewI *Parent, std::function<void(FindSymResult&)> Callback)

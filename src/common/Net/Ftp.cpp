@@ -30,7 +30,7 @@ struct IFtpPrivate
 	LAutoPtr<LSocketI> Data;	// get data
 	LAutoPtr<LFile> F;
 	LString Charset = DefaultFtpCharset;
-	LString ErrBuf;
+	LError Err;
 	IFtpCallback *Callback = NULL;
 	bool UseTLS = false;
 	
@@ -56,14 +56,10 @@ int LookupMonth(char *m)
 ///////////////////////////////////////////////////////////////////
 IFtpEntry::IFtpEntry()
 {
-	Attributes = 0;
-	Size = 0;
-	UserData = NULL;
 }
 
 IFtpEntry::IFtpEntry(IFtpEntry *Entry)
 {
-	UserData = NULL;
 	if (Entry)
 		*this = *Entry;
 }
@@ -137,9 +133,6 @@ IFtpEntry::IFtpEntry(struct ftpparse *Fp, const char *Cs)
 
 IFtpEntry::IFtpEntry(char *Entry, const char *Cs)
 {
-	UserData = NULL;
-	Attributes = 0;
-	Size = 0;
 	if (Entry)
 	{
 		const char *Ws = " \t";
@@ -273,14 +266,17 @@ IFtp::~IFtp()
 	DeleteObj(d);
 }
 
-const char *IFtp::GetError()
+LError IFtp::GetError()
 {
-	return d->ErrBuf;
+	return d->Err;
 }
 
-LAutoString IFtp::ToFtpCs(const char *s)
+LAutoString IFtp::ToFtpCs(const char *str)
 {
-	return LAutoString((char*)LNewConvertCp(GetCharset(), s, "utf-8"));
+	LAutoString s((char*)LNewConvertCp(GetCharset(), str, "utf-8"));
+	if (!s)
+		d->Err.Set(LErrorNotSupported, "Charset conversion failed.");
+	return s;
 }
 
 LAutoString IFtp::FromFtpCs(const char *s)
@@ -335,7 +331,8 @@ ssize_t IFtp::ReadLine(char *Msg, ssize_t MsgSize)
 			if (isdigit(*s))
 			{
 				char *e = s;
-				while (isdigit(*e)) e++;
+				while (isdigit(*e))
+					e++;
 
 				if (*e != '-')
 				{
@@ -353,12 +350,8 @@ ssize_t IFtp::ReadLine(char *Msg, ssize_t MsgSize)
 			}
 
 			d->In.Delete(It);
-			d->ErrBuf.Empty();
-			
 			if (i)
-			{
 				return i;
-			}
 		}
 
 		// Ok, no result code in the input list so
@@ -371,7 +364,14 @@ ssize_t IFtp::ReadLine(char *Msg, ssize_t MsgSize)
 			Read = Socket->Read(d->InBuf+Len, sizeof(d->InBuf)-Len-1, 0);
 		}
 
-		if (Read > 0)
+		if (Read <= 0)
+		{
+			if (!d->Err)
+				d->Err.Set(LErrorIoFailed, LString::Fmt("Read returned " LPrintfSSizeT, Read));
+			Close();
+			break;
+		}
+		else
 		{
 			// process input into lines
 			char *Eol = 0;
@@ -401,7 +401,6 @@ ssize_t IFtp::ReadLine(char *Msg, ssize_t MsgSize)
 			}
 			while (Eol);
 		}
-		else break; // the read failed....
 
 	} // loop around to check results
 
@@ -424,11 +423,11 @@ FtpOpenStatus IFtp::Open(LSocketI *S, char *RemoteHost, int Port, char *User, ch
 	const char *CurCmd = NULL;
 	try
 	{
-		SslSocket *SslSock = dynamic_cast<SslSocket*>(S);
+		auto SslSock = dynamic_cast<SslSocket*>(S);
 		if (d->UseTLS && !SslSock)
 		{
 			LAssert(!"Must use SslSocket for TLS based connections.");
-			d->ErrBuf = "Must use SslSocket for TLS based connections.";
+			d->Err.Set(LErrorInvalidParam, "Must use SslSocket for TLS based connections.");
 			return FO_Error;
 		}
 
@@ -442,10 +441,11 @@ FtpOpenStatus IFtp::Open(LSocketI *S, char *RemoteHost, int Port, char *User, ch
 
 		d->Host = RemoteHost;
 		d->Port = Port;
+		d->CurMode = FT_Unknown;
 
 		if (!Socket || !Socket->Open(RemoteHost, Port))
 		{
-			d->ErrBuf = "Socket failed to connect.";
+			d->Err.Set(LErrorConnectRefused, Socket->GetErrorString());
 			return FO_ConnectFailed;
 		}
 
@@ -462,14 +462,14 @@ FtpOpenStatus IFtp::Open(LSocketI *S, char *RemoteHost, int Port, char *User, ch
 			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "%s\r\n", CurCmd = "AUTH TLS");
 			if (!WriteLine())
 			{
-				d->ErrBuf = "Failed to write AUTH cmd.";
+				d->Err.Set(LErrorIoFailed, "Failed to write AUTH cmd.");
 				return FO_Error;
 			}
 
 			auto Result = ReadLine();
 			if (Result != 234)
 			{
-				d->ErrBuf.Printf("AUTH cmd responded with %i", Result);
+				d->Err.Set(LErrorFuncFailed, LString::Fmt("AUTH cmd responded with %i", Result));
 				return FO_Error;
 			}
 
@@ -478,7 +478,7 @@ FtpOpenStatus IFtp::Open(LSocketI *S, char *RemoteHost, int Port, char *User, ch
 			auto IsSsl = SslSock->SetValue(LSocket_Protocol, v);
 			if (!IsSsl)
 			{
-				d->ErrBuf.Printf("Couldn't set socket to SSL");
+				d->Err.Set(LErrorFuncFailed, "Couldn't set socket to SSL");
 				return FO_Error;
 			}
 
@@ -486,7 +486,7 @@ FtpOpenStatus IFtp::Open(LSocketI *S, char *RemoteHost, int Port, char *User, ch
 			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "%s 0\r\n", CurCmd = "PBSZ");
 			if (!WriteLine())
 			{
-				d->ErrBuf.Printf("Couldn't write PBSZ command");
+				d->Err.Set(LErrorIoFailed, "Couldn't write PBSZ command");
 				return FO_Error;
 			}
 			Verify(ReadLine(), 200);
@@ -495,7 +495,7 @@ FtpOpenStatus IFtp::Open(LSocketI *S, char *RemoteHost, int Port, char *User, ch
 			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "%s\r\n", CurCmd = "PROT P");
 			if (!WriteLine())
 			{
-				d->ErrBuf.Printf("Couldn't write PROT command");
+				d->Err.Set(LErrorIoFailed, "Couldn't write PROT command");
 				return FO_Error;
 			}
 			Verify(ReadLine(), 200);
@@ -507,7 +507,7 @@ FtpOpenStatus IFtp::Open(LSocketI *S, char *RemoteHost, int Port, char *User, ch
 			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "%s %s\r\n", CurCmd = "USER", User);
 			if (!WriteLine())
 			{
-				d->ErrBuf.Printf("Couldn't write USER command");
+				d->Err.Set(LErrorIoFailed, "Couldn't write USER command");
 				return FO_Error;
 			}
 
@@ -518,7 +518,7 @@ FtpOpenStatus IFtp::Open(LSocketI *S, char *RemoteHost, int Port, char *User, ch
 					ValidStr(Password) ? Password : (char*)"");
 			if (!WriteLine())
 			{
-				d->ErrBuf.Printf("Couldn't write PASS command");
+				d->Err.Set(LErrorIoFailed, "Couldn't write PASS command");
 				return FO_Error;
 			}
 
@@ -545,7 +545,7 @@ FtpOpenStatus IFtp::Open(LSocketI *S, char *RemoteHost, int Port, char *User, ch
 			}
 			else
 			{
-				d->ErrBuf.Printf("Couldn't write USER command");
+				d->Err.Set(LErrorIoFailed, "Couldn't write USER command");
 				return FO_Error;
 			}
 		}
@@ -565,7 +565,7 @@ FtpOpenStatus IFtp::Open(LSocketI *S, char *RemoteHost, int Port, char *User, ch
 
 		if (!Authenticated)
 		{
-			d->ErrBuf = "Authentication failed.";
+			d->Err.Set(LErrorAccessDenied, "Authentication failed.");
 			return FO_LoginFailed;
 		}
 
@@ -573,8 +573,8 @@ FtpOpenStatus IFtp::Open(LSocketI *S, char *RemoteHost, int Port, char *User, ch
 	}
 	catch (ssize_t Error)
 	{
-		d->ErrBuf.Printf("Got error code " LPrintfSSizeT " from cmd %s", Error, CurCmd);
-		LgiTrace("%s:%i - %s\n", _FL, d->ErrBuf.Get());
+		d->Err.Set(LErrorFuncFailed, LString::Fmt("Got error code " LPrintfSSizeT " from cmd %s", Error, CurCmd));
+		LgiTrace("%s:%i - %s\n", _FL, d->Err.ToString().Get());
 		return FO_Error;
 	}
 }
@@ -642,24 +642,29 @@ LString IFtp::GetDir()
 bool IFtp::SetDir(const char *Dir)
 {
 	bool Status = false;
+	char errMsg[256] = "unknown";
 
 	try
 	{
-		if (Dir && IsOpen())
+		if (!Dir)
+			d->Err.Set(LErrorInvalidParam, "No dir param");
+		else if (!IsOpen())
+			d->Err.Set(LErrorInvalidParam, "Not open");
+		else if (auto f = ToFtpCs(Dir))
 		{
-			auto f = ToFtpCs(Dir);
-			if (f)
-			{
-				sprintf_s(d->OutBuf, sizeof(d->OutBuf), "CWD %s\r\n", f.Get());
-				WriteLine();
-				Verify(ReadLine(), 250);
-				Status = true;
-			}
+			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "CWD %s\r\n", f.Get());
+			WriteLine();
+			auto code = ReadLine(errMsg, sizeof(errMsg));
+			if (code != 250)
+				throw code;
+			d->Err.Empty();
+			Status = true;
 		}
 	}
 	catch (ssize_t Error)
 	{
-		LgiTrace("%s:%i - error: " LPrintfSSizeT "\n", _FL, Error);
+		d->Err.Set(LErrorFuncFailed, LString::Fmt("cwd error: " LPrintfSSizeT " %s (connected=%i)",
+			Error, errMsg, IsOpen()));
 	}
 
 	return Status;
@@ -755,8 +760,17 @@ bool IFtp::ListDir(LArray<IFtpEntry*> &Dir)
 
 	try
 	{
-		if (IsOpen() &&
-			SetupData(true))
+		if (!IsOpen())
+		{
+			if (!d->Err)
+				d->Err.Set(LErrorInvalidParam, "Not open.");
+		}
+		else if (!SetupData(true))
+		{
+			if (!d->Err)
+				d->Err.Set(LErrorFuncFailed, "SetupData failed.");
+		}
+		else
 		{
 			LStringPipe Buf;
 
@@ -869,7 +883,6 @@ bool IFtp::ListDir(LArray<IFtpEntry*> &Dir)
 				}
 			}
 		}
-		else printf("%s:%i - SetupData failed.\n", _FL);
 	}
 	catch (ssize_t Error)
 	{
@@ -957,7 +970,10 @@ bool IFtp::DeleteFile(const char *Remote, LError *Error)
 bool IFtp::DownloadStream(LStream *out, IFtpEntry *Remote, bool Binary)
 {
 	if (!out || !Remote || !Remote->Name)
+	{
+		d->Err.Set(LErrorInvalidParam);
 		return false;
+	}
 
 	return TransferFile(out, Remote->Name, Remote->Size, false, Binary);
 }
@@ -1020,14 +1036,13 @@ bool IFtp::TransferFile(LStream *Stream, const char *Remote, int64 Size, bool Up
 
 						if (!Upload)
 							Size -= RestorePos;
-						AbortTransfer = false;
 
 						bool Error = false;
 						while (	Socket &&
 								d->Data &&
 								(Size < 0 || Processed < Size) &&
 								!Error &&
-								!AbortTransfer &&
+								!IsCancelled() &&
 								(!Meter || !Meter->IsCancelled()))
 						{
 							if (Meter)
@@ -1076,7 +1091,7 @@ bool IFtp::TransferFile(LStream *Stream, const char *Remote, int64 Size, bool Up
 										break;
 									}
 								}
-								while (Len > 0 && !AbortTransfer && !Error);
+								while (Len > 0 && !IsCancelled() && !Error);
 							}
 							else
 							{
@@ -1098,7 +1113,7 @@ bool IFtp::TransferFile(LStream *Stream, const char *Remote, int64 Size, bool Up
 										Len = d->Data->Read((char*) Temp, TempLen, 0);
 									}
 
-									if (Len <= 0 || AbortTransfer)
+									if (Len <= 0 || IsCancelled())
 									{
 										break;
 									}
@@ -1114,12 +1129,12 @@ bool IFtp::TransferFile(LStream *Stream, const char *Remote, int64 Size, bool Up
 									}
 								}
 
-								if (Len <= 0)
+								if (Processed != Size)
 									Error = true;
 							}
 						}
 							
-						if (AbortTransfer || (Meter && Meter->IsCancelled()))
+						if (IsCancelled() || (Meter && Meter->IsCancelled()))
 						{
 							// send abort command
 							sprintf_s(d->OutBuf, sizeof(d->OutBuf), "ABOR\r\n");
@@ -1138,8 +1153,12 @@ bool IFtp::TransferFile(LStream *Stream, const char *Remote, int64 Size, bool Up
 
 						if (Size < 0)
 							Status = true;
+						else if (Size == Processed)
+							Status = true;
 						else
-							Status = Size == Processed;
+							d->Err.Set(LErrorIoFailed,
+										LString::Fmt("Only received " LPrintfInt64 " of " LPrintfInt64 " bytes",
+													Processed, Size));
 
 						if (Meter)
 							Meter->Value(0);
@@ -1163,9 +1182,7 @@ bool IFtp::TransferFile(LStream *Stream, const char *Remote, int64 Size, bool Up
 	{
 		if (IsOpen())
 		{
-			d->ErrBuf.Printf("%s:%i - TransferFile error: " LPrintfSSizeT "\n",
-				_FL,
-				Error);			
+			d->Err.Set(LErrorIoFailed, LString::Fmt("TransferFile error: " LPrintfSSizeT "\n", Error));
 		}
 
 		Status = false;
@@ -1198,8 +1215,8 @@ bool IFtp::SetupData(bool Binary, bool Debug)
 
 		if (!d->Data)
 		{
-			d->ErrBuf.Printf("No data socket, Socket=%p.", Socket.Get());
-			LgiTrace("%s:%i - %s\n", _FL, d->ErrBuf.Get());
+			d->Err.Set(LErrorInvalidParam, LString::Fmt("No data socket, Socket=%p.", Socket.Get()));
+			LgiTrace("%s:%i - %s\n", _FL, d->Err.ToString().Get());
 		}
 		else
 		{
@@ -1302,7 +1319,9 @@ bool IFtp::SetupData(bool Binary, bool Debug)
 	}
 	catch (ssize_t Error)
 	{
-		LgiTrace("%s:%i - error: " LPrintfSSizeT "\n", _FL, Error);
+		if (!d->Err)
+			d->Err.Set(LErrorFuncFailed, LString::Fmt("Ftp cmd err " LPrintfSSizeT, Error));
+		LgiTrace("%s:%i - error: %s\n", _FL, d->Err.ToString().Get());
 	}
 
 	return Status;
@@ -1312,7 +1331,12 @@ bool IFtp::ConnectData()
 {
 	if (PassiveMode)
 	{
-		return d->Data->Open(Ip, Port) != 0;
+		auto result = d->Data->Open(Ip, Port);
+		if (result)
+			return true;
+		
+		if (!d->Err)
+			d->Err.Set(LErrorFuncFailed, LString::Fmt("Failed to open socket to '%s:%i'", Ip, Port));
 	}
 	else
 	{

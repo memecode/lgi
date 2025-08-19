@@ -14,7 +14,16 @@ typedef LArray<LAppInfo> AppArray;
 
 class LAppPrivate : public BApplication
 {
+	static LAppPrivate *Inst;
+
 public:
+	static bool Post(BMessage *msg)
+	{
+		if (!Inst)
+			return false;		
+		return Inst->PostMessage(msg) == B_OK;
+	}
+
 	// Common
 	LApp *Owner = NULL;
 	LAutoPtr<LJson> Config;
@@ -37,6 +46,7 @@ public:
 		Args(0, 0),
 		Owner(a)
 	{
+		Inst = this;
 		GuiThread = LCurrentThreadHnd();
 		GuiThreadId = LCurrentThreadId();
 	}
@@ -67,15 +77,102 @@ public:
 		printf("~LAppPrivate: CountLockRequests()=%i\n", CountLockRequests());
 		printf("~LAppPrivate: GuiThreadId=%i LockingThread()=%i\n", GuiThreadId, LockingThread());
 		*/
+		
+		Inst = nullptr;
 	}
 
 	LJson *GetConfigJson();
 	bool SaveConfig();
+
+	void OnMessage(BMessage *m)
+	{
+		LView *view = nullptr;
+		m->FindPointer(LMessage::PropView, (void**)&view);
+		LWindow *wnd = nullptr;
+		m->FindPointer(LMessage::PropWindow, (void**)&wnd);
+		if (!view && !wnd)
+		{
+			LAssert(0);
+			printf("%s:%i - no view/wnd in msg.\n", _FL);
+			return;
+		}
+		
+		if (view && LView::RecentlyDeleted(view))
+		{
+			printf("%s:%i - view is recently deleted.\n", _FL);
+			return;
+		}
+		
+		int32_t event = -1;
+		if (m->FindInt32(LMessage::PropEvent, &event) != B_OK)
+		{
+			printf("%s:%i - no event in msg.\n", _FL);
+			return;
+		}
+		
+		using Events = LMessage::Events;
+		switch (event)
+		{
+			default:
+			{
+				printf("%s:%i - unhandled event '%s'\n", _FL, LMessage::ToString((Events)event));
+				break;
+			}
+		}
+	}
 	
 	void MessageReceived(BMessage* message)
 	{
 		switch (message->what)
 		{
+			case M_HAIKU_WND_EVENT:
+			{
+				LWindow *wnd = nullptr;
+				if (B_OK != message->FindPointer(LMessage::PropWindow, (void**)&wnd) ||
+					!wnd)
+				{
+					LAssert(0);
+					printf("%s:%i - no view/wnd in msg.\n", _FL);
+					break;
+				}
+				
+				int32_t event = -1;
+				if (message->FindInt32(LMessage::PropEvent, &event) != B_OK)
+				{
+					printf("%s:%i - no event in msg.\n", _FL);
+					return;
+				}
+				
+				wnd->HaikuEvent((LMessage::Events)event, message);
+				break;
+			}
+			case M_HAIKU_VIEW_EVENT:
+			{
+				LView *view = nullptr;
+				if (B_OK != message->FindPointer(LMessage::PropView, (void**)&view) ||
+					!view)
+				{
+					LAssert(0);
+					printf("%s:%i - no view/wnd in msg.\n", _FL);
+					break;
+				}
+				
+				if (LView::RecentlyDeleted(view))
+				{
+					printf("%s:%i - view is recently deleted.\n", _FL);
+					break;
+				}
+				
+				int32_t event = -1;
+				if (message->FindInt32(LMessage::PropEvent, &event) != B_OK)
+				{
+					printf("%s:%i - no event in msg.\n", _FL);
+					return;
+				}
+				
+				view->HaikuEvent((LMessage::Events)event, message);
+				break;
+			}
 			case M_HANDLE_IN_THREAD:
 				LView::HandleInThreadMessage(message);
 				break;
@@ -86,7 +183,7 @@ public:
 				printf("%s:%i Unhandled MessageReceived %i (%.4s)\n", _FL, message->what, &message->what);
 				break;
 		}
-	
+
 		BApplication::MessageReceived(message);
 	}
 	

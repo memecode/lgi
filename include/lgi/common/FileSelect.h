@@ -37,6 +37,7 @@ class IFileSelectSystem
 public:
 	virtual ~IFileSelectSystem() {}
 
+	virtual void SetUi(LViewI *view) = 0;
 	virtual char GetDirChar() = 0;
 	virtual LString PathJoin(LString base, LString leaf) = 0;
 	virtual void Stat(LString path, std::function<void(struct stat*, LString, LError)> cb) = 0;

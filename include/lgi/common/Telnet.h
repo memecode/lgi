@@ -30,6 +30,11 @@ public:
 	
 	bool IsOpen() override { return s.IsOpen(); }
 	
+	bool IsReadable(int TimeoutMs)
+	{
+		return s.IsReadable(TimeoutMs);
+	}
+	
 	ssize_t Read(void *Ptr, ssize_t Size, int Flags = 0) override
 	{
 		if (!Ptr || Size <= 0 || !s.IsOpen())

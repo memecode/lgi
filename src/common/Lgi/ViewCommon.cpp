@@ -2419,16 +2419,10 @@ bool LView::InThread()
 	
 	#elif defined(HAIKU)
 
-		auto h = Handle();
-		if (!h)
-			return true;
-		
-		auto looper = h->Looper();
-		if (!looper)
-			return true;
-			
+		// All events should be handled in the app thread...
+		// Anything in a BWindow should be forwarded to the app thread.
 		auto CurThreadId = LCurrentThreadId();
-		return CurThreadId == looper->Thread();
+		return CurThreadId == LAppInst->GetGuiThreadId();
 		
 	#else
 
@@ -2497,7 +2491,7 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64_t tim
 		r = m.AddInt64(LMessage::PropB, b);
 		if (r != B_OK)
 			printf("%s:%i - AddUInt64 failed.\n", _FL);
-		r = m.AddPointer(LMessage::PropView, static_cast<LViewI*>(this));
+		r = m.AddPointer(LMessage::PropView, static_cast<LView*>(this));
 		if (r != B_OK)
 			printf("%s:%i - AddPointer failed.\n", _FL);
 

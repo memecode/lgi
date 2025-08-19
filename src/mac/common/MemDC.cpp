@@ -589,6 +589,9 @@ void LMemDC::Blt(int x, int y, LSurface *Src, LRect *a)
 		else
 			r = Src->Bounds();
 
+		#if 1
+		LAssert(!"Impl with something else");
+		#else
 		CGImageRef Img = CGWindowListCreateImage(r, kCGWindowListOptionOnScreenOnly, kCGNullWindowID, kCGWindowImageDefault);
 		if (Img)
 		{
@@ -624,6 +627,7 @@ void LMemDC::Blt(int x, int y, LSurface *Src, LRect *a)
 			}
 		}
 		else printf("%s:%i - CGWindowListCreateImage failed.\n", _FL);
+		#endif
 	}
 	else
 	{

@@ -36,7 +36,7 @@ public:
 		LgiTrace("SocketInfo: %s\n", Str);
 	}
 
-	void OnError(int ErrorCode, const char *ErrorDescription)
+	void OnError(int ErrorCode, const char *ErrorDescription) override
 	{
 		LgiTrace("SocketError %i: %s\n", ErrorCode, ErrorDescription);
 	}
@@ -58,14 +58,16 @@ public:
 	LCancel localCancel;
 	
 	// Lock before using
-	LArray<LMessage*> messages;
+	using LMsgArray = LArray<LMessage*>;
+	LThreadSafeInterface<LMsgArray> messages;
 
 	LHttpServerPriv(LHttpServer::Callback *cb, int portVal, LCancel *cancelObj) :
 		LThread("LHttpServerPriv.Thread"),
 		LMutex("LHttpServerPriv.Lock"),
 		callback(cb),
 		port(portVal),
-		cancel(cancelObj ? cancelObj : &localCancel)
+		cancel(cancelObj ? cancelObj : &localCancel),
+		messages(new LMsgArray, "messages.lock")
 	{
 		Run();
 	}
@@ -143,7 +145,7 @@ public:
 		LgiTrace("Listening on port %i.\n", port);
 		while (!cancel->IsCancelled())
 		{
-			if (Listen.IsReadable(1))
+			if (Listen.IsReadable(10))
 			{
 				LAutoPtr<LSocketI> s(new LSocket);
 				if (s)
@@ -157,13 +159,21 @@ public:
 				}
 			}
 
-			for (auto ws: webSockets)
-				ws->Read();
-
-			Auto lck(this, _FL);
-			for (auto m: messages)
+			{
+				Auto lck(this, _FL);
+				for (auto ws: webSockets)
+					ws->Read();
+			}
+			
+			LHttpServerPriv::LMsgArray msgArr;
+			{
+				if (auto msgs = messages.Lock(_FL))
+					msgArr.Swap(*msgs.Get());
+			}
+			for (auto m: msgArr)
 				OnEvent(m);
-			messages.DeleteObjects();
+			msgArr.DeleteObjects();
+			
 		}
 
 		printf("Closing listen socket: %i\n", (int)Listen.Handle());
@@ -258,7 +268,7 @@ int LHttpThread::Main()
 	{
 		*Eol = 0;
 		Eol += 2;
-		int FirstLine = Eol - Action;
+		int FirstLine = (int) (Eol - Action);
 
 		char *Uri = strchr(Action, ' ');
 		if (Uri)
@@ -355,10 +365,10 @@ bool LHttpServer::WebsocketUpgrade(LHttpServer::Request *req, LWebSocketBase::On
 
 	if (auto ws = new LWebSocket(req->sock, true, onMsg))
 	{
-		printf("Upgrading ws...\n");
+		// printf("Upgrading ws...\n");
 		if (ws->Upgrade(req->headers))
 		{
-			printf("Adding ws...\n");
+			// printf("Adding ws...\n");
 			PostEvent(M_ADD_WEBSOCKET, (LMessage::Param)ws);
 			return true;
 		}
@@ -374,22 +384,11 @@ bool LHttpServer::WebsocketUpgrade(LHttpServer::Request *req, LWebSocketBase::On
 
 bool LHttpServer::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64_t TimeoutMs)
 {
-	if (TimeoutMs > 0)
-	{
-		if (!d->LockWithTimeout(TimeoutMs, _FL))
-		{
-			printf("Error: couldn't lock.\n");
-			return false;
-		}
-	}
-	else if (!d->Lock(_FL))
-	{
-		printf("Error: couldn't lock.\n");
+	auto msgs = d->messages.Lock(_FL);
+	if (!msgs)
 		return false;
-	}
 
-	d->messages.Add(new LMessage(Cmd, a, b));	
-	d->Unlock();
+	msgs->Add(new LMessage(Cmd, a, b));	
 	return true;
 }
 

@@ -55,6 +55,9 @@ protected:
 
 	#elif defined(HAIKU)
 		
+		friend class LAppPrivate;
+		// This is called in the app thread.. lock the window before using
+		void HaikuEvent(LMessage::Events event, BMessage *m) override;
 		LWindowZoom _PrevZoom = LZoomNormal;
 	
 	#else
@@ -178,6 +181,9 @@ public:
 		ViewDelete
 	};
 	void SetFocus(LViewI *ctrl, FocusType type);
+	
+	
+	bool GetWillFocus();
 	/// This setting can turn of taking focus when the window is shown. Useful for popups that
 	/// don't want to steal focus from an underlying window.
 	/// The default value is 'true'

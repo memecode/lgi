@@ -68,8 +68,8 @@ public:
 
 	AddFilesProgress(LViewI *par);
 
-	int64 Value();
-	void Value(int64 val);
+	int64 Value() override;
+	void Value(int64 val) override;
 	int OnNotify(LViewI *c, const LNotification &n) override;
 };
 

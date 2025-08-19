@@ -207,7 +207,7 @@ public:
 				{
 					LMemQueue p(1024);
 					LString Err;
-					auto r = LgiGetUri(this, &p, &Err, Job->Uri);
+					auto r = LGetUri(this, &p, &Err, Job->Uri);
 					if (r)
 					{
 						auto Hint = p.Peek(16);

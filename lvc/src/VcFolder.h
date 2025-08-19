@@ -43,6 +43,14 @@ enum LvcResolve
 	ResolveTool,
 };
 
+struct RewriteInfo
+{
+	struct Pair {
+		LString name, email;
+	};
+	Pair oldAuthor, newAuthor;
+};
+
 class ReaderThread : public LThread
 {
 	VersionCtrl Vcs;
@@ -230,6 +238,7 @@ protected:
 	int CmdErrors = 0;
 	LArray<CommitField> Fields;
 	LArray<std::function<void()>> OnVcsTypeEvents;
+	LAutoPtr<LThread> rewriteThread;
 
 	// Author name/email
 	Author AuthorLocal, AuthorGlobal;
@@ -387,6 +396,7 @@ public:
 	void SelectCommit(LWindow *Parent, LString Commit, LString Path);
 	void Checkout(const char *Rev, bool isBranch);
 	void Delete(const char *Path, bool KeepLocal = true);
+	void RewriteAuthor(RewriteInfo info);
 	
 	// Branch commands
 	bool GetBranches(bool refresh, ParseParams *Params = NULL);

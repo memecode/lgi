@@ -34,5 +34,5 @@ def findLibAndLink(name, hasMajorVer):
 		if not os.path.islink(full) and f.find(name) >= 0:
 			makeLink(f, hasMajorVer)
 
-findLibAndLink("libz_local", True)
+findLibAndLink("libz", True)
 findLibAndLink("libpng16", False)

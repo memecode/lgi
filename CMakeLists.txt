@@ -549,6 +549,12 @@ elseif (LINUX)
 			${GTK3_LIBRARIES}
 			${GST_LIBRARIES}
 			magic
+		PRIVATE
+			iconv
+		)
+	target_link_directories(lgi
+		PRIVATE
+			${DEPS}/build-x64-release/lib
 		)
 
 	target_include_directories(lgi-stub

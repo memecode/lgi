@@ -10,6 +10,7 @@
 #include "lgi/common/TextLog.h"
 #include "lgi/common/DropFiles.h"
 #include "lgi/common/TableLayout.h"
+#include "lgi/common/Box.h"
 
 const char *AppName = "Lgi Test App";
 
@@ -19,6 +20,9 @@ enum Ctrls
 	IDC_EDIT2,
 	IDC_BLT_TEST,
 	IDC_TXT,
+	ID_BOX,
+	ID_CLICK_TEST,
+	ID_LOG
 };
 
 void LStringTest()
@@ -251,9 +255,36 @@ struct OriginTest : public LView
 	}
 };
 
+class ClickTest : public LView
+{
+public:
+	LTextLog *log = nullptr;
+
+	ClickTest(int id)
+	{
+		SetId(id);
+	}
+
+	void OnMouseClick(LMouse &m) override
+	{
+		if (!log)
+			return;
+
+		log->Print("Click: %s\n", m.ToString().Get());
+	}
+
+	void OnPaint(LSurface *pDC) override
+	{
+		pDC->Colour(L_LOW);
+		pDC->Rectangle();
+	}
+};
+
 class App : public LWindow
 {
 	LOptionsFile Opts;
+	LBox *box = nullptr;
+	LTextLog *log = nullptr;
 	LEdit *e = NULL;
 	LEdit *e2 = NULL;
 	LTextLabel *Txt = NULL;
@@ -277,8 +308,15 @@ public:
 		{
 			#if 1
 
-				// AddView(new OriginTest(10, 10, 0));
-				// AddView(new OriginTest(120, 10, 10));
+				ClickTest *clicks;
+				AddView(box = new LBox(ID_BOX));
+				box->AddView(clicks = new ClickTest(ID_CLICK_TEST));
+				box->AddView(clicks->log = log = new LTextLog(ID_LOG));
+
+			#elif 0
+
+				AddView(new OriginTest(10, 10, 0));
+				AddView(new OriginTest(120, 10, 10));
 
 			#elif 0
 

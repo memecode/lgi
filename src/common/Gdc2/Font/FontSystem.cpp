@@ -128,7 +128,7 @@ LFontSystem::LFontSystem()
 					#endif
 					; //  && Rev == 0);  // WinXP does it's own glyph substitution
 	d->DefaultGlyphSub = d->SubSupport;
-	d->Used;		// the '0th' font spot isn't used
+						// the '0th' font spot isn't used
 						// because Lut[Char] == 0 means no font
 						// available
 	ZeroObj(Lut);		// Clear the table to 'no font'
@@ -206,11 +206,6 @@ int StringSort(LString *a, LString *b)
 bool LFontSystem::EnumerateFonts(LString::Array &Fonts)
 {
 	Fonts.SetFixedLength(false);
-
-	if (!LAppInst->InThread())
-	{
-		int asd=0;
-	}
 
 	LMutex::Auto lck(d, _FL);
 	if (!AllFonts.Length())

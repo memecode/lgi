@@ -25,6 +25,7 @@
 #include "lgi/common/FileSelect.h"
 #include "lgi/common/Menu.h"
 #include "lgi/common/Uri.h"
+#include "lgi/common/Stat.h"
 
 enum IconIndexes {
 	FSI_FILE,
@@ -167,7 +168,7 @@ public:
 	char *File; // We don't own this string
 	bool IsDir = false;
 
-	LFolderItem(LFileSelectDlg *dlg, char *FullPath, LDirectory *Dir);
+	LFolderItem(LFileSelectDlg *dlg, char *FullPath, LDirectory *Dir, bool isDir);
 	~LFolderItem();
 
 	void OnActivate();
@@ -453,7 +454,7 @@ public:
 	}
 };
 
-class FolderCtrl : public LView
+class LFolderCtrl : public LView
 {
 	struct Part
 	{
@@ -487,14 +488,14 @@ class FolderCtrl : public LView
 	}
 	
 public:
-	FolderCtrl(int id)
+	LFolderCtrl(int id)
 	{
 		e = NULL;
 		Cursor = 0;
 		SetId(id);
 	}
 	
-	~FolderCtrl()
+	~LFolderCtrl()
 	{
 	}
 	
@@ -517,17 +518,17 @@ public:
 
 	LString NameAt(ssize_t Level)
 	{
-		LString n;
-		#ifndef WINDOWS
-		n += "/";
-		#endif
+		LString::Array a;
 		for (unsigned i=0; i<=Level && i<p.Length(); i++)
-		{
-			n += (const char16*) *(p[i].ds.Get());
-			n += DIR_STR;
-		}
+			a.Add((const char16*) *(p[i].ds.Get()));
 
-		return n;		
+		LString n, sep(DIR_STR);
+		#ifndef WINDOWS
+		if (a.Length() == 0 || a[0] != "~")
+			n += sep;
+		#endif
+
+		return n + sep.Join(a) + sep;
 	}
 
 	const char *Name() override
@@ -789,18 +790,16 @@ public:
 	LTextLabel *Ctrl1 = NULL;
 
 	#if USE_FOLDER_CTRL
-	FolderCtrl *Ctrl2 = NULL;
+	LFolderCtrl *FolderCtrl = NULL;
 	#else
-	LEdit *Ctrl2 = NULL;
+	LEdit *FolderCtrl = NULL;
 	#endif
 	
-	LFolderDrop *Ctrl3 = NULL;
+	LFolderDrop *FolderDrop = NULL;
 	LIconButton *BackBtn = NULL;
 	LIconButton *UpBtn = NULL;
 	LIconButton *NewDirBtn = NULL;
 	LFolderList *FileLst = NULL;
-	LTextLabel *Ctrl8 = NULL;
-	LTextLabel *Ctrl9 = NULL;
 	LEdit *FileNameEdit = NULL;
 	LCombo *FileTypeCbo = NULL;
 	LButton *SaveBtn = NULL;
@@ -883,6 +882,9 @@ LFileSelectDlg::LFileSelectDlg(LFileSelectPrivate *select)
 	SetParent(d->Parent);
 	MinSize.ZOff(450, 300);
 
+	if (d->System)
+		d->System->SetUi(this);
+
 	if (!d->InitSize.Valid())
 	{
 		auto Dpi = LScreenDpi();
@@ -916,12 +918,12 @@ void LFileSelectDlg::OnCreate()
 	c->VerticalAlign(LCss::Len(LCss::VerticalMiddle));
 	c = Tbl->GetCell(x++, y);
 	#if USE_FOLDER_CTRL
-	c->Add(Ctrl2 = new FolderCtrl(IDC_PATH));
+	c->Add(FolderCtrl = new LFolderCtrl(IDC_PATH));
 	#else
-	c->Add(Ctrl2 = new LEdit(IDC_PATH, 0, 0, 245, 21, ""));
+	c->Add(FolderCtrl = new LEdit(IDC_PATH, 0, 0, 245, 21, ""));
 	#endif
 	c = Tbl->GetCell(x++, y);
-	c->Add(Ctrl3 = new LFolderDrop(this, IDC_DROP, 336, 7, 16, 21));
+	c->Add(FolderDrop = new LFolderDrop(this, IDC_DROP, 336, 7, 16, 21));
 	c = Tbl->GetCell(x++, y);
 	c->Add(BackBtn = new LIconButton(IDC_BACK, 378, 7, 27, 21, d->BtnIcons, FSI_BACK));
 	c = Tbl->GetCell(x++, y);
@@ -952,7 +954,7 @@ void LFileSelectDlg::OnCreate()
 	// File name row
 	x = 0; y++;
 	c = Tbl->GetCell(x++, y);
-	c->Add(Ctrl8 = new LTextLabel(IDC_STATIC, 14, 275, -1, -1, "File name:"));
+	c->Add(new LTextLabel(IDC_STATIC, 14, 275, -1, -1, "File name:"));
 	c = Tbl->GetCell(x, y, true, 2);
 	x += 2;
 	c->Add(FileNameEdit = new LEdit(IDC_FILE, 100, 268, 266, 21, ""));
@@ -962,7 +964,7 @@ void LFileSelectDlg::OnCreate()
 	// 4th row
 	x = 0; y++;
 	c = Tbl->GetCell(x++, y);
-	c->Add(Ctrl9 = new LTextLabel(IDC_STATIC, 14, 303, -1, -1, "Files of type:"));
+	c->Add(new LTextLabel(IDC_STATIC, 14, 303, -1, -1, "Files of type:"));
 	c = Tbl->GetCell(x, y, true, 2);
 	x += 2;
 	c->Add(FileTypeCbo = new LCombo(IDC_TYPE, 100, 296, 266, 21, ""));
@@ -1180,8 +1182,8 @@ void LFileSelectDlg::SetFolder(char *f)
 
 void LFileSelectDlg::OnFolder()
 {
-	if (Ctrl3)
-		Ctrl3->OnFolder();
+	if (FolderDrop)
+		FolderDrop->OnFolder();
 	if (FileLst)
 		FileLst->OnFolder();
 
@@ -1788,7 +1790,7 @@ LFolderDrop::LFolderDrop(LFileSelectDlg *dlg, int Id, int x, int y, int cx, int 
 	LDropDown(Id, x, y, cx, cy, 0),
 	LFolderView(dlg)
 {
-	SetPopup(new LFileSystemPopup(this, dlg, cx + (dlg->Ctrl2 ? dlg->Ctrl2->X() : 0) ));
+	SetPopup(new LFileSystemPopup(this, dlg, cx + (dlg->FolderCtrl ? dlg->FolderCtrl->X() : 0) ));
 }
 
 LFolderDrop::~LFolderDrop()
@@ -1808,7 +1810,7 @@ void LFolderDrop::OnFolder()
 #define IDM_CREATE_SHORTCUT		1005
 #define IDM_DELETE				1006
 
-LFolderItem::LFolderItem(LFileSelectDlg *dlg, char *FullPath, LDirectory *Dir)
+LFolderItem::LFolderItem(LFileSelectDlg *dlg, char *FullPath, LDirectory *Dir, bool isDir)
 {
 	Dlg = dlg;
 	Path = FullPath;
@@ -1817,7 +1819,7 @@ LFolderItem::LFolderItem(LFileSelectDlg *dlg, char *FullPath, LDirectory *Dir)
 		File++;
 	else
 		File = Path;
-	IsDir = Dir->IsDir();
+	IsDir = isDir;
 }
 
 LFolderItem::~LFolderItem()
@@ -2165,17 +2167,35 @@ void LFolderList::OnDir(LDirectory &Dir)
 	bool ShowHiddenFiles = Dlg->ShowHidden ? Dlg->ShowHidden->Value() : false;
 	for (auto Found = true; Found; Found = Dir.Next())
 	{
-		char Name[LDirectory::MaxPathLen];
+		char Name[LDirectory::MaxPathLen] = "";
 		if (!Dir.Path(Name, sizeof(Name)))
+		{
+			printf("%s:%i - path failed\n", _FL);
 			continue;
+		}
 		
 		bool Match = true;
+		bool isDir = Dir.IsDir();
+		
+		if (Dir.IsSymLink())
+		{
+			// Check if the target is a folder:
+			char target[LDirectory::MaxPathLen] = {};
+			if (LResolveShortcut(Name, target, sizeof(target)))
+			{
+				LStat st(target);
+				isDir = st.IsDir();
+				// printf("%s:%i - stat link(%s) dir=%i\n", _FL, target, isDir);
+			}
+			else printf("%s:%i - LResolveShortcut(%s) failed.\n", _FL, Name);
+		}
+		
 		if (!ShowHiddenFiles && Dir.IsHidden())
 		{
 			Match = false;
 		}
-		else if (!Dir.IsDir() &&
-				Ext.Length() > 0)
+		else if (!isDir &&
+				  Ext.Length() > 0)
 		{
 			Match = false;
 			for (auto e: Ext)
@@ -2193,7 +2213,7 @@ void LFolderList::OnDir(LDirectory &Dir)
 			Match = stristr(Dir.GetName(), FilterKey) != NULL;
 
 		if (Match)
-			New.Insert(new LFolderItem(Dlg, Name, &Dir));
+			New.Insert(new LFolderItem(Dlg, Name, &Dir, isDir));
 	}
 
 	// Sort items...
@@ -2207,10 +2227,10 @@ void LFolderList::OnFolder()
 {
 	Empty();
 
-	if (!Dlg->Ctrl2)
+	if (!Dlg->FolderCtrl)
 		return;
 
-	auto Path = Dlg->Ctrl2->Name();
+	auto Path = Dlg->FolderCtrl->Name();
 	if (auto sys = Dlg->d->GetSystem())
 	{
 		sys->ReadDir(Path, [this](auto &dir)

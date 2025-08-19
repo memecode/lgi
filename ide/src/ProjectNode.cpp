@@ -174,7 +174,7 @@ void ProjectNode::OpenLocalCache(IdeDoc *&Doc)
 {
 	if (sLocalCache)
 	{
-		Project->GetApp()->OpenFile(sLocalCache, this, [this](auto Doc)
+		Project->GetApp()->OpenFile(sLocalCache, this, false, [this](auto Doc)
 		{
 			if (Doc)
 			{
@@ -389,7 +389,7 @@ void ProjectNode::AutoDetectType()
 		}
 	}
 		
-	if (!Type)
+	if (!Type && sFile)
 	{
 		auto Ext = LGetExtension(sFile);
 
@@ -557,7 +557,7 @@ void ProjectNode::OnExpand(bool b)
 			// This could be either:
 			// a) the first time the folder node is expanded
 			// b) the user is refreshing the listing
-			be->ReadFolder(SystemIntf::TForeground, sFile, [this](auto d)
+			be->ReadFolder(SystemIntf::TForeground, sFile, [this](auto d, auto err)
 				{
 					bool first = placeholder != nullptr;
 					
@@ -642,7 +642,7 @@ bool ProjectNode::Serialize(LDirectory *d)
 	if (Type == NodeDir)
 	{
 		// Add placeholder child node to allow user to expand the dir
-		if (placeholder = new LTreeItem)
+		if ((placeholder = new LTreeItem))
 		{
 			placeholder->SetText("...loading...");
 			Insert(placeholder);
@@ -826,7 +826,7 @@ IdeDoc *ProjectNode::Open()
 					backend->Read(
 						SystemIntf::TForeground,
 						path,
-						[this, DocHnd = Doc->AddDispatch(), Doc, path](auto err, auto data)
+						[this, DocHnd = Doc->AddDispatch(), Doc, path](auto data, auto err)
 						{
 							LString errMsg;
 
@@ -843,7 +843,7 @@ IdeDoc *ProjectNode::Open()
 								OnDocOpen(Doc, Doc->OpenData(data));
 							}
 
-							if (errMsg)
+							if (errMsg && GetTree())
 								LPopupNotification::Message(GetTree()->GetWindow(), errMsg );
 						});
 				}

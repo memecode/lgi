@@ -86,9 +86,9 @@ public:
 class IFtpEntry
 {
 public:
-	int Attributes;
-	LPermissions Perms;
-	int64 Size;
+	int Attributes = 0;
+	LPermissions Perms = {};
+	int64 Size = 0;
 	LString Name;
 	LString Path;
 	LString User;
@@ -96,7 +96,7 @@ public:
 	LDateTime Date;
 
 	// App specific fields
-	void *UserData;
+	void *UserData = nullptr;
 	uint8_t Updated : 1;
 	uint8_t Added : 1;
 	uint8_t Deleted: 1;
@@ -110,6 +110,11 @@ public:
 	virtual ~IFtpEntry();
 
 	IFtpEntry &operator =(const IFtpEntry &e);
+
+	operator bool() const
+	{
+		return Name.Get() != nullptr;
+	}
 
 	bool IsDir()
 	{
@@ -155,7 +160,7 @@ public:
 	virtual Progress *GetMeter() = 0;
 	virtual void SetMeter(Progress *m) = 0;
 	virtual bool GetAuthed() = 0;
-	virtual const char *GetError() = 0;
+	virtual LError GetError() = 0;
 
 	// Data
 	virtual LSocketI *Handle() = 0;
@@ -197,7 +202,6 @@ public:
 	virtual bool RenameFile(const char *From, const char *To) = 0;
 	virtual bool SetPerms(const char *File, LPermissions Perms) = 0;
 	virtual bool ResumeAt(int64 Pos) = 0;
-	virtual void Abort() = 0;
 
 	virtual bool OnFileError(const char *path, bool write) = 0;
 };
@@ -231,7 +235,6 @@ protected:
 
 	// State
 	int64 RestorePos = 0;
-	bool AbortTransfer = false;
 	
 	bool SetupData(bool Binary, bool Debug = false);
 	bool ConnectData();
@@ -266,7 +269,7 @@ public:
 	Progress *GetMeter() override { return Meter; }
 	void SetMeter(Progress *m) override { Meter = m; }
 	bool GetAuthed() override { return Authenticated; }
-	const char *GetError() override;
+	LError GetError() override;
 	bool GetUseTLS();
 	void SetUseTLS(bool b);
 
@@ -309,8 +312,6 @@ public:
 	bool SetPerms(const char *File, LPermissions Perms) override;
 	/// Set the resume point before downloading a file
 	bool ResumeAt(int64 Pos) override;
-	/// Abort the current transfer
-	void Abort() override { AbortTransfer = true; }
 };
 
 #endif

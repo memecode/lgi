@@ -228,6 +228,7 @@ _GNU_SOURCE</Release>
 					<Debug>HAS_LIBSSH</Debug>
 					<Release>HAS_LIBSSH</Release>
 				</All>
+				<Linux />
 			</Defines>
 			<TargetType>
 				<All>Executable</All>
@@ -251,18 +252,17 @@ _GNU_SOURCE</Release>
 					<Debug>`pkg-config --cflags gtk+-3.0`</Debug>
 					<Release>`pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
-				<Haiku />
 			</SystemIncludes>
 			<LibraryPaths>
 				<All />
-				<Haiku />
+				<Linux />
 			</LibraryPaths>
 			<ApplicationIcon>
 				<Haiku>./resources/icon.hvif</Haiku>
 			</ApplicationIcon>
 			<Options>
 				<All />
-				<Haiku />
+				<Linux />
 			</Options>
 		</Build>
 		<Editor>
@@ -287,7 +287,7 @@ _GNU_SOURCE</Release>
 			</Environment>
 			<Arguments>
 				<All>
-					<Debug>/home/matthew/code/lgi/trunk/ide/LgiIdeProj.xml</Debug>
+					<Debug>/home/matthew/sites/sydneyband/SydneybandProject.xml</Debug>
 				</All>
 			</Arguments>
 			<DebugAdmin />
@@ -295,7 +295,7 @@ _GNU_SOURCE</Release>
 		</Debug>
 		<Advanced>
 			<PostBuildCommands>
-				<Haiku />
+				<Linux />
 			</PostBuildCommands>
 			<OtherMakefileRules />
 		</Advanced>

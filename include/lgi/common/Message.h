@@ -3,7 +3,26 @@
 #define _GMESSAGE_H_
 
 #ifdef HAIKU
+
 #include <functional>
+
+// This list of events are send from the BWindow threads over
+// to the application thread for processing.
+#define L_APP_PRIV_EVENTS() \
+	_(None) \
+	_(QuitRequested) \
+	_(General) \
+	_(FrameMoved) \
+	_(FrameResized) \
+	_(AttachedToWindow) \
+	_(KeyDown) \
+	_(KeyUp) \
+	_(Draw) \
+	_(MouseDown) \
+	_(MouseUp) \
+	_(MouseMoved) \
+	_(MakeFocus)
+
 #endif
 
 enum LgiMessages
@@ -124,11 +143,16 @@ enum LgiMessages
 		M_CLOSE,
 
 		#if defined(HAIKU)
-		M_HANDLE_IN_THREAD, // A = (LMessage::InThreadCb*)Cb;
-		M_LWINDOW_DELETE,
-		M_LMENUITEM_ENABLE,
-		M_LSUBMENU_APPENDITEM,
-		M_ON_CREATE,
+			M_HANDLE_IN_THREAD,		// A = (LMessage::InThreadCb*)Cb;
+			M_LWINDOW_DELETE,
+			M_LMENUITEM_ENABLE,
+			M_LSUBMENU_APPENDITEM,
+			M_HAIKU_WND_EVENT,		// PropWindow=LWindow*, PropEvent=LAppPriv::Event
+			M_HAIKU_VIEW_EVENT,		// PropView=LView*, PropEvent=LAppPriv::Event
+			M_MOUSE_MSG,			// Archived LMouse object
+			M_KEY_MSG,				// Archived LKey object
+			M_SET_ROOT_VIEW,		// Sent from a LWindow to it's root LView to redirect
+									// paint calls to LWindow::OnPaint
 		#endif
 	
 	#elif defined(MAC)
@@ -238,7 +262,28 @@ public:
 		HWND hWnd;
 		WPARAM a;
 		LPARAM b;
-	#elif !defined(HAIKU)
+	#elif defined(HAIKU)
+		// Event processing
+		enum Events
+		{
+			#define _(name) name,
+			L_APP_PRIV_EVENTS()
+			#undef _
+		};
+		static const char *ToString(Events e)
+		{
+			switch (e)
+			{
+				#define _(name) case name: return #name;
+				L_APP_PRIV_EVENTS()
+				#undef _
+			}
+			return NULL;
+		}
+
+		Param a;
+		Param b;
+	#else	
 		Param a;
 		Param b;
 	#endif
@@ -252,9 +297,11 @@ public:
 	#endif
 
 	#if defined(HAIKU)
-	static constexpr const char *PropA = "lgiA";
-	static constexpr const char *PropB = "lgiB";
-	static constexpr const char *PropView = "lgiView";
+	static constexpr const char *PropA = "lgiA"; // (LMessage::Param)
+	static constexpr const char *PropB = "lgiB"; // (LMessage::Param)
+	static constexpr const char *PropView = "lgiView"; // (LView*)
+	static constexpr const char *PropWindow = "lgiWnd"; // (LWindow*)
+	static constexpr const char *PropEvent = "lgiEvent"; // LAppPrivate::Events as Int32
 	static constexpr const char *PropCallback = "lgiCallback";
 	static constexpr const char *PropNames[2] = {"lgi_a", "lgi_b"};
 	typedef std::function<void()> InThreadCb;

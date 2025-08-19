@@ -240,7 +240,7 @@ public:
 	void SaveAll(std::function<void(bool)> Callback, bool CloseDirty = false);
 	void CloseAll();
 
-	void OpenFile(const char *FileName, NodeSource *Src, std::function<void(IdeDoc*)> callback);
+	void OpenFile(const char *FileName, NodeSource *Src, bool canonical, std::function<void(IdeDoc*)> callback);
 	void OnNewDoc(IdeProject *Proj, IdeDoc *Doc);
 	IdeDoc *NewDocWnd(const char *FileName, NodeSource *Src);
 	IdeDoc *GetCurrentDoc();
@@ -283,6 +283,7 @@ public:
 	void OnProjectDestroy(IdeProject *Proj);
 	void OnProjectChange();
 	void OnFile(char *File, bool IsProject = false);
+	bool SaveAllAndQuit();
 	bool OnRequestClose(bool IsClose) override;
 	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
 	LMessage::Result OnEvent(LMessage *m) override;
@@ -310,7 +311,7 @@ public:
 	~SysCharSupport();
 
 	int OnNotify(LViewI *v, const LNotification &n) override;
-	void OnPosChange();
+	void OnPosChange() override;
 };
 
 ////////////////////////////////////////////////////////////////////////

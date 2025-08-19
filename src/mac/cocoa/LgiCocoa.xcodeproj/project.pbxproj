@@ -33,6 +33,7 @@
 		343874B7230F46B200CF96B4 /* App.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B3230F46B200CF96B4 /* App.h */; };
 		343874B8230F46B200CF96B4 /* Layout.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B4230F46B200CF96B4 /* Layout.h */; };
 		343BE8C72355D0CE00742E21 /* PopupList.h in Headers */ = {isa = PBXBuildFile; fileRef = 343BE8C62355D0CE00742E21 /* PopupList.h */; };
+		344412152E223F220072DADA /* PopupNotification.h in Headers */ = {isa = PBXBuildFile; fileRef = 344412142E223F220072DADA /* PopupNotification.h */; };
 		344991912CB1E6D400E96737 /* XmlTree.h in Headers */ = {isa = PBXBuildFile; fileRef = 344991902CB1E6D400E96737 /* XmlTree.h */; };
 		3449B8CE26BBF6B10022A9B8 /* Notifications.h in Headers */ = {isa = PBXBuildFile; fileRef = 3449B8CD26BBF6B10022A9B8 /* Notifications.h */; };
 		344CFBC8237365B800AE6B35 /* ClipBoard.h in Headers */ = {isa = PBXBuildFile; fileRef = 344CFBC7237365B800AE6B35 /* ClipBoard.h */; };
@@ -239,6 +240,7 @@
 		343874B3230F46B200CF96B4 /* App.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = App.h; path = ../../../include/lgi/common/App.h; sourceTree = SOURCE_ROOT; };
 		343874B4230F46B200CF96B4 /* Layout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Layout.h; path = ../../../include/lgi/common/Layout.h; sourceTree = "<group>"; };
 		343BE8C62355D0CE00742E21 /* PopupList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PopupList.h; path = ../../../include/lgi/common/PopupList.h; sourceTree = "<group>"; };
+		344412142E223F220072DADA /* PopupNotification.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PopupNotification.h; sourceTree = "<group>"; };
 		344991902CB1E6D400E96737 /* XmlTree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XmlTree.h; path = ../../../include/lgi/common/XmlTree.h; sourceTree = SOURCE_ROOT; };
 		3449B8CD26BBF6B10022A9B8 /* Notifications.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Notifications.h; path = ../../../include/lgi/common/Notifications.h; sourceTree = "<group>"; };
 		344CFBC7237365B800AE6B35 /* ClipBoard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ClipBoard.h; path = ../../../include/lgi/common/ClipBoard.h; sourceTree = "<group>"; };
@@ -365,7 +367,7 @@
 		3477C4EC1CC27F1C0028B84B /* TrayIcon.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = TrayIcon.cpp; path = ../../common/Lgi/TrayIcon.cpp; sourceTree = SOURCE_ROOT; };
 		3477C5161CC303B70028B84B /* LgiUiBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiUiBase.h; path = ../../../include/lgi/common/LgiUiBase.h; sourceTree = "<group>"; };
 		347AFB9727A0DC5E00BE4ABE /* 15Bit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = 15Bit.cpp; path = ../../common/Gdc2/15Bit.cpp; sourceTree = SOURCE_ROOT; };
-		3483413C2CDAB9F3002AF938 /* CommsBus.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CommsBus.cpp; path = ../../../common/Net/CommsBus.cpp; sourceTree = "<group>"; };
+		3483413C2CDAB9F3002AF938 /* CommsBus.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CommsBus.cpp; path = ../../common/Net/CommsBus.cpp; sourceTree = SOURCE_ROOT; };
 		348362411F233A77003B2A6D /* Stream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Stream.h; path = ../../../include/lgi/common/Stream.h; sourceTree = SOURCE_ROOT; };
 		34837C4825C677ED00D103B4 /* AppPriv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppPriv.h; path = ../../../private/mac/AppPriv.h; sourceTree = SOURCE_ROOT; };
 		3485B1CC2C0957C40079218F /* TimeZoneInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TimeZoneInfo.h; path = ../../../../../lgi/trunk/include/lgi/common/TimeZoneInfo.h; sourceTree = SOURCE_ROOT; };
@@ -632,6 +634,7 @@
 		3477C2B51CBF972B0028B84B /* Interface_XP */ = {
 			isa = PBXGroup;
 			children = (
+				344412142E223F220072DADA /* PopupNotification.h */,
 				34837C4825C677ED00D103B4 /* AppPriv.h */,
 				348CD46925C63E56001AA32B /* AppCommon.cpp */,
 				34B6B19023CFD0F100C24906 /* DragAndDropCommon.cpp */,
@@ -846,6 +849,7 @@
 				3449B8CE26BBF6B10022A9B8 /* Notifications.h in Headers */,
 				343874B8230F46B200CF96B4 /* Layout.h in Headers */,
 				3477C2AC1CBF72170028B84B /* ViewPriv.h in Headers */,
+				344412152E223F220072DADA /* PopupNotification.h in Headers */,
 				3409C0CA27580ED60050302A /* ListItemRadioBtn.h in Headers */,
 				3477C35D1CC2253E0028B84B /* LgiInterfaces.h in Headers */,
 				34F6153E27E5628600FE5B0C /* Token.h in Headers */,

@@ -115,13 +115,19 @@ struct LWebSocketPriv : public LWebSocketBase
 	ssize_t Read()
 	{
 		if (!Sock)
+		{
+			Close();
 			return -1;
+		}
 		
 		// Check there is space to read into
 		if (Data.Length() - Used < 1024)
 		{
 			if (!Data.Length(Data.Length() ? Data.Length() << 1 : 1024))
+			{
+				Close();
 				return -1;
+			}
 		}
 
 		// Check if there's data:
@@ -134,7 +140,7 @@ struct LWebSocketPriv : public LWebSocketBase
 		// Read data
 		auto base = Data.AddressOf();
 		auto rd = Sock->Read(base + Used, Data.Length() - Used);
-		printf("%s:%i - Got %i bytes\n", _FL, (int)rd);
+		// printf("%s:%i - Got %i bytes\n", _FL, (int)rd);
 		if (rd <= 0)
 		{
 			Close();
@@ -217,8 +223,11 @@ struct LWebSocketPriv : public LWebSocketBase
 		{
 			Sock->Close();
 			Sock.Reset();
-			if (Ws->CloseCb)
-				Ws->CloseCb();
+		}
+		if (Ws->CloseCb)
+		{
+			Ws->CloseCb();
+			Ws->CloseCb = nullptr;
 		}
 	}
 
@@ -355,7 +364,7 @@ struct LWebSocketPriv : public LWebSocketBase
 			return Error("Writing HTTP response failed.");
 
 		State = WsMessages;
-		printf("Websocket upgraded.\n");
+		// printf("Websocket upgraded.\n");
 		CheckMsg();
 		return true;
 	}

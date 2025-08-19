@@ -218,7 +218,7 @@ public:
 		Thread.Reset();
 	}
 
-	bool OnViewKey(LView *v, LKey &k)
+	bool OnViewKey(LView *v, LKey &k) override
 	{
 		switch (k.vkey)
 		{
@@ -1217,6 +1217,7 @@ public:
 	bool Running = false;
 	bool Building = false;
 	bool FixBuildWait = false;
+	bool InShutdown = false;
 	int RebuildWait = 0;
 	LSubMenu *WindowsMenu = NULL;
 	LSubMenu *CreateMakefileMenu = NULL;
@@ -2259,7 +2260,7 @@ void AppWnd::OnReceiveFiles(LArray<const char*> &Files)
 		else if (ext && !stricmp(ext, "xml"))
 		{
 			if (!OpenProject(f, NULL))
-				OpenFile(f, NULL, NULL);
+				OpenFile(f, NULL, false, NULL);
 		}
 		else if (LDirExists(f))
 			;
@@ -2284,7 +2285,7 @@ void AppWnd::OnReceiveFiles(LArray<const char*> &Files)
 		}
 		else
 		{
-			OpenFile(f, NULL, NULL);
+			OpenFile(f, NULL, false, NULL);
 		}
 	}
 	
@@ -2665,22 +2666,22 @@ int AppWnd::OnFixBuildErrors()
 						// printf("note=%i\n", (int)note);
 						if (note > 0)
 						{
-							auto before = GetToken(code, note-1, -1);
-							auto after  = GetToken(code, note+key.Length(), 1);
+							auto before = GetToken(code, (int)note-1, -1);
+							auto after  = GetToken(code, (int)(note+key.Length()), 1);
 							bool changed = false;
 							// printf("tokens: '%s' and '%s'\n", before.Get(), after.Get());
 							if (!before.Equals("const"))
 							{
 								// add the const
 								LString constStr = "const ";
-								InsertString(code, note, constStr);
+								InsertString(code, (int)note, constStr);
 								note += constStr.Length();
 								changed = true;
 							}
 							if (!after.Equals("&"))
 							{
 								LString amp = "&";
-								InsertString(code, note+key.Length(), amp);
+								InsertString(code, (int)(note+key.Length()), amp);
 								changed = true;
 							}
 							if (changed)
@@ -2962,21 +2963,52 @@ void AppWnd::CloseAll()
 	);
 }
 
-bool AppWnd::OnRequestClose(bool IsOsQuit)
+bool AppWnd::SaveAllAndQuit()
 {
 	if (!IsClean())
 	{
-		SaveAll([](bool status)
-		{
-			LCloseApp();
-		},	true);	
-	
+		SaveAll([this](bool status)
+			{
+				d->InShutdown = false;
+				LCloseApp();
+			},
+			true);
 		return false;
 	}
-	else
+	
+	return true;
+}
+
+bool AppWnd::OnRequestClose(bool IsOsQuit)
+{
+	if (d->InShutdown)
+		return false;
+		
+	d->InShutdown = true;
+	if (d->FindSym)
 	{
-		return LWindow::OnRequestClose(IsOsQuit);
+		printf("Calling find sym shutdown...\n");
+		d->FindSym->Shutdown([this]()
+			{
+				printf("Find sym shutdown cb\n");
+				if (SaveAllAndQuit())
+				{
+					printf("SaveAllAndQuit ret true\n");
+					d->InShutdown = false;
+
+					RunCallback([]()
+						{
+							LCloseApp();
+						});
+				}
+			});
+
+		printf("Find sym return false\n");
+		return false;
 	}
+
+	printf("Call SaveAllAndQuit\n");
+	return SaveAllAndQuit();
 }
 
 void AppWnd::DumpHistory()
@@ -3125,7 +3157,7 @@ void AppWnd::GotoReference(const char *File, int Line, bool CurIp, bool WithHist
 	};
 
 	if (File)
-		OpenFile(File, NULL, OnDoc);
+		OpenFile(File, NULL, false, OnDoc);
 	else if (auto doc = GetCurrentDoc())
 		OnDoc(doc);
 }
@@ -3196,13 +3228,13 @@ void AppWnd::OnNewDoc(IdeProject *Proj, IdeDoc *Doc)
 	Doc->Raise();
 }
 
-void AppWnd::OpenFile(const char *FileName, NodeSource *Src, std::function<void(IdeDoc*)> callback)
+void AppWnd::OpenFile(const char *FileName, NodeSource *Src, bool canonical, std::function<void(IdeDoc*)> callback)
 {
 	if (!InThread())
 	{
-		RunCallback( [this, callback, fn=LString(FileName), Src]()
+		RunCallback( [this, canonical, callback, fn=LString(FileName), Src]()
 		{
-			OpenFile(fn, Src, callback);
+			OpenFile(fn, Src, canonical, callback);
 		});
 		return;
 	}
@@ -3223,7 +3255,28 @@ void AppWnd::OpenFile(const char *FileName, NodeSource *Src, std::function<void(
 	{
 		if (auto backend = Proj->GetBackend())
 		{
-			// Can't assume the full path here...
+			if (!canonical &&
+				(LIsRelativePath(FileName) || *FileName == '~'))
+			{
+				// Can't assume the full path here...
+				LString::Array hints;
+				hints.Add(Proj->GetBuildFolder());
+				hints.Add(backend->GetBasePath());
+
+				backend->ResolvePath(FileName, hints,
+					[this, Src, callback](auto str, auto err)
+					{
+						if (err)
+							GetBuildLog()->Print("%s:%i - ResolvePath failed: %s\n", _FL, err.ToString().Get());
+						else
+							OpenFile(str, Src, true, callback);
+					});
+				return;
+			}
+			else
+			{
+				FullPath = FileName;
+			}
 		}
 		else if (LIsRelativePath(File))
 		{
@@ -3299,44 +3352,32 @@ void AppWnd::OpenFile(const char *FileName, NodeSource *Src, std::function<void(
 	{
 		if (auto backend = Proj ? Proj->GetBackend() : NULL)
 		{
-			LString::Array pathHints;
-			pathHints.Add(Proj->GetBuildFolder());
-			pathHints.Add(backend->GetBasePath());
-			backend->ResolvePath(File, pathHints, [this, backend, Proj, Doc, callback](auto err, auto FullPath)
+			backend->Read(SystemIntf::TForeground, FullPath, [this, Proj, Doc, callback, FullPath](auto data, auto err)
 			{
 				if (err)
 				{
-					GetBuildLog()->Print("error: %s (%s)\n", err.ToString().Get(), FullPath.Get());
-					return;
+					LgiMsg(this, "Error opening '%s': %s", AppName, MB_OK, FullPath.Get(), err.ToString().Get());
 				}
-
-				backend->Read(SystemIntf::TForeground, FullPath, [this, Proj, Doc, callback, FullPath](auto err, auto data)
+				else if (data)
 				{
-					if (err)
+					auto Doc = new IdeDoc(this, 0, FullPath);
+					if (Doc)
 					{
-						LgiMsg(this, "Error opening '%s': %s", AppName, MB_OK, FullPath.Get(), err.ToString().Get());
+						Doc->SetProject(Proj);
+						Doc->OpenData(data);
+
+						LRect p = d->Mdi->NewPos();
+						Doc->LView::SetPos(p);
+						d->Docs.Insert(Doc);
+						d->OnFile(FullPath);
+
+						OnNewDoc(Proj, Doc);
+
+						if (callback)
+							callback(Doc);
 					}
-					else if (data)
-					{
-						auto Doc = new IdeDoc(this, 0, FullPath);
-						if (Doc)
-						{
-							Doc->SetProject(Proj);
-							Doc->OpenData(data);
-
-							LRect p = d->Mdi->NewPos();
-							Doc->LView::SetPos(p);
-							d->Docs.Insert(Doc);
-							d->OnFile(FullPath);
-
-							OnNewDoc(Proj, Doc);
-
-							if (callback)
-								callback(Doc);
-						}
-					}
-					else LAssert(!"one of these needs to be set");
-				});
+				}
+				else LAssert(!"one of these needs to be set");
 			});
 		}
 		else if (LFileExists(File))
@@ -3525,7 +3566,7 @@ LMessage::Result AppWnd::OnEvent(LMessage *m)
 		}
 		case M_GET_PLATFORM_FLAGS:
 		{
-			PostThreadEvent(m->A(), M_GET_PLATFORM_FLAGS, 0, GetPlatform());
+			PostThreadEvent((int)m->A(), M_GET_PLATFORM_FLAGS, 0, GetPlatform());
 			break;
 		}
 		case M_MAKEFILES_CREATED:
@@ -3831,6 +3872,8 @@ int AppWnd::OnNotify(LViewI *Ctrl, const LNotification &n)
 					d->BreakPoints.DeleteSelection();
 					break;
 				}
+				default:
+					break;
 			}
 			break;
 		}
@@ -4116,7 +4159,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			s->Open([this](auto s, auto ok)
 			{
 				if (ok)
-					OpenFile(s->Name(), NULL, NULL);
+					OpenFile(s->Name(), NULL, false, NULL);
 			});
 			break;
 		}
@@ -4875,7 +4918,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				if (f)
 					f->Raise();
 				else
-					OpenFile(r, NULL, NULL);
+					OpenFile(r, NULL, false, NULL);
 			}
 
 			index = Cmd - IDM_RECENT_PROJECT;

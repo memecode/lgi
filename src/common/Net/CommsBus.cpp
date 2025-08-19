@@ -67,7 +67,7 @@ struct IpList : public LArray<uint32_t>
 static bool GatewayIp(uint32_t ip)
 {
 	uint8_t lsb = ip & 0xff;
-	uint8_t msb = (ip >> 24) & 0xff;
+	// uint8_t msb = (ip >> 24) & 0xff;
 	return lsb == 1;
 }
 
@@ -1294,7 +1294,7 @@ struct LCommsBusPriv :
 									found = true;
 									peers->SetDirty("acceptedServerTcp");
 	
-									LOG("Incomming server connection existing peer: %s/%s\n",
+									LOG("Incoming server connection existing peer: %s/%s\n",
 										LIpToStr(remoteIp).Get(),
 										p->hostName.Get());
 								}
@@ -1302,7 +1302,18 @@ struct LCommsBusPriv :
 						}
 						if (!found)
 						{
-							LOG("Incomming server connection, new peer: '%s'\n", LIpToStr(remoteIp).Get());
+							LOG("Incoming server connection, new peer: '%s'\n", LIpToStr(remoteIp).Get());
+							
+							#if 0
+							// Is this happening because the UDP receive hasn't been called to add
+							// a new peer? (Seen on mac)
+							if (auto p = new ServerPeers::LPeer(log))
+							{
+								p->hostName = LIpToStr(remoteIp);
+								p->ip4.Add(remoteIp);
+								peers->peers.Add(p->hostName, p);
+							}
+							#endif
 						}
 					}
 					else if (auto conn = new CommsClient(log, sock))

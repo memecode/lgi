@@ -257,7 +257,7 @@ IdeCommon *IdeCommon::GetSubFolder(IdeProject *Project, char *Name, bool Create)
 	{
 		LString base;
 		ProjectNode *node;
-		if (node = dynamic_cast<ProjectNode*>(this))
+		if ((node = dynamic_cast<ProjectNode*>(this)))
 		{
 			// sub folder
 			base = node->GetFullPath();

@@ -97,11 +97,11 @@ public:
 	
 	const char *GetClass() override { return "GdcTiff"; }
 
-	int GetCapabilites() { return FILTER_CAP_READ; }
-	IoStatus ReadImage(LSurface *pDC, LStream *In);
-	IoStatus WriteImage(LStream *Out, LSurface *pDC);
+	int GetCapabilites() override { return FILTER_CAP_READ; }
+	IoStatus ReadImage(LSurface *pDC, LStream *In) override;
+	IoStatus WriteImage(LStream *Out, LSurface *pDC) override;
 
-	bool GetVariant(const char *n, LVariant &v, const char *a)
+	bool GetVariant(const char *n, LVariant &v, const char *a) override
 	{
 		if (!stricmp(n, LGI_FILTER_TYPE))
 		{
@@ -339,7 +339,7 @@ bool IFD::Read(TiffIo &f)
 	f.Read(&Count, sizeof(Count));
 	f.Read(&Offset, sizeof(Offset));
 
-	int Size = Count * ElementSize();
+	auto Size = Count * ElementSize();
 	if (Size > 4)
 	{
 		Data = new uchar[Size];
@@ -582,7 +582,7 @@ LFilter::IoStatus GdcTiff::ProcessRead(LSurface *pDC)
 			ushort *s = (ushort*) Palette->GetData();
 			if (s && Palette->Type == TYPE_USHORT)
 			{
-				int Colours = Palette->Count / 3;
+				int Colours = (int)Palette->Count / 3;
 				LPalette *Pal = new LPalette(0, Colours);
 				if (Pal)
 				{

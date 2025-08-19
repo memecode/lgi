@@ -123,6 +123,7 @@ enum AppIds
 	IDM_FORGET,
 	ID_RESTORE,
 	ID_GOTO_ITEM,
+	ID_REWRITE_AUTHOR
 };
 
 enum AppMessages

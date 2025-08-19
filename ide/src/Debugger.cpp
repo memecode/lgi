@@ -279,6 +279,8 @@ class Gdb :
 				}
 				break;
 			}
+			default:
+				break;
 		}
 	}
 
@@ -765,7 +767,7 @@ class Gdb :
 		}
 	}
 	
-	int Main()
+	int Main() override
 	{
 		const char *Path = "gdb";
 		const char *Shell = "bash";
@@ -1097,7 +1099,7 @@ public:
 		// LStackTrace("%i ~Gdb\n", LCurrentThreadId());
 	}
 
-	bool Load(LDebugEvents *EventHandler, const char *exe, const char *args, bool runAsAdmin, const char *initDir, const char *Env)
+	bool Load(LDebugEvents *EventHandler, const char *exe, const char *args, bool runAsAdmin, const char *initDir, const char *Env) override
 	{
 		Events = EventHandler;
 		Exe = exe;
@@ -1112,7 +1114,7 @@ public:
 		return true;
 	}
 
-	bool AttachTo(LDebugEvents *EventHandler, int Pid)
+	bool AttachTo(LDebugEvents *EventHandler, int Pid) override
 	{
 		Events = EventHandler;
 		AttachToPid = Pid;
@@ -1179,7 +1181,7 @@ public:
 			});
 	}
 
-	void GetCallStack(TStringsCb cb)
+	void GetCallStack(TStringsCb cb) override
 	{
 		LAssert((bool)cb);
 
@@ -1292,7 +1294,7 @@ public:
 			UnloadInternal(cb);
 	}
 	
-	bool GetRunning()
+	bool GetRunning() override
 	{
 		return Running;
 	}
@@ -1806,7 +1808,7 @@ public:
 		}
 	};
 
-	void GetVariables(bool Locals, bool Detailed, TVarArray *init, TVarsCb cb)
+	void GetVariables(bool Locals, bool Detailed, TVarArray *init, TVarsCb cb) override
 	{
 		#if DEBUG_STRUCT_LOGGING
 		#else
@@ -1851,7 +1853,7 @@ public:
 		}
 	}
 
-	void GetRegisters(TStringsCb cb)
+	void GetRegisters(TStringsCb cb) override
 	{
 		if (cb)
 			Cmd("info registers",	
@@ -1975,7 +1977,7 @@ public:
 		);
 	}
 
-	bool ReadMemory(LString &BaseAddr, int Length, LArray<uint8_t> &OutBuf, LString *ErrorMsg)
+	bool ReadMemory(LString &BaseAddr, int Length, LArray<uint8_t> &OutBuf, LString *ErrorMsg) override
 	{
 		#if 0
 		if (!BaseAddr)
@@ -2210,7 +2212,7 @@ public:
 		}
 	}
 
-	void UserCommand(const char *cmd, TStatusCb cb)
+	void UserCommand(const char *cmd, TStatusCb cb) override
 	{
 		Cmd(cmd,
 			false,
@@ -2221,7 +2223,7 @@ public:
 			});
 	}
 
-	void GetResponse(const char *c, TStringCb cb)
+	void GetResponse(const char *c, TStringCb cb) override
 	{
 		Cmd(c,
 			false,

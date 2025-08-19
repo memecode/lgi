@@ -49,9 +49,6 @@
     <ClCompile Include="..\..\src\common\Text\XmlTreeUi.cpp">
       <Filter>Source Files\Lgi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\common\Text\DeEscape.cpp">
-      <Filter>Source Files\Lgi</Filter>
-    </ClCompile>
     <ClCompile Include="..\Src\BrowseUi.cpp">
       <Filter>Source Files\Browse</Filter>
     </ClCompile>
@@ -59,6 +56,12 @@
       <Filter>Source Files\Ssh</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\common\Text\RemoveAnsi.cpp">
+      <Filter>Source Files\Lgi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\Net\Http.cpp">
+      <Filter>Source Files\Lgi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\Net\OpenSSLSocket.cpp">
       <Filter>Source Files\Lgi</Filter>
     </ClCompile>
   </ItemGroup>
