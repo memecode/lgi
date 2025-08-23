@@ -85,10 +85,10 @@ LArray<T> LSmooth(LArray<T> &a, double amount)
 }
 
 template<typename T>
-LAutoPtr<LSurface> LGraph(LArray<T> &data, LColour col = LColour::Blue)
+LAutoPtr<LSurface> LGraph(LArray<T> &data, LColour col = LColour::Blue, LColour background = LColour::White)
 {
     LAutoPtr<LSurface> img(new LMemDC(_FL, (int)data.Length(), 256, System32BitColourSpace));
-    img->Colour(LColour::White);
+    img->Colour(background);
     img->Rectangle();
     img->Colour(col);
 
