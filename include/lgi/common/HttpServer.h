@@ -25,8 +25,21 @@ public:
 		// By default these are both LStringPipe's allocated by LHttpThread::Main,
 		// However the LHttpServer::Callback::OnRequest can swap out the object for
 		// something more suitable if needed. E.g. body -> LFile or something.
-		LAutoPtr<LStream> headers;
+		LString headers;
 		LAutoPtr<LStream> body;
+
+		LString GetHeader(LString field)
+		{
+			return LGetHeaderField(headers, field);
+		}
+		
+		bool SetHeader(LString field, LString value)
+		{
+			if (!field)
+				return false;
+
+			return LSetHeaderFeild(headers, field, value);
+		}
 	};
 
 	struct Callback

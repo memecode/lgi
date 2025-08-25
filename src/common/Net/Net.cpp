@@ -64,6 +64,7 @@
 #define ETIMEOUT				400
 #define PROTO_UDP				0x100
 #define PROTO_BROADCAST			0x200
+#define IsNewLine(ch)			((ch) == '\r' || (ch) == '\n')
 
 #if defined POSIX
 
@@ -1590,58 +1591,61 @@ bool LHaveNetConnection()
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Gets a field value
-void InetGetField(	const char *s,
+void InetGetField(	const char *start, const char *end,
 					std::function<char*(size_t)> alloc,
 					std::function<void(size_t)> setLength)
 {
-	const char *e = s;
+	const char *s = start, *e = start;
 	static const char *WhiteSpace = " \r\t\n";
+	LArray<LRange> parts;
+	size_t totalLen = 0;
 
 	// Look for the end of the string
-	while (*e)
+	while (true)
 	{
-		if (*e == '\n')
+		if (*e == 0 || e >= end)
 		{
-			if (!strchr(" \t", e[1]))
-			{
-				break;
-			}
+			auto len = e - s;
+			totalLen += len;
+			parts.New().Set(s - start, len);
+			break;
 		}
+		else if (IsNewLine(*e))
+		{
+			auto len = e - s;
+			totalLen += len;
+			parts.New().Set(s - start, len);
 
-		e++;
+			if (*e == '\r' &&
+				end - e >= 3 &&
+				e[1] == '\n' &&
+				IsWhite(e[2]))
+			{
+				e += 3; // \r\n case
+			}
+			else if (*e == '\n' &&
+				end - e >= 2 &&
+				IsWhite(e[1]))
+			{
+				e += 2; // no '\r' case...
+			}
+			else break; // normal end of header value
+
+			s = e;
+		}
+		else e++;
 	}
 
-	// Trim whitespace off each end of the string
-	while (s < e && strchr(WhiteSpace, *s))
-		s++;
-	while (e > s && strchr(" \r\t\n", e[-1]))
-		e--;
-
-	// Calc the length
-	auto Str = alloc(e - s);
-	if (Str)
+	// Build the string...
+	if (auto str = alloc(totalLen))
 	{
-		auto In = s;
-		auto Out = Str;
-
-		while (In < e)
+		size_t offset = 0;
+		for (auto &r: parts)
 		{
-			if (*In == '\r')
-			{
-			}
-			else if (*In == 9)
-			{
-				*Out++ = ' ';
-			}
-			else
-			{
-				*Out++ = *In;
-			}
-
-			In++;
+			memcpy(str + offset, start + r.Start, r.Len);
+			offset += r.Len;
 		}
-
-		setLength(Out - Str);
+		str[totalLen] = 0;
 	}
 }
 
@@ -1700,7 +1704,7 @@ char *InetGetHeaderField(	// Returns an allocated string or NULL on failure
 					}
 					
 					char *value = NULL;
-					InetGetField(s,
+					InetGetField(s, End,
 						[&value](auto sz)
 						{
 							return value = new char[sz + 1];
@@ -1716,6 +1720,107 @@ char *InetGetHeaderField(	// Returns an allocated string or NULL on failure
 	}
 
 	return NULL;
+}
+
+struct LHeader
+{
+	char *field;
+	size_t fieldLen;
+	char *value;
+	size_t valueLen;
+
+	bool Is(LString f)
+	{
+		if (f.Length() != fieldLen)
+			return false;
+		return !Strnicmp(field, f.Get(), fieldLen);
+	}
+
+	LString UnwrapValue()
+	{
+		LStringPipe p(256);
+		char *end = value + valueLen;
+		for (char *s = value; s < end; )
+		{
+			char *e = s;
+			while (e < end && !IsNewLine(*e))
+				e++;
+
+			p.Write(s, e - s);
+			if (e >= end)
+				break;
+
+			// Skip over the wrapping marker
+			if (e < end && *e == '\r') e++;
+			if (e < end && *e == '\n') e++;
+			if (e < end && IsWhite(*e)) e++;
+			s = e;
+		}
+		return p.NewLStr();
+	}
+};
+
+LArray<LHeader> IterateHeaders(LString &headers)
+{
+	LArray<LHeader> a;
+
+	if (headers)
+	{
+		auto end = headers.Get() + headers.Length();
+		for (auto s = headers.Get(); s < end; )
+		{
+			while (s < end && IsWhite(*s)) s++;
+			auto field = s;
+			
+			while (s < end && !strchr("\r\n:", *s)) s++;
+			auto fieldLen = s - field;
+
+			if (s < end && *s == ':')
+			{
+				// has value
+				s++;
+				while (s < end && IsWhite(*s)) s++;
+				auto value = s;
+				while (true)
+				{
+					if (s >= end   ||
+						*s == 0    ||
+						*s == '\r' ||
+						*s == '\n')
+					{
+						// is it a multiline value?
+						if (end - s >= 3 &&
+							IsNewLine(s[0]) &&
+							IsNewLine(s[1]) &&
+							IsWhite(s[2]))
+						{
+							// yes.. keep going
+							s += 2;
+						}
+						else
+						{
+							// no... emit header
+							auto &hdr = a.New();
+							hdr.field = field;
+							hdr.fieldLen = fieldLen;
+							hdr.value = value;
+							hdr.valueLen = s - value;
+							break;
+						}
+					}
+					s++;
+				}
+			}
+			else
+			{
+				while (s < end && !strchr("\r\n", *s)) s++;
+			}
+			if (s < end && *s == '\r') s++;
+			if (s < end && *s == '\n') s++;
+		}
+	}
+
+	return a;
 }
 
 LString LGetHeaderField(LString Headers, const char *Field)
@@ -1756,7 +1861,7 @@ LString LGetHeaderField(LString Headers, const char *Field)
 			}
 					
 			LString value;
-			InetGetField(s,
+			InetGetField(s, End,
 				[&value](auto sz)
 				{
 					value.Length(sz);
@@ -1767,10 +1872,108 @@ LString LGetHeaderField(LString Headers, const char *Field)
 					value.Length(sz);
 				});
 			return value;
+
 		}
 	}
 
 	return LString();
+}		 
+
+static LString WrapValue(LString hdr, LString val)
+{
+	const int MaxLine = 76;
+	LStringPipe out;
+	for (size_t i = 0; i < val.Length(); )
+	{
+		auto remaining = val.Length() - i;
+		auto avail = i ? MaxLine - 1 : MaxLine - hdr.Length() - 2; 
+		auto bytes = MIN(remaining, avail);
+
+		out.Write(val.Get() + i, bytes);
+		if (bytes < remaining)
+			out.Write("\r\n ", 3);
+
+		i += bytes;
+	}
+	return out.NewLStr();
+}
+
+bool LSetHeaderFeild(LString &headers, LString field, LString value)
+{
+	LArray<LHeader> parsed = IterateHeaders(headers);
+	
+	// Check if the header already exists...
+	for (auto &h: parsed)
+	{
+		if (h.Is(field))
+		{
+			// It does... rewrite the value
+			auto before = headers(0, h.value - headers.Get());
+			auto after = headers(h.value + h.valueLen - headers.Get(), -1);
+			headers = before + WrapValue(field, value) + after;
+			return true;
+		}
+	}
+
+	// Not already part of the header list... append it
+	bool hasTrailingEol = headers.Length() >= 2 &&
+		headers(-2) == '\r' &&
+		headers(-1) == '\n';
+	headers += LString::Fmt("%s%s: %s\r\n", hasTrailingEol ? "" : "\r\n", field.Get(), WrapValue(field, value).Get());
+
+	return true;
+}
+
+bool LHeaderUnitTests()
+{
+	const char *testHdrs = "Content-Type: text/html\r\n"
+		"Content-Length: 12345\r\n"
+		"Cookie: someData";
+	const char *contentType = "text/html";
+	const char *contentLen = "12345";
+	const char *cookie = "someData";
+
+	#define CHECK(val) if (!(val)) { LAssert(0); return false; }
+
+	CHECK(LGetHeaderField(testHdrs, "Content-Type") == contentType);
+	CHECK(LGetHeaderField(testHdrs, "Content-Length") == contentLen);
+	CHECK(LGetHeaderField(testHdrs, "Cookie") == cookie);
+
+	// Test setting the len to a shorter value:
+	LString in = testHdrs;
+	const char *shortVal = "321";
+	LSetHeaderFeild(in, "Content-Length", shortVal);
+	CHECK(LGetHeaderField(in, "Content-Type") == contentType);
+	CHECK(LGetHeaderField(in, "Content-Length") == shortVal);
+	CHECK(LGetHeaderField(in, "Cookie") == cookie);
+	
+	// Test setting the len to a longer value:
+	in = testHdrs;
+	const char *longVal = "5675689569234";
+	LSetHeaderFeild(in, "Content-Length", longVal);
+	CHECK(LGetHeaderField(in, "Content-Type") == contentType);
+	CHECK(LGetHeaderField(in, "Content-Length") == longVal);
+	CHECK(LGetHeaderField(in, "Cookie") == cookie);
+
+	// Test setting the last value:
+	in = testHdrs;
+	const char *newCookie = "thisIsTheOtherData";
+	LSetHeaderFeild(in, "Cookie", newCookie);
+	CHECK(LGetHeaderField(in, "Content-Type") == contentType);
+	CHECK(LGetHeaderField(in, "Content-Length") == contentLen);
+	CHECK(LGetHeaderField(in, "Cookie") == newCookie);
+
+	// Test setting a wrapped value
+	in = testHdrs;
+	const char *newType = "0----=====1----=====2----=====3----=====4----=====5----=====6----=====7----=====8----=====9----=====10---=====";
+	LSetHeaderFeild(in, "Content-Type", newType);
+	CHECK(LGetHeaderField(in, "Content-Type") == newType);
+	CHECK(LGetHeaderField(in, "Content-Length") == contentLen);
+	CHECK(LGetHeaderField(in, "Cookie") == cookie);
+	for (auto ln: in.SplitDelimit("\r\n"))
+		CHECK(ln.Length() <= 76);
+
+	return true;
 }
 
 void InetGetSubField_Impl(	const char *s,

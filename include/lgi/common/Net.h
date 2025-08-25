@@ -87,6 +87,10 @@ LgiExtern LString LGetHeaderField(LString Headers, const char *Field);
 LgiFunc char *InetGetSubField(const char *s, const char *Field);
 LgiExtern LString LGetSubField(LString HeaderValue, const char *Field);
 
+/// Set a header value
+LgiExtern bool LSetHeaderFeild(LString &headers, LString field, LString value);
+LgiFunc bool LHeaderUnitTests();
+
 /// Make md5 hash
 LgiFunc void MDStringToDigest
 (
