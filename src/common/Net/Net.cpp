@@ -1760,44 +1760,62 @@ struct LHeader
 	}
 };
 
-LArray<LHeader> IterateHeaders(LString &headers)
+void IterateHeaders(
+	/// Input headers
+	LString &headers,
+	/// Output array
+	LArray<LHeader> &a,
+	/// [Optional] filter for specfic field
+	LString filterField = LString(),
+	/// [Optional] max fields to return (0 = all)
+	int limitCount = 0)
 {
-	LArray<LHeader> a;
+	if (!headers)
+		return;
 
-	if (headers)
+	auto end = headers.Get() + headers.Length();
+	for (auto s = headers.Get(); s < end; )
 	{
-		auto end = headers.Get() + headers.Length();
-		for (auto s = headers.Get(); s < end; )
-		{
-			while (s < end && IsWhite(*s)) s++;
-			auto field = s;
-			
-			while (s < end && !strchr("\r\n:", *s)) s++;
-			auto fieldLen = s - field;
+		while (s < end && IsWhite(*s)) s++;
+		auto field = s;
+		
+		while (s < end && !strchr("\r\n:", *s)) s++;
+		auto fieldLen = s - field;
 
-			if (s < end && *s == ':')
+		if (s < end && *s == ':')
+		{
+			// has value
+			s++;
+			while (s < end && IsWhite(*s)) s++;
+			auto value = s;
+			while (true)
 			{
-				// has value
-				s++;
-				while (s < end && IsWhite(*s)) s++;
-				auto value = s;
-				while (true)
+				if (s >= end   ||
+					*s == 0    ||
+					*s == '\r' ||
+					*s == '\n')
 				{
-					if (s >= end   ||
-						*s == 0    ||
-						*s == '\r' ||
-						*s == '\n')
+					// is it a multiline value?
+					if (end - s >= 3 &&
+						IsNewLine(s[0]) &&
+						IsNewLine(s[1]) &&
+						IsWhite(s[2]))
 					{
-						// is it a multiline value?
-						if (end - s >= 3 &&
-							IsNewLine(s[0]) &&
-							IsNewLine(s[1]) &&
-							IsWhite(s[2]))
-						{
-							// yes.. keep going
-							s += 2;
-						}
-						else
+						// yes.. keep going
+						s += 2;
+					}
+					else
+					{
+						if
+						(
+							filterField.IsEmpty()
+							||
+							(
+								filterField.Length() == fieldLen
+								&&
+								!Strnicmp(filterField.Get(), field, fieldLen)
+							)
+						)
 						{
 							// no... emit header
 							auto &hdr = a.New();
@@ -1805,22 +1823,24 @@ LArray<LHeader> IterateHeaders(LString &headers)
 							hdr.fieldLen = fieldLen;
 							hdr.value = value;
 							hdr.valueLen = s - value;
-							break;
+							
+							if (limitCount > 0 &&
+								a.Length() >= limitCount)
+								return;
 						}
+						break;
 					}
-					s++;
 				}
+				s++;
 			}
-			else
-			{
-				while (s < end && !strchr("\r\n", *s)) s++;
-			}
-			if (s < end && *s == '\r') s++;
-			if (s < end && *s == '\n') s++;
 		}
+		else
+		{
+			while (s < end && !strchr("\r\n", *s)) s++;
+		}
+		if (s < end && *s == '\r') s++;
+		if (s < end && *s == '\n') s++;
 	}
-
-	return a;
 }
 
 LString LGetHeaderField(LString Headers, const char *Field)
@@ -1828,56 +1848,67 @@ LString LGetHeaderField(LString Headers, const char *Field)
 	if (!Headers || !Field)
 		return LString();
 
-	// for all lines
-	auto End = Headers.Get() + Headers.Length();
-	auto FldLen = Strlen(Field);
-	for (auto s = Headers.Get();
-		s < End;
-		s = SeekNextLine(s, End))
-	{
-		if (!*s)
-			break;
-		if (*s != '\t' &&
-			Strnicmp(s, Field, FldLen) == 0 &&
-			s[FldLen] == ':')
+	#if 1
+
+		LArray<LHeader> parsed;
+		IterateHeaders(Headers, parsed, Field, 1);
+		if (parsed.Length() > 0)
+			return parsed[0].UnwrapValue();
+	
+	#else
+
+		// for all lines
+		auto End = Headers.Get() + Headers.Length();
+		auto FldLen = Strlen(Field);
+		for (auto s = Headers.Get();
+			s < End;
+			s = SeekNextLine(s, End))
 		{
-			// found a match
-			s += FldLen + 1;
-
-			while (*s && s < End)
+			if (!*s)
+				break;
+			if (*s != '\t' &&
+				Strnicmp(s, Field, FldLen) == 0 &&
+				s[FldLen] == ':')
 			{
-				if (strchr(" \t\r", *s))
-				{
-					s++;
-				}
-				else if (*s == '\n')
-				{
-					if (strchr(" \r\n\t", s[1]))
-						s += 2;
-					else
-						break;
-				}
-				else break;							
-			}
-					
-			LString value;
-			InetGetField(s, End,
-				[&value](auto sz)
-				{
-					value.Length(sz);
-					return value.Get();
-				},
-				[&value](auto sz)
-				{
-					value.Length(sz);
-				});
-			return value;
+				// found a match
+				s += FldLen + 1;
 
+				while (*s && s < End)
+				{
+					if (strchr(" \t\r", *s))
+					{
+						s++;
+					}
+					else if (*s == '\n')
+					{
+						if (strchr(" \r\n\t", s[1]))
+							s += 2;
+						else
+							break;
+					}
+					else break;							
+				}
+						
+				LString value;
+				InetGetField(s, End,
+					[&value](auto sz)
+					{
+						value.Length(sz);
+						return value.Get();
+					},
+					[&value](auto sz)
+					{
+						value.Length(sz);
+					});
+				return value;
+
+			}
 		}
-	}
+		
+	#endif
 
 	return LString();
-}		 
+}
 
 static LString WrapValue(LString hdr, LString val)
 {
@@ -1900,7 +1931,8 @@ static LString WrapValue(LString hdr, LString val)
 
 bool LSetHeaderFeild(LString &headers, LString field, LString value)
 {
-	LArray<LHeader> parsed = IterateHeaders(headers);
+	LArray<LHeader> parsed;
+	IterateHeaders(headers, parsed, LString());
 	
 	// Check if the header already exists...
 	for (auto &h: parsed)
