@@ -388,9 +388,24 @@ void LListItem::OnMeasure(LPoint *Info)
 		auto s = GetDs(0);
 		Info->x = 22 + (s ? s->X() : 0);
 	}
-		
-	LFont *f = Parent ? Parent->GetFont() : LSysFont;
+	
+	auto f = Parent ? Parent->GetFont() : LSysFont;
 	Info->y = MAX(16, f->GetHeight() + 2); // the default height
+
+	if (auto css = GetCss())
+	{
+		auto ht = css->Height();
+		if (ht)
+		{
+			auto wnd = Parent ? Parent->GetWindow() : nullptr;
+			auto dpi = wnd ? wnd->GetDpi() : LScreenDpi();
+			int box = Parent ? Parent->Y() : GdcD->Y() /* I mean, what else should I use here? */;
+			int px = ht.ToPx(box, f, dpi.y);
+			if (px)
+				Info->y = px;
+			
+		}
+	}	
 }
 
 bool LListItem::GridLines()
@@ -2399,7 +2414,7 @@ void LList::PourAll()
 
 	// Layout all the elements
 	LRect Client = GetClient();
-	LFont *Font = GetFont();
+	auto Font = GetFont();
 	
 	if (d->Mode == LListDetails)
 	{

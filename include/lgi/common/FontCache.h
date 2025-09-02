@@ -133,7 +133,7 @@ public:
 			Fam.Names.New() = DefaultFont->Face();
 		
 		LCss::Len Sz = Style->FontSize();
-		if (!Sz.IsValid())
+		if (!Sz)
 			Sz = DefaultFont->Size();
 		LCss::FontWeightType Weight = Style->FontWeight();
 		LCss::FontWeightType DefaultWeight = DefaultFont && DefaultFont->Bold() ?

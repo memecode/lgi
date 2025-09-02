@@ -313,7 +313,7 @@ struct BoxRange
 
 	LString toString(const char *label, LCss::Len &l)
 	{
-		if (!l.IsValid())
+		if (!l)
 			return "";
 
 		LStringPipe p;
@@ -399,7 +399,7 @@ void LBox::OnPosChange()
 		}
 
 		// Work out some min and max values		
-		if (!box.Size.IsValid())
+		if (!box.Size)
 		{
 			// Check if the view has layout capabilities...
 			LViewLayoutInfo info;
@@ -426,9 +426,9 @@ void LBox::OnPosChange()
 			}
 		}
 		
-		if (box.Size.IsValid())
+		if (box.Size)
 		{
-			if (!vi->Size.IsValid())
+			if (!vi->Size)
 				vi->Size = box.Size;
 
 			if (box.Size.Type == LCss::LenPercent)
@@ -658,7 +658,7 @@ bool IsValidLen(LCss *c, LCss::PropType p)
 	if (!c || c->GetType(p) != LCss::TypeLen) return false;
 	LCss::Len *l = (LCss::Len*)c->PropAddress(p);
 	if (!l) return false;
-	return l->IsValid();
+	return l;
 }
 
 void LBox::OnMouseMove(LMouse &m)
@@ -723,7 +723,7 @@ void LBox::OnMouseMove(LMouse &m)
 	{
 		// Work out the minimum height of the view
 		LCss::Len MinHeight = EditCss->MinHeight();
-		int MinPx = MinHeight.IsValid() ? MinHeight.ToPx(ViewPos.Y(), Edit->GetFont()) : DEFAULT_MINIMUM_SIZE_PX;
+		int MinPx = MinHeight ? MinHeight.ToPx(ViewPos.Y(), Edit->GetFont()) : DEFAULT_MINIMUM_SIZE_PX;
 
 		int Offset = m.y - d->DragOffset.y - SplitPos.y1;
 		if (Offset)
@@ -777,7 +777,7 @@ void LBox::OnMouseMove(LMouse &m)
 	{
 		// Work out the minimum width of the view
 		auto MinWidth = EditCss->MinWidth();
-		auto MinPx = MinWidth.IsValid() ? MinWidth.ToPx(ViewPos.X(), Edit->GetFont()) : DEFAULT_MINIMUM_SIZE_PX;
+		auto MinPx = MinWidth ? MinWidth.ToPx(ViewPos.X(), Edit->GetFont()) : DEFAULT_MINIMUM_SIZE_PX;
 
 		auto Offset = m.x - d->DragOffset.x - SplitPos.x1;
 		if (Offset)

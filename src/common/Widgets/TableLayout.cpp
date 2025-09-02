@@ -789,10 +789,10 @@ void TableCell::LayoutWidth(int Depth, int &MinX, int &MaxX, CellFlag &Flag)
 	auto Fnt = Table->GetFont();
 	int Tx = Table->X();
 
-	if (MinWid.IsValid())
+	if (MinWid)
 		Min = MAX(Min, MinWid.ToPx(Tx, Fnt));
 
-	if (Wid.IsValid())
+	if (Wid)
 	{		
 		if (Wid.Type == LCss::LenAuto)
 			Flag = SizeFill;
@@ -824,7 +824,7 @@ void TableCell::LayoutWidth(int Depth, int &MinX, int &MaxX, CellFlag &Flag)
 		}
 	}
 
-	if (!Wid.IsValid() || Flag != SizeFixed)
+	if (!Wid || Flag != SizeFixed)
 	{
 		auto c = Children.AddressOf();
 		for (int i=0; i<Children.Length(); i++, c++)
@@ -848,7 +848,7 @@ void TableCell::LayoutWidth(int Depth, int &MinX, int &MaxX, CellFlag &Flag)
 					v->GetId(), Pos.GetStr(), c->r.GetStr(), _FL);
 			#endif
 				
-			if (ChildWid.IsValid())
+			if (ChildWid)
 			{
 				int MaxPx = MaxCellWidth();
 				c->Inf.Width.Min = c->Inf.Width.Max = ChildWid.ToPx(MaxPx, v->GetFont());
@@ -989,7 +989,7 @@ void TableCell::LayoutWidth(int Depth, int &MinX, int &MaxX, CellFlag &Flag)
 		Max = MAX(Max, TotalBtnX);
 	}
 
-	if (MaxWid.IsValid())
+	if (MaxWid)
 	{
 		int Tx = Table->X();
 		int Px = MaxWid.ToPx(Tx, Table->GetFont()) - Padding.x1 - Padding.x2;
@@ -1080,7 +1080,7 @@ void TableCell::LayoutHeight(int Depth, int Width, int &MinY, int &MaxY, CellFla
 		if (c->Inf.Width.Max > Width)
 			c->Inf.Width.Max = Width;
 
-		if (Ht.IsValid())
+		if (Ht)
 		{
 			int CtrlHeight = Ht.ToPx(Table->Y(), v->GetFont());
 			c->Inf.Height.Min = c->Inf.Height.Max = CtrlHeight;
@@ -1622,7 +1622,7 @@ void LTableLayoutPrivate::LayoutHorizontal(const LRect Client, int Depth, int *M
 						Prof->Add(s);
 					}
 
-					if (c->Width().IsValid())
+					if (c->Width())
 					{
 						LCss::Len l = c->Width();
 						if (l.Type == LCss::LenAuto)
@@ -1766,7 +1766,7 @@ void LTableLayoutPrivate::LayoutHorizontal(const LRect Client, int Depth, int *M
 		if (Css)
 		{
 			auto MinWid = Css->MinWidth();
-			if (MinWid.IsValid())
+			if (MinWid)
 			{
 				int px = MinWid.ToPx(Ctrl->X(), Ctrl->GetFont());
 				*MinX = MAX(*MinX, px);
@@ -1781,7 +1781,7 @@ void LTableLayoutPrivate::LayoutHorizontal(const LRect Client, int Depth, int *M
 		if (Css)
 		{
 			auto MaxWid = Css->MaxWidth();
-			if (MaxWid.IsValid())
+			if (MaxWid)
 			{
 				int px = MaxWid.ToPx(Ctrl->X(), Ctrl->GetFont());
 				*MaxX = MIN(*MaxX, px);
@@ -1987,7 +1987,7 @@ void LTableLayoutPrivate::LayoutVertical(const LRect Client, int Depth, int *Min
 		if (Css)
 		{
 			auto MinHt = Css->MinHeight();
-			if (MinHt.IsValid())
+			if (MinHt)
 			{
 				auto px = MinHt.ToPx(Ctrl->Y(), Ctrl->GetFont());
 				*MinY = MAX(*MinY, px);
@@ -2002,7 +2002,7 @@ void LTableLayoutPrivate::LayoutVertical(const LRect Client, int Depth, int *Min
 		if (Css)
 		{
 			auto MaxHt = Css->MaxHeight();
-			if (MaxHt.IsValid())
+			if (MaxHt)
 			{
 				auto px = MaxHt.ToPx(Ctrl->Y(), Ctrl->GetFont());
 				*MaxY = MIN(*MaxY, px);
@@ -2053,8 +2053,8 @@ void LTableLayoutPrivate::LayoutPost(const LRect Client, int Depth)
 						LCss::Len Left = c->Left();
 						LCss::Len Top = c->Top();
 						
-						int LeftPx = Left.IsValid() ? Left.ToPx(Client.X(), Fnt) : Px;
-						int TopPx = Top.IsValid() ? Top.ToPx(Client.Y(), Fnt) : Py;
+						int LeftPx = Left ? Left.ToPx(Client.X(), Fnt) : Px;
+						int TopPx = Top ? Top.ToPx(Client.Y(), Fnt) : Py;
 						
 						c->Pos.Offset(Client.x1 + LeftPx, Client.y1 + TopPx);
 					}

@@ -146,7 +146,7 @@ LFont& LEmojiFont::operator =(const LFont& f)
 
 bool LEmojiFont::Create(const char *Face, LCss::Len Sz, LSurface *pSurface)
 {
-	if (Sz.IsValid())
+	if (Sz)
 		Size(Sz);
 
 	if (!priv->Fn)
@@ -194,7 +194,7 @@ bool LEmojiFont::Create(const char *Face, LCss::Len Sz, LSurface *pSurface)
 
 	auto Dpi = LScreenDpi();
 	Sz = Size();
-	if (Sz.IsValid() && priv->Img)
+	if (Sz && priv->Img)
 	{
 		int NewCell = (int) (Sz.Value * Dpi.x / 50);
 		int Cx = priv->Img->X() / EMOJI_CELL_SIZE;

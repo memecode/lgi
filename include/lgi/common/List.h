@@ -280,6 +280,8 @@ protected:
 	ContainerItemDrop GetItemReorderPos(LPoint ms) override;
 
 public:
+	using TItem = LListItem;
+
 	/// Constructor
 	LList
 	(

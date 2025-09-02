@@ -478,7 +478,7 @@ public:
 		}
 
 		bool Parse(const char *&s, PropType Prop = PropNull, ParsingStyle Type = ParseStrict);
-		bool IsValid() const { return Type != LenInherit; }
+		operator bool() const { return Type != LenInherit; }
 		bool IsDynamic() const { return	Type == LenPercent ||
 									Type == LenInherit ||
 									Type == LenAuto ||

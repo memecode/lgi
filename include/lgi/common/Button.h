@@ -84,6 +84,9 @@ public:
 	void OnCreate() override;
 	void OnAttach() override;
 	void OnStyleChange();
+
+	// Click handling: to override default action, use one of these:
+	std::function<void(const LMouse &m)> onClickFn;
 	virtual void OnClick(const LMouse &m);
 
 	// Impl

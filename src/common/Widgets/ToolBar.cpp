@@ -1243,7 +1243,7 @@ bool LToolBar::OnLayout(LViewLayoutInfo &Inf)
 	return true;
 }
 
-#define GetBorderSpacing()	GetCss() && GetCss()->BorderSpacing().IsValid() ? \
+#define GetBorderSpacing()	GetCss() && GetCss()->BorderSpacing() ? \
 							GetCss()->BorderSpacing().ToPx(X(), GetFont()) : \
 							1
 

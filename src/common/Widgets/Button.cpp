@@ -329,7 +329,10 @@ bool LButton::OnKey(LKey &k)
 
 void LButton::OnClick(const LMouse &m)
 {
-	SendNotify(LNotification(m));
+	if (onClickFn)
+		onClickFn(m);
+	else
+		SendNotify(LNotification(m));
 }
 
 void LButton::OnFocus(bool f)
@@ -509,8 +512,8 @@ bool LButton::OnLayout(LViewLayoutInfo &Inf)
 			MaxX = Css->MaxWidth();
 		}
 
-		Inf.Width.Min = MinX.IsValid() ? MinX.ToPx(c.X(), Font) : BaseX + ImgX + TxtMin.x;
-		Inf.Width.Max = MaxX.IsValid() ? MaxX.ToPx(c.X(), Font) : BaseX + ImgX + TxtMax.x;
+		Inf.Width.Min = MinX ? MinX.ToPx(c.X(), Font) : BaseX + ImgX + TxtMin.x;
+		Inf.Width.Max = MaxX ? MaxX.ToPx(c.X(), Font) : BaseX + ImgX + TxtMax.x;
 		
 		/*
 		LgiTrace("%i.Layout.Btn.x = %i, %i  valid=%i,%i c=%s, base=%i, img=%i\n", GetId(), 
@@ -531,8 +534,8 @@ bool LButton::OnLayout(LViewLayoutInfo &Inf)
 			MaxY = Css->MaxHeight();
 		}
 
-		Inf.Height.Min = MinY.IsValid() ? MinY.ToPx(c.Y(), Font) : BaseY + MAX(ImgY, TxtMin.y);
-		Inf.Height.Max = MaxY.IsValid() ? MaxY.ToPx(c.Y(), Font) : BaseY + MAX(ImgY, TxtMax.y);
+		Inf.Height.Min = MinY ? MinY.ToPx(c.Y(), Font) : BaseY + MAX(ImgY, TxtMin.y);
+		Inf.Height.Max = MaxY ? MaxY.ToPx(c.Y(), Font) : BaseY + MAX(ImgY, TxtMax.y);
 
 		// LgiTrace("%i.Layout.Btn.y = %i, %i\n", GetId(), Inf.Height.Min, Inf.Height.Max);
 	}

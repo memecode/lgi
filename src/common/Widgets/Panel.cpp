@@ -182,8 +182,8 @@ bool LPanel::Pour(LRegion &rgn)
 		{
 			auto css = v->GetCss();
 			if (css &&
-				css->Width() == LCss::LenAuto &&
-				css->Height() == LCss::LenAuto)
+				css->Width().Type == LCss::LenAuto &&
+				css->Height().Type == LCss::LenAuto)
 			{
 				LRect c = GetClient();
 				LCssTools tools(css, v->GetFont());

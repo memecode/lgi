@@ -219,6 +219,8 @@ protected:
 	void OnDragExit() override;
 	
 public:
+	using TItem = LTreeItem;
+
 	LTree(int id, int x = 0, int y = 0, int cx = 100, int cy = 100, const char *name = NULL);
 	~LTree();
 

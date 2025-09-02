@@ -86,7 +86,7 @@ LRichTextPriv::EmojiDisplayStr::EmojiDisplayStr(StyleText *src,
 
 	CharPx = EMOJI_CELL_SIZE;
 	Size = fntSize;
-	if (Size.IsValid())
+	if (Size)
 	{
 		int Px = Size.ToPx();
 		if (Px > 0)

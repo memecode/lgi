@@ -134,7 +134,7 @@ LAutoPtr<LLibrary> LFontPrivate::Gdi32;
 LFont::LFont(const char *face, LCss::Len size)
 {
 	d = new LFontPrivate;
-	if (face && size.IsValid())
+	if (face && size)
 	{
 		Create(face, size);
 	}
@@ -555,7 +555,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 {
 	bool FaceChanging = false;
 	bool SizeChanging = false;
-	bool ValidInitFaceSize = ValidStr(Face()) && Size().IsValid();
+	bool ValidInitFaceSize = ValidStr(Face()) && Size();
 
 	if (face)
 	{
@@ -567,7 +567,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 		Face(face);
 	}
 	
-	if (size.IsValid())
+	if (size)
 	{
 		SizeChanging = LTypeFace::d->_Size != size;
 		LTypeFace::d->_Size = size;
@@ -946,7 +946,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 				_FL, Face(), PointSize(), Bold(), Italic());
 		else if (!ValidStr(Face()))
 			printf("%s:%i - No font face.\n", _FL);
-		else if (!Size().IsValid())
+		else if (!Size())
 			printf("%s:%i - Invalid size.\n", _FL);
 		else
 		{
