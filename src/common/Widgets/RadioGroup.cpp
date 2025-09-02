@@ -657,6 +657,14 @@ void LRadioButton::Value(int64 i)
 	}
 }
 
+void LRadioButton::OnClick(const LMouse &m)
+{
+	if (onClickFn)
+		onClickFn(m);
+	else
+		Value(true);
+}
+
 void LRadioButton::OnMouseClick(LMouse &m)
 {
 	if (Enabled())
@@ -672,7 +680,7 @@ void LRadioButton::OnMouseClick(LMouse &m)
 			r.Overlap(m.x, m.y) &&
 			WasCapturing)
 		{
-			Value(true);
+			OnClick(m);
 		}
 		else
 		{

@@ -25,6 +25,7 @@ class LgiClass LButton :
 	#else
 	public LView,
 	#endif
+	public LClickable,
 	public ResObject
 {
 	class LButtonPrivate *d;
@@ -85,9 +86,8 @@ public:
 	void OnAttach() override;
 	void OnStyleChange();
 
-	// Click handling: to override default action, use one of these:
-	std::function<void(const LMouse &m)> onClickFn;
-	virtual void OnClick(const LMouse &m);
+	// Click handling:
+	void OnClick(const LMouse &m) override;
 
 	// Impl
 	const char *Name() override { return LView::Name(); }

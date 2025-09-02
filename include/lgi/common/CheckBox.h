@@ -13,6 +13,7 @@ class LgiClass LCheckBox :
 	#else
 	public LView,
 	#endif
+	public LClickable,
 	public ResObject
 {
 	class LCheckBoxPrivate *d;
@@ -51,15 +52,7 @@ public:
 	/// Sets the current value.
 	void Value(int64 b) override;
 
-	// Impl
-	const char *Name() override { return LView::Name(); }
-	const char16 *NameW() override { return LView::NameW(); }
-	bool Name(const char *n) override;
-	bool NameW(const char16 *n) override;
-	void SetFont(LFont *Fnt, bool OwnIt = false) override;
-    bool OnLayout(LViewLayoutInfo &Inf) override;
-	int BoxSize();
-
+	// Events
 	void OnMouseClick(LMouse &m) override;
 	void OnMouseEnter(LMouse &m) override;
 	void OnMouseExit(LMouse &m) override;
@@ -71,6 +64,16 @@ public:
 	void OnStyleChange();
 	LMessage::Result OnEvent(LMessage *Msg) override;
 	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
+	void OnClick(const LMouse &m) override;
+
+	// Impl
+	const char *Name() override { return LView::Name(); }
+	const char16 *NameW() override { return LView::NameW(); }
+	bool Name(const char *n) override;
+	bool NameW(const char16 *n) override;
+	void SetFont(LFont *Fnt, bool OwnIt = false) override;
+    bool OnLayout(LViewLayoutInfo &Inf) override;
+	int BoxSize();
 
 	#if defined(WINNATIVE)
 		int SysOnNotify(int Msg, int Code);

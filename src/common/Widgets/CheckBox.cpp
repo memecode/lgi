@@ -222,6 +222,28 @@ void LCheckBox::SetFont(LFont *Fnt, bool OwnIt)
 	Invalidate();
 }
 
+void LCheckBox::OnClick(const LMouse &m)
+{
+	if (onClickFn)
+		onClickFn(m);
+	else
+	{
+		if (d->Three)
+		{
+			switch (d->Val)
+			{
+				case 0:
+					Value(2); break;
+				case 2:
+					Value(1); break;
+				default:
+					Value(0); break;
+			}
+		}
+		else Value(!d->Val);			
+	}
+}
+
 void LCheckBox::OnMouseClick(LMouse &m)
 {
 	if (Enabled())
@@ -239,22 +261,7 @@ void LCheckBox::OnMouseClick(LMouse &m)
 			r.Overlap(m.x, m.y) &&
 			Click)
 		{
-			if (d->Three)
-			{
-				switch (d->Val)
-				{
-					case 0:
-						Value(2); break;
-					case 2:
-						Value(1); break;
-					default:
-						Value(0); break;
-				}
-			}
-			else
-			{
-				Value(!d->Val);
-			}
+			OnClick(m);
 		}
 		else
 		{
