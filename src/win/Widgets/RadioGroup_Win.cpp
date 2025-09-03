@@ -336,6 +336,14 @@ LRadioButton::~LRadioButton()
 	DeleteObj(d);
 }
 
+void LRadioButton::OnClick(const LMouse &m)
+{
+	if (onClickFn)
+		onClickFn(m);
+	else
+		Value(true);
+}
+
 bool LRadioButton::SetGroup(LArray<int> CtrlIds)
 {
 	auto w = GetWindow();
@@ -395,7 +403,9 @@ int LRadioButton::SysOnNotify(int Msg, int Code)
 		Code == BN_CLICKED &&
 		GetParent())
 	{
-		Value(true);
+		LMouse ms;
+		GetMouse(ms);
+		OnClick(ms);
 	}
 	
 	return 0;
@@ -497,6 +507,7 @@ bool LRadioButton::OnLayout(LViewLayoutInfo &Inf)
 	
     return true;    
 }
+
 int LRadioButton::OnNotify(LViewI *Ctrl, const LNotification &n)
 {
 	if (Ctrl == (LViewI*)this && n.Type == LNotifyActivate)
@@ -505,6 +516,7 @@ int LRadioButton::OnNotify(LViewI *Ctrl, const LNotification &n)
 	}
 	return 0;
 }
+
 bool LRadioButton::OnKey(LKey &k)
 {
 	bool Status = false;
@@ -564,4 +576,5 @@ bool LRadioButton::OnKey(LKey &k)
 	}
 	return Status;
 }
+
 #endif

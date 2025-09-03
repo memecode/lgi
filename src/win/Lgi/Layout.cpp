@@ -130,8 +130,8 @@ void LLayout::SetPourLargest(bool i)
 
 LCss::Len &SelectValid(LCss::Len &a, LCss::Len &b, LCss::Len &c)
 {
-	if (a.IsValid()) return a;
-	if (b.IsValid()) return b;
+	if (a) return a;
+	if (b) return b;
 	return c;
 }
 
@@ -165,9 +165,9 @@ bool LLayout::Pour(LRegion &r)
 		s = css->MarginBottom();
 		p.y2 -= SelectValid(s, margin, zero).ToPx(r.Y(), f);
 	
-		if ((s = css->Width()).IsValid())
+		if ((s = css->Width()))
 			p.x2 = p.x1 + s.ToPx(r.X(), f) - 1;
-		if ((s = css->Height()).IsValid())
+		if ((s = css->Height()))
 			p.y2 = p.y1 + s.ToPx(r.Y(), f) - 1;
 	}
 	
