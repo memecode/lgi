@@ -5202,6 +5202,8 @@ bool BlameLine::Parse(VersionCtrl type, LArray<BlameLine> &out, LString in)
 			for (auto &ln: lines)
 			{
 				auto s = ln.Get();
+				while (IsWhite(*s))
+					s++;
 				auto eUser = strchr(s, ' ');
 				if (!eUser)
 					continue;
