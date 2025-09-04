@@ -60,6 +60,7 @@ class LgiClass LRadioButton :
 	#else
 	public LView,
 	#endif
+	public LClickable,
 	public ResObject
 {
 	friend class LRadioGroup;
@@ -90,7 +91,11 @@ public:
 	void OnAttach() override;
 	void OnStyleChange();
 	bool OnKey(LKey &k) override;
+
+	// Click handling:
+	void OnClick(const LMouse &m) override;
 	
+	// Platform impl
 	#if WINNATIVE && !XP_BUTTON
 		int SysOnNotify(int Msg, int Code);
 		LMessage::Result OnEvent(LMessage *m) override;

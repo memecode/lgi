@@ -108,7 +108,7 @@ void LStatusBar::OnPosChange()
 			wid = css->Width();
 		
 		auto &l = layout[i];
-		if (wid.IsValid())
+		if (wid)
 		{
 			px = wid.ToPx(boxPx, fnt);
 			l.Width.Min = px;

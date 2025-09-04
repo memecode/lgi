@@ -34,14 +34,14 @@ ifeq ($(Build),Debug)
 		-lgstreamer-1.0 \
 		`pkg-config --libs gtk+-3.0`
 	Inc =  \
+		-I./private/common \
 		-I./private/linux \
 		-I./include \
 		-I./include/lgi/linux/Gtk \
 		-I../deps/build-x64-debug/include \
 		-I./include/lgi/linux \
 		`pkg-config --cflags gtk+-3.0` \
-		`pkg-config --cflags gstreamer-1.0` \
-		-I./private/common
+		`pkg-config --cflags gstreamer-1.0`
 else
 	CFlags += -s -Os -Wno-format-truncation
 	CppFlags += -s -Os -Wno-format-truncation
@@ -57,27 +57,27 @@ else
 		-lgstreamer-1.0 \
 		`pkg-config --libs gtk+-3.0`
 	Inc =  \
-		`pkg-config --cflags gstreamer-1.0` \
-		`pkg-config --cflags gtk+-3.0` \
-		-I./include/lgi/linux/Gtk \
-		-I./include/lgi/linux \
-		-I../deps/build-x64-release/include \
-		-I./private/common \
 		-I./include \
-		-I./private/linux
+		-I./include/lgi/linux \
+		`pkg-config --cflags gtk+-3.0` \
+		`pkg-config --cflags gstreamer-1.0` \
+		-I../deps/build-x64-release/include \
+		-I./private/linux \
+		-I./include/lgi/linux/Gtk \
+		-I./private/common
 endif
 
 # Dependencies
-Source =	src/linux/General/File.cpp \
-			src/common/General/TimeZone.cpp \
-			src/common/General/DateTime.cpp \
-			src/linux/Lgi/DragAndDrop.cpp \
+Source =	src/common/Gdc2/Tools/ColourReduce.cpp \
 			src/linux/General/ShowFileProp_Linux.cpp \
+			src/linux/Lgi/App.cpp \
+			src/linux/General/File.cpp \
+			src/common/General/TimeZone.cpp \
+			src/linux/Lgi/DragAndDrop.cpp \
 			src/common/Lgi/DragAndDropCommon.cpp \
 			src/common/General/Containers.cpp \
 			src/common/General/Properties.cpp \
 			src/common/General/FileCommon.cpp \
-			src/linux/Lgi/General.cpp \
 			src/linux/Lgi/View.cpp \
 			src/linux/Lgi/Window.cpp \
 			src/linux/Gtk/LgiWidget.cpp \
@@ -86,11 +86,11 @@ Source =	src/linux/General/File.cpp \
 			src/common/Lgi/Library.cpp \
 			src/common/Lgi/WindowCommon.cpp \
 			src/linux/General/Mem.cpp \
-			src/linux/Lgi/App.cpp \
-			src/common/General/ExeCheck.cpp \
-			src/linux/Lgi/Menu.cpp \
-			src/common/Gdc2/Tools/ColourReduce.cpp \
+			src/common/General/DateTime.cpp \
+			src/linux/Lgi/General.cpp \
 			src/common/Lgi/MenuCommon.cpp \
+			src/linux/Lgi/Menu.cpp \
+			src/common/General/ExeCheck.cpp \
 			src/posix/Roster.cpp \
 			src/posix/SubProcess.cpp \
 			src/common/Resource/LgiRes.cpp \
@@ -233,18 +233,18 @@ clean :
 
 VPATH=$(BuildDir) \
 	./src/common/Skins/Gel \
-	./src/common/Gdc2/Tools \
+	./src/common/Resource \
 	./src/common/General \
-	./src/common/Hash/sha1 \
 	./src/linux/Lgi \
-	./src/common/Gdc2/Path \
+	./src/common/Gdc2/Font \
 	./src/linux/General \
 	./src/common/Lgi \
 	./src/linux/Gtk \
-	./src/common/Gdc2/Font \
-	./src/common/Resource \
+	./src/common/Gdc2/Tools \
 	./src/posix \
+	./src/common/Gdc2/Path \
 	./src/common/Gdc2 \
+	./src/common/Hash/sha1 \
 	./src/common/Net \
 	./src/common/Gdc2/Filters \
 	./src/common/Widgets \

@@ -110,7 +110,7 @@ LRect LCssTools::ApplyMargin(LRect &in)
 	LCss::Len margin = Css->Margin();
 	#define DoMargin(name, edge, box, sign) \
 		{ LCss::Len m = Css->Margin##name(); \
-		r.edge sign (m.IsValid() ? &m : &margin)->ToPx(in.box(), Font); }
+		r.edge sign (m ? &m : &margin)->ToPx(in.box(), Font); }
 	DoMargin(Left, x1, X, +=)
 	DoMargin(Top, y1, Y, +=)
 	DoMargin(Right, x2, X, -=)
@@ -128,8 +128,8 @@ LRect LCssTools::GetPadding(LRect &box, LRect *def)
 		#define DoPadding(name, edge, dim) \
 			{ \
 				LCss::Len p = Css->Padding##name(); \
-				auto v = p.IsValid() ? &p : &padding; \
-				r.edge = v->IsValid() ? v->ToPx(box.dim(), Font) : (def ? def->edge : 0); \
+				auto v = p ? &p : &padding; \
+				r.edge = *v ? v->ToPx(box.dim(), Font) : (def ? def->edge : 0); \
 			}
 		DoPadding(Left, x1, X)
 		DoPadding(Top, y1, Y)
@@ -154,8 +154,8 @@ LRect LCssTools::GetBorder(LRect &box, LRect *def)
 		#define _(name, edge, dim) \
 			{ \
 				LCss::Len p = Css->Border##name(); \
-				auto v = p.IsValid() ? &p : &border; \
-				r.edge = v->IsValid() ? v->ToPx(box.dim(), Font) : (def ? def->edge : 0); \
+				auto v = p ? &p : &border; \
+				r.edge = *v ? v->ToPx(box.dim(), Font) : (def ? def->edge : 0); \
 			}
 		_(Left, x1, X)
 		_(Top, y1, Y)

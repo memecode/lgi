@@ -266,18 +266,21 @@ bool LXmlTreeUi::Convert(LDom *Tag, LViewI *Ui, bool ToUI)
 							break;
 						}
 
-						LXmlTag *t = Xml->GetChildTag(Map.key);
-						if (!t) continue;
-						LList *Lst;
-						if (!Ui->GetViewById(m->Id, Lst)) continue;
-						Lst->Empty();
+						LList *container;
+						auto t = Xml->GetChildTag(Map.key);
+						if (!t || !Ui->GetViewById(m->Id, container))
+							continue;
+						
+						container->Empty();
 						for (auto c: t->Children)
 						{
-							auto i = dynamic_cast<LListItem*>(m->Callback());
+							auto i = dynamic_cast<LList::TItem*>(m->Callback());
 							if (i)
 							{
-								i->XmlIo(c, false);
-								Lst->Insert(i);
+								if (i->XmlIo(c, false))
+									container->Insert(i);
+								else
+									delete i;
 							}
 						}
 						break;
@@ -382,11 +385,12 @@ bool LXmlTreeUi::Convert(LDom *Tag, LViewI *Ui, bool ToUI)
 								Lst->GetAll(All);
 								for (auto i: All)
 								{
-									LXmlTag *n = new LXmlTag(m->ChildElementName);
-									if (n)
+									if (auto n = new LXmlTag(m->ChildElementName))
 									{
-										i->XmlIo(n, true);
-										Child->InsertTag(n);
+										if (i->XmlIo(n, true))
+											Child->InsertTag(n);
+										else
+											delete n;
 									}
 								}
 								break;

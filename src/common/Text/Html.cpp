@@ -393,7 +393,7 @@ public:
 		{
 			auto ff = ValidStr(Face.Names[0]) ? Face.Names[0].Get() : Default->Face();
 			f->Face(ff);
-			f->Size(Size.IsValid() ? Size : Default->Size());
+			f->Size(Size ? Size : Default->Size());
 			f->Bold(IsBold);
 			f->Italic(IsItalic);
 			f->Underline(IsUnderline);
@@ -557,9 +557,9 @@ public:
 		LFlowRegion This(*this);
 		LFlowStack &Fs = Stack.New();
 
-		Fs.LeftAbs = Left.IsValid() ? ResolveX(Left, Tag, IsMargin) : 0;
-		Fs.RightAbs = Right.IsValid() ? ResolveX(Right, Tag, IsMargin) : 0;
-		Fs.TopAbs = Top.IsValid() ? ResolveY(Top, Tag, IsMargin) : 0;
+		Fs.LeftAbs = Left ? ResolveX(Left, Tag, IsMargin) : 0;
+		Fs.RightAbs = Right ? ResolveX(Right, Tag, IsMargin) : 0;
+		Fs.TopAbs = Top ? ResolveY(Top, Tag, IsMargin) : 0;
 
 		x1 += Fs.LeftAbs;
 		cx += Fs.LeftAbs;
@@ -628,7 +628,7 @@ public:
 		{
 			LFlowStack &Fs = Stack[len-1];
 
-			int BottomAbs = Bottom.IsValid() ? ResolveY(Bottom, Tag, IsMargin) : 0;
+			int BottomAbs = Bottom ? ResolveY(Bottom, Tag, IsMargin) : 0;
 
 			x1 -= Fs.LeftAbs;
 			cx -= Fs.LeftAbs;
@@ -709,7 +709,7 @@ public:
 	bool LimitX(int &x, LCss::Len Min, LCss::Len Max, LFont *f)
 	{
 		bool Limited = false;
-		if (Min.IsValid())
+		if (Min)
 		{
 			int Px = Min.ToPx(x2 - x1 + 1, f, false);
 			if (Px > x)
@@ -718,7 +718,7 @@ public:
 				Limited = true;
 			}
 		}
-		if (Max.IsValid())
+		if (Max)
 		{
 			int Px = Max.ToPx(x2 - x1 + 1, f, false);
 			if (Px < x)
@@ -770,14 +770,14 @@ public:
 				for (LTag *p = ToTag(t->Parent); p; p = ToTag(p->Parent))
 				{
 					auto h = p->Height();
-					if (h.IsValid() && !h.IsDynamic())
+					if (h && !h.IsDynamic())
 					{
 						Ab = h;
 						break;
 					}
 				}
 
-				if (!Ab.IsValid())
+				if (!Ab)
 				{
 					LAssert(Html != NULL);
 					Ab.Type = LCss::LenPx;
@@ -830,7 +830,7 @@ public:
 	{
 		bool Limited = false;
 		int TotalY = Html ? Html->Y() : 0;
-		if (Min.IsValid())
+		if (Min)
 		{
 			int Px = Min.ToPx(TotalY, f, false);
 			if (Px > y)
@@ -839,7 +839,7 @@ public:
 				Limited = true;
 			}
 		}
-		if (Max.IsValid())
+		if (Max)
 		{
 			int Px = Max.ToPx(TotalY, f, false);
 			if (Px < y)
@@ -3002,7 +3002,7 @@ void LTag::SetStyle()
 			if (Table)
 			{
 				Len l = Table->_CellPadding();
-				if (!l.IsValid())
+				if (!l)
 				{
 					l.Type = LCss::LenPx;
 					l.Value = DefaultCellPadding;
@@ -4000,7 +4000,7 @@ bool LTag::GetWidthMetrics(LTag *Table, uint16 &Min, uint16 &Max)
 		case TAG_IMG:
 		{
 			Len w = Width();
-			if (w.IsValid())
+			if (w)
 			{
 				int x = (int) w.Value;
 				Min = MAX(Min, x);
@@ -4022,7 +4022,7 @@ bool LTag::GetWidthMetrics(LTag *Table, uint16 &Min, uint16 &Max)
 		case TAG_TH:
 		{
 			Len w = Width();
-			if (w.IsValid())
+			if (w)
 			{
 				if (w.IsDynamic())
 				{
@@ -4053,7 +4053,7 @@ bool LTag::GetWidthMetrics(LTag *Table, uint16 &Min, uint16 &Max)
 		case TAG_TABLE:
 		{
 			Len w = Width();
-			if (w.IsValid() && !w.IsDynamic())
+			if (w && !w.IsDynamic())
 			{
 				// Fixed width table...
 				int CellSpacing = BorderSpacing().ToPx(Min, GetFont());
@@ -4405,17 +4405,17 @@ void LHtmlTableLayout::LayoutTable(LFlowRegion *f, uint16 Depth)
 	SizeCol.Length(0);
 	
 	LCss::Len BdrSpacing = Table->BorderSpacing();
-	CellSpacing = BdrSpacing.IsValid() ? (int)BdrSpacing.Value : 0;
+	CellSpacing = BdrSpacing ? (int)BdrSpacing.Value : 0;
 
 	// Resolve total table width.
 	TableWidth = Table->Width();
-	if (TableWidth.IsValid())
+	if (TableWidth)
 		AvailableX = f->ResolveX(TableWidth, Table, false);
 	else
 		AvailableX = f->X();
 
 	LCss::Len MaxWidth = Table->MaxWidth();
-	if (MaxWidth.IsValid())
+	if (MaxWidth)
 	{
 	    int Px = f->ResolveX(MaxWidth, Table, false);
 	    if (Px < AvailableX)
@@ -4464,9 +4464,9 @@ void LHtmlTableLayout::LayoutTable(LFlowRegion *f, uint16 Depth)
 						continue;
 
 					LCss::Len Content = t->Width();
-					if (Content.IsValid() && t->Cell->Span.x == 1)
+					if (Content && t->Cell->Span.x == 1)
 					{
-						if (SizeCol[x].IsValid())
+						if (SizeCol[x])
 						{
 							int OldPx = f->ResolveX(SizeCol[x], t, false);
 							int NewPx = f->ResolveX(Content, t, false);
@@ -4566,7 +4566,7 @@ void LHtmlTableLayout::LayoutTable(LFlowRegion *f, uint16 Depth)
 					}
 					
 					LCss::Len Width = t->Width();
-					if (Width.IsValid())
+					if (Width)
 					{
 						int Px = f->ResolveX(Width, t, false);
 						t->Cell->MinContent = MAX(t->Cell->MinContent, Px);
@@ -4617,7 +4617,7 @@ void LHtmlTableLayout::LayoutTable(LFlowRegion *f, uint16 Depth)
 		for (int x=0; x<s.x; x++)
 		{
 			LCss::Len w = SizeCol[x];
-			if (w.IsValid())
+			if (w)
 			{
 				int Px = f->ResolveX(w, Table, false);
 				
@@ -4668,7 +4668,7 @@ void LHtmlTableLayout::LayoutTable(LFlowRegion *f, uint16 Depth)
 	}
 	else if (TotalX < AvailableX)
 	{
-		AllocatePx(0, s.x, AvailableX, TableWidth.IsValid());
+		AllocatePx(0, s.x, AvailableX, TableWidth);
 		DumpCols("AfterRemainingAlloc");
 	}
 
@@ -4720,7 +4720,7 @@ void LHtmlTableLayout::LayoutTable(LFlowRegion *f, uint16 Depth)
 				}
 
 					
-				if (Ht.IsValid() &&
+				if (Ht &&
 					Ht.Type != LCss::LenPercent &&
 					Ht.Type != LCss::LenMinContent) // Make no sense to resolve that here
 				{
@@ -4752,7 +4752,7 @@ void LHtmlTableLayout::LayoutTable(LFlowRegion *f, uint16 Depth)
 				if (t->Cell->Pos.x == x && t->Cell->Pos.y == y)
 				{
 					LCss::Len Ht = t->Height();
-					if (!(Ht.IsValid() && Ht.Type != LCss::LenPercent))
+					if (!(Ht && Ht.Type != LCss::LenPercent))
 					{
 						DistributeSize(MaxRow, y, t->Cell->Span.y, t->Size.y, CellSpacing);
 					}
@@ -5400,7 +5400,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 			bool XLimit = false, YLimit = false;
 			double Scale = 1.0;
 
-			if (w.IsValid() && w.Type != LenAuto)
+			if (w && w.Type != LenAuto)
 			{
 				Size.x = Flow->ResolveX(w, this, false);
 				XLimit = true;
@@ -5421,7 +5421,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 			}
 			XLimit |= Flow->LimitX(Size.x, MinWidth(), MaxWidth(), f);
 
-			if (h.IsValid() && h.Type != LenAuto)
+			if (h && h.Type != LenAuto)
 			{
 				Size.y = Flow->ResolveY(h, this, false);
 				YLimit = true;
@@ -5448,13 +5448,13 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 					Size.x = (int) ceil((double)Size.y * AspectRatio);
 				}
 			}
-			if (MinY.IsValid())
+			if (MinY)
 			{
 				int Px = Flow->ResolveY(MinY, this, false);
 				if (Size.y < Px)
 					Size.y = Px;
 			}
-			if (MaxY.IsValid())
+			if (MaxY)
 			{
 				int Px = Flow->ResolveY(MaxY, this, false);
 				if (Size.y > Px)
@@ -5560,7 +5560,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 
 		// Set the width if any
 		LCss::Len Wid = Width();
-		if (!IsTableCell(TagId) && Wid.IsValid())
+		if (!IsTableCell(TagId) && Wid)
 			Size.x = Flow->ResolveX(Wid, this, false);
 		else if (TagId != TAG_IMG)
 		{
@@ -5572,13 +5572,13 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 		else if (Disp == DispInlineBlock)
 			Size.x = 0;
 
-		if (MaxWidth().IsValid())
+		if (MaxWidth())
 		{
 			int Px = Flow->ResolveX(MaxWidth(), this, false);
 			if (Size.x > Px)
 				Size.x = Px;
 		}
-		if (MinWidth().IsValid())
+		if (MinWidth())
 		{
 			int Px = Flow->ResolveX(MinWidth(), this, false);
 			if (Size.x < Px)
@@ -5684,7 +5684,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 				LCss::Len LineHt;
 				LFont *LineFnt = GetFont();
 
-				for (LTag *t = this; t && !LineHt.IsValid(); t = ToTag(t->Parent))
+				for (LTag *t = this; t && !LineHt; t = ToTag(t->Parent))
 				{
 					LineHt = t->LineHeight();
 					if (t->TagId == TAG_TABLE)
@@ -5695,7 +5695,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 				{
 					int FontPx = LineFnt->GetHeight();
 					
-					if (!LineHt.IsValid() ||
+					if (!LineHt ||
 						LineHt.Type == LCss::LenAuto ||
 						LineHt.Type == LCss::LenNormal)
 					{
@@ -5823,13 +5823,13 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 		bool AcceptHt = !IsTableCell(TagId) && Ht.Type != LenPercent;
 		if (AcceptHt)
 		{
-			if (Ht.IsValid())
+			if (Ht)
 			{
 				int HtPx = Flow->ResolveY(Ht, this, false);
 				if (HtPx > Flow->y2)
 					Flow->y2 = HtPx;
 			}
-			if (MaxHt.IsValid())
+			if (MaxHt)
 			{
 				int MaxHtPx = Flow->ResolveY(MaxHt, this, false);
 				if (MaxHtPx < Flow->y2)
@@ -5863,7 +5863,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 		else
 		{
 			LCss::Len Wid = Width();
-			int WidPx = Wid.IsValid() ? Flow->ResolveX(Wid, this, true) : 0;
+			int WidPx = Wid ? Flow->ResolveX(Wid, this, true) : 0;
 			
 			Size.x = MAX(WidPx, Size.x);
 			Size.x += Flow->ResolveX(PaddingRight(), this, true);
@@ -5889,7 +5889,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 				Flow->Inline--;
 
 
-			if (Height().IsValid())
+			if (Height())
 			{
 				Size.y = Flow->ResolveY(Height(), this, false);
 				Flow->y2 = MAX(Flow->y1 + Size.y + MarginB - 1, Flow->y2);
@@ -5922,11 +5922,11 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 				{
 					LRect r = Ctrl->GetPos();
 
-					if (Width().IsValid())
+					if (Width())
 						Size.x = Flow->ResolveX(Width(), this, false);
 					else
 						Size.x = r.X();
-					if (Height().IsValid())
+					if (Height())
 						Size.y = Flow->ResolveY(Height(), this, false);
 					else
 						Size.y = r.Y();
@@ -6231,12 +6231,12 @@ public:
 					LBlendStop stops[2] = { {0.0, 0}, {1.0, 0} };
 					uint32_t iColour = defs[i]->Color.IsValid() ? defs[i]->Color.Rgb32 : Back.c32();
 					uint32_t kColour = defs[k]->Color.IsValid() ? defs[k]->Color.Rgb32 : Back.c32();
-					if (defs[i]->IsValid() && defs[k]->IsValid())
+					if (*defs[i] && *defs[k])
 					{
 						stops[0].c32 = iColour;
 						stops[1].c32 = kColour;
 					}
-					else if (defs[i]->IsValid())
+					else if (*defs[i])
 					{
 						stops[0].c32 = stops[1].c32 = iColour;
 					}
@@ -6264,7 +6264,7 @@ public:
 					// Draw the arc...
 					LPath p;
 					p.Circle(ctr, Px);
-					if (defs[i]->IsValid() || defs[k]->IsValid())
+					if (*defs[i] || *defs[k])
 						p.Fill(this, br);
 					
 					// Fill the background
@@ -6323,7 +6323,7 @@ void LTag::PaintBorderAndBackground(LSurface *pDC, LColour &Back, LRect *BorderP
 		BorderDef name = Border##name(); \
 		BorderPx->coord = name.Style != LCss::BorderNone ? name.ToPx(Size.axis, f) : 0;
 	#define BorderValid(name) \
-		((name).IsValid() && (name).Style != LCss::BorderNone)
+		((name) && (name).Style != LCss::BorderNone)
 	
 	DoEdge(x1, x, Left);
 	DoEdge(y1, y, Top);

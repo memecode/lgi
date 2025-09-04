@@ -116,10 +116,36 @@ int LCheckBox::SysOnNotify(int Msg, int Code)
 	if (Msg == WM_COMMAND &&
 		Code == BN_CLICKED)
 	{
-		SendNotify((int)Value());
+		LMouse ms;
+		GetMouse(ms);
+		OnClick(ms);
 	}
 	
 	return 0;
+}
+
+void LCheckBox::OnClick(const LMouse &m)
+{
+	if (onClickFn)
+		onClickFn(m);
+	else
+	{
+		if (d->Three)
+		{
+			switch (d->Val)
+			{
+				case 0:
+					Value(2); break;
+				case 2:
+					Value(1); break;
+				default:
+					Value(0); break;
+			}
+		}
+		else Value(!d->Val);
+
+		SendNotify((int)Value());
+	}
 }
 
 int LCheckBox::OnNotify(LViewI *Ctrl, int Flags)

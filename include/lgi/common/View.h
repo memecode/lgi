@@ -4,9 +4,9 @@
 #include "lgi/common/Mutex.h"
 
 #if defined(LGI_CARBON)
-LgiFunc void DumpHnd(HIViewRef v, int depth = 0);
+	LgiFunc void DumpHnd(HIViewRef v, int depth = 0);
 #elif LGI_COCOA && defined(__OBJC__)
-#include "LCocoaView.h"
+	#include "LCocoaView.h"
 #endif
 
 
@@ -1018,3 +1018,15 @@ public:
 	LMessage::Result OnEvent(LMessage *Msg);
 };
 
+/// Clickable "thing"
+class LgiClass LClickable
+{
+public:
+	// Click handling: to override default action, use one of these:
+	std::function<void(const LMouse &m)> onClickFn;
+	virtual void OnClick(const LMouse &m)
+	{
+		if (onClickFn)
+			onClickFn(m);
+	}
+};

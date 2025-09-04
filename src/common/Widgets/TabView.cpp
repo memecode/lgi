@@ -533,10 +533,10 @@ LRect &LTabView::GetTabClient()
 		{
 			// Inset by any padding
 			LCss::Len l;
-			d->TabClient.x1 += (l = p->GetCss()->PaddingLeft()).IsValid()   ? l.ToPx(d->TabClient.X(), GetFont()) : 0;
-			d->TabClient.y1 += (l = p->GetCss()->PaddingTop()).IsValid()    ? l.ToPx(d->TabClient.Y(), GetFont()) : 0;
-			d->TabClient.x2 -= (l = p->GetCss()->PaddingRight()).IsValid()  ? l.ToPx(d->TabClient.X(), GetFont()) : 0;
-			d->TabClient.y2 -= (l = p->GetCss()->PaddingBottom()).IsValid() ? l.ToPx(d->TabClient.Y(), GetFont()) : 0;
+			d->TabClient.x1 += (l = p->GetCss()->PaddingLeft())   ? l.ToPx(d->TabClient.X(), GetFont()) : 0;
+			d->TabClient.y1 += (l = p->GetCss()->PaddingTop())    ? l.ToPx(d->TabClient.Y(), GetFont()) : 0;
+			d->TabClient.x2 -= (l = p->GetCss()->PaddingRight())  ? l.ToPx(d->TabClient.X(), GetFont()) : 0;
+			d->TabClient.y2 -= (l = p->GetCss()->PaddingBottom()) ? l.ToPx(d->TabClient.Y(), GetFont()) : 0;
 		}
 	}
 	else
@@ -705,10 +705,10 @@ LRect &LTabView::CalcInset()
 	if (GetCss())
 	{
 		LCss::Len l;
-		if ((l = GetCss()->PaddingLeft()).IsValid())   Padding.x1 = l.ToPx(d->Inset.X(), f);
-		if ((l = GetCss()->PaddingTop()).IsValid())    Padding.y1 = l.ToPx(d->Inset.Y(), f);
-		if ((l = GetCss()->PaddingRight()).IsValid())  Padding.x2 = l.ToPx(d->Inset.X(), f);
-		if ((l = GetCss()->PaddingBottom()).IsValid()) Padding.y2 = l.ToPx(d->Inset.Y(), f);
+		if ((l = GetCss()->PaddingLeft()))   Padding.x1 = l.ToPx(d->Inset.X(), f);
+		if ((l = GetCss()->PaddingTop()))    Padding.y1 = l.ToPx(d->Inset.Y(), f);
+		if ((l = GetCss()->PaddingRight()))  Padding.x2 = l.ToPx(d->Inset.X(), f);
+		if ((l = GetCss()->PaddingBottom())) Padding.y2 = l.ToPx(d->Inset.Y(), f);
 	}
 
 	int TabTextY = 0;

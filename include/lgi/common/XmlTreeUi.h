@@ -24,7 +24,11 @@ public:
 	/// Create attribute <-> UI element mapping for generic control
 	void Map(const char *Attr, int UiIdent, int Type = GV_NULL);
 	/// Create attribute <-> UI element mapping for LItemContainer control
-	void Map(const char *Attr, int UiIdent, const char *ChildElementName, std::function<LItem*()> Callback);
+	void Map(const char *Attr,
+			int UiIdent,
+			const char *ChildElementName,
+			// This callback constructs an item for the container
+			std::function<LItem*()> Callback);
 	/// Create attribute <-> UI element mapping for a enum and group of radio buttons.
 	void Map(const char *Attr, EnumMap &Mapping);
 	/// Clear all mappings

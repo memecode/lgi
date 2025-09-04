@@ -51,6 +51,8 @@ private:
 	LArray<LWebSocket*> webSockets;
 
 public:
+	constexpr static const char *sContentLength = "Content-Length";
+
 	LHttpServer::Callback *callback;
 	LHttpServer_TraceSocket Listen;
 	int port;
@@ -239,7 +241,7 @@ int LHttpThread::Main()
 			req.headers.Set(ReqEnd, HeadersEnd - ReqEnd);
 
 			// LOG_HTTP("%s:%i - Headers=%i\n%s\n", _FL, (int)req.headers.Length(), req.headers.Get());
-			auto len = LGetHeaderField(req.headers, "Content-Length");
+			auto len = LGetHeaderField(req.headers, LHttpServerPriv::sContentLength);
 			if (len)
 			{
 				ContentLen = len.Int();
@@ -295,11 +297,10 @@ int LHttpThread::Main()
 					req.headers = Eol;
 					req.body = Eoh + 4;
 
-		
+					LStringPipe *RespBody = nullptr;
 					LHttpServer::Response resp;
-					LStringPipe *RespHeaders = nullptr, *RespBody = nullptr;
-					resp.headers.Reset(RespHeaders = new LStringPipe(256));
 					resp.body.Reset(RespBody = new LStringPipe(256));
+
 					auto Code = p->callback->OnRequest(&req, &resp);
 					if (req.sock)
 					{
@@ -307,8 +308,23 @@ int LHttpThread::Main()
 
 						auto stream = dynamic_cast<LSocket*>(req.sock.Get());
 						stream->Print("HTTP/1.0 %i Ok\r\n", Code);
-						if (auto hdrs = RespHeaders->NewLStr().Strip())
+
+						if (resp.body)
+						{
+							auto len = resp.body->GetSize();
+							if (len >= 0)
+							{
+								// Make sure we have a Content-Length
+								auto contentLen = resp.GetHeader(LHttpServerPriv::sContentLength);
+								if (!contentLen)
+									resp.SetHeader(LHttpServerPriv::sContentLength, LString::Fmt(LPrintfInt64, len));
+							}
+						}
+
+						if (auto hdrs = resp.headers.Strip())
+						{
 							stream->Print("%s\r\n", hdrs.Get());
+						}
 						stream->Print("\r\n");
 						
 						if (resp.body)

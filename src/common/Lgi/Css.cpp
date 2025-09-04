@@ -1346,7 +1346,7 @@ bool LCss::HasFontStyle()
 	if (Fam.Length() > 0)
 		return true;
 	auto Sz = FontSize();
-	if (Sz.IsValid())
+	if (Sz)
 		return true;
 	auto Style = FontStyle();
 	if (Style != FontStyleInherit)

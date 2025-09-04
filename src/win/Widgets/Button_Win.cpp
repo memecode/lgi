@@ -516,7 +516,10 @@ void LButton::Value(int64 i)
 
 void LButton::OnClick(const LMouse &m)
 {
-	SendNotify(LNotification(m));
+	if (onClickFn)
+		onClickFn(m);
+	else
+		SendNotify(LNotification(m));
 }
 
 void LButton::SetPreferredSize(int x, int y)

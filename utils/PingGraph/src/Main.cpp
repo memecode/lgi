@@ -1,3 +1,5 @@
+#define _CRT_SECURE_NO_WARNINGS 1
+
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Box.h"
 #include "lgi/common/TableLayout.h"
@@ -14,6 +16,7 @@
 
 //////////////////////////////////////////////////////////////////
 const char *AppName = "PingGraph";
+#define HISTORY		0
 
 enum Ctrls 
 {
@@ -38,7 +41,16 @@ class Graph : public LView, public LMutex
 
 	LString logPath;
 	LFile logFile;
+	#if HISTORY
+	int groupX = 20;
+	#else
 	int groupX = 1;
+	#endif
+	LColour cGraph = LColour(200, 200, 200);
+	LColour cSamples = LColour::Blue;
+	LColour cBack = LColour(L_WORKSPACE);
+	LColour cHalf = cBack.Mix(cSamples);
+	LArray<LString> historyDays;
 
 public:
 	Graph(int id) : LMutex("Graph")
@@ -56,6 +68,41 @@ public:
 				auto rd = logFile.Read(samples.AddressOf(), samples.Length() * sz);
 			}
 		}
+	}
+
+	LString::Array DaysWithSamples()
+	{
+		LHashTbl<IntKey<time_t>, bool> map;
+		auto s = samples.AddressOf();
+		auto e = s + samples.Length();
+		while (s < e)
+		{
+			auto t = localtime(&s->time);
+			t->tm_hour = 0;
+			t->tm_min = 0;
+			t->tm_sec = 0;
+			map.Add(mktime(t), true);
+			s++;
+		}
+
+		LString::Array days;
+		for (auto p: map)
+		{
+			auto t = localtime(&p.key);
+			if (t->tm_wday > 0 && t->tm_wday < 6)
+				days.Add(LString::Fmt("%i/%2.2i/%2.2i", t->tm_year+1900, t->tm_mon+1, t->tm_mday));
+		}
+
+		days.Sort([](auto a, auto b)
+			{
+				return Stricmp(a->Get(), b->Get());
+			});
+		return days;
+	}
+
+	void SetHistoryDays(LArray<LString> days)
+	{
+		historyDays = days;
 	}
 
 	bool OnMouseWheel(double Lines)
@@ -87,32 +134,24 @@ public:
 		Invalidate();
 	}
 
-	void OnPaint(LSurface *pDC) override
+	void DrawGraph(LSurface *pDC, LRect &client, time_t endTime, LString dayLabel)
 	{
-		#if WINDOWS
-		LDoubleBuffer dblBuf(pDC);
-		#endif
-
-		Auto lck(this, _FL);
-
-		LColour cGraph(200, 200, 200);
-		LColour cSamples = LColour::Blue;
-		LColour cBack = LColour(L_WORKSPACE);
-		LColour cHalf = cBack.Mix(cSamples);
-
-		pDC->Colour(cBack);
-		pDC->Rectangle();
-
 		if (samples.Length() == 0)
 			return;
 
 		auto fnt = GetFont();
 		int markPx = 3;
 		int scale = 5000; // ms
-		auto client = GetClient();
 		auto draw = client;
 		draw.Inset(5, fnt->GetHeight());
 		draw.y2 -= fnt->GetHeight() + (markPx * 2);
+
+		LDisplayString label(fnt, dayLabel);
+		fnt->Colour(LColour(L_TEXT), cBack);
+		fnt->Transparent(true);
+		label.Draw(pDC, draw.x1, client.y1);
+		draw.x1 += 70;
+
 		LDisplayString ds(fnt, "5000ms");
 		draw.x1 += (markPx * 2) + ds.X();
 		
@@ -122,20 +161,21 @@ public:
 		pDC->Line(draw.x2, draw.y1, draw.x2, draw.y2);
 		
 		LPoint prev;
-		auto now = time(NULL); // time at draw.x2
 		size_t i = 0;
 		auto XtoTime = [&](int x)
 			{
 				int dx = draw.x2 - x;
-				return now - (dx * groupX);
+				return endTime - (dx * groupX);
 			};
 		auto TimeToX = [&](time_t time)
 			{
-				int64_t sec = now - time;
+				int64_t sec = endTime - time;
 				return (int) (draw.x2 - (sec / groupX));
 			};
 
 		auto startTime = XtoTime(draw.x1);
+
+		// Find start of the sample range:
 		for (ssize_t n=samples.Length()-1; n > 0; n--)
 		{
 			if (TimeToX(samples[n].time) < draw.x1)
@@ -144,6 +184,23 @@ public:
 				break;
 			}
 		}
+
+		// Find the end of the sample range:
+		size_t endRange = samples.Length() - 1;
+		for (ssize_t n=endRange; n > 0; n--)
+		{
+			if (samples[n].time <= endTime)
+			{
+				endRange = n;
+				break;
+			}
+		}
+		#if HISTORY
+		// Trim off any -1 samples...
+		while (endRange > i && samples[endRange].value < 0)
+			endRange--;
+		#endif
+
 		auto first = samples[i].time;
 		auto prev_time = first;
 
@@ -151,7 +208,12 @@ public:
 		pDC->Colour(cGraph);
 		fnt->Fore(cGraph);
 		fnt->Transparent(true);
-		for (int k = 0; k <= scale; k += 1000)
+		#if HISTORY
+		int kInc = scale;
+		#else
+		int kInc = 1000;
+		#endif
+		for (int k = 0; k <= scale; k += kInc)
 		{
 			auto str = LString::Fmt("%ims", k);
 			LDisplayString ds(fnt, str);
@@ -188,10 +250,12 @@ public:
 			}
 		}
 
+		#if !HISTORY
 		{
 			LDisplayString ds(fnt, LString::Fmt("groupX=%i", groupX));
 			ds.Draw(pDC, draw.x2 - 5 - ds.X(), draw.y1);
 		}
+		#endif
 
 		// Draw samples
 		if (groupX == 1)
@@ -212,6 +276,9 @@ public:
 		}
 		else
 		{
+			// LDateTime dt("2025/08/20 17:12:00");
+			// auto debugTime = dt.GetUnix();
+
 			for (int x=draw.x1; x<=draw.x2; x++)
 			{
 				int total = 0;
@@ -219,9 +286,20 @@ public:
 				int min = draw.Y();
 				int count = 0;
 
+				/*
+				auto unixTime = XtoTime(x);
+				if (ABS((int64_t)unixTime - debugTime) < 100)
+				{
+					int asd=0;
+				}
+				*/
+
 				while (i < samples.Length())
 				{
 					auto &s = samples[i];
+					if (i > endRange)
+						break;
+
 					auto sx = TimeToX(s.time);
 					if (sx == x)
 					{
@@ -249,6 +327,44 @@ public:
 					pDC->Line(x, draw.y2 - min, x, draw.y2 - max);
 				}
 			}
+		}
+	}
+
+	void OnPaint(LSurface *pDC) override
+	{
+		#if WINDOWS
+		LDoubleBuffer dblBuf(pDC);
+		#endif
+
+		Auto lck(this, _FL);
+		auto client = GetClient();
+
+		pDC->Colour(cBack);
+		pDC->Rectangle();
+
+		if (historyDays.Length())
+		{
+			for (unsigned i=0; i<historyDays.Length(); i++)
+			{
+				auto parts = historyDays[i].SplitDelimit("/");
+				struct tm t = {};
+				t.tm_year = (int)parts[0].Int() - 1900;
+				t.tm_mon = (int)parts[1].Int() - 1;
+				t.tm_mday = (int)parts[2].Int();
+				t.tm_hour = 18;
+				auto end = mktime(&t);
+
+				int y1 = client.y1 + (i * client.Y() / (int)historyDays.Length());
+				int y2 = client.y1 + ((i+1) * client.Y() / (int)historyDays.Length());
+				LRect r(client.x1, y1, client.x2, y2-1);
+				
+				DrawGraph(pDC, r, end, historyDays[i]);
+			}
+		}
+		else
+		{
+			auto endTime = time(NULL); // time at draw.x2
+			DrawGraph(pDC, client, endTime, "live");
 		}
 	}
 };
@@ -391,7 +507,21 @@ public:
 				if (auto s = v.Str())
 				{
 					hostname->Name(s);
-					worker.Reset(new Worker(this, s, log, graph));
+
+					#if HISTORY
+						// scan the sample database for days with data
+						LArray<LString> days = graph->DaysWithSamples();
+						days.PopLast();
+						days = days.Slice(-7, -1);
+						for (auto d: days)
+						{
+							log->Print("%s\n", d.Get());
+						}
+						graph->SetHistoryDays(days);
+					#else
+						// setup the thread to live capture more samples
+						worker.Reset(new Worker(this, s, log, graph));
+					#endif
 				}
 			}
 		}

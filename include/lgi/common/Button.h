@@ -25,6 +25,7 @@ class LgiClass LButton :
 	#else
 	public LView,
 	#endif
+	public LClickable,
 	public ResObject
 {
 	class LButtonPrivate *d;
@@ -84,7 +85,9 @@ public:
 	void OnCreate() override;
 	void OnAttach() override;
 	void OnStyleChange();
-	virtual void OnClick(const LMouse &m);
+
+	// Click handling:
+	void OnClick(const LMouse &m) override;
 
 	// Impl
 	const char *Name() override { return LView::Name(); }

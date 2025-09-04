@@ -656,7 +656,7 @@ int LSubProcess::Wait()
 				d->ExitValue = WEXITSTATUS(Status);
 			else
 				d->ExitValue = 255;
-			printf("%s:%i - wait, ExitValue=%i\n", _FL, r, d->ExitValue);
+			printf("%s:%i - wait, r=%i, ExitValue=%i\n", _FL, r, d->ExitValue);
 		}
 	}
 	else printf("%s:%i - wait: invalid PID.\n", _FL);
