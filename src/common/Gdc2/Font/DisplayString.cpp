@@ -2043,11 +2043,6 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 			LColour cBack = Font->Back();
 			LColour cWhitespace;
 
-			if (Stristr(Str, L"Your email address and telephone numbers"))
-			{
-				int asd=0;
-			}
-
 			LAutoPtr<MemTextBuf> mem24;
 			if (!pDC->IsScreen() &&
 				pDC->HasAlpha() &&

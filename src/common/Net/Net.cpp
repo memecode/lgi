@@ -1786,7 +1786,8 @@ void IterateHeaders(
 		{
 			// has value
 			s++;
-			while (s < end && IsWhite(*s)) s++;
+			while (s < end && (*s == ' ' || *s == '\t'))
+				s++;
 			auto value = s;
 			while (true)
 			{
@@ -1848,65 +1849,11 @@ LString LGetHeaderField(LString Headers, const char *Field)
 	if (!Headers || !Field)
 		return LString();
 
-	#if 1
-
-		LArray<LHeader> parsed;
-		IterateHeaders(Headers, parsed, Field, 1);
-		if (parsed.Length() > 0)
-			return parsed[0].UnwrapValue();
+	LArray<LHeader> parsed;
+	IterateHeaders(Headers, parsed, Field, 1);
+	if (parsed.Length() > 0)
+		return parsed[0].UnwrapValue();
 	
-	#else
-
-		// for all lines
-		auto End = Headers.Get() + Headers.Length();
-		auto FldLen = Strlen(Field);
-		for (auto s = Headers.Get();
-			s < End;
-			s = SeekNextLine(s, End))
-		{
-			if (!*s)
-				break;
-			if (*s != '\t' &&
-				Strnicmp(s, Field, FldLen) == 0 &&
-				s[FldLen] == ':')
-			{
-				// found a match
-				s += FldLen + 1;
-
-				while (*s && s < End)
-				{
-					if (strchr(" \t\r", *s))
-					{
-						s++;
-					}
-					else if (*s == '\n')
-					{
-						if (strchr(" \r\n\t", s[1]))
-							s += 2;
-						else
-							break;
-					}
-					else break;							
-				}
-						
-				LString value;
-				InetGetField(s, End,
-					[&value](auto sz)
-					{
-						value.Length(sz);
-						return value.Get();
-					},
-					[&value](auto sz)
-					{
-						value.Length(sz);
-					});
-				return value;
-
-			}
-		}
-		
-	#endif
-
 	return LString();
 }
 
@@ -1961,11 +1908,22 @@ bool LHeaderUnitTests()
 	const char *testHdrs = "Content-Type: text/html\r\n"
 		"Content-Length: 12345\r\n"
 		"Cookie: someData";
+	const char *testHdrs2 =
+		"Thread-Index: AdweBDOj\r\n"
+		"Content-Class: \r\n"
+		"Date: Fri, 5 Sep 2025 03:58:07 +0000\r\n"
+		"Message-ID: \r\n"
+		" <JH0PR03MB8021DD51331.outlook.com>\r\n";
 	const char *contentType = "text/html";
 	const char *contentLen = "12345";
 	const char *cookie = "someData";
 
 	#define CHECK(val) if (!(val)) { LAssert(0); return false; }
+
+	auto date = LGetHeaderField(testHdrs2, "Date");
+	CHECK(date == "Fri, 5 Sep 2025 03:58:07 +0000");
+	auto msgId = LGetHeaderField(testHdrs2, "Message-ID");
+	CHECK(msgId == "<JH0PR03MB8021DD51331.outlook.com>");
 
 	CHECK(LGetHeaderField(testHdrs, "Content-Type") == contentType);
 	CHECK(LGetHeaderField(testHdrs, "Content-Length") == contentLen);
