@@ -404,7 +404,8 @@ public:
 				const wchar_t *end = str + wchars;
 				for (const wchar_t *ch = str; ch < end; ch++)
 				{
-					if (!LgiUtf32To8(*ch, o, OutLen))
+					if (!*ch ||
+						!LgiUtf32To8(*ch, o, OutLen))
 					{
 						*o = 0;
 						break;

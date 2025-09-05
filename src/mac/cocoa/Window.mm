@@ -723,7 +723,7 @@ void LWindow::Visible(bool i)
 			[Wnd.p orderFront:NULL];
 		}
 		[NSApp activateIgnoringOtherApps:YES];
-
+ 
 		SetDefaultFocus(this);
 		OnPosChange();
 	}
@@ -883,11 +883,11 @@ bool LWindow::HandleViewKey(LView *v, LKey &k)
 	}
 	
 	// Allow any hooks to see the key...
-	for (int i=0; i<d->Hooks.Length(); i++)
+	for (auto &h: d->Hooks)
 	{
-		if (d->Hooks[i].Flags & LKeyEvents)
+		if (h.Flags & LKeyEvents)
 		{
-			if (d->Hooks[i].Target->OnViewKey(v, k))
+			if (h.Target->OnViewKey(v, k))
 			{
 				Status = true;
 				

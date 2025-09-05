@@ -11,7 +11,7 @@
 		34148AFC2349ECA200D5E495 /* LgiCocoa.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B20D1217968820079E3C9 /* LgiCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		341C7AC821A752DC0083C9CE /* About.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 341C7AC721A752DC0083C9CE /* About.cpp */; };
 		343688C92CA7929E0009E57A /* SystemIntf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 343688C82CA7924B0009E57A /* SystemIntf.cpp */; };
-		343688CB2CA793210009E57A /* libssh.4.10.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 343688CA2CA793210009E57A /* libssh.4.10.1.dylib */; };
+		343688CB2CA793210009E57A /* libssh.4.9.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 343688CA2CA793210009E57A /* libssh.4.9.6.dylib */; };
 		3458E51E2CE7EDBB00039176 /* RemoveAnsi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3458E51D2CE7EDBB00039176 /* RemoveAnsi.cpp */; };
 		345B2101217969700079E3C9 /* PythonParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20D52179696B0079E3C9 /* PythonParser.cpp */; };
 		345B2102217969700079E3C9 /* MemDumpViewer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20DA2179696B0079E3C9 /* MemDumpViewer.cpp */; };
@@ -105,7 +105,7 @@
 		341C7AC721A752DC0083C9CE /* About.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = About.cpp; path = ../../src/common/Lgi/About.cpp; sourceTree = "<group>"; };
 		343688C72CA7924B0009E57A /* SystemIntf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SystemIntf.h; path = ../../include/lgi/common/SystemIntf.h; sourceTree = "<group>"; };
 		343688C82CA7924B0009E57A /* SystemIntf.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SystemIntf.cpp; path = ../../src/common/Lgi/SystemIntf.cpp; sourceTree = "<group>"; };
-		343688CA2CA793210009E57A /* libssh.4.10.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssh.4.10.1.dylib; path = ../../../../../../../opt/local/lib/libssh.4.10.1.dylib; sourceTree = "<group>"; };
+		343688CA2CA793210009E57A /* libssh.4.9.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssh.4.9.6.dylib; path = ../../../../../../../opt/local/lib/libssh.4.9.6.dylib; sourceTree = "<group>"; };
 		3458E51D2CE7EDBB00039176 /* RemoveAnsi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RemoveAnsi.cpp; path = ../../src/common/Text/RemoveAnsi.cpp; sourceTree = "<group>"; };
 		345B206C217965E80079E3C9 /* LgiIde.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LgiIde.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		345B2077217965EA0079E3C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -174,7 +174,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				343688CB2CA793210009E57A /* libssh.4.10.1.dylib in Frameworks */,
+				343688CB2CA793210009E57A /* libssh.4.9.6.dylib in Frameworks */,
 				34D625802CA78EE400FF505C /* LgiCocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -225,7 +225,7 @@
 			children = (
 				34F442EE2DFC3C05001DBEF5 /* libpng16.16.45.git.dylib */,
 				34F442F02DFC3C14001DBEF5 /* libz.1.4.1.1.dylib */,
-				343688CA2CA793210009E57A /* libssh.4.10.1.dylib */,
+				343688CA2CA793210009E57A /* libssh.4.9.6.dylib */,
 				345B20C3217967760079E3C9 /* LgiCocoa.xcodeproj */,
 			);
 			name = Frameworks;
