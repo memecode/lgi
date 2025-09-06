@@ -1591,10 +1591,12 @@ bool LHaveNetConnection()
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Gets a field value
-void InetGetField(	const char *start, const char *end,
+void InetGetField(	const char *start,
+					const char *end, // maybe NULL is not known, in which case scan till the end of the whole header value
 					std::function<char*(size_t)> alloc,
 					std::function<void(size_t)> setLength)
 {
+	LAssert(start != nullptr);
 	const char *s = start, *e = start;
 	static const char *WhiteSpace = " \r\t\n";
 	LArray<LRange> parts;
@@ -1603,7 +1605,7 @@ void InetGetField(	const char *start, const char *end,
 	// Look for the end of the string
 	while (true)
 	{
-		if (*e == 0 || e >= end)
+		if (*e == 0 || (end && e >= end))
 		{
 			auto len = e - s;
 			totalLen += len;
@@ -1617,14 +1619,14 @@ void InetGetField(	const char *start, const char *end,
 			parts.New().Set(s - start, len);
 
 			if (*e == '\r' &&
-				end - e >= 3 &&
+				(!end || end - e >= 3) &&
 				e[1] == '\n' &&
 				IsWhite(e[2]))
 			{
 				e += 3; // \r\n case
 			}
 			else if (*e == '\n' &&
-				end - e >= 2 &&
+				(!end || end - e >= 2) &&
 				IsWhite(e[1]))
 			{
 				e += 2; // no '\r' case...
@@ -1672,7 +1674,7 @@ char *InetGetHeaderField(	// Returns an allocated string or NULL on failure
 	if (Headers && Field)
 	{
 		// for all lines
-		const char *End = Len < 0 ? 0 : Headers + Len;
+		const char *End = Len < 0 ? nullptr : Headers + Len;
 		size_t FldLen = strlen(Field);
 		
 		for (const char *s = Headers;
@@ -1687,6 +1689,8 @@ char *InetGetHeaderField(	// Returns an allocated string or NULL on failure
 				if (*s == ':')
 				{
 					s++;
+
+					// Skip over leading whitespace:
 					while (*s)
 					{
 						if (strchr(" \t\r", *s))
@@ -1695,7 +1699,7 @@ char *InetGetHeaderField(	// Returns an allocated string or NULL on failure
 						}
 						else if (*s == '\n')
 						{
-							if (strchr(" \r\n\t", s[1]))
+							if (strchr(" \r\t", s[1]))
 								s += 2;
 							else
 								break;
@@ -1772,6 +1776,11 @@ void IterateHeaders(
 {
 	if (!headers)
 		return;
+
+	if (filterField.Equals("List-Owner"))
+	{
+		int asd=0;
+	}
 
 	auto end = headers.Get() + headers.Length();
 	for (auto s = headers.Get(); s < end; )
