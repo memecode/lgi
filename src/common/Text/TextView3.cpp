@@ -3606,13 +3606,11 @@ void LTextView3::DoContextMenu(LMouse &m)
 		ClipText.Reset(NewStr(Clip.Text()));
 	}
 
-	LStyle *s = HitStyle(HitText(m.x, m.y, true));
+	auto s = HitStyle(HitText(m.x, m.y, true));
 	if (s)
 	{
 		if (OnStyleMenu(s, &RClick))
-		{
 			RClick.AppendSeparator();
-		}
 	}
 
 	RClick.AppendItem(LLoadString(L_TEXTCTRL_CUT, "Cut"), IDM_CUT, HasSelection());

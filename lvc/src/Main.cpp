@@ -1033,7 +1033,10 @@ public:
 	}
 };
 
-class App : public LWindow, public AppPriv
+class App :
+	public LWindow,
+	public AppPriv,
+	public LDocumentEnv
 {
 	LAutoPtr<LImageList> ImgLst;
 	LBox *FoldersBox = NULL;
@@ -1044,6 +1047,81 @@ class App : public LWindow, public AppPriv
 		if (!Stricmp(MethodName, METHOD_GetContext))
 		{
 			*Args.GetReturn() = (AppPriv*)this;
+			return true;
+		}
+
+		return false;
+	}
+
+	int ID_OPEN_IN_VSCODE = -1;
+	bool AppendItems(LSubMenu *Menu, const char *Param, int Base = 1000) override
+	{
+		if (!Menu)
+			return false;
+
+		Menu->AppendSeparator();
+		Menu->AppendItem("Open in vscode", ID_OPEN_IN_VSCODE = Base++);
+		return true;
+	}
+
+	bool OnMenu(LDocView *View, int Id, void *Context) override
+	{
+		if (Diff && Id == ID_OPEN_IN_VSCODE)
+		{
+			LgiTrace("%s:%i - open in vscode\n", _FL);
+			
+			auto txt = Diff->NameW();
+			auto pos = Diff->GetCaret();
+					
+			auto lnStart = [&]()
+			{
+				while (	pos > 0 &&
+						txt[pos-1] != '\n')
+					pos--;
+				return txt + pos;
+			};
+					
+			LString ref;
+			int add = 2;
+			while (auto s = lnStart())
+			{
+				if (s[0] == '@' && s[1] == '@')
+				{
+					auto e = Strchr(s, '\n');
+					ref = LString(s, e - s);
+					break;
+				}
+						
+				if (s == txt)
+					break;
+				else
+					pos--;
+				add++;
+			}
+					
+			if (ref)
+			{
+				auto parts = ref.Strip("@ ").SplitDelimit(" ,-+");
+				auto ln = (parts[2].Int() + add);
+
+				// Get currently select file...
+				if (auto curFile = Files->GetSelected())
+				{
+					auto fileLn = LString::Fmt("%s:%i", curFile->GetText(COL_FILENAME), ln);
+					LPopupNotification::Message(this, fileLn);
+
+					if (!CommsBus)
+					{
+						CommsBus.Reset(new LCommsBus(Log));
+					}
+					if (CommsBus)
+					{
+						Log->Print("Sending vscode the file/line: %s\n", fileLn.Get());
+						CommsBus->SendMsg("vscode.goto", fileLn);
+					}
+				}
+			}
+
 			return true;
 		}
 
@@ -1181,7 +1259,7 @@ public:
 
 		auto p = Tabs->Append("Diff");
 		p->Append(Diff = new DiffView(IDC_TXT));
-		// Diff->Sunken(true);
+		Diff->SetEnv(this);
 		Diff->SetWrapType(L_WRAP_NONE);
 
 		p = Tabs->Append("Log");
@@ -1827,65 +1905,6 @@ public:
 					}
 					default:
 						break;
-				}
-				break;
-			}
-			case IDC_TXT:
-			{
-				if (n.Type == LNotifyItemDoubleClick)
-				{
-					printf("IDC_TXT: dbl click\n");
-					auto txt = Diff->NameW();
-					auto pos = Diff->GetCaret();
-					
-					auto lnStart = [&]()
-					{
-						while (	pos > 0 &&
-								txt[pos-1] != '\n')
-							pos--;
-						return txt + pos;
-					};
-					
-					LString ref;
-					int add = 2;
-					while (auto s = lnStart())
-					{
-						if (s[0] == '@' && s[1] == '@')
-						{
-							auto e = Strchr(s, '\n');
-							ref = LString(s, e - s);
-							break;
-						}
-						
-						if (s == txt)
-							break;
-						else
-							pos--;
-						add++;
-					}
-					
-					if (ref)
-					{
-						auto parts = ref.Strip("@ ").SplitDelimit(" ,-+");
-						auto ln = (parts[2].Int() + add);
-
-						// Get currently select file...
-						if (auto curFile = Files->GetSelected())
-						{
-							auto fileLn = LString::Fmt("%s:%i", curFile->GetText(COL_FILENAME), ln);
-							LPopupNotification::Message(this, fileLn);
-
-							if (!CommsBus)
-							{
-								CommsBus.Reset(new LCommsBus(Log));
-							}
-							if (CommsBus)
-							{
-								Log->Print("Sending vscode the file/line: %s\n", fileLn.Get());
-								CommsBus->SendMsg("vscode.goto", fileLn);
-							}
-						}
-					}
 				}
 				break;
 			}
