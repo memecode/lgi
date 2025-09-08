@@ -1246,6 +1246,8 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 					Sect.Rule = Data;
 				else if (IsVar(Field, "RDATE"))
 					Sect.RecurDate = Data;
+
+				int asd=0;
 			}			
 			else if (IsVar(Field, "TZID"))
 			{
@@ -1278,30 +1280,45 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 		if (Match)
 		{
 			LDateTime Norm, Dst;
-			if (EvalRule(Norm, Match->Normal,   EventStart.Year()) &&
+			if (EvalRule(Norm, Match->Normal,   EventStart.Year()) ||
 				EvalRule(Dst,  Match->Daylight, EventStart.Year()) )
 			{
 				bool IsDst = false;
-				if (Dst < Norm)
+
+				if (Norm.IsValid() && Dst.IsValid())
 				{
-					// DST in the middle of the year
-					// |Jan----DST------Norm----Dec|
-					if (EventStart >= Dst && EventStart <= Norm)
-						IsDst = true;
-				}
-				else
-				{
-					// DST over the start and end of the year
-					// |Jan----Norm------DST----Dec|
-					if (EventStart >= Norm && EventStart <= Dst)
-						IsDst = false;
+					if (Dst < Norm)
+					{
+						// DST in the middle of the year
+						// |Jan----DST------Norm----Dec|
+						if (EventStart >= Dst && EventStart <= Norm)
+							IsDst = true;
+					}
 					else
-						IsDst = true;
-				}
+					{
+						// DST over the start and end of the year
+						// |Jan----Norm------DST----Dec|
+						if (EventStart >= Norm && EventStart <= Dst)
+							IsDst = false;
+						else
+							IsDst = true;
+					}
 				
-				#if DEBUG_LOGGING
-				LgiTrace("Eval Start=%s, Norm=%s, Dst=%s, IsDst=%i\n", EventStart.Get().Get(), Norm.Get().Get(), Dst.Get().Get(), IsDst);
-				#endif
+					#if DEBUG_LOGGING
+					LgiTrace("Eval Start=%s, Norm=%s, Dst=%s, IsDst=%i\n", EventStart.Get().Get(), Norm.Get().Get(), Dst.Get().Get(), IsDst);
+					#endif
+				}
+				else if (Norm.IsValid())
+				{
+					// Only have a normal timezone, so use that...
+					IsDst = false;
+				}
+				else if (Dst.IsValid())
+				{
+					// Only have a DST timezone, so use that...
+					IsDst = true;
+				}
+				else LAssert(!"one or the other must be set");
 				
 				EffectiveTz = IsDst ? Match->Daylight.To : Match->Normal.To;
 				c->SetStr(FIELD_CAL_TIMEZONE, LString::Fmt("%4.4i,%s", EffectiveTz, StartTz.Get()));
