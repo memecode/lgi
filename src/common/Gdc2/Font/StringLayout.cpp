@@ -160,7 +160,7 @@ void LStringLayout::DoPreLayout(int32 &MinX, int32 &MaxX)
 	MinX = 0;
 	MaxX = 0;
 		
-	LFont *f = GetBaseFont();
+	auto f = GetBaseFont();
 	if (!Text.Length() || !f)
 		return;
 

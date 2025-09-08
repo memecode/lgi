@@ -1318,7 +1318,11 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 					// Only have a DST timezone, so use that...
 					IsDst = true;
 				}
-				else LAssert(!"one or the other must be set");
+				else
+				{
+					LAssert(!"one or the other must be set");
+					goto StoreStringTz;
+				}
 				
 				EffectiveTz = IsDst ? Match->Daylight.To : Match->Normal.To;
 				c->SetStr(FIELD_CAL_TIMEZONE, LString::Fmt("%4.4i,%s", EffectiveTz, StartTz.Get()));
