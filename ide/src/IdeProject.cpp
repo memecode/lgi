@@ -722,10 +722,10 @@ public:
 			}
 			
 			// Get the compile options:
-			auto compOpts = d->Settings.GetStr(ProjCompileOptions, NULL, Platform);
+			LString compOpts = d->Settings.GetStr(ProjCompileOptions, NULL, Platform);
 			if (ValidStr(compOpts))
 			{
-				sCompilerOpts[Cfg].Printf(" %s", compOpts);
+				sCompilerOpts[Cfg].Printf(" %s", compOpts.Replace("\n", " ").Get());
 			}
 		
 			// Collect all dependencies, output their lib names and paths

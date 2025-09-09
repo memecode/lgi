@@ -178,6 +178,7 @@ LListItemColumn *LListItemColumn::GetItemCol(LListItem *i, int Col)
 // List item
 LListItem::LListItem(const char *initStr)
 {
+	LAssert(_user.Ptr == nullptr);
 	d = new LListItemPrivate;
 	Pos.ZOff(-1, -1);
 	if (initStr)

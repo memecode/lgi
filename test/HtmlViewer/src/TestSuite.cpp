@@ -206,7 +206,7 @@ public:
 				else
 				{
 					LMemQueue p(1024);
-					LString Err;
+					LError Err;
 					auto r = LGetUri(this, &p, &Err, Job->Uri);
 					if (r)
 					{

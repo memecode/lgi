@@ -91,9 +91,9 @@ protected:
 public:
 	// Application defined, defaults to 0
 	union {
-		void *_UserPtr;
-		NativeInt _UserInt;
-	};
+		void *Ptr;
+		NativeInt Int;
+	}	_user = {};
 
 	// Object
 	LListItem(const char *initStr = NULL);
@@ -499,6 +499,7 @@ public:
 		Invalidate(&ItemsPos);
 	}
 	
+    /// Sort by a textual comparison on the given column
 	void Sort(int Column)
 	{
 		if (Items.Length() == 0)
@@ -506,14 +507,37 @@ public:
 		if (!Lock(_FL))
 			return;
 
-		LListItem *Kb = Items[Keyboard];
+		auto Kb = Items[Keyboard];
 		Items.Sort
 		(
-			[Column](LListItem *a, LListItem *b) -> int
+			[Column](auto *a, auto *b)
 			{
-				const char *ATxt = a->GetText(Column);
-				const char *BTxt = b->GetText(Column);
-				return (ATxt && BTxt) ? stricmp(ATxt, BTxt) : 0;
+				auto aTxt = a->GetText(Column);
+				auto bTxt = b->GetText(Column);
+				auto cmp = Stricmp(aTxt, bTxt);
+				// LgiTrace("item.cmp: '%s' '%s' = %i, ptr=%i\n", aTxt, bTxt, cmp, (int)(b - a));
+				return cmp ? cmp : b - a;
+			}
+		);
+		Keyboard = Kb ? (int)Items.IndexOf(Kb) : -1;
+		Unlock();
+		Invalidate(&ItemsPos);
+	}
+	
+	/// Sort by the compare function of the items:
+	void Sort()
+	{
+		if (Items.Length() == 0)
+			return;
+		if (!Lock(_FL))
+			return;
+
+		auto Kb = Items[Keyboard];
+		Items.Sort
+		(
+			[](auto *a, auto *b) -> int
+			{
+				return a->Compare(b);
 			}
 		);
 		Keyboard = Kb ? (int)Items.IndexOf(Kb) : -1;

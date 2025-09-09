@@ -59,7 +59,7 @@ struct LLayoutString : public LDisplayString
 
 /// This class lays out a block of text according to the given styles. It
 /// builds upon the LDisplayString class to render sections of text.
-class LStringLayout
+class LgiClass LStringLayout
 {
 protected:
 	LFontCache *FontCache = NULL;
@@ -95,7 +95,7 @@ public:
 	void SetFontCache(LFontCache *cache) { FontCache = cache; }
 
 	/// Adds a run of text with the same style
-	bool Add(const char *Str, LCss *Style);
+	bool Add(const char *Str, LCss *Style = nullptr);
 	uint32_t NextChar(char *s);
 	uint32_t PrevChar(char *s);
 	LFont *GetBaseFont();

@@ -189,7 +189,7 @@ public:
 				#endif
 
 				LMemStream o(1024);
-				LString err;
+				LError err;
 				int Installed = 0;
 				if (!LGetUri(this, &o, &err, s))
 				{

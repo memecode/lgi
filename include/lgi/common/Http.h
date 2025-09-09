@@ -19,7 +19,7 @@ class LHttp
 	char *Headers = NULL;
 	bool NoCache = false;
 	LString AuthUser, AuthPassword;
-	LString ErrorMsg;
+	LError err;
 
 public:
 	enum ContentEncoding
@@ -49,7 +49,7 @@ public:
 	bool Close();
 	bool IsOpen();
 	LSocketI *GetSocket() { return Socket; }
-	LString GetErrorString() { return ErrorMsg; }
+	LError &GetError() { return err; }
 
 	// General
 	bool Request(	const char *Type,
@@ -105,7 +105,7 @@ bool LGetUri
 	/// The output stream to put the data
 	LStreamI *Out,
 	/// Any error message
-	LString *OutError,
+	LError *OutError,
 	/// The input URI to retreive
 	const char *InUri,
 	/// [Optional] Extra headers to use

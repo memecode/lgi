@@ -57,8 +57,32 @@ public:
 
 		return 0;
 	}
+
+	int Compare(LListItem *To, ssize_t Field) override
+	{
+		auto b = dynamic_cast<DumpItem*>(To);
+
+		switch (Field)
+		{
+			case 0:
+			{
+				return b->Size - Size;
+			}
+			case 1:
+			{
+				return stricmp(Alloc, b->Alloc);
+			}
+			case 2:
+			{
+				return b->Count - Count;
+			}
+		}
+
+		return 0;
+	}
 };
 
+/*
 int Cmp(LListItem *A, LListItem *B, NativeInt d)
 {
 	DumpItem *a = (DumpItem*) A;
@@ -83,7 +107,6 @@ int Cmp(LListItem *A, LListItem *B, NativeInt d)
 	return 0;
 }
 
-/*
 char *Strnstr(char *s, const char *find, int len)
 {
     if (!s || !find || len < 0)
@@ -176,14 +199,11 @@ public:
 				{
 					case LNotifyItemSelect:
 					{
-						LListItem *s = Lst->GetSelected();
-						if (s)
+						if (auto s = Lst->GetSelected())
 						{
-							DumpItem *di = dynamic_cast<DumpItem*>(s);
+							auto di = dynamic_cast<DumpItem*>(s);
 							if (di && Ed)
-							{
 								Ed->Name(di->Stack);
-							}
 						}
 						break;
 					}
@@ -192,9 +212,7 @@ public:
 						int Col;
 						LMouse m;
 						if (Lst->GetColumnClickInfo(Col, m))
-						{
-							Lst->Sort<NativeInt>(Cmp, Col);
-						}
+							Lst->Sort(Col);
 						break;
 					}
 					default:
@@ -370,13 +388,11 @@ public:
 			}
 
 			List<LListItem> Items;
-			// for (void *p = h.First(); p; p = h.Next())
-			for (auto p : h)
-			{
-				Items.Insert((DumpItem*)p.value);
-			}
+			for (auto p: h)
+				Items.Insert(p.value);
+
 			Lst->Insert(Items);
-			Lst->Sort(Cmp);
+			Lst->Sort(0);
 		}
 	}
 };

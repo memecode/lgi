@@ -1591,10 +1591,12 @@ bool LHaveNetConnection()
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Gets a field value
-void InetGetField(	const char *start, const char *end,
+void InetGetField(	const char *start,
+					const char *end, // maybe NULL is not known, in which case scan till the end of the whole header value
 					std::function<char*(size_t)> alloc,
 					std::function<void(size_t)> setLength)
 {
+	LAssert(start != nullptr);
 	const char *s = start, *e = start;
 	static const char *WhiteSpace = " \r\t\n";
 	LArray<LRange> parts;
@@ -1603,7 +1605,7 @@ void InetGetField(	const char *start, const char *end,
 	// Look for the end of the string
 	while (true)
 	{
-		if (*e == 0 || e >= end)
+		if (*e == 0 || (end && e >= end))
 		{
 			auto len = e - s;
 			totalLen += len;
@@ -1617,14 +1619,14 @@ void InetGetField(	const char *start, const char *end,
 			parts.New().Set(s - start, len);
 
 			if (*e == '\r' &&
-				end - e >= 3 &&
+				(!end || end - e >= 3) &&
 				e[1] == '\n' &&
 				IsWhite(e[2]))
 			{
 				e += 3; // \r\n case
 			}
 			else if (*e == '\n' &&
-				end - e >= 2 &&
+				(!end || end - e >= 2) &&
 				IsWhite(e[1]))
 			{
 				e += 2; // no '\r' case...
@@ -1672,7 +1674,7 @@ char *InetGetHeaderField(	// Returns an allocated string or NULL on failure
 	if (Headers && Field)
 	{
 		// for all lines
-		const char *End = Len < 0 ? 0 : Headers + Len;
+		const char *End = Len < 0 ? nullptr : Headers + Len;
 		size_t FldLen = strlen(Field);
 		
 		for (const char *s = Headers;
@@ -1687,6 +1689,8 @@ char *InetGetHeaderField(	// Returns an allocated string or NULL on failure
 				if (*s == ':')
 				{
 					s++;
+
+					// Skip over leading whitespace:
 					while (*s)
 					{
 						if (strchr(" \t\r", *s))
@@ -1695,7 +1699,7 @@ char *InetGetHeaderField(	// Returns an allocated string or NULL on failure
 						}
 						else if (*s == '\n')
 						{
-							if (strchr(" \r\n\t", s[1]))
+							if (strchr(" \r\t", s[1]))
 								s += 2;
 							else
 								break;
@@ -1773,6 +1777,11 @@ void IterateHeaders(
 	if (!headers)
 		return;
 
+	if (filterField.Equals("List-Owner"))
+	{
+		int asd=0;
+	}
+
 	auto end = headers.Get() + headers.Length();
 	for (auto s = headers.Get(); s < end; )
 	{
@@ -1786,7 +1795,8 @@ void IterateHeaders(
 		{
 			// has value
 			s++;
-			while (s < end && IsWhite(*s)) s++;
+			while (s < end && (*s == ' ' || *s == '\t'))
+				s++;
 			auto value = s;
 			while (true)
 			{
@@ -1848,65 +1858,11 @@ LString LGetHeaderField(LString Headers, const char *Field)
 	if (!Headers || !Field)
 		return LString();
 
-	#if 1
-
-		LArray<LHeader> parsed;
-		IterateHeaders(Headers, parsed, Field, 1);
-		if (parsed.Length() > 0)
-			return parsed[0].UnwrapValue();
+	LArray<LHeader> parsed;
+	IterateHeaders(Headers, parsed, Field, 1);
+	if (parsed.Length() > 0)
+		return parsed[0].UnwrapValue();
 	
-	#else
-
-		// for all lines
-		auto End = Headers.Get() + Headers.Length();
-		auto FldLen = Strlen(Field);
-		for (auto s = Headers.Get();
-			s < End;
-			s = SeekNextLine(s, End))
-		{
-			if (!*s)
-				break;
-			if (*s != '\t' &&
-				Strnicmp(s, Field, FldLen) == 0 &&
-				s[FldLen] == ':')
-			{
-				// found a match
-				s += FldLen + 1;
-
-				while (*s && s < End)
-				{
-					if (strchr(" \t\r", *s))
-					{
-						s++;
-					}
-					else if (*s == '\n')
-					{
-						if (strchr(" \r\n\t", s[1]))
-							s += 2;
-						else
-							break;
-					}
-					else break;							
-				}
-						
-				LString value;
-				InetGetField(s, End,
-					[&value](auto sz)
-					{
-						value.Length(sz);
-						return value.Get();
-					},
-					[&value](auto sz)
-					{
-						value.Length(sz);
-					});
-				return value;
-
-			}
-		}
-		
-	#endif
-
 	return LString();
 }
 
@@ -1961,11 +1917,22 @@ bool LHeaderUnitTests()
 	const char *testHdrs = "Content-Type: text/html\r\n"
 		"Content-Length: 12345\r\n"
 		"Cookie: someData";
+	const char *testHdrs2 =
+		"Thread-Index: AdweBDOj\r\n"
+		"Content-Class: \r\n"
+		"Date: Fri, 5 Sep 2025 03:58:07 +0000\r\n"
+		"Message-ID: \r\n"
+		" <JH0PR03MB8021DD51331.outlook.com>\r\n";
 	const char *contentType = "text/html";
 	const char *contentLen = "12345";
 	const char *cookie = "someData";
 
 	#define CHECK(val) if (!(val)) { LAssert(0); return false; }
+
+	auto date = LGetHeaderField(testHdrs2, "Date");
+	CHECK(date == "Fri, 5 Sep 2025 03:58:07 +0000");
+	auto msgId = LGetHeaderField(testHdrs2, "Message-ID");
+	CHECK(msgId == "<JH0PR03MB8021DD51331.outlook.com>");
 
 	CHECK(LGetHeaderField(testHdrs, "Content-Type") == contentType);
 	CHECK(LGetHeaderField(testHdrs, "Content-Length") == contentLen);

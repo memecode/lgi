@@ -866,7 +866,7 @@ void VcFolder::FilterCurrentFiles()
 		// LgiTrace("Filter '%s' by '%s' = %i\n", fn, d->FileFilter.Get(), vis);
 	}
 
-	d->Files->Sort(0);
+	d->Files->Sort(COL_FILENAME);
 	d->Files->UpdateAllItems();
 	d->Files->ResizeColumnsToContent();
 }
@@ -3075,9 +3075,9 @@ struct GitRewriteThread :
 		{
 			// Not installed so...
 			LStringPipe out;
-			LString outErr;
+			LError outErr;
 			if (!LGetUri(this, &out, &outErr, tool))
-				return Error("failed to download tool");
+				return Error(LString::Fmt("failed to download tool: %s", outErr.ToString().Get()));
 
 			LFile outFile(toolPath, O_WRITE);
 			if (outFile)
@@ -5202,6 +5202,8 @@ bool BlameLine::Parse(VersionCtrl type, LArray<BlameLine> &out, LString in)
 			for (auto &ln: lines)
 			{
 				auto s = ln.Get();
+				while (IsWhite(*s))
+					s++;
 				auto eUser = strchr(s, ' ');
 				if (!eUser)
 					continue;

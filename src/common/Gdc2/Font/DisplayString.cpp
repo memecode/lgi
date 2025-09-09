@@ -2043,11 +2043,6 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 			LColour cBack = Font->Back();
 			LColour cWhitespace;
 
-			if (Stristr(Str, L"Your email address and telephone numbers"))
-			{
-				int asd=0;
-			}
-
 			LAutoPtr<MemTextBuf> mem24;
 			if (!pDC->IsScreen() &&
 				pDC->HasAlpha() &&
@@ -2269,19 +2264,32 @@ void LDisplayString::FDraw(LSurface *pDC, int fx, int fy, LRect *frc, bool Debug
 
 	#elif defined __GTK_H__
 	
-		Gtk::cairo_t *cr = pDC->Handle();
+		auto cr = pDC->Handle();
 		if (!cr)
 		{
 			LAssert(!"Can't get cairo.");
 			return;
 		}
-
+		
 		pango_context_set_font_description(LFontSystem::Inst()->GetContext(), Font->Handle());
 		cairo_save(cr);
 
+		double Dx = (double)fx / FScale;
+		double Dy = (double)fy / FScale;
+
+		auto clip = pDC->ClipRgn();
+		if (clip.Valid())
+		{
+			cairo_translate(cr, 0, 0);
+			cairo_rectangle(cr,
+				(double)clip.x1,
+				(double)clip.y1,
+				(double)clip.X(),
+				(double)clip.Y());
+			cairo_clip(cr);
+		}
+
 		LColour b = Font->Back();
-		double Dx = ((double)fx / FScale);
-		double Dy = ((double)fy / FScale);
 		double rx, ry, rw, rh;
 		if (!Font->Transparent())
 		{
@@ -2289,8 +2297,8 @@ void LDisplayString::FDraw(LSurface *pDC, int fx, int fy, LRect *frc, bool Debug
 			cairo_set_source_rgb(cr, (double)b.r()/255.0, (double)b.g()/255.0, (double)b.b()/255.0); cairo_new_path(cr);
 			if (frc)
 			{
-				rx = ((double)frc->x1 / FScale);
-				ry = ((double)frc->y1 / FScale);
+				rx = (double)frc->x1 / FScale;
+				ry = (double)frc->y1 / FScale;
 				rw = (double)frc->X() / FScale;
 				rh = (double)frc->Y() / FScale;
 			}
@@ -2312,8 +2320,8 @@ void LDisplayString::FDraw(LSurface *pDC, int fx, int fy, LRect *frc, bool Debug
 		}
 		else if (frc)
 		{
-			rx = ((double)frc->x1 / FScale);
-			ry = ((double)frc->y1 / FScale);
+			rx = (double)frc->x1 / FScale;
+			ry = (double)frc->y1 / FScale;
 			rw = (double)frc->X() / FScale;
 			rh = (double)frc->Y() / FScale;
 
@@ -2329,12 +2337,12 @@ void LDisplayString::FDraw(LSurface *pDC, int fx, int fy, LRect *frc, bool Debug
 			double Bx = ((double)b.X()) / FScale;
 			
 			#if DEBUG_BOUNDS
-			double By = Font->GetHeight();
-			cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
-			cairo_rectangle(cr, 0, 0, Bx, By);
-			cairo_rectangle(cr, 1, 1, Bx - 2.0, By - 2.0);
-			cairo_set_fill_rule(cr, Gtk::CAIRO_FILL_RULE_EVEN_ODD);
-			cairo_fill(cr);
+				double By = Font->GetHeight();
+				cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
+				cairo_rectangle(cr, 0, 0, Bx, By);
+				cairo_rectangle(cr, 1, 1, Bx - 2.0, By - 2.0);
+				cairo_set_fill_rule(cr, Gtk::CAIRO_FILL_RULE_EVEN_ODD);
+				cairo_fill(cr);
 			#endif
 			
 			if (b.Hnd)
