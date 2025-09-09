@@ -3075,9 +3075,9 @@ struct GitRewriteThread :
 		{
 			// Not installed so...
 			LStringPipe out;
-			LString outErr;
+			LError outErr;
 			if (!LGetUri(this, &out, &outErr, tool))
-				return Error("failed to download tool");
+				return Error(LString::Fmt("failed to download tool: %s", outErr.ToString().Get()));
 
 			LFile outFile(toolPath, O_WRITE);
 			if (outFile)

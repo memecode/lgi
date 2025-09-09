@@ -1229,7 +1229,7 @@ public:
 
 		// Download the file...
 		LStringPipe Out;
-		LString Error;
+		LError Error;
 		bool r = LGetUri(&Cancel, &Out, &Error, Uri, NULL/*InHdrs*/, NULL/*Proxy*/);
 		if (r)
 		{
@@ -1238,7 +1238,7 @@ public:
 		else
 		{
 			// Show the download error in the build log...
-			Log->Print("%s:%i - Web build download failed: %s\n", _FL, Error.Get());
+			Log->Print("%s:%i - Web build download failed: %s\n", _FL, Error.ToString().Get());
 		}
 
 		return 0;
