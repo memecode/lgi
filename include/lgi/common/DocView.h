@@ -120,7 +120,7 @@ public:
 		LAutoPtr<LStreamI> Stream;
 		LAutoPtr<LSurface> pDC;
 		LString Filename;
-		LString Error;
+		LError Error;
 		JobStatus Status;
 		LString MimeType, ContentId;
 

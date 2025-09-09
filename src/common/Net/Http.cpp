@@ -102,17 +102,17 @@ bool LHttp::Open(LAutoPtr<LSocketI> S, const char *RemoteHost, int Port)
 			u.Port = Port;
 
 		if (!Socket)
-			ErrorMsg = "No socket object.";
+			err.Set(LErrorInvalidParam, "No socket object.");
 		else if (Socket->Open(u.sHost, u.Port > 0 ? u.Port : HTTP_PORT))
 			return true;
 		else
-			ErrorMsg = Socket->GetErrorString();
+			err.Set(LErrorFuncFailed, Socket->GetErrorString());
 	}
 	else
-		ErrorMsg = "No remote host.";
+		err.Set(LErrorInvalidParam, "No remote host.");
 
-	if (ErrorMsg)
-		LgiTrace("%s:%i - %s.\n", _FL, ErrorMsg.Get());
+	if (err)
+		LgiTrace("%s:%i - %s.\n", _FL, err.ToString().Get());
 
 	return false;
 }
@@ -151,7 +151,11 @@ bool LHttp::Request
 {
 	// Input validation
 	if (!Socket || !Uri || !Out || !Type)
+	{
+		err.Set(LErrorInvalidParam,
+				LString::Fmt("%s:%i - missing param %p,%p,%p,%p", _FL, Socket, Uri, Out, Type));
 		return false;
+	}
 
 	#if DEBUG_LOGGING
 	LStringPipe Log;
@@ -242,6 +246,7 @@ bool LHttp::Request
 		{
 			// Digest authentication
 			// Not implemented yet...
+			err.Set(LErrorNotSupported, "Digest authentication not impl.");
 			LAssert(!"Not impl.");
 		}
 	}
@@ -253,11 +258,20 @@ bool LHttp::Request
 	#endif
 
 	bool Status = false;
-	if (Socket && c)
+	if (!Socket || !c)
+	{
+		err.Set(LErrorInvalidParam,
+				LString::Fmt("%s:%i - missing param %p,%p", _FL, Socket, c));
+	}
+	else
 	{
 		// Write the headers...
 		bool WriteOk = Socket->Write(c, c.Length()) == c.Length();
-		if (WriteOk)
+		if (!WriteOk)
+		{
+			err.Set(LErrorIoFailed, "Write headers failed.");
+		}
+		else
 		{
 			// Write any body...
 			if (InBody)
@@ -268,6 +282,7 @@ bool LHttp::Request
 					ssize_t w = Socket->Write(s, r);
 					if (w < r)
 					{
+						err.Set(LErrorIoFailed, "Write body failed.");
 						return false;
 					}
 
@@ -310,7 +325,11 @@ bool LHttp::Request
 
 			// Process output
 			auto h = Headers.NewLStr();
-			if (h)
+			if (!h)
+			{
+				err.Set(LErrorNoMem, "Header alloc failed.");
+			}
+			else
 			{
 				#if DEBUG_LOGGING
 				Log.Print("HTTP res.hdrs=%s\n-------------------------------------\nHTTP res.body=", h);
@@ -719,18 +738,18 @@ void ZLibFree(voidpf opaque, voidpf address)
 	// Do nothing... the memory is owned by an autoptr
 }
 
-bool LGetUri(LCancel *Cancel, LStreamI *Out, LString *OutError, const char *InUri, const char *InHeaders, LUri *InProxy)
+bool LGetUri(LCancel *Cancel, LStreamI *Out, LError *OutError, const char *InUri, const char *InHeaders, LUri *InProxy)
 {
 	if (!InUri || !Out)
 	{
 		if (OutError)
-			OutError->Printf("Parameter missing error (%p,%p)", InUri, Out);
+			OutError->Set(LErrorInvalidParam, LString::Fmt("Parameter missing error (%p,%p)", InUri, Out));
 		return false;
 	}
 
 	LHttp Http;
 	int RedirectLimit = 10;
-	LAutoString Location;
+	LString Location;
 
 	for (int i=0;
 		i<RedirectLimit &&
@@ -760,7 +779,7 @@ bool LGetUri(LCancel *Cancel, LStreamI *Out, LString *OutError, const char *InUr
 		if (!s)
 		{
 			if (OutError)
-				OutError->Printf("Alloc Failed");
+				OutError->Set(LErrorNoMem, "Socket alloc Failed");
 			return false;
 		}
 
@@ -771,7 +790,12 @@ bool LGetUri(LCancel *Cancel, LStreamI *Out, LString *OutError, const char *InUr
 		if (!Http.Open(s, InUri, DefaultPort))
 		{
 			if (OutError)
-				OutError->Printf("Http open failed for '%s:%i'", InUri, DefaultPort);
+			{
+				if (Http.GetError())
+					*OutError = Http.GetError();
+				else
+					OutError->Set(LErrorFuncFailed, LString::Fmt("Http open failed for '%s:%i'", InUri, DefaultPort));
+			}
 			return false;
 		}
 
@@ -805,31 +829,30 @@ bool LGetUri(LCancel *Cancel, LStreamI *Out, LString *OutError, const char *InUr
 		int StatusCatagory = Status / 100;
 		if (StatusCatagory == 3)
 		{
-			LString Headers = OutHeaders.NewLStr();
-			LgiTrace("Header=%s\n", Headers.Get());
-			LAutoString Loc(InetGetHeaderField(Headers, "Location", -1));
+			auto Headers = OutHeaders.NewLStr();
+			auto Loc = LGetHeaderField(Headers, "Location");
 			if (!Loc)
 			{
 				if (OutError)
-					*OutError = "HTTP redirect doesn't have a location header.";
+					OutError->Set(LErrorInvalidParam, "HTTP redirect doesn't have a location header.");
 				return false;
 			}
 			
 			if (!_stricmp(Loc, InUri))
 			{
 				if (OutError)
-					*OutError = "HTTP redirect to same URI.";
+					OutError->Set(LErrorInvalidParam, "HTTP redirect to same URI.");
 				return false;
 			}
 
-			LgiTrace("HTTP redir(%i) from '%s' to '%s'\n", i, InUri, Loc.Get());
+			// LgiTrace("HTTP redir(%i) from '%s' to '%s'\n", i, InUri, Loc.Get());
 
 			LUri u(Loc);
 			if (!u.sHost)
 			{
 				LUri in(InUri);
 				in.sPath = u.sPath;
-				Location.Reset(NewStr(in.ToString()));
+				Location = in.ToString();
 			}
 			else
 			{
@@ -844,7 +867,15 @@ bool LGetUri(LCancel *Cancel, LStreamI *Out, LString *OutError, const char *InUr
 			Enc = LHttp::EncodeRaw;
 
 			if (OutError)
-				OutError->Printf("Got %i for '%.200s'\n", Status, InUri);
+			{
+				if (Http.GetError())
+					*OutError = Http.GetError();
+				else if (Status)
+					OutError->Set(	LErrorFuncFailed,
+									LString::Fmt("Got http status %i for '%.200s'\n", Status, InUri));
+				else
+					OutError->Set(LErrorFuncFailed, "Unknown http error.");
+			}
 			return false;
 		}
 
@@ -857,7 +888,7 @@ bool LGetUri(LCancel *Cancel, LStreamI *Out, LString *OutError, const char *InUr
 			if (!Cp.Copy(&TmpFile, Out))
 			{
 				if (OutError)
-					*OutError = "Stream copy failed.";
+					OutError->Set(LErrorFuncFailed, "Stream copy failed.");
 				return false;
 			}
 		}
@@ -867,7 +898,7 @@ bool LGetUri(LCancel *Cancel, LStreamI *Out, LString *OutError, const char *InUr
 			if (Len <= 0)
 			{
 				if (OutError)
-					*OutError = "No data to ungzip.";
+					OutError->Set(LErrorFuncFailed, "No data to ungzip.");
 				return false;
 			}
 
@@ -875,7 +906,7 @@ bool LGetUri(LCancel *Cancel, LStreamI *Out, LString *OutError, const char *InUr
 			if (!Data)
 			{
 				if (OutError)
-					*OutError = "Alloc Failed";
+					OutError->Set(LErrorNoMem, "Alloc Failed");
 				return false;
 			}
 
@@ -913,7 +944,8 @@ bool LGetUri(LCancel *Cancel, LStreamI *Out, LString *OutError, const char *InUr
 			{
 				GdcD->NeedsCapability("zlib");
 				if (OutError)
-					OutError->Printf("Gzip decompression not available (needs %s)", z ? z->Name() : "zlib library");
+					OutError->Set(	LErrorFuncFailed,
+									LString::Fmt("Gzip decompression not available (needs %s)", z ? z->Name() : "zlib library"));
 				return false;
 			}
 		}
