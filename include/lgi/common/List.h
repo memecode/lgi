@@ -91,9 +91,9 @@ protected:
 public:
 	// Application defined, defaults to 0
 	union {
-		void *_UserPtr;
-		NativeInt _UserInt;
-	};
+		void *Ptr;
+		NativeInt Int;
+	}	_user = {};
 
 	// Object
 	LListItem(const char *initStr = NULL);
@@ -510,9 +510,13 @@ public:
 		auto Kb = Items[Keyboard];
 		Items.Sort
 		(
-			[Column](auto *a, auto *b) -> int
+			[Column](auto *a, auto *b)
 			{
-				return Stricmp(a->GetText(Column), b->GetText(Column));
+				auto aTxt = a->GetText(Column);
+				auto bTxt = b->GetText(Column);
+				auto cmp = Stricmp(aTxt, bTxt);
+				// LgiTrace("item.cmp: '%s' '%s' = %i, ptr=%i\n", aTxt, bTxt, cmp, (int)(b - a));
+				return cmp ? cmp : b - a;
 			}
 		);
 		Keyboard = Kb ? (int)Items.IndexOf(Kb) : -1;

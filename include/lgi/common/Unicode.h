@@ -527,11 +527,8 @@ int Strncmp(const T *str_a, const T *str_b, ssize_t len)
 template<typename T>
 int Stricmp(const T *str_a, const T *str_b)
 {
-	if (!str_a || !str_b)
-		return -1;
-
-	REG const T *a = str_a;
-	REG const T *b = str_b;
+	REG const T *a = str_a ? str_a : "";
+	REG const T *b = str_b ? str_b : "";
 	REG T ach, bch;
 
 	while (true)

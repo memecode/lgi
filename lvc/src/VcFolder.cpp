@@ -866,7 +866,7 @@ void VcFolder::FilterCurrentFiles()
 		// LgiTrace("Filter '%s' by '%s' = %i\n", fn, d->FileFilter.Get(), vis);
 	}
 
-	d->Files->Sort(0);
+	d->Files->Sort(COL_FILENAME);
 	d->Files->UpdateAllItems();
 	d->Files->ResizeColumnsToContent();
 }
