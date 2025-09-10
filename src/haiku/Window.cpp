@@ -53,7 +53,8 @@ enum LAttachState
 	LDetaching,
 };
 
-class LWindowPrivate : public BWindow
+class LWindowPrivate :
+	public BWindow
 {
 public:
 	LWindow *Wnd;
@@ -236,10 +237,8 @@ public:
 
 ///////////////////////////////////////////////////////////////////////
 LWindow::LWindow() :
-	LView(0)
-	#ifdef _DEBUG
-	, DebugDC(_FL)
-	#endif
+	LView(nullptr),
+	_screenBuf(_FL)
 {
 	d = new LWindowPrivate(this);
 	_Window = this;

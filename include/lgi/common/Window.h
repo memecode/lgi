@@ -56,9 +56,13 @@ protected:
 	#elif defined(HAIKU)
 		
 		friend class LAppPrivate;
+
 		// This is called in the app thread.. lock the window before using
 		void HaikuEvent(LMessage::Events event, BMessage *m) override;
+		// Previous zoom state
 		LWindowZoom _PrevZoom = LZoomNormal;
+		// Double buffer
+		LMemDC _screenBuf;
 	
 	#else
 
@@ -106,7 +110,7 @@ protected:
 
 public:
 	#ifdef _DEBUG
-	LMemDC DebugDC;
+	LAutoPtr<LMemDC> DebugDC;
 	#endif
 
 	#ifdef __GTK_H__
