@@ -2832,14 +2832,6 @@ void SerialiseContext::PostLoad(AppWnd *App)
 	}
 }
 
-int DialogNameCompare(ResDialog *a, ResDialog *b, NativeInt Data)
-{
-	const char *A = (a)?a->Name():0;
-	const char *B = (b)?b->Name():0;
-	if (A && B) return stricmp(A, B);
-	return -1;
-}
-
 void AppWnd::SortDialogs()
 {
 	List<Resource> Lst;
@@ -2856,7 +2848,13 @@ void AppWnd::SortDialogs()
 			}
 		}
 
-		Dlgs.Sort(DialogNameCompare);
+		Dlgs.Sort([](auto a, auto b)
+			{
+				const char *A = (a)?a->Name():0;
+				const char *B = (b)?b->Name():0;
+				if (A && B) return stricmp(A, B);
+				return -1;
+			});
 
 		for (auto d: Dlgs)
 		{
@@ -4627,7 +4625,7 @@ void FindMenuKeys(LList *out, ResMenu *menu)
 			item->SetText(ref, ColRefId);
 			item->SetText(ctrl, ColCtrlId);
 			item->SetText(i->GetStr()->Get(), ColName);
-			item->_UserPtr = static_cast<FieldSource*>(i);
+			item->User.Ptr = static_cast<FieldSource*>(i);
 
 			out->Insert(item);
 		}
@@ -4661,7 +4659,7 @@ void FindShortCuts(LList *Out, LViewI *In)
 				li->SetText(ctrl, ColCtrlId);
 				li->SetText(rdc->GetClass(), ColName);
 				
-				li->_UserPtr = static_cast<FieldSource*>(rdc);
+				li->User.Ptr = static_cast<FieldSource*>(rdc);
 				
 				Out->Insert(li);
 			}
@@ -4683,7 +4681,7 @@ int ShortCutView::OnNotify(LViewI *Ctrl, const LNotification &n)
 				if (!li)
 					break;
 
-				auto c = (FieldSource*) li->_UserPtr;
+				auto c = (FieldSource*) li->User.Ptr;
 				if (!c)
 					break;
 

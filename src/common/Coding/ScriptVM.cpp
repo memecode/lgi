@@ -44,9 +44,8 @@ extern "C" uint64 __cdecl CallExtern64(void *FuncAddr, NativeInt *Ret, uint32_t 
 #include <signal.h>
 #endif
 
-int LVariantCmp(LVariant *a, LVariant *b, NativeInt Data)
+int LVariantCmp(LVariant *a, LVariant *b, LVariant *param)
 {
-	LVariant *Param = (LVariant*) Data;
 	if (!a || !b)
 		return 0;
 		
@@ -61,9 +60,9 @@ int LVariantCmp(LVariant *a, LVariant *b, NativeInt Data)
 	}
 	else if (a->Type == GV_DOM &&
 			 b->Type == GV_DOM &&
-			 Param)
+			 param)
 	{
-		const char *Fld = Param->Str();
+		const char *Fld = param->Str();
 		int Dir = 1;
 		if (Fld && *Fld == '-')
 		{

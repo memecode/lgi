@@ -283,22 +283,6 @@ public:
 	}
 };
 
-int VectCompareY(LVector *a, LVector *b, NativeInt Data)
-{
-	double d = a->Bounds.y1 - b->Bounds.y1;
-	return (d < 0) ? -1 : 1;
-}
-
-int VectCompareX(LVector *a, LVector *b, NativeInt Data)
-{
-	NativeInt i = Data >> SUB_SHIFT;
-	NativeInt r = Data & SUB_MASK;
-
-	double d = a->aax[i - a->y1].x[r] - b->aax[i - b->y1].x[r];
-	
-	return (d < 0) ? -1 : 1;
-}
-
 ///////////////////////////////////////////////////////////
 enum LSegType
 {
@@ -1376,7 +1360,11 @@ bool LPath::Flatten()
 	}
 
 	// Sort the vectors on their top edge
-	Vecs.Sort(VectCompareY);
+	Vecs.Sort([](auto a, auto b)
+		{
+			double d = a->Bounds.y1 - b->Bounds.y1;
+			return (d < 0) ? -1 : 1;
+		});
 
 	#ifdef DEBUG_LOG
 	DEBUG_LOG("\n");
@@ -1999,11 +1987,6 @@ void LSolidBrush::Rop(LRopArgs &Args)
 }
 
 ////////////////////////////////////////////////////////////////////////////
-int StopCompare(LBlendStop *a, LBlendStop *b, NativeInt Data)
-{
-	return a->Pos > b->Pos ? 1 : -1;
-}
-
 bool LBlendBrush::Start(LRopArgs &Args)
 {
 	List<LBlendStop> s;
@@ -2011,7 +1994,10 @@ bool LBlendBrush::Start(LRopArgs &Args)
 	{
 		s.Insert(Stop+n);
 	}
-	s.Sort(StopCompare);
+	s.Sort([](auto a, auto b)
+		{
+			return a->Pos > b->Pos ? 1 : -1;
+		});
 
 	auto it = s.begin();
 	LBlendStop *Prev = *it;

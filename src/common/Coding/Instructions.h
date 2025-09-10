@@ -1696,8 +1696,11 @@ case IDomCall:
 					}
 					case ContainerSort:
 					{
-						auto Param = Arg.Length() > 0 ? Arg[0] : NULL;
-						Dom->Value.Lst->Sort(LVariantCmp, (NativeInt)Param);
+						LVariant *param = Arg.Length() > 0 ? Arg[0] : NULL;
+						Dom->Value.Lst->Sort([param](auto a, auto b)
+							{
+								return LVariantCmp(a, b, param);
+							});
 						break;
 					}
 					default:

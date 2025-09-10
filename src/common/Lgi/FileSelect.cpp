@@ -2005,26 +2005,6 @@ void LFolderItem::OnMouseClick(LMouse &m)
 	}
 }
 
-int LFolderItemCompare(LListItem *A, LListItem *B, NativeInt Data)
-{
-	LFolderItem *a = dynamic_cast<LFolderItem*>(A);
-	LFolderItem *b = dynamic_cast<LFolderItem*>(B);
-	if (a && b)
-	{
-		if (a->IsDir ^ b->IsDir)
-		{
-			if (a->IsDir) return -1;
-			else return 1;
-		}
-		else if (a->File && b->File)
-		{
-			return stricmp(a->File, b->File);
-		}
-	}
-
-	return 0;
-}
-
 LFolderList::LFolderList(LFileSelectDlg *dlg, int Id, int x, int y, int cx, int cy) :
 	LList(Id, x, y, cx, cy),
 	LFolderView(dlg)
@@ -2217,7 +2197,25 @@ void LFolderList::OnDir(LDirectory &Dir)
 	}
 
 	// Sort items...
-	New.Sort(LFolderItemCompare);
+	New.Sort([](auto A, auto B)
+		{
+			auto a = dynamic_cast<LFolderItem*>(A);
+			auto b = dynamic_cast<LFolderItem*>(B);
+			if (a && b)
+			{
+				if (a->IsDir ^ b->IsDir)
+				{
+					if (a->IsDir) return -1;
+					else return 1;
+				}
+				else if (a->File && b->File)
+				{
+					return Stricmp(a->File, b->File);
+				}
+			}
+
+			return 0;
+		});
 
 	// Display items...
 	Insert(New);

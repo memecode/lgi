@@ -93,7 +93,7 @@ public:
 	union {
 		void *Ptr;
 		NativeInt Int;
-	}	_user = {};
+	}	User = {};
 
 	// Object
 	LListItem(const char *initStr = NULL);
@@ -152,7 +152,11 @@ public:
 	void OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c) override;
 
 	// Over-ridable
-	virtual int Compare(LListItem *To, ssize_t Field = 0) { return 0; }
+	virtual int Compare(LListItem *To, ssize_t Field = 0)
+	{
+		LAssert(!"need to override this");
+		return 0;
+	}
 	virtual void OnColumnNotify(int Col, int64 Data) { Update(); }
 };
 
@@ -481,6 +485,8 @@ public:
 		Unlock();
 		Invalidate(&ItemsPos);
 	}
+
+	bool SetSort(SortParam sort, bool reorderItems = true, bool setMark = true) override;
 
 	/// Sort the list
 	void Sort

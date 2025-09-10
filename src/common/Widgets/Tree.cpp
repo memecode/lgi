@@ -21,16 +21,20 @@ struct LTreeLocker
 {
 	LTree *t = NULL;
 	bool status = false;
+
 	LTreeLocker(LTree *tree, const char *file, int line) : t(tree)
 	{
 		if (t)
 			status = t->Lock(file, line);
 	}
+
 	~LTreeLocker()
 	{
 		if (status && t)
 			t->Unlock();
 	}
+
+	operator bool() const { return status; }
 };
 
 #define TREELOCK(ptr) LTreeLocker _lock(ptr, _FL);
@@ -858,6 +862,34 @@ void LTreeItem::_MouseClick(LMouse &m)
 	}
 }
 
+bool LTreeItem::SetSort(SortParam sort, bool reorderItems, bool setMark)
+{
+	LTreeLocker lck(GetTree(), _FL);
+	if (!lck)
+		return false;
+	return LSortable::SetSort(sort, reorderItems, setMark);
+}
+
+void LTreeItem::Sort(std::function<int(LTreeNode*, LTreeNode*)> compare)
+{
+	LTreeLocker lck(GetTree(), _FL);
+	if (!lck)
+		return;
+
+	Items.Sort(compare);
+	GetTree()->UpdateAllItems();
+}
+
+void LTreeItem::Sort(int Column)
+{
+	LTreeLocker lck(GetTree(), _FL);
+}
+
+void LTreeItem::Sort()
+{
+	LTreeLocker lck(GetTree(), _FL);
+}
+
 void LTreeItem::OnPaint(ItemPaintCtx &Ctx)
 {
 	LAssert(Tree != NULL);
@@ -1133,6 +1165,45 @@ LTree::~LTree()
 {
 	Empty();
 	DeleteObj(d);
+}
+
+void LTree::Sort(std::function<int(LTreeNode*, LTreeNode*)> compare)
+{
+	LTreeLocker lck(this, _FL);
+	if (!lck)
+		return;
+
+	Items.Sort(compare);
+	UpdateAllItems();
+}
+	
+void LTree::Sort(int Column)
+{
+	LTreeLocker lck(this, _FL);
+	if (!lck)
+		return;
+
+	Items.Sort([Column](auto a, auto b)
+		{
+			auto aTxt = a->GetText(Column);
+			auto bTxt = b->GetText(Column);
+			int cmp = Stricmp(aTxt, bTxt);
+			return cmp ? cmp : (int) (b - a);
+		});
+	UpdateAllItems();
+}
+	
+void LTree::Sort()
+{
+	LTreeLocker lck(this, _FL);
+	if (!lck)
+		return;
+
+	Items.Sort([](auto a, auto b)
+		{
+			return a->Compare(b);
+		});
+	UpdateAllItems();
 }
 
 // Internal tree methods

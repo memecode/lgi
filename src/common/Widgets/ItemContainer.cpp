@@ -228,7 +228,7 @@ void LItemContainer::PaintColumnHeadings(LSurface *pDC)
 
 LItemColumn *LItemContainer::AddColumn(const char *Name, int Width, int Where)
 {
-	LItemColumn *c = 0;
+	LItemColumn *c = nullptr;
 
 	if (Lock(_FL))
 	{
@@ -404,16 +404,25 @@ void LItemContainer::GetColumnSizes(ColSizes &cs)
 	}
 }
 
-void LItemContainer::SetSortingMark(int ColIdx, bool Up)
+void LItemContainer::SetSortingMark(SortParam sort)
 {
-	for (int i=0; i<GetColumns(); i++)
-	{
-		auto c = ColumnAt(i);
-		if (!c)
-			continue;
+	if (sortMark == sort)
+		return;
 
-		c->UpArrow(ColIdx == i && Up);
-		c->DownArrow(ColIdx == i && !Up);
+	if (Lock(_FL))
+	{
+		sortMark = sort;
+
+		for (int i=0; i<GetColumns(); i++)
+		{
+			if (auto c = ColumnAt(i))
+			{
+				c->UpArrow(sortMark.Col == i && !sortMark.Ascend);
+				c->DownArrow(sortMark.Col == i && sortMark.Ascend);
+			}
+		}
+
+		Unlock();
 	}
 }
 

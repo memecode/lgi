@@ -37,11 +37,6 @@ public:
 	LDateTime Date;
 };
 
-int InfCmp(FileInf *a, FileInf *b, NativeInt d)
-{
-	return -a->Date.Compare(&b->Date);
-}
-
 class HtmlItem : public LListItem
 {
     char *Base;
@@ -396,7 +391,10 @@ public:
 							}
 						}
 					}
-					Files.Sort(InfCmp);
+					Files.Sort([](auto a, auto b)
+						{
+							return -a->Date.Compare(&b->Date);
+						});
 
 					for (auto f: Files)
 					{

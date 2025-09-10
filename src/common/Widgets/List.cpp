@@ -178,7 +178,7 @@ LListItemColumn *LListItemColumn::GetItemCol(LListItem *i, int Col)
 // List item
 LListItem::LListItem(const char *initStr)
 {
-	LAssert(_user.Ptr == nullptr);
+	LAssert(User.Ptr == nullptr);
 	d = new LListItemPrivate;
 	Pos.ZOff(-1, -1);
 	if (initStr)
@@ -2840,4 +2840,27 @@ int LList::GetContentSize(int Index)
 	}
 
 	return Max;
+}
+
+bool LList::SetSort(SortParam sort, bool reorderItems, bool setMark)
+{
+	if (sortParam == sort)
+		return true;
+	if (!Lock(_FL))
+		return false;
+
+	bool status = true;
+	if (sort.Col >= (ssize_t) Columns.Length())
+		status = false;
+	else
+	{
+		sortParam = sort;
+		if (setMark)
+			SetSortingMark(sort);
+		if (reorderItems)
+			Sort();
+	}
+		
+	Unlock();
+	return status;
 }

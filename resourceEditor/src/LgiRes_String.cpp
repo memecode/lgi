@@ -1103,14 +1103,12 @@ void ResStringGroup::AppendLanguage(LLanguageId Id)
 	}
 }
 
-int RefCmp(ResString *a, ResString *b, NativeInt d)
-{
-	return a->GetRef() - b->GetRef();
-}
-
 void ResStringGroup::Sort()
 {
-	Strs.Sort(RefCmp);
+	Strs.Sort([](auto a, auto b)
+		{
+			return a->GetRef() - b->GetRef();
+		});
 }
 
 void ResStringGroup::RemoveUnReferenced()

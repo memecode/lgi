@@ -234,11 +234,73 @@ public:
 
 #define DEFAULT_COLUMN_SPACING		12
 
+class LgiClass LSortable
+{
+public:
+    struct SortParam
+	{
+        int Col = -1;
+        bool Ascend = true;
+
+		operator bool() const
+		{
+			return Col >= 0;
+		}
+
+		bool operator ==(const SortParam &sp) const
+		{
+			return Col == sp.Col && Ascend == sp.Ascend;
+		}
+    };
+
+protected:
+	SortParam sortParam, sortMark;
+
+public:
+	/// Sets/clears the sorting mark
+	virtual void SetSortingMark(
+		/// Index of the column, or -1 to unset
+		int ColIdx = -1,
+		/// Which mark to set
+		bool Up = true)
+	{
+		SetSortingMark({ ColIdx, !Up });
+	}
+	
+	virtual void SetSortingMark(SortParam sort)
+	{
+		sortMark = sort;
+	}
+
+	/// \returns the current sorting params:
+	virtual SortParam GetSort() { return sortParam; }
+
+	/// Set the sorting params, and optionally reorder the items
+	virtual bool SetSort(SortParam sort, bool reorderItems = true, bool setMark = true)
+	{
+		sortParam = sort;
+
+		if (setMark)
+			SetSortingMark(sort);
+		if (reorderItems)
+			Sort();
+
+		return true;
+	}
+		
+	/// Sorts items via the specified column
+	virtual void Sort(int column) = 0;
+		
+	/// Sorts items via the LItem::Compare function
+	virtual void Sort() = 0;
+};
+
 class LgiClass LItemContainer :
 	public LLayout,
 	public LImageListOwner,
 	public LDragDropSource,
-	public LDragDropTarget
+	public LDragDropTarget,
+	virtual public LSortable
 {
 	friend class LItemColumn;
 	friend class LItem;
@@ -459,13 +521,6 @@ public:
 
 	int HitColumn(int x, int y, LItemColumn *&Resize, LItemColumn *&Over);
 
-	/// Sets/clears the sorting mark
-	void SetSortingMark(
-		/// Index of the column, or -1 to unset
-		int ColIdx = -1,
-		/// Which mark to set
-		bool Up = true);
-
 	/// Called when a column is clicked
 	virtual void OnColumnClick
 	(
@@ -489,6 +544,9 @@ public:
 		LAssert(!"Not impl..");
 		return *this;
 	}
+
+	// Sorting:
+	void SetSortingMark(SortParam sort) override;
 
 	// Drag and drop support:
 	
