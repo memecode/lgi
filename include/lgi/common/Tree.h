@@ -185,14 +185,19 @@ public:
 		[[deprecated]]
 		bool Sort(int (*Compare)(LTreeItem*, LTreeItem*, T user_param), T user_param = 0)
 		{
-			auto t = GetTree();
+			// FIXME: needs locking... but tree is not defined...
+			// auto t = GetTree();
 			if (!Compare)
 				return false;
+			// if (!t->Lock(_FL)) return false;
 
-			// FIXME: needs locking?		
-			Items.Sort(Compare, user_param);
+			Items.Sort([Compare, user_param](auto a, auto b)
+				{
+					return Compare(a, b, user_param);
+				});
 			SetLayoutDirty();
 
+			// t->Unlock();
 			return true;
 		}
 
