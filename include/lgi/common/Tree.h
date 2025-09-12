@@ -36,6 +36,19 @@ protected:
 	bool ReorderPos(LItemContainer::ContainerItemDrop &drop, LPoint &pt, int depth);
 
 public:
+	class LgiClass Locker {
+		LTree *tree = nullptr;
+		bool locked = false;
+	public:
+		Locker(LTree *t, const char *file, int line);
+		~Locker();
+		operator bool() const { return locked || !tree; }
+	};
+	Locker ScopedLock(const char *file, int line)
+	{
+		return Locker(Tree, file, line);
+	}
+
 	LTreeNode();
 	virtual ~LTreeNode();
 
