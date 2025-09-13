@@ -67,13 +67,14 @@ public:
 };
 
 int LRadioGroupPrivate::NextId = 10000;
-LRadioGroup::LRadioGroup(int id, const char *name, int Init)
+LRadioGroup::LRadioGroup(int id, const char *name, int64_t Init)
 	: ResObject(Res_Group)
 {
 	d = new LRadioGroupPrivate(this);
 	Name(name);
 	SetId(id);
-	d->Val = Init;
+	if (Init >= 0)
+		d->Val = Init;
 	LResources::StyleElement(this);
 }
 
@@ -359,14 +360,24 @@ LRadioButton *LRadioGroup::Append(const char *name)
 	return NULL;
 }
 
-LRadioButton *LRadioGroup::Selected()
+LRadioButton *LRadioGroup::Selected(const char *newSelection)
 {
 	for (auto w: Children)
 	{
 		if (auto btn = dynamic_cast<LRadioButton*>(w))
 		{
-			if (btn->Value())
+			if (newSelection)
+			{
+				if (!Stricmp(newSelection, btn->Name()))
+				{
+					btn->Value(true);
+					return btn;
+				}
+			}
+			else if (btn->Value())
+			{
 				return btn;
+			}
 		}
 	}
 

@@ -1144,7 +1144,7 @@ LItem::~LItem()
 
 LView *LItem::EditLabel(int Col)
 {
-	LItemContainer *c = GetContainer();
+	auto c = GetContainer();
 	if (!c)
 		return NULL;
 	
@@ -1160,9 +1160,8 @@ LView *LItem::EditLabel(int Col)
 
 void LItem::OnEditLabelEnd()
 {
-	LItemContainer *c = GetContainer();
-	if (c)
-		c->ItemEdit = NULL;
+	if (auto c = GetContainer())
+		c->ItemEdit = nullptr;
 }
 
 void LItem::SetEditLabelSelection(int SelStart, int SelEnd)
