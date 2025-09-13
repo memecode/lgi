@@ -676,7 +676,7 @@ public:
 			{
 				Str->Len = NewLen;
 				Str->Refs = 1;
-				Str->Str[0] = 0; // NULL terminate...
+				Str->Str[Str->Len] = 0; // NULL terminate...
 			}
 			else return 0;
 		}

@@ -1064,6 +1064,10 @@ public:
 	/// Search for a substring and return it's index, or -1 if not found.
 	ssize_t Find(LString str, bool caseSensitive = true);
 
+	/// Finds the first occurance of any of the characters in 'searchChars'.
+	/// \returns the byte index or -1 if not found.
+	ssize_t CharAt(LString searchChars);
+
 	/// Iterate over the data in the container
 	/// Callback should return true to keep iterating...
 	void Iterate(std::function<bool(uint8_t*, size_t)> callback, bool reverse = false) const;

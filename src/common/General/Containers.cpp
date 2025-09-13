@@ -332,6 +332,27 @@ ssize_t LMemQueue::Write(const void *_Ptr, ssize_t Size, int Flags)
 	return Status;
 }
 
+ssize_t LMemQueue::CharAt(LString searchChars)
+{
+	ssize_t pos = 0, match = -1;
+	
+	Iterate([&](auto ptr, auto sz)
+		{
+			for (int i=0; i<sz; i++)
+			{
+				if (strchr(searchChars.Get(), ptr[i]))
+				{
+					match = pos;
+					return false;
+				}
+				pos++;
+			}
+			return true;
+		});
+
+	return match;
+}
+
 ssize_t LMemQueue::Find(LString str, bool caseSensitive)
 {
 	if (!str.Get())
@@ -496,7 +517,6 @@ ssize_t LStringPipe::LineChars()
 	for (auto m: Mem)
 	{
 		uint8_t *p = m->Ptr();
-
 		for (int i = m->Next; i < m->Used; i++)
 		{
 			Len++;
