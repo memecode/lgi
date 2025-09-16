@@ -533,6 +533,9 @@
     <ClCompile Include="..\src\posix\SubProcess.cpp">
       <Filter>Source Files\Core\Process</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\common\General\SubProcessCommon.cpp">
+      <Filter>Source Files\Core\Process</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\lgi\common\About.h">

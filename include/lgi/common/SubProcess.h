@@ -41,6 +41,8 @@
 	#define LSUBPROCESS_ERROR	ERROR_PROCESS_ABORTED
 #endif
 
+#include "lgi/common/Thread.h"
+
 LgiExtern bool LIsProcess(OsProcessId Pid);
 
 class LgiClass LSubProcess : public LStream

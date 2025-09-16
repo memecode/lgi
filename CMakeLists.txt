@@ -179,6 +179,7 @@ set (CommonSource
 	include/lgi/common/OptionsFile.h
 	src/common/Lgi/OptionsFile.cpp
 	include/lgi/common/SubProcess.h
+	src/common/General/SubProcessCommon.cpp
 	include/lgi/common/Stream.h
 	src/common/Lgi/Stream.cpp
 	src/common/Lgi/MemStream.cpp

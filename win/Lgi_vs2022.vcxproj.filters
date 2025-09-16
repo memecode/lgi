@@ -506,6 +506,9 @@
     <ClCompile Include="..\src\common\Net\CommsBus.cpp">
       <Filter>Source Files\Network\CommsBus</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\common\General\SubProcessCommon.cpp">
+      <Filter>Source Files\Core\Process</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\lgi\common\Gdc2.h">
@@ -1099,9 +1102,6 @@
     <ClInclude Include="..\include\lgi\common\StructuredLog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\SubProcess.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\TableDb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1236,6 +1236,9 @@
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\CommsBus.h">
       <Filter>Source Files\Network\CommsBus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\SubProcess.h">
+      <Filter>Source Files\Core\Process</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
