@@ -131,6 +131,45 @@ public:
 	ssize_t Read(void *Buf, ssize_t Size, int Flags = 0) override;
 	bool Write(LString s);
 	ssize_t Write(const void *Buf, ssize_t Size, int Flags = 0) override;
+
+	// General management thread helper class:
+	class LgiClass IoThread :
+		public LThread,
+		public LMutex,
+		public LCancel
+	{
+		LAutoPtr<LSubProcess> process;
+		LStringPipe out;
+
+		// Private methods:
+		void doRead(bool ended);
+		int Main();
+		
+	public:
+		// Client applications can use one of these functions to get data from the process:
+		using TCallback = std::function<void(LString)>;
+		
+			/// Handle a single line of output (will correctly handle printing over the current line with '\r'):
+			/// This isn't particularly efficent.
+			TCallback onLine;
+			/// Handle blocks of unparsed output:
+			TCallback onBlock;			
+			/// Handle the entire output of the application on exit:
+			/// Note: By default this will include stderr output as well.
+			TCallback onStdout;
+		
+		/// Event fired when the process is complete:
+		std::function<void(int exitValue)> onComplete;
+		
+		// Object		
+		IoThread(const char *exe = nullptr, const char *args = nullptr);
+		~IoThread();
+		
+		// Methods:
+		bool Create(const char *exe, const char *args = nullptr);
+		bool Start(bool ReadAccess = true, bool WriteAccess = false, bool MapStderrToStdout = true);
+		LSubProcess *GetProcess() const { return process; }
+	};
 };
 
 #endif
