@@ -102,7 +102,7 @@ public:
 	void Empty() { DeleteObjects(); }
 	LRect Bounds();
 	LRect *TopRect(LRegion *c);
-	void FlowText(LTag *Tag, LFlowRegion *c, LFont *Font, int LineHeight, char16 *Text, LCss::LengthType Align);
+	void FlowText(LTag *Tag, LFlowRegion *c, LFont *Font, int LineHeight, char16 *Text, LCss::LengthType Align, bool Debug = false);
 };
 
 struct LHtmlTableLayout
@@ -305,8 +305,8 @@ protected:
 	LTag *HasOpenTag(char *t);
 	LTag *PrevTag();
 	LRect ChildBounds();
-	bool GetWidthMetrics(LTag *Table, uint16 &Min, uint16 &Max);
-	void LayoutTable(LFlowRegion *f, uint16 Depth);
+	bool GetWidthMetrics(LTag *Table, uint32_t &Min, uint32_t &Max);
+	void LayoutTable(LFlowRegion *f, uint32_t Depth);
 	void BoundParents();
 	bool PeekTag(char *s, char *tag);
 	LTag *GetTable();
@@ -327,7 +327,7 @@ public:
 
 	// Hierarchy
 	LHtml *Html = NULL;
-	bool IsBlock() { return Display() == LCss::DispBlock; }
+	bool IsBlock() { return SupportedDisplay() == LCss::DispBlock; }
 	LTag *GetBlockParent(ssize_t *Idx = NULL);
 	LFont *GetFont();
 
@@ -354,7 +354,7 @@ public:
 		LPoint Span;
 		LRect BorderPx;
 		LRect PaddingPx;
-		uint16 MinContent, MaxContent;
+		uint32_t MinContent, MaxContent;
 		LCss::LengthType XAlign;
 		LHtmlTableLayout *Cells;
 		
@@ -414,7 +414,9 @@ public:
 	void Restyle();
 	/// Recursively call restyle on all nodes in the doc tree
 	void RestyleAll();
-	
+
+	/// Return the supported display setting (only support some of them)
+	LCss::DisplayType SupportedDisplay();
 	/// Takes the CSS styles, parses and stores them in the current object,
 	//// overwriting any duplicate properties.
 	void SetCssStyle(const char *Style);

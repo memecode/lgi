@@ -263,12 +263,31 @@ public:
 	};
 
 	enum DisplayType {
+		DispInvalid,
+
 		DispInherit,
-		DispBlock,
 		DispInline,
+		DispBlock,
+		DispContents,
+		DispFlex,
+		DispGrid,
 		DispInlineBlock,
+		DispInlineFlex,
+		DispInlineGrid,
+		DispInlineTable,
 		DispListItem,
+		DispRunIn,
+		DispTable,
+		DispTableCaption,
+		DispTableColumnGroup,
+		DispTableHeaderGroup,
+		DispTableFooterGroup,
+		DispTableRowGroup,
+		DispTableCell,
+		DispTableColumn,
+		DispTableRow,
 		DispNone,
+		DispInitial,
 	};
 
 	enum PositionType {

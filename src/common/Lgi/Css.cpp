@@ -66,6 +66,38 @@ float LCss::FontSizeTable[7] =
 	2.0f,  // SizeXXLarge
 };
 
+struct LCssDisplayMap : public LHashTbl<ConstStrKey<char,false>, LCss::DisplayType>
+{
+	LCssDisplayMap() :
+		LHashTbl<ConstStrKey<char,false>, LCss::DisplayType>(64, LCss::DispInvalid)
+	{
+		#define DISPLAY(txt, prop) Add(txt, LCss::prop);
+		DISPLAY("inherit", DispInherit)
+		DISPLAY("inline", DispInline)
+		DISPLAY("block", DispBlock)
+		DISPLAY("contents", DispContents)
+		DISPLAY("flex", DispFlex)
+		DISPLAY("grid", DispGrid)
+		DISPLAY("inline-block", DispInlineBlock)
+		DISPLAY("inline-flex", DispInlineFlex)
+		DISPLAY("inline-grid", DispInlineGrid)
+		DISPLAY("inline-table", DispInlineTable)
+		DISPLAY("list-item", DispListItem)
+		DISPLAY("run-in", DispRunIn)
+		DISPLAY("table", DispTable)
+		DISPLAY("table-caption", DispTableCaption)
+		DISPLAY("table-column-group", DispTableColumnGroup)
+		DISPLAY("table-header-group", DispTableHeaderGroup)
+		DISPLAY("table-footer-group", DispTableFooterGroup)
+		DISPLAY("table-row-group", DispTableRowGroup)
+		DISPLAY("table-cell", DispTableCell)
+		DISPLAY("table-column", DispTableColumn)
+		DISPLAY("table-row", DispTableRow)
+		DISPLAY("none", DispNone)
+		DISPLAY("initial", DispInitial)
+	}
+}	displayMap;
+
 /////////////////////////////////////////////////////////////////////////////
 static bool ParseWord(const char *&s, const char *word)
 {
@@ -1434,7 +1466,7 @@ bool LCss::ParseFontWeight(PropType PropId, const char *&s)
 
 bool LCss::ParseBackgroundRepeat(const char *&s)
 {
-	RepeatType *w = (RepeatType*)Props.Find(PropBackgroundRepeat);
+	auto w = (RepeatType*)Props.Find(PropBackgroundRepeat);
 	if (!w) Props.Add(PropBackgroundRepeat, w = new RepeatType);
 
 	     if (ParseWord(s, "inherit")) *w = RepeatInherit;
@@ -1449,19 +1481,15 @@ bool LCss::ParseBackgroundRepeat(const char *&s)
 
 bool LCss::ParseDisplayType(const char *&s)
 {
-	DisplayType *t = (DisplayType*)Props.Find(PropDisplay);
+	auto t = (DisplayType*)Props.Find(PropDisplay);
 	if (!t) Props.Add(PropDisplay, t = new DisplayType);
 	
-	if (ParseWord(s, "block")) *t = DispBlock;
-	else if (ParseWord(s, "inline-block")) *t = DispInlineBlock;
-	else if (ParseWord(s, "inline")) *t = DispInline;
-	else if (ParseWord(s, "list-item")) *t = DispListItem;
-	else if (ParseWord(s, "none")) *t = DispNone;
-	else
-	{
-		*t = DispInherit;
+	LAutoString val(ParseString(s));
+	auto dsp = displayMap.Find(val);
+	if (dsp == LCss::DispInvalid)
 		return false;
-	}
+
+	*t = dsp;
 	return true;
 }
 

@@ -1219,7 +1219,7 @@ void LFlowRegion::AlignText()
 			if (Offset)
 				for (auto l : Line)
 				{
-					if (l->Tag->Display() != LCss::DispInlineBlock)
+					if (l->Tag->SupportedDisplay() != LCss::DispInlineBlock)
 						l->Offset(Offset, 0);
 				}
 		}
@@ -1553,9 +1553,9 @@ bool LTag::CreateSource(LStringPipe &p, int Depth, bool LastWasBlock)
 				if (Props.Find(PropDisplay)
 					&&
 					(
-						(!i->Block() && Display() == DispInline)
+						(!i->Block() && SupportedDisplay() == DispInline)
 						||
-						(i->Block() && Display() == DispBlock)
+						(i->Block() && SupportedDisplay() == DispBlock)
 					))
 				{
 					DelProp(PropDisplay);
@@ -3218,8 +3218,9 @@ void LTag::SetStyle()
 			Cell->Span.x = MAX(Cell->Span.x, 1);
 			Cell->Span.y = MAX(Cell->Span.y, 1);
 			
-			if (Display() == DispInline ||
-				Display() == DispInlineBlock)
+			auto disp = SupportedDisplay();
+			if (disp == DispInline ||
+				disp == DispInlineBlock)
 			{
 				Display(DispBlock); // Inline-block TD??? Nope.
 			}
@@ -3929,13 +3930,14 @@ LTag *LTag::GetTableCell(int x, int y)
 
 // This function gets the largest and smallest piece of content
 // in this cell and all it's children.
-bool LTag::GetWidthMetrics(LTag *Table, uint16 &Min, uint16 &Max)
+bool LTag::GetWidthMetrics(LTag *Table, uint32_t &Min, uint32_t &Max)
 {
 	bool Status = true;
 	int MarginPx = 0;
 	int LineWidth = 0;
+	auto disp = SupportedDisplay();
 
-	if (Display() == LCss::DispNone)
+	if (disp == LCss::DispNone)
 		return true;
 
 	// Break the text into words and measure...
@@ -3944,17 +3946,19 @@ bool LTag::GetWidthMetrics(LTag *Table, uint16 &Min, uint16 &Max)
 		int MinContent = 0;
 		int MaxContent = 0;
 
-		LFont *f = GetFont();
+		auto f = GetFont();
 		if (f)
 		{
-			for (char16 *s = Text(); s && *s; )
+			for (auto s = Text(); s && *s; )
 			{
 				// Skip whitespace...
-				while (*s && StrchrW(WhiteW, *s)) s++;
+				while (*s && StrchrW(WhiteW, *s))
+					s++;
 				
 				// Find end of non-whitespace
 				char16 *e = s;
-				while (*e && !StrchrW(WhiteW, *e)) e++;
+				while (*e && !StrchrW(WhiteW, *e))
+					e++;
 				
 				// Find size of the word
 				ssize_t Len = e - s;
@@ -3987,8 +3991,9 @@ bool LTag::GetWidthMetrics(LTag *Table, uint16 &Min, uint16 &Max)
 	switch (TagId)
 	{
 		default:
-		{
-			if (IsBlock())
+		{			
+			if (disp == LCss::DispBlock ||
+				disp == LCss::DispInlineBlock)
 			{
 				MarginPx = (int)(BorderLeft().ToPx() +
 								BorderRight().ToPx() +
@@ -4078,7 +4083,7 @@ bool LTag::GetWidthMetrics(LTag *Table, uint16 &Min, uint16 &Max)
 						LTag *t = c.Get(x, y);
 						if (t)
 						{
-							uint16 a = 0, b = 0;							
+							uint32_t a = 0, b = 0;							
 							if (t->GetWidthMetrics(Table, a, b))
 							{
 								ColMin[x] = MAX(ColMin[x], a);
@@ -4108,8 +4113,8 @@ bool LTag::GetWidthMetrics(LTag *Table, uint16 &Min, uint16 &Max)
 
 	for (unsigned i = 0; i < Children.Length(); i++)
 	{
-		LTag *c = ToTag(Children[i]);
-		uint16 TagMax = 0;
+		auto c = ToTag(Children[i]);
+		uint32_t TagMax = 0;
 		
 		Status &= c->GetWidthMetrics(Table, Min, TagMax);
 		LineWidth += TagMax;
@@ -4161,7 +4166,7 @@ T Sum(LArray<T> &a)
 	return s;
 }
 
-void LTag::LayoutTable(LFlowRegion *f, uint16 Depth)
+void LTag::LayoutTable(LFlowRegion *f, uint32_t Depth)
 {
 	if (!Cell->Cells)
 	{
@@ -4459,7 +4464,7 @@ void LHtmlTableLayout::LayoutTable(LFlowRegion *f, uint16 Depth)
 
 				if (t->Cell->Pos.x == x && t->Cell->Pos.y == y)
 				{
-					LCss::DisplayType Disp = t->Display();
+					LCss::DisplayType Disp = t->SupportedDisplay();
 					if (Disp == LCss::DispNone)
 						continue;
 
@@ -4956,7 +4961,13 @@ LRect *LHtmlArea::TopRect(LRegion *c)
 	return Top;
 }
 
-void LHtmlArea::FlowText(LTag *Tag, LFlowRegion *Flow, LFont *Font, int LineHeight, char16 *Text, LCss::LengthType Align)
+void LHtmlArea::FlowText(LTag *Tag,
+						LFlowRegion *Flow,
+						LFont *Font,
+						int LineHeight,
+						char16 *Text,
+						LCss::LengthType Align,
+						bool Debug)
 {
 	if (!Flow || !Text || !Font)
 		return;
@@ -5015,7 +5026,8 @@ void LHtmlArea::FlowText(LTag *Tag, LFlowRegion *Flow, LFont *Font, int LineHeig
 		Tr->Text = Text;
 
 		LDisplayString ds(Font, Text, MIN(1024, FullLen - (Text-Start)));
-		ssize_t Chars = ds.CharAt(Flow->X());
+		auto flowX = Flow->X();
+		ssize_t Chars = ds.CharAt(flowX);
 		bool Wrap = false;
 		if (Text[Chars])
 		{
@@ -5038,7 +5050,12 @@ void LHtmlArea::FlowText(LTag *Tag, LFlowRegion *Flow, LFont *Font, int LineHeig
 						;
 
 					// Wrap...
-					if (*Text == ' ') Text++;
+					if (*Text == ' ')
+						Text++;
+
+					if (Debug)
+						LgiTrace("%s:%i wrapped-overflow: flowX=%i, ds.X=%i, chars=%i, len=%i, text='%S'\n",
+							_FL, flowX, ds.X(), Chars, Tr->Len, Text);
 				}
 				else
 				{
@@ -5050,6 +5067,11 @@ void LHtmlArea::FlowText(LTag *Tag, LFlowRegion *Flow, LFont *Font, int LineHeig
 			else
 			{
 				Tr->Len = n;
+
+				if (Debug)
+					LgiTrace("%s:%i wrapped: flowX=%i, ds.X=%i, chars=%i, len=%i, text='%S'\n",
+						_FL, flowX, ds.X(), Chars, Tr->Len, Text);
+
 				LAssert(Tr->Len > 0);
 				Wrap = true;
 			}
@@ -5059,6 +5081,10 @@ void LHtmlArea::FlowText(LTag *Tag, LFlowRegion *Flow, LFont *Font, int LineHeig
 		{
 			// Fits..
 			Tr->Len = Chars;
+
+			if (Debug)
+				LgiTrace("%s:%i fits: flowX=%i, chars=%i, len=%i, text='%S'\n", _FL, flowX, Chars, Tr->Len, Text);
+
 			LAssert(Tr->Len > 0);
 		}
 
@@ -5261,49 +5287,52 @@ bool LTag::Serialize(LXmlTag *t, bool Write)
 	return true;
 }
 
-/*
-/// This method centers the text in the area given to the tag. Used for inline block elements.
-void LTag::CenterText()
+LCss::DisplayType LTag::SupportedDisplay()
 {
-	if (!Parent)
-		return;
-
-	// Find the size of the text elements.
-	int ContentPx = 0;
-	for (unsigned i=0; i<TextPos.Length(); i++)
+	auto disp = Display();
+	switch (disp)
 	{
-		LFlowRect *fr = TextPos[i];
-		ContentPx += fr->X();
-	}
-	
-	LFont *f = GetFont();
-	int ParentPx = ToTag(Parent)->Size.x;
-	int AvailPx = Size.x;
+		case LCss::DispContents:
+		case LCss::DispFlex:
+		case LCss::DispGrid:
+		case LCss::DispListItem:
+		case LCss::DispRunIn:
+		case LCss::DispTable:
+		case LCss::DispTableCaption:
+		case LCss::DispTableColumnGroup:
+		case LCss::DispTableHeaderGroup:
+		case LCss::DispTableFooterGroup:
+		case LCss::DispTableRowGroup:
+		case LCss::DispTableCell:
+		case LCss::DispTableColumn:
+		case LCss::DispTableRow:
+		case LCss::DispInitial:
+		case LCss::DispInlineTable:
+			return LCss::DispBlock;
 
-	// Remove the border and padding from the content area
-	AvailPx -= BorderLeft().ToPx(ParentPx, f);
-	AvailPx -= BorderRight().ToPx(ParentPx, f);
-	AvailPx -= PaddingLeft().ToPx(ParentPx, f);
-	AvailPx -= PaddingRight().ToPx(ParentPx, f);
-	if (AvailPx > ContentPx)
-	{
-		// Now offset all the regions to the right
-		int OffPx = (AvailPx - ContentPx) >> 1;
-		for (unsigned i=0; i<TextPos.Length(); i++)
-		{
-			LFlowRect *fr = TextPos[i];
-			fr->Offset(OffPx, 0);
-		}
+		// Map to inline?
+		case LCss::DispInlineFlex:
+		case LCss::DispInlineGrid:
+			return LCss::DispInline;
+
+		// Fully supported:
+		case LCss::DispInherit:
+		case LCss::DispInline:
+		case LCss::DispBlock:
+		case LCss::DispInlineBlock:
+		case LCss::DispNone:
+			return disp;
 	}
+
+	return LCss::DispInherit;
 }
-*/
 
 void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 {
 	if (Depth >= MAX_RECURSION_DEPTH)
 		return;
 
-	DisplayType Disp = Display();
+	DisplayType Disp = SupportedDisplay();
 	if (Disp == DispNone)
 		return;
 
@@ -5544,11 +5573,6 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 		if (Disp == DispBlock)
 			Flow->EndBlock();
 		
-		#ifdef _DEBUG
-		if (Debug)
-			LgiTrace("Before %s\n", Flow->ToString().Get());
-		#endif
-
 		BlockFlowWidth = Flow->X();
 		
 		// Indent the margin...
@@ -5603,13 +5627,23 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 		else
 		{
 			Flow->x2 = Flow->X();
+			if (Debug)
+				LgiTrace("%s:%i '%s' flow.x=%i (%i,%i)\n",
+					_FL, Tag.Get(), Flow->X(), Flow->cx, Flow->x2);
+
 			Flow->x1 =	Flow->ResolveX(BorderLeft(), this, true) +
 						Flow->ResolveX(PaddingLeft(), this, true);
 			Flow->cx = Flow->x1;
+
+			if (Debug)
+				LgiTrace("%s:%i '%s' flow.x1=%i\n",
+					_FL, Tag.Get(), Flow->x1);
+			
+
 			Flow->y1 += Flow->ResolveY(BorderTop(), this, true) +
 						Flow->ResolveY(PaddingTop(), this, true);
 			Flow->y2 = Flow->y1;
-			
+
 			if (!IsTableTag())
 				Flow->Inline++;
 		}
@@ -5718,14 +5752,9 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 			}
 
 			// Flow in the rest of the text...
-			char16 *Txt = Text();
-			LCss::LengthType Align = GetAlign(true);
-			TextPos.FlowText(this, Flow, f, LineHeightCache, Txt, Align);
-
-			#ifdef _DEBUG
-			if (Debug)
-				LgiTrace("%s:%i - %p.size=%p\n", _FL, this, &Size.x);
-			#endif
+			auto Txt = Text();
+			auto Align = GetAlign(true);
+			TextPos.FlowText(this, Flow, f, LineHeightCache, Txt, Align, Debug);
 		}
 	}
 
@@ -5760,6 +5789,9 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 			default:
 			{
 				t->OnFlow(Flow, Depth + 1);
+
+				if (Debug)
+					LgiTrace("%s:%i '%s' child '%s' flow: x=%i size.x=%i\n", _FL, Tag.Get(), t->Tag.Get(), Flow->X(), Size.x);
 				break;
 			}
 		}
@@ -6339,7 +6371,7 @@ void LTag::PaintBorderAndBackground(LSurface *pDC, LColour &Back, LRect *BorderP
 		DrawBackground)
 	{
 		// Work out the rectangles
-		switch (Display())
+		switch (SupportedDisplay())
 		{
 			case DispInlineBlock:
 			case DispBlock:
@@ -6533,8 +6565,9 @@ static void FillRectWithImage(LSurface *pDC, LRect *r, LSurface *Image, LCss::Re
 
 void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 {
+	auto disp = SupportedDisplay();
 	if (Depth >= MAX_RECURSION_DEPTH ||
-		Display() == DispNone)
+		disp == DispNone)
 		return;
 	if (
 		#ifdef _DEBUG
@@ -6719,7 +6752,7 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 			LColour fore = _Colour(true);
 			LColour back = _Colour(false);
 
-			if (Display() == DispBlock && Html->Environment)
+			if (disp == DispBlock && Html->Environment)
 			{
 				LCss::ImageDef Img = BackgroundImage();
 				if (Img.Img)
@@ -6989,7 +7022,7 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
-		LTag *t = ToTag(Children[i]);
+		auto t = ToTag(Children[i]);
 		pDC->SetOrigin(Px - t->Pos.x, Py - t->Pos.y);
 		t->OnPaint(pDC, InSelection, Depth + 1);
 		pDC->SetOrigin(Px, Py);
@@ -9323,7 +9356,7 @@ LHtmlTableLayout::LHtmlTableLayout(LTag *table)
 	for (size_t i=0; i<Table->Children.Length(); i++)
 	{
 		r = ToTag(Table->Children[i]);
-		if (r->Display() == LCss::DispNone)
+		if (r->SupportedDisplay() == LCss::DispNone)
 			continue;
 			
 		if (r->TagId == TAG_TR)
@@ -9442,7 +9475,7 @@ LHtmlTableLayout::LHtmlTableLayout(LTag *table)
 				
 				if (IsTableCell(cell->TagId))
 				{
-					if (cell->Display() == LCss::DispNone)
+					if (cell->SupportedDisplay() == LCss::DispNone)
 						continue;
 						
 					while (Get(x, y))
