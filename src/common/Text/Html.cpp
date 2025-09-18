@@ -5053,9 +5053,11 @@ void LHtmlArea::FlowText(LTag *Tag,
 					if (*Text == ' ')
 						Text++;
 
+					#if 0
 					if (Debug)
 						LgiTrace("%s:%i wrapped-overflow: flowX=%i, ds.X=%i, chars=%i, len=%i, text='%S'\n",
 							_FL, flowX, ds.X(), Chars, Tr->Len, Text);
+					#endif
 				}
 				else
 				{
@@ -5068,9 +5070,11 @@ void LHtmlArea::FlowText(LTag *Tag,
 			{
 				Tr->Len = n;
 
+				#if 0
 				if (Debug)
 					LgiTrace("%s:%i wrapped: flowX=%i, ds.X=%i, chars=%i, len=%i, text='%S'\n",
 						_FL, flowX, ds.X(), Chars, Tr->Len, Text);
+				#endif
 
 				LAssert(Tr->Len > 0);
 				Wrap = true;
@@ -5082,8 +5086,10 @@ void LHtmlArea::FlowText(LTag *Tag,
 			// Fits..
 			Tr->Len = Chars;
 
+			#if 0
 			if (Debug)
 				LgiTrace("%s:%i fits: flowX=%i, chars=%i, len=%i, text='%S'\n", _FL, flowX, Chars, Tr->Len, Text);
+			#endif
 
 			LAssert(Tr->Len > 0);
 		}
@@ -5292,6 +5298,7 @@ LCss::DisplayType LTag::SupportedDisplay()
 	auto disp = Display();
 	switch (disp)
 	{
+		// Map to block?
 		case LCss::DispContents:
 		case LCss::DispFlex:
 		case LCss::DispGrid:
@@ -5332,7 +5339,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 	if (Depth >= MAX_RECURSION_DEPTH)
 		return;
 
-	DisplayType Disp = SupportedDisplay();
+	auto Disp = SupportedDisplay();
 	if (Disp == DispNone)
 		return;
 
@@ -5340,7 +5347,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 	auto FlowStart = LMicroTime();
 	uint64_t FlowTime = 0;
 
-	LFont *f = GetFont();
+	auto f = GetFont();
 	LFlowRegion Local(*Flow);
 	bool Restart = true;
 	int BlockFlowWidth = 0;
@@ -5400,12 +5407,10 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 		{
 			Size.x = Size.y = 0;
 			
-			LCss::Len w    = Width();
-			LCss::Len h    = Height();
-			// LCss::Len MinX = MinWidth();
-			// LCss::Len MaxX = MaxWidth();
-			LCss::Len MinY = MinHeight();
-			LCss::Len MaxY = MaxHeight();
+			auto w    = Width();
+			auto h    = Height();
+			auto MinY = MinHeight();
+			auto MaxY = MaxHeight();
 			LAutoPtr<LDisplayString> a;
 			int ImgX, ImgY;		
 			if (Image)
@@ -5479,13 +5484,13 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 			}
 			if (MinY)
 			{
-				int Px = Flow->ResolveY(MinY, this, false);
+				auto Px = Flow->ResolveY(MinY, this, false);
 				if (Size.y < Px)
 					Size.y = Px;
 			}
 			if (MaxY)
 			{
-				int Px = Flow->ResolveY(MaxY, this, false);
+				auto Px = Flow->ResolveY(MaxY, this, false);
 				if (Size.y > Px)
 					Size.y = Px;
 			}
@@ -5504,7 +5509,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 				Pos.y = Flow->y1;
 				Flow->y2 = MAX(Flow->y1, Pos.y + Size.y - 1);
 
-				LCss::LengthType a = GetAlign(true);
+				auto a = GetAlign(true);
 				switch (a)
 				{
 					case AlignCenter:
@@ -5547,10 +5552,10 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 		{
 			Flow->EndBlock();
 			
-			LCss::Len left = GetCssLen(MarginLeft, Margin);
-			LCss::Len top = GetCssLen(MarginTop, Margin);
-			LCss::Len right = GetCssLen(MarginRight, Margin);
-			LCss::Len bottom = GetCssLen(MarginBottom, Margin);
+			auto left = GetCssLen(MarginLeft, Margin);
+			auto top = GetCssLen(MarginTop, Margin);
+			auto right = GetCssLen(MarginRight, Margin);
+			auto bottom = GetCssLen(MarginBottom, Margin);
 			Flow->Indent(this, left, top, right, bottom, true);
 
 			LayoutTable(Flow, Depth + 1);
@@ -5576,14 +5581,14 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 		BlockFlowWidth = Flow->X();
 		
 		// Indent the margin...
-		LCss::Len left = GetCssLen(MarginLeft, Margin);
-		LCss::Len top = GetCssLen(MarginTop, Margin);
-		LCss::Len right = GetCssLen(MarginRight, Margin);
-		LCss::Len bottom = GetCssLen(MarginBottom, Margin);
+		auto left = GetCssLen(MarginLeft, Margin);
+		auto top = GetCssLen(MarginTop, Margin);
+		auto right = GetCssLen(MarginRight, Margin);
+		auto bottom = GetCssLen(MarginBottom, Margin);
 		Flow->Indent(this, left, top, right, bottom, true);
 
 		// Set the width if any
-		LCss::Len Wid = Width();
+		auto Wid = Width();
 		if (!IsTableCell(TagId) && Wid)
 			Size.x = Flow->ResolveX(Wid, this, false);
 		else if (TagId != TAG_IMG)
@@ -5667,7 +5672,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 				// Insert the list marker
 				if (!PreText())
 				{
-					LCss::ListStyleTypes s = Parent->ListStyleType();
+					auto s = Parent->ListStyleType();
 					if (s == ListInherit)
 					{
 						if (Parent->TagId == TAG_OL)
@@ -5765,8 +5770,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
-		LTag *t = ToTag(Children[i]);
-
+		auto t = ToTag(Children[i]);
 		switch (t->Position())
 		{
 			case PosStatic:
@@ -5790,8 +5794,10 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 			{
 				t->OnFlow(Flow, Depth + 1);
 
+				#if 0
 				if (Debug)
 					LgiTrace("%s:%i '%s' child '%s' flow: x=%i size.x=%i\n", _FL, Tag.Get(), t->Tag.Get(), Flow->X(), Size.x);
+				#endif
 				break;
 			}
 		}
