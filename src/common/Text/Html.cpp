@@ -3930,7 +3930,7 @@ LTag *LTag::GetTableCell(int x, int y)
 
 // This function gets the largest and smallest piece of content
 // in this cell and all it's children.
-bool LTag::GetWidthMetrics(LTag *Table, uint32_t &Min, uint32_t &Max)
+bool LTag::GetWidthMetrics(LTag *Table, int32_t &Min, int32_t &Max)
 {
 	bool Status = true;
 	int MarginPx = 0;
@@ -4083,7 +4083,7 @@ bool LTag::GetWidthMetrics(LTag *Table, uint32_t &Min, uint32_t &Max)
 						LTag *t = c.Get(x, y);
 						if (t)
 						{
-							uint32_t a = 0, b = 0;							
+							int32_t a = 0, b = 0;							
 							if (t->GetWidthMetrics(Table, a, b))
 							{
 								ColMin[x] = MAX(ColMin[x], a);
@@ -4114,7 +4114,7 @@ bool LTag::GetWidthMetrics(LTag *Table, uint32_t &Min, uint32_t &Max)
 	for (unsigned i = 0; i < Children.Length(); i++)
 	{
 		auto c = ToTag(Children[i]);
-		uint32_t TagMax = 0;
+		int32_t TagMax = 0;
 		
 		Status &= c->GetWidthMetrics(Table, Min, TagMax);
 		LineWidth += TagMax;
@@ -7362,11 +7362,7 @@ bool LHtml::Name(const char *s)
 		Tag->RestyleAll();
 	}
 
-	if (d->DeferredLoads == 0)
-	{
-		OnLoad();
-	}
-
+	OnLoad();
 	Invalidate();	
 
 	return true;
@@ -7718,6 +7714,8 @@ void LHtml::OnPaint(LSurface *ScreenDC)
 			LgiTrace("%s:%i - Html max paint time reached: %i ms.\n", _FL, LCurrentTime() - PaintStart);
 		}
 	}
+
+	OnPaintFinished(pDC);
 
 	#if HTML_USE_DOUBLE_BUFFER
 	if (MemDC)

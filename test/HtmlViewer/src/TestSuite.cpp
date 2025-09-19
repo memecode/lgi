@@ -9,15 +9,19 @@
 #include "lgi/common/ProgressDlg.h"
 #include "lgi/common/Combo.h"
 #include "lgi/common/Net.h"
-#include "lgi/common/Http.h"
 #include "lgi/common/Filter.h"
 #include "lgi/common/ImageComparison.h"
 #include "lgi/common/OpenSSLSocket.h"
 #include "lgi/common/Net.h"
 #include "lgi/common/EmojiFont.h"
-#include "lgi/common/Http.h"
 #include "lgi/common/Menu.h"
 #include "lgi/common/PopupNotification.h"
+#include "lgi/common/TabView.h"
+#include "lgi/common/Tree.h"
+#include "lgi/common/TextLog.h"
+#include "../src/common/Text/HtmlPriv.h"
+#include "lgi/common/Http.h"
+
 #include "resdefs.h"
 
 #define HAS_LOG_VIEW			0
@@ -25,9 +29,109 @@
 
 enum Controls
 {
-	IDC_HTML = 100,
-	IDC_LOG,
-	IDC_LIST
+	ID_HTML = 100,
+	ID_LOG,
+	ID_LIST,
+	ID_TABS,
+	ID_DEBUG_BOX,
+	ID_TAG_TREE,
+	ID_TAG_DETAIL
+};
+
+#ifdef _LHTML2_H
+using THtmlClass = Html2::LHtml2;
+using THtmlTag = Html2::LTag;
+#else
+using THtmlClass = Html1::LHtml;
+using THtmlTag = Html1::LTag;
+#endif
+
+class HtmlScriptContext;
+struct AppContext
+{
+	LTree *tagTree = nullptr;
+	LTextLog *tagDetail = nullptr;
+    HtmlScriptContext *Html = nullptr;
+
+	bool ValidTag(THtmlTag *t);
+
+	struct TagItem : public LTreeItem
+	{
+		THtmlTag *tag = nullptr;
+		THtmlClass *html = nullptr;
+		AppContext *context = nullptr;
+
+		TagItem(AppContext *ctx, THtmlTag *t) :
+			tag(t), context(ctx)
+		{
+			html = tag->Html;
+		}
+
+		const char *GetText(int i = 0) override
+		{
+			if (!context->ValidTag(tag))
+			{
+				tag = nullptr;
+				return "##deleted##";
+			}
+
+			if (tag->Tag)
+				return tag->Tag;
+
+			switch (tag->TagId)
+			{
+				case HtmlTag::CONTENT:
+					return "CONTENT";
+				case HtmlTag::CONDITIONAL:
+					return "CONDITIONAL";
+				case HtmlTag::ROOT:
+					return "ROOT";
+			}
+
+			return "NULL";
+		}
+
+		void OnSelect()
+		{
+			if (!Expanded())
+				Expanded(true);
+
+			// Update details view:
+			if (tag)
+			{
+				LStringPipe p;
+				if (tag->Class.Length())
+					p.Print("class: %s\n", LString(",").Join(tag->Class).Get());
+				if (tag->Condition)
+					p.Print("condition: %s\n", tag->Condition.Get());
+				if (tag->GetText())
+				{
+					LAutoString utf(WideToUtf8(tag->GetText()));
+					if (LIsUtf8(utf))
+						p.Print("text: %S\n", utf.Get());
+				}
+				tag->AllAttr([&](auto var, auto val)
+					{
+						if (Stricmp(var, "class"))
+							p.Print("attr: %s='%s'\n", var, val);
+					});
+
+				if (auto css = tag->ToLString())
+				{
+					p.Print("css:\n");
+					for (auto ln: css.SplitDelimit("\n"))
+						p.Print("\t%s\n", ln.Get());
+				}
+
+				auto detail = p.NewLStr();
+				context->tagDetail->Name(detail);
+
+				// Repaint the html control to show the active selection:
+				html->Invalidate();
+			}
+			else context->tagDetail->Name("null tag");
+		}
+	};
 };
 
 class FileInf
@@ -67,35 +171,41 @@ public:
 };
 
 class HtmlScriptContext :
-	#ifdef _GHTML2_H
-	public Html2::LHtml2,
-	#else
-	public Html1::LHtml,
-	#endif
+	public THtmlClass,
 	public LScriptContext
 {
-	LScriptEngine *Eng;
+	LScriptEngine *Eng = nullptr;
+	AppContext *appContext = nullptr;
 	
 public:
 	static LHostFunc Methods[];
 
-	HtmlScriptContext(int Id, LDocumentEnv *Env) :
-		#ifdef _GHTML2_H
-		Html2::LHtml2
-		#else
-		Html1::LHtml
-		#endif
-		(Id, 0, 0, 100, 100, Env)
-	{
-		Eng = NULL;
-		
-		LFont *f = new LFont;
-		if (f)
+	HtmlScriptContext(int Id, LDocumentEnv *Env, AppContext *context) :
+		THtmlClass(Id, 0, 0, 100, 100, Env),
+		appContext(context)
+	{		
+		if (auto f = new LFont)
 		{
 			f->Face("Times New Roman");
 			f->PointSize(12); // Size '16' is about 12 pt. Maybe they mean 16px?
 			SetFont(f, true);
 		}
+	}
+
+	bool Find(THtmlTag *tag, THtmlTag *search)
+	{
+		if (tag == search)
+			return true;
+		for (auto c: tag->Children)
+			if (auto child = dynamic_cast<THtmlTag*>(c))
+				if (Find(child, search))
+					return true;
+		return false;
+	}
+
+	bool ValidTag(THtmlTag *t)
+	{
+		return Find(Tag, t);
 	}
 
 	LHostFunc *GetCommands()
@@ -115,6 +225,90 @@ public:
 	LAutoString GetDataFolder()
 	{
 		return LAutoString();
+	}
+
+	void createTree(LTreeNode *out, THtmlTag *in)
+	{
+		if (auto item = new AppContext::TagItem(appContext, in))
+		{
+			out->Insert(item);
+
+			for (auto e: in->Children)
+			{
+				if (auto child = dynamic_cast<THtmlTag*>(e))
+				{
+					createTree(item, child);
+				}
+			}
+		}
+	}
+
+	using TTagMap = LHashTbl<PtrKey<THtmlTag*>,bool>;
+	void MakeMap(TTagMap &map, THtmlTag *t)
+	{
+		map.Add(t, true);
+		for (auto c: t->Children)
+			if (auto cTag = dynamic_cast<THtmlTag*>(c))
+				MakeMap(map, cTag);
+	}
+
+	void cleanTree(TTagMap &map, LTreeNode *n)
+	{
+		// remove any deleted nodes from the tree...
+		for (auto c = n->GetChild(); c; )
+		{
+			auto next = c->GetNext();
+			cleanTree(map, c);
+			c = next;
+		}
+
+		if (auto i = dynamic_cast<AppContext::TagItem*>(n))
+			if (!i->tag || !map.Find(i->tag))
+			{
+				i->Remove();
+				delete i;
+			}
+	}
+
+	void cleanTree()
+	{
+		LHashTbl<PtrKey<THtmlTag*>,bool> map;
+		MakeMap(map, Tag);
+		cleanTree(map, appContext->tagTree);
+	}
+
+	void OnLoad() override
+	{
+		// call parent class
+		THtmlClass::OnLoad();
+
+		// build tag tree:
+		if (appContext->tagTree)
+		{			
+			cleanTree();
+			createTree(appContext->tagTree, Tag);
+		}
+	}
+
+	void OnPaintFinished(LSurface *pDC) override
+	{
+		cleanTree();
+
+		// If there is a selection tag for debug... show it now...
+		if (auto sel = dynamic_cast<AppContext::TagItem*>(appContext->tagTree->Selection()))
+		{
+			auto tag = sel->tag;
+
+			// Figure out global position of tag:
+			LRect r;
+			r.ZOff(tag->Size.x, tag->Size.y);
+			for (auto t = tag; t; t = dynamic_cast<THtmlTag*>(t->Parent))
+				r.Offset(t->Pos.x, t->Pos.y);
+
+			pDC->Colour(LColour::Red);
+			pDC->LineStyle(LSurface::LineAlternate);
+			pDC->Box(&r);
+		}
 	}
 };
 
@@ -239,14 +433,21 @@ public:
 	}
 };
 
+bool AppContext::ValidTag(THtmlTag *t)
+{
+	return Html->ValidTag(t);
+}
+
 class AppWnd :
 	public LWindow,
 	public LDefaultDocumentEnv,
-	public LCapabilityTarget
+	public LCapabilityTarget,
+	public AppContext
 {
-	LList *Lst = NULL;
-    HtmlScriptContext *Html = NULL;
-    LTextView3 *Text = NULL;
+	LList *Lst = nullptr;
+	LTabView *tabs = nullptr;
+	LBox *debugBox = nullptr;
+    LTextView3 *Text = nullptr;
 	LString FilesFolder;
 	LAutoPtr<LScriptEngine> Script;
 	LAutoPtr<HtmlImageLoader> Worker;
@@ -326,11 +527,22 @@ public:
 			if (auto box = new LBox)
 			{
 				AddView(box);
-				box->AddView(Lst = new LList(IDC_LIST, 0, 0, 100, 100));
-				Lst->Sunken(false);
-				Lst->AddColumn("File", 400);
-				Lst->CssStyles("width: 200px;");
-				box->Value(200);
+
+				box->AddView(tabs = new LTabView(ID_TABS));
+				tabs->SetPourChildren(true);
+				
+				auto tab = tabs->Append("Files");
+					tab->Append(Lst = new LList(ID_LIST, 0, 0, 100, 100));
+						Lst->Sunken(false);
+						Lst->SetPourLargest(true);
+						Lst->AddColumn("File", 400);
+						Lst->CssStyles("width: 200px;");
+				tab = tabs->Append("Debug");
+					tab->Append(debugBox = new LBox(ID_DEBUG_BOX, true));
+						debugBox->AddView(tagTree = new LTree(ID_TAG_TREE));
+						debugBox->AddView(tagDetail = new LTextLog(ID_TAG_DETAIL));
+
+				box->Value(350);
 
 				#if HAS_LOG_VIEW
 					LBox *vert = new LBox;
@@ -355,7 +567,7 @@ public:
 						sp->SizePx = 2;
 					}
 				#else
-					box->AddView(Html = new HtmlScriptContext(IDC_HTML, this));
+					box->AddView(Html = new HtmlScriptContext(ID_HTML, this, this));
 				#endif
 
 				Script.Reset(new LScriptEngine(this, Html, NULL));
@@ -418,7 +630,7 @@ public:
 			AttachChildren();
 			
 			Visible(true);
-			OnNotify(FindControl(IDC_LIST), LNotifyItemSelect);
+			OnNotify(FindControl(ID_LIST), LNotifyItemSelect);
 		}
 		else LExitApp();
 	}
@@ -573,7 +785,7 @@ public:
 	{
 		switch (c->GetId())
 		{
-			case IDC_LIST:
+			case ID_LIST:
 			{
 				if (n.Type == LNotifyItemSelect)
 				{
@@ -596,7 +808,7 @@ public:
 				}
 				break;
 			}
-			case IDC_HTML:
+			case ID_HTML:
 			{
 				switch (n.Type)
 				{

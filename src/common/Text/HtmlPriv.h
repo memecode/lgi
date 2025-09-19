@@ -305,7 +305,7 @@ protected:
 	LTag *HasOpenTag(char *t);
 	LTag *PrevTag();
 	LRect ChildBounds();
-	bool GetWidthMetrics(LTag *Table, uint32_t &Min, uint32_t &Max);
+	bool GetWidthMetrics(LTag *Table, int32_t &Min, int32_t &Max);
 	void LayoutTable(LFlowRegion *f, uint32_t Depth);
 	void BoundParents();
 	bool PeekTag(char *s, char *tag);
@@ -354,7 +354,7 @@ public:
 		LPoint Span;
 		LRect BorderPx;
 		LRect PaddingPx;
-		uint32_t MinContent, MaxContent;
+		int32_t MinContent, MaxContent;
 		LCss::LengthType XAlign;
 		LHtmlTableLayout *Cells;
 		
@@ -394,6 +394,11 @@ public:
 	// Attributes
 	bool Get(const char *attr, const char *&val) { val = Attr.Find(attr); return val != NULL; }
 	void Set(const char *attr, const char *val);
+	void AllAttr(std::function<void(const char*attr, const char*val)> cb)
+	{
+		for (auto p: Attr)
+			cb(p.key, p.value);
+	}
 
 	// Methods
 	char16 *Text() { return Txt; }
