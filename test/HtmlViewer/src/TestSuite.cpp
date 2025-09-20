@@ -272,6 +272,9 @@ public:
 
 	void cleanTree()
 	{
+		if (!Tag)
+			return;
+
 		LHashTbl<PtrKey<THtmlTag*>,bool> map;
 		MakeMap(map, Tag);
 		cleanTree(map, appContext->tagTree);
@@ -578,9 +581,20 @@ public:
 					Html->SetLoadImages(true);
 				#endif
 				
+				#ifdef MAC
+				#define TIME_TO_DATE(ts) ((ts) / 1000)
+				#else
+				#define TIME_TO_DATE(ts) (ts)
+				#endif
+				
 				LFile::Path files(LSP_APP_INSTALL);
+				#if defined(MAC) && defined(_DEBUG)
+				files += "../../../../";
+				#endif
 				files += "../files";
-				if (files.Exists())
+				if (!files.Exists())
+					LgiTrace("%s:%i - files folder '%s' doesn't exist", _FL, files.GetFull().Get());
+				else
 				{
 					FilesFolder = files.GetFull();
 
@@ -588,16 +602,16 @@ public:
 					LDirectory d;
 					for (auto b = d.First(FilesFolder); b; b = d.Next())
 					{
-						if (!d.IsDir() && MatchStr("*.html", d.GetName()))
+						if (!d.IsDir() &&
+							MatchStr("*.html", d.GetName()))
 						{
 							char p[256];
 							if (d.Path(p, sizeof(p)))
 							{
-								FileInf *f = new FileInf;
-								if (f)
+								if (auto f = new FileInf)
 								{
 									f->File = p;
-									f->Date.Set(d.GetLastWriteTime());
+									f->Date.Set(TIME_TO_DATE(d.GetLastWriteTime()));
 									Files.Insert(f);
 								}
 							}
@@ -610,11 +624,9 @@ public:
 
 					for (auto f: Files)
 					{
-						char *d = strrchr(f->File, DIR_CHAR);
-						if (d)
+						if (auto d = strrchr(f->File, DIR_CHAR))
 						{
-							HtmlItem *i = new HtmlItem(FilesFolder, d + 1);
-							if (i)
+							if (auto i = new HtmlItem(FilesFolder, d + 1))
 								Lst->Insert(i);
 						}
 					}
