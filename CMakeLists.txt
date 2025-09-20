@@ -517,8 +517,6 @@ if (APPLE)
 	set_source_files_properties(${OBJCPP_SOURCE} PROPERTIES 
                             COMPILE_FLAGS "-x objective-c++")
 
-
-
 elseif (LINUX)
 
 	target_compile_definitions(lgi

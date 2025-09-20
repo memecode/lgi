@@ -153,7 +153,7 @@ bool LHttp::Request
 	if (!Socket || !Uri || !Out || !Type)
 	{
 		err.Set(LErrorInvalidParam,
-				LString::Fmt("%s:%i - missing param %p,%p,%p,%p", _FL, Socket, Uri, Out, Type));
+				LString::Fmt("%s:%i - missing param %p,%p,%p,%p", _FL, Socket.Get(), Uri, Out, Type));
 		return false;
 	}
 
@@ -261,7 +261,7 @@ bool LHttp::Request
 	if (!Socket || !c)
 	{
 		err.Set(LErrorInvalidParam,
-				LString::Fmt("%s:%i - missing param %p,%p", _FL, Socket, c));
+				LString::Fmt("%s:%i - missing param %p,%p", _FL, Socket.Get(), c.Get()));
 	}
 	else
 	{

@@ -43,7 +43,7 @@ protected:
 	/// Aka from LView::AddDispatch().
 	int ViewHandle          = InvalidViewId;
 
-	friend bool LView::CommonEvents(LMessage::Result &result, LMessage *Msg);
+	friend class LView;
 	#if defined WIN32
 		friend uint WINAPI ThreadEntryPoint(void *i);
 	    void Create(class LThread *Thread, OsThread &hThread, OsThreadId &ThreadId);
