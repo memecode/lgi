@@ -86,12 +86,12 @@ struct AppContext
 					return "CONDITIONAL";
 				case HtmlTag::ROOT:
 					return "ROOT";
+				default:
+					return "NULL";
 			}
-
-			return "NULL";
 		}
 
-		void OnSelect()
+		void OnSelect() override
 		{
 			if (!Expanded())
 				Expanded(true);
@@ -108,7 +108,7 @@ struct AppContext
 				{
 					LAutoString utf(WideToUtf8(tag->GetText()));
 					if (LIsUtf8(utf))
-						p.Print("text: %S\n", utf.Get());
+						p.Print("text: '%s'\n", utf.Get());
 				}
 				tag->AllAttr([&](auto var, auto val)
 					{
@@ -122,6 +122,14 @@ struct AppContext
 					for (auto ln: css.SplitDelimit("\n"))
 						p.Print("\t%s\n", ln.Get());
 				}
+				
+				if (tag->HtmlId)
+					p.Print("id='%s'\n", tag->HtmlId);
+				p.Print("isTable: %i\n", tag->IsTable());
+				p.Print("isTableRow: %i\n", tag->IsTableRow());
+				p.Print("isTableCell: %i\n", tag->IsTableCell());
+				p.Print("pos: %i, %i\n", tag->Pos.x, tag->Pos.y);
+				p.Print("size: %i, %i\n", tag->Size.x, tag->Size.y);
 
 				auto detail = p.NewLStr();
 				context->tagDetail->Name(detail);
@@ -208,7 +216,7 @@ public:
 		return Find(Tag, t);
 	}
 
-	LHostFunc *GetCommands()
+	LHostFunc *GetCommands() override
 	{
 		return Methods;
 	}
@@ -217,12 +225,12 @@ public:
 	{		
 	}
 	
-	LString GetIncludeFile(const char *FileName)
+	LString GetIncludeFile(const char *FileName) override
 	{
 		return LString();
 	}
 	
-	LAutoString GetDataFolder()
+	LAutoString GetDataFolder() override
 	{
 		return LAutoString();
 	}
@@ -456,7 +464,7 @@ class AppWnd :
 	LAutoPtr<HtmlImageLoader> Worker;
 	LAutoPtr<LEmojiFont> Emoji;
 
-	LoadType GetContent(LAutoPtr<LoadJob> &j)
+	LoadType GetContent(LAutoPtr<LoadJob> &j) override
 	{
 		LUri u(j->Uri);
 		if (!u.sProtocol)
@@ -767,7 +775,7 @@ public:
 		}
 	};
 
-	int OnCommand(int Cmd, int Event, OsView Wnd)
+	int OnCommand(int Cmd, int Event, OsView Wnd) override
 	{
 		switch (Cmd)
 		{
@@ -846,13 +854,13 @@ public:
 		return 0;
 	}
 
-	bool OnCompileScript(LDocView *Parent, char *Script, const char *Language, const char *MimeType)
+	bool OnCompileScript(LDocView *Parent, char *Script, const char *Language, const char *MimeType) override
 	{
 		// return Script->Compile(Code, true);
 		return false;
 	}
 
-	bool OnExecuteScript(LDocView *Parent, char *Script)
+	bool OnExecuteScript(LDocView *Parent, char *Script) override
 	{
 		return false; // Script->RunTemporary(Code);
 	}

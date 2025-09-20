@@ -506,7 +506,7 @@ public:
 	}
 	
     /// Sort by a textual comparison on the given column
-	void Sort(int Column)
+	void Sort(int Column) override
 	{
 		if (Items.Length() == 0)
 			return;
@@ -531,7 +531,7 @@ public:
 	}
 	
 	/// Sort by the compare function of the items:
-	void Sort()
+	void Sort() override
 	{
 		if (Items.Length() == 0)
 			return;

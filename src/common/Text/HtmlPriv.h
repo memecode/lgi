@@ -455,7 +455,7 @@ public:
 	int OnNotify(LNotification n);
 	void CollectFormValues(LHashTbl<ConstStrKey<char,false>,char*> &f);
 
-	// GDom impl
+	// LDom impl
 	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
 	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
 

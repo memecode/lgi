@@ -364,18 +364,18 @@ public:
 		Threads.DeleteObjects();
 	}
 	
-	void OnCreate()
+	void OnCreate() override
 	{
 		AttachChildren();
 	}
 	
-	void OnPaint(LSurface *pDC)
+	void OnPaint(LSurface *pDC) override
 	{
 		pDC->Colour(L_MED);
 		pDC->Rectangle();
 	}
 	
-	LMessage::Param OnEvent(LMessage *Msg)
+	LMessage::Param OnEvent(LMessage *Msg) override
 	{
 		switch (Msg->Msg())
 		{
@@ -420,7 +420,7 @@ public:
 		return LLayout::OnEvent(Msg);
 	}
 	
-	void OnPosChange()
+	void OnPosChange() override
 	{
 		LLayout::OnPosChange();
 		
