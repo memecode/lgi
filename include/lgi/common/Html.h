@@ -167,6 +167,7 @@ public:
 	virtual bool OnContextMenuCreate(struct LTagHit &Hit, LSubMenu &RClick) { return true; }
 	virtual void OnContextMenuCommand(struct LTagHit &Hit, int Cmd) {}
 	virtual void OnPaintFinished(LSurface *pDC) {}
+	virtual void DebugTagInfo(LTag *tag);
 };
 
 }

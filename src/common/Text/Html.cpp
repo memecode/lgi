@@ -2019,6 +2019,72 @@ LTag *LTag::IsAnchor(LString *Uri)
 	return a;
 }
 
+void LHtml::DebugTagInfo(LTag *tag)
+{
+	if (!tag)
+		return;
+
+	auto Style = tag->ToLString();
+	LStringPipe p(256);
+	p.Print("Tag: %s\n", tag->Tag ? tag->Tag.Get() : "CONTENT");
+	if (tag->Class.Length())
+	{
+		p.Print("Class(es): ");
+		for (unsigned i=0; i<tag->Class.Length(); i++)
+		{
+			p.Print("%s%s", i?", ":"", tag->Class[i].Get());
+		}
+		p.Print("\n");
+	}
+	if (tag->HtmlId)
+	{
+		p.Print("Id: %s\n", tag->HtmlId);
+	}
+	p.Print("Pos: %i,%i   Size: %i,%i\n\n", tag->Pos.x, tag->Pos.y, tag->Size.x, tag->Size.y);
+	p.Print("Style:\n", Style.Get());
+			
+	auto s = Style.SplitDelimit("\n");
+	for (unsigned i=0; i<s.Length(); i++)
+		p.Print("    %s\n", s[i].Get());
+			
+	p.Print("\nParent tags:\n");
+	LDisplayString Sp(LSysFont, " ");
+	for (LTag *t=ToTag(tag->Parent); t && t->Parent; t=ToTag(t->Parent))
+	{
+		LStringPipe Tmp;
+		Tmp.Print("    %s", t->Tag ? t->Tag.Get() : "CONTENT");
+		if (t->HtmlId)
+		{
+			Tmp.Print("#%s", t->HtmlId);
+		}
+		for (unsigned i=0; i<t->Class.Length(); i++)
+		{
+			Tmp.Print(".%s", t->Class[i].Get());
+		}
+		LAutoString Txt(Tmp.NewStr());
+		p.Print("%s", Txt.Get());
+		LDisplayString Ds(LSysFont, Txt);
+		int Px = 170 - Ds.X();
+		int Chars = Px / Sp.X();
+		for (int c=0; c<Chars; c++)
+			p.Print(" ");
+
+		p.Print("(%i,%i)-(%i,%i)\n",
+			t->Pos.x,
+			t->Pos.y,
+			t->Size.x,
+			t->Size.y);
+	}
+			
+	LAutoString a(p.NewStr());
+			
+	LgiMsg(	this,
+			"%s",
+			GetClass(),
+			MB_OK,
+			a.Get());
+}
+
 bool LTag::OnMouseClick(LMouse &m)
 {
 	bool Processed = false;
@@ -2079,67 +2145,7 @@ bool LTag::OnMouseClick(LMouse &m)
 	{
 		#ifdef _DEBUG
 		if (m.Ctrl())
-		{
-			auto Style = ToLString();
-			LStringPipe p(256);
-			p.Print("Tag: %s\n", Tag ? Tag.Get() : "CONTENT");
-			if (Class.Length())
-			{
-				p.Print("Class(es): ");
-				for (unsigned i=0; i<Class.Length(); i++)
-				{
-					p.Print("%s%s", i?", ":"", Class[i].Get());
-				}
-				p.Print("\n");
-			}
-			if (HtmlId)
-			{
-				p.Print("Id: %s\n", HtmlId);
-			}
-			p.Print("Pos: %i,%i   Size: %i,%i\n\n", Pos.x, Pos.y, Size.x, Size.y);
-			p.Print("Style:\n", Style.Get());
-			
-			auto s = Style.SplitDelimit("\n");
-			for (unsigned i=0; i<s.Length(); i++)
-				p.Print("    %s\n", s[i].Get());
-			
-			p.Print("\nParent tags:\n");
-			LDisplayString Sp(LSysFont, " ");
-			for (LTag *t=ToTag(Parent); t && t->Parent; t=ToTag(t->Parent))
-			{
-				LStringPipe Tmp;
-				Tmp.Print("    %s", t->Tag ? t->Tag.Get() : "CONTENT");
-				if (t->HtmlId)
-				{
-					Tmp.Print("#%s", t->HtmlId);
-				}
-				for (unsigned i=0; i<t->Class.Length(); i++)
-				{
-					Tmp.Print(".%s", t->Class[i].Get());
-				}
-				LAutoString Txt(Tmp.NewStr());
-				p.Print("%s", Txt.Get());
-				LDisplayString Ds(LSysFont, Txt);
-				int Px = 170 - Ds.X();
-				int Chars = Px / Sp.X();
-				for (int c=0; c<Chars; c++)
-					p.Print(" ");
-
-				p.Print("(%i,%i)-(%i,%i)\n",
-					t->Pos.x,
-					t->Pos.y,
-					t->Size.x,
-					t->Size.y);
-			}
-			
-			LAutoString a(p.NewStr());
-			
-			LgiMsg(	Html,
-					"%s",
-					Html->GetClass(),
-					MB_OK,
-					a.Get());
-		}
+			Html->DebugTagInfo(this);
 		else
 		#endif
 		{
@@ -2437,12 +2443,8 @@ void LTag::GetTagByPos(LTagHit &TagHit, int x, int y, int Depth, bool InBody, bo
 
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
-		LTag *t = ToTag(Children[i]);
-		if (t->Pos.x >= 0 &&
-			t->Pos.y >= 0)
-		{
+		if (auto t = ToTag(Children[i]))
 			t->GetTagByPos(TagHit, x - t->Pos.x, y - t->Pos.y, Depth + 1, InBody, DebugLog);
-		}
 	}
 }
 
@@ -2799,7 +2801,7 @@ void LTag::Restyle()
 	#endif
 }
 
-void LTag::SetStyle()
+void LTag::SetDefaultCss()
 {
 	const static float FntMul[] =
 	{
@@ -2812,43 +2814,7 @@ void LTag::SetStyle()
 		3.0f	// size=7
 	};
 
-	const char *s = 0;
-	#ifdef _DEBUG
-	if (Get("debug", s))
-	{
-		if ((Debug = atoi(s)))
-		{
-			LgiTrace("Debug Tag: %p '%s'\n", this, Tag ? Tag.Get() : "CONTENT");
-		}
-	}
-	#endif
-
-	if (Get("Color", s))
-	{
-		ColorDef Def;
-		if (LHtmlParser::ParseColour(s, Def))
-			Color(Def);
-	}
-
-	if (Get("Background", s) ||
-		Get("bgcolor", s))
-	{
-		ColorDef Def;
-		if (LHtmlParser::ParseColour(s, Def))
-		{
-			BackgroundColor(Def);
-		}
-		else
-		{
-			LCss::ImageDef Img;
-			
-			Img.Type = ImageUri;
-			Img.Uri = s;
-			
-			BackgroundImage(Img);
-			BackgroundRepeat(RepeatBoth);
-		}
-	}
+	const char *s = nullptr;
 
 	switch (TagId)
 	{
@@ -2858,6 +2824,23 @@ void LTag::SetStyle()
 				Display(LCss::DispNone);
 			break;
 		}
+		case TAG_PRE:
+		{
+			LFontType Type;
+			if (Type.GetSystemFont("Fixed"))
+			{
+				LAssert(ValidStr(Type.GetFace()));
+				FontFamily(Type.GetFace());
+			}
+			break;
+		}
+	    case TAG_BIG:
+	    {
+            LCss::Len l;
+            l.Type = SizeLarger;
+	        FontSize(l);
+	        break;
+	    }
 		case TAG_LINK:
 		{
 			const char *Type, *Href;
@@ -2945,6 +2928,74 @@ void LTag::SetStyle()
 			}
 			break;
 		}
+		case TAG_TABLE:
+		{
+			Len l;
+
+			if (!Cell)
+				Cell = new TblCell;
+
+			if (Get("border", s))
+			{
+				BorderDef b;
+				if (b.Parse(this, s))
+				{
+					BorderLeft(b);
+					BorderRight(b);
+					BorderTop(b);
+					BorderBottom(b);
+				}
+			}
+
+			if (Get("cellspacing", s) &&
+				l.Parse(s, PropBorderSpacing, ParseRelaxed))
+			{
+				BorderSpacing(l);
+			}
+			else
+			{
+				// BorderSpacing(LCss::Len(LCss::LenPx, 2.0f));
+			}
+
+			if (Get("cellpadding", s) &&
+				l.Parse(s, Prop_CellPadding, ParseRelaxed))
+			{
+				_CellPadding(l);
+			}
+
+			if (Get("align", s))
+			{
+				Len l;
+				if (l.Parse(s))
+					Cell->XAlign = l.Type;
+			}
+			break;
+		}
+		case TAG_TD:
+		case TAG_TH:
+		{
+			if (!Cell)
+				Cell = new TblCell;
+
+			LTag *Table = GetTable();
+			if (Table)
+			{
+				Len l = Table->_CellPadding();
+				if (!l)
+				{
+					l.Type = LCss::LenPx;
+					l.Value = DefaultCellPadding;
+				}
+				PaddingLeft(l);
+				PaddingRight(l);
+				PaddingTop(l);
+				PaddingBottom(l);
+			}
+			
+			if (TagId == TAG_TH)
+				FontWeight(LCss::FontWeightBold);
+			break;
+		}
 		case TAG_BODY:
 		{
 			MarginLeft(Len(Get("leftmargin", s) ? s : DefaultBodyMargin));
@@ -3000,223 +3051,6 @@ void LTag::SetStyle()
 			Display(LCss::DispNone);
 			break;
 		}
-	}
-
-	if (Get("width", s))
-	{
-		Len l;
-		if (l.Parse(s, PropWidth, ParseRelaxed))
-			Width(l);
-	}
-	if (Get("height", s))
-	{
-		Len l;
-		if (l.Parse(s, PropHeight, ParseRelaxed))
-			Height(l);
-	}
-	if (Get("align", s))
-	{
-		if (_stricmp(s, "left") == 0) TextAlign(Len(AlignLeft));
-		else if (_stricmp(s, "right") == 0) TextAlign(Len(AlignRight));
-		else if (_stricmp(s, "center") == 0) TextAlign(Len(AlignCenter));
-	}
-	if (Get("valign", s))
-	{
-		if (_stricmp(s, "top") == 0) VerticalAlign(Len(VerticalTop));
-		else if (_stricmp(s, "middle") == 0) VerticalAlign(Len(VerticalMiddle));
-		else if (_stricmp(s, "bottom") == 0) VerticalAlign(Len(VerticalBottom));
-	}
-
-	Get("id", HtmlId);
-
-	if (Get("class", s))
-		Class = LString(s).SplitDelimit(" \t");
-
-	Restyle();
-
-	if (IsTable())
-	{
-		// These should not override any CSS already set...
-		// We can't fully know if this is a table till after the restyle.
-		Len l;
-
-		if (!Cell)
-			Cell = new TblCell;
-
-		if (Get("border", s))
-		{
-			BorderDef b;
-			if (b.Parse(this, s))
-			{
-				BorderLeft(b);
-				BorderRight(b);
-				BorderTop(b);
-				BorderBottom(b);
-			}
-		}
-
-		if (Get("cellspacing", s) &&
-			l.Parse(s, PropBorderSpacing, ParseRelaxed))
-		{
-			BorderSpacing(l);
-		}
-		else
-		{
-			// BorderSpacing(LCss::Len(LCss::LenPx, 2.0f));
-		}
-
-		if (Get("cellpadding", s) &&
-			l.Parse(s, Prop_CellPadding, ParseRelaxed))
-		{
-			_CellPadding(l);
-		}
-
-		if (Get("align", s))
-		{
-			Len l;
-			if (l.Parse(s))
-				Cell->XAlign = l.Type;
-		}
-	}
-	else if (IsTableRow())
-	{
-	}
-	else if (IsTableCell())
-	{
-		// These should not override any CSS already set...
-		// We can't fully know if this is a table till after the restyle.
-		if (!Cell)
-			Cell = new TblCell;
-
-		if (auto Table = GetTable())
-		{
-			Len l = Table->_CellPadding();
-			if (!l)
-			{
-				l.Type = LCss::LenPx;
-				l.Value = DefaultCellPadding;
-			}
-			PaddingLeft(l);
-			PaddingRight(l);
-			PaddingTop(l);
-			PaddingBottom(l);
-		}
-		
-		if (TagId == TAG_TH &&
-			FontWeight() == LCss::FontWeightInherit)
-			FontWeight(LCss::FontWeightBold);
-
-		const char *s;
-		if (Get("colspan", s))
-			Cell->Span.x = atoi(s);
-		else
-			Cell->Span.x = 1;
-		if (Get("rowspan", s))
-			Cell->Span.y = atoi(s);
-		else
-			Cell->Span.y = 1;
-		
-		Cell->Span.x = MAX(Cell->Span.x, 1);
-		Cell->Span.y = MAX(Cell->Span.y, 1);
-		
-		auto disp = SupportedDisplay();
-		if (disp == DispInline ||
-			disp == DispInlineBlock)
-		{
-			Display(DispBlock); // Inline-block TD??? Nope.
-		}
-	}
-	else switch (TagId)
-	{
-		default: break;
-	    case TAG_BIG:
-	    {
-            LCss::Len l;
-            l.Type = SizeLarger;
-	        FontSize(l);
-	        break;
-	    }
-	    /*
-		case TAG_META:
-		{
-			LAutoString Cs;
-
-			const char *s;
-			if (Get("http-equiv", s) &&
-				_stricmp(s, "Content-Type") == 0)
-			{
-				const char *ContentType;
-				if (Get("content", ContentType))
-				{
-					char *CharSet = stristr(ContentType, "charset=");
-					if (CharSet)
-					{
-						char16 *cs = NULL;
-						Html->ParsePropValue(CharSet + 8, cs);
-						Cs.Reset(WideToUtf8(cs));
-						DeleteArray(cs);
-					}
-				}
-			}
-
-			if (Get("name", s) && _stricmp(s, "charset") == 0 && Get("content", s))
-			{
-				Cs.Reset(NewStr(s));
-			}
-			else if (Get("charset", s))
-			{
-				Cs.Reset(NewStr(s));
-			}
-
-			if (Cs)
-			{
-				if (Cs &&
-					_stricmp(Cs, "utf-16") != 0 &&
-					_stricmp(Cs, "utf-32") != 0 &&
-					LGetCsInfo(Cs))
-				{
-					// Html->SetCharset(Cs);
-				}
-			}
-			break;
-		}
-		*/
-		case TAG_BODY:
-		{
-			LCss::ColorDef Bk = BackgroundColor();
-			if (Bk.Type != ColorInherit)
-			{
-				// Copy the background up to the LHtml wrapper
-				Html->GetCss(true)->BackgroundColor(Bk);
-			}
-			break;
-		}
-		case TAG_HEAD:
-		{
-			Display(DispNone);
-			break;
-		}
-		case TAG_PRE:
-		{
-			LFontType Type;
-			if (Type.GetSystemFont("Fixed"))
-			{
-				LAssert(ValidStr(Type.GetFace()));
-				FontFamily(Type.GetFace());
-			}
-			break;
-		}
-		case TAG_IMG:
-		{
-			const char *Uri;
-			if (Html->Environment &&
-				Get("src", Uri))
-			{
-				// printf("Uri: %s\n", Uri);
-				LoadImage(Uri);
-			}
-			break;
-		}
 		case TAG_H1:
 		{
 			char s[32];
@@ -3263,6 +3097,108 @@ void LTag::SetStyle()
 			sprintf_s(s, sizeof(s), "%ipt", (int)((float)Html->DefFont()->PointSize() * FntMul[0]));
 			FontSize(Len(s));
 			FontWeight(FontWeightBold);
+			break;
+		}
+	}
+}
+
+void LTag::SetAttributeStyles()
+{
+	const char *s = nullptr;
+
+	if (IsTable())
+	{
+		if (!Cell)
+			Cell = new TblCell;
+	}
+	else if (IsTableCell())
+	{
+		if (!Cell)
+			Cell = new TblCell;
+
+		if (Get("colspan", s))
+			Cell->Span.x = atoi(s);
+		else
+			Cell->Span.x = 1;
+		if (Get("rowspan", s))
+			Cell->Span.y = atoi(s);
+		else
+			Cell->Span.y = 1;
+		
+		Cell->Span.x = MAX(Cell->Span.x, 1);
+		Cell->Span.y = MAX(Cell->Span.y, 1);
+		
+		auto disp = SupportedDisplay();
+		if (disp == DispInline ||
+			disp == DispInlineBlock)
+		{
+			Display(DispTableCell); // Inline-block TD??? Nope.
+		}
+	}
+
+	if (Get("Color", s))
+	{
+		ColorDef Def;
+		if (LHtmlParser::ParseColour(s, Def))
+			Color(Def);
+	}
+
+	if (Get("Background", s) ||
+		Get("bgcolor", s))
+	{
+		ColorDef Def;
+		if (LHtmlParser::ParseColour(s, Def))
+		{
+			BackgroundColor(Def);
+		}
+		else
+		{
+			LCss::ImageDef Img;
+			
+			Img.Type = ImageUri;
+			Img.Uri = s;
+			
+			BackgroundImage(Img);
+			BackgroundRepeat(RepeatBoth);
+		}
+	}
+
+	if (Get("width", s))
+	{
+		Len l;
+		if (l.Parse(s, PropWidth, ParseRelaxed))
+			Width(l);
+	}
+	if (Get("height", s))
+	{
+		Len l;
+		if (l.Parse(s, PropHeight, ParseRelaxed))
+			Height(l);
+	}
+	if (Get("align", s))
+	{
+		if (_stricmp(s, "left") == 0) TextAlign(Len(AlignLeft));
+		else if (_stricmp(s, "right") == 0) TextAlign(Len(AlignRight));
+		else if (_stricmp(s, "center") == 0) TextAlign(Len(AlignCenter));
+	}
+	if (Get("valign", s))
+	{
+		if (_stricmp(s, "top") == 0) VerticalAlign(Len(VerticalTop));
+		else if (_stricmp(s, "middle") == 0) VerticalAlign(Len(VerticalMiddle));
+		else if (_stricmp(s, "bottom") == 0) VerticalAlign(Len(VerticalBottom));
+	}
+
+	switch (TagId)
+	{
+		case TAG_IMG:
+		{
+			const char *Uri;
+			if (Html->Environment &&
+				Get("src", Uri))
+			{
+				// printf("Uri: %s\n", Uri);
+				LoadImage(Uri);
+			}
 			break;
 		}
 		case TAG_FONT:
@@ -3368,6 +3304,52 @@ void LTag::SetStyle()
 					}
 				}
 			}
+			break;
+		}
+		default:
+			break;
+	}
+}
+
+void LTag::SetStyle()
+{
+	const char *s = nullptr;
+	#ifdef _DEBUG
+	if (Get("debug", s))
+	{
+		if ((Debug = atoi(s)))
+		{
+			LgiTrace("Debug Tag: %p '%s'\n", this, Tag ? Tag.Get() : "CONTENT");
+		}
+	}
+	#endif
+
+	SetDefaultCss();
+
+	Get("id", HtmlId);
+	if (Get("class", s))
+		Class = LString(s).SplitDelimit(" \t");
+	Restyle();
+
+	SetAttributeStyles();
+
+	switch (TagId)
+	{
+		default:
+			break;
+		case TAG_BODY:
+		{
+			LCss::ColorDef Bk = BackgroundColor();
+			if (Bk.Type != ColorInherit)
+			{
+				// Copy the background up to the LHtml wrapper
+				Html->GetCss(true)->BackgroundColor(Bk);
+			}
+			break;
+		}
+		case TAG_HEAD:
+		{
+			Display(DispNone);
 			break;
 		}
 	}
@@ -8196,7 +8178,7 @@ bool LHtml::OnKey(LKey &k)
 {
 	bool Status = false;
 
-	k.Trace("LHtml::OnKey");
+	// k.Trace("LHtml::OnKey");
 
 	if (k.Down())
 	{
@@ -8804,7 +8786,7 @@ void LHtml::OnMouseMove(LMouse &m)
 		return;
 
 	LString Uri;
-	LTag *HitTag = Hit.NearestText && Hit.Near == 0 ? Hit.NearestText : Hit.Direct;
+	auto HitTag = Hit.NearestText && Hit.Near == 0 ? Hit.NearestText : Hit.Direct;
 	if (HitTag &&
 		HitTag->TipId == 0 &&
 		Hit.LocalCoords.x >= 0 &&
@@ -9580,12 +9562,13 @@ bool LHtmlTableLayout::Set(LTag *t)
 	return true;
 }
 
-void LTagHit::Dump(const char *Desc)
+LString LTagHit::ToString()
 {
+	LStringPipe out;
 	LArray<LTag*> d, n;
 	LTag *t = Direct;
 	unsigned i;
-	for (i=0; i<3 && t; t = ToTag(t->Parent), i++)
+	for (i=0; i<6 && t; t = ToTag(t->Parent), i++)
 	{
 		d.AddAt(0, t);
 	}
@@ -9595,16 +9578,23 @@ void LTagHit::Dump(const char *Desc)
 		n.AddAt(0, t);
 	}
 	
-	LgiTrace("Hit: %s Direct: ", Desc);
+	out.Print("Direct: ");
 	for (i=0; i<d.Length(); i++)
-		LgiTrace(">%s", d[i]->Tag ? d[i]->Tag.Get() : "CONTENT");
-	LgiTrace(" Nearest: ");
+		out.Print(">%s", d[i]->Tag ? d[i]->Tag.Get() : "CONTENT");
+	out.Print(" Nearest: ");
 	for (i=0; i<n.Length(); i++)
-		LgiTrace(">%s", n[i]->Tag ? n[i]->Tag.Get() : "CONTENT");
-	LgiTrace(" Local: %ix%i Index: %i Block: %s '%.10S'\n",
+		out.Print(">%s", n[i]->Tag ? n[i]->Tag.Get() : "CONTENT");
+	out.Print(" Local: %ix%i Index: %i Block: %s '%.10S'",
 		LocalCoords.x, LocalCoords.y,
 		Index,
 		Block ? Block->GetStr() : NULL,
 		Block ? Block->Text + Index : NULL);
+
+	return out.NewLStr();
+}
+
+void LTagHit::Dump(const char *Desc)
+{
+	LgiTrace("Hit: %s %s\n", Desc, ToString().Get());
 }
 

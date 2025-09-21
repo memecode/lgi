@@ -20,27 +20,17 @@ class LFlowRegion;
 
 struct LTagHit
 {
-	LTag *Direct;		// Tag directly under cursor
-	LTag *NearestText;	// Nearest tag with text
-	int Near;			// How close in px was the position to NearestText.
-						// 0 if a direct hit, >0 is near miss, -1 if invalid.
-	bool NearSameRow;	// True if 'NearestText' on the same row as click.
-	LPoint LocalCoords;	// The position in local co-ords of the tag
+	LTag *Direct = nullptr;			// Tag directly under cursor
+	LTag *NearestText = nullptr;	// Nearest tag with text
+	int Near = -1;					// How close in px was the position to NearestText.
+									// 0 if a direct hit, >0 is near miss, -1 if invalid.
+	bool NearSameRow = false;		// True if 'NearestText' on the same row as click.
+	LPoint LocalCoords{-1, -1};		// The position in local co-ords of the tag
 
-	LFlowRect *Block;	// Text block hit
-	ssize_t Index; // If Block!=NULL then index into text, otherwise -1.
+	LFlowRect *Block = nullptr;		// Text block hit
+	ssize_t Index = -1;				// If Block!=NULL then index into text, otherwise -1.
 
-	LTagHit()
-	{
-		Direct = NULL;
-		NearestText = NULL;
-		NearSameRow = false;
-		Block = 0;
-		Near = -1;
-		Index = -1;
-		LocalCoords.x = LocalCoords.y = -1;
-	}
-	
+	LString ToString();
 	void Dump(const char *Desc);
 };
 
@@ -413,6 +403,10 @@ public:
 	char *ParseText(char *Doc);
 	bool ConvertToText(TextConvertState &State);
 	
+	/// Sets up the default style for a tag before classes, id's and style attributes are applied
+	void SetDefaultCss();
+	/// Sets styles based on the element's attributes... these take precedence over CSS
+	void SetAttributeStyles();
 	/// Configures the tag's styles.
 	void SetStyle();
 	/// Called to apply CSS selectors on initialization and also when properties change at runtime.

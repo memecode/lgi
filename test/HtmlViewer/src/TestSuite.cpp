@@ -49,6 +49,7 @@ using THtmlTag = Html1::LTag;
 class HtmlScriptContext;
 struct AppContext
 {
+	LTabView *tabs = nullptr;
 	LTree *tagTree = nullptr;
 	LTextLog *tagDetail = nullptr;
     HtmlScriptContext *Html = nullptr;
@@ -140,6 +141,24 @@ struct AppContext
 			else context->tagDetail->Name("null tag");
 		}
 	};
+
+	TagItem *FindTagItem(THtmlTag *tag)
+	{
+		TagItem *out = nullptr;
+		tagTree->ForAllItems([&](auto item)
+			{
+				if (auto ti = dynamic_cast<TagItem*>(item))
+				{
+					if (ti->tag == tag)
+					{
+						out = ti;
+						return false;
+					}
+				}
+				return true;
+			});
+		return out;
+	}
 };
 
 class FileInf
@@ -321,6 +340,18 @@ public:
 			pDC->Box(&r);
 		}
 	}
+
+	void DebugTagInfo(THtmlTag *tag) override
+	{
+		appContext->tabs->Value(1);
+
+		// Find the selected tag's item:
+		if (auto item = appContext->FindTagItem(tag))
+		{
+			item->Select(true);
+			item->ScrollTo();
+		}
+	}
 };
 
 LHostFunc HtmlScriptContext::Methods[] =
@@ -456,7 +487,6 @@ class AppWnd :
 	public AppContext
 {
 	LList *Lst = nullptr;
-	LTabView *tabs = nullptr;
 	LBox *debugBox = nullptr;
     LTextView3 *Text = nullptr;
 	LString FilesFolder;

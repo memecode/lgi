@@ -87,8 +87,13 @@ public:
 		return Items.end();
 	}
 
-	/// Calls a f(n) for each
-	int ForEach(std::function<void(LTreeItem*)> Fn);
+	/// Calls a function for each item in the tree.
+	/// \returns true if the whole tree was visited
+	bool ForEach(
+		/// Can return false to stop propagation
+		std::function<bool(LTreeItem*)> Fn,
+		/// [Optional] count of items visited
+		int *Count = nullptr);
 
 	/// Returns a valid pointer if this is a child tree item.
 	/// NULL for the root Tree.
@@ -326,14 +331,16 @@ public:
 		n.Empty();
 		return ForAllItems([&n](LTreeItem *item)
 			{
-				T *t = dynamic_cast<T*>(item);
-				if (t)
+				if (auto t = dynamic_cast<T*>(item))
 					n.Add(t);
+				return true;
 			});
 	}
 	
 	/// Call a function for every item
-	bool ForAllItems(std::function<void(LTreeItem*)> Callback);
+	/// Callback can should return true to continue iteration.
+	/// Or false to stop.
+	bool ForAllItems(std::function<bool(LTreeItem*)> Callback);
 
 	/// Returns the item at an x,y location
 	LTreeItem *ItemAtPoint(int x, int y, bool Debug = false);

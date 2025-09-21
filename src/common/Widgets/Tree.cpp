@@ -335,17 +335,21 @@ bool LTreeNode::HasItem(LTreeItem *obj, bool recurse)
 	return false;
 }
 
-int LTreeNode::ForEach(std::function<void(LTreeItem*)> Fn)
+bool LTreeNode::ForEach(std::function<bool(LTreeItem*)> Fn, int *count)
 {
-	int Count = 0;
-	
-	for (auto t : Items)
+	for (auto t: Items)
 	{
-		Fn(t);
-		Count += t->ForEach(Fn);
+		if (!Fn(t))
+			return false;
+			
+		if (count)
+			*count++;
+		
+		if (!t->ForEach(Fn, count))
+			return false;
 	}
 	
-	return Count + 1;
+	return true;
 }
 
 ssize_t LTreeNode::IndexOf()
@@ -2240,16 +2244,17 @@ bool LTree::GetItems(LArray<LItem*> &arr, bool selectedOnly)
 		ForEach([arr](auto i) mutable
 		{
 			arr.Add(i);
+			return true;
 		});
 	}
 
 	return arr.Length() > 0;
 }
 
-bool LTree::ForAllItems(std::function<void(LTreeItem*)> Callback)
+bool LTree::ForAllItems(std::function<bool(LTreeItem*)> Callback)
 {
 	auto lck = ScopedLock(_FL);
-	return ForEach(Callback) > 0;
+	return ForEach(Callback);
 }
 
 void LTree::OnItemClick(LTreeItem *Item, LMouse &m)
