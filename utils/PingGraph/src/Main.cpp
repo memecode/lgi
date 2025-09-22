@@ -224,29 +224,49 @@ public:
 
 		// Draw x axis
 		int nextX = 0;
-		int prevMin = 0;
+		int gridSizeMins[] = {1, 5, 15, 30, 60};
+		int gridSeconds = 60 * 60;
+		auto gridTxtPx = LDisplayString(fnt, "99:99").X();
+		time_t now = 0;
+		time(&now);
+		for (int i=0; i<CountOf(gridSizeMins); i++)
+		{
+			auto x1 = TimeToX(now);
+			auto x2 = TimeToX(now - (gridSizeMins[i] * 60));
+			if (ABS(x2 - x1) > gridTxtPx)
+			{
+				gridSeconds = gridSizeMins[i] * 60;
+				break;
+			}
+		}
+
+		auto prevLabel = XtoTime(draw.x1) / gridSeconds;
 		for (int x = draw.x1; x <= draw.x2; x++)
 		{
 			time_t unix = XtoTime(x);
-			#if WINDOWS
-			struct tm localMem, *local = &localMem;
-			auto localTimeErr = localtime_s(&localMem, &unix);
-			if (!localTimeErr && local->tm_min != prevMin)
-			#else
-			struct tm *local = localtime(&unix);
-			if (local && local->tm_min != prevMin)
-			#endif
+			auto current = unix / gridSeconds;
+			if (current != prevLabel)
 			{
-				auto str = LString::Fmt("%i:%2.2i", local->tm_hour, local->tm_min);
-				LDisplayString ds(fnt, str);
-				auto drawX = x - (ds.X()/2);
-				if (!nextX || drawX >= nextX)
+				prevLabel = current;
+				#if WINDOWS
+				struct tm localMem, *local = &localMem;
+				auto localTimeErr = localtime_s(&localMem, &unix);
+				if (!localTimeErr)
+				#else
+				struct tm *local = localtime(&unix);
+				if (local)
+				#endif
 				{
-					ds.Draw(pDC, x - (ds.X()/2), draw.y2 + (markPx*2));
-					nextX = x + ds.X();
-					pDC->Line(x, draw.y2, x, draw.y2+markPx);
+					auto str = LString::Fmt("%i:%2.2i", local->tm_hour, local->tm_min);
+					LDisplayString ds(fnt, str);
+					auto drawX = x - (ds.X()/2);
+					if (!nextX || drawX >= nextX)
+					{
+						ds.Draw(pDC, x - (ds.X()/2), draw.y2 + (markPx*2));
+						nextX = x + ds.X();
+						pDC->Line(x, draw.y2, x, draw.y2+markPx);
+					}
 				}
-				prevMin = local->tm_min;
 			}
 		}
 
