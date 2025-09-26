@@ -5597,18 +5597,21 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 		else
 		{
 			Flow->x2 = Flow->X();
+			#ifdef _DEBUG
 			if (Debug)
 				LgiTrace("%s:%i '%s' flow.x=%i (%i,%i)\n",
 					_FL, Tag.Get(), Flow->X(), Flow->cx, Flow->x2);
+			#endif
 
 			Flow->x1 =	Flow->ResolveX(BorderLeft(), this, true) +
 						Flow->ResolveX(PaddingLeft(), this, true);
 			Flow->cx = Flow->x1;
 
+			#ifdef _DEBUG
 			if (Debug)
 				LgiTrace("%s:%i '%s' flow.x1=%i\n",
 					_FL, Tag.Get(), Flow->x1);
-			
+			#endif			
 
 			Flow->y1 += Flow->ResolveY(BorderTop(), this, true) +
 						Flow->ResolveY(PaddingTop(), this, true);
@@ -5724,7 +5727,12 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 			// Flow in the rest of the text...
 			auto Txt = Text();
 			auto Align = GetAlign(true);
-			TextPos.FlowText(this, Flow, f, LineHeightCache, Txt, Align, Debug);
+			TextPos.FlowText(this, Flow, f, LineHeightCache, Txt, Align,
+				#ifdef _DEBUG
+				Debug);
+				#else
+				false);
+				#endif
 		}
 	}
 
