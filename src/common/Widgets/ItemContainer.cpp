@@ -311,6 +311,7 @@ void LItemContainer::EmptyColumns()
 {
 	Columns.DeleteObjects();
 	Invalidate(&ColumnHeader);
+	sortMark.Col = -1; // the column object no longer exists... unset this
 	SendNotify(LNotifyItemColumnsChanged);
 }
 

@@ -239,17 +239,29 @@ class LgiClass LSortable
 public:
     struct SortParam
 	{
-        int Col = -1;
+		constexpr static int INVALID = -1;
+
+        int Col = INVALID;
         bool Ascend = true;
 
 		operator bool() const
 		{
-			return Col >= 0;
+			return Col != INVALID;
 		}
 
 		bool operator ==(const SortParam &sp) const
 		{
 			return Col == sp.Col && Ascend == sp.Ascend;
+		}
+
+		bool operator !=(const SortParam &sp) const
+		{
+			return Col != sp.Col || Ascend != sp.Ascend;
+		}
+
+		void Empty()
+		{
+			Col = INVALID;
 		}
     };
 
