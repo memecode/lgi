@@ -244,6 +244,7 @@ public:
         int Col = INVALID;
         bool Ascend = true;
 
+		// Test if the object is in the empty state
 		operator bool() const
 		{
 			return Col != INVALID;
@@ -259,9 +260,29 @@ public:
 			return Col != sp.Col || Ascend != sp.Ascend;
 		}
 
+		// Set to the empty state
 		void Empty()
 		{
 			Col = INVALID;
+			Ascend = true;
+		}
+
+		// Serialize to/from an integer value
+		void Serialize(bool write, int &stored)
+		{
+			if (write) // save
+			{
+				stored = (Col + 1) * (Ascend ? 1 : -1);
+			}
+			else // load
+			{
+				if (stored)
+				{
+					Col = ABS(stored) - 1;
+					Ascend = stored > 0;
+				}
+				else Empty();
+			}
 		}
     };
 

@@ -56,6 +56,7 @@ protected:
 
 public:
 	static size_t Instances;
+	using TCommitCb = std::function<void(VcCommit*)>;
 
 	LString::Array Files;
 	LArray<VcEdge*> Edges;
@@ -63,6 +64,7 @@ public:
 	int Idx = -1; // Used by LinkParents
 	LColour NodeColour;
 	LHashTbl<PtrKey<VcEdge*>, int> Pos;
+	LHashTbl<ConstStrKey<char,false>, TCommitCb*> extraCommands;
 
 	VcCommit(AppPriv *priv, VcFolder *folder);
 	VcCommit(const VcCommit &c);

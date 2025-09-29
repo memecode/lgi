@@ -358,7 +358,13 @@ void BrowseUi::ParseLog(LArray<VcCommit*> &commits, LString raw)
 	now.SetNow();
 
 	for (auto commit: d->Commits)
+	{
+		commit->extraCommands.Add("Save As", new VcCommit::TCommitCb([this](auto commit)
+			{
+				int asd=0;
+			}));
 		d->Log->Insert(commit);
+	}
 
 	d->Log->ResizeColumnsToContent();
 
