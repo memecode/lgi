@@ -541,9 +541,9 @@ public:
 		auto Kb = Items[Keyboard];
 		Items.Sort
 		(
-			[](auto *a, auto *b) -> int
+			[this](auto *a, auto *b) -> int
 			{
-				return a->Compare(b);
+				return a->Compare(b, sortParam.Col);
 			}
 		);
 		Keyboard = Kb ? (int)Items.IndexOf(Kb) : -1;
