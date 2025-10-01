@@ -707,7 +707,7 @@ public:
 	public:
 		SaveImagesState(AppWnd *app) :
 			LProgressDlg(app),
-			LThread("SaveImagesState", AddDispatch()),
+			LThread("SaveImagesState"),
 			App(app)
 		{
 			SetDescription("Scanning for HTML...");

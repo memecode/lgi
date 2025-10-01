@@ -213,7 +213,6 @@ enum LgiMessages
 	M_SCROLL_TO,			// Sent from LTreeItem to LTree
 	M_SET_SCROLL, // LScrollBar
 	M_JOBS_LOADED,			// LHtml
-	M_THREAD_COMPLETED,		// A=(LThread*)Thread
 	M_SET_CTRL_NAME,		// A=(int)CtrlId, B=(LString*)Name
 	M_SET_CTRL_ENABLE,		// A=(int)CtrlId, B=(bool)Enabled
 	M_SET_CTRL_VISIBLE,		// A=(int)CtrlId, B=(bool)Visible

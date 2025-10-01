@@ -161,6 +161,7 @@ public:
 			TCallback onStdout;
 		
 		/// Event fired when the process is complete:
+		/// Note: this runs in the thread itself.
 		std::function<void(int exitValue)> onComplete;
 		
 		// Object		

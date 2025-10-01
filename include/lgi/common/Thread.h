@@ -40,9 +40,6 @@ protected:
 	/// Auto deletes the thread after ::Main has finished.
 	bool DeleteOnExit       = false;
 
-	/// Aka from LView::AddDispatch().
-	int ViewHandle          = InvalidViewId;
-
 	friend class LView;
 	#if defined WIN32
 		friend uint WINAPI ThreadEntryPoint(void *i);
@@ -56,11 +53,7 @@ protected:
 public:
 	LThread(
 		/// Name for the thread.
-		const char *Name,
-		/// [Optional] Handle from LView::AddDispatch()
-		/// This enables the OnComplete event to be called
-		/// from the GUI thread after the thread exits.
-		int viewHandle = -1
+		const char *Name
 	);
 	virtual ~LThread();
 
@@ -82,15 +75,9 @@ public:
 	// Override to do something
 	virtual int Main() = 0;
 
-	// Events
+	// Events called in thread:
 	virtual void OnBeforeMain() {}
 	virtual void OnAfterMain() {}
-
-	/// This event runs after the thread has finished but 
-	/// is called from the main GUI thread. It requires a valid
-	/// viewHandle to be passed to the constructor. Which can
-	/// be aquired by calling LView::AddDispatch().
-	virtual void OnComplete() {}
 
 	// Register of threadId <-> texture names
 	static void RegisterThread(OsThreadId id, LString name);

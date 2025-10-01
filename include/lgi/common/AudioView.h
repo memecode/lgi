@@ -598,6 +598,7 @@ protected:
 			LString Msg;
 			Msg.Printf("Saving '%s'...", FileName.Get());
 			LPopupNotification::Message(view->GetWindow(), Msg);
+			DeleteOnExit = true;
 
 			Run();
 		}
@@ -607,8 +608,9 @@ protected:
 			WaitForExit();
 		}
 
-		void OnComplete()
+		void OnAfterMain() override
 		{
+			// FIXME: port to running in the thread
 			if (ErrorMsg)
 				LPopupNotification::Message(view->GetWindow(), ErrorMsg);
 			else
@@ -616,7 +618,6 @@ protected:
 
 			view->State = CtrlNormal;
 			view->Saving.Release(); // it doesn't own the ptr anymore
-			DeleteOnExit = true;
 		}
 
 		int Main()
@@ -1070,8 +1071,10 @@ private:
 			Cancel();
 		}
 
-		void OnComplete()
+		void OnAfterMain() override
 		{
+			// FIXME: port to running in thread:
+
 			// Clean up thread array...
 			LThread *t = this;
 			LAssert(view->WaveFormThreads.HasItem(t));
@@ -1769,18 +1772,20 @@ class LAudioRepairView : public LAudioView
 		LArray<LBookmark> bookmarks;
 
 		ErrorThread(LAudioRepairView *v, int64_t startSample, int64_t endSample, int ch) :
-			LThread("ErrorThread", v->AddDispatch())
+			LThread("ErrorThread")
 		{
 			view = v;
 			start = startSample;
 			end = endSample;
 			channel = ch;
+			DeleteOnExit = true;
 
 			Run();
 		}
 
-		void OnComplete()
+		void OnAfterMain() override
 		{
+			// FIXME: threading... this is supposed to run in the GUI thread.
 			auto &BookMarks = view->GetBookMarks();
 			BookMarks[channel].Add(bookmarks);
 			BookMarks[channel].Sort([](auto a, auto b)
@@ -1794,7 +1799,6 @@ class LAudioRepairView : public LAudioView
 			view->ErrorThreads.Delete(this);
 			if (view->ErrorThreads.Length() == 0)
 				LPopupNotification::Message(view->GetWindow(), "Done.");
-			DeleteOnExit = true;
 		}
 
 		int Main()
