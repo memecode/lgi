@@ -2,7 +2,6 @@
 #include "lgi/common/EventTargetThread.h"
 
 LEventSinkMap LEventSinkMap::Dispatch(128);
-LThreadSafeInterface<LArray<LThread::DeletedThreadInfo>,true> LThread::DeletedThreads(new LArray<LThread::DeletedThreadInfo>);
 
 //////////////////////////////////////////////////////////////////////////////////
 void LThread::WaitForExit(int WarnAfterMs)

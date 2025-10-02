@@ -590,7 +590,8 @@ protected:
 		LString ErrorMsg;
 		LString FileName;
 
-		SaveThread(LAudioView *v, const char *filename) : LThread("SaveThread", v->AddDispatch())
+		SaveThread(LAudioView *v, const char *filename) :
+			LThread("SaveThread")
 		{
 			view = v;
 			FileName = filename;
@@ -1060,7 +1061,8 @@ private:
 	{
 		LAudioView *view;
 
-		WaveFormThread(LAudioView *v) : LThread("WaveFormThread", v->AddDispatch())
+		WaveFormThread(LAudioView *v) :
+			LThread("WaveFormThread")
 		{
 			view = v;
 			Run();

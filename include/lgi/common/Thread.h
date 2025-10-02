@@ -82,16 +82,6 @@ public:
 	// Register of threadId <-> texture names
 	static void RegisterThread(OsThreadId id, LString name);
 	static const char *GetThreadName(OsThreadId id);
-
-
-	// Debugging:
-	struct DeletedThreadInfo
-	{
-		LThread *t;
-		LString name;
-		uint64_t ts;
-	};
-	static LThreadSafeInterface<LArray<DeletedThreadInfo>,true> DeletedThreads;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////
