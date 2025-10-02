@@ -3567,7 +3567,7 @@ char *LTag::ParseText(char *Doc)
 	TagId = TAG_BODY;
 	Tag.Reset(NewStr("body"));
 	Info = Html->GetTagInfo(Tag);
-	char *OriginalCp = NewStr(Html->Charset);
+	LString OriginalCp = Html->Charset;
 
 	LStringPipe Utf16;
 	char *s = Doc;
@@ -3596,8 +3596,7 @@ char *LTag::ParseText(char *Doc)
 
 			// Output tag
 			Html->SetCharset("iso-8859-1");
-			char16 *t = CleanText(s, e - s, NULL, false);
-			if (t)
+			if (auto t = CleanText(s, e - s, NULL, false))
 			{
 				Utf16.Push(t);
 				DeleteArray(t);
@@ -3607,11 +3606,9 @@ char *LTag::ParseText(char *Doc)
 		else if (!*s || *s == '\n')
 		{
 			// Output previous line
-			char16 *Line = Utf16.NewStrW();
-			if (Line)
+			if (auto Line = Utf16.NewStrW())
 			{
-				LTag *t = new LTag(Html, this);
-				if (t)
+				if (auto t = new LTag(Html, this))
 				{
 					t->Color(LColour(L_TEXT));
 					t->Text(Line);
@@ -3621,8 +3618,8 @@ char *LTag::ParseText(char *Doc)
 			if (*s == '\n')
 			{
 				s++;
-				LTag *t = new LTag(Html, this);
-				if (t)
+
+				if (auto t = new LTag(Html, this))
 				{
 					t->TagId = TAG_BR;
 					t->Tag.Reset(NewStr("br"));
@@ -3635,7 +3632,8 @@ char *LTag::ParseText(char *Doc)
 		{
 			// Seek end of text
 			char *e = s;
-			while (*e && *e != '\r' && *e != '\n' && *e != '<') e++;
+			while (*e && *e != '\r' && *e != '\n' && *e != '<')
+				e++;
 			
 			// Output text
 			Html->SetCharset(OriginalCp);
@@ -3649,7 +3647,6 @@ char *LTag::ParseText(char *Doc)
 	}
 	
 	Html->SetCharset(OriginalCp);
-	DeleteArray(OriginalCp);
 
 	return 0;
 }
@@ -6723,7 +6720,7 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 				}
 			}
 			
-			pDC->ClipRgn(0);
+			pDC->ClipRgn(nullptr);
 			break;
 		}
 		default:
@@ -6739,7 +6736,7 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 					LRect Clip(0, 0, Size.x-1, Size.y-1);
 					pDC->ClipRgn(&Clip);					
 					FillRectWithImage(pDC, &Clip, Img.Img, BackgroundRepeat());					
-					pDC->ClipRgn(NULL);
+					pDC->ClipRgn(nullptr);
 
 					back.Empty();
 				}
@@ -6747,7 +6744,7 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 
 			PaintBorderAndBackground(pDC, back, NULL);
 
-			LFont *f = GetFont();
+			auto f = GetFont();
 			#if DEBUG_TEXT_AREA
 			bool IsEditor = Html ? !Html->GetReadOnly() : false;
 			#else
@@ -6924,7 +6921,7 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 					ssize_t Base = GetTextStart();
 					for (unsigned i=0; i<TextPos.Length(); i++)
 					{
-						LFlowRect *Tr = TextPos[i];
+						auto Tr = TextPos[i];
 						if (!Tr)
 							break;
 						ssize_t Pos = (Tr->Text - Text()) - Base;
@@ -7159,8 +7156,8 @@ void LHtml::ParseDocument(const char *Doc)
 			Parse(Tag, Doc);
 
 			// Add body tag if not specified...
-			LTag *Html = Tag->GetTagByName("html");
-			LTag *Body = Tag->GetTagByName("body");
+			auto Html = Tag->GetTagByName("html");
+			auto Body = Tag->GetTagByName("body");
 
 			if (!Html && !Body)
 			{
@@ -7209,7 +7206,7 @@ void LHtml::ParseDocument(const char *Doc)
 			
 			if (Html && Body)
 			{
-				char16 *t = Tag->Text();
+				auto t = Tag->Text();
 				if (t)
 				{
 					if (ValidStrW(t))
@@ -7603,49 +7600,49 @@ LPointF LHtml::GetDpiScale()
 void LHtml::OnPaint(LSurface *ScreenDC)
 {
 	#if PROFILE_PAINT
-	LProfile Prof("LHtml::OnPaint");
-	Prof.HideResultsIfBelow(200);
+		LProfile Prof("LHtml::OnPaint");
+		Prof.HideResultsIfBelow(200);
 	#endif
 
 	#if HTML_USE_DOUBLE_BUFFER
-	LRect Client = GetClient();
-	if (ScreenDC->IsScreen())
-	{
-		if (!MemDC ||
-			(MemDC->X() < Client.X() || MemDC->Y() < Client.Y()))
+		LRect Client = GetClient();
+		if (ScreenDC->IsScreen())
 		{
-			if (MemDC.Reset(new LMemDC(_FL)))
+			if (!MemDC ||
+				(MemDC->X() < Client.X() || MemDC->Y() < Client.Y()))
 			{
-				int Sx = Client.X() + 10;
-				int Sy = Client.Y() + 10;
-				PROF("CreateMemDC");
-				if (!MemDC->Create(Sx, Sy, System32BitColourSpace))
+				if (MemDC.Reset(new LMemDC(_FL)))
 				{
-					MemDC.Reset();
+					int Sx = Client.X() + 10;
+					int Sy = Client.Y() + 10;
+					PROF("CreateMemDC");
+					if (!MemDC->Create(Sx, Sy, System32BitColourSpace))
+					{
+						MemDC.Reset();
+					}
 				}
 			}
+			if (MemDC)
+			{
+				MemDC->ClipRgn(nullptr);
+				#if 0//def _DEBUG
+					MemDC->Colour(LColour(255, 0, 255));
+					MemDC->Rectangle();
+				#endif
+			}
 		}
-		if (MemDC)
-		{
-			MemDC->ClipRgn(NULL);
-			#if 0//def _DEBUG
-			MemDC->Colour(LColour(255, 0, 255));
-			MemDC->Rectangle();
-			#endif
-		}
-	}
 	#endif
 
 	LSurface *pDC = MemDC ? MemDC : ScreenDC;
 
 	#if 0
-	Gtk::cairo_matrix_t mx;
-	Gtk::cairo_get_matrix(pDC->Handle(), &mx);
-	LPoint Offset;
-	WindowVirtualOffset(&Offset);
-	printf("\tHtml paint mx=%g,%g off=%i,%i\n",
-		mx.x0, mx.y0,
-		Offset.x, Offset.y);
+		Gtk::cairo_matrix_t mx;
+		Gtk::cairo_get_matrix(pDC->Handle(), &mx);
+		LPoint Offset;
+		WindowVirtualOffset(&Offset);
+		printf("\tHtml paint mx=%g,%g off=%i,%i\n",
+			mx.x0, mx.y0,
+			Offset.x, Offset.y);
 	#endif
 
 	PROF("Background");
@@ -7691,12 +7688,12 @@ void LHtml::OnPaint(LSurface *ScreenDC)
 	OnPaintFinished(pDC);
 
 	#if HTML_USE_DOUBLE_BUFFER
-	if (MemDC)
-	{
-		pDC->SetOrigin(0, 0);
-		PROF("Blt");
-		ScreenDC->Blt(0, 0, MemDC);
-	}
+		if (MemDC)
+		{
+			pDC->SetOrigin(0, 0);
+			PROF("Blt");
+			ScreenDC->Blt(0, 0, MemDC);
+		}
 	#endif
 
 	if (d->OnLoadAnchor && VScroll)
@@ -8417,9 +8414,9 @@ void LHtml::OnMouseClick(LMouse &m)
 			#define IDM_CHARSET_BASE	10000
 
 			RClick.AppendItem					(LLoadString(L_TEXTCTRL_COPY, "Copy"), IDM_COPY, HasSelection());
-			LMenuItem *Vs = RClick.AppendItem	(LLoadString(L_VIEW_SOURCE, "View Source"), IDM_VIEW_SRC, Source != 0);
+			auto Vs = RClick.AppendItem	(LLoadString(L_VIEW_SOURCE, "View Source"), IDM_VIEW_SRC, Source != 0);
 			RClick.AppendItem					(LLoadString(L_COPY_SOURCE, "Copy Source"), IDM_COPY_SRC, Source != 0);
-			LMenuItem *Load = RClick.AppendItem	(LLoadString(L_VIEW_IMAGES, "View External Images"), IDM_VIEW_IMAGES, true);
+			auto Load = RClick.AppendItem	(LLoadString(L_VIEW_IMAGES, "View External Images"), IDM_VIEW_IMAGES, true);
 			if (Load) Load->Checked(GetLoadImages());
 			RClick.AppendItem					(LLoadString(L_VIEW_IN_DEFAULT_BROWSER, "View in Default Browser"), IDM_EXTERNAL, Source != 0);
 			LSubMenu *Cs = RClick.AppendSub		(LLoadString(L_CHANGE_CHARSET, "Change Charset"));

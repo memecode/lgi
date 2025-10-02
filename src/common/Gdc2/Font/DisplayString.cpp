@@ -2276,14 +2276,17 @@ void LDisplayString::FDraw(LSurface *pDC, int fx, int fy, LRect *frc, bool Debug
 
 		double Dx = (double)fx / FScale;
 		double Dy = (double)fy / FScale;
-
+		
 		auto clip = pDC->ClipRgn();
 		if (clip.Valid())
 		{
+			int ox = 0, oy = 0;
+			pDC->GetOrigin(ox, oy);
+
 			cairo_translate(cr, 0, 0);
 			cairo_rectangle(cr,
-				(double)clip.x1,
-				(double)clip.y1,
+				(double)clip.x1 + ox,
+				(double)clip.y1 + oy,
 				(double)clip.X(),
 				(double)clip.Y());
 			cairo_clip(cr);
