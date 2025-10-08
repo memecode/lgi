@@ -36,6 +36,19 @@ protected:
 	bool ReorderPos(LItemContainer::ContainerItemDrop &drop, LPoint &pt, int depth);
 
 public:
+	class LgiClass Locker {
+		LTree *tree = nullptr;
+		bool locked = false;
+	public:
+		Locker(LTree *t, const char *file, int line);
+		~Locker();
+		operator bool() const { return locked || !tree; }
+	};
+	Locker ScopedLock(const char *file, int line)
+	{
+		return Locker(Tree, file, line);
+	}
+
 	LTreeNode();
 	virtual ~LTreeNode();
 
@@ -74,29 +87,22 @@ public:
 		return Items.end();
 	}
 
-	/// Sorts the child items
-	template<typename T>
-	bool Sort(int (*Compare)(LTreeItem*, LTreeItem*, T user_param), T user_param = 0)
-	{
-		if (!Compare)
-			return false;
-		
-		Items.Sort(Compare, user_param);
-		SetLayoutDirty();
-		return true;
-	}
-
-	/// Calls a f(n) for each
-	int ForEach(std::function<void(LTreeItem*)> Fn);
+	/// Calls a function for each item in the tree.
+	/// \returns true if the whole tree was visited
+	bool ForEach(
+		/// Can return false to stop propagation
+		std::function<bool(LTreeItem*)> Fn,
+		/// [Optional] count of items visited
+		int *Count = nullptr);
 
 	/// Returns a valid pointer if this is a child tree item.
 	/// NULL for the root Tree.
 	virtual LTreeItem *IsItem() { return NULL; }
 
-	/// Gets the expanced state of the tree item
+	/// Gets the expanded state of the tree item
 	virtual bool Expanded() { return false; }
 
-	/// Sets the expanced state of the tree item
+	/// Sets the expanded state of the tree item
 	virtual void Expanded(bool b) {}
 
 	/// Called to set the visible state of the node
@@ -104,7 +110,10 @@ public:
 };
 
 /// The item class for a tree. This defines a node in the heirarchy.
-class LgiClass LTreeItem : public LItem, public LTreeNode
+class LgiClass LTreeItem :
+	public LItem,
+	public LTreeNode,
+	virtual public LSortable
 {
 	friend class LTree;
 	friend class LTreeNode;
@@ -160,7 +169,7 @@ public:
 	void Update() override;
 	/// Returns true if the tree item is currently selected.
 	bool Select() override;
-	/// Selects or deselects the tree item.
+	/// Selects or de-selects the tree item.
 	void Select(bool b) override;
 	/// Returns true if the node has children and is open.
 	bool Expanded() override;
@@ -181,6 +190,38 @@ public:
 	/// Paints the item
 	void OnPaint(ItemPaintCtx &Ctx) override;
 	void OnPaint(LSurface *pDC) override { LAssert(0); }
+
+	// Sorting:
+		virtual int Compare(LTreeItem *To, ssize_t Field = 0)
+		{
+			LAssert(!"need to override this");
+			return 0;
+		}
+		bool SetSort(SortParam sort, bool reorderItems = true, bool setMark = true) override;
+
+		template<typename T>
+		[[deprecated]]
+		bool Sort(int (*Compare)(LTreeItem*, LTreeItem*, T user_param), T user_param = 0)
+		{
+			// FIXME: needs locking... but tree is not defined...
+			// auto t = GetTree();
+			if (!Compare)
+				return false;
+			// if (!t->Lock(_FL)) return false;
+
+			Items.Sort([Compare, user_param](auto a, auto b)
+				{
+					return Compare(a, b, user_param);
+				});
+			SetLayoutDirty();
+
+			// t->Unlock();
+			return true;
+		}
+
+		void Sort(std::function<int(LTreeNode*, LTreeNode*)> compare);
+		void Sort(int Column) override;
+		void Sort() override;
 };
 
 /// A tree control.
@@ -290,14 +331,16 @@ public:
 		n.Empty();
 		return ForAllItems([&n](LTreeItem *item)
 			{
-				T *t = dynamic_cast<T*>(item);
-				if (t)
+				if (auto t = dynamic_cast<T*>(item))
 					n.Add(t);
+				return true;
 			});
 	}
 	
 	/// Call a function for every item
-	bool ForAllItems(std::function<void(LTreeItem*)> Callback);
+	/// Callback can should return true to continue iteration.
+	/// Or false to stop.
+	bool ForAllItems(std::function<bool(LTreeItem*)> Callback);
 
 	/// Returns the item at an x,y location
 	LTreeItem *ItemAtPoint(int x, int y, bool Debug = false);
@@ -312,6 +355,11 @@ public:
 	/// Call 'Update' on all tree items
 	void UpdateAllItems() override;
 	
+	// Sorting:
+	void Sort(std::function<int(LTreeNode*, LTreeNode*)> compare);
+	void Sort(int Column) override;
+	void Sort() override;
+
 	// Visual style
 	enum ThumbStyle
 	{

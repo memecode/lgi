@@ -207,6 +207,11 @@ public:
 		Set(attr, utf8);
 	}
 
+	bool IsTable();
+	bool IsTableRow();
+	bool IsTableCell();
+	bool IsTableTag(); // is and of the table, row or cell elements
+
 	#ifdef _DEBUG
 	bool Debug()
 	{

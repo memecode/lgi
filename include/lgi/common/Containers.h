@@ -674,21 +674,18 @@ public:
 	}
 
 	/// Sorts the list
-	template<typename User>
+	using TCallback = std::function<int(T*, T*)>;
+
 	void Sort
 	(
 		/// The callback function used to compare 2 pointers
-		int (*Compare)(T *a, T *b, User data),
-		/// User data that is passed into the callback
-		User Data = 0
+		TCallback callback
 	)
 	{
 		if (Items < 1)
 			return;
 
 		VALIDATE();
-
-		// LProfile prof("List<T>Sort");
 
 		// Save the List to an Array
 		LArray<T*> a;
@@ -697,13 +694,6 @@ public:
 		for (LstBlk *i = FirstObj; i; i = i->Next)
 			for (int n=0; n<i->Count; n++)
 				*p++ = i->Ptr[n];
-		
-		// prof.Add("Compare");
-
-		struct UserData {
-			int (*Compare)(T *a, T *b, User data);
-			User Data;
-		} ud = {Compare, Data};		
 		
 		#if !defined(WINDOWS) && !defined(HAIKU) && !defined(LINUX)
 		#define USER_DATA_FIRST 1
@@ -726,7 +716,7 @@ public:
 				a.Length(),
 				sizeof(T*),
 				#if USER_DATA_FIRST
-					&ud,
+					&callback,
 				#endif
 				#if defined(HAIKU) || defined(LINUX)
 					// typedef int (*_compare_function_qsort_r)(const void*, const void*, void*);
@@ -736,15 +726,13 @@ public:
 					[](void *ud, const void *a, const void *b) -> int
 				#endif
 				{
-					auto *user = (UserData*)ud;
-					return user->Compare(*(T**)a, *(T**)b, user->Data);
+					auto cb = (TCallback*)ud;
+					return (*cb)(*(T**)a, *(T**)b);
 				}
 				#if !USER_DATA_FIRST
-					, &ud
+					, &callback
 				#endif
 			);
-
-		// prof.Add("Copy");
 
 		// Copy back to the List
 		p = a.AddressOf();
@@ -1075,6 +1063,10 @@ public:
 
 	/// Search for a substring and return it's index, or -1 if not found.
 	ssize_t Find(LString str, bool caseSensitive = true);
+
+	/// Finds the first occurance of any of the characters in 'searchChars'.
+	/// \returns the byte index or -1 if not found.
+	ssize_t CharAt(LString searchChars);
 
 	/// Iterate over the data in the container
 	/// Callback should return true to keep iterating...

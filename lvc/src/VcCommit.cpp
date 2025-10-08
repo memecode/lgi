@@ -525,14 +525,10 @@ void VcCommit::OnMouseClick(LMouse &m)
 			}
 			case IDM_UPDATE:
 			{
-				VcFolder *f = GetFolder();
-				if (!f)
-				{
+				if (auto f = GetFolder())
+					f->Checkout(Rev, false);
+				else
 					LAssert(!"No folder?");
-					break;
-				}
-
-				f->Checkout(Rev, false);
 				break;
 			}
 			case IDM_COPY_REV:

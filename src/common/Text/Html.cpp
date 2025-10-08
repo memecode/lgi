@@ -89,8 +89,6 @@
 #define DEBUG_LOG(...)
 #endif
 
-#define IsTableCell(id)				( ((id) == TAG_TD) || ((id) == TAG_TH) )
-#define IsTableTag()				(TagId == TAG_TABLE || TagId == TAG_TR || TagId == TAG_TD || TagId == TAG_TH)
 #define GetCssLen(a, b)				a().Type == LCss::LenInherit ? b() : a()
 
 static char WordDelim[]	=			".,<>/?[]{}()*&^%$#@!+|\'\"";
@@ -1172,7 +1170,7 @@ LCss::LengthType LTag::GetAlign(bool x)
 		
 		if (x)
 		{
-			if (IsTableCell(TagId) && Cell && Cell->XAlign)
+			if (IsTableCell() && Cell && Cell->XAlign)
 				l.Type = Cell->XAlign;
 			else
 				l = t->TextAlign();
@@ -1187,7 +1185,7 @@ LCss::LengthType LTag::GetAlign(bool x)
 			return l.Type;
 		}
 
-		if (t->TagId == TAG_TABLE)
+		if (t->IsTable())
 			break;
 	}
 	
@@ -1219,7 +1217,7 @@ void LFlowRegion::AlignText()
 			if (Offset)
 				for (auto l : Line)
 				{
-					if (l->Tag->Display() != LCss::DispInlineBlock)
+					if (l->Tag->SupportedDisplay() != LCss::DispInlineBlock)
 						l->Offset(Offset, 0);
 				}
 		}
@@ -1553,9 +1551,9 @@ bool LTag::CreateSource(LStringPipe &p, int Depth, bool LastWasBlock)
 				if (Props.Find(PropDisplay)
 					&&
 					(
-						(!i->Block() && Display() == DispInline)
+						(!i->Block() && SupportedDisplay() == DispInline)
 						||
-						(i->Block() && Display() == DispBlock)
+						(i->Block() && SupportedDisplay() == DispBlock)
 					))
 				{
 					DelProp(PropDisplay);
@@ -1703,12 +1701,12 @@ LColour LTag::_Colour(bool f)
 		}
 
 		#if 1
-		if (!f && t->TagId == TAG_TABLE)
+		if (!f && t->IsTable())
 			break;
 		#else
 		/*	This implements some basic level of colour inheritance for
 			background colours. See test case 'cisra-cqs.html'. */
-		if (!f && t->TagId == TAG_TABLE)
+		if (!f && t->IsTable())
 			break;
 		#endif
 	}
@@ -2021,6 +2019,72 @@ LTag *LTag::IsAnchor(LString *Uri)
 	return a;
 }
 
+void LHtml::DebugTagInfo(LTag *tag)
+{
+	if (!tag)
+		return;
+
+	auto Style = tag->ToLString();
+	LStringPipe p(256);
+	p.Print("Tag: %s\n", tag->Tag ? tag->Tag.Get() : "CONTENT");
+	if (tag->Class.Length())
+	{
+		p.Print("Class(es): ");
+		for (unsigned i=0; i<tag->Class.Length(); i++)
+		{
+			p.Print("%s%s", i?", ":"", tag->Class[i].Get());
+		}
+		p.Print("\n");
+	}
+	if (tag->HtmlId)
+	{
+		p.Print("Id: %s\n", tag->HtmlId);
+	}
+	p.Print("Pos: %i,%i   Size: %i,%i\n\n", tag->Pos.x, tag->Pos.y, tag->Size.x, tag->Size.y);
+	p.Print("Style:\n", Style.Get());
+			
+	auto s = Style.SplitDelimit("\n");
+	for (unsigned i=0; i<s.Length(); i++)
+		p.Print("    %s\n", s[i].Get());
+			
+	p.Print("\nParent tags:\n");
+	LDisplayString Sp(LSysFont, " ");
+	for (LTag *t=ToTag(tag->Parent); t && t->Parent; t=ToTag(t->Parent))
+	{
+		LStringPipe Tmp;
+		Tmp.Print("    %s", t->Tag ? t->Tag.Get() : "CONTENT");
+		if (t->HtmlId)
+		{
+			Tmp.Print("#%s", t->HtmlId);
+		}
+		for (unsigned i=0; i<t->Class.Length(); i++)
+		{
+			Tmp.Print(".%s", t->Class[i].Get());
+		}
+		LAutoString Txt(Tmp.NewStr());
+		p.Print("%s", Txt.Get());
+		LDisplayString Ds(LSysFont, Txt);
+		int Px = 170 - Ds.X();
+		int Chars = Px / Sp.X();
+		for (int c=0; c<Chars; c++)
+			p.Print(" ");
+
+		p.Print("(%i,%i)-(%i,%i)\n",
+			t->Pos.x,
+			t->Pos.y,
+			t->Size.x,
+			t->Size.y);
+	}
+			
+	LAutoString a(p.NewStr());
+			
+	LgiMsg(	this,
+			"%s",
+			GetClass(),
+			MB_OK,
+			a.Get());
+}
+
 bool LTag::OnMouseClick(LMouse &m)
 {
 	bool Processed = false;
@@ -2081,67 +2145,7 @@ bool LTag::OnMouseClick(LMouse &m)
 	{
 		#ifdef _DEBUG
 		if (m.Ctrl())
-		{
-			auto Style = ToLString();
-			LStringPipe p(256);
-			p.Print("Tag: %s\n", Tag ? Tag.Get() : "CONTENT");
-			if (Class.Length())
-			{
-				p.Print("Class(es): ");
-				for (unsigned i=0; i<Class.Length(); i++)
-				{
-					p.Print("%s%s", i?", ":"", Class[i].Get());
-				}
-				p.Print("\n");
-			}
-			if (HtmlId)
-			{
-				p.Print("Id: %s\n", HtmlId);
-			}
-			p.Print("Pos: %i,%i   Size: %i,%i\n\n", Pos.x, Pos.y, Size.x, Size.y);
-			p.Print("Style:\n", Style.Get());
-			
-			auto s = Style.SplitDelimit("\n");
-			for (unsigned i=0; i<s.Length(); i++)
-				p.Print("    %s\n", s[i].Get());
-			
-			p.Print("\nParent tags:\n");
-			LDisplayString Sp(LSysFont, " ");
-			for (LTag *t=ToTag(Parent); t && t->Parent; t=ToTag(t->Parent))
-			{
-				LStringPipe Tmp;
-				Tmp.Print("    %s", t->Tag ? t->Tag.Get() : "CONTENT");
-				if (t->HtmlId)
-				{
-					Tmp.Print("#%s", t->HtmlId);
-				}
-				for (unsigned i=0; i<t->Class.Length(); i++)
-				{
-					Tmp.Print(".%s", t->Class[i].Get());
-				}
-				LAutoString Txt(Tmp.NewStr());
-				p.Print("%s", Txt.Get());
-				LDisplayString Ds(LSysFont, Txt);
-				int Px = 170 - Ds.X();
-				int Chars = Px / Sp.X();
-				for (int c=0; c<Chars; c++)
-					p.Print(" ");
-
-				p.Print("(%i,%i)-(%i,%i)\n",
-					t->Pos.x,
-					t->Pos.y,
-					t->Size.x,
-					t->Size.y);
-			}
-			
-			LAutoString a(p.NewStr());
-			
-			LgiMsg(	Html,
-					"%s",
-					Html->GetClass(),
-					MB_OK,
-					a.Get());
-		}
+			Html->DebugTagInfo(this);
 		else
 		#endif
 		{
@@ -2409,7 +2413,7 @@ void LTag::GetTagByPos(LTagHit &TagHit, int x, int y, int Depth, bool InBody, bo
 	}
 	else if
 	(
-		TagId != TAG_TR &&
+		!IsTableRow() &&
 		Tag &&
 		x >= 0 &&
 		y >= 0 &&
@@ -2439,12 +2443,8 @@ void LTag::GetTagByPos(LTagHit &TagHit, int x, int y, int Depth, bool InBody, bo
 
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
-		LTag *t = ToTag(Children[i]);
-		if (t->Pos.x >= 0 &&
-			t->Pos.y >= 0)
-		{
+		if (auto t = ToTag(Children[i]))
 			t->GetTagByPos(TagHit, x - t->Pos.x, y - t->Pos.y, Depth + 1, InBody, DebugLog);
-		}
 	}
 }
 
@@ -2801,7 +2801,7 @@ void LTag::Restyle()
 	#endif
 }
 
-void LTag::SetStyle()
+void LTag::SetDefaultCss()
 {
 	const static float FntMul[] =
 	{
@@ -2814,45 +2814,7 @@ void LTag::SetStyle()
 		3.0f	// size=7
 	};
 
-	const char *s = 0;
-	#ifdef _DEBUG
-	if (Get("debug", s))
-	{
-		if ((Debug = atoi(s)))
-		{
-			LgiTrace("Debug Tag: %p '%s'\n", this, Tag ? Tag.Get() : "CONTENT");
-		}
-	}
-	#endif
-
-	if (Get("Color", s))
-	{
-		ColorDef Def;
-		if (LHtmlParser::ParseColour(s, Def))
-		{
-			Color(Def);
-		}
-	}
-
-	if (Get("Background", s) ||
-		Get("bgcolor", s))
-	{
-		ColorDef Def;
-		if (LHtmlParser::ParseColour(s, Def))
-		{
-			BackgroundColor(Def);
-		}
-		else
-		{
-			LCss::ImageDef Img;
-			
-			Img.Type = ImageUri;
-			Img.Uri = s;
-			
-			BackgroundImage(Img);
-			BackgroundRepeat(RepeatBoth);
-		}
-	}
+	const char *s = nullptr;
 
 	switch (TagId)
 	{
@@ -2862,6 +2824,23 @@ void LTag::SetStyle()
 				Display(LCss::DispNone);
 			break;
 		}
+		case TAG_PRE:
+		{
+			LFontType Type;
+			if (Type.GetSystemFont("Fixed"))
+			{
+				LAssert(ValidStr(Type.GetFace()));
+				FontFamily(Type.GetFace());
+			}
+			break;
+		}
+	    case TAG_BIG:
+	    {
+            LCss::Len l;
+            l.Type = SizeLarger;
+	        FontSize(l);
+	        break;
+	    }
 		case TAG_LINK:
 		{
 			const char *Type, *Href;
@@ -3072,170 +3051,6 @@ void LTag::SetStyle()
 			Display(LCss::DispNone);
 			break;
 		}
-	}
-
-	if (Get("width", s))
-	{
-		Len l;
-		if (l.Parse(s, PropWidth, ParseRelaxed))
-		{
-			Width(l);
-		}
-	}
-	if (Get("height", s))
-	{
-		Len l;
-		if (l.Parse(s, PropHeight, ParseRelaxed))
-			Height(l);
-	}
-	if (Get("align", s))
-	{
-		if (_stricmp(s, "left") == 0) TextAlign(Len(AlignLeft));
-		else if (_stricmp(s, "right") == 0) TextAlign(Len(AlignRight));
-		else if (_stricmp(s, "center") == 0) TextAlign(Len(AlignCenter));
-	}
-	if (Get("valign", s))
-	{
-		if (_stricmp(s, "top") == 0) VerticalAlign(Len(VerticalTop));
-		else if (_stricmp(s, "middle") == 0) VerticalAlign(Len(VerticalMiddle));
-		else if (_stricmp(s, "bottom") == 0) VerticalAlign(Len(VerticalBottom));
-	}
-
-	Get("id", HtmlId);
-
-	if (Get("class", s))
-	{
-		Class = LString(s).SplitDelimit(" \t");
-	}
-
-	Restyle();
-
-	switch (TagId)
-	{
-		default: break;
-	    case TAG_BIG:
-	    {
-            LCss::Len l;
-            l.Type = SizeLarger;
-	        FontSize(l);
-	        break;
-	    }
-	    /*
-		case TAG_META:
-		{
-			LAutoString Cs;
-
-			const char *s;
-			if (Get("http-equiv", s) &&
-				_stricmp(s, "Content-Type") == 0)
-			{
-				const char *ContentType;
-				if (Get("content", ContentType))
-				{
-					char *CharSet = stristr(ContentType, "charset=");
-					if (CharSet)
-					{
-						char16 *cs = NULL;
-						Html->ParsePropValue(CharSet + 8, cs);
-						Cs.Reset(WideToUtf8(cs));
-						DeleteArray(cs);
-					}
-				}
-			}
-
-			if (Get("name", s) && _stricmp(s, "charset") == 0 && Get("content", s))
-			{
-				Cs.Reset(NewStr(s));
-			}
-			else if (Get("charset", s))
-			{
-				Cs.Reset(NewStr(s));
-			}
-
-			if (Cs)
-			{
-				if (Cs &&
-					_stricmp(Cs, "utf-16") != 0 &&
-					_stricmp(Cs, "utf-32") != 0 &&
-					LGetCsInfo(Cs))
-				{
-					// Html->SetCharset(Cs);
-				}
-			}
-			break;
-		}
-		*/
-		case TAG_BODY:
-		{
-			LCss::ColorDef Bk = BackgroundColor();
-			if (Bk.Type != ColorInherit)
-			{
-				// Copy the background up to the LHtml wrapper
-				Html->GetCss(true)->BackgroundColor(Bk);
-			}
-			
-			/*
-			LFont *f = GetFont();
-			if (FontSize().Type == LenInherit)
-			{
-       		    FontSize(Len(LenPt, (float)f->PointSize()));
-			}
-			*/
-			break;
-		}
-		case TAG_HEAD:
-		{
-			Display(DispNone);
-			break;
-		}
-		case TAG_PRE:
-		{
-			LFontType Type;
-			if (Type.GetSystemFont("Fixed"))
-			{
-				LAssert(ValidStr(Type.GetFace()));
-				FontFamily(Type.GetFace());
-			}
-			break;
-		}
-		case TAG_TR:
-			break;
-		case TAG_TD:
-		case TAG_TH:
-		{
-			LAssert(Cell != NULL);
-			
-			const char *s;
-			if (Get("colspan", s))
-				Cell->Span.x = atoi(s);
-			else
-				Cell->Span.x = 1;
-			if (Get("rowspan", s))
-				Cell->Span.y = atoi(s);
-			else
-				Cell->Span.y = 1;
-			
-			Cell->Span.x = MAX(Cell->Span.x, 1);
-			Cell->Span.y = MAX(Cell->Span.y, 1);
-			
-			if (Display() == DispInline ||
-				Display() == DispInlineBlock)
-			{
-				Display(DispBlock); // Inline-block TD??? Nope.
-			}
-			break;
-		}
-		case TAG_IMG:
-		{
-			const char *Uri;
-			if (Html->Environment &&
-				Get("src", Uri))
-			{
-				// printf("Uri: %s\n", Uri);
-				LoadImage(Uri);
-			}
-			break;
-		}
 		case TAG_H1:
 		{
 			char s[32];
@@ -3282,6 +3097,108 @@ void LTag::SetStyle()
 			sprintf_s(s, sizeof(s), "%ipt", (int)((float)Html->DefFont()->PointSize() * FntMul[0]));
 			FontSize(Len(s));
 			FontWeight(FontWeightBold);
+			break;
+		}
+	}
+}
+
+void LTag::SetAttributeStyles()
+{
+	const char *s = nullptr;
+
+	if (IsTable())
+	{
+		if (!Cell)
+			Cell = new TblCell;
+	}
+	else if (IsTableCell())
+	{
+		if (!Cell)
+			Cell = new TblCell;
+
+		if (Get("colspan", s))
+			Cell->Span.x = atoi(s);
+		else
+			Cell->Span.x = 1;
+		if (Get("rowspan", s))
+			Cell->Span.y = atoi(s);
+		else
+			Cell->Span.y = 1;
+		
+		Cell->Span.x = MAX(Cell->Span.x, 1);
+		Cell->Span.y = MAX(Cell->Span.y, 1);
+		
+		auto disp = SupportedDisplay();
+		if (disp == DispInline ||
+			disp == DispInlineBlock)
+		{
+			Display(DispTableCell); // Inline-block TD??? Nope.
+		}
+	}
+
+	if (Get("Color", s))
+	{
+		ColorDef Def;
+		if (LHtmlParser::ParseColour(s, Def))
+			Color(Def);
+	}
+
+	if (Get("Background", s) ||
+		Get("bgcolor", s))
+	{
+		ColorDef Def;
+		if (LHtmlParser::ParseColour(s, Def))
+		{
+			BackgroundColor(Def);
+		}
+		else
+		{
+			LCss::ImageDef Img;
+			
+			Img.Type = ImageUri;
+			Img.Uri = s;
+			
+			BackgroundImage(Img);
+			BackgroundRepeat(RepeatBoth);
+		}
+	}
+
+	if (Get("width", s))
+	{
+		Len l;
+		if (l.Parse(s, PropWidth, ParseRelaxed))
+			Width(l);
+	}
+	if (Get("height", s))
+	{
+		Len l;
+		if (l.Parse(s, PropHeight, ParseRelaxed))
+			Height(l);
+	}
+	if (Get("align", s))
+	{
+		if (_stricmp(s, "left") == 0) TextAlign(Len(AlignLeft));
+		else if (_stricmp(s, "right") == 0) TextAlign(Len(AlignRight));
+		else if (_stricmp(s, "center") == 0) TextAlign(Len(AlignCenter));
+	}
+	if (Get("valign", s))
+	{
+		if (_stricmp(s, "top") == 0) VerticalAlign(Len(VerticalTop));
+		else if (_stricmp(s, "middle") == 0) VerticalAlign(Len(VerticalMiddle));
+		else if (_stricmp(s, "bottom") == 0) VerticalAlign(Len(VerticalBottom));
+	}
+
+	switch (TagId)
+	{
+		case TAG_IMG:
+		{
+			const char *Uri;
+			if (Html->Environment &&
+				Get("src", Uri))
+			{
+				// printf("Uri: %s\n", Uri);
+				LoadImage(Uri);
+			}
 			break;
 		}
 		case TAG_FONT:
@@ -3389,6 +3306,52 @@ void LTag::SetStyle()
 			}
 			break;
 		}
+		default:
+			break;
+	}
+}
+
+void LTag::SetStyle()
+{
+	const char *s = nullptr;
+	#ifdef _DEBUG
+	if (Get("debug", s))
+	{
+		if ((Debug = atoi(s)))
+		{
+			LgiTrace("Debug Tag: %p '%s'\n", this, Tag ? Tag.Get() : "CONTENT");
+		}
+	}
+	#endif
+
+	SetDefaultCss();
+
+	Get("id", HtmlId);
+	if (Get("class", s))
+		Class = LString(s).SplitDelimit(" \t");
+	Restyle();
+
+	SetAttributeStyles();
+
+	switch (TagId)
+	{
+		default:
+			break;
+		case TAG_BODY:
+		{
+			LCss::ColorDef Bk = BackgroundColor();
+			if (Bk.Type != ColorInherit)
+			{
+				// Copy the background up to the LHtml wrapper
+				Html->GetCss(true)->BackgroundColor(Bk);
+			}
+			break;
+		}
+		case TAG_HEAD:
+		{
+			Display(DispNone);
+			break;
+		}
 	}
 
 	if (IsBlock())
@@ -3403,11 +3366,8 @@ void LTag::SetStyle()
 	}
 	
 	if (Ctrl)
-	{
-		LFont *f = GetFont();
-		if (f)
+		if (auto f = GetFont())
 			Ctrl->SetFont(f, false);
-	}
 }
 
 void LTag::OnStyleChange(const char *name)
@@ -3607,7 +3567,7 @@ char *LTag::ParseText(char *Doc)
 	TagId = TAG_BODY;
 	Tag.Reset(NewStr("body"));
 	Info = Html->GetTagInfo(Tag);
-	char *OriginalCp = NewStr(Html->Charset);
+	LString OriginalCp = Html->Charset;
 
 	LStringPipe Utf16;
 	char *s = Doc;
@@ -3636,8 +3596,7 @@ char *LTag::ParseText(char *Doc)
 
 			// Output tag
 			Html->SetCharset("iso-8859-1");
-			char16 *t = CleanText(s, e - s, NULL, false);
-			if (t)
+			if (auto t = CleanText(s, e - s, NULL, false))
 			{
 				Utf16.Push(t);
 				DeleteArray(t);
@@ -3647,11 +3606,9 @@ char *LTag::ParseText(char *Doc)
 		else if (!*s || *s == '\n')
 		{
 			// Output previous line
-			char16 *Line = Utf16.NewStrW();
-			if (Line)
+			if (auto Line = Utf16.NewStrW())
 			{
-				LTag *t = new LTag(Html, this);
-				if (t)
+				if (auto t = new LTag(Html, this))
 				{
 					t->Color(LColour(L_TEXT));
 					t->Text(Line);
@@ -3661,8 +3618,8 @@ char *LTag::ParseText(char *Doc)
 			if (*s == '\n')
 			{
 				s++;
-				LTag *t = new LTag(Html, this);
-				if (t)
+
+				if (auto t = new LTag(Html, this))
 				{
 					t->TagId = TAG_BR;
 					t->Tag.Reset(NewStr("br"));
@@ -3675,7 +3632,8 @@ char *LTag::ParseText(char *Doc)
 		{
 			// Seek end of text
 			char *e = s;
-			while (*e && *e != '\r' && *e != '\n' && *e != '<') e++;
+			while (*e && *e != '\r' && *e != '\n' && *e != '<')
+				e++;
 			
 			// Output text
 			Html->SetCharset(OriginalCp);
@@ -3689,7 +3647,6 @@ char *LTag::ParseText(char *Doc)
 	}
 	
 	Html->SetCharset(OriginalCp);
-	DeleteArray(OriginalCp);
 
 	return 0;
 }
@@ -3861,9 +3818,7 @@ bool LTag::OnUnhandledColor(LCss::ColorDef *def, const char *&s)
 
 void LTag::ZeroTableElements()
 {
-	if (TagId == TAG_TABLE ||
-		TagId == TAG_TR ||
-		IsTableCell(TagId))
+	if (IsTableTag())
 	{
 		Size.x = 0;
 		Size.y = 0;
@@ -3875,8 +3830,8 @@ void LTag::ZeroTableElements()
 
 		for (unsigned i=0; i<Children.Length(); i++)
 		{
-			LTag *t = ToTag(Children[i]);
-			t->ZeroTableElements();
+			if (auto t = ToTag(Children[i]))
+				t->ZeroTableElements();
 		}
 	}
 }
@@ -3929,13 +3884,14 @@ LTag *LTag::GetTableCell(int x, int y)
 
 // This function gets the largest and smallest piece of content
 // in this cell and all it's children.
-bool LTag::GetWidthMetrics(LTag *Table, uint16 &Min, uint16 &Max)
+bool LTag::GetWidthMetrics(LTag *Table, int32_t &Min, int32_t &Max)
 {
 	bool Status = true;
 	int MarginPx = 0;
 	int LineWidth = 0;
+	auto disp = SupportedDisplay();
 
-	if (Display() == LCss::DispNone)
+	if (disp == LCss::DispNone)
 		return true;
 
 	// Break the text into words and measure...
@@ -3944,17 +3900,19 @@ bool LTag::GetWidthMetrics(LTag *Table, uint16 &Min, uint16 &Max)
 		int MinContent = 0;
 		int MaxContent = 0;
 
-		LFont *f = GetFont();
+		auto f = GetFont();
 		if (f)
 		{
-			for (char16 *s = Text(); s && *s; )
+			for (auto s = Text(); s && *s; )
 			{
 				// Skip whitespace...
-				while (*s && StrchrW(WhiteW, *s)) s++;
+				while (*s && StrchrW(WhiteW, *s))
+					s++;
 				
 				// Find end of non-whitespace
 				char16 *e = s;
-				while (*e && !StrchrW(WhiteW, *e)) e++;
+				while (*e && !StrchrW(WhiteW, *e))
+					e++;
 				
 				// Find size of the word
 				ssize_t Len = e - s;
@@ -3984,11 +3942,95 @@ bool LTag::GetWidthMetrics(LTag *Table, uint16 &Min, uint16 &Max)
 	}
 
 	// Specific tag handling?
-	switch (TagId)
+	if (IsTable())
+	{
+		Len w = Width();
+		if (w && !w.IsDynamic())
+		{
+			// Fixed width table...
+			int CellSpacing = BorderSpacing().ToPx(Min, GetFont());
+			
+			int Px = ((int)w.Value) + (CellSpacing << 1);
+			Min = MAX(Min, Px);
+			Max = MAX(Max, Px);
+			return true;
+		}
+		else
+		{
+			LPoint s;
+			LHtmlTableLayout c(this);
+			c.GetSize(s.x, s.y);
+
+			// Auto layout table
+			LArray<int> ColMin, ColMax;
+			for (int y=0; y<s.y; y++)
+			{
+				for (int x=0; x<s.x;)
+				{
+					LTag *t = c.Get(x, y);
+					if (t)
+					{
+						int32_t a = 0, b = 0;							
+						if (t->GetWidthMetrics(Table, a, b))
+						{
+							ColMin[x] = MAX(ColMin[x], a);
+							ColMax[x] = MAX(ColMax[x], b);
+						}
+						
+						x += t->Cell->Span.x;
+					}
+					else break;
+				}
+			}
+			
+			int MinSum = 0, MaxSum = 0;
+			for (int i=0; i<s.x; i++)
+			{
+				MinSum += ColMin[i];
+				MaxSum += ColMax[i];
+			}
+			
+			Min = MAX(Min, MinSum);
+			Max = MAX(Max, MaxSum);
+			return true;
+		}
+	}
+	else if (IsTableCell())
+	{
+		Len w = Width();
+		if (w)
+		{
+			if (w.IsDynamic())
+			{
+				Min = MAX(Min, (int)w.Value);
+				Max = MAX(Max, (int)w.Value);
+			}
+			else
+			{
+				Max = w.ToPx(0, GetFont());
+			}
+		}
+		else
+		{
+			LCss::BorderDef BLeft = BorderLeft();
+			LCss::BorderDef BRight = BorderRight();
+			LCss::Len PLeft = PaddingLeft();
+			LCss::Len PRight = PaddingRight();
+			
+			MarginPx = (int)(PLeft.ToPx()  +
+							PRight.ToPx()  +
+							BLeft.ToPx());
+			
+			if (Table->BorderCollapse() == LCss::CollapseCollapse)
+				MarginPx += BRight.ToPx();
+		}
+	}
+	else switch (TagId)
 	{
 		default:
-		{
-			if (IsBlock())
+		{			
+			if (disp == LCss::DispBlock ||
+				disp == LCss::DispInlineBlock)
 			{
 				MarginPx = (int)(BorderLeft().ToPx() +
 								BorderRight().ToPx() +
@@ -4018,98 +4060,12 @@ bool LTag::GetWidthMetrics(LTag *Table, uint16 &Min, uint16 &Max)
 			}
 			break;
 		}
-		case TAG_TD:
-		case TAG_TH:
-		{
-			Len w = Width();
-			if (w)
-			{
-				if (w.IsDynamic())
-				{
-					Min = MAX(Min, (int)w.Value);
-					Max = MAX(Max, (int)w.Value);
-				}
-				else
-				{
-					Max = w.ToPx(0, GetFont());
-				}
-			}
-			else
-			{
-				LCss::BorderDef BLeft = BorderLeft();
-				LCss::BorderDef BRight = BorderRight();
-				LCss::Len PLeft = PaddingLeft();
-				LCss::Len PRight = PaddingRight();
-				
-				MarginPx = (int)(PLeft.ToPx()  +
-								PRight.ToPx()  + 
-								BLeft.ToPx());
-				
-				if (Table->BorderCollapse() == LCss::CollapseCollapse)
-					MarginPx += BRight.ToPx();
-			}
-			break;
-		}
-		case TAG_TABLE:
-		{
-			Len w = Width();
-			if (w && !w.IsDynamic())
-			{
-				// Fixed width table...
-				int CellSpacing = BorderSpacing().ToPx(Min, GetFont());
-				
-				int Px = ((int)w.Value) + (CellSpacing << 1);
-				Min = MAX(Min, Px);
-				Max = MAX(Max, Px);
-				return true;
-			}
-			else
-			{
-				LPoint s;
-				LHtmlTableLayout c(this);
-				c.GetSize(s.x, s.y);
-
-				// Auto layout table
-				LArray<int> ColMin, ColMax;
-				for (int y=0; y<s.y; y++)
-				{
-					for (int x=0; x<s.x;)
-					{
-						LTag *t = c.Get(x, y);
-						if (t)
-						{
-							uint16 a = 0, b = 0;							
-							if (t->GetWidthMetrics(Table, a, b))
-							{
-								ColMin[x] = MAX(ColMin[x], a);
-								ColMax[x] = MAX(ColMax[x], b);
-							}
-							
-							x += t->Cell->Span.x;
-						}
-						else break;
-					}
-				}
-				
-				int MinSum = 0, MaxSum = 0;
-				for (int i=0; i<s.x; i++)
-				{
-					MinSum += ColMin[i];
-					MaxSum += ColMax[i];
-				}
-				
-				Min = MAX(Min, MinSum);
-				Max = MAX(Max, MaxSum);
-				return true;
-			}
-			break;
-		}
 	}
 
 	for (unsigned i = 0; i < Children.Length(); i++)
 	{
-		LTag *c = ToTag(Children[i]);
-		uint16 TagMax = 0;
+		auto c = ToTag(Children[i]);
+		int32_t TagMax = 0;
 		
 		Status &= c->GetWidthMetrics(Table, Min, TagMax);
 		LineWidth += TagMax;
@@ -4161,8 +4117,11 @@ T Sum(LArray<T> &a)
 	return s;
 }
 
-void LTag::LayoutTable(LFlowRegion *f, uint16 Depth)
+void LTag::LayoutTable(LFlowRegion *f, uint32_t Depth)
 {
+	if (!Cell && IsTableTag())
+		Cell = new TblCell;
+		
 	if (!Cell->Cells)
 	{
 		#if defined(_DEBUG) && DEBUG_TABLE_LAYOUT
@@ -4459,7 +4418,7 @@ void LHtmlTableLayout::LayoutTable(LFlowRegion *f, uint16 Depth)
 
 				if (t->Cell->Pos.x == x && t->Cell->Pos.y == y)
 				{
-					LCss::DisplayType Disp = t->Display();
+					LCss::DisplayType Disp = t->SupportedDisplay();
 					if (Disp == LCss::DispNone)
 						continue;
 
@@ -4770,15 +4729,15 @@ void LHtmlTableLayout::LayoutTable(LFlowRegion *f, uint16 Depth)
 	
 	for (y=0; y<s.y; y++)
 	{
-		LTag *Prev = 0;
+		LTag *Prev = nullptr;
 		for (int x=0; x<s.x; )
 		{
-			LTag *t = Get(x, y);
+			auto t = Get(x, y);
 			if (!t && Prev)
 			{
 				// Add missing cell
 				LTag *Row = ToTag(Prev->Parent);
-				if (Row && Row->TagId == TAG_TR)
+				if (Row && Row->IsTableRow())
 				{
 					t = new LTag(Table->Html, Row);
 					if (t)
@@ -4956,7 +4915,13 @@ LRect *LHtmlArea::TopRect(LRegion *c)
 	return Top;
 }
 
-void LHtmlArea::FlowText(LTag *Tag, LFlowRegion *Flow, LFont *Font, int LineHeight, char16 *Text, LCss::LengthType Align)
+void LHtmlArea::FlowText(LTag *Tag,
+						LFlowRegion *Flow,
+						LFont *Font,
+						int LineHeight,
+						char16 *Text,
+						LCss::LengthType Align,
+						bool Debug)
 {
 	if (!Flow || !Text || !Font)
 		return;
@@ -5015,7 +4980,8 @@ void LHtmlArea::FlowText(LTag *Tag, LFlowRegion *Flow, LFont *Font, int LineHeig
 		Tr->Text = Text;
 
 		LDisplayString ds(Font, Text, MIN(1024, FullLen - (Text-Start)));
-		ssize_t Chars = ds.CharAt(Flow->X());
+		auto flowX = Flow->X();
+		ssize_t Chars = ds.CharAt(flowX);
 		bool Wrap = false;
 		if (Text[Chars])
 		{
@@ -5038,7 +5004,14 @@ void LHtmlArea::FlowText(LTag *Tag, LFlowRegion *Flow, LFont *Font, int LineHeig
 						;
 
 					// Wrap...
-					if (*Text == ' ') Text++;
+					if (*Text == ' ')
+						Text++;
+
+					#if 0
+					if (Debug)
+						LgiTrace("%s:%i wrapped-overflow: flowX=%i, ds.X=%i, chars=%i, len=%i, text='%S'\n",
+							_FL, flowX, ds.X(), Chars, Tr->Len, Text);
+					#endif
 				}
 				else
 				{
@@ -5050,6 +5023,13 @@ void LHtmlArea::FlowText(LTag *Tag, LFlowRegion *Flow, LFont *Font, int LineHeig
 			else
 			{
 				Tr->Len = n;
+
+				#if 0
+				if (Debug)
+					LgiTrace("%s:%i wrapped: flowX=%i, ds.X=%i, chars=%i, len=%i, text='%S'\n",
+						_FL, flowX, ds.X(), Chars, Tr->Len, Text);
+				#endif
+
 				LAssert(Tr->Len > 0);
 				Wrap = true;
 			}
@@ -5059,6 +5039,12 @@ void LHtmlArea::FlowText(LTag *Tag, LFlowRegion *Flow, LFont *Font, int LineHeig
 		{
 			// Fits..
 			Tr->Len = Chars;
+
+			#if 0
+			if (Debug)
+				LgiTrace("%s:%i fits: flowX=%i, chars=%i, len=%i, text='%S'\n", _FL, flowX, Chars, Tr->Len, Text);
+			#endif
+
 			LAssert(Tr->Len > 0);
 		}
 
@@ -5261,49 +5247,60 @@ bool LTag::Serialize(LXmlTag *t, bool Write)
 	return true;
 }
 
-/*
-/// This method centers the text in the area given to the tag. Used for inline block elements.
-void LTag::CenterText()
+LCss::DisplayType LTag::SupportedDisplay()
 {
-	if (!Parent)
-		return;
-
-	// Find the size of the text elements.
-	int ContentPx = 0;
-	for (unsigned i=0; i<TextPos.Length(); i++)
+	auto disp = Display();
+	switch (disp)
 	{
-		LFlowRect *fr = TextPos[i];
-		ContentPx += fr->X();
-	}
-	
-	LFont *f = GetFont();
-	int ParentPx = ToTag(Parent)->Size.x;
-	int AvailPx = Size.x;
+		// Map to block?
+		case LCss::DispContents:
+		case LCss::DispFlex:
+		case LCss::DispGrid:
+		case LCss::DispListItem:
+		case LCss::DispRunIn:
+		case LCss::DispTableCaption:
+		case LCss::DispTableColumnGroup:
+		case LCss::DispTableHeaderGroup:
+		case LCss::DispTableFooterGroup:
+		case LCss::DispTableRowGroup:
+		case LCss::DispTableColumn:
+		case LCss::DispInitial:
+		case LCss::DispInlineTable:
+			return LCss::DispBlock;
+			
+		// Map to inline?
+		case LCss::DispInlineFlex:
+		case LCss::DispInlineGrid:
+			return LCss::DispInline;
 
-	// Remove the border and padding from the content area
-	AvailPx -= BorderLeft().ToPx(ParentPx, f);
-	AvailPx -= BorderRight().ToPx(ParentPx, f);
-	AvailPx -= PaddingLeft().ToPx(ParentPx, f);
-	AvailPx -= PaddingRight().ToPx(ParentPx, f);
-	if (AvailPx > ContentPx)
-	{
-		// Now offset all the regions to the right
-		int OffPx = (AvailPx - ContentPx) >> 1;
-		for (unsigned i=0; i<TextPos.Length(); i++)
-		{
-			LFlowRect *fr = TextPos[i];
-			fr->Offset(OffPx, 0);
-		}
+		// Supported table values:
+		case LCss::DispTable:
+		case LCss::DispTableCell:
+		case LCss::DispTableRow:
+			return disp;
+
+		// Fully supported:
+		case LCss::DispInherit:
+		case LCss::DispInline:
+		case LCss::DispBlock:
+		case LCss::DispInlineBlock:
+		case LCss::DispNone:
+			return disp;
+
+		default:
+			LAssert(0);
+			break;
 	}
+
+	return LCss::DispInherit;
 }
-*/
 
 void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 {
 	if (Depth >= MAX_RECURSION_DEPTH)
 		return;
 
-	DisplayType Disp = Display();
+	auto Disp = SupportedDisplay();
 	if (Disp == DispNone)
 		return;
 
@@ -5311,7 +5308,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 	auto FlowStart = LMicroTime();
 	uint64_t FlowTime = 0;
 
-	LFont *f = GetFont();
+	auto f = GetFont();
 	LFlowRegion Local(*Flow);
 	bool Restart = true;
 	int BlockFlowWidth = 0;
@@ -5328,6 +5325,29 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 	{
 		Html->Tip.DeleteTip(TipId);
 		TipId = 0;
+	}
+
+	if (IsTable())
+	{
+		Flow->EndBlock();
+		
+		auto left   = GetCssLen(MarginLeft, Margin);
+		auto top    = GetCssLen(MarginTop, Margin);
+		auto right  = GetCssLen(MarginRight, Margin);
+		auto bottom = GetCssLen(MarginBottom, Margin);
+		Flow->Indent(this, left, top, right, bottom, true);
+
+		LayoutTable(Flow, Depth + 1);
+
+		Flow->y1 += Size.y;
+		Flow->y2 = Flow->y1;
+		Flow->cx = Flow->x1;
+		Flow->my = 0;
+		Flow->MAX.y = MAX(Flow->MAX.y, Flow->y2);
+
+		Flow->Outdent(this, left, top, right, bottom, true);
+		BoundParents();
+		return;
 	}
 
 	switch (TagId)
@@ -5351,7 +5371,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 				LTag *t = ToTag(Children[i]);
 				t->OnFlow(&Temp, Depth + 1);
 
-				if (TagId == TAG_TR)
+				if (IsTableRow())
 				{
 					Temp.x2 -= MIN(t->Size.x, Temp.X());
 				}
@@ -5371,12 +5391,10 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 		{
 			Size.x = Size.y = 0;
 			
-			LCss::Len w    = Width();
-			LCss::Len h    = Height();
-			// LCss::Len MinX = MinWidth();
-			// LCss::Len MaxX = MaxWidth();
-			LCss::Len MinY = MinHeight();
-			LCss::Len MaxY = MaxHeight();
+			auto w    = Width();
+			auto h    = Height();
+			auto MinY = MinHeight();
+			auto MaxY = MaxHeight();
 			LAutoPtr<LDisplayString> a;
 			int ImgX, ImgY;		
 			if (Image)
@@ -5450,13 +5468,13 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 			}
 			if (MinY)
 			{
-				int Px = Flow->ResolveY(MinY, this, false);
+				auto Px = Flow->ResolveY(MinY, this, false);
 				if (Size.y < Px)
 					Size.y = Px;
 			}
 			if (MaxY)
 			{
-				int Px = Flow->ResolveY(MaxY, this, false);
+				auto Px = Flow->ResolveY(MaxY, this, false);
 				if (Size.y > Px)
 					Size.y = Px;
 			}
@@ -5475,7 +5493,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 				Pos.y = Flow->y1;
 				Flow->y2 = MAX(Flow->y1, Pos.y + Size.y - 1);
 
-				LCss::LengthType a = GetAlign(true);
+				auto a = GetAlign(true);
 				switch (a)
 				{
 					case AlignCenter:
@@ -5514,28 +5532,6 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 			return;
 			break;
 		}
-		case TAG_TABLE:
-		{
-			Flow->EndBlock();
-			
-			LCss::Len left = GetCssLen(MarginLeft, Margin);
-			LCss::Len top = GetCssLen(MarginTop, Margin);
-			LCss::Len right = GetCssLen(MarginRight, Margin);
-			LCss::Len bottom = GetCssLen(MarginBottom, Margin);
-			Flow->Indent(this, left, top, right, bottom, true);
-
-			LayoutTable(Flow, Depth + 1);
-
-			Flow->y1 += Size.y;
-			Flow->y2 = Flow->y1;
-			Flow->cx = Flow->x1;
-			Flow->my = 0;
-			Flow->MAX.y = MAX(Flow->MAX.y, Flow->y2);
-
-			Flow->Outdent(this, left, top, right, bottom, true);
-			BoundParents();
-			return;
-		}
 	}
 
 	if (Disp == DispBlock || Disp == DispInlineBlock)
@@ -5544,23 +5540,18 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 		if (Disp == DispBlock)
 			Flow->EndBlock();
 		
-		#ifdef _DEBUG
-		if (Debug)
-			LgiTrace("Before %s\n", Flow->ToString().Get());
-		#endif
-
 		BlockFlowWidth = Flow->X();
 		
 		// Indent the margin...
-		LCss::Len left = GetCssLen(MarginLeft, Margin);
-		LCss::Len top = GetCssLen(MarginTop, Margin);
-		LCss::Len right = GetCssLen(MarginRight, Margin);
-		LCss::Len bottom = GetCssLen(MarginBottom, Margin);
+		auto left = GetCssLen(MarginLeft, Margin);
+		auto top = GetCssLen(MarginTop, Margin);
+		auto right = GetCssLen(MarginRight, Margin);
+		auto bottom = GetCssLen(MarginBottom, Margin);
 		Flow->Indent(this, left, top, right, bottom, true);
 
 		// Set the width if any
-		LCss::Len Wid = Width();
-		if (!IsTableCell(TagId) && Wid)
+		auto Wid = Width();
+		if (!IsTableCell() && Wid)
 			Size.x = Flow->ResolveX(Wid, this, false);
 		else if (TagId != TAG_IMG)
 		{
@@ -5603,13 +5594,26 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 		else
 		{
 			Flow->x2 = Flow->X();
+			#ifdef _DEBUG
+			if (Debug)
+				LgiTrace("%s:%i '%s' flow.x=%i (%i,%i)\n",
+					_FL, Tag.Get(), Flow->X(), Flow->cx, Flow->x2);
+			#endif
+
 			Flow->x1 =	Flow->ResolveX(BorderLeft(), this, true) +
 						Flow->ResolveX(PaddingLeft(), this, true);
 			Flow->cx = Flow->x1;
+
+			#ifdef _DEBUG
+			if (Debug)
+				LgiTrace("%s:%i '%s' flow.x1=%i\n",
+					_FL, Tag.Get(), Flow->x1);
+			#endif			
+
 			Flow->y1 += Flow->ResolveY(BorderTop(), this, true) +
 						Flow->ResolveY(PaddingTop(), this, true);
 			Flow->y2 = Flow->y1;
-			
+
 			if (!IsTableTag())
 				Flow->Inline++;
 		}
@@ -5633,7 +5637,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 				// Insert the list marker
 				if (!PreText())
 				{
-					LCss::ListStyleTypes s = Parent->ListStyleType();
+					auto s = Parent->ListStyleType();
 					if (s == ListInherit)
 					{
 						if (Parent->TagId == TAG_OL)
@@ -5687,7 +5691,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 				for (LTag *t = this; t && !LineHt; t = ToTag(t->Parent))
 				{
 					LineHt = t->LineHeight();
-					if (t->TagId == TAG_TABLE)
+					if (t->IsTable())
 						break;
 				}
 
@@ -5718,14 +5722,14 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 			}
 
 			// Flow in the rest of the text...
-			char16 *Txt = Text();
-			LCss::LengthType Align = GetAlign(true);
-			TextPos.FlowText(this, Flow, f, LineHeightCache, Txt, Align);
-
-			#ifdef _DEBUG
-			if (Debug)
-				LgiTrace("%s:%i - %p.size=%p\n", _FL, this, &Size.x);
-			#endif
+			auto Txt = Text();
+			auto Align = GetAlign(true);
+			TextPos.FlowText(this, Flow, f, LineHeightCache, Txt, Align,
+				#ifdef _DEBUG
+				Debug);
+				#else
+				false);
+				#endif
 		}
 	}
 
@@ -5736,8 +5740,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
-		LTag *t = ToTag(Children[i]);
-
+		auto t = ToTag(Children[i]);
 		switch (t->Position())
 		{
 			case PosStatic:
@@ -5760,11 +5763,16 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 			default:
 			{
 				t->OnFlow(Flow, Depth + 1);
+
+				#if 0
+				if (Debug)
+					LgiTrace("%s:%i '%s' child '%s' flow: x=%i size.x=%i\n", _FL, Tag.Get(), t->Tag.Get(), Flow->X(), Size.x);
+				#endif
 				break;
 			}
 		}
 
-		if (TagId == TAG_TR)
+		if (IsTableRow())
 		{
 			Flow->x2 -= MIN(t->Size.x, Flow->X());
 		}
@@ -5820,7 +5828,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 			XAlign = LCss::AlignCenter;
 		}
 
-		bool AcceptHt = !IsTableCell(TagId) && Ht.Type != LenPercent;
+		bool AcceptHt = !IsTableCell() && Ht.Type != LenPercent;
 		if (AcceptHt)
 		{
 			if (Ht)
@@ -6054,8 +6062,8 @@ bool LTag::PeekTag(char *s, char *tag)
 
 LTag *LTag::GetTable()
 {
-	LTag *t = 0;
-	for (t=ToTag(Parent); t && t->TagId != TAG_TABLE; t = ToTag(t->Parent))
+	LTag *t = nullptr;
+	for (t=ToTag(Parent); t && !t->IsTable(); t = ToTag(t->Parent))
 		;
 	return t;
 }
@@ -6339,7 +6347,7 @@ void LTag::PaintBorderAndBackground(LSurface *pDC, LColour &Back, LRect *BorderP
 		DrawBackground)
 	{
 		// Work out the rectangles
-		switch (Display())
+		switch (SupportedDisplay())
 		{
 			case DispInlineBlock:
 			case DispBlock:
@@ -6533,8 +6541,9 @@ static void FillRectWithImage(LSurface *pDC, LRect *r, LSurface *Image, LCss::Re
 
 void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 {
+	auto disp = SupportedDisplay();
 	if (Depth >= MAX_RECURSION_DEPTH ||
-		Display() == DispNone)
+		disp == DispNone)
 		return;
 	if (
 		#ifdef _DEBUG
@@ -6711,7 +6720,7 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 				}
 			}
 			
-			pDC->ClipRgn(0);
+			pDC->ClipRgn(nullptr);
 			break;
 		}
 		default:
@@ -6719,7 +6728,7 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 			LColour fore = _Colour(true);
 			LColour back = _Colour(false);
 
-			if (Display() == DispBlock && Html->Environment)
+			if (disp == DispBlock && Html->Environment)
 			{
 				LCss::ImageDef Img = BackgroundImage();
 				if (Img.Img)
@@ -6727,7 +6736,7 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 					LRect Clip(0, 0, Size.x-1, Size.y-1);
 					pDC->ClipRgn(&Clip);					
 					FillRectWithImage(pDC, &Clip, Img.Img, BackgroundRepeat());					
-					pDC->ClipRgn(NULL);
+					pDC->ClipRgn(nullptr);
 
 					back.Empty();
 				}
@@ -6735,7 +6744,7 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 
 			PaintBorderAndBackground(pDC, back, NULL);
 
-			LFont *f = GetFont();
+			auto f = GetFont();
 			#if DEBUG_TEXT_AREA
 			bool IsEditor = Html ? !Html->GetReadOnly() : false;
 			#else
@@ -6912,7 +6921,7 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 					ssize_t Base = GetTextStart();
 					for (unsigned i=0; i<TextPos.Length(); i++)
 					{
-						LFlowRect *Tr = TextPos[i];
+						auto Tr = TextPos[i];
 						if (!Tr)
 							break;
 						ssize_t Pos = (Tr->Text - Text()) - Base;
@@ -6977,9 +6986,9 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 	if (IsTableCell(TagId))
 	{
 		LTag *Tbl = this;
-		while (Tbl->TagId != TAG_TABLE && Tbl->Parent)
+		while (!Tbl->IsTable() && Tbl->Parent)
 			Tbl = Tbl->Parent;
-		if (Tbl && Tbl->TagId == TAG_TABLE && Tbl->Debug)
+		if (Tbl && Tbl->IsTable() && Tbl->Debug)
 		{
 			pDC->Colour(LColour(255, 0, 0));
 			pDC->Box(0, 0, Size.x-1, Size.y-1);
@@ -6989,7 +6998,7 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
-		LTag *t = ToTag(Children[i]);
+		auto t = ToTag(Children[i]);
 		pDC->SetOrigin(Px - t->Pos.x, Py - t->Pos.y);
 		t->OnPaint(pDC, InSelection, Depth + 1);
 		pDC->SetOrigin(Px, Py);
@@ -6999,7 +7008,7 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 	if (TagId == TAG_TD)
 	{
 		LTag *Tbl = this;
-		while (Tbl && Tbl->TagId != TAG_TABLE)
+		while (Tbl && !Tbl->IsTable())
 			Tbl = ToTag(Tbl->Parent);
 		if (Tbl && Tbl->Debug)
 		{
@@ -7147,8 +7156,8 @@ void LHtml::ParseDocument(const char *Doc)
 			Parse(Tag, Doc);
 
 			// Add body tag if not specified...
-			LTag *Html = Tag->GetTagByName("html");
-			LTag *Body = Tag->GetTagByName("body");
+			auto Html = Tag->GetTagByName("html");
+			auto Body = Tag->GetTagByName("body");
 
 			if (!Html && !Body)
 			{
@@ -7197,7 +7206,7 @@ void LHtml::ParseDocument(const char *Doc)
 			
 			if (Html && Body)
 			{
-				char16 *t = Tag->Text();
+				auto t = Tag->Text();
 				if (t)
 				{
 					if (ValidStrW(t))
@@ -7323,11 +7332,7 @@ bool LHtml::Name(const char *s)
 		Tag->RestyleAll();
 	}
 
-	if (d->DeferredLoads == 0)
-	{
-		OnLoad();
-	}
-
+	OnLoad();
 	Invalidate();	
 
 	return true;
@@ -7595,49 +7600,49 @@ LPointF LHtml::GetDpiScale()
 void LHtml::OnPaint(LSurface *ScreenDC)
 {
 	#if PROFILE_PAINT
-	LProfile Prof("LHtml::OnPaint");
-	Prof.HideResultsIfBelow(200);
+		LProfile Prof("LHtml::OnPaint");
+		Prof.HideResultsIfBelow(200);
 	#endif
 
 	#if HTML_USE_DOUBLE_BUFFER
-	LRect Client = GetClient();
-	if (ScreenDC->IsScreen())
-	{
-		if (!MemDC ||
-			(MemDC->X() < Client.X() || MemDC->Y() < Client.Y()))
+		LRect Client = GetClient();
+		if (ScreenDC->IsScreen())
 		{
-			if (MemDC.Reset(new LMemDC(_FL)))
+			if (!MemDC ||
+				(MemDC->X() < Client.X() || MemDC->Y() < Client.Y()))
 			{
-				int Sx = Client.X() + 10;
-				int Sy = Client.Y() + 10;
-				PROF("CreateMemDC");
-				if (!MemDC->Create(Sx, Sy, System32BitColourSpace))
+				if (MemDC.Reset(new LMemDC(_FL)))
 				{
-					MemDC.Reset();
+					int Sx = Client.X() + 10;
+					int Sy = Client.Y() + 10;
+					PROF("CreateMemDC");
+					if (!MemDC->Create(Sx, Sy, System32BitColourSpace))
+					{
+						MemDC.Reset();
+					}
 				}
 			}
+			if (MemDC)
+			{
+				MemDC->ClipRgn(nullptr);
+				#if 0//def _DEBUG
+					MemDC->Colour(LColour(255, 0, 255));
+					MemDC->Rectangle();
+				#endif
+			}
 		}
-		if (MemDC)
-		{
-			MemDC->ClipRgn(NULL);
-			#if 0//def _DEBUG
-			MemDC->Colour(LColour(255, 0, 255));
-			MemDC->Rectangle();
-			#endif
-		}
-	}
 	#endif
 
 	LSurface *pDC = MemDC ? MemDC : ScreenDC;
 
 	#if 0
-	Gtk::cairo_matrix_t mx;
-	Gtk::cairo_get_matrix(pDC->Handle(), &mx);
-	LPoint Offset;
-	WindowVirtualOffset(&Offset);
-	printf("\tHtml paint mx=%g,%g off=%i,%i\n",
-		mx.x0, mx.y0,
-		Offset.x, Offset.y);
+		Gtk::cairo_matrix_t mx;
+		Gtk::cairo_get_matrix(pDC->Handle(), &mx);
+		LPoint Offset;
+		WindowVirtualOffset(&Offset);
+		printf("\tHtml paint mx=%g,%g off=%i,%i\n",
+			mx.x0, mx.y0,
+			Offset.x, Offset.y);
 	#endif
 
 	PROF("Background");
@@ -7680,13 +7685,15 @@ void LHtml::OnPaint(LSurface *ScreenDC)
 		}
 	}
 
+	OnPaintFinished(pDC);
+
 	#if HTML_USE_DOUBLE_BUFFER
-	if (MemDC)
-	{
-		pDC->SetOrigin(0, 0);
-		PROF("Blt");
-		ScreenDC->Blt(0, 0, MemDC);
-	}
+		if (MemDC)
+		{
+			pDC->SetOrigin(0, 0);
+			PROF("Blt");
+			ScreenDC->Blt(0, 0, MemDC);
+		}
 	#endif
 
 	if (d->OnLoadAnchor && VScroll)
@@ -8176,7 +8183,7 @@ bool LHtml::OnKey(LKey &k)
 {
 	bool Status = false;
 
-	k.Trace("LHtml::OnKey");
+	// k.Trace("LHtml::OnKey");
 
 	if (k.Down())
 	{
@@ -8407,9 +8414,9 @@ void LHtml::OnMouseClick(LMouse &m)
 			#define IDM_CHARSET_BASE	10000
 
 			RClick.AppendItem					(LLoadString(L_TEXTCTRL_COPY, "Copy"), IDM_COPY, HasSelection());
-			LMenuItem *Vs = RClick.AppendItem	(LLoadString(L_VIEW_SOURCE, "View Source"), IDM_VIEW_SRC, Source != 0);
+			auto Vs = RClick.AppendItem	(LLoadString(L_VIEW_SOURCE, "View Source"), IDM_VIEW_SRC, Source != 0);
 			RClick.AppendItem					(LLoadString(L_COPY_SOURCE, "Copy Source"), IDM_COPY_SRC, Source != 0);
-			LMenuItem *Load = RClick.AppendItem	(LLoadString(L_VIEW_IMAGES, "View External Images"), IDM_VIEW_IMAGES, true);
+			auto Load = RClick.AppendItem	(LLoadString(L_VIEW_IMAGES, "View External Images"), IDM_VIEW_IMAGES, true);
 			if (Load) Load->Checked(GetLoadImages());
 			RClick.AppendItem					(LLoadString(L_VIEW_IN_DEFAULT_BROWSER, "View in Default Browser"), IDM_EXTERNAL, Source != 0);
 			LSubMenu *Cs = RClick.AppendSub		(LLoadString(L_CHANGE_CHARSET, "Change Charset"));
@@ -8784,7 +8791,7 @@ void LHtml::OnMouseMove(LMouse &m)
 		return;
 
 	LString Uri;
-	LTag *HitTag = Hit.NearestText && Hit.Near == 0 ? Hit.NearestText : Hit.Direct;
+	auto HitTag = Hit.NearestText && Hit.Near == 0 ? Hit.NearestText : Hit.Direct;
 	if (HitTag &&
 		HitTag->TipId == 0 &&
 		Hit.LocalCoords.x >= 0 &&
@@ -9204,67 +9211,64 @@ struct BuildContext
 	{
 		bool RetReattach = false;
 		
-		switch (t->TagId)
+		if (t->IsTable())
 		{
-			case TAG_TABLE:
+			if (!Table)
+				Table = t;
+			else
+				return false;
+		}
+		else if (t->IsTableRow())
+		{
+			CurTr = t;
+		}
+		else if (t->IsTableCell())
+		{
+			CurTd = t;
+			if (t->Parent != CurTr)
 			{
-				if (!Table)
-					Table = t;
+				if
+				(
+					!CurTr &&
+					(Table || TBody)
+				)
+				{
+					LTag *p = TBody ? TBody : Table;
+					CurTr = new LTag(p->Html, p);
+					if (CurTr)
+					{
+						CurTr->Tag.Reset(NewStr("tr"));
+						CurTr->TagId = TAG_TR;
+						
+
+						ssize_t Idx = t->Parent->Children.IndexOf(t);
+						t->Parent->Attach(CurTr, Idx);
+					}
+				}
+				
+				if (CurTr)
+				{
+					CurTr->Attach(t);
+					RetReattach = true;
+				}
 				else
+				{
+					LAssert(0);
 					return false;
-				break;
+				}
 			}
+			
+			t->Cell->Pos.x = cx;
+			t->Cell->Pos.y = cy;
+			Layout->Set(t);
+		}
+		else switch (t->TagId)
+		{
 			case TAG_TBODY:
 			{
 				if (TBody)
 					return false;
 				TBody = t;
-				break;
-			}
-			case TAG_TR:
-			{
-				CurTr = t;
-				break;
-			}
-			case TAG_TD:
-			{
-				CurTd = t;
-				if (t->Parent != CurTr)
-				{
-					if
-					(
-						!CurTr &&
-						(Table || TBody)
-					)
-					{
-						LTag *p = TBody ? TBody : Table;
-						CurTr = new LTag(p->Html, p);
-						if (CurTr)
-						{
-							CurTr->Tag.Reset(NewStr("tr"));
-							CurTr->TagId = TAG_TR;
-							
-
-							ssize_t Idx = t->Parent->Children.IndexOf(t);
-							t->Parent->Attach(CurTr, Idx);
-						}
-					}
-					
-					if (CurTr)
-					{
-						CurTr->Attach(t);
-						RetReattach = true;
-					}
-					else
-					{
-						LAssert(0);
-						return false;
-					}
-				}
-				
-				t->Cell->Pos.x = cx;
-				t->Cell->Pos.y = cy;
-				Layout->Set(t);
 				break;
 			}
 			default:
@@ -9323,7 +9327,7 @@ LHtmlTableLayout::LHtmlTableLayout(LTag *table)
 	for (size_t i=0; i<Table->Children.Length(); i++)
 	{
 		r = ToTag(Table->Children[i]);
-		if (r->Display() == LCss::DispNone)
+		if (r->SupportedDisplay() == LCss::DispNone)
 			continue;
 			
 		if (r->TagId == TAG_TR)
@@ -9364,7 +9368,7 @@ LHtmlTableLayout::LHtmlTableLayout(LTag *table)
 			}
 			if (FakeRow)
 			{
-				if (!IsTableCell(r->TagId) && !FakeCell)
+				if (!r->IsTableCell() && !FakeCell)
 				{
 					if ((FakeCell = new LTag(Table->Html, FakeRow)))
 					{
@@ -9381,7 +9385,7 @@ LHtmlTableLayout::LHtmlTableLayout(LTag *table)
 				ssize_t Idx = Table->Children.IndexOf(r);
 				r->Detach();
 
-				if (IsTableCell(r->TagId))
+				if (r->IsTableCell())
 				{
 					FakeRow->Attach(r);
 				}
@@ -9399,13 +9403,13 @@ LHtmlTableLayout::LHtmlTableLayout(LTag *table)
 	for (size_t n=0; n<Table->Children.Length(); n++)
 	{
 		LTag *r = ToTag(Table->Children[n]);
-		if (r->TagId == TAG_TR)
+		if (r->IsTableRow())
 		{
 			int x = 0;
 			for (size_t i=0; i<r->Children.Length(); i++)
 			{
-				LTag *cell = ToTag(r->Children[i]);
-				if (!IsTableCell(cell->TagId))
+				auto cell = ToTag(r->Children[i]);
+				if (!cell->IsTableCell())
 				{
 					if (!FakeCell)
 					{
@@ -9440,9 +9444,9 @@ LHtmlTableLayout::LHtmlTableLayout(LTag *table)
 					FakeCell = NULL;
 				}
 				
-				if (IsTableCell(cell->TagId))
+				if (cell->IsTableCell())
 				{
-					if (cell->Display() == LCss::DispNone)
+					if (cell->SupportedDisplay() == LCss::DispNone)
 						continue;
 						
 					while (Get(x, y))
@@ -9450,10 +9454,14 @@ LHtmlTableLayout::LHtmlTableLayout(LTag *table)
 						x++;
 					}
 
-					cell->Cell->Pos.x = x;
-					cell->Cell->Pos.y = y;
-					Set(cell);
-					x += cell->Cell->Span.x;
+					if (cell->Cell)
+					{
+						cell->Cell->Pos.x = x;
+						cell->Cell->Pos.y = y;
+						Set(cell);
+						x += cell->Cell->Span.x;
+					}
+					else LgiTrace("%s:%i - no Cell ptr?\n", _FL);
 				}
 			}
 
@@ -9559,12 +9567,13 @@ bool LHtmlTableLayout::Set(LTag *t)
 	return true;
 }
 
-void LTagHit::Dump(const char *Desc)
+LString LTagHit::ToString()
 {
+	LStringPipe out;
 	LArray<LTag*> d, n;
 	LTag *t = Direct;
 	unsigned i;
-	for (i=0; i<3 && t; t = ToTag(t->Parent), i++)
+	for (i=0; i<6 && t; t = ToTag(t->Parent), i++)
 	{
 		d.AddAt(0, t);
 	}
@@ -9574,16 +9583,23 @@ void LTagHit::Dump(const char *Desc)
 		n.AddAt(0, t);
 	}
 	
-	LgiTrace("Hit: %s Direct: ", Desc);
+	out.Print("Direct: ");
 	for (i=0; i<d.Length(); i++)
-		LgiTrace(">%s", d[i]->Tag ? d[i]->Tag.Get() : "CONTENT");
-	LgiTrace(" Nearest: ");
+		out.Print(">%s", d[i]->Tag ? d[i]->Tag.Get() : "CONTENT");
+	out.Print(" Nearest: ");
 	for (i=0; i<n.Length(); i++)
-		LgiTrace(">%s", n[i]->Tag ? n[i]->Tag.Get() : "CONTENT");
-	LgiTrace(" Local: %ix%i Index: %i Block: %s '%.10S'\n",
+		out.Print(">%s", n[i]->Tag ? n[i]->Tag.Get() : "CONTENT");
+	out.Print(" Local: %ix%i Index: %i Block: %s '%.10S'",
 		LocalCoords.x, LocalCoords.y,
 		Index,
 		Block ? Block->GetStr() : NULL,
 		Block ? Block->Text + Index : NULL);
+
+	return out.NewLStr();
+}
+
+void LTagHit::Dump(const char *Desc)
+{
+	LgiTrace("Hit: %s %s\n", Desc, ToString().Get());
 }
 

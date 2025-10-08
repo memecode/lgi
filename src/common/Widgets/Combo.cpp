@@ -11,25 +11,6 @@
 
 #define COMBO_HEIGHT			20
 
-int IntCompare(char *a, char *b, NativeInt c)
-{
-	int A = atoi(a);
-	int B = atoi(b);
-	return A - B;
-}
-
-int DblCompare(char *a, char *b, NativeInt c)
-{
-	double A = atof(a);
-	double B = atof(b);
-	return A > B ? 1 : A < B ? -1 : 0;
-}
-
-int StringCompare(char *a, char *b, NativeInt c)
-{
-	return stricmp(a, b);
-}
-
 class LComboPrivate
 {
 	LDisplayString *Text;
@@ -297,20 +278,36 @@ void LCombo::DoMenu()
 		{
 			if (d->Sub == GV_INT32)
 			{
-				d->Items.Sort(IntCompare);
+				d->Items.Sort([](auto a, auto b)
+					{
+						int A = Atoi(a);
+						int B = Atoi(b);
+						return A - B;
+					});
 			}
 			else if (d->Sub == GV_DOUBLE)
 			{
-				d->Items.Sort(DblCompare);
+				d->Items.Sort([](auto a, auto b)
+					{
+						double A = atof(a);
+						double B = atof(b);
+						return A > B ? 1 : A < B ? -1 : 0;
+					});
 			}
 			else
 			{
-				d->Items.Sort(StringCompare);
+				d->Items.Sort([](auto a, auto b)
+					{
+						return Stricmp(a, b);
+					});
 			}
 		}
 		else if (d->SortItems)
 		{
-			d->Items.Sort(StringCompare);
+			d->Items.Sort([](auto a, auto b)
+				{
+					return Stricmp(a, b);
+				});
 		}
 
 		auto It = d->Items.begin();

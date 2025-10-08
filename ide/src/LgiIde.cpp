@@ -1174,20 +1174,6 @@ public:
 	}
 };
 
-int DocSorter(IdeDoc *a, IdeDoc *b, NativeInt d)
-{
-	auto A = a->GetFileName();
-	auto B = b->GetFileName();
-	if (A && B)
-	{
-		auto Af = strrchr(A, DIR_CHAR);
-		auto Bf = strrchr(B, DIR_CHAR);
-		return stricmp(Af?Af+1:A, Bf?Bf+1:B);
-	}
-	
-	return 0;
-}
-
 struct FileLoc
 {
 	LAutoString File;
@@ -1647,7 +1633,19 @@ public:
 		if (WindowsMenu)
 		{
 			WindowsMenu->Empty();
-			Docs.Sort(DocSorter);
+			Docs.Sort([](auto a, auto b)
+				{
+					auto A = a->GetFileName();
+					auto B = b->GetFileName();
+					if (A && B)
+					{
+						auto Af = strrchr(A, DIR_CHAR);
+						auto Bf = strrchr(B, DIR_CHAR);
+						return stricmp(Af?Af+1:A, Bf?Bf+1:B);
+					}
+	
+					return 0;
+				});
 			int n=0;
 			for (auto d: Docs)
 			{

@@ -250,6 +250,7 @@
     <ClCompile Include="..\src\common\General\Growl.cpp" />
     <ClCompile Include="..\src\common\General\Password.cpp" />
     <ClCompile Include="..\src\common\General\DateTime.cpp" />
+    <ClCompile Include="..\src\common\General\SubProcessCommon.cpp" />
     <ClCompile Include="..\src\common\General\TimeZone.cpp" />
     <ClCompile Include="..\src\common\Hash\md5\md5.c" />
     <ClCompile Include="..\src\common\Hash\sha1\sha1.c" />
@@ -325,9 +326,9 @@
     <ClCompile Include="..\src\common\Widgets\Popup.cpp" />
     <ClCompile Include="..\src\common\Widgets\ProgressDlg.cpp" />
     <ClCompile Include="..\src\common\Widgets\RadioGroup.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\common\Widgets\Slider.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

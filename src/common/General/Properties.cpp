@@ -999,18 +999,16 @@ bool ObjProperties::Serialize(LFile &f, bool Write)
 	return Status;
 }
 
-int Prop_Compare(Prop *a, Prop *b, NativeInt data)
-{
-	return _stricmp(a->Name, b->Name);
-}
-
 bool ObjProperties::SerializeText(LFile &f, bool Write)
 {
 	const char *s = "[Properties]";
 
 	if (Write)
 	{
-		Properties.Sort(Prop_Compare, (NativeInt)this);
+		Properties.Sort([](auto a, auto b)
+			{
+				return Stricmp(a->Name, b->Name);
+			});
 
 		f.SetSize(0);
 		f.Write(s, strlen(s));

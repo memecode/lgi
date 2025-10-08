@@ -918,17 +918,34 @@ public:
 		LArray<Type> a;
 
 		// Range limit the inputs...
-		if (Start < 0) Start = len + Start;
-		if (Start > (ssize_t)len) Start = len;
+		if (Start < 0)
+		{
+			Start = len + Start;
+			if (Start < 0)
+				Start = 0;
+		}
+		if (Start > (ssize_t)len)
+			Start = len;
 		
-		if (End < 0) End = len + End + 1;
-		if (End > (ssize_t)len) End = len;
+		if (End < 0)
+		{
+			End = len + End + 1;
+			if (End < 0)
+				End = 0;
+		}
+		if (End > (ssize_t)len)
+			End = len;
 
 		if (End > Start)
 		{
-			a.Length(End - Start);
-			for (size_t i=0; i<a.Length(); i++)
-				a[i] = p[Start + i];
+			if (a.Length(End - Start))
+			{
+				for (size_t i=0; i<a.Length(); i++)
+				{
+					LAssert(Start + i < len);
+					a[i] = p[Start + i];
+				}
+			}
 		}
 
 		return a;

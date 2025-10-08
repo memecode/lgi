@@ -26,14 +26,12 @@ class LRadioGroupPrivate
 {
 public:
 	static int NextId;
-	int64 InitVal;
-	int MaxLayoutWidth;
+	int64 InitVal = -1;
+	int MaxLayoutWidth = 0;
     LHashTbl<PtrKey<void*>,LViewLayoutInfo*> Info;
 
 	LRadioGroupPrivate()
 	{
-		InitVal = 0;
-		MaxLayoutWidth = 0;
 	}
 
 	~LRadioGroupPrivate()
@@ -44,11 +42,12 @@ public:
 
 int LRadioGroupPrivate::NextId = 10000;
 
-LRadioGroup::LRadioGroup(int id, const char *name, int Init)
+LRadioGroup::LRadioGroup(int id, const char *name, int64_t Init)
 	: ResObject(Res_Group)
 {
 	d = new LRadioGroupPrivate;
-	d->InitVal = Init;
+	if (Init >= 0)
+		d->InitVal = Init;
 
 	Name(name);
 	SetId(id);
@@ -115,7 +114,9 @@ void LRadioGroup::OnCreate()
 {
 	SetFont(LSysFont);
 	AttachChildren();
-	Value(d->InitVal);
+
+	if (d->InitVal >= 0)
+		Value(d->InitVal);
 }
 
 int64 LRadioGroup::Value()
@@ -163,14 +164,24 @@ void LRadioGroup::Value(int64 Which)
 	}
 }
 
-LRadioButton *LRadioGroup::Selected()
+LRadioButton *LRadioGroup::Selected(const char *newSelection)
 {
 	for (auto w: Children)
 	{
 		if (auto btn = dynamic_cast<LRadioButton*>(w))
 		{
-			if (btn->Value())
+			if (newSelection)
+			{
+				if (!Stricmp(newSelection, btn->Name()))
+				{
+					btn->Value(true);
+					return btn;
+				}
+			}
+			else if (btn->Value())
+			{
 				return btn;
+			}
 		}
 	}
 
@@ -300,9 +311,8 @@ class LRadioButtonPrivate
 {
 public:
 	DWORD ParentProc = 0;
-	int64 InitVal = 0;
 	LArray<int> GroupIDs;
-	bool InValue = false;
+	int64 InitVal = -1;
 };
 
 LRadioButton::LRadioButton(int id, const char *name)
@@ -375,7 +385,11 @@ void LRadioButton::OnAttach()
 	OnStyleChange();
 	LView::OnAttach();
 
-	Value(d->InitVal);
+	if (d->InitVal > 0)
+	{
+		auto nm = Name();
+ 		Value(d->InitVal);
+	}
 }
 
 void LRadioButton::OnStyleChange()
@@ -430,62 +444,57 @@ int64 LRadioButton::Value()
 
 void LRadioButton::Value(int64 i)
 {
-	if (!d->InValue)
+	if (Handle())
 	{
-		d->InValue = true;
-		if (Handle())
+		if (i)
 		{
-			if (i)
+			// Turn off any other radio buttons in the current group
+			if (d->GroupIDs.Length())
 			{
-				// Turn off any other radio buttons in the current group
-				if (d->GroupIDs.Length())
+				if (auto w = GetWindow())
 				{
-					if (auto w = GetWindow())
+					for (auto id: d->GroupIDs)
 					{
-						for (auto id: d->GroupIDs)
-						{
-							if (id == GetId())
-								continue;
+						if (id == GetId())
+							continue;
 
-							LRadioButton *button;
-							if (w->GetViewById(id, button))
-							{
-								if (button->Value())
-									button->Value(false);
-							}
-						}
-					}
-				}
-				else
-				{
-					for (LViewI *c: GetParent()->IterateViews())
-					{
-						LRadioButton *b = dynamic_cast<LRadioButton*>(c);
-						if (b &&
-							b != this &&
-							b-Value())
+						LRadioButton *button;
+						if (w->GetViewById(id, button))
 						{
-							b->Value(false);
+							if (button->Value())
+								button->Value(false);
 						}
 					}
 				}
 			}
-
-			// Change the value of this button
-			SendMessage(Handle(), BM_SETCHECK, i, 0);
-
-			if (i)
+			else
 			{
-				// If gaining selection, tell the parent
-				SendNotify(LNotifyValueChanged);
+				for (LViewI *c: GetParent()->IterateViews())
+				{
+					auto b = dynamic_cast<LRadioButton*>(c);
+					if (b &&
+						b != this &&
+						b-Value())
+					{
+						auto nm = b->Name();
+						b->Value(false);
+					}
+				}
 			}
 		}
-		else
-		{
-			d->InitVal = i;
-		}
 
-		d->InValue = false;
+		// Change the value of this button
+		SendMessage(Handle(), BM_SETCHECK, d->InitVal = i, 0);
+
+		if (i)
+		{
+			// If gaining selection, tell the parent
+			SendNotify(LNotifyValueChanged);
+		}
+	}
+	else
+	{
+		d->InitVal = i;
 	}
 }
 

@@ -1,7 +1,7 @@
 /// \file
 /// \author Matthew Allen
-#ifndef _GHTML2_H
-#define _GHTML2_H
+#ifndef _LHTML2_H
+#define _LHTML2_H
 
 #include "lgi/common/DocView.h"
 #include "lgi/common/HtmlCommon.h"

@@ -439,7 +439,7 @@ public:
 	void OnExpand(bool b);
 	const char *GetText(int Col);
 	int GetImage(int Flags);
-	int Compare(VcLeaf *b);
+	int Compare(LTreeItem *To, ssize_t Field = 0) override;
 	bool Select();
 	void Select(bool b);
 	void OnMouseClick(LMouse &m);

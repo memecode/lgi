@@ -665,6 +665,36 @@ bool LHtmlElement::HasChild(LHtmlElement *c)
 	return false;
 }
 
+bool LHtmlElement::IsTable()
+{
+	return TagId == TAG_TABLE || (Display() == LCss::DispTable);
+}
+
+bool LHtmlElement::IsTableRow()
+{
+	return TagId == TAG_TR || (Display() == LCss::DispTableRow);
+}
+
+bool LHtmlElement::IsTableCell()
+{
+	return TagId == TAG_TD ||
+		TagId == TAG_TH ||
+		(Display() == LCss::DispTableCell);
+}
+
+bool LHtmlElement::IsTableTag()
+{
+	auto dsp = Display();
+	return TagId == TAG_TABLE ||
+		TagId == TAG_TR ||
+		TagId == TAG_TD ||
+		TagId == TAG_TH ||
+		dsp == LCss::DispTable ||
+		dsp == LCss::DispTableRow ||
+		dsp == LCss::DispTableCell;
+}
+
+
 ////////////////////////////////////////////////////////////////////////
 bool LCssStyle::GetVariant(const char *Name, LVariant &Value, const char *Array)
 {

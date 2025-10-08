@@ -228,7 +228,7 @@ void LItemContainer::PaintColumnHeadings(LSurface *pDC)
 
 LItemColumn *LItemContainer::AddColumn(const char *Name, int Width, int Where)
 {
-	LItemColumn *c = 0;
+	LItemColumn *c = nullptr;
 
 	if (Lock(_FL))
 	{
@@ -311,6 +311,7 @@ void LItemContainer::EmptyColumns()
 {
 	Columns.DeleteObjects();
 	Invalidate(&ColumnHeader);
+	sortMark.Col = -1; // the column object no longer exists... unset this
 	SendNotify(LNotifyItemColumnsChanged);
 }
 
@@ -404,16 +405,25 @@ void LItemContainer::GetColumnSizes(ColSizes &cs)
 	}
 }
 
-void LItemContainer::SetSortingMark(int ColIdx, bool Up)
+void LItemContainer::SetSortingMark(SortParam sort)
 {
-	for (int i=0; i<GetColumns(); i++)
-	{
-		auto c = ColumnAt(i);
-		if (!c)
-			continue;
+	if (sortMark == sort)
+		return;
 
-		c->UpArrow(ColIdx == i && Up);
-		c->DownArrow(ColIdx == i && !Up);
+	if (Lock(_FL))
+	{
+		sortMark = sort;
+
+		for (int i=0; i<GetColumns(); i++)
+		{
+			if (auto c = ColumnAt(i))
+			{
+				c->UpArrow(sortMark.Col == i && !sortMark.Ascend);
+				c->DownArrow(sortMark.Col == i && sortMark.Ascend);
+			}
+		}
+
+		Unlock();
 	}
 }
 
@@ -1135,7 +1145,7 @@ LItem::~LItem()
 
 LView *LItem::EditLabel(int Col)
 {
-	LItemContainer *c = GetContainer();
+	auto c = GetContainer();
 	if (!c)
 		return NULL;
 	
@@ -1151,9 +1161,8 @@ LView *LItem::EditLabel(int Col)
 
 void LItem::OnEditLabelEnd()
 {
-	LItemContainer *c = GetContainer();
-	if (c)
-		c->ItemEdit = NULL;
+	if (auto c = GetContainer())
+		c->ItemEdit = nullptr;
 }
 
 void LItem::SetEditLabelSelection(int SelStart, int SelEnd)

@@ -1319,31 +1319,6 @@ NodeView::~NodeView()
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////
-int NodeSort(LTreeItem *a, LTreeItem *b, NativeInt d)
-{
-	ProjectNode *A = dynamic_cast<ProjectNode*>(a);
-	ProjectNode *B = dynamic_cast<ProjectNode*>(b);
-	if (A && B)
-	{
-		if
-		(
-			(A->GetType() == NodeDir)
-			^
-			(B->GetType() == NodeDir)
-		)
-		{
-			return A->GetType() == NodeDir ? -1 : 1;
-		}
-		else
-		{
-			return Stricmp(a->GetText(0), b->GetText(0));
-		}
-	}
-
-	return 0;
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 bool ReadVsProjFile(LString File, LString &Ver, LString::Array &Configs)
 {

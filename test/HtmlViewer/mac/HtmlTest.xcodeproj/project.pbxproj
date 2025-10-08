@@ -9,8 +9,6 @@
 /* Begin PBXBuildFile section */
 		3416FADB2748AA070062D3B8 /* HomoglyphsTable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3416FAD92748AA070062D3B8 /* HomoglyphsTable.cpp */; };
 		3416FADC2748AA070062D3B8 /* Homoglyphs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3416FADA2748AA070062D3B8 /* Homoglyphs.cpp */; };
-		342BE8DB29D047F8004B3AF2 /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 342BE8D629D04666004B3AF2 /* LgiCocoa.framework */; };
-		342BE8DC29D04804004B3AF2 /* LgiCocoa.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 342BE8D629D04666004B3AF2 /* LgiCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		34319029238DF4A700DDE1F5 /* TestSuite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34319027238DF4A700DDE1F5 /* TestSuite.cpp */; };
 		3431902A238DF4A700DDE1F5 /* HtmlTestSuite.lr8 in Resources */ = {isa = PBXBuildFile; fileRef = 34319028238DF4A700DDE1F5 /* HtmlTestSuite.lr8 */; };
 		3431902C238DF51B00DDE1F5 /* OpenSSLSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3431902B238DF51B00DDE1F5 /* OpenSSLSocket.cpp */; };
@@ -31,18 +29,20 @@
 		343FB8952386621600797ABC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 343FB8942386621600797ABC /* Assets.xcassets */; };
 		343FB8AB238662C500797ABC /* LgiMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 343FB8AA238662C500797ABC /* LgiMain.cpp */; };
 		343FB8DC2386642A00797ABC /* OptionsFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 343FB8DB2386642A00797ABC /* OptionsFile.cpp */; };
+		34A7A5F52E7E77D800A46B7B /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34A7A5F42E7E777900A46B7B /* LgiCocoa.framework */; };
+		34A7A5F82E7E77FB00A46B7B /* LgiCocoa.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34A7A5F42E7E777900A46B7B /* LgiCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		34C81A5825DA09770053F93A /* Http.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C81A5725DA09770053F93A /* Http.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		342BE8D529D04666004B3AF2 /* PBXContainerItemProxy */ = {
+		34A7A5F32E7E777900A46B7B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 343FB8A42386627A00797ABC /* LgiCocoa.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 3477C2681CBF020F0028B84B;
 			remoteInfo = LgiCocoa;
 		};
-		342BE8D929D047F1004B3AF2 /* PBXContainerItemProxy */ = {
+		34A7A5F62E7E77F000A46B7B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 343FB8A42386627A00797ABC /* LgiCocoa.xcodeproj */;
 			proxyType = 1;
@@ -58,7 +58,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				342BE8DC29D04804004B3AF2 /* LgiCocoa.framework in CopyFiles */,
+				34A7A5F82E7E77FB00A46B7B /* LgiCocoa.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -99,21 +99,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				342BE8DB29D047F8004B3AF2 /* LgiCocoa.framework in Frameworks */,
+				34A7A5F52E7E77D800A46B7B /* LgiCocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		342BE8D229D04666004B3AF2 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				342BE8D629D04666004B3AF2 /* LgiCocoa.framework */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		343FB8852386621400797ABC = {
 			isa = PBXGroup;
 			children = (
@@ -166,7 +158,6 @@
 				34319033238DF97200DDE1F5 /* EmojiFont.cpp */,
 				343FB8DB2386642A00797ABC /* OptionsFile.cpp */,
 				343FB8AA238662C500797ABC /* LgiMain.cpp */,
-				343FB8A42386627A00797ABC /* LgiCocoa.xcodeproj */,
 			);
 			name = Lgi;
 			sourceTree = "<group>";
@@ -183,8 +174,17 @@
 		343FB8C52386638C00797ABC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				343FB8A42386627A00797ABC /* LgiCocoa.xcodeproj */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		34A7A5F02E7E777900A46B7B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				34A7A5F42E7E777900A46B7B /* LgiCocoa.framework */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -202,7 +202,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				342BE8DA29D047F1004B3AF2 /* PBXTargetDependency */,
+				34A7A5F72E7E77F000A46B7B /* PBXTargetDependency */,
 			);
 			name = HtmlTest;
 			productName = HtmlTest;
@@ -236,7 +236,7 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 342BE8D229D04666004B3AF2 /* Products */;
+					ProductGroup = 34A7A5F02E7E777900A46B7B /* Products */;
 					ProjectRef = 343FB8A42386627A00797ABC /* LgiCocoa.xcodeproj */;
 				},
 			);
@@ -248,11 +248,11 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		342BE8D629D04666004B3AF2 /* LgiCocoa.framework */ = {
+		34A7A5F42E7E777900A46B7B /* LgiCocoa.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = LgiCocoa.framework;
-			remoteRef = 342BE8D529D04666004B3AF2 /* PBXContainerItemProxy */;
+			remoteRef = 34A7A5F32E7E777900A46B7B /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -301,10 +301,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		342BE8DA29D047F1004B3AF2 /* PBXTargetDependency */ = {
+		34A7A5F72E7E77F000A46B7B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = LgiCocoa;
-			targetProxy = 342BE8D929D047F1004B3AF2 /* PBXContainerItemProxy */;
+			targetProxy = 34A7A5F62E7E77F000A46B7B /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -453,7 +453,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.memecode.htmltest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				VALID_ARCHS = x86_64;
 			};
 			name = Debug;
 		};
@@ -489,7 +488,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.memecode.htmltest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				VALID_ARCHS = x86_64;
 			};
 			name = Release;
 		};

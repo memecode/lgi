@@ -93,7 +93,7 @@ public:
 	union {
 		void *Ptr;
 		NativeInt Int;
-	}	_user = {};
+	}	User = {};
 
 	// Object
 	LListItem(const char *initStr = NULL);
@@ -152,7 +152,11 @@ public:
 	void OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c) override;
 
 	// Over-ridable
-	virtual int Compare(LListItem *To, ssize_t Field = 0) { return 0; }
+	virtual int Compare(LListItem *To, ssize_t Field = 0)
+	{
+		LAssert(!"need to override this");
+		return 0;
+	}
 	virtual void OnColumnNotify(int Col, int64 Data) { Update(); }
 };
 
@@ -482,6 +486,8 @@ public:
 		Invalidate(&ItemsPos);
 	}
 
+	bool SetSort(SortParam sort, bool reorderItems = true, bool setMark = true) override;
+
 	/// Sort the list
 	void Sort
 	(
@@ -500,7 +506,7 @@ public:
 	}
 	
     /// Sort by a textual comparison on the given column
-	void Sort(int Column)
+	void Sort(int Column) override
 	{
 		if (Items.Length() == 0)
 			return;
@@ -525,7 +531,7 @@ public:
 	}
 	
 	/// Sort by the compare function of the items:
-	void Sort()
+	void Sort() override
 	{
 		if (Items.Length() == 0)
 			return;
@@ -535,9 +541,9 @@ public:
 		auto Kb = Items[Keyboard];
 		Items.Sort
 		(
-			[](auto *a, auto *b) -> int
+			[this](auto *a, auto *b) -> int
 			{
-				return a->Compare(b);
+				return a->Compare(b, sortParam.Col);
 			}
 		);
 		Keyboard = Kb ? (int)Items.IndexOf(Kb) : -1;

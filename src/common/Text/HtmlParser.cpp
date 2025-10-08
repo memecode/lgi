@@ -810,15 +810,31 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 							}
 						}
 					}
-
+					
 					if (IsBlock(Elem->Display()) || Elem->TagId == TAG_BR)
 					{
 						SkipNonDisplay(s);
 					}
-
+					
 					Elem->SetStyle();
 
-					switch (Elem->TagId)
+					if (Elem->IsTable())
+					{
+						if (Elem->Parent->IsTable())
+						{
+							// Um no...
+							if (BackOut)
+							{
+								auto l = OpenTags.Length() ? OpenTags.Last() : nullptr;
+								if (l && l->IsTable())
+									CloseTag(l);
+
+								*BackOut = true;
+								return StartTag;
+							}
+						}
+					}
+					else switch (Elem->TagId)
 					{
 						default: break;
 						case TAG_SCRIPT:
@@ -841,23 +857,6 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 								}
 
 								s = End;
-							}
-							break;
-						}
-						case TAG_TABLE:
-						{
-							if (Elem->Parent->TagId == TAG_TABLE)
-							{
-								// Um no...
-								if (BackOut)
-								{
-									auto l = OpenTags.Length() ? OpenTags.Last() : nullptr;
-									if (l && l->TagId == TAG_TABLE)
-										CloseTag(l);
-
-									*BackOut = true;
-									return StartTag;
-								}
 							}
 							break;
 						}
@@ -953,7 +952,9 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 						if (CloseExisting)
 						{
 							LHtmlElement *p;
-							for (int TagIdx = (int)OpenTags.Length()-1; TagIdx >= 0 && (p = OpenTags[TagIdx]) && p->TagId != TAG_TABLE; TagIdx--)
+							for (int TagIdx = (int)OpenTags.Length()-1;
+								TagIdx >= 0 && (p = OpenTags[TagIdx]) && !p->IsTable();
+								TagIdx--)
 							{
 								if (p->TagId == Elem->TagId)
 								{
@@ -983,7 +984,7 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 										break;
 									}
 
-									if (t->TagId == TAG_TABLE)
+									if (t->IsTable())
 										break;
 								}
 
@@ -1012,7 +1013,7 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 											LHtmlElement *Attach = Elem->Parent;
 											while (Attach)
 											{
-												if (Attach->TagId == TAG_TABLE || Attach->TagId == TAG_TBODY)
+												if (Attach->IsTable() || Attach->TagId == TAG_TBODY)
 													break;
 												Attach = Attach->Parent;
 											}

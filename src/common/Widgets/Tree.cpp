@@ -17,23 +17,18 @@
 #define TreeUpdateNow		false
 #define ForAll(Items)		for (auto c : Items)
 
-struct LTreeLocker
+//////////////////////////////////////////////////////////////////////////////
+LTreeNode::Locker::Locker(LTree *t, const char *file, int line) : tree(t)
 {
-	LTree *t = NULL;
-	bool status = false;
-	LTreeLocker(LTree *tree, const char *file, int line) : t(tree)
-	{
-		if (t)
-			status = t->Lock(file, line);
-	}
-	~LTreeLocker()
-	{
-		if (status && t)
-			t->Unlock();
-	}
-};
-
-#define TREELOCK(ptr) LTreeLocker _lock(ptr, _FL);
+	if (t)
+		locked = t->LView::Lock(file, line);
+}
+		
+LTreeNode::Locker::~Locker()
+{
+	if (locked && tree)
+		tree->Unlock();
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // Private class definitions for binary compatibility
@@ -340,17 +335,21 @@ bool LTreeNode::HasItem(LTreeItem *obj, bool recurse)
 	return false;
 }
 
-int LTreeNode::ForEach(std::function<void(LTreeItem*)> Fn)
+bool LTreeNode::ForEach(std::function<bool(LTreeItem*)> Fn, int *count)
 {
-	int Count = 0;
-	
-	for (auto t : Items)
+	for (auto t: Items)
 	{
-		Fn(t);
-		Count += t->ForEach(Fn);
+		if (!Fn(t))
+			return false;
+			
+		if (count)
+			*count++;
+		
+		if (!t->ForEach(Fn, count))
+			return false;
 	}
 	
-	return Count + 1;
+	return true;
 }
 
 ssize_t LTreeNode::IndexOf()
@@ -723,7 +722,7 @@ const char *LTreeItem::GetText(int i)
 
 bool LTreeItem::SetText(const char *s, int i)
 {
-	TREELOCK(Tree);
+	auto lck = ScopedLock(_FL);
 
 	Str[i] = s;
 	if (Tree)
@@ -856,6 +855,34 @@ void LTreeItem::_MouseClick(LMouse &m)
 				Tree->OnItemClick(this, m);
 		}
 	}
+}
+
+bool LTreeItem::SetSort(SortParam sort, bool reorderItems, bool setMark)
+{
+	auto lck = ScopedLock(_FL);
+	if (!lck)
+		return false;
+	return LSortable::SetSort(sort, reorderItems, setMark);
+}
+
+void LTreeItem::Sort(std::function<int(LTreeNode*, LTreeNode*)> compare)
+{
+	auto lck = ScopedLock(_FL);
+	if (!lck)
+		return;
+
+	Items.Sort(compare);
+	GetTree()->UpdateAllItems();
+}
+
+void LTreeItem::Sort(int Column)
+{
+	auto lck = ScopedLock(_FL);
+}
+
+void LTreeItem::Sort()
+{
+	auto lck = ScopedLock(_FL);
 }
 
 void LTreeItem::OnPaint(ItemPaintCtx &Ctx)
@@ -1135,6 +1162,44 @@ LTree::~LTree()
 	DeleteObj(d);
 }
 
+void LTree::Sort(std::function<int(LTreeNode*, LTreeNode*)> compare)
+{
+	auto lck = ScopedLock(_FL);
+	if (!lck)
+		return;
+
+	Items.Sort(compare);
+	UpdateAllItems();
+}
+	
+void LTree::Sort(int Column)
+{
+	auto lck = ScopedLock(_FL);
+	if (!lck)
+		return;
+
+	Items.Sort([Column](auto a, auto b)
+		{
+			auto cmp = Stricmp(a->GetText(Column), b->GetText(Column));
+			return cmp ? cmp : (int) (b - a);
+		});
+
+	UpdateAllItems();
+}
+	
+void LTree::Sort()
+{
+	auto lck = ScopedLock(_FL);
+	if (!lck)
+		return;
+
+	Items.Sort([](auto a, auto b)
+		{
+			return a->Compare(b);
+		});
+	UpdateAllItems();
+}
+
 // Internal tree methods
 List<LTreeItem>	*LTree::GetSelLst()
 {
@@ -1143,8 +1208,7 @@ List<LTreeItem>	*LTree::GetSelLst()
 
 void LTree::_Update(LRect *r, bool Now)
 {
-	TREELOCK(this)
-
+	auto lck = ScopedLock(_FL);
 	if (r)
 	{
 		LRect u = *r;
@@ -1161,8 +1225,7 @@ void LTree::_Update(LRect *r, bool Now)
 
 void LTree::_UpdateBelow(int y, bool Now)
 {
-	TREELOCK(this)
-
+	auto lck = ScopedLock(_FL);
 	LPoint s = ScrollPxPos();
 	LRect c = GetClient();
 	LRect u(c.x1, y - s.y + c.y1, X()-1, Y()-1);
@@ -1171,8 +1234,7 @@ void LTree::_UpdateBelow(int y, bool Now)
 
 void LTree::ClearDs(int Col)
 {
-	TREELOCK(this)
-
+	auto lck = ScopedLock(_FL);
 	List<LTreeItem>::I it = Items.begin();
 	for (LTreeItem *i=*it; i; i=*++it)
 		i->_ClearDs(Col);
@@ -1180,8 +1242,7 @@ void LTree::ClearDs(int Col)
 
 LPoint LTree::ScrollPxPos()
 {
-	TREELOCK(this)
-
+	auto lck = ScopedLock(_FL);
 	LPoint Status;
 	Status.x = (HScroll) ? (int)HScroll->Value() : 0;
 	Status.y = (VScroll) ? (int)VScroll->Value() * TREE_BLOCK : 0;
@@ -1197,7 +1258,7 @@ void LTree::_UpdateScrollBars()
 		Processing = true;
 		
 		{
-			TREELOCK(this)
+			auto lck = ScopedLock(_FL);
 			LPoint Old = ScrollPxPos();
 			
 			LRect Client = GetClient();
@@ -1249,8 +1310,7 @@ void LTree::_UpdateScrollBars()
 
 void LTree::_OnSelect(LTreeItem *Item)
 {
-	TREELOCK(this)
-
+	auto lck = ScopedLock(_FL);
 	if
 	(
 		!MultiSelect()
@@ -1282,8 +1342,7 @@ void LTree::_OnSelect(LTreeItem *Item)
 
 void LTree::_Pour()
 {
-	TREELOCK(this)
-
+	auto lck = ScopedLock(_FL);
 	d->InPour = true;
 	d->Limit.x = rItems.x1;
 	d->Limit.y = rItems.y1;
@@ -1324,24 +1383,21 @@ void LTree::OnItemSelect(LTreeItem *Item)
 	if (!Item)
 		return;
 
-	TREELOCK(this)
-
+	auto lck = ScopedLock(_FL);
 	Item->OnSelect();
 	SendNotify(LNotifyItemSelect);
 }
 
 void LTree::OnItemExpand(LTreeItem *Item, bool Expand)
 {
-	TREELOCK(this)
-
+	auto lck = ScopedLock(_FL);
 	if (Item)
 		Item->OnExpand(Expand);
 }
 
 LTreeItem *LTree::GetAdjacent(LTreeItem *i, bool Down)
 {
-	TREELOCK(this)
-
+	auto lck = ScopedLock(_FL);
 	LTreeItem *Ret = NULL;
 	if (i)
 	{
@@ -1419,9 +1475,7 @@ LTreeItem *LTree::GetAdjacent(LTreeItem *i, bool Down)
 
 bool LTree::OnKey(LKey &k)
 {
-	if (!Lock(_FL))
-		return false;
-	
+	auto lck = ScopedLock(_FL);
 	bool Status = false;
 	LTreeItem *i = d->Selection[0];
 	if (!i)
@@ -1596,14 +1650,12 @@ bool LTree::OnKey(LKey &k)
 		i->OnKey(k);
 	}
 
-	Unlock();
 	return Status;
 }
 
 LTreeItem *LTree::ItemAtPoint(int x, int y, bool Debug)
 {
-	TREELOCK(this)
-
+	auto lck = ScopedLock(_FL);
 	LPoint s = ScrollPxPos();
 
 	List<LTreeItem>::I it = Items.begin();
@@ -1620,8 +1672,7 @@ LTreeItem *LTree::ItemAtPoint(int x, int y, bool Debug)
 
 bool LTree::OnMouseWheel(double Lines)
 {
-	TREELOCK(this)
-
+	auto lck = ScopedLock(_FL);
 	if (VScroll)
 		VScroll->Value(VScroll->Value() + (int)Lines);
 	
@@ -1630,8 +1681,7 @@ bool LTree::OnMouseWheel(double Lines)
 
 void LTree::OnMouseClick(LMouse &m)
 {
-	TREELOCK(this)
-
+	auto lck = ScopedLock(_FL);
 	d->CurrentClick = &m;
 
 	if (m.Down())
@@ -1727,8 +1777,7 @@ void LTree::OnMouseMove(LMouse &m)
 	if (!IsCapturing())
 		return;
 
-	TREELOCK(this)
-
+	auto lck = ScopedLock(_FL);
 	switch (DragMode)
 	{
 		/*
@@ -1785,8 +1834,7 @@ void LTree::OnMouseMove(LMouse &m)
 
 void LTree::OnPosChange()
 {
-	TREELOCK(this)
-		
+	auto lck = ScopedLock(_FL);
 	if (Columns.Length() == 0 &&
 		d->LastLayoutPx != GetClient().X())
 		d->LayoutDirty = true;
@@ -1796,7 +1844,7 @@ void LTree::OnPosChange()
 
 void LTree::OnPaint(LSurface *pDC)
 {
-	TREELOCK(this)
+	auto lck = ScopedLock(_FL);
 	LCssTools Tools(this);
 
 	#if 0 // coverage testing...
@@ -1919,7 +1967,7 @@ int LTree::OnNotify(LViewI *Ctrl, const LNotification &n)
 		case IDC_HSCROLL:
 		case IDC_VSCROLL:
 		{
-			TREELOCK(this)
+			auto lck = ScopedLock(_FL);
 			if (n.Type == LNotifyScrollBarCreate)
 			{
 				_UpdateScrollBars();
@@ -1960,8 +2008,7 @@ LMessage::Result LTree::OnEvent(LMessage *Msg)
 
 LTreeItem *LTree::Insert(LTreeItem *Obj, ssize_t Pos)
 {
-	TREELOCK(this)
-		
+	auto lck = ScopedLock(_FL);
 	LTreeItem *NewObj = LTreeNode::Insert(Obj, Pos);
 	if (NewObj)
 		NewObj->_SetTreePtr(this);
@@ -1971,7 +2018,7 @@ LTreeItem *LTree::Insert(LTreeItem *Obj, ssize_t Pos)
 
 bool LTree::HasItem(LTreeItem *Obj, bool Recurse)
 {
-	TREELOCK(this)
+	auto lck = ScopedLock(_FL);
 	if (!Obj)
 		return false;
 	return LTreeNode::HasItem(Obj, Recurse);
@@ -1979,8 +2026,7 @@ bool LTree::HasItem(LTreeItem *Obj, bool Recurse)
 
 bool LTree::Remove(LTreeItem *Obj)
 {
-	TREELOCK(this)
-		
+	auto lck = ScopedLock(_FL);
 	bool Status = false;
 	if (Obj && Obj->Tree == this)
 	{
@@ -1993,8 +2039,7 @@ bool LTree::Remove(LTreeItem *Obj)
 
 void LTree::RemoveAll()
 {
-	TREELOCK(this)
-		
+	auto lck = ScopedLock(_FL);
 	List<LTreeItem>::I it = Items.begin();
 	for (LTreeItem *i=*it; i; i=*++it)
 		i->_Remove();
@@ -2004,8 +2049,7 @@ void LTree::RemoveAll()
 
 void LTree::Empty()
 {
-	TREELOCK(this)
-		
+	auto lck = ScopedLock(_FL);
 	LTreeItem *i;
 	while ((i = Items[0]))
 		Delete(i);	
@@ -2015,8 +2059,7 @@ bool LTree::Delete(LTreeItem *Obj)
 {
 	bool Status = false;
 	
-	TREELOCK(this)
-		
+	auto lck = ScopedLock(_FL);
 	if (Obj)
 	{
 		LTreeItem *i;
@@ -2035,8 +2078,7 @@ bool LTree::Delete(LTreeItem *Obj)
 
 void LTree::OnPulse()
 {
-	TREELOCK(this)
-		
+	auto lck = ScopedLock(_FL);
 	if (d->DropTarget)
 	{
 		int64 p = LCurrentTime() - d->DropSelectTime;
@@ -2099,8 +2141,7 @@ void LTree::OnPulse()
 
 int LTree::GetContentSize(int ColumnIdx)
 {
-	TREELOCK(this)
-		
+	auto lck = ScopedLock(_FL);
 	int MaxPx = 0;
 	
 	List<LTreeItem>::I it = Items.begin();
@@ -2115,8 +2156,7 @@ int LTree::GetContentSize(int ColumnIdx)
 
 LCursor LTree::GetCursor(int x, int y)
 {
-	TREELOCK(this)
-		
+	auto lck = ScopedLock(_FL);
 	LItemColumn *Resize = NULL, *Over = NULL;
 	HitColumn(x, y, Resize, Over);
 
@@ -2125,16 +2165,14 @@ LCursor LTree::GetCursor(int x, int y)
 
 void LTree::OnDragEnter()
 {
-	TREELOCK(this)
-		
+	auto lck = ScopedLock(_FL);
 	InsideDragOp(true);
 	SetPulse(120);
 }
 
 void LTree::OnDragExit()
 {
-	TREELOCK(this)
-		
+	auto lck = ScopedLock(_FL);
 	InsideDragOp(false);
 	SetPulse();
 	SelectDropTarget(0);
@@ -2144,8 +2182,7 @@ void LTree::OnDragExit()
 
 void LTree::SelectDropTarget(LTreeItem *Item)
 {
-	TREELOCK(this)
-		
+	auto lck = ScopedLock(_FL);
 	if (Item != d->DropTarget)
 	{
 		bool Update = (d->DropTarget != 0) ^ (Item != 0);
@@ -2172,8 +2209,7 @@ void LTree::SelectDropTarget(LTreeItem *Item)
 
 bool LTree::Select(LTreeItem *Obj)
 {
-	TREELOCK(this)
-		
+	auto lck = ScopedLock(_FL);
 	bool Status = false;
 	if (Obj && IsAttached())
 	{
@@ -2192,7 +2228,7 @@ bool LTree::Select(LTreeItem *Obj)
 
 LTreeItem *LTree::Selection()
 {
-	TREELOCK(this)
+	auto lck = ScopedLock(_FL);
 	return d->Selection[0];
 }
 
@@ -2208,16 +2244,17 @@ bool LTree::GetItems(LArray<LItem*> &arr, bool selectedOnly)
 		ForEach([arr](auto i) mutable
 		{
 			arr.Add(i);
+			return true;
 		});
 	}
 
 	return arr.Length() > 0;
 }
 
-bool LTree::ForAllItems(std::function<void(LTreeItem*)> Callback)
+bool LTree::ForAllItems(std::function<bool(LTreeItem*)> Callback)
 {
-	TREELOCK(this)
-	return ForEach(Callback) > 0;
+	auto lck = ScopedLock(_FL);
+	return ForEach(Callback);
 }
 
 void LTree::OnItemClick(LTreeItem *Item, LMouse &m)
@@ -2225,8 +2262,7 @@ void LTree::OnItemClick(LTreeItem *Item, LMouse &m)
 	if (!Item)
 		return;
 
-	TREELOCK(this)
-
+	auto lck = ScopedLock(_FL);
 	Item->OnMouseClick(m);
 	if (!m.Ctrl() && !m.Shift())
 		SendNotify(LNotification(m));
@@ -2234,7 +2270,7 @@ void LTree::OnItemClick(LTreeItem *Item, LMouse &m)
 
 void LTree::OnFocus(bool b)
 {
-	TREELOCK(this)
+	auto lck = ScopedLock(_FL);
 
 	// errors during deletion of the control can cause 
 	// this to be called after the destructor
@@ -2257,16 +2293,14 @@ static void LTreeItemUpdateAll(LTreeNode *n)
 
 void LTree::UpdateAllItems()
 {
-	TREELOCK(this)
-
+	auto lck = ScopedLock(_FL);
 	d->LayoutDirty = true;
 	LTreeItemUpdateAll(this);
 }
 
 void LTree::SetVisualStyle(ThumbStyle Btns, bool JoiningLines)
 {
-	TREELOCK(this)
-
+	auto lck = ScopedLock(_FL);
 	d->Btns = Btns;
 	d->JoiningLines = JoiningLines;
 	Invalidate();
@@ -2277,8 +2311,7 @@ void LTree::OnItemBeginDrag(LTreeItem *Item, LMouse &m)
 	if (!Item)
 		return;
 
-	TREELOCK(this)
-
+	auto lck = ScopedLock(_FL);
 	auto clientHandled = Item->OnBeginDrag(m);
 	if (DragItem && !clientHandled)
 	{

@@ -82,17 +82,8 @@ uint WINAPI ThreadEntryPoint(void *i)
 		}
 
 		// Shutdown...
-		Thread->State = LThread::THREAD_EXITED;
-		bool DelayDelete = false;
-		if (Thread->ViewHandle >= 0)
-		{
-			// If DeleteOnExit is set AND ViewHandle then the LView::OnEvent handle will
-			// process the delete... don't do it here.
-			DelayDelete = PostThreadEvent(Thread->ViewHandle, M_THREAD_COMPLETED, (LMessage::Param)Thread);
-			// However if PostThreadEvent fails... do honour DeleteOnExit.
-		}
-		
-		if (!DelayDelete && Thread->DeleteOnExit)
+		Thread->State = LThread::THREAD_EXITED;	
+		if (Thread->DeleteOnExit)
 		{
 			DeleteObj(Thread);
 		}
@@ -107,14 +98,13 @@ uint WINAPI ThreadEntryPoint(void *i)
 const OsThread LThread::InvalidHandle = 0;
 const OsThreadId LThread::InvalidId = 0;
 
-LThread::LThread(const char *name, int viewHandle)
+LThread::LThread(const char *name)
 {
 	State = THREAD_INIT;
 	hThread = InvalidHandle;
 	ThreadId = InvalidId;
 	ReturnValue = 0;
 	DeleteOnExit = false;
-	ViewHandle = viewHandle;
 	Priority = ThreadPriorityNormal;
 	Name = name;
 	Create(this, hThread, ThreadId);

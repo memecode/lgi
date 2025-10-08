@@ -124,11 +124,35 @@ void IdeCommon::CollectAllSource(LArray<LString> &c, SysPlatform Platform)
 
 void IdeCommon::SortChildren()
 {
+	auto NodeSort = [](auto a, auto b)
+		{
+			auto A = dynamic_cast<ProjectNode*>(a);
+			auto B = dynamic_cast<ProjectNode*>(b);
+			if (A && B)
+			{
+				if
+				(
+					(A->GetType() == NodeDir)
+					^
+					(B->GetType() == NodeDir)
+				)
+				{
+					return A->GetType() == NodeDir ? -1 : 1;
+				}
+				else
+				{
+					return Stricmp(a->GetText(0), b->GetText(0));
+				}
+			}
+
+			return 0;
+		};
+
 	Items.Sort(NodeSort);
-	Children.Sort([](auto a, auto b)
+	Children.Sort([NodeSort=std::move(NodeSort)](auto a, auto b)
 	{
-		LTreeItem *A = dynamic_cast<LTreeItem*>(*a);
-		LTreeItem *B = dynamic_cast<LTreeItem*>(*b);
+		auto A = dynamic_cast<LTreeItem*>(*a);
+		auto B = dynamic_cast<LTreeItem*>(*b);
 		return NodeSort(A, B);
 	});
 	

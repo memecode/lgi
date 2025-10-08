@@ -3232,15 +3232,6 @@ void VcFolder::CreateBranch(const char *Name, ParseParams::TCallback cb)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
-int FolderCompare(LTreeItem *a, LTreeItem *b, NativeInt UserData)
-{
-	VcLeaf *A = dynamic_cast<VcLeaf*>(a);
-	VcLeaf *B = dynamic_cast<VcLeaf*>(b);
-	if (!A || !B)
-		return 0;
-	return A->Compare(B);
-}
-
 struct SshFindEntry
 {
 	LString Flags, Name, User, Group;
@@ -3391,7 +3382,14 @@ void VcFolder::ReadDir(LTreeItem *Parent, const char *ReadUri)
 	}
 	#endif
 
-	Parent->Sort(FolderCompare);
+	Parent->Sort([](auto a, auto b)
+		{
+			VcLeaf *A = dynamic_cast<VcLeaf*>(a);
+			VcLeaf *B = dynamic_cast<VcLeaf*>(b);
+			if (!A || !B)
+				return 0;
+			return A->Compare(B);
+		});
 }
 
 void VcFolder::OnVcsType(LString errorMsg)
@@ -5545,14 +5543,20 @@ int VcLeaf::GetImage(int Flags)
 	return Folder ? IcoFolder : IcoFile;
 }
 
-int VcLeaf::Compare(VcLeaf *b)
+int VcLeaf::Compare(LTreeItem *item, ssize_t column)
 {
 	// Sort folders to the top...
-	if (Folder ^ b->Folder)
-		return (int)b->Folder - (int)Folder;
+	if (auto b = dynamic_cast<VcLeaf*>(item))
+	{
+		if (Folder ^ b->Folder)
+			return (int)b->Folder - (int)Folder;
 	
-	// Then alphabetical
-	return Stricmp(Leaf.Get(), b->Leaf.Get());
+		// Then alphabetical
+		return Stricmp(Leaf.Get(), b->Leaf.Get());
+	}
+	else LAssert(0);
+
+	return 0;
 }
 
 bool VcLeaf::Select()

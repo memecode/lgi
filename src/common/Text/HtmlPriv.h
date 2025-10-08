@@ -20,27 +20,17 @@ class LFlowRegion;
 
 struct LTagHit
 {
-	LTag *Direct;		// Tag directly under cursor
-	LTag *NearestText;	// Nearest tag with text
-	int Near;			// How close in px was the position to NearestText.
-						// 0 if a direct hit, >0 is near miss, -1 if invalid.
-	bool NearSameRow;	// True if 'NearestText' on the same row as click.
-	LPoint LocalCoords;	// The position in local co-ords of the tag
+	LTag *Direct = nullptr;			// Tag directly under cursor
+	LTag *NearestText = nullptr;	// Nearest tag with text
+	int Near = -1;					// How close in px was the position to NearestText.
+									// 0 if a direct hit, >0 is near miss, -1 if invalid.
+	bool NearSameRow = false;		// True if 'NearestText' on the same row as click.
+	LPoint LocalCoords{-1, -1};		// The position in local co-ords of the tag
 
-	LFlowRect *Block;	// Text block hit
-	ssize_t Index; // If Block!=NULL then index into text, otherwise -1.
+	LFlowRect *Block = nullptr;		// Text block hit
+	ssize_t Index = -1;				// If Block!=NULL then index into text, otherwise -1.
 
-	LTagHit()
-	{
-		Direct = NULL;
-		NearestText = NULL;
-		NearSameRow = false;
-		Block = 0;
-		Near = -1;
-		Index = -1;
-		LocalCoords.x = LocalCoords.y = -1;
-	}
-	
+	LString ToString();
 	void Dump(const char *Desc);
 };
 
@@ -102,7 +92,7 @@ public:
 	void Empty() { DeleteObjects(); }
 	LRect Bounds();
 	LRect *TopRect(LRegion *c);
-	void FlowText(LTag *Tag, LFlowRegion *c, LFont *Font, int LineHeight, char16 *Text, LCss::LengthType Align);
+	void FlowText(LTag *Tag, LFlowRegion *c, LFont *Font, int LineHeight, char16 *Text, LCss::LengthType Align, bool Debug = false);
 };
 
 struct LHtmlTableLayout
@@ -305,8 +295,8 @@ protected:
 	LTag *HasOpenTag(char *t);
 	LTag *PrevTag();
 	LRect ChildBounds();
-	bool GetWidthMetrics(LTag *Table, uint16 &Min, uint16 &Max);
-	void LayoutTable(LFlowRegion *f, uint16 Depth);
+	bool GetWidthMetrics(LTag *Table, int32_t &Min, int32_t &Max);
+	void LayoutTable(LFlowRegion *f, uint32_t Depth);
 	void BoundParents();
 	bool PeekTag(char *s, char *tag);
 	LTag *GetTable();
@@ -327,7 +317,7 @@ public:
 
 	// Hierarchy
 	LHtml *Html = NULL;
-	bool IsBlock() { return Display() == LCss::DispBlock; }
+	bool IsBlock() { return SupportedDisplay() == LCss::DispBlock; }
 	LTag *GetBlockParent(ssize_t *Idx = NULL);
 	LFont *GetFont();
 
@@ -354,7 +344,7 @@ public:
 		LPoint Span;
 		LRect BorderPx;
 		LRect PaddingPx;
-		uint16 MinContent, MaxContent;
+		int32_t MinContent, MaxContent;
 		LCss::LengthType XAlign;
 		LHtmlTableLayout *Cells;
 		
@@ -394,6 +384,11 @@ public:
 	// Attributes
 	bool Get(const char *attr, const char *&val) { val = Attr.Find(attr); return val != NULL; }
 	void Set(const char *attr, const char *val);
+	void AllAttr(std::function<void(const char*attr, const char*val)> cb)
+	{
+		for (auto p: Attr)
+			cb(p.key, p.value);
+	}
 
 	// Methods
 	char16 *Text() { return Txt; }
@@ -408,13 +403,19 @@ public:
 	char *ParseText(char *Doc);
 	bool ConvertToText(TextConvertState &State);
 	
+	/// Sets up the default style for a tag before classes, id's and style attributes are applied
+	void SetDefaultCss();
+	/// Sets styles based on the element's attributes... these take precedence over CSS
+	void SetAttributeStyles();
 	/// Configures the tag's styles.
 	void SetStyle();
 	/// Called to apply CSS selectors on initialization and also when properties change at runtime.
 	void Restyle();
 	/// Recursively call restyle on all nodes in the doc tree
 	void RestyleAll();
-	
+
+	/// Return the supported display setting (only support some of them)
+	LCss::DisplayType SupportedDisplay();
 	/// Takes the CSS styles, parses and stores them in the current object,
 	//// overwriting any duplicate properties.
 	void SetCssStyle(const char *Style);
@@ -448,7 +449,7 @@ public:
 	int OnNotify(LNotification n);
 	void CollectFormValues(LHashTbl<ConstStrKey<char,false>,char*> &f);
 
-	// GDom impl
+	// LDom impl
 	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
 	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
 
