@@ -306,17 +306,17 @@ public:
 		
 		if (Attach(0))
 		{
-			#if 1
+			#if 0
 
 				ClickTest *clicks;
 				AddView(box = new LBox(ID_BOX));
 				box->AddView(clicks = new ClickTest(ID_CLICK_TEST));
 				box->AddView(clicks->log = log = new LTextLog(ID_LOG));
 
-			#elif 0
+			#elif 1
 
-				AddView(new OriginTest(10, 10, 0));
-				AddView(new OriginTest(120, 10, 10));
+				AddView(new OriginTest(20, 10, 0));
+				// AddView(new OriginTest(120, 40, 10));
 
 			#elif 0
 

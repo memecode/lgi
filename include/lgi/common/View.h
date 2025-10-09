@@ -932,7 +932,9 @@ public:
 	#endif
 };
 
+#if LGI_VIEW_HANDLE
 LgiFunc LView *LViewFromHandle(OsView hWnd);
+#endif
 
 
 /// \brief Factory for creating view's by name.

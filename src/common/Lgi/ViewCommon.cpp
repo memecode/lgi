@@ -426,10 +426,7 @@ bool LView::HasView(LViewI *v)
 OsWindow LView::WindowHandle()
 {
 	auto w = GetWindow();
-	OsWindow h;
-	if (w)
-		h = w->WindowHandle();
-	return h;
+	return w ? w->WindowHandle() : nullptr;
 }
 
 LWindow *LView::GetWindow()
