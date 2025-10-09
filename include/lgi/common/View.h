@@ -230,7 +230,6 @@ public:
 
 	/// Returns the OS handle of the view
 	#if defined(HAIKU)
-	OsView Handle() const;
 	static void HandleInThreadMessage(BMessage *Msg);
 	#elif LGI_VIEW_HANDLE
 	OsView Handle() const { return _View; }

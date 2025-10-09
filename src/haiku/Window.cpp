@@ -42,7 +42,7 @@ class HookInfo
 {
 public:
 	LWindowHookType Flags;
-	LView *Target;
+	LView *Target = nullptr;
 };
 
 enum LAttachState
@@ -53,11 +53,18 @@ enum LAttachState
 	LDetaching,
 };
 
+class LWindowView :
+	public BView
+{
+};
+
 class LWindowPrivate :
 	public BWindow
 {
 public:
-	LWindow *Wnd;
+	LWindow *wnd = nullptr;
+	LWindowView *view = nullptr;
+	
 	bool SnapToEdge = false;
 	LArray<HookInfo> Hooks;
 	LWindow *ModalParent = NULL;
@@ -73,14 +80,14 @@ public:
 		return s;
 	}
 	
-	LWindowPrivate(LWindow *wnd) :
+	LWindowPrivate(LWindow *owner) :
 		BWindow(
 			/* frame: */ BRect(100,100,400,400),
 			/* title: */ MakeName(wnd),
 			/* look:  */ B_DOCUMENT_WINDOW_LOOK,
 			/* feel:  */ B_NORMAL_WINDOW_FEEL,
 			/* flags: */ B_WILL_ACCEPT_FIRST_CLICK),
-		Wnd(wnd)
+		wnd(owner)
 	{
 	}
 
@@ -95,10 +102,10 @@ public:
 		#endif
 	
 		LAssert(ModalChild == NULL);
-		DeleteObj(Wnd->Menu);
+		DeleteObj(wnd->Menu);
 		if (Thread() >= 0 && IsMinimized())
-			Wnd->_PrevZoom = LZoomMin;
-		Wnd->d = NULL;
+			wnd->_PrevZoom = LZoomMin;
+		wnd->d = NULL;
 
 		Lock();
 
@@ -143,7 +150,7 @@ public:
 	BMessage MakeMessage(LMessage::Events e)
 	{
 		BMessage m(M_HAIKU_WND_EVENT);
-		m.AddPointer(LMessage::PropWindow, (void*)Wnd);
+		m.AddPointer(LMessage::PropWindow, (void*)wnd);
 		m.AddInt32(LMessage::PropEvent, e);
 		return m;
 	}
@@ -186,7 +193,6 @@ public:
 	{
 		if (message->what == M_LWINDOW_DELETE)
 		{
-			Wnd->Handle()->RemoveSelf();			
 			Quit();
 		}
 		else
@@ -209,19 +215,19 @@ public:
 			ThreadMsgDone = true;
 			
 			LString n;
-			n.Printf("%s/%s", Wnd->GetClass(), Wnd->Name());
+			n.Printf("%s/%s", wnd->GetClass(), wnd->Name());
 			LThread::RegisterThread(Thread(), n);
 		}
 		
 		if (ModalChild && focus)
 		{
 			printf("%s:%i - %s dropping activate, has modal: %s.\n", _FL,
-				Wnd->GetClass(),
+				wnd->GetClass(),
 				ModalChild->GetClass());
 				
 			SendBehind(ModalChild->WindowHandle());
 			
-			auto w = Wnd;
+			auto w = wnd;
 			while (auto p = w->GetModalParent())
 			{
 				p->WindowHandle()->SendBehind(w->WindowHandle());
@@ -243,10 +249,6 @@ LWindow::LWindow() :
 	d = new LWindowPrivate(this);
 	_Window = this;
 	ClearFlag(WndFlags, GWF_VISIBLE);
-	
-	BMessage msg(M_SET_ROOT_VIEW);
-	msg.AddPointer("window", this);
-	Handle()->MessageReceived(&msg);
 }
 
 LWindow::~LWindow()
@@ -361,7 +363,6 @@ int LWindow::WaitThread()
 		if (d->Lock())
 		{
 			// printf("%s::~LWindow Quiting\n", Name());
-			Handle()->RemoveSelf();
 			d->Quit();
 			// printf("%s::~LWindow Quit finished\n", Name());
 		}
@@ -513,7 +514,7 @@ bool DndPointMap(LViewI *&v, LPoint &p, LDragDropTarget *&t, LWindow *Wnd, int x
 
 void LWindow::UpdateRootView()
 {
-	auto rootView = Handle();
+	auto rootView = d->view;
 	if (!rootView)
 	{
 		printf("%s:%i - Can't update root view: no view handle.\n", _FL);
@@ -560,7 +561,7 @@ bool LWindow::Attach(LViewI *p)
 		return false;
 	}
 
-	auto rootView = Handle();
+	auto rootView = d->view;
 	auto wnd = WindowHandle();
 	if (rootView && wnd)
 	{
@@ -939,7 +940,7 @@ LRect &LWindow::GetClient(bool ClientSpace)
 	LLocker lck(WindowHandle(), _FL);
 	if (lck.Lock())
 	{
-		LRect br = Handle()->Bounds();
+		LRect br = d->view->Bounds();
 		if (br.Valid())
 		{
 			r = br;
@@ -1074,7 +1075,7 @@ void LWindow::OnPosChange()
 		auto frame = WindowHandle()->Bounds();
 		auto menu = WindowHandle()->KeyMenuBar();
 		auto menuPos = menu ? menu->Frame() : BRect(0, 0, 0, 0);
-		auto rootPos = Handle()->Frame();
+		auto rootPos = d->Frame();
 		if (menu)
 		{
 			if (menu->IsHidden()) // Why?
@@ -1103,8 +1104,8 @@ void LWindow::OnPosChange()
 		int rootTop = menu ? menuPos.bottom + 1 : 0;
 		if (rootPos.top != rootTop)
 		{
-			Handle()->MoveTo(0, rootTop);
-			Handle()->ResizeTo(rootPos.Width(), frame.Height() - menuPos.Height());
+			d->MoveTo(0, rootTop);
+			d->ResizeTo(rootPos.Width(), frame.Height() - menuPos.Height());
 		}
 	
 		lck.Unlock();		
@@ -1337,12 +1338,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 	if (!ctrl)
 		return;
 		
-	LLocker lck(d, _FL);
-	if (lck.WaitForLock())
-	{
-		auto h = ctrl->Handle();
-		h->MakeFocus(type == GainFocus ? true : false);
-	}
+	// FIXME: add focus support
 }
 
 void LWindow::SetDragHandlers(bool On)

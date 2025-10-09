@@ -56,7 +56,17 @@ LScreenDC::LScreenDC(LView *view, void *param)
 {
 	d = new LScreenPrivate;
 	if (d->View = view)
-		d->v = view->Handle();
+	{
+		if (auto wndHnd = view->WindowHandle())
+		{
+			d->v = wndHnd->ChildAt(0);
+			if (!d->v)
+			{
+				printf("%s:%i - error: BWindow doesn't have a view?\n", _FL);
+			}
+		}
+		else printf("%s:%i - error: no BWindow?\n", _FL);
+	}
 
 	d->Bits = GdcD->GetBits();
 

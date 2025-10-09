@@ -440,29 +440,16 @@ LWindow *LView::GetWindow()
 		auto *w = d->GetParent();
 		for (; w; w = w->d ? w->d->GetParent() : NULL)
 		{
-			/*
-			#ifdef HAIKU
-			auto wnd = dynamic_cast<LWindow*>(w);
-			if (wnd)
-			{
-				LAssert(!_InLock);
-				_Window = wnd;
-				printf("setting wnd for %s to %s/%s\n", GetClass(), _Window->GetClass(), _Window->Name());
-				break;
-			}
-			#else
-			*/
 			if (w->_Window)
 			{
 				LAssert(!_InLock);
 				_Window = w->_Window;
 				break;
 			}
-			// #endif
 		}
 	}
 	
-	#ifdef HAIKU
+	#if 0
 	// Check the window is the same thread as us
 	if (Handle() && _Window)
 	{
@@ -488,23 +475,17 @@ bool LView::Lock(const char *file, int line, int TimeOut)
 	#ifdef HAIKU
 
 		bool Debug = false;
-		if (!d || !d->Hnd)
+		
+		auto wndHnd = WindowHandle();
+		if (!wndHnd)
 		{
-			if (Debug)
-				printf("%s:%i - no handle %p %p\n", _FL, d, d ? d->Hnd : NULL);
+			printf("%s:%i - can't lock, no window.\n", _FL);
 			return false;
-		}
-	
-		if (d->Hnd->Parent() == NULL)
-		{
-			if (Debug)
-				printf("%s:%p - Lock() no parent.\n", GetClass(), this);
-			return true;
 		}
 		
 		if (TimeOut >= 0)
 		{
-			auto r = d->Hnd->LockLooperWithTimeout(TimeOut * 1000);
+			auto r = wndHnd->LockLooperWithTimeout(TimeOut * 1000);
 			if (r == B_OK)
 			{
 				if (_InLock == 0)
@@ -521,7 +502,7 @@ bool LView::Lock(const char *file, int line, int TimeOut)
 				}
 				_InLock++;
 				if (Debug)
-					printf("%s:%p - Lock() cnt=%i par=%p.\n", GetClass(), this, _InLock, d->Hnd->Parent());
+					printf("%s:%p - Lock() cnt=%i wndHnd=%p.\n", GetClass(), this, _InLock, wndHnd);
 				return true;
 			}
 		
@@ -529,7 +510,7 @@ bool LView::Lock(const char *file, int line, int TimeOut)
 			return false;
 		}
 	
-		auto r = d->Hnd->LockLooper();
+		auto r = wndHnd->LockLooper();
 		if (r)
 		{
 			if (_InLock == 0)
@@ -592,15 +573,10 @@ void LView::Unlock()
 {
 	#ifdef HAIKU
 	
-		if (!d || !d->Hnd)
+		auto wndHnd = WindowHandle();
+		if (!wndHnd)
 		{
-			printf("%s:%i - Unlock() error, no hnd.\n", _FL);
-			return;
-		}
-	
-		if (!d->Hnd->Parent())
-		{
-			// printf("%s:%p - Unlock() no parent.\n", GetClass(), this);
+			printf("%s:%i - Unlock() error, no wndHnd.\n", _FL);
 			return;
 		}
 	
@@ -615,7 +591,7 @@ void LView::Unlock()
 			}
 		
 			// printf("%s:%p - Calling UnlockLooper: %i.\n", GetClass(), this, _InLock);
-			d->Hnd->UnlockLooper();
+			wndHnd->UnlockLooper();
 			_InLock--;
 			// printf("%s:%p - UnlockLooper done: %i.\n", GetClass(), this, _InLock);
 			
@@ -759,7 +735,7 @@ int LView::OnNotify(LViewI *Ctrl, const LNotification &Data)
 	}
 	else if (d && d->Parent)
 	{
-		#ifdef HAIKU
+		#if 0 // HAIKU
 		// Don't let notifications blindly pass into other threads.
 		auto bCur = Handle();
 		auto bParent = d->Parent->Handle();
@@ -1526,56 +1502,7 @@ void LView::Visible(bool v)
 	if (v) SetFlag(GViewFlags, GWF_VISIBLE);
 	else ClearFlag(GViewFlags, GWF_VISIBLE);
 
- 	#if defined(HAIKU)
-		LLocker lck(d->Hnd, _FL);
-		if (!IsAttached() || lck.Lock())
-		{
-			const int attempts = 3;
-			// printf("%s/%p:Visible(%i) hidden=%i\n", GetClass(), this, v, d->Hnd->IsHidden());
-			if (v)
-			{
-				bool parentHidden = false;
-				for (auto p = d->Hnd->Parent(); p; p = p->Parent())
-				{
-					if (p->IsHidden())
-					{
-						parentHidden = true;
-						break;
-					}
-				}
-				if (!parentHidden) // Don't try and show if one of the parent's is hidden.
-				{
-					for (int i=0; i<attempts && d->Hnd->IsHidden(); i++)
-					{
-						// printf("\t%p Show\n", this);
-						d->Hnd->Show();
-					}
-					if (d->Hnd->IsHidden())
-					{
-						printf("%s:%i - Failed to show %s.\n", _FL, GetClass());
-						for (auto p = d->Hnd->Parent(); p; p = p->Parent())
-							printf("\tparent: %s/%p ishidden=%i\n", p->Name(), p, p->IsHidden());
-					}
-				}
-			}
-			else
-			{
-				for (int i=0; i<attempts && !d->Hnd->IsHidden(); i++)
-				{
-					// printf("\t%p Hide\n", this);
-					d->Hnd->Hide();
-				}
-				if (!d->Hnd->IsHidden())
-				{
-					printf("%s:%i - Failed to hide %s.\n", _FL, GetClass());
-					for (auto p = d->Hnd->Parent(); p; p = p->Parent())
-						printf("\tparent: %s/%p ishidden=%i\n", p->Name(), p, p->IsHidden());
-				}
-			}
-			// printf("\t%s/%p:Visible(%i) hidden=%i\n", GetClass(), this, v, d->Hnd->IsHidden());
-		}
-		else LgiTrace("%s:%i - Can't lock.\n", _FL);
- 	#elif LGI_VIEW_HANDLE	
+ 	#if LGI_VIEW_HANDLE
 		if (_View)
 		{
 			#if WINNATIVE
@@ -1621,20 +1548,13 @@ bool LView::Focus()
 			if (Active)
 				Has = w->GetFocus() == static_cast<LViewI*>(this);
 		}
-	#elif defined(HAIKU)
-		LLocker lck(d->Hnd, _FL);
-		if (lck.Lock())
-		{
-			Has = d->Hnd->IsFocus();
-			lck.Unlock();
-		}	
 	#elif defined(WINNATIVE)
 		if (_View)
 		{
 			HWND hFocus = GetFocus();
 			Has = hFocus == _View;
 		}
-	#elif LGI_COCOA
+	#elif HAIKU || LGI_COCOA
 		Has = TestFlag(WndFlags, GWF_FOCUS);
 	#elif LGI_CARBON
 		LWindow *w = GetWindow();
@@ -2357,7 +2277,7 @@ LColour LView::StyleColour(int CssPropType, LColour Default, int Depth)
 
 OsThreadId LView::ViewThread()
 {
-	#if defined(HAIKU)
+	#if 0 // defined(HAIKU)
 
 		auto h = Handle();
 		if (!h)
@@ -2429,32 +2349,13 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64_t tim
 
 	#elif defined(HAIKU)
 
-		if (!d || !d->Hnd)
+		auto bWnd = WindowHandle();
+		if (!bWnd)
 		{
-			printf("%s:%i - Bad pointers %p %p\n", _FL, d, d ? d->Hnd : NULL);
+			printf("%s:%i - no wndHnd\n", _FL);
 			return false;
 		}
 		
-		BWindow *bWnd = NULL;
-		LWindow *wnd = dynamic_cast<LWindow*>(this);
-		if (wnd)
-		{
-			bWnd = wnd->WindowHandle();
-		}
-		else
-		{
-			// Look for an attached view to lock...
-			for (LViewI *v = this; v; v = v->GetParent())
-			{
-				auto vhnd = v->Handle();
-				if (vhnd && ::IsAttached(vhnd))
-				{
-					bWnd = vhnd->Window();
-					break;
-				}
-			}
- 		}
-
 		BMessage m(Cmd);
 		
 		auto r = m.AddInt64(LMessage::PropA, a);

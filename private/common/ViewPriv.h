@@ -220,7 +220,6 @@ public:
 	
 	#elif defined(HAIKU)
 	
-		BView *Hnd = NULL;
 		LArray<BMessage*> MsgQue; // For before the window is attached...
 	
 	#endif
