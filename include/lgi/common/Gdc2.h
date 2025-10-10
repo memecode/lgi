@@ -742,7 +742,11 @@ public:
 	#else
 
 		/// Construct a wrapper to draw on a window
-		LScreenDC(LView *view, void *Param = 0);
+		#if HAIKU
+		LScreenDC(BView *view, void *Param = nullptr);
+		#else
+		LScreenDC(LView *view, void *Param = nullptr);
+		#endif
 	
 		#if defined(LGI_SDL)
 		#elif defined(__GTK_H__)

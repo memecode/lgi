@@ -382,7 +382,7 @@ public:
 		pDC->Colour(L_MED);
 		pDC->Rectangle();
 		
-		#if 0
+		#if 1
 		pDC->Colour(LColour::Red);
 		pDC->Line(0, 0, c.X()-1, c.Y()-1);
 		#endif

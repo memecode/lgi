@@ -73,14 +73,8 @@ struct LBView : public Parent
 			B_TRANSPARENT_BACKGROUND
 		)
 	{
-		printf("%s\n", __func__);
 	}
 	
-	~LBView()
-	{
-		printf("%s\n", __func__);
-	}
-
 	BMessage MakeMessage(LMessage::Events e)
 	{
 		BMessage m(M_HAIKU_WND_EVENT);
@@ -300,30 +294,29 @@ struct LBView : public Parent
 	{
 		Parent::UnlockLooper();
 			
-		bool done = false;
-		if (wnd)
-		{
-			// it's the root view of a LWindow
-			BMessage m(M_HAIKU_WND_EVENT);
-			m.AddPointer(LMessage::PropWindow, wnd);
-			m.AddInt32(LMessage::PropEvent, LMessage::Draw);
-			m.AddRect("update", updateRect);
-			m.AddPointer("done", &done);
-			LAppPrivate::Post(&m);
-		}
-		else
-		{
-			// it's a regular LView
-			auto m = MakeMessage(LMessage::Draw);
-			m.AddRect("update", updateRect);
-			m.AddPointer("done", &done);
-			LAppPrivate::Post(&m);
-		}
+		LMemDC *done = nullptr;
+		auto m = MakeMessage(LMessage::Draw);
+		m.AddRect("update", updateRect);
+		m.AddPointer("done", &done);
+		LAppPrivate::Post(&m);
 		
 		while (!done)
 			LSleep(1);
 
 		Parent::LockLooper();
+		
+		// now draw the buffer to the view
+		auto bmp = done->GetBitmap();
+		if (!bmp)
+		{
+			printf("%s:%i - No bitmap.\n", _FL);
+			return;
+		}
+	
+		Parent::SetDrawingMode(B_OP_COPY);
+		auto f = Parent::Frame();
+		printf("%s:%i drawbitmap %s\n", _FL, ((LRect)f).GetStr());
+		Parent::DrawBitmap(bmp, f, f);
 	}
 
 	LMouse ConvertMouse(BPoint where, bool down = false)
@@ -425,7 +418,12 @@ class LWindowPrivate :
 {
 public:
 	LWindow *wnd = nullptr;
+	
+	// The root view that tracks all the events
 	BView *view = nullptr;
+	
+	// This is a memory buffer for painting all the child LView's into:
+	LAutoPtr<LMemDC> mem;
 	
 	bool SnapToEdge = false;
 	LArray<HookInfo> Hooks;
@@ -470,8 +468,7 @@ public:
 		wnd->d = NULL;
 
 		Lock();
-		DeleteObj(view);
-		// printf("%p::~LWindowPrivate end\n", this);
+		printf("%p::~LWindowPrivate end\n", this);
 	}
 
 	bool HasThread()
@@ -521,8 +518,7 @@ public:
 	{
 		auto m = MakeMessage(LMessage::FrameMoved);
 		m.AddPoint("pos", newPosition);
-		LAppPrivate::Post(&m);		
-		
+		LAppPrivate::Post(&m);
 		BWindow::FrameMoved(newPosition);
 	}
 
@@ -531,8 +527,7 @@ public:
 		auto m = MakeMessage(LMessage::FrameResized);
 		m.AddFloat("width", width);
 		m.AddFloat("height", height);
-		LAppPrivate::Post(&m);		
-
+		LAppPrivate::Post(&m);
 		BWindow::FrameResized(width, height);
 	}
 
@@ -628,8 +623,137 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 	if (!m)
 		return;
 		
-	// Common view handling...
-	LView::HaikuEvent(event, m);
+	switch (event)
+	{
+		case LMessage::QuitRequested:
+		{
+			int *result = nullptr;
+			if (m->FindPointer("result", (void**)&result) != B_OK)
+			{
+				printf("%s:%i - error: no result ptr.\n", _FL);
+				return;
+			}
+			*result = OnRequestClose(false);
+			break;
+		}
+		case LMessage::General:
+		{
+			BMessage msg;
+			if (m->FindMessage("message", &msg) != B_OK)
+			{
+				printf("%s:%i - no message.\n", _FL);
+				return;
+			}
+			
+			OnEvent((LMessage*) &msg);
+			break;
+		}
+		case LMessage::FrameMoved:
+		{
+			BPoint pos;
+			if (m->FindPoint("pos", &pos) != B_OK)
+			{
+				printf("%s:%i - no pos.\n", _FL);
+				return;
+			}
+			
+			Pos.Offset(pos.x - Pos.x1, pos.y - Pos.y1);
+			OnPosChange();
+			break;
+		}
+		case LMessage::FrameResized:
+		{
+			float width = 0.0f, height = 0.0f;
+			if (m->FindFloat("width", &width) != B_OK ||
+				m->FindFloat("height", &height) != B_OK)
+			{
+				printf("%s:%i - missing width/height param.\n", _FL);
+				return;
+			}
+
+			printf("LMessage::FrameResized: %g,%g\n", width, height);
+			Pos.SetSize(width, height);
+			OnPosChange();
+			break;
+		}
+		case LMessage::AttachedToWindow:
+		{
+			OnCreate();
+			break;
+		}
+		case LMessage::Draw:
+		{
+			BRect updateRect;
+			m->FindRect("update", &updateRect);
+			
+			LMemDC **done = nullptr;
+			m->FindPointer("done", (void**)&done);
+			
+			auto c = GetClient();
+			if (!d->mem ||
+				d->mem->X() < c.X() ||
+				d->mem->Y() < c.Y())
+			{
+				// Create a memory context big enough
+				#define ROUNDUP(i) ( (i) - ((i) % 32) + 32 )
+				
+				d->mem.Reset(new LMemDC(_FL, ROUNDUP(c.X()), ROUNDUP(c.Y()), System32BitColourSpace));
+			}
+			if (!d->mem || !done)
+				break;
+			
+			LPoint off(0, 0);
+			printf("	View.ReceiveDraw %s\n", LRect(updateRect).GetStr());
+			_Paint(d->mem, &off, NULL);
+			
+			*done = d->mem.Get();
+			break;
+		}
+		case LMessage::MouseMoved:
+		case LMessage::MouseDown:
+		case LMessage::MouseUp:
+		{
+			LMessage msg;
+			if (m->FindMessage("mouse", &msg) != B_OK)
+			{
+				printf("%s:%i - no mouse message.\n", _FL);
+				return;
+			}
+			
+			LMouse ms(&msg);
+			_Mouse(ms, event == LMessage::MouseMoved);
+			break;
+		}
+		case LMessage::KeyUp:
+		case LMessage::KeyDown:
+		{
+			BMessage msg;
+			if (m->FindMessage("key", &msg) != B_OK)
+			{
+				printf("%s:%i - no key param.\n", _FL);
+				return;
+			}
+			
+			LKey k(&msg);
+			if (auto wnd = GetWindow())
+				wnd->HandleViewKey(this, k);
+			else
+				OnKey(k);
+			break;
+		}
+		case LMessage::MakeFocus:
+		{
+			bool focus = true;
+			if (m->FindBool("focus", &focus) != B_OK)
+			{
+				printf("%s:%i - no focus param.\n", _FL);
+				return;
+			}
+			
+			OnFocus(focus);
+			break;
+		}
+	}
 }
 
 LWindow *LWindow::GetModalParent()
@@ -1431,46 +1555,49 @@ void LWindow::OnPaint(LSurface *pDC)
 
 void LWindow::OnPosChange()
 {
-	LLocker lck(WindowHandle(), _FL);
-	if (lck.Lock())
+	if (d->view)
 	{
-		auto frame = WindowHandle()->Bounds();
-		auto menu = WindowHandle()->KeyMenuBar();
-		auto menuPos = menu ? menu->Frame() : BRect(0, 0, 0, 0);
-		auto rootPos = d->Frame();
-		if (menu)
+		LLocker lck(WindowHandle(), _FL);
+		if (lck.Lock())
 		{
-			if (menu->IsHidden()) // Why?
+			auto frame = WindowHandle()->Bounds();
+			auto menu = WindowHandle()->KeyMenuBar();
+			auto menuPos = menu ? menu->Frame() : BRect(0, 0, 0, 0);
+			auto rootPos = d->view->Frame();
+			if (menu)
 			{
-				menu->Show();
-				if (menu->IsHidden())
+				if (menu->IsHidden()) // Why?
 				{
-					// printf("Can't show menu?\n");
-					for (auto p = menu->Parent(); p; p = p->Parent())
-						printf("   par=%s %i\n", p->Name(), p->IsHidden());
+					menu->Show();
+					if (menu->IsHidden())
+					{
+						// printf("Can't show menu?\n");
+						for (auto p = menu->Parent(); p; p = p->Parent())
+							printf("   par=%s %i\n", p->Name(), p->IsHidden());
+					}
+				}			
+				if (menuPos.Width() < 1) // Again... WHHHHY? FFS
+				{
+					float x = 0.0f, y = 0.0f;
+					menu->GetPreferredSize(&x, &y);
+					// printf("Pref=%g,%g\n", x, y);
+					if (y > 0.0f)
+						menu->ResizeTo(frame.Width(), y);
 				}
-			}			
-			if (menuPos.Width() < 1) // Again... WHHHHY? FFS
+			}	
+			#if 0
+			printf("frame=%s menu=%p,%i,%s rootpos=%s\n",
+				ToString(frame).Get(), menu, menu?menu->IsHidden():0, ToString(menuPos).Get(), ToString(rootPos).Get());
+			#endif
+			int rootTop = menu ? menuPos.bottom + 1 : 0;
+			if (rootPos.top != rootTop)
 			{
-				float x = 0.0f, y = 0.0f;
-				menu->GetPreferredSize(&x, &y);
-				// printf("Pref=%g,%g\n", x, y);
-				if (y > 0.0f)
-					menu->ResizeTo(frame.Width(), y);
+				d->view->MoveTo(0, rootTop);
+				d->view->ResizeTo(rootPos.Width(), frame.Height() - menuPos.Height());
 			}
-		}	
-		#if 0
-		printf("frame=%s menu=%p,%i,%s rootpos=%s\n",
-			ToString(frame).Get(), menu, menu?menu->IsHidden():0, ToString(menuPos).Get(), ToString(rootPos).Get());
-		#endif
-		int rootTop = menu ? menuPos.bottom + 1 : 0;
-		if (rootPos.top != rootTop)
-		{
-			d->MoveTo(0, rootTop);
-			d->ResizeTo(rootPos.Width(), frame.Height() - menuPos.Height());
+		
+			lck.Unlock();		
 		}
-	
-		lck.Unlock();		
 	}
 
 	LView::OnPosChange();

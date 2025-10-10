@@ -906,8 +906,10 @@ void LView::OnNcPaint(LSurface *pDC, LRect &r)
 		LAutoPtr<LSurface> Local;
 		if (!pDC)
 		{
-			Local.Reset(new LScreenDC(this));
-			pDC = Local;
+			// FIXME: create suitable local dc
+			// Local.Reset(new LScreenDC(this));
+			// pDC = Local;
+			return;
 		}
 		if (!pDC)
 		{

@@ -29,8 +29,7 @@ public:
 	int Rop = GDC_SET;
 	NativeInt Alpha = -1;
 
-	LView *View = NULL;
-	OsView v = NULL;
+	BView *v = nullptr;
 
 	LScreenPrivate()
 	{
@@ -52,24 +51,11 @@ LScreenDC::LScreenDC()
 	d->Bits = GdcD->GetBits();
 }
 
-LScreenDC::LScreenDC(LView *view, void *param)
+LScreenDC::LScreenDC(BView *view, void *param)
 {
 	d = new LScreenPrivate;
-	if (d->View = view)
-	{
-		if (auto wndHnd = view->WindowHandle())
-		{
-			d->v = wndHnd->ChildAt(0);
-			if (!d->v)
-			{
-				printf("%s:%i - error: BWindow doesn't have a view?\n", _FL);
-			}
-		}
-		else printf("%s:%i - error: no BWindow?\n", _FL);
-	}
-
+	d->v = view;
 	d->Bits = GdcD->GetBits();
-
 	if (!d->v)
 	{
 		LgiTrace("%s:%i - LScreenDC::LScreenDC - No view?\n", _FL);
