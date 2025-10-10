@@ -1154,7 +1154,7 @@ public:
 				dir = RemoteRoot();
 		
 			p->args = LString::Fmt(	"grep -I -R -Hn \"%s\" %s\n",
-									params->Text.Get(),
+									params->Text.Escape().Get(),
 									dir.Get());
 			return RunProcess(dir, p->args, &p->io, this,
 				[p](auto code)
