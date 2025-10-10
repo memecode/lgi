@@ -73,6 +73,8 @@ class LgiClass LError
 	
 public:
 	LString::Array DevNotes;
+	const char *SrcFile = nullptr;
+	int SrcLine = 0;
 
 	LError(int code = 0, const char *msg = NULL)
 	{
@@ -88,6 +90,12 @@ public:
 	operator bool() const
 	{
 		return Code != 0;
+	}
+
+	void SetSource(const char *file, int line)
+	{
+		SrcFile = file;
+		SrcLine = line;
 	}
 
 	void Set(int code, const char *msg = NULL)

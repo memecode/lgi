@@ -1378,7 +1378,13 @@ public:
 	void OnError(LString msg, const char *fn, const char *file, int line)
 	{
 		if (Events)
-			Events->OnError(LString::Fmt("%s (%f %f:%i)", msg.Get(), fn, file, line));
+		{
+			LError err(	LErrorFuncFailed,
+						LString::Fmt("%s (fn=%s src=%s:%i)", msg.Get(), fn, file, line));
+			err.SrcFile = file;
+			err.SrcLine = line;
+			Events->OnError(err);
+		}
 	}
 
 	void AddBpInternal(int id, TStatusCb cb)
@@ -1393,6 +1399,12 @@ public:
 				// We can remove the init dir from the start of file
 				file = file(InitDir.Length(),-1).LStrip("\\/");
 			}
+
+			if (file(0) == '~')
+			{
+				file = file.Replace("~", "$HOME");
+			}
+
 			sprintf_s(cmd, sizeof(cmd), "break %s:" LPrintfSSizeT, file.Get(), bp.Line);
 		}
 		else if (bp.Symbol)

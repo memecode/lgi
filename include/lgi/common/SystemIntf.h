@@ -115,6 +115,7 @@ protected:
 	LArray<TWork*> foregroundWork, backgroundWork;
 	LArray<TTimedWork*> timedWork;
 	uint64_t lastLogTs = 0;
+	TBoolCallback onReady;
 
 	// This adds work to the queue:
 	void AddWork(LString ctx, TPriority priority, TCallback &&job);	
@@ -132,9 +133,10 @@ public:
 		using TOffset = __off_t;
 	#endif
 
-	SystemIntf(LStream *logger, LString name) :
+	SystemIntf(LStream *logger, LString name, TBoolCallback readyCallback) :
 		LMutex(name + ".lock"),
-		log(logger)
+		log(logger),
+		onReady(std::move(readyCallback))
 	{
 	}
 	virtual ~SystemIntf() {}
@@ -205,4 +207,7 @@ public:
 	virtual bool ProcessOutput(const char *cmdLine, std::function<void(int32_t,LString)> cb) = 0;
 };
 
-extern LAutoPtr<SystemIntf> CreateSystemInterface(LView *parent, LString uri, LStream *log);
+extern LAutoPtr<SystemIntf> CreateSystemInterface(	LView *parent,
+													LString uri,
+													LStream *log,
+													SystemIntf::TBoolCallback readyCallback);

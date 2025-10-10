@@ -537,10 +537,12 @@ class AppWnd :
 
 	bool NeedsCapability(const char *Name, const char *Param) override
 	{
-		RunCallback([this, Name=LString::Fmt("Needs capability '%s'", Name)]()
-		{
-			LPopupNotification::Message(this, Name);
-		});
+		RunCallback(
+			[this, Name=LString::Fmt("Needs capability '%s'", Name)]()
+			{
+				LPopupNotification::Message(this, Name);
+			},
+			_FL);
 		return true;
 	}
 	

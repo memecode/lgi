@@ -1944,7 +1944,7 @@ AppWnd::AppWnd()
 						// GetBuildLog()->Print("OnBreakPoint(%s, %i)\n", bp.File.Get(), added);
 						doc->OnBreakPoint(id, added);
 					}
-					else GetBuildLog()->Print("%s:%i - no file '%s'\n", _FL, bp.File.Get());					
+					// else GetBuildLog()->Print("%s:%i - no file '%s'\n", _FL, bp.File.Get());					
 				}
 			}
 		});
@@ -2997,7 +2997,8 @@ bool AppWnd::OnRequestClose(bool IsOsQuit)
 					RunCallback([]()
 						{
 							LCloseApp();
-						});
+						},
+						_FL);
 				}
 			});
 
@@ -3125,7 +3126,8 @@ void AppWnd::GotoReference(const char *File, int Line, bool CurIp, bool WithHist
 			[this, File=LString(File), Line, CurIp, WithHistory, Callback]()
 			{
 				GotoReference(File, Line, CurIp, WithHistory, Callback);
-			}
+			},
+			_FL
 		);		
 		return;
 	}
@@ -3230,10 +3232,12 @@ void AppWnd::OpenFile(const char *FileName, NodeSource *Src, bool canonical, std
 {
 	if (!InThread())
 	{
-		RunCallback( [this, canonical, callback, fn=LString(FileName), Src]()
-		{
-			OpenFile(fn, Src, canonical, callback);
-		});
+		RunCallback(
+			[this, canonical, callback, fn=LString(FileName), Src]()
+			{
+				OpenFile(fn, Src, canonical, callback);
+			},
+			_FL);
 		return;
 	}
 

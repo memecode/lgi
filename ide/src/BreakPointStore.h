@@ -122,6 +122,7 @@ public:
 		TBreakPointDeleted,
 		TBreakPointEnabled,
 		TBreakPointDisabled,
+		TBreakPointModified,
 	};
 
 	using TStatusCb = std::function<void(bool)>;
@@ -394,6 +395,19 @@ public:
 		if (auto i = BreakPoints.Find(id))
 			bp = i->obj;
 		return bp;
+	}
+
+	/// Changes a specific break point
+	bool Update(int id, BreakPoint &bp)
+	{
+		TLock lck(this, _FL);
+		if (auto i = BreakPoints.Find(id))
+		{
+			i->obj = bp;
+			Notify(TBreakPointModified, id);
+		}
+		else return false;
+		return true;
 	}
 
 	/// Looks up the id for a given breakpoint

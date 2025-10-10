@@ -396,8 +396,8 @@ class SshBackend :
 	}
 
 public:
-	SshBackend(LView *parent, LString u, LStream *logger) :
-		SystemIntf(logger, "SshBackend"),
+	SshBackend(LView *parent, LString u, LStream *logger, TBoolCallback readyCallback) :
+		SystemIntf(logger, "SshBackend", readyCallback),
 		LThread("SshBackend.Thread"),
 		app(parent),
 		uri(u),
@@ -498,14 +498,15 @@ public:
 		return LString();
 	}
 
-	LString MakeAbsolute(LString relPath) override
+	LString MakeAbsolute(LString path) override
 	{
-		if (relPath(0) == remoteSep(0))
+		if (path(0) == remoteSep(0))
 		{
-			LAssert(!"this doesn't look like a relative path bro?");
+			// Already absolute
+			return path;
 		}
 
-		auto native = MakeNative(relPath);
+		auto native = MakeNative(path);
 		if (native(0) == '~')
 		{
 			if (homePath)
@@ -588,7 +589,8 @@ public:
 						if (code == 0)
 							found = path;
 					}
-					else LAssert(!"no home folder?");
+					else
+						LAssert(!"no home folder?");
 				}
 				else
 				{
@@ -629,9 +631,26 @@ public:
 					{
 						LError err(found ? LErrorNone : LErrorPathNotFound, found ? nullptr : "path not found");
 						cb(found, err);
-					});
+					},
+					_FL);
 			}
 		);
+	}
+
+	void GetHome()
+	{
+		ProcessOutput("echo $HOME",
+			[this](auto exitCode, auto str)
+			{
+				if (!exitCode)
+				{
+					RemoveAnsi(str);
+					homePath = str;
+
+					if (onReady)
+						onReady(true);
+				}
+			});
 	}
 
 	void OnConnected()
@@ -639,15 +658,7 @@ public:
 		GetSysType(
 			[this](auto sys)
 			{
-				ProcessOutput("echo $HOME",
-					[this](auto exitCode, auto str)
-					{
-						if (!exitCode)
-						{
-							RemoveAnsi(str);
-							homePath = str;
-						}
-					});
+				GetHome();
 			});
 	}
 
@@ -688,7 +699,8 @@ public:
 						app->RunCallback( [this, cb]() mutable
 							{
 								cb(sysType);
-							});
+							},
+							_FL);
 					}
 				}
 			}
@@ -1007,7 +1019,8 @@ public:
 							}
 							cb(&s, file, err);
 						}
-					});
+					},
+					_FL);
 			}
 		);
 		return true;
@@ -1056,7 +1069,8 @@ public:
 					{
 						cb(dir, err);
 						delete dir;
-					});
+					},
+					_FL);
 			} );
 		return true;
 	}
@@ -1103,7 +1117,8 @@ public:
 				app->RunCallback( [callback, paths]() mutable
 					{
 						callback(paths);
-					});
+					},
+					_FL);
 			} );
 
 		return true;
@@ -1213,7 +1228,8 @@ public:
 					app->RunCallback( [this, err, cb, data=buf.NewLStr()]() mutable
 						{
 							cb(data, err);
-						});
+						},
+						_FL);
 				}
 			} );
 
@@ -1246,7 +1262,8 @@ public:
 					app->RunCallback( [this, err, result]() mutable
 						{
 							result(err);
-						});
+						},
+						_FL);
 				}
 			} );
 
@@ -1271,7 +1288,8 @@ public:
 					app->RunCallback( [exitVal, cb]() mutable
 						{
 							cb(exitVal == 0);
-						});
+						},
+						_FL);
 				}
 			} );
 
@@ -1300,7 +1318,8 @@ public:
 							if (exitVal)
 								err.Set(LErrorFuncFailed, LString::Fmt("cmd returned %i", exitVal));
 							cb(err);
-						});
+						},
+						_FL);
 				}
 			} );
 
@@ -1325,7 +1344,8 @@ public:
 					app->RunCallback( [exitVal, cb]() mutable
 						{
 							cb(exitVal == 0);
-						});
+						},
+						_FL);
 				}
 			} );
 
@@ -1350,7 +1370,7 @@ public:
 
 		AddWork(
 			MakeContext(_FL, cmdLine),
-			TBackground,
+			TForeground,
 			[this, cb, cmd=LString::Fmt("%s\n", cmdLine)]()
 			{
 				int32_t exitVal;
@@ -1361,7 +1381,8 @@ public:
 					app->RunCallback( [exitVal, cb, out=TrimContent(out.NewLStr())]() mutable
 						{
 							cb(exitVal, out);
-						});
+						},
+						_FL);
 				}
 			} );
 
@@ -1376,8 +1397,8 @@ class LocalBackend : public SystemIntf
 	LStream *log = NULL;
 
 public:
-	LocalBackend(LView *parent, LString uri, LStream *logger) :
-		SystemIntf(logger, "LocalBackend"),
+	LocalBackend(LView *parent, LString uri, LStream *logger, TBoolCallback readyCallback) :
+		SystemIntf(logger, "LocalBackend", readyCallback),
 		app(parent),
 		log(logger)
 	{
@@ -1823,8 +1844,8 @@ class FtpBackend :
 public:
 	constexpr static int MAX_ATTEMPTS = 5;
 
-	FtpBackend(LView *view, LString addr, LStream *logger) :
-		SystemIntf(logger, "FtpBackend"),
+	FtpBackend(LView *view, LString addr, LStream *logger, TBoolCallback readyCallback) :
+		SystemIntf(logger, "FtpBackend", readyCallback),
 		LThread("FtpBackend.Thread"),
 		parent(view),
 		uri(addr),
@@ -1961,7 +1982,8 @@ public:
 							cb(nullptr, LString(), err);
 						else
 							cb(&s, path, err);
-					});
+					},
+					_FL);
 			});
 
 		return true;
@@ -2081,7 +2103,8 @@ public:
 						curDir->Valid();
 						delete curDir;
 					}
-				});
+				},
+				_FL);
 			});
 
 		return true;
@@ -2167,10 +2190,12 @@ public:
 						});
 				}
 
-				parent->RunCallback([this, err, fileData, result]()
-				{
-					result(fileData, err);
-				});
+				parent->RunCallback(
+					[this, err, fileData, result]()
+					{
+						result(fileData, err);
+					},
+					_FL);
 			});
 
 		return true;
@@ -2214,10 +2239,12 @@ public:
 						return EOk;
 					});
 
-				parent->RunCallback([this, err, result]()
-				{
-					result(err);
-				});
+				parent->RunCallback(
+					[this, err, result]()
+					{
+						result(err);
+					},
+					_FL);
 			});
 
 		return true;
@@ -2245,10 +2272,12 @@ public:
 						return f->DeleteFile(parts.leaf, &err) ? EOk : EError;
 					});
 
-				parent->RunCallback([this, err, cb]()
-				{
-					cb(err);
-				});
+				parent->RunCallback(
+					[this, err, cb]()
+					{
+						cb(err);
+					},
+					_FL);
 			});
 
 		return false;
@@ -2565,15 +2594,18 @@ public:
 	}
 };
 
-LAutoPtr<SystemIntf> CreateSystemInterface(LView *parent, LString uri, LStream *log)
+LAutoPtr<SystemIntf> CreateSystemInterface(	LView *parent,
+											LString uri,
+											LStream *log,
+											SystemIntf::TBoolCallback readyCallback)
 {
 	LAutoPtr<SystemIntf> backend;
 	LUri u(uri);
 	if (u.IsProtocol("ssh"))
-		backend.Reset(new SshBackend(parent, uri, log));
+		backend.Reset(new SshBackend(parent, uri, log, readyCallback));
 	else if (u.IsProtocol("ftp"))
-		backend.Reset(new FtpBackend(parent, uri, log));
+		backend.Reset(new FtpBackend(parent, uri, log, readyCallback));
 	else	
-		backend.Reset(new LocalBackend(parent, uri, log));
+		backend.Reset(new LocalBackend(parent, uri, log, readyCallback));
 	return backend;
 }

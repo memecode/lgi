@@ -1954,7 +1954,8 @@ int IdeDoc::OnNotify(LViewI *v, const LNotification &n)
 							[popup=d->FilePopup, v, n]()
 							{
 								popup->OnNotify(v, n);
-							}
+							},
+							_FL
 						);
 					}
 				}
@@ -1997,7 +1998,8 @@ int IdeDoc::OnNotify(LViewI *v, const LNotification &n)
 						d->MethodPopup->RunCallback([popup=d->MethodPopup, v, n]()
 							{
 								popup->OnNotify(v, n);
-							});
+							},
+							_FL);
 					}
 				}
 			}
@@ -2032,7 +2034,8 @@ int IdeDoc::OnNotify(LViewI *v, const LNotification &n)
 						d->SymPopup->RunCallback([popup=d->SymPopup, v, n]()
 							{
 								popup->OnNotify(v, n);
-							});
+							},
+							_FL);
 					}
 				}
 			}

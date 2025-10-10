@@ -499,18 +499,27 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 
 				if (backend)
 				{
-					backend->ReadFolder(SystemIntf::TBackground, p, [this, Platforms, recurse, out = &out](auto dir, auto err)
+					backend->ReadFolder(SystemIntf::TBackground, p,
+						[this, Platforms, recurse, out = &out](auto dir, auto err)
 						{
-							LString::Array subFolders;
-							for (int b = true; b; b = dir->Next())
+							if (err)
 							{
-								if (recurse && dir->IsDir())
-									subFolders.Add(dir->FullPath());
-								else
-									AddDirectoryEntry(*dir, Platforms);
+								LgiTrace("%s:%i - ReadFolder err: %s\n", _FL, err.ToString().Get());
 							}
-							if (subFolders.Length())
-								AddPaths(*out, subFolders, Platforms, recurse);
+							else if (dir)
+							{
+								LString::Array subFolders;
+								for (int b = true; b; b = dir->Next())
+								{
+									if (recurse && dir->IsDir())
+										subFolders.Add(dir->FullPath());
+									else
+										AddDirectoryEntry(*dir, Platforms);
+								}
+								if (subFolders.Length())
+									AddPaths(*out, subFolders, Platforms, recurse);
+							}
+							else LAssert(0);
 						});
 				}
 				else // local folder:

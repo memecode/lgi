@@ -414,17 +414,27 @@ public:
 	/// On Haiku this will be the BWindow's thread, there is one per LWindow.
 	OsThreadId ViewThread();
 
-protected:	
+	/// Generic callback type
+	using TCallback = std::function<void()>;
+
+protected:
+	struct CallbackInfo
+	{
+		TCallback cb;
+		const char *file;
+		int line;
+	};
+
 	class CallbackStore : public LMutex
 	{
-		LHashTbl<IntKey<int>, std::function<void()>*> map;
+		LHashTbl<IntKey<int>, CallbackInfo*> map;
 
 	public:
 		CallbackStore() : LMutex("CallbackStore")
 		{
 		}
 
-		int Add(std::function<void()> cb)
+		int Add(TCallback &&cb, const char *file, int line)
 		{
 			if (!LockWithTimeout(4000, _FL))
 			{
@@ -437,8 +447,13 @@ protected:
 			for (; map.Find(id); id++)
 				;			
 			
-			map.Add(id, new std::function<void()>(std::move(cb)));
-			// printf("%i: CbStore.Add %i\n", LCurrentThreadId(), id);
+			if (auto inf = new CallbackInfo)
+			{
+				inf->cb = std::move(cb);
+				inf->file = file;
+				inf->line = line;
+				map.Add(id, inf);
+			}
 
 			Unlock();
 			return id;
@@ -453,13 +468,12 @@ protected:
 			}			
 
 			bool status = false;
-			auto cb = map.Find(id);
-			if (cb)
+			if (CallbackInfo *info = map.Find(id))
 			{
-				(*cb)();
+				info->cb();
 				if (map.Delete(id))
 				{
-					delete cb;
+					delete info;
 					status = true;
 					// printf("%i: CbStore.Call %i\n", LCurrentThreadId(), id);
 				}
@@ -501,7 +515,7 @@ public:
 	/// Run some code in the UI thread...
 	/// But don't wait for any sort of response.
 	/// \returns true if the callback was sent (but not necessarily processed).
-	bool RunCallback(std::function<void()> Callback)
+	bool RunCallback(std::function<void()> Callback, const char *file, int line)
 	{
 		if (!Callback)
 		{
@@ -509,7 +523,7 @@ public:
 			return false;
 		}
 
-		int id = CbStore.Add(std::move(Callback));
+		int id = CbStore.Add(std::move(Callback), file, line);
 
 		return PostEvent(M_VIEW_RUN_CALLBACK, (LMessage::Param) id);
 	}
@@ -542,9 +556,11 @@ public:
 		}
 
 		int id = CbStore.Add([Callback, &result]()
-		{
-			result.Reset(new T(Callback()));
-		});
+			{
+				result.Reset(new T(Callback()));
+			},
+			file,
+			line);
 
 		auto ref = LString::Fmt("f=%s,ln=%i,cur=" LPrintfThreadId ",view=" LPrintfThreadId,
 			file, line,

@@ -16,7 +16,7 @@ public:
 	
 	virtual void OnState(bool Debugging, bool Running) = 0;
 	virtual void OnFileLine(const char *File, int Line, bool CurrentIp) = 0;
-	virtual void OnError(LString Str) = 0;
+	virtual void OnError(LError err) = 0;
 	virtual void OnCrash(int Code) = 0;
 	virtual void Ungrab() = 0;
 	virtual void OnWarning(LString str) = 0;
