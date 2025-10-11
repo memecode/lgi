@@ -101,7 +101,7 @@ public:
 			if (In())
 				return i->Obj[Cur];
 
-			LAssert(!"Invalid iterator.");
+			// LAssert(!"Invalid iterator.");
 			return Lst->emptyValue;
 		}
 
