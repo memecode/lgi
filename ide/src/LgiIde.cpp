@@ -3266,9 +3266,27 @@ void AppWnd::OpenFile(const char *FileName, NodeSource *Src, bool canonical, std
 				hints.Add(backend->GetBasePath());
 
 				backend->ResolvePath(FileName, hints,
-					[this, Src, callback](auto str, auto err)
+					[this, Src, callback, backend, txt=LString(FileName)](auto str, auto err) mutable
 					{
-						if (err)
+						if (err.GetCode() == LErrorPathNotFound)
+						{
+							// Try a find in files search...
+							LString::Array base;
+							base.Add(backend->GetBasePath());
+							backend->SearchFileNames(
+								txt,
+								base,
+								[this, Src, callback, txt](auto &strs)
+								{
+									LString::Array matches;
+									for (auto s: strs)
+										if (s.Find(txt) >= 0)
+											matches.Add(s);
+									if (matches.Length() == 1)
+										OpenFile(matches[0], Src, true, callback);
+								});
+						}
+						else if (err)
 							GetBuildLog()->Print("%s:%i - ResolvePath failed: %s\n", _FL, err.ToString().Get());
 						else
 							OpenFile(str, Src, true, callback);
