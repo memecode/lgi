@@ -53,6 +53,55 @@
 
 #define IsSymbolChar(c)			( IsDigit(c) || IsAlpha(c) || strchr("-_", c) )
 
+bool FilterTempFiles(LString &path)
+{
+	if (auto ext = LGetExtension(path))
+	{
+		if (!Stricmp(ext, "o") ||
+			!Stricmp(ext, "i") ||
+			!Stricmp(ext, "d"))
+			return false;
+	}
+
+	return true;
+}
+
+void FileResultsToList(LList *lst, LArray<LString> &files, LString inputLeaf, int platformHint)
+{
+	if (!lst || files.Length() == 0)
+		return;
+
+	List<LListItem> exact;
+	List<LListItem> others;
+	auto platform = PlatformFlagsToStr(platformHint).Lower();
+
+	for (auto r: files)
+	{
+		if (!FilterTempFiles(r))
+			continue;
+
+		bool isExact = false;
+		if (auto leaf = LGetLeaf(r))
+			if (inputLeaf.Equals(leaf))
+				isExact = true;
+
+		bool hasPlatform = platform && r.Lower().Find(platform) >= 0;
+		auto a = isExact ? &exact : &others;
+		a->Insert(new LListItem(r), hasPlatform ? 0 : -1);
+		
+		if (exact.Length() + others.Length() > 200)
+			break;
+	}
+	
+	lst->Empty();
+	lst->Insert(exact);
+	lst->Insert(others);
+	lst->ResizeColumnsToContent();
+
+	if (auto i = lst->ItemAt(0))
+		i->Select(true);
+}
+
 LString::Array CollectAllSystemIncludePaths(IdeProject* proj, SysPlatform Platform)
 {
 	LString::Array Paths;
@@ -181,8 +230,8 @@ int SysIncThread::Main()
 //////////////////////////////////////////////////////////////////////////////////////////
 class FindInProject : public LDialog
 {
-	AppWnd *App = NULL;
-	LList *Lst = NULL;
+	AppWnd *App = nullptr;
+	LList *Lst = nullptr;
 	bool SearchSysInc = false;
 	static LString::Array SysHeaders;
 	LAutoPtr<SysIncThread> Thread;
@@ -192,7 +241,6 @@ public:
 
 	FindInProject(AppWnd *app)
 	{
-		Lst = NULL;
 		App = app;
 		if (LoadFromResource(IDD_FIND_PROJECT_FILE))
 		{
@@ -281,19 +329,14 @@ public:
 				paths += CollectAllSystemIncludePaths(App->RootProject(), PlatformFlagsToEnum(Platforms));
 			}
 
-			backend->SearchFileNames(s, paths, [this, Hnd = AddDispatch()](auto &results)
+			backend->SearchFileNames(s, paths,
+				[this, Hnd = AddDispatch(), inputLeaf=LString(LGetLeaf(s))](auto &results)
 				{
 					// This checks if the window still exists...
 					// It may have been deleted while the search was being done.
 					if (!LEventSinkMap::Dispatch.IsSink(Hnd))
 						return;
-
-					Lst->Empty();
-
-					for (auto result: results)
-						Lst->Insert(new LListItem(result));
-
-					Lst->ResizeColumnsToContent();
+					FileResultsToList(Lst, results, inputLeaf, App->GetPlatform());
 				});
 		}
 		else
