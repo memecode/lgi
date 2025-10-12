@@ -290,35 +290,8 @@ struct LBView : public Parent
 		Parent::MessageReceived(message);
 	}
 
-	void Draw(BRect updateRect)
-	{
-		Parent::UnlockLooper();
-			
-		LMemDC *done = nullptr;
-		auto m = MakeMessage(LMessage::Draw);
-		m.AddRect("update", updateRect);
-		m.AddPointer("done", &done);
-		LAppPrivate::Post(&m);
-		
-		while (!done)
-			LSleep(1);
-
-		Parent::LockLooper();
-		
-		// now draw the buffer to the view
-		auto bmp = done->GetBitmap();
-		if (!bmp)
-		{
-			printf("%s:%i - No bitmap.\n", _FL);
-			return;
-		}
+	void Draw(BRect updateRect) override;
 	
-		Parent::SetDrawingMode(B_OP_COPY);
-		auto f = Parent::Frame();
-		printf("%s:%i drawbitmap %s\n", _FL, ((LRect)f).GetStr());
-		Parent::DrawBitmap(bmp, f, f);
-	}
-
 	LMouse ConvertMouse(BPoint where, bool down = false)
 	{
 		LMouse m;
@@ -410,9 +383,6 @@ struct LBView : public Parent
 	}
 };
 
-template<typename Parent>
-uint32 LBView<Parent>::MouseButtons = 0;
-
 class LWindowPrivate :
 	public BWindow
 {
@@ -422,8 +392,8 @@ public:
 	// The root view that tracks all the events
 	BView *view = nullptr;
 	
-	// This is a memory buffer for painting all the child LView's into:
-	LAutoPtr<LMemDC> mem;
+	// This is a memory buffer for painting all the child LView's into.
+	LThreadSafeInterface<LMemDC, true> mem;
 	
 	bool SnapToEdge = false;
 	LArray<HookInfo> Hooks;
@@ -447,7 +417,8 @@ public:
 			/* feel:  */ B_NORMAL_WINDOW_FEEL,
 			/* flags: */ B_WILL_ACCEPT_FIRST_CLICK),
 		wnd(owner),
-		view(new LBView<BView>(owner))
+		view(new LBView<BView>(owner)),
+		mem(nullptr)
 	{
 	}
 
@@ -548,18 +519,29 @@ public:
 
 	void MessageReceived(BMessage *message)
 	{
-		if (message->what == M_LWINDOW_DELETE)
+		switch (message->what)
 		{
-			Quit();
-		}
-		else
-		{
-			BWindow::MessageReceived(message);
+			case M_LWINDOW_DELETE:
+			{
+				Quit();
+				break;
+			}
+			case M_INVALIDATE:
+			{
+				if (view)
+					view->Invalidate();
+				break;
+			}
+			default:
+			{
+				BWindow::MessageReceived(message);
 
-			// Redirect the message to the app loop:
-			auto m = MakeMessage(LMessage::General);
-			m.AddMessage("message", message);
-			LAppPrivate::Post(&m);
+				// Redirect the message to the app loop:
+				auto m = MakeMessage(LMessage::General);
+				m.AddMessage("message", message);
+				LAppPrivate::Post(&m);
+				break;
+			}
 		}
 	}
 	
@@ -599,9 +581,47 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////
+template<typename Parent>
+uint32 LBView<Parent>::MouseButtons = 0;
+
+template<typename Parent>
+void LBView<Parent>::Draw(BRect updateRect)
+{
+	Parent::UnlockLooper(); // hold the lock on the BWindow can cause a deadlock
+	auto memDc = wnd->d->mem.Lock(_FL);
+	Parent::LockLooper();
+	if (!memDc)
+	{
+		// Handle error?
+		printf("%s:%i - can't lock mem DC.\n", _FL);
+		return;
+	}
+
+	if (!memDc.Get())
+	{
+		// Gui thread hasn't created the memory context yet...
+		auto m = MakeMessage(LMessage::Draw);
+		LAppPrivate::Post(&m);
+		printf("%s:%i - no LMemDC yes, sending draw..\n", _FL);
+		return;
+	}
+	
+	// Draw the buffer to the view
+	auto bmp = memDc->GetBitmap();
+	if (!bmp)
+	{
+		printf("%s:%i - no bitmap.\n", _FL);
+		return;
+	}
+
+	Parent::SetDrawingMode(B_OP_COPY);
+	auto f = Parent::Frame();
+	Parent::DrawBitmap(bmp, f, f);
+}
+
+///////////////////////////////////////////////////////////////////////
 LWindow::LWindow() :
-	LView(nullptr),
-	_screenBuf(_FL)
+	LView(nullptr)
 {
 	d = new LWindowPrivate(this);
 	_Window = this;
@@ -648,6 +668,11 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 			OnEvent((LMessage*) &msg);
 			break;
 		}
+		case LMessage::AttachedToWindow:
+		{
+			OnCreate();
+			break;
+		}
 		case LMessage::FrameMoved:
 		{
 			BPoint pos;
@@ -663,50 +688,57 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 		}
 		case LMessage::FrameResized:
 		{
-			float width = 0.0f, height = 0.0f;
-			if (m->FindFloat("width", &width) != B_OK ||
-				m->FindFloat("height", &height) != B_OK)
+			float fx = 0.0f, fy = 0.0f;
+			if (m->FindFloat("width",  &fx) != B_OK ||
+				m->FindFloat("height", &fy) != B_OK)
 			{
 				printf("%s:%i - missing width/height param.\n", _FL);
 				return;
 			}
 
-			printf("LMessage::FrameResized: %g,%g\n", width, height);
-			Pos.SetSize(width, height);
-			OnPosChange();
-			break;
-		}
-		case LMessage::AttachedToWindow:
-		{
-			OnCreate();
-			break;
+			int x = (int)floor(fx);
+			int y = (int)floor(fy);
+			if (Pos.X() != x || Pos.Y() != y)
+			{
+				// printf("LMessage::FrameResized: %i,%i\n", x, y);
+				Pos.SetSize(x, y);
+				OnPosChange();
+			}
+			else break;
+			
+			// fall through to draw code:
 		}
 		case LMessage::Draw:
 		{
-			BRect updateRect;
-			m->FindRect("update", &updateRect);
-			
-			LMemDC **done = nullptr;
-			m->FindPointer("done", (void**)&done);
+			auto memDC = d->mem.Lock(_FL);
+			if (!memDC)
+			{
+				printf("%s:%i - Failed to lock memDc.\n", _FL);
+				break;
+			}
 			
 			auto c = GetClient();
-			if (!d->mem ||
-				d->mem->X() < c.X() ||
-				d->mem->Y() < c.Y())
+			if (!memDC.Get() ||
+				memDC->X() < c.X() ||
+				memDC->Y() < c.Y())
 			{
 				// Create a memory context big enough
 				#define ROUNDUP(i) ( (i) - ((i) % 32) + 32 )
-				
-				d->mem.Reset(new LMemDC(_FL, ROUNDUP(c.X()), ROUNDUP(c.Y()), System32BitColourSpace));
+				memDC.Set(new LMemDC(_FL, ROUNDUP(c.X()), ROUNDUP(c.Y()), System32BitColourSpace));
 			}
-			if (!d->mem || !done)
+			if (!memDC.Get())
+			{
+				printf("%s:%i - No memDC object.\n", _FL);
 				break;
+			}
 			
 			LPoint off(0, 0);
-			printf("	View.ReceiveDraw %s\n", LRect(updateRect).GetStr());
-			_Paint(d->mem, &off, NULL);
+			// printf("Window.Draw cls=%s\n", GetClass());
+			_Paint(memDC.Get(), &off, NULL);
 			
-			*done = d->mem.Get();
+			// Ask the BView to invalidate itself:
+			BMessage inval(M_INVALIDATE);
+			d->PostMessage(&inval);
 			break;
 		}
 		case LMessage::MouseMoved:

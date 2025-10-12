@@ -69,7 +69,6 @@ private:
 	
 	#if defined(HAIKU) || defined(MAC)
 	
-		template<typename Parent> friend class LBView;
 		static bool RecentlyDeleted(LViewI *v);
 
 	#endif

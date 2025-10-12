@@ -159,9 +159,22 @@ public:
 			LAssert(GetLocked());
 			return tsi->object;
 		}
+		
+		bool Set(T *newObj)
+		{
+			if (!GetLocked())
+				return false;
+				
+			if (Own)
+				DeleteObj(tsi->object);			
+			tsi->object = newObj;
+			
+			return true;
+		}
 	};
 
-	LThreadSafeInterface(T *obj, const char *name = NULL) : LMutex(name ? name : "LThreadSafeInterface")
+	LThreadSafeInterface(T *obj, const char *name = nullptr) :
+		LMutex(name ? name : "LThreadSafeInterface")
 	{
 		object = obj;
 	}
@@ -171,6 +184,17 @@ public:
 		Lock(_FL);
 		if (Own)
 			DeleteObj(object);
+	}
+	
+	bool Set(T *newObj)
+	{
+		Auto lck(_FL);
+		if (!lck)
+			return false;
+		if (Own)
+			DeleteObj(object);
+		object = newObj;
+		return true;
 	}
 
 	Locked Lock(const char *file, int line)

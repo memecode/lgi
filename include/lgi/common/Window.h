@@ -36,7 +36,6 @@ class LgiClass LWindow :
 	#endif
 	public LDragDropTarget
 {
-	friend class BViewRedir;
 	friend class LApp;
 	friend class LView;
 	friend class LButton;
@@ -56,13 +55,12 @@ protected:
 	#elif defined(HAIKU)
 		
 		friend class LAppPrivate;
+		template<typename Parent> friend struct LBView;
 
 		// This is called in the app thread.. lock the window before using
 		void HaikuEvent(LMessage::Events event, BMessage *m) override;
 		// Previous zoom state
 		LWindowZoom _PrevZoom = LZoomNormal;
-		// Double buffer
-		LMemDC _screenBuf;
 	
 	#else
 
