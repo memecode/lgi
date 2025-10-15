@@ -75,6 +75,7 @@ public:
 
 	constexpr static int WAIT_MS = 50;
 	LStream *log = NULL;
+	int nextHandle = 100;
 
 	using TBoolCallback = std::function<void(bool)>;
 	using TErrorCallback = std::function<void(LError)>;
@@ -90,9 +91,10 @@ public:
 protected:
 	// Lock before using
 	struct TWork;
-	using TCallback = std::function<void()>;
-	struct TWork
+	using TCallback = std::function<void(struct TWork*)>;
+	struct TWork : public LCancel
 	{
+		int handle = -1;
 		LString context;
 		TCallback fp;
 
@@ -101,11 +103,6 @@ protected:
 			context = ctx;
 			fp = std::move(call);
 		}
-
-		~TWork()
-		{
-			// LStackTrace("%p::~TWork", this);
-		}
 	};
 	struct TTimedWork : public TWork
 	{
@@ -113,16 +110,21 @@ protected:
 		TTimedWork(LString &ctx, TCallback &&call) : TWork(ctx, std::move(call)) {}
 	};
 	LArray<TWork*> foregroundWork, backgroundWork;
-	LArray<TTimedWork*> timedWork;
 	uint64_t lastLogTs = 0;
 	TBoolCallback onReady;
 
+	// Lock before using:
+	LArray<TTimedWork*> timedWork;
+	LAutoPtr<TWork> curWork;
+
 	// This adds work to the queue:
-	void AddWork(LString ctx, TPriority priority, TCallback &&job);	
+	int AddWork(LString ctx, TPriority priority, TCallback &&job);	
 	// Call this in the main function of the sub-class:
 	void DoWork();
 	// True if there is work to do
 	bool HasWork();
+	// Cancel an existing work item:
+	void CancelWork(int handle, bool wait = true);
 
 public:
 	#if defined(HAIKU) || defined(MAC)
@@ -163,7 +165,10 @@ public:
 	virtual bool Rename(LString oldPath, LString newPath, TBoolCallback cb) = 0;
 
 	// Searching:
-	virtual bool SearchFileNames(const char *searchTerms, LString::Array paths, std::function<void(LArray<LString>&)> results) = 0;
+	virtual bool SearchFileNames(const char *searchTerms,
+								LString::Array paths,
+								std::function<void(LArray<LString>&)> results,
+								bool cancelPrev = true) = 0;
 
 	struct FindParams
 	{
