@@ -165,6 +165,7 @@ public:
 	LString			Styles; // Somewhat temporary object to store unparsed styles particular to
 							// this view until runtime, where the view heirarchy is known.
 	LString::Array	Classes;
+	bool			cssLayoutDone = false;
 
 	// Event handling
 	int				SinkHnd = -1;

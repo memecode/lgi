@@ -233,7 +233,6 @@ LTabView::LTabView(int id, int x, int y, int cx, int cy, const char *name, int I
 	LRect r(x, y, x+cx, y+cy);
 	SetPos(r);
 	Name(name);
-	_BorderSize = 0;
 	SetTabStop(true);
 	SetPourLargest(true);
 

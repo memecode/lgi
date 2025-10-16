@@ -98,11 +98,11 @@ void SystemIntf::CancelWork(int handle, bool wait)
 
 	while (wait)
 	{
-		LSleep(1);
+		LSleep(20); // air gap the lock checks...
 
 		Auto lck(this, _FL);
 		if (!curWork || curWork->handle != handle)
-			break;
+			break; // work is complete.
 	}
 }
 
@@ -143,8 +143,14 @@ void SystemIntf::DoWork()
 			TCallback fp = std::move(curWork->fp);
 			TWork *work = curWork.Get();
 			Unlock();
+			
 			fp(work);
-			curWork.Reset();
+
+			if (Lock(_FL))
+			{
+				curWork.Reset();
+				Unlock();
+			}
 		
 			auto now = LCurrentTime();
 			if (now - lastLogTs >= 500)
@@ -1114,7 +1120,6 @@ public:
 							msg = parts.Last().Strip();
 					}
 					err.Set(LErrorFuncFailed, msg);
-					// LgiTrace("cmd='%s'\nls='%s'\nerr='%s'\n", cmd.Get(), ls.Get(), msg.Get());
 				}
 				else
 				{
@@ -1131,6 +1136,9 @@ public:
 			} );
 		return true;
 	}
+
+	LString::Array fileCache;
+	uint64_t fileCacheTs = 0;
 
 	bool SearchFileNames(const char *searchTerms,
 						LString::Array inputPaths,
@@ -1151,41 +1159,64 @@ public:
 			SystemIntf::TForeground,
 			[this, inputPaths, callback, searchTerms=LString(searchTerms)](auto work) mutable
 			{
-				log->Print("%s:%i - search(%i) starting\n", _FL, work->handle);
+				auto now = LCurrentTime();
+				auto oneMin = 1000 * 60;
+				auto updateCache = fileCache.Length() == 0;
+				auto parts = searchTerms.SplitDelimit();
 
+				if (updateCache)
+				{
+					for (auto path: inputPaths)
+					{
+						if (work->IsCancelled())
+							break;
+						
+						LString absPath;
+						if (LIsRelativePath(path))
+							absPath = JoinPath(RemoteRoot(), path);
+						else
+							absPath = path;
+
+						auto args = LString::Fmt("cd %s && find .", absPath.Get());
+						/*
+						for (size_t i=0; i<parts.Length(); i++)
+							args += LString::Fmt("%s -iname \"*%s*\"", i ? " -and" : "", LGetLeaf(parts[i]));
+						*/
+						args += " -not -path \"*/.hg/*\" -and -not -iname \"*.d\"";
+
+						int32_t exitCode = 0;
+						auto result = Cmd(GetConsole(), args + "\n", &exitCode, nullptr, work);
+						if (exitCode)
+						{
+							log->Print("%s:%i - find failed with %i\n%s\n", _FL, exitCode, result.Get());
+						}
+						else
+						{
+							auto lines = TrimContent(result).SplitDelimit("\r\n");
+						
+							// Turn the results back into absolute paths...
+							for (auto ln: lines)
+								fileCache.Add(JoinPath(absPath, ln));
+						}
+					}
+				}
+
+				// filter all files in 'fileCache' via the search terms into 'paths'
 				LArray<LString> paths;
 				paths.SetFixedLength(false);
-
-				for (auto path: inputPaths)
+				for (auto &f: fileCache)
 				{
-					if (work->IsCancelled())
-					{
-						log->Print("%s:%i - search(%i) cancel cur\n", _FL, work->handle);
-						break;
-					}
-						
-					LString absPath;
-					if (LIsRelativePath(path))
-						absPath = JoinPath(RemoteRoot(), path);
-					else
-						absPath = path;
-
-					auto parts = searchTerms.SplitDelimit();
-					auto args = LString::Fmt("cd %s && find .", absPath.Get());
+					bool match = true;
 					for (size_t i=0; i<parts.Length(); i++)
-						args += LString::Fmt("%s -iname \"*%s*\"", i ? " -and" : "", LGetLeaf(parts[i]));
-					args += " -and -not -path \"*/.hg/*\" -and -not -iname \"*.d\"";
-
-					int32_t exitCode = 0;
-					auto result = Cmd(GetConsole(), args + "\n", &exitCode, nullptr, work);
-					if (!exitCode)
 					{
-						auto lines = TrimContent(result).SplitDelimit("\r\n");
-						
-						// Turn the results back into absolute paths...
-						for (auto ln: lines)
-							paths.Add(JoinPath(absPath, ln));
+						if (!Stristr(f.Get(), parts[i].Get()))
+						{
+							match = false;
+							break;
+						}
 					}
+					if (match)
+						paths.Add(f);
 				}
 
 				log->Print("%s:%i - search(%i) SearchFilesHnd=%i\n", _FL, work->handle, SearchFilesHnd);

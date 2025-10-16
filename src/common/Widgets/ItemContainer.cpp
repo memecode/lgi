@@ -1263,7 +1263,6 @@ LItemEdit::LItemEdit(LView *parent, LItem *item, int index, int SelStart, int Se
 	d->Item = item;
 	d->Index = index;
 
-	_BorderSize = 0;
 	Sunken(false);
 	Raised(false);
 	

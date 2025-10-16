@@ -100,9 +100,9 @@ protected:
 	#ifndef HAIKU
 	LMutex				*_Lock = NULL;
 	#endif
-	uint16				_BorderSize = 0;
 	uint16				_IsToolBar = 0;
 	int					WndFlags = 0;
+	LRect				_Margin, _Border;
 
 	static LViewI		*_Capturing;
 	static LViewI		*_Over;
@@ -664,7 +664,10 @@ public:
 	LCursor GetCursor(int x, int y) override;
 	
 	/// \brief Get the position of the view relitive to it's parent.
-	virtual LRect &GetPos() override { return Pos; }
+	LRect &GetPos() override { return Pos; }
+	LRect &GetMargin() override;
+	LRect &GetBorder() override;
+
 	/// Get the client region of the window relitive to itself (ie always 0,0-x,y)
 	virtual LRect &GetClient(bool InClientSpace = true) override;
 	/// Set the position of the view in terms of it's parent
@@ -720,7 +723,7 @@ public:
 		LMouse &m,
 		/// Get the location in screen coordinates
 		bool ScreenCoords = false
-	) override;
+	)	override;
 
 	/// \brief Gets the ID associated with the view
 	///
@@ -895,6 +898,9 @@ public:
 	/// Called after the view is attached to a new parent
 	void OnAttach() override;
 	
+	/// This calculates the margin and border from CSS (or _BorderSize)
+	bool CssLayout(bool reCalculate = false) override;
+
 	/// Called to get layout information for the control. It's called
 	/// up to 3 times to collect various dimensions:
 	/// 1) PreLayout: Get the maximum width, and optionally the minimum width.

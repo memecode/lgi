@@ -9,7 +9,7 @@ LStatusBar::LStatusBar(int id)
 {
 	Name("LGI_StatusBar");
 	Raised(true);
-	_BorderSize = 1;
+	GetBorder().Set(1, 1, 1, 1);
 	if (id > 0)
 		SetId(id);
 	LResources::StyleElement(this);
@@ -209,7 +209,7 @@ LStatusPane::LStatusPane()
 	SetParent(0);
 	LRect r(0, 0, GetWidth()-1, 20);
 	SetPos(r);
-	_BorderSize = 1;
+	GetBorder().Set(1, 1, 1, 1);
 }
 
 bool LStatusPane::Name(const char *n)

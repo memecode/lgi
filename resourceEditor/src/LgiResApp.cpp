@@ -1228,7 +1228,7 @@ public:
 		c = col;
 		LRect r(x1, y1, x2, y2);
 		SetPos(r);
-		_BorderSize = 1;
+		GetBorder().Set(1, 1, 1, 1);
 		Sunken(true);
 	}
 	

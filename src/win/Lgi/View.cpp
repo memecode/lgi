@@ -772,7 +772,7 @@ LRect &LView::GetClient(bool InClientSpace)
 		}
 		else if (Sunken() || Raised())
 		{
-			Client.Inset(_BorderSize, _BorderSize);
+			Client.Inset(&_Border);
 		}
 	}
 
@@ -2085,11 +2085,10 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 			case WM_NCCALCSIZE:
 			{
 				LMessage::Param Status = 0;
-				int Edge = (Sunken() || Raised()) ? _BorderSize : 0;
 				RECT *rc = NULL;
 				if (Msg->a)
 				{
-					NCCALCSIZE_PARAMS *p = (NCCALCSIZE_PARAMS*) Msg->b;
+					auto p = (NCCALCSIZE_PARAMS*) Msg->b;
 					rc = p->rgrc;
 				}
 				else
@@ -2102,12 +2101,12 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 					Status = DefWindowProcW(_View, Msg->m, Msg->a, Msg->b);
 				}
 
-				if (Edge && rc && !TestFlag(WndFlags, GWF_SYS_BORDER))
+				if (GetBorder() && rc && !TestFlag(WndFlags, GWF_SYS_BORDER))
 				{
-					rc->left += Edge;
-					rc->top += Edge;
-					rc->right -= Edge;
-					rc->bottom -= Edge;
+					rc->left   += _Border.x1;
+					rc->top    += _Border.y1;
+					rc->right  -= _Border.x2;
+					rc->bottom -= _Border.y2;
 					return 0;
 				}
 				
@@ -2115,12 +2114,11 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 			}
 			case WM_NOTIFY:
 			{
-				NMHDR *Hdr = (NMHDR*)Msg->B();
-				if (Hdr)
+				if (auto hdr = (NMHDR*)Msg->B())
 				{
 					LView *Wnd;
-					if (CastHwnd(Wnd, Hdr->hwndFrom))
-						Wnd->SysOnNotify(Msg->Msg(), Hdr->code);
+					if (CastHwnd(Wnd, hdr->hwndFrom))
+						Wnd->SysOnNotify(Msg->Msg(), hdr->code);
 				}
 				break;
 			}

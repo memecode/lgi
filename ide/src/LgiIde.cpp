@@ -71,6 +71,12 @@ void FileResultsToList(LList *lst, LArray<LString> &files, LString inputLeaf, in
 	if (!lst || files.Length() == 0)
 		return;
 
+	// There is often an empty list if the previous search is canceled.
+	// Don't clear the result in that case...
+	if (files.Length() == 0 &&
+		lst->Length() > 0)
+		return;
+
 	List<LListItem> exact;
 	List<LListItem> others;
 	auto platform = PlatformFlagsToStr(platformHint).Lower();
@@ -5301,7 +5307,7 @@ public:
 		LRect r(10, 10, 110, 210);
 		SetPos(r);
 		Sunken(true);
-		printf("_BorderSize=%i\n", _BorderSize);
+		printf("_Border=%s\n", _Border.GetStr());
 	}
 
 	void OnPaint(LSurface *pdc)

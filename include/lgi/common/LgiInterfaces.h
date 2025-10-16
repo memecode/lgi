@@ -521,6 +521,8 @@ public:
 
 	// Size and position	
 	virtual LRect &GetPos() = 0;
+	virtual LRect &GetMargin() = 0;
+	virtual LRect &GetBorder() = 0;
 	virtual LRect &GetClient(bool InClientSpace = true) = 0;
 	virtual bool SetPos(LRect &p, bool Repaint = false) = 0;
 	virtual int X() = 0;
@@ -585,6 +587,7 @@ public:
 	virtual bool Invalidate(LRect *r = 0, bool Repaint = false, bool NonClient = false) = 0;
 	virtual bool Invalidate(LRegion *r, bool Repaint = false, bool NonClient = false) = 0;
 	virtual void SetPulse(int Ms = -1) = 0;
+	virtual bool CssLayout(bool reCalculate = false) = 0;
 	virtual bool OnLayout(LViewLayoutInfo &Inf) = 0;
 
 protected:
