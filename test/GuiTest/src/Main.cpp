@@ -226,7 +226,7 @@ struct OriginTest : public LView
 	OriginTest(int x, int y, int off)
 	{
 		#ifdef _DEBUG
-		_Debug = true;
+		// _Debug = true;
 		#endif
 
 		LRect r(0, 0, 99, 99);
@@ -239,7 +239,7 @@ struct OriginTest : public LView
 	void OnPaint(LSurface *pDC)
 	{
 		auto c = GetClient();
-		printf("c=%s off=%i dc=%i,%i\n", GetPos().GetStr(), offset, pDC->X(), pDC->Y());
+		// printf("c=%s off=%i dc=%i,%i\n", GetPos().GetStr(), offset, pDC->X(), pDC->Y());
 		pDC->Colour(L_WHITE);
 		pDC->Rectangle();
 
@@ -252,6 +252,44 @@ struct OriginTest : public LView
 		LSysFont->Colour(L_TEXT, L_HIGH);
 		LSysFont->Transparent(false);
 		ds.Draw(pDC, 40, 10);
+	}
+};
+
+struct RepaintTest : public LView
+{
+	uint64_t ts = 0;
+
+	RepaintTest(int x, int y)
+	{
+		LRect r(x, y, x + 100, y + 50);
+		SetPos(r);
+		ts = LCurrentTime();
+	}
+	
+	void OnCreate()
+	{
+		printf("onCreate called.\n");
+		SetPulse(1000);
+	}
+	
+	void OnPulse()
+	{
+		printf("onPulse..\n");
+		Invalidate();
+	}
+	
+	void OnPaint(LSurface *pDC)
+	{
+		pDC->Colour(L_WORKSPACE);
+		pDC->Rectangle();
+		
+		auto fnt = GetFont();
+		auto diff = LCurrentTime() - ts;
+		auto s = LString::Fmt(LPrintfInt64, diff);
+		LDisplayString ds(fnt, s);
+		fnt->Transparent(true);
+		fnt->Fore(L_TEXT);
+		ds.Draw(pDC, 5, 5);
 	}
 };
 
@@ -315,8 +353,8 @@ public:
 
 			#elif 1
 
-				AddView(new OriginTest(20, 10, 0));
-				// AddView(new OriginTest(120, 40, 10));
+				// AddView(new OriginTest(20, 10, 0));
+				AddView(new RepaintTest(20, 100));
 
 			#elif 0
 
@@ -378,7 +416,7 @@ public:
 	void OnPaint(LSurface *pDC) override
 	{
 		auto c = GetClient();
-		printf("	LWindow::OnPaint %s %i,%i\n", c.GetStr(), pDC->X(), pDC->Y());
+		// printf("	LWindow::OnPaint %s %i,%i\n", c.GetStr(), pDC->X(), pDC->Y());
 		pDC->Colour(L_MED);
 		pDC->Rectangle();
 		

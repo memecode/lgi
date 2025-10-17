@@ -2054,15 +2054,12 @@ bool LView::AttachChildren()
 {
 	for (auto c: Children)
 	{
-		bool a = c->IsAttached();
-		if (!a)
+		if (c->IsAttached())
+			continue;
+		if (!c->Attach(this))
 		{
-			
-			if (!c->Attach(this))
-			{
-				LgiTrace("%s:%i - failed to attach %s\n", _FL, c->GetClass());
-				return false;
-			}
+			LgiTrace("%s:%i - failed to attach %s\n", _FL, c->GetClass());
+			return false;
 		}
 	}
 

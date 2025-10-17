@@ -368,9 +368,10 @@ bool LView::SetPos(LRect &p, bool Repaint)
 
 bool LView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 {
-	auto *ParWnd = GetWindow();
-	if (!ParWnd)
+	auto wnd = GetWindow();
+	if (!wnd)
 		return false; // Nothing we can do till we attach
+
 	if (!InThread())
 	{
 		DEBUG_INVALIDATE("%s::Invalidate out of thread\n", GetClass());
@@ -404,6 +405,15 @@ bool LView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 		return false;
 	}
 
+	auto hnd = wnd->WindowHandle();
+	if (!hnd)
+	{
+		printf("%s:%i - no handle.\n", _FL);
+		return false;
+	}
+	
+	BMessage inval(M_INVALIDATE);
+	hnd->PostMessage(&inval);
 	return true;
 }
 
@@ -588,20 +598,23 @@ bool LView::Attach(LViewI *parent)
 	bool Status = false;
 	bool Debug = false; // !Stricmp(GetClass(), "LScrollBar");
 
-	LView *Parent = d->GetParent();
-	LAssert(Parent == NULL || Parent == parent);
+	// Parent handling
+	auto wasAttached = IsAttached();
+	LView *oldParent = d->GetParent();
+	if (oldParent && oldParent != parent)
+	{
+		Detach();
+	}
 
 	SetParent(parent);
-	Parent = d->GetParent();
-	
-	auto WndNull = _Window == NULL;
-	_Window = Parent ? Parent->_Window : this;
-
-	if (!parent)
+	auto Parent = d->GetParent();
+	if (!Parent)
 	{
 		LgiTrace("%s:%i - No parent window.\n", _FL);
 		return false;
 	}
+
+	auto w = GetWindow();
 
 	if (Debug)
 		LgiTrace("%s:%i - Attaching %s to view %s\n",
@@ -626,7 +639,6 @@ bool LView::Attach(LViewI *parent)
 			_FL,
 			GetClass(), parent->GetClass());
 
-	auto w = GetWindow();
 	if (w && TestFlag(WndFlags, GWF_FOCUS))
 		w->SetFocus(this, LWindow::GainFocus);
 
@@ -637,6 +649,11 @@ bool LView::Attach(LViewI *parent)
 			d->Parent->AddView(this);
 		d->Parent->OnChildrenChanged(this, true);
 	}
+	
+	bool attached = IsAttached();
+	printf("%s - attach, %i,%i\n", GetClass(), wasAttached, attached);
+	if (attached && !wasAttached)
+		OnCreate();
 	
 	return Status;
 }
