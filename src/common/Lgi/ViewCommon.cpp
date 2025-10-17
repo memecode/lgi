@@ -852,7 +852,9 @@ int LView::OnCommand(int Cmd, int Event, OsView Wnd)
 void LView::OnNcPaint(LSurface *pDC, LRect &r)
 {
 	int px = 0;
-	if (_Border.x1 == _Border.x2 == _Border.y1 == _Border.y2)
+	if (_Border.x1 == _Border.x2 &&
+		_Border.x1 == _Border.y1 &&
+		_Border.x1 == _Border.y2)
 		px = _Border.x1;
 
 	if (px == 2)
