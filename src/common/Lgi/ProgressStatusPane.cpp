@@ -17,7 +17,7 @@ LProgressStatusPane::LProgressStatusPane() : DoEvery(200)
 {
 	SetWidth(100);
 	Sunken(true);
-	_BorderSize = 1;
+	GetBorder().Set(1, 1, 1, 1);
 }
 
 LProgressStatusPane::~LProgressStatusPane()

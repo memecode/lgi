@@ -53,6 +53,61 @@
 
 #define IsSymbolChar(c)			( IsDigit(c) || IsAlpha(c) || strchr("-_", c) )
 
+bool FilterTempFiles(LString &path)
+{
+	if (auto ext = LGetExtension(path))
+	{
+		if (!Stricmp(ext, "o") ||
+			!Stricmp(ext, "i") ||
+			!Stricmp(ext, "d"))
+			return false;
+	}
+
+	return true;
+}
+
+void FileResultsToList(LList *lst, LArray<LString> &files, LString inputLeaf, int platformHint)
+{
+	if (!lst || files.Length() == 0)
+		return;
+
+	// There is often an empty list if the previous search is canceled.
+	// Don't clear the result in that case...
+	if (files.Length() == 0 &&
+		lst->Length() > 0)
+		return;
+
+	List<LListItem> exact;
+	List<LListItem> others;
+	auto platform = PlatformFlagsToStr(platformHint).Lower();
+
+	for (auto r: files)
+	{
+		if (!FilterTempFiles(r))
+			continue;
+
+		bool isExact = false;
+		if (auto leaf = LGetLeaf(r))
+			if (inputLeaf.Equals(leaf))
+				isExact = true;
+
+		bool hasPlatform = platform && r.Lower().Find(platform) >= 0;
+		auto a = isExact ? &exact : &others;
+		a->Insert(new LListItem(r), hasPlatform ? 0 : -1);
+		
+		if (exact.Length() + others.Length() > 200)
+			break;
+	}
+	
+	lst->Empty();
+	lst->Insert(exact);
+	lst->Insert(others);
+	lst->ResizeColumnsToContent();
+
+	if (auto i = lst->ItemAt(0))
+		i->Select(true);
+}
+
 LString::Array CollectAllSystemIncludePaths(IdeProject* proj, SysPlatform Platform)
 {
 	LString::Array Paths;
@@ -181,8 +236,8 @@ int SysIncThread::Main()
 //////////////////////////////////////////////////////////////////////////////////////////
 class FindInProject : public LDialog
 {
-	AppWnd *App = NULL;
-	LList *Lst = NULL;
+	AppWnd *App = nullptr;
+	LList *Lst = nullptr;
 	bool SearchSysInc = false;
 	static LString::Array SysHeaders;
 	LAutoPtr<SysIncThread> Thread;
@@ -192,7 +247,6 @@ public:
 
 	FindInProject(AppWnd *app)
 	{
-		Lst = NULL;
 		App = app;
 		if (LoadFromResource(IDD_FIND_PROJECT_FILE))
 		{
@@ -281,19 +335,14 @@ public:
 				paths += CollectAllSystemIncludePaths(App->RootProject(), PlatformFlagsToEnum(Platforms));
 			}
 
-			backend->SearchFileNames(s, paths, [this, Hnd = AddDispatch()](auto &results)
+			backend->SearchFileNames(s, paths,
+				[this, Hnd = AddDispatch(), inputLeaf=LString(LGetLeaf(s))](auto &results)
 				{
 					// This checks if the window still exists...
 					// It may have been deleted while the search was being done.
 					if (!LEventSinkMap::Dispatch.IsSink(Hnd))
 						return;
-
-					Lst->Empty();
-
-					for (auto result: results)
-						Lst->Insert(new LListItem(result));
-
-					Lst->ResizeColumnsToContent();
+					FileResultsToList(Lst, results, inputLeaf, App->GetPlatform());
 				});
 		}
 		else
@@ -1944,7 +1993,7 @@ AppWnd::AppWnd()
 						// GetBuildLog()->Print("OnBreakPoint(%s, %i)\n", bp.File.Get(), added);
 						doc->OnBreakPoint(id, added);
 					}
-					else GetBuildLog()->Print("%s:%i - no file '%s'\n", _FL, bp.File.Get());					
+					// else GetBuildLog()->Print("%s:%i - no file '%s'\n", _FL, bp.File.Get());					
 				}
 			}
 		});
@@ -2997,7 +3046,8 @@ bool AppWnd::OnRequestClose(bool IsOsQuit)
 					RunCallback([]()
 						{
 							LCloseApp();
-						});
+						},
+						_FL);
 				}
 			});
 
@@ -3125,7 +3175,8 @@ void AppWnd::GotoReference(const char *File, int Line, bool CurIp, bool WithHist
 			[this, File=LString(File), Line, CurIp, WithHistory, Callback]()
 			{
 				GotoReference(File, Line, CurIp, WithHistory, Callback);
-			}
+			},
+			_FL
 		);		
 		return;
 	}
@@ -3230,10 +3281,12 @@ void AppWnd::OpenFile(const char *FileName, NodeSource *Src, bool canonical, std
 {
 	if (!InThread())
 	{
-		RunCallback( [this, canonical, callback, fn=LString(FileName), Src]()
-		{
-			OpenFile(fn, Src, canonical, callback);
-		});
+		RunCallback(
+			[this, canonical, callback, fn=LString(FileName), Src]()
+			{
+				OpenFile(fn, Src, canonical, callback);
+			},
+			_FL);
 		return;
 	}
 
@@ -3262,9 +3315,27 @@ void AppWnd::OpenFile(const char *FileName, NodeSource *Src, bool canonical, std
 				hints.Add(backend->GetBasePath());
 
 				backend->ResolvePath(FileName, hints,
-					[this, Src, callback](auto str, auto err)
+					[this, Src, callback, backend, txt=LString(FileName)](auto str, auto err) mutable
 					{
-						if (err)
+						if (err.GetCode() == LErrorPathNotFound)
+						{
+							// Try a find in files search...
+							LString::Array base;
+							base.Add(backend->GetBasePath());
+							backend->SearchFileNames(
+								txt,
+								base,
+								[this, Src, callback, txt](auto &strs)
+								{
+									LString::Array matches;
+									for (auto s: strs)
+										if (s.Find(txt) >= 0)
+											matches.Add(s);
+									if (matches.Length() == 1)
+										OpenFile(matches[0], Src, true, callback);
+								});
+						}
+						else if (err)
 							GetBuildLog()->Print("%s:%i - ResolvePath failed: %s\n", _FL, err.ToString().Get());
 						else
 							OpenFile(str, Src, true, callback);
@@ -5236,7 +5307,7 @@ public:
 		LRect r(10, 10, 110, 210);
 		SetPos(r);
 		Sunken(true);
-		printf("_BorderSize=%i\n", _BorderSize);
+		printf("_Border=%s\n", _Border.GetStr());
 	}
 
 	void OnPaint(LSurface *pdc)

@@ -827,22 +827,15 @@ public:
 				paths += CollectAllSystemIncludePaths(Proj, PlatformFlagsToEnum(App->GetPlatform()));
 			}
 
-			backend->SearchFileNames(InputStr, paths, [this, hnd=Lst->AddDispatch()](auto &results)
+			backend->SearchFileNames(InputStr, paths,
+				[this, hnd=Lst->AddDispatch(), inputLeaf=LString(LGetLeaf(InputStr))](auto &results)
 				{
 					// This prevents the callback crashing if the list has been deleted 
 					// between the SearchFileNames and the results coming back.
 					if (!LEventSinkMap::Dispatch.IsSink(hnd))
 						return;
 
-					List<LListItem> Items;
-					for (auto r: results)
-					{
-						Items.Insert(new LListItem(r));
-						if (Items.Length() > 200)
-							break;
-					}
-					Lst->Empty();
-					Lst->Insert(Items);
+					FileResultsToList(Lst, results, inputLeaf, App->GetPlatform());
 					OnChange();
 				});
 		}
@@ -1954,7 +1947,8 @@ int IdeDoc::OnNotify(LViewI *v, const LNotification &n)
 							[popup=d->FilePopup, v, n]()
 							{
 								popup->OnNotify(v, n);
-							}
+							},
+							_FL
 						);
 					}
 				}
@@ -1997,7 +1991,8 @@ int IdeDoc::OnNotify(LViewI *v, const LNotification &n)
 						d->MethodPopup->RunCallback([popup=d->MethodPopup, v, n]()
 							{
 								popup->OnNotify(v, n);
-							});
+							},
+							_FL);
 					}
 				}
 			}
@@ -2032,7 +2027,8 @@ int IdeDoc::OnNotify(LViewI *v, const LNotification &n)
 						d->SymPopup->RunCallback([popup=d->SymPopup, v, n]()
 							{
 								popup->OnNotify(v, n);
-							});
+							},
+							_FL);
 					}
 				}
 			}

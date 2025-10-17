@@ -557,7 +557,6 @@ LToolButton::LToolButton(int Bx, int By)
 	SetParent(0);
 	TipId = -1;
 
-	_BorderSize = 0;
 	LResources::StyleElement(this);
 }
 
@@ -1034,7 +1033,7 @@ LToolBar::LToolBar()
 {
 	d = new LToolBarPrivate;
 	Name("LGI_Toolbar");
-	_BorderSize = 1;
+	GetBorder().Set(1, 1, 1, 1);
 	_IsToolBar = 1;
 
 	// Setup tool button font

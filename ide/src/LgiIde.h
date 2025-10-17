@@ -341,3 +341,4 @@ extern const char sCurrentPlatform[];
 extern const char *Untitled;
 extern const char SourcePatterns[];
 extern LString::Array CollectAllSystemIncludePaths(IdeProject* proj, SysPlatform Platform);
+extern void FileResultsToList(LList *lst, LArray<LString> &files, LString inputLeaf, int platformHint);

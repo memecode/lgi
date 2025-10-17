@@ -79,6 +79,14 @@ public:
 		y1 = r->y1;
 		y2 = r->y2;
 	}
+
+	operator bool() const
+	{
+		return x1 != 0 ||
+			y1 != 0 ||
+			x2 != 0 ||
+			y2 != 0;
+	}
 	
 	LPoint Origin() { return LPoint(x1, y1); }
 	LPoint Center() { return LPoint(x1 + (X()/2), y1 + (Y()/2)); }

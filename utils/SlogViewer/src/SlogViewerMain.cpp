@@ -657,10 +657,12 @@ public:
 		if (!InThread())
 		{
 			// Make sure this is running in the window's thread
-			RunCallback([this]()
-			{
-				ClearLogs();
-			});
+			RunCallback(
+				[this]()
+				{
+					ClearLogs();
+				},
+				_FL);
 			return;
 		}
 

@@ -220,6 +220,7 @@ public:
 	const char *GetText(int Col);
 	int GetImage(int Flags);
 	void OnMouseClick(LMouse &m);
+	void OnBackendReady();
 };
 
 class IdeTree : public LTree

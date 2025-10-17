@@ -96,9 +96,9 @@ protected:
 	#ifndef HAIKU
 	LMutex				*_Lock = NULL;
 	#endif
-	uint16				_BorderSize = 0;
 	uint16				_IsToolBar = 0;
 	int					WndFlags = 0;
+	LRect				_Margin, _Border;
 
 	static LViewI		*_Capturing;
 	static LViewI		*_Over;
@@ -409,17 +409,27 @@ public:
 	/// On Haiku this will be the BWindow's thread, there is one per LWindow.
 	OsThreadId ViewThread();
 
-protected:	
+	/// Generic callback type
+	using TCallback = std::function<void()>;
+
+protected:
+	struct CallbackInfo
+	{
+		TCallback cb;
+		const char *file;
+		int line;
+	};
+
 	class CallbackStore : public LMutex
 	{
-		LHashTbl<IntKey<int>, std::function<void()>*> map;
+		LHashTbl<IntKey<int>, CallbackInfo*> map;
 
 	public:
 		CallbackStore() : LMutex("CallbackStore")
 		{
 		}
 
-		int Add(std::function<void()> cb)
+		int Add(TCallback &&cb, const char *file, int line)
 		{
 			if (!LockWithTimeout(4000, _FL))
 			{
@@ -432,8 +442,13 @@ protected:
 			for (; map.Find(id); id++)
 				;			
 			
-			map.Add(id, new std::function<void()>(std::move(cb)));
-			// printf("%i: CbStore.Add %i\n", LCurrentThreadId(), id);
+			if (auto inf = new CallbackInfo)
+			{
+				inf->cb = std::move(cb);
+				inf->file = file;
+				inf->line = line;
+				map.Add(id, inf);
+			}
 
 			Unlock();
 			return id;
@@ -448,13 +463,12 @@ protected:
 			}			
 
 			bool status = false;
-			auto cb = map.Find(id);
-			if (cb)
+			if (CallbackInfo *info = map.Find(id))
 			{
-				(*cb)();
+				info->cb();
 				if (map.Delete(id))
 				{
-					delete cb;
+					delete info;
 					status = true;
 					// printf("%i: CbStore.Call %i\n", LCurrentThreadId(), id);
 				}
@@ -496,7 +510,7 @@ public:
 	/// Run some code in the UI thread...
 	/// But don't wait for any sort of response.
 	/// \returns true if the callback was sent (but not necessarily processed).
-	bool RunCallback(std::function<void()> Callback)
+	bool RunCallback(std::function<void()> Callback, const char *file, int line)
 	{
 		if (!Callback)
 		{
@@ -504,7 +518,7 @@ public:
 			return false;
 		}
 
-		int id = CbStore.Add(std::move(Callback));
+		int id = CbStore.Add(std::move(Callback), file, line);
 
 		return PostEvent(M_VIEW_RUN_CALLBACK, (LMessage::Param) id);
 	}
@@ -537,9 +551,11 @@ public:
 		}
 
 		int id = CbStore.Add([Callback, &result]()
-		{
-			result.Reset(new T(Callback()));
-		});
+			{
+				result.Reset(new T(Callback()));
+			},
+			file,
+			line);
 
 		auto ref = LString::Fmt("f=%s,ln=%i,cur=" LPrintfThreadId ",view=" LPrintfThreadId,
 			file, line,
@@ -643,7 +659,10 @@ public:
 	LCursor GetCursor(int x, int y) override;
 	
 	/// \brief Get the position of the view relitive to it's parent.
-	virtual LRect &GetPos() override { return Pos; }
+	LRect &GetPos() override { return Pos; }
+	LRect &GetMargin() override;
+	LRect &GetBorder() override;
+
 	/// Get the client region of the window relitive to itself (ie always 0,0-x,y)
 	virtual LRect &GetClient(bool InClientSpace = true) override;
 	/// Set the position of the view in terms of it's parent
@@ -699,7 +718,7 @@ public:
 		LMouse &m,
 		/// Get the location in screen coordinates
 		bool ScreenCoords = false
-	) override;
+	)	override;
 
 	/// \brief Gets the ID associated with the view
 	///
@@ -874,6 +893,9 @@ public:
 	/// Called after the view is attached to a new parent
 	void OnAttach() override;
 	
+	/// This calculates the margin and border from CSS (or _BorderSize)
+	bool CssLayout(bool reCalculate = false) override;
+
 	/// Called to get layout information for the control. It's called
 	/// up to 3 times to collect various dimensions:
 	/// 1) PreLayout: Get the maximum width, and optionally the minimum width.

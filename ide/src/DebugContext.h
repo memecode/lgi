@@ -44,7 +44,7 @@ public:
 	ssize_t Write(const void *Ptr, ssize_t Size, int Flags = 0) override;
 	void OnState(bool Debugging, bool Running) override;
 	void OnFileLine(const char *File, int Line, bool CurrentIp) override;
-	void OnError(LString Str) override;
+	void OnError(LError err) override;
 	void OnCrash(int Code) override;
 	void Ungrab() override;
 	void OnWarning(LString str) override;

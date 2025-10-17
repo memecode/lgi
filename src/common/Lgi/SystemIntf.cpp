@@ -36,10 +36,10 @@ extern const char *ToString(SysPlatform p)
 #endif
 
 // General SystemIntf work handling:
-void SystemIntf::AddWork(LString ctx, TPriority priority, TCallback &&job)
+int SystemIntf::AddWork(LString ctx, TPriority priority, TCallback &&job)
 {
 	if (IsCancelled())
-		return;
+		return -1;
 		
 	auto start = LCurrentTime();
 	Auto lck(this, _FL);
@@ -47,11 +47,17 @@ void SystemIntf::AddWork(LString ctx, TPriority priority, TCallback &&job)
 	if (now - start > 100)
 		log->Print("AddWork lock took %i\n", _FL, (int)(now-start));
 
-	auto w = new TWork(ctx, std::move(job));
-	if (priority != SystemIntf::TBackground)
-		foregroundWork.Add(w);
-	else
-		backgroundWork.Add(w);
+	if (auto w = new TWork(ctx, std::move(job)))
+	{
+		w->handle = nextHandle++;
+		if (priority != SystemIntf::TBackground)
+			foregroundWork.Add(w);
+		else
+			backgroundWork.Add(w);
+		return w->handle;
+	}
+
+	return -1;
 }
 
 bool SystemIntf::HasWork()
@@ -60,11 +66,50 @@ bool SystemIntf::HasWork()
 			backgroundWork.Length() > 0;
 }
 
+void SystemIntf::CancelWork(int handle, bool wait)
+{
+	{
+		// Check the regular queues for pending work...
+		Auto lck(this, _FL);
+		auto check = [this, handle](LArray<TWork*> &arr)
+			{
+				for (auto w: arr)
+					if (w->handle == handle)
+					{
+						log->Print("%s:%i - canceled scheduled work: %i\n", _FL, handle);
+						arr.Delete(w);
+						delete w;
+						return true;
+					}
+				return false;
+			};
+		if (check(foregroundWork))
+			return;
+		if (check(backgroundWork))
+			return;
+
+		// Potentially it's the current work in progress:
+		if (curWork && curWork->handle == handle)
+		{
+			log->Print("%s:%i - canceling cur work: %i\n", _FL, handle);
+			curWork->Cancel();
+		}
+	}
+
+	while (wait)
+	{
+		LSleep(20); // air gap the lock checks...
+
+		Auto lck(this, _FL);
+		if (!curWork || curWork->handle != handle)
+			break; // work is complete.
+	}
+}
+
 void SystemIntf::DoWork()
 {
 	// Is there work to do?
 	auto now = LCurrentTime();
-	LAutoPtr<TWork> curWork;
 	{
 		Auto lck(this, _FL);
 		if (timedWork.Length())
@@ -91,18 +136,35 @@ void SystemIntf::DoWork()
 		}
 	}
 
-	if (curWork)
+	if (Lock(_FL))
 	{
-		curWork->fp();
-
-		auto now = LCurrentTime();
-		if (now - lastLogTs >= 500)
+		if (curWork)
 		{
-			lastLogTs = now;
-			log->Print("foreground %i, background %i\n", (int)foregroundWork.Length(), (int)backgroundWork.Length());
+			TCallback fp = std::move(curWork->fp);
+			TWork *work = curWork.Get();
+			Unlock();
+			
+			fp(work);
+
+			if (Lock(_FL))
+			{
+				curWork.Reset();
+				Unlock();
+			}
+		
+			auto now = LCurrentTime();
+			if (now - lastLogTs >= 500)
+			{
+				lastLogTs = now;
+				log->Print("foreground %i, background %i\n", (int)foregroundWork.Length(), (int)backgroundWork.Length());
+			}
+		}
+		else
+		{
+			Unlock();
+			LSleep(WAIT_MS);
 		}
 	}
-	else LSleep(WAIT_MS);
 }
 
 SystemIntf::PathParts SystemIntf::SplitPath(LString path)
@@ -263,6 +325,7 @@ class SshBackend :
 	LString homePath;
 	LArray<Process*> processes;
 	constexpr static const char *separators = "/\\";
+	int SearchFilesHnd = -1;
 
 	// Lock before use
 	using TWork = std::function<void()>;
@@ -274,7 +337,7 @@ class SshBackend :
 	{
 		AddWork(MakeContext(_FL, "OnProcessComplete"),
 			SystemIntf::TForeground,
-			[this]()
+			[this](auto cancelJob)
 			{
 				// Clean up all exited processes:
 				for (unsigned i=0; i<processes.Length(); i++)
@@ -388,7 +451,7 @@ class SshBackend :
 					*exitCode = -1;
 
 				if (*exitCode)
-					log->Print("Cmd failed: %s\n", output.Get());
+					log->Print("Cmd failed: %s\n	%s\n", cmd.Get(), output.Get());
 			}
 		}
 
@@ -396,8 +459,8 @@ class SshBackend :
 	}
 
 public:
-	SshBackend(LView *parent, LString u, LStream *logger) :
-		SystemIntf(logger, "SshBackend"),
+	SshBackend(LView *parent, LString u, LStream *logger, TBoolCallback readyCallback) :
+		SystemIntf(logger, "SshBackend", readyCallback),
 		LThread("SshBackend.Thread"),
 		app(parent),
 		uri(u),
@@ -498,14 +561,15 @@ public:
 		return LString();
 	}
 
-	LString MakeAbsolute(LString relPath) override
+	LString MakeAbsolute(LString path) override
 	{
-		if (relPath(0) == remoteSep(0))
+		if (path(0) == remoteSep(0))
 		{
-			LAssert(!"this doesn't look like a relative path bro?");
+			// Already absolute
+			return path;
 		}
 
-		auto native = MakeNative(relPath);
+		auto native = MakeNative(path);
 		if (native(0) == '~')
 		{
 			if (homePath)
@@ -557,7 +621,7 @@ public:
 		AddWork(
 			MakeContext(_FL, path),
 			TForeground,
-			[this, path = PreparePath(path), hints, cb, startTs = LCurrentTime()]() mutable
+			[this, path = PreparePath(path), hints, cb, startTs = LCurrentTime()](auto cancelJob) mutable
 			{
 				auto now = LCurrentTime();
 				if (now - startTs > 1000)
@@ -588,7 +652,8 @@ public:
 						if (code == 0)
 							found = path;
 					}
-					else LAssert(!"no home folder?");
+					else
+						LAssert(!"no home folder?");
 				}
 				else
 				{
@@ -629,9 +694,26 @@ public:
 					{
 						LError err(found ? LErrorNone : LErrorPathNotFound, found ? nullptr : "path not found");
 						cb(found, err);
-					});
+					},
+					_FL);
 			}
 		);
+	}
+
+	void GetHome()
+	{
+		ProcessOutput("echo $HOME",
+			[this](auto exitCode, auto str)
+			{
+				if (!exitCode)
+				{
+					RemoveAnsi(str);
+					homePath = str;
+
+					if (onReady)
+						onReady(true);
+				}
+			});
 	}
 
 	void OnConnected()
@@ -639,15 +721,7 @@ public:
 		GetSysType(
 			[this](auto sys)
 			{
-				ProcessOutput("echo $HOME",
-					[this](auto exitCode, auto str)
-					{
-						if (!exitCode)
-						{
-							RemoveAnsi(str);
-							homePath = str;
-						}
-					});
+				GetHome();
 			});
 	}
 
@@ -663,7 +737,7 @@ public:
 		AddWork(
 			MakeContext(_FL, "GetSysType"),
 			SystemIntf::TForeground,
-			[this, cb]()
+			[this, cb](auto cancelJob)
 			{
 				if (auto output = Cmd(GetConsole(), "uname -a\n"))
 				{
@@ -688,7 +762,8 @@ public:
 						app->RunCallback( [this, cb]() mutable
 							{
 								cb(sysType);
-							});
+							},
+							_FL);
 					}
 				}
 			}
@@ -943,7 +1018,7 @@ public:
 		AddWork(
 			MakeContext(_FL, path),
 			SystemIntf::TForeground,
-			[this, cb, path = PreparePath(path)]()
+			[this, cb, path = PreparePath(path)](auto cancelJob)
 			{
 				auto cmd = LString::Fmt("stat %s\n", path.Get());
 				int32_t exitCode = 0;
@@ -1007,7 +1082,8 @@ public:
 							}
 							cb(&s, file, err);
 						}
-					});
+					},
+					_FL);
 			}
 		);
 		return true;
@@ -1024,7 +1100,7 @@ public:
 			[	this,
 				cb,
 				path = PreparePath(Path),
-				logger = priority == TDebugLogging ? log : nullptr]()
+				logger = priority == TDebugLogging ? log : nullptr](auto cancelJob)
 			{
 				int32_t exitCode = 0;
 				auto cmd = LString::Fmt("ls -lan %s\n", path.Get());
@@ -1044,7 +1120,6 @@ public:
 							msg = parts.Last().Strip();
 					}
 					err.Set(LErrorFuncFailed, msg);
-					// LgiTrace("cmd='%s'\nls='%s'\nerr='%s'\n", cmd.Get(), ls.Get(), msg.Get());
 				}
 				else
 				{
@@ -1056,54 +1131,104 @@ public:
 					{
 						cb(dir, err);
 						delete dir;
-					});
+					},
+					_FL);
 			} );
 		return true;
 	}
 
-	bool SearchFileNames(const char *searchTerms, LString::Array inputPaths, std::function<void(LArray<LString>&)> callback) override
+	LString::Array fileCache;
+	uint64_t fileCacheTs = 0;
+
+	bool SearchFileNames(const char *searchTerms,
+						LString::Array inputPaths,
+						std::function<void(LArray<LString>&)> callback,
+						bool cancelPrev) override
 	{
 		if (!searchTerms || !callback)
 			return false;
 
-		AddWork(
+		if (cancelPrev && SearchFilesHnd >= 0)
+		{
+			log->Print("%s:%i - canceling previous work: %i\n", _FL, SearchFilesHnd);
+			CancelWork(SearchFilesHnd);
+		}
+
+		SearchFilesHnd = AddWork(
 			MakeContext(_FL, searchTerms),
 			SystemIntf::TForeground,
-			[this, inputPaths, callback, searchTerms = LString(searchTerms)]() mutable
+			[this, inputPaths, callback, searchTerms=LString(searchTerms)](auto work) mutable
 			{
-				LArray<LString> paths;
-				paths.SetFixedLength(false);
+				auto now = LCurrentTime();
+				auto oneMin = 1000 * 60;
+				auto updateCache = fileCache.Length() == 0;
+				auto parts = searchTerms.SplitDelimit();
 
-				for (auto path: inputPaths)
+				if (updateCache)
 				{
-					LString absPath;
-					if (LIsRelativePath(path))
-						absPath = JoinPath(RemoteRoot(), path);
-					else
-						absPath = path;
-
-					auto parts = searchTerms.SplitDelimit();
-					auto args = LString::Fmt("cd %s && find .", absPath.Get());
-					for (size_t i=0; i<parts.Length(); i++)
-						args += LString::Fmt("%s -iname \"*%s*\"", i ? " -and" : "", LGetLeaf(parts[i]));
-					args += " -and -not -path \"*/.hg/*\" -and -not -iname \"*.d\"";
-
-					int32_t exitCode = 0;
-					auto result = Cmd(GetConsole(), args + "\n", &exitCode);
-					if (!exitCode)
+					for (auto path: inputPaths)
 					{
-						auto lines = TrimContent(result).SplitDelimit("\r\n");
+						if (work->IsCancelled())
+							break;
 						
-						// Turn the results back into absolute paths...
-						for (auto ln: lines)
-							paths.Add(JoinPath(absPath, ln));
+						LString absPath;
+						if (LIsRelativePath(path))
+							absPath = JoinPath(RemoteRoot(), path);
+						else
+							absPath = path;
+
+						auto args = LString::Fmt("cd %s && find .", absPath.Get());
+						/*
+						for (size_t i=0; i<parts.Length(); i++)
+							args += LString::Fmt("%s -iname \"*%s*\"", i ? " -and" : "", LGetLeaf(parts[i]));
+						*/
+						args += " -not -path \"*/.hg/*\" -and -not -iname \"*.d\"";
+
+						int32_t exitCode = 0;
+						auto result = Cmd(GetConsole(), args + "\n", &exitCode, nullptr, work);
+						if (exitCode)
+						{
+							log->Print("%s:%i - find failed with %i\n%s\n", _FL, exitCode, result.Get());
+						}
+						else
+						{
+							auto lines = TrimContent(result).SplitDelimit("\r\n");
+						
+							// Turn the results back into absolute paths...
+							for (auto ln: lines)
+								fileCache.Add(JoinPath(absPath, ln));
+						}
 					}
 				}
 
-				app->RunCallback( [callback, paths]() mutable
+				// filter all files in 'fileCache' via the search terms into 'paths'
+				LArray<LString> paths;
+				paths.SetFixedLength(false);
+				for (auto &f: fileCache)
+				{
+					bool match = true;
+					for (size_t i=0; i<parts.Length(); i++)
+					{
+						if (!Stristr(f.Get(), parts[i].Get()))
+						{
+							match = false;
+							break;
+						}
+					}
+					if (match)
+						paths.Add(f);
+				}
+
+				log->Print("%s:%i - search(%i) SearchFilesHnd=%i\n", _FL, work->handle, SearchFilesHnd);
+				if (work->handle == SearchFilesHnd)
+					SearchFilesHnd = -1;
+
+				app->RunCallback(
+					[callback, paths]() mutable
 					{
 						callback(paths);
-					});
+					},
+					_FL);
 			} );
 
 		return true;
@@ -1139,7 +1264,7 @@ public:
 				dir = RemoteRoot();
 		
 			p->args = LString::Fmt(	"grep -I -R -Hn \"%s\" %s\n",
-									params->Text.Get(),
+									params->Text.Escape().Get(),
 									dir.Get());
 			return RunProcess(dir, p->args, &p->io, this,
 				[p](auto code)
@@ -1190,7 +1315,7 @@ public:
 		AddWork(
 			MakeContext(_FL, Path),
 			priority,
-			[this, cb, Path = PreparePath(Path, false)]() mutable
+			[this, cb, Path = PreparePath(Path, false)](auto cancelJob) mutable
 			{
 				LStringPipe buf;
 
@@ -1213,7 +1338,8 @@ public:
 					app->RunCallback( [this, err, cb, data=buf.NewLStr()]() mutable
 						{
 							cb(data, err);
-						});
+						},
+						_FL);
 				}
 			} );
 
@@ -1233,7 +1359,7 @@ public:
 		AddWork(
 			MakeContext(_FL, Path),
 			priority,
-			[this, result, Path = PreparePath(Path, false), Data]() mutable
+			[this, result, Path = PreparePath(Path, false), Data](auto cancelJob) mutable
 			{
 				LMemStream stream(Data.Get(), Data.Length(), false);
 
@@ -1246,7 +1372,8 @@ public:
 					app->RunCallback( [this, err, result]() mutable
 						{
 							result(err);
-						});
+						},
+						_FL);
 				}
 			} );
 
@@ -1261,7 +1388,7 @@ public:
 		AddWork(
 			MakeContext(_FL, path),
 			SystemIntf::TForeground,
-			[this, cb, createParents, Path = PreparePath(path)]()
+			[this, cb, createParents, Path = PreparePath(path)](auto cancelJob)
 			{
 				auto args = LString::Fmt("mkdir%s %s", createParents ? " -p" : "", Path.Get());
 				int32_t exitVal;
@@ -1271,7 +1398,8 @@ public:
 					app->RunCallback( [exitVal, cb]() mutable
 						{
 							cb(exitVal == 0);
-						});
+						},
+						_FL);
 				}
 			} );
 
@@ -1286,7 +1414,7 @@ public:
 		AddWork(
 			MakeContext(_FL, path),
 			TForeground,
-			[this, cb, recursiveForce, Path = PreparePath(path)]()
+			[this, cb, recursiveForce, Path = PreparePath(path)](auto cancelJob)
 			{
 				auto args = LString::Fmt("rm%s %s", recursiveForce ? " -rf" : "", Path.Get());
 				int32_t exitVal;
@@ -1300,7 +1428,8 @@ public:
 							if (exitVal)
 								err.Set(LErrorFuncFailed, LString::Fmt("cmd returned %i", exitVal));
 							cb(err);
-						});
+						},
+						_FL);
 				}
 			} );
 
@@ -1315,7 +1444,7 @@ public:
 		AddWork(
 			MakeContext(_FL, newPath),
 			TForeground,
-			[this, cb, from = PreparePath(oldPath), to = PreparePath(newPath)]()
+			[this, cb, from = PreparePath(oldPath), to = PreparePath(newPath)](auto cancelJob)
 			{
 				auto args = LString::Fmt("mv %s %s", from.Get(), to.Get());
 				int32_t exitVal;
@@ -1325,7 +1454,8 @@ public:
 					app->RunCallback( [exitVal, cb]() mutable
 						{
 							cb(exitVal == 0);
-						});
+						},
+						_FL);
 				}
 			} );
 
@@ -1350,8 +1480,8 @@ public:
 
 		AddWork(
 			MakeContext(_FL, cmdLine),
-			TBackground,
-			[this, cb, cmd=LString::Fmt("%s\n", cmdLine)]()
+			TForeground,
+			[this, cb, cmd=LString::Fmt("%s\n", cmdLine)](auto cancelJob)
 			{
 				int32_t exitVal;
 				LStringPipe out;
@@ -1361,7 +1491,8 @@ public:
 					app->RunCallback( [exitVal, cb, out=TrimContent(out.NewLStr())]() mutable
 						{
 							cb(exitVal, out);
-						});
+						},
+						_FL);
 				}
 			} );
 
@@ -1376,8 +1507,8 @@ class LocalBackend : public SystemIntf
 	LStream *log = NULL;
 
 public:
-	LocalBackend(LView *parent, LString uri, LStream *logger) :
-		SystemIntf(logger, "LocalBackend"),
+	LocalBackend(LView *parent, LString uri, LStream *logger, TBoolCallback readyCallback) :
+		SystemIntf(logger, "LocalBackend", readyCallback),
 		app(parent),
 		log(logger)
 	{
@@ -1442,7 +1573,10 @@ public:
 		return true;
 	}
 
-	bool SearchFileNames(const char *searchTerms, LString::Array paths, std::function<void(LArray<LString>&)> results) override
+	bool SearchFileNames(const char *searchTerms,
+						LString::Array paths,
+						std::function<void(LArray<LString>&)> results,
+						bool cancelPrev) override
 	{
 		// This could probably be threaded....
 		auto parts = LString(searchTerms).SplitDelimit();
@@ -1823,8 +1957,8 @@ class FtpBackend :
 public:
 	constexpr static int MAX_ATTEMPTS = 5;
 
-	FtpBackend(LView *view, LString addr, LStream *logger) :
-		SystemIntf(logger, "FtpBackend"),
+	FtpBackend(LView *view, LString addr, LStream *logger, TBoolCallback readyCallback) :
+		SystemIntf(logger, "FtpBackend", readyCallback),
 		LThread("FtpBackend.Thread"),
 		parent(view),
 		uri(addr),
@@ -1916,7 +2050,7 @@ public:
 
 		AddWork(MakeContext(_FL, path),
 			TForeground,
-			[this, path, cb=std::move(cb)]()
+			[this, path, cb=std::move(cb)](auto cancelJob)
 			{
 				LError err;
 				struct stat s = {};
@@ -1961,7 +2095,8 @@ public:
 							cb(nullptr, LString(), err);
 						else
 							cb(&s, path, err);
-					});
+					},
+					_FL);
 			});
 
 		return true;
@@ -2066,7 +2201,7 @@ public:
 
 		AddWork(MakeContext(_FL, Path),
 			priority,
-			[this, Path = ConvertPath(Path), results]() mutable
+			[this, Path = ConvertPath(Path), results](auto cancelJob) mutable
 			{
 				LError err;
 				LAutoPtr<FtpDir> curDir = FtpListDir(Path, err);
@@ -2081,7 +2216,8 @@ public:
 						curDir->Valid();
 						delete curDir;
 					}
-				});
+				},
+				_FL);
 			});
 
 		return true;
@@ -2111,7 +2247,7 @@ public:
 		AddWork(
 			MakeContext(_FL, path),
 			priority,
-			[this, path, result]() mutable
+			[this, path, result](auto cancelJob) mutable
 			{
 				LError err;
 				LString fileData;
@@ -2167,10 +2303,12 @@ public:
 						});
 				}
 
-				parent->RunCallback([this, err, fileData, result]()
-				{
-					result(fileData, err);
-				});
+				parent->RunCallback(
+					[this, err, fileData, result]()
+					{
+						result(fileData, err);
+					},
+					_FL);
 			});
 
 		return true;
@@ -2185,7 +2323,7 @@ public:
 		AddWork(
 			MakeContext(_FL, path),
 			priority,
-			[this, path, result, Data]() mutable
+			[this, path, result, Data](auto cancelJob) mutable
 			{
 				LError err;
 				auto parts = SplitPath(path);
@@ -2214,10 +2352,12 @@ public:
 						return EOk;
 					});
 
-				parent->RunCallback([this, err, result]()
-				{
-					result(err);
-				});
+				parent->RunCallback(
+					[this, err, result]()
+					{
+						result(err);
+					},
+					_FL);
 			});
 
 		return true;
@@ -2235,7 +2375,7 @@ public:
 		AddWork(
 			MakeContext(_FL, path),
 			TForeground,
-			[this, path, cb]() mutable
+			[this, path, cb](auto cancelJob) mutable
 			{
 				LError err;
 				auto parts = SplitPath(path);
@@ -2245,10 +2385,12 @@ public:
 						return f->DeleteFile(parts.leaf, &err) ? EOk : EError;
 					});
 
-				parent->RunCallback([this, err, cb]()
-				{
-					cb(err);
-				});
+				parent->RunCallback(
+					[this, err, cb]()
+					{
+						cb(err);
+					},
+					_FL);
 			});
 
 		return false;
@@ -2260,7 +2402,10 @@ public:
 		return false;
 	}
 
-	bool SearchFileNames(const char *searchTerms, LString::Array paths, std::function<void(LArray<LString>&)> results) override
+	bool SearchFileNames(const char *searchTerms,
+						LString::Array paths,
+						std::function<void(LArray<LString>&)> results,
+						bool cancelPrev) override
 	{
 		if (!searchTerms || !results)
 			return false;
@@ -2307,7 +2452,7 @@ public:
 		void Post(LString ctx, int addMilliseconds)
 		{
 			LMutex::Auto lck(owner, _FL);
-			if (auto w = new TTimedWork(ctx, [this]() { Iterate(); }))
+			if (auto w = new TTimedWork(ctx, [this](auto cancelJob) { Iterate(); }))
 			{
 				w->ts = LCurrentTime() + addMilliseconds;
 				owner->timedWork.Add(w);
@@ -2565,15 +2710,18 @@ public:
 	}
 };
 
-LAutoPtr<SystemIntf> CreateSystemInterface(LView *parent, LString uri, LStream *log)
+LAutoPtr<SystemIntf> CreateSystemInterface(	LView *parent,
+											LString uri,
+											LStream *log,
+											SystemIntf::TBoolCallback readyCallback)
 {
 	LAutoPtr<SystemIntf> backend;
 	LUri u(uri);
 	if (u.IsProtocol("ssh"))
-		backend.Reset(new SshBackend(parent, uri, log));
+		backend.Reset(new SshBackend(parent, uri, log, readyCallback));
 	else if (u.IsProtocol("ftp"))
-		backend.Reset(new FtpBackend(parent, uri, log));
+		backend.Reset(new FtpBackend(parent, uri, log, readyCallback));
 	else	
-		backend.Reset(new LocalBackend(parent, uri, log));
+		backend.Reset(new LocalBackend(parent, uri, log, readyCallback));
 	return backend;
 }

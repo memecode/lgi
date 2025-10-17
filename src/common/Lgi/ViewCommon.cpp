@@ -259,7 +259,9 @@ bool LView::RecentlyDeleted(LViewI *v)
 }
 #endif
 
-LView::LView(OsView view)
+LView::LView(OsView view) :
+	_Margin(0, 0, 0, 0),
+	_Border(0, 0, 0, 0)
 {
 	#ifdef _DEBUG
     _Debug = false;
@@ -678,6 +680,59 @@ void LView::OnAttach()
 	#endif
 }
 
+LRect &LView::GetMargin()
+{
+	if (!d->cssLayoutDone)
+		CssLayout();
+	return _Margin;
+}
+
+LRect &LView::GetBorder()
+{
+	if (!d->cssLayoutDone)
+		CssLayout();
+	return _Border;
+}
+
+bool LView::CssLayout(bool reCalculate)
+{
+	if (!d->cssLayoutDone || reCalculate)
+	{
+		LRect box;
+		if (auto parent = GetParent())
+			box = parent->GetClient();
+		else
+			box = Pos;
+
+		d->cssLayoutDone = true;
+		if (auto css = GetCss())
+		{
+			auto fnt = GetFont();
+			auto border = css->Border();
+			auto calcBorder = [&](int &out, LCss::BorderDef b, int box) {
+					LCss::BorderDef *def = b ? &b : &border;
+					out = def->ToPx(box, fnt);
+				};
+			calcBorder(_Border.x1, css->BorderLeft(), box.X());
+			calcBorder(_Border.x2, css->BorderRight(), box.X());
+			calcBorder(_Border.y1, css->BorderTop(), box.Y());
+			calcBorder(_Border.y2, css->BorderBottom(), box.Y());
+
+			auto margin = css->Margin();
+			auto calcMargin = [&](int &out, LCss::Len b, int box) {
+					LCss::Len *def = b ? &b : &margin;
+					out = def->ToPx(box, fnt);
+				};
+			calcMargin(_Margin.x1, css->MarginLeft(), box.X());
+			calcMargin(_Margin.x2, css->MarginRight(), box.X());
+			calcMargin(_Margin.y1, css->MarginTop(), box.Y());
+			calcMargin(_Margin.y2, css->MarginBottom(), box.Y());
+		}
+	}
+
+	return true;
+}
+
 void LView::OnCreate()
 {
 }
@@ -769,8 +824,11 @@ int LView::OnCommand(int Cmd, int Event, OsView Wnd)
 
 void LView::OnNcPaint(LSurface *pDC, LRect &r)
 {
-	int Border = Sunken() || Raised() ? _BorderSize : 0;
-	if (Border == 2)
+	int px = 0;
+	if (_Border.x1 == _Border.x2 == _Border.y1 == _Border.y2)
+		px = _Border.x1;
+
+	if (px == 2)
 	{
 		LEdge e;
 		if (Sunken())
@@ -785,7 +843,7 @@ void LView::OnNcPaint(LSurface *pDC, LRect &r)
 		#endif
 			LWideBorder(pDC, r, e);
 	}
-	else if (Border == 1)
+	else if (px == 1)
 	{
 		LThinBorder(pDC, r, Sunken() ? DefaultSunkenEdge : DefaultRaisedEdge);
 	}
@@ -1829,12 +1887,10 @@ bool LView::DropTarget(bool t)
 
 bool LView::Sunken()
 {
-	// ThreadCheck();
-
 	#if WINNATIVE
-	return TestFlag(d->WndExStyle, WS_EX_CLIENTEDGE);
+		return TestFlag(d->WndExStyle, WS_EX_CLIENTEDGE);
 	#else
-	return TestFlag(GViewFlags, GWF_SUNKEN);
+		return TestFlag(GViewFlags, GWF_SUNKEN);
 	#endif
 }
 
@@ -1843,33 +1899,31 @@ void LView::Sunken(bool i)
 	ThreadCheck();
 
 	#if WINNATIVE
-	if (i) SetFlag(d->WndExStyle, WS_EX_CLIENTEDGE);
-	else ClearFlag(d->WndExStyle, WS_EX_CLIENTEDGE);
-	if (_View)
-	    SetWindowLong(_View, GWL_EXSTYLE, d->WndExStyle);
+		if (i) SetFlag(d->WndExStyle, WS_EX_CLIENTEDGE);
+		else ClearFlag(d->WndExStyle, WS_EX_CLIENTEDGE);
+		if (_View)
+			SetWindowLong(_View, GWL_EXSTYLE, d->WndExStyle);
 	#else
-	if (i) SetFlag(GViewFlags, GWF_SUNKEN);
-	else ClearFlag(GViewFlags, GWF_SUNKEN);
+		if (i) SetFlag(GViewFlags, GWF_SUNKEN);
+		else ClearFlag(GViewFlags, GWF_SUNKEN);
 	#endif
 
 	if (i)
 	{
-		if (!_BorderSize)
-			_BorderSize = 2;
+		if (!GetBorder().x1)
+			_Border.Set(2, 2, 2, 2);
 	}
-	else _BorderSize = 0;
+	else _Border.ZOff(0, 0);
 }
 
 bool LView::Flat()
 {
-	// ThreadCheck();
-
 	#if WINNATIVE
-	return	!TestFlag(d->WndExStyle, WS_EX_CLIENTEDGE) &&
-			!TestFlag(d->WndExStyle, WS_EX_WINDOWEDGE);
+		return	!TestFlag(d->WndExStyle, WS_EX_CLIENTEDGE) &&
+				!TestFlag(d->WndExStyle, WS_EX_WINDOWEDGE);
 	#else
-	return !TestFlag(GViewFlags, GWF_SUNKEN) &&
-		   !TestFlag(GViewFlags, GWF_RAISED);
+		return !TestFlag(GViewFlags, GWF_SUNKEN) &&
+			   !TestFlag(GViewFlags, GWF_RAISED);
 	#endif
 }
 
@@ -1878,20 +1932,18 @@ void LView::Flat(bool i)
 	ThreadCheck();
 	
 	#if WINNATIVE
-	ClearFlag(d->WndExStyle, (WS_EX_CLIENTEDGE|WS_EX_WINDOWEDGE));
+		ClearFlag(d->WndExStyle, (WS_EX_CLIENTEDGE|WS_EX_WINDOWEDGE));
 	#else
-	ClearFlag(GViewFlags, (GWF_RAISED|GWF_SUNKEN));
+		ClearFlag(GViewFlags, (GWF_RAISED|GWF_SUNKEN));
 	#endif
 }
 
 bool LView::Raised()
 {
-	// ThreadCheck();
-	
 	#if WINNATIVE
-	return TestFlag(d->WndExStyle, WS_EX_WINDOWEDGE);
+		return TestFlag(d->WndExStyle, WS_EX_WINDOWEDGE);
 	#else
-	return TestFlag(GViewFlags, GWF_RAISED);
+		return TestFlag(GViewFlags, GWF_RAISED);
 	#endif
 }
 
@@ -1900,19 +1952,19 @@ void LView::Raised(bool i)
 	ThreadCheck();
 
 	#if WINNATIVE
-	if (i) SetFlag(d->WndExStyle, WS_EX_WINDOWEDGE);
-	else ClearFlag(d->WndExStyle, WS_EX_WINDOWEDGE);
+		if (i) SetFlag(d->WndExStyle, WS_EX_WINDOWEDGE);
+		else ClearFlag(d->WndExStyle, WS_EX_WINDOWEDGE);
 	#else
-	if (i) SetFlag(GViewFlags, GWF_RAISED);
-	else ClearFlag(GViewFlags, GWF_RAISED);
+		if (i) SetFlag(GViewFlags, GWF_RAISED);
+		else ClearFlag(GViewFlags, GWF_RAISED);
 	#endif
 
 	if (i)
 	{
-		if (!!_BorderSize)
-			_BorderSize = 2;
+		if (!GetBorder().x1)
+			_Border.Set(2, 2, 2, 2);
 	}
-	else _BorderSize = 0;
+	else _Border.ZOff(0, 0);
 }
 
 int LView::GetId() const

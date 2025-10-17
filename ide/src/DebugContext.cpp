@@ -198,37 +198,39 @@ public:
 		int CurrentThread = -1;
 		Db->GetThreads([this](auto threads, auto cur)
 			{
-				App->RunCallback([this, threads, cur]() mutable
-				{
-					Ctx->Threads->Empty();
-					for (unsigned i=0; i<threads.Length(); i++)
+				App->RunCallback(
+					[this, threads, cur]() mutable
 					{
-						auto &f = threads[i];
-						if (IsDigit(*f))
+						Ctx->Threads->Empty();
+						for (unsigned i=0; i<threads.Length(); i++)
 						{
-							char *Sp = f;
-							while (*Sp && IsDigit(*Sp))
-								Sp++;
-							if (*Sp)
+							auto &f = threads[i];
+							if (IsDigit(*f))
 							{
-								*Sp++ = 0;
-								while (*Sp && IsWhite(*Sp))
+								char *Sp = f;
+								while (*Sp && IsDigit(*Sp))
 									Sp++;
+								if (*Sp)
+								{
+									*Sp++ = 0;
+									while (*Sp && IsWhite(*Sp))
+										Sp++;
 
-								LListItem *it = new LListItem;
+									LListItem *it = new LListItem;
 						
-								int ThreadId = atoi(f);
-								it->SetText(f, 0);
-								it->SetText(Sp, 1);
+									int ThreadId = atoi(f);
+									it->SetText(f, 0);
+									it->SetText(Sp, 1);
 						
-								Ctx->Threads->Insert(it);
-								it->Select(ThreadId == cur);
-							}
-						}			
-					}
+									Ctx->Threads->Insert(it);
+									it->Select(ThreadId == cur);
+								}
+							}			
+						}
 			
-					Ctx->Threads->SendNotify();
-				});
+						Ctx->Threads->SendNotify();
+					},
+					_FL);
 			});
 	}
 
@@ -283,10 +285,12 @@ public:
 			printf("Db->GetCallStack...\n");
 			Db->GetCallStack([this](auto Stack)
 			{
-				Ctx->CallStack->RunCallback([this, Stack]() mutable
-				{
-					OnCallStack(Stack);
-				});
+				Ctx->CallStack->RunCallback(
+					[this, Stack]() mutable
+					{
+						OnCallStack(Stack);
+					},
+					_FL);
 			});
 		}
 		else
@@ -394,7 +398,8 @@ bool LDebugContext::DumpObject(const char *Var, const char *Val)
 				[this, txt]()
 				{
 					ObjectDump->Name(txt);
-				}
+				},
+				_FL
 			);
 		}
 	);
@@ -635,7 +640,8 @@ void LDebugContext::Quit()
 							// Calling 'finished' will delete 'this'
 							finished();
 						}
-					});
+					},
+					_FL);
 			});
 }
 
@@ -937,15 +943,21 @@ ssize_t LDebugContext::Write(const void *Ptr, ssize_t Size, int Flags)
 	return -1;
 }
 
-void LDebugContext::OnError(LString Str)
+void LDebugContext::OnError(LError err)
 {
-	if (DebuggerLog)
-		DebuggerLog->Print("Error: %s\n", Str.Get());
+	LAssert(err.SrcFile && err.SrcLine);
 
-	d->App->RunCallback([this, Str]()
+	auto str = err.ToString();
+
+	if (DebuggerLog)
+		DebuggerLog->Print("Error: %s\n", str.Get());
+
+	d->App->RunCallback([this, err]() mutable
 		{
-			LPopupNotification::Message(d->App, Str);
-		});
+			LPopupNotification::Message(d->App, err.ToString());
+		},
+		err.SrcFile,
+		err.SrcLine);
 }
 
 void LDebugContext::OnCrash(int Code)

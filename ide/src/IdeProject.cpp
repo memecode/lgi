@@ -1433,7 +1433,8 @@ void BuildThread::OnAfterMain()
 	p->GetApp()->RunCallback([p]()
 	{
 		p->BuildThreadFinished();
-	});
+	},
+	_FL);
 }
 
 BuildThread::~BuildThread()
@@ -3410,6 +3411,43 @@ void IdeProject::CreateProject()
 	Expanded(true);	
 }
 
+void IdeProject::OnBackendReady()
+{
+	if (d->Backend)
+	{
+		// Fix up any relative break point paths...
+		if (auto store = d->App->GetBreakPointStore())
+		{
+			LArray<int> all = store->GetAll();
+			for (auto id: all)
+			{
+				auto bp = store->Get(id);
+				if (bp.File.Find("~") >= 0)
+				{
+					LString::Array hints;
+					d->Backend->ResolvePath(bp.File, hints,
+						[store, id](auto path, auto err)
+						{
+							if (err)
+							{
+								LAssert(!"handle err");
+							}
+							else
+							{
+								auto bp = store->Get(id);
+								if (bp)
+								{
+									bp.File = path;
+									store->Update(id, bp);
+								}
+							}
+						});
+				}
+			}
+		}
+	}
+}
+
 ProjectStatus IdeProject::OpenFile(const char *FileName)
 {
 	auto Log = d->App->GetBuildLog();
@@ -3520,6 +3558,7 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 					{
 						if (auto store = d->App->GetBreakPointStore())
 						{
+							// Can't resolve the paths with '~' to absolute here, the backend hasn't been initialized.
 							if (auto id = store->Add(bp))
 							{
 								d->UserBreakpoints.Add(id);
@@ -3564,9 +3603,17 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 			Uri = cache = u.ToString();
 		}
 
-		d->Backend = CreateSystemInterface(d->App, Uri, d->App->GetNetworkLog());
-		if (d->Backend)
+		if ((d->Backend = CreateSystemInterface(d->App,
+												Uri,
+												d->App->GetNetworkLog(),
+												[this](auto status)
+												{
+													if (status)
+														OnBackendReady();
+												})))
+		{
 			Refresh();
+		}
 	}
 
 	if (auto be = GetBackend())

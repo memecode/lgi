@@ -26,7 +26,7 @@ LPanel::LPanel(const char *name, int size, bool open)
 	OpenSize = size;
 	Align = GV_EDGE_TOP;
 	
-	_BorderSize = 1;
+	GetBorder().Set(1, 1, 1, 1);
 	Raised(true);
 	LResources::StyleElement(this);
 }
