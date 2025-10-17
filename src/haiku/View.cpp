@@ -320,17 +320,17 @@ bool LView::_Mouse(LMouse &m, bool Move)
 
 LRect &LView::GetClient(bool ClientSpace)
 {
-	int Edge = (Sunken() || Raised()) ? _BorderSize : 0;
+	auto border = GetBorder();
 
 	static LRect c;
 	if (ClientSpace)
 	{
-		c.ZOff(Pos.X() - 1 - (Edge<<1), Pos.Y() - 1 - (Edge<<1));
+		c.ZOff(Pos.X() - 1 - _Border.x1 - _Border.x2, Pos.Y() - 1 - _Border.y1 - _Border.y2);
 	}
 	else
 	{
 		c.ZOff(Pos.X()-1, Pos.Y()-1);
-		c.Inset(Edge, Edge);
+		c.Inset(&_Border);
 	}
 	
 	return c;
@@ -393,7 +393,7 @@ bool LView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 
 	DEBUG_INVALIDATE("%s::Invalidate r=%s frame=%i\n", GetClass(), r.GetStr(), Frame);
 	if (!Frame)
-		r.Offset(_BorderSize, _BorderSize);
+		r.Inset(&GetBorder());
 
 	LPoint Offset;
 	WindowVirtualOffset(&Offset);

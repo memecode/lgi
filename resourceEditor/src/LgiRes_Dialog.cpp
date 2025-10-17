@@ -3492,7 +3492,8 @@ void ResDialog::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
 	LAutoPtr<LSurface> Local;
 	if (!pDC)
 	{
-		if (!Local.Reset(new LScreenDC(this))) return;
+		if (!Local.Reset(new LScreenDC(this)))
+			return;
 		pDC = Local;
 	}
 

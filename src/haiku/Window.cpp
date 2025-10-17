@@ -907,6 +907,11 @@ int LWindow::WaitThread()
 	return value;
 }
 
+OsPainter LWindow::GetPainter()
+{
+	return d->view;
+}
+
 OsWindow LWindow::WindowHandle()
 {
 	return d;

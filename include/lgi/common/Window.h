@@ -287,6 +287,7 @@ public:
 		// Props
 		#if defined(HAIKU)
 			OsWindow WindowHandle() override;
+			OsPainter GetPainter();
 		#else
 			OsWindow WindowHandle() override { return Wnd; }
 		#endif

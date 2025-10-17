@@ -51,17 +51,20 @@ LScreenDC::LScreenDC()
 	d->Bits = GdcD->GetBits();
 }
 
-LScreenDC::LScreenDC(BView *view, void *param)
+LScreenDC::LScreenDC(LView *view, void *param)
 {
 	d = new LScreenPrivate;
-	d->v = view;
+	
+	if (auto wnd = view->GetWindow())
+		d->v = wnd->GetPainter();
+	
 	d->Bits = GdcD->GetBits();
 	if (!d->v)
 	{
 		LgiTrace("%s:%i - LScreenDC::LScreenDC - No view?\n", _FL);
 		LAssert(0);
 		return;
-	}
+	}	
 	
 	d->Client = ((LRect)d->v->Frame()).ZeroTranslate();
 

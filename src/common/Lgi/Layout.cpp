@@ -187,8 +187,12 @@ void LLayout::OnPosChange()
 {
 	LRect r = LView::GetClient();
 	#ifndef MAC
-	int Edge = (Sunken() || Raised()) ? _BorderSize : 0;
-	r.Offset(Edge, Edge);
+	if (int borderPx =	_Border.x1 == _Border.x2 &&
+						_Border.x1 == _Border.y1 &&
+						_Border.x1 == _Border.y2
+						? _Border.x1
+						: 0)
+		r.Offset(borderPx, borderPx);
 	#endif
 	LRect v(r.x2-LScrollBar::SCROLL_BAR_SIZE+1, r.y1, r.x2, r.y2);
 	LRect h(r.x1, r.y2-LScrollBar::SCROLL_BAR_SIZE+1, r.x2, r.y2);
