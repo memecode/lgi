@@ -412,8 +412,13 @@ bool LView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 		return false;
 	}
 	
-	BMessage inval(M_INVALIDATE);
-	hnd->PostMessage(&inval);
+	// Ask the LWindow to paint the area, and then invalidate itself:
+	BMessage m(M_HAIKU_WND_EVENT);
+	m.AddPointer(LMessage::PropWindow, (void*)wnd);
+	m.AddInt32(LMessage::PropEvent, LMessage::Draw);
+	m.AddRect("rect", r);
+	LAppPrivate::Post(&m);
+		
 	return true;
 }
 
@@ -650,10 +655,11 @@ bool LView::Attach(LViewI *parent)
 		d->Parent->OnChildrenChanged(this, true);
 	}
 	
-	bool attached = IsAttached();
-	printf("%s - attach, %i,%i\n", GetClass(), wasAttached, attached);
-	if (attached && !wasAttached)
+	if (IsAttached() && !wasAttached && !d->onCreateEvent)
+	{
+		d->onCreateEvent = true;
 		OnCreate();
+	}
 	
 	return Status;
 }

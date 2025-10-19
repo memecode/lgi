@@ -268,13 +268,13 @@ struct RepaintTest : public LView
 	
 	void OnCreate()
 	{
-		printf("onCreate called.\n");
+		// printf("onCreate called.\n");
 		SetPulse(1000);
 	}
 	
 	void OnPulse()
 	{
-		printf("onPulse..\n");
+		// printf("onPulse..\n");
 		Invalidate();
 	}
 	

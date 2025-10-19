@@ -232,9 +232,6 @@ struct LBView : public Parent
 		LAppPrivate::Post(&m);
 	}
 
-	// LWindow's get their events from their LWindowPrivate
-	#define IsLWindow	dynamic_cast<LWindow*>(d->View)
-
 	void FrameMoved(BPoint p)
 	{
 		auto m = MakeMessage(LMessage::FrameMoved);
@@ -242,14 +239,8 @@ struct LBView : public Parent
 		LAppPrivate::Post(&m);		
 	}
 
-	void FrameResized(float width, float height)
-	{
-		auto m = MakeMessage(LMessage::FrameResized);
-		m.AddFloat("width", width);
-		m.AddFloat("height", height);
-		LAppPrivate::Post(&m);		
-	}
-
+	void FrameResized(float width, float height) override;
+	
 	void MessageReceived(BMessage *message)
 	{
 		if (message->what == M_SET_ROOT_VIEW)
@@ -265,15 +256,6 @@ struct LBView : public Parent
 		LAppPrivate::Post(&m);
 		
 		/*
-		void *v = NULL;
-		if (message->FindPointer(LMessage::PropView, &v) == B_OK)
-		{
-			// Proxy'd event for child view...
-			((LView*)v)->OnEvent((LMessage*)message);
-			return;
-		}
-		else d->View->OnEvent((LMessage*)message);
-		
 		if (message->what == B_MOUSE_WHEEL_CHANGED)
 		{
 			float x = 0.0f, y = 0.0f;
@@ -391,6 +373,7 @@ public:
 	
 	// The root view that tracks all the events
 	BView *view = nullptr;
+	LRect client; // bounds of view...
 	
 	// This is a memory buffer for painting all the child LView's into.
 	LThreadSafeInterface<LMemDC, true> mem;
@@ -528,7 +511,16 @@ public:
 			}
 			case M_INVALIDATE:
 			{
-				if (view)
+				if (!view)
+				{
+					printf("%s:%i - no view to invalidate?\n", _FL);
+					break;
+				}
+				
+				BRect r;
+				if (B_OK == message->FindRect("rect", &r))
+					view->Invalidate(r);
+				else
 					view->Invalidate();
 				break;
 			}
@@ -584,39 +576,67 @@ public:
 template<typename Parent>
 uint32 LBView<Parent>::MouseButtons = 0;
 
+
+template<typename Parent>
+void LBView<Parent>::FrameResized(float width, float height)
+{
+	auto m = MakeMessage(LMessage::FrameResized);
+	m.AddFloat("width", width);
+	m.AddFloat("height", height);
+
+	wnd->d->client.ZOff(width-1, height-1);
+
+	LAppPrivate::Post(&m);		
+}
+
 template<typename Parent>
 void LBView<Parent>::Draw(BRect updateRect)
 {
-	Parent::UnlockLooper(); // hold the lock on the BWindow can cause a deadlock
-	auto memDc = wnd->d->mem.Lock(_FL);
-	Parent::LockLooper();
-	if (!memDc)
-	{
-		// Handle error?
-		printf("%s:%i - can't lock mem DC.\n", _FL);
-		return;
-	}
-
-	if (!memDc.Get())
-	{
-		// Gui thread hasn't created the memory context yet...
-		auto m = MakeMessage(LMessage::Draw);
-		LAppPrivate::Post(&m);
-		printf("%s:%i - no LMemDC yes, sending draw..\n", _FL);
-		return;
-	}
-	
-	// Draw the buffer to the view
-	auto bmp = memDc->GetBitmap();
-	if (!bmp)
-	{
-		printf("%s:%i - no bitmap.\n", _FL);
-		return;
-	}
-
-	Parent::SetDrawingMode(B_OP_COPY);
 	auto f = Parent::Frame();
-	Parent::DrawBitmap(bmp, f, f);
+
+	#if 1
+
+		// Parent::UnlockLooper(); // holding the lock on the BWindow can cause a deadlock, so unlock it here
+		
+		// auto memDc = wnd->d->mem.Lock(_FL);
+		
+		// Parent::LockLooper(); // relock it now... to do drawing
+
+		/*
+		if (!memDc || !memDc.Get())
+		{
+			// Gui thread hasn't created the memory context yet...
+			auto m = MakeMessage(LMessage::Draw);
+			LAppPrivate::Post(&m);
+			printf("%s:%i - no LMemDC yet, sending draw..\n", _FL);
+			return;
+		}
+		
+		// Draw the buffer to the view
+		auto bmp = memDc->GetBitmap();
+		if (!bmp)
+		{
+			printf("%s:%i - no bitmap.\n", _FL);
+			return;
+		}
+
+		Parent::SetDrawingMode(B_OP_COPY);
+		*/
+
+		// printf("DrawBitmap %s\n", ((LRect)f).GetStr());
+		#if 0
+			Parent::DrawBitmap(bmp, f, f);
+		#else
+			Parent::SetHighColor(222, 222, 222);
+			Parent::FillRect(f);
+		#endif
+
+	#else
+
+		Parent::SetHighColor(222, 222, 222);
+		Parent::FillRect(f);
+
+	#endif
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -665,7 +685,12 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 				return;
 			}
 			
-			OnEvent((LMessage*) &msg);
+			LView *view = nullptr;
+			msg.FindPointer(LMessage::PropView, (void**)&view);
+			if (view)
+				view->OnEvent((LMessage*) &msg);
+			else			
+				OnEvent((LMessage*) &msg);
 			break;
 		}
 		case LMessage::AttachedToWindow:
@@ -710,6 +735,10 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 		}
 		case LMessage::Draw:
 		{
+			// Anything that needs to lock the window needs to be BEFORE getting the memory DC lock...
+			auto c = GetClient();
+
+			// Don't lock the window AFTER this:
 			auto memDC = d->mem.Lock(_FL);
 			if (!memDC)
 			{
@@ -717,7 +746,6 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 				break;
 			}
 			
-			auto c = GetClient();
 			if (!memDC.Get() ||
 				memDC->X() < c.X() ||
 				memDC->Y() < c.Y())
@@ -733,7 +761,6 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 			}
 			
 			LPoint off(0, 0);
-			// printf("Window.Draw cls=%s\n", GetClass());
 			_Paint(memDC.Get(), &off, NULL);
 			
 			// Ask the BView to invalidate itself:
@@ -1456,29 +1483,7 @@ LPointF LWindow::GetDpiScale()
 
 LRect &LWindow::GetClient(bool ClientSpace)
 {
-	static LRect r;
-	
-	r = Pos.ZeroTranslate();
-
-	LLocker lck(WindowHandle(), _FL);
-	if (lck.Lock())
-	{
-		LRect br = d->view->Bounds();
-		if (br.Valid())
-		{
-			r = br;
-		
-			auto frm = d->Frame();
-			frm.OffsetBy(-frm.left, -frm.top);
-			// printf("%s:%i - LWindow::GetClient: Frame=%s Bounds=%s r=%s\n", _FL, ToString(frm).Get(), br.GetStr(), r.GetStr());
-		}
-		// else printf("%s:%i - LWindow::GetClient: Bounds not valid.\n", _FL);
-		
-		lck.Unlock();
-	}
-	// else printf("%s:%i - LWindow::GetClient: no lock.\n", _FL);
-	
-	return r;
+	return d->client;
 }
 
 #if DEBUG_SERIALIZE_STATE
@@ -1622,13 +1627,13 @@ void LWindow::OnPosChange()
 						menu->ResizeTo(frame.Width(), y);
 				}
 			}	
-			#if 0
-			printf("frame=%s menu=%p,%i,%s rootpos=%s\n",
-				ToString(frame).Get(), menu, menu?menu->IsHidden():0, ToString(menuPos).Get(), ToString(rootPos).Get());
-			#endif
 			int rootTop = menu ? menuPos.bottom + 1 : 0;
 			if (rootPos.top != rootTop)
 			{
+				#if 1
+				printf("frame=%s menu=%p,%i,%s rootpos=%s\n",
+					ToString(frame).Get(), menu, menu?menu->IsHidden():0, ToString(menuPos).Get(), ToString(rootPos).Get());
+				#endif
 				d->view->MoveTo(0, rootTop);
 				d->view->ResizeTo(rootPos.Width(), frame.Height() - menuPos.Height());
 			}

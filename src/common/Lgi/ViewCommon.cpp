@@ -389,21 +389,34 @@ bool LView::AddView(LViewI *v, int Where)
 	if (!v)
 		return false;
 
+	#ifdef HAIKU
+	auto wasAttached = v->IsAttached();
+	#endif
+	
 	LAssert(!Children.HasItem(v));
-	bool Add = Children.Insert(v, Where);
-	if (Add)
+	if (!Children.Insert(v, Where))
+		return false;
+		
+	auto gv = v->GetLView();
+	if (gv && gv->_Window != _Window)
 	{
-		LView *gv = v->GetLView();
-		if (gv && gv->_Window != _Window)
-		{
-			LAssert(!_InLock);
-			gv->_Window = _Window;
-		}
-		v->SetParent(this);
-		v->OnAttach();
-		OnChildrenChanged(v, true);
+		LAssert(!_InLock);
+		gv->_Window = _Window;
 	}
-	return Add;
+	v->SetParent(this);
+	v->OnAttach();
+	OnChildrenChanged(v, true);
+
+	#ifdef HAIKU
+	auto lv = v->GetLView();
+	if (lv && !wasAttached && lv->IsAttached() && !lv->d->onCreateEvent)
+	{
+		lv->d->onCreateEvent = true;
+		lv->OnCreate();
+	}
+	#endif
+
+	return true;
 }
 
 bool LView::DelView(LViewI *v)
@@ -964,9 +977,8 @@ void LView::OnNcPaint(LSurface *pDC, LRect &r)
 		LAutoPtr<LSurface> Local;
 		if (!pDC)
 		{
-			// FIXME: create suitable local dc
-			// Local.Reset(new LScreenDC(this));
-			// pDC = Local;
+			Local.Reset(new LScreenDC(this));
+			pDC = Local;
 			return;
 		}
 		if (!pDC)
@@ -2421,7 +2433,7 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64_t tim
 			auto threadId = bWnd->Thread();
 			if (threadId <= 0)
 			{
-				// printf("####### %s:%i warning, BWindow(%s) has no thread for PostEvent!?\n", _FL, GetClass());
+				printf("####### %s:%i warning, BWindow(%s) has no thread for PostEvent!?\n", _FL, GetClass());
 			}
 			else
 			{
@@ -2434,7 +2446,7 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64_t tim
 
 		// Not attached yet...
 		d->MsgQue.Add(new BMessage(m));
-		// printf("%s:%i - PostEvent.MsgQue=%i\n", _FL, (int)d->MsgQue.Length());
+		printf("%s:%i - PostEvent.MsgQue=%i\n", _FL, (int)d->MsgQue.Length());
 		
 		return true;
 

@@ -221,6 +221,7 @@ public:
 	
 	#elif defined(HAIKU)
 	
+		bool onCreateEvent = false;
 		LArray<BMessage*> MsgQue; // For before the window is attached...
 	
 	#endif

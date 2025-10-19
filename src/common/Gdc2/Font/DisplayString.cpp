@@ -1939,7 +1939,7 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 		}
 		
 		int OriginX = 0, OriginY = 0;
-		// pDC->GetOrigin(OriginX, OriginY);		
+		pDC->GetOrigin(OriginX, OriginY);		
 		
 		font_height height = {0};
 		fnt->GetHeight(&height);
