@@ -598,11 +598,10 @@ void LBView<Parent>::Draw(BRect updateRect)
 
 		// Parent::UnlockLooper(); // holding the lock on the BWindow can cause a deadlock, so unlock it here
 		
-		// auto memDc = wnd->d->mem.Lock(_FL);
+		auto memDc = wnd->d->mem.Lock(_FL);
 		
 		// Parent::LockLooper(); // relock it now... to do drawing
 
-		/*
 		if (!memDc || !memDc.Get())
 		{
 			// Gui thread hasn't created the memory context yet...
@@ -621,10 +620,9 @@ void LBView<Parent>::Draw(BRect updateRect)
 		}
 
 		Parent::SetDrawingMode(B_OP_COPY);
-		*/
 
 		// printf("DrawBitmap %s\n", ((LRect)f).GetStr());
-		#if 0
+		#if 1
 			Parent::DrawBitmap(bmp, f, f);
 		#else
 			Parent::SetHighColor(222, 222, 222);
