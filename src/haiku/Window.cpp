@@ -69,8 +69,7 @@ struct LBView : public Parent
 			B_FULL_UPDATE_ON_RESIZE | 
 			B_WILL_DRAW |
 			B_NAVIGABLE |
-			B_FRAME_EVENTS |
-			B_TRANSPARENT_BACKGROUND
+			B_FRAME_EVENTS
 		)
 	{
 	}
