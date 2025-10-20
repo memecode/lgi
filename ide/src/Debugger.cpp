@@ -351,7 +351,7 @@ class Gdb :
 				#if DEBUG_STRUCT_LOGGING
 				Log->Log("SetState.change:", DebuggingProcess, Running);
 				#else
-				Log->Print("SetState(%i,%i) changed\n", DebuggingProcess, Running);
+				// Log->Print("SetState(%i,%i) changed\n", DebuggingProcess, Running);
 				#endif
 
 				if (Events)
@@ -709,7 +709,9 @@ class Gdb :
 			{
 				*LinePtr++ = *p;
 				*LinePtr = 0;
-				OnLine(Line, LinePtr - Line);
+				auto bytes = LinePtr - Line;
+				bytes = RemoveAnsi(Line, bytes);
+				OnLine(Line, bytes);
 				LinePtr = Line;
 			}
 			else if (LinePtr < LineEnd)
@@ -722,15 +724,16 @@ class Gdb :
 		*LinePtr = 0;
 
 		// Check for prompt
-		auto bytes = LinePtr - Line;
-		if (bytes == 0)
+		LString partial(Line, LinePtr - Line);
+		if (partial.Length() == 0)
 			return;
+		RemoveAnsi(partial);
 		#if DEBUG_STRUCT_LOGGING
-		Log->Log("bytes:", bytes);
+		Log->Log("partial:", partial);
 		#endif
-		if (bytes == 6)
+		if (partial.Length() == 6)
 		{
-			AtPrompt = !_strnicmp(Line, sPrompt, bytes);
+			AtPrompt = partial.Equals(sPrompt);
 			#if DEBUG_STRUCT_LOGGING
 			Log->Log("AtPrompt:", AtPrompt, "Running:", Running);
 			#endif
@@ -745,20 +748,20 @@ class Gdb :
 
 			if (AtPrompt)
 			{
-				Events->Write(Line, bytes);
+				Events->Write(partial);
 				ProcessCommands();
 			}
 		}
-		else if (Strnistr(Line, "Quit anyway? (y or n)", bytes))
+		else if (partial.Find("Quit anyway? (y or n)") >= 0)
 		{
 			// It's asking us if we want to quit.
 			LString yes("y\n");
 			Write(yes);
 		}
-		else if (RemoteGdb && bytes > 2)
+		else if (RemoteGdb && partial.Length() > 2)
 		{
 			// Check for something that might be a prompt, and cancel the process if found.
-			auto last = Line + bytes - 2;
+			auto last = partial.Get() + partial.Length() - 2;
 			if (!Strncmp(last, "> ", 2))
 			{
 				LScriptArguments args(nullptr);
@@ -934,7 +937,8 @@ class Gdb :
 				Rd = RemoteGdb->Read(Buf, sizeof(Buf)-1);
 				if (Rd > 0)
 				{
-					Rd = RemoveAnsi(Buf, Rd);
+					// Null terminate. Don't do ansi removal here,
+					// as there can be partial sequences that break parsing
 					Buf[Rd] = 0;
 				}
 				else if (Rd < 0)
@@ -1663,7 +1667,7 @@ public:
 			if (optionalErr)
 				err.Set(LErrorFuncFailed, optionalErr);
 
-			log->Print("%s cb=%i\n", __FUNCTION__, (bool)cb);
+			// log->Print("%s cb=%i\n", __FUNCTION__, (bool)cb);
 			if (cb)
 				cb(err, vars);
 
@@ -1674,7 +1678,7 @@ public:
 		{
 			auto old = calls.load();
 			calls += offset;
-			log->Print("%s(%i)=%i\n", __FUNCTION__, offset, calls.load());
+			// log->Print("%s(%i)=%i\n", __FUNCTION__, offset, calls.load());
 			if (calls.load() == 0 && old > 0)
 			{
 				Finish();
