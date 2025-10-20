@@ -379,7 +379,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 				backend->Read(SystemIntf::TBackground, Path, [this, f, Debug, line](auto data, auto err) mutable
 				{
 					if (err)
-						LogBuild("Backend.Read.Err: %s\n", err.ToString().Get());
+						; //LogBuild("Backend.Read.Err: %s\n", err.ToString().Get());
 					else
 						AddFileData(f, data, Debug);
 
