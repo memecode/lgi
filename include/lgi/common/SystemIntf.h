@@ -48,7 +48,8 @@ struct StripAnsiStream : public LStream
 		while (auto ln = p.Pop())
 		{
 			RemoveAnsi(ln);
-			out->Write(ln.Replace("\r"));
+			auto s = ln.Replace("\r");
+			out->Write(s);
 			out->Write("\n", 1);
 		}
 

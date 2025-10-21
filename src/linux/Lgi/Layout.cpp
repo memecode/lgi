@@ -149,10 +149,12 @@ bool LLayout::_SetScrollBars(bool x, bool y)
 
 	if (!InThread())
 	{
-		RunCallback([this, x, y]()
-		{
-			_SetScrollBars(x, y);
-		});
+		RunCallback(
+			[this, x, y]()
+			{
+				_SetScrollBars(x, y);
+			},
+			_FL);
 		return false;
 	};
 
