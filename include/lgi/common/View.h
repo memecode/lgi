@@ -93,9 +93,7 @@ protected:
 	#endif
 
 	LView				*_Window = NULL;
-	#ifndef HAIKU
 	LMutex				*_Lock = NULL;
-	#endif
 	uint16				_IsToolBar = 0;
 	int					WndFlags = 0;
 	LRect				_Margin, _Border;

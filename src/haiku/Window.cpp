@@ -374,6 +374,11 @@ public:
 	BView *view = nullptr;
 	LRect client; // bounds of view...
 	
+	// There is now one main GUI thread that handles all app code
+	// However each window has it's own independant lock, like the
+	// other OS's (win/mac/linux). This is that lock:
+	LMutex wndLock;
+		
 	// This is a memory buffer for painting all the child LView's into.
 	LThreadSafeInterface<LMemDC, true> mem;
 	
@@ -398,6 +403,7 @@ public:
 			/* look:  */ B_DOCUMENT_WINDOW_LOOK,
 			/* feel:  */ B_NORMAL_WINDOW_FEEL,
 			/* flags: */ B_WILL_ACCEPT_FIRST_CLICK),
+		wndLock(MakeName(owner) + ".lock"),
 		wnd(owner),
 		view(new LBView<BView>(owner)),
 		mem(nullptr)
@@ -641,6 +647,7 @@ LWindow::LWindow() :
 	LView(nullptr)
 {
 	d = new LWindowPrivate(this);
+	_Lock = &d->wndLock;
 	_Window = this;
 	ClearFlag(WndFlags, GWF_VISIBLE);
 }
@@ -926,6 +933,7 @@ int LWindow::WaitThread()
 	}
 	else printf("%s:%i - No thread to wait for: %s\n", _FL, GetClass());
 	
+	_Lock = nullptr;
 	DeleteObj(d);
 
 	return value;

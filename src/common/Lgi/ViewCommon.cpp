@@ -484,8 +484,9 @@ LWindow *LView::GetWindow()
 
 bool LView::Lock(const char *file, int line, int TimeOut)
 {
-	#ifdef HAIKU
+	#if 0 // def HAIKU
 
+		// Haiku is moving to a similar 1 GUI thread model
 		bool Debug = false;
 		
 		auto wndHnd = WindowHandle();
@@ -583,7 +584,7 @@ bool LView::Lock(const char *file, int line, int TimeOut)
 
 void LView::Unlock()
 {
-	#ifdef HAIKU
+	#if 0 // def HAIKU
 	
 		auto wndHnd = WindowHandle();
 		if (!wndHnd)
