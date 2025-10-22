@@ -3290,7 +3290,7 @@ void AppWnd::OpenFile(const char *FileName, NodeSource *Src, bool canonical, std
 		return;
 	}
 
-	LgiTrace("%s:%i openfile(%s, %p, %i, %i)\n", _FL, FileName, Src, canonical, callback != false);
+	LgiTrace("%s:%i openfile(%s, %p, %i, %i)\n", _FL, FileName, Src, canonical, (bool)callback);
 
 	static bool DoingProjectFind = false;
 	IdeDoc *Doc = NULL;
