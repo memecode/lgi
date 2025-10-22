@@ -58,9 +58,9 @@ bool SshConnection::DetectVcs(VcFolder *Fld)
 bool SshConnection::Command(VcFolder *Fld, LString Exe, LString Args, ParseFn Parser, ParseParams *Params, LoggingType LogType)
 {
 	bool HasCallback = Params && Params->Callback;
-	if (!Fld || !Exe || (!Parser && !HasCallback))
+	if (!Fld || Exe.IsEmpty())
 	{
-		LAssert(!"Param error.");
+		LAssert(!"Missing param.");
 		return false;
 	}
 
