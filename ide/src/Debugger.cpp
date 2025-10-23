@@ -666,8 +666,7 @@ class Gdb :
 			// Pop the next command off the queue
 			{
 				LMutex::Auto lck(this, _FL);
-				curCmd.Reset(commands[0]);
-				commands.DeleteAt(0, true);
+				curCmd.Reset(commands.PopFirst());
 			}
 			if (curCmd)
 			{
@@ -1323,6 +1322,7 @@ public:
 				Cmd("handle SIGTTOU ignore nostop", false);
 				Cmd("handle SIG34 ignore nostop", false);
 				Cmd("handle SIGPIPE nostop", false);
+				Cmd("set pagination 0", false);
 				if (PrettyPrintPy)
 					Cmd(LString::Fmt("python exec(open(\"%s\").read())", PrettyPrintPy.Get()), false);
 			}

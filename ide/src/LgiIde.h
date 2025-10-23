@@ -29,7 +29,12 @@
 #define OptFileSeparator		"\n"
 #define ALL_FOLDER_SEP			"/\\"
 
-#define THREAD_WARNING(...)		if (!InThread()) { LgiTrace("#### %s:%i out of thread call.\n", __FUNCTION__, __LINE__); return __VA_ARGS__; }
+#define THREAD_WARNING(...)		if (!InThread()) \
+	{ \
+		LgiTrace("#### %s:%i out of thread call (thread=%i/0x%x)\n", __FUNCTION__, __LINE__, LCurrentThreadId(), LCurrentThreadId()); \
+		LAssert(0); \
+		return __VA_ARGS__; \
+	}
 
 enum IdeMessages
 {
