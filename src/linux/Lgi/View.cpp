@@ -530,17 +530,16 @@ gboolean LView::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 
 LRect &LView::GetClient(bool ClientSpace)
 {
-	int Edge = (Sunken() || Raised()) ? _BorderSize : 0;
-
 	static LRect c;
 	if (ClientSpace)
 	{
-		c.ZOff(Pos.X() - 1 - (Edge<<1), Pos.Y() - 1 - (Edge<<1));
+		c.ZOff(	Pos.X() - 1 - _Border.x1 - _Border.x2,
+				Pos.Y() - 1 - _Border.y1 - _Border.y2);
 	}
 	else
 	{
 		c.ZOff(Pos.X()-1, Pos.Y()-1);
-		c.Inset(Edge, Edge);
+		c.Inset(&_Border);
 	}
 	
 	return c;
@@ -632,7 +631,7 @@ bool LView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 
 	DEBUG_INVALIDATE("%s::Invalidate r=%s frame=%i\n", GetClass(), r.GetStr(), Frame);
 	if (!Frame)
-		r.Offset(_BorderSize, _BorderSize);
+		r.Offset(_Border.x1, _Border.y1);
 
 	LPoint Offset;
 	WindowVirtualOffset(&Offset);
@@ -923,8 +922,8 @@ bool LView::GetMouse(LMouse &m, bool ScreenCoords)
 		{
 			LPoint p;
 			WindowVirtualOffset(&p);
-			m.x = (int)axes[0] - p.x - _BorderSize;
-			m.y = (int)axes[1] - p.y - _BorderSize;
+			m.x = (int)axes[0] - p.x - _Border.x1;
+			m.y = (int)axes[1] - p.y - _Border.y1;
 			// printf("GetMs %g,%g %i,%i %i,%i device=%p wnd=%p\n", axes[0], axes[1], p.x, p.y, m.x, m.y, device, wnd);
 		}
 	}

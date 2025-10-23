@@ -43,7 +43,13 @@ SshConnection *AppPriv::GetConnection(const char *Uri, const char *Prompt, bool 
 	if (!Conn && Create)
 	{
 		if (!Prompt)
-			Log->Print("Warning: No remote prompt defined for '%s'\n", Uri);
+		{
+			// Sanitize the Uri
+			LUri u(Uri);
+			if (u.sPass)
+				u.sPass = "*******";
+			Log->Print("Warning: No remote prompt defined for '%s'\n", u.ToString().Get());
+		}
 		Connections.Add(s, Conn = new SshConnection(Log, s, Prompt ? Prompt : "*$ "));
 	}
 	return Conn;

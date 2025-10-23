@@ -153,7 +153,7 @@ void SystemIntf::DoWork()
 			}
 		
 			auto now = LCurrentTime();
-			if (now - lastLogTs >= 500)
+			if (now - lastLogTs >= 3000)
 			{
 				lastLogTs = now;
 				log->Print("foreground %i, background %i\n", (int)foregroundWork.Length(), (int)backgroundWork.Length());

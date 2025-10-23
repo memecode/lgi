@@ -1261,6 +1261,7 @@ public:
 	BreakPointStore BreakPoints;
 	int DocBpCallback = BreakPointStore::INVALID_ID;
 	LAutoPtr<LCommsBus> CommsBus;
+	LString::Array pendingFileOpens;
 	
 	// Debugging
 	LDebugContext *DbgContext = NULL;
@@ -1764,7 +1765,7 @@ public:
 		if (!File)
 		{
 			LgiTrace("%s:%i - No input File?\n", _FL);
-			return NULL;
+			return nullptr;
 		}
 		
 		for (auto Doc: Docs)
@@ -1775,8 +1776,7 @@ public:
 			}
 		}
 
-		// LgiTrace("%s:%i - '%s' not found in %i docs.\n", _FL, File, Docs.Length());
-		return 0;
+		return nullptr;
 	}
 
 	IdeProject *IsProjectOpen(const char *File)
@@ -3290,6 +3290,8 @@ void AppWnd::OpenFile(const char *FileName, NodeSource *Src, bool canonical, std
 		return;
 	}
 
+	LgiTrace("%s:%i openfile(%s, %p, %i, %i)\n", _FL, FileName, Src, canonical, (bool)callback);
+
 	static bool DoingProjectFind = false;
 	IdeDoc *Doc = NULL;
 	
@@ -3421,33 +3423,45 @@ void AppWnd::OpenFile(const char *FileName, NodeSource *Src, bool canonical, std
 	{
 		if (auto backend = Proj ? Proj->GetBackend() : NULL)
 		{
-			backend->Read(SystemIntf::TForeground, FullPath, [this, Proj, Doc, callback, FullPath](auto data, auto err)
+			if (d->pendingFileOpens.HasItem(FullPath))
 			{
-				if (err)
+				LgiTrace("%s:%i - pendingFileOpens has '%s'\n", _FL, FullPath.Get());
+				return;
+			}
+
+			d->pendingFileOpens.Add(FullPath);
+
+			backend->Read(SystemIntf::TForeground,
+				FullPath,
+				[this, Proj, Doc, callback, FullPath](auto data, auto err)
 				{
-					LgiMsg(this, "Error opening '%s': %s", AppName, MB_OK, FullPath.Get(), err.ToString().Get());
-				}
-				else if (data)
-				{
-					auto Doc = new IdeDoc(this, 0, FullPath);
-					if (Doc)
+					d->pendingFileOpens.Delete(FullPath);
+
+					if (err)
 					{
-						Doc->SetProject(Proj);
-						Doc->OpenData(data);
-
-						LRect p = d->Mdi->NewPos();
-						Doc->LView::SetPos(p);
-						d->Docs.Insert(Doc);
-						d->OnFile(FullPath);
-
-						OnNewDoc(Proj, Doc);
-
-						if (callback)
-							callback(Doc);
+						LgiMsg(this, "Error opening '%s': %s", AppName, MB_OK, FullPath.Get(), err.ToString().Get());
 					}
-				}
-				else LAssert(!"one of these needs to be set");
-			});
+					else if (data)
+					{
+						auto Doc = new IdeDoc(this, 0, FullPath);
+						if (Doc)
+						{
+							Doc->SetProject(Proj);
+							Doc->OpenData(data);
+
+							LRect p = d->Mdi->NewPos();
+							Doc->LView::SetPos(p);
+							d->Docs.Insert(Doc);
+							d->OnFile(FullPath);
+
+							OnNewDoc(Proj, Doc);
+
+							if (callback)
+								callback(Doc);
+						}
+					}
+					else LAssert(!"one of these needs to be set");
+				});
 		}
 		else if (LFileExists(File))
 		{
