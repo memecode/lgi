@@ -372,7 +372,17 @@ public:
 	
 	// The root view that tracks all the events
 	BView *view = nullptr;
-	LRect client; // bounds of view...
+	LRect client;	// bounds of view... so there is no need to lock the 
+					// BWindow to get the client rect.
+	
+	// When invalidate is called on a view, it sends LMessage::Invalidate
+	// to LWindow::HaikuEvent. This will check 'viewDirty' to see if something
+	// else recently changed the view. This compresses multiple invalidate
+	// messages into one actual draw... if it's initially false, a
+	// LMessage::Draw event is sent. Otherwise if a pending Draw is active,
+	// nothing needs to be done.
+	//
+	// This should eventually be a region.
 	bool viewDirty = false;
 	
 	// There is now one main GUI thread that handles all app code
@@ -598,7 +608,11 @@ void LBView<Parent>::FrameResized(float width, float height)
 template<typename Parent>
 void LBView<Parent>::Draw(BRect updateRect)
 {
-	auto f = Parent::Frame();
+	auto f = Parent::Bounds();
+	#if 0 // coverage testing
+	Parent::SetHighColor(255, 0, 255);
+	Parent::FillRect(f);
+	#endif
 
 	// Parent::UnlockLooper(); // holding the lock on the BWindow can cause a deadlock, so unlock it here
 	auto memDc = wnd->d->mem.Lock(_FL);
@@ -1101,8 +1115,7 @@ void LWindow::UpdateRootView()
 	
 	auto f = wnd->Frame();
 	rootView->ResizeTo(f.Width(), f.Height() - menuPos.Height());
-	if (menu)
-		rootView->MoveTo(0, menuPos.Height());
+	// if (menu) rootView->MoveTo(0, menuPos.Height());
 	rootView->SetResizingMode(B_FOLLOW_ALL_SIDES);
 	printf("rootView set resize mode follow all sides\n");
 }
@@ -1636,8 +1649,8 @@ void LWindow::OnPosChange()
 			if (rootPos.top != rootTop)
 			{
 				#if 1
-				printf("frame=%s menu=%p,%i,%s rootpos=%s\n",
-					ToString(frame).Get(), menu, menu?menu->IsHidden():0, ToString(menuPos).Get(), ToString(rootPos).Get());
+				printf("frame=%s menu=%p,%i,%s rootpos=%s rootTop=%i\n",
+					ToString(frame).Get(), menu, menu?menu->IsHidden():0, ToString(menuPos).Get(), ToString(rootPos).Get(), rootTop);
 				#endif
 				d->view->MoveTo(0, rootTop);
 				d->view->ResizeTo(rootPos.Width(), frame.Height() - menuPos.Height());
