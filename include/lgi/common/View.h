@@ -730,8 +730,9 @@ public:
 	/// The ID of a view is designed to associate controls defined in resource
 	/// files with a object at runtime via a C header file define.
 	int GetId() const override;
-	/// Sets the view's ID.
-	void SetId(int i) override;
+	/// Sets the view's ID. If you pass 'GENERATE_ID', then a unique ID will be created.
+	constexpr static int GENERATE_ID = -100;
+	void SetId(int id) override;
 	/// true if this control is a tab stop.
 	bool GetTabStop() override;
 	/// \brief Sets whether this control is a tab stop.

@@ -812,33 +812,29 @@ int LView::OnNotify(LViewI *Ctrl, const LNotification &Data)
 		// Default activation is to focus the current control.
 		Focus(true);
 	}
-	else if (d && d->Parent)
+	else if (auto p = d ? d->Parent : nullptr)
 	{
-		#ifdef HAIKU
-		// Don't let notifications blindly pass into other threads.
-		auto bCur = Handle();
-		auto bParent = d->Parent->Handle();
-		if (bCur && bParent)
+		// default behavior is just to pass the 
+		// notification up to the parent
+
+		#if LGI_VIEW_HANDLE
+		// If there is a handle and we're NOT in the GUI thread...
+		if (!InThread() && p->Handle())
 		{
-			auto curThread = bCur->Looper() ? bCur->Looper()->Thread() : LCurrentThreadId();
-			auto parThread = bParent->Looper() ? bParent->Looper()->Thread() : -1;
-			if (curThread != parThread && parThread >= 0)
+			if (Ctrl->GetId() < 0)
+				Ctrl->SetId(GENERATE_ID);
+			if (Ctrl->GetId() > 0)
 			{
-				printf(	"OnNotify can't cross thread boundary!\n"
-						"    this=%s/%s (thread=%i/%s)\n"
-						"    parent=%s/%s (thread=%i/%s)\n",
-						GetClass(), Name(), curThread, LThread::GetThreadName(curThread),
-						d->Parent->GetClass(), d->Parent->Name(), parThread, LThread::GetThreadName(parThread));
+				// Post this over to the GUI thread instead:
+				p->PostEvent(M_CHANGE,
+							(LMessage::Param) Ctrl->GetId(),
+							(LMessage::Param) new LNotification(Data));
 				return 0;
 			}
 		}
 		#endif
-
-		// default behavior is just to pass the 
-		// notification up to the parent
-
-		// FIXME: eventually we need to call the 'LNotification' parent fn...
-		return d->Parent->OnNotify(Ctrl, Data);
+		
+		return p->OnNotify(Ctrl, Data);
 	}
 
 	return 0;
@@ -1115,36 +1111,7 @@ void LView::SendNotify(LNotification note)
 			// instead of sending a pointer to the object, is that the object 
 			// _could_ be deleted between the message being sent and being received.
 			// Which would result in an invalid memory access on that object.
-			LViewI *p = GetWindow();
-			if (!p)
-			{
-				// No window? Find the top most parent we can...
-				p = this;
-				while (p->GetParent())
-					p = p->GetParent();
-			}
-			if (p)
-			{
-				// Give the control a valid ID
-				int i;
-
-				for (i=10; i<1000; i++)
-				{
-					if (!p->FindControl(i))
-					{
-						printf("Giving the ctrl '%s' the id '%i' for SendNotify\n",
-							GetClass(),
-							i);
-						SetId(i);
-						break;
-					}
-				}
-			}
-			else
-			{
-				// Ok this is really bad... go random (better than nothing)
-				SetId(5000 + LRand(2000));
-			}
+			SetId(GENERATE_ID);
 		}
 			
         LAssert(GetId() > 0); // We must have a valid ctrl ID at this point, otherwise
@@ -2057,17 +2024,49 @@ int LView::GetId() const
 	return d->CtrlId;
 }
 
-void LView::SetId(int i)
+void LView::SetId(int id)
 {
+	if (id == GENERATE_ID)
+	{
+		LViewI *p = GetWindow();
+		if (!p)
+		{
+			// No window? Find the top most parent we can...
+			p = this;
+			while (p->GetParent())
+				p = p->GetParent();
+		}
+		if (p)
+		{
+			// Give the control a valid ID
+			int i;
+
+			for (i=10; i<1000; i++)
+			{
+				if (!p->FindControl(i))
+				{
+					printf("Giving the ctrl '%s' the id '%i' for SendNotify\n",
+						GetClass(),
+						i);
+					SetId(i);
+					break;
+				}
+			}
+		}
+		else
+		{
+			// Ok this is really bad... go random (better than nothing)
+			SetId(5000 + LRand(2000));
+		}
+	}
+
 	// This is needed by SendNotify function which is thread safe.
 	// So no thread safety check here.
-	d->CtrlId = i;
+	d->CtrlId = id;
 
 	#if WINNATIVE
-	if (_View)
-		SetWindowLong(_View, GWL_ID, d->CtrlId);
-	#elif defined __GTK_H__
-	#elif defined MAC
+		if (_View)
+			SetWindowLong(_View, GWL_ID, d->CtrlId);
 	#endif
 }
 

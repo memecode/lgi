@@ -1435,8 +1435,9 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 			case M_CHANGE:
 			{
 				LWindow *w = GetWindow();
-				LAutoPtr<LNotification> note((LNotification*)Msg->B());
-				LViewI *Ctrl = w ? w->FindControl((int)Msg->a) : 0;
+
+				auto note = Msg->AutoB<LNotification>();
+				auto Ctrl = w ? w->FindControl((int)Msg->a) : nullptr;
 				if (Ctrl)
 				{
 					LAssert(note.Get() != NULL);
@@ -1444,7 +1445,7 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 				}
 				else
 				{
-					LgiTrace("Ctrl %i not found.\n", Msg->a);
+					LgiTrace("Ctrl %i not found.\n", (int)Msg->a);
 				}
 				break;
 			}
