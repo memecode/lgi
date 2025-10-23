@@ -1024,6 +1024,7 @@ void LView::OnNcPaint(LSurface *pDC, LRect &r)
 		{
 			LRect OldClip = pDC->ClipRgn();
 			pDC->ClipRgn(Update);
+			printf("%s: paint clipping to %s\n", GetClass(), Update->GetStr());
 			OnPaint(pDC);
 			pDC->ClipRgn(OldClip.Valid() ? &OldClip : NULL);
 		}
@@ -1051,6 +1052,7 @@ void LView::OnNcPaint(LSurface *pDC, LRect &r)
 					LPoint co(p.x1, p.y1);
 					// LgiTrace("%s::_Paint %i,%i\n", w->GetClass(), p.x1, p.y1);
 					pDC->SetClient(&p);
+					// printf("%s: set client %s\n", GetClass(), p.GetStr());
 					w->_Paint(pDC, &co);
 					pDC->SetClient(NULL);
 				}

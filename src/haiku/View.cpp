@@ -415,7 +415,7 @@ bool LView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 	// Ask the LWindow to paint the area, and then invalidate itself:
 	BMessage m(M_HAIKU_WND_EVENT);
 	m.AddPointer(LMessage::PropWindow, (void*)wnd);
-	m.AddInt32(LMessage::PropEvent, LMessage::Draw);
+	m.AddInt32(LMessage::PropEvent, LMessage::Invalidate);
 	m.AddRect("rect", r);
 	LAppPrivate::Post(&m);
 		

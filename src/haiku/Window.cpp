@@ -373,6 +373,7 @@ public:
 	// The root view that tracks all the events
 	BView *view = nullptr;
 	LRect client; // bounds of view...
+	bool viewDirty = false;
 	
 	// There is now one main GUI thread that handles all app code
 	// However each window has it's own independant lock, like the
@@ -599,47 +600,33 @@ void LBView<Parent>::Draw(BRect updateRect)
 {
 	auto f = Parent::Frame();
 
-	#if 1
+	// Parent::UnlockLooper(); // holding the lock on the BWindow can cause a deadlock, so unlock it here
+	auto memDc = wnd->d->mem.Lock(_FL);
+	// Parent::LockLooper(); // relock it now... to do drawing
 
-		// Parent::UnlockLooper(); // holding the lock on the BWindow can cause a deadlock, so unlock it here
+	if (!memDc || !memDc.Get())
+	{
+		// Gui thread hasn't created the memory context yet...
+		auto m = MakeMessage(LMessage::Draw);
+		LAppPrivate::Post(&m);
+		printf("%s:%i - no LMemDC yet, sending draw..\n", _FL);
 		
-		auto memDc = wnd->d->mem.Lock(_FL);
-		
-		// Parent::LockLooper(); // relock it now... to do drawing
-
-		if (!memDc || !memDc.Get())
-		{
-			// Gui thread hasn't created the memory context yet...
-			auto m = MakeMessage(LMessage::Draw);
-			LAppPrivate::Post(&m);
-			printf("%s:%i - no LMemDC yet, sending draw..\n", _FL);
-			return;
-		}
-		
-		// Draw the buffer to the view
-		auto bmp = memDc->GetBitmap();
-		if (!bmp)
-		{
-			printf("%s:%i - no bitmap.\n", _FL);
-			return;
-		}
-
-		Parent::SetDrawingMode(B_OP_COPY);
-
-		// printf("DrawBitmap %s\n", ((LRect)f).GetStr());
-		#if 1
-			Parent::DrawBitmap(bmp, f, f);
-		#else
-			Parent::SetHighColor(222, 222, 222);
-			Parent::FillRect(f);
-		#endif
-
-	#else
-
+		// Draw a blank background...
 		Parent::SetHighColor(222, 222, 222);
 		Parent::FillRect(f);
+		return;
+	}
+	
+	// Draw the buffer to the view
+	auto bmp = memDc->GetBitmap();
+	if (!bmp)
+	{
+		printf("%s:%i - no bitmap.\n", _FL);
+		return;
+	}
 
-	#endif
+	Parent::SetDrawingMode(B_OP_COPY);
+	Parent::DrawBitmap(bmp, f, f);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -715,6 +702,16 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 			OnPosChange();
 			break;
 		}
+		case LMessage::Invalidate:
+		{
+			if (!d->viewDirty)
+			{
+				d->viewDirty = true;				
+				auto msg = d->MakeMessage(LMessage::Draw);
+				LAppPrivate::Post(&msg);
+			}
+			break;
+		}
 		case LMessage::FrameResized:
 		{
 			float fx = 0.0f, fy = 0.0f;
@@ -729,7 +726,6 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 			int y = (int)floor(fy);
 			if (Pos.X() != x || Pos.Y() != y)
 			{
-				// printf("LMessage::FrameResized: %i,%i\n", x, y);
 				Pos.SetSize(x, y);
 				OnPosChange();
 			}
@@ -739,8 +735,11 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 		}
 		case LMessage::Draw:
 		{
+			// static int DRAW_COUNT = 0;
+			
 			// Anything that needs to lock the window needs to be BEFORE getting the memory DC lock...
 			auto c = GetClient();
+			// printf("%s draw %s (%i)\n", GetClass(), c.GetStr(), DRAW_COUNT++);
 
 			// Don't lock the window AFTER this:
 			auto memDC = d->mem.Lock(_FL);
@@ -766,6 +765,7 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 			
 			LPoint off(0, 0);
 			_Paint(memDC.Get(), &off, NULL);
+			d->viewDirty = false;
 			
 			// Ask the BView to invalidate itself:
 			BMessage inval(M_INVALIDATE);

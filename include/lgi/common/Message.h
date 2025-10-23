@@ -21,7 +21,8 @@
 	_(MouseDown) \
 	_(MouseUp) \
 	_(MouseMoved) \
-	_(MakeFocus)
+	_(MakeFocus) \
+	_(Invalidate)
 
 #endif
 
