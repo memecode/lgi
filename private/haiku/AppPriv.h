@@ -97,7 +97,7 @@ public:
 			return;
 		}
 		
-		if (view && LView::RecentlyDeleted(view))
+		if (view && LView::LockHandler(view, LView::OpExists))
 		{
 			printf("%s:%i - view is recently deleted.\n", _FL);
 			return;
@@ -133,6 +133,12 @@ public:
 				{
 					LAssert(0);
 					printf("%s:%i - no view/wnd in msg.\n", _FL);
+					break;
+				}
+
+				if (!LView::LockHandler(wnd, LView::OpExists))
+				{
+					printf("%s:%i - %p is recently deleted\n", _FL, wnd);
 					break;
 				}
 				

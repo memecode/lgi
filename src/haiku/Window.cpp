@@ -655,6 +655,9 @@ LWindow::LWindow() :
 
 LWindow::~LWindow()
 {
+	LockHandler(this, OpDelete);
+	printf("~LWindow %p, %p\n", this, (LViewI*)this);
+
 	if (LAppInst->AppWnd == this)
 		LAppInst->AppWnd = NULL;
 

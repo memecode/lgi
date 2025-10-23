@@ -55,14 +55,21 @@ DocEdit::DocEdit(IdeDoc *d, LFontType *f) :
 DocEdit::~DocEdit()
 {
 	ParentState = KExiting;
-	Event.Signal();
-	while (!IsExited())
-		LSleep(1);
-	SetEnv(0);
+	
+	if (GetState() > LThread::THREAD_INIT)
+	{
+		Event.Signal();
+		WaitForExit();
+	}
+	else LgiTrace("%s:%i - DocEdit, thread never started?\n", _FL);
+	
+	SetEnv(nullptr);
 }
 
 void DocEdit::OnCreate()
 {
+	printf("Got DocEdit::OnCreate()\n");
+
 	LTextView3::OnCreate();
 	Run();
 }

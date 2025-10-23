@@ -118,145 +118,62 @@ LMouse &lgi_adjust_click(LMouse &Info, LViewI *Wnd, bool Capturing, bool Debug)
 
 //////////////////////////////////////////////////////////////////////////////////////
 // LView class methods
-LViewI *LView::_Capturing = 0;
-LViewI *LView::_Over = 0;
+LViewI *LView::_Capturing = nullptr;
+LViewI *LView::_Over = nullptr;
 
 #if LGI_VIEW_HASH
 
 struct ViewTbl : public LMutex
 {
-	typedef LHashTbl<PtrKey<LViewI*>, int> T;
+	typedef LHashTbl<PtrKey<LViewI*>, bool> T;
 	
 private:
 	T Map;
 
 public:
-	ViewTbl() : Map(2000), LMutex("ViewTbl")
+	ViewTbl() : Map(2000, false), LMutex("ViewTbl.Lock")
 	{
 	}
 
 	T *Lock()
 	{
 		if (!LMutex::Lock(_FL))
-			return NULL;
+			return nullptr;
 		return &Map;
 	}
 }	ViewTblInst;
 
 bool LView::LockHandler(LViewI *v, LView::LockOp Op)
 {
-	ViewTbl::T *m = ViewTblInst.Lock();
+	auto m = ViewTblInst.Lock();
 	if (!m)
 		return false;
-	int Ref = m->Find(v);
-	bool Status = false;
+		
+	auto exists = m->Find(v);
+	bool status = false;
 	switch (Op)
 	{
 		case OpCreate:
 		{
-			if (Ref == 0)
-				Status = m->Add(v, 1);
-			else
-				LAssert(!"Already exists?");
+			status = m->Add(v, 1);
 			break;
 		}
 		case OpDelete:
 		{
-			if (Ref == 1)
-				Status = m->Delete(v);
-			else
-				LAssert(!"Either locked or missing.");
+			if (exists)
+				status = m->Delete(v);
 			break;
 		}
 		case OpExists:
 		{
-			Status = Ref > 0;
+			status = exists;
 			break;
 		}
 	}	
 	ViewTblInst.Unlock();
-	return Status;
+	return status;
 }
 
-#endif
-
-#if defined(HAIKU) || defined(MAC)
-class LDeletedViews : public LMutex
-{
-	struct DeletedView
-	{
-		uint64_t ts;
-		LViewI *v;
-	};
-	LArray<DeletedView> views;
-
-public:
-	LDeletedViews() : LMutex("LDeletedViews")
-	{
-
-	}
-
-	void OnCreate(LViewI *v)
-	{
-		// Haiku:
-		// It is not uncommon for the same pointer to be added twice.
-		// The allocator often reuses the same address when a view is
-		// deleted and a new one created. In that case, make sure a
-		// newly created (and valid) pointer is NOT in the list...
-		for (size_t i = 0; i < views.Length(); i++)
-		{
-			auto &del = views[i];
-			if (v == del.v)
-			{
-				views.DeleteAt(i--);
-				break;
-			}
-		}
-	}
-
-	void OnDelete(LViewI *v)
-	{
-		if (!Lock(_FL))
-			return;
-
-		auto &del = views.New();
-		del.v = v;
-		del.ts = LCurrentTime();
-
-		Unlock();
-	}
-
-	bool Has(LViewI *v)
-	{
-		if (!Lock(_FL))
-			return false;
-
-		auto now = LCurrentTime();
-		bool status = false;
-		for (size_t i = 0; i < views.Length(); i++)
-		{
-			auto &del = views[i];
-			if (v == del.v)
-			{
-				status = true;
-			}
-			if (now >= del.ts + 60000)
-			{
-				// printf("	DeletedViews remove=%p\n", views[i].v);
-				views.DeleteAt(i--);
-			}
-		}
-		
-		Unlock();
-		return status;
-	}
-
-}	DeletedViews;
-
-bool LView::RecentlyDeleted(LViewI *v)
-{
-	return DeletedViews.Has(v);
-}
 #endif
 
 LView::LView(OsView view) :
@@ -265,9 +182,6 @@ LView::LView(OsView view) :
 {
 	#ifdef _DEBUG
     _Debug = false;
-	#endif
-	#if defined(HAIKU) || defined(MAC)
-		DeletedViews.OnCreate(static_cast<LViewI*>(this));
 	#endif
 
 	d = new LViewPrivate(this);
@@ -289,10 +203,6 @@ LView::LView(OsView view) :
 
 LView::~LView()
 {
-	#if defined(HAIKU) || defined(MAC)
-		DeletedViews.OnDelete(static_cast<LViewI*>(this));
-	#endif
-
 	if (d->SinkHnd >= 0)
 	{
 		LEventSinkMap::Dispatch.RemoveSink(this);

@@ -67,12 +67,6 @@ private:
 	
 	#endif
 	
-	#if defined(HAIKU) || defined(MAC)
-	
-		static bool RecentlyDeleted(LViewI *v);
-
-	#endif
-
 	#if defined(LGI_SDL)
 
 		friend Uint32 SDL_PulseCallback(Uint32 interval, LView *v);
