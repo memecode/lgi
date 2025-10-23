@@ -579,7 +579,8 @@ public:
 	virtual bool PointToScreen(LPoint &p) = 0;
 	virtual bool PointToView(LPoint &p) = 0;
 	virtual bool WindowVirtualOffset(LPoint *Offset) = 0;	
-	virtual LViewI *WindowFromPoint(int x, int y, int DebugDepth = 0) = 0;
+	[[deprecated]] virtual LViewI *WindowFromPoint(int x, int y, int DebugDepth = 0) = 0;
+	virtual LViewI *ViewFromPoint(LPoint pt, LPoint *localPt = nullptr) = 0;
 	virtual LPoint &GetWindowBorderSize() = 0;
 	virtual bool IsOver(LMouse &m) = 0;
 

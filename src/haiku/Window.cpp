@@ -797,7 +797,9 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 				return;
 			}
 			
-			LMouse ms(&msg);
+			LMouse ms(&msg);			
+			ms.Target = ViewFromPoint(ms, &ms);
+			// ms.Trace("wnd event");
 			_Mouse(ms, event == LMessage::MouseMoved);
 			break;
 		}

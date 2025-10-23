@@ -2248,6 +2248,36 @@ LString _ViewDesc(LViewI *v)
 	return s;
 }
 
+LViewI *LView::ViewFromPoint(LPoint pt, LPoint *localPt)
+{
+	// We iterate over the child in reverse order because if they overlap the
+	// end of the list is on "top". So they should get the click or whatever
+	// before the the lower windows.
+	auto it = Children.rbegin();
+	auto n = Children.Length() - 1;
+	for (LViewI *c = *it; c; c = *--it)
+	{
+		if (!c->Visible())
+			continue;
+
+		auto pos = c->GetPos();		
+		if (pos.Overlap(pt))
+		{
+			if (auto v = c->ViewFromPoint(pt - pos.TopLeft(), localPt))
+				return v;
+		}
+	}
+
+	if (Pos.ZeroTranslate().Overlap(pt))
+	{
+		if (localPt)
+			*localPt = pt - _Border.TopLeft();
+		return this;
+	}
+
+	return nullptr;
+}
+
 LViewI *LView::WindowFromPoint(int x, int y, int DebugDepth)
 {
 	char Tabs[64];
