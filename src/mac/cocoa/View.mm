@@ -300,19 +300,17 @@ bool LView::_Mouse(LMouse &m, bool Move)
 
 LRect &LView::GetClient(bool ClientSpace)
 {
-	int Edge = (Sunken() || Raised()) ? _BorderSize : 0;
-
 	static LRect c;
 	c = Pos;
 	c.Offset(-c.x1, -c.y1);
 	if (ClientSpace)
 	{
-		c.x2 -= Edge << 1;
-		c.y2 -= Edge << 1;
+		c.x2 -= _Border.x1 + _Border.x2;
+		c.y2 -= _Border.y1 + _Border.y2;
 	}
 	else
 	{
-		c.Inset(Edge, Edge);
+		c.Inset(&_Border);
 	}
 	
 	return c;
