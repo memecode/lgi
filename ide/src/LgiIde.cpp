@@ -3038,17 +3038,21 @@ bool AppWnd::OnRequestClose(bool IsOsQuit)
 		d->FindSym->Shutdown([this]()
 			{
 				printf("Find sym shutdown cb\n");
-				if (SaveAllAndQuit())
-				{
-					printf("SaveAllAndQuit ret true\n");
-					d->InShutdown = false;
-
-					RunCallback([]()
+				RunCallback([this]()
+					{
+						if (SaveAllAndQuit())
 						{
-							LCloseApp();
-						},
-						_FL);
-				}
+							printf("SaveAllAndQuit ret true\n");
+							d->InShutdown = false;
+
+							RunCallback([]()
+								{
+									LCloseApp();
+								},
+								_FL);
+						}
+					},
+					_FL);
 			});
 
 		printf("Find sym return false\n");

@@ -1148,11 +1148,13 @@ public:
 		if (!searchTerms || !callback)
 			return false;
 
+		/*
 		if (cancelPrev && SearchFilesHnd >= 0)
 		{
 			log->Print("%s:%i - canceling previous work: %i\n", _FL, SearchFilesHnd);
 			CancelWork(SearchFilesHnd);
 		}
+		*/
 
 		SearchFilesHnd = AddWork(
 			MakeContext(_FL, searchTerms),
@@ -1178,10 +1180,6 @@ public:
 							absPath = path;
 
 						auto args = LString::Fmt("cd %s && find .", absPath.Get());
-						/*
-						for (size_t i=0; i<parts.Length(); i++)
-							args += LString::Fmt("%s -iname \"*%s*\"", i ? " -and" : "", LGetLeaf(parts[i]));
-						*/
 						args += " -not -path \"*/.hg/*\" -and -not -iname \"*.d\"";
 
 						int32_t exitCode = 0;

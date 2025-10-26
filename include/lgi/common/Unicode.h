@@ -234,7 +234,7 @@ inline uint32_t LgiUtf16To32(const uint16_t *&i, ssize_t &Bytes)
 }
 
 /// Convert utf-16 char to utf-8
-inline bool LgiUtf16To8(const uint16_t *&in, ssize_t &inSize, uint8_t *&out, ssize_t &outSize)
+inline bool LgiUtf16To8(const uint16_t *&in, ssize_t &inBytes, uint8_t *&out, ssize_t &outSize)
 {
 	if (!in || !out || outSize <= 0)
 		return false;
@@ -245,7 +245,7 @@ inline bool LgiUtf16To8(const uint16_t *&in, ssize_t &inSize, uint8_t *&out, ssi
 		return true;
 	}
 
-	uint32_t u32 = LgiUtf16To32(in, inSize);
+	uint32_t u32 = LgiUtf16To32(in, inBytes);
 	return LgiUtf32To8(u32, out, outSize);
 }
 

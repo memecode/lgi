@@ -292,6 +292,9 @@ public:
 	
 	/// \returns true if this event should show a context menu
 	bool IsContextMenu() const;
+
+	/// \returns the utf8 verison of c16;
+	LString utf8() const;
 };
 
 /// \brief All the parameters of a mouse click event

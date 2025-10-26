@@ -31,6 +31,22 @@ LKey::LKey(int Vkey, uint32_t flags)
 	#endif
 }
 
+LString LKey::utf8() const
+{
+	char buf[8] = "";
+	auto out = (uint8_t*)buf;
+	ssize_t outSize = sizeof(buf);
+	ssize_t inSize = sizeof(c16);
+	#if WINDOWS
+		auto in = (const uint16_t*)&c16;
+		LgiUtf16To8(in, inSize, out, outSize);
+	#else
+		auto in = (const uint32_t*)&c16;
+		LgiUtf32To8(in, inSize, out, outSize);
+	#endif
+	return buf;
+}
+
 bool LKey::IsContextMenu() const
 {
 	return !IsChar && vkey == LK_CONTEXTKEY;

@@ -50,6 +50,10 @@ public:
 	LMouse			*CurrentClick = NULL;
 	LTreeItem		*ScrollTo = NULL;
     
+	uint64_t		searchTs = 0;
+	LString			searchTerm;
+	LTreeItem		*matchedItem = nullptr;
+
     // Visual style
 	LTree::ThumbStyle Btns = LTree::TreeTriangle;
 	bool			JoiningLines = false;
@@ -1477,7 +1481,8 @@ bool LTree::OnKey(LKey &k)
 {
 	auto lck = ScopedLock(_FL);
 	bool Status = false;
-	LTreeItem *i = d->Selection[0];
+	
+	auto i = d->Selection[0];
 	if (!i)
 	{
 		i = Items[0];
@@ -1492,6 +1497,7 @@ bool LTree::OnKey(LKey &k)
 			case LK_PAGEUP:
 			case LK_PAGEDOWN:
 			{
+				d->searchTerm.Empty();
 				if (i && i->d->Pos.Y() > 0)
 				{
 					int Page = GetClient().Y() / i->d->Pos.Y();
@@ -1515,8 +1521,8 @@ bool LTree::OnKey(LKey &k)
 			}
 			case LK_HOME:
 			{
-				LTreeItem *i;
-				if ((i = Items[0]))
+				d->searchTerm.Empty();
+				if (auto i = Items[0])
 				{
 					i->Select(true);
 					i->ScrollTo();
@@ -1526,6 +1532,7 @@ bool LTree::OnKey(LKey &k)
 			}
 			case LK_END:
 			{
+				d->searchTerm.Empty();
 				LTreeItem *n = i, *p = NULL;
 				while ((n = GetAdjacent(n, true)))
 				{
@@ -1541,6 +1548,7 @@ bool LTree::OnKey(LKey &k)
 			}
 			case LK_LEFT:
 			{
+				d->searchTerm.Empty();
 				if (i)
 				{
 					if (i->Items.Length() && i->Expanded())
@@ -1561,8 +1569,8 @@ bool LTree::OnKey(LKey &k)
 			}
 			case LK_UP:
 			{
-				LTreeItem *n = GetAdjacent(i, false);
-				if (n)
+				d->searchTerm.Empty();
+				if (auto n = GetAdjacent(i, false))
 				{
 					n->Select(true);
 					n->ScrollTo();
@@ -1572,6 +1580,7 @@ bool LTree::OnKey(LKey &k)
 			}
 			case LK_RIGHT:
 			{
+				d->searchTerm.Empty();
 				if (i)
 				{
 					i->Expanded(true);
@@ -1585,8 +1594,8 @@ bool LTree::OnKey(LKey &k)
 			}
 			case LK_DOWN:
 			{
-				LTreeItem *n = GetAdjacent(i, true);
-				if (n)
+				d->searchTerm.Empty();
+				if (auto n = GetAdjacent(i, true))
 				{
 					n->Select(true);
 					n->ScrollTo();
@@ -1596,23 +1605,18 @@ bool LTree::OnKey(LKey &k)
 			}
 			case LK_DELETE:
 			{
-				if (k.Down())
-				{
-					Unlock(); // before potentially being deleted...?
-					SendNotify(LNotification(k));
-					// This might delete the item... so just return here.
-					return true;
-				}
-				break;
+				d->searchTerm.Empty();
+				Unlock(); // before potentially being deleted...?
+				SendNotify(LNotification(k));
+				// This might delete the item... so just return here.
+				return true;
 			}
 			#ifdef VK_APPS
 			case VK_APPS:
 			{
-				LTreeItem *s = Selection();
-				if (s)
+				if (auto s = Selection())
 				{
-					LRect *r = &s->d->Text;
-					if (r)
+					if (auto r = &s->d->Text)
 					{
 						LMouse m;
 						m.x = r->x1 + (r->X() >> 1);
@@ -1636,9 +1640,25 @@ bool LTree::OnKey(LKey &k)
 					case 'f':
 					{
 						if (k.Ctrl())
+						{
 							SendNotify(LNotifyContainerFind);
+							return true;
+						}
 						break;
 					}
+				}
+
+				if (k.IsChar)
+				{
+					auto now = LCurrentTime();
+					if (now - d->searchTs > 2000)
+					{
+						// Start a new search term
+						d->searchTerm.Empty();
+					}
+
+					d->searchTerm += k.utf8();
+					d->searchTs = now;
 				}
 				break;
 			}
@@ -1647,7 +1667,27 @@ bool LTree::OnKey(LKey &k)
 
 	if (i && i != (LTreeItem*)this)
 	{
-		i->OnKey(k);
+		if (!i->OnKey(k) &&
+			d->searchTerm)
+		{
+			// Tree item didn't use key... so use the search term to look through the children and select one...
+			d->matchedItem = nullptr;
+			for (auto c = i->GetChild(); c; c = c->GetNext())
+			{
+				if (auto txt = c->GetText())
+				{
+					if (!Strnicmp(d->searchTerm.Get(), txt, d->searchTerm.Length()))
+					{
+						d->matchedItem = c;
+						break;
+					}
+				}
+			}
+
+			if (d->matchedItem)
+				SetPulse(200);
+			LgiTrace("matchedItem='%s' search='%s'\n", d->matchedItem ? d->matchedItem->GetText() : nullptr, d->searchTerm.Get());
+		}
 	}
 
 	return Status;
@@ -2079,6 +2119,15 @@ bool LTree::Delete(LTreeItem *Obj)
 void LTree::OnPulse()
 {
 	auto lck = ScopedLock(_FL);
+
+	if (d->matchedItem)
+	{
+		
+		d->matchedItem->Select(true);
+		d->matchedItem = nullptr;
+		SetPulse();
+	}
+
 	if (d->DropTarget)
 	{
 		int64 p = LCurrentTime() - d->DropSelectTime;
