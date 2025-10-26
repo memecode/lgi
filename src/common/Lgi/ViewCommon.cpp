@@ -316,9 +316,11 @@ bool LView::AddView(LViewI *v, int Where)
 	v->OnAttach();
 	OnChildrenChanged(v, true);
 
+	/*
 	printf("AddView %p/%s <- %p/%s\n",
 		static_cast<LViewI*>(this), GetClass(),
 		v, v->GetClass());
+	*/
 
 	#ifdef HAIKU
 	auto lv = v->GetLView();
@@ -2190,61 +2192,6 @@ LViewI *LView::ViewFromPoint(LPoint pt, LPoint *localPt)
 	}
 
 	return nullptr;
-}
-
-LViewI *LView::WindowFromPoint(int x, int y, int DebugDepth)
-{
-	char Tabs[64];
-	if (DebugDepth)
-	{
-		memset(Tabs, 9, DebugDepth);
-		Tabs[DebugDepth] = 0;
-		LgiTrace("%s%s %i\n", Tabs, _ViewDesc(this).Get(), Children.Length());
-	}
-
-	// We iterate over the child in reverse order because if they overlap the
-	// end of the list is on "top". So they should get the click or whatever
-	// before the the lower windows.
-	auto it = Children.rbegin();
-	int n = (int)Children.Length() - 1;
-	for (LViewI *c = *it; c; c = *--it)
-	{
-		LRect CPos = c->GetPos();
-		
-		if (CPos.Overlap(x, y) && c->Visible())
-		{
-			LRect CClient;
-			CClient = c->GetClient(false);
-
-            int Ox = CPos.x1 + CClient.x1;
-            int Oy = CPos.y1 + CClient.y1;
-			if (DebugDepth)
-			{
-				LgiTrace("%s[%i] %s Pos=%s Client=%s m(%i,%i)->(%i,%i)\n",
-						Tabs, n--,
-						_ViewDesc(c).Get(),
-						CPos.GetStr(),
-						CClient.GetStr(),
-						x, y,
-						x - Ox, y - Oy);
-			}
-
-			LViewI *Child = c->WindowFromPoint(x - Ox, y - Oy, DebugDepth ? DebugDepth  + 1 : 0);
-			if (Child)
-				return Child;
-		}
-		else if (DebugDepth)
-		{
-			LgiTrace("%s[%i] MISSED %s Pos=%s m(%i,%i)\n", Tabs, n--, _ViewDesc(c).Get(), CPos.GetStr(), x, y);
-		}
-	}
-
-	if (x >= 0 && y >= 0 && x < Pos.X() && y < Pos.Y())
-	{
-		return this;
-	}
-
-	return NULL;
 }
 
 LColour LView::StyleColour(int CssPropType, LColour Default, int Depth)

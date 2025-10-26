@@ -785,8 +785,6 @@ public:
 
 	/// true if the mouse event is over the view
 	bool IsOver(LMouse &m) override;
-	/// returns the sub window located at the point x,y	
-	[[deprecated]] LViewI *WindowFromPoint(int x, int y, int DebugDepth = 0) override;
 	/// returns the view located at 'point'. Optionally it can return the
 	/// local coordinates in 'localPt'.
 	LViewI *ViewFromPoint(LPoint point, LPoint *localPt = nullptr) override;

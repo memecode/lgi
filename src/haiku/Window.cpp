@@ -254,20 +254,6 @@ struct LBView : public Parent
 		m.AddMessage("message", message);
 		LAppPrivate::Post(&m);
 		
-		/*
-		if (message->what == B_MOUSE_WHEEL_CHANGED)
-		{
-			float x = 0.0f, y = 0.0f;
-			message->FindFloat("be:wheel_delta_x", &x);
-			message->FindFloat("be:wheel_delta_y", &y);
-			d->View->OnMouseWheel(y * 3.0f);
-		}
-		else if (message->what == M_SET_SCROLL)
-		{
-			return;
-		}
-		*/
-		
 		Parent::MessageReceived(message);
 	}
 
@@ -1069,7 +1055,7 @@ bool DndPointMap(LViewI *&v, LPoint &p, LDragDropTarget *&t, LWindow *Wnd, int x
 {
 	LRect cli = Wnd->GetClient();
 	t = NULL;
-	v = Wnd->WindowFromPoint(x - cli.x1, y - cli.y1, false);
+	v = Wnd->ViewFromPoint(LPoint(x, y) - cli.TopLeft());
 	if (!v)
 	{
 		LgiTrace("%s:%i - <no view> @ %i,%i\n", _FL, x, y);
@@ -1125,7 +1111,6 @@ void LWindow::UpdateRootView()
 	rootView->ResizeTo(f.Width(), f.Height() - menuPos.Height());
 	// if (menu) rootView->MoveTo(0, menuPos.Height());
 	rootView->SetResizingMode(B_FOLLOW_ALL_SIDES);
-	printf("rootView set resize mode follow all sides\n");
 }
 
 bool LWindow::Attach(LViewI *p)
@@ -1806,6 +1791,33 @@ LMessage::Param LWindow::OnEvent(LMessage *m)
 {
 	switch (m->Msg())
 	{
+		case B_MOUSE_WHEEL_CHANGED:
+		{
+			float x = 0.0f, y = 0.0f;
+			m->FindFloat("be:wheel_delta_x", &x);
+			m->FindFloat("be:wheel_delta_y", &y);
+			printf("%s:%i - B_MOUSE_WHEEL_CHANGED %g %g\n", _FL, x, y);
+			
+			// Figure out which LView the mouse is over...
+			LLocker lck(d, _FL);
+			if (!lck.Lock())
+				return false;			
+			BPoint pt;
+			uint32 btns;
+			d->view->GetMouse(&pt, &btns);
+			lck.Unlock();
+			
+			if (auto view = ViewFromPoint(pt))
+			{
+				view->OnMouseWheel(y * 3.0f);
+			}			
+			break;
+		}
+		case M_SET_SCROLL:
+		{
+			printf("%s:%i - M_SET_SCROLL??\n", _FL);
+			break;
+		}
 		case M_CLOSE:
 		{
 			if (OnRequestClose(false))
