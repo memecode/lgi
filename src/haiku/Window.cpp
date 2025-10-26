@@ -424,7 +424,6 @@ public:
 		wnd->d = NULL;
 
 		Lock();
-		printf("%p::~LWindowPrivate end\n", this);
 	}
 
 	bool HasThread()
@@ -643,7 +642,7 @@ LWindow::~LWindow()
 {
 	WndFlags |= GWF_DESTRUCTOR;
 	LockHandler(this, OpDelete);
-	printf("~LWindow %p, %p\n", this, (LViewI*)this);
+	// printf("~LWindow %p, %p\n", this, (LViewI*)this);
 
 	if (LAppInst->AppWnd == this)
 		LAppInst->AppWnd = NULL;
@@ -1641,7 +1640,7 @@ void LWindow::OnPosChange()
 			int rootTop = menu ? menuPos.bottom + 1 : 0;
 			if (rootPos.top != rootTop)
 			{
-				#if 1
+				#if 0
 				printf("frame=%s menu=%p,%i,%s rootpos=%s rootTop=%i\n",
 					ToString(frame).Get(), menu, menu?menu->IsHidden():0, ToString(menuPos).Get(), ToString(rootPos).Get(), rootTop);
 				#endif
@@ -1796,7 +1795,7 @@ LMessage::Param LWindow::OnEvent(LMessage *m)
 			float x = 0.0f, y = 0.0f;
 			m->FindFloat("be:wheel_delta_x", &x);
 			m->FindFloat("be:wheel_delta_y", &y);
-			printf("%s:%i - B_MOUSE_WHEEL_CHANGED %g %g\n", _FL, x, y);
+			// printf("%s:%i - B_MOUSE_WHEEL_CHANGED %g %g\n", _FL, x, y);
 			
 			// Figure out which LView the mouse is over...
 			LLocker lck(d, _FL);

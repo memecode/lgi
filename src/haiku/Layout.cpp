@@ -230,6 +230,7 @@ void LLayout::OnNcPaint(LSurface *pDC, LRect &r)
 {
 	LView::OnNcPaint(pDC, r);
 	
+	/*
 	if (VScroll && VScroll->Visible())
 	{
 		r.x2 -= VScroll->X();
@@ -239,13 +240,16 @@ void LLayout::OnNcPaint(LSurface *pDC, LRect &r)
 	{
 		r.y2 -= HScroll->Y();
 	}
+	*/
 	
 	if (VScroll && VScroll->Visible() &&
 		HScroll && HScroll->Visible())
 	{
 		// Draw square at the end of each scroll bar
-		LRect s(	VScroll->GetPos().x1, HScroll->GetPos().y1,
-					VScroll->GetPos().x2, HScroll->GetPos().y2);
+		auto vpos = VScroll->GetPos();
+		auto hpos = HScroll->GetPos();
+		LRect s(	vpos.x1, hpos.y1,
+					vpos.x2, hpos.y2);
 		pDC->Colour(L_MED);
 		pDC->Rectangle(&s);
 	}

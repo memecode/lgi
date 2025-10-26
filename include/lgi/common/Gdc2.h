@@ -1069,6 +1069,10 @@ public:
 
 	void HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b);
 	void VertLine(int x, int y1, int y2, COLOUR a, COLOUR b);
+	
+	#if HAIKU
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
+	#endif
 };
 
 /// \brief An implemenation of LSurface to print to a printer.

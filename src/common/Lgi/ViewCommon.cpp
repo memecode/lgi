@@ -935,7 +935,7 @@ void LView::OnNcPaint(LSurface *pDC, LRect &r)
 		{
 			LRect OldClip = pDC->ClipRgn();
 			pDC->ClipRgn(Update);
-			printf("%s: paint clipping to %s\n", GetClass(), Update->GetStr());
+			// printf("%s: paint clipping to %s\n", GetClass(), Update->GetStr());
 			OnPaint(pDC);
 			pDC->ClipRgn(OldClip.Valid() ? &OldClip : NULL);
 		}
@@ -946,11 +946,15 @@ void LView::OnNcPaint(LSurface *pDC, LRect &r)
 
 		#if PAINT_VIRTUAL_CHILDREN
 		// Paint any virtual children
+		LVariant v;
 		for (auto i : Children)
 		{
 			auto w = i->GetLView();
 			if (w && w->Visible())
 			{
+				// bool debug = !Stricmp(w->GetClass(), "LScrollBar");
+				// pDC->SetValue("debug", v = debug);
+				
 				#if LGI_VIEW_HANDLE
 				if (!w->Handle())
 				#endif
@@ -959,11 +963,14 @@ void LView::OnNcPaint(LSurface *pDC, LRect &r)
 					p.Offset(o.x, o.y);
 					if (HasClient)
 						p.Offset(Client.x1 - r.x1, Client.y1 - r.y1);
+					/*
+					if (debug)
+						printf("_Paint p=%s o=%i,%i hasCli=%i\n",
+							p.GetStr(), o.x, o.y, HasClient);
+					*/
 					
 					LPoint co(p.x1, p.y1);
-					// LgiTrace("%s::_Paint %i,%i\n", w->GetClass(), p.x1, p.y1);
 					pDC->SetClient(&p);
-					// printf("%s: set client %s\n", GetClass(), p.GetStr());
 					w->_Paint(pDC, &co);
 					pDC->SetClient(NULL);
 				}
@@ -972,7 +979,7 @@ void LView::OnNcPaint(LSurface *pDC, LRect &r)
 		#endif
 
 		if (HasClient)
-			pDC->SetClient(0);
+			pDC->SetClient(nullptr);
 	}
 
 #endif

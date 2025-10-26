@@ -237,7 +237,7 @@ VPATH=$(BuildDir) \
 	./src/common/Skins/Gel \
 	./src/common/Resource \
 	./src/posix \
+	./src/haiku \
 	./src/common/Lgi \
 	./src/common/General \
-	./src/haiku \
 	./src/common/Gdc2/Filters

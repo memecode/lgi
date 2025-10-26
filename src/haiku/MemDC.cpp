@@ -16,6 +16,7 @@
 
 #include "lgi/common/Gdc2.h"
 #include "lgi/common/LgiString.h"
+#include "lgi/common/Variant.h"
 
 #include <Bitmap.h>
 
@@ -30,6 +31,7 @@ public:
 	BBitmap *Bmp = NULL;
 	BView *View = NULL;
 	int LockCount = 0;
+	bool debug = false;
 
 	~LMemDCPrivate()
 	{
@@ -104,12 +106,12 @@ bool LMemDC::GetClient(LRect *c)
 	return false;
 }
 
-LString descRect(BRect r)
+static LString descRect(BRect r)
 {
 	return LString::Fmt("%g,%g,%g,%g", r.left, r.top, r.right, r.bottom);
 }
 
-LString descClip(BView *view)
+static LString descClip(BView *view)
 {
 	BRegion region;
 	view->GetClippingRegion(&region);
@@ -127,41 +129,40 @@ void LMemDC::SetClient(LRect *c)
 
 	if (c)
 	{
-		LRect Doc;
+		LRect doc;
 		if (d->Client.Length())
-			Doc = d->Client.Last();
+			doc = d->Client.Last();
 		else
-			Doc = Bounds();
+			doc = Bounds();
 		
-		LRect r = *c;
-		r.Bound(&Doc);
-		d->Client.Add(r);
+		Clip = *c;
+		Clip.Bound(&doc);
+		d->Client.Add(Clip);
 		
-		// auto before = descClip(d->View);
+		auto before = descClip(d->View);
 		
-		Clip = r;
 		d->View->ConstrainClippingRegion(NULL);
 		d->View->SetOrigin(0, 0);
 		
-		// auto mid = descClip(d->View);		
+		auto mid = descClip(d->View);		
 		
 		BRect br = Clip;
 		d->View->ClipToRect(br);
 		// d->View->SetOrigin(Clip.x1, Clip.y1);
 		
-		// auto after = descClip(d->View);
-		// LRect bounds = d->View->Bounds();
+		auto after = descClip(d->View);
+		LRect bounds = d->View->Bounds();
 		
-		/*
-		printf("SetClient %s br=%s len=%i viewClip=%s -> %s -> %s\n",
-			Clip.GetStr(),
-			descRect(br).Get(),
-			(int)d->Client.Length(),
-			before.Get(), mid.Get(), after.Get());
-		*/
+		if (d->debug)
+			printf("SetClient c=%s, clip=%s doc=%s len=%i viewClip=%s -> %s -> %s\n",
+				c->GetStr(),
+				Clip.GetStr(),
+				doc.GetStr(),
+				(int)d->Client.Length(),
+				before.Get(), mid.Get(), after.Get());
 		
-		OriginX = -r.x1;
-		OriginY = -r.y1;
+		OriginX = -Clip.x1;
+		OriginY = -Clip.y1;
 	}
 	else
 	{
@@ -436,4 +437,14 @@ void LMemDC::VertLine(int x, int y1, int y2, COLOUR a, COLOUR b)
 
 		pApp->c = Prev;
 	}
+}
+
+bool LMemDC::SetVariant(const char *Name, LVariant &Value, const char *Array)
+{
+	if (!Stricmp(Name, "debug"))
+	{
+		d->debug = Value.CastBool();
+	}
+
+	return false;
 }

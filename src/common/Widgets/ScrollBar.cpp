@@ -12,6 +12,24 @@
 	#define WINXP_LOOK		1
 #endif
 
+
+#include "Region.h"
+static LString descRect(BRect r)
+{
+	return LString::Fmt("%g,%g,%g,%g", r.left, r.top, r.right, r.bottom);
+}
+
+static LString descClip(BView *view)
+{
+	BRegion region;
+	view->GetClippingRegion(&region);
+
+	LString::Array a;
+	for (int i=0; i<region.CountRects(); i++)
+		a.Add(descRect(region.RectAt(i)));
+	return LString("(") + LString(" ").Join(a) + ")";
+}
+
 enum ScrollZone
 {
 	BTN_NONE,
@@ -110,10 +128,7 @@ public:
 
 	void OnPaint(LSurface *pDC)
 	{
-		LColour SlideCol(L_MED);
-		SlideCol.Rgb(	(255 + SlideCol.r()) >> 1,
-						(255 + SlideCol.g()) >> 1,
-						(255 + SlideCol.b()) >> 1);
+		auto SlideCol = LColour(L_MED).Mix(LColour::White);
 
 		#if MAC_LOOK || MAC_SKIN
 		
@@ -136,6 +151,27 @@ public:
 		
 		#elif WINXP_LOOK
 		
+			/*
+			if (auto painter = pDC->Handle())
+			{
+				auto locked = painter->LockLooper();
+				auto clp = descClip(painter);
+				printf("%s:%i - painter=%p, clp=%s\n", _FL, painter, clp.Get());
+				if (locked)
+					painter->UnlockLooper();
+					
+				if (clp == "()")
+				{
+					static bool first = true;
+					if (first)
+					{
+						first = false;
+						// Widget->GetWindow()->_Dump();
+					}
+				}
+			}
+			*/
+		
 			// left/up button
 			LRect r = Sub;
 			DrawBorder(pDC, r, IsOver() == BTN_SUB ? DefaultSunkenEdge : DefaultRaisedEdge);
@@ -149,7 +185,6 @@ public:
 			pDC->Colour(L_MED);
 			pDC->Rectangle(&r);
 			DrawIcon(pDC, r, true, IsValid() ? L_BLACK : L_LOW);
-
 
 			// printf("Paint %ix%i, %s\n", pDC->X(), pDC->Y(), Widget->GetPos().GetStr());
 			if (IsValid())
