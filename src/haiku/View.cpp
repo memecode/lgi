@@ -130,9 +130,16 @@ LViewPrivate::~LViewPrivate()
 		delete EventTargets[0];
 }
 
-// This is called in the app thread.. lock the view before using
-void LView::HaikuEvent(LMessage::Events event, BMessage *m)
+void LView::SetFlagAll(int flag, bool add)
 {
+	if (add)
+		WndFlags |= flag;
+	else
+		WndFlags &= ~flag;
+
+	for (auto c: Children)
+		if (auto v = c->GetLView())
+			v->SetFlagAll(flag, add);
 }
 
 void LView::_Focus(bool f)

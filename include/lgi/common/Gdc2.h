@@ -1044,6 +1044,7 @@ public:
 	// Set new clipping region
 	LRect ClipRgn(LRect *Rgn) override;
 
+	bool GetClient(LRect *c) override;
 	void SetClient(LRect *c) override;
 
 	/// Locks the bits for access. LMemDC's start in the locked state.

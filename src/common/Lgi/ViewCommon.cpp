@@ -222,7 +222,6 @@ LView::~LView()
 
 	_Delete();
 
-	// printf("%p::~LView delete %p th=%u\n", this, d, LCurrentThreadId());
 	DeleteObj(d);	
 	// printf("%p::~LView\n", this);
 }
@@ -317,6 +316,10 @@ bool LView::AddView(LViewI *v, int Where)
 	v->OnAttach();
 	OnChildrenChanged(v, true);
 
+	printf("AddView %p/%s <- %p/%s\n",
+		static_cast<LViewI*>(this), GetClass(),
+		v, v->GetClass());
+
 	#ifdef HAIKU
 	auto lv = v->GetLView();
 	if (lv && !wasAttached && lv->IsAttached() && !lv->d->onCreateEvent)
@@ -334,12 +337,12 @@ bool LView::DelView(LViewI *v)
 	if (!v)
 		return false;
 
-	bool Has = Children.HasItem(v);
 	bool b = Children.Delete(v);
-	if (Has)
+	if (b)
+	{
+		v->SetParent(nullptr);
 		OnChildrenChanged(v, false);
-	Has = Children.HasItem(v);
-	LAssert(!Has);
+	}
 	return b;
 }
 
@@ -2118,20 +2121,22 @@ bool LView::WindowVirtualOffset(LPoint *Offset)
 		Offset->x = 0;
 		Offset->y = 0;
 		
-		for (LViewI *Wnd = this; Wnd; Wnd = Wnd->GetParent())
+		for (LView *view = this; view; view = dynamic_cast<LView*>(view->GetParent()))
 		{
 			#if !LGI_VIEW_HANDLE
-			auto IsWnd = dynamic_cast<LWindow*>(Wnd);
+			auto IsWnd = dynamic_cast<LWindow*>(view);
 			if (!IsWnd)
 			#else
-			if (!Wnd->Handle())
+			if (!view->Handle())
 			#endif
 			{
-				LRect r = Wnd->GetPos();
-				LViewI *Par = Wnd->GetParent();
-				if (Par)
+				if (view->WndFlags & GWF_DESTRUCTOR)
+					break;
+					
+				LRect r = view->GetPos();
+				if (auto parent = view->GetParent())
 				{
-					LRect c = Par->GetClient(false);
+					LRect c = parent->GetClient(false);
 					Offset->x += r.x1 + c.x1;
 					Offset->y += r.y1 + c.y1;
 				}
@@ -2801,13 +2806,18 @@ void LView::_Dump(int Depth)
 		auto wid = GtkCast(WindowHandle(), gtk_widget, GtkWidget);
 		DumpGtk(wid);
 	
+	#elif HAIKU
+
+		printf("%s%p/%s pos=%s\n", Sp, this, GetClass(), Pos.GetStr());
+		for (auto c: Children)
+		{
+			if (auto g = c->GetLView())
+				g->_Dump(Depth + 1);
+		}
+	
 	#elif !defined(MAC)
 	
-		#if defined(HAIKU)
-		LLocker lck(WindowHandle(), _FL);
-		if (lck.Lock())
-		#endif
-			::_Dump(0, WindowHandle());
+		::_Dump(0, WindowHandle());
 	
 	#endif
 }

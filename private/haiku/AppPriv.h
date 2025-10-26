@@ -138,7 +138,7 @@ public:
 
 				if (!LView::LockHandler(wnd, LView::OpExists))
 				{
-					printf("%s:%i - %p is recently deleted\n", _FL, wnd);
+					// printf("%s:%i - %p is recently deleted\n", _FL, wnd);
 					break;
 				}
 				

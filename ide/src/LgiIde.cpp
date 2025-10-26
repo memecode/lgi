@@ -2015,10 +2015,13 @@ AppWnd::AppWnd()
 	}
 	else
 		LAssert(!"Log object missing.");
+
+	// _Dump();
 }
 
 AppWnd::~AppWnd()
 {
+	printf("AppWnd::~AppWnd() start\n");
 	d->BreakPoints.DeleteCallback(d->DocBpCallback);
 
 	// Everything needs to be clean BEFORE we get here... because we can't show
@@ -2037,6 +2040,7 @@ AppWnd::~AppWnd()
 
 	LAppInst->AppWnd = NULL;
 	DeleteObj(d);
+	printf("AppWnd::~AppWnd() end\n");
 }
 
 void AppWnd::DocIsCrlf(bool crlf)

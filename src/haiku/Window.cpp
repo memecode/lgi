@@ -655,6 +655,7 @@ LWindow::LWindow() :
 
 LWindow::~LWindow()
 {
+	WndFlags |= GWF_DESTRUCTOR;
 	LockHandler(this, OpDelete);
 	printf("~LWindow %p, %p\n", this, (LViewI*)this);
 
@@ -920,6 +921,8 @@ int LWindow::WaitThread()
 {
 	if (!d)
 		return -1;
+
+	SetFlagAll(GWF_DESTRUCTOR, true);
 
 	thread_id id = d->Thread();
 	bool thisThread = id == LCurrentThreadId();

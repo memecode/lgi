@@ -63,7 +63,9 @@ private:
 	#elif defined HAIKU
 	
 		friend class LAppPrivate;
-		virtual void HaikuEvent(LMessage::Events event, BMessage *m);
+		virtual void HaikuEvent(LMessage::Events event, BMessage *m) {}
+		// Recurses over the whole view tree setting a flag in 'WndFlags'
+		void SetFlagAll(int flag, bool add = true);
 	
 	#endif
 	
