@@ -42,11 +42,6 @@
 		#endif
 	}
 
-	OsView WindowFromPoint(int x, int y, int DebugDepth = 0)
-	{
-		return NULL;
-	}
-
 	bool GetWindowRect(OsView Wnd, LRect &rc)
 	{
 		return false;

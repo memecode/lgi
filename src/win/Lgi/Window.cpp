@@ -107,9 +107,6 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 LWindow::LWindow() : LView(nullptr)
-	#ifdef _DEBUG
-	, DebugDC(_FL)
-	#endif
 {
 	_Window = this;
 	d = new LWindowPrivate;

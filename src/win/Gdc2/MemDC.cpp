@@ -94,6 +94,13 @@ LMemDC::~LMemDC()
 	#endif
 }
 
+bool LMemDC::GetClient(LRect *c)
+{
+	if (c)
+		*c = Clip;
+	return true;
+}
+
 void LMemDC::SetClient(LRect *c)
 {
 	if (c)

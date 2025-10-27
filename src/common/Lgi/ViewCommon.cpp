@@ -891,9 +891,7 @@ void LView::OnNcPaint(LSurface *pDC, LRect &r)
 		LAutoPtr<LSurface> Local;
 		if (!pDC)
 		{
-			Local.Reset(new LScreenDC(this));
-			pDC = Local;
-			return;
+			Local.Reset(pDC = new LScreenDC(this));
 		}
 		if (!pDC)
 		{

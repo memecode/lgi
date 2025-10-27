@@ -5,13 +5,14 @@
 /// I've using the American spelling for 'color' as opposed to the English 'colour'
 /// because the CSS spec is written with 'color' as the spelling.
 
-#include "LgiInc.h"
+#include "lgi/common/LgiInc.h"
 #include "LgiOsDefs.h"
 #include "lgi/common/Mem.h"
 #include "lgi/common/Gdc2.h"
 #include "lgi/common/AutoPtr.h"
 #include "lgi/common/LgiString.h"
 #include "lgi/common/HashTable.h"
+#include "lgi/common/Colour.h"
 
 #ifndef LINUX
 #pragma pack(push, 1)

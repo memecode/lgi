@@ -1654,7 +1654,7 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 				Ms.y = (short) (Msg->b>>16);
 				Ms.Flags = 0;
 
-				LViewI *MouseOver = WindowFromPoint(Ms.x, Ms.y);
+				auto MouseOver = ViewFromPoint(Ms);
 				if (MouseOver &&
 					_Over != MouseOver &&
 					!(MouseOver == this || MouseOver->Handle() == 0))
@@ -1756,7 +1756,7 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 				SetKeyFlag(Ms.Flags, VK_MENU, MK_ALT);
 				Ms.Down((Msg->a & (MK_LBUTTON|MK_MBUTTON|MK_RBUTTON)) != 0);
 
-				LViewI *MouseOver = WindowFromPoint(Ms.x, Ms.y);
+				auto MouseOver = ViewFromPoint(Ms);
 				if (_Over != MouseOver)
 				{
 					if (_Over)
