@@ -29,8 +29,7 @@ public:
 	int Rop = GDC_SET;
 	NativeInt Alpha = -1;
 
-	LView *View = NULL;
-	OsView v = NULL;
+	BView *v = nullptr;
 
 	LScreenPrivate()
 	{
@@ -55,17 +54,17 @@ LScreenDC::LScreenDC()
 LScreenDC::LScreenDC(LView *view, void *param)
 {
 	d = new LScreenPrivate;
-	if (d->View = view)
-		d->v = view->Handle();
-
+	
+	if (auto wnd = view->GetWindow())
+		d->v = wnd->GetPainter();
+	
 	d->Bits = GdcD->GetBits();
-
 	if (!d->v)
 	{
 		LgiTrace("%s:%i - LScreenDC::LScreenDC - No view?\n", _FL);
 		LAssert(0);
 		return;
-	}
+	}	
 	
 	d->Client = ((LRect)d->v->Frame()).ZeroTranslate();
 

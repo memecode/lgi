@@ -63,7 +63,7 @@ extern LRect GtkGetPos(Gtk::GtkWidget *w);
 
 class LPulseThread : public LThread, public LCancel
 {
-	LView *View = NULL;
+	LView *View = nullptr;
 	LString ViewClass;
 	int Length = 0;
 	LThreadEvent Event;
@@ -71,9 +71,7 @@ class LPulseThread : public LThread, public LCancel
 
 	LString MakeName(LView *v, const char *Type)
 	{
-		LString s;
-		s.Printf("LPulseThread.%s.%s", v->GetClass(), Type);
-		return s;
+		return LString::Fmt("LPulseThread.%s.%s", v->GetClass(), Type);
 	}
 
 public:
@@ -107,12 +105,16 @@ public:
 			
 			if (!View->PostEvent(M_PULSE, 0, 0, 50/*milliseconds*/))
 			{
+				printf("%s:%i - pulse post event failed: %s\n", _FL, ViewClass.Get());
+				return -1;
+				/*
 				auto now = LCurrentTime();
 				if (now - WarnTs >= 5000)
 				{
 					WarnTs = now;
 					printf("%s:%i - PulseThread::PostEvent failed for %p/%s.\n", _FL, View, ViewClass.Get());
 				}
+				*/
 			}
 		}
 		
@@ -221,7 +223,7 @@ public:
 	
 	#elif defined(HAIKU)
 	
-		BView *Hnd = NULL;
+		bool onCreateEvent = false;
 		LArray<BMessage*> MsgQue; // For before the window is attached...
 	
 	#endif
@@ -235,16 +237,7 @@ public:
 			return Parent;
 		
 		if (ParentI)
-		{
-			#if defined(HAIKU) || defined(MAC)
-			if (LView::RecentlyDeleted(ParentI) ||
-				ParentI != ParentI2)
-			{
-				return NULL;
-			}
-			#endif
 			return ParentI->GetLView();
-		}
 
 		return NULL;
 	}

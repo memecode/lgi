@@ -178,6 +178,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			return false;
 		
 		backendCalls++;
+
 		auto ref = LString::Fmt("%s:%i", file, line);
 		int calls = backendCallers.Find(ref);
 		backendCallers.Add(ref, calls + 1);

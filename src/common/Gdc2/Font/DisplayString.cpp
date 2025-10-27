@@ -1920,43 +1920,48 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 		{
 			LgiTrace("%s:%i - No ptr: %p/%p.\n", _FL, Font, pDC);
 			return;
-		}
-		
-		/*
-		if (!Font->InThread())
-		{
-			LAssert(!"Not in font's thread.");
-			return;
-		}
-		*/
+		}		
 
 		auto fnt = Font->Handle();
 		auto view = pDC->Handle();
+		LRect client;
+		pDC->GetClient(&client);
 		if (!fnt || !view)
 		{
 			LgiTrace("%s:%i - No handle: %p/%p(%s).\n", _FL, fnt, view, pDC->GetClass());
 			return;
 		}
-		
-		int OriginX = 0, OriginY = 0;
-		// pDC->GetOrigin(OriginX, OriginY);		
-		
+
 		font_height height = {0};
 		fnt->GetHeight(&height);
 
-		#if 0
-		_debug = false;
-		for (auto &i: Info)
-		{
-			if (Stristr(i.Str, "Arguments"))
-				_debug = true;
-		}		
-		if (_debug)
-			printf("	trans=%i height=%g,%g,%g\n", Font->Transparent(), height.ascent, height.descent, height.leading);
-		#endif
+		LRect pos;
+		if (r)
+			pos = *r;
+		else
+			pos.Set(px, py, px+x, py+y);
 
+		int ox = 0, oy = 0;
+		pDC->GetOrigin(ox, oy);
+		pos.Offset(-ox, -oy);
+				
 		auto locked = view->LockLooper();
 
+		BRegion region;
+		view->GetClippingRegion(&region);
+		LRect viewClip = region.Frame();
+		
+		/*
+		auto origin = view->Origin();
+		printf("	'%s' at %i,%i, pos=%s, ori=%g,%g cli=%s viewclip=%s\n",
+			Info[0].Str,
+			px, py,
+			pos.GetStr(),
+			origin.x, origin.y,
+			client.GetStr(),
+			viewClip.GetStr());
+		*/
+				
 		if (!Font->Transparent())
 		{
 			view->SetHighColor(Font->Back());
@@ -1965,15 +1970,15 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 				clip = *r;
 			else
 				clip.Set(px, py, px+x, py+y);
-			clip.Offset(-OriginX, -OriginY);
+			clip.Offset(-ox, -oy);
 			view->FillRect(clip);
 		}
 
 		view->SetFont(fnt);
 		view->SetHighColor(Font->Fore());
 
-		int cx = px - OriginX;
-		int cy = py - OriginY;
+		int cx = px - ox;
+		int cy = py - oy;
 		for (auto &i: Info)
 		{
 			#if 0
@@ -1985,9 +1990,6 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 			
 			cx += i.X;
 		}
-
-		BRegion region;
-		view->GetClippingRegion(&region);
 
 		if (locked)		
 			view->UnlockLooper();

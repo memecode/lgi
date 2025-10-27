@@ -1,15 +1,14 @@
 #pragma once
 
+#include "lgi/common/Rect.h"
+#include "lgi/common/Mutex.h"
+
 #if defined(LGI_CARBON)
 	LgiFunc void DumpHnd(HIViewRef v, int depth = 0);
 #elif LGI_COCOA && defined(__OBJC__)
 	#include "LCocoaView.h"
 #endif
-#include "lgi/common/Message.h"
-#include "lgi/common/Rect.h"
-#include "lgi/common/Mutex.h"
-#include "lgi/common/DragAndDrop.h"
-#include "lgi/common/Gdc2.h"
+
 
 /// \brief The base class for all windows in the GUI.
 ///
@@ -62,21 +61,14 @@ private:
 		static		void CALLBACK TimerProc(OsView hwnd, UINT uMsg, UINT_PTR idEvent, uint32_t dwTime);
 
 	#elif defined HAIKU
-
+	
 		friend class LAppPrivate;
-		
-		// This is called in the app thread.. lock the view before using
-		virtual void HaikuEvent(LMessage::Events event, BMessage *m);
-
+		virtual void HaikuEvent(LMessage::Events event, BMessage *m) {}
+		// Recurses over the whole view tree setting a flag in 'WndFlags'
+		void SetFlagAll(int flag, bool add = true);
+	
 	#endif
 	
-	#if defined(HAIKU) || defined(MAC)
-	
-		template<typename Parent> friend class LBView;
-		static bool RecentlyDeleted(LViewI *v);
-
-	#endif
-
 	#if defined(LGI_SDL)
 
 		friend Uint32 SDL_PulseCallback(Uint32 interval, LView *v);
@@ -97,9 +89,7 @@ protected:
 	#endif
 
 	LView				*_Window = NULL;
-	#ifndef HAIKU
 	LMutex				*_Lock = NULL;
-	#endif
 	uint16				_IsToolBar = 0;
 	int					WndFlags = 0;
 	LRect				_Margin, _Border;
@@ -233,7 +223,6 @@ public:
 
 	/// Returns the OS handle of the view
 	#if defined(HAIKU)
-	OsView Handle() const;
 	static void HandleInThreadMessage(BMessage *Msg);
 	#elif LGI_VIEW_HANDLE
 	OsView Handle() const { return _View; }
@@ -796,8 +785,9 @@ public:
 
 	/// true if the mouse event is over the view
 	bool IsOver(LMouse &m) override;
-	/// returns the sub window located at the point x,y	
-	LViewI *WindowFromPoint(int x, int y, int DebugDepth = 0) override;
+	/// returns the view located at 'point'. Optionally it can return the
+	/// local coordinates in 'localPt'.
+	LViewI *ViewFromPoint(LPoint point, LPoint *localPt = nullptr) override;
 	/// Sets a timer to call the OnPulse() event
 	void SetPulse
 	(
@@ -959,7 +949,9 @@ public:
 	#endif
 };
 
+#if LGI_VIEW_HANDLE
 LgiFunc LView *LViewFromHandle(OsView hWnd);
+#endif
 
 
 /// \brief Factory for creating view's by name.

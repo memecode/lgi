@@ -97,7 +97,7 @@ public:
 			return;
 		}
 		
-		if (view && LView::RecentlyDeleted(view))
+		if (view && LView::LockHandler(view, LView::OpExists))
 		{
 			printf("%s:%i - view is recently deleted.\n", _FL);
 			return;
@@ -135,6 +135,12 @@ public:
 					printf("%s:%i - no view/wnd in msg.\n", _FL);
 					break;
 				}
+
+				if (!LView::LockHandler(wnd, LView::OpExists))
+				{
+					// printf("%s:%i - %p is recently deleted\n", _FL, wnd);
+					break;
+				}
 				
 				int32_t event = -1;
 				if (message->FindInt32(LMessage::PropEvent, &event) != B_OK)
@@ -144,33 +150,6 @@ public:
 				}
 				
 				wnd->HaikuEvent((LMessage::Events)event, message);
-				break;
-			}
-			case M_HAIKU_VIEW_EVENT:
-			{
-				LView *view = nullptr;
-				if (B_OK != message->FindPointer(LMessage::PropView, (void**)&view) ||
-					!view)
-				{
-					LAssert(0);
-					printf("%s:%i - no view/wnd in msg.\n", _FL);
-					break;
-				}
-				
-				if (LView::RecentlyDeleted(view))
-				{
-					printf("%s:%i - view is recently deleted.\n", _FL);
-					break;
-				}
-				
-				int32_t event = -1;
-				if (message->FindInt32(LMessage::PropEvent, &event) != B_OK)
-				{
-					printf("%s:%i - no event in msg.\n", _FL);
-					return;
-				}
-				
-				view->HaikuEvent((LMessage::Events)event, message);
 				break;
 			}
 			case M_HANDLE_IN_THREAD:

@@ -2,6 +2,8 @@
 #define _LWINDOW_H_
 
 #include "lgi/common/View.h"
+#include "lgi/common/DragAndDrop.h"
+#include "lgi/common/Gdc2.h"
 
 /// The available states for a top level window
 enum LWindowZoom
@@ -34,7 +36,6 @@ class LgiClass LWindow :
 	#endif
 	public LDragDropTarget
 {
-	friend class BViewRedir;
 	friend class LApp;
 	friend class LView;
 	friend class LButton;
@@ -54,8 +55,11 @@ protected:
 	#elif defined(HAIKU)
 		
 		friend class LAppPrivate;
+		template<typename Parent> friend struct LBView;
+
 		// This is called in the app thread.. lock the window before using
 		void HaikuEvent(LMessage::Events event, BMessage *m) override;
+		// Previous zoom state
 		LWindowZoom _PrevZoom = LZoomNormal;
 	
 	#else
@@ -104,7 +108,7 @@ protected:
 
 public:
 	#ifdef _DEBUG
-	LMemDC DebugDC;
+	LAutoPtr<LMemDC> DebugDC;
 	#endif
 
 	#ifdef __GTK_H__
@@ -283,6 +287,7 @@ public:
 		// Props
 		#if defined(HAIKU)
 			OsWindow WindowHandle() override;
+			OsPainter GetPainter();
 		#else
 			OsWindow WindowHandle() override { return Wnd; }
 		#endif

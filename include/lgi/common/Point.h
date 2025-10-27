@@ -110,6 +110,19 @@ public:
 		y = (int)p[1].Int();
 		return true;
 	}
+	
+	#if HAIKU
+	LPoint(const BPoint &p)
+	{
+		x = (int)p.x;
+		y = (int)p.y;
+	}
+	
+	operator BPoint() const
+	{
+		return BPoint(x, y);
+	}
+	#endif
 };
 
 /// 3d Point

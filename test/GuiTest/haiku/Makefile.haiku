@@ -46,7 +46,7 @@ else
 endif
 
 # Dependencies
-Source =	Main.cpp \
+Source =	./src/Main.cpp \
 			../../src/common/Lgi/LgiMain.cpp \
 			../../src/common/Db/DbTable.cpp
 
@@ -364,5 +364,6 @@ cleanall :
 
 VPATH=$(BuildDir) \
 	./ \
+	./src \
 	../../src/common/Lgi \
 	../../src/common/Db

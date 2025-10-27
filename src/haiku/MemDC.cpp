@@ -16,6 +16,7 @@
 
 #include "lgi/common/Gdc2.h"
 #include "lgi/common/LgiString.h"
+#include "lgi/common/Variant.h"
 
 #include <Bitmap.h>
 
@@ -30,6 +31,7 @@ public:
 	BBitmap *Bmp = NULL;
 	BView *View = NULL;
 	int LockCount = 0;
+	bool debug = false;
 
 	~LMemDCPrivate()
 	{
@@ -89,38 +91,94 @@ OsPainter LMemDC::Handle()
 	return d->View;
 }
 
+bool LMemDC::GetClient(LRect *c)
+{
+	if (!c)
+		return false;
+
+	if (d->Client.Length())
+	{
+		*c = d->Client.Last();
+		return true;
+	}
+
+	c->ZOff(-1, -1);
+	return false;
+}
+
+static LString descRect(BRect r)
+{
+	return LString::Fmt("%g,%g,%g,%g", r.left, r.top, r.right, r.bottom);
+}
+
+static LString descClip(BView *view)
+{
+	BRegion region;
+	view->GetClippingRegion(&region);
+
+	LString::Array a;
+	for (int i=0; i<region.CountRects(); i++)
+		a.Add(descRect(region.RectAt(i)));
+	return LString("(") + LString(" ").Join(a) + ")";
+}
+
 void LMemDC::SetClient(LRect *c)
 {
+	Handle();
+	auto locked = d->View->LockLooper();
+
 	if (c)
 	{
-		Handle();
-
-		LRect Doc;
+		LRect doc;
 		if (d->Client.Length())
-			Doc = d->Client.Last();
+			doc = d->Client.Last();
 		else
-			Doc = Bounds();
+			doc = Bounds();
 		
-		LRect r = *c;
-		r.Bound(&Doc);
-		d->Client.Add(r);
+		Clip = *c;
+		Clip.Bound(&doc);
+		d->Client.Add(Clip);
 		
-		Clip = r;
+		auto before = descClip(d->View);
 		
-		OriginX = -r.x1;
-		OriginY = -r.y1;
+		d->View->ConstrainClippingRegion(NULL);
+		d->View->SetOrigin(0, 0);
+		
+		auto mid = descClip(d->View);		
+		
+		BRect br = Clip;
+		d->View->ClipToRect(br);
+		// d->View->SetOrigin(Clip.x1, Clip.y1);
+		
+		auto after = descClip(d->View);
+		LRect bounds = d->View->Bounds();
+		
+		if (d->debug)
+			printf("SetClient c=%s, clip=%s doc=%s len=%i viewClip=%s -> %s -> %s\n",
+				c->GetStr(),
+				Clip.GetStr(),
+				doc.GetStr(),
+				(int)d->Client.Length(),
+				before.Get(), mid.Get(), after.Get());
+		
+		OriginX = -Clip.x1;
+		OriginY = -Clip.y1;
 	}
 	else
 	{
 		if (d->Client.Length())
 			d->Client.PopLast();
 
+		// d->View->SetOrigin(0, 0);
+		d->View->ConstrainClippingRegion(NULL);
+
 		if (d->Client.Length())
 		{
-			auto &r = d->Client.Last();
-			OriginX = -r.x1;
-			OriginY = -r.y1;
-			Clip = r;
+			Clip = d->Client.Last();
+			OriginX = -Clip.x1;
+			OriginY = -Clip.y1;
+			// d->View->SetOrigin(Clip.x1, Clip.y1);
+			d->View->ClipToRect(Clip);
 		}
 		else
 		{
@@ -128,7 +186,16 @@ void LMemDC::SetClient(LRect *c)
 			OriginY = 0;
 			Clip.ZOff(pMem->x-1, pMem->y-1);
 		}
+
+		/*		
+		auto after = descClip(d->View);
+		printf("UnSetClient %s len=%i viewClip=%s\n", Clip.GetStr(), (int)d->Client.Length(),
+			after.Get());
+		*/
 	}
+
+	if (locked)	
+		d->View->UnlockLooper();
 }
 
 
@@ -289,17 +356,18 @@ LRect LMemDC::ClipRgn(LRect *Rgn)
 {
 	LRect Old = Clip;
 	
+	auto bounds = Bounds();
 	if (Rgn)
 	{
-		LRect Dc(0, 0, X()-1, Y()-1);
-		
 		Clip = *Rgn;
 		Clip.Offset(-OriginX, -OriginY);
-		Clip.Bound(&Dc);
+		Clip.Bound(&bounds);
+		// printf("  ClipRgn=%s\n", Clip.GetStr());
 	}
 	else
 	{
-		Clip.ZOff(X()-1, Y()-1);
+		Clip = bounds;
+		// printf("  unClipRgn=%s\n", Clip.GetStr());
 	}
 	
 	return Old;
@@ -369,4 +437,14 @@ void LMemDC::VertLine(int x, int y1, int y2, COLOUR a, COLOUR b)
 
 		pApp->c = Prev;
 	}
+}
+
+bool LMemDC::SetVariant(const char *Name, LVariant &Value, const char *Array)
+{
+	if (!Stricmp(Name, "debug"))
+	{
+		d->debug = Value.CastBool();
+	}
+
+	return false;
 }

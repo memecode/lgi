@@ -29,7 +29,7 @@
 #include <unistd.h>
 #define XP_CTRLS					1
 #define POSIX						1
-#define LGI_VIEW_HANDLE				1
+#define LGI_VIEW_HANDLE				0
 #define LGI_VIEW_HASH               1
 #define LGI_HAIKU					1
 #if __x86_64
@@ -130,6 +130,7 @@ LgiFunc void LSleep(uint32_t i);
 #endif
 
 #define LPrintfInt64			"%lld"
+#define LPrintfUInt64			"%llu"
 #define LPrintfHex64			"%llx"
 #define LPrintfSizeT			"%zu"
 #define LPrintfSSizeT			"%zi"

@@ -112,418 +112,8 @@ bool LgiIsKeyDown(int Key)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// Wrapper around a BView to redirect various events to the Lgi class methods
-template<typename Parent = BView>
-struct LBView : public Parent
-{
-	LViewPrivate *d = NULL;
-	LWindow *wnd = nullptr;
-	static uint32 MouseButtons;
-
-	LBView(LViewPrivate *priv) :
-		d(priv),
-		Parent
-		(
-			"",
-			B_FULL_UPDATE_ON_RESIZE | 
-			B_WILL_DRAW |
-			B_NAVIGABLE |
-			B_FRAME_EVENTS |
-			B_TRANSPARENT_BACKGROUND
-		)
-	{
-		Parent::SetName(d->View->GetClass());
-	}
-	
-	~LBView()
-	{
-		if (d)
-			d->Hnd = NULL;
-	}		
-
-	BMessage MakeMessage(LMessage::Events e)
-	{
-		BMessage m(M_HAIKU_VIEW_EVENT);
-		m.AddPointer(LMessage::PropView, (void*)d->View);
-		m.AddInt32(LMessage::PropEvent, e);
-		return m;
-	}
-
-	void AttachedToWindow()
-	{
-		LOG("%s:%i %s d=%p\n", _FL, __FUNCTION__, d);
-		if (!d)
-			return;
-
-		Parent::SetViewColor(B_TRANSPARENT_COLOR);
-
-		auto wnd = dynamic_cast<LWindow*>(d->View);
-		if (wnd)
-		{
-			// Ignore the position of the LWindow root view.
-			// It will track the inside of the BWindow frame automatically.
-		}
-		else
-		{		
-			// The view position may have been set before attachment. In which case
-			// the OS view's position isn't up to date. Therefor by setting it here
-			// it's up to date.
-			auto Pos = d->View->Pos;
-			Parent::ResizeTo(Pos.X(), Pos.Y());
-			// printf("%s:%i - %s::MoveTo %i,%i\n", _FL, d->View->GetClass(), Pos.x1, Pos.y1);
-			Parent::MoveTo(Pos.x1, Pos.y1);
-		}
-
-		auto m = MakeMessage(LMessage::AttachedToWindow);
-		LAppPrivate::Post(&m);
-	}
-	
-	LKey ConvertKey(const char *bytes, int32 numBytes)
-	{
-		LKey k;
-		
-		uint8_t *utf = (uint8_t*)bytes;
-		ssize_t len = numBytes;
-		auto w = LgiUtf8To32(utf, len);
-
-		key_info KeyInfo;
-		if (get_key_info(&KeyInfo) == B_OK)
-		{
-			k.Ctrl(  TestFlag(KeyInfo.modifiers, B_CONTROL_KEY));
-			k.Alt(   TestFlag(KeyInfo.modifiers, B_MENU_KEY   ));
-			k.Shift( TestFlag(KeyInfo.modifiers, B_SHIFT_KEY  ));
-			k.System(TestFlag(KeyInfo.modifiers, B_COMMAND_KEY));
-		}
-
-		#if 0
-		LString::Array a;
-		for (int i=0; i<numBytes; i++)
-			a.New().Printf("%i(%x)", (uint8_t)bytes[i], (uint8_t)bytes[i]);
-		if (KeyInfo.modifiers & B_CONTROL_KEY)
-			a.New() = "B_CONTROL_KEY";
-		if (KeyInfo.modifiers & B_MENU_KEY)
-			a.New() = "B_MENU_KEY";
-		if (KeyInfo.modifiers & B_SHIFT_KEY)
-			a.New() = "B_SHIFT_KEY";
-		if (KeyInfo.modifiers & B_COMMAND_KEY)
-			a.New() = "B_COMMAND_KEY";
-		printf("ConvertKey(%s)=%i\n", LString(",").Join(a).Get(), w);
-		#endif
-		
-		if (KeyInfo.modifiers & B_COMMAND_KEY)
-			// Currently Alt+Key issues a command key, but only the "up" down.
-			// Most of the Lgi apps are expecting at least a "down" key first.
-			// So just set the "up" event to "down" here.
-			k.Down(true);		
-		
-		if (w)
-		{
-			if (w == B_FUNCTION_KEY)
-			{
-				auto bmsg = Parent::Window()->CurrentMessage();
-				if (bmsg)
-				{
-					int32 key = 0;
-					if (bmsg->FindInt32("key", &key) == B_OK)
-					{
-						// Translate the function keys into the LGI address space...
-						switch (key)
-						{
-							case B_F1_KEY: w = LK_F1;   break;
-							case B_F2_KEY: w = LK_F2;   break;
-							case B_F3_KEY: w = LK_F3;   break;
-							case B_F4_KEY: w = LK_F4;   break;
-							case B_F5_KEY: w = LK_F5;   break;
-							case B_F6_KEY: w = LK_F6;   break;
-							case B_F7_KEY: w = LK_F7;   break;
-							case B_F8_KEY: w = LK_F8;   break;
-							case B_F9_KEY: w = LK_F9;   break;
-							case B_F10_KEY: w = LK_F10; break;
-							case B_F11_KEY: w = LK_F11; break;
-							case B_F12_KEY: w = LK_F12; break;
-							default:
-								printf("%s:%i - Upsupported key %i.\n", _FL, key);
-								break;
-						}
-					}
-					else printf("%s:%i - No 'key' in BMessage.\n", _FL);
-				}
-				else printf("%s:%i - No BMessage.\n", _FL);
-			}
-
-			k.c16 = k.vkey = w;
-			
-		}
-
-		k.IsChar =
-			!(
-				k.System()
-				||
-				k.Alt()
-			)
-			&&
-			(
-				(k.c16 >= ' ' && k.c16 < LK_DELETE)
-				||
-				k.c16 == LK_BACKSPACE
-				||
-				k.c16 == LK_TAB
-				||
-				k.c16 == LK_RETURN
-			);
-
-		return k;
-	}
-	
-	void KeyDown(const char *bytes, int32 numBytes)
-	{
-		if (!d) return;
-
-		auto k = ConvertKey(bytes, numBytes);
-		k.Down(true);
-
-		auto m = MakeMessage(LMessage::KeyDown);
-		auto keyMsg = k.Archive();
-		m.AddMessage("key", &keyMsg);
-		LAppPrivate::Post(&m);
-	}
-	
-	void KeyUp(const char *bytes, int32 numBytes)
-	{
-		if (!d) return;
-
-		auto k = ConvertKey(bytes, numBytes);
-		k.Down(false);
-
-		auto m = MakeMessage(LMessage::KeyUp);
-		auto keyMsg = k.Archive();
-		m.AddMessage("key", &keyMsg);
-		LAppPrivate::Post(&m);
-	}
-
-	// LWindow's get their events from their LWindowPrivate
-	#define IsLWindow	dynamic_cast<LWindow*>(d->View)
-
-	void FrameMoved(BPoint p)
-	{
-		if (!d || IsLWindow)
-			return;
-		
-		auto m = MakeMessage(LMessage::FrameMoved);
-		m.AddPoint("pos", p);
-		LAppPrivate::Post(&m);		
-	}
-
-	void FrameResized(float width, float height)
-	{
-		if (!d || IsLWindow)
-			return;
-			
-		auto m = MakeMessage(LMessage::FrameResized);
-		m.AddFloat("width", width);
-		m.AddFloat("height", height);
-		LAppPrivate::Post(&m);		
-	}
-
-	void MessageReceived(BMessage *message)
-	{
-		if (!d)
-			return;
-
-		if (message->what == M_SET_ROOT_VIEW)
-		{
-			if (B_OK != message->FindPointer("window", (void**)&wnd) ||!wnd)
-				printf("%s:%i - no window in M_SET_ROOT_VIEW\n", _FL);
-			return;
-		}
-
-		// Redirect the message to the app loop:
-		auto m = MakeMessage(LMessage::General);
-		m.AddMessage("message", message);
-		LAppPrivate::Post(&m);
-		
-		/*
-		void *v = NULL;
-		if (message->FindPointer(LMessage::PropView, &v) == B_OK)
-		{
-			// Proxy'd event for child view...
-			((LView*)v)->OnEvent((LMessage*)message);
-			return;
-		}
-		else d->View->OnEvent((LMessage*)message);
-		
-		if (message->what == B_MOUSE_WHEEL_CHANGED)
-		{
-			float x = 0.0f, y = 0.0f;
-			message->FindFloat("be:wheel_delta_x", &x);
-			message->FindFloat("be:wheel_delta_y", &y);
-			d->View->OnMouseWheel(y * 3.0f);
-		}
-		else if (message->what == M_SET_SCROLL)
-		{
-			return;
-		}
-		*/
-		
-		Parent::MessageReceived(message);
-	}
-
-	void Draw(BRect updateRect)
-	{
-		if (!d)
-			return;
-		
-		Parent::UnlockLooper();
-			
-		bool done = false;
-		if (wnd)
-		{
-			// it's the root view of a LWindow
-			BMessage m(M_HAIKU_WND_EVENT);
-			m.AddPointer(LMessage::PropWindow, wnd);
-			m.AddInt32(LMessage::PropEvent, LMessage::Draw);
-			m.AddRect("update", updateRect);
-			m.AddPointer("done", &done);
-			LAppPrivate::Post(&m);
-		}
-		else
-		{
-			// it's a regular LView
-			auto m = MakeMessage(LMessage::Draw);
-			m.AddRect("update", updateRect);
-			m.AddPointer("done", &done);
-			LAppPrivate::Post(&m);
-		}
-		
-		while (!done)
-			LSleep(1);
-
-		Parent::LockLooper();
-	}
-
-	LMouse ConvertMouse(BPoint where, bool down = false)
-	{
-		LMouse m;
-		BPoint loc;
-		uint32 buttons = 0;
-		
-		m.Target = d->View;
-		
-		m.x = where.x;
-		m.y = where.y;
-		
-		if (down)
-		{
-			m.Down(true);
-			Parent::GetMouse(&loc, &buttons, false);
-			MouseButtons = buttons; // save for up click
-		}
-		else
-		{
-			buttons = MouseButtons;
-		}
-		
-		if (buttons & B_PRIMARY_MOUSE_BUTTON) m.Left(true);
-		if (buttons & B_TERTIARY_MOUSE_BUTTON) m.Middle(true);
-		if (buttons & B_SECONDARY_MOUSE_BUTTON) m.Right(true);
-		
-		uint32 mod = modifiers();
-		if (mod & B_SHIFT_KEY) m.Shift(true);
-		if (mod & B_OPTION_KEY) m.Alt(true);
-		if (mod & B_CONTROL_KEY) m.Ctrl(true);
-		if (mod & B_COMMAND_KEY) m.System(true);
-		
-		return m;
-	}
-	
- 	void MouseDown(BPoint where)
-	{		
-		if (!d)
-			return;
-	
-		static uint64_t lastClick = 0;
-		bigtime_t interval = 0;
-		status_t r = get_click_speed(&interval);
-		auto now = LCurrentTime();
-		bool doubleClick = now-lastClick < (interval/1000);
-		lastClick = now;
-		
-		auto ms = ConvertMouse(where, true);
-		ms.Double(doubleClick);
-		auto msg = ms.Archive();
-
-		auto m = MakeMessage(LMessage::MouseDown);
-		m.AddMessage("mouse", &msg);
-		LAppPrivate::Post(&m);
-	}
-	
-	void MouseUp(BPoint where) 
-	{
-		if (!d)
-			return;
-
-		LMouse ms = ConvertMouse(where);
-		ms.Down(false);
-		auto msg = ms.Archive();
-
-		auto m = MakeMessage(LMessage::MouseUp);
-		m.AddMessage("mouse", &msg);
-		LAppPrivate::Post(&m);
-	}
-	
-	void MouseMoved(BPoint where, uint32 code, const BMessage *dragMessage)
-	{
-		if (!d)
-			return;
-
-		LMouse ms = ConvertMouse(where);
-		ms.Down(ms.Left() ||
-				ms.Middle() ||
-				ms.Right());
-		ms.IsMove(true);
-		auto msg = ms.Archive();
-
-		auto m = MakeMessage(LMessage::MouseMoved);
-		m.AddMessage("mouse", &msg);
-		LAppPrivate::Post(&m);
-	}
-
-	void MakeFocus(bool focus=true)
-	{
-		if (!d) return;
-
-		LLocker lck(this, _FL);
-		if (lck.Lock())
-		{
-			Parent::MakeFocus(focus);
-
-			auto m = MakeMessage(LMessage::MakeFocus);
-			m.AddBool("focus", focus);
-			LAppPrivate::Post(&m);
-		}
-		else printf("%s:%i - Failed to lock: cls=%s.\n", _FL, d->View->GetClass());
-	}
-};
-
-template<typename Parent>
-uint32 LBView<Parent>::MouseButtons = 0;
-
-LView *LViewFromHandle(OsView hWnd)
-{
-	if (!hWnd)
-		return NULL;
-		
-	auto bv = dynamic_cast<LBView<BView>*>(hWnd);
-	if (!bv || !bv->d)
-		return NULL;
-		
-	return bv->d->View;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 LViewPrivate::LViewPrivate(LView *view) :
-	View(view),
-	Hnd(new LBView<BView>(this))
+	View(view)
 {
 }
 
@@ -538,159 +128,18 @@ LViewPrivate::~LViewPrivate()
 
 	while (EventTargets.Length())
 		delete EventTargets[0];
-
-	if (Hnd)
-	{
-		auto *bv = dynamic_cast<LBView<BView>*>(Hnd);
-		// printf("%p::~LViewPrivate View=%p bv=%p th=%u\n", this, View, bv, LCurrentThreadId());
-		if (bv)
-			bv->d = NULL;
-
-		auto Wnd = Hnd->Window();
-		bool locked = false;
-
-		if (Wnd)
-			locked = Wnd->LockLooper();
-			
-		if (Hnd->Parent())
-			Hnd->RemoveSelf();
-		
-		DeleteObj(Hnd);
-
-		if (Wnd && locked)
-			Wnd->UnlockLooper();
-	}
 }
 
-// This is called in the app thread.. lock the view before using
-void LView::HaikuEvent(LMessage::Events event, BMessage *m)
+void LView::SetFlagAll(int flag, bool add)
 {
-	if (!m)
-		return;
-		
-	switch (event)
-	{
-		case LMessage::QuitRequested:
-		{
-			int *result = nullptr;
-			if (m->FindPointer("result", (void**)&result) != B_OK)
-			{
-				printf("%s:%i - error: no result ptr.\n", _FL);
-				return;
-			}
-			*result = OnRequestClose(false);
-			break;
-		}
-		case LMessage::General:
-		{
-			BMessage msg;
-			if (m->FindMessage("message", &msg) != B_OK)
-			{
-				printf("%s:%i - no message.\n", _FL);
-				return;
-			}
-			
-			OnEvent((LMessage*) &msg);
-			break;
-		}
-		case LMessage::FrameMoved:
-		{
-			BPoint pos;
-			if (m->FindPoint("pos", &pos) != B_OK)
-			{
-				printf("%s:%i - no pos.\n", _FL);
-				return;
-			}
-			
-			Pos.Offset(pos.x - Pos.x1, pos.y - Pos.y1);
-			OnPosChange();
-			break;
-		}
-		case LMessage::FrameResized:
-		{
-			float width = 0.0f, height = 0.0f;
-			if (m->FindFloat("width", &width) != B_OK ||
-				m->FindFloat("height", &height) != B_OK)
-			{
-				printf("%s:%i - missing width/height param.\n", _FL);
-				return;
-			}
+	if (add)
+		WndFlags |= flag;
+	else
+		WndFlags &= ~flag;
 
-			printf("LMessage::FrameResized: %g,%g\n", width, height);
-			Pos.SetSize(width, height);
-			OnPosChange();
-			break;
-		}
-		case LMessage::AttachedToWindow:
-		{
-			OnCreate();
-			break;
-		}
-		case LMessage::Draw:
-		{
-			BRect updateRect;
-			m->FindRect("update", &updateRect);
-			bool *done = nullptr;
-			m->FindPointer("done", (void**)&done);
-			
-			LPoint off(0, 0);
-			printf("	View.ReceiveDraw %s\n", LRect(updateRect).GetStr());
-
-			LLocker lck(Handle(), _FL);
-			if (lck.Lock())
-			{
-				LScreenDC dc(this, &updateRect);
-				_Paint(&dc, &off, NULL);
-			}
-			
-			*done = true;
-			break;
-		}
-		case LMessage::MouseMoved:
-		case LMessage::MouseDown:
-		case LMessage::MouseUp:
-		{
-			LMessage msg;
-			if (m->FindMessage("mouse", &msg) != B_OK)
-			{
-				printf("%s:%i - no mouse message.\n", _FL);
-				return;
-			}
-			
-			LMouse ms(&msg);
-			_Mouse(ms, event == LMessage::MouseMoved);
-			break;
-		}
-		case LMessage::KeyUp:
-		case LMessage::KeyDown:
-		{
-			BMessage msg;
-			if (m->FindMessage("key", &msg) != B_OK)
-			{
-				printf("%s:%i - no key param.\n", _FL);
-				return;
-			}
-			
-			LKey k(&msg);
-			if (auto wnd = GetWindow())
-				wnd->HandleViewKey(this, k);
-			else
-				OnKey(k);
-			break;
-		}
-		case LMessage::MakeFocus:
-		{
-			bool focus = true;
-			if (m->FindBool("focus", &focus) != B_OK)
-			{
-				printf("%s:%i - no focus param.\n", _FL);
-				return;
-			}
-			
-			OnFocus(focus);
-			break;
-		}
-	}
+	for (auto c: Children)
+		if (auto v = c->GetLView())
+			v->SetFlagAll(flag, add);
 }
 
 void LView::_Focus(bool f)
@@ -701,13 +150,6 @@ void LView::_Focus(bool f)
 		SetFlag(WndFlags, GWF_FOCUS);
 	else
 		ClearFlag(WndFlags, GWF_FOCUS);
-
-	LLocker lck(d->Hnd, _FL);
-	if (lck.Lock())
-	{
-		d->Hnd->MakeFocus(f);
-		lck.Unlock();
-	}
 
 	// OnFocus will be called by the LBview handler...
 	Invalidate();
@@ -841,11 +283,15 @@ bool LView::_Mouse(LMouse &m, bool Move)
 			{
 				curId = haikuId;
 				
-				LLocker lck(Handle(), _FL);
-				if (lck.Lock())
+				if (auto w = WindowHandle())
 				{
-					Handle()->SetViewCursor(new BCursor(curId));
-					lck.Unlock();
+					LLocker lck(w, _FL);
+					if (lck.Lock())
+					{
+						if (auto v = w->ChildAt(0))
+							v->SetViewCursor(new BCursor(curId));
+						lck.Unlock();
+					}
 				}
 			}
 		}
@@ -881,38 +327,20 @@ bool LView::_Mouse(LMouse &m, bool Move)
 
 LRect &LView::GetClient(bool ClientSpace)
 {
-	int Edge = (Sunken() || Raised()) ? _BorderSize : 0;
+	auto border = GetBorder();
 
 	static LRect c;
 	if (ClientSpace)
 	{
-		c.ZOff(Pos.X() - 1 - (Edge<<1), Pos.Y() - 1 - (Edge<<1));
+		c.ZOff(Pos.X() - 1 - _Border.x1 - _Border.x2, Pos.Y() - 1 - _Border.y1 - _Border.y2);
 	}
 	else
 	{
 		c.ZOff(Pos.X()-1, Pos.Y()-1);
-		c.Inset(Edge, Edge);
+		c.Inset(&_Border);
 	}
 	
 	return c;
-}
-
-LViewI *LView::FindControl(OsView hCtrl)
-{
-	if (d->Hnd == hCtrl)
-	{
-		return this;
-	}
-
-	for (auto i : Children)
-	{
-		LViewI *Ctrl = i->FindControl(hCtrl);
-		if (Ctrl)
-		{
-			return Ctrl;
-		}
-	}
-	return 0;
 }
 
 void LView::Quit(bool DontDelete)
@@ -931,38 +359,26 @@ void LView::Quit(bool DontDelete)
 
 bool LView::SetPos(LRect &p, bool Repaint)
 {
-	bool debug = p.x1 == 513 && p.y1 == 281;
+	bool debug = false;
 
 	if (Pos != p)
 	{
 		Pos = p;
-
-		LLocker lck(d->Hnd, _FL);
-		if (lck.Lock())
-		{
-			auto p = dynamic_cast<LView*>(GetParent());
-			auto offset = p ? p->_BorderSize : 0;
-
-			d->Hnd->ResizeTo(Pos.X(), Pos.Y());
-			// printf("%s:%i - %s::MoveTo %i,%i\n", _FL, GetClass(), Pos.x1+offset, Pos.y1+offset);
-			d->Hnd->MoveTo(Pos.x1+offset, Pos.y1+offset);
-			d->Hnd->Invalidate();
-			lck.Unlock();
-		}
-		// else if (debug) printf("%s:%i - SetPos no lock: d->Hnd=%p.\n", _FL, d->Hnd);
-		
 		OnPosChange();
+		
+		// FIXME: work out union of before and after position to invalidate:
+		Invalidate();
 	}
-	// else if (debug) printf("%s:%i - SetPos noop: d->Hnd=%p.\n", _FL, d->Hnd);
 
 	return true;
 }
 
 bool LView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 {
-	auto *ParWnd = GetWindow();
-	if (!ParWnd)
+	auto wnd = GetWindow();
+	if (!wnd)
 		return false; // Nothing we can do till we attach
+
 	if (!InThread())
 	{
 		DEBUG_INVALIDATE("%s::Invalidate out of thread\n", GetClass());
@@ -984,7 +400,7 @@ bool LView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 
 	DEBUG_INVALIDATE("%s::Invalidate r=%s frame=%i\n", GetClass(), r.GetStr(), Frame);
 	if (!Frame)
-		r.Offset(_BorderSize, _BorderSize);
+		r.Inset(&GetBorder());
 
 	LPoint Offset;
 	WindowVirtualOffset(&Offset);
@@ -996,25 +412,20 @@ bool LView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 		return false;
 	}
 
-	static bool Repainting = false;
-	if (!Repainting)
+	auto hnd = wnd->WindowHandle();
+	if (!hnd)
 	{
-		Repainting = true;
-
-		if (d->Hnd)
-		{
-			LLocker lck(d->Hnd, _FL);
-			if (lck.Lock())
-				d->Hnd->Invalidate();
-		}
-
-		Repainting = false;
+		printf("%s:%i - no handle.\n", _FL);
+		return false;
 	}
-	else
-	{
-		DEBUG_INVALIDATE("	error: repainting\n");
-	}
-
+	
+	// Ask the LWindow to paint the area, and then invalidate itself:
+	BMessage m(M_HAIKU_WND_EVENT);
+	m.AddPointer(LMessage::PropWindow, (void*)wnd);
+	m.AddInt32(LMessage::PropEvent, LMessage::Invalidate);
+	m.AddRect("rect", r);
+	LAppPrivate::Post(&m);
+		
 	return true;
 }
 
@@ -1091,76 +502,62 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 	return 0;
 }
 
-OsView LView::Handle() const
-{
-	if (!d)
-	{
-		printf("%s:%i - No priv?\n", _FL);
-		return NULL;
-	}
-	
-	return d->Hnd;
-}
-
 bool LView::PointToScreen(LPoint &p)
 {
-	if (!Handle())
-	{
-		LgiTrace("%s:%i - No handle.\n", _FL);
-		return false;
-	}
-
 	LPoint Offset;
 	WindowVirtualOffset(&Offset);
 	// printf("p=%i,%i offset=%i,%i\n", p.x, p.y, Offset.x, Offset.y);
 	p += Offset;
 	// printf("p=%i,%i\n", p.x, p.y);
 
-	LLocker lck(Handle(), _FL);
+	auto w = WindowHandle();
+	LLocker lck(w, _FL);
 	if (!lck.Lock())
 	{
 		LgiTrace("%s:%i - Can't lock.\n", _FL);
 		return false;
 	}
 	
-	BPoint pt = Handle()->ConvertToScreen(BPoint(p.x, p.y));
-	// printf("pt=%g,%g\n", pt.x, pt.y);
-	p.x = pt.x;
-	p.y = pt.y;
-	// printf("p=%i,%i\n\n", p.x, p.y);
+	if (auto v = w->ChildAt(0))
+	{
+		BPoint pt = v->ConvertToScreen(BPoint(p.x, p.y));
+		// printf("pt=%g,%g\n", pt.x, pt.y);
+		p.x = pt.x;
+		p.y = pt.y;
+		// printf("p=%i,%i\n\n", p.x, p.y);
+	}
 
 	return true;
 }
 
 bool LView::PointToView(LPoint &p)
 {
-	if (!Handle())
-	{
-		LgiTrace("%s:%i - No handle.\n", _FL);
-		return false;
-	}
-
 	LPoint Offset;
 	WindowVirtualOffset(&Offset);
 	p -= Offset;
 
-	LLocker lck(Handle(), _FL);
+	auto w = WindowHandle();
+	LLocker lck(w, _FL);
 	if (!lck.Lock())
 	{
 		LgiTrace("%s:%i - Can't lock.\n", _FL);
 		return false;
 	}
 	
-	BPoint pt = Handle()->ConvertFromScreen(BPoint(Offset.x, Offset.y));
-	Offset.x = pt.x;
-	Offset.y = pt.y;
+	if (auto v = w->ChildAt(0))
+	{
+		BPoint pt = v->ConvertFromScreen(BPoint(Offset.x, Offset.y));
+		Offset.x = pt.x;
+		Offset.y = pt.y;
+	}
 
 	return true;
 }
 
 bool LView::GetMouse(LMouse &m, bool ScreenCoords)
 {
-	LLocker Locker(d->Hnd, _FL);
+	auto w = WindowHandle();
+	LLocker Locker(w, _FL);
 	if (!Locker.Lock())
 		return false;
 
@@ -1170,9 +567,12 @@ bool LView::GetMouse(LMouse &m, bool ScreenCoords)
 	BPoint Cursor;
 	uint32 Buttons;
 	
-	d->Hnd->GetMouse(&Cursor, &Buttons);
-	if (ScreenCoords)
-		d->Hnd->ConvertToScreen(&Cursor);
+	if (auto v = w->ChildAt(0))
+	{
+		v->GetMouse(&Cursor, &Buttons);
+		if (ScreenCoords)
+			v->ConvertToScreen(&Cursor);
+	}
 	
 	// position
 	m.x = Cursor.x;
@@ -1197,17 +597,7 @@ bool LView::GetMouse(LMouse &m, bool ScreenCoords)
 
 bool LView::IsAttached()
 {
-	bool attached = false;
-	
-	LLocker lck(d->Hnd, _FL);
-	if (lck.WaitForLock())
-	{
-		auto pview = d->Hnd->Parent();
-		auto pwnd = d->Hnd->Window();
-		attached = pview != NULL || pwnd != NULL;
-	}
-	
-	return attached;
+	return GetParent() && GetWindow();
 }
 
 const char *LView::GetClass()
@@ -1220,91 +610,62 @@ bool LView::Attach(LViewI *parent)
 	bool Status = false;
 	bool Debug = false; // !Stricmp(GetClass(), "LScrollBar");
 
-	LView *Parent = d->GetParent();
-	LAssert(Parent == NULL || Parent == parent);
+	// Parent handling
+	auto wasAttached = IsAttached();
+	LView *oldParent = d->GetParent();
+	if (oldParent && oldParent != parent)
+	{
+		Detach();
+	}
 
 	SetParent(parent);
-	Parent = d->GetParent();
-	
-	auto WndNull = _Window == NULL;
-	_Window = Parent ? Parent->_Window : this;
-
-	if (!parent)
+	auto Parent = d->GetParent();
+	if (!Parent)
 	{
 		LgiTrace("%s:%i - No parent window.\n", _FL);
+		return false;
 	}
-	else
+
+	auto w = GetWindow();
+
+	if (Debug)
+		LgiTrace("%s:%i - Attaching %s to view %s\n",
+			_FL, GetClass(), parent->GetClass());
+
+	Status = true;
+	
+	if (d->MsgQue.Length())
 	{
-		auto bview = parent->Handle();
-		if (!bview)
+		auto w = WindowHandle();
+		LLocker lck(w, _FL);
+		if (lck.Lock())
 		{
-			LgiTrace("%s:%i - No bview for %s\n", _FL, GetClass());
+			for (auto bmsg: d->MsgQue)
+				w->PostMessage(bmsg);
+			d->MsgQue.DeleteObjects();
 		}
-		else
-		{
-			LLocker lck(bview, _FL);
-			
-			auto looper = bview->Looper();
-			auto thread = looper ? looper->Thread() : 0;
-			
-			if (thread <= 0 || lck.Lock())
-			{
-				if (Debug)
-					LgiTrace("%s:%i - Attaching %s to view %s\n",
-						_FL, GetClass(), parent->GetClass());
+	}
 
-				d->Hnd->SetName(GetClass());
-				if (::IsAttached(d->Hnd))
-					d->Hnd->RemoveSelf();
-				bview->AddChild(d->Hnd);
+	if (Debug)
+		LgiTrace("%s:%i - Attached %s to view %S, success\n",
+			_FL,
+			GetClass(), parent->GetClass());
 
-				d->Hnd->ResizeTo(Pos.X(), Pos.Y());
-				// printf("%s:%i - %s::MoveTo %i,%i\n", _FL, GetClass(), Pos.x1, Pos.y1);
-				d->Hnd->MoveTo(Pos.x1, Pos.y1);
-				
-				bool ShowView = TestFlag(GViewFlags, GWF_VISIBLE) && d->Hnd->IsHidden();
-				if (Debug)
-					LgiTrace("%s:%i - IsHidden=%i ShowView=%i\n", _FL, d->Hnd->IsHidden(), ShowView);
-				if (ShowView)
-					d->Hnd->Show();
+	if (w && TestFlag(WndFlags, GWF_FOCUS))
+		w->SetFocus(this, LWindow::GainFocus);
 
-				if (TestFlag(WndFlags, GWF_FOCUS))
-					d->Hnd->MakeFocus();
-
-				Status = true;
-				
-				if (d->MsgQue.Length())
-				{
-					// printf("%s:%i - %s.Attach msgQue=%i\n", _FL, GetClass(), (int)d->MsgQue.Length());
-					for (auto bmsg: d->MsgQue)
-						d->Hnd->Window()->PostMessage(bmsg);
-					d->MsgQue.DeleteObjects();
-				}
-
-				if (Debug)
-					LgiTrace("%s:%i - Attached %s/%p to view %s/%p, success\n",
-						_FL,
-						GetClass(), d->Hnd,
-						parent->GetClass(), bview);
-
-				auto w = GetWindow();
-				if (w && TestFlag(WndFlags, GWF_FOCUS))
-					w->SetFocus(this, LWindow::GainFocus);
-			}
-			else
-			{
-				LgiTrace("%s:%i - Error attaching %s to view %s, can't lock.\n",
-					_FL, GetClass(), parent->GetClass());
-			}
-		}
-
-		if (!Parent->HasView(this))
-		{
-			OnAttach();
-			if (!d->Parent->HasView(this))
-				d->Parent->AddView(this);
-			d->Parent->OnChildrenChanged(this, true);
-		}
+	if (!Parent->HasView(this))
+	{
+		OnAttach();
+		if (!d->Parent->HasView(this))
+			d->Parent->AddView(this);
+		d->Parent->OnChildrenChanged(this, true);
+	}
+	
+	if (IsAttached() && !wasAttached && !d->onCreateEvent)
+	{
+		d->onCreateEvent = true;
+		OnCreate();
 	}
 	
 	return Status;

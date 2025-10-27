@@ -37,21 +37,10 @@ void *ThreadEntryPoint(void *i)
 
 		// mark thread over...
 		Thread->State = LThread::THREAD_EXITED;
-		bool DelayDelete = false;
-		if (Thread->ViewHandle >= 0)
-		{
-			// If DeleteOnExit is set AND ViewHandle then the LView::OnEvent handle will
-			// process the delete... don't do it here.
-			DelayDelete = PostThreadEvent(Thread->ViewHandle, M_THREAD_COMPLETED, (LMessage::Param)Thread);
-			// However if PostThreadEvent fails... do honour DeleteOnExit.
-		}
-		
-		if (!DelayDelete && Thread->DeleteOnExit)
+		if (Thread->DeleteOnExit)
 		{
 			DeleteObj(Thread);
 		}
-
-
 		pthread_exit(0);
 	}
 	return 0;
@@ -60,7 +49,7 @@ void *ThreadEntryPoint(void *i)
 const OsThread LThread::InvalidHandle = NULL;
 const OsThreadId LThread::InvalidId = 0;
 
-LThread::LThread(const char *ThreadName, int viewHandle)
+LThread::LThread(const char *ThreadName)
 {
 	Name = ThreadName;
 	ThreadId = 0;

@@ -168,14 +168,6 @@ bool LMdiChild::Attach(LViewI *p)
 
 bool LMdiChild::Detach()
 {
-	#if MDI_TAB_STYLE
-	LMdiParent *par = dynamic_cast<LMdiParent*>(GetParent());
-	if (par)
-	{
-		LAssert(par->d->Children.HasItem(this));
-		par->d->Children.Delete(this);
-	}
-	#endif
 	return LLayout::Detach();
 }
 
@@ -988,40 +980,52 @@ bool LMdiParent::SetScrollBars(bool x, bool y)
 	return false;
 }
 
-void LMdiParent::OnChildrenChanged(LViewI *Wnd, bool Attaching)
+void LMdiParent::OnChildrenChanged(LViewI *view, bool Attaching)
 {
 	#if MDI_TAB_STYLE
-	if (Attaching && !dynamic_cast<LMdiChild*>(Wnd))
-	{
-		LAssert(0);
-		return;
-	}
-	
-	if (!d->InOnPosChange /*&& Attaching*/)
-	{
-		d->Tabs.ZOff(-1, -1);
-		OnPosChange();
-		Invalidate();
-	}
-	#else
-	for (LViewI *v=Children.First(); v; )
-	{
-		LMdiChild *c = dynamic_cast<LMdiChild*>(v);
-		v = Children.Next();
-		if (c)
+
+		if (auto c = dynamic_cast<LMdiChild*>(view))
 		{
-			c->Invalidate(&c->d->Title);
-			
-			if (!v)
+			if (Attaching)
 			{
-				LViewI *n = c->Children.First();
-				if (n)
+				if (!d->Children.HasItem(c))
+					d->Children.Add(c);
+			}
+			else
+			{
+				if (d->Children.HasItem(c));
+					d->Children.Delete(c);
+			}
+		}
+		
+		if (!d->InOnPosChange)
+		{
+			d->Tabs.ZOff(-1, -1);
+			OnPosChange();
+			Invalidate();
+		}
+	
+	#else
+	
+		for (LViewI *v=Children.First(); v; )
+		{
+			auto c = dynamic_cast<LMdiChild*>(v);
+			v = Children.Next();
+			if (c)
+			{
+				c->Invalidate(&c->d->Title);
+				
+				if (!v)
 				{
-					n->Focus(true);
+					LViewI *n = c->Children.First();
+					if (n)
+					{
+						n->Focus(true);
+					}
 				}
 			}
 		}
-	}
+
 	#endif
 }
 

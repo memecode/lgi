@@ -2015,6 +2015,8 @@ AppWnd::AppWnd()
 	}
 	else
 		LAssert(!"Log object missing.");
+
+	// _Dump();
 }
 
 AppWnd::~AppWnd()

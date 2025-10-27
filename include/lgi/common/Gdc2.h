@@ -742,7 +742,7 @@ public:
 	#else
 
 		/// Construct a wrapper to draw on a window
-		LScreenDC(LView *view, void *Param = 0);
+		LScreenDC(LView *view, void *Param = nullptr);
 	
 		#if defined(LGI_SDL)
 		#elif defined(__GTK_H__)
@@ -1044,6 +1044,7 @@ public:
 	// Set new clipping region
 	LRect ClipRgn(LRect *Rgn) override;
 
+	bool GetClient(LRect *c) override;
 	void SetClient(LRect *c) override;
 
 	/// Locks the bits for access. LMemDC's start in the locked state.
@@ -1068,6 +1069,10 @@ public:
 
 	void HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b);
 	void VertLine(int x, int y1, int y2, COLOUR a, COLOUR b);
+	
+	#if HAIKU
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
+	#endif
 };
 
 /// \brief An implemenation of LSurface to print to a printer.

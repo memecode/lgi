@@ -18,13 +18,13 @@ public:
 	const char *GetClass() { return "LMdiChild"; }
 
 	#if MDI_TAB_STYLE
-	int GetOrder();
+		int GetOrder();
 	#else
-	void OnPaint(LSurface *pDC);	
-	void OnMouseClick(LMouse &m);
-	void OnMouseMove(LMouse &m);
-	LCursor GetCursor(int x, int y);
-	LRect &GetClient(bool InClientSpace = true);
+		void OnPaint(LSurface *pDC);	
+		void OnMouseClick(LMouse &m);
+		void OnMouseMove(LMouse &m);
+		LCursor GetCursor(int x, int y);
+		LRect &GetClient(bool InClientSpace = true);
 	#endif
 
 	bool Attach(LViewI *p);
@@ -47,7 +47,7 @@ class LMdiParent : public LLayout
 	class LMdiParentPrivate *d;
 
 	#if MDI_TAB_STYLE
-	int GetNextOrder();
+		int GetNextOrder();
 	#endif
 	LMdiChild *IsChild(LViewI *v);
 	LArray<LMdiChild*> &PrivChildren();

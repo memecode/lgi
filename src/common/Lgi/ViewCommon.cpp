@@ -118,145 +118,62 @@ LMouse &lgi_adjust_click(LMouse &Info, LViewI *Wnd, bool Capturing, bool Debug)
 
 //////////////////////////////////////////////////////////////////////////////////////
 // LView class methods
-LViewI *LView::_Capturing = 0;
-LViewI *LView::_Over = 0;
+LViewI *LView::_Capturing = nullptr;
+LViewI *LView::_Over = nullptr;
 
 #if LGI_VIEW_HASH
 
 struct ViewTbl : public LMutex
 {
-	typedef LHashTbl<PtrKey<LViewI*>, int> T;
+	typedef LHashTbl<PtrKey<LViewI*>, bool> T;
 	
 private:
 	T Map;
 
 public:
-	ViewTbl() : Map(2000), LMutex("ViewTbl")
+	ViewTbl() : Map(2000, false), LMutex("ViewTbl.Lock")
 	{
 	}
 
 	T *Lock()
 	{
 		if (!LMutex::Lock(_FL))
-			return NULL;
+			return nullptr;
 		return &Map;
 	}
 }	ViewTblInst;
 
 bool LView::LockHandler(LViewI *v, LView::LockOp Op)
 {
-	ViewTbl::T *m = ViewTblInst.Lock();
+	auto m = ViewTblInst.Lock();
 	if (!m)
 		return false;
-	int Ref = m->Find(v);
-	bool Status = false;
+		
+	auto exists = m->Find(v);
+	bool status = false;
 	switch (Op)
 	{
 		case OpCreate:
 		{
-			if (Ref == 0)
-				Status = m->Add(v, 1);
-			else
-				LAssert(!"Already exists?");
+			status = m->Add(v, 1);
 			break;
 		}
 		case OpDelete:
 		{
-			if (Ref == 1)
-				Status = m->Delete(v);
-			else
-				LAssert(!"Either locked or missing.");
+			if (exists)
+				status = m->Delete(v);
 			break;
 		}
 		case OpExists:
 		{
-			Status = Ref > 0;
+			status = exists;
 			break;
 		}
 	}	
 	ViewTblInst.Unlock();
-	return Status;
+	return status;
 }
 
-#endif
-
-#if defined(HAIKU) || defined(MAC)
-class LDeletedViews : public LMutex
-{
-	struct DeletedView
-	{
-		uint64_t ts;
-		LViewI *v;
-	};
-	LArray<DeletedView> views;
-
-public:
-	LDeletedViews() : LMutex("LDeletedViews")
-	{
-
-	}
-
-	void OnCreate(LViewI *v)
-	{
-		// Haiku:
-		// It is not uncommon for the same pointer to be added twice.
-		// The allocator often reuses the same address when a view is
-		// deleted and a new one created. In that case, make sure a
-		// newly created (and valid) pointer is NOT in the list...
-		for (size_t i = 0; i < views.Length(); i++)
-		{
-			auto &del = views[i];
-			if (v == del.v)
-			{
-				views.DeleteAt(i--);
-				break;
-			}
-		}
-	}
-
-	void OnDelete(LViewI *v)
-	{
-		if (!Lock(_FL))
-			return;
-
-		auto &del = views.New();
-		del.v = v;
-		del.ts = LCurrentTime();
-
-		Unlock();
-	}
-
-	bool Has(LViewI *v)
-	{
-		if (!Lock(_FL))
-			return false;
-
-		auto now = LCurrentTime();
-		bool status = false;
-		for (size_t i = 0; i < views.Length(); i++)
-		{
-			auto &del = views[i];
-			if (v == del.v)
-			{
-				status = true;
-			}
-			if (now >= del.ts + 60000)
-			{
-				// printf("	DeletedViews remove=%p\n", views[i].v);
-				views.DeleteAt(i--);
-			}
-		}
-		
-		Unlock();
-		return status;
-	}
-
-}	DeletedViews;
-
-bool LView::RecentlyDeleted(LViewI *v)
-{
-	return DeletedViews.Has(v);
-}
 #endif
 
 LView::LView(OsView view) :
@@ -265,9 +182,6 @@ LView::LView(OsView view) :
 {
 	#ifdef _DEBUG
     _Debug = false;
-	#endif
-	#if defined(HAIKU) || defined(MAC)
-		DeletedViews.OnCreate(static_cast<LViewI*>(this));
 	#endif
 
 	d = new LViewPrivate(this);
@@ -289,10 +203,6 @@ LView::LView(OsView view) :
 
 LView::~LView()
 {
-	#if defined(HAIKU) || defined(MAC)
-		DeletedViews.OnDelete(static_cast<LViewI*>(this));
-	#endif
-
 	if (d->SinkHnd >= 0)
 	{
 		LEventSinkMap::Dispatch.RemoveSink(this);
@@ -312,7 +222,6 @@ LView::~LView()
 
 	_Delete();
 
-	// printf("%p::~LView delete %p th=%u\n", this, d, LCurrentThreadId());
 	DeleteObj(d);	
 	// printf("%p::~LView\n", this);
 }
@@ -389,21 +298,40 @@ bool LView::AddView(LViewI *v, int Where)
 	if (!v)
 		return false;
 
+	#ifdef HAIKU
+	auto wasAttached = v->IsAttached();
+	#endif
+	
 	LAssert(!Children.HasItem(v));
-	bool Add = Children.Insert(v, Where);
-	if (Add)
+	if (!Children.Insert(v, Where))
+		return false;
+		
+	auto gv = v->GetLView();
+	if (gv && gv->_Window != _Window)
 	{
-		LView *gv = v->GetLView();
-		if (gv && gv->_Window != _Window)
-		{
-			LAssert(!_InLock);
-			gv->_Window = _Window;
-		}
-		v->SetParent(this);
-		v->OnAttach();
-		OnChildrenChanged(v, true);
+		LAssert(!_InLock);
+		gv->_Window = _Window;
 	}
-	return Add;
+	v->SetParent(this);
+	v->OnAttach();
+	OnChildrenChanged(v, true);
+
+	/*
+	printf("AddView %p/%s <- %p/%s\n",
+		static_cast<LViewI*>(this), GetClass(),
+		v, v->GetClass());
+	*/
+
+	#ifdef HAIKU
+	auto lv = v->GetLView();
+	if (lv && !wasAttached && lv->IsAttached() && !lv->d->onCreateEvent)
+	{
+		lv->d->onCreateEvent = true;
+		lv->OnCreate();
+	}
+	#endif
+
+	return true;
 }
 
 bool LView::DelView(LViewI *v)
@@ -411,12 +339,12 @@ bool LView::DelView(LViewI *v)
 	if (!v)
 		return false;
 
-	bool Has = Children.HasItem(v);
 	bool b = Children.Delete(v);
-	if (Has)
+	if (b)
+	{
+		v->SetParent(nullptr);
 		OnChildrenChanged(v, false);
-	Has = Children.HasItem(v);
-	LAssert(!Has);
+	}
 	return b;
 }
 
@@ -428,10 +356,7 @@ bool LView::HasView(LViewI *v)
 OsWindow LView::WindowHandle()
 {
 	auto w = GetWindow();
-	OsWindow h;
-	if (w)
-		h = w->WindowHandle();
-	return h;
+	return w ? w->WindowHandle() : nullptr;
 }
 
 LWindow *LView::GetWindow()
@@ -442,29 +367,16 @@ LWindow *LView::GetWindow()
 		auto *w = d->GetParent();
 		for (; w; w = w->d ? w->d->GetParent() : NULL)
 		{
-			/*
-			#ifdef HAIKU
-			auto wnd = dynamic_cast<LWindow*>(w);
-			if (wnd)
-			{
-				LAssert(!_InLock);
-				_Window = wnd;
-				printf("setting wnd for %s to %s/%s\n", GetClass(), _Window->GetClass(), _Window->Name());
-				break;
-			}
-			#else
-			*/
 			if (w->_Window)
 			{
 				LAssert(!_InLock);
 				_Window = w->_Window;
 				break;
 			}
-			// #endif
 		}
 	}
 	
-	#ifdef HAIKU
+	#if 0
 	// Check the window is the same thread as us
 	if (Handle() && _Window)
 	{
@@ -487,26 +399,21 @@ LWindow *LView::GetWindow()
 
 bool LView::Lock(const char *file, int line, int TimeOut)
 {
-	#ifdef HAIKU
+	#if 0 // def HAIKU
 
+		// Haiku is moving to a similar 1 GUI thread model
 		bool Debug = false;
-		if (!d || !d->Hnd)
+		
+		auto wndHnd = WindowHandle();
+		if (!wndHnd)
 		{
-			if (Debug)
-				printf("%s:%i - no handle %p %p\n", _FL, d, d ? d->Hnd : NULL);
+			printf("%s:%i - can't lock, no window.\n", _FL);
 			return false;
-		}
-	
-		if (d->Hnd->Parent() == NULL)
-		{
-			if (Debug)
-				printf("%s:%p - Lock() no parent.\n", GetClass(), this);
-			return true;
 		}
 		
 		if (TimeOut >= 0)
 		{
-			auto r = d->Hnd->LockLooperWithTimeout(TimeOut * 1000);
+			auto r = wndHnd->LockLooperWithTimeout(TimeOut * 1000);
 			if (r == B_OK)
 			{
 				if (_InLock == 0)
@@ -523,7 +430,7 @@ bool LView::Lock(const char *file, int line, int TimeOut)
 				}
 				_InLock++;
 				if (Debug)
-					printf("%s:%p - Lock() cnt=%i par=%p.\n", GetClass(), this, _InLock, d->Hnd->Parent());
+					printf("%s:%p - Lock() cnt=%i wndHnd=%p.\n", GetClass(), this, _InLock, wndHnd);
 				return true;
 			}
 		
@@ -531,7 +438,7 @@ bool LView::Lock(const char *file, int line, int TimeOut)
 			return false;
 		}
 	
-		auto r = d->Hnd->LockLooper();
+		auto r = wndHnd->LockLooper();
 		if (r)
 		{
 			if (_InLock == 0)
@@ -592,17 +499,12 @@ bool LView::Lock(const char *file, int line, int TimeOut)
 
 void LView::Unlock()
 {
-	#ifdef HAIKU
+	#if 0 // def HAIKU
 	
-		if (!d || !d->Hnd)
+		auto wndHnd = WindowHandle();
+		if (!wndHnd)
 		{
-			printf("%s:%i - Unlock() error, no hnd.\n", _FL);
-			return;
-		}
-	
-		if (!d->Hnd->Parent())
-		{
-			// printf("%s:%p - Unlock() no parent.\n", GetClass(), this);
+			printf("%s:%i - Unlock() error, no wndHnd.\n", _FL);
 			return;
 		}
 	
@@ -617,7 +519,7 @@ void LView::Unlock()
 			}
 		
 			// printf("%s:%p - Calling UnlockLooper: %i.\n", GetClass(), this, _InLock);
-			d->Hnd->UnlockLooper();
+			wndHnd->UnlockLooper();
 			_InLock--;
 			// printf("%s:%p - UnlockLooper done: %i.\n", GetClass(), this, _InLock);
 			
@@ -991,6 +893,7 @@ void LView::OnNcPaint(LSurface *pDC, LRect &r)
 		{
 			Local.Reset(new LScreenDC(this));
 			pDC = Local;
+			return;
 		}
 		if (!pDC)
 		{
@@ -1032,6 +935,7 @@ void LView::OnNcPaint(LSurface *pDC, LRect &r)
 		{
 			LRect OldClip = pDC->ClipRgn();
 			pDC->ClipRgn(Update);
+			// printf("%s: paint clipping to %s\n", GetClass(), Update->GetStr());
 			OnPaint(pDC);
 			pDC->ClipRgn(OldClip.Valid() ? &OldClip : NULL);
 		}
@@ -1042,11 +946,15 @@ void LView::OnNcPaint(LSurface *pDC, LRect &r)
 
 		#if PAINT_VIRTUAL_CHILDREN
 		// Paint any virtual children
+		LVariant v;
 		for (auto i : Children)
 		{
 			auto w = i->GetLView();
 			if (w && w->Visible())
 			{
+				// bool debug = !Stricmp(w->GetClass(), "LScrollBar");
+				// pDC->SetValue("debug", v = debug);
+				
 				#if LGI_VIEW_HANDLE
 				if (!w->Handle())
 				#endif
@@ -1055,9 +963,13 @@ void LView::OnNcPaint(LSurface *pDC, LRect &r)
 					p.Offset(o.x, o.y);
 					if (HasClient)
 						p.Offset(Client.x1 - r.x1, Client.y1 - r.y1);
+					/*
+					if (debug)
+						printf("_Paint p=%s o=%i,%i hasCli=%i\n",
+							p.GetStr(), o.x, o.y, HasClient);
+					*/
 					
 					LPoint co(p.x1, p.y1);
-					// LgiTrace("%s::_Paint %i,%i\n", w->GetClass(), p.x1, p.y1);
 					pDC->SetClient(&p);
 					w->_Paint(pDC, &co);
 					pDC->SetClient(NULL);
@@ -1067,7 +979,7 @@ void LView::OnNcPaint(LSurface *pDC, LRect &r)
 		#endif
 
 		if (HasClient)
-			pDC->SetClient(0);
+			pDC->SetClient(nullptr);
 	}
 
 #endif
@@ -1553,56 +1465,7 @@ void LView::Visible(bool v)
 	if (v) SetFlag(GViewFlags, GWF_VISIBLE);
 	else ClearFlag(GViewFlags, GWF_VISIBLE);
 
- 	#if defined(HAIKU)
-		LLocker lck(d->Hnd, _FL);
-		if (!IsAttached() || lck.Lock())
-		{
-			const int attempts = 3;
-			// printf("%s/%p:Visible(%i) hidden=%i\n", GetClass(), this, v, d->Hnd->IsHidden());
-			if (v)
-			{
-				bool parentHidden = false;
-				for (auto p = d->Hnd->Parent(); p; p = p->Parent())
-				{
-					if (p->IsHidden())
-					{
-						parentHidden = true;
-						break;
-					}
-				}
-				if (!parentHidden) // Don't try and show if one of the parent's is hidden.
-				{
-					for (int i=0; i<attempts && d->Hnd->IsHidden(); i++)
-					{
-						// printf("\t%p Show\n", this);
-						d->Hnd->Show();
-					}
-					if (d->Hnd->IsHidden())
-					{
-						printf("%s:%i - Failed to show %s.\n", _FL, GetClass());
-						for (auto p = d->Hnd->Parent(); p; p = p->Parent())
-							printf("\tparent: %s/%p ishidden=%i\n", p->Name(), p, p->IsHidden());
-					}
-				}
-			}
-			else
-			{
-				for (int i=0; i<attempts && !d->Hnd->IsHidden(); i++)
-				{
-					// printf("\t%p Hide\n", this);
-					d->Hnd->Hide();
-				}
-				if (!d->Hnd->IsHidden())
-				{
-					printf("%s:%i - Failed to hide %s.\n", _FL, GetClass());
-					for (auto p = d->Hnd->Parent(); p; p = p->Parent())
-						printf("\tparent: %s/%p ishidden=%i\n", p->Name(), p, p->IsHidden());
-				}
-			}
-			// printf("\t%s/%p:Visible(%i) hidden=%i\n", GetClass(), this, v, d->Hnd->IsHidden());
-		}
-		else LgiTrace("%s:%i - Can't lock.\n", _FL);
- 	#elif LGI_VIEW_HANDLE	
+ 	#if LGI_VIEW_HANDLE
 		if (_View)
 		{
 			#if WINNATIVE
@@ -1648,20 +1511,13 @@ bool LView::Focus()
 			if (Active)
 				Has = w->GetFocus() == static_cast<LViewI*>(this);
 		}
-	#elif defined(HAIKU)
-		LLocker lck(d->Hnd, _FL);
-		if (lck.Lock())
-		{
-			Has = d->Hnd->IsFocus();
-			lck.Unlock();
-		}	
 	#elif defined(WINNATIVE)
 		if (_View)
 		{
 			HWND hFocus = GetFocus();
 			Has = hFocus == _View;
 		}
-	#elif LGI_COCOA
+	#elif HAIKU || LGI_COCOA
 		Has = TestFlag(WndFlags, GWF_FOCUS);
 	#elif LGI_CARBON
 		LWindow *w = GetWindow();
@@ -2188,15 +2044,12 @@ bool LView::AttachChildren()
 {
 	for (auto c: Children)
 	{
-		bool a = c->IsAttached();
-		if (!a)
+		if (c->IsAttached())
+			continue;
+		if (!c->Attach(this))
 		{
-			
-			if (!c->Attach(this))
-			{
-				LgiTrace("%s:%i - failed to attach %s\n", _FL, c->GetClass());
-				return false;
-			}
+			LgiTrace("%s:%i - failed to attach %s\n", _FL, c->GetClass());
+			return false;
 		}
 	}
 
@@ -2277,20 +2130,22 @@ bool LView::WindowVirtualOffset(LPoint *Offset)
 		Offset->x = 0;
 		Offset->y = 0;
 		
-		for (LViewI *Wnd = this; Wnd; Wnd = Wnd->GetParent())
+		for (LView *view = this; view; view = dynamic_cast<LView*>(view->GetParent()))
 		{
 			#if !LGI_VIEW_HANDLE
-			auto IsWnd = dynamic_cast<LWindow*>(Wnd);
+			auto IsWnd = dynamic_cast<LWindow*>(view);
 			if (!IsWnd)
 			#else
-			if (!Wnd->Handle())
+			if (!view->Handle())
 			#endif
 			{
-				LRect r = Wnd->GetPos();
-				LViewI *Par = Wnd->GetParent();
-				if (Par)
+				if (view->WndFlags & GWF_DESTRUCTOR)
+					break;
+					
+				LRect r = view->GetPos();
+				if (auto parent = view->GetParent())
 				{
-					LRect c = Par->GetClient(false);
+					LRect c = parent->GetClient(false);
 					Offset->x += r.x1 + c.x1;
 					Offset->y += r.y1 + c.y1;
 				}
@@ -2316,59 +2171,34 @@ LString _ViewDesc(LViewI *v)
 	return s;
 }
 
-LViewI *LView::WindowFromPoint(int x, int y, int DebugDepth)
+LViewI *LView::ViewFromPoint(LPoint pt, LPoint *localPt)
 {
-	char Tabs[64];
-	if (DebugDepth)
-	{
-		memset(Tabs, 9, DebugDepth);
-		Tabs[DebugDepth] = 0;
-		LgiTrace("%s%s %i\n", Tabs, _ViewDesc(this).Get(), Children.Length());
-	}
-
 	// We iterate over the child in reverse order because if they overlap the
 	// end of the list is on "top". So they should get the click or whatever
 	// before the the lower windows.
 	auto it = Children.rbegin();
-	int n = (int)Children.Length() - 1;
+	auto n = Children.Length() - 1;
 	for (LViewI *c = *it; c; c = *--it)
 	{
-		LRect CPos = c->GetPos();
-		
-		if (CPos.Overlap(x, y) && c->Visible())
-		{
-			LRect CClient;
-			CClient = c->GetClient(false);
+		if (!c->Visible())
+			continue;
 
-            int Ox = CPos.x1 + CClient.x1;
-            int Oy = CPos.y1 + CClient.y1;
-			if (DebugDepth)
-			{
-				LgiTrace("%s[%i] %s Pos=%s Client=%s m(%i,%i)->(%i,%i)\n",
-						Tabs, n--,
-						_ViewDesc(c).Get(),
-						CPos.GetStr(),
-						CClient.GetStr(),
-						x, y,
-						x - Ox, y - Oy);
-			}
-
-			LViewI *Child = c->WindowFromPoint(x - Ox, y - Oy, DebugDepth ? DebugDepth  + 1 : 0);
-			if (Child)
-				return Child;
-		}
-		else if (DebugDepth)
+		auto pos = c->GetPos();		
+		if (pos.Overlap(pt))
 		{
-			LgiTrace("%s[%i] MISSED %s Pos=%s m(%i,%i)\n", Tabs, n--, _ViewDesc(c).Get(), CPos.GetStr(), x, y);
+			if (auto v = c->ViewFromPoint(pt - pos.TopLeft(), localPt))
+				return v;
 		}
 	}
 
-	if (x >= 0 && y >= 0 && x < Pos.X() && y < Pos.Y())
+	if (Pos.ZeroTranslate().Overlap(pt))
 	{
+		if (localPt)
+			*localPt = pt - _Border.TopLeft();
 		return this;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 LColour LView::StyleColour(int CssPropType, LColour Default, int Depth)
@@ -2410,7 +2240,7 @@ LColour LView::StyleColour(int CssPropType, LColour Default, int Depth)
 
 OsThreadId LView::ViewThread()
 {
-	#if defined(HAIKU)
+	#if 0 // defined(HAIKU)
 
 		auto h = Handle();
 		if (!h)
@@ -2482,32 +2312,13 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64_t tim
 
 	#elif defined(HAIKU)
 
-		if (!d || !d->Hnd)
+		auto bWnd = WindowHandle();
+		if (!bWnd)
 		{
-			printf("%s:%i - Bad pointers %p %p\n", _FL, d, d ? d->Hnd : NULL);
+			printf("%s:%i - no wndHnd\n", _FL);
 			return false;
 		}
 		
-		BWindow *bWnd = NULL;
-		LWindow *wnd = dynamic_cast<LWindow*>(this);
-		if (wnd)
-		{
-			bWnd = wnd->WindowHandle();
-		}
-		else
-		{
-			// Look for an attached view to lock...
-			for (LViewI *v = this; v; v = v->GetParent())
-			{
-				auto vhnd = v->Handle();
-				if (vhnd && ::IsAttached(vhnd))
-				{
-					bWnd = vhnd->Window();
-					break;
-				}
-			}
- 		}
-
 		BMessage m(Cmd);
 		
 		auto r = m.AddInt64(LMessage::PropA, a);
@@ -2525,7 +2336,7 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64_t tim
 			auto threadId = bWnd->Thread();
 			if (threadId <= 0)
 			{
-				// printf("####### %s:%i warning, BWindow(%s) has no thread for PostEvent!?\n", _FL, GetClass());
+				printf("####### %s:%i warning, BWindow(%s) has no thread for PostEvent!?\n", _FL, GetClass());
 			}
 			else
 			{
@@ -2538,7 +2349,7 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64_t tim
 
 		// Not attached yet...
 		d->MsgQue.Add(new BMessage(m));
-		// printf("%s:%i - PostEvent.MsgQue=%i\n", _FL, (int)d->MsgQue.Length());
+		printf("%s:%i - PostEvent.MsgQue=%i\n", _FL, (int)d->MsgQue.Length());
 		
 		return true;
 
@@ -2949,13 +2760,18 @@ void LView::_Dump(int Depth)
 		auto wid = GtkCast(WindowHandle(), gtk_widget, GtkWidget);
 		DumpGtk(wid);
 	
+	#elif HAIKU
+
+		printf("%s%p/%s pos=%s\n", Sp, this, GetClass(), Pos.GetStr());
+		for (auto c: Children)
+		{
+			if (auto g = c->GetLView())
+				g->_Dump(Depth + 1);
+		}
+	
 	#elif !defined(MAC)
 	
-		#if defined(HAIKU)
-		LLocker lck(WindowHandle(), _FL);
-		if (lck.Lock())
-		#endif
-			::_Dump(0, WindowHandle());
+		::_Dump(0, WindowHandle());
 	
 	#endif
 }
