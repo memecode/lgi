@@ -720,9 +720,8 @@ bool LView::Detach()
 	if (d->Parent)
 	{
 		d->Parent->DelView(this);
-		d->Parent->OnChildrenChanged(this, false);
-		d->Parent = 0;
-		d->ParentI = 0;
+		LAssert(!d->Parent);
+		LAssert(!d->ParentI);
 		Status = true;
 		WndFlags &= ~GWF_FOCUS;
 
