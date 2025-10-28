@@ -332,6 +332,7 @@ public:
 		void Quit(bool DontDelete = false);
 		LRect *GetDecorSize();
 		bool TranslateMouse(LMouse &m);
+		LViewI *WindowFromPoint(int x, int y, bool Debug = false);
 		void _OnViewDelete();
 		void SetParent(LViewI *p) override;
 	
@@ -341,10 +342,6 @@ public:
 		void Quit(bool DontDelete = false) override;
 		int OnCommand(int Cmd, int Event, OsView Wnd) override;
 		
-		#if defined(LGI_CARBON)
-			OSErr HandlerCallback(DragTrackingMessage *tracking, DragRef theDrag);
-		#endif
-
 	#endif
 };
 

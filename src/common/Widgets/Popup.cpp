@@ -1,4 +1,5 @@
 #include <stdio.h>
+
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Popup.h"
 #include "lgi/common/SkinEngine.h"
@@ -6,6 +7,7 @@
 #include "lgi/common/Thread.h"
 #include "lgi/common/ThreadEvent.h"
 #include "lgi/common/Menu.h"
+#include "lgi/common/Window.h"
 
 #if LGI_COCOA
 	#include <Cocoa/Cocoa.h>
@@ -295,45 +297,45 @@ public:
 				m.y != Old.y)
 			{
 				// Mouse moved...
-				OsView hOver = 0;
+				OsView hOver = nullptr;
 
 				#if WINNATIVE
 
-				POINT WinPt = { m.x, m.y };
-				hOver = WindowFromPoint(WinPt);
+					POINT WinPt = { m.x, m.y };
+					hOver = WindowFromPoint(WinPt);
 
-				RECT WinRect;
-				GetClientRect(hOver, &WinRect);
-				ScreenToClient(hOver, &WinPt);
-				LRect rc = WinRect;
-				LPoint p(WinPt.x, WinPt.y);
+					RECT WinRect;
+					GetClientRect(hOver, &WinRect);
+					ScreenToClient(hOver, &WinPt);
+					LRect rc = WinRect;
+					LPoint p(WinPt.x, WinPt.y);
 
 				#elif defined __GTK_H__
 				
-				hOver = WindowFromPoint(m.x, m.y);
-				LRect rc;
-				LPoint p(m.x, m.y);
-				if (hOver)
-				{
-					if (!GetWindowRect(hOver, rc))
+					// hOver = WindowFromPoint(m.x, m.y);
+					LRect rc;
+					LPoint p(m.x, m.y);
+					if (hOver)
 					{
-						LgiTrace("No Rect for over\n");
+						if (!GetWindowRect(hOver, rc))
+						{
+							LgiTrace("No Rect for over\n");
+						}
+						if (!ScreenToClient(hOver, p))
+						{
+							LgiTrace("No conversion for point.\n");
+						}
 					}
-					if (!ScreenToClient(hOver, p))
+					else
 					{
-						LgiTrace("No conversion for point.\n");
+						// LgiTrace("No hOver\n");
 					}
-				}
-				else
-				{
-					// LgiTrace("No hOver\n");
-				}
 				
 				#else
 				
-				// Not implemented.
-				LPoint p;
-				LRect rc;
+					// Not implemented.
+					LPoint p;
+					LRect rc;
 				
 				#endif
 

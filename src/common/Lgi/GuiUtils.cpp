@@ -41,8 +41,7 @@ LString LKey::utf8() const
 		auto in = (const uint16_t*)&c16;
 		LgiUtf16To8(in, inSize, out, outSize);
 	#else
-		auto in = (const uint32_t*)&c16;
-		LgiUtf32To8(in, inSize, out, outSize);
+		LgiUtf32To8(c16, out, outSize);
 	#endif
 	return buf;
 }
