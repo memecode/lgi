@@ -494,49 +494,43 @@ void LMouseHook::UnregisterPopup(LPopup *p)
 }
 
 #if defined(WIN32)
-LRESULT CALLBACK LMouseHook::MouseProc(int Code, WPARAM a, LPARAM b)
-{
-	return 0;
-}
-#elif defined(LGI_CARBON)
-WindowRef CreateBorderlessWindow()
-{
-	Rect r = {0,0,100,100};
-	WindowRef wr;
-	OSStatus e = CreateNewWindow
-				(
-					kDocumentWindowClass,
-					(WindowAttributes)
-					(
-						kWindowStandardHandlerAttribute |
-						kWindowCompositingAttribute |
-						kWindowNoShadowAttribute |
-						kWindowNoTitleBarAttribute
-					),
-					&r,
-					&wr
-				);
-	if (e)
+	LRESULT CALLBACK LMouseHook::MouseProc(int Code, WPARAM a, LPARAM b)
 	{
-		LgiTrace("%s:%i - Error: Creating popup window: %i\n", _FL, e);
-		return NULL;
+		return 0;
 	}
-	return wr;
-}
+#elif defined(LGI_CARBON)
+	WindowRef CreateBorderlessWindow()
+	{
+		Rect r = {0,0,100,100};
+		WindowRef wr;
+		OSStatus e = CreateNewWindow
+					(
+						kDocumentWindowClass,
+						(WindowAttributes)
+						(
+							kWindowStandardHandlerAttribute |
+							kWindowCompositingAttribute |
+							kWindowNoShadowAttribute |
+							kWindowNoTitleBarAttribute
+						),
+						&r,
+						&wr
+					);
+		if (e)
+		{
+			LgiTrace("%s:%i - Error: Creating popup window: %i\n", _FL, e);
+			return NULL;
+		}
+		return wr;
+	}
 #endif
 
 /////////////////////////////////////////////////////////////////////////////////////
 class LPopupPrivate
 {
 public:
-	bool TakeFocus;
-	bool GotOnCreate;
-	
-	LPopupPrivate()
-	{
-		TakeFocus = true;
-		GotOnCreate = false;
-	}
+	bool TakeFocus = true;
+	bool GotOnCreate = false;
 };
 
 LArray<LPopup*> LPopup::CurrentPopups;
@@ -561,7 +555,7 @@ LPopup::LPopup(LView *owner)
 			
 			Panel.p.contentView = [[LCocoaView alloc] init:this];
 		}
-	#elif defined(HAIKU)
+	#elif HAIKU
 		_Window = this;
 		auto w = WindowHandle();
 		if (w)
@@ -596,7 +590,23 @@ LPopup::LPopup(LView *owner)
 		#if !WINNATIVE
 			Owner->PopupChild() = this;
 		#endif
-		#if WINDOWS
+
+		#if defined(__GTK_H__)
+			if (auto popupHnd = WindowHandle()) // Ie Gtk::GtkWindow*
+			{
+				if (auto wnd = Owner->GetWindow()) // Ie LWindow*
+				{
+					if (auto ownerHnd = wnd->WindowHandle()) // Ie Gtk::GtkWindow*
+					{
+						gtk_window_set_attached_to(ownerHnd, GTK_WIDGET(popupHnd));
+						gtk_window_set_transient_for(popupHnd, ownerHnd);
+					}
+					else printf("%s:%i - no hnd?\n", _FL);
+				}
+				else printf("%s:%i - no owner window?\n", _FL);
+			}
+			else printf("%s:%i - no popup handle?\n", _FL);
+		#elif WINDOWS
 			if (!_Window)
 				_Window = Owner->GetWindow();
 		#endif
