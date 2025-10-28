@@ -314,7 +314,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	sprintf_s(id, sizeof(id), "com.memecode.%s", name);
 	
 	if (d->GuiEnv)
-		d->App = Gtk::gtk_application_new(id, Gtk::G_APPLICATION_FLAGS_NONE); 
+		d->App = Gtk::gtk_application_new(id, Gtk::G_APPLICATION_DEFAULT_FLAGS); 
 
 	MouseHook = new LMouseHook;
 

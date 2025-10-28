@@ -906,8 +906,10 @@ public:
 	template<typename Fn>
 	void Sort(Fn Compare)
 	{
+		if (Items == 0)
+			return;
 		RandomAccessIter Start(this, 0);
-		RandomAccessIter End(Start, Items);
+		RandomAccessIter End(Start, Items-1);
 		std::sort
 		(
 			Start, End,
