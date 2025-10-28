@@ -12,7 +12,7 @@
 	#define WINXP_LOOK		1
 #endif
 
-
+#if HAIKU
 #include "Region.h"
 static LString descRect(BRect r)
 {
@@ -29,6 +29,7 @@ static LString descClip(BView *view)
 		a.Add(descRect(region.RectAt(i)));
 	return LString("(") + LString(" ").Join(a) + ")";
 }
+#endif
 
 enum ScrollZone
 {

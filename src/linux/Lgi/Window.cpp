@@ -104,10 +104,7 @@ public:
 #define GWND_CREATE		0x0010000
 
 LWindow::LWindow(GtkWidget *w) :
-	LView(0)
-	#ifdef _DEBUG
-	, DebugDC(_FL)
-	#endif
+	LView(nullptr)
 {
 	d = new LWindowPrivate;
 	_QuitOnClose = false;
@@ -307,6 +304,7 @@ void LWindow::SetDecor(bool Visible)
 		LgiTrace("%s:%i - No window to set decor.\n", _FL);
 }
 
+/*
 LViewI *LWindow::WindowFromPoint(int x, int y, bool Debug)
 {
 	if (!_Root)
@@ -318,10 +316,11 @@ LViewI *LWindow::WindowFromPoint(int x, int y, bool Debug)
 
 	return LView::WindowFromPoint(x - rpos.x1, y - rpos.y1, Debug);
 }
+*/
 
 bool LWindow::TranslateMouse(LMouse &m)
 {
-	m.Target = WindowFromPoint(m.x, m.y, false);
+	m.Target = ViewFromPoint(m);
 	if (!m.Target)
 		return false;
 
@@ -691,7 +690,7 @@ bool DndPointMap(LViewI *&v, LPoint &p, LDragDropTarget *&t, LWindow *Wnd, int x
 {
 	LRect cli = Wnd->GetClient();
 	t = NULL;
-	v = Wnd->WindowFromPoint(x - cli.x1, y - cli.y1, false);
+	v = Wnd->ViewFromPoint(LPoint(x, y) - cli.TopLeft());
 	if (!v)
 	{
 		LgiTrace("%s:%i - <no view> @ %i,%i\n", _FL, x, y);
