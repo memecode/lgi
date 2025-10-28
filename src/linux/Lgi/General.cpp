@@ -15,6 +15,7 @@
 #include "lgi/common/SubProcess.h"
 #include "lgi/common/TextLabel.h"
 #include "lgi/common/Button.h"
+#include "lgi/common/Uri.h"
 #ifndef LGI_SDL
 #include "LgiWinManGlue.h"
 #endif
@@ -220,6 +221,13 @@ bool _GetSystemFont(char *FontType, char *Font, int FontBufSize, int &PointSize)
 	return Status;
 }
 
+static const char *desktopFolders[] =
+{
+	"/usr/share/applications",
+	"/var/lib/snapd/desktop/applications",
+	nullptr
+};
+
 static bool XdgMimeLookup(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 {
 	static bool NoXdgMime = false;
@@ -240,7 +248,7 @@ static bool XdgMimeLookup(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 	#endif
 
 	LSubProcess proc("xdg-mime", Args);
-	if (proc.Start())
+	if (!proc.Start())
 	{
 		NoXdgMime = true;
 		LgiTrace("%s:%i - Failed to execute xdg-mime %s\n", _FL, Args);
@@ -248,27 +256,37 @@ static bool XdgMimeLookup(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 	}
 
 	proc.Communicate(&Output);
-	auto o = Output.NewLStr();
+	auto o = Output.NewLStr().Strip();
 
 	#if DEBUG_GET_APPS_FOR_MIMETYPE
 	printf("Output:\n%s\n", o.Get());
 	#endif
-	if (o)
+	if (!o)
 	{
 		LgiTrace("%s:%i - No output from xdg-mime\n", _FL);
 		return false;
 	}
 
 	char p[MAX_PATH_LEN];
-	if (LMakePath(p, sizeof(p), "/usr/share/applications", o.Strip()))
+	bool exists = false;	
+	for (int i=0; desktopFolders[i]; i++)
 	{
-		LgiTrace("%s:%i - Failed to create path.\n", _FL);
-		return false;
+		if (!LMakePath(p, sizeof(p), desktopFolders[i], o.Strip()))
+		{
+			LgiTrace("%s:%i - Failed to create path.\n", _FL);
+			return false;
+		}
+		
+		exists = LFileExists(p);
+		#if DEBUG_GET_APPS_FOR_MIMETYPE
+		printf("DesktopExists: '%s' = %i\n", p, exists);
+		#endif
+		if (exists)
+			break;
 	}
-	
-	if (LFileExists(p))
+	if (!exists)
 	{
-		LgiTrace("%s:%i - '%s' doesn't exist.", _FL, p);
+		LgiTrace("%s:%i - '%s' doesn't exist.\n", _FL, p);
 		return false;
 	}
 
@@ -276,62 +294,55 @@ static bool XdgMimeLookup(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 	LString Section;
 
 	#if DEBUG_GET_APPS_FOR_MIMETYPE
-	printf("Reading '%s', got %i bytes\n", p, strlen(txt));
+	printf("Reading '%s', got %i bytes\n", p, (int)strlen(txt));
 	#endif
 
-	if (txt)
+	if (!txt)
 	{
 		LgiTrace("%s:%i - Can't read from '%s'\n", _FL, p);
 		return false;
 	}
 
-	auto &ai = Apps.New();
+	auto &info = Apps.New();
 	bool Status = false;
 	
-	auto t = txt.SplitDelimit("\r\n");
-	for (auto line: t)
+	for (auto line: txt.SplitDelimit("\r\n"))
 	{
-		char *Var = line;
-		
 		#if DEBUG_GET_APPS_FOR_MIMETYPE
-		printf("	'%s'\n", Var);
-		#endif
-		
-		if (*Var == '[')
+		// printf("	'%s'\n", Var);
+		#endif		
+		if (line(0) == '[')
 		{
-			Var++;
-			auto End = strchr(Var, ']');
-			if (End)
-				Section.Set(Var, End - Var);
+			auto end = line.Find("]");
+			if (end > 0)
+			{
+				Section = line(1, end);
+				#if DEBUG_GET_APPS_FOR_MIMETYPE
+				printf("	Section='%s'\n", Section.Get());
+				#endif
+			}
 		}
 		else if (Section.Equals("Desktop Entry"))
 		{
-			char *Value = strchr(Var, '=');
-			if (Value)
+			auto var = line.SplitDelimit("=", 1);
+			if (var.Length() == 2)
 			{
-				*Value++ = 0;
-				if (!stricmp(Var, "Exec"))
+				if (var[0].Equals("Exec"))
 				{
-					LAutoString exe(TrimStr(Value));
-					char *sp = strchr(exe, ' ');
-					if (sp)
-						ai.Path.Set(exe, sp-exe);
-					else
-						ai.Path = exe;
-					
+					info.Path = var[1];
 					Status = true;
 				}
-				else if (!stricmp(Var, "Name") ||
-						!stricmp(Var, LangName))
+				else if (var[0].Equals("Name") ||
+						 var[0].Equals(LangName))
 				{
-					ai.Name = Value;
+					info.Name = var[1];
 				}
 			}
 		}
 	}
 
 	#if DEBUG_GET_APPS_FOR_MIMETYPE
-	printf("	ai='%s' '%s'\n", ai.Name.Get(), ai.Path.Get());
+	printf("	info='%s' '%s'\n", info.Name.Get(), info.Path.Get());
 	#endif
 	
 	return Status;
@@ -339,12 +350,21 @@ static bool XdgMimeLookup(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 
 static bool DesktopToAppInfo(const char *desktop, LAppInfo &info)
 {
-	LFile::Path path("/usr/share/applications");
-	path += desktop;
-	if (!path.Exists())
+	LString fullPath;
+	for (int i=0; desktopFolders[i]; i++)
+	{
+		LFile::Path path(desktopFolders[i]);
+		path += desktop;
+		if (path.Exists())
+		{
+			fullPath = path.GetFull();
+			break;
+		}
+	}
+	if (!fullPath)
 		return false;
 		
-	LFile f(path);
+	LFile f(fullPath);
 	if (!f)
 		return false;
 	
@@ -420,8 +440,13 @@ static bool MimeAppsLookup(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 {
 	bool Status = XdgMimeLookup(Mime, Apps, Limit);
+	printf("%s: XdgMimeLookup=%i\n", __func__, Status);
 	if (!Status)
+	{
 		Status = MimeAppsLookup(Mime, Apps, Limit);
+		printf("%s: MimeAppsLookup=%i\n", __func__, Status);
+	}
+	
 	return Status;
 }
 
@@ -449,159 +474,164 @@ LString LErrorCodeToString(uint32_t ErrorCode)
 
 bool LExecute(const char *File, const char *Args, const char *Dir, LString *Error)
 {
-	if (File)
+	if (!File)
 	{
-		bool IsUrl = false;
+		LgiTrace("%s:%i - no file.\n", _FL);
+		if (Error) *Error = "No file parameter";
+		return false;
+	}
+	
+	bool IsUrl = false;
 
-		char App[MAX_PATH_LEN] = "";
-		if (strnicmp(File, "http://", 7) == 0 ||
-			strnicmp(File, "https://", 8) == 0)
+	LString App;
+	auto uriSep = Stristr(File, "://");
+	if (uriSep != nullptr && uriSep - File < 32)
+	{
+		IsUrl = true;
+		LUri u(File);
+		if (u.IsProtocol("http") ||
+			u.IsProtocol("https"))
+			App = LGetAppForMimeType("text/html");
+	}
+	else
+	{
+		struct stat f;
+		char Path[MAX_PATH_LEN];
+		
+		// see if the file is executable
+		bool InPath = false;
+		bool Ok = stat(File, &f) == 0;
+		if (Ok)
 		{
-			IsUrl = true;
-			LGetAppForMimeType("text/html", App, sizeof(App));
+			strcpy_s(Path, sizeof(Path), File);
 		}
 		else
 		{
-			struct stat f;
-			char Path[MAX_PATH_LEN];
-			
-			// see if the file is executable
-			bool InPath = false;
-			bool Ok = stat(File, &f) == 0;
-			if (Ok)
+			// look in the path
+			InPath = true;
+			LToken p(getenv("PATH"), LGI_PATH_SEPARATOR);
+			for (int i=0; i<p.Length() && !Ok; i++)
 			{
-				strcpy_s(Path, sizeof(Path), File);
+				LMakePath(Path, sizeof(Path), p[i], File);
+				Ok = stat(Path, &f) == 0;
+			}
+		}
+		
+		if (Ok)			
+		{
+			if (S_ISDIR(f.st_mode))
+			{
+				// open the directory in the current browser
+				App = LGetAppForMimeType("inode/directory");
 			}
 			else
 			{
-				// look in the path
-				InPath = true;
-				LToken p(getenv("PATH"), LGI_PATH_SEPARATOR);
-				for (int i=0; i<p.Length() && !Ok; i++)
+				// look up the type...
+				auto Mime = LGetFileMimeType(File);
+				if (Mime)
 				{
-					LMakePath(Path, sizeof(Path), p[i], File);
-					Ok = stat(Path, &f) == 0;
-				}
-			}
-			
-			if (Ok)			
-			{
-				if (S_ISDIR(f.st_mode))
-				{
-					// open the directory in the current browser
-					LGetAppForMimeType("inode/directory", App, sizeof(App));
-				}
-				else
-				{
-					// look up the type...
-					auto Mime = LGetFileMimeType(File);
-					if (Mime)
+					// printf("LGetFileMimeType(%s)=%s\n", File, Mime);
+					
+					if (stricmp(Mime, "application/x-executable") == 0 ||
+						stricmp(Mime, "application/x-shellscript") == 0 ||
+						stricmp(Mime, "text/x-python") == 0)
 					{
-						// printf("LGetFileMimeType(%s)=%s\n", File, Mime);
-						
-						if (stricmp(Mime, "application/x-executable") == 0 ||
-							stricmp(Mime, "application/x-shellscript") == 0 ||
-							stricmp(Mime, "text/x-python") == 0)
-						{
-							TreatAsExe:
-							char f[512];
-							sprintf_s(f, sizeof(f), "\"%s\" %s &", File, Args ? Args : (char*)"");
-							if (Dir)
-								chdir(Dir);
-							return system(f) == 0;
-						}
-						else
-						{
-							// got the mime type
-							if (!LGetAppForMimeType(Mime, App, sizeof(App)))
-							{
-								// printf("%s:%i: LExecute - LgiGetAppForMimeType failed to return the app for '%s'\n", _FL, File);
-								goto TreatAsExe;
-							}
-						}
+						TreatAsExe:
+						char f[512];
+						sprintf_s(f, sizeof(f), "\"%s\" %s &", File, Args ? Args : (char*)"");
+						if (Dir)
+							chdir(Dir);
+						return system(f) == 0;
 					}
 					else
 					{
-						// printf("LExecute: LGetFileMimeType failed to return a mime type for '%s'\n", File);
-						
-						// If a file can't be typed it's most likely an executable.
-						// goto TreatAsExe;
+						// got the mime type
+						if (!(App = LGetAppForMimeType(Mime)))
+						{
+							// printf("%s:%i: LExecute - LgiGetAppForMimeType failed to return the app for '%s'\n", _FL, File);
+							goto TreatAsExe;
+						}
 					}
 				}
-			}
-			else if (Error)
-				Error->Printf("'%s' doesn't exist.\n", File);
-		}
-
-		if (!App[0])
-		{
-			if (Error)
-				*Error = "No app registered to open HTML.";
-		}
-		else
-		{
-			bool FileAdded = false;
-			LString AppPath;
-			LString EscFile = LString::Escape(File, -1, " &");
-
-			LString a = App;
-			int Pos;
-			while ((Pos = a.Find("%")) >= 0)
-			{
-				char *s = a.Get() + Pos;
-				printf("a='%s'\n", a.Get());
-				switch (s[1])
-				{			
-					case 'f':
-					case 'F':
-					{
-						a = a(0,Pos) + EscFile + a(Pos+2,-1);
-						FileAdded = true;
-						break;
-					}
-					case 'u':
-					case 'U':
-					{
-						if (IsUrl)
-							a = a(0,Pos) + EscFile + a(Pos+2,-1);
-						else
-							a = a(0,Pos) + LString("file:") + EscFile + a(Pos+2,-1);
-						FileAdded = true;
-						break;
-					}
-					default:
-					{
-						// we don't understand this command
-						a = a(0,Pos) + a(Pos+2,-1);
-						break;
-					}
+				else
+				{
+					// printf("LExecute: LGetFileMimeType failed to return a mime type for '%s'\n", File);
+					
+					// If a file can't be typed it's most likely an executable.
+					// goto TreatAsExe;
 				}
-				printf("a='%s'\n", a.Get());
 			}
-
-			if (!FileAdded)
-			{
-				a += " ";
-				a += EscFile;
-			}
-
-			a += " > /dev/null 2> /dev/null &";
-
-			int e;
-			if (Dir)
-				chdir(Dir);
-			printf("a=\n%s\n", a.Get());
-			if (e = system(a))
-			{
-				if (Error)
-					*Error = LErrorCodeToString(errno);
-				return false;
-			}
-
-			return true;
 		}
+		else if (Error)
+			Error->Printf("'%s' doesn't exist.\n", File);
 	}
-	return false;
+
+	if (!App)
+	{
+		if (Error)
+			*Error = "No app registered to open HTML.";
+		return false;
+	}
+
+	bool FileAdded = false;
+	LString AppPath;
+	LString EscFile = LString::Escape(File, -1, " &");
+
+	LString a = App;
+	int Pos;
+	while ((Pos = a.Find("%")) >= 0)
+	{
+		char *s = a.Get() + Pos;
+		printf("a='%s'\n", a.Get());
+		switch (s[1])
+		{			
+			case 'f':
+			case 'F':
+			{
+				a = a(0,Pos) + EscFile + a(Pos+2,-1);
+				FileAdded = true;
+				break;
+			}
+			case 'u':
+			case 'U':
+			{
+				if (IsUrl)
+					a = a(0,Pos) + EscFile + a(Pos+2,-1);
+				else
+					a = a(0,Pos) + LString("file:") + EscFile + a(Pos+2,-1);
+				FileAdded = true;
+				break;
+			}
+			default:
+			{
+				// we don't understand this command
+				a = a(0,Pos) + a(Pos+2,-1);
+				break;
+			}
+		}
+		printf("a='%s'\n", a.Get());
+	}
+
+	if (!FileAdded)
+	{
+		a += " ";
+		a += EscFile;
+	}
+
+	a += " > /dev/null 2> /dev/null &";
+
+	int e;
+	if (Dir)
+		chdir(Dir);
+	printf("a=\n%s\n", a.Get());
+	if (e = system(a))
+	{
+		if (Error)
+			*Error = LErrorCodeToString(errno);
+		return false;
+	}
+
+	return true;
 }
 
 //////////////////////////////////////////////////////////////////////////
