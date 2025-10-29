@@ -385,9 +385,6 @@ public:
 
 LWindow::LWindow(OsWindow wnd) :
 	LView(NULL)
-	#ifdef _DEBUG
-	, DebugDC(_FL)
-	#endif	
 {
 	d = new LWindowPrivate(this);
 	_QuitOnClose = false;
@@ -1406,6 +1403,7 @@ bool LWindow::UnregisterHook(LView *Target)
 	return false;
 }
 
+/*
 LViewI *LWindow::WindowFromPoint(int x, int y, int DebugDepth)
 {
 	for (int i=0; i<LPopup::CurrentPopups.Length(); i++)
@@ -1424,6 +1422,7 @@ LViewI *LWindow::WindowFromPoint(int x, int y, int DebugDepth)
 	
 	return LView::WindowFromPoint(x, y, DebugDepth ? DebugDepth + 1 : 0);
 }
+*/
 
 int LWindow::OnCommand(int Cmd, int Event, OsView SrcCtrl)
 {

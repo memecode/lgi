@@ -149,7 +149,7 @@ struct DndEvent
 		Pt.Set(loc.x, frame.size.height - loc.y);
 		
 		LDragDropTarget *t = NULL;
-		v = cv.w->WindowFromPoint(Pt.x, Pt.y);
+		v = cv.w->ViewFromPoint(Pt);
 		if (!v)
 			return;
 
@@ -322,7 +322,7 @@ struct DndEvent
 	int x = (int)pt.x;
 	int y = (int)(r.size.height - pt.y);
 
-	auto t = self.w->WindowFromPoint(x, y);
+	auto t = self.w->ViewFromPoint(LPoint(x, y));
 	if (!t)
 		return;
 
