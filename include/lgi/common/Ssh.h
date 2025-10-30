@@ -684,7 +684,7 @@ public:
 
 		LError ret(LErrorNone);
 
-		#if 1 // New sftp code:
+		#if 0 // New sftp code:
 		
 			auto sftp = sftp_new(Ssh);
 			if (!sftp)
@@ -844,7 +844,7 @@ public:
 		LError ret(LErrorNone);
 		auto Parts = LString(To).RSplit("/", 1);
 		
-		#if 1 // New sftp code:
+		#if 0 // New sftp code:
 		
 			auto sftp = sftp_new(Ssh);
 			if (!sftp)
@@ -961,8 +961,8 @@ public:
 					}
 
 					Meter.Value(i);
-					Err = i == length ? LErrorNone : LErrorIoFailed;
-					Log->Print("%s:%i - Upload: %s.\n", _FL, Err ? "Error" : "Ok");
+					ret = i == length ? LErrorNone : LErrorIoFailed;
+					Log->Print("%s:%i - Upload: %s.\n", _FL, ret ? "Error" : "Ok");
 				}
 				else
 				{

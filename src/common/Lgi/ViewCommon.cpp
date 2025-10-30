@@ -1594,26 +1594,6 @@ void LView::Focus(bool i)
 
 				SetFocus(GetDesktopWindow());
 			}
-
-		#elif defined LGI_CARBON
-		
-			LViewI *Wnd = GetWindow();
-			if (Wnd && i)
-			{
-				OSErr e = SetKeyboardFocus(Wnd->WindowHandle(), _View, 1);
-				if (e)
-				{
-					// e = SetKeyboardFocus(Wnd->WindowHandle(), _View, kControlFocusNextPart);
-					// if (e)
-					{
-						HIViewRef p = HIViewGetSuperview(_View);
-						// errCouldntSetFocus
-						printf("%s:%i - SetKeyboardFocus failed: %i (%s, %p)\n", _FL, e, GetClass(), p);
-					}
-				}
-				// else printf("%s:%i - SetFocus v=%p(%s)\n", _FL, _View, GetClass());
-			}
-			else printf("%s:%i - no window?\n", _FL);
 		
 		#endif
 	}

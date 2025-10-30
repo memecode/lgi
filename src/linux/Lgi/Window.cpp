@@ -1841,7 +1841,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 			if (d->Focus == ctrl)
 			{
 				#if DEBUG_SETFOCUS
-				LAutoString _ctrl = DescribeView(ctrl);
+				auto _ctrl = DescribeView(ctrl);
 				LgiTrace("SetFocus(%s, %s) already has focus.\n", _ctrl.Get(), TypeName);
 				#endif
 				return;
@@ -1849,11 +1849,11 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 
 			if (d->Focus)
 			{
-				LView *gv = d->Focus->GetLView();
+				auto gv = d->Focus->GetLView();
 				if (gv)
 				{
 					#if DEBUG_SETFOCUS
-					LAutoString _foc = DescribeView(d->Focus);
+					auto _foc = DescribeView(d->Focus);
 					LgiTrace(".....defocus LView: %s\n", _foc.Get());
 					#endif
 					gv->_Focus(false);
@@ -1861,7 +1861,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 				else if (IsActive())
 				{
 					#if DEBUG_SETFOCUS
-					LAutoString _foc = DescribeView(d->Focus);
+					auto _foc = DescribeView(d->Focus);
 					LgiTrace(".....defocus view: %s (active=%i)\n", _foc.Get(), IsActive());
 					#endif
 					d->Focus->OnFocus(false);
@@ -1881,7 +1881,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 				if (gv)
 				{
 					#if DEBUG_SETFOCUS
-					LAutoString _set = DescribeView(d->Focus);
+					auto _set = DescribeView(d->Focus);
 					LgiTrace("LWindow::SetFocus(%s, %s) %i focusing LView\n",
 						_set.Get(),
 						TypeName,
@@ -1893,7 +1893,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 				else if (IsActive())
 				{			
 					#if DEBUG_SETFOCUS
-					LAutoString _set = DescribeView(d->Focus);
+					auto _set = DescribeView(d->Focus);
 					LgiTrace("LWindow::SetFocus(%s, %s) %i focusing nonGView (active=%i)\n",
 						_set.Get(),
 						TypeName,
@@ -1910,8 +1910,8 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 		case LoseFocus:
 		{
 			#if DEBUG_SETFOCUS
-			LAutoString _Ctrl = DescribeView(d->Focus);
-			LAutoString _Focus = DescribeView(d->Focus);
+			auto _Ctrl = DescribeView(d->Focus);
+			auto _Focus = DescribeView(d->Focus);
 			LgiTrace("LWindow::SetFocus(%s, %s) d->Focus=%s\n",
 				_Ctrl.Get(),
 				TypeName,
@@ -1928,7 +1928,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 			if (ctrl == d->Focus)
 			{
 				#if DEBUG_SETFOCUS
-				LAutoString _Ctrl = DescribeView(d->Focus);
+				auto _Ctrl = DescribeView(d->Focus);
 				LgiTrace("LWindow::SetFocus(%s, %s) on delete\n",
 					_Ctrl.Get(),
 					TypeName);

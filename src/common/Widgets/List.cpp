@@ -20,9 +20,6 @@
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/CssTools.h"
 
-// Debug defines
-#define DEBUG_EDIT_LABEL				1
-
 // Number of pixels you have to move the mouse until a drag is initiated.
 #define DRAG_THRESHOLD					4
 

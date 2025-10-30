@@ -145,6 +145,8 @@ public:
 	LItemEdit(LView *parent, LItem *item, int index, int selstart, int selend);
 	~LItemEdit();
 	
+	const char *GetClass() override { return "LItemEdit"; }
+	
 	LItem *GetItem();
 	void OnPaint(LSurface *pDC) override;
 	int OnNotify(LViewI *v, const LNotification &n) override;
@@ -153,6 +155,10 @@ public:
 
 	bool OnKey(LKey &k) override;
 	void OnFocus(bool f) override;
+	bool Name(const char *n) override;
+	bool NameW(const char16 *n) override;
+	const char *Name() override;
+	const char16 *NameW() override;
 };
 
 /// Item container column

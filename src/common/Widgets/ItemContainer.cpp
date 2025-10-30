@@ -23,6 +23,10 @@
 	typedef BOOL (__stdcall *_SetLayeredWindowAttributes)(HWND hwnd, COLORREF crKey, BYTE bAlpha, DWORD dwFlags);
 #endif
 
+// Debug defines
+#define DEBUG_EDIT_LABEL					0
+
+// Classes
 class LItemColumnPrivate
 {
 	LDisplayString *Txt = NULL;
@@ -1243,17 +1247,10 @@ public:
 class LItemEditPrivate
 {
 public:
-	LItem *Item;
-	LEdit *Edit;
-	int Index;
-	bool Esc;
-
-	LItemEditPrivate()
-	{
-		Esc = false;
-		Item = 0;
-		Index = 0;
-	}
+	LItem *Item = nullptr;
+	LEdit *Edit = nullptr;
+	int Index = 0;
+	bool Esc = false;
 };
 
 LItemEdit::LItemEdit(LView *parent, LItem *item, int index, int SelStart, int SelEnd)
@@ -1447,5 +1444,25 @@ LMessage::Result LItemEdit::OnEvent(LMessage *Msg)
 	}
 
 	return LPopup::OnEvent(Msg);
+}
+
+bool LItemEdit::Name(const char *n)
+{
+	return d->Edit ? d->Edit->Name(n) : false;
+}
+
+bool LItemEdit::NameW(const char16 *n)
+{
+	return d->Edit ? d->Edit->NameW(n) : false;
+}
+
+const char *LItemEdit::Name()
+{
+	return d->Edit ? d->Edit->Name() : nullptr;
+}
+
+const char16 *LItemEdit::NameW()
+{
+	return d->Edit ? d->Edit->NameW() : nullptr;
 }
 
