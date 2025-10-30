@@ -205,9 +205,14 @@ struct AppPriv
 	#endif
 	
 	AppPriv() :
-		Opts(LOptionsFile::DesktopMode, AppName),
-		sLog(LStructuredLog::TFile, "Lvc.slog")
+		Opts(LOptionsFile::DesktopMode, AppName),		
+		#if 1 // network structured logging:
+			sLog(LStructuredLog::TNetworkEndpoint, LStructuredLog::sDefaultEndpoint, true)
+		#else // file structured logging:
+			sLog(LStructuredLog::TFile, "Lvc.slog")
+		#endif
 	{		
+		sLog.Clear();
 	}	
 	~AppPriv();
 

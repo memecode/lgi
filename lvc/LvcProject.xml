@@ -101,9 +101,11 @@ resources
 			<SystemIncludes>
 				<Linux>
 					<Debug>/usr/include/gstreamer-1.0
-`pkg-config --cflags gtk+-3.0`</Debug>
+`pkg-config --cflags gtk+-3.0`
+/usr/include/libssh</Debug>
 					<Release>/usr/include/gstreamer-1.0
-`pkg-config --cflags gtk+-3.0`</Release>
+`pkg-config --cflags gtk+-3.0`
+/usr/include/libssh</Release>
 				</Linux>
 			</SystemIncludes>
 			<Libraries>

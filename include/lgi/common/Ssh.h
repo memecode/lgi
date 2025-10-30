@@ -682,68 +682,143 @@ public:
 		if (!To || !From)
 			return LError(LErrorInvalidParam);
 
-		ssh_scp Scp = ssh_scp_new(Ssh, SSH_SCP_READ, From);
-		if (!Scp)
-		{
-			Log->Print("%s:%i - ssh_scp_new failed.\n", _FL);
-			return LError(LErrorNoMem, "ssh_scp_new failed");
-		}
-
 		LError ret(LErrorNone);
-		ssh_set_blocking(Ssh, true); // scp doesn't seem to like non-blocking
-		auto r = ssh_scp_init(Scp);
-		if (r != SSH_OK)
-		{
-			ERR_MSG("ssh_scp_init failed with %i", r);
-		}
-		else
-		{
-			size_t BufLen = 1 << 20;
-			LArray<char> Buf(BufLen);
-			uint64_t i = 0;
-			IoProgress Meter(this);
 
-			r = ssh_scp_pull_request(Scp);
-			if (r == SSH_SCP_REQUEST_WARNING)
+		#if 1 // New sftp code:
+		
+			auto sftp = sftp_new(Ssh);
+			if (!sftp)
 			{
-				auto warn = ssh_scp_request_get_warning(Scp);
-				ret.Set(LErrorPathNotFound, warn);
+				Log->Print("%s:%i - sftp_new failed.\n", _FL);
+				return LError(LErrorNoMem, "sftp_new failed");
 			}
-			else if (r != SSH_SCP_REQUEST_NEWFILE)
+			
+			auto rc = sftp_init(sftp);
+			if (rc != SSH_OK)
 			{
-				ERR_MSG("ssh_scp_pull_request failed: %i", r);
+				Log->Print("%s:%i - sftp_init failed.\n", _FL);
+				ret.Set(LErrorNoMem, "sftp_init failed");
+			}
+			else
+			{			
+				auto file = sftp_open(sftp, From, O_RDONLY, 0);
+				if (!file)
+				{
+					Log->Print("%s:%i - sftp_open(%s) failed.\n", _FL, From);
+					ret.Set(LErrorNoMem, "sftp_open failed");
+				}
+				else
+				{
+					if (auto stat = sftp_fstat(file))
+					{
+						size_t BufLen = 1 << 20;
+						LArray<char> Buf(BufLen);
+						uint64_t i = 0;
+						IoProgress Meter(this);
+						
+						Meter.SetLength(stat->size);
+						
+						while (!CancelObj->IsCancelled() && i < stat->size)
+						{
+							auto rd = sftp_read(file, Buf.AddressOf(), Buf.Length());
+							if (rd <= 0)
+								break;
+								
+							auto wr = To->Write(Buf.AddressOf(), rd);
+							if (wr < rd)
+							{
+								Log->Print("%s:%i - Write failed.\n", _FL);
+								ret.Set(LErrorIoFailed, "write failed.");
+								break;
+							}
+
+							i += rd;
+							Meter.Value(i);
+						}
+						
+						if (i < stat->size)
+						{
+							Log->Print("%s:%i - Incomplete download.\n", _FL);
+							ret.Set(LErrorIoFailed, "incomplete download.");
+						}
+					}
+					else
+					{
+						Log->Print("%s:%i - sftp_fstat failed.\n", _FL);
+						ret.Set(LErrorNoMem, "sftp_fstat failed");
+					}
+
+					sftp_close(file);
+				}
+			}
+			
+			sftp_free(sftp);
+		
+		#else // Deprecated scp code:
+
+			ssh_scp Scp = ssh_scp_new(Ssh, SSH_SCP_READ, From);
+			if (!Scp)
+			{
+				Log->Print("%s:%i - ssh_scp_new failed.\n", _FL);
+				return LError(LErrorNoMem, "ssh_scp_new failed");
+			}
+
+			ssh_set_blocking(Ssh, true); // scp doesn't seem to like non-blocking
+			auto r = ssh_scp_init(Scp);
+			if (r != SSH_OK)
+			{
+				ERR_MSG("ssh_scp_init failed with %i", r);
 			}
 			else
 			{
-				auto Len = ssh_scp_request_get_size64(Scp);
-				ssh_scp_accept_request(Scp);
+				size_t BufLen = 1 << 20;
+				LArray<char> Buf(BufLen);
+				uint64_t i = 0;
+				IoProgress Meter(this);
 
-				// Log->Print("%s:%i - Downloading %s...\n", _FL, From);
-				Meter.SetLength(Len);
-
-				while (!CancelObj->IsCancelled() && i < Len)
+				r = ssh_scp_pull_request(Scp);
+				if (r == SSH_SCP_REQUEST_WARNING)
 				{
-					auto rd = ssh_scp_read(Scp, Buf.AddressOf(), Buf.Length());
-					if (rd <= 0)
-						break;
-					auto wr = To->Write(Buf.AddressOf(), rd);
-					if (wr < rd)
+					auto warn = ssh_scp_request_get_warning(Scp);
+					ret.Set(LErrorPathNotFound, warn);
+				}
+				else if (r != SSH_SCP_REQUEST_NEWFILE)
+				{
+					ERR_MSG("ssh_scp_pull_request failed: %i", r);
+				}
+				else
+				{
+					auto Len = ssh_scp_request_get_size64(Scp);
+					ssh_scp_accept_request(Scp);
+
+					// Log->Print("%s:%i - Downloading %s...\n", _FL, From);
+					Meter.SetLength(Len);
+
+					while (!CancelObj->IsCancelled() && i < Len)
 					{
-						Log->Print("%s:%i - Write failed.\n", _FL);
-						break;
+						auto rd = ssh_scp_read(Scp, Buf.AddressOf(), Buf.Length());
+						if (rd <= 0)
+							break;
+						auto wr = To->Write(Buf.AddressOf(), rd);
+						if (wr < rd)
+						{
+							Log->Print("%s:%i - Write failed.\n", _FL);
+							break;
+						}
+
+						i += rd;
+						Meter.Value(i);
 					}
 
-					i += rd;
-					Meter.Value(i);
+					bool status = i == Len;
+					// Log->Print("%s:%i - Download %s.\n", _FL, status ? "Successful" : "Error");
 				}
-
-				bool status = i == Len;
-				// Log->Print("%s:%i - Download %s.\n", _FL, status ? "Successful" : "Error");
 			}
-		}
 
-		ssh_scp_close(Scp);
-		ssh_scp_free(Scp);
+			ssh_scp_close(Scp);
+			ssh_scp_free(Scp);
+			
+		#endif
 
 		return ret;
 	}
@@ -762,67 +837,146 @@ public:
 
 	LError UploadFile(const char *To, LStream *From)
 	{
-		LError Err(LErrorFuncFailed);
-
 		if (!To || !From)
 			return LError(LErrorInvalidParam);
 
 		// Write the file...
+		LError ret(LErrorNone);
 		auto Parts = LString(To).RSplit("/", 1);
 		
-		ssh_set_blocking(Ssh, true); // scp doesn't seem to like non-blocking
-		ssh_scp Scp = ssh_scp_new(Ssh, SSH_SCP_WRITE, Parts[0]);
-		if (!Scp)
-		{
-			Log->Print("%s:%i - ssh_scp_new failed.\n", _FL);
-			return LError(LErrorNoMem);
-		}
-
-		auto r = ssh_scp_init(Scp);
-		if (r == SSH_OK)
-		{
-			auto length = From->GetSize();
-			r = ssh_scp_push_file(Scp, To, length, 0644);
-			if (r == SSH_OK)
+		#if 1 // New sftp code:
+		
+			auto sftp = sftp_new(Ssh);
+			if (!sftp)
 			{
-				size_t BufLen = 128<<10;
-				LArray<char> Buf(BufLen);
-				int64_t i = 0;
-				IoProgress Meter(this);
-				Meter.SetLength(length);
-
-				Log->Print("%s:%i - Writing %s.\n", _FL, LFormatSize(length).Get());
-				for (i=0; !CancelObj->IsCancelled() && i<length; )
-				{
-					auto rd = From->Read(Buf.AddressOf(), Buf.Length());
-					if (rd <= 0)
-						break;
-					r = ssh_scp_write(Scp, Buf.AddressOf(), rd);
-					if (r != S_OK)
-					{
-						Log->Print("%s:%i - ssh_scp_write failed.\n", _FL);
-						break;
-					}
-
-					i += rd;
-					Meter.Value(i);
-				}
-
-				Meter.Value(i);
-				Err = i == length ? LErrorNone : LErrorIoFailed;
-				Log->Print("%s:%i - Upload: %s.\n", _FL, Err ? "Error" : "Ok");
+				Log->Print("%s:%i - sftp_new failed.\n", _FL);
+				return LError(LErrorNoMem, "sftp_new failed");
+			}
+			
+			auto rc = sftp_init(sftp);
+			if (rc != SSH_OK)
+			{
+				Log->Print("%s:%i - sftp_init failed.\n", _FL);
+				ret.Set(LErrorNoMem, "sftp_init failed");
 			}
 			else
-			{
-				Log->Print("%s:%i - ssh_scp_push_file(%s,%" PRIi64 ") failed with: %i.\n", _FL, To, length, r);
+			{			
+				auto file = sftp_open(sftp, To, O_WRONLY, 0);
+				if (!file)
+				{
+					Log->Print("%s:%i - sftp_open(%s) failed.\n", _FL, To);
+					ret.Set(LErrorNoMem, "sftp_open failed");
+				}
+				else
+				{
+					auto inSize = From->GetSize();
+					if (inSize >= 0)
+					{
+						size_t BufLen = 1 << 20;
+						LArray<char> Buf(BufLen);
+						uint64_t i = 0;
+						IoProgress Meter(this);
+						
+						Meter.SetLength(inSize);
+						
+						while (!CancelObj->IsCancelled() && i < inSize)
+						{
+							auto remaining = inSize - i;
+							auto rd = From->Read(Buf.AddressOf(), MIN(remaining, Buf.Length()));
+							if (rd <= 0)
+							{
+								Log->Print("%s:%i - Read failed.\n", _FL);
+								ret.Set(LErrorIoFailed, "read failed.");
+								break;
+							}
+						
+							auto wr = sftp_write(file, Buf.AddressOf(), rd);
+							if (wr < rd)
+							{
+								Log->Print("%s:%i - Write failed.\n", _FL);
+								ret.Set(LErrorIoFailed, "write failed.");
+								break;
+							}
+								
+							i += rd;
+							Meter.Value(i);
+						}
+						
+						if (i < inSize && !ret)
+						{
+							Log->Print("%s:%i - Incomplete download.\n", _FL);
+							ret.Set(LErrorIoFailed, "incomplete download.");
+						}
+					}
+					else
+					{
+						Log->Print("%s:%i - invalid input file size.\n", _FL);
+						ret.Set(LErrorNoMem, "invalid input file size");
+					}
+
+					sftp_close(file);
+				}
 			}
-		}
-		else Log->Print("%s:%i - ssh_scp_init failed with %i\n", _FL, r);
+			
+			sftp_free(sftp);
+		
+		#else // Old scp code:
+		
+			ssh_set_blocking(Ssh, true); // scp doesn't seem to like non-blocking
+			ssh_scp Scp = ssh_scp_new(Ssh, SSH_SCP_WRITE, Parts[0]);
+			if (!Scp)
+			{
+				Log->Print("%s:%i - ssh_scp_new failed.\n", _FL);
+				return LError(LErrorNoMem);
+			}
 
-		ssh_scp_close(Scp);
-		ssh_scp_free(Scp);
+			auto r = ssh_scp_init(Scp);
+			if (r == SSH_OK)
+			{
+				auto length = From->GetSize();
+				r = ssh_scp_push_file(Scp, To, length, 0644);
+				if (r == SSH_OK)
+				{
+					size_t BufLen = 128<<10;
+					LArray<char> Buf(BufLen);
+					int64_t i = 0;
+					IoProgress Meter(this);
+					Meter.SetLength(length);
 
-		return Err;
+					Log->Print("%s:%i - Writing %s.\n", _FL, LFormatSize(length).Get());
+					for (i=0; !CancelObj->IsCancelled() && i<length; )
+					{
+						auto rd = From->Read(Buf.AddressOf(), Buf.Length());
+						if (rd <= 0)
+							break;
+						r = ssh_scp_write(Scp, Buf.AddressOf(), rd);
+						if (r != S_OK)
+						{
+							Log->Print("%s:%i - ssh_scp_write failed.\n", _FL);
+							break;
+						}
+
+						i += rd;
+						Meter.Value(i);
+					}
+
+					Meter.Value(i);
+					Err = i == length ? LErrorNone : LErrorIoFailed;
+					Log->Print("%s:%i - Upload: %s.\n", _FL, Err ? "Error" : "Ok");
+				}
+				else
+				{
+					Log->Print("%s:%i - ssh_scp_push_file(%s,%" PRIi64 ") failed with: %i.\n", _FL, To, length, r);
+				}
+			}
+			else Log->Print("%s:%i - ssh_scp_init failed with %i\n", _FL, r);
+
+			ssh_scp_close(Scp);
+			ssh_scp_free(Scp);
+			
+		#endif
+
+		return ret;
 	}
 
 	LAutoPtr<SshConsole> CreateConsole(bool createShell = true)

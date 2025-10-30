@@ -90,10 +90,13 @@ LSsh::SshConsole *SshConnection::GetConsole()
 	}
 	if (Connected && !console)
 	{
-		console = CreateConsole();
-		
-		// Get log in preamble
-		WaitPrompt(console);
+		if (console = CreateConsole())
+		{		
+			// Get log in preamble
+			Log->Print("Ssh: waiting for prompt '%s'\n", Prompt.Get());
+			WaitPrompt(console);
+		}
+		else Log->Print("Ssh error: no console?\n");
 	}
 	return console;
 }
@@ -106,11 +109,6 @@ public:
 	ProgressListItem(int64_t mx = 100) : maximum(mx)
 	{
 		v = 0;
-	}
-
-	~ProgressListItem()
-	{
-		int asd=0;
 	}
 
 	int64_t Value() { return v; }
@@ -233,6 +231,7 @@ SSH_LOG("waitPrompt data:", rd, tmp);
 		auto now = LCurrentTime();
 		if (now - LastReadTs > 4000)
 		{
+			LastReadTs = now; // no point spamming the log
 			auto sz = out.GetSize();
 SSH_LOG("waitPrompt out:", sz, &out);
 			auto last = LastLine(out);
