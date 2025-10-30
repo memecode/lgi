@@ -192,7 +192,7 @@ bool LView::_Mouse(LMouse &m, bool Move)
 	else
 	{
 		// Convert root NSView coords to _Over coords
-		auto t = WindowFromPoint(m.x, m.y);
+		auto t = ViewFromPoint(m);
 		if (t)
 		{
 			/*
@@ -943,24 +943,21 @@ bool LView::Detach()
 		_Window = NULL;
 	}
 
-	if (d->Parent)
+	if (auto parent = d->Parent)
 	{
 		// Remove the view from the parent
 		int D = 0;
-		while (d->Parent->HasView(this))
+		while (parent->HasView(this))
 		{
-			d->Parent->DelView(this);
+			parent->DelView(this);
 			D++;
 		}
 
 		if (D > 1)
 		{
 			printf("%s:%i - Error: View %s(%p) was in %s(%p) list %i times.\n",
-				_FL, GetClass(), this, d->Parent->GetClass(), d->Parent, D);
+				_FL, GetClass(), this, parent->GetClass(), parent, D);
 		}
-
-		d->Parent->OnChildrenChanged(this, false);
-		d->Parent = NULL;
 	}
 
 	Status = true;

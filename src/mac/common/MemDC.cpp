@@ -731,6 +731,17 @@ void LMemDC::SetOrigin(LPoint pt)
 	LSurface::SetOrigin(pt);
 }
 
+bool LMemDC::GetClient(LRect *c)
+{
+	if (!c)
+		return false;
+	if (d->Client.Length())
+		*c = d->Client.Last();
+	else
+		*c = Bounds();
+	return true;
+}
+
 void LMemDC::SetClient(LRect *c)
 {
 	if (c)

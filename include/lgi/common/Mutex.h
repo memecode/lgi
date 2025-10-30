@@ -188,7 +188,7 @@ public:
 	
 	bool Set(T *newObj)
 	{
-		Auto lck(_FL);
+		Auto lck(_FL, this);
 		if (!lck)
 			return false;
 		if (Own)
