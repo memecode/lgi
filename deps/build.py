@@ -63,7 +63,7 @@ elif platform.system() == "Linux":
                 "libgtk3.0-dev",
                 "libgtk-3-dev",
                 "libgstreamer1.0-dev",
-                "libappindicator3-dev",
+                "libayatana-appindicator3-1",
                 "libssh-dev",
                 "cmake",
                 "ninja-build" ]

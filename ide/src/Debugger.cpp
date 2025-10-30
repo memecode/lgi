@@ -6,7 +6,7 @@
 */
 
 #define DEBUG_STOP_ON_GTK_ERROR	0
-#define DEBUG_STRUCT_LOGGING	0
+#define DEBUG_STRUCT_LOGGING	1
 static bool DEBUG_SHOW_GDB_IO = false;
 #define ECHO_GDB_OUTPUT			0
 #define ERR_CTX					__FUNCTION__, _FL
@@ -44,7 +44,7 @@ const char sPrompt[] = "(gdb) ";
 #endif
 
 // Breakpoint logging
-#if 1
+#if 0
 #define BP_LOG(...)	printf(__VA_ARGS__)
 #else
 #define BP_LOG(...)
@@ -1272,6 +1272,10 @@ public:
 
 	void UnloadInternal(TStatusCb cb)
 	{
+		#if DEBUG_STRUCT_LOGGING
+		Log->Log("UnloadInternal called");
+		#endif
+		
 		Cmd("q", false, [this, cb](auto &err)
 		{
 			SetState(false, false);
