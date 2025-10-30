@@ -191,6 +191,16 @@ LPopupNotification *LPopupNotification::Message(LWindow *ref, LString msg)
 	if (!ref)
 		return NULL;
 
+	if (!LAppInst->InThread())
+	{
+		LAppInst->RunCallback([ref, msg]()
+			{
+				LPopupNotification::Message(ref, msg);
+			},
+			_FL);
+		return nullptr;
+	}
+	
 	auto w = PopupNotificationFactory.map.Find(ref);
 	if (w)
 	{

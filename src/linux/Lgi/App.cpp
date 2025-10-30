@@ -570,9 +570,15 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 			}
 		}
 	}
-	else
+	
+	if (auto callbacks = i->d->callbacks.Lock(_FL))
 	{
-		// printf("IdleWrapper start no lock\n");
+		for (auto &cb: *callbacks.Get())
+		{
+			if (cb->cb)
+				cb->cb();
+		}
+		callbacks->DeleteObjects();
 	}
 	
 	// printf("IdleWrapper end\n");
@@ -581,6 +587,23 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 }
 
 static GtkIdle idle = {0};
+
+bool LApp::RunCallback(std::function<void()> Callback, const char *file, int line)
+{
+	auto cb = d->callbacks.Lock(file, line);
+	if (!cb)
+		return false;
+		
+	if (auto cb = new LAppPrivate::TCallback)
+	{
+		cb->file = file;
+		cb->line = line;
+		cb->cb = std::move(Callback);
+	}
+	else return false;
+	return true;
+}
+
 bool LApp::Run(OnIdleProc IdleCallback, void *IdleParam)
 {
 	if (!InThread())

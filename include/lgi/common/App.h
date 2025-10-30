@@ -250,6 +250,9 @@ public:
 		void *IdleParam = NULL
 	) override;
 	
+	/// Run a callback in the GUI thread:
+	bool RunCallback(std::function<void()> Callback, const char *file, int line);
+	
 	/// Event called to process the command line
 	void OnCommandLine() override;
 	

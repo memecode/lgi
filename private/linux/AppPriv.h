@@ -65,10 +65,20 @@ public:
 	LVariant ClipData;
 	LHashTbl<IntKey<int>, ::LVariant*> ClipNotify;
 
+	// Callback support
+	struct TCallback {
+		const char *file;
+		int line;
+		std::function<void()> cb;
+	};
+	using TCallbackArr = LArray<TCallback*>;
+	LThreadSafeInterface<TCallbackArr> callbacks;
+
 	LAppPrivate(LApp *a) : Args(0, 0), Owner(a)
 		#if HAS_LIB_MAGIC
 		, MagicLock("MagicLock")
 		#endif
+		, callbacks(new TCallbackArr)
 	{
 		GuiThread = LCurrentThreadHnd();
 		GuiThreadId = LCurrentThreadId();
