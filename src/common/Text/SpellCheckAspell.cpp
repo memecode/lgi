@@ -1218,8 +1218,14 @@ public:
 					{
 						const char *Err = aspell_error_message(PossibleErr);
 						LgiTrace("Aspell Checker: %s\n", Err);
-						if (Err &&
-							stristr(Err, "No word lists can be found") &&
+						if (Err
+							&&
+							(
+								Stristr(Err, "No word lists can be found")
+								||
+								Stristr(Err, "can not be opened for reading")
+							)
+							&&
 							Dictionary)
 						{
 							OnMissingDictionary();
