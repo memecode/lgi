@@ -1270,6 +1270,9 @@
     <ClInclude Include="..\include\lgi\common\UdpTransport.h">
       <Filter>Source Files\Network\CommsBus</Filter>
     </ClInclude>
+    <ClInclude Include="..\private\win\AppPriv.h">
+      <Filter>Source Files\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\src\win\Lgi.natvis">

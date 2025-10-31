@@ -861,6 +861,32 @@ bool LApp::Run(OnIdleProc IdleCallback, void *IdleParam)
 	return Msg.message != WM_QUIT;
 }
 
+class LAppCallbackWnd : public LWindow
+{
+public:
+	const char *GetClass() override { return "LAppCallbackWnd"; }
+	LAppCallbackWnd()
+	{
+		// Create but don't make visible...
+		Name(GetClass());
+		Attach(nullptr);
+	}
+};
+
+bool LApp::RunCallback(std::function<void()> callback, const char *file, int line)
+{
+	LMutex::Auto lck(d, _FL);
+	if (lck)
+	{
+		if (!d->callbackWnd)
+			d->callbackWnd.Reset(new LAppCallbackWnd);
+		if (d->callbackWnd)
+			return d->callbackWnd->RunCallback(callback, file, line);
+	}
+	
+	return false;
+}
+
 // Old yield code... don't use. Just here for reference.
 bool LYield(bool &QuitReceived)
 {

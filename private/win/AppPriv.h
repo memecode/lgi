@@ -4,7 +4,7 @@
 #include "lgi/common/Json.h"
 #include "lgi/common/FontCache.h"
 
-class LAppPrivate
+class LAppPrivate : public LMutex
 {
 public:
 	// Common
@@ -18,6 +18,7 @@ public:
 	int LinuxWine = -1;
 	LString Mime, ProductId;
 	bool ThemeAware = true;
+	LAutoPtr<LWindow> callbackWnd; // lock before using
 
 	/// Any fonts needed for styling the elements
 	LAutoPtr<LFontCache> FontCache;
@@ -27,7 +28,9 @@ public:
 	LApp::ClassContainer Classes;
 	LSymLookup *SymLookup = NULL;
 
-	LAppPrivate(LApp *owner) : Owner(owner)
+	LAppPrivate(LApp *owner)
+		: LMutex("LAppPrivate.Lock")
+		, Owner(owner)
 	{
 		auto b = DuplicateHandle(	GetCurrentProcess(),
 									GetCurrentThread(),
