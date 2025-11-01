@@ -1,8 +1,16 @@
 #pragma once
 
 #include "lgi/common/DisplayString.h"
+#if LINUX
+#include "lgi/common/Popup.h"
+#endif
 
-class LgiClass LPopupNotification : public LWindow
+class LgiClass LPopupNotification :
+	#if LINUX
+	public LPopup
+	#else
+	public LWindow
+	#endif
 {
 	constexpr static int Border = 10;	// px
 	constexpr static int ShowMs = 4000; // milliseconds

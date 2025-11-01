@@ -217,22 +217,25 @@ LPopupNotification *LPopupNotification::Message(LWindow *ref, LString msg)
 }
 
 LPopupNotification::LPopupNotification(LWindow *ref, LString msg)
+	#if LINUX
+	: LPopup(ref)
+	#endif
 {
 	#if 1
-	cFore = cBack = cBorder = L_TOOL_TIP;
-	if (cFore.ToHLS())
-	{
-		cBorder.SetHLS(cBorder.GetH(), (int)(cBorder.GetL()*0.6), cBorder.GetS());
-		cFore.SetHLS  (cFore.GetH(),   (int)(cFore.GetL()*0.4),   cFore.GetS());
-	}
-	else
-	{
-		cBorder = cBorder.Mix(LColour::Black, 0.05f);
-		cFore = cFore.Mix(LColour::Black, 0.5f);
-	}
+		cFore = cBack = cBorder = L_TOOL_TIP;
+		if (cFore.ToHLS())
+		{
+			cBorder.SetHLS(cBorder.GetH(), (int)(cBorder.GetL()*0.6), cBorder.GetS());
+			cFore.SetHLS  (cFore.GetH(),   (int)(cFore.GetL()*0.4),   cFore.GetS());
+		}
+		else
+		{
+			cBorder = cBorder.Mix(LColour::Black, 0.05f);
+			cFore = cFore.Mix(LColour::Black, 0.5f);
+		}
 	#else
-	cBorder = cFore = LColour(0xd4, 0xb8, 0x62);
-	cBack = LColour(0xf7, 0xf0, 0xd5);
+		cBorder = cFore = LColour(0xd4, 0xb8, 0x62);
+		cBack = LColour(0xf7, 0xf0, 0xd5);
 	#endif
 
 	SetTitleBar(false);
@@ -293,10 +296,10 @@ void LPopupNotification::Init()
 	SetAlwaysOnTop(true);
 	SetPulse(500);		
 	if (!IsAttached())
-		Attach(0);
+		Attach(nullptr);
 	Visible(true);
 	
-	printf("%s:%i - showing pop note at %s: %s\n",
+	printf("%s:%i - showing LPopupNotification at %s: %s\n",
 		_FL, pos.GetStr(), GetMsgs().Get());
 }
 
