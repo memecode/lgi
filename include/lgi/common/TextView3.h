@@ -411,7 +411,7 @@ public:
 	virtual void DoContextMenu(LMouse &m);
 	virtual bool OnStyleClick(LStyle *style, LMouse *m);
 	virtual bool OnStyleMenu(LStyle *style, LSubMenu *m);
-	virtual void OnStyleMenuClick(LStyle *style, int i);
+	virtual void OnStyleMenuClick(LStyle *style, int menuId);
 };
 
 #endif

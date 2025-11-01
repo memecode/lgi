@@ -3602,10 +3602,10 @@ void LTextView3::Redo()
 void LTextView3::DoContextMenu(LMouse &m)
 {
 	LSubMenu RClick;
-	LAutoString ClipText;
+	LString ClipText;
 	{
 		LClipBoard Clip(this);
-		ClipText.Reset(NewStr(Clip.Text()));
+		ClipText = Clip.Text();
 	}
 
 	auto s = HitStyle(HitText(m.x, m.y, true));
@@ -3617,7 +3617,7 @@ void LTextView3::DoContextMenu(LMouse &m)
 
 	RClick.AppendItem(LLoadString(L_TEXTCTRL_CUT, "Cut"), IDM_CUT, HasSelection());
 	RClick.AppendItem(LLoadString(L_TEXTCTRL_COPY, "Copy"), IDM_COPY, HasSelection());
-	RClick.AppendItem(LLoadString(L_TEXTCTRL_PASTE, "Paste"), IDM_PASTE, ClipText != 0);
+	RClick.AppendItem(LLoadString(L_TEXTCTRL_PASTE, "Paste"), IDM_PASTE, !ClipText.IsEmpty());
 	RClick.AppendSeparator();
 
 	RClick.AppendItem("Copy All", IDM_COPY_ALL, true);
@@ -3807,7 +3807,7 @@ bool LTextView3::OnStyleMenu(LStyle *style, LSubMenu *m)
 	return false;
 }
 
-void LTextView3::OnStyleMenuClick(LStyle *style, int i)
+void LTextView3::OnStyleMenuClick(LStyle *style, int menuId)
 {
 	switch (style->Owner)
 	{
@@ -3815,7 +3815,7 @@ void LTextView3::OnStyleMenuClick(LStyle *style, int i)
 		{
 			LString s(Text + style->Start, style->Len);
 
-			switch (i)
+			switch (menuId)
 			{
 				case IDM_NEW:
 				case IDM_OPEN:
