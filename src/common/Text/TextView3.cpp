@@ -1413,7 +1413,8 @@ void LTextView3::PourStyle(size_t Start, ssize_t EditSize)
 		{
 			if (EditSize > 0)
 			{
-				if (s->Overlap(Start, EditSize < 0 ? -EditSize : EditSize))
+				LRange r(Start, EditSize < 0 ? -EditSize : EditSize);
+				if (s->Overlap(r))
 				{
 					Style.Delete(s);
 					continue;
@@ -1421,7 +1422,8 @@ void LTextView3::PourStyle(size_t Start, ssize_t EditSize)
 			}
 			else
 			{
-				if (s->Overlap(Start, -EditSize))
+				LRange r(Start, -EditSize);
+				if (s->Overlap(r))
 				{
 					Style.Delete(s);
 					continue;

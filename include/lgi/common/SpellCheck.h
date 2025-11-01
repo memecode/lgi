@@ -48,20 +48,23 @@ public:
 
 	struct Params
 	{
-		LOptionsFile::PortableType IsPortable;
+		LOptionsFile::PortableType IsPortable = LOptionsFile::UnknownMode;
 		LString OptionsPath;
 		LString Lang, Dict;
-		LCapabilityTarget *CapTarget;
-		
-		Params()
-		{
-			CapTarget = NULL;
-		}
+		LCapabilityTarget *CapTarget = nullptr;
 	};
 	
 	struct SpellingError : public LRange
 	{
 		LString::Array Suggestions;
+		
+		LString ToString() const
+		{
+			return LString::Fmt("range=%s "
+								"suggest=%s",
+								GetStr(),
+								LString(",").Join(Suggestions).Get());
+		}
 	};
 	
 	struct CheckText : public LRange
@@ -72,11 +75,20 @@ public:
 		// Application specific data
 		LArray<LVariant> User;
 		
-		CheckText()
+		LString ToString() const
 		{
+			LString::Array a;
+			for (size_t i=0; i<Errors.Length(); i++)
+				a.Add(Errors.ItemAt(i).ToString());
+			
+			return LString::Fmt("range=%s "
+								"txt='%s' "
+								"errs=%s",
+								GetStr(),
+								Text.Get(),
+								LString(",").Join(a).Get());
 		}
 	};
-
 
 	LSpellCheck(LString Name) : LEventTargetThread(Name) {}
 	virtual ~LSpellCheck() {}

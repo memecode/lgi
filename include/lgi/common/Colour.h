@@ -182,7 +182,7 @@ public:
 	uint32_t GetNative();
 	
 	// String IO
-	char *GetStr();
+	char *GetStr() const;
 	bool SetStr(const char *Str);
 	
 	#ifdef HAIKU

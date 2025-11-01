@@ -100,6 +100,12 @@ struct LRange
 		return Start >= 0 && Len > 0;
 	}
 
+	void Empty()
+	{			
+		Start = 0;
+		Len = 0;
+	}
+
 	operator bool() const
 	{
 		return Start >= 0 && Len > 0;
@@ -135,7 +141,7 @@ struct LRange
 	}
 
 	#ifdef LPrintfSSizeT
-	const char *GetStr()
+	const char *GetStr() const
 	{
 		static const int strs = 4;
 		static char s[strs][32];

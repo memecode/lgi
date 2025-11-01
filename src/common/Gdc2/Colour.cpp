@@ -526,18 +526,22 @@ uint32_t LColour::GetNative()
 	return c32();
 }
 
-char *LColour::GetStr()
+char *LColour::GetStr() const
 {
-	static char Buf[4][32];
+	#define STR_BUFS	8
+	#define BUF_LEN		32
+	static char Buf[STR_BUFS][BUF_LEN];
 	static int Idx = 0;
 	int b = Idx++;
-	if (Idx >= 4) Idx = 0;
+	if (Idx >= STR_BUFS)
+		Idx = 0;
+	
 	switch (space)
 	{
 		case System32BitColourSpace:
 			if (rgb.a == 0xff)
 			{
-				sprintf_s(	Buf[b], 32,
+				sprintf_s(	Buf[b], BUF_LEN,
 							"rgb(%i,%i,%i)",
 							rgb.r,
 							rgb.g,
@@ -545,7 +549,7 @@ char *LColour::GetStr()
 			}
 			else
 			{
-				sprintf_s(	Buf[b], 32,
+				sprintf_s(	Buf[b], BUF_LEN,
 							"rgba(%i,%i,%i,%i)",
 							rgb.r,
 							rgb.g,
@@ -554,21 +558,22 @@ char *LColour::GetStr()
 			}
 			break;
 		case CsIndex8:
-			sprintf_s(	Buf[b], 32,
+			sprintf_s(	Buf[b], BUF_LEN,
 						"index(%i)",
 						index);
 			break;
 		case CsHls32:
-			sprintf_s(	Buf[b], 32,
+			sprintf_s(	Buf[b], BUF_LEN,
 						"hls(%i,%i,%i)",
 						hls.h,
 						hls.l,
 						hls.s);
 			break;
+		case CsNone:
+			sprintf_s(Buf[b], BUF_LEN, "emptyColour");
+			break;
 		default:
-			sprintf_s(	Buf[b], 32,
-						"unknown(%i)",
-						space);
+			sprintf_s(Buf[b], 32, "unknown(%i)", space);
 			break;
 	}
 

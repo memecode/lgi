@@ -13,6 +13,7 @@
 #include "lgi/common/Css.h"
 #include "lgi/common/UnrolledList.h"
 #include "lgi/common/FindReplaceDlg.h"
+#include "lgi/common/Range.h"
 
 // use CRLF as opposed to just LF
 // internally it uses LF only... this is just to remember what to
@@ -54,7 +55,7 @@ public:
 		STYLE_URL,
 	};
 
-	class LStyle
+	class LStyle : public LRange
 	{
 	protected:
 		void RefreshLayout(size_t Start, ssize_t Len);
@@ -67,10 +68,6 @@ public:
 		/// own styles. LTextView3::PourStyle is owner '0', anything else it
 		/// will leave alone.
 		StyleOwners Owner = STYLE_NONE;
-		/// The start index into the text buffer of the region to style.
-		ssize_t Start = 0;
-		/// The length of the styled region
-		ssize_t Len = 0;
 		/// The font to draw the styled text in
 		LFont *Font = nullptr;
 		/// The colour to draw with. If transparent, then the default 
@@ -117,19 +114,19 @@ public:
 			Decor = LCss::TextDecorNone;
 			return *this;
 		}
-
-		void Empty()
-		{			
-			Start = -1;
-			Len = 0;
-		}
-
-		bool Valid()
+		
+		LString ToString() const
 		{
-			return Start >= 0 && Len > 0;
+			return LString::Fmt("range=" LPrintfSSizeT "," LPrintfSSizeT " "
+								"owner=%i "
+								"colours=%s,%s "
+								"decor=%i,%s",
+								Start, Len,
+								(int)Owner,
+								Fore.GetStr(), Back.GetStr(),
+								(int)Decor, DecorColour.GetStr());
+			
 		}
-
-		size_t End() const { return Start + Len; }
 
 		/// \returns true if style is the same
 		bool operator ==(const LStyle &s)
@@ -140,22 +137,6 @@ public:
 					Fore == s.Fore &&
 					Back == s.Back &&
 					Decor == s.Decor;
-		}
-
-		/// Returns true if this style overlaps the position of 's'
-		bool Overlap(LStyle &s)
-		{
-			return Overlap(s.Start, s.Len);
-		}
-
-		/// Returns true if this style overlaps the position of 's'
-		bool Overlap(ssize_t sStart, ssize_t sLen)
-		{
-			if (sStart + sLen - 1 < Start ||
-				sStart >= Start + Len)
-				return false;
-
-			return true;
 		}
 
 		void Union(const LStyle &s)
