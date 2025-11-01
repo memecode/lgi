@@ -286,6 +286,10 @@ void LPopupNotification::Init()
 	}
 
 	auto r = RefWnd->GetPos();
+	#if LINUX
+	r = r.Move(-27, -30);	// Not sure why this is needed, but if the window is fullscreen... 
+							// it moves things back on screen
+	#endif
 	auto Sz = CalcSize();
 
 	LRect pos;
