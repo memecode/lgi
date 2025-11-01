@@ -909,7 +909,14 @@ public:
 		if (Items == 0)
 			return;
 		RandomAccessIter Start(this, 0);
-		RandomAccessIter End(Start, Items-1);
+		RandomAccessIter End(Start,
+			#if WINDOWS
+				// WTF windows... WTF!!!
+				Items
+			#else
+				Items - 1
+			#endif
+			);
 		std::sort
 		(
 			Start, End,
@@ -920,6 +927,31 @@ public:
 			}
 		);
 	}
+
+	static bool UnitTest()
+	{
+		// Lets just CHECK that the Sort(Compare) implementation works correctly....
+		LUnrolledList<int> lst(0);
+		lst.Add(34);
+		lst.Add(23);
+		lst.Add(78);
+		lst.Add(12);
+		lst.Sort([](auto &a, auto &b)
+			{
+				return a - b;
+			});
+		for (int i=0; i<lst.Length()-1; i++)
+		{
+			auto a = lst[i];
+			auto b = lst[i+1];
+			if (a > b)
+			{
+				LAssert(!"Sort failure!?");
+				return false;
+			}
+		}
+		return true;
+	};
 	
 	/// Assign the contents of another list to this one
 	LUnrolledList<T,BlockSize> &operator =(const LUnrolledList<T,BlockSize> &lst)
