@@ -910,7 +910,7 @@ public:
 			return;
 		RandomAccessIter Start(this, 0);
 		RandomAccessIter End(Start,
-			#if WINDOWS
+			#if WINDOWS || MAC
 				// WTF windows... WTF!!!
 				Items
 			#else

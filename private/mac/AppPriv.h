@@ -6,7 +6,7 @@
 
 typedef LArray<LAppInfo*> AppArray;
 
-class LAppPrivate
+class LAppPrivate : public LMutex
 {
 public:
 	LApp *Owner;
@@ -26,11 +26,14 @@ public:
 	LAutoString Mime;
 	LAutoString Name;
 	LAutoString UrlArg;
-	
+	LAutoPtr<LWindow> callbackWnd; // lock before using
+
 	/// Any fonts needed for styling the elements
 	LAutoPtr<LFontCache> FontCache;
 	
-	LAppPrivate(LApp *owner) : Owner(owner)
+	LAppPrivate(LApp *owner) :
+		LMutex("LAppPrivate.lock"),
+		Owner(owner)
 	{
 		NsApp = NULL;
 		RunDepth = 0;
