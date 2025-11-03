@@ -19,25 +19,36 @@
 
 #elif defined __GTK_H__
 
-	#define USE_APPINDICATOR	0
+	/* Change to use:
+	
+		AppIndicator* appind = app_indicator_new("appname", "appname", APP_INDICATOR_CATEGORY_HARDWARE);
+	
+		https://wiki.ubuntu.com/DesktopExperienceTeam/ApplicationIndicators
+	
+		Electron impl:
+			https://github.com/electron/electron/blob/2a94d414f76c8d2025197996aca026f4c87e9f27/shell/browser/ui/tray_icon_linux.cc#L34
+			StatusIconLinuxDbus is impl in chromium: https://github.com/chromium/chromium/blob/main/chrome/browser/ui/views/status_icons/status_icon_linux_dbus.cc#L225
+		
+		org.kde.StatusNotifierWatcher, what is it?
+			https://deepwiki.com/ubuntu/gnome-shell-extension-appindicator/4-status-notifier-watcher
 
-	// Change to use:
-	// AppIndicator* appind = app_indicator_new("appname", "appname", APP_INDICATOR_CATEGORY_HARDWARE);
-	// https://wiki.ubuntu.com/DesktopExperienceTeam/ApplicationIndicators
+		https://github.com/search?q=repo%3AAyatanaIndicators%2Flibayatana-appindicator%20org.kde.StatusNotifierWatcher&type=code
+			NOTIFICATION_WATCHER_DBUS_ADDR
+			
+		Need to call d->Parent callbacks:
+			/// Called when the tray icon menu is about to be displayed.
+			virtual void OnTrayMenu(LSubMenu &m) {}
+			/// Called when the tray icon menu item has been selected.
+			virtual void OnTrayMenuResult(int MenuId) {}		
+	*/
 
 	namespace Gtk {
 		#include <glib.h>
 		#include <gdk-pixbuf/gdk-pixbuf.h>
-		#if USE_APPINDICATOR
-			// sudo apt-get install libayatana-appindicator3-dev
-			#include <libayatana-appindicator/app-indicator.h>
-		#endif
+		// sudo apt-get install libayatana-appindicator3-dev
+		#include <libayatana-appindicator/app-indicator.h>
 	}
 	using namespace Gtk;
-
-	class LTrayIconPrivate;
-	static void tray_icon_on_click(GtkStatusIcon *status_icon, LTrayIconPrivate *d);
-	static void tray_icon_on_menu(GtkStatusIcon *status_icon, guint button, guint activate_time, LTrayIconPrivate *d);
 
 #endif
 
@@ -45,9 +56,9 @@
 class LTrayIconPrivate
 {
 public:
-	LWindow *Parent;	// parent window
-	int64 Val;			// which icon is currently visible
-	bool Visible;
+	LWindow *Parent = nullptr;	// parent window
+	int64 Val = 0;				// which icon is currently visible
+	bool Visible = false;
 
 	#if WINNATIVE
 	
@@ -64,58 +75,22 @@ public:
 		LArray<NSImage*> Icon;
 		LStatusItem *Handler;
 
-	#elif defined(__GTK_H__)
+	#elif LINUX
 	
-		LArray<LSurface*> Images;
-		#if USE_APPINDICATOR
-			GlibWrapper<AppIndicator> appind;
-			typedef LString IconRef; // path to file?
-		#else
-			GlibWrapper<GtkStatusIcon> tray_icon;
-			typedef GdkPixbuf *IconRef;
-		#endif
+		GlibWrapper<AppIndicator> appind;
+		GtkWidget *menuRoot = nullptr;
+		
+		typedef LString IconRef; // path to file?
 		LArray<IconRef> Icon;
-		uint64 LastClickTime;
-		gint DoubleClickTime;
+		uint64 LastClickTime = 0;
+		gint DoubleClickTime = 0;
 	
 		void OnClick()
 		{
-			#if USE_APPINDICATOR
-				if (!appind)
-					return;
-					
-				// LAssert(!"Impl me.");
-			#else
-				if (!tray_icon)
-					return;
-
-				uint64 Now = LCurrentTime();
-				GdkModifierType mask;
-				gint x, y;
+			if (!appind)
+				return;
 				
-				#if 0
-					GdkScreen *s = gtk_status_icon_get_screen(tray_icon);
-					GdkDisplay *dsp = gdk_screen_get_display(s);
-					gdk_display_get_pointer(dsp, &s, &x, &y, &mask);
-				#else
-					auto display = gdk_display_get_default();
-					auto seat = gdk_display_get_default_seat(display);
-					auto device = gdk_seat_get_pointer(seat);
-					gdk_device_get_position (device, NULL, &x, &y);
-					gdouble axes[5] = {0};
-					gdk_device_get_state(device, gdk_get_default_root_window(), axes, &mask);
-				#endif
-				
-				LMouse m;
-				m.x = x;
-				m.y = y;
-				m.SetModifer(mask);
-				m.Left(true);
-				m.Down(true);
-				m.Double(Now - LastClickTime < DoubleClickTime);
-				Parent->OnTrayClick(m);
-				LastClickTime = Now;
-			#endif
+			// LAssert(!"Impl me.");
 		}
 	
 		void OnMenu(guint button, guint activate_time)
@@ -140,8 +115,6 @@ public:
 	LTrayIconPrivate(LWindow *p)
 	{
 		Parent = p;
-		Val = 0;
-		Visible = false;
 		
 		#if WINNATIVE
 		
@@ -164,24 +137,15 @@ public:
 				}
 			}
 		
-		#elif defined(__GTK_H__)
+		#elif LINUX
 
-			GtkSettings *settings = gtk_settings_get_default();
+			auto settings = gtk_settings_get_default();
 			DoubleClickTime = 500;
 			if (settings)
 				g_object_get(G_OBJECT(settings), "gtk-double-click-time", &DoubleClickTime, NULL);
 
 			LastClickTime = 0;
-			#if USE_APPINDICATOR
-				// Wait for icons to be loaded before creating...
-			#else
-				tray_icon = Gtk::gtk_status_icon_new();
-				if (tray_icon)
-				{
-					tray_icon.Connect("activate", G_CALLBACK(tray_icon_on_click), this);
-					tray_icon.Connect("popup-menu", G_CALLBACK(tray_icon_on_menu), this);
-				}
-			#endif
+			// Wait for icons to be loaded before creating...
 		
 		#endif
 	}	
@@ -199,14 +163,7 @@ public:
 			for (auto i: Icon)
 				[i release];
 		
-		#elif defined(__GTK_H__)
-		
-			#if USE_APPINDICATOR
-			#else
-				for (int n=0; n<Icon.Length(); n++)
-					g_object_unref(Icon[n]);
-			#endif
-			Images.DeleteObjects();
+		#elif LINUX
 		
 		#else
 		
@@ -291,7 +248,7 @@ bool LTrayIcon::Load(const TCHAR *Str)
 		[nf release];
 		return img != NULL;
 	
-	#elif defined(__GTK_H__)
+	#elif LINUX
 
 		if (!Str)
 			return false;
@@ -304,30 +261,7 @@ bool LTrayIcon::Load(const TCHAR *Str)
 			return false;
 		}
 
-		#if USE_APPINDICATOR
-
-			d->Icon.Add(File);		
-		
-		#else
-
-			LAutoPtr<LSurface> Ico(GdcD->Load(File));
-			if (!Ico)
-			{
-				LgiTrace("%s:%i - Failed to load '%s'\n", _FL, sStr.Get());
-				return false;
-			}
-
-			Gtk::GdkPixbuf *Pb = Ico->CreatePixBuf();
-			if (!Pb)
-			{
-				LgiTrace("%s:%i - Failed to CreatePixBuf '%s'\n", _FL, sStr.Get());
-				return false;
-			}
-
-			d->Icon.Add(Pb);
-			d->Images.Add(Ico.Release());
-			
-		#endif
+		d->Icon.Add(File);		
 	
 	#else
 	
@@ -375,6 +309,14 @@ bool LTrayIcon::Visible()
 	#endif
 }
 
+void menuMapped(GtkWidget *widget,
+               GdkEvent  *event,
+               gpointer   user_data)
+{
+	printf("menuMapped !!!!\n");
+}
+
+
 void LTrayIcon::Visible(bool v)
 {
 	if (Visible() != v)
@@ -401,7 +343,7 @@ void LTrayIcon::Visible(bool v)
 					int asd=0;
 				}
 			
-			#elif USE_APPINDICATOR
+			#elif LINUX
 				
 				if (!d->Icon.IdxCheck(d->Val))
 				{
@@ -419,50 +361,44 @@ void LTrayIcon::Visible(bool v)
 					static int count = 0;
 					
 					auto id = LString::Fmt("%s-appindicator-%d", name, count++);
-					d->appind = app_indicator_new(id, iconRef, APP_INDICATOR_CATEGORY_COMMUNICATIONS);
+					d->appind = app_indicator_new(id, "indicator-messages", APP_INDICATOR_CATEGORY_COMMUNICATIONS);
 					printf("%s:%i - app_indicator_new(%s, %s) = %p\n",
 						_FL,
 						id.Get(),
 						iconRef.Get(),
 						d->appind.obj);
-				}
-				else
-				{
-					app_indicator_set_icon(d->appind, iconRef);
-				}
-				
-				if (d->appind)
-				{
-					app_indicator_set_title(d->appind, name);
-					app_indicator_set_status(d->appind, APP_INDICATOR_STATUS_ACTIVE);
-					printf("%s:%i - app_indicator_set_status(ACTIVE) called: %i, %s\n",
-						_FL,
-						app_indicator_get_status(d->appind),
-						app_indicator_get_icon(d->appind));
-				}
-				else printf("%s:%i - No app ind.\n", _FL);
-				
-			#elif defined(__GTK_H__)
 
-				if (d->tray_icon)
-				{
-					if (d->Val < 0 || d->Val >= d->Icon.Length())
-						d->Val = 0;
-					if (d->Val < d->Icon.Length())
+					if (d->appind)
 					{
-						LTrayIconPrivate::IconRef Ref = d->Icon[d->Val];
-						if (Ref)
-						{
-							Gtk::gtk_status_icon_set_visible(d->tray_icon, true);
+						app_indicator_set_status(d->appind, APP_INDICATOR_STATUS_ACTIVE);
+						app_indicator_set_icon(d->appind, iconRef);
+						app_indicator_set_title(d->appind, name);
 
-							Gtk::gtk_status_icon_set_from_pixbuf(d->tray_icon, Ref);
-							Gtk::gtk_status_icon_set_tooltip_text(d->tray_icon, LBase::Name());
-						}
+						printf("%s:%i - app_indicator_set_status(ACTIVE) called: %i, %s, %s\n",
+							_FL,
+							app_indicator_get_status(d->appind),
+							app_indicator_get_icon(d->appind),
+							app_indicator_get_title(d->appind));
+							
+						if (!d->menuRoot)
+						{
+							// There must be a menu or the app indicator won't show up.
+							if (d->menuRoot = gtk_menu_new())
+							{
+								auto item = gtk_menu_item_new_with_label("...loading...");
+								gtk_menu_shell_append(GTK_MENU_SHELL(d->menuRoot), item);
+								gtk_widget_show (item);
+
+								// Setup some event to capture the menu being made visible
+								// g_signal_connect(d->menuRoot, "map-event", G_CALLBACK(menuMapped), NULL);
+
+				    			app_indicator_set_menu(d->appind, GTK_MENU(d->menuRoot));
+				    		}
+			    		}
 					}
-					else LgiTrace("%s:%i - No icon to show in tray.\n", _FL);
+					else printf("%s:%i - No app ind.\n", _FL);
 				}
-				else LgiTrace("%s:%i - No tray icon to hide.\n", _FL);
-			
+				
 			#elif LGI_COCOA
 			
 				if (d->StatusItem)
@@ -472,15 +408,6 @@ void LTrayIcon::Visible(bool v)
 					// Force display of the right icon...
 					auto v = d->Val++;
 					Value(v);
-				}
-			
-			#elif defined MAC
-
-				if (!d->Visible)
-				{
-					int64 Ico = d->Val;
-					d->Val = -1;
-					Value(Ico);
 				}
 			
 			#endif
@@ -497,11 +424,7 @@ void LTrayIcon::Visible(bool v)
 
 			#elif LGI_COCOA
 
-			#elif LGI_CARBON
-			
-				RestoreApplicationDockTileImage();
-
-			#elif USE_APPINDICATOR
+			#elif LINUX
 				
 				if (d->appind)
 				{
@@ -513,13 +436,6 @@ void LTrayIcon::Visible(bool v)
 				}
 				else printf("%s:%i Error: no app indicator.\n", _FL);
 				
-			#elif defined(__GTK_H__)
-
-				if (d->tray_icon)
-					gtk_status_icon_set_visible(d->tray_icon, false);
-				else
-					LgiTrace("%s:%i - No tray icon to hide.\n", _FL);
-
 			#endif
 		}
 	}
@@ -559,29 +475,13 @@ void LTrayIcon::Value(int64 v)
 				}
 			}
 		
-		#elif USE_APPINDICATOR
+		#elif LINUX
 			
 			if (d->appind)
 			{
 				LAssert(!"Impl me.");
 			}
 			
-		#elif defined __GTK_H__
-
-			if (d->tray_icon)
-			{
-				if (d->Val < 0 || d->Val >= d->Icon.Length())
-					d->Val = 0;
-				if (d->Val < d->Icon.Length())
-				{
-					LTrayIconPrivate::IconRef Ref = d->Icon[d->Val];
-					if (Ref)
-						Gtk::gtk_status_icon_set_from_pixbuf(d->tray_icon, Ref);
-				}
-				else LgiTrace("%s:%i - No icon to show in tray.\n", _FL);
-			}
-			else LgiTrace("%s:%i - No tray icon to hide.\n", _FL);
-		
 		#elif LGI_COCOA
 		
 			d->Val = limit(v, 0, d->Icon.Length()-1);
@@ -594,55 +494,6 @@ void LTrayIcon::Value(int64 v)
 
 			Visible(true);
 		
-		#elif LGI_CARBON
-		
-		LSurface *t = d->Val >= 0 ? d->Icon[d->Val] : NULL;
-		if (t)
-		{
-			CGContextRef c = BeginCGContextForApplicationDockTile();
-			if (c)
-			{
-				// CGContextTranslateCTM(c, 0, 128); 
-				// CGContextScaleCTM(c, 1.0, -1.0); 
-
-				LScreenDC Dc((LView*)0, c);
-				LMemDC m;
-				if (m.Create(t->X()*4, t->Y()*4, System32BitColourSpace))
-				{
-					double Sx = (double) t->X() / m.X();
-					double Sy = (double) t->Y() / m.Y();
-					for (int y=0; y<m.Y(); y++)
-					{
-						int Y = (int) (y * Sy);
-						System32BitPixel *s = (System32BitPixel*)(*t)[Y];
-						System32BitPixel *d = (System32BitPixel*)(m)[m.Y()-y-1];
-						
-						for (int x=0; x<m.X(); x++)
-						{
-							d[x] = s[(int)(x * Sx)];
-						}
-					}
-					
-					Dc.Blt(Dc.X()-m.X()-1, 0, &m);
-				}
-				else
-				{
-					LAssert(!"Failed to create memory bitmap");
-				}
-
-				CGContextFlush(c);
-				EndCGContextForApplicationDockTile(c);
-			}
-			else
-			{
-				RestoreApplicationDockTileImage();
-			}
-		}
-		else
-		{
-			RestoreApplicationDockTileImage();
-		}
-
 		#endif
 	}
 }
@@ -651,78 +502,79 @@ LMessage::Result LTrayIcon::OnEvent(LMessage *Message)
 {
 	#if WINNATIVE
 	
-	if (Message->Msg() == M_TRAY_NOTIFY &&
-		Message->A() == d->MyId)
-	{
-		// got a notification from the icon
-		LMouse m;
-		ZeroObj(m);
-		switch (Message->B())
+		if (Message->Msg() == M_TRAY_NOTIFY &&
+			Message->A() == d->MyId)
 		{
-			case WM_LBUTTONDBLCLK:
-			case WM_RBUTTONDBLCLK:
-			case WM_MBUTTONDBLCLK:
+			// got a notification from the icon
+			LMouse m;
+			ZeroObj(m);
+			switch (Message->B())
 			{
-				m.Down(true);
-				m.Double(true);
-				break;
+				case WM_LBUTTONDBLCLK:
+				case WM_RBUTTONDBLCLK:
+				case WM_MBUTTONDBLCLK:
+				{
+					m.Down(true);
+					m.Double(true);
+					break;
+				}
+				case WM_LBUTTONDOWN:
+				case WM_RBUTTONDOWN:
+				case WM_MBUTTONDOWN:
+				{
+					m.Down(true);
+					break;
+				}
 			}
-			case WM_LBUTTONDOWN:
-			case WM_RBUTTONDOWN:
-			case WM_MBUTTONDOWN:
-			{
-				m.Down(true);
-				break;
-			}
-		}
 
-		switch (Message->B())
-		{
-			case WM_LBUTTONDBLCLK:
-			case WM_LBUTTONDOWN:
-			case WM_LBUTTONUP:
+			switch (Message->B())
 			{
-				m.Left(true);
-				break;
+				case WM_LBUTTONDBLCLK:
+				case WM_LBUTTONDOWN:
+				case WM_LBUTTONUP:
+				{
+					m.Left(true);
+					break;
+				}
+				case WM_RBUTTONDBLCLK:
+				case WM_RBUTTONDOWN:
+				case WM_RBUTTONUP:
+				{
+					m.Right(true);
+					break;
+				}
+				case WM_MBUTTONDBLCLK:
+				case WM_MBUTTONDOWN:
+				case WM_MBUTTONUP:
+				{
+					m.Middle(true);
+					break;
+				}
 			}
-			case WM_RBUTTONDBLCLK:
-			case WM_RBUTTONDOWN:
-			case WM_RBUTTONUP:
-			{
-				m.Right(true);
-				break;
-			}
-			case WM_MBUTTONDBLCLK:
-			case WM_MBUTTONDOWN:
-			case WM_MBUTTONUP:
-			{
-				m.Middle(true);
-				break;
-			}
-		}
 
-		switch (Message->B())
-		{
-			case WM_LBUTTONDBLCLK:
-			case WM_RBUTTONDBLCLK:
-			case WM_MBUTTONDBLCLK:
+			switch (Message->B())
 			{
-				m.Double(true);
-				break;
+				case WM_LBUTTONDBLCLK:
+				case WM_RBUTTONDBLCLK:
+				case WM_MBUTTONDBLCLK:
+				{
+					m.Double(true);
+					break;
+				}
+			}
+
+			if (d->Parent)
+			{
+				d->Parent->OnTrayClick(m);
 			}
 		}
-
-		if (d->Parent)
+		else if (Message->Msg() == d->TrayCreateMsg)
 		{
-			d->Parent->OnTrayClick(m);
+			// explorer crashed... reinit the icon
+			ZeroObj(d->TrayIcon);
+			Visible(true);
 		}
-	}
-	else if (Message->Msg() == d->TrayCreateMsg)
-	{
-		// explorer crashed... reinit the icon
-		ZeroObj(d->TrayIcon);
-		Visible(true);
-	}
+		
 	#endif
 
 	return 0;

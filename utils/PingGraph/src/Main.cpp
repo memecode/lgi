@@ -285,7 +285,7 @@ public:
 			{
 				auto &s = samples[i];
 				int x = TimeToX(s.time);
-				int y = s.value >= 0 ? s.value * draw.Y() / scale : draw.Y();
+				int y = s.value >= 0 ? MIN(s.value, scale) * draw.Y() / scale : draw.Y();
 				LPoint pt(x,
 						  draw.y2 - y);
 				if (prev.x && s.time - prev_time < 10)			
@@ -415,7 +415,9 @@ public:
 
 	void OnLine(LString line)
 	{
+		// log->Print("line: %s\n", line.Get());
 		auto p = line.SplitDelimit();
+		#if WINDOWS
 		if (p[0].Equals("reply"))
 		{
 			auto time = p[4].SplitDelimit("=");
@@ -425,6 +427,20 @@ public:
 				graph->AddSample((int32_t)ms);
 			}
 		}
+		#else
+		if (p[1].Equals("bytes") &&
+			p[2].Equals("from"))
+		{
+			auto time = p[p.Length()-2].SplitDelimit("=");
+			if (time[0].Equals("time"))
+			{
+				auto ms = time[1].Int();
+				// log->Print("sample: %i\n", (int)ms);
+				graph->AddSample((int32_t)ms);
+			}
+			else log->Print("not time\n");
+		}
+		#endif
 		else if (line.Find("timed out") >= 0)
 		{
 			graph->AddSample(-1);
@@ -549,6 +565,12 @@ public:
 
 	~App()
 	{
+		if (hostname)
+		{
+			LVariant v = hostname->Name();
+			options.SetValue(OptHostName, v);
+			options.SerializeFile(true);
+		}
 	}
 
 	void Start(const char *host)

@@ -508,7 +508,6 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
-			<Executable />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -523,7 +522,8 @@
 				<Linux>
 					<Debug>./include/lgi/linux
 ./include/lgi/linux/Gtk
-./private/linux</Debug>
+./private/linux
+</Debug>
 					<Release>./include/lgi/linux
 ./include/lgi/linux/Gtk
 ./private/linux</Release>
@@ -544,9 +544,11 @@
 			<SystemIncludes>
 				<Linux>
 					<Debug>`pkg-config --cflags gtk+-3.0`
-`pkg-config --cflags gstreamer-1.0`</Debug>
+`pkg-config --cflags gstreamer-1.0`
+`pkg-config --cflags ayatana-appindicator3-0.1`</Debug>
 					<Release>`pkg-config --cflags gtk+-3.0`
-`pkg-config --cflags gstreamer-1.0`</Release>
+`pkg-config --cflags gstreamer-1.0`
+`pkg-config --cflags ayatana-appindicator3-0.1`</Release>
 				</Linux>
 				<Haiku>
 					<Debug>../../../../system/develop/headers</Debug>
@@ -556,15 +558,16 @@
 			<Libraries>
 				<Linux>
 					<Debug>magic
-appindicator3
 crypt
 gstreamer-1.0
-`pkg-config --libs gtk+-3.0`</Debug>
+`pkg-config --libs gtk+-3.0`
+`pkg-config --libs ayatana-appindicator3-0.1`
+</Debug>
 					<Release>magic
-appindicator3
 crypt
 gstreamer-1.0
-`pkg-config --libs gtk+-3.0`</Release>
+`pkg-config --libs gtk+-3.0`
+`pkg-config --libs ayatana-appindicator3-0.1`</Release>
 				</Linux>
 				<Haiku>
 					<Debug>-static-libgcc
@@ -621,13 +624,5 @@ _GNU_SOURCE</Release>
 				</All>
 			</LibraryPaths>
 		</Build>
-		<Advanced>
-			<PostBuildCommands />
-		</Advanced>
-		<Debug>
-			<Arguments />
-		</Debug>
-		<Remote />
-		<Editor />
 	</Settings>
 </Project>
