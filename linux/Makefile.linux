@@ -234,21 +234,21 @@ clean :
 	@echo Cleaned $(BuildDir)
 
 VPATH=$(BuildDir) \
+	./src/linux/General \
+	./src/linux/Gtk \
+	./src/posix \
+	./src/linux/Lgi \
 	./src/common/Hash/sha1 \
 	./src/common/Skins/Gel \
-	./src/linux/General \
 	./src/common/General \
 	./src/common/Gdc2 \
 	./src/common/Gdc2/Path \
-	./src/linux/Gtk \
 	./src/common/Lgi \
 	./src/common/Gdc2/Filters \
 	./src/common/Resource \
-	./src/posix \
 	./src/common/Hash/md5 \
 	./src/common/Text \
 	./src/common/Gdc2/Font \
 	./src/common/Widgets \
 	./src/common/Net \
-	./src/common/Gdc2/Tools \
-	./src/linux/Lgi
+	./src/common/Gdc2/Tools

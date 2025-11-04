@@ -291,30 +291,28 @@ private:
 		
 	#endif
 
-	#ifdef WIN32
-	LONG Refs;
-	#endif
-
 	#if WINNATIVE
-	// IUnknown
-	ULONG STDMETHODCALLTYPE AddRef();
-	ULONG STDMETHODCALLTYPE Release();
-	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, void **ppv);
+		LONG Refs;
+	
+		// IUnknown
+		ULONG STDMETHODCALLTYPE AddRef();
+		ULONG STDMETHODCALLTYPE Release();
+		HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, void **ppv);
 
-	// IDropTarget
-	HRESULT STDMETHODCALLTYPE DragEnter(IDataObject *pDataObject, DWORD grfKeyState, POINTL pt, DWORD *pdwEffect);
-	HRESULT STDMETHODCALLTYPE DragOver(DWORD grfKeyState, POINTL pt, DWORD *pdwEffect);
-	HRESULT STDMETHODCALLTYPE DragLeave(void);
-	HRESULT STDMETHODCALLTYPE Drop(IDataObject *pDataObject, DWORD grfKeyState, POINTL pt, DWORD *pdwEffect);
+		// IDropTarget
+		HRESULT STDMETHODCALLTYPE DragEnter(IDataObject *pDataObject, DWORD grfKeyState, POINTL pt, DWORD *pdwEffect);
+		HRESULT STDMETHODCALLTYPE DragOver(DWORD grfKeyState, POINTL pt, DWORD *pdwEffect);
+		HRESULT STDMETHODCALLTYPE DragLeave(void);
+		HRESULT STDMETHODCALLTYPE Drop(IDataObject *pDataObject, DWORD grfKeyState, POINTL pt, DWORD *pdwEffect);
 	#endif
 
 protected:
 	#if WINNATIVE
-	// Data elements
-	IDataObject *DataObject;
+		// Data elements
+		IDataObject *DataObject;
 
-	// Tools
-	bool OnDropFileGroupDescriptor(FILEGROUPDESCRIPTOR *Data, LString::Array &Files);
+		// Tools
+		bool OnDropFileGroupDescriptor(FILEGROUPDESCRIPTOR *Data, LString::Array &Files);
 	#endif
 
 public:

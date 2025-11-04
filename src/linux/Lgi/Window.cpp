@@ -906,30 +906,32 @@ gboolean
 LWindowDragDataDrop(GtkWidget *widget, GdkDragContext *context, gint x, gint y, guint time, LWindow *Wnd)
 {
 	auto obj = new LGtkDrop(widget, context, x, y, time, Wnd);
+	DND_LOG("%s:%i - LWindowDragDataDrop = %p\n", _FL, obj);
 	return obj != NULL;
 }
 
 void
 LWindowDragEnd(GtkWidget *widget, GdkDragContext *context, LWindow *Wnd)
 {
-	DND_LOG("%s:%i - %s (fn=%s, hnds=%i)\n", _FL, Wnd->GetClass(), __func__, (int)LDragDropTarget::Handles.Length());
+	DND_LOG("%s:%i - LWindowDragEnd (cls=%s, hnds=%i)\n", _FL, Wnd->GetClass(), (int)LDragDropTarget::Handles.Length());
 
 	for (auto hnd: LDragDropTarget::Handles)
 		PostThreadEvent(hnd, M_DND_END);
+		
 	LDragDropTarget::Handles.Empty();
 }
 
 gboolean
 LWindowDragFailed(GtkWidget *widget, GdkDragContext *context, GtkDragResult result, LWindow *Wnd)
 {
-	DND_LOG("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
+	DND_LOG("%s:%i - LWindowDragFailed cls=%s\n", _FL, Wnd->GetClass());
 	return false;
 }
 
 void
 LWindowDragLeave(GtkWidget *widget, GdkDragContext *context, guint time, LWindow *Wnd)
 {
-	DND_LOG("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
+	DND_LOG("%s:%i - LWindowDragLeave cls=%s\n", _FL, Wnd->GetClass());
 }
 
 gboolean

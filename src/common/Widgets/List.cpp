@@ -2183,7 +2183,6 @@ bool LList::Insert(List<LListItem> &l, int Index, bool Update)
 		if (Update)
 		{
 			// Update screen
-			PourAll();
 			Invalidate();
 
 			// Notify

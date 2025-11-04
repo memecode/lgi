@@ -90,7 +90,15 @@ void LSleep(uint32_t i)
 	}
 }
 
-int GtkAssertDlg(const char *File, int Line, const char *Msg)
+enum AssertBtn {
+	AB_NONE,
+	AB_BREAK,
+	AB_QUIT,
+	AB_IGNORE,
+	AB_WAITING_RESPONSE,
+};
+
+AssertBtn GtkAssertDlg(const char *File, int Line, const char *Msg)
 {
 	Gtk::GtkWidget *dialog = 
 		Gtk::gtk_message_dialog_new 
@@ -104,10 +112,14 @@ int GtkAssertDlg(const char *File, int Line, const char *Msg)
 			Msg
 		);
 	Gtk::GtkDialog *dlg = GtkCast(dialog, gtk_dialog, GtkDialog);		
-	Gtk::gtk_dialog_add_buttons(dlg, "Break", 1, "Quit", 2, "Ignore", 3, NULL);
+	Gtk::gtk_dialog_add_buttons(dlg,
+		"Break", AB_BREAK,
+		"Quit", AB_QUIT,
+		"Ignore", AB_IGNORE
+		, NULL);
 	int Result = Gtk::gtk_dialog_run(dlg);
 	Gtk::gtk_widget_destroy(dialog);
-	return Result;
+	return (AssertBtn)Result;
 }
 
 void _lgi_assert(bool b, const char *test, const char *file, int line)
@@ -123,26 +135,63 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 		#ifdef LGI_SDL
 		exit(-1);
 		#else
-		Gtk::gint Result = Gtk::GTK_RESPONSE_NO;
+		AssertBtn Result = AB_NONE;
 		
 		#if 1
 		if (LAppInst->InThread())
+		{
 			Result = GtkAssertDlg(file, line, test);
+		}
 		else
-			Result = 1;
+		{
+			// This may or may not work, depending on whether the GUI thread is
+			// actually running. If it's deadlocked, this will fail.
+			LAppInst->RunCallback([pResult = &Result, file, line, test]()
+				{
+					// Tell the calling thread we've got the callback and we're
+					// waiting on the user.
+					*pResult = AB_WAITING_RESPONSE;
+
+					// Actually ASK the user for input:
+					*pResult = GtkAssertDlg(file, line, test);
+				},
+				_FL);
+
+			auto startTs = LCurrentTime();
+			while (Result == AB_NONE)
+			{
+				if (LCurrentTime() - startTs >= 5000 &&
+					Result == AB_NONE)
+				{
+					// GUI thread is deadlocked!
+					// Assume the user wants 'Ignore'
+					Result = AB_IGNORE;
+					break;
+				}
+				LSleep(10);
+			}
+		}
 		#endif
 
 		switch (Result)
 		{
-			case 1:
+			case AB_BREAK:
 			{
-				int *i = NULL;
+				// Try and bring the debugger up:
+				int *i = nullptr;
 				*i = 0;
 				break;
 			}
-			case 2:
+			case AB_QUIT:
 			{
+				// Hard exit:
 				exit(-1);
+				break;
+			}
+			default:
+			case AB_IGNORE:
+			{
+				printf("%s:%i - assert '%s' ignored.\n", _FL, test);
 				break;
 			}
 		}

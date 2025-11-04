@@ -132,8 +132,12 @@ bool LLayout::SetScrollBars(bool x, bool y)
 {
 	static bool Processing = false;
 
-	if (!Processing &&
-		(((HScroll!=0) ^ x ) || ((VScroll!=0) ^ y )) )
+	if (!InThread())
+	{
+		PostEvent(M_SET_SCROLL, x, y);
+	}
+	else if (!Processing &&
+			(((HScroll!=0) ^ x ) || ((VScroll!=0) ^ y )) )
 	{
 		Processing = true;
 		if (x)
@@ -262,12 +266,20 @@ LRect &LLayout::GetClient(bool ClientSpace)
 
 LMessage::Result LLayout::OnEvent(LMessage *Msg)
 {
+	if (Msg->Msg() == M_SET_SCROLL)
+	{
+		SetScrollBars(Msg->A(), Msg->B());
+		return true;
+	}
+
     if (Msg->Msg() != M_INVALIDATE)
     {
         if (VScroll) VScroll->OnEvent(Msg);
         if (HScroll) HScroll->OnEvent(Msg);
     }
+
 	auto Status = LView::OnEvent(Msg);
+	
 	if (Msg->Msg() == M_CHANGE &&
 		Status == -1 &&
 		GetParent())

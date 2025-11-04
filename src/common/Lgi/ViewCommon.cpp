@@ -1623,13 +1623,16 @@ extern pascal OSStatus LgiViewDndHandler(EventHandlerCallRef inHandlerCallRef, E
 // Recursively add drag dest to all view and all children
 bool GtkAddDragDest(LViewI *v, bool IsTarget)
 {
-	if (!v) return false;
-	LWindow *w = v->GetWindow();
-	if (!w) return false;
+	if (!v)
+		return false;
+	auto w = v->GetWindow();
+	if (!w)
+		return false;
 	auto wid = GtkCast(w->WindowHandle(), gtk_widget, GtkWidget);
 
 	if (IsTarget)
 	{
+		LgiTrace("%s:%i - gtk_drag_dest_set on %s\n", _FL, v->GetClass());
 		Gtk::gtk_drag_dest_set(	wid,
 								(Gtk::GtkDestDefaults)0,
 								NULL,
@@ -1641,7 +1644,7 @@ bool GtkAddDragDest(LViewI *v, bool IsTarget)
 		Gtk::gtk_drag_dest_unset(wid);
 	}
 	
-	for (LViewI *c: v->IterateViews())
+	for (auto c: v->IterateViews())
 		GtkAddDragDest(c, IsTarget);
 	
 	return true;
@@ -1762,7 +1765,7 @@ bool LView::DropTarget(bool t)
 
 		Status = GtkAddDragDest(this, t);
 		if (Status && !d->DropTarget)
-			d->DropTarget = t ? GetWindow() : 0;
+			d->DropTarget = t ? GetWindow() : nullptr;
 
 	#endif
 

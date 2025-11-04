@@ -9,11 +9,10 @@
 */
 
 #include <stdio.h>
+
 #include "lgi/common/Lgi.h"
 #include "lgi/common/ScrollBar.h"
 #include "lgi/common/Notifications.h"
-
-#define M_SET_SCROLL		(M_USER + 0x2000)
 
 //////////////////////////////////////////////////////////////////////////////
 LLayout::LLayout()
@@ -115,7 +114,6 @@ void LLayout::AttachScrollBars()
 
 bool LLayout::SetScrollBars(bool x, bool y)
 {
-	#ifdef M_SET_SCROLL
 	if (x ^ (HScroll != NULL)
 		||
 		y ^ (VScroll != NULL))
@@ -136,9 +134,6 @@ bool LLayout::SetScrollBars(bool x, bool y)
 		// Duplicate... ignore...
 		return true;
 	}
-	#else
-	_SetScrollBars(x, y);
-	#endif
 
 	return true;
 }
@@ -289,7 +284,6 @@ LRect &LLayout::GetClient(bool ClientSpace)
 
 LMessage::Param LLayout::OnEvent(LMessage *Msg)
 {
-	#ifdef M_SET_SCROLL
 	if (Msg->Msg() == M_SET_SCROLL)
 	{
 		_SetScroll.SentMsg = false;
@@ -301,10 +295,7 @@ LMessage::Param LLayout::OnEvent(LMessage *Msg)
 			VScroll->SendNotify(LNotifyScrollBarCreate);
 		return 0;
 	}
-	#endif
 
-	// if (VScroll) VScroll->OnEvent(Msg);
-	// if (HScroll) HScroll->OnEvent(Msg);
 	int Status = LView::OnEvent(Msg);
 	if (Msg->Msg() == M_CHANGE &&
 		Status == -1 &&
