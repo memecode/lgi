@@ -28,7 +28,9 @@ public:
 	void OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *Col)
 	{
 		LSurface *pDC = Ctx.pDC;
-		LRect c(0, 0, 10, 10);
+		int px = (int)((float)Ctx.Y() * 0.8f);
+		int pad = (int)((float)Ctx.Y() * 0.1f);
+		LRect c(0, 0, px-1, px-1);
 		c.Offset(Ctx.x1 + ((Ctx.X()-c.X())/2), Ctx.y1 + ((Ctx.Y()-c.Y())/2));
 
 		// Box
@@ -43,13 +45,13 @@ public:
 		{
 			pDC->Colour(LColour(L_TEXT));
 
-			pDC->Line(c.x1+1, c.y1+1, c.x2-1, c.y2-1);
-			pDC->Line(c.x1+1, c.y1+2, c.x2-2, c.y2-1);
-			pDC->Line(c.x1+2, c.y1+1, c.x2-1, c.y2-2);
+			pDC->Line(c.x1+pad, c.y1+pad, c.x2-pad, c.y2-pad);
+			pDC->Line(c.x1+pad, c.y1+pad+1, c.x2-pad-1, c.y2-pad);
+			pDC->Line(c.x1+pad+1, c.y1+pad, c.x2-pad, c.y2-pad-1);
 
-			pDC->Line(c.x1+1, c.y2-1, c.x2-1, c.y1+1);
-			pDC->Line(c.x1+1, c.y2-2, c.x2-2, c.y1+1);
-			pDC->Line(c.x1+2, c.y2-1, c.x2-1, c.y1+2);
+			pDC->Line(c.x1+pad, c.y2-pad, c.x2-pad, c.y1+pad);
+			pDC->Line(c.x1+pad, c.y2-pad-1, c.x2-pad-1, c.y1+pad);
+			pDC->Line(c.x1+pad+1, c.y2-pad, c.x2-pad, c.y1+pad+1);
 		}
 	}
 

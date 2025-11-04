@@ -456,8 +456,12 @@ void LTrayIcon::Value(int64 v)
 			
 			if (d->appind)
 			{
-				LAssert(!"Impl me.");
+				if (d->Icon.IdxCheck(d->Val))
+					app_indicator_set_icon(d->appind, d->Icon[d->Val]);
+				else
+					LgiTrace("%s:%i - index out of range.\n", _FL);
 			}
+			else LgiTrace("%s:%i - no object.\n", _FL);
 			
 		#elif LGI_COCOA
 		
