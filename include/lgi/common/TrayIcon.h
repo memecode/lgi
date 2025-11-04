@@ -33,6 +33,9 @@ public:
 	/// Set the index of the icon you want visible
 	void Value(int64 v);
 
+	/// Update the sub menu
+	void UpdateMenu();
+
 	/// Call this in your window's OnEvent handler
 	virtual LMessage::Result OnEvent(LMessage *Msg);
 };

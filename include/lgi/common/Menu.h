@@ -146,6 +146,10 @@ public:
 	);
 	virtual ~LSubMenu();
 
+	// Events
+	std::function<void(LMenuItem*)> OnMenuActivate;
+	
+	// Methods
 	const char *GetClass() override { return "LSubMenu"; }
 
 	/// Returns the OS handle

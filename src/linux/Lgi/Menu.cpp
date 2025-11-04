@@ -155,8 +155,7 @@ LMenuItem *LSubMenu::ItemAt(int Id)
 
 LMenuItem *LSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where, const char *Shortcut)
 {
-	LMenuItem *i = new LMenuItem(Menu, this, Str, Id, Where < 0 ? Items.Length() : Where, Shortcut);
-	if (i)
+	if (auto i = new LMenuItem(Menu, this, Str, Id, Where < 0 ? Items.Length() : Where, Shortcut))
 	{
 		i->Enabled(Enabled);
 
@@ -173,7 +172,7 @@ LMenuItem *LSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where
 		return i;
 	}
 
-	return 0;
+	return nullptr;
 }
 
 LMenuItem *LSubMenu::AppendSeparator(int Where)
@@ -543,24 +542,24 @@ void LMenuItem::OnGtkEvent(LString Event)
 	{
 		if (!Sub() && !InSetCheck)
 		{
-			LSubMenu *Parent = GetParent();
+			auto Parent = GetParent();
 		
 			if (!Parent || !Parent->IsContext(this))
 			{
-				auto m = GetMenu();
-				if (m)
+				if (auto m = GetMenu())
 				{
 					// Attached to a menu, so send an event to the window
-					LViewI *w = m->WindowHandle();
-					if (w)
+					if (auto w = m->WindowHandle())
 						w->PostEvent(M_COMMAND, Id());
 					else
 						LAssert(!"No window for menu to send to");
+					return;
 				}
-				else
-				{
-					// Could be just a popup menu... in which case do nothing.				
-				}
+			}
+
+			if (Parent && Parent->OnMenuActivate)
+			{
+				Parent->OnMenuActivate(this);
 			}
 		}
 	}
@@ -574,19 +573,7 @@ void LMenuItem::OnGtkEvent(LString Event)
 LMenuItem::LMenuItem()
 {
 	d = new LMenuItemPrivate();
-	Info = NULL;
-	Child = NULL;
-	Menu = NULL;
-	Parent = NULL;
-	InSetCheck = false;
-
 	Handle(GTK_MENU_ITEM(gtk_separator_menu_item_new()));
-	
-	Position = -1;
-	
-	_Flags = 0;	
-	_Icon = -1;
-	_Id = 0;
 }
 
 LMenuItem::LMenuItem(LMenu *m, LSubMenu *p, const char *txt, int id, int Pos, const char *shortcut)
@@ -594,21 +581,13 @@ LMenuItem::LMenuItem(LMenu *m, LSubMenu *p, const char *txt, int id, int Pos, co
 	d = NULL;
 	LAutoString Txt = MenuItemParse(txt);
 	LBase::Name(txt);
-	Info = NULL;
 
 	Handle(GTK_MENU_ITEM(gtk_menu_item_new_with_mnemonic(Txt)));
-	
-	Child = NULL;
+
 	Menu = m;
 	Parent = p;
-	InSetCheck = false;
-
 	Position = Pos;
-
-	_Flags = 0;	
-	_Icon = -1;
 	_Id = id;
-
 	ShortCut = shortcut;
 	ScanForAccel();
 }

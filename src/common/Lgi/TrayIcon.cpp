@@ -1,5 +1,8 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/TrayIcon.h"
+#if LINUX
+#include "lgi/common/Menu.h"
+#endif
 
 #define SYSTEM_TRAY_REQUEST_DOCK    0
 #define SYSTEM_TRAY_BEGIN_MESSAGE   1
@@ -78,32 +81,13 @@ public:
 	#elif LINUX
 	
 		GlibWrapper<AppIndicator> appind;
-		GtkWidget *menuRoot = nullptr;
+		LSubMenu menuRoot;
 		
 		typedef LString IconRef; // path to file?
 		LArray<IconRef> Icon;
 		uint64 LastClickTime = 0;
 		gint DoubleClickTime = 0;
 	
-		void OnClick()
-		{
-			if (!appind)
-				return;
-				
-			// LAssert(!"Impl me.");
-		}
-	
-		void OnMenu(guint button, guint activate_time)
-		{
-			LMouse m;
-			m.Left(button == 1);
-			m.Middle(button == 2);
-			m.Right(button == 3);
-			m.Down(true);
-			
-			Parent->OnTrayClick(m);
-		}
-
 	#else
 
 		typedef LSurface *IconRef;
@@ -174,19 +158,7 @@ public:
 
 };
 
-#if defined(__GTK_H__)
-
-	void tray_icon_on_click(GtkStatusIcon *status_icon, LTrayIconPrivate *d)
-	{
-		d->OnClick();
-	}
-
-	void tray_icon_on_menu(GtkStatusIcon *status_icon, guint button, guint activate_time, LTrayIconPrivate *d)
-	{
-		d->OnMenu(button, activate_time);
-	}
-
-#elif LGI_COCOA
+#if LGI_COCOA
 
 	@implementation LStatusItem
 
@@ -380,21 +352,26 @@ void LTrayIcon::Visible(bool v)
 							app_indicator_get_icon(d->appind),
 							app_indicator_get_title(d->appind));
 							
-						if (!d->menuRoot)
+						// Setup some event to capture the menu being made visible
+						// g_signal_connect(d->menuRoot, "map-event", G_CALLBACK(menuMapped), NULL);
+
+						if (auto menu = GTK_MENU(d->menuRoot.Handle()))
 						{
-							// There must be a menu or the app indicator won't show up.
-							if (d->menuRoot = gtk_menu_new())
-							{
-								auto item = gtk_menu_item_new_with_label("...loading...");
-								gtk_menu_shell_append(GTK_MENU_SHELL(d->menuRoot), item);
-								gtk_widget_show (item);
-
-								// Setup some event to capture the menu being made visible
-								// g_signal_connect(d->menuRoot, "map-event", G_CALLBACK(menuMapped), NULL);
-
-				    			app_indicator_set_menu(d->appind, GTK_MENU(d->menuRoot));
-				    		}
+							d->menuRoot.OnMenuActivate = [this](auto item)
+								{
+									if (!item || !d->Parent)
+									{
+										LgiTrace("%s:%i - OnMenuActivate bad param.\n", _FL);
+										return;										
+									}	
+										
+									LgiTrace("%s:%i - OnMenuActivate got id %i.\n", _FL, item->Id());
+									d->Parent->OnTrayMenuResult(item->Id());
+								};
+							
+			    			app_indicator_set_menu(d->appind, GTK_MENU(d->menuRoot.Handle()));
 			    		}
+			    		else LAssert(!"No menu?");
 					}
 					else printf("%s:%i - No app ind.\n", _FL);
 				}
@@ -580,3 +557,14 @@ LMessage::Result LTrayIcon::OnEvent(LMessage *Message)
 	return 0;
 }
 
+void LTrayIcon::UpdateMenu()
+{
+	#if LINUX
+	
+	if (d->Parent)
+		d->Parent->OnTrayMenu(d->menuRoot);
+	else
+		LgiTrace("%s:%i - param error\n", _FL);
+	
+	#endif
+}

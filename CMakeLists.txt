@@ -541,6 +541,7 @@ elseif (LINUX)
 			${GST_INCLUDE_DIRS}
 		PRIVATE
 			private/linux
+			/usr/include/libayatana-appindicator3-0.1
 		)
 	
 	target_link_libraries(lgi
@@ -550,6 +551,7 @@ elseif (LINUX)
 			magic
 		PRIVATE
 			iconv
+			ayatana-appindicator3
 		)
 	target_link_directories(lgi
 		PRIVATE
@@ -563,7 +565,8 @@ elseif (LINUX)
 			${GTK3_INCLUDE_DIRS}
 			${GST_INCLUDE_DIRS}
 		PRIVATE
-			private/linux)
+			private/linux
+			/usr/include/libayatana-appindicator3-0.1)
 	target_compile_definitions(lgi-stub
 		PUBLIC
 			LINUX)
