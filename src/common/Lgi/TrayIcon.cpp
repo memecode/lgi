@@ -281,13 +281,14 @@ bool LTrayIcon::Visible()
 	#endif
 }
 
+#if __GTK_H__
 void menuMapped(GtkWidget *widget,
                GdkEvent  *event,
                gpointer   user_data)
 {
 	printf("menuMapped !!!!\n");
 }
-
+#endif
 
 void LTrayIcon::Visible(bool v)
 {

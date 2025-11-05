@@ -477,11 +477,14 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 				}
 			}
 		}
-	}		
+	}
 
 	#if DEBUG_SUBPROCESS
 	LgiTrace("%s:%i - Exe='%S'\n", _FL, WExe.Get());
 	#endif
+
+	if (!WExe)
+		return false;
 		
 	LStringPipe Args;
 	for (unsigned i=0; i<d->Args.Length(); i++)
