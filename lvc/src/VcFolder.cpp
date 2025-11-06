@@ -1157,7 +1157,6 @@ void VcFolder::Select(bool b)
 				case VcHg:
 				{
 					IsLogging = StartCmd("log", &VcFolder::ParseLog);
-					// StartCmd("resolve -l", &VcFolder::ParseResolveList);
 					break;
 				}
 				case VcPending:

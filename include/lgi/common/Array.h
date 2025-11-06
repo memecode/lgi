@@ -9,8 +9,6 @@
 #include <initializer_list>
 #include <functional>
 
-#define GARRAY_MIN_SIZE			16
-
 #if defined(LGI_CHECK_MALLOC) && !defined(LGI_MEM_DEBUG)
 #error "Include GMem.h first"
 #endif
@@ -59,8 +57,8 @@ template <class Type>
 class LArray
 {
 	Type *p = NULL;
-	size_t len = 0;
-	size_t alloc = 0;
+	ssize_t len = 0;
+	ssize_t alloc = 0;
 
 #ifdef _DEBUG
 public:
@@ -73,6 +71,8 @@ protected:
 
 public:
 	typedef Type ItemType;
+	constexpr static ssize_t MIN_SIZE = 16;
+	constexpr static ssize_t INVALID = -1;
 
 	/// Constructor
 	LArray(size_t PreAlloc = 0)
@@ -148,7 +148,7 @@ public:
 	/// Does a range check on an index...
 	bool IdxCheck(ssize_t i) const
 	{
-		return i >= 0 && i < (ssize_t)len;
+		return i >= 0 && i < len;
 	}
 	
 	/// Returns the number of used entries
@@ -174,7 +174,7 @@ public:
 	}
 
 	/// Sets the length of available entries
-	bool Length(size_t i)
+	bool Length(ssize_t i)
 	{
 		if (i > 0)
 		{
@@ -187,7 +187,7 @@ public:
 				return false;
 			}
 
-			size_t nalloc = alloc;
+			ssize_t nalloc = alloc;
 			if (i < len)
 			{
 			    // Shrinking
@@ -203,7 +203,7 @@ public:
 			
 			if (nalloc != alloc)
 			{
-				Type *np = (Type*)malloc(sizeof(Type) * nalloc);
+				auto np = (Type*)malloc(sizeof(Type) * nalloc);
 				if (!np)
 				{
 					return false;
@@ -227,7 +227,7 @@ public:
 			}
 			else if (i < len)
 			{
-				for (size_t n=i; n<len; n++)
+				for (ssize_t n=i; n<len; n++)
 					p[n].~Type();
 			}
 
@@ -237,8 +237,8 @@ public:
 		{
 			if (p)
 			{
-				size_t Length = len;
-				for (size_t i=0; i<Length; i++)
+				ssize_t Length = len;
+				for (ssize_t i=0; i<Length; i++)
 					p[i].~Type();
 			}
 			Free();
@@ -252,7 +252,7 @@ public:
 		if (Length() != a.Length())
 			return false;
 
-		for (size_t i=0; i<len; i++)
+		for (ssize_t i=0; i<len; i++)
 			if (p[i] != a.ItemAt(i))
 				return false;
 
@@ -272,7 +272,7 @@ public:
 		warnResize = a.warnResize;
 		if (p && a.p)
 		{
-			for (size_t i=0; i<len; i++)
+			for (ssize_t i=0; i<len; i++)
 				p[i] = a.p[i];
 		}
 		
@@ -305,45 +305,54 @@ public:
 
 	/// This can be used instead of the [] operator in situations
 	/// where the array is const.
-	const Type &ItemAt(size_t i) const
+	const Type &ItemAt(ssize_t index) const
 	{
-		if (i >= 0 && (uint32_t)i < len)
-			return p[i];
+		if (index >= 0 && index < len)
+			return p[index];
 
 		static Type t;
 		return t;
 	}
 
 	// Returns the address of an item or NULL if index is out of range
-	Type *AddressOf(size_t i = 0)
+	Type *AddressOf(ssize_t index = 0)
 	{
-		return i < len ? p + i : NULL;
+		if (index < 0)
+			index += len;
+		
+		if (index < 0 || index >= len)
+			return nullptr;		
+		
+		return p + index;
 	}
 
 	/// \brief Returns a reference a given entry.
 	///
 	/// If the entry is off the end of the array and "fixed" is false,
 	/// it will grow to make it valid.
-	Type &operator [](size_t i)
+	Type &operator [](ssize_t index)
 	{
-		if
-		(
-			fixed && ((uint32_t)i >= len)
-		)
+		static Type empty;
+
+		if (index < 0) // index from the end... -1 being the last element, -2 the second last etc.
+			index += len;
+		if (index < 0)
+			return empty;
+
+		if (fixed && index >= len)
 		{
 			#ifndef LGI_STATIC
 			if (warnResize)
 				LStackTrace("%s:%i - Attempt to enlarged fixed array.", _FL);
 			#endif
-			static Type empty;
 			return empty;
 		}
 		
-		if (i >= (int)alloc)
+		if (index >= alloc)
 		{
 			// increase array length
-			size_t nalloc = MAX(alloc, GARRAY_MIN_SIZE);
-			while (nalloc <= (uint32_t)i)
+			auto nalloc = MAX(alloc, MIN_SIZE);
+			while (nalloc <= index)
 			{
 				nalloc <<= 1;
 			}
@@ -361,7 +370,7 @@ public:
 			#endif
 
 			// alloc new array
-			Type *np = (Type*) malloc(sizeof(Type) * nalloc);
+			auto np = (Type*) malloc(sizeof(Type) * nalloc);
 			if (np)
 			{
 				// clear new cells
@@ -387,12 +396,12 @@ public:
 		}
 
 		// adjust length of the the array
-		if ((uint32_t)i + 1 > len)
+		if (index + 1 > len)
 		{
-			len = i + 1;
+			len = index + 1;
 		}
 		
-		return p[i];
+		return p[index];
 	}
 
 	/// Delete all the entries as if they are pointers to objects
@@ -436,12 +445,13 @@ public:
 	/// Find the index of entry 'n'
 	ssize_t IndexOf(Type n)
 	{
-		for (uint i=0; i<len; i++)
+		for (ssize_t i=0; i<len; i++)
 		{
-			if (p[i] == n) return i;
+			if (p[i] == n)
+				return i;
 		}
 		
-		return -1;
+		return INVALID;
 	}
 
 	/// Returns true if the item 'n' is in the array
@@ -478,27 +488,28 @@ public:
 	bool DeleteAt
 	(
 		/// The index of the entry to delete
-		size_t Index,
+		ssize_t index,
 		/// true if the order of the array matters, otherwise false.
 		bool Ordered = false
 	)
 	{
-		if (p && Index < len)
+		if (index < 0)
+			index += len;
+		if (index < 0)
+			return false;
+
+		if (p && index < len)
 		{
 			// Delete the object
-			p[Index].~Type();
+			p[index].~Type();
 
 			// Move the memory up
-			if (Index < len - 1)
+			if (index < len - 1)
 			{
 				if (Ordered)
-				{
-					memmove(p + Index, p + Index + 1, (len - Index - 1) * sizeof(Type) );
-				}
+					memmove(p + index, p + index + 1, (len - index - 1) * sizeof(Type) );
 				else
-				{
-					p[Index] = p[len-1];
-				}
+					p[index] = p[len-1];
 			}
 
 			// Adjust length
@@ -630,7 +641,7 @@ public:
 	bool AddAt
 	(
 		/// Item to insert before
-		size_t Index,
+		ssize_t index,
 		/// Item to insert
 		Type n
 	)
@@ -639,16 +650,16 @@ public:
 		if (!Length(len + 1))
 			return false;
 
-		if (Index < len - 1)
+		if (index >= 0 && index < len - 1)
 			// Shift elements after insert point up one
-			memmove(p + Index + 1, p + Index, (len - Index - 1) * sizeof(Type) );
+			memmove(p + index + 1, p + index, (len - index - 1) * sizeof(Type) );
 		else
 			// Add at the end, not after the end...
-			Index = len - 1;
+			index = len - 1;
 
 		// Insert item
-		memset(p + Index, 0, sizeof(*p));
-		p[Index] = n;
+		memset(p + index, 0, sizeof(*p));
+		p[index] = n;
 
 		return true;
 	}
@@ -657,26 +668,31 @@ public:
 	bool AddAt
 	(
 		/// Item to insert before
-		size_t Index,
+		ssize_t index,
 		/// Array to insert
 		const LArray<Type> &a
 	)
 	{
+		if (index < 0)
+			index += len;
+		if (index < 0)
+			return false;
+
 		// Make room
 		if (!Length(len + a.Length()))
 			return false;
 
-		if (Index < len - 1)
+		if (index < len - 1)
 			// Shift elements after insert point up one
-			memmove(p + Index + a.Length(), p + Index, (len - Index - a.Length()) * sizeof(Type) );
+			memmove(p + index + a.Length(), p + index, (len - index - a.Length()) * sizeof(Type) );
 		else
 			// Add at the end, not after the end...
-			Index = len - 1;
+			index = len - a.Length();
 
 		// Insert items
-		memset(p + Index, 0, a.Length() * sizeof(*p));
+		memset(p + index, 0, a.Length() * sizeof(*p));
 		for (size_t i=0; i<a.Length(); i++)
-			p[Index+i] = a.ItemAt(i);
+			p[index+i] = a.ItemAt(i);
 
 		return true;
 	}
@@ -761,7 +777,7 @@ public:
 	Type *Release()
 	{
 		Type *Ptr = p;
-		p = 0;
+		p = nullptr;
 		len = alloc = 0;
 		return Ptr;
 	}
@@ -793,7 +809,7 @@ public:
 		ssize_t Common = MIN(bRange.Len, aRange.Len);
 		ssize_t aIdx = aRange.Start;
 		ssize_t bIdx = bRange.Start;
-		for (int i=0; i<Common; i++) // First the common items
+		for (ssize_t i=0; i<Common; i++) // First the common items
 			(*this)[aIdx++] = b[bIdx++];
 		if (aRange.Len < bRange.Len)
 		{
@@ -813,7 +829,7 @@ public:
 		}
 
 		// Now copy Tmp into b
-		int TmpIdx = 0;
+		ssize_t TmpIdx = 0;
 		bIdx = bRange.Start;
 		for (TmpIdx=0; TmpIdx<Common; TmpIdx++) // First the common items.
 			b[bIdx++] = Tmp[TmpIdx];
@@ -942,7 +958,7 @@ public:
 			{
 				for (size_t i=0; i<a.Length(); i++)
 				{
-					LAssert(Start + i < len);
+					LAssert(Start + (ssize_t)i < len);
 					a[i] = p[Start + i];
 				}
 			}
@@ -956,7 +972,7 @@ public:
 		LArray<Type> r;
 
 		r.Length(len);
-		for (size_t i=0, k=len-1; i<len; i++, k--)
+		for (ssize_t i=0, k=len-1; i<len; i++, k--)
 			r.p[i] = p[k];
 
 		return r;
@@ -968,7 +984,7 @@ public:
 		if (!Compare || len == 0)
 			return notFound;
 		
-		for (size_t s = 0, e = len - 1; s <= e; )
+		for (ssize_t s = 0, e = len - 1; s <= e; )
 		{
 			if (e - s < 2)
 			{
