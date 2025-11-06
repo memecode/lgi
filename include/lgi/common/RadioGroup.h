@@ -45,6 +45,10 @@ public:
 	bool OnLayout(LViewLayoutInfo &Inf) override;
 	void OnStyleChange();
 
+	/// This recurses through all child views and finds all the radio buttons
+	/// The index of which is used to get/set the value of this control.
+	LArray<LRadioButton*> CollectButtons();
+
 	const char *Name() override { return LView::Name(); }
 	const char16 *NameW() override { return LView::NameW(); }
 	bool Name(const char *n) override;

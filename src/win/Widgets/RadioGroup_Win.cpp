@@ -72,6 +72,23 @@ void LRadioGroup::OnAttach()
 {
 }
 
+static void Collect(LArray<LRadioButton*> &btns, LViewI *v)
+{
+	for (auto c: v->IterateViews())
+	{
+		if (auto btn = dynamic_cast<LRadioButton*>(c))
+			btns.Add(btn);
+		Collect(btns, c);
+	}
+};
+
+LArray<LRadioButton*> LRadioGroup::CollectButtons()
+{
+	LArray<LRadioButton*> btns;	
+	Collect(btns, this);
+	return btns;
+}
+
 LMessage::Result LRadioGroup::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
@@ -121,18 +138,14 @@ void LRadioGroup::OnCreate()
 
 int64 LRadioGroup::Value()
 {
-	if (Handle())
+	if (IsAttached())
 	{
 		int n = 0;
-		for (auto c: Children)
+		for (auto c: CollectButtons())
 		{
-			LRadioButton *Check = dynamic_cast<LRadioButton*>(c);
-			if (Check)
-			{
-				if (Check->Value())
-					return n;
-				n++;
-			}
+			if (c->Value())
+				return n;
+			n++;
 		}
 
 		return -1;
@@ -145,17 +158,13 @@ int64 LRadioGroup::Value()
 
 void LRadioGroup::Value(int64 Which)
 {
-	if (Handle())
+	if (IsAttached())
 	{
 		int n = 0;
-		for (auto c: Children)
+		for (auto c: CollectButtons())
 		{
-			LRadioButton *Check = dynamic_cast<LRadioButton*>(c);
-			if (Check)
-			{
-				Check->Value(n == Which);
-				n++;
-			}
+			c->Value(n == Which);
+			n++;
 		}
 	}
 	else
@@ -166,26 +175,23 @@ void LRadioGroup::Value(int64 Which)
 
 LRadioButton *LRadioGroup::Selected(const char *newSelection)
 {
-	for (auto w: Children)
+	for (auto c: CollectButtons())
 	{
-		if (auto btn = dynamic_cast<LRadioButton*>(w))
+		if (newSelection)
 		{
-			if (newSelection)
+			if (!Stricmp(newSelection, c->Name()))
 			{
-				if (!Stricmp(newSelection, btn->Name()))
-				{
-					btn->Value(true);
-					return btn;
-				}
+				c->Value(true);
+				return c;
 			}
-			else if (btn->Value())
-			{
-				return btn;
-			}
+		}
+		else if (c->Value())
+		{
+			return c;
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 int LRadioGroup::OnNotify(LViewI *Ctrl, const LNotification &n)
@@ -211,7 +217,7 @@ void LRadioGroup::OnPaint(LSurface *pDC)
 
 LRadioButton *LRadioGroup::Append(const char *name)
 {
-	LRadioButton *But = new LRadioButton(d->NextId++, name);
+	auto But = new LRadioButton(d->NextId++, name);
 	if (But)
 	{
 		Children.Insert(But);
@@ -469,7 +475,7 @@ void LRadioButton::Value(int64 i)
 			}
 			else
 			{
-				for (LViewI *c: GetParent()->IterateViews())
+				for (auto c: GetParent()->IterateViews())
 				{
 					auto b = dynamic_cast<LRadioButton*>(c);
 					if (b &&
