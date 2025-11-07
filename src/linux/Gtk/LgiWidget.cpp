@@ -1057,14 +1057,17 @@ lgi_widget_class_init(LgiWidgetClass *cls)
 	*/
 	widget_class->key_press_event				= lgi_widget_key_event;
 	widget_class->key_release_event				= lgi_widget_key_event;
-	widget_class->drag_begin					= lgi_widget_drag_begin;
-	widget_class->drag_end						= lgi_widget_drag_end;
-	widget_class->drag_data_get					= lgi_widget_drag_data_get;
-	widget_class->drag_data_delete				= lgi_widget_drag_data_delete;
-	widget_class->drag_leave					= lgi_widget_drag_leave;
-	widget_class->drag_motion					= lgi_widget_drag_motion;
-	widget_class->drag_drop						= lgi_widget_drag_drop;
-	widget_class->drag_data_received			= lgi_widget_drag_data_received;
+	
+	#if 0
+		widget_class->drag_begin					= lgi_widget_drag_begin;
+		widget_class->drag_end						= lgi_widget_drag_end;
+		widget_class->drag_data_get					= lgi_widget_drag_data_get;
+		widget_class->drag_data_delete				= lgi_widget_drag_data_delete;
+		widget_class->drag_leave					= lgi_widget_drag_leave;
+		widget_class->drag_motion					= lgi_widget_drag_motion;
+		widget_class->drag_drop						= lgi_widget_drag_drop;
+		widget_class->drag_data_received			= lgi_widget_drag_data_received;
+	#endif
 
 	GtkContainerClass *container_class = (GtkContainerClass*)cls;
 	container_class->add						= lgi_widget_add;

@@ -541,7 +541,7 @@ gboolean LWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 		{
 			GdkEventConfigure *c = &event->configure;
 			Pos.Set(c->x, c->y, c->x+c->width-1, c->y+c->height-1);
-			// printf("%s::GDK_CONFIGURE %s\n", GetClass(), Pos.GetStr());
+			printf("%s::GDK_CONFIGURE size=%s\n", GetClass(), Pos.GetStr());
 			OnPosChange();
 			return FALSE;
 			break;
@@ -664,8 +664,7 @@ GtkWindowRealize(GtkWidget *widget, LWindow *This)
 void
 GtkRootResize(GtkWidget *widget, GdkRectangle *r, LView *This)
 {
-	LWindow *w = This->GetWindow();
-	if (w)
+	if (auto w = This->GetWindow())
 	{
 		if (r)
 		{
@@ -693,7 +692,7 @@ bool DndPointMap(LViewI *&v, LPoint &p, LDragDropTarget *&t, LWindow *Wnd, int x
 	v = Wnd->ViewFromPoint(LPoint(x, y) - cli.TopLeft());
 	if (!v)
 	{
-		LgiTrace("%s:%i - <no view> @ %i,%i\n", _FL, x, y);
+		DND_ERROR("%s:%i - <no view> @ %i,%i\n", _FL, x, y);
 		return false;
 	}
 
@@ -709,7 +708,7 @@ bool DndPointMap(LViewI *&v, LPoint &p, LDragDropTarget *&t, LWindow *Wnd, int x
 	if (t)
 		return true;
 
-	// LgiTrace("%s:%i - No target for %s\n", _FL, v->GetClass());
+	DND_ERROR("%s:%i - No target for %s\n", _FL, v->GetClass());
 	return false;
 }
 
@@ -735,8 +734,13 @@ void
 LWindowDragDataReceived(GtkWidget *widget, GdkDragContext *context, gint x, gint y, GtkSelectionData *data, guint info, guint time, LWindow *Wnd)
 {
 	LPoint p;
-	LViewI *v;
-	LDragDropTarget *t;
+	LViewI *v = nullptr;
+	LDragDropTarget *t = nullptr;
+	auto wView = LWidgetToView(widget);
+	
+	printf("%s:%i - LWindowDragDataReceived wid=%p/%s\n",
+		_FL, widget, wView?wView->GetClass():"");
+	
 	if (!DndPointMap(v, p, t, Wnd, x, y))
 	{
 		LgiTrace("%s:%i - DndPointMap false.\n", _FL);
@@ -924,7 +928,7 @@ LWindowDragEnd(GtkWidget *widget, GdkDragContext *context, LWindow *Wnd)
 gboolean
 LWindowDragFailed(GtkWidget *widget, GdkDragContext *context, GtkDragResult result, LWindow *Wnd)
 {
-	DND_LOG("%s:%i - LWindowDragFailed cls=%s\n", _FL, Wnd->GetClass());
+	DND_LOG("%s:%i - LWindowDragFailed cls=%s result=%i\n", _FL, Wnd->GetClass(), result);
 	return false;
 }
 
@@ -940,8 +944,12 @@ LWindowDragMotion(GtkWidget *widget, GdkDragContext *context, gint x, gint y, gu
 	LPoint p;
 	LViewI *v;
 	LDragDropTarget *t;
+
 	if (!DndPointMap(v, p, t, Wnd, x, y))
+	{
+		DND_ERROR("%s:%i - DndPointMap failed\n", _FL);
 		return false;
+	}
 
 	// Store a handle to the view in LDragDropTarget. When it comes time
 	// for the 'end' event use that to call each target's OnDragExit method.
@@ -955,6 +963,8 @@ LWindowDragMotion(GtkWidget *widget, GdkDragContext *context, gint x, gint y, gu
 	if (Flags != DROPEFFECT_NONE)
 		gdk_drag_status(context, EffectToDragAction(Flags), time);
 
+	// DND_LOG("%s:%i - LWindowDragMotion=%i v=%s\n", _FL, Flags, v->GetClass());
+		
 	return Flags != DROPEFFECT_NONE;
 }
 

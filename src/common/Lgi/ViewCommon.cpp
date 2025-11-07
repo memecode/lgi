@@ -597,7 +597,9 @@ void LView::OnAttach()
 									(Gtk::GtkDestDefaults)0,
 									NULL,
 									0,
-									Gtk::GDK_ACTION_DEFAULT);
+									Gtk::GDK_ACTION_COPY |
+									Gtk::GDK_ACTION_MOVE |
+									Gtk::GDK_ACTION_LINK);
 			// printf("%s:%i - Drop dest for '%s'\n", _FL, GetClass());
 		}
 		else
@@ -1637,7 +1639,10 @@ bool GtkAddDragDest(LViewI *v, bool IsTarget)
 								(Gtk::GtkDestDefaults)0,
 								NULL,
 								0,
-								Gtk::GDK_ACTION_DEFAULT);
+								(Gtk::GdkDragAction)
+								(Gtk::GDK_ACTION_COPY |
+								 Gtk::GDK_ACTION_MOVE |
+								 Gtk::GDK_ACTION_LINK));
 	}
 	else
 	{

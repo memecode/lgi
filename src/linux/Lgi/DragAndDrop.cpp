@@ -13,13 +13,6 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/DragAndDrop.h"
 
-#if DEBUG_DND
-#define LOG(...)	printf(__VA_ARGS__)
-#else
-#define LOG(...)
-#endif
-#define ERROR(...)	printf(__VA_ARGS__)
-
 static int NextDndType = 600;
 static LHashTbl<ConstStrKey<char,false>, int> DndTypes(0, -1);
 
@@ -114,7 +107,10 @@ bool LDragDropSource::SetIcon(LSurface *Img, LRect *SubRgn)
 bool LDragDropSource::CreateFileDrop(LDragData *OutputData, LMouse &m, LString::Array &Files)
 {
 	if (!OutputData || !Files.First())
+	{
+		DND_ERROR("%s:%i - param error.\n", _FL);
 		return false;
+	}
 
 	LString::Array a;
 	for (auto f : Files)
@@ -122,7 +118,10 @@ bool LDragDropSource::CreateFileDrop(LDragData *OutputData, LMouse &m, LString::
 
 	auto s = LString("\n").Join(a);
 	if (!s)
+	{
+		DND_ERROR("%s:%i - no string.\n", _FL);
 		return false;
+	}
 
 	DND_LOG("%s:%i - LDragDropSource::CreateFileDrop=%s\n", _FL, s.Get());
 	OutputData->Data[0].SetBinary(s.Length(), s.Get());
@@ -156,7 +155,7 @@ LgiDragDataGet(GtkWidget        *widget,
 	auto Src = (LDragDropSource*)user_data;
 	if (!Src)
 	{
-		ERROR("%s:%i - no source.\n", _FL);
+		DND_ERROR("%s:%i - no source.\n", _FL);
 		return;
 	}
 
@@ -164,7 +163,7 @@ LgiDragDataGet(GtkWidget        *widget,
 	auto targets = gdk_drag_context_list_targets(context);
 	if (!targets)
 	{
-		ERROR("%s:%i - no target.\n", _FL);
+		DND_ERROR("%s:%i - no target.\n", _FL);
 		return;
 	}
 		
@@ -174,13 +173,13 @@ LgiDragDataGet(GtkWidget        *widget,
 		if (auto format = gdk_atom_name((GdkAtom)node->data))
 		{
 			data.New().Format = format;
-			LOG("%s:%i - fmt=%s\n", _FL, format);
+			DND_LOG("%s:%i - fmt=%s\n", _FL, format);
 		}
     }
 		
 	if (!Src->GetData(data))
 	{
-		ERROR("%s:%i - source failed to get data.\n", _FL);
+		DND_ERROR("%s:%i - source failed to get data.\n", _FL);
 		return;
 	}
 
@@ -211,7 +210,7 @@ LgiDragDataGet(GtkWidget        *widget,
 				else
 				{
 					LAssert(0);
-					ERROR("%s:%i - no string?\n", _FL);
+					DND_ERROR("%s:%i - no string?\n", _FL);
 				}
 				break;
 			}
@@ -229,14 +228,14 @@ LgiDragDataGet(GtkWidget        *widget,
 				else
 				{
 					LAssert(0);
-					ERROR("%s:%i - no binary?\n", _FL);
+					DND_ERROR("%s:%i - no binary?\n", _FL);
 				}
 				break;
 			}
 			default:
 			{
 				LAssert(!"Impl this data type?");
-				ERROR("%s:%i - type not implemented.\n", _FL);
+				DND_ERROR("%s:%i - type not implemented.\n", _FL);
 				break;
 			}
 		}
@@ -244,7 +243,7 @@ LgiDragDataGet(GtkWidget        *widget,
 
 	if (!count)
 	{
-		ERROR("%s:%i - no data items set.\n", _FL);
+		DND_ERROR("%s:%i - no data items set.\n", _FL);
 	}
 }
 
@@ -257,7 +256,7 @@ DragEnd(	GtkWidget      *widget,
 	auto Src = (LDragDropSource*)user_data;
 	if (!Src)
 	{
-		ERROR("%s:%i - no source.\n", _FL);
+		DND_ERROR("%s:%i - no source.\n", _FL);
 		return false;
 	}
 
@@ -294,14 +293,14 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 		#endif
 		)
 	{
-		ERROR("%s:%i - Error: No source window or handle.\n", _FL);
+		DND_ERROR("%s:%i - Error: No source window or handle.\n", _FL);
 		return -1;
 	}
 
 	LDragFormats Formats(true);
 	if (!GetFormats(Formats))
 	{
-		ERROR("%s:%i - Error: Failed to get source formats.\n", _FL);
+		DND_ERROR("%s:%i - Error: Failed to get source formats.\n", _FL);
 		return -1;
 	}
 	
@@ -319,14 +318,14 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 	auto w = SourceWnd->GetWindow();
 	if (!w)
 	{
-		ERROR("%s:%i - No Window.\n", _FL);
+		DND_ERROR("%s:%i - No Window.\n", _FL);
 		return -1;
 	}
 
 	d->SignalWnd = GTK_WIDGET(w->WindowHandle());
 	if (!d->SignalWnd)
 	{
-		ERROR("%s:%i - No GtkWidget.\n", _FL);
+		DND_ERROR("%s:%i - No GtkWidget.\n", _FL);
 		return -1;
 	}
 	
@@ -345,7 +344,7 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 			Si.Sig = g_signal_connect(G_OBJECT(d->SignalWnd), "drag-end", G_CALLBACK(DragEnd), this);
 		}
 	}
-	else ERROR("%s:%i - No signal window?\n", _FL);
+	else DND_ERROR("%s:%i - No signal window?\n", _FL);
 
 	LMouse m;
 	SourceWnd->GetMouse(m);
