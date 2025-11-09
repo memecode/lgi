@@ -625,7 +625,9 @@ bool LDebugContext::ParseFrameReference(const char *Frame, LAutoString &File, in
 
 void LDebugContext::Quit()
 {
-	if (d->Db)
+	if (!d->Db)
+		DBG_LOG("%s:%i no object\n", __func__);
+	else
 		d->Db->Unload([this](auto status)
 			{
 				if (!status)
@@ -647,14 +649,11 @@ void LDebugContext::Quit()
 
 bool LDebugContext::OnCommand(int Cmd)
 {
-	#if DEBUG_SESSION_LOGGING
-	LgiTrace("LDebugContext::OnCommand(%i)\n", Cmd);
-	#endif
-	
 	switch (Cmd)
 	{
 		case IDM_START_DEBUG:
 		{
+			DBG_LOG("%s(IDM_START_DEBUG) db=%p\n", __func__, d->Db.Get());
 			if (d->Db)
 			{
 				d->Db->SetRunning(true, nullptr);
@@ -663,12 +662,14 @@ bool LDebugContext::OnCommand(int Cmd)
 		}
 		case IDM_CONTINUE:
 		{
+			DBG_LOG("%s(IDM_CONTINUE) db=%p\n", __func__, d->Db.Get());
 			if (d->Db)
 				d->Db->SetRunning(true, nullptr);
 			break;
 		}
 		case IDM_ATTACH_TO_PROCESS:
 		{
+			DBG_LOG("%s(IDM_ATTACH_TO_PROCESS)\n", __func__);
 			auto dlg = new AttachToProcess(d->App);
 			dlg->DoModal([this, dlg](auto Dlg, auto Code)
 			{
@@ -681,6 +682,7 @@ bool LDebugContext::OnCommand(int Cmd)
 		}
 		case IDM_STOP_DEBUG:
 		{
+			DBG_LOG("%s(IDM_STOP_DEBUG) db=%p\n", __func__, d->Db.Get());
 			if (!d->Db)
 				return false;
 
@@ -689,41 +691,47 @@ bool LDebugContext::OnCommand(int Cmd)
 		}
 		case IDM_PAUSE_DEBUG:
 		{
+			DBG_LOG("%s(IDM_PAUSE_DEBUG) db=%p\n", __func__, d->Db.Get());
 			if (d->Db)
 				d->Db->SetRunning(false, nullptr);
 			break;
 		}
 		case IDM_RESTART_DEBUGGING:
 		{
+			DBG_LOG("%s(IDM_RESTART_DEBUGGING) db=%p\n", __func__, d->Db.Get());
 			if (d->Db)
 				d->Db->Restart(nullptr);
 			break;
 		}
 		case IDM_RUN_TO:
 		{
+			DBG_LOG("%s(IDM_RUN_TO) db=%p\n", __func__, d->Db.Get());
 			break;
 		}
 		case IDM_STEP_INTO:
 		{
-			printf("debugger IDM_STEP_INTO\n");
+			DBG_LOG("%s(IDM_STEP_INTO) db=%p\n", __func__, d->Db.Get());
 			if (d->Db)
 				d->Db->StepInto(nullptr);
 			break;
 		}
 		case IDM_STEP_OVER:
 		{
+			DBG_LOG("%s(IDM_STEP_OVER) db=%p\n", __func__, d->Db.Get());
 			if (d->Db)
 				d->Db->StepOver(nullptr);
 			break;
 		}
 		case IDM_STEP_OUT:
 		{
+			DBG_LOG("%s(IDM_STEP_OUT) db=%p\n", __func__, d->Db.Get());
 			if (d->Db)
 				d->Db->StepOut(nullptr);
 			break;
 		}
 		case IDM_TOGGLE_BREAKPOINT:
 		{
+			DBG_LOG("%s(IDM_TOGGLE_BREAKPOINT) db=%p\n", __func__, d->Db.Get());
 			break;
 		}
 		default:

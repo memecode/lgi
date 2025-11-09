@@ -1288,6 +1288,7 @@ public:
 
 	void Unload(TStatusCb cb) override
 	{
+		DBG_LOG("%s:%i - %i Running=%i cb=%i\n", _FL, __func__, Running, cb);
 		if (Running)
 			Break([this, cb](auto status)
 				{
@@ -2168,6 +2169,7 @@ public:
 
 	void Break(TStatusCb cb, bool SuppressFL = false) override
 	{
+		DBG_LOG("%s:%i - %i backend=%p ProcessId=%i\n", _FL, __func__, backend, ProcessId);
 		if (backend)
 		{
 			if (ProcessId < 0)
@@ -2224,8 +2226,12 @@ public:
 				SuppressNextFileLine = SuppressFL;
 				int result = kill(ProcessId, SIGINT);
 				auto ErrNo = errno;
+				DBG_LOG("%s:%i - %i kill(%i)=%i ErrNo=%i\n", _FL, __func__, ProcessId, result, ErrNo);
 				if (result)
 					LogMsg("%s:%i - SIGINT failed with %i(0x%x): %s (pid=%i)\n", _FL, ErrNo, ErrNo, LErrorCodeToString(ErrNo).Get(), ProcessId);
+
+				if (cb)
+					cb(result == 0);
 			#else
 				LAssert(!"Impl me");
 			#endif		

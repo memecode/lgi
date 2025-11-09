@@ -7,7 +7,12 @@
 
 #include "BreakPointStore.h"
 
-#define DEBUG_SESSION_LOGGING		0
+#define DEBUG_SESSION_LOGGING		1
+#if DEBUG_SESSION_LOGGING
+	#define DBG_LOG(...)			LgiTrace(__VA_ARGS__)
+#else
+	#define DBG_LOG(...)			;
+#endif
 
 class LDebugEvents : public LStream
 {
