@@ -900,9 +900,7 @@ class Gdb :
 			}
 		}
 
-		#if DEBUG_SESSION_LOGGING
-		LgiTrace("Gdb::Main - entering loop...\n");
-		#endif
+		DBG_LOG("Gdb::Main - entering loop...\n");
 		State = Looping;
 		
 		if (AttachToPid > 0)
@@ -1288,7 +1286,7 @@ public:
 
 	void Unload(TStatusCb cb) override
 	{
-		DBG_LOG("%s:%i - %i Running=%i cb=%i\n", _FL, __func__, Running, cb);
+		DBG_LOG("%s:%i - %s Running=%i cb=%i\n", _FL, __func__, Running, cb);
 		if (Running)
 			Break([this, cb](auto status)
 				{
@@ -1386,14 +1384,14 @@ public:
 
 	void OnError(LString msg, const char *fn, const char *file, int line)
 	{
-		if (Events)
-		{
-			LError err(	LErrorFuncFailed,
-						LString::Fmt("%s (fn=%s src=%s:%i)", msg.Get(), fn, file, line));
-			err.SrcFile = file;
-			err.SrcLine = line;
-			Events->OnError(err);
-		}
+		if (!Events)
+			return;
+
+		LError err(	LErrorFuncFailed,
+					LString::Fmt("%s (fn=%s src=%s:%i)", msg.Get(), fn, file, line));
+		err.SrcFile = file;
+		err.SrcLine = line;
+		Events->OnError(err);
 	}
 
 	void AddBpInternal(int id, TStatusCb cb)

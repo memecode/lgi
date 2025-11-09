@@ -79,7 +79,7 @@ public:
 	virtual void OnBeforeMain() {}
 	virtual void OnAfterMain() {}
 
-	// Register of threadId <-> texture names
+	// Register of threadId <-> thread names
 	static void RegisterThread(OsThreadId id, LString name);
 	static const char *GetThreadName(OsThreadId id);
 };

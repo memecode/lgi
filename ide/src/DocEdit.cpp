@@ -241,12 +241,14 @@ void DocEdit::OnMouseClick(LMouse &m)
 	)
 	{
 		// Margin click... work out the line
-		int Y = (VScroll) ? (int)VScroll->Value() : 0;
-		LFont *f = GetFont();
-		if (!f) return;
+		auto Y = GetScrollPos().y;
+		auto f = GetFont();
+		if (!f)
+			return;
+		
 		LCss::Len PaddingTop = GetCss(true)->PaddingTop();
-		int TopPx = PaddingTop.ToPx(GetClient().Y(), f);
-		int Idx = ((m.y - TopPx) / f->GetHeight()) + Y + 1;
+		auto TopPx = PaddingTop.ToPx(GetClient().Y(), f);
+		auto Idx = ((m.y - TopPx) / f->GetHeight()) + Y + 1;
 		if (Idx > 0 && Idx <= LTextView3::Line.Length())
 		{
 			Doc->OnMarginClick(Idx);

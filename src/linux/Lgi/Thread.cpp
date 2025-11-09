@@ -22,6 +22,7 @@ void *ThreadEntryPoint(void *i)
 	{
 		LThread *Thread = (LThread*) i;
 		Thread->ThreadId = LCurrentThreadId();
+		LThread::RegisterThread(Thread->ThreadId, Thread->Name);
 
 		// Make sure we have finished executing the setup
 		while (Thread->State == LThread::THREAD_INIT)

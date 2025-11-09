@@ -262,7 +262,10 @@ _GNU_SOURCE</Release>
 			</ApplicationIcon>
 			<Options>
 				<All />
-				<Linux />
+				<Linux>
+					<Debug>-Wno-format-truncation</Debug>
+					<Release>-Wno-format-truncation</Release>
+				</Linux>
 			</Options>
 		</Build>
 		<Editor>

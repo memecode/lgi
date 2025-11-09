@@ -2,6 +2,7 @@
 #include <errno.h>
 
 #include "lgi/common/Lgi.h"
+#include "lgi/common/Thread.h"
 
 //////////////////////////////////////////////////////////////////////////////
 char *SemPrint(OsSemaphore *s)
@@ -20,28 +21,18 @@ char *SemPrint(OsSemaphore *s)
 LMutex::LMutex(const char *name)
 {
     LAssert(name != NULL);
-	_Thread = 0;
-	_Count = 0;
-	File = 0;
-	Line = 0;
-	MaxLockTime = -1;
-	_Name = NewStr(name);
-	#ifdef _DEBUG
-	_DebugSem = false;
-	#endif
+	_Name = name;
 
 	#if defined WIN32
 	
-	// _Sem = CreateMutex(NULL, FALSE, NULL);
-	InitializeCriticalSection(&_Sem);
+		InitializeCriticalSection(&_Sem);
 	
 	#elif defined POSIX
 
-	ZeroObj(_Sem);
-	if (pthread_mutex_init(&_Sem, 0))
-	{
-		LgiTrace("%s:%i - Couldn't create mutex for LMutex\n", __FILE__, __LINE__);
-	}
+		if (pthread_mutex_init(&_Sem, 0))
+		{
+			LgiTrace("%s:%i - Couldn't create mutex for LMutex\n", __FILE__, __LINE__);
+		}
 
 	#endif
 }
@@ -50,17 +41,15 @@ LMutex::~LMutex()
 {
 	#if defined WIN32
 
-	// CloseHandle(_Sem);
-	// _Sem = 0;
-	DeleteCriticalSection(&_Sem);
+		// CloseHandle(_Sem);
+		// _Sem = 0;
+		DeleteCriticalSection(&_Sem);
 
 	#elif defined POSIX
 
-	pthread_mutex_destroy(&_Sem);
+		pthread_mutex_destroy(&_Sem);
 
 	#endif
-	
-	DeleteArray(_Name);
 }
 
 const char *LMutex::GetName()
@@ -70,45 +59,40 @@ const char *LMutex::GetName()
 
 void LMutex::SetName(const char *s)
 {
-	DeleteArray(_Name);
-	_Name = NewStr(s);
+	_Name = s;
 }
 
 bool LMutex::_Lock()
 {
 	#if defined WIN32
 
-	// LAssert(_Sem != 0);
-	// return WaitForSingleObject(_Sem, INFINITE) == WAIT_OBJECT_0;
-	EnterCriticalSection(&_Sem);
-	return true;
+		EnterCriticalSection(&_Sem);
 
 	#elif defined POSIX
 
-	if (pthread_mutex_trylock(&_Sem))
-	{
-		// printf("\t%s:%i - pthread_mutex_trylock errored: %s\n\t_Sem=%s\n", __FILE__, __LINE__, GetErrorName(errno), SemPrint(&_Sem));
-		return false;
-	}
-	
-	return true;
+		if (pthread_mutex_trylock(&_Sem))
+		{
+			// printf("\t%s:%i - pthread_mutex_trylock errored: %s\n\t_Sem=%s\n", __FILE__, __LINE__, GetErrorName(errno), SemPrint(&_Sem));
+			return false;
+		}
 
 	#endif
+
+	return true;
 }
 
 void LMutex::_Unlock()
 {
 	#if defined WIN32
 
-	// ReleaseMutex(_Sem);
-	LeaveCriticalSection(&_Sem);
+		LeaveCriticalSection(&_Sem);
 
 	#elif defined POSIX
 
-	if (pthread_mutex_unlock(&_Sem))
-	{
-		printf("\t%s:%i - pthread_mutex_unlock errored\n", _FL);
-	}
+		if (pthread_mutex_unlock(&_Sem))
+		{
+			printf("\t%s:%i - pthread_mutex_unlock errored\n", _FL);
+		}
 
 	#endif
 }
@@ -134,15 +118,6 @@ bool LMutex::Lock(const char *file, int line, bool NoTrace)
 				File = file;
 				Line = line;
 
-				/*
-				if (_Name && stricmp(_Name, "ScribeWnd") == 0)
-				{
-					char m[256];
-					sprintf_s(m, sizeof(m), "Lock '%s' by 0x%x, count=%i\n", _Name, _Thread, _Count);
-					OutputDebugString(m);
-				}
-				*/
-
 				Status = true;
 			}
 			_Unlock();
@@ -157,15 +132,17 @@ bool LMutex::Lock(const char *file, int line, bool NoTrace)
 		auto Now = LCurrentTime();
 		if (Warn && Now > Start + 5000 && !NoTrace)
 		{
-			LgiTrace("LMutex=%p(%s): Can't lock after %ims... LockingThread=%i ThisThread=%i Count=%i Locker=%s:%i.\n",
+			auto lockThreadName = LThread::GetThreadName(_Thread);
+			auto thisThreadName = LThread::GetThreadName(CurrentThread);
+			LgiTrace("LMutex=%p(%s): Can't lock after %ims... locking=%i/%s (%s:%i) cur=%i/%s count=%i\n",
 					this,
-					_Name,
+					_Name.Get(),
 					(int)(Now - Start),
-					_Thread,
-					CurrentThread,
-					_Count,
-					File,
-					Line);
+					// locking:
+					_Thread, lockThreadName, File, Line,
+					// cur:
+					CurrentThread, thisThreadName,
+					_Count);
 			Start = Now;
 
 			// Warn = false;
@@ -180,12 +157,6 @@ bool LMutex::Lock(const char *file, int line, bool NoTrace)
 		#endif
 	}
 
-	#ifdef _DEBUG
-    /*
-	if (_DebugSem)
-		LStackTrace("%p::Lock %i\n", this, _Count);
-    */
-	#endif
 	return Status;
 }
 
@@ -220,23 +191,11 @@ bool LMutex::LockWithTimeout(int Timeout, const char *file, int line)
 		}
 	}
 
-	#ifdef _DEBUG
-    /*
-	if (_DebugSem)
-		LStackTrace("%p::LockWi %i\n", this, _Count);
-    */
-	#endif
 	return Status;
 }
 
 void LMutex::Unlock()
 {
-	#ifdef _DEBUG
-    /*
-	if (_DebugSem)
-		LStackTrace("%p::Unlock %i\n", this, _Count);
-    */
-	#endif
 	while (!_Lock())
 	{
 		LSleep(1);

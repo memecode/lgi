@@ -1980,6 +1980,7 @@ AppWnd::AppWnd()
 	
 	d->DocBpCallback = d->BreakPoints.AddCallback([this](auto event, auto id)
 		{
+			printf("%s:%i - event=%i\n", _FL, event);
 			if (event == BreakPointStore::TBreakPointAdded ||
 				event == BreakPointStore::TBreakPointDeleted)
 			{
@@ -1990,10 +1991,10 @@ AppWnd::AppWnd()
 					if (auto doc = FindOpenFile(bp.File))
 					{
 						auto added = event == BreakPointStore::TBreakPointAdded;
-						// GetBuildLog()->Print("OnBreakPoint(%s, %i)\n", bp.File.Get(), added);
+						printf("OnBreakPoint(%s, %i)\n", bp.File.Get(), added);
 						doc->OnBreakPoint(id, added);
 					}
-					// else GetBuildLog()->Print("%s:%i - no file '%s'\n", _FL, bp.File.Get());					
+					else printf("%s:%i - no file '%s'\n", _FL, bp.File.Get());					
 				}
 			}
 		});
@@ -2353,10 +2354,7 @@ void AppWnd::OnReceiveFiles(LArray<const char*> &Files)
 void AppWnd::OnDebugState(bool Debugging, bool Running)
 {
 	// Make sure this event is processed in the GUI thread.
-	#if DEBUG_SESSION_LOGGING
-	LgiTrace("AppWnd::OnDebugState(%i,%i) InThread=%i\n", Debugging, Running, InThread());
-	#endif
-	
+	// DBG_LOG("AppWnd::OnDebugState(%i,%i) InThread=%i\n", Debugging, Running, InThread());
 	PostEvent(M_DEBUG_ON_STATE, Debugging, Running);
 }
 
@@ -3220,18 +3218,22 @@ void AppWnd::GotoReference(const char *File, int Line, bool CurIp, bool WithHist
 IdeDoc *AppWnd::FindOpenFile(char *FileName)
 {
 	if (!FileName)
-		return NULL;
+	{
+		printf("%s:%i - no filename\n", _FL);
+		return nullptr;
+	}
 
 	List<IdeDoc>::I it = d->Docs.begin();
 	for (IdeDoc *i=*it; i; i=*++it)
 	{
 		auto f = i->GetFileName();
-		if (f)
+		if (!f)
+			printf("%s:%i - doc has no filename\n", _FL);
+		else
 		{
-			IdeProject *p = i->GetProject();
-			if (p)
+			if (auto p = i->GetProject())
 			{
-				LAutoString Base = p->GetBasePath();
+				auto Base = p->GetBasePath();
 				if (Base)
 				{
 					char Path[MAX_PATH_LEN];
@@ -3240,9 +3242,11 @@ IdeDoc *AppWnd::FindOpenFile(char *FileName)
 					else
 						strcpy_s(Path, sizeof(Path), f);
 
+					printf("FindOpenFile(%s),%s\n", FileName, Path);
 					if (stricmp(Path, FileName) == 0)
 						return i;
 				}
+				else printf("%s:%i - project has no base path\n", _FL);
 			}
 			else
 			{
@@ -3252,7 +3256,7 @@ IdeDoc *AppWnd::FindOpenFile(char *FileName)
 		}
 	}
 
-	return 0;
+	return nullptr;
 }
 
 void AppWnd::OnNewDoc(IdeProject *Proj, IdeDoc *Doc)

@@ -177,13 +177,9 @@ public:
 	
 	~LDebugContextPriv()
 	{
-		#if DEBUG_SESSION_LOGGING
-		LgiTrace("~LDebugContextPriv freeing debugger...\n");
-		#endif
+		DBG_LOG("~LDebugContextPriv freeing debugger...\n");
 		Db.Reset();
-		#if DEBUG_SESSION_LOGGING
-		LgiTrace("...done.\n");
-		#endif
+		DBG_LOG("...done.\n");
 	}
 
 	void UpdateThreads()
@@ -363,9 +359,7 @@ LMessage::Param LDebugContext::OnEvent(LMessage *m)
 	{
 		case M_ON_CRASH:
 		{
-			#if DEBUG_SESSION_LOGGING
-			LgiTrace("LDebugContext::OnEvent(M_ON_CRASH)\n");
-			#endif
+			DBG_LOG("LDebugContext::OnEvent(M_ON_CRASH)\n");
 			d->UpdateCallStack();
 			break;
 		}
@@ -904,9 +898,7 @@ void LDebugContext::OnMemoryDump(const char *Addr, int WordSize, int Width, bool
 
 void LDebugContext::OnState(bool Debugging, bool Running)
 {
-	#if DEBUG_SESSION_LOGGING
-	LgiTrace("LDebugContext::OnState(%i, %i)\n", Debugging, Running);
-	#endif
+	DBG_LOG("LDebugContext::OnState(%i, %i) start\n", Debugging, Running);
 	
 	if (d->InDebugging != Debugging && d->Db)
 		d->InDebugging = Debugging;
@@ -914,9 +906,7 @@ void LDebugContext::OnState(bool Debugging, bool Running)
 	if (d->App)
 		d->App->OnDebugState(Debugging, Running);
 	
-	#if DEBUG_SESSION_LOGGING
-	LgiTrace("LDebugContext::OnState(%i, %i) ###ENDED###\n", Debugging, Running);
-	#endif
+	DBG_LOG("LDebugContext::OnState(%i, %i) end\n", Debugging, Running);
 	
 	// This object may be deleted at this point... don't access anything.
 }

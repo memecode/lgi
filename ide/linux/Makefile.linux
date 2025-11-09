@@ -19,13 +19,11 @@ CFlags = -MMD -MP -fPIC -fno-inline
 CppFlags = $(CFlags) -fpermissive -std=c++14
 
 ifeq ($(Build),Debug)
-	CFlags += -g
-	CppFlags += -g
+	CFlags += -g -Wno-format-truncation
+	CppFlags += -g -Wno-format-truncation
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DHAS_LIBSSH
 	Libs =  \
-		-L../../deps/build-x64-debug/lib \
-		-liconv \
 		-lssh \
 		-lmagic \
 		-lpthread \
@@ -33,16 +31,16 @@ ifeq ($(Build),Debug)
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I../include \
-		-I../include/lgi/linux/Gtk \
 		-I./src \
 		-I./resources \
-		-I../private/common \
+		`pkg-config --cflags gtk+-3.0` \
 		-I../include/lgi/linux \
-		`pkg-config --cflags gtk+-3.0`
+		-I../include \
+		-I../private/common \
+		-I../include/lgi/linux/Gtk
 else
-	CFlags += -s -Os
-	CppFlags += -s -Os
+	CFlags += -s -Os -Wno-format-truncation
+	CppFlags += -s -Os -Wno-format-truncation
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DHAS_LIBSSH
 	Libs =  \
 		-lssh \
@@ -52,31 +50,36 @@ else
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I../private/common \
-		-I./src \
 		-I../include \
-		-I../include/lgi/linux \
-		-I./resources \
 		-I../include/lgi/linux/Gtk \
-		`pkg-config --cflags gtk+-3.0`
+		`pkg-config --cflags gtk+-3.0` \
+		-I../include/lgi/linux \
+		-I../private/common \
+		-I./resources \
+		-I./src
 endif
 
 # Dependencies
-Source =	../src/common/Text/TextView4.cpp \
-			../src/common/Text/Html.cpp \
-			src/History.cpp \
+Source =	../src/common/Net/OpenSSLSocket.cpp \
+			src/LgiUtils.cpp \
 			src/DocEdit.cpp \
-			../src/common/Text/HtmlCommon.cpp \
-			../src/common/Net/OpenSSLSocket.cpp \
-			../src/common/Lgi/LgiMain.cpp \
-			../src/common/Lgi/Mdi.cpp \
-			src/DebugContext.cpp \
 			src/WebFldDlg.cpp \
-			../src/common/Text/DocView.cpp \
-			../src/common/Text/HtmlParser.cpp \
-			../src/common/Text/Homoglyphs/Homoglyphs.cpp \
-			../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
 			../src/common/Lgi/RemoteFileSelect.cpp \
+			../src/common/Text/HtmlCommon.cpp \
+			../src/common/Text/DocView.cpp \
+			../src/common/Text/TextView4.cpp \
+			src/IdeDoc.cpp \
+			../src/common/Text/Html.cpp \
+			src/LgiIde.cpp \
+			../src/common/Text/Homoglyphs/Homoglyphs.cpp \
+			../src/common/Text/HtmlParser.cpp \
+			../src/common/Lgi/LgiMain.cpp \
+			src/DebugContext.cpp \
+			../src/common/Lgi/Mdi.cpp \
+			../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
+			src/Debugger.cpp \
+			../src/common/Net/Http.cpp \
+			src/History.cpp \
 			../src/common/Coding/ParseCpp.cpp \
 			../src/common/Text/RemoveAnsi.cpp \
 			../src/common/Text/TextConvert.cpp \
@@ -98,12 +101,7 @@ Source =	../src/common/Text/TextView4.cpp \
 			../src/common/Coding/LexCpp.cpp \
 			src/IdeCommon.cpp \
 			src/MemDumpViewer.cpp \
-			src/SpaceTabConv.cpp \
-			src/IdeDoc.cpp \
-			src/Debugger.cpp \
-			src/LgiUtils.cpp \
-			src/LgiIde.cpp \
-			../src/common/Net/Http.cpp
+			src/SpaceTabConv.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -132,7 +130,8 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 		$(Target) $(Objects) $(Libs)
 	@echo Done.
 
-../$(BuildDir)/liblgi-gtk3$(Tag).so : ../../deps/build-x64-debug/include/jconfig.h \
+../$(BuildDir)/liblgi-gtk3$(Tag).so : ../../deps/build-x64-debug/include/iconv.h \
+	../../deps/build-x64-debug/include/jconfig.h \
 	../../deps/build-x64-debug/include/jerror.h \
 	../../deps/build-x64-debug/include/jmorecfg.h \
 	../../deps/build-x64-debug/include/jpeglib.h \
@@ -444,9 +443,9 @@ cleanall :
 	+make -C "../" -f ./linux/Makefile.linux clean
 
 VPATH=$(BuildDir) \
-	../src/common/Text \
 	../src/common/Text/Homoglyphs \
-	../src/common/Net \
+	../src/common/Text \
 	../src/common/Lgi \
+	../src/common/Net \
 	./src \
 	../src/common/Coding

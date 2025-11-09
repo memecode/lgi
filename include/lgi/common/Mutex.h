@@ -8,21 +8,21 @@
 /// This is a re-enterant mutex class for thread locking.
 class LgiClass LMutex
 {
-	OsThreadId _Thread;
-	OsSemaphore _Sem;
-	const char *File;
-	int Line;
-	int MaxLockTime; // Warn if locked too long, default off (-1)
+	OsThreadId _Thread = 0;
+	OsSemaphore _Sem = {};
+	const char *File = nullptr;
+	int Line = 0;
+	int MaxLockTime = -1; // Warn if locked too long, default off (-1)
 	#ifdef _DEBUG
-	bool _DebugSem;
+	bool _DebugSem = false;
 	#endif
 	
 	bool _Lock();
 	void _Unlock();
-	char *_Name;
+	LString _Name;
 
 protected:
-	int _Count;
+	int _Count = 0;
 
 public:
 	/// Constructor

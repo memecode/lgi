@@ -1645,7 +1645,7 @@ bool GtkAddDragDest(LViewI *v, bool IsTarget)
 			targets.Add({(Gtk::gchar*)"text/plain", 0, 0});
 			targets.Add({(Gtk::gchar*)"text/uri-list", 0, 0});
 			
-			LgiTrace("%s:%i - gtk_drag_dest_set on %s\n", _FL, v->GetClass());
+			// LgiTrace("%s:%i - gtk_drag_dest_set on %s\n", _FL, v->GetClass());
 
 			Gtk::gtk_drag_dest_set(	wid,
 									Gtk::GTK_DEST_DEFAULT_ALL,

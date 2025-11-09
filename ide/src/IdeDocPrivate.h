@@ -8,18 +8,18 @@
 class EditTray : public LLayout
 {
 	LRect FileBtn;
-	LEdit *FileSearch;
+	LEdit *FileSearch = nullptr;
 
 	LRect FuncBtn;
-	LEdit *FuncSearch;
+	LEdit *FuncSearch = nullptr;
 
 	LRect SymBtn;
-	LEdit *SymSearch;
+	LEdit *SymSearch = nullptr;
 
 	LRect TextMsg;
 
-	LTextView3 *Ctrl;
-	IdeDoc *Doc;
+	LTextView3 *Ctrl = nullptr;
+	IdeDoc *Doc = nullptr;
 
 public:
 	int Line, Col;
@@ -45,15 +45,15 @@ class IdeDocPrivate : public NodeView, public LMutex
 	LString Buffer;
 
 public:
-	IdeDoc *Doc = NULL;
-	AppWnd *App = NULL;
-	IdeProject *Project = NULL;
+	IdeDoc *Doc = nullptr;
+	AppWnd *App = nullptr;
+	IdeProject *Project = nullptr;
 	LDateTime ModTs;
-	class DocEdit *Edit = NULL;
-	EditTray *Tray = NULL;
-	class ProjFilePopup *FilePopup = NULL;
-	class ProjMethodPopup *MethodPopup = NULL;
-	class ProjSymPopup *SymPopup = NULL;
+	class DocEdit *Edit = nullptr;
+	EditTray *Tray = nullptr;
+	class ProjFilePopup *FilePopup = nullptr;
+	class ProjMethodPopup *MethodPopup = nullptr;
+	class ProjSymPopup *SymPopup = nullptr;
 	LString::Array WriteBuf;
 	LAutoPtr<LThread> Build;
 	LHashTbl<IntKey<ssize_t>, int> BreakPoints;
