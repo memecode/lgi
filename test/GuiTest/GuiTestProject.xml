@@ -3,7 +3,7 @@
 	<Node Name="Source" Type="1" Platforms="15" Id="1">
 		<Node File="../../src/common/Db/DbTable.cpp" Type="2" Platforms="15" />
 		<Node File="../../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="15" />
-		<Node File="./Main.cpp" Type="2" Platforms="15" />
+		<Node File="./src/Main.cpp" Type="2" Platforms="15" />
 	</Node>
 	<Node Name="Headers" Type="1" Platforms="15" Id="2" />
 	<Node File="../../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
@@ -18,25 +18,22 @@
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
-			<ShowWhiteSpace />
-			<CommentFile />
-			<CommentFunction />
 		</Editor>
 		<General>
 			<Makefile>
 				<Haiku>haiku/Makefile.haiku</Haiku>
-				<Linux>Makefile.linux</Linux>
+				<Linux>./linux/Makefile.linux</Linux>
 			</Makefile>
 			<Executable>
 				<Haiku>
 					<Debug>gui_test</Debug>
 					<Release>gui_test</Release>
 				</Haiku>
-				<Linux />
+				<Linux>
+					<Debug>./gui_test</Debug>
+					<Release>./gui_test</Release>
+				</Linux>
 			</Executable>
-			<Compiler />
-			<CCrossCompiler />
-			<CppCrossCompiler />
 		</General>
 		<Build>
 			<TargetType>
@@ -61,8 +58,6 @@
 					<Debug>_GNU_SOURCE</Debug>
 					<Release>_GNU_SOURCE</Release>
 				</Haiku>
-				<All />
-				<Linux />
 			</Defines>
 			<Libraries>
 				<Haiku>
@@ -71,7 +66,6 @@ gnu</Debug>
 					<Release>be
 gnu</Release>
 				</Haiku>
-				<All />
 				<Linux>
 					<Debug>magic
 pthread
@@ -93,32 +87,16 @@ pthread
 `pkg-config --cflags gstreamer-1.0`</Release>
 				</Linux>
 			</SystemIncludes>
-			<LibraryPaths>
-				<All />
-				<Linux />
-			</LibraryPaths>
-			<TargetName>
-				<Linux />
-			</TargetName>
-			<ApplicationIcon />
+			<LibraryPaths />
+			<TargetName />
+			<Options />
 		</Build>
 		<Advanced>
-			<OtherMakefileRules />
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
+			<PostBuildCommands />
 		</Advanced>
 		<Debug>
-			<Environment />
-			<Arguments>
-				<All />
-			</Arguments>
-			<DebugAdmin />
-			<InitialDir />
+			<Arguments />
 		</Debug>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
+		<Remote />
 	</Settings>
 </Project>

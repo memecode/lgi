@@ -169,13 +169,33 @@ public:
 
 class DnDtarget : public LTextLog
 {
+	bool first = true;
+	
 public:
+	const char *GetClass() const { return "DnDtarget"; }
+
 	DnDtarget() : LTextLog(10)
 	{
+		Print("%s...\n", GetClass());
+		DropTarget(true);
 	}
 
 	int WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState)
 	{
+		if (first)
+		{
+			first = false;
+			for (auto &f: Formats.GetAll())
+				Print("%s: %s\n", __func__, f.Get());
+		}
+
+		// Set them all to supported... that was the drop can enumerate things:
+		for (auto &f: Formats.GetAll())
+		{
+			if (!f.Equals("DELETE"))
+				Formats.Supports(f);
+		}
+		
 		return DROPEFFECT_COPY;
 	}
 
@@ -351,12 +371,12 @@ public:
 				box->AddView(clicks = new ClickTest(ID_CLICK_TEST));
 				box->AddView(clicks->log = log = new LTextLog(ID_LOG));
 
-			#elif 1
+			#elif 0
 
 				// AddView(new OriginTest(20, 10, 0));
 				AddView(new RepaintTest(20, 100));
 
-			#elif 0
+			#elif 1
 
 				LTabView *t = new LTabView(100);
 				t->Attach(this);

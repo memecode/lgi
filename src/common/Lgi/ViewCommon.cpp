@@ -238,6 +238,9 @@ bool LView::CommonEvents(LMessage::Result &result, LMessage *Msg)
 		case M_PULSE:
 		{
 			OnPulse();
+
+			for (auto t: d->EventTargets)
+				t->OnPulse();
 			break;
 		}
 		case M_SET_CTRL_NAME:
@@ -1632,22 +1635,38 @@ bool GtkAddDragDest(LViewI *v, bool IsTarget)
 		return false;
 	auto wid = GtkCast(w->WindowHandle(), gtk_widget, GtkWidget);
 
+	#if 1
 	if (IsTarget)
 	{
-		LgiTrace("%s:%i - gtk_drag_dest_set on %s\n", _FL, v->GetClass());
-		Gtk::gtk_drag_dest_set(	wid,
-								(Gtk::GtkDestDefaults)0,
-								NULL,
-								0,
-								(Gtk::GdkDragAction)
-								(Gtk::GDK_ACTION_COPY |
-								 Gtk::GDK_ACTION_MOVE |
-								 Gtk::GDK_ACTION_LINK));
+		if (auto t = v->DropTarget())
+		{
+			LArray<Gtk::GtkTargetEntry> targets;
+			targets.Add({(Gtk::gchar*)"STRING", 0, 0});
+			targets.Add({(Gtk::gchar*)"text/plain", 0, 0});
+			targets.Add({(Gtk::gchar*)"text/uri-list", 0, 0});
+			
+			LgiTrace("%s:%i - gtk_drag_dest_set on %s\n", _FL, v->GetClass());
+
+			Gtk::gtk_drag_dest_set(	wid,
+									Gtk::GTK_DEST_DEFAULT_ALL,
+									#if 0
+										nullptr,
+										0,
+									#else
+										targets.AddressOf(),
+										targets.Length(),
+									#endif
+									(Gtk::GdkDragAction)
+									(Gtk::GDK_ACTION_COPY |
+									 Gtk::GDK_ACTION_MOVE |
+									 Gtk::GDK_ACTION_LINK));
+		}
 	}
 	else
 	{
 		Gtk::gtk_drag_dest_unset(wid);
 	}
+	#endif
 	
 	for (auto c: v->IterateViews())
 		GtkAddDragDest(c, IsTarget);

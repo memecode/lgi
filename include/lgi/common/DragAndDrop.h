@@ -288,6 +288,7 @@ private:
 		
 		static LArray<int> Handles;
 		LArray<LDragData> Data;
+		LString::Array acceptedFormats;
 		
 	#endif
 

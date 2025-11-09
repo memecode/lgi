@@ -738,15 +738,15 @@ LWindowDragDataReceived(GtkWidget *widget, GdkDragContext *context, gint x, gint
 	LDragDropTarget *t = nullptr;
 	auto wView = LWidgetToView(widget);
 	
-	printf("%s:%i - LWindowDragDataReceived wid=%p/%s\n",
-		_FL, widget, wView?wView->GetClass():"");
+	printf("%s:%i - LWindowDragDataReceived wid=%p/%s wnd=%s\n",
+		_FL, widget, wView?wView->GetClass():nullptr, Wnd?Wnd->GetClass():nullptr);
 	
 	if (!DndPointMap(v, p, t, Wnd, x, y))
 	{
 		LgiTrace("%s:%i - DndPointMap false.\n", _FL);
 		return;
 	}
-
+	
 	bool matched = false;
 	auto type = gdk_atom_name(gtk_selection_data_get_data_type(data));
 	for (auto &d: t->Data)
@@ -773,10 +773,11 @@ LWindowDragDataReceived(GtkWidget *widget, GdkDragContext *context, gint x, gint
 	if (!matched)
 		LgiTrace("%s:%i - LWindowDragDataReceived: no matching data '%s'.\n", _FL, type);
 
+	DND_LOG("%s:%i - t=%p t->Data.len=%i\n", _FL, t, (int)t->Data.Length());
 	Wnd->PostEvent(M_DND_DATA_RECEIVED);
 }
 
-int GetAcceptFmts(LString::Array &Formats, GdkDragContext *context, LDragDropTarget *t, LPoint &p)
+int GetAcceptFmts(LString::Array &Formats, GdkDragContext *context, LViewI *v, LDragDropTarget *t, LPoint &p)
 {
 	int KeyState = 0;
 	LDragFormats Fmts(true);
@@ -787,7 +788,6 @@ int GetAcceptFmts(LString::Array &Formats, GdkDragContext *context, LDragDropTar
 	{
 		if (auto a = gdk_atom_name((GdkAtom)i->data))
 		{
-			// DND_LOG("%s:%i - accept fmt: %s\n", _FL, a);
 			Fmts.Supports(a);
 		}
 		else
@@ -797,14 +797,42 @@ int GetAcceptFmts(LString::Array &Formats, GdkDragContext *context, LDragDropTar
 		i = i->next;
 	}
 
+	DND_LOG("%s:%i %s - accept fmts: %s\n", _FL, __func__, LString(",").Join(Fmts.GetAll()).Get());
+
 	Fmts.SetSource(false);
 	auto Flags = t->WillAccept(Fmts, p, KeyState);
 	auto sup = Fmts.GetSupported();
 	if (sup.Length())
+	{
 		Formats += sup;
+
+		if (Gtk::GtkWidget *wid = GTK_WIDGET(v->WindowHandle()))
+		{
+			LArray<Gtk::GtkTargetEntry> matches;
+			for (auto &s: sup)
+			{
+				auto &m = matches.New();
+				m.target = s;
+				m.flags = 0;
+				m.info = 0;
+			}
+		
+			Gtk::gtk_drag_dest_set(	wid,
+									Gtk::GTK_DEST_DEFAULT_ALL,
+									matches.AddressOf(),
+									matches.Length(),
+									(Gtk::GdkDragAction)
+									(Gtk::GDK_ACTION_COPY |
+									 Gtk::GDK_ACTION_MOVE |
+									 Gtk::GDK_ACTION_LINK));
+		}
+		else DND_ERROR("%s:%i - can't get GtkWidget.\n", _FL);
+	}
 	else
+	{
 		DND_ERROR("%s:%i - %s no supported formats in '%s'\n",
 			_FL, t->GetClass(), Fmts.ToString().Get());
+	}
 	
 	return Flags;
 }
@@ -813,22 +841,28 @@ struct LGtkDrop : public LView::ViewEventTarget
 {
 	uint64_t Start = 0;
 	LPoint p;
-	LViewI *v = NULL;
-	LDragDropTarget *t = NULL;
+	LViewI *v = nullptr;
+	LDragDropTarget *t = nullptr;
+	LWindow *wnd = nullptr;
+	GdkDragContext *context = nullptr;
+	guint time = 0;
 
 	LArray<LDragData> Data;
-	LString::Array Formats;
+	// LString::Array Formats;
 	int KeyState = 0;
 	int Flags = 0;
 	
 	const char *GetClass() { return "LGtkDrop"; }
 	
 	LGtkDrop(GtkWidget *widget,
-			 GdkDragContext *context,
+			 GdkDragContext *Context,
 			 gint x, gint y,
-			 guint time,
+			 guint Time,
 			 LWindow *Wnd)
 		: LView::ViewEventTarget(Wnd, M_DND_DATA_RECEIVED)
+		, wnd(Wnd)
+		, context(Context)
+		, time(Time)
 	{
 		DND_LOG("%s:%i - LGtkDrop created...\n", _FL);
 		Start = LCurrentTime();
@@ -843,24 +877,28 @@ struct LGtkDrop : public LView::ViewEventTarget
 		t->Data.Length(0);
 		
 		// Request the data...
-		Flags = GetAcceptFmts(Formats, context, t, p);
-		if (Formats.Length() == 0)
+		if (t->acceptedFormats.Length() == 0)
 		{
 			DND_ERROR("%s:%i - no accept formats!\n", _FL);
 			PostEvent(M_DND_DATA_RECEIVED);
 		}
 		else
 		{
-			for (auto f: Formats)
-			{
+			auto hnd = GTK_WIDGET(Wnd->WindowHandle());
+		
+			for (auto f: t->acceptedFormats)
 				t->Data.New().Format = f;
-				DND_LOG("%s:%i accept fmt: %s\n", _FL, f.Get());
-				gtk_drag_get_data(widget, context, gdk_atom_intern(f, true), time);
-			}
-		}	
-	
+
+			// Start the first one... sigh. If only you know, we could do them all in one go?!
+			DND_LOG("%s:%i gtk_drag_get_data: %s\n", _FL, t->acceptedFormats[0].Get());
+			gtk_drag_get_data(hnd, context, gdk_atom_intern(t->acceptedFormats[0], true), time);
+		}
+		
+		DND_LOG("%s:%i - t->Data formats=%i target=%p\n", _FL, (int)t->Data.Length(), t);
+		
 		// Callbacks should be received by LWindowDragDataReceived
 		// Once they have all arrived or the timeout has been reached we call OnComplete
+		Wnd->SetPulse(500);
 	}
 	
 	~LGtkDrop()
@@ -875,14 +913,31 @@ struct LGtkDrop : public LView::ViewEventTarget
 			case M_DND_DATA_RECEIVED:
 			{
 				size_t HasData = 0;
-				for (auto d: t->Data)
+				const char *firstEmpty = nullptr;
+				for (auto &d: t->Data)
+				{
 					if (d.Data.Length() > 0)
 						HasData++;
+					else if (!firstEmpty)
+						firstEmpty = d.Format;
+				}
 
 				DND_LOG("%s:%i - Got M_DND_DATA_RECEIVED %i of %i\n",
-					_FL, (int)HasData, (int)Formats.Length());
-				OnComplete(false);
-				return OBJ_DELETED;
+					_FL, (int)HasData, (int)t->Data.Length());
+					
+				if (HasData >= t->Data.Length())
+				{
+					OnComplete(false);
+					return OBJ_DELETED;
+				}
+				else if (firstEmpty)
+				{
+					// Request the next format:
+					auto hnd = GTK_WIDGET(wnd->WindowHandle());
+					DND_LOG("%s:%i gtk_drag_get_data: %s\n", _FL, firstEmpty);
+					gtk_drag_get_data(hnd, context, gdk_atom_intern(firstEmpty, true), time);
+				}
+				break;
 			}
 		}
 		return 0;
@@ -892,7 +947,7 @@ struct LGtkDrop : public LView::ViewEventTarget
 	{
 		auto now = LCurrentTime();
 		DND_LOG("%s:%i - LGtkDrop::OnPulse %i\n", _FL, (int)(now - Start));
-		if (now - Start >= 5000)
+		if (now - Start >= 3000)
 		{
 			OnComplete(true);
 		}
@@ -942,8 +997,8 @@ gboolean
 LWindowDragMotion(GtkWidget *widget, GdkDragContext *context, gint x, gint y, guint time, LWindow *Wnd)
 {
 	LPoint p;
-	LViewI *v;
-	LDragDropTarget *t;
+	LViewI *v = nullptr;
+	LDragDropTarget *t = nullptr;
 
 	if (!DndPointMap(v, p, t, Wnd, x, y))
 	{
@@ -957,13 +1012,18 @@ LWindowDragMotion(GtkWidget *widget, GdkDragContext *context, gint x, gint y, gu
 	if (LDragDropTarget::Handles.IndexOf(hnd) < 0)
 		LDragDropTarget::Handles.Add(hnd);
 
-	LString::Array Formats;
-	int Flags = GetAcceptFmts(Formats, context, t, p);
-	
+	t->acceptedFormats.Empty();
+	int Flags = GetAcceptFmts(t->acceptedFormats, context, v, t, p);
+
 	if (Flags != DROPEFFECT_NONE)
 		gdk_drag_status(context, EffectToDragAction(Flags), time);
 
-	// DND_LOG("%s:%i - LWindowDragMotion=%i v=%s\n", _FL, Flags, v->GetClass());
+	#if 0
+		GdkDragAction action = gdk_drag_context_get_actions(context);
+		GdkDragProtocol proto = gdk_drag_context_get_protocol(context);
+		DND_LOG("%s:%i - LWindowDragMotion=%i v=%s act=%x proto=%i\n",
+			_FL, Flags, v->GetClass(), action, proto);
+	#endif
 		
 	return Flags != DROPEFFECT_NONE;
 }
@@ -1535,7 +1595,7 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 			
 			if (Position.Valid())
 			{
-				printf("SerializeState setpos %s\n", Position.GetStr());
+				// printf("SerializeState setpos %s\n", Position.GetStr());
 				SetPos(Position);
 			}
 			
@@ -1547,7 +1607,7 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 	{
 		LWindowZoom State = GetZoom();
 		auto s = LString::Fmt("State=%i;Pos=%s", (int)State, GetPos().GetStr());
-		printf("SerializeState store: %s\n", s.Get());
+		// printf("SerializeState store: %s\n", s.Get());
 		if (!Store->SetValue(FieldName, v = s))
 			return false;
 	}

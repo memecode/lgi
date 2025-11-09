@@ -309,7 +309,7 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 	{
 		auto &entry = e.New();
 		entry.target = f;
-		entry.flags = 0;
+		entry.flags = (int) (Gtk::GTK_TARGET_SAME_APP | Gtk::GTK_TARGET_OTHER_APP);
 		entry.info = GtkGetDndType(f);
 	}
 	
@@ -352,8 +352,10 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 	if (m.Left()) btn = 1;
 	else if (m.Middle()) btn = 2;
 	else if (m.Right()) btn = 3;
+	
 	d->Ctx = gtk_drag_begin_with_coordinates(d->SignalWnd, Targets, Action, btn, NULL, m.x, m.y);
-
+	gtk_target_list_unref(Targets);
+	
 	#if 0 // Not working, who the fuck knows why. GTK is suck.
 		if (!d->Ico && !Icon)
 			d->Ico.Reset(DefIcon.Create());
@@ -388,8 +390,7 @@ const char *LDragDropTarget::GetClass() const
 
 void LDragDropTarget::SetWindow(LView *to)
 {
-	To = to;
-	if (To)
+	if (To = to)
 	{
 		To->DropTarget(this);
 		auto Status = To->DropTarget(true);
