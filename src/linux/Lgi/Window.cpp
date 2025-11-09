@@ -541,7 +541,7 @@ gboolean LWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 		{
 			GdkEventConfigure *c = &event->configure;
 			Pos.Set(c->x, c->y, c->x+c->width-1, c->y+c->height-1);
-			printf("%s::GDK_CONFIGURE size=%s\n", GetClass(), Pos.GetStr());
+			// printf("%s::GDK_CONFIGURE size=%s\n", GetClass(), Pos.GetStr());
 			OnPosChange();
 			return FALSE;
 			break;
@@ -1506,39 +1506,36 @@ LRect &LWindow::GetClient(bool ClientSpace)
 bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 {
 	if (!Store || !FieldName)
+	{
+		LgiTrace("%s:%i - missing param\n", _FL);
 		return false;
+	}
 
+	LVariant v;
 	if (Load)
 	{
-		::LVariant v;
 		if (Store->GetValue(FieldName, v) && v.Str())
 		{
 			LRect Position(0, 0, -1, -1);
 			LWindowZoom State = LZoomNormal;
 
-// printf("SerializeState load %s\n", v.Str());
-
-
-			LToken t(v.Str(), ";");
-			for (int i=0; i<t.Length(); i++)
+			auto vars = LString(v.Str()).SplitDelimit(";");
+			for (auto var: vars)
 			{
-				char *Var = t[i];
-				char *Value = strchr(Var, '=');
-				if (Value)
+				auto parts = var.SplitDelimit("=", 1);
+				if (parts.Length() == 2)
 				{
-					*Value++ = 0;
-
-					if (stricmp(Var, "State") == 0)
-						State = (LWindowZoom) atoi(Value);
-					else if (stricmp(Var, "Pos") == 0)
-						Position.SetStr(Value);
+					if (parts[0].Equals("State"))
+						State = (LWindowZoom)parts[1].Int();
+					else if (parts[0].Equals("Pos"))
+						Position.SetStr(parts[1]);
 				}
 				else return false;
 			}
 			
 			if (Position.Valid())
 			{
-// printf("SerializeState setpos %s\n", Position.GetStr());
+				printf("SerializeState setpos %s\n", Position.GetStr());
 				SetPos(Position);
 			}
 			
@@ -1548,12 +1545,10 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 	}
 	else
 	{
-		char s[256];
 		LWindowZoom State = GetZoom();
-		sprintf(s, "State=%i;Pos=%s", State, GetPos().GetStr());
-
-		::LVariant v = s;
-		if (!Store->SetValue(FieldName, v))
+		auto s = LString::Fmt("State=%i;Pos=%s", (int)State, GetPos().GetStr());
+		printf("SerializeState store: %s\n", s.Get());
+		if (!Store->SetValue(FieldName, v = s))
 			return false;
 	}
 
