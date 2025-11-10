@@ -47,7 +47,7 @@
 
 /* Begin PBXFileReference section */
 		34109865217ACEC8007020CE /* LgiMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiMain.cpp; path = ../../../src/common/Lgi/LgiMain.cpp; sourceTree = SOURCE_ROOT; };
-		34109867217ACEE0007020CE /* Main.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = Main.cpp; path = ../Main.cpp; sourceTree = SOURCE_ROOT; };
+		34109867217ACEE0007020CE /* Main.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = Main.cpp; path = ../src/Main.cpp; sourceTree = SOURCE_ROOT; };
 		34109869217ACEF0007020CE /* DbTable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DbTable.cpp; path = ../../../src/common/Db/DbTable.cpp; sourceTree = SOURCE_ROOT; };
 		3474179C2178B50B0097AD99 /* LgiTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LgiTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		347417AD2178B50B0097AD99 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };

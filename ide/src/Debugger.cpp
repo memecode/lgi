@@ -1286,7 +1286,7 @@ public:
 
 	void Unload(TStatusCb cb) override
 	{
-		DBG_LOG("%s:%i - %s Running=%i cb=%i\n", _FL, __func__, Running, cb);
+		DBG_LOG("%s:%i - %s Running=%i cb=%i\n", _FL, __func__, Running, (bool)cb);
 		if (Running)
 			Break([this, cb](auto status)
 				{
