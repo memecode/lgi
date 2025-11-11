@@ -64,7 +64,7 @@ Static_x64*
 tests/Debug
 tests/Release
 tests/x64
-test/HtmlViewer/Files
+test/HtmlViewer/files
 test/HtmlViewer/Output
 test/HtmlViewer/HtmlTestSuite
 test/HtmlViewer/mac/DerivedData
@@ -73,8 +73,8 @@ test/HtmlEditor/htmleditor
 test/GuiTest/gui_test
 test/GuiTest/gui_test.txt
 test/GuiTest/Lgi Test App.xml
-test/GuiTest/Mac/DerivedData
-test/GuiTest/Mac/build
+test/GuiTest/mac/build
+test/GuiTest/mac/DerivedData
 test/UnitTests/mac/DerivedData
 test/UnitTests/unittests
 test/commsBusTest/build
