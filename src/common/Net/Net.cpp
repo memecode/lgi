@@ -2264,6 +2264,12 @@ struct LHostnameAsyncPriv
 			LString::Array a;			
 			while (*p.u8 > 0)
 			{
+				if (*p.u8 >= 64)
+				{
+					LAssert(!"label too long.");
+					return LString();
+				}
+				
 				auto &s = a.New();
 				if (!s.Length(*p.u8++))
 					return LString();
