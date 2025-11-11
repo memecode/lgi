@@ -4968,8 +4968,8 @@ int IdeTree::WillAccept(LDragFormats &Formats, LPoint p, int KeyState)
 		return DROPEFFECT_LINK;
 	}
 
-	IdeCommon *Src = dynamic_cast<IdeCommon*>(Selection());
-	IdeCommon *Dst = dynamic_cast<IdeCommon*>(Hit);
+	auto Src = dynamic_cast<IdeCommon*>(Selection());
+	auto Dst = dynamic_cast<IdeCommon*>(Hit);
 	if (Src && Dst)
 	{
 		// Check this folder is not a child of the src

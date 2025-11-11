@@ -58,10 +58,7 @@
 			<Node File="./src/IdeDoc.h" Type="3" Platforms="15" />
 			<Node File="./src/IdeDocPrivate.h" Type="3" Platforms="15" />
 		</Node>
-		<Node Name="Ftp" Type="1" Platforms="15" Open="0" Id="4">
-			<Node File="../include/lgi/common/Ftp.h" Type="3" Platforms="15" />
-			<Node File="../src/common/Net/Ftp.cpp" Type="2" Platforms="15" />
-		</Node>
+		<Node File="./src/SpaceTabConv.cpp" Type="2" Platforms="15" />
 		<Node Name="Projects" Type="1" Platforms="15" Id="1">
 			<Node File="./src/IdeProject.cpp" Type="2" Platforms="15" />
 			<Node File="./src/IdeProject.h" Type="3" Platforms="15" />
@@ -69,10 +66,8 @@
 			<Node File="./src/IdeProjectSettings.h" Type="3" Platforms="15" />
 			<Node File="./src/MissingFiles.cpp" Type="2" Platforms="15" />
 			<Node File="./src/NewProjectFromTemplate.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Lgi/SystemIntf.cpp" Type="2" Platforms="15" />
-			<Node File="../include/lgi/common/SystemIntf.h" Type="3" Platforms="15" />
-			<Node File="./src/ProjectNode.cpp" Type="2" Platforms="15" />
 			<Node File="./src/ProjectNode.h" Type="3" Platforms="15" />
+			<Node File="./src/ProjectNode.cpp" Type="2" Platforms="15" />
 		</Node>
 		<Node Name="RemoteFileSelect" Type="1" Platforms="15" Id="1">
 			<Node File="../src/common/Lgi/RemoteFileSelect.cpp" Type="2" Platforms="15" />
@@ -91,17 +86,22 @@
 			<Node File="./src/SimpleCppParser.cpp" Type="2" Platforms="15" />
 		</Node>
 		<Node Name="Source Code" Type="1" Platforms="15" Open="1" Id="6">
-			<Node File="..\src\common\Coding\LexCpp.cpp" Type="2" Platforms="15" />
-			<Node File="..\include\lgi\common\LexCpp.h" Type="3" Platforms="15" />
-			<Node File="..\src\common\Coding\ParseCpp.cpp" Type="2" Platforms="15" />
-			<Node File=".\src\SysCharSupport.cpp" Type="2" Platforms="15" />
+			<Node File="../src/common/Coding/LexCpp.cpp" Type="2" Platforms="15" />
+			<Node File="../include/lgi/common/LexCpp.h" Type="3" Platforms="15" />
+			<Node File="../src/common/Coding/ParseCpp.cpp" Type="2" Platforms="15" />
+			<Node File="./src/SysCharSupport.cpp" Type="2" Platforms="15" />
+		</Node>
+		<Node Name="SysIntf" Type="1" Platforms="15" Id="1">
+			<Node File="../src/common/Lgi/SystemIntf.cpp" Type="2" Platforms="15" />
+			<Node File="../include/lgi/common/SystemIntf.h" Type="3" Platforms="15" />
+			<Node File="../src/common/Net/Ftp.cpp" Type="2" Platforms="15" />
+			<Node File="../include/lgi/common/Ftp.h" Type="3" Platforms="15" />
 		</Node>
 		<Node File="./src/IdeCommon.cpp" Type="2" Platforms="15" />
 		<Node File="./src/LgiIde.cpp" Type="2" Platforms="15" />
 		<Node File="./src/LgiIde.h" Type="3" Platforms="15" />
 		<Node File="./src/LgiUtils.cpp" Type="2" Platforms="15" />
 		<Node File="./src/MemDumpViewer.cpp" Type="2" Platforms="15" />
-		<Node File="./src/SpaceTabConv.cpp" Type="2" Platforms="15" />
 	</Node>
 	<Node File="../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
 	<Settings>

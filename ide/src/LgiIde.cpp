@@ -5421,6 +5421,19 @@ void TimeZoneInfoTest()
 }
 */
 
+uint32_t FilterIps()
+{
+	auto addr = LWhatsMyIp();
+	for (auto ip: addr)
+	{
+		auto s = LIpToStr(ip);
+		if (s.Find("192.168.") == 0 ||
+			s.Find("10.0.") == 0)
+			return ip;
+	}
+	return addr.Last();
+}
+
 int LgiMain(OsAppArguments &AppArgs)
 {
 	printf("LgiIde v%s\n", APP_VER);
@@ -5445,7 +5458,7 @@ int LgiMain(OsAppArguments &AppArgs)
 		LHeaderUnitTests();
 		// LHostnameAsync::UnitTests();
 
-		auto myIp = LIpToStr(LWhatsMyIp().Last());
+		auto myIp = LIpToStr(FilterIps());
 		auto hostName = LHostName();
 		printf("ip=%s, hostname=%s\n", myIp.Get(), hostName.Get());
 

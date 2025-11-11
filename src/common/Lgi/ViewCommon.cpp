@@ -581,37 +581,6 @@ void LView::OnAttach()
 		if (!v->GetParent())
 			v->SetParent(this);
 	}
-
-	#if 0 // defined __GTK_H__
-	if (_View && !DropTarget())
-	{
-		// If one of our parents is drop capable we need to set a dest here
-		LViewI *p;
-		for (p = GetParent(); p; p = p->GetParent())
-		{
-			if (p->DropTarget())
-			{
-				break;
-			}
-		}
-		if (p)
-		{
-			Gtk::gtk_drag_dest_set(	_View,
-									(Gtk::GtkDestDefaults)0,
-									NULL,
-									0,
-									Gtk::GDK_ACTION_COPY |
-									Gtk::GDK_ACTION_MOVE |
-									Gtk::GDK_ACTION_LINK);
-			// printf("%s:%i - Drop dest for '%s'\n", _FL, GetClass());
-		}
-		else
-		{
-			Gtk::gtk_drag_dest_unset(_View);
-			// printf("%s:%i - Not setting drop dest '%s'\n", _FL, GetClass());
-		}
-	}
-	#endif
 }
 
 LRect &LView::GetMargin()
@@ -1624,8 +1593,26 @@ LDragDropTarget *LView::DropTarget(LDragDropTarget *Set)
 extern pascal OSStatus LgiViewDndHandler(EventHandlerCallRef inHandlerCallRef, EventRef inEvent, void *inUserData);
 #endif
 
+/*
 #if defined __GTK_H__
-// Recursively add drag dest to all view and all children
+// Recursively collect all drag types of all the children
+
+using TDndHash = LHashTbl<ConstStrKey<char,false>,bool>;
+void GtkCollectDragType(TDndHash &map, LViewI *v)
+{
+	if (auto target = v->DropTarget())
+	{
+		LDragFormats formats(true);
+		auto res = target->WillAccept(formats, LPoint(), 0);
+		for (auto &fmt: formats.GetAll())
+			if (!map.Find(fmt))
+				map.Add(fmt, true);
+	}
+
+	for (auto c: v->IterateViews())
+		GtkCollectDragType(map, c);
+}
+
 bool GtkAddDragDest(LViewI *v, bool IsTarget)
 {
 	if (!v)
@@ -1634,33 +1621,33 @@ bool GtkAddDragDest(LViewI *v, bool IsTarget)
 	if (!w)
 		return false;
 	auto wid = GtkCast(w->WindowHandle(), gtk_widget, GtkWidget);
-
+	
 	#if 1
 	if (IsTarget)
 	{
-		if (auto t = v->DropTarget())
-		{
-			LArray<Gtk::GtkTargetEntry> targets;
-			targets.Add({(Gtk::gchar*)"STRING", 0, 0});
-			targets.Add({(Gtk::gchar*)"text/plain", 0, 0});
-			targets.Add({(Gtk::gchar*)"text/uri-list", 0, 0});
-			
-			// LgiTrace("%s:%i - gtk_drag_dest_set on %s\n", _FL, v->GetClass());
+		TDndHash map;
+		GtkCollectDragType(map, v);
 
-			Gtk::gtk_drag_dest_set(	wid,
-									Gtk::GTK_DEST_DEFAULT_ALL,
-									#if 0
-										nullptr,
-										0,
-									#else
-										targets.AddressOf(),
-										targets.Length(),
-									#endif
-									(Gtk::GdkDragAction)
-									(Gtk::GDK_ACTION_COPY |
-									 Gtk::GDK_ACTION_MOVE |
-									 Gtk::GDK_ACTION_LINK));
+		LArray<Gtk::GtkTargetEntry> targets;
+		LString::Array fmts;
+		for (auto p: map)
+		{
+			targets.Add({(Gtk::gchar*)p.key, 0, 0});
+			fmts.Add(p.key);
 		}
+			
+		if (fmts.Length())
+			LgiTrace("%s:%i - %s gtk_drag_dest_set fmt=%s\n",
+				_FL, v->GetClass(), LString(", ").Join(fmts).Get());
+
+		Gtk::gtk_drag_dest_set(	wid,
+								Gtk::GTK_DEST_DEFAULT_ALL,
+								targets.AddressOf(),
+								targets.Length(),
+								(Gtk::GdkDragAction)
+								(Gtk::GDK_ACTION_COPY |
+									Gtk::GDK_ACTION_MOVE |
+									Gtk::GDK_ACTION_LINK));
 	}
 	else
 	{
@@ -1668,12 +1655,10 @@ bool GtkAddDragDest(LViewI *v, bool IsTarget)
 	}
 	#endif
 	
-	for (auto c: v->IterateViews())
-		GtkAddDragDest(c, IsTarget);
-	
 	return true;
 }
 #endif
+*/
 
 bool LView::DropTarget(bool t)
 {
@@ -1787,9 +1772,12 @@ bool LView::DropTarget(bool t)
 
 	#elif defined __GTK_H__
 
-		Status = GtkAddDragDest(this, t);
-		if (Status && !d->DropTarget)
-			d->DropTarget = t ? GetWindow() : nullptr;
+		if (auto wnd = GetWindow())
+		{
+			Status = wnd->OnGtkDropTarget(this, t);
+			if (Status && !d->DropTarget)
+				d->DropTarget = t ? GetWindow() : nullptr;
+		}
 
 	#endif
 

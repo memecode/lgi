@@ -79,6 +79,7 @@ protected:
 		LRect _RootAlloc;
 		void OnGtkDelete();
 		Gtk::gboolean OnGtkEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event);
+		bool OnGtkDropTarget(LView *view, bool isTarget);
 
 	#elif defined(LGI_CARBON)
 

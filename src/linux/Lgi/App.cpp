@@ -315,7 +315,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	
 	if (d->GuiEnv)
 		d->App = Gtk::gtk_application_new(id,
-			#ifdef G_APPLICATION_DEFAULT_FLAGS
+			#if GtkVer(2, 74)
 			Gtk::G_APPLICATION_DEFAULT_FLAGS
 			#else
 			Gtk::G_APPLICATION_FLAGS_NONE

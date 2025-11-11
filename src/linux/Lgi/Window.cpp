@@ -46,8 +46,8 @@ enum LAttachState
 class LWindowPrivate
 {
 public:
-	int Sx = 0, Sy = 0;
-	LKey LastKey;
+	LPoint Size;
+	LKey LastKey = {};
 	LArray<HookInfo> Hooks;
 	bool SnapToEdge = false;
 	LString Icon;
@@ -59,7 +59,7 @@ public:
 	bool WillFocus = true;
 	
 	// State
-	GdkWindowState State;
+	GdkWindowState State = {};
 	bool HadCreateEvent = false;
 	
 	// Focus stuff
@@ -67,33 +67,31 @@ public:
 	LViewI *Focus = NULL;
 	bool Active = false;
 
+	// Dnd
+	LHashTbl<ConstStrKey<char,false>, bool> dndFormats;
+	bool dndFormatsDirty = false;
+
 	LWindowPrivate()
 	{
 		Decor.ZOff(-1, -1);
-		State = (Gtk::GdkWindowState)0;
-		
-		LastKey.vkey = 0;
-		LastKey.c16 = 0;
-		LastKey.Data = 0;
-		LastKey.IsChar = 0;
 	}
 	
 	int GetHookIndex(LView *Target, bool Create = false)
 	{
-		for (int i=0; i<Hooks.Length(); i++)
+		int i = 0;
+		for (auto &h: Hooks)
 		{
-			if (Hooks[i].Target == Target) return i;
+			if (h.Target == Target)
+				return i;
+			i++;
 		}
 		
 		if (Create)
 		{
-			HookInfo *n = &Hooks[Hooks.Length()];
-			if (n)
-			{
-				n->Target = Target;
-				n->Flags = LNoEvents;
-				return Hooks.Length() - 1;
-			}
+			auto &n = Hooks.New();
+			n.Target = Target;
+			n.Flags = LNoEvents;
+			return Hooks.Length() - 1;
 		}
 		
 		return -1;
@@ -342,6 +340,40 @@ bool LWindow::TranslateMouse(LMouse &m)
 		}
 	}
 
+	return true;
+}
+
+bool LWindow::OnGtkDropTarget(LView *view, bool isTarget)
+{
+	if (!view)
+		return false;
+	
+	LDragFormats formats(true);
+	if (auto target = view->DropTarget())
+	{
+		target->WillAccept(formats, LPoint(), 0);
+	}
+
+	for (auto &fmt: formats.GetAll())
+	{
+		bool has = d->dndFormats.Find(fmt);
+		if (isTarget ^ has)
+		{
+			if (isTarget)
+				d->dndFormats.Add(fmt, true);
+			else
+				d->dndFormats.Delete(fmt);
+			
+			if (!d->dndFormatsDirty)
+			{
+				d->dndFormatsDirty = true;
+				PostEvent(M_DND_UPDATE_FORMATS); // ok if this fails..
+				// it's probably because the window isn't mapped yet, in
+				// which case we'll update in the OnCreate event...
+			}
+		}
+	}
+	
 	return true;
 }
 
@@ -759,7 +791,8 @@ LWindowDragDataReceived(GtkWidget *widget, GdkDragContext *context, gint x, gint
 			auto ptr = gtk_selection_data_get_data_with_length(data, &length);
 			if (ptr)
 			{
-				LgiTrace("%s:%i - LWindowDragDataReceived got data '%s': %.*s\n", _FL, type, (int)length, ptr);
+				LgiTrace("%s:%i - LWindowDragDataReceived got data '%s', bytes=%i\n",
+						_FL, type, (int)length);
 				d.Data[0].SetBinary(length, (void*)ptr, false);
 			}
 			else
@@ -797,7 +830,7 @@ int GetAcceptFmts(LString::Array &Formats, GdkDragContext *context, LViewI *v, L
 		i = i->next;
 	}
 
-	DND_LOG("%s:%i %s - accept fmts: %s\n", _FL, __func__, LString(",").Join(Fmts.GetAll()).Get());
+	// DND_LOG("%s:%i %s - accept fmts: %s\n", _FL, __func__, LString(",").Join(Fmts.GetAll()).Get());
 
 	Fmts.SetSource(false);
 	auto Flags = t->WillAccept(Fmts, p, KeyState);
@@ -806,6 +839,7 @@ int GetAcceptFmts(LString::Array &Formats, GdkDragContext *context, LViewI *v, L
 	{
 		Formats += sup;
 
+		/*
 		if (Gtk::GtkWidget *wid = GTK_WIDGET(v->WindowHandle()))
 		{
 			LArray<Gtk::GtkTargetEntry> matches;
@@ -817,6 +851,9 @@ int GetAcceptFmts(LString::Array &Formats, GdkDragContext *context, LViewI *v, L
 				m.info = 0;
 			}
 		
+			printf("%s gtk_drag_dest_set %s on %s\n", __func__,
+				LString(", ").Join(sup).Get(), v->GetClass());
+				
 			Gtk::gtk_drag_dest_set(	wid,
 									Gtk::GTK_DEST_DEFAULT_ALL,
 									matches.AddressOf(),
@@ -827,6 +864,7 @@ int GetAcceptFmts(LString::Array &Formats, GdkDragContext *context, LViewI *v, L
 									 Gtk::GDK_ACTION_LINK));
 		}
 		else DND_ERROR("%s:%i - can't get GtkWidget.\n", _FL);
+		*/
 	}
 	else
 	{
@@ -1638,7 +1676,7 @@ bool LWindow::SetPos(LRect &p, bool Repaint)
 void LWindow::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
 	// Force repour
-	d->Sx = d->Sy = -1;
+	d->Size.x = d->Size.y = -1;
 }
 
 void LWindow::OnCreate()
@@ -1656,11 +1694,11 @@ void LWindow::OnPosChange()
 {
 	LView::OnPosChange();
 
-	if (d->Sx != X() ||	d->Sy != Y())
+	if (d->Size.x != X() ||	d->Size.y != Y())
 	{
 		PourAll();
-		d->Sx = X();
-		d->Sy = Y();
+		d->Size.x = X();
+		d->Size.y = Y();
 	}
 }
 
@@ -1818,6 +1856,43 @@ LMessage::Param LWindow::OnEvent(LMessage *m)
 			{
 				Quit();
 				return 0;
+			}
+			break;
+		}
+		case M_DND_UPDATE_FORMATS:
+		{
+			if (d->dndFormatsDirty)
+			{
+				auto wid = GTK_WIDGET(Wnd);
+				d->dndFormatsDirty = false;
+				
+				LArray<Gtk::GtkTargetEntry> targets;
+				LString::Array fmts;
+				for (auto p: d->dndFormats)
+				{
+					targets.Add({(Gtk::gchar*)p.key, 0, 0});
+					fmts.Add(p.key);
+				}
+						
+				if (fmts.Length())
+				{
+					LgiTrace("%s:%i - gtk_drag_dest_set on %s, fmt=%s\n",
+						_FL, GetClass(), LString(", ").Join(fmts).Get());
+
+					Gtk::gtk_drag_dest_set(	wid,
+											Gtk::GTK_DEST_DEFAULT_ALL,
+											targets.AddressOf(),
+											targets.Length(),
+											(Gtk::GdkDragAction)
+											(Gtk::GDK_ACTION_COPY |
+												Gtk::GDK_ACTION_MOVE |
+												Gtk::GDK_ACTION_LINK));
+				}
+				else
+				{
+					LgiTrace("%s:%i - gtk_drag_dest_unset on %s\n", _FL, GetClass());
+					Gtk::gtk_drag_dest_unset(wid);
+				}
 			}
 			break;
 		}

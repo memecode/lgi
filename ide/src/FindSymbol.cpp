@@ -79,16 +79,13 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 				return false;
 			}
 
-			IsSource =	!_stricmp(Ext, "c")
-						||
-						!_stricmp(Ext, "cpp")
-						||
+			IsSource =	!_stricmp(Ext, "c") ||
+						!_stricmp(Ext, "cpp") ||
 						!_stricmp(Ext, "cxx");
-			IsHeader =	!_stricmp(Ext, "h")
-						||
-						!_stricmp(Ext, "hpp")
-						||
-						!_stricmp(Ext, "hxx");
+			IsHeader =	!_stricmp(Ext, "h") ||
+						!_stricmp(Ext, "hpp") ||
+						!_stricmp(Ext, "hxx") ||
+						!_stricmp(Ext, "hh");
 			IsPython =	!_stricmp(Ext, "py");
 			IsJavascript = !_stricmp(Ext, "js");
 

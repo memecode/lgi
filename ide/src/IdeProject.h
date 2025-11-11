@@ -9,7 +9,11 @@
 #include "lgi/common/ProgressDlg.h"
 #include "lgi/common/List.h"
 
+#if MAC
 #define NODE_DROP_FORMAT			"com.memecode.ProjectNode"
+#else
+#define NODE_DROP_FORMAT			"application/x-lgiide-projectNode"
+#endif
 
 #define OPT_Ftp						"ftp"
 #define OPT_Www						"www"
@@ -228,6 +232,8 @@ class IdeTree : public LTree
 	LTreeItem *Hit = NULL;
 
 public:
+	const char *GetClass() override { return "IdeTree"; }
+
 	IdeTree();
 	
 	void OnCreate();

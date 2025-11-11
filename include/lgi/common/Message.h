@@ -70,10 +70,11 @@ enum LgiMessages
 		M_TEXT_UPDATE_NAME,
 		
 		/// Dnd data received via LWindowDragDataReceived
-		/// /sa 
 		M_DND_DATA_RECEIVED,
 		/// The dnd operation has ended. Call LDragDropTarget::OnDragExit
 		M_DND_END,
+		/// Update the dnd formats on the GtkWindow
+		M_DND_UPDATE_FORMATS,
 		
 	#elif defined(WINNATIVE)
 
@@ -144,6 +145,7 @@ enum LgiMessages
 		M_CLOSE,
 
 		#if defined(HAIKU)
+
 			M_HANDLE_IN_THREAD,		// A = (LMessage::InThreadCb*)Cb;
 			M_LWINDOW_DELETE,
 			M_LMENUITEM_ENABLE,

@@ -3374,7 +3374,9 @@ int LTextView4::WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState)
 {
 	Formats.Supports("text/uri-list");
 	Formats.Supports("text/html");
+	#if WINDOWS
 	Formats.Supports("UniformResourceLocatorW");
+	#endif
 	return Formats.Length() ? DROPEFFECT_COPY : DROPEFFECT_NONE;
 }
 

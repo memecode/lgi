@@ -60,38 +60,34 @@ else
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
 		-I./private/common \
+		-I./private/linux \
 		`pkg-config --cflags ayatana-appindicator3-0.1` \
 		-I./include/lgi/linux/Gtk \
 		`pkg-config --cflags gstreamer-1.0` \
 		-I../deps/build-x64-release/include \
 		-I./include/lgi/linux \
-		-I./include \
-		-I./private/linux
+		-I./include
 endif
 
 # Dependencies
-Source =	src/linux/Lgi/App.cpp \
-			src/linux/Lgi/General.cpp \
-			src/common/Lgi/DragAndDropCommon.cpp \
-			src/common/General/DateTime.cpp \
-			src/linux/Lgi/View.cpp \
+Source =	src/linux/Lgi/General.cpp \
 			src/linux/General/File.cpp \
-			src/linux/General/ShowFileProp_Linux.cpp \
-			src/common/Lgi/AppCommon.cpp \
-			src/common/General/Properties.cpp \
-			src/common/Gdc2/Tools/ColourReduce.cpp \
-			src/common/General/FileCommon.cpp \
-			src/linux/Lgi/Window.cpp \
-			src/linux/Gtk/LgiWidget.cpp \
+			src/common/Lgi/DragAndDropCommon.cpp \
 			src/linux/Lgi/DragAndDrop.cpp \
+			src/linux/Lgi/View.cpp \
 			src/common/General/TimeZone.cpp \
-			src/common/Lgi/WindowCommon.cpp \
+			src/linux/Lgi/App.cpp \
 			src/common/General/Containers.cpp \
+			src/common/General/Properties.cpp \
+			src/common/General/FileCommon.cpp \
+			src/linux/Gtk/LgiWidget.cpp \
+			src/common/Lgi/AppCommon.cpp \
 			src/common/Lgi/ViewCommon.cpp \
 			src/common/Lgi/Library.cpp \
+			src/common/Lgi/WindowCommon.cpp \
 			src/linux/General/Mem.cpp \
 			src/linux/Lgi/Menu.cpp \
-			src/common/General/ExeCheck.cpp \
+			src/common/Gdc2/Tools/ColourReduce.cpp \
 			src/common/Lgi/MenuCommon.cpp \
 			src/posix/Roster.cpp \
 			src/posix/SubProcess.cpp \
@@ -113,6 +109,10 @@ Source =	src/linux/Lgi/App.cpp \
 			src/common/Lgi/ToolTip.cpp \
 			src/common/Lgi/TrayIcon.cpp \
 			src/common/Lgi/FileSelect.cpp \
+			src/linux/General/ShowFileProp_Linux.cpp \
+			src/linux/Lgi/Window.cpp \
+			src/common/General/DateTime.cpp \
+			src/common/General/ExeCheck.cpp \
 			src/common/Lgi/Alert.cpp \
 			src/common/Lgi/FindReplace.cpp \
 			src/common/Lgi/FontSelect.cpp \
@@ -234,18 +234,18 @@ clean :
 	@echo Cleaned $(BuildDir)
 
 VPATH=$(BuildDir) \
-	./src/common/Gdc2/Font \
-	./src/common/Gdc2/Tools \
+	./src/common/Skins/Gel \
+	./src/linux/General \
+	./src/common/General \
+	./src/common/Lgi \
+	./src/linux/Lgi \
+	./src/common/Gdc2/Path \
+	./src/linux/Gtk \
 	./src/common/Resource \
 	./src/posix \
-	./src/common/Gdc2/Path \
-	./src/common/General \
-	./src/linux/Lgi \
-	./src/linux/General \
-	./src/linux/Gtk \
-	./src/common/Skins/Gel \
-	./src/common/Lgi \
 	./src/common/Gdc2 \
+	./src/common/Gdc2/Tools \
+	./src/common/Gdc2/Font \
 	./src/common/Hash/sha1 \
 	./src/common/Net \
 	./src/common/Gdc2/Filters \
