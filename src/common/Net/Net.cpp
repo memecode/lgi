@@ -2124,16 +2124,37 @@ uint32_t LHostnameToIp(const char *Host)
 }
 
 #if WINDOWS
-#define M_ASYNC_HOSTNAME		M_USER + 200
-LRESULT CALLBACK LHostnameAsyncPriv_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	#define M_ASYNC_HOSTNAME		M_USER + 200
+	LRESULT CALLBACK LHostnameAsyncPriv_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	#define PORTABLE_GETADDR		0
+#elif defined(MAC) || defined(HAIKU)
+	#define PORTABLE_GETADDR		1
+	#include "lgi/common/Thread.h"
+	#include "lgi/common/ThreadEvent.h"
+#else
+	#define PORTABLE_GETADDR		0
 #endif
 
-struct LHostnameAsyncPriv : public LRefCount
+struct LHostnameAsyncPriv
+	: public LRefCount
+	#if PORTABLE_GETADDR
+	, public LThread
+	, public LCancel
+	#endif
 {
 	LHostnameAsync::TCallback callback;
+	LError err;
 
-	#if WINDOWS
-		LError		err;
+	#if PORTABLE_GETADDR
+		LString::Array nameServers;
+		LString searchDomain;
+		LString name;
+		uint64_t endTime = 0;
+		static uint16_t nextId;
+		uint16_t transId = 0;
+		uint32_t result_ip4 = 0;
+		LString result_name;
+	#elif WINDOWS
 		PADDRINFOEX	addrInfo = nullptr;
 		OVERLAPPED	overlapped = {};
 		HANDLE		completeEvent = nullptr;
@@ -2145,18 +2166,268 @@ struct LHostnameAsyncPriv : public LRefCount
 		~LHostnameAsyncPriv()
 		{
 		}
-	#elif defined(MAC) || defined(HAIKU)
-		#warning "Not implemented"
 	#else // posixy?
 		struct gaicb req = {};
 		struct sigevent event = {};
 		bool done = false;
 	#endif
 	uint64_t startTs = 0;
+
+	#if PORTABLE_GETADDR
+		LHostnameAsyncPriv() : LThread("LHostnameAsyncPriv")
+		{
+			nameServers.Add("192.168.0.1");
+			
+			// Look up the DNS servers
+			LFile file("/etc/resolv.conf", O_READ);
+			if (file)
+			{
+				for (auto &ln: file.Read().SplitDelimit("\n"))
+				{
+					if (ln(0) == '#')
+						continue;
+					auto parts = ln.SplitDelimit();
+					if (parts.Length() == 2)
+					{
+						if (parts[0].Equals("nameserver"))
+							nameServers.Add(parts[1]);
+						else if (parts[0].Equals("search"))
+							searchDomain = parts[1];
+					}
+				}
+			}
+			
+			printf("resolve: %s\n", LString(",").Join(nameServers).Get());
+		}
+		
+		~LHostnameAsyncPriv()
+		{
+			Cancel();
+			WaitForExit();
+		}
+		
+		void DnsLookup(const char *addr, int timeoutMs)
+		{
+			IncRef();
+			name = addr;
+			endTime = timeoutMs >= 0 ? LCurrentTime() + timeoutMs : 0;
+			Run();
+		}
+		
+		enum QTypes {
+			QT_A		= 1,  // a host address
+			QT_NS		= 2,  // an authoritative name server
+			QT_MD		= 3,  // a mail destination (Obsolete - use MX)
+			QT_MF		= 4,  // a mail forwarder (Obsolete - use MX)
+			QT_CNAME	= 5,  // the canonical name for an alias
+			QT_SOA		= 6,  // marks the start of a zone of authority
+			QT_MB		= 7,  // a mailbox domain name (EXPERIMENTAL)
+			QT_MG	 	= 8,  // a mail group member (EXPERIMENTAL)
+			QT_MR		= 9,  // a mail rename domain name (EXPERIMENTAL)
+			QT_NULL		= 10, // a null RR (EXPERIMENTAL)
+			QT_WKS		= 11, // a well known service description
+			QT_PTR		= 12, // a domain name pointer
+			QT_HINFO	= 13, // host information
+			QT_MINFO	= 14, // mailbox or mail list information
+			QT_MX		= 15, // mail exchange
+			QT_TXT		= 16, // text strings
+		};
+		
+		enum QClasses {
+			QC_IN		= 1, // the Internet
+			QC_CS		= 2, // the CSNET class (Obsolete - used only for examples in some obsolete RFCs)
+			QC_CH		= 3, // the CHAOS class
+			QC_HS		= 4, // Hesiod [Dyer 87]
+		};
+
+		constexpr static int BUF_LEN = 1500;
+		
+		LString ReadStr(LPointer &p, char *msgStart)
+		{
+			if ((*p.u8 & 0xc0) == 0xc0)
+			{
+				// Reference...
+				auto u16 = ntohs(*p.u16++);
+				auto offset = u16 & ~0xc000;
+				if (offset < 0 || offset >= BUF_LEN)
+				{
+					printf("readstr invalid offset=%i\n", offset);
+					return LString();
+				}
+				
+				LPointer ptr;
+				ptr.c = msgStart + offset;
+				return ReadStr(ptr, msgStart);
+			}
+
+			// Literal:
+			LString::Array a;			
+			while (*p.u8 > 0)
+			{
+				auto &s = a.New();
+				if (!s.Length(*p.u8++))
+					return LString();
+				memcpy(s.Get(), p.c, s.Length());
+				p.c += s.Length();
+			}
+			p.c++;
+			return LString(".").Join(a);
+		}
+		
+		bool WriteStr(LPointer &p, LString &s)
+		{
+			auto parts = s.SplitDelimit(".");
+			for (auto &part: parts)
+			{
+				if (part.Length() >= 64)
+				{
+					LAssert(!"label too long.");
+					return false;
+				}
+				*p.u8++ = (uint8_t)part.Length();
+				memcpy(p.c, part.Get(), part.Length());
+				p.c += part.Length();
+			}
+			*p.c++ = 0;
+			return true;
+		}
+		
+		int Main() override
+		{
+			printf("in main.\n");
+
+			LSocket sock;
+			sock.SetUdp(true);
+
+			while (!IsCancelled())
+			{
+				if (endTime && LCurrentTime() >= endTime)
+				{
+					printf("main timeout reached.\n");
+					break;
+				}
+			
+				char msg[BUF_LEN];
+				LPointer p;
+				p.c = msg;
+					
+				if (transId)
+				{
+					// Check for incomming replies...
+					uint32_t read_ip = 0;
+					uint16_t read_port = 0;
+					if (auto rd = sock.ReadUdp(msg, sizeof(msg), 0, &read_ip, &read_port))
+					{
+						printf("rd=%i ip=%s port=%i\n", (int)rd, LIpToStr(read_ip).Get(), read_port);
+
+						#define ERR(...) { printf(__VA_ARGS__); continue; }
+						
+						auto id = ntohs(*p.u16++);
+						if (id != transId)
+							ERR("%s:%i - not the right transaction id: %i/%i\n", _FL, id, transId);
+						
+						auto flags = ntohs(*p.u16++);
+						if (!(flags & 0x8000))
+							ERR("%s:%i - not a response\n", _FL)
+						auto questions = ntohs(*p.u16++);
+						auto answers = ntohs(*p.u16++);
+						auto auth_rec = ntohs(*p.u16++);
+						auto add_rec = ntohs(*p.u16++);
+						LString q;
+						for (int i=0; i<questions; i++)
+						{
+							// printf("read q:\n");
+							q = ReadStr(p, msg);
+							QTypes type = (QTypes) ntohs(*p.u16++);
+							QClasses cls = (QClasses) ntohs(*p.u16++);
+							// printf("got q: '%s' %i,%i\n", q.Get(), type, cls);
+						}
+						for (int i=0; i<answers; i++)
+						{
+							// printf("read a:\n");
+							auto aName = ReadStr(p, msg);
+							QTypes type = (QTypes) ntohs(*p.u16++);
+							QClasses cls = (QClasses) ntohs(*p.u16++);
+							auto ttl = ntohl(*p.u32++);
+							auto len = ntohs(*p.u16++);
+							if (type == QT_A)
+							{
+								if (len == 4)
+								{
+									result_name = aName;
+									result_ip4 = ntohl(*p.u32);
+									printf("a='%s' ip=%s type=%i cls=%i\n",
+										aName.Get(), LIpToStr(result_ip4).Get(), type, cls);
+								}
+								else ERR("%s:%i - invalid A record len: %i\n", _FL, len);
+							}
+							p.c += len;
+						}						
+						break;
+					}
+				}
+				else
+				{
+					if (nameServers.Length() == 0)
+					{
+						err.Set(LErrorInvalidParam, "no dns server");
+						Complete();
+						break;
+					}
+
+					// Send UDP request packet
+					auto dnsServer = LIpToInt(nameServers[0]);
+
+					*p.u16++ = htons(transId = nextId++);
+					*p.u16++ = htons(0x0100); // query, stardard, not trunc, recurse
+					*p.u16++ = htons(1); // questions
+					*p.u16++ = htons(0); // answers
+					*p.u16++ = htons(0); // nameserver records
+					*p.u16++ = htons(1); // additional records
+					
+					// question record:
+					if (!WriteStr(p, name))
+						break;
+					*p.u16++ = htons(QT_A);
+					*p.u16++ = htons(QC_IN);
+					
+					// additional record:
+					*p.u8++ = 0; // root
+					*p.u16++ = htons(41); // OPT
+					*p.u16++ = htons(1472); // UDP payload size
+					*p.u8++ = 0; // ext rcode
+					*p.u8++ = 0; // EDNS0 ver
+					*p.u16++ = htons(0); // Z: cannot handle DNSSEC
+					*p.u16++ = htons(0); // data len?
+					
+					int len = p.c - msg;
+					int wr = sock.WriteUdp(msg, len, 0, dnsServer, DNS_PORT);
+					printf("dns write=%i\n", wr);
+				}
+			}
+			
+			printf("%s:%i - call complete\n", _FL);
+			Complete();
+			printf("%s:%i - exit thread\n", _FL);
+			return 0;
+		}
+	#endif
 	
 	void Complete()
 	{
-		#if WINDOWS
+		#if PORTABLE_GETADDR
+			if (callback)
+			{
+				if (!result_ip4)
+				{
+					err.Set(LErrorFuncFailed, "ip not found");
+				}
+				
+				printf("%s:%i - calling cb\n", _FL);
+				callback(result_ip4, err, LCurrentTime() - startTs);
+			}
+			else printf("%s:%i - no callback in complete\n", _FL);
+		#elif WINDOWS
 			uint32_t ip = 0;
 
 			if (!err)
@@ -2185,9 +2456,7 @@ struct LHostnameAsyncPriv : public LRefCount
 				CloseHandle(completeEvent);
 				completeEvent = nullptr;
 			}
-	#elif defined(MAC) || defined(HAIKU)
-		#warning "Not implemented"
-	#else
+		#else
 			done = true;
 			auto result = gai_error(&req);
 			LError err;
@@ -2242,9 +2511,14 @@ struct LHostnameAsyncPriv : public LRefCount
 		DecRef();
 	}
 
-	void Cancel()
+	bool Cancel(bool b = true)
+		#if PORTABLE_GETADDR
+		override
+		#endif
 	{
-		#if WINDOWS
+		#if PORTABLE_GETADDR
+			return LCancel::Cancel(b);
+		#elif WINDOWS
 			if (completeEvent)
 			{
 				// It didn't finish yet, so cancel it...
@@ -2256,17 +2530,21 @@ struct LHostnameAsyncPriv : public LRefCount
 				// And cleanup
 				CloseHandle(completeEvent);
 			}
-		#elif defined(MAC) || defined(HAIKU)
-			#warning "not impl"
+			return true;
 		#else
 			if (!done)
 			{
 				done = true;
 				gai_cancel(&req);
 			}
-		#endif
+			return true;
+		#endif		
 	}
 };
+
+#if PORTABLE_GETADDR
+	uint16_t LHostnameAsyncPriv::nextId = 1;
+#endif
 
 LHostnameAsync::LHostnameAsync(const char *host, TCallback callback, int timeoutMs)
 {
@@ -2276,7 +2554,9 @@ LHostnameAsync::LHostnameAsync(const char *host, TCallback callback, int timeout
 		d->callback = callback;
 		d->startTs = LCurrentTime();
 
-		#if WINDOWS
+		#if PORTABLE_GETADDR
+			d->DnsLookup(host, timeoutMs);
+		#elif WINDOWS
 			LAutoWString wHost(Utf8ToWide(host));
 			d->IncRef();
 			struct timeval timeout = {};
@@ -2310,8 +2590,6 @@ LHostnameAsync::LHostnameAsync(const char *host, TCallback callback, int timeout
 					callback(0, err, LCurrentTime() - d->startTs);
 				d->DecRef();
 			}
-		#elif defined(MAC) || defined(HAIKU)
-			#warning "Not implemented"
 		#else
 			struct gaicb *reqs[1] = {&d->req};
 			d->req.ar_name = host;

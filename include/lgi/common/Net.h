@@ -42,6 +42,7 @@ typedef int SOCKET;
 #define FTP_PORT				21
 #define SSH_PORT				22
 #define SMTP_PORT				25
+#define DNS_PORT				53
 #define HTTP_PORT				80
 #define HTTPS_PORT				443
 #define SMTP_SSL_PORT			465
