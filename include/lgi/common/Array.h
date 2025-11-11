@@ -929,6 +929,7 @@ public:
 		return DeleteAt(It.i, true);
 	}
 
+	// Return a subset of the array:
 	LArray<Type> Slice(ssize_t Start, ssize_t End = -1)
 	{
 		LArray<Type> a;

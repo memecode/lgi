@@ -633,9 +633,12 @@ class Gdb :
 
 		if (BreakPoints.Length() > 0)
 		{
+			// LArray<BpInfo*> temp;
 			TLock lck(this, _FL);
 			BP_LOG("BreakPoints.Length()=%i\n", (int)BreakPoints.Length());
-			for (auto p: BreakPoints)
+			auto bpCopy = BreakPoints; // make a copy so when we edit the list 
+			// the changes don't invalidate the iterator...
+			for (auto p: bpCopy)
 			{
 				if (p.value->state == TPendingAdd)
 				{
