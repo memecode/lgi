@@ -5443,6 +5443,7 @@ int LgiMain(OsAppArguments &AppArgs)
 
 		// TimeZoneInfoTest();
 		LHeaderUnitTests();
+		// LHostnameAsync::UnitTests();
 
 		auto myIp = LIpToStr(LWhatsMyIp().Last());
 		auto hostName = LHostName();

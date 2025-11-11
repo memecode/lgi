@@ -78,6 +78,8 @@ public:
 	typedef std::function<void(uint32_t ip4, LError &err, uint64_t timeMs)> TCallback;
 	LHostnameAsync(const char *host, TCallback callback, int timeoutMs = -1);
 	~LHostnameAsync();
+	
+	static bool UnitTests();
 };
 
 /// Get a specific value from a list of headers (as a dynamic string)

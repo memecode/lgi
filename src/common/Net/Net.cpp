@@ -1,10 +1,10 @@
 /*hdr
-**		FILE:			INet.cpp
+**		FILE:			Net.cpp
 **		AUTHOR:			Matthew Allen
 **		DATE:			28/5/98
 **		DESCRIPTION:	Internet sockets
 **
-**		Copyright (C) 1998, Matthew Allen
+**		Copyright (C) 2025, Matthew Allen
 **				fret@memecode.com
 */
 
@@ -2176,7 +2176,7 @@ struct LHostnameAsyncPriv
 	#if PORTABLE_GETADDR
 		LHostnameAsyncPriv() : LThread("LHostnameAsyncPriv")
 		{
-			nameServers.Add("192.168.0.1");
+			// nameServers.Add("192.168.0.1");
 			
 			// Look up the DNS servers
 			LFile file("/etc/resolv.conf", O_READ);
@@ -2197,7 +2197,7 @@ struct LHostnameAsyncPriv
 				}
 			}
 			
-			printf("resolve: %s\n", LString(",").Join(nameServers).Get());
+			// printf("resolve: %s\n", LString(",").Join(nameServers).Get());
 		}
 		
 		~LHostnameAsyncPriv()
@@ -2240,68 +2240,143 @@ struct LHostnameAsyncPriv
 			QC_HS		= 4, // Hesiod [Dyer 87]
 		};
 
-		constexpr static int BUF_LEN = 1500;
-		
-		LString ReadStr(LPointer &p, char *msgStart)
+		struct DnsBuf
 		{
-			if ((*p.u8 & 0xc0) == 0xc0)
+			constexpr static int BUF_LEN = 1500;
+	
+			char msg[BUF_LEN] = "";
+			int msgLen = 0;
+			LPointer p;
+			
+			DnsBuf()
 			{
-				// Reference...
-				auto u16 = ntohs(*p.u16++);
-				auto offset = u16 & ~0xc000;
-				if (offset < 0 || offset >= BUF_LEN)
-				{
-					printf("readstr invalid offset=%i\n", offset);
-					return LString();
-				}
-				
-				LPointer ptr;
-				ptr.c = msgStart + offset;
-				return ReadStr(ptr, msgStart);
+				p.c = msg;
+			}
+			
+			char const *end() const
+			{
+				return msg + (msgLen ? msgLen : BUF_LEN);
+			}
+			
+			size_t size() const
+			{
+				if (p.c < msg || p.c >= end())
+					throw std::exception();
+				return p.c - msg;
+			}
+			
+			void check(size_t bytes)
+			{
+				if (p.c + bytes >= end())
+					throw std::exception();
+			}
+			
+			// Readers
+			uint8_t r8()
+			{
+				check(1);
+				return *p.u8++;
 			}
 
-			// Literal:
-			LString::Array a;			
-			while (*p.u8 > 0)
+			uint16_t r16()
 			{
-				if (*p.u8 >= 64)
+				check(2);
+				return ntohs(*p.u16++);
+			}
+
+			uint32_t r32()
+			{
+				check(4);
+				return ntohl(*p.u32++);
+			}
+
+			LString readStr(LPointer &p)
+			{
+				if ((*p.u8 & 0xc0) == 0xc0)
 				{
-					LAssert(!"label too long.");
-					return LString();
+					// Reference...
+					auto u16 = ntohs(*p.u16++);
+					auto offset = u16 & ~0xc000;
+					if (offset < 0 || offset >= BUF_LEN)
+					{
+						printf("readstr invalid offset=%i\n", offset);
+						return LString();
+					}
+					
+					LPointer ptr;
+					ptr.c = msg + offset;
+					return readStr(ptr);
+				}
+
+				// Literal:
+				LString::Array a;
+				while (*p.u8 > 0)
+				{
+					if (*p.u8 >= 64)
+					{
+						LAssert(!"label too long.");
+						return LString();
+					}
+					
+					auto &s = a.New();
+					check(1);
+					if (!s.Length(*p.u8++))
+						return LString();
+					
+					check(s.Length());
+					memcpy(s.Get(), p.c, s.Length());
+					p.c += s.Length();
+				}
+
+				check(1);
+				p.c++;
+				return LString(".").Join(a);
+			}
+
+			// Writers
+			void w8(uint8_t v)
+			{
+				check(1);
+				*p.u8++ = v;
+			}
+
+			void w16(uint16_t v)
+			{
+				check(2);
+				*p.u16++ = htons(v);
+			}
+
+			void w32(uint32_t v)
+			{
+				check(4);
+				*p.u32++ = htonl(v);
+			}
+
+			bool writeStr(LString &s)
+			{
+				auto parts = s.SplitDelimit(".");
+				for (auto &part: parts)
+				{
+					if (part.Length() >= 64)
+					{
+						LAssert(!"label too long.");
+						return false;
+					}
+					check(part.Length() + 1);
+					*p.u8++ = (uint8_t)part.Length();
+					memcpy(p.c, part.Get(), part.Length());
+					p.c += part.Length();
 				}
 				
-				auto &s = a.New();
-				if (!s.Length(*p.u8++))
-					return LString();
-				memcpy(s.Get(), p.c, s.Length());
-				p.c += s.Length();
+				check(1);
+				*p.c++ = 0;
+				return true;
 			}
-			p.c++;
-			return LString(".").Join(a);
-		}
 		
-		bool WriteStr(LPointer &p, LString &s)
-		{
-			auto parts = s.SplitDelimit(".");
-			for (auto &part: parts)
-			{
-				if (part.Length() >= 64)
-				{
-					LAssert(!"label too long.");
-					return false;
-				}
-				*p.u8++ = (uint8_t)part.Length();
-				memcpy(p.c, part.Get(), part.Length());
-				p.c += part.Length();
-			}
-			*p.c++ = 0;
-			return true;
-		}
+		};
 		
 		int Main() override
 		{
-			printf("in main.\n");
-
 			LSocket sock;
 			sock.SetUdp(true);
 
@@ -2309,112 +2384,120 @@ struct LHostnameAsyncPriv
 			{
 				if (endTime && LCurrentTime() >= endTime)
 				{
-					printf("main timeout reached.\n");
+					printf("%s:%i - main timeout reached.\n", _FL);
 					break;
 				}
 			
-				char msg[BUF_LEN];
-				LPointer p;
-				p.c = msg;
-					
-				if (transId)
-				{
-					// Check for incomming replies...
-					uint32_t read_ip = 0;
-					uint16_t read_port = 0;
-					if (auto rd = sock.ReadUdp(msg, sizeof(msg), 0, &read_ip, &read_port))
-					{
-						printf("rd=%i ip=%s port=%i\n", (int)rd, LIpToStr(read_ip).Get(), read_port);
+				DnsBuf buf;
 
-						#define ERR(...) { printf(__VA_ARGS__); continue; }
+				try
+				{
+					if (transId)
+					{
+						// Check for incomming replies...
+						uint32_t read_ip = 0;
+						uint16_t read_port = 0;
 						
-						auto id = ntohs(*p.u16++);
-						if (id != transId)
-							ERR("%s:%i - not the right transaction id: %i/%i\n", _FL, id, transId);
-						
-						auto flags = ntohs(*p.u16++);
-						if (!(flags & 0x8000))
-							ERR("%s:%i - not a response\n", _FL)
-						auto questions = ntohs(*p.u16++);
-						auto answers = ntohs(*p.u16++);
-						auto auth_rec = ntohs(*p.u16++);
-						auto add_rec = ntohs(*p.u16++);
-						LString q;
-						for (int i=0; i<questions; i++)
+						if ((buf.msgLen = sock.ReadUdp(buf.msg, sizeof(buf.msg), 0, &read_ip, &read_port)))
 						{
-							// printf("read q:\n");
-							q = ReadStr(p, msg);
-							QTypes type = (QTypes) ntohs(*p.u16++);
-							QClasses cls = (QClasses) ntohs(*p.u16++);
-							// printf("got q: '%s' %i,%i\n", q.Get(), type, cls);
-						}
-						for (int i=0; i<answers; i++)
-						{
-							// printf("read a:\n");
-							auto aName = ReadStr(p, msg);
-							QTypes type = (QTypes) ntohs(*p.u16++);
-							QClasses cls = (QClasses) ntohs(*p.u16++);
-							auto ttl = ntohl(*p.u32++);
-							auto len = ntohs(*p.u16++);
-							if (type == QT_A)
+							// printf("rd=%i ip=%s port=%i\n", (int)rd, LIpToStr(read_ip).Get(), read_port);
+
+							#define ERR(...) { printf(__VA_ARGS__); continue; }
+							
+							auto id = buf.r16();
+							if (id != transId)
+								ERR("%s:%i - not the right transaction id: %i/%i\n", _FL, id, transId);
+							
+							auto flags = buf.r16();
+							if (!(flags & 0x8000))
+								ERR("%s:%i - not a response\n", _FL)
+							auto questions = buf.r16();
+							auto answers = buf.r16();
+							auto auth_rec = buf.r16();
+							auto add_rec = buf.r16();
+							LString q;
+							for (int i=0; i<questions; i++)
 							{
-								if (len == 4)
-								{
-									result_name = aName;
-									result_ip4 = ntohl(*p.u32);
-									printf("a='%s' ip=%s type=%i cls=%i\n",
-										aName.Get(), LIpToStr(result_ip4).Get(), type, cls);
-								}
-								else ERR("%s:%i - invalid A record len: %i\n", _FL, len);
+								// printf("read q:\n");
+								q = buf.readStr(buf.p);
+								QTypes type = (QTypes) buf.r16();
+								QClasses cls = (QClasses) buf.r16();
+								// printf("got q: '%s' %i,%i\n", q.Get(), type, cls);
 							}
-							p.c += len;
-						}						
-						break;
+							for (int i=0; i<answers; i++)
+							{
+								// printf("read a:\n");
+								auto aName = buf.readStr(buf.p);
+								QTypes type = (QTypes) buf.r16();
+								QClasses cls = (QClasses) buf.r16();
+								auto ttl = buf.r32();
+								auto len = buf.r16();
+								if (type == QT_A)
+								{
+									if (len == 4)
+									{
+										result_name = aName;
+										result_ip4 = buf.r32();
+										/*
+										printf("a='%s' ip=%s type=%i cls=%i\n",
+											aName.Get(), LIpToStr(result_ip4).Get(), type, cls);
+										*/
+									}
+									else ERR("%s:%i - invalid A record len: %i\n", _FL, len);
+								}
+								else buf.p.c += len;
+							}
+							break;
+						}
+					}
+					else
+					{
+						if (nameServers.Length() == 0)
+						{
+							err.Set(LErrorInvalidParam, "no dns server");
+							Complete();
+							break;
+						}
+
+						// Send UDP request packet
+						auto dnsServer = LIpToInt(nameServers[0]);
+
+						buf.w16(transId = nextId++);
+						buf.w16(0x0100); // query, stardard, not trunc, recurse
+						buf.w16(1); // questions
+						buf.w16(0); // answers
+						buf.w16(0); // nameserver records
+						buf.w16(1); // additional records
+						
+						// question record:
+						if (!buf.writeStr(name))
+							break;
+						buf.w16(QT_A);
+						buf.w16(QC_IN);
+						
+						// additional record:
+						buf.w8(0); // root
+						buf.w16(41); // OPT
+						buf.w16(1472); // UDP payload size
+						buf.w8(0); // ext rcode
+						buf.w8(0); // EDNS0 ver
+						buf.w16(0); // Z: cannot handle DNSSEC
+						buf.w16(0); // data len?
+						
+						auto wr = sock.WriteUdp(buf.msg, buf.size(), 0, dnsServer, DNS_PORT);
+						// printf("dns write=%i\n", wr);
 					}
 				}
-				else
+				catch (...)
 				{
-					if (nameServers.Length() == 0)
-					{
-						err.Set(LErrorInvalidParam, "no dns server");
-						Complete();
-						break;
-					}
-
-					// Send UDP request packet
-					auto dnsServer = LIpToInt(nameServers[0]);
-
-					*p.u16++ = htons(transId = nextId++);
-					*p.u16++ = htons(0x0100); // query, stardard, not trunc, recurse
-					*p.u16++ = htons(1); // questions
-					*p.u16++ = htons(0); // answers
-					*p.u16++ = htons(0); // nameserver records
-					*p.u16++ = htons(1); // additional records
-					
-					// question record:
-					if (!WriteStr(p, name))
-						break;
-					*p.u16++ = htons(QT_A);
-					*p.u16++ = htons(QC_IN);
-					
-					// additional record:
-					*p.u8++ = 0; // root
-					*p.u16++ = htons(41); // OPT
-					*p.u16++ = htons(1472); // UDP payload size
-					*p.u8++ = 0; // ext rcode
-					*p.u8++ = 0; // EDNS0 ver
-					*p.u16++ = htons(0); // Z: cannot handle DNSSEC
-					*p.u16++ = htons(0); // data len?
-					
-					int len = p.c - msg;
-					int wr = sock.WriteUdp(msg, len, 0, dnsServer, DNS_PORT);
-					printf("dns write=%i\n", wr);
+					err.Set(LErrorAddrNotAvail, "buffer range err");
+					break;
 				}
 			}
 			
-			printf("%s:%i - call complete\n", _FL);
+			// printf("%s:%i - call complete\n", _FL);
 			Complete();
-			printf("%s:%i - exit thread\n", _FL);
+			// printf("%s:%i - exit thread\n", _FL);
 			return 0;
 		}
 	#endif
@@ -2429,7 +2512,7 @@ struct LHostnameAsyncPriv
 					err.Set(LErrorFuncFailed, "ip not found");
 				}
 				
-				printf("%s:%i - calling cb\n", _FL);
+				// printf("%s:%i - calling cb\n", _FL);
 				callback(result_ip4, err, LCurrentTime() - startTs);
 			}
 			else printf("%s:%i - no callback in complete\n", _FL);
@@ -2624,6 +2707,52 @@ LHostnameAsync::~LHostnameAsync()
 	d->DecRef();
 }
 
+bool LHostnameAsync::UnitTests()
+{
+	// Basic good case
+	auto t1 = LCurrentTime();
+	uint32_t result_ip4 = 0;
+	LError error;
+	bool called = false;
+	auto host1 = "www.memecode.com";
+	LHostnameAsync a1(host1,
+		[&](auto ip4, auto err, auto time)
+		{
+			printf("%s=%s\n", host1, LIpToStr(ip4).Get());
+			result_ip4 = ip4;
+			error = err;
+			called = true; // must be last
+		});
+	
+	auto waitResult = [&](uint64_t startTs, int timeout = 3000) {
+		while (!called)
+			LSleep(10);
+		return true;
+	};
+	if (!waitResult(t1))
+		return false;
+	
+	auto t2 = LCurrentTime();
+	result_ip4 = 0;
+	called = false;
+	auto host2 = "this-url-doesnt-exist-really-I-checked.com";
+	LHostnameAsync a2(host2,
+		[&](auto ip4, auto err, auto time)
+		{
+			printf("%s=%s (err=%s)\n", host2, LIpToStr(ip4).Get(), err.ToString().Get());
+			result_ip4 = ip4;
+			error = err;
+			called = true; // must be last
+		});
+	
+	if (!waitResult(t2))
+		return false;
+	
+	// printf("%s:%i - LHostnameAsync::UnitTests\n", _FL);
+	return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////////
 LString LHostName()
 {
 	char hostname[256];

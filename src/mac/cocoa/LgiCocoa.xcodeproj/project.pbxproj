@@ -167,6 +167,7 @@
 		349F939E2B92CBAD002410A2 /* TextConvert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 349F939D2B92CBAD002410A2 /* TextConvert.cpp */; };
 		34A3ACE820568D5800B1D62A /* StringLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34A3ACE720568D5800B1D62A /* StringLayout.cpp */; };
 		34A3ACEA20568D9700B1D62A /* MenuCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34A3ACE920568D9700B1D62A /* MenuCommon.cpp */; };
+		34A981282EC321EB007C25C6 /* Net.h in Headers */ = {isa = PBXBuildFile; fileRef = 34A981272EC321EB007C25C6 /* Net.h */; };
 		34B14E3426951C6E004C22CC /* Slider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34B14E3326951C6E004C22CC /* Slider.cpp */; };
 		34B531D822F65734002B50F7 /* Menu.h in Headers */ = {isa = PBXBuildFile; fileRef = 34B531D722F65734002B50F7 /* Menu.h */; };
 		34B6B19123CFD0F100C24906 /* DragAndDropCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34B6B19023CFD0F100C24906 /* DragAndDropCommon.cpp */; };
@@ -377,6 +378,7 @@
 		349F939D2B92CBAD002410A2 /* TextConvert.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TextConvert.cpp; path = ../../common/Text/TextConvert.cpp; sourceTree = SOURCE_ROOT; };
 		34A3ACE720568D5800B1D62A /* StringLayout.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StringLayout.cpp; path = ../../common/Gdc2/Font/StringLayout.cpp; sourceTree = SOURCE_ROOT; };
 		34A3ACE920568D9700B1D62A /* MenuCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MenuCommon.cpp; path = ../../common/Lgi/MenuCommon.cpp; sourceTree = SOURCE_ROOT; };
+		34A981272EC321EB007C25C6 /* Net.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Net.h; path = ../../../include/lgi/common/Net.h; sourceTree = "<group>"; };
 		34B14E3326951C6E004C22CC /* Slider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Slider.cpp; path = ../../common/Widgets/Slider.cpp; sourceTree = SOURCE_ROOT; };
 		34B531D722F65734002B50F7 /* Menu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Menu.h; path = ../../../include/lgi/common/Menu.h; sourceTree = "<group>"; };
 		34B6B19023CFD0F100C24906 /* DragAndDropCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DragAndDropCommon.cpp; path = ../../common/Lgi/DragAndDropCommon.cpp; sourceTree = SOURCE_ROOT; };
@@ -788,9 +790,10 @@
 			isa = PBXGroup;
 			children = (
 				3483413B2CDAB9E3002AF938 /* CommsBus */,
-				346FACE91D3C75AE00FFEBCE /* Uri.cpp */,
 				346FACEA1D3C75AE00FFEBCE /* MDStringToDigest.cpp */,
+				34A981272EC321EB007C25C6 /* Net.h */,
 				3477C31B1CC04D3F0028B84B /* Net.cpp */,
+				346FACE91D3C75AE00FFEBCE /* Uri.cpp */,
 			);
 			name = Network;
 			sourceTree = "<group>";
@@ -847,6 +850,7 @@
 			files = (
 				344CFBC8237365B800AE6B35 /* ClipBoard.h in Headers */,
 				3449B8CE26BBF6B10022A9B8 /* Notifications.h in Headers */,
+				34A981282EC321EB007C25C6 /* Net.h in Headers */,
 				343874B8230F46B200CF96B4 /* Layout.h in Headers */,
 				3477C2AC1CBF72170028B84B /* ViewPriv.h in Headers */,
 				344412152E223F220072DADA /* PopupNotification.h in Headers */,

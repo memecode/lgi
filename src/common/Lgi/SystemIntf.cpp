@@ -504,7 +504,7 @@ public:
 
 			if (IsCancelled())
 			{
-				printf("work took: " LPrintfInt64 "\n", LCurrentTime()-startTs);
+				// printf("work took: " LPrintfInt64 "\n", LCurrentTime()-startTs);
 				if (!HasWork())
 					break;
 			}
@@ -2698,7 +2698,7 @@ public:
 			DoWork();
 			if (IsCancelled())
 			{
-				printf("work took: " LPrintfInt64 "\n", LCurrentTime()-startTs);
+				// printf("work took: " LPrintfInt64 "\n", LCurrentTime()-startTs);
 				if (!HasWork())
 					break;
 			}
