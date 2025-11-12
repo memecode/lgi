@@ -397,6 +397,13 @@ public:
 		Ssh = NULL;
 	}
 
+	LString FmtError(LString context)
+	{
+		auto code = ssh_get_error_code(Ssh);
+		auto msg = ssh_get_error(Ssh);
+		return LString::Fmt("%s: %i,%s", context.Get(), code, msg);
+	}
+
 	LCancel *GetCancel() const
 	{
 		return CancelObj;
@@ -656,7 +663,7 @@ public:
 		ssh_disconnect(Ssh);
 		Connected = false;
 	}
-
+	
 	LError DownloadFile(const char *To, const char *From)
 	{
 		LFile::Path to(To);
@@ -691,26 +698,26 @@ public:
 			auto sftp = sftp_new(Ssh);
 			if (!sftp)
 			{
-				auto code = ssh_get_error_code(Ssh);
-				auto err = ssh_get_error(Ssh);
-				auto msg = LString::Fmt("sftp_new failed: %i,%s", code, err);
-				Log->Print("%s:%i - %s\n", _FL, ssh_get_error(Ssh), msg.Get());
+				auto msg = FmtError("sftp_new failed");
+				Log->Print("%s:%i - %s\n", _FL, msg.Get());
 				return LError(LErrorNoMem, msg);
 			}
 			
 			auto rc = sftp_init(sftp);
 			if (rc != SSH_OK)
 			{
-				Log->Print("%s:%i - sftp_init failed.\n", _FL);
-				ret.Set(LErrorNoMem, "sftp_init failed");
+				auto msg = FmtError("sftp_init failed");
+				Log->Print("%s:%i - %s\n", _FL, msg.Get());
+				ret.Set(LErrorNoMem, msg);
 			}
 			else
 			{			
 				auto file = sftp_open(sftp, From, O_RDONLY, 0);
 				if (!file)
 				{
-					Log->Print("%s:%i - sftp_open(%s) failed.\n", _FL, From);
-					ret.Set(LErrorNoMem, "sftp_open failed");
+					auto msg = FmtError(LString::Fmt("sftp_open(%s) failed", From));
+					Log->Print("%s:%i - %s.\n", _FL, msg.Get());
+					ret.Set(LErrorNoMem, msg);
 				}
 				else
 				{
@@ -732,7 +739,7 @@ public:
 							auto wr = To->Write(Buf.AddressOf(), rd);
 							if (wr < rd)
 							{
-								Log->Print("%s:%i - Write failed.\n", _FL);
+								Log->Print("%s:%i - out file write failed.\n", _FL);
 								ret.Set(LErrorIoFailed, "write failed.");
 								break;
 							}
@@ -854,23 +861,26 @@ public:
 			auto sftp = sftp_new(Ssh);
 			if (!sftp)
 			{
-				Log->Print("%s:%i - sftp_new failed.\n", _FL);
-				return LError(LErrorNoMem, "sftp_new failed");
+				auto msg = FmtError("sftp_new failed");
+				Log->Print("%s:%i - %s\n", _FL, msg.Get());
+				return LError(LErrorNoMem, msg);
 			}
 			
 			auto rc = sftp_init(sftp);
 			if (rc != SSH_OK)
 			{
-				Log->Print("%s:%i - sftp_init failed.\n", _FL);
-				ret.Set(LErrorNoMem, "sftp_init failed");
+				auto msg = FmtError("sftp_init failed");
+				Log->Print("%s:%i - %s\n", _FL, msg.Get());
+				ret.Set(LErrorNoMem, msg);
 			}
 			else
 			{			
 				auto file = sftp_open(sftp, To, O_WRONLY, 0);
 				if (!file)
 				{
-					Log->Print("%s:%i - sftp_open(%s) failed.\n", _FL, To);
-					ret.Set(LErrorNoMem, "sftp_open failed");
+					auto msg = FmtError(LString::Fmt("sftp_open(%s) failed", To));
+					Log->Print("%s:%i - %s\n", _FL, msg.Get());
+					ret.Set(LErrorNoMem, msg);
 				}
 				else
 				{
