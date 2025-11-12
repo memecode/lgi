@@ -659,7 +659,8 @@ public:
 
 	LError DownloadFile(const char *To, const char *From)
 	{
-		LFile local(To, O_WRITE);
+		LFile::Path to(To);
+		LFile local(to.Absolute(), O_WRITE);
 		if (!local.IsOpen())
 		{
 			Log->Print("%s:%i - Can't open '%s'.\n", _FL, To);
@@ -683,14 +684,18 @@ public:
 			return LError(LErrorInvalidParam);
 
 		LError ret(LErrorNone);
+		ssh_set_blocking(Ssh, true); // scp/sftp doesn't seem to like non-blocking
 
-		#if 0 // New sftp code:
+		#if 1 // New sftp code:
 		
 			auto sftp = sftp_new(Ssh);
 			if (!sftp)
 			{
-				Log->Print("%s:%i - sftp_new failed.\n", _FL);
-				return LError(LErrorNoMem, "sftp_new failed");
+				auto code = ssh_get_error_code(Ssh);
+				auto err = ssh_get_error(Ssh);
+				auto msg = LString::Fmt("sftp_new failed: %i,%s", code, err);
+				Log->Print("%s:%i - %s\n", _FL, ssh_get_error(Ssh), msg.Get());
+				return LError(LErrorNoMem, msg);
 			}
 			
 			auto rc = sftp_init(sftp);
@@ -763,7 +768,6 @@ public:
 				return LError(LErrorNoMem, "ssh_scp_new failed");
 			}
 
-			ssh_set_blocking(Ssh, true); // scp doesn't seem to like non-blocking
 			auto r = ssh_scp_init(Scp);
 			if (r != SSH_OK)
 			{
@@ -843,6 +847,7 @@ public:
 		// Write the file...
 		LError ret(LErrorNone);
 		auto Parts = LString(To).RSplit("/", 1);
+		ssh_set_blocking(Ssh, true); // scp/sftp doesn't seem to like non-blocking
 		
 		#if 0 // New sftp code:
 		
@@ -922,7 +927,6 @@ public:
 		
 		#else // Old scp code:
 		
-			ssh_set_blocking(Ssh, true); // scp doesn't seem to like non-blocking
 			ssh_scp Scp = ssh_scp_new(Ssh, SSH_SCP_WRITE, Parts[0]);
 			if (!Scp)
 			{
