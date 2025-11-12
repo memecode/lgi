@@ -559,7 +559,7 @@ int LItemContainer::WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState)
 	for (auto &f: Formats.GetSupported())
 		DND_LOG("%s:%i willacc format: %s\n", _FL, f.Get());
 
-	if (DragItem && Formats.HasFormat(ContainerItemsFormat))
+	if (DragItem)
 	{
 		Formats.Supports(ContainerItemsFormat);
 		if (auto pos = GetItemReorderPos(Pt))
@@ -571,10 +571,10 @@ int LItemContainer::WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState)
 				DND_LOG("%s:%i new ContainerItemDrop at %s\n", _FL, pos.pos.GetStr());
 				Invalidate();
 			}
-
+			
 			return DROPEFFECT_MOVE;
 		}
-		else printf("%s:%i no item reorder pos.\n", _FL);
+		// else printf("%s:%i no item reorder pos.\n", _FL);
 	}
 
 	return DROPEFFECT_NONE;
@@ -620,6 +620,12 @@ int LItemContainer::OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
 	}
 
 	return DROPEFFECT_NONE;
+}
+
+void LItemContainer::SetDragItem(ItemDragFlags flags)
+{
+	DragItem = flags;
+	DropTarget(DragItem != ITEM_DRAG_USER);
 }
 
 void LItemContainer::OnDragExit()

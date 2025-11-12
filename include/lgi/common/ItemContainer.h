@@ -399,7 +399,12 @@ public:
 	
 	/// This is the drag and drop format that uses `ContainerItemsDrag`
 	/// \sa SetDragItem
-	constexpr static const char *ContainerItemsFormat = "com.memecode.lgi-item";
+	constexpr static const char *ContainerItemsFormat = 
+		#if MAC
+		"com.memecode.lgi-item";
+		#else
+		"application/x-lgi-item";
+		#endif
 
 	/// The data format for `ContainerItemsFormat`
 	/// A list of items being dragged over a container view
@@ -599,7 +604,7 @@ public:
 	/// The format for the drag and drop is `ContainerItemsFormat` and the data in that
 	/// format is described by `ContainerItemsDrag`. Finally when the user drops the items
 	/// the control handles the drop via `OnReorderDrop`.
-	void SetDragItem(ItemDragFlags flags) { DragItem = flags; }
+	void SetDragItem(ItemDragFlags flags);
 
 	bool GetFormats(LDragFormats &Formats) override;
 	bool GetData(LArray<LDragData> &Data) override;

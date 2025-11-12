@@ -347,16 +347,23 @@ bool LWindow::OnGtkDropTarget(LView *view, bool isTarget)
 {
 	if (!view)
 		return false;
-	
+
 	LDragFormats formats(true);
 	if (auto target = view->DropTarget())
 	{
 		target->WillAccept(formats, LPoint(), 0);
 	}
+	if (formats.Length() == 0)
+	{
+		printf("OnGtkDropTarget got no targets for %s\n", view->GetClass());
+		return false;
+	}
 
 	for (auto &fmt: formats.GetAll())
 	{
 		bool has = d->dndFormats.Find(fmt);
+		printf("OnGtkDropTarget for %s, fmt=%s, %i %i\n",
+			view->GetClass(), fmt.Get(), has, isTarget);
 		if (isTarget ^ has)
 		{
 			if (isTarget)

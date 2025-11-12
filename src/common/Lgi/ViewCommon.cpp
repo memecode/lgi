@@ -301,36 +301,31 @@ bool LView::AddView(LViewI *v, int Where)
 	if (!v)
 		return false;
 
-	#ifdef HAIKU
-	auto wasAttached = v->IsAttached();
-	#endif
-	
 	LAssert(!Children.HasItem(v));
 	if (!Children.Insert(v, Where))
 		return false;
-		
-	auto gv = v->GetLView();
-	if (gv && gv->_Window != _Window)
+	
+	auto lview = v->GetLView();	
+	bool isAttaching = false;
+	if (auto window = GetWindow())
 	{
-		LAssert(!_InLock);
-		gv->_Window = _Window;
+		if (lview && lview->_Window != _Window)
+		{
+			LAssert(!_InLock);
+			isAttaching = true;
+			lview->_Window = _Window;
+		}
 	}
 	v->SetParent(this);
-	v->OnAttach();
 	OnChildrenChanged(v, true);
-
-	/*
-	printf("AddView %p/%s <- %p/%s\n",
-		static_cast<LViewI*>(this), GetClass(),
-		v, v->GetClass());
-	*/
+	if (isAttaching)
+		v->OnAttach();
 
 	#ifdef HAIKU
-	auto lv = v->GetLView();
-	if (lv && !wasAttached && lv->IsAttached() && !lv->d->onCreateEvent)
+	if (isAttaching && lview && !lview->d->onCreateEvent)
 	{
-		lv->d->onCreateEvent = true;
-		lv->OnCreate();
+		lview->d->onCreateEvent = true;
+		lview->OnCreate();
 	}
 	#endif
 
@@ -367,36 +362,20 @@ LWindow *LView::GetWindow()
 	if (!_Window)
 	{
 		// Walk up parent list and find someone who has a window
-		auto *w = d->GetParent();
-		for (; w; w = w->d ? w->d->GetParent() : NULL)
+		for (auto *w = d->GetParent();
+			w;
+			w = w->d ? w->d->GetParent() : nullptr)
 		{
 			if (w->_Window)
 			{
 				LAssert(!_InLock);
 				_Window = w->_Window;
+				OnAttach();
 				break;
 			}
 		}
 	}
 	
-	#if 0
-	// Check the window is the same thread as us
-	if (Handle() && _Window)
-	{
-		auto ourBWnd = Handle() ? Handle()->Window() : NULL;
-		auto ourThread = ourBWnd ? ourBWnd->Thread() : -1;
-		if (ourThread >= 0)
-		{
-			auto wndBWnd = _Window->Handle() ? _Window->Handle()->Window() : NULL;
-			auto wndThread = wndBWnd ? wndBWnd->Thread() : -1;
-			if (ourThread != wndThread)
-			{
-				printf("WARNING: window thread mismatch!! cls=%s us=%i, wnd=%i\n", GetClass(), ourThread, wndThread);
-			}
-		}
-	}
-	#endif
-		
 	return dynamic_cast<LWindow*>(_Window);
 }
 
@@ -581,6 +560,23 @@ void LView::OnAttach()
 		if (!v->GetParent())
 			v->SetParent(this);
 	}
+	
+	#ifdef __GTK_H__
+	if (TestFlag(GViewFlags, GWF_DROP_TARGET))
+	{
+		if (auto wnd = GetWindow())
+		{
+			printf("%s -> calling OnGtkDropTarget\n", GetClass());
+			auto Status = wnd->OnGtkDropTarget(this, true);
+			if (Status && !d->DropTarget)
+				d->DropTarget = GetWindow();
+		}
+		else
+		{
+			LgiTrace("%s:%i - can't setup dnd for '%s', no window?\n", _FL, GetClass());
+		}
+	}
+	#endif
 }
 
 LRect &LView::GetMargin()
