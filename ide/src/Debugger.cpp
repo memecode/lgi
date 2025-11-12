@@ -6,7 +6,7 @@
 */
 
 #define DEBUG_STOP_ON_GTK_ERROR	0
-#define DEBUG_STRUCT_LOGGING	1
+#define DEBUG_STRUCT_LOGGING	0
 static bool DEBUG_SHOW_GDB_IO = false;
 #define ECHO_GDB_OUTPUT			0
 #define ERR_CTX					__FUNCTION__, _FL

@@ -856,7 +856,7 @@ public:
 		auto Parts = LString(To).RSplit("/", 1);
 		ssh_set_blocking(Ssh, true); // scp/sftp doesn't seem to like non-blocking
 		
-		#if 0 // New sftp code:
+		#if 1 // New sftp code:
 		
 			auto sftp = sftp_new(Ssh);
 			if (!sftp)
