@@ -264,7 +264,11 @@ bool ProjectNode::Save(LDocView *Edit, NodeView *Callback, LStream *Out)
 int ProjectNode::GetId()
 {
 	if (!NodeId && Project)
+	{
 		NodeId = Project->AllocateId();
+		if (auto p = GetProject())
+			p->SetDirty();
+	}
 
 	return NodeId;
 }

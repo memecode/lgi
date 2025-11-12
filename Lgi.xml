@@ -8,16 +8,16 @@
 				<Node File="./src/common/General/TimeZone.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Drag and Drop" Type="1" Platforms="15" Open="0" Id="4">
-				<Node Name="Haiku" Type="1" Platforms="15" Id="4">
+				<Node Name="Haiku" Type="1" Platforms="15" Id="5">
 					<Node File=".\src\haiku\DragAndDrop.cpp" Type="2" Platforms="8" />
 				</Node>
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="6">
 					<Node File=".\src\linux\Lgi\DragAndDrop.cpp" Type="2" Platforms="2" />
 				</Node>
-				<Node Name="Mac" Type="1" Platforms="15" Id="1">
+				<Node Name="Mac" Type="1" Platforms="15" Id="7">
 					<Node File="./src/mac/cocoa/DragAndDrop.mm" Type="8" Platforms="4" />
 				</Node>
-				<Node Name="Windows" Type="1" Platforms="15" Open="0" Id="7">
+				<Node Name="Windows" Type="1" Platforms="15" Open="0" Id="8">
 					<Node File=".\include\lgi\common\Com.h" Type="3" Platforms="15" />
 					<Node File=".\src\win\Lgi\DragAndDrop.cpp" Type="2" Platforms="1" />
 				</Node>
@@ -25,19 +25,19 @@
 				<Node File=".\src\common\Lgi\DragAndDropCommon.cpp" Type="2" Platforms="15" />
 				<Node File=".\include\lgi\common\DropFiles.h" Type="3" Platforms="15" />
 			</Node>
-			<Node Name="File" Type="1" Platforms="15" Open="0" Id="8">
-				<Node Name="Haiku" Type="1" Platforms="15" Id="8">
+			<Node Name="File" Type="1" Platforms="15" Open="0" Id="9">
+				<Node Name="Haiku" Type="1" Platforms="15" Id="10">
 					<Node File=".\src\haiku\File.cpp" Type="2" Platforms="8" />
 					<Node File=".\src\haiku\ShowFileProp_Haiku.cpp" Type="2" Platforms="8" />
 				</Node>
-				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="10">
+				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="11">
 					<Node File="./src/linux/General/File.cpp" Type="2" Platforms="2" />
 					<Node File="./src/linux/General/ShowFileProp_Linux.cpp" Type="2" Platforms="2" />
 				</Node>
-				<Node Name="Mac" Type="1" Platforms="15" Id="1">
+				<Node Name="Mac" Type="1" Platforms="15" Id="12">
 					<Node File="./src/mac/cocoa/ShowFileProp_Mac.mm" Type="8" Platforms="15" />
 				</Node>
-				<Node Name="Win" Type="1" Platforms="15" Open="0" Id="11">
+				<Node Name="Win" Type="1" Platforms="15" Open="0" Id="13">
 					<Node File=".\src\win\General\File.cpp" Type="2" Platforms="1" />
 					<Node File=".\src\win\General\ShowFileProp_Win.cpp" Type="2" Platforms="1" />
 				</Node>
@@ -45,8 +45,8 @@
 				<Node File=".\include\lgi\common\File.h" Type="3" Platforms="15" />
 				<Node File=".\src\common\General\FileCommon.cpp" Type="2" Platforms="15" />
 			</Node>
-			<Node Name="Interface" Type="1" Platforms="15" Open="1" Id="12">
-				<Node Name="Haiku" Type="1" Platforms="15" Id="1">
+			<Node Name="Interface" Type="1" Platforms="15" Open="1" Id="14">
+				<Node Name="Haiku" Type="1" Platforms="15" Id="15">
 					<Node File=".\src\haiku\Window.cpp" Type="2" Platforms="8" />
 					<Node File=".\src\haiku\App.cpp" Type="2" Platforms="8" />
 					<Node File=".\src\haiku\General.cpp" Type="2" Platforms="8" />
@@ -56,8 +56,8 @@
 					<Node File=".\private\haiku\AppPriv.h" Type="3" Platforms="8" />
 				</Node>
 				<Node File=".\include\lgi\common\Window.h" Type="3" Platforms="15" />
-				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="14">
-					<Node Name="Headers" Type="1" Platforms="15" Open="0" Id="15">
+				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="16">
+					<Node Name="Headers" Type="1" Platforms="15" Open="0" Id="17">
 						<Node File=".\include\lgi\linux\Gtk\LgiOsClasses.h" Type="3" Platforms="2" />
 						<Node File=".\include\lgi\linux\Gtk\LgiOsDefs.h" Type="3" Platforms="2" />
 						<Node File="./private/linux/AppPriv.h" Type="3" Platforms="2" />
@@ -69,14 +69,14 @@
 					<Node File=".\src\linux\Gtk\LgiWidget.cpp" Type="2" Platforms="2" />
 					<Node File=".\include\lgi\linux\Gtk\LgiWidget.h" Type="3" Platforms="15" />
 				</Node>
-				<Node Name="Mac" Type="1" Platforms="15" Id="1">
+				<Node Name="Mac" Type="1" Platforms="15" Id="18">
 					<Node File=".\src\mac\cocoa\App.mm" Type="2" Platforms="4" />
 					<Node File=".\src\mac\cocoa\General.mm" Type="2" Platforms="4" />
 					<Node File=".\src\mac\cocoa\View.mm" Type="2" Platforms="4" />
 					<Node File=".\src\mac\cocoa\Widgets.mm" Type="2" Platforms="4" />
 					<Node File=".\src\mac\cocoa\Window.mm" Type="2" Platforms="4" />
 				</Node>
-				<Node Name="Win" Type="1" Platforms="15" Open="0" Id="16">
+				<Node Name="Win" Type="1" Platforms="15" Open="0" Id="19">
 					<Node File=".\src\win\Lgi\App.cpp" Type="2" Platforms="1" />
 					<Node File=".\src\win\Lgi\General.cpp" Type="2" Platforms="1" />
 					<Node File=".\src\win\Lgi\Printer.cpp" Type="2" Platforms="1" />
@@ -94,22 +94,22 @@
 				<Node File=".\include\lgi\common\Window.h" Type="3" Platforms="15" />
 				<Node File=".\src\common\Lgi\WindowCommon.cpp" Type="2" Platforms="15" />
 			</Node>
-			<Node Name="Libraries" Type="1" Platforms="15" Open="1" Id="17">
+			<Node Name="Libraries" Type="1" Platforms="15" Open="1" Id="20">
 				<Node File=".\src\common\Lgi\Library.cpp" Type="2" Platforms="15" />
 				<Node File=".\include\lgi\common\Library.h" Type="3" Platforms="15" />
 			</Node>
-			<Node Name="Memory Subsystem" Type="1" Platforms="15" Open="0" Id="18">
-				<Node Name="Haiku" Type="1" Platforms="15" Id="6">
+			<Node Name="Memory Subsystem" Type="1" Platforms="15" Open="0" Id="21">
+				<Node Name="Haiku" Type="1" Platforms="15" Id="22">
 					<Node File=".\src\haiku\Mem.cpp" Type="2" Platforms="8" />
 				</Node>
-				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="20">
+				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="23">
 					<Node File=".\src\linux\General\Mem.cpp" Type="2" Platforms="2" />
 				</Node>
-				<Node Name="Property List" Type="1" Platforms="15" Open="0" Id="21">
+				<Node Name="Property List" Type="1" Platforms="15" Open="0" Id="24">
 					<Node File=".\src\common\General\Properties.cpp" Type="2" Platforms="15" />
 					<Node File=".\include\lgi\common\Properties.h" Type="3" Platforms="15" />
 				</Node>
-				<Node Name="Win" Type="1" Platforms="15" Open="0" Id="22">
+				<Node Name="Win" Type="1" Platforms="15" Open="0" Id="25">
 					<Node File=".\src\win\General\Mem.cpp" Type="2" Platforms="1" />
 					<Node File="./src/common/General/qsort.cpp" Type="2" Platforms="1" />
 				</Node>
@@ -121,55 +121,55 @@
 				<Node File=".\include\lgi\common\Mem.h" Type="3" Platforms="15" />
 				<Node File=".\include\lgi\common\UnrolledList.h" Type="3" Platforms="15" />
 			</Node>
-			<Node Name="Menus" Type="1" Platforms="15" Open="0" Id="23">
-				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="25">
+			<Node Name="Menus" Type="1" Platforms="15" Open="0" Id="26">
+				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="27">
 					<Node File=".\src\linux\Lgi\Menu.cpp" Type="2" Platforms="2" />
 				</Node>
-				<Node Name="Win32" Type="1" Platforms="15" Open="0" Id="26">
+				<Node Name="Win32" Type="1" Platforms="15" Open="0" Id="28">
 					<Node File=".\src\win\Lgi\Menu.cpp" Type="2" Platforms="1" />
 				</Node>
 				<Node File=".\include\lgi\common\Menu.h" Type="3" Platforms="15" />
 				<Node File=".\src\common\Lgi\MenuCommon.cpp" Type="2" Platforms="15" />
 			</Node>
-			<Node Name="Process" Type="1" Platforms="15" Open="0" Id="27">
-				<Node Name="Posix" Type="1" Platforms="15" Id="1">
+			<Node Name="Process" Type="1" Platforms="15" Open="0" Id="29">
+				<Node Name="Posix" Type="1" Platforms="15" Id="30">
 					<Node File="./src/posix/Roster.cpp" Type="2" Platforms="14" />
 					<Node File="./src/posix/SubProcess.cpp" Type="2" Platforms="14" />
 				</Node>
-				<Node Name="Win" Type="1" Platforms="15" Id="2">
+				<Node Name="Win" Type="1" Platforms="15" Id="31">
 					<Node File="./src/win/Lgi/Roster.cpp" Type="2" Platforms="1" />
 					<Node File="./src/win/Lgi/SubProcess.cpp" Type="2" Platforms="1" />
 				</Node>
 				<Node File="./include/lgi/common/Roster.h" Type="3" Platforms="15" />
 				<Node File="./include/lgi/common/SubProcess.h" Type="3" Platforms="15" />
 			</Node>
-			<Node Name="Resources" Type="1" Platforms="15" Open="0" Id="28">
+			<Node Name="Resources" Type="1" Platforms="15" Open="0" Id="32">
 				<Node File="./src/common/Resource/LgiRes.cpp" Type="2" Platforms="15" />
 				<Node File=".\include\lgi\common\LgiRes.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Resource/Res.cpp" Type="2" Platforms="15" />
 				<Node File=".\include\lgi\common\Res.h" Type="3" Platforms="15" />
 			</Node>
-			<Node Name="Skin" Type="1" Platforms="15" Open="0" Id="29">
+			<Node Name="Skin" Type="1" Platforms="15" Open="0" Id="33">
 				<Node File="./src/common/Skins/Gel/Gel.cpp" Type="2" Platforms="15" />
 				<Node File="./src/common/Gdc2/Path/Path.cpp" Type="2" Platforms="15" />
 			</Node>
-			<Node Name="Stream" Type="1" Platforms="15" Open="0" Id="30">
+			<Node Name="Stream" Type="1" Platforms="15" Open="0" Id="34">
 				<Node File=".\include\lgi\common\Dom.h" Type="3" Platforms="15" />
 				<Node File=".\src\common\Lgi\MemStream.cpp" Type="2" Platforms="15" />
 				<Node File=".\src\common\Lgi\Stream.cpp" Type="2" Platforms="15" />
 				<Node File=".\include\lgi\common\Stream.h" Type="3" Platforms="15" />
 			</Node>
-			<Node Name="Threads" Type="1" Platforms="15" Open="0" Id="31">
-				<Node Name="Haiku" Type="1" Platforms="15" Id="5">
+			<Node Name="Threads" Type="1" Platforms="15" Open="0" Id="35">
+				<Node Name="Haiku" Type="1" Platforms="15" Id="36">
 					<Node File=".\src\haiku\Thread.cpp" Type="2" Platforms="8" />
 				</Node>
-				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="33">
+				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="37">
 					<Node File=".\src\linux\Lgi\Thread.cpp" Type="2" Platforms="2" />
 				</Node>
-				<Node Name="Mac" Type="1" Platforms="15" Id="1">
+				<Node Name="Mac" Type="1" Platforms="15" Id="38">
 					<Node File="./src/mac/cocoa/Thread.mm" Type="2" Platforms="4" />
 				</Node>
-				<Node Name="Win32" Type="1" Platforms="15" Open="0" Id="34">
+				<Node Name="Win32" Type="1" Platforms="15" Open="0" Id="39">
 					<Node File=".\src\win\Lgi\Thread.cpp" Type="2" Platforms="1" />
 				</Node>
 				<Node File="./include/lgi/common/EventTargetThread.h" Type="3" Platforms="15" />
@@ -180,7 +180,7 @@
 				<Node File="./src/common/Lgi/ThreadEvent.cpp" Type="2" Platforms="15" />
 				<Node File="./include/lgi/common/ThreadEvent.h" Type="3" Platforms="15" />
 			</Node>
-			<Node Name="Variant" Type="1" Platforms="15" Open="0" Id="35">
+			<Node Name="Variant" Type="1" Platforms="15" Open="0" Id="40">
 				<Node File="./include/lgi/common/DomFields.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Lgi/Variant.cpp" Type="2" Platforms="15" />
 				<Node File="./include/lgi/common/Variant.h" Type="3" Platforms="15" />
@@ -196,11 +196,11 @@
 			<Node File="./src/common/Lgi/TrayIcon.cpp" Type="2" Platforms="15" />
 			<Node File="./include/lgi/common/TrayIcon.h" Type="3" Platforms="15" />
 		</Node>
-		<Node Name="Dialogs" Type="1" Platforms="15" Open="0" Id="36">
-			<Node Name="File Select Win" Type="1" Platforms="15" Open="0" Id="38">
+		<Node Name="Dialogs" Type="1" Platforms="15" Open="0" Id="41">
+			<Node Name="File Select Win" Type="1" Platforms="15" Open="0" Id="42">
 				<Node File=".\src\win\Lgi\FileSelect.cpp" Type="2" Platforms="1" />
 			</Node>
-			<Node Name="File Select XP" Type="1" Platforms="15" Open="0" Id="37">
+			<Node Name="File Select XP" Type="1" Platforms="15" Open="0" Id="43">
 				<Node File=".\src\common\Lgi\FileSelect.cpp" Type="2" Platforms="14" />
 				<Node File=".\include\lgi\common\FileSelect.h" Type="3" Platforms="15" />
 			</Node>
@@ -212,15 +212,15 @@
 			<Node File="./src/common/Lgi/Input.cpp" Type="2" Platforms="15" />
 			<Node File="./include/lgi/common/Input.h" Type="3" Platforms="15" />
 		</Node>
-		<Node Name="Graphics" Type="1" Platforms="15" Open="0" Id="39">
-			<Node Name="_Core" Type="1" Platforms="15" Open="0" Id="40">
-				<Node Name="Haiku" Type="1" Platforms="15" Id="2">
+		<Node Name="Graphics" Type="1" Platforms="15" Open="0" Id="44">
+			<Node Name="_Core" Type="1" Platforms="15" Open="0" Id="45">
+				<Node Name="Haiku" Type="1" Platforms="15" Id="46">
 					<Node File="./src/haiku/Gdc2.cpp" Type="2" Platforms="8" />
 				</Node>
-				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="42">
+				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="47">
 					<Node File=".\src\linux\Gtk\Gdc2.cpp" Type="2" Platforms="2" />
 				</Node>
-				<Node Name="Win" Type="1" Platforms="15" Open="0" Id="43">
+				<Node Name="Win" Type="1" Platforms="15" Open="0" Id="48">
 					<Node File=".\src\win\Gdc2\Gdc2.cpp" Type="2" Platforms="1" />
 				</Node>
 				<Node File="./src/common/Gdc2/Colour.cpp" Type="2" Platforms="15" />
@@ -235,7 +235,7 @@
 				<Node File="./include/lgi/common/Palette.h" Type="3" Platforms="15" />
 				<Node File="./include/lgi/common/PixelRops.h" Type="3" Platforms="15" />
 			</Node>
-			<Node Name="Font" Type="1" Platforms="15" Open="0" Id="44">
+			<Node Name="Font" Type="1" Platforms="15" Open="0" Id="49">
 				<Node File="./src/common/Gdc2/Font/DisplayString.cpp" Type="2" Platforms="15" />
 				<Node File="./include/lgi/common/DisplayString.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Gdc2/Font/Font.cpp" Type="2" Platforms="15" />
@@ -248,7 +248,7 @@
 				<Node File="./src/common/Gdc2/Font/TypeFace.cpp" Type="2" Platforms="15" />
 				<Node File="./src/common/Gdc2/Font/FontType.cpp" Type="2" Platforms="15" />
 			</Node>
-			<Node Name="Applicators" Type="1" Platforms="15" Open="0" Id="45">
+			<Node Name="Applicators" Type="1" Platforms="15" Open="0" Id="50">
 				<Node File="./src/common/Gdc2/15Bit.cpp" Type="2" Platforms="15" />
 				<Node File="./src/common/Gdc2/16Bit.cpp" Type="2" Platforms="15" />
 				<Node File="./src/common/Gdc2/24Bit.cpp" Type="2" Platforms="15" />
@@ -256,7 +256,7 @@
 				<Node File="./src/common/Gdc2/8Bit.cpp" Type="2" Platforms="15" />
 				<Node File="./src/common/Gdc2/Alpha.cpp" Type="2" Platforms="15" />
 			</Node>
-			<Node Name="Filters" Type="1" Platforms="15" Open="0" Id="46">
+			<Node Name="Filters" Type="1" Platforms="15" Open="0" Id="51">
 				<Node File="./src/common/Gdc2/Filters/Filter.cpp" Type="2" Platforms="15" />
 				<Node File="./src/common/Gdc2/Filters/Gif.cpp" Type="2" Platforms="15" />
 				<Node File="./src/common/Gdc2/Filters/Jpeg.cpp" Type="2" Platforms="15" />
@@ -264,28 +264,28 @@
 				<Node File="./src/common/Gdc2/Filters/Png.cpp" Type="2" Platforms="15" />
 				<Node File="./src/common/Gdc2/Filters/Svg.cpp" Type="2" Platforms="15" />
 			</Node>
-			<Node Name="Rect/Region" Type="1" Platforms="15" Open="0" Id="47">
+			<Node Name="Rect/Region" Type="1" Platforms="15" Open="0" Id="52">
 				<Node File=".\src\common\Gdc2\Rect.cpp" Type="2" Platforms="15" />
 				<Node File=".\include\lgi\common\Rect.h" Type="3" Platforms="15" />
 			</Node>
-			<Node Name="Surfaces" Type="1" Platforms="15" Open="0" Id="48">
-				<Node Name="Haiku" Type="1" Platforms="15" Id="3">
+			<Node Name="Surfaces" Type="1" Platforms="15" Open="0" Id="53">
+				<Node Name="Haiku" Type="1" Platforms="15" Id="54">
 					<Node File=".\src\haiku\MemDC.cpp" Type="2" Platforms="8" />
 					<Node File=".\src\haiku\PrintDC.cpp" Type="2" Platforms="8" />
 					<Node File=".\src\haiku\ScreenDC.cpp" Type="2" Platforms="8" />
 				</Node>
-				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="50">
+				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="55">
 					<Node File="./src/linux/Gtk/MemDC.cpp" Type="2" Platforms="2" />
 					<Node File="./src/linux/Gtk/PrintDC.cpp" Type="2" Platforms="2" />
 					<Node File="./src/linux/Gtk/ScreenDC.cpp" Type="2" Platforms="2" />
 					<Node File="./src/linux/Lgi/Printer.cpp" Type="2" Platforms="2" />
 				</Node>
-				<Node Name="Mac" Type="1" Platforms="15" Open="0" Id="51">
+				<Node Name="Mac" Type="1" Platforms="15" Open="0" Id="56">
 					<Node File="./src/linux/Gtk/MemDC.cpp" Type="2" Platforms="4" />
 					<Node File="./src/linux/Gtk/PrintDC.cpp" Type="2" Platforms="4" />
 					<Node File="./src/linux/Gtk/ScreenDC.cpp" Type="2" Platforms="4" />
 				</Node>
-				<Node Name="Win" Type="1" Platforms="15" Open="0" Id="52">
+				<Node Name="Win" Type="1" Platforms="15" Open="0" Id="57">
 					<Node File=".\src\win\Gdc2\ScreenDC.cpp" Type="2" Platforms="1" />
 					<Node File=".\src\win\Gdc2\PrintDC.cpp" Type="2" Platforms="1" />
 					<Node File=".\src\win\Gdc2\MemDC.cpp" Type="2" Platforms="1" />
@@ -293,38 +293,38 @@
 				<Node File="./include/lgi/common/Printer.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Gdc2/Surface.cpp" Type="2" Platforms="15" />
 			</Node>
-			<Node Name="Gdi Leak" Type="1" Platforms="15" Open="0" Id="53">
+			<Node Name="Gdi Leak" Type="1" Platforms="15" Open="0" Id="58">
 				<Node File=".\src\win\Gdc2\GdiLeak.cpp" Type="2" Platforms="1" />
 				<Node File=".\include\lgi\common\GdiLeak.h" Type="3" Platforms="15" />
 			</Node>
 		</Node>
-		<Node Name="General" Type="1" Platforms="15" Open="0" Id="54">
-			<Node Name="Clipboard" Type="1" Platforms="15" Open="0" Id="55">
-				<Node Name="Haiku" Type="1" Platforms="15" Open="0" Id="58">
+		<Node Name="General" Type="1" Platforms="15" Open="0" Id="59">
+			<Node Name="Clipboard" Type="1" Platforms="15" Open="0" Id="60">
+				<Node Name="Haiku" Type="1" Platforms="15" Open="0" Id="61">
 					<Node File="./src/haiku/ClipBoard.cpp" Type="2" Platforms="8" />
 				</Node>
-				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="57">
+				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="62">
 					<Node File="./src/linux/Lgi/ClipBoard.cpp" Type="2" Platforms="2" />
 				</Node>
-				<Node Name="Win32" Type="1" Platforms="15" Open="0" Id="56">
+				<Node Name="Win32" Type="1" Platforms="15" Open="0" Id="63">
 					<Node File=".\src\win\Lgi\ClipBoard.cpp" Type="2" Platforms="1" />
 				</Node>
 				<Node File="./include/lgi/common/ClipBoard.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Lgi/ClipBoardCommon.cpp" Type="2" Platforms="15" />
 			</Node>
-			<Node Name="Data Dlg" Type="1" Platforms="15" Open="0" Id="59">
+			<Node Name="Data Dlg" Type="1" Platforms="15" Open="0" Id="64">
 				<Node File=".\src\common\Lgi\DataDlg.cpp" Type="2" Platforms="15" />
 				<Node File=".\include\lgi\common\DataDlg.h" Type="3" Platforms="15" />
 				<Node File=".\src\common\General\Password.cpp" Type="2" Platforms="15" />
 				<Node File=".\include\lgi\common\Password.h" Type="3" Platforms="15" />
 			</Node>
-			<Node Name="Hash" Type="1" Platforms="15" Id="1">
+			<Node Name="Hash" Type="1" Platforms="15" Id="65">
 				<Node File="./src/common/Hash/md5/md5.c" Type="2" Platforms="15" />
 				<Node File="./src/common/Hash/md5/md5.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Hash/sha1/sha1.c" Type="2" Platforms="15" />
 				<Node File="./src/common/Hash/sha1/sha1.h" Type="3" Platforms="15" />
 			</Node>
-			<Node Name="Mru" Type="1" Platforms="15" Open="0" Id="60">
+			<Node Name="Mru" Type="1" Platforms="15" Open="0" Id="66">
 				<Node File=".\src\common\Lgi\Mru.cpp" Type="2" Platforms="15" />
 				<Node File=".\include\lgi\common\Mru.h" Type="3" Platforms="15" />
 			</Node>
@@ -334,7 +334,7 @@
 			<Node File="./include/lgi/common/OptionsFile.h" Type="3" Platforms="15" />
 			<Node File="./src/common/Lgi/Rand.cpp" Type="2" Platforms="15" />
 		</Node>
-		<Node Name="Text" Type="1" Platforms="15" Open="0" Id="61">
+		<Node Name="Text" Type="1" Platforms="15" Open="0" Id="67">
 			<Node File="./include/lgi/common/LgiString.h" Type="3" Platforms="15" />
 			<Node File="./src/common/Text/String.cpp" Type="2" Platforms="15" />
 			<Node File="./include/lgi/common/StringClass.h" Type="3" Platforms="15" />
@@ -347,8 +347,8 @@
 			<Node File="./src/common/Text/XmlTree.cpp" Type="2" Platforms="15" />
 			<Node File="./include/lgi/common/XmlTree.h" Type="3" Platforms="15" />
 		</Node>
-		<Node Name="Widgets" Type="1" Platforms="15" Open="1" Id="62">
-			<Node Name="Common" Type="1" Platforms="15" Open="0" Id="63">
+		<Node Name="Widgets" Type="1" Platforms="15" Open="1" Id="68">
+			<Node Name="Common" Type="1" Platforms="15" Open="0" Id="69">
 				<Node File="./src/common/Widgets/Bitmap.cpp" Type="2" Platforms="15" />
 				<Node File="./include/lgi/common/Bitmap.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Widgets/Button.cpp" Type="2" Platforms="15" />
@@ -397,30 +397,30 @@
 				<Node File="./src/common/Widgets/Tree.cpp" Type="2" Platforms="15" />
 				<Node File="./include/lgi/common/Tree.h" Type="3" Platforms="15" />
 			</Node>
-			<Node Name="Css" Type="1" Platforms="15" Open="0" Id="64">
+			<Node Name="Css" Type="1" Platforms="15" Open="0" Id="70">
 				<Node File=".\src\common\Lgi\Css.cpp" Type="2" Platforms="15" />
 				<Node File=".\include\lgi\common\Css.h" Type="3" Platforms="15" />
 				<Node File=".\src\common\Lgi\CssTools.cpp" Type="2" Platforms="15" />
 				<Node File=".\include\lgi\common\CssTools.h" Type="3" Platforms="15" />
 			</Node>
-			<Node Name="Haiku" Type="1" Platforms="15" Id="7">
+			<Node Name="Haiku" Type="1" Platforms="15" Id="71">
 				<Node File=".\src\haiku\Layout.cpp" Type="2" Platforms="8" />
 				<Node File=".\src\haiku\Widgets.cpp" Type="2" Platforms="8" />
 			</Node>
-			<Node Name="Layout" Type="1" Platforms="15" Open="0" Id="68">
+			<Node Name="Layout" Type="1" Platforms="15" Open="0" Id="72">
 				<Node File=".\src\common\Widgets\Box.cpp" Type="2" Platforms="15" />
 				<Node File=".\include\lgi\common\Box.h" Type="3" Platforms="15" />
 				<Node File=".\src\common\Widgets\Splitter.cpp" Type="2" Platforms="15" />
 				<Node File=".\src\common\Widgets\TableLayout.cpp" Type="2" Platforms="15" />
 				<Node File=".\include\lgi\common\TableLayout.h" Type="3" Platforms="15" />
 			</Node>
-			<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="66">
+			<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="73">
 				<Node File="./include/lgi/common/Dialog.h" Type="3" Platforms="15" />
 				<Node File="./src/linux/Lgi/Layout.cpp" Type="2" Platforms="2" />
 				<Node File="./src/linux/Lgi/Dialog.cpp" Type="2" Platforms="2" />
 				<Node File="./include/lgi/common/Widgets.h" Type="3" Platforms="15" />
 			</Node>
-			<Node Name="Win" Type="1" Platforms="15" Open="0" Id="67">
+			<Node Name="Win" Type="1" Platforms="15" Open="0" Id="74">
 				<Node File=".\src\win\Widgets\Edit_Win.cpp" Type="2" Platforms="1" />
 				<Node File=".\src\win\Widgets\Dialog_Win.cpp" Type="2" Platforms="1" />
 				<Node File=".\src\win\Lgi\ScrollBar.cpp" Type="2" Platforms="1" />
@@ -430,21 +430,21 @@
 			<Node File="./include/lgi/common/DocView.h" Type="3" Platforms="15" />
 			<Node File="./include/lgi/common/ImageList.h" Type="3" Platforms="15" />
 		</Node>
-		<Node Name="Network" Type="1" Platforms="15" Open="0" Id="69">
-			<Node Name="CommsBus" Type="1" Platforms="15" Id="1">
+		<Node Name="Network" Type="1" Platforms="15" Open="0" Id="75">
+			<Node Name="CommsBus" Type="1" Platforms="15" Id="76">
 				<Node File="./src/common/Net/CommsBus.cpp" Type="2" Platforms="15" />
 				<Node File="./include/lgi/common/CommsBus.h" Type="3" Platforms="15" />
 				<Node File="./include/lgi/common/UdpTransport.h" Type="3" Platforms="15" />
 			</Node>
-			<Node Name="Headers" Type="1" Platforms="15" Open="0" Id="73">
-				<Node Name="Haiku" Type="1" Platforms="15" Id="1">
+			<Node Name="Headers" Type="1" Platforms="15" Open="0" Id="77">
+				<Node Name="Haiku" Type="1" Platforms="15" Id="78">
 					<Node File=".\include\lgi\haiku\LgiOsClasses.h" Type="3" Platforms="8" />
 					<Node File=".\include\lgi\haiku\LgiOsDefs.h" Type="3" Platforms="8" />
 				</Node>
-				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="75">
+				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="79">
 					<Node File=".\include\lgi\linux\Gtk\LgiOsDefs.h" Type="3" Platforms="2" />
 				</Node>
-				<Node Name="Mac" Type="1" Platforms="15" Id="1">
+				<Node Name="Mac" Type="1" Platforms="15" Id="80">
 					<Node File=".\include\lgi\mac\cocoa\LCocoaView.h" Type="3" Platforms="15" />
 					<Node File=".\include\lgi\mac\cocoa\LgiMac.h" Type="3" Platforms="15" />
 					<Node File=".\include\lgi\mac\cocoa\LgiOs.h" Type="3" Platforms="15" />
@@ -453,7 +453,7 @@
 					<Node File=".\include\lgi\mac\cocoa\ObjCWrapper.h" Type="3" Platforms="15" />
 					<Node File=".\include\lgi\mac\cocoa\SymLookup.h" Type="3" Platforms="15" />
 				</Node>
-				<Node Name="Win" Type="1" Platforms="15" Open="0" Id="76">
+				<Node Name="Win" Type="1" Platforms="15" Open="0" Id="81">
 					<Node File=".\include\lgi\win\LgiOsDefs.h" Type="3" Platforms="1" />
 				</Node>
 				<Node File="./include/lgi/common/AutoPtr.h" Type="3" Platforms="15" />
@@ -478,7 +478,7 @@
 				<Node File="./include/lgi/common/TimeZoneInfo.h" Type="3" Platforms="15" />
 				<Node File="./include/lgi/common/Token.h" Type="3" Platforms="15" />
 			</Node>
-			<Node Name="Mime Message" Type="1" Platforms="15" Open="0" Id="72">
+			<Node Name="Mime Message" Type="1" Platforms="15" Open="0" Id="82">
 				<Node File=".\include\lgi\common\Mime.h" Type="3" Platforms="15" />
 			</Node>
 			<Node File="./src/common/Net/MDStringToDigest.cpp" Type="2" Platforms="15" />
@@ -489,7 +489,7 @@
 			<Node File="./include/lgi/common/Uri.h" Type="3" Platforms="15" />
 		</Node>
 	</Node>
-	<Node Name="Build" Type="1" Platforms="15" Id="1">
+	<Node Name="Build" Type="1" Platforms="15" Id="83">
 		<Node File="./CMakeLists.txt" Type="8" Platforms="15" />
 		<Node File="./haiku/Makefile.haiku" Type="9" Platforms="0" />
 		<Node File="./linux/Makefile.linux" Type="9" Platforms="15" />
@@ -508,6 +508,11 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
+			<Executable>
+				<Linux />
+			</Executable>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -610,19 +615,49 @@ _GNU_SOURCE</Debug>
 					<Release>POSIX
 _GNU_SOURCE</Release>
 				</Haiku>
+				<Linux />
 			</Defines>
 			<Options>
 				<Linux>
 					<Debug>-Wno-format-truncation</Debug>
 					<Release>-Wno-format-truncation</Release>
 				</Linux>
+				<All />
 			</Options>
 			<LibraryPaths>
 				<All>
 					<Debug>../deps/build-x64-debug/lib</Debug>
 					<Release>../deps/build-x64-release/lib</Release>
 				</All>
+				<Linux />
 			</LibraryPaths>
+			<ApplicationIcon />
 		</Build>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
+		<Debug>
+			<Environment />
+			<Arguments>
+				<All />
+			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
+		</Debug>
+		<Editor>
+			<TabSize />
+			<IndentSize />
+			<ShowWhiteSpace />
+			<UseHardTabs />
+			<CommentFile />
+			<CommentFunction />
+		</Editor>
+		<Advanced>
+			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+		</Advanced>
 	</Settings>
 </Project>

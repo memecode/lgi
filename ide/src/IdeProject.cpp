@@ -3448,6 +3448,13 @@ void IdeProject::OnBackendReady()
 	}
 }
 
+static void ForAll(LXmlTag *t, std::function<void(LXmlTag*)> cb)
+{
+	cb(t);	
+	for (auto c: t->Children)
+		ForAll(c, cb);
+}
+
 ProjectStatus IdeProject::OpenFile(const char *FileName)
 {
 	auto Log = d->App->GetBuildLog();
@@ -3510,6 +3517,32 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 		return OpenError;
 	}
 
+	// Validate / de-duplicate node IDs
+	// Doesn't matter what the ID is... so long as it's unique and
+	// doesn't change (other than the fixup here)
+	LHashTbl<IntKey<int>, LXmlTag*> idMap;
+	ForAll(&r, [&](auto elem)
+		{
+			if (auto id = elem->GetAttr("Id"))
+			{
+				int originalId = Atoi(id);
+				if (originalId > 0)
+				{
+					int newId = originalId;
+					while (idMap.Find(newId))
+						newId++;
+					if (newId != originalId)
+					{					
+						elem->SetAttr("Id", newId);
+						d->NextNodeId = newId + 1;
+						// printf("Node id %i -> %i\n", originalId, newId);
+						SetDirty();
+					}
+					idMap.Add(newId, elem);
+				}
+			}
+		});
+
 	Prof.Add("Progress Setup");
 
 	#if DEBUG_OPEN_PROGRESS
@@ -3530,7 +3563,7 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 			LgiTrace("%s:%i failed to open '%s' for reading.\n", _FL, d->UserFile.Get());
 		else
 		{
-			LString::Array lines = Uf.Read().SplitDelimit("\n");
+			auto lines = Uf.Read().SplitDelimit("\n");
 			for (auto &ln: lines)
 			{
 				LString var, value;

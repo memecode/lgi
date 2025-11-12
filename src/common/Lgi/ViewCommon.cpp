@@ -566,9 +566,8 @@ void LView::OnAttach()
 	{
 		if (auto wnd = GetWindow())
 		{
-			printf("%s -> calling OnGtkDropTarget\n", GetClass());
 			auto Status = wnd->OnGtkDropTarget(this, true);
-			if (Status && !d->DropTarget)
+			if (!d->DropTarget)
 				d->DropTarget = GetWindow();
 		}
 		else

@@ -352,18 +352,29 @@ bool LWindow::OnGtkDropTarget(LView *view, bool isTarget)
 	if (auto target = view->DropTarget())
 	{
 		target->WillAccept(formats, LPoint(), 0);
+
+		if (formats.Length() == 0)
+		{
+			printf("%s:%i - WillAccept returned no formats for %s\n",
+				_FL, view->GetClass());
+				
+			return false;
+		}
 	}
-	if (formats.Length() == 0)
+	else if (isTarget)
 	{
-		printf("OnGtkDropTarget got no targets for %s\n", view->GetClass());
+		DND_ERROR("%s:%i - no DropTarget for %s\n",
+				_FL, view->GetClass());
 		return false;
 	}
 
 	for (auto &fmt: formats.GetAll())
 	{
 		bool has = d->dndFormats.Find(fmt);
-		printf("OnGtkDropTarget for %s, fmt=%s, %i %i\n",
-			view->GetClass(), fmt.Get(), has, isTarget);
+		
+		// printf("OnGtkDropTarget for %s, fmt=%s, %i %i\n",
+		// 	view->GetClass(), fmt.Get(), has, isTarget);
+		
 		if (isTarget ^ has)
 		{
 			if (isTarget)

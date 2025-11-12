@@ -3,13 +3,20 @@
 #include "DocEdit.h"
 
 #define COMP_STYLE				1
-#define LOG_STYLE				0
+
+#if 0
+#define LOG_STYLE(...)			printf(__VA_ARGS__)
+#else
+#define LOG_STYLE(...)				
+#endif
+
 #define PROFILE_STYLE			0
 #if PROFILE_STYLE
 	#define PROF(str)			Prof.Add(str)
 #else
 	#define PROF(str)
 #endif
+
 #define ColourComment			LColour(0, 140, 0)
 #define ColourHashDef			LColour(0, 0, 222)
 #define ColourLiteral			LColour(192, 0, 0)
@@ -103,6 +110,7 @@ void DocEdit::OnApplyStyles()
 	#if PROFILE_STYLE
 	LProfile Prof("OnApplyStyles");
 	#endif
+
 	PROF("Lock");
 	LTextView3::LStyle Vis(STYLE_NONE);
 	GetVisible(Vis);
@@ -113,27 +121,24 @@ void DocEdit::OnApplyStyles()
 		if (Params.Styles.Length())
 		{
 			Style.Swap(Params.Styles);
-			#if LOG_STYLE
-			LgiTrace("Swapped in %i styles.\n", (int)Style.Length());
-			#endif
+			LOG_STYLE("Swapped in " LPrintfSizeT " styles.\n", Style.Length());
 			PROF("Inval");
-			if (Params.Dirty.Start >= 0)
+			if (Params.Dirty.Valid())
 			{
-				#if LOG_STYLE
-				LgiTrace("Visible rgn: %i + %i = %i\n", Vis.Start, Vis.Len, Vis.End());
-				LgiTrace("Dirty rgn: %i + %i = %i\n", Params.Dirty.Start, Params.Dirty.Len, Params.Dirty.End());
-				#endif
+				LOG_STYLE("Visible rgn: " LPrintfSSizeT " + " LPrintfSSizeT " = " LPrintfSSizeT "\n", Vis.Start, Vis.Len, Vis.End());
+				LOG_STYLE("Dirty rgn: " LPrintfSSizeT " + " LPrintfSSizeT " = " LPrintfSSizeT "\n", Params.Dirty.Start, Params.Dirty.Len, Params.Dirty.End());
+				
 				ssize_t CurLine = -1, DirtyStartLine = -1, DirtyEndLine = -1;
 				GetTextLine(Cursor, &CurLine);
-				LTextLine *Start = GetTextLine(Params.Dirty.Start, &DirtyStartLine);
-				LTextLine *End = GetTextLine(MIN(Size, Params.Dirty.End()), &DirtyEndLine);
+				
+				auto Start = GetTextLine(Params.Dirty.Start, &DirtyStartLine);
+				auto End = GetTextLine(MIN(Size, Params.Dirty.End()), &DirtyEndLine);
+				
 				if (CurLine >= 0 &&
 					DirtyStartLine >= 0 &&
 					DirtyEndLine >= 0)
 				{
-					#if LOG_STYLE
-					LgiTrace("Dirty lines %i, %i, %i\n", CurLine, DirtyStartLine, DirtyEndLine);
-					#endif
+					LOG_STYLE("Dirty lines " LPrintfSSizeT ", " LPrintfSSizeT ", " LPrintfSSizeT "\n", CurLine, DirtyStartLine, DirtyEndLine);
 						
 					if (DirtyStartLine != CurLine ||
 						DirtyEndLine != CurLine)
@@ -144,25 +149,23 @@ void DocEdit::OnApplyStyles()
 								c.x2,
 								Params.Dirty.End() >= Vis.End() ? c.y2 : DocToScreen(End->r).y2);
 							
-						#if LOG_STYLE
-						LgiTrace("Cli: %s, Start rgn: %s, End rgn: %s, Update: %s\n",
+						LOG_STYLE("Cli: %s, Start rgn: %s, End rgn: %s, Update: %s\n",
 								c.GetStr(), Start->r.GetStr(), End->r.GetStr(), r.GetStr());
-						#endif
 						Invalidate(&r);
-					}						
+					}
+					else
+					{
+						LOG_STYLE("%s:%i - Dirty same as cur.\n", _FL);
+					}
 				}
 				else
 				{
-					#if LOG_STYLE
-					LgiTrace("No Change: %i, %i, %i\n", CurLine, DirtyStartLine, DirtyEndLine);
-					#endif
+					LOG_STYLE("No Change: " LPrintfSSizeT ", " LPrintfSSizeT ", " LPrintfSSizeT "\n", CurLine, DirtyStartLine, DirtyEndLine);
 				}
 			}
 			else
 			{
-				#if LOG_STYLE
-				LgiTrace("Invalidate everything\n");
-				#endif
+				LOG_STYLE("Invalidate everything\n");
 				Invalidate();
 			}
 		}
@@ -186,9 +189,7 @@ int DocEditStyling::Main()
 			Unlock();
 		}
 		WorkerState = KStyling;
-		#if LOG_STYLE
-		LgiTrace("DocEdit.Worker starting style...\n");
-		#endif
+		LOG_STYLE("DocEdit.Worker starting style...\n");
 		switch (FileType)
 		{
 			case SrcCpp:
@@ -218,9 +219,7 @@ int DocEditStyling::Main()
 		
 		if (ParentState != KCancel && ParentState != KExiting)
 		{
-			#if LOG_STYLE
-			LgiTrace("DocEdit.Worker finished style... Items=%i ParentState=%i\n", (int)p.Styles.Length(), ParentState);
-			#endif
+			LOG_STYLE("DocEdit.Worker finished style... Items=%i ParentState=%i\n", (int)p.Styles.Length(), ParentState);
 			View->PostEvent(M_STYLING_DONE);
 		}
 	}
@@ -1215,9 +1214,7 @@ void DocEdit::PourStyle(size_t Start, ssize_t EditSize)
 	}
 	// Create the StyleIn array from the current document
 	// Lock the object and give the text to the worker
-	#if LOG_STYLE
-	LgiTrace("DocEdit starting style...\n");
-	#endif
+	LOG_STYLE("DocEdit starting style...\n");
 	ParentState = KStyling;
 	if (DocEditStyling::Lock(_FL))
 	{

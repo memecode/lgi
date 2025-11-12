@@ -133,7 +133,9 @@ LItemContainer::~LItemContainer()
 void LItemContainer::OnCreate()
 {
 	DropSource(this);
-	LDragDropTarget::SetWindow(this);
+	
+	// Only do this when the client app asks for dnd support by calling SetDragItem
+	// LDragDropTarget::SetWindow(this);
 }
 
 void LItemContainer::PaintColumnHeadings(LSurface *pDC)
@@ -624,8 +626,11 @@ int LItemContainer::OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
 
 void LItemContainer::SetDragItem(ItemDragFlags flags)
 {
-	DragItem = flags;
-	DropTarget(DragItem != ITEM_DRAG_USER);
+	if (DragItem = flags)
+	{
+		DropTarget(this);
+		DropTarget(true);
+	}
 }
 
 void LItemContainer::OnDragExit()
