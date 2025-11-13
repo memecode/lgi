@@ -1367,10 +1367,9 @@ int LFile::Open(const char *File, int Mode)
 		Close();
 		d->hFile = open(File, Mode
 #ifdef O_LARGEFILE
-								  | O_LARGEFILE
+						| O_LARGEFILE
 #endif
-						,
-						S_IRUSR | S_IWUSR);
+						, S_IRUSR | S_IWUSR);
 		if (ValidHandle(d->hFile))
 		{
 			d->Attributes = Mode;

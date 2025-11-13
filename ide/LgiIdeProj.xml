@@ -58,7 +58,6 @@
 			<Node File="./src/IdeDoc.h" Type="3" Platforms="15" />
 			<Node File="./src/IdeDocPrivate.h" Type="3" Platforms="15" />
 		</Node>
-		<Node File="./src/SpaceTabConv.cpp" Type="2" Platforms="15" />
 		<Node Name="Projects" Type="1" Platforms="15" Id="9">
 			<Node File="./src/IdeProject.cpp" Type="2" Platforms="15" />
 			<Node File="./src/IdeProject.h" Type="3" Platforms="15" />
@@ -102,6 +101,7 @@
 		<Node File="./src/LgiIde.h" Type="3" Platforms="15" />
 		<Node File="./src/LgiUtils.cpp" Type="2" Platforms="15" />
 		<Node File="./src/MemDumpViewer.cpp" Type="2" Platforms="15" />
+		<Node File="./src/SpaceTabConv.cpp" Type="2" Platforms="15" />
 	</Node>
 	<Node File="../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
 	<Settings>
@@ -150,8 +150,6 @@ WINNATIVE</Release>
 					<Debug>/home/matthew/Code/Lgi/trunk/Ide/Code/IdeProjectSettings.cpp</Debug>
 				</All>
 			</Arguments>
-			<CCrossCompiler />
-			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -228,7 +226,6 @@ _GNU_SOURCE</Release>
 					<Debug>HAS_LIBSSH</Debug>
 					<Release>HAS_LIBSSH</Release>
 				</All>
-				<Linux />
 			</Defines>
 			<TargetType>
 				<All>Executable</All>
@@ -253,15 +250,11 @@ _GNU_SOURCE</Release>
 					<Release>`pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
 			</SystemIncludes>
-			<LibraryPaths>
-				<All />
-				<Linux />
-			</LibraryPaths>
+			<LibraryPaths />
 			<ApplicationIcon>
 				<Haiku>./resources/icon.hvif</Haiku>
 			</ApplicationIcon>
 			<Options>
-				<All />
 				<Linux>
 					<Debug>-Wno-format-truncation</Debug>
 					<Release>-Wno-format-truncation</Release>
@@ -281,30 +274,16 @@ _GNU_SOURCE</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
-			<CommentFile />
-			<CommentFunction />
 		</Editor>
 		<Debug>
 			<Environment>
 				<All>SOME_TEST=testing</All>
 			</Environment>
-			<Arguments>
-				<All>
-					<Debug>/home/matthew/sites/sydneyband/SydneybandProject.xml</Debug>
-				</All>
-			</Arguments>
-			<DebugAdmin />
-			<InitialDir />
+			<Arguments />
 		</Debug>
 		<Advanced>
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
-			<OtherMakefileRules />
+			<PostBuildCommands />
 		</Advanced>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
+		<Remote />
 	</Settings>
 </Project>

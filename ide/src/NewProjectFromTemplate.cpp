@@ -147,14 +147,22 @@ bool CreateProject(const char *Name, const char *Template, const char *Folder)
 void NewProjectFromTemplate(LViewI *parent)
 {
 	LFile::Path p(LSP_APP_INSTALL);
+	auto appInstall = p.GetFull();
 	p +=
 		#ifdef MAC
 		"../../../../"
+		#elif WINDOWS
+		"../"
 		#endif
-		"../../templates";
+		"../templates";
 	if (!p.Exists())
 	{
-		LgiMsg(parent, "The path '%s' doesn't exist.", AppName, MB_OK, p.GetFull().Get());
+		LgiMsg(parent,
+			"The path '%s' doesn't exist.\n"
+			"appInstall='%s'",
+			AppName, MB_OK,
+			p.GetFull().Get(),
+			appInstall.Get());
 		return;
 	}
 

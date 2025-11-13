@@ -515,13 +515,13 @@ bool LButton::OnLayout(LViewLayoutInfo &Inf)
 		Inf.Width.Min = MinX ? MinX.ToPx(c.X(), Font) : BaseX + ImgX + TxtMin.x;
 		Inf.Width.Max = MaxX ? MaxX.ToPx(c.X(), Font) : BaseX + ImgX + TxtMax.x;
 		
-		/*
+		#if 0
 		LgiTrace("%i.Layout.Btn.x = %i, %i  valid=%i,%i c=%s, base=%i, img=%i\n", GetId(), 
 			Inf.Width.Min, Inf.Width.Max,
-			MinX.IsValid(), MaxX.IsValid(),
+			(bool)MinX, (bool)MaxX,
 			c.GetStr(),
 			BaseX, ImgX);
-		*/
+		#endif
 	}
 	else
 	{

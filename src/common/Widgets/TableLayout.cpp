@@ -33,9 +33,9 @@ enum CellFlag
 };
 
 #define Izza(c)				dynamic_cast<c*>(v)
-// #define DEBUG_LAYOUT		55
+// #define DEBUG_LAYOUT		100
 #define DEBUG_PROFILE		0
-// #define DEBUG_DRAW_CELLS	1
+#define DEBUG_DRAW_CELLS	0
 // #define DEBUG_CTRL_ID		12
 
 #ifdef DEBUG_CTRL_ID
@@ -792,38 +792,6 @@ void TableCell::LayoutWidth(int Depth, int &MinX, int &MaxX, CellFlag &Flag)
 	if (MinWid)
 		Min = MAX(Min, MinWid.ToPx(Tx, Fnt));
 
-	if (Wid)
-	{		
-		if (Wid.Type == LCss::LenAuto)
-			Flag = SizeFill;
-		else
-		{
-			// If we set Min here too the console app breaks because the percentage 
-			// is over-subscribe (95%) to force one cell to grow to fill available space.
-			Max = Wid.ToPx(Tx, Fnt) - Padding.x1 - Padding.x2;
-			
-			if (!Wid.IsDynamic())
-			{
-				Flag = SizeFixed;
-				Min = Max;
-
-				/*	This is breaking normal usage, where 'Min' == 0.
-					Need to redesign for edge case.
-
-				if (Padding.x1 + Padding.x2 > Min)
-				{
-					// Remove padding as it's going to oversize the cell
-					Padding.x1 = Padding.x2 = 0;
-				}
-				*/
-			}
-			else
-			{
-				Flag = SizeGrow;
-			}
-		}
-	}
-
 	if (!Wid || Flag != SizeFixed)
 	{
 		auto c = Children.AddressOf();
@@ -866,7 +834,7 @@ void TableCell::LayoutWidth(int Depth, int &MinX, int &MaxX, CellFlag &Flag)
 						Flag = SizeFill;
 				}
 				else if (Max)
-					Max += c->Inf.Width.Max + LTableLayout::CellSpacing;
+					Max += c->Inf.Width.Max + Table->d->BorderSpacing;
 				else
 					Max = c->Inf.Width.Max + 1;
 
@@ -890,7 +858,7 @@ void TableCell::LayoutWidth(int Depth, int &MinX, int &MaxX, CellFlag &Flag)
 				MaxBtnX = MAX(MaxBtnX, c->Inf.Width.Min);
 				TotalBtnX = TotalBtnX
 							?
-							TotalBtnX + LTableLayout::CellSpacing + c->Inf.Width.Min
+							TotalBtnX + Table->d->BorderSpacing + c->Inf.Width.Min
 							:
 							c->Inf.Width.Min;
 
@@ -922,6 +890,7 @@ void TableCell::LayoutWidth(int Depth, int &MinX, int &MaxX, CellFlag &Flag)
 				
 				Min = MAX(Min, min_x + PadX);
 				Max = MAX(Max, max_x + PadX);
+				Log().Print("%s:%i - max=%i\n", _FL, Max);
 				if (Flag < SizeGrow)
 					Flag = SizeGrow;
 			}
@@ -944,7 +913,7 @@ void TableCell::LayoutWidth(int Depth, int &MinX, int &MaxX, CellFlag &Flag)
 			}
 			else if (Izza(LList))
 			{
-				LList *Lst = Izza(LList);
+				auto Lst = Izza(LList);
 				int m = 0;
 				for (int i=0; i<Lst->GetColumns(); i++)
 				{
@@ -962,7 +931,7 @@ void TableCell::LayoutWidth(int Depth, int &MinX, int &MaxX, CellFlag &Flag)
 			}
 			else
 			{
-				LTableLayout *Tbl = Izza(LTableLayout);
+				auto Tbl = Izza(LTableLayout);
 				if (Tbl)
 				{
 					Tbl->d->InitBorderSpacing();
@@ -983,6 +952,41 @@ void TableCell::LayoutWidth(int Depth, int &MinX, int &MaxX, CellFlag &Flag)
 		}
 	}
 
+	if (Wid)
+	{		
+		if (Wid.Type == LCss::LenAuto)
+		{
+			Flag = SizeFill;
+		}
+		else
+		{
+			// If we set Min here too the console app breaks because the percentage 
+			// is over-subscribe (95%) to force one cell to grow to fill available space.
+			int widthPx =  Wid.ToPx(Tx, Fnt) - Padding.x1 - Padding.x2;
+			Max = MAX(Max, widthPx);
+			
+			if (!Wid.IsDynamic())
+			{
+				Flag = SizeFixed;
+				Min = Max;
+
+				/*	This is breaking normal usage, where 'Min' == 0.
+					Need to redesign for edge case.
+
+				if (Padding.x1 + Padding.x2 > Min)
+				{
+					// Remove padding as it's going to oversize the cell
+					Padding.x1 = Padding.x2 = 0;
+				}
+				*/
+			}
+			else
+			{
+				Flag = SizeGrow;
+			}
+		}
+	}
+
 	if (MaxBtnX)
 	{
 		Min = MAX(Min, MaxBtnX);
@@ -996,12 +1000,13 @@ void TableCell::LayoutWidth(int Depth, int &MinX, int &MaxX, CellFlag &Flag)
 		if (Min > Px)
 			Min = Px;
 		if (Max > Px)
+		{
 			Max = Px;
+		}
 	}
 
 	MinX = MAX(MinX, Min + Padding.x1 + Padding.x2);
 	MaxX = MAX(MaxX, Max + Padding.x1 + Padding.x2);
-
 }
 
 /// Calculate the height of the cell based on the given width
@@ -1114,7 +1119,7 @@ void TableCell::LayoutHeight(int Depth, int Width, int &MinY, int &MaxY, CellFla
 			{
 				// Wrap
 				Cur.x = Pos.x1;
-				Cur.y = NextY + LTableLayout::CellSpacing;
+				Cur.y = NextY + Table->d->BorderSpacing;
 			}
 
 			c->r.Offset(Cur.x - c->r.x1, Cur.y - c->r.y1);
@@ -1136,7 +1141,7 @@ void TableCell::LayoutHeight(int Depth, int Width, int &MinY, int &MaxY, CellFla
 			{
 				// Wrap
 				Cur.x = Pos.x1;
-				Cur.y = NextY + LTableLayout::CellSpacing;
+				Cur.y = NextY + Table->d->BorderSpacing;
 			}
 			
 			c->r.Offset(Cur.x, Cur.y);
@@ -1557,8 +1562,7 @@ void LTableLayoutPrivate::LayoutHorizontal(const LRect Client, int Depth, int *M
 	{
 		for (Cx=0; Cx<Cols.Length(); )
 		{
-			TableCell *c = GetCellAt(Cx, Cy);
-			if (c)
+			if (auto c = GetCellAt(Cx, Cy))
 			{
 				// Non-spanned cells
 				if (c->Cell.x1 == Cx &&
@@ -1572,16 +1576,15 @@ void LTableLayoutPrivate::LayoutHorizontal(const LRect Client, int Depth, int *M
 						Prof->Add(s);
 					}
 
-					int &MinC = MinCol[Cx];
-					int &MaxC = MaxCol[Cx];
-					CellFlag &ColF = ColFlags[Cx];
+					auto &MinC = MinCol[Cx];
+					auto &MaxC = MaxCol[Cx];
+					auto &ColF = ColFlags[Cx];
 					c->LayoutWidth(Depth, MinC, MaxC, ColF);
 				}
 
 				Cx += c->Cell.X();
 			}
-			else
-				Cx++;
+			else Cx++;
 		}
 	}
 

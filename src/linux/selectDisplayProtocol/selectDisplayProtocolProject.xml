@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Project>
+	<Node Name="Source" Type="1" Platforms="15" Id="1">
+		<Node File="../../common/Lgi/LgiMain.cpp" Type="2" Platforms="15" />
+		<Node File="./src/main.cpp" Type="2" Platforms="15" />
+	</Node>
+	<Node Name="Build" Type="1" Platforms="15" Id="2">
+		<Node File="./linux/Makefile.linux" Type="9" Platforms="15" />
+	</Node>
+	<Node File="/home/matthew/code/lgi/trunk/Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
+	<Settings>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
+		<General>
+			<Makefile>
+				<Linux>linux/Makefile.linux</Linux>
+			</Makefile>
+			<Executable>
+				<Linux>
+					<Debug>./select_desktop</Debug>
+					<Release>./select_desktop</Release>
+				</Linux>
+			</Executable>
+			<Compiler />
+			<CCrossCompiler />
+			<CppCrossCompiler />
+		</General>
+		<Debug>
+			<Environment />
+			<Arguments>
+				<All />
+			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
+		</Debug>
+		<Build>
+			<Defines>
+				<All />
+				<Linux />
+			</Defines>
+			<Options>
+				<All />
+				<Linux />
+			</Options>
+			<IncludePaths>
+				<All>
+					<Debug>../../../include</Debug>
+					<Release>../../../include</Release>
+				</All>
+				<Linux>
+					<Debug>../../../include/lgi/linux
+../../../include/lgi/linux/Gtk</Debug>
+					<Release>../../../include/lgi/linux
+../../../include/lgi/linux/Gtk</Release>
+				</Linux>
+			</IncludePaths>
+			<SystemIncludes>
+				<Linux>
+					<Debug>`pkg-config --cflags gtk+-3.0`</Debug>
+					<Release>`pkg-config --cflags gtk+-3.0`</Release>
+				</Linux>
+			</SystemIncludes>
+			<Libraries>
+				<All />
+				<Linux>
+					<Debug>pthread
+`pkg-config --libs gtk+-3.0`
+-static-libgcc</Debug>
+					<Release>pthread
+`pkg-config --libs gtk+-3.0`
+-static-libgcc</Release>
+				</Linux>
+			</Libraries>
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
+			<TargetType>
+				<All>Executable</All>
+			</TargetType>
+			<TargetName>
+				<Linux />
+			</TargetName>
+			<ApplicationIcon />
+		</Build>
+		<Editor>
+			<TabSize>
+				<All>4</All>
+			</TabSize>
+			<IndentSize>
+				<All>4</All>
+			</IndentSize>
+			<ShowWhiteSpace />
+			<UseHardTabs>
+				<All>1</All>
+			</UseHardTabs>
+			<CommentFile />
+			<CommentFunction />
+		</Editor>
+		<Advanced>
+			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+		</Advanced>
+	</Settings>
+</Project>
