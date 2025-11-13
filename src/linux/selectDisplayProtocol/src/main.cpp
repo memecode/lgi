@@ -22,7 +22,7 @@ enum Ctrls {
 };
 
 LColour colX11(0x66, 0x1a, 0xff);
-LColour colWayland(0x00, 0x86, 0xb3);
+LColour colWayland(0x00, 0x90, 0x90);
 LColour colBack(0x60, 0x60, 0x60);
 
 static const char *sPolicyFolder = "/usr/share/polkit-1/actions/";
@@ -196,6 +196,7 @@ public:
    	
 	void SetWayland(bool wayland)
 	{
+		/*
 		auto dataPath = getDataFilePath();
 		
 		LJson j;
@@ -211,10 +212,16 @@ public:
 		out.SetSize(0);
 		out.Write(j.GetJson());
 		out.Close();
+		*/
 
-		auto cmd = LString::Fmt("pkexec \"%s\" -setDesktop \"%s\"", LGetExeFile().Get(), dataPath.Get());
+		LFile::Path p(LSP_EXE);
+		p += "setDesktop.py";
+		auto cmd = LString::Fmt("pkexec python \"%s\" %s",
+			p.GetFull().Get(),
+			wayland ? "wayland" : "x11");
 		printf("cmd=%s\n", cmd.Get());
-		system(cmd);
+		auto r = system(cmd);
+		printf("sys=%i\n", r);
 	}
 
 	int OnNotify(LViewI *Ctrl, const LNotification &n) override

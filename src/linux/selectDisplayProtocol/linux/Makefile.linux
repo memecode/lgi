@@ -30,10 +30,10 @@ ifeq ($(Build),Debug)
 		-llgi-gtk3$(Tag) \
 		-L../../../$(BuildDir)
 	Inc =  \
+		-I../../../include/lgi/linux \
 		-I../../../include/lgi/linux/Gtk \
-		`pkg-config --cflags gtk+-3.0` \
 		-I../../../include \
-		-I../../../include/lgi/linux
+		`pkg-config --cflags gtk+-3.0`
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
@@ -45,10 +45,10 @@ else
 		-llgi-gtk3$(Tag) \
 		-L../../../$(BuildDir)
 	Inc =  \
-		-I../../../include/lgi/linux/Gtk \
 		-I../../../include \
 		-I../../../include/lgi/linux \
-		`pkg-config --cflags gtk+-3.0`
+		`pkg-config --cflags gtk+-3.0` \
+		-I../../../include/lgi/linux/Gtk
 endif
 
 # Dependencies
@@ -82,13 +82,13 @@ $(Target) : ../../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 		$(Target) $(Objects) $(Libs)
 	@echo Done.
 
-../../../$(BuildDir)/liblgi-gtk3$(Tag).so : ../../../../deps/build-x64-release/include/iconv.h \
-	../../../../deps/build-x64-release/include/jconfig.h \
-	../../../../deps/build-x64-release/include/jerror.h \
-	../../../../deps/build-x64-release/include/jmorecfg.h \
-	../../../../deps/build-x64-release/include/jpeglib.h \
-	../../../../deps/build-x64-release/include/lunasvg/lunasvg.h \
-	../../../../deps/build-x64-release/include/png.h \
+../../../$(BuildDir)/liblgi-gtk3$(Tag).so : ../../../../deps/build-x64-debug/include/iconv.h \
+	../../../../deps/build-x64-debug/include/jconfig.h \
+	../../../../deps/build-x64-debug/include/jerror.h \
+	../../../../deps/build-x64-debug/include/jmorecfg.h \
+	../../../../deps/build-x64-debug/include/jpeglib.h \
+	../../../../deps/build-x64-debug/include/lunasvg/lunasvg.h \
+	../../../../deps/build-x64-debug/include/png.h \
 	../../../include/lgi/common/App.h \
 	../../../include/lgi/common/Array.h \
 	../../../include/lgi/common/AutoPtr.h \

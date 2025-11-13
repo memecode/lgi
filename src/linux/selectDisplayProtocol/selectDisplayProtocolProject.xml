@@ -5,14 +5,13 @@
 		<Node File="./src/main.cpp" Type="2" Platforms="15" />
 	</Node>
 	<Node Name="Build" Type="1" Platforms="15" Id="2">
+		<Node File="./com.memecode.selectDisplay.policy" Type="8" Platforms="15" />
 		<Node File="./linux/Makefile.linux" Type="9" Platforms="15" />
+		<Node File="./setDesktop.py" Type="8" Platforms="15" />
 	</Node>
 	<Node File="/home/matthew/code/lgi/trunk/Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
 	<Settings>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
+		<Remote />
 		<General>
 			<Makefile>
 				<Linux>linux/Makefile.linux</Linux>
@@ -23,27 +22,13 @@
 					<Release>./select_desktop</Release>
 				</Linux>
 			</Executable>
-			<Compiler />
-			<CCrossCompiler />
-			<CppCrossCompiler />
 		</General>
 		<Debug>
-			<Environment />
-			<Arguments>
-				<All />
-			</Arguments>
-			<DebugAdmin />
-			<InitialDir />
+			<Arguments />
 		</Debug>
 		<Build>
-			<Defines>
-				<All />
-				<Linux />
-			</Defines>
-			<Options>
-				<All />
-				<Linux />
-			</Options>
+			<Defines />
+			<Options />
 			<IncludePaths>
 				<All>
 					<Debug>../../../include</Debug>
@@ -63,7 +48,6 @@
 				</Linux>
 			</SystemIncludes>
 			<Libraries>
-				<All />
 				<Linux>
 					<Debug>pthread
 `pkg-config --libs gtk+-3.0`
@@ -73,17 +57,11 @@
 -static-libgcc</Release>
 				</Linux>
 			</Libraries>
-			<LibraryPaths>
-				<All />
-				<Linux />
-			</LibraryPaths>
+			<LibraryPaths />
 			<TargetType>
 				<All>Executable</All>
 			</TargetType>
-			<TargetName>
-				<Linux />
-			</TargetName>
-			<ApplicationIcon />
+			<TargetName />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -92,18 +70,12 @@
 			<IndentSize>
 				<All>4</All>
 			</IndentSize>
-			<ShowWhiteSpace />
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
-			<CommentFile />
-			<CommentFunction />
 		</Editor>
 		<Advanced>
-			<OtherMakefileRules />
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
+			<PostBuildCommands />
 		</Advanced>
 	</Settings>
 </Project>
