@@ -1172,6 +1172,9 @@ public:
 		Test.Reset();
 		SerializeState(&Opts, "WndPos", false);
 		SaveFolders();
+
+		// Haiku: wait for the window thread to shutdown cleanly.
+		WaitThread();
 	}
 	
 	void OnCreate()

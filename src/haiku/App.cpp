@@ -335,6 +335,12 @@ bool LApp::InThread()
 	return Gui == Me;
 }
 
+bool LApp::RunCallback(std::function<void()> callback, const char *file, int line)
+{
+	printf("%s:%i - impl me.\n", _FL);
+	return false;
+}
+
 bool LApp::Run(OnIdleProc IdleCallback, void *IdleParam)
 {
 	if (!InThread())

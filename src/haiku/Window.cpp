@@ -904,10 +904,10 @@ bool LWindow::SetModalChild(LWindow *c)
 
 int LWindow::WaitThread()
 {
+	SetFlagAll(GWF_DESTRUCTOR, true);
+
 	if (!d)
 		return -1;
-
-	SetFlagAll(GWF_DESTRUCTOR, true);
 
 	thread_id id = d->Thread();
 	bool thisThread = id == LCurrentThreadId();

@@ -2179,7 +2179,14 @@ struct LHostnameAsyncPriv
 			// nameServers.Add("192.168.0.1");
 			
 			// Look up the DNS servers
-			LFile file("/etc/resolv.conf", O_READ);
+			LFile file(
+				#if HAIKU
+				"/boot/system/settings/network/"
+				#else
+				"/etc/"
+				#endif
+				"resolv.conf",
+				O_READ);
 			if (file)
 			{
 				for (auto &ln: file.Read().SplitDelimit("\n"))
