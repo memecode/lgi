@@ -74,6 +74,11 @@ public:
 		SetPos(r);
 		MoveToCenter();
 		SetQuitOnClose(true);
+		
+		LFile::Path iconPath(LSP_EXE);
+		iconPath += "resources/icon.svg";
+		if (iconPath.Exists())
+			SetIcon(iconPath);
 
 		int y = 0;
 		LTextLabel *label;
