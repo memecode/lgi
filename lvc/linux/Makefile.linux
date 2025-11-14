@@ -32,14 +32,14 @@ ifeq ($(Build),Debug)
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I../include/lgi/linux/Gtk \
-		-I../../../../../../usr/include/gstreamer-1.0 \
-		-I../include \
-		-I./src \
-		-I../include/lgi/linux \
 		-I./resources \
+		-I../include \
+		-I../include/lgi/linux/Gtk \
+		-I../include/lgi/linux \
 		-I../../../../../../usr/include/libssh \
-		`pkg-config --cflags gtk+-3.0`
+		`pkg-config --cflags gtk+-3.0` \
+		-I../../../../../../usr/include/gstreamer-1.0 \
+		-I./src
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
@@ -53,32 +53,33 @@ else
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I../../../../../../usr/include/libssh \
-		-I../include/lgi/linux \
 		-I./resources \
-		-I./src \
-		-I../include/lgi/linux/Gtk \
 		`pkg-config --cflags gtk+-3.0` \
 		-I../include \
-		-I../../../../../../usr/include/gstreamer-1.0
+		-I../../../../../../usr/include/libssh \
+		-I../include/lgi/linux \
+		-I../../../../../../usr/include/gstreamer-1.0 \
+		-I../include/lgi/linux/Gtk \
+		-I./src
 endif
 
 # Dependencies
-Source =	../src/common/Lgi/LgiMain.cpp \
-			src/VcCommit.cpp \
-			../src/common/Net/Http.cpp \
-			../src/common/Widgets/ControlTree.cpp \
-			src/SshConnection.cpp \
+Source =	../src/common/Widgets/ControlTree.cpp \
 			src/PatchViewer.cpp \
+			src/Main.cpp \
+			src/DropDownBtn.cpp \
+			src/VcFolder.cpp \
 			../src/common/Net/OpenSSLSocket.cpp \
 			../src/common/Lgi/StructuredLog.cpp \
 			../src/common/Text/RemoveAnsi.cpp \
+			../src/common/Lgi/LgiMain.cpp \
+			src/VcCommit.cpp \
+			../src/common/Net/Ssh.cpp \
 			src/BrowseUi.cpp \
-			src/VcFile.cpp \
-			src/VcFolder.cpp \
-			src/DropDownBtn.cpp \
-			src/Main.cpp \
-			../src/common/Text/XmlTreeUi.cpp
+			../src/common/Net/Http.cpp \
+			src/SshConnection.cpp \
+			../src/common/Text/XmlTreeUi.cpp \
+			src/VcFile.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -421,7 +422,7 @@ cleanall :
 
 VPATH=$(BuildDir) \
 	../src/common/Widgets \
-	../src/common/Net \
+	../src/common/Text \
 	./src \
 	../src/common/Lgi \
-	../src/common/Text
+	../src/common/Net

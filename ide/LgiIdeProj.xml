@@ -91,10 +91,12 @@
 			<Node File="./src/SysCharSupport.cpp" Type="2" Platforms="15" />
 		</Node>
 		<Node Name="SysIntf" Type="1" Platforms="15" Id="13">
-			<Node File="../src/common/Lgi/SystemIntf.cpp" Type="2" Platforms="15" />
-			<Node File="../include/lgi/common/SystemIntf.h" Type="3" Platforms="15" />
 			<Node File="../src/common/Net/Ftp.cpp" Type="2" Platforms="15" />
 			<Node File="../include/lgi/common/Ftp.h" Type="3" Platforms="15" />
+			<Node File="../src/common/Net/Ssh.cpp" Type="2" Platforms="15" />
+			<Node File="../include/lgi/common/Ssh.h" Type="3" Platforms="15" />
+			<Node File="../src/common/Lgi/SystemIntf.cpp" Type="2" Platforms="15" />
+			<Node File="../include/lgi/common/SystemIntf.h" Type="3" Platforms="15" />
 		</Node>
 		<Node File="./src/IdeCommon.cpp" Type="2" Platforms="15" />
 		<Node File="./src/LgiIde.cpp" Type="2" Platforms="15" />
