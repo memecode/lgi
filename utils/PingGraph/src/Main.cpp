@@ -513,6 +513,7 @@ public:
 		MoveToCenter();
 		SetQuitOnClose(true);
 
+		SetIcon(LFile::Path(LSP_APP_INSTALL) / "resources/icon.svg");
 		options.SerializeFile(false);
 
 		if (Attach(0))
