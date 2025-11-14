@@ -593,7 +593,18 @@ public:
 
 		// Font
 		if (Ctrl->GetFont() == LSysFont)
-			Ctrl->SetFont(LSysBold);
+		{
+			if (LSysFont == LSysBold)
+			{
+				LAssert(!"these shouldn't be the same.");
+			}
+			else
+			{
+				// printf("%s:%i - setting btn to bold, fnt=%p -> %p\n", _FL, Ctrl->GetFont(), LSysBold);
+				Ctrl->SetFont(LSysBold);
+				// printf("	fnt=%p\n", Ctrl->GetFont());
+			}
+		}
 
 		// Background
 		LCssTools Tools(Ctrl->GetCss(), Ctrl->GetFont());

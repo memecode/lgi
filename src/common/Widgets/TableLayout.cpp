@@ -2282,10 +2282,13 @@ void LTableLayout::InvalidateLayout()
 		}
 
 		if (IsAttached())
+		{
+			// printf("%s:%i posting M_TABLE_LAYOUT, InvalidateLayout\n", _FL);
 			PostEvent(M_TABLE_LAYOUT);
-	}
+		}
 
-	Invalidate();
+		Invalidate();
+	}
 }
 
 LMessage::Result LTableLayout::OnEvent(LMessage *m)
@@ -2307,9 +2310,6 @@ void LTableLayout::OnPaint(LSurface *pDC)
 {
 	if (SizeChanged() || d->LayoutDirty)
 	{
-		if (GetId() == 20)
-			Log().Print("20 : clearing layout dirty LGI_VIEW_HANDLE=%i\n", LGI_VIEW_HANDLE);
-
 		#if LGI_VIEW_HANDLE
 		if (!Handle())
 		#endif
@@ -2317,13 +2317,13 @@ void LTableLayout::OnPaint(LSurface *pDC)
 		#if LGI_VIEW_HANDLE
 		else
 			if (PostEvent(M_TABLE_LAYOUT))
+			{
+				// printf("%s:%i posting M_TABLE_LAYOUT, sz=%i dirt=%i\n", _FL, SizeChanged(), d->LayoutDirty);
 				return;
+			}
 			else
 				LAssert(!"Post event failed.");
 		#endif
-
-		if (GetId() == 20)
-			Log().Print("20 : painting\n");
 	}
 
 	d->Dpi = GetWindow()->GetDpi();

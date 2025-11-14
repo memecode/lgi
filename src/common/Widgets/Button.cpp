@@ -154,8 +154,15 @@ void LButton::SetIsToggle(bool toggle)
 
 void LButton::OnStyleChange()
 {
-	SetFont(NULL);
-	GetFont();
+	// This was causing a LTableLayout loop:
+	// LTableLayout::InvalidateLayout
+	//  OnPaint_LButton
+	//   LButton::SetFont
+	//    LButton::OnStyleChange, and then fnt->null
+
+	// SetFont(NULL);
+	// GetFont();
+
 	d->Layout(GetCss(true), LBase::Name());
 }
 
