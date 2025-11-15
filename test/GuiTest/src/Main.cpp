@@ -172,7 +172,7 @@ class DnDtarget : public LTextLog
 	bool first = true;
 	
 public:
-	const char *GetClass() const { return "DnDtarget"; }
+	const char *GetClass() override { return "DnDtarget"; }
 
 	DnDtarget() : LTextLog(10)
 	{

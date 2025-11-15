@@ -880,9 +880,6 @@
     <ClInclude Include="..\include\lgi\common\SpellCheck.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Ssh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\Stat.h">
       <Filter>Header Files</Filter>
     </ClInclude>

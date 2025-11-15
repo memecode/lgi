@@ -524,7 +524,7 @@ LError LSsh::UploadFile(const char *To, LStream *From)
 				{
 					size_t BufLen = 1 << 20;
 					LArray<char> Buf(BufLen);
-					uint64_t i = 0;
+					int64_t i = 0;
 					IoProgress Meter(this);
 					
 					Meter.SetLength(inSize);
@@ -532,7 +532,7 @@ LError LSsh::UploadFile(const char *To, LStream *From)
 					while (!CancelObj->IsCancelled() && i < inSize)
 					{
 						auto remaining = inSize - i;
-						auto rd = From->Read(Buf.AddressOf(), MIN(remaining, Buf.Length()));
+						auto rd = From->Read(Buf.AddressOf(), MIN(remaining, (int64_t)Buf.Length()));
 						if (rd <= 0)
 						{
 							Log->Print("%s:%i - Read failed.\n", _FL);

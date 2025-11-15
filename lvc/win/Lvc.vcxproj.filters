@@ -64,6 +64,9 @@
     <ClCompile Include="..\..\src\common\Net\OpenSSLSocket.cpp">
       <Filter>Source Files\Lgi</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\common\Net\Ssh.cpp">
+      <Filter>Source Files\Ssh</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Src\SshConnection.h">
@@ -92,6 +95,9 @@
     </ClInclude>
     <ClInclude Include="..\src\BranchEditDlg.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\lgi\common\Ssh.h">
+      <Filter>Source Files\Ssh</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

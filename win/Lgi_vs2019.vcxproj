@@ -576,7 +576,6 @@
     <ClInclude Include="..\include\lgi\common\SoftwareUpdate.h" />
     <ClInclude Include="..\include\lgi\common\SpellCheck.h" />
     <ClInclude Include="..\include\lgi\common\Splitter.h" />
-    <ClInclude Include="..\include\lgi\common\Ssh.h" />
     <ClInclude Include="..\include\lgi\common\Stat.h" />
     <ClInclude Include="..\include\lgi\common\StatusBar.h" />
     <ClInclude Include="..\include\lgi\common\Store.h" />

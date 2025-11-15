@@ -175,6 +175,7 @@
     <ClCompile Include="..\..\src\common\Lgi\LgiMain.cpp" />
     <ClCompile Include="..\..\src\common\Net\Http.cpp" />
     <ClCompile Include="..\..\src\common\Net\OpenSSLSocket.cpp" />
+    <ClCompile Include="..\..\src\common\Net\Ssh.cpp" />
     <ClCompile Include="..\..\src\common\Text\RemoveAnsi.cpp" />
     <ClCompile Include="..\..\src\common\Text\XmlTreeUi.cpp" />
     <ClCompile Include="..\Src\BrowseUi.cpp" />
@@ -191,6 +192,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\lgi\common\IniFile.h" />
+    <ClInclude Include="..\..\include\lgi\common\Ssh.h" />
     <ClInclude Include="..\..\include\lgi\common\StructuredIo.h" />
     <ClInclude Include="..\..\include\lgi\common\StructuredLog.h" />
     <ClInclude Include="..\src\BranchEditDlg.h" />

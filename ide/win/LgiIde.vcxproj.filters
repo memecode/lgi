@@ -126,6 +126,9 @@
     <ClInclude Include="..\..\include\lgi\common\Ftp.h">
       <Filter>Source Files\System Backends</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\lgi\common\Ssh.h">
+      <Filter>Source Files\System Backends</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\common\Lgi\About.cpp">
@@ -234,6 +237,9 @@
       <Filter>Source Files\System Backends</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\common\Net\Ftp.cpp">
+      <Filter>Source Files\System Backends</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\Net\Ssh.cpp">
       <Filter>Source Files\System Backends</Filter>
     </ClCompile>
   </ItemGroup>
