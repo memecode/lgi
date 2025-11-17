@@ -29,6 +29,7 @@ enum LErrorCodes
 	LErrorTimerExpired  = ERROR_SEM_TIMEOUT,
 	LErrorIoFailed      = ERROR_WRITE_FAULT,
 	LErrorTimedOut      = ERROR_TIMEOUT,
+	LErrorCancelled		= ERROR_CANCELLED,
 
 	LErrorAddrInUse     = WSAEADDRINUSE,
 	LErrorAddrNotAvail  = WSAEADDRNOTAVAIL,
