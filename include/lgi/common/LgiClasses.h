@@ -73,15 +73,16 @@ public:
 		/// The first button text
 		const char *Btn1,
 		/// The [optional] 2nd buttons text
-		const char *Btn2 = NULL,
+		const char *Btn2 = nullptr,
 		/// The [optional] 3rd buttons text
-		const char *Btn3 = NULL
+		const char *Btn3 = nullptr
 	);
 
 	const char *GetClass() override { return "LAlert"; }
     void SetAppModal();
 	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
 	void SetButtonCallback(int ButtonIdx, std::function<void(int)> Callback);
+	void DisableBtn(int idx);
 };
 #endif
 

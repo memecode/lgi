@@ -1514,7 +1514,7 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 			{
 				SetId(d->CtrlId);
 
-				LWindow *w = GetWindow();
+				auto w = GetWindow();
 				if (w && w->GetFocus() == this)
 				{
 					HWND hCur = GetFocus();
@@ -1530,18 +1530,26 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 					}
 				}
 
-				if (TestFlag(GViewFlags, GWF_DROP_TARGET))
+				#if 1
+				if (!Stricmp(GetClass(), "LTree"))
 				{
-					DropTarget(true);
+					int asd=0;
 				}
+				#endif
 
 				OnCreate();
+
+				if (TestFlag(LViewFlags, GWF_DROP_TARGET))
+				{
+					// This should be AFTER the OnCreate call to allow the view to 
+					// register the drop target.
+					DropTarget(true);
+				}
 				break;
 			}
 			case WM_SETFOCUS:
 			{
-				LWindow *w = GetWindow();
-				if (w)
+				if (auto w = GetWindow())
 				{
 					w->SetFocus(this, LWindow::GainFocus);
 				}
@@ -1556,8 +1564,7 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 			}
 			case WM_KILLFOCUS:
 			{
-				LWindow *w = GetWindow();
-				if (w)
+				if (auto w = GetWindow())
 				{
 					w->SetFocus(this, LWindow::LoseFocus);
 				}
@@ -1573,8 +1580,7 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 			{
 				if (!IsIconic(_View))
 				{
-					WINDOWPOS *Info = (LPWINDOWPOS) Msg->b;
-					if (Info)
+					if (auto Info = (LPWINDOWPOS) Msg->b)
 					{
 						if (Info->x == -32000 &&
 							Info->y == -32000)
@@ -1590,7 +1596,7 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 						}
 						else
 						{
-							int Shadow = WINDOWS_SHADOW_AMOUNT;
+							// int Shadow = WINDOWS_SHADOW_AMOUNT;
 	
 							LRect r;
 							r.ZOff(Info->cx-1, Info->cy-1);
@@ -1598,12 +1604,6 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 							if (r.Valid() && r != Pos)
 							{
 								Pos = r;
-								/*
-								LgiTrace("%p/%s::PosChange %s\n", this, Name(), Pos.GetStr());
-								Pos.x2 -= Shadow;
-								Pos.y2 -= Shadow;
-								LgiTrace("    %s\n", Pos.GetStr());
-								*/
 							}
 						}
 					}

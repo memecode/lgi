@@ -358,6 +358,10 @@ LgiFunc bool LGetAppsForMimeType
 /// \ingroup Base
 LgiFunc int LIsReleaseBuild();
 
+#ifndef LGI_STATIC
+LgiFunc class LAlert *LAssertDlg(LString Msg, bool canDebug, std::function<void(int)> Callback);
+#endif
+
 #if defined WIN32
 
 	/// Registers an active x control

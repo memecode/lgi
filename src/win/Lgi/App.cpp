@@ -258,6 +258,8 @@ void LInvalidParam(const wchar_t * expression,
 extern int MouseRollMsg;
 typedef HRESULT (CALLBACK *fDllGetVersion)(DLLVERSIONINFO *);
 
+LApp::TMessageLoop LApp::messageLoop = LApp::TAppRun;
+
 LApp::LApp(OsAppArguments &AppArgs, const char *AppName, LAppArguments *Opts)
 {
 	// LApp instance

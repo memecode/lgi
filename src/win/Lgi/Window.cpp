@@ -900,14 +900,6 @@ LMessage::Result LWindow::OnEvent(LMessage *Msg)
 			OnPosChange();
 			break;
 		}
-		case M_ASSERT_UI:
-		{
-			LAutoPtr<LString> Str((LString*)Msg->A());
-			extern void LAssertDlg(LString Msg, std::function<void(int)> Callback);
-			if (Str)
-				LAssertDlg(Str ? *Str : "Error: no msg.", NULL);
-			break;
-		}
 		case M_SET_WINDOW_PLACEMENT:
 		{
 			/*	Apparently if you use SetWindowPlacement inside the WM_CREATE handler,

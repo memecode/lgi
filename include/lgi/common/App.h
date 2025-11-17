@@ -352,7 +352,7 @@ public:
 		/// Returns the freetype version as a string.
 		LString GetFreetypeVersion();
 	
-	#elif defined(WIN32)
+	#elif WINDOWS
 
 		HINSTANCE GetInstance();
 		int GetShow();
@@ -360,6 +360,14 @@ public:
 		/// \returns true if the application is running under Wine on Linux. This is useful to know
 		/// if you need to work around missing functionality in the Wine implementation.
 		bool IsWine();
+
+		enum TMessageLoop
+		{
+			TAppRun,
+			TDragPump,
+			TAssertPump
+		};
+		static TMessageLoop messageLoop;
 
 	#elif defined(LINUX)
 	

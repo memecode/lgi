@@ -29,11 +29,11 @@ LAlert::LAlert(	LViewI *parent,
 	SetParent(parent);
 	Name((char*)Title);
 
-	LTableLayout *Tbl = new LTableLayout(100);
+	auto Tbl = new LTableLayout(100);
 	Tbl->GetCss(true)->Padding("10px");
 	AddView(Tbl);
 
-	LLayoutCell *c = Tbl->GetCell(0, 0, true);
+	auto c = Tbl->GetCell(0, 0, true);
 	c->Add(new LTextLabel(-1, 8, 8, -1, -1, Text));
 	c->PaddingBottom(LCss::Len("10px"));
 
@@ -78,6 +78,11 @@ void LAlert::SetAppModal()
 	#else
 		LgiTrace("%s:%i - SetAppModal not implemented.\n", _FL);
     #endif
+}
+
+void LAlert::DisableBtn(int idx)
+{
+	SetCtrlEnabled(CMD_BASE + idx - 1, false);
 }
 
 void LAlert::SetButtonCallback(int ButtonIdx, std::function<void(int)> Callback)

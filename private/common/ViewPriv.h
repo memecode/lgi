@@ -10,7 +10,7 @@
 
 	#include "commctrl.h"
 	#include "Uxtheme.h"
-	#define GViewFlags d->WndStyle
+	#define LViewFlags d->WndStyle
 
 #else
 

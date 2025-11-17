@@ -852,59 +852,90 @@ LString WinGetSpecialFolderPath(int Id)
 #ifndef LGI_STATIC
 static bool AssertUiOpen = false;
 
-void LAssertDlg(LString Msg, std::function<void(int)> Callback)
+LAlert *LAssertDlg(LString Msg, bool canDebug, std::function<void(int)> Callback)
 {
 	AssertUiOpen = true;
-	auto a = new LAlert(LAppInst ? LAppInst->AppWnd : NULL, "Assert Failed", Msg, "Abort", "Debug", "Ignore");
+	
+	auto a = new LAlert(LAppInst ? LAppInst->AppWnd : nullptr, "Assert Failed", Msg, "Abort", "Debug", "Ignore");
 	a->SetAppModal();
-	a->DoModal([Callback](auto d, auto code)
-	{
-		if (Callback)
-			Callback(code);
-		AssertUiOpen = false;
-	});
+	if (!canDebug)
+		a->DisableBtn(2);
+	a->DoModal(	[Callback](auto d, auto code)
+				{
+					if (Callback)
+						Callback(code);
+					AssertUiOpen = false;
+				});
+	return a;
 }
 #endif
 
+struct LAssertState : public LRefCount
+{
+	constexpr static int INVALID = -1;
+	int result = INVALID;
+	bool assertFinished = false;
+
+	LAssertState()
+	{
+		IncRef(); // one for _lgi_assert
+		IncRef(); // and one for LAssertDlg's callback
+	}
+
+	operator bool() const
+	{
+		return result != INVALID;
+	}
+};
+
 void _lgi_assert(bool b, const char *test, const char *file, int line)
 {
-	if (!b)
-	{
-		#ifdef LGI_STATIC
+	if (b)
+		return;
 
-			assert(b);
+	#ifdef LGI_STATIC
 
-		#else
+		assert(b);
 
-			if (AssertUiOpen || !LAppInst || !LSysFont)
+	#else
+
+		LgiTrace("%s:%i - Assert: %s failed.\n", file, line, test);
+
+		if (AssertUiOpen || !LAppInst || !LSysFont)
+		{
+			// Woah boy...
+			return;
+		}
+
+		#ifdef _DEBUG
+
+			auto Msg = LString::Fmt("Assert failed, file: %s, line: %i\n%s", file, line, test);
+			auto canDebug = 
+				#if WINDOWS
+				LApp::messageLoop != LApp::TDragPump;
+				#else
+				true;
+				#endif
+
+			if (LAppInst->InThread())
 			{
-				// Woah boy...
-				LgiTrace("%s:%i - Assert: %s failed.\n", file, line, test);
-			}
-			else
-			{
-				LgiTrace("%s:%i - Assert failed:\n%s\n", file, line, test);
-
-				#ifdef _DEBUG
-
-					LString Msg;
-					Msg.Printf("Assert failed, file: %s, line: %i\n%s", file, line, test);
-
-					int Result = 0;
-					if (LAppInst->InThread())
+				// We are in the GUI thread, show the dialog inline
+				auto state = new LAssertState;
+				auto dlg = LAssertDlg(Msg,
+					canDebug,
+					[state /* can't assume that the calling function stack is there anymore */](auto result)
 					{
-						// We are in the GUI thread, show the dialog inline
-						int Result = -1;
-						LAssertDlg(Msg, [&](auto result)
+						switch (state->result = result)
 						{
-							switch (Result = result)
+							case 1:
 							{
-								case 1:
-								{
-									exit(-1);
-									break;
-								}
-								case 2:
+								state->DecRef();
+								exit(-1);
+								break;
+							}
+							case 2:
+							{
+								if (!state->assertFinished)
 								{
 									// Bring up the debugger...
 									#if defined(_WIN64) || !defined(_MSC_VER)
@@ -912,37 +943,58 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 									#else
 									_asm int 3
 									#endif
-									break;
 								}
-								default:
-								case 3:
+								else
 								{
-									break;
+									LgiTrace("%s:%i - debug callback, but parent fn has exited.\n", _FL);
 								}
-							}			
-						});
-
-						#if WINDOWS
-						MSG Msg = {0};
-						while (	Result < 1 &&
-								GetMessage(&Msg, NULL, 0, 0) > 0)
-						{
-							TranslateMessage(&Msg);
-							DispatchMessage(&Msg);
+								break;
+							}
+							default:
+							case 3:
+							{
+								break;
+							}
 						}
-						#endif
-					}
-					else
+
+						state->DecRef();
+					});
+
+				#if WINDOWS
+				if (!canDebug)
+				{
+					// A drag message loop is running, so the app can't run a second 
+					// message loop here, otherwise the mouse events are not handled.
+				}
+				else
+				{
+					auto prev = LApp::messageLoop;
+					LApp::messageLoop = LApp::TAssertPump;
+
+					MSG Msg = {};
+					while (	!*state &&
+							GetMessage(&Msg, NULL, 0, 0) > 0)
 					{
-						// Fall back to windows UI
-						assert(0);
+						TranslateMessage(&Msg);
+						DispatchMessage(&Msg);
 					}
 
+					LApp::messageLoop = prev;
+				}
 				#endif
+
+				state->assertFinished = true;
+				state->DecRef();
+			}
+			else
+			{
+				// Fall back to windows UI
+				assert(0);
 			}
 
 		#endif
-	}
+
+	#endif
 }
 
 //////////////////////////////////////////////////////////////////////

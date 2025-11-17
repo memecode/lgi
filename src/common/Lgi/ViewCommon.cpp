@@ -562,7 +562,7 @@ void LView::OnAttach()
 	}
 	
 	#ifdef __GTK_H__
-	if (TestFlag(GViewFlags, GWF_DROP_TARGET))
+	if (TestFlag(LViewFlags, GWF_DROP_TARGET))
 	{
 		if (auto wnd = GetWindow())
 		{
@@ -1369,15 +1369,15 @@ bool LView::Enabled()
 		return IsWindowEnabled(_View) != 0;
 	#endif
 	
-	return !TestFlag(GViewFlags, GWF_DISABLED);
+	return !TestFlag(LViewFlags, GWF_DISABLED);
 }
 
 void LView::Enabled(bool i)
 {
 	ThreadCheck();
 
-	if (!i) SetFlag(GViewFlags, GWF_DISABLED);
-	else ClearFlag(GViewFlags, GWF_DISABLED);
+	if (!i) SetFlag(LViewFlags, GWF_DISABLED);
+	else ClearFlag(LViewFlags, GWF_DISABLED);
 
 	#if LGI_VIEW_HANDLE && !defined(HAIKU)
 	if (_View)
@@ -1421,16 +1421,16 @@ bool LView::Visible()
 	
 	#endif
 
-	return TestFlag(GViewFlags, GWF_VISIBLE);
+	return TestFlag(LViewFlags, GWF_VISIBLE);
 }
 
 void LView::Visible(bool v)
 {
 	ThreadCheck();
 	
-	bool HasChanged = TestFlag(GViewFlags, GWF_VISIBLE) ^ v;
-	if (v) SetFlag(GViewFlags, GWF_VISIBLE);
-	else ClearFlag(GViewFlags, GWF_VISIBLE);
+	bool HasChanged = TestFlag(LViewFlags, GWF_VISIBLE) ^ v;
+	if (v) SetFlag(LViewFlags, GWF_VISIBLE);
+	else ClearFlag(LViewFlags, GWF_VISIBLE);
 
  	#if LGI_VIEW_HANDLE
 		if (_View)
@@ -1661,8 +1661,8 @@ bool LView::DropTarget(bool t)
 
 	bool Status = false;
 
-	if (t) SetFlag(GViewFlags, GWF_DROP_TARGET);
-	else ClearFlag(GViewFlags, GWF_DROP_TARGET);
+	if (t) SetFlag(LViewFlags, GWF_DROP_TARGET);
+	else ClearFlag(LViewFlags, GWF_DROP_TARGET);
 
 	#if WINNATIVE
 	
@@ -1784,7 +1784,7 @@ bool LView::Sunken()
 	#if WINNATIVE
 		return TestFlag(d->WndExStyle, WS_EX_CLIENTEDGE);
 	#else
-		return TestFlag(GViewFlags, GWF_SUNKEN);
+		return TestFlag(LViewFlags, GWF_SUNKEN);
 	#endif
 }
 
@@ -1798,8 +1798,8 @@ void LView::Sunken(bool i)
 		if (_View)
 			SetWindowLong(_View, GWL_EXSTYLE, d->WndExStyle);
 	#else
-		if (i) SetFlag(GViewFlags, GWF_SUNKEN);
-		else ClearFlag(GViewFlags, GWF_SUNKEN);
+		if (i) SetFlag(LViewFlags, GWF_SUNKEN);
+		else ClearFlag(LViewFlags, GWF_SUNKEN);
 	#endif
 
 	if (i)
@@ -1816,8 +1816,8 @@ bool LView::Flat()
 		return	!TestFlag(d->WndExStyle, WS_EX_CLIENTEDGE) &&
 				!TestFlag(d->WndExStyle, WS_EX_WINDOWEDGE);
 	#else
-		return !TestFlag(GViewFlags, GWF_SUNKEN) &&
-			   !TestFlag(GViewFlags, GWF_RAISED);
+		return !TestFlag(LViewFlags, GWF_SUNKEN) &&
+			   !TestFlag(LViewFlags, GWF_RAISED);
 	#endif
 }
 
@@ -1828,7 +1828,7 @@ void LView::Flat(bool i)
 	#if WINNATIVE
 		ClearFlag(d->WndExStyle, (WS_EX_CLIENTEDGE|WS_EX_WINDOWEDGE));
 	#else
-		ClearFlag(GViewFlags, (GWF_RAISED|GWF_SUNKEN));
+		ClearFlag(LViewFlags, (GWF_RAISED|GWF_SUNKEN));
 	#endif
 }
 
@@ -1837,7 +1837,7 @@ bool LView::Raised()
 	#if WINNATIVE
 		return TestFlag(d->WndExStyle, WS_EX_WINDOWEDGE);
 	#else
-		return TestFlag(GViewFlags, GWF_RAISED);
+		return TestFlag(LViewFlags, GWF_RAISED);
 	#endif
 }
 
@@ -1849,8 +1849,8 @@ void LView::Raised(bool i)
 		if (i) SetFlag(d->WndExStyle, WS_EX_WINDOWEDGE);
 		else ClearFlag(d->WndExStyle, WS_EX_WINDOWEDGE);
 	#else
-		if (i) SetFlag(GViewFlags, GWF_RAISED);
-		else ClearFlag(GViewFlags, GWF_RAISED);
+		if (i) SetFlag(LViewFlags, GWF_RAISED);
+		else ClearFlag(LViewFlags, GWF_RAISED);
 	#endif
 
 	if (i)

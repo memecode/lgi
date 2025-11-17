@@ -435,7 +435,11 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 		IDataObject *Data = 0;
 		if (QueryInterface(IID_IDataObject, (void**)&Data) == S_OK)
 		{
+			auto prevLoop = LApp::messageLoop;
+			LApp::messageLoop = LApp::TDragPump;
 			int Ok = ::DoDragDrop(Data, this, Effect, &dwEffect) == DRAGDROP_S_DROP;
+			LApp::messageLoop = prevLoop;
+
 			Data->Release();
 
 			if (!Ok)
@@ -691,50 +695,58 @@ HRESULT STDMETHODCALLTYPE LDragDropTarget::DragEnter(IDataObject *pDataObject, D
 
 	*pdwEffect = DROPEFFECT_NONE;
 
-	POINT p;
-	p.x = pt.x;
-	p.y = pt.y;
-	ScreenToClient(To->Handle(), &p);
-	LPoint Pt(p.x, p.y);
-
-	// Clean out format list
-	Formats.Empty();
-	Formats.SetSource(true);
-
-	// Something from another app, enum the formats.
-	IEnumFORMATETC *FormatETC = 0;
-	if (pDataObject->EnumFormatEtc(DATADIR_GET, &FormatETC) == S_OK &&
-		FormatETC)
+	if (!To)
 	{
-		ULONG Fetched = 0;
-		FORMATETC Format;
+		LAssert(!"no 'To' view set.");
+	}
+	else
+	{
+		POINT p;
+		p.x = pt.x;
+		p.y = pt.y;
+		ScreenToClient(To->Handle(), &p);
+		LPoint Pt(p.x, p.y);
 
-		// Ask what formats are being dropped
-		FormatETC->Reset();
-		while (FormatETC->Next(1, &Format, &Fetched) == S_OK)
+		// Clean out format list
+		Formats.Empty();
+		Formats.SetSource(true);
+
+		// Something from another app, enum the formats.
+		IEnumFORMATETC *FormatETC = 0;
+		if (pDataObject->EnumFormatEtc(DATADIR_GET, &FormatETC) == S_OK &&
+			FormatETC)
 		{
-			if (Fetched == 1)
+			ULONG Fetched = 0;
+			FORMATETC Format;
+
+			// Ask what formats are being dropped
+			FormatETC->Reset();
+			while (FormatETC->Next(1, &Format, &Fetched) == S_OK)
 			{
-				char *s = FormatToStr(Format.cfFormat);
-				if (s)
-					Formats.Supports(s);
+				if (Fetched == 1)
+				{
+					char *s = FormatToStr(Format.cfFormat);
+					if (s)
+						Formats.Supports(s);
+				}
 			}
+			FormatETC->Release();
 		}
-		FormatETC->Release();
+
+		// Process the format list
+		if (Formats.Length() > 0)
+		{
+			// Ask the app what formats it supports.
+			// It deletes those it doesn't and leaves the formats it can handle
+			Formats.SetSource(false);
+			*pdwEffect = WillAccept(Formats, Pt, MapW32FlagsToLgi(grfKeyState));
+			// LgiTrace("WillAccept=%i\n", *pdwEffect);
+			Result = S_OK;
+		}
+
+		OnDragEnter();
 	}
 
-	// Process the format list
-	if (Formats.Length() > 0)
-	{
-		// Ask the app what formats it supports.
-		// It deletes those it doesn't and leaves the formats it can handle
-		Formats.SetSource(false);
-		*pdwEffect = WillAccept(Formats, Pt, MapW32FlagsToLgi(grfKeyState));
-		// LgiTrace("WillAccept=%i\n", *pdwEffect);
-		Result = S_OK;
-	}
-
-	OnDragEnter();
 	return Result;
 }
 
