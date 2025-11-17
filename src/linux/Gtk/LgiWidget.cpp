@@ -124,10 +124,10 @@ LMouse _map_mouse_event(LView *v, int x, int y, bool Motion, bool Debug = false)
 {
 	LMouse m;
 
-	auto View = v->ViewFromPoint(LPoint(x, y));
+	auto View = v->ViewFromPoint(LPoint(x, y), nullptr/*, Motion ? 0 : -1*/);
 	LPoint Offset;
 	bool FoundParent = false;
-	for (auto i=View; i != NULL; i=i->GetParent())
+	for (auto i = View; i; i = i->GetParent())
 	{
 		if (i == v)
 		{

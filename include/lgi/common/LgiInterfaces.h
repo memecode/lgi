@@ -579,7 +579,7 @@ public:
 	virtual bool PointToScreen(LPoint &p) = 0;
 	virtual bool PointToView(LPoint &p) = 0;
 	virtual bool WindowVirtualOffset(LPoint *Offset) = 0;	
-	virtual LViewI *ViewFromPoint(LPoint pt, LPoint *localPt = nullptr) = 0;
+	virtual LViewI *ViewFromPoint(LPoint pt, LPoint *localPt = nullptr, int param = 0) = 0;
 	virtual LPoint &GetWindowBorderSize() = 0;
 	virtual bool IsOver(LMouse &m) = 0;
 
@@ -593,16 +593,6 @@ public:
 protected:
 	virtual bool OnViewMouse(LView *v, LMouse &m) = 0;
 	virtual bool OnViewKey(LView *v, LKey &k) = 0;
-};
-
-class LMemoryPoolI
-{
-public:
-	virtual ~LMemoryPoolI() {}
-
-	virtual void *Alloc(size_t Size) = 0;
-	virtual void Free(void *Ptr) = 0;
-	virtual void Empty() = 0;
 };
 
 // File system interface

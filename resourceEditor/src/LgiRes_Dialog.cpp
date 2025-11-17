@@ -9,8 +9,6 @@
 **		fret@memecode.com
 */
 
-// Old control offset 3,17
-
 ////////////////////////////////////////////////////////////////////
 #include <stdlib.h>
 
@@ -326,7 +324,7 @@ ResDialogCtrl::~ResDialogCtrl()
 	}
 }
 
-char *ResDialogCtrl::GetRefText()
+const char *ResDialogCtrl::GetRefText()
 {
 	static char Buf[64];
 	if (GetStr())
@@ -342,17 +340,13 @@ char *ResDialogCtrl::GetRefText()
 
 void ResDialogCtrl::ListChildren(List<ResDialogCtrl> &l, bool Deep)
 {
-	for (LViewI *w: View()->IterateViews())
+	for (auto w: View()->IterateViews())
 	{
-		ResDialogCtrl *c = dynamic_cast<ResDialogCtrl*>(w);
-		LAssert(c);
-		if (c)
+		if (auto c = dynamic_cast<ResDialogCtrl*>(w))
 		{
 			l.Insert(c);
 			if (Deep)
-			{
-				c->ListChildren(l);
-			}
+				c->ListChildren(l, Deep);
 		}
 	}
 }
@@ -384,21 +378,6 @@ bool ResDialogCtrl::SetPos(LRect &p, bool Repaint)
 
 	if (p != View()->GetPos())
 	{
-		/*
-		if (ParentCtrl)
-		{
-			if (p.x1 < ParentCtrl->Client.x1)
-			{
-				p.Offset(ParentCtrl->Client.x1 - p.x1, 0);
-			}
-
-			if (p.y1 < ParentCtrl->Client.y1)
-			{
-				p.Offset(0, ParentCtrl->Client.y1 - p.y1);
-			}
-		}
-		*/
-
 		// set our size
 		bool Status = View()->SetPos(p, Repaint);
 		
@@ -410,8 +389,7 @@ bool ResDialogCtrl::SetPos(LRect &p, bool Repaint)
 		View()->Invalidate(&r, false, true);
 		
 		// check our parents are big enough to show us...
-		ResDialogCtrl *Par = ParentCtrl();
-		if (Par)
+		if (auto Par = ParentCtrl())
 		{
 			LRect t = Par->View()->GetPos();
 			Par->ResDialogCtrl::SetPos(t, true);

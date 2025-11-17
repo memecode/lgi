@@ -2161,30 +2161,49 @@ LString _ViewDesc(LViewI *v)
 	return s;
 }
 
-LViewI *LView::ViewFromPoint(LPoint pt, LPoint *localPt)
+LViewI *LView::ViewFromPoint(LPoint pt, LPoint *localPt, int param)
 {
+	int depth = param < 0 ? (-param - 1) : (param > 0 ? param - 1 : 0);
+	bool debug = param < 0;
+	auto indent = LString("  ") * depth;
+
+	auto cli = GetClient(false);
+	auto lwnd = dynamic_cast<LWindow*>(this);
+	if (!lwnd)
+		pt -= cli.TopLeft();
+
 	// We iterate over the child in reverse order because if they overlap the
 	// end of the list is on "top". So they should get the click or whatever
 	// before the the lower windows.
 	auto it = Children.rbegin();
-	auto n = Children.Length() - 1;
-	for (LViewI *c = *it; c; c = *--it)
+	for (auto c = *it; c; c = *--it)
 	{
 		if (!c->Visible())
 			continue;
 
-		auto pos = c->GetPos();		
+		auto pos = c->GetPos();
 		if (pos.Overlap(pt))
 		{
-			if (auto v = c->ViewFromPoint(pt - pos.TopLeft(), localPt))
+			if (debug)
+				printf("%sview=%s pt=%s overPos=%s cli=%s\n",
+					indent.Get(), c->GetClass(), pt.GetStr().Get(), pos.GetStr(), cli.GetStr());
+				
+			if (auto v = c->ViewFromPoint(	pt - pos.TopLeft(),
+											localPt,
+											param == 0 ? 0 : param + (param < 0 ? -1 : 1)))
 				return v;
 		}
 	}
 
-	if (Pos.ZeroTranslate().Overlap(pt))
+	auto zPos = Pos.ZeroTranslate();
+	if (zPos.Overlap(pt))
 	{
 		if (localPt)
 			*localPt = pt - _Border.TopLeft();
+			
+		if (debug)
+			printf("%sfound=%s pt=%s overPos=%s cli=%s\n",
+				indent.Get(), GetClass(), pt.GetStr().Get(), zPos.GetStr(), cli.GetStr());
 		return this;
 	}
 

@@ -13,6 +13,9 @@
 		<Node File="../src/common/Gdc2/Filters/Lzw.cpp" Type="2" Platforms="15" />
 	</Node>
 	<Node Name="Objects" Type="1" Open="1" Platforms="7" Id="2">
+		<Node Name="Css" Type="1" Platforms="15" Id="8">
+			<Node File="./src/LgiRes_Css.cpp" Type="2" Platforms="15" />
+		</Node>
 		<Node Name="Dialog" Type="1" Open="0" Platforms="7" Id="3">
 			<Node File="./src/LgiRes_ControlTree.cpp" Type="2" Platforms="15" />
 			<Node File="./src/LgiRes_Dialog.cpp" Type="2" Platforms="15" />
@@ -27,13 +30,12 @@
 			<Node File="./src/LgiRes_String.cpp" Type="2" Platforms="15" />
 			<Node File="./src/LgiRes_String.h" Type="3" Platforms="15" />
 		</Node>
-		<Node File="./src/LgiRes_Css.cpp" Type="2" Platforms="15" />
 		<Node File="./src/LgiResApp.cpp" Type="2" Platforms="15" />
 		<Node File="./src/LgiResEdit.h" Type="3" Platforms="15" />
 		<Node File="./src/Search.cpp" Type="2" Platforms="15" />
 		<Node File="./src/ShowLanguages.cpp" Type="2" Platforms="15" />
 	</Node>
-	<Node Name="Resources" Type="1" Open="0" Platforms="7" Id="1">
+	<Node Name="Resources" Type="1" Open="0" Platforms="7" Id="7">
 		<Node File="./resources/lgires.lr8" Type="5" Platforms="15" />
 	</Node>
 	<Node File="../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
@@ -140,5 +142,13 @@ be</Release>
 				<All>1</All>
 			</UseHardTabs>
 		</Editor>
+		<Debug>
+			<Arguments>
+				<All>
+					<Debug>/home/matthew/code/soundunitedtools/resources/SoundUnitedTools.lr8</Debug>
+					<Release>/home/matthew/code/soundunitedtools/resources/SoundUnitedTools.lr8</Release>
+				</All>
+			</Arguments>
+		</Debug>
 	</Settings>
 </Project>

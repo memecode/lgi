@@ -866,16 +866,6 @@ void ResString::PasteText()
 }
 
 ////////////////////////////////////////////////////////////////////
-int ResStringCompareFunc(LListItem *a, LListItem *b, ssize_t Data)
-{
-	ResString *A = dynamic_cast<ResString*>(a);
-	if (A)
-	{
-		return A->Compare(dynamic_cast<ResString*>(b), Data);
-	}
-	return -1;
-}
-
 StringGroupList::StringGroupList(ResStringGroup *g) :
 	LList(0, 0, 200, 200),
 	grp(g)
@@ -901,13 +891,19 @@ void StringGroupList::OnColumnClick(int Col, LMouse &m)
 		grp->SortAscend = true;
 	}
 
-	LList::Sort<ssize_t>(ResStringCompareFunc, (grp->SortCol + 1) * ((grp->SortAscend) ? 1 : -1));
+	LList::Sort([this, Data = (grp->SortCol + 1) * ((grp->SortAscend) ? 1 : -1)](auto a, auto b)
+		{
+			auto A = dynamic_cast<ResString*>(a);
+			auto B = dynamic_cast<ResString*>(b);
+			if (A && B)
+			{
+				return A->Compare(B, Data);
+			}
+			return -1;
+		});
 
-	LListItem *Sel = GetSelected();
-	if (Sel)
-	{
+	if (auto Sel = GetSelected())
 		Sel->ScrollTo();
-	}
 }
 
 void StringGroupList::OnItemSelect(LArray<LListItem*> &Items)

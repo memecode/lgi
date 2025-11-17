@@ -2395,8 +2395,7 @@ void LTextView4::ClearDirty(std::function<void(bool)> OnStatus, bool Ask, const 
 			
 			if (!FileName)
 			{
-				LFileSelect *Select = new LFileSelect;
-				Select->Parent(this);
+				auto Select = new LFileSelect(this);
 				Select->Save([FileName=LString(FileName), DoSave](auto Select, auto ok)
 				{
 					if (ok)

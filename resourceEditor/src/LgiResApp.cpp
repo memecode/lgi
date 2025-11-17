@@ -1037,8 +1037,8 @@ void AppWnd::OnCreate()
 			_FileMenu->AppendItem("Import Win32 Script", ID_IMPORT_WIN32, true, n++);
 			_FileMenu->AppendItem("Import LgiRes Language", ID_IMPORT_LANG, true, n++);
 			_FileMenu->AppendItem("Compare To File...", ID_COMPARE, true, n++);
-			_FileMenu->AppendSeparator(n++);
 			_FileMenu->AppendItem("Properties", ID_PROPERTIES, true, n++);
+			_FileMenu->AppendSeparator(n++);
 		}
 
 		ViewMenu = Menu->FindSubMenu(IDM_VIEW);

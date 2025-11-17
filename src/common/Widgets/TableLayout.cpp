@@ -890,7 +890,6 @@ void TableCell::LayoutWidth(int Depth, int &MinX, int &MaxX, CellFlag &Flag)
 				
 				Min = MAX(Min, min_x + PadX);
 				Max = MAX(Max, max_x + PadX);
-				Log().Print("%s:%i - max=%i\n", _FL, Max);
 				if (Flag < SizeGrow)
 					Flag = SizeGrow;
 			}

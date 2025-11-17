@@ -158,16 +158,17 @@ LMenuItem *LSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where
 	if (auto i = new LMenuItem(Menu, this, Str, Id, Where < 0 ? Items.Length() : Where, Shortcut))
 	{
 		i->Enabled(Enabled);
-
 		Items.Insert(i, Where);
 
-		GtkWidget *item = GTK_WIDGET(i->Handle());
-		LAssert(item);
-		if (item)
+		if (auto item = GTK_WIDGET(i->Handle()))
 		{
-			gtk_menu_shell_append(Info, item);
+			if (Where < 0)
+				gtk_menu_shell_append(Info, item);
+			else
+				gtk_menu_shell_insert(Info, item, Where);
 			gtk_widget_show(item);
 		}
+		else LAssert(!"no widget");
 
 		return i;
 	}
@@ -177,27 +178,27 @@ LMenuItem *LSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where
 
 LMenuItem *LSubMenu::AppendSeparator(int Where)
 {
-	LMenuItem *i = new LMenuItem;
-	if (i)
+	if (auto i = new LMenuItem())
 	{
 		i->Parent = this;
 		i->Menu = Menu;
-		i->Id(-2);
 
 		Items.Insert(i, Where);
 
-		GtkWidget *item = GTK_WIDGET(i->Handle());
-		LAssert(item);
-		if (item)
+		if (auto item = GTK_WIDGET(i->Handle()))
 		{
-			gtk_menu_shell_append(Info, item);
+			if (Where >= 0)
+				gtk_menu_shell_insert(Info, item, Where);
+			else
+				gtk_menu_shell_append(Info, item);
 			gtk_widget_show(item);
 		}
+		else LAssert(!"no widget");
 		
 		return i;
 	}
 
-	return 0;
+	return nullptr;
 }
 
 LSubMenu *LSubMenu::AppendSub(const char *Str, int Where)
@@ -206,7 +207,7 @@ LSubMenu *LSubMenu::AppendSub(const char *Str, int Where)
 	auto i = new LMenuItem(Menu, this, Str, -1 /*ID*/, Where < 0 ? Items.Length() : Where);
 	if (i)
 	{
-		i->Id(-1);
+		i->Id(ItemId_Submenu);
 		Items.Insert(i, Where);
 
 		GtkWidget *item = GTK_WIDGET(i->Handle());
@@ -220,14 +221,13 @@ LSubMenu *LSubMenu::AppendSub(const char *Str, int Where)
 			gtk_widget_show(item);
 		}
 
-		i->Child = new LSubMenu(Str);
-		if (i->Child)
+		if (i->Child = new LSubMenu(Str))
 		{
 			i->Child->Parent = i;
 			i->Child->Menu = Menu;
 			i->Child->Window = Window;
 			
-			GtkWidget *sub = GTK_WIDGET(i->Child->Handle());
+			auto sub = GTK_WIDGET(i->Child->Handle());
 			LAssert(sub);
 			if (i->Handle() && sub)
 			{
@@ -241,12 +241,12 @@ LSubMenu *LSubMenu::AppendSub(const char *Str, int Where)
 		return i->Child;
 	}
 
-	return 0;
+	return nullptr;
 }
 
 void LSubMenu::ClearHandle()
 {
-	Info = NULL;
+	Info = nullptr;
 	for (auto i: Items)
 	{
 		i->ClearHandle();
@@ -373,7 +373,7 @@ LSubMenu *LSubMenu::FindSubMenu(int Id)
 {
 	for (auto i: Items)
 	{
-		LSubMenu *Sub = i->Sub();
+		auto Sub = i->Sub();
 
 		// LOG("Find(%i) '%s' %i sub=%p\n", Id, i->Name(), i->Id(), Sub);
 		if (i->Id() == Id)
@@ -382,22 +382,19 @@ LSubMenu *LSubMenu::FindSubMenu(int Id)
 		}
 		else if (Sub)
 		{
-			LSubMenu *m = Sub->FindSubMenu(Id);
-			if (m)
-			{
+			if (auto m = Sub->FindSubMenu(Id))
 				return m;
-			}
 		}
 	}
 
-	return 0;
+	return nullptr;
 }
 
 LMenuItem *LSubMenu::FindItem(int Id)
 {
 	for (auto i: Items)
 	{
-		LSubMenu *Sub = i->Sub();
+		auto Sub = i->Sub();
 
 		if (i->Id() == Id)
 		{
@@ -405,11 +402,8 @@ LMenuItem *LSubMenu::FindItem(int Id)
 		}
 		else if (Sub)
 		{
-			i = Sub->FindItem(Id);
-			if (i)
-			{
-				return i;
-			}
+			if (auto m = Sub->FindItem(Id))
+				return m;
 		}
 	}
 
@@ -573,6 +567,7 @@ void LMenuItem::OnGtkEvent(LString Event)
 LMenuItem::LMenuItem()
 {
 	d = new LMenuItemPrivate();
+	_Id = LSubMenu::ItemId_Separator;
 	Handle(GTK_MENU_ITEM(gtk_separator_menu_item_new()));
 }
 
@@ -948,23 +943,14 @@ void LMenuItem::Id(int i)
 void LMenuItem::Separator(bool s)
 {
 	if (s)
-	{
-		_Id = -2;
-	}
+		_Id = LSubMenu::ItemId_Separator;
 }
 
 struct MenuItemIndex
 {
-	Gtk::GtkWidget *w;
-	int Current;
-	int Index;
-	
-	MenuItemIndex()
-	{
-		Index = -1;
-		Current = 0;
-		w = NULL;
-	}
+	Gtk::GtkWidget *w = nullptr;
+	int Current = 0;
+	int Index = -1;
 };
 
 static void
@@ -1220,7 +1206,7 @@ const char *LMenuItem::Name()
 
 bool LMenuItem::Separator()
 {
-	return _Id == -2;
+	return _Id == LSubMenu::ItemId_Separator;
 }
 
 bool LMenuItem::Checked()

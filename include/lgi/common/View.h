@@ -787,7 +787,7 @@ public:
 	bool IsOver(LMouse &m) override;
 	/// returns the view located at 'point'. Optionally it can return the
 	/// local coordinates in 'localPt'.
-	LViewI *ViewFromPoint(LPoint point, LPoint *localPt = nullptr) override;
+	LViewI *ViewFromPoint(LPoint point, LPoint *localPt = nullptr, int param = 0) override;
 	/// Sets a timer to call the OnPulse() event
 	void SetPulse
 	(

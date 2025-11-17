@@ -735,30 +735,37 @@ LWindowUnrealize(GtkWidget *widget, LWindow *wnd)
 	// printf("%s:%i - LWindowUnrealize %s\n", _FL, wnd->GetClass());
 }
 
-bool DndPointMap(LViewI *&v, LPoint &p, LDragDropTarget *&t, LWindow *Wnd, int x, int y)
+bool DndPointMap(LViewI *&view, LPoint &localPt, LDragDropTarget *&t, LWindow *Wnd, LPoint mousePt)
 {
 	LRect cli = Wnd->GetClient();
 	t = NULL;
-	v = Wnd->ViewFromPoint(LPoint(x, y) - cli.TopLeft());
-	if (!v)
+	view = Wnd->ViewFromPoint(mousePt - cli.TopLeft(), &localPt);
+	if (!view)
 	{
-		DND_ERROR("%s:%i - <no view> @ %i,%i\n", _FL, x, y);
+		DND_ERROR("%s:%i - <no view> @ %s\n", _FL, mousePt.GetStr().Get());
 		return false;
 	}
 
+	/*
 	v->WindowVirtualOffset(&p);
-	p.x = x - p.x;
-	p.y = y - p.y;
+	p.x = pt.x - p.x;
+	p.y = pt.y - p.y;
+	*/
 
-	for (LViewI *view = v; !t && view; view = view->GetParent())
-	{
-		t = view->DropTarget();
-		v = view;
-	}
+	for (LViewI *v = view; !t && v; v = v->GetParent())
+		t = v->DropTarget();
 	if (t)
 		return true;
 
-	DND_ERROR("%s:%i - No target for %s\n", _FL, v->GetClass());
+	static uint64_t lastTs = 0;
+	auto now = LCurrentTime();
+	if (now - lastTs > 2000)
+	{
+		lastTs = now;
+		DND_ERROR("%s:%i - No target for %s @ %s\n", _FL, view->GetClass(), mousePt.GetStr().Get());
+		for (LViewI *v = view; !t && v; v = v->GetParent())
+			DND_ERROR("	view=%s\n", view->GetClass());
+	}
 	return false;
 }
 
@@ -783,7 +790,7 @@ LWindowDragDataGet(GtkWidget *widget, GdkDragContext *context, GtkSelectionData 
 void
 LWindowDragDataReceived(GtkWidget *widget, GdkDragContext *context, gint x, gint y, GtkSelectionData *data, guint info, guint time, LWindow *Wnd)
 {
-	LPoint p;
+	LPoint p, mousePt(x, y);
 	LViewI *v = nullptr;
 	LDragDropTarget *t = nullptr;
 	auto wView = LWidgetToView(widget);
@@ -791,7 +798,7 @@ LWindowDragDataReceived(GtkWidget *widget, GdkDragContext *context, gint x, gint
 	printf("%s:%i - LWindowDragDataReceived wid=%p/%s wnd=%s\n",
 		_FL, widget, wView?wView->GetClass():nullptr, Wnd?Wnd->GetClass():nullptr);
 	
-	if (!DndPointMap(v, p, t, Wnd, x, y))
+	if (!DndPointMap(v, p, t, Wnd, mousePt))
 	{
 		LgiTrace("%s:%i - DndPointMap false.\n", _FL);
 		return;
@@ -912,7 +919,7 @@ struct LGtkDrop : public LView::ViewEventTarget
 	
 	LGtkDrop(GtkWidget *widget,
 			 GdkDragContext *Context,
-			 gint x, gint y,
+			 LPoint mousePt,
 			 guint Time,
 			 LWindow *Wnd)
 		: LView::ViewEventTarget(Wnd, M_DND_DATA_RECEIVED)
@@ -924,7 +931,7 @@ struct LGtkDrop : public LView::ViewEventTarget
 		Start = LCurrentTime();
 		
 		// Map the point to a view...
-		if (!DndPointMap(v, p, t, Wnd, x, y))
+		if (!DndPointMap(v, p, t, Wnd, mousePt))
 		{
 			DND_ERROR("%s:%i - DndPointMap failed!\n", _FL);
 			return;
@@ -1020,7 +1027,8 @@ struct LGtkDrop : public LView::ViewEventTarget
 gboolean
 LWindowDragDataDrop(GtkWidget *widget, GdkDragContext *context, gint x, gint y, guint time, LWindow *Wnd)
 {
-	auto obj = new LGtkDrop(widget, context, x, y, time, Wnd);
+	LPoint mousePt(x, y);
+	auto obj = new LGtkDrop(widget, context, mousePt, time, Wnd);
 	DND_LOG("%s:%i - LWindowDragDataDrop = %p\n", _FL, obj);
 	return obj != NULL;
 }
@@ -1052,11 +1060,11 @@ LWindowDragLeave(GtkWidget *widget, GdkDragContext *context, guint time, LWindow
 gboolean
 LWindowDragMotion(GtkWidget *widget, GdkDragContext *context, gint x, gint y, guint time, LWindow *Wnd)
 {
-	LPoint p;
+	LPoint p, mousePt(x, y);
 	LViewI *v = nullptr;
 	LDragDropTarget *t = nullptr;
 
-	if (!DndPointMap(v, p, t, Wnd, x, y))
+	if (!DndPointMap(v, p, t, Wnd, mousePt))
 	{
 		DND_ERROR("%s:%i - DndPointMap failed\n", _FL);
 		return false;

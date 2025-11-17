@@ -1050,7 +1050,7 @@ bool LWindow::Obscured()
 	return	false;
 }
 
-bool DndPointMap(LViewI *&v, LPoint &p, LDragDropTarget *&t, LWindow *Wnd, int x, int y)
+bool DndPointMap(LViewI *&v, LPoint &p, LDragDropTarget *&t, LWindow *Wnd, LPoint pt)
 {
 	LRect cli = Wnd->GetClient();
 	t = NULL;

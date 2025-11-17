@@ -79,7 +79,7 @@ protected:
 
 	void TabString(char *Str);
 	void ReadPos(char *Str);
-	char *GetRefText();
+	const char *GetRefText();
 
 	LRect Goobers[8];
 	int OverGoober = -1;

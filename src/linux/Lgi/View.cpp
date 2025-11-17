@@ -376,7 +376,7 @@ bool LView::_Mouse(LMouse &m, bool Move)
 	}
 
 	#if DEBUG_MOUSE_EVENTS
-	// if (!Move)
+	if (!Move)
 		LgiTrace("%s:%i - _Capturing=%p/%s\n", _FL, _Capturing, _Capturing ? _Capturing->GetClass() : NULL);
 	#endif
 	if (Move)
@@ -384,8 +384,7 @@ bool LView::_Mouse(LMouse &m, bool Move)
 		auto *o = m.Target;
 		if (_Over != o)
 		{
-			#if DEBUG_MOUSE_EVENTS
-			// if (!o) WindowFromPoint(m.x, m.y, true);
+			#if 0 // DEBUG_MOUSE_EVENTS
 			LgiTrace("%s:%i - _Over changing from %p/%s to %p/%s\n", _FL,
 					_Over, _Over ? _Over->GetClass() : NULL,
 					o, o ? o->GetClass() : NULL);
@@ -565,6 +564,9 @@ bool LView::SetPos(LRect &p, bool Repaint)
 	{
 		Pos = p;
 		OnPosChange();
+		
+		if (Repaint)
+			Invalidate();
 	}
 
 	return true;

@@ -1,9 +1,6 @@
 //
-//  LCancel.h
-//  Lgi
-//
+//  LError.h
 //  Created by Matthew Allen on 19/10/2017.
-//
 //
 
 #ifndef _LERROR_H_
@@ -52,6 +49,7 @@ enum LErrorCodes
 	LErrorTimerExpired  = ETIME,
 	LErrorIoFailed      = EIO,
 	LErrorTimedOut      = ETIMEDOUT,
+	LErrorCancelled		= ECANCELED,
 
 	LErrorAddrInUse     = EADDRINUSE,
 	LErrorAddrNotAvail  = EADDRNOTAVAIL,
