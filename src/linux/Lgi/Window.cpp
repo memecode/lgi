@@ -1659,7 +1659,7 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 			
 			if (Position.Valid())
 			{
-				// printf("SerializeState setpos %s\n", Position.GetStr());
+				printf("SerializeState setpos %s\n", Position.GetStr());
 				SetPos(Position);
 			}
 			
@@ -1669,11 +1669,22 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 	}
 	else
 	{
-		LWindowZoom State = GetZoom();
-		auto s = LString::Fmt("State=%i;Pos=%s", (int)State, GetPos().GetStr());
-		// printf("SerializeState store: %s\n", s.Get());
-		if (!Store->SetValue(FieldName, v = s))
-			return false;
+		if (GTK_IS_WINDOW(Wnd))
+		{
+			gint sx, sy;
+			gtk_window_get_size(Wnd, &sx, &sy);
+			LRect r(0, 0, sx-1, sy-1);
+
+			LWindowZoom State = GetZoom();
+			auto s = LString::Fmt("State=%i;Pos=%s", (int)State, r.GetStr());
+			printf("SerializeState store: %s, gtk=%i,%i\n", s.Get(), sx, sy);
+			if (!Store->SetValue(FieldName, v = s))
+				return false;
+		}
+		else
+		{
+			printf("%s:%i - not a gtk window\n", _FL);
+		}
 	}
 
 	return true;
@@ -1691,6 +1702,7 @@ bool LWindow::SetPos(LRect &p, bool Repaint)
 	{
 		ThreadCheck();
 		
+		printf("%s::SetPos(%s)\n", GetClass(), Pos.GetStr());
 		gtk_window_resize(Wnd, MAX(1, Pos.X()), Pos.Y());
 		gtk_window_move(Wnd, Pos.x1, Pos.y1);
 	}
