@@ -134,8 +134,12 @@ void LItemContainer::OnCreate()
 {
 	DropSource(this);
 	
-	// Only do this when the client app asks for dnd support by calling SetDragItem
-	// LDragDropTarget::SetWindow(this);
+	if (DragItem)
+	{
+		// Only do this when the client app asks for dnd support by calling SetDragItem
+		// In this case, it was done before this OnCreate event...
+		LDragDropTarget::SetWindow(this);
+	}
 }
 
 void LItemContainer::PaintColumnHeadings(LSurface *pDC)

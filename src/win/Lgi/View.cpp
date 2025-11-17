@@ -1530,7 +1530,7 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 					}
 				}
 
-				#if 1
+				#if 0
 				if (!Stricmp(GetClass(), "LTree"))
 				{
 					int asd=0;
