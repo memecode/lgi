@@ -57,6 +57,7 @@ public:
 	LAttachState AttachState = LUnattached;
 	bool ShowTitleBar = true;
 	bool WillFocus = true;
+	LPoint lastKnownSize;
 	
 	// State
 	GdkWindowState State = {};
@@ -105,7 +106,6 @@ LWindow::LWindow(GtkWidget *w) :
 	LView(nullptr)
 {
 	d = new LWindowPrivate;
-	_QuitOnClose = false;
 	Wnd = GTK_WINDOW(w);
 	if (Wnd)
 	{
@@ -264,15 +264,7 @@ void LWindow::OnGtkRealize()
 void LWindow::OnGtkDelete()
 {
 	// Delete everything we own...
-	// DeleteObj(Menu);
 
-	#if 0
-	while (Children.Length())
-	{
-		LViewI *c = Children.First();
-		c->Detach();
-	}
-	#else
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
 		LViewI *c = Children[i];
@@ -280,13 +272,15 @@ void LWindow::OnGtkDelete()
 		if (v)
 			v->OnGtkDelete();
 	}
-	#endif
 	
 	// These will be destroyed by GTK after returning from LWindowCallback
-	Wnd = NULL;
+	Wnd = nullptr;
 	#ifndef __GTK_H__
-	_View = NULL;
+	_View = nullptr;
 	#endif
+	
+	if (_QuitOnClose)
+		LCloseApp();
 }
 
 LRect *LWindow::GetDecorSize()
@@ -413,7 +407,15 @@ gboolean LWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 		{
 			bool Close = OnRequestClose(false);
 			if (Close)
-				OnGtkDelete();     		
+			{
+				// This last known size is used by SerializeState
+				gint sx = 0, sy = 0;
+				gtk_window_get_size(Wnd, &sx, &sy);
+				if (sx && sy)
+					d->lastKnownSize = LPoint(sx, sy);
+				
+				OnGtkDelete();
+			}
 			return !Close;
 		}
 		case GDK_DESTROY:
@@ -1669,22 +1671,25 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 	}
 	else
 	{
+		LPoint size = d->lastKnownSize;
 		if (GTK_IS_WINDOW(Wnd))
 		{
-			gint sx, sy;
+			gint sx = 0, sy = 0;
 			gtk_window_get_size(Wnd, &sx, &sy);
-			LRect r(0, 0, sx-1, sy-1);
+			if (sx && sy)
+			{
+				size.x = sx;
+				size.y = sy;
+			}
+		}
+		
+		LRect r(0, 0, size.x-1, size.y-1);
 
-			LWindowZoom State = GetZoom();
-			auto s = LString::Fmt("State=%i;Pos=%s", (int)State, r.GetStr());
-			printf("SerializeState store: %s, gtk=%i,%i\n", s.Get(), sx, sy);
-			if (!Store->SetValue(FieldName, v = s))
-				return false;
-		}
-		else
-		{
-			printf("%s:%i - not a gtk window\n", _FL);
-		}
+		LWindowZoom State = GetZoom();
+		auto s = LString::Fmt("State=%i;Pos=%s", (int)State, r.GetStr());
+		printf("SerializeState store: %s, gtk=%i,%i\n", s.Get(), size.x, size.y);
+		if (!Store->SetValue(FieldName, v = s))
+			return false;
 	}
 
 	return true;

@@ -14,7 +14,7 @@
 
 #else
 
-	#define GViewFlags WndFlags
+	#define LViewFlags WndFlags
 
 #endif
 
