@@ -1116,14 +1116,16 @@ void LFileSelectDlg::OnCreate()
 	{
 		case TypeOpenFile:
 		{
-			Name("Open");
+			if (!d->Title)
+				Name("Open");
 			if (SaveBtn)
 				SaveBtn->Name("Open");
 			break;
 		}
 		case TypeSaveFile:
 		{
-			Name("Save As");
+			if (!d->Title)
+				Name("Save As");
 			SaveBtn->Name("Save As");
 			break;
 		}
@@ -1131,7 +1133,8 @@ void LFileSelectDlg::OnCreate()
 		{
 			SaveBtn->Enabled(true);
 			FileNameEdit->Enabled(false);
-			Name("Open Folder");
+			if (!d->Title)
+				Name("Open Folder");
 			SaveBtn->Name("Open");
 			break;
 		}
@@ -2365,6 +2368,8 @@ void LFileSelect::Open(SelectCb Cb)
 {
 	auto Dlg = new LFileSelectDlg(d);
 	d->Type = TypeOpenFile;
+	if (d->Title)
+		Dlg->Name(d->Title);
 	Dlg->DoModal([this, cb=std::move(Cb)](auto dlg, auto code)
 	{
 		LAutoPtr<LFileSelect> select(this);
@@ -2377,6 +2382,8 @@ void LFileSelect::OpenFolder(SelectCb Cb)
 {
 	auto Dlg = new LFileSelectDlg(d);
 	d->Type = TypeOpenFolder;
+	if (d->Title)
+		Dlg->Name(d->Title);
 	Dlg->DoModal([this, cb=std::move(Cb)](auto d, auto code)
 	{
 		LAutoPtr<LFileSelect> select(this);
@@ -2389,6 +2396,8 @@ void LFileSelect::Save(SelectCb Cb)
 {
 	auto *Dlg = new LFileSelectDlg(d);	
 	d->Type = TypeSaveFile;
+	if (d->Title)
+		Dlg->Name(d->Title);
 	Dlg->DoModal([this, cb=std::move(Cb)](auto dlg, auto code)
 	{
 		LAutoPtr<LFileSelect> select(this);

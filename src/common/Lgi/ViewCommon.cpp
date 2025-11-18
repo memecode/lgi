@@ -967,9 +967,12 @@ void LView::SetParent(LViewI *p)
 
 void LView::SendNotify(LNotification note)
 {
-	LViewI *n = d->Notify ? d->Notify : d->Parent;
+	auto n = d->Notify ? d->Notify : d->Parent;
 	if (!n)
+	{
+		LgiTrace("%s:%i - %s::SendNotify no parent OR notify?\n", _FL, GetClass());
 		return;
+	}
 
 	if (
 		#if LGI_VIEW_HANDLE && !defined(HAIKU)
@@ -977,6 +980,8 @@ void LView::SendNotify(LNotification note)
 		#endif
 		InThread())
 	{
+		// if (GetId() == 506)
+		printf("%s::call onnote %i\n", GetClass(), GetId());
 		n->OnNotify(this, note);
 	}
 	else
@@ -993,7 +998,7 @@ void LView::SendNotify(LNotification note)
 			SetId(GENERATE_ID);
 		}
 			
-        LAssert(GetId() > 0); // We must have a valid ctrl ID at this point, otherwise
+        LAssert(GetId() > 0);	// We must have a valid ctrl ID at this point, otherwise
 								// the receiver will never be able to find our object.
             
         // printf("Post M_CHANGE %i %i\n", GetId(), Data);

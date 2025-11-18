@@ -82,19 +82,21 @@ public:
 	LCursor GetCursor(int x, int y) { return LCUR_Ibeam; }
 
 	#if WINNATIVE
-	LMessage::Result OnEvent(LMessage *Msg);
-	void OnFocus(bool f);
-	const char *Name() override;
-	bool Name(const char *s) override;
-	const char16 *NameW() override;
-	bool NameW(const char16 *s) override;
+		LMessage::Result OnEvent(LMessage *Msg);
+		void OnFocus(bool f);
+		const char *Name() override;
+		bool Name(const char *s) override;
+		const char16 *NameW() override;
+		bool NameW(const char16 *s) override;
 	#else
-	bool Paste();
-	void OnEnter(LKey &k);
-	void SendNotify(LNotification note);
-	bool OnLayout(LViewLayoutInfo &Inf) { return false; }
-    void OnPaint(LSurface *pDC);
-	bool SetScrollBars(bool x, bool y);
+		bool Paste();
+		void OnEnter(LKey &k);
+		bool OnLayout(LViewLayoutInfo &Inf) { return false; }
+	    void OnPaint(LSurface *pDC);
+		bool SetScrollBars(bool x, bool y);
+
+		// Why was this needed?
+		// void SendNotify(LNotification note);
 	#endif
 };
 

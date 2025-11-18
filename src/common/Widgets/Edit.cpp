@@ -66,6 +66,7 @@ void LEdit::SetEmptyText(const char *EmptyText)
 	Invalidate();
 }
 
+/* I don't see the point of this?
 void LEdit::SendNotify(LNotification n)
 {
 	if (n.Type == LNotifyDocChanged)
@@ -74,6 +75,7 @@ void LEdit::SendNotify(LNotification n)
 			 n.Type == LNotifyEscapeKey)
 		return LTextView3::SendNotify(n);
 }
+*/
 
 LRange LEdit::GetSelectionRange()
 {

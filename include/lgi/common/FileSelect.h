@@ -75,7 +75,7 @@ class FILE_SELECT_CLS LFileSelect :
 public:
 	typedef std::function<void(LAutoPtr<LFileSelect>, bool)> SelectCb;
 
-	LFileSelect(LViewI *Window = NULL, IFileSelectSystem *System = NULL);
+	LFileSelect(LViewI *Window = nullptr, IFileSelectSystem *System = nullptr);
 	~LFileSelect();
 
 	// Properties
