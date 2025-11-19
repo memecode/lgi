@@ -1054,16 +1054,18 @@ bool DndPointMap(LViewI *&v, LPoint &p, LDragDropTarget *&t, LWindow *Wnd, LPoin
 {
 	LRect cli = Wnd->GetClient();
 	t = NULL;
-	v = Wnd->ViewFromPoint(LPoint(x, y) - cli.TopLeft());
+	v = Wnd->ViewFromPoint(pt - cli.TopLeft());
 	if (!v)
 	{
-		LgiTrace("%s:%i - <no view> @ %i,%i\n", _FL, x, y);
+		LgiTrace("%s:%i - <no view> @ %i,%i\n", _FL, pt.GetStr().Get());
 		return false;
 	}
 
+	/*
 	v->WindowVirtualOffset(&p);
 	p.x = x - p.x;
 	p.y = y - p.y;
+	*/
 
 	for (LViewI *view = v; !t && view; view = view->GetParent())
 		t = view->DropTarget();

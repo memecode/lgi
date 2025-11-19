@@ -69,6 +69,7 @@ Source =	../src/common/Lgi/StructuredLog.cpp \
 			../src/common/Text/XmlTreeUi.cpp \
 			../src/common/Lgi/LgiMain.cpp \
 			../src/common/Net/Http.cpp \
+			../src/common/Net/Ssh.cpp \
 			../src/common/Net/OpenSSLSocket.cpp \
 			../src/common/Text/RemoveAnsi.cpp
 

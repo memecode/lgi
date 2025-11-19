@@ -21,7 +21,7 @@
 #include "AppPriv.h"
 #include <Cursor.h>
 
-#define DEBUG_MOUSE_EVENTS			0
+#define DEBUG_MOUSE_EVENTS			1
 
 #if 0
 #define DEBUG_INVALIDATE(...)		printf(__VA_ARGS__)
