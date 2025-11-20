@@ -3865,8 +3865,7 @@ void LTextView3::OnMouseClick(LMouse &m)
 			{
 				SetCaret(Hit, m.Shift());
 
-				LStyle *s = HitStyle(Hit);
-				if (s)
+				if (auto s = HitStyle(Hit))
 					Processed = OnStyleClick(s, &m);
 			}
 

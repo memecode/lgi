@@ -640,6 +640,21 @@ public:
 			return p;
 		}
 		
+		LFile::Path HomeRelative()
+		{
+			LFile::Path home(LSP_HOME);
+			LFile::Path out = *this;
+			if (out.Slice(0, home.Length()) == home)
+			{
+				// Replace the first elements with '~'
+				out[0] = "~";
+				for (int i=0; i<home.Length()-1; i++)
+					out.DeleteAt(1, true);
+			}
+			
+			return out;
+		}
+		
 		bool FixCase();
 		State Exists();
 		bool IsFile() { return Exists() == TypeFile; }

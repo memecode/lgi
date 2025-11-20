@@ -442,54 +442,49 @@ bool LDetectLinks(LArray<LLinkInfo> &Links, T *Text, ssize_t TextCharLen = -1)
 		TextCharLen = Strlen(Text);
 
 	T *End = Text + TextCharLen;
-	static T Http[] = {'h', 't', 't', 'p', ':', '/', '/', 0 };
-	static T Https[] = {'h', 't', 't', 'p', 's', ':', '/', '/', 0};
-
 	for (int64 i=0; i<TextCharLen; i++)
 	{
 		switch (Text[i])
 		{
-			case 'h':
-			case 'H':
+			case ':':
 			{
-				int64 Remaining = TextCharLen - i;
-				if
-				(
-					Remaining >= 7
-					&&
-					(
-						Strnicmp(Text+i, Http, 6) == 0 ||
-						Strnicmp(Text+i, Https, 7) == 0
-					)
-				)
+				auto Remaining = TextCharLen - i;
+				if (Remaining > 2 &&
+					Text[i+1] == '/' &&
+					Text[i+2] == '/')
 				{
+					// find start, seek back over the protocol
+					auto start = Text + i;
+					while (start > Text &&
+						IsAlpha(start[-1]))
+						start--;
+					
 					// find end
-					T *s = Text + i;
-					T *e = s + 6;
-					for ( ; e < End && UrlChar(*e); e++)
+					auto end = Text + i + 2;
+					for ( ; end < End && UrlChar(*end); end++)
 						;
 					
 					while
 					(
-						e > s &&
+						end > start &&
 						!
 						(
-							IsAlpha(e[-1]) ||
-							IsDigit(e[-1]) ||
-							e[-1] == '/'
+							IsAlpha(end[-1]) ||
+							IsDigit(end[-1]) ||
+							end[-1] == '/'
 						)
 					)
-						e--;
+						end--;
 
-					Links.New().Set(s - Text, e - s, false);
-					i = e - Text;
+					Links.New().Set(start - Text, end - start, false);
+					i = end - Text;
 				}
 				break;
 			}
 			case '@':
 			{
 				// find start
-				T *s = Text + (MAX(i, 1) - 1);
+				auto s = Text + (MAX(i, 1) - 1);
 				
 				for ( ; s > Text && EmailChar(*s); s--)
 					;
@@ -524,6 +519,6 @@ bool LDetectLinks(LArray<LLinkInfo> &Links, T *Text, ssize_t TextCharLen = -1)
 		}
 	}
 
-	return true;
+	return Links.Length() > 0;
 }
 
