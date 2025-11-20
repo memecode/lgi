@@ -46,8 +46,23 @@ Known bugs:
 #include "lgi/common/DocView.h"
 #include "ParserCommon.h"
 
-// #define DEBUG_FILE		"server.cpp"
+#define DEBUG_FILE		"Array.h"
 // #define DEBUG_LINE		17
+
+static char16 StrClass[]		= {'c', 'l', 'a', 's', 's', 0};
+static char16 StrStruct[]		= {'s', 't', 'r', 'u', 'c', 't', 0};
+static char16 StrEnum[]		    = {'e', 'n', 'u', 'm', 0};
+static char16 StrOpenBracket[]	= {'{', 0};
+static char16 StrColon[]		= {':', 0};
+static char16 StrSemiColon[]	= {';', 0};
+static char16 StrDefine[]		= {'d', 'e', 'f', 'i', 'n', 'e', 0};
+static char16 StrExtern[]		= {'e', 'x', 't', 'e', 'r', 'n', 0};
+static char16 StrTypedef[]		= {'t', 'y', 'p', 'e', 'd', 'e', 'f', 0};
+static char16 StrConst[]		= {'c', 'o', 'n', 's', 't', 0};
+static char16 StrConstExpr[]	= {'c', 'o', 'n', 's', 't', 'e', 'x', 'p', 'r', 0};
+static char16 StrC[]			= {'\"', 'C', '\"', 0};
+static char16 StrHash[]			= {'#', 0};
+static char16 StrTemplate[]		= {'t', 'e', 'm', 'p', 'l', 'a', 't', 'e', 0};
 
 const char *TypeToStr(DefnType t)
 {
@@ -149,7 +164,7 @@ bool SeekPtr(char16 *&s, char16 *end, int &Line)
 {
 	if (s > end)
 	{
-		LAssert(0);
+		LAssert(!"seek pointer is after the end of buffer");
 		return false;
 	}
 
@@ -163,7 +178,7 @@ bool SeekPtr(char16 *&s, char16 *end, int &Line)
 	return true;
 }
 
-DefnType GuessDefnType(char16 *def, bool debug)
+DefnType GuessDefnType(LString &def, bool debug)
 {
 	// In the context of a class member, this could be a variable defn:
 	//
@@ -178,7 +193,7 @@ DefnType GuessDefnType(char16 *def, bool debug)
 
 	int roundDepth = 0;
 	int equalsAtZero = 0;
-	for (auto s = def; *s; s++)
+	for (auto s = def.Get(); *s; s++)
 	{
 		if (*s == '(')
 			roundDepth++;
@@ -191,12 +206,147 @@ DefnType GuessDefnType(char16 *def, bool debug)
 		}
 	}
 
-	/*
-	if (equalsAtZero && debug)
-		printf("equalsAtZero: %S\n", def);
-	*/
+	if (def.Find("operator") >= 0)
+		return DefnFunc;
 
 	return equalsAtZero ? DefnVariable : DefnFunc;
+}
+
+template<typename A, typename B>
+bool Compare(A *a, B *b, bool debug = false)
+{
+	if (!a || !b)
+	{
+		if (debug) printf("	cmp, null param\n");
+		return false;
+	}
+	
+	while (*a && *a == *b)
+	{
+		if (debug) printf("	cmp, a:%i b:%i\n", *a, *b);
+		a++;
+		b++;
+	}
+
+	if (debug) printf("	cmp, finish a:%i b:%i\n", *a, *b);
+	return !*a && !*b;
+}
+
+struct ClassInfo
+{
+	bool isTemplate = false;
+	char16 *templateStart = nullptr;
+	char16 *templateEnd = nullptr;
+	char16 *typeName = nullptr; // 'struct', 'class' etc
+	char16 *className = nullptr;
+	char16 *body = nullptr;
+
+	LString name;
+
+	operator bool() const
+	{
+		return typeName && body && *body == '{' && name;
+	}
+};
+
+#ifdef DEBUG_FILE
+#define DEBUG_LOG(...) if (Debug) do { LgiTrace(__VA_ARGS__); } while (0)
+#else
+#define DEBUG_LOG(...)
+#endif
+
+ClassInfo ParseClassDefn(char16 *&n, const char *FileName, int &Line, LString &CurClassDecl, int LimitTo, bool Debug)
+{
+	ClassInfo c;
+
+	char16 *t;
+	LString::Array parts;
+	
+	while (n && *n)
+	{
+		char16 *startTok = n;
+		if (!(t = LexCpp(n, LexStrdup)))
+		{
+			LgiTrace("%s:%i - LexCpp failed at %s:%i.\n", _FL, FileName, Line+1);
+			break;
+		}
+
+		DEBUG_LOG("%s: t='%S' @ line %i\n", __func__, t, Line+1);
+
+		if (Compare(t, "template"))
+		{
+			c.isTemplate = true;
+			skipws(n);
+			if (*n == '<')
+			{
+				c.templateStart = n++;
+
+				// Parse over the template parameters
+				while ((t = LexCpp(n, LexStrdup)))
+				{
+					bool end = Compare(t, ">");
+					// DEBUG_LOG("%s: template tok '%S' end=%i.\n", __func__, t, end);
+					DeleteArray(t);
+					if (end)
+					{
+						c.templateEnd = n;
+						break;
+					}
+				}
+
+				// DEBUG_LOG("%s: template ended.\n", __func__);
+				if (!c.templateEnd)
+				{
+					// Error: no template end found...
+					DEBUG_LOG("%s: error: no template end found: %.32S\n", __func__, startTok);
+					break;
+				}
+			}
+			else
+			{
+				DEBUG_LOG("%s: error: no start template, n='%.20S'.\n", __func__, n);
+				break;
+			}
+		}
+		else if (Compare(t, ";") ||
+				 Compare(t, "friend"))
+		{
+			DeleteArray(t);
+			break;
+		}
+		else if (Compare(t, "LgiClass") ||
+				 Compare(t, "ScribeClass"))
+		{
+			// Ignore these...
+			DeleteArray(t);
+		}
+		else if (Compare(t, "class") ||
+				 Compare(t, "struct"))
+		{
+			c.typeName = startTok;
+		}
+		else if (Compare(t, "{"))
+		{
+			skipws(startTok);
+			c.body = startTok;
+			DeleteArray(t);
+
+			c.name = LString("").Join(parts);
+
+			DEBUG_LOG("%s: class name='%s' @ line %i\n", __func__, c.name.Get(), Line+1);
+			break;
+		}
+		else if (c.typeName)
+		{
+			parts.Add(t);
+		}
+		else
+		{
+			DeleteArray(t);
+		}
+	}
+
+	return c;
 }
 
 bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns, int LimitTo, LError &err, bool Debug)
@@ -204,20 +354,6 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 	if (!Cpp)
 		// An empty file isn't an error, but it has no symbols.
 		return true;
-
-	static char16 StrClass[]		= {'c', 'l', 'a', 's', 's', 0};
-	static char16 StrStruct[]		= {'s', 't', 'r', 'u', 'c', 't', 0};
-	static char16 StrEnum[]		    = {'e', 'n', 'u', 'm', 0};
-	static char16 StrOpenBracket[]	= {'{', 0};
-	static char16 StrColon[]		= {':', 0};
-	static char16 StrSemiColon[]	= {';', 0};
-	static char16 StrDefine[]		= {'d', 'e', 'f', 'i', 'n', 'e', 0};
-	static char16 StrExtern[]		= {'e', 'x', 't', 'e', 'r', 'n', 0};
-	static char16 StrTypedef[]		= {'t', 'y', 'p', 'e', 'd', 'e', 'f', 0};
-	static char16 StrConst[]		= {'c', 'o', 'n', 's', 't', 0};
-	static char16 StrConstExpr[]	= {'c', 'o', 'n', 's', 't', 'e', 'x', 'p', 'r', 0};
-	static char16 StrC[]			= {'\"', 'C', '\"', 0};
-	static char16 StrHash[]			= {'#', 0};
 
 	char WhiteSpace[] = " \t\r\n";
 	
@@ -230,7 +366,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 	#endif
 	int CaptureLevel = 0;
 	int InClass = false;	// true if we're in a class definition			
-	char16 *CurClassDecl = 0;
+	LString CurClassDecl;
 	bool IsEnum = 0, IsClass = false, IsStruct = false;
 	bool FnEmit = false;	// don't emit functions between a f(n) and the next '{'
 							// they are only parent class initializers
@@ -240,7 +376,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 	bool ConditionParsingErr = false;
 
 	#ifdef DEBUG_FILE
-	Debug |= FileName && stristr(FileName, DEBUG_FILE) != NULL;
+	Debug = !Stricmp(LGetLeaf(FileName), DEBUG_FILE);
 	#endif
 
 	while (s && *s)
@@ -404,6 +540,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 				if (ConditionalFirst)
 					Depth++;
 				FnEmit = false;
+				LastDecl = s;
 				#ifdef DEBUG_FILE
 				if (Debug)
 					LgiTrace("%s:%i - FnEmit=%i Depth=%i @ line %i\n", _FL, FnEmit, Depth, Line+1);
@@ -476,7 +613,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 					if (Debug)
 						LgiTrace("%s:%i - CaptureLevel=%i Depth=%i @ line %i\n", _FL, CaptureLevel, Depth, Line+1);
 					#endif
-					DeleteArray(CurClassDecl);
+					CurClassDecl.Empty();
 				}
 				break;
 			}
@@ -526,103 +663,109 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 					char16 *End = s;
 					while (*End)
 					{
-						if (*End == '/' &&
+						if (End[0] == '/' &&
 							End[1] == '/')
 						{
-							End = Strchr(End, '\n');
-							if (!End) break;
+							if (auto nl = Strchr(End, '\n'))
+								End = nl;
+							else
+								break;
 						}
-						if (*End == '(')
+						else if (*End == '(')
 						{
 							RoundDepth++;
 						}
 						else if (*End == ')')
 						{
 							if (--RoundDepth == 0)
+							{
+								End++;
 								break;
+							}
 						}
+						else if (*End == '{' ||
+								 *End == ';')
+						{
+							break;
+						}
+
 						End++;
 					}
+
 					if (End && *End)
 					{
-						End++;
-
-						auto Buf = NewStrW(Start, End-Start);
-						if (Buf)
+						if (auto Buf = LString(Start, End-Start))
 						{
+							DEBUG_LOG("Buf='%s'\n", Buf.Get());
+
 							// remove new-lines
-							auto Out = Buf;
-							for (auto In = Buf; *In; In++)
+							auto Out = Buf.Get();
+							for (auto In = Buf.Get(); *In;)
 							{
 								if (*In == '\r' || *In == '\n' || *In == '\t' || *In == ' ')
 								{
 									*Out++ = ' ';
 									skipws(In);
-									In--;
 								}
 								else if (In[0] == '/' && In[1] == '/')
 								{
-									In = StrchrW(In, '\n');
-									if (!In) break;
+									In = Strchr(In, '\n');
+									if (!In)
+										break;
 								}
 								else
 								{
-									*Out++ = *In;
+									*Out++ = *In++;
 								}
 							}
-							*Out++ = 0;
+							Buf.Length(Out - Buf.Get());
 
+							DEBUG_LOG("	Buf='%s'\n", Buf.Get());
 							if (CurClassDecl)
 							{
-								char16 Str[1024];
-								ZeroObj(Str);
-								
-								StrncpyW(Str, Buf, CountOf(Str));
-								char16 *b = StrchrW(Str, '(');
-								if (b)
+								auto pos = Buf.Find("(");
+								if (pos >= 0)
 								{
-									// Skip whitespace between name and '('
-									while
-									(
-										b > Str
-										&&
-										strchr(WhiteSpace, b[-1])																									
-									)
+									auto opPos = Buf.Find("operator");
+									if (opPos >= 0 && opPos < pos)
 									{
-										b--;
-									}
-
-									// Skip over to the start of the name..
-									while
-									(
-										b > Str
-										&&
-										b[-1] != '*'
-										&&
-										b[-1] != '&'
-										&&
-										!strchr(WhiteSpace, b[-1])																									
-									)
-									{
-										b--;
-									}
-									
-									auto ClsLen = StrlenW(CurClassDecl);
-									auto BLen = StrlenW(b);
-									if (ClsLen + BLen + 1 > CountOf(Str))
-									{
-										LgiTrace("%s:%i - Defn too long: %i\n", _FL, ClsLen + BLen + 1);
+										pos = opPos;
 									}
 									else
 									{
-										memmove(b + ClsLen + 2, b, sizeof(*b) * (BLen+1));
-										memcpy(b, CurClassDecl, sizeof(*b) * ClsLen);
-										b += ClsLen;
-										*b++ = ':';
-										*b++ = ':';
-										DeleteArray(Buf);
-										Buf = NewStrW(Str);
+										// Skip whitespace between name and '('
+										while
+										(
+											pos > 0
+											&&
+											strchr(WhiteSpace, Buf(pos-1))
+										)
+										{
+											pos--;
+										}
+
+										// Skip over to the start of the name..
+										while
+										(
+											pos > 0
+											&&
+											Buf(pos-1) != '*'
+											&&
+											Buf(pos-1) != '&'
+											&&
+											!strchr(WhiteSpace, Buf(pos-1))
+										)
+										{
+											pos--;
+										}
 									}
+
+									// 'b' now points to the start of the function
+									// now we add 'CurClassDecl' and '::' before the function name,
+									LString before = Buf(0, pos);
+									LString after = Buf(pos, -1);
+									Buf = before + CurClassDecl + "::" + after;
+									DEBUG_LOG("	ClsBuf='%s'\n", Buf.Get());
 								}
 							}
 
@@ -639,8 +782,6 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 							)
 								Defns.New().Set(Type, FileName, Buf, Line + 1);
 
-							DeleteArray(Buf);
-							
 							while (*End && !strchr(";:{#", *End))
 								End++;
 
@@ -648,8 +789,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 
 							FnEmit = *End != ';';
 							#if 0 // def DEBUG_FILE
-							if (Debug)
-								LgiTrace("%s:%i - FnEmit=%i Depth=%i @ line %i\n", _FL, FnEmit, Depth, Line+1);
+							DEBUG_LOG("%s:%i - FnEmit=%i Depth=%i @ line %i\n", _FL, FnEmit, Depth, Line+1);
 							#endif
 						}
 					}
@@ -720,7 +860,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 							if (CurClassDecl)
 							{
 								// Class scope var?
-								auto full = LString::Fmt("%S::%S", CurClassDecl, var);
+								auto full = LString::Fmt("%s::%S", CurClassDecl.Get(), var);
 								Defns.New().Set(DefnVariable, FileName, full, Line + 1);
 							}
 							else
@@ -850,114 +990,54 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 						DefineStructClass:
 
 						// Class / Struct
-						if (Depth == 0)
+						if (Depth != CaptureLevel)
+						{
+							#ifdef DEBUG_FILE
+							if (Debug)
+								LgiTrace("%s:%i - CLASS/STRUCT defn: not capturing, CaptureLevel=%i Depth=%i @ line %i\n",
+										_FL, CaptureLevel, Depth, Line+1);
+							#endif
+						}
+						else
 						{
 							// Check if this is really a class/struct definition or just a reference
-							char16 *next = s;
-							while (*next)
-							{
-								// If we seek to the next line, check it's not a preprocessor directive.
-								if (*next == '\n')
-								{
-									next++;
-									while (*next && strchr(WhiteSpace, *next))
-										next++;
-									if (*next == '#')
-									{
-										// Skip the processor line...
-										while (*next && *next != '\n')
-											next++;
-									}
-									continue;
-								}
-								else if (strchr(";(){", *next))
-									break;
-									
-								next++;
-							}
-
-							if (*next == '{')
+							char16 *next = LastDecl;
+							auto classDef = ParseClassDefn(next, FileName, Line, CurClassDecl, LimitTo, Debug);
+							if (classDef)
 							{
 								// Full definition
 								InClass = true;
-								CaptureLevel = 1;
-								#ifdef DEBUG_FILE
-								if (Debug)
-									LgiTrace("%s:%i - CLASS/STRUCT defn: CaptureLevel=%i Depth=%i @ line %i\n", _FL, CaptureLevel, Depth, Line+1);
-								#endif
+								CaptureLevel++;
+
+								DEBUG_LOG("%s:%i - CLASS/STRUCT defn: CaptureLevel=%i Depth=%i @ line %i\n",
+										_FL, CaptureLevel, Depth, Line+1);
 								
-								char16 *n = Start, *t;
-								List<char16> Tok;
+								if (CurClassDecl)
+									CurClassDecl = CurClassDecl + "::" + classDef.name;
+								else
+									CurClassDecl = classDef.name;
 								
-								while (IsAlpha(*n))
-									n++;
-							
-								while (n && *n)
+								if (LimitTo == DefnNone || (LimitTo & DefnClass) != 0)
 								{
-									char16 *Last = n;
-									if ((t = LexCpp(n, LexStrdup)))
-									{
-										#ifdef DEBUG_FILE
-										if (Debug)
-											LgiTrace("	t='%S' @ line %i\n", t, Line+1);
-										#endif
-
-										if (StrcmpW(t, StrSemiColon) == 0)
-										{
-											DeleteArray(t);
-											break;
-										}
-										else if (StrcmpW(t, L"LgiClass") == 0  ||
-												 StrcmpW(t, L"ScribeClass") == 0)
-										{
-											// Ignore these...
-											DeleteArray(t);
-										}
-										else if (StrcmpW(t, StrHash) ||
-												 StrcmpW(t, StrOpenBracket) == 0 ||
-												 StrcmpW(t, StrColon) == 0)
-										{
-											DeleteArray(CurClassDecl);
-											if (Tok.Length() > 0)
-											{
-												CurClassDecl = *Tok.rbegin();
-												Tok.Delete(CurClassDecl);
-											}
-											else
-											{
-												CurClassDecl = t;
-												t = NULL;
-											}
-											
-											if (LimitTo == DefnNone || (LimitTo & DefnClass) != 0)
-											{
-												char16 r = *Last;
-												*Last = 0;
-												Defns.New().Set(DefnClass, FileName, CurClassDecl, Line + 1);
-												*Last = r;
-												SeekPtr(s, next, Line);
-											}
-
-											#ifdef DEBUG_FILE
-											if (Debug)
-												LgiTrace("	class='%S' @ line %i\n", CurClassDecl, Line+1);
-											#endif
-
-											DeleteArray(t);
-											break;
-										}
-										else
-										{
-											Tok.Insert(t);
-										}
-									}
-									else
-									{
-										LgiTrace("%s:%i - LexCpp failed at %s:%i.\n", _FL, FileName, Line+1);
-										break;
-									}
+									Defns.New().Set(DefnClass, FileName, CurClassDecl, Line + 1);
 								}
-								Tok.DeleteArrays();
+
+								if (s < classDef.body)
+								{
+									SeekPtr(s, classDef.body, Line);
+									DEBUG_LOG("post class s='%s'\n",
+										LString::Escape(LString(s, 20)).Get()
+										);
+								}
+								else
+								{
+									DEBUG_LOG("class bad ptr: body='%s'  s='%s'\n",
+										LString::Escape(LString(classDef.body, 20)).Get(),
+										LString::Escape(LString(s, 20)).Get()
+										);
+								}
+
+								DEBUG_LOG("	class='%s' @ line %i\n", CurClassDecl.Get(), Line+1);
 							}
 							else if (InTypedef)
 							{
@@ -988,6 +1068,17 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 									Defns.New().Set(DefnTypedef, FileName, sName, Line + 1);
 									a.DeleteArrays();
 								}
+							}
+							else
+							{
+								#if 1
+								DEBUG_LOG("%s:%i - CLASS/STRUCT no defn: type='%.5S' body='%.5S' name='%s'\n",
+											_FL,
+											classDef.typeName,
+											classDef.body,
+											classDef.name.Get());
+								// return false;
+								#endif
 							}
 						}
 					}
@@ -1047,8 +1138,6 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 		}
 	}
 	
-	DeleteArray(CurClassDecl);
-
 	if (Debug)
 	{
 		for (unsigned i=0; i<Defns.Length(); i++)

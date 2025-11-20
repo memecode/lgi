@@ -50,7 +50,9 @@ public:
 	void Set(DefnType type, const char *file, LString s, int line)
 	{
 		if (s(0) == ')')
-			printf("%s:%i - Unexpected ')'.\n", _FL);
+		{
+			// printf("%s:%i - Unexpected ')'.\n", _FL);
+		}
 		
 		Type = type;
 		File = file;
