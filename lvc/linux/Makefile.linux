@@ -32,14 +32,14 @@ ifeq ($(Build),Debug)
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I./resources \
+		-I../../../../../../usr/include/gstreamer-1.0 \
 		-I../include \
+		-I./src \
+		-I./resources \
 		-I../include/lgi/linux/Gtk \
 		-I../include/lgi/linux \
 		-I../../../../../../usr/include/libssh \
-		`pkg-config --cflags gtk+-3.0` \
-		-I../../../../../../usr/include/gstreamer-1.0 \
-		-I./src
+		`pkg-config --cflags gtk+-3.0`
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
@@ -53,9 +53,9 @@ else
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I./resources \
 		`pkg-config --cflags gtk+-3.0` \
 		-I../include \
+		-I./resources \
 		-I../../../../../../usr/include/libssh \
 		-I../include/lgi/linux \
 		-I../../../../../../usr/include/gstreamer-1.0 \
@@ -64,22 +64,22 @@ else
 endif
 
 # Dependencies
-Source =	../src/common/Widgets/ControlTree.cpp \
-			src/PatchViewer.cpp \
+Source =	../src/common/Net/Ssh.cpp \
 			src/Main.cpp \
-			src/DropDownBtn.cpp \
-			src/VcFolder.cpp \
+			src/VcCommit.cpp \
+			../src/common/Widgets/ControlTree.cpp \
+			../src/common/Text/XmlTreeUi.cpp \
+			../src/common/Lgi/LgiMain.cpp \
+			../src/common/Net/Http.cpp \
+			src/SshConnection.cpp \
+			src/BrowseUi.cpp \
 			../src/common/Net/OpenSSLSocket.cpp \
 			../src/common/Lgi/StructuredLog.cpp \
 			../src/common/Text/RemoveAnsi.cpp \
-			../src/common/Lgi/LgiMain.cpp \
-			src/VcCommit.cpp \
-			../src/common/Net/Ssh.cpp \
-			src/BrowseUi.cpp \
-			../src/common/Net/Http.cpp \
-			src/SshConnection.cpp \
-			../src/common/Text/XmlTreeUi.cpp \
-			src/VcFile.cpp
+			src/DropDownBtn.cpp \
+			src/PatchViewer.cpp \
+			src/VcFile.cpp \
+			src/VcFolder.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -421,8 +421,8 @@ cleanall :
 	+make -C "../" -f ./linux/Makefile.linux clean
 
 VPATH=$(BuildDir) \
+	./src \
 	../src/common/Widgets \
 	../src/common/Text \
-	./src \
-	../src/common/Lgi \
-	../src/common/Net
+	../src/common/Net \
+	../src/common/Lgi

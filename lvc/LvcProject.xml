@@ -3,6 +3,7 @@
 	<Node Name="Build" Type="1" Platforms="15" Id="1">
 		<Node File="./haiku/buildHaiku.py" Type="8" Platforms="15" />
 		<Node File="./haiku/Makefile.haiku" Type="9" Platforms="15" />
+		<Node File="./linux/Makefile.linux" Type="9" Platforms="15" />
 	</Node>
 	<Node Name="Headers" Type="1" Platforms="15" Id="2">
 		<Node File="./resources/resdefs.h" Type="3" Platforms="15" />
@@ -10,7 +11,6 @@
 	<Node Name="Resources" Type="1" Platforms="15" Id="3">
 		<Node File="./resources/icon32.png" Type="6" Platforms="15" />
 		<Node File="./installer-zip.py" Type="8" Platforms="15" />
-		<Node File="./linux/Makefile.linux" Type="9" Platforms="15" />
 	</Node>
 	<Node Name="Source" Type="1" Platforms="15" Id="4">
 		<Node Name="Lgi" Type="1" Platforms="15" Id="5">
@@ -69,6 +69,8 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -128,6 +130,7 @@ be</Debug>
 ssh
 be</Release>
 				</Haiku>
+				<All />
 			</Libraries>
 			<TargetType>
 				<All>Executable</All>
@@ -143,13 +146,22 @@ HAS_LIBSSH=1</Debug>
 					<Release>_GNU_SOURCE
 HAS_LIBSSH=1</Release>
 				</Haiku>
+				<All />
 			</Defines>
-			<LibraryPaths />
-			<TargetName />
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
+			<TargetName>
+				<Linux />
+			</TargetName>
 			<ApplicationIcon>
 				<Haiku>./resources/icon.hvif</Haiku>
 			</ApplicationIcon>
-			<Options />
+			<Options>
+				<All />
+				<Linux />
+			</Options>
 		</Build>
 		<Editor>
 			<TabSize>
@@ -161,13 +173,27 @@ HAS_LIBSSH=1</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
+			<ShowWhiteSpace />
+			<CommentFile />
+			<CommentFunction />
 		</Editor>
 		<Advanced>
-			<PostBuildCommands />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+			<OtherMakefileRules />
 		</Advanced>
 		<Debug>
-			<Arguments />
+			<Arguments>
+				<All />
+			</Arguments>
+			<Environment />
+			<DebugAdmin />
+			<InitialDir />
 		</Debug>
-		<Remote />
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
 	</Settings>
 </Project>

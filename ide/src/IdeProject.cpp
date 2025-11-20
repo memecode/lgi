@@ -1251,7 +1251,29 @@ public:
 
 				// Output VPATH
 				m.Print("VPATH=$(BuildDir)");
-				VPath.Sort();
+				
+				// Sort so that platform specific paths are before common.
+				// otherwise the common version of a source file may be selected over
+				// the platform specific one. E.g.
+				//		src/common/Lgi/Layout.cpp
+				//			-vs-
+				//		src/linux/Lgi/Layout.cpp
+				// Which is generally NOT what is needed.
+				VPath.Sort( [](auto a, auto b)
+					{
+						int aCommon = a->Replace("\\","/").Find("/common/") >= 0;
+						int bCommon = b->Replace("\\","/").Find("/common/") >= 0;
+						if (aCommon ^ bCommon)
+						{
+							// printf("cmp common diff: %s,%i - %s,%i\n", a->Get(), aCommon, b->Get(), bCommon);
+							return aCommon - bCommon;
+						}
+						
+						// Otherwise alphabetical?
+						// printf("cmp alpha: %s - %s\n", a->Get(), b->Get());
+						return Stricmp(b->Get(), a->Get());
+					});				
+				
 				for (int i=0; i<VPath.Length() && !IsCancelled(); i++)
 				{
 					LString p = VPath[i];
@@ -4330,7 +4352,6 @@ bool IdeProject::InProject(bool FuzzyMatch, const char *Path, bool Open, IdeDoc 
 			int NodePlatforms = Cur.value->GetPlatforms();
 			uint32_t Score = 0;
 
-			LgiTrace("node:%s\n", Cur.key);
 			if (stristr(Cur.key, Path))
 			{
 				Score += PathLen;

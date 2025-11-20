@@ -34,9 +34,9 @@ ifeq ($(Build),Debug)
 		`pkg-config --libs gtk+-3.0` \
 		`pkg-config --libs ayatana-appindicator3-0.1`
 	Inc =  \
-		-I./private/common \
 		-I./include \
 		`pkg-config --cflags gstreamer-1.0` \
+		-I./private/common \
 		-I../deps/build-x64-debug/include \
 		-I./include/lgi/linux/Gtk \
 		-I./include/lgi/linux \
@@ -58,34 +58,40 @@ else
 		`pkg-config --libs gtk+-3.0` \
 		`pkg-config --libs ayatana-appindicator3-0.1`
 	Inc =  \
-		`pkg-config --cflags gtk+-3.0` \
-		-I./private/linux \
 		-I./private/common \
 		`pkg-config --cflags ayatana-appindicator3-0.1` \
+		`pkg-config --cflags gtk+-3.0` \
 		-I./include/lgi/linux/Gtk \
 		`pkg-config --cflags gstreamer-1.0` \
 		-I../deps/build-x64-release/include \
+		-I./include/lgi/linux \
 		-I./include \
-		-I./include/lgi/linux
+		-I./private/linux
 endif
 
 # Dependencies
-Source =	src/common/General/TimeZone.cpp \
-			src/linux/Lgi/General.cpp \
+Source =	src/linux/Lgi/General.cpp \
+			src/common/Gdc2/Tools/ColourReduce.cpp \
 			src/common/Lgi/DragAndDropCommon.cpp \
-			src/linux/Lgi/Window.cpp \
+			src/common/General/TimeZone.cpp \
+			src/linux/Gtk/LgiWidget.cpp \
 			src/linux/Lgi/View.cpp \
 			src/common/General/DateTime.cpp \
-			src/common/General/Containers.cpp \
+			src/linux/General/ShowFileProp_Linux.cpp \
 			src/common/General/Properties.cpp \
-			src/common/General/FileCommon.cpp \
-			src/common/Lgi/AppCommon.cpp \
+			src/linux/Lgi/App.cpp \
 			src/common/Lgi/ViewCommon.cpp \
+			src/common/General/FileCommon.cpp \
+			src/common/General/Containers.cpp \
+			src/linux/General/File.cpp \
+			src/linux/Lgi/Window.cpp \
+			src/linux/Lgi/DragAndDrop.cpp \
+			src/common/Lgi/AppCommon.cpp \
 			src/common/Lgi/Library.cpp \
 			src/common/Lgi/WindowCommon.cpp \
 			src/linux/General/Mem.cpp \
 			src/linux/Lgi/Menu.cpp \
-			src/common/Gdc2/Tools/ColourReduce.cpp \
+			src/common/General/ExeCheck.cpp \
 			src/common/Lgi/MenuCommon.cpp \
 			src/posix/Roster.cpp \
 			src/posix/SubProcess.cpp \
@@ -108,12 +114,6 @@ Source =	src/common/General/TimeZone.cpp \
 			src/common/Lgi/TrayIcon.cpp \
 			src/common/Lgi/FileSelect.cpp \
 			src/common/Lgi/Alert.cpp \
-			src/linux/General/File.cpp \
-			src/linux/Gtk/LgiWidget.cpp \
-			src/common/General/ExeCheck.cpp \
-			src/linux/General/ShowFileProp_Linux.cpp \
-			src/linux/Lgi/App.cpp \
-			src/linux/Lgi/DragAndDrop.cpp \
 			src/common/Lgi/FindReplace.cpp \
 			src/common/Lgi/FontSelect.cpp \
 			src/common/Lgi/Input.cpp \
@@ -234,21 +234,21 @@ clean :
 	@echo Cleaned $(BuildDir)
 
 VPATH=$(BuildDir) \
-	./src/common/Skins/Gel \
-	./src/common/Lgi \
-	./src/common/General \
-	./src/linux/Lgi \
-	./src/common/Gdc2/Path \
-	./src/linux/Gtk \
-	./src/common/Resource \
 	./src/posix \
-	./src/common/Gdc2 \
-	./src/common/Gdc2/Tools \
-	./src/common/Gdc2/Font \
+	./src/linux/Lgi \
+	./src/linux/Gtk \
 	./src/linux/General \
-	./src/common/Hash/sha1 \
-	./src/common/Net \
-	./src/common/Gdc2/Filters \
 	./src/common/Widgets \
+	./src/common/Text \
+	./src/common/Skins/Gel \
+	./src/common/Resource \
+	./src/common/Net \
+	./src/common/Lgi \
+	./src/common/Hash/sha1 \
 	./src/common/Hash/md5 \
-	./src/common/Text
+	./src/common/General \
+	./src/common/Gdc2/Tools \
+	./src/common/Gdc2/Path \
+	./src/common/Gdc2/Font \
+	./src/common/Gdc2/Filters \
+	./src/common/Gdc2

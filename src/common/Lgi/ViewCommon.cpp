@@ -970,7 +970,7 @@ void LView::SendNotify(LNotification note)
 	auto n = d->Notify ? d->Notify : d->Parent;
 	if (!n)
 	{
-		LgiTrace("%s:%i - %s::SendNotify no parent OR notify?\n", _FL, GetClass());
+		// LgiTrace("%s:%i - %s::SendNotify no parent OR notify?\n", _FL, GetClass());
 		return;
 	}
 
@@ -980,8 +980,6 @@ void LView::SendNotify(LNotification note)
 		#endif
 		InThread())
 	{
-		// if (GetId() == 506)
-		printf("%s::call onnote %i\n", GetClass(), GetId());
 		n->OnNotify(this, note);
 	}
 	else

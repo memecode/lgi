@@ -737,11 +737,11 @@ LWindowUnrealize(GtkWidget *widget, LWindow *wnd)
 	// printf("%s:%i - LWindowUnrealize %s\n", _FL, wnd->GetClass());
 }
 
-bool DndPointMap(LViewI *&view, LPoint &localPt, LDragDropTarget *&t, LWindow *Wnd, LPoint mousePt)
+bool DndPointMap(LViewI *&view, LPoint &localPt, LDragDropTarget *&t, LWindow *Wnd, LPoint mousePt, int param = 0)
 {
 	LRect cli = Wnd->GetClient();
-	t = NULL;
-	view = Wnd->ViewFromPoint(mousePt - cli.TopLeft(), &localPt);
+	t = nullptr;
+	view = Wnd->ViewFromPoint(mousePt - cli.TopLeft(), &localPt, param);
 	if (!view)
 	{
 		DND_ERROR("%s:%i - <no view> @ %s\n", _FL, mousePt.GetStr().Get());
@@ -1066,7 +1066,7 @@ LWindowDragMotion(GtkWidget *widget, GdkDragContext *context, gint x, gint y, gu
 	LViewI *v = nullptr;
 	LDragDropTarget *t = nullptr;
 
-	if (!DndPointMap(v, p, t, Wnd, mousePt))
+	if (!DndPointMap(v, p, t, Wnd, mousePt, -1))
 	{
 		DND_ERROR("%s:%i - DndPointMap failed\n", _FL);
 		return false;
@@ -1661,7 +1661,7 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 			
 			if (Position.Valid())
 			{
-				printf("SerializeState setpos %s\n", Position.GetStr());
+				// printf("SerializeState setpos %s\n", Position.GetStr());
 				SetPos(Position);
 			}
 			
@@ -1687,7 +1687,7 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 
 		LWindowZoom State = GetZoom();
 		auto s = LString::Fmt("State=%i;Pos=%s", (int)State, r.GetStr());
-		printf("SerializeState store: %s, gtk=%i,%i\n", s.Get(), size.x, size.y);
+		// printf("SerializeState store: %s, gtk=%i,%i\n", s.Get(), size.x, size.y);
 		if (!Store->SetValue(FieldName, v = s))
 			return false;
 	}
@@ -1707,7 +1707,6 @@ bool LWindow::SetPos(LRect &p, bool Repaint)
 	{
 		ThreadCheck();
 		
-		printf("%s::SetPos(%s)\n", GetClass(), Pos.GetStr());
 		gtk_window_resize(Wnd, MAX(1, Pos.X()), Pos.Y());
 		gtk_window_move(Wnd, Pos.x1, Pos.y1);
 	}

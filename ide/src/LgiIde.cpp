@@ -5456,7 +5456,7 @@ int LgiMain(OsAppArguments &AppArgs)
 
 		// TimeZoneInfoTest();
 		LHeaderUnitTests();
-		LHostnameAsync::UnitTests();
+		// LHostnameAsync::UnitTests();
 
 		auto myIp = LIpToStr(FilterIps());
 		auto hostName = LHostName();

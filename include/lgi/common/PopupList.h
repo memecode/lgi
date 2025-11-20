@@ -31,25 +31,21 @@ public:
 	public:
 		T *Value;
 		
-		Item(T *val = NULL)
+		Item(T *val = nullptr)
 		{
 			Value = val;
 		}
 	};
 
 protected:
-	LList *Lst = NULL;
-	LViewI *Edit = NULL;
+	LList *Lst = nullptr;
+	LViewI *Edit = nullptr;
 	bool Registered = false;
 	PositionType PosType;
 
 	LWindow *HookWnd()
 	{
-		#if defined(LGI_CARBON)// || defined(__GTK_H__)
-		return GetWindow();
-		#else
 		return Edit->GetWindow();
-		#endif
 	}
 
 public:
@@ -211,8 +207,7 @@ public:
 				n.Type == LNotifyItemClick)
 			{
 				auto s = Lst->GetSelected();
-				Item *Sel = dynamic_cast<Item*>(s);
-				if (Sel)
+				if (auto Sel = dynamic_cast<Item*>(s))
 					OnSelect(Sel->Value);
 				else
 					OnSelect(s);

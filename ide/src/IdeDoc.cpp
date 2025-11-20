@@ -508,13 +508,21 @@ void EditTray::OnMouseClick(LMouse &m)
 class ProjMethodPopup : public LPopupList<DefnInfo>
 {
 	AppWnd *App;
-
-public:
 	LArray<DefnInfo> All;
 
+public:
 	ProjMethodPopup(AppWnd *app, LViewI *target) : LPopupList(target, PopupAbove, POPUP_WIDTH)
 	{
 		App = app;
+	}
+
+	void SetAll(LArray<DefnInfo> &arr)
+	{
+		if (Lst)
+			// list items will reference objects in 'All'
+			Lst->Empty();
+
+		All = arr;
 	}
 
 	LString ToString(DefnInfo *Obj) override
@@ -531,16 +539,14 @@ public:
 	{
 		LString InputStr = s;
 		LString::Array p = InputStr.SplitDelimit(" \t");
-		
+
 		LArray<DefnInfo*> Matching;
-		for (unsigned i=0; i<All.Length(); i++)
+		for (auto &Def: All)
 		{
-			DefnInfo *Def = &All[i];
-			
 			bool Match = true;
 			for (unsigned n=0; n<p.Length(); n++)
 			{
-				if (!stristr(Def->Name, p[n]))
+				if (!stristr(Def.Name, p[n]))
 				{
 					Match = false;
 					break;
@@ -548,7 +554,9 @@ public:
 			}
 			
 			if (Match)
-				Matching.Add(Def);
+			{
+				Matching.Add(&Def);
+			}
 		}
 		
 		return SetItems(Matching);
@@ -571,18 +579,32 @@ class ProjSymPopup : public LPopupList<FindSymResult>
 {
 	AppWnd *App;
 	IdeDoc *Doc;
-	int CommonPathLen;
-
-public:
+	int CommonPathLen = 0;
 	LArray<FindSymResult*> All;
 
+public:
 	ProjSymPopup(AppWnd *app, IdeDoc *doc, LViewI *target) : LPopupList(target, PopupAbove, POPUP_WIDTH)
 	{
 		App = app;
 		Doc = doc;
-		CommonPathLen = 0;
 	}
 	
+	void SetResults(LArray<FindSymResult*> &arr)
+	{
+		if (Lst)
+			// Lst items reference objects in 'All'
+			Lst->Empty();
+		All.DeleteObjects();
+		All.Swap(arr); // this takes ownership of the objects...
+
+		for (auto a: All)
+			if (!a->File)
+				printf("result=%s, %s:%i\n", a->Symbol.Get(), a->File.Get(), a->Line);
+
+		FindCommonPathLength();
+		LPopupList<FindSymResult>::SetItems(All);
+	}
+
 	void FindCommonPathLength()
 	{
 		LString s;
@@ -633,6 +655,7 @@ public:
 	
 	void OnSelect(FindSymResult *Obj) override
 	{
+		printf("%s:%i - OnSel %s,%i\n", _FL, Obj->File.Get(), Obj->Line);
 		App->GotoReference(Obj->File, Obj->Line, false, true, NULL);
 	}
 	
@@ -748,13 +771,20 @@ class ProjFilePopup : public LPopupList<ProjectNode>
 	LString::Array SysInc;
 	LString::Array SysHeaders;
 	LAutoPtr<SysIncThread> Thread;
-
-public:
 	LArray<ProjectNode*> Nodes;
 
+public:
 	ProjFilePopup(AppWnd *app, LViewI *target) : LPopupList(target, PopupAbove, POPUP_WIDTH)
 	{
 		App = app;
+	}
+	
+	void SetNodes(LArray<ProjectNode*> &nodes)
+	{
+		if (Lst)
+			// Lst items point to nodes... so delete them first
+			Lst->Empty();
+		Nodes = nodes;
 	}
 
 	LString ToString(ProjectNode *Obj) override
@@ -1786,9 +1816,7 @@ LMessage::Result IdeDoc::OnEvent(LMessage *Msg)
 			if (Input != Resp->Str) // Is the input string still the same?
 				break;
 
-			d->SymPopup->All.Swap(Resp->Results);
-			d->SymPopup->FindCommonPathLength();
-			d->SymPopup->SetItems(d->SymPopup->All);
+			d->SymPopup->SetResults(Resp->Results);
 			d->SymPopup->Visible(true);
 			break;
 		}
@@ -1894,6 +1922,10 @@ int IdeDoc::OnNotify(LViewI *v, const LNotification &n)
 				d->Edit->Focus(true);
 				break;
 			}
+			else if (n.Type == LNotifyCursorChanged)
+			{
+				break;
+			}
 			
 			auto SearchStr = v->Name();
 			if (ValidStr(SearchStr))
@@ -1918,9 +1950,10 @@ int IdeDoc::OnNotify(LViewI *v, const LNotification &n)
 						{
 							// Get all the nodes
 							auto All = p->GetAllProjects();
+							LArray<ProjectNode*> nodes;
 							for (auto p: All)
 							{
-								p->GetAllNodes(d->FilePopup->Nodes);
+								p->GetAllNodes(nodes);
 								
 								if (searchSysInc.CastInt32())
 								{
@@ -1928,6 +1961,8 @@ int IdeDoc::OnNotify(LViewI *v, const LNotification &n)
 										SysInc += s.Strip().SplitDelimit("\r\n");
 								}
 							}
+							
+							d->FilePopup->SetNodes(nodes);
 						}
 					}
 				}
@@ -1967,6 +2002,10 @@ int IdeDoc::OnNotify(LViewI *v, const LNotification &n)
 				d->Edit->Focus(true);
 				break;
 			}
+			else if (n.Type == LNotifyCursorChanged)
+			{
+				break;
+			}
 			
 			auto SearchStr = v->Name();
 			if (ValidStr(SearchStr))
@@ -1976,10 +2015,11 @@ int IdeDoc::OnNotify(LViewI *v, const LNotification &n)
 				if (d->MethodPopup)
 				{
 					// Populate with symbols
-					d->MethodPopup->All.Length(0);
-
+					LArray<DefnInfo> All;
 					LError err;
-					BuildDefnList(GetFileName(), (char16*)d->Edit->NameW(), d->MethodPopup->All, DefnFunc, err);
+
+					BuildDefnList(GetFileName(), (char16*)d->Edit->NameW(), All, DefnFunc, err);
+					d->MethodPopup->SetAll(All);
 
 					// Update list elements...
 					if (d->MethodPopup->InThread())
@@ -2008,6 +2048,10 @@ int IdeDoc::OnNotify(LViewI *v, const LNotification &n)
 			{
 				printf("%s:%i Got LNotifyEscapeKey\n", _FL);
 				d->Edit->Focus(true);
+				break;
+			}
+			else if (n.Type == LNotifyCursorChanged)
+			{
 				break;
 			}
 			
