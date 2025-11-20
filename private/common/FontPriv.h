@@ -1,11 +1,11 @@
 #ifndef _GFONT_PRIV_H_
 #define _GFONT_PRIV_H_
 
-#if defined USE_CORETEXT
-#include <ApplicationServices/ApplicationServices.h>
-typedef ATSUTextMeasurement OsTextSize;
+#if MAC
+	#include <ApplicationServices/ApplicationServices.h>
+	typedef ATSUTextMeasurement OsTextSize;
 #else
-typedef double OsTextSize;
+	typedef double OsTextSize;
 #endif
 
 class LTypeFacePrivate
@@ -72,11 +72,11 @@ public:
 	#ifdef WINDOWS
 		static LAutoPtr<LLibrary> Gdi32;
 	#endif
-	#ifdef USE_CORETEXT
-		CFDictionaryRef Attributes = NULL;
+	#if MAC
+		CFDictionaryRef Attributes = nullptr;
 	#endif
 	#ifdef __GTK_H__
-		Gtk::PangoContext *PangoCtx = NULL;
+		Gtk::PangoContext *PangoCtx = nullptr;
 	#endif
 	#ifdef HAIKU
 		OsThreadId	Thread = -1;

@@ -280,7 +280,7 @@ bool StringConvert(Out *&out, ssize_t &OutWords, const In *in, ssize_t InLen)
 #define VisibleTabChar				0x2192
 #define IsTabChar(c)				(c == '\t') // || (c == VisibleTabChar && VisibleTab))
 
-#if USE_CORETEXT
+#if MAC
 	#include <CoreFoundation/CFString.h>
 
 	void LDisplayString::CreateAttrStr()
@@ -295,14 +295,16 @@ bool StringConvert(Out *&out, ssize_t &OutWords, const In *in, ssize_t InLen)
 		}
 
 		wchar_t *w = Wide;
-		CFStringRef string = CFStringCreateWithBytes(kCFAllocatorDefault, (const uint8_t*)w, StrlenW(w) * sizeof(*w), kCFStringEncodingUTF32LE, false);
+		CFStringRef string = CFStringCreateWithBytes(kCFAllocatorDefault,
+													(const uint8_t*)w,
+													StrlenW(w) * sizeof(*w),
+													kCFStringEncodingUTF32LE,
+													false);
 		if (string)
 		{
 			CFDictionaryRef attributes = Font->GetAttributes();
 			if (attributes)
 				AttrStr = CFAttributedStringCreate(kCFAllocatorDefault, string, attributes);
-			
-			// else LAssert(0);
 			
 			CFRelease(string);
 		}
@@ -334,18 +336,8 @@ LDisplayString::LDisplayString(LFont *f, const char *s, ssize_t l, LSurface *pdc
 	
 	#elif defined MAC && !defined(LGI_SDL)
 	
-		Hnd = 0;
-		#if USE_CORETEXT
-		AttrStr = NULL;
-		#endif
 		if (Font && Str && StrWords > 0)
-		{
-			#if USE_CORETEXT
-				CreateAttrStr();
-			#else
-				ATSUCreateTextLayout(&Hnd);
-			#endif
-		}
+			CreateAttrStr();
 	
 	#endif
 }
@@ -371,19 +363,8 @@ LDisplayString::LDisplayString(LFont *f, const char16 *s, ssize_t l, LSurface *p
 	
 	#elif defined MAC && !defined(LGI_SDL)
 	
-		Hnd = NULL;
-		#if USE_CORETEXT
-		AttrStr = NULL;
-		#endif
 		if (Font && Str && StrWords > 0)
-		{
-			#if USE_CORETEXT
-				CreateAttrStr();
-			#else
-				OSStatus e = ATSUCreateTextLayout(&Hnd);
-				if (e) printf("%s:%i - ATSUCreateTextLayout failed with %i.\n", _FL, (int)e);
-			#endif
-		}
+			CreateAttrStr();
 	
 	#endif
 }
@@ -422,25 +403,16 @@ LDisplayString::~LDisplayString()
 
 	#elif defined MAC
 
-		#if USE_CORETEXT
-
-			if (Hnd)
-			{
-				CFRelease(Hnd);
-				Hnd = NULL;
-			}
-			if (AttrStr)
-			{
-				CFRelease(AttrStr);
-				AttrStr = NULL;
-			}
-
-		#else
-
 		if (Hnd)
-			ATSUDisposeTextLayout(Hnd);
-
-		#endif
+		{
+			CFRelease(Hnd);
+			Hnd = nullptr;
+		}
+		if (AttrStr)
+		{
+			CFRelease(AttrStr);
+			AttrStr = nullptr;
+		}
 
 	#endif
 	
@@ -477,7 +449,7 @@ void LDisplayString::Layout(bool Debug)
 
 	LaidOut = 1;
 
-	#if defined(LGI_SDL)
+	#if LGI_SDL
 	
 		FT_Face Fnt = Font->Handle();
 		FT_Error error;
@@ -671,102 +643,28 @@ void LDisplayString::Layout(bool Debug)
 			printf("%s:%i - Height error: %i > %i\n", _FL, y, Font->GetHeight());
 		}
 	
-	#elif defined MAC && !defined(LGI_SDL)
+	#elif MAC
 	
-		#if USE_CORETEXT
+		int height = Font->GetHeight();
+		y = height;
 
-			int height = Font->GetHeight();
-			y = height;
-
-			if (AttrStr)
+		if (AttrStr)
+		{
+			LAssert(!Hnd);
+			Hnd = CTLineCreateWithAttributedString(AttrStr);
+			if (Hnd)
 			{
-				LAssert(!Hnd);
-				Hnd = CTLineCreateWithAttributedString(AttrStr);
-				if (Hnd)
-				{
-					CGFloat ascent = 0.0;
-					CGFloat descent = 0.0;
-					CGFloat leading = 0.0;
-					double width = CTLineGetTypographicBounds(Hnd, &ascent, &descent, &leading);
-					x = ceil(width);
-					xf = width * FScale;
-					yf = height * FScale;
-				}
+				CGFloat ascent = 0.0;
+				CGFloat descent = 0.0;
+				CGFloat leading = 0.0;
+				double width = CTLineGetTypographicBounds(Hnd, &ascent, &descent, &leading);
+				x = ceil(width);
+				xf = width * FScale;
+				yf = height * FScale;
 			}
+		}
 	
-		#else
-	
-			if (!Hnd || !Str)
-				return;
-
-			OSStatus e = ATSUSetTextPointerLocation(Hnd, Str, 0, len, len);
-			if (e)
-			{
-				char *a = 0;
-				StringConvert(a, NULL, Str, len);
-				printf("%s:%i - ATSUSetTextPointerLocation failed with errorcode %i (%s)\n", _FL, (int)e, a);
-				DeleteArray(a);
-				return;
-			}
-
-			e = ATSUSetRunStyle(Hnd, Font->Handle(), 0, len);
-			if (e)
-			{
-				char *a = 0;
-				StringConvert(a, NULL, Str, len);
-				printf("%s:%i - ATSUSetRunStyle failed with errorcode %i (%s)\n", _FL, (int)e, a);
-				DeleteArray(a);
-				return;
-			}
-
-			ATSUTextMeasurement fTextBefore;
-			ATSUTextMeasurement fTextAfter;
-
-			if (pDC)
-			{
-				OsPainter dc = pDC->Handle();
-				ATSUAttributeTag		Tags[1] = {kATSUCGContextTag};
-				ByteCount				Sizes[1] = {sizeof(CGContextRef)};
-				ATSUAttributeValuePtr	Values[1] = {&dc};
-
-				e = ATSUSetLayoutControls(Hnd, 1, Tags, Sizes, Values);
-				if (e) printf("%s:%i - ATSUSetLayoutControls failed (e=%i)\n", _FL, (int)e);
-			}
-			
-			ATSUTab Tabs[32];
-			for (int i=0; i<CountOf(Tabs); i++)
-			{
-				Tabs[i].tabPosition = (i * Font->TabSize()) << 16;
-				Tabs[i].tabType = kATSULeftTab;
-			}
-			e = ATSUSetTabArray(Hnd, Tabs, CountOf(Tabs));
-			if (e) printf("%s:%i - ATSUSetTabArray failed (e=%i)\n", _FL, (int)e);
-
-			e = ATSUGetUnjustifiedBounds(	Hnd,
-											kATSUFromTextBeginning,
-											kATSUToTextEnd,
-											&fTextBefore,
-											&fTextAfter,
-											&fAscent,
-											&fDescent);
-			if (e)
-			{
-				char *a = 0;
-				StringConvert(a, NULL, Str, len);
-				printf("%s:%i - ATSUGetUnjustifiedBounds failed with errorcode %i (%s)\n", _FL, (int)e, a);
-				DeleteArray(a);
-				return;
-			}
-
-			xf = fTextAfter - fTextBefore;
-			yf = fAscent + fDescent;
-			x = (xf + 0xffff) >> 16;
-			y = (yf + 0xffff) >> 16;
-			ATSUSetTransientFontMatching(Hnd, true);
-
-		#endif
-	
-	#elif defined(HAIKU)
+	#elif HAIKU
 
 		if (!Font)
 		{
@@ -1096,31 +994,27 @@ void LDisplayString::TruncateWithDots(int Width)
 	
 	#elif defined(MAC)
 	
-		#if USE_CORETEXT
-
-			if (Hnd)
+		if (Hnd)
+		{
+			/*
+			CFAttributedStringRef truncationString = CFAttributedStringCreate(NULL, CFSTR("\u2026"), Font->GetAttributes());
+			if (truncationString)
 			{
-				/*
-				CFAttributedStringRef truncationString = CFAttributedStringCreate(NULL, CFSTR("\u2026"), Font->GetAttributes());
-				if (truncationString)
+				CTLineRef truncationToken = CTLineCreateWithAttributedString(truncationString);
+				CFRelease(truncationString);
+				if (truncationToken)
 				{
-					CTLineRef truncationToken = CTLineCreateWithAttributedString(truncationString);
-					CFRelease(truncationString);
-					if (truncationToken)
+					CTLineRef TruncatedLine = CTLineCreateTruncatedLine(Hnd, Width, kCTLineTruncationEnd, truncationToken);
+					CFRelease(truncationToken);
+					if (TruncatedLine)
 					{
-						CTLineRef TruncatedLine = CTLineCreateTruncatedLine(Hnd, Width, kCTLineTruncationEnd, truncationToken);
-						CFRelease(truncationToken);
-						if (TruncatedLine)
-						{
-							CFRelease(Hnd);
-							Hnd = TruncatedLine;
-						}
+						CFRelease(Hnd);
+						Hnd = TruncatedLine;
 					}
 				}
-				 */
 			}
-	
-		#endif
+			*/
+		}
 	
 	#endif
 }
@@ -1198,40 +1092,27 @@ ssize_t LDisplayString::CharAt(int Px, LPxToIndexType Type)
 
 		if (Hnd && Str)
 		{
-			
-			#if USE_CORETEXT
-
-				CGPoint pos = { (CGFloat)Px, 1.0f };
-				CFIndex utf16 = CTLineGetStringIndexForPosition(Hnd, pos);
-			
-				// 'utf16' is in UTF-16, and the API needs to return a UTF-32 index...
-				// So convert between the 2 here...
-				LAssert(Str != NULL);
-				int utf32 = 0;
-				for (int i=0; Str[i] && i<utf16;)
+			CGPoint pos = { (CGFloat)Px, 1.0f };
+			CFIndex utf16 = CTLineGetStringIndexForPosition(Hnd, pos);
+		
+			// 'utf16' is in UTF-16, and the API needs to return a UTF-32 index...
+			// So convert between the 2 here...
+			LAssert(Str != NULL);
+			int utf32 = 0;
+			for (int i=0; Str[i] && i<utf16;)
+			{
+				if (IsUtf16_Lead(Str[i]))
 				{
-					if (IsUtf16_Lead(Str[i]))
-					{
-						if (!Str[i+1])
-							break;
-						i += 2;
-					}
-					else i++;
-					utf32++;
+					if (!Str[i+1])
+						break;
+					i += 2;
 				}
-			
-				// printf("utf=%i,%i\n", (int)utf16, utf32);
-				return utf32;
-			
-			#else
-
-				UniCharArrayOffset Off = 0;
-				Boolean IsLeading;
-				OSStatus e = ATSUPositionToOffset(Hnd, FloatToFixed(Px), FloatToFixed(y / 2), &Off, &IsLeading, &Off2);
-				if (e) printf("%s:%i - ATSUPositionToOffset failed with %i, CharAt(%i) x=%i len=%i\n", _FL, (int)e, Px, x, len);
-				else Status = Off;
-
-			#endif
+				else i++;
+				utf32++;
+			}
+		
+			// printf("utf=%i,%i\n", (int)utf16, utf32);
+			return utf32;
 		}
 	
 	#else // This case is for Win32 and Haiku.
@@ -2391,7 +2272,11 @@ void LDisplayString::FDraw(LSurface *pDC, int fx, int fy, LRect *frc, bool Debug
 		
 		cairo_restore(cr);
 	
-	#elif defined MAC && !defined(LGI_SDL)
+	#elif LGI_SDL
+	
+		#error "impl me?"
+	
+	#elif MAC
 
 		int Ox = 0, Oy = 0;
 		int px = fx >> FShift;
@@ -2423,135 +2308,43 @@ void LDisplayString::FDraw(LSurface *pDC, int fx, int fy, LRect *frc, bool Debug
 		
 		if (Hnd && pDC && StrWords > 0)
 		{
-			OsPainter				dc = pDC->Handle();
+			auto dc = pDC->Handle();
+			auto y = pDC->Y() - py + Oy;
 
-			#if USE_CORETEXT
-
-				int y = (pDC->Y() - py + Oy);
-
+			CGContextSaveGState(dc);
+			pDC->Colour(Font->Fore());
+		
+			if (pDC->IsScreen())
+			{
+				if (frc)
+				{
+					CGRect rect = rc;
+					rect.size.width += 1.0;
+					rect.size.height += 1.0;
+					CGContextClipToRect(dc, rect);
+				}
+				CGContextTranslateCTM(dc, 0, pDC->Y()-1);
+				CGContextScaleCTM(dc, 1.0, -1.0);
+			}
+			else if (frc)
+			{
 				CGContextSaveGState(dc);
-				pDC->Colour(Font->Fore());
-			
-				if (pDC->IsScreen())
-				{
-					if (frc)
-					{
-						CGRect rect = rc;
-						rect.size.width += 1.0;
-						rect.size.height += 1.0;
-						CGContextClipToRect(dc, rect);
-					}
-					CGContextTranslateCTM(dc, 0, pDC->Y()-1);
-					CGContextScaleCTM(dc, 1.0, -1.0);
-				}
-				else
-				{
-					if (frc)
-					{
-						CGContextSaveGState(dc);
-						
-						CGRect rect = rc;
-						rect.origin.x -= Ox;
-						rect.origin.y = pDC->Y() - rect.origin.y + Oy - rect.size.height;
-						rect.size.width += 1.0;
-						rect.size.height += 1.0;
-						CGContextClipToRect(dc, rect);
-					}
-				}
+				
+				CGRect rect = rc;
+				rect.origin.x -= Ox;
+				rect.origin.y = pDC->Y() - rect.origin.y + Oy - rect.size.height;
+				rect.size.width += 1.0;
+				rect.size.height += 1.0;
+				CGContextClipToRect(dc, rect);
+			}
 
-				CGFloat Tx = (CGFloat)fx / FScale - Ox;
-				CGFloat Ty = (CGFloat)y - Font->Ascent();
-				CGContextSetTextPosition(dc, Tx, Ty);
+			auto Tx = (CGFloat)fx / FScale - Ox;
+			auto Ty = (CGFloat)y - Font->Ascent();
+			CGContextSetTextPosition(dc, Tx, Ty);
 
-				CTLineDraw(Hnd, dc);
+			CTLineDraw(Hnd, dc);
 
-				CGContextRestoreGState(dc);
-
-			#else
-
-				ATSUAttributeTag		Tags[1] = {kATSUCGContextTag};
-				ByteCount				Sizes[1] = {sizeof(CGContextRef)};
-				ATSUAttributeValuePtr	Values[1] = {&dc};
-
-				e = ATSUSetLayoutControls(Hnd, 1, Tags, Sizes, Values);
-				if (e)
-				{
-					printf("%s:%i - ATSUSetLayoutControls failed (e=%i)\n", _FL, (int)e);
-				}
-				else
-				{
-					// Set style attr
-					ATSURGBAlphaColor c;
-					LColour Fore = Font->Fore();
-					c.red	= (double) Fore.r() / 255.0;
-					c.green = (double) Fore.g() / 255.0;
-					c.blue	= (double) Fore.b() / 255.0;
-					c.alpha = 1.0;
-					
-					ATSUAttributeTag Tags[]			= {kATSURGBAlphaColorTag};
-					ATSUAttributeValuePtr Values[]	= {&c};
-					ByteCount Lengths[]				= {sizeof(c)};
-					
-					e = ATSUSetAttributes(	Font->Handle(),
-											CountOf(Tags),
-											Tags,
-											Lengths,
-											Values);
-					if (e)
-					{
-						printf("%s:%i - Error setting font attr (e=%i)\n", _FL, (int)e);
-					}
-					else
-					{
-						int y = (pDC->Y() - py + Oy);
-
-						if (pDC->IsScreen())
-						{
-							CGContextSaveGState(dc);
-
-							if (frc)
-							{
-								CGRect rect = rc;
-								rect.size.width += 1.0;
-								rect.size.height += 1.0;
-								CGContextClipToRect(dc, rect);
-							}
-							CGContextTranslateCTM(dc, 0, pDC->Y()-1);
-							CGContextScaleCTM(dc, 1.0, -1.0);
-
-							e = ATSUDrawText(Hnd, kATSUFromTextBeginning, kATSUToTextEnd, fx - Long2Fix(Ox), Long2Fix(y) - fAscent);
-
-							CGContextRestoreGState(dc);
-						}
-						else
-						{
-							if (frc)
-							{
-								CGContextSaveGState(dc);
-								
-								CGRect rect = rc;
-								rect.origin.x -= Ox;
-								rect.origin.y = pDC->Y() - rect.origin.y + Oy - rect.size.height;
-								rect.size.width += 1.0;
-								rect.size.height += 1.0;
-								CGContextClipToRect(dc, rect);
-							}
-							
-							e = ATSUDrawText(Hnd, kATSUFromTextBeginning, kATSUToTextEnd, Long2Fix(px - Ox), Long2Fix(y) - fAscent);
-							
-							if (frc)
-								CGContextRestoreGState(dc);
-						}
-						if (e)
-						{
-							char *a = 0;
-							StringConvert(a, NULL, Str, len);
-							printf("%s:%i - ATSUDrawText failed with %i, len=%i, str=%.20s\n", _FL, (int)e, len, a);
-							DeleteArray(a);
-						}
-					}
-				}
-			#endif
+			CGContextRestoreGState(dc);
 		}
 	
 	#endif

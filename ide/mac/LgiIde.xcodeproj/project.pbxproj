@@ -35,6 +35,7 @@
 		345B2118217969700079E3C9 /* IdeProjectSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FE217969700079E3C9 /* IdeProjectSettings.cpp */; };
 		345B2119217969700079E3C9 /* MissingFiles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FF217969700079E3C9 /* MissingFiles.cpp */; };
 		3483413A2CC4B5E6002AF938 /* RemoteFileSelect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 348341392CC4B5E6002AF938 /* RemoteFileSelect.cpp */; };
+		349E73732ECFB36100A68615 /* Ssh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 349E73722ECFB36100A68615 /* Ssh.cpp */; };
 		34C4FD2A22FD7EB800C4BECB /* icons.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211D217969D30079E3C9 /* icons.png */; };
 		34C4FD2B22FD7EC100C4BECB /* LgiIde.lr8 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211C217969D30079E3C9 /* LgiIde.lr8 */; };
 		34C4FD2C22FD7EC700C4BECB /* mac-icon.icns in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211B217969D30079E3C9 /* mac-icon.icns */; };
@@ -152,6 +153,7 @@
 		345B211D217969D30079E3C9 /* icons.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icons.png; path = ../Resources/icons.png; sourceTree = "<group>"; };
 		348341382CC4B5E6002AF938 /* RemoteFileSelect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RemoteFileSelect.h; path = ../../include/lgi/common/RemoteFileSelect.h; sourceTree = "<group>"; };
 		348341392CC4B5E6002AF938 /* RemoteFileSelect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RemoteFileSelect.cpp; path = ../../src/common/Lgi/RemoteFileSelect.cpp; sourceTree = "<group>"; };
+		349E73722ECFB36100A68615 /* Ssh.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Ssh.cpp; sourceTree = "<group>"; };
 		34C0A79A2D35105600DC9D96 /* StructuredLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StructuredLog.h; path = ../../include/lgi/common/StructuredLog.h; sourceTree = "<group>"; };
 		34C0A79B2D35106C00DC9D96 /* StructuredIo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StructuredIo.h; path = ../../include/lgi/common/StructuredIo.h; sourceTree = "<group>"; };
 		34C75D9223A0D89A006DE6D1 /* NewProjectFromTemplate.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = NewProjectFromTemplate.cpp; path = ../src/NewProjectFromTemplate.cpp; sourceTree = "<group>"; };
@@ -325,6 +327,7 @@
 		348341372CC4B5CE002AF938 /* RemoteFileSelect */ = {
 			isa = PBXGroup;
 			children = (
+				349E73722ECFB36100A68615 /* Ssh.cpp */,
 				34D21CE12179788B003D1EA6 /* Ftp.cpp */,
 				343688C82CA7924B0009E57A /* SystemIntf.cpp */,
 				343688C72CA7924B0009E57A /* SystemIntf.h */,
@@ -469,6 +472,7 @@
 				345B2104217969700079E3C9 /* DocEditStyling.cpp in Sources */,
 				345B210B217969700079E3C9 /* SimpleCppParser.cpp in Sources */,
 				34D21CE8217978C4003D1EA6 /* LgiMain.cpp in Sources */,
+				349E73732ECFB36100A68615 /* Ssh.cpp in Sources */,
 				345B2116217969700079E3C9 /* Debugger.cpp in Sources */,
 				341C7AC821A752DC0083C9CE /* About.cpp in Sources */,
 				345B210E217969700079E3C9 /* History.cpp in Sources */,

@@ -69,16 +69,10 @@ protected:
 	
 	#elif defined(MAC)
 	
-	#if USE_CORETEXT
-		CTLineRef Hnd;
-		CFAttributedStringRef AttrStr;
+		CTLineRef Hnd = nullptr;
+		CFAttributedStringRef AttrStr = nullptr;
 		void CreateAttrStr();
-	#else
-		ATSUTextLayout Hnd;
-		ATSUTextMeasurement fAscent;
-		ATSUTextMeasurement fDescent;
-	#endif
-	
+
 	#elif defined(WINNATIVE) || defined(HAIKU)
 	
 	class CharInfo

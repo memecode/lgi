@@ -2,9 +2,9 @@
 **	FILE:			LFont.cpp
 **	AUTHOR:			Matthew Allen
 **	DATE:			5/5/97
-**	DESCRIPTION:	Gdc2 Font Support
+**	DESCRIPTION:	Lgi Font Support
 **
-**	Copyright (C) 1997-2002, Matthew Allen
+**	Copyright (C) 1997-2025, Matthew Allen
 **		fret@memecode.com
 */
 
@@ -118,12 +118,28 @@
 
 	#include <pango/pangocairo.h>
 
-#elif USE_CORETEXT
+#elif MAC
 
-	// CTFontCreateUIFontForLanguage
-	// #include <HIToolbox/HITheme.h>
 	#include <CoreText/CTFont.h>
+	#include <CoreText/CTTextTab.h>
 
+	CTParagraphStyleRef CreateParagraphStyleWithRegularTabs(double tabPx)
+	{
+		const auto tab_stops = CFArrayCreate(nullptr, nullptr, 0, nullptr);
+		
+		CTParagraphStyleSetting settings[2];
+		settings[0].spec = kCTParagraphStyleSpecifierDefaultTabInterval;
+		settings[0].valueSize = sizeof(tabPx);
+		settings[0].value = &tabPx;
+		settings[1].spec = kCTParagraphStyleSpecifierTabStops;
+		settings[1].valueSize = sizeof(CFArrayRef);
+		settings[1].value = static_cast<const void *>(&tab_stops);
+				
+		auto para = CTParagraphStyleCreate(settings, 2);
+		CFRelease(tab_stops);
+		return para;
+	}
+	
 #endif
 
 ////////////////////////////////////////////////////////////////////
@@ -303,11 +319,7 @@ bool LFont::Destroy()
 			}
 			Gtk::pango_font_description_free(d->hFont);
 		#elif defined MAC
-			#if USE_CORETEXT
 			CFRelease(d->hFont);
-			#else
-			ATSUDisposeStyle(d->hFont);
-			#endif
 		#elif defined(HAIKU)
 			DeleteObj(d->hFont);
 		#else
@@ -321,7 +333,7 @@ bool LFont::Destroy()
 	return Status;
 }
 
-#if USE_CORETEXT
+#if MAC
 CFDictionaryRef LFont::GetAttributes()
 {
 	return d->Attributes;
@@ -546,10 +558,6 @@ LSurface *LFont::GetSurface()
 {
 	return d->pSurface;
 }
-
-#ifdef WINDOWS
-
-#endif
 
 bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 {
@@ -1057,15 +1065,15 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 				values.Add(sBold.CreateStringRef());
 			}
 
-			CFDictionaryRef FontAttrD = CFDictionaryCreate(	kCFAllocatorDefault,
-															(const void**)key.AddressOf(),
-															(const void**)values.AddressOf(),
-															key.Length(),
-															&kCFTypeDictionaryKeyCallBacks,
-															&kCFTypeDictionaryValueCallBacks);
+			auto FontAttrD = CFDictionaryCreate(kCFAllocatorDefault,
+												(const void**)key.AddressOf(),
+												(const void**)values.AddressOf(),
+												key.Length(),
+												&kCFTypeDictionaryKeyCallBacks,
+												&kCFTypeDictionaryValueCallBacks);
 			if (FontAttrD)
 			{
-				CTFontDescriptorRef descriptor = CTFontDescriptorCreateWithAttributes(FontAttrD);
+				auto descriptor = CTFontDescriptorCreateWithAttributes(FontAttrD);
 				if (descriptor)
 				{
 					float PtSz = 0.0;
@@ -1125,6 +1133,13 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 				key.Add(kCTForegroundColorFromContextAttributeName);
 				values.Add(kCFBooleanTrue);
 
+				auto pstyle = CreateParagraphStyleWithRegularTabs(TabSize());
+				if (pstyle)
+				{
+					key.Add(kCTParagraphStyleAttributeName);
+					values.Add(pstyle);
+				}
+
 				if (Underline())
 				{
 					key.Add(kCTUnderlineStyleAttributeName);
@@ -1139,6 +1154,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 													&kCFTypeDictionaryKeyCallBacks,
 													&kCFTypeDictionaryValueCallBacks);
 				
+				CFRelease(pstyle);
 				return true;
 			}
 			

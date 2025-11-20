@@ -250,7 +250,7 @@ public:
 	}
 };
 
-#if defined USE_CORETEXT
+#if MAC
 
 bool MacGetSystemFont(LTypeFace &Info, CTFontUIFontType Which)
 {
@@ -458,31 +458,7 @@ bool LFontType::GetSystemFont(const char *Which)
 		
 			#elif defined MAC
 			
-
-				#ifdef USE_CORETEXT
-
 				Status = MacGetSystemFont(Info, kCTFontUIFontControlContent);
-
-				#else
-			
-				Str255 Name;
-				SInt16 Size;
-				Style St;
-				OSStatus e = GetThemeFont(	kThemeSmallSystemFont,
-											smSystemScript,
-											Name,
-											&Size,
-											&St);
-				if (e) printf("%s:%i - GetThemeFont failed with %i\n", __FILE__, __LINE__, (int)e);
-				else
-				{
-					Info.Face(p2c(Name));
-					Info.PointSize(Size);
-					Status = true;
-					
-					// printf("System=%s,%i\n", Info.Face(), Size);
-				}
-				#endif
 
 			#endif
 		}
@@ -513,29 +489,7 @@ bool LFontType::GetSystemFont(const char *Which)
 
 			#elif defined MAC && !LGI_COCOA
 			
-				#if USE_CORETEXT
-
-					Status = MacGetSystemFont(Info, kCTFontUIFontMenuItem);
-
-				#else
-
-					Str255 Name;
-					SInt16 Size;
-					Style St;
-					OSStatus e = GetThemeFont(	kThemeMenuItemFont,
-												smSystemScript,
-												Name,
-												&Size,
-												&St);
-					if (e) printf("%s:%i - GetThemeFont failed with %i\n", __FILE__, __LINE__, (int)e);
-					else
-					{
-						Info.Face(p2c(Name));
-						Info.PointSize(Size);
-						Status = true;
-					}
-			
-				#endif
+				Status = MacGetSystemFont(Info, kCTFontUIFontMenuItem);
 
 			#endif
 		}
@@ -568,29 +522,7 @@ bool LFontType::GetSystemFont(const char *Which)
 
 			#elif defined MAC && !LGI_COCOA
 			
-				#if USE_CORETEXT
-
 				Status = MacGetSystemFont(Info, kCTFontUIFontToolbar);
-			
-				#else
-			
-				Str255 Name;
-				SInt16 Size;
-				Style St;
-				OSStatus e = GetThemeFont(	kThemeToolbarFont,
-											smSystemScript,
-											Name,
-											&Size,
-											&St);
-				if (e) printf("%s:%i - GetThemeFont failed with %i\n", __FILE__, __LINE__, (int)e);
-				else
-				{
-					Info.Face(p2c(Name));
-					Info.PointSize(Size);
-					Status = true;
-				}
-			
-				#endif
 
 			#endif
 		}
@@ -621,29 +553,7 @@ bool LFontType::GetSystemFont(const char *Which)
 
 			#elif defined MAC && !LGI_COCOA
 			
-				#if USE_CORETEXT
-
 				Status = MacGetSystemFont(Info, kCTFontUIFontSystemDetail);
-			
-				#else
-			
-				Str255 Name;
-				SInt16 Size;
-				Style St;
-				OSStatus e = GetThemeFont(	kThemeToolbarFont,
-											smSystemScript,
-											Name,
-											&Size,
-											&St);
-				if (e) printf("%s:%i - GetThemeFont failed with %i\n", __FILE__, __LINE__, (int)e);
-				else
-				{
-					Info.Face(p2c(Name));
-					Info.PointSize(Size);
-					Status = true;
-				}
-			
-				#endif
 
 			#endif
 		}
@@ -683,29 +593,7 @@ bool LFontType::GetSystemFont(const char *Which)
 			
 			#elif defined MAC
 			
-				#if USE_CORETEXT
-
 				Status = MacGetSystemFont(Info, kCTFontUIFontSmallSystem);
-			
-				#else
-			
-				Str255 Name;
-				SInt16 Size;
-				Style St;
-				OSStatus e = GetThemeFont(	kThemeSmallSystemFont,
-											smSystemScript,
-											Name,
-											&Size,
-											&St);
-				if (e) printf("%s:%i - GetThemeFont failed with %i\n", __FILE__, __LINE__, (int)e);
-				else
-				{
-					Info.Face(p2c(Name));
-					Info.PointSize(Size - 2);
-					Status = true;
-				}
-			
-				#endif
 
 			#endif
 		}

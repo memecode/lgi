@@ -5129,8 +5129,7 @@ void LTextView3::OnPaint(LSurface *pDC)
 						Cur >= NextStyle->Start &&				// && we're inside the styled area
 						Cur < NextStyle->Start+NextStyle->Len)
 					{
-						LFont *Sf = NextStyle->Font ? NextStyle->Font : Font;
-						if (Sf)
+						if (auto Sf = NextStyle->Font ? NextStyle->Font : Font)
 						{
 							// draw styled text
 							if (NextStyle->Fore.IsValid())
@@ -5245,11 +5244,11 @@ void LTextView3::OnPaint(LSurface *pDC)
 					{
 						CursorPos.ZOff(1, LineY-1);
 
-						ssize_t At = Cursor-l->Start;
+						ssize_t At = Cursor - l->Start; // chars from start of line
 						
 						LDisplayString Ds(Font, MapText(Text+l->Start, At), At);
 						Ds.ShowVisibleTab(ShowWhiteSpace);
-						int CursorX = Ds.X();
+						auto CursorX = Ds.X();
 						CursorPos.Offset(rPadding.x1 + CursorX, Tr.y1);
 						
 						if (CanScrollX)

@@ -265,9 +265,9 @@ public:
 	/// Converts printable characters to unicode.
 	LAutoString ConvertToUnicode(char16 *Input, ssize_t Len = -1);
 	
-	#if USE_CORETEXT
+	#if MAC
 		CFDictionaryRef GetAttributes();
-	#elif defined(HAIKU)
+	#elif HAIKU
 		bool InThread();
 	#endif
 };

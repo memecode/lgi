@@ -65,9 +65,6 @@ public:
 #define _stricmp					strcasecmp
 #define _strnicmp					strncasecmp
 
-// Text system
-#define USE_CORETEXT				1
-
 // System defines
 #define POSIX						1
 #define LGI_COCOA					1
