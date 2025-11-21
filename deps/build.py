@@ -115,12 +115,20 @@ if clean:
 
 if installPaths:
     if platform.system() == "Linux":
+        codeFolder = os.path.abspath(os.path.join(trunkFolder, "..", ".."))
+        scribeLibs = os.path.join(codeFolder, "scribe", "libs")
+        
         paths = [
             os.path.join(depsFolder, "build-x64-debug/lib"),
             os.path.join(depsFolder, "build-x64-release/lib"),
             os.path.join(trunkFolder, "Debug"),
             os.path.join(trunkFolder, "Release"),
         ]
+
+        if os.path.isdir(scribeLibs):
+            paths.append(os.path.join(scribeLibs, "build-x64-debug/lib"))
+            paths.append(os.path.join(scribeLibs, "build-x64-release/lib"))
+
         cfgFile = "/etc/ld.so.conf.d/lgi.conf"
         try:
             conf = open(cfgFile, "w")
@@ -129,10 +137,12 @@ if installPaths:
             conf.close()
             p = subprocess.run(["ldconfig"])
             print("..paths added to:", cfgFile)
+            for p in paths:
+                print("   ", p)
         except:
             print("Add paths to:", cfgFile)
-            print("   ", os.path.join(depsFolder, "build-x64-debug/lib"))
-            print("   ", os.path.join(depsFolder, "build-x64-release/lib"))
+            for p in paths:
+                print("   ", p)
             print("Then: sudo ldconfig")
     else:
         print("Add impl for", platform.system(), "here")
