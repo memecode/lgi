@@ -327,9 +327,11 @@ public:
 	/// Set the current environment
 	virtual void SetEnv(LDocumentEnv *e)
 	{
-		if (Environment) Environment->DetachView(this);
+		if (Environment)
+			Environment->DetachView(this);
 		Environment = e;
-		if (Environment) Environment->AttachView(this);
+		if (Environment)
+			Environment->AttachView(this);
 	}
 	/// When the env has loaded a resource it can pass it to the doc control via this method.
 	/// It MUST be thread safe. Often an environment will call this function directly from
