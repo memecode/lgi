@@ -5440,6 +5440,7 @@ int LgiMain(OsAppArguments &AppArgs)
 	LApp a(AppArgs, "LgiIde");
 	if (a.IsOk())
 	{
+		LTraceGetFilePath(true);
 		LUri::UnitTests();
 
 		a.AppWnd = new AppWnd;

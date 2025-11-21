@@ -503,7 +503,7 @@ struct LTracingSupport : public LMutex
 		}
 	}
 
-	LString GetFilePath()
+	LString GetFilePath(bool clearContents = false)
 	{
 		auto Exe = LGetExeFile();
 		if (!Exe)
@@ -519,7 +519,7 @@ struct LTracingSupport : public LMutex
 			LogPath.Printf("%s.txt", path);
 		}
 		else
-			#endif
+		#endif
 		{
 			auto Dot = strrchr(Exe, '.');
 			if (Dot && !strchr(Dot, DIR_CHAR))
@@ -547,6 +547,9 @@ struct LTracingSupport : public LMutex
 			return LString("trace.txt");
 		}	
 
+		if (clearContents)
+			FileDev->Delete(LogPath, nullptr, false);
+
 		return LogPath;
 	}
 };
@@ -558,9 +561,9 @@ void LTraceSetStream(LStreamI *stream)
 	Trace.Stream = stream;
 }
 
-LString LTraceGetFilePath()
+LString LTraceGetFilePath(bool clearContents)
 {
-	return Trace.GetFilePath();
+	return Trace.GetFilePath(clearContents);
 }
 
 #if defined(WINDOWS) || defined(LGI_TRACE_TO_FILE)

@@ -49,50 +49,14 @@ Known bugs:
 #define DEBUG_FILE		"Array.h"
 // #define DEBUG_LINE		17
 
-static char16 StrClass[]		= {'c', 'l', 'a', 's', 's', 0};
-static char16 StrStruct[]		= {'s', 't', 'r', 'u', 'c', 't', 0};
-static char16 StrEnum[]		    = {'e', 'n', 'u', 'm', 0};
-static char16 StrOpenBracket[]	= {'{', 0};
-static char16 StrColon[]		= {':', 0};
-static char16 StrSemiColon[]	= {';', 0};
-static char16 StrDefine[]		= {'d', 'e', 'f', 'i', 'n', 'e', 0};
-static char16 StrExtern[]		= {'e', 'x', 't', 'e', 'r', 'n', 0};
-static char16 StrTypedef[]		= {'t', 'y', 'p', 'e', 'd', 'e', 'f', 0};
-static char16 StrConst[]		= {'c', 'o', 'n', 's', 't', 0};
-static char16 StrConstExpr[]	= {'c', 'o', 'n', 's', 't', 'e', 'x', 'p', 'r', 0};
-static char16 StrC[]			= {'\"', 'C', '\"', 0};
-static char16 StrHash[]			= {'#', 0};
-static char16 StrTemplate[]		= {'t', 'e', 'm', 'p', 'l', 'a', 't', 'e', 0};
 
-const char *TypeToStr(DefnType t)
-{
-	switch (t)
-	{
-		default:
-		case DefnNone:      return "DefnNone";
-		case DefnDefine:    return "DefnDefine";
-		case DefnFunc:      return "DefnFunc";
-		case DefnClass:     return "DefnClass";
-		case DefnEnum:      return "DefnEnum";
-		case DefnEnumValue: return "DefnEnumValue";
-		case DefnTypedef:   return "DefnTypedef";
-		case DefnVariable:  return "DefnVariable";
-	}
-}
+#ifdef DEBUG_FILE
+#define DEBUG_LOG(...) if (Debug) do { LgiTrace(__VA_ARGS__); } while (0)
+#else
+#define DEBUG_LOG(...)
+#endif
 
-bool IsFirst(LArray<int> &a, int depth)
-{
-	if (depth == 0)
-		return true;
-
-	for (int i=0; i<depth; i++)
-		if (a[i] > 1)
-			return false;
-
-	return true;
-}
-
-bool IsFuncNameChar(char c)
+static bool IsFuncNameChar(char c)
 {
 	return	strchr("_:=~[]<>-+", c) ||
 			IsAlpha(c) ||
@@ -160,213 +124,53 @@ bool ParseFunction(LRange &Return, LRange &Name, LRange &Args, const char *Defn)
 	return true;
 }
 
-bool SeekPtr(char16 *&s, char16 *end, int &Line)
+struct CppContext
 {
-	if (s > end)
-	{
-		LAssert(!"seek pointer is after the end of buffer");
-		return false;
-	}
+	constexpr static char16 StrClass[]			= {'c', 'l', 'a', 's', 's', 0};
+	constexpr static char16 StrStruct[]			= {'s', 't', 'r', 'u', 'c', 't', 0};
+	constexpr static char16 StrEnum[]		    = {'e', 'n', 'u', 'm', 0};
+	constexpr static char16 StrOpenBracket[]	= {'{', 0};
+	constexpr static char16 StrColon[]			= {':', 0};
+	constexpr static char16 StrSemiColon[]		= {';', 0};
+	constexpr static char16 StrDefine[]			= {'d', 'e', 'f', 'i', 'n', 'e', 0};
+	constexpr static char16 StrTypedef[]		= {'t', 'y', 'p', 'e', 'd', 'e', 'f', 0};
+	constexpr static char16 StrHash[]			= {'#', 0};
+	constexpr static char16 StrTemplate[]		= {'t', 'e', 'm', 'p', 'l', 'a', 't', 'e', 0};
+	constexpr static const char WhiteSpace[]	= " \t\r\n";
 
-	while (s < end)
-	{
-		if (*s == '\n')
-			Line++;
-		s++;
-	}
-
-	return true;
-}
-
-DefnType GuessDefnType(LString &def, bool debug)
-{
-	// In the context of a class member, this could be a variable defn:
-	//
-	//		bool myVar = true;
-	//		bool myVar = someFn();
-	//
-	// or a function defn:
-	//
-	//		bool myFunction(int someArg = 10);
-	//
-	// Try to guess which it is:
-
-	int roundDepth = 0;
-	int equalsAtZero = 0;
-	for (auto s = def.Get(); *s; s++)
-	{
-		if (*s == '(')
-			roundDepth++;
-		else if (*s == ')')
-			roundDepth--;
-		else if (*s == '=')
-		{
-			if (roundDepth == 0)
-				equalsAtZero++;
-		}
-	}
-
-	if (def.Find("operator") >= 0)
-		return DefnFunc;
-
-	return equalsAtZero ? DefnVariable : DefnFunc;
-}
-
-template<typename A, typename B>
-bool Compare(A *a, B *b, bool debug = false)
-{
-	if (!a || !b)
-	{
-		if (debug) printf("	cmp, null param\n");
-		return false;
-	}
-	
-	while (*a && *a == *b)
-	{
-		if (debug) printf("	cmp, a:%i b:%i\n", *a, *b);
-		a++;
-		b++;
-	}
-
-	if (debug) printf("	cmp, finish a:%i b:%i\n", *a, *b);
-	return !*a && !*b;
-}
-
-struct ClassInfo
-{
-	bool isTemplate = false;
-	char16 *templateStart = nullptr;
-	char16 *templateEnd = nullptr;
-	char16 *typeName = nullptr; // 'struct', 'class' etc
-	char16 *className = nullptr;
-	char16 *body = nullptr;
-
-	LString name;
-
-	operator bool() const
-	{
-		return typeName && body && *body == '{' && name;
-	}
-};
-
-#ifdef DEBUG_FILE
-#define DEBUG_LOG(...) if (Debug) do { LgiTrace(__VA_ARGS__); } while (0)
-#else
-#define DEBUG_LOG(...)
-#endif
-
-ClassInfo ParseClassDefn(char16 *&n, const char *FileName, int &Line, LString &CurClassDecl, int LimitTo, bool Debug)
-{
-	ClassInfo c;
-
-	char16 *t;
-	LString::Array parts;
-	
-	while (n && *n)
-	{
-		char16 *startTok = n;
-		if (!(t = LexCpp(n, LexStrdup)))
-		{
-			LgiTrace("%s:%i - LexCpp failed at %s:%i.\n", _FL, FileName, Line+1);
-			break;
-		}
-
-		DEBUG_LOG("%s: t='%S' @ line %i\n", __func__, t, Line+1);
-
-		if (Compare(t, "template"))
-		{
-			c.isTemplate = true;
-			skipws(n);
-			if (*n == '<')
-			{
-				c.templateStart = n++;
-
-				// Parse over the template parameters
-				while ((t = LexCpp(n, LexStrdup)))
-				{
-					bool end = Compare(t, ">");
-					// DEBUG_LOG("%s: template tok '%S' end=%i.\n", __func__, t, end);
-					DeleteArray(t);
-					if (end)
-					{
-						c.templateEnd = n;
-						break;
-					}
-				}
-
-				// DEBUG_LOG("%s: template ended.\n", __func__);
-				if (!c.templateEnd)
-				{
-					// Error: no template end found...
-					DEBUG_LOG("%s: error: no template end found: %.32S\n", __func__, startTok);
-					break;
-				}
-			}
-			else
-			{
-				DEBUG_LOG("%s: error: no start template, n='%.20S'.\n", __func__, n);
-				break;
-			}
-		}
-		else if (Compare(t, ";") ||
-				 Compare(t, "friend"))
-		{
-			DeleteArray(t);
-			break;
-		}
-		else if (Compare(t, "LgiClass") ||
-				 Compare(t, "ScribeClass"))
-		{
-			// Ignore these...
-			DeleteArray(t);
-		}
-		else if (Compare(t, "class") ||
-				 Compare(t, "struct"))
-		{
-			c.typeName = startTok;
-		}
-		else if (Compare(t, "{"))
-		{
-			skipws(startTok);
-			c.body = startTok;
-			DeleteArray(t);
-
-			c.name = LString("").Join(parts);
-
-			DEBUG_LOG("%s: class name='%s' @ line %i\n", __func__, c.name.Get(), Line+1);
-			break;
-		}
-		else if (c.typeName)
-		{
-			parts.Add(t);
-		}
-		else
-		{
-			DeleteArray(t);
-		}
-	}
-
-	return c;
-}
-
-bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns, int LimitTo, LError &err, bool Debug)
-{
-	if (!Cpp)
-		// An empty file isn't an error, but it has no symbols.
-		return true;
-
-	char WhiteSpace[] = " \t\r\n";
-	
-	char16 *s = Cpp;
-	char16 *LastDecl = s;
-	int Depth = 0;
-	int Line = 0;
+	const char *FileName = nullptr;
+	int Line = DefnNone;
+	int LimitTo;
+	bool Debug = false;
+	char16 *LastDecl = nullptr;
 	#ifdef DEBUG_LINE
 	int PrevLine = 0;
 	#endif
-	int CaptureLevel = 0;
-	int InClass = false;	// true if we're in a class definition			
-	LString CurClassDecl;
+
+	struct TScope
+	{
+		DefnType type;
+		int line;
+		char16 *source;
+
+		TScope()
+			: type(DefnNone)
+			, line(0)
+			, source(nullptr)
+		{}
+
+		TScope(DefnType t, int l, char16 *s)
+			: type(t)
+			, line(l)
+			, source(s)
+		{}
+	};
+
+	LArray<TScope> Scopes;
+
+	// Array of classes, from outer to inner scope
+	LString::Array ClassNames;
+
 	bool IsEnum = 0, IsClass = false, IsStruct = false;
 	bool FnEmit = false;	// don't emit functions between a f(n) and the next '{'
 							// they are only parent class initializers
@@ -375,777 +179,1066 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 	bool ConditionalFirst = true;
 	bool ConditionParsingErr = false;
 
-	#ifdef DEBUG_FILE
-	Debug = !Stricmp(LGetLeaf(FileName), DEBUG_FILE);
-	#endif
-
-	while (s && *s)
+	// Get the full class name, including parent classes
+	LString curClass()
 	{
-		// skip ws
-		while (*s && strchr(" \t\r", *s)) s++;
-		
-		#ifdef DEBUG_LINE
-		if (Debug)
+		return LString("::").Join(ClassNames);
+	};
+
+	// Print a list of scopes for debugging
+	LString curScope()
+	{
+		LString::Array a;
+		for (auto &s: Scopes)
+			a.New().Printf("%s:%i", TypeToStr(s.type), s.line);
+		return LString::Fmt("%i(%s)", (int)Scopes.Length(), LString(">").Join(a).Get());
+	};
+
+	DefnType lastScope()
+	{
+		if (Scopes.Length())
+			return Scopes.Last().type;
+		return DefnNone;
+	}
+
+	const char *TypeToStr(DefnType t)
+	{
+		switch (t)
 		{
-			if (Line >= DEBUG_LINE - 1)
+			default:
+			case DefnNone:      return "DefnNone";
+			case DefnDefine:    return "DefnDefine";
+			case DefnFunc:      return "DefnFunc";
+			case DefnClass:     return "DefnClass";
+			case DefnEnum:      return "DefnEnum";
+			case DefnEnumValue: return "DefnEnumValue";
+			case DefnTypedef:   return "DefnTypedef";
+			case DefnVariable:  return "DefnVariable";
+			case DefnScope:     return "DefnScope";
+			case DefnExternC:   return "DefnExternC";
+		}
+	}
+
+	bool IsFirst(LArray<int> &a, int depth)
+	{
+		if (depth == 0)
+			return true;
+
+		for (int i=0; i<depth; i++)
+			if (a[i] > 1)
+				return false;
+
+		return true;
+	}
+
+	bool SeekPtr(char16 *&s, char16 *end, int &Line)
+	{
+		if (s > end)
+		{
+			LAssert(!"seek pointer is after the end of buffer");
+			return false;
+		}
+
+		while (s < end)
+		{
+			if (*s == '\n')
+				Line++;
+			s++;
+		}
+
+		return true;
+	}
+
+	DefnType GuessDefnType(LString &def, bool debug)
+	{
+		// In the context of a class member, this could be a variable defn:
+		//
+		//		bool myVar = true;
+		//		bool myVar = someFn();
+		//
+		// or a function defn:
+		//
+		//		bool myFunction(int someArg = 10);
+		//
+		// Try to guess which it is:
+
+		int roundDepth = 0;
+		int equalsAtZero = 0;
+		for (auto s = def.Get(); *s; s++)
+		{
+			if (*s == '(')
+				roundDepth++;
+			else if (*s == ')')
+				roundDepth--;
+			else if (*s == '=')
 			{
-				int asd=0;
-			}
-			else if (PrevLine != Line)
-			{
-				PrevLine = Line;
-				// LgiTrace("%s:%i '%.10S'\n", FileName, Line + 1, s);
+				if (roundDepth == 0)
+					equalsAtZero++;
 			}
 		}
+
+		if (def.Find("operator") >= 0)
+			return DefnFunc;
+
+		return equalsAtZero ? DefnVariable : DefnFunc;
+	}
+
+	template<typename A, typename B>
+	bool Compare(A *doc,
+				B *match,
+				// true if you need both strings to fully match, ie NULL terminated token
+				// false if matching a string in a longer body of text that is not NULL terminated
+				bool fullMatch)
+	{
+		if (!doc || !match)
+		{
+			return false;
+		}
+	
+		while (*match && *doc == *match)
+		{
+			doc++;
+			match++;
+		}
+
+		return (!fullMatch || !*doc) && !*match;
+	}
+
+	struct ClassInfo
+	{
+		bool isTemplate = false;
+		char16 *templateStart = nullptr;
+		char16 *templateEnd = nullptr;
+		char16 *typeName = nullptr; // 'struct', 'class' etc
+		char16 *className = nullptr;
+		char16 *body = nullptr;
+
+		LString name;
+
+		operator bool() const
+		{
+			return typeName && body && *body == '{' && name;
+		}
+	};
+
+	ClassInfo ParseClassDefn(char16 *&n)
+	{
+		ClassInfo c;
+
+		char16 *t;
+		LString::Array parts;
+	
+		while (n && *n)
+		{
+			char16 *startTok = n;
+			if (!(t = LexCpp(n, LexStrdup)))
+			{
+				LgiTrace("%s:%i - LexCpp failed at %s:%i.\n", _FL, FileName, Line+1);
+				break;
+			}
+
+			DEBUG_LOG("%s: t='%S' @ line %i\n", __func__, t, Line+1);
+
+			if (Compare(t, "template", true))
+			{
+				c.isTemplate = true;
+				skipws(n);
+				if (*n == '<')
+				{
+					c.templateStart = n++;
+
+					// Parse over the template parameters
+					while ((t = LexCpp(n, LexStrdup)))
+					{
+						bool end = Compare(t, ">", true);
+						// DEBUG_LOG("%s: template tok '%S' end=%i.\n", __func__, t, end);
+						DeleteArray(t);
+						if (end)
+						{
+							c.templateEnd = n;
+							break;
+						}
+					}
+
+					// DEBUG_LOG("%s: template ended.\n", __func__);
+					if (!c.templateEnd)
+					{
+						// Error: no template end found...
+						DEBUG_LOG("%s: error: no template end found: %.32S\n", __func__, startTok);
+						break;
+					}
+				}
+				else
+				{
+					DEBUG_LOG("%s: error: no start template, n='%.20S'.\n", __func__, n);
+					break;
+				}
+			}
+			else if (Compare(t, ";", true) ||
+					 Compare(t, "friend", true))
+			{
+				DeleteArray(t);
+				break;
+			}
+			else if (Compare(t, "LgiClass", true) ||
+					 Compare(t, "ScribeClass", true))
+			{
+				// Ignore these...
+				DeleteArray(t);
+			}
+			else if (Compare(t, "class", true) ||
+					 Compare(t, "struct", true))
+			{
+				c.typeName = startTok;
+			}
+			else if (Compare(t, "{", true))
+			{
+				skipws(startTok);
+				c.body = startTok;
+				DeleteArray(t);
+
+				c.name = LString("").Join(parts);
+
+				DEBUG_LOG("%s: class name='%s' @ line %i\n", __func__, c.name.Get(), Line+1);
+				break;
+			}
+			else if (c.typeName)
+			{
+				parts.Add(t);
+			}
+			else
+			{
+				DeleteArray(t);
+			}
+		}
+
+		return c;
+	}
+
+	bool Parse(char16 *Cpp, LArray<DefnInfo> &Defns, LError &err)
+	{	
+		char16 *s = Cpp;
+		LastDecl = s;
+
+		#ifdef DEBUG_FILE
+		Debug = !Stricmp(LGetLeaf(FileName), DEBUG_FILE);
+		if (!Debug)
+			return true;
 		#endif
 
-		// tackle decl
-		switch (*s)
+		while (s && *s)
 		{
-			case 0:
-				break;
-			case '\n':
+			// skip ws
+			while (*s && strchr(" \t\r", *s)) s++;
+		
+			#ifdef DEBUG_LINE
+			if (Debug)
 			{
-				Line ++;
-				s++;
-				break;
+				if (Line >= DEBUG_LINE - 1)
+				{
+					int asd=0;
+				}
+				else if (PrevLine != Line)
+				{
+					PrevLine = Line;
+					// LgiTrace("%s:%i '%.10S'\n", FileName, Line + 1, s);
+				}
 			}
-			case '#':
+			#endif
+
+			// tackle decl
+			switch (*s)
 			{
-				const char16 *Hash = s;
+				case 0:
+					break;
+				case '\n':
+				{
+					Line++;
+					s++;
+					break;
+				}
+				case '#':
+				{
+					const char16 *Hash = s;
 				
-				s++;
-				skipws(s)
+					s++;
+					skipws(s)
 
-				const char16 *End = s;
-				while (*End && IsAlpha(*End))
-					End++;
+					const char16 *End = s;
+					while (*End && IsAlpha(*End))
+						End++;
 
-				if
-				(
+					if
 					(
-						LimitTo == DefnNone
-						||
-						(LimitTo & DefnDefine) != 0
+						(
+							LimitTo == DefnNone
+							||
+							(LimitTo & DefnDefine) != 0
+						)
+						&&
+						(End - s) == 6
+						&&
+						StrncmpW(StrDefine, s, 6) == 0
 					)
-					&&
-					(End - s) == 6
-					&&
-					StrncmpW(StrDefine, s, 6) == 0
-				)
-				{
-					s += 6;
-					defnskipws(s);
-					LexCpp(s, LexNoReturn);
-
-					char16 r = *s;
-					*s = 0;					
-					Defns.New().Set(DefnDefine, FileName, Hash, Line + 1);					
-					*s = r;
-					
-				}
-
-				char16 *Eol = Strchr(s, '\n');
-				if (!Eol) Eol = s + Strlen(s);
-
-				// bool IsIf = false, IsElse = false, IsElseIf = false;
-				if
-				(
-					((End - s) == 2 && !Strncmp(L"if", s, End - s))
-					||
-					((End - s) == 5 && !Strncmp(L"ifdef", s, End - s))
-					||
-					((End - s) == 6 && !Strncmp(L"ifndef", s, End - s))
-				)
-				{
-					ConditionalIndex[ConditionalDepth] = 1;
-					ConditionalDepth++;
-					ConditionalFirst = IsFirst(ConditionalIndex, ConditionalDepth);
-					if (Debug)
-						LgiTrace("%s:%i - ConditionalDepth++=%i Line=%i: %.*S\n", _FL, ConditionalDepth, Line+1, Eol - s + 1, s - 1);
-				}
-				else if
-				(
-					((End - s) == 4 && !Strncmp(L"else", s, End - s))
-					||
-					((End - s) == 7 && !Strncmp(L"else if", s, 7))
-				)
-				{
-					if (ConditionalDepth <= 0 &&
-						!ConditionParsingErr)
 					{
-						ConditionParsingErr = true;
-						LgiTrace("%s:%i - Error parsing pre-processor conditions: %s:%i\n", _FL, FileName, Line+1);
+						s += 6;
+						defnskipws(s);
+						LexCpp(s, LexNoReturn);
+
+						char16 r = *s;
+						*s = 0;					
+						Defns.New().Set(DefnDefine, FileName, Hash, Line + 1);					
+						*s = r;
+					
 					}
 
-					if (ConditionalDepth > 0)
+					char16 *Eol = Strchr(s, '\n');
+					if (!Eol) Eol = s + Strlen(s);
+
+					// bool IsIf = false, IsElse = false, IsElseIf = false;
+					if
+					(
+						((End - s) == 2 && !Strncmp(L"if", s, End - s))
+						||
+						((End - s) == 5 && !Strncmp(L"ifdef", s, End - s))
+						||
+						((End - s) == 6 && !Strncmp(L"ifndef", s, End - s))
+					)
 					{
-						ConditionalIndex[ConditionalDepth-1]++;
+						ConditionalIndex[ConditionalDepth] = 1;
+						ConditionalDepth++;
 						ConditionalFirst = IsFirst(ConditionalIndex, ConditionalDepth);
 						if (Debug)
-							LgiTrace("%s:%i - ConditionalDepth=%i Idx++ Line=%i: %.*S\n", _FL, ConditionalDepth, Line+1, Eol - s + 1, s - 1);
+							LgiTrace("%s:%i - ConditionalDepth++=%i Line=%i: %.*S\n", _FL, ConditionalDepth, Line+1, Eol - s + 1, s - 1);
 					}
-				}
-				else if
-				(
-					((End - s) == 5 && !Strncmp(L"endif", s, End - s))
-				)
-				{
-					if (ConditionalDepth <= 0 &&
-						!ConditionParsingErr)
+					else if
+					(
+						((End - s) == 4 && !Strncmp(L"else", s, End - s))
+						||
+						((End - s) == 7 && !Strncmp(L"else if", s, 7))
+					)
 					{
-						ConditionParsingErr = true;
-						// LgiTrace("%s:%i - Error parsing pre-processor conditions: %s:%i\n", _FL, FileName, Line+1);
+						if (ConditionalDepth <= 0 &&
+							!ConditionParsingErr)
+						{
+							ConditionParsingErr = true;
+							LgiTrace("%s:%i - Error parsing pre-processor conditions: %s:%i\n", _FL, FileName, Line+1);
+						}
+
+						if (ConditionalDepth > 0)
+						{
+							ConditionalIndex[ConditionalDepth-1]++;
+							ConditionalFirst = IsFirst(ConditionalIndex, ConditionalDepth);
+							if (Debug)
+								LgiTrace("%s:%i - ConditionalDepth=%i Idx++ Line=%i: %.*S\n", _FL, ConditionalDepth, Line+1, Eol - s + 1, s - 1);
+						}
+					}
+					else if
+					(
+						((End - s) == 5 && !Strncmp(L"endif", s, End - s))
+					)
+					{
+						if (ConditionalDepth <= 0 &&
+							!ConditionParsingErr)
+						{
+							ConditionParsingErr = true;
+							// LgiTrace("%s:%i - Error parsing pre-processor conditions: %s:%i\n", _FL, FileName, Line+1);
+						}
+
+						if (ConditionalDepth > 0)
+							ConditionalDepth--;
+						ConditionalFirst = IsFirst(ConditionalIndex, ConditionalDepth);
+						if (Debug)
+							LgiTrace("%s:%i - ConditionalDepth--=%i Line=%i: %.*S\n", _FL, ConditionalDepth, Line+1, Eol - s + 1, s - 1);
 					}
 
-					if (ConditionalDepth > 0)
-						ConditionalDepth--;
-					ConditionalFirst = IsFirst(ConditionalIndex, ConditionalDepth);
+					while (*s)
+					{
+						if (*s == '\n')
+						{
+							// could be end of # command
+							char Last = (s[-1] == '\r') ? s[-2] : s[-1];
+							if (Last != '\\') break;
+							Line++;
+						}
+
+						s++;
+						LastDecl = s;
+					}
+					break;
+				}
+				case '\"':
+				case '\'':
+				{
+					char16 Delim = *s;
+					s++;
+					while (*s)
+					{
+						if (*s == Delim) { s++; break; }
+						if (*s == '\\') s++;
+						if (*s == '\n') Line++;
+						s++;
+					}
+					break;
+				}
+				case '{':
+				{
+					s++;
+					if (ConditionalFirst)
+						Scopes.Add({DefnScope, Line, s});
+					FnEmit = false;
+					LastDecl = s;
+					#ifdef DEBUG_FILE
 					if (Debug)
-						LgiTrace("%s:%i - ConditionalDepth--=%i Line=%i: %.*S\n", _FL, ConditionalDepth, Line+1, Eol - s + 1, s - 1);
+						LgiTrace("%s:%i - FnEmit=%i Scope=%s @ line %i\n", _FL, FnEmit, curScope().Get(), Line+1);
+					#endif				
+					break;
 				}
-
-				while (*s)
+				case '}':
 				{
-					if (*s == '\n')
+					s++;
+
+					if (ConditionalFirst)
 					{
-						// could be end of # command
-						char Last = (s[-1] == '\r') ? s[-2] : s[-1];
-						if (Last != '\\') break;
-						Line++;
+						if (Scopes.Length() > 0)
+						{
+							Scopes.PopLast();
+							DEBUG_LOG("%s:%i - Scope=%s @ line %i\n", _FL, curScope().Get(), Line+1);
+						}
+						else
+						{
+							DEBUG_LOG("%s:%i - ERROR Depth zero @ line %i\n", _FL, Line+1);
+						}
+
 					}
 
+					defnskipws(s);
+					LastDecl = s;
+					if (IsEnum)
+					{
+						if (IsAlpha(*s)) // typedef'd enum?
+						{
+							LAutoWString t(LexCpp(s, LexStrdup));
+							if (t)
+								Defns.New().Set(DefnEnum, FileName, t.Get(), Line + 1);
+						}
+
+						IsEnum = false;
+					}
+					break;
+				}
+				case ';':
+				{
 					s++;
 					LastDecl = s;
-				}
-				break;
-			}
-			case '\"':
-			case '\'':
-			{
-				char16 Delim = *s;
-				s++;
-				while (*s)
-				{
-					if (*s == Delim) { s++; break; }
-					if (*s == '\\') s++;
-					if (*s == '\n') Line++;
-					s++;
-				}
-				break;
-			}
-			case '{':
-			{
-				s++;
-				if (ConditionalFirst)
-					Depth++;
-				FnEmit = false;
-				LastDecl = s;
-				#ifdef DEBUG_FILE
-				if (Debug)
-					LgiTrace("%s:%i - FnEmit=%i Depth=%i @ line %i\n", _FL, FnEmit, Depth, Line+1);
-				#endif				
-				break;
-			}
-			case '}':
-			{
-				s++;
-
-				if (ConditionalFirst)
-				{
-					if (Depth > 0)
+				
+					if (Scopes.Length() == 0 && ClassNames.Length())
 					{
-						Depth--;
-						#ifdef DEBUG_FILE
-						if (Debug)
-							LgiTrace("%s:%i - CaptureLevel=%i Depth=%i @ line %i\n", _FL, CaptureLevel, Depth, Line+1);
-						#endif
+						// Check for typedef struct name
+						char16 *Start = s - 1;
+						while (Start > Cpp && Start[-1] != '}')
+							Start--;
+						auto TypeDef = LString(Start, s - Start - 1).Strip();
+						if (TypeDef.Length() > 0)
+						{
+							if (LimitTo == DefnNone || (LimitTo & DefnClass) != 0)
+							{
+								Defns.New().Set(DefnClass, FileName, TypeDef, Line + 1);
+							}
+						}
+
+						// End the class def
+						if (Scopes.Length() > 0)
+						{
+							auto d = Scopes.PopLast();
+							if (d.type == DefnClass)
+								ClassNames.PopLast();
+						}
+						DEBUG_LOG("%s:%i - Scope=%s @ line %i\n", _FL, curScope().Get(), Line+1);
+					}
+					break;
+				}
+				case '/':
+				{
+					s++;
+					if (*s == '/')
+					{
+						// one line comment
+						while (*s && *s != '\n') s++;
+						LastDecl = s;
+					}
+					else if (*s == '*')
+					{
+						// multi line comment
+						s++;
+						while (*s)
+						{
+							if (s[0] == '*' && s[1] == '/')
+							{
+								s += 2;
+								break;
+							}
+
+							if (*s == '\n') Line++;
+							s++;
+						}
+						LastDecl = s;
+					}
+					break;
+				}
+				case '(':
+				{
+					s++;
+
+					if (Line == 77)
+					{
+						int asd=0;
+					}
+
+					auto context = lastScope();
+					if (context != DefnScope &&
+						!FnEmit &&
+						LastDecl &&
+						ConditionalFirst)
+					{
+						// function?
+					
+						// find start:
+						char16 *Start = LastDecl;
+						skipws(Start);
+						if (Strnstr(Start, L"__attribute__", s - Start))
+							break;
+					
+						// find end (matching closing bracket)
+						int RoundDepth = 1;
+						char16 *End = s;
+						while (*End)
+						{
+							if (End[0] == '/' &&
+								End[1] == '/')
+							{
+								if (auto nl = Strchr(End, '\n'))
+									End = nl;
+								else
+									break;
+							}
+							else if (*End == '(')
+							{
+								RoundDepth++;
+							}
+							else if (*End == ')')
+							{
+								if (--RoundDepth == 0)
+								{
+									End++;
+									break;
+								}
+							}
+							else if (*End == '{' ||
+									 *End == ';')
+							{
+								break;
+							}
+
+							End++;
+						}
+
+						if (End && *End)
+						{
+							if (auto Buf = LString(Start, End-Start))
+							{
+								DEBUG_LOG("Buf='%s'\n", Buf.Get());
+
+								// remove new-lines
+								auto Out = Buf.Get();
+								for (auto In = Buf.Get(); *In;)
+								{
+									if (*In == '\r' || *In == '\n' || *In == '\t' || *In == ' ')
+									{
+										*Out++ = ' ';
+										skipws(In);
+									}
+									else if (In[0] == '/' && In[1] == '/')
+									{
+										In = Strchr(In, '\n');
+										if (!In)
+											break;
+									}
+									else
+									{
+										*Out++ = *In++;
+									}
+								}
+								Buf.Length(Out - Buf.Get());
+
+								DEBUG_LOG("	Buf='%s'\n", Buf.Get());
+								if (ClassNames.Length())
+								{
+									auto pos = Buf.Find("(");
+									if (pos >= 0)
+									{
+										auto opPos = Buf.Find("operator");
+										if (opPos >= 0 && opPos < pos)
+										{
+											pos = opPos;
+										}
+										else
+										{
+											// Skip whitespace between name and '('
+											while
+											(
+												pos > 0
+												&&
+												strchr(WhiteSpace, Buf(pos-1))
+											)
+											{
+												pos--;
+											}
+
+											// Skip over to the start of the name..
+											while
+											(
+												pos > 0
+												&&
+												Buf(pos-1) != '*'
+												&&
+												Buf(pos-1) != '&'
+												&&
+												!strchr(WhiteSpace, Buf(pos-1))
+											)
+											{
+												pos--;
+											}
+										}
+
+										// 'b' now points to the start of the function
+										// now we add 'CurClassDecl' and '::' before the function name,
+										LString before = Buf(0, pos);
+										LString after = Buf(pos, -1);
+										Buf = before + curClass() + "::" + after;
+										DEBUG_LOG("	ClsBuf='%s'\n", Buf.Get());
+									}
+								}
+
+								// cache f(n) def
+								auto Type = GuessDefnType(Buf, Debug);
+								if
+								(
+									(
+										LimitTo == DefnNone ||
+										(LimitTo & Type) != 0
+									)
+									&&
+									*Buf != ')'
+								)
+									Defns.New().Set(Type, FileName, Buf, Line + 1);
+
+								while (*End && !strchr(";:{#", *End))
+									End++;
+
+								SeekPtr(s, End, Line);
+
+								switch (*End)
+								{
+									case ';':
+									{
+										// Forward definition
+										break;
+									}
+									case '{':
+									{
+										// Has a function implementation, so consume the starting bracket and
+										// emit a new function scope...
+										Scopes.Add({DefnFunc, Line, s++});
+										break;
+									}
+									default:
+									{
+										break;
+									}
+								}
+								#if 0 // def DEBUG_FILE
+								DEBUG_LOG("%s:%i - FnEmit=%i Depth=%i @ line %i\n", _FL, FnEmit, Depth, Line+1);
+								#endif
+							}
+						}
 					}
 					else
 					{
 						#ifdef DEBUG_FILE
 						if (Debug)
-							LgiTrace("%s:%i - ERROR Depth already=%i @ line %i\n", _FL, Depth, Line+1);
+							LgiTrace("%s:%i - Not attempting fn parse: Scope=%s, fnEmit=%i, CondFirst=%i, %s:%i:%.20S\n",
+								_FL, curScope().Get(), FnEmit, ConditionalFirst,
+								LGetLeaf(FileName), Line, s-1);
 						#endif
 					}
-
+					break;
 				}
-
-				defnskipws(s);
-				LastDecl = s;
-				if (IsEnum)
+				default:
 				{
-					if (IsAlpha(*s)) // typedef'd enum?
+					bool InTypedef = false;
+
+					if (IsAlpha(*s) || IsDigit(*s) || *s == '_')
 					{
-						LAutoWString t(LexCpp(s, LexStrdup));
-						if (t)
-							Defns.New().Set(DefnEnum, FileName, t.Get(), Line + 1);
-					}
-
-					IsEnum = false;
-				}
-				break;
-			}
-			case ';':
-			{
-				s++;
-				LastDecl = s;
-				
-				if (Depth == 0 && InClass)
-				{
-					// Check for typedef struct name
-					char16 *Start = s - 1;
-					while (Start > Cpp && Start[-1] != '}')
-						Start--;
-					LString TypeDef = LString(Start, s - Start - 1).Strip();
-					if (TypeDef.Length() > 0)
-					{
-						if (LimitTo == DefnNone || (LimitTo & DefnClass) != 0)
-						{
-							Defns.New().Set(DefnClass, FileName, TypeDef, Line + 1);
-						}
-					}
-
-					// End the class def
-					InClass = false;
-					CaptureLevel = 0;
-					#ifdef DEBUG_FILE
-					if (Debug)
-						LgiTrace("%s:%i - CaptureLevel=%i Depth=%i @ line %i\n", _FL, CaptureLevel, Depth, Line+1);
-					#endif
-					CurClassDecl.Empty();
-				}
-				break;
-			}
-			case '/':
-			{
-				s++;
-				if (*s == '/')
-				{
-					// one line comment
-					while (*s && *s != '\n') s++;
-					LastDecl = s;
-				}
-				else if (*s == '*')
-				{
-					// multi line comment
-					s++;
-					while (*s)
-					{
-						if (s[0] == '*' && s[1] == '/')
-						{
-							s += 2;
-							break;
-						}
-
-						if (*s == '\n') Line++;
+						char16 *Start = s;
+					
 						s++;
-					}
-					LastDecl = s;
-				}
-				break;
-			}
-			case '(':
-			{
-				s++;
-				if (Depth == CaptureLevel && !FnEmit && LastDecl && ConditionalFirst)
-				{
-					// function?
+						defnskipsym(s);
 					
-					// find start:
-					char16 *Start = LastDecl;
-					skipws(Start);
-					if (Strnstr(Start, L"__attribute__", s - Start))
-						break;
-					
-					// find end (matching closing bracket)
-					int RoundDepth = 1;
-					char16 *End = s;
-					while (*End)
-					{
-						if (End[0] == '/' &&
-							End[1] == '/')
+						auto TokLen = s - Start;
+						if (TokLen == 6 && Compare(Start, "extern", false))
 						{
-							if (auto nl = Strchr(End, '\n'))
-								End = nl;
-							else
-								break;
-						}
-						else if (*End == '(')
-						{
-							RoundDepth++;
-						}
-						else if (*End == ')')
-						{
-							if (--RoundDepth == 0)
+							// extern "C" block?
+							LAutoWString t(LexCpp(s, LexStrdup));
+							if (Compare(t.Get(), "\"C\"", true))
 							{
-								End++;
-								break;
-							}
-						}
-						else if (*End == '{' ||
-								 *End == ';')
-						{
-							break;
-						}
-
-						End++;
-					}
-
-					if (End && *End)
-					{
-						if (auto Buf = LString(Start, End-Start))
-						{
-							DEBUG_LOG("Buf='%s'\n", Buf.Get());
-
-							// remove new-lines
-							auto Out = Buf.Get();
-							for (auto In = Buf.Get(); *In;)
-							{
-								if (*In == '\r' || *In == '\n' || *In == '\t' || *In == ' ')
+								defnskipws(s);
+								if (*s == '{')
 								{
-									*Out++ = ' ';
-									skipws(In);
-								}
-								else if (In[0] == '/' && In[1] == '/')
-								{
-									In = Strchr(In, '\n');
-									if (!In)
-										break;
+									Scopes.Add({DefnExternC, Line, Start});
+									s++;
 								}
 								else
 								{
-									*Out++ = *In++;
+									int asd=0;
 								}
 							}
-							Buf.Length(Out - Buf.Get());
-
-							DEBUG_LOG("	Buf='%s'\n", Buf.Get());
-							if (CurClassDecl)
+							else
 							{
-								auto pos = Buf.Find("(");
-								if (pos >= 0)
+								int asd=0;
+							}
+						}
+						else if (
+							(TokLen == 5 && Compare(Start, "const", false)) ||
+							(TokLen == 9 && Compare(Start, "constexpr", false))
+						)
+						{
+							// const/constexpr
+							skipws(s);
+
+							auto n = s;
+							LArray<char16*> parts;
+							ssize_t equals = -1;
+							while (auto t = LexCpp(n, LexStrdup))
+							{
+								if (!Stricmp(t, L";"))
 								{
-									auto opPos = Buf.Find("operator");
-									if (opPos >= 0 && opPos < pos)
+									DeleteArray(t);
+									break;
+								}
+
+								if (!Stricmp(t, L"="))
+									equals = parts.Length();
+								parts.Add(t);
+							}
+
+							if (equals > 0 && parts.Length() > 0)
+							{
+								auto var = parts[equals-1];
+
+								if (ClassNames.Length())
+								{
+									// Class scope var?
+									LString::Array a = ClassNames;
+									a.Add(var);
+									auto full = LString("::").Join(a);
+									Defns.New().Set(DefnVariable, FileName, full, Line + 1);
+								}
+								else
+								{
+									// Global scope var?
+									Defns.New().Set(DefnVariable, FileName, var, Line + 1);
+								}
+							}
+
+							parts.DeleteArrays();
+						}
+						else if (TokLen == 7 && StrncmpW(StrTypedef, Start, 7) == 0)
+						{
+							// Typedef
+							skipws(s);
+						
+							IsStruct = !Strnicmp(StrStruct, s, StrlenW(StrStruct));
+							IsClass  = !Strnicmp(StrClass,  s, StrlenW(StrClass));
+							if (IsStruct || IsClass)
+							{
+								Start = s;
+								InTypedef = true;
+								goto DefineStructClass;
+							}
+
+							IsEnum = !Strnicmp(StrEnum, s, StrlenW(StrEnum));
+							if (IsEnum)
+							{
+								Start = s;
+								s += 4;
+								goto DefineEnum;
+							}
+						
+							LStringPipe p;
+							char16 *i;
+							for (i = Start; i && *i;)
+							{
+								switch (*i)
+								{
+									case ' ':
+									case '\t':
 									{
-										pos = opPos;
+										p.Push(Start, i - Start);
+									
+										defnskipws(i);
+
+										char16 sp[] = {' ', 0};
+										p.Push(sp);
+
+										Start = i;
+										break;
+									}
+									case '\n':
+										Line++;
+										// fall thru
+									case '\r':
+									{
+										p.Push(Start, i - Start);
+										i++;
+										Start = i;
+										break;
+									}
+									case '{':
+									{
+										p.Push(Start, i - Start);
+									
+										int Depth = 1;
+										i++;
+										while (*i && Depth > 0)
+										{
+											switch (*i)
+											{
+												case '{':
+													Depth++;
+													break;
+												case '}':
+													Depth--;
+													break;
+												case '\n':
+													Line++;
+													break;
+											}
+											i++;
+										}
+										Start = i;
+										break;
+									}
+									case ';':
+									{
+										p.Push(Start, i - Start);
+										s = i;
+										i = 0;
+										break;
+									}
+									default:
+									{
+										i++;
+										break;
+									}
+								}
+							}
+						
+							if (auto Typedef = p.NewStrW())
+							{
+								if (LimitTo == DefnNone || (LimitTo & DefnTypedef) != 0)
+								{
+									Defns.New().Set(DefnTypedef, FileName, Typedef, Line + 1);
+								}
+								DeleteArray(Typedef);
+							}
+						}
+						else if
+						(
+							(
+								TokLen == 5
+								&&
+								(IsClass = !StrncmpW(StrClass, Start, 5))
+							)
+							||
+							(
+								TokLen == 6
+								&&
+								(IsStruct = !StrncmpW(StrStruct, Start, 6))
+							)
+						)
+						{
+							DefineStructClass:
+
+							// Class / Struct
+							if (lastScope() == DefnScope)
+							{
+								DEBUG_LOG("%s:%i - CLASS/STRUCT defn: not capturing, Scopes=%s @ line %i\n",
+											_FL, curScope().Get(), Line+1);
+							}
+							else
+							{
+								// Check if this is really a class/struct definition or just a reference
+								char16 *next = LastDecl;
+								auto classDef = ParseClassDefn(next);
+								if (classDef)
+								{
+									// Full definition
+									Scopes.Add({DefnClass, Line, s});
+
+									DEBUG_LOG("%s:%i - CLASS/STRUCT defn: Scopes=%s @ line %i\n",
+											_FL, curScope().Get(), Line+1);
+								
+									ClassNames.Add(classDef.name);
+								
+									if (LimitTo == DefnNone || (LimitTo & DefnClass) != 0)
+									{
+										Defns.New().Set(DefnClass, FileName, curClass(), Line + 1);
+									}
+
+									if (s < classDef.body)
+									{
+										SeekPtr(s, classDef.body + 1/*seek past the colon, we have emitted the class scope*/, Line);
+										DEBUG_LOG("post class s='%s'\n",
+											LString::Escape(LString(s, 20)).Get()
+											);
 									}
 									else
 									{
-										// Skip whitespace between name and '('
-										while
-										(
-											pos > 0
-											&&
-											strchr(WhiteSpace, Buf(pos-1))
-										)
-										{
-											pos--;
-										}
-
-										// Skip over to the start of the name..
-										while
-										(
-											pos > 0
-											&&
-											Buf(pos-1) != '*'
-											&&
-											Buf(pos-1) != '&'
-											&&
-											!strchr(WhiteSpace, Buf(pos-1))
-										)
-										{
-											pos--;
-										}
+										DEBUG_LOG("class bad ptr: body='%s'  s='%s'\n",
+											LString::Escape(LString(classDef.body, 20)).Get(),
+											LString::Escape(LString(s, 20)).Get()
+											);
 									}
 
-									// 'b' now points to the start of the function
-									// now we add 'CurClassDecl' and '::' before the function name,
-									LString before = Buf(0, pos);
-									LString after = Buf(pos, -1);
-									Buf = before + CurClassDecl + "::" + after;
-									DEBUG_LOG("	ClsBuf='%s'\n", Buf.Get());
+									DEBUG_LOG("	class='%s' @ line %i\n", curClass().Get(), Line+1);
 								}
-							}
-
-							// cache f(n) def
-							auto Type = GuessDefnType(Buf, Debug);
-							if
-							(
-								(
-									LimitTo == DefnNone ||
-									(LimitTo & Type) != 0
-								)
-								&&
-								*Buf != ')'
-							)
-								Defns.New().Set(Type, FileName, Buf, Line + 1);
-
-							while (*End && !strchr(";:{#", *End))
-								End++;
-
-							SeekPtr(s, End, Line);
-
-							FnEmit = *End != ';';
-							#if 0 // def DEBUG_FILE
-							DEBUG_LOG("%s:%i - FnEmit=%i Depth=%i @ line %i\n", _FL, FnEmit, Depth, Line+1);
-							#endif
-						}
-					}
-				}
-				else
-				{
-					#ifdef DEBUG_FILE
-					if (Debug)
-						LgiTrace("%s:%i - Not attempting fn parse: depth=%i, capture=%i, fnEmit=%i, CondFirst=%i, %s:%i:%.20S\n",
-							_FL, Depth, CaptureLevel, FnEmit, ConditionalFirst,
-							LGetLeaf(FileName), Line, s-1);
-					#endif
-				}
-				break;
-			}
-			default:
-			{
-				bool InTypedef = false;
-
-				if (IsAlpha(*s) || IsDigit(*s) || *s == '_')
-				{
-					char16 *Start = s;
-					
-					s++;
-					defnskipsym(s);
-					
-					auto TokLen = s - Start;
-					if (TokLen == 6 && StrncmpW(StrExtern, Start, 6) == 0)
-					{
-						// extern "C" block
-						char16 *t = LexCpp(s, LexStrdup); // "C"
-						if (t && StrcmpW(t, StrC) == 0)
-						{
-							defnskipws(s);
-							if (*s == '{')
-							{
-								Depth--;
-							}
-						}
-						DeleteArray(t);
-					}
-					else if ((TokLen == 5 && !StrncmpW(StrConst, Start, 5)) ||
-							 (TokLen == 9 && !StrncmpW(StrConstExpr, Start, 9)))
-					{
-						// const/constexpr
-						skipws(s);
-
-						auto n = s;
-						LArray<char16*> parts;
-						ssize_t equals = -1;
-						while (auto t = LexCpp(n, LexStrdup))
-						{
-							if (!Stricmp(t, L";"))
-							{
-								DeleteArray(t);
-								break;
-							}
-
-							if (!Stricmp(t, L"="))
-								equals = parts.Length();
-							parts.Add(t);
-						}
-
-						if (equals > 0 && parts.Length() > 0)
-						{
-							auto var = parts[equals-1];
-
-							if (CurClassDecl)
-							{
-								// Class scope var?
-								auto full = LString::Fmt("%s::%S", CurClassDecl.Get(), var);
-								Defns.New().Set(DefnVariable, FileName, full, Line + 1);
-							}
-							else
-							{
-								// Global scope var?
-								Defns.New().Set(DefnVariable, FileName, var, Line + 1);
-							}
-						}
-
-						parts.DeleteArrays();
-					}
-					else if (TokLen == 7 && StrncmpW(StrTypedef, Start, 7) == 0)
-					{
-						// Typedef
-						skipws(s);
-						
-						IsStruct = !Strnicmp(StrStruct, s, StrlenW(StrStruct));
-						IsClass  = !Strnicmp(StrClass,  s, StrlenW(StrClass));
-						if (IsStruct || IsClass)
-						{
-							Start = s;
-							InTypedef = true;
-							goto DefineStructClass;
-						}
-
-						IsEnum = !Strnicmp(StrEnum, s, StrlenW(StrEnum));
-						if (IsEnum)
-						{
-							Start = s;
-							s += 4;
-							goto DefineEnum;
-						}
-						
-						LStringPipe p;
-						char16 *i;
-						for (i = Start; i && *i;)
-						{
-							switch (*i)
-							{
-								case ' ':
-								case '\t':
+								else if (InTypedef)
 								{
-									p.Push(Start, i - Start);
-									
-									defnskipws(i);
+									// Typedef'ing some other structure...
+									// char16 *Start = s;
+									LexCpp(s, LexNoReturn);
+									defnskipws(s);
 
-									char16 sp[] = {' ', 0};
-									p.Push(sp);
-
-									Start = i;
-									break;
-								}
-								case '\n':
-									Line++;
-									// fall thru
-								case '\r':
-								{
-									p.Push(Start, i - Start);
-									i++;
-									Start = i;
-									break;
-								}
-								case '{':
-								{
-									p.Push(Start, i - Start);
-									
-									int Depth = 1;
-									i++;
-									while (*i && Depth > 0)
+									LArray<char16*> a;
+									char16 *t;
+									ssize_t StartRd = -1, EndRd = -1;
+									while ((t = LexCpp(s, LexStrdup)))
 									{
-										switch (*i)
-										{
-											case '{':
-												Depth++;
-												break;
-											case '}':
-												Depth--;
-												break;
-											case '\n':
-												Line++;
-												break;
-										}
-										i++;
+										if (StartRd < 0 && !StrcmpW(t, L"("))
+											StartRd = a.Length();
+										else if (EndRd < 0 && !StrcmpW(t, L")"))
+											EndRd = a.Length();
+
+										if (!StrcmpW(t, StrSemiColon))
+											break;
+										a.Add(t);
 									}
-									Start = i;
-									break;
-								}
-								case ';':
-								{
-									p.Push(Start, i - Start);
-									s = i;
-									i = 0;
-									break;
-								}
-								default:
-								{
-									i++;
-									break;
-								}
-							}
-						}
-						
-						if (auto Typedef = p.NewStrW())
-						{
-							if (LimitTo == DefnNone || (LimitTo & DefnTypedef) != 0)
-							{
-								Defns.New().Set(DefnTypedef, FileName, Typedef, Line + 1);
-							}
-							DeleteArray(Typedef);
-						}
-					}
-					else if
-					(
-						(
-							TokLen == 5
-							&&
-							(IsClass = !StrncmpW(StrClass, Start, 5))
-						)
-						||
-						(
-							TokLen == 6
-							&&
-							(IsStruct = !StrncmpW(StrStruct, Start, 6))
-						)
-					)
-					{
-						DefineStructClass:
 
-						// Class / Struct
-						if (Depth != CaptureLevel)
-						{
-							#ifdef DEBUG_FILE
-							if (Debug)
-								LgiTrace("%s:%i - CLASS/STRUCT defn: not capturing, CaptureLevel=%i Depth=%i @ line %i\n",
-										_FL, CaptureLevel, Depth, Line+1);
-							#endif
-						}
-						else
-						{
-							// Check if this is really a class/struct definition or just a reference
-							char16 *next = LastDecl;
-							auto classDef = ParseClassDefn(next, FileName, Line, CurClassDecl, LimitTo, Debug);
-							if (classDef)
-							{
-								// Full definition
-								InClass = true;
-								CaptureLevel++;
-
-								DEBUG_LOG("%s:%i - CLASS/STRUCT defn: CaptureLevel=%i Depth=%i @ line %i\n",
-										_FL, CaptureLevel, Depth, Line+1);
-								
-								if (CurClassDecl)
-									CurClassDecl = CurClassDecl + "::" + classDef.name;
-								else
-									CurClassDecl = classDef.name;
-								
-								if (LimitTo == DefnNone || (LimitTo & DefnClass) != 0)
-								{
-									Defns.New().Set(DefnClass, FileName, CurClassDecl, Line + 1);
-								}
-
-								if (s < classDef.body)
-								{
-									SeekPtr(s, classDef.body, Line);
-									DEBUG_LOG("post class s='%s'\n",
-										LString::Escape(LString(s, 20)).Get()
-										);
+									if (a.Length())
+									{
+										auto iName = StartRd > 0 && EndRd > StartRd ? StartRd - 1 : a.Length() - 1;
+										auto sName = a[iName];
+										Defns.New().Set(DefnTypedef, FileName, sName, Line + 1);
+										a.DeleteArrays();
+									}
 								}
 								else
 								{
-									DEBUG_LOG("class bad ptr: body='%s'  s='%s'\n",
-										LString::Escape(LString(classDef.body, 20)).Get(),
-										LString::Escape(LString(s, 20)).Get()
-										);
+									#if 1
+									DEBUG_LOG("%s:%i - CLASS/STRUCT no defn: type='%.5S' body='%.5S' name='%s'\n",
+												_FL,
+												classDef.typeName,
+												classDef.body,
+												classDef.name.Get());
+									// return false;
+									#endif
 								}
-
-								DEBUG_LOG("	class='%s' @ line %i\n", CurClassDecl.Get(), Line+1);
-							}
-							else if (InTypedef)
-							{
-								// Typedef'ing some other structure...
-								// char16 *Start = s;
-								LexCpp(s, LexNoReturn);
-								defnskipws(s);
-
-								LArray<char16*> a;
-								char16 *t;
-								ssize_t StartRd = -1, EndRd = -1;
-								while ((t = LexCpp(s, LexStrdup)))
-								{
-									if (StartRd < 0 && !StrcmpW(t, L"("))
-										StartRd = a.Length();
-									else if (EndRd < 0 && !StrcmpW(t, L")"))
-										EndRd = a.Length();
-
-									if (!StrcmpW(t, StrSemiColon))
-										break;
-									a.Add(t);
-								}
-
-								if (a.Length())
-								{
-									auto iName = StartRd > 0 && EndRd > StartRd ? StartRd - 1 : a.Length() - 1;
-									auto sName = a[iName];
-									Defns.New().Set(DefnTypedef, FileName, sName, Line + 1);
-									a.DeleteArrays();
-								}
-							}
-							else
-							{
-								#if 1
-								DEBUG_LOG("%s:%i - CLASS/STRUCT no defn: type='%.5S' body='%.5S' name='%s'\n",
-											_FL,
-											classDef.typeName,
-											classDef.body,
-											classDef.name.Get());
-								// return false;
-								#endif
 							}
 						}
-					}
-					else if
-					(
-						TokLen == 4
-						&&
-						StrncmpW(StrEnum, Start, 4) == 0
-					)
-					{
-						DefineEnum:
+						else if
+						(
+							TokLen == 4
+							&&
+							StrncmpW(StrEnum, Start, 4) == 0
+						)
+						{
+							DefineEnum:
 
-						IsEnum = true;
-						defnskipws(s);
+							IsEnum = true;
+							defnskipws(s);
 						
-						LAutoWString t(LexCpp(s, LexStrdup));
-						if (t && isalpha(*t))
-						{
-							Defns.New().Set(DefnEnum, FileName, t.Get(), Line + 1);
-						}
-					}
-					else if (IsEnum)
-					{
-						char16 r = *s;
-						*s = 0;
-						Defns.New().Set(DefnEnumValue, FileName, Start, Line + 1);
-						*s = r;
-						defnskipws(s);
-						if (*s == '=')
-						{
-							s++;
-							while (true)
+							LAutoWString t(LexCpp(s, LexStrdup));
+							if (t && isalpha(*t))
 							{
-								defnskipws(s);
-								defnskipsym(s);
-								defnskipws(s);
-								if (*s == 0 || *s == ',' || *s == '}')
-									break;
-								LAssert(*s != '\n');
+								Defns.New().Set(DefnEnum, FileName, t.Get(), Line + 1);
+							}
+						}
+						else if (IsEnum)
+						{
+							char16 r = *s;
+							*s = 0;
+							Defns.New().Set(DefnEnumValue, FileName, Start, Line + 1);
+							*s = r;
+							defnskipws(s);
+							if (*s == '=')
+							{
 								s++;
+								while (true)
+								{
+									defnskipws(s);
+									defnskipsym(s);
+									defnskipws(s);
+									if (*s == 0 || *s == ',' || *s == '}')
+										break;
+									LAssert(*s != '\n');
+									s++;
+								}
 							}
 						}
-					}
 					
-					if (s[-1] == ':')
-					{
-						LastDecl = s;
+						if (s[-1] == ':')
+						{
+							LastDecl = s;
+						}
 					}
-				}
-				else
-				{
-					s++;
-				}
+					else
+					{
+						s++;
+					}
 
-				break;
+					break;
+				}
 			}
 		}
-	}
 	
-	if (Debug)
-	{
-		for (unsigned i=0; i<Defns.Length(); i++)
+		if (Debug)
 		{
-			DefnInfo *def = &Defns[i];
-			LgiTrace("    %s: %s:%i %s\n", TypeToStr(def->Type), def->File.Get(), def->Line, def->Name.Get());
+			for (unsigned i=0; i<Defns.Length(); i++)
+			{
+				DefnInfo *def = &Defns[i];
+				LgiTrace("    %s: %s:%i %s\n", TypeToStr(def->Type), def->File.Get(), def->Line, def->Name.Get());
+			}
 		}
-	}
 	
-	return true;
+		return true;
+	}
+
+	CppContext(const char *fileName, int limitTo, bool debug)
+		: FileName(fileName)
+		, LimitTo(limitTo)
+		, Debug(debug)
+	{
+	}
+};
+
+bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns, int LimitTo, LError &err, bool Debug)
+{
+	if (!Cpp)
+		// An empty file isn't an error, but it has no symbols.
+		return true;
+
+	CppContext context(FileName, LimitTo, Debug);
+	return context.Parse(Cpp, Defns, err);
 }
+

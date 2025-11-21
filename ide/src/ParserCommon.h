@@ -20,6 +20,8 @@ enum DefnType
 	DefnEnumValue = 0x10,
 	DefnTypedef = 0x20,
 	DefnVariable = 0x40,
+	DefnScope = 0x80,
+	DefnExternC = 0x100,
 };
 
 extern bool ParseFunction(LRange &Return, LRange &Name, LRange &Args, const char *Defn);
