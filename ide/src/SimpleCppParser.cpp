@@ -46,7 +46,7 @@ Known bugs:
 #include "lgi/common/DocView.h"
 #include "ParserCommon.h"
 
-#define DEBUG_FILE		"Array.h"
+#define DEBUG_FILE		"LgiClasses.h"
 // #define DEBUG_LINE		17
 
 
@@ -61,6 +61,24 @@ static bool IsFuncNameChar(char c)
 	return	strchr("_:=~[]<>-+", c) ||
 			IsAlpha(c) ||
 			IsDigit(c);
+}
+
+const char *TypeToStr(DefnType t)
+{
+	switch (t)
+	{
+		default:
+		case DefnNone:      return "DefnNone";
+		case DefnDefine:    return "DefnDefine";
+		case DefnFunc:      return "DefnFunc";
+		case DefnClass:     return "DefnClass";
+		case DefnEnum:      return "DefnEnum";
+		case DefnEnumValue: return "DefnEnumValue";
+		case DefnTypedef:   return "DefnTypedef";
+		case DefnVariable:  return "DefnVariable";
+		case DefnScope:     return "DefnScope";
+		case DefnExternC:   return "DefnExternC";
+	}
 }
 
 bool ParseFunction(LRange &Return, LRange &Name, LRange &Args, const char *Defn)
@@ -126,17 +144,7 @@ bool ParseFunction(LRange &Return, LRange &Name, LRange &Args, const char *Defn)
 
 struct CppContext
 {
-	constexpr static char16 StrClass[]			= {'c', 'l', 'a', 's', 's', 0};
-	constexpr static char16 StrStruct[]			= {'s', 't', 'r', 'u', 'c', 't', 0};
-	constexpr static char16 StrEnum[]		    = {'e', 'n', 'u', 'm', 0};
-	constexpr static char16 StrOpenBracket[]	= {'{', 0};
-	constexpr static char16 StrColon[]			= {':', 0};
-	constexpr static char16 StrSemiColon[]		= {';', 0};
-	constexpr static char16 StrDefine[]			= {'d', 'e', 'f', 'i', 'n', 'e', 0};
-	constexpr static char16 StrTypedef[]		= {'t', 'y', 'p', 'e', 'd', 'e', 'f', 0};
-	constexpr static char16 StrHash[]			= {'#', 0};
-	constexpr static char16 StrTemplate[]		= {'t', 'e', 'm', 'p', 'l', 'a', 't', 'e', 0};
-	constexpr static const char WhiteSpace[]	= " \t\r\n";
+	constexpr static const char *WhiteSpace		= " \t\r\n";
 
 	const char *FileName = nullptr;
 	int Line = DefnNone;
@@ -149,8 +157,13 @@ struct CppContext
 
 	struct TScope
 	{
+		// The type of scope starting
 		DefnType type;
+		
+		// Line that the scope started on
 		int line;
+
+		// Ptr to source at the start of the scope (for debugging)
 		char16 *source;
 
 		TScope()
@@ -164,6 +177,11 @@ struct CppContext
 			, line(l)
 			, source(s)
 		{}
+
+		LString toString() const
+		{
+			return LString::Fmt("%s:%i", TypeToStr(type), line);
+		}
 	};
 
 	LArray<TScope> Scopes;
@@ -190,8 +208,9 @@ struct CppContext
 	{
 		LString::Array a;
 		for (auto &s: Scopes)
-			a.New().Printf("%s:%i", TypeToStr(s.type), s.line);
-		return LString::Fmt("%i(%s)", (int)Scopes.Length(), LString(">").Join(a).Get());
+			a.New() = s.toString();
+		auto desc = LString(">").Join(a);
+		return LString::Fmt("%i(%s)", (int)Scopes.Length(), desc?desc.Get():"");
 	};
 
 	DefnType lastScope()
@@ -201,22 +220,27 @@ struct CppContext
 		return DefnNone;
 	}
 
-	const char *TypeToStr(DefnType t)
+	bool popScope()
 	{
-		switch (t)
+		if (Scopes.Length() == 0)
+			return false;
+
+		auto s = Scopes.PopLast();
+		if (s.type == DefnClass)
 		{
-			default:
-			case DefnNone:      return "DefnNone";
-			case DefnDefine:    return "DefnDefine";
-			case DefnFunc:      return "DefnFunc";
-			case DefnClass:     return "DefnClass";
-			case DefnEnum:      return "DefnEnum";
-			case DefnEnumValue: return "DefnEnumValue";
-			case DefnTypedef:   return "DefnTypedef";
-			case DefnVariable:  return "DefnVariable";
-			case DefnScope:     return "DefnScope";
-			case DefnExternC:   return "DefnExternC";
+			if (ClassNames.Length())
+			{
+				auto cls = ClassNames.PopLast();
+				DEBUG_LOG("%s:%i - removing class name: %s\n", _FL, cls.Get());
+			}
+			else
+			{
+				DEBUG_LOG("%s:%i - popping class scope without class name?\n", _FL);
+				return false;
+			}
 		}
+
+		return true;
 	}
 
 	bool IsFirst(LArray<int> &a, int depth)
@@ -311,6 +335,7 @@ struct CppContext
 		char16 *templateEnd = nullptr;
 		char16 *typeName = nullptr; // 'struct', 'class' etc
 		char16 *className = nullptr;
+		char16 *colon = nullptr;
 		char16 *body = nullptr;
 
 		LString name;
@@ -380,6 +405,11 @@ struct CppContext
 				DeleteArray(t);
 				break;
 			}
+			else if (Compare(t, ":", true))
+			{
+				c.colon = startTok;
+				DeleteArray(t);
+			}
 			else if (Compare(t, "LgiClass", true) ||
 					 Compare(t, "ScribeClass", true))
 			{
@@ -402,7 +432,7 @@ struct CppContext
 				DEBUG_LOG("%s: class name='%s' @ line %i\n", __func__, c.name.Get(), Line+1);
 				break;
 			}
-			else if (c.typeName)
+			else if (c.typeName && !c.colon)
 			{
 				parts.Add(t);
 			}
@@ -478,7 +508,7 @@ struct CppContext
 						&&
 						(End - s) == 6
 						&&
-						StrncmpW(StrDefine, s, 6) == 0
+						Compare(s, "define", false)
 					)
 					{
 						s += 6;
@@ -602,7 +632,7 @@ struct CppContext
 					{
 						if (Scopes.Length() > 0)
 						{
-							Scopes.PopLast();
+							popScope();
 							DEBUG_LOG("%s:%i - Scope=%s @ line %i\n", _FL, curScope().Get(), Line+1);
 						}
 						else
@@ -629,9 +659,9 @@ struct CppContext
 				}
 				case ';':
 				{
-					s++;
-					LastDecl = s;
+					LastDecl = ++s;
 				
+					/*
 					if (Scopes.Length() == 0 && ClassNames.Length())
 					{
 						// Check for typedef struct name
@@ -656,6 +686,7 @@ struct CppContext
 						}
 						DEBUG_LOG("%s:%i - Scope=%s @ line %i\n", _FL, curScope().Get(), Line+1);
 					}
+					*/
 					break;
 				}
 				case '/':
@@ -697,6 +728,7 @@ struct CppContext
 
 					auto context = lastScope();
 					if (context != DefnScope &&
+						context != DefnFunc &&
 						!FnEmit &&
 						LastDecl &&
 						ConditionalFirst)
@@ -747,7 +779,7 @@ struct CppContext
 						{
 							if (auto Buf = LString(Start, End-Start))
 							{
-								DEBUG_LOG("Buf='%s'\n", Buf.Get());
+								DEBUG_LOG("	Buf='%s' line=%i context=%s\n", Buf.Get(), Line, TypeToStr(context));
 
 								// remove new-lines
 								auto Out = Buf.Get();
@@ -771,7 +803,7 @@ struct CppContext
 								}
 								Buf.Length(Out - Buf.Get());
 
-								DEBUG_LOG("	Buf='%s'\n", Buf.Get());
+								// DEBUG_LOG("	Buf='%s'\n", Buf.Get());
 								if (ClassNames.Length())
 								{
 									auto pos = Buf.Find("(");
@@ -953,13 +985,13 @@ struct CppContext
 
 							parts.DeleteArrays();
 						}
-						else if (TokLen == 7 && StrncmpW(StrTypedef, Start, 7) == 0)
+						else if (TokLen == 7 && Compare(Start, "typedef", false))
 						{
 							// Typedef
 							skipws(s);
 						
-							IsStruct = !Strnicmp(StrStruct, s, StrlenW(StrStruct));
-							IsClass  = !Strnicmp(StrClass,  s, StrlenW(StrClass));
+							IsStruct = Compare(s, "struct", false);
+							IsClass  = Compare(s, "class", false);
 							if (IsStruct || IsClass)
 							{
 								Start = s;
@@ -967,7 +999,7 @@ struct CppContext
 								goto DefineStructClass;
 							}
 
-							IsEnum = !Strnicmp(StrEnum, s, StrlenW(StrEnum));
+							IsEnum = Compare(s, "enum", false);
 							if (IsEnum)
 							{
 								Start = s;
@@ -1058,13 +1090,13 @@ struct CppContext
 							(
 								TokLen == 5
 								&&
-								(IsClass = !StrncmpW(StrClass, Start, 5))
+								(IsClass = Compare(Start, "class", false))
 							)
 							||
 							(
 								TokLen == 6
 								&&
-								(IsStruct = !StrncmpW(StrStruct, Start, 6))
+								(IsStruct = Compare(Start, "struct", false))
 							)
 						)
 						{
@@ -1099,6 +1131,7 @@ struct CppContext
 									if (s < classDef.body)
 									{
 										SeekPtr(s, classDef.body + 1/*seek past the colon, we have emitted the class scope*/, Line);
+										LastDecl = s;
 										DEBUG_LOG("post class s='%s'\n",
 											LString::Escape(LString(s, 20)).Get()
 											);
@@ -1130,7 +1163,7 @@ struct CppContext
 										else if (EndRd < 0 && !StrcmpW(t, L")"))
 											EndRd = a.Length();
 
-										if (!StrcmpW(t, StrSemiColon))
+										if (Compare(t, ";", true))
 											break;
 										a.Add(t);
 									}
@@ -1160,7 +1193,7 @@ struct CppContext
 						(
 							TokLen == 4
 							&&
-							StrncmpW(StrEnum, Start, 4) == 0
+							Compare(Start, "enum", false)
 						)
 						{
 							DefineEnum:
