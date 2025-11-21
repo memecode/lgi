@@ -48,7 +48,7 @@ Known bugs:
 
 #define DEBUG_FILE		"LgiClasses.h"
 // #define DEBUG_LINE		17
-
+#define PARSE_ALL_FILES		1 // else parse just the 'DEBUG_FILE'
 
 #ifdef DEBUG_FILE
 #define DEBUG_LOG(...) if (Debug) do { LgiTrace(__VA_ARGS__); } while (0)
@@ -452,6 +452,8 @@ struct CppContext
 
 		#ifdef DEBUG_FILE
 		Debug = !Stricmp(LGetLeaf(FileName), DEBUG_FILE);
+		#endif
+		#if !PARSE_ALL_FILES
 		if (!Debug)
 			return true;
 		#endif
