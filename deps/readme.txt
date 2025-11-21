@@ -18,3 +18,7 @@ Main dependencies:
     - lunasvg
     - libntlm
     - libiconv
+
+
+Linux: to install the library paths in your system use:
+    sudo ./build.py installpaths

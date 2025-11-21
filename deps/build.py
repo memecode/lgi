@@ -16,6 +16,8 @@ first = True
 clean = False
 installPaths = False
 for arg in sys.argv:
+    if arg == "--help":
+        sys.exit(0)
     if arg.lower() == 'clean':
         clean = True
     elif arg.lower() == 'installpaths':
@@ -23,7 +25,15 @@ for arg in sys.argv:
 
 def checkPackage(pkg):
     p = subprocess.run(["dpkg", "-l", pkg], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    return p.returncode == 0
+    for ln in p.stdout.decode().split("\n"):
+        p = ln.split()
+        if len(p) > 2 and p[1].find(pkg) == 0:
+            status = p[0]
+            if status == "un":
+                return False
+            elif status == "ii":
+                return True
+    return False
 
 def hasPackage(pkg):
     p = subprocess.run(["apt-cache", "search", pkg], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -63,18 +73,19 @@ elif platform.system() == "Linux":
                 "libgtk3.0-dev",
                 "libgtk-3-dev",
                 "libgstreamer1.0-dev",
-                "libayatana-appindicator3-1",
+                "libayatana-appindicator3-dev",
                 "libssh-dev",
                 "cmake",
-                "ninja-build" ]
+                "ninja-build",
+                "git" ]
     needs = []
     print("Checking required packages:")
     for pkg in packages:
         c = checkPackage(pkg)
-        #print("  check", pkg, c)
+        # print("  check", pkg, c)
         if not c:
             h = hasPackage(pkg)
-            #print("    has", pkg, h)
+            # print("    has", pkg, h)
             if h:
                 needs.append(pkg)
     if len(needs) > 0:
@@ -88,7 +99,8 @@ else:
     sys.exit(-1)
 
 curFolder = os.path.abspath(os.path.join(os.path.realpath(__file__), ".."))
-depsFolder = os.path.abspath(os.path.join(curFolder, "..", "..", "deps"))
+trunkFolder = os.path.abspath(os.path.join(curFolder, ".."))
+depsFolder = os.path.abspath(os.path.join(trunkFolder, "..", "deps"))
 if not os.path.exists(depsFolder):
     os.mkdir(depsFolder)
 
@@ -103,10 +115,25 @@ if clean:
 
 if installPaths:
     if platform.system() == "Linux":
-        print("Add paths to: /etc/ld.so.conf.d/lgi.conf")
-        print("Debug:", os.path.join(depsFolder, "build-x64-debug/lib"))
-        print("Release:", os.path.join(depsFolder, "build-x64-release/lib"))
-        print("Then: sudo ldconfig")
+        paths = [
+            os.path.join(depsFolder, "build-x64-debug/lib"),
+            os.path.join(depsFolder, "build-x64-release/lib"),
+            os.path.join(trunkFolder, "Debug"),
+            os.path.join(trunkFolder, "Release"),
+        ]
+        cfgFile = "/etc/ld.so.conf.d/lgi.conf"
+        try:
+            conf = open(cfgFile, "w")
+            for p in paths:
+                conf.write(p + "\n")
+            conf.close()
+            p = subprocess.run(["ldconfig"])
+            print("..paths added to:", cfgFile)
+        except:
+            print("Add paths to:", cfgFile)
+            print("   ", os.path.join(depsFolder, "build-x64-debug/lib"))
+            print("   ", os.path.join(depsFolder, "build-x64-release/lib"))
+            print("Then: sudo ldconfig")
     else:
         print("Add impl for", platform.system(), "here")
     sys.exit(0)

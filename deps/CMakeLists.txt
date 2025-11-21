@@ -43,13 +43,15 @@ function(GitProject NAME URI BRANCH ADDTARGET)
         execute_process(COMMAND git clone --recurse-submodules -b ${BRANCH} ${URI} ${DIR}
             RESULT_VARIABLE clone_result
             OUTPUT_VARIABLE clone_out)
-        if(${clone_result})
-            message(FATAL_ERROR "${NAME} clone failed: ${clone_out}")
+        if(NOT ${clone_result} MATCHES "^[0-9]+$" OR ${clone_result})
+            message("git clone --recurse-submodules -b ${BRANCH} ${URI} ${DIR}")
+            message(FATAL_ERROR "${NAME} clone failed: ${clone_result} ${clone_out}")
         endif()
     endif()
 
     if(${ADDTARGET})
         set(LISTS "${DIR}/CMakeLists.txt")
+        message("adding cmake: ${DIR}/CMakeLists.txt")
         if(EXISTS ${LISTS})
             add_subdirectory(${DIR} ${NAME})
         else()
