@@ -1347,10 +1347,14 @@ public:
 	bool Write(TPriority priority, const char *Path, LString Data, std::function<void(LError)> result) override
 	{
 		if (!Path)
+		{
+			log->Print("%s:%i - no path.\n", _FL);
 			return false;
+		}
 		if (!Data)
 		{
 			LAssert(!"should be some data?");
+			log->Print("%s:%i - no data.\n", _FL);
 			return false;
 		}
 
@@ -1364,7 +1368,9 @@ public:
 				if (Path.Find("~") == 0 && homePath)
 					Path = Path.Replace("~", homePath);
 
+				// log->Print("%s:%i - ssh::UploadFile(%s)...\n", _FL, Path.Get());
 				auto err = ssh->UploadFile(Path, &stream);
+				// log->Print("	UploadFile=%s\n", err.ToString().Get());
 				if (result)
 				{
 					app->RunCallback( [this, err, result]() mutable

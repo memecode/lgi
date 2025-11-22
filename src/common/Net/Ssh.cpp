@@ -509,7 +509,7 @@ LError LSsh::UploadFile(const char *To, LStream *From)
 		}
 		else
 		{			
-			auto file = sftp_open(sftp, To, O_WRONLY, 0);
+			auto file = sftp_open(sftp, To, O_WRONLY|O_TRUNC, 0);
 			if (!file)
 			{
 				auto msg = FmtError(LString::Fmt("sftp_open(%s) failed", To));

@@ -24,6 +24,7 @@
 #include "lgi/common/PopupNotification.h"
 #include "lgi/common/RemoveAnsi.h"
 #include "lgi/common/Uri.h"
+#include "lgi/common/StructuredLog.h"
 
 #include "LgiIde.h"
 #include "resdefs.h"
@@ -196,24 +197,51 @@ class BuildThread : public LThread, public LStream, public LCancel
 		public SystemIntf::ProcessIo
 	{
 		LViewI *target;
+		LStringPipe p;
+
+		#if 0
+			#define SLOG(...) sLog.Log(__VA_ARGS__)
+			#define SLOGGING 1
+			LStructuredLog sLog;
+		#else
+			#define SLOG(...)
+		#endif
 	
 	public:
 		StreamToLog(LViewI *t)
+			#if SLOGGING
+			: sLog(LStructuredLog::TNetworkEndpoint, LStructuredLog::sDefaultEndpoint)
+			#endif
 		{
 			target = t;
 			output = this;
+
+			#if SLOGGING
+			sLog.Clear();
+			#endif
 		}
 
 		ssize_t Write(const void *Ptr, ssize_t Size, int Flags = 0) override
 		{
-			// Remove ansi
-			LAutoString s(NewStr((char*)Ptr, Size));
-			auto newSize = RemoveAnsi(s.Get(), Size);
-			if (newSize >= 0 && newSize < Size)
-				s.Get()[newSize] = 0; // null terminate the string...
+			LString s((char*)Ptr, Size);
+			SLOG("raw:", s);
+			p.Write(s.Replace("\r", "\n"));
 
-			// Send the string to the log...
-			target->PostEvent(M_APPEND_TEXT, (LMessage::Param)s.Release(), AppWnd::BuildTab);
+			while (auto ln = p.Pop())
+			{
+				// Remove ansi
+				LString before = ln.Get();
+				RemoveAnsi(ln);
+				if (ln.Length() == 0)
+					continue;
+
+				ln = ln.Strip() + "\n";
+				SLOG("ln:", before, ln);
+
+				// Send the string to the log...
+				target->PostEvent(M_APPEND_TEXT, (LMessage::Param)NewStr(ln), AppWnd::BuildTab);
+			}
+
 			return Size;
 		}
 	};
@@ -2200,8 +2228,10 @@ int BuildThread::Main()
 		{
 			Exe = "ninja";
 			if (Jobs.CastInt32())
-				TmpArgs.Printf("-j %i", Jobs.CastInt32());
-				
+				TmpArgs += LString::Fmt(" -j %i", Jobs.CastInt32());
+			if (Clean)
+				TmpArgs += " clean";
+
 			InitDir.Swap(MakePath);
 			MakePath.Empty();
 			LTrimDir(InitDir);
@@ -2267,6 +2297,7 @@ int BuildThread::Main()
 		LString Msg;
 		Proj->GetApp()->PostEvent(M_APPEND_TEXT, (LMessage::Param)NewStr(Msg), AppWnd::BuildTab);
 
+		TmpArgs = TmpArgs.Strip();
 		printf("Making: %s %s\n", Exe.Get(), TmpArgs.Get());
 		if (auto backend = Proj->GetBackend())
 		{

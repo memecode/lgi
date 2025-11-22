@@ -46,7 +46,7 @@ Known bugs:
 #include "lgi/common/DocView.h"
 #include "ParserCommon.h"
 
-#define DEBUG_FILE		"LgiClasses.h"
+// #define DEBUG_FILE		"LgiClasses.h"
 // #define DEBUG_LINE		17
 #define PARSE_ALL_FILES		1 // else parse just the 'DEBUG_FILE'
 
@@ -722,11 +722,6 @@ struct CppContext
 				case '(':
 				{
 					s++;
-
-					if (Line == 77)
-					{
-						int asd=0;
-					}
 
 					auto context = lastScope();
 					if (context != DefnScope &&
