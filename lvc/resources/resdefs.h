@@ -79,10 +79,15 @@
 #define ID_NAME									136
 #define ID_CREATE								138
 #define ID_REMOTE_PROMPT						141
+#define ID_SHOW_REMOTE							142
 #define ID_OLD_NAME								147
 #define ID_NEW_NAME								148
 #define ID_OLD_EMAIL							149
 #define ID_NEW_EMAIL							150
+#define ID_FILTER_TBL							153
+#define ID_FILTER								155
+#define ID_CLEAR_FILTER							156
+#define ID_CHECKOUT								157
 #define ID_TABLE								500
 #define IDC_COMMIT								501
 #define ID_PULL									502

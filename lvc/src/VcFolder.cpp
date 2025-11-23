@@ -1296,7 +1296,7 @@ void VcFolder::GetCurrentRevision(ParseParams *Params)
 	}
 }
 
-bool VcFolder::GetBranches(bool refresh, ParseParams *Params)
+bool VcFolder::GetBranches(bool refresh, bool includeRemote, ParseParams *Params)
 {
 	if ((!refresh && Branches.Length() > 0) || IsBranches != StatusNone)
 		return true;
@@ -1304,13 +1304,20 @@ bool VcFolder::GetBranches(bool refresh, ParseParams *Params)
 	switch (GetType())
 	{
 		case VcGit:
-			if (StartCmd("branch -v", &VcFolder::ParseBranches, Params))
+		{
+			LString args = "-P branch -v";
+			if (includeRemote)
+				args += " -r";
+			if (StartCmd(args, &VcFolder::ParseBranches, Params))
 				IsBranches = StatusActive;
 			break;
+		}
 		case VcSvn:
+		{
 			Branches.Add("trunk", new VcBranch("trunk"));
 			OnBranchesChange();
 			break;
+		}
 		case VcHg:
 		{
 			if (StartCmd("branches", &VcFolder::ParseBranches, Params))

@@ -30,8 +30,8 @@
 			<Node File="./src/SshConnection.cpp" Type="2" Platforms="15" />
 			<Node File="./src/SshConnection.h" Type="3" Platforms="15" />
 		</Node>
+		<Node File="./src/BranchEditDlg.h" Type="3" Platforms="15" />
 		<Node File="./src/BrowseUi.cpp" Type="2" Platforms="15" />
-		<Node File="./src/VcFolder.h" Type="3" Platforms="15" />
 		<Node File="./src/DropDownBtn.cpp" Type="2" Platforms="15" />
 		<Node File="./src/Lvc.h" Type="3" Platforms="15" />
 		<Node File="./src/Main.cpp" Type="2" Platforms="15" />
@@ -41,6 +41,7 @@
 		<Node File="./src/VcFile.cpp" Type="2" Platforms="15" />
 		<Node File="./src/VcFile.h" Type="3" Platforms="15" />
 		<Node File="./src/VcFolder.cpp" Type="2" Platforms="15" />
+		<Node File="./src/VcFolder.h" Type="3" Platforms="15" />
 	</Node>
 	<Node File="../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
 	<Settings>

@@ -4,6 +4,8 @@ class BranchEditDlg : public LDialog
 {
 	LList *lst = nullptr;
 	VcFolder *folder = nullptr;
+	LString curBranch;
+	LString filterStr;
 
 	void Default()
 	{
@@ -23,7 +25,7 @@ public:
 		if (GetViewById(ID_LIST, lst))
 		{
 			lst->AddColumn("name", 500);
-			LString cur = f->GetCurrentBranch();			
+			curBranch = f->GetCurrentBranch();			
 			auto &cache = f->GetBranchCache();
 
 			for (auto p: cache)
@@ -32,17 +34,81 @@ public:
 				{
 					item->SetText(p.key);
 					lst->Insert(item);
+					
+					if (curBranch == p.key)
+						item->Select(true);
 				}
 			}
+			
+			lst->Sort(0 /*column*/);
+			lst->ResizeColumnsToContent();
 		}
 		else LAssert(0);
 		Default();
+	}
+	
+	void ParseBranches(LString &str)
+	{
+		// Should be thread safe... as the LList control is thread safe...
+		
+		LHashTbl<ConstStrKey<char,false>, LListItem*> map;
+		LArray<LListItem*> all;
+		if (lst->GetAll(all))
+		{
+			for (auto i: all)
+				map.Add(i->GetText(), i);
+		}
+
+		auto lines = str.SplitDelimit("\n");
+		for (auto &ln: lines)
+		{
+			auto parts = ln.SplitDelimit();
+			auto branch = parts[0];
+			if (!map.Find(branch))
+			{
+				if (auto i = new LListItem(branch))
+				{
+					map.Add(i->GetText(), i);
+					lst->Insert(i);
+				}
+			}
+		}
+
+		lst->Sort(0 /*column*/);
+		lst->ResizeColumnsToContent();
+	}
+	
+	void UpdateFilter()
+	{
+		LArray<LListItem*> all;
+		if (lst->GetAll(all))
+		{
+			for (auto i: all)
+			{
+				auto txt = i->GetText();
+				auto vis = filterStr ? Stristr(txt, filterStr.Get()) != nullptr : true;
+				i->GetCss(true)->Display(vis ? LCss::DispBlock : LCss::DispNone);
+			}
+		}
+		
+		lst->UpdateAllItems();
 	}
 
 	int OnNotify(LViewI *Ctrl, const LNotification &n) override
 	{
 		switch (Ctrl->GetId())
 		{
+			case ID_CHECKOUT:
+			{
+				if (auto sel = lst->GetSelected())
+				{
+					if (auto name = sel->GetText())
+					{
+						folder->Checkout(name, true);
+					}
+				}
+				break;
+			}
 			case ID_DELETE:
 			{
 				if (auto sel = lst->GetSelected())
@@ -102,6 +168,44 @@ public:
 							else LgiMsg(this, "%s", Name(), MB_OK, str.Get());
 						});
 				}
+				break;
+			}
+			case ID_SHOW_REMOTE:
+			{
+				if (auto params = new ParseParams([this](auto code, auto str)
+					{
+						if (code)
+							LgiTrace("%s:%i show remote failed: %i\n", _FL, code);
+						else
+							ParseBranches(str);
+					}))
+				{
+					folder->GetBranches(true, GetCtrlValue(ID_SHOW_REMOTE) != 0, params);
+					
+					LView *edit;
+					if (GetViewById(ID_FILTER, edit))
+						edit->Focus(true);
+				}
+				break;
+			}
+			case ID_FILTER:
+			{
+				if (n.Type == LNotifyEscapeKey)
+				{
+					filterStr.Empty();
+					SetCtrlName(ID_FILTER, nullptr);
+				}
+				else
+				{
+					LString f = Ctrl->Name();
+					if (filterStr != f)
+					{
+						filterStr = f;
+						UpdateFilter();
+					}
+				}
+				
+				SetCtrlEnabled(ID_CLEAR_FILTER, !filterStr.IsEmpty());
 				break;
 			}
 			case ID_CLOSE:

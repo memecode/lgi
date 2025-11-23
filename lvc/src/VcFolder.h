@@ -399,7 +399,7 @@ public:
 	void RewriteAuthor(RewriteInfo info);
 	
 	// Branch commands
-	bool GetBranches(bool refresh, ParseParams *Params = NULL);
+	bool GetBranches(bool refresh, bool includeRemote = false, ParseParams *Params = nullptr);
 	bool RenameBranch(LString NewName, LArray<VcCommit*> &Revs);
 	void DeleteBranch(const char *Name, ParseParams::TCallback cb = nullptr);
 	void MergeBranch(const char *Name, ParseParams::TCallback cb = nullptr);
