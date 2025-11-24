@@ -142,7 +142,11 @@ class LgiClass LDragFormats
 	LArray<Fmt> Formats;
 
 public:
-	LDragFormats(bool source);
+	LDragFormats(
+		// Defines what 'Supports' does:
+		//    false: mark an existing format as supported, used for LDragDropTarget
+		//    true:  insert the format is not already present, used for LDragDropSource
+		bool source);
 
 	bool IsSource() { return Source; }
 	void SetSource(bool s) { Source = s; }

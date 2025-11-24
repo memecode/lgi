@@ -12,7 +12,6 @@
 
 #include "LgiIde.h"
 #include "FindSymbol.h"
-#include "ParserCommon.h"
 #include "resdefs.h"
 
 #define MSG_TIME_MS				1000
@@ -822,6 +821,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 							FindSymResult *r = new FindSymResult();
 							if (r)
 							{
+								r->Type = Def.Type;
 								r->Score = ScoreSum;
 								r->File = Def.File.Get();
 								r->Symbol = Def.Name.Get();

@@ -575,14 +575,93 @@ public:
 	}
 };
 
+#define DEBUG_SORT	0
+
 class ProjSymPopup : public LPopupList<FindSymResult>
 {
 	AppWnd *App;
 	IdeDoc *Doc;
 	int CommonPathLen = 0;
 	LArray<FindSymResult*> All;
+	LString keyword;
+
+	bool isWord(char ch)
+	{
+		return IsAlpha(ch);
+	}
+
+	int score(FindSymResult *r)
+	{
+		LString &s = r->Symbol;
+		int pos = s.Lower().Find(keyword.Lower());
+		if (pos < 0)
+		{
+			printf("%s:%i - no match? keyword='%s' sym='%s'\n", _FL, keyword.Get(), s.Get());
+			return 0;
+		}
+		
+		bool matchCase = !strncmp(s.Get() + pos, keyword.Get(), keyword.Length());
+		char before = pos > 0 ? s(pos-1) : ' ';
+		auto end = pos + keyword.Length();
+		char after = end < s.Length() ? s(end) : ' ';
+		bool matchWord = !isWord(before) && !isWord(after);
+
+		auto ext = LGetExtension(r->File);
+		bool isHeader = !Stricmp(ext, "h") || !Stricmp(ext, "hpp") || !Stricmp(ext, "hh");
+		bool classMatch = r->Type == DefnClass;
+		int sum = matchWord + matchCase + isHeader + classMatch;
+		
+		#if DEBUG_SORT
+		printf("score '%s' '%s' = word=%i, case=%i, hdr=%i = %i\n",
+			r->File.Get(), r->Symbol.Get(),
+			matchWord, matchCase, isHeader, sum);
+		#endif
+		
+		return sum;
+	}
+
+	void Sort(LArray<FindSymResult*> &arr)
+	{
+		#if DEBUG_SORT
+		printf("sorting for keyword '%s'\n", keyword.Get());
+		#endif		
+
+		// Sort the results according to their accuracy...
+		//	Matching case...
+		//	Matching whole word...
+		//	Local project...
+		arr.Sort([this](auto a, auto b)
+			{
+				auto aScore = score(*a);
+				auto bScore = score(*b);
+				if (aScore != bScore)
+				{
+					/*
+					printf("diff score: '%s'=%i '%s'=%i\n",
+						(*a)->Symbol.Get(), aScore,
+						(*b)->Symbol.Get(), bScore);
+					*/
+					return bScore - aScore;
+				}
+				
+				/*
+				printf("same score: '%s' '%s'\n",
+					(*a)->Symbol.Get(),
+					(*b)->Symbol.Get());
+				*/
+				return Stricmp((*a)->Symbol.Get(), (*b)->Symbol.Get());
+			});
+			
+		#if DEBUG_SORT		
+		printf("sort result:\n");
+		for (auto r: arr)
+			printf("	%s\n", r->Symbol.Get());
+		#endif
+	}
 
 public:
+	using TParent = LPopupList<FindSymResult>;
+
 	ProjSymPopup(AppWnd *app, IdeDoc *doc, LViewI *target) : LPopupList(target, PopupAbove, POPUP_WIDTH)
 	{
 		App = app;
@@ -602,7 +681,8 @@ public:
 				printf("result=%s, %s:%i\n", a->Symbol.Get(), a->File.Get(), a->Line);
 
 		FindCommonPathLength();
-		LPopupList<FindSymResult>::SetItems(All);
+		Sort(All);
+		TParent::SetItems(All);
 	}
 
 	void FindCommonPathLength()
@@ -666,13 +746,13 @@ public:
 			(n.Type == LNotifyValueChanged || n.Type == LNotifyDocChanged))
 		{
 			// Kick off search...
-			LString s = Ctrl->Name();
-			s = s.Strip();
-			if (s.Length() > 2)
-				App->FindSymbol(Doc->AddDispatch(), s);
+			keyword = Ctrl->Name();
+			keyword = keyword.Strip();
+			if (keyword.Length() > 2)
+				App->FindSymbol(Doc->AddDispatch(), keyword);
 		}
 		
-		return LPopupList<FindSymResult>::OnNotify(Ctrl, n);
+		return TParent::OnNotify(Ctrl, n);
 	}
 };
 

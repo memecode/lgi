@@ -739,7 +739,8 @@ LWindowUnrealize(GtkWidget *widget, LWindow *wnd)
 
 bool DndPointMap(LViewI *&view, LPoint &localPt, LDragDropTarget *&t, LWindow *Wnd, LPoint mousePt, int param = 0)
 {
-	LRect cli = Wnd->GetClient();
+	LRect cli = Wnd->GetClient(false);
+
 	t = nullptr;
 	view = Wnd->ViewFromPoint(mousePt - cli.TopLeft(), &localPt, param);
 	if (!view)
@@ -1066,7 +1067,7 @@ LWindowDragMotion(GtkWidget *widget, GdkDragContext *context, gint x, gint y, gu
 	LViewI *v = nullptr;
 	LDragDropTarget *t = nullptr;
 
-	if (!DndPointMap(v, p, t, Wnd, mousePt, -1))
+	if (!DndPointMap(v, p, t, Wnd, mousePt))
 	{
 		DND_ERROR("%s:%i - DndPointMap failed\n", _FL);
 		return false;

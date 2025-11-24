@@ -3,6 +3,8 @@
 #include "lgi/common/EventTargetThread.h"
 #include "lgi/common/SystemIntf.h"
 
+#include "ParserCommon.h"
+
 enum FindSymMessages
 {
 	/// Find symbol results message:
@@ -34,6 +36,7 @@ enum FindSymMessages
 
 struct FindSymResult
 {
+	DefnType Type = DefnNone;
 	LString Symbol, File;
 	int Line;
 	int Score;
