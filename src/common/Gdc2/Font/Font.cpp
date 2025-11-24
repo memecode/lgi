@@ -120,23 +120,26 @@
 
 #elif MAC
 
-	#include <CoreText/CTFont.h>
-	#include <CoreText/CTTextTab.h>
-
-	CTParagraphStyleRef CreateParagraphStyleWithRegularTabs(double tabPx)
+	CTParagraphStyleRef CreateParagraphStyleWithRegularTabs(double originPx, double tabPx)
 	{
-		const auto tab_stops = CFArrayCreate(nullptr, nullptr, 0, nullptr);
+		const void *tabRef[] = { CTTextTabCreate(kCTTextAlignmentLeft,
+												originPx,
+												nullptr) };
+		const auto tabStops = CFArrayCreate(nullptr, tabRef, 1, nullptr);
 		
 		CTParagraphStyleSetting settings[2];
+		
 		settings[0].spec = kCTParagraphStyleSpecifierDefaultTabInterval;
 		settings[0].valueSize = sizeof(tabPx);
 		settings[0].value = &tabPx;
+		
 		settings[1].spec = kCTParagraphStyleSpecifierTabStops;
 		settings[1].valueSize = sizeof(CFArrayRef);
-		settings[1].value = static_cast<const void *>(&tab_stops);
+		settings[1].value = static_cast<const void *>(&tabStops);
 				
 		auto para = CTParagraphStyleCreate(settings, 2);
-		CFRelease(tab_stops);
+		CFRelease(tabStops);
+		
 		return para;
 	}
 	
@@ -1133,7 +1136,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 				key.Add(kCTForegroundColorFromContextAttributeName);
 				values.Add(kCFBooleanTrue);
 
-				auto pstyle = CreateParagraphStyleWithRegularTabs(TabSize());
+				auto pstyle = CreateParagraphStyleWithRegularTabs(0, TabSize());
 				if (pstyle)
 				{
 					key.Add(kCTParagraphStyleAttributeName);

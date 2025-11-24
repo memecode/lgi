@@ -282,33 +282,6 @@ bool StringConvert(Out *&out, ssize_t &OutWords, const In *in, ssize_t InLen)
 
 #if MAC
 	#include <CoreFoundation/CFString.h>
-
-	void LDisplayString::CreateAttrStr()
-	{
-		if (!Wide)
-			return;
-
-		if (AttrStr)
-		{
-			CFRelease(AttrStr);
-			AttrStr = NULL;
-		}
-
-		wchar_t *w = Wide;
-		CFStringRef string = CFStringCreateWithBytes(kCFAllocatorDefault,
-													(const uint8_t*)w,
-													StrlenW(w) * sizeof(*w),
-													kCFStringEncodingUTF32LE,
-													false);
-		if (string)
-		{
-			CFDictionaryRef attributes = Font->GetAttributes();
-			if (attributes)
-				AttrStr = CFAttributedStringCreate(kCFAllocatorDefault, string, attributes);
-			
-			CFRelease(string);
-		}
-	}
 #endif
 
 LDisplayString::LDisplayString(LFont *f, const char *s, ssize_t l, LSurface *pdc)
@@ -324,7 +297,7 @@ LDisplayString::LDisplayString(LFont *f, const char *s, ssize_t l, LSurface *pdc
 	#endif
 	StringConvert(Str, StrWords, s, l);
 	
-	#if defined __GTK_H__
+	#if defined(__GTK_H__)
 	
 		d = new LDisplayStringPriv(this);
 		if (Font && Str)
@@ -333,12 +306,7 @@ LDisplayString::LDisplayString(LFont *f, const char *s, ssize_t l, LSurface *pdc
 			if (StrWords > 0)
 				d->Create(pDC ? pDC->GetPrintContext() : NULL);
 		}
-	
-	#elif defined MAC && !defined(LGI_SDL)
-	
-		if (Font && Str && StrWords > 0)
-			CreateAttrStr();
-	
+		
 	#endif
 }
 
@@ -355,16 +323,11 @@ LDisplayString::LDisplayString(LFont *f, const char16 *s, ssize_t l, LSurface *p
 	#endif
 	StringConvert(Str, StrWords, s, l);
 	
-	#if defined __GTK_H__
+	#if defined(__GTK_H__)
 	
 		d = new LDisplayStringPriv(this);
 		if (Font && Str && StrWords > 0)
 			d->Create(pDC ? pDC->GetPrintContext() : NULL);
-	
-	#elif defined MAC && !defined(LGI_SDL)
-	
-		if (Font && Str && StrWords > 0)
-			CreateAttrStr();
 	
 	#endif
 }
@@ -648,20 +611,79 @@ void LDisplayString::Layout(bool Debug)
 		int height = Font->GetHeight();
 		y = height;
 
+		if (!Wide)
+		{
+			LgiTrace("%s:%i - no wide version of display string?\n", _FL);
+			return;
+		}
+
 		if (AttrStr)
 		{
-			LAssert(!Hnd);
-			Hnd = CTLineCreateWithAttributedString(AttrStr);
-			if (Hnd)
+			CFRelease(AttrStr);
+			AttrStr = NULL;
+		}
+
+		wchar_t *w = Wide;
+		auto string = CFStringCreateWithBytes(	kCFAllocatorDefault,
+												(const uint8_t*)w,
+												StrlenW(w) * sizeof(*w),
+												kCFStringEncodingUTF32LE,
+												false);
+		if (string)
+		{
+			auto attributes = Font->GetAttributes();
+			if (attributes)
 			{
-				CGFloat ascent = 0.0;
-				CGFloat descent = 0.0;
-				CGFloat leading = 0.0;
-				double width = CTLineGetTypographicBounds(Hnd, &ascent, &descent, &leading);
-				x = ceil(width);
-				xf = width * FScale;
-				yf = height * FScale;
+				if (DrawOffsetF != 0)
+				{
+					// add tab origin to the attributes...
+					double offsetPx = DrawOffsetF / FScale;
+					double tabSize = Font->TabSize();
+					CTParagraphStyleRef paraRef = CreateParagraphStyleWithRegularTabs(
+						-offsetPx, tabSize);
+					if (!paraRef)
+						LgiTrace("%s:%i - CreateParagraphStyleWithRegularTabs failed\n", _FL);
+					else if (auto attr = Font->GetAttributes())
+					{
+						CFMutableDictionaryRef copy = CFDictionaryCreateMutableCopy(nullptr, 0, attr);
+
+						CFDictionarySetValue(copy,
+							kCTParagraphStyleAttributeName,
+							(const void*) paraRef);
+
+						AttrStr = CFAttributedStringCreate(kCFAllocatorDefault, string, copy);
+
+						CFRelease(copy);
+					}
+					else
+						LgiTrace("%s:%i - no font attributes?\n", _FL);
+				}
+				else
+				{
+					AttrStr = CFAttributedStringCreate(kCFAllocatorDefault, string, attributes);
+				}
 			}
+			
+			CFRelease(string);
+		}
+
+		if (!AttrStr)
+		{
+			LgiTrace("%s:%i - failed to create attr str?\n", _FL);
+			return;
+		}
+		
+		LAssert(!Hnd);
+		Hnd = CTLineCreateWithAttributedString(AttrStr);
+		if (Hnd)
+		{
+			CGFloat ascent = 0.0;
+			CGFloat descent = 0.0;
+			CGFloat leading = 0.0;
+			double width = CTLineGetTypographicBounds(Hnd, &ascent, &descent, &leading);
+			x = ceil(width);
+			xf = width * FScale;
+			yf = height * FScale;
 		}
 	
 	#elif HAIKU
@@ -2336,6 +2358,32 @@ void LDisplayString::FDraw(LSurface *pDC, int fx, int fy, LRect *frc, bool Debug
 				rect.size.width += 1.0;
 				rect.size.height += 1.0;
 				CGContextClipToRect(dc, rect);
+			}
+			
+			double xPos = fx / FScale;
+			
+			// FIXME: Apply 'DrawOffsetF' somehow?
+			// Recreate the CTTextTabCreate with a different ruler?
+			// Stored in CFDictionaryRef Attributes in font priv
+			if (DrawOffsetF != 0)
+			{
+				double offsetPx = DrawOffsetF / FScale;
+				double tabSize = Font->TabSize();
+				CTParagraphStyleRef paraRef = CreateParagraphStyleWithRegularTabs(
+					xPos - offsetPx, tabSize);
+				if (paraRef)
+				{
+					auto attr = Font->GetAttributes();
+					if (attr)
+					{
+						CFMutableDictionaryRef copy = CFDictionaryCreateMutableCopy(nullptr, 0, attr);
+						// Set 'kCTParagraphStyleAttributeName' in 'attr'?
+						CFDictionarySetValue(copy,
+							kCTParagraphStyleAttributeName,
+							(const void*) paraRef);
+						CFRelease(copy);
+					}
+				}
 			}
 
 			auto Tx = (CGFloat)fx / FScale - Ox;

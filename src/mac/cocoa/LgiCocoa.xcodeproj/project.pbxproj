@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		340138E62ED5097B00EF7B63 /* DisplayString.h in Headers */ = {isa = PBXBuildFile; fileRef = 340138E52ED5097B00EF7B63 /* DisplayString.h */; };
 		34063DA32DCBF865007CB2C2 /* TimeZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34063DA22DCBF865007CB2C2 /* TimeZone.cpp */; };
 		340833152698F8FF0028012F /* FontPriv.h in Headers */ = {isa = PBXBuildFile; fileRef = 340833122698F8FE0028012F /* FontPriv.h */; };
 		340833162698F8FF0028012F /* FontType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 340833132698F8FE0028012F /* FontType.cpp */; };
@@ -214,6 +215,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		340138E52ED5097B00EF7B63 /* DisplayString.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DisplayString.h; sourceTree = "<group>"; };
 		34063DA22DCBF865007CB2C2 /* TimeZone.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; name = TimeZone.cpp; path = ../../../../../lgi/trunk/src/common/General/TimeZone.cpp; sourceTree = SOURCE_ROOT; };
 		340833122698F8FE0028012F /* FontPriv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FontPriv.h; path = ../../../private/common/FontPriv.h; sourceTree = SOURCE_ROOT; };
 		340833132698F8FE0028012F /* FontType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FontType.cpp; path = ../../common/Gdc2/Font/FontType.cpp; sourceTree = SOURCE_ROOT; };
@@ -670,9 +672,10 @@
 			isa = PBXGroup;
 			children = (
 				3477C2CD1CC047BE0028B84B /* Charset.cpp */,
+				340138E52ED5097B00EF7B63 /* DisplayString.h */,
 				3477C2D81CC048F90028B84B /* DisplayString.cpp */,
-				3477C2D91CC048F90028B84B /* Font.cpp */,
 				345920FC1F25649000098DFD /* Font.h */,
+				3477C2D91CC048F90028B84B /* Font.cpp */,
 				345920FD1F25649000098DFD /* FontCache.h */,
 				340833122698F8FE0028012F /* FontPriv.h */,
 				345920FE1F25649000098DFD /* FontSelect.h */,
@@ -882,6 +885,7 @@
 				345598C32D08D9F300680A5F /* Filter.h in Headers */,
 				3485B1CD2C0957C40079218F /* TimeZoneInfo.h in Headers */,
 				34D795FE2BFD771800904325 /* Css.h in Headers */,
+				340138E62ED5097B00EF7B63 /* DisplayString.h in Headers */,
 				34D795FC2BFD771800904325 /* Colour.h in Headers */,
 				3477C2A11CBF0A920028B84B /* Mem.h in Headers */,
 				3477C2D51CC0481B0028B84B /* Array.h in Headers */,

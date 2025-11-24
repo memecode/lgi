@@ -68,6 +68,12 @@
 	#define PrevOsChar(Ptr)	Ptr--
 	#define NextOsChar(Ptr)	Ptr++
 
+#elif MAC
+
+	#include <CoreText/CTFont.h>
+	#include <CoreText/CTTextTab.h>
+	extern CTParagraphStyleRef CreateParagraphStyleWithRegularTabs(double originPx, double tabPx);
+
 #endif
 
 #define LGI_WHITESPACE_WEIGHT			0.15f		// amount of foreground colour in visible whitespace

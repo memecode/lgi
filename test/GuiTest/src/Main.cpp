@@ -395,7 +395,6 @@ public:
 			fnt->Fore(L_TEXT);
 			ds2.Draw(pdc, x, p.y);
 			
-			
 			p.y += ds1.Y();
 		}
 	}
