@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3407C3062ED45A2E004FEFB9 /* Ssh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3407C3052ED45A2E004FEFB9 /* Ssh.cpp */; };
 		342BC3C32E4C07600090FD81 /* Http.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 342BC3C22E4C07600090FD81 /* Http.cpp */; };
 		342BC3C72E4C077D0090FD81 /* OpenSSLSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 342BC3C62E4C077D0090FD81 /* OpenSSLSocket.cpp */; };
 		342D52A50F0CBA2F002A1C7C /* LgiMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 342D52A40F0CBA2F002A1C7C /* LgiMain.cpp */; };
@@ -70,6 +71,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3407C3052ED45A2E004FEFB9 /* Ssh.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Ssh.cpp; sourceTree = "<group>"; };
 		342BC3C22E4C07600090FD81 /* Http.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Http.cpp; path = ../../src/common/Net/Http.cpp; sourceTree = "<group>"; };
 		342BC3C62E4C077D0090FD81 /* OpenSSLSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OpenSSLSocket.cpp; path = ../../src/common/Net/OpenSSLSocket.cpp; sourceTree = "<group>"; };
 		342D52A40F0CBA2F002A1C7C /* LgiMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiMain.cpp; path = ../../src/common/Lgi/LgiMain.cpp; sourceTree = SOURCE_ROOT; };
@@ -202,6 +204,7 @@
 		3449AB3D28B96C7800F8AAD4 /* Ssh */ = {
 			isa = PBXGroup;
 			children = (
+				3407C3052ED45A2E004FEFB9 /* Ssh.cpp */,
 				3449AB5728B96C8A00F8AAD4 /* SshConnection.cpp */,
 				3449AB5628B96C8A00F8AAD4 /* SshConnection.h */,
 			);
@@ -362,6 +365,7 @@
 				3457FE4C2081CB3D00014BE4 /* VcCommit.cpp in Sources */,
 				3457FE4E2081CB3D00014BE4 /* VcFolder.cpp in Sources */,
 				3485E7F5294F13F70020C14D /* PatchViewer.cpp in Sources */,
+				3407C3062ED45A2E004FEFB9 /* Ssh.cpp in Sources */,
 				3457FE4A2081CB3D00014BE4 /* DropDownBtn.cpp in Sources */,
 				3457FE4D2081CB3D00014BE4 /* VcFile.cpp in Sources */,
 				343B7EE22D14B846006C250F /* RemoveAnsi.cpp in Sources */,

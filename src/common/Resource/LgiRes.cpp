@@ -277,7 +277,7 @@ public:
 };
 
 static LResourceContainer ResourceOwner;
-bool LResources::LoadStyles = false;
+bool LResources::LoadStyles = true;
 
 void LResources::FreeAllInstances()
 {

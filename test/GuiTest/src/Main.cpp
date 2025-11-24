@@ -180,7 +180,7 @@ public:
 		DropTarget(true);
 	}
 
-	int WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState)
+	int WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState) override
 	{
 		if (first)
 		{
@@ -199,7 +199,7 @@ public:
 		return DROPEFFECT_COPY;
 	}
 
-	int OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
+	int OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState) override
 	{
 		LString Keys;
 		if (KeyState & LGI_EF_CTRL)
@@ -338,6 +338,57 @@ public:
 	}
 };
 
+class DisplayStrTest : public LLayout
+{
+	int tabSize = 0;
+	
+public:
+	DisplayStrTest(int id)
+	{
+		SetId(id);
+		SetPourLargest(true);
+		
+		GetCss(true)->FontFamily("monospace");
+
+		if (auto fnt = GetFont())
+		{
+			LDisplayString ds(fnt, "1234");
+			fnt->TabSize(tabSize = ds.X());
+		}
+	}
+
+	void OnPaint(LSurface *pdc)
+	{
+		pdc->Colour(L_WORKSPACE);
+		pdc->Rectangle();
+		
+		const char *strs[] = {
+			"1\t1\t1",
+			"12\t12\t12",
+			"123\t123\t123",
+			"1234\t1234\t1234",
+			"12345\t12345\t12345",
+			"123456\t123456\t123456",
+			"1234567\t1234567\t1234567",
+			"123456781234567812345678",
+		};
+		auto fnt = GetFont();
+		LPoint p(10, 10);
+		
+		pdc->Colour(LColour(192,192,192));
+		for (int x=0; x<10; x++)
+			pdc->VLine(p.x + (x * tabSize), 0, Y()-1);
+		
+		fnt->Transparent(true);
+		for (int i=0; i<8; i++)
+		{
+			LDisplayString ds(fnt, strs[i]);
+			ds.Draw(pdc, p.x, p.y);
+			p.y += ds.Y();
+		}
+	}
+};
+
 class App : public LWindow
 {
 	LOptionsFile Opts;
@@ -376,7 +427,7 @@ public:
 				// AddView(new OriginTest(20, 10, 0));
 				AddView(new RepaintTest(20, 100));
 
-			#elif 1
+			#elif 0
 
 				LTabView *t = new LTabView(100);
 				t->Attach(this);
@@ -419,6 +470,10 @@ public:
 				e->Password(true);
 				e->SetEmptyText("(this is a test)");
 
+			#elif 1
+
+				AddView(new DisplayStrTest(100));
+
 			#endif
 			
 			AttachChildren();
@@ -440,7 +495,7 @@ public:
 		pDC->Colour(L_MED);
 		pDC->Rectangle();
 		
-		#if 1
+		#if 0
 		pDC->Colour(LColour::Red);
 		pDC->Line(0, 0, c.X()-1, c.Y()-1);
 		#endif

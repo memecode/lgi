@@ -130,7 +130,47 @@ public:
 			}
 		}
 		if (!FamHasDefFace)
-			Fam.Names.New() = DefaultFont->Face();
+		{
+			// Try and figure out what the caller wants from the
+			for (auto t: Fam.Generic)
+			{
+				switch (t)
+				{
+					case LCss::FontFamilySerif:
+					case LCss::FontFamilyUiSerif:
+						break;
+					case LCss::FontFamilySansSerif:
+					case LCss::FontFamilyUiSansSerif:
+						break;
+					case LCss::FontFamilyUiMonospace:
+					case LCss::FontFamilyMonospace:
+					{
+						LFontType type;
+						if (type.GetSystemFont("Fixed"))
+							Fam.Names.New() = type.GetFace();
+						break;
+					}
+					case LCss::FontFamilyCursive:
+						break;
+					case LCss::FontFamilyFantasy:
+						break;
+					case LCss::FontFamilySystemUi:
+						Fam.Names.New() = DefaultFont->Face();
+						break;
+					case LCss::FontFamilyUiRounded:
+						break;
+					default:
+					case LCss::FontFamilyEmoji:
+					case LCss::FontFamilyMath:
+					case LCss::FontFamilyFangsong:
+						break;
+				}
+			}
+			
+			if (!Fam.Names.Length())
+				// Fall back to the default font name
+				Fam.Names.New() = DefaultFont->Face();
+		}
 		
 		LCss::Len Sz = Style->FontSize();
 		if (!Sz)
