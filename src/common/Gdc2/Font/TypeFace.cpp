@@ -64,7 +64,12 @@ void LTypeFace::PointSize(int i)
 void LTypeFace::TabSize(int i)
 {
 	d->_TabSize = MAX(i, 8);
-	_OnPropChange(false);
+	_OnPropChange(
+		#if MAC
+		true);
+		#else
+		false);
+		#endif
 }
 
 void LTypeFace::Quality(int i)

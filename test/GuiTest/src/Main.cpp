@@ -362,7 +362,7 @@ public:
 		pdc->Colour(L_WORKSPACE);
 		pdc->Rectangle();
 		
-		const char *strs[] = {
+		LString strs[] = {
 			"1\t1\t1",
 			"12\t12\t12",
 			"123\t123\t123",
@@ -379,12 +379,24 @@ public:
 		for (int x=0; x<10; x++)
 			pdc->VLine(p.x + (x * tabSize), 0, Y()-1);
 		
+		int chars = 2;
 		fnt->Transparent(true);
 		for (int i=0; i<8; i++)
 		{
-			LDisplayString ds(fnt, strs[i]);
-			ds.Draw(pdc, p.x, p.y);
-			p.y += ds.Y();
+			int x = p.x;
+			
+			LDisplayString ds1(fnt, strs[i](0, chars));
+			fnt->Fore(LColour::Blue);
+			ds1.Draw(pdc, x, p.y);
+			x += ds1.X();
+			
+			LDisplayString ds2(fnt, strs[i](chars, -1));
+			ds2.SetDrawOffset(x - p.x);
+			fnt->Fore(L_TEXT);
+			ds2.Draw(pdc, x, p.y);
+			
+			
+			p.y += ds1.Y();
 		}
 	}
 };
