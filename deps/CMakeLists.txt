@@ -115,13 +115,20 @@ if (1)
 
     else()
         install(TARGETS jpeg
-            DESTINATION ${CMAKE_BINARY_DIR}/lib)
+            RUNTIME
+                DESTINATION ${CMAKE_BINARY_DIR}/bin
+            LIBRARY
+                DESTINATION ${CMAKE_BINARY_DIR}/lib)
+
     endif()
 endif()
 
 # zlib
 GitProject(zlib "https://github.com/madler/zlib.git" "develop" TRUE)
 install(TARGETS zlib
+    RUNTIME
+        DESTINATION ${CMAKE_BINARY_DIR}/bin
+    LIBRARY
         DESTINATION ${CMAKE_BINARY_DIR}/lib)
 # fix the output name
 set_target_properties(
@@ -142,6 +149,9 @@ set(ZLIB_INCLUDE_DIR
     ${CMAKE_BINARY_DIR}/zlib)
 GitProject(libpng  "https://github.com/memecode/libpng.git" "libpng16" TRUE)
 install(TARGETS png_shared
+    RUNTIME
+        DESTINATION ${CMAKE_BINARY_DIR}/bin
+    LIBRARY
         DESTINATION ${CMAKE_BINARY_DIR}/lib)
 
 if (1)

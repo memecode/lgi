@@ -70,12 +70,10 @@ compile.
 >#### vs2022
 >Load  and build `win/Lgi_vs2022.sln`
 >
->#### Add binary folders to your PATH:
+>#### Add these library folders to your PATH:
 > ```
-> lgi\deps\build-debug\lib
-> lgi\deps\build-release\lib
-> lgi\trunk\win\debug
-> lgi\trunk\win\release
+> lgi\deps\build-x64\bin
+> lgi\trunk\lib
 >```
 
 ### Building using XCode:
@@ -111,7 +109,7 @@ One way of starting an application is to use `LgiIde`:
 >- Right click `$ProjectName/Source` and add `lgi/trunk/src/common/Lgi/LgiMain.cpp`
 >- Start adding your own source, implementing `LgiMain` somewhere...
 
-### Win32:
+### Windows
 Add the project `win\Lgi_vs2019.vxproj` to your workspace. Then in your 
 new project you'll need to set these settings:
 
@@ -128,14 +126,14 @@ new project you'll need to set these settings:
 	- Object/library modules:
 		- Add `imm32.lib` (if you use LTextView3.cpp)
 
-### Linux/Cygwin:
+### Linux/Cygwin
 * Add to your library string:
 	- [Debug] `-Llgi/trunk/Debug -llgid`
 	- [Release] `-Llgi/trunk/Release -llgi`
 * Add to your compile flags:
 	- `-ilgi/trunk/include`
 
-### Mac:
+### Mac
 * Include the `src/cocoa/LgiCocoa.xcodeproj` into your app
 	- Select your top level project in the tree
 	- Select your target

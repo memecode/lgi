@@ -66,9 +66,11 @@ if(HAIKU)
             -Wno-pointer-to-int-cast)
 endif()
     
-
 install(TARGETS ${LIBNAME}
-    DESTINATION ${CMAKE_BINARY_DIR}/lib)
+    RUNTIME
+        DESTINATION ${CMAKE_BINARY_DIR}/bin
+    LIBRARY
+        DESTINATION ${CMAKE_BINARY_DIR}/lib)
 install(FILES
     ${SRC}/source/include/iconv.h
     DESTINATION ${CMAKE_BINARY_DIR}/include)

@@ -36,7 +36,10 @@ target_compile_definitions(${LIBNAME} PRIVATE PACKAGE_STRING="1.14")
 
 # installation
 install(TARGETS ${LIBNAME}
-    DESTINATION ${CMAKE_BINARY_DIR}/lib)
+    RUNTIME
+        DESTINATION ${CMAKE_BINARY_DIR}/bin
+    LIBRARY
+        DESTINATION ${CMAKE_BINARY_DIR}/lib)
 install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/ntlm.h
     DESTINATION ${CMAKE_BINARY_DIR}/include)
