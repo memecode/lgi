@@ -24,6 +24,10 @@ Assuming you have `git` installed:
     ~$ mkdir code
     ~/code$ git clone https://github.com/memecode/lgi.git lgi/trunk
 
+Note: in the following document the convention is that anything starting 
+with `lgi/...` means the `~/code/lgi/...` in the above example. It will
+generally have 2 subfolders `trunk` and `deps` once built.
+
 ### Building the dependencies
 
 Lgi has a built in dependency builder in `deps`:
@@ -90,7 +94,7 @@ One way of starting an application is to use `LgiIde`:
 >- Give it a name
 >- Select the template to use `windows/basic_gui_2019`
 >- Select an output path and click `Create`
->- Now only the new `.sln` file in the output folder and build from there.
+>- Now open the new `.sln` solution in the output folder and build from there.
 >
 >#### Linux
 >```
@@ -119,36 +123,33 @@ new project you'll need to set these settings:
 		- [Release] Run time library: Multithreaded DLL
 	- Preprocessor
 		- Define: LGI_STATIC (if your using LgiStatic version)
-		- Include path: `~/code/lgi/trunk/include`
+		- Include path: `lgi/trunk/include`
 * Link tab
 	- Object/library modules:
 		- Add `imm32.lib` (if you use LTextView3.cpp)
 
 ### Linux/Cygwin:
 * Add to your library string:
-	- [Debug] `-L~/code/lgi/trunk/Debug -llgid`
-	- [Release] `-L~/code/lgi/trunk/Release -llgi`
+	- [Debug] `-Llgi/trunk/Debug -llgid`
+	- [Release] `-Llgi/trunk/Release -llgi`
 * Add to your compile flags:
-	- `-i~/code/lgi/trunk/include`
+	- `-ilgi/trunk/include`
 
 ### Mac:
-* Include the `lgi.framework` into your app
-* Add the these folders to your include path:
-	- `~/code/lgi/trunk/include`
+* Include the `src/cocoa/LgiCocoa.xcodeproj` into your app
+	- Select your top level project in the tree
+	- Select your target
+	- In `Build Settings 🡒 Search Paths 🡒 Header Search Paths` add `lgi/trunk/include`
+	- In `Build Settings 🡒 Custom Compiler Flags 🡒 Other C++ Flags` add `-DMAC -DPOSIX -DLGI_COCOA`
+		- And for the `Debug` sub-setting also add `-D_DEBUG`
+	- In `Build Phases 🡒 Target Dependencies` add `LgiCocoa`
+	- In `Build Phases 🡒 Link Binary With Libraries` add `LgiCocoa`
 
 ## Usage
 
 In most cases just:
 
     #include "lgi/common/Lgi.h"
-
-But you can also include `Gdc2.h` for just graphics support without all
-the GUI stuff.
-
-The naming conventions for container methods are:
-
-- "Delete(...)" removes from the container and frees the object.
-- "Remove(...)" just removes from the container.
 
 ## Documentation
     
