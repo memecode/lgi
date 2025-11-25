@@ -27,6 +27,25 @@ using namespace Gtk;
 
 extern Gtk::GdkDragAction EffectToDragAction(int Effect);
 
+static LString::Array gtk_context_targets(GdkDragContext *context)
+{
+	LString::Array fmts;
+	if (!context)
+		return fmts;
+
+	if (auto targets = gdk_drag_context_list_targets(context))
+	{
+		for (auto i = targets; i; i = i->next)
+		{
+			if (auto a = gdk_atom_name((GdkAtom)i->data))
+				fmts.Add(a);
+			else
+				DND_LOG("%s:%i - gdk_atom_name failed.\n", _FL);
+		}
+	}
+	return fmts;
+}
+
 ///////////////////////////////////////////////////////////////////////
 class HookInfo
 {
@@ -760,6 +779,7 @@ bool DndPointMap(LViewI *&view, LPoint &localPt, LDragDropTarget *&t, LWindow *W
 	if (t)
 		return true;
 
+	/*
 	static uint64_t lastTs = 0;
 	auto now = LCurrentTime();
 	if (now - lastTs > 2000)
@@ -769,13 +789,15 @@ bool DndPointMap(LViewI *&view, LPoint &localPt, LDragDropTarget *&t, LWindow *W
 		for (LViewI *v = view; !t && v; v = v->GetParent())
 			DND_ERROR("	view=%s\n", view->GetClass());
 	}
+	*/
 	return false;
 }
 
 void
 LWindowDragBegin(GtkWidget *widget, GdkDragContext *context, LWindow *Wnd)
 {
-	DND_LOG("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
+	auto fmts = gtk_context_targets(context);
+	DND_LOG("%s:%i - %s %s, targets=%s\n", _FL, Wnd->GetClass(), __func__, LString(",").Join(fmts).Get());
 }
 
 void
@@ -838,66 +860,32 @@ LWindowDragDataReceived(GtkWidget *widget, GdkDragContext *context, gint x, gint
 	Wnd->PostEvent(M_DND_DATA_RECEIVED);
 }
 
-int GetAcceptFmts(LString::Array &Formats, GdkDragContext *context, LViewI *v, LDragDropTarget *t, LPoint &p)
+int GetAcceptFmts(LString::Array &Formats, GdkDragContext *context, LViewI *v, LDragDropTarget *t, LPoint &p, int debugLog = false)
 {
 	int KeyState = 0;
-	LDragFormats Fmts(true);
+	LDragFormats formats(true);
 
-	auto targets = gdk_drag_context_list_targets(context);
-	Gtk::GList *i = targets;
-	while (i)
-	{
-		if (auto a = gdk_atom_name((GdkAtom)i->data))
-		{
-			Fmts.Supports(a);
-		}
-		else
-		{
-			DND_ERROR("%s:%i - accept fmt: (null)", _FL);
-		}
-		i = i->next;
-	}
+	// Load all the formats from 'context' into 'formats'
+	for (auto a: gtk_context_targets(context))
+		formats.Supports(a);
+		
+	// Now switch it to target mode, and ask 't' to fill out what it supports:
+	formats.SetSource(false);
+	if (debugLog)
+		DND_LOG("%s:%i %s - all fmts: %s\n", _FL, __func__, LString(",").Join(formats.GetAll()).Get());
 
-	// DND_LOG("%s:%i %s - accept fmts: %s\n", _FL, __func__, LString(",").Join(Fmts.GetAll()).Get());
-
-	Fmts.SetSource(false);
-	auto Flags = t->WillAccept(Fmts, p, KeyState);
-	auto sup = Fmts.GetSupported();
+	auto Flags = t->WillAccept(formats, p, KeyState);
+	auto sup = formats.GetSupported();
 	if (sup.Length())
 	{
+		if (debugLog)
+			DND_LOG("%s:%i %s - supported fmts: %s\n", _FL, __func__, LString(",").Join(formats.GetSupported()).Get());
 		Formats += sup;
-
-		/*
-		if (Gtk::GtkWidget *wid = GTK_WIDGET(v->WindowHandle()))
-		{
-			LArray<Gtk::GtkTargetEntry> matches;
-			for (auto &s: sup)
-			{
-				auto &m = matches.New();
-				m.target = s;
-				m.flags = 0;
-				m.info = 0;
-			}
-		
-			printf("%s gtk_drag_dest_set %s on %s\n", __func__,
-				LString(", ").Join(sup).Get(), v->GetClass());
-				
-			Gtk::gtk_drag_dest_set(	wid,
-									Gtk::GTK_DEST_DEFAULT_ALL,
-									matches.AddressOf(),
-									matches.Length(),
-									(Gtk::GdkDragAction)
-									(Gtk::GDK_ACTION_COPY |
-									 Gtk::GDK_ACTION_MOVE |
-									 Gtk::GDK_ACTION_LINK));
-		}
-		else DND_ERROR("%s:%i - can't get GtkWidget.\n", _FL);
-		*/
 	}
 	else
 	{
 		DND_ERROR("%s:%i - %s no supported formats in '%s'\n",
-			_FL, t->GetClass(), Fmts.ToString().Get());
+			_FL, t->GetClass(), formats.ToString().Get());
 	}
 	
 	return Flags;
@@ -914,7 +902,6 @@ struct LGtkDrop : public LView::ViewEventTarget
 	guint time = 0;
 
 	LArray<LDragData> Data;
-	// LString::Array Formats;
 	int KeyState = 0;
 	int Flags = 0;
 	
@@ -936,7 +923,7 @@ struct LGtkDrop : public LView::ViewEventTarget
 		// Map the point to a view...
 		if (!DndPointMap(v, p, t, Wnd, mousePt))
 		{
-			DND_ERROR("%s:%i - DndPointMap failed!\n", _FL);
+			DND_ERROR("%s:%i - DndPointMap failed in LGtkDrop!\n", _FL);
 			return;
 		}
 			
@@ -1050,7 +1037,25 @@ LWindowDragEnd(GtkWidget *widget, GdkDragContext *context, LWindow *Wnd)
 gboolean
 LWindowDragFailed(GtkWidget *widget, GdkDragContext *context, GtkDragResult result, LWindow *Wnd)
 {
-	DND_LOG("%s:%i - LWindowDragFailed cls=%s result=%i\n", _FL, Wnd->GetClass(), result);
+	if (auto targetLst = gtk_drag_dest_get_target_list(widget))
+	{
+		gint n_targets = 0;
+		if (auto targets = gtk_target_table_new_from_list(targetLst, &n_targets))
+		{
+			DND_LOG("%s:%i - LWindowDragFailed window=%s supports:\n", _FL, Wnd->GetClass());
+			for (int i=0; i<n_targets; i++)
+				DND_LOG("    target=%s\n", targets[i].target);
+			gtk_target_table_free(targets, n_targets);
+		}
+	}
+	else DND_ERROR("%s:%i - no targets on window.\n", _FL);
+
+	DND_LOG("%s:%i - LWindowDragFailed cls=%s result=%i context.targets=%s\n",
+		_FL,
+		Wnd->GetClass(),
+		result,
+		LString(",").Join(gtk_context_targets(context)).Get());
+		
 	return false;
 }
 
@@ -1063,13 +1068,16 @@ LWindowDragLeave(GtkWidget *widget, GdkDragContext *context, guint time, LWindow
 gboolean
 LWindowDragMotion(GtkWidget *widget, GdkDragContext *context, gint x, gint y, guint time, LWindow *Wnd)
 {
+	static LString::Array contextFmts, acceptedFmts;
+	static int prevFlags = 0;
+
 	LPoint p, mousePt(x, y);
 	LViewI *v = nullptr;
 	LDragDropTarget *t = nullptr;
 
 	if (!DndPointMap(v, p, t, Wnd, mousePt))
 	{
-		DND_ERROR("%s:%i - DndPointMap failed\n", _FL);
+		// DND_ERROR("%s:%i - DndPointMap failed\n", _FL);
 		return false;
 	}
 
@@ -1082,14 +1090,32 @@ LWindowDragMotion(GtkWidget *widget, GdkDragContext *context, gint x, gint y, gu
 	t->acceptedFormats.Empty();
 	int Flags = GetAcceptFmts(t->acceptedFormats, context, v, t, p);
 
-	if (Flags != DROPEFFECT_NONE)
-		gdk_drag_status(context, EffectToDragAction(Flags), time);
+	bool changed = false;
+	auto contextFormats = gtk_context_targets(context);
+	if (contextFormats != contextFmts)
+	{
+		changed = true;
+		contextFmts = contextFormats;
+	}
+	if (t->acceptedFormats != acceptedFmts)
+	{
+		changed = true;
+		acceptedFmts = t->acceptedFormats;
+	}
+	if (prevFlags != Flags)
+	{
+		changed = true;
+		prevFlags = Flags;
+	}
 
-	#if 0
-		GdkDragAction action = gdk_drag_context_get_actions(context);
-		GdkDragProtocol proto = gdk_drag_context_get_protocol(context);
-		DND_LOG("%s:%i - LWindowDragMotion=%i v=%s act=%x proto=%i\n",
-			_FL, Flags, v->GetClass(), action, proto);
+	gdk_drag_status(context, EffectToDragAction(Flags), time);
+
+	#if 1
+		if (changed)
+			DND_LOG("%s:%i - LWindowDragMotion=%i v=%s context=%s accepted=%s\n",
+				_FL, Flags, v->GetClass(),
+				LString(",").Join(contextFmts).Get(),
+				LString(",").Join(acceptedFmts).Get());
 	#endif
 		
 	return Flags != DROPEFFECT_NONE;
@@ -1882,11 +1908,7 @@ void LWindow::PourAll()
 	}
 	
 	for (int i=0; i<Update.Length(); i++)
-	{
 		Invalidate(Update[i]);
-	}
-
-	// _Dump();
 }
 
 LMessage::Param LWindow::OnEvent(LMessage *m)
@@ -1911,19 +1933,25 @@ LMessage::Param LWindow::OnEvent(LMessage *m)
 				
 				LArray<Gtk::GtkTargetEntry> targets;
 				LString::Array fmts;
+				/* auto allFlags =
+					(Gtk::GtkTargetFlags)
+					(Gtk::GTK_TARGET_SAME_APP |
+					Gtk::GTK_TARGET_SAME_WIDGET |
+					Gtk::GTK_TARGET_OTHER_APP |
+					Gtk::GTK_TARGET_OTHER_WIDGET); */
 				for (auto p: d->dndFormats)
 				{
 					targets.Add({(Gtk::gchar*)p.key, 0, 0});
 					fmts.Add(p.key);
 				}
 						
-				if (fmts.Length())
+				if (targets.Length())
 				{
 					LgiTrace("%s:%i - gtk_drag_dest_set on %s, fmt=%s\n",
 						_FL, GetClass(), LString(", ").Join(fmts).Get());
 
 					Gtk::gtk_drag_dest_set(	wid,
-											Gtk::GTK_DEST_DEFAULT_ALL,
+											Gtk::GTK_DEST_DEFAULT_DROP,
 											targets.AddressOf(),
 											targets.Length(),
 											(Gtk::GdkDragAction)

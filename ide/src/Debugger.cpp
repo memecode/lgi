@@ -1329,6 +1329,7 @@ public:
 				Cmd("handle SIG34 ignore nostop", false);
 				Cmd("handle SIGPIPE nostop", false);
 				Cmd("set pagination 0", false);
+				Cmd("set print thread-events off", false);
 				if (PrettyPrintPy)
 					Cmd(LString::Fmt("python exec(open(\"%s\").read())", PrettyPrintPy.Get()), false);
 			}

@@ -41,20 +41,33 @@ bool LDragFormats::HasFormat(const char *Fmt)
 
 void LDragFormats::Supports(LString Fmt)
 {
+	auto debug = false; // Fmt.Equals("application/x-scribe-thing-list");
+
 	if (Source)
 	{
 		// Drag sources just add the formats to the list
 		if (!HasFormat(Fmt))
+		{
 			Formats.New().Set(Fmt);
+			if (debug)
+				DND_LOG("%s:%i - source Supports(%s) added.\n", _FL, Fmt.Get());
+		}
 	}
 	else
 	{
 		// Drag targets mark the supported formats
+		bool found = false;
 		for (auto &f: Formats)
 		{
 			if (f.Equals(Fmt))
-				f.Val = true;
+			{
+				f.Val = found = true;
+				break;
+			}
 		}
+		
+		if (debug)
+			DND_LOG("%s:%i - target Supports(%s)=%i.\n", _FL, Fmt.Get(), found);
 	}
 }
 

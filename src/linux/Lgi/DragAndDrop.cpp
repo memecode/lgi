@@ -311,9 +311,11 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 		entry.target = f;
 		entry.flags = (int) (Gtk::GTK_TARGET_SAME_APP | Gtk::GTK_TARGET_OTHER_APP);
 		entry.info = GtkGetDndType(f);
+
+		DND_ERROR("%s:%i - LDragDropSource::Drag: adding target '%s'.\n", _FL, f.Get());
 	}
 	
-	auto Targets = Gtk::gtk_target_list_new(&e[0], e.Length());
+	auto Targets = Gtk::gtk_target_list_new(e.AddressOf(), e.Length());
 	auto Action = EffectToDragAction(Effect);
 	auto w = SourceWnd->GetWindow();
 	if (!w)
