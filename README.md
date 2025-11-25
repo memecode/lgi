@@ -65,10 +65,12 @@ compile.
 >Load  and build `win/Lgi_vs2022.sln`
 >
 >#### Add binary folders to your PATH:
-	> ~/code/lgi/deps/build-debug/lib
-	> ~/code/lgi/deps/build-release/lib
-	> ~/code/lgi/trunk/win/debug
-	> ~/code/lgi/trunk/win/release
+> ```
+> ~/code/lgi/deps/build-debug/lib
+> ~/code/lgi/deps/build-release/lib
+> ~/code/lgi/trunk/win/debug
+> ~/code/lgi/trunk/win/release
+>```
 
 ### Building using XCode:
 >Open `src/mac/cocoa/LgiCocoa.xcodeproj` in XCode and then build.
@@ -89,11 +91,12 @@ One way of starting an application is to use `LgiIde`:
 >- Now only the new `.sln` file in the output folder and build from there.
 >
 >#### Linux
->
-	>~$ cd code/lgi/trunk/ide
-	>~/code/lgi/trunk/ide$ ln -s linux/Makefile.linux makefile
-	>~/code/lgi/trunk/ide$ make -j##
-	>~/code/lgi/trunk/ide$ ./lgiide
+>```
+>~$ cd code/lgi/trunk/ide
+>~/code/lgi/trunk/ide$ ln -s linux/Makefile.linux makefile
+>~/code/lgi/trunk/ide$ make -j##
+>~/code/lgi/trunk/ide$ ./lgiide
+>```
 >
 >- Then use the menu: Project 🡒 New
 >- Save the project somewhere as `$ProjectName`
