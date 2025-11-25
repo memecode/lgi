@@ -36,7 +36,7 @@ Lgi has a built in dependency builder in `deps`:
 >
 >Then you can ask it to add various paths to ldconfig with:
 >```
-~/code/lgi/trunk/deps$ sudo ./build.py installpaths
+>~/code/lgi/trunk/deps$ sudo ./build.py installpaths
 >```
 #### Cross platform
 
@@ -68,14 +68,14 @@ compile.
 >
 >#### Add binary folders to your PATH:
 > ```
-> ~/code/lgi/deps/build-debug/lib
-> ~/code/lgi/deps/build-release/lib
-> ~/code/lgi/trunk/win/debug
-> ~/code/lgi/trunk/win/release
+> lgi\deps\build-debug\lib
+> lgi\deps\build-release\lib
+> lgi\trunk\win\debug
+> lgi\trunk\win\release
 >```
 
 ### Building using XCode:
->Open `src/mac/cocoa/LgiCocoa.xcodeproj` in XCode and then build.
+>Open `lgi/trunk/src/mac/cocoa/LgiCocoa.xcodeproj` in XCode and then build.
 
 ## Creating an application
 
