@@ -35,9 +35,9 @@ Lgi has a built in dependency builder in `deps`:
 >The `build.py` will mention if you need to install various packages first.
 >
 >Then you can ask it to add various paths to ldconfig with:
->
-	~/code/lgi/trunk/deps$ sudo ./build.py installpaths
->
+>```
+~/code/lgi/trunk/deps$ sudo ./build.py installpaths
+>```
 #### Cross platform
 
 Note that there are some compile time options in `include/common/Lgi.h`.
@@ -46,17 +46,19 @@ compile.
 
 ### Building using make:
 >(For Haiku, substitute `haiku` for `linux` here)
->
-	>~/code/lgi/trunk$ ln -s linux/Makefile.linux makefile
-	>~/code/lgi/trunk$ make -j ##
+>```
+>~/code/lgi/trunk$ ln -s linux/Makefile.linux makefile
+>~/code/lgi/trunk$ make -j ##
+>```
 
 ### Building using cmake:
 >Assuming you have `ninja` installed:
->
-	>~/code/lgi/trunk$ mkdir build
-	>~/code/lgi/trunk$ cd build
-	>~/code/lgi/trunk/build$ cmake -GNinja ..
-	>~/code/lgi/trunk/build$ ninja
+>```
+>~/code/lgi/trunk$ mkdir build
+>~/code/lgi/trunk$ cd build
+>~/code/lgi/trunk/build$ cmake -GNinja ..
+>~/code/lgi/trunk/build$ ninja
+>```
 
 ### Building using Visual Studio:
 >#### vs2019
