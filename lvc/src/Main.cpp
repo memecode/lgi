@@ -1206,7 +1206,7 @@ public:
 			Tree->SetDragItem(LItemContainer::ITEM_DRAG_REORDER);
 			c->Add(Tree);
 		c = FolderLayout->GetCell(0, 1);
-			c->Add(new LEdit(IDC_FILTER_FOLDERS, 0, 0, -1, -1));
+			c->Add(new LEdit(IDC_FILTER_FOLDERS));
 		c = FolderLayout->GetCell(1, 1);
 			c->Add(new LButton(IDC_CLEAR_FILTER_FOLDERS, 0, 0, -1, -1, "x"));
 		FolderLayout->Attach(FoldersBox);
@@ -1217,7 +1217,7 @@ public:
 			Commits = new CommitList(IDC_LIST);
 			c->Add(Commits);
 		c = CommitsLayout->GetCell(0, 1);
-			c->Add(new LEdit(IDC_FILTER_COMMITS, 0, 0, -1, -1));
+			c->Add(new LEdit(IDC_FILTER_COMMITS));
 		c = CommitsLayout->GetCell(1, 1);
 			c->Add(new LButton(IDC_CLEAR_FILTER_COMMITS, 0, 0, -1, -1, "x"));
 		c = CommitsLayout->GetCell(2, 1);
@@ -1238,7 +1238,7 @@ public:
 			Files->AddColumn("Name", 400);
 			c->Add(Files);
 		c = FilesLayout->GetCell(0, 1);
-			c->Add(new LEdit(IDC_FILTER_FILES, 0, 0, -1, -1));
+			c->Add(new LEdit(IDC_FILTER_FILES));
 		c = FilesLayout->GetCell(1, 1);
 			c->Add(new LButton(IDC_CLEAR_FILTER_FILES, 0, 0, -1, -1, "x"));
 		FilesLayout->GetCss(true)->Width("35%");

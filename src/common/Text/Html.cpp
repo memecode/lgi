@@ -3252,7 +3252,7 @@ void LTag::SetAttributeStyles()
 				break;
 
 			LAssert(!Ctrl);
-			Ctrl = new LCombo(Html->d->NextCtrlId++, 0, 0, 100, LSysFont->GetHeight() + 8, NULL);
+			Ctrl = new LCombo(Html->d->NextCtrlId++);
 			CtrlType = CtrlSelect;
 			break;
 		}
@@ -3287,9 +3287,11 @@ void LTag::SetAttributeStyles()
 				{
 					LEdit *Ed;
 					LAutoString UtfCleanValue(WideToUtf8(CleanValue));
-					Ctrl = Ed = new LEdit(Html->d->NextCtrlId++, 0, 0, 60, LSysFont->GetHeight() + 8, UtfCleanValue);
+					Ctrl = Ed = new LEdit(Html->d->NextCtrlId++, UtfCleanValue);
 					if (Ctrl)
 					{
+						LRect r(0, 0, 60, LSysFont->GetHeight() + 8);
+						Ed->SetPos(r);
 						Ed->Sunken(false);
 						Ed->Password(CtrlType == CtrlPassword);
 					}						

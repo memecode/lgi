@@ -75,20 +75,19 @@ public:
 
 LRect LCombo::Pad(8, 4, 24, 4);
 
-LCombo::LCombo(int id, int x, int y, int cx, int cy, const char *name) :
+LCombo::LCombo(int id, LRect *pos) :
 	ResObject(Res_ComboBox)
 {
 	d = new LComboPrivate;
 	
 	SetId(id);
-	LRect e(x, y, x+cx, y+cy);
-	SetPos(e);
-	Name(name);
 	SetTabStop(true);
+	if (pos)
+		SetPos(*pos);
 
 	#if WINNATIVE
-	SetDlgCode(DLGC_WANTARROWS);
-	SetStyle(GetStyle() | WS_CHILD | WS_VISIBLE);
+		SetDlgCode(DLGC_WANTARROWS);
+		SetStyle(GetStyle() | WS_CHILD | WS_VISIBLE);
 	#endif
 	LResources::StyleElement(this);
 }

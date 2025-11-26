@@ -206,6 +206,8 @@ public:
 	virtual void	_Paint(LSurface *pDC = NULL, LPoint *Offset = NULL, LRect *Update = NULL);
 
 public:
+	constexpr static int ID_STATIC = -1;
+
 	/// \brief Creates a view/window.
 	///
 	/// On non-Win32 platforms the default argument is the class that redirects the

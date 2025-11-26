@@ -166,7 +166,7 @@ public:
 			Lst->AddColumn("Location", 300);
 			Lst->AddColumn("Count", 100);
 
-			Split->AddView(Ed = new LEdit(101, 0, 0, 100, 100, ""));
+			Split->AddView(Ed = new LEdit(101));
 			Ed->Enabled(false);
 			Ed->MultiLine(true);
 

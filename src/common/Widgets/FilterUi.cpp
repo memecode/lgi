@@ -447,39 +447,30 @@ public:
 class LFilterItemPrivate
 {
 public:
-	LFilterNode Node;
-	LFilterViewPrivate *Data;
-	LRect Btns[IconMax];
+	LFilterNode Node = LNODE_NULL;
+	LFilterViewPrivate *Data = nullptr;
+	LRect Btns[IconMax] = {};
 	LRect NotBtn;
 	LRect FieldBtn, FieldDropBtn;
 	LRect OpBtn, OpDropBtn;
 	LRect ValueBtn;
 
-	bool Not;
-	char *Field, *Value;
-	int Op;
-	LEdit *FieldEd, *ValueEd;
-	LCombo *OpCbo;
+	bool Not = false;
+	char *Field = nullptr, *Value = nullptr;
+	int Op = 0;
+	LAutoPtr<LEdit> FieldEd;
+	LAutoPtr<LEdit> ValueEd;
+	LAutoPtr<LCombo> OpCbo;
 
 	LFilterItemPrivate()
 	{
-		Not = false;
-		Data = 0;
-		Node = LNODE_NULL;
 		EmptyRects();
-		Field = Value = 0;
-		Op = 0;
-		FieldEd = ValueEd = 0;
-		OpCbo = 0;
 	}
 
 	~LFilterItemPrivate()
 	{
 		DeleteArray(Field);
 		DeleteArray(Value);
-		DeleteObj(FieldEd);
-		DeleteObj(OpCbo);
-		DeleteObj(ValueEd);
 	}
 
 	void EmptyRects()
@@ -565,41 +556,13 @@ void LFilterItem::SetValue(char *s)
 	else Update();
 }
 
-#define StartCtrl(Rc, Ed, Name, Obj) \
-	if (!d->Ed) \
-	{ \
-		LPoint sc = d->Data->Tree->ScrollPxPos(); \
-		d->Ed = new Obj(n++, c.x1 + Pos->x1 + Rc.x1 - sc.x, c.y1 + Pos->y1 + Rc.y1 - sc.y, \
-								Rc.X(), Rc.Y(), \
-								Name); \
-		if (d->Ed) \
-		{ \
-			d->Ed->Attach(GetTree()); \
-		} \
-	} \
-	else \
-	{ \
-		LRect r = Rc; \
-		LPoint sc = d->Data->Tree->ScrollPxPos(); \
-		r.Offset(c.x1 + Pos->x1 - sc.x, c.y1 + Pos->y1 - sc.y); \
-		d->Ed->SetPos(r); \
-	}
-
-#define EndEdit(Rc, Ed, Var) \
-	if (d->Ed) \
-	{ \
-		DeleteArray(d->Var); \
-		d->Var = NewStr(d->Ed->Name()); \
-		DeleteObj(d->Ed); \
-	}
-
 void LFilterItem::_PourText(LPoint &Size)
 {
 	Size.y = LSysFont->GetHeight() +
 	#ifdef MAC
-	14; // Not sure what the deal is here... it just looks better.
+		14; // Not sure what the deal is here... it just looks better.
 	#else
-	10;
+		10;
 	#endif
 	
 	switch (d->Node)
@@ -843,6 +806,33 @@ void LFilterItem::_PaintText(LItem::ItemPaintCtx &Ctx)
 	}
 }
 
+#define StartCtrl(Rc, Ed, InitStr, Obj) \
+{ \
+	LRect r(Rc.X(), Rc.Y()); \
+	r.Offset(c.x1 + Pos->x1 + Rc.x1 - sc.x, c.y1 + Pos->y1 + Rc.y1 - sc.y); \
+	if (!d->Ed) \
+	{ \
+		if (d->Ed.Reset(new Obj(ctrlId++))) \
+		{ \
+			d->Ed->SetPos(r); \
+			d->Ed->Name(InitStr); \
+			d->Ed->Attach(GetTree()); \
+		} \
+	} \
+	else \
+	{ \
+		d->Ed->SetPos(r); \
+	} \
+}
+
+#define EndEdit(Rc, Ed, Var) \
+	if (d->Ed) \
+	{ \
+		DeleteArray(d->Var); \
+		d->Var = NewStr(d->Ed->Name()); \
+		d->Ed.Reset(); \
+	}
+
 void LFilterItem::ShowControls(bool s)
 {
 	if (!GetTree() || d->Node != LNODE_COND)
@@ -850,15 +840,16 @@ void LFilterItem::ShowControls(bool s)
 
 	if (s)
 	{
-		LRect *Pos = _GetRect(TreeItemText);
-		LRect c = GetTree()->GetClient();
-		int n = 1;
+		auto Pos = _GetRect(TreeItemText);
+		auto c = GetTree()->GetClient();
+		LPoint sc = d->Data->Tree->ScrollPxPos();
+		int ctrlId = 1;
 
 		LRect Cbo = d->OpBtn;
 		Cbo.Union(&d->OpDropBtn);
 
 		StartCtrl(d->FieldBtn, FieldEd, d->Field, LEdit);
-		StartCtrl(Cbo, OpCbo, 0, LCombo);
+		StartCtrl(Cbo, OpCbo, nullptr, LCombo);
 		StartCtrl(d->ValueBtn, ValueEd, d->Value, LEdit);
 		
 		if (d->OpCbo && !d->OpCbo->Length())
@@ -884,7 +875,7 @@ void LFilterItem::ShowControls(bool s)
 		if (d->OpCbo)
 		{
 			d->Op = (int)d->OpCbo->Value();
-			DeleteObj(d->OpCbo);
+			d->OpCbo.Reset();
 		}
 		EndEdit(ValueBtn, ValueEd, Value);
 	}

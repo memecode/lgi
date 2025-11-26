@@ -61,9 +61,11 @@ LInput::LInput(LViewI *parent, const char *InitStr, const char *Msg, const char 
 	Name(Title);
 
 	c = Tbl->GetCell(0, Cy++);
-	c->Add(Edit = new LEdit(IDC_EDIT, 5, Txt->GetPos().y2 + 5, EditX - 1, MsgDs.Y()+7, InitStr));
+	c->Add(Edit = new LEdit(IDC_EDIT, InitStr));
 	if (Edit)
 	{
+		LRect r(5, Txt->GetPos().y2 + 5, EditX - 1, MsgDs.Y()+7);
+		Edit->SetPos(r);
 		Edit->Password(Password);
 		Edit->Focus(true);
 		if (Callback)

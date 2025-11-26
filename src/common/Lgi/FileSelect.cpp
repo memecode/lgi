@@ -442,7 +442,7 @@ class FolderCtrlEdit : public LEdit
 {
 public:
 	FolderCtrlEdit(int id, LRect c) :
-		LEdit(id, c.x1, c.y1, c.X()-1, c.Y()-1)
+		LEdit(id, nullptr, &c)
 	{
 	}
 
@@ -947,7 +947,7 @@ void LFileSelectDlg::OnCreate()
 	c->Add(new LCheckBox(IDC_FILTER_CLEAR, "Filter items:"));
 	c->VerticalAlign(LCss::Len(LCss::VerticalMiddle));
 	c = t->GetCell(1, 0);
-	c->Add(FilterEdit = new LEdit(IDC_FILTER, 0, 0, 60, 20));
+	c->Add(FilterEdit = new LEdit(IDC_FILTER));
 	c = t->GetCell(0, 1, true, 2);
 	c->Add(FileLst = new LFolderList(this, IDC_VIEW, 14, 35, 448, 226));
 	
@@ -957,7 +957,7 @@ void LFileSelectDlg::OnCreate()
 	c->Add(new LTextLabel(IDC_STATIC, 14, 275, -1, -1, "File name:"));
 	c = Tbl->GetCell(x, y, true, 2);
 	x += 2;
-	c->Add(FileNameEdit = new LEdit(IDC_FILE, 100, 268, 266, 21, ""));
+	c->Add(FileNameEdit = new LEdit(IDC_FILE));
 	c = Tbl->GetCell(x, y, true, 3);
 	c->Add(SaveBtn = new LButton(IDOK, 392, 268, 70, 21, "Ok"));
 
@@ -967,7 +967,7 @@ void LFileSelectDlg::OnCreate()
 	c->Add(new LTextLabel(IDC_STATIC, 14, 303, -1, -1, "Files of type:"));
 	c = Tbl->GetCell(x, y, true, 2);
 	x += 2;
-	c->Add(FileTypeCbo = new LCombo(IDC_TYPE, 100, 296, 266, 21, ""));
+	c->Add(FileTypeCbo = new LCombo(IDC_TYPE));
 	c = Tbl->GetCell(x++, y, true, 3);
 	c->Add(CancelBtn = new LButton(IDCANCEL, 392, 296, 70, 21, "Cancel"));
 

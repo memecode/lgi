@@ -336,9 +336,9 @@ public:
 			Threads.Add(new ThreadLoader(this, a, 1));
 		}
 		
-		AddView(AName = new LEdit(IDC_A_NAME, 0, 0, 100, LSysFont->GetHeight() + 8, FileA));
-		AddView(BName = new LEdit(IDC_B_NAME, 0, 0, 100, LSysFont->GetHeight() + 8, FileB));			
-		AddView(CName = new LEdit(IDC_C_NAME, 0, 0, 100, LSysFont->GetHeight() + 8, NULL));
+		AddView(AName = new LEdit(IDC_A_NAME, FileA));
+		AddView(BName = new LEdit(IDC_B_NAME, FileB));			
+		AddView(CName = new LEdit(IDC_C_NAME, NULL));
 		CName->Sunken(false);
 		CName->Enabled(false);
 

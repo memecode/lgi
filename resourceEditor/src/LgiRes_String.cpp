@@ -35,7 +35,7 @@ LangDlg::LangDlg(LView *parent, List<LLanguage> &l, int Init)
 	Name("Language");
 
 	Children.Insert(new LTextLabel(-1, 10, 10, -1, -1, "Select language:"));
-	Children.Insert(Sel = new LCombo(-1, 20, 30, 150, 20, ""));
+	Children.Insert(Sel = new LCombo(ID_STATIC));
 	if (Sel)
 	{
 		if (l.Length() > 40)

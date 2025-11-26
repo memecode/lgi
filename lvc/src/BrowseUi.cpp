@@ -277,7 +277,7 @@ BrowseUi::BrowseUi(TMode mode, AppPriv *priv, VcFolder *folder, LString path)
 		c->Add(new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Filter:"));
 		c->VerticalAlign(LCss::VerticalMiddle);
 		c = d->BlameTbl->GetCell(1, 0);
-		c->Add(new LEdit(IDC_BLAME_FILTER, 0, 0, -1, -1));
+		c->Add(new LEdit(IDC_BLAME_FILTER));
 		c = d->BlameTbl->GetCell(2, 0);
 		c->Add(new LButton(IDC_BLAME_FILTER_CLEAR, 0, 0, -1, -1, "x"));
 		
@@ -296,7 +296,7 @@ BrowseUi::BrowseUi(TMode mode, AppPriv *priv, VcFolder *folder, LString path)
 		c->Add(new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Filter:"));
 		c->VerticalAlign(LCss::VerticalMiddle);
 		c = d->LogTbl->GetCell(1, 0);
-		c->Add(new LEdit(IDC_LOG_FILTER, 0, 0, -1, -1));
+		c->Add(new LEdit(IDC_LOG_FILTER));
 		c = d->LogTbl->GetCell(2, 0);
 		c->Add(new LButton(IDC_LOG_FILTER_CLEAR, 0, 0, -1, -1, "x"));
 

@@ -29,13 +29,13 @@ ifeq ($(Build),Debug)
 		-llgi-gtk3$(Tag) \
 		-L../../$(BuildDir)
 	Inc =  \
-		-I./resources \
-		`pkg-config --cflags gtk+-3.0` \
 		-I../../../../../../../usr/include/gstreamer-1.0 \
+		-I../../include \
 		-I../../private/common \
+		-I./resources \
 		-I../../include/lgi/linux/Gtk \
-		-I../../include/lgi/linux \
-		-I../../include
+		`pkg-config --cflags gtk+-3.0` \
+		-I../../include/lgi/linux
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
@@ -46,35 +46,34 @@ else
 		-llgi-gtk3$(Tag) \
 		-L../../$(BuildDir)
 	Inc =  \
-		-I./resources \
-		`pkg-config --cflags gtk+-3.0` \
-		-I../../../../../../../usr/include/gstreamer-1.0 \
-		-I../../private/common \
+		-I../../include \
 		-I../../include/lgi/linux/Gtk \
 		-I../../include/lgi/linux \
-		-I../../include
+		-I./resources \
+		-I../../private/common \
+		-I../../../../../../../usr/include/gstreamer-1.0 \
+		`pkg-config --cflags gtk+-3.0`
 endif
 
 # Dependencies
-Source =	src/TestSuite.cpp \
-			../../src/common/Widgets/ZoomView.cpp \
-			../../src/common/Text/HtmlParser.cpp \
-			../../src/common/Text/HtmlCommon.cpp \
-			../../src/common/Text/Html.cpp \
-			../../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
-			../../src/common/Text/Homoglyphs/Homoglyphs.cpp \
-			../../src/common/Text/Emoji/EmojiTools.cpp \
-			../../src/common/Text/Emoji/EmojiMap.cpp \
-			../../src/common/Net/OpenSSLSocket.cpp \
+Source =	../../src/common/Lgi/LgiMain.cpp \
 			../../src/common/Net/Http.cpp \
-			../../src/common/Lgi/LgiMain.cpp \
+			../../src/common/Text/Html.cpp \
+			../../src/common/Text/HtmlCommon.cpp \
+			src/TestSuite.cpp \
 			../../src/common/Images/Compare/ImageComparison.cpp \
-			../../src/common/Gdc2/Font/EmojiFont.cpp \
-			../../src/common/Gdc2/Filters/Png.cpp \
+			../../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
 			../../src/common/Coding/ScriptVM.cpp \
+			../../src/common/Text/HtmlParser.cpp \
 			../../src/common/Coding/ScriptLibrary.cpp \
+			../../src/common/Text/Emoji/EmojiMap.cpp \
 			../../src/common/Coding/ScriptCompiler.cpp \
-			../../src/common/Coding/LexCpp.cpp
+			../../src/common/Coding/LexCpp.cpp \
+			../../src/common/Gdc2/Font/EmojiFont.cpp \
+			../../src/common/Text/Emoji/EmojiTools.cpp \
+			../../src/common/Text/Homoglyphs/Homoglyphs.cpp \
+			../../src/common/Net/OpenSSLSocket.cpp \
+			../../src/common/Widgets/ZoomView.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -103,7 +102,14 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 		$(Target) $(Objects) $(Libs)
 	@echo Done.
 
-../../$(BuildDir)/liblgi-gtk3$(Tag).so : ../../include/lgi/common/App.h \
+../../$(BuildDir)/liblgi-gtk3$(Tag).so : ../../../deps/build-x64-debug/include/iconv.h \
+	../../../deps/build-x64-debug/include/jconfig.h \
+	../../../deps/build-x64-debug/include/jerror.h \
+	../../../deps/build-x64-debug/include/jmorecfg.h \
+	../../../deps/build-x64-debug/include/jpeglib.h \
+	../../../deps/build-x64-debug/include/lunasvg/lunasvg.h \
+	../../../deps/build-x64-debug/include/png.h \
+	../../include/lgi/common/App.h \
 	../../include/lgi/common/Array.h \
 	../../include/lgi/common/AutoPtr.h \
 	../../include/lgi/common/Base64.h \
@@ -120,6 +126,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/ColourSpace.h \
 	../../include/lgi/common/Com.h \
 	../../include/lgi/common/Combo.h \
+	../../include/lgi/common/CommsBus.h \
 	../../include/lgi/common/Containers.h \
 	../../include/lgi/common/Core.h \
 	../../include/lgi/common/Css.h \
@@ -152,6 +159,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/ImageList.h \
 	../../include/lgi/common/Input.h \
 	../../include/lgi/common/ItemContainer.h \
+	../../include/lgi/common/Jpeg.h \
 	../../include/lgi/common/Json.h \
 	../../include/lgi/common/Layout.h \
 	../../include/lgi/common/Lgi.h \
@@ -170,6 +178,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/ListItemCheckBox.h \
 	../../include/lgi/common/ListItemRadioBtn.h \
 	../../include/lgi/common/LMallocArray.h \
+	../../include/lgi/common/Lzw.h \
 	../../include/lgi/common/Mail.h \
 	../../include/lgi/common/Matrix.h \
 	../../include/lgi/common/Mem.h \
@@ -205,6 +214,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/RegKey.h \
 	../../include/lgi/common/Res.h \
 	../../include/lgi/common/Rops.h \
+	../../include/lgi/common/Roster.h \
 	../../include/lgi/common/ScrollBar.h \
 	../../include/lgi/common/SkinEngine.h \
 	../../include/lgi/common/Slider.h \
@@ -225,6 +235,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/TextLabel.h \
 	../../include/lgi/common/TextLog.h \
 	../../include/lgi/common/TextView3.h \
+	../../include/lgi/common/TextView4.h \
 	../../include/lgi/common/Thread.h \
 	../../include/lgi/common/ThreadEvent.h \
 	../../include/lgi/common/TimeZoneInfo.h \
@@ -234,6 +245,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/TrayIcon.h \
 	../../include/lgi/common/Tree.h \
 	../../include/lgi/common/TypeToString.h \
+	../../include/lgi/common/UdpTransport.h \
 	../../include/lgi/common/Undo.h \
 	../../include/lgi/common/Unicode.h \
 	../../include/lgi/common/UnicodeString.h \
@@ -266,6 +278,11 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/common/Gdc2/Alpha.cpp \
 	../../src/common/Gdc2/Colour.cpp \
 	../../src/common/Gdc2/Filters/Filter.cpp \
+	../../src/common/Gdc2/Filters/Gif.cpp \
+	../../src/common/Gdc2/Filters/Jpeg.cpp \
+	../../src/common/Gdc2/Filters/Lzw.cpp \
+	../../src/common/Gdc2/Filters/Png.cpp \
+	../../src/common/Gdc2/Filters/Svg.cpp \
 	../../src/common/Gdc2/Font/Charset.cpp \
 	../../src/common/Gdc2/Font/DisplayString.cpp \
 	../../src/common/Gdc2/Font/Font.cpp \
@@ -322,6 +339,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/common/Lgi/ViewCommon.cpp \
 	../../src/common/Lgi/WindowCommon.cpp \
 	../../src/common/Net/Base64.cpp \
+	../../src/common/Net/CommsBus.cpp \
 	../../src/common/Net/MDStringToDigest.cpp \
 	../../src/common/Net/Net.cpp \
 	../../src/common/Net/Uri.cpp \
@@ -332,6 +350,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/common/Text/String.cpp \
 	../../src/common/Text/TextConvert.cpp \
 	../../src/common/Text/TextView3.cpp \
+	../../src/common/Text/TextView4.cpp \
 	../../src/common/Text/Token.cpp \
 	../../src/common/Text/Unicode.cpp \
 	../../src/common/Text/Utf8.cpp \
@@ -377,6 +396,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/linux/Lgi/Thread.cpp \
 	../../src/linux/Lgi/View.cpp \
 	../../src/linux/Lgi/Window.cpp \
+	../../src/posix/Roster.cpp \
 	../../src/posix/SubProcess.cpp
 	export Build=$(Build); \
 	$(MAKE) -C ../../ -f ./linux/Makefile.linux
@@ -404,5 +424,4 @@ VPATH=$(BuildDir) \
 	../../src/common/Lgi \
 	../../src/common/Images/Compare \
 	../../src/common/Gdc2/Font \
-	../../src/common/Gdc2/Filters \
 	../../src/common/Coding

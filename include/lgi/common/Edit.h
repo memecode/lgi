@@ -36,16 +36,10 @@ public:
 	(
 		/// Ctrl's ID
 		int id,
-		/// x coord
-		int x = 0,
-		/// y coord
-		int y = 0,
-		/// width
-		int cx = -1,
-		/// height
-		int cy = -1,
-		/// Initial text
-		const char *name = NULL
+		/// Optional initial text
+		const char *name = nullptr,
+		/// Optional initial position
+		LRect *pos = nullptr
 	);
 	~LEdit();
 

@@ -24,7 +24,7 @@ public:
 
         if ((c = GetCell(0, y++)))
         {
-            c->Add(Name = new LEdit(ID_NAME, 0, 0, 80, 20, 0));
+            c->Add(Name = new LEdit(ID_NAME));
             Name->Name(Css->Name());
         }
 

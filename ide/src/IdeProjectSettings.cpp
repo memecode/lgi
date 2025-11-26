@@ -337,7 +337,7 @@ public:
 		auto t = d->Editing.GetChildTag(Path);
 		if (Setting->Type == GV_STRING)
 		{
-			Ctrls[i].Edit = new LEdit(IDC_EDIT_BASE + i, 0, 0, 60, 20);
+			Ctrls[i].Edit = new LEdit(IDC_EDIT_BASE + i);
 			Ctrls[i].Edit->MultiLine(Setting->Flag.MultiLine);
 			Ctrls[i].Edit->Password(Setting->Flag.IsPassword);
 			if (t && t->GetContent())
@@ -360,7 +360,7 @@ public:
 			if (Setting->Flag.Enum)
 			{
 				// Enum setting
-				c->Add(Ctrls[i].Cbo = new LCombo(IDC_COMBO_BASE + i, 0, 0, 60, 20));
+				c->Add(Ctrls[i].Cbo = new LCombo(IDC_COMBO_BASE + i));
 				
 				const char **Init = GetEnumValues(Setting->Setting);
 				if (Init)
@@ -376,7 +376,7 @@ public:
 			else
 			{
 				// Straight integer
-				c->Add(Ctrls[i].Edit = new LEdit(IDC_EDIT_BASE + i, 0, 0, 60, 20));
+				c->Add(Ctrls[i].Edit = new LEdit(IDC_EDIT_BASE + i));
 				if (t)
 					Ctrls[i].Edit->Value(t->GetContent() ? atoi(t->GetContent()) : 0);
 			}

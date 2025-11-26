@@ -403,8 +403,8 @@ LBrowser::LBrowser(LViewI *owner, const char *Title, char *Uri)
 	AddView(d->Back = new LButton(IDC_BACK, 0, 0, BTN_X, 20, "<-"));
 	AddView(d->Forward = new LButton(IDC_FORWARD, 0, 0, BTN_X, 20, "->"));
 	AddView(d->Stop = new LButton(IDC_REFRESH_STOP, 0, 0, -1, 20, "Refresh"));
-	AddView(d->UriEdit = new LEdit(IDC_URI, 0, 0, 100, 20, 0));
-	AddView(d->SearchEdit = new LEdit(IDC_SEARCH_TXT, 0, 0, 100, 20, ""));
+	AddView(d->UriEdit = new LEdit(IDC_URI));
+	AddView(d->SearchEdit = new LEdit(IDC_SEARCH_TXT));
 	AddView(d->Search = new LButton(IDC_SEARCH, 0, 0, -1, 20, "Search"));
 	AddView(d->Html = new Html1::LHtml(IDC_HTML, 0, 0, 100, 100));
 

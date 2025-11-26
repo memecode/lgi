@@ -1197,9 +1197,15 @@ void LItem::SetEditLabelSelection(int SelStart, int SelEnd)
 class LItemEditBox : public LEdit
 {
 	LItemEdit *ItemEdit;
+	LRect initSz;
+	LRect *setInitSz(int x, int y)
+	{
+		initSz.Set(1, 1, x-3, y-3);
+		return &initSz;
+	}
 
 public:
-	LItemEditBox(LItemEdit *i, int x, int y, const char *s) : LEdit(100, 1, 1, x-3, y-3, s)
+	LItemEditBox(LItemEdit *i, int x, int y, const char *s) : LEdit(100, s, setInitSz(x, y))
 	{
 		ItemEdit = i;
 		Sunken(false);

@@ -25,11 +25,11 @@ void LEdit::KeyProcessed()
 	d->NotificationProcessed = true;
 }
 
-LEdit::LEdit(int id, int x, int y, int cx, int cy, const char *name) :
+LEdit::LEdit(int id, const char *name, LRect *pos) :
 	#if WINNATIVE
 	ResObject(Res_EditBox)
 	#else
-	LTextView3(id, x, y, cx, cy)
+	LTextView3(id, pos?pos->x1:0, pos?pos->y1:0, pos?pos->X():20, pos?pos->Y():20)
 	#endif
 {
 	#if !WINNATIVE
@@ -40,18 +40,20 @@ LEdit::LEdit(int id, int x, int y, int cx, int cy, const char *name) :
 	#endif
 	d = new LEditPrivate;
 
-	LDisplayString Ds(LSysFont, (char*)(name?name:"A"));
-	if (cx < 0) cx = Ds.X() + 6;
-	if (cy < 0) cy = Ds.Y() + 4;
-
 	d->Multiline = false;
 	d->Password = false;
 
 	Sunken(true);
-	if (name) Name(name);
-
-	LRect r(x, y, x+MAX(cx, 10), y+MAX(cy, 10));
-	SetPos(r);
+	if (name)
+		Name(name);
+	if (pos)
+		SetPos(*pos);
+	else
+	{
+		LDisplayString Ds(LSysFont, (char*)(name?name:"A"));
+		LRect r(0, 0, MAX(Ds.X() + 6, 10), MAX(Ds.Y() + 4, 10));
+		SetPos(r);
+	}
 	LResources::StyleElement(this);
 }
 

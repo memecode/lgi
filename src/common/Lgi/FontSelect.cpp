@@ -75,8 +75,8 @@ LFontSelect::LFontSelect(LView *Parent, void *Init, int InitLen)
 	
 	c = d->Tbl->GetCell(1, 1, true, 1, 1);
 		c->Add(rg = new LRadioGroup(IDM_STATIC, LLoadString(L_FONTUI_PTSIZE, "Pt Size")));
-		rg->AddView(new LEdit(IDC_PT_SIZE, 0, 0, 56, 21, ""));
-		rg->AddView(d->PtSizes = new LCombo(IDC_SELECT_SIZE, 0, 0, 20, 20, ""));
+		rg->AddView(new LEdit(IDC_PT_SIZE));
+		rg->AddView(d->PtSizes = new LCombo(IDC_SELECT_SIZE));
 	
 	c = d->Tbl->GetCell(0, 2, true, 2, 1);
 		c->Add(new LTextLabel(IDM_STATIC, 0, 0, -1, -1, LLoadString(L_FONTUI_PREVIEW, "Preview:")));

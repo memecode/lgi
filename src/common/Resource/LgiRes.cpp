@@ -740,7 +740,7 @@ ResObject *LResources::CreateObject(LXmlTag *t, ResObject *Parent)
 		}
 		else if (stricmp(t->GetTag(), Res_EditBox) == 0)
 		{
-			Wnd = new LEdit(0, 0, 0, -1, -1, "");
+			Wnd = new LEdit(0);
 		}
 		else if (stricmp(t->GetTag(), Res_CheckBox) == 0)
 		{
@@ -797,7 +797,7 @@ ResObject *LResources::CreateObject(LXmlTag *t, ResObject *Parent)
 		}
 		else if (stricmp(t->GetTag(), Res_ComboBox) == 0)
 		{
-			Wnd = new LCombo(0, 0, 0, 100, 20, "");
+			Wnd = new LCombo(0);
 		}
 		else if (stricmp(t->GetTag(), Res_Bitmap) == 0)
 		{

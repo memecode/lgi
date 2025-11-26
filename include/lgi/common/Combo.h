@@ -24,17 +24,9 @@ public:
 	LCombo
 	(
 		/// The control ID
-		int id,
-		/// The left edge x coordinate
-		int x,
-		/// The top edge y coordinate
-		int y,
-		/// The width
-		int cx,
-		/// The height
-		int cy,
-		/// The initial text
-		const char *name = NULL
+		int id = ID_STATIC,
+		/// Optional ctrl pos
+		LRect *pos = nullptr
 	);
 	~LCombo();
 
@@ -116,14 +108,14 @@ public:
 	bool OnKey(LKey &k) override;
 	
 	#if WINNATIVE
-	bool SetPos(LRect &p, bool Repaint = false);
-	int SysOnNotify(int Msg, int Code);
+		bool SetPos(LRect &p, bool Repaint = false);
+		int SysOnNotify(int Msg, int Code);
 	#else
-	void OnFocus(bool f) override;
-	void OnPaint(LSurface *pDC) override;
-	void OnMouseClick(LMouse &m) override;
-	void OnPosChange() override;
-	void SetFont(LFont *Fnt, bool OwnIt = false) override;
+		void OnFocus(bool f) override;
+		void OnPaint(LSurface *pDC) override;
+		void OnMouseClick(LMouse &m) override;
+		void OnPosChange() override;
+		void SetFont(LFont *Fnt, bool OwnIt = false) override;
 	#endif
 };
 

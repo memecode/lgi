@@ -997,14 +997,14 @@ public:
 							if (c)
 							{
 								c->PaddingRight(LCss::Len("1em"));
-								c->Add(ed = new LEdit(IDC_MEM_ADDR, 0, 0, 60, 20));
+								c->Add(ed = new LEdit(IDC_MEM_ADDR));
 								ed->SetFont(&Small);
 							}								
 							c = MemTable->GetCell(x++, y);
 							if (c)
 							{
 								c->PaddingRight(LCss::Len("1em"));
-								c->Add(cbo = new LCombo(IDC_MEM_SIZE, 0, 0, 60, 20));
+								c->Add(cbo = new LCombo(IDC_MEM_SIZE));
 								cbo->SetFont(&Small);
 								cbo->Insert("1 byte");
 								cbo->Insert("2 bytes");
@@ -1022,7 +1022,7 @@ public:
 							if (c)
 							{
 								c->PaddingRight(LCss::Len("1em"));
-								c->Add(ed = new LEdit(IDC_MEM_ROW_LEN, 0, 0, 60, 20));
+								c->Add(ed = new LEdit(IDC_MEM_ROW_LEN));
 								ed->SetFont(&Small);
 							}
 							c = MemTable->GetCell(x++, y);								
@@ -1101,7 +1101,7 @@ public:
 										DebuggerLog = 
 										new DebugTextLog(IDC_DEBUGGER_LOG));
 					DebuggerLog->SetFont(&Small);
-					DebugLog->AddView(DebugEdit = new LEdit(IDC_DEBUG_EDIT, 0, 0, 60, 20));
+					DebugLog->AddView(DebugEdit = new LEdit(IDC_DEBUG_EDIT));
 					DebugEdit->GetCss(true)->Height(LCss::Len(LCss::LenPx, (float)(LSysFont->GetHeight() + 8)));
 				}
 			}

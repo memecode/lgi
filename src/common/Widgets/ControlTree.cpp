@@ -218,8 +218,12 @@ void LControlTree::Item::Select(bool b)
 				default:
 					break;
 				case GV_STRING:
-					if ((Ctrl = new LEdit(CtrlId, 0, 0, 200, CtrlY, 0)))
+					if ((Ctrl = new LEdit(CtrlId)))
+					{
+						LRect r(0, 0, 200, CtrlY);
+						Ctrl->SetPos(r);
 						Ctrl->Name(Value.Str());
+					}
 					if (Flags & TYPE_FILE)
 						Browse = new LButton(IDC_BROWSE, 0, 0, -1, CtrlY, "...");
 					break;
@@ -231,7 +235,7 @@ void LControlTree::Item::Select(bool b)
 					if (Enum)
 					{
 						LCombo *Cbo;
-						if ((Ctrl = (Cbo = new LCombo(CtrlId, 0, 0, 120, CtrlY, 0))))
+						if ((Ctrl = (Cbo = new LCombo(CtrlId))))
 						{
 							int Idx = -1;
 
@@ -247,10 +251,11 @@ void LControlTree::Item::Select(bool b)
 								Ctrl->Value(Idx);
 						}
 					}
-					else
+					else if ((Ctrl = new LEdit(CtrlId)))
 					{
-						if ((Ctrl = new LEdit(CtrlId, 0, 0, 60, CtrlY, 0)))
-							Ctrl->Value(Value.CastInt32());
+						LRect r(0, 0, 60, CtrlY);
+						Ctrl->SetPos(r);
+						Ctrl->Value(Value.CastInt32());
 					}
 					break;
 			}

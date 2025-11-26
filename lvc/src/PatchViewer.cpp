@@ -148,7 +148,7 @@ public:
 			c->PaddingLeft("0.5em");
 			c->PaddingTop("0.5em");
 		c = tbl->GetCell(1, y);
-			c->Add(new LEdit(IDC_PATCH_FILE, 0, 0, 60, 20));
+			c->Add(new LEdit(IDC_PATCH_FILE));
 			c->PaddingTop("0.5em");
 		c = tbl->GetCell(2, y++);
 			c->Add(new LButton(IDC_BROWSE_PATCH, 0, 0, -1, -1, "..."));
@@ -160,7 +160,7 @@ public:
 			c->VerticalAlign(LCss::VerticalMiddle);
 			c->PaddingLeft("0.5em");
 		c = tbl->GetCell(1, y);
-			c->Add(new LEdit(IDC_BASE_DIR, 0, 0, 60, 20));
+			c->Add(new LEdit(IDC_BASE_DIR));
 		c = tbl->GetCell(2, y++);
 			c->Add(new LButton(IDC_BROWSE_BASE, 0, 0, -1, -1, "..."));
 			c->PaddingRight("0.5em");

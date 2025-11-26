@@ -68,7 +68,7 @@ LFindDlg::LFindDlg(LView *Parent, Callback Cb, const char *Init)
         c->Add(new LTextLabel(IDS_16, 14, 14, -1, -1, LLoadString(L_FR_FIND_WHAT, "Find what:")));
         
         c = t->GetCell(1, Row);
-    	c->Add(d->Edit = new LEdit(IDC_TEXT, 91, 7, 168, 21, ""));
+    	c->Add(d->Edit = new LEdit(IDC_TEXT));
     	
     	c = t->GetCell(2, Row++);
     	c->Add(new LButton(IDOK, 294, 7, 70, 21, LLoadString(L_FR_FIND_NEXT, "Find Next")));
@@ -213,7 +213,7 @@ LReplaceDlg::LReplaceDlg(LView *Parent, Callback Cb, char *InitFind, char *InitR
     	c->Add(new LTextLabel(-1, 14, 14, -1, -1, LLoadString(L_FR_FIND_WHAT, "Find what:")));
 
         c = t->GetCell(1, Row);
-    	c->Add(f = new LEdit(IDC_TEXT, 0, 0, 60, 20, ""));
+    	c->Add(f = new LEdit(IDC_TEXT));
 
         c = t->GetCell(2, Row++);
     	c->Add(new LButton(IDC_FR_FIND, 0, 0, -1, -1, LLoadString(L_FR_FIND_NEXT, "Find Next")));
@@ -222,7 +222,7 @@ LReplaceDlg::LReplaceDlg(LView *Parent, Callback Cb, char *InitFind, char *InitR
 	    c->Add(new LTextLabel(-1, 0, 0, -1, -1, LLoadString(L_FR_REPLACE_WITH, "Replace with:")));
 
         c = t->GetCell(1, Row);	
-    	c->Add(new LEdit(IDC_REPLACE_WITH, 0, 0, -1, -1, ""));
+    	c->Add(new LEdit(IDC_REPLACE_WITH));
 
         c = t->GetCell(2, Row++);	
     	c->Add(new LButton(IDC_FR_REPLACE, 0, 0, -1, -1, LLoadString(L_FR_REPLACE, "Replace")));

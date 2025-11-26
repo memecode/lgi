@@ -55,10 +55,10 @@ EditTray::EditTray(LTextView3 *ctrl, IdeDoc *doc)
 	FuncBtn.ZOff(-1, -1);
 	SymBtn.ZOff(-1, -1);
 		
-	int Ht = LSysFont->GetHeight() + 6;
-	AddView(FileSearch   = new LEdit(IDC_FILE_SEARCH,   0, 0, EDIT_CTRL_WIDTH, Ht));
-	AddView(FuncSearch   = new LEdit(IDC_METHOD_SEARCH, 0, 0, EDIT_CTRL_WIDTH, Ht));
-	AddView(SymSearch    = new LEdit(IDC_SYMBOL_SEARCH, 0, 0, EDIT_CTRL_WIDTH, Ht));
+	LRect r(0, 0, EDIT_CTRL_WIDTH-1, LSysFont->GetHeight()+5);
+	AddView(FileSearch   = new LEdit(IDC_FILE_SEARCH,   nullptr, &r));
+	AddView(FuncSearch   = new LEdit(IDC_METHOD_SEARCH, nullptr, &r));
+	AddView(SymSearch    = new LEdit(IDC_SYMBOL_SEARCH, nullptr, &r));
 }
 	
 EditTray::~EditTray()
