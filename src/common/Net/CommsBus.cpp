@@ -5,6 +5,16 @@
 #include "lgi/common/Json.h"
 #include "lgi/common/UdpTransport.h"
 
+/*
+If you see broadcast errors on port 45454 on Linux:
+	
+	sudo ufw allow in 45454
+	sudo ufw allow out 45454
+	
+Monitoring:
+	tail -f /var/log/syslog | grep -i ufw
+*/
+
 #define COMMBUS_MULTICAST	"230.6.6.10"
 #define DEFAULT_COMMS_PORT	45454
 #define RETRY_SERVER		-2

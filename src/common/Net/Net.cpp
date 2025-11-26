@@ -1504,7 +1504,12 @@ int LSocket::WriteUdp(void *Buffer, int Size, int Flags, uint32_t Ip, uint16_t P
 	}
 	else
 	{
-		printf("%s:%i - sendto failed with %i.\n", _FL, errno);
+		LError err(errno);
+		auto msg = LString::Fmt("WriteUdp.sendto(%s,%i) failed with %s.",
+			LIpToStr(Ip).Get(), Port,
+			err.ToString().Get());
+		LgiTrace("%s:%i %s\n", _FL, msg.Get());
+		OnError(err.GetCode(), msg);
 	}
 	return (int)b;
 }

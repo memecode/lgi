@@ -58,9 +58,9 @@ else
 		`pkg-config --libs gtk+-3.0` \
 		`pkg-config --libs ayatana-appindicator3-0.1`
 	Inc =  \
+		`pkg-config --cflags gtk+-3.0` \
 		-I./private/common \
 		`pkg-config --cflags ayatana-appindicator3-0.1` \
-		`pkg-config --cflags gtk+-3.0` \
 		-I./include/lgi/linux/Gtk \
 		`pkg-config --cflags gstreamer-1.0` \
 		-I../deps/build-x64-release/include \
@@ -70,25 +70,25 @@ else
 endif
 
 # Dependencies
-Source =	src/linux/Lgi/General.cpp \
-			src/common/Gdc2/Tools/ColourReduce.cpp \
+Source =	src/linux/Lgi/App.cpp \
+			src/linux/Lgi/General.cpp \
 			src/common/Lgi/DragAndDropCommon.cpp \
-			src/common/General/TimeZone.cpp \
-			src/linux/Gtk/LgiWidget.cpp \
-			src/linux/Lgi/View.cpp \
 			src/common/General/DateTime.cpp \
-			src/linux/General/ShowFileProp_Linux.cpp \
-			src/common/General/Properties.cpp \
-			src/linux/Lgi/App.cpp \
-			src/common/Lgi/ViewCommon.cpp \
-			src/common/General/FileCommon.cpp \
-			src/common/General/Containers.cpp \
+			src/linux/Lgi/View.cpp \
 			src/linux/General/File.cpp \
-			src/linux/Lgi/Window.cpp \
-			src/linux/Lgi/DragAndDrop.cpp \
+			src/linux/General/ShowFileProp_Linux.cpp \
 			src/common/Lgi/AppCommon.cpp \
-			src/common/Lgi/Library.cpp \
+			src/common/General/Properties.cpp \
+			src/common/Gdc2/Tools/ColourReduce.cpp \
+			src/common/General/FileCommon.cpp \
+			src/linux/Lgi/Window.cpp \
+			src/linux/Gtk/LgiWidget.cpp \
+			src/linux/Lgi/DragAndDrop.cpp \
+			src/common/General/TimeZone.cpp \
 			src/common/Lgi/WindowCommon.cpp \
+			src/common/General/Containers.cpp \
+			src/common/Lgi/ViewCommon.cpp \
+			src/common/Lgi/Library.cpp \
 			src/linux/General/Mem.cpp \
 			src/linux/Lgi/Menu.cpp \
 			src/common/General/ExeCheck.cpp \

@@ -492,8 +492,8 @@
 	</Node>
 	<Node Name="Build" Type="1" Platforms="15" Id="83">
 		<Node File="./CMakeLists.txt" Type="8" Platforms="15" />
-		<Node File="./haiku/Makefile.haiku" Type="9" Platforms="0" />
-		<Node File="./linux/Makefile.linux" Type="9" Platforms="15" />
+		<Node File="./haiku/Makefile.haiku" Type="9" Platforms="8" />
+		<Node File="./linux/Makefile.linux" Type="9" Platforms="2" />
 	</Node>
 	<Settings>
 		<General>

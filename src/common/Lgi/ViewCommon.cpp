@@ -1705,9 +1705,9 @@ bool LView::DropTarget(bool t)
 
 		if (auto wnd = GetWindow())
 		{
-			Status = wnd->OnGtkDropTarget(this, t);
-			if (Status && !d->DropTarget)
+			if (!DropTarget())
 				d->DropTarget = t ? GetWindow() : nullptr;
+			Status = wnd->OnGtkDropTarget(this, t);
 		}
 
 	#endif

@@ -235,13 +235,13 @@ bool LXmlTreeUi::Convert(LDom *Tag, LViewI *Ui, bool ToUI)
 	if (Ui && Tag)
 	{
 		LVariant v;
-		LXmlTag *Xml = dynamic_cast<LXmlTag*>(Tag);
+		auto Xml = dynamic_cast<LXmlTag*>(Tag);
 		if (ToUI)
 		{
 			// Xml -> UI
-			for (auto Map : d->Maps)
+			for (auto Map: d->Maps)
 			{
-				Mapping *m = Map.value;
+				auto m = Map.value;
 				switch (m->Hint)
 				{
 					case GV_HASHTABLE:
@@ -334,11 +334,11 @@ bool LXmlTreeUi::Convert(LDom *Tag, LViewI *Ui, bool ToUI)
 							}
 							Status = true;
 						}
-						else
+						else // no value, so set to blank
 						{
-							LEdit *c;
-							if (Ui->GetViewById(m->Id, c))
-								c->Name("");
+							LView *v;
+							if (Ui->GetViewById(m->Id, v))
+								v->Name("");
 						}
 						break;
 					}

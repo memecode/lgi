@@ -32,12 +32,12 @@ ifeq ($(Build),Debug)
 		-L../$(BuildDir)
 	Inc =  \
 		-I../include \
-		-I../private/common \
-		-I../include/lgi/linux/Gtk \
 		-I./resources \
-		-I../include/lgi/linux \
+		-I./src \
+		-I../include/lgi/linux/Gtk \
+		-I../private/common \
 		`pkg-config --cflags gtk+-3.0` \
-		-I./src
+		-I../include/lgi/linux
 else
 	CFlags += -s -Os -Wno-format-truncation
 	CppFlags += -s -Os -Wno-format-truncation
@@ -51,37 +51,16 @@ else
 		-L../$(BuildDir)
 	Inc =  \
 		-I./resources \
-		-I../include/lgi/linux/Gtk \
 		-I./src \
-		`pkg-config --cflags gtk+-3.0` \
+		-I../include \
 		-I../private/common \
 		-I../include/lgi/linux \
-		-I../include
+		`pkg-config --cflags gtk+-3.0` \
+		-I../include/lgi/linux/Gtk
 endif
 
 # Dependencies
-Source =	src/IdeDoc.cpp \
-			../src/common/Lgi/RemoteFileSelect.cpp \
-			../src/common/Coding/ParseCpp.cpp \
-			../src/common/Text/RemoveAnsi.cpp \
-			../src/common/Text/TextConvert.cpp \
-			src/DocEditStyling.cpp \
-			../src/common/Lgi/About.cpp \
-			src/History.cpp \
-			../src/common/Text/DocView.cpp \
-			src/LgiIde.cpp \
-			../src/common/Net/OpenSSLSocket.cpp \
-			src/Debugger.cpp \
-			../src/common/Text/TextView4.cpp \
-			../src/common/Lgi/LgiMain.cpp \
-			../src/common/Text/Html.cpp \
-			src/WebFldDlg.cpp \
-			../src/common/Lgi/Mdi.cpp \
-			../src/common/Text/HtmlCommon.cpp \
-			src/DebugContext.cpp \
-			src/DocEdit.cpp \
-			../src/common/Text/HtmlParser.cpp \
-			../src/common/Text/Homoglyphs/Homoglyphs.cpp \
+Source =	src/LgiUtils.cpp \
 			src/IdeProject.cpp \
 			src/IdeProjectSettings.cpp \
 			src/MissingFiles.cpp \
@@ -89,6 +68,23 @@ Source =	src/IdeDoc.cpp \
 			src/ProjectNode.cpp \
 			src/IdeFindInFiles.cpp \
 			src/FindSymbol.cpp \
+			../src/common/Net/OpenSSLSocket.cpp \
+			src/DebugContext.cpp \
+			../src/common/Net/Http.cpp \
+			../src/common/Text/DocView.cpp \
+			../src/common/Text/HtmlCommon.cpp \
+			src/WebFldDlg.cpp \
+			../src/common/Text/TextView4.cpp \
+			../src/common/Coding/ParseCpp.cpp \
+			../src/common/Text/RemoveAnsi.cpp \
+			../src/common/Text/TextConvert.cpp \
+			src/DocEditStyling.cpp \
+			../src/common/Lgi/About.cpp \
+			src/DocEdit.cpp \
+			src/LgiIde.cpp \
+			../src/common/Text/Homoglyphs/Homoglyphs.cpp \
+			../src/common/Lgi/Mdi.cpp \
+			src/IdeDoc.cpp \
 			src/JavascriptParser.cpp \
 			src/PythonParser.cpp \
 			src/SimpleCppParser.cpp \
@@ -97,12 +93,16 @@ Source =	src/IdeDoc.cpp \
 			src/IdeCommon.cpp \
 			../src/common/Net/Ftp.cpp \
 			../src/common/Net/Ssh.cpp \
+			src/Debugger.cpp \
+			../src/common/Lgi/LgiMain.cpp \
+			src/History.cpp \
+			../src/common/Text/HtmlParser.cpp \
+			../src/common/Text/Html.cpp \
+			../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
+			../src/common/Lgi/RemoteFileSelect.cpp \
 			../src/common/Lgi/SystemIntf.cpp \
 			src/MemDumpViewer.cpp \
-			src/SpaceTabConv.cpp \
-			../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
-			src/LgiUtils.cpp \
-			../src/common/Net/Http.cpp
+			src/SpaceTabConv.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -445,8 +445,8 @@ cleanall :
 
 VPATH=$(BuildDir) \
 	./src \
-	../src/common/Coding \
-	../src/common/Lgi \
-	../src/common/Net \
+	../src/common/Text/Homoglyphs \
 	../src/common/Text \
-	../src/common/Text/Homoglyphs
+	../src/common/Net \
+	../src/common/Lgi \
+	../src/common/Coding

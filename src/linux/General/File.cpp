@@ -662,10 +662,15 @@ struct LVolumePriv
 								v->d->Type = VT_HARDDISK;
 
 								struct statvfs s = {0};
+								auto startTs = LCurrentTime();
 								int r = statvfs(Mount, &s);
+								auto endTs = LCurrentTime();
+								if (endTs - startTs > 20)
+									LgiTrace("%s:%i - statvfs(%s) took " LPrintfInt64 "ms.\n", _FL, Mount.Get(), endTs-startTs);
+								
 								if (r)
 								{
-									LgiTrace("%s:%i - statvfs(%s) failed.\n", _FL, Mount);
+									LgiTrace("%s:%i - statvfs(%s) failed.\n", _FL, Mount.Get());
 								}
 								else
 								{
@@ -1057,12 +1062,15 @@ int LDirectory::First(const char *Name, const char *Pattern)
 	d->end = d->path + strlen(d->path);
 	d->dir = opendir(d->path);
 	if (!d->dir)
-		printf("%s:%i - opendir(%s) failed: %i\n", _FL, Name, errno);
+	{
+		if (errno != ENOENT)
+			LgiTrace("%s:%i - opendir(%s) failed: %i\n", _FL, Name, errno);
+	}
 	else
 	{
 		d->entry = readdir(d->dir);
 		if (!d->entry)
-			printf("%s:%i - readdir failed: %i\n", _FL, errno);
+			LgiTrace("%s:%i - readdir failed: %i\n", _FL, errno);
 		else
 		{
 			char s[MaxPathLen];
