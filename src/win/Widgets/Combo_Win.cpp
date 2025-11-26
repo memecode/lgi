@@ -38,17 +38,13 @@ public:
 	}
 };
 
-LCombo::LCombo(int id, int x, int y, int cx, int cy, const char *name) :
+LCombo::LCombo(int id, LRect *pos) :
 	ResObject(Res_ComboBox)
 {
 	d = new LComboPrivate;
-	if (ValidStr(name))
-		Name(name);
-	
-	LRect r(x, y, x+cx, y+cy);
-	SetPos(r);
-	
 	SetId(id);
+	if (pos)
+		SetPos(*pos);
 	SetTabStop(true);
 	SetStyle(GetStyle() | CBS_DROPDOWNLIST | CBS_DISABLENOSCROLL);
 

@@ -53,8 +53,8 @@ class LDataGridEdit : public LEdit
 	LDataGridPriv *d;
 
 public:
-	LDataGridEdit(LDataGridPriv *data, int id, int x, int y, int cx, int cy, const char *txt) :
-		LEdit(id, x, y, cx, cy, txt)
+	LDataGridEdit(LDataGridPriv *data, int id, const char *txt, LRect *pos) :
+		LEdit(id, txt, pos)
 	{
 		d = data;
 	}
@@ -133,7 +133,7 @@ class LDataGridCombo : public LCombo
 	LDataGridPriv *d;
 
 public:
-	LDataGridCombo(LDataGridPriv *priv, int id, LRect &rc) : LCombo(id, rc.x1, rc.y1, rc.X(), rc.Y(), 0)
+	LDataGridCombo(LDataGridPriv *priv, int id, LRect &rc) : LCombo(id, &rc)
 	{
 		d = priv;
 	}
@@ -339,7 +339,7 @@ void LDataGridPriv::Create(int NewCol)
 					rc.y2 -= 1;
 
 					// Create edit control with the correct info for the cell
-                    e = Edit = new LDataGridEdit(this, IDC_EDIT, rc.x1, rc.y1, rc.X(), rc.Y(), CurText);
+                    e = Edit = new LDataGridEdit(this, IDC_EDIT, CurText, &rc);
 					if (e)
 					{
 						e->Sunken(false);

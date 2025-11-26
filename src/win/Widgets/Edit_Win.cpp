@@ -73,21 +73,25 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-LEdit::LEdit(int id, int x, int y, int cx, int cy, const char *name) :
+LEdit::LEdit(int id, const char *name, LRect *pos) :
 	LControl(LGI_EDITBOX),
 	ResObject(Res_EditBox)
 {
 	d = new LEditPrivate;
-	LPoint Size = SizeOfStr((name)?name:(char*)"A");
-	if (cx < 0) cx = Size.x + 6;
-	if (cy < 0) cy = Size.y + 4;
 	WndFlags |= GWF_SYS_BORDER;
 
 	SetId(id);
 	Sunken(true);
-	if (name) Name(name);
-	LRect r(x, y, x+max(cx, 10), y+max(cy, 10));
-	SetPos(r);
+	if (name)
+		Name(name);
+	if (pos)
+		SetPos(*pos);
+	else
+	{
+		auto size = SizeOfStr((name)?name:(char*)"A");
+		LRect r(0, 0, max(size.x+6, 10), max(size.y+4, 10));
+		SetPos(r);
+	}
 	SetStyle(WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_TABSTOP);
 	SetFont(LSysFont);
 
