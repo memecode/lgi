@@ -4180,14 +4180,65 @@ bool VcFolder::ParseCommit(int Result, LString s, ParseParams *Params)
 	return true;
 }
 
+bool isPersonalUrl(LString s)
+{
+	const char *personalUrl[] = {
+		"phab.mallen.id.au",
+		"github.com/memecode"
+	};
+	for (int i=0; i<CountOf(personalUrl); i++)
+		if (s.Lower().Find(personalUrl[i]) >= 0)
+			return true;
+	return false;
+}
+
 void VcFolder::Commit(const char *Msg, const char *Branch, bool AndPush)
 {
+	if (preCommitCheck)
+	{
+		preCommitCheck = false;
+		GetRemoteUrl
+		(
+			[
+				this,
+				msg=LString(Msg),
+				branch=LString(Branch),
+				AndPush
+			]
+			(auto code, auto url)
+			{
+				if (isPersonalUrl(url))
+				{
+					// Check if the author is set correctly...
+					GetAuthor
+					(
+						true,
+						[this, msg, branch, AndPush](auto name, auto email)
+						{
+							if (name == "Matthew Allen" &&
+								email == "fret@memecode.com")
+								Commit(msg, branch, AndPush);
+							else
+								LgiMsg(GetTree(), "Author name/email not setup for personal repo.", AppName, MB_OK);
+						}
+					);
+				}
+				else
+				{
+					Commit(msg, branch, AndPush);
+				}
+			}
+		);
+		return;
+	}
+
+	#if 1
+
 	LArray<VcFile*> Add;
 	bool Partial = false;
 	for (auto fp: *d->Files)
 	{
-		VcFile *f = dynamic_cast<VcFile*>(fp);
-		if (f)
+		if (auto f = dynamic_cast<VcFile*>(fp))
 		{
 			int c = f->Checked();
 			if (c > 0)
@@ -4320,6 +4371,8 @@ void VcFolder::Commit(const char *Msg, const char *Branch, bool AndPush)
 			}
 		}
 	}
+	
+	#endif
 }
 
 bool VcFolder::ParseStartBranch(int Result, LString s, ParseParams *Params)

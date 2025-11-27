@@ -243,6 +243,7 @@ protected:
 	// Author name/email
 	Author AuthorLocal, AuthorGlobal;
 	bool IsGettingAuthor = false;
+	bool preCommitCheck = true;
 
 	// This is set when a blame or log is looking at a particular file, 
 	// and wants it selected after the file list is populated
