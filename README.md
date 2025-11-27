@@ -66,9 +66,9 @@ compile.
 
 ### Building using Visual Studio:
 >#### vs2019
->Load  and build `win/Lgi_vs2019.sln`
+>Load  and build [win/Lgi_vs2019.sln](https://github.com/memecode/lgi/blob/main/win/Lgi_vs2019.sln)
 >#### vs2022
->Load  and build `win/Lgi_vs2022.sln`
+>Load  and build [win/Lgi_vs2022.sln](https://github.com/memecode/lgi/blob/main/win/Lgi_vs2022.sln)
 >
 >#### Add these library folders to your PATH:
 > ```
@@ -77,7 +77,7 @@ compile.
 >```
 
 ### Building using XCode:
->Open `lgi/trunk/src/mac/cocoa/LgiCocoa.xcodeproj` in XCode and then build.
+>Open [lgi/trunk/src/mac/cocoa/LgiCocoa.xcodeproj](https://github.com/memecode/lgi/tree/main/src/mac/cocoa/LgiCocoa.xcodeproj) in XCode and then build.
 
 ## Creating an application
 
@@ -85,7 +85,7 @@ One way of starting an application is to use `LgiIde`:
 
 >#### Windows
 >
->Build and run `lgi/trunk/ide/win/LgiIde.sln`
+>Build and run [lgi/trunk/ide/win/LgiIde.sln](https://github.com/memecode/lgi/blob/main/ide/win/LgiIde.sln)
 >
 >Use the menu Project 🡒 New From Template
 >
@@ -111,8 +111,8 @@ One way of starting an application is to use `LgiIde`:
 
 ### Build settings:
 #### Windows
-Add the project `win\Lgi_vs2019.vxproj` to your workspace. Then in your 
-new project you'll need to set these settings:
+Add the project [win\Lgi_vs2019.vxproj](https://github.com/memecode/lgi/blob/main/win/Lgi_vs2019.vcxproj) to your workspace.
+Then in your new project you'll need to set these settings:
 
 * C/C++ tab
 	- C++ Language
@@ -151,17 +151,22 @@ with links into the source code itself.
 
 The general pattern for bootstrapping an application is:
 
-- Add `LgiMain.cpp` and then in a new source file
-- implement `LgiMain` that
-- instantiates an `LApp` object and
-- then creates an instance of a new application class that overrides `LWindow`. Assign that to `LApp::AppWnd`
-- finally start the message pump by calling `LApp::Run`
+- Add [LgiMain.cpp](https://github.com/memecode/lgi/blob/main/src/common/Lgi/LgiMain.cpp) and then in a new source file
+- implement [LgiMain](https://github.com/memecode/lgi/blob/main/src/common/Lgi/LgiMain.cpp#L36) that
+- instantiates an [LApp](https://github.com/memecode/lgi/blob/main/include/lgi/common/App.h#L105) object and
+- then creates an instance of a new application class that overrides 
+	[LWindow](https://github.com/memecode/lgi/blob/main/include/lgi/common/Window.h#L31). Assign that to
+	[LApp::AppWnd](https://github.com/memecode/lgi/blob/main/include/lgi/common/App.h#L204).
+- finally start the message pump by calling [LApp::Run](https://github.com/memecode/lgi/blob/main/include/lgi/common/App.h#L245)
 
-There is a fairly bare bones example of this in `lgi/trunk/templates/windows/basic_gui_vs2019`. It's
-not windows specific though, and the code in `main.cpp` will run on all supported platforms.
+There is a fairly bare bones example of this in
+[lgi/trunk/templates/windows/basic_gui_vs2019](https://github.com/memecode/lgi/tree/main/templates/windows/basic_gui_vs2019).
+It's not windows specific though, and the code in
+[Main.cpp](https://github.com/memecode/lgi/blob/main/templates/windows/basic_gui_vs2019/Main.cpp)
+will run on all supported platforms.
 
 If you want to look at some more complete examples, see:
 
-- lgi/trunk/ide
-- lgi/trunk/lvc
-- lgi/trunk/resourceEditor
+- [lgi/trunk/ide](https://github.com/memecode/lgi/tree/main/ide)
+- [lgi/trunk/lvc](https://github.com/memecode/lgi/tree/main/lvc)
+- [lgi/trunk/resourceEditor](https://github.com/memecode/lgi/tree/main/resourceEditor)
