@@ -109,7 +109,8 @@ One way of starting an application is to use `LgiIde`:
 >- Right click `$ProjectName/Source` and add `lgi/trunk/src/common/Lgi/LgiMain.cpp`
 >- Start adding your own source, implementing `LgiMain` somewhere...
 
-### Windows
+### Build settings:
+#### Windows
 Add the project `win\Lgi_vs2019.vxproj` to your workspace. Then in your 
 new project you'll need to set these settings:
 
@@ -126,14 +127,14 @@ new project you'll need to set these settings:
 	- Object/library modules:
 		- Add `imm32.lib` (if you use LTextView3.cpp)
 
-### Linux/Cygwin
+#### Linux/Cygwin
 * Add to your library string:
 	- [Debug] `-Llgi/trunk/Debug -llgid`
 	- [Release] `-Llgi/trunk/Release -llgi`
 * Add to your compile flags:
 	- `-ilgi/trunk/include`
 
-### Mac
+#### Mac
 * Include the `src/cocoa/LgiCocoa.xcodeproj` into your app
 	- Select your top level project in the tree
 	- Select your target
@@ -143,16 +144,24 @@ new project you'll need to set these settings:
 	- In `Build Phases 🡒 Target Dependencies` add `LgiCocoa`
 	- In `Build Phases 🡒 Link Binary With Libraries` add `LgiCocoa`
 
-## Usage
+## Writing applications
 
-In most cases just:
+There is a fairly complete list of features on the [Lgi Homepage](https://www.memecode.com/lgi/#features) 
+with links into the source code itself.
 
-    #include "lgi/common/Lgi.h"
+The general pattern for bootstrapping an application is:
 
-## Documentation
-    
-See: docs/html/index.html.
+- Add `LgiMain.cpp` and then in a new source file
+- implement `LgiMain` that
+- instantiates an `LApp` object and
+- then creates an instance of a new application class that overrides `LWindow`. Assign that to `LApp::AppWnd`
+- finally start the message pump by calling `LApp::Run`
 
-Which you may have to generate with doxygen if you are building from the
-repository.
+There is a fairly bare bones example of this in `lgi/trunk/templates/windows/basic_gui_vs2019`. It's
+not windows specific though, and the code in `main.cpp` will run on all supported platforms.
 
+If you want to look at some more complete examples, see:
+
+- lgi/trunk/ide
+- lgi/trunk/lvc
+- lgi/trunk/resourceEditor
