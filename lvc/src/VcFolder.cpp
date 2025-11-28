@@ -2348,30 +2348,77 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 	{
 		case VcGit:
 		{
+			enum TState {
+				TNone,
+				TAdded,
+				TNotStaged,
+				TUntracked,
+				TDiffs,
+			}	state = TNone;
+		
+			struct PathStatus {
+				LString op, path;
+			};
+			LArray<PathStatus> added, notStaged, untracked;			
+		
 			List<LListItem> Files;
-			LString::Array a = s.Split("\n");
 			LString Diff;
-			VcFile *f = NULL;
-			for (unsigned i=0; i<a.Length(); i++)
+			VcFile *f = nullptr;
+
+			auto findPath = [&](LString path) -> PathStatus* {
+				for (auto &i: added)
+					if (path == i.path)
+						return &i;
+				for (auto &i: notStaged)
+					if (path == i.path)
+						return &i;
+				return nullptr;
+			};
+			
+			for (auto &line: s.Split("\n"))
 			{
-				const char *Ln = a[i];
-				if (!_strnicmp(Ln, "diff", 4))
+				const char *txt = line.Get();
+				
+				if (!Stricmp(txt, "Changes to be committed:"))
+					state = TAdded;
+				else if (!Stricmp(txt, "Changes not staged for commit:"))
+					state = TNotStaged;
+				else if (!Stricmp(txt, "Untracked files:"))
+					state = TUntracked;
+				else if (!_strnicmp(txt, "diff", 4))
 				{
+					state = TDiffs;
 					if (f)
 						f->SetDiff(Diff);
 					Diff.Empty();
 
-					auto Bits = a[i].SplitDelimit();
+					auto header = line.SplitDelimit(nullptr, 2);
+					/*
+					for (int i=0; i<header.Length(); i++)
+						d->Log->Print("hdr[%i]='%s'\n", i, header[i].Get());
+					*/
+					auto paths = header.Last().SplitDelimit();
+					
 					LString Fn, State = "M";
-					if (Bits[1].Equals("--cc"))
-					{
-						Fn = Bits.Last();
+					if (header[1].Equals("--cc"))
 						State = "C";
-					}
-					else
-						Fn = Bits.Last()(2,-1);
 
-					// LgiTrace("%s\n", a[i].Get());
+					auto half = paths.Length() / 2;
+					auto lastPath = LString(" ").Join(paths.Slice(half, -1));
+					Fn = lastPath(2, -1);
+					
+					auto p = findPath(Fn);
+					if (!p)
+					{
+						// Maybe it's just a single path?
+						Fn = header.Last()(2, -1); // strip off the 'a/' prefix
+						p = findPath(Fn);
+						if (!p)
+						{
+							d->Log->Print("failed to find valid path in '%s'\n", header.Last().Get());
+							break;
+						}
+					}
 
 					f = FindFile(Fn);
 					if (!f)
@@ -2382,29 +2429,78 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 					f->GetStatus();
 					Files.Insert(f);
 				}
-				else if (!_strnicmp(Ln, "new file", 8))
+				else switch (state)
 				{
-					if (f)
-						f->SetText("A", COL_STATE);
-				}
-				else if (!_strnicmp(Ln, "deleted file", 12))
-				{
-					if (f)
-						f->SetText("D", COL_STATE);
-				}
-				else if (!_strnicmp(Ln, "index", 5) ||
-						 !_strnicmp(Ln, "commit", 6)   ||
-						 !_strnicmp(Ln, "Author:", 7)   ||
-						 !_strnicmp(Ln, "Date:", 5)   ||
-						 !_strnicmp(Ln, "+++", 3)   ||
-						 !_strnicmp(Ln, "---", 3))
-				{
-					// Ignore
-				}
-				else
-				{
-					if (Diff) Diff += "\n";
-					Diff += a[i];
+					case TAdded:
+					{
+						if (*txt == '\t')
+						{
+							auto parts = line.Strip().SplitDelimit(":", 1);
+							if (parts.Length() == 2)
+							{
+								auto &file = added.New();
+								file.op = parts[0].Strip();
+								file.path = parts[1].Strip();
+								
+								d->Log->Print("added '%s' = '%s'\n", file.op.Get(), file.path.Get());
+							}
+						}
+						break;
+					}
+					case TNotStaged:
+					{
+						if (*txt == '\t')
+						{
+							auto parts = line.Strip().SplitDelimit(":", 1);
+							if (parts.Length() == 2)
+							{
+								auto &file = notStaged.New();
+								file.op = parts[0].Strip();
+								file.path = parts[1].Strip();
+
+								d->Log->Print("notStaged '%s' = '%s'\n", file.op.Get(), file.path.Get());
+							}
+						}
+						break;
+					}
+					case TUntracked:
+					{
+						if (*txt == '\t')
+						{
+							auto &file = untracked.New();
+							file.path = line.Strip();
+						}
+						break;
+					}
+					case TDiffs:
+					{
+						if (!_strnicmp(txt, "new file", 8))
+						{
+							if (f)
+								f->SetText("A", COL_STATE);
+						}
+						else if (!_strnicmp(txt, "deleted file", 12))
+						{
+							if (f)
+								f->SetText("D", COL_STATE);
+						}
+						else if (!_strnicmp(txt, "index", 5) ||
+								 !_strnicmp(txt, "commit", 6)   ||
+								 !_strnicmp(txt, "Author:", 7)   ||
+								 !_strnicmp(txt, "Date:", 5)   ||
+								 !_strnicmp(txt, "+++", 3)   ||
+								 !_strnicmp(txt, "---", 3))
+						{
+							// Ignore
+						}
+						else
+						{
+							if (Diff)
+								Diff += "\n";
+							Diff += line;
+						}
+						break;
+					}
 				}
 			}
 
@@ -3626,7 +3722,10 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 			int Fmt = ToolVersion[VcGit] >= Ver2Int("2.8.0") ? 2 : 1;
 			for (auto Ln : Lines)
 			{
+				VcFile *f = nullptr;
 				auto Type = Ln(0);
+
+				d->Log->Print("%i: type=%c ln='%s'\n", Fmt, Type, Ln.Get());
 				if (Ln.Lower().Find("error:") >= 0)
 				{
 				}
@@ -3637,8 +3736,6 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 				}
 				else if (Type != '?')
 				{
-					VcFile *f = NULL;
-					
 					if (Fmt == 2)
 					{
 						LString::Array p = Ln.SplitDelimit(" ", 8);
@@ -3647,35 +3744,41 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 						else
 						{
 							auto path = p[6];
-							f = new VcFile(d, this, path, IsWorking);
-							auto state = p[1].Strip(".");
-							auto pos = p[1].Find(state);
-							
-							d->Log->Print("%s state='%s' pos=%i\n", path.Get(), state.Get(), (int)pos);
-							
-							f->SetText(state, COL_STATE);
-							f->SetText(p.Last(), COL_FILENAME);
-							f->SetStaged(pos == 0);
+							if (f = new VcFile(d, this, path, IsWorking))
+							{
+								auto state = p[1].Strip(".");
+								auto pos = p[1].Find(state);
+								
+								d->Log->Print("%s state='%s' pos=%i\n", path.Get(), state.Get(), (int)pos);
+								
+								f->SetText(state, COL_STATE);
+								f->SetText(p.Last(), COL_FILENAME);
+								f->SetStaged(pos == 0);
+							}
 						}
 					}
 					else if (Fmt == 1)
 					{
 						LString::Array p = Ln.SplitDelimit(" ");
-						f = new VcFile(d, this, LString(), IsWorking);
-						f->SetText(p[0], COL_STATE);
-						f->SetText(p.Last(), COL_FILENAME);
+						if (f = new VcFile(d, this, LString(), IsWorking))
+						{
+							f->SetText(p[0], COL_STATE);
+							f->SetText(p.Last(), COL_FILENAME);
+						}
 					}
 					
-					if (f)
-						Ins.Insert(f);
 				}
 				else if (ShowUntracked)
 				{
-					VcFile *f = new VcFile(d, this, LString(), IsWorking);
-					f->SetText("?", COL_STATE);
-					f->SetText(Ln(2,-1), COL_FILENAME);
-					Ins.Insert(f);
+					if (f = new VcFile(d, this, LString(), IsWorking))
+					{
+						f->SetText("?", COL_STATE);
+						f->SetText(Ln(2,-1), COL_FILENAME);
+					}
 				}
+
+				if (f)
+					Ins.Insert(f);
 			}
 			break;
 		}

@@ -31,13 +31,13 @@ ifeq ($(Build),Debug)
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I../include \
-		-I./resources \
-		-I./src \
-		-I../include/lgi/linux/Gtk \
 		-I../private/common \
 		`pkg-config --cflags gtk+-3.0` \
-		-I../include/lgi/linux
+		-I./resources \
+		-I../include \
+		-I../include/lgi/linux/Gtk \
+		-I../include/lgi/linux \
+		-I./src
 else
 	CFlags += -s -Os -Wno-format-truncation
 	CppFlags += -s -Os -Wno-format-truncation
@@ -50,17 +50,36 @@ else
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I./resources \
-		-I./src \
-		-I../include \
-		-I../private/common \
-		-I../include/lgi/linux \
 		`pkg-config --cflags gtk+-3.0` \
-		-I../include/lgi/linux/Gtk
+		-I./src \
+		-I../private/common \
+		-I../include/lgi/linux/Gtk \
+		-I../include/lgi/linux \
+		-I./resources \
+		-I../include
 endif
 
 # Dependencies
-Source =	src/LgiUtils.cpp \
+Source =	../src/common/Net/Http.cpp \
+			src/IdeDoc.cpp \
+			../src/common/Text/HtmlCommon.cpp \
+			../src/common/Net/OpenSSLSocket.cpp \
+			../src/common/Lgi/Mdi.cpp \
+			../src/common/Text/DocView.cpp \
+			src/DebugContext.cpp \
+			../src/common/Text/TextView4.cpp \
+			../src/common/Lgi/LgiMain.cpp \
+			../src/common/Text/Html.cpp \
+			../src/common/Text/HtmlParser.cpp \
+			../src/common/Text/Homoglyphs/Homoglyphs.cpp \
+			../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
+			../src/common/Lgi/RemoteFileSelect.cpp \
+			src/WebFldDlg.cpp \
+			../src/common/Coding/ParseCpp.cpp \
+			../src/common/Text/RemoveAnsi.cpp \
+			../src/common/Text/TextConvert.cpp \
+			src/DocEditStyling.cpp \
+			../src/common/Lgi/About.cpp \
 			src/IdeProject.cpp \
 			src/IdeProjectSettings.cpp \
 			src/MissingFiles.cpp \
@@ -68,23 +87,6 @@ Source =	src/LgiUtils.cpp \
 			src/ProjectNode.cpp \
 			src/IdeFindInFiles.cpp \
 			src/FindSymbol.cpp \
-			../src/common/Net/OpenSSLSocket.cpp \
-			src/DebugContext.cpp \
-			../src/common/Net/Http.cpp \
-			../src/common/Text/DocView.cpp \
-			../src/common/Text/HtmlCommon.cpp \
-			src/WebFldDlg.cpp \
-			../src/common/Text/TextView4.cpp \
-			../src/common/Coding/ParseCpp.cpp \
-			../src/common/Text/RemoveAnsi.cpp \
-			../src/common/Text/TextConvert.cpp \
-			src/DocEditStyling.cpp \
-			../src/common/Lgi/About.cpp \
-			src/DocEdit.cpp \
-			src/LgiIde.cpp \
-			../src/common/Text/Homoglyphs/Homoglyphs.cpp \
-			../src/common/Lgi/Mdi.cpp \
-			src/IdeDoc.cpp \
 			src/JavascriptParser.cpp \
 			src/PythonParser.cpp \
 			src/SimpleCppParser.cpp \
@@ -93,16 +95,14 @@ Source =	src/LgiUtils.cpp \
 			src/IdeCommon.cpp \
 			../src/common/Net/Ftp.cpp \
 			../src/common/Net/Ssh.cpp \
-			src/Debugger.cpp \
-			../src/common/Lgi/LgiMain.cpp \
-			src/History.cpp \
-			../src/common/Text/HtmlParser.cpp \
-			../src/common/Text/Html.cpp \
-			../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
-			../src/common/Lgi/RemoteFileSelect.cpp \
 			../src/common/Lgi/SystemIntf.cpp \
 			src/MemDumpViewer.cpp \
-			src/SpaceTabConv.cpp
+			src/SpaceTabConv.cpp \
+			src/Debugger.cpp \
+			src/DocEdit.cpp \
+			src/LgiUtils.cpp \
+			src/LgiIde.cpp \
+			src/History.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)

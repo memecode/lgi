@@ -46,7 +46,7 @@ Known bugs:
 #include "lgi/common/DocView.h"
 #include "ParserCommon.h"
 
-// #define DEBUG_FILE		"LgiClasses.h"
+// #define DEBUG_FILE			"DragAndDrop.h"
 // #define DEBUG_LINE		17
 #define PARSE_ALL_FILES		1 // else parse just the 'DEBUG_FILE'
 
@@ -87,7 +87,7 @@ bool ParseFunction(LRange &Return, LRange &Name, LRange &Args, const char *Defn)
 		return false;
 
 	int Depth = 0;
-	const char *c, *Last = NULL;
+	const char *c, *Last = nullptr;
 	for (c = Defn; *c; c++)
 	{
 		if (*c == '(')
@@ -355,6 +355,18 @@ struct CppContext
 	
 		while (n && *n)
 		{
+			skipws(n);
+			
+			if (*n == '#')
+			{
+				// Skip preprocessor command?
+				if (auto eol = Strchr(n, '\n'))
+				{
+					DEBUG_LOG("%s: skip preproc='%.*S'\n", __func__, (int)(eol-n), n);
+					n = eol + 1;
+				}
+			}
+			
 			char16 *startTok = n;
 			if (!(t = LexCpp(n, LexStrdup)))
 			{
