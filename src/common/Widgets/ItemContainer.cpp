@@ -29,7 +29,7 @@
 // Classes
 class LItemColumnPrivate
 {
-	LDisplayString *Txt = NULL;
+	LAutoPtr<LDisplayString> Txt;
 
 public:
 	LRect Pos;
@@ -55,7 +55,6 @@ public:
 
 	~LItemColumnPrivate()
 	{
-		DeleteObj(Txt);
 		if (OwnIcon)
 		{
 			DeleteObj(cIcon);
@@ -65,13 +64,13 @@ public:
 	void SetName(const char *n)
 	{
 		cName = n;
-		DeleteObj(Txt);
+		Txt.Reset();
 	}
 
 	// Try and delay the creation of the display string till
 	// the code is being called from an event, and in the window's thread
 	// on Haiku. That way it gets a thread specific font handle.
-	LDisplayString *&GetDs()
+	LAutoPtr<LDisplayString> *GetDs()
 	{
 		if (!Txt)
 		{
@@ -83,9 +82,9 @@ public:
 						:
 						LSysFont;			
 		
-			Txt = new LDisplayString(f, cName);
+			Txt.Reset(new LDisplayString(f, cName));
 		}
-		return Txt;
+		return &Txt;
 	}
 };
 
@@ -1021,13 +1020,14 @@ void LItemColumn::OnPaint_Content(LSurface *pDC, LRect &r, bool FillBackground)
 	}
 	else if (ValidStr(d->cName))
 	{
-		auto Ds = d->GetDs();
-		if (!Ds || !Ds->GetFont())
+		auto dspStrPtr = d->GetDs();
+		if (!dspStrPtr || !(*dspStrPtr)->GetFont())
 		{
 			LAssert(0);
 			return;
 		}
 		
+		auto Ds = dspStrPtr->Get();
 		auto f = Ds->GetFont();
 
 		LColour cText = Fore;
@@ -1125,7 +1125,7 @@ void LItemColumn::OnPaint(LSurface *pDC, LRect &Rgn)
 				LSkinState State;
 				
 				State.pScreen	= pDC;
-				State.ptrText	= &d->GetDs();
+				State.ptrText	= d->GetDs();
 				State.Rect		= Rgn;
 				State.Value		= Value();
 				State.Enabled	= GetList()->Enabled();

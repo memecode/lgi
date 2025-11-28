@@ -13,19 +13,19 @@
 
 class LComboPrivate
 {
-	LDisplayString *Text;
+	LAutoPtr<LDisplayString> Text;
 
 public:
-	ssize_t Current;
-	bool SortItems;
-	int Sub;
+	ssize_t Current = 0;
+	bool SortItems = false;
+	LVariantType SubMenuType = GV_NULL;
 	LRect Arrow;
-	List<char> Items;
-	uint64 LastKey;
+	LString::Array items;
+	uint64 LastKey = 0;
 	LAutoString Find;
-	LSubMenu *Menu;
-	LCombo::SelectedState SelState;
-	bool LayoutDirty;
+	LAutoPtr<LSubMenu> Menu;
+	LCombo::SelectedState SelState = LCombo::SelectedDisable;
+	bool LayoutDirty = false;
 
 	#if defined LGI_CARBON
 	ThemeButtonDrawInfo Cur;
@@ -33,29 +33,13 @@ public:
 
 	LComboPrivate()
 	{
-		LayoutDirty = false;
-		SelState = LCombo::SelectedDisable;
-		SortItems = false;
-		Sub = false;
-		Current = 0;
-		LastKey = 0;
-		Menu = 0;
-		Text = 0;
-
 		#if defined LGI_CARBON
-		Cur.state = kThemeStateInactive;
-		Cur.value = kThemeButtonOff;
-		Cur.adornment = kThemeAdornmentNone;
+			Cur.state = kThemeStateInactive;
+			Cur.value = kThemeButtonOff;
+			Cur.adornment = kThemeAdornmentNone;
 		#endif
 	}
 
-	~LComboPrivate()
-	{
-		Items.DeleteArrays();
-		DeleteObj(Menu);
-		DeleteObj(Text);
-	}
-	
 	LDisplayString *GetText(const char *File, int Line)
 	{
 		return Text;
@@ -63,11 +47,10 @@ public:
 
 	void SetText(LDisplayString *ds, const char *File, int Line)
 	{
-		DeleteObj(Text);
-		Text = ds;
+		Text.Reset(ds);
 	}
 	
-	LDisplayString **GetTextPtr()
+	LAutoPtr<LDisplayString> *GetTextPtr()
 	{
 		return &Text;
 	}
@@ -107,14 +90,14 @@ void LCombo::Sort(bool s)
 	d->SortItems = s;
 }
 
-int LCombo::Sub()
+LVariantType LCombo::SubMenuType()
 {
-	return d->Sub;
+	return d->SubMenuType;
 }
 
-void LCombo::Sub(int s) // GV_???
+void LCombo::SubMenuType(LVariantType type) // GV_???
 {
-	d->Sub = s;
+	d->SubMenuType = type;
 }
 
 LSubMenu *LCombo::GetMenu()
@@ -124,17 +107,17 @@ LSubMenu *LCombo::GetMenu()
 
 void LCombo::SetMenu(LSubMenu *m)
 {
-	d->Menu = m;
+	d->Menu.Reset(m);
 }
 
 size_t LCombo::Length()
 {
-	return d->Items.Length();
+	return d->items.Length();
 }
 
-char *LCombo::operator [](ssize_t i)
+const char *LCombo::operator [](ssize_t i)
 {
-	return d->Items.ItemAt(i);
+	return d->items[i];
 }
 
 bool LCombo::Name(const char *n)
@@ -142,9 +125,9 @@ bool LCombo::Name(const char *n)
 	if (ValidStr(n))
 	{
 		int Index = 0;
-		for (auto i: d->Items)
+		for (auto i: d->items)
 		{
-			if (stricmp(n, i) == 0)
+			if (i.Equals(n))
 			{
 				Value(Index);
 				return true;
@@ -152,15 +135,10 @@ bool LCombo::Name(const char *n)
 			Index++;
 		}
 
-		char *New = NewStr(n);
-		if (New)
-		{
-			d->Items.Insert(New);
-			d->Current = d->Items.Length() - 1;
-			d->SetText(NULL, _FL);
-			Invalidate();
-		}
-		else return false;
+		d->items.Add(n);
+		d->Current = d->items.Length() - 1;
+		d->SetText(NULL, _FL);
+		Invalidate();
 	}
 	else
 	{
@@ -174,7 +152,7 @@ bool LCombo::Name(const char *n)
 
 const char *LCombo::Name()
 {
-	return d->Items.ItemAt(d->Current);
+	return d->items[d->Current];
 }
 
 void LCombo::Value(int64 i)
@@ -213,26 +191,23 @@ bool LCombo::Delete()
 
 bool LCombo::Delete(size_t i)
 {
-	char *c = d->Items.ItemAt(i);
-	if (c)
-	{
-		d->Items.Delete(c);
-		DeleteArray(c);
-		return true;
-	}
-	return false;
+	if (!d->items.IdxCheck(i))
+		return false;
+
+	return d->items.DeleteAt(i);
 }
 
-bool LCombo::Delete(char *p)
+bool LCombo::Delete(const char *p)
 {
-	if (p && d->Items.HasItem(p))
-	{
-		d->Items.Delete(p);
-		DeleteArray(p);
-		d->LayoutDirty = true;
-		return true;
-	}
-	return false;
+	if (!p)
+		return false;
+	auto idx = d->items.IndexOf(p);
+	if (idx < 0)
+		return false;
+
+	d->items.DeleteAt(idx);
+	d->LayoutDirty = true;
+	return true;
 }
 
 bool LCombo::Insert(const char *p, int Index)
@@ -240,7 +215,7 @@ bool LCombo::Insert(const char *p, int Index)
 	if (!p)
 		return false;
 
-	if (!d->Items.Insert(NewStr(p), Index))
+	if (!d->items.AddAt(Index, p))
 		return false;
 	
 	d->LayoutDirty = true;
@@ -269,51 +244,57 @@ void LCombo::DoMenu()
 	}
 	else
 	{
+		auto SubMenuType = d->SubMenuType;
 		LSubMenu RClick;
 		int Base = 1000;
 		int i=0;
 
-		if (d->Sub)
+		if (d->items.Length() > 500 &&
+			SubMenuType == GV_NULL)
 		{
-			if (d->Sub == GV_INT32)
+			// Seems like an excessive amount of items to not have a sub menu type?
+			SubMenuType = GV_STRING;
+		}
+
+		if (SubMenuType != GV_NULL)
+		{
+			if (SubMenuType == GV_INT32)
 			{
-				d->Items.Sort([](auto a, auto b)
+				d->items.Sort([](auto *a, auto *b)
 					{
-						int A = Atoi(a);
-						int B = Atoi(b);
-						return A - B;
+						return a->Int() - b->Int();
 					});
 			}
-			else if (d->Sub == GV_DOUBLE)
+			else if (SubMenuType == GV_DOUBLE)
 			{
-				d->Items.Sort([](auto a, auto b)
+				d->items.Sort([](auto *a, auto *b)
 					{
-						double A = atof(a);
-						double B = atof(b);
+						auto A = a->Float();
+						auto B = b->Float();
 						return A > B ? 1 : A < B ? -1 : 0;
 					});
 			}
 			else
 			{
-				d->Items.Sort([](auto a, auto b)
+				d->items.Sort([](auto *a, auto *b)
 					{
-						return Stricmp(a, b);
+						return Stricmp(a->Get(), b->Get());
 					});
 			}
 		}
 		else if (d->SortItems)
 		{
-			d->Items.Sort([](auto a, auto b)
+			d->items.Sort([](auto *a, auto *b)
 				{
-					return Stricmp(a, b);
+					return Stricmp(a->Get(), b->Get());
 				});
 		}
 
-		auto It = d->Items.begin();
+		auto It = d->items.begin();
 		char *c = *It;
 		if (c)
 		{
-			if (d->Sub)
+			if (SubMenuType)
 			{
 				int n = 0;
 				double dbl = 0;
@@ -322,7 +303,7 @@ void LCombo::DoMenu()
 				for (; c; c = *(++It), i++)
 				{
 					LUtf8Ptr u(c);
-					if (d->Sub == GV_INT32)
+					if (SubMenuType == GV_INT32)
 					{
 						int ci = atoi(c);
 						if (!m || n != ci)
@@ -332,7 +313,7 @@ void LCombo::DoMenu()
 							m = RClick.AppendSub(Name);
 						}
 					}
-					else if (d->Sub == GV_DOUBLE)
+					else if (SubMenuType == GV_DOUBLE)
 					{
 						double cd = atof(c);
 						if (!m || dbl != cd)
@@ -456,7 +437,7 @@ bool LCombo::OnKey(LKey &k)
 			{
 				// Next value in the list...
 				int i = (int)Value();
-				if (i < d->Items.Length()-1)
+				if (i < d->items.Length()-1)
 				{
 					Value(i+1);
 				}
@@ -487,7 +468,7 @@ bool LCombo::OnKey(LKey &k)
 					if (Len > 0 && d->Find)
 					{
 						int Index = 0;
-						for (auto i: d->Items)
+						for (auto &i: d->items)
 						{
 							if (strnicmp(i, d->Find, Len) == 0)
 							{
@@ -544,53 +525,6 @@ void LCombo::OnPaint(LSurface *pDC)
 
 	LColour cBack = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
 
-	#if defined LGI_CARBON
-
-		pDC->Colour(cBack);
-		pDC->Rectangle();
-
-		LRect Cli = GetClient();
-		LRect c = Cli;
-	
-		c.Size(1, 1);
-		c.y2 -= 1;
-		HIRect Bounds = c;
-		HIThemeButtonDrawInfo Info;
-		HIRect LabelRect;
-
-		Info.version = 0;
-		Info.state = Enabled() ? kThemeStateActive : kThemeStateInactive;
-		Info.kind = kThemePopupButton;
-		Info.value = Focus() ? kThemeButtonOn : kThemeButtonOff;
-		Info.adornment = Focus() ? kThemeAdornmentFocus : kThemeAdornmentNone;
-
-		OSStatus e = HIThemeDrawButton(	  &Bounds,
-										  &Info,
-										  pDC->Handle(),
-										  kHIThemeOrientationNormal,
-										  &LabelRect);
-
-		if (e) printf("%s:%i - HIThemeDrawButton failed %li\n", _FL, e);
-		else if (d->GetText(_FL))
-		{
-			LRect Txt;
-			Txt = LabelRect;
-			LDisplayString *Ds = d->GetText(_FL);
-			int y = Cli.y1 + ((Cli.Y() - Ds->Y()) / 2) + 1;
-
-			auto f = Ds->GetFont();
-			f->Transparent(true);
-			f->Fore(L_TEXT);
-			Ds->Draw(pDC, Txt.x1, y);
-			
-			#if 0
-			pDC->Colour(LColour(255, 0, 0));
-			pDC->Box(Txt.x1, y, Txt.x1 + Ds->X()-1, y + Ds->Y() - 1);
-			#endif
-		}
-	
-	#else
-	
 	if (LApp::SkinEngine &&
 		TestFlag(LApp::SkinEngine->GetFeatures(), GSKIN_COMBO))
 	{
@@ -678,7 +612,6 @@ void LCombo::OnPaint(LSurface *pDC)
 			}
 		}
 	}
-	#endif
 }
 
 void LCombo::OnAttach()

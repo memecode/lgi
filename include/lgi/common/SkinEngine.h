@@ -33,35 +33,22 @@
 // Drawing state
 class LSkinState
 {
-	LArray<LDisplayString*> Tmp;
-	
 public:
-	int Size;						// Class size, for version checking
-	LSurface *pScreen;				// Output surface
-	LArray<LDisplayString*> *aText;	// Array of display strings for the view
-	LDisplayString **ptrText;		// Ptr to ptr for display string
+	int Size = 0;					// Class size, for version checking
+	LSurface *pScreen = nullptr;	// Output surface
+	LArray<LDisplayString*> *aText = nullptr; // Array of display strings for the view
+	LAutoPtr<LDisplayString> *ptrText = nullptr; // Ptr to ptr for display string
 	LRect Rect;						// Region to paint (if relevant)
-	bool MouseOver;					// TRUE if the mouse is over the view
-	int64 Value;					// Value of the control if available
-	bool Enabled;					// TRUE if the control is enabled
-	bool Focus;						// TRUE if the control has focus
-	bool ForceUpdate;				// TRUE if cached info should be discarded
-	LSurface *Image;				// Any icon that needs displaying
-	LView *View;
+	bool MouseOver = false;			// TRUE if the mouse is over the view
+	int64 Value = 0;				// Value of the control if available
+	bool Enabled = true;			// TRUE if the control is enabled
+	bool Focus = false;				// TRUE if the control has focus
+	bool ForceUpdate = false;		// TRUE if cached info should be discarded
+	LSurface *Image = nullptr;		// Any icon that needs displaying
+	LView *View = nullptr;
 
 	LSkinState()
 	{
-		aText = NULL;
-		ptrText = NULL;
-		Value = 0;
-		Enabled = true;
-		Focus = false;
-		Size = sizeof(*this);
-		pScreen = 0;
-		MouseOver = false;
-		Image = NULL;
-		View = NULL;
-		ForceUpdate = false;
 	}
 
 	size_t TextObjects()
@@ -69,7 +56,7 @@ public:
 		if (aText)
 			return aText->Length();
 		if (ptrText)
-			return *ptrText != NULL ? 1 : 0;
+			return ptrText->Get() != nullptr ? 1 : 0;
 		return 0;
 	}
 	
@@ -87,27 +74,27 @@ public:
 		return NULL;
 	}
 	
-	LArray<LDisplayString*> *AllText()
+	LArray<LDisplayString*> allText()
 	{
+		LArray<LDisplayString*> all;
+		
 		if (aText)
-			return aText;
+			all = *aText;
+		else if (ptrText && ptrText->Get())
+			all.Add(ptrText->Get());
 		
-		if (ptrText && *ptrText && Tmp.Length(1))
-		{
-			Tmp[0] = *ptrText;
-			return &Tmp;
-		}
-		
-		return NULL;
+		return all;
 	}
 
 	LRect TextBounds()
 	{
-		auto Txt = AllText();
+		auto Txt = allText();
 		LRect TxtBounds;
-		for (size_t i=0; i<Txt->Length(); i++)
+		
+		int i = 0;
+		for (auto ds: Txt)
 		{
-			auto t = dynamic_cast<LLayoutString*>((*Txt)[i]);
+			auto t = dynamic_cast<LLayoutString*>(ds);
 			if (t)
 			{
 				LRect r(0, 0, t->X()-1, t->Y()-1);
@@ -116,6 +103,7 @@ public:
 				else TxtBounds = r;
 			}
 			else LAssert(!"Wrong obj.");
+			i++;
 		}
 		return TxtBounds;
 	}

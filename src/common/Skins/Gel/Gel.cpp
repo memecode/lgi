@@ -424,14 +424,15 @@ class GelSkin : public LSkinEngine
 
 		LRegion Rgn;
 		Rgn = rcFill;
-		LArray<LDisplayString*> *Text = State->AllText();
+		auto Text = State->allText();
 		LSurface *pDC = State->pScreen;
-		if (Text && Text->Length() > 0 && rcFill.X() > 3)
+		if (Text.Length() > 0 && rcFill.X() > 3)
 		{
 			LRect Bounds;
-			for (unsigned i=0; i<Text->Length(); i++)
+			int i = 0;
+			for (auto ds: Text)
 			{
-				LLayoutString *t = dynamic_cast<LLayoutString*>((*Text)[i]);
+				auto t = dynamic_cast<LLayoutString*>(ds);
 				if (!t)
 					break;
 				LRect c;
@@ -461,6 +462,7 @@ class GelSkin : public LSkinEngine
 					f->Colour(Low, Back);
 					t->Draw(pDC, c.x1, c.y1, &c);
 				}
+				i++;
 			}
 
 			if ((Ctrl->Focus() && Enabled) || Debug)
@@ -644,22 +646,19 @@ public:
 		
 		LSurface *Out = &Mem;
 		
-		LArray<LDisplayString*> *Txt = State->AllText();
+		auto Txt = State->allText();
 
 		int ContentX = 0;
 		int SpacingPx = 4;
 		if (State->Image)
 			ContentX += State->Image->X();
 		int MaxTxt = 0;
-		if (Txt)
+		for (auto ds: Txt)
 		{
-			for (unsigned i=0; i<Txt->Length(); i++)
-			{
-				MaxTxt = MAX(MaxTxt, (*Txt)[i]->X());
-			}
-			ContentX += MaxTxt;
+			MaxTxt = MAX(MaxTxt, ds->X());
 		}
-		if (State->Image && Txt && Txt->Length() > 0)
+		ContentX += MaxTxt;
+		if (State->Image && Txt.Length() > 0)
 			ContentX += SpacingPx;
 
 		int CurX = (Ctrl->X() - ContentX) >> 1;
@@ -672,18 +671,17 @@ public:
 			Out->Op(Op);
 			CurX += State->Image->X() + SpacingPx;
 		}
-		if (Txt && Txt->Length() > 0)
+		if (Txt.Length())
 		{
-			LDisplayString *First = (*Txt)[0];
-			int sx = MaxTxt, sy = (int) Txt->Length() * First->Y();
+			auto First = Txt[0];
+			int sx = MaxTxt, sy = (int) Txt.Length() * First->Y();
 			int ty = (Ctrl->Y()-sy) >> 1;
 
 			LFont *f = First->GetFont();
 			f->Transparent(true);
 			
-			for (unsigned i=0; i<Txt->Length(); i++)
+			for (auto Text: Txt)
 			{
-				LDisplayString *Text = (*Txt)[i];
 				if (Ctrl->Enabled())
 				{
 					f->Colour(Fore, Back);

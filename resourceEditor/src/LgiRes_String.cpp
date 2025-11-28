@@ -40,7 +40,7 @@ LangDlg::LangDlg(LView *parent, List<LLanguage> &l, int Init)
 	{
 		if (l.Length() > 40)
 		{
-			Sel->Sub(GV_STRING);
+			Sel->SubMenuType(GV_STRING);
 		}
 
 		for (auto li: l)

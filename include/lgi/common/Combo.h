@@ -37,13 +37,10 @@ public:
 	/// Sets whether to sort the list
 	void Sort(bool s);
 	/// Returns whether to classify the list into submenus
-	int Sub();
+	LVariantType SubMenuType();
 	/// Makes the list of entries sort into submenus. Good for large lists.
-	void Sub
-	(
-		/// The type of classification to use. One of #GV_INT32, #GV_DOUBLE or #GV_STRING.
-		int Type
-	);
+	/// The type of classification to use. One of #GV_INT32, #GV_DOUBLE or #GV_STRING.
+	void SubMenuType(LVariantType Type);
 	/// Sets the selected item
 	void Value(int64 i) override;
 	/// Returns the select item
@@ -81,7 +78,7 @@ public:
 	/// Deletes the item at index 'i'
 	bool Delete(size_t i);
 	/// Deletes the item matching 'p'
-	bool Delete(char *p);
+	bool Delete(const char *p);
 	/// Clears all items in the list
 	void Empty();
 	/// Inserts a new item
@@ -95,7 +92,7 @@ public:
 	/// Gets the items in the list
 	size_t Length();
 	/// Returns the item at index 'i'
-	char *operator [](ssize_t i);
+	const char *operator [](ssize_t i);
 	/// Returns the index of a given string
 	int IndexOf(const char *str);
 
