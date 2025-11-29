@@ -2074,13 +2074,13 @@ void VcFolder::OnCmdError(LString Output, const char *Msg)
 				
 	CmdErrors++;
 	d->Tabs->Value(1);
-	GetCss(true)->Color(LColour::Red);
+	SetColourType(TColError);
 	Update();
 }
 
 void VcFolder::ClearError()
 {
-	GetCss(true)->Color(LCss::ColorInherit);
+	SetColourType(TColNone);
 }
 
 bool VcFolder::ParseInfo(int Result, LString s, ParseParams *Params)
@@ -2845,7 +2845,7 @@ void VcFolder::Empty()
 	d->Files->Empty();
 
 	if (!Uri.IsFile())	
-		GetCss(true)->Color(LColour::Blue);
+		SetColourType(TColRemote);
 }
 
 class LRewriteAuthor : public LDialog, public RewriteInfo
@@ -3618,6 +3618,28 @@ LString ConvertUPlus(LString s)
 	return LString((LString::Char32*)c.AddressOf());
 }
 
+void VcFolder::SetColourType(TColourType t)
+{
+	switch (t)
+	{
+		case TColNone:
+			GetCss(true)->Color(LCss::ColorInherit);
+			break;
+		case TColChanged:
+			GetCss(true)->Color(LColour(255, 128, 0));
+			break;
+		case TColError:
+			GetCss(true)->Color(LColour::Red);
+			break;
+		case TColRemote:
+			GetCss(true)->Color(LColour::Blue);
+			break;
+		case TColSuccess:
+			GetCss(true)->Color(LColour::Green);
+			break;
+	}
+}
+
 bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 {
 	bool ShowUntracked = d->Wnd()->GetCtrlValue(ID_UNTRACKED) != 0;
@@ -3722,11 +3744,14 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 				d->Log->Print("%i: type=%c ln='%s'\n", Fmt, Type, Ln.Get());
 				if (Ln.Lower().Find("error:") >= 0)
 				{
+					OnCmdError(s, Ln);
+					break;
 				}
 				else if (Ln.Find("usage: git") >= 0)
 				{
 					// It's probably complaining about the --porcelain=2 parameter
 					OnCmdError(s, "Args error");
+					break;
 				}
 				else if (Type != '?')
 				{
@@ -3743,7 +3768,7 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 								auto state = p[1].Strip(".");
 								auto pos = p[1].Find(state);
 								
-								d->Log->Print("%s state='%s' pos=%i\n", path.Get(), state.Get(), (int)pos);
+								// d->Log->Print("%s state='%s' pos=%i\n", path.Get(), state.Get(), (int)pos);
 								
 								f->SetText(state, COL_STATE);
 								f->SetText(p.Last(), COL_FILENAME);
@@ -3760,7 +3785,6 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 							f->SetText(p.Last(), COL_FILENAME);
 						}
 					}
-					
 				}
 				else if (ShowUntracked)
 				{
@@ -3844,15 +3868,12 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 		}
 	}
 
-	if ((Unpushed = Ins.Length() > 0))
-	{
-		if (CmdErrors == 0)
-			GetCss(true)->Color(LColour(255, 128, 0));
-	}
-	else if (Unpulled == 0)
-	{
-		GetCss(true)->Color(LCss::ColorInherit);
-	}
+	if (CmdErrors > 0)
+		;
+	else if ((Unpushed = Ins.Length() > 0))
+		SetColourType(TColChanged);
+	else
+		SetColourType(TColNone);
 
 	Update();
 	if (LTreeItem::Select())
@@ -3948,7 +3969,7 @@ void VcFolder::FolderStatus(const char *uri, VcLeaf *Notify)
 			return;
 	}
 
-	ParseParams *p = new ParseParams;
+	auto p = new ParseParams;
 	if (uri && Notify)
 	{
 		p->AltInitPath = uri;
@@ -4233,7 +4254,7 @@ bool VcFolder::ParseCommit(int Result, LString s, ParseParams *Params)
 			{
 				Unpushed = 0;
 				Update();
-				GetCss(true)->Color(LColour::Green);
+				SetColourType(TColSuccess);
 			}
 			break;
 		}
@@ -4250,7 +4271,7 @@ bool VcFolder::ParseCommit(int Result, LString s, ParseParams *Params)
 				if (Params && Params->Str.Find("Push") >= 0)
 					Push();
 				else
-					GetCss(true)->Color(LColour::Green);
+					SetColourType(TColSuccess);
 			}
 			break;
 		}
@@ -4263,7 +4284,7 @@ bool VcFolder::ParseCommit(int Result, LString s, ParseParams *Params)
 			{
 				Unpushed = 0;
 				Update();
-				GetCss(true)->Color(LColour::Green);
+				SetColourType(TColSuccess);
 			}
 			break;
 		}
@@ -4626,7 +4647,7 @@ bool VcFolder::ParsePush(int Result, LString s, ParseParams *Params)
 		}
 
 		Unpushed = 0;
-		GetCss(true)->Color(LColour::Green);
+		SetColourType(TColSuccess);
 		Update();
 		Status = true;
 	}
@@ -4714,9 +4735,9 @@ bool VcFolder::ParsePull(int Result, LString s, ParseParams *Params)
 				}
 			}
 			if (HasUpdates)
-				GetCss(true)->Color(LColour::Green);
+				SetColourType(TColSuccess);
 			else
-				GetCss(true)->Color(LCss::ColorInherit);
+				SetColourType(TColNone);
 			break;
 		}
 		case VcSvn:
@@ -4839,7 +4860,7 @@ bool VcFolder::ParseClean(int Result, LString s, ParseParams *Params)
 	{
 		case VcSvn:
 			if (Result == 0)
-				GetCss(true)->Color(LCss::ColorInherit);
+				SetColourType(TColNone);
 			break;
 		default:
 			LAssert(!"Impl me.");

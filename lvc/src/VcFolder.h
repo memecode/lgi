@@ -398,6 +398,15 @@ public:
 	void Checkout(const char *Rev, bool isBranch);
 	void Delete(const char *Path, bool KeepLocal = true);
 	void RewriteAuthor(RewriteInfo info);
+
+	enum TColourType {
+		TColNone,
+		TColChanged,	// orange
+		TColError,		// red
+		TColRemote,		// blue
+		TColSuccess,	// green
+	};
+	void SetColourType(TColourType t);
 	
 	// Branch commands
 	bool GetBranches(bool refresh, bool includeRemote = false, ParseParams *Params = nullptr);
