@@ -878,7 +878,7 @@ void TableCell::LayoutWidth(int Depth, int &MinX, int &MaxX, CellFlag &Flag)
 				LCombo *Cbo = Izza(LCombo);
 				LFont *f = Cbo->GetFont();
 				int min_x = -1, max_x = 0;
-				char *t;
+				const char *t = nullptr;
 
 				for (int i=0; i < Cbo->Length() && (t = (*Cbo)[i]); i++)
 				{

@@ -16,26 +16,17 @@ LRect LCombo::Pad(8, 4, 24, 4);
 class LComboPrivate
 {
 public:
-	bool SortItems;
-	int SubType;
+	bool SortItems = false;
+	LVariantType SubType = GV_NULL;
 	LAutoString Buffer;
 	LRect Pos;
 	
 	// Initialization data
-	size_t Len;
-	bool Init;
-	int64 Value;
+	size_t Len = 0;
+	bool Init = false;
+	int64 Value = 0;
 	LString Name;
 	LArray<LString> Strs;
-
-	LComboPrivate()
-	{
-		Len = 0;
-		SortItems = 0;
-		SubType = GV_NULL;
-		Init = false;
-		Value = 0;
-	}
 };
 
 LCombo::LCombo(int id, LRect *pos) :
@@ -99,12 +90,12 @@ void LCombo::Sort(bool s)
 	d->SortItems = s;
 }
 
-int LCombo::Sub()
+LVariantType LCombo::SubMenuType()
 {
 	return d->SubType;
 }
 
-void LCombo::Sub(int Type)
+void LCombo::SubMenuType(LVariantType Type)
 {
 	d->SubType = Type;
 }
@@ -250,7 +241,7 @@ bool LCombo::Delete(size_t i)
 	return false;
 }
 
-bool LCombo::Delete(char *p)
+bool LCombo::Delete(const char *p)
 {
 	int Idx = IndexOf(p);
 
@@ -311,7 +302,7 @@ size_t LCombo::Length()
 	return d->Strs.Length();
 }
 
-char *LCombo::operator [](ssize_t i)
+const char *LCombo::operator [](ssize_t i)
 {
 	if (i >= 0 && i < (ssize_t)d->Strs.Length())
 		return d->Strs[i];
