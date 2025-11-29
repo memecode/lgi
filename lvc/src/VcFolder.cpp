@@ -2358,6 +2358,10 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 		
 			struct PathStatus {
 				LString op, path;
+				void set(LString::Array &a) {
+					op = a[0].Strip();
+					path = a[1].Strip();
+				}
 			};
 			LArray<PathStatus> added, notStaged, untracked;			
 		
@@ -2412,12 +2416,14 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 					{
 						// Maybe it's just a single path?
 						Fn = header.Last()(2, -1); // strip off the 'a/' prefix
+						/*
 						p = findPath(Fn);
 						if (!p)
 						{
 							d->Log->Print("failed to find valid path in '%s'\n", header.Last().Get());
 							break;
 						}
+						*/
 					}
 
 					f = FindFile(Fn);
@@ -2437,13 +2443,7 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 						{
 							auto parts = line.Strip().SplitDelimit(":", 1);
 							if (parts.Length() == 2)
-							{
-								auto &file = added.New();
-								file.op = parts[0].Strip();
-								file.path = parts[1].Strip();
-								
-								d->Log->Print("added '%s' = '%s'\n", file.op.Get(), file.path.Get());
-							}
+								added.New().set(parts);
 						}
 						break;
 					}
@@ -2453,13 +2453,7 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 						{
 							auto parts = line.Strip().SplitDelimit(":", 1);
 							if (parts.Length() == 2)
-							{
-								auto &file = notStaged.New();
-								file.op = parts[0].Strip();
-								file.path = parts[1].Strip();
-
-								d->Log->Print("notStaged '%s' = '%s'\n", file.op.Get(), file.path.Get());
-							}
+								notStaged.New().set(parts);
 						}
 						break;
 					}
