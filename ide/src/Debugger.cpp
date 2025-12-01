@@ -337,7 +337,7 @@ class Gdb :
 		return false;
 	}
 	
-	void SetState(bool is_debug, bool is_run)
+	void SetState(const char *file, int line, bool is_debug, bool is_run)
 	{
 		if (Lock(_FL))
 		{
@@ -351,7 +351,7 @@ class Gdb :
 				#if DEBUG_STRUCT_LOGGING
 				Log->Log("SetState.change:", DebuggingProcess, Running);
 				#else
-				// Log->Print("SetState(%i,%i) changed\n", DebuggingProcess, Running);
+				printf("SetState(%i,%i) changed by %s:%i\n", DebuggingProcess, Running, file, line);
 				#endif
 
 				if (Events)
@@ -383,7 +383,7 @@ class Gdb :
 	
 	void OnExit()
 	{
-		SetState(false, false);
+		SetState(_FL, false, false);
 	}
 	
 	char *NativePath(char *p)
@@ -690,7 +690,7 @@ class Gdb :
 				if (wr)
 				{
 					if (curCmd->setRunning)
-						SetState(DebuggingProcess, true);
+						SetState(_FL, DebuggingProcess, true);
 					break;
 				}
 
@@ -740,13 +740,15 @@ class Gdb :
 			return;
 		RemoveAnsi(partial);
 		#if DEBUG_STRUCT_LOGGING
-		Log->Log("partial:", partial);
+			Log->Log("partial:", partial);
 		#endif
 		if (partial.Length() == 6)
 		{
 			AtPrompt = partial.Equals(sPrompt);
 			#if DEBUG_STRUCT_LOGGING
 			Log->Log("AtPrompt:", AtPrompt, "Running:", Running);
+			#else
+			printf("partial='%s' AtPrompt=%i\n", partial.Get(), AtPrompt);
 			#endif
 
 			if (Running ^ !AtPrompt)
@@ -754,7 +756,7 @@ class Gdb :
 				#if DEBUG_STRUCT_LOGGING
 				// Log->Log("AtPrompt:", AtPrompt);
 				#endif
-				SetState(DebuggingProcess, !AtPrompt);
+				SetState(_FL, DebuggingProcess, !AtPrompt);
 			}
 
 			if (AtPrompt)
@@ -965,7 +967,7 @@ class Gdb :
 				LSleep(10); // don't eat CPU
 		}
 
-		SetState(false, false);
+		SetState(_FL, false, false);
 
 		if (RemoteGdb)
 		{
@@ -1258,7 +1260,7 @@ public:
 			[this, cb](auto &err)
 			{
 				if (!err)
-					SetState(true, false);
+					SetState(_FL, true, false);
 
 				if (cb)
 					cb(!err);
@@ -1288,7 +1290,7 @@ public:
 		
 		Cmd("q", false, [this, cb](auto &err)
 		{
-			SetState(false, false);
+			SetState(_FL, false, false);
 			State = Exiting;
 
 			if (cb)
@@ -1378,7 +1380,7 @@ public:
 			}
 			else
 			{
-				SetState(true, Running);
+				SetState(_FL, true, Running);
 
 				Cmd(a,
 					true,
@@ -1530,7 +1532,7 @@ public:
 			inf->onDelete = [this](auto id)
 				{
 					// sub process has started...
-					SetState(true, Running);
+					SetState(_FL, true, Running);
 					Cmd(mainBreakPointCmd, true, [this](auto err)
 						{
 							// Clean up the state...
@@ -2127,7 +2129,7 @@ public:
 			[this, cb](auto &err)
 			{
 				if (!err)
-					SetState(DebuggingProcess, true);
+					SetState(_FL, DebuggingProcess, true);
 				if (cb)
 					cb(!err);
 			});
@@ -2140,7 +2142,7 @@ public:
 			[this, cb](auto &err)
 			{
 				if (!err)
-					SetState(DebuggingProcess, true);
+					SetState(_FL, DebuggingProcess, true);
 				if (cb)
 					cb(!err);
 			});
@@ -2153,7 +2155,7 @@ public:
 			[this, cb](auto &err)
 			{
 				if (!err)
-					SetState(DebuggingProcess, true);
+					SetState(_FL, DebuggingProcess, true);
 				if (cb)
 					cb(!err);
 			});

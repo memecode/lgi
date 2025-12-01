@@ -1214,19 +1214,21 @@ int SslSocket::Close()
 	if (Bio)
 	{
 		auto result = Library->BIO_free_all(Bio);
+		/*
 		if (result != 1)
 			printf("%s:%i result =%i\n", _FL, result);
+		*/
 	}	
-	Ssl = NULL;
-	Bio = NULL;
+	Ssl = nullptr;
+	Bio = nullptr;
 
 	if (d->ListenSocket != INVALID_SOCKET)
 	{
 		LgiTrace("Closing d->ListenSocket=%i\n", d->ListenSocket);
 		#if defined WIN32
-		closesocket(d->ListenSocket);
+    		closesocket(d->ListenSocket);
 		#else
-		close(d->ListenSocket);
+	    	close(d->ListenSocket);
 		#endif
 		d->ListenSocket = INVALID_SOCKET;
 	}

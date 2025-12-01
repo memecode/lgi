@@ -27,7 +27,8 @@ public:
 		RadioExclusion type,
 		/// The initial value.
 		bool value = false
-	) : LListItemColumn(host, column)
+	)
+	:   LListItemColumn(host, column)
 	{
 		Type = type;
 		LListItemColumn::Value(value);
@@ -77,15 +78,13 @@ public:
 			// Switch off any other controls in the row / column...
 			if (Type == ListExclusive)
 			{
-				if (!GetList())
-					return;
-				for (auto i : *GetAllItems())
+				for (auto item: *GetAllItems())
 				{
-					for (auto c : *i->GetItemCols())
+					for (auto c: *item->GetItemCols())
 					{
 						if (c->GetColumn() == GetColumn())
 						{
-							LListItemRadioBtn *r = dynamic_cast<LListItemRadioBtn*>(c);
+							auto r = dynamic_cast<LListItemRadioBtn*>(c);
 							if (r != this)
 							{
 								r->Value(0);
@@ -97,14 +96,22 @@ public:
 			}
 			else if (Type == ItemExclusive)
 			{
-				for (auto c : *GetItem()->GetItemCols())
+    			LArray<LListItem*> sel;
+    			if (GetList())
+    			    GetList()->GetSelection(sel);
+    			else
+    			    sel.Add(GetItem());
+
+				for (auto item: sel)
 				{
-					LListItemRadioBtn *r = dynamic_cast<LListItemRadioBtn*>(c);
-					if (r && r != this)
-					{
-						r->Value(false);
-					}
-				}
+    				for (auto col: *item->GetItemCols())
+    				{
+    					if (auto radioBtn = dynamic_cast<LListItemRadioBtn*>(col))
+    					{
+        					radioBtn->Value(radioBtn->GetColumn() == GetColumn());
+       					}
+    				}
+    			}
 			}
 
 			if (GetList())
