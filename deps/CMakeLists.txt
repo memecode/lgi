@@ -130,13 +130,17 @@ install(TARGETS zlib
         DESTINATION ${CMAKE_BINARY_DIR}/bin
     LIBRARY
         DESTINATION ${CMAKE_BINARY_DIR}/lib)
-# fix the output name
-set_target_properties(
-    zlib
-    PROPERTIES OUTPUT_NAME zlib)
-if(LINUX)
-    target_compile_options(zlibstatic PRIVATE -fPIC)
-endif()
+
+# This is making the lib 'libzlib' on MacOSX, what was it fixing specifically?
+# Maybe it's windows specific?
+#
+# Fix the output name
+# set_target_properties(
+#     zlib
+#     PROPERTIES OUTPUT_NAME zlib)
+# if(LINUX)
+#     target_compile_options(zlibstatic PRIVATE -fPIC)
+# endif()
 
 # libpng
 set(PNG_HARDWARE_OPTIMIZATIONS 0)

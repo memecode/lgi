@@ -94,7 +94,13 @@ LRect LScreenFlip(LRect r)
 	}
 	else
 	{
-		// printf("%s:%i - No Screen?\n", _FL);
+		LgiTrace("%s:%i - r=%s not found in:\n", _FL, r.GetStr());
+		for (NSScreen *s in [NSScreen screens])
+		{
+			LRect frame = s.frame;
+			LRect vis = s.visibleFrame;
+			LgiTrace("	frame=%s vis=%s\n", frame.GetStr(), vis.GetStr());
+		}
 		r.ZOff(-1, -1);
 	}
 	
@@ -339,9 +345,15 @@ public:
 
 - (void)windowDidMove:(NSNotification*)event
 {
-	// LNsWindow *w = event.object;
-	// GRect r = LScreenFlip(w.frame);
-	// printf("windowDidMove: %s\n", r.GetStr());
+	LNsWindow *w = event.object;
+	LRect r = w.frame;
+	printf("windowDidMove: %s\n", r.GetStr());
+	
+	for (NSScreen *s in [NSScreen screens])
+	{
+		LRect frame = s.frame;
+		LgiTrace("	frame=%s\n", frame.GetStr());
+	}
 }
 
 - (BOOL)windowShouldClose:(NSWindow*)sender
@@ -1185,7 +1197,11 @@ LRect &LWindow::GetPos()
 
 	if (Wnd)
 	{
-		Pos = LScreenFlip(Wnd.p.frame);
+		auto p = LScreenFlip(Wnd.p.frame);
+		if (p.Valid())
+			Pos = p;
+		else
+			LgiTrace("%s:%i - LScreenFlip failed.\n", _FL);
 		
 		// printf("%s::GetPos %s\n", GetClass(), Pos.GetStr());
 	}
@@ -1201,9 +1217,14 @@ bool LWindow::SetPos(LRect &p, bool Repaint)
 	if (Wnd)
 	{
 		LRect r = LScreenFlip(p);
-		[Wnd.p setFrame:r display:YES];
-		
-		// printf("%s::SetPos %s\n", GetClass(), Pos.GetStr());
+		if (r.Valid())
+			[Wnd.p setFrame:r display:YES];
+		else
+		{
+			LgiTrace("%s::SetPos failed to flip %s\n", GetClass(), Pos.GetStr());
+			// LAssert(!"LScreenFlip failed.");
+			[Wnd.p setFrame:p display:YES];
+		}
 	}
 
 	return true;
@@ -1239,6 +1260,8 @@ void LWindow::OnPosChange()
 		d->Sx = X();
 		d->Sy = Y();
 	}
+	
+	LgiTrace("%s::OnPosChange %s\n", GetClass(), GetPos().GetStr());
 }
 
 #define IsTool(v) \

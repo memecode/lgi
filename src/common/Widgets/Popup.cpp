@@ -686,7 +686,8 @@ bool LPopup::SetPos(LRect &r, bool repaint)
 	if (Panel)
 	{
 		LRect flipped = LScreenFlip(r);
-		[Panel.p setFrame:flipped display:Visible()];
+		if (flipped.Valid())
+			[Panel.p setFrame:flipped display:Visible()];
 	}
 	
 	return true;
