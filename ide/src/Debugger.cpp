@@ -2231,7 +2231,7 @@ public:
 				if (ProcessId < 0)
 				{
 					auto msg = LString::Fmt("%s:%i - No process ID (yet?)", _FL);
-					DBG_LOG("%s\n", msg)
+					DBG_LOG("%s\n", msg);
 					LogMsg("%s\n", msg);
 					return;
 				}
