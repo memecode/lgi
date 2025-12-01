@@ -1600,7 +1600,16 @@ bool LView::DropTarget(bool t)
 	if (t) SetFlag(LViewFlags, GWF_DROP_TARGET);
 	else ClearFlag(LViewFlags, GWF_DROP_TARGET);
 
-	#if WINNATIVE
+	#if defined __GTK_H__
+
+		if (auto wnd = GetWindow())
+		{
+			if (!DropTarget())
+				d->DropTarget = t ? GetWindow() : nullptr;
+			Status = wnd->OnGtkDropTarget(this, t);
+		}
+		
+	#elif WINNATIVE
 	
 		if (_View)
 		{
@@ -1618,7 +1627,11 @@ bool LView::DropTarget(bool t)
 			}
 		}
 
-	#elif defined MAC && !defined(LGI_SDL)
+	#elif defined(LGI_SDL)
+
+		// No support
+
+	#elif defined(MAC)
 
 		auto Wnd = dynamic_cast<LWindow*>(GetWindow());
 		if (Wnd)
@@ -1670,45 +1683,7 @@ bool LView::DropTarget(bool t)
 				}
 			}
 
-		#elif LGI_CARBON
-	
-			if (t)
-			{
-				static EventTypeSpec DragEvents[] =
-				{
-					{ kEventClassControl, kEventControlDragEnter },
-					{ kEventClassControl, kEventControlDragWithin },
-					{ kEventClassControl, kEventControlDragLeave },
-					{ kEventClassControl, kEventControlDragReceive },
-				};
-				
-				if (!d->DndHandler)
-				{
-					OSStatus e = ::InstallControlEventHandler(	_View,
-																NewEventHandlerUPP(LgiViewDndHandler),
-																GetEventTypeCount(DragEvents),
-																DragEvents,
-																(void*)this,
-																&d->DndHandler);
-					if (e) LgiTrace("%s:%i - InstallEventHandler failed (%i)\n", _FL, e);
-				}
-				SetControlDragTrackingEnabled(_View, true);
-			}
-			else
-			{
-				SetControlDragTrackingEnabled(_View, false);
-			}
-	
 		#endif
-
-	#elif defined __GTK_H__
-
-		if (auto wnd = GetWindow())
-		{
-			if (!DropTarget())
-				d->DropTarget = t ? GetWindow() : nullptr;
-			Status = wnd->OnGtkDropTarget(this, t);
-		}
 
 	#endif
 
