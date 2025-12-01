@@ -2325,7 +2325,7 @@ int BuildThread::Main()
 			
 			StreamToLog log(Proj->GetApp());
 			uint64_t msgTs = LCurrentTime();
-			int calls = 0;
+			size_t calls = 0;
 			while
 			(
 				(!backendExitCode && !IsCancelled())
@@ -3578,7 +3578,7 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 		{
 			if (auto id = elem->GetAttr("Id"))
 			{
-				int originalId = Atoi(id);
+				int originalId = (int) Atoi(id);
 				if (originalId > 0)
 				{
 					int newId = originalId;

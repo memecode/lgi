@@ -95,7 +95,7 @@ public:
 	{
 		if (auto item = lst->GetSelected())
 		{
-			Pid = Atoi(item->GetText(ColPid));
+			Pid = (int) Atoi(item->GetText(ColPid));
 			if (Pid > 0)
 				EndModal(true);
 		}
@@ -191,7 +191,7 @@ public:
 		}
 		
 		LArray<LString> Threads;
-		int CurrentThread = -1;
+		// int CurrentThread = -1;
 		Db->GetThreads([this](auto threads, auto cur)
 			{
 				App->RunCallback(

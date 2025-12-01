@@ -236,10 +236,10 @@ public:
 
 	IdeTree();
 	
-	void OnCreate();
-	void OnDragExit();
-	int WillAccept(LDragFormats &Formats, LPoint p, int KeyState);
-	int OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState);
+	void OnCreate() override;
+	void OnDragExit() override;
+	int WillAccept(LDragFormats &Formats, LPoint p, int KeyState) override;
+	int OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState) override;
 };
 
 extern const char TagSettings[];

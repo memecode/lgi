@@ -770,7 +770,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 										_FL,
 										fs->Path.Get(),
 										PlatformFlagsToStr(fs->Platforms).Get(),
-										PlatformFlagsToStr(Platforms).Get());
+										PlatformFlagsToStr((int)Platforms).Get());
 						#endif
 						continue;
 					}
@@ -980,7 +980,7 @@ LMessage::Result FindSymbolDlg::OnEvent(LMessage *m)
 		case M_GET_PLATFORM_FLAGS:
 		{
 			// Ok the app replied with the current platform flags:
-			PlatformFlags = m->B();
+			PlatformFlags = (int) m->B();
 
 			// Now continue the original search:
 			Sys->Search(AddDispatch(), GetCtrlName(IDC_STR), PlatformFlags);
@@ -1206,11 +1206,6 @@ bool FindSymbolSystem::OnFile(const char *Path, SymAction Action, int Platforms)
 	{
 		printf("%s:%i - Can't add '%s' with no platforms.\n", _FL, Path);
 		return false;
-	}
-
-	if (Stristr(Path, "/fileteepee"))
-	{
-		int asd=0;
 	}
 
 	if (auto ext = LGetExtension(Path))

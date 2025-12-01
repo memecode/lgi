@@ -31,7 +31,7 @@ public:
 		DeleteArray(Stack);
 	}
 
-	const char *GetText(int c)
+	const char *GetText(int c) override
 	{
 		static char s[64];
 		switch (c)

@@ -993,7 +993,7 @@ void LMdiParent::OnChildrenChanged(LViewI *view, bool Attaching)
 			}
 			else
 			{
-				if (d->Children.HasItem(c));
+				if (d->Children.HasItem(c))
 					d->Children.Delete(c);
 			}
 		}

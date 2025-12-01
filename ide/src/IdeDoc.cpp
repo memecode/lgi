@@ -593,7 +593,7 @@ class ProjSymPopup : public LPopupList<FindSymResult>
 	int score(FindSymResult *r)
 	{
 		LString &s = r->Symbol;
-		int pos = s.Lower().Find(keyword.Lower());
+		auto pos = s.Lower().Find(keyword.Lower());
 		if (pos < 0)
 		{
 			printf("%s:%i - no match? keyword='%s' sym='%s'\n", _FL, keyword.Get(), s.Get());

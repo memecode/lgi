@@ -5377,12 +5377,8 @@ void LDirTest()
 
 	for (auto b = dir.First(LGetSystemPath(LSP_HOME)); b; b = dir.Next())
 	{
-		bool debug = Stricmp(dir.GetName(), "restored.mp4") == 0;
+		// bool debug = Stricmp(dir.GetName(), "restored.mp4") == 0;
 		auto modTime = dir.GetLastWriteTime();
-		if (debug)
-		{
-			int asd=0;
-		}
 		auto dt = LDirectory::TsToDateTime(modTime);
 
 		LgiTrace("%-36sunix=" LPrintfInt64 ", dt=%s %g\n",

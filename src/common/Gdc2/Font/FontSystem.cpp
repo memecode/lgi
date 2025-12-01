@@ -715,7 +715,7 @@ LFont *LFontSystem::GetGlyph(uint32_t u, LFont *UserFont)
 			// but only for a max of 10ms. This may result in a few missing glyphs but reduces the max time a display
 			// string takes to layout
 			auto Start = LCurrentTime();
-			int Used = d->Used;
+			// int Used = d->Used;
 			while (SubFonts.Length() > 0 && (LCurrentTime() - Start) < 10)
 			{
 				LString f = SubFonts[0];

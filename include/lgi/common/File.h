@@ -44,7 +44,7 @@
 	#define LFileCompare					strcmp
 
 	#define O_READ							O_RDONLY
-	#define O_WRITE							O_WRONLY|O_CREAT
+	#define O_WRITE							(O_WRONLY|O_CREAT)
 	#ifdef MAC
 		#define O_SHARE						O_SHLOCK
 	#else

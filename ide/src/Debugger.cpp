@@ -500,10 +500,6 @@ class Gdb :
 
 		// if (DEBUG_SHOW_GDB_IO)
 		{
-			if (Strnstr(Start, "Breakpoint 1 at", Length))
-			{
-				int asd=0;
-			}
 			// Log->Print("OnLine: '%.*s'\n", (int)Length-1, Start);
 		}
 
@@ -953,7 +949,6 @@ class Gdb :
 				else if (Rd < 0)
 				{
 					// Remote process quit?
-					int asd=0;
 				}
 			}
 
@@ -2231,8 +2226,8 @@ public:
 				if (ProcessId < 0)
 				{
 					auto msg = LString::Fmt("%s:%i - No process ID (yet?)", _FL);
-					DBG_LOG("%s\n", msg);
-					LogMsg("%s\n", msg);
+					DBG_LOG("%s\n", msg.Get());
+					LogMsg("%s\n", msg.Get());
 					return;
 				}
 		

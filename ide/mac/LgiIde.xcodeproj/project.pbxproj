@@ -153,7 +153,7 @@
 		345B211D217969D30079E3C9 /* icons.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icons.png; path = ../Resources/icons.png; sourceTree = "<group>"; };
 		348341382CC4B5E6002AF938 /* RemoteFileSelect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RemoteFileSelect.h; path = ../../include/lgi/common/RemoteFileSelect.h; sourceTree = "<group>"; };
 		348341392CC4B5E6002AF938 /* RemoteFileSelect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RemoteFileSelect.cpp; path = ../../src/common/Lgi/RemoteFileSelect.cpp; sourceTree = "<group>"; };
-		349E73722ECFB36100A68615 /* Ssh.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Ssh.cpp; sourceTree = "<group>"; };
+		349E73722ECFB36100A68615 /* Ssh.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Ssh.cpp; path = ../../src/common/Net/Ssh.cpp; sourceTree = SOURCE_ROOT; };
 		34C0A79A2D35105600DC9D96 /* StructuredLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StructuredLog.h; path = ../../include/lgi/common/StructuredLog.h; sourceTree = "<group>"; };
 		34C0A79B2D35106C00DC9D96 /* StructuredIo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StructuredIo.h; path = ../../include/lgi/common/StructuredIo.h; sourceTree = "<group>"; };
 		34C75D9223A0D89A006DE6D1 /* NewProjectFromTemplate.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = NewProjectFromTemplate.cpp; path = ../src/NewProjectFromTemplate.cpp; sourceTree = "<group>"; };
