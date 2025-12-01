@@ -108,7 +108,9 @@ public:
     				{
     					if (auto radioBtn = dynamic_cast<LListItemRadioBtn*>(col))
     					{
-        					radioBtn->Value(radioBtn->GetColumn() == GetColumn());
+    					    bool val = radioBtn->GetColumn() == GetColumn();
+        					radioBtn->LListItemColumn::Value(val);
+        					radioBtn->Update();
        					}
     				}
     			}
