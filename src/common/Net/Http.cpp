@@ -231,7 +231,7 @@ bool LHttp::Request
 
 	if (AuthUser && AuthPassword)
 	{
-		if (1)
+		#if 1
 		{
 			// Basic authentication
 			char Raw[128];
@@ -242,13 +242,14 @@ bool LHttp::Request
 			
 			Cmd.Print("Authorization: Basic %s\r\n", Base64);
 		}
-		else
+		#else
 		{
 			// Digest authentication
 			// Not implemented yet...
 			err.Set(LErrorNotSupported, "Digest authentication not impl.");
 			LAssert(!"Not impl.");
 		}
+		#endif
 	}
 	Cmd.Push("\r\n");
 	

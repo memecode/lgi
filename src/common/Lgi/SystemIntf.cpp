@@ -499,7 +499,7 @@ public:
 	{
 		while (true)
 		{
-			auto startTs = LCurrentTime();
+			// auto startTs = LCurrentTime();
 			DoWork();
 
 			if (IsCancelled())
@@ -1161,8 +1161,8 @@ public:
 			SystemIntf::TForeground,
 			[this, inputPaths, callback, searchTerms=LString(searchTerms)](auto work) mutable
 			{
-				auto now = LCurrentTime();
-				auto oneMin = 1000 * 60;
+				// auto now = LCurrentTime();
+				// auto oneMin = 1000 * 60;
 				auto updateCache = fileCache.Length() == 0;
 				auto parts = searchTerms.SplitDelimit();
 
@@ -2696,11 +2696,11 @@ public:
 
 	int Main() override
 	{
-		uint64_t lastConnect = 0;
+		// uint64_t lastConnect = 0;
 
 		while (true)
 		{
-			auto startTs = LCurrentTime();
+			// auto startTs = LCurrentTime();
 			DoWork();
 			if (IsCancelled())
 			{

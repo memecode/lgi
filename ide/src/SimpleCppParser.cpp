@@ -939,14 +939,6 @@ struct CppContext
 									Scopes.Add({DefnExternC, Line, Start});
 									s++;
 								}
-								else
-								{
-									int asd=0;
-								}
-							}
-							else
-							{
-								int asd=0;
 							}
 						}
 						else if (

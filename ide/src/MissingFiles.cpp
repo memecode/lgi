@@ -352,7 +352,7 @@ public:
 		return 0;
 	}
 
-	LMessage::Result OnEvent(LMessage *Msg)
+	LMessage::Result OnEvent(LMessage *Msg) override
 	{
 		switch (Msg->Msg())
 		{
