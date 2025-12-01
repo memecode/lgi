@@ -336,9 +336,9 @@ bool LXmlTreeUi::Convert(LDom *Tag, LViewI *Ui, bool ToUI)
 						}
 						else // no value, so set to blank
 						{
-							LView *v;
-							if (Ui->GetViewById(m->Id, v))
-								v->Name("");
+							LEdit *e;
+							if (Ui->GetViewById(m->Id, e))
+								e->Name("");
 						}
 						break;
 					}

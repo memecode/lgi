@@ -744,7 +744,7 @@ ResObject *LResources::CreateObject(LXmlTag *t, ResObject *Parent)
 		}
 		else if (stricmp(t->GetTag(), Res_CheckBox) == 0)
 		{
-			Wnd = new LCheckBox(0, "");
+			Wnd = new LCheckBox(0);
 		}
 		else if (stricmp(t->GetTag(), Res_Button) == 0)
 		{

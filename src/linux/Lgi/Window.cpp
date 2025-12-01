@@ -373,6 +373,11 @@ bool LWindow::OnGtkDropTarget(LView *view, bool isTarget)
 				
 			return false;
 		}
+		
+		#if 0
+		for (auto &fmt: formats.GetAll())
+			DND_LOG("%s:%i %s - %s=%s\n", _FL, __func__, view->GetClass(), fmt.Get());
+		#endif
 	}
 	else if (isTarget)
 	{

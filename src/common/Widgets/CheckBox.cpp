@@ -11,17 +11,19 @@
 static int PadX1Px = 20;
 static int PadX2Px = 6;
 #ifdef MAC
-static int PadYPx = 8;
-static int TextYOffset = 6;
+    static int PadYPx = 8;
+    static int TextYOffset = 6;
 #else
-static int PadYPx = 0;
-static int TextYOffset = 0;
+    static int PadYPx = 0;
+    static int TextYOffset = 0;
 #endif
 static int MinYSize = 16;
 
-class LCheckBoxPrivate : public LMutex, public LStringLayout
+class LCheckBoxPrivate :
+    public LMutex,
+    public LStringLayout
 {
-	LCheckBox *Ctrl = NULL;
+	LCheckBox *Ctrl = nullptr;
 	
 public:
 	int64 Val = 0;
@@ -29,19 +31,19 @@ public:
 	bool Three = false;
 	LRect ValuePos;
 	#ifdef HAIKU
-	OsThreadId CreateThread = -1;
+    	OsThreadId CreateThread = -1;
 	#endif
 
 	LCheckBoxPrivate(LCheckBox *ctrl) :
 		LMutex("LCheckBoxPrivate"),
 		Ctrl(ctrl),
 		#ifdef HAIKU
-		// This is most likely running in the constructor of the window. Which is NOT the BWindow's thread.
-		// Therefor wait for the actually thread before getting a thread specific font cache.
-		LStringLayout(NULL),
-		CreateThread(LCurrentThreadId())
+    		// This is most likely running in the constructor of the window. Which is NOT the BWindow's thread.
+    		// Therefor wait for the actually thread before getting a thread specific font cache.
+    		LStringLayout(nullptr),
+    		CreateThread(LCurrentThreadId())
 		#else
-		LStringLayout(LAppInst->GetFontCache())
+		    LStringLayout(LAppInst->GetFontCache())
 		#endif
 	{	
 		Ctrl = ctrl;
@@ -80,10 +82,12 @@ LCheckBox::LCheckBox(int id, const char *name, int InitState) :
 	ResObject(Res_CheckBox)
 {
 	d = new LCheckBoxPrivate(this);
-	Name(name);
-	LDisplayString ds(GetFont(), name);
-	auto cx = ds.X() + PadX1Px + PadX2Px;
-	auto cy = MAX(ds.Y(), MinYSize) + PadYPx;
+	if (name)
+	    Name(name);
+
+    LDisplayString ds(GetFont(), name ? name : "A");
+    auto cx = ds.X() + PadX1Px + PadX2Px;
+    auto cy = MAX(ds.Y(), MinYSize) + PadYPx;
 
 	d->Val = InitState;
 	LRect r(0, 0, cx-1, cy-1);

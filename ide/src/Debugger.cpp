@@ -573,19 +573,28 @@ class Gdb :
 						// Ok so whats the process ID?
 						#ifdef POSIX
 						
-							int Pid = 
-							getpgid(ThreadId);
-							// LogMsg("Pid for Thread %i = %i\n", ThreadId, Pid);
+							int Pid = getpgid(ThreadId);
+
 							if (Pid > 0 && ProcessId < 0)
-								// LgiTrace("Got the thread id: %i, and pid: %i\n", ThreadId, Pid);
+							{
+								DBG_LOG("Got the thread id: %i, and pid: %i\n", ThreadId, Pid);
 								ProcessId = Pid;
+							}
+							else
+							{
+								DBG_LOG("%s:%i - getpgid(%i)=%i  ProcessId=%i\n", ThreadId, Pid, ProcessId);
+							}
+
 						#else
 
 							LAssert(!"Impl me.");
 
 						#endif
 					}
-					else LgiTrace("%s:%i - No thread id?\n", _FL);
+					else
+					{
+						DBG_LOG("%s:%i - No thread id?\n", _FL);
+					}
 				}
 			}
 			else
@@ -2171,7 +2180,7 @@ public:
 
 	void Break(TStatusCb cb, bool SuppressFL = false) override
 	{
-		DBG_LOG("%s:%i - %i backend=%p ProcessId=%i\n", _FL, __func__, backend, ProcessId);
+		DBG_LOG("%s:%i - %s, backend=%p, ProcessId=%i\n", _FL, __func__, backend, ProcessId);
 		if (backend)
 		{
 			if (ProcessId < 0)
@@ -2221,7 +2230,9 @@ public:
 			#ifdef POSIX
 				if (ProcessId < 0)
 				{
-					LogMsg("%s:%i - No process ID (yet?).\n", _FL);
+					auto msg = LString::Fmt("%s:%i - No process ID (yet?)", _FL);
+					DBG_LOG("%s\n", msg)
+					LogMsg("%s\n", msg);
 					return;
 				}
 		
