@@ -122,6 +122,7 @@ class Gdb :
 		TBpState state = TInit;
 
 		std::function<void(int,BpInfo*)> onIndex;	// the gdbIndex is assigned
+		std::function<void(int,BpInfo*)> onHit;		// the break point was hit
 		std::function<void(int)> onDelete;			// the bp is deleted from gdb
 	};
 	LHashTbl<IntKey<int>, BpInfo*> BreakPoints; // requires locking
@@ -509,7 +510,9 @@ class Gdb :
 			// If the current command wants the data in a particular format:
 			if (curCmd->arrayCb ||
 				curCmd->pipeCb)
-			{
+			{	
+				printf("OnLine '%.*s' -> curCmd\n", (int)Length-1, Start);
+				
 				curCmd->pipe.Write(Start, Length);
 				return;
 			}
@@ -526,6 +529,8 @@ class Gdb :
 
 		if (ParseState == ParseBreakPoint)
 		{
+			printf("OnLine '%.*s' -> ParseBreakPoint\n", (int)Length-1, Start);
+
 			LOG("\tbreak:'%s'\n", BreakInfo[0].Get());
 			OnBreakPoint(BreakInfo[0]);
 			ParseState = ParseNone;
@@ -534,6 +539,8 @@ class Gdb :
 
 		if (ParseState == ParseNone)
 		{
+			printf("OnLine '%.*s' -> ParseNone\n", (int)Length-1, Start);
+
 			if (Stristr(Start, "received signal SIGSEGV"))
 			{
 				Events->Ungrab();
@@ -551,6 +558,8 @@ class Gdb :
 					Events->Ungrab();
 					OnExit();
 				}
+				/* This doesn't seem to be reliable... we don't always get the "New Thread" line
+				
 				else if (stristr(Start, "New Thread"))
 				{
 					LString s(Start, Length);
@@ -592,6 +601,7 @@ class Gdb :
 						DBG_LOG("%s:%i - No thread id?\n", _FL);
 					}
 				}
+				*/
 			}
 			else
 			{
@@ -680,6 +690,7 @@ class Gdb :
 			{
 				// Write the command to the stream
 				auto str = LString::Fmt("%s\n", curCmd->cmd.Get());
+				DBG_LOG("write cmd '%s'\n", curCmd->cmd.Get());
 				auto wr = Write(str);
 				if (RemoteGdb)
 					SuppressEchoLine = wr;						
@@ -1359,25 +1370,25 @@ public:
 			}
 			
 			// Create the command to start things:
-			LString a;
+			LString startCmd;
 			if (DebuggingProcess)
-				a = "c";
+				startCmd = "c";
 			else if (Args)
-				a.Printf("r %s", Args.Get());
+				startCmd.Printf("r %s", Args.Get());
 			else
-				a = "r";
+				startCmd = "r";
 
-			if (a(0) == 'r' && (ProcessId < 0 || bpStore->Length() > 0))
+			if (startCmd(0) == 'r' && (ProcessId < 0 || bpStore->Length() > 0))
 			{
 				mainBreakPoint.Symbol = "main";
-				mainBreakPointCmd = a;
+				mainBreakPointCmd = startCmd;
 				bpStore->Add(mainBreakPoint);
 			}
 			else
 			{
 				SetState(_FL, true, Running);
 
-				Cmd(a,
+				Cmd(startCmd,
 					true,
 					[this, cb](auto &err)
 					{
@@ -1510,6 +1521,49 @@ public:
 			});
 	}
 
+	void GetProcessId()
+	{
+		// Get the process id?
+		DBG_LOG("%s:%i - %s getting process id...\n", _FL, __func__);
+		Cmd("info proc", false,
+			[this](auto err, LString::Array *lines)
+			{
+				/* E.g.
+				(gdb) info proc
+				process 31352
+				cmdline = '/home/matthew/code/lgi/trunk/ide/lgiide'
+				cwd = '/home/matthew/code/lgi/trunk/ide'
+				exe = '/home/matthew/code/lgi/trunk/ide/lgiide'
+				*/
+				if (err)
+				{
+					DBG_LOG("%s:%i - %s process id err: %s\n", _FL, __func__, err.ToString().Get());
+					if (Events)
+						Events->OnError(err);
+				}
+				else if (lines)
+				{
+					for (auto &line: *lines)
+					{
+						// DBG_LOG("%s:%i - process info line '%s'\n", _FL, line.Get());
+
+						auto parts = line.SplitDelimit();
+						if (parts.Length() == 2 &&
+							parts[0].Equals("process"))
+						{
+							ProcessId = (int)parts[1].Int();
+							DBG_LOG("%s:%i - got process id: %i\n", _FL, ProcessId);
+						}
+					}
+					
+					if (ProcessId < 0)
+						DBG_LOG("%s:%i - %s process id err: output didn't contain an id\n", _FL, __func__);
+				}
+			}
+		);
+
+	}
+
 	// Called when the gdb break point index is assigned
 	void OnBreakPointIndex(int id, BpInfo *inf)
 	{
@@ -1519,25 +1573,30 @@ public:
 		auto bp = bpStore->Get(id);
 		if (bp == mainBreakPoint)
 		{
-			// Get the process id?
+			DBG_LOG("%s:%i - %s got main bp.\n", _FL, __func__);
 
-			// Install various breakpoints
-
-			// Install a callback for the 
 			inf->onDelete = [this](auto id)
 				{
-					// sub process has started...
-					SetState(_FL, true, Running);
-					Cmd(mainBreakPointCmd, true, [this](auto err)
-						{
-							// Clean up the state...
-							mainBreakPoint.Empty();
-							mainBreakPointCmd.Empty();
-						});
+					// Get the process id
+					GetProcessId();
+					
+					// Then continue to run...
+					DebuggingProcess = true;
+					Cmd("c", true);
 				};
 
-			// Delete the temporary main breakpoint...
-			bpStore->Delete(id);
+			// now that the breakpoint on 'main' is set up... start the process running:
+			Cmd(mainBreakPointCmd, true, [this, id](auto err)
+				{
+					// The break point has been hit right?
+					
+					// Clean up the state...
+					mainBreakPoint.Empty();
+					mainBreakPointCmd.Empty();
+
+					// Delete the temporary break point...
+					bpStore->Delete(id); // which will trigger the GetProcessId / continue callback above...
+				});
 		}
 	}
 
