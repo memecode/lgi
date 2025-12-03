@@ -30,9 +30,9 @@ extern const char *ToString(SysPlatform p)
 }
 
 #if 1
-#define LOG(...) log->Print(__VA_ARGS__)
+	#define LOG(...) log->Print(__VA_ARGS__)
 #else
-#define LOG(...)
+	#define LOG(...)
 #endif
 
 // General SystemIntf work handling:

@@ -697,7 +697,7 @@ LString LSsh::ReadToPrompt(LSsh::SshConsole *c, LStream *output, LCancel *cancel
 			else
 			{
 				auto now = LCurrentTime();
-				if (now - startTs > 2000)
+				if (now - startTs > 5000)
 				{
 					auto lastLn = p.PeekLine(false);
 					RemoveAnsi(lastLn);

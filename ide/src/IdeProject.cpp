@@ -225,7 +225,7 @@ class BuildThread : public LThread, public LStream, public LCancel
 		{
 			LString s((char*)Ptr, Size);
 			SLOG("raw:", s);
-			p.Write(s.Replace("\r", "\n"));
+			p.Write(s.Replace("\r\n", "\n").Replace("\r", "\n"));
 
 			while (auto ln = p.Pop())
 			{
@@ -1495,10 +1495,12 @@ BuildThread::~BuildThread()
 
 ssize_t BuildThread::Write(const void *Buffer, ssize_t Size, int Flags)
 {
-	if (Proj->GetApp())
-	{
-		Proj->GetApp()->PostEvent(M_APPEND_TEXT, (LMessage::Param)NewStr((char*)Buffer, Size), AppWnd::BuildTab);
-	}
+	// printf("%s:%i BuildThread::Write='%.*s'\n", _FL, (int)Size, (const char*)Buffer);
+	if (auto app = Proj->GetApp())
+		app->PostEvent(M_APPEND_TEXT, (LMessage::Param)NewStr((char*)Buffer, Size), AppWnd::BuildTab);
+	else
+		LAssert(!"no app ptr");
+	
 	return Size;
 }
 

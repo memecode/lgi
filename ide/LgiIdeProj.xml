@@ -152,8 +152,6 @@ WINNATIVE</Release>
 					<Debug>/home/matthew/Code/Lgi/trunk/Ide/Code/IdeProjectSettings.cpp</Debug>
 				</All>
 			</Arguments>
-			<CCrossCompiler />
-			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -230,7 +228,6 @@ _GNU_SOURCE</Release>
 					<Debug>HAS_LIBSSH</Debug>
 					<Release>HAS_LIBSSH</Release>
 				</All>
-				<Linux />
 			</Defines>
 			<TargetType>
 				<All>Executable</All>
@@ -255,10 +252,7 @@ _GNU_SOURCE</Release>
 					<Release>`pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
 			</SystemIncludes>
-			<LibraryPaths>
-				<All />
-				<Linux />
-			</LibraryPaths>
+			<LibraryPaths />
 			<ApplicationIcon>
 				<Haiku>./resources/icon.hvif</Haiku>
 			</ApplicationIcon>
@@ -267,7 +261,6 @@ _GNU_SOURCE</Release>
 					<Debug>-Wno-format-truncation</Debug>
 					<Release>-Wno-format-truncation</Release>
 				</Linux>
-				<All />
 			</Options>
 		</Build>
 		<Editor>
@@ -283,8 +276,6 @@ _GNU_SOURCE</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
-			<CommentFile />
-			<CommentFunction />
 		</Editor>
 		<Debug>
 			<Environment>
@@ -292,21 +283,13 @@ _GNU_SOURCE</Release>
 			</Environment>
 			<Arguments>
 				<All>
-					<Debug>/home/matthew/code/lgi/trunk/ide/LgiIdeProj.xml</Debug>
+					<Debug>/home/matthew/code/castPi/castPiProject.xml</Debug>
 				</All>
 			</Arguments>
-			<DebugAdmin />
-			<InitialDir />
 		</Debug>
 		<Advanced>
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
-			<OtherMakefileRules />
+			<PostBuildCommands />
 		</Advanced>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
+		<Remote />
 	</Settings>
 </Project>
