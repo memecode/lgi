@@ -26,11 +26,13 @@ ifeq ($(Build),Debug)
 	Libs =  \
 		-lmagic \
 		-lssh \
+		-liconv \
 		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0` \
 		-pthread \
 		-llgi-gtk3$(Tag) \
-		-L../$(BuildDir)
+		-L../$(BuildDir) \
+		-L../../deps/build-x64-debug/lib
 	Inc =  \
 		-I../../../../../../usr/include/gstreamer-1.0 \
 		-I../include \
@@ -47,11 +49,13 @@ else
 	Libs =  \
 		-lmagic \
 		-lssh \
+		-liconv \
 		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0` \
 		-pthread \
 		-llgi-gtk3$(Tag) \
-		-L../$(BuildDir)
+		-L../$(BuildDir) \
+		-L../../deps/build-x64-debug/lib
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
 		-I../include \
