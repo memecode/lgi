@@ -3,12 +3,14 @@
 
 #include "lgi/common/Thread.h"
 #include "lgi/common/Net.h"
+#include "lgi/common/StructuredLog.h"
 
 class LTelnet : public LStream
 {
 	LSocket s;
 	LArray<uint8_t> buf;
 	ssize_t used;
+	LStructuredLog *slog = nullptr;
 	
 public:
 	LTelnet(const char *host = NULL, int port = 23)
@@ -28,11 +30,19 @@ public:
 		return true;
 	}
 	
-	bool IsOpen() override { return s.IsOpen(); }
+	void SetSlog(LStructuredLog *l)
+	{
+		slog = l;
+	}
+	
+	bool IsOpen() override
+	{
+		return s.IsOpen();
+	}
 	
 	bool IsReadable(int TimeoutMs)
 	{
-		return s.IsReadable(TimeoutMs);
+		return s.IsReadable(TimeoutMs) || used > 0;
 	}
 	
 	ssize_t Read(void *Ptr, ssize_t Size, int Flags = 0) override
@@ -41,52 +51,56 @@ public:
 			return -1;
 			
 		auto rd = s.Read(buf.AddressOf() + used, buf.Length() - used);
-		// LgiTrace("telnet.rd=%i  used=%i\n", (int)rd, (int)used);
 		if (rd > 0)
+		{
+			if (slog)
+				slog->Log("telnet.rd=", rd, used, LString((const char*)buf.AddressOf() + used, rd));
 			used += rd;
-		
-		uint8_t *p = (uint8_t*)Ptr;
-		ssize_t i, start = 0, wr = 0;
-		for (i=0; i<used; i++)
-		{
-			if (buf[i] == 255)
-			{
-				auto common = MIN(Size-wr, i-start);
-				if (common > 0)
-				{
-					memcpy(p+wr, buf.AddressOf(start), common);
-					wr += common;
-				}
-				if (used - i < 2)
-				{
-					// Haven't got the whole command
-					memmove(buf.AddressOf(0), buf.AddressOf(i), used-i);
-					used -= i;
-					return i;
-				}
-				i += 2; // skip over the command structure.
-				start = i + 1;
-			}
-		}
-		if (start < i)
-		{
-			auto common = MIN(Size-wr, i-start);
-			if (common > 0)
-			{
-				memcpy(p+wr, buf.AddressOf(start), common);
-				wr += common;
-			}
 		}
 		
-		used = 0;		
-		return wr;
+		auto in = buf.AddressOf();
+		auto endIn = in + used;
+		auto outStart = (uint8_t*) Ptr;
+		auto out = outStart;
+		auto endOut = out + Size;
+
+		while (in < endIn)
+		{
+			if (*in == 255)
+			{
+				// Skip cmd...
+				auto remaining = endIn - in;
+				if (remaining < 3)
+					break;
+				in += 3;
+			}
+			else if (out >= endOut)
+			{
+				// no more write space...
+				break;
+			}
+			else
+			{
+				*out++ = *in++;
+			}
+		}
+
+		auto remaining = endIn - in;
+		if (remaining > 0)
+			memmove(buf.AddressOf(), in, remaining);
+		used = remaining;
+		
+		auto written = out - outStart;
+		if (slog)
+			slog->Log("telnet.rd.written=", used, written, LString((const char*)Ptr, written));
+		return written;
 	}
 	
 	LString Read()
 	{
 		char buf[512];
 		auto rd = Read(buf, sizeof(buf));
-		return LString(buf, rd);
+		return LString(buf, rd > 0 ? rd : 0);
 	}
 
 	ssize_t Write(const void *Ptr, ssize_t Size, int Flags = 0) override

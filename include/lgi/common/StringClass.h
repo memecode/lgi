@@ -346,6 +346,10 @@ public:
 			else
 				return false;
 		}
+		else if (bytes == 0)
+		{
+			return true;
+		}
 
 		Str = (RefStr*)malloc(sizeof(RefStr) + bytes);
 		if (!Str)
