@@ -43,6 +43,7 @@ public:
 		Locker(LTree *t, const char *file, int line);
 		~Locker();
 		operator bool() const { return locked || !tree; }
+		void Unlock();
 	};
 	Locker ScopedLock(const char *file, int line)
 	{

@@ -1305,7 +1305,7 @@ bool VcFolder::GetBranches(bool refresh, bool includeRemote, ParseParams *Params
 	{
 		case VcGit:
 		{
-			LString args = "-P branch -v";
+			LString args = "branch -v";
 			if (includeRemote)
 				args += " -r";
 			if (StartCmd(args, &VcFolder::ParseBranches, Params))

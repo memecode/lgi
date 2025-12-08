@@ -41,8 +41,6 @@ LMutex::~LMutex()
 {
 	#if defined WIN32
 
-		// CloseHandle(_Sem);
-		// _Sem = 0;
 		DeleteCriticalSection(&_Sem);
 
 	#elif defined POSIX
@@ -70,9 +68,11 @@ bool LMutex::_Lock()
 
 	#elif defined POSIX
 
-		if (pthread_mutex_trylock(&_Sem))
+		auto err = pthread_mutex_trylock(&_Sem);
+		if (err)
 		{
-			// printf("\t%s:%i - pthread_mutex_trylock errored: %s\n\t_Sem=%s\n", __FILE__, __LINE__, GetErrorName(errno), SemPrint(&_Sem));
+			LError e(err);
+			printf("%s:%i - pthread_mutex_trylock errored=%s name='%s'\n", _FL, e.ToString().Get(), _Name.Get());
 			return false;
 		}
 
@@ -89,9 +89,11 @@ void LMutex::_Unlock()
 
 	#elif defined POSIX
 
-		if (pthread_mutex_unlock(&_Sem))
+		auto err = pthread_mutex_unlock(&_Sem);
+		if (err)
 		{
-			printf("\t%s:%i - pthread_mutex_unlock errored\n", _FL);
+			LError e(err);
+			printf("%s:%i - pthread_mutex_unlock errored=%s\n", _FL, e.ToString().Get());
 		}
 
 	#endif
@@ -203,7 +205,7 @@ void LMutex::Unlock()
 	
 	if (_Count < 1)
 	{
-		printf("%s:%i - _Count=%i\n", __FILE__, __LINE__, _Count);
+		printf("%s:%i - unlock, count=%i, name=%s\n", _FL, _Count, _Name.Get());
 	
 		#if 0
 		// I want a stack trace the next time this happens

@@ -26,8 +26,16 @@ LTreeNode::Locker::Locker(LTree *t, const char *file, int line) : tree(t)
 		
 LTreeNode::Locker::~Locker()
 {
+	Unlock();
+}
+
+void LTreeNode::Locker::Unlock()
+{
 	if (locked && tree)
+	{
 		tree->Unlock();
+		locked = false;
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1606,7 +1614,7 @@ bool LTree::OnKey(LKey &k)
 			case LK_DELETE:
 			{
 				d->searchTerm.Empty();
-				Unlock(); // before potentially being deleted...?
+				lck.Unlock(); // before potentially being deleted...?
 				SendNotify(LNotification(k));
 				// This might delete the item... so just return here.
 				return true;
