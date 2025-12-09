@@ -7,6 +7,8 @@ class LIniFile
 
 	LString IsSection(LString &ln)
 	{
+		if (!ln)
+			return LString();
 		char *s = ln.Get();
 		const char *start = NULL, *end = NULL;
 		for (auto i=s; *i; i++)
