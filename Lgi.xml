@@ -142,6 +142,7 @@
 				</Node>
 				<Node File="./include/lgi/common/Roster.h" Type="3" Platforms="15" />
 				<Node File="./include/lgi/common/SubProcess.h" Type="3" Platforms="15" />
+				<Node File="./src/common/General/SubProcessCommon.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Resources" Type="1" Platforms="15" Open="0" Id="32">
 				<Node File="./src/common/Resource/LgiRes.cpp" Type="2" Platforms="15" />
