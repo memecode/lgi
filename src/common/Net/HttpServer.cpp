@@ -5,7 +5,7 @@
 
 struct LHttpServerPriv;
 
-#if 0
+#if 1
 #define LOG_HTTP(...)	printf(__VA_ARGS__)
 #else
 #define LOG_HTTP(...)
@@ -145,9 +145,22 @@ public:
 		}
 
 		LgiTrace("Listening on port %i.\n", port);
+		auto logTs = LCurrentTime();
+		int readableCalls = 0;
 		while (!cancel->IsCancelled())
 		{
-			if (Listen.IsReadable(10))
+			/*
+			auto now = LCurrentTime();
+			if (now - logTs >= 1000)
+			{
+				logTs = now;
+				LOG_HTTP("readbleCalls=%i\n", readableCalls);
+				readableCalls = 0;
+			}
+			readableCalls++;
+			*/
+		
+			if (Listen.IsReadable(20))
 			{
 				LAutoPtr<LSocketI> s(new LSocket);
 				if (s)
@@ -174,8 +187,7 @@ public:
 			}
 			for (auto m: msgArr)
 				OnEvent(m);
-			msgArr.DeleteObjects();
-			
+			msgArr.DeleteObjects();			
 		}
 
 		printf("Closing listen socket: %i\n", (int)Listen.Handle());
@@ -335,7 +347,7 @@ int LHttpThread::Main()
 							LCopyStreamer cp(256 << 10);
 							auto copied = cp.Copy(resp.body, stream);
 							if (copied != bytes)
-								LOG_HTTP("%s:%i - body copy failed! " LPrintfSizeT " -> " LPrintfSSizeT "\n", bytes, copied);
+								LOG_HTTP("%s:%i - body copy failed! " LPrintfSizeT " -> " LPrintfSSizeT "\n", _FL, bytes, copied);
 						}
 					}
 				}
@@ -470,11 +482,14 @@ bool LHttpServer::Callback::ParseHtmlWithDom(LVariant &Out, LDom *Dom, const cha
 		{
 			p.Write(s, e - s);
 			s = e + 2;
-			while (*s && strchr(" \t\r\n", *s)) s++;
+			while (*s && strchr(" \t\r\n", *s))
+				s++;
 			auto v = s;
-			while (*s && (isdigit(*s) || isalpha(*s) || strchr(".[]", *s)) ) s++;
+			while (*s && (isdigit(*s) || isalpha(*s) || strchr(".[]", *s)) )
+				s++;
 			char *Var = NewStr(v, s - v);
-			while (*s && strchr(" \t\r\n", *s)) s++;
+			while (*s && strchr(" \t\r\n", *s))
+				s++;
 			if (strncmp(s, "?>", 2) == 0)
 			{
 				LVariant Value;
