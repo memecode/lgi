@@ -2,6 +2,7 @@
 #include "lgi/common/HttpServer.h"
 #include "lgi/common/Net.h"
 #include "lgi/common/Thread.h"
+#include "lgi/common/SubProcess.h"
 
 struct LHttpServerPriv;
 
@@ -53,6 +54,7 @@ private:
 public:
 	constexpr static const char *sContentLength = "Content-Length";
 
+	LHttpServer *server = nullptr;
 	LHttpServer::Callback *callback;
 	LHttpServer_TraceSocket Listen;
 	int port;
@@ -63,9 +65,13 @@ public:
 	using LMsgArray = LArray<LMessage*>;
 	LThreadSafeInterface<LMsgArray> messages;
 
-	LHttpServerPriv(LHttpServer::Callback *cb, int portVal, LCancel *cancelObj) :
+	LHttpServerPriv(LHttpServer *httpServer,
+					LHttpServer::Callback *cb,
+					int portVal,
+					LCancel *cancelObj) :
 		LThread("LHttpServerPriv.Thread"),
 		LMutex("LHttpServerPriv.Lock"),
+		server(httpServer),
 		callback(cb),
 		port(portVal),
 		cancel(cancelObj ? cancelObj : &localCancel),
@@ -132,9 +138,57 @@ public:
 	int Main()
 	{
 	    LOG_HTTP("Attempting to listen on port %i...\n", port);
+	    
+	    LAutoPtr<LSubProcess::IoThread> netstat;
 		while (!Listen.Listen(port))
 		{
 			LOG_HTTP("...can't listen on port %i.\n", port);
+			
+			if (server->onListenError)
+			{
+				#if LINUX
+				if (netstat.Reset(new LSubProcess::IoThread("netstat", "-tulnp")))
+				{
+					netstat->onStdout = [this](auto str)
+					{
+						auto key = LString::Fmt(":%i", port);
+						LString hdrs;
+						bool noProcess = true;
+						for (auto &ln: str.SplitDelimit("\r\n"))
+						{
+							if (ln.Find("Proto") == 0)
+								hdrs = ln;
+							else if (hdrs && ln.Find(key) > 0)
+							{
+								noProcess = false;
+								
+								auto pos = hdrs.Find("PID");
+								auto parts = ln(pos, -1).SplitDelimit("/");
+								if (parts.Length() == 2)
+								{
+									int pid = (int) parts[0].Int();
+									if (pid > 0 &&
+										server->onListenError(pid, parts[1]))
+									{
+										auto killPid = LString::Fmt("kill -9 %i", pid);
+										printf("%s:%i - %s\n", _FL, killPid.Get());
+										system(killPid);
+									}
+								}
+							}
+						}
+						
+						if (noProcess)
+						{
+							printf("%s:%i - no process on port %i...?\n", _FL, port);
+						}
+					};
+					
+					netstat->Start();
+				}
+				#endif
+			}
+			
 			auto start = LCurrentTime();
 			while (LCurrentTime() - start < 5000)
 			{
@@ -363,7 +417,7 @@ int LHttpThread::Main()
 
 LHttpServer::LHttpServer(LHttpServer::Callback *cb, int port, LCancel *cancel)
 {
-	d = new LHttpServerPriv(cb, port, cancel);
+	d = new LHttpServerPriv(this, cb, port, cancel);
 }
 
 LHttpServer::~LHttpServer()
@@ -514,3 +568,4 @@ bool LHttpServer::Callback::ParseHtmlWithDom(LVariant &Out, LDom *Dom, const cha
 	Out.Value.String = p.NewStr();
 	return true;
 }
+

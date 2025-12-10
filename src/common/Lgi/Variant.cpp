@@ -574,7 +574,7 @@ LVariant &LVariant::operator =(LVariant const &i)
 		}
 		case GV_HASHTABLE:
 		{
-			if ((Value.Hash = new LHash))
+			if ((Value.Hash = new TVariantMap))
 			{
 				if (i.Value.Hash)
 				{
@@ -692,14 +692,14 @@ List<LVariant> *LVariant::SetList(List<LVariant> *Lst)
 	return Value.Lst;
 }
 
-bool LVariant::SetHashTable(LHash *Table, bool Copy)
+bool LVariant::SetHashTable(TVariantMap *Table, bool Copy)
 {
 	Empty();
 	Type = GV_HASHTABLE;
 
 	if (Copy && Table)
 	{
-		if ((Value.Hash = new LHash))
+		if ((Value.Hash = new TVariantMap))
 		{
 			// const char *k;
 			// for (LVariant *p = Table->First(&k); p; p = Table->Next(&k))
@@ -711,7 +711,7 @@ bool LVariant::SetHashTable(LHash *Table, bool Copy)
 	}
 	else
 	{
-		Value.Hash = Table ? Table : new LHash;
+		Value.Hash = Table ? Table : new TVariantMap;
 	}
 
 	return Value.Hash != 0;
@@ -2059,7 +2059,7 @@ ssize_t LCustomType::CustomField::Sizeof()
 		case GV_DATETIME:
 			return sizeof(LDateTime);
 		case GV_HASHTABLE:
-			return sizeof(LVariant::LHash);
+			return sizeof(LVariant::TVariantMap);
 		case GV_OPERATOR:
 			return sizeof(LOperator);
 		case GV_LMOUSE:
@@ -2434,6 +2434,21 @@ double LScriptArguments::DoubleAt(size_t i, double Default)
 LDom *LScriptArguments::DomAt(size_t i)
 {
 	return IdxCheck(i) ? (*this)[i]->CastDom() : NULL;
+}
+
+LVariant::TVariantMap *LScriptArguments::HashAt(size_t i)
+{
+	if (!IdxCheck(i))
+		return nullptr;
+		
+	if (auto var = (*this)[i])
+	{
+		if (var->Type != GV_HASHTABLE)
+			return nullptr;
+		return var->Value.Hash;
+	}
+	
+	return nullptr;
 }
 
 bool LScriptArguments::Throw(const char *file, int line, const char *Msg, ...)

@@ -189,7 +189,7 @@ public:
 class LgiClass LVariant
 {
 public:
-	typedef LHashTbl<ConstStrKey<char>,LVariant*> LHash;
+	using TVariantMap = LHashTbl<ConstStrKey<char>,LVariant*>;
 
 	/// The type of the variant
     LVariantType Type;
@@ -222,7 +222,7 @@ public:
 		/// Valid when Type == #GV_LIST
 	    List<LVariant> *Lst;
 		/// Valid when Type == #GV_HASHTABLE
-	    LHash *Hash;
+	    TVariantMap *Hash;
 		/// Valid when Type == #GV_DATETIME
 		LDateTime *Date;
 		/// Valid when Type == #GV_CUSTOM
@@ -358,7 +358,7 @@ public:
 	/// Sets the value to a copy of the list
 	List<LVariant> *SetList(List<LVariant> *Lst = NULL);
 	/// Sets the value to a hashtable
-	bool SetHashTable(LHash *Table = NULL, bool Copy = true);
+	bool SetHashTable(TVariantMap *Table = NULL, bool Copy = true);
 	/// Set the value to a surface
 	bool SetSurface(class LSurface *Ptr, bool Own);
 	/// Set the value to a stream
@@ -475,6 +475,7 @@ public:
 	int64_t Int64At(size_t i, int64_t Default = 0);
 	double DoubleAt(size_t i, double Default = 0);
 	LDom *DomAt(size_t i);
+	LVariant::TVariantMap *HashAt(size_t i);
 };
 
 #endif

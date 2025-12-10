@@ -1,6 +1,12 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/SubProcess.h"
 
+#if 0
+#define LOG(...)		printf(__VA_ARGS__)
+#else
+#define LOG(...)
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 LSubProcess::IoThread::IoThread(const char *exe, const char *args) :
 	LThread("LSubProcess.IoThread.Thread"),
@@ -28,25 +34,48 @@ bool LSubProcess::IoThread::Start(bool ReadAccess, bool WriteAccess, bool MapStd
 {
 	Auto lck(this, _FL);
 	if (!process)
+	{
+		LOG("%s:%i - start: no process?\n", _FL);
 		return false;
-	return process->Start(ReadAccess, WriteAccess, MapStderrToStdout);
+	}
+	
+	if (!process->Start(ReadAccess, WriteAccess, MapStderrToStdout))
+	{
+		LOG("%s:%i - start: failed to start process\n", _FL);
+		return false;
+	}
+	
+	// Start the thread to watch the output...
+	LOG("%s:%i - start: run thread\n", _FL);
+	Run();
+	return true;
 }
 
-void LSubProcess::IoThread::doRead(bool ended)
+/// \returns true if something was read
+bool LSubProcess::IoThread::doRead(bool ended)
 {
 	if (!process || !process->Peek())
-		return;
+	{
+		LOG("%s:%i - doRead: no process or peek=0\n", _FL);
+		return false;
+	}
 
 	char buf[1024];
 	auto rd = process->Read(buf, sizeof(buf));
 	if (!ended && rd <= 0)
-		return;
+	{
+		LOG("%s:%i - doRead: read=0\n", _FL);
+		return false;
+	}
 
 	if (onBlock)
 	{
 		// Unparsed data mode:
 		if (rd > 0)
+		{
+			LOG("%s:%i - doRead: onBlock=%i\n", _FL, (int)rd);
 			onBlock(LString(buf, rd));
+		}
 	}
 	else if (onLine)
 	{
@@ -87,20 +116,34 @@ void LSubProcess::IoThread::doRead(bool ended)
 		if (rd > 0)
 			out.Write(buf, rd);
 		if (ended)
-			onStdout(out.NewLStr());
+		{
+			auto stdout = out.NewLStr();
+			LOG("%s:%i - doRead: onStdout ended=%i\n", _FL, (int)stdout.Length());
+			onStdout(stdout);
+		}
+		else
+		{
+			LOG("%s:%i - doRead: onStdout running=%i\n", _FL, (int)rd);
+		}
 	}
+
+	return true;
 }
 
 int LSubProcess::IoThread::Main()
 {
+	LOG("%s:%i - main: starting...\n", _FL);
 	while (!IsCancelled())
 	{
+		bool readData = false;
+		
 		{
 			Auto lck(this, _FL);
 			if (process)
 			{
 				bool running = process->IsRunning();
-				doRead(!running);
+				readData = doRead(!running);
+				LOG("%s:%i - main: doRead=%i running=%i\n", _FL, readData, running);
 				if (!running)
 				{
 					if (onComplete)
@@ -108,10 +151,16 @@ int LSubProcess::IoThread::Main()
 					break;
 				}
 			}
+			else
+			{
+				LOG("%s:%i - main: no process\n", _FL);
+			}
 		}
 		
-		LSleep(50);
+		if (!readData) // only sleep when there is no data
+			LSleep(50);
 	}
 
+	LOG("%s:%i - main: exiting...\n", _FL);
 	return 0;
 }

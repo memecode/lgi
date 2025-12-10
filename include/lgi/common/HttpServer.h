@@ -52,6 +52,10 @@ public:
 
 		virtual int OnRequest(Request *req, Response *resp) = 0;
 	};
+	
+	/// This callback is called when the server can't listen on the desired port
+	/// If the function returns true, the server will try and kill the process.
+	std::function<bool(int pid, LString process)> onListenError;
 
 	LHttpServer(Callback *cb, int port, LCancel *cancel);
 	~LHttpServer();

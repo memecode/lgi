@@ -31,12 +31,12 @@ ifeq ($(Build),Debug)
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I../private/common \
-		`pkg-config --cflags gtk+-3.0` \
-		-I./resources \
 		-I../include \
+		-I../private/common \
+		-I./resources \
 		-I../include/lgi/linux/Gtk \
 		-I../include/lgi/linux \
+		`pkg-config --cflags gtk+-3.0` \
 		-I./src
 else
 	CFlags += -s -Os -Wno-format-truncation
@@ -50,39 +50,34 @@ else
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I../include \
 		`pkg-config --cflags gtk+-3.0` \
-		-I../private/common \
-		-I../include/lgi/linux/Gtk \
-		-I../include/lgi/linux \
+		-I../include \
 		-I./resources \
+		-I../private/common \
+		-I../include/lgi/linux \
+		-I../include/lgi/linux/Gtk \
 		-I./src
 endif
 
 # Dependencies
 Source =	../src/common/Net/Http.cpp \
-			src/LgiIde.cpp \
-			src/IdeDoc.cpp \
-			../src/common/Net/OpenSSLSocket.cpp \
-			src/Debugger.cpp \
-			../src/common/Lgi/LgiMain.cpp \
 			../src/common/Text/DocView.cpp \
-			src/DebugContext.cpp \
-			../src/common/Text/TextView4.cpp \
-			../src/common/Lgi/Mdi.cpp \
-			../src/common/Text/HtmlCommon.cpp \
-			../src/common/Text/Html.cpp \
-			../src/common/Text/HtmlParser.cpp \
-			../src/common/Text/Homoglyphs/Homoglyphs.cpp \
-			../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
 			../src/common/Lgi/RemoteFileSelect.cpp \
-			src/WebFldDlg.cpp \
 			../src/common/Coding/ParseCpp.cpp \
 			../src/common/Text/RemoveAnsi.cpp \
 			../src/common/Text/TextConvert.cpp \
-			src/DocEditStyling.cpp \
 			../src/common/Lgi/About.cpp \
 			src/IdeProject.cpp \
+			../src/common/Text/HtmlCommon.cpp \
+			src/History.cpp \
+			../src/common/Lgi/Mdi.cpp \
+			../src/common/Text/TextView4.cpp \
+			src/WebFldDlg.cpp \
+			../src/common/Text/Html.cpp \
+			../src/common/Net/OpenSSLSocket.cpp \
+			src/DebugContext.cpp \
+			src/LgiIde.cpp \
+			../src/common/Text/HtmlParser.cpp \
 			src/IdeProjectSettings.cpp \
 			src/MissingFiles.cpp \
 			src/NewProjectFromTemplate.cpp \
@@ -100,9 +95,14 @@ Source =	../src/common/Net/Http.cpp \
 			../src/common/Lgi/SystemIntf.cpp \
 			src/MemDumpViewer.cpp \
 			src/SpaceTabConv.cpp \
+			../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
+			src/Debugger.cpp \
+			src/IdeDoc.cpp \
 			src/LgiUtils.cpp \
-			src/History.cpp \
-			src/DocEdit.cpp
+			../src/common/Text/Homoglyphs/Homoglyphs.cpp \
+			src/DocEditStyling.cpp \
+			src/DocEdit.cpp \
+			../src/common/Lgi/LgiMain.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -332,6 +332,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/common/General/FileCommon.cpp \
 	../src/common/General/Password.cpp \
 	../src/common/General/Properties.cpp \
+	../src/common/General/SubProcessCommon.cpp \
 	../src/common/General/TimeZone.cpp \
 	../src/common/Hash/md5/md5.c \
 	../src/common/Hash/md5/md5.h \

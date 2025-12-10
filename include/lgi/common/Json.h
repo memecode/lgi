@@ -638,14 +638,15 @@ public:
 		return true;
 	}
 
-	LArray<LString> GetKeys(const char *Addr = NULL)
+	LString::Array GetKeys(const char *Addr = nullptr)
 	{
-		Key *k = Deref(Addr, true);
-		LArray<LString> a;
-		if (k)
-			for (auto &i : k->Obj)
-				a.Add(i.Name);
-		return a;
+		LString::Array keys;
+
+		if (auto k = Deref(Addr, true))
+			for (auto &i: k->Obj)
+				keys.Add(i.Name);
+
+		return keys;
 	}
 
 	// Testing 

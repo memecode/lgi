@@ -144,7 +144,7 @@ public:
 		LStringPipe out;
 
 		// Private methods:
-		void doRead(bool ended);
+		bool doRead(bool ended);
 		int Main();
 		
 	public:
