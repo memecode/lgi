@@ -168,7 +168,7 @@ public:
 								{
 									int pid = (int) parts[0].Int();
 									if (pid > 0 &&
-										server->onListenError(pid, parts[1]))
+										server->onListenError(pid, parts[1].Strip()))
 									{
 										auto killPid = LString::Fmt("kill -9 %i", pid);
 										printf("%s:%i - %s\n", _FL, killPid.Get());
