@@ -499,11 +499,6 @@ class Gdb :
 			return;
 		}
 
-		// if (DEBUG_SHOW_GDB_IO)
-		{
-			// Log->Print("OnLine: '%.*s'\n", (int)Length-1, Start);
-		}
-
 		// Send output
 		if (curCmd)
 		{
@@ -558,50 +553,6 @@ class Gdb :
 					Events->Ungrab();
 					OnExit();
 				}
-				/* This doesn't seem to be reliable... we don't always get the "New Thread" line
-				
-				else if (stristr(Start, "New Thread"))
-				{
-					LString s(Start, Length);
-					LString::Array a = s.SplitDelimit("[] ()");
-					int ThreadId = -1;
-					for (unsigned i=0; i<a.Length(); i++)
-					{
-						if (a[i] == LString("LWP") && i < a.Length() - 1)
-						{
-							ThreadId = (int)a[i+1].Int();
-							break;
-						}
-					}
-					if (ThreadId > 0)
-					{
-						// Ok so whats the process ID?
-						#ifdef POSIX
-						
-							int Pid = getpgid(ThreadId);
-
-							if (Pid > 0 && ProcessId < 0)
-							{
-								DBG_LOG("Got the thread id: %i, and pid: %i\n", ThreadId, Pid);
-								ProcessId = Pid;
-							}
-							else
-							{
-								DBG_LOG("%s:%i - getpgid(%i)=%i  ProcessId=%i\n", ThreadId, Pid, ProcessId);
-							}
-
-						#else
-
-							LAssert(!"Impl me.");
-
-						#endif
-					}
-					else
-					{
-						DBG_LOG("%s:%i - No thread id?\n", _FL);
-					}
-				}
-				*/
 			}
 			else
 			{
@@ -1382,6 +1333,7 @@ public:
 			{
 				mainBreakPoint.Symbol = "main";
 				mainBreakPointCmd = startCmd;
+				SuppressNextFileLine = true;
 				bpStore->Add(mainBreakPoint);
 			}
 			else

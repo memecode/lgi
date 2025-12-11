@@ -316,7 +316,7 @@ void EditTray::OnFunctionList(LMouse &m)
 {
 	LArray<DefnInfo> Funcs;
 	LError err;
-	if (BuildDefnList(Doc->GetFileName(), (char16*)Ctrl->NameW(), Funcs, DefnNone /*DefnFunc | DefnClass*/, err))
+	if (BuildDefnList(Doc->GetFileName(), (char16*)Ctrl->NameW(), Funcs, DefnNone, err))
 	{
 		LSubMenu s;
 		LArray<DefnInfo*> a;					
