@@ -321,17 +321,17 @@ void EditTray::OnFunctionList(LMouse &m)
 		LSubMenu s;
 		LArray<DefnInfo*> a;					
 		
-		int ScreenHt = GdcD->Y();
-		int ScreenLines = ScreenHt / LSysFont->GetHeight();
-		float Ratio = ScreenHt ? (float)(LSysFont->GetHeight() * Funcs.Length()) / ScreenHt : 0.0f;
-		bool UseSubMenus = Ratio > 0.9f;
-		int Buckets = UseSubMenus ? (int)(ScreenLines * 0.9) : 1;
-		int BucketSize = MAX(2, (int)Funcs.Length() / Buckets);
-		LSubMenu *Cur = NULL;
+		auto ScreenHt = GdcD->Y();
+		auto ScreenLines = ScreenHt / LSysFont->GetHeight();
+		auto Ratio = ScreenHt ? (float)(LSysFont->GetHeight() * Funcs.Length()) / ScreenHt : 0.0f;
+		auto UseSubMenus = Ratio > 0.9f;
+		auto Buckets = UseSubMenus ? (int)(ScreenLines * 0.9) : 1;
+		auto BucketSize = MAX(2, (int)Funcs.Length() / Buckets);
+		LSubMenu *Cur = nullptr;
 		
 		for (unsigned n=0; n<Funcs.Length(); n++)
 		{
-			DefnInfo *i = &Funcs[n];
+			auto i = &Funcs[n];
 			char Buf[256], *o = Buf;
 			
 			if (i->Type != DefnEnumValue)
@@ -2098,7 +2098,7 @@ int IdeDoc::OnNotify(LViewI *v, const LNotification &n)
 					LArray<DefnInfo> All;
 					LError err;
 
-					BuildDefnList(GetFileName(), (char16*)d->Edit->NameW(), All, DefnFunc, err);
+					BuildDefnList(GetFileName(), (char16*)d->Edit->NameW(), All, DefnNone, err);
 					d->MethodPopup->SetAll(All);
 
 					// Update list elements...

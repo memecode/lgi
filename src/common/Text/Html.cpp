@@ -8630,7 +8630,7 @@ void LHtml::OnMouseClick(LMouse &m)
 								F.Write(u, strlen(u));
 							F.Close();
 							
-							LString Err;
+							LError Err;
 							if (!LExecute(Path, NULL, NULL, &Err))
 							{
 								LgiMsg(	this,
@@ -8638,7 +8638,7 @@ void LHtml::OnMouseClick(LMouse &m)
 										LAppInst ? LAppInst->LBase::Name() : GetClass(),
 										MB_OK,
 										Path,
-										Err.Get());
+										Err.ToString().Get());
 							}
 						}
 						break;

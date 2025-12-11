@@ -170,7 +170,8 @@ LgiFunc char *LSeekUtf8
 	char *Start = 0
 );
 
-/// Returns the next token in a string, leaving the argument pointing to the end of the token
+/// Returns the next token as a heap string, leaving the argument pointing to the end of the token
+/// A token is defined as a quoted string or an unquoted string that ends in whitespace.
 /// \ingroup Text
 LgiFunc char *LTokStr(const char *&s);
 
@@ -280,13 +281,13 @@ LgiFunc const char *LGetOsName();
 LgiFunc bool LExecute
 (
 	/// The file to open
-	const char *File,
+	const char *file,
 	/// The arguments to pass to the program
-	const char *Arguments="",
+	const char *arguments = "",
 	/// The directory to run in
-	const char *Dir = NULL,
+	const char *dir = nullptr,
 	/// An error message
-	LString *ErrorMsg = NULL
+	LError *error = nullptr
 );
 
 /// Initializes the random number generator

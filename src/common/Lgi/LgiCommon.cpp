@@ -2538,7 +2538,8 @@ char *LTokStr(const char *&s)
 				{
 					// error, no end delimiter
 					e = s;
-					while (*e) e++;
+					while (*e)
+						e++;
 				}
 				Status = NewStr(s, e - s);
 				s = *e ? e + 1 : e;
@@ -2546,7 +2547,8 @@ char *LTokStr(const char *&s)
 			else
 			{
 				const char *e = s;
-				while (*e && !strchr(Delim, *e)) e++;
+				while (*e && !strchr(Delim, *e))
+					e++;
 				Status = NewStr(s, e - s);
 				s = e;
 			}

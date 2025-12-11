@@ -23,7 +23,11 @@
 
 #include <pwd.h>
 
-#define DEBUG_GET_APPS_FOR_MIMETYPE			0
+#if 1
+#define MT_APPS_LOG(...)		LgiTrace(__VA_ARGS__)
+#else
+#define MT_APPS_LOG(...)
+#endif
 
 ////////////////////////////////////////////////////////////////
 // Local helper functions
@@ -281,40 +285,38 @@ static bool XdgMimeLookup(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 {
 	static bool NoXdgMime = false;
 	if (NoXdgMime)
+	{
+		MT_APPS_LOG("%s:%i %s - NoXdgMime.\n", _FL, __func__);
 		return false;
+	}
 
 	char Args[MAX_PATH_LEN];
 	sprintf(Args, "query default %s", Mime);
 	LStringPipe Output;
 
-	LLanguage *CurLang = LGetLanguageId();	
+	auto CurLang = LGetLanguageId();	
 	char LangName[64];
 	sprintf_s(LangName, sizeof(LangName), "Name[%s]", CurLang ? CurLang->Id : "en");
 
-	#if DEBUG_GET_APPS_FOR_MIMETYPE
-	printf("LGetAppsForMimeType('%s', ..., %i)\nRunning 'xdg-mime %s'\n",
-		Mime, Limit, Args);
-	#endif
+	MT_APPS_LOG("LGetAppsForMimeType('%s', ..., %i)\nRunning 'xdg-mime %s'\n", Mime, Limit, Args);
 
 	LSubProcess proc("xdg-mime", Args);
 	if (!proc.Start())
 	{
 		NoXdgMime = true;
-		LgiTrace("%s:%i - Failed to execute xdg-mime %s\n", _FL, Args);
+		MT_APPS_LOG("%s:%i %s - Failed to execute xdg-mime %s\n", _FL, __func__, Args);
 		return false;
 	}
 
 	proc.Communicate(&Output);
 	auto o = Output.NewLStr().Strip();
 
-	#if DEBUG_GET_APPS_FOR_MIMETYPE
-	printf("Output:\n%s\n", o.Get());
-	#endif
 	if (!o)
 	{
-		LgiTrace("%s:%i - No output from xdg-mime\n", _FL);
+		MT_APPS_LOG("%s:%i - No output from xdg-mime\n", _FL);
 		return false;
 	}
+	MT_APPS_LOG("Output:\n%s\n", o.Get());
 
 	char p[MAX_PATH_LEN];
 	bool exists = false;	
@@ -322,33 +324,29 @@ static bool XdgMimeLookup(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 	{
 		if (!LMakePath(p, sizeof(p), desktopFolders[i], o.Strip()))
 		{
-			LgiTrace("%s:%i - Failed to create path.\n", _FL);
+			MT_APPS_LOG("%s:%i - Failed to create path.\n", _FL);
 			return false;
 		}
 		
 		exists = LFileExists(p);
-		#if DEBUG_GET_APPS_FOR_MIMETYPE
-		printf("DesktopExists: '%s' = %i\n", p, exists);
-		#endif
+		MT_APPS_LOG("DesktopExists: '%s' = %i\n", p, exists);
 		if (exists)
 			break;
 	}
 	if (!exists)
 	{
-		LgiTrace("%s:%i - '%s' doesn't exist.\n", _FL, p);
+		MT_APPS_LOG("%s:%i - '%s' doesn't exist.\n", _FL, p);
 		return false;
 	}
 
 	auto txt = LReadFile(p);
 	LString Section;
 
-	#if DEBUG_GET_APPS_FOR_MIMETYPE
-	printf("Reading '%s', got %i bytes\n", p, (int)strlen(txt));
-	#endif
+	MT_APPS_LOG("Reading '%s', got %i bytes\n", p, (int)strlen(txt));
 
 	if (!txt)
 	{
-		LgiTrace("%s:%i - Can't read from '%s'\n", _FL, p);
+		MT_APPS_LOG("%s:%i - Can't read from '%s'\n", _FL, p);
 		return false;
 	}
 
@@ -357,18 +355,15 @@ static bool XdgMimeLookup(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 	
 	for (auto line: txt.SplitDelimit("\r\n"))
 	{
-		#if DEBUG_GET_APPS_FOR_MIMETYPE
-		// printf("	'%s'\n", Var);
-		#endif		
+		// MT_APPS_LOG("	'%s'\n", Var);
+		
 		if (line(0) == '[')
 		{
 			auto end = line.Find("]");
 			if (end > 0)
 			{
 				Section = line(1, end);
-				#if DEBUG_GET_APPS_FOR_MIMETYPE
-				printf("	Section='%s'\n", Section.Get());
-				#endif
+				MT_APPS_LOG("	Section='%s'\n", Section.Get());
 			}
 		}
 		else if (Section.Equals("Desktop Entry"))
@@ -390,9 +385,7 @@ static bool XdgMimeLookup(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 		}
 	}
 
-	#if DEBUG_GET_APPS_FOR_MIMETYPE
-	printf("	info='%s' '%s'\n", info.Name.Get(), info.Path.Get());
-	#endif
+	MT_APPS_LOG("	info='%s' '%s'\n", info.Name.Get(), info.Path.Get());
 	
 	return Status;
 }
@@ -489,11 +482,11 @@ static bool MimeAppsLookup(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 {
 	bool Status = XdgMimeLookup(Mime, Apps, Limit);
-	printf("%s: XdgMimeLookup=%i\n", __func__, Status);
+	MT_APPS_LOG("%s: XdgMimeLookup=%i apps=%i\n", __func__, Status, (int)Apps.Length());
 	if (!Status)
 	{
 		Status = MimeAppsLookup(Mime, Apps, Limit);
-		printf("%s: MimeAppsLookup=%i\n", __func__, Status);
+		MT_APPS_LOG("%s: MimeAppsLookup=%i apps=%i\n", __func__, Status, (int)Apps.Length());
 	}
 	
 	return Status;
@@ -521,12 +514,13 @@ LString LErrorCodeToString(uint32_t ErrorCode)
 	return e;
 }
 
-bool LExecute(const char *File, const char *Args, const char *Dir, LString *Error)
+bool LExecute(const char *File, const char *Args, const char *Dir, LError *error)
 {
 	if (!File)
 	{
 		LgiTrace("%s:%i - no file.\n", _FL);
-		if (Error) *Error = "No file parameter";
+		if (error)
+			error->Set(LErrorInvalidParam, "Missing file parameter");
 		return false;
 	}
 	
@@ -583,14 +577,25 @@ bool LExecute(const char *File, const char *Args, const char *Dir, LString *Erro
 					
 					if (stricmp(Mime, "application/x-executable") == 0 ||
 						stricmp(Mime, "application/x-shellscript") == 0 ||
+						stricmp(Mime, "application/x-pie-executable") == 0 ||
 						stricmp(Mime, "text/x-python") == 0)
 					{
 						TreatAsExe:
 						char f[512];
 						sprintf_s(f, sizeof(f), "\"%s\" %s &", File, Args ? Args : (char*)"");
 						if (Dir)
-							chdir(Dir);
-						return system(f) == 0;
+							chdir(Dir);						
+						
+						auto result = system(f);
+						printf("%s:%i - system(%s) = %i\n", _FL, f, result);
+						if (result)
+						{
+							if (error)
+								error->Set(LErrorFuncFailed, LString::Fmt("system(%s) failed", f));
+							return false;
+						}
+						
+						return true;
 					}
 					else
 					{
@@ -611,14 +616,14 @@ bool LExecute(const char *File, const char *Args, const char *Dir, LString *Erro
 				}
 			}
 		}
-		else if (Error)
-			Error->Printf("'%s' doesn't exist.\n", File);
+		else if (error)
+			error->Set(LErrorPathNotFound, LString::Fmt("'%s' doesn't exist.\n", File));
 	}
 
 	if (!App)
 	{
-		if (Error)
-			*Error = "No app registered to open HTML.";
+		if (error)
+			error->Set(LErrorPathNotFound, "No app registered to open file type.");
 		return false;
 	}
 
@@ -675,13 +680,13 @@ bool LExecute(const char *File, const char *Args, const char *Dir, LString *Erro
 	printf("a=\n%s\n", a.Get());
 	if (e = system(a))
 	{
-		if (Error)
-			*Error = LErrorCodeToString(errno);
+		if (error)
+			error->Set(errno);
 		return false;
 	}
 
 	return true;
-}
+} 
 
 //////////////////////////////////////////////////////////////////////////
 WindowManager LGetWindowManager()

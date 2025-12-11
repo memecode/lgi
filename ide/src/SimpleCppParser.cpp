@@ -63,7 +63,7 @@ static bool IsFuncNameChar(char c)
 			IsDigit(c);
 }
 
-const char *TypeToStr(DefnType t)
+const char *toString(DefnType t)
 {
 	switch (t)
 	{
@@ -147,20 +147,26 @@ struct CppContext
 	constexpr static const char *WhiteSpace		= " \t\r\n";
 
 	const char *FileName = nullptr;
-	int Line = DefnNone;
-	int LimitTo;
+	int LineNum = 1;
+	int LimitTo = DefnNone;
 	bool Debug = false;
 	char16 *LastDecl = nullptr;
 	#ifdef DEBUG_LINE
 	int PrevLine = 0;
 	#endif
 
+	bool EmitDefn(DefnType t) const
+	{
+		return	LimitTo == DefnNone ||
+				(LimitTo & t) != 0;
+	}
+
 	struct TScope
 	{
 		// The type of scope starting
 		DefnType type;
 		
-		// Line that the scope started on
+		// Line that the scope started on (1..lines)
 		int line;
 
 		// Ptr to source at the start of the scope (for debugging)
@@ -168,7 +174,7 @@ struct CppContext
 
 		TScope()
 			: type(DefnNone)
-			, line(0)
+			, line(1)
 			, source(nullptr)
 		{}
 
@@ -180,7 +186,7 @@ struct CppContext
 
 		LString toString() const
 		{
-			return LString::Fmt("%s:%i", TypeToStr(type), line);
+			return LString::Fmt("%s:%i", ::toString(type), line);
 		}
 	};
 
@@ -370,7 +376,7 @@ struct CppContext
 			char16 *startTok = n;
 			if (!(t = LexCpp(n, LexStrdup)))
 			{
-				LgiTrace("%s:%i - LexCpp failed at %s:%i.\n", _FL, FileName, Line+1);
+				LgiTrace("%s:%i - LexCpp failed at %s:%i.\n", _FL, FileName, LineNum);
 				break;
 			}
 
@@ -497,7 +503,7 @@ struct CppContext
 					break;
 				case '\n':
 				{
-					Line++;
+					LineNum++;
 					s++;
 					break;
 				}
@@ -514,11 +520,7 @@ struct CppContext
 
 					if
 					(
-						(
-							LimitTo == DefnNone
-							||
-							(LimitTo & DefnDefine) != 0
-						)
+						EmitDefn(DefnDefine)
 						&&
 						(End - s) == 6
 						&&
@@ -531,7 +533,7 @@ struct CppContext
 
 						char16 r = *s;
 						*s = 0;					
-						Defns.New().Set(DefnDefine, FileName, Hash, Line + 1);					
+						Defns.New().Set(DefnDefine, FileName, Hash, LineNum);
 						*s = r;
 					
 					}
@@ -553,7 +555,7 @@ struct CppContext
 						ConditionalDepth++;
 						ConditionalFirst = IsFirst(ConditionalIndex, ConditionalDepth);
 						if (Debug)
-							LgiTrace("%s:%i - ConditionalDepth++=%i Line=%i: %.*S\n", _FL, ConditionalDepth, Line+1, Eol - s + 1, s - 1);
+							LgiTrace("%s:%i - ConditionalDepth++=%i Line=%i: %.*S\n", _FL, ConditionalDepth, LineNum, Eol - s + 1, s - 1);
 					}
 					else if
 					(
@@ -566,7 +568,7 @@ struct CppContext
 							!ConditionParsingErr)
 						{
 							ConditionParsingErr = true;
-							LgiTrace("%s:%i - Error parsing pre-processor conditions: %s:%i\n", _FL, FileName, Line+1);
+							LgiTrace("%s:%i - Error parsing pre-processor conditions: %s:%i\n", _FL, FileName, LineNum);
 						}
 
 						if (ConditionalDepth > 0)
@@ -574,7 +576,7 @@ struct CppContext
 							ConditionalIndex[ConditionalDepth-1]++;
 							ConditionalFirst = IsFirst(ConditionalIndex, ConditionalDepth);
 							if (Debug)
-								LgiTrace("%s:%i - ConditionalDepth=%i Idx++ Line=%i: %.*S\n", _FL, ConditionalDepth, Line+1, Eol - s + 1, s - 1);
+								LgiTrace("%s:%i - ConditionalDepth=%i Idx++ Line=%i: %.*S\n", _FL, ConditionalDepth, LineNum, Eol - s + 1, s - 1);
 						}
 					}
 					else if
@@ -593,7 +595,7 @@ struct CppContext
 							ConditionalDepth--;
 						ConditionalFirst = IsFirst(ConditionalIndex, ConditionalDepth);
 						if (Debug)
-							LgiTrace("%s:%i - ConditionalDepth--=%i Line=%i: %.*S\n", _FL, ConditionalDepth, Line+1, Eol - s + 1, s - 1);
+							LgiTrace("%s:%i - ConditionalDepth--=%i Line=%i: %.*S\n", _FL, ConditionalDepth, LineNum, Eol - s + 1, s - 1);
 					}
 
 					while (*s)
@@ -603,7 +605,7 @@ struct CppContext
 							// could be end of # command
 							char Last = (s[-1] == '\r') ? s[-2] : s[-1];
 							if (Last != '\\') break;
-							Line++;
+							LineNum++;
 						}
 
 						s++;
@@ -620,7 +622,7 @@ struct CppContext
 					{
 						if (*s == Delim) { s++; break; }
 						if (*s == '\\') s++;
-						if (*s == '\n') Line++;
+						if (*s == '\n') LineNum++;
 						s++;
 					}
 					break;
@@ -629,7 +631,7 @@ struct CppContext
 				{
 					s++;
 					if (ConditionalFirst)
-						Scopes.Add({DefnScope, Line, s});
+						Scopes.Add({DefnScope, LineNum, s});
 					FnEmit = false;
 					LastDecl = s;
 					#ifdef DEBUG_FILE
@@ -664,7 +666,7 @@ struct CppContext
 						{
 							LAutoWString t(LexCpp(s, LexStrdup));
 							if (t)
-								Defns.New().Set(DefnEnum, FileName, t.Get(), Line + 1);
+								Defns.New().Set(DefnEnum, FileName, t.Get(), LineNum);
 						}
 
 						IsEnum = false;
@@ -685,7 +687,7 @@ struct CppContext
 						auto TypeDef = LString(Start, s - Start - 1).Strip();
 						if (TypeDef.Length() > 0)
 						{
-							if (LimitTo == DefnNone || (LimitTo & DefnClass) != 0)
+							if (EmitDefn(DefnClass))
 							{
 								Defns.New().Set(DefnClass, FileName, TypeDef, Line + 1);
 							}
@@ -724,7 +726,7 @@ struct CppContext
 								break;
 							}
 
-							if (*s == '\n') Line++;
+							if (*s == '\n') LineNum++;
 							s++;
 						}
 						LastDecl = s;
@@ -865,19 +867,16 @@ struct CppContext
 								auto Type = GuessDefnType(Buf, Debug);
 								if
 								(
-									(
-										LimitTo == DefnNone ||
-										(LimitTo & Type) != 0
-									)
+									EmitDefn(Type)
 									&&
 									*Buf != ')'
 								)
-									Defns.New().Set(Type, FileName, Buf, Line + 1);
+									Defns.New().Set(Type, FileName, Buf, LineNum);
 
 								while (*End && !strchr(";:{#", *End))
 									End++;
 
-								SeekPtr(s, End, Line);
+								SeekPtr(s, End, LineNum);
 
 								switch (*End)
 								{
@@ -890,7 +889,7 @@ struct CppContext
 									{
 										// Has a function implementation, so consume the starting bracket and
 										// emit a new function scope...
-										Scopes.Add({DefnFunc, Line, s++});
+										Scopes.Add({DefnFunc, LineNum, s++});
 										break;
 									}
 									default:
@@ -936,7 +935,7 @@ struct CppContext
 								defnskipws(s);
 								if (*s == '{')
 								{
-									Scopes.Add({DefnExternC, Line, Start});
+									Scopes.Add({DefnExternC, LineNum, Start});
 									s++;
 								}
 							}
@@ -975,12 +974,12 @@ struct CppContext
 									LString::Array a = ClassNames;
 									a.Add(var);
 									auto full = LString("::").Join(a);
-									Defns.New().Set(DefnVariable, FileName, full, Line + 1);
+									Defns.New().Set(DefnVariable, FileName, full, LineNum);
 								}
 								else
 								{
 									// Global scope var?
-									Defns.New().Set(DefnVariable, FileName, var, Line + 1);
+									Defns.New().Set(DefnVariable, FileName, var, LineNum);
 								}
 							}
 
@@ -1028,7 +1027,7 @@ struct CppContext
 										break;
 									}
 									case '\n':
-										Line++;
+										LineNum++;
 										// fall thru
 									case '\r':
 									{
@@ -1054,7 +1053,7 @@ struct CppContext
 													Depth--;
 													break;
 												case '\n':
-													Line++;
+													LineNum++;
 													break;
 											}
 											i++;
@@ -1079,9 +1078,9 @@ struct CppContext
 						
 							if (auto Typedef = p.NewStrW())
 							{
-								if (LimitTo == DefnNone || (LimitTo & DefnTypedef) != 0)
+								if (EmitDefn(DefnTypedef))
 								{
-									Defns.New().Set(DefnTypedef, FileName, Typedef, Line + 1);
+									Defns.New().Set(DefnTypedef, FileName, Typedef, LineNum);
 								}
 								DeleteArray(Typedef);
 							}
@@ -1117,21 +1116,21 @@ struct CppContext
 								if (classDef)
 								{
 									// Full definition
-									Scopes.Add({DefnClass, Line, s});
+									Scopes.Add({DefnClass, LineNum, s});
 
 									DEBUG_LOG("%s:%i - CLASS/STRUCT defn: Scopes=%s @ line %i\n",
 											_FL, curScope().Get(), Line+1);
 								
 									ClassNames.Add(classDef.name);
 								
-									if (LimitTo == DefnNone || (LimitTo & DefnClass) != 0)
+									if (EmitDefn(DefnClass))
 									{
-										Defns.New().Set(DefnClass, FileName, curClass(), Line + 1);
+										Defns.New().Set(DefnClass, FileName, curClass(), LineNum);
 									}
 
 									if (s < classDef.body)
 									{
-										SeekPtr(s, classDef.body + 1/*seek past the colon, we have emitted the class scope*/, Line);
+										SeekPtr(s, classDef.body + 1/*seek past the colon, we have emitted the class scope*/, LineNum);
 										LastDecl = s;
 										DEBUG_LOG("post class s='%s'\n",
 											LString::Escape(LString(s, 20)).Get()
@@ -1173,7 +1172,7 @@ struct CppContext
 									{
 										auto iName = StartRd > 0 && EndRd > StartRd ? StartRd - 1 : a.Length() - 1;
 										auto sName = a[iName];
-										Defns.New().Set(DefnTypedef, FileName, sName, Line + 1);
+										Defns.New().Set(DefnTypedef, FileName, sName, LineNum);
 										a.DeleteArrays();
 									}
 								}
@@ -1205,14 +1204,14 @@ struct CppContext
 							LAutoWString t(LexCpp(s, LexStrdup));
 							if (t && isalpha(*t))
 							{
-								Defns.New().Set(DefnEnum, FileName, t.Get(), Line + 1);
+								Defns.New().Set(DefnEnum, FileName, t.Get(), LineNum);
 							}
 						}
 						else if (IsEnum)
 						{
 							char16 r = *s;
 							*s = 0;
-							Defns.New().Set(DefnEnumValue, FileName, Start, Line + 1);
+							Defns.New().Set(DefnEnumValue, FileName, Start, LineNum);
 							*s = r;
 							defnskipws(s);
 							if (*s == '=')
@@ -1251,7 +1250,7 @@ struct CppContext
 			for (unsigned i=0; i<Defns.Length(); i++)
 			{
 				DefnInfo *def = &Defns[i];
-				LgiTrace("    %s: %s:%i %s\n", TypeToStr(def->Type), def->File.Get(), def->Line, def->Name.Get());
+				LgiTrace("    %s: %s:%i %s\n", toString(def->Type), def->File.Get(), def->Line, def->Name.Get());
 			}
 		}
 	

@@ -198,11 +198,11 @@ bool LDefaultDocumentEnv::OnNavigate(LDocView *Parent, const char *Uri)
 				LAutoString Exe(TrimStr(First->Path, "\"\'"));
 				LAutoString Args(a.NewStr());
 
-				LString ErrorMsg;
-				if (LExecute(Exe, Args, ".", &ErrorMsg))
+				LError err;
+				if (LExecute(Exe, Args, ".", &err))
 					return true;
 
-				LgiMsg(Parent, "Failed to open '%s':\n%s", LAppInst->LBase::Name(), MB_OK, Exe.Get(), ErrorMsg.Get());
+				LgiMsg(Parent, "Failed to open '%s':\n%s", LAppInst->LBase::Name(), MB_OK, Exe.Get(), err.ToString().Get());
 			}
 			else
 			{
@@ -212,11 +212,11 @@ bool LDefaultDocumentEnv::OnNavigate(LDocView *Parent, const char *Uri)
 		else
 		{
 			// webpage
-			LString ErrorMsg;
-			if (LExecute(Uri, NULL, NULL, &ErrorMsg))
+			LError err;
+			if (LExecute(Uri, NULL, NULL, &err))
 				return true;
 
-			LgiMsg(Parent, "Failed to open '%s':\n%s", LAppInst->LBase::Name(), MB_OK, Uri, ErrorMsg.Get());
+			LgiMsg(Parent, "Failed to open '%s':\n%s", LAppInst->LBase::Name(), MB_OK, Uri, err.ToString().Get());
 		}
 	}
 

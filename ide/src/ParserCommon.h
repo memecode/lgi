@@ -6,7 +6,7 @@
 #define isword(s)				(s && (isdigit(s) || isalpha(s) || (s) == '_') )
 #define iswhite(s)				(s && strchr(LWhiteSpace, s) != 0)
 #define skipws(s)				while (iswhite(*s)) s++;
-#define defnskipws(s)			while (iswhite(*s)) { if (*s == '\n') Line++; s++; }
+#define defnskipws(s)			while (iswhite(*s)) { if (*s == '\n') LineNum++; s++; }
 #define defnskipsym(s)			while (IsAlpha(*s) || IsDigit(*s) || strchr("_:.~", *s)) { s++; }
 #define IsValidVariableChar(ch)	(IsAlpha(ch) || IsDigit(ch) || strchr("_", ch) != NULL)
 
@@ -24,6 +24,7 @@ enum DefnType
 	DefnExternC = 0x100,
 };
 
+extern const char *toString(DefnType t);
 extern bool ParseFunction(LRange &Return, LRange &Name, LRange &Args, const char *Defn);
 
 class DefnInfo
@@ -136,8 +137,6 @@ public:
 		return Score;
 	}
 };
-
-extern const char *TypeToStr(DefnType t);
 
 extern bool BuildCppDefnList
 (
