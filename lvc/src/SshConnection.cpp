@@ -159,6 +159,8 @@ LString LastLine(LStringPipe &input)
 	input.Iterate([&s, &ln](auto ptr, auto bytes)
 		{
 			s = LString((char*)ptr, bytes) + s;
+			if (!s)
+				return false;
 			auto end = s.Get() + s.Length();
 			for (auto p = end - 1; p >= s.Get(); p--)
 			{
