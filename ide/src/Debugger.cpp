@@ -1552,6 +1552,7 @@ public:
 							parts[0].Equals("process"))
 						{
 							ProcessId = (int)parts[1].Int();
+							Log->Print("ProcessId=%i\n", ProcessId);
 							DBG_LOG("%s:%i - got process id: %i\n", _FL, ProcessId);
 						}
 					}

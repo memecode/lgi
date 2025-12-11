@@ -807,27 +807,27 @@ public:
 class IdeOutput : public LTabView
 {
 public:
-	AppWnd *App = NULL;
-	LTabPage *Build = NULL;
-	LTabPage *Output = NULL;
-	LTabPage *Debug = NULL;
-	LTabPage *Find = NULL;
-	LTabPage *Network = NULL;
-	LTabPage *CommsState = NULL;
+	AppWnd *App = nullptr;
+	LTabPage *Build = nullptr;
+	LTabPage *Output = nullptr;
+	LTabPage *Debug = nullptr;
+	LTabPage *Find = nullptr;
+	LTabPage *Network = nullptr;
+	LTabPage *CommsState = nullptr;
 	LTextLog4 *Txt[AppWnd::Channels::ChannelMax] = {};
 	LArray<char> Buf[AppWnd::Channels::ChannelMax];
 	LFont Small;
 	LFont Fixed;
 
-	LTabView *DebugTab = NULL;
-	LBox *DebugBox = NULL;
-	LBox *DebugLog = NULL;
-	LList *Locals = NULL, *CallStack = NULL, *Threads = NULL, *BreakPoints = NULL;
-	LTree *Watch = NULL;
-	LTextLog *ObjectDump = NULL, *MemoryDump = NULL, *Registers = NULL;
-	LTableLayout *MemTable = NULL;
-	LEdit *DebugEdit = NULL;
-	DebugTextLog *DebuggerLog = NULL;
+	LTabView *DebugTab = nullptr;
+	LBox *DebugBox = nullptr;
+	LBox *DebugLog = nullptr;
+	LList *Locals = nullptr, *CallStack = nullptr, *Threads = nullptr, *BreakPoints = nullptr;
+	LTree *Watch = nullptr;
+	LTextLog *ObjectDump = nullptr, *MemoryDump = nullptr, *Registers = nullptr;
+	LTableLayout *MemTable = nullptr;
+	LEdit *DebugEdit = nullptr;
+	DebugTextLog *DebuggerLog = nullptr;
 
 	IdeOutput(AppWnd *app)
 	{
@@ -1868,8 +1868,7 @@ AppWnd::AppWnd()
 			}
 			else LgiTrace("%s:%i - FindSubMenu failed.\n", _FL);
 
-			LMenuItem *Debug = GetMenu()->FindItem(IDM_DEBUG_MODE);
-			if (Debug)
+			if (auto Debug = GetMenu()->FindItem(IDM_DEBUG_MODE))
 				Debug->Checked(true);
 			else
 				LgiTrace("%s:%i - FindSubMenu failed.\n", _FL);
@@ -4730,6 +4729,10 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				}
 				else
 				{
+					// Clear the debug log
+					d->Output->DebuggerLog->Empty();
+					
+					// Start debugging:
 					p->Execute(
 						ExeDebug,
 						[this](auto err, auto ctx)
