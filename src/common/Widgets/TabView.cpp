@@ -404,8 +404,7 @@ void LTabView::Value(int64 i)
 
 		if (IsAttached())
 		{
-			auto p = it[d->Current];
-			if (p)
+			if (auto p = it[d->Current])
 			{
 				if (!p->IsAttached())
 				{
@@ -413,10 +412,20 @@ void LTabView::Value(int64 i)
 				}
 				p->AttachChildren();
 				p->Visible(true);
+				
+				for (auto c: p->IterateViews())
+				{
+					printf("TabView::Value(%i) c=%s pos=%s\n", (int)i, c->GetClass(), c->GetPos().GetStr());
+				}
 			}
 
 			Invalidate();
 		}
+		else
+		{
+			LgiTrace("%s:%i - tab page not attached\n", _FL);
+			LAssert(!"probably meant to attach the tabs view first?");
+		}			
 
 		LNotification n(LNotifyValueChanged, _FL);
 		n.Int[0] = d->Current;
@@ -601,8 +610,7 @@ void LTabView::OnMouseClick(LMouse &m)
 	else if (Result >= 0)
 	{
 		TabIterator it(Children);
-		LTabPage *p = it[Result];
-		if (p)
+		if (auto p = it[Result])
 		{
 			if (p->HasButton() &&
 				p->BtnPos.Overlap(m))
@@ -1411,13 +1419,10 @@ LMessage::Result LTabPage::OnEvent(LMessage *Msg)
 	return LView::OnEvent(Msg);
 }
 
-void LTabPage::Append(LViewI *Wnd)
+bool LTabPage::Append(LViewI *Wnd)
 {
 	if (!Wnd)
-	{
-		LgiTrace("%s:%i - no wnd.\n", _FL);
-		return;
-	}
+		return false;
 
 	if (IsAttached() && TabCtrl)
 	{
@@ -1433,7 +1438,9 @@ void LTabPage::Append(LViewI *Wnd)
 	{
 		AddView(Wnd);
 	}
-	else LAssert(0);
+	else return false;
+	
+	return true;
 }
 
 bool LTabPage::Remove(LViewI *Wnd)

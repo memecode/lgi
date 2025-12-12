@@ -144,7 +144,7 @@ public:
 	void OnStyleChange();
 	void SetFont(LFont *Font, bool OwnIt = false) override;
 
-	void Append(LViewI *Wnd);
+	bool Append(LViewI *Wnd);
 	bool Remove(LViewI *Wnd);
 	bool LoadFromResource(int Resource);
 	void Select();

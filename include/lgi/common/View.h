@@ -942,6 +942,7 @@ public:
 		virtual void OnPulse() {}
 
 		// Impl LMessage::Result OnEvent(LMessage *Msg) in your subclass
+		// When the object is no longer needed, delete this, and return OBJ_DELETED from OnEvent.
 	};
 
 	#if defined(_DEBUG)
