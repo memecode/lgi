@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Project>
 	<Node Name="Source" Type="1" Platforms="15" Id="1">
-		<Node Name="Lgi" Type="1" Platforms="15" Id="1">
+		<Node Name="Lgi" Type="1" Platforms="15" Id="2">
 			<Node File="../../src/common/Lgi/DocApp.cpp" Type="2" Platforms="15" />
 			<Node File="../../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="15" />
 		</Node>
 		<Node File="./src/SlogViewerMain.cpp" Type="2" Platforms="15" />
 	</Node>
-	<Node Name="Headers" Type="1" Platforms="15" Id="2" />
-	<Node File="../../Lgi.xml" Type="4" Platforms="15" />
+	<Node Name="Headers" Type="1" Platforms="15" Id="3" />
+	<Node File="../../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
 	<Settings>
-		<Advanced />
+		<Advanced>
+			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+		</Advanced>
 		<General>
 			<Makefile>
 				<Linux>Makefile.linux</Linux>
@@ -24,8 +29,17 @@
 			<Compiler>
 				<Linux>gcc</Linux>
 			</Compiler>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
-		<Debug />
+		<Debug>
+			<Environment />
+			<Arguments>
+				<All />
+			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
+		</Debug>
 		<Build>
 			<TargetType>
 				<All>Executable</All>
@@ -53,6 +67,7 @@
 `pkg-config --libs gtk+-3.0`
 -static-libgcc</Release>
 				</Linux>
+				<All />
 			</Libraries>
 			<SystemIncludes>
 				<Linux>
@@ -60,6 +75,22 @@
 					<Release>`pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
 			</SystemIncludes>
+			<Defines>
+				<All />
+				<Linux />
+			</Defines>
+			<Options>
+				<All />
+				<Linux />
+			</Options>
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
+			<TargetName>
+				<Linux />
+			</TargetName>
+			<ApplicationIcon />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -71,6 +102,13 @@
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
+			<ShowWhiteSpace />
+			<CommentFile />
+			<CommentFunction />
 		</Editor>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
 	</Settings>
 </Project>

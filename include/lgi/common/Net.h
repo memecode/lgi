@@ -91,7 +91,7 @@ LgiFunc char *InetGetSubField(const char *s, const char *Field);
 LgiExtern LString LGetSubField(LString HeaderValue, const char *Field);
 
 /// Set a header value
-LgiExtern bool LSetHeaderFeild(LString &headers, LString field, LString value);
+LgiExtern bool LSetHeaderFeild(LString &headers, LString field, LString value, int wrapAt = 76);
 LgiFunc bool LHeaderUnitTests();
 
 /// Make md5 hash
@@ -532,5 +532,5 @@ public:
 	LSelect &operator +=(LSocketI *sock);
 	
 	LArray<LSocketI*> Readable(int Timeout = -1);
-	LArray<LSocketI*> Writeable(int Timeout = -1);
+	LArray<LSocketI*> Writable(int Timeout = -1);
 };

@@ -1,4 +1,7 @@
+#if WINDOWS
 #define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include "lgi/common/Lgi.h"
 #include "lgi/common/OptionsFile.h"
 #include "lgi/common/DocApp.h"
@@ -98,7 +101,15 @@ public:
 					}
 					case GV_STRING:
 					{
-						p.Print(" %.*s", (int)MIN(32,v.data.Length()), v.data.AddressOf());
+						if (LIsUtf8(v.data.AddressOf(), v.data.Length()))
+						{
+							p.Print(" %.*s", (int)MIN(32,v.data.Length()), v.data.AddressOf());
+						}
+						else
+						{
+							p.Print("<non-uft8>");
+						}
+						
 						if (v.data.Length() >= 32)
 							p.Print("...");
 						break;

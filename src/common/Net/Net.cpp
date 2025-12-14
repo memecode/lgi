@@ -1871,14 +1871,13 @@ LString LGetHeaderField(LString Headers, const char *Field)
 	return LString();
 }
 
-static LString WrapValue(LString hdr, LString val)
+static LString WrapValue(LString hdr, LString val, int wrapAt)
 {
-	const int MaxLine = 76;
 	LStringPipe out;
 	for (size_t i = 0; i < val.Length(); )
 	{
 		auto remaining = val.Length() - i;
-		auto avail = i ? MaxLine - 1 : MaxLine - hdr.Length() - 2; 
+		auto avail = i ? wrapAt - 1 : wrapAt - hdr.Length() - 2; 
 		auto bytes = MIN(remaining, avail);
 
 		out.Write(val.Get() + i, bytes);
@@ -1890,7 +1889,7 @@ static LString WrapValue(LString hdr, LString val)
 	return out.NewLStr();
 }
 
-bool LSetHeaderFeild(LString &headers, LString field, LString value)
+bool LSetHeaderFeild(LString &headers, LString field, LString value, int wrapAt)
 {
 	LArray<LHeader> parsed;
 	IterateHeaders(headers, parsed, LString());
@@ -1903,7 +1902,7 @@ bool LSetHeaderFeild(LString &headers, LString field, LString value)
 			// It does... rewrite the value
 			auto before = headers(0, h.value - headers.Get());
 			auto after = headers(h.value + h.valueLen - headers.Get(), -1);
-			headers = before + WrapValue(field, value) + after;
+			headers = before + WrapValue(field, value, wrapAt) + after;
 			return true;
 		}
 	}
@@ -1912,7 +1911,7 @@ bool LSetHeaderFeild(LString &headers, LString field, LString value)
 	bool hasTrailingEol = headers.Length() >= 2 &&
 		headers(-2) == '\r' &&
 		headers(-1) == '\n';
-	headers += LString::Fmt("%s%s: %s\r\n", hasTrailingEol ? "" : "\r\n", field.Get(), WrapValue(field, value).Get());
+	headers += LString::Fmt("%s%s: %s\r\n", hasTrailingEol ? "" : "\r\n", field.Get(), WrapValue(field, value, wrapAt).Get());
 
 	return true;
 }
@@ -3096,81 +3095,81 @@ int LSelect::Select(LArray<LSocketI*> &Results, bool Rd, bool Wr, int TimeoutMs)
 
 	#ifdef LINUX
 
-	// Because Linux doesn't return from select() when the socket is
-	// closed elsewhere we have to do something different... damn Linux,
-	// why can't you just like do the right thing?
-		
-	LArray<struct pollfd> fds;
-	fds.Length(s.Length());
-	for (unsigned i=0; i<s.Length(); i++)
-	{
-		auto in = s[i];
-		auto &out = fds[i];
-		out.fd = in->Handle();
-		if (out.fd < 0)
+		// Because Linux doesn't return from select() when the socket is
+		// closed elsewhere we have to do something different... damn Linux,
+		// why can't you just like do the right thing?
+			
+		LArray<struct pollfd> fds;
+		fds.Length(s.Length());
+		for (unsigned i=0; i<s.Length(); i++)
 		{
-			LgiTrace("%s:%i - Warning: invalid socket!\n", _FL);
+			auto in = s[i];
+			auto &out = fds[i];
 			out.fd = in->Handle();
-		}
-		out.events =	(Wr ? POLLOUT : 0) |
-						(Rd ? POLLIN : 0) |
-						POLLRDHUP |
-						POLLERR;
-		out.revents = 0;
-	}
-
-	int r = poll(fds.AddressOf(), fds.Length(), TimeoutMs);
-	int Signalled = 0;
-	if (r > 0)
-	{
-		for (unsigned i=0; i<fds.Length(); i++)
-		{
-			auto &f = fds[i];
-			if (f.revents != 0)
+			if (out.fd < 0)
 			{
-				Signalled++;
-								
-				if (f.fd == s[i]->Handle())
+				LgiTrace("%s:%i - Warning: invalid socket!\n", _FL);
+				out.fd = in->Handle();
+			}
+			out.events =	(Wr ? POLLOUT : 0) |
+							(Rd ? POLLIN : 0) |
+							POLLRDHUP |
+							POLLERR;
+			out.revents = 0;
+		}
+
+		auto r = poll(fds.AddressOf(), fds.Length(), TimeoutMs);
+		int Signalled = 0;
+		if (r > 0)
+		{
+			for (unsigned i=0; i<fds.Length(); i++)
+			{
+				auto &f = fds[i];
+				if (f.revents != 0)
 				{
-					// printf("Poll[%i] = %x (flags=%x)\n", i, f.revents, Flags);
-					Results.Add(s[i]);
+					Signalled++;
+									
+					if (f.fd == s[i]->Handle())
+					{
+						// printf("Poll[%i] = %x (flags=%x)\n", i, f.revents, Flags);
+						Results.Add(s[i]);
+					}
+					else LAssert(0);
 				}
-				else LAssert(0);
 			}
 		}
-	}
-	
-	return Signalled;
+		
+		return Signalled;
 		
 	#else
 		
-	struct timeval t = {TimeoutMs / 1000, (TimeoutMs % 1000) * 1000};
+		struct timeval t = {TimeoutMs / 1000, (TimeoutMs % 1000) * 1000};
 
-	fd_set r;
-	FD_ZERO(&r);
-	OsSocket Max = 0;
-	for (auto Sock : s)
-	{
-		auto h = Sock->Handle();
-		if (Max < h)
-			Max = h;
-		FD_SET(h, &r);
-	}
-		
-	int v = select(	(int)Max+1,
-					Rd ? &r : NULL,
-					Wr ? &r : NULL,
-					NULL, TimeoutMs >= 0 ? &t : NULL);
-	if (v > 0)
-	{
+		fd_set r;
+		FD_ZERO(&r);
+		OsSocket Max = 0;
 		for (auto Sock : s)
 		{
-			if (FD_ISSET(Sock->Handle(), &r))
-				Results.Add(Sock);
+			auto h = Sock->Handle();
+			if (Max < h)
+				Max = h;
+			FD_SET(h, &r);
 		}
-	}
+			
+		int v = select(	(int)Max+1,
+						Rd ? &r : NULL,
+						Wr ? &r : NULL,
+						NULL, TimeoutMs >= 0 ? &t : NULL);
+		if (v > 0)
+		{
+			for (auto Sock : s)
+			{
+				if (FD_ISSET(Sock->Handle(), &r))
+					Results.Add(Sock);
+			}
+		}
 
-	return v;
+		return v;
 
 	#endif
 }
@@ -3182,7 +3181,7 @@ LArray<LSocketI*> LSelect::Readable(int TimeoutMs)
 	return r;
 }
 
-LArray<LSocketI*> LSelect::Writeable(int TimeoutMs)
+LArray<LSocketI*> LSelect::Writable(int TimeoutMs)
 {
 	LArray<LSocketI*> r;
 	Select(r, false, true, TimeoutMs);

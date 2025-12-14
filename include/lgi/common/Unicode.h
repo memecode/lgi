@@ -899,6 +899,6 @@ LgiFunc char *WideToUtf8
 
 /// Return true if the string is valid utf-8
 /// \ingroup Text
-LgiClass bool LIsUtf8(const char *s, ssize_t len = -1);
+LgiClass bool LIsUtf8(const void *buf, ssize_t len = -1);
 
 #endif

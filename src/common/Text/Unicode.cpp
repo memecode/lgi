@@ -41,7 +41,7 @@ char *WideToUtf8(const wchar_t *In, ptrdiff_t InLen)
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
-bool LIsUtf8(const char *s, ssize_t len)
+bool LIsUtf8(const void *buf, ssize_t len)
 {
 	#define LenCheck(Need) \
 		if (len >= 0 && (len - (s - Start)) < Need) \
@@ -51,10 +51,11 @@ bool LIsUtf8(const char *s, ssize_t len)
 			goto Utf8Error; \
 		s++;
 
+	auto s = (const uint8_t *) buf;
 	if (!s || *s == 0)
 		return true;
 
-	const char *Start = s;
+	auto Start = s;
 	while
 		(
 			(

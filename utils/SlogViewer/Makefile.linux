@@ -15,7 +15,7 @@ endif
 MakeDir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 BuildDir = $(Build)
 
-CFlags = -MMD -MP -g -fPIC -fno-inline
+CFlags = -MMD -MP -fPIC -fno-inline
 CppFlags = $(CFlags) -fpermissive -std=c++14
 
 ifeq ($(Build),Debug)
@@ -30,11 +30,11 @@ ifeq ($(Build),Debug)
 		-llgi-gtk3$(Tag) \
 		-L../../$(BuildDir)
 	Inc =  \
-		`pkg-config --cflags gtk+-3.0` \
 		-I./resources \
-		-I../../include/lgi/linux/Gtk \
+		-I../../include \
+		`pkg-config --cflags gtk+-3.0` \
 		-I../../include/lgi/linux \
-		-I../../include
+		-I../../include/lgi/linux/Gtk
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
@@ -46,17 +46,17 @@ else
 		-llgi-gtk3$(Tag) \
 		-L../../$(BuildDir)
 	Inc =  \
+		-I../../include/lgi/linux \
+		-I../../include \
 		`pkg-config --cflags gtk+-3.0` \
 		-I./resources \
-		-I../../include/lgi/linux/Gtk \
-		-I../../include/lgi/linux \
-		-I../../include
+		-I../../include/lgi/linux/Gtk
 endif
 
 # Dependencies
-Source =	src/SlogViewerMain.cpp \
-			../../src/common/Lgi/LgiMain.cpp \
-			../../src/common/Lgi/DocApp.cpp
+Source =	../../src/common/Lgi/LgiMain.cpp \
+			../../src/common/Lgi/DocApp.cpp \
+			src/SlogViewerMain.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -85,21 +85,36 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 		$(Target) $(Objects) $(Libs)
 	@echo Done.
 
-../../$(BuildDir)/liblgi-gtk3$(Tag).so : ../../include/lgi/common/App.h \
+../../$(BuildDir)/liblgi-gtk3$(Tag).so : ../../../deps/build-x64-release/include/iconv.h \
+	../../../deps/build-x64-release/include/jconfig.h \
+	../../../deps/build-x64-release/include/jerror.h \
+	../../../deps/build-x64-release/include/jmorecfg.h \
+	../../../deps/build-x64-release/include/jpeglib.h \
+	../../../deps/build-x64-release/include/lunasvg/lunasvg.h \
+	../../../deps/build-x64-release/include/png.h \
+	../../include/lgi/common/App.h \
 	../../include/lgi/common/Array.h \
 	../../include/lgi/common/AutoPtr.h \
+	../../include/lgi/common/Base64.h \
+	../../include/lgi/common/Bitmap.h \
 	../../include/lgi/common/Box.h \
 	../../include/lgi/common/Button.h \
+	../../include/lgi/common/CairoSurface.h \
 	../../include/lgi/common/Cancel.h \
+	../../include/lgi/common/Capabilities.h \
+	../../include/lgi/common/Charset.h \
 	../../include/lgi/common/CheckBox.h \
 	../../include/lgi/common/ClipBoard.h \
 	../../include/lgi/common/Colour.h \
 	../../include/lgi/common/ColourSpace.h \
 	../../include/lgi/common/Com.h \
 	../../include/lgi/common/Combo.h \
+	../../include/lgi/common/CommsBus.h \
 	../../include/lgi/common/Containers.h \
+	../../include/lgi/common/Core.h \
 	../../include/lgi/common/Css.h \
 	../../include/lgi/common/CssTools.h \
+	../../include/lgi/common/CurrentTime.h \
 	../../include/lgi/common/DataDlg.h \
 	../../include/lgi/common/DateTime.h \
 	../../include/lgi/common/Dialog.h \
@@ -110,6 +125,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/DragAndDrop.h \
 	../../include/lgi/common/DropFiles.h \
 	../../include/lgi/common/Edit.h \
+	../../include/lgi/common/Emoji.h \
 	../../include/lgi/common/Error.h \
 	../../include/lgi/common/EventTargetThread.h \
 	../../include/lgi/common/File.h \
@@ -123,8 +139,10 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/GdcTools.h \
 	../../include/lgi/common/GdiLeak.h \
 	../../include/lgi/common/HashTable.h \
+	../../include/lgi/common/ImageList.h \
 	../../include/lgi/common/Input.h \
 	../../include/lgi/common/ItemContainer.h \
+	../../include/lgi/common/Jpeg.h \
 	../../include/lgi/common/Json.h \
 	../../include/lgi/common/Layout.h \
 	../../include/lgi/common/Lgi.h \
@@ -138,9 +156,14 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/LgiString.h \
 	../../include/lgi/common/LgiUiBase.h \
 	../../include/lgi/common/Library.h \
+	../../include/lgi/common/LibraryUtils.h \
 	../../include/lgi/common/List.h \
 	../../include/lgi/common/ListItemCheckBox.h \
 	../../include/lgi/common/ListItemRadioBtn.h \
+	../../include/lgi/common/LMallocArray.h \
+	../../include/lgi/common/Lzw.h \
+	../../include/lgi/common/Mail.h \
+	../../include/lgi/common/Matrix.h \
 	../../include/lgi/common/Mem.h \
 	../../include/lgi/common/Menu.h \
 	../../include/lgi/common/Message.h \
@@ -149,7 +172,10 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/Mutex.h \
 	../../include/lgi/common/Net.h \
 	../../include/lgi/common/Notifications.h \
+	../../include/lgi/common/OAuth2.h \
 	../../include/lgi/common/OptionsFile.h \
+	../../include/lgi/common/Palette.h \
+	../../include/lgi/common/Panel.h \
 	../../include/lgi/common/Password.h \
 	../../include/lgi/common/Path.h \
 	../../include/lgi/common/PixelRops.h \
@@ -158,6 +184,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/PopupList.h \
 	../../include/lgi/common/PopupNotification.h \
 	../../include/lgi/common/Printer.h \
+	../../include/lgi/common/Profile.h \
 	../../include/lgi/common/Progress.h \
 	../../include/lgi/common/ProgressDlg.h \
 	../../include/lgi/common/ProgressView.h \
@@ -165,10 +192,19 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/RadioGroup.h \
 	../../include/lgi/common/Range.h \
 	../../include/lgi/common/Rect.h \
+	../../include/lgi/common/RectF.h \
 	../../include/lgi/common/RefCount.h \
+	../../include/lgi/common/RegKey.h \
 	../../include/lgi/common/Res.h \
+	../../include/lgi/common/Rops.h \
+	../../include/lgi/common/Roster.h \
 	../../include/lgi/common/ScrollBar.h \
+	../../include/lgi/common/SkinEngine.h \
 	../../include/lgi/common/Slider.h \
+	../../include/lgi/common/Splitter.h \
+	../../include/lgi/common/Stat.h \
+	../../include/lgi/common/StatusBar.h \
+	../../include/lgi/common/Store3Defs.h \
 	../../include/lgi/common/Stream.h \
 	../../include/lgi/common/StringClass.h \
 	../../include/lgi/common/StringLayout.h \
@@ -177,17 +213,25 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/SubProcess.h \
 	../../include/lgi/common/TableLayout.h \
 	../../include/lgi/common/TabView.h \
+	../../include/lgi/common/TextConvert.h \
 	../../include/lgi/common/TextFile.h \
 	../../include/lgi/common/TextLabel.h \
 	../../include/lgi/common/TextLog.h \
 	../../include/lgi/common/TextView3.h \
+	../../include/lgi/common/TextView4.h \
 	../../include/lgi/common/Thread.h \
 	../../include/lgi/common/ThreadEvent.h \
+	../../include/lgi/common/TimeZoneInfo.h \
 	../../include/lgi/common/Token.h \
 	../../include/lgi/common/ToolBar.h \
 	../../include/lgi/common/ToolTip.h \
+	../../include/lgi/common/TrayIcon.h \
 	../../include/lgi/common/Tree.h \
+	../../include/lgi/common/TypeToString.h \
+	../../include/lgi/common/UdpTransport.h \
+	../../include/lgi/common/Undo.h \
 	../../include/lgi/common/Unicode.h \
+	../../include/lgi/common/UnicodeString.h \
 	../../include/lgi/common/UnrolledList.h \
 	../../include/lgi/common/Uri.h \
 	../../include/lgi/common/Variant.h \
@@ -217,6 +261,11 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/common/Gdc2/Alpha.cpp \
 	../../src/common/Gdc2/Colour.cpp \
 	../../src/common/Gdc2/Filters/Filter.cpp \
+	../../src/common/Gdc2/Filters/Gif.cpp \
+	../../src/common/Gdc2/Filters/Jpeg.cpp \
+	../../src/common/Gdc2/Filters/Lzw.cpp \
+	../../src/common/Gdc2/Filters/Png.cpp \
+	../../src/common/Gdc2/Filters/Svg.cpp \
 	../../src/common/Gdc2/Font/Charset.cpp \
 	../../src/common/Gdc2/Font/DisplayString.cpp \
 	../../src/common/Gdc2/Font/Font.cpp \
@@ -237,6 +286,8 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/common/General/FileCommon.cpp \
 	../../src/common/General/Password.cpp \
 	../../src/common/General/Properties.cpp \
+	../../src/common/General/SubProcessCommon.cpp \
+	../../src/common/General/TimeZone.cpp \
 	../../src/common/Hash/md5/md5.c \
 	../../src/common/Hash/md5/md5.h \
 	../../src/common/Hash/sha1/sha1.c \
@@ -272,6 +323,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/common/Lgi/ViewCommon.cpp \
 	../../src/common/Lgi/WindowCommon.cpp \
 	../../src/common/Net/Base64.cpp \
+	../../src/common/Net/CommsBus.cpp \
 	../../src/common/Net/MDStringToDigest.cpp \
 	../../src/common/Net/Net.cpp \
 	../../src/common/Net/Uri.cpp \
@@ -280,7 +332,9 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/common/Skins/Gel/Gel.cpp \
 	../../src/common/Text/DocView.cpp \
 	../../src/common/Text/String.cpp \
+	../../src/common/Text/TextConvert.cpp \
 	../../src/common/Text/TextView3.cpp \
+	../../src/common/Text/TextView4.cpp \
 	../../src/common/Text/Token.cpp \
 	../../src/common/Text/Unicode.cpp \
 	../../src/common/Text/Utf8.cpp \
@@ -317,6 +371,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/linux/Gtk/ScreenDC.cpp \
 	../../src/linux/Lgi/App.cpp \
 	../../src/linux/Lgi/ClipBoard.cpp \
+	../../src/linux/Lgi/Dialog.cpp \
 	../../src/linux/Lgi/DragAndDrop.cpp \
 	../../src/linux/Lgi/General.cpp \
 	../../src/linux/Lgi/Layout.cpp \
@@ -324,8 +379,8 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/linux/Lgi/Printer.cpp \
 	../../src/linux/Lgi/Thread.cpp \
 	../../src/linux/Lgi/View.cpp \
-	../../src/linux/Lgi/Dialog.cpp \
 	../../src/linux/Lgi/Window.cpp \
+	../../src/posix/Roster.cpp \
 	../../src/posix/SubProcess.cpp
 	export Build=$(Build); \
 	$(MAKE) -C ../../ -f ./linux/Makefile.linux

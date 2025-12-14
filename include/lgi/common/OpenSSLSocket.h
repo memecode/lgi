@@ -89,7 +89,7 @@ public:
 	const char *GetErrorString() override;
 };
 
-extern bool StartSSL(LString &ErrorMsg, SslSocket *Sock);
+extern bool StartSSL(LString &ErrorMsg, SslSocket *Sock = nullptr);
 extern void EndSSL();
 
 #endif
