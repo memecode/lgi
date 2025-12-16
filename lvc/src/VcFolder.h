@@ -141,15 +141,18 @@ class VcFolder : public LTreeItem
 public:
 	using TBranchHash = LHashTbl<ConstStrKey<char>,VcBranch*>;
 
-protected:
 	struct Author
 	{
 		bool InProgress = false;
 		LString name, email;
+		
+		Author() {}
+		Author(const char *n, const char *e) { name = n; email = e; }
 		operator bool() const { return !name.IsEmpty() && !email.IsEmpty(); }
 		LString ToString() { return LString::Fmt("%s <%s>", name.Get(), email.Get()); }
 	};
 
+protected:
 	class Cmd : public LStream
 	{
 		LString::Array Context;
@@ -353,11 +356,12 @@ public:
 	void SetCurrentBranch(LString name);
 	TBranchHash &GetBranchCache() { return Branches; }
 	LXmlTag *Save();
-	LString GetConfigFile(bool local);
+	LString GetConfigFile(bool local, bool createIfMissing);
 	LString GetRemotePrompt() { return RemotePrompt; }
 	void SetRemotePrompt(LString p) { RemotePrompt = p; }
-	bool GetAuthor(bool local, std::function<void(LString name,LString email)> callback);
-	bool SetAuthor(bool local, LString name, LString email);
+	bool GetAuthor(bool local, std::function<void(Author &author)> callback);
+	void GetAuthors(std::function<void(Author &local, Author &global)> callback);
+	bool SetAuthor(bool local, Author author);
 	void ShowAuthor();
 	void UpdateAuthorUi();
 	void Empty();

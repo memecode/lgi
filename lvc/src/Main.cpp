@@ -200,16 +200,16 @@ public:
 		LoadFromResource(IDD_AUTHOR);
 		MoveSameScreen(wnd);
 
-		f->GetAuthor(true, [this](auto name, auto email)
+		f->GetAuthor(true, [this](auto author)
 		{
-			SetCtrlName(IDC_LOCAL_NAME, name);
-			SetCtrlName(IDC_LOCAL_EMAIL, email);
+			SetCtrlName(IDC_LOCAL_NAME, author.name);
+			SetCtrlName(IDC_LOCAL_EMAIL, author.email);
 		});
 
-		f->GetAuthor(false, [this](auto name, auto email)
+		f->GetAuthor(false, [this](auto author)
 		{
-			SetCtrlName(IDC_GLOBAL_NAME, name);
-			SetCtrlName(IDC_GLOBAL_EMAIL, email);
+			SetCtrlName(IDC_GLOBAL_NAME, author.name);
+			SetCtrlName(IDC_GLOBAL_EMAIL, author.email);
 		});
 	}
 
@@ -219,8 +219,8 @@ public:
 		{
 			case IDOK:
 			{
-				folder->SetAuthor(true,  GetCtrlName(IDC_LOCAL_NAME),  GetCtrlName(IDC_LOCAL_EMAIL));
-				folder->SetAuthor(false, GetCtrlName(IDC_GLOBAL_NAME), GetCtrlName(IDC_GLOBAL_EMAIL));
+				folder->SetAuthor(true,  { GetCtrlName(IDC_LOCAL_NAME), GetCtrlName(IDC_LOCAL_EMAIL) });
+				folder->SetAuthor(false, { GetCtrlName(IDC_GLOBAL_NAME), GetCtrlName(IDC_GLOBAL_EMAIL) });
 				// fall through
 			}
 			case IDCANCEL:

@@ -874,12 +874,12 @@ void VcFolder::FilterCurrentFiles()
 void VcFolder::ShowAuthor()
 {
 	if (!AuthorLocal)
-		GetAuthor(true, [this](auto name, auto email)
+		GetAuthor(true, [this](auto author)
 		{
 			UpdateAuthorUi();
 		});
 	if (!AuthorGlobal)
-		GetAuthor(false, [this](auto name, auto email)
+		GetAuthor(false, [this](auto author)
 		{
 			UpdateAuthorUi();
 		});
@@ -894,7 +894,7 @@ void VcFolder::UpdateAuthorUi()
 		d->Wnd()->SetCtrlName(IDC_AUTHOR, AuthorGlobal.ToString());
 }
 
-LString VcFolder::GetConfigFile(bool local)
+LString VcFolder::GetConfigFile(bool local, bool createIfMissing)
 {
 	switch (GetType())
 	{
@@ -915,8 +915,23 @@ LString VcFolder::GetConfigFile(bool local)
 				}
 
 				d->Log->Print("%s: %i\n", p.GetFull().Get(), p.Exists());
-				if (p.Exists())
-					return p.GetFull();
+				
+				if (!p.Exists())
+				{
+					if (createIfMissing)
+					{
+						LFile f(p, O_WRITE);
+						f.SetSize(0);
+						d->Log->Print("%s:%i - created config file '%s'\n", _FL, p.GetFull().Get());
+					}
+					else return LString();
+				}
+				
+				return p.GetFull();
+			}
+			else
+			{
+				LAssert(!"impl me.");
 			}
 			break;
 		}
@@ -930,7 +945,21 @@ LString VcFolder::GetConfigFile(bool local)
 	return LString();
 }
 
-bool VcFolder::GetAuthor(bool local, std::function<void(LString name,LString email)> callback)
+void VcFolder::GetAuthors(std::function<void(Author &local, Author &global)> callback)
+{
+	if (!callback)
+		return;
+		
+	GetAuthor(true, [this, callback](auto local)
+	{
+		GetAuthor(false, [this, callback, local](auto global) mutable
+		{
+			callback(local, global);
+		});
+	});
+}
+
+bool VcFolder::GetAuthor(bool local, std::function<void(Author &author)> callback)
 {
 	auto scope = local ? "--local" : "--global";
 	auto target = local ? &AuthorLocal : &AuthorGlobal;
@@ -959,7 +988,7 @@ bool VcFolder::GetAuthor(bool local, std::function<void(LString name,LString ema
 
 				target->InProgress = false;
 				if (callback)
-					callback(target->name, target->email);
+					callback(*target);
 			};
 
 			auto args = LString::Fmt("config -l %s", scope);
@@ -968,7 +997,7 @@ bool VcFolder::GetAuthor(bool local, std::function<void(LString name,LString ema
 		}
 		case VcHg:
 		{
-			auto config = GetConfigFile(local);
+			auto config = GetConfigFile(local, false);
 			if (!config)
 				return false;
 
@@ -985,7 +1014,7 @@ bool VcFolder::GetAuthor(bool local, std::function<void(LString name,LString ema
 			}
 
 			IsGettingAuthor = false;
-			callback(target->name, target->email);
+			callback(*target);
 			break;
 		}
 		default:
@@ -998,9 +1027,9 @@ bool VcFolder::GetAuthor(bool local, std::function<void(LString name,LString ema
 	return true;
 }
 
-bool VcFolder::SetAuthor(bool local, LString name, LString email)
+bool VcFolder::SetAuthor(bool local, Author author)
 {
-	if (!name || !email)
+	if (!author.name || !author.email)
 	{
 		d->Log->Print("%s:%i - No user/email given.\n", _FL);
 		return false;
@@ -1009,31 +1038,30 @@ bool VcFolder::SetAuthor(bool local, LString name, LString email)
 	auto scope = local ? "--local" : "--global";
 	auto target = local ? &AuthorLocal : &AuthorGlobal;
 
-	target->name = name;
-	target->email = email;
+	*target = author;
 
 	switch (GetType())
 	{
 		case VcGit:
 		{
-			auto args = LString::Fmt("config %s user.name \"%s\"", scope, name.Get());
+			auto args = LString::Fmt("config %s user.name \"%s\"", scope, author.name.Get());
 			StartCmd(args);
 
-			args = LString::Fmt("config %s user.email \"%s\"", scope, email.Get());
+			args = LString::Fmt("config %s user.email \"%s\"", scope, author.email.Get());
 			StartCmd(args);
 			break;
 		}
 		case VcHg:
 		{
-			auto config = GetConfigFile(local);
+			auto config = GetConfigFile(local, true);
 			if (!config)
 				return false;
 
-			LString author;
-			author.Printf("%s <%s>", name.Get(), email.Get());
+			LString s;
+			s.Printf("%s <%s>", author.name.Get(), author.email.Get());
 
 			LIniFile data(config);
-			data.Set("ui", "username", author);
+			data.Set("ui", "username", s);
 			return data.Write();
 		}
 		default:
@@ -4328,13 +4356,17 @@ void VcFolder::Commit(const char *Msg, const char *Branch, bool AndPush)
 				if (isPersonalUrl(url))
 				{
 					// Check if the author is set correctly...
-					GetAuthor
+					GetAuthors
 					(
-						true,
-						[this, msg, branch, AndPush](auto name, auto email)
+						[this, msg, branch, AndPush](auto local, auto global)
 						{
-							if (name == "Matthew Allen" &&
-								email == "fret@memecode.com")
+							bool localOk =	local &&
+											local.name == "Matthew Allen" &&
+											local.email == "fret@memecode.com";
+							bool globalOk =	!local &&
+											global.name == "Matthew Allen" &&
+											global.email == "fret@memecode.com";
+							if (localOk || globalOk)
 								Commit(msg, branch, AndPush);
 							else
 								LgiMsg(GetTree(), "Author name/email not setup for personal repo.", AppName, MB_OK);
