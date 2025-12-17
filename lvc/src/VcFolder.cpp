@@ -2425,10 +2425,11 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 					Diff.Empty();
 
 					auto header = line.SplitDelimit(nullptr, 2);
-					/*
-					for (int i=0; i<header.Length(); i++)
-						d->Log->Print("hdr[%i]='%s'\n", i, header[i].Get());
-					*/
+					
+					if (0)
+						for (int i=0; i<header.Length(); i++)
+							d->Log->Print("hdr[%i]='%s'\n", i, header[i].Get());
+					
 					auto paths = header.Last().SplitDelimit();
 					
 					LString Fn, State = "M";
@@ -2440,18 +2441,11 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 					Fn = lastPath(2, -1);
 					
 					auto p = findPath(Fn);
+					// d->Log->Print("    Fn='%s' p='%s'\n", Fn.Get(), p ? p->path.Get() : "null");
 					if (!p)
 					{
 						// Maybe it's just a single path?
-						Fn = header.Last()(2, -1); // strip off the 'a/' prefix
-						/*
-						p = findPath(Fn);
-						if (!p)
-						{
-							d->Log->Print("failed to find valid path in '%s'\n", header.Last().Get());
-							break;
-						}
-						*/
+						// Fn = header.Last()(2, -1); // strip off the 'a/' prefix
 					}
 
 					f = FindFile(Fn);
