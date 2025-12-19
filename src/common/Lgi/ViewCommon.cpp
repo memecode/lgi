@@ -996,8 +996,12 @@ void LView::SendNotify(LNotification note)
 			SetId(GENERATE_ID);
 		}
 			
-        LAssert(GetId() > 0);	// We must have a valid ctrl ID at this point, otherwise
-								// the receiver will never be able to find our object.
+		if (GetId() <= 0)
+		{
+		    LgiTrace("%s:%i - no ctrl id for %s? (%i)\n", _FL, GetClass(), GetId());
+            LAssert(!"no ctrl id");	// We must have a valid ctrl ID at this point, otherwise
+			    					// the receiver will never be able to find our object.
+		}
             
         // printf("Post M_CHANGE %i %i\n", GetId(), Data);
         n->PostEvent(M_CHANGE, (LMessage::Param) GetId(), (LMessage::Param) new LNotification(note));
@@ -1804,7 +1808,7 @@ void LView::SetId(int id)
 						GetClass(),
 						i);
 					SetId(i);
-					break;
+					return;
 				}
 			}
 		}
