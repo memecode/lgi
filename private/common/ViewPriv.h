@@ -71,13 +71,16 @@ class LPulseThread : public LThread, public LCancel
 
 	LString MakeName(LView *v, const char *Type)
 	{
-		return LString::Fmt("LPulseThread.%s.%s", v->GetClass(), Type);
+		auto s = LString::Fmt("Pulse.%s", v->GetClass());
+		if (Type)
+			s += LString::Fmt(".%s", Type);
+		return s;
 	}
 
 public:
 	LPulseThread(LView *view, int len) :
 		View(view),
-		LThread(MakeName(view, "Thread")),
+		LThread(MakeName(view, nullptr)),
 		Event(MakeName(view, "Event"))
 	{
 		LAssert(View);

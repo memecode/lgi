@@ -217,7 +217,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 	bool DoingProgress = false;
 	
 	FindSymbolSystemPriv(int appSinkHnd) :
-		LEventTargetThread("FindSymbolSystemPriv"),
+		LEventTargetThread("FindSymSys"),
 		hApp(appSinkHnd)	
 	{
 		for (auto &e: LString(KNOWN_EXT).SplitDelimit(","))

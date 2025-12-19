@@ -239,7 +239,7 @@ protected:
 
 public:
 	LEventTargetThread(LString Name, bool RunImmediately = true) :
-		LThread(Name + ".Thread"),
+		LThread(Name + ".Th"),
 		LMutex(Name + ".Mutex"),
 		Event(ProcessName(Name, "Event"))
 	{

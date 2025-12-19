@@ -32,9 +32,16 @@ void *ThreadEntryPoint(void *i)
 		
 		pthread_detach(Thread->hThread);
 		
-		LString Nm = Thread->Name;
-		if (Nm)
-			pthread_setname_np(pthread_self(), Nm);
+		if (Thread->Name)
+		{
+			auto nm = Thread->Name;
+		    if (Thread->Name.Length() >= 16)
+			{
+				printf("%s:%i - thread %i name too long '%s'\n", _FL, LCurrentThreadId(), Thread->Name.Get());
+				nm = Thread->Name(-16, -1);
+			}
+			pthread_setname_np(pthread_self(), nm);
+		}
 
 		// Do thread's work
 		Thread->OnBeforeMain();

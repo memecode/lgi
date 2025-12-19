@@ -506,7 +506,7 @@ class Gdb :
 			if (curCmd->arrayCb ||
 				curCmd->pipeCb)
 			{	
-				printf("OnLine '%.*s' -> curCmd\n", (int)Length-1, Start);
+				printf("OnLine '%.*s' -> curCmd='%s'\n", (int)Length-1, Start, curCmd->cmd.Get());
 				
 				curCmd->pipe.Write(Start, Length);
 				return;
@@ -1157,7 +1157,9 @@ public:
 	{
 		LAssert((bool)cb);
 
-		Cmd("bt",
+		// limit the stack frames to 50... otherwise it can hang
+		// printing out 1000's of frames.
+		Cmd("bt 50", 
 			false,
 			[this, cb](LError &err, LString::Array *Bt)
 			{

@@ -71,8 +71,10 @@ bool LMutex::_Lock()
 		auto err = pthread_mutex_trylock(&_Sem);
 		if (err)
 		{
+		    /*
 			LError e(err);
 			printf("%s:%i - pthread_mutex_trylock errored=%s name='%s'\n", _FL, e.ToString().Get(), _Name.Get());
+			*/
 			return false;
 		}
 

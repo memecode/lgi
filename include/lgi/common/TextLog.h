@@ -7,7 +7,7 @@
 #include "lgi/common/Net.h"
 
 template<typename TView>
-class LThreadSafeTextView : public TView, public LStream
+class LTsTextView : public TView, public LStream
 {
 protected:
 	// This strips out '\r' characters in the input.
@@ -47,7 +47,7 @@ protected:
 	}
 
 public:
-	LThreadSafeTextView(int id) : TView(id, 0, 0, 2000, 1000), Sem("LThreadSafeTextView")
+	LTsTextView(int id) : TView(id, 0, 0, 2000, 1000), Sem("LTsTextView")
 	{
 		TView::Sunken(true);
 		TView::SetPourLargest(true);
@@ -55,7 +55,7 @@ public:
 		TView::SetWrapType(L_WRAP_NONE);
 	}
 	
-	const char *GetClass() override { return "LThreadSafeTextView"; }
+	const char *GetClass() override { return "LTsTextView"; }
 	
 	void SetSizeLimit(size_t limit)
 	{
@@ -176,9 +176,9 @@ public:
 	}
 };
 
-typedef LThreadSafeTextView<LTextView3> LTextLog;
+typedef LTsTextView<LTextView3> LTextLog;
 #ifdef _LTEXTVIEW4_H
-typedef LThreadSafeTextView<LTextView4> LTextLog4;
+typedef LTsTextView<LTextView4> LTextLog4;
 #endif
 
 #endif

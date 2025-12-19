@@ -684,10 +684,6 @@ bool LSubProcess::Signal(int which)
 	}
 
 	printf("%s:%i - kill(%i, %i).\n", _FL, d->ChildPid, which);
-	/*
-	if (which == SIGTERM)
-		d->ChildPid = INVALID_PID;
-	*/
 
 	return true;
 }

@@ -993,7 +993,7 @@ struct LCommsBusPriv :
 	LArray<CommsClient*> clients;
 		
 	LCommsBusPriv(LStream *Log, LView *commsstate) :
-		LThread("LCommsBusPriv.Thread"),
+		LThread("CommsBus.Th"),
 		LMutex("LCommsBusPriv.Lock"),
 		log(Log),
 		commsState(commsstate)
