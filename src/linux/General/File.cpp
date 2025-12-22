@@ -511,6 +511,13 @@ bool LGetDriveInfo(
 #include <sys/statvfs.h>
 #include <pwd.h>
 
+#define DEBUG_VOLUMES       0
+#if DEBUG_VOLUMES
+    #define VLOG(...)       printf(__VA_ARGS__)
+#else
+    #define VLOG(...)
+#endif
+
 struct LVolumePriv
 {
 	LVolume *Owner = NULL;
@@ -546,7 +553,7 @@ struct LVolumePriv
 			struct statvfs s = {0};
 			int r = statvfs(Path, &s);
 			if (r)
-				LgiTrace("%s:%i - statvfs failed with %i\n", _FL, r);
+				VLOG("%s:%i - statvfs failed with %i\n", _FL, r);
 			else
 			{
 				Size = (uint64_t)s.f_blocks * s.f_frsize;
@@ -574,7 +581,7 @@ struct LVolumePriv
 				{
 					LAssert(newVol != v->d->Owner);
 					v->d->NextVol = newVol;
-					// printf("Insert %p:%s into %p:%s\n", newVol, newVol->Name(), vol, vol->Name());
+					VLOG("Insert %p:%s into %p:%s\n", newVol, newVol->Name(), vol, vol->Name());
 					break;
 				}
 			}
@@ -583,7 +590,7 @@ struct LVolumePriv
 		{
 			LAssert(newVol != vol->d->Owner);
 			vol->d->ChildVol = newVol;
-			// printf("Insert %p:%s into %p:%s\n", newVol, newVol->Name(), vol, vol->Name());
+			VLOG("Insert %p:%s into %p:%s\n", newVol, newVol->Name(), vol, vol->Name());
 		}
 	}
 
@@ -632,7 +639,12 @@ struct LVolumePriv
 			// functionality. I would appreciate someone telling me how
 			// to do this properly. Till then...
 			LFile f;
-			if (f.Open("/etc/fstab", O_READ))
+			auto fstabFile = "/etc/fstab";
+			if (!f.Open(fstabFile, O_READ))
+			{
+			    VLOG("%s:%i - failed to read '%s'\n", _FL, fstabFile);
+			}
+			else
 			{
 				auto Buf = f.Read();
 				f.Close();
@@ -641,11 +653,21 @@ struct LVolumePriv
 				for (auto ln : Lines)
 				{
 					auto M = ln.Strip().SplitDelimit(" \t");
-					if (M[0](0) != '#' && M.Length() > 2)
+					if (M[0](0) == '#')
+					{
+					    VLOG("fstab: comment line: %s\n", ln.Get());
+					}
+					else if (M.Length() <= 2)
+					{
+					    VLOG("fstab: not enough tokens: %s\n", ln.Get());
+					}
+					else
 					{
 						auto &Device = M[0];
 						auto &Mount = M[1];
 						auto &FileSys = M[2];
+
+					    VLOG("fstab: dev=%s mnt=%s fs=%s\n", Device.Get(), Mount.Get(), FileSys.Get());
 
 						if (
 							(Device.Find("/dev/") == 0 || Mount.Find("/mnt/") == 0) &&

@@ -195,8 +195,8 @@ bool LDefaultDocumentEnv::OnNavigate(LDocView *Parent, const char *Uri)
 					a.Print(" %s", Uri);
 				}
 
-				LAutoString Exe(TrimStr(First->Path, "\"\'"));
-				LAutoString Args(a.NewStr());
+				auto Exe = First->Path.Strip("\"\'");
+				auto Args = a.NewLStr();
 
 				LError err;
 				if (LExecute(Exe, Args, ".", &err))

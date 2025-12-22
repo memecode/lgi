@@ -329,11 +329,17 @@ LgiExtern bool LGetMimeTypeExtensions
 	LArray<LString> &Ext
 );
 
-inline bool LGetAppForMimeType(const char *Mime, char *AppPath, int BufSize)
+/// \deprecated Use the LString LGetAppForMimeType(mt) directly.
+[[deprecated]] inline bool LGetAppForMimeType(const char *Mime, char *AppPath, int BufSize)
 {
-	LString p = LGetAppForMimeType(Mime);
-	if (AppPath && p) strcpy_s(AppPath, BufSize, p);
-	return p.Length() > 0;
+    if (!Mime || !AppPath)
+        return false;
+	if (auto p = LGetAppForMimeType(Mime))
+	{
+	    strcpy_s(AppPath, BufSize, p);
+    	return p.Length() > 0;
+    }
+	return false;
 }
 
 /// Returns the all applications that can open a given mime type.

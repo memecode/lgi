@@ -229,16 +229,17 @@ uint32_t htoi(const Char *s)
 }
 
 template<typename Char>
-uint64 htoi64(const Char *s)
+uint64_t htoi64(const Char *s)
 {
-	return HexToInt<uint64,Char>(s);
+	return HexToInt<uint64_t,Char>(s);
 }
 
 /// Trims delimiter characters off a string.
 ///
-/// \returns A dynamically allocated copy of the input without any delimiter characters
+/// \returns A heap allocated copy of the input without any delimiter characters
 /// on the start or end.
-LgiFunc char *TrimStr(const char *s, const char *Delim = " \r\n\t");
+/// \deprecated Use LString::Strip() instead
+LgiFunc [[deprecated]] char *TrimStr(const char *s, const char *Delim = " \r\n\t");
 /// Returns true if the string points to something with one or more non-whitespace characters.
 LgiFunc bool ValidStr(const char *s);
 /// Makes a heap allocated copy of a string.

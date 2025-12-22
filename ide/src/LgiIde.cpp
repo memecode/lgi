@@ -3171,6 +3171,7 @@ IdeDoc *AppWnd::GetCurrentDoc()
 
 void AppWnd::GotoReference(const char *File, int Line, bool CurIp, bool WithHistory, std::function<void(IdeDoc*)> Callback)
 {
+	printf("%s:%i - GotoReference '%s' %i\n", _FL, File, Line);
 	if (!InThread())
 	{
 		RunCallback
@@ -4361,7 +4362,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				Doc->DoGoto(NULL);
 			else
 			{
-				LInput *Inp = new LInput(this, NULL, LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto [file:]line:"), "Goto");
+				auto Inp = new LInput(this, NULL, LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto [file:]line:"), "Goto");
 				Inp->DoModal([Inp,this](auto dlg, auto code)
 				{
 					if (code == IDOK)

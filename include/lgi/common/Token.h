@@ -10,18 +10,16 @@ LgiFunc char *LSkipDelim(char *p, const char *Delimiter = " \r\n\t", bool NotDel
 /// A simple token parser
 class LToken : public LArray<char*>
 {
-	char *Raw;
+	char *Raw = nullptr;
 
 public:
 	LToken()
 	{
-		Raw = 0;
 		fixed = true;
 	}
 	
 	LToken(const char *Str, const char *Delimiters = " \r\n\t,", bool GroupDelim = true, ssize_t Length = -1)
 	{
-		Raw = 0;
 		fixed = true;
 		Parse(Str, Delimiters, GroupDelim, Length);
 	}
