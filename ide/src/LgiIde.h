@@ -276,7 +276,7 @@ public:
 	LStream *GetCommsStateLog();
 	void GotoReference(const char *File, int Line, bool CurIp, bool WithHistory, std::function<void(IdeDoc*)> Callback);
 	void FindSymbol(int ResultsSinkHnd, const char *Sym);
-	bool GetSystemIncludePaths(LArray<LString> &Paths);
+	bool GetSystemIncludePaths(LString::Array &Paths);
 	bool ShowInProject(const char *Fn);
 	bool Build();
 	void SeekHistory(int Offset);

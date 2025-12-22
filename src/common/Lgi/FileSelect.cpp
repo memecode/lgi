@@ -960,6 +960,8 @@ void LFileSelectDlg::OnCreate()
 	c->Add(FileNameEdit = new LEdit(IDC_FILE));
 	c = Tbl->GetCell(x, y, true, 3);
 	c->Add(SaveBtn = new LButton(IDOK, 392, 268, 70, 21, "Ok"));
+	if (SaveBtn)
+		SaveBtn->Default(true);
 
 	// 4th row
 	x = 0; y++;

@@ -1257,7 +1257,7 @@ public:
 	LSubMenu *WindowsMenu = NULL;
 	LSubMenu *CreateMakefileMenu = NULL;
 	LAutoPtr<FindSymbolSystem> FindSym;
-	LArray<LAutoString> SystemIncludePaths;
+	LString::Array SystemIncludePaths;
 	BreakPointStore BreakPoints;
 	int DocBpCallback = BreakPointStore::INVALID_ID;
 	LAutoPtr<LCommsBus> CommsBus;
@@ -5187,7 +5187,7 @@ void AppWnd::FindSymbol(int ResultsSinkHnd, const char *Sym)
 	d->FindSym->Search(ResultsSinkHnd, Sym, d->Platform);
 }
 
-bool AppWnd::GetSystemIncludePaths(LArray<LString> &Paths)
+bool AppWnd::GetSystemIncludePaths(LString::Array &Paths)
 {
 	if (d->SystemIncludePaths.Length() == 0)
 	{
@@ -5198,7 +5198,7 @@ bool AppWnd::GetSystemIncludePaths(LArray<LString> &Paths)
 		sp1.Connect(&sp2);
 		sp1.Start(true, false);
 		
-		char Buf[256];
+		LString Buf;
 		ssize_t r;
 
 		LStringPipe p;
@@ -5208,7 +5208,7 @@ bool AppWnd::GetSystemIncludePaths(LArray<LString> &Paths)
 		}
 
 		bool InIncludeList = false;
-		while (p.Pop(Buf, sizeof(Buf)))
+		while (Buf = p.Pop())
 		{
 			if (stristr(Buf, "#include"))
 			{
@@ -5220,8 +5220,7 @@ bool AppWnd::GetSystemIncludePaths(LArray<LString> &Paths)
 			}
 			else if (InIncludeList)
 			{
-				LAutoString a(TrimStr(Buf));
-				d->SystemIncludePaths.New() = a;
+				d->SystemIncludePaths.Add(Buf.Strip());
 			}
 		}
 		#else
@@ -5273,13 +5272,10 @@ bool AppWnd::GetSystemIncludePaths(LArray<LString> &Paths)
 									(Name = prop->GetAttr("Name")) &&
 									!stricmp(Name, "IncludeDirectories"))
 								{
-									char *Bar = strchr(prop->GetContent(), '|');
+									auto Bar = strchr(prop->GetContent(), '|');
 									LToken t(Bar ? Bar + 1 : prop->GetContent(), ";");
-									for (int i=0; i<t.Length(); i++)
-									{
-										char *s = t[i];
-										d->SystemIncludePaths.New().Reset(NewStr(s));
-									}
+									for (auto tok: t)
+										d->SystemIncludePaths.Add(tok);
 								}
 							}
 					}
@@ -5289,11 +5285,7 @@ bool AppWnd::GetSystemIncludePaths(LArray<LString> &Paths)
 		#endif
 	}
 	
-	for (int i=0; i<d->SystemIncludePaths.Length(); i++)
-	{
-		Paths.Add(NewStr(d->SystemIncludePaths[i]));
-	}
-	
+	Paths += d->SystemIncludePaths;
 	return true;
 }
 
