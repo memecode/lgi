@@ -158,7 +158,7 @@ public:
 
 	// Find/Replace Params
 	bool OwnFindReplaceParams = true;
-	LDocFindReplaceParams3 *FindReplaceParams = NULL;
+	LDocFindReplaceParams3 *FindReplaceParams = nullptr;
 
 	// Map buffer
 	LArray<char16> MapBuf;

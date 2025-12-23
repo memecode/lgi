@@ -410,13 +410,24 @@ public:
 
 		bool Valid()
 		{
-			return MimeType.Get() != NULL &&
-				FileName.Get() != NULL &&
-				(
-					(Data.Type == GV_BINARY && Data.Value.Binary.Data != NULL)
-					||
-					(Stream.Get() != NULL)
-				);
+			return	MimeType.Get() != NULL &&
+					FileName.Get() != NULL &&
+					(
+						(Data.Type == GV_BINARY && Data.Value.Binary.Data != NULL)
+						||
+						(Stream.Get() != NULL)
+					);
+		}
+		
+		int64_t GetSize()
+		{
+			if (Data.Type == GV_BINARY)
+				return Data.Value.Binary.Length;
+			
+			if (Stream)
+				return Stream->GetSize();
+			
+			return 0;
 		}
 	};
 

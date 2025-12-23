@@ -168,19 +168,14 @@ class LDocFindReplaceParams3 : public LDocFindReplaceParams
 {
 public:
 	// Find/Replace History
-	char16 *LastFind;
-	char16 *LastReplace;
-	bool MatchCase;
-	bool MatchWord;
-	bool SelectionOnly;
+	char16 *LastFind = nullptr;
+	char16 *LastReplace = nullptr;
+	bool MatchCase = false;
+	bool MatchWord = false;
+	bool SelectionOnly = false;
 	
 	LDocFindReplaceParams3()
 	{
-		LastFind = 0;
-		LastReplace = 0;
-		MatchCase = false;
-		MatchWord = false;
-		SelectionOnly = false;
 	}
 
 	~LDocFindReplaceParams3()

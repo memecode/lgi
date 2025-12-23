@@ -276,41 +276,44 @@ public:
 		{
 			// Being called from within the thread, in which case we can't signal 
 			// the event because we'll be stuck in this loop and not waitin on it.
+			//
+			// Also there is no waiting to do, the message loop will exit because
+			// cancel was called.
 			#ifdef _DEBUG
 			LgiTrace("%s:%i - EndThread called from inside thread.\n", _FL);
 			#endif
+			return;
 		}
-		else
-		{			
-			Event.Signal();
-		}
-
-		uint64 Start = LCurrentTime();
-				
+		
+		// Signal the event to wake up the thread:
+		Event.Signal();
+		
+		// Wait for it to exit:
+		uint64 Start = LCurrentTime();				
 		while (!IsExited())
 		{
 			LSleep(10);
 					
-			uint64 Now = LCurrentTime();
+			auto Now = LCurrentTime();
 			if (Now - Start > 2000)
 			{
 				#ifdef LINUX
-				int val = 1111;
-				int r = sem_getvalue(Event.Handle(), &val);
+					int val = 1111;
+					int r = sem_getvalue(Event.Handle(), &val);
 
-				printf("%s:%i - EndThread() hung waiting for %s to exit (caller.thread=%i, worker.thread=%i, event=%p, r=%i, val=%i).\n",
-					_FL, LThread::GetName(),
-					LCurrentThreadId(),
-					GetId(),
-					Event.Handle(),
-					r,
-					val);
+					printf("%s:%i - EndThread() hung waiting for %s to exit (caller.thread=%i, worker.thread=%i, event=%p, r=%i, val=%i).\n",
+						_FL, LThread::GetName(),
+						LCurrentThreadId(),
+						GetId(),
+						Event.Handle(),
+						r,
+						val);
 				#else
-				printf("%s:%i - EndThread() hung waiting for %s to exit (caller.thread=0x%x, worker.thread=0x%x, event=%p).\n",
-					_FL, LThread::GetName(),
-					(int)LCurrentThreadId(),
-					(int)GetId(),
-					(void*)(ssize_t)Event.Handle());
+					printf("%s:%i - EndThread() hung waiting for %s to exit (caller.thread=0x%x, worker.thread=0x%x, event=%p).\n",
+						_FL, LThread::GetName(),
+						(int)LCurrentThreadId(),
+						(int)GetId(),
+						(void*)(ssize_t)Event.Handle());
 				#endif
 						
 				Start = Now;
