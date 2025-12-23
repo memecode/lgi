@@ -117,9 +117,9 @@ bool LSubProcess::IoThread::doRead(bool ended)
 			out.Write(buf, rd);
 		if (ended)
 		{
-			auto stdout = out.NewLStr();
-			LOG("%s:%i - doRead: onStdout ended=%i\n", _FL, (int)stdout.Length());
-			onStdout(stdout);
+			auto stdOut = out.NewLStr();
+			LOG("%s:%i - doRead: onStdout ended=%i\n", _FL, (int)stdOut.Length());
+			onStdout(stdOut);
 		}
 		else
 		{

@@ -479,13 +479,17 @@ LString LErrorCodeToString(uint32_t ErrorCode)
     return Str;
 }
 
-bool LExecute(const char *File, const char *Arguments, const char *Dir, LString *ErrorMsg)
+bool LExecute(const char *File, const char *Arguments, const char *Dir, LError *err)
 {
 	int Error = 0;
 	HINSTANCE Status = NULL;
 	
 	if (!File)
+	{
+		if (err)
+			err->Set(LErrorInvalidParam);
 		return false;
+	}
 
 	uint64 Now = LCurrentTime();
 	if (LGetOs() == LGI_OS_WIN9X)
@@ -520,8 +524,8 @@ bool LExecute(const char *File, const char *Arguments, const char *Dir, LString 
 		LgiTrace("ShellExecuteW took %I64i\n", LCurrentTime() - Now);
 	#endif
 
-	if (ErrorMsg)
-		*ErrorMsg = LErrorCodeToString(Error);
+	if (err)
+		err->Set(Error);
 	
 	return (size_t)Status > 32;
 }
