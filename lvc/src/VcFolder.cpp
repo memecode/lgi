@@ -894,7 +894,7 @@ void VcFolder::UpdateAuthorUi()
 		d->Wnd()->SetCtrlName(IDC_AUTHOR, AuthorGlobal.ToString());
 }
 
-LString VcFolder::GetConfigFile(bool local, bool createIfMissing)
+void VcFolder::GetConfigFile(bool local, bool createIfMissing, std::function<void(LString&)> callback)
 {
 	switch (GetType())
 	{
@@ -924,25 +924,84 @@ LString VcFolder::GetConfigFile(bool local, bool createIfMissing)
 						f.SetSize(0);
 						d->Log->Print("%s:%i - created config file '%s'\n", _FL, p.GetFull().Get());
 					}
-					else return LString();
+					else return;
 				}
 				
-				return p.GetFull();
+				if (callback)
+					callback(p.GetFull());
 			}
 			else
 			{
-				LAssert(!"impl me.");
+				#if HAS_LIBSSH
+					auto conn = d->GetConnection(Uri.ToString(), RemotePrompt);
+					if (!conn)
+						return;
+	
+					conn->WithConsole([this, local, conn, callback, createIfMissing](LSsh::SshConsole &console)
+						{
+							LString rcFile;
+							if (local)
+							{
+								auto p = Uri.sPath.Strip("/") + "/.hg/hgrc";
+								auto resp = conn->RunCmd(console, LString::Fmt("stat %s", p.Get()));
+								if (resp.code)
+								{
+									if (createIfMissing)
+										LAssert(!"impl me");
+								}
+								else
+								{
+									rcFile = p;
+								}
+							}
+							else
+							{
+								LString p = "~/.hgrc";
+								auto resp = conn->RunCmd(console, LString::Fmt("stat %s", p.Get()));
+								if (resp.code)
+								{
+									p = "~/mercurial.ini";
+									resp = conn->RunCmd(console, LString::Fmt("stat %s", p.Get()));
+									if (resp.code)
+									{
+										if (createIfMissing)
+											LAssert(!"impl me");
+									}
+									else
+									{
+										rcFile = p;
+									}
+								}
+								else
+								{
+									rcFile = p;
+								}
+							}
+
+							if (rcFile)
+							{
+								// Check it's absolute:
+								if (rcFile(0) == '~')
+								{
+									auto home = conn->RunCmd(console, "echo $HOME").out;
+									rcFile = rcFile.Replace("~", home);
+								}
+
+								callback(rcFile);
+							}
+						});
+				#else
+					d->Log->Print("FIXME: impl VcFolder::GetConfigFile for remote repos.\n", _FL);
+				#endif
 			}
 			break;
 		}
 		default:
 		{
 			NoImplementation(_FL);
-			return false;
+			break;
 		}
 	}
-
-	return LString();
 }
 
 void VcFolder::GetAuthors(std::function<void(Author &local, Author &global)> callback)
@@ -997,24 +1056,31 @@ bool VcFolder::GetAuthor(bool local, std::function<void(Author &author)> callbac
 		}
 		case VcHg:
 		{
-			auto config = GetConfigFile(local, false);
-			if (!config)
-				return false;
+			GetConfigFile(local, false,
+				[this, callback, target](auto config)
+				{
+					if (!config)
+						return;
 
-			LIniFile data(config);
-			auto author = data.Get("ui", "username");
+					SshConnection *conn = nullptr;
+					if (!Uri.IsFile())
+						conn = d->GetConnection(Uri.ToString(), RemotePrompt);
 
-			auto start = author.Find("<");
-			auto end = author.Find(">", start);
-			if (start >= 0 &&
-				end >= start)
-			{
-				target->name = author(0, start).Strip();
-				target->email = author(start + 1, end).Strip();
-			}
+					LIniFile data(conn, config);
+					auto author = data.Get("ui", "username");
 
-			IsGettingAuthor = false;
-			callback(*target);
+					auto start = author.Find("<");
+					auto end = author.Find(">", start);
+					if (start >= 0 &&
+						end >= start)
+					{
+						target->name = author(0, start).Strip();
+						target->email = author(start + 1, end).Strip();
+					}
+
+					IsGettingAuthor = false;
+					callback(*target);
+				});
 			break;
 		}
 		default:
@@ -1053,16 +1119,22 @@ bool VcFolder::SetAuthor(bool local, Author author)
 		}
 		case VcHg:
 		{
-			auto config = GetConfigFile(local, true);
-			if (!config)
-				return false;
+			GetConfigFile(local, true, [this, target, author](auto config)
+				{
+					if (!config)
+						return;
 
-			LString s;
-			s.Printf("%s <%s>", author.name.Get(), author.email.Get());
+					LString s;
+					s.Printf("%s <%s>", author.name.Get(), author.email.Get());
 
-			LIniFile data(config);
-			data.Set("ui", "username", s);
-			return data.Write();
+					SshConnection *conn = nullptr;
+					if (!Uri.IsFile())
+						conn = d->GetConnection(Uri.ToString(), RemotePrompt);
+
+					LIniFile data(conn, config);
+					data.Set("ui", "username", s);
+					data.Write();
+				});
 		}
 		default:
 		{

@@ -2172,7 +2172,7 @@ const char* toString(VersionCtrl v)
 void LIniFileTest()
 {
 	auto fn = "C:\\Users\\Matthew\\temp\\mercurial.ini";
-	LIniFile ini(fn);
+	LIniFile ini(nullptr, fn);
 	LAssert(ini);
 	auto user = ini.Get("ui", "username");
 	LAssert(user.Find("fret@memecode.com")>=0);

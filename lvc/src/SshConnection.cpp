@@ -76,6 +76,13 @@ bool SshConnection::Command(VcFolder *Fld, LString Exe, LString Args, ParseFn Pa
 	return PostObject(GetHandle(), M_RUN_CMD, p);
 }
 
+bool SshConnection::WithConsole(TConsoleCallback cb)
+{
+	LAutoPtr<SshParams> p(new SshParams(this));
+	p->callback = std::move(cb);
+	return PostObject(GetHandle(), M_RUN_CMD, p);
+}
+
 LStream *SshConnection::GetStream()
 {
 	return GetConsole();
@@ -454,6 +461,16 @@ SSH_LOG("detectVcs:", ls);
 LProfile prof("OnEvent");
 #endif
 			auto p = Msg->AutoA<SshParams>();
+
+			if (p->callback)
+			{
+				if (auto c = GetConsole())
+				{
+					p->callback(*c);
+				}
+				break;
+			}
+
 PROF("get console");
 			LString path = PathFilter(p->Path);
 			LStream *con = GetStream();
@@ -461,7 +478,6 @@ PROF("get console");
 				break;
 
 			auto Debug = p->Params && p->LogType == LogDebug;
-
 PROF("cd");
 			LString cmd;
 			cmd.Printf("cd %s\n", path.Get());

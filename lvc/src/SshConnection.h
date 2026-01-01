@@ -34,9 +34,55 @@
 		~SshConnection();
 		bool DetectVcs(VcFolder *Fld);
 		bool Command(VcFolder *Fld, LString Exe, LString Args, ParseFn Parser, ParseParams *Params, LoggingType Logging);
-	
+
+		using TConsoleCallback = std::function<void(SshConsole&)>;
+		bool WithConsole(TConsoleCallback cb);
+
 		// This is the GUI thread message handler
 		static bool HandleMsg(LMessage *m);
+
+
+
+		struct ProcessOutput
+		{
+			LString out;
+			int code;
+		};
+
+		ProcessOutput RunCmd(LSsh::SshConsole &console, LString cmd)
+		{
+			console.Write(cmd + "\n");
+			LStringPipe out;
+			char buf[512];
+			while (!console.s->AtPrompt(out))
+			{
+				auto rd = console.Read(buf, sizeof(buf));
+				if (rd > 0) out.Write(buf, rd);
+				else LSleep(10);
+			}
+			ProcessOutput p;
+			p.out = out.NewLStr().Replace("\r");
+			RemoveAnsi(p.out);
+			// strip first and last lines
+			auto first = p.out.Find("\n");
+			auto last = p.out.RFind("\n");
+			if (first >= 0 && last > first)
+				p.out = p.out(first + 1, last);
+
+			console.Write("echo $?\n");
+			while (!console.s->AtPrompt(out))
+			{
+				auto rd = console.Read(buf, sizeof(buf));
+				if (rd > 0) out.Write(buf, rd);
+				else LSleep(10);
+			}
+
+			auto result = out.NewLStr();
+			RemoveAnsi(result);
+			auto lines = result.Replace("\r").SplitDelimit("\n");
+			p.code = lines.Length() > 1 ? (int)lines[1].Int() : -1;
+			return p;
+		};
 	};
 
 #else

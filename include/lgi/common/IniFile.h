@@ -2,6 +2,7 @@
 
 class LIniFile
 {
+	LSsh *ssh = nullptr;
 	LString filePath;
 	LString::Array lines;
 
@@ -59,8 +60,9 @@ class LIniFile
 	}
 
 public:
-	LIniFile(const char *Path = NULL)
+	LIniFile(LSsh *Ssh, const char *Path = NULL)
 	{
+		ssh = Ssh;
 		if (Path)
 			Read(Path);
 	}
@@ -72,10 +74,23 @@ public:
 
 	bool Read(const char *Path)
 	{
-		auto txt = LReadFile(filePath = Path);
-		if (!txt)
-			return false;
-		lines = txt.Replace("\r", "").SplitDelimit("\n", -1, false);
+		if (ssh)
+		{
+			LStringPipe p;
+			auto err = ssh->DownloadFile(&p, Path);
+			if (err)
+				return false;
+
+			lines = p.NewLStr().Replace("\r").SplitDelimit("\n", -1, false);
+		}
+		else
+		{
+			auto txt = LReadFile(filePath = Path);
+			if (!txt)
+				return false;
+			lines = txt.Replace("\r", "").SplitDelimit("\n", -1, false);
+		}
+
 		return true;
 	}
 
@@ -85,11 +100,22 @@ public:
 			filePath = Path;
 		if (!filePath)
 			return false;
-		LFile out(filePath, O_WRITE);
-		if (!out)
-			return false;
-		out.SetSize(0);
-		return out.Write(LString("\n").Join(lines));
+
+		auto content = LString("\n").Join(lines);
+		if (ssh)
+		{
+			LMemStream wrapper(content.Get(), content.Length(), false);
+			auto err = ssh->UploadFile(filePath, &wrapper);
+			return !err;
+		}
+		else
+		{
+			LFile out(filePath, O_WRITE);
+			if (!out)
+				return false;
+			out.SetSize(0);
+			return out.Write(content);
+		}
 	}
 
 	LString Get(LString section, LString var)

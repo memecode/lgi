@@ -127,6 +127,7 @@ struct SshParams
 	ParseFn Parser = NULL;
 	ParseParams *Params = NULL;
 	int ExitCode = -1;
+	SshConnection::TConsoleCallback callback;
 
 	SshParams(SshConnection *con) : c(con)
 	{
@@ -356,7 +357,7 @@ public:
 	void SetCurrentBranch(LString name);
 	TBranchHash &GetBranchCache() { return Branches; }
 	LXmlTag *Save();
-	LString GetConfigFile(bool local, bool createIfMissing);
+	void GetConfigFile(bool local, bool createIfMissing, std::function<void(LString&)> callback);
 	LString GetRemotePrompt() { return RemotePrompt; }
 	void SetRemotePrompt(LString p) { RemotePrompt = p; }
 	bool GetAuthor(bool local, std::function<void(Author &author)> callback);
