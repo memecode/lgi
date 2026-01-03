@@ -140,7 +140,8 @@ public:
 	    LOG_HTTP("Attempting to listen on port %i...\n", port);
 	    
 	    LAutoPtr<LSubProcess::IoThread> netstat;
-		while (!Listen.Listen(port))
+		while (	!cancel->IsCancelled() &&
+				!Listen.Listen(port))
 		{
 			LOG_HTTP("...can't listen on port %i.\n", port);
 			

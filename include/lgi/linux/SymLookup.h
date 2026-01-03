@@ -49,48 +49,10 @@ public:
 
 		for (int i=0; Sym[i] && i<IpLen; i++)
 		{
-			/*
-			char *s = strrchr(Sym[i], '('), *e;
-			if (s != 0 && (e = strchr(++s, '+')))
-			{
-				LStringPipe un;
-				un.Write(Sym[i], s - Sym[i] - 1);
-				un.Write((void*)" (" 2);
-
-				char *man = NewStr(s, e - s);
-				if (man)
-				{			
-					LProcess p;
-					p.Run("c++filt", man, 0, true, 0, &un);
-					un.Write(e, strlen(e));
-					
-					DeleteArray(man);
-				}
-
-				man = un.NewStr();
-				if (man)
-				{
-					char *o = man;
-					for (char *i=man; *i; i++)
-						if (*i != '\n') *o++ = *i;
-					*o++ = 0;
-					
-					int CopyLen = strlen(man);
-					strsafecpy(buf, man, buflen);
-					buflen -= CopyLen;
-					buf += CopyLen;
-				}
-				
-				DeleteArray(man);
-			}
-			else
-			*/
-			{
-				auto CopyLen = strlen(Sym[i]);
-				strcpy_s(buf, buflen, Sym[i]);
-				buflen -= CopyLen;
-				buf += CopyLen;
-			}
+			auto CopyLen = strlen(Sym[i]);
+			strcpy_s(buf, buflen, Sym[i]);
+			buflen -= CopyLen;
+			buf += CopyLen;
 			
 			if (buflen > 1)
 			{

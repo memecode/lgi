@@ -531,6 +531,7 @@ elseif (LINUX)
 			-w
 			-fno-inline
 			-fpermissive
+			-rdynamic
 		)
 
 	target_include_directories(lgi
@@ -570,6 +571,14 @@ elseif (LINUX)
 	target_compile_definitions(lgi-stub
 		PUBLIC
 			LINUX)
+	target_compile_options(lgi-stub
+		PUBLIC
+			-fPIC
+			-w
+			-fno-inline
+			-fpermissive
+			-rdynamic
+		)
 
 elseif (MSVC)
 

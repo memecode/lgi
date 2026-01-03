@@ -1382,9 +1382,9 @@ void SslSocket::IsBlocking(bool block)
 
 bool SslSocket::IsReadable(int TimeoutMs)
 {
-	char byte;
 	if (Ssl)
 	{
+		char byte;
 		int peek = Library->SSL_peek(Ssl, &byte, 1);
 		if (peek > 0)
 			return true;
@@ -1394,8 +1394,12 @@ bool SslSocket::IsReadable(int TimeoutMs)
 	// on us between the validity check and the select.
 	// Which is important because a socket value of -1
 	// (ie invalid) will crash the FD_SET macro.
-	OsSocket s = Handle();
-	if (!d->Cancel->IsCancelled() && ValidSocket(s))
+	auto s = Handle();
+	if (!ValidSocket(s))
+	{
+		LgiTrace("%s:%i - Not a valid socket.\n", _FL);
+	}
+	else if (!d->Cancel->IsCancelled())
 	{
 		struct timeval t = {TimeoutMs / 1000, (TimeoutMs % 1000) * 1000};
 
@@ -1413,7 +1417,6 @@ bool SslSocket::IsReadable(int TimeoutMs)
 			// Error();
 		}
 	}
-	else LgiTrace("%s:%i - Not a valid socket.\n", _FL);
 
 	return false;
 }

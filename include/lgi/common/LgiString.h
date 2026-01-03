@@ -239,7 +239,7 @@ uint64_t htoi64(const Char *s)
 /// \returns A heap allocated copy of the input without any delimiter characters
 /// on the start or end.
 /// \deprecated Use LString::Strip() instead
-LgiFunc [[deprecated]] char *TrimStr(const char *s, const char *Delim = " \r\n\t");
+[[deprecated]] LgiExtern char *TrimStr(const char *s, const char *Delim = " \r\n\t");
 /// Returns true if the string points to something with one or more non-whitespace characters.
 LgiFunc bool ValidStr(const char *s);
 /// Makes a heap allocated copy of a string.

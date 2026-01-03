@@ -9,7 +9,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 LSubProcess::IoThread::IoThread(const char *exe, const char *args) :
-	LThread("LSubProcess.IoThread.Thread"),
+	LThread("SubProcIoThread"),
 	LMutex( "LSubProcess.IoThread.Lock")
 {
 	if (exe)
