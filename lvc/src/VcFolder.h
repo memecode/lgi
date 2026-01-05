@@ -357,11 +357,11 @@ public:
 	void SetCurrentBranch(LString name);
 	TBranchHash &GetBranchCache() { return Branches; }
 	LXmlTag *Save();
-	void GetConfigFile(bool local, bool createIfMissing, std::function<void(LString&)> callback);
+	void GetConfigFile(bool local, bool createIfMissing, std::function<void(LString)> callback, bool debug = false);
 	LString GetRemotePrompt() { return RemotePrompt; }
 	void SetRemotePrompt(LString p) { RemotePrompt = p; }
-	bool GetAuthor(bool local, std::function<void(Author &author)> callback);
-	void GetAuthors(std::function<void(Author &local, Author &global)> callback);
+	bool GetAuthor(bool local, std::function<void(Author &author)> callback, bool debug = false);
+	void GetAuthors(std::function<void(Author &local, Author &global)> callback, bool debug = false);
 	bool SetAuthor(bool local, Author author);
 	void ShowAuthor();
 	void UpdateAuthorUi();

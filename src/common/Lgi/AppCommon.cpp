@@ -80,6 +80,94 @@ bool LApp::SetConfig(const char *Variable, const char *Value)
 	return false;
 }
 
+const char *LApp::GetArgumentAt(int n)
+{
+	return n >= 0 && n < d->Args.Args ? NewStr(d->Args.Arg[n]) : 0;
+}
+
+bool LApp::GetOption(const char *Option, char *Dest, size_t DestLen)
+{
+	LString Buf;
+	if (!GetOption(Option, Buf))
+		return false;
+
+	if (Dest && DestLen == 0)
+		return false;
+
+	strcpy_s(Dest, DestLen, Buf);
+	return true;
+}
+
+bool LApp::GetOption(const char *Option, LString &Buf)
+{
+	if (!IsOk() || !Option)
+	{
+		LgiTrace("%s:%i - param err.\n", _FL);
+		return false;
+	}
+	
+	auto OptLen = strlen(Option);
+	for (int i=1; i<d->Args.Args; i++)
+	{
+		auto a = d->Args.Arg[i];
+		if (!a)
+			continue;
+
+		// LgiTrace("\topt=%s arg=%s\n", Option, a);
+		switch (*a++)
+		{
+			case '-':
+				if (*a == '-')
+					a++;
+				// fall through
+			case '/':
+			case '\\':
+				if (!strnicmp(a, Option, OptLen))
+				{
+					const char *Arg = nullptr;
+					if (strlen(a+OptLen) > 0)
+					{
+						Arg = a + OptLen;
+						if (*Arg == '=')
+							Arg++;
+					}
+					else if (i < d->Args.Args - 1)
+					{
+						Arg = d->Args.Arg[i + 1];
+					}					
+					if (Arg)
+					{
+						if (strchr("\'\"", *Arg))
+						{
+							auto Delim = *Arg++;
+							auto End = strchr(Arg, Delim);
+							if (End)
+							{
+								auto Len = End-Arg;
+								if (Len > 0)
+									Buf.Set(Arg, Len);
+								else
+									return false;
+							}
+							else return false;
+						}
+						else
+						{
+							Buf = Arg;
+						}
+					}
+
+					return true;
+				}
+				break;
+			default:
+				break;
+		}
+	}
+
+	return false;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////
 LJson *LAppPrivate::GetConfigJson()
 {
@@ -356,3 +444,4 @@ void LPopupNotification::OnPulse()
 		Msgs.DeleteObjects();
 	}
 }
+

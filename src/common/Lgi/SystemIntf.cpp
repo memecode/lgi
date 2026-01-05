@@ -1261,7 +1261,7 @@ public:
 			if (params->Type == FindParams::SearchPaths)
 				dir = RemoteRoot();
 		
-			p->args = LString::Fmt(	"grep -I -R -Hn \"%s\" %s\n",
+			p->args = LString::Fmt(	"grep -I -R -F -Hn \"%s\" %s\n",
 									params->Text.Escape().Get(),
 									dir.Get());
 			return RunProcess(dir, p->args, &p->io, this,

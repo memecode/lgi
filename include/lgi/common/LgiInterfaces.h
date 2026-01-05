@@ -348,10 +348,11 @@ public:
 	(
 		/// The option to look for.
 		const char *Option,
-		/// The buffer to receive the value of the command line parameter or NULL if you don't care.
-		char *Dst = 0,
+		/// [Optional] buffer to receive the value of the command line parameter or NULL if just testing for
+		/// the presence of the option only.
+		char *Dst = nullptr,
 		/// The buffer size in bytes
-		int DstSize = 0
+		size_t DstSize = 0
 	) = 0;
 	
 	/// Gets the application conf stored in lgi.conf

@@ -285,10 +285,10 @@ public:
 	(
 		/// The option to look for.
 		const char *Option,
-		/// The buffer to receive the value of the command line parameter or NULL if you don't care.
-		char *Dst = NULL,
+		/// [Optional] buffer to receive the value of the command line parameter or NULL if you don't care.
+		char *Dst = nullptr,
 		/// The buffer size in bytes
-		int DstSize = 0
+		size_t DstSize = 0
 	) override;
 
 	/// Return the path to the Lgi config file... (not the same as the application options, more global Lgi apps settings)

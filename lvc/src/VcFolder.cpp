@@ -894,7 +894,7 @@ void VcFolder::UpdateAuthorUi()
 		d->Wnd()->SetCtrlName(IDC_AUTHOR, AuthorGlobal.ToString());
 }
 
-void VcFolder::GetConfigFile(bool local, bool createIfMissing, std::function<void(LString&)> callback)
+void VcFolder::GetConfigFile(bool local, bool createIfMissing, std::function<void(LString)> callback, bool debug)
 {
 	switch (GetType())
 	{
@@ -934,6 +934,7 @@ void VcFolder::GetConfigFile(bool local, bool createIfMissing, std::function<voi
 			{
 				#if HAS_LIBSSH
 					auto conn = d->GetConnection(Uri.ToString(), RemotePrompt);
+					if (debug) d->Log->Print("%s:%i - conn=%p\n", _FL, conn);
 					if (!conn)
 						return;
 	
@@ -1004,21 +1005,29 @@ void VcFolder::GetConfigFile(bool local, bool createIfMissing, std::function<voi
 	}
 }
 
-void VcFolder::GetAuthors(std::function<void(Author &local, Author &global)> callback)
+void VcFolder::GetAuthors(std::function<void(Author &local, Author &global)> callback, bool debug)
 {
 	if (!callback)
 		return;
 		
-	GetAuthor(true, [this, callback](auto local)
-	{
-		GetAuthor(false, [this, callback, local](auto global) mutable
+	if (debug) d->Log->Print("%s:%i - getAuthors(true)...\n", _FL);
+	
+	GetAuthor(true, [this, callback, debug](auto local)
 		{
-			callback(local, global);
-		});
-	});
+			if (debug) d->Log->Print("%s:%i - getAuthors(true) cb=%s\n", _FL, local.ToString().Get());
+			
+			GetAuthor(false, [this, callback, local, debug](auto global) mutable
+				{
+					if (debug) d->Log->Print("%s:%i - getAuthors(false) cb=%s\n", _FL, global.ToString().Get());
+
+					callback(local, global);
+				},
+				debug);
+		},
+		debug);
 }
 
-bool VcFolder::GetAuthor(bool local, std::function<void(Author &author)> callback)
+bool VcFolder::GetAuthor(bool local, std::function<void(Author &author)> callback, bool debug)
 {
 	auto scope = local ? "--local" : "--global";
 	auto target = local ? &AuthorLocal : &AuthorGlobal;
@@ -1057,14 +1066,19 @@ bool VcFolder::GetAuthor(bool local, std::function<void(Author &author)> callbac
 		case VcHg:
 		{
 			GetConfigFile(local, false,
-				[this, callback, target](auto config)
+				[this, callback, target, debug](auto config)
 				{
 					if (!config)
+					{
+						if (debug) d->Log->Print("%s:%i - error, no config.\n", _FL);
 						return;
+					}
 
 					SshConnection *conn = nullptr;
 					if (!Uri.IsFile())
 						conn = d->GetConnection(Uri.ToString(), RemotePrompt);
+
+					if (debug) d->Log->Print("%s:%i - file='%s' conn=%p.\n", _FL, config.Get(), conn);
 
 					LIniFile data(conn, config);
 					auto author = data.Get("ui", "username");
@@ -4413,8 +4427,8 @@ void VcFolder::Commit(const char *Msg, const char *Branch, bool AndPush)
 		(
 			[
 				this,
-				msg=LString(Msg),
-				branch=LString(Branch),
+				msg = LString(Msg),
+				branch = LString(Branch),
 				AndPush
 			]
 			(auto code, auto url)

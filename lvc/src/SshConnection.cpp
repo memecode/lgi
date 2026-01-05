@@ -100,8 +100,9 @@ LSsh::SshConsole *SshConnection::GetConsole()
 		if (console = CreateConsole())
 		{		
 			// Get log in preamble
-			Log->Print("Ssh: waiting for prompt '%s'\n", Prompt.Get());
-			WaitPrompt(console);
+			WaitPrompt(console
+				// , nullptr, "getConsole"
+				);
 		}
 		else Log->Print("Ssh error: no console?\n");
 	}
