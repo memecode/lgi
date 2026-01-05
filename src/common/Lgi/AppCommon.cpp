@@ -80,9 +80,11 @@ bool LApp::SetConfig(const char *Variable, const char *Value)
 	return false;
 }
 
-const char *LApp::GetArgumentAt(int n)
+LString LApp::GetArgumentAt(size_t n)
 {
-	return n >= 0 && n < d->Args.Args ? NewStr(d->Args.Arg[n]) : 0;
+	if (n < d->Args.Args)
+		return d->Args.Arg[n];
+	return LString();
 }
 
 bool LApp::GetOption(const char *Option, char *Dest, size_t DestLen)

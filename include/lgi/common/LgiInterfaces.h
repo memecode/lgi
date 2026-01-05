@@ -304,8 +304,8 @@ public:
 	/// Returns the arguemnts
 	virtual OsAppArguments *GetAppArgs() = 0;
 
-	/// Returns the n'th argument as a heap string. Free with DeleteArray(...).
-	virtual const char *GetArgumentAt(int n) = 0;
+	/// Returns the n'th argument
+	virtual LString GetArgumentAt(size_t n) = 0;
 	
 	/// Enters the message loop.
 	virtual bool Run

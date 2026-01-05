@@ -27,70 +27,145 @@ const char LSpellCheck::Delimiters[] =
 HINSTANCE _lgi_app_instance = NULL;
 extern LPTOP_LEVEL_EXCEPTION_FILTER _PrevExceptionHandler;
 
+struct AppArgPriv
+{
+	LAutoWString CmdLine;
+	LArray<LString*> Cache;
+	LArray<const char*> argPtrs;
+
+	AppArgPriv()
+	{
+	}
+
+	~AppArgPriv()
+	{
+		Empty();
+	}
+
+	void Empty()
+	{
+		CmdLine.Reset();
+		argPtrs.Empty();
+		Cache.DeleteObjects();
+	}
+
+	void Parse(OsAppArguments *target)
+	{
+		LAutoString CmdLine(WideToUtf8(CmdLine));
+		auto Delim = "\'\"";
+		for (char *s = CmdLine; *s; )
+		{
+			// skip ws
+			while (*s && strchr(LString::WhiteSpace, *s)) s++;
+
+			// read to end of token
+			auto e = s;
+			if (strchr(Delim, *s))
+			{
+				auto Delim = *s++;
+				e = strchr(s, Delim);
+				if (!e)
+					e = s + strlen(s);
+			}
+			else
+			{
+				for (; *e && !strchr(LString::WhiteSpace, *e); e++)
+					;
+			}
+
+			if (s == e)
+				break;
+
+			if (auto a = new LString(s, e - s))
+			{
+				Cache.Add(a);
+				argPtrs.Add(a->Get());
+			}
+		
+			s = *e ? e + 1 : e;
+		}
+
+		target->Args = (int)argPtrs.Length();
+		target->Arg = argPtrs.AddressOf();
+	}
+};
+
 OsAppArguments::OsAppArguments()
 {
-	_Default();
+	Pid = GetCurrentProcessId();
+	d = new AppArgPriv();
 }
 
-OsAppArguments::OsAppArguments(int Args, const char **Arg)
+OsAppArguments::OsAppArguments(const char16 *lpCmdLine)
 {
-	_Default();
-	Set(Args, Arg);
+	Pid = GetCurrentProcessId();
+	if (d = new AppArgPriv())
+	{
+		d->CmdLine.Reset(NewStrW(lpCmdLine));
+		d->Parse(this);
+	}
 }
 
-OsAppArguments &OsAppArguments::operator =(OsAppArguments &p)
+OsAppArguments::OsAppArguments(int args, const char **arg)
+{
+	Pid = GetCurrentProcessId();
+	if (d = new AppArgPriv())
+		Set(args, arg);
+}
+
+OsAppArguments &OsAppArguments::operator =(const OsAppArguments &p)
 {
 	hInstance = p.hInstance;
 	Pid = p.Pid;
 	nCmdShow = p.nCmdShow;
-	lpCmdLine = 0;
-	
-	CmdLine.Reset(NewStrW(p.lpCmdLine));
-	lpCmdLine = CmdLine;
-	return *this;
-}
 
-void OsAppArguments::_Default()
-{
-	hInstance = 0;
-	lpCmdLine = 0;
-	Pid = GetCurrentProcessId();
-	nCmdShow = SW_RESTORE;
+	if (d = new AppArgPriv())
+	{
+		d->CmdLine.Reset(NewStrW(p.d->CmdLine));
+		d->Parse(this);
+	}
+
+	return *this;
 }
 
 bool OsAppArguments::Get(const char *option, const char **value)
 {
-	if (!lpCmdLine || !option)
+	if (!option)
 		return false;
 
-	char16 *c = lpCmdLine;
-	auto getArg = [&]() -> LString
+	auto optLen = strlen(option);
+	for (int i=1; i<Args; i++)
 	{
-		while (*c && IsWhite(*c))
-			c++;
-		auto start = c;
-		while (*c && !IsWhite(*c))
-			c++;
-		return LString(start, c - start);
-	};
+		auto a = Arg[i];
+		if (!strchr("-/", *a))
+			continue;
+		a++;
+		if (*a == '-') // skip second dash if present
+			a++;
 
-	while (*c)
-	{
-		LString a = getArg();
-		if (a(0) != '-')
+		if (Strnicmp(a, option, optLen))
 			continue;
 
-		if (a(1, -1) == option)
+		// found matching option?
+		auto end = a + optLen;
+		if (*end == '=')
 		{
-			if (value && Cache.Reset(new LString))
+			if (value)
+				*value = end + 1;
+			return true;
+		}
+		else if (*end == 0)
+		{
+			if (value)
 			{
-				*Cache = getArg();
-				if (!Cache.Get())
-					return false;
-				*value = Cache->Get();
+				if (i < Args - 1)
+					*value = Arg[i+1];
+				else
+					return false; // missing value arg
 			}
 			return true;
 		}
+		// else continue...
 	}
 	 
 	return false;
@@ -98,19 +173,31 @@ bool OsAppArguments::Get(const char *option, const char **value)
 
 void OsAppArguments::Set(int Args, const char **Arg)
 {
-	LStringPipe p;
+	Empty();
 	for (int i=0; i<Args; i++)
 	{
-		p.Print("%s%s", i?" ":"", Arg[i]);
+		if (auto a = new LString(Arg[i]))
+		{
+			d->Cache.Add(a);
+			d->argPtrs.Add(a->Get());
+		}
 	}
-	LAutoString s(p.NewStr());
-	Set(s);
+	Args = (int)d->argPtrs.Length();
+	Arg = d->argPtrs.AddressOf();
 }
 
 void OsAppArguments::Set(char *Utf)
 {
-	CmdLine.Reset(Utf8ToWide(Utf));
-	lpCmdLine = CmdLine;
+	Empty();
+	d->CmdLine.Reset(Utf8ToWide(Utf));
+	d->Parse(this);
+}
+
+void OsAppArguments::Empty()
+{
+	Args = 0;
+	Arg = nullptr;
+	d->Empty();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -519,6 +606,7 @@ OsAppArguments *LApp::GetAppArgs()
 	return IsOk() ? &d->Args : 0;
 }
 
+/*
 const char *LApp::GetArgumentAt(int n)
 {
 	if (d->Args.lpCmdLine)
@@ -615,6 +703,7 @@ bool LApp::GetOption(const char *Option, char *Dest, int DestLen)
 	}
 	return false;
 }
+*/
 
 // #include "LInput.h"
 
@@ -625,8 +714,9 @@ void LApp::SetAppArgs(OsAppArguments &AppArgs)
 
 void LApp::OnCommandLine()
 {
+	/*
 	char WhiteSpace[] = " \r\n\t";
-	char *CmdLine = WideToUtf8(d->Args.lpCmdLine);
+	char *CmdLine = WideToUtf8(d->Args.d->CmdLine);
 
 	if (ValidStr(CmdLine))
 	{
@@ -683,6 +773,7 @@ void LApp::OnCommandLine()
 	}
 
 	DeleteArray(CmdLine);
+	*/
 }
 
 void LApp::OnUrl(const char *Url)

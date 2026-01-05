@@ -238,8 +238,8 @@ public:
 	/// Returns the arguemnts
 	OsAppArguments *GetAppArgs() override;
 
-	/// Returns the n'th argument as a heap string. Free with DeleteArray(...).
-	const char *GetArgumentAt(int n) override;
+	/// Returns the n'th argument.
+	LString GetArgumentAt(size_t n) override;
 	
 	/// Enters the message loop.
 	bool Run

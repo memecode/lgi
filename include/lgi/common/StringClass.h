@@ -71,7 +71,7 @@ protected:
 		char *s = Str->Str;
 		char *e = s + Str->Len;
 
-		if (!set) set = " \t\r\n";
+		if (!set) set = WhiteSpace;
 
 		if (left)
 		{		
@@ -90,6 +90,8 @@ protected:
 	}
 
 public:
+	constexpr static const char *WhiteSpace = " \t\r\n";
+
 	/// A copyable array of strings
 	class Array : public LArray<LString>
 	{
@@ -772,7 +774,7 @@ public:
 
 		if (Str)
 		{
-			const char *delim = Delimiters ? Delimiters : " \t\r\n";
+			const char *delim = Delimiters ? Delimiters : WhiteSpace;
 			const char *s = Get(), *end = s + Length();
 			while (s < end)
 			{

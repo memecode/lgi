@@ -107,21 +107,21 @@ typedef int (__stdcall *p_vscprintf)(const char *format, va_list argptr);
 
 class LgiClass OsAppArguments
 {
-	LAutoWString CmdLine;
-	LAutoPtr<class LString> Cache;
-
-	void _Default();
+	struct AppArgPriv *d;
+	void Empty();
 
 public:
-	HINSTANCE hInstance;
-	DWORD Pid;
-	char16 *lpCmdLine;
-	int nCmdShow;
+	HINSTANCE hInstance = nullptr;
+	DWORD Pid = 0;
+	int nCmdShow = SW_RESTORE;
+	int Args = 0;
+	const char **Arg = nullptr;
 
 	OsAppArguments();
-	OsAppArguments(int Args, const char **Arg);
+	OsAppArguments(const char16 *lpCmdLine);
+	OsAppArguments(int args, const char **arg);
 
-	OsAppArguments &operator =(OsAppArguments &p);
+	OsAppArguments &operator =(const OsAppArguments &p);
 
 	bool Get(const char *option, const char **value = NULL);
 	void Set(char *Utf);

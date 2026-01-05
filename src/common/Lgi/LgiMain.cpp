@@ -105,72 +105,11 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdS
 	#endif
 	if (_BuildCheck())
 	{
-		char16 *CL = (char16*)GetCommandLineW();
-
-    	#if WINNATIVE
-    	
-			OsAppArguments AppArgs;
-			#if !_CONSOLE
+		OsAppArguments AppArgs(GetCommandLineW());
+		#if !_CONSOLE
 			AppArgs.hInstance = hInstance;
 			AppArgs.nCmdShow = nCmdShow;
-			#endif
-
-			if (*CL == '\"')
-			{
-				AppArgs.lpCmdLine = StrchrW(CL+1, '\"');
-			}
-			else
-			{
-				AppArgs.lpCmdLine = StrchrW(CL+1, ' ');
-			}
-			if (AppArgs.lpCmdLine) AppArgs.lpCmdLine++;
-
-		#else
-			LString::Array Mem;
-			LArray<char*> Args;
-			char16 *Ws = L" \t\r\n";
-			for (char16 *c = CL; *c; )
-			{
-			    while (*c && StrchrW(Ws, *c))
-			    	c++;
-			    if (!*c)
-			    {
-			    	printf("Breaking on NULL at %i\n", (int)(c-CL));
-			    	break;
-			    }
-			    if (*c == '\"' || *c == '\'')
-			    {
-			        char16 delim = *c++;
-			        char16 *end = StrchrW(c, delim);
-			        if (end)
-			        {
-						LString s(c, end-c);
-						Mem.New() = s;
-			            Args.Add(s.Get());
-			            c = end + 1;
-			        }
-			        else
-			        {
-						LString s(c);
-						Mem.New() = s;
-			            Args.Add(s.Get());
-			            break;
-			        }
-			    }
-			    else
-			    {
-			        char16 *end = c;
-	    		    while (*end && !StrchrW(Ws, *end)) end++;
-	    		    if (end > c)
-		                Args.Add(WideToUtf8(c, end-c));
-		            c = end + (*end != 0);
-			    }
-			}
-			
-			OsAppArguments AppArgs(Args.Length(), (const char**) &Args[0]);
-			
 		#endif
-		
 		Status = LgiMain(AppArgs);
 	}
 
