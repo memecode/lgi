@@ -453,7 +453,7 @@ LString LErrorCodeToString(uint32 ErrorCode)
 	return e;
 }
 
-bool LExecute(const char *File, const char *Args, const char *Dir, LString *ErrorMsg)
+bool LExecute(const char *File, const char *Args, const char *Dir, LError *error)
 {
 	bool Status = false;
 	
