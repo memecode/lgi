@@ -128,6 +128,11 @@ OsAppArguments &OsAppArguments::operator =(const OsAppArguments &p)
 	return *this;
 }
 
+const char16 *OsAppArguments::GetFull()
+{
+	return d->CmdLine;
+}
+
 bool OsAppArguments::Get(const char *option, const char **value)
 {
 	if (!option)

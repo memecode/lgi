@@ -1762,7 +1762,7 @@ struct LHeader
 			// Skip over the wrapping marker
 			if (e < end && *e == '\r') e++;
 			if (e < end && *e == '\n') e++;
-			if (e < end && IsWhite(*e)) e++;
+			// if (e < end && IsWhite(*e)) e++;
 			s = e;
 		}
 		return p.NewLStr();
@@ -1781,11 +1781,6 @@ void IterateHeaders(
 {
 	if (!headers)
 		return;
-
-	if (filterField.Equals("List-Owner"))
-	{
-		int asd=0;
-	}
 
 	auto end = headers.Get() + headers.Length();
 	for (auto s = headers.Get(); s < end; )
@@ -1874,17 +1869,44 @@ LString LGetHeaderField(LString Headers, const char *Field)
 static LString WrapValue(LString hdr, LString val, int wrapAt)
 {
 	LStringPipe out;
-	for (size_t i = 0; i < val.Length(); )
+	size_t col = hdr.Length() + 2;
+	auto *v = val.Get();
+
+	for (ssize_t i = 0; i < (ssize_t)val.Length(); )
 	{
 		auto remaining = val.Length() - i;
-		auto avail = i ? wrapAt - 1 : wrapAt - hdr.Length() - 2; 
-		auto bytes = MIN(remaining, avail);
+		auto avail = wrapAt - col; 
+		if (remaining <= avail)
+		{
+			// Can write whole string:
+			out.Write(v + i, remaining);
+			break;
+		}
 
-		out.Write(val.Get() + i, bytes);
-		if (bytes < remaining)
-			out.Write("\r\n ", 3);
-
-		i += bytes;
+		// Seek back to find nearest whitespace between 'i' and 'i+common'
+		ssize_t whitePos = -1;
+		for (ssize_t k = i + MIN(avail, remaining); k >= i; k--)
+			if (v[k] == ' ' || v[k] == '\t')
+			{
+				whitePos = k;
+				break;
+			}
+		if (whitePos >= 0)
+		{
+			// Write up to whitePos, and then wrap
+			out.Write(v + i, whitePos - i);
+			out.Write("\r\n", 2);
+			i = whitePos;
+			col = 1;
+			// whitespace goes on next line..
+		}
+		else
+		{
+			// No break opportunity... what should really happen here?
+			out.Write(v + i, avail);
+			i += avail;
+			col = 0;
+		}
 	}
 	return out.NewLStr();
 }
@@ -1936,7 +1958,7 @@ bool LHeaderUnitTests()
 	auto date = LGetHeaderField(testHdrs2, "Date");
 	CHECK(date == "Fri, 5 Sep 2025 03:58:07 +0000");
 	auto msgId = LGetHeaderField(testHdrs2, "Message-ID");
-	CHECK(msgId == "<JH0PR03MB8021DD51331.outlook.com>");
+	CHECK(msgId == " <JH0PR03MB8021DD51331.outlook.com>");
 
 	CHECK(LGetHeaderField(testHdrs, "Content-Type") == contentType);
 	CHECK(LGetHeaderField(testHdrs, "Content-Length") == contentLen);
@@ -1968,7 +1990,7 @@ bool LHeaderUnitTests()
 
 	// Test setting a wrapped value
 	in = testHdrs;
-	const char *newType = "0----=====1----=====2----=====3----=====4----=====5----=====6----=====7----=====8----=====9----=====10---=====";
+	const char *newType = "0----=====1----=====2----=====3----=====4----= ===5----=====6----=====7----== ==8----=====9----=====10---=====";
 	LSetHeaderFeild(in, "Content-Type", newType);
 	CHECK(LGetHeaderField(in, "Content-Type") == newType);
 	CHECK(LGetHeaderField(in, "Content-Length") == contentLen);

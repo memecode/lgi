@@ -126,6 +126,7 @@ public:
 	bool Get(const char *option, const char **value = NULL);
 	void Set(char *Utf);
 	void Set(int Args, const char **Arg);
+	const char16 *GetFull();
 };
 
 //////////////////////////////////////////////////////////////////
