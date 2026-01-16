@@ -16,7 +16,8 @@
 
 #define DEBUG_SHOW_NODE_COUNTS		0
 
-const char *TypeNames[NodeMax] = {
+const char *TypeNames[NodeMax] =
+{
 	"None",
 	"Folder",
 	"Source",

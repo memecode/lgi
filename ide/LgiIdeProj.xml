@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Project TabSize="4" IndentSize="4" UseTabs="1" Makefile="./Makefile.linux" Exe="./lgiide" ShowWhitespace="0" BuildType="0" TargetType="0" TargetName="lgiide" Compiler="0">
+	<Node Name="Build" Type="1" Platforms="15" Id="1">
+		<Node File="./haiku/buildHaiku.py" Type="8" Platforms="15" />
+		<Node File="./CMakeLists.txt" Type="8" Platforms="15" />
+		<Node File="./haiku/Makefile.haiku" Type="9" Platforms="15" />
+		<Node File="./linux/Makefile.linux" Type="9" Platforms="15" />
+		<Node File="./win/Makefile.windows" Type="9" Platforms="15" />
+		<Node File="./docs/notes.txt" Type="8" Platforms="15" />
+	</Node>
 	<Node Name="Lgi" Type="1" Platforms="15" Open="1" Id="7">
 		<Node Name="Html" Type="1" Platforms="15" Id="1">
 			<Node File="../src/common/Text/Html.cpp" Type="2" Platforms="15" />
@@ -30,12 +38,8 @@
 		<Node File="../include/lgi/common/TextLog.h" Type="3" Platforms="15" />
 	</Node>
 	<Node Name="Resources" Type="1" Platforms="15" Open="1" Id="8">
+		<Node File="./resources/LgiIde.lr8" Type="5" Platforms="15" />
 		<Node File="./resources/resource.h" Type="3" Platforms="15" />
-		<Node File="./haiku/buildHaiku.py" Type="8" Platforms="15" />
-		<Node File="./CMakeLists.txt" Type="8" Platforms="15" />
-		<Node File="./haiku/Makefile.haiku" Type="9" Platforms="15" />
-		<Node File="./linux/Makefile.linux" Type="9" Platforms="15" />
-		<Node File="./win/Makefile.windows" Type="9" Platforms="15" />
 	</Node>
 	<Node Name="Source Files" Type="1" Platforms="15" Open="1" Id="3">
 		<Node Name="Debugger" Type="1" Platforms="15" Open="0" Id="4">

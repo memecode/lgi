@@ -20,14 +20,14 @@
 #define OPT_NodeFlags				"NodeFlags"
 #define OPT_Breakpoint				"Breakpoint"
 
-enum ExeAction
+enum TExeAction
 {
 	ExeRun,
 	ExeDebug,
 	ExeValgrind
 };
 
-enum AppCommands
+enum TAppCommands
 {
 	IDM_INSERT = 100,
 	IDM_NEW_FOLDER,
@@ -50,7 +50,7 @@ enum AppCommands
 	IDM_REBUILD_ALL
 };
 
-enum ProjectStatus
+enum TProjectStatus
 {
 	OpenError,
 	OpenOk,
@@ -160,7 +160,7 @@ public:
 	void BuildThreadFinished();
 	void Clean(bool All, BuildConfig Config);
 	void CleanForPlatform(bool All, BuildConfig Config, SysPlatform Platform);
-	void Execute(ExeAction Act = ExeRun, std::function<void(LError&, LDebugContext*)> contextCb = NULL);
+	void Execute(TExeAction Act = ExeRun, std::function<void(LError&, LDebugContext*)> contextCb = NULL);
 	bool FixMissingFiles();
 	bool FindDuplicateSymbols();
 	bool InProject(bool FuzzyMatch, const char *Path, bool Open, class IdeDoc **Doc = 0);
@@ -203,7 +203,7 @@ public:
 
 	// File
 	void CreateProject();
-	ProjectStatus OpenFile(const char *FileName);
+	TProjectStatus OpenFile(const char *FileName);
 	bool SaveFile();
 	bool GetClean();
 	void SetClean(std::function<void(bool)> OnDone);

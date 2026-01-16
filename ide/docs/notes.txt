@@ -1,0 +1,10 @@
+		Notes
+		-----
+		
+
+Bugs:
+
+Arguments in project settings not passed to processing being debugged:
+	They do get passed to the Debugger instance, but not used?
+	Gdb::Load
+		

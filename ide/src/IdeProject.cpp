@@ -2825,11 +2825,11 @@ class ExecuteThread : public LThread, public LStream, public LCancel
 	IdeProject *Proj = NULL;
 	LString Exe, Args, Path;
 	int Len = 32 << 10;
-	ExeAction Act;
+	TExeAction Act;
 	int AppHnd;
 
 public:
-	ExecuteThread(IdeProject *proj, const char *exe, const char *args, char *path, ExeAction act) :
+	ExecuteThread(IdeProject *proj, const char *exe, const char *args, char *path, TExeAction act) :
 		LThread("ExecuteThread")
 	{
 		Proj = proj;
@@ -2894,11 +2894,11 @@ public:
 			else if (Act == ExeValgrind)
 			{
 				#ifdef LINUX
-				LString ExePath = Proj->GetExecutable(GetCurrentPlatform());
+				auto ExePath = Proj->GetExecutable(GetCurrentPlatform());
 				if (ExePath)
 				{
 					char Path[MAX_PATH_LEN];
-					char *ExeLeaf = LGetLeaf(Exe);
+					auto ExeLeaf = LGetLeaf(Exe);
 					strcpy_s(Path, sizeof(Path), ExeLeaf ? ExeLeaf : Exe.Get());
 					LTrimDir(Path);
 									
@@ -2921,9 +2921,9 @@ public:
 					
 					if (Term && WorkDir && Execute)
 					{					
-						char *e = QuoteStr(ExePath);
-						char *p = QuoteStr(Path);
-						const char *a = Proj->GetExeArgs() ? Proj->GetExeArgs() : "";
+						auto e = QuoteStr(ExePath);
+						auto p = QuoteStr(Path);
+						auto a = Proj->GetExeArgs() ? Proj->GetExeArgs() : "";
 						char Args[512];
 						sprintf(Args,
 								"%s%s "
@@ -2963,7 +2963,7 @@ public:
 	}
 };
 
-void IdeProject::Execute(ExeAction Act, std::function<void(LError&, LDebugContext*)> cb)
+void IdeProject::Execute(TExeAction Act, std::function<void(LError&, LDebugContext*)> cb)
 {
 	LString Base;
 	if (d->Backend)
@@ -3510,7 +3510,7 @@ static void ForAll(LXmlTag *t, std::function<void(LXmlTag*)> cb)
 		ForAll(c, cb);
 }
 
-ProjectStatus IdeProject::OpenFile(const char *FileName)
+TProjectStatus IdeProject::OpenFile(const char *FileName)
 {
 	auto Log = d->App->GetBuildLog();
 

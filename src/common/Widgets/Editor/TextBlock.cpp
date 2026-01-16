@@ -642,7 +642,7 @@ bool LRichTextPriv::TextBlock::HitTest(HitTestResult &htr)
 				int OffFix = InputX - FixX;
 				int OffPx = FixedToInt(OffFix);
 				ssize_t OffChar = ds->PosToIndex(OffPx, true);
-				printf("%s: offchar=%i offpx=%i\n", __FUNCTION__, (int)OffChar, (int)OffPx);
+				// printf("%s: offchar=%i offpx=%i\n", __FUNCTION__, (int)OffChar, (int)OffPx);
 
 				// d->DebugRects[0].Set(Pos.x1, r.y1, Pos.x1 + InputX+1, r.y2);
 						

@@ -17,7 +17,7 @@ namespace Gtk {
 #endif
 
 
-enum Ids
+enum TIds
 {
 	ID_TBL = 100,
 	ID_PROCESSES,
