@@ -303,6 +303,8 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	// Setup the file and graphics sub-systems
 	d->FileSystem = new LFileSystem;
 	d->GdcSystem = new GdcDevice;
+	if (d->GdcSystem->X() == 0)
+		d->GuiEnv = false;
 
 	SetAppArgs(AppArgs);
 
@@ -314,6 +316,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	sprintf_s(id, sizeof(id), "com.memecode.%s", name);
 	
 	if (d->GuiEnv)
+	{
 		d->App = Gtk::gtk_application_new(id,
 			#if GtkVer(3, 25)
 				// definately NOT in 3.24, but not sure where it got added
@@ -322,6 +325,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 				Gtk::G_APPLICATION_FLAGS_NONE
 			#endif
 			);
+	}
 
 	MouseHook = new LMouseHook;
 
@@ -369,6 +373,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 
 	// System font setup
 	LFontType SysFontType;
+
 
 	Gtk::PangoFontMap *fm = Gtk::pango_cairo_font_map_get_default();
 	if (fm)
