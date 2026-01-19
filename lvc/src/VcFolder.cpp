@@ -4169,11 +4169,9 @@ void VcFolder::ListWorkingFolder()
 			Arg = "status";
 			break;
 		case VcGit:
-			#if 1
-				Arg = "status -vv";
-			#else
-				Arg = "diff --diff-filter=CMRTU --cached";
-			#endif
+			Arg = "status -vv";
+			if (Untracked)
+				Arg += " -u";
 			break;
 		case VcHg:
 			Arg = "status -mard";

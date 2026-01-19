@@ -7,7 +7,7 @@
 #define IDC_BRANCH								11
 #define IDC_BRANCH_DROPDOWN						14
 #define IDC_MSG									16
-#define IDD_OPTIONS								22
+#define ID_OPTIONS								22
 #define IDC_OPTIONS_TABLE						23
 #define IDC_SVN									25
 #define IDC_SVN_BROWSE							26
@@ -23,7 +23,7 @@
 #define ID_UPDATE								41
 #define ID_BRANCHES								45
 #define IDC_BUILD_FIX							47
-#define IDD_REMOTE_FOLDER						61
+#define ID_REMOTE_FOLDER						61
 #define IDC_62									62
 #define ID_HOSTS								64
 #define IDC_65									65
@@ -44,7 +44,7 @@
 #define IDS_ERR_REVERT_FAILED					89
 #define IDC_AUTHOR								91
 #define IDC_EDIT_AUTHOR							92
-#define IDD_AUTHOR								93
+#define ID_AUTHOR								93
 #define IDD_									94
 #define IDC_LOCAL_NAME							95
 #define IDC_LOCAL_EMAIL							104
@@ -71,7 +71,6 @@
 #define IDS_COPY_FMT							127
 #define IDS_ERR_NO_PATH_FMT						128
 #define ID_BRANCH_EDIT							129
-#define IDD_BRANCHES							130
 #define ID_LIST									132
 #define ID_DELETE								133
 #define ID_MERGE								134
@@ -95,8 +94,8 @@
 #define IDC_COMMIT_TABLE						504
 #define IDM_PATCH_VIEWER						505
 #define IDM_MENU_506							506
-#define IDD_COMMIT								507
-#define IDD_TOOLBAR								508
+#define ID_COMMIT								507
+#define ID_TOOLBAR								508
 #define ID_OPEN									509
 #define IDM_FILE								510
 #define IDM_OPTIONS								511

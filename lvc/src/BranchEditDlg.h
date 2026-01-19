@@ -16,7 +16,7 @@ public:
 	BranchEditDlg(VcFolder *f) :
 		folder(f)
 	{
-		auto loaded = LoadFromResource(IDD_BRANCHES);
+		auto loaded = LoadFromResource(ID_BRANCHES);
 		LAssert(loaded);
 
 		auto v = f->GetTree();
