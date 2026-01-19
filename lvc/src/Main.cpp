@@ -197,7 +197,7 @@ public:
 	{
 		auto wnd = folder->GetTree()->GetWindow();
 		SetParent(wnd);
-		LoadFromResource(IDD_AUTHOR);
+		LoadFromResource(ID_AUTHOR);
 		MoveSameScreen(wnd);
 
 		f->GetAuthor(true, [this](auto author)
@@ -241,7 +241,7 @@ public:
 	{
 		LString Name;
 		LRect Pos;
-		if (LoadFromResource(IDD_TOOLBAR, this, &Pos, &Name))
+		if (LoadFromResource(ID_TOOLBAR, this, &Pos, &Name))
 		{
 			OnPosChange();
 		}
@@ -293,7 +293,7 @@ public:
 	{
 		LString Name;
 		LRect Pos;
-		if (LoadFromResource(IDD_COMMIT, this, &Pos, &Name))
+		if (LoadFromResource(ID_COMMIT, this, &Pos, &Name))
 		{
 			LTableLayout *v;
 			if (GetViewById(IDC_COMMIT_TABLE, v))
@@ -368,7 +368,7 @@ public:
 		Map(OPT_CvsPath, IDC_CVS, GV_STRING);
 		Map(OPT_CvsLimit, IDC_CVS_LIMIT);
 
-		if (LoadFromResource(IDD_OPTIONS))
+		if (LoadFromResource(ID_OPTIONS))
 		{
 			MoveSameScreen(Parent);
 			Convert(&Opts, this, true);
@@ -1432,6 +1432,7 @@ public:
 					break;
 
 				mi->Checked(!mi->Checked());
+				SetCtrlValue(ID_UNTRACKED, mi->Checked());
 
 				LArray<VcFolder*> Flds;
 				Tree->GetSelection(Flds);
@@ -1903,7 +1904,7 @@ public:
 					}
 					case LNotifyItemDoubleClick:
 					{
-						VcFolder *f = dynamic_cast<VcFolder*>(Tree->Selection());
+						auto f = dynamic_cast<VcFolder*>(Tree->Selection());
 						if (!f)
 							break;
 
@@ -1915,6 +1916,14 @@ public:
 					default:
 						break;
 				}
+				break;
+			}
+			case ID_UNTRACKED:
+			{				
+				if (auto mi = GetMenu()->FindItem(IDM_UNTRACKED))
+					mi->Checked(c->Value() != 0);
+
+				// if (auto f = dynamic_cast<VcFolder*>(Tree->Selection()))				
 				break;
 			}
 		}
@@ -1971,7 +1980,7 @@ struct SshHost : public LTreeItem
 RemoteFolderDlg::RemoteFolderDlg(App *application) : app(application), root(NULL), newhost(NULL), tree(NULL)
 {
 	SetParent(app);
-	LoadFromResource(IDD_REMOTE_FOLDER);
+	LoadFromResource(ID_REMOTE_FOLDER);
 
 	if (GetViewById(ID_HOSTS, tree))
 	{

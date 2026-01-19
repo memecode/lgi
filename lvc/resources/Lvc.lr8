@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources Offset="1">
 	<string-group Name="_Dialog Symbols_">
-		<String Ref="1" Cid="508" Define="IDD_TOOLBAR" en="Toolbar" />
+		<String Ref="1" Cid="508" Define="ID_TOOLBAR" en="Toolbar" />
 		<String Ref="2" Cid="500" Define="ID_TABLE" />
 		<String Ref="3" Cid="501" Define="IDC_COMMIT" en="Commit" />
 		<String Ref="5" Cid="502" Define="ID_PULL" en="Pull" />
 		<String Ref="6" Cid="503" Define="ID_PUSH" en="Push" />
-		<String Ref="9" Cid="507" Define="IDD_COMMIT" en="Commit" />
+		<String Ref="9" Cid="507" Define="ID_COMMIT" en="Commit" />
 		<String Ref="10" Cid="504" Define="IDC_COMMIT_TABLE" />
 		<String Ref="11" Cid="11" Define="IDC_BRANCH" />
 		<String Ref="12" Cid="-1" Define="IDC_STATIC" en="Branch:" />
@@ -15,7 +15,7 @@
 		<String Ref="15" Cid="-1" Define="IDC_STATIC" en="Commit message:" />
 		<String Ref="16" Cid="16" Define="IDC_MSG" />
 		<String Ref="18" Cid="509" Define="ID_OPEN" en="Open Folder" />
-		<String Ref="22" Cid="22" Define="IDD_OPTIONS" en="Options" />
+		<String Ref="22" Cid="22" Define="ID_OPTIONS" en="Options" />
 		<String Ref="23" Cid="23" Define="IDC_OPTIONS_TABLE" />
 		<String Ref="24" Cid="-1" Define="IDC_STATIC" en="Svn binary:" />
 		<String Ref="25" Cid="25" Define="IDC_SVN" />
@@ -38,7 +38,7 @@
 		<String Ref="45" Cid="45" Define="ID_BRANCHES" />
 		<String Ref="48" Cid="41" Define="ID_UPDATE" en="Update" />
 		<String Ref="50" Cid="47" Define="IDC_BUILD_FIX" en="BuildFix" />
-		<String Ref="61" Cid="61" Define="IDD_REMOTE_FOLDER" en="Remote Folder" />
+		<String Ref="61" Cid="61" Define="ID_REMOTE_FOLDER" en="Remote Folder" />
 		<String Ref="62" Cid="62" Define="IDC_62" />
 		<String Ref="63" Cid="-1" Define="IDC_STATIC" en="Hosts:" />
 		<String Ref="64" Cid="64" Define="ID_HOSTS" />
@@ -63,7 +63,7 @@
 		<String Ref="90" Cid="-1" Define="IDC_STATIC" en="Author:" />
 		<String Ref="91" Cid="91" Define="IDC_AUTHOR" />
 		<String Ref="92" Cid="92" Define="IDC_EDIT_AUTHOR" en="..." />
-		<String Ref="93" Cid="93" Define="IDD_AUTHOR" en="Edit Commit Author" />
+		<String Ref="93" Cid="93" Define="ID_AUTHOR" en="Edit Commit Author" />
 		<String Ref="94" Cid="94" Define="IDD_" />
 		<String Ref="96" Cid="95" Define="IDC_LOCAL_NAME" />
 		<String Ref="98" Cid="-1" Define="IDC_STATIC" en="name:" />
@@ -78,7 +78,7 @@
 		<String Ref="108" Cid="-1" Define="IDC_STATIC" en="Global:" />
 		<String Ref="109" Cid="-1" Define="IDC_STATIC" en="Local:" />
 		<String Ref="129" Cid="129" Define="ID_BRANCH_EDIT" en="..." />
-		<String Ref="130" Cid="130" Define="IDD_BRANCHES" en="Branches" />
+		<String Ref="130" Cid="45" Define="ID_BRANCHES" en="Branches" />
 		<String Ref="131" Cid="500" Define="ID_TABLE" />
 		<String Ref="132" Cid="132" Define="ID_LIST" />
 		<String Ref="133" Cid="133" Define="ID_DELETE" en="Delete" />
@@ -488,7 +488,7 @@
 		</TableLayout>
 	</Dialog>
 	<Dialog pos="7,7,998,136" ref="1">
-		<TableLayout pos="7,7,972,97" ref="2" Style="padding-top: 3px;" cols="0.114,0.118,0.110,0.075,0.056,0.186,0.114,0.114,0.114" rows="1.000">
+		<TableLayout pos="7,7,972,97" ref="2" Style="padding-top: 3px;" CellStyle="padding-right: 1em;" cols="0.114,0.118,0.110,0.075,0.056,0.186,0.114,0.114,0.114" rows="1.000">
 			<tr>
 				<td addr="0,0" valign="Center" style="padding-left: 4px;&#10;padding-right: 1em;">
 					<Button Pos="7,21,83,48" image="" toggle="0" ref="18" />
@@ -507,7 +507,7 @@
 					<Button Pos="399,14,439,41" image="" toggle="0" ref="40" />
 				</td>
 				<td addr="5,0" valign="Center" style="padding-right: 1em;">
-					<CheckBox pos="452,21,514,41" ref="38" />
+					<CheckBox pos="455,21,615,41" ref="38" />
 				</td>
 				<td addr="6,0" valign="Center">
 					<StaticText pos="631,21,707,48" ref="44" />

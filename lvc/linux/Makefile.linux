@@ -26,22 +26,20 @@ ifeq ($(Build),Debug)
 	Libs =  \
 		-lmagic \
 		-lssh \
-		-liconv \
 		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0` \
 		-pthread \
 		-llgi-gtk3$(Tag) \
-		-L../$(BuildDir) \
-		-L../../deps/build-x64-debug/lib
+		-L../$(BuildDir)
 	Inc =  \
-		-I../../../../../../usr/include/gstreamer-1.0 \
-		-I../include \
 		-I./src \
-		-I./resources \
-		-I../include/lgi/linux/Gtk \
 		-I../include/lgi/linux \
+		-I../../../../../../usr/include/gstreamer-1.0 \
 		-I../../../../../../usr/include/libssh \
-		`pkg-config --cflags gtk+-3.0`
+		`pkg-config --cflags gtk+-3.0` \
+		-I../include \
+		-I./resources \
+		-I../include/lgi/linux/Gtk
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
@@ -49,41 +47,39 @@ else
 	Libs =  \
 		-lmagic \
 		-lssh \
-		-liconv \
 		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0` \
 		-pthread \
 		-llgi-gtk3$(Tag) \
-		-L../$(BuildDir) \
-		-L../../deps/build-x64-debug/lib
+		-L../$(BuildDir)
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
-		-I../include \
-		-I./resources \
 		-I../../../../../../usr/include/libssh \
 		-I../include/lgi/linux \
 		-I../../../../../../usr/include/gstreamer-1.0 \
 		-I../include/lgi/linux/Gtk \
+		-I./resources \
+		-I../include \
 		-I./src
 endif
 
 # Dependencies
-Source =	../src/common/Net/Ssh.cpp \
-			src/Main.cpp \
-			src/VcCommit.cpp \
-			../src/common/Widgets/ControlTree.cpp \
-			../src/common/Text/XmlTreeUi.cpp \
+Source =	../src/common/Widgets/ControlTree.cpp \
 			../src/common/Lgi/LgiMain.cpp \
 			../src/common/Net/Http.cpp \
+			src/VcFile.cpp \
 			src/SshConnection.cpp \
+			src/DropDownBtn.cpp \
 			src/BrowseUi.cpp \
+			src/VcFolder.cpp \
 			../src/common/Net/OpenSSLSocket.cpp \
 			../src/common/Lgi/StructuredLog.cpp \
 			../src/common/Text/RemoveAnsi.cpp \
-			src/DropDownBtn.cpp \
 			src/PatchViewer.cpp \
-			src/VcFile.cpp \
-			src/VcFolder.cpp
+			../src/common/Net/Ssh.cpp \
+			src/VcCommit.cpp \
+			src/Main.cpp \
+			../src/common/Text/XmlTreeUi.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -112,13 +108,13 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 		$(Target) $(Objects) $(Libs)
 	@echo Done.
 
-../$(BuildDir)/liblgi-gtk3$(Tag).so : ../../deps/build-x64-debug/include/iconv.h \
-	../../deps/build-x64-debug/include/jconfig.h \
-	../../deps/build-x64-debug/include/jerror.h \
-	../../deps/build-x64-debug/include/jmorecfg.h \
-	../../deps/build-x64-debug/include/jpeglib.h \
-	../../deps/build-x64-debug/include/lunasvg/lunasvg.h \
-	../../deps/build-x64-debug/include/png.h \
+../$(BuildDir)/liblgi-gtk3$(Tag).so : ../../deps/build-x64-release/include/iconv.h \
+	../../deps/build-x64-release/include/jconfig.h \
+	../../deps/build-x64-release/include/jerror.h \
+	../../deps/build-x64-release/include/jmorecfg.h \
+	../../deps/build-x64-release/include/jpeglib.h \
+	../../deps/build-x64-release/include/lunasvg/lunasvg.h \
+	../../deps/build-x64-release/include/png.h \
 	../include/lgi/common/App.h \
 	../include/lgi/common/Array.h \
 	../include/lgi/common/AutoPtr.h \
@@ -313,6 +309,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/common/General/FileCommon.cpp \
 	../src/common/General/Password.cpp \
 	../src/common/General/Properties.cpp \
+	../src/common/General/SubProcessCommon.cpp \
 	../src/common/General/TimeZone.cpp \
 	../src/common/Hash/md5/md5.c \
 	../src/common/Hash/md5/md5.h \

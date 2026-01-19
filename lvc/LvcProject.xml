@@ -11,6 +11,7 @@
 	<Node Name="Resources" Type="1" Platforms="15" Id="3">
 		<Node File="./resources/icon32.png" Type="6" Platforms="15" />
 		<Node File="./installer-zip.py" Type="8" Platforms="15" />
+		<Node File="./resources/Lvc.lr8" Type="5" Platforms="15" />
 	</Node>
 	<Node Name="Source" Type="1" Platforms="15" Id="4">
 		<Node Name="Lgi" Type="1" Platforms="15" Id="5">
