@@ -399,12 +399,12 @@ public:
 	bool Select(LListItem *Obj);
 	/// Gets the first selected object
 	LListItem *GetSelected();
-	/// Select all the item in the list
-	void SelectAll();
 	/// Scrolls the view to the first selected item if not in view
 	void ScrollToSelection();
 	/// Clears the text cache for all the items and repaints the screen.
 	void UpdateAllItems() override;
+	/// Select or deselect all items..
+	bool SelectAll(bool select = true) override;
 	/// Gets the number of items.
 	size_t Length() { return Items.Length(); }
 

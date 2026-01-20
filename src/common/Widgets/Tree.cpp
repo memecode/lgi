@@ -1793,6 +1793,9 @@ void LTree::OnMouseClick(LMouse &m)
 			}
 			else
 			{
+				// No item under cursor... de-select all
+				SelectAll(false);
+			
 				SendNotify(LNotification(m, LNotifyContainerClick));
 			}
 		}
@@ -2353,6 +2356,21 @@ void LTree::UpdateAllItems()
 	auto lck = ScopedLock(_FL);
 	d->LayoutDirty = true;
 	LTreeItemUpdateAll(this);
+}
+
+bool LTree::SelectAll(bool select)
+{
+	auto lck = ScopedLock(_FL);
+	if (!MultiSelect())
+		return false;
+		
+	ForEach([select](auto i)
+		{
+			i->Select(select);
+			return true;
+		});
+		
+	return true;
 }
 
 void LTree::SetVisualStyle(ThumbStyle Btns, bool JoiningLines)

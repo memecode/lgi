@@ -577,6 +577,11 @@ public:
 	virtual void UpdateAllItems() = 0;
 	virtual int GetContentSize(int ColumnIdx) = 0;
 	virtual bool GetItems(LArray<LItem*> &arr, bool selectedOnly = false) = 0;
+	
+	/// This only works if MultiSelect is enabled
+	virtual bool SelectAll(
+		/// If this is false: de-select all
+		bool select = true) = 0;
 
 	/// Resizes all the columns to their content, allowing a little extra space for visual effect
 	virtual void ResizeColumnsToContent(int Border = DEFAULT_COLUMN_SPACING);

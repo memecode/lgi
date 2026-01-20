@@ -355,6 +355,8 @@ public:
 	void RemoveAll();
 	/// Call 'Update' on all tree items
 	void UpdateAllItems() override;
+	/// This only works if MultiSelect is enabled
+	bool SelectAll(bool select = true) override;
 	
 	// Sorting:
 	void Sort(std::function<int(LTreeNode*, LTreeNode*)> compare);

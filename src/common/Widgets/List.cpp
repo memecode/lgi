@@ -1,11 +1,11 @@
 /*hdr
-**      FILE:           LList.cpp
-**      AUTHOR:         Matthew Allen
-**      DATE:           14/2/2000
-**      DESCRIPTION:    Lgi self-drawn listbox
+**		FILE:			LList.cpp
+**		AUTHOR:			Matthew Allen
+**		DATE:			14/2/2000
+**		DESCRIPTION:	Lgi self-drawn listbox
 **
-**      Copyright (C) 2000 Matthew Allen
-**              fret@memecode.com
+**		Copyright (C) 2000 Matthew Allen
+**				fret@memecode.com
 */
 
 #include <math.h>
@@ -292,9 +292,8 @@ void LListItem::Select(bool b)
 			d->Selected &&
 			!Parent->d->NoSelectEvent)
 		{
-			LArray<LListItem*> Items;
-			Items.Add(this);
-			Parent->OnItemSelect(Items);
+			LArray<LListItem*> items { this };
+			Parent->OnItemSelect(items);
 		}
 	}
 }
@@ -525,7 +524,7 @@ void LListItem::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 				{
 					int CenterY = Ctx.y1 + ((Ctx.Y() - Parent->GetImageList()->TileY()) >> 1);
 					LAssert(CenterY >= 0);
-					    
+						
 					Parent->GetImageList()->Draw(pDC, Ctx.x1+1, CenterY, Img, Background);
 				}
 			}
@@ -543,7 +542,7 @@ void LListItem::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 void LListItem::OnPaint(LItem::ItemPaintCtx &Ctx)
 {
 	if (!Parent || !d->Visible)
-	    return;
+		return;
 
 	int x = Ctx.x1;
 	auto CtxX = Ctx.X();
@@ -723,7 +722,7 @@ void LList::OnItemSelect(LArray<LListItem*> &It)
 				{
 					if (i->d->Selected)
 					{
-					    /*
+						/*
 						i->d->Selected = false;
 						i->Update();
 						*/
@@ -1412,8 +1411,8 @@ void LList::OnMouseClick(LMouse &m)
 						d->DeleteFlag = 0;
 
 						// Check if the handler hung for a long time...
-						uint64 Now = LCurrentTime();
-						HandlerHung = Now - StartHandler > 200;
+						auto now = LCurrentTime();
+						HandlerHung = now - StartHandler > 200;
 						if (!HandlerHung && !m.Double() && !m.IsContextMenu())
 						{
 							// Start d'n'd watcher pulse...
@@ -2057,21 +2056,6 @@ void LList::Value(int64 Index)
 			i->Select(false);
 		}
 		n++;
-	}
-}
-
-void LList::SelectAll()
-{
-	if (Lock(_FL))
-	{
-		ForAllItems(i)
-		{
-			i->d->Selected = true;
-		}
-
-		Unlock();
-
-		Invalidate();
 	}
 }
 
@@ -2767,24 +2751,42 @@ void LList::OnFocus(bool b)
 
 void LList::UpdateAllItems()
 {
-    if (Lock(_FL))
-    {
+	if (Lock(_FL))
+	{
 		bool needsRepour = false;
 
-	    ForAllItems(i)
-	    {
+		ForAllItems(i)
+		{
 			auto css = i->GetCss();
 			bool vis = !css || css->Display() != LCss::DispNone;
 			if (i->d->Visible != vis)
 				needsRepour = true;
-		    i->d->EmptyDisplay();
-	    }
-	    Unlock();
+			i->d->EmptyDisplay();
+		}
+		Unlock();
 
 		if (needsRepour)
 			PourAll();
 		Invalidate();
 	}	
+}
+
+bool LList::SelectAll(bool select)
+{
+	if (!Lock(_FL))
+		return false;
+
+	bool status = MultiSelect();
+	if (MultiSelect())
+	{
+		ForAllItems(i)
+		{
+			i->d->Selected = true;
+		}
+	}
+	Unlock();	
+	Invalidate();
+	return status;
 }
 
 int LList::GetContentSize(int Index)
