@@ -972,7 +972,7 @@ bool MailSmtp::Open(LSocketI *S,
 				Port = SMTP_PORT;
 		}
 
-		LAutoString Server(TrimStr(Str));
+		auto Server = LString(Str).Strip();
 		if (Server)
 		{
 			if (SocketLock.Lock(_FL))
@@ -2078,9 +2078,8 @@ bool MailPop3::Open(LSocketI *S, const char *RemoteHost, int Port, const char *U
 	bool Status = false;
 	// bool RemoveMail = false;
 	char Str[256] = "";
-	char *Apop = 0;
-	char *Server = 0;
-	bool SecureAuth = TestFlag(Flags, MAIL_SECURE_AUTH);
+	char *Apop = nullptr;
+	char *Server = nullptr;
 
 	if (!RemoteHost)
 		Error(_FL, "No remote POP host.\n");
@@ -2149,7 +2148,7 @@ bool MailPop3::Open(LSocketI *S, const char *RemoteHost, int Port, const char *U
 				char *user = (char*) LNewConvertCp("iso-8859-1", User, "utf-8");
 				char *pass = (char*) LNewConvertCp("iso-8859-1", Password, "utf-8");
 
-				if (user && (pass || SecureAuth))
+				if (user && pass)
 				{
 					bool SecurityError = false;
 
@@ -2201,6 +2200,7 @@ bool MailPop3::Open(LSocketI *S, const char *RemoteHost, int Port, const char *U
 						}
 					}
 
+					/*
 					if (!SecurityError && SecureAuth)
 					{
 						LHashTbl<ConstStrKey<char,false>, bool> AuthTypes, Capabilities;
@@ -2217,7 +2217,9 @@ bool MailPop3::Open(LSocketI *S, const char *RemoteHost, int Port, const char *U
 							}
 						}
 					}					
-					else if (!SecurityError && !Authed)
+					else 
+					*/
+					if (!SecurityError && !Authed)
 					{
 						// have to use non-key method
 						sprintf_s(Buffer, sizeof(Buffer), "USER %s\r\n", user);

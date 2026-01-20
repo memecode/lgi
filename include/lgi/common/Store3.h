@@ -328,7 +328,7 @@ public:
 	/// \returns the options object
 	virtual LOptionsFile *GetOptions(bool Create = false) { return 0; }
 	/// A new item is available
-	virtual void OnNew(LDataFolderI *parent, LArray<LDataI*> &new_items, int pos, bool is_new) = 0;
+	virtual void OnNew(LDataFolderI *parent, LArray<LDataI*> &new_items, int pos, bool is_new, bool filter) = 0;
 	/// When an item is deleted
 	virtual bool OnDelete(LDataFolderI *parent, LArray<LDataI*> &items) = 0;
 	/// When an item is moved to a new folder
@@ -558,13 +558,13 @@ extern LDataStoreI *OpenMail3
 extern LDataStoreI *OpenImap
 (
 	/// The host name of the IMAP server
-	char *Host,
+	LString Host,
 	/// The port to connect to, or <= 0 means use default
 	int Port,
 	/// The user name of the account to connect to
-	char *User,
+	LString User,
 	/// [Optional] The password of the user
-	char *Pass,
+	LString Pass,
 	/// Various flags that control the type of connection made:
 	/// \sa #MAIL_SSL, #MAIL_SECURE_AUTH
 	int ConnectFlags,

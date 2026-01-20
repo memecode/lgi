@@ -32,14 +32,14 @@ ifeq ($(Build),Debug)
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I./src \
-		-I../include/lgi/linux \
 		-I../../../../../../usr/include/gstreamer-1.0 \
-		-I../../../../../../usr/include/libssh \
-		`pkg-config --cflags gtk+-3.0` \
 		-I../include \
+		-I./src \
+		-I../include/lgi/linux/Gtk \
+		-I../include/lgi/linux \
 		-I./resources \
-		-I../include/lgi/linux/Gtk
+		-I../../../../../../usr/include/libssh \
+		`pkg-config --cflags gtk+-3.0`
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
@@ -54,32 +54,32 @@ else
 		-L../$(BuildDir)
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
+		-I./src \
+		-I../include \
 		-I../../../../../../usr/include/libssh \
 		-I../include/lgi/linux \
 		-I../../../../../../usr/include/gstreamer-1.0 \
 		-I../include/lgi/linux/Gtk \
-		-I./resources \
-		-I../include \
-		-I./src
+		-I./resources
 endif
 
 # Dependencies
-Source =	../src/common/Widgets/ControlTree.cpp \
+Source =	src/DropDownBtn.cpp \
+			../src/common/Text/XmlTreeUi.cpp \
+			../src/common/Widgets/ControlTree.cpp \
+			src/VcFile.cpp \
 			../src/common/Lgi/LgiMain.cpp \
 			../src/common/Net/Http.cpp \
-			src/VcFile.cpp \
+			src/Main.cpp \
 			src/SshConnection.cpp \
-			src/DropDownBtn.cpp \
-			src/BrowseUi.cpp \
-			src/VcFolder.cpp \
 			../src/common/Net/OpenSSLSocket.cpp \
 			../src/common/Lgi/StructuredLog.cpp \
 			../src/common/Text/RemoveAnsi.cpp \
 			src/PatchViewer.cpp \
+			src/VcFolder.cpp \
 			../src/common/Net/Ssh.cpp \
 			src/VcCommit.cpp \
-			src/Main.cpp \
-			../src/common/Text/XmlTreeUi.cpp
+			src/BrowseUi.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -108,13 +108,13 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 		$(Target) $(Objects) $(Libs)
 	@echo Done.
 
-../$(BuildDir)/liblgi-gtk3$(Tag).so : ../../deps/build-x64-release/include/iconv.h \
-	../../deps/build-x64-release/include/jconfig.h \
-	../../deps/build-x64-release/include/jerror.h \
-	../../deps/build-x64-release/include/jmorecfg.h \
-	../../deps/build-x64-release/include/jpeglib.h \
-	../../deps/build-x64-release/include/lunasvg/lunasvg.h \
-	../../deps/build-x64-release/include/png.h \
+../$(BuildDir)/liblgi-gtk3$(Tag).so : ../../deps/build-x64-debug/include/iconv.h \
+	../../deps/build-x64-debug/include/jconfig.h \
+	../../deps/build-x64-debug/include/jerror.h \
+	../../deps/build-x64-debug/include/jmorecfg.h \
+	../../deps/build-x64-debug/include/jpeglib.h \
+	../../deps/build-x64-debug/include/lunasvg/lunasvg.h \
+	../../deps/build-x64-debug/include/png.h \
 	../include/lgi/common/App.h \
 	../include/lgi/common/Array.h \
 	../include/lgi/common/AutoPtr.h \

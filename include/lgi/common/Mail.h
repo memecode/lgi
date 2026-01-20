@@ -243,7 +243,7 @@ public:
 /// Force the use of NTLM type authentication
 #define MAIL_USE_NTLM				0x10
 /// Secure auth
-#define MAIL_SECURE_AUTH			0x20
+// #define MAIL_SECURE_AUTH			0x20
 /// Use SSL
 #define MAIL_SSL					0x40
 /// OAUTH2
