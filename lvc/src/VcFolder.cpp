@@ -1466,21 +1466,28 @@ bool VcFolder::ParseRevList(int Result, LString s, ParseParams *Params)
 			Commits.SetFixedLength(false);
 			
 			// Split on the NULL chars...
-			char *c = s.Get();
-			char *e = c + s.Length();
+			auto c = s.Get();
+			auto e = c + s.Length();
 			while (c < e)
 			{
-				char *nul = c;
+				auto nul = c;
 				while (nul < e && *nul) nul++;
-				if (nul <= c) break;
+				if (nul <= c)
+					break;
 				Commits.New().Set(c, nul-c);
-				if (nul >= e) break;
+				if (nul >= e)
+					break;
 				c = nul + 1;
 			}
 
+			int n = 0;
 			for (auto Commit: Commits)
 			{
 				LAutoPtr<VcCommit> Rev(new VcCommit(d, this));
+
+				if (n < 10)
+					printf("[%i]=%s\n\n", n++, Commit.Get());
+
 				if (Rev->GitParse(Commit, true))
 				{
 					Log.Add(Rev.Release());

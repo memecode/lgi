@@ -608,12 +608,13 @@ void LDisplayString::Layout(bool Debug)
 	
 	#elif MAC
 	
-		int height = Font->GetHeight();
+		auto height = Font->GetHeight();
 		y = height;
 
 		if (!Wide)
 		{
-			LgiTrace("%s:%i - no wide version of display string?\n", _FL);
+			if (Str)
+				LgiTrace("%s:%i - no wide version of display string?\n", _FL);
 			return;
 		}
 

@@ -2598,7 +2598,7 @@ LString::Array LGetPath()
 		if (path)
 		{
 			auto lines = LReadFile(path).Split("\n");
-			printf("path: reading '%s' got %i lines\n", path.Get(), (int)lines.Length());
+			// printf("path: reading '%s' got %i lines\n", path.Get(), (int)lines.Length());
 			for (auto Ln: lines)
 			{
 				auto p = Ln.SplitDelimit(" =", 2);
