@@ -302,9 +302,19 @@ protected:
 			e++;
 		}
 	}
+	
+	void THREAD_UNSAFE() const
+	{
+		if (!ownThread)
+			return;
+		
+		auto curThread = LCurrentThreadId();
+		LAssert(ownThread != curThread);
+	}
 
 public:
 	constexpr static size_t Unlimited = 0;
+	OsThreadId ownThread = 0; // set check for thread safety
 
 	/// Constructs the hash table
 	LHashTbl
@@ -348,6 +358,7 @@ public:
 	/// Deletes the hash table removing all contents from memory
 	virtual ~LHashTbl()
 	{
+		THREAD_UNSAFE();
 		if (Table)
 		{
 			Empty();
@@ -363,6 +374,8 @@ public:
 	/// Copy operator
 	HashTable &operator =(const HashTable &c)
 	{
+		THREAD_UNSAFE();
+
 		if (IsOk() && c.IsOk())
 		{
 			Empty();
@@ -386,6 +399,7 @@ public:
 	/// Sets the maximum table size. Or LHashTbl::Unlimited (0) for unlimited.
 	void SetMaxSize(size_t m)
 	{
+		THREAD_UNSAFE();
 		MaxSize = m;
 	}
 
@@ -400,6 +414,7 @@ public:
 	{
 		bool Status = false;
 
+		THREAD_UNSAFE();
 		if (!IsOk())
 			return false;
 
@@ -485,6 +500,8 @@ public:
 		Value v
 	)
 	{
+		THREAD_UNSAFE();
+
 		if (!Size && !SetSize(DefaultSize))
 			return false;
 
@@ -545,6 +562,8 @@ public:
 		bool NoResize = false
 	)
 	{
+		THREAD_UNSAFE();
+
 		ssize_t Index = -1;
 		if (GetEntry(k, Index))
 		{
@@ -602,6 +621,8 @@ public:
 	/// Returns the value at 'key'
 	Value Find(const Key k) const
 	{
+		THREAD_UNSAFE();
+
 		ssize_t Index = -1;
 		if (IsOk() && GetEntry(k, Index))
 		{
@@ -614,6 +635,8 @@ public:
 	/// Returns the Key at 'val'
 	Key FindKey(const Value val)
 	{
+		THREAD_UNSAFE();
+
 		if (IsOk())
 		{
 			Pair *c = Table;
@@ -636,6 +659,8 @@ public:
 	/// for that.
 	void Empty(bool freeTable = false)
 	{
+		THREAD_UNSAFE();
+
 		if (!IsOk())
 			return;
 
@@ -661,6 +686,8 @@ public:
 	/// Returns the amount of memory in use by the hash table.
 	int64 Sizeof()
 	{
+		THREAD_UNSAFE();
+
 		int64 Sz = sizeof(*this);
 
 		Sz += Sz * sizeof(Pair);
@@ -690,6 +717,8 @@ public:
 	/// Deletes values as objects
 	void DeleteObjects()
 	{
+		THREAD_UNSAFE();
+
 		for (size_t i=0; i<Size; i++)
 		{
 			if (Table[i].key != this->NullKey)
@@ -705,6 +734,8 @@ public:
 	/// Deletes values as arrays
 	void DeleteArrays()
 	{
+		THREAD_UNSAFE();
+
 		for (size_t i=0; i<Size; i++)
 		{
 			if (Table[i].key != this->NullKey)
@@ -720,6 +751,8 @@ public:
 	/// Swaps the objects
 	void Swap(LHashTbl<KeyTrait,Value> &h)
 	{
+		THREAD_UNSAFE();
+
 		LSwap(this->NullKey, h.NullKey);
 		LSwap(NullValue, h.NullValue);
 		LSwap(Used, h.Used);
@@ -790,11 +823,15 @@ public:
 
 	PairIterator begin()
 	{
+		THREAD_UNSAFE();
+
 		return PairIterator(this, -1);
 	}
 
 	PairIterator end()
 	{
+		THREAD_UNSAFE();
+
 		return PairIterator(this, Size);
 	}
 };

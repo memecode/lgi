@@ -527,7 +527,7 @@ int Strncmp(const T *str_a, const T *str_b, ssize_t len)
 template<typename T>
 int Stricmp(const T *str_a, const T *str_b)
 {
-	const T empty[] = {0};
+	const T empty[1] = {};
 	const T *a = str_a ? str_a : empty;
 	const T *b = str_b ? str_b : empty;
 	T ach, bch;
