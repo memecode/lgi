@@ -64,16 +64,14 @@ void AppPriv::SortCommits(int col)
 			auto B = dynamic_cast<VcCommit*>(b);
 
 			if (A == NULL || B == NULL)
-			{
-				return (A ? 1 : -1) - (B ? 1 : -1);
-			}
+				return (int)(a - b);
 
 			auto f = A->GetFolder();
 			auto flds = f->GetFields();
 			if (!flds.Length())
 			{
 				LgiTrace("%s:%i - No fields?\n", _FL);
-				return 0;
+				return (int)(a - b);
 			}
 		
 			auto fld = flds[col];
@@ -82,20 +80,35 @@ void AppPriv::SortCommits(int col)
 				case LGraph:
 				case LIndex:
 				case LParents:
-				case LRevision:
 				default:
-					return (int) (B->GetIndex() - A->GetIndex());
-
+				{
+					auto diff = B->GetIndex() - A->GetIndex();
+					if (diff)
+						return (int)diff;
+					break;
+				}
+				
 				case LBranch:
 				case LAuthor:
 				case LMessageTxt:
-					return Stricmp(A->GetFieldText(fld), B->GetFieldText(fld));
+				case LRevision:
+				{
+					auto diff = Stricmp(A->GetFieldText(fld), B->GetFieldText(fld));
+					if (diff)
+						return (int)diff;
+					break;
+				}
 
 				case LTime:
-					return B->GetTs().Compare(&A->GetTs());
+				{
+					auto diff = B->GetTs().Compare(&A->GetTs());
+					if (diff)
+						return (int)diff;
+					break;
+				}
 			}
 
-			return 0;
+			return (int)(a - b);
 		}
 	);
 }
