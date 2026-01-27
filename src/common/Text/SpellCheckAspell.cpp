@@ -121,11 +121,11 @@ protected:
 	LArray<LanguageEntry> Languages;
 
 	LAutoPtr<LSpellCheck::Params> SpellParams;
-	int InstallAttempt;
-	LViewI *Wnd;
+	int InstallAttempt = 0;
+	LViewI *Wnd = nullptr;
 	LString Language, Dictionary; // e.g. "en"
-	AspellConfig *SpellConfig;
-	bool PreSendCheck;
+	AspellConfig *SpellConfig = nullptr;
+	bool PreSendCheck = false;
 	LString AspellPath, DataDir, DictBasePath, DictLangPath;
 
 	bool CheckCreateFolder(const char *Dir)
@@ -192,10 +192,6 @@ public:
             #endif
         )
 	{
-		Wnd = NULL;
-		SpellConfig = NULL;
-		PreSendCheck = false;
-		InstallAttempt = 0;
 	}
 
 	~ASpell()
@@ -1081,14 +1077,12 @@ int Dlg::DlgX = -1, Dlg::DlgY = -1;
 ///////////////////////////////////////////////////////////////////////
 class SpellCheckAspell : public LSpellCheck, public ASpell
 {
-	AspellSpeller *SpellChecker;
-	AspellCanHaveError *PossibleErr;
+	AspellSpeller *SpellChecker = nullptr;
+	AspellCanHaveError *PossibleErr = nullptr;
 
 public:
-	SpellCheckAspell() : LSpellCheck("SpellCheckAspell")
+	SpellCheckAspell() : LSpellCheck("Aspell")
 	{
-		SpellChecker = NULL;
-		PossibleErr = NULL;
 	}
 	
 	void OnMissingDictionary()
