@@ -2,15 +2,14 @@
 /// \author Matthew Allen (fret@memecode.com)
 /// \brief A combo box control
 
-#ifndef __GCOMBO2_H
-#define __GCOMBO2_H
+#pragma once
 
 /// Combo Box widget.
 class LgiClass LCombo :
 	#ifdef WINNATIVE
-	public LControl,
+		public LControl,
 	#else
-	public LView,
+		public LView,
 	#endif
 	public ResObject	
 {
@@ -103,6 +102,7 @@ public:
 	LMessage::Result OnEvent(LMessage *Msg) override;
 	void OnAttach() override;
 	bool OnKey(LKey &k) override;
+	bool OnLayout(LViewLayoutInfo &Inf) override;
 	
 	#if WINNATIVE
 		bool SetPos(LRect &p, bool Repaint = false);
@@ -115,6 +115,4 @@ public:
 		void SetFont(LFont *Fnt, bool OwnIt = false) override;
 	#endif
 };
-
-#endif
 

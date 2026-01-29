@@ -748,96 +748,94 @@ public:
 	void OnPaint_LCombo(LCombo *Ctrl, LSkinState *State)
 	{
 		LMemDC Mem(_FL);
-		if (Mem.Create(Ctrl->X(), Ctrl->Y(), OsDefaultCs))
-		{
-			// Font
-			if (Ctrl->GetFont() == LSysFont)
-				Ctrl->SetFont(LSysBold);
-
-			// Back
-			LColour TextDefault(L_TEXT), BackDefault(L_HIGH);
-			LCssTools Tools(Ctrl->GetCss(), Ctrl->GetFont());
-			LColour &Fore = Tools.GetFore(&TextDefault), &Back = Tools.GetBack();
-			if (Back.IsValid())
-			{
-				Mem.Colour(Back);
-				Mem.Rectangle();
-			}
-
-			DrawBtn(&Mem, Ctrl->GetClient(), BackDefault, false, State->Enabled);
-			
-			int n = 22;
-			LColour DkGrey(L_DKGREY);
-			
-			if (Ctrl->X() > 32)
-			{
-				LDisplayString *Text = State->FirstText();
-				if (Text)
-				{
-					int sx = Text->X(), sy = Text->Y();
-					int tx = LCombo::Pad.x1;
-					int ty = (Ctrl->Y()-sy+1) >> 1;
-						
-					int Off = 0;
-					LRect c = Ctrl->GetClient();
-					c.x1 += 8;
-					c.x2 -= n + 3;
-					
-					int Cx = Ctrl->X();
-					int PadX = LCombo::Pad.x1 + LCombo::Pad.x2;
-					if (Text->X() > PadX)
-					{
-						// Make the text fit
-						Text->TruncateWithDots(Cx - PadX);
-					}
-
-					LFont *f = Text->GetFont();
-					f->Transparent(true);
-					if (Ctrl->Enabled())
-					{
-						f->Colour(Fore, Back);
-						Text->Draw(&Mem, tx+Off, ty+Off+BTN_TEXT_OFFSET_Y, &c);
-					}
-					else
-					{
-						f->Colour(LColour(L_LIGHT), LColour(L_MED));
-						Text->Draw(&Mem, tx+Off+1, ty+Off+1+BTN_TEXT_OFFSET_Y, &c);
-
-						f->Colour(LColour(L_LOW), LColour(L_MED));
-						Text->Draw(&Mem, tx+Off, ty+Off+BTN_TEXT_OFFSET_Y, &c);
-					}
-					
-					if (Ctrl->Focus() && c.X() > 4)
-					{
-						LRect b(tx-2, ty, tx + sx + 1, ty + sy - 2);
-						b.Offset(Off, Off);
-						c.Inset(-2, 0);
-						b.Bound(&c);
-
-						Mem.Colour(Rgb24(180, 180, 180), 24);
-						Mem.Box(&b);
-					}
-				}
-				
-				// Draw separator
-				Mem.Colour(Rgba32(180, 180, 180, 255), 32);
-				Mem.Line(Mem.X()-n, 1, Mem.X()-n, Mem.Y()-2);
-			}
-			
-			Mem.Colour(State->Enabled ? Fore : DkGrey);
-			int Bx = Mem.X() < 26 ? Mem.X()/2 : Mem.X()-13, By = (Mem.Y() + 4) >> 1;
-			for (int i=0; i<5; i++)
-			{				
-				Mem.Line(Bx-i, By-i, Bx+i, By-i);
-			}
-			
-			State->pScreen->Blt(0, 0, &Mem);
-		}
-		else
+		if (!Mem.Create(Ctrl->X(), Ctrl->Y(), OsDefaultCs))
 		{
 			State->pScreen->Colour(Rgb24(255, 0, 255), 24);
 			State->pScreen->Rectangle();
+			return;
 		}
+
+		// Font
+		if (Ctrl->GetFont() == LSysFont)
+			Ctrl->SetFont(LSysBold);
+
+		// Back
+		LColour TextDefault(L_TEXT), BackDefault(L_HIGH);
+		LCssTools Tools(Ctrl->GetCss(), Ctrl->GetFont());
+		LColour &Fore = Tools.GetFore(&TextDefault), &Back = Tools.GetBack();
+		if (Back.IsValid())
+		{
+			Mem.Colour(Back);
+			Mem.Rectangle();
+		}
+
+		DrawBtn(&Mem, Ctrl->GetClient(), BackDefault, false, State->Enabled);
+		
+		int n = 22;
+		LColour DkGrey(L_DKGREY);
+		
+		if (Ctrl->X() > 32)
+		{
+			if (auto Text = State->FirstText())
+			{
+				int sx = Text->X(), sy = Text->Y();
+				int tx = LCombo::Pad.x1;
+				int ty = (Ctrl->Y()-sy+1) >> 1;
+					
+				int Off = 0;
+				LRect c = Ctrl->GetClient();
+				c.x1 += 8;
+				c.x2 -= n + 3;
+				
+				int Cx = Ctrl->X();
+				int PadX = LCombo::Pad.x1 + LCombo::Pad.x2;
+				if (Text->X() > PadX)
+				{
+					// Make the text fit
+					Text->TruncateWithDots(Cx - PadX);
+				}
+
+				auto f = Text->GetFont();
+				f->Transparent(true);
+				if (Ctrl->Enabled())
+				{
+					f->Colour(Fore, Back);
+					Text->Draw(&Mem, tx+Off, ty+Off+BTN_TEXT_OFFSET_Y, &c);
+				}
+				else
+				{
+					f->Colour(LColour(L_LIGHT), LColour(L_MED));
+					Text->Draw(&Mem, tx+Off+1, ty+Off+1+BTN_TEXT_OFFSET_Y, &c);
+
+					f->Colour(LColour(L_LOW), LColour(L_MED));
+					Text->Draw(&Mem, tx+Off, ty+Off+BTN_TEXT_OFFSET_Y, &c);
+				}
+				
+				if (Ctrl->Focus() && c.X() > 4)
+				{
+					LRect b(tx-2, ty, tx + sx + 1, ty + sy - 2);
+					b.Offset(Off, Off);
+					c.Inset(-2, 0);
+					b.Bound(&c);
+
+					Mem.Colour(Rgb24(180, 180, 180), 24);
+					Mem.Box(&b);
+				}
+			}
+			
+			// Draw separator
+			Mem.Colour(Rgba32(180, 180, 180, 255), 32);
+			Mem.Line(Mem.X()-n, 1, Mem.X()-n, Mem.Y()-2);
+		}
+		
+		Mem.Colour(State->Enabled ? Fore : DkGrey);
+		int Bx = Mem.X() < 26 ? Mem.X()/2 : Mem.X()-13, By = (Mem.Y() + 4) >> 1;
+		for (int i=0; i<5; i++)
+		{				
+			Mem.Line(Bx-i, By-i, Bx+i, By-i);
+		}
+		
+		State->pScreen->Blt(0, 0, &Mem);
 	}
 
 	#define DEBUG_CHECKBOX 0

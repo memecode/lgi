@@ -5,13 +5,13 @@
 
 class LgiClass LCssTools
 {
-	LView *View;
-	LCss *Css;
-	LFont *Font;
+	LView *View = nullptr;
+	LCss *Css = nullptr;
+	LFont *Font = nullptr;
 	
 	LColour Fore, Back;
 	uint8_t ForeInit : 1, BackInit : 1;
-	LSurface *BackImg;
+	LSurface *BackImg = nullptr;
 	LRect BackPos;
 	
 	bool SetLineStyle(LSurface *pDC, LCss::BorderDef &d);
@@ -19,12 +19,10 @@ class LgiClass LCssTools
 public:
 	LCssTools(LCss *css, LFont *font)
 	{
-		View = NULL;
 		Css = css;
 		Font = font;
 		ForeInit = 0;
 		BackInit = 0;
-		BackImg = NULL;
 	}
 	
 	LCssTools(LView *view)
@@ -35,7 +33,6 @@ public:
 		Font = view ? view->GetFont() : 0;
 		ForeInit = 0;
 		BackInit = 0;
-		BackImg = NULL;
 	}
 		
 	/// Gets the foreground colour for text
