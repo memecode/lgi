@@ -2076,10 +2076,7 @@ bool MailPop3::ListCmd(const char *Cmd, LHashTbl<ConstStrKey<char,false>, bool> 
 bool MailPop3::Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, LDom *SettingStore, int Flags)
 {
 	bool Status = false;
-	// bool RemoveMail = false;
-	char Str[256] = "";
 	char *Apop = nullptr;
-	char *Server = nullptr;
 
 	if (!RemoteHost)
 		Error(_FL, "No remote POP host.\n");
@@ -2099,19 +2096,19 @@ bool MailPop3::Open(LSocketI *S, const char *RemoteHost, int Port, const char *U
 				Port = POP3_PORT;
 		}
 
-		strcpy_s(Str, sizeof(Str), RemoteHost);
-		char *Colon = strchr(Str, ':');
-		if (Colon)
+		LString Server = RemoteHost;
+		auto parts = Server.SplitDelimit(":");
+		if (parts.Length() > 1)
 		{
-			*Colon = 0;
-			Colon++;
-			Port = atoi(Colon);
+			Server = parts[0].Strip();
+			Port = (int) parts[1].Int();
 		}
+		else 
 
 		if (S &&
 			User &&
 			Password &&
-			(Server = TrimStr(Str)))
+			Server)
 		{
 			S->SetTimeout(30 * 1000);
 
@@ -2259,7 +2256,6 @@ bool MailPop3::Open(LSocketI *S, const char *RemoteHost, int Port, const char *U
 
 CleanUp:
 	DeleteArray(Apop);
-	DeleteArray(Server);
 
 	return Status;
 }

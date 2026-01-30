@@ -9,7 +9,7 @@
 		<Node File="./docs/notes.txt" Type="8" Platforms="15" />
 	</Node>
 	<Node Name="Lgi" Type="1" Platforms="15" Open="1" Id="7">
-		<Node Name="Html" Type="1" Platforms="15" Id="1">
+		<Node Name="Html" Type="1" Platforms="15" Id="2">
 			<Node File="../src/common/Text/Html.cpp" Type="2" Platforms="15" />
 			<Node File="../include/lgi/common/Html.h" Type="3" Platforms="15" />
 			<Node File="../src/common/Text/HtmlCommon.cpp" Type="2" Platforms="15" />
@@ -17,7 +17,7 @@
 			<Node File="../src/common/Text/HtmlParser.cpp" Type="2" Platforms="15" />
 			<Node File="../include/lgi/common/HtmlParser.h" Type="3" Platforms="15" />
 		</Node>
-		<Node Name="TextView" Type="1" Platforms="15" Id="2">
+		<Node Name="TextView" Type="1" Platforms="15" Id="3">
 			<Node File="../src/common/Text/TextView4.cpp" Type="2" Platforms="15" />
 			<Node File="../include/lgi/common/TextView4.h" Type="3" Platforms="15" />
 		</Node>
@@ -41,20 +41,20 @@
 		<Node File="./resources/LgiIde.lr8" Type="5" Platforms="15" />
 		<Node File="./resources/resource.h" Type="3" Platforms="15" />
 	</Node>
-	<Node Name="Source Files" Type="1" Platforms="15" Open="1" Id="3">
-		<Node Name="Debugger" Type="1" Platforms="15" Open="0" Id="4">
+	<Node Name="Source Files" Type="1" Platforms="15" Open="1" Id="4">
+		<Node Name="Debugger" Type="1" Platforms="15" Open="0" Id="5">
 			<Node File="./src/BreakPointStore.h" Type="3" Platforms="15" />
 			<Node File="./src/DebugContext.cpp" Type="2" Platforms="15" />
 			<Node File="./src/DebugContext.h" Type="3" Platforms="15" />
 			<Node File="./src/Debugger.cpp" Type="2" Platforms="15" />
 			<Node File="./src/Debugger.h" Type="3" Platforms="7" />
 		</Node>
-		<Node Name="Dialogs" Type="1" Platforms="15" Open="0" Id="5">
+		<Node Name="Dialogs" Type="1" Platforms="15" Open="0" Id="6">
 			<Node File="./src/WebFldDlg.h" Type="3" Platforms="15" />
 			<Node File="./src/WebFldDlg.cpp" Type="2" Platforms="15" />
 			<Node File="../src/common/Lgi/About.cpp" Type="2" Platforms="15" />
 		</Node>
-		<Node Name="Docs" Type="1" Platforms="15" Id="6">
+		<Node Name="Docs" Type="1" Platforms="15" Id="9">
 			<Node File="./src/DocEdit.cpp" Type="2" Platforms="15" />
 			<Node File="./src/DocEdit.h" Type="3" Platforms="15" />
 			<Node File="./src/DocEditStyling.cpp" Type="2" Platforms="15" />
@@ -62,7 +62,7 @@
 			<Node File="./src/IdeDoc.h" Type="3" Platforms="15" />
 			<Node File="./src/IdeDocPrivate.h" Type="3" Platforms="15" />
 		</Node>
-		<Node Name="Projects" Type="1" Platforms="15" Id="9">
+		<Node Name="Projects" Type="1" Platforms="15" Id="10">
 			<Node File="./src/IdeProject.cpp" Type="2" Platforms="15" />
 			<Node File="./src/IdeProject.h" Type="3" Platforms="15" />
 			<Node File="./src/IdeProjectSettings.cpp" Type="2" Platforms="15" />
@@ -72,11 +72,11 @@
 			<Node File="./src/ProjectNode.h" Type="3" Platforms="15" />
 			<Node File="./src/ProjectNode.cpp" Type="2" Platforms="15" />
 		</Node>
-		<Node Name="RemoteFileSelect" Type="1" Platforms="15" Id="10">
+		<Node Name="RemoteFileSelect" Type="1" Platforms="15" Id="11">
 			<Node File="../src/common/Lgi/RemoteFileSelect.cpp" Type="2" Platforms="15" />
 			<Node File="../include/lgi/common/RemoteFileSelect.h" Type="3" Platforms="15" />
 		</Node>
-		<Node Name="Search" Type="1" Platforms="15" Open="1" Id="11">
+		<Node Name="Search" Type="1" Platforms="15" Open="1" Id="12">
 			<Node File="./src/IdeFindInFiles.cpp" Type="2" Platforms="15" />
 			<Node File="./src/IdeFindInFiles.h" Type="3" Platforms="15" />
 			<Node File="./src/FindSymbol.cpp" Type="2" Platforms="15" />
@@ -88,13 +88,13 @@
 			<Node File="./src/PythonParser.cpp" Type="2" Platforms="15" />
 			<Node File="./src/SimpleCppParser.cpp" Type="2" Platforms="15" />
 		</Node>
-		<Node Name="Source Code" Type="1" Platforms="15" Open="1" Id="12">
+		<Node Name="Source Code" Type="1" Platforms="15" Open="1" Id="13">
 			<Node File="../src/common/Coding/LexCpp.cpp" Type="2" Platforms="15" />
 			<Node File="../include/lgi/common/LexCpp.h" Type="3" Platforms="15" />
 			<Node File="../src/common/Coding/ParseCpp.cpp" Type="2" Platforms="15" />
 			<Node File="./src/SysCharSupport.cpp" Type="2" Platforms="15" />
 		</Node>
-		<Node Name="SysIntf" Type="1" Platforms="15" Id="13">
+		<Node Name="SysIntf" Type="1" Platforms="15" Id="14">
 			<Node File="../src/common/Net/Ftp.cpp" Type="2" Platforms="15" />
 			<Node File="../include/lgi/common/Ftp.h" Type="3" Platforms="15" />
 			<Node File="../src/common/Net/Ssh.cpp" Type="2" Platforms="15" />
@@ -156,6 +156,8 @@ WINNATIVE</Release>
 					<Debug>/home/matthew/Code/Lgi/trunk/Ide/Code/IdeProjectSettings.cpp</Debug>
 				</All>
 			</Arguments>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -262,7 +264,10 @@ _GNU_SOURCE</Release>
 /usr/include/libssh</Release>
 				</Linux>
 			</SystemIncludes>
-			<LibraryPaths />
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
 			<ApplicationIcon>
 				<Haiku>./resources/icon.hvif</Haiku>
 			</ApplicationIcon>
@@ -271,6 +276,7 @@ _GNU_SOURCE</Release>
 					<Debug>-Wno-format-truncation</Debug>
 					<Release>-Wno-format-truncation</Release>
 				</Linux>
+				<All />
 			</Options>
 		</Build>
 		<Editor>
@@ -286,6 +292,8 @@ _GNU_SOURCE</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
+			<CommentFile />
+			<CommentFunction />
 		</Editor>
 		<Debug>
 			<Environment>
@@ -296,10 +304,18 @@ _GNU_SOURCE</Release>
 					<Debug>/home/matthew/code/castPi/castPiProject.xml</Debug>
 				</All>
 			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
 		</Debug>
 		<Advanced>
-			<PostBuildCommands />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+			<OtherMakefileRules />
 		</Advanced>
-		<Remote />
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
 	</Settings>
 </Project>

@@ -13,6 +13,7 @@
 #include "lgi/common/Containers.h"
 #include "lgi/common/HashTable.h"
 #include "lgi/common/LgiString.h"
+#include "lgi/common/StringClass.h"
 
 class LCompiledCode;
 
@@ -70,7 +71,9 @@ enum LVariantType
 	GV_LKEY,
 	/// Pointer to LStream (20)
 	GV_STREAM,
-	/// The maximum value for the variant type. (21)
+	// LString object (21)
+	GV_LSTRING,
+	/// The maximum value for the variant type. (22)
 	/// (This is used by the scripting engine to refer to a LVariant itself)
 	GV_MAX,
 };
@@ -209,6 +212,8 @@ public:
 		char *String;
 	    /// Valid when Type == #GV_WSTRING
 		char16 *WString;
+	    /// Valid when Type == #GV_LSTRING
+		LString *LStr;
 		/// Valid when Type == #GV_DOM
 		LDom *Dom;
 		/// Valid when Type is #GV_VOID_PTR, #GV_LVIEW, #GV_LMOUSE or #GV_LKEY
@@ -300,6 +305,8 @@ public:
 	LVariant(const char *s);
 	/// Constructor for wide string
 	LVariant(const char16 *s);
+	/// Constructor for LString (will create a new LString that is a reference to the argument)
+	LVariant(LString *s);
 	/// Constructor for ptr
 	LVariant(void *p);
 	/// Constructor for DOM ptr
@@ -334,6 +341,8 @@ public:
 	LVariant &operator =(const char *s);
 	/// Assign a wide string value (makes a copy)
 	LVariant &operator =(const char16 *s);
+	/// Assign a LString (makes a reference, effecting 's', hence no 'const')
+	LVariant &operator =(LString *s);
 	/// Assign another variant value
 	LVariant &operator =(LVariant const &i);
 	/// Assign value to a void ptr
@@ -368,7 +377,7 @@ public:
 	char *Str();
 	/// Returns the value as an LString
 	LString LStr();
-	/// Returns a wide string if valid (will convert a GV_STRING to wide)
+	/// Returns a wide string if valid (will convert any GV_STRING or GV_LSTRING to GV_WSTRING)
 	char16 *WStr();
 	/// Returns the string, releasing ownership of the memory to caller and
 	/// changing this LVariant to GV_NULL.
@@ -376,10 +385,15 @@ public:
 	/// Returns the wide string, releasing ownership of the memory to caller and
 	/// changing this LVariant to GV_NULL.
 	char16 *ReleaseWStr();
+	/// Return the LString, releasing ownership of the memory to caller and
+	/// changing this LVariant to GV_NULL.
+	LString *ReleaseLStr();
 	/// Sets the variant to a heap string and takes ownership of it
 	bool OwnStr(char *s);
 	/// Sets the variant to a wide heap string and takes ownership of it
 	bool OwnStr(char16 *s);
+	/// Sets the variant to a heap allocated LString and takes ownership of it
+	bool OwnStr(LString *s);
 	/// Sets the variant to NULL
 	void Empty();
 	/// Returns the byte length of the data
@@ -409,7 +423,7 @@ public:
 	int64 CastInt64() const;
 	/// Casts the value to double, from whatever source type. The
 	/// LVariant type does not change after calling this.
-	double CastDouble() const;
+	double CastDouble(double defaultVal = 0.0) const;
 	/// Cast to a string from whatever source type, the LVariant will
 	/// take the type GV_STRING after calling this. This is because
 	/// returning a static string is not thread safe.
@@ -417,8 +431,8 @@ public:
 	/// Casts to a DOM ptr
 	LDom *CastDom() const;
 	/// Casts to a boolean. You probably DON'T want to use this function. The
-	/// behavior for strings -> bool is such that if the string is value it
-	/// always evaluates to true, and false if it's not a valid string. Commonly
+	/// behavior for strings -> bool is such that if the string is non-NULL it
+	/// always evaluates to true, and false if it's NULL. Commonly
 	/// what you want is to evaluate whether the string is zero or non-zero in
 	/// which cast you should use "CastInt32() != 0" instead.
 	bool CastBool() const;

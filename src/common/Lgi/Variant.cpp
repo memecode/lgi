@@ -146,6 +146,15 @@ LVariant::LVariant(const char16 *s)
 	Type = Value.WString ? GV_WSTRING : GV_NULL;
 }
 
+LVariant::LVariant(LString *s)
+{
+	if (s && (Value.LStr = new LString))
+	{
+		*Value.LStr = *s;
+		Type = GV_LSTRING;
+	}
+}
+
 LVariant::LVariant(void *p)
 {
 	Type = GV_NULL;
@@ -208,6 +217,13 @@ bool LVariant::operator ==(LVariant &v)
 			char16 *w = v.WStr();
 			if (Value.WString && w)
 				return !StrcmpW(Value.WString, w);
+			break;
+		}
+		case GV_LSTRING:
+		{
+			char *s = v.Str();
+			if (Value.LStr && s)
+				return !Strcmp(Value.LStr->Get(), s);
 			break;
 		}
 		case GV_BINARY:
@@ -417,6 +433,19 @@ LVariant &LVariant::operator =(const char16 *s)
 	return *this;
 }
 
+LVariant &LVariant::operator =(LString *s)
+{
+	Empty();
+	if (s && (Value.LStr = new LString))
+	{
+		Type = GV_LSTRING;
+		*Value.LStr = *s;
+	}
+
+	return *this;
+}
+
+
 LVariant &LVariant::operator =(void *p)
 {
 	Empty();
@@ -535,6 +564,12 @@ LVariant &LVariant::operator =(LVariant const &i)
 		case GV_WSTRING:
 		{
 			Value.WString = NewStrW(i.Value.WString);
+			break;
+		}
+		case GV_LSTRING:
+		{
+			if (i.Value.LStr && (Value.LStr = new LString))
+				Value.LStr->Set(i.Value.LStr->Get()); // unfortunately a copy, the source is 'const', can't take a reference
 			break;
 		}
 		case GV_BINARY:
@@ -766,6 +801,17 @@ bool LVariant::OwnStr(char16 *w)
 	return true;
 }
 
+bool LVariant::OwnStr(LString *s)
+{
+	Empty();
+	if (!s)
+		return false;
+
+	Value.LStr = s;
+	Type = GV_LSTRING;
+	return true;
+}
+
 char *LVariant::ReleaseStr()
 {
 	char *Ret = Str();
@@ -777,52 +823,94 @@ char *LVariant::ReleaseStr()
 	return Ret;
 }
 
+char16 *LVariant::ReleaseWStr()
+{
+	if (auto Ret = WStr())
+	{
+		Value.WString = nullptr;
+		Type = GV_NULL;
+		return Ret;
+	}
+
+	return nullptr;
+}
+
+LString *LVariant::ReleaseLStr()
+{
+	if (auto ls = Value.LStr)
+	{
+		Value.LStr = nullptr;
+		Type = GV_NULL;
+		return ls;
+	}
+
+	return nullptr;
+}
+
 LString LVariant::LStr()
 {
+	if (Type == GV_LSTRING && Value.LStr)
+		return LString(*Value.LStr);
+
 	return Str();
 }
 
 char *LVariant::Str()
 {
-	if (Type == GV_STRING)
-		return Value.String;
-
-	if (Type == GV_WSTRING)
+	switch (Type)
 	{
-		char *u = WideToUtf8(Value.WString);
-		DeleteArray(Value.WString);
-		Type = GV_STRING;
-		return Value.String = u;
+		case GV_STRING:
+		{
+			return Value.String;
+		}
+		case GV_WSTRING:
+		{
+			auto u = WideToUtf8(Value.WString);
+			DeleteArray(Value.WString);
+			Type = GV_STRING;
+			return Value.String = u;
+		}
+		case GV_LSTRING:
+		{
+			if (Value.LStr)
+				return Value.LStr->Get();
+			break;
+		}
 	}
 
-	return 0;
-}
-
-char16 *LVariant::ReleaseWStr()
-{
-	char16 *Ret = WStr();
-	if (Ret)
-	{
-		Value.WString = 0;
-		Type = GV_NULL;
-	}
-	return Ret;
+	return nullptr;
 }
 
 char16 *LVariant::WStr()
 {
-	if (Type == GV_WSTRING)
-		return Value.WString;
-
-	if (Type == GV_STRING)
+	switch (Type)
 	{
-		char16 *w = Utf8ToWide(Value.String);
-		DeleteArray(Value.String);
-		Type = GV_WSTRING;
-		return Value.WString = w;
+		case GV_WSTRING:
+		{
+			return Value.WString;
+		}
+		case GV_STRING:
+		{
+			char16 *w = Utf8ToWide(Value.String);
+			DeleteArray(Value.String);
+			Type = GV_WSTRING;
+			return Value.WString = w;
+		}
+		case GV_LSTRING:
+		{
+			if (!Value.LStr)
+				return nullptr;				
+			if (auto w = Utf8ToWide(Value.LStr->Get()))
+			{
+				delete Value.LStr;
+				Type = GV_WSTRING;
+				return Value.WString = w;
+			}
+			break;
+		}
 	}
 
-	return 0;
+	return nullptr;
 }
 
 void LVariant::Empty()
@@ -851,6 +939,11 @@ void LVariant::Empty()
 		case GV_WSTRING:
 		{
 			DeleteArray(Value.WString);
+			break;
+		}
+		case GV_LSTRING:
+		{
+			DeleteObj(Value.LStr);
 			break;
 		}
 		case GV_BINARY:
@@ -939,6 +1032,10 @@ int64 LVariant::Length()
 			return sizeof(Value.Dbl);
 		case GV_STRING:
 			return Value.String ? strlen(Value.String) : 0;
+		case GV_WSTRING:
+			return Value.WString ? StrlenW(Value.WString) * sizeof(char16) : 0;
+		case GV_LSTRING:
+			return Value.LStr ? Value.LStr->Length() : 0;
 		case GV_BINARY:
 			return Value.Binary.Length;
 		case GV_LIST:
@@ -979,8 +1076,6 @@ int64 LVariant::Length()
 			return sizeof(Value.Op);
 		case GV_CUSTOM:
 			break;
-		case GV_WSTRING:
-			return Value.WString ? StrlenW(Value.WString) * sizeof(char16) : 0;
 		case GV_LSURFACE:
 		{
 			int64 Sz = 0;
@@ -1008,7 +1103,8 @@ int64 LVariant::Length()
 
 bool LVariant::IsInt()
 {
-	return Type == GV_INT32 || Type == GV_INT64;
+	return	Type == GV_INT32 ||
+			Type == GV_INT64;
 }
 
 bool LVariant::IsBool()
@@ -1023,7 +1119,9 @@ bool LVariant::IsDouble()
 
 bool LVariant::IsString()
 {
-	return Type == GV_STRING;
+	return	Type == GV_STRING ||
+			Type == GV_WSTRING ||
+			Type == GV_LSTRING;
 }
 
 bool LVariant::IsBinary()
@@ -1086,12 +1184,13 @@ LVariant &LVariant::Cast(LVariantType NewType)
 				switch (Type)
 				{
 					case GV_STRING:
+					case GV_WSTRING:
+					case GV_LSTRING:
 					{
 						// String -> LDateTime
-						LDateTime *Dt = new LDateTime;
-						if (Dt)
+						if (auto Dt = new LDateTime)
 						{
-							Dt->Set(Value.String);
+							Dt->Set(Str());
 							Empty();
 							Value.Date = Dt;
 							Type = NewType;
@@ -1101,8 +1200,7 @@ LVariant &LVariant::Cast(LVariantType NewType)
 					case GV_INT64:
 					{
 						// Int64 (system date) -> LDateTime
-						LDateTime *Dt = new LDateTime;
-						if (Dt)
+						if (auto Dt = new LDateTime)
 						{
 							Dt->Set((uint64_t)Value.Int64);
 							Empty();
@@ -1133,6 +1231,10 @@ void *LVariant::CastVoidPtr() const
 			break;
 		case GV_STRING:
 			return Value.String;
+		case GV_WSTRING:
+			return Value.WString;
+		case GV_LSTRING:
+			return Value.LStr ? Value.LStr->Get() : nullptr;
 		case GV_BINARY:
 			return Value.Binary.Data;
 		case GV_LIST:
@@ -1149,8 +1251,6 @@ void *LVariant::CastVoidPtr() const
 			return Value.Hash;
 		case GV_CUSTOM:
 			return Value.Custom.Data;
-		case GV_WSTRING:
-			return Value.WString;
 		case GV_LSURFACE:
 			return Value.Surface.Ptr;
 		case GV_LVIEW:
@@ -1161,7 +1261,7 @@ void *LVariant::CastVoidPtr() const
 			return Value.Key;
 	}
 
-	return 0;
+	return nullptr;
 }
 
 LDom *LVariant::CastDom() const
@@ -1241,15 +1341,17 @@ bool LVariant::CastBool() const
 		// but it means that if you want to evaluate the value of the varient you should
 		// use CastInt32 instead.
 		case GV_STRING:
-			return ValidStr(Value.String);
+			return Value.String != nullptr;
 		case GV_WSTRING:
-			return ValidStrW(Value.WString);
+			return Value.WString != nullptr;
+		case GV_LSTRING:
+			return Value.LStr != nullptr;
 	}
 
 	return false;
 }
 
-double LVariant::CastDouble() const
+double LVariant::CastDouble(double defaultVal) const
 {
 	switch (Type)
 	{
@@ -1264,7 +1366,18 @@ double LVariant::CastDouble() const
 		case GV_INT64:
 			return (double)Value.Int64;
 		case GV_STRING:
-			return Value.String ? atof(Value.String) : 0;
+			return Value.String ? atof(Value.String) : defaultVal;
+		case GV_LSTRING:
+			return Value.LStr ? Value.LStr->Float() : defaultVal;
+		case GV_WSTRING:
+		{
+			#if WINDOWS
+			return Value.WString ? _wtof(Value.WString) : defaultVal;
+			#else
+			wchar_t *endptr = nullptr;
+			return Value.WString ? wcstof(Value.WString, &endptr) : defaultVal;
+			#endif
+		}
 		case GV_DOMREF:
 		{
 			static LVariant v;
@@ -1279,7 +1392,7 @@ double LVariant::CastDouble() const
 		}
 	}
 	
-	return 0;
+	return defaultVal;
 }
 
 int32 LVariant::CastInt32() const
@@ -1297,6 +1410,7 @@ int32 LVariant::CastInt32() const
 		case GV_INT64:
 			return (int32)Value.Int64;
 		case GV_STRING:
+		{
 			if (!Value.String)
 				return 0;
 			
@@ -1306,8 +1420,23 @@ int32 LVariant::CastInt32() const
 				return static_cast<int32>(Atoi(Value.String, 16));
 
 			return atoi(Value.String);
-		case GV_DOM:
-			return Value.Dom != 0;
+		}
+		case GV_WSTRING:
+		{
+			if (!Value.WString)
+				return 0;
+			
+			if (IsAlpha(Value.WString[0]))
+				return !Stricmp(Value.WString, L"true");
+			else if (Value.String[0] == '0' && tolower(Value.WString[1]) == 'x')
+				return static_cast<int32>(Atoi(Value.WString, 16));
+
+			return Atoi(Value.WString);
+		}
+		case GV_LSTRING:
+		{
+			return Value.LStr ? (int32)Value.LStr->Int() : 0;
+		}
 		case GV_DOMREF:
 		{
 			static LVariant v;
@@ -1320,6 +1449,10 @@ int32 LVariant::CastInt32() const
 			}
 			break;
 		}
+
+		// Check object for NULL
+		case GV_DOM:
+			return Value.Dom != NULL;
 		case GV_LIST:
 			return Value.Lst != NULL;
 		case GV_HASHTABLE:
@@ -1364,6 +1497,22 @@ int64 LVariant::CastInt64() const
 				return Atoi(Value.String, 16);
 
 			return Atoi(Value.String);
+		}
+		case GV_WSTRING:
+		{
+			if (!Value.WString)
+				return 0;
+
+			if (IsAlpha(Value.WString[0]))
+				return !Stricmp(Value.WString, L"true");
+			else if (Value.WString[0] == '0' && tolower(Value.WString[1]) == 'x')
+				return Atoi(Value.WString, 16);
+
+			return Atoi(Value.WString);
+		}
+		case GV_LSTRING:
+		{
+			return Value.LStr ? Value.LStr->Int() : 0;
 		}
 		case GV_DOMREF:
 		{
@@ -1467,6 +1616,7 @@ char *LVariant::CastString()
 		}
 		case GV_STRING:
 		case GV_WSTRING:
+		case GV_LSTRING:
 		{
 			return Str();
 		}
@@ -1817,6 +1967,15 @@ LString LVariant::ToString()
 		case GV_STRING:
 			s.Printf("(string)\"%s\"", Value.String);
 			break;
+		case GV_WSTRING:
+			s.Printf("(wchar_t*)\"%S\"", Value.WString);
+			break;
+		case GV_LSTRING:
+			if (Value.LStr)
+				s.Printf("(LString)\"%s\"", Value.LStr->Get());
+			else
+				s.Printf("(LString)NULL");
+			break;
 		case GV_BINARY:
 			s.Printf("(binary[%i])%p", Value.Binary.Length, Value.Binary.Data);
 			break;
@@ -1847,9 +2006,6 @@ LString LVariant::ToString()
 			break;
 		case GV_CUSTOM:
 			s.Printf("(LCustom.%s)%p", Value.Custom.Dom->GetName(), Value.Custom.Data);
-			break;
-		case GV_WSTRING:
-			s.Printf("(wchar_t*)\"%S\"", Value.WString);
 			break;
 		case GV_LSURFACE:
 			s.Printf("(LSurface)%p", Value.Surface.Ptr);
@@ -2056,6 +2212,8 @@ ssize_t LCustomType::CustomField::Sizeof()
 			return sizeof(double);
 		case GV_STRING:
 			return sizeof(char);
+		case GV_WSTRING:
+			return sizeof(char16);
 		case GV_DATETIME:
 			return sizeof(LDateTime);
 		case GV_HASHTABLE:
