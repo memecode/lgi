@@ -1040,7 +1040,7 @@ LImageList *LMenuItem::GetImageList()
 }
 
 gboolean
-LgiMenuItemDraw(GtkWidget *widget, cairo_t *cr, LMenuItem *mi)
+LMenuItemDraw(GtkWidget *widget, cairo_t *cr, LMenuItem *mi)
 {
 	auto cls = GTK_WIDGET_GET_CLASS(widget);
 	cls->draw(widget, cr);
@@ -1051,49 +1051,41 @@ LgiMenuItemDraw(GtkWidget *widget, cairo_t *cr, LMenuItem *mi)
 void LMenuItem::PaintIcon(Gtk::cairo_t *cr)
 {
 	if (_Icon < 0)
+	{
+		LgiTrace("%s:%i - PaintIcon, no icon\n", _FL);
 		return;
+	}
 	auto il = GetImageList();
 	if (!il)
+	{
+		LgiTrace("%s:%i - PaintIcon, no image list\n", _FL);
 		return;
+	}
 
 	auto wid = GTK_WIDGET(Info.obj);
 	GtkAllocation a;
 	gtk_widget_get_allocation(wid, &a);
 
 	LScreenDC Dc(cr, a.width, a.height);
+	LMemDC Buf(_FL, a.width, a.height, System32BitColourSpace);
 
-	#if 1
-
-		LMemDC Buf(_FL, a.width, a.height, System32BitColourSpace);
-
-		if (auto StyleCtx = gtk_widget_get_style_context(wid))
-		{
-			gtk_render_background(	StyleCtx,
-									Buf.Handle(),
-									0,
-									0,
-									Buf.X(),
-									Buf.Y());
-		}
-		else
-		{
-			Buf.Colour(LColour::Black);
-			Buf.Rectangle();
-		}
-		
-		il->Draw(&Buf, 4, 5, _Icon, LColour(), !Enabled());
-		Dc.Blt(a.x, a.y, &Buf);
+	if (auto StyleCtx = gtk_widget_get_style_context(wid))
+	{
+		gtk_render_background(	StyleCtx,
+								Buf.Handle(),
+								0,
+								0,
+								Buf.X(),
+								Buf.Y());
+	}
+	else
+	{
+		Buf.Colour(LColour::Black);
+		Buf.Rectangle();
+	}
 	
-	#else // old deprecated gtk_style_context_get_background_color call.
-
-		GdkRGBA bk = {0};
-		gtk_style_context_get_background_color(	gtk_widget_get_style_context(wid),
-												gtk_widget_get_state_flags(wid),
-												&bk);
-
-		il->Draw(&Dc, 7, 5, _Icon, bk.alpha ? LColour(bk) : LColour::White);
-	
-	#endif
+	il->Draw(&Buf, 4, 5, _Icon, LColour(), !Enabled());
+	Dc.Blt(0, 0, &Buf);
 }
 
 void LMenuItem::Icon(int i)
@@ -1101,7 +1093,7 @@ void LMenuItem::Icon(int i)
 	_Icon = i;
 
 	if (Info)
-		Info.Connect("draw", (GCallback)LgiMenuItemDraw, this);
+		Info.Connect("draw", (GCallback)LMenuItemDraw, this);
 }
 
 void LMenuItem::Checked(bool c)
