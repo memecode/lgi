@@ -457,3 +457,31 @@ bool LCombo::OnKey(LKey &k)
 	
 	return false;
 }
+
+bool LCombo::OnLayout(LViewLayoutInfo &Inf)
+{
+	auto fnt = GetFont();
+
+	if (!Inf.Width.Max)
+	{
+		// Width calc
+		int mx = 0;
+		for (auto &s: d->Strs)
+		{
+			LDisplayString ds(fnt, s);
+			mx = MAX(mx, ds.X());
+		}
+		Inf.Width.Min =
+			Inf.Width.Max =
+			mx + 36;
+	}
+	else if (!Inf.Height.Max)
+	{
+		Inf.Height.Min =
+			Inf.Height.Max =
+			fnt->GetHeight() + 8;
+	}
+
+	return true;
+}
+
