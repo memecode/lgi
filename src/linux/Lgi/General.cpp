@@ -278,6 +278,7 @@ static const char *desktopFolders[] =
 {
 	"/usr/share/applications",
 	"/var/lib/snapd/desktop/applications",
+	"~/.local/share/applications",
 	nullptr
 };
 
