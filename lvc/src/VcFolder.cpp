@@ -2487,7 +2487,7 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 			LArray<PathStatus> added, notStaged, untracked;			
 		
 			List<LListItem> Files;
-			LString Diff;
+			LStringPipe Diffs(16 << 10);
 			VcFile *f = nullptr;
 
 			auto findPath = [&](LString path) -> PathStatus* {
@@ -2500,7 +2500,8 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 				return nullptr;
 			};
 			
-			for (auto &line: s.Split("\n"))
+			auto lines = s.Split("\n");
+			for (auto &line: lines)
 			{
 				const char *txt = line.Get();
 				
@@ -2514,8 +2515,8 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 				{
 					state = TDiffs;
 					if (f)
-						f->SetDiff(Diff);
-					Diff.Empty();
+						f->SetDiff(Diffs.NewLStr());
+					Diffs.Empty();
 
 					auto header = line.SplitDelimit(nullptr, 2);
 					
@@ -2604,19 +2605,17 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 						}
 						else
 						{
-							if (Diff)
-								Diff += "\n";
-							Diff += line;
+							Diffs.Print("%s\n", line.Get());
 						}
 						break;
 					}
 				}
 			}
 
-			if (f && Diff)
+			if (f && Diffs.GetSize() > 0)
 			{
-				f->SetDiff(Diff);
-				Diff.Empty();
+				f->SetDiff(Diffs.NewLStr());
+				Diffs.Empty();
 			}
 
 			InsertFiles(Files);
