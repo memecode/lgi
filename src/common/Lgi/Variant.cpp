@@ -433,13 +433,13 @@ LVariant &LVariant::operator =(const char16 *s)
 	return *this;
 }
 
-LVariant &LVariant::operator =(LString *s)
+LVariant &LVariant::operator =(LString s)
 {
 	Empty();
-	if (s && (Value.LStr = new LString))
+	if (Value.LStr = new LString)
 	{
 		Type = GV_LSTRING;
-		*Value.LStr = *s;
+		*Value.LStr = s;
 	}
 
 	return *this;

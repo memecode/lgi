@@ -3601,12 +3601,12 @@ TProjectStatus IdeProject::OpenFile(const char *FileName)
 	Prof.Add("Progress Setup");
 
 	#if DEBUG_OPEN_PROGRESS
-	int64 Nodes = r.CountTags();
-	LProgressDlg Prog(d->App, 1000);
-	Prog.SetDescription("Loading project...");
-	Prog.SetLimits(0, Nodes);
-	Prog.SetYieldTime(1000);
-	Prog.SetAlwaysOnTop(true);
+		int64 Nodes = r.CountTags();
+		LProgressDlg Prog(d->App, 1000);
+		Prog.SetDescription("Loading project...");
+		Prog.SetLimits(0, Nodes);
+		Prog.SetYieldTime(1000);
+		Prog.SetAlwaysOnTop(true);
 	#endif
 
 	Prof.Add("UserFile");
@@ -3647,11 +3647,14 @@ TProjectStatus IdeProject::OpenFile(const char *FileName)
 						if (auto store = d->App->GetBreakPointStore())
 						{
 							// Can't resolve the paths with '~' to absolute here, the backend hasn't been initialized.
-							if (auto id = store->Add(bp))
+							if (store->Has(bp) == BreakPointStore::INVALID_ID)
 							{
-								d->UserBreakpoints.Add(id);
+								if (auto id = store->Add(bp))
+								{
+									d->UserBreakpoints.Add(id);
+								}
+								else LAssert(0);
 							}
-							else LAssert(0);
 						}
 						else LAssert(0);
 					}
@@ -3832,6 +3835,7 @@ bool IdeProject::SaveFile()
 		else LgiTrace("%s:%i - Couldn't open '%s' for writing.\n", _FL, Full.Get());
 	}
 
+	// printf("%s:%i - saveFile UserFileDirty=%i\n", _FL, d->UserFileDirty);
 	if (d->UserFileDirty)
 	{
 		LFile f;
@@ -3844,16 +3848,19 @@ bool IdeProject::SaveFile()
 			for (auto i: d->UserNodeFlags)
 				f.Print("%s:%i,%x\n", OPT_NodeFlags, i.key, i.value);
 			
-			if (auto store = d->App->GetBreakPointStore())
+			if (!GetParentProject())
 			{
-				for (auto id: d->UserBreakpoints)
+				// Only store breakpoint info in the top level project userfile:
+				if (auto store = d->App->GetBreakPointStore())
 				{
-					auto bp = store->Get(id);
-					if (bp)
-						f.Print("%s:%s\n", OPT_Breakpoint, bp.Save().Get());
+					for (auto id: store->GetAll())
+					{
+						if (auto bp = store->Get(id))
+							f.Print("%s:%s\n", OPT_Breakpoint, bp.Save().Get());
+					}
 				}
+				else LAssert(!"there should already be a breakpoint store, even if empty");
 			}
-			else LAssert(0);
 
 			d->UserFileDirty = false;
 			#if 0
@@ -4101,19 +4108,18 @@ void IdeProject::SetClean(std::function<void(bool)> OnDone)
 {
 	auto CleanNodes = [this, OnDone]()
 	{
-		// printf("IdeProject.SetClean.CleanNodes\n");
 		for (auto i: *this)
 		{
-			ProjectNode *p = dynamic_cast<ProjectNode*>(i);
-			if (!p) break;
-			p->SetClean();
+			if (auto p = dynamic_cast<ProjectNode*>(i))
+				p->SetClean();
+			else
+				break;
 		}
 
 		if (OnDone)
 			OnDone(true);
 	};
 
-	// printf("IdeProject.SetClean dirty=%i,%i validfile=%i\n", d->Dirty, d->UserFileDirty, ValidStr(d->FileName));
 	if (d->Dirty || d->UserFileDirty)
 	{
 		if (ValidStr(d->FileName))

@@ -2276,7 +2276,8 @@ bool VcFolder::ParseWorking(int Result, LString s, ParseParams *Params)
 		case VcHg:
 		{
 			ParseParams Local;
-			if (!Params) Params = &Local;
+			if (!Params)
+				Params = &Local;
 			Params->IsWorking = true;
 			ParseStatus(Result, s, Params);
 			
@@ -3767,8 +3768,7 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 			LHashTbl<ConstStrKey<char>,VcFile*> Map;
 			for (auto i: *d->Files)
 			{
-				VcFile *f = dynamic_cast<VcFile*>(i);
-				if (f)
+				if (auto f = dynamic_cast<VcFile*>(i))
 					Map.Add(f->GetText(COL_FILENAME), f);
 			}
 
@@ -3820,7 +3820,7 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 				{
 					LString File = f(2, -1);
 
-					VcFile *f = Map.Find(File);
+					auto f = Map.Find(File);
 					if (!f)
 					{
 						if ((f = new VcFile(d, this, LString(), IsWorking)))
@@ -3837,8 +3837,7 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 
 			for (auto i: *d->Files)
 			{
-				VcFile *f = dynamic_cast<VcFile*>(i);
-				if (f)
+				if (auto f = dynamic_cast<VcFile*>(i))
 				{
 					if (f->GetStatus() == VcFile::SUnknown)
 						f->SetStatus(VcFile::SUntracked);
@@ -3923,7 +3922,7 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 				return false;
 			}
 			
-			LString::Array Lines = s.SplitDelimit("\r\n");
+			auto Lines = s.SplitDelimit("\r\n");
 			for (auto Ln : Lines)
 			{
 				char Type = Ln(0);
@@ -3942,35 +3941,41 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 				}
 				else if (Type != '?')
 				{
-					LString::Array p = Ln.SplitDelimit(" ", 1);
-					if (p.Length() == 2)
+					auto p = Ln.SplitDelimit(" ", 1);
+					if (p.Length() != 2)
 					{
-						LString File;
-						if (GetType() == VcSvn)
-							File = ConvertUPlus(p.Last());
-						else
-							File = p.Last();
+						LAssert(!"What happen?");
+						break;
+					}
 
-						if (GetType() == VcSvn &&
-							File.Find("+    ") == 0)
-						{
-							File = File(5, -1);
-						}
+					LString File;
+					if (GetType() == VcSvn)
+						File = ConvertUPlus(p.Last());
+					else
+						File = p.Last();
 
-						VcFile *f = new VcFile(d, this, LString(), IsWorking);
+					if (GetType() == VcSvn &&
+						File.Find("+    ") == 0)
+					{
+						File = File(5, -1);
+					}
+
+					if (auto f = new VcFile(d, this, LString(), IsWorking))
+					{
 						f->SetText(p[0], COL_STATE);
 						f->SetText(File.Replace("\\","/"), COL_FILENAME);
 						f->GetStatus();
 						Ins.Insert(f);
 					}
-					else LAssert(!"What happen?");
 				}
 				else if (ShowUntracked)
 				{
-					VcFile *f = new VcFile(d, this, LString(), IsWorking);
-					f->SetText("?", COL_STATE);
-					f->SetText(Ln(2,-1), COL_FILENAME);
-					Ins.Insert(f);
+					if (auto f = new VcFile(d, this, LString(), IsWorking))
+					{
+						f->SetText("?", COL_STATE);
+						f->SetText(Ln(2,-1), COL_FILENAME);
+						Ins.Insert(f);
+					}
 				}
 			}
 			break;

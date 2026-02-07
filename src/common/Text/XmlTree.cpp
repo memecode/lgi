@@ -656,6 +656,8 @@ bool LXmlTag::SetVariant(const char *Name, LVariant &Value, const char *Array)
 				break;
 			}
 			case GV_STRING:
+			case GV_WSTRING:
+			case GV_LSTRING:
 			{
 				SetAttr(Name, Value.Str());
 				break;

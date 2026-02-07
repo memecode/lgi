@@ -2956,21 +2956,23 @@ void AppWnd::SaveAll(std::function<void(bool)> Callback, bool CloseDirty)
 {
 	THREAD_WARNING()
 
-	auto ss = new SaveState;	
-	ss->d = d;
-	ss->Callback = Callback;
-	ss->CloseDirty = CloseDirty;
-	for (auto Doc: d->Docs)
+	if (auto ss = new SaveState)
 	{
-		if (!Doc->GetClean())
-			ss->Docs.Add(Doc);
-	}	
-	for (auto Proj: d->Projects)
-	{
-		if (!Proj->GetClean())
-			ss->Projects.Add(Proj);
-	}	
-	ss->Iterate();
+		ss->d = d;
+		ss->Callback = Callback;
+		ss->CloseDirty = CloseDirty;
+		for (auto Doc: d->Docs)
+		{
+			if (!Doc->GetClean())
+				ss->Docs.Add(Doc);
+		}	
+		for (auto Proj: d->Projects)
+		{
+			if (!Proj->GetClean())
+				ss->Projects.Add(Proj);
+		}	
+		ss->Iterate();
+	}
 }
 
 void AppWnd::CloseAll()
@@ -3009,56 +3011,58 @@ void AppWnd::CloseAll()
 	);
 }
 
+// \returns true if quitting app is ok
 bool AppWnd::SaveAllAndQuit()
 {
 	if (!IsClean())
 	{
 		SaveAll([this](bool status)
-			{
-				d->InShutdown = false;
-				LCloseApp();
-			},
-			true);
+		{
+			d->InShutdown = false;
+			LCloseApp();
+		},
+		true);
+		
+		// not ok to quit, the save process still in progress
 		return false;
 	}
 	
 	return true;
 }
 
+// \returns true if the app can quit immediately.
 bool AppWnd::OnRequestClose(bool IsOsQuit)
 {
 	if (d->InShutdown)
+		// already quiting
 		return false;
 		
 	d->InShutdown = true;
 	if (d->FindSym)
 	{
-		printf("Calling find sym shutdown...\n");
+		// shutdown the find sym thread cleanly.
 		d->FindSym->Shutdown([this]()
+		{
+			// this is NOT in the GUI thread... so move to that:
+			RunCallback([this]()
 			{
-				printf("Find sym shutdown cb\n");
-				RunCallback([this]()
-					{
-						if (SaveAllAndQuit())
-						{
-							printf("SaveAllAndQuit ret true\n");
-							d->InShutdown = false;
+				// on the GUI thread:
+				if (SaveAllAndQuit())
+				{
+					d->InShutdown = false;
 
-							RunCallback([]()
-								{
-									LCloseApp();
-								},
-								_FL);
-						}
+					RunCallback([]()
+					{
+						LCloseApp();
 					},
 					_FL);
-			});
-
-		printf("Find sym return false\n");
+				}
+			},
+			_FL);
+		});
 		return false;
 	}
 
-	printf("Call SaveAllAndQuit\n");
 	return SaveAllAndQuit();
 }
 
@@ -3073,23 +3077,6 @@ void AppWnd::DumpHistory()
 	}
 	#endif
 }
-
-/*
-void CheckHistory(LArray<FileLoc> &CursorHistory)
-{
-	if (CursorHistory.Length() > 0)
-	{
-		FileLoc *loc = &CursorHistory[0];
-		for (unsigned i=CursorHistory.Length(); i<CursorHistory.GetAlloc(); i++)
-		{
-			if ((NativeInt)loc[i].File.Get() == 0xcdcdcdcdcdcdcdcd)
-			{
-				int asd=0;
-			}
-		}
-	}
-}
-*/
 
 void AppWnd::OnLocationChange(const char *File, int Line)
 {

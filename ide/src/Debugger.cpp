@@ -350,7 +350,7 @@ class Gdb :
 				Unlock();
 
 				#if DEBUG_STRUCT_LOGGING
-				Log->Log("SetState.change:", DebuggingProcess, Running);
+				Log->Log("SetState.change:", DebuggingProcess, Running, LString::Fmt("%s:%i", file, line));
 				#else
 				printf("SetState(%i,%i) changed by %s:%i\n", DebuggingProcess, Running, file, line);
 				#endif
@@ -506,7 +506,7 @@ class Gdb :
 			if (curCmd->arrayCb ||
 				curCmd->pipeCb)
 			{	
-				printf("OnLine '%.*s' -> curCmd='%s'\n", (int)Length-1, Start, curCmd->cmd.Get());
+				// printf("OnLine '%.*s' -> curCmd='%s'\n", (int)Length-1, Start, curCmd->cmd.Get());
 				
 				curCmd->pipe.Write(Start, Length);
 				return;
@@ -700,28 +700,25 @@ class Gdb :
 		#if DEBUG_STRUCT_LOGGING
 			Log->Log("partial:", partial);
 		#endif
-		if (partial.Length() == 6)
+		if (partial.Length() == 6 && partial.Equals(sPrompt))
 		{
-			AtPrompt = partial.Equals(sPrompt);
+			AtPrompt = true;
 			#if DEBUG_STRUCT_LOGGING
 			Log->Log("AtPrompt:", AtPrompt, "Running:", Running);
 			#else
 			printf("partial='%s' AtPrompt=%i\n", partial.Get(), AtPrompt);
 			#endif
 
-			if (Running ^ !AtPrompt)
+			if (Running)
 			{
 				#if DEBUG_STRUCT_LOGGING
 				// Log->Log("AtPrompt:", AtPrompt);
 				#endif
-				SetState(_FL, DebuggingProcess, !AtPrompt);
+				SetState(_FL, DebuggingProcess, false);
 			}
 
-			if (AtPrompt)
-			{
-				Events->Write(partial);
-				ProcessCommands();
-			}
+			Events->Write(partial);
+			ProcessCommands();
 		}
 		else if (partial.Find("Quit anyway? (y or n)") >= 0)
 		{
@@ -1021,7 +1018,10 @@ public:
 		LMutex("Gdb.Lock"),
 		bpStore(BpStore),
 		#if DEBUG_STRUCT_LOGGING
-			Log(new LStructuredLog(LStructuredLog::TNetworkEndpoint, LStructuredLog::sDefaultEndpoint, true, netLog)),
+			Log(new LStructuredLog(	LStructuredLog::TNetworkEndpoint,
+									LStructuredLog::sDefaultEndpoint,
+									true,
+									netLog)),
 		#else
 			Log(log),
 		#endif
@@ -1506,7 +1506,11 @@ public:
 							parts[0].Equals("process"))
 						{
 							ProcessId = (int)parts[1].Int();
+							#if DEBUG_STRUCT_LOGGING
+							Log->Log("ProcessId:", ProcessId);
+							#else
 							Log->Print("ProcessId=%i\n", ProcessId);
+							#endif
 							DBG_LOG("%s:%i - got process id: %i\n", _FL, ProcessId);
 						}
 					}
@@ -1770,11 +1774,11 @@ public:
 					{
 						val++;
 						v.Type.Set(val, end - val);
-						v.Value.OwnStr(TrimStr(end + 1));
+						v.Value = LString(end + 1).Strip();
 					}
 					else
 					{
-						v.Value.OwnStr(TrimStr(val));
+						v.Value = LString(val).Strip();
 					}				
 				}
 			}
@@ -2137,8 +2141,6 @@ public:
 			true,
 			[this, cb](auto &err)
 			{
-				if (!err)
-					SetState(_FL, DebuggingProcess, true);
 				if (cb)
 					cb(!err);
 			});
@@ -2150,8 +2152,6 @@ public:
 			true,
 			[this, cb](auto &err)
 			{
-				if (!err)
-					SetState(_FL, DebuggingProcess, true);
 				if (cb)
 					cb(!err);
 			});
@@ -2163,8 +2163,6 @@ public:
 			true,
 			[this, cb](auto &err)
 			{
-				if (!err)
-					SetState(_FL, DebuggingProcess, true);
 				if (cb)
 					cb(!err);
 			});

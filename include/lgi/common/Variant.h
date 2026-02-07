@@ -342,7 +342,7 @@ public:
 	/// Assign a wide string value (makes a copy)
 	LVariant &operator =(const char16 *s);
 	/// Assign a LString (makes a reference, effecting 's', hence no 'const')
-	LVariant &operator =(LString *s);
+	LVariant &operator =(LString s);
 	/// Assign another variant value
 	LVariant &operator =(LVariant const &i);
 	/// Assign value to a void ptr

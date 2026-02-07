@@ -498,7 +498,7 @@ public:
 		if (!compare || !Lock(_FL))
 			return;
 
-		LListItem *Kb = Keyboard >= 0 && Keyboard < (ssize_t)Items.Length() ? Items[Keyboard] : NULL;
+		auto Kb = Keyboard >= 0 && Keyboard < (ssize_t)Items.Length() ? Items[Keyboard] : NULL;
 		Items.Sort(compare);
 		Keyboard = Kb ? Items.IndexOf(Kb) : -1;
 		Unlock();
