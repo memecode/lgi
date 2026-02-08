@@ -9,8 +9,6 @@
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/Menu.h"
 
-#define COMBO_HEIGHT			20
-
 class LComboPrivate
 {
 	LAutoPtr<LDisplayString> Text;

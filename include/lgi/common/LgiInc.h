@@ -66,7 +66,7 @@
 			#define LgiFunc			extern
 		#endif
 		
-		#if __GNUC__ >= 4 || defined(__clang__)
+		#if __GNUC__ >= 4
 			#if LGI_LIBRARY
 				#define LgiClass		__attribute__((visibility("default")))
 				#define LgiExtern		extern

@@ -47,6 +47,7 @@
 		345920FF1F25649000098DFD /* Font.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FC1F25649000098DFD /* Font.h */; };
 		345921001F25649000098DFD /* FontCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FD1F25649000098DFD /* FontCache.h */; };
 		345921011F25649000098DFD /* FontSelect.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FE1F25649000098DFD /* FontSelect.h */; };
+		34593A792F2327E70060D64D /* Combo.h in Headers */ = {isa = PBXBuildFile; fileRef = 34593A782F2327E70060D64D /* Combo.h */; };
 		345EB84E235C6C01007D05DB /* Popup.h in Headers */ = {isa = PBXBuildFile; fileRef = 345EB84D235C6C01007D05DB /* Popup.h */; };
 		346DDEC1240C882900751380 /* RadioGroup.h in Headers */ = {isa = PBXBuildFile; fileRef = 346DDEC0240C882900751380 /* RadioGroup.h */; };
 		346FACE71D3C720B00FFEBCE /* Message.h in Headers */ = {isa = PBXBuildFile; fileRef = 346FACE61D3C720B00FFEBCE /* Message.h */; };
@@ -257,6 +258,7 @@
 		345920FC1F25649000098DFD /* Font.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Font.h; path = ../../../include/lgi/common/Font.h; sourceTree = SOURCE_ROOT; };
 		345920FD1F25649000098DFD /* FontCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FontCache.h; path = ../../../include/lgi/common/FontCache.h; sourceTree = SOURCE_ROOT; };
 		345920FE1F25649000098DFD /* FontSelect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FontSelect.h; path = ../../../include/lgi/common/FontSelect.h; sourceTree = SOURCE_ROOT; };
+		34593A782F2327E70060D64D /* Combo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Combo.h; path = ../../../include/lgi/common/Combo.h; sourceTree = SOURCE_ROOT; };
 		345EB84D235C6C01007D05DB /* Popup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Popup.h; path = ../../../include/lgi/common/Popup.h; sourceTree = SOURCE_ROOT; };
 		346DDEC0240C882900751380 /* RadioGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RadioGroup.h; path = ../../../include/lgi/common/RadioGroup.h; sourceTree = SOURCE_ROOT; };
 		346FACE61D3C720B00FFEBCE /* Message.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Message.h; path = ../../../include/lgi/common/Message.h; sourceTree = "<group>"; };
@@ -726,22 +728,23 @@
 				3477C2F31CC04BF00028B84B /* Box.cpp */,
 				3477C2F41CC04BF00028B84B /* Button.cpp */,
 				3477C2F51CC04BF00028B84B /* CheckBox.cpp */,
+				34593A782F2327E70060D64D /* Combo.h */,
 				3477C2F61CC04BF00028B84B /* Combo.cpp */,
 				3477C2F71CC04BF00028B84B /* Edit.cpp */,
 				3477C2EC1CC04BBB0028B84B /* ItemContainer.cpp */,
-				3477C2ED1CC04BBB0028B84B /* List.cpp */,
 				3409C0C827580ED60050302A /* List.h */,
+				3477C2ED1CC04BBB0028B84B /* List.cpp */,
 				3409C0C927580ED60050302A /* ListItemCheckBox.h */,
 				3409C0C727580ED60050302A /* ListItemRadioBtn.h */,
 				3477C2F81CC04BF00028B84B /* Panel.cpp */,
-				3477C2D61CC048390028B84B /* Popup.cpp */,
 				345EB84D235C6C01007D05DB /* Popup.h */,
+				3477C2D61CC048390028B84B /* Popup.cpp */,
 				343BE8C62355D0CE00742E21 /* PopupList.h */,
-				3477C2F91CC04BF00028B84B /* Progress.cpp */,
 				3418EBCE25D9FEA600EA168A /* Progress.h */,
+				3477C2F91CC04BF00028B84B /* Progress.cpp */,
 				3418EBD025D9FEF500EA168A /* ProgressDlg.h */,
-				3477C2FA1CC04BF00028B84B /* RadioGroup.cpp */,
 				346DDEC0240C882900751380 /* RadioGroup.h */,
+				3477C2FA1CC04BF00028B84B /* RadioGroup.cpp */,
 				3477C2DE1CC04A030028B84B /* ScrollBar.cpp */,
 				34B14E3326951C6E004C22CC /* Slider.cpp */,
 				3477C2FB1CC04BF00028B84B /* Splitter.cpp */,
@@ -908,6 +911,7 @@
 				340C58BE2D29EE680056D654 /* DragAndDrop.h in Headers */,
 				3418EBD125D9FEF500EA168A /* ProgressDlg.h in Headers */,
 				343874B6230F46B200CF96B4 /* View.h in Headers */,
+				34593A792F2327E70060D64D /* Combo.h in Headers */,
 				34B6F5502BA3A81A0095B1C5 /* UnrolledList.h in Headers */,
 				345920FF1F25649000098DFD /* Font.h in Headers */,
 				344991912CB1E6D400E96737 /* XmlTree.h in Headers */,

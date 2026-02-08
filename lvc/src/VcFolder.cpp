@@ -1480,14 +1480,9 @@ bool VcFolder::ParseRevList(int Result, LString s, ParseParams *Params)
 				c = nul + 1;
 			}
 
-			int n = 0;
 			for (auto Commit: Commits)
 			{
 				LAutoPtr<VcCommit> Rev(new VcCommit(d, this));
-
-				if (n < 10)
-					printf("[%i]=%s\n\n", n++, Commit.Get());
-
 				if (Rev->GitParse(Commit, true))
 				{
 					Log.Add(Rev.Release());
