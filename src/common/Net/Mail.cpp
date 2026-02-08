@@ -2249,7 +2249,7 @@ bool MailPop3::Open(LSocketI *S, const char *RemoteHost, int Port, const char *U
 				}
 			}
 			else
-				Error(_FL, "Failed to open socket to %s:%i and read reply.\n", Server, Port);
+				Error(_FL, "Failed to open socket to %s:%i and read reply.\n", Server.Get(), Port);
 		}
 		else Error(_FL, "No user/pass.\n");
 	}
