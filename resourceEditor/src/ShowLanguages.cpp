@@ -38,11 +38,6 @@ public:
 	}
 };
 
-int Cmp(LListItem *a, LListItem *b, NativeInt d)
-{
-	return stricmp(a->GetText(2), b->GetText(2));
-}
-
 ShowLanguagesDlg::ShowLanguagesDlg(AppWnd *app)
 {
 	d = new ShowLanguagesDlgPriv;
@@ -72,7 +67,10 @@ ShowLanguagesDlg::ShowLanguagesDlg(AppWnd *app)
 			}
 		}
 
-		d->Lst->Sort(Cmp);
+		d->Lst->Sort([](auto a, auto b)
+			{
+				return stricmp(a->GetText(2), b->GetText(2));
+			});
 		d->Lst->Select(*d->Lst->begin());
 	}
 }

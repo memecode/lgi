@@ -174,3 +174,7 @@ if (1)
     GitProject(libntlm "https://gitlab.com/gsasl/libntlm.git" "master" TRUE)
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/libntlm)
 endif()
+
+if (1)
+    GitProject(quickjs-ng "https://github.com/quickjs-ng/quickjs.git" "master" TRUE)
+endif()
