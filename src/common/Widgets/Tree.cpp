@@ -895,6 +895,19 @@ void LTreeItem::Sort(int Column)
 void LTreeItem::Sort()
 {
 	auto lck = ScopedLock(_FL);
+	if (!lck)
+		return;
+
+	Items.Sort([](auto a, auto b)
+		{
+			return a->Compare(b);
+		});
+	
+	for (auto i: Items)
+	{
+		if (i->Expanded())
+			i->Sort();
+	}
 }
 
 void LTreeItem::OnPaint(ItemPaintCtx &Ctx)
@@ -1209,6 +1222,13 @@ void LTree::Sort()
 		{
 			return a->Compare(b);
 		});
+	
+	for (auto i: Items)
+	{
+		if (i->Expanded())
+			i->Sort();
+	}
+
 	UpdateAllItems();
 }
 
