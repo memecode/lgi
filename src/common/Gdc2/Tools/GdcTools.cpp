@@ -585,28 +585,24 @@ bool ResampleDC(LSurface *dst, LSurface *src, LRect *FromRgn, Progress *Prog)
 
 #else
 
-bool ResampleDC(LSurface *pDest, LSurface *pSrc, LRect *FromRgn, Progress *Prog)
+bool ResampleDC(LSurface *pDest, LSurface *pSrc, LRect *fromRect, Progress *Prog)
 {
 	if (!pDest || !pSrc)
 		return false;
 
-	LRect Full(0, 0, pSrc->X()-1, pSrc->Y()-1), Sr;
-	if (FromRgn)
+	auto full = pSrc->Bounds(), srcRect = full;
+	if (fromRect)
 	{
-		Sr = *FromRgn;
-		Sr.Bound(&Full);
-	}
-	else
-	{
-		Sr = Full;
+		srcRect = *fromRect;
+		srcRect.Bound(&full);
 	}
 
-	double ScaleX = (double) Sr.X() / pDest->X();
-	double ScaleY = (double) Sr.Y() / pDest->Y();
-	int Sx = (int) (ScaleX * 256.0);
-	int Sy = (int) (ScaleY * 256.0);
-	int SrcBits = pSrc->GetBits();
-	int OutBits = pDest->GetBits() == 32 ? 32 : 24;
+	double ScaleX = (double) srcRect.X() / pDest->X();
+	double ScaleY = (double) srcRect.Y() / pDest->Y();
+	auto Sx = (int) (ScaleX * 256.0);
+	auto Sy = (int) (ScaleY * 256.0);
+	auto SrcBits = pSrc->GetBits();
+	auto OutBits = pDest->GetBits() == 32 ? 32 : 24;
 	RgbLut<uint16> ToLinear(RgbLutLinear, RgbLutSRGB);
 	RgbLut<uint8_t, 1<<16> ToSRGB(RgbLutSRGB, RgbLutLinear);
 
@@ -616,12 +612,12 @@ bool ResampleDC(LSurface *pDest, LSurface *pSrc, LRect *FromRgn, Progress *Prog)
 		Prog->SetRange(pDest->Y());
 	}
 	
-	Sr.x1 <<= 8;
-	Sr.y1 <<= 8;
-	Sr.x2 <<= 8;
-	Sr.y2 <<= 8;
+	srcRect.x1 <<= 8;
+	srcRect.y1 <<= 8;
+	srcRect.x2 <<= 8;
+	srcRect.y2 <<= 8;
 
-	LPalette *DestPal = pDest->Palette();
+	auto DestPal = pDest->Palette();
 	System32BitPixel pal8[256];
 	if (pSrc->GetBits() <= 8)
 	{
@@ -646,12 +642,12 @@ bool ResampleDC(LSurface *pDest, LSurface *pSrc, LRect *FromRgn, Progress *Prog)
 	}
 
 	// For each destination pixel
-	LSurface *pAlpha = pSrc->AlphaDC();
-	LColourSpace SrcCs = pSrc->GetColourSpace();
-	LColourSpace DstCs = pDest->GetColourSpace();
-	bool HasSrcAlpha = LColourSpaceHasAlpha(SrcCs);
-	bool HasDestAlpha = LColourSpaceHasAlpha(DstCs);
-	bool ProcessAlpha = HasSrcAlpha && HasDestAlpha;
+	auto pAlpha = pSrc->AlphaDC();
+	auto SrcCs = pSrc->GetColourSpace();
+	auto DstCs = pDest->GetColourSpace();
+	auto HasSrcAlpha = LColourSpaceHasAlpha(SrcCs);
+	auto HasDestAlpha = LColourSpaceHasAlpha(DstCs);
+	auto ProcessAlpha = HasSrcAlpha && HasDestAlpha;
 	for (int Dy = 0; Dy<pDest->Y(); Dy++)
 	{
 		for (int Dx = 0; Dx<pDest->X(); Dx++)
@@ -663,8 +659,8 @@ bool ResampleDC(LSurface *pDest, LSurface *pSrc, LRect *FromRgn, Progress *Prog)
 			uint64 A = 0;
 			REG uint64 a;
 
-			int NextX = (Dx+1)*Sx+Sr.x1;
-			int NextY = (Dy+1)*Sy+Sr.y1;
+			int NextX = (Dx + 1) * Sx + srcRect.x1;
+			int NextY = (Dy + 1) * Sy + srcRect.y1;
 			int Nx, Ny;
 			COLOUR c;
 			
@@ -673,13 +669,12 @@ bool ResampleDC(LSurface *pDest, LSurface *pSrc, LRect *FromRgn, Progress *Prog)
 			{
 				case 32:
 				{
-					for (int y=Dy*Sy+Sr.y1; y<NextY; y=Ny)
+					for (int y=Dy * Sy + srcRect.y1; y < NextY; y = Ny)
 					{
 						Ny = y + (256 - (y%256));
 
 						REG System32BitPixel *Src;
-						// register uchar *DivLut = Div255Lut;
-						for (REG int x=Dx*Sx+Sr.x1; x<NextX; x=Nx)
+						for (REG int x=Dx * Sx + srcRect.x1; x < NextX; x = Nx)
 						{
 							Nx = x + (256 - (x%256));
 
@@ -704,7 +699,7 @@ bool ResampleDC(LSurface *pDest, LSurface *pSrc, LRect *FromRgn, Progress *Prog)
 				}
 				case 8:
 				{
-					for (int y=Dy*Sy+Sr.y1; y<NextY; y=Ny)
+					for (int y=Dy * Sy + srcRect.y1; y < NextY; y = Ny)
 					{
 						Ny = y + (256 - (y%256));
 
@@ -712,7 +707,7 @@ bool ResampleDC(LSurface *pDest, LSurface *pSrc, LRect *FromRgn, Progress *Prog)
 						{
 							uint8_t Alpha;
 							REG int SrcX, SrcY;
-							for (REG int x=Dx*Sx+Sr.x1; x<NextX; x=Nx)
+							for (REG int x=Dx * Sx + srcRect.x1; x < NextX; x = Nx)
 							{
 								Nx = x + (256 - (x%256));
 
@@ -733,7 +728,7 @@ bool ResampleDC(LSurface *pDest, LSurface *pSrc, LRect *FromRgn, Progress *Prog)
 						}
 						else
 						{
-							for (REG int x=Dx*Sx+Sr.x1; x<NextX; x=Nx)
+							for (REG int x=Dx * Sx + srcRect.x1; x < NextX; x = Nx)
 							{
 								Nx = x + (256 - (x%256));
 
@@ -752,11 +747,11 @@ bool ResampleDC(LSurface *pDest, LSurface *pSrc, LRect *FromRgn, Progress *Prog)
 				}
 				default:
 				{
-					for (int y=Dy*Sy+Sr.y1; y<NextY; y=Ny)
+					for (int y=Dy * Sy + srcRect.y1; y < NextY; y = Ny)
 					{
 						Ny = y + (256 - (y%256));
 
-						for (REG int x=Dx*Sx+Sr.x1; x<NextX; x=Nx)
+						for (REG int x=Dx * Sx + srcRect.x1; x < NextX; x = Nx)
 						{
 							Nx = x + (256 - (x%256));
 

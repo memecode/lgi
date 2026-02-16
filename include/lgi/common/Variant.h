@@ -356,6 +356,7 @@ public:
 	LVariant &operator =(class LMouse *p);
 	LVariant &operator =(class LKey *k);
 	LVariant &operator =(class LStream *s);
+	LVariant &operator =(LAutoPtr<class LSurface> surface);
 
 	bool operator ==(LVariant &v);
 	bool operator !=(LVariant &v) { return !(*this == v); }

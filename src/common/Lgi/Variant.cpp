@@ -522,6 +522,20 @@ LVariant &LVariant::operator =(LStream *s)
 	return *this;
 }
 
+LVariant &LVariant::operator =(LAutoPtr<LSurface> surface)
+{
+	Empty();
+	if (surface)
+	{
+		Type = GV_LSURFACE;
+		Value.Surface.Ptr = surface.Release();
+		Value.Surface.Ptr->IncRef();
+		Value.Surface.Own = true;
+	}
+	
+	return *this;
+}
+
 LVariant &LVariant::operator =(LVariant const &i)
 {
 	if (&i == this)

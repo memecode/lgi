@@ -956,10 +956,10 @@ bool LRichTextPriv::ImageBlock::DoContext(LSubMenu &s, LPoint Doc, ssize_t Offse
 		LSubMenu *c = s.AppendSub("Transform Image");
 		if (c)
 		{
-			c->AppendItem("Rotate Clockwise", IDM_CLOCKWISE); 
-			c->AppendItem("Rotate Anti-clockwise", IDM_ANTI_CLOCKWISE); 
-			c->AppendItem("Horizontal Flip", IDM_X_FLIP); 
-			c->AppendItem("Vertical Flip", IDM_Y_FLIP); 
+			c->AppendItem("Rotate Clockwise", ID_CLOCKWISE); 
+			c->AppendItem("Rotate Anti-clockwise", ID_ANTI_CLOCKWISE); 
+			c->AppendItem("Horizontal Flip", ID_X_FLIP); 
+			c->AppendItem("Vertical Flip", ID_Y_FLIP); 
 		}
 
 		c = s.AppendSub("Scale Image");
@@ -984,7 +984,7 @@ bool LRichTextPriv::ImageBlock::DoContext(LSubMenu &s, LPoint Doc, ssize_t Offse
 					m += s;
 				}
 				
-				LMenuItem *mi = c->AppendItem(m, IDM_SCALE_IMAGE+i, !IsBusy());
+				auto mi = c->AppendItem(m, ID_SCALE_IMAGE+i, !IsBusy());
 				if (mi && ResizeIdx == i)
 				{
 					mi->Checked(true);
@@ -1125,10 +1125,10 @@ LMessage::Result LRichTextPriv::ImageBlock::OnEvent(LMessage *Msg)
 		{
 			if (!SourceImg)
 				break;
-			if (Msg->A() >= IDM_SCALE_IMAGE &&
-				Msg->A() <  IDM_SCALE_IMAGE + CountOf(ImgScales))
+			if (Msg->A() >= ID_SCALE_IMAGE &&
+				Msg->A() <  ID_SCALE_IMAGE + CountOf(ImgScales))
 			{
-				int i = (int)Msg->A() - IDM_SCALE_IMAGE;
+				int i = (int)Msg->A() - ID_SCALE_IMAGE;
 				if (i >= 0 && i < (int)Scales.Length())
 				{
 					ScaleInf &si = Scales[i];
@@ -1145,22 +1145,22 @@ LMessage::Result LRichTextPriv::ImageBlock::OnEvent(LMessage *Msg)
 			}
 			else switch (Msg->A())
 			{
-				case IDM_CLOCKWISE:
+				case ID_CLOCKWISE:
 					LOADER_LOG("%s:%i - Posting M_IMAGE_ROTATE\n", _FL);
 					if (PostThreadEvent(GetThreadHandle(), M_IMAGE_ROTATE, (LMessage::Param) SourceImg.Get(), 1))
 						UpdateThreadBusy(_FL, 1);
 					break;
-				case IDM_ANTI_CLOCKWISE:
+				case ID_ANTI_CLOCKWISE:
 					LOADER_LOG("%s:%i - Posting M_IMAGE_ROTATE\n", _FL);
 					if (PostThreadEvent(GetThreadHandle(), M_IMAGE_ROTATE, (LMessage::Param) SourceImg.Get(), -1))
 						UpdateThreadBusy(_FL, 1);
 					break;
-				case IDM_X_FLIP:
+				case ID_X_FLIP:
 					LOADER_LOG("%s:%i - Posting M_IMAGE_FLIP\n", _FL);
 					if (PostThreadEvent(GetThreadHandle(), M_IMAGE_FLIP, (LMessage::Param) SourceImg.Get(), 1))
 						UpdateThreadBusy(_FL, 1);
 					break;
-				case IDM_Y_FLIP:
+				case ID_Y_FLIP:
 					LOADER_LOG("%s:%i - Posting M_IMAGE_FLIP\n", _FL);
 					if (PostThreadEvent(GetThreadHandle(), M_IMAGE_FLIP, (LMessage::Param) SourceImg.Get(), 0))
 						UpdateThreadBusy(_FL, 1);

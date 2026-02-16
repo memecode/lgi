@@ -1362,39 +1362,39 @@ void LRichTextEdit::DoContextMenu(LMouse &m)
 	if (Over)
 		Over->DoContext(RClick, Doc, BlkOffset, true);
 
-	RClick.AppendItem(LLoadString(L_TEXTCTRL_CUT, "Cut"), IDM_RTE_CUT, HasSelection());
-	RClick.AppendItem(LLoadString(L_TEXTCTRL_COPY, "Copy"), IDM_RTE_COPY, HasSelection());
-	RClick.AppendItem(LLoadString(L_TEXTCTRL_PASTE, "Paste"), IDM_RTE_PASTE, ClipText != 0);
+	RClick.AppendItem(LLoadString(L_TEXTCTRL_CUT, "Cut"), ID_RTE_CUT, HasSelection());
+	RClick.AppendItem(LLoadString(L_TEXTCTRL_COPY, "Copy"), ID_RTE_COPY, HasSelection());
+	RClick.AppendItem(LLoadString(L_TEXTCTRL_PASTE, "Paste"), ID_RTE_PASTE, ClipText != 0);
 	RClick.AppendSeparator();
 
-	RClick.AppendItem(LLoadString(L_TEXTCTRL_UNDO, "Undo"), IDM_RTE_UNDO, false /* UndoQue.CanUndo() */);
-	RClick.AppendItem(LLoadString(L_TEXTCTRL_REDO, "Redo"), IDM_RTE_REDO, false /* UndoQue.CanRedo() */);
+	RClick.AppendItem(LLoadString(L_TEXTCTRL_UNDO, "Undo"), ID_RTE_UNDO, false /* UndoQue.CanUndo() */);
+	RClick.AppendItem(LLoadString(L_TEXTCTRL_REDO, "Redo"), ID_RTE_REDO, false /* UndoQue.CanRedo() */);
 	RClick.AppendSeparator();
 
 	#if 0
-	i = RClick.AppendItem(LLoadString(L_TEXTCTRL_FIXED, "Fixed Width Font"), IDM_FIXED, true);
+	i = RClick.AppendItem(LLoadString(L_TEXTCTRL_FIXED, "Fixed Width Font"), ID_FIXED, true);
 	if (i) i->Checked(GetFixedWidthFont());
 	#endif
 
-	i = RClick.AppendItem(LLoadString(L_TEXTCTRL_AUTO_INDENT, "Auto Indent"), IDM_AUTO_INDENT, true);
+	i = RClick.AppendItem(LLoadString(L_TEXTCTRL_AUTO_INDENT, "Auto Indent"), ID_AUTO_INDENT, true);
 	if (i) i->Checked(AutoIndent);
 	
-	i = RClick.AppendItem(LLoadString(L_TEXTCTRL_SHOW_WHITESPACE, "Show Whitespace"), IDM_SHOW_WHITE, true);
+	i = RClick.AppendItem(LLoadString(L_TEXTCTRL_SHOW_WHITESPACE, "Show Whitespace"), ID_SHOW_WHITE, true);
 	if (i) i->Checked(ShowWhiteSpace);
 	
-	i = RClick.AppendItem(LLoadString(L_TEXTCTRL_HARD_TABS, "Hard Tabs"), IDM_HARD_TABS, true);
+	i = RClick.AppendItem(LLoadString(L_TEXTCTRL_HARD_TABS, "Hard Tabs"), ID_HARD_TABS, true);
 	if (i) i->Checked(HardTabs);
 	
-	RClick.AppendItem(LLoadString(L_TEXTCTRL_INDENT_SIZE, "Indent Size"), IDM_INDENT_SIZE, true);
-	RClick.AppendItem(LLoadString(L_TEXTCTRL_TAB_SIZE, "Tab Size"), IDM_TAB_SIZE, true);
+	RClick.AppendItem(LLoadString(L_TEXTCTRL_INDENT_SIZE, "Indent Size"), ID_INDENT_SIZE, true);
+	RClick.AppendItem(LLoadString(L_TEXTCTRL_TAB_SIZE, "Tab Size"), ID_TAB_SIZE, true);
 	
 	LSubMenu *Src = RClick.AppendSub("Source");
 	if (Src)
 	{
-		Src->AppendItem("Copy Original", IDM_COPY_ORIGINAL, d->OriginalText.Get() != NULL);
-		Src->AppendItem("Copy Current", IDM_COPY_CURRENT);
+		Src->AppendItem("Copy Original", ID_COPY_ORIGINAL, d->OriginalText.Get() != NULL);
+		Src->AppendItem("Copy Current", ID_COPY_CURRENT);
 		#ifdef _DEBUG
-		Src->AppendItem("Dump Nodes", IDM_DUMP_NODES);
+		Src->AppendItem("Dump Nodes", ID_DUMP_NODES);
 		// Edit->DumpNodes(Tree);
 		#endif
 	}
@@ -1413,54 +1413,54 @@ void LRichTextEdit::DoContextMenu(LMouse &m)
 	m.ToScreen();
 	switch (Id = RClick.Float(this, m.x, m.y))
 	{
-		case IDM_FIXED:
+		case ID_FIXED:
 		{
 			SetFixedWidthFont(!GetFixedWidthFont());							
 			SendNotify(LNotifyFixedWidthChanged);
 			break;
 		}
-		case IDM_RTE_CUT:
+		case ID_RTE_CUT:
 		{
 			Cut();
 			break;
 		}
-		case IDM_RTE_COPY:
+		case ID_RTE_COPY:
 		{
 			Copy();
 			break;
 		}
-		case IDM_RTE_PASTE:
+		case ID_RTE_PASTE:
 		{
 			Paste();
 			break;
 		}
-		case IDM_RTE_UNDO:
+		case ID_RTE_UNDO:
 		{
 			Undo();
 			break;
 		}
-		case IDM_RTE_REDO:
+		case ID_RTE_REDO:
 		{
 			Redo();
 			break;
 		}
-		case IDM_AUTO_INDENT:
+		case ID_AUTO_INDENT:
 		{
 			AutoIndent = !AutoIndent;
 			break;
 		}
-		case IDM_SHOW_WHITE:
+		case ID_SHOW_WHITE:
 		{
 			ShowWhiteSpace = !ShowWhiteSpace;
 			Invalidate();
 			break;
 		}
-		case IDM_HARD_TABS:
+		case ID_HARD_TABS:
 		{
 			HardTabs = !HardTabs;
 			break;
 		}
-		case IDM_INDENT_SIZE:
+		case ID_INDENT_SIZE:
 		{
 			char s[32];
 			sprintf_s(s, sizeof(s), "%i", IndentSize);
@@ -1475,7 +1475,7 @@ void LRichTextEdit::DoContextMenu(LMouse &m)
 			});
 			break;
 		}
-		case IDM_TAB_SIZE:
+		case ID_TAB_SIZE:
 		{
 			char s[32];
 			sprintf_s(s, sizeof(s), "%i", TabSize);
@@ -1487,19 +1487,19 @@ void LRichTextEdit::DoContextMenu(LMouse &m)
 			});
 			break;
 		}
-		case IDM_COPY_ORIGINAL:
+		case ID_COPY_ORIGINAL:
 		{
 			LClipBoard c(this);
 			c.Text(d->OriginalText);
 			break;
 		}
-		case IDM_COPY_CURRENT:
+		case ID_COPY_CURRENT:
 		{
 			LClipBoard c(this);
 			c.Text(Name());
 			break;
 		}
-		case IDM_DUMP_NODES:
+		case ID_DUMP_NODES:
 		{
 			#ifdef _DEBUG
 			NodeView *nv = new NodeView(GetWindow());

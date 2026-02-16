@@ -1144,8 +1144,7 @@ bool SystemFunctions::Execute(LScriptArguments &Args)
 	if (Status)
 	{
 		e.Communicate(&p);
-		LAutoString o(p.NewStr());
-		*Args.GetReturn() = o;
+		*Args.GetReturn() = p.NewLStr();
 	}
 	else if (Log)
 	{

@@ -135,6 +135,9 @@ public:
 		ForegroundColourBtn,
 		BackgroundColourBtn,
 
+		BulletsBtn,
+		NumberedListBtn,
+		
 		MakeLinkBtn,
 		RemoveLinkBtn,
 		RemoveStyleBtn,

@@ -3268,7 +3268,7 @@ void LTag::SetAttributeStyles()
 			LAutoWString CleanValue(Value ? CleanText(Value, strlen(Value), "utf-8", true, true) : NULL);
 			if (CleanValue)
 			{
-				CtrlValue = CleanValue;
+				CtrlValue = CleanValue.Get();
 			}
 			
 			if (Get("type", Type))

@@ -2003,7 +2003,7 @@ bool LRichTextPriv::TextBlock::DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset
 			if (Offset >= pos && Offset < pos + (ssize_t)t->Length())
 			{
 				// Is over a link...
-				s.AppendItem("Open URL", IDM_OPEN_URL);
+				s.AppendItem("Open URL", ID_OPEN_URL);
 				ClickedUri = t->Param;
 				break;
 			}
@@ -2021,7 +2021,7 @@ LMessage::Result LRichTextPriv::TextBlock::OnEvent(LMessage* Msg)
 	{
 		case M_COMMAND:
 		{
-			if (Msg->A() == IDM_OPEN_URL)
+			if (Msg->A() == ID_OPEN_URL)
 			{
 				if (ClickedUri)
 					LExecute(ClickedUri);

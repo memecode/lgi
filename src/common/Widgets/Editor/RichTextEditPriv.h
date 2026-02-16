@@ -70,33 +70,33 @@
 
 enum RteCommands
 {
-	// IDM_OPEN = 10,
-	IDM_NEW = 2000,
-	IDM_RTE_COPY,
-	IDM_RTE_CUT,
-	IDM_RTE_PASTE,
-	IDM_RTE_UNDO,
-	IDM_RTE_REDO,
-	IDM_COPY_URL,
-	IDM_AUTO_INDENT,
-	IDM_UTF8,
-	IDM_PASTE_NO_CONVERT,
-	IDM_FIXED,
-	IDM_SHOW_WHITE,
-	IDM_HARD_TABS,
-	IDM_INDENT_SIZE,
-	IDM_TAB_SIZE,
-	IDM_DUMP,
-	IDM_RTL,
-	IDM_COPY_ORIGINAL,
-	IDM_COPY_CURRENT,
-	IDM_DUMP_NODES,
-	IDM_CLOCKWISE,
-	IDM_ANTI_CLOCKWISE,
-	IDM_X_FLIP,
-	IDM_Y_FLIP,
-	IDM_SCALE_IMAGE,
-	IDM_OPEN_URL,
+	ID_NEW = 2000,
+	ID_RTE_COPY,
+	ID_RTE_CUT,
+	ID_RTE_PASTE,
+	ID_RTE_UNDO,
+	ID_RTE_REDO,
+	ID_COPY_URL,
+	ID_AUTO_INDENT,
+	ID_UTF8,
+	ID_PASTE_NO_CONVERT,
+	ID_FIXED,
+	ID_SHOW_WHITE,
+	ID_HARD_TABS,
+	ID_INDENT_SIZE,
+	ID_TAB_SIZE,
+	ID_DUMP,
+	ID_RTL,
+	ID_COPY_ORIGINAL,
+	ID_COPY_CURRENT,
+	ID_DUMP_NODES,
+	ID_CLOCKWISE,
+	ID_ANTI_CLOCKWISE,
+	ID_X_FLIP,
+	ID_Y_FLIP,
+	ID_SCALE_IMAGE,
+	ID_OPEN_URL,
+
 	CODEPAGE_BASE = 100,
 	CONVERT_CODEPAGE_BASE = 200,
 	SPELLING_BASE = 300
@@ -336,19 +336,19 @@ public:
 	LAutoString UtfNameCache;
 	LAutoPtr<LFont> EditFont;
 	LAutoPtr<LFont> UiFont;
-	bool WordSelectMode;
-	bool Dirty;
-	LPoint DocumentExtent; // Px
+	bool WordSelectMode = false;
+	bool Dirty = false;
+	LPoint DocumentExtent = {0, 0}; // Px
 	LString Charset;
 	LHtmlStaticInst Inst;
-	int NextUid;
+	int NextUid = 1;
 	LStream *Log;
-	bool HtmlLinkAsCid;
-	uint64 BlinkTs;
+	bool HtmlLinkAsCid = false;
+	uint64 BlinkTs = 0;
 
 	// Spell check support
-	LSpellCheck *SpellCheck;
-	bool SpellDictionaryLoaded;
+	LSpellCheck *SpellCheck = nullptr;
+	bool SpellDictionaryLoaded = false;
 	LString SpellLang, SpellDict;
 
 	// This is set when the user changes a style without a selection,
@@ -356,16 +356,24 @@ public:
 	LArray<LRichTextEdit::RectType> StyleDirty;
 
 	// Toolbar
-	bool ShowTools;
+	bool ShowTools = true;
 	LRichTextEdit::RectType ClickedBtn, OverBtn;
 	ButtonState BtnState[LRichTextEdit::MaxArea];
 	LRect Areas[LRichTextEdit::MaxArea];
 	LVariant Values[LRichTextEdit::MaxArea];
+	
+	enum ToolbarIconIndex {
+		IconBullets,
+		IconNumbered
+	};
+	LAutoPtr<LSurface> toolbarIcons;	
+	LAutoPtr<LSurface> ResizeIcon(ToolbarIconIndex index, int px);
+
 
 	// Scrolling
 	int ScrollLinePx;
-	int ScrollOffsetPx;
-	bool ScrollChange;
+	int ScrollOffsetPx = 0;
+	bool ScrollChange = false;
 
 	// Eat keys (OS bug work arounds)
 	LArray<uint32_t> EatVkeys;
@@ -619,8 +627,8 @@ public:
 	};
 
 	LArray<Transaction*> UndoQue;
-	ssize_t UndoPos;
-	bool UndoPosLock;
+	ssize_t UndoPos = 0;
+	bool UndoPosLock = false;
 
 	bool AddTrans(LAutoPtr<Transaction> &t);
 	bool SetUndoPos(ssize_t Pos);
