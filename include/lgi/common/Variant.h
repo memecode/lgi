@@ -357,6 +357,7 @@ public:
 	LVariant &operator =(class LKey *k);
 	LVariant &operator =(class LStream *s);
 	LVariant &operator =(LAutoPtr<class LSurface> surface);
+	LVariant &operator =(LAutoString autoStr);
 
 	bool operator ==(LVariant &v);
 	bool operator !=(LVariant &v) { return !(*this == v); }

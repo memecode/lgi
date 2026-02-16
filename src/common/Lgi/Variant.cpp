@@ -536,6 +536,12 @@ LVariant &LVariant::operator =(LAutoPtr<LSurface> surface)
 	return *this;
 }
 
+LVariant &LVariant::operator =(LAutoString autoStr)
+{
+	OwnStr(autoStr.Release());
+	return *this;
+}
+
 LVariant &LVariant::operator =(LVariant const &i)
 {
 	if (&i == this)
