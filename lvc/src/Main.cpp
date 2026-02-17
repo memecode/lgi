@@ -64,7 +64,10 @@ void AppPriv::SortCommits(int col)
 			auto B = dynamic_cast<VcCommit*>(b);
 
 			if (A == NULL || B == NULL)
-				return (int)(a - b);
+			{
+				// The null ptr will be the 'UncommitedItem' (or 0)
+				return (A ? 1 : 0) - (B ? 1 : 0);
+			}
 
 			auto f = A->GetFolder();
 			auto flds = f->GetFields();
