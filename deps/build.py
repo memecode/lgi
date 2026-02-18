@@ -53,7 +53,11 @@ universalArchs = []
 extraCmakeArgs = []
 if platform.system() == "Windows":
     subfolders = ["build-x64"]
-    gen = ["Visual Studio 16 2019"]
+    # detect the compiler:
+    if os.path.exists("C:\\Program Files\\Microsoft Visual Studio\\2022"):
+        gen = ["Visual Studio 17 2022"]
+    else:
+        gen = ["Visual Studio 16 2019"]
     arch = ["-A", "x64"]
     singleConfig = False
 elif platform.system() == "Darwin":

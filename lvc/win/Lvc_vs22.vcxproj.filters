@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Lgi">
+      <UniqueIdentifier>{fa200907-15ff-4b7a-a2c4-77c17b81b307}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{ceabde46-f0f5-4728-929b-43ebf21b9fa0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\StructuredLog">
+      <UniqueIdentifier>{699395fd-5c52-485b-aee9-12ca42fecba2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Ssh">
+      <UniqueIdentifier>{954c3d3b-a151-4c83-b7cc-c36301353e1b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\PatchViewer">
+      <UniqueIdentifier>{9ebbbfd3-1106-4ecf-b05d-f0366063de49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Browse">
+      <UniqueIdentifier>{96f59874-2e83-4564-9706-35afdc3494e2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\Src\Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Src\VcCommit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Src\VcFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Src\VcFolder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\Lgi\LgiMain.cpp">
+      <Filter>Source Files\Lgi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Src\DropDownBtn.cpp">
+      <Filter>Source Files\Lgi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Src\PatchViewer.cpp">
+      <Filter>Source Files\PatchViewer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\Text\XmlTreeUi.cpp">
+      <Filter>Source Files\Lgi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Src\BrowseUi.cpp">
+      <Filter>Source Files\Browse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Src\SshConnection.cpp">
+      <Filter>Source Files\Ssh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\Text\RemoveAnsi.cpp">
+      <Filter>Source Files\Lgi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\Net\Http.cpp">
+      <Filter>Source Files\Lgi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\Net\OpenSSLSocket.cpp">
+      <Filter>Source Files\Lgi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\Net\Ssh.cpp">
+      <Filter>Source Files\Ssh</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Src\SshConnection.h">
+      <Filter>Source Files\Ssh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\lgi\common\StructuredIo.h">
+      <Filter>Source Files\StructuredLog</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\lgi\common\StructuredLog.h">
+      <Filter>Source Files\StructuredLog</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Src\Lvc.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Src\VcCommit.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Src\VcFile.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Src\VcFolder.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\lgi\common\IniFile.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\BranchEditDlg.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\lgi\common\Ssh.h">
+      <Filter>Source Files\Ssh</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\resources\Lvc.rc">
+      <Filter>Resources</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="..\..\src\win\General\Lgi.manifest">
+      <Filter>Resources</Filter>
+    </Manifest>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\installer-zip.py">
+      <Filter>Resources</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\resources\icon32.ico">
+      <Filter>Resources</Filter>
+    </Image>
+  </ItemGroup>
+</Project>

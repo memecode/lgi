@@ -51,7 +51,7 @@ function(GitProject NAME URI BRANCH ADDTARGET)
 
     if(${ADDTARGET})
         set(LISTS "${DIR}/CMakeLists.txt")
-        message("adding cmake: ${DIR}/CMakeLists.txt")
+        message("adding cmake: ${LISTS}")
         if(EXISTS ${LISTS})
             add_subdirectory(${DIR} ${NAME})
         else()
@@ -67,6 +67,10 @@ file(MAKE_DIRECTORY ${LIB_FOLDER})
 if(WIN32)
     # '/FS' - Forces writes to the PDB file to be serialized through MSPDBSRV.EXE.
     add_compile_options(/FS)
+
+    # fix the slashs in CMAKE_INSTALL_DOCDIR
+    string(REPLACE "\\" "/" CMAKE_INSTALL_DOCDIR "${CMAKE_INSTALL_DOCDIR}")
+    message("Fixed CMAKE_INSTALL_DOCDIR=${CMAKE_INSTALL_DOCDIR}")
 endif()
 
 if (1)
@@ -148,9 +152,19 @@ set(PNG_ARM_NEON off)
 set(PNG_STATIC off)
 set(PNG_SHARED on)
 set(PNG_BUILD_ZLIB OFF)
+set(ZLIB_LIBRARY
+    ${DEPS}/zlib)
 set(ZLIB_INCLUDE_DIR
     ${DEPS}/zlib
     ${CMAKE_BINARY_DIR}/zlib)
+set(ZLIB_VERSION "1.3.2")
+
+if (1)
+    # used by ide/lvc
+    GitProject(libssh "https://git.libssh.org/projects/libssh.git" "libssh-0.12.0" TRUE)
+endif()
+
+
 GitProject(libpng  "https://github.com/memecode/libpng.git" "libpng16" TRUE)
 install(TARGETS png_shared
     RUNTIME
@@ -176,5 +190,6 @@ if (1)
 endif()
 
 if (1)
+    # unused at the moment, but might replace Lgi's native scripting language sometime
     GitProject(quickjs-ng "https://github.com/quickjs-ng/quickjs.git" "master" TRUE)
 endif()
