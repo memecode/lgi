@@ -145,8 +145,7 @@ public:
 	}
 	
 	void SetStyle()
-	{
-		
+	{		
 	}
 };
 
@@ -705,7 +704,7 @@ public:
 		}
 
 		// If this returns non-zero further command processing is aborted.
-		LMessage::Result OnEvent(LMessage *Msg)
+		LMessage::Result OnEvent(LMessage *Msg) override
 		{
 			return false;
 		}
@@ -1007,7 +1006,9 @@ public:
 		void LayoutOffsets(int DefaultFontHt);
 	};
 	
-	class TextBlock : public Block
+	class TextBlock :
+		public Block,
+		public LCssBox
 	{
 		LNamedStyle *Style;
 		LArray<LSpellCheck::SpellingError> SpellingErrors;
@@ -1027,9 +1028,6 @@ public:
 		// True if the 'Layout' data is out of date.
 		bool LayoutDirty;
 
-		// Size of the edges
-		LRect Margin, Border, Padding;
-		
 		// Default font for the block
 		LFont *Fnt;
 		
@@ -1134,6 +1132,56 @@ public:
 		ssize_t DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, LArray<uint32_t> *DeletedText = NULL);
 		bool DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper);
 		Block *Split(Transaction *Trans, ssize_t AtOffset);
+	};
+
+	// Unordered or numbered list
+	class ListBlock :
+		public Block
+	{
+		LRect Pos;
+		bool numbered = false;
+		LArray<Block*> blocks;
+
+	public:
+		ListBlock(LRichTextPriv *priv);
+		ListBlock(const ListBlock *Copy);
+		~ListBlock();
+
+		const char *GetClass() override { return "ListBlock"; }
+		LMessage::Result OnEvent(LMessage *Msg) override;
+		LRect GetPos() override;
+		ssize_t Length() override;
+		bool HitTest(HitTestResult &htr) override;
+		bool GetPosFromIndex(BlockCursor *Cursor) override;
+		bool OnLayout(Flow &f) override;
+		void OnPaint(PaintContext &Ctx) override;
+		bool ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rgn) override;
+		bool OffsetToLine(ssize_t Offset, int *ColX, LArray<int> *LineY) override;
+		ssize_t LineToOffset(ssize_t Line) override;
+		int GetLines() override;
+		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, LFindReplaceCommon *Params) override;
+		void SetSpellingErrors(LArray<LSpellCheck::SpellingError> &Errors, LRange r) override;
+		void IncAllStyleRefs() override;
+		void Dump() override;
+		LNamedStyle *GetStyle(ssize_t At = -1) override;
+		bool DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset /* internal to this block, not the whole doc. */, bool TopOfMenu) override;
+		#ifdef _DEBUG
+		void DumpNodes(LTreeItem *Ti) override;
+		#endif
+		bool IsValid() override;
+		bool IsBusy(bool Stop = false) override;
+		Block *Clone() override;
+		void OnComponentInstall(LString Name) override;
+		ssize_t CopyAt(ssize_t Offset, ssize_t Chars, LArray<uint32_t> *Text) override;
+		bool Seek(SeekType To, BlockCursor &Cursor) override;
+
+		// Edit
+		bool AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars = -1, LNamedStyle *Style = NULL) override;
+		ssize_t DeleteAt(Transaction *Trans, ssize_t Offset, ssize_t Chars, LArray<uint32_t> *DeletedText = NULL) override;
+		bool ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, LCss *Style, bool Add) override;
+		bool DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper) override;
+		Block *Split(Transaction *Trans, ssize_t AtOffset) override;
+		bool OnDictionary(Transaction *Trans) override;
 	};
 
 	class ImageBlock :

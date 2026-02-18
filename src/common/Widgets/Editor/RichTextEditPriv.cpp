@@ -2158,7 +2158,7 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 		
 	for (unsigned i = 0; i < e->Children.Length(); i++)
 	{
-		LHtmlElement *c = e->Children[i];
+		auto c = e->Children[i];
 		LAutoPtr<LCss> Style;
 		if (ParentStyle)
 			Style.Reset(new LCss(*ParentStyle));
@@ -2239,7 +2239,7 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 			}
 			case TAG_IMG:
 			{
-				ctx.Tb = NULL;
+				ctx.Tb = nullptr;
 				IsBlock = true;
 				break;
 			}
@@ -2281,7 +2281,7 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 			}
 		}
 
-		LNamedStyle *CachedStyle = AddStyleToCache(Style);			
+		auto CachedStyle = AddStyleToCache(Style);			
 
 		if
 		(
@@ -2358,6 +2358,10 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 					st->Param = Link;
 			}
 		}
+		else if (c->TagId == TAG_UL ||
+				 c->TagId == TAG_OL)
+		{
+		}
 		else
 		{
 			if (IsBlock && ctx.Tb != NULL)
@@ -2385,7 +2389,7 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 				}
 			}
 
-			char16 *Txt = c->GetText();
+			auto Txt = c->GetText();
 			if
 			(
 				Txt
@@ -2418,7 +2422,7 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 			return false;
 			
 		if (EndStyleChange)
-			ctx.Tb = NULL;
+			ctx.Tb = nullptr;
 		if (IsBlock)
 			ctx.StartOfLine = true;
 	}
