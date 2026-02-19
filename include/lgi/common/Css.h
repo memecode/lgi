@@ -1453,3 +1453,40 @@ protected:
 #ifndef LINUX
 #pragma pack(pop)
 #endif
+
+class LCssBox
+{
+public:
+	LRect margin, border, padding;
+	
+	LCssBox()
+	{
+		margin.ZOff(0, 0);
+		border.ZOff(0, 0);
+		padding.ZOff(0, 0);
+	}
+	
+	void SetStyle(LFont *fnt, LCss *css, LRect &parentBox)
+	{
+		if (fnt == nullptr || css == nullptr)
+		{
+			LAssert(!"missing param");
+			return;
+		}
+
+		margin.x1 = css->MarginLeft().ToPx(parentBox.X(), fnt);
+		margin.y1 = css->MarginTop().ToPx(parentBox.Y(), fnt);
+		margin.x2 = css->MarginRight().ToPx(parentBox.X(), fnt);
+		margin.y2 = css->MarginBottom().ToPx(parentBox.Y(), fnt);
+
+		border.x1 = css->BorderLeft().ToPx(parentBox.X(), fnt);
+		border.y1 = css->BorderTop().ToPx(parentBox.Y(), fnt);
+		border.x2 = css->BorderRight().ToPx(parentBox.X(), fnt);
+		border.y2 = css->BorderBottom().ToPx(parentBox.Y(), fnt);
+
+		padding.x1 = css->PaddingLeft().ToPx(parentBox.X(), fnt);
+		padding.y1 = css->PaddingTop().ToPx(parentBox.Y(), fnt);
+		padding.x2 = css->PaddingRight().ToPx(parentBox.X(), fnt);
+		padding.y2 = css->PaddingBottom().ToPx(parentBox.Y(), fnt);
+	}
+};

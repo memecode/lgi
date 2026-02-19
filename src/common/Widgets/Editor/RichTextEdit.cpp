@@ -418,7 +418,7 @@ bool LRichTextEdit::Name(const char *s)
 	if (!d->LHtmlParser::Parse(&Root, s))
 		return d->Error(_FL, "Failed to parse HTML.");
 	
-	LHtmlElement *Body = FindElement(&Root, TAG_BODY);
+	auto Body = FindElement(&Root, TAG_BODY);
 	if (!Body)
 		Body = &Root;
 
@@ -435,7 +435,7 @@ bool LRichTextEdit::Name(const char *s)
 		// Clear out any zero length blocks.
 		for (unsigned i=0; i<d->Blocks.Length(); i++)
 		{
-			LRichTextPriv::Block *b = d->Blocks[i];
+			auto b = d->Blocks[i];
 			if (b->Length() == 0)
 			{
 				d->Blocks.DeleteAt(i--, true);

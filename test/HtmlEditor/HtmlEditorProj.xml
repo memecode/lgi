@@ -13,6 +13,7 @@
 			<Node File="../../src/common/Widgets/Editor/BlockCursor.cpp" Type="2" Platforms="15" />
 			<Node File="../../src/common/Widgets/Editor/HorzRuleBlock.cpp" Type="2" Platforms="15" />
 			<Node File="../../src/common/Widgets/Editor/ImageBlock.cpp" Type="2" Platforms="15" />
+			<Node File="../../src/common/Widgets/Editor/ListBlock.cpp" Type="2" Platforms="15" />
 			<Node File="../../src/common/Widgets/Editor/RichTextEdit.cpp" Type="2" Platforms="15" />
 			<Node File="../../include/lgi/common/RichTextEdit.h" Type="3" Platforms="15" />
 			<Node File="../../src/common/Widgets/Editor/RichTextEditPriv.cpp" Type="2" Platforms="15" />

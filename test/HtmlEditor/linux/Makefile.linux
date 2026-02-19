@@ -29,13 +29,13 @@ ifeq ($(Build),Debug)
 		-llgi-gtk3$(Tag) \
 		-L../../$(BuildDir)
 	Inc =  \
-		-I../../private/common \
-		-I../../include/lgi/linux \
-		-I../../include \
 		-I./resources \
+		-I../../../../../../../usr/include/gstreamer-1.0 \
+		-I../../private/common \
+		-I../../include \
 		-I../../include/lgi/linux/Gtk \
-		`pkg-config --cflags gtk+-3.0` \
-		-I../../../../../../../usr/include/gstreamer-1.0
+		-I../../include/lgi/linux \
+		`pkg-config --cflags gtk+-3.0`
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
@@ -46,33 +46,34 @@ else
 		-llgi-gtk3$(Tag) \
 		-L../../$(BuildDir)
 	Inc =  \
-		-I../../include/lgi/linux/Gtk \
-		-I../../private/common \
+		-I../../../../../../../usr/include/gstreamer-1.0 \
 		-I./resources \
-		-I../../include/lgi/linux \
+		-I../../include/lgi/linux/Gtk \
 		-I../../include \
-		`pkg-config --cflags gtk+-3.0` \
-		-I../../../../../../../usr/include/gstreamer-1.0
+		-I../../private/common \
+		-I../../include/lgi/linux \
+		`pkg-config --cflags gtk+-3.0`
 endif
 
 # Dependencies
 Source =	../../src/common/Lgi/LgiMain.cpp \
-			../../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
+			../../src/common/Net/Http.cpp \
 			../../src/common/Widgets/Editor/RichTextEditPriv.cpp \
-			../../src/common/Widgets/Editor/RichTextEdit.cpp \
+			../../src/common/Text/Emoji/EmojiMap.cpp \
+			../../src/common/Text/Emoji/EmojiTools.cpp \
+			../../src/common/Text/Html.cpp \
 			../../src/common/Widgets/Editor/TextBlock.cpp \
 			../../src/common/Text/HtmlCommon.cpp \
-			../../src/common/Text/HtmlParser.cpp \
 			../../src/common/Text/Homoglyphs/Homoglyphs.cpp \
+			../../src/common/Text/HtmlParser.cpp \
 			../../src/common/Net/OpenSSLSocket.cpp \
 			../../src/common/Widgets/Editor/BlockCursor.cpp \
 			../../src/common/Widgets/Editor/HorzRuleBlock.cpp \
-			../../src/common/Widgets/Editor/ImageBlock.cpp \
-			../../src/common/Text/Emoji/EmojiMap.cpp \
-			../../src/common/Text/Emoji/EmojiTools.cpp \
 			src/Rich.cpp \
-			../../src/common/Net/Http.cpp \
-			../../src/common/Text/Html.cpp
+			../../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
+			../../src/common/Widgets/Editor/ImageBlock.cpp \
+			../../src/common/Widgets/Editor/ListBlock.cpp \
+			../../src/common/Widgets/Editor/RichTextEdit.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -101,13 +102,13 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 		$(Target) $(Objects) $(Libs)
 	@echo Done.
 
-../../$(BuildDir)/liblgi-gtk3$(Tag).so : ../../../deps/build-x64-release/include/iconv.h \
-	../../../deps/build-x64-release/include/jconfig.h \
-	../../../deps/build-x64-release/include/jerror.h \
-	../../../deps/build-x64-release/include/jmorecfg.h \
-	../../../deps/build-x64-release/include/jpeglib.h \
-	../../../deps/build-x64-release/include/lunasvg/lunasvg.h \
-	../../../deps/build-x64-release/include/png.h \
+../../$(BuildDir)/liblgi-gtk3$(Tag).so : ../../../deps/build-x64-debug/include/iconv.h \
+	../../../deps/build-x64-debug/include/jconfig.h \
+	../../../deps/build-x64-debug/include/jerror.h \
+	../../../deps/build-x64-debug/include/jmorecfg.h \
+	../../../deps/build-x64-debug/include/jpeglib.h \
+	../../../deps/build-x64-debug/include/lunasvg/lunasvg.h \
+	../../../deps/build-x64-debug/include/png.h \
 	../../include/lgi/common/App.h \
 	../../include/lgi/common/Array.h \
 	../../include/lgi/common/AutoPtr.h \
