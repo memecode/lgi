@@ -152,15 +152,22 @@ set(PNG_ARM_NEON off)
 set(PNG_STATIC off)
 set(PNG_SHARED on)
 set(PNG_BUILD_ZLIB OFF)
-set(ZLIB_LIBRARY
-    ${DEPS}/zlib)
-set(ZLIB_INCLUDE_DIR
-    ${DEPS}/zlib
-    ${CMAKE_BINARY_DIR}/zlib)
-set(ZLIB_VERSION "1.3.2")
+set(ZLIB_ROOT ${DEPS}/zlib)
 
 if (1)
     # used by ide/lvc
+    set(WITH_ZLIB TRUE)
+
+    # this disables the 'dist' target that conflicts with libjpeg's 'dist' target.
+    function(add_custom_target target)
+        message("my add_custom_target: ${target}")
+        if(${target} STREQUAL "dist")
+            message("Warning: excluding duplicate target '${target}' (${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE})")
+            return()
+        endif()
+        _add_custom_target(${ARGV})
+    endfunction()
+
     GitProject(libssh "https://git.libssh.org/projects/libssh.git" "libssh-0.12.0" TRUE)
 endif()
 
@@ -192,4 +199,5 @@ endif()
 if (1)
     # unused at the moment, but might replace Lgi's native scripting language sometime
     GitProject(quickjs-ng "https://github.com/quickjs-ng/quickjs.git" "master" TRUE)
+    # set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--stack,8388608")
 endif()
