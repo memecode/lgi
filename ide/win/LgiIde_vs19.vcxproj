@@ -178,12 +178,6 @@
     <ResourceCompile Include="..\resources\Script1.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\win\Lgi_vs2019.vcxproj">
-      <Project>{95df9ca4-6d37-4a85-a648-80c2712e0da1}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <MASM Include="..\..\src\common\Coding\ExternCall.asm">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </MASM>
@@ -191,6 +185,11 @@
   <ItemGroup>
     <None Include="..\haiku\buildHaiku.py" />
     <None Include="Makefile.windows" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\win\Lgi_vs19.vcxproj">
+      <Project>{95df9ca4-6d37-4a85-a648-80c2712e0da1}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
