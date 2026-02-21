@@ -197,7 +197,32 @@ if (1)
 endif()
 
 if (1)
+    if(WIN32)
+        if(CMAKE_GENERATOR STREQUAL "Visual Studio 16 2019")
+            # vs2019 doesn't have 'stdatomic.h', grab one from here:
+            GitProject(simple-stdatomic "https://github.com/zenny-chen/simple-stdatomic-for-VS-Clang.git" "master" FALSE)
+            set(STDATOMIC_ROOT "${DEPS}/simple-stdatomic")
+            set(EMSCRIPTEN FALSE)
+
+            # wrap the lib in a very simple static library:
+            add_library(stdatomic STATIC ${STDATOMIC_ROOT}/stdatomic.c)
+            target_include_directories(stdatomic PUBLIC ${STDATOMIC_ROOT})
+            target_compile_definitions(stdatomic PUBLIC "-D_Atomic=")
+        else()
+            message("Assuming '${CMAKE_GENERATOR}' has support for stdatomic.h")
+        endif()
+    endif()
+
     # unused at the moment, but might replace Lgi's native scripting language sometime
     GitProject(quickjs-ng "https://github.com/quickjs-ng/quickjs.git" "master" TRUE)
-    # set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--stack,8388608")
+
+    if(DEFINED STDATOMIC_ROOT)
+        # add custom header path:
+        message("adding STDATOMIC_INC")
+        target_link_libraries(qjs-libc PRIVATE stdatomic)
+        target_link_libraries(run-test262 PRIVATE stdatomic)
+    else()
+        message(FATAL_ERROR "not adding STDATOMIC_INC")
+    endif()
 endif()
+

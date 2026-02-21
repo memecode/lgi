@@ -12,6 +12,7 @@ jobs = 2 if cores <= 4 else cores - 1
 print("usage: build.py [clean] [installPaths]")
 print("cores:", cores, "jobs:", jobs);
 
+useVsVer = 2022
 first = True
 clean = False
 installPaths = False
@@ -22,6 +23,8 @@ for arg in sys.argv:
         clean = True
     elif arg.lower() == 'installpaths':
         installPaths = True
+    elif arg == "2019":
+        useVsVer = 2019
 
 def checkPackage(pkg):
     p = subprocess.run(["dpkg", "-l", pkg], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -54,7 +57,7 @@ extraCmakeArgs = []
 if platform.system() == "Windows":
     subfolders = ["build-x64"]
     # detect the compiler:
-    if os.path.exists("C:\\Program Files\\Microsoft Visual Studio\\2022"):
+    if os.path.exists("C:\\Program Files\\Microsoft Visual Studio\\2022") and useVsVer == 2022:
         gen = ["Visual Studio 17 2022"]
     else:
         gen = ["Visual Studio 16 2019"]
