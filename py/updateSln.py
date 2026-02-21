@@ -2,6 +2,7 @@
 import os
 import sys
 import subprocess
+import shutil
 
 if len(sys.argv) < 2:
     print("usage:", sys.argv[0], " <slnPath>")
@@ -37,7 +38,15 @@ def getSlnVsVer(sln):
     return None
 
 # check if the sln name has the correct postfix for the version of sln it is
-def nameOk(sln):
+def nameOk(path):
+    ext = path.rsplit(".", 1)[-1]
+    if ext == "sln":
+        sln = path
+    elif ext == "vcxproj":
+        sln = path.rsplit(".", 1)[0] + ".sln"
+    else:
+        print("nameOk err: unexpected ext:", ext)
+        sys.exit(-1)
     slnVer = getSlnVsVer(sln)
     if slnVer is None:    
         print("nameOk: no sln ver:", sln)
@@ -73,12 +82,19 @@ def newName(sln):
     return os.path.join(os.path.dirname(sln), "_".join(p))
 
 
-def vcsRename(vcs, oldPath, newPath):
-    args = [vcs, "mv", oldPath, newPath]
-    print("vcsRename:", args)
+def vcsCommand(vcs, cmd, oldPath, newPath):
+
+    if vcs == "git" and cmd == "cp":
+        # no git copy command, so....
+        shutil.copyfile(oldPath, newPath)
+        args = [vcs, "add", newPath]
+    else:
+        args = [vcs, cmd, oldPath, newPath]
+
+    print("vcsCommand:", args)
     p = subprocess.run(args, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
     if p.returncode:
-        print("vcsRename error:", p.stdout.decode())
+        print("vcsCommand error:", p.stdout.decode())
     return p.returncode == 0
 
 def renameSln(sln):
@@ -130,15 +146,15 @@ def renameSln(sln):
         os.path.exists(oldProj) and \
         os.path.exists(oldFilters):
 
-        vcsRename(vcs, oldSln,     newSln)
-        vcsRename(vcs, oldProj,    newProj)
-        vcsRename(vcs, oldFilters, newFilters)
+        vcsCommand(vcs, "mv", oldSln,     newSln)
+        vcsCommand(vcs, "mv", oldProj,    newProj)
+        vcsCommand(vcs, "mv", oldFilters, newFilters)
         if os.path.exists(oldUser):
             os.rename(oldUser, newUser)
 
     return newSln
 
-def checkProjLink(sln):
+def checkProjLink(sln, targetVsVer = None):
     changed = False
     lines = open(sln, "r").read().replace("\r", "").split("\n")
     for idx in range(len(lines)):
@@ -149,14 +165,25 @@ def checkProjLink(sln):
             parts = vars[1].split(",")
             proj = parts[0].strip().strip("\"")
             path = parts[1].strip().strip("\"")
+            fullPath = os.path.abspath(path)
             print(vars[0], proj, "=", path)
             if proj == "Lgi":
                 if path.find("_vs2019"):
                     changed = True
-                    vars[1] = vars[1].replace("_vs2019", "_vs19")
+                    if targetVsVer is None:
+                        vars[1] = vars[1].replace("_vs2019", "_vs19")
+                    else:
+                        vars[1] = vars[1].replace("_vs2019", "_vs22")
                     lines[idx] = "=".join(vars)
                     print("newline:", lines[idx])
-            elif not os.path.exists(path) or not nameOk(path):
+                elif path.find("_vs19") and \
+                    not targetVsVer is None and \
+                    targetVsVer == 2022:
+                    changed = True
+                    vars[1] = vars[1].replace("_vs19", "_vs22")
+                    lines[idx] = "=".join(vars)
+                    print("newline:", lines[idx])
+            elif not os.path.exists(fullPath) or not nameOk(path):
                 base = path.rsplit(".", 1)[0]
                 newSln = None
                 if os.path.exists(base + "_vs19.vcxproj"):
@@ -165,8 +192,14 @@ def checkProjLink(sln):
                     vars[1] = vars[1].replace(path, newPath)
                     lines[idx] = "=".join(vars)
                     print("######## sln name change:", path, newPath)
+                elif os.path.exists(base + "_vs22.vcxproj"):
+                    newPath = base + "_vs22.vcxproj"
+                    changed = True
+                    vars[1] = vars[1].replace(path, newPath)
+                    lines[idx] = "=".join(vars)
+                    print("######## sln name change:", path, newPath)
                 else:
-                    print("######## need to fix the path:", path, base)
+                    print("######## need to fix the path:", fullPath, base)
     if changed:
         txt = "\n".join(lines)
         print("\nnewtxt:")
@@ -193,6 +226,18 @@ checkProjLink(sln)
 
 if slnVer == 2019:
     # check if there is a 2022 version of the solution
-    newSln = sln.rsplit(".", 1)[0] + "_vs22.sln"
+    oldProj    = sln.rsplit(".", 1)[0] + ".vcxproj"
+    oldFilters = sln.rsplit(".", 1)[0] + ".vcxproj.filters"
+    newSln     = sln.rsplit("_", 1)[0] + "_vs22.sln"
     if not os.path.exists(newSln):
-        print("create 2022 sln:", newSln)
+        newProj = oldProj.replace("19", "22")
+        newFilters = oldFilters.replace("19", "22")
+        print("2022 sln:", newSln)
+        print("2022 prj:", newProj)
+        print("2022 fil:", newFilters)
+        
+        vcsCommand(vcs, "cp", sln, newSln)
+        vcsCommand(vcs, "cp", oldProj, newProj)
+        vcsCommand(vcs, "cp", oldFilters, newFilters)
+        
+        checkProjLink(newSln, 2022)

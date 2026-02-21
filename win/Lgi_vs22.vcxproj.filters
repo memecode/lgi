@@ -509,6 +509,9 @@
     <ClCompile Include="..\src\common\General\SubProcessCommon.cpp">
       <Filter>Source Files\Core\Process</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\common\Text\Token.cpp">
+      <Filter>Source Files\Text</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\lgi\common\Gdc2.h">

@@ -1,0 +1,200 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>LgiIde</ProjectName>
+    <ProjectGuid>{967AF7EF-7C17-4FCC-997E-BED17F886F07}</ProjectGuid>
+    <RootNamespace>LgiIde_vc8</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>12.0.30501.0</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(Platform)$(Configuration)22\</OutDir>
+    <IntDir>$(Platform)$(Configuration)22\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\..\..\..\CodeLib\libpng-1.6.26</IncludePath>
+    <TargetName>LgiIde</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(Platform)$(Configuration)22\</OutDir>
+    <IntDir>$(Platform)$(Configuration)22\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\..\..\..\CodeLib\libpng-1.6.26</IncludePath>
+    <TargetName>LgiIde</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\src;..\resources;..\..\include;..\..\include\lgi\win;..\..\..\deps\build-x64\include;C:\Program Files\OpenSSL-Win64\include;..\..\..\..\..\codelib\libssh\include;..\..\..\..\..\codelib\libssh\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>LUNASVG_BUILD_STATIC;HAS_LIBSSH;WIN32;_DEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level2</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>lunasvg.lib;plutovg.lib;ssh.lib;imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetFileName)</OutputFile>
+      <AdditionalLibraryDirectories>..\lib;..\..\..\..\..\codelib\libssh\build\src\Debug;..\..\..\..\..\codelib\lunasvg\build\Debug;..\..\..\..\..\codelib\lunasvg\build\_deps\plutovg-build\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>..\..\src\win\General\Lgi.manifest</AdditionalManifestFiles>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\src;..\resources;..\..\include;..\..\include\lgi\win;..\..\..\deps\build-x64\include;C:\Program Files\OpenSSL-Win64\include;..\..\..\..\..\codelib\libssh\include;..\..\..\..\..\codelib\libssh\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>LUNASVG_BUILD_STATIC;HAS_LIBSSH;WIN32;NDEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level2</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>lunasvg.lib;plutovg.lib;ssh.lib;imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetFileName)</OutputFile>
+      <AdditionalLibraryDirectories>..\lib;..\..\..\..\..\codelib\libssh\build\src\Release;..\..\..\..\..\codelib\lunasvg\build\Release;..\..\..\..\..\codelib\lunasvg\build\_deps\plutovg-build\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>..\..\src\win\General\Lgi.manifest</AdditionalManifestFiles>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\lgi\common\EventTargetThread.h" />
+    <ClInclude Include="..\..\include\lgi\common\Ftp.h" />
+    <ClInclude Include="..\..\include\lgi\common\RemoteFileSelect.h" />
+    <ClInclude Include="..\..\include\lgi\common\Scripting.h" />
+    <ClInclude Include="..\..\include\lgi\common\Ssh.h" />
+    <ClInclude Include="..\..\include\lgi\common\SystemIntf.h" />
+    <ClInclude Include="..\..\include\lgi\common\TimeZoneInfo.h" />
+    <ClInclude Include="..\..\src\common\Coding\ScriptingPriv.h" />
+    <ClInclude Include="..\resources\resdefs.h" />
+    <ClInclude Include="..\src\BreakPointStore.h" />
+    <ClInclude Include="..\src\DebugContext.h" />
+    <ClInclude Include="..\src\IdeFindInFiles.h" />
+    <ClInclude Include="..\src\FindSymbol.h" />
+    <ClInclude Include="..\src\Debugger.h" />
+    <ClInclude Include="..\src\IdeDoc.h" />
+    <ClInclude Include="..\src\IdeDocPrivate.h" />
+    <ClInclude Include="..\src\IdeProject.h" />
+    <ClInclude Include="..\src\IdeProjectSettings.h" />
+    <ClInclude Include="..\src\LgiIde.h" />
+    <ClInclude Include="..\src\ProjectNode.h" />
+    <ClInclude Include="..\src\PythonParser.h" />
+    <ClInclude Include="..\src\SpaceTabConv.h" />
+    <ClInclude Include="..\src\WebFldDlg.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\common\Coding\LexCpp.cpp" />
+    <ClCompile Include="..\..\src\common\Coding\ScriptCompiler.cpp" />
+    <ClCompile Include="..\..\src\common\Coding\ScriptLibrary.cpp" />
+    <ClCompile Include="..\..\src\common\Coding\ScriptVM.cpp" />
+    <ClCompile Include="..\..\src\common\Lgi\RemoteFileSelect.cpp" />
+    <ClCompile Include="..\..\src\common\Lgi\SystemIntf.cpp" />
+    <ClCompile Include="..\..\src\common\Net\Ftp.cpp" />
+    <ClCompile Include="..\..\src\common\Net\Http.cpp" />
+    <ClCompile Include="..\..\src\common\Net\OpenSSLSocket.cpp" />
+    <ClCompile Include="..\..\src\common\Lgi\About.cpp" />
+    <ClCompile Include="..\..\src\common\Lgi\Mdi.cpp" />
+    <ClCompile Include="..\..\src\common\Lgi\LgiMain.cpp" />
+    <ClCompile Include="..\..\src\common\Net\Ssh.cpp" />
+    <ClCompile Include="..\..\src\common\Text\RemoveAnsi.cpp" />
+    <ClCompile Include="..\src\DocEdit.cpp" />
+    <ClCompile Include="..\src\DocEditStyling.cpp" />
+    <ClCompile Include="..\src\IdeFindInFiles.cpp" />
+    <ClCompile Include="..\src\FindSymbol.cpp" />
+    <ClCompile Include="..\src\DebugContext.cpp" />
+    <ClCompile Include="..\src\Debugger.cpp" />
+    <ClCompile Include="..\src\History.cpp" />
+    <ClCompile Include="..\src\IdeCommon.cpp" />
+    <ClCompile Include="..\src\IdeDoc.cpp" />
+    <ClCompile Include="..\src\IdeProject.cpp" />
+    <ClCompile Include="..\src\IdeProjectSettings.cpp" />
+    <ClCompile Include="..\src\JavascriptParser.cpp" />
+    <ClCompile Include="..\src\LgiIde.cpp" />
+    <ClCompile Include="..\src\LgiUtils.cpp" />
+    <ClCompile Include="..\src\MemDumpViewer.cpp" />
+    <ClCompile Include="..\src\MissingFiles.cpp" />
+    <ClCompile Include="..\src\NewProjectFromTemplate.cpp" />
+    <ClCompile Include="..\src\ProjectNode.cpp" />
+    <ClCompile Include="..\src\PythonParser.cpp" />
+    <ClCompile Include="..\src\SimpleCppParser.cpp" />
+    <ClCompile Include="..\src\SpaceTabConv.cpp" />
+    <ClCompile Include="..\src\SysCharSupport.cpp" />
+    <ClCompile Include="..\src\WebFldDlg.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="..\..\src\win\General\Lgi.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\resources\Script1.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="..\..\src\common\Coding\ExternCall.asm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </MASM>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\haiku\buildHaiku.py" />
+    <None Include="Makefile.windows" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\win\Lgi_vs22.vcxproj">
+      <Project>{95df9ca4-6d37-4a85-a648-80c2712e0da1}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
+  </ImportGroup>
+</Project>
