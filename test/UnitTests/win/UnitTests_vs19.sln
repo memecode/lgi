@@ -2,9 +2,9 @@
 # Visual Studio 2019
 VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTests", "UnitTests.vcxproj", "{18BF30E1-D77B-496E-8761-99A426DD3B41}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTests", "UnitTests_vs19.vcxproj", "{18BF30E1-D77B-496E-8761-99A426DD3B41}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lgi", "..\..\..\win\Lgi_vs2019.vcxproj", "{95DF9CA4-6D37-4A85-A648-80C2712E0DA1}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lgi", "..\..\..\win\Lgi_vs19.vcxproj", "{95DF9CA4-6D37-4A85-A648-80C2712E0DA1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
