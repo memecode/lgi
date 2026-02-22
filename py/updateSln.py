@@ -28,7 +28,12 @@ def getSlnVsVer(sln):
     lines = open(sln, "r").read().replace("\r", "").split("\n")
     for ln in lines:
         # print("ln:", ln)
-        if ln.find("VisualStudioVersion") >= 0:
+        if ln[0] == "#":
+            if ln.find("2019") > 0:
+                return 2019
+            elif ln.find("2022") > 0:
+                return 2022
+        elif ln.find("VisualStudioVersion") >= 0:
             p = ln.split("=", 1)
             fullVer = p[-1].strip().split(".")
             for ver in versions:
@@ -97,15 +102,16 @@ def vcsCommand(vcs, cmd, oldPath, newPath):
         print("vcsCommand error:", p.stdout.decode())
     return p.returncode == 0
 
+# returns the new file name or None on error
 def renameSln(sln):
     slnVer = getSlnVsVer(sln)
     if slnVer is None:
         print("renameSln: no sln ver:", sln)
-        return False    
+        return None
     vcs = getVcsType(sln)
     if vcs is None:
         print("renameSln: no vcs:", sln)
-        return False    
+        return None    
 
     leaf = os.path.basename(sln)
     parts = leaf.split(".")
@@ -156,7 +162,13 @@ def renameSln(sln):
 
 def checkProjLink(sln, targetVsVer = None):
     changed = False
-    lines = open(sln, "r").read().replace("\r", "").split("\n")
+    if os.path.exists(sln):
+        print("sln open:", sln)
+        f = open(sln, "r")
+        txt = f.read()
+        lines = txt.replace("\r", "").split("\n")
+    else:
+        return
     for idx in range(len(lines)):
         ln = lines[idx]
         # print("ln:", ln)
@@ -220,6 +232,9 @@ if nameOk(sln):
     print("sln name is ok")
 else:
     sln = renameSln(sln)
+    if sln is None:
+        sys.exit(-1)
+    
 
 print("sln:", sln)
 checkProjLink(sln)

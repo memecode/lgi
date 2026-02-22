@@ -222,7 +222,7 @@ if (1)
         target_link_libraries(qjs-libc PRIVATE stdatomic)
         target_link_libraries(run-test262 PRIVATE stdatomic)
     else()
-        message(FATAL_ERROR "not adding STDATOMIC_INC")
+        message("not adding STDATOMIC_INC")
     endif()
 endif()
 
