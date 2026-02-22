@@ -23,29 +23,29 @@
 	<Dialog pos="7,7,497,395" ref="2">
 		<TableLayout pos="7,7,475,356" ref="3" cols="0.500,0.500" rows="0.167,0.167,0.167,0.167,0.167,0.167">
 			<tr>
-				<td>
+				<td addr="0,0">
 					<StaticText pos="14,14,111,34" ref="4" />
 				</td>
-				<td>
+				<td addr="1,0">
 					<EditBox Pos="251,14,348,34" ref="5" />
 				</td>
 			</tr>
 			<tr>
-				<td>
+				<td addr="0,1">
 					<StaticText pos="14,76,104,96" ref="6" />
 				</td>
-				<td>
+				<td addr="1,1">
 					<ComboBox pos="251,73,355,93" ref="7" />
 				</td>
 			</tr>
 			<tr>
-				<td />
-				<td>
+				<td addr="0,2" />
+				<td addr="1,2">
 					<CheckBox pos="244,132,355,152" ref="8" />
 				</td>
 			</tr>
 			<tr>
-				<td colspan="2">
+				<td addr="0,3" colspan="2">
 					<Group pos="14,168,447,209" ref="9">
 						<RadioBox pos="35,21,118,34" ref="10" />
 						<RadioBox pos="140,21,223,41" ref="11" />
@@ -54,19 +54,19 @@
 				</td>
 			</tr>
 			<tr>
-				<td>
+				<td addr="0,4">
 					<ListView pos="14,231,209,265" ref="13" />
 				</td>
-				<td>
+				<td addr="1,4">
 					<TreeView pos="238,231,433,272" ref="14" />
 				</td>
 			</tr>
 			<tr>
-				<td>
+				<td addr="0,5">
 					<Progress pos="21,294,174,314" ref="15" />
 				</td>
-				<td>
-					<Button pos="280,301,363,321" ref="16" />
+				<td addr="1,5">
+					<Button Pos="280,301,363,321" toggle="0" ref="16" />
 				</td>
 			</tr>
 		</TableLayout>

@@ -28,24 +28,24 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -90,7 +90,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\include;..\..\include\lgi\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\include;..\..\..\include\lgi\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -112,7 +112,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\include;..\..\include\lgi\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\include;..\..\..\include\lgi\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN64;_DEBUG;_CONSOLE;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -131,7 +131,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..\include;..\..\include\lgi\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\include;..\..\..\include\lgi\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -155,7 +155,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..\include;..\..\include\lgi\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\include;..\..\..\include\lgi\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN64;NDEBUG;_CONSOLE;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -173,15 +173,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\common\Coding\LexCpp.cpp" />
-    <ClCompile Include="..\..\src\common\Coding\ScriptCompiler.cpp" />
-    <ClCompile Include="..\..\src\common\Coding\ScriptLibrary.cpp" />
-    <ClCompile Include="..\..\src\common\Coding\ScriptVM.cpp" />
-    <ClCompile Include="..\..\src\common\Lgi\LgiMain.cpp" />
-    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="..\..\..\src\common\Coding\LexCpp.cpp" />
+    <ClCompile Include="..\..\..\src\common\Coding\ScriptCompiler.cpp" />
+    <ClCompile Include="..\..\..\src\common\Coding\ScriptLibrary.cpp" />
+    <ClCompile Include="..\..\..\src\common\Coding\ScriptVM.cpp" />
+    <ClCompile Include="..\..\..\src\common\Lgi\LgiMain.cpp" />
+    <ClCompile Include="..\src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\src\common\Coding\ExternCall.asm">
+    <CustomBuild Include="..\..\..\src\common\Coding\ExternCall.asm">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">cd $(IntDir)
 "c:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx64\x64\ml64.exe" %(FullPath) /c
 </Command>
@@ -191,31 +191,30 @@
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(Filename).obj;%(Outputs)</Outputs>
     </CustomBuild>
-    <None Include="..\..\docs\scripting\index.html" />
-    <None Include="..\..\docs\scripting\library.html" />
-    <None Include="..\..\docs\scripting\scripting.css" />
-    <None Include="..\..\docs\scripting\syntax.html" />
-    <None Include="Scripts\BitwiseOps.script" />
-    <None Include="Scripts\CustomType.script" />
-    <None Include="Scripts\DateTime.script" />
-    <None Include="Scripts\ExpressionTest.script" />
-    <None Include="Scripts\ExternTest.script" />
-    <None Include="Scripts\FileSystem.script" />
-    <None Include="Scripts\FunctionScope.script" />
-    <None Include="Scripts\LValue Test.script" />
-    <None Include="Scripts\NumericOps.script" />
-    <None Include="Scripts\Object.script" />
-    <None Include="Scripts\Strings.script" />
-    <None Include="Scripts\System.script" />
+    <None Include="..\..\..\docs\scripting\index.html" />
+    <None Include="..\..\..\docs\scripting\library.html" />
+    <None Include="..\..\..\docs\scripting\scripting.css" />
+    <None Include="..\..\..\docs\scripting\syntax.html" />
+    <None Include="..\Scripts\BitwiseOps.script" />
+    <None Include="..\Scripts\CustomType.script" />
+    <None Include="..\Scripts\DateTime.script" />
+    <None Include="..\Scripts\ExpressionTest.script" />
+    <None Include="..\Scripts\ExternTest.script" />
+    <None Include="..\Scripts\FileSystem.script" />
+    <None Include="..\Scripts\FunctionScope.script" />
+    <None Include="..\Scripts\LValue Test.script" />
+    <None Include="..\Scripts\NumericOps.script" />
+    <None Include="..\Scripts\Object.script" />
+    <None Include="..\Scripts\Strings.script" />
+    <None Include="..\Scripts\System.script" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\common\Coding\ScriptingPriv.h" />
-    <ClInclude Include="..\..\src\common\Coding\Instructions.h" />
+    <ClInclude Include="..\..\..\src\common\Coding\ScriptingPriv.h" />
+    <ClInclude Include="..\..\..\src\common\Coding\Instructions.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\win\Lgi_vs2019.vcxproj">
+    <ProjectReference Include="..\..\..\win\Lgi_vs22.vcxproj">
       <Project>{95df9ca4-6d37-4a85-a648-80c2712e0da1}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -28,7 +28,7 @@ def getSlnVsVer(sln):
     lines = open(sln, "r").read().replace("\r", "").split("\n")
     for ln in lines:
         # print("ln:", ln)
-        if ln[0] == "#":
+        if len(ln) > 0 and ln[0] == "#":
             if ln.find("2019") > 0:
                 return 2019
             elif ln.find("2022") > 0:
