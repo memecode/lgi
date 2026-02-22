@@ -1,0 +1,134 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{7985b591-4530-4e8d-9c6d-548d0b89a19c}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+    <Filter Include="Lgi">
+      <UniqueIdentifier>{a4c991b0-729e-474a-88df-86ee58479274}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{42d83401-80f5-44e4-9c26-e91423d5f214}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Controls">
+      <UniqueIdentifier>{ca6ef51c-f1e1-4fa9-9eb1-592f10a617b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Controls\Html">
+      <UniqueIdentifier>{102281d9-5fed-495e-8ce7-d4232c9afda4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Controls\RichTextEdit">
+      <UniqueIdentifier>{666d6b50-f5fb-48b3-8e73-d8a90741e5ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Controls\RichTextEdit\Emoji">
+      <UniqueIdentifier>{62a1d4c6-9ce5-466d-a6a2-65e26f62c288}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Controls\RichTextEdit\Spelling">
+      <UniqueIdentifier>{579fa028-117b-44f0-8f9d-bf0cc8ac9187}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Test Files">
+      <UniqueIdentifier>{d072fbae-b32a-44a9-9f14-9aae81a47698}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\common\Gdc2\Tools\GdcTools.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Net\Http.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Net\OpenSSLSocket.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Lgi\LgiMain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Text\Emoji\EmojiMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Text\Emoji\EmojiTools.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Text\Homoglyphs\Homoglyphs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Text\Homoglyphs\HomoglyphsTable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Text\Html.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Text\HtmlCommon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Text\HtmlParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Widgets\Editor\BlockCursor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Widgets\Editor\RichTextEdit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Widgets\Editor\RichTextEditPriv.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Widgets\Editor\HorzRuleBlock.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Widgets\Editor\ImageBlock.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Widgets\Editor\TextBlock.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\win\Lgi\SpellCheckWindows.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Rich.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\common\Widgets\Editor\GRichTextEditPriv.h">
+      <Filter>Controls\RichTextEdit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\common\Emoji.h">
+      <Filter>Lgi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\common\GHtmlPriv.h">
+      <Filter>Lgi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\common\GRichTextEdit.h">
+      <Filter>Lgi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\common\LgiSpellCheck.h">
+      <Filter>Lgi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\resources\resource.h">
+      <Filter>Lgi</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\resources\icon1.ico">
+      <Filter>Resources</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\resources\Rich.rc">
+      <Filter>Resources</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\TestCases\hr.html">
+      <Filter>Test Files</Filter>
+    </None>
+    <None Include="..\TestCases\sig.html">
+      <Filter>Test Files</Filter>
+    </None>
+    <None Include="..\TestCases\example.html">
+      <Filter>Test Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>
