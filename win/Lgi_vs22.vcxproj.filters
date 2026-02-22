@@ -512,6 +512,24 @@
     <ClCompile Include="..\src\common\Text\Token.cpp">
       <Filter>Source Files\Text</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\common\Gdc2\Filters\Gif.cpp">
+      <Filter>Source Files\Graphics\Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Gdc2\Filters\Jpeg.cpp">
+      <Filter>Source Files\Graphics\Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Gdc2\Filters\Lzw.cpp">
+      <Filter>Source Files\Graphics\Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Gdc2\Filters\Png.cpp">
+      <Filter>Source Files\Graphics\Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Gdc2\Filters\Svg.cpp">
+      <Filter>Source Files\Graphics\Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Gdc2\Filters\Tiff.cpp">
+      <Filter>Source Files\Graphics\Filters</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\lgi\common\Gdc2.h">
@@ -698,12 +716,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\FileTransferProgress.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Filter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\FilterUi.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\FindInFiles.h">
@@ -1242,6 +1254,12 @@
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\SubProcess.h">
       <Filter>Source Files\Core\Process</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Filter.h">
+      <Filter>Source Files\Graphics\Filters</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\FilterUi.h">
+      <Filter>Source Files\Graphics\Filters</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
