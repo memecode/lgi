@@ -2151,15 +2151,9 @@ struct HtmlElementCb : public LCss::ElementCallback<LHtmlElement>
 
 bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentStyle, int Depth)
 {
-	char Sp[48];
-	int SpLen = MIN(Depth << 1, sizeof(Sp) - 1);
-	memset(Sp, ' ', SpLen);
-	Sp[SpLen] = 0;
-		
-	for (unsigned i = 0; i < e->Children.Length(); i++)
+	for (auto c: e->Children)
 	{
-		auto c = e->Children[i];
-		LAutoPtr<LCss> Style;
+		LAutoPtr<LCss> Style; // this is the style of the current element, initially NULL
 		if (ParentStyle)
 			Style.Reset(new LCss(*ParentStyle));
 
@@ -2169,7 +2163,7 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 			Matches.Length() > 0 &&
 			(Style.Get() || Style.Reset(new LCss)))
 		{
-			for (auto s : Matches)
+			for (auto s: Matches)
 			{
 				const char *p = s->Style;
 				Style->Parse(p, LCss::ParseRelaxed);
@@ -2178,15 +2172,18 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 			
 		// Check to see if the element is block level and end the previous
 		// paragraph if so.
-		c->Info = c->Tag ? LHtmlStatic::Inst->GetTagInfo(c->Tag) : NULL;
-		bool IsBlock =	c->Info != NULL && c->Info->Block();
+		c->Info = c->Tag ? LHtmlStatic::Inst->GetTagInfo(c->Tag) : nullptr;
+		bool IsBlock =	c->Info && c->Info->Block();
 		switch (c->TagId) 
 		{
 			case TAG_STYLE:
 			{
-				char16 *Style = e->GetText();
-				if (ValidStrW(Style))
-					LAssert(!"Impl me.");
+				LAutoString utf(WideToUtf8(e->GetText()));
+				if (utf)
+				{
+					const char *s = utf.Get();
+					ctx.StyleStore.Parse(s);
+				}
 				continue;
 				break;
 			}
@@ -2212,9 +2209,9 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 					Style.Reset(new LCss);
 				if (Style)
 				{
-					Style->MarginTop(LCss::Len("0.5em"));
+					Style->MarginTop(   LCss::Len("0.5em"));
 					Style->MarginBottom(LCss::Len("0.5em"));
-					Style->MarginLeft(LCss::Len("1em"));
+					Style->MarginLeft(  LCss::Len("1em"));
 					if (ctx.Tb)
 						ctx.Tb->StripLast(NoTransaction);
 				}
@@ -2263,26 +2260,20 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 			LRichEditElemContext StyleCtx;
 			if (ctx.StyleStore.Match(Selectors, &StyleCtx, dynamic_cast<LRichEditElem*>(c)))
 			{
-				for (unsigned n=0; n<Selectors.Length(); n++)
+				for (auto sel: Selectors)
 				{
-					LCss::Selector *sel = Selectors[n];
-					if (sel)
+					if (const char *s = sel->Style)
 					{
-						const char *s = sel->Style;
-						if (s)
-						{
-							if (!Style)
-								Style.Reset(new LCss);
-							if (Style)
-								Style->Parse(s, LCss::ParseRelaxed);
-						}
+						if (!Style)
+							Style.Reset(new LCss);
+						if (Style)
+							Style->Parse(s, LCss::ParseRelaxed);
 					}
 				}
 			}
 		}
 
-		auto CachedStyle = AddStyleToCache(Style);			
-
+		auto CachedStyle = AddStyleToCache(Style);
 		if
 		(
 			(IsBlock && ctx.LastChar != '\n')
@@ -2292,7 +2283,7 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 		{
 			if (!ctx.Tb && c->TagId == TAG_BR)
 			{
-				// Don't do this for IMG and HR layout.
+				// Don't do this for IMG and HR layout.  (<-- this comment doesn't make sense?)
 				Blocks.Add(ctx.Tb = new TextBlock(this));
 				if (CachedStyle && ctx.Tb)
 					ctx.Tb->SetStyle(CachedStyle);
@@ -2300,6 +2291,7 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 
 			if (ctx.Tb)
 			{
+				// Add a new line to the current text block to implement moving to the next block level element
 				const uint32_t Nl[] = {'\n', 0};
 				ctx.Tb->AddText(NoTransaction, -1, Nl, 1, NULL);
 				ctx.LastChar = '\n';

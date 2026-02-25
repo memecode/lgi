@@ -16,6 +16,26 @@ LRichTextPriv::ListBlock::~ListBlock()
 	LAssert(Cursors == 0);
 }
 
+LRichTextPriv::TextBlock *LRichTextPriv::ListBlock::GetInsertPoint()
+{
+	if (startItem)
+	{
+		startItem = false;
+		blocks.Add(new LRichTextPriv::TextBlock(d));
+	}
+
+	if (!blocks.Length())
+	{
+		LAssert(!"there should be at least one block right?");
+		return nullptr;
+	}
+
+	auto tb = dynamic_cast<LRichTextPriv::TextBlock*>(blocks.Last());
+	LAssert(tb); // we should have a text block to insert into right?
+	// if it's something else, maybe there should be special handling?
+	return tb;
+}
+
 LRect LRichTextPriv::ListBlock::GetPos()
 {
 	return Pos;

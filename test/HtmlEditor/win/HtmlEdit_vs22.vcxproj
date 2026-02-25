@@ -283,6 +283,7 @@
     <ClCompile Include="..\..\..\src\common\Text\HtmlCommon.cpp" />
     <ClCompile Include="..\..\..\src\common\Text\HtmlParser.cpp" />
     <ClCompile Include="..\..\..\src\common\Widgets\Editor\BlockCursor.cpp" />
+    <ClCompile Include="..\..\..\src\common\Widgets\Editor\ListBlock.cpp" />
     <ClCompile Include="..\..\..\src\common\Widgets\Editor\RichTextEdit.cpp" />
     <ClCompile Include="..\..\..\src\common\Widgets\Editor\RichTextEditPriv.cpp" />
     <ClCompile Include="..\..\..\src\common\Widgets\Editor\HorzRuleBlock.cpp" />
@@ -296,7 +297,8 @@
     <ClInclude Include="..\..\..\include\common\GHtmlPriv.h" />
     <ClInclude Include="..\..\..\include\common\GRichTextEdit.h" />
     <ClInclude Include="..\..\..\include\common\LgiSpellCheck.h" />
-    <ClInclude Include="..\..\..\src\common\Widgets\Editor\GRichTextEditPriv.h" />
+    <ClInclude Include="..\..\..\include\lgi\common\RichTextEdit.h" />
+    <ClInclude Include="..\..\..\src\common\Widgets\Editor\RichTextEditPriv.h" />
     <ClInclude Include="..\resources\resource.h" />
   </ItemGroup>
   <ItemGroup>

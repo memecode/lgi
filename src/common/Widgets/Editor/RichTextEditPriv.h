@@ -1140,12 +1140,16 @@ public:
 	{
 		LRect Pos;
 		bool numbered = false;
+		bool startItem = false;
 		LArray<Block*> blocks;
 
 	public:
 		ListBlock(LRichTextPriv *priv);
 		ListBlock(const ListBlock *Copy);
 		~ListBlock();
+
+		void StartItem() { startItem = true; }
+		TextBlock *GetInsertPoint();
 
 		const char *GetClass() override { return "ListBlock"; }
 		LMessage::Result OnEvent(LMessage *Msg) override;
@@ -1344,25 +1348,28 @@ public:
 
 	struct CreateContext
 	{
-		TextBlock *Tb;
-		ImageBlock *Ib;
-		HorzRuleBlock *Hrb;
+		TextBlock *Tb = nullptr;
+		ImageBlock *Ib = nullptr;
+		HorzRuleBlock *Hrb = nullptr;
+		ListBlock *Lst = nullptr;
+		LFontCache* FontCache = nullptr;
 		LArray<uint32_t> Buf;
-		uint32_t LastChar;
-		LFontCache *FontCache;
+		uint32_t LastChar = '\n';
 		LCss::Store StyleStore;
-		bool StartOfLine;
+		bool StartOfLine = true;
 		
 		CreateContext(LFontCache *fc)
 		{
-			Tb = NULL;
-			Ib = NULL;
-			Hrb = NULL;
-			LastChar = '\n';
 			FontCache = fc;
-			StartOfLine = true;
 		}
 		
+		TextBlock *GetInsertPoint()
+		{
+			if (Lst)
+				return Lst->GetInsertPoint();
+			return Tb;
+		}
+
 		bool AddText(LNamedStyle *Style, char16 *Str)
 		{
 			if (!Str || !Tb)
