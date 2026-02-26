@@ -2545,14 +2545,10 @@ void LRichTextPriv::DumpNodes(LTree *Root)
 
 	for (unsigned i=0; i<Blocks.Length(); i++)
 	{
-		LTreeItem *ti = new LTreeItem;
-		Block *b = Blocks[i];
+		auto ti = new LTreeItem;
+		auto b = Blocks[i];
 		b->DumpNodes(ti);
-
-		LString s;
-		s.Printf("[%i] %s", i, ti->GetText());
-		ti->SetText(s);
-
+		ti->SetText(LString::Fmt("[%i] %s", i, ti->GetText()));
 		Root->Insert(ti);
 	}
 }

@@ -1138,6 +1138,8 @@ public:
 		LRect Pos;
 		bool numbered = false;
 		bool startItem = false;
+		
+		LArray<LRect> items;
 		LArray<Block*> blocks;
 
 	public:

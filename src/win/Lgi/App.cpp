@@ -719,66 +719,58 @@ void LApp::SetAppArgs(OsAppArguments &AppArgs)
 
 void LApp::OnCommandLine()
 {
-	/*
-	char WhiteSpace[] = " \r\n\t";
-	char *CmdLine = WideToUtf8(d->Args.d->CmdLine);
+	auto WhiteSpace = " \r\n\t";
+	LAutoString CmdLine(WideToUtf8(d->Args.GetFull()));
 
-	if (ValidStr(CmdLine))
-	{
-		// LgiTrace("CmdLine='%s'\n", CmdLine);
-		LArray<const char*> Files;
+	if (!ValidStr(CmdLine))
+		return;
+
+	LArray<const char*> Files;
 		
-		char *Delim = "\'\"";
-		char *s;
-		for (s = CmdLine; *s; )
+	auto Delim = "\'\"";
+	int index = 0;
+	for (char *s = CmdLine; *s; index++)
+	{
+		// skip ws
+		while (*s && strchr(WhiteSpace, *s))
+			s++;
+
+		// read to end of token
+		auto e = s;
+		if (strchr(Delim, *s))
 		{
-			// skip ws
-			while (*s && strchr(WhiteSpace, *s)) s++;
+			char Delim = *s++;
+			e = strchr(s, Delim);
+			if (!e)
+				e = s + strlen(s);
+		}
+		else
+		{
+			for (; *e && !strchr(WhiteSpace, *e); e++)
+				;
+		}
 
-			// read to end of token
-			char *e = s;
-			if (strchr(Delim, *s))
-			{
-				char Delim = *s++;
-				e = strchr(s, Delim);
-				if (!e)
-					e = s + strlen(s);
-			}
-			else
-			{
-				for (; *e && !strchr(WhiteSpace, *e); e++)
-					;
-			}
-
-			char *Arg = NewStr(s, e - s);
-			if (Arg)
+		if (index)
+		{
+			if (auto Arg = NewStr(s, e - s))
 			{
 				if (LFileExists(Arg))
-				{
 					Files.Add(Arg);
-				}
 				else
-				{
 					DeleteArray(Arg);
-				}
 			}
-
-			// next
-			s = (*e) ? e + 1 : e;
 		}
 
-		// call app
-		if (Files.Length() > 0)
-		{
-			OnReceiveFiles(Files);
-		}
-
-		// clear up
-		Files.DeleteArrays();
+		// next
+		s = *e ? e + 1 : e;
 	}
 
-	DeleteArray(CmdLine);
-	*/
+	// call app
+	if (Files.Length() > 0)
+		OnReceiveFiles(Files);
+
+	// clear up
+	Files.DeleteArrays();
 }
 
 void LApp::OnUrl(const char *Url)

@@ -158,8 +158,25 @@ void LRichTextPriv::ListBlock::OnPaint(PaintContext &Ctx)
 	Ctx.pDC->Rectangle(&Pos);
 	Ctx.pDC->Colour(Fore);
 
+	auto fnt = d->View->GetFont();
+	fnt->Transparent(false);
+
+	const uint8_t bulletUtf8[] = { 0xE2, 0x80, 0xA2, 0 };
+
+	int idx = 0;
 	for (auto b: blocks)
 	{
+		LRect i = items[idx++];
+		Ctx.pDC->Colour(L_MED);
+		Ctx.pDC->Box(&i);
+		i.Inset(1, 1);
+
+		fnt->Fore(L_TEXT);
+		fnt->Back(Back);
+
+		LDisplayString bullet(fnt, (char*)bulletUtf8);
+		bullet.Draw(Ctx.pDC, i.x1, i.y1, &i);
+
 		b->OnPaint(Ctx);
 	}
 
@@ -176,12 +193,21 @@ bool LRichTextPriv::ListBlock::OnLayout(Flow &flow)
 	int marginX1 = 20;
 	flow.Left += marginX1;
 	
+	items.Length(blocks.Length());
+
+	int idx = 0;
 	for (auto b: blocks)
 	{
+		auto& i = items[idx++];
+		i.x1 = Pos.x1;
+		i.y1 = flow.CurY;
+		i.x2 = flow.Left - 1;
+
 		b->OnLayout(flow);
 		
 		auto blkPos = b->GetPos();
 		Pos.y2 = blkPos.y2;
+		i.y2 = blkPos.y2;
 		flow.CurY = Pos.y2 + 1;
 	}
 
@@ -259,9 +285,18 @@ bool LRichTextPriv::ListBlock::DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset
 }
 
 #ifdef _DEBUG
-void LRichTextPriv::ListBlock::DumpNodes(LTreeItem *Ti)
+void LRichTextPriv::ListBlock::DumpNodes(LTreeItem *blockItem)
 {
-	Ti->SetText("ListBlock");
+	blockItem->SetText("ListBlock");
+
+	for (unsigned i=0; i<blocks.Length(); i++)
+	{
+		auto childItem = new LTreeItem;
+		auto b = blocks[i];
+		b->DumpNodes(childItem);
+		childItem->SetText(LString::Fmt("[%i] %s", i, childItem->GetText()));
+		blockItem->Insert(childItem);
+	}
 }
 #endif
 
