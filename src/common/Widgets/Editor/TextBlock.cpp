@@ -238,7 +238,6 @@ LRichTextPriv::TextBlock::TextBlock(LRichTextPriv *priv) : Block(priv)
 	LayoutDirty = false;
 	Len = 0;
 	Pos.ZOff(-1, -1);
-	Style = NULL;
 	Fnt = NULL;
 	ClickErrIdx = -1;			
 }

@@ -2209,9 +2209,9 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 					Style.Reset(new LCss);
 				if (Style)
 				{
-					Style->MarginTop(   LCss::Len("0.5em"));
-					Style->MarginBottom(LCss::Len("0.5em"));
-					Style->MarginLeft(  LCss::Len("1em"));
+					Style->MarginTop(    LCss::Len("0.5em") );
+					Style->MarginBottom( LCss::Len("0.5em") );
+					Style->MarginLeft(   LCss::Len("1em"  ) );
 					if (ctx.Tb)
 						ctx.Tb->StripLast(NoTransaction);
 				}
@@ -2301,11 +2301,18 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 		
 		bool EndStyleChange = false;
 
+		if (c->TagId == TAG_LI &&
+			ctx.Lst)
+		{
+			ctx.Lst->StartItem();
+		}
+
 		if (c->TagId == TAG_IMG)
 		{
-			Blocks.Add(ctx.Ib = new ImageBlock(this));
-			if (ctx.Ib)
+			if (ctx.Ib = new ImageBlock(this))
 			{
+				Blocks.Add(ctx.Ib);
+
 				const char *s;
 				if (c->Get("src", s))
 					ctx.Ib->Source = s;
@@ -2332,7 +2339,8 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 		}
 		else if (c->TagId == TAG_HR)
 		{
-			Blocks.Add(ctx.Hrb = new HorzRuleBlock(this));
+			if (ctx.Hrb = new HorzRuleBlock(this))
+				Blocks.Add(ctx.Hrb);
 		}
 		else if (c->TagId == TAG_A)
 		{
@@ -2353,6 +2361,9 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 		else if (c->TagId == TAG_UL ||
 				 c->TagId == TAG_OL)
 		{
+			EndStyleChange = true;
+			if (ctx.Lst = new ListBlock(this, c->TagId == TAG_OL))
+				Blocks.Add(ctx.Lst);
 		}
 		else
 		{
@@ -2393,12 +2404,6 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 				)
 			)
 			{
-				if (!ctx.Tb)
-				{
-					Blocks.Add(ctx.Tb = new TextBlock(this));
-					ctx.Tb->SetStyle(CachedStyle);
-				}
-
 				#ifdef __GTK_H__
 				for (auto *i = Txt; *i; i++)
 					if (*i == 0xa0)
@@ -2414,7 +2419,11 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 			return false;
 			
 		if (EndStyleChange)
+		{
 			ctx.Tb = nullptr;
+			ctx.Lst = nullptr;
+		}
+		
 		if (IsBlock)
 			ctx.StartOfLine = true;
 	}

@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Project>
+	<Node Name="Build" Type="1" Platforms="15" Id="7">
+		<Node File="./linux/Makefile.linux" Type="9" Platforms="15" />
+	</Node>
 	<Node Name="Source" Type="1" Platforms="7" Open="1" Id="1">
 		<Node File="./src/Rich.cpp" Type="2" Platforms="7" />
 		<Node Name="Rich Text Editor" Type="1" Platforms="15" Open="1" Id="2">
@@ -33,10 +36,10 @@
 			<Node File="../../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="7" />
 		</Node>
 	</Node>
-	<Node File="../../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
-	<Node Name="Build" Type="1" Platforms="15" Id="7">
-		<Node File="./linux/Makefile.linux" Type="9" Platforms="15" />
+	<Node Name="Tests" Type="1" Platforms="15" Id="1">
+		<Node File="./testcases/list.html" Type="7" Platforms="15" />
 	</Node>
+	<Node File="../../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
 	<Settings>
 		<General>
 			<Makefile>
@@ -58,8 +61,6 @@
 					<Release>./TestCases/test.html</Release>
 				</All>
 			</Arguments>
-			<CCrossCompiler />
-			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -94,7 +95,6 @@ resources</Release>
 					<Release>pthread
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
-				<All />
 			</Libraries>
 			<SystemIncludes>
 				<Linux>
@@ -106,22 +106,6 @@ resources</Release>
 `pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
 			</SystemIncludes>
-			<Defines>
-				<All />
-				<Linux />
-			</Defines>
-			<LibraryPaths>
-				<All />
-				<Linux />
-			</LibraryPaths>
-			<TargetName>
-				<Linux />
-			</TargetName>
-			<Options>
-				<All />
-				<Linux />
-			</Options>
-			<ApplicationIcon />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -133,27 +117,15 @@ resources</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
-			<ShowWhiteSpace />
-			<CommentFile />
-			<CommentFunction />
 		</Editor>
-		<Advanced>
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
-			<OtherMakefileRules />
-		</Advanced>
+		<Advanced />
 		<Debug>
 			<Arguments>
-				<All />
+				<All>
+					<Debug>/home/matthew/code/lgi/trunk/test/HtmlEditor/testcases/list.html</Debug>
+					<Release>/home/matthew/code/lgi/trunk/test/HtmlEditor/testcases/list.html</Release>
+				</All>
 			</Arguments>
-			<Environment />
-			<DebugAdmin />
-			<InitialDir />
 		</Debug>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
 	</Settings>
 </Project>

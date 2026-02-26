@@ -662,16 +662,14 @@ public:
 
 	public:
 		/// This is the number of cursors current referencing this Block.
-		int8 Cursors;
+		int8 Cursors = 0;
 		/// Draw debug selection
-		bool DrawDebug;
+		bool DrawDebug = false;
 		
 		Block(LRichTextPriv *priv)
 		{
 			d = priv;
-			DrawDebug = false;
 			BlockUid = d->NextUid++;
-			Cursors = 0;
 		}
 
 		Block(const Block *blk)
@@ -679,7 +677,6 @@ public:
 			d = blk->d;
 			DrawDebug = false;
 			BlockUid = blk->GetUid();
-			Cursors = 0;
 		}
 		
 		virtual ~Block()
@@ -1010,10 +1007,10 @@ public:
 		public Block,
 		public LCssBox
 	{
-		LNamedStyle *Style;
+		LNamedStyle *Style = nullptr;
+		LSpellCheck::SpellingError *SpErr = nullptr;
 		LArray<LSpellCheck::SpellingError> SpellingErrors;
-		int PaintErrIdx, ClickErrIdx;
-		LSpellCheck::SpellingError *SpErr;
+		int PaintErrIdx = -1, ClickErrIdx = -1;
 		LString ClickedUri;
 
 		bool PreEdit(Transaction *Trans);
@@ -1144,12 +1141,12 @@ public:
 		LArray<Block*> blocks;
 
 	public:
-		ListBlock(LRichTextPriv *priv);
+		ListBlock(LRichTextPriv *priv, bool isNumbered);
 		ListBlock(const ListBlock *Copy);
 		~ListBlock();
 
 		void StartItem() { startItem = true; }
-		TextBlock *GetInsertPoint();
+		TextBlock *GetTextBlock();
 
 		const char *GetClass() override { return "ListBlock"; }
 		LMessage::Result OnEvent(LMessage *Msg) override;
@@ -1348,31 +1345,40 @@ public:
 
 	struct CreateContext
 	{
+		LRichTextPriv *d;
+		
 		TextBlock *Tb = nullptr;
 		ImageBlock *Ib = nullptr;
 		HorzRuleBlock *Hrb = nullptr;
 		ListBlock *Lst = nullptr;
-		LFontCache* FontCache = nullptr;
 		LArray<uint32_t> Buf;
 		uint32_t LastChar = '\n';
 		LCss::Store StyleStore;
 		bool StartOfLine = true;
 		
-		CreateContext(LFontCache *fc)
+		CreateContext(LRichTextPriv *priv) :
+			d(priv)
 		{
-			FontCache = fc;
 		}
 		
-		TextBlock *GetInsertPoint()
+		TextBlock *GetTextBlock()
 		{
 			if (Lst)
-				return Lst->GetInsertPoint();
+				return Lst->GetTextBlock();
+				
+			if (!Tb)
+			{
+				Tb = new TextBlock(d);
+				d->Blocks.Add(Tb);
+			}
+				
 			return Tb;
 		}
 
 		bool AddText(LNamedStyle *Style, char16 *Str)
 		{
-			if (!Str || !Tb)
+			auto insertTb = GetTextBlock();
+			if (!Str || !insertTb)
 				return false;
 			
 			int Used = 0;
@@ -1395,18 +1401,18 @@ public:
 				else
 				{
 					#ifdef WINDOWS
-					ssize_t Len = s[0] && s[1] ? 4 : (s[0] ? 2 : 0);
-					Buf[Used++] = LgiUtf16To32((const uint16 *&)s, Len);
+						ssize_t Len = s[0] && s[1] ? 4 : (s[0] ? 2 : 0);
+						Buf[Used++] = LgiUtf16To32((const uint16 *&)s, Len);
 					#else
-					Buf[Used++] = *s++;
+						Buf[Used++] = *s++;
 					#endif
 					while (s < e && !IsWhite(*s))
 					{
 						#ifdef WINDOWS
-						Len = s[0] && s[1] ? 4 : (s[0] ? 2 : 0);
-						Buf[Used++] = LgiUtf16To32((const uint16 *&)s, Len);
+							Len = s[0] && s[1] ? 4 : (s[0] ? 2 : 0);
+							Buf[Used++] = LgiUtf16To32((const uint16 *&)s, Len);
 						#else
-						Buf[Used++] = *s++;
+							Buf[Used++] = *s++;
 						#endif
 					}
 				}
@@ -1415,7 +1421,7 @@ public:
 			bool Status = false;
 			if (Used > 0)
 			{
-				Status = Tb->AddText(NoTransaction, -1, &Buf[0], Used, Style);
+				Status = insertTb->AddText(NoTransaction, -1, &Buf[0], Used, Style);
 				LastChar = Buf[Used-1];
 			}
 			return Status;

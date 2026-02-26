@@ -3,7 +3,11 @@
 
 #include "RichTextEditPriv.h"
 
-LRichTextPriv::ListBlock::ListBlock(LRichTextPriv *priv) : Block(priv)
+#define DEBUG_COVERAGE_TEST		1
+
+LRichTextPriv::ListBlock::ListBlock(LRichTextPriv *priv, bool isNumbered) :
+	Block(priv),
+	numbered(isNumbered)
 {
 }
 
@@ -16,7 +20,7 @@ LRichTextPriv::ListBlock::~ListBlock()
 	LAssert(Cursors == 0);
 }
 
-LRichTextPriv::TextBlock *LRichTextPriv::ListBlock::GetInsertPoint()
+LRichTextPriv::TextBlock *LRichTextPriv::ListBlock::GetTextBlock()
 {
 	if (startItem)
 	{
@@ -146,7 +150,11 @@ void LRichTextPriv::ListBlock::OnPaint(PaintContext &Ctx)
 
 	LColour Fore, Back = Ctx.Back();
 	Fore = Ctx.Fore().Mix(Back, 0.75f);
+	#if DEBUG_COVERAGE_TEST
+	Ctx.pDC->Colour(Back.Mix(LColour(255, 0, 255)));
+	#else
 	Ctx.pDC->Colour(Back);
+	#endif
 	Ctx.pDC->Rectangle(&Pos);
 	Ctx.pDC->Colour(Fore);
 
@@ -165,6 +173,9 @@ bool LRichTextPriv::ListBlock::OnLayout(Flow &flow)
 	Pos.x2 = flow.Right;
 	Pos.y2 = flow.CurY;
 	
+	int marginX1 = 20;
+	flow.Left += marginX1;
+	
 	for (auto b: blocks)
 	{
 		b->OnLayout(flow);
@@ -174,6 +185,7 @@ bool LRichTextPriv::ListBlock::OnLayout(Flow &flow)
 		flow.CurY = Pos.y2 + 1;
 	}
 
+	flow.Left -= marginX1;
 	return true;
 }
 
