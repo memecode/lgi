@@ -1135,18 +1135,24 @@ public:
 	class ListBlock :
 		public Block
 	{
+	public:
+		using TType = LCss::ListStyleTypes;
+
+	protected:
 		LRect Pos;
-		bool numbered = false;
+		TType type = TType::ListInherit;
 		bool startItem = false;
 		
 		LArray<LRect> items;
 		LArray<Block*> blocks;
 
 	public:
-		ListBlock(LRichTextPriv *priv, bool isNumbered);
+		ListBlock(LRichTextPriv *priv, TType lstType);
 		ListBlock(const ListBlock *Copy);
 		~ListBlock();
 
+		const char *TypeToElem();
+		TType GetType() { return type; }
 		void StartItem() { startItem = true; }
 		TextBlock *GetTextBlock();
 

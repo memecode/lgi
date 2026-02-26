@@ -1451,7 +1451,7 @@ int32 LVariant::CastInt32() const
 			else if (Value.String[0] == '0' && tolower(Value.WString[1]) == 'x')
 				return static_cast<int32>(Atoi(Value.WString, 16));
 
-			return Atoi(Value.WString);
+			return (int32) Atoi(Value.WString);
 		}
 		case GV_LSTRING:
 		{

@@ -5,9 +5,9 @@
 
 #define DEBUG_COVERAGE_TEST		1
 
-LRichTextPriv::ListBlock::ListBlock(LRichTextPriv *priv, bool isNumbered) :
+LRichTextPriv::ListBlock::ListBlock(LRichTextPriv *priv, TType lstType) :
 	Block(priv),
-	numbered(isNumbered)
+	type(lstType)
 {
 }
 
@@ -116,10 +116,37 @@ ssize_t LRichTextPriv::ListBlock::Length()
 	return len;
 }
 
+const char *LRichTextPriv::ListBlock::TypeToElem()
+{
+	switch (type)
+	{
+		case TType::ListInherit:
+		case TType::ListNone:
+		case TType::ListDisc:
+		case TType::ListCircle:
+		case TType::ListSquare:
+			return "ul";
+
+		case TType::ListDecimal:
+		case TType::ListDecimalLeadingZero:
+		case TType::ListLowerRoman:
+		case TType::ListUpperRoman:
+		case TType::ListLowerGreek:
+		case TType::ListUpperGreek:
+		case TType::ListLowerAlpha:
+		case TType::ListUpperAlpha:
+		case TType::ListArmenian:
+		case TType::ListGeorgian:
+			return "ol";
+	}
+	LAssert(!"invalid type");
+	return nullptr;
+}
+
 bool LRichTextPriv::ListBlock::ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng)
 {
 	bool status = true;
-	auto elem = numbered ? "nl" : "ul";
+	auto elem = TypeToElem();
 	s.Print("<%s>\n", elem);
 	for (auto b: blocks)
 	{

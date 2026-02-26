@@ -2349,7 +2349,7 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 			if (ctx.Tb &&
 				ctx.Tb->Txt.Length())
 			{
-				StyleText *st = ctx.Tb->Txt.Last();
+				auto st = ctx.Tb->Txt.Last();
 
 				st->Element = TAG_A;
 			
@@ -2362,7 +2362,29 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 				 c->TagId == TAG_OL)
 		{
 			EndStyleChange = true;
-			if (ctx.Lst = new ListBlock(this, c->TagId == TAG_OL))
+
+			LCss::ListStyleTypes type = LCss::ListStyleTypes::ListInherit;
+			if (Style)
+				type = Style->ListStyleType();
+			if (c->TagId == TAG_OL && type == LCss::ListStyleTypes::ListInherit)
+			{
+				const char *s;
+				if (c->Get("type", s))
+				{
+					if (!Stricmp(s, "1"))
+						type = LCss::ListStyleTypes::ListDecimal;
+					else if (!Stricmp(s, "A"))
+						type = LCss::ListStyleTypes::ListUpperAlpha;
+					else if (!Stricmp(s, "a"))
+						type = LCss::ListStyleTypes::ListLowerAlpha;
+					else if (!Stricmp(s, "I"))
+						type = LCss::ListStyleTypes::ListUpperRoman;
+					else if (!Stricmp(s, "i"))
+						type = LCss::ListStyleTypes::ListLowerRoman;
+				}
+			}
+
+			if (ctx.Lst = new ListBlock(this, type))
 				Blocks.Add(ctx.Lst);
 		}
 		else
