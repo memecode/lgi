@@ -1151,8 +1151,6 @@ public:
 		ListBlock(const ListBlock *Copy);
 		~ListBlock();
 		
-		void StartItem() { startNewItem = true; }
-
 		const char *TypeToElem();
 		TType GetType() { return type; }
 		void StartItem() { startItem = true; }
