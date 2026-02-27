@@ -453,8 +453,7 @@ public:
 						p->Append(b);
 					}
 					
-					p = Tabs->Append("Node View");
-					if (p)
+					if (p = Tabs->Append("Node View"))
 					{
 						p->AddView(Tree = new LTree(IDC_TREE, 0, 0, 100, 100));
 						Tree->SetPourLargest(true);
@@ -523,9 +522,7 @@ public:
 		DeleteObj(Bar);
 		if (Edit && Caps && Status)
 		{
-			// const char *k;
-			// for (bool b = Caps->First(&k); b; b = Caps->Next(&k))
-			for (auto k : *Caps)
+			for (auto k: *Caps)
 				Edit->PostEvent(M_COMPONENT_INSTALLED, new LString(k.key));
 		}
 		PourAll();
@@ -701,8 +698,7 @@ public:
 	{
 		if (Edit && Files.Length() > 0)
 		{
-			auto t = LReadFile(Files[0]);
-			if (t)
+			if (auto t = LReadFile(Files[0]))
 				Edit->Name(t);
 		}
 	}

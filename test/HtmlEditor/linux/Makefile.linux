@@ -29,6 +29,7 @@ ifeq ($(Build),Debug)
 		-llgi-gtk3$(Tag) \
 		-L../../$(BuildDir)
 	Inc =  \
+		-I../../include \
 		-I./resources \
 		-I../../include/lgi/linux \
 		`pkg-config --cflags gtk+-3.0` \

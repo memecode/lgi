@@ -170,8 +170,10 @@ public:
 	bool IsBusy(bool Stop = false);
 
 	// File IO
-	bool Open(const char *Name, const char *Cs = NULL) override;
-	bool Save(const char *Name, const char *Cs = NULL) override;
+	bool Open(const char *Name, const char *Cs = nullptr) override;
+	bool Open(LStream *stream, const char *Cs = nullptr);
+	bool Save(const char *Name, const char *Cs = nullptr) override;
+	bool Save(LStream *stream, const char *Cs = nullptr);
 
 	// Clipboard IO
 	bool Cut() override;

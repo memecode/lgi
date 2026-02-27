@@ -2246,7 +2246,7 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 			}
 		}
 			
-		const char *Css, *Class;
+		const char *Css = nullptr, *Class = nullptr;
 		if (c->Get("style", Css))
 		{
 			if (!Style)
@@ -2301,10 +2301,10 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 		
 		bool EndStyleChange = false;
 
-		if (c->TagId == TAG_LI &&
-			ctx.Lst)
+		if (c->TagId == TAG_LI)
 		{
-			ctx.Lst->StartItem();
+			if (ctx.Lst)
+				ctx.Lst->StartItem();
 		}
 
 		if (c->TagId == TAG_IMG)

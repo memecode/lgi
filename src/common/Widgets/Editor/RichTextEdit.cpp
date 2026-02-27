@@ -885,48 +885,58 @@ bool LRichTextEdit::ClearDirty(bool Ask, const char *FileName)
 
 bool LRichTextEdit::Open(const char *Name, const char *CharSet)
 {
-	bool Status = false;
 	LFile f;
+	if (!f.Open(Name, O_READ|O_SHARE))
+		return false;
+	return Open(&f, CharSet);
+}
 
-	if (f.Open(Name, O_READ|O_SHARE))
-	{
-		size_t Bytes = (size_t)f.GetSize();
-		SetCursor(0, false);
+bool LRichTextEdit::Open(LStream *stream, const char *CharSet)
+{
+	if (!stream)
+		return false;
+
+	auto bytes = (size_t)stream->GetSize();
+	SetCursor(0, false);
+	
+	LAutoString c8(new char[bytes + 4]);
+	if (!c8)
+		return false;
+
+	auto rd = stream->Read(c8, bytes);
+	if (rd < 0)
+		return false;
+			
+	auto DataStart = c8.Get();
+
+	c8[rd] = 0;
+	c8[rd+1] = 0;
+	c8[rd+2] = 0;
+	c8[rd+3] = 0;
 		
-		char *c8 = new char[Bytes + 4];
-		if (c8)
-		{
-			if (f.Read(c8, (int)Bytes) == Bytes)
-			{
-				char *DataStart = c8;
-
-				c8[Bytes] = 0;
-				c8[Bytes+1] = 0;
-				c8[Bytes+2] = 0;
-				c8[Bytes+3] = 0;
-				
-				if ((uchar)c8[0] == 0xff && (uchar)c8[1] == 0xfe)
-				{
-					// utf-16
-					if (!CharSet)
-					{
-						CharSet = "utf-16";
-						DataStart += 2;
-					}
-				}
-				
-			}
-
-			DeleteArray(c8);
-		}
-		else
-		{
-		}
-
-		Invalidate();
+	// FIXME: handle other types of byte order marks here... utf-8/utf-32/BigE/LittleE
+	if ((uchar)c8[0] == 0xff && (uchar)c8[1] == 0xfe)
+	{
+		// utf-16
+		DataStart += 2;
+		#ifdef WINDOWS
+			NameW((char16*)DataStart);
+		#else
+			Name(LStrConvertCp("utf-8", DataStart, "utf-16"));
+		#endif
 	}
+	else
+	{
+		if (CharSet && Stricmp(CharSet, "utf-8"))
+			// Not utf-8, convert
+			Name(LStrConvertCp("utf-8", DataStart, CharSet));
+		else
+			Name(DataStart);
+	}	
 
-	return Status;
+	Invalidate();
+
+	return true;
 }
 
 bool LRichTextEdit::Save(const char *FileName, const char *CharSet)
@@ -934,14 +944,21 @@ bool LRichTextEdit::Save(const char *FileName, const char *CharSet)
 	LFile f;
 	if (!FileName || !f.Open(FileName, O_WRITE))
 		return false;
+	return Save(&f, CharSet);
+}
 
-	f.SetSize(0);
-	const char *Nm = Name();
+bool LRichTextEdit::Save(LStream *stream, const char *CharSet)
+{
+	if (!stream)
+		return false;
+
+	stream->SetSize(0);
+	auto Nm = Name();
 	if (!Nm)
 		return false;
 
 	size_t Len = strlen(Nm);
-	return f.Write(Nm, (int)Len) == Len;
+	return stream->Write(Nm, Len) == Len;
 }
 
 void LRichTextEdit::UpdateScrollBars(bool Reset)
