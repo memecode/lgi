@@ -443,7 +443,7 @@ public:
 	}
 	
 	/// Find the index of entry 'n'
-	ssize_t IndexOf(Type n)
+	ssize_t IndexOf(Type n) const
 	{
 		for (ssize_t i=0; i<len; i++)
 		{

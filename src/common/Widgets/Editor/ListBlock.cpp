@@ -25,7 +25,7 @@ LRichTextPriv::TextBlock *LRichTextPriv::ListBlock::GetTextBlock()
 	if (startItem)
 	{
 		startItem = false;
-		blocks.Add(new LRichTextPriv::TextBlock(d));
+		Add(new LRichTextPriv::TextBlock(d));
 	}
 
 	if (!blocks.Length())
@@ -59,16 +59,6 @@ bool LRichTextPriv::ListBlock::IsBusy(bool Stop)
 	}
 
 	return false;
-}
-
-int LRichTextPriv::ListBlock::GetLines()
-{
-	int lines = 0;
-	
-	for (auto b: blocks)
-		lines += b->GetLines();
-
-	return lines;
 }
 
 bool LRichTextPriv::ListBlock::OffsetToLine(ssize_t Offset, int *ColX, LArray<int> *LineY)

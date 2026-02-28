@@ -519,7 +519,7 @@ bool LRichTextPriv::ImageBlock::Load(const char *Src)
 	return false;
 }
 
-int LRichTextPriv::ImageBlock::GetLines()
+int LRichTextPriv::ImageBlock::GetLines() const
 {
 	return 1;
 }

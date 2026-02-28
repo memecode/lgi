@@ -23,7 +23,7 @@ bool LRichTextPriv::HorzRuleBlock::IsValid()
 	return true;
 }
 
-int LRichTextPriv::HorzRuleBlock::GetLines()
+int LRichTextPriv::HorzRuleBlock::GetLines() const
 {
 	return 1;
 }

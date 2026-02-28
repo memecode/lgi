@@ -1326,7 +1326,7 @@ bool LRichTextPriv::TextBlock::IsValid()
 	return true;
 }
 
-int LRichTextPriv::TextBlock::GetLines()
+int LRichTextPriv::TextBlock::GetLines() const
 {
 	return (int)Layout.Length();
 }
