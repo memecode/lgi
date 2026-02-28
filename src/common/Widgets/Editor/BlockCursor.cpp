@@ -4,19 +4,13 @@
 
 LRichTextPriv::BlockCursor::BlockCursor(const BlockCursor &c)
 {
-	Blk = NULL;
-	Blink = true;
 	*this = c;
 }
 		
 LRichTextPriv::BlockCursor::BlockCursor(Block *b, ssize_t off, int line)
 {
-	Blk = NULL;
-	Offset = -1;
 	Pos.ZOff(-1, -1);
 	Line.ZOff(-1, -1);
-	LineHint = 0;
-	Blink = true;
 
 	if (b)
 		Set(b, off, line);

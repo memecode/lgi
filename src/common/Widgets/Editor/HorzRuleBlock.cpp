@@ -81,7 +81,7 @@ bool LRichTextPriv::HorzRuleBlock::GetPosFromIndex(BlockCursor *Cursor)
 	return true;
 }
 
-bool LRichTextPriv::HorzRuleBlock::HitTest(HitTestResult &htr)
+bool LRichTextPriv::HorzRuleBlock::HitTest(int offset, HitTestResult &htr)
 {
 	if (htr.In.y < Pos.y1 || htr.In.y > Pos.y2)
 		return false;

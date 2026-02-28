@@ -91,7 +91,7 @@ public:
 	const char *GetCharset() override;
 	void SetCharset(const char *s) override;
 
-	ssize_t HitTest(int x, int y);
+	ssize_t HitTest(LPoint pt);
 	bool DeleteSelection(char16 **Cut = NULL);
 	bool SetSpellCheck(class LSpellCheck *sp);
 	

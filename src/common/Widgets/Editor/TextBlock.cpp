@@ -475,9 +475,9 @@ bool LRichTextPriv::TextBlock::GetPosFromIndex(BlockCursor *Cursor)
 
 	if (LayoutDirty)
 	{
-		Cursor->Pos.ZOff(-1, -1); // This is valid behaviour... need to 
-								// wait for layout before getting cursor
-								// position.
+		Cursor->Pos.ZOff(-1, -1); // This is valid behavior... need to 
+								  // wait for layout before getting cursor
+								  // position.
 		return false;
 	}
 		
@@ -485,17 +485,17 @@ bool LRichTextPriv::TextBlock::GetPosFromIndex(BlockCursor *Cursor)
 	int LastY = 0;
 	for (unsigned i=0; i<Layout.Length(); i++)
 	{
-		TextLine *tl = Layout[i];
+		auto tl = Layout[i];
 		PtrCheckBreak(tl);
 
-		LRect r = tl->PosOff;
+		auto r = tl->PosOff;
 		r.Offset(Pos.x1, Pos.y1);
 				
 		int FixX = 0;
 		for (unsigned n=0; n<tl->Strs.Length(); n++)
 		{
-			DisplayStr *ds = tl->Strs[n];
-			ssize_t dsChars = ds->Chars;
+			auto ds = tl->Strs[n];
+			auto dsChars = ds->Chars;
 					
 			if
 			(
@@ -510,7 +510,7 @@ bool LRichTextPriv::TextBlock::GetPosFromIndex(BlockCursor *Cursor)
 				)
 			)
 			{
-				ssize_t CharOffset = Cursor->Offset - CharPos;
+				auto CharOffset = Cursor->Offset - CharPos;
 				if (CharOffset == 0)
 				{
 					// First char
@@ -582,12 +582,12 @@ bool LRichTextPriv::TextBlock::GetPosFromIndex(BlockCursor *Cursor)
 	return false;
 }
 		
-bool LRichTextPriv::TextBlock::HitTest(HitTestResult &htr)
+bool LRichTextPriv::TextBlock::HitTest(int offset, HitTestResult &htr)
 {
 	if (htr.In.y < Pos.y1 || htr.In.y > Pos.y2)
 		return false;
 
-	ssize_t CharPos = 0;
+	ssize_t CharPos = offset;
 	for (unsigned i=0; i<Layout.Length(); i++)
 	{
 		TextLine *tl = Layout[i];

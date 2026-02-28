@@ -306,6 +306,7 @@ public:
 	{
 		SkUnknown,
 		
+		// Start and ends
 		SkLineStart,
 		SkLineEnd,		
 		SkDocStart,
@@ -323,6 +324,10 @@ public:
 		SkCurrentLine,		
 		SkDownLine,
 		SkDownPage,
+
+		// Impl events
+		SkSeekEnter,
+		SkSeekExit
 	};
 
 	struct DisplayStr;
@@ -571,21 +576,21 @@ public:
 	struct HitTestResult
 	{
 		LPoint In;
-		Block *Blk;
-		DisplayStr *Ds;
-		ssize_t Idx;
-		int LineHint;
-		bool Near;
+		Block *Blk = nullptr;
+		DisplayStr *Ds = nullptr;
+		ssize_t Idx = -1;
+		int LineHint = -1;
+		bool Near = false;
 		
 		HitTestResult(int x, int y)
 		{
 			In.x = x;
 			In.y = y;
-			Blk = NULL;
-			Ds = NULL;
-			Idx = -1;
-			LineHint = -1;
-			Near = false;
+		}
+
+		HitTestResult(LPoint pt)
+		{
+			In = pt;
 		}
 	};
 
@@ -642,11 +647,11 @@ public:
 		public LEventTargetI
 	{
 	protected:
-		int BlockUid;
+		int BlockUid; // unique ID for referencing blocks later
 		LRichTextPriv *d;
 		Block *parent = nullptr;
 		LArray<Block*> blocks; // children
-		LRect pos;
+		LRect pos; // this is in full doc coords, not relative to parent.
 
 	public:
 		/// This is the number of cursors current referencing this Block.
@@ -780,6 +785,10 @@ public:
 		// If this returns non-zero further command processing is aborted.
 		LMessage::Result OnEvent(LMessage *Msg) override
 		{
+			for (auto b : blocks)
+				if (b->OnEvent(Msg))
+					return true;
+
 			return false;
 		}
 
@@ -801,13 +810,54 @@ public:
 				return len;
 			}
 			
-			virtual bool HitTest(HitTestResult &htr)
+			virtual bool HitTest(int offset, HitTestResult &htr)
 			{
+				auto originalPt = htr.In;
+					
+				for (auto b: blocks)
+				{
+					auto blkPos = b->GetPos();
+					if (blkPos.Overlap(htr.In))
+					{
+						// htr.In = originalPt - blkPos.TopLeft();
+						if (b->HitTest(offset, htr))
+							return true;
+					}
+
+					offset += b->Length();
+				}
+
+				htr.In = originalPt;
 				return false;
 			}
 			
+			// This function sets the BlockCursor's Pos and Line rect's from the cursor's index
 			virtual bool GetPosFromIndex(BlockCursor *Cursor)
 			{
+				if (!Cursor)
+					return false;
+
+				auto idx = Cursor->Offset;
+				for (auto b: blocks)
+				{
+					auto len = b->Length();
+					if (idx >= 0 && idx < len)
+					{
+						// In this sub-block
+						BlockCursor tmp(b, idx, -1);
+						if (b->GetPosFromIndex(&tmp))
+						{
+							// Map back into our coords
+							auto topLeft = b->GetPos().TopLeft();
+							Cursor->Pos = tmp.Pos + topLeft;
+							Cursor->Line = tmp.Line + topLeft;
+							return true;
+						}
+					}
+
+					idx -= len;
+				}
+
 				return false;
 			}
 
@@ -880,7 +930,20 @@ public:
 			
 			virtual LNamedStyle *GetStyle(ssize_t At = -1)
 			{
-				LAssert(!"fixme");
+				ssize_t at = At;
+
+				for (auto b : blocks)
+				{
+					if (at <= 0)
+						return nullptr; // FIXME: style of the list item
+
+					at--;
+					if (at >= 0 && at < b->Length())
+						return b->GetStyle(at);
+
+					at -= b->Length();
+				}
+
 				return nullptr;
 			}
 
@@ -1040,14 +1103,22 @@ public:
 				return false;
 			}
 
-			void Iterate(std::function<void(Block*)> callback)
+			void Iterate(	int offset,
+							LPoint pos,
+							std::function<void(Block *blk, int docOffset, LPoint docPos)> callback)
 			{
 				if (!callback)
 					return;
 
-				callback(this);
+				callback(this, offset, pos);
+				
 				for (auto b: blocks)
-					b->Iterate(callback);
+				{
+					auto blkPos = b->GetPos();
+					LPoint p = pos + blkPos.TopLeft();
+					b->Iterate(offset, p, callback);
+					offset += b->Length();
+				}
 			}
 
 		/************************************************
@@ -1142,16 +1213,16 @@ public:
 	struct BlockCursor
 	{
 		// The block the cursor is in.
-		Block *Blk;
+		Block *Blk = nullptr;
 
 		// This is the character offset of the cursor relative to
 		// the start of 'Blk'.
-		ssize_t Offset;
+		ssize_t Offset = -1;
 
 		// In wrapped text, a given offset can either be at the end
 		// of one line or the start of the next line. This tells the
 		// text block which line the cursor is actually on.
-		int LineHint;
+		int LineHint = 0;
 		
 		// This is the position on the screen in doc coords.
 		LRect Pos;
@@ -1161,7 +1232,7 @@ public:
 		LRect Line;
 
 		// Cursor is currently blinking on
-		bool Blink;
+		bool Blink = true;
 
 		BlockCursor(const BlockCursor &c);
 		BlockCursor(Block *b, ssize_t off, int line);
@@ -1381,7 +1452,7 @@ public:
 		ssize_t Length();
 		bool ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng);
 		bool GetPosFromIndex(BlockCursor *Cursor);
-		bool HitTest(HitTestResult &htr);
+		bool HitTest(int offset, HitTestResult &htr);
 		void OnPaint(PaintContext &Ctx);
 		bool OnLayout(Flow &flow);
 		ssize_t GetTextAt(ssize_t Offset, LArray<StyleText*> &t);
@@ -1436,7 +1507,7 @@ public:
 		ssize_t Length();
 		bool ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng);
 		bool GetPosFromIndex(BlockCursor *Cursor);
-		bool HitTest(HitTestResult &htr);
+		bool HitTest(int offset, HitTestResult &htr);
 		void OnPaint(PaintContext &Ctx);
 		bool OnLayout(Flow &flow);
 		ssize_t GetTextAt(ssize_t Offset, LArray<StyleText*> &t);
@@ -1469,7 +1540,6 @@ public:
 		using TType = LCss::ListStyleTypes;
 
 	protected:
-		LRect Pos;
 		TType type = TType::ListInherit;
 		bool startItem = false;
 		
@@ -1486,11 +1556,6 @@ public:
 		TextBlock *GetTextBlock();
 
 		const char *GetClass() override { return "ListBlock"; }
-		LMessage::Result OnEvent(LMessage *Msg) override;
-		LRect GetPos() override;
-		ssize_t Length() override;
-		bool HitTest(HitTestResult &htr) override;
-		bool GetPosFromIndex(BlockCursor *Cursor) override;
 		bool OnLayout(Flow &f) override;
 		void OnPaint(PaintContext &Ctx) override;
 		bool ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rgn) override;
@@ -1499,17 +1564,13 @@ public:
 		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, LFindReplaceCommon *Params) override;
 		void SetSpellingErrors(LArray<LSpellCheck::SpellingError> &Errors, LRange r) override;
 		void IncAllStyleRefs() override;
-		void Dump() override;
-		LNamedStyle *GetStyle(ssize_t At = -1) override;
 		bool DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset /* internal to this block, not the whole doc. */, bool TopOfMenu) override;
 		#ifdef _DEBUG
 		void DumpNodes(LTreeItem *Ti) override;
 		#endif
 		bool IsValid() override;
-		bool IsBusy(bool Stop = false) override;
 		bool HasBlock(Block* blk) const { return blocks.IndexOf(blk) >= 0; }
 		Block *Clone() override;
-		void OnComponentInstall(LString Name) override;
 		ssize_t CopyAt(ssize_t Offset, ssize_t Chars, LArray<uint32_t> *Text) override;
 		bool Seek(SeekType To, BlockCursor &Cursor) override;
 
@@ -1519,7 +1580,6 @@ public:
 		bool ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, LCss *Style, bool Add) override;
 		bool DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper) override;
 		Block *Split(Transaction *Trans, ssize_t AtOffset) override;
-		bool OnDictionary(Transaction *Trans) override;
 	};
 
 	class ImageBlock :
@@ -1620,7 +1680,7 @@ public:
 		ssize_t Length();
 		bool ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng);
 		bool GetPosFromIndex(BlockCursor *Cursor);
-		bool HitTest(HitTestResult &htr);
+		bool HitTest(int offset, HitTestResult &htr);
 		void OnPaint(PaintContext &Ctx);
 		bool OnLayout(Flow &flow);
 		ssize_t GetTextAt(ssize_t Offset, LArray<StyleText*> &t);
@@ -1660,8 +1720,8 @@ public:
 	LRect SelectionRect();
 	bool GetSelection(LArray<char16> *Text, LAutoString *Html);
 	ssize_t IndexOfCursor(BlockCursor *c);
-	ssize_t HitTest(int x, int y, int &LineHint, Block **Blk = NULL, ssize_t *BlkOffset = NULL);
-	bool CursorFromPos(int x, int y, LAutoPtr<BlockCursor> *Cursor, ssize_t *GlobalIdx);
+	ssize_t HitTest(LPoint pt, int &LineHint, Block **Blk = NULL, ssize_t *BlkOffset = NULL);
+	bool CursorFromPos(LPoint pt, LAutoPtr<BlockCursor> *Cursor, ssize_t *GlobalIdx);
 	Block *GetBlockByIndex(ssize_t Index, ssize_t *Offset = NULL, int *BlockIdx = NULL, int *LineCount = NULL);
 	bool Layout(LScrollBar *&ScrollY);
 	void OnStyleChange(LRichTextEdit::RectType t);

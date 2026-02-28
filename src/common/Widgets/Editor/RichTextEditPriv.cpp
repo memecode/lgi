@@ -835,26 +835,14 @@ bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 			else // Seek to previous block
 			{
 				SeekPrevBlock:
-				ssize_t Idx = container.GetBlocks().IndexOf(c->Blk);
-				if (Idx < 0)
-				{
-					LAssert(0);
-					break;
-				}
-
-				if (Idx == 0)
+				auto prev = c->Blk->Prev();
+				if (!prev)
 					break; // Beginning of document
 				
-				auto b = container.GetBlocks()[--Idx];
-				if (!b)
-				{
-					LAssert(0);
-					break;
-				}
-
-				if (!c.Reset(new BlockCursor(b, b->Length(), b->GetLines()-1)))
+				if (!c.Reset(new BlockCursor(prev, prev->Length(), prev->GetLines()-1)))
 					break;
 
+				prev->Seek(SkSeekEnter, *c);
 				Status = true;
 			}
 			break;
@@ -896,6 +884,7 @@ bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 
 			if (c->Offset < c->Blk->Length())
 			{
+				// seek internally in the block
 				LArray<int> Ln;
 				if (c->Blk->OffsetToLine(c->Offset, NULL, &Ln) &&
 					Ln.Length() == 2 &&
@@ -915,20 +904,14 @@ bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 			else // Seek to next block
 			{
 				SeekNextBlock:
-				ssize_t Idx = container.GetBlocks().IndexOf(c->Blk);
-				if (Idx < 0)
-					return Error(_FL, "Block ptr index error.");
-
-				if (Idx >= (int)container.GetBlocks().Length() - 1)
+				auto next = c->Blk->Next();
+				if (!next)
 					break; // End of document
 				
-				Block *b = container.GetBlocks()[++Idx];
-				if (!b)
-					return Error(_FL, "No block at %i.", Idx);
-
-				if (!c.Reset(new BlockCursor(b, 0, 0)))
+				if (!c.Reset(new BlockCursor(next, 0, 0)))
 					break;
 
+				next->Seek(SkSeekEnter, *c);
 				Status = true;
 			}
 			break;
@@ -970,7 +953,7 @@ bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 			LRect &Content = Areas[LRichTextEdit::ContentArea];
 			int LineHint = -1;
 			int TargetY = In->Pos.y1 - Content.Y();
-			ssize_t Idx = HitTest(In->Pos.x1, MAX(TargetY, 0), LineHint);
+			ssize_t Idx = HitTest(LPoint(In->Pos.x1, MAX(TargetY, 0)), LineHint);
 			if (Idx >= 0)
 			{
 				ssize_t Offset = -1;
@@ -990,7 +973,7 @@ bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 			LRect &Content = Areas[LRichTextEdit::ContentArea];
 			int LineHint = -1;
 			int TargetY = In->Pos.y1 + Content.Y();
-			ssize_t Idx = HitTest(In->Pos.x1, MIN(TargetY, DocumentExtent.y-1), LineHint);
+			ssize_t Idx = HitTest(LPoint(In->Pos.x1, MIN(TargetY, DocumentExtent.y-1)), LineHint);
 			if (Idx >= 0)
 			{
 				ssize_t Offset = -1;
@@ -1205,10 +1188,10 @@ LSurface *LEmojiImage::GetEmojiImage()
 	return EmojiImg;
 }
 
-ssize_t LRichTextPriv::HitTest(int x, int y, int &LineHint, Block **Blk, ssize_t *BlkOffset)
+ssize_t LRichTextPriv::HitTest(LPoint pt, int &LineHint, Block **Blk, ssize_t *BlkOffset)
 {
 	ssize_t CharPos = 0;
-	HitTestResult r(x, y);
+	HitTestResult r(pt);
 
 	if (container.GetBlocks().Length() == 0)
 	{
@@ -1218,7 +1201,7 @@ ssize_t LRichTextPriv::HitTest(int x, int y, int &LineHint, Block **Blk, ssize_t
 
 	auto b = container.GetBlocks().First();
 	LRect rc = b->GetPos();
-	if (y < rc.y1)
+	if (pt.y < rc.y1)
 	{
 		if (Blk) *Blk = b;
 		return 0;
@@ -1228,8 +1211,8 @@ ssize_t LRichTextPriv::HitTest(int x, int y, int &LineHint, Block **Blk, ssize_t
 	{
 		b = container.GetBlocks()[i];
 		LRect p = b->GetPos();
-		bool Over = y >= p.y1 && y <= p.y2;
-		if (b->HitTest(r))
+		bool Over = pt.y >= p.y1 && pt.y <= p.y2;
+		if (b->HitTest(CharPos, r))
 		{
 			LineHint = r.LineHint;
 
@@ -1242,7 +1225,7 @@ ssize_t LRichTextPriv::HitTest(int x, int y, int &LineHint, Block **Blk, ssize_t
 		}
 		else if (Over)
 		{
-			Error(_FL, "Block failed to hit, i=%i, pos=%s, y=%i.", i, p.GetStr(), y);
+			Error(_FL, "Block failed to hit, i=%i, pos=%s, y=%i.", i, p.GetStr(), pt.y);
 		}
 			
 		CharPos += b->Length();
@@ -1250,7 +1233,7 @@ ssize_t LRichTextPriv::HitTest(int x, int y, int &LineHint, Block **Blk, ssize_t
 
 	b = container.GetBlocks().Last();
 	rc = b->GetPos();
-	if (y > rc.y2)
+	if (pt.y > rc.y2)
 	{
 		if (Blk) *Blk = b;
 		return CharPos + b->Length();
@@ -1259,28 +1242,18 @@ ssize_t LRichTextPriv::HitTest(int x, int y, int &LineHint, Block **Blk, ssize_t
 	return -1;
 }
 	
-bool LRichTextPriv::CursorFromPos(int x, int y, LAutoPtr<BlockCursor> *Cursor, ssize_t *GlobalIdx)
+bool LRichTextPriv::CursorFromPos(LPoint pt, LAutoPtr<BlockCursor> *Cursor, ssize_t *GlobalIdx)
 {
-	ssize_t CharPos = 0;
-	HitTestResult r(x, y);
+	HitTestResult r(pt);
+	if (!container.HitTest(0, r))
+		return false;
 
-	for (unsigned i=0; i<container.GetBlocks().Length(); i++)
-	{
-		Block *b = container.GetBlocks()[i];
-		if (b->HitTest(r))
-		{
-			if (Cursor)
-				Cursor->Reset(new BlockCursor(b, r.Idx, r.LineHint));
-			if (GlobalIdx)
-				*GlobalIdx = CharPos + r.Idx;
-
-			return true;
-		}
-			
-		CharPos += b->Length();
-	}
+	if (Cursor)
+		Cursor->Reset(new BlockCursor(r.Blk, r.Idx, r.LineHint));
+	if (GlobalIdx)
+		*GlobalIdx = r.Idx;
 		
-	return false;
+	return true;
 }
 
 LRichTextPriv::Block *LRichTextPriv::GetBlockByIndex(ssize_t Index, ssize_t *Offset, int *BlockIdx, int *LineCount)

@@ -699,7 +699,7 @@ bool LRichTextPriv::ImageBlock::GetPosFromIndex(BlockCursor *Cursor)
 	return true;
 }
 
-bool LRichTextPriv::ImageBlock::HitTest(HitTestResult &htr)
+bool LRichTextPriv::ImageBlock::HitTest(int offset, HitTestResult &htr)
 {
 	if (htr.In.y < Pos.y1 || htr.In.y > Pos.y2)
 		return false;

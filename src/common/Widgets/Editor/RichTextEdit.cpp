@@ -567,7 +567,7 @@ ssize_t LRichTextEdit::GetCaret(bool Cur)
 bool LRichTextEdit::IndexAt(int x, int y, ssize_t &Off, int &LineHint)
 {
 	LPoint Doc = d->ScreenToDoc(x, y);
-	Off = d->HitTest(Doc.x, Doc.y, LineHint);
+	Off = d->HitTest(Doc, LineHint);
 	return Off >= 0;
 }
 
@@ -1160,7 +1160,7 @@ int LRichTextEdit::OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
 					if (AddIndex < 0)
 					{
 						int LineHint = -1;
-						ssize_t Idx = d->HitTest(TestPt.x, TestPt.y, LineHint);
+						ssize_t Idx = d->HitTest(TestPt, LineHint);
 						if (Idx >= 0)
 						{
 							ssize_t BlkOffset;
@@ -1243,10 +1243,10 @@ void LRichTextEdit::OnFocus(bool f)
 	SetPulse(f ? RTE_PULSE_RATE : -1);
 }
 
-ssize_t LRichTextEdit::HitTest(int x, int y)
+ssize_t LRichTextEdit::HitTest(LPoint pt)
 {
 	int Line = -1;
-	return d->HitTest(x, y, Line);
+	return d->HitTest(pt, Line);
 }
 
 void LRichTextEdit::Undo()
@@ -1300,7 +1300,7 @@ void LRichTextEdit::DoContextMenu(LMouse &m)
 	if (Content.Overlap(m.x, m.y))
 	{
 		int LineHint;
-		Offset = d->HitTest(Doc.x, Doc.y, LineHint, &Over, &BlkOffset);
+		Offset = d->HitTest(Doc, LineHint, &Over, &BlkOffset);
 	}
 	if (Over)
 		Over->DoContext(RClick, Doc, BlkOffset, true);
@@ -1509,7 +1509,7 @@ void LRichTextEdit::OnMouseClick(LMouse &m)
 				AutoCursor c(new BlkCursor(NULL, 0, 0));
 				LPoint Doc = d->ScreenToDoc(m.x, m.y);
 				ssize_t Idx = -1;
-				if (d->CursorFromPos(Doc.x, Doc.y, &c, &Idx))
+				if (d->CursorFromPos(Doc, &c, &Idx))
 				{
 					d->ClickedBtn = ContentArea;
 					d->SetCursor(c, m.Shift());
@@ -1575,7 +1575,7 @@ void LRichTextEdit::OnMouseMove(LMouse &m)
 			AutoCursor c;
 			LPoint Doc = d->ScreenToDoc(m.x, m.y);
 			ssize_t Idx = -1;
-			if (d->CursorFromPos(Doc.x, Doc.y, &c, &Idx) && c)
+			if (d->CursorFromPos(Doc, &c, &Idx) && c)
 			{
 				if (d->WordSelectMode && d->Selection)
 				{
@@ -1640,25 +1640,25 @@ bool LRichTextEdit::OnKey(LKey &k)
 		return false;
 
 	#ifdef WINDOWS
-	// Wtf is this?
-	// Weeeelll, windows likes to send a LK_TAB after a Ctrl+I doesn't it?
-	// And this just takes care of that TAB before it can overwrite your
-	// selection.
-	if (ToLower(k.c16) == 'i' &&
-		k.Ctrl())
-	{
-		d->EatVkeys.Add(LK_TAB);
-	}
-	else if (d->EatVkeys.Length())
-	{
-		auto Idx = d->EatVkeys.IndexOf(k.vkey);
-		if (Idx >= 0)
+		// Wtf is this?
+		// Weeeelll, windows likes to send a LK_TAB after a Ctrl+I doesn't it?
+		// And this just takes care of that TAB before it can overwrite your
+		// selection.
+		if (ToLower(k.c16) == 'i' &&
+			k.Ctrl())
 		{
-			// Yum yum
-			d->EatVkeys.DeleteAt(Idx);
-			return true;
+			d->EatVkeys.Add(LK_TAB);
 		}
-	}
+		else if (d->EatVkeys.Length())
+		{
+			auto Idx = d->EatVkeys.IndexOf(k.vkey);
+			if (Idx >= 0)
+			{
+				// Yum yum
+				d->EatVkeys.DeleteAt(Idx);
+				return true;
+			}
+		}
 	#endif
 
 	// k.Trace("LRichTextEdit::OnKey");
@@ -2712,7 +2712,7 @@ void LRichTextEdit::OnPulse()
 				AutoCursor c(new BlkCursor(NULL, 0, 0));
 				LPoint Doc = d->ScreenToDoc(m.x, m.y);
 				ssize_t Idx = -1;
-				if (d->CursorFromPos(Doc.x, Doc.y, &c, &Idx))
+				if (d->CursorFromPos(Doc, &c, &Idx))
 				{
 					d->SetCursor(c, true);
 					if (d->WordSelectMode)

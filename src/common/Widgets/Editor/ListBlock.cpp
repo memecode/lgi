@@ -40,70 +40,21 @@ LRichTextPriv::TextBlock *LRichTextPriv::ListBlock::GetTextBlock()
 	return tb;
 }
 
-LRect LRichTextPriv::ListBlock::GetPos()
-{
-	return Pos;
-}
-
 bool LRichTextPriv::ListBlock::IsValid()
 {
 	return blocks.Length() > 0;
 }
 
-bool LRichTextPriv::ListBlock::IsBusy(bool Stop)
-{
-	for (auto b: blocks)
-	{
-		if (b->IsBusy(Stop))
-			return true;
-	}
-
-	return false;
-}
-
 bool LRichTextPriv::ListBlock::OffsetToLine(ssize_t Offset, int *ColX, LArray<int> *LineY)
 {
+	LAssert(!"fixme");
 	return false;
 }
 
 ssize_t LRichTextPriv::ListBlock::LineToOffset(ssize_t Line)
 {
+	LAssert(!"fixme");
 	return 0;
-}
-
-void LRichTextPriv::ListBlock::Dump()
-{
-	for (auto b: blocks)
-		b->Dump();
-}
-
-LNamedStyle *LRichTextPriv::ListBlock::GetStyle(ssize_t At)
-{
-	ssize_t at = At;
-	
-	for (auto b: blocks)
-	{
-		if (at <= 0)
-			return nullptr; // FIXME: style of the list item
-			
-		at--;
-		if (at >= 0 && at < b->Length())
-			return b->GetStyle(at);
-		
-		at -= b->Length();
-	}
-
-	return nullptr;
-}
-
-ssize_t LRichTextPriv::ListBlock::Length()
-{
-	ssize_t len = 0;
-
-	for (auto b: blocks)
-		len += 1 + b->Length();
-	
-	return len;
 }
 
 const char *LRichTextPriv::ListBlock::TypeToElem()
@@ -148,19 +99,6 @@ bool LRichTextPriv::ListBlock::ToHtml(LStream &s, LArray<LDocView::ContentMedia>
 	return status;
 }
 
-bool LRichTextPriv::ListBlock::GetPosFromIndex(BlockCursor *Cursor)
-{
-	if (!Cursor)
-		return d->Error(_FL, "No cursor param.");
-
-	return true;
-}
-
-bool LRichTextPriv::ListBlock::HitTest(HitTestResult &htr)
-{
-	return false;
-}
-
 void LRichTextPriv::ListBlock::OnPaint(PaintContext &Ctx)
 {
 	Ctx.SelectBeforePaint(this);
@@ -168,11 +106,11 @@ void LRichTextPriv::ListBlock::OnPaint(PaintContext &Ctx)
 	LColour Fore, Back = Ctx.Back();
 	Fore = Ctx.Fore().Mix(Back, 0.75f);
 	#if DEBUG_COVERAGE_TEST
-	Ctx.pDC->Colour(Back.Mix(LColour(255, 0, 255)));
+		Ctx.pDC->Colour(Back.Mix(LColour(255, 0, 255)));
 	#else
-	Ctx.pDC->Colour(Back);
+		Ctx.pDC->Colour(Back);
 	#endif
-	Ctx.pDC->Rectangle(&Pos);
+	Ctx.pDC->Rectangle(&pos);
 	Ctx.pDC->Colour(Fore);
 
 	auto fnt = d->View->GetFont();
@@ -202,10 +140,10 @@ void LRichTextPriv::ListBlock::OnPaint(PaintContext &Ctx)
 
 bool LRichTextPriv::ListBlock::OnLayout(Flow &flow)
 {
-	Pos.x1 = flow.Left;
-	Pos.y1 = flow.CurY;
-	Pos.x2 = flow.Right;
-	Pos.y2 = flow.CurY;
+	pos.x1 = flow.Left;
+	pos.y1 = flow.CurY;
+	pos.x2 = flow.Right;
+	pos.y2 = flow.CurY;
 	
 	int marginX1 = 20;
 	flow.Left += marginX1;
@@ -216,16 +154,16 @@ bool LRichTextPriv::ListBlock::OnLayout(Flow &flow)
 	for (auto b: blocks)
 	{
 		auto& i = items[idx++];
-		i.x1 = Pos.x1;
+		i.x1 = pos.x1;
 		i.y1 = flow.CurY;
 		i.x2 = flow.Left - 1;
 
 		b->OnLayout(flow);
 		
 		auto blkPos = b->GetPos();
-		Pos.y2 = blkPos.y2;
+		pos.y2 = blkPos.y2;
 		i.y2 = blkPos.y2;
-		flow.CurY = Pos.y2 + 1;
+		flow.CurY = pos.y2 + 1;
 	}
 
 	flow.Left -= marginX1;
@@ -241,63 +179,53 @@ bool LRichTextPriv::ListBlock::Seek(SeekType To, BlockCursor &Cursor)
 {
 	switch (To)
 	{
-		case SkLineStart:
+		case SkSeekEnter:
 		{
-			Cursor.Offset = 0;
-			Cursor.LineHint = 0;
-			break;
-		}
-		case SkLineEnd:
-		{
-			Cursor.Offset = 1;
-			Cursor.LineHint = 0;
-			break;
-		}
-		case SkLeftChar:
-		{
-			if (Cursor.Offset != 1)
-				return false;
-			Cursor.Offset = 0;
-			Cursor.LineHint = 0;
-			break;
-		}
-		case SkRightChar:
-		{
-			if (Cursor.Offset != 0)
-				return false;
-			Cursor.Offset = 1;
-			Cursor.LineHint = 0;
+			if (Cursor.Offset == 0)
+			{
+				// move cursor to start of the first block:
+				if (blocks.Length() == 0)
+					return false;
+
+				auto b = blocks[0];
+				Cursor.Set(b, 0, 0);
+				return true;
+			}
+			else
+			{
+				// end of block?
+				LAssert(!"fixme");
+			}
 			break;
 		}
 		default:
 		{
-			return false;
 			break;
 		}
 	}
 
-	return true;
+	return false;
 }
 
 ssize_t LRichTextPriv::ListBlock::FindAt(ssize_t StartIdx, const uint32_t *Str, LFindReplaceCommon *Params)
 {
-	// FIXME: impl
+	LAssert(!"fixme");
 	return 0;
 }
 
 void LRichTextPriv::ListBlock::SetSpellingErrors(LArray<LSpellCheck::SpellingError> &Errors, LRange r)
 {
-	// FIXME: impl
+	LAssert(!"fixme");
 }
 
 void LRichTextPriv::ListBlock::IncAllStyleRefs()
 {
-	// FIXME: what should happen here?
+	LAssert(!"fixme");
 }
 
 bool LRichTextPriv::ListBlock::DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool TopOfMenu)
 {
-	// FIXME: impl
+	LAssert(!"fixme");
 	return false;
 }
 
@@ -322,33 +250,21 @@ LRichTextPriv::Block *LRichTextPriv::ListBlock::Clone()
 	return new ListBlock(this);
 }
 
-void LRichTextPriv::ListBlock::OnComponentInstall(LString Name)
-{
-	for (auto b: blocks)
-		b->OnComponentInstall(Name);
-}
-
-LMessage::Result LRichTextPriv::ListBlock::OnEvent(LMessage *Msg)
-{
-	for (auto b: blocks)
-		if (b->OnEvent(Msg))
-			return true;
-
-	return false;
-}
-
 bool LRichTextPriv::ListBlock::AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars, LNamedStyle *Style)
 {
+	LAssert(!"fixme");
 	return false;
 }
 
 bool LRichTextPriv::ListBlock::ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, LCss *Style, bool Add)
 {
+	LAssert(!"fixme");
 	return false;
 }
 
 ssize_t LRichTextPriv::ListBlock::DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, LArray<uint32_t> *DeletedText)
 {
+	LAssert(!"fixme");
 	return false;
 }
 
@@ -356,6 +272,7 @@ bool LRichTextPriv::ListBlock::DoCase(Transaction *Trans, ssize_t StartIdx, ssiz
 {
 	bool status = true;
 
+	LAssert(!"fixme");
 	for (auto b: blocks)
 		if (!b->DoCase(Trans, StartIdx, Chars, Upper)) // FIXME: use correct start / chars
 			status = false;
@@ -365,16 +282,7 @@ bool LRichTextPriv::ListBlock::DoCase(Transaction *Trans, ssize_t StartIdx, ssiz
 
 LRichTextPriv::Block *LRichTextPriv::ListBlock::Split(Transaction *Trans, ssize_t AtOffset)
 {
+	LAssert(!"fixme");
 	return nullptr;
 }
 
-bool LRichTextPriv::ListBlock::OnDictionary(Transaction *Trans)
-{
-	bool status = true;
-	
-	for (auto b: blocks)
-		if (!b->OnDictionary(Trans))
-			status = false;
-		
-	return status;
-}
