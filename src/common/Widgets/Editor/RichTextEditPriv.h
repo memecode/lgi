@@ -296,6 +296,8 @@ class LRichTextPriv :
 	LStringPipe LogBuffer;
 
 public:
+	constexpr static int INVALID_IDX = -1;
+
 	enum SelectModeType
 	{
 		Unselected = 0,
@@ -834,7 +836,7 @@ public:
 				}
 
 				htr.In = originalPt;
-				return false;
+				return htr.Near;
 			}
 			
 			// This function sets the BlockCursor's Pos and Line rect's from the cursor's index
@@ -912,10 +914,12 @@ public:
 				return count;
 			}
 
+			// Returns the character offset of the string if found (>= 0)
+			// or INVALID_IDX if not.
 			virtual ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, LFindReplaceCommon *Params)
 			{
 				LAssert(!"fixme");
-				return -1;
+				return INVALID_IDX;
 			}
 
 			virtual void SetSpellingErrors(LArray<LSpellCheck::SpellingError> &Errors, LRange r)
@@ -925,7 +929,8 @@ public:
 
 			virtual void IncAllStyleRefs()
 			{
-				LAssert(!"fixme");
+				for (auto b: blocks)
+					b->IncAllStyleRefs();
 			}
 
 			virtual void Dump()
@@ -1519,22 +1524,17 @@ public:
 		ssize_t GetTextAt(ssize_t Offset, LArray<StyleText*> &t);
 		ssize_t CopyAt(ssize_t Offset, ssize_t Chars, LArray<uint32_t> *Text);
 		bool Seek(SeekType To, BlockCursor &Cursor);
-		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, LFindReplaceCommon *Params);
-		void IncAllStyleRefs();
-		bool DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling);
+		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, LFindReplaceCommon *Params) { return INVALID_IDX; }
 		#ifdef _DEBUG
 		void DumpNodes(LTreeItem *Ti);
 		#endif
 		Block *Clone();
 
-		// Events
-		LMessage::Result OnEvent(LMessage *Msg);
-
 		// Transactional changes
 		bool AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars = -1, LNamedStyle *Style = NULL);
 		bool ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, LCss *Style, bool Add);
 		ssize_t DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, LArray<uint32_t> *DeletedText = NULL);
-		bool DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper);
+		bool DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper) { return false; }
 		Block *Split(Transaction *Trans, ssize_t AtOffset);
 	};
 
@@ -1569,7 +1569,6 @@ public:
 		ssize_t LineToOffset(ssize_t Line) override;
 		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, LFindReplaceCommon *Params) override;
 		void SetSpellingErrors(LArray<LSpellCheck::SpellingError> &Errors, LRange r) override;
-		void IncAllStyleRefs() override;
 		bool DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset /* internal to this block, not the whole doc. */, bool TopOfMenu) override;
 		#ifdef _DEBUG
 		void DumpNodes(LTreeItem *Ti) override;

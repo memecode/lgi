@@ -130,7 +130,7 @@ void LRichTextPriv::ListBlock::OnPaint(PaintContext &Ctx)
 		fnt->Back(Back);
 
 		LDisplayString bullet(fnt, (char*)bulletUtf8);
-		bullet.Draw(Ctx.pDC, i.x1, i.y1, &i);
+		bullet.Draw(Ctx.pDC, i.x1 + ((i.X() - bullet.X()) / 2), i.y1, &i);
 
 		b->OnPaint(Ctx);
 	}
@@ -145,7 +145,8 @@ bool LRichTextPriv::ListBlock::OnLayout(Flow &flow)
 	pos.x2 = flow.Right;
 	pos.y2 = flow.CurY;
 	
-	int marginX1 = 20;
+	auto fnt = d->View->GetFont();
+	int marginX1 = fnt->GetHeight();
 	flow.Left += marginX1;
 	
 	items.Length(blocks.Length());
@@ -215,11 +216,6 @@ ssize_t LRichTextPriv::ListBlock::FindAt(ssize_t StartIdx, const uint32_t *Str, 
 }
 
 void LRichTextPriv::ListBlock::SetSpellingErrors(LArray<LSpellCheck::SpellingError> &Errors, LRange r)
-{
-	LAssert(!"fixme");
-}
-
-void LRichTextPriv::ListBlock::IncAllStyleRefs()
 {
 	LAssert(!"fixme");
 }

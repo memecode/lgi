@@ -2263,11 +2263,10 @@ void LRichTextPriv::TextBlock::IncAllStyleRefs()
 {
 	if (Style)
 		Style->RefCount++;
-	for (unsigned i=0; i<Txt.Length(); i++)
-	{
-		LNamedStyle *s = Txt[i]->GetStyle();
-		if (s) s->RefCount++;
-	}
+
+	for (auto t: Txt)
+		if (auto s = t->GetStyle())
+			s->RefCount++;
 }
 
 bool LRichTextPriv::TextBlock::ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, LCss *Style, bool Add)
