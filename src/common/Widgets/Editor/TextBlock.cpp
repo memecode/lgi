@@ -582,12 +582,12 @@ bool LRichTextPriv::TextBlock::GetPosFromIndex(BlockCursor *Cursor)
 	return false;
 }
 		
-bool LRichTextPriv::TextBlock::HitTest(int offset, HitTestResult &htr)
+bool LRichTextPriv::TextBlock::HitTest(int blkOffset, HitTestResult &htr)
 {
 	if (htr.In.y < Pos.y1 || htr.In.y > Pos.y2)
 		return false;
 
-	ssize_t CharPos = offset;
+	ssize_t CharPos = 0;
 	for (unsigned i=0; i<Layout.Length(); i++)
 	{
 		TextLine *tl = Layout[i];
@@ -601,6 +601,8 @@ bool LRichTextPriv::TextBlock::HitTest(int offset, HitTestResult &htr)
 							htr.In.y <= r.y2;
 		if (OnThisLine && htr.In.x <= r.x1)
 		{
+			htr.Blk = this;
+			htr.BlkOffset = blkOffset;
 			htr.Near = true;
 			htr.Idx = CharPos;
 			htr.LineHint = i;
@@ -630,10 +632,11 @@ bool LRichTextPriv::TextBlock::HitTest(int offset, HitTestResult &htr)
 						
 				htr.Blk = this;
 				htr.Ds = ds;
-				htr.Idx = CharPos + OffChar;
+				htr.BlkOffset = blkOffset;
+				htr.Idx = OffChar;
 				htr.LineHint = i;
 
-				LAssert(htr.Idx <= Length());
+				///LAssert(htr.Idx <= Length());
 
 				return true;
 			}
@@ -645,6 +648,8 @@ bool LRichTextPriv::TextBlock::HitTest(int offset, HitTestResult &htr)
 
 		if (OnThisLine)
 		{
+			htr.Blk = this;
+			htr.BlkOffset = blkOffset;
 			htr.Near = true;
 			htr.Idx = CharPos;
 			htr.LineHint = i;

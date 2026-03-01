@@ -181,21 +181,22 @@ bool LRichTextPriv::ListBlock::Seek(SeekType To, BlockCursor &Cursor)
 	{
 		case SkSeekEnter:
 		{
+			if (blocks.Length() == 0)
+				return false;
+
 			if (Cursor.Offset == 0)
 			{
-				// move cursor to start of the first block:
-				if (blocks.Length() == 0)
-					return false;
-
+				// cursor entering the start, move cursor to start of the first block:
 				auto b = blocks[0];
 				Cursor.Set(b, 0, 0);
-				return true;
 			}
 			else
 			{
-				// end of block?
-				LAssert(!"fixme");
+				// cursor enterin the end, move to the end of the last block
+				auto b = blocks.Last();
+				Cursor.Set(b, b->Length()-1, b->GetLines()-1);
 			}
+			return true;
 			break;
 		}
 		default:

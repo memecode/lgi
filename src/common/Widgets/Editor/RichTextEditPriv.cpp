@@ -1248,6 +1248,12 @@ bool LRichTextPriv::CursorFromPos(LPoint pt, LAutoPtr<BlockCursor> *Cursor, ssiz
 	if (!container.HitTest(0, r))
 		return false;
 
+	if (!r.Blk)
+	{
+		container.HitTest(0, r);
+	}
+
+	LAssert(r.Blk != nullptr);
 	if (Cursor)
 		Cursor->Reset(new BlockCursor(r.Blk, r.Idx, r.LineHint));
 	if (GlobalIdx)

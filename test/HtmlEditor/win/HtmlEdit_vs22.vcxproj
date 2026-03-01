@@ -310,6 +310,7 @@
   <ItemGroup>
     <None Include="..\TestCases\example.html" />
     <None Include="..\TestCases\hr.html" />
+    <None Include="..\testcases\list.html" />
     <None Include="..\TestCases\sig.html" />
   </ItemGroup>
   <ItemGroup>

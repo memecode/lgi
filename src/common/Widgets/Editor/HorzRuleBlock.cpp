@@ -81,13 +81,14 @@ bool LRichTextPriv::HorzRuleBlock::GetPosFromIndex(BlockCursor *Cursor)
 	return true;
 }
 
-bool LRichTextPriv::HorzRuleBlock::HitTest(int offset, HitTestResult &htr)
+bool LRichTextPriv::HorzRuleBlock::HitTest(int blkOffset, HitTestResult &htr)
 {
 	if (htr.In.y < Pos.y1 || htr.In.y > Pos.y2)
 		return false;
 
 	htr.Near = false;
 	htr.LineHint = 0;
+	htr.BlkOffset = blkOffset;
 
 	int Cx = Pos.x1 + (Pos.X() / 2);
 	if (htr.In.x < Cx)
