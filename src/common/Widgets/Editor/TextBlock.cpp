@@ -581,8 +581,8 @@ bool LRichTextPriv::TextBlock::GetPosFromIndex(BlockCursor *Cursor)
 			
 	return false;
 }
-		
-bool LRichTextPriv::TextBlock::HitTest(int blkOffset, HitTestResult &htr)
+
+bool LRichTextPriv::TextBlock::HitTest(ssize_t blkOffset, HitTestResult &htr)
 {
 	if (htr.In.y < Pos.y1 || htr.In.y > Pos.y2)
 		return false;

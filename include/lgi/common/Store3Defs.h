@@ -454,6 +454,7 @@ enum Store3Fields
 	FIELD_PARENT = 172,					// (LDataFolderI*) Parent of store3 item
 	FIELD_URI = 173,					// (char*)
 	FIELD_FOLDER_PATH = 174,			// (char*)
+	FIELD_MAPI_PROFILES = 175,			// (char*) (comma separated?)
 
 	FIELD_MAX,
 };

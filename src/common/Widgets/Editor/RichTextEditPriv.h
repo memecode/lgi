@@ -581,12 +581,12 @@ public:
 		LPoint In;
 
 		// Output:
-		Block *Blk		= nullptr;	// matching block
-		int BlkOffset	= 0;		// char offset to the block
-		DisplayStr *Ds	= nullptr;	// matching string
-		ssize_t Idx		= -1;		// index into 'Blk' that was hit
-		int LineHint	= -1;		// if >= 0 this is the line the hit occurs on
-		bool Near		= false;	// true if the hit was only a near miss
+		Block *Blk			= nullptr;	// matching block
+		ssize_t BlkOffset	= 0;		// char offset to the block
+		DisplayStr *Ds		= nullptr;	// matching string
+		ssize_t Idx			= -1;		// index into 'Blk' that was hit
+		int LineHint		= -1;		// if >= 0 this is the line the hit occurs on
+		bool Near			= false;	// true if the hit was only a near miss
 		
 		HitTestResult(int x, int y)
 		{
@@ -752,7 +752,7 @@ public:
 				auto &a = b->parent->blocks;
 				auto idx = a.IndexOf(b);
 				LAssert(idx >= 0);
-				if (idx < a.Length() - 1)
+				if (idx < (ssize_t)a.Length() - 1)
 					return a[idx + 1];
 			}
 
@@ -816,7 +816,7 @@ public:
 				return len;
 			}
 			
-			virtual bool HitTest(int blkOffset, HitTestResult &htr)
+			virtual bool HitTest(ssize_t blkOffset, HitTestResult &htr)
 			{
 				auto originalPt = htr.In;
 					
@@ -1114,9 +1114,9 @@ public:
 				return false;
 			}
 
-			void Iterate(	int offset,
+			void Iterate(	ssize_t offset,
 							LPoint pos,
-							std::function<void(Block *blk, int docOffset, LPoint docPos)> callback)
+							std::function<void(Block *blk, ssize_t docOffset, LPoint docPos)> callback)
 			{
 				if (!callback)
 					return;
@@ -1463,7 +1463,7 @@ public:
 		ssize_t Length();
 		bool ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng);
 		bool GetPosFromIndex(BlockCursor *Cursor);
-		bool HitTest(int blkOffset, HitTestResult &htr);
+		bool HitTest(ssize_t blkOffset, HitTestResult &htr) override;
 		void OnPaint(PaintContext &Ctx);
 		bool OnLayout(Flow &flow);
 		ssize_t GetTextAt(ssize_t Offset, LArray<StyleText*> &t);
@@ -1518,7 +1518,7 @@ public:
 		ssize_t Length();
 		bool ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng);
 		bool GetPosFromIndex(BlockCursor *Cursor);
-		bool HitTest(int blkOffset, HitTestResult &htr);
+		bool HitTest(ssize_t blkOffset, HitTestResult &htr) override;
 		void OnPaint(PaintContext &Ctx);
 		bool OnLayout(Flow &flow);
 		ssize_t GetTextAt(ssize_t Offset, LArray<StyleText*> &t);
@@ -1685,7 +1685,7 @@ public:
 		ssize_t Length();
 		bool ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng);
 		bool GetPosFromIndex(BlockCursor *Cursor);
-		bool HitTest(int blkOffset, HitTestResult &htr);
+		bool HitTest(ssize_t blkOffset, HitTestResult &htr) override;
 		void OnPaint(PaintContext &Ctx);
 		bool OnLayout(Flow &flow);
 		ssize_t GetTextAt(ssize_t Offset, LArray<StyleText*> &t);
