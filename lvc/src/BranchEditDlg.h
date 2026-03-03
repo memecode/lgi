@@ -102,8 +102,15 @@ public:
 			{
 				if (auto sel = lst->GetSelected())
 				{
-					if (auto name = sel->GetText())
+					if (LString name = sel->GetText())
 					{
+						LString sep("/");
+						auto parts = name.Split(sep);
+						if (parts[0].Equals("origin"))
+						{
+							parts.DeleteAt(0, true);
+							name = sep.Join(parts);
+						}
 						folder->Checkout(name, true);
 					}
 				}
