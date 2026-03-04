@@ -128,10 +128,11 @@ if (1)
 endif()
 
 # zlib
+set(ZLIB_BUILD_SHARED TRUE)
 GitProject(zlib "https://github.com/madler/zlib.git" "develop" TRUE)
-install(TARGETS zlib
+install(TARGETS zlib # all of these should just be in the ./lib sub-folder
     RUNTIME
-        DESTINATION ${CMAKE_BINARY_DIR}/bin
+        DESTINATION ${CMAKE_BINARY_DIR}/lib
     LIBRARY
         DESTINATION ${CMAKE_BINARY_DIR}/lib)
 
@@ -153,10 +154,13 @@ set(PNG_STATIC off)
 set(PNG_SHARED on)
 set(PNG_BUILD_ZLIB OFF)
 set(ZLIB_ROOT ${DEPS}/zlib)
+message("ZLIB_ROOT=${ZLIB_ROOT}")
 
 if (1)
     # used by ide/lvc
     set(WITH_ZLIB TRUE)
+    # hack libssh's cmake into thinking zlib is available, when in reality it hasn't been built yet:
+    set(ZLIB_LIBRARY "${DEPS}/build-x64/lib/zlib.dll")
 
     # this disables the 'dist' target that conflicts with libjpeg's 'dist' target.
     function(add_custom_target target)
