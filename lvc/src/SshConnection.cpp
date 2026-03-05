@@ -8,7 +8,7 @@
 #define PROFILE_WaitPrompt		0
 #define PROFILE_OnEvent			0
 
-#define DEBUG_SSH_LOGGING		0
+#define DEBUG_SSH_LOGGING		1
 #if DEBUG_SSH_LOGGING
 	#define SSH_LOG(...)		d->sLog.Log(__VA_ARGS__)
 #else
@@ -23,7 +23,7 @@ SshConnection::SshConnection(LTextLog *log, const char *uri, const char *prompt)
 				return SshConnect;
 			},
 			log),
-	LEventTargetThread("SshConnection")
+	LEventTargetThread("SshConn")
 {
 	auto Wnd = log->GetWindow();
 	GuiHnd = Wnd->AddDispatch();
@@ -92,6 +92,7 @@ LSsh::SshConsole *SshConnection::GetConsole()
 {
 	if (!Connected)
 	{
+		SSH_LOG("SshConnection::GetConsole() Open:", Host.sHost, Host.sUser, Host.sPass, Host.Port);
 		auto r = Open(Host.sHost, Host.sUser, Host.sPass, true, Host.Port);
 		Log->Print("Ssh: %s open: %i\n", Host.sHost.Get(), r);
 	}
@@ -100,9 +101,7 @@ LSsh::SshConsole *SshConnection::GetConsole()
 		if (console = CreateConsole())
 		{		
 			// Get log in preamble
-			WaitPrompt(console
-				// , nullptr, "getConsole"
-				);
+			WaitPrompt(console);
 		}
 		else Log->Print("Ssh error: no console?\n");
 	}

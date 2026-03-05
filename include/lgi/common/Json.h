@@ -455,13 +455,13 @@ public:
 				if (!a.IdxCheck(Pos))
 					return Pair();
 				
-				Key &k = a[Pos];				
-				if (k.Name)
+				Key &k = a[Pos];
+				if (k.Name || k.Str)
 					return Pair(k.Name, k.Str);
 				
 				if (k.Obj.Length())
 					return Pair(k.Obj[0].Name, k.Obj[0].Str);
-					
+
 				return Pair();
 			}
 
