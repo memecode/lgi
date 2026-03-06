@@ -90,13 +90,17 @@ class LJson
 			{
 				r.Print("%s\"%s\": ", indent.Get(), Name.Get());
 			}
-			if (Str)
+
+			if (!Str && !Obj.Length() && !Array.Length())
+			{
+				r.Print("null");
+			}
+			else if (Str)
 			{
 				auto q = LString::Escape(Str, Str.Length(), EscapeChars, 'u');
 				r.Print("\"%s\"", q.Get());
 			}
-
-			if (Obj.Length())
+			else if (Obj.Length())
 			{
 				r.Print("%s{\n", indent.Get());
 				Depth++;
@@ -113,7 +117,7 @@ class LJson
 				r.Print("\n%s}", indent.Get());
 				Depth--;
 			}
-			else if (!Str)
+			else
 			{
 				// bool isObjArray = Array.Length() ? Array[0].Obj.Length() > 0 : false;
 
@@ -141,7 +145,7 @@ class LJson
 				}
 				else
 				{
-					// Pring multiple strings, each on their own line.
+					// Print multiple strings, each on their own line.
  					r.Write("[", 1);
 					auto arrIndent = MakeIndent(Depth + 1);
 					for (unsigned i=0; i<Array.Length(); i++)
@@ -571,7 +575,7 @@ public:
 	Iter GetArray(LString Addr)
 	{
 		Iter a(this);
-		Key *k = Deref(Addr, false);
+		auto k = Deref(Addr, false);
 		if (k)
 			a.Set(&k->Array);
 
@@ -580,7 +584,7 @@ public:
 
 	bool Set(LString Addr, const char *Val)
 	{
-		Key *k = Deref(Addr, true);
+		auto k = Deref(Addr, true);
 		if (!k)
 			return false;
 		k->Str = Val;
@@ -617,7 +621,7 @@ public:
 
 	bool Set(LString Addr, const LArray<LString> &Array)
 	{
-		Key *k = Deref(Addr, true);
+		auto k = Deref(Addr, true);
 		if (!k)
 			return false;
 		for (size_t i=0; i<Array.Length(); i++)
@@ -627,7 +631,7 @@ public:
 
 	bool Set(LString Addr, const LArray<LJson> &Array)
 	{
-		Key *k = Deref(Addr, true);
+		auto k = Deref(Addr, true);
 		if (!k)
 			return false;
 		for (size_t i=0; i<Array.Length(); i++)

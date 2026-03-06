@@ -69,7 +69,7 @@ public:
 					LHttpServer::Callback *cb,
 					int portVal,
 					LCancel *cancelObj) :
-		LThread("LHttpServerPriv.Thread"),
+		LThread("HttpSrvPrv.Th"),
 		LMutex("LHttpServerPriv.Lock"),
 		server(httpServer),
 		callback(cb),
@@ -139,6 +139,8 @@ public:
 	{
 	    LOG_HTTP("Attempting to listen on port %i...\n", port);
 	    
+		Listen.SetReuseAddress(true);
+
 	    LAutoPtr<LSubProcess::IoThread> netstat;
 		while (	!cancel->IsCancelled() &&
 				!Listen.Listen(port))

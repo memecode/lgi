@@ -155,7 +155,7 @@ public:
 			/// This isn't particularly efficent.
 			TCallback onLine;
 			/// Handle blocks of unparsed output:
-			TCallback onBlock;			
+			TCallback onBlock;
 			/// Handle the entire output of the application on exit:
 			/// Note: By default this will include stderr output as well.
 			TCallback onStdout;
@@ -172,6 +172,7 @@ public:
 		bool Create(const char *exe, const char *args = nullptr);
 		bool Start(bool ReadAccess = true, bool WriteAccess = false, bool MapStderrToStdout = true);
 		LSubProcess *GetProcess() const { return process; }
+		bool IsRunning() { return process ? process->IsRunning() : false; }
 	};
 };
 
