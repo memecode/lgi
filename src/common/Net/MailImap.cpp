@@ -2856,24 +2856,21 @@ bool MailIMap::GetFolders(LArray<MailImapFolder*> &Folders)
 			{
 				char Sep[] = { GetFolderSep(), 0 };
 
-				for (auto d: Dialog)
+				for (auto dlg: Dialog)
 				{
-					LArray<LAutoString> t;
-					char *s;
-					while ((s = LTokStr((const char*&)d)))
-					{
-						t[t.Length()].Reset(s);
-					}
+					LString::Array t;
+					LString tok;
+					const char *s = dlg;
+					while ((tok = LTokLStr(s)))
+						t.New() = tok;
 					
 					if (t.Length() >= 5)
 					{
-						if (strcmp(t[0], "*") == 0 &&
-							_stricmp(t[1], "LIST") == 0)
+						if (t[0].Equals("*") &&
+							t[1].Equals("LIST"))
 						{
-							char *Folder = t[t.Length()-1];
-
-							MailImapFolder *f = new MailImapFolder();
-							if (f)
+							auto Folder = t.Last();
+							if (auto f = new MailImapFolder())
 							{
 								Folders.Add(f);
 								f->Sep = Sep[0];
@@ -2882,19 +2879,9 @@ bool MailIMap::GetFolders(LArray<MailImapFolder*> &Folders)
 								f->NoSelect = stristr(t[2], "NoSelect") != 0;
 								f->NoInferiors = stristr(t[2], "NoInferiors") != 0;
 
-								// LgiTrace("Imap folder '%s' %s\n", Folder, t[2].Get());
-
 								// Alloc name
-								if (Folder[0] == '\"')
-								{
-									char *p = TrimStr(Folder, "\"");
-									f->Path = DecodeImapString(p);
-									DeleteArray(p);
-								}
-								else
-								{
-									f->Path = DecodeImapString(Folder);
-								}
+								f->Path = DecodeImapString(Folder.Strip("\""));
+								LAssert(f->Path);
 							}
 						}						
 					}

@@ -174,6 +174,7 @@ LgiFunc char *LSeekUtf8
 /// A token is defined as a quoted string or an unquoted string that ends in whitespace.
 /// \ingroup Text
 LgiFunc char *LTokStr(const char *&s);
+LgiFunc LString LTokLStr(const char *&s);
 
 /// Formats a data size into appropriate units
 /// \ingroup Base

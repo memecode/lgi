@@ -2519,43 +2519,66 @@ void LFormatSize(char *Str, int SLen, int64_t Size)
 	}
 }
 
+template<typename Callback>
+static bool _TokStr(Callback cb, const char *&s)
+{
+	if (!s || !*s)
+		return false;
+
+	// Skip whitespace
+	static char Delim[] = ", \t\r\n";
+	while (*s && strchr(Delim, *s))
+		s++;
+	if (!*s)
+		return false;
+
+	if (strchr("\'\"", *s))
+	{
+		char Delim = *s++;
+		const char *e = strchr(s, Delim);
+		if (!e)
+		{
+			// error, no end delimiter
+			e = s;
+			while (*e)
+				e++;
+			return false;
+		}
+		
+		cb(s, e - s);
+		s = *e ? e + 1 : e;
+	}
+	else
+	{
+		const char *e = s;
+		while (*e && !strchr(Delim, *e))
+			e++;
+		cb(s, e - s);
+		s = e;
+	}
+	return true;
+}
+
 char *LTokStr(const char *&s)
 {
-	char *Status = 0;
-
-	if (s && *s)
-	{
-		// Skip whitespace
-		static char Delim[] = ", \t\r\n";
-		while (*s && strchr(Delim, *s)) s++;
-		if (*s)
+	char *status = nullptr;
+	_TokStr([&](auto start, auto len)
 		{
-			if (strchr("\'\"", *s))
-			{
-				char Delim = *s++;
-				const char *e = strchr(s, Delim);
-				if (!e)
-				{
-					// error, no end delimiter
-					e = s;
-					while (*e)
-						e++;
-				}
-				Status = NewStr(s, e - s);
-				s = *e ? e + 1 : e;
-			}
-			else
-			{
-				const char *e = s;
-				while (*e && !strchr(Delim, *e))
-					e++;
-				Status = NewStr(s, e - s);
-				s = e;
-			}
-		}		
-	}
+			status = NewStr(start, len);
+		}, s);
 	
-	return Status;
+	return status;
+}
+
+LString LTokLStr(const char *&s)
+{
+	LString status;
+	_TokStr([&](auto start, auto len)
+		{
+			status.Set(start, len);
+		}, s);
+
+	return status;
 }
 
 LString LGetEnv(const char *Var)
