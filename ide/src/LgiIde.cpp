@@ -3728,7 +3728,8 @@ LMessage::Result AppWnd::OnEvent(LMessage *m)
 						CurIpDoc->UpdateControl();
 						
 					// Ask the debugger context to shutdown cleanly...
-					d->DbgContext->Quit();
+					if (d->DbgContext)
+						d->DbgContext->Quit();
 				}
 			}
 			

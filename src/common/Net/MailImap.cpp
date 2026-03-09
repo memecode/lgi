@@ -1757,7 +1757,7 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 							CommandFinished();
 						}
 					}
-					else if (!_stricmp(AuthType, "XOAUTH2"))
+					else if (!Stricmp(AuthType, "XOAUTH2"))
 					{
 						if (stristr(RemoteHost, "office365.com"))
 						{

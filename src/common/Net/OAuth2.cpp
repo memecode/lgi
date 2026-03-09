@@ -173,17 +173,19 @@ struct LOAuth2Priv
 	LString AccessToken, RefreshToken;
 	int64 ExpiresIn;
 
-	struct Server : public LSocket
+	struct OAuth2Server : public LStream
 	{
-		LSocket Listen;
+		SslSocket Listen;
 		LOAuth2Priv *d;
-		LSocket s;
+		SslSocket s = nullptr;
 
 	public:
 		LHashTbl<ConstStrKey<char,false>,LString> Params;
 		LString Body;
 
-		Server(LOAuth2Priv *cd) : d(cd)
+		OAuth2Server(LOAuth2Priv *priv) :
+			d(priv),
+			Listen(this, nullptr/*caps*/, true)
 		{
 			auto Start = LCurrentTime();
 			while (	!d->Cancel->IsCancelled() &&
@@ -193,6 +195,12 @@ struct LOAuth2Priv
 				d->Log->Print("Error: Can't listen on %i... (%s)\n", LOCALHOST_PORT, Listen.GetErrorString());
 				LSleep(1000);
 			}
+		}
+
+		ssize_t Write(const void *Ptr, ssize_t Size, int Flags = 0) override
+		{
+			LgiTrace("%s:%i OAuth2Server: %.*s\n", _FL, (int)Size, Ptr);
+			return Size;
 		}
 
 		bool GetReq()
@@ -277,14 +285,15 @@ struct LOAuth2Priv
 		if (Token)
 			return true;
 
-		Server Svr(this);
+		OAuth2Server Svr(this);
 		LString Endpoint;
 		Endpoint.Printf(Params.ApiUri, Id.Get());
 		CodeVerifier = ToText(SslSocket::Random(48));
 
 		LUri u(Endpoint);
 		LString Uri, Redir, RedirEnc, Scope;
-		Redir.Printf("http://localhost:%i", LOCALHOST_PORT);
+		Redir.Printf("https://127.0.0.1:%i", LOCALHOST_PORT);
+		// Redir.Printf("https://memecode.com/scribe/oauth2.php");
 		Scope = u.EncodeStr(Params.Scope);
 		RedirEnc = u.EncodeStr(Redir, ":/");
 		Uri.Printf("%s?client_id=%s&redirect_uri=%s&response_type=code&code_challenge=%s&scope=%s",

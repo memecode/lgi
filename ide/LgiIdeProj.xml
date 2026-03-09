@@ -301,7 +301,7 @@ _GNU_SOURCE</Release>
 			</Environment>
 			<Arguments>
 				<All>
-					<Debug>/home/matthew/code/castPi/castPiProject.xml</Debug>
+					<Debug>/home/matthew/sites/MemecodeWebProj.xml</Debug>
 				</All>
 			</Arguments>
 			<DebugAdmin />
