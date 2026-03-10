@@ -300,9 +300,7 @@ _GNU_SOURCE</Release>
 				<All>SOME_TEST=testing</All>
 			</Environment>
 			<Arguments>
-				<All>
-					<Debug>/home/matthew/sites/MemecodeWebProj.xml</Debug>
-				</All>
+				<All />
 			</Arguments>
 			<DebugAdmin />
 			<InitialDir />

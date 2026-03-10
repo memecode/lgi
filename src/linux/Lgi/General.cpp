@@ -630,20 +630,26 @@ bool LExecute(const char *File, const char *Args, const char *Dir, LError *error
 
 	bool FileAdded = false;
 	LString AppPath;
-	LString EscFile = LString::Escape(File, -1, " &");
+	LString EscFile = LString::Escape(File, -1, " ");
 
 	LString a = App;
-	int Pos;
-	while ((Pos = a.Find("%")) >= 0)
+	LArray<size_t> subPos;
+	for (char *s = a.Get(); *s; s++)
 	{
-		char *s = a.Get() + Pos;
-		printf("a='%s'\n", a.Get());
-		switch (s[1])
+		if (*s == '%' && strchr("fu", ToLower(s[1])))
+			subPos.Add(s - a.Get());
+	}
+	for (auto pos: subPos)
+	{
+		auto before = a(0, pos);
+		auto after = a(pos + 2, -1);
+		
+		switch (a(pos+1))
 		{			
 			case 'f':
 			case 'F':
 			{
-				a = a(0,Pos) + EscFile + a(Pos+2,-1);
+				a = before + EscFile + after;
 				FileAdded = true;
 				break;
 			}
@@ -651,20 +657,13 @@ bool LExecute(const char *File, const char *Args, const char *Dir, LError *error
 			case 'U':
 			{
 				if (IsUrl)
-					a = a(0,Pos) + EscFile + a(Pos+2,-1);
+					a = before + "\"" + EscFile + "\"" + after;
 				else
-					a = a(0,Pos) + LString("file:") + EscFile + a(Pos+2,-1);
+					a = before + LString::Fmt("\"file:%s\"", EscFile.Get()) + after;
 				FileAdded = true;
 				break;
 			}
-			default:
-			{
-				// we don't understand this command
-				a = a(0,Pos) + a(Pos+2,-1);
-				break;
-			}
 		}
-		printf("a='%s'\n", a.Get());
 	}
 
 	if (!FileAdded)
@@ -678,7 +677,7 @@ bool LExecute(const char *File, const char *Args, const char *Dir, LError *error
 	int e;
 	if (Dir)
 		chdir(Dir);
-	printf("a=\n%s\n", a.Get());
+	printf("a='%s'\n", a.Get());
 	if (e = system(a))
 	{
 		if (error)

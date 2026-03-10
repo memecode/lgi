@@ -68,6 +68,7 @@ public:
 	bool GetRemoteIp(char *IpAddr) override;
 
 	// Server
+	void SetCert(LString certFile, LString keyFile);
 	bool Listen(int Port = 0) override;
 	bool CanAccept(int TimeoutMs = 0) override;
 	bool Accept(LSocketI *c) override;

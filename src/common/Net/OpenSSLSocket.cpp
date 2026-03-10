@@ -1238,6 +1238,12 @@ int SslSocket::Close()
 	return true;
 }
 
+void SslSocket::SetCert(LString certFile, LString keyFile)
+{
+	d->CertFile = certFile;
+	d->KeyFile = keyFile;
+}
+
 bool SslSocket::Listen(int Port)
 {
 	if (!Library)

@@ -33,6 +33,8 @@ public:
 		LString Scope;
 		LUri Proxy;
 		
+		LString SslKey, SslCert;
+		
 		Params()
 		{
 			Provider = None;

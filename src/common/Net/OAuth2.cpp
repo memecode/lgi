@@ -52,15 +52,22 @@ ssize_t ChunkSize(ssize_t &Pos, LString &Buf, LString &Body)
 
 static bool GetHttp(LSocketI *s, LString &Hdrs, LString &Body, bool IsResponse)
 {
-	LString Resp = GetHeaders(s);
+	printf("%s:%i - GetHttp\n", _FL);
+	auto Resp = GetHeaders(s);
+	printf("%s:%i - Resp=%s\n", _FL, Resp.Get());
+	if (!Resp)
+		return false;
 
 	char Buf[512];
 	ssize_t Rd;
 	auto BodyPos = Resp.Find("\r\n\r\n");
-	LAutoString Len(InetGetHeaderField(Resp, "Content-Length", BodyPos));
+	LAssert(BodyPos > 0);
+	Hdrs = Resp(0, BodyPos);
+
+	auto Len = LGetHeaderField(Hdrs, "Content-Length");
 	if (Len)
 	{
-		int Bytes = atoi(Len);
+		auto Bytes = Len.Int();
 		size_t Total = BodyPos + 4 + Bytes;
 		while (Resp.Length() < Total)
 		{
@@ -73,25 +80,26 @@ static bool GetHttp(LSocketI *s, LString &Hdrs, LString &Body, bool IsResponse)
 	}
 	else if (s->IsOpen() && IsResponse)
 	{
-		LAutoString Te(InetGetHeaderField(Resp, "Transfer-Encoding", BodyPos));
-		bool Chunked = Te && !_stricmp(Te, "chunked");
-
+		auto TransferEncoding = LGetHeaderField(Hdrs, "Transfer-Encoding");
+		bool Chunked = TransferEncoding.Equals("chunked");
+		printf("%s:%i - Chunked=%i\n", _FL, Chunked);
 		if (Chunked)
 		{
 			ssize_t Pos = 0;
 
-			Hdrs = Resp(0, BodyPos);
 			LString Raw = Resp(BodyPos + 4, -1);
 			Body.Empty();
 
 			while (s->IsOpen())
 			{
 				auto Sz = ChunkSize(Pos, Raw, Body);
+				printf("%s:%i - ChunkSize=%i\n", _FL, (int)Sz);
 				if (Sz == 0)
 					break;
 				if (Sz < 0)
 				{
 					Rd = s->Read(Buf, sizeof(Buf));
+					printf("%s:%i - Rd=%i\n", _FL, (int)Rd);
 					if (Rd > 0)
 						Raw += LString(Buf, Rd);
 					else
@@ -108,7 +116,6 @@ static bool GetHttp(LSocketI *s, LString &Hdrs, LString &Body, bool IsResponse)
 		}
 	}
 
-	Hdrs = Resp(0, BodyPos);
 	Body = Resp(BodyPos + 4, -1);
 
 	return true;
@@ -163,12 +170,13 @@ struct LOAuth2Priv
 {
 	LOAuth2::Params Params;
 	LString Id;
-	LStream *Log;
+	LStream *Log = nullptr;
 	LString Token;
 	LString CodeVerifier;
 	LStringPipe LocalLog;
-	LDom *Store;
-	LCancel *Cancel;
+	LDom *Store = nullptr;
+	LCancel *Cancel = nullptr;
+	LString RedirectUri;
 
 	LString AccessToken, RefreshToken;
 	int64 ExpiresIn;
@@ -178,22 +186,29 @@ struct LOAuth2Priv
 		SslSocket Listen;
 		LOAuth2Priv *d;
 		SslSocket s = nullptr;
+		bool listening = false;
 
 	public:
 		LHashTbl<ConstStrKey<char,false>,LString> Params;
 		LString Body;
 
-		OAuth2Server(LOAuth2Priv *priv) :
-			d(priv),
+		OAuth2Server() :
 			Listen(this, nullptr/*caps*/, true)
 		{
-			auto Start = LCurrentTime();
-			while (	!d->Cancel->IsCancelled() &&
-					!Listen.Listen(LOCALHOST_PORT) &&
-					(LCurrentTime() - Start) < 60000)
+		}
+
+		void SetPriv(LOAuth2Priv *priv)
+		{
+			if (d = priv)
 			{
-				d->Log->Print("Error: Can't listen on %i... (%s)\n", LOCALHOST_PORT, Listen.GetErrorString());
-				LSleep(1000);
+				if (d->Params.SslKey && d->Params.SslCert)
+					Listen.SetCert(d->Params.SslCert, d->Params.SslKey);
+		
+				if (!listening)
+				{
+					Listen.SetCancel(d->Cancel);
+					listening = Listen.Listen(LOCALHOST_PORT);
+				}
 			}
 		}
 
@@ -210,11 +225,15 @@ struct LOAuth2Priv
 				if (Listen.IsReadable(100) &&
 					Listen.Accept(&s))
 				{
+					printf("%s:%i - accepting https connection...\n", _FL);
+					
 					// Read access code out of response
 					LString Hdrs;
 					if (GetHttp(&s, Hdrs, Body, false))
 					{
 						auto Url = UrlFromHeaders(Hdrs);
+						printf("%s:%i - Url=%s\n", _FL, Url.Get());
+
 						auto Vars = Url.Split("?", 1);
 						if (Vars.Length() != 2)
 						{
@@ -238,18 +257,20 @@ struct LOAuth2Priv
 			return false;
 		}
 
-		bool Response(const char *Txt)
+		bool Response(const char *Txt, int StatusCode = 200)
 		{
 			LString Msg;
-			Msg.Printf("HTTP/1.0 200 OK\r\n"
+			Msg.Printf("HTTP/1.0 %i OK\r\n"
 						"\r\n"
 						"<html>\n"
 						"<body>%s</body>\n"
 						"</html>",
-						Txt);
+						StatusCode, Txt);
 			return ::Write(&s, Msg);
 		}
 	};
+	
+	static LAutoPtr<OAuth2Server> httpsServer;
 
 	LString Base64(LString s)
 	{
@@ -285,17 +306,20 @@ struct LOAuth2Priv
 		if (Token)
 			return true;
 
-		OAuth2Server Svr(this);
+		if (!httpsServer && !httpsServer.Reset(new OAuth2Server))
+			return false;
+		httpsServer->SetPriv(this);
+
 		LString Endpoint;
 		Endpoint.Printf(Params.ApiUri, Id.Get());
 		CodeVerifier = ToText(SslSocket::Random(48));
 
 		LUri u(Endpoint);
-		LString Uri, Redir, RedirEnc, Scope;
-		Redir.Printf("https://127.0.0.1:%i", LOCALHOST_PORT);
+		LString Uri, RedirEnc, Scope;
+		RedirectUri.Printf("https://localhost:%i/auth", LOCALHOST_PORT);
 		// Redir.Printf("https://memecode.com/scribe/oauth2.php");
 		Scope = u.EncodeStr(Params.Scope);
-		RedirEnc = u.EncodeStr(Redir, ":/");
+		RedirEnc = u.EncodeStr(RedirectUri, ":/");
 		Uri.Printf("%s?client_id=%s&redirect_uri=%s&response_type=code&code_challenge=%s&scope=%s",
 					Params.AuthUri.Get(),
 					Params.ClientID.Get(),
@@ -306,10 +330,12 @@ struct LOAuth2Priv
 			Log->Print("%s:%i - Uri: %s\n", _FL, Uri.Get());
 		LExecute(Uri); // Open browser for user to auth
 
-		if (Svr.GetReq())
+		if (httpsServer->GetReq())
 		{
-			Token = Svr.Params.Find("code");
-			Svr.Response(Token ? "Ok: Got token. You can close this window/tab now." : "Error: No token.");
+			Token = httpsServer->Params.Find("code");
+			if (Log)
+				Log->Print("%s:%i - Token='%s'\n", _FL, Token.Get());
+			httpsServer->Response(Token ? "Ok: Got token. You can close this window/tab now." : "Error: No token.");
 		}
 
 		return Token != NULL;
@@ -331,12 +357,12 @@ struct LOAuth2Priv
 			LString Body, Http;
 			Body.Printf("code=%s&"
 						"client_id=%s&"
-						"redirect_uri=http://localhost:%i&"
+						"redirect_uri=%s&"
 						"code_verifier=%s&"
 						"grant_type=authorization_code",
 						FormEncode(Token).Get(),
 						Params.ClientID.Get(),
-						LOCALHOST_PORT,
+						RedirectUri.Get(),
 						FormEncode(CodeVerifier).Get());
 			if (Params.ClientSecret)
 			{
@@ -367,7 +393,7 @@ struct LOAuth2Priv
 				return false;
 			}
 
-			// Log->Print("Body=%s\n", Body.Get());
+			Log->Print("Body=%s\n", Body.Get());
 			LJson j(Body);
 
 			AccessToken = j.Get("access_token");
@@ -475,6 +501,8 @@ struct LOAuth2Priv
 		return true;
 	}
 };
+
+LAutoPtr<LOAuth2Priv::OAuth2Server> LOAuth2Priv::httpsServer;
 
 LOAuth2::LOAuth2(LOAuth2::Params &params, const char *account, LDom *store, LCancel *cancel, LStream *log)
 {
