@@ -1905,7 +1905,10 @@ bool LDom::GetValue(const char *Var, LVariant &Value)
 		if (Name.IsEmpty())
 			LgiTrace("%s:%i - Warning name parse failed for '%s'\n", _FL, Var);
 		else
-			Status = Object->GetVariant(Name, Value, Arr.IsEmpty() ? NULL : Arr.Get());
+		{
+			bool arrEmpty = Arr.IsEmpty();
+			Status = Object->GetVariant(Name, Value, arrEmpty ? NULL : Arr.Get());
+		}
 	}
 
 	_OnAccess(false);
@@ -1929,7 +1932,10 @@ bool LDom::SetValue(const char *Var, LVariant &Value)
 				if (Name.IsEmpty())
 					LgiTrace("%s:%i - Warning name parse failed for '%s'\n", _FL, Var);
 				else
-					Status = Object->SetVariant(Name, Value, Arr.IsEmpty() ? NULL : Arr.Get());
+				{
+					auto arrEmpty = Arr.IsEmpty();
+					Status = Object->SetVariant(Name, Value, arrEmpty ? NULL : Arr.Get());
+				}
 			}
 
 			_OnAccess(false);

@@ -1791,14 +1791,13 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 						LString s;
 						s.Printf("user=%s\001auth=Bearer %s\001\001", User, AccessToken.Get());
 						#if DEBUG_OAUTH2
-						LgiTrace("%s:%i - s=%s.\n", _FL, s.Replace("\001", "%01").Get());
+						LgiTrace("%s:%i - s=%s\n", _FL, s.Replace("\001", "%01").Get());
 						#endif
-						Base64Str(s);						
 
 						// Issue the IMAP command
 						int AuthCmd = d->NextCmd++;
 						LString AuthStr;
-						AuthStr.Printf("A%4.4i AUTHENTICATE XOAUTH2 %s\r\n", AuthCmd, s.Get());
+						AuthStr.Printf("A%4.4i AUTHENTICATE XOAUTH2 %s\r\n", AuthCmd, LToBase64(s).Get());
 						if (WriteBuf(false, AuthStr))
 						{
 							Dialog.DeleteArrays();
@@ -1811,13 +1810,12 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 										l++;
 										while (*l && strchr(LWhiteSpace, *l))
 											l++;
-										s = l;
-										UnBase64Str(s);
+										s = LToBinary(LString(l));
 										Log(s.Strip(), LSocketI::SocketMsgError);
 				
 										LJson t(s);
 										auto StatusCode = t.Get("status").Int();
-										LgiTrace("%s:%i - HTTP status: %" PRIi64 "\n%s\n", _FL, StatusCode, s.Get());
+										LgiTrace("%s:%i - status: %" PRIi64 "\n%s\n", _FL, StatusCode, s.Get());
 
 										sprintf_s(Buf, sizeof(Buf), "\r\n");
 										WriteBuf(false, NULL, true);
@@ -1825,7 +1823,7 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 										if (StatusCode == 400)
 										{
 											// Refresh the token...?
-											if (Auth.Refresh())
+											if (Auth.Restart())
 											{
 												CommandFinished();
 												

@@ -57,6 +57,7 @@ public:
 
 	LString GetAccessToken();
 	bool Refresh();
+	bool Restart();
 };
 
 #endif

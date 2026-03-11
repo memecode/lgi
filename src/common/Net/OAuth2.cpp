@@ -8,8 +8,8 @@
 
 //////////////////////////////////////////////////////////////////
 #define LOCALHOST_PORT		54900
-#define OPT_AccessToken		"AccessToken"
-#define OPT_RefreshToken	"RefreshToken"
+#define OPT_AccessToken		"OAuthAccessToken"
+#define OPT_RefreshToken	"OAuthRefreshToken"
 
 static LString GetHeaders(LSocketI *s)
 {
@@ -25,30 +25,6 @@ static LString GetHeaders(LSocketI *s)
 	
 	s->Close();
 	return LString();
-}
-
-ssize_t ChunkSize(ssize_t &Pos, LString &Buf, LString &Body)
-{
-	static LString Eol("\r\n");
-	auto End = Buf.Find(Eol, Pos);
-	if (End > Pos)
-	{
-		auto Sz = Buf(Pos, End).Int(16);
-		if (Sz >= 0)
-		{
-			End += Eol.Length();
-
-			auto Bytes = End + Sz + Eol.Length();
-			if (Buf.Length() >= Bytes)
-			{
-				Body += Buf(End, End + Sz);
-				Pos = End + Sz + Eol.Length();
-				return Sz;
-			}
-		}
-	}
-
-	return -1;
 }
 
 static bool GetHttp(LSocketI *s, LString &Hdrs, LString &Body, bool IsResponse)
@@ -82,7 +58,6 @@ static bool GetHttp(LSocketI *s, LString &Hdrs, LString &Body, bool IsResponse)
 	{
 		auto TransferEncoding = LGetHeaderField(Hdrs, "Transfer-Encoding");
 		bool Chunked = TransferEncoding.Equals("chunked");
-		printf("%s:%i - Chunked=%i\n", _FL, Chunked);
 		if (Chunked)
 		{
 			BodyPos += 4;
@@ -266,7 +241,9 @@ struct LOAuth2Priv
 						"<body>%s</body>\n"
 						"</html>",
 						StatusCode, Txt);
-			return ::Write(&s, Msg);
+			auto status = ::Write(&s, Msg);
+			s.Close();
+			return status;
 		}
 	};
 	
@@ -477,14 +454,10 @@ struct LOAuth2Priv
 			return false;
 
 		LVariant v;
-		auto KeyB64 = Base64(LString::Fmt("%s.%s", Params.Scope.Get(), Id.Get()));
-		auto kAccTok = LString::Fmt("OAuth2-%s-%s", OPT_AccessToken, KeyB64.Get()).RStrip("=");
-		auto kRefreshTok = LString::Fmt("OAuth2-%s-%s", OPT_RefreshToken, KeyB64.Get()).RStrip("=");
-
 		if (Write)
 		{
-			Store->SetValue(kAccTok, v = AccessToken.Get());
-			Store->SetValue(kRefreshTok, v = RefreshToken.Get());
+			Store->SetValue(OPT_AccessToken, v = AccessToken.Get());
+			Store->SetValue(OPT_RefreshToken, v = RefreshToken.Get());
 		}
 		else
 		{
@@ -492,8 +465,8 @@ struct LOAuth2Priv
 			RefreshToken.Empty();
 			
 			LVariant r;
-			if (!Store->GetValue(kAccTok, v) ||
-				!Store->GetValue(kRefreshTok, r))
+			if (!Store->GetValue(OPT_AccessToken, v) ||
+				!Store->GetValue(OPT_RefreshToken, r))
 				return false;
 
 			AccessToken = v.Str();
@@ -523,6 +496,13 @@ bool LOAuth2::Refresh()
 	d->AccessToken.Empty();
 	d->Serialize(true);
 	return d->Refresh();
+}
+
+bool LOAuth2::Restart()
+{
+	d->AccessToken.Empty();
+	d->Serialize(true);
+	return true;
 }
 
 LString LOAuth2::GetAccessToken()

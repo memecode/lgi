@@ -42,8 +42,10 @@ extern void DecodeAddrName(const char *Start, LString &Name, LString &Addr, cons
 extern int MaxLineLen(char *Text);
 extern char *EncodeImapString(const char *s);
 extern char *DecodeImapString(const char *s);
-extern bool UnBase64Str(LString &s);
-extern bool Base64Str(LString &s);
+// Use LToBinary instead
+[[deprecated]] extern bool UnBase64Str(LString &s);
+// Use LToBase64 instead
+[[deprecated]] extern bool Base64Str(LString &s);
 
 extern const char *sTextPlain;
 extern const char *sTextHtml;

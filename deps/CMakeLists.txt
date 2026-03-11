@@ -5,6 +5,10 @@ project(lgiDeps)
 enable_language( C CXX ASM )
 if(UNIX AND NOT APPLE)
     set(LINUX TRUE)
+    set(USE_SYSTEM_ZLIB TRUE) # having zlib in the path can conflict with say apt Firefox
+                              # so turning this off can make Lgi more compatible on Linux
+else()
+    set(USE_SYSTEM_ZLIB FALSE)
 endif()
 
 get_filename_component(DEPS "${CMAKE_CURRENT_LIST_DIR}/../../deps" ABSOLUTE)
@@ -127,25 +131,18 @@ if (1)
     endif()
 endif()
 
-# zlib
-set(ZLIB_BUILD_SHARED TRUE)
-GitProject(zlib "https://github.com/madler/zlib.git" "develop" TRUE)
-install(TARGETS zlib # all of these should just be in the ./lib sub-folder
-    RUNTIME
-        DESTINATION ${CMAKE_BINARY_DIR}/lib
-    LIBRARY
-        DESTINATION ${CMAKE_BINARY_DIR}/lib)
-
-# This is making the lib 'libzlib' on MacOSX, what was it fixing specifically?
-# Maybe it's windows specific?
-#
-# Fix the output name
-# set_target_properties(
-#     zlib
-#     PROPERTIES OUTPUT_NAME zlib)
-# if(LINUX)
-#     target_compile_options(zlibstatic PRIVATE -fPIC)
-# endif()
+if (NOT USE_SYSTEM_ZLIB)
+    # zlib
+    set(ZLIB_BUILD_SHARED TRUE)
+    GitProject(zlib "https://github.com/madler/zlib.git" "develop" TRUE)
+    install(TARGETS zlib # all of these should just be in the ./lib sub-folder
+        RUNTIME
+            DESTINATION ${CMAKE_BINARY_DIR}/lib
+        LIBRARY
+            DESTINATION ${CMAKE_BINARY_DIR}/lib)
+    set(ZLIB_ROOT ${DEPS}/zlib)
+    message("ZLIB_ROOT=${ZLIB_ROOT}")
+endif()
 
 # libpng
 set(PNG_HARDWARE_OPTIMIZATIONS 0)
@@ -153,14 +150,14 @@ set(PNG_ARM_NEON off)
 set(PNG_STATIC off)
 set(PNG_SHARED on)
 set(PNG_BUILD_ZLIB OFF)
-set(ZLIB_ROOT ${DEPS}/zlib)
-message("ZLIB_ROOT=${ZLIB_ROOT}")
 
 if (1)
     # used by ide/lvc
     set(WITH_ZLIB TRUE)
-    # hack libssh's cmake into thinking zlib is available, when in reality it hasn't been built yet:
-    set(ZLIB_LIBRARY "${DEPS}/build-x64/lib/zlib.dll")
+    if (NOT USE_SYSTEM_ZLIB)
+        # hack libssh's cmake into thinking zlib is available, when in reality it hasn't been built yet:
+        set(ZLIB_LIBRARY "${DEPS}/build-x64/lib/zlib.dll")
+    endif()
 
     # this disables the 'dist' target that conflicts with libjpeg's 'dist' target.
     function(add_custom_target target)
