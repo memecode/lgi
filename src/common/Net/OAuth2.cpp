@@ -4,6 +4,7 @@
 #include "lgi/common/Base64.h"
 #include "lgi/common/OAuth2.h"
 #include "lgi/common/Json.h"
+#include "lgi/common/Http.h"
 
 //////////////////////////////////////////////////////////////////
 #define LOCALHOST_PORT		54900
@@ -52,13 +53,12 @@ ssize_t ChunkSize(ssize_t &Pos, LString &Buf, LString &Body)
 
 static bool GetHttp(LSocketI *s, LString &Hdrs, LString &Body, bool IsResponse)
 {
-	printf("%s:%i - GetHttp\n", _FL);
 	auto Resp = GetHeaders(s);
-	printf("%s:%i - Resp=%s\n", _FL, Resp.Get());
+	// printf("%s:%i - Resp=%s\n", _FL, Resp.Get());
 	if (!Resp)
 		return false;
 
-	char Buf[512];
+	char Buf[1024];
 	ssize_t Rd;
 	auto BodyPos = Resp.Find("\r\n\r\n");
 	LAssert(BodyPos > 0);
@@ -85,28 +85,28 @@ static bool GetHttp(LSocketI *s, LString &Hdrs, LString &Body, bool IsResponse)
 		printf("%s:%i - Chunked=%i\n", _FL, Chunked);
 		if (Chunked)
 		{
-			ssize_t Pos = 0;
-
-			LString Raw = Resp(BodyPos + 4, -1);
-			Body.Empty();
-
-			while (s->IsOpen())
+			BodyPos += 4;
+			
+			// Transfer the remaining body into 'Buf':
+			ssize_t used = Resp.Length() - BodyPos;
+			if (used > sizeof(Buf))
 			{
-				auto Sz = ChunkSize(Pos, Raw, Body);
-				printf("%s:%i - ChunkSize=%i\n", _FL, (int)Sz);
-				if (Sz == 0)
-					break;
-				if (Sz < 0)
-				{
-					Rd = s->Read(Buf, sizeof(Buf));
-					printf("%s:%i - Rd=%i\n", _FL, (int)Rd);
-					if (Rd > 0)
-						Raw += LString(Buf, Rd);
-					else
-						break;
-				}
+				LAssert(!"Too much body to transfer to Buf");
+				return false;
 			}
-
+			memcpy(Buf, Resp.Get() + BodyPos, used);
+			
+			// Read the rest of the transfer:
+			LStringPipe out(1024);
+			auto err = LHttp::ReadChunked(s, &out, Buf, sizeof(Buf), used);
+			if (err)
+			{
+				LAssert(!"chunked read failed");
+				return false;
+			}
+			
+			Body = out.NewLStr();
+			// printf("ChunkedBody=%s\n", Body.Get());
 			return true;
 		}
 		else
@@ -477,13 +477,9 @@ struct LOAuth2Priv
 			return false;
 
 		LVariant v;
-		LString Key, kAccTok, kRefreshTok;
-		Key.Printf("%s.%s", Params.Scope.Get(), Id.Get());
-		auto KeyB64 = Base64(Key);
-		kAccTok.Printf("OAuth2-%s-%s", OPT_AccessToken, KeyB64.Get());
-		kAccTok = kAccTok.RStrip("=");
-		kRefreshTok.Printf("OAuth2-%s-%s", OPT_RefreshToken, KeyB64.Get());
-		kRefreshTok= kRefreshTok.RStrip("=");
+		auto KeyB64 = Base64(LString::Fmt("%s.%s", Params.Scope.Get(), Id.Get()));
+		auto kAccTok = LString::Fmt("OAuth2-%s-%s", OPT_AccessToken, KeyB64.Get()).RStrip("=");
+		auto kRefreshTok = LString::Fmt("OAuth2-%s-%s", OPT_RefreshToken, KeyB64.Get()).RStrip("=");
 
 		if (Write)
 		{
@@ -492,10 +488,16 @@ struct LOAuth2Priv
 		}
 		else
 		{
-			if (Store->GetValue(kAccTok, v)) AccessToken = v.Str();
-			else return false;
-			if (Store->GetValue(kRefreshTok, v)) RefreshToken = v.Str();
-			else return false;
+			AccessToken.Empty();
+			RefreshToken.Empty();
+			
+			LVariant r;
+			if (!Store->GetValue(kAccTok, v) ||
+				!Store->GetValue(kRefreshTok, r))
+				return false;
+
+			AccessToken = v.Str();
+			RefreshToken = r.Str();
 		}
 
 		return true;

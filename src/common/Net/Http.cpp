@@ -11,6 +11,110 @@
 
 #define DEBUG_LOGGING		0
 
+LError LHttp::ReadChunked(LSocketI *sock, LStream *output, char *buf, ssize_t bufLen, ssize_t used, LStream *log)
+{
+	#define LOG_PRINT if (log) log->Print
+
+	if (!sock ||
+		!output)
+		return LError(LErrorInvalidParam);
+
+	auto shiftDown = [&](char *ptr)
+		{
+			LAssert(ptr >= buf && ptr <= buf + bufLen);
+			auto bytes = ptr - buf;
+			memmove(buf, ptr, used - bytes);
+			used -= bytes;
+		};
+	auto readMore = [&]() -> ssize_t
+		{
+			auto rd = sock->Read(buf + used, bufLen - used);
+			if (rd > 0)
+				used += rd;
+			return rd;
+		};
+
+	while (sock->IsOpen())
+	{
+		// Try and get chunk header
+		char *end;
+		do
+		{
+			if (end = Strnstr(buf, "\r\n", used))
+				// We found the end of the chunk header line
+				break;
+
+			// Didn't find it, read some more:
+			if (readMore() < 0)
+				// Read failed
+				return LError(LErrorIoFailed, "socket read failed");
+		}
+		while (true);
+
+		// Process the chunk header							
+		end += 2;
+		
+		auto chunkSize = htoi(buf);
+		if (chunkSize <= 0)
+			// End of stream.
+			return LError(LErrorNone);
+		
+		ssize_t chunkDone = 0;
+		shiftDown(end); // consume header
+		
+		// Loop over the body of the chunk
+		while (chunkDone < chunkSize)
+		{
+			auto remaining = chunkSize - chunkDone;
+			auto common = MIN(used, remaining);
+
+			LOG_PRINT("%s:%i - remaining:%i, common=%i\n", _FL, (int)remaining, (int)common);
+			if (common > 0)
+			{
+				// Write any available data to the output:
+				auto wr = output->Write(buf, common);
+				LOG_PRINT("%s:%i - wr:%i\n", _FL, (int)wr);
+				if (wr <= 0)
+					return LError(LErrorIoFailed, "write to output failed");
+
+				chunkDone += wr;
+				shiftDown(buf + wr);
+			}
+
+			if (used >= bufLen)
+			{
+				LAssert(!"no space in buffer?");
+				return LError(LErrorIoFailed, "no space in buffer");
+			}
+
+			auto rd = readMore();
+			LOG_PRINT("%s:%i - chunk rd:%i\n", _FL, (int)rd);
+			if (rd < 0)
+				return LError(LErrorIoFailed, "socket read failed");
+		}
+		
+		// Loop over the CRLF postfix
+		if (sock && used < 2)
+		{
+			auto rd = readMore();
+			LOG_PRINT("%s:%i - rd:%i\n", _FL, (int)rd);
+			if (rd < 0)
+				return LError(LErrorIoFailed, "socket read failed");
+		}							
+		if (used < 2 || buf[0] != '\r' || buf[1] != '\n')
+		{
+			LOG_PRINT("%s:%i - Post fix missing\n", _FL);
+			LAssert(!"Post fix missing.");
+			return LError(LErrorIoFailed, "chunk postfix");
+		}
+		if (used >= 2)
+			shiftDown(buf + 2);
+	}
+	
+	return LError(LErrorIoFailed);
+}
+
+
 ///////////////////////////////////////////////////////////////////
 class ILogProxy : public LSocketI
 {
@@ -344,12 +448,12 @@ bool LHttp::Request
 				else
 				{
 					auto sTransferEncoding = LGetHeaderField(h, "Transfer-Encoding");
-					IsChunked = sTransferEncoding && sTransferEncoding.Equals("chunked");
+					IsChunked = sTransferEncoding.Equals("chunked");
 					Out->SetSize(0);
 				}
 				auto sContentEncoding = LGetHeaderField(h, "Content-Encoding");
 				ContentEncoding Encoding = EncodeRaw;
-				if (sContentEncoding && sContentEncoding.Equals("gzip"))
+				if (sContentEncoding.Equals("gzip"))
 					Encoding = EncodeGZip;
 				if (OutEncoding)
 					*OutEncoding = Encoding;
@@ -376,10 +480,10 @@ bool LHttp::Request
 					while (true)
 					{
 						// Try and get chunk header
-						char *End = Strnstr(s, "\r\n", Used);
+						auto End = Strnstr(s, "\r\n", Used);
 						if (!End)
 						{
-							ssize_t r = Socket->Read(s + Used, sizeof(s) - Used);
+							auto r = Socket->Read(s + Used, sizeof(s) - Used);
 							if (r < 0)
 								break;
 							
@@ -411,8 +515,8 @@ bool LHttp::Request
 						// Loop over the body of the chunk
 						while (Socket && ChunkDone < ChunkSize)
 						{
-							ssize_t Remaining = ChunkSize - ChunkDone;
-							ssize_t Common = MIN(Used, Remaining);
+							auto Remaining = ChunkSize - ChunkDone;
+							auto Common = MIN(Used, Remaining);
 
 							#ifdef _DEBUG
 							Log.Print("%s:%i - remaining:%i, common=%i\n", _FL, (int)Remaining, (int)Common);
@@ -420,7 +524,7 @@ bool LHttp::Request
 
 							if (Common > 0)
 							{
-								ssize_t w = Out->Write(s, Common);
+								auto w = Out->Write(s, Common);
 								#ifdef _DEBUG
 								Log.Print("%s:%i - w:%i\n", _FL, (int)w);
 								#endif
@@ -448,7 +552,7 @@ bool LHttp::Request
 								}
 							}
 
-							ssize_t r = Socket->Read(s + Used, sizeof(s) - Used);
+							auto r = Socket->Read(s + Used, sizeof(s) - Used);
 							#ifdef _DEBUG
 							Log.Print("%s:%i - r:%i\n", _FL, (int)r);
 							#endif

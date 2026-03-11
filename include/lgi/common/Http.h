@@ -4,6 +4,7 @@
 #include "lgi/common/Net.h"
 #include "lgi/common/Uri.h"
 
+// HTTP[S] client class:
 class LHttp
 {
 	LString Proxy;
@@ -95,6 +96,14 @@ public:
 						OutHeaders,
 						NULL);
 	}
+
+	// Helper function for reading chunked data:
+	static LError ReadChunked(	LSocketI *sock,
+								LStream *output,
+								char *buf, // may contain 'used' bytes of data when called
+								ssize_t bufLen,
+								ssize_t used,
+								LStream *log = nullptr);
 };
 
 /// This method will download a URI.
