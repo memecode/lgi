@@ -161,6 +161,7 @@ struct LOAuth2Priv
 
 	LString AccessToken, RefreshToken;
 	int64 ExpiresIn;
+	bool Dirty = false;
 
 	struct OAuth2Server : public LStream
 	{
@@ -390,7 +391,8 @@ struct LOAuth2Priv
 			AccessToken = j.Get("access_token");
 			RefreshToken = j.Get("refresh_token");
 			ExpiresIn = j.Get("expires_in").Int();
-
+			Dirty = true;
+			
 			if (!AccessToken)
 				Log->Print("Failed to get AccessToken: %s\n", Body.Get());
 		}
@@ -450,6 +452,7 @@ struct LOAuth2Priv
 
 		AccessToken = j.Get("access_token");
 		ExpiresIn = j.Get("expires_in").Int();
+		Dirty = true;
 
 		return AccessToken.Get() != NULL;
 	}
@@ -473,6 +476,7 @@ struct LOAuth2Priv
 		{
 			Store->SetValue(OPT_AccessToken, v = AccessToken.Get());
 			Store->SetValue(OPT_RefreshToken, v = RefreshToken.Get());
+			Dirty = false;
 		}
 		else
 		{
@@ -518,6 +522,21 @@ bool LOAuth2::Restart()
 	d->AccessToken.Empty();
 	d->Serialize(true);
 	return true;
+}
+
+void LOAuth2::OnLogin()
+{
+	if (d->Dirty)
+	{
+		// Login success... store the access token
+		d->Serialize(true);
+		if (d->Store)
+		{
+			// This flushes the options changes to disk
+			LScriptArguments Args(nullptr);
+			d->Store->CallMethod("SaveOptions", Args);
+		}
+	}
 }
 
 LString LOAuth2::GetAccessToken()

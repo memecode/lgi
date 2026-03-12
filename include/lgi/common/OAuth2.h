@@ -58,6 +58,7 @@ public:
 	LString GetAccessToken();
 	bool Refresh();
 	bool Restart();
+	void OnLogin(); // successful login
 };
 
 #endif

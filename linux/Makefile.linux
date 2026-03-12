@@ -34,9 +34,9 @@ ifeq ($(Build),Debug)
 		`pkg-config --libs gtk+-3.0` \
 		`pkg-config --libs ayatana-appindicator3-0.1`
 	Inc =  \
+		-I./private/common \
 		-I./include \
 		`pkg-config --cflags gstreamer-1.0` \
-		-I./private/common \
 		-I../deps/build-x64-debug/include \
 		-I./include/lgi/linux/Gtk \
 		-I./include/lgi/linux \
@@ -60,18 +60,18 @@ else
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
 		-I./private/common \
+		-I./private/linux \
 		`pkg-config --cflags ayatana-appindicator3-0.1` \
 		-I./include/lgi/linux/Gtk \
 		`pkg-config --cflags gstreamer-1.0` \
 		-I../deps/build-x64-release/include \
-		-I./include/lgi/linux \
 		-I./include \
-		-I./private/linux
+		-I./include/lgi/linux
 endif
 
 # Dependencies
-Source =	src/linux/General/File.cpp \
-			src/linux/Lgi/General.cpp \
+Source =	src/linux/Lgi/General.cpp \
+			src/linux/General/File.cpp \
 			src/common/Lgi/DragAndDropCommon.cpp \
 			src/linux/Lgi/DragAndDrop.cpp \
 			src/linux/Lgi/View.cpp \
@@ -111,8 +111,8 @@ Source =	src/linux/General/File.cpp \
 			src/linux/General/ShowFileProp_Linux.cpp \
 			src/linux/Lgi/App.cpp \
 			src/linux/Lgi/Window.cpp \
-			src/common/General/DateTime.cpp \
 			src/common/General/ExeCheck.cpp \
+			src/common/General/DateTime.cpp \
 			src/common/Lgi/FileSelect.cpp \
 			src/common/Lgi/Alert.cpp \
 			src/common/Lgi/FindReplace.cpp \

@@ -1192,7 +1192,7 @@ bool MailSmtp::Open(LSocketI *S,
 							{
 								LString s;
 								s.Printf("user=%s\001auth=Bearer %s\001\001\0", UserName, Tok.Get());
-								Base64Str(s);
+								s = LToBase64(s);
 
 								sprintf_s(Buffer, sizeof(Buffer), "AUTH %s %s\r\n", Auth.Get(), s.Get());
 								VERIFY_RET_VAL(Write(0, true));
