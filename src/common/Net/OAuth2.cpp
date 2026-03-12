@@ -11,6 +11,12 @@
 #define OPT_AccessToken		"OAuthAccessToken"
 #define OPT_RefreshToken	"OAuthRefreshToken"
 
+#if 0
+#define LOG(...)			LgiTrace(__VA_ARGS__)
+#else
+#define LOG(...)
+#endif
+
 static LString GetHeaders(LSocketI *s)
 {
 	char Buf[256];
@@ -305,14 +311,20 @@ struct LOAuth2Priv
 					Scope.Get());
 		if (Log)
 			Log->Print("%s:%i - Uri: %s\n", _FL, Uri.Get());
+
+		LOG("%s: open browser: %s\n", __func__, Uri.Get());
 		LExecute(Uri); // Open browser for user to auth
 
+		LOG("%s: http get req...\n", __func__);
 		if (httpsServer->GetReq())
 		{
 			Token = httpsServer->Params.Find("code");
+			LOG("%s: Token='%s'\n", __func__, Token.Get());
 			if (Log)
 				Log->Print("%s:%i - Token='%s'\n", _FL, Token.Get());
+			LOG("%s: sending resp...\n", __func__);
 			httpsServer->Response(Token ? "Ok: Got token. You can close this window/tab now." : "Error: No token.");
+			LOG("%s: sent resp.\n", __func__);
 		}
 
 		return Token != NULL;
@@ -358,6 +370,7 @@ struct LOAuth2Priv
 						Api.sHost.Get(),
 						Body.Length(),
 						Body.Get());
+			LOG("%s: writing post req\n", __func__);
 			if (!Write(&sock, Http))
 			{
 				Log->Print("%s:%i - Error writing to socket.\n", _FL);
@@ -365,12 +378,13 @@ struct LOAuth2Priv
 			}
 
 			LString Hdrs;
+			LOG("%s: reading resp\n", __func__);
 			if (!GetHttp(&sock, Hdrs, Body, true))
 			{
 				return false;
 			}
 
-			Log->Print("Body=%s\n", Body.Get());
+			LOG("%s: got body='%s'\n", __func__, Body.Get());
 			LJson j(Body);
 
 			AccessToken = j.Get("access_token");
@@ -381,6 +395,7 @@ struct LOAuth2Priv
 				Log->Print("Failed to get AccessToken: %s\n", Body.Get());
 		}
 
+		LOG("%s: AccessToken='%s'\n", __func__, AccessToken.Get());
 		return AccessToken.Get() != NULL;
 	}
 
@@ -507,16 +522,25 @@ bool LOAuth2::Restart()
 
 LString LOAuth2::GetAccessToken()
 {
+	LOG("%s: AccessToken='%s'\n", __func__, d->AccessToken.Get());
 	if (d->AccessToken)
 		return d->AccessToken;
 
+	LOG("%s: calling GetToken...\n", __func__);
 	if (d->GetToken())
 	{
+		LOG("%s: got token, calling GetAccess...\n", __func__);
 		d->Log->Print("Got token.\n");
-		if (d->GetAccess())
+		auto result = d->GetAccess();
+		LOG("%s: GetAccess=%i\n", __func__, result);
+		if (result)
+		{
 			return d->AccessToken;
+		}
 		else
+		{
 			d->Log->Print("No access.\n");
+		}
 			
 	}
 	else d->Log->Print("No token.\n");
