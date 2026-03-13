@@ -116,6 +116,12 @@ LgiExtern LString LStrConvertCp
 	ssize_t InLen = -1
 );
 
+/// Returns the next token as a heap string, leaving the argument pointing to the end of the token
+/// A token is defined as a quoted string or an unquoted string that ends in whitespace.
+/// \ingroup Text
+LgiExtern char* LTokStr(const char*& s);
+LgiExtern LString LTokLStr(const char*& s);
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -169,12 +175,6 @@ LgiFunc char *LSeekUtf8
 	/// The start of the memory buffer if you known
 	char *Start = 0
 );
-
-/// Returns the next token as a heap string, leaving the argument pointing to the end of the token
-/// A token is defined as a quoted string or an unquoted string that ends in whitespace.
-/// \ingroup Text
-LgiFunc char *LTokStr(const char *&s);
-LgiFunc LString LTokLStr(const char *&s);
 
 /// Formats a data size into appropriate units
 /// \ingroup Base
