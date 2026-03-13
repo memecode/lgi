@@ -935,13 +935,22 @@ bool LRichTextEdit::Save(const char *FileName, const char *CharSet)
 	if (!FileName || !f.Open(FileName, O_WRITE))
 		return false;
 
-	f.SetSize(0);
-	const char *Nm = Name();
+	return Save(&f, CharSet);
+}
+
+bool LRichTextEdit::Save(LStream* stream, const char* CharSet)
+{
+	if (!stream)
+		return false;
+
+	stream->SetSize(0);
+	
+	auto Nm = Name();
 	if (!Nm)
 		return false;
 
-	size_t Len = strlen(Nm);
-	return f.Write(Nm, (int)Len) == Len;
+	auto Len = strlen(Nm);
+	return stream->Write(Nm, Len) == Len;
 }
 
 void LRichTextEdit::UpdateScrollBars(bool Reset)
@@ -1300,10 +1309,10 @@ void LRichTextEdit::OnFocus(bool f)
 	SetPulse(f ? RTE_PULSE_RATE : -1);
 }
 
-ssize_t LRichTextEdit::HitTest(int x, int y)
+ssize_t LRichTextEdit::HitTest(LPoint pt)
 {
 	int Line = -1;
-	return d->HitTest(x, y, Line);
+	return d->HitTest(pt.x, pt.y, Line);
 }
 
 void LRichTextEdit::Undo()
