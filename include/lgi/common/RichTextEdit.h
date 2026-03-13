@@ -2,6 +2,9 @@
 /// \author Matthew Allen
 /// \brief A unicode text editor
 
+
+// Currently this is experimental code:
+
 #ifndef _RICH_TEXT_EDIT_H_
 #define _RICH_TEXT_EDIT_H_
 
