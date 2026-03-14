@@ -669,6 +669,7 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 	return Status;
 }
 
+/// \returns the exit code of the process
 int32 LSubProcess::Communicate(LStreamI *Out, LStreamI *In, LCancel *Cancel)
 {
 	char Buf[1024];

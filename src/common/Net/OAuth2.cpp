@@ -5,6 +5,7 @@
 #include "lgi/common/OAuth2.h"
 #include "lgi/common/Json.h"
 #include "lgi/common/Http.h"
+#include "lgi/common/SubProcess.h"
 
 //////////////////////////////////////////////////////////////////
 #define LOCALHOST_PORT		54900
@@ -565,4 +566,127 @@ LString LOAuth2::GetAccessToken()
 	else d->Log->Print("No token.\n");
 
 	return LString();
+}
+
+bool CheckVersion(LString ver, LString minVer)
+{
+	auto stripChars = "v\r\n\t ";
+	auto v = ver.Strip(stripChars).SplitDelimit(".");
+	auto minV = minVer.LStrip(stripChars).SplitDelimit(".");
+	if (v.Length() < 2 ||
+		minV.Length() < 2)
+		return false;
+	if (v[0].Int() < minV[0].Int())
+		return false;
+	if (v[1].Int() < minV[1].Int())
+		return false;
+	return true;
+}
+
+bool LOAuth2::Params::ScanForKeyAndCert(const char* folder)
+{
+	LDirectory dir;
+	for (auto b = dir.First(folder); b; b = dir.Next())
+	{
+		if (dir.IsDir())
+			continue;
+		auto name = dir.GetName();
+		auto ext = LGetExtension(name);
+		if (!Stricmp(ext, "pem"))
+		{
+			if (Stristr(name, "key.pem"))
+				SslKey = dir.FullPath();
+			else
+				SslCert = dir.FullPath();
+		}
+	}
+
+	return	LFileExists(SslKey) &&
+			LFileExists(SslCert);
+}
+
+bool LOAuth2::Params::CheckRequirement(const char *req)
+{
+	if (!Stricmp(req, CapMkcert))
+	{
+		// Check if mkcert is installed and available to call...
+		LSubProcess sub("mkcert", "--version");
+		if (!sub.Start())
+			return false;
+		LStringPipe out;
+		if (sub.Communicate(&out))
+			return false;		
+		if (!CheckVersion(out.NewLStr(), "1.4"))
+			return false;
+		
+		return true;
+	}
+	else if (!Stricmp(req, CapHttpsCert))
+	{
+		// Check that we have SSL certs for the HTTPS server:
+		if (LFileExists(SslKey) &&
+			LFileExists(SslCert))
+		{
+			// Probably ok? Can we validate them somehow?
+			return true;
+		}
+
+		// Check the cert folder exists:
+		LFile::Path appRoot(LSP_APP_ROOT);
+		auto certFolder = appRoot / "certs";
+		if (!LDirExists(certFolder))
+		{
+			if (!FileDev->CreateFolder(certFolder, true))
+			{
+				LgiTrace("%s:%i - Can't create cert folder '%s'\n", _FL, certFolder.GetFull().Get());
+				return false;
+			}
+		}
+		if (!LDirExists(certFolder))
+		{
+			LgiTrace("%s:%i - Cert folder '%s' missing\n", _FL, certFolder.GetFull().Get());
+			return false;
+		}
+
+		// If the cert files exist... then ok, return success
+		if (ScanForKeyAndCert(certFolder))
+			return true;
+
+		{
+			// Then make sure the CA is installed into the browser(s):
+			LSubProcess sub("mkcert", "-install");
+			if (!sub.Start())
+				return false;
+			LStringPipe out;
+			if (sub.Communicate(&out))
+				return false;
+			return true;
+		}
+
+		{
+			// Create the certificate with mkcert:
+			LSubProcess sub("mkcert", LString::Fmt("localhost 127.0.0.1 ::1"));
+			sub.SetInitFolder(certFolder);
+			if (!sub.Start())
+			{
+				LgiTrace("%s:%i - Failed to start 'mkcert'\n", _FL);
+				return false;
+			}
+
+			LStringPipe out;
+			if (sub.Communicate(&out))
+			{
+				LgiTrace("%s:%i - Failed to read 'mkcert' output\n", _FL);
+				return false;
+			}
+		}
+
+		return ScanForKeyAndCert(certFolder);
+	}
+	else
+	{
+		LAssert(!"unknown capability");
+	}
+	
+	return false;
 }
