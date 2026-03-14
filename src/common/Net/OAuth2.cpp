@@ -255,8 +255,6 @@ struct LOAuth2Priv
 		}
 	};
 	
-	static LAutoPtr<OAuth2Server> httpsServer;
-
 	LString Base64(LString s)
 	{
 		LString b;
@@ -311,9 +309,7 @@ struct LOAuth2Priv
 					RedirEnc.Get(),
 					CodeVerifier.Get(),
 					Scope.Get());
-		if (Log)
-			Log->Print("%s:%i - Uri: %s\n", _FL, Uri.Get());
-
+		LOG("%s:%i - Uri: %s\n", _FL, Uri.Get());
 		LOG("%s: open browser: %s\n", __func__, Uri.Get());
 		LExecute(Uri); // Open browser for user to auth
 
@@ -322,8 +318,6 @@ struct LOAuth2Priv
 		{
 			Token = httpsServer->Params.Find("code");
 			LOG("%s: Token='%s'\n", __func__, Token.Get());
-			if (Log)
-				Log->Print("%s:%i - Token='%s'\n", _FL, Token.Get());
 			LOG("%s: sending resp...\n", __func__);
 			httpsServer->Response(Token ? "Ok: Got token. You can close this window/tab now." : "Error: No token.");
 			LOG("%s: sent resp.\n", __func__);
@@ -458,6 +452,8 @@ struct LOAuth2Priv
 		return AccessToken.Get() != NULL;
 	}
 
+	LAutoPtr<OAuth2Server> httpsServer;
+
 	LOAuth2Priv(LOAuth2::Params &params, const char *account, LDom *store, LStream *log, LCancel *cancel)
 	{
 		Params = params;
@@ -496,8 +492,6 @@ struct LOAuth2Priv
 		return true;
 	}
 };
-
-LAutoPtr<LOAuth2Priv::OAuth2Server> LOAuth2Priv::httpsServer;
 
 LOAuth2::LOAuth2(LOAuth2::Params &params, const char *account, LDom *store, LCancel *cancel, LStream *log)
 {
