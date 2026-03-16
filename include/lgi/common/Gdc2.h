@@ -1107,38 +1107,40 @@ public:
 	#if defined __GTK_H__
 	
 		Gtk::GtkPrintContext *GetPrintContext();
+		OsPainter Handle() override;
+		void SetHandle(OsPainter handle);
 	
-		int Op() { return GDC_SET; }
-		int Op(int Op, NativeInt Param = -1) { return GDC_SET; }
+		int Op() override { return GDC_SET; }
+		int Op(int Op, NativeInt Param = -1) override { return GDC_SET; }
 	
-		LRect ClipRgn(LRect *Rgn);
-		LRect ClipRgn();
-		COLOUR Colour();
-		COLOUR Colour(COLOUR c, int Bits = 0);
-		LColour Colour(LColour c);
+		LRect ClipRgn(LRect *Rgn) override;
+		LRect ClipRgn() override;
+		COLOUR Colour() override;
+		COLOUR Colour(COLOUR c, int Bits = 0) override;
+		LColour Colour(LColour c) override;
 	
-		void Set(int x, int y);
+		void Set(int x, int y) override;
 	
-		void HLine(int x1, int x2, int y);
-		void VLine(int x, int y1, int y2);
-		void Line(int x1, int y1, int x2, int y2);
+		void HLine(int x1, int x2, int y) override;
+		void VLine(int x, int y1, int y2) override;
+		void Line(int x1, int y1, int x2, int y2) override;
 	
-		void Circle(double cx, double cy, double radius);
-		void FilledCircle(double cx, double cy, double radius);
-		void Arc(double cx, double cy, double radius, double start, double end);
-		void FilledArc(double cx, double cy, double radius, double start, double end);
-		void Ellipse(double cx, double cy, double x, double y);
-		void FilledEllipse(double cx, double cy, double x, double y);
+		void Circle(double cx, double cy, double radius) override;
+		void FilledCircle(double cx, double cy, double radius) override;
+		void Arc(double cx, double cy, double radius, double start, double end) override;
+		void FilledArc(double cx, double cy, double radius, double start, double end) override;
+		void Ellipse(double cx, double cy, double x, double y) override;
+		void FilledEllipse(double cx, double cy, double x, double y) override;
 	
-		void Box(int x1, int y1, int x2, int y2);
-		void Box(LRect *a = NULL);
-		void Rectangle(int x1, int y1, int x2, int y2);
-		void Rectangle(LRect *a = NULL);
-		void Blt(int x, int y, LSurface *Src, LRect *a = NULL);
-		void StretchBlt(LRect *d, LSurface *Src, LRect *s);
+		void Box(int x1, int y1, int x2, int y2) override;
+		void Box(LRect *a = NULL) override;
+		void Rectangle(int x1, int y1, int x2, int y2) override;
+		void Rectangle(LRect *a = NULL) override;
+		void Blt(int x, int y, LSurface *Src, LRect *a = NULL) override;
+		void StretchBlt(LRect *d, LSurface *Src, LRect *s) override;
 	
-		void Polygon(int Points, LPoint *Data);
-		void Bezier(int Threshold, LPoint *Pt);
+		void Polygon(int Points, LPoint *Data) override;
+		void Bezier(int Threshold, LPoint *Pt) override;
 
 	#endif
 };

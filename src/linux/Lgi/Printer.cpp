@@ -73,8 +73,7 @@ GtkPrintBegin(	GtkPrintOperation	*operation,
 				GtkPrintContext		*context,
 				LPrinterPrivate		*d)
 {
-	GtkPrintSettings *settings = gtk_print_operation_get_print_settings(operation);
-	if (settings)
+	if (auto settings = gtk_print_operation_get_print_settings(operation))
 	{
 		d->PrinterName = gtk_print_settings_get_printer(settings);
 	}
@@ -98,8 +97,13 @@ GtkPrintDrawPage(	GtkPrintOperation	*operation,
 					LPrinterPrivate		*d)
 {
 	cairo_t *ct = gtk_print_context_get_cairo_context(context);
-	if (ct && d->PrintDC)
-		LAssert(d->PrintDC->Handle() == ct); // Just checking it's the same handle
+	if (ct &&
+		d->PrintDC &&
+		d->PrintDC->Handle() != ct)
+	{
+		// Update to the new handle?
+		d->PrintDC->SetHandle(ct);
+	}
 	
 	d->Events->OnPrintPage(d->PrintDC, page_number);
 }
@@ -123,14 +127,13 @@ void LPrinter::Print(	LPrinter::Context *Events,
 		return;
 	}
 		
-	GError *Error = NULL;
+	GError *Error = nullptr;
 	GtkPrintOperationResult Result;
-	GtkWindow *Wnd = NULL;
+	GtkWindow *Wnd = nullptr;
 	
 	if (Parent)
 	{
-		LWindow *w = Parent->GetWindow();
-		if (w)
+		if (auto w = Parent->GetWindow())
 			Wnd = w->WindowHandle();
 	}
 	
@@ -141,6 +144,55 @@ void LPrinter::Print(	LPrinter::Context *Events,
 	g_signal_connect(G_OBJECT(d->Op), "draw-page", G_CALLBACK(GtkPrintDrawPage), d);
 	
 	gtk_print_operation_set_job_name(d->Op, PrintJobName);
+	gtk_print_operation_set_embed_page_setup(d->Op, true); // allow customization of page setup
+	
+	if (Events)
+	{
+		auto orientation = Events->GetOrientation();
+		if (orientation != PoDefault)
+		{
+			auto pageSetup = gtk_print_operation_get_default_page_setup(d->Op);
+			if (!pageSetup)
+			{
+				pageSetup = gtk_page_setup_new();
+			}			
+			auto settings = gtk_print_operation_get_print_settings(d->Op);
+			if (!settings)
+			{
+				settings = gtk_print_settings_new();
+			}
+			if (settings || pageSetup)
+			{
+				switch (orientation)
+				{
+					case PoPortrait:
+						if (pageSetup)
+							gtk_page_setup_set_orientation(pageSetup, GTK_PAGE_ORIENTATION_PORTRAIT);
+						if (settings)
+							gtk_print_settings_set_orientation(settings, GTK_PAGE_ORIENTATION_PORTRAIT);
+						break;
+					case PoLandscape:
+						if (pageSetup)
+							gtk_page_setup_set_orientation(pageSetup, GTK_PAGE_ORIENTATION_LANDSCAPE);
+						if (settings)
+							gtk_print_settings_set_orientation(settings,  GTK_PAGE_ORIENTATION_LANDSCAPE);
+						break;
+				}
+				
+				if (pageSetup)
+				{
+					gtk_print_operation_set_default_page_setup(d->Op, pageSetup);
+					g_object_unref(pageSetup);
+				}
+				if (settings)
+				{
+					gtk_print_operation_set_print_settings(d->Op, settings);
+					g_object_unref(settings);
+				}
+			}
+		}
+	}
+	
 	Result = gtk_print_operation_run(d->Op,
 									GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
 									Wnd,
@@ -165,7 +217,7 @@ void LPrinter::Print(	LPrinter::Context *Events,
 	if (d->Op)
 	{
 		g_object_unref(d->Op);
-		d->Op = NULL;
+		d->Op = nullptr;
 	}
     
     return;
