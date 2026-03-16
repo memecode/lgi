@@ -145,7 +145,8 @@ public:
 	}
 	
 	void SetStyle()
-	{		
+	{
+		
 	}
 };
 
@@ -296,8 +297,6 @@ class LRichTextPriv :
 	LStringPipe LogBuffer;
 
 public:
-	constexpr static int INVALID_IDX = -1;
-
 	enum SelectModeType
 	{
 		Unselected = 0,
@@ -308,7 +307,6 @@ public:
 	{
 		SkUnknown,
 		
-		// Start and ends
 		SkLineStart,
 		SkLineEnd,		
 		SkDocStart,
@@ -326,10 +324,6 @@ public:
 		SkCurrentLine,		
 		SkDownLine,
 		SkDownPage,
-
-		// Impl events
-		SkSeekEnter,
-		SkSeekExit
 	};
 
 	struct DisplayStr;
@@ -397,7 +391,7 @@ public:
 	struct Flow
 	{
 		LRichTextPriv *d;
-		LSurface *pDC;	// Used for painting/printing.
+		LSurface *pDC;	// Used for printing.
 
 		int Left, Right;// Left and right margin positions as measured in px
 						// from the left of the page (controls client area).
@@ -577,26 +571,22 @@ public:
 
 	struct HitTestResult
 	{
-		// Input: The point being searched for
 		LPoint In;
-
-		// Output:
-		Block *Blk			= nullptr;	// matching block
-		ssize_t BlkOffset	= 0;		// char offset to the block
-		DisplayStr *Ds		= nullptr;	// matching string
-		ssize_t Idx			= -1;		// index into 'Blk' that was hit
-		int LineHint		= -1;		// if >= 0 this is the line the hit occurs on
-		bool Near			= false;	// true if the hit was only a near miss
+		Block *Blk;
+		DisplayStr *Ds;
+		ssize_t Idx;
+		int LineHint;
+		bool Near;
 		
 		HitTestResult(int x, int y)
 		{
 			In.x = x;
 			In.y = y;
-		}
-
-		HitTestResult(LPoint pt)
-		{
-			In = pt;
+			Blk = NULL;
+			Ds = NULL;
+			Idx = -1;
+			LineHint = -1;
+			Near = false;
 		}
 	};
 
@@ -643,32 +633,46 @@ public:
 	bool AddTrans(LAutoPtr<Transaction> &t);
 	bool SetUndoPos(ssize_t Pos);
 
+	template<typename T>
+	bool GetBlockByUid(T *&Ptr, int Uid, int *Idx = NULL)
+	{
+		for (unsigned i=0; i<Blocks.Length(); i++)
+		{
+			Block *b = Blocks[i];
+			if (b->GetUid() == Uid)
+			{
+				if (Idx) *Idx = i;
+				return (Ptr = dynamic_cast<T*>(b)) != NULL;
+			}
+		}
+
+		if (Idx) *Idx = -1;
+		return false;
+	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	// A Block is like a DIV in HTML, it's as wide as the page and
-	// always starts and ends on a whole line. However they can be
-	// nested, as in HTML.
+	// always starts and ends on a whole line.
 	class Block :
 		public LEventSinkI,
 		public LEventTargetI
 	{
 	protected:
-		int BlockUid; // unique ID for referencing blocks later
+		int BlockUid;
 		LRichTextPriv *d;
-		Block *parent = nullptr;
-		LArray<Block*> blocks; // children
-		LRect pos; // this is in full doc coords, not relative to parent.
 
 	public:
 		/// This is the number of cursors current referencing this Block.
-		int8 Cursors = 0;
+		int8 Cursors;
 		/// Draw debug selection
-		bool DrawDebug = false;
+		bool DrawDebug;
 		
 		Block(LRichTextPriv *priv)
 		{
 			d = priv;
+			DrawDebug = false;
 			BlockUid = d->NextUid++;
+			Cursors = 0;
 		}
 
 		Block(const Block *blk)
@@ -676,105 +680,17 @@ public:
 			d = blk->d;
 			DrawDebug = false;
 			BlockUid = blk->GetUid();
+			Cursors = 0;
 		}
 		
 		virtual ~Block()
-		{
-			LStackTrace("%p::~Block()");
-			Empty();
-		}
-
-		template<typename T>
-		bool GetBlockByUid(T*& Ptr, int Uid, int *Idx = NULL)
-		{
-			for (unsigned i = 0; i < blocks.Length(); i++)
-			{
-				Block* b = blocks[i];
-				if (b->GetUid() == Uid)
-				{
-					if (Idx) *Idx = i;
-					return (Ptr = dynamic_cast<T*>(b)) != NULL;
-				}
-			}
-
-			if (Idx) *Idx = -1;
-			return false;
-		}		
-		
-		LRichTextPriv* GetPriv() { return d; }
-		LArray<Block*> &GetBlocks() { return blocks; }
-		void Add(Block *child, ssize_t index = -1)
-		{
-			blocks.AddAt(index, child);
-			child->parent = this;
-		}
-
-		bool Remove()
-		{
-			if (!parent)
-				return false;
-
-			if (!parent->blocks.HasItem(this))
-				return false;
-
-			parent->blocks.Delete(this);
-			parent = nullptr;
-			
-			return true;
-		}
-
-		// Find the previous Block in the tree
-		Block *Prev()
-		{
-			for (auto b = this; b; b = b->parent)
-			{
-				if (!b->parent)
-					break;
-
-				auto& a = b->parent->blocks;
-				auto idx = a.IndexOf(b);
-				LAssert(idx >= 0);
-				if (idx > 0)
-					return a[idx - 1];
-			}
-
-			return nullptr;
-		}
-		
-		// Find the next Block in the tree
-		Block* Next()
-		{
-			for (auto b = this; b; b = b->parent)
-			{
-				if (!b->parent)
-					break;
-				
-				auto &a = b->parent->blocks;
-				auto idx = a.IndexOf(b);
-				LAssert(idx >= 0);
-				if (idx < (ssize_t)a.Length() - 1)
-					return a[idx + 1];
-			}
-
-			return nullptr;
-		}
-
-		// Clears the block to empty
-		void Empty()
 		{
 			// We must have removed cursors by the time we are deleted
 			// otherwise there will be a hanging pointer in the cursor
 			// object.
 			LAssert(Cursors == 0);
-			while (blocks.Length())
-			{
-				auto b = blocks[0];
-				LAssert(b->parent == this);
-				b->Remove();
-				delete b;
-			}
 		}
-
+		
 		// Events
 		bool PostEvent(int Cmd, LMessage::Param a = 0, LMessage::Param b = 0, int64_t TimeoutMs = -1)
 		{
@@ -789,12 +705,8 @@ public:
 		}
 
 		// If this returns non-zero further command processing is aborted.
-		LMessage::Result OnEvent(LMessage *Msg) override
+		LMessage::Result OnEvent(LMessage *Msg)
 		{
-			for (auto b : blocks)
-				if (b->OnEvent(Msg))
-					return true;
-
 			return false;
 		}
 
@@ -802,230 +714,33 @@ public:
 		 * Get state methods, do not modify the block   *
 		 ***********************************************/
 			virtual const char *GetClass() { return "Block"; }
-			
-			virtual LRect GetPos()
-			{
-				return pos;
-			}
-			
-			virtual ssize_t Length()
-			{
-				ssize_t len = 0;
-				for (auto b: blocks)
-					len += b->Length();
-				return len;
-			}
-			
-			virtual bool HitTest(ssize_t blkOffset, HitTestResult &htr)
-			{
-				auto originalPt = htr.In;
-					
-				for (auto b: blocks)
-				{
-					auto blkPos = b->GetPos();
-					if (blkPos.Overlap(htr.In))
-					{
-						if (b->HitTest(blkOffset, htr))
-						{
-							if (!htr.Near)
-								return true;
-						}
-					}
-
-					blkOffset += b->Length();
-				}
-
-				htr.In = originalPt;
-				return htr.Near;
-			}
-			
-			// This function sets the BlockCursor's Pos and Line rect's from the cursor's index
-			virtual bool GetPosFromIndex(BlockCursor *Cursor)
-			{
-				if (!Cursor)
-					return false;
-
-				auto idx = Cursor->Offset;
-				for (auto b: blocks)
-				{
-					auto len = b->Length();
-					if (idx >= 0 && idx < len)
-					{
-						// In this sub-block
-						BlockCursor tmp(b, idx, -1);
-						if (b->GetPosFromIndex(&tmp))
-						{
-							// Map back into our coords
-							auto topLeft = b->GetPos().TopLeft();
-							Cursor->Pos = tmp.Pos + topLeft;
-							Cursor->Line = tmp.Line + topLeft;
-							return true;
-						}
-					}
-
-					idx -= len;
-				}
-
-				return false;
-			}
-
-			virtual bool OnLayout(Flow &f)
-			{
-				for (auto b: blocks)
-				{
-					if (!b->OnLayout(f))
-						return false;
-				}
-
-				return true;
-			}
-
-			virtual void OnPaint(PaintContext &Ctx)
-			{
-				for (auto b: blocks)
-					b->OnPaint(Ctx);
-			}
-
-			virtual bool ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rgn)
-			{
-				for (auto b: blocks)
-					if (!b->ToHtml(s, Media, Rgn))
-						return false;
-				return true;
-			}
-
-			virtual bool OffsetToLine(ssize_t Offset, int *ColX, LArray<int> *LineY)
-			{
-				LAssert(!"fixme");
-				return false;
-			}
-
-			virtual ssize_t LineToOffset(ssize_t Line)
-			{
-				LAssert(!"fixme");
-				return -1;
-			}
-
-			virtual int GetLines() const
-			{
-				uint32_t count = 0;
-				for (size_t i = 0; i < blocks.Length(); i++)
-					count += blocks.ItemAt(i)->GetLines();
-				return count;
-			}
-
-			// Returns the character offset of the string if found (>= 0)
-			// or INVALID_IDX if not.
-			virtual ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, LFindReplaceCommon *Params)
-			{
-				LAssert(!"fixme");
-				return INVALID_IDX;
-			}
-
-			virtual void SetSpellingErrors(LArray<LSpellCheck::SpellingError> &Errors, LRange r)
-			{
-				LAssert(!"fixme");
-			}
-
-			virtual void IncAllStyleRefs()
-			{
-				for (auto b: blocks)
-					b->IncAllStyleRefs();
-			}
-
-			virtual void Dump()
-			{
-				for (auto b: blocks)
-					b->Dump();
-			}
-			
-			virtual LNamedStyle *GetStyle(ssize_t At = -1)
-			{
-				ssize_t at = At;
-
-				for (auto b : blocks)
-				{
-					if (at <= 0)
-						return nullptr; // FIXME: style of the list item
-
-					at--;
-					if (at >= 0 && at < b->Length())
-						return b->GetStyle(at);
-
-					at -= b->Length();
-				}
-
-				return nullptr;
-			}
-
-			virtual int GetUid() const
-			{
-				return BlockUid;
-			}
-
-			virtual bool DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset /* internal to this block, not the whole doc. */, bool TopOfMenu)
-			{
-				return false;
-			}
-
+			virtual LRect GetPos() = 0;
+			virtual ssize_t Length() = 0;
+			virtual bool HitTest(HitTestResult &htr) = 0;
+			virtual bool GetPosFromIndex(BlockCursor *Cursor) = 0;
+			virtual bool OnLayout(Flow &f) = 0;
+			virtual void OnPaint(PaintContext &Ctx) = 0;
+			virtual bool ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rgn) = 0;
+			virtual bool OffsetToLine(ssize_t Offset, int *ColX, LArray<int> *LineY) = 0;
+			virtual ssize_t LineToOffset(ssize_t Line) = 0;
+			virtual int GetLines() = 0;
+			virtual ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, LFindReplaceCommon *Params) = 0;
+			virtual void SetSpellingErrors(LArray<LSpellCheck::SpellingError> &Errors, LRange r) {}
+			virtual void IncAllStyleRefs() {}
+			virtual void Dump() {}
+			virtual LNamedStyle *GetStyle(ssize_t At = -1) = 0;
+			virtual int GetUid() const { return BlockUid; }
+			virtual bool DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset /* internal to this block, not the whole doc. */, bool TopOfMenu) { return false; }
 			#ifdef _DEBUG
-			virtual void DumpNodes(LTreeItem *Ti)
-			{
-				Ti->SetText(GetClass());
-				for (auto b: blocks)
-				{
-					if (auto item = new LTreeItem)
-					{
-						b->DumpNodes(item);
-						Ti->Insert(item);
-					}
-				}
-			}
+			virtual void DumpNodes(LTreeItem *Ti) = 0;
 			#endif
-
-			virtual bool IsValid()
-			{
-				for (auto b: blocks)
-					if (!b->IsValid())
-						return false;
-				return true;
-			}
-
-			virtual bool IsBusy(bool Stop = false)
-			{
-				for (auto b: blocks)
-					if (b->IsBusy(Stop))
-						return true;
-				return false;
-			}
-			
-			virtual bool HasBlock(Block *blk) const
-			{
-				if (blk == this)
-					return true;
-				for (size_t i=0; i<blocks.Length(); i++)
-					if (blocks.ItemAt(i)->HasBlock(blk))
-						return true;
-				return false;
-			}
-
-			virtual Block *Clone()
-			{
-				return new Block(d);
-			}
-
-			virtual void OnComponentInstall(LString Name)
-			{
-				for (auto b: blocks)
-					b->OnComponentInstall(Name);
-			}
+			virtual bool IsValid() { return false; }
+			virtual bool IsBusy(bool Stop = false) { return false; }
+			virtual Block *Clone() = 0;
+			virtual void OnComponentInstall(LString Name) {}
 
 			// Copy some or all of the text out
-			virtual ssize_t CopyAt(ssize_t Offset, ssize_t Chars, LArray<uint32_t> *Text)
-			{
-				LAssert(!"fixme");
-				return false;
-			}
+			virtual ssize_t CopyAt(ssize_t Offset, ssize_t Chars, LArray<uint32_t> *Text) { return false; }
 
 			/// This method moves a cursor index.
 			/// \returns the new cursor index or -1 on error.
@@ -1035,102 +750,7 @@ public:
 				SeekType To,
 				/// [In/Out] The starting cursor.
 				BlockCursor &Cursor
-			)
-			{
-				LAssert(!"fixme");
-				return false;
-			}
-
-			int GetLine(BlockCursor* cursor)
-			{
-				if (!cursor)
-					return -1;
-
-				auto Idx = blocks.IndexOf(d->Cursor->Blk);
-				if (Idx < 0)
-				{
-					LAssert(0);
-					return -1;
-				}
-
-				int Count = 0;
-
-				// Count lines in blocks before the cursor...
-				for (int i = 0; i < Idx; i++)
-				{
-					auto b = blocks[i];
-					Count += b->GetLines();
-				}
-
-				// Add the lines in the cursor's block...
-				if (cursor->LineHint)
-				{
-					Count += cursor->LineHint;
-				}
-				else
-				{
-					LArray<int> BlockLine;
-					if (cursor->Blk->OffsetToLine(cursor->Offset, NULL, &BlockLine))
-						Count += BlockLine.First();
-					else
-					{
-						// Hmmm...
-						LAssert(!"Can't find block line.");
-						return -1;
-					}
-				}
-
-				return Count;
-			}
-
-			void SetLine(int Line);
-
-			ssize_t GetCaret(BlockCursor* cursor, bool Cur)
-			{
-				if (!cursor)
-					return -1;
-
-				ssize_t CharPos = 0;
-				for (auto b: blocks)
-				{
-					if (cursor->Blk == b)
-						return CharPos + cursor->Offset;
-					CharPos += b->Length();
-				}
-
-				LAssert(!"Cursor block not found.");
-				return -1;
-			}
-
-			bool HasBlock(LRichTextPriv::Block* blk)
-			{
-				if (this == blk)
-					return true;
-
-				for (auto b: blocks)
-					if (b->HasBlock(blk))
-						return true;
-				
-				return false;
-			}
-
-			void Iterate(	ssize_t offset,
-							LPoint pos,
-							std::function<void(Block *blk, ssize_t docOffset, LPoint docPos)> callback)
-			{
-				if (!callback)
-					return;
-
-				callback(this, offset, pos);
-				
-				for (auto b: blocks)
-				{
-					auto blkPos = b->GetPos();
-					LPoint p = pos + blkPos.TopLeft();
-					b->Iterate(offset, p, callback);
-					offset += b->Length();
-				}
-			}
+			) = 0;
 
 		/************************************************
 		 * Change state methods, require a transaction  *
@@ -1148,11 +768,7 @@ public:
 				ssize_t Chars = -1,
 				/// [Optional] Style to give the text, NULL means "use the existing style"
 				LNamedStyle *Style = NULL
-			)
-			{
-				LAssert(!"fixme");
-				return false;
-			}
+			)	{ return false; }
 
 			/// Delete some chars
 			/// \returns the number of chars actually removed
@@ -1162,11 +778,7 @@ public:
 				ssize_t Offset,
 				ssize_t Chars,
 				LArray<uint32_t> *DeletedText = NULL
-			)
-			{
-				LAssert(!"fixme");
-				return false;
-			}
+			)	{ return false; }
 
 			/// Changes the style of a range of characters
 			virtual bool ChangeStyle
@@ -1176,11 +788,7 @@ public:
 				ssize_t Chars,
 				LCss *Style,
 				bool Add
-			)
-			{
-				LAssert(!"fixme");
-				return false;
-			}
+			)	{ return false; }
 
 			virtual bool DoCase
 			(
@@ -1192,11 +800,7 @@ public:
 				ssize_t Chars,
 				/// True if upper case is desired
 				bool Upper
-			)
-			{
-				LAssert(!"fixme");
-				return false;
-			}
+			)	{ return false; }
 
 			// Split a block
 			virtual Block *Split
@@ -1205,35 +809,24 @@ public:
 				Transaction *Trans,
 				/// The index to add at (-1 = the end)
 				ssize_t AtOffset
-			)
-			{
-				LAssert(!"fixme");
-				return NULL;
-			}
-
+			)	{ return NULL; }
 			// Event called on dictionary load
-			virtual bool OnDictionary(Transaction *Trans)
-			{
-				for (auto b: blocks)
-					if (!b->OnDictionary(Trans))
-						return false;
-				return true;
-			}
+			virtual bool OnDictionary(Transaction *Trans) { return false; }
 	};
 
 	struct BlockCursor
 	{
 		// The block the cursor is in.
-		Block *Blk = nullptr;
+		Block *Blk;
 
 		// This is the character offset of the cursor relative to
 		// the start of 'Blk'.
-		ssize_t Offset = -1;
+		ssize_t Offset;
 
 		// In wrapped text, a given offset can either be at the end
 		// of one line or the start of the next line. This tells the
 		// text block which line the cursor is actually on.
-		int LineHint = 0;
+		int LineHint;
 		
 		// This is the position on the screen in doc coords.
 		LRect Pos;
@@ -1243,7 +836,7 @@ public:
 		LRect Line;
 
 		// Cursor is currently blinking on
-		bool Blink = true;
+		bool Blink;
 
 		BlockCursor(const BlockCursor &c);
 		BlockCursor(Block *b, ssize_t off, int line);
@@ -1414,14 +1007,12 @@ public:
 		void LayoutOffsets(int DefaultFontHt);
 	};
 	
-	class TextBlock :
-		public Block,
-		public LCssBox
+	class TextBlock : public Block
 	{
-		LNamedStyle *Style = nullptr;
-		LSpellCheck::SpellingError *SpErr = nullptr;
+		LNamedStyle *Style;
 		LArray<LSpellCheck::SpellingError> SpellingErrors;
-		int PaintErrIdx = -1, ClickErrIdx = -1;
+		int PaintErrIdx, ClickErrIdx;
+		LSpellCheck::SpellingError *SpErr;
 		LString ClickedUri;
 
 		bool PreEdit(Transaction *Trans);
@@ -1436,6 +1027,9 @@ public:
 		// True if the 'Layout' data is out of date.
 		bool LayoutDirty;
 
+		// Size of the edges
+		LRect Margin, Border, Padding;
+		
 		// Default font for the block
 		LFont *Fnt;
 		
@@ -1453,7 +1047,7 @@ public:
 
 		// No state change methods
 		const char *GetClass() { return "TextBlock"; }
-		int GetLines() const;
+		int GetLines();
 		bool OffsetToLine(ssize_t Offset, int *ColX, LArray<int> *LineY);
 		ssize_t LineToOffset(ssize_t Line);
 		LRect GetPos() { return Pos; }
@@ -1463,7 +1057,7 @@ public:
 		ssize_t Length();
 		bool ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng);
 		bool GetPosFromIndex(BlockCursor *Cursor);
-		bool HitTest(ssize_t blkOffset, HitTestResult &htr) override;
+		bool HitTest(HitTestResult &htr);
 		void OnPaint(PaintContext &Ctx);
 		bool OnLayout(Flow &flow);
 		ssize_t GetTextAt(ssize_t Offset, LArray<StyleText*> &t);
@@ -1476,7 +1070,6 @@ public:
 		#ifdef _DEBUG
 		void DumpNodes(LTreeItem *Ti);
 		#endif
-		bool HasBlock(Block* blk) const { return false; }
 		Block *Clone();
 		bool IsEmptyLine(BlockCursor *Cursor);
 		void UpdateSpellingAndLinks(Transaction *Trans, LRange r);
@@ -1508,7 +1101,7 @@ public:
 
 		// No state change methods
 		const char *GetClass() { return "HorzRuleBlock"; }
-		int GetLines() const;
+		int GetLines();
 		bool OffsetToLine(ssize_t Offset, int *ColX, LArray<int> *LineY);
 		ssize_t LineToOffset(ssize_t Line);
 		LRect GetPos() { return Pos; }
@@ -1518,73 +1111,29 @@ public:
 		ssize_t Length();
 		bool ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng);
 		bool GetPosFromIndex(BlockCursor *Cursor);
-		bool HitTest(ssize_t blkOffset, HitTestResult &htr) override;
+		bool HitTest(HitTestResult &htr);
 		void OnPaint(PaintContext &Ctx);
 		bool OnLayout(Flow &flow);
 		ssize_t GetTextAt(ssize_t Offset, LArray<StyleText*> &t);
 		ssize_t CopyAt(ssize_t Offset, ssize_t Chars, LArray<uint32_t> *Text);
 		bool Seek(SeekType To, BlockCursor &Cursor);
-		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, LFindReplaceCommon *Params) { return INVALID_IDX; }
+		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, LFindReplaceCommon *Params);
+		void IncAllStyleRefs();
+		bool DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling);
 		#ifdef _DEBUG
 		void DumpNodes(LTreeItem *Ti);
 		#endif
 		Block *Clone();
 
+		// Events
+		LMessage::Result OnEvent(LMessage *Msg);
+
 		// Transactional changes
 		bool AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars = -1, LNamedStyle *Style = NULL);
 		bool ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, LCss *Style, bool Add);
 		ssize_t DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, LArray<uint32_t> *DeletedText = NULL);
-		bool DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper) { return false; }
+		bool DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper);
 		Block *Split(Transaction *Trans, ssize_t AtOffset);
-	};
-
-	// Unordered or numbered list
-	class ListBlock :
-		public Block
-	{
-	public:
-		using TType = LCss::ListStyleTypes;
-
-	protected:
-		TType type = TType::ListInherit;
-		bool startItem = false;
-		
-		LArray<LRect> items;
-
-	public:
-		ListBlock(LRichTextPriv *priv, TType lstType);
-		ListBlock(const ListBlock *Copy);
-		~ListBlock();
-		
-		const char *TypeToElem();
-		TType GetType() { return type; }
-		void StartItem() { startItem = true; }
-		TextBlock *GetTextBlock();
-
-		const char *GetClass() override { return "ListBlock"; }
-		bool OnLayout(Flow &f) override;
-		void OnPaint(PaintContext &Ctx) override;
-		bool ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rgn) override;
-		bool OffsetToLine(ssize_t Offset, int *ColX, LArray<int> *LineY) override;
-		ssize_t LineToOffset(ssize_t Line) override;
-		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, LFindReplaceCommon *Params) override;
-		void SetSpellingErrors(LArray<LSpellCheck::SpellingError> &Errors, LRange r) override;
-		bool DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset /* internal to this block, not the whole doc. */, bool TopOfMenu) override;
-		#ifdef _DEBUG
-		void DumpNodes(LTreeItem *Ti) override;
-		#endif
-		bool IsValid() override;
-		bool HasBlock(Block* blk) const { return blocks.IndexOf(blk) >= 0; }
-		Block *Clone() override;
-		ssize_t CopyAt(ssize_t Offset, ssize_t Chars, LArray<uint32_t> *Text) override;
-		bool Seek(SeekType To, BlockCursor &Cursor) override;
-
-		// Edit
-		bool AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars = -1, LNamedStyle *Style = NULL) override;
-		ssize_t DeleteAt(Transaction *Trans, ssize_t Offset, ssize_t Chars, LArray<uint32_t> *DeletedText = NULL) override;
-		bool ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, LCss *Style, bool Add) override;
-		bool DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper) override;
-		Block *Split(Transaction *Trans, ssize_t AtOffset) override;
 	};
 
 	class ImageBlock :
@@ -1675,7 +1224,7 @@ public:
 		void MaxImageFilter();
 
 		// No state change methods
-		int GetLines() const;
+		int GetLines();
 		bool OffsetToLine(ssize_t Offset, int *ColX, LArray<int> *LineY);
 		ssize_t LineToOffset(ssize_t Line);
 		LRect GetPos() { return Pos; }
@@ -1685,7 +1234,7 @@ public:
 		ssize_t Length();
 		bool ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng);
 		bool GetPosFromIndex(BlockCursor *Cursor);
-		bool HitTest(ssize_t blkOffset, HitTestResult &htr) override;
+		bool HitTest(HitTestResult &htr);
 		void OnPaint(PaintContext &Ctx);
 		bool OnLayout(Flow &flow);
 		ssize_t GetTextAt(ssize_t Offset, LArray<StyleText*> &t);
@@ -1697,7 +1246,6 @@ public:
 		#ifdef _DEBUG
 		void DumpNodes(LTreeItem *Ti);
 		#endif
-		bool HasBlock(Block* blk) const { return false; }
 		Block *Clone();
 		void OnComponentInstall(LString Name);
 
@@ -1710,9 +1258,11 @@ public:
 		ssize_t DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, LArray<uint32_t> *DeletedText = NULL);
 		bool DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper);
 	};
-
-	Block container;
 	
+	LArray<Block*> Blocks;
+	Block *Next(Block *b);
+	Block *Prev(Block *b);
+
 	void InvalidateDoc(LRect *r);
 	void ScrollTo(LRect r);
 	void UpdateStyleUI();
@@ -1725,8 +1275,8 @@ public:
 	LRect SelectionRect();
 	bool GetSelection(LArray<char16> *Text, LAutoString *Html);
 	ssize_t IndexOfCursor(BlockCursor *c);
-	ssize_t HitTest(LPoint pt, int &LineHint, Block **Blk = NULL, ssize_t *BlkOffset = NULL);
-	bool CursorFromPos(LPoint pt, LAutoPtr<BlockCursor> *Cursor, ssize_t *GlobalIdx);
+	ssize_t HitTest(int x, int y, int &LineHint, Block **Blk = NULL, ssize_t *BlkOffset = NULL);
+	bool CursorFromPos(int x, int y, LAutoPtr<BlockCursor> *Cursor, ssize_t *GlobalIdx);
 	Block *GetBlockByIndex(ssize_t Index, ssize_t *Offset = NULL, int *BlockIdx = NULL, int *LineCount = NULL);
 	bool Layout(LScrollBar *&ScrollY);
 	void OnStyleChange(LRichTextEdit::RectType t);
@@ -1746,39 +1296,28 @@ public:
 
 	struct CreateContext
 	{
-		Block *Container = nullptr;
-		TextBlock *Tb = nullptr;
-		ImageBlock *Ib = nullptr;
-		HorzRuleBlock *Hrb = nullptr;
-		ListBlock *Lst = nullptr;
+		TextBlock *Tb;
+		ImageBlock *Ib;
+		HorzRuleBlock *Hrb;
 		LArray<uint32_t> Buf;
-		uint32_t LastChar = '\n';
+		uint32_t LastChar;
+		LFontCache *FontCache;
 		LCss::Store StyleStore;
-		bool StartOfLine = true;
+		bool StartOfLine;
 		
-		CreateContext(Block *c) :
-			Container(c)
+		CreateContext(LFontCache *fc)
 		{
+			Tb = NULL;
+			Ib = NULL;
+			Hrb = NULL;
+			LastChar = '\n';
+			FontCache = fc;
+			StartOfLine = true;
 		}
 		
-		TextBlock *GetTextBlock()
-		{
-			if (Lst)
-				return Lst->GetTextBlock();
-				
-			if (!Tb)
-			{
-				Tb = new TextBlock(Container->GetPriv());
-				Container->Add(Tb);
-			}
-				
-			return Tb;
-		}
-
 		bool AddText(LNamedStyle *Style, char16 *Str)
 		{
-			auto insertTb = GetTextBlock();
-			if (!Str || !insertTb)
+			if (!Str || !Tb)
 				return false;
 			
 			int Used = 0;
@@ -1801,18 +1340,18 @@ public:
 				else
 				{
 					#ifdef WINDOWS
-						ssize_t Len = s[0] && s[1] ? 4 : (s[0] ? 2 : 0);
-						Buf[Used++] = LgiUtf16To32((const uint16 *&)s, Len);
+					ssize_t Len = s[0] && s[1] ? 4 : (s[0] ? 2 : 0);
+					Buf[Used++] = LgiUtf16To32((const uint16 *&)s, Len);
 					#else
-						Buf[Used++] = *s++;
+					Buf[Used++] = *s++;
 					#endif
 					while (s < e && !IsWhite(*s))
 					{
 						#ifdef WINDOWS
-							Len = s[0] && s[1] ? 4 : (s[0] ? 2 : 0);
-							Buf[Used++] = LgiUtf16To32((const uint16 *&)s, Len);
+						Len = s[0] && s[1] ? 4 : (s[0] ? 2 : 0);
+						Buf[Used++] = LgiUtf16To32((const uint16 *&)s, Len);
 						#else
-							Buf[Used++] = *s++;
+						Buf[Used++] = *s++;
 						#endif
 					}
 				}
@@ -1821,7 +1360,7 @@ public:
 			bool Status = false;
 			if (Used > 0)
 			{
-				Status = insertTb->AddText(NoTransaction, -1, &Buf[0], Used, Style);
+				Status = Tb->AddText(NoTransaction, -1, &Buf[0], Used, Style);
 				LastChar = Buf[Used-1];
 			}
 			return Status;

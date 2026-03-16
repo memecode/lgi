@@ -4861,12 +4861,12 @@ bool VcFolder::ParsePull(int Result, LString s, ParseParams *Params)
 			// Svn also does a merge by default and can update our current position...
 			CurrentCommit.Empty();
 
-			LString::Array a = s.SplitDelimit("\r\n");
+			auto a = s.SplitDelimit("\r\n");
 			for (auto &Ln: a)
 			{
 				if (Ln.Find("At revision") >= 0)
 				{
-					LString::Array p = Ln.SplitDelimit(" .");
+					auto p = Ln.SplitDelimit(" .");
 					CurrentCommit = p.Last();
 					break;
 				}

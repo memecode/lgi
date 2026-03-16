@@ -5,11 +5,18 @@
 #include "lgi/common/OAuth2.h"
 #include "lgi/common/Json.h"
 #include "lgi/common/Http.h"
+#include "lgi/common/SubProcess.h"
 
 //////////////////////////////////////////////////////////////////
 #define LOCALHOST_PORT		54900
 #define OPT_AccessToken		"OAuthAccessToken"
 #define OPT_RefreshToken	"OAuthRefreshToken"
+
+#if 0
+#define LOG(...)			LgiTrace(__VA_ARGS__)
+#else
+#define LOG(...)
+#endif
 
 static LString GetHeaders(LSocketI *s)
 {
@@ -155,6 +162,7 @@ struct LOAuth2Priv
 
 	LString AccessToken, RefreshToken;
 	int64 ExpiresIn;
+	bool Dirty = false;
 
 	struct OAuth2Server : public LStream
 	{
@@ -247,8 +255,6 @@ struct LOAuth2Priv
 		}
 	};
 	
-	static LAutoPtr<OAuth2Server> httpsServer;
-
 	LString Base64(LString s)
 	{
 		LString b;
@@ -303,16 +309,18 @@ struct LOAuth2Priv
 					RedirEnc.Get(),
 					CodeVerifier.Get(),
 					Scope.Get());
-		if (Log)
-			Log->Print("%s:%i - Uri: %s\n", _FL, Uri.Get());
+		LOG("%s:%i - Uri: %s\n", _FL, Uri.Get());
+		LOG("%s: open browser: %s\n", __func__, Uri.Get());
 		LExecute(Uri); // Open browser for user to auth
 
+		LOG("%s: http get req...\n", __func__);
 		if (httpsServer->GetReq())
 		{
 			Token = httpsServer->Params.Find("code");
-			if (Log)
-				Log->Print("%s:%i - Token='%s'\n", _FL, Token.Get());
+			LOG("%s: Token='%s'\n", __func__, Token.Get());
+			LOG("%s: sending resp...\n", __func__);
 			httpsServer->Response(Token ? "Ok: Got token. You can close this window/tab now." : "Error: No token.");
+			LOG("%s: sent resp.\n", __func__);
 		}
 
 		return Token != NULL;
@@ -358,6 +366,7 @@ struct LOAuth2Priv
 						Api.sHost.Get(),
 						Body.Length(),
 						Body.Get());
+			LOG("%s: writing post req\n", __func__);
 			if (!Write(&sock, Http))
 			{
 				Log->Print("%s:%i - Error writing to socket.\n", _FL);
@@ -365,22 +374,25 @@ struct LOAuth2Priv
 			}
 
 			LString Hdrs;
+			LOG("%s: reading resp\n", __func__);
 			if (!GetHttp(&sock, Hdrs, Body, true))
 			{
 				return false;
 			}
 
-			Log->Print("Body=%s\n", Body.Get());
+			LOG("%s: got body='%s'\n", __func__, Body.Get());
 			LJson j(Body);
 
 			AccessToken = j.Get("access_token");
 			RefreshToken = j.Get("refresh_token");
 			ExpiresIn = j.Get("expires_in").Int();
-
+			Dirty = true;
+			
 			if (!AccessToken)
 				Log->Print("Failed to get AccessToken: %s\n", Body.Get());
 		}
 
+		LOG("%s: AccessToken='%s'\n", __func__, AccessToken.Get());
 		return AccessToken.Get() != NULL;
 	}
 
@@ -435,9 +447,12 @@ struct LOAuth2Priv
 
 		AccessToken = j.Get("access_token");
 		ExpiresIn = j.Get("expires_in").Int();
+		Dirty = true;
 
 		return AccessToken.Get() != NULL;
 	}
+
+	LAutoPtr<OAuth2Server> httpsServer;
 
 	LOAuth2Priv(LOAuth2::Params &params, const char *account, LDom *store, LStream *log, LCancel *cancel)
 	{
@@ -458,6 +473,7 @@ struct LOAuth2Priv
 		{
 			Store->SetValue(OPT_AccessToken, v = AccessToken.Get());
 			Store->SetValue(OPT_RefreshToken, v = RefreshToken.Get());
+			Dirty = false;
 		}
 		else
 		{
@@ -476,8 +492,6 @@ struct LOAuth2Priv
 		return true;
 	}
 };
-
-LAutoPtr<LOAuth2Priv::OAuth2Server> LOAuth2Priv::httpsServer;
 
 LOAuth2::LOAuth2(LOAuth2::Params &params, const char *account, LDom *store, LCancel *cancel, LStream *log)
 {
@@ -505,21 +519,168 @@ bool LOAuth2::Restart()
 	return true;
 }
 
+void LOAuth2::OnLogin()
+{
+	if (d->Dirty)
+	{
+		// Login success... store the access token
+		d->Serialize(true);
+		if (d->Store)
+		{
+			// This flushes the options changes to disk
+			LScriptArguments Args(nullptr);
+			d->Store->CallMethod("SaveOptions", Args);
+		}
+	}
+}
+
 LString LOAuth2::GetAccessToken()
 {
+	LOG("%s: AccessToken='%s'\n", __func__, d->AccessToken.Get());
 	if (d->AccessToken)
 		return d->AccessToken;
 
+	LOG("%s: calling GetToken...\n", __func__);
 	if (d->GetToken())
 	{
+		LOG("%s: got token, calling GetAccess...\n", __func__);
 		d->Log->Print("Got token.\n");
-		if (d->GetAccess())
+		auto result = d->GetAccess();
+		LOG("%s: GetAccess=%i\n", __func__, result);
+		if (result)
+		{
 			return d->AccessToken;
+		}
 		else
+		{
 			d->Log->Print("No access.\n");
+		}
 			
 	}
 	else d->Log->Print("No token.\n");
 
 	return LString();
+}
+
+bool CheckVersion(LString ver, LString minVer)
+{
+	auto stripChars = "v\r\n\t ";
+	auto v = ver.Strip(stripChars).SplitDelimit(".");
+	auto minV = minVer.LStrip(stripChars).SplitDelimit(".");
+	if (v.Length() < 2 ||
+		minV.Length() < 2)
+		return false;
+	if (v[0].Int() < minV[0].Int())
+		return false;
+	if (v[1].Int() < minV[1].Int())
+		return false;
+	return true;
+}
+
+bool LOAuth2::Params::ScanForKeyAndCert(const char* folder)
+{
+	LDirectory dir;
+	for (auto b = dir.First(folder); b; b = dir.Next())
+	{
+		if (dir.IsDir())
+			continue;
+		auto name = dir.GetName();
+		auto ext = LGetExtension(name);
+		if (!Stricmp(ext, "pem"))
+		{
+			if (Stristr(name, "key.pem"))
+				SslKey = dir.FullPath();
+			else
+				SslCert = dir.FullPath();
+		}
+	}
+
+	return	LFileExists(SslKey) &&
+			LFileExists(SslCert);
+}
+
+bool LOAuth2::Params::CheckRequirement(const char *req)
+{
+	if (!Stricmp(req, CapMkcert))
+	{
+		// Check if mkcert is installed and available to call...
+		LSubProcess sub("mkcert", "--version");
+		if (!sub.Start())
+			return false;
+		LStringPipe out;
+		if (sub.Communicate(&out))
+			return false;		
+		if (!CheckVersion(out.NewLStr(), "1.4"))
+			return false;
+		
+		return true;
+	}
+	else if (!Stricmp(req, CapHttpsCert))
+	{
+		// Check that we have SSL certs for the HTTPS server:
+		if (LFileExists(SslKey) &&
+			LFileExists(SslCert))
+		{
+			// Probably ok? Can we validate them somehow?
+			return true;
+		}
+
+		// Check the cert folder exists:
+		LFile::Path appRoot(LSP_APP_ROOT);
+		auto certFolder = appRoot / "certs";
+		if (!LDirExists(certFolder))
+		{
+			if (!FileDev->CreateFolder(certFolder, true))
+			{
+				LgiTrace("%s:%i - Can't create cert folder '%s'\n", _FL, certFolder.GetFull().Get());
+				return false;
+			}
+		}
+		if (!LDirExists(certFolder))
+		{
+			LgiTrace("%s:%i - Cert folder '%s' missing\n", _FL, certFolder.GetFull().Get());
+			return false;
+		}
+
+		// If the cert files exist... then ok, return success
+		if (ScanForKeyAndCert(certFolder))
+			return true;
+
+		{
+			// Then make sure the CA is installed into the browser(s):
+			LSubProcess sub("mkcert", "-install");
+			if (!sub.Start())
+				return false;
+			LStringPipe out;
+			if (sub.Communicate(&out))
+				return false;
+			return true;
+		}
+
+		{
+			// Create the certificate with mkcert:
+			LSubProcess sub("mkcert", LString::Fmt("localhost 127.0.0.1 ::1"));
+			sub.SetInitFolder(certFolder);
+			if (!sub.Start())
+			{
+				LgiTrace("%s:%i - Failed to start 'mkcert'\n", _FL);
+				return false;
+			}
+
+			LStringPipe out;
+			if (sub.Communicate(&out))
+			{
+				LgiTrace("%s:%i - Failed to read 'mkcert' output\n", _FL);
+				return false;
+			}
+		}
+
+		return ScanForKeyAndCert(certFolder);
+	}
+	else
+	{
+		LAssert(!"unknown capability");
+	}
+	
+	return false;
 }

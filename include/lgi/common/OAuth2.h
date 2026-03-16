@@ -24,17 +24,22 @@ public:
 			OAuthMicrosoft,
 		}	Provider;
 		
-		LString ClientID;
-		LString ClientSecret;
+		LString ClientID, ClientSecret;
 		LString RedirURIs;
 		LString AuthUri;
 		LString ApiUri;
-		// LString RevokeUri;
 		LString Scope;
 		LUri Proxy;
 		
 		LString SslKey, SslCert;
+		bool ScanForKeyAndCert(const char *folder);
 		
+		// Requirements to function:
+		constexpr static const char *CapMkcert = "mkcert";
+		constexpr static const char *CapHttpsCert = "https-cert";
+		LString::Array RequiredCapabilities;
+		bool CheckRequirement(const char *req);
+
 		Params()
 		{
 			Provider = None;
@@ -58,6 +63,7 @@ public:
 	LString GetAccessToken();
 	bool Refresh();
 	bool Restart();
+	void OnLogin(); // successful login
 };
 
 #endif

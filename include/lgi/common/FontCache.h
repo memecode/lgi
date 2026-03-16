@@ -5,7 +5,8 @@
 
 class LFontCache
 {
-	LFont *DefaultFont;
+	LFont *DefaultFont = nullptr;
+	LSurface *DrawContext = nullptr;
 	LArray<LFont*> Fonts;
 	LHashTbl<ConstStrKey<char>, LString> FontName;
 	
@@ -15,10 +16,12 @@ public:
 	(
 		/// This is an externally owned default font... or optionally 
 		/// NULL if there is no default.
-		LFont *DefFnt = NULL
+		LFont *DefFnt = nullptr,
+		LSurface *Context = nullptr
 	)
 	{
 		DefaultFont = DefFnt;
+		DrawContext = Context;
 	}
 	
 	~LFontCache()
@@ -88,7 +91,7 @@ public:
 				Sz.Value--;
 			}
 
-			if (!f->Create(Face, Sz))
+			if (!f->Create(Face, Sz, DrawContext))
 			{
 				LAssert(0);
 				DeleteObj(f);

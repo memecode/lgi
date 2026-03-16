@@ -3,25 +3,23 @@
 // #include <cups/cups.h>
 
 #define PS_SCALE			10
+#define DEFAULT_BITS		24
 
 ///////////////////////////////////////////////////////////////////////////////////////
 class LPrintDCPrivate // : public GCups
 {
 public:
-	class PrintPainter *p;
-	Gtk::GtkPrintContext *Handle;
+	class PrintPainter *p = nullptr;
+	Gtk::GtkPrintContext *Handle = nullptr;
 	LString PrintJobName;
 	LString PrinterName;
-	int Pages;
+	int Pages = 0;
 	LColour c;
 	LRect Clip;
-	Gtk::cairo_t *cr;
+	Gtk::cairo_t *cr = nullptr;
 	
 	LPrintDCPrivate(Gtk::GtkPrintContext *handle)
 	{
-		cr = NULL;
-		p = 0;
-		Pages = 0;
 		Handle = handle;
 	}
 	
@@ -60,6 +58,20 @@ Gtk::GtkPrintContext *LPrintDC::GetPrintContext()
 	return d->Handle;
 }
 
+OsPainter LPrintDC::Handle()
+{
+	return d->cr;
+}
+
+void LPrintDC::SetHandle(OsPainter hnd)
+{
+	if (d->cr != hnd)
+	{
+		LgiTrace("%s:%i - LPrintDC updating handle to %p\n", _FL, hnd);
+		d->cr = hnd;
+	}
+}
+
 int LPrintDC::X()
 {
 	return gtk_print_context_get_width(d->Handle);
@@ -72,7 +84,7 @@ int LPrintDC::Y()
 
 int LPrintDC::GetBits()
 {
-	return 24;
+	return DEFAULT_BITS;
 }
 
 LPoint LPrintDC::GetDpi()
@@ -103,7 +115,7 @@ COLOUR LPrintDC::Colour()
 
 COLOUR LPrintDC::Colour(COLOUR c, int Bits)
 {
-	LColour col(c, Bits);
+	LColour col(c, Bits ? Bits : DEFAULT_BITS);
 	return Colour(col).c24();
 }
 

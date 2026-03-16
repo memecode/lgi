@@ -18,8 +18,6 @@
 #else
 	#define DEBUG_FETCH				0
 #endif
-#define OPT_ImapOAuth2AccessToken	"OAuth2AccessTok"
-
 
 #undef _FL
 #define _FL LGetLeaf(__FILE__), __LINE__
@@ -1843,17 +1841,7 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 											LoggedIn)
 										{
 											Log(l, LSocketI::SocketMsgReceive);
-
-											if (SettingStore)
-											{
-												// Login successful, so persist the AuthCode for next time
-												LVariant v = AccessToken.Get();
-												bool b = SettingStore->SetValue(OPT_ImapOAuth2AccessToken, v);
-												if (!b)
-												{
-													Log("Couldn't store access token.", LSocketI::SocketMsgWarning);
-												}
-											}
+											Auth.OnLogin();
 											break;
 										}
 										else

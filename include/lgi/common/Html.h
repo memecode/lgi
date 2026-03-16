@@ -56,12 +56,12 @@ protected:
 	LAutoPtr<LSurface>	MemDC;
 
 	// This lock is separate from the window lock to avoid deadlocks.
-	struct GJobSem : public LMutex
+	struct LJobSem : public LMutex
 	{
     	// Data that has to be accessed under Lock
 	    LArray<LDocumentEnv::LoadJob*> Jobs;
-	    GJobSem() : LMutex("GJobSem") {}
-	} JobSem;
+	    LJobSem() : LMutex("LJobSem") {}
+	}	JobSem;
 
 	// Methods
 	void _New();

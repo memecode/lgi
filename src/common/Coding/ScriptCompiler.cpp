@@ -12,6 +12,7 @@
 const char *sDebugger		= "Debugger";
 
 int LFunctionInfo::_Infos = 0;
+static SystemFunctions SystemFnContext;
 
 enum LTokenType
 {
@@ -129,8 +130,6 @@ struct Node
 
 LCompiledCode::LCompiledCode() : Globals(SCOPE_GLOBAL), Debug(0, -1)
 {
-	SysContext = NULL;
-	UserContext = NULL;
 }
 
 LCompiledCode::LCompiledCode(LCompiledCode &copy) : Globals(SCOPE_GLOBAL), Debug(0, -1)
@@ -383,6 +382,7 @@ class LCompilerPriv :
 	LArray<LAutoPtr<LExternFunc>> FuncMem;
 
 public:
+	static LScriptEngine Eng;
 	LScriptContext *SysCtx = NULL;
 	LScriptContext *UserCtx = NULL;
 	LCompiledCode *Code = NULL;
@@ -703,11 +703,10 @@ public:
 	/// Convert the source from one big string into an array of tokens
 	bool Lex(char *Source, const char *FileName)
 	{
-		char16 *w = Utf8ToWide(Source);
+		LAutoWString w(Utf8ToWide(Source));
 		if (!w)
 			return OnError(0, "Couldn't convert source to wide chars.");
 		
-		LScriptEngine Eng(NULL, NULL, NULL);
 		ssize_t FileIndex = Lines.GetFileIndex(FileName);
 		int Line = 1;
 		char16 *s = w, *t;
@@ -809,13 +808,7 @@ public:
 		} // end of "while (t = LexCpp)" loop
 
 		if (!Script)
-		{
-			Script = w;
-		}
-		else
-		{
-			DeleteArray(w);
-		}
+			Script = w.Release();
 
 		return true;
 	}
@@ -3584,6 +3577,8 @@ public:
 	}
 };
 
+LScriptEngine LCompilerPriv::Eng;
+
 LCompiler::LCompiler()
 {
 	d = new LCompilerPriv;
@@ -3624,7 +3619,7 @@ bool LCompiler::Compile
 	if (SysContext)
 	{
 		auto f = SysContext->GetCommands();
-		for (int i=0; f[i].Method; i++)
+		for (int i=0; f[i].Type > NullFunc; i++)
 		{
 			f[i].Context = SysContext;
 			d->Methods.Add(f[i].Method, &f[i]);
@@ -3689,7 +3684,6 @@ class LScriptEnginePrivate
 {
 public:
 	LViewI *Parent = NULL;
-	SystemFunctions SysContext;
 	LScriptContext *UserContext = NULL;
 	LCompiledCode *Code = NULL;
 	LVmCallback *Callback = NULL;
@@ -3702,7 +3696,7 @@ LScriptEngine::LScriptEngine(LViewI *parent, LScriptContext *UserContext, LVmCal
 	d->Parent = parent;
 	d->UserContext = UserContext;
 	d->Callback = Callback;
-	d->SysContext.SetEngine(this);
+	// d->SysContext.SetEngine(this);
 }
 
 LScriptEngine::~LScriptEngine()
@@ -3725,7 +3719,7 @@ bool LScriptEngine::Compile(LAutoPtr<LCompiledCode> &Obj, LScriptContext *UserCo
 
 	LCompiler Comp;
 	return Comp.Compile(Obj,
-						&d->SysContext,
+						&SystemFnContext,
 						UserContext ? UserContext : d->UserContext,
 						FileName,
 						Script,
@@ -3760,7 +3754,7 @@ LExecutionStatus LScriptEngine::RunTemporary(LCompiledCode *Obj, char *Script, L
 		d->Code = Temp;
 		
 		LCompiler Comp;
-		if (Comp.Compile(Temp, &d->SysContext, d->UserContext, Temp->GetFileName(), Script, NULL))
+		if (Comp.Compile(Temp, &SystemFnContext, d->UserContext, Temp->GetFileName(), Script, NULL))
 		{
 			LVirtualMachine Vm(d->Callback);
 			Status = Vm.Execute(dynamic_cast<LCompiledCode*>(Temp.Get()), TempLen, NULL, true, Ret ? Ret : &d->ReturnValue);
@@ -3787,7 +3781,7 @@ bool LScriptEngine::EvaluateExpression(LVariant *Result, LDom *VariableSource, c
 	// Compile the script
 	LCompiler Comp;
 	LAutoPtr<LCompiledCode> Obj;
-	if (!Comp.Compile(Obj, &d->SysContext, d->UserContext, NULL, a, VariableSource))
+	if (!Comp.Compile(Obj, &SystemFnContext, d->UserContext, NULL, a, VariableSource))
 	{
 		LAssert(0);
 		return false;
@@ -3795,9 +3789,9 @@ bool LScriptEngine::EvaluateExpression(LVariant *Result, LDom *VariableSource, c
 	
 	// Execute the script
 	LVirtualMachine Vm(d->Callback);
-	LCompiledCode *Code = dynamic_cast<LCompiledCode*>(Obj.Get());
+	auto Code = dynamic_cast<LCompiledCode*>(Obj.Get());
 	auto ReturnVal = Result ? Result : &d->ReturnValue;
-	LExecutionStatus s = Vm.Execute(Code, 0, NULL, true, ReturnVal);
+	auto s = Vm.Execute(Code, 0, NULL, true, ReturnVal);
 	if (s != ScriptSuccess)
 	{
 		return false;
@@ -3814,8 +3808,8 @@ bool LScriptEngine::EvaluateExpression(LVariant *Result, LDom *VariableSource, c
 
 LStream *LScriptEngine::GetConsole()
 {
-	if (d->SysContext.GetLog())
-		return d->SysContext.GetLog();
+	if (SystemFnContext.GetLog())
+		return SystemFnContext.GetLog();
 
 	if (d->UserContext && d->UserContext->GetLog())
 		return d->UserContext->GetLog();
@@ -3825,7 +3819,7 @@ LStream *LScriptEngine::GetConsole()
 
 bool LScriptEngine::SetConsole(LStream *t)
 {
-	d->SysContext.SetLog(t);
+	SystemFnContext.SetLog(t);
 
 	if (d->UserContext)
 		d->UserContext->SetLog(t);
@@ -3852,5 +3846,5 @@ bool LScriptEngine::CallMethod(LCompiledCode *Obj, const char *Method, LScriptAr
 
 LScriptContext *LScriptEngine::GetSystemContext()
 {
-	return &d->SysContext;
+	return &SystemFnContext;
 }

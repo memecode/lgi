@@ -56,19 +56,19 @@ private:
 	Collection Files; // requires locking to access
 
 public:
-	LBrowser *Wnd = NULL;
-	Html1::LHtml *Html = NULL;
+	LBrowser *Wnd = nullptr;
+	Html1::LHtml *Html = nullptr;
 	LAutoPtr<LBrowserThread> Thread;
-	LEdit *UriEdit = NULL;
-	LEdit *SearchEdit = NULL;
-	LButton *Back = NULL;
-	LButton *Forward = NULL;
-	LButton *Stop = NULL;
-	LButton *Search = NULL;
+	LEdit *UriEdit = nullptr;
+	LEdit *SearchEdit = nullptr;
+	LButton *Back = nullptr;
+	LButton *Forward = nullptr;
+	LButton *Stop = nullptr;
+	LButton *Search = nullptr;
 	LArray<LString> History;
 	ssize_t CurHistory = 0;
 	bool Loading = false;
-	LBrowser::LBrowserEvents *Events = NULL;
+	LBrowser::LBrowserEvents *Events = nullptr;
 	LHttp Http;
 	LString::Array ResourcePaths;
 
@@ -97,7 +97,7 @@ public:
 
 	bool LoadCurrent()
 	{
-		char *Uri = History[CurHistory];
+		auto Uri = History[CurHistory];
 		if (!Uri)
 			return false;
 
@@ -238,7 +238,7 @@ public:
 		LUri BaseUri(Uri);
 		
 		LUri u(j->Uri);
-		const char *LoadFileName = NULL;
+		const char *LoadFileName = nullptr;
 		if (u.sProtocol)
 		{
 			
@@ -286,6 +286,11 @@ public:
 					break;
 				}
 			}
+		}
+
+		if (Events)
+		{
+			Events->FileNotFound(Wnd, j->Uri);
 		}
 
 		return LoadError;

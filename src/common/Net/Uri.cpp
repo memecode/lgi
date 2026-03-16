@@ -174,7 +174,7 @@ bool LUri::Set(const char *uri)
 
 	for (auto c = s; *c; c++)
 	{
-		if (c[0] == ':')
+		if (*c == ':')
 		{
 			if (!hasProto &&
 				!hasAt &&
@@ -185,7 +185,20 @@ bool LUri::Set(const char *uri)
 				c += 2;
 			}
 			else
-				hasColon = c; // port number or user/pass separator?
+			{
+				if (c - s == 1 &&
+					IsAlpha(s[0]) &&
+					strchr("/\\", c[1]))
+				{
+					// This looks like a windows path?
+					hasPath = s;
+					break;
+				}
+				else
+				{
+					hasColon = c; // port number or user/pass separator?
+				}
+			}
 		}
 		else if (c[0] == '@' && !hasAt)
 		{
@@ -362,6 +375,8 @@ bool LUri::UnitTests()
 		{"host:1234",                                        LUri(NULL, NULL, NULL, "host", 1234, NULL)                         },
 		{"somePath/seg/file.png",                            LUri(NULL, NULL, NULL, NULL, 0, "somePath/seg/file.png")           },
 		{"mailto:user@host.com",                             LUri("mailto", "user", NULL, "host.com", 0, NULL)                  },
+		{"C:\\windows\\",		                             LUri(NULL, NULL, NULL, NULL, 0, "C:\\windows\\")                   },
+		{"/mnt/unix/path",		                             LUri(NULL, NULL, NULL, NULL, 0, "/mnt/unix/path")                  },
 	};
 
 	for (auto &test: Parse)

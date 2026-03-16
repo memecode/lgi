@@ -1104,7 +1104,7 @@ LExecutionStatus LVirtualMachine::ExecuteFunction(LCompiledCode *Code, LFunction
 	d->ArgsOutput = ArgsOut;
 	auto Prev = Args.Vm;
 	Args.Vm = this;
-	LExecutionStatus r = d->Run(LVirtualMachinePriv::RunContinue);
+	auto r = d->Run(LVirtualMachinePriv::RunContinue);
 	Args.Vm = Prev;
 
 	return r;

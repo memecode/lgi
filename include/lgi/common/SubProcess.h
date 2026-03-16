@@ -125,6 +125,7 @@ public:
 	bool Interrupt();
 	bool Kill();
 	bool Signal(int which);
+	/// \returns the exit code of the process
 	int32 Communicate(LStreamI *Out, LStreamI *In = NULL, LCancel *Cancel = NULL);
 	
 	// IO

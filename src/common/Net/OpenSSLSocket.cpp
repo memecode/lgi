@@ -1211,16 +1211,23 @@ int SslSocket::Close()
 		return false;
 	}
 
-	if (Bio)
+	if (Ssl)
 	{
-		auto result = Library->BIO_free_all(Bio);
+		auto res = Library->SSL_shutdown(Ssl);
+		Library->SSL_free(Ssl);
+		Ssl = nullptr;
+		Bio = nullptr;
+	}
+	else if (Bio)
+	{
+		auto res = Library->BIO_free_all(Bio);
+		Library->BIO_free(Bio);
 		/*
 		if (result != 1)
 			printf("%s:%i result =%i\n", _FL, result);
 		*/
+		Bio = nullptr;
 	}	
-	Ssl = nullptr;
-	Bio = nullptr;
 
 	if (d->ListenSocket != INVALID_SOCKET)
 	{

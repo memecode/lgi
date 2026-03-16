@@ -40,61 +40,71 @@ struct LPrintPageRanges : public LArray<LRange>
 	}
 };
 
-
-class LPrintEvents
-{
-public:
-	constexpr static int OnBeginPrintError = -1;
-	constexpr static int OnBeginPrintCancel = 0;
-
-	virtual ~LPrintEvents() {}
-
-	/*
-	/// Get the number of pages in the document
-	int GetPages();
-
-	/// Get the range of pages to print that was selected by the user
-	bool GetPageRange
-	(
-		/// You'll get pairs of ints, each pair is the start and end page
-		/// number of a range to print. i.e. [5, 10], [14, 16]
-		LArray<int> &p
-	);
-	*/
-
-	virtual void OnBeginPrint(
-		/// The print device context to print with
-		LPrintDC *pDC,
-		/// Callback for the status of the operation. Will return one of:
-		/// - OnBeginPrintError
-		/// - OnBeginPrintCancel
-		/// - A positive number of pages
-		std::function<void(int)> callback
-	)
-	{
-		if (callback) callback(OnBeginPrintError);
-	}
-	virtual bool OnPrintPage(LPrintDC *pDC, int PageIndex) = 0;
-	virtual LPrintPageRanges *GetPageRanges() { return NULL; }
-};
-
 /// Class to connect to a printer and start printing pages.
 class LgiClass LPrinter
 {
 	class LPrinterPrivate *d;
 
 public:
+	enum PageOrientation {
+		PoDefault,
+		PoPortrait,
+		PoLandscape,
+	};
+
+	struct Context
+	{
+		constexpr static int OnBeginPrintError = -1;
+		constexpr static int OnBeginPrintCancel = 0;
+
+		virtual ~Context() {}
+
+		/*
+		/// Get the number of pages in the document
+		int GetPages();
+
+		/// Get the range of pages to print that was selected by the user
+		bool GetPageRange
+		(
+		/// You'll get pairs of ints, each pair is the start and end page
+		/// number of a range to print. i.e. [5, 10], [14, 16]
+		LArray<int> &p
+		);
+		*/
+
+		virtual PageOrientation GetOrientation()
+		{
+			return PoDefault;
+		}
+
+		virtual void OnBeginPrint(
+			/// The print device context to print with
+			LPrintDC *pDC,
+			/// Callback for the status of the operation. Will return one of:
+			/// - OnBeginPrintError
+			/// - OnBeginPrintCancel
+			/// - A positive number of pages
+			std::function<void(int)> callback
+		)
+		{
+			if (callback)
+				callback(OnBeginPrintError);
+		}
+		virtual bool OnPrintPage(LPrintDC *pDC, int PageIndex) = 0;
+		virtual LPrintPageRanges *GetPageRanges() { return NULL; }
+	};
+
 	LPrinter();
 	virtual ~LPrinter();
 
 	/// Browse to a printer
-	bool Browse(LView *Parent);
+	bool Browse(LView *Parent, PageOrientation Po);
 
 	/// Start a print job
 	void Print
 	(
 		/// The event callback for pagination and printing of pages
-		LPrintEvents *Events,
+		Context *Events,
 		/// The status callback
 		std::function<void(int)> callback,
 		/// [Optional] The name of the print job

@@ -358,16 +358,16 @@ public:
 	bool Send(class LViewI *View);
 
 	// Wrappers for passing heap objects in parameters
-	template<typename T>
+	template<typename T, bool Arr = false>
 	LAutoPtr<T> AutoA()
 	{
-		return LAutoPtr<T>((T*)A());
+		return LAutoPtr<T, Arr>((T*)A());
 	}
 
-	template<typename T>
+	template<typename T, bool Arr = false>
 	LAutoPtr<T> AutoB()
 	{
-		return LAutoPtr<T>((T*)B());
+		return LAutoPtr<T, Arr>((T*)B());
 	}
 };
 

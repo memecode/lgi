@@ -1,5 +1,4 @@
-#ifndef _GDRAW_LIST_SURFACE_H_
-#define _GDRAW_LIST_SURFACE_H_
+#pragma once
 
 class LDrawListSurface : public LSurface
 {
@@ -69,4 +68,3 @@ public:
 	void Palette(LPalette *pPal, bool bOwnIt = true) override { }
 };
 
-#endif

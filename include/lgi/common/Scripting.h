@@ -66,18 +66,26 @@ struct LFunc
 
 struct LHostFunc : public LFunc
 {
-	LScriptContext *Context;
+	LScriptContext *Context = nullptr;
 	LString Args;
-	ScriptCmd Func;
+	ScriptCmd Func = nullptr;
 	
 	LHostFunc(const LHostFunc &f)
 	{
+		Type = f.Type;
+		Method = f.Method;
+		InUse = f.InUse;
+
 		Context = f.Context;
 		Args = f.Args;
-		Method = f.Method;
 		Func = f.Func;
 	}
 	
+	LHostFunc() :
+		LFunc()
+	{
+	}
+
 	LHostFunc(const char *method, const char *args, ScriptCmd proc) : LFunc(method, HostFunc)
 	{
 		Args = args;
@@ -320,10 +328,10 @@ class LCompiledCode
 	LString Source;
 	
 	/// The system context (all the system functions)
-	LScriptContext *SysContext;
+	LScriptContext *SysContext = nullptr;
 	
 	/// Any user context (application functions)
-	LScriptContext *UserContext;
+	LScriptContext *UserContext = nullptr;
 
 	/// Debug info to map instruction address back to source line numbers
 	LHashTbl<IntKey<NativeInt>, int> Debug;
@@ -367,7 +375,9 @@ class LScriptEngine
 	class LScriptEnginePrivate *d;
 
 public:
-	LScriptEngine(LViewI *parent, LScriptContext *UserContext, LVmCallback *Callback);
+	LScriptEngine(	LViewI *parent = nullptr,
+					LScriptContext *UserContext = nullptr,
+					LVmCallback *Callback = nullptr);
 	~LScriptEngine();
 
 	LStream *GetConsole();
