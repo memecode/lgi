@@ -53,28 +53,28 @@ public:
 };
 
 // Win32 Memory Handler
-class LgiClass GMem {
+class LgiClass LGlobalMem {
 
-	int64 Size;
-	HGLOBAL hMem;
-	void *pMem;
+	int64 Size = 0;
+	HGLOBAL hMem = nullptr;
+	void *pMem = nullptr;
 
 public:
-	GMem(int64 size)
+	LGlobalMem(int64 size, int flags = GMEM_FIXED)
 	{
 		Size = size;
-		hMem = GlobalAlloc(GMEM_FIXED, (DWORD)Size);
-		pMem = 0;
+		hMem = GlobalAlloc(flags, (DWORD)Size);
 	}
 
-	GMem(HGLOBAL hmem)
+	LGlobalMem(HGLOBAL hmem)
 	{
-		hMem = hmem;
-		Size = GlobalSize(hMem);
-		pMem = 0;
+		if (hMem = hmem)
+			Size = GlobalSize(hMem);
+		else
+			LAssert(!"null handle");
 	}
 
-	~GMem()
+	~LGlobalMem()
 	{
 		if (pMem)
 		{
@@ -88,6 +88,17 @@ public:
 		}
 	}
 
+	HGLOBAL Release()
+	{
+		UnLock();
+
+		auto h = hMem;
+		hMem = nullptr;
+		Size = 0;
+
+		return h;
+	}
+
 	void *Lock()
 	{
 		return pMem = GlobalLock(hMem);
@@ -98,7 +109,7 @@ public:
 		if (pMem)
 		{
 			GlobalUnlock(hMem);
-			pMem = 0;
+			pMem = nullptr;
 		}
 	}
 
@@ -112,9 +123,9 @@ public:
 		if (pMem)
 		{
 			GlobalUnlock(hMem);
-			pMem = 0;
+			pMem = nullptr;
 		}
-		hMem = 0;
+		hMem = nullptr;
 		Size = 0;
 	}
 

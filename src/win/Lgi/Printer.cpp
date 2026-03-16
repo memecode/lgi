@@ -6,13 +6,12 @@
 class LPrinterPrivate
 {
 public:
-	PRINTDLG Info;
+	PRINTDLGW Info;
 	LString Err;
-	bool NeedsDC;
+	bool NeedsDC = false;
 
 	LPrinterPrivate()
 	{
-		NeedsDC = false;
 		ZeroObj(Info);
 		Info.lStructSize = sizeof(Info);
 	}
@@ -37,10 +36,10 @@ LString LPrinter::GetErrorMsg()
 #define PrintStatus(val) \
 	{ if (callback) callback(val); return; }
 
-void LPrinter::Print(LPrintEvents *Events, std::function<void(int)> callback, const char *PrintJobName, int Pages, LView *Parent)
+void LPrinter::Print(LPrinter::Context *Events, std::function<void(int)> callback, const char *PrintJobName, int Pages, LView *Parent)
 {
 	if (!Events)
-		PrintStatus(LPrintEvents::OnBeginPrintError);
+		PrintStatus(Context::OnBeginPrintError);
 		
 	if
 	(
@@ -54,10 +53,10 @@ void LPrinter::Print(LPrintEvents *Events, std::function<void(int)> callback, co
 	)
 	{
 		d->NeedsDC = true;
-		bool r = Browse(Parent);
+		bool r = Browse(Parent, Events->GetOrientation());
 		d->NeedsDC = false;
 		if (!r)
-			PrintStatus(LPrintEvents::OnBeginPrintCancel);
+			PrintStatus(Context::OnBeginPrintCancel);
 	}
 	else
 	{
@@ -65,11 +64,11 @@ void LPrinter::Print(LPrintEvents *Events, std::function<void(int)> callback, co
 		d->Info.Flags = PD_RETURNDC;
 		d->Info.hDC = 0;
 		if (!PrintDlg(&d->Info))
-			PrintStatus(LPrintEvents::OnBeginPrintError);
+			PrintStatus(Context::OnBeginPrintError);
 	}
 
 	if (!d->Info.hDC)
-		PrintStatus(LPrintEvents::OnBeginPrintError);
+		PrintStatus(Context::OnBeginPrintError);
 	
 	LString PrinterName;
 	if (d->Info.hDevNames)
@@ -92,85 +91,159 @@ void LPrinter::Print(LPrintEvents *Events, std::function<void(int)> callback, co
 		if (dc)
 			delete dc;
 		d->Err.Printf("%s:%i - StartDoc failed.\n", _FL);
-		PrintStatus(LPrintEvents::OnBeginPrintError);
+		PrintStatus(Context::OnBeginPrintError);
 	}	
 	
-	Events->OnBeginPrint(dc, [this, dc, Events, callback, PrintJobName=LString(PrintJobName), Pages](auto JobPages)
-	{
-		LAutoPtr<LPrintDC> ownDc(dc); // Make sure we free the dc
-
-		if (JobPages <= LPrintEvents::OnBeginPrintCancel)
-			PrintStatus(JobPages);
-
-		bool Status = false;
-		DOCINFO Info;
-		LAutoWString DocName(Utf8ToWide(PrintJobName ? PrintJobName : "Lgi Print Job"));
-
-		ZeroObj(Info);
-		Info.cbSize = sizeof(DOCINFO); 
-		Info.lpszDocName = DocName; 
-
-		if (Pages > 0)
-			JobPages = min(JobPages, Pages);
-		
-		auto PageRanges = Events->GetPageRanges();
-		for (int i=0; i<JobPages; i++)
+	Events->OnBeginPrint(dc,
+		[this, dc, Events, callback, PrintJobName=LString(PrintJobName), Pages](auto JobPages)
 		{
-			if (!PageRanges || PageRanges->InRanges(i + 1))
+			LAutoPtr<LPrintDC> ownDc(dc); // Make sure we free the dc
+
+			if (JobPages <= Context::OnBeginPrintCancel)
+				PrintStatus(JobPages);
+
+			bool Status = false;
+			DOCINFO Info;
+			LAutoWString DocName(Utf8ToWide(PrintJobName ? PrintJobName : "Lgi Print Job"));
+
+			ZeroObj(Info);
+			Info.cbSize = sizeof(DOCINFO); 
+			Info.lpszDocName = DocName; 
+
+			if (Pages > 0)
+				JobPages = min(JobPages, Pages);
+		
+			auto PageRanges = Events->GetPageRanges();
+			for (int i=0; i<JobPages; i++)
 			{
-				if (StartPage(dc->Handle()) > 0)
+				if (!PageRanges || PageRanges->InRanges(i + 1))
 				{
-					Status |= Events->OnPrintPage(dc, i);
-					EndPage(dc->Handle());
-				}
-				else
-				{
-					d->Err.Printf("%s:%i - StartPage failed.", _FL);
-					JobPages = LPrintEvents::OnBeginPrintError;
-					break;
+					if (StartPage(dc->Handle()) > 0)
+					{
+						Status |= Events->OnPrintPage(dc, i);
+						EndPage(dc->Handle());
+					}
+					else
+					{
+						d->Err.Printf("%s:%i - StartPage failed.", _FL);
+						JobPages = Context::OnBeginPrintError;
+						break;
+					}
 				}
 			}
-		}
 	
-		LString OutputFile = dc->GetOutputFileName();
-		if (LFileExists(OutputFile))
-			LBrowseToFile(OutputFile);
+			LString OutputFile = dc->GetOutputFileName();
+			if (LFileExists(OutputFile))
+				LBrowseToFile(OutputFile);
 
-		PrintStatus(JobPages);
-	});	
+			PrintStatus(JobPages);
+		});	
 }
 
-bool LPrinter::Browse(LView *Parent)
+bool LPrinter::Browse(LView *Parent, PageOrientation Po)
 {
-	d->Info.hwndOwner = (Parent) ? Parent->Handle() : 0;
+	d->Info.hwndOwner = Parent ? Parent->Handle() : 0;
 	d->Info.Flags = PD_PRINTSETUP | PD_PAGENUMS;
+
+	if (Po != PoDefault)
+	{
+		if (!d->Info.hDevMode)
+		{
+			d->Info.Flags |= PD_RETURNDEFAULT;
+			PrintDlg(&d->Info);
+			d->Info.Flags &= ~PD_RETURNDEFAULT;
+		}
+		if (d->Info.hDevMode)
+		{
+			// This setting is ignored in my experience (windows 10):
+			LGlobalMem DevMode(d->Info.hDevMode);
+			if (auto pDevMode = (DEVMODEW*)DevMode.Lock())
+			{
+				switch (Po)
+				{
+					case PoLandscape:
+						pDevMode->dmFields |= DM_ORIENTATION;
+						pDevMode->dmOrientation = DMORIENT_LANDSCAPE;
+						break;
+					case PoPortrait:
+						pDevMode->dmFields |= DM_ORIENTATION;
+						pDevMode->dmOrientation = DMORIENT_PORTRAIT;
+						break;
+				}
+				DevMode.UnLock();
+			}
+		}
+
+		// So instead we have to do this:
+		// Catch the WM_INITDIALOG message and simulate a "click" on the right orientation.
+		// I mean what could go wrong?
+		d->Info.Flags |= PD_ENABLESETUPHOOK;
+		d->Info.lCustData = Po;
+		d->Info.lpfnSetupHook = [](auto hwnd, auto msg, auto wparam, auto lparam)
+			{
+				switch (msg)
+				{
+					case WM_INITDIALOG:
+					{
+						enum CtrlIds {
+							ID_PORTRAIT  = 0x420,
+							ID_LANDSCAPE = 0x421,
+							ID_GROUP     = 0x430,
+						};
+						if (auto pd = (PRINTDLGW*)lparam)
+						{
+							HWND ctrls[] = { GetDlgItem(hwnd, ID_PORTRAIT),
+											 GetDlgItem(hwnd, ID_LANDSCAPE) };
+							
+							auto setVal = [&](int idx)
+								{
+									#if 1
+										if (ctrls[idx])
+										{
+											LPARAM mouseLoc = MAKELONG(3, 3);
+											SendMessage(ctrls[idx], WM_LBUTTONDOWN, MK_LBUTTON, mouseLoc);
+											SendMessage(ctrls[idx], WM_LBUTTONUP, 0, mouseLoc);
+										}
+										else LAssert(!"no ctrl?");
+									#else
+	.									// This doesn't work, because of course it doesn't...
+										for (int i=0; i<CountOf(ctrls); i++)
+											if (ctrls[i])
+												SendMessage(ctrls[i], BM_SETCHECK, i == idx ? BST_CHECKED : BST_UNCHECKED, 0);
+									#endif
+								};
+
+							switch ((PageOrientation) pd->lCustData)
+							{
+								case LPrinter::PoPortrait:
+								{
+									setVal(0);
+									break;
+								}
+								case LPrinter::PoLandscape:
+								{
+									setVal(1);
+									break;
+								}
+								default:
+									break;
+							}
+						}
+						break;
+					}
+					default:
+						// LgiTrace("lpfnSetupHook %p, %i, %i, %i\n", hwnd, msg, wparam, lparam);
+						break;
+				}
+				return (UINT_PTR)FALSE; // let the print dialog handle the message
+			};
+	}
+
 	if (d->NeedsDC)
 		d->Info.Flags |= PD_RETURNDC;
-	/*
-	if (d->Pages > 1)
-	{
-		d->Info.nMinPage = 1;
-		d->Info.nMaxPage = d->Pages;
-	}
-	*/
 
-	return PrintDlg(&d->Info) != 0;
+	return PrintDlgW(&d->Info) != 0;
 }
-
-/*
-bool GPrinter::GetPageRange(LArray<int> &p)
-{
-	if (d->Info.Flags & PD_PAGENUMS)
-	{
-		p[0] = d->Info.nFromPage;
-		p[1] = d->Info.nToPage;
-
-		return true;
-	}
-
-	return false;
-}
-*/
 
 #define MAGIC_PRINTDLG					0xAAFF0100
 #define MAGIC_DEVMODE					0xAAFF0101
@@ -178,13 +251,13 @@ bool GPrinter::GetPageRange(LArray<int> &p)
 
 bool LPrinter::Serialize(LString &Str, bool Write)
 {
-	int Size = sizeof(d->Info);
+	DWORD Size = sizeof(d->Info);
 	if (Write)
 	{
-		GMem DevMode(d->Info.hDevMode);
-		GMem DevNames(d->Info.hDevNames);
-		DEVMODE *Mode = (DEVMODE*) DevMode.Lock();
-		DEVNAMES *Names = (DEVNAMES*) DevNames.Lock();
+		LGlobalMem DevMode(d->Info.hDevMode);
+		LGlobalMem DevNames(d->Info.hDevNames);
+		auto Mode = (DEVMODE*) DevMode.Lock();
+		auto Names = (DEVNAMES*) DevNames.Lock();
 		LMemQueue Temp;
 		int32 m;
 
@@ -282,7 +355,7 @@ bool LPrinter::Serialize(LString &Str, bool Write)
 							}
 							case MAGIC_DEVMODE:
 							{
-								GMem DevMode(Size);
+								LGlobalMem DevMode(Size);
 								DEVMODE *Mode = (DEVMODE*) DevMode.Lock();
 								if (Mode)
 								{
@@ -294,7 +367,7 @@ bool LPrinter::Serialize(LString &Str, bool Write)
 							}
 							case MAGIC_DEVNAMES:
 							{
-								GMem DevNames(Size);
+								LGlobalMem DevNames(Size);
 								DEVNAMES *Names = (DEVNAMES*) DevNames.Lock();
 								if (Names)
 								{

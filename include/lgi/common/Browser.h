@@ -18,6 +18,7 @@ public:
 		virtual ~LBrowserEvents() {}
 
 		virtual bool OnSearch(LBrowser *br, const char *txt) { return false; }
+		virtual void FileNotFound(LBrowser *br, const char *path) {}
 	};
 	
 	LBrowser(LViewI *owner, const char *Title, char *Uri = 0);
