@@ -15,7 +15,7 @@ public:
 	LString Printer;
 	LString Err;
 	LString PrinterName;
-	LPrintEvents *Events;
+	LPrinter::Context *Events;
 	
 	LAutoPtr<LPrintDC> PrintDC;
 	
@@ -44,7 +44,7 @@ LPrinter::~LPrinter()
 	DeleteObj(d);
 }
 
-bool LPrinter::Browse(LView *Parent)
+bool LPrinter::Browse(LView *Parent, PageOrientation ori)
 {
 	if (d->Settings != NULL)
 		Gtk::gtk_print_operation_set_print_settings(d->Op, d->Settings);
@@ -104,7 +104,7 @@ GtkPrintDrawPage(	GtkPrintOperation	*operation,
 	d->Events->OnPrintPage(d->PrintDC, page_number);
 }
 
-void LPrinter::Print(	LPrintEvents *Events,
+void LPrinter::Print(	LPrinter::Context *Events,
 						std::function<void(int)> Callback,
 						const char *PrintJobName,
 						int Pages,
