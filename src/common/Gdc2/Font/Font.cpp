@@ -675,7 +675,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 	
 		d->pSurface = pSurface;
 		GdiAutoDC localDC;
-		HDC hDC = pSurface ? pSurface->Handle() : localDC.Get();
+		HDC hDC = pSurface && pSurface->Handle() ? pSurface->Handle() : localDC.Get();
 		auto Sz = Size();
 		int Win32Height = 0;
 		if (Sz.Type == LCss::LenPt)
@@ -1334,6 +1334,37 @@ LAutoString LFont::ConvertToUnicode(char16 *Input, ssize_t Len)
 #include "lgi/common/GdiLeak.h"
 
 /////////////////////////////////////////////////////////////////////////////
+class AutoHdc
+{
+	bool own = false;
+	HDC hdc = nullptr;
+
+public:
+	AutoHdc(LSurface *surface)
+	{
+		if (surface)
+			hdc = surface->Handle();
+
+		if (!hdc)
+		{
+			hdc = CreateCompatibleDC(NULL);
+			own = true;
+		}
+	}
+
+	~AutoHdc()
+	{
+		if (own)
+			DeleteDC(hdc);
+	}
+
+	operator HDC() const
+	{
+		LAssert(hdc);
+		return hdc;
+	}
+};
+
 void LFont::_Measure(int &x, int &y, OsChar *Str, int Len)
 {
 	if (!Handle())
@@ -1343,7 +1374,7 @@ void LFont::_Measure(int &x, int &y, OsChar *Str, int Len)
 		return;
 	}
 
-	HDC hDC = GetSurface() ? GetSurface()->Handle() : CreateCompatibleDC(0);
+	AutoHdc hDC(GetSurface());
 	HFONT hOldFont = (HFONT) SelectObject(hDC, Handle());
 
 	SIZE Size;
@@ -1368,7 +1399,7 @@ int LFont::_CharAt(int x, OsChar *Str, int Len, LPxToIndexType Type)
 		return -1;
 
 	INT Fit = 0;
-	HDC hDC = CreateCompatibleDC(GetSurface()?GetSurface()->Handle():0);
+	AutoHdc hDC(GetSurface());
 	HFONT hOldFont = (HFONT) SelectObject(hDC, Handle());
 	if (hOldFont)
 	{

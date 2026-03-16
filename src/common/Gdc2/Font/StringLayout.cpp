@@ -359,7 +359,7 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 			#endif
 
 			// Create a display string for the segment
-			LLayoutString *n = new LLayoutString(Fnt, Bytes ? (char*)s.GetPtr() : (char*)"", Bytes ? (int)Bytes : 1);
+			auto n = new LLayoutString(Fnt, Bytes ? (char*)s.GetPtr() : (char*)"", Bytes ? (int)Bytes : 1);
 			if (n)
 			{
 				n->Set(MinLines - 1, LineFX, y, Run, StartOffset);
