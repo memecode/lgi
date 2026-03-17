@@ -55,8 +55,9 @@ public:
 	int64			DropSelectTime = 0;
     int8            IconTextGap = 0;
     int				LastLayoutPx = -1;
-	LMouse			*CurrentClick = NULL;
-	LTreeItem		*ScrollTo = NULL;
+	LMouse			*CurrentClick = nullptr;
+	LTreeItem		*ScrollTo = nullptr;
+	bool			showUpdates = true;
     
 	uint64_t		searchTs = 0;
 	LString			searchTerm;
@@ -67,9 +68,9 @@ public:
 	bool			JoiningLines = false;
 
 	// Pointers into items... be careful to clear when deleting items...
-	LTreeItem		*LastHit = NULL;
+	LTreeItem		*LastHit = nullptr;
 	List<LTreeItem>	Selection;
-	LTreeItem		*DropTarget = NULL;
+	LTreeItem		*DropTarget = nullptr;
 };
 
 class LTreeItemPrivate
@@ -1187,6 +1188,21 @@ LTree::~LTree()
 	DeleteObj(d);
 }
 
+bool LTree::GetShowUpdates()
+{
+	return d->showUpdates;
+}
+
+void LTree::SetShowUpdates(bool update)
+{
+	if (d->showUpdates != update)
+	{
+		d->showUpdates = update;
+		if (d->showUpdates)
+			UpdateAllItems();
+	}
+}
+
 void LTree::Sort(std::function<int(LTreeNode*, LTreeNode*)> compare)
 {
 	auto lck = ScopedLock(_FL);
@@ -1240,6 +1256,9 @@ List<LTreeItem>	*LTree::GetSelLst()
 
 void LTree::_Update(LRect *r, bool Now)
 {
+	if (!d->showUpdates)
+		return;
+	
 	auto lck = ScopedLock(_FL);
 	if (r)
 	{
@@ -1257,6 +1276,9 @@ void LTree::_Update(LRect *r, bool Now)
 
 void LTree::_UpdateBelow(int y, bool Now)
 {
+	if (!d->showUpdates)
+		return;
+
 	auto lck = ScopedLock(_FL);
 	LPoint s = ScrollPxPos();
 	LRect c = GetClient();
@@ -1275,6 +1297,7 @@ void LTree::ClearDs(int Col)
 LPoint LTree::ScrollPxPos()
 {
 	auto lck = ScopedLock(_FL);
+
 	LPoint Status;
 	Status.x = (HScroll) ? (int)HScroll->Value() : 0;
 	Status.y = (VScroll) ? (int)VScroll->Value() * TREE_BLOCK : 0;
@@ -2373,6 +2396,9 @@ static void LTreeItemUpdateAll(LTreeNode *n)
 
 void LTree::UpdateAllItems()
 {
+	if (!d->showUpdates)
+		return;
+
 	auto lck = ScopedLock(_FL);
 	d->LayoutDirty = true;
 	LTreeItemUpdateAll(this);

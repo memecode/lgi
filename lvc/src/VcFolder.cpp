@@ -1623,15 +1623,14 @@ void VcFolder::LogFile(const char *uri)
 
 VcLeaf *VcFolder::FindLeaf(const char *Path, bool OpenTree)
 {
-	VcLeaf *r = NULL;	
+	VcLeaf *r = nullptr;
 	
 	if (OpenTree)
 		DoExpand();
 	
 	for (auto n = GetChild(); !r && n; n = n->GetNext())
 	{
-		auto l = dynamic_cast<VcLeaf*>(n);
-		if (l)
+		if (auto l = dynamic_cast<VcLeaf*>(n))
 			r = l->FindLeaf(Path, OpenTree);
 	}
 	
@@ -1642,7 +1641,9 @@ bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 {
 	int Skipped = 0, Errors = 0;
 	bool LoggingFile = Params ? Params->Str != NULL : false;
-	VcLeaf *File = LoggingFile ? FindLeaf(Params->Str, true) : NULL; // This may be NULL even if we are logging a file...
+	GetTree()->SetShowUpdates(false);
+	auto File = LoggingFile ? FindLeaf(Params->Str, true) : NULL; // This may be NULL even if we are logging a file...
+	GetTree()->SetShowUpdates(true);
 	
 	LArray<VcCommit*> *Out, BrowseLog;
 	if (File)
