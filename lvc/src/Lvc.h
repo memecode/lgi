@@ -29,6 +29,8 @@
 #define OPT_CvsLimit		"cvs-limit"
 #define OPT_RemotePrompt	"remotePrompt"
 
+#define OPT_DiffPad			"diffPad"
+
 #define METHOD_GetContext	"GetContext"
 
 #define APP_VERSION			"0.8"

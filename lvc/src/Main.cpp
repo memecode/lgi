@@ -384,6 +384,8 @@ public:
 		Map(OPT_CvsPath, IDC_CVS, GV_STRING);
 		Map(OPT_CvsLimit, IDC_CVS_LIMIT);
 
+		Map(OPT_DiffPad, ID_DIFF_PAD);
+
 		if (LoadFromResource(ID_OPTIONS))
 		{
 			MoveSameScreen(Parent);

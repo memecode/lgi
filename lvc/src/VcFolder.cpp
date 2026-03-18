@@ -698,19 +698,26 @@ void VcFolder::SelectCommit(LWindow *Parent, LString Commit, LString Path)
 		// found. In which case we should go get just that commit and add it:
 		d->Files->Empty();
 
+		// Get diff padding option:
+		LVariant diffPad;
+		d->Opts.GetValue(OPT_DiffPad, diffPad);
+		LString contextLines = "";
+		if (!diffPad.IsNull())
+			contextLines.Printf(" -U%i", diffPad.CastInt32());
+
 		// Diff just that ref:
 		LString a;
 		switch (GetType())
 		{
 			case VcGit:
 			{
-				a.Printf("diff %s~ %s", Commit.Get(), Commit.Get());
+				a.Printf("diff%s %s~ %s", contextLines.Get(), Commit.Get(), Commit.Get());
 				StartCmd(a, &VcFolder::ParseSelectCommit);
 				break;
 			}
 			case VcHg:
 			{
-				a.Printf("log -p -r %s", Commit.Get());
+				a.Printf("log%s -p -r %s", contextLines.Get(), Commit.Get());
 				StartCmd(a, &VcFolder::ParseSelectCommit);
 				break;
 			}
@@ -3656,11 +3663,18 @@ void VcFolder::ListCommit(VcCommit *c)
 {
 	if (!IsFilesCmd)
 	{
+		// Get diff padding option:
+		LVariant diffPad;
+		d->Opts.GetValue(OPT_DiffPad, diffPad);
+		LString contextLines = "";
+		if (!diffPad.IsNull())
+			contextLines.Printf(" -U%i", diffPad.CastInt32());
+
 		LString Args;
 		switch (GetType())
 		{
 			case VcGit:
-				Args.Printf("show %s^..%s", c->GetRev(), c->GetRev());
+				Args.Printf("show%s %s^..%s", contextLines.Get(), c->GetRev(), c->GetRev());
 				IsFilesCmd = StartCmd(Args, &VcFolder::ParseFiles, new ParseParams(c->GetRev()));
 				break;
 			case VcSvn:
@@ -3685,7 +3699,7 @@ void VcFolder::ListCommit(VcCommit *c)
 			}
 			case VcHg:
 			{
-				Args.Printf("diff --change %s", c->GetRev());
+				Args.Printf("diff%s --change %s", contextLines.Get(), c->GetRev());
 				IsFilesCmd = StartCmd(Args, &VcFolder::ParseFiles, new ParseParams(c->GetRev()));
 				break;
 			}

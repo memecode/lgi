@@ -106,6 +106,9 @@
 		<String Ref="155" Cid="155" Define="ID_FILTER" />
 		<String Ref="156" Cid="156" Define="ID_CLEAR_FILTER" en="x" />
 		<String Ref="157" Cid="157" Define="ID_CHECKOUT" en="Checkout" />
+		<String Ref="158" Cid="-1" Define="IDC_STATIC" en="Diff context:" />
+		<String Ref="159" Cid="159" Define="ID_DIFF_PAD" />
+		<String Ref="160" Cid="-1" Define="IDC_STATIC" en="lines" />
 	</string-group>
 	<string-group Name="General">
 		<String Ref="84" Cid="84" Define="IDS_CREATE_NEW_BRANCH" en="Push will create a new remote branch. Is that ok?" />
@@ -137,49 +140,8 @@
 		<String Ref="127" Cid="127" Define="IDS_COPY_FMT" en="Copy &apos;%s&apos;" />
 		<String Ref="128" Cid="128" Define="IDS_ERR_NO_PATH_FMT" en="Can&apos;t find path &apos;%s&apos;." />
 	</string-group>
-	<Dialog pos="8,8,458,210" ref="135">
-		<TableLayout pos="14,14,440,167" ref="139" cols="0.333,0.333,0.333" rows="0.250,0.250,0.250,0.250">
-			<tr>
-				<td addr="0,0" />
-				<td addr="1,0">
-					<StaticText pos="145,14,200,27" ref="143" />
-				</td>
-				<td addr="2,0">
-					<StaticText pos="290,7,352,27" ref="144" />
-				</td>
-			</tr>
-			<tr>
-				<td addr="0,1">
-					<StaticText pos="14,48,69,68" ref="145" />
-				</td>
-				<td addr="1,1">
-					<EditBox Pos="147,42,216,62" ref="147" />
-				</td>
-				<td addr="2,1">
-					<EditBox Pos="287,42,363,62" ref="148" />
-				</td>
-			</tr>
-			<tr>
-				<td addr="0,2">
-					<StaticText pos="7,81,90,101" ref="146" />
-				</td>
-				<td addr="1,2">
-					<EditBox Pos="147,77,216,97" ref="149" />
-				</td>
-				<td addr="2,2">
-					<EditBox Pos="287,77,363,97" ref="150" />
-				</td>
-			</tr>
-			<tr>
-				<td addr="0,3" colspan="3" align="Max">
-					<Button Pos="252,112,307,132" image="" toggle="0" ref="151" />
-					<Button Pos="322,112,391,132" image="" toggle="0" ref="152" />
-				</td>
-			</tr>
-		</TableLayout>
-	</Dialog>
 	<Dialog pos="8,8,410,217" ref="93">
-		<TableLayout pos="7,7,391,181" ref="94" Style="margin: 1em;" cols="0.333,0.333,0.333" rows="0.143,0.143,0.143,0.143,0.143,0.143,0.143">
+		<TableLayout pos="7,7,391,181" ref="94" cols="0.333,0.333,0.333" rows="0.143,0.143,0.143,0.143,0.143,0.143,0.143">
 			<tr>
 				<td addr="0,0">
 					<StaticText pos="0,0,76,20" ref="109" />
@@ -339,78 +301,89 @@
 			</tr>
 		</TableLayout>
 	</Dialog>
-	<Dialog pos="7,7,477,276" ref="22">
-		<TableLayout pos="14,7,468,244" ref="23" cols="0.179,0.515,0.153,0.153" rows="0.167,0.167,0.167,0.167,0.167,0.167">
+	<Dialog pos="7,7,505,343" ref="22">
+		<TableLayout pos="14,7,461,307" ref="23" cols="0.222,0.472,0.153,0.153" rows="0.143,0.143,0.143,0.143,0.143,0.143,0.143">
 			<tr>
 				<td addr="0,0" />
 				<td addr="1,0">
-					<StaticText pos="91,7,167,20" ref="78" />
+					<StaticText pos="108,7,184,20" ref="78" />
 				</td>
 				<td addr="2,0" />
 				<td addr="3,0">
-					<StaticText pos="385,7,433,27" ref="77" />
+					<StaticText pos="378,7,426,27" ref="77" />
 				</td>
 			</tr>
 			<tr>
 				<td addr="0,1">
-					<StaticText pos="14,43,76,63" ref="24" />
+					<StaticText pos="14,47,76,67" ref="24" />
 				</td>
 				<td addr="1,1">
-					<EditBox Pos="84,42,286,62" ref="25" />
+					<EditBox Pos="96,46,286,66" ref="25" />
 				</td>
 				<td addr="2,1">
-					<Button Pos="327,43,347,63" toggle="0" ref="26" />
+					<Button Pos="321,47,341,67" toggle="0" ref="26" />
 				</td>
 				<td addr="3,1" style="width:100px;">
-					<EditBox Pos="385,42,419,62" ref="79" />
+					<EditBox Pos="378,46,412,66" ref="79" />
 				</td>
 			</tr>
 			<tr>
 				<td addr="0,2">
-					<StaticText pos="14,87,76,100" ref="27" />
+					<StaticText pos="14,95,76,108" ref="27" />
 				</td>
 				<td addr="1,2">
-					<EditBox Pos="84,84,286,104" ref="28" />
+					<EditBox Pos="96,90,286,110" ref="28" />
 				</td>
 				<td addr="2,2">
-					<Button Pos="327,80,347,100" toggle="0" ref="29" />
+					<Button Pos="321,88,341,108" toggle="0" ref="29" />
 				</td>
 				<td addr="3,2" style="width:100px;">
-					<EditBox Pos="385,77,419,97" ref="80" />
+					<EditBox Pos="378,85,412,105" ref="80" />
 				</td>
 			</tr>
 			<tr>
 				<td addr="0,3">
-					<StaticText pos="14,124,76,137" ref="30" />
+					<StaticText pos="14,136,76,149" ref="30" />
 				</td>
 				<td addr="1,3">
-					<EditBox Pos="84,119,286,139" ref="32" />
+					<EditBox Pos="96,131,286,151" ref="32" />
 				</td>
 				<td addr="2,3">
-					<Button Pos="327,117,347,137" toggle="0" ref="36" />
+					<Button Pos="321,129,341,149" toggle="0" ref="36" />
 				</td>
 				<td addr="3,3" style="width:100px;">
-					<EditBox Pos="385,119,412,139" ref="81" />
+					<EditBox Pos="378,131,405,151" ref="81" />
 				</td>
 			</tr>
 			<tr>
 				<td addr="0,4">
-					<StaticText pos="14,160,69,173" ref="31" />
+					<StaticText pos="14,176,69,189" ref="31" />
 				</td>
 				<td addr="1,4">
-					<EditBox Pos="84,154,286,174" ref="33" />
+					<EditBox Pos="96,170,286,190" ref="33" />
 				</td>
 				<td addr="2,4">
-					<Button Pos="327,154,347,174" toggle="0" ref="37" />
+					<Button Pos="321,170,341,190" toggle="0" ref="37" />
 				</td>
 				<td addr="3,4" style="width:100px;">
-					<EditBox Pos="385,154,412,174" ref="82" />
+					<EditBox Pos="378,170,405,190" ref="82" />
 				</td>
 			</tr>
 			<tr>
-				<td addr="0,5" colspan="4" align="Max">
-					<Button Pos="252,189,314,216" image="" toggle="0" ref="34" />
-					<Button Pos="329,189,391,216" image="" toggle="0" ref="35" />
+				<td addr="0,5">
+					<StaticText pos="7,210,69,223" ref="158" />
+				</td>
+				<td addr="1,5">
+					<EditBox Pos="102,213,234,233" ref="159" />
+				</td>
+				<td addr="2,5" colspan="2">
+					<StaticText pos="314,213,369,233" ref="160" />
+				</td>
+			</tr>
+			<tr>
+				<td addr="0,6" colspan="4" align="Max">
+					<Button Pos="252,250,314,277" image="" toggle="0" ref="34" />
+					<Button Pos="329,250,391,277" image="" toggle="0" ref="35" />
 				</td>
 			</tr>
 		</TableLayout>
@@ -487,8 +460,49 @@
 			</tr>
 		</TableLayout>
 	</Dialog>
+	<Dialog pos="8,8,458,210" ref="135">
+		<TableLayout pos="14,14,440,167" ref="139" cols="0.333,0.333,0.333" rows="0.250,0.250,0.250,0.250">
+			<tr>
+				<td addr="0,0" />
+				<td addr="1,0">
+					<StaticText pos="145,14,200,27" ref="143" />
+				</td>
+				<td addr="2,0">
+					<StaticText pos="290,7,352,27" ref="144" />
+				</td>
+			</tr>
+			<tr>
+				<td addr="0,1">
+					<StaticText pos="14,48,69,68" ref="145" />
+				</td>
+				<td addr="1,1">
+					<EditBox Pos="147,42,216,62" ref="147" />
+				</td>
+				<td addr="2,1">
+					<EditBox Pos="287,42,363,62" ref="148" />
+				</td>
+			</tr>
+			<tr>
+				<td addr="0,2">
+					<StaticText pos="7,81,90,101" ref="146" />
+				</td>
+				<td addr="1,2">
+					<EditBox Pos="147,77,216,97" ref="149" />
+				</td>
+				<td addr="2,2">
+					<EditBox Pos="287,77,363,97" ref="150" />
+				</td>
+			</tr>
+			<tr>
+				<td addr="0,3" colspan="3" align="Max">
+					<Button Pos="252,112,307,132" image="" toggle="0" ref="151" />
+					<Button Pos="322,112,391,132" image="" toggle="0" ref="152" />
+				</td>
+			</tr>
+		</TableLayout>
+	</Dialog>
 	<Dialog pos="7,7,998,136" ref="1">
-		<TableLayout pos="7,7,972,97" ref="2" Style="padding-top: 3px;" CellStyle="padding-right: 1em;" cols="0.114,0.118,0.110,0.075,0.056,0.186,0.114,0.114,0.114" rows="1.000">
+		<TableLayout pos="7,7,972,97" ref="2" cols="0.114,0.118,0.110,0.075,0.056,0.186,0.114,0.114,0.114" rows="1.000">
 			<tr>
 				<td addr="0,0" valign="Center" style="padding-left: 4px;&#10;padding-right: 1em;">
 					<Button Pos="7,21,83,48" image="" toggle="0" ref="18" />

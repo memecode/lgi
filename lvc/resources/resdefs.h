@@ -87,6 +87,7 @@
 #define ID_FILTER								155
 #define ID_CLEAR_FILTER							156
 #define ID_CHECKOUT								157
+#define ID_DIFF_PAD								159
 #define ID_TABLE								500
 #define IDC_COMMIT								501
 #define ID_PULL									502
