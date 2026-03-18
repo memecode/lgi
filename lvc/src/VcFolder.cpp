@@ -668,6 +668,20 @@ void VcFolder::GetRemoteUrl(ParseParams::TCallback Callback)
 	}
 }
 
+LString VcFolder::DiffContextOption()
+{
+	LString opt = "";
+	
+	LVariant diffPad;
+	if (d->Opts.GetValue(OPT_DiffPad, diffPad) &&
+		!diffPad.IsNull())
+	{
+		opt.Printf(" -U%i", diffPad.CastInt32());
+	}
+	
+	return opt;
+}
+
 void VcFolder::SelectCommit(LWindow *Parent, LString Commit, LString Path)
 {
 	bool requireFullMatch = true;
@@ -698,26 +712,19 @@ void VcFolder::SelectCommit(LWindow *Parent, LString Commit, LString Path)
 		// found. In which case we should go get just that commit and add it:
 		d->Files->Empty();
 
-		// Get diff padding option:
-		LVariant diffPad;
-		d->Opts.GetValue(OPT_DiffPad, diffPad);
-		LString contextLines = "";
-		if (!diffPad.IsNull())
-			contextLines.Printf(" -U%i", diffPad.CastInt32());
-
 		// Diff just that ref:
 		LString a;
 		switch (GetType())
 		{
 			case VcGit:
 			{
-				a.Printf("diff%s %s~ %s", contextLines.Get(), Commit.Get(), Commit.Get());
+				a.Printf("diff%s %s~ %s", DiffContextOption().Get(), Commit.Get(), Commit.Get());
 				StartCmd(a, &VcFolder::ParseSelectCommit);
 				break;
 			}
 			case VcHg:
 			{
-				a.Printf("log%s -p -r %s", contextLines.Get(), Commit.Get());
+				a.Printf("log%s -p -r %s", DiffContextOption().Get(), Commit.Get());
 				StartCmd(a, &VcFolder::ParseSelectCommit);
 				break;
 			}
@@ -3663,18 +3670,11 @@ void VcFolder::ListCommit(VcCommit *c)
 {
 	if (!IsFilesCmd)
 	{
-		// Get diff padding option:
-		LVariant diffPad;
-		d->Opts.GetValue(OPT_DiffPad, diffPad);
-		LString contextLines = "";
-		if (!diffPad.IsNull())
-			contextLines.Printf(" -U%i", diffPad.CastInt32());
-
 		LString Args;
 		switch (GetType())
 		{
 			case VcGit:
-				Args.Printf("show%s %s^..%s", contextLines.Get(), c->GetRev(), c->GetRev());
+				Args.Printf("show%s %s^..%s", DiffContextOption().Get(), c->GetRev(), c->GetRev());
 				IsFilesCmd = StartCmd(Args, &VcFolder::ParseFiles, new ParseParams(c->GetRev()));
 				break;
 			case VcSvn:
@@ -3699,7 +3699,7 @@ void VcFolder::ListCommit(VcCommit *c)
 			}
 			case VcHg:
 			{
-				Args.Printf("diff%s --change %s", contextLines.Get(), c->GetRev());
+				Args.Printf("diff%s --change %s", DiffContextOption().Get(), c->GetRev());
 				IsFilesCmd = StartCmd(Args, &VcFolder::ParseFiles, new ParseParams(c->GetRev()));
 				break;
 			}
@@ -4190,12 +4190,12 @@ void VcFolder::ListWorkingFolder()
 			Arg = "status";
 			break;
 		case VcGit:
-			Arg = "status -vv";
+			Arg.Printf("status -vv");
 			if (Untracked)
 				Arg += " -u";
 			break;
 		case VcHg:
-			Arg = "status -mard";
+			Arg.Printf("status -mard");
 			break;
 		default:
 			return;

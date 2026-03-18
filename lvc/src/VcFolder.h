@@ -300,6 +300,7 @@ protected:
 	void CurrentRev(std::function<void(LString)> Callback);
 	LColour BranchColour(const char *Name);
 	void UpdateBranchUi();
+	LString DiffContextOption();
 
 	bool ParseDiffs(LString s, LString Rev, bool IsWorking);
 	

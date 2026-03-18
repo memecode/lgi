@@ -314,8 +314,8 @@
 				</td>
 			</tr>
 			<tr>
-				<td addr="0,1">
-					<StaticText pos="14,47,76,67" ref="24" />
+				<td addr="0,1" valign="Center">
+					<StaticText pos="14,49,76,62" ref="24" />
 				</td>
 				<td addr="1,1">
 					<EditBox Pos="96,46,286,66" ref="25" />
@@ -328,7 +328,7 @@
 				</td>
 			</tr>
 			<tr>
-				<td addr="0,2">
+				<td addr="0,2" valign="Center">
 					<StaticText pos="14,95,76,108" ref="27" />
 				</td>
 				<td addr="1,2">
@@ -342,7 +342,7 @@
 				</td>
 			</tr>
 			<tr>
-				<td addr="0,3">
+				<td addr="0,3" valign="Center">
 					<StaticText pos="14,136,76,149" ref="30" />
 				</td>
 				<td addr="1,3">
@@ -356,7 +356,7 @@
 				</td>
 			</tr>
 			<tr>
-				<td addr="0,4">
+				<td addr="0,4" valign="Center">
 					<StaticText pos="14,176,69,189" ref="31" />
 				</td>
 				<td addr="1,4">
@@ -370,13 +370,13 @@
 				</td>
 			</tr>
 			<tr>
-				<td addr="0,5">
+				<td addr="0,5" valign="Center">
 					<StaticText pos="7,210,69,223" ref="158" />
 				</td>
 				<td addr="1,5">
 					<EditBox Pos="102,213,234,233" ref="159" />
 				</td>
-				<td addr="2,5" colspan="2">
+				<td addr="2,5" colspan="2" valign="Center">
 					<StaticText pos="314,213,369,233" ref="160" />
 				</td>
 			</tr>
