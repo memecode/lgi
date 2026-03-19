@@ -81,7 +81,7 @@ public:
 	int Compare(LListItem *To, ssize_t Field);
 	void CopyText();
 	void PasteText();
-	char *GetDefine() { return Define; }
+	const char *GetDefine() { return Define; }
 	void SetDefine(const char *s);
 	
 	// Item
@@ -141,7 +141,7 @@ public:
 	ResString *FindRef(int Ref);
 	int FindId(int Id, List<ResString*> &Strs);
 	int UniqueRef();
-	int UniqueId(char *Define = 0);
+	int UniqueId(const char *Define = nullptr);
 	int OnCommand(int Cmd, int Event, OsView hWnd);
 	void SetLanguages();
 	int GetLanguages() { return (int)Lang.Length(); }

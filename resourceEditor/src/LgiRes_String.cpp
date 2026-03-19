@@ -1278,7 +1278,7 @@ int ResStringGroup::UniqueRef()
 	return n + 1;
 }
 
-int ResStringGroup::UniqueId(char *Define)
+int ResStringGroup::UniqueId(const char *Define)
 {
 	int n = 1;
 

@@ -777,7 +777,7 @@ public:
 	bool ListObjects(List<Resource> &Lst);
 	int GetUniqueStrRef(int Start = 1);
 	int GetUniqueCtrlId();
-	void FindStrings(List<ResString> &Strs, char *Define = 0, int *CtrlId = 0);
+	void FindStrings(List<ResString> &Strs, const char *Define = nullptr, int *CtrlId = nullptr);
 	ResString *GetStrFromRef(int Ref);
 	ResStringGroup *GetDialogSymbols();
 

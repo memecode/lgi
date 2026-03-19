@@ -654,7 +654,6 @@ bool LOAuth2::Params::CheckRequirement(const char *req)
 			LStringPipe out;
 			if (sub.Communicate(&out))
 				return false;
-			return true;
 		}
 
 		{

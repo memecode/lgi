@@ -789,8 +789,7 @@ void CtrlTable::EnumCtrls(List<ResDialogCtrl> &Ctrls)
 
 bool CtrlTable::GetVariant(const char *Name, LVariant &Value, const char *Array)
 {
-	LDomProperty p = LStringToDomProp(Name);
-	switch (p)
+	switch (LStringToDomProp(Name))
 	{
 		case TableLayoutCols:
 		{
@@ -821,6 +820,12 @@ bool CtrlTable::GetVariant(const char *Name, LVariant &Value, const char *Array)
 				return false;
 
 			Value = d->GetCellAt((int)Coords[0].Int(), (int)Coords[1].Int());
+			break;
+		}
+		case ObjStyle:
+		{
+			if (CssStyle)
+				Value = CssStyle;
 			break;
 		}
 		default:

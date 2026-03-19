@@ -530,6 +530,7 @@ bool ResDialogCtrl::Serialize(FieldTree &Fields)
 	Fields.Serialize(this, VAL_Enabled, e, true);
 	Fields.Serialize(this, VAL_Class, CssClass);
 	Fields.Serialize(this, VAL_Style, CssStyle);
+	LgiTrace("%s:%i - %s style='%s'\n", _FL, GetStr()->GetDefine(), CssStyle.Get());
 
 	if (Fields.GetMode() == FieldTree::UiToObj ||
 		Fields.GetMode() == FieldTree::StoreToObj)
@@ -3798,7 +3799,8 @@ void ResDialog::CleanSymbols()
 bool ResDialog::Write(LXmlTag *t, SerialiseContext &Ctx)
 {
 	bool Status = false;
-	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children[0]);
+	
+	auto Ctrl = dynamic_cast<ResDialogCtrl*>(Children[0]);
 	if (Ctrl)
 	{
 		// duplicates symbols should have been removed before the 
