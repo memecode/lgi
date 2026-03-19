@@ -11,7 +11,7 @@
 
 #define DEBUG_COMBOBOX	1365
 
-LRect LCombo::Pad(8, 4, 24, 4);
+LRect LCombo::Pad(4, 4, 4, 4);
 
 class LComboPrivate
 {
@@ -473,7 +473,7 @@ bool LCombo::OnLayout(LViewLayoutInfo &Inf)
 		}
 		Inf.Width.Min =
 			Inf.Width.Max =
-			mx + 36;
+			mx + LCombo::Pad.x1 + LCombo::Pad.x2;
 	}
 	else if (!Inf.Height.Max)
 	{
