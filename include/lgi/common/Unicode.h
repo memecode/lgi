@@ -49,235 +49,32 @@ typedef unsigned int uint32_t;
 #define IsUtf8_Trail(c)		( ((uint8_t)(c) & 0xc0) == 0x80 )
 
 // Stand-alone functions
+//
+// 2026-03-22:
+// These used to be 'inline' for speed, but at least with gcc 13.3.0 when building in Release mode
+// it would generate incorrect code, whereby the 'i' input parameter wouldn't NOT be modified, shifting
+// forward across the string. This breaks the expectations of the calling code. So I've made them
+// non-inline for the time being so that things don't break. I'd rather have slower code thats reliable
+// than code that gets stuck in infinite loops.
 
 /// Convert a single utf-8 char to utf-32 or returns -1 on error.
-inline int32 LgiUtf8To32(uint8_t *&i, ssize_t &Len)
-{
-	int32 Out = 0;
-
-	#define InvalidUtf()		{ Len--; i++; return -1; }
-
-	if (Len > 0)
-	{
-		if (!*i)
-		{
-			Len = 0;
-			return 0;
-		}
-
-		if (IsUtf8_1Byte(*i))
-		{
-			// 1 byte UTF-8
-			Len--;
-			return *i++;
-		}
-		else if (IsUtf8_2Byte(*i))
-		{
-			// 2 byte UTF-8
-			if (Len > 1)
-			{
-				Out = ((int)(*i++ & 0x1f)) << 6;
-				Len--;
-
-				if (IsUtf8_Trail(*i))
-				{
-					Out |= *i++ & 0x3f;
-					Len--;
-				}
-				else InvalidUtf()
-			}
-		}
-		else if (IsUtf8_3Byte(*i))
-		{
-			// 3 byte UTF-8
-			if (Len > 2)
-			{
-				Out = ((int)(*i++ & 0x0f)) << 12;
-				Len--;
-
-				if (IsUtf8_Trail(*i))
-				{
-					Out |= ((int)(*i++ & 0x3f)) << 6;
-					Len--;
-
-					if (IsUtf8_Trail(*i))
-					{
-						Out |= *i++ & 0x3f;
-						Len--;
-					}
-					else InvalidUtf()
-				}
-				else InvalidUtf()
-			}
-		}
-		else if (IsUtf8_4Byte(*i))
-		{
-			// 4 byte UTF-8
-			if (Len > 3)
-			{
-				Out = ((int)(*i++ & 0x07)) << 18;
-				Len--;
-
-				if (IsUtf8_Trail(*i))
-				{
-					Out |= ((int)(*i++ & 0x3f)) << 12;
-					Len--;
-
-					if (IsUtf8_Trail(*i))
-					{
-						Out |= ((int)(*i++ & 0x3f)) << 6;
-						Len--;
-
-						if (IsUtf8_Trail(*i))
-						{
-							Out |= *i++ & 0x3f;
-							Len--;
-						}
-						else InvalidUtf()
-					}
-					else InvalidUtf()
-				}
-				else InvalidUtf()
-			}
-		}
-		else InvalidUtf()
-	}
-
-	return Out;
-}
+LgiFunc int32 LgiUtf8To32(uint8_t *&i, ssize_t &Len);
 
 /// Convert a single utf-32 char to utf-8
-inline bool LgiUtf32To8(uint32_t u32, uint8_t *&outBuf, ssize_t &outBufSize, bool warn = true)
-{
-	if ((u32 & ~0x7f) == 0)
-	{
-		if (outBufSize > 0)
-		{
-			*outBuf++ = u32;
-			outBufSize--;
-			return true;
-		}
-	}
-	else if ((u32 & ~0x7ff) == 0)
-	{
-		if (outBufSize > 1)
-		{
-			*outBuf++ = 0xc0 | (u32 >> 6);
-			*outBuf++ = 0x80 | (u32 & 0x3f);
-			outBufSize -= 2;
-			return true;
-		}
-	}
-	else if ((u32 & 0xffff0000) == 0)
-	{
-		if (outBufSize > 2)
-		{
-			*outBuf++ = 0xe0 | (u32 >> 12);
-			*outBuf++ = 0x80 | ((u32 & 0x0fc0) >> 6);
-			*outBuf++ = 0x80 | (u32 & 0x3f);
-			outBufSize -= 3;
-			return true;
-		}
-	}
-	else
-	{
-		if (outBufSize > 3)
-		{
-			*outBuf++ = 0xf0 | (u32 >> 18);
-			*outBuf++ = 0x80 | ((u32 & 0x3f000) >> 12);
-			*outBuf++ = 0x80 | ((u32 & 0xfc0) >> 6);
-			*outBuf++ = 0x80 | (u32 & 0x3f);
-			outBufSize -= 4;
-			return true;
-		}
-	}
-
-	if (warn)
-		LAssert(!"Buffer size too small");
-	return false;
-}
+LgiFunc bool LgiUtf32To8(uint32_t u32, uint8_t *&outBuf, ssize_t &outBufSize, bool warn = true);
 
 // Defined for decoding UTF16
 #define IsUtf16_Lead(c)		( ((uint16)(c) & 0xfc00) == 0xD800 )
 #define IsUtf16_Trail(c)	( ((uint16)(c) & 0xfc00) == 0xDc00 )
 
 /// Convert a single utf-16 char to utf-32
-inline uint32_t LgiUtf16To32(const uint16_t *&i, ssize_t &Bytes)
-{
-	if (Bytes > 1)
-	{
-		if (!*i)
-		{
-			Bytes = 0;
-			return 0;
-		}
-
-		int n = *i & 0xfc00;
-		if (n == 0xd800 || n == 0xdc00)
-		{
-			// 2 word UTF
-			if (Bytes > 3)
-			{
-				Bytes -= sizeof(uint16)<<1;
-				int w = (*i & 0x3c0) >> 6;
-				int zy = *i++ & 0x3f;
-				return ((w + 1) << 16) | (zy << 10) | (*i++ & 0x3ff);
-			}
-		}
-
-		// 1 word UTF
-		Bytes -= sizeof(uint16);
-		return *i++;
-	}
-
-	return 0;
-}
+LgiFunc uint32_t LgiUtf16To32(const uint16_t *&i, ssize_t &Bytes);
 
 /// Convert utf-16 char to utf-8
-inline bool LgiUtf16To8(const uint16_t *&in, ssize_t &inBytes, uint8_t *&out, ssize_t &outSize)
-{
-	if (!in || !out || outSize <= 0)
-		return false;
-		
-	if (!*in)
-	{
-		*out = 0;
-		return true;
-	}
-
-	uint32_t u32 = LgiUtf16To32(in, inBytes);
-	return LgiUtf32To8(u32, out, outSize);
-}
+LgiFunc bool LgiUtf16To8(const uint16_t *&in, ssize_t &inBytes, uint8_t *&out, ssize_t &outSize);
 
 /// Convert a single utf-32 char to utf-16
-inline bool LgiUtf32To16(uint32_t c, uint16_t *&i, ssize_t &Len)
-{
-	if (c >= 0x10000)
-	{
-		// 2 word UTF
-		if (Len < 4)
-			return false;
-
-		int w = c - 0x10000;
-		*i++ = 0xd800 + (w >> 10);
-		*i++ = 0xdc00 + (c & 0x3ff);
-		Len -= sizeof(*i) << 1;
-	}
-	else
-	{
-		if (Len < 2)
-			return false;
-		if (c > 0xD7FF && c < 0xE000)
-			return false;
-
-		// 1 word UTF
-		*i++ = c;
-		Len -= sizeof(*i);
-		return true;
-	}
-	
-	return false;
-}
+LgiFunc bool LgiUtf32To16(uint32_t c, uint16_t *&i, ssize_t &Len);
 
 /// Seeks the pointer 'Ptr' to the next utf-8 character
 template<typename T>

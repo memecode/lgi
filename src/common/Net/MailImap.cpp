@@ -514,12 +514,21 @@ char *EncodeImapString(const char *s)
 {
 	LStringPipe p;
 	ssize_t Len = s ? strlen(s) : 0;
-	
+
 	while (s && *s)
 	{
-		int c = LgiUtf8To32((uint8*&)s, Len);
+		auto c = LgiUtf8To32((uint8_t*&)s, Len);
 
 		DoNextChar:
+		if (c == 0)
+		{
+			// This should never happen, but it did occur with gcc 13.3.0 in optimized code
+			// The inline version of LgiUtf8To32 didn't modify the 's' parameter like it should.
+			// Causing c to be 0 and s to still point to the START of the string.
+			printf("%s:%i warning: null char?\n", _FL);
+			break;
+		}
+		
 		if ((c >= ' ' && c < 0x80) ||
 			c == '\n' ||
 			c == '\t' ||
@@ -553,6 +562,7 @@ char *EncodeImapString(const char *s)
 			{
 				Str[i] = (Str[i]>>8) | ((Str[i]&0xff)<<8);
 			}
+			
 			ssize_t BinLen = Str.Length() << 1;
 			ssize_t BaseLen = BufferLen_BinTo64(BinLen);
 			char *Base64 = new char[BaseLen+1];
@@ -565,7 +575,6 @@ char *EncodeImapString(const char *s)
 					Bytes--;
 				}
 				Base64[Bytes] = 0;
-
 				p.Print("&%s-", Base64);
 				DeleteArray(Base64);
 			}
