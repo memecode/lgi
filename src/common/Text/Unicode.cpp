@@ -211,7 +211,7 @@ int32 LgiUtf8To32(uint8_t *&i, ssize_t &Len)
 	return Out;
 }
 
-bool LgiUtf32To8(uint32_t u32, uint8_t *&outBuf, ssize_t &outBufSize, bool warn = true)
+bool LgiUtf32To8(uint32_t u32, uint8_t *&outBuf, ssize_t &outBufSize, bool warn)
 {
 	if ((u32 & ~0x7f) == 0)
 	{
