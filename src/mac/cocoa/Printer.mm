@@ -31,7 +31,7 @@ LPrinter::~LPrinter()
 	DeleteObj(d);
 }
 
-bool LPrinter::Browse(LView *Parent)
+bool LPrinter::Browse(LView *Parent, PageOrientation Po)
 {
 	return false;
 }
@@ -56,20 +56,27 @@ LString LPrinter::GetErrorMsg()
 }
 
 #define ErrCheck(fn) \
-if (e != noErr) \
-{ \
-	d->Err.Printf("%s:%i - %s failed with %i\n", _FL, fn, e); \
-	LgiTrace(d->Err); \
-	goto OnError; \
-}
+	if (e != noErr) \
+	{ \
+		d->Err.Printf("%s:%i - %s failed with %i\n", _FL, fn, e); \
+		LgiTrace(d->Err); \
+		goto OnError; \
+	}
 
-void LPrinter::Print(LPrintEvents *Events,
-					std::function<void(int)> callback,
-					const char *PrintJobName,
-					int MaxPages,
-					LView *Parent)
+void LPrinter::Print(
+		/// The event callback for pagination and printing of pages
+		Context *Events,
+		/// The status callback
+		std::function<void(int)> callback,
+		/// [Optional] The name of the print job
+		const char *PrintJobName,
+		/// [Optional] The maximum number of pages to print
+		int Pages,
+		/// [Optional] The parent window for the printer selection dialog
+		LView *Parent
+		)
 {
-	int Status = LPrintEvents::OnBeginPrintError;
+	int Status = LPrinter::Context::OnBeginPrintError;
 
 	if (!Events)
 	{

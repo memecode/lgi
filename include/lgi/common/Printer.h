@@ -59,19 +59,6 @@ public:
 
 		virtual ~Context() {}
 
-		/*
-		/// Get the number of pages in the document
-		int GetPages();
-
-		/// Get the range of pages to print that was selected by the user
-		bool GetPageRange
-		(
-		/// You'll get pairs of ints, each pair is the start and end page
-		/// number of a range to print. i.e. [5, 10], [14, 16]
-		LArray<int> &p
-		);
-		*/
-
 		virtual PageOrientation GetOrientation()
 		{
 			return PoDefault;
