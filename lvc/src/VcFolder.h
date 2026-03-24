@@ -395,7 +395,7 @@ public:
 	void CountToTip();
 	bool UpdateSubs(); // Clone/checkout any sub-repositories.
 	void LogFilter(const char *Filter);
-	void LogFile(const char *Path);
+	void LogFile(const char *Path, BrowseUi *existingUi);
 	void ClearLog();
 	LString GetFilePart(const char *uri);
 	void FilterCurrentFiles();

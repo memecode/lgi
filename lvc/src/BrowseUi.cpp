@@ -34,6 +34,12 @@ enum Ids {
 	IDM_GOTO_LINE
 };
 
+enum Tabs {
+	TabBlame,
+	TabLog,
+	TabRaw,
+};
+
 struct BrowseUiPriv
 {
 	LList *Blame = NULL;
@@ -266,51 +272,67 @@ BrowseUi::BrowseUi(TMode mode, AppPriv *priv, VcFolder *folder, LString path)
 		MoveToCenter();
 	}
 
-	if (Attach(0))
+	if (!Attach(0))
+		return;
+
+	AddView(d->Tabs = new LTabView(IDC_TABS));
+
+	auto BlameTab = d->Tabs->Append("Blame");
+	BlameTab->Append(d->BlameTbl = new LTableLayout(IDC_BLAME_TABLE));
+
+	if (auto c = d->BlameTbl->GetCell(0, 0))
 	{
-		AddView(d->Tabs = new LTabView(IDC_TABS));
-
-		auto BlameTab = d->Tabs->Append("Blame");
-		BlameTab->Append(d->BlameTbl = new LTableLayout(IDC_BLAME_TABLE));
-
-		auto c = d->BlameTbl->GetCell(0, 0);
 		c->Add(new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Filter:"));
 		c->VerticalAlign(LCss::VerticalMiddle);
-		c = d->BlameTbl->GetCell(1, 0);
+	}
+	if (auto c = d->BlameTbl->GetCell(1, 0))
+	{
 		c->Add(new LEdit(IDC_BLAME_FILTER));
-		c = d->BlameTbl->GetCell(2, 0);
+	}
+	if (auto c = d->BlameTbl->GetCell(2, 0))
+	{
 		c->Add(new LButton(IDC_BLAME_FILTER_CLEAR, 0, 0, -1, -1, "x"));
-		
-		c = d->BlameTbl->GetCell(0, 1, true, 3);
-		c->Add(d->Blame = new LList(IDC_BLAME_LST));
-		d->Blame->AddColumn("Ref", 100);
-		d->Blame->AddColumn("User", 100);
-		d->Blame->AddColumn("Date", 100);
-		d->Blame->AddColumn("Line", 100);
-		d->Blame->AddColumn("Src", 1000);
-		d->Blame->SetPourLargest(true);
+	}
+	
+	if (auto c = d->BlameTbl->GetCell(0, 1, true, 3))
+	{
+		if (c->Add(d->Blame = new LList(IDC_BLAME_LST)))
+		{
+			d->Blame->AddColumn("Ref", 100);
+			d->Blame->AddColumn("User", 100);
+			d->Blame->AddColumn("Date", 100);
+			d->Blame->AddColumn("Line", 100);
+			d->Blame->AddColumn("Src", 1000);
+			d->Blame->SetPourLargest(true);
+		}
+	}
 
-		auto LogTab = d->Tabs->Append("Log");
+	if (auto LogTab = d->Tabs->Append("Log"))
+	{
 		LogTab->Append(d->LogTbl = new LTableLayout(IDC_LOG_TABLE));
-		c = d->LogTbl->GetCell(0, 0);
-		c->Add(new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Filter:"));
-		c->VerticalAlign(LCss::VerticalMiddle);
-		c = d->LogTbl->GetCell(1, 0);
-		c->Add(new LEdit(IDC_LOG_FILTER));
-		c = d->LogTbl->GetCell(2, 0);
-		c->Add(new LButton(IDC_LOG_FILTER_CLEAR, 0, 0, -1, -1, "x"));
+		if (auto c = d->LogTbl->GetCell(0, 0))
+		{
+			c->Add(new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Filter:"));
+			c->VerticalAlign(LCss::VerticalMiddle);
+			c = d->LogTbl->GetCell(1, 0);
+			c->Add(new LEdit(IDC_LOG_FILTER));
+			c = d->LogTbl->GetCell(2, 0);
+			c->Add(new LButton(IDC_LOG_FILTER_CLEAR, 0, 0, -1, -1, "x"));
 
-		c = d->LogTbl->GetCell(0, 1, true, 3);
-		c->Add(d->Log = new LList(IDC_LOG_LST));
-		folder->UpdateColumns(d->Log);
-		d->Log->SetPourLargest(true);
+			c = d->LogTbl->GetCell(0, 1, true, 3);
+			if (c->Add(d->Log = new LList(IDC_LOG_LST)))
+			{
+				folder->UpdateColumns(d->Log);
+				d->Log->SetPourLargest(true);
+			}
+		}
+	}
 
-		auto RawTab = d->Tabs->Append("Raw");
+	if (auto RawTab = d->Tabs->Append("Raw"))
 		RawTab->Append(d->Raw = new LTextLog(IDC_RAW));
 
-		AttachChildren();
-		Visible(true);
-	}
+	AttachChildren();
+	Visible(true);
 }
 
 BrowseUi::~BrowseUi()
@@ -456,6 +478,34 @@ int BrowseUi::OnNotify(LViewI *Ctrl, const LNotification &n)
 			}
 
 			d->Log->UpdateAllItems();
+			break;
+		}
+		case IDC_TABS:
+		{
+			switch (n.Type)
+			{
+				case LNotifyValueChanged:
+				{
+					// tab selected:
+					switch (n.Int[0])
+					{
+						case TabBlame:
+						{
+							// Refresh blame tab:
+							int asd=0;
+							break;
+						}
+						case TabLog:
+						{
+							// Refresh the log tab:
+							d->Folder->LogFile(d->Path, this);
+							break;
+						}
+						default:
+							break;
+					}
+				}
+			}
 			break;
 		}
 	}

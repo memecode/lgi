@@ -1599,7 +1599,7 @@ void VcFolder::LogFilter(const char *Filter)
 	}
 }
 
-void VcFolder::LogFile(const char *uri)
+void VcFolder::LogFile(const char *uri, BrowseUi *existingUi)
 {
 	LString Args;
 	
@@ -1624,9 +1624,12 @@ void VcFolder::LogFile(const char *uri)
 					FileToSelect = Abs;
 			}
 
-			ParseParams *Params = new ParseParams(uri);
-			Args.Printf("log \"%s\"", FileToSelect.Get());
-			IsLogging = StartCmd(Args, &VcFolder::ParseLog, Params, LogNormal);
+			if (auto params = new ParseParams(uri))
+			{
+				params->browseUi = existingUi;
+				Args.Printf("log \"%s\"", FileToSelect.Get());
+				IsLogging = StartCmd(Args, &VcFolder::ParseLog, params, LogNormal);
+			}
 			break;
 		}
 		default:
@@ -1903,8 +1906,9 @@ bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 	}
 	else if (LoggingFile)
 	{
-		if (auto ui = new BrowseUi(BrowseUi::TLog, d, this, Params->Str))
-			ui->ParseLog(BrowseLog, s);
+		auto browseUi = Params->browseUi ? Params->browseUi : new BrowseUi(BrowseUi::TLog, d, this, Params->Str);
+		if (browseUi)
+			browseUi->ParseLog(BrowseLog, s);
 	}
 
 	// LgiTrace("%s:%i - ParseLog: Skip=%i, Error=%i\n", _FL, Skipped, Errors);
@@ -5772,10 +5776,9 @@ void VcLeaf::OnBrowse()
 			if (Dir.IsDir())
 				continue;
 
-			VcFile *f = new VcFile(d, Parent, LString(), true);
-			if (f)
+			if (auto f = new VcFile(d, Parent, LString(), true))
 			{
-				f->SetUri(LString("file://") + full);
+				f->SetUri(full.ToString());
 				f->SetText(Dir.GetName(), COL_FILENAME);
 				Files->Insert(f);
 			}
@@ -5906,33 +5909,34 @@ void VcLeaf::OnMouseClick(LMouse &m)
 	if (m.IsContextMenu())
 	{
 		LSubMenu s;
-		s.AppendItem("Log", IDM_LOG);
-		s.AppendItem("Blame", IDM_BLAME, !Folder);
+		s.AppendItem(LLoadString(IDS_LOG), IDM_LOG);
+		s.AppendItem(LLoadString(IDS_BLAME), IDM_BLAME, !Folder);
 		s.AppendSeparator();
-		s.AppendItem("Browse To", IDM_BROWSE_FOLDER);
-		s.AppendItem("Terminal At", IDM_TERMINAL);
+		s.AppendItem(LLoadString(IDS_BROWSE_TO), IDM_BROWSE_FOLDER);
+		s.AppendItem(LLoadString(ID_TERMINAL_AT), IDM_TERMINAL);
 		
+		auto full = Full();
 		int Cmd = s.Float(GetTree(), m - _ScrollPos());
 		switch (Cmd)
 		{
 			case IDM_LOG:
 			{
-				Parent->LogFile(Full());
+				Parent->LogFile(full, nullptr);
 				break;
 			}
 			case IDM_BLAME:
 			{
-				Parent->Blame(Full());
+				Parent->Blame(full);
 				break;
 			}
 			case IDM_BROWSE_FOLDER:
 			{
-				LBrowseToFile(Full());
+				LBrowseToFile(full);
 				break;
 			}
 			case IDM_TERMINAL:
 			{
-				TerminalAt(Full());
+				TerminalAt(full);
 				break;
 			}
 		}

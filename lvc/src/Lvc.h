@@ -164,6 +164,7 @@ struct ParseParams
 	LString Str;
 	LString AltInitPath;
 	class VcLeaf *Leaf = nullptr;
+	class BrowseUi *browseUi = nullptr;
 	bool IsWorking = false;
 
 	// This callback is called AFTER the parsing function... you

@@ -139,6 +139,7 @@
 		<String Ref="126" Cid="126" Define="IDS_AUTO" en="Auto" />
 		<String Ref="127" Cid="127" Define="IDS_COPY_FMT" en="Copy &apos;%s&apos;" />
 		<String Ref="128" Cid="128" Define="IDS_ERR_NO_PATH_FMT" en="Can&apos;t find path &apos;%s&apos;." />
+		<String Ref="161" Cid="161" Define="ID_TERMINAL_AT" en="Terminal At" />
 	</string-group>
 	<Dialog pos="8,8,410,217" ref="93">
 		<TableLayout pos="7,7,391,181" ref="94" cols="0.333,0.333,0.333" rows="0.143,0.143,0.143,0.143,0.143,0.143,0.143">

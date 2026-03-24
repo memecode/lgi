@@ -71,6 +71,11 @@ LString VcFile::GetUri()
 
 void VcFile::SetUri(LString uri)
 {
+	if (uri.Equals("ile://"))
+	{
+		int asd=0;
+	}
+	printf("VcFile::SetUri '%s'\n", uri.Get());
 	Uri.Set(uri);
 }
 
@@ -335,7 +340,7 @@ void VcFile::OnMouseClick(LMouse &m)
 			}
 			case IDM_LOG_FILE:
 			{
-				Owner->LogFile(Uris[0]);
+				Owner->LogFile(Uris[0], nullptr);
 				break;
 			}
 			case IDM_COPY_LEAF:
