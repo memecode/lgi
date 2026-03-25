@@ -10,7 +10,7 @@ CC = gcc
 CPP = g++
 Target = lgi-gtk3
 ifndef Build
-	Build = Release
+	Build = Debug
 endif
 MakeDir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 BuildDir = $(Build)
@@ -34,13 +34,13 @@ ifeq ($(Build),Debug)
 		`pkg-config --libs gtk+-3.0` \
 		`pkg-config --libs ayatana-appindicator3-0.1`
 	Inc =  \
+		-I./include \
+		`pkg-config --cflags gstreamer-1.0` \
+		-I../deps/build-x64-debug/include \
 		-I./include/lgi/linux/Gtk \
 		-I./include/lgi/linux \
 		-I./private/common \
 		-I./private/linux \
-		-I../deps/build-x64-debug/include \
-		-I./include \
-		`pkg-config --cflags gstreamer-1.0` \
 		`pkg-config --cflags ayatana-appindicator3-0.1` \
 		`pkg-config --cflags gtk+-3.0`
 else
@@ -58,29 +58,26 @@ else
 		`pkg-config --libs gtk+-3.0` \
 		`pkg-config --libs ayatana-appindicator3-0.1`
 	Inc =  \
-		-I./include/lgi/linux/Gtk \
 		`pkg-config --cflags gtk+-3.0` \
-		`pkg-config --cflags gstreamer-1.0` \
-		-I./include \
 		-I./private/common \
-		-I./private/linux \
 		`pkg-config --cflags ayatana-appindicator3-0.1` \
+		-I./include/lgi/linux/Gtk \
+		`pkg-config --cflags gstreamer-1.0` \
 		-I../deps/build-x64-release/include \
-		-I./include/lgi/linux
+		-I./include/lgi/linux \
+		-I./include \
+		-I./private/linux
 endif
 
 # Dependencies
-Source =	src/linux/General/File.cpp \
-			src/common/General/TimeZone.cpp \
+Source =	src/common/Widgets/StatusBar.cpp \
 			src/linux/Lgi/General.cpp \
+			src/linux/General/File.cpp \
 			src/common/Lgi/DragAndDropCommon.cpp \
-			src/linux/Lgi/Window.cpp \
-			src/linux/Lgi/App.cpp \
-			src/linux/Lgi/View.cpp \
-			src/common/General/DateTime.cpp \
-			src/linux/General/ShowFileProp_Linux.cpp \
-			src/common/General/ExeCheck.cpp \
 			src/linux/Lgi/DragAndDrop.cpp \
+			src/linux/Lgi/View.cpp \
+			src/common/General/TimeZone.cpp \
+			src/linux/General/ShowFileProp_Linux.cpp \
 			src/common/General/Containers.cpp \
 			src/common/General/Properties.cpp \
 			src/common/General/FileCommon.cpp \
@@ -113,6 +110,10 @@ Source =	src/linux/General/File.cpp \
 			src/common/Lgi/Object.cpp \
 			src/common/Lgi/ToolTip.cpp \
 			src/common/Lgi/TrayIcon.cpp \
+			src/linux/Lgi/App.cpp \
+			src/linux/Lgi/Window.cpp \
+			src/common/General/DateTime.cpp \
+			src/common/General/ExeCheck.cpp \
 			src/common/Lgi/FileSelect.cpp \
 			src/common/Lgi/Alert.cpp \
 			src/common/Lgi/FindReplace.cpp \
@@ -180,7 +181,6 @@ Source =	src/linux/General/File.cpp \
 			src/common/Widgets/TableLayout.cpp \
 			src/common/Widgets/ScrollBar.cpp \
 			src/common/Widgets/TabView.cpp \
-			src/common/Widgets/StatusBar.cpp \
 			src/common/Text/TextView3.cpp \
 			src/common/Widgets/TextLabel.cpp \
 			src/common/Text/TextView4.cpp \

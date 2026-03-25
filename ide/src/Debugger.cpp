@@ -1300,6 +1300,8 @@ public:
 				Cmd("handle SIGPIPE nostop", false);
 				Cmd("set pagination 0", false);
 				Cmd("set print thread-events off", false);
+				Cmd("set print frame-arguments none", false);
+				
 				if (PrettyPrintPy)
 					Cmd(LString::Fmt("python exec(open(\"%s\").read())", PrettyPrintPy.Get()), false);
 			}

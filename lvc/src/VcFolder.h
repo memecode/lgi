@@ -8,6 +8,11 @@
 
 #include "SshConnection.h"
 
+#define DEBUG_SLOG				0
+#if DEBUG_SLOG
+#include "lgi/common/StructuredLog.h"
+#endif
+
 class VcLeaf;
 
 enum LoggingType
@@ -57,6 +62,10 @@ class ReaderThread : public LThread
 	LStream *Out;
 	LAutoPtr<LSubProcess> Process;
 	int FilterCount;
+
+	#if DEBUG_SLOG
+	LStructuredLog sLog;
+	#endif
 
 	int OnLine(char *s, ssize_t len);
 	bool OnData(char *Buf, ssize_t &r);
@@ -347,7 +356,7 @@ public:
 	LString LocalPath();
 	const char *NoPipeOpt();
 	LUri GetUri();
-	VcLeaf *FindLeaf(const char *Path, bool OpenTree);
+	VcLeaf *FindLeaf(LString Path, bool OpenTree);
 	void DefaultFields();
 	void UpdateColumns(LList *lst = NULL);
 	int IndexOfCommitField(CommitField fld);
@@ -404,6 +413,7 @@ public:
 	void Checkout(const char *Rev, bool isBranch);
 	void Delete(const char *Path, bool KeepLocal = true);
 	void RewriteAuthor(RewriteInfo info);
+	void GotoItem(LString path);
 
 	enum TColourType {
 		TColNone,
@@ -440,8 +450,6 @@ class VcLeaf : public LTreeItem
 	LString Leaf;
 	LTreeItem *Tmp = NULL;
 
-	void DoExpand();
-
 public:
 	LArray<VcCommit*> Log;
 
@@ -449,7 +457,8 @@ public:
 	~VcLeaf();
 
 	LString Full();
-	VcLeaf *FindLeaf(const char *Path, bool OpenTree, int depth = 0);
+	void DoExpand();
+	VcLeaf *FindLeaf(LString Path, bool OpenTree, int depth = 0);
 	void OnBrowse();
 	void AfterBrowse();
 	void OnExpand(bool b);

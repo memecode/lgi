@@ -32,13 +32,13 @@ ifeq ($(Build),Debug)
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I../../../../../../usr/include/gstreamer-1.0 \
-		-I../include \
-		-I./src \
 		-I../include/lgi/linux/Gtk \
-		-I../include/lgi/linux \
-		-I./resources \
+		-I./src \
 		-I../../../../../../usr/include/libssh \
+		-I../include/lgi/linux \
+		-I../include \
+		-I../../../../../../usr/include/gstreamer-1.0 \
+		-I./resources \
 		`pkg-config --cflags gtk+-3.0`
 else
 	CFlags += -s -Os
@@ -53,33 +53,33 @@ else
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		`pkg-config --cflags gtk+-3.0` \
-		-I./src \
-		-I../include \
-		-I../../../../../../usr/include/libssh \
 		-I../include/lgi/linux \
+		-I./src \
 		-I../../../../../../usr/include/gstreamer-1.0 \
 		-I../include/lgi/linux/Gtk \
-		-I./resources
+		`pkg-config --cflags gtk+-3.0` \
+		-I../include \
+		-I./resources \
+		-I../../../../../../usr/include/libssh
 endif
 
 # Dependencies
-Source =	src/DropDownBtn.cpp \
-			../src/common/Text/XmlTreeUi.cpp \
-			../src/common/Widgets/ControlTree.cpp \
-			src/VcFile.cpp \
-			../src/common/Lgi/LgiMain.cpp \
-			../src/common/Net/Http.cpp \
-			src/Main.cpp \
+Source =	../src/common/Net/Http.cpp \
 			src/SshConnection.cpp \
+			src/BrowseUi.cpp \
 			../src/common/Net/OpenSSLSocket.cpp \
 			../src/common/Lgi/StructuredLog.cpp \
 			../src/common/Text/RemoveAnsi.cpp \
-			src/PatchViewer.cpp \
+			../src/common/Widgets/ControlTree.cpp \
 			src/VcFolder.cpp \
 			../src/common/Net/Ssh.cpp \
+			src/PatchViewer.cpp \
 			src/VcCommit.cpp \
-			src/BrowseUi.cpp
+			src/Main.cpp \
+			src/VcFile.cpp \
+			../src/common/Text/XmlTreeUi.cpp \
+			src/DropDownBtn.cpp \
+			../src/common/Lgi/LgiMain.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -108,13 +108,13 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 		$(Target) $(Objects) $(Libs)
 	@echo Done.
 
-../$(BuildDir)/liblgi-gtk3$(Tag).so : ../../deps/build-x64-debug/include/iconv.h \
-	../../deps/build-x64-debug/include/jconfig.h \
-	../../deps/build-x64-debug/include/jerror.h \
-	../../deps/build-x64-debug/include/jmorecfg.h \
-	../../deps/build-x64-debug/include/jpeglib.h \
-	../../deps/build-x64-debug/include/lunasvg/lunasvg.h \
-	../../deps/build-x64-debug/include/png.h \
+../$(BuildDir)/liblgi-gtk3$(Tag).so : ../../deps/build-x64-release/include/iconv.h \
+	../../deps/build-x64-release/include/jconfig.h \
+	../../deps/build-x64-release/include/jerror.h \
+	../../deps/build-x64-release/include/jmorecfg.h \
+	../../deps/build-x64-release/include/jpeglib.h \
+	../../deps/build-x64-release/include/lunasvg/lunasvg.h \
+	../../deps/build-x64-release/include/png.h \
 	../include/lgi/common/App.h \
 	../include/lgi/common/Array.h \
 	../include/lgi/common/AutoPtr.h \

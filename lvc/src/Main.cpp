@@ -1304,34 +1304,58 @@ public:
 			Opts.CreateTag(OPT_Folders);
 			f = Opts.LockTag(OPT_Folders, _FL);
 		}
-		if (f)
-		{
-			new GetVcsVersions(this);
+		if (!f)
+			return;
 
-			for (auto c: f->Children)
+		new GetVcsVersions(this);
+
+		for (auto c: f->Children)
+		{
+			if (c->IsTag(OPT_Folder))
 			{
-				if (c->IsTag(OPT_Folder))
+				auto f = new VcFolder(this, c);
+				Tree->Insert(f);
+			}
+		}
+		Opts.Unlock();
+		
+		LRect Large(0, 0, 2000, 200);
+		Tree->SetPos(Large);
+		Tree->ResizeColumnsToContent();
+		
+		LItemColumn *col;
+		int i = 0, px = 0;
+		while ((col = Tree->ColumnAt(i++)))
+		{
+			px += col->Width();
+		}
+		
+		FoldersBox->Value(MAX(320, px + 20));
+        
+        // new TestThread();
+
+		// Process command line options
+		LString selectFolder;
+		if (LAppInst->GetOption("select", selectFolder))
+		{
+			for (auto item = Tree->GetChild(); item; item = item->GetNext())
+			{
+				if (auto f = dynamic_cast<VcFolder*>(item))
 				{
-					auto f = new VcFolder(this, c);
-					Tree->Insert(f);
+					auto local = f->GetUri().sPath.RStrip("/");
+					printf("paths: '%s' - '%s'\n", local.Get(), selectFolder.Get());
+					if (local == selectFolder)
+					{
+						f->Select(true);
+						
+						LString gotoItem;
+						if (LAppInst->GetOption("goto", gotoItem))
+						{
+							f->GotoItem(gotoItem);
+						}
+					}
 				}
 			}
-			Opts.Unlock();
-			
-			LRect Large(0, 0, 2000, 200);
-			Tree->SetPos(Large);
-			Tree->ResizeColumnsToContent();
-			
-			LItemColumn *c;
-			int i = 0, px = 0;
-			while ((c = Tree->ColumnAt(i++)))
-			{
-				px += c->Width();
-			}
-			
-			FoldersBox->Value(MAX(320, px + 20));
-            
-            // new TestThread();
 		}
 	}
 	

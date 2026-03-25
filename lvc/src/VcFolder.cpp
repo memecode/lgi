@@ -119,7 +119,11 @@ int ToolVersion[VcMax] = {0};
 	#define LOG_READER(...)
 #endif
 
-ReaderThread::ReaderThread(VersionCtrl vcs, LAutoPtr<LSubProcess> p, LStream *out) : LThread("ReaderThread")
+ReaderThread::ReaderThread(VersionCtrl vcs, LAutoPtr<LSubProcess> p, LStream *out)
+	: LThread("ReaderThread")
+	#if DEBUG_SLOG
+	, sLog(LStructuredLog::TNetworkEndpoint, LStructuredLog::sDefaultEndpoint, true)
+	#endif
 {
 	Vcs = vcs;
 	Process = p;
@@ -175,7 +179,11 @@ int ReaderThread::OnLine(char *s, ssize_t len)
 
 bool ReaderThread::OnData(char *Buf, ssize_t &r)
 {
+	#if DEBUG_SLOG
+	sLog.Log("OnData:", LString(Buf, r));
+	#else
 	LOG_READER("OnData %i\n", (int)r);
+	#endif
 	
 	#if 1
 	char *Start = Buf;
@@ -221,17 +229,32 @@ int ReaderThread::Main()
 		return ErrSubProcessFailed;
 	}
 
-	char Buf[1024];
+	char Buf[4 << 10];
 	ssize_t r;
 	
+	#if DEBUG_SLOG
+	sLog.Log("ReaderThread starting loop", LCurrentThreadId());
+	#else
 	LOG_READER("%s:%i - starting reader loop, pid=%i\n", _FL, Process->Handle());
+	#endif
 	while (Process->IsRunning())
 	{
 		if (Out)
 		{
+			#if DEBUG_SLOG
+			sLog.Log("starting read.");
+			#else
 			LOG_READER("%s:%i - starting read.\n", _FL);
+			#endif
+			
 			r = Process->Read(Buf, sizeof(Buf));
+			
+			#if DEBUG_SLOG
+			sLog.Log("read:", LString(Buf, r));
+			#else
 			LOG_READER("%s:%i - read=%i.\n", _FL, (int)r);
+			#endif
+			
 			if (r > 0)
 			{
 				if (!OnData(Buf, r))
@@ -246,18 +269,37 @@ int ReaderThread::Main()
 		}
 	}
 
+	#if DEBUG_SLOG
+	sLog.Log("process loop done");
+	#else
 	LOG_READER("%s:%i - process loop done.\n", _FL);
+	#endif
 	if (Out)
 	{
 		while ((r = Process->Read(Buf, sizeof(Buf))) > 0)
+		{
+			#if DEBUG_SLOG
+			sLog.Log("post loop read:", LString(Buf, r));
+			#endif
 			OnData(Buf, r);
+		}
 	}
 
+	#if DEBUG_SLOG
+	sLog.Log("loop done");
+	#else
 	LOG_READER("%s:%i - loop done.\n", _FL);
+	#endif
 	Result = (int) Process->GetExitValue();
 	#if _DEBUG
 	if (Result)
+	{
+		#if DEBUG_SLOG
+		sLog.Log("process exit code:", Result);
+		#else
 		printf("%s:%i - Process err: %i 0x%x\n", _FL, Result, Result);
+		#endif
+	}
 	#endif
 	
 	return Result;
@@ -1638,20 +1680,62 @@ void VcFolder::LogFile(const char *uri, BrowseUi *existingUi)
 	}
 }
 
-VcLeaf *VcFolder::FindLeaf(const char *Path, bool OpenTree)
+VcLeaf *VcFolder::FindLeaf(LString Path, bool OpenTree)
 {
-	VcLeaf *r = nullptr;
-	
-	if (OpenTree)
-		DoExpand();
-	
-	for (auto n = GetChild(); !r && n; n = n->GetNext())
+	LString rel = LMakeRelativePath(Uri.sPath, Path);
+	auto parts = rel.SplitDelimit("/\\");
+	for (size_t i=0; i<parts.Length(); i++)
 	{
-		if (auto l = dynamic_cast<VcLeaf*>(n))
-			r = l->FindLeaf(Path, OpenTree);
+		if (parts[i].Equals("."))
+			parts.DeleteAt(i--, true);
+		else
+			printf("p='%s'\n", parts[i].Get());
 	}
 	
-	return r;
+	if (Tmp && OpenTree)
+		DoExpand();
+	
+	LTreeItem *i = this;
+	int idx = 0;
+	for (auto p: parts)
+	{
+		// Find the current child item matching the current path segment
+		VcLeaf *leaf = nullptr;
+		for (auto c = i->GetChild(); c; c = c->GetNext())
+		{
+			auto name = c->GetText();
+			auto match = !Stricmp(name, p.Get());
+			printf("%i: p='%s' name='%s' = %i\n", idx, p.Get(), name, match);
+			if (match)
+			{
+				if (leaf = dynamic_cast<VcLeaf*>(c))
+				{
+					if (OpenTree)
+						leaf->DoExpand();
+				}
+				else
+				{
+					printf("%s: c not a leaf?\n", __func__);
+					return nullptr;
+				}				
+				break;
+			}
+		}
+		if (leaf)
+		{
+			i = leaf;
+		}
+		else
+		{
+			leaf = dynamic_cast<VcLeaf*>(i);
+			printf("%s: can't find path seg '%s' at '%s'\n", __func__, p.Get(), leaf ? leaf->Full().Get() : nullptr);
+		}
+		idx++;
+	}
+	
+	auto result = dynamic_cast<VcLeaf*>(i);
+	printf("%s: result=%p\n", __func__, result);
+	return result;
 }
 
 bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
@@ -1902,7 +1986,10 @@ bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 
 	if (File)
 	{
-		File->ShowLog();
+		if (Params && Params->browseUi)
+			Params->browseUi->OnLeafLog(File);
+		else
+			File->ShowLog();
 	}
 	else if (LoggingFile)
 	{
@@ -3131,8 +3218,7 @@ void VcFolder::OnMouseClick(LMouse &m)
 
 						if (auto path = inp->GetStr())
 						{
-							pathParts = path.SplitDelimit("\\/");
-							PathSeek();
+							GotoItem(path);
 						}
 					});
 				break;
@@ -3152,6 +3238,12 @@ void VcFolder::OnMouseClick(LMouse &m)
 				break;
 		}
 	}
+}
+
+void VcFolder::GotoItem(LString path)
+{
+	pathParts = path.SplitDelimit("\\/");
+	PathSeek();
 }
 
 void VcFolder::PathSeek()
@@ -5798,7 +5890,7 @@ void VcLeaf::AfterBrowse()
 {
 }
 
-VcLeaf *VcLeaf::FindLeaf(const char *Path, bool OpenTree, int depth)
+VcLeaf *VcLeaf::FindLeaf(LString Path, bool OpenTree, int depth)
 {
 	if (depth > 32)
 	{
@@ -5807,11 +5899,13 @@ VcLeaf *VcLeaf::FindLeaf(const char *Path, bool OpenTree, int depth)
 	}
 
 	auto full = Full();
-	if (!Stricmp(Path, full.Get()))
+	if (Path.Equals(full))
 		return this;
-
+	
+	/*
 	if (OpenTree)
 		DoExpand();
+	*/
 
 	for (auto n = GetChild(); n; n = n->GetNext())
 	{

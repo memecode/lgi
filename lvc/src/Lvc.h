@@ -312,6 +312,7 @@ public:
 	void ParseBlame(LArray<BlameLine> &lines, LString raw);
 	void ParseLog(LArray<VcCommit*> &commits, LString raw);
 	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
+	void OnLeafLog(VcLeaf *file);
 };
 
 class DropDownBtn : public LDropDown, public ResObject

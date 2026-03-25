@@ -42,14 +42,14 @@ enum Tabs {
 
 struct BrowseUiPriv
 {
-	LList *Blame = NULL;
-	LList *Log = NULL;
-	LTextLog *Raw = NULL;
-	LTabView *Tabs = NULL;
-	AppPriv *Priv = NULL;
-	VcFolder *Folder = NULL;
-	LTableLayout *BlameTbl = NULL;
-	LTableLayout *LogTbl = NULL;
+	LList *Blame = nullptr;
+	LList *Log = nullptr;
+	LTextLog *Raw = nullptr;
+	LTabView *Tabs = nullptr;
+	AppPriv *Priv = nullptr;
+	VcFolder *Folder = nullptr;
+	LTableLayout *BlameTbl = nullptr;
+	LTableLayout *LogTbl = nullptr;
 
 	BrowseUi::TMode Mode;
 	LString Output;
@@ -498,6 +498,7 @@ int BrowseUi::OnNotify(LViewI *Ctrl, const LNotification &n)
 						case TabLog:
 						{
 							// Refresh the log tab:
+							// Results come back via the method 'OnLeafLog'
 							d->Folder->LogFile(d->Path, this);
 							break;
 						}
@@ -511,4 +512,13 @@ int BrowseUi::OnNotify(LViewI *Ctrl, const LNotification &n)
 	}
 
 	return LWindow::OnNotify(Ctrl, n);
+}
+
+void BrowseUi::OnLeafLog(VcLeaf *file)
+{
+	if (!file)
+		return;
+	
+	// Add the leaf's log to the UI:
+	d->Log->Insert(file->Log);
 }

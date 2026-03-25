@@ -1606,9 +1606,16 @@ struct LCommsBusPriv :
 				if (Lock(_FL))
 				{
 					// Write any outgoing messages
+					auto startTs = LCurrentTime();
 					for (size_t i=0; i<writeQue.Length(); i++)
 					{
 						auto now = LCurrentTime();
+						if (now - startTs > 1000)
+						{
+							printf("%s:%i - writing taking a long time...\n", _FL);
+							break;
+						}
+
 						auto &info = writeQue[i];
 						if (!info.firstSendTs || (now - info.recentSendTs >= SEND_TIMEOUT))
 						{
