@@ -8,10 +8,12 @@
 #include "lgi/common/StructuredLog.h"
 #include "lgi/common/PopupNotification.h"
 #include "lgi/common/TextLabel.h"
+#include "lgi/common/PopupNotification.h"
 
 #include "Lvc.h"
 #include "resdefs.h"
 #include "BranchEditDlg.h"
+#include "CherryPickDlg.h"
 #ifdef WINDOWS
 #include "resource.h"
 #endif
@@ -1930,6 +1932,23 @@ public:
 						dlg->DoModal(nullptr);
 					}
 				}
+				break;
+			}
+			case ID_CHERRY_PICK:
+			{
+				LArray<VcFolder*> sel;
+				if (Tree->GetSelection(sel))
+				{
+					if (auto dlg = new CherryPickDlg(sel.First()))
+						dlg->DoModal([this, dlg, folder = sel.First()](auto autoPtr, auto code)
+							{
+								if (!code)
+									return;
+								
+								folder->CherryPick(dlg->commit.hash, dlg->mergeParentIdx);
+							});
+				}
+				else LPopupNotification::Message(this, "Select a folder first...");
 				break;
 			}
 			case IDC_LIST:

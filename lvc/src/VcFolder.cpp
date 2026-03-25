@@ -945,9 +945,9 @@ void VcFolder::ShowAuthor()
 void VcFolder::UpdateAuthorUi()
 {
 	if (AuthorLocal)
-		d->Wnd()->SetCtrlName(IDC_AUTHOR, AuthorLocal.ToString());
+		d->Wnd()->SetCtrlName(IDC_AUTHOR, AuthorLocal.Get());
 	else if (AuthorGlobal)
-		d->Wnd()->SetCtrlName(IDC_AUTHOR, AuthorGlobal.ToString());
+		d->Wnd()->SetCtrlName(IDC_AUTHOR, AuthorGlobal.Get());
 }
 
 void VcFolder::GetConfigFile(bool local, bool createIfMissing, std::function<void(LString)> callback, bool debug)
@@ -1061,7 +1061,7 @@ void VcFolder::GetConfigFile(bool local, bool createIfMissing, std::function<voi
 	}
 }
 
-void VcFolder::GetAuthors(std::function<void(Author &local, Author &global)> callback, bool debug)
+void VcFolder::GetAuthors(std::function<void(TAuthor &local, TAuthor &global)> callback, bool debug)
 {
 	if (!callback)
 		return;
@@ -1070,11 +1070,11 @@ void VcFolder::GetAuthors(std::function<void(Author &local, Author &global)> cal
 	
 	GetAuthor(true, [this, callback, debug](auto local)
 		{
-			if (debug) d->Log->Print("%s:%i - getAuthors(true) cb=%s\n", _FL, local.ToString().Get());
+			if (debug) d->Log->Print("%s:%i - getAuthors(true) cb=%s\n", _FL, local.Get().Get());
 			
 			GetAuthor(false, [this, callback, local, debug](auto global) mutable
 				{
-					if (debug) d->Log->Print("%s:%i - getAuthors(false) cb=%s\n", _FL, global.ToString().Get());
+					if (debug) d->Log->Print("%s:%i - getAuthors(false) cb=%s\n", _FL, global.Get().Get());
 
 					callback(local, global);
 				},
@@ -1083,7 +1083,7 @@ void VcFolder::GetAuthors(std::function<void(Author &local, Author &global)> cal
 		debug);
 }
 
-bool VcFolder::GetAuthor(bool local, std::function<void(Author &author)> callback, bool debug)
+bool VcFolder::GetAuthor(bool local, std::function<void(TAuthor &author)> callback, bool debug)
 {
 	auto scope = local ? "--local" : "--global";
 	auto target = local ? &AuthorLocal : &AuthorGlobal;
@@ -1163,7 +1163,7 @@ bool VcFolder::GetAuthor(bool local, std::function<void(Author &author)> callbac
 	return true;
 }
 
-bool VcFolder::SetAuthor(bool local, Author author)
+bool VcFolder::SetAuthor(bool local, TAuthor author)
 {
 	if (!author.name || !author.email)
 	{
@@ -3277,6 +3277,91 @@ void VcFolder::PathSeek()
 		if (!item->Select())
 			item->Select(true);
 		item->ScrollTo();
+	}
+}
+
+void VcFolder::GetCommit(LString hash, std::function<void(TCommitInfo&)> callback)
+{
+	switch (GetType())
+	{
+		default:
+		{
+			NoImplementation(_FL);
+			break;
+		}
+		case VcGit:
+		{
+			auto args = LString::Fmt("show %s", hash.Get());
+			ParseParams *p = new ParseParams;
+			p->Callback = [this, callback=std::move(callback)](auto code, auto str)
+				{
+					// process the show command
+					auto doubleNl = str.Find("\n\n");
+					if (doubleNl >= 0)
+					{
+						TCommitInfo inf;
+						auto hdrs = str(0, doubleNl);
+						inf.message = str(doubleNl + 2, -1).Strip();
+						for (auto ln: hdrs.SplitDelimit("\n"))
+						{
+							auto var = ln.SplitDelimit(" \t:", 1);
+							if (var.Length() == 2)
+							{
+								if (var[0].Equals("commit"))
+									inf.hash = var[1].Strip();
+								else if (var[0].Equals("Merge"))
+									inf.mergeParents = var[1].Strip().SplitDelimit();
+								else if (var[0].Equals("Author"))
+									inf.author.Set(var[1].Strip());
+								else if (var[0].Equals("Date"))
+									inf.dateStr = var[1].Strip();
+							}
+						}
+						
+						if (inf.hash)
+						{
+							callback(inf);
+						}
+					}
+					else LAssert(!"unexpected fmt");
+				};
+			StartCmd(args, nullptr, p);
+			break;
+		}
+	}
+}
+
+void VcFolder::CherryPick(LString hash, int parentIdx, std::function<void(bool)> callback)
+{
+	switch (GetType())
+	{
+		default:
+		{
+			NoImplementation(_FL);
+			break;
+		}
+		case VcGit:
+		{
+			LString args;
+			if (parentIdx >= 0)
+				args = LString::Fmt("cherry-pick -m %u %s", parentIdx, hash.Get());
+			else
+				args = LString::Fmt("cherry-pick %s", hash.Get());
+			
+			ParseParams *p = nullptr;
+			if (callback)
+			{
+				if (p = new ParseParams)
+				{
+					p->Callback = [this, callback](auto code, auto str)
+						{
+							callback(code == 0);					
+						};
+				}
+			}
+			StartCmd(args, nullptr, p);
+			break;
+		}
 	}
 }
 

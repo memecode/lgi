@@ -32,14 +32,14 @@ ifeq ($(Build),Debug)
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I../include/lgi/linux/Gtk \
-		-I./src \
-		-I../../../../../../usr/include/libssh \
 		-I../include/lgi/linux \
-		-I../include \
+		`pkg-config --cflags gtk+-3.0` \
 		-I../../../../../../usr/include/gstreamer-1.0 \
+		-I../../../../../../usr/include/libssh \
 		-I./resources \
-		`pkg-config --cflags gtk+-3.0`
+		-I../include \
+		-I./src \
+		-I../include/lgi/linux/Gtk
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
@@ -53,33 +53,33 @@ else
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
+		`pkg-config --cflags gtk+-3.0` \
 		-I../include/lgi/linux \
-		-I./src \
 		-I../../../../../../usr/include/gstreamer-1.0 \
 		-I../include/lgi/linux/Gtk \
-		`pkg-config --cflags gtk+-3.0` \
-		-I../include \
 		-I./resources \
-		-I../../../../../../usr/include/libssh
+		-I./src \
+		-I../../../../../../usr/include/libssh \
+		-I../include
 endif
 
 # Dependencies
-Source =	../src/common/Net/Http.cpp \
-			src/SshConnection.cpp \
-			src/BrowseUi.cpp \
-			../src/common/Net/OpenSSLSocket.cpp \
-			../src/common/Lgi/StructuredLog.cpp \
-			../src/common/Text/RemoveAnsi.cpp \
-			../src/common/Widgets/ControlTree.cpp \
+Source =	../src/common/Net/OpenSSLSocket.cpp \
 			src/VcFolder.cpp \
-			../src/common/Net/Ssh.cpp \
+			../src/common/Lgi/StructuredLog.cpp \
+			../src/common/Lgi/LgiMain.cpp \
+			../src/common/Net/Http.cpp \
+			src/SshConnection.cpp \
+			../src/common/Text/RemoveAnsi.cpp \
+			src/BrowseUi.cpp \
+			../src/common/Widgets/ControlTree.cpp \
+			../src/common/Text/XmlTreeUi.cpp \
 			src/PatchViewer.cpp \
+			src/VcFile.cpp \
 			src/VcCommit.cpp \
 			src/Main.cpp \
-			src/VcFile.cpp \
-			../src/common/Text/XmlTreeUi.cpp \
 			src/DropDownBtn.cpp \
-			../src/common/Lgi/LgiMain.cpp
+			../src/common/Net/Ssh.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)

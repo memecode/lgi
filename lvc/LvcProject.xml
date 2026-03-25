@@ -31,7 +31,10 @@
 			<Node File="./src/SshConnection.cpp" Type="2" Platforms="15" />
 			<Node File="./src/SshConnection.h" Type="3" Platforms="15" />
 		</Node>
-		<Node File="./src/BranchEditDlg.h" Type="3" Platforms="15" />
+		<Node Name="Ui" Type="1" Platforms="15" Id="1">
+			<Node File="./src/BranchEditDlg.h" Type="3" Platforms="15" />
+			<Node File="./src/CherryPickDlg.h" Type="3" Platforms="15" />
+		</Node>
 		<Node File="./src/BrowseUi.cpp" Type="2" Platforms="15" />
 		<Node File="./src/DropDownBtn.cpp" Type="2" Platforms="15" />
 		<Node File="./src/Lvc.h" Type="3" Platforms="15" />
@@ -146,12 +149,9 @@ HAS_LIBSSH=1</Debug>
 HAS_LIBSSH=1</Release>
 				</Haiku>
 			</Defines>
-			<LibraryPaths />
-			<TargetName />
 			<ApplicationIcon>
 				<Haiku>./resources/icon.hvif</Haiku>
 			</ApplicationIcon>
-			<Options />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -164,17 +164,10 @@ HAS_LIBSSH=1</Release>
 				<All>1</All>
 			</UseHardTabs>
 		</Editor>
-		<Advanced>
-			<PostBuildCommands />
-		</Advanced>
 		<Debug>
 			<Arguments>
-				<All>
-					<Debug>-select ~/work/heos -goto sapphire/lib_act/src/CActDeviceProfile.cpp</Debug>
-					<Release>-select ~/work/heos -goto sapphire/lib_act/src/CActDeviceProfile.cpp</Release>
-				</All>
+				<All />
 			</Arguments>
 		</Debug>
-		<Remote />
 	</Settings>
 </Project>

@@ -70,7 +70,7 @@
 #define IDS_AUTO								126
 #define IDS_COPY_FMT							127
 #define IDS_ERR_NO_PATH_FMT						128
-#define ID_BRANCH_EDIT							129
+#define ID_CHERRY_PICK_DLG						129
 #define ID_LIST									132
 #define ID_DELETE								133
 #define ID_MERGE								134
@@ -89,6 +89,11 @@
 #define ID_CHECKOUT								157
 #define ID_DIFF_PAD								159
 #define ID_TERMINAL_AT							161
+#define ID_CHERRY_PICK							162
+#define ID_BRANCH								166
+#define ID_PARENT_COMMITS						173
+#define ID_DATE									175
+#define ID_MESSAGE								178
 #define ID_TABLE								500
 #define IDC_COMMIT								501
 #define ID_PULL									502
@@ -123,3 +128,4 @@
 #define IDS_REVERT_THIS							531
 #define IDS_REVERT_BEFORE						532
 #define ID_CLOSE								533
+#define ID_BRANCH_EDIT							534

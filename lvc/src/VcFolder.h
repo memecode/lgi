@@ -151,15 +151,27 @@ class VcFolder : public LTreeItem
 public:
 	using TBranchHash = LHashTbl<ConstStrKey<char>,VcBranch*>;
 
-	struct Author
+	struct TAuthor
 	{
 		bool InProgress = false;
 		LString name, email;
 		
-		Author() {}
-		Author(const char *n, const char *e) { name = n; email = e; }
+		TAuthor() {}
+		TAuthor(const char *n, const char *e) { name = n; email = e; }
+		
 		operator bool() const { return !name.IsEmpty() && !email.IsEmpty(); }
-		LString ToString() { return LString::Fmt("%s <%s>", name.Get(), email.Get()); }
+		LString Get() { return LString::Fmt("%s <%s>", name.Get(), email.Get()); }
+		bool Set(LString s)
+		{
+			auto start = s.Find("<");
+			auto end = s.Find(">", start);
+			if (start < 0 || end < 0)
+				return 0;
+			
+			name = s(0, start).Strip();
+			email = s(start + 1, end).Strip();
+			return true;
+		}
 	};
 
 protected:
@@ -254,7 +266,7 @@ protected:
 	LAutoPtr<LThread> rewriteThread;
 
 	// Author name/email
-	Author AuthorLocal, AuthorGlobal;
+	TAuthor AuthorLocal, AuthorGlobal;
 	bool IsGettingAuthor = false;
 	bool preCommitCheck = true;
 
@@ -370,9 +382,9 @@ public:
 	void GetConfigFile(bool local, bool createIfMissing, std::function<void(LString)> callback, bool debug = false);
 	LString GetRemotePrompt() { return RemotePrompt; }
 	void SetRemotePrompt(LString p) { RemotePrompt = p; }
-	bool GetAuthor(bool local, std::function<void(Author &author)> callback, bool debug = false);
-	void GetAuthors(std::function<void(Author &local, Author &global)> callback, bool debug = false);
-	bool SetAuthor(bool local, Author author);
+	bool GetAuthor(bool local, std::function<void(TAuthor &author)> callback, bool debug = false);
+	void GetAuthors(std::function<void(TAuthor &local, TAuthor &global)> callback, bool debug = false);
+	bool SetAuthor(bool local, TAuthor author);
 	void ShowAuthor();
 	void UpdateAuthorUi();
 	void Empty();
@@ -414,6 +426,15 @@ public:
 	void Delete(const char *Path, bool KeepLocal = true);
 	void RewriteAuthor(RewriteInfo info);
 	void GotoItem(LString path);
+	
+	struct TCommitInfo
+	{
+		LString hash, message, dateStr;
+		TAuthor author;
+		LString::Array mergeParents;
+	};
+	void GetCommit(LString hash, std::function<void(TCommitInfo&)> callback);
+	void CherryPick(LString hash, int parentIdx = -1, std::function<void(bool)> callback = nullptr);
 
 	enum TColourType {
 		TColNone,
