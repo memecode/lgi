@@ -3743,12 +3743,14 @@ void VcFolder::ReadDir(LTreeItem *Parent, const char *ReadUri)
 			parentUri += "/";
 
 		auto localPath = u.LocalPath();
+		/*
 		auto debug = "C:\\code\\lgi\\trunk\\.hg\\store\\data\\templates\\mac\\basic__gui\\"; //%name%.xcodeproj
 		if (!Stricmp(localPath.Get(), debug))
 		{
 			int asd=0;
 		}
 		LgiTrace("localPath: %s\n", localPath.Get());
+		*/
 
 		for (int b = Dir.First(localPath); b; b = Dir.Next())
 		{

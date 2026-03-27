@@ -31,7 +31,7 @@
 			<Node File="./src/SshConnection.cpp" Type="2" Platforms="15" />
 			<Node File="./src/SshConnection.h" Type="3" Platforms="15" />
 		</Node>
-		<Node Name="Ui" Type="1" Platforms="15" Id="1">
+		<Node Name="Ui" Type="1" Platforms="15" Id="7">
 			<Node File="./src/BranchEditDlg.h" Type="3" Platforms="15" />
 			<Node File="./src/CherryPickDlg.h" Type="3" Platforms="15" />
 		</Node>
@@ -74,6 +74,8 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -133,6 +135,7 @@ be</Debug>
 ssh
 be</Release>
 				</Haiku>
+				<All />
 			</Libraries>
 			<TargetType>
 				<All>Executable</All>
@@ -148,10 +151,22 @@ HAS_LIBSSH=1</Debug>
 					<Release>_GNU_SOURCE
 HAS_LIBSSH=1</Release>
 				</Haiku>
+				<All />
 			</Defines>
 			<ApplicationIcon>
 				<Haiku>./resources/icon.hvif</Haiku>
 			</ApplicationIcon>
+			<Options>
+				<All />
+				<Linux />
+			</Options>
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
+			<TargetName>
+				<Linux />
+			</TargetName>
 		</Build>
 		<Editor>
 			<TabSize>
@@ -163,11 +178,27 @@ HAS_LIBSSH=1</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
+			<ShowWhiteSpace />
+			<CommentFile />
+			<CommentFunction />
 		</Editor>
 		<Debug>
 			<Arguments>
 				<All />
 			</Arguments>
+			<Environment />
+			<DebugAdmin />
+			<InitialDir />
 		</Debug>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
+		<Advanced>
+			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+		</Advanced>
 	</Settings>
 </Project>
