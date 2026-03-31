@@ -19,6 +19,7 @@ Monitoring:
 #define DEFAULT_COMMS_PORT	45454
 #define RETRY_SERVER		-2
 #define USE_TRANSPORT		0
+#define MAX_MSG_SIZE		(1 << 20) // MiB
 
 #if 0
 #define LOG(...)			
@@ -197,7 +198,7 @@ struct Connection
 	LArray<char> readBuf;
 	ssize_t used = 0;
 	bool connected = false;
-	LStream *log = NULL;
+	LStream *log = nullptr;
 	
 	Connection(LStream *l) :
 		readBuf(8 << 10),
@@ -210,6 +211,8 @@ struct Connection
 		readBuf(8 << 10),
 		log(l)
 	{
+		if (sock)
+			sock->IsBlocking(false);
 	}
 
 	bool Valid()
@@ -1030,8 +1033,14 @@ struct LCommsBusPriv :
 		return LString::Fmt("%s:%s", isServer ? "server" : "client", GetUid());
 	}
 
-	void Que(Block::Auto &blk)
+	bool Que(Block::Auto &blk)
 	{
+		if (blk->GetSize() >= MAX_MSG_SIZE)
+		{
+			LAssert(!"block over size");
+			return false;
+		}
+	
 		Auto lck(this, _FL);
 
 		// LOG("%s que msg '%s'\n", Describe().Get(), blk->ToString().Get());
@@ -1040,13 +1049,8 @@ struct LCommsBusPriv :
 		info.firstSendTs = 0;
 		info.recentSendTs = 0;
 		info.blk = blk.Release();
-
-		/*
-		for (auto &i: writeQue)
-		{
-			LOG("	writeque: %s\n", i.blk->ToString().Get());
-		}
-		*/
+		
+		return true;
 	}
 
 	bool ServerSend(Block *blk, bool localOnly)
@@ -1619,6 +1623,11 @@ struct LCommsBusPriv :
 						auto &info = writeQue[i];
 						if (!info.firstSendTs || (now - info.recentSendTs >= SEND_TIMEOUT))
 						{
+							if (info.blk->GetSize() >= MAX_MSG_SIZE)
+							{
+								LAssert(!"over size msg");
+							}
+							
 							if (c.Write(info.blk))
 							{
 								#if 0
