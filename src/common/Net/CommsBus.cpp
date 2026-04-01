@@ -322,12 +322,29 @@ struct Connection
 			return false;
 
 		size_t bytes = b->GetSize() + sizeof(Block);
-		char *ptr = (char*)b;
+		auto ptr = (char*)b;
 		size_t i = 0;
+		
+		if (sock->IsBlocking())
+		{
+			LAssert(!"shouldn't be blocking?");
+		}
 
 		while (i < bytes)
 		{
-			auto wr = sock->Write(ptr, bytes - i);
+			auto startTs = LCurrentTime();
+			auto wr = sock->Write(ptr, bytes - i
+				#ifdef LINUX
+				// Not sure why this is needed on a non-blocking socket, but otherwise it CAN block?!?
+				, MSG_DONTWAIT
+				#endif
+				);
+			auto elapsed = LCurrentTime() - startTs;
+			if (elapsed >= 100)
+			{
+				LgiTrace("%s:%i write too %i ms?\n", _FL, (int)elapsed);
+			}			
+			
 			if (wr > 0)
 			{
 				i += wr;
