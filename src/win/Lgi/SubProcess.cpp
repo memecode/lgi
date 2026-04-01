@@ -426,6 +426,8 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 	LgiTrace("%s:%i - %p::Start(%i,%i,%i)\n", _FL, this, ReadAccess, WriteAccess, MapStderrToStdout);
 	#endif
 
+	LAssert(d->Exe);
+
 	// Find the end of the process list
 	LArray<LSubProcess*> p;
 	for (LSubProcess *s=this; s; s=s->Child)
@@ -460,22 +462,25 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 
 		for (unsigned i=0; i<p.Length(); i++)
 		{
-			char s[MAX_PATH_LEN];
-			LMakePath(s, sizeof(s), p[i], d->Exe);
-			if (LFileExists(s))
+			char s[MAX_PATH_LEN] = "";
+			if (LMakePath(s, sizeof(s), p[i], d->Exe))
 			{
-				WExe.Reset(Utf8ToWide(s));
-				break;
-			}
-			if (!HasExt)
-			{
-				strcat_s(s, sizeof(s), ".exe");
 				if (LFileExists(s))
 				{
 					WExe.Reset(Utf8ToWide(s));
 					break;
 				}
+				if (!HasExt)
+				{
+					strcat_s(s, sizeof(s), ".exe");
+					if (LFileExists(s))
+					{
+						WExe.Reset(Utf8ToWide(s));
+						break;
+					}
+				}
 			}
+			else LgiTrace("%s:%i - failed to make path\n", _FL);
 		}
 	}
 
