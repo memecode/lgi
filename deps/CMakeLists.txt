@@ -7,8 +7,10 @@ if(UNIX AND NOT APPLE)
     set(LINUX TRUE)
     set(USE_SYSTEM_ZLIB TRUE) # having zlib in the path can conflict with say apt Firefox
                               # so turning this off can make Lgi more compatible on Linux
+    set(USE_SYSTEM_PNG TRUE)
 else()
     set(USE_SYSTEM_ZLIB FALSE)
+    set(USE_SYSTEM_PNG FALSE)
 endif()
 
 get_filename_component(DEPS "${CMAKE_CURRENT_LIST_DIR}/../../deps" ABSOLUTE)
@@ -144,12 +146,14 @@ if (NOT USE_SYSTEM_ZLIB)
     message("ZLIB_ROOT=${ZLIB_ROOT}")
 endif()
 
-# libpng
-set(PNG_HARDWARE_OPTIMIZATIONS 0)
-set(PNG_ARM_NEON off)
-set(PNG_STATIC off)
-set(PNG_SHARED on)
-set(PNG_BUILD_ZLIB OFF)
+if (NOT USE_SYSTEM_PNG)
+    # libpng
+    set(PNG_HARDWARE_OPTIMIZATIONS 0)
+    set(PNG_ARM_NEON off)
+    set(PNG_STATIC off)
+    set(PNG_SHARED on)
+    set(PNG_BUILD_ZLIB OFF)
+endif()
 
 if (1)
     # used by ide/lvc
@@ -172,13 +176,14 @@ if (1)
     GitProject(libssh "https://git.libssh.org/projects/libssh.git" "libssh-0.12.0" TRUE)
 endif()
 
-
-GitProject(libpng  "https://github.com/memecode/libpng.git" "libpng16" TRUE)
-install(TARGETS png_shared
-    RUNTIME
-        DESTINATION ${CMAKE_BINARY_DIR}/bin
-    LIBRARY
-        DESTINATION ${CMAKE_BINARY_DIR}/lib)
+if (NOT USE_SYSTEM_PNG)
+    GitProject(libpng  "https://github.com/memecode/libpng.git" "libpng16" TRUE)
+    install(TARGETS png_shared
+        RUNTIME
+            DESTINATION ${CMAKE_BINARY_DIR}/bin
+        LIBRARY
+            DESTINATION ${CMAKE_BINARY_DIR}/lib)
+endif()
 
 if (1)
     # lunasvg
