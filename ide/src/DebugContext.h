@@ -7,14 +7,14 @@ class LDebugContext : public LDebugEvents
 	class LDebugContextPriv *d;
 	
 public:
-	LTree *Watch = NULL;
-	LList *Locals = NULL;
-	LList *CallStack = NULL;
-	LList *Threads = NULL;
-	LTextLog *ObjectDump = NULL;
-	LTextLog *MemoryDump = NULL;
-	LStream *DebuggerLog = NULL;
-	LTextLog *Registers = NULL;
+	LTree *Watch = nullptr;
+	LList *Locals = nullptr;
+	LList *CallStack = nullptr;
+	LList *Threads = nullptr;
+	LTextLog *ObjectDump = nullptr;
+	LTextLog *MemoryDump = nullptr;
+	LStream *DebuggerLog = nullptr;
+	LTextLog *Registers = nullptr;
 	std::function<void()> onFinished;
 
 	// Object

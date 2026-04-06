@@ -108,15 +108,16 @@ public:
 			case ID_FILTER:
 			{
 				LArray<LListItem*> all;
-				if (lst->GetAll(all))
+				if (!lst->GetAll(all))
+					break;
+
+				for (auto i: all)
 				{
-					for (auto i: all)
-					{
-						auto process = i->GetText(ColProcess);
-						bool vis = Stristr(process, c->Name());
-						i->GetCss(true)->Display(vis ? LCss::DispBlock : LCss::DispNone);
-					}
+					auto process = i->GetText(ColProcess);
+					bool vis = Stristr(process, c->Name());
+					i->GetCss(true)->Display(vis ? LCss::DispBlock : LCss::DispNone);
 				}
+				lst->UpdateAllItems();
 				break;
 			}
 			case ID_PROCESSES:
@@ -329,7 +330,7 @@ LDebugContext::LDebugContext(AppWnd *App,
 
 	auto log = App->GetDebugLog();
 	LAssert(log);
-	if (d->Db.Reset(CreateGdbDebugger(App->GetBreakPointStore(), log, Proj->GetBackend(), Platform, d->App->GetNetworkLog())))
+	if (d->Db.Reset(CreateGdbDebugger(App->GetBreakPointStore(), log, Proj ? Proj->GetBackend() : nullptr, Platform, d->App->GetNetworkLog())))
 	{
 		LFile::Path p;
 		if (InitDir)

@@ -524,7 +524,7 @@ class Gdb :
 
 		if (ParseState == ParseBreakPoint)
 		{
-			printf("OnLine '%.*s' -> ParseBreakPoint\n", (int)Length-1, Start);
+			// printf("OnLine '%.*s' -> ParseBreakPoint\n", (int)Length-1, Start);
 
 			LOG("\tbreak:'%s'\n", BreakInfo[0].Get());
 			OnBreakPoint(BreakInfo[0]);
@@ -752,17 +752,22 @@ class Gdb :
 		
 		if (AttachToPid > 0)
 		{
-			auto Arg = LString::Fmt("--pid %i", AttachToPid);
+			Args = LString::Fmt("--pid %i", AttachToPid);
 
-			LgiTrace("Attaching Debugger: %s %s\n", Path, Args.Get());
+			if (Log)
+				Log->Print("Attaching Debugger: %s %s\n", Path, Args.Get());
 			if (backend)
 			{
 				LAssert(!"impl me");
 			}
 			else
 			{
-				if (!LocalGdb.Reset(new LSubProcess(Path, Arg)))
+				if (!LocalGdb.Reset(new LSubProcess(Path, Args)))
+				{
+					if (Log)
+						Log->Print("%s:%i - failed to alloc.\n", _FL);
 					return false;
+				}
 			}
 		}
 		else
@@ -875,7 +880,7 @@ class Gdb :
 		if (AttachToPid > 0)
 		{
 			DebuggingProcess = true;
-			Running = true; // Initial state of process is running
+			Running = false; // Initial state of process is stopped
 		}
 
 		char Buf[513] = "";
@@ -1043,11 +1048,11 @@ public:
 		if (pp.Exists())
 		{
 			PrettyPrintPy = pp.GetFull();		
-			LgiTrace("%s:%i - Gdb.Print='%s'\n", _FL, PrettyPrintPy.Get());
+			if (log) log->Print("%s:%i - Gdb.Print='%s'\n", _FL, PrettyPrintPy.Get());
 		}
 		else
 		{
-			LgiTrace("%s:%i - Didn't find Gdb.Print='%s'\n", _FL, pp.GetFull().Get());
+			if (log) log->Print("%s:%i - Didn't find Gdb.Print='%s'\n", _FL, pp.GetFull().Get());
 		}
 
 		// Register to hear about break point changes

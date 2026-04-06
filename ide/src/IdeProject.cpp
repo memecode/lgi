@@ -1928,8 +1928,15 @@ void BuildThread::Step1()
 		[this, backend, callId](auto d, auto err)
 		{
 			StreamToLog log(Proj->GetApp());
-			// LOG("Step1 got folder..\n");
-			for (int i=true; i; i=d->Next())
+			
+			if (!d || err)
+			{
+				LOG("Error: %s\n", err.ToString().Get());
+				RemoveCall(callId);
+				return;
+			}
+			
+			for (int i=true; i && d; i=d->Next())
 			{
 				if (d->IsDir())
 					continue;
@@ -1974,7 +1981,9 @@ void BuildThread::Step1()
 			}
 
 			if (backendPaths.Length() > 0)
+			{
 				AddWork([this]() { Step1(); }); // Look at the next path...
+			}
 			else if (!backendProjFound)
 			{
 				LOG("Error: no project xml found.\n");

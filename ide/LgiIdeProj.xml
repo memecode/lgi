@@ -296,9 +296,7 @@ _GNU_SOURCE</Release>
 			<CommentFunction />
 		</Editor>
 		<Debug>
-			<Environment>
-				<All>SOME_TEST=testing</All>
-			</Environment>
+			<Environment />
 			<Arguments>
 				<All />
 			</Arguments>
