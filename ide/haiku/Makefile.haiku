@@ -125,7 +125,7 @@ $(BuildDir)/%.o: %.cpp
 $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	mkdir -p $(BuildDir)
 	@echo Linking $(Target) [$(Build)]...
-	$(CPP) -Wl,-export-dynamic,-R. -o \
+	$(CPP) -Wl,-export-dynamic,-R. -Wl,--no-demangle -o \
 		$(Target) $(Objects) $(Libs)
 	/boot/home/code/lgi/trunk/src/haiku/hvif_to_rdef.py ./resources/icon.hvif $(Build)/lgiide.rdef lgiide
 	rc $(Build)/lgiide.rdef

@@ -122,154 +122,6 @@ LgiExtern LString LStrConvertCp
 LgiExtern char* LTokStr(const char*& s);
 LgiExtern LString LTokLStr(const char*& s);
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-/////////////////////////////////////////////////////////////
-// Externs
-
-// Codepages
-
-/// Converts a buffer of text to a different charset
-/// \ingroup Text
-/// \returns the bytes written to the location pointed to by 'Out'
-LgiFunc ssize_t LBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, const void *&In, const char *InCp, ssize_t &InLen);
-
-/// \brief Converts a string to a new charset
-/// \return A dynamically allocate, null terminated string in the new charset
-/// \ingroup Text
-LgiFunc void *LNewConvertCp
-(
-	/// Output charset
-	const char *OutCharset,
-	/// Input buffer
-	const void *In,
-	/// The input data's charset
-	const char *InCharset,
-	/// Bytes of valid data in the input
-	ssize_t InLen = -1
-);
-
-/// Return true if Lgi support the charset
-/// \ingroup Text
-LgiFunc bool LIsCpImplemented(const char *Cp);
-
-/// Converts the ANSI code page to a charset name
-/// \ingroup Text
-LgiFunc const char *LAnsiToLgiCp(int AnsiCodePage = -1);
-
-/// Calculate the number of characters in a string
-/// \ingroup Text
-LgiFunc int LCharLen(const void *Str, const char *Cp, int Bytes = -1);
-
-/// Move a pointer along a utf-8 string by characters
-/// \ingroup Text
-LgiFunc char *LSeekUtf8
-(
-	/// Pointer to the current character
-	const char *Ptr,
-	/// The number of characters to move forward or back
-	ssize_t D,
-	/// The start of the memory buffer if you known
-	char *Start = 0
-);
-
-/// Formats a data size into appropriate units
-/// \ingroup Base
-LgiFunc void LFormatSize
-(
-	/// Output string
-	char *Str,
-	/// Output string buffer length
-	int SLen,
-	/// Input size in bytes
-	int64_t Size
-);
-
-/// \returns true if the path is a volume root.
-LgiFunc bool LIsVolumeRoot(const char *Path);
-
-/// Converts a string from URI encoding (ala %20 -> ' ')
-/// \returns a dynamically allocated string or NULL on error
-/// \ingroup Text
-LgiFunc char *LDecodeUri
-(
-	/// The URI
-	const char *uri,
-	/// The length or -1 if NULL terminated
-	int len = -1
-);
-
-/// Converts a string to URI encoding (ala %20 -> ' ')
-/// \returns a dynamically allocated string or NULL on error
-/// \ingroup Text
-LgiFunc char *LEncodeUri
-(
-	/// The URI
-	const char *uri,
-	/// The length or -1 if NULL terminated
-	int len = -1
-);
-
-// Path
-#if LGI_COCOA || defined(__GTK_H__) || defined(HAIKU)
-	LgiExtern LString LgiArgsAppPath;
-#endif
-
-/// Returns the system path specified
-/// \ingroup Base
-LgiFunc bool LGetSystemPath
-(
-	/// Which path to retreive
-	LSystemPath Which,
-	/// The buffer to receive the path into 
-	char *Dst,
-	/// The size of the receive buffer in bytes
-	ssize_t DstSize
-);
-
-/// \brief Recursively search for files
-/// \return Non zero if something was found
-/// \ingroup Base
-LgiFunc bool LRecursiveFileSearch
-(
-	/// Start search in this dir
-	const char *Root,
-	/// Extensions to match
-	LArray<const char*> *Ext = NULL,
-	/// [optional] Output filenames
-	LArray<char*> *Files = NULL,
-	/// [optional] Output total size
-	uint64 *Size = NULL,
-	/// [optional] File count
-	uint64 *Count = NULL,
-	/// [optional] Callback for match
-	std::function<bool(const char *Path, class LDirectory *Dir)> Callback = NULL,
-	/// [optional] Cancel object
-	LCancel *Cancel = NULL
-);
-
-// Resources
-
-/// Gets the currently selected language
-/// \ingroup Resources
-LgiFunc struct LLanguage *LGetLanguageId();
-
-// Os version functions
-
-/// Gets the current operating system and optionally it's version.
-/// \returns One of the defines starting with #LGI_OS_UNKNOWN in LgiDefs.h
-/// \ingroup Base
-LgiFunc int LGetOs(LArray<int> *Ver = 0);
-
-/// Gets the current operation systems name.
-/// \ingroup Base
-LgiFunc const char *LGetOsName();
-
-// System
-
 /// \brief Opens a file or directory.
 ///
 /// If the input is an executable then it is run. If the input file
@@ -291,15 +143,158 @@ LgiExtern bool LExecute
 	LError *error = nullptr
 );
 
+/////////////////////////////////////////////////////////////
+// Externs
+
+// Codepages
+
+/// Converts a buffer of text to a different charset
+/// \ingroup Text
+/// \returns the bytes written to the location pointed to by 'Out'
+LgiExtern ssize_t LBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, const void *&In, const char *InCp, ssize_t &InLen);
+
+/// \brief Converts a string to a new charset
+/// \return A dynamically allocate, null terminated string in the new charset
+/// \ingroup Text
+LgiExtern void *LNewConvertCp
+(
+	/// Output charset
+	const char *OutCharset,
+	/// Input buffer
+	const void *In,
+	/// The input data's charset
+	const char *InCharset,
+	/// Bytes of valid data in the input
+	ssize_t InLen = -1
+);
+
+/// Return true if Lgi support the charset
+/// \ingroup Text
+LgiExtern bool LIsCpImplemented(const char *Cp);
+
+/// Converts the ANSI code page to a charset name
+/// \ingroup Text
+LgiExtern const char *LAnsiToLgiCp(int AnsiCodePage = -1);
+
+/// Calculate the number of characters in a string
+/// \ingroup Text
+LgiExtern int LCharLen(const void *Str, const char *Cp, int Bytes = -1);
+
+/// Move a pointer along a utf-8 string by characters
+/// \ingroup Text
+LgiExtern char *LSeekUtf8
+(
+	/// Pointer to the current character
+	const char *Ptr,
+	/// The number of characters to move forward or back
+	ssize_t D,
+	/// The start of the memory buffer if you known
+	char *Start = 0
+);
+
+/// Formats a data size into appropriate units
+/// \ingroup Base
+LgiExtern void LFormatSize
+(
+	/// Output string
+	char *Str,
+	/// Output string buffer length
+	int SLen,
+	/// Input size in bytes
+	int64_t Size
+);
+
+/// \returns true if the path is a volume root.
+LgiExtern bool LIsVolumeRoot(const char *Path);
+
+/// Converts a string from URI encoding (ala %20 -> ' ')
+/// \returns a dynamically allocated string or NULL on error
+/// \ingroup Text
+LgiExtern char *LDecodeUri
+(
+	/// The URI
+	const char *uri,
+	/// The length or -1 if NULL terminated
+	int len = -1
+);
+
+/// Converts a string to URI encoding (ala %20 -> ' ')
+/// \returns a dynamically allocated string or NULL on error
+/// \ingroup Text
+LgiExtern char *LEncodeUri
+(
+	/// The URI
+	const char *uri,
+	/// The length or -1 if NULL terminated
+	int len = -1
+);
+
+// Path
+#if LGI_COCOA || defined(__GTK_H__) || defined(HAIKU)
+	LgiExtern LString LgiArgsAppPath;
+#endif
+
+/// Returns the system path specified
+/// \ingroup Base
+LgiExtern bool LGetSystemPath
+(
+	/// Which path to retreive
+	LSystemPath Which,
+	/// The buffer to receive the path into 
+	char *Dst,
+	/// The size of the receive buffer in bytes
+	ssize_t DstSize
+);
+
+/// \brief Recursively search for files
+/// \return Non zero if something was found
+/// \ingroup Base
+LgiExtern bool LRecursiveFileSearch
+(
+	/// Start search in this dir
+	const char *Root,
+	/// Extensions to match
+	LArray<const char*> *Ext = NULL,
+	/// [optional] Output filenames
+	LArray<char*> *Files = NULL,
+	/// [optional] Output total size
+	uint64 *Size = NULL,
+	/// [optional] File count
+	uint64 *Count = NULL,
+	/// [optional] Callback for match
+	std::function<bool(const char *Path, class LDirectory *Dir)> Callback = NULL,
+	/// [optional] Cancel object
+	LCancel *Cancel = NULL
+);
+
+// Resources
+
+/// Gets the currently selected language
+/// \ingroup Resources
+LgiExtern struct LLanguage *LGetLanguageId();
+
+// Os version functions
+
+/// Gets the current operating system and optionally it's version.
+/// \returns One of the defines starting with #LGI_OS_UNKNOWN in LgiDefs.h
+/// \ingroup Base
+LgiExtern int LGetOs(LArray<int> *Ver = 0);
+
+/// Gets the current operation systems name.
+/// \ingroup Base
+LgiExtern const char *LGetOsName();
+
+// System
+
 /// Initializes the random number generator
 /// \ingroup Base
-LgiFunc void LRandomize(uint Seed);
+LgiExtern void LRandomize(uint Seed);
 
 /// Returns a random number between 0 and Max-1
 /// \ingroup Base
-LgiFunc uint LRand(uint Max = 0);
+LgiExtern uint LRand(uint Max = 0);
 
-LgiFunc bool _lgi_read_colour_config(const char *Tag, uint32_t *c);
+LgiExtern bool _lgi_read_colour_config(const char *Tag, uint32_t *c);
 
 #ifndef SND_ASYNC
 #define SND_ASYNC	0x0001
@@ -307,7 +302,7 @@ LgiFunc bool _lgi_read_colour_config(const char *Tag, uint32_t *c);
 
 /// Plays a sound
 /// \ingroup Base
-LgiFunc bool LPlaySound
+LgiExtern bool LPlaySound
 (
 	/// File name of the sound to play
 	const char *FileName,
@@ -345,7 +340,7 @@ LgiExtern bool LGetMimeTypeExtensions
 
 /// Returns the all applications that can open a given mime type.
 /// \ingroup Mime
-LgiFunc bool LGetAppsForMimeType
+LgiExtern bool LGetAppsForMimeType
 (
 	/// The type of files to match apps to.
 	///
@@ -364,7 +359,7 @@ LgiFunc bool LGetAppsForMimeType
 
 /// Returns true if the build is for release.
 /// \ingroup Base
-LgiFunc int LIsReleaseBuild();
+LgiExtern int LIsReleaseBuild();
 
 #ifndef LGI_STATIC
 LgiFunc class LAlert *LAssertDlg(LString Msg, bool canDebug, std::function<void(int)> Callback);
@@ -421,12 +416,8 @@ LgiFunc class LAlert *LAssertDlg(LString Msg, bool canDebug, std::function<void(
 
 #elif defined(__OBJC__)
 
-	LgiFunc NSCursor *LCocoaCursor(LCursor lc);
+	LgiExtern NSCursor *LCocoaCursor(LCursor lc);
 
-#endif
-
-#ifdef __cplusplus
-}
 #endif
 
 #endif
