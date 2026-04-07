@@ -99,13 +99,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 		$(Target) $(Objects) $(Libs)
 	@echo Done.
 
-../$(BuildDir)/liblgi-gtk3$(Tag).so : ../../deps/build-x64-release/include/iconv.h \
-	../../deps/build-x64-release/include/jconfig.h \
-	../../deps/build-x64-release/include/jerror.h \
-	../../deps/build-x64-release/include/jmorecfg.h \
-	../../deps/build-x64-release/include/jpeglib.h \
-	../../deps/build-x64-release/include/lunasvg/lunasvg.h \
-	../../deps/build-x64-release/include/png.h \
+../$(BuildDir)/liblgi-gtk3$(Tag).so : \
 	../include/lgi/common/App.h \
 	../include/lgi/common/Array.h \
 	../include/lgi/common/AutoPtr.h \
