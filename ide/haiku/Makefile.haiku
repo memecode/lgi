@@ -78,6 +78,7 @@ Source =	../src/common/Text/HtmlCommon.cpp \
 			../src/common/Lgi/Mdi.cpp \
 			../src/common/Net/Ftp.cpp \
 			../src/common/Lgi/About.cpp \
+			../src/common/Net/Ssh.cpp \
 			src/MissingFiles.cpp \
 			src/IdeFindInFiles.cpp \
 			src/ProjectNode.cpp \
@@ -132,13 +133,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	xres -o $(Target) $(Build)/lgiide.rsrc
 	@echo Done.
 
-../$(BuildDir)/liblgi$(Tag).so : ../../deps/build-x64-release/include/iconv.h \
-	../../deps/build-x64-release/include/jconfig.h \
-	../../deps/build-x64-release/include/jerror.h \
-	../../deps/build-x64-release/include/jmorecfg.h \
-	../../deps/build-x64-release/include/jpeglib.h \
-	../../deps/build-x64-release/include/lunasvg/lunasvg.h \
-	../../deps/build-x64-release/include/png.h \
+../$(BuildDir)/liblgi$(Tag).so : \
 	../include/lgi/common/App.h \
 	../include/lgi/common/Array.h \
 	../include/lgi/common/AutoPtr.h \

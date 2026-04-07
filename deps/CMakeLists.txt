@@ -155,7 +155,7 @@ if (NOT USE_SYSTEM_PNG)
     set(PNG_BUILD_ZLIB OFF)
 endif()
 
-if (1)
+if (NOT HAIKU)
     # used by ide/lvc
     set(WITH_ZLIB TRUE)
     if (NOT USE_SYSTEM_ZLIB)

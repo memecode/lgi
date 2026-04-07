@@ -279,7 +279,7 @@ LgiFunc const char *LGetOsName();
 /// directory.
 ///
 /// \ingroup Base
-LgiFunc bool LExecute
+LgiExtern bool LExecute
 (
 	/// The file to open
 	const char *file,

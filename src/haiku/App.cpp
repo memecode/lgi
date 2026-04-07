@@ -392,12 +392,13 @@ void LApp::OnReceiveFiles(LArray<const char*> &Files)
 		LAssert(!"You probably want to set 'AppWnd' before calling LApp::Run... maybe.");
 }
 
-const char *LApp::GetArgumentAt(int n)
+/*
+LString LApp::GetArgumentAt(size_t n)
 {
-	return n >= 0 && n < d->Args.Args ? NewStr(d->Args.Arg[n]) : 0;
+	return n >= 0 && n < d->Args.Args ? LString(d->Args.Arg[n]) : LString();
 }
 
-bool LApp::GetOption(const char *Option, char *Dest, int DestLen)
+bool LApp::GetOption(const char *Option, char *Dest, size_t DestLen)
 {
 	LString Buf;
 	if (GetOption(Option, Buf))
@@ -470,6 +471,7 @@ bool LApp::GetOption(const char *Option, LString &Buf)
 
 	return false;
 }
+*/
 
 void LApp::OnCommandLine()
 {
