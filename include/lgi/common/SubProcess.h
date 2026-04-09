@@ -166,11 +166,11 @@ public:
 		std::function<void(int exitValue)> onComplete;
 		
 		// Object		
-		IoThread(const char *exe = nullptr, const char *args = nullptr);
+		IoThread(const char *exe = nullptr, const char *args = nullptr, const char *initFolder = nullptr);
 		~IoThread();
 		
 		// Methods:
-		bool Create(const char *exe, const char *args = nullptr);
+		bool Create(const char *exe, const char *args = nullptr, const char *initFolder = nullptr);
 		bool Start(bool ReadAccess = true, bool WriteAccess = false, bool MapStderrToStdout = true);
 		LSubProcess *GetProcess() const { return process; }
 		bool IsRunning() { return process ? process->IsRunning() : false; }
