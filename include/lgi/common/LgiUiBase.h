@@ -158,7 +158,8 @@ public:
 	OsEvent Event = nullptr;
 
 	virtual ~LUiEvent() {}
-	virtual void Trace(const char *Msg) const {}
+	virtual LString ToString() const = 0;
+	virtual void Trace(const char *Msg) const = 0;
 
 	/// The key or mouse button was being pressed. false on the up-click.
 	bool Down() const	{ return TestFlag(Flags, LGI_EF_DOWN); }
@@ -199,22 +200,22 @@ public:
 	#endif
 	
 	#if LGI_COCOA
-	void SetModifer(uint32_t modifierKeys);
+		void SetModifer(uint32_t modifierKeys);
 	#else
-	void SetModifer(uint32_t modifierKeys)
-	{
-		#if defined(__GTK_H__)
-		System((modifierKeys & Gtk::GDK_MOD4_MASK) != 0);
-		Shift((modifierKeys & Gtk::GDK_SHIFT_MASK) != 0);
-		Alt((modifierKeys & Gtk::GDK_MOD1_MASK) != 0);
-		Ctrl((modifierKeys & Gtk::GDK_CONTROL_MASK) != 0);
-		#elif LGI_CARBON
-		System(modifierKeys & cmdKey);
-		Shift(modifierKeys & shiftKey);
-		Alt(modifierKeys & optionKey);
-		Ctrl(modifierKeys & controlKey);
-		#endif
-	}
+		void SetModifer(uint32_t modifierKeys)
+		{
+			#if defined(__GTK_H__)
+				System((modifierKeys & Gtk::GDK_MOD4_MASK) != 0);
+				Shift((modifierKeys & Gtk::GDK_SHIFT_MASK) != 0);
+				Alt((modifierKeys & Gtk::GDK_MOD1_MASK) != 0);
+				Ctrl((modifierKeys & Gtk::GDK_CONTROL_MASK) != 0);
+			#elif LGI_CARBON
+				System(modifierKeys & cmdKey);
+				Shift(modifierKeys & shiftKey);
+				Alt(modifierKeys & optionKey);
+				Ctrl(modifierKeys & controlKey);
+			#endif
+		}
 	#endif
 };
 
@@ -263,13 +264,29 @@ public:
 	BMessage Archive() const;
 	#endif
 
-	void Trace(const char *Msg) const
+	LString ToString() const
 	{
-		LgiTrace("%s LKey vkey=%i(0x%x) c16=%i(%c) IsChar=%i down=%i ctrl=%i alt=%i sh=%i sys=%i\n",
-			Msg ? Msg : (char*)"",
-			vkey, vkey,
+		auto name = KeyName(vkey);
+		char value[16] = "";
+		if (!name)
+			snprintf(value, sizeof(value), "%i", vkey);
+		
+		return LString::Fmt("vkey=%s(0x%x) c16=%i(%c) IsChar=%i down=%i ctrl=%i alt=%i sh=%i sys=%i",
+			name ? name : value, vkey,
 			c16, c16 >= ' ' && c16 < 127 ? c16 : '.',
 			IsChar, Down(), Ctrl(), Alt(), Shift(), System());
+	}
+	
+	void Trace(const char *Msg) const
+	{
+		auto name = KeyName(vkey);
+		char value[16] = "";
+		if (!name)
+			snprintf(value, sizeof(value), "%i", vkey);
+		
+		LgiTrace("%s LKey %s\n",
+			Msg ? Msg : (char*)"",
+			ToString().Get());
 	}
 	
 	bool CapsLock() const
@@ -295,6 +312,9 @@ public:
 
 	/// \returns the utf8 verison of c16;
 	LString utf8() const;
+	
+	/// \returns the name of the key as a string
+	static const char *KeyName(char16 vkey);
 };
 
 /// \brief All the parameters of a mouse click event

@@ -2502,6 +2502,12 @@ IdeProject::IdeProject(AppWnd *App, ProjectNode *DepParent) : IdeCommon(NULL)
 
 IdeProject::~IdeProject()
 {
+	if (d->DepParent)
+	{
+		printf("%s:%i - ~IdeProject clearing DepParent->Dep...\n", _FL);
+		d->DepParent->OnProjectDelete(this);
+	}
+
 	d->App->GetBreakPointStore()->DeleteCallback(bpStoreCb);
 
 	d->App->OnProjectDestroy(this);

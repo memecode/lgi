@@ -89,9 +89,6 @@
     <ClCompile Include="..\..\..\src\win\Lgi\SpellCheckWindows.cpp">
       <Filter>Controls\RichTextEdit\Spelling</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\common\Widgets\Editor\ListBlock.cpp">
-      <Filter>Controls\RichTextEdit</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\common\Emoji.h">

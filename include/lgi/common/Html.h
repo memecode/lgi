@@ -120,7 +120,7 @@ public:
 	/// Select all the text in the control (not impl)
 	void SelectAll() override;
 	/// Return the selection in a dynamically allocated string
-	char *GetSelection() override;
+	LString GetSelection() override;
 	
 	// Prop
 

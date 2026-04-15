@@ -1226,7 +1226,7 @@ bool LWindow::HandleViewMouse(LView *v, LMouse &m)
 bool LWindow::HandleViewKey(LView *v, LKey &k)
 {
 	bool Status = false;
-	LViewI *Ctrl = 0;
+	LViewI *Ctrl = nullptr;
 	
 	#if DEBUG_HANDLEVIEWKEY
 	bool Debug = 1; // k.vkey == LK_RETURN;
@@ -1234,9 +1234,12 @@ bool LWindow::HandleViewKey(LView *v, LKey &k)
 	
 	// if (Debug)
 	{
-		LgiTrace("%s/%p::HandleViewKey=%i ischar=%i %s%s%s%s\n",
+		auto keyName = LKey::KeyName(k.vkey);
+		auto keyVal = LString::Fmt("%i", k.vkey);
+		
+		LgiTrace("%s/%p::HandleViewKey vkey=%s c16=%i ischar=%i %s%s%s%s\n",
 			v->GetClass(), v,
-			k.c16,
+			keyName ? keyName : keyVal.Get(), k.c16,
 			k.IsChar,
 			(char*)(k.Down()?" Down":" Up"),
 			(char*)(k.Shift()?" Shift":""),

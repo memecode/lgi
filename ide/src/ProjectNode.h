@@ -43,7 +43,6 @@ class ProjectNode :
 	LString Label;
 
 	IdeProject *Dep = NULL;
-	ProjectNode *DepParent = NULL;
 	int LinkAgainst = true;
 
 	// Import process
@@ -96,13 +95,14 @@ public:
 	bool GetFormats(LDragFormats &Formats) override;
 	bool GetData(LArray<LDragData> &Data) override;
 	
-	// Ui events
+	// Events
 	bool OnBeginDrag(LMouse &m) override;
 	bool OnKey(LKey &k) override;
 	void OnExpand(bool b) override;
 	void OnMouseClick(LMouse &m) override;
 	void OnProperties();
 	void OnPulse() override;
+	void OnProjectDelete(IdeProject *p);
 
 	// Serialization
 	bool Load(LDocView *Edit, NodeView *Callback) override;

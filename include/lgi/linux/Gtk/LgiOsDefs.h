@@ -418,166 +418,169 @@ enum MessageBoxType
 
 	#include <gdk/gdkkeysyms-compat.h>
 
-	typedef enum {
-		/* The keyboard syms have been cleverly chosen to map to ASCII */
-		LK_UNKNOWN		= 0,
-		LK_FIRST		= 0,
-		LK_BACKSPACE	= 8,
-		LK_TAB			= 9,
-		LK_CLEAR		= GDK_Clear,
-		LK_RETURN		= 13,
-		LK_PAUSE		= GDK_Pause,
-		LK_ESCAPE		= GDK_Escape,
-		LK_SPACE		= 32,
-		LK_EXCLAIM		= 33,
-		LK_QUOTEDBL		= 34,
-		LK_HASH			= 35,
-		LK_DOLLAR		= 36,
-		LK_AMPERSAND	= 38,
-		LK_QUOTE		= 39,
-		LK_LEFTPAREN	= 40,
-		LK_RIGHTPAREN	= 41,
-		LK_ASTERISK		= 42,
-		LK_PLUS			= 43,
-		LK_COMMA		= 44,
-		LK_MINUS		= 45,
-		LK_PERIOD		= 46,
-		LK_SLASH		= 47,
-		LK_0			= 48,
-		LK_1			= 49,
-		LK_2			= 50,
-		LK_3			= 51,
-		LK_4			= 52,
-		LK_5			= 53,
-		LK_6			= 54,
-		LK_7			= 55,
-		LK_8			= 56,
-		LK_9			= 57,
-		LK_COLON		= 58,
-		LK_SEMICOLON	= 59,
-		LK_LESS			= 60,
-		LK_EQUALS		= 61,
-		LK_GREATER		= 62,
-		LK_QUESTION		= 63,
-		LK_AT			= 64,
-		/* 
-		   Skip uppercase letters
-		 */
-		LK_LEFTBRACKET	= GDK_bracketleft,
-		LK_BACKSLASH	= GDK_backslash,
-		LK_RIGHTBRACKET	= GDK_bracketright,
-		LK_CARET		= 94,
-		LK_UNDERSCORE	= GDK_underscore,
-		LK_BACKQUOTE	= 96,
-		LK_a			= GDK_a,
-		LK_b			= GDK_b,
-		LK_c			= GDK_c,
-		LK_d			= GDK_d,
-		LK_e			= GDK_e,
-		LK_f			= GDK_f,
-		LK_g			= GDK_g,
-		LK_h			= GDK_h,
-		LK_i			= GDK_i,
-		LK_j			= GDK_j,
-		LK_k			= GDK_k,
-		LK_l			= GDK_l,
-		LK_m			= GDK_m,
-		LK_n			= GDK_n,
-		LK_o			= GDK_o,
-		LK_p			= GDK_p,
-		LK_q			= GDK_q,
-		LK_r			= GDK_r,
-		LK_s			= GDK_s,
-		LK_t			= GDK_t,
-		LK_u			= GDK_u,
-		LK_v			= GDK_v,
-		LK_w			= GDK_w,
-		LK_x			= GDK_x,
-		LK_y			= GDK_y,
-		LK_z			= GDK_z,
-		/* End of ASCII mapped keysyms */
-
-		/* Numeric keypad */
-		LK_KEYPADENTER	= GDK_KP_Enter,
-		LK_KP0			= GDK_KP_0,
-		LK_KP1			= GDK_KP_1,
-		LK_KP2			= GDK_KP_2,
-		LK_KP3			= GDK_KP_3,
-		LK_KP4			= GDK_KP_4,
-		LK_KP5			= GDK_KP_5,
-		LK_KP6			= GDK_KP_6,
-		LK_KP7			= GDK_KP_7,
-		LK_KP8			= GDK_KP_8,
-		LK_KP9			= GDK_KP_9,
-		LK_KP_PERIOD	= GDK_KP_Decimal,
-		LK_KP_DELETE	= GDK_KP_Delete,
-		LK_KP_MULTIPLY	= GDK_KP_Multiply,
-		LK_KP_PLUS		= GDK_KP_Add,
-		LK_KP_MINUS		= GDK_KP_Subtract,
-		LK_KP_DIVIDE	= GDK_KP_Divide,
-		LK_KP_EQUALS	= GDK_KP_Equal,
-
-		/* Arrows + Home/End pad */
-		LK_HOME			= GDK_Home,
-		LK_LEFT			= GDK_Left,
-		LK_UP			= GDK_Up,
-		LK_RIGHT		= GDK_Right,
-		LK_DOWN			= GDK_Down,
-		LK_PAGEUP		= GDK_Page_Up,
-		LK_PAGEDOWN		= GDK_Page_Down,
-		LK_END			= GDK_End,
-		LK_INSERT		= GDK_Insert,
-
-		/* Function keys */
-		LK_F1			= GDK_F1,
-		LK_F2			= GDK_F2,
-		LK_F3			= GDK_F3,
-		LK_F4			= GDK_F4,
-		LK_F5			= GDK_F5,
-		LK_F6			= GDK_F6,
-		LK_F7			= GDK_F7,
-		LK_F8			= GDK_F8,
-		LK_F9			= GDK_F9,
-		LK_F10			= GDK_F10,
-		LK_F11			= GDK_F11,
-		LK_F12			= GDK_F12,
-		LK_F13			= GDK_F13,
-		LK_F14			= GDK_F14,
-		LK_F15			= GDK_F15,
-
-		/* Key state modifier keys */
-		LK_NUMLOCK		= GDK_Num_Lock,
-		LK_CAPSLOCK		= GDK_Caps_Lock,
-		LK_SCROLLOCK	= GDK_Scroll_Lock,
-		LK_LSHIFT		= GDK_Shift_L,
-		LK_RSHIFT		= GDK_Shift_R,
-		LK_LCTRL		= GDK_Control_L,
-		LK_RCTRL		= GDK_Control_R,
-		LK_LALT			= GDK_Alt_L,
-		LK_RALT			= GDK_Alt_R,
-		LK_LMETA		= GDK_Hyper_L,
-		LK_RMETA		= GDK_Hyper_R,
-		LK_LSUPER		= GDK_Super_L, /* "Windows" key */
-		LK_RSUPER		= GDK_Super_R,
-
-		/* Miscellaneous function keys */
-		LK_HELP			= GDK_Help,
-		LK_PRINT		= GDK_Print,
-		LK_SYSREQ		= GDK_Sys_Req,
-		LK_BREAK		= GDK_Break,
-		LK_MENU			= GDK_Menu,
-		LK_UNDO			= GDK_Undo,
-		LK_REDO			= GDK_Redo,
-		LK_EURO			= GDK_EuroSign, /* Some european keyboards */
-		LK_COMPOSE		= GDK_Multi_key, /* Multi-key compose key */
-		LK_MODE			= GDK_Mode_switch, /* "Alt Gr" key (could be wrong) */
-		LK_DELETE		= GDK_Delete,
-		LK_POWER		= 0x10000,	/* Power Macintosh power key */
-		LK_CONTEXTKEY	= GDK_Menu,
-
+	#define L_ALL_KEYS() \
+		/* The keyboard syms have been cleverly chosen to map to ASCII */ \
+		_(LK_UNKNOWN, 0) \
+		_(LK_BACKSPACE, 8) \
+		_(LK_TAB, 9) \
+		_(LK_CLEAR, GDK_Clear) \
+		_(LK_RETURN, 13) \
+		_(LK_PAUSE, GDK_Pause) \
+		_(LK_ESCAPE, GDK_Escape) \
+		_(LK_SPACE, 32) \
+		_(LK_EXCLAIM, 33) \
+		_(LK_QUOTEDBL, 34) \
+		_(LK_HASH, 35) \
+		_(LK_DOLLAR, 36) \
+		_(LK_AMPERSAND, 38) \
+		_(LK_QUOTE, 39) \
+		_(LK_LEFTPAREN, 40) \
+		_(LK_RIGHTPAREN, 41) \
+		_(LK_ASTERISK, 42) \
+		_(LK_PLUS, 43) \
+		_(LK_COMMA, 44) \
+		_(LK_MINUS, 45) \
+		_(LK_PERIOD, 46) \
+		_(LK_SLASH, 47) \
+		_(LK_0, 48) \
+		_(LK_1, 49) \
+		_(LK_2, 50) \
+		_(LK_3, 51) \
+		_(LK_4, 52) \
+		_(LK_5, 53) \
+		_(LK_6, 54) \
+		_(LK_7, 55) \
+		_(LK_8, 56) \
+		_(LK_9, 57) \
+		_(LK_COLON, 58) \
+		_(LK_SEMICOLON, 59) \
+		_(LK_LESS, 60) \
+		_(LK_EQUALS, 61) \
+		_(LK_GREATER, 62) \
+		_(LK_QUESTION, 63) \
+		_(LK_AT, 64) \
+		\
+		/* Skip uppercase letters */ \
+		_(LK_LEFTBRACKET, GDK_bracketleft) \
+		_(LK_BACKSLASH, GDK_backslash) \
+		_(LK_RIGHTBRACKET, GDK_bracketright) \
+		_(LK_CARET, 94) \
+		_(LK_UNDERSCORE, GDK_underscore) \
+		_(LK_BACKQUOTE, 96) \
+		_(LK_a, GDK_a) \
+		_(LK_b, GDK_b) \
+		_(LK_c, GDK_c) \
+		_(LK_d, GDK_d) \
+		_(LK_e, GDK_e) \
+		_(LK_f, GDK_f) \
+		_(LK_g, GDK_g) \
+		_(LK_h, GDK_h) \
+		_(LK_i, GDK_i) \
+		_(LK_j, GDK_j) \
+		_(LK_k, GDK_k) \
+		_(LK_l, GDK_l) \
+		_(LK_m, GDK_m) \
+		_(LK_n, GDK_n) \
+		_(LK_o, GDK_o) \
+		_(LK_p, GDK_p) \
+		_(LK_q, GDK_q) \
+		_(LK_r, GDK_r) \
+		_(LK_s, GDK_s) \
+		_(LK_t, GDK_t) \
+		_(LK_u, GDK_u) \
+		_(LK_v, GDK_v) \
+		_(LK_w, GDK_w) \
+		_(LK_x, GDK_x) \
+		_(LK_y, GDK_y) \
+		_(LK_z, GDK_z) \
+		/* End of ASCII mapped keysyms */ \
+		\
+		/* Numeric keypad */ \
+		_(LK_KEYPADENTER, GDK_KP_Enter) \
+		_(LK_KP0, GDK_KP_0) \
+		_(LK_KP1, GDK_KP_1) \
+		_(LK_KP2, GDK_KP_2) \
+		_(LK_KP3, GDK_KP_3) \
+		_(LK_KP4, GDK_KP_4) \
+		_(LK_KP5, GDK_KP_5) \
+		_(LK_KP6, GDK_KP_6) \
+		_(LK_KP7, GDK_KP_7) \
+		_(LK_KP8, GDK_KP_8) \
+		_(LK_KP9, GDK_KP_9) \
+		_(LK_KP_PERIOD, GDK_KP_Decimal) \
+		_(LK_KP_DELETE, GDK_KP_Delete) \
+		_(LK_KP_MULTIPLY, GDK_KP_Multiply) \
+		_(LK_KP_PLUS, GDK_KP_Add) \
+		_(LK_KP_MINUS, GDK_KP_Subtract) \
+		_(LK_KP_DIVIDE, GDK_KP_Divide) \
+		_(LK_KP_EQUALS, GDK_KP_Equal) \
+		\
+		/* Arrows + Home/End pad */ \
+		_(LK_HOME, GDK_Home) \
+		_(LK_LEFT, GDK_Left) \
+		_(LK_UP, GDK_Up) \
+		_(LK_RIGHT, GDK_Right) \
+		_(LK_DOWN, GDK_Down) \
+		_(LK_PAGEUP, GDK_Page_Up) \
+		_(LK_PAGEDOWN, GDK_Page_Down) \
+		_(LK_END, GDK_End) \
+		_(LK_INSERT, GDK_Insert) \
+		\
+		/* Function keys */ \
+		_(LK_F1, GDK_F1) \
+		_(LK_F2, GDK_F2) \
+		_(LK_F3, GDK_F3) \
+		_(LK_F4, GDK_F4) \
+		_(LK_F5, GDK_F5) \
+		_(LK_F6, GDK_F6) \
+		_(LK_F7, GDK_F7) \
+		_(LK_F8, GDK_F8) \
+		_(LK_F9, GDK_F9) \
+		_(LK_F10, GDK_F10) \
+		_(LK_F11, GDK_F11) \
+		_(LK_F12, GDK_F12) \
+		_(LK_F13, GDK_F13) \
+		_(LK_F14, GDK_F14) \
+		_(LK_F15, GDK_F15) \
+		\
+		/* Key state modifier keys */ \
+		_(LK_NUMLOCK, GDK_Num_Lock) \
+		_(LK_CAPSLOCK, GDK_Caps_Lock) \
+		_(LK_SCROLLOCK, GDK_Scroll_Lock) \
+		_(LK_LSHIFT, GDK_Shift_L) \
+		_(LK_RSHIFT, GDK_Shift_R) \
+		_(LK_LCTRL, GDK_Control_L) \
+		_(LK_RCTRL, GDK_Control_R) \
+		_(LK_LALT, GDK_Alt_L) \
+		_(LK_RALT, GDK_Alt_R) \
+		_(LK_LMETA, GDK_Hyper_L) \
+		_(LK_RMETA, GDK_Hyper_R) \
+		_(LK_LSUPER, GDK_Super_L) /* "Windows" key */ \
+		_(LK_RSUPER, GDK_Super_R) \
+		\
+		/* Miscellaneous function keys */ \
+		_(LK_HELP, GDK_Help) \
+		_(LK_PRINT, GDK_Print) \
+		_(LK_SYSREQ, GDK_Sys_Req) \
+		_(LK_BREAK, GDK_Break) \
+		_(LK_MENU, GDK_Menu) \
+		_(LK_UNDO, GDK_Undo) \
+		_(LK_REDO, GDK_Redo) \
+		_(LK_EURO, GDK_EuroSign) /* Some european keyboards */ \
+		_(LK_COMPOSE, GDK_Multi_key) /* Multi-key compose key */ \
+		_(LK_MODE, GDK_Mode_switch) /* "Alt Gr" key (could be wrong) */ \
+		_(LK_DELETE, GDK_Delete) \
+		_(LK_POWER, 0x10000) /* Power Macintosh power key */ \
+		/*_(LK_CONTEXTKEY, GDK_Menu)*/ \
+		\
 		/* Add any other keys here */
+
+	typedef enum {
+		#define _(name, val) name = val,
+		L_ALL_KEYS()
+		#undef _
 		LK_LAST
-	} LgiKey;
+	}	LgiKey;
 
 #else
 

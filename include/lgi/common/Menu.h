@@ -444,6 +444,8 @@ public:
 	LAccelerator(int flags, int vkey, int chr, int id);
 	
 	int GetId() { return Id; }
+	LString ToString() const;
+	void Trace(const char *Msg) const;
 
 	/// See if the accelerator matchs a keyboard event
 	bool Match(LKey &k);

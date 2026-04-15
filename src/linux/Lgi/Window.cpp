@@ -16,7 +16,7 @@ using namespace Gtk;
 #include "LgiWidget.h"
 
 #define DEBUG_SETFOCUS			0
-#define DEBUG_HANDLEVIEWKEY		0
+#define DEBUG_HANDLEVIEWKEY		1
 #define DEBUG_POUR				0
 
 #if DEBUG_POUR
@@ -1293,14 +1293,17 @@ bool LWindow::HandleViewKey(LView *v, LKey &k)
 	LViewI *Ctrl = 0;
 	
 	#if DEBUG_HANDLEVIEWKEY
-	bool Debug = 1; // k.vkey == LK_RETURN;
+	bool Debug = k.vkey != LK_LSHIFT && k.vkey != LK_LCTRL;
 	char SafePrint = k.c16 < ' ' ? ' ' : k.c16;
 	
 	// if (Debug)
 	{
-		LgiTrace("%s/%p::HandleViewKey=%i ischar=%i %s%s%s%s (d->Focus=%s/%p)\n",
+		auto keyName = LKey::KeyName(k.vkey);
+		auto keyVal = IsAlpha(k.vkey) ? LString::Fmt("'%c'", k.vkey) : LString::Fmt("%i", k.vkey);
+
+		LgiTrace("%s/%p::HandleViewKey vkey=%s c16=%i ischar=%i %s%s%s%s (d->Focus=%s/%p)\n",
 			v->GetClass(), v,
-			k.c16,
+			keyName ? keyName : keyVal.Get(), k.c16,
 			k.IsChar,
 			(char*)(k.Down()?" Down":" Up"),
 			(char*)(k.Shift()?" Shift":""),
@@ -1311,8 +1314,7 @@ bool LWindow::HandleViewKey(LView *v, LKey &k)
 	#endif
 
 	// Any window in a popup always gets the key...
-	LViewI *p;
-	for (p = v->GetParent(); p; p = p->GetParent())
+	for (auto p = v->GetParent(); p; p = p->GetParent())
 	{
 		if (dynamic_cast<LPopup*>(p))
 		{
@@ -1400,7 +1402,6 @@ bool LWindow::HandleViewKey(LView *v, LKey &k)
 		}
 	}
 
-	// printf("Ctrl=%p\n", Ctrl);
 	if (Ctrl)
 	{
 		if (Ctrl->Enabled())
