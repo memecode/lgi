@@ -93,6 +93,9 @@ protected:
 	LSubProcess *Parent, *Child;
 
 public:
+	/// This is printed when the sub-process fails to start.
+	constexpr static const char *sErrorStr = "LSUBPROCESS_ERROR_STR";
+
 	// Object
 	LSubProcess(const char *exe, const char *args = NULL, bool pseudoConsole = false);
 	~LSubProcess();

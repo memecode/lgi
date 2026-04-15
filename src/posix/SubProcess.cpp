@@ -427,24 +427,24 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 	bool Status = false;
 
 	#ifdef HAIKU
-	// Haiku has issues when you try and execute something that doesn't exist:
-	//		https://dev.haiku-os.org/ticket/18576
-	// This is to try and work around that issue. I tried just execvp'ing 'ls' but
-	// it doesn't work. The locks are still all messed up.
-	if (!LFileExists(d->Exe))
-	{
-		auto exe = FindInPath(d->Exe);
-		if (!exe)
+		// Haiku has issues when you try and execute something that doesn't exist:
+		//		https://dev.haiku-os.org/ticket/18576
+		// This is to try and work around that issue. I tried just execvp'ing 'ls' but
+		// it doesn't work. The locks are still all messed up.
+		if (!LFileExists(d->Exe))
 		{
-			LgiTrace("%s:%i - '%s' not found.\n", _FL, d->Exe.Get());
-			return false;
+			auto exe = FindInPath(d->Exe);
+			if (!exe)
+			{
+				LgiTrace("%s:%i - '%s' not found.\n", _FL, d->Exe.Get());
+				return false;
+			}
+			d->Exe = exe;
 		}
-		d->Exe = exe;
-	}
 	#endif
 
 	#if DEBUG_SUBPROCESS
-	LgiTrace("%s:%i - %p::Start(%i,%i,%i)\n", _FL, this, ReadAccess, WriteAccess, MapStderrToStdout);
+		LgiTrace("%s:%i - %p::Start(%i,%i,%i)\n", _FL, this, ReadAccess, WriteAccess, MapStderrToStdout);
 	#endif
 
 	int in[2];
@@ -501,7 +501,7 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 		close(out[1]);
 
 		// Execute the child
-		d->Args.Add(NULL);
+		d->Args.Add(nullptr);
 		
 		LString::Array Path;
 		if (!LFileExists(d->Exe))
@@ -560,7 +560,7 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 
 		// Execution will pass to here if the 'Exe' can't run or doesn't exist
 		// So by exiting with an error the parent process can handle it.
-		printf("LSUBPROCESS_ERROR\n");
+		printf("%s\n", sErrorStr);
 
 		#if defined(MAC) || defined(HAIKU)
 		// While 'exit' would be nice and clean it does cause crashes in free the global InitLibPng object
