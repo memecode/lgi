@@ -1238,16 +1238,16 @@ struct FileLoc
 class AppWndPrivate
 {
 public:
-	AppWnd *App = NULL;
+	AppWnd *App = nullptr;
 	int Platform = 0;
-	LMdiParent *Mdi = NULL;
+	LMdiParent *Mdi = nullptr;
 	LOptionsFile Options;
-	LBox *HBox = NULL, *VBox = NULL;
+	LBox *HBox = nullptr, *VBox = nullptr;
 	List<IdeDoc> Docs;
 	List<IdeProject> Projects;
-	LImageList *Icons = NULL;
-	LTree *Tree = NULL;
-	IdeOutput *Output = NULL;
+	LImageList *Icons = nullptr;
+	LTree *Tree = nullptr;
+	IdeOutput *Output = nullptr;
 	bool Debugging = false;
 	bool Running = false;
 	bool Building = false;
@@ -2898,8 +2898,7 @@ struct SaveState
 	{
 		if (Docs.Length())
 		{
-			auto doc = Docs[0];
-			Docs.DeleteAt(0);
+			auto doc = Docs.PopFirst();
 			
 			SAVE_LOG("Saving doc...\n");
 			doc->SetClean([this, doc](bool ok)
@@ -2920,8 +2919,7 @@ struct SaveState
 		}
 		else if (Projects.Length())
 		{
-			auto proj = Projects[0];
-			Projects.DeleteAt(0);
+			auto proj = Projects.PopFirst();
 			
 			SAVE_LOG("Saving proj...\n");
 			proj->SetClean([this, proj](bool ok)
@@ -3695,7 +3693,11 @@ LMessage::Result AppWnd::OnEvent(LMessage *m)
 		{
 			if (!d->Output)
 				break;
+				
+			
 			d->Output->Value(m->A());
+			if (m->B() && m->A() >= 0 && m->A() < AppWnd::Channels::ChannelMax)
+				d->Output->Txt[m->A()]->Name(nullptr);
 			break;
 		}
 		case M_DEBUG_ON_STATE:
@@ -4429,7 +4431,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				auto Edit = dynamic_cast<LTextView3*>(Focus);
 				if (Edit && Edit->HasSelection())
 				{
-					LAutoString a(Edit->GetSelection());
+					auto a = Edit->GetSelection();
 					Dlg->Params->Text = a;
 				}
 			}
@@ -4467,7 +4469,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 					if (auto backend = p->GetBackend())
 					{
 						backend->FindInFiles(d->FindParameters, GetFindLog());
-						PostThreadEvent(d->AppHnd, M_SELECT_TAB, AppWnd::FindTab);
+						PostThreadEvent(d->AppHnd, M_SELECT_TAB, AppWnd::FindTab, true);
 					}
 					else // local find in the files:
 					{

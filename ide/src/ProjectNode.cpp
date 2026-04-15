@@ -947,6 +947,15 @@ bool ProjectNode::OnKey(LKey &k)
 	return false;
 }
 
+void ProjectNode::OnProjectDelete(IdeProject *p)
+{
+	// This should be Dep
+	if (p == Dep)
+		Dep = nullptr;
+	else
+		LAssert(!"wrong pointer?");
+}
+
 void ProjectNode::OnPulse()
 {
 	auto StartTs = LCurrentTime();

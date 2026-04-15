@@ -1366,6 +1366,8 @@ bool LMenu::SetPrefAndAboutItems(int a, int b)
 
 bool LMenu::OnKey(LView *v, LKey &k)
 {
+	// LOG("LMenu::OnKey k=%s\n", k.ToString().Get());
+
 	if (k.Down())
 	{
 		for (auto a: Accel)
@@ -1439,6 +1441,17 @@ LAccelerator::LAccelerator(int flags, int vkey, int chr, int id)
 	Vkey = vkey;
 	Chr = chr;
 	Id = id;
+}
+
+LString LAccelerator::ToString() const
+{
+	return LString::Fmt("vkey=%i chr=%i flags=%x id=%i\n",
+		Vkey, Chr, Flags, Id);
+}
+
+void LAccelerator::Trace(const char *Msg) const
+{
+	LgiTrace("%s Accelerator %s\n", Msg, ToString().Get());
 }
 
 bool LAccelerator::Match(LKey &k)

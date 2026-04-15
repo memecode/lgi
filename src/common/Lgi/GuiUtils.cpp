@@ -51,6 +51,17 @@ bool LKey::IsContextMenu() const
 	return !IsChar && vkey == LK_CONTEXTKEY;
 }
 
+const char *LKey::KeyName(char16 vkey)
+{
+	switch (vkey)
+	{
+		#define _(name, val) case val: return #name;
+		L_ALL_KEYS()
+		#undef _
+	}
+	return nullptr;
+}
+
 #ifdef HAIKU
 
 LKey::LKey(BMessage *m)

@@ -7939,9 +7939,9 @@ void LHtml::SetLoadImages(bool i)
 	}
 }
 
-char *LHtml::GetSelection()
+LString LHtml::GetSelection()
 {
-	char *s = 0;
+	LString s;
 
 	if (Cursor && Selection)
 	{
@@ -7949,18 +7949,19 @@ char *LHtml::GetSelection()
 		bool InSelection = false;
 		Tag->CopyClipboard(p, InSelection);
 
-		int Len = (int)p.GetSize();
+		auto Len = p.GetSize();
 		if (Len > 0)
 		{
-			char16 *t = (char16*)p.New(sizeof(char16));
+			auto t = (char16*)p.New(sizeof(char16));
 			if (t)
 			{
 				size_t Len = StrlenW(t);
 				for (int i=0; i<Len; i++)
 				{
-					if (t[i] == 0xa0) t[i] = ' ';
+					if (t[i] == 0xa0)
+						t[i] = ' ';
 				}
-				s = WideToUtf8(t);
+				s = t;
 				DeleteArray(t);
 			}
 		}

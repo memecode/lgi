@@ -203,6 +203,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		{
 			onShutdown();
 			onShutdown = nullptr;
+			backend = nullptr;
 		}
 	}
 	

@@ -1690,7 +1690,7 @@ bool LTree::OnKey(LKey &k)
 					case 'F':
 					case 'f':
 					{
-						if (k.Ctrl())
+						if (k.Ctrl() && !k.Shift())
 						{
 							SendNotify(LNotifyContainerFind);
 							return true;

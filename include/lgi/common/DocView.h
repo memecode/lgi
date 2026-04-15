@@ -358,7 +358,7 @@ public:
 	/// Select all the text in the control
 	virtual void SelectAll() {}
 	/// Get the selection as a dynamicially allocated utf-8 string
-	virtual char *GetSelection() { return 0; }
+	virtual LString GetSelection() { return LString(); }
 
 	/// Returns the character index at the x,y location
 	virtual ssize_t IndexAt(int x, int y) { return 0; }

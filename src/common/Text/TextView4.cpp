@@ -1991,15 +1991,16 @@ LRange LTextView4::GetSelectionRange()
 	return r;
 }
 
-char *LTextView4::GetSelection()
+LString LTextView4::GetSelection()
 {
-	LRange s = GetSelectionRange();
-	if (s.Len > 0)
+	LString ret;
+	if (auto s = GetSelectionRange())
 	{
-		return (char*)LNewConvertCp("utf-8", Text + s.Start, LGI_WideCharset, s.Len*sizeof(Text[0]) );
+		LAutoString txt((char*) LNewConvertCp("utf-8", Text + s.Start, LGI_WideCharset, s.Len*sizeof(Text[0]) ));
+		ret = txt.Get();
 	}
 
-	return 0;
+	return ret;
 }
 
 bool LTextView4::HasSelection()
@@ -2895,7 +2896,7 @@ void LTextView4::DoReplace(std::function<void(bool)> Callback)
 		}
 	}
 
-	LAutoString LastFind8(SingleLineSelection ? GetSelection() : WideToUtf8(d->FindReplaceParams->LastFind));
+	LString LastFind8(SingleLineSelection ? GetSelection() : LString(d->FindReplaceParams->LastFind));
 	LAutoString LastReplace8(WideToUtf8(d->FindReplaceParams->LastReplace));
 	
 	auto Dlg = new LReplaceDlg(this,
