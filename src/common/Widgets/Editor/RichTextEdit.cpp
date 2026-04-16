@@ -464,16 +464,18 @@ bool LRichTextEdit::NameW(const char16 *s)
 	return Name(a);
 }
 
-char *LRichTextEdit::GetSelection()
+LString LRichTextEdit::GetSelection()
 {
+	LString s;
 	if (!HasSelection())
-		return NULL;
+		return s;
 
 	LArray<char16> Text;
 	if (!d->GetSelection(&Text, NULL))
-		return NULL;
+		return s;
 	
-	return WideToUtf8(&Text[0]);
+	s = Text.AddressOf();
+	return s;
 }
 
 bool LRichTextEdit::HasSelection()

@@ -4683,7 +4683,11 @@ void VcFolder::Commit(const char *Msg, const char *Branch, bool AndPush)
 	if (CurrentBranch && Branch &&
 		!CurrentBranch.Equals(Branch))
 	{
-		int Response = LgiMsg(GetTree(), "Do you want to start a new branch?", AppName, MB_YESNO);
+		auto Msg = LString::Fmt("%s\ncur=%s new=%s",
+			LLoadString(IDS_NEW_BRANCH_Q),
+			CurrentBranch.Get(),
+			Branch);
+		auto Response = LgiMsg(GetTree(), Msg, AppName, MB_YESNO);
 		if (Response != IDYES)
 			return;
 

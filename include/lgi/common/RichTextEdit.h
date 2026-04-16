@@ -165,7 +165,7 @@ public:
 	bool GetLineColumnAtIndex(LPoint &Pt, ssize_t Index = -1) override;
 	size_t GetLines() override;
 	void GetTextExtent(int &x, int &y) override;
-	char *GetSelection() override;
+	LString GetSelection() override;
 	void SetStylePrefix(LString s);
 	bool IsBusy(bool Stop = false);
 

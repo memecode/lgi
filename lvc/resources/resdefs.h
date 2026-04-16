@@ -129,3 +129,4 @@
 #define IDS_REVERT_BEFORE						532
 #define ID_CLOSE								533
 #define ID_BRANCH_EDIT							534
+#define IDS_NEW_BRANCH_Q						535
