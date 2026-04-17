@@ -104,6 +104,7 @@
 		340BE2302D14B5FB007003B5 /* commands.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = commands.svg; path = ../resources/commands.svg; sourceTree = "<group>"; };
 		3411DB712AB86D6700CB3837 /* PostBuildStep.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = PostBuildStep.py; sourceTree = "<group>"; };
 		341C7AC721A752DC0083C9CE /* About.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = About.cpp; path = ../../src/common/Lgi/About.cpp; sourceTree = "<group>"; };
+		341DF5D82F92EA3200AFED9A /* Ssh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Ssh.h; path = /Users/matthew/code/lgi/trunk/include/lgi/common/Ssh.h; sourceTree = "<absolute>"; };
 		343688C72CA7924B0009E57A /* SystemIntf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SystemIntf.h; path = ../../include/lgi/common/SystemIntf.h; sourceTree = "<group>"; };
 		343688C82CA7924B0009E57A /* SystemIntf.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SystemIntf.cpp; path = ../../src/common/Lgi/SystemIntf.cpp; sourceTree = "<group>"; };
 		343688CA2CA793210009E57A /* libssh.4.9.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssh.4.9.6.dylib; path = ../../../../../../../opt/local/lib/libssh.4.9.6.dylib; sourceTree = "<group>"; };
@@ -327,6 +328,7 @@
 		348341372CC4B5CE002AF938 /* RemoteFileSelect */ = {
 			isa = PBXGroup;
 			children = (
+				341DF5D82F92EA3200AFED9A /* Ssh.h */,
 				349E73722ECFB36100A68615 /* Ssh.cpp */,
 				34D21CE12179788B003D1EA6 /* Ftp.cpp */,
 				343688C82CA7924B0009E57A /* SystemIntf.cpp */,

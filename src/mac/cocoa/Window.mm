@@ -345,6 +345,7 @@ public:
 
 - (void)windowDidMove:(NSNotification*)event
 {
+	/*
 	LNsWindow *w = event.object;
 	LRect r = w.frame;
 	printf("windowDidMove: %s\n", r.GetStr());
@@ -354,6 +355,7 @@ public:
 		LRect frame = s.frame;
 		LgiTrace("	frame=%s\n", frame.GetStr());
 	}
+	*/
 }
 
 - (BOOL)windowShouldClose:(NSWindow*)sender
@@ -1261,7 +1263,7 @@ void LWindow::OnPosChange()
 		d->Sy = Y();
 	}
 	
-	LgiTrace("%s::OnPosChange %s\n", GetClass(), GetPos().GetStr());
+	// LgiTrace("%s::OnPosChange %s\n", GetClass(), GetPos().GetStr());
 }
 
 #define IsTool(v) \

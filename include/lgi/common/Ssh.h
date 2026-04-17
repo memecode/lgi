@@ -27,6 +27,11 @@
 #else
 	#define SSH_SLOG(...)
 #endif
+#if 1
+	#define SSH_LOG(...)			Log ? Log->Print(__VA_ARGS__) : printf(__VA_ARGS__)
+#else
+	#define SSH_LOG(...)
+#endif
 
 class LSsh
 {

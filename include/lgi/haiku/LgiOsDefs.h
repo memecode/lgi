@@ -279,166 +279,162 @@ enum MessageBoxType
 /// \sa LMouse
 #define LGI_VMOUSE_DOUBLE			0x400
 
+#define L_ALL_KEYS() \
+	/* The keyboard syms have been cleverly chosen to map to ASCII */ \
+	_(LK_UNKNOWN, 0) \
+	_(LK_FIRST, 0) \
+	_(LK_BACKSPACE, B_BACKSPACE) \
+	_(LK_TAB, B_TAB) \
+	_(LK_RETURN, B_RETURN) \
+	_(LK_ESCAPE, B_ESCAPE) \
+	_(LK_SPACE, B_SPACE) \
+	_(LK_EXCLAIM, '!') \
+	_(LK_QUOTEDBL, '\"') \
+	_(LK_HASH, '#') \
+	_(LK_DOLLAR, '$') \
+	_(LK_AMPERSAND, '&') \
+	_(LK_QUOTE, '\'') \
+	_(LK_LEFTPAREN, '(') \
+	_(LK_RIGHTPAREN, ')') \
+	_(LK_ASTERISK, '*') \
+	_(LK_PLUS, '+') \
+	_(LK_COMMA, ',') \
+	_(LK_MINUS, '-') \
+	_(LK_PERIOD, '.') \
+	_(LK_SLASH, '/') \
+	_(LK_0, '0') \
+	_(LK_1, '1') \
+	_(LK_2, '2') \
+	_(LK_3, '3') \
+	_(LK_4, '4') \
+	_(LK_5, '5') \
+	_(LK_6, '6') \
+	_(LK_7, '7') \
+	_(LK_8, '8') \
+	_(LK_9, '9') \
+	_(LK_COLON, ':') \
+	_(LK_SEMICOLON, ';') \
+	_(LK_LESS, '<') \
+	_(LK_EQUALS, '=') \
+	_(LK_GREATER, '>') \
+	_(LK_QUESTION, '?') \
+	_(LK_AT, '@') \
+	/* Skip uppercase letters */ \
+	_(LK_LEFTBRACKET, '[') \
+	_(LK_BACKSLASH, '\\') \
+	_(LK_RIGHTBRACKET, ']') \
+	_(LK_CARET, '^') \
+	_(LK_UNDERSCORE, '_') \
+	_(LK_BACKQUOTE, 96) \
+	_(LK_a, 'a') \
+	_(LK_b, 'b') \
+	_(LK_c, 'c') \
+	_(LK_d, 'd') \
+	_(LK_e, 'e') \
+	_(LK_f, 'f') \
+	_(LK_g, 'g') \
+	_(LK_h, 'h') \
+	_(LK_i, 'i') \
+	_(LK_j, 'j') \
+	_(LK_k, 'k') \
+	_(LK_l, 'l') \
+	_(LK_m, 'm') \
+	_(LK_n, 'n') \
+	_(LK_o, 'o') \
+	_(LK_p, 'p') \
+	_(LK_q, 'q') \
+	_(LK_r, 'r') \
+	_(LK_s, 's') \
+	_(LK_t, 't') \
+	_(LK_u, 'u') \
+	_(LK_v, 'v') \
+	_(LK_w, 'w') \
+	_(LK_x, 'x') \
+	_(LK_y, 'y') \
+	_(LK_z, 'z') \
+	/* End of ASCII mapped keysyms */ \
+	\
+	/* Arrows + Home/End pad */ \
+	_(LK_HOME, B_HOME) \
+	_(LK_LEFT, B_LEFT_ARROW) \
+	_(LK_UP, B_UP_ARROW) \
+	_(LK_RIGHT, B_RIGHT_ARROW) \
+	_(LK_DOWN, B_DOWN_ARROW) \
+	_(LK_PAGEUP, B_PAGE_UP) \
+	_(LK_PAGEDOWN, B_PAGE_DOWN) \
+	_(LK_END, B_END) \
+	_(LK_INSERT, B_INSERT) \
+	_(LK_DELETE, B_DELETE) \
+	/* Numeric keypad */ \
+	_(LK_KEYPADENTER, 1000) \
+	_(LK_KP0, 1001) \
+	_(LK_KP1, 1002) \
+	_(LK_KP2, 1003) \
+	_(LK_KP3, 1004) \
+	_(LK_KP4, 1005) \
+	_(LK_KP5, 1006) \
+	_(LK_KP6, 1007) \
+	_(LK_KP7, 1008) \
+	_(LK_KP8, 1009) \
+	_(LK_KP9, 1010) \
+	_(LK_KP_PERIOD, 1011) \
+	_(LK_KP_DELETE, 1012) \
+	_(LK_KP_MULTIPLY, 1013) \
+	_(LK_KP_PLUS, 1014) \
+	_(LK_KP_MINUS, 1015) \
+	_(LK_KP_DIVIDE, 1016) \
+	_(LK_KP_EQUALS, 1017) \
+	/* Function keys */ \
+	_(LK_F1, 1018) \
+	_(LK_F2, 1019) \
+	_(LK_F3, 1020) \
+	_(LK_F4, 1021) \
+	_(LK_F5, 1022) \
+	_(LK_F6, 1023) \
+	_(LK_F7, 1024) \
+	_(LK_F8, 1025) \
+	_(LK_F9, 1026) \
+	_(LK_F10, 1027) \
+	_(LK_F11, 1028) \
+	_(LK_F12, 1029) \
+	_(LK_F13, 1030) \
+	_(LK_F14, 1031) \
+	_(LK_F15, 1032) \
+	/* Key state modifier keys */ \
+	_(LK_NUMLOCK, 1033) \
+	_(LK_CAPSLOCK, 1034) \
+	_(LK_SCROLLOCK, 1035) \
+	_(LK_LSHIFT, 1036) \
+	_(LK_RSHIFT, 1037) \
+	_(LK_LCTRL, 1038) \
+	_(LK_RCTRL, 1039) \
+	_(LK_LALT, 1040) \
+	_(LK_RALT, 1041) \
+	_(LK_LMETA, 1042) \
+	_(LK_RMETA, 1043) \
+	_(LK_LSUPER, 1044) /* "Windows" key */ \
+	_(LK_RSUPER, 1045) \
+	/* Miscellaneous function keys */ \
+	_(LK_HELP, 1046) \
+	_(LK_PRINT, 1047) \
+	_(LK_SYSREQ, 1048) \
+	_(LK_BREAK, 1049) \
+	_(LK_MENU, 1050) \
+	_(LK_UNDO, 1051) \
+	_(LK_REDO, 1052) \
+	_(LK_EURO, 1053) /* Some european keyboards */ \
+	_(LK_COMPOSE, 1054) /* Multi-key compose key */ \
+	_(LK_MODE, 1055) /* "Alt Gr" key (could be wrong) */ \
+	_(LK_POWER, 1056) /* Power Macintosh power key */ \
+	_(LK_CONTEXTKEY, 1057)
+	/* Add any other keys here */
 
 enum LgiKey
 {
-	/* The keyboard syms have been cleverly chosen to map to ASCII */
-	LK_UNKNOWN		= 0,
-	LK_FIRST		= 0,
-	LK_BACKSPACE	= B_BACKSPACE,
-	LK_TAB			= B_TAB,
-	LK_RETURN		= B_RETURN,
-	LK_ESCAPE		= B_ESCAPE,
-	LK_SPACE		= B_SPACE,
-	LK_EXCLAIM		= '!',
-	LK_QUOTEDBL		= '\"',
-	LK_HASH			= '#',
-	LK_DOLLAR		= '$',
-	LK_AMPERSAND	= '&',
-	LK_QUOTE		= '\'',
-	LK_LEFTPAREN	= '(',
-	LK_RIGHTPAREN	= ')',
-	LK_ASTERISK		= '*',
-	LK_PLUS			= '+',
-	LK_COMMA		= ',',
-	LK_MINUS		= '-',
-	LK_PERIOD		= '.',
-	LK_SLASH		= '/',
-	LK_0			= '0',
-	LK_1			= '1',
-	LK_2			= '2',
-	LK_3			= '3',
-	LK_4			= '4',
-	LK_5			= '5',
-	LK_6			= '6',
-	LK_7			= '7',
-	LK_8			= '8',
-	LK_9			= '9',
-	LK_COLON		= ':',
-	LK_SEMICOLON	= ';',
-	LK_LESS			= '<',
-	LK_EQUALS		= '=',
-	LK_GREATER		= '>',
-	LK_QUESTION		= '?',
-	LK_AT			= '@',
-	/* 
-	   Skip uppercase letters
-	 */
-	LK_LEFTBRACKET	= '[',
-	LK_BACKSLASH	= '\\',
-	LK_RIGHTBRACKET	= ']',
-	LK_CARET		= '^',
-	LK_UNDERSCORE	= '_',
-	LK_BACKQUOTE	= 96,
-	LK_a			= 'a',
-	LK_b			= 'b',
-	LK_c			= 'c',
-	LK_d			= 'd',
-	LK_e			= 'e',
-	LK_f			= 'f',
-	LK_g			= 'g',
-	LK_h			= 'h',
-	LK_i			= 'i',
-	LK_j			= 'j',
-	LK_k			= 'k',
-	LK_l			= 'l',
-	LK_m			= 'm',
-	LK_n			= 'n',
-	LK_o			= 'o',
-	LK_p			= 'p',
-	LK_q			= 'q',
-	LK_r			= 'r',
-	LK_s			= 's',
-	LK_t			= 't',
-	LK_u			= 'u',
-	LK_v			= 'v',
-	LK_w			= 'w',
-	LK_x			= 'x',
-	LK_y			= 'y',
-	LK_z			= 'z',
-	/* End of ASCII mapped keysyms */
-
-	/* Arrows + Home/End pad */
-	LK_HOME			= B_HOME,
-	LK_LEFT			= B_LEFT_ARROW,
-	LK_UP			= B_UP_ARROW,
-	LK_RIGHT		= B_RIGHT_ARROW,
-	LK_DOWN			= B_DOWN_ARROW,
-	LK_PAGEUP		= B_PAGE_UP,
-	LK_PAGEDOWN		= B_PAGE_DOWN,
-	LK_END			= B_END,
-	LK_INSERT		= B_INSERT,
-	LK_DELETE		= B_DELETE,
-
-	/* Numeric keypad */
-	LK_KEYPADENTER	,
-	LK_KP0			,
-	LK_KP1			,
-	LK_KP2			,
-	LK_KP3			,
-	LK_KP4			,
-	LK_KP5			,
-	LK_KP6			,
-	LK_KP7			,
-	LK_KP8			,
-	LK_KP9			,
-	LK_KP_PERIOD	,
-	LK_KP_DELETE	,
-	LK_KP_MULTIPLY	,
-	LK_KP_PLUS		,
-	LK_KP_MINUS		,
-	LK_KP_DIVIDE	,
-	LK_KP_EQUALS	,
-
-	/* Function keys */
-	LK_F1,
-	LK_F2			,
-	LK_F3			,
-	LK_F4			,
-	LK_F5			,
-	LK_F6			,
-	LK_F7			,
-	LK_F8			,
-	LK_F9			,
-	LK_F10			,
-	LK_F11			,
-	LK_F12			,
-	LK_F13			,
-	LK_F14			,
-	LK_F15			,
-
-	/* Key state modifier keys */
-	LK_NUMLOCK		,
-	LK_CAPSLOCK		,
-	LK_SCROLLOCK	,
-	LK_LSHIFT		,
-	LK_RSHIFT		,
-	LK_LCTRL		,
-	LK_RCTRL		,
-	LK_LALT			,
-	LK_RALT			,
-	LK_LMETA		,
-	LK_RMETA		,
-	LK_LSUPER		, /* "Windows" key */
-	LK_RSUPER		,
-
-	/* Miscellaneous function keys */
-	LK_HELP			,
-	LK_PRINT		,
-	LK_SYSREQ		,
-	LK_BREAK		,
-	LK_MENU			,
-	LK_UNDO			,
-	LK_REDO			,
-	LK_EURO			, /* Some european keyboards */
-	LK_COMPOSE		, /* Multi-key compose key */
-	LK_MODE			, /* "Alt Gr" key (could be wrong) */
-	LK_POWER		,	/* Power Macintosh power key */
-	LK_CONTEXTKEY	,
-
-	/* Add any other keys here */
+	#define _(key, val) key = val,
+	L_ALL_KEYS()
+	#undef _
 	LK_LAST
-
 };
 
 /////////////////////////////////////////////////////////////////////////////////////

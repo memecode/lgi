@@ -140,6 +140,7 @@ bool LSsh::Open(const char *Host, const char *Username, const char *Password, bo
 	auto c = ConfigHostLookup(Host);
 	if (c.HostName)
 	{
+		SSH_LOG("loaded config entry: host='%s' port=%i user='%s'\n", c.HostName.Get(), c.Port, c.User.Get());
 		r = ssh_options_set(Ssh, SSH_OPTIONS_HOST, c.HostName);
 		if (c.Port > 0)
 			r = ssh_options_set(Ssh, SSH_OPTIONS_PORT, &c.Port);
