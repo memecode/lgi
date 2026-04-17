@@ -1443,17 +1443,6 @@ LAccelerator::LAccelerator(int flags, int vkey, int chr, int id)
 	Id = id;
 }
 
-LString LAccelerator::ToString() const
-{
-	return LString::Fmt("vkey=%i chr=%i flags=%x id=%i\n",
-		Vkey, Chr, Flags, Id);
-}
-
-void LAccelerator::Trace(const char *Msg) const
-{
-	LgiTrace("%s Accelerator %s\n", Msg, ToString().Get());
-}
-
 bool LAccelerator::Match(LKey &k)
 {
 	if (k.vkey == LK_RSHIFT ||

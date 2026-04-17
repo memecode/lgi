@@ -223,7 +223,7 @@ enum LDialogIds
 #define NSDeleteFunctionKey			0xF728
 #endif
 
-#define MacKeyDef() \
+#define L_ALL_KEYS() \
 	_(A, 0) _(B, 11) _(C, 8) _(D, 2) _(E, 14) _(F, 3) \
 	_(G, 5) _(H, 4) _(I, 34) _(J, 38) _(K, 40) _(L, 37) \
 	_(M, 46) _(N, 45) _(O, 31) _(P, 35) _(Q, 12) _(R, 15) \
@@ -281,7 +281,7 @@ enum LDialogIds
 enum LVirtualKeys
 {
 	#define _(k, v) LK_ ##k = v,
-	MacKeyDef()
+	L_ALL_KEYS()
 	#undef _
 	
 	LK_RETURN = LK_ENTER,
@@ -289,8 +289,6 @@ enum LVirtualKeys
 };
 
 #undef _KEY
-
-LgiFunc const char *LVirtualKeyToString(LVirtualKeys c);
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Externs
