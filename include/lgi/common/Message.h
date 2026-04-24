@@ -1,29 +1,26 @@
 
-#ifndef _GMESSAGE_H_
-#define _GMESSAGE_H_
+#pragma once 
 
 #ifdef HAIKU
+	#include <functional>
 
-#include <functional>
-
-// This list of events are send from the BWindow threads over
-// to the application thread for processing.
-#define L_APP_PRIV_EVENTS() \
-	_(None) \
-	_(QuitRequested) \
-	_(General) \
-	_(FrameMoved) \
-	_(FrameResized) \
-	_(AttachedToWindow) \
-	_(KeyDown) \
-	_(KeyUp) \
-	_(Draw) \
-	_(MouseDown) \
-	_(MouseUp) \
-	_(MouseMoved) \
-	_(MakeFocus) \
-	_(Invalidate)
-
+	// This list of events are send from the BWindow threads over
+	// to the application thread for processing.
+	#define L_APP_PRIV_EVENTS() \
+		_(None) \
+		_(QuitRequested) \
+		_(General) \
+		_(FrameMoved) \
+		_(FrameResized) \
+		_(AttachedToWindow) \
+		_(KeyDown) \
+		_(KeyUp) \
+		_(Draw) \
+		_(MouseDown) \
+		_(MouseUp) \
+		_(MouseMoved) \
+		_(MakeFocus) \
+		_(Invalidate)
 #endif
 
 enum LgiMessages
@@ -372,10 +369,8 @@ public:
 };
 
 #ifdef LINUX
-extern LMessage CreateMsg(int m, int a = 0, int b = 0);
+	extern LMessage CreateMsg(int m, int a = 0, int b = 0);
 #else
-#define CreateMsg(m, a, b)				LMessage(m, a, b)
+	#define CreateMsg(m, a, b)				LMessage(m, a, b)
 #endif
 
-
-#endif

@@ -15,6 +15,8 @@
 #include "lgi/common/Variant.h"
 #include "lgi/common/Token.h"
 #include "lgi/common/FontCache.h"
+#include "lgi/common/Message.h"
+
 #include "AppPriv.h"
 
 #define DEBUG_MSG_TYPES				0
@@ -24,6 +26,59 @@
 using namespace Gtk;
 
 bool GlibWidgetSearch(GtkWidget *p, GtkWidget *w, bool Debug, int depth = 0);
+
+
+#define L_ALL_MESSAGES() \
+	_(M_SYSTEM) \
+	_(M_CLOSE) \
+	_(M_X11_REPARENT) \
+	_(M_MOUSEENTER) \
+	_(M_MOUSEEXIT) \
+	_(M_WANT_DIALOG_PROC) \
+	_(M_MENU) \
+	_(M_COMMAND) \
+	_(M_DRAG_DROP) \
+	_(M_TRAY_NOTIFY) \
+	_(M_CUT) \
+	_(M_COPY) \
+	_(M_PASTE) \
+	_(M_GTHREADWORK_COMPELTE) \
+	_(M_SET_VISIBLE) \
+	_(M_CAPTURE_PULSE) \
+	_(M_TEXT_UPDATE_NAME) \
+	_(M_DND_DATA_RECEIVED) \
+	_(M_DND_END) \
+	_(M_DND_UPDATE_FORMATS) \
+	_(M_DESCRIBE) \
+	_(M_CHANGE) \
+	_(M_DELETE) \
+	_(M_TABLE_LAYOUT) \
+	_(M_URL) \
+	_(M_LOG_TEXT) \
+	_(M_LOG_EMPTY) \
+	_(M_INVALIDATE) \
+	_(M_RESIZE_TO_CONTENT) \
+	_(M_SCROLL_TO) \
+	_(M_SET_SCROLL) \
+	_(M_JOBS_LOADED) \
+	_(M_SET_CTRL_NAME) \
+	_(M_SET_CTRL_ENABLE) \
+	_(M_SET_CTRL_VISIBLE) \
+	_(M_VIEW_RUN_CALLBACK) \
+	_(M_PULSE) \
+	_(M_USER)
+
+struct LMessageNames : public LHashTbl<IntKey<int>, const char *>
+{
+	LMessageNames()
+	{
+		#define _(name) Add(LgiMessages::name, #name);
+		L_ALL_MESSAGES()
+		#undef _
+	}
+	
+}	messageNames;
+
 
 ////////////////////////////////////////////////////////////////
 struct OsAppArgumentsPriv
@@ -688,7 +743,12 @@ bool LApp::PostEvent(LViewI *View, int Msg, LMessage::Param a, LMessage::Param b
 				MsgCounts.Add(msg.m, MsgCounts.Find(msg.m) + 1);
 
 			for (auto c: MsgCounts)
-				printf("    %i->%i\n", c.key, (int)c.value);
+			{
+				if (auto nm = messageNames.Find(c.key))
+					printf("    %s->%i\n", nm, (int)c.value);
+				else
+					printf("    %i->%i\n", c.key, (int)c.value);
+			}
 		}
 	}
 	#endif

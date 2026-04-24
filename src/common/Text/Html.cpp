@@ -8417,7 +8417,7 @@ void LHtml::OnMouseClick(LMouse &m)
 			#define IDM_CHARSET_BASE	10000
 
 			RClick.AppendItem					(LLoadString(L_TEXTCTRL_COPY, "Copy"), IDM_COPY, HasSelection());
-			auto Vs = RClick.AppendItem	(LLoadString(L_VIEW_SOURCE, "View Source"), IDM_VIEW_SRC, Source != 0);
+			auto ViewSrc = RClick.AppendItem	(LLoadString(L_VIEW_SOURCE, "View Source"), IDM_VIEW_SRC, Source != 0);
 			RClick.AppendItem					(LLoadString(L_COPY_SOURCE, "Copy Source"), IDM_COPY_SRC, Source != 0);
 			auto Load = RClick.AppendItem	(LLoadString(L_VIEW_IMAGES, "View External Images"), IDM_VIEW_IMAGES, true);
 			if (Load) Load->Checked(GetLoadImages());
@@ -8445,10 +8445,8 @@ void LHtml::OnMouseClick(LMouse &m)
 				RClick.AppendItem("Dump Layout", IDM_DUMP, Tag != 0);
 			}
 
-			if (Vs)
-			{
-				Vs->Checked(!IsHtml);
-			}
+			if (ViewSrc)
+				ViewSrc->Checked(!IsHtml);
 			
 			if (OnContextMenuCreate(Hit, RClick) &&
 				GetMouse(m, true))
@@ -8463,28 +8461,28 @@ void LHtml::OnMouseClick(LMouse &m)
 					}
 					case IDM_VIEW_SRC:
 					{
-						if (Vs)
-						{
-							DeleteObj(Tag);
-							IsHtml = !IsHtml;
-							ParseDocument(Source);
-						}
+						if (!ViewSrc)
+							break;
+
+						DeleteObj(Tag);
+						IsHtml = !IsHtml;
+						ParseDocument(Source);
 						break;
 					}
 					case IDM_COPY_SRC:
 					{
-						if (Source)
+						if (!Source)
+							break;
+
+						LClipBoard c(this);
+						auto ViewCs = GetCharset();
+						if (ViewCs)
 						{
-							LClipBoard c(this);
-							const char *ViewCs = GetCharset();
-							if (ViewCs)
-							{
-								LAutoWString w((char16*)LNewConvertCp(LGI_WideCharset, Source, ViewCs));
-								if (w)
-									c.TextW(w);
-							}
-							else c.Text(Source);
+							LAutoWString w((char16*)LNewConvertCp(LGI_WideCharset, Source, ViewCs));
+							if (w)
+								c.TextW(w);
 						}
+						else c.Text(Source);
 						break;
 					}
 					case IDM_VIEW_IMAGES:
@@ -8494,14 +8492,13 @@ void LHtml::OnMouseClick(LMouse &m)
 					}
 					case IDM_DUMP:
 					{
-						if (Tag)
+						if (!Tag)
+							break;
+
+						if (auto s = Tag->DumpW())
 						{
-							LAutoWString s = Tag->DumpW();
-							if (s)
-							{
-								LClipBoard c(this);
-								c.TextW(s);
-							}
+							LClipBoard c(this);
+							c.TextW(s);
 						}
 						break;
 					}

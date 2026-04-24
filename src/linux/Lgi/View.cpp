@@ -581,7 +581,7 @@ LRect GtkGetPos(GtkWidget *w)
 
 bool LView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 {
-	#if 0 // Debug where lots of invalidate calls are from
+	#if 1 // Debug where lots of invalidate calls are from
 		static uint64_t StartTs = 0;
 		static int Count = 0;
 		static LHashTbl<ConstStrKey<char,false>,int> Classes;

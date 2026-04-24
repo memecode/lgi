@@ -45,11 +45,11 @@ enum Messages
 
 struct Context
 {
-	LList *lst = NULL;
-	LTabView *tabs = NULL;
-	LTextView3 *hex = NULL;
-	LTextView3 *escaped = NULL;
-	LTextLog *log = NULL;
+	LList *lst = nullptr;
+	LTabView *tabs = nullptr;
+	LTextView3 *hex = nullptr;
+	LTextView3 *escaped = nullptr;
+	LTextLog *log = nullptr;
 };
 
 class Entry : public LListItem
@@ -228,6 +228,11 @@ public:
 
 	void Select(bool b) override
 	{
+		LListItem::Select(b);
+
+		if (!b)
+			return;
+			
 		if (!GetList()->InThread())
 		{
 			// Make sure to call this in the right thread...
@@ -237,13 +242,8 @@ public:
 
 		LAssert(GetList()->InThread());
 
-		LListItem::Select(b);
-
 		auto mode = (DisplayMode)c->tabs->Value();
 		auto ctrl = mode ? c->escaped : c->hex;
-
-		if (!b)
-			return;
 
 		LStringPipe p;
 		LString Obj;
@@ -594,7 +594,7 @@ public:
 										items.Insert(cur.Release());
 										if (items.Length() > 100)
 										{
-											lst->Insert(items);
+											lst->Insert(items, -1, false);
 											items.Empty();
 										}
 										return;

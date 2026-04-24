@@ -185,7 +185,7 @@ LString LMemQueue::PeekLine(bool start) const
 			}
 			else
 			{
-				for (ssize_t i=sz; i > 0 && p[i-1] != '\n'; i--)
+				for (ssize_t i=sz; i > 0 && p[i-1] && p[i-1] != '\n'; i--)
 					cp++;
 
 				auto offset = sz - cp;
