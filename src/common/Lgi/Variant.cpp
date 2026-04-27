@@ -1898,55 +1898,52 @@ bool LDom::GetValue(const char *Var, LVariant &Value)
 	}
 
 	bool Status = false;
-
 	LString Name, Arr;
 	if (auto Object = ResolveObject(Var, Name, Arr))
 	{
 		if (Name.IsEmpty())
+		{
 			LgiTrace("%s:%i - Warning name parse failed for '%s'\n", _FL, Var);
+		}
 		else
 		{
-			bool arrEmpty = Arr.IsEmpty();
-			Status = Object->GetVariant(Name, Value, arrEmpty ? NULL : Arr.Get());
+			auto arrVal = Arr.IsEmpty() ? nullptr : Arr.Get();
+			Status = Object->GetVariant(Name, Value, arrVal);
 		}
 	}
 
 	_OnAccess(false);
-
 	return Status;
 }
 
 bool LDom::SetValue(const char *Var, LVariant &Value)
 {
-	bool Status = false;
+	if (!Var)
+		return false;
 
-	if (Var)
+	if (!_OnAccess(true))
 	{
-		// LMutex *Sem = dynamic_cast<LMutex*>(this);
-		if (_OnAccess(true))
+		LgiTrace("%s:%i - Locking error\n", _FL);
+		LAssert(0);
+		return false;
+	}
+	
+	bool Status = false;
+	LString Name, Arr;
+	if (auto Object = ResolveObject(Var, Name, Arr))
+	{
+		if (Name.IsEmpty())
 		{
-			LString Name, Arr;
-			LDom *Object = ResolveObject(Var, Name, Arr);
-			if (Object)
-			{
-				if (Name.IsEmpty())
-					LgiTrace("%s:%i - Warning name parse failed for '%s'\n", _FL, Var);
-				else
-				{
-					auto arrEmpty = Arr.IsEmpty();
-					Status = Object->SetVariant(Name, Value, arrEmpty ? NULL : Arr.Get());
-				}
-			}
-
-			_OnAccess(false);
+			LgiTrace("%s:%i - Warning name parse failed for '%s'\n", _FL, Var);
 		}
 		else
 		{
-			LgiTrace("%s:%i - Locking error\n", _FL);
-			LAssert(0);
+			auto arrVal = Arr.IsEmpty() ? nullptr : Arr.Get();
+			Status = Object->SetVariant(Name, Value, arrVal);
 		}
 	}
 
+	_OnAccess(false);
 	return Status;
 }
 

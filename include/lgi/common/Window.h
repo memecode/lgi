@@ -50,7 +50,7 @@ protected:
 
 	#if WINNATIVE
 
-		LWindow *_Dialog = NULL;
+		LWindow *_Dialog = nullptr;
 
 	#elif defined(HAIKU)
 		
@@ -64,7 +64,7 @@ protected:
 	
 	#else
 
-		OsWindow Wnd = NULL;
+		OsWindow Wnd = nullptr;
 		void SetDeleteOnClose(bool i);
 
 	#endif
@@ -97,10 +97,10 @@ protected:
 	#endif
 
 	/// The default button
-	LViewI *_Default = NULL;
+	LViewI *_Default = nullptr;
 
 	/// The menu on the window
-	LMenu *Menu = NULL;
+	LMenu *Menu = nullptr;
 
 	void SetDragHandlers(bool On);
 	
@@ -113,11 +113,11 @@ public:
 	#endif
 
 	#ifdef __GTK_H__
-		LWindow(Gtk::GtkWidget *w = NULL);
+		LWindow(Gtk::GtkWidget *w = nullptr);
 	#elif LGI_CARBON
-		LWindow(WindowRef wr = NULL);
+		LWindow(WindowRef wr = nullptr);
 	#elif LGI_COCOA
-		LWindow(OsWindow wnd = NULL);
+		LWindow(OsWindow wnd = nullptr);
 	#else
 		LWindow();
 	#endif
@@ -229,7 +229,7 @@ public:
 
 	/// Builds a map of keyboard short cuts.
 	typedef LHashTbl<IntKey<int>,LViewI*> ShortcutMap;
-	void BuildShortcuts(ShortcutMap &Map, LViewI *v = NULL);
+	void BuildShortcuts(ShortcutMap &Map, LViewI *v = nullptr);
 
 	////////////////////// Events ///////////////////////////////
 	

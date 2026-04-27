@@ -27,12 +27,12 @@ Deleting a LWindow senarios:
  
 	Users clicks close:
         NSWindowDelegate::windowWillClose
-            GWindowPrivate::OnClose(CloseUser)
+            LWindowPrivate::OnClose(CloseUser)
                 LNsWindow::onDelete
 
     Something deletes the LWindow programmatically:
         LWindow::~LWindow
-			GWindowPriv::OnClose(CloseDestructor)
+			LWindowPriv::OnClose(CloseDestructor)
 				LNsWindow::onDelete
 					self.close
 						windowWillClose -> block
@@ -41,7 +41,7 @@ Deleting a LWindow senarios:
 		LNsWindow::onQuit (async)
 			self.close
 				NSWindowDelegate::windowWillClose
-					GWindowPrivate::OnClose(CloseUser)
+					LWindowPrivate::OnClose(CloseUser)
 						LNsWindow::onDelete
 
 */
@@ -135,11 +135,11 @@ LWindowDelegate *Delegate = nil;
 class LWindowPrivate
 {
 public:
-	LWindow *Wnd = NULL;
-	LWindow *ChildDlg = NULL;
-	LMenu *EmptyMenu = NULL;
-	LViewI *Focus = NULL;
-	NSView *ContentCache = NULL;
+	LWindow *Wnd = nullptr;
+	LWindow *ChildDlg = nullptr;
+	LMenu *EmptyMenu = nullptr;
+	LViewI *Focus = nullptr;
+	NSView *ContentCache = nullptr;
 
 	int Sx = -1, Sy = -1;
 
