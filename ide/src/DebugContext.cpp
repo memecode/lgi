@@ -9,6 +9,10 @@
 #include "IdeProject.h"
 #include "resdefs.h"
 
+// Supported debuggers:
+#include "gdb.h"
+#include "lldb.h"
+
 #ifdef LINUX
 namespace Gtk {
 	#include "gdk/gdkx.h"
@@ -16,6 +20,11 @@ namespace Gtk {
 }
 #endif
 
+#ifdef MAC
+	#define CreateDebuggerFn CreateLldbDebugger
+#else
+	#define CreateDebuggerFn CreateGdbDebugger
+#endif
 
 enum TIds
 {
@@ -330,7 +339,7 @@ LDebugContext::LDebugContext(AppWnd *App,
 
 	auto log = App->GetDebugLog();
 	LAssert(log);
-	if (d->Db.Reset(CreateGdbDebugger(App->GetBreakPointStore(), log, Proj ? Proj->GetBackend() : nullptr, Platform, d->App->GetNetworkLog())))
+	if (d->Db.Reset(CreateDebuggerFn(App->GetBreakPointStore(), log, Proj ? Proj->GetBackend() : nullptr, Platform, d->App->GetNetworkLog())))
 	{
 		LFile::Path p;
 		if (InitDir)

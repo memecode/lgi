@@ -16,7 +16,6 @@
 
 #include "BreakPointStore.h"
 #include "FindSymbol.h"
-#include "Debugger.h"
 #ifdef WIN32
 #include "resource.h"
 #endif

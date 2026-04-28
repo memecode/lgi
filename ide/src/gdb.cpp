@@ -30,7 +30,7 @@ static bool DEBUG_SHOW_GDB_IO = false;
 #endif
 #include "lgi/common/SystemIntf.h"
 
-#include "Debugger.h"
+#include "gdb.h"
 #include "LgiIde.h"
 
 const char sPrompt[] = "(gdb) ";
