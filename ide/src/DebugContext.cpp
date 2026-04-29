@@ -11,7 +11,7 @@
 
 // Supported debuggers:
 #include "gdb.h"
-// #include "lldb.h"
+#include "lldb.h"
 
 #ifdef LINUX
 namespace Gtk {

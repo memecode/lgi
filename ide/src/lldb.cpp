@@ -1,7 +1,7 @@
 #include "lgi/common/Lgi.h"
 
 #include "Debugger.h"
-// #include "lldb.h"
+#include "lldb.h"
 
 /*	Install:
 
