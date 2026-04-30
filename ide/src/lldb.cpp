@@ -15,15 +15,58 @@
 
 #if __has_include ("lldb/API/LLDB.h")
 #include <lldb/API/LLDB.h>
+#include <lldb/API/SBDebugger.h>
 #define HAVE_LLDB	1
 
-class LLdb : public LDebugger
+class LLdb :
+	public LDebugger,
+	public LMutex,
+	public LThread,
+	public LCancel
 {
+	// Breakpoints:
 	BreakPointStore *bpStore = nullptr;
-	LStream *log = nullptr;
+	int BpCallback = BreakPointStore::INVALID_ID;
+	void OnBpStoreEvent(BreakPointStore::TEvent event, int param)
+	{
+		switch (event)
+		{
+			case BreakPointStore::TStoreDeleted:
+				bpStore = nullptr;
+				break;
+			case BreakPointStore::TBreakPointAdded:
+			case BreakPointStore::TBreakPointDeleted:
+			case BreakPointStore::TBreakPointEnabled:
+			case BreakPointStore::TBreakPointDisabled:
+			case BreakPointStore::TBreakPointModified:
+				// FIXME: impl...
+				break;
+		}
+	}
+	
+	// Platform support:
 	SystemIntf *backend = nullptr;
 	SysPlatform platform = PlatformUnknown;
+	LDebugEvents *events = nullptr;
+
+	// Logging:
+	LStream *log = nullptr;
 	LStream *networkLog = nullptr;
+	
+	// Impl:	
+	lldb::SBDebugger debugger;
+
+	int Main()
+	{
+		debugger = lldb::SBDebugger::Create(true);
+		
+		while (!IsCancelled())
+		{
+			LSleep(10);
+		}
+		
+		return 0;
+	}
 
 public:
 	LLdb(	BreakPointStore *BpStore,
@@ -31,21 +74,48 @@ public:
 			SystemIntf *Backend,
 			SysPlatform Platform,
 			LStream *NetworkLog)
-			: bpStore(BpStore)
-			, log(Log)
-			, backend(Backend)
-			, platform(Platform)
-			, networkLog(NetworkLog)			
+		: LMutex("LLdb.Lck")
+		, LThread("LLdb.Th")
+		, bpStore(BpStore)
+		, log(Log)
+		, backend(Backend)
+		, platform(Platform)
+		, networkLog(NetworkLog)
 	{
+	
+		if (bpStore)
+			BpCallback = bpStore->AddCallback([this](auto event, auto param)
+				{
+					OnBpStoreEvent(event, param);
+				});
+				
+		Run();
+	}
+	
+	~LLdb()
+	{
+		Cancel();
+		
+		if (bpStore && BpCallback != BreakPointStore::INVALID_ID)
+			bpStore->DeleteCallback(BpCallback);
+		
+		WaitForExit();
 	}
 	
 	bool Load(LDebugEvents *EventHandler, const char *Exe, const char *Args, bool RunAsAdmin, const char *InitDir, const char *Env)
 	{
+		events = EventHandler;
+		
+		// https://lldb.llvm.org/python_api/lldb.SBDebugger.html
+		// target = debugger.CreateTargetWithFileAndArch(exe, lldb.LLDB_ARCH_DEFAULT)
+		
 		return false;
 	}
 	
 	bool AttachTo(LDebugEvents *EventHandler, int Pid)
 	{
+		events = EventHandler;
+
 		return false;
 	}
 	

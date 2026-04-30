@@ -159,6 +159,8 @@ WINNATIVE</Release>
 					<Debug>/home/matthew/Code/Lgi/trunk/Ide/Code/IdeProjectSettings.cpp</Debug>
 				</All>
 			</Arguments>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -204,9 +206,11 @@ WINNATIVE</Release>
 				<Linux>
 					<Debug>magic
 pthread
+lldb
 `pkg-config --libs gtk+-3.0`</Debug>
 					<Release>magic
 pthread
+lldb
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
 				<Haiku>
@@ -260,9 +264,11 @@ _GNU_SOURCE</Release>
 			<SystemIncludes>
 				<Linux>
 					<Debug>`pkg-config --cflags gtk+-3.0`
-/usr/include/libssh</Debug>
+/usr/include/libssh
+/usr/include/lldb</Debug>
 					<Release>`pkg-config --cflags gtk+-3.0`
-/usr/include/libssh</Release>
+/usr/include/libssh
+/usr/include/lldb</Release>
 				</Linux>
 			</SystemIncludes>
 			<Options>
@@ -270,10 +276,15 @@ _GNU_SOURCE</Release>
 					<Debug>-Wno-format-truncation</Debug>
 					<Release>-Wno-format-truncation</Release>
 				</Linux>
+				<All />
 			</Options>
 			<ApplicationIcon>
 				<Haiku>./resources/icon.hvif</Haiku>
 			</ApplicationIcon>
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
 		</Build>
 		<Editor>
 			<TabSize>
@@ -288,6 +299,26 @@ _GNU_SOURCE</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
+			<CommentFile />
+			<CommentFunction />
 		</Editor>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
+		<Debug>
+			<Environment />
+			<Arguments>
+				<All />
+			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
+		</Debug>
+		<Advanced>
+			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+		</Advanced>
 	</Settings>
 </Project>

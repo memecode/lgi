@@ -497,12 +497,12 @@ public:
 	int Main()
 	{
 		const char *PlatformName = ToString(Platform);
-		const char *PlatformLibraryExt = NULL;
-		const char *PlatformStaticLibExt = NULL;
+		const char *PlatformLibraryExt = nullptr;
+		const char *PlatformStaticLibExt = nullptr;
 		const char *PlatformExeExt = "";
 		const char *CCompilerFlags = "-MMD -MP -fPIC -fno-inline";
 		const char *CppCompilerFlags = "$(CFlags) -fpermissive -std=c++14";
-		const char *TargetType = d->Settings.GetStr(ProjTargetType, NULL, Platform);
+		const char *TargetType = d->Settings.GetStr(ProjTargetType, nullptr, Platform);
 		const char *CompilerName = d->Settings.GetStr(ProjCompiler);
 		LString LinkerFlags;
 		LString CCompilerBinary = "gcc";
