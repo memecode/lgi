@@ -183,10 +183,9 @@ WINNATIVE</Release>
 				<Linux>
 					<Debug>../include/lgi/linux
 ../include/lgi/linux/Gtk
-../../../../codelib/openssl/include</Debug>
+</Debug>
 					<Release>../include/lgi/linux
 ../include/lgi/linux/Gtk
-../../../../codelib/openssl/include
 </Release>
 				</Linux>
 				<Haiku>

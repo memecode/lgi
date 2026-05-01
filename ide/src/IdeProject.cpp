@@ -722,7 +722,6 @@ public:
 		Proj->GetChildProjects(Deps);
 		for (auto d: Deps)
 		{
-			printf("Dep is: %p\n", d);
 			if (!d)
 			{
 				LAssert(!"Dep is NULL!");
@@ -812,7 +811,6 @@ public:
 
 			for (auto dep: Deps)
 			{
-				printf("Dep2 is: %p\n", d);
 				if (!dep)
 					continue;
 				LString Target = dep->GetTargetName(Platform);
@@ -870,9 +868,8 @@ public:
 			{
 				// Add settings include paths.
 				LToken Paths(SysIncludes, "\r\n");
-				for (int i=0; i<Paths.Length(); i++)
+				for (auto p: Paths)
 				{
-					auto p = Paths[i];
 					auto pn = ToNativeStr(p);
 					if (pn.Get()[0] != '`' && !Proj->CheckExists(pn))
 						OnError("%s:%i - System include path '%s' doesn't exist (from %s).\n",
@@ -898,6 +895,7 @@ public:
 				}
 				else
 				{
+					/* This doesn't make sense?
 					LFile::Path p;
 					if (LIsRelativePath(i))
 					{
@@ -905,8 +903,11 @@ public:
 						p += i;
 					}
 					else p = i;
+					
 					auto rel = LMakeRelativePath(Base, p.GetFull());
 					s.Printf(" \\\n\t\t-I%s", ToUnixPath(rel ? rel : i));
+					*/
+					s.Printf(" \\\n\t\t-I%s", i.Get());
 				}
 
 				sIncludes[Cfg] += s;
@@ -4711,8 +4712,7 @@ bool IdeProject::BuildIncludePaths(LString::Array &Paths, LString::Array *SysPat
 		LArray<ProjectNode*> Nodes;
 		if (p->GetAllNodes(Nodes))
 		{
-			auto NodeBase = p->GetFullPath();
-			if (NodeBase)
+			if (auto NodeBase = p->GetFullPath())
 			{
 				LTrimDir(NodeBase);
 
@@ -4894,11 +4894,20 @@ bool IdeProject::GetAllDependencies(LArray<char*> &Files, SysPlatform Platform)
 	LString::Array IncPaths;
 	BuildIncludePaths(IncPaths, NULL, false, false, Platform);
 	
-	// Add all source to dependencies
-	for (int i=0; i<Src.Length(); i++)
+	// FIXME: Filter out the LGI deps folder, there should be a better way of doing this....
+	for (int i=0; i<IncPaths.Length(); i++)
 	{
-		char *f = Src[i];
-		ProjDependency *dep = Deps.Find(f);
+		if (IncPaths[i].Find("lgi/deps/build") >= 0)
+		{
+			LgiTrace("%s:%i - Filtering LGI dep path '%s'\n", _FL, IncPaths[i].Get());
+			IncPaths.DeleteAt(i--);
+		}
+	}
+	
+	// Add all source to dependencies
+	for (auto f: Src)
+	{
+		auto dep = Deps.Find(f);
 		if (!dep)
 			Deps.Add(f, new ProjDependency(f));
 	}
@@ -4910,16 +4919,15 @@ bool IdeProject::GetAllDependencies(LArray<char*> &Files, SysPlatform Platform)
 		// Find all the unscanned dependencies
 		Unscanned.Length(0);
 
-		for (auto d : Deps)
+		for (auto d: Deps)
 		{
 			if (!d.value->Scanned)
 				Unscanned.Add(d.value);
 		}		
 
-		for (int i=0; i<Unscanned.Length(); i++)
+		for (auto d: Unscanned)
 		{
 			// Then scan source for includes...
-			ProjDependency *d = Unscanned[i];
 			d->Scanned = true;
 			
 			char *Src = d->File;
@@ -4953,10 +4961,8 @@ bool IdeProject::GetAllDependencies(LArray<char*> &Files, SysPlatform Platform)
 	}
 	while (Unscanned.Length() > 0);
 	
-	for (auto d : Deps)
-	{
+	for (auto d: Deps)
 		Files.Add(d.value->File.Release());
-	}
 	
 	Deps.DeleteObjects();
 	GetTree()->Unlock();
