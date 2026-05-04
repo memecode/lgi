@@ -143,27 +143,57 @@ VersionCtrl AppPriv::DetectVcs(VcFolder *Fld)
 		#endif
 	}
 
-	auto Path = u.sPath.Get();
-	#ifdef WINDOWS
-		if (*Path == '/')
-			Path++;
-	#endif
+	auto Path = u.sPath.Strip("/");
 
-	if (LMakePath(p, sizeof(p), Path, ".git") &&
-		LDirExists(p))
-		return VcGit;
+	auto simpleCheck = [&](LString Path)
+		{
+			if (LMakePath(p, sizeof(p), Path, ".git") &&
+				LDirExists(p))
+				return VcGit;
 
-	if (LMakePath(p, sizeof(p), Path, ".svn") &&
-		LDirExists(p))
-		return VcSvn;
+			if (LMakePath(p, sizeof(p), Path, ".svn") &&
+				LDirExists(p))
+				return VcSvn;
 
-	if (LMakePath(p, sizeof(p), Path, ".hg") &&
-		LDirExists(p))
-		return VcHg;
+			if (LMakePath(p, sizeof(p), Path, ".hg") &&
+				LDirExists(p))
+				return VcHg;
 
-	if (LMakePath(p, sizeof(p), Path, "CVS") &&
-		LDirExists(p))
-		return VcCvs;
+			if (LMakePath(p, sizeof(p), Path, "CVS") &&
+				LDirExists(p))
+				return VcCvs;
+
+			return VcNone;
+		};
+	
+	auto vcs = simpleCheck(Path);
+	if (vcs != VcNone)
+		return vcs;
+
+	// Check all the parent folders... submodule?
+	LFile::Path parent(Path);
+	while (parent.PopLast())
+	{
+		vcs = simpleCheck(parent.GetFull());
+		if (vcs == VcGit)
+		{
+			// Is it a sub-module?
+			if (auto modules = LReadFile(parent / ".gitmodules"))
+			{
+				for (auto subs: modules.Split("[submodule"))
+				{
+					const char *s = subs.Get();
+					auto relPath = LTokLStr(s);
+					auto fullPath = (parent / relPath).GetFull().Strip("/");
+					if (fullPath.Equals(Path))
+					{
+						Fld->SetParentRepo(parent.GetFull(), relPath);
+						return vcs;
+					}
+				}
+			}
+		}
+	}
 
 	return VcNone;
 }

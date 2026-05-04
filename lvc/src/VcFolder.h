@@ -264,6 +264,10 @@ protected:
 	LArray<CommitField> Fields;
 	LArray<std::function<void()>> OnVcsTypeEvents;
 	LAutoPtr<LThread> rewriteThread;
+	
+	// Sub modules:
+	LString parentRepo; // if non-null, this is a sub-module of 'parentRepo'
+	LString subRepoPath; // if non-null, a relative path to the sub repo
 
 	// Author name/email
 	TAuthor AuthorLocal, AuthorGlobal;
@@ -382,6 +386,7 @@ public:
 	void GetConfigFile(bool local, bool createIfMissing, std::function<void(LString)> callback, bool debug = false);
 	LString GetRemotePrompt() { return RemotePrompt; }
 	void SetRemotePrompt(LString p) { RemotePrompt = p; }
+	void SetParentRepo(LString folder, LString relPath) { parentRepo = folder; subRepoPath = relPath; }
 	bool GetAuthor(bool local, std::function<void(TAuthor &author)> callback, bool debug = false);
 	void GetAuthors(std::function<void(TAuthor &local, TAuthor &global)> callback, bool debug = false);
 	bool SetAuthor(bool local, TAuthor author);

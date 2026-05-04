@@ -2567,6 +2567,8 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 {
 	LAssert(IsWorking || Rev.Get() != NULL);
 
+	printf("s='%s'\n", s.Get());
+
 	switch (GetType())
 	{
 		case VcGit:
@@ -2577,16 +2579,26 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 				TNotStaged,
 				TUntracked,
 				TDiffs,
+				TUnmerged,
 			}	state = TNone;
 		
 			struct PathStatus {
 				LString op, path;
 				void set(LString::Array &a) {
-					op = a[0].Strip();
-					path = a[1].Strip();
+					if (a.Length() != 2)
+						LgiTrace("%s:%i - error: wrong part count.\n", _FL);
+					else
+					{
+						op = a[0].Strip();
+						path = a[1].Strip();
+					}
+				}
+				LString toString() const
+				{
+					return LString::Fmt("op=%s, path='%s'", op.Get(), path.Get());
 				}
 			};
-			LArray<PathStatus> added, notStaged, untracked;			
+			LArray<PathStatus> added, notStaged, untracked, conflicted;
 		
 			List<LListItem> Files;
 			LStringPipe Diffs(16 << 10);
@@ -2613,6 +2625,8 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 					state = TNotStaged;
 				else if (!Stricmp(txt, "Untracked files:"))
 					state = TUntracked;
+				else if (!Stricmp(txt, "Unmerged paths:"))
+					state = TUnmerged;
 				else if (!_strnicmp(txt, "diff", 4))
 				{
 					state = TDiffs;
@@ -2622,9 +2636,10 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 
 					auto header = line.SplitDelimit(nullptr, 2);
 					
-					if (0)
-						for (int i=0; i<header.Length(); i++)
-							d->Log->Print("hdr[%i]='%s'\n", i, header[i].Get());
+					#if 0
+					for (int i=0; i<header.Length(); i++)
+						d->Log->Print("hdr[%i]='%s'\n", i, header[i].Get());
+					#endif
 					
 					auto paths = header.Last().SplitDelimit();
 					
@@ -2633,8 +2648,17 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 						State = "C";
 
 					auto half = paths.Length() / 2;
+					/*
+					for (auto &pth: paths)
+						printf("pth='%s'\n", pth.Get());
+					*/
 					auto lastPath = LString(" ").Join(paths.Slice(half, -1));
-					Fn = lastPath(2, -1);
+					// printf("lastPath='%s'\n", lastPath.Get());
+					if (IsAlpha(lastPath(0)) && lastPath(1) == '/')
+						Fn = lastPath(2, -1);
+					else
+						Fn = lastPath;
+					// printf("Fn='%s'\n", Fn.Get());
 					
 					auto p = findPath(Fn);
 					// d->Log->Print("    Fn='%s' p='%s'\n", Fn.Get(), p ? p->path.Get() : "null");
@@ -2646,15 +2670,20 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 
 					f = FindFile(Fn);
 					if (!f)
+					{
 						f = new VcFile(d, this, Rev, IsWorking);
 
-					f->SetText(State, COL_STATE);
-					f->SetText(Fn.Replace("\\","/"), COL_FILENAME);
-					f->GetStatus();
-					Files.Insert(f);
+						f->SetText(State, COL_STATE);
+						f->SetText(Fn.Replace("\\","/"), COL_FILENAME);
+						f->GetStatus();
+						// printf("s.get()=%p\n", s.Get());
+						Files.Insert(f);
+					}
 				}
 				else switch (state)
 				{
+					default:
+						break;
 					case TAdded:
 					{
 						if (*txt == '\t')
@@ -2662,6 +2691,16 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 							auto parts = line.Strip().SplitDelimit(":", 1);
 							if (parts.Length() == 2)
 								added.New().set(parts);
+						}
+						break;
+					}
+					case TUnmerged:
+					{
+						if (*txt == '\t')
+						{
+							auto parts = line.Strip().SplitDelimit(":", 1);
+							if (parts.Length() == 2)
+								conflicted.New().set(parts);
 						}
 						break;
 					}
@@ -2718,6 +2757,20 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 			{
 				f->SetDiff(Diffs.NewLStr());
 				Diffs.Empty();
+			}
+			
+			for (auto &ns: conflicted)
+			{
+				auto f = FindFile(ns.path);
+				if (!f)
+				{
+					f = new VcFile(d, this, Rev, IsWorking);
+
+					f->SetText("C", COL_STATE);
+					f->SetText(ns.path.Replace("\\","/"), COL_FILENAME);
+					f->GetStatus();
+					Files.Insert(f);
+				}
 			}
 
 			InsertFiles(Files);
@@ -4069,7 +4122,7 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 						else
 						{
 							auto path = p[6];
-							if (f = new VcFile(d, this, path, IsWorking))
+							if ((f = new VcFile(d, this, path, IsWorking)))
 							{
 								auto state = p[1].Strip(".");
 								auto pos = p[1].Find(state);
@@ -4085,7 +4138,7 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 					else if (Fmt == 1)
 					{
 						LString::Array p = Ln.SplitDelimit(" ");
-						if (f = new VcFile(d, this, LString(), IsWorking))
+						if ((f = new VcFile(d, this, LString(), IsWorking)))
 						{
 							f->SetText(p[0], COL_STATE);
 							f->SetText(p.Last(), COL_FILENAME);
@@ -4094,7 +4147,7 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 				}
 				else if (ShowUntracked)
 				{
-					if (f = new VcFile(d, this, LString(), IsWorking))
+					if ((f = new VcFile(d, this, LString(), IsWorking)))
 					{
 						f->SetText("?", COL_STATE);
 						f->SetText(Ln(2,-1), COL_FILENAME);

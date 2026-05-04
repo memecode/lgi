@@ -170,3 +170,19 @@ If you want to look at some more complete examples, see:
 - [lgi/trunk/ide](https://github.com/memecode/lgi/tree/main/ide)
 - [lgi/trunk/lvc](https://github.com/memecode/lgi/tree/main/lvc)
 - [lgi/trunk/resourceEditor](https://github.com/memecode/lgi/tree/main/resourceEditor)
+
+## Debugging Notes:
+
+Various debuggers allow addition of custom formatting of Lgi types.
+
+- Windows Visual Studio:
+	- `src/win/Lgi.natvis`
+- Mac Xcode lldb summary strings:
+	- add to `~/.lldbinit`:
+		```
+		command script import %lgi/src/mac/lgi_types_xcode.py
+		```
+		- LString: len:{$VAR.Str->Len} str:{(char*) $VAR.Str->Str}:s
+		- LArray: 
+- Linux:
+	- There is some support for custom types in: `ide/src/gdb.cpp`
