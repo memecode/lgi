@@ -30,11 +30,13 @@
 		345B2112217969700079E3C9 /* LgiUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20F52179696E0079E3C9 /* LgiUtils.cpp */; };
 		345B2113217969700079E3C9 /* LgiIde.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20F62179696E0079E3C9 /* LgiIde.cpp */; };
 		345B2114217969700079E3C9 /* IdeCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20F72179696F0079E3C9 /* IdeCommon.cpp */; };
-		345B2116217969700079E3C9 /* Debugger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FC2179696F0079E3C9 /* Debugger.cpp */; };
+		345B2116217969700079E3C9 /* gdb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FC2179696F0079E3C9 /* gdb.cpp */; };
 		345B2117217969700079E3C9 /* DebugContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FD2179696F0079E3C9 /* DebugContext.cpp */; };
 		345B2118217969700079E3C9 /* IdeProjectSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FE217969700079E3C9 /* IdeProjectSettings.cpp */; };
 		345B2119217969700079E3C9 /* MissingFiles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FF217969700079E3C9 /* MissingFiles.cpp */; };
 		3483413A2CC4B5E6002AF938 /* RemoteFileSelect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 348341392CC4B5E6002AF938 /* RemoteFileSelect.cpp */; };
+		34872EB52FAAA4C600E22EBF /* lldb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34872EB42FAAA4C600E22EBF /* lldb.cpp */; };
+		34872EB72FAAA9E300E22EBF /* liblldb.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 34872EB62FAAA9E300E22EBF /* liblldb.dylib */; };
 		349E73732ECFB36100A68615 /* Ssh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 349E73722ECFB36100A68615 /* Ssh.cpp */; };
 		34C4FD2A22FD7EB800C4BECB /* icons.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211D217969D30079E3C9 /* icons.png */; };
 		34C4FD2B22FD7EC100C4BECB /* LgiIde.lr8 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211C217969D30079E3C9 /* LgiIde.lr8 */; };
@@ -144,7 +146,7 @@
 		345B20F82179696F0079E3C9 /* IdeProject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IdeProject.h; path = ../src/IdeProject.h; sourceTree = "<group>"; };
 		345B20F92179696F0079E3C9 /* LgiIde.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiIde.h; path = ../src/LgiIde.h; sourceTree = "<group>"; };
 		345B20FA2179696F0079E3C9 /* ProjectNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ProjectNode.h; path = ../src/ProjectNode.h; sourceTree = "<group>"; };
-		345B20FC2179696F0079E3C9 /* Debugger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Debugger.cpp; path = ../src/Debugger.cpp; sourceTree = "<group>"; };
+		345B20FC2179696F0079E3C9 /* gdb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gdb.cpp; path = ../src/gdb.cpp; sourceTree = "<group>"; };
 		345B20FD2179696F0079E3C9 /* DebugContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DebugContext.cpp; path = ../src/DebugContext.cpp; sourceTree = "<group>"; };
 		345B20FE217969700079E3C9 /* IdeProjectSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IdeProjectSettings.cpp; path = ../src/IdeProjectSettings.cpp; sourceTree = "<group>"; };
 		345B20FF217969700079E3C9 /* MissingFiles.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MissingFiles.cpp; path = ../src/MissingFiles.cpp; sourceTree = "<group>"; };
@@ -154,6 +156,10 @@
 		345B211D217969D30079E3C9 /* icons.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icons.png; path = ../Resources/icons.png; sourceTree = "<group>"; };
 		348341382CC4B5E6002AF938 /* RemoteFileSelect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RemoteFileSelect.h; path = ../../include/lgi/common/RemoteFileSelect.h; sourceTree = "<group>"; };
 		348341392CC4B5E6002AF938 /* RemoteFileSelect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RemoteFileSelect.cpp; path = ../../src/common/Lgi/RemoteFileSelect.cpp; sourceTree = "<group>"; };
+		34872EB22FAAA4C600E22EBF /* gdb.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = gdb.h; sourceTree = "<group>"; };
+		34872EB32FAAA4C600E22EBF /* lldb.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lldb.h; sourceTree = "<group>"; };
+		34872EB42FAAA4C600E22EBF /* lldb.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = lldb.cpp; sourceTree = "<group>"; };
+		34872EB62FAAA9E300E22EBF /* liblldb.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = liblldb.dylib; path = "/opt/local/libexec/llvm-devel/lib/liblldb.dylib"; sourceTree = "<absolute>"; };
 		349E73722ECFB36100A68615 /* Ssh.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Ssh.cpp; path = ../../src/common/Net/Ssh.cpp; sourceTree = SOURCE_ROOT; };
 		34C0A79A2D35105600DC9D96 /* StructuredLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StructuredLog.h; path = ../../include/lgi/common/StructuredLog.h; sourceTree = "<group>"; };
 		34C0A79B2D35106C00DC9D96 /* StructuredIo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StructuredIo.h; path = ../../include/lgi/common/StructuredIo.h; sourceTree = "<group>"; };
@@ -178,6 +184,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				343688CB2CA793210009E57A /* libssh.4.9.6.dylib in Frameworks */,
+				34872EB72FAAA9E300E22EBF /* liblldb.dylib in Frameworks */,
 				34D625802CA78EE400FF505C /* LgiCocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -226,6 +233,7 @@
 		345B20CB217967B70079E3C9 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				34872EB62FAAA9E300E22EBF /* liblldb.dylib */,
 				34F442EE2DFC3C05001DBEF5 /* libpng16.16.45.git.dylib */,
 				34F442F02DFC3C14001DBEF5 /* libz.1.4.1.1.dylib */,
 				343688CA2CA793210009E57A /* libssh.4.9.6.dylib */,
@@ -301,9 +309,12 @@
 		345B212421796A1E0079E3C9 /* Debugging */ = {
 			isa = PBXGroup;
 			children = (
+				34872EB22FAAA4C600E22EBF /* gdb.h */,
+				34872EB32FAAA4C600E22EBF /* lldb.h */,
+				34872EB42FAAA4C600E22EBF /* lldb.cpp */,
 				345B20FD2179696F0079E3C9 /* DebugContext.cpp */,
 				345B20F02179696E0079E3C9 /* DebugContext.h */,
-				345B20FC2179696F0079E3C9 /* Debugger.cpp */,
+				345B20FC2179696F0079E3C9 /* gdb.cpp */,
 				345B20ED2179696D0079E3C9 /* Debugger.h */,
 			);
 			name = Debugging;
@@ -472,10 +483,11 @@
 				345B2114217969700079E3C9 /* IdeCommon.cpp in Sources */,
 				345B2108217969700079E3C9 /* SpaceTabConv.cpp in Sources */,
 				345B2104217969700079E3C9 /* DocEditStyling.cpp in Sources */,
+				34872EB52FAAA4C600E22EBF /* lldb.cpp in Sources */,
 				345B210B217969700079E3C9 /* SimpleCppParser.cpp in Sources */,
 				34D21CE8217978C4003D1EA6 /* LgiMain.cpp in Sources */,
 				349E73732ECFB36100A68615 /* Ssh.cpp in Sources */,
-				345B2116217969700079E3C9 /* Debugger.cpp in Sources */,
+				345B2116217969700079E3C9 /* gdb.cpp in Sources */,
 				341C7AC821A752DC0083C9CE /* About.cpp in Sources */,
 				345B210E217969700079E3C9 /* History.cpp in Sources */,
 				345B2113217969700079E3C9 /* LgiIde.cpp in Sources */,
@@ -624,6 +636,7 @@
 		345B207E217965EA0079E3C9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = arm64;
 				CLANG_ANALYZER_NONNULL = YES_NONAGGRESSIVE;
 				CLANG_ENABLE_OBJC_ARC = NO;
 				CODE_SIGN_STYLE = Manual;
@@ -638,6 +651,7 @@
 					../../include/lgi/mac/cocoa,
 					/opt/local/include,
 					/opt/local/libexec/openssl3/include,
+					"/opt/local/libexec/llvm-devel/include",
 				);
 				INFOPLIST_FILE = Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -645,6 +659,7 @@
 					"$(inherited)",
 					/opt/local/lib,
 					"$(PROJECT_DIR)",
+					"/opt/local/libexec/llvm-devel/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				OTHER_CFLAGS = (
@@ -668,6 +683,7 @@
 		345B207F217965EA0079E3C9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = arm64;
 				CLANG_ANALYZER_NONNULL = YES_NONAGGRESSIVE;
 				CLANG_ENABLE_OBJC_ARC = NO;
 				CODE_SIGN_STYLE = Manual;
@@ -682,6 +698,7 @@
 					../../include/lgi/mac/cocoa,
 					/opt/local/include,
 					/opt/local/libexec/openssl3/include,
+					"/opt/local/libexec/llvm-devel/include",
 				);
 				INFOPLIST_FILE = Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -689,6 +706,7 @@
 					"$(inherited)",
 					/opt/local/lib,
 					"$(PROJECT_DIR)",
+					"/opt/local/libexec/llvm-devel/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				OTHER_CFLAGS = (
