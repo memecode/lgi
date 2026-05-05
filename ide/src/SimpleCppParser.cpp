@@ -46,7 +46,7 @@ Known bugs:
 #include "lgi/common/DocView.h"
 #include "ParserCommon.h"
 
-// #define DEBUG_FILE			"DragAndDrop.h"
+// #define DEBUG_FILE			"SBTarget.h"
 // #define DEBUG_LINE		17
 #define PARSE_ALL_FILES		1 // else parse just the 'DEBUG_FILE'
 
@@ -67,7 +67,6 @@ const char *toString(DefnType t)
 {
 	switch (t)
 	{
-		default:
 		case DefnNone:      return "DefnNone";
 		case DefnDefine:    return "DefnDefine";
 		case DefnFunc:      return "DefnFunc";
@@ -78,6 +77,10 @@ const char *toString(DefnType t)
 		case DefnVariable:  return "DefnVariable";
 		case DefnScope:     return "DefnScope";
 		case DefnExternC:   return "DefnExternC";
+		case DefnNameSpace: return "DefnNameSpace";
+		default:
+			LAssert(!"Invalid value");
+			return nullptr;
 	}
 }
 
@@ -171,6 +174,9 @@ struct CppContext
 
 		// Ptr to source at the start of the scope (for debugging)
 		char16 *source;
+		
+		// Extra information, e.g. 'namespace'
+		LString name;
 
 		TScope()
 			: type(DefnNone)
@@ -178,15 +184,20 @@ struct CppContext
 			, source(nullptr)
 		{}
 
-		TScope(DefnType t, int l, char16 *s)
+		TScope(DefnType t, int l, char16 *s, LString n = LString())
 			: type(t)
 			, line(l)
 			, source(s)
+			, name(n)
 		{}
 
 		LString toString() const
 		{
-			return LString::Fmt("%s:%i", ::toString(type), line);
+			auto sType = ::toString(type);
+			if (name)
+				return LString::Fmt("%s:%i(%s)", sType, line, name.Get());
+			else
+				return LString::Fmt("%s:%i", sType, line);
 		}
 	};
 
@@ -196,7 +207,7 @@ struct CppContext
 	LString::Array ClassNames;
 
 	bool IsEnum = 0, IsClass = false, IsStruct = false;
-	bool FnEmit = false;	// don't emit functions between a f(n) and the next '{'
+	bool FnEmit = true;		// don't emit functions between a f(n) and the next '{'
 							// they are only parent class initializers
 	LArray<int> ConditionalIndex;
 	int ConditionalDepth = 0;
@@ -237,7 +248,7 @@ struct CppContext
 			if (ClassNames.Length())
 			{
 				auto cls = ClassNames.PopLast();
-				DEBUG_LOG("%s:%i - removing class name: %s\n", _FL, cls.Get());
+				// DEBUG_LOG("%s:%i - removing class name: %s\n", _FL, cls.Get());
 			}
 			else
 			{
@@ -358,7 +369,7 @@ struct CppContext
 
 		char16 *t;
 		LString::Array parts;
-	
+		
 		while (n && *n)
 		{
 			skipws(n);
@@ -380,7 +391,7 @@ struct CppContext
 				break;
 			}
 
-			DEBUG_LOG("%s: t='%S' @ line %i\n", __func__, t, Line+1);
+			// DEBUG_LOG("%s: t='%S' @ line %i\n", __func__, t, LineNum+1);
 
 			if (Compare(t, "template", true))
 			{
@@ -447,7 +458,7 @@ struct CppContext
 
 				c.name = LString("").Join(parts);
 
-				DEBUG_LOG("%s: class name='%s' @ line %i\n", __func__, c.name.Get(), Line+1);
+				DEBUG_LOG("%s: class name='%s' @ line %i\n", __func__, c.name.Get(), LineNum);
 				break;
 			}
 			else if (c.typeName && !c.colon)
@@ -469,7 +480,8 @@ struct CppContext
 		LastDecl = s;
 
 		#ifdef DEBUG_FILE
-		Debug = !Stricmp(LGetLeaf(FileName), DEBUG_FILE);
+		if (Debug = !Stricmp(LGetLeaf(FileName), DEBUG_FILE))
+			DEBUG_LOG("%s:%i - logging FileName='%s'\n", _FL, FileName);
 		#endif
 		#if !PARSE_ALL_FILES
 		if (!Debug)
@@ -632,11 +644,11 @@ struct CppContext
 					s++;
 					if (ConditionalFirst)
 						Scopes.Add({DefnScope, LineNum, s});
-					FnEmit = false;
+					// FnEmit = false;
 					LastDecl = s;
 					#ifdef DEBUG_FILE
 					if (Debug)
-						LgiTrace("%s:%i - FnEmit=%i Scope=%s @ line %i\n", _FL, FnEmit, curScope().Get(), Line+1);
+						LgiTrace("%s:%i - setting FnEmit=%i Scope=%s @ line %i\n", _FL, FnEmit, curScope().Get(), LineNum);
 					#endif				
 					break;
 				}
@@ -648,14 +660,25 @@ struct CppContext
 					{
 						if (Scopes.Length() > 0)
 						{
+							auto s = lastScope();
 							popScope();
-							DEBUG_LOG("%s:%i - Scope=%s @ line %i\n", _FL, curScope().Get(), Line+1);
+							if (s == DefnNameSpace)
+							{
+								auto ns = ClassNames.PopLast();
+								#ifdef DEBUG_FILE
+								if (Debug)
+									LgiTrace("%s:%i - popping namespace '%s' @ line %i\n", _FL, ns.Get(), LineNum);
+								#endif
+							}
+							else
+							{
+								DEBUG_LOG("%s:%i - popping scope=%s @ line %i\n", _FL, curScope().Get(), LineNum);
+							}
 						}
 						else
 						{
-							DEBUG_LOG("%s:%i - ERROR Depth zero @ line %i\n", _FL, Line+1);
+							DEBUG_LOG("%s:%i - ERROR Depth zero @ line %i\n", _FL, LineNum);
 						}
-
 					}
 
 					defnskipws(s);
@@ -689,7 +712,7 @@ struct CppContext
 						{
 							if (EmitDefn(DefnClass))
 							{
-								Defns.New().Set(DefnClass, FileName, TypeDef, Line + 1);
+								Defns.New().Set(DefnClass, FileName, TypeDef, TypeToStr + 1);
 							}
 						}
 
@@ -700,7 +723,7 @@ struct CppContext
 							if (d.type == DefnClass)
 								ClassNames.PopLast();
 						}
-						DEBUG_LOG("%s:%i - Scope=%s @ line %i\n", _FL, curScope().Get(), Line+1);
+						DEBUG_LOG("%s:%i - Scope=%s @ line %i\n", _FL, curScope().Get(), TypeToStr+1);
 					}
 					*/
 					break;
@@ -740,7 +763,7 @@ struct CppContext
 					auto context = lastScope();
 					if (context != DefnScope &&
 						context != DefnFunc &&
-						!FnEmit &&
+						// !FnEmit &&
 						LastDecl &&
 						ConditionalFirst)
 					{
@@ -790,7 +813,7 @@ struct CppContext
 						{
 							if (auto Buf = LString(Start, End-Start))
 							{
-								DEBUG_LOG("	Buf='%s' line=%i context=%s\n", Buf.Get(), Line, TypeToStr(context));
+								DEBUG_LOG("	Buf='%s' line=%i context=%s\n", Buf.Get(), LineNum, toString(context));
 
 								// remove new-lines
 								auto Out = Buf.Get();
@@ -909,7 +932,7 @@ struct CppContext
 						if (Debug)
 							LgiTrace("%s:%i - Not attempting fn parse: Scope=%s, fnEmit=%i, CondFirst=%i, %s:%i:%.20S\n",
 								_FL, curScope().Get(), FnEmit, ConditionalFirst,
-								LGetLeaf(FileName), Line, s-1);
+								LGetLeaf(FileName), LineNum, s-1);
 						#endif
 					}
 					break;
@@ -926,7 +949,45 @@ struct CppContext
 						defnskipsym(s);
 					
 						auto TokLen = s - Start;
-						if (TokLen == 6 && Compare(Start, "extern", false))
+						
+						if (TokLen == 9 && Compare(Start, "namespace", false))
+						{
+							// Is this a reference or the start of a block?
+							LAutoWString t;
+							LString::Array nsNames;
+							while (t.Reset(LexCpp(s, LexStrdup)))
+							{
+								// printf("%s:%i - ns tok='%S'\n", _FL, t.Get());
+								if (Compare(t.Get(), ";", true))
+								{
+									// reference: no nothing...
+									nsNames.Empty();
+									break;
+								}
+								else if (Compare(t.Get(), "{", true))
+								{
+									break;
+								}
+								else
+								{
+									nsNames.New() = t.Get();
+								}
+							}
+							
+							LastDecl = s;
+							
+							if (nsNames.Length())
+							{
+								auto nsName = LString("").Join(nsNames);
+								LAssert(nsName.Length() > 0);
+								Scopes.Add( {DefnNameSpace, LineNum, Start, nsName } );
+								ClassNames.Add(nsName);
+
+								DEBUG_LOG("%s:%i - namespace defn: %s, scopes=%s @ line %i\n",
+										_FL, nsName.Get(), curScope().Get(), LineNum);
+							}
+						}
+						else if (TokLen == 6 && Compare(Start, "extern", false))
 						{
 							// extern "C" block?
 							LAutoWString t(LexCpp(s, LexStrdup));
@@ -940,10 +1001,8 @@ struct CppContext
 								}
 							}
 						}
-						else if (
-							(TokLen == 5 && Compare(Start, "const", false)) ||
-							(TokLen == 9 && Compare(Start, "constexpr", false))
-						)
+						else if (	(TokLen == 5 && Compare(Start, "const",     false)) ||
+									(TokLen == 9 && Compare(Start, "constexpr", false)) )
 						{
 							// const/constexpr
 							skipws(s);
@@ -1103,12 +1162,16 @@ struct CppContext
 							DefineStructClass:
 
 							// Class / Struct
+							
+							/* Why is this even here? Shouldn't we always capture nested classes?
 							if (lastScope() == DefnScope)
 							{
 								DEBUG_LOG("%s:%i - CLASS/STRUCT defn: not capturing, Scopes=%s @ line %i\n",
-											_FL, curScope().Get(), Line+1);
+											_FL, curScope().Get(), LineNum);
 							}
 							else
+							*/
+							
 							{
 								// Check if this is really a class/struct definition or just a reference
 								char16 *next = LastDecl;
@@ -1116,10 +1179,10 @@ struct CppContext
 								if (classDef)
 								{
 									// Full definition
-									Scopes.Add({DefnClass, LineNum, s});
+									Scopes.Add( { DefnClass, LineNum, s, classDef.name } );
 
 									DEBUG_LOG("%s:%i - CLASS/STRUCT defn: Scopes=%s @ line %i\n",
-											_FL, curScope().Get(), Line+1);
+											_FL, curScope().Get(), LineNum);
 								
 									ClassNames.Add(classDef.name);
 								
@@ -1132,9 +1195,7 @@ struct CppContext
 									{
 										SeekPtr(s, classDef.body + 1/*seek past the colon, we have emitted the class scope*/, LineNum);
 										LastDecl = s;
-										DEBUG_LOG("post class s='%s'\n",
-											LString::Escape(LString(s, 20)).Get()
-											);
+										// DEBUG_LOG("post class s='%s'\n", LString::Escape(LString(s, 20)).Get());
 									}
 									else
 									{
@@ -1144,7 +1205,7 @@ struct CppContext
 											);
 									}
 
-									DEBUG_LOG("	class='%s' @ line %i\n", curClass().Get(), Line+1);
+									DEBUG_LOG("	class='%s' @ line %i\n", curClass().Get(), LineNum);
 								}
 								else if (InTypedef)
 								{
@@ -1178,7 +1239,7 @@ struct CppContext
 								}
 								else
 								{
-									#if 1
+									#if 0
 									DEBUG_LOG("%s:%i - CLASS/STRUCT no defn: type='%.5S' body='%.5S' name='%s'\n",
 												_FL,
 												classDef.typeName,
@@ -1201,11 +1262,31 @@ struct CppContext
 							IsEnum = true;
 							defnskipws(s);
 						
-							LAutoWString t(LexCpp(s, LexStrdup));
-							if (t && isalpha(*t))
+							// scan forward to see what type of enum:
+							LAutoWString t;
+							LString::Array names;
+							while (t.Reset(LexCpp(s, LexStrdup)))
 							{
-								Defns.New().Set(DefnEnum, FileName, t.Get(), LineNum);
+								if (Compare(t.Get(), "{", true))
+								{
+									// start scope..
+									Scopes.Add({DefnEnum, LineNum, s});
+									break;
+								}
+								else if (IsAlpha(*t.Get()))
+								{
+									names.New() = t.Get();
+								}
+								else
+								{
+									DEBUG_LOG("%s:%i - unexpected enum part '%S'\n", _FL, t.Get());
+									break;
+								}
 							}
+
+							auto name = LString("").Join(names);
+							if (name.Length() > 0) // if the enum has no name... ignore...
+								Defns.New().Set(DefnEnum, FileName, name, LineNum);
 						}
 						else if (IsEnum)
 						{

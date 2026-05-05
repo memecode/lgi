@@ -22,6 +22,12 @@
 #define KNOWN_EXT				"c,cpp,cxx,h,hpp,hxx,py,js"
 #define INDEX_EXT				"idx"
 
+#if 1
+	#define LOG(...)			printf(__VA_ARGS__)
+#else
+	#define LOG(...)
+#endif
+
 int SYM_FILE_SENT = 0;
 
 class FindSymbolDlg : public LDialog

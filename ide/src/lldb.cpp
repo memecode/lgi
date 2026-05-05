@@ -54,7 +54,16 @@ class LLdb :
 	LStream *networkLog = nullptr;
 	
 	// Impl:	
-	lldb::SBDebugger debugger;
+	lldb::SBDebugger	debugger;
+	lldb::SBTarget		target;
+	lldb::SBProcess		process;
+	
+	struct Cmd
+	{
+		enum TCmd {
+		} type;
+		
+	};
 
 	int Main()
 	{
@@ -107,7 +116,11 @@ public:
 		events = EventHandler;
 		
 		// https://lldb.llvm.org/python_api/lldb.SBDebugger.html
-		// target = debugger.CreateTargetWithFileAndArch(exe, lldb.LLDB_ARCH_DEFAULT)
+		target = debugger.CreateTargetWithFileAndArch(Exe, LLDB_ARCH_DEFAULT);
+		if (target)
+		{
+			process = target.LaunchSimple(nullptr, nullptr, InitDir);
+		}
 		
 		return false;
 	}
