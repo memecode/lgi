@@ -845,10 +845,7 @@ public:
 		if (Path)
 		{
 			if (auto p = LString(Path).RStrip("/"))
-			{
 				pathsAdded.Add(p, true);
-				printf("Adding vol path: %s\n", Path);
-			}
 		}
 		i->SetText(v->Name());
 		i->SetText(Path, 1);

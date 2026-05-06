@@ -143,7 +143,7 @@ VersionCtrl AppPriv::DetectVcs(VcFolder *Fld)
 		#endif
 	}
 
-	auto Path = u.sPath.Strip("/");
+	auto Path = u.sPath.RStrip("/");
 
 	auto simpleCheck = [&](LString Path)
 		{

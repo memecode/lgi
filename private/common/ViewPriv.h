@@ -71,7 +71,7 @@ class LPulseThread : public LThread, public LCancel
 
 	LString MakeName(LView *v, const char *Type)
 	{
-		auto s = LString::Fmt("Pulse.%s", v->GetClass());
+		auto s = LString::Fmt("%.12s.Pls", v->GetClass());
 		if (Type)
 			s += LString::Fmt(".%s", Type);
 		return s;
