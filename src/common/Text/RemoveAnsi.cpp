@@ -190,7 +190,7 @@ size_t RemoveAnsi(char *in, size_t length)
 	*out = 0;
 	
 	return out - in;
-}	
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 LRemoveAnsiStream::LRemoveAnsiStream(LStream *outputStream)

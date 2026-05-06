@@ -567,15 +567,13 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 									SourceData.Write(Result);
 									
 									// Create some new elements based on the dynamically generated string
-									char *p = Result;
+									auto p = Result.Get();
 									do
 									{
-										LHtmlElement *c = CreateElement(Elem);
-										if (c)
-										{
+										if (auto c = CreateElement(Elem))
 											p = ParseHtml(c, p, Depth + 1, InPreTag);
-										}
-										else break;
+										else
+											break;
 									}
 									while (ValidStr(p));
 								}

@@ -55,9 +55,6 @@
     <ClCompile Include="..\Src\SshConnection.cpp">
       <Filter>Source Files\Ssh</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\common\Text\RemoveAnsi.cpp">
-      <Filter>Source Files\Lgi</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\common\Net\Http.cpp">
       <Filter>Source Files\Lgi</Filter>
     </ClCompile>
@@ -66,6 +63,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\common\Net\Ssh.cpp">
       <Filter>Source Files\Ssh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\Text\RemoveAnsi.cpp">
+      <Filter>Source Files\Lgi</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

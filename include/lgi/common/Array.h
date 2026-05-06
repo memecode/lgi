@@ -3,6 +3,7 @@
 /// \brief Growable, type-safe array.
 #pragma once 
 
+#include <type_traits>
 #include <stdlib.h>
 #include <assert.h>
 #include <cstdlib>
@@ -702,11 +703,15 @@ public:
 	{
 		if (len <= 0)
 			return;
-		std::qsort(p, len, sizeof(*p), [](const void *a, const void *b)
+
+		std::qsort(p, len, sizeof(*p), [](const void *a, const void *b) -> int
 		{
 			auto B = (const Type*)b;
 			auto A = (const Type*)a;
-			return *A - *B;
+			if (std::is_pointer_v<Type>)
+				return **A - **B;
+			else
+				return (int)(*A - *B);
 		});
 	}
 

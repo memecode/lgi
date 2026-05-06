@@ -686,6 +686,34 @@ LVariant &LVariant::operator =(LVariant const &i)
 	return *this;
 }
 
+int LVariant::operator -(LVariant &v)
+{
+	if (IsString() && v.IsString())
+	{
+		return Stricmp(Str(), v.Str());
+	}
+	else if (IsInt() && v.IsInt())
+	{
+		auto cmp = v.CastInt64() - CastInt64();
+		if (cmp < 0)
+			return -1;
+		return cmp > 0 ? 1 : 0;
+	}
+	else if (IsDouble() && v.IsDouble())
+	{
+		auto cmp = v.CastDouble() - CastDouble();
+		if (cmp < 0.0)
+			return -1;
+		return cmp > 0.0 ? 1 : 0;
+	}
+	else
+	{
+		LAssert(!"Unsupported comparison type?");
+	}
+
+	return 0;
+}
+
 bool LVariant::SetDomRef(LDom *obj, char *name)
 {
 	Empty();

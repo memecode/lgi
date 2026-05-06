@@ -361,6 +361,7 @@ public:
 
 	bool operator ==(LVariant &v);
 	bool operator !=(LVariant &v) { return !(*this == v); }
+	int operator -(LVariant &v);
 
 	/// Sets the value to a DOM variable reference
 	bool SetDomRef(LDom *obj, char *name);

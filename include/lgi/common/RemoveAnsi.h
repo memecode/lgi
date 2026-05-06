@@ -6,7 +6,7 @@ extern void RemoveAnsi(LString &a);
 
 // If you need stateful parsing of ansi codes across memory blocks, use this:
 // It _should_ handle partial ansi escape codes between Write calls.
-class LgiClass LRemoveAnsiStream : public LStream
+class LRemoveAnsiStream : public LStream
 {
 	LStream *out = nullptr;
 	struct AnsiParser *d;

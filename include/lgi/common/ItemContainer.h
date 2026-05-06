@@ -240,9 +240,18 @@ public:
 
 #define DEFAULT_COLUMN_SPACING		12
 
+template<typename T>
+int LCastComparison(T val)
+{
+	if (val < 0)
+		return -1;
+	return val > 0 ? 1 : 0;
+}
+
 class LgiClass LSortable
 {
 public:
+
     struct SortParam
 	{
 		constexpr static int INVALID = -1;

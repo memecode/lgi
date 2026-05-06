@@ -339,6 +339,9 @@ elseif (MSVC)
 
 	set(Source
 		${CommonSource}
+		include/lgi/win/LgiOs.h
+		include/lgi/win/LgiOsDefs.h
+		include/lgi/win/LgiOsClasses.h
 		src/win/General/Lgi.manifest
 		src/win/Gdc2/Gdc2.cpp
 		src/win/Gdc2/GdiLeak.cpp

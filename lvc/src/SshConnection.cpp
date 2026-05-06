@@ -8,13 +8,6 @@
 #define PROFILE_WaitPrompt		0
 #define PROFILE_OnEvent			0
 
-#define DEBUG_SSH_LOGGING		1
-#if DEBUG_SSH_LOGGING
-	#define SSH_LOG(...)		d->sLog.Log(__VA_ARGS__)
-#else
-	#define SSH_LOG(...)
-#endif
-
 //////////////////////////////////////////////////////////////////
 SshConnection::SshConnection(LTextLog *log, const char *uri, const char *prompt) :
 	LSsh(	[this](auto msg, auto type)
@@ -92,7 +85,7 @@ LSsh::SshConsole *SshConnection::GetConsole()
 {
 	if (!Connected)
 	{
-		SSH_LOG("SshConnection::GetConsole() Open:", Host.sHost, Host.sUser, Host.sPass, Host.Port);
+		SSH_SLOG("SshConnection::GetConsole() Open:", Host.sHost, Host.sUser, Host.sPass, Host.Port);
 		auto r = Open(Host.sHost, Host.sUser, Host.sPass, true, Host.Port);
 		Log->Print("Ssh: %s open: %i\n", Host.sHost.Get(), r);
 	}
@@ -228,7 +221,7 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data, const char *Debug, i
 		{
 			// Got some data... keep asking for more:
 			LString tmp((char*)buf.ptr, rd);
-SSH_LOG("waitPrompt data:", rd, tmp);
+SSH_SLOG("waitPrompt data:", rd, tmp);
 
 			BytesRead += rd;
 			buf.Commit(rd);
@@ -242,7 +235,7 @@ SSH_LOG("waitPrompt data:", rd, tmp);
 		{
 			LastReadTs = now; // no point spamming the log
 			auto sz = out.GetSize();
-SSH_LOG("waitPrompt out:", sz, &out);
+SSH_SLOG("waitPrompt out:", sz, &out);
 			auto last = LastLine(out);
 
 			// Does the buffer end with a ':' on a line by itself?
@@ -274,7 +267,7 @@ SSH_LOG("waitPrompt out:", sz, &out);
 		// LgiTrace("last='%s'\n", last.Get());
 		PROFILE("matchstr");
 		auto result = MatchStr(Prompt, last);
-SSH_LOG("waitPrompt result:", result, Prompt, last);
+SSH_SLOG("waitPrompt result:", result, Prompt, last);
 		if (Debug)
 		{
 			LgiTrace("WaitPrompt.%s match='%s' with '%s' = %i\n", Debug, Prompt.Get(), last.Get(), result);
@@ -303,7 +296,7 @@ SSH_LOG("waitPrompt result:", result, Prompt, last);
 
 					*Data = LString(start, end - start).Replace("\r");
 				}
-SSH_LOG("waitPrompt data:", *Data);
+SSH_SLOG("waitPrompt data:", *Data);
 			}
 
 			if (Debug)
@@ -416,7 +409,7 @@ LMessage::Result SshConnection::OnEvent(LMessage *Msg)
 			else
 			{
 				ls.Printf("find %s -maxdepth 1 -printf \"%%f\n\"\n", path.Get());
-SSH_LOG("detectVcs:", ls);
+SSH_SLOG("detectVcs:", ls);
 				con->Write(ls, ls.Length());
 				auto pr = WaitPrompt(con, &out, nullptr, 3000);
 				lines = out.SplitDelimit("\r\n");
@@ -481,14 +474,14 @@ PROF("get console");
 PROF("cd");
 			LString cmd;
 			cmd.Printf("cd %s\n", path.Get());
-SSH_LOG(">>>> cd:", path);
+SSH_SLOG(">>>> cd:", path);
 			auto wr = con->Write(cmd, cmd.Length());
 PROF("cd wait");
 			auto pr = WaitPrompt(con, NULL, Debug?"Cd":NULL);
 
 PROF("cmd");
 			cmd.Printf("%s %s\n", p->Exe.Get(), p->Args.Get());
-SSH_LOG(">>>> cmd:", cmd);
+SSH_SLOG(">>>> cmd:", cmd);
 			if (Log)
 				Log->Print("%s", cmd.Get());
 			wr = con->Write(cmd, cmd.Length());
@@ -498,7 +491,7 @@ PROF("cmd wait");
 PROF("result");
 			LString result;
 			cmd = "echo $?\n";
-SSH_LOG(">>>> result:", cmd);
+SSH_SLOG(">>>> result:", cmd);
 			wr = con->Write(cmd, cmd.Length());
 PROF("result wait");
 			pr = WaitPrompt(con, &result, Debug?"Echo":NULL);
