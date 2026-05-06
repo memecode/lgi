@@ -325,40 +325,38 @@ const char *LSubProcess::GetEnvironment(const char *Var)
 
 bool LSubProcess::SetEnvironment(const char *Var, const char *Value)
 {	
-	Variable *v = GetEnvVar(Var, true);
+	auto v = GetEnvVar(Var, true);
 	if (!v)
 		return false;
 	
 	bool IsPath = !_stricmp(Var, "PATH");
 
 	LStringPipe a;
-	const char *s = Value;
+	auto s = Value;
 	while (*s)
 	{
-		char *n = strchr(s, '%');
-		char *e = n ? strchr(n + 1, '%') : NULL;
+		auto n = strchr(s, '%');
+		auto e = n ? strchr(n + 1, '%') : NULL;
 		if (n && e)
 		{
-			a.Write(s, (int) (n-s));
+			a.Write(s, n - s);
 			
 			n++;
-			ptrdiff_t bytes = e - n;
+			auto bytes = e - n;
 			char Name[128];	
-			if (bytes > sizeof(Name) - 1) bytes = sizeof(Name)-1;			
+			if (bytes > sizeof(Name) - 1)
+				bytes = sizeof(Name)-1;
 			memcpy(Name, n, bytes);
 			Name[bytes] = 0;
 			
-			const char *existing = GetEnvironment(Name);
-			if (existing)
-			{
-				a.Write(existing, (int)strlen(existing));
-			}
+			if (auto existing = GetEnvironment(Name))
+				a.Write(existing, strlen(existing));
 
 			s = e + 1;
 		}
 		else
 		{
-			a.Write(s, (int)strlen(s));
+			a.Write(s, strlen(s));
 			break;
 		}
 	}
@@ -532,7 +530,7 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 			LArray<char*> Env;
             
 			Vars.SetFixedLength(false);
-			for (auto v : d->Environment)
+			for (auto v: d->Environment)
 			{
 				LString &s = Vars.New();
 				s.Printf("%s=%s", v.Var.Get(), v.Val.Get());
@@ -544,10 +542,10 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 			Env.Add(NULL);
             
 			#if DEBUG_SUBPROCESS
-			printf("Exe=%s\n", d->Exe.Get());
-			printf("Env.Len=%i\n", (int)Env.Length());
-			for (int i=0; i<Env.Length(); i++)
-				printf("Env[%i]=%s\n", i, Env[i]);
+				printf("Exe=%s\n", d->Exe.Get());
+				printf("Env.Len=%i\n", (int)Env.Length());
+				for (int i=0; i<Env.Length(); i++)
+					printf("Env[%i]=%s\n", i, Env[i]);
 			#endif
 			
 			int r = execve(d->Exe, &d->Args[0], Env.AddressOf());
@@ -563,12 +561,12 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 		printf("%s\n", sErrorStr);
 
 		#if defined(MAC) || defined(HAIKU)
-		// While 'exit' would be nice and clean it does cause crashes in free the global InitLibPng object
-		// We HAVE to call exec??? to replace the process... anything will do... 'ls' will just quit quickly
-		char *a= {0};
-		execv("/bin/ls", &a);
+			// While 'exit' would be nice and clean it does cause crashes in free the global InitLibPng object
+			// We HAVE to call exec??? to replace the process... anything will do... 'ls' will just quit quickly
+			char *a= {0};
+			execv("/bin/ls", &a);
 		#else
-		exit(LSUBPROCESS_ERROR);
+			exit(LSUBPROCESS_ERROR);
 		#endif
 	}
 	else
@@ -724,7 +722,7 @@ ssize_t LSubProcess::Read(void *Buf, ssize_t Size, int TimeoutMs)
 			FD_ZERO(&r);
 			FD_SET(s, &r);
 			
-			int v = select((int)s+1, &r, 0, 0, &t);
+			auto v = select((int)s+1, &r, 0, 0, &t);
 			if (v > 0 && FD_ISSET(s, &r))
 			{
 				DoRead = true;
@@ -738,7 +736,7 @@ ssize_t LSubProcess::Read(void *Buf, ssize_t Size, int TimeoutMs)
 		else LgiTrace("%s:%i - Invalid socket.\n", _FL);
 	}
 	
-	return (int)read(d->Io.Read, Buf, Size);
+	return read(d->Io.Read, Buf, Size);
 }
 
 int LSubProcess::Peek()
@@ -756,7 +754,7 @@ bool LSubProcess::Write(LString s)
 
 ssize_t LSubProcess::Write(const void *Buf, ssize_t Size, int Flags)
 {
-	return (int)write(d->Io.Write, Buf, Size);
+	return write(d->Io.Write, Buf, Size);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////

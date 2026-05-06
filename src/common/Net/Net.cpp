@@ -645,9 +645,18 @@ int LSocket::Open(const char *HostAddr, int Port)
 
 		ZeroObj(RemoteAddr);
 		#ifdef WIN32
-		d->Socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+			d->Socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
 		#else
-		d->Socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+			d->Socket = socket(	AF_INET,
+								SOCK_STREAM |
+								#ifdef SOCK_CLOEXEC
+								SOCK_CLOEXEC	// this is an attempt to NOT pass sockets to child processes...
+												// which I almost never want to do. There we're cases where things like
+												// LgiIde and SU tools would use ping to check if something was up, and
+												// when the main process died, the ping process would still be listening
+												// on the socket. Which breaks things like LCommsBus badly.
+								#endif												
+								, IPPROTO_TCP);
 		#endif
 
 		if (ValidSocket(d->Socket))
