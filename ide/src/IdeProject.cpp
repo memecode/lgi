@@ -501,7 +501,7 @@ public:
 		const char *PlatformStaticLibExt = nullptr;
 		const char *PlatformExeExt = "";
 		const char *CCompilerFlags = "-MMD -MP -fPIC -fno-inline";
-		const char *CppCompilerFlags = "$(CFlags) -fpermissive -std=c++14";
+		const char *CppCompilerFlags = "$(CFlags) -fpermissive -std=c++17";
 		const char *TargetType = d->Settings.GetStr(ProjTargetType, nullptr, Platform);
 		const char *CompilerName = d->Settings.GetStr(ProjCompiler);
 		LString LinkerFlags;

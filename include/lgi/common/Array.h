@@ -698,21 +698,44 @@ public:
 		return true;
 	}
 
+protected:
+	template<typename T>
+	void SortImpl(T a)
+	{
+		// Sorting non-pointers...
+		std::qsort(p, len, sizeof(*p),
+			[](const void *a, const void *b) -> int
+			{
+				auto A = (const Type*)a;
+				auto B = (const Type*)b;
+				auto cmp = *A - *B;
+				if (cmp < 0) return -1;
+				return cmp > 0 ? 1 : 0;
+			});
+	}
+
+	template<typename T>
+	void SortImpl(T*& a)
+	{
+		// Sorting pointers...
+		std::qsort(p, len, sizeof(*p),
+			[](const void *a, const void *b) -> int
+			{
+				auto &A = *(const Type*)a;
+				auto &B = *(const Type*)b;
+				auto cmp = *A - *B;
+				if (cmp < 0) return -1;
+				return cmp > 0 ? 1 : 0;
+			});
+	}
+
+public:
 	/// Sorts the array via objects '-' operator
 	void Sort()
 	{
 		if (len <= 0)
 			return;
-
-		std::qsort(p, len, sizeof(*p), [](const void *a, const void *b) -> int
-		{
-			auto B = (const Type*)b;
-			auto A = (const Type*)a;
-			if (std::is_pointer_v<Type>)
-				return **A - **B;
-			else
-				return (int)(*A - *B);
-		});
+		SortImpl(*p);
 	}
 
 	/// Sorts the array via a callback.

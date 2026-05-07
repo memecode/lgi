@@ -2071,9 +2071,9 @@ bool LSurface::IsPreMultipliedAlpha()
 template<typename Px>
 void ConvertToPreMul(Px *src, int x)
 {
-	REGISTER uchar *DivLut = Div255Lut;
-	REGISTER Px *s = src;
-	REGISTER Px *e = s + x;
+	uchar *DivLut = Div255Lut;
+	Px *s = src;
+	Px *e = s + x;
 	while (s < e)
 	{
 		s->r = DivLut[s->r * s->a];
@@ -2087,8 +2087,8 @@ template<typename Px>
 void ConvertFromPreMul(Px *src, int x)
 {
 	// REGISTER uchar *DivLut = Div255Lut;
-	REGISTER Px *s = src;
-	REGISTER Px *e = s + x;
+	Px *s = src;
+	Px *e = s + x;
 	while (s < e)
 	{
 		if (s->a > 0 && s->a < 255)
@@ -2148,8 +2148,8 @@ bool LSurface::ConvertPreMulAlpha(bool ToPreMul)
 template<typename Px>
 void MakeOpaqueRop32(Px *in, int len)
 {
-	REGISTER Px *s = in;
-	REGISTER Px *e = s + len;
+	Px *s = in;
+	Px *e = s + len;
 	while (s < e)
 	{
 		s->a = 0xff;
@@ -2160,8 +2160,8 @@ void MakeOpaqueRop32(Px *in, int len)
 template<typename Px>
 void MakeOpaqueRop64(Px *in, int len)
 {
-	REGISTER Px *s = in;
-	REGISTER Px *e = s + len;
+	Px *s = in;
+	Px *e = s + len;
 	while (s < e)
 	{
 		s->a = 0xffff;
