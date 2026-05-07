@@ -361,7 +361,7 @@ public:
 
 	bool operator ==(LVariant &v);
 	bool operator !=(LVariant &v) { return !(*this == v); }
-	int operator -(LVariant &v);
+	int64_t operator -(const LVariant &v) const;
 
 	/// Sets the value to a DOM variable reference
 	bool SetDomRef(LDom *obj, char *name);
@@ -376,12 +376,19 @@ public:
 	/// Set the value to a stream
 	bool SetStream(class LStreamI *Ptr, bool Own);
 
+	/// Returns the string if valid or nullptr. Doesn't modify variant.
+	const char *ConstStr() const;
 	/// Returns the string if valid (will convert a GV_WSTRING to utf)
 	char *Str();
-	/// Returns the value as an LString
-	LString LStr();
+	
+	/// Returns a const wide string if valid, or nullptr
+	const char16 *ConstWStr() const;
 	/// Returns a wide string if valid (will convert any GV_STRING or GV_LSTRING to GV_WSTRING)
 	char16 *WStr();
+
+	/// Returns the value as an LString (usually making a copy)
+	LString LStr() const;
+
 	/// Returns the string, releasing ownership of the memory to caller and
 	/// changing this LVariant to GV_NULL.
 	char *ReleaseStr();
@@ -403,17 +410,17 @@ public:
 	int64 Length();
 
 	/// True if currently a int
-	bool IsInt();
+	bool IsInt() const;
 	/// True if currently a bool
-	bool IsBool();
+	bool IsBool() const;
 	/// True if currently a double
-	bool IsDouble();
+	bool IsDouble() const;
 	/// True if currently a string
-	bool IsString();
+	bool IsString() const;
 	/// True if currently a binary block
-	bool IsBinary();
+	bool IsBinary() const;
 	/// True if currently null
-	bool IsNull();
+	bool IsNull() const;
 
 	/// Changes the variant's type, maintaining the value where possible. If
 	/// no conversion is available then nothing happens.

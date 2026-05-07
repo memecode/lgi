@@ -700,7 +700,7 @@ public:
 
 protected:
 	template<typename T>
-	void SortImpl(T a)
+	void SortImpl(T& a)
 	{
 		// Sorting non-pointers...
 		std::qsort(p, len, sizeof(*p),

@@ -271,7 +271,76 @@ bool LContainers::Run()
 		if (SwapTest.GetSize() != 8)
 			return FAIL(_FL, "Swap failed.");
 	}
+	
+	// Integer variant sorting tests...
+	{
+		LArray<LVariant> nonPtr;
+		nonPtr.Add(LVariant(33));
+		nonPtr.Add(LVariant(22));
+		nonPtr.Add(LVariant(44));
+		nonPtr.Sort();
+		for (unsigned i=0; i<nonPtr.Length()-1; i++)
+		{
+			auto &a = nonPtr[i];
+			auto &b = nonPtr[i+1];
+			auto cmp = b - a;
+			printf("int variant cmp: %i - %i = %i\n", b.CastInt32(), a.CastInt32(), (int)cmp);
+			if (cmp < 0)
+				return FAIL(_FL, "sort failed");
+		}
+		
+		LArray<LVariant*> ptr;
+		ptr.Add(new LVariant(33));
+		ptr.Add(new LVariant(22));
+		ptr.Add(new LVariant(44));
+		ptr.Sort();
+		for (unsigned i=0; i<ptr.Length()-1; i++)
+		{
+			auto *a = ptr[i];
+			auto *b = ptr[i+1];
+			auto cmp = *b - *a;
+			printf("int variant ptr cmp: %i - %i = %i\n", b->CastInt32(), a->CastInt32(), (int)cmp);
+			if (cmp < 0)
+				return FAIL(_FL, "sort failed");
+		}
+		ptr.DeleteObjects();		
+	}
+
+	// String variant sorting tests...
+	{
+		LArray<LVariant> nonPtr;
+		nonPtr.Add(LVariant("bbb"));
+		nonPtr.Add(LVariant("aaa"));
+		nonPtr.Add(LVariant("ccc"));
+		nonPtr.Sort();
+		for (unsigned i=0; i<nonPtr.Length()-1; i++)
+		{
+			auto &a = nonPtr[i];
+			auto &b = nonPtr[i+1];
+			auto cmp = b - a;
+			printf("str variant cmp: %s - %s = %i\n", b.ConstStr(), a.ConstStr(), (int)cmp);
+			if (cmp < 0)
+				return FAIL(_FL, "sort failed");
+		}
+		
+		LArray<LVariant*> ptr;
+		ptr.Add(new LVariant("bbb"));
+		ptr.Add(new LVariant("aaa"));
+		ptr.Add(new LVariant("ccc"));
+		ptr.Sort();
+		for (unsigned i=0; i<ptr.Length()-1; i++)
+		{
+			auto *a = ptr[i];
+			auto *b = ptr[i+1];
+			auto cmp = *b - *a;
+			printf("str variant ptr cmp: %s - %s = %i\n", b->ConstStr(), a->ConstStr(), (int)cmp);
+			if (cmp < 0)
+				return FAIL(_FL, "sort failed");
+		}
+		ptr.DeleteObjects();		
+	}
 
 	return true;
 }
+
 

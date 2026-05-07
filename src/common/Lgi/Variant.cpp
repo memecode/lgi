@@ -686,18 +686,20 @@ LVariant &LVariant::operator =(LVariant const &i)
 	return *this;
 }
 
-int LVariant::operator -(LVariant &v)
+int64_t LVariant::operator -(const LVariant &v) const
 {
 	if (IsString() && v.IsString())
 	{
-		return Stricmp(Str(), v.Str());
+		auto ca = ConstStr();
+		auto cb = v.ConstStr();
+		if (ca && cb)
+			return Stricmp(ca, cb);
+			
+		return Stricmp(LStr().Get(), v.LStr().Get());
 	}
 	else if (IsInt() && v.IsInt())
 	{
-		auto cmp = v.CastInt64() - CastInt64();
-		if (cmp < 0)
-			return -1;
-		return cmp > 0 ? 1 : 0;
+		return CastInt64() - v.CastInt64();
 	}
 	else if (IsDouble() && v.IsDouble())
 	{
@@ -895,12 +897,43 @@ LString *LVariant::ReleaseLStr()
 	return nullptr;
 }
 
-LString LVariant::LStr()
+LString LVariant::LStr() const
 {
-	if (Type == GV_LSTRING && Value.LStr)
-		return LString(*Value.LStr);
+	switch (Type)
+	{
+		case GV_STRING:
+			return LString(Value.String);
+		case GV_LSTRING:
+			if (Value.LStr)
+				return *Value.LStr;
+			break;
+		case GV_WSTRING:
+			return LString(Value.WString);
+	}
 
-	return Str();
+	return LString();
+}
+
+const char *LVariant::ConstStr() const
+{
+	switch (Type)
+	{
+		case GV_STRING:
+		{
+			return Value.String;
+		}
+		case GV_LSTRING:
+		{
+			if (Value.LStr)
+				return Value.LStr->Get();
+			break;
+		}
+		case GV_WSTRING:
+			// Can't convert from wstring to char?
+			break;
+	}
+
+	return nullptr;
 }
 
 char *LVariant::Str()
@@ -927,6 +960,11 @@ char *LVariant::Str()
 	}
 
 	return nullptr;
+}
+
+const char16 *LVariant::ConstWStr() const
+{
+	return Type == GV_WSTRING ? Value.WString : nullptr;
 }
 
 char16 *LVariant::WStr()
@@ -1149,35 +1187,35 @@ int64 LVariant::Length()
 	return 0;
 }
 
-bool LVariant::IsInt()
+bool LVariant::IsInt() const
 {
 	return	Type == GV_INT32 ||
 			Type == GV_INT64;
 }
 
-bool LVariant::IsBool()
+bool LVariant::IsBool() const
 {
 	return Type == GV_BOOL;
 }
 
-bool LVariant::IsDouble()
+bool LVariant::IsDouble() const
 {
 	return Type == GV_DOUBLE;
 }
 
-bool LVariant::IsString()
+bool LVariant::IsString() const
 {
 	return	Type == GV_STRING ||
 			Type == GV_WSTRING ||
 			Type == GV_LSTRING;
 }
 
-bool LVariant::IsBinary()
+bool LVariant::IsBinary() const
 {
 	return Type == GV_BINARY;
 }
 
-bool LVariant::IsNull()
+bool LVariant::IsNull() const
 {
 	return Type == GV_NULL;
 }
