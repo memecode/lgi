@@ -41,12 +41,12 @@ bool LStringTests::Run()
 	const char *EncodeResult2 = "=?iso-8859-9?Q?Beytullah_Gen=E7?=";
 
 	LString::Array CharsetPrefs;
-	const char *Rfc2047Input = "Beytullah Genç";
-	const char *UtfInput = "Beytullah GenÃ§";
+	const uint8_t Rfc2047Input[] = { 0x42,0x65,0x79,0x74,0x75,0x6C,0x6C,0x61,0x68,0x20,0x47,0x65,0x6E, 0xE7, 0 }; // "Beytullah Genç" in windows-1252
+	const uint8_t UtfInput[]     = { 0x42,0x65,0x79,0x74,0x75,0x6C,0x6C,0x61,0x68,0x20,0x47,0x65,0x6E, 0xC3,0xA7, 0 }; // "Beytullah Genç" in utf-8
 	const char *Charset = "windows-1252";
 
 	// No prefered charset testing:
-	LAutoString result1( EncodeRfc2047(NewStr(Rfc2047Input), Charset) );
+	LAutoString result1( EncodeRfc2047(NewStr((char*)Rfc2047Input), Charset) );
 	if (Stricmp(result1.Get(), EncodeResult1))
 	{
 		printf("result1='%s'\n", result1.Get());
@@ -54,14 +54,25 @@ bool LStringTests::Run()
 		return FAIL(_FL, "EncodeRfc2047");
 	}
 	LAutoString decode1( DecodeRfc2047(NewStr(result1)) );
-	if (Strcmp(UtfInput, decode1.Get()))
-		return FAIL(_FL, "DecodeRfc2047");
+	if (Strcmp((char*)UtfInput, decode1.Get()))
+	{
+		LString::Array a;
+		for (uint8_t *c = (uint8_t*)decode1.Get(); *c; c++)
+			a.New().Printf("%2.2x", *c);
+		printf("decode1=%s\n", LString(",").Join(a).Get());
+		a.Empty();
+		for (uint8_t *c = (uint8_t*)UtfInput; *c; c++)
+			a.New().Printf("%2.2x", *c);
+		printf("UtfInput=%s\n", LString(",").Join(a).Get());
 
-	LString   result2 = LEncodeRfc2047(Rfc2047Input, Charset);
+		return FAIL(_FL, "DecodeRfc2047");
+	}
+
+	LString   result2 = LEncodeRfc2047((char*)Rfc2047Input, Charset);
 	if (Stricmp(result2.Get(), EncodeResult1))
 		return FAIL(_FL, "LEncodeRfc2047");
 	LAutoString decode2( DecodeRfc2047(NewStr(result2)) );
-	if (Strcmp(UtfInput, decode2.Get()))
+	if (Strcmp((char*)UtfInput, decode2.Get()))
 		return FAIL(_FL, "DecodeRfc2047");
 
 	// Redo tests with a charset preference set:
@@ -69,7 +80,7 @@ bool LStringTests::Run()
 	LAutoString result3( EncodeRfc2047(NewStr(Rfc2047Input), Charset, &CharsetPrefs));
 	if (Stricmp(result3.Get(), EncodeResult2))
 		return FAIL(_FL, "EncodeRfc2047");
-	LString     result4 = LEncodeRfc2047(Rfc2047Input, Charset, &CharsetPrefs);
+	LString     result4 = LEncodeRfc2047((char*)Rfc2047Input, Charset, &CharsetPrefs);
 	if (Stricmp(result4.Get(), EncodeResult2))
 		return FAIL(_FL, "EncodeRfc2047");
 
