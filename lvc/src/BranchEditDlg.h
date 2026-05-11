@@ -1,5 +1,7 @@
 #pragma once
 
+#include "lgi/common/ClipBoard.h"
+
 class BranchEditDlg : public LDialog
 {
 	LList *lst = nullptr;
@@ -35,7 +37,9 @@ public:
 					item->SetText(p.key);
 					lst->Insert(item);
 					
-					if (curBranch == p.key)
+					bool eq = curBranch.Equals(p.key);
+					printf("cmp '%s' '%s' = %i", curBranch.Get(), p.key, eq);
+					if (eq)
 						item->Select(true);
 				}
 			}
@@ -218,6 +222,15 @@ public:
 			case ID_CLOSE:
 			{
 				EndModal(0);
+				break;
+			}
+			case ID_COPY_NAME:
+			{
+				if (auto i = lst ? lst->GetSelected() : nullptr)
+				{
+					LClipBoard clip(this);
+					clip.Text(i->GetText());
+				}				
 				break;
 			}
 		}

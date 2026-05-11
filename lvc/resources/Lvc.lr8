@@ -126,6 +126,7 @@
 		<String Ref="177" Cid="173" Define="ID_PARENT_COMMITS" />
 		<String Ref="178" Cid="178" Define="ID_MESSAGE" />
 		<String Ref="179" Cid="-1" Define="IDC_STATIC" en="Parent commit:" />
+		<String Ref="180" Cid="180" Define="ID_COPY_NAME" en="Copy Name" />
 	</string-group>
 	<string-group Name="General">
 		<String Ref="84" Cid="84" Define="IDS_CREATE_NEW_BRANCH" en="Push will create a new remote branch. Is that ok?" />
@@ -220,57 +221,62 @@
 		</TableLayout>
 	</Dialog>
 	<Dialog pos="8,8,498,399" ref="130">
-		<TableLayout pos="7,7,475,349" ref="131" cols="0.735,0.265" rows="0.167,0.167,0.175,0.263,0.117,0.111">
+		<TableLayout pos="7,7,475,349" ref="131" cols="0.735,0.265" rows="0.150,0.150,0.158,0.202,0.140,0.100,0.100">
 			<tr>
-				<td addr="0,0" rowspan="3">
+				<td addr="0,0" rowspan="4">
 					<ListView pos="14,7,202,125" ref="132" />
 				</td>
 				<td addr="1,0" align="Max">
-					<Button Pos="350,21,440,48" image="" toggle="0" ref="133" />
+					<Button Pos="350,20,440,47" image="" toggle="0" ref="133" />
 				</td>
 			</tr>
 			<tr>
 				<td addr="1,1" align="Max">
-					<Button Pos="357,76,440,103" image="" toggle="1" ref="134" />
+					<Button Pos="350,63,433,90" image="" toggle="1" ref="134" />
 				</td>
 			</tr>
 			<tr>
 				<td addr="1,2" align="Max">
-					<Button Pos="357,126,433,153" toggle="0" ref="157" />
+					<Button Pos="357,114,433,141" toggle="0" ref="157" />
 				</td>
 			</tr>
 			<tr>
-				<td addr="0,3">
-					<TableLayout pos="14,177,300,239" ref="153" cols="0.333,0.333,0.333" rows="1.000">
+				<td addr="1,3" align="Max">
+					<Button Pos="350,168,433,195" toggle="0" ref="180" />
+				</td>
+			</tr>
+			<tr>
+				<td addr="0,4">
+					<TableLayout pos="14,217,307,258" ref="153" cols="0.333,0.333,0.333" rows="1.000">
 						<tr>
 							<td addr="0,0" valign="Center">
-								<StaticText pos="14,14,48,34" ref="154" />
+								<StaticText pos="14,0,48,19" ref="154" />
 							</td>
 							<td addr="1,0">
-								<EditBox Pos="97,7,180,34" ref="155" />
+								<EditBox Pos="99,0,182,19" ref="155" />
 							</td>
 							<td addr="2,0">
-								<Button Pos="203,7,230,34" toggle="0" ref="156" />
+								<Button Pos="207,0,234,19" toggle="0" ref="156" />
 							</td>
 						</tr>
 					</TableLayout>
 				</td>
-				<td addr="1,3" />
-			</tr>
-			<tr>
-				<td addr="0,4">
-					<EditBox Pos="14,257,195,284" ref="136" />
-				</td>
-				<td addr="1,4" align="Max">
-					<Button Pos="371,264,440,284" image="" toggle="0" ref="138" />
-				</td>
+				<td addr="1,4" />
 			</tr>
 			<tr>
 				<td addr="0,5">
-					<CheckBox pos="7,310,188,323" ref="142" />
+					<EditBox Pos="14,265,195,292" ref="136" />
 				</td>
 				<td addr="1,5" align="Max">
-					<Button Pos="371,296,440,323" image="" toggle="0" ref="137" />
+					<Button Pos="371,272,440,292" image="" toggle="0" ref="138" />
+				</td>
+			</tr>
+			<tr>
+				<td addr="0,6">
+					<CheckBox pos="7,313,188,326" ref="142" />
+				</td>
+				<td addr="1,6" align="Max">
+					<Button Pos="371,299,440,326" image="" toggle="0" ref="137" />
 				</td>
 			</tr>
 		</TableLayout>

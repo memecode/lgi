@@ -94,6 +94,7 @@
 #define ID_PARENT_COMMITS						173
 #define ID_DATE									175
 #define ID_MESSAGE								178
+#define ID_COPY_NAME							180
 #define ID_TABLE								500
 #define IDC_COMMIT								501
 #define ID_PULL									502
