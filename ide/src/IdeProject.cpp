@@ -532,6 +532,16 @@ public:
 
 		auto Base = Proj->GetBasePath();
 		auto MakeFile = Proj->GetMakefile(Platform);
+		if (auto makefileExt = LGetExtension(MakeFile))
+		{
+			if (!Stricmp(makefileExt, "ninja"))
+			{
+				// We can't overwrite a ninja build file with our makefile... quit:
+				Log->Print("%s:%i - Not updating external ninja file '%s'.\n", _FL, MakeFile.Get());
+				return -1;
+			}
+		}		
+		
 		LString MakeFilePath;
 		Proj->CheckExists(MakeFile);
 		if (!MakeFile)
