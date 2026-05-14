@@ -969,11 +969,17 @@ DebugTrace("%s:%i - SSL_get_error=%i\n", _FL, err);
 								try
 								{
 									#ifdef MAC
-									// OpenSSL on mac seems to not be thread safe... at least for this
-									// call. Really guys? Really?
-									LMutex::Auto lck(Library, _FL);
+										// OpenSSL on mac seems to not be thread safe... at least for this
+										// call. Really guys? Really?
+										LMutex::Auto lck(Library, _FL);
 									#endif
+									auto startTs = LCurrentTime();
 									r = Library->SSL_connect(Ssl);
+									auto elapsedTs = LCurrentTime() - startTs;
+									if (elapsedTs > 200)
+									{
+										LgiTrace("%s:%i Error: SSL_connect blocked when it shouldn't! (%ims)\n", _FL, (int)elapsedTs);
+									}
 								}
 								catch (...)
 								{

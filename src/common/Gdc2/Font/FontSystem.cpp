@@ -608,8 +608,10 @@ LFont *LFontSystem::GetGlyph(uint32_t u, LFont *UserFont)
 {
 	if (u > MAX_UNICODE || !UserFont)
 	{
-		LAssert(!"Invalid character");
-		return 0;
+		static int warn = 0;
+		if (warn++ < 20)
+			LgiTrace("%s:%i - invalid unicode 0x%x\n", _FL, u);		
+		return nullptr;
 	}
 
 	// Check app font

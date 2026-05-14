@@ -7985,8 +7985,7 @@ bool LHtml::SetVariant(const char *Name, LVariant &Value, const char *Array)
 
 bool LHtml::Copy()
 {
-	LAutoString s(GetSelection());
-	if (s)
+	if (auto s = GetSelection())
 	{
 		RemoveZeroWidthCharacters(s);
 
