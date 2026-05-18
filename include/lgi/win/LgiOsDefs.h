@@ -296,14 +296,10 @@ LgiFunc char *FormatToStr(int f);
 extern bool LgiToWindowsCursor(OsView Hnd, LCursor Cursor);
 
 #ifdef _MSC_VER
-#define snprintf					_snprintf_s
-//#define vsnprintf					_vsnprintf
 #define vsnwprintf					_vsnwprintf
 #define stricmp						_stricmp
 #define strlwr						_strlwr
 #define strnicmp					_strnicmp
-// #define vsnprintf					_vsnprintf_s
-// #define getcwd						_getcwd
 #endif
 #define atoi64						_atoi64
 
