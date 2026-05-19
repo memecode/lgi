@@ -46,12 +46,12 @@ Known bugs:
 #include "lgi/common/DocView.h"
 #include "ParserCommon.h"
 
-// #define DEBUG_FILE			"SBTarget.h"
-// #define DEBUG_LINE		17
+// #define DEBUG_FILE			"MissingFiles.cpp"
+// #define DEBUG_LINE			9
 #define PARSE_ALL_FILES		1 // else parse just the 'DEBUG_FILE'
 
 #ifdef DEBUG_FILE
-#define DEBUG_LOG(...) if (Debug) do { LgiTrace(__VA_ARGS__); } while (0)
+#define DEBUG_LOG(...)		if (Debug) do { LgiTrace(__VA_ARGS__); } while (0)
 #else
 #define DEBUG_LOG(...)
 #endif
@@ -496,13 +496,13 @@ struct CppContext
 			#ifdef DEBUG_LINE
 			if (Debug)
 			{
-				if (Line >= DEBUG_LINE - 1)
+				if (LineNum >= DEBUG_LINE - 1)
 				{
 					int asd=0;
 				}
-				else if (PrevLine != Line)
+				else if (PrevLine != LineNum)
 				{
-					PrevLine = Line;
+					PrevLine = LineNum;
 					// LgiTrace("%s:%i '%.10S'\n", FileName, Line + 1, s);
 				}
 			}
@@ -1265,7 +1265,8 @@ struct CppContext
 							// scan forward to see what type of enum:
 							LAutoWString t;
 							LString::Array names;
-							while (t.Reset(LexCpp(s, LexStrdup)))
+							int nameLine = -1;
+							while (t.Reset(LexCpp(s, LexStrdup, nullptr, &LineNum)))
 							{
 								if (Compare(t.Get(), "{", true))
 								{
@@ -1275,6 +1276,8 @@ struct CppContext
 								}
 								else if (IsAlpha(*t.Get()))
 								{
+									if (nameLine < 0)
+										nameLine = LineNum;
 									names.New() = t.Get();
 								}
 								else
@@ -1286,7 +1289,7 @@ struct CppContext
 
 							auto name = LString("").Join(names);
 							if (name.Length() > 0) // if the enum has no name... ignore...
-								Defns.New().Set(DefnEnum, FileName, name, LineNum);
+								Defns.New().Set(DefnEnum, FileName, name, nameLine);
 						}
 						else if (IsEnum)
 						{

@@ -94,7 +94,7 @@ LanguageParams LangParam[] =
 };
 
 DocEditStyling::DocEditStyling(DocEdit *view) : 
-	LThread("DocEditStyling.Thread"),
+	LThread("DocEditStyl.Th"),
 	LMutex("DocEditStyling.Lock"),
 	View(view),
 	Event("DocEditStyling.Event"),
