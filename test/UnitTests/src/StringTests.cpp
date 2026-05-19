@@ -77,7 +77,7 @@ bool LStringTests::Run()
 
 	// Redo tests with a charset preference set:
 	CharsetPrefs.Add("iso-8859-9");
-	LAutoString result3( EncodeRfc2047(NewStr(Rfc2047Input), Charset, &CharsetPrefs));
+	LAutoString result3( EncodeRfc2047(NewStr((char*) Rfc2047Input), Charset, &CharsetPrefs));
 	if (Stricmp(result3.Get(), EncodeResult2))
 		return FAIL(_FL, "EncodeRfc2047");
 	LString     result4 = LEncodeRfc2047((char*)Rfc2047Input, Charset, &CharsetPrefs);

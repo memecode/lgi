@@ -296,7 +296,7 @@ LgiFunc char *FormatToStr(int f);
 extern bool LgiToWindowsCursor(OsView Hnd, LCursor Cursor);
 
 #ifdef _MSC_VER
-#define snprintf					_snprintf_s
+// #define snprintf					_sprintf_s
 //#define vsnprintf					_vsnprintf
 #define vsnwprintf					_vsnwprintf
 #define stricmp						_stricmp
