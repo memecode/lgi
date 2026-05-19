@@ -648,9 +648,9 @@ int LSocket::Open(const char *HostAddr, int Port)
 			d->Socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
 		#else
 			d->Socket = socket(	AF_INET,
-								SOCK_STREAM |
+								SOCK_STREAM
 								#ifdef SOCK_CLOEXEC
-								SOCK_CLOEXEC	// this is an attempt to NOT pass sockets to child processes...
+								| SOCK_CLOEXEC	// this is an attempt to NOT pass sockets to child processes...
 												// which I almost never want to do. There we're cases where things like
 												// LgiIde and SU tools would use ping to check if something was up, and
 												// when the main process died, the ping process would still be listening
