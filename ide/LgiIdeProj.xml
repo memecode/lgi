@@ -315,6 +315,9 @@ _GNU_SOURCE</Release>
 			</Arguments>
 			<DebugAdmin />
 			<InitialDir />
+			<Debugger>
+				<All>lldb</All>
+			</Debugger>
 		</Debug>
 		<Advanced>
 			<OtherMakefileRules />

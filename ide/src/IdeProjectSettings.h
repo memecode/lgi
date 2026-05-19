@@ -33,7 +33,8 @@ enum ProjSetting
 	ProjRemoteUri,
 	ProjRemotePass,
 	ProjEnv,
-	ProjInitDir
+	ProjInitDir,
+	ProjDebugger
 };
 
 class IdeProjectSettings

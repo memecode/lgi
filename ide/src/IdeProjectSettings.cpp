@@ -64,6 +64,13 @@ const char *sBuildTypes[] =
 	NULL
 };
 
+const char *sDebuggers[] =
+{
+	"gdb",
+	"lldb",
+	nullptr
+};
+
 static const char **GetEnumValues(ProjSetting s)
 {
 	switch (s)
@@ -72,6 +79,8 @@ static const char **GetEnumValues(ProjSetting s)
 			return sCompilers;
 		case ProjTargetType:
 			return sBuildTypes;
+		case ProjDebugger:
+			return sDebuggers;
 		default:
 			LAssert(!"Unknown enum type.");
 			break;
@@ -135,6 +144,7 @@ SettingInfo AllSettings[] =
 	{ProjArgs,					GV_STRING,		"Arguments",			sDebug,		{SF_CROSSPLATFORM|SF_CONFIG_SPECIFIC}},
 	{ProjDebugAdmin,			GV_BOOL,		"DebugAdmin",			sDebug,		{SF_CROSSPLATFORM}},
 	{ProjInitDir,				GV_STRING,		"InitialDir",			sDebug,		{SF_CROSSPLATFORM|SF_FOLDER_SELECT}},
+	{ProjDebugger,				GV_INT32,		"Debugger",				sDebug,		{SF_CROSSPLATFORM|SF_ENUM}},
 	
 	{ProjDefines,				GV_STRING,		"Defines",				sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC}},
 	{ProjCompileOptions,		GV_STRING,		"Options",				sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC}},

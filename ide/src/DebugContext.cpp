@@ -20,11 +20,8 @@ namespace Gtk {
 }
 #endif
 
-#ifdef MAC
-	#define CreateDebuggerFn CreateLldbDebugger
-#else
-	#define CreateDebuggerFn CreateGdbDebugger
-#endif
+typedef LDebugger *(*pCreateDebugger)(BreakPointStore *bpStore, LStream *Log, SystemIntf *Backend, SysPlatform platform, LStream *networkLog);
+
 
 enum TIds
 {
@@ -337,9 +334,26 @@ LDebugContext::LDebugContext(AppWnd *App,
 	d->Proj = Proj;
 	d->Exe = Exe;
 
+#ifdef MAC
+	pCreateDebugger createDebugger = CreateLldbDebugger;
+#else
+	pCreateDebugger createDebugger = CreateGdbDebugger;
+#endif
+	if (Proj)
+	{
+		// Check if the user is overriding the debugger:
+		if (auto dbgType = Proj->GetSettings()->GetStr(ProjDebugger, NULL, Platform))
+		{
+			if (!Stricmp(dbgType, "gdb"))
+				createDebugger = CreateGdbDebugger;
+			else if (!Stricmp(dbgType, "lldb"))
+				createDebugger = CreateLldbDebugger;
+		}
+	}
+
 	auto log = App->GetDebugLog();
 	LAssert(log);
-	if (d->Db.Reset(CreateDebuggerFn(App->GetBreakPointStore(), log, Proj ? Proj->GetBackend() : nullptr, Platform, d->App->GetNetworkLog())))
+	if (d->Db.Reset(createDebugger(App->GetBreakPointStore(), log, Proj ? Proj->GetBackend() : nullptr, Platform, d->App->GetNetworkLog())))
 	{
 		LFile::Path p;
 		if (InitDir)
