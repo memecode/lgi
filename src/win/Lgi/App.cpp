@@ -53,7 +53,7 @@ struct AppArgPriv
 	{
 		LAutoString CmdLine(WideToUtf8(CmdLine));
 		auto Delim = "\'\"";
-		for (char *s = CmdLine; *s; )
+		for (char *s = CmdLine; s && *s; )
 		{
 			// skip ws
 			while (*s && strchr(LString::WhiteSpace, *s)) s++;
