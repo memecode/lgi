@@ -1255,6 +1255,9 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 			v = "SSL";
 		Socket->SetValue(LSocket_Protocol, v);
 
+		if (d->Cancel)
+			Socket->SetCancel(d->Cancel);
+
 		// connect
 		if (Socket->Open(Remote, Port))
 		{

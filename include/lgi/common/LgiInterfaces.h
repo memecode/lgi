@@ -268,7 +268,9 @@ public:
 	virtual void OnInformation(const char *Str) {}
 
 	/// Process an error
-	virtual int Error(void *Param) { return 0; }
+	virtual int Error(
+		/// Optional HOSTENT ptr
+		void *Param = nullptr)	{ return 0; }
 	virtual const char *GetErrorString() { return NULL; }
 	
 	LString LocalIp()

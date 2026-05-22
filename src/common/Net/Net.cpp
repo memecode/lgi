@@ -66,6 +66,13 @@
 #define PROTO_BROADCAST			0x200
 #define IsNewLine(ch)			((ch) == '\r' || (ch) == '\n')
 
+#define CONNECT_LOGGING			1
+#if CONNECT_LOGGING
+	#define CONNECT_LOG(...)	LgiTrace(__VA_ARGS__)
+#else
+	#define CONNECT_LOG(...)
+#endif
+
 #if defined POSIX
 
 	#include <stdio.h>
@@ -91,6 +98,24 @@
 #ifdef WIN32
 static bool SocketsOpen = false;
 #endif
+
+static int getError()
+{
+	#ifdef WIN32
+		return WSAGetLastError();
+	#else
+		return errno;
+	#endif
+}
+
+static void setError(unsigned e)
+{
+	#if WINDOWS
+		WSASetLastError(e);
+	#else
+		errno = e;
+	#endif
+}
 
 bool StartNetworkStack()
 {
@@ -266,25 +291,25 @@ class LSocketImplPrivate : public LCancel
 {
 public:
 	// Data
-	int Blocking	: 1;
-	int NoDelay		: 1;
-	int Udp			: 1;
-	int Broadcast	: 1;
+	uint32_t Blocking	: 1;
+	uint32_t NoDelay	: 1;
+	uint32_t Udp		: 1;
+	uint32_t Broadcast	: 1;
 
-	int			LogType		= NET_LOG_NONE;
 	LString		LogFile;
+	int			LogType		= NET_LOG_NONE;
 	int			Timeout		= -1;
+	int			LastError = 0;
 	OsSocket	Socket		= INVALID_SOCKET;
-	int			LastError	= 0;
-	LCancel		*Cancel		= NULL;
+	LCancel		*Cancel		= nullptr;
 	LString		ErrStr;
 
 	LSocketImplPrivate()
 	{	
-		Cancel = this;
-		Blocking = true;
-		NoDelay = false;
-		Udp = false;
+		Cancel    = this;
+		Blocking  = true;
+		NoDelay   = false;
+		Udp       = false;
 		Broadcast = false;
 	}
 
@@ -509,13 +534,14 @@ void LSocket::IsBlocking(bool block)
 	{
 		d->Blocking = block;
 	
+		LAssert(ValidSocket(d->Socket));
 		#if defined WIN32
-		ulong NonBlocking = !block;
-		ioctlsocket(d->Socket, FIONBIO, &NonBlocking);
+			ulong NonBlocking = !block;
+			ioctlsocket(d->Socket, FIONBIO, &NonBlocking);
 		#elif defined POSIX
-		fcntl(d->Socket, F_SETFL, d->Blocking ? 0 : O_NONBLOCK);
+			fcntl(d->Socket, F_SETFL, d->Blocking ? 0 : O_NONBLOCK);
 		#else
-		#error Impl me.
+			#error Impl me.
 		#endif
 	}
 }
@@ -712,53 +738,53 @@ int LSocket::Open(const char *HostAddr, int Port)
 				// Name address
 				#ifdef LINUX
 
-				Host = new HostEnt;
-				if (Host)
-				{
-					memset(Host, 0, sizeof(*Host));
+					Host = new HostEnt;
+					if (Host)
+					{
+						memset(Host, 0, sizeof(*Host));
 					
-					HostEnt *Result = 0;
-					int Err = 0;
-					int Ret;
-					while
-					(
+						HostEnt *Result = 0;
+						int Err = 0;
+						int Ret;
+						while
 						(
-							!GetCancel()
-							||
-							!GetCancel()->IsCancelled()
+							(
+								!GetCancel()
+								||
+								!GetCancel()->IsCancelled()
+							)
+							&&
+							(
+								Ret
+								=
+								gethostbyname_r(HostAddr,
+												Host,
+												&Buf[0], Buf.Length(),
+												&Result,
+												&Err)
+							)
+							==
+							ERANGE
 						)
-						&&
-						(
-							Ret
-							=
-							gethostbyname_r(HostAddr,
-											Host,
-											&Buf[0], Buf.Length(),
-											&Result,
-											&Err)
-						)
-						==
-						ERANGE
-					)
-					{
-						Buf.Length(Buf.Length() << 1);
+						{
+							Buf.Length(Buf.Length() << 1);
+						}
+						if (Ret)
+						{
+							auto ErrStr = LErrorCodeToString(Err);
+							printf("%s:%i - gethostbyname_r('%s') returned %i, %i, %s\n",
+								_FL, HostAddr, Ret, Err, ErrStr.Get());
+							DeleteObj(Host);
+						}
 					}
-					if (Ret)
-					{
-						auto ErrStr = LErrorCodeToString(Err);
-						printf("%s:%i - gethostbyname_r('%s') returned %i, %i, %s\n",
-							_FL, HostAddr, Ret, Err, ErrStr.Get());
-						DeleteObj(Host);
-					}
-				}
 				
-				#if DEBUG_CONNECT
-				printf("%s:%i - Host=%p\n", __FILE__, __LINE__, Host);
-				#endif
+					#if DEBUG_CONNECT
+					printf("%s:%i - Host=%p\n", __FILE__, __LINE__, Host);
+					#endif
 				
 				#else
 				
-				Host = gethostbyname(HostAddr);
+					Host = gethostbyname(HostAddr);
 				
 				#endif
 				
@@ -770,164 +796,94 @@ int LSocket::Open(const char *HostAddr, int Port)
 				}
 			}
 			
-			if (1)
+			RemoteAddr.sin_family = AF_INET;
+			RemoteAddr.sin_port = htons(Port);
+				
+			if (Host)
 			{
-				RemoteAddr.sin_family = AF_INET;
-				RemoteAddr.sin_port = htons(Port);
+				if (Host->h_addr_list && Host->h_addr_list[0])
+				{
+					memcpy(&RemoteAddr.sin_addr, Host->h_addr_list[0], sizeof(in_addr) );
+				}
+				else return false;
+			}
+			else
+			{
+				memcpy(&RemoteAddr.sin_addr, &IpAddress, sizeof(IpAddress) );
+			}
+
+			// Setup the connect
+			bool Block = IsBlocking();
+			if (Block)
+			{
+				CONNECT_LOG(LPrintSock " - Setting non blocking\n", d->Socket);
+				IsBlocking(false);
+			}
 				
-				if (Host)
+			auto timeoutMs = d->Timeout > 0 ? d->Timeout : 30000;
+			uint64_t startTs = LCurrentTime();
+			int calls = 0;
+			int err;
+
+			while (	LCurrentTime() - startTs < timeoutMs &&
+					!d->Cancel->IsCancelled())
+			{
+				// Try to connect...
+				auto ts1 = LCurrentTime();
+				if (calls == 0 || IsWritable(500))
 				{
-					if (Host->h_addr_list && Host->h_addr_list[0])
+					CONNECT_LOG(LPrintSock " %i: connect to %s:%i=", d->Socket, calls, HostAddr, Port);
+					err = connect(d->Socket, (sockaddr*)&RemoteAddr, sizeof(sockaddr_in));
+					CONNECT_LOG("%i Block=%u wait=%i\n", err, Block, (int)(LCurrentTime() - ts1));
+					if (err)
 					{
-						memcpy(&RemoteAddr.sin_addr, Host->h_addr_list[0], sizeof(in_addr) );
+						auto e = getError();
+						CONNECT_LOG(LPrintSock " e=%i", d->Socket, e);
 					}
-					else return false;
 				}
 				else
 				{
-					memcpy(&RemoteAddr.sin_addr, &IpAddress, sizeof(IpAddress) );
+					err = -1;
+				}
+				auto ts2 = LCurrentTime();
+				calls++;
+
+				if (!err)
+				{
+					Status = true;
+					CONNECT_LOG(LPrintSock " - Connected in " LPrintfUInt64 "ms\n", d->Socket, LCurrentTime() - startTs);
+					break;
 				}
 
-				#ifdef WIN32
-				if (d->Timeout < 0)
+				if (!Block)
 				{
-					// Do blocking connect
-					Status = connect(d->Socket, (sockaddr*) &RemoteAddr, sizeof(sockaddr_in));
-				}
-				else
-				#endif
-				{
-					#define CONNECT_LOGGING			0
-					
-					// Setup the connect
-					bool Block = IsBlocking();
-					if (Block)
-					{
-						#if CONNECT_LOGGING
-						LgiTrace(LPrintSock " - Setting non blocking\n", d->Socket);
-						#endif
-						IsBlocking(false);
-					}
-				
-					// Do initial connect to kick things off..
-					#if CONNECT_LOGGING
-					LgiTrace(LPrintSock " - Doing initial connect to %s:%i\n", d->Socket, HostAddr, Port);
-					#endif
-					Status = connect(d->Socket, (sockaddr*) &RemoteAddr, sizeof(sockaddr_in));
-					#if CONNECT_LOGGING
-					LgiTrace(LPrintSock " - Initial connect=%i Block=%i\n", d->Socket, Status, Block);
-					#endif
-
-					// Wait for the connect to finish?
-					if (Status && Block)
-					{
-						Error(Host);
-
-						#ifdef WIN32
-						// yeah I know... wtf? (http://itamarst.org/writings/win32sockets.html)
-						#define IsWouldBlock() (d->LastError == EWOULDBLOCK || d->LastError == WSAEINVAL || d->LastError == WSAEWOULDBLOCK)
-						#else
-						#define IsWouldBlock() (d->LastError == EWOULDBLOCK || d->LastError == EINPROGRESS)
-						#endif
-
-						#if CONNECT_LOGGING
-						LgiTrace(LPrintSock " - IsWouldBlock()=%i d->LastError=%i\n", d->Socket, IsWouldBlock(), d->LastError);
-						#endif
-
-						int64 End = LCurrentTime() + (d->Timeout > 0 ? d->Timeout : 30000);
-						while (	!d->Cancel->IsCancelled() &&
-								ValidSocket(d->Socket) &&
-								IsWouldBlock())
-						{
-							int64 Remaining = End - LCurrentTime();
-
-							#if CONNECT_LOGGING
-							LgiTrace(LPrintSock " - Remaining " LPrintfInt64 "\n", d->Socket, Remaining);
-							#endif
-
-							if (Remaining < 0)
-							{
-								#if CONNECT_LOGGING
-								LgiTrace(LPrintSock " - Leaving loop\n", d->Socket);
-								#endif
-								break;
-							}
-							
-							if (IsWritable((int)MIN(Remaining, 1000)))
-							{
-								// Should be ready to connect now...
-								#if CONNECT_LOGGING
-								LgiTrace(LPrintSock " - Secondary connect...\n", d->Socket);
-								#endif
-								Status = connect(d->Socket, (sockaddr*) &RemoteAddr, sizeof(sockaddr_in));
-								#if CONNECT_LOGGING
-								LgiTrace(LPrintSock " - Secondary connect=%i\n", d->Socket, Status);
-								#endif
-								if (Status != 0)
-								{
-									Error(Host);
-									
-									if (d->LastError == EISCONN
-										#ifdef WIN32
-										|| d->LastError == WSAEISCONN // OMG windows, really?
-										#endif
-										)
-									{
-										Status = 0;
-									}
-									else
-									{
-										#if CONNECT_LOGGING
-										LgiTrace(LPrintSock " - Connect=%i Err=%i\n", d->Socket, Status, d->LastError);
-										#endif
-										if (IsWouldBlock())
-											continue;
-									}
-									break;
-								}
-								else
-								{
-									#if CONNECT_LOGGING
-									LgiTrace(LPrintSock " - Connected...\n", d->Socket);
-									#endif
-									break;
-								}
-							}
-							else
-							{
-								#if CONNECT_LOGGING
-								LgiTrace(LPrintSock " - Timout...\n", d->Socket);
-								#endif
-							}
-						}
-					}
-
-					if (Block)
-						IsBlocking(true);
-				}
-
-				if (!Status)
-				{
-					char Info[256];
-					sprintf_s(Info,
-							sizeof(Info),
-							"[INET] Socket Connect: %s [%i.%i.%i.%i], port: %i",
-							HostAddr,
-							(RemoteAddr.sin_addr.s_addr) & 0xFF,
-							(RemoteAddr.sin_addr.s_addr >> 8) & 0xFF,
-							(RemoteAddr.sin_addr.s_addr >> 16) & 0xFF,
-							(RemoteAddr.sin_addr.s_addr >> 24) & 0xFF,
-							Port);
-					OnInformation(Info);
-				}
-				else
-				{
-					Error();
+					CONNECT_LOG("%i - non-blocking, so exit connect loop\n", d->Socket);
+					break;
 				}
 			}
 
+			if (Block)
+				IsBlocking(true);
+
 			if (Status)
 			{
+				// Connected..
+				char Info[256];
+				sprintf_s(Info,
+						sizeof(Info),
+						"[INET] Socket Connect: %s [%i.%i.%i.%i], port: %i",
+						HostAddr,
+						(RemoteAddr.sin_addr.s_addr) & 0xFF,
+						(RemoteAddr.sin_addr.s_addr >> 8) & 0xFF,
+						(RemoteAddr.sin_addr.s_addr >> 16) & 0xFF,
+						(RemoteAddr.sin_addr.s_addr >> 24) & 0xFF,
+						Port);
+				OnInformation(Info);
+			}
+			else
+			{
+				Error();
+
 				#ifdef WIN32
 				closesocket(d->Socket);
 				#else
@@ -1135,7 +1091,7 @@ ssize_t LSocket::Write(const void *Data, ssize_t Len, int Flags)
 
 	int Status = 0;
 
-	if (d->Timeout < 0 || IsWritable(d->Timeout))
+	if (IsWritable(d->Timeout))
 	{
 		Status = (int)send
 		(
@@ -1148,7 +1104,8 @@ ssize_t LSocket::Write(const void *Data, ssize_t Len, int Flags)
 			#endif
 		);
 	}
-	
+	else setError(LErrorWouldBlock);
+
 	if (Status < 0)
 		Error();
 	else if (Status == 0)
@@ -1175,9 +1132,7 @@ ssize_t LSocket::Read(void *Data, ssize_t Len, int Flags)
 
 	ssize_t Status = -1;
 
-	if (!d->Blocking ||
-		d->Timeout < 0 ||
-		IsReadable(d->Timeout))
+	if (IsReadable(d->Timeout))
 	{
 		Status = recv(d->Socket, (char*)Data, (int) Len, Flags
 			#ifdef MSG_NOSIGNAL
@@ -1185,6 +1140,7 @@ ssize_t LSocket::Read(void *Data, ssize_t Len, int Flags)
 			#endif
 			);
 	}
+	else setError(LErrorWouldBlock);
 
 	Log("Read", (int)Status, (char*)Data, Status>0 ? Status : 0);
 
@@ -1217,23 +1173,18 @@ const char *LSocket::GetErrorString()
 	return d->ErrStr;
 }
 
-int LSocket::Error(void *Param)
+int LSocket::Error(void *HostEntParam /* optional HOSTENT ptr */)
 {
 	// Get the most recent error.
-	if (!(d->LastError =
-		#ifdef WIN32
-		WSAGetLastError()
-		#else
-		errno
-		#endif
-		))
+	if ( !( d->LastError = getError() ) )
 		return 0;
 
 	// These are not really errors...
-	if (d->LastError == EWOULDBLOCK ||
+	if (d->LastError == LErrorWouldBlock ||
 		d->LastError == EISCONN)
 		return 0;
 
+	/* This is probably redundant...
 	static class ErrorMsg {
 	public:
 		int Code;
@@ -1242,6 +1193,7 @@ int LSocket::Error(void *Param)
 	ErrorCodes[] =
 	{
 		{0,					"Socket disconnected."},
+		{LErrorWouldBlock,	"Operation would block."},
 
 		#if defined WIN32
 		{WSAEACCES,			"Permission denied."},
@@ -1277,7 +1229,6 @@ int LSocket::Error(void *Param)
 		{WSAESHUTDOWN,		"Cannot send after socket shutdown."},
 		{WSAESOCKTNOSUPPORT,"Socket type not supported."},
 		{WSAETIMEDOUT,		"Connection timed out."},
-		{WSAEWOULDBLOCK,	"Operation would block."},
 		{WSAHOST_NOT_FOUND,	"Host not found."},
 		{WSANOTINITIALISED,	"Successful WSAStartup not yet performed."},
 		{WSANO_DATA,		"Valid name, no data record of requested type."},
@@ -1337,12 +1288,15 @@ int LSocket::Error(void *Param)
 	{
 		Error++;
 	}
+	*/
 
-	if (d->LastError == 10060 && Param)
+	LString errMsg = LErrorCodeToString(d->LastError);
+
+	if (d->LastError == 10060 && HostEntParam)
 	{
-		HostEnt *He = (HostEnt*)Param;
+		HostEnt *He = (HostEnt*)HostEntParam;
 		char s[256];
-		sprintf_s(s, sizeof(s), "%s (gethostbyname returned '%s')", Error->Msg, He->h_name);
+		sprintf_s(s, sizeof(s), "%s (gethostbyname returned '%s')", errMsg.Get(), He->h_name);
 		OnError(d->LastError, s);
 	}
 	else
@@ -1350,7 +1304,7 @@ int LSocket::Error(void *Param)
 		if (d->LastError != 36)
 		#endif
 	{
-		OnError(d->LastError, (Error->Code >= 0) ? Error->Msg : "<unknown error>");
+		OnError(d->LastError, errMsg ? errMsg.Get() : "<unknown error>");
 	}
 
 
