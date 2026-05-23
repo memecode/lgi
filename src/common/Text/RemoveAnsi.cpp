@@ -122,6 +122,7 @@ struct AnsiParser
 					{
 						emitAnsi();
 						state = TNon;
+						echoChars = true;
 					}
 					else if (used < sizeof(ansi))
 					{
@@ -138,7 +139,8 @@ struct AnsiParser
 				}
 				case TString:
 				{
-					if (*s == 0x9C)
+					if (*s == 0x9C ||
+						*s == cBELL)
 					{
 						emitAnsi();
 						state = TNon;
@@ -162,7 +164,9 @@ void RemoveAnsi(LArray<char> &a)
 
 void RemoveAnsi(LString &a)
 {
-	auto newSize = RemoveAnsi(a.Get(), a.Length());
+	auto aStr = a.Get();
+	auto aLen = a.Length();
+	auto newSize = RemoveAnsi(aStr, aLen);
 	a.Length(newSize);
 }
 
