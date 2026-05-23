@@ -12,6 +12,7 @@
 	if (transferType == SshAuto) \
 		transferType = SshScp;
 
+static bool SshFirst = true;
 
 LSsh::LSsh(	KnownHostCallback hostCb,
 			LStream *log,
@@ -20,6 +21,12 @@ LSsh::LSsh(	KnownHostCallback hostCb,
 	CancelObj = cancel ? cancel : &LocalCancel;
 	Log = log;
 	HostCb = hostCb;
+
+	if (SshFirst)
+	{
+		ssh_init();
+		SshFirst = false;
+	}
 }
 
 LSsh::~LSsh()
@@ -175,11 +182,12 @@ bool LSsh::Open(const char *Host, const char *Username, const char *Password, bo
 
 	if (r != SSH_OK)
 	{
+		LString errMsg = ssh_get_error(Ssh);
 		ssh_free(Ssh);
 		Ssh = NULL;
 
 		if (Log)
-			Log->Print("%s:%i - ssh_connect failed.\n", _FL);
+			Log->Print("%s:%i - ssh_connect failed: %s\n", _FL, errMsg.Get());
 		return false;
 	}
 	// Log->Print("%s:%i - ssh_connect ok.\n", _FL);

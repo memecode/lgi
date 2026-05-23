@@ -209,9 +209,9 @@ class SshBackend :
 	{
 		SshBackend *backend;
 		LString dir, cmd;
-		LStream *log = NULL;
-		ProcessIo *out = NULL;
-		LCancel *cancel = NULL;
+		LStream *log = nullptr;
+		ProcessIo *out = nullptr;
+		LCancel *cancel = nullptr;
 		std::function<void(int)> exitcodeCb;
 		int32_t exitCode = -1;
 
@@ -317,9 +317,9 @@ class SshBackend :
 		}
 	};
 
-	LView *app = NULL;
+	LView *app = nullptr;
 	LUri uri;
-	LStream *log = NULL;
+	LStream *log = nullptr;
 	SysPlatform sysType = PlatformUnknown;
 	LString remoteSep;
 	LString homePath;
