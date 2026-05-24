@@ -302,7 +302,8 @@ public:
 	LString		LogFile;
 	int			LogType		= NET_LOG_NONE;
 	int			Timeout		= -1;
-	int			LastError = 0;
+	int			LastError	= 0;
+	bool		NoDisconnectEvent = false;
 	OsSocket	Socket		= INVALID_SOCKET;
 	LCancel		*Cancel		= nullptr;
 	LString		ErrStr;
@@ -318,6 +319,20 @@ public:
 
 	~LSocketImplPrivate()
 	{
+	}
+
+	int SetBlocking(bool block)
+	{
+		LAssert(ValidSocket(Socket));
+		#if defined WIN32
+			ulong NonBlocking = !block;
+			return ioctlsocket(Socket, FIONBIO, &NonBlocking);
+		#elif defined POSIX
+			return fcntl(Socket, F_SETFL, d->Blocking ? 0 : O_NONBLOCK);
+		#else
+			#error Impl me.
+			return -1;
+		#endif
 	}
 
 	bool Select(int TimeoutMs, bool Read)
@@ -537,16 +552,11 @@ void LSocket::IsBlocking(bool block)
 	{
 		d->Blocking = block;
 	
-		LAssert(ValidSocket(d->Socket));
 		LOG("%s:%i," LPrintSock " - blocking=%i\n", _FUNC, d->Socket, block);
-		#if defined WIN32
-			ulong NonBlocking = !block;
-			ioctlsocket(d->Socket, FIONBIO, &NonBlocking);
-		#elif defined POSIX
-			fcntl(d->Socket, F_SETFL, d->Blocking ? 0 : O_NONBLOCK);
-		#else
-			#error Impl me.
-		#endif
+		if (ValidSocket(d->Socket))
+		{
+			d->SetBlocking(d->Blocking);
+		}
 	}
 }
 
@@ -799,10 +809,7 @@ int LSocket::Open(const char *HostAddr, int Port)
 
 			// Setup the connect
 			bool Block = IsBlocking();
-			if (Block)
-			{
-				IsBlocking(false);
-			}
+			d->SetBlocking(false); // bypass LSocket::SetBlocking check if value has changed...
 				
 			auto timeoutMs = d->Timeout > 0 ? d->Timeout : 30000;
 			uint64_t startTs = LCurrentTime();
@@ -849,8 +856,9 @@ int LSocket::Open(const char *HostAddr, int Port)
 				}
 			}
 
+			// Restore blocking option
 			if (Block)
-				IsBlocking(true);
+				d->SetBlocking(true);
 
 			if (Status)
 			{
@@ -870,13 +878,9 @@ int LSocket::Open(const char *HostAddr, int Port)
 			else
 			{
 				Error();
-
-				#ifdef WIN32
-				closesocket(d->Socket);
-				#else
-				close(d->Socket);
-				#endif
-				d->Socket = INVALID_SOCKET;
+				d->NoDisconnectEvent = true;
+				Close();
+				d->NoDisconnectEvent = false;
 			}
 		}
 		else
@@ -1012,12 +1016,13 @@ int LSocket::Close()
 	{
 		LOG("%s:%i," LPrintSock " - closing socket\n", _FUNC, d->Socket);
 		#if defined WIN32
-		closesocket(d->Socket);
+			closesocket(d->Socket);
 		#else
-		close(d->Socket);
+			close(d->Socket);
 		#endif
 		d->Socket = INVALID_SOCKET;
-		OnDisconnect();
+		if (!d->NoDisconnectEvent)
+			OnDisconnect();
 	}
 
 	return true;
