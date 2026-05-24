@@ -66,11 +66,14 @@
 #define PROTO_BROADCAST			0x200
 #define IsNewLine(ch)			((ch) == '\r' || (ch) == '\n')
 
-#define CONNECT_LOGGING			1
-#if CONNECT_LOGGING
-	#define CONNECT_LOG(...)	LgiTrace(__VA_ARGS__)
+#define SOCKET_LOGGING			1
+#if SOCKET_LOGGING
+	#define _FUNC				__func__, __LINE__
+	#define LOG(...)			LgiTrace(__VA_ARGS__)
+	#define LOG_INDENT(...)		LgiTrace("    " __VA_ARGS__)
 #else
-	#define CONNECT_LOG(...)
+	#define LOG(...)
+	#define LOG_INDENT(...)
 #endif
 
 #if defined POSIX
@@ -535,6 +538,7 @@ void LSocket::IsBlocking(bool block)
 		d->Blocking = block;
 	
 		LAssert(ValidSocket(d->Socket));
+		LOG("%s:%i," LPrintSock " - blocking=%i\n", _FUNC, d->Socket, block);
 		#if defined WIN32
 			ulong NonBlocking = !block;
 			ioctlsocket(d->Socket, FIONBIO, &NonBlocking);
@@ -658,6 +662,8 @@ int LSocket::Open(const char *HostAddr, int Port)
 {
 	int Status = -1;
 	
+	LOG("%s:%i - Open(%s,%i)", _FUNC, HostAddr, Port);
+	
 	Close();
 
 	if (HostAddr)
@@ -666,7 +672,7 @@ int LSocket::Open(const char *HostAddr, int Port)
 		BytesRead = 0;
 		
 		sockaddr_in RemoteAddr;
-		HostEnt *Host = 0;
+		HostEnt *Host = nullptr;
 		in_addr_t IpAddress = 0;
 
 		ZeroObj(RemoteAddr);
@@ -689,6 +695,8 @@ int LSocket::Open(const char *HostAddr, int Port)
 		{
 			LArray<char> Buf(512);
 
+			LOG_INDENT("%s:%i," LPrintSock " - socket created\n", _FUNC, d->Socket);
+
 			#if !defined(MAC)
 			option_t i;
 			socklen_t sz = sizeof(i);
@@ -709,29 +717,6 @@ int LSocket::Open(const char *HostAddr, int Port)
 					Error();
 					return 0;
 				}
-				
-				/* This seems complete unnecessary? -fret Dec 2018
-				#if defined(WIN32)
-
-				Host = c((const char*) &IpAddress, 4, AF_INET);
-				if (!Host)
-					Error();
-
-				#else
-
-				Host = gethostbyaddr
-				(
-					#ifdef MAC
-					HostAddr,
-					#else
-					&IpAddress,
-					#endif
-					4,
-					AF_INET
-				);
-
-				#endif
-				*/
 			}
 			else
 			{
@@ -816,7 +801,6 @@ int LSocket::Open(const char *HostAddr, int Port)
 			bool Block = IsBlocking();
 			if (Block)
 			{
-				CONNECT_LOG(LPrintSock " - Setting non blocking\n", d->Socket);
 				IsBlocking(false);
 			}
 				
@@ -832,13 +816,16 @@ int LSocket::Open(const char *HostAddr, int Port)
 				auto ts1 = LCurrentTime();
 				if (calls == 0 || IsWritable(500))
 				{
-					CONNECT_LOG(LPrintSock " %i: connect to %s:%i=", d->Socket, calls, HostAddr, Port);
+					LOG_INDENT("%s:%i," LPrintSock " - calling connect\n", _FUNC, d->Socket);
 					err = connect(d->Socket, (sockaddr*)&RemoteAddr, sizeof(sockaddr_in));
-					CONNECT_LOG("%i Block=%u wait=%i\n", err, Block, (int)(LCurrentTime() - ts1));
 					if (err)
 					{
 						auto e = getError();
-						CONNECT_LOG(LPrintSock " e=%i", d->Socket, e);
+						LOG_INDENT("%s:%i," LPrintSock " =%i, err=%i\n", _FUNC, d->Socket, err, e);
+					}
+					else
+					{
+						LOG_INDENT("%s:%i," LPrintSock " =%i, wait=%i\n", _FUNC, d->Socket, err, (int)(LCurrentTime() - ts1));
 					}
 				}
 				else
@@ -851,13 +838,13 @@ int LSocket::Open(const char *HostAddr, int Port)
 				if (!err)
 				{
 					Status = true;
-					CONNECT_LOG(LPrintSock " - Connected in " LPrintfUInt64 "ms\n", d->Socket, LCurrentTime() - startTs);
+					LOG_INDENT("%s:%i," LPrintSock " connected in " LPrintfUInt64 "ms\n", _FUNC, d->Socket, LCurrentTime() - startTs);
 					break;
 				}
 
 				if (!Block)
 				{
-					CONNECT_LOG("%i - non-blocking, so exit connect loop\n", d->Socket);
+					LOG_INDENT("%s:%i," LPrintSock " non-blocking, so exit connect loop..\n", _FUNC, d->Socket);
 					break;
 				}
 			}
@@ -1023,6 +1010,7 @@ int LSocket::Close()
 {
 	if (ValidSocket(d->Socket))
 	{
+		LOG("%s:%i," LPrintSock " - closing socket\n", _FUNC, d->Socket);
 		#if defined WIN32
 		closesocket(d->Socket);
 		#else
