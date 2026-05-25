@@ -68,7 +68,7 @@
 
 #define SOCKET_LOGGING			1
 #if SOCKET_LOGGING
-	#define CONSOLE_LOGGING		1
+	#define CONSOLE_LOGGING		0
 	#define _FUNC				__func__, __LINE__
 	#if CONSOLE_LOGGING
 		#define LOG(...)		printf(__VA_ARGS__)
@@ -385,7 +385,7 @@ public:
 		// call in a much smaller timeout and a loop so that we can respond to Cancel being set
 		// in a timely manner.
 		auto Now = LCurrentTime();
-		auto End = Now + TimeoutMs;
+		auto End = TimeoutMs < 0 ? 0 : Now + TimeoutMs;
 		do
 		{
 			// Do the cancel check...
@@ -393,15 +393,23 @@ public:
 				break;
 
 			// How many ms to wait?
-			Now = LCurrentTime();
-			auto Remain = MIN(CancelCheckMs, (int)(End - Now));
-			if (Remain <= 0)
-				break;
-			
-			if (Select(Remain, Read))
+			int wait;
+			if (End)
+			{
+				Now = LCurrentTime();
+				if (Now > End)
+					break;
+				wait = MIN(CancelCheckMs, (int)(End-Now));
+			}
+			else
+			{
+				wait = Blocking ? CancelCheckMs : 0/* check once but don't wait?*/;
+			}
+
+			if (Select(wait, Read))
 				return true;
 		}
-		while (Now < End);
+		while (Blocking);
 
 		return false;
 	}
@@ -488,53 +496,64 @@ bool LSocket::IsReadable(int TimeoutMs)
 	// Which is important because a socket value of -1
 	// (ie invalid) will crash the FD_SET macro.
 	OsSocket s = d->Socket; 
-	if (ValidSocket(s) && !d->Cancel->IsCancelled())
+	if (!ValidSocket(s))
 	{
-		#ifdef LINUX
-
-			// Because Linux doesn't return from select() when the socket is
-			// closed elsewhere we have to do something different... damn Linux,
-			// why can't you just like do the right thing?
-			
-			struct pollfd fds;
-			fds.fd = s;
-			fds.events = POLLIN | POLLRDHUP | POLLERR;
-			fds.revents = 0;
-
-			int r = poll(&fds, 1, TimeoutMs);
-			if (r > 0)
-			{
-				return fds.revents != 0;
-			}
-			else if (r < 0)
-			{
-				Error();
-			}
-		
-		#else
-		
-			struct timeval t = {TimeoutMs / 1000, (TimeoutMs % 1000) * 1000};
-
-			fd_set r;
-			FD_ZERO(&r);
-			FD_SET(s, &r);
-			
-			int v = select((int)s+1, &r, 0, 0, &t);
-			if (v > 0 && FD_ISSET(s, &r))
-			{
-				return true;
-			}
-			else if (v < 0)
-			{
-				Error();
-			}
-		
-		#endif
-	}
-	else
 		LgiTrace("%s:%i - Not a valid socket.\n", _FL);
+		return false;
+	}
+		
+	if (d->Cancel->IsCancelled())
+		return false;
 
-	return false;
+	#ifdef LINUX
+
+		@error "this should handle Cancel events and TimeoutMs=-1 too..."
+		// 
+		// Because Linux doesn't return from select() when the socket is
+		// closed elsewhere we have to do something different... damn Linux,
+		// why can't you just like do the right thing?
+			
+		struct pollfd fds;
+		fds.fd = s;
+		fds.events = POLLIN | POLLRDHUP | POLLERR;
+		fds.revents = 0;
+
+		int r = poll(&fds, 1, TimeoutMs);
+		if (r > 0)
+		{
+			return fds.revents != 0;
+		}
+		else if (r < 0)
+		{
+			Error();
+		}
+
+		return false;
+		
+	#else
+		
+		return d->SelectWithCancel(TimeoutMs, true);
+
+		/*
+		auto ms = TimeoutMs < 0 ? d->CancelCheckMs : TimeoutMs;
+		struct timeval t = {ms / 1000, (ms % 1000) * 1000};
+
+		fd_set r;
+		FD_ZERO(&r);
+		FD_SET(s, &r);
+			
+		int v = select((int)s+1, &r, 0, 0, &t);
+		if (v > 0 && FD_ISSET(s, &r))
+		{
+			return true;
+		}
+		else if (v < 0)
+		{
+			Error();
+		}
+		*/
+		
+	#endif		
 }
 
 bool LSocket::IsWritable(int TimeoutMs)
@@ -676,7 +695,7 @@ int LSocket::GetRemotePort()
 
 int LSocket::Open(const char *HostAddr, int Port)
 {
-	int Status = -1;
+	int Status = false;
 	
 	LOG("%s:%i - Open(%s,%i)", _FUNC, HostAddr, Port);
 	
@@ -834,6 +853,13 @@ int LSocket::Open(const char *HostAddr, int Port)
 					if (err)
 					{
 						auto e = getError();
+						#if WINDOWS
+						if (e == WSAEISCONN)
+							// Sigh
+							err = 0;
+						else
+						#endif
+
 						LOG_INDENT("%s:%i," LPrintSock " =%i, err=%i\n", _FUNC, d->Socket, err, e);
 					}
 					else
@@ -895,7 +921,7 @@ int LSocket::Open(const char *HostAddr, int Port)
 		}
 	}
 	
-	return Status == 0;
+	return Status;
 }
 
 bool LSocket::SetReuseAddress(bool reuse)
