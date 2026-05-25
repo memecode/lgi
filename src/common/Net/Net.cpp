@@ -68,9 +68,15 @@
 
 #define SOCKET_LOGGING			1
 #if SOCKET_LOGGING
+	#define CONSOLE_LOGGING		1
 	#define _FUNC				__func__, __LINE__
-	#define LOG(...)			LgiTrace(__VA_ARGS__)
-	#define LOG_INDENT(...)		LgiTrace("    " __VA_ARGS__)
+	#if CONSOLE_LOGGING
+		#define LOG(...)		printf(__VA_ARGS__)
+		#define LOG_INDENT(...)	printf("    " __VA_ARGS__)
+	#else
+		#define LOG(...)		LgiTrace(__VA_ARGS__)
+		#define LOG_INDENT(...)	LgiTrace("    " __VA_ARGS__)
+	#endif
 #else
 	#define LOG(...)
 	#define LOG_INDENT(...)
@@ -936,6 +942,8 @@ bool LSocket::Bind(int Port, bool reuseAddr)
 
 bool LSocket::Listen(int Port)
 {
+	LOG("%s:%i - Listen(%i)", _FUNC, Port);
+
 	if (!ValidSocket(d->Socket))
 		d->Socket = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -944,6 +952,8 @@ bool LSocket::Listen(int Port)
 		Error();
 		return false;
 	}
+
+	LOG_INDENT("%s:%i," LPrintSock " - socket created\n", _FUNC, d->Socket);
 
 	BytesWritten = 0;
 	BytesRead = 0;
@@ -955,13 +965,17 @@ bool LSocket::Listen(int Port)
 	a->sin_port = htons(Port);
 	a->sin_addr.OsAddr = INADDR_ANY;
 
-	if (bind(d->Socket, &Addr, sizeof(Addr)) < 0)
+	auto result = bind(d->Socket, &Addr, sizeof(Addr));
+	LOG_INDENT("%s:%i," LPrintSock " - bind=%i\n", _FUNC, d->Socket, result);
+	if (result < 0)
 	{
 		Error();
 		return false;
 	}
 		
-	if (listen(d->Socket, SOMAXCONN) == SOCKET_ERROR)
+	result = listen(d->Socket, SOMAXCONN);
+	LOG_INDENT("%s:%i," LPrintSock " - listen=%i\n", _FUNC, d->Socket, result);
+	if (result == SOCKET_ERROR)
 	{
 		Error();
 		return false;
@@ -972,6 +986,8 @@ bool LSocket::Listen(int Port)
 
 bool LSocket::Accept(LSocketI *c)
 {
+	LOG("%s:%i - Accept(%p)", _FUNC, c);
+
 	if (!c)
 	{
 		LAssert(0);
@@ -989,6 +1005,7 @@ bool LSocket::Accept(LSocketI *c)
 		if (IsReadable(100))
 		{
 			NewSocket = accept(d->Socket, &Address, &Length);
+			LOG_INDENT("%s:%i," LPrintSock " - accept\n", _FUNC, NewSocket);
 			break;
 		}
 		else if (d->Timeout > 0)

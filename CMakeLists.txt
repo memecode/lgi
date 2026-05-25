@@ -599,6 +599,10 @@ elseif (MSVC)
 			/W2
 		)
 
+	target_compile_definitions(lgi
+		PRIVATE
+			$<$<CONFIG:Debug>:_DEBUG>)
+
 	target_include_directories(lgi
 		PUBLIC
 			include/lgi/win
@@ -627,6 +631,10 @@ elseif (MSVC)
 			WINDOWS
 			_UNICODE
 			UNICODE)
+
+	target_compile_definitions(lgi-stub
+		PRIVATE
+			$<$<CONFIG:Debug>:_DEBUG>)
 
 elseif (HAIKU)
 
