@@ -192,9 +192,12 @@ public:
 #pragma pack(pop)
 #endif
 
-struct Connection
+class Connection
 {
+protected:
 	LAutoPtr<LSocket> sock;
+
+public:
 	LArray<char> readBuf;
 	ssize_t used = 0;
 	bool connected = false;
@@ -215,8 +218,26 @@ struct Connection
 			sock->IsBlocking(false);
 	}
 
+	LSocket *GetSock() const
+	{
+		return sock;
+	}
+
+	bool SetSock(LAutoPtr<LSocket> s)
+	{
+		sock = s;
+		if (sock)
+			sock->IsBlocking(false);
+		else
+			return false;
+		return true;
+	}
+
 	bool Valid()
 	{
+		if (!sock)
+			return false;
+		LAssert(!sock->IsBlocking());
 		return sock && ValidSocket(sock->Handle());
 	}
 	
@@ -945,19 +966,19 @@ struct LCommsBusPriv :
 				{
 					// Try and setup a TCP connection:
 					p->connectTs = now;
-					if (!p->sock)
+					if (!p->GetSock())
 					{
-						if (p->sock.Reset(new LSocket))
+						LAutoPtr<LSocket> sock(new LSocket);
+						if (p->SetSock(sock))
 						{
-							p->sock->SetTimeout(PEER_TIMEOUT);
-							p->sock->IsBlocking(false);
+							p->GetSock()->SetTimeout(PEER_TIMEOUT);
 						}
 					}
-					if (p->sock)
+					if (p->GetSock())
 					{
 						auto addr = LIpToStr(p->effectiveIp);
 						LOG("peer connecting: %s/%s\n", addr.Get(), p->hostName.Get());
-						auto result = p->sock->Open(addr, DEFAULT_COMMS_PORT);
+						auto result = p->GetSock()->Open(addr, DEFAULT_COMMS_PORT);
 						LOG("\tconnected: %i\n", result);
 						if (result)
 							SetDirty("newPeerTcpConnection");
@@ -1322,7 +1343,7 @@ struct LCommsBusPriv :
 								}
 								else
 								{
-									p->sock = sock;
+									p->SetSock(sock);
 									found = true;
 									peers->SetDirty("acceptedServerTcp");
 	
@@ -1354,7 +1375,7 @@ struct LCommsBusPriv :
 						conn->OnConnect();
 						LOG("%s got new client connection, sock=" LPrintfSock "\n",
 							Describe().Get(),
-							conn->sock->Handle());
+							conn->GetSock()->Handle());
 					}
 				}
 			}
@@ -1363,7 +1384,7 @@ struct LCommsBusPriv :
 				// Check connections for incoming data:
 				for (auto c: clients)
 				{
-					if (!ValidSocket(c->sock->Handle()))
+					if (!c->Valid())
 					{
 						clients.Delete(c);
 						delete c;
@@ -1535,7 +1556,7 @@ struct LCommsBusPriv :
 			if (!c.connected)
 			{
 				// Connect to the server...
-				c.connected = c.sock->Open("localhost", DEFAULT_COMMS_PORT);
+				c.connected = c.GetSock()->Open("localhost", DEFAULT_COMMS_PORT);
 				LOG("%s connected=%i, que=%i, ep=%i\n",
 					Describe().Get(),
 					c.connected,
