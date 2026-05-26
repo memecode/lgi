@@ -334,7 +334,7 @@ public:
 			ulong NonBlocking = !block;
 			return ioctlsocket(Socket, FIONBIO, &NonBlocking);
 		#elif defined POSIX
-			return fcntl(Socket, F_SETFL, d->Blocking ? 0 : O_NONBLOCK);
+			return fcntl(Socket, F_SETFL, Blocking ? 0 : O_NONBLOCK);
 		#else
 			#error Impl me.
 			return -1;
@@ -405,6 +405,9 @@ public:
 			{
 				wait = Blocking ? CancelCheckMs : 0/* check once but don't wait?*/;
 			}
+			
+			if (!ValidSocket(Socket))
+				break;
 
 			if (Select(wait, Read))
 				return true;
@@ -505,7 +508,7 @@ bool LSocket::IsReadable(int TimeoutMs)
 	if (d->Cancel->IsCancelled())
 		return false;
 
-	#ifdef LINUX
+	#if 0 // def LINUX
 
 		@error "this should handle Cancel events and TimeoutMs=-1 too..."
 		// 
