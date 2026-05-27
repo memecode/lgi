@@ -42,6 +42,7 @@ extern void DecodeAddrName(const char *Start, LString &Name, LString &Addr, cons
 extern int MaxLineLen(char *Text);
 extern char *EncodeImapString(const char *s);
 extern char *DecodeImapString(const char *s);
+
 // Use LToBinary instead
 [[deprecated]] extern bool UnBase64Str(LString &s);
 // Use LToBase64 instead
@@ -228,6 +229,24 @@ public:
 		ErrMsgId = ResourceId;
 		ErrMsgFmt = Fmt;
 		ErrMsgParam = Param;
+	}
+
+	// Formats a LDateTime according to RFC822:
+	static LString FormatDateTimeRfc(const LDateTime *dt)
+	{
+		if (!dt)
+			return LString();
+
+		auto tzMin = dt->GetTimeZone();
+		return LString::Fmt("%2.2i %s %4.4i %2.2i:%2.2i:%2.2i %+2.2i%2.2i", 
+			dt->Day(),
+			LDateTime::MonthsShort[dt->Month() - 1],
+			dt->Year(),
+			dt->Hours(),
+			dt->Minutes(),
+			dt->Seconds(),
+			tzMin / 60,
+			ABS(tzMin) % 60);
 	}
 };
 

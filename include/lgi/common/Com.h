@@ -15,7 +15,7 @@
 template <class T>
 class LUnknownImpl : public T
 {
-	int Count;
+	int Count = 0;
 
 	class Interface
 	{
@@ -32,7 +32,7 @@ class LUnknownImpl : public T
 	List<Interface> Interfaces;
 
 protected:
-	bool TraceRefs;
+	bool TraceRefs = false;
 
 	void AddInterface(REFIID iid, void *pvObject)
 	{
@@ -46,8 +46,6 @@ protected:
 public:
 	LUnknownImpl()
 	{
-		Count = 0;
-		TraceRefs = false;
 	}
 
 	virtual ~LUnknownImpl()

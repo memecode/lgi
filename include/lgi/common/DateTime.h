@@ -219,13 +219,13 @@ public:
 	/// Sets the date to an NULL state
 	void Empty();
 
-	/// Returns the day
+	/// Returns the day: 1 -> 31
 	int Day() const { return _Day; }
-	/// Sets the day
+	/// Sets the day: 1 -> 31
 	void Day(int d) { _Day = d; }
-	/// Returns the month
+	/// Returns the month: 1 -> 12
 	int Month() const { return _Month; }
-	/// Sets the month
+	/// Sets the month: 1 -> 12
 	void Month(int m) { _Month = m; }
 	/// Sets the month by it's name
 	void Month(char *m);
