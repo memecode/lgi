@@ -46,7 +46,7 @@ Known bugs:
 #include "lgi/common/DocView.h"
 #include "ParserCommon.h"
 
-// #define DEBUG_FILE			"MissingFiles.cpp"
+// #define DEBUG_FILE			"Net.cpp"
 // #define DEBUG_LINE			9
 #define PARSE_ALL_FILES		1 // else parse just the 'DEBUG_FILE'
 
@@ -438,6 +438,16 @@ struct CppContext
 			{
 				c.colon = startTok;
 				DeleteArray(t);
+			}
+			else if (Compare(t, "=", true))
+			{
+				if (!c.body)
+				{
+					// Most likely a variable decl like:
+					// struct someType varName = { ..init values.. };
+					// Which we DON'T want to capture...
+					return ClassInfo();
+				}
 			}
 			else if (Compare(t, "LgiClass", true) ||
 					 Compare(t, "ScribeClass", true))
