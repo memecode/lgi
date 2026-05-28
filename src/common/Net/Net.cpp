@@ -386,6 +386,11 @@ public:
 		// in a timely manner.
 		auto Now = LCurrentTime();
 		auto End = TimeoutMs < 0 ? 0 : Now + TimeoutMs;
+
+		// Non-blocking, no timeout: check once, don't loop
+		// Non-blocking, timeout: check until timeout expires
+		// Blocking, no timeout: check till event happens
+		// Blocking, timeout, check till timeout
 		do
 		{
 			// Do the cancel check...
@@ -397,7 +402,7 @@ public:
 			if (End)
 			{
 				Now = LCurrentTime();
-				if (Now > End)
+				if (Now >= End)
 					break;
 				wait = MIN(CancelCheckMs, (int)(End-Now));
 			}
@@ -412,7 +417,7 @@ public:
 			if (Select(wait, Read))
 				return true;
 		}
-		while (Blocking);
+		while (Blocking || TimeoutMs >= 0);
 
 		return false;
 	}
@@ -508,55 +513,35 @@ bool LSocket::IsReadable(int TimeoutMs)
 	if (d->Cancel->IsCancelled())
 		return false;
 
-	#if 0 // def LINUX
+	/*
+	LINUX:
 
-		@error "this should handle Cancel events and TimeoutMs=-1 too..."
-		// 
-		// Because Linux doesn't return from select() when the socket is
-		// closed elsewhere we have to do something different... damn Linux,
-		// why can't you just like do the right thing?
-			
-		struct pollfd fds;
-		fds.fd = s;
-		fds.events = POLLIN | POLLRDHUP | POLLERR;
-		fds.revents = 0;
-
-		int r = poll(&fds, 1, TimeoutMs);
-		if (r > 0)
-		{
-			return fds.revents != 0;
-		}
-		else if (r < 0)
-		{
-			Error();
-		}
-
-		return false;
+	@error "this should handle Cancel events and TimeoutMs=-1 too..."
+	// 
+	// Because Linux doesn't return from select() when the socket is
+	// closed elsewhere we have to do something different... damn Linux,
+	// why can't you just like do the right thing?
 		
-	#else
-		
-		return d->SelectWithCancel(TimeoutMs, true);
+	struct pollfd fds;
+	fds.fd = s;
+	fds.events = POLLIN | POLLRDHUP | POLLERR;
+	fds.revents = 0;
 
-		/*
-		auto ms = TimeoutMs < 0 ? d->CancelCheckMs : TimeoutMs;
-		struct timeval t = {ms / 1000, (ms % 1000) * 1000};
+	int r = poll(&fds, 1, TimeoutMs);
+	if (r > 0)
+	{
+		return fds.revents != 0;
+	}
+	else if (r < 0)
+	{
+		Error();
+	}
 
-		fd_set r;
-		FD_ZERO(&r);
-		FD_SET(s, &r);
-			
-		int v = select((int)s+1, &r, 0, 0, &t);
-		if (v > 0 && FD_ISSET(s, &r))
-		{
-			return true;
-		}
-		else if (v < 0)
-		{
-			Error();
-		}
-		*/
+	return false;
 		
-	#endif		
+	*/
+		
+	return d->SelectWithCancel(TimeoutMs, true);
 }
 
 bool LSocket::IsWritable(int TimeoutMs)
