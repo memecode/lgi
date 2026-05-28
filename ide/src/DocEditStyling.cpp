@@ -90,7 +90,9 @@ LanguageParams LangParam[] =
 	// Xml
 	{NULL, NULL, NULL},
 	// Html/Php
-	{NULL, NULL, HtmlEdges}
+	{NULL, NULL, HtmlEdges},
+	// Diff
+	{NULL, NULL, NULL}
 };
 
 DocEditStyling::DocEditStyling(DocEdit *view) : 
@@ -203,6 +205,9 @@ int DocEditStyling::Main()
 				break;
 			case SrcHtml:
 				StyleHtml(p);
+				break;
+			case SrcDiff:
+				StyleDiff(p);
 				break;
 			default:
 				StyleDefault(p);
@@ -1140,7 +1145,107 @@ void DocEditStyling::StyleHtml(StylingParams &p)
 	}
 	END_CODE();
 }
-	
+
+void DocEditStyling::StyleDiff(StylingParams &p)
+{
+	auto Text = p.Text.AddressOf();
+	auto end = Text + p.Text.Length();
+
+	enum DiffState {
+		TPreamble,
+		THeader,
+		TDiff,
+	}	state = TPreamble;
+
+	LString delContext, addContext, lineContext;
+	int contextLines = 0;
+	LColour cAdd(0, 0x80, 0), cDel(0xc0, 0, 0), cWhite = LColour::White;
+	LColour cGrey(0xc0, 0xc0, 0xc0);
+	float mix = 0.94f;
+		
+	auto &Style = p.Styles;
+	for (auto s = Text; s < end;)
+	{
+		auto eol = s; // end of current line
+		while (eol < end && *eol != '\n')
+			eol++;
+		
+		LColour fore, back;
+		LString target;
+		
+		if (!Strncmp(s, L"--- ", 4))
+		{
+			delContext = LString(s + 4, eol - s - 4);
+			fore = cDel;
+			back = cDel.Mix(cWhite, mix);
+		}
+		else if (!Strncmp(s, L"+++ ", 4))
+		{
+			addContext = LString(s + 4, eol - s - 4);
+			fore = cAdd;
+			back = cAdd.Mix(cWhite, mix);
+		}
+		else if (!Strncmp(s, L"diff ", 5) ||
+				 !Strncmp(s, L"index ", 6))
+		{
+			fore = cGrey;
+			back = cGrey.Mix(cWhite, mix);
+		}
+		else if (!Strncmp(s, L"@@", 2))
+		{
+			contextLines = 0;
+			fore = cGrey;
+			back = cGrey.Mix(cWhite, mix);
+			lineContext = LString(s + 3, eol - s - 3);
+		}
+		else if (*s == '+')
+		{
+			fore = cAdd;
+			
+			if (lineContext && addContext)
+			{
+				// these 'goto' links are caught by DocEdit::OnStyleClick
+				auto parts = lineContext.SplitDelimit(" -+\t,");
+				int line = (int) parts[2].Int() + contextLines;
+				target.Printf("goto://file/%s:%i", addContext(2, -1).Get(), line);
+			}
+		}
+		else if (*s == '-')
+		{
+			fore = cDel;
+
+			if (lineContext && delContext)
+			{
+				// these 'goto' links are caught by DocEdit::OnStyleClick
+				auto parts = lineContext.SplitDelimit(" -+\t,");
+				int line = (int) parts[0].Int() + contextLines;
+				target.Printf("goto://file/%s:%i", delContext(2, -1).Get(), line);
+			}
+		}
+		else
+		{
+			contextLines++;
+		}
+
+		if (fore || back)
+		{			
+			auto &st = Style.New().Construct(View, LTextView3::STYLE_IDE);
+			st.Start = s - Text;
+			st.Len = eol - s;
+			if (fore)
+				st.Fore = fore;
+			if (back)
+				st.Back = back;
+			if (target)
+				st.Data = target;
+		}
+		
+		if (eol == end)
+			break;
+		s = eol + 1;
+	}
+}
+
 void DocEditStyling::AddKeywords(const char **keys, bool IsType)
 {
 	for (const char **k = keys; *k; k++)
@@ -1183,8 +1288,13 @@ void DocEdit::PourStyle(size_t Start, ssize_t EditSize)
 				!stricmp(Ext, "php") ||
 				!stricmp(Ext, "js"))
 			FileType = SrcHtml;
+		else if (!stricmp(Ext, "diff"))
+			FileType = SrcDiff;
 		else
 			FileType = SrcPlainText;
+			
+		LAssert(FileType < CountOf(LangParam));
+			
 		if (LangParam[FileType].Keywords)
 			AddKeywords(LangParam[FileType].Keywords, false);
 		if (LangParam[FileType].Types)

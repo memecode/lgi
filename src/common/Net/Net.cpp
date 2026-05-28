@@ -66,7 +66,7 @@
 #define PROTO_BROADCAST			0x200
 #define IsNewLine(ch)			((ch) == '\r' || (ch) == '\n')
 
-#define SOCKET_LOGGING			1
+#define SOCKET_LOGGING			0
 #if SOCKET_LOGGING
 	#define CONSOLE_LOGGING		0
 	#define _FUNC				__func__, __LINE__

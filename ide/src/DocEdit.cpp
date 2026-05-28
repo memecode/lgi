@@ -2,6 +2,9 @@
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/ScrollBar.h"
 #include "lgi/common/Menu.h"
+#include "lgi/common/Uri.h"
+#include "lgi/common/PopupNotification.h"
+
 #include "LgiIde.h"
 #include "DocEdit.h"
 #include "IdeDocPrivate.h"
@@ -203,6 +206,35 @@ void DocEdit::OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour)
 			}
 		}
 	}
+}
+
+bool DocEdit::OnStyleClick(LStyle *style, LMouse *m)
+{
+	if (style->Owner == STYLE_IDE && m && m->Double())
+	{
+		// Check if this is a 'goto' link?
+		LUri u(style->Data.Str());
+		if (u.IsProtocol("goto"))
+		{		
+			auto parts = u.sPath.SplitDelimit(":");
+			if (parts.Length() == 2)
+			{
+				LFile::Path p(Doc->GetFullPath());				
+				auto target = p / ".." / parts[0];
+				if (target.Exists())
+				{
+					Doc->GetApp()->OpenFile(target, nullptr, true,
+						[lineNum=(int)parts[1].Int()](auto doc)
+						{
+							doc->SetLine(lineNum, false);
+						});
+				}
+				else LPopupNotification::Message(GetWindow(), LString::Fmt("Failed to find '%s'", target.GetFull().Get()));
+			}
+		}
+	}
+
+	return LTextView3::OnStyleClick(style, m);
 }
 
 void DocEdit::OnMouseClick(LMouse &m)

@@ -316,7 +316,7 @@ _GNU_SOURCE</Release>
 			<DebugAdmin />
 			<InitialDir />
 			<Debugger>
-				<All>lldb</All>
+				<All>gdb</All>
 			</Debugger>
 		</Debug>
 		<Advanced>

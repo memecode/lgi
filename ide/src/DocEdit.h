@@ -15,6 +15,7 @@ enum SourceType
 	SrcPython,
 	SrcXml,
 	SrcHtml,
+	SrcDiff,
 };
 
 class DocEdit;
@@ -28,7 +29,7 @@ public:
 		CodeCss,
 		CodeComment,
 		CodePre,
-		CodeJavascript
+		CodeJavascript,
 	};
 
 protected:
@@ -148,6 +149,7 @@ private:
 		void StyleDefault(StylingParams &p);
 		void StyleXml(StylingParams &p);
 		void StyleHtml(StylingParams &p);
+		void StyleDiff(StylingParams &p);
 
 		Node Root;
 		LUnrolledList<LTextView3::LStyle> PrevStyle;
@@ -190,6 +192,7 @@ public:
 	void DoGoto(std::function<void(bool)> Callback) override;
 	void OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour) override;
 	void OnMouseClick(LMouse &m) override;
+	bool OnStyleClick(LStyle *style, LMouse *m) override;
 	bool OnKey(LKey &k) override;	
 	bool OnMenu(LDocView *View, int Id, void *Context) override;
 	LMessage::Result OnEvent(LMessage *m) override;
