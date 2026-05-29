@@ -3033,3 +3033,49 @@ LString LGetAppForProtocol(const char *Protocol)
 	return App;
 }
 
+LString LExpandVars(const char* in, LDom* source)
+{
+	LStringPipe p;
+
+	LAssert(in);
+	LAssert(source);
+	if (!in || !source)
+		return LString();
+
+	auto *s = in;
+	while (true)
+	{
+		auto *e = s;
+		while (*e && e[0] != '$' && e[1] != '{')
+			e++;
+
+		if (e > s)
+			// write any non-var section before this
+			p.Write(s, e - s);
+
+		if (e[0] == '$' && e[1] == '{')
+		{
+			// start var...
+			s = e + 2;
+			for (e = s; *e && *e != '}'; e++)
+				;
+			if (!*e)
+			{
+				LAssert(!"variable not terminated correctly");
+				break;
+			}
+
+			LString var(s, e - s);
+			LVariant val;
+			if (source->GetValue(var, val))
+			{
+				p.Write(val.Str());
+			}
+
+			s = e + 1;
+		}
+		else break;
+	}
+
+	return p.NewLStr();
+}

@@ -229,6 +229,9 @@ LgiExtern char *LEncodeUri
 	int len = -1
 );
 
+// Expand a strings that include ${var} names, using 'source' to fill out the values:
+LgiExtern LString LExpandVars(const char* in, LDom* source);
+
 // Path
 #if LGI_COCOA || defined(__GTK_H__) || defined(HAIKU)
 	LgiExtern LString LgiArgsAppPath;

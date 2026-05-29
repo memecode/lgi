@@ -69,8 +69,15 @@
 #define SOCKET_LOGGING			0
 #if SOCKET_LOGGING
 	#define CONSOLE_LOGGING		0
+	#define SOCKET_LOG_FILE		"${LSP_APP_ROOT}/socket-${handle}.log" // any variable in here needs to be supported by LSocket::GetValue
 	#define _FUNC				__func__, __LINE__
-	#if CONSOLE_LOGGING
+	#ifdef SOCKET_LOG_FILE
+		// Print to preOpenLog until the socket has a handle (for the file name)
+		#define LOG(...)		if (d->socketLog) d->socketLog->Print(__VA_ARGS__);        \
+								else d->preOpenLog.Print(__VA_ARGS__)
+		#define LOG_INDENT(...)	if (d->socketLog) d->socketLog->Print("    " __VA_ARGS__); \
+								else d->preOpenLog.Print("    " __VA_ARGS__)
+	#elif CONSOLE_LOGGING
 		#define LOG(...)		printf(__VA_ARGS__)
 		#define LOG_INDENT(...)	printf("    " __VA_ARGS__)
 	#else
@@ -305,14 +312,21 @@ public:
 	uint32_t Udp		: 1;
 	uint32_t Broadcast	: 1;
 
-	LString		LogFile;
-	int			LogType		= NET_LOG_NONE;
 	int			Timeout		= -1;
 	int			LastError	= 0;
 	bool		NoDisconnectEvent = false;
 	OsSocket	Socket		= INVALID_SOCKET;
 	LCancel		*Cancel		= nullptr;
 	LString		ErrStr;
+
+	// Application level logging:
+	LString		LogFile;
+	int			LogType = NET_LOG_NONE;
+
+	// Lgi level logging:
+	//		To enable, define SOCKET_LOGGING and SOCKET_LOG_FILE
+	LAutoPtr<LFile> socketLog;
+	LStringPipe preOpenLog; // collect logs in memory before 'open'
 
 	LSocketImplPrivate()
 	{	
@@ -426,8 +440,6 @@ public:
 LSocket::LSocket(LStreamI *logger, void *unused_param)
 {
 	StartNetworkStack();
-	BytesWritten = 0;
-	BytesRead = 0;
 	d = new LSocketImplPrivate;
 }
 
@@ -685,7 +697,7 @@ int LSocket::Open(const char *HostAddr, int Port)
 {
 	int Status = false;
 	
-	LOG("%s:%i - Open(%s,%i)", _FUNC, HostAddr, Port);
+	LOG("%s:%i - Open(%s,%i)\n", _FUNC, HostAddr, Port);
 	
 	Close();
 
@@ -717,6 +729,22 @@ int LSocket::Open(const char *HostAddr, int Port)
 		if (ValidSocket(d->Socket))
 		{
 			LArray<char> Buf(512);
+
+			#if defined(SOCKET_LOG_FILE)
+			// Open the log file and flush all the pre open data to it...
+			auto filePath = LExpandVars(SOCKET_LOG_FILE, this);
+
+			if (filePath && d->socketLog.Reset(new LFile))
+			{
+				if (!d->socketLog->Open(filePath, O_WRITE))
+					LAssert(!"failed to open log file");
+				else if (d->preOpenLog.GetSize() > 0)
+				{
+					d->socketLog->SetSize(0);
+					d->socketLog->Write(d->preOpenLog.NewLStr());
+				}
+			}
+			#endif
 
 			LOG_INDENT("%s:%i," LPrintSock " - socket created\n", _FUNC, d->Socket);
 
@@ -1111,10 +1139,14 @@ void LSocket::Log(const char *Msg, ssize_t Ret, const char *Buf, ssize_t Len)
 ssize_t LSocket::Write(const void *Data, ssize_t Len, int Flags)
 {
 	if (!ValidSocket(d->Socket) || !Data || d->Cancel->IsCancelled())
+	{
+		LOG("%s:%i," LPrintSock " - write failed\n", _FUNC, d->Socket);
 		return -1;
+	}
 
-	int Status = 0;
+	ssize_t Status = 0;
 
+	LOG("%s:%i," LPrintSock " - write(" LPrintfSSizeT ") timeout=%i\n", _FUNC, d->Socket, Len, d->Timeout);
 	if (IsWritable(d->Timeout))
 	{
 		Status = (int)send
@@ -1127,8 +1159,14 @@ ssize_t LSocket::Write(const void *Data, ssize_t Len, int Flags)
 			| MSG_NOSIGNAL
 			#endif
 		);
+
+		LOG_INDENT("%s:%i," LPrintSock " = " LPrintfSSizeT "\n", _FUNC, d->Socket, Status);
 	}
-	else setError(LErrorWouldBlock);
+	else
+	{
+		setError(LErrorWouldBlock);
+		LOG_INDENT("%s:%i," LPrintSock " ... LErrorWouldBlock\n", _FUNC, d->Socket);
+	}
 
 	if (Status < 0)
 		Error();
@@ -1152,10 +1190,14 @@ ssize_t LSocket::Write(const void *Data, ssize_t Len, int Flags)
 ssize_t LSocket::Read(void *Data, ssize_t Len, int Flags)
 {
 	if (!ValidSocket(d->Socket) || !Data || d->Cancel->IsCancelled())
+	{
+		LOG("%s:%i," LPrintSock " - read failed\n", _FUNC, d->Socket);
 		return -1;
+	}
 
 	ssize_t Status = -1;
 
+	LOG("%s:%i," LPrintSock " - read(" LPrintfSSizeT ") timeout=%i\n", _FUNC, d->Socket, Len, d->Timeout);
 	if (IsReadable(d->Timeout))
 	{
 		Status = recv(d->Socket, (char*)Data, (int) Len, Flags
@@ -1163,8 +1205,13 @@ ssize_t LSocket::Read(void *Data, ssize_t Len, int Flags)
 			| MSG_NOSIGNAL
 			#endif
 			);
+		LOG_INDENT("%s:%i," LPrintSock " = " LPrintfSSizeT "\n", _FUNC, d->Socket, Status);
 	}
-	else setError(LErrorWouldBlock);
+	else
+	{
+		setError(LErrorWouldBlock);
+		LOG_INDENT("%s:%i," LPrintSock " ...LErrorWouldBlock\n", _FUNC, d->Socket);
+	}
 
 	Log("Read", (int)Status, (char*)Data, Status>0 ? Status : 0);
 
@@ -1499,6 +1546,25 @@ int LSocket::WriteUdp(void *Buffer, int Size, int Flags, uint32_t Ip, uint16_t P
 		OnError(err.GetCode(), msg);
 	}
 	return (int)b;
+}
+
+bool LSocket::GetValue(const char *Var, LVariant &Value)
+{
+	if (!Stricmp(Var, "LSP_APP_ROOT"))
+	{
+		Value = LGetSystemPath(LSP_APP_ROOT);
+	}
+	else if (!Stricmp(Var, "handle"))
+	{
+		Value = LString::Fmt(LPrintSock, Handle());
+	}
+	else
+	{
+		LAssert(!"unsupported field");
+		return false;
+	}
+
+	return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////

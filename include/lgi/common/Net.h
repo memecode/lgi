@@ -119,7 +119,7 @@ protected:
 	bool CreateUdpSocket();
 
 public:
-	ssize_t	BytesRead, BytesWritten;
+	ssize_t	BytesRead = 0, BytesWritten = 0;
 
 	/// Creates the class
 	LSocket(LStreamI *logger = NULL, void *unused_param = NULL);
@@ -299,6 +299,8 @@ public:
 			s->SetCancel(GetCancel());
 		return s;
 	}
+
+	bool GetValue(const char* Var, LVariant& Value) override;
 
 	// Statics
 
