@@ -66,10 +66,10 @@
 #define PROTO_BROADCAST			0x200
 #define IsNewLine(ch)			((ch) == '\r' || (ch) == '\n')
 
-#define SOCKET_LOGGING			0
+#define SOCKET_LOGGING			1
 #if SOCKET_LOGGING
 	#define CONSOLE_LOGGING		0
-	#define SOCKET_LOG_FILE		"${LSP_APP_ROOT}/socket-${handle}.log" // any variable in here needs to be supported by LSocket::GetValue
+	#define SOCKET_LOG_FILE		"${LSP_APP_INSTALL}/socket-${handle}.log" // any variable in here needs to be supported by LSocket::GetValue
 	#define _FUNC				__func__, __LINE__
 	#ifdef SOCKET_LOG_FILE
 		// Print to preOpenLog until the socket has a handle (for the file name)
@@ -1553,6 +1553,10 @@ bool LSocket::GetValue(const char *Var, LVariant &Value)
 	if (!Stricmp(Var, "LSP_APP_ROOT"))
 	{
 		Value = LGetSystemPath(LSP_APP_ROOT);
+	}
+	else if (!Stricmp(Var, "LSP_APP_INSTALL"))
+	{
+		Value = LGetSystemPath(LSP_APP_INSTALL);
 	}
 	else if (!Stricmp(Var, "handle"))
 	{
