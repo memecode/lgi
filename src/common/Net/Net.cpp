@@ -58,18 +58,18 @@
 #include "lgi/common/RegKey.h"
 #include "lgi/common/Window.h"
 #include "LgiOsClasses.h"
+#include "lgi/common/App.h"
 
-#define USE_BSD_SOCKETS			1
 #define DEBUG_CONNECT			0
 #define ETIMEOUT				400
 #define PROTO_UDP				0x100
 #define PROTO_BROADCAST			0x200
 #define IsNewLine(ch)			((ch) == '\r' || (ch) == '\n')
 
-#define SOCKET_LOGGING			0
+#define SOCKET_LOGGING			1
 #if SOCKET_LOGGING
 	#define CONSOLE_LOGGING		0
-	#define SOCKET_LOG_FILE		"${LSP_APP_ROOT}/socket-${handle}.log" // any variable in here needs to be supported by LSocket::GetValue
+	#define SOCKET_LOG_FILE		"${app.PathAppInstall}/socket-${handle}.log" // any variable in here needs to be supported by LSocket::GetValue
 	#define _FUNC				__func__, __LINE__
 	#ifdef SOCKET_LOG_FILE
 		// Print to preOpenLog until the socket has a handle (for the file name)
@@ -1548,13 +1548,13 @@ int LSocket::WriteUdp(void *Buffer, int Size, int Flags, uint32_t Ip, uint16_t P
 	return (int)b;
 }
 
-bool LSocket::GetValue(const char *Var, LVariant &Value)
+bool LSocket::GetVariant(const char *Name, LVariant &Value, const char *Array)
 {
-	if (!Stricmp(Var, "LSP_APP_ROOT"))
+	if (!Stricmp(Name, "App"))
 	{
-		Value = LGetSystemPath(LSP_APP_ROOT);
+		Value = (LDom*)LApp::ObjInstance();
 	}
-	else if (!Stricmp(Var, "handle"))
+	else if (!Stricmp(Name, "handle"))
 	{
 		Value = LString::Fmt(LPrintSock, Handle());
 	}

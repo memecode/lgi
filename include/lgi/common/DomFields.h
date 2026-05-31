@@ -106,3 +106,28 @@ _(AppPalette, "Palette")		// (LPalette*)(void*)
 _(AppBackground, "Background")	// (uint32_t) rgba32
 _(AppAngle, "Angle")			// (int32_t) degrees
 _(AppBounds, "Bounds")			// (LRect*)(void*)
+
+// LApp
+_(PathRoot,				"PathRoot")
+_(PathOs,				"PathOs")
+_(PathOsLib,			"PathOsLib")
+_(PathTemp,				"PathTemp")
+_(PathMountPoint,		"PathMountPoint")
+_(PathDesktop,			"PathDesktop")
+_(PathHome,				"PathHome")
+_(PathExe,				"PathExe")
+_(PathTrash,			"PathTrash")
+_(PathAppInstall,		"PathAppInstall")
+_(PathAppRoot,			"PathAppRoot")
+
+_(PathCommonAppData,	"PathCommonAppData")
+_(PathUserAppData,		"PathUserAppData")
+_(PathLocalAppData,		"PathLocalAppData")
+
+_(PathUserApps,			"PathUserApps")
+_(PathUserDocuments,	"PathUserDocuments")
+_(PathUserMusic,		"PathUserMusic")
+_(PathUserVideo,		"PathUserVideo")
+_(PathUserDownloads,	"PathUserDownloads")
+_(PathUserLinks,		"PathUserLinks")
+_(PathUserPictures,		"PathUserPictures")

@@ -7,12 +7,11 @@
 class LgiClass OsApplication
 {
 protected:
-	HCURSOR hNormalCursor;
+	HCURSOR hNormalCursor = nullptr;
 
 public:
 	OsApplication()
 	{
-		hNormalCursor = 0;
 	}
 };
 

@@ -75,24 +75,25 @@ struct LAppArguments
 class LAppPrivate;
 
 #if LGI_COCOA && defined __OBJC__
-#include "LCocoaView.h"
 
-@interface LNsApplication : NSApplication
-{
-}
+	#include "LCocoaView.h"
 
-@property LAppPrivate *d;
+	@interface LNsApplication : NSApplication
+	{
+	}
 
-- (id)init;
-- (void)setPriv:(nonnull LAppPrivate*)priv;
-- (void)terminate:(nullable id)sender;
-- (void)dealloc;
-- (void)assert:(nonnull LCocoaAssert*)ca;
-- (void)onUrl:(NSAppleEventDescriptor *)event withReplyEvent:(NSAppleEventDescriptor *)reply;
+	@property LAppPrivate *d;
 
-@end
+	- (id)init;
+	- (void)setPriv:(nonnull LAppPrivate*)priv;
+	- (void)terminate:(nullable id)sender;
+	- (void)dealloc;
+	- (void)assert:(nonnull LCocoaAssert*)ca;
+	- (void)onUrl:(NSAppleEventDescriptor *)event withReplyEvent:(NSAppleEventDescriptor *)reply;
 
-ObjCWrapper(LNsApplication, OsApp)
+	@end
+
+	ObjCWrapper(LNsApplication, OsApp)
 
 #endif
 
@@ -102,7 +103,9 @@ ObjCWrapper(LNsApplication, OsApp)
 /// operating system. And once your initialization is complete the 'Run' method
 /// is called to enter the main application loop that processes messages for the
 /// life time of the application.
-class LgiClass LApp : virtual public LAppI,
+class LgiClass LApp :
+	virtual public LAppI,
+	virtual public LDom,
 	public LBase,
 	public OsApplication
 {
@@ -114,7 +117,7 @@ public:
 
 protected:
 	// private member vars
-	class LAppPrivate *d = NULL;
+	class LAppPrivate *d = nullptr;
 	
 	#if defined LGI_SDL
 	
@@ -194,14 +197,14 @@ public:
 		LFont *GetFont(bool bold);
 	#else		
 		/// The system font
-		LFont *SystemNormal = NULL;
+		LFont *SystemNormal = nullptr;
 		
 		/// The system font in bold
-		LFont *SystemBold = NULL;
+		LFont *SystemBold = nullptr;
 	#endif
 	
 	/// Pointer to the applications main window
-	LWindow *AppWnd = NULL;
+	LWindow *AppWnd = nullptr;
 
 	/// Returns true if the LApp object initialized correctly
 	bool IsOk() const override;
@@ -225,20 +228,24 @@ public:
 		OsAppArguments &AppArgs,
 		/// The application's name.
 		const char *AppName,
-		/// Optional args
+		/// Optional arguments
 		LAppArguments *ObjArgs = nullptr
 	);
+
+	LApp(const LApp &app) = delete;
 
 	/// Destroys the object
 	virtual ~LApp();
 
+	const char *GetClass() override { return "LApp"; }
+
 	/// Resets the arguments
 	void SetAppArgs(OsAppArguments &AppArgs) override;
 	
-	/// Returns the arguemnts
+	/// Returns the arguments
 	OsAppArguments *GetAppArgs() override;
 
-	/// Returns the n'th argument.
+	/// Returns an argument by index.
 	LString GetArgumentAt(size_t n) override;
 	
 	/// Enters the message loop.
@@ -332,6 +339,9 @@ public:
 
 	/// Gets the font cache
 	class LFontCache *GetFontCache() override;
+
+	// Dom
+	bool GetVariant(const char* Name, LVariant& Value, const char* Array = nullptr) override;
 
 	// OS Specific
 	#if defined(LGI_SDL)

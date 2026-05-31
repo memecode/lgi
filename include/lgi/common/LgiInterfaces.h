@@ -280,7 +280,7 @@ public:
 	}
 };
 
-class LAppI
+class LAppI : public LDomI
 {
 public:
 	/// The idle function should return false to wait for more

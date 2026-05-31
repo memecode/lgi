@@ -109,6 +109,7 @@ LgiFunc void MDStringToDigest
 /// Implementation of a network socket
 class LgiClass LSocket :
 	public LSocketI,
+	virtual public LDom,
 	public LStream
 {
 protected:
@@ -300,7 +301,7 @@ public:
 		return s;
 	}
 
-	bool GetValue(const char* Var, LVariant& Value) override;
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = nullptr) override;
 
 	// Statics
 
