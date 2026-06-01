@@ -602,7 +602,11 @@ void LgiTrace(const char *Msg, ...)
 			auto Output = Trace.GetStream();
 			if (Output && Trace.Open())
 			{
-				Output->Write(Buffer, Ch);
+				Output->Write(Buffer,
+					// vsnprintf returns the total amount of space it needs, which can be LONGER
+					// than the size of 'Buffer'. So truncate that here, so that the trace stream
+					// doesn't crash!
+					MIN(sizeof(Buffer)-1, Ch));
 				Trace.Close();
 			}
 		}

@@ -1574,11 +1574,11 @@ bool LHaveNetConnection()
 
 	// Check for dial up connection
 	#if defined WIN32
-	typedef DWORD (__stdcall *RasEnumConnections_Proc)(LPRASCONN lprasconn, LPDWORD lpcb, LPDWORD lpcConnections); 
-	typedef DWORD (__stdcall *RasGetConnectStatus_Proc)(HRASCONN hrasconn, LPRASCONNSTATUS lprasconnstatus);
+	typedef DWORD (__stdcall *pRasEnumConnections)(LPRASCONN lprasconn, LPDWORD lpcb, LPDWORD lpcConnections); 
+	typedef DWORD (__stdcall *pRasGetConnectStatus)(HRASCONN hrasconn, LPRASCONNSTATUS lprasconnstatus);
 
-	HMODULE hRas = (HMODULE) LoadLibraryA("rasapi32.dll");
-	if (hRas)
+	LLibrary Ras("rasapi32.dll");
+	if (Ras.IsLoaded())
 	{
 		RASCONN Con[10];
 		DWORD Connections = 0;
@@ -1587,55 +1587,30 @@ bool LHaveNetConnection()
 		ZeroObj(Con);
 		Con[0].dwSize = sizeof(Con[0]);
 
-		RasEnumConnections_Proc pRasEnumConnections = (RasEnumConnections_Proc) GetProcAddress(hRas, "RasEnumConnectionsA"); 
-		RasGetConnectStatus_Proc pRasGetConnectStatus = (RasGetConnectStatus_Proc) GetProcAddress(hRas, "RasGetConnectStatusA"); 
+		auto RasEnumConnections  = (pRasEnumConnections)  Ras.GetAddress("RasEnumConnectionsA"); 
+		auto RasGetConnectStatus = (pRasGetConnectStatus) Ras.GetAddress("RasGetConnectStatusA"); 
 
-		if (pRasEnumConnections &&
-			pRasGetConnectStatus)
+		if (RasEnumConnections &&
+			RasGetConnectStatus)
 		{
-			pRasEnumConnections(Con, &Bytes, &Connections);
+			RasEnumConnections(Con, &Bytes, &Connections);
 
-			for (unsigned i=0; i<Connections; i++)
+			for (DWORD i=0; i<Connections; i++)
 			{
 				RASCONNSTATUS Stat;
-				char *Err = "";
-
 				ZeroObj(Stat);
 				Stat.dwSize = sizeof(Stat);
 
 				DWORD Error = 0;				
-				if (!(Error=pRasGetConnectStatus(Con[i].hrasconn, &Stat)))
+				if (!(Error = RasGetConnectStatus(Con[i].hrasconn, &Stat)))
 				{
 					if (Stat.rasconnstate == RASCS_Connected)
 					{
 						Status = true;
 					}
 				}
-
-				/*
-				else
-				{
-					switch (Error)
-					{
-						case ERROR_NOT_ENOUGH_MEMORY:
-						{
-							Err = "Not enuf mem.";
-							break;
-						}
-						case ERROR_INVALID_HANDLE:
-						{
-							Err = "Invalid Handle.";
-							break;
-						}
-					}
-				}
-
-				int n=0;
-				*/
 			}
 		}
-
-		FreeLibrary(hRas);
 	}
 	#endif
 

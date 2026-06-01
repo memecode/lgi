@@ -576,8 +576,8 @@ T *Strnistr(const T *Data, const T *Value, ptrdiff_t DataLen)
 }
 
 /// Converts a string to int64 (base 10)
-template<typename T>
-int64 Atoi(const T *s, int Base = 10, int64 DefaultValue = -1)
+template<typename CHAR, typename RESULT = int64>
+RESULT Atoi(const CHAR *s, int Base = 10, RESULT DefaultValue = -1)
 {
 	if (!s)
 		return DefaultValue;
@@ -591,8 +591,8 @@ int64 Atoi(const T *s, int Base = 10, int64 DefaultValue = -1)
 	else if (*s == '+')
 		s++;
 
-	int64 v = 0;
-	const T *Start = s;
+	RESULT v = 0;
+	const CHAR *Start = s;
 	if (Base <= 10)
 	{
 		while (*s >= '0' && *s <= '9')

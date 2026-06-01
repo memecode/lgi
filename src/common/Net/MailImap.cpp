@@ -2187,9 +2187,9 @@ int MailIMap::Fetch(bool ByUid,
 	}
 	
 	int Status = 0;
-	int Cmd = d->NextCmd++;
+	auto cmdRef = LString::Fmt("A%4.4i", d->NextCmd++);
 	LStringPipe p(256);
-	p.Print("A%4.4i %sFETCH ", Cmd, ByUid ? "UID " : "");
+	p.Print("%s %sFETCH ", cmdRef.Get(), ByUid ? "UID " : "");
 	p.Write(Seq, strlen(Seq));
 	p.Print(" (%s)\r\n", RequestParts);
 	LAutoString WrBuf(p.NewStr());
@@ -2206,20 +2206,17 @@ int MailIMap::Fetch(bool ByUid,
 		Buf.Length(1024 + (SizeHint>0?(uint32)SizeHint:0));
 		ssize_t Used = 0;
 		ssize_t MsgSize;
-		// int64 Start = LCurrentTime();
 		int64 Bytes = 0;
 		bool Done = false;
-		
-		// uint64 TotalTs = 0;
 
-		bool Blocking = Socket->IsBlocking();
+		auto Blocking = Socket->IsBlocking();
 		Socket->IsBlocking(false);
 
 		#if DEBUG_FETCH
 		LgiTrace("%s:%i - Fetch: Starting loop\n", _FL);
 		#endif
 
-		uint64 LastActivity = LCurrentTime();
+		auto LastActivity = LCurrentTime();
 		bool Debug = false;
 		while (!Done)
 		{
@@ -2341,7 +2338,7 @@ int MailIMap::Fetch(bool ByUid,
 					}
 					
 					// Call the callback function
-					if (Callback(this, atoi(Param), Parts, UserData))
+					if (Callback(this, Atoi<char,int>(Param), Parts, UserData))
 					{
 						#if DEBUG_FETCH
 						LgiTrace("%s:%i - Fetch: Callback OK\n", _FL);
@@ -2379,14 +2376,13 @@ int MailIMap::Fetch(bool ByUid,
 					auto t = LString(Line).SplitDelimit(" \r\n");
 					if (t.Length() >= 2)
 					{
-						char *r = t[0];
-						if (*r == 'A')
+						if (t[0] == cmdRef)
 						{
-							bool IsOk = !_stricmp(t[1], "Ok");
-							int Response = atoi(r + 1);
+							bool IsOk = t[1].Equals("Ok");
 							Log(Line, IsOk ? LSocketI::SocketMsgReceive : LSocketI::SocketMsgError);
-							if (Response == Cmd)
+							if (IsOk)
 							{
+								Status = true;
 								Done = true;
 								break;
 							}
@@ -2418,11 +2414,13 @@ int MailIMap::Fetch(bool ByUid,
 
 	Unlock();
 
+	/* No records is not really an error...
 	if (!Status && !Error->GetCode())
 	{
 		Error->Set(ENODATA);
 		Error->AddNote(_FL, "No records received.");
 	}
+	*/
 	return Status;
 }
 
