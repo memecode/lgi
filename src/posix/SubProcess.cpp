@@ -31,12 +31,12 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/SubProcess.h"
 
-#define DEBUG_SUBPROCESS		0
-#define DEBUG_ARGS				0
+#define DEBUG_SUBPROCESS	0
+#define DEBUG_ARGS			0
 
-#define NULL_PIPE -1
-#define ClosePipe close
-#define INVALID_PID -1
+#define NULL_PIPE			-1
+#define INVALID_PID			-1
+#define ClosePipe			close
 
 #include <pwd.h>
 #if defined(LINUX) // !mac and !haiku
@@ -49,6 +49,14 @@
 #ifdef HAIKU
 #include <Roster.h>
 #endif
+
+#define DEBUG_LOG			0
+#if DEBUG_LOG
+	#define LOG(...)		if (LSubProcess::debugLog) LSubProcess::debugLog->Print(__VA_ARGS__)
+#else
+	#define LOG(...)
+#endif
+LStream *LSubProcess::debugLog = nullptr;
 
 LSubProcess::Pipe::Pipe()
 {
@@ -606,6 +614,9 @@ int32 LSubProcess::Communicate(LStreamI *Out, LStreamI *In, LCancel *Cancel)
 	LAssert(In == NULL); // Impl me.
 	#define NOT_CANCELLED (!Cancel || !Cancel->IsCancelled())
 
+	LOG("%s: start loop...\n", __func__);
+	int noData = 0;
+	uint64_t lastPeekLog = 0;
 	while (IsRunning() && NOT_CANCELLED)
 	{
 		if (Cancel)
@@ -614,15 +625,25 @@ int32 LSubProcess::Communicate(LStreamI *Out, LStreamI *In, LCancel *Cancel)
 			// We should peek the input stream and check for input.
 			// Otherwise the Read could hang and the Cancel object wouldn't
 			// be checked for some time.
-			if (!Peek())
+			auto bytes = Peek();
+			auto now = LCurrentTime();
+			if (now - lastPeekLog >= 1000)
+			{
+				lastPeekLog = now;
+				LOG("%s: peek=%i\n", __func__, (int)bytes);
+			}
+			if (!bytes)
 			{
 				// Try not to use 100% of a CPU core.
-				LSleep(1);
+				noData++;
+				LSleep(10);
 				continue;
 			}
 		}
 		
+		LOG("%s: reading...\n", __func__);
 		r = Read(Buf, sizeof(Buf));
+		LOG("%s: read=%i buf='%.*s'\n", __func__, (int)r, (int)r, Buf);
 		if (r > 0 && Out)
 			Out->Write(Buf, r);
 	}
@@ -630,12 +651,14 @@ int32 LSubProcess::Communicate(LStreamI *Out, LStreamI *In, LCancel *Cancel)
 	while (NOT_CANCELLED)
 	{
 		r = Read(Buf, sizeof(Buf));
+		LOG("%s: post loop read=%i\n", __func__, (int)r);
 		if (r > 0 && Out)
 			Out->Write(Buf, r);
 		else
 			break;
 	}
 
+	LOG("%s: loop done.\n", __func__);
 	return GetExitValue();
 }
 

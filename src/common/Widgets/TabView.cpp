@@ -413,10 +413,10 @@ void LTabView::Value(int64 i)
 				p->AttachChildren();
 				p->Visible(true);
 				
+				/*
 				for (auto c: p->IterateViews())
-				{
 					printf("TabView::Value(%i) c=%s pos=%s\n", (int)i, c->GetClass(), c->GetPos().GetStr());
-				}
+				*/
 			}
 
 			Invalidate();

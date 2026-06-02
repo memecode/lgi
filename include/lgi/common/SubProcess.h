@@ -49,12 +49,13 @@ class LgiClass LSubProcess : public LStream
 {
 public:
 	#if defined(WIN32)
-	typedef HANDLE PipeHandle;
-	typedef DWORD ProcessId;
+		typedef HANDLE PipeHandle;
+		typedef DWORD ProcessId;
 	#else
-	typedef int PipeHandle;
-	typedef pid_t ProcessId;
+		typedef int PipeHandle;
+		typedef pid_t ProcessId;
 	#endif
+	static LStream *debugLog;
 
 	union Pipe
 	{
