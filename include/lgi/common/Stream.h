@@ -262,7 +262,7 @@ public:
 
 
 /// Tee stream that writes to multiple child streams.
-class LgiClass LStreamTee : public LStreamI
+class LgiClass LStreamTee : public LStream
 {
 protected:
 	LArray<LStreamI*> streams;
@@ -274,7 +274,7 @@ protected:
 	}
 
 public:
-	LStreamTee(LStreamI *a, LStreamI *b = NULL)
+	LStreamTee(LStreamI *a, LStreamI *b = nullptr)
 	{
 		if (a)
 			streams.Add(a);
@@ -322,7 +322,7 @@ public:
 	int64 GetPos() override { return NotImpl(); }	
 	int64 SetPos(int64 Pos) override { return NotImpl(); }
 	ssize_t Read(void *b, ssize_t l, int f = 0) override { return NotImpl(); }
-	LStreamI *Clone() override { NotImpl(); return NULL; }
+	LStreamI *Clone() override { NotImpl(); return nullptr; }
 };
 
 #endif

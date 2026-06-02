@@ -262,14 +262,15 @@ public:
 		if (!sock ||
 			!sock->IsReadable(10))
 		{
-			LOG("Server: client not readable...\n");
+			// LOG("Connection: not readable...\n");
 			return false;
 		}
 
-		LOG("Server: client readable...\n");
+		// LOG("Connection: readable...\n");
 
 		// Read some data:
 		auto rd = sock->Read(readBuf.AddressOf() + used, readBuf.Length() - used);
+		// LOG("Connection: read=%i\n", (int)rd);
 		if (rd <= 0)
 		{
 			// printf("read disconnected: %i\n", (int)rd);
@@ -481,6 +482,13 @@ struct LCommsBusPriv :
 	constexpr static int CONNECT_ATTEMPT	= SECONDS(1);
 	constexpr static int PEER_TIMEOUT		= SECONDS(5);
 
+	constexpr static const char *sHostname	= "hostname";
+	constexpr static const char *sIp		= "ip";
+	constexpr static const char *sPeers		= "peers";
+	constexpr static const char *sDirect	= "direct";
+	constexpr static const char *sEndpoints	= "endpoints";
+	constexpr static const char *sConnection = "connection";
+
 	struct ServerPeers
 	{
 		LCommsBusPriv *d = nullptr;
@@ -502,12 +510,6 @@ struct LCommsBusPriv :
 		// Peer info
 		struct LPeer : public Connection
 		{
-			constexpr static const char *sHostname = "hostname";
-			constexpr static const char *sIp = "ip";
-			constexpr static const char *sPeers = "peers";
-			constexpr static const char *sDirect = "direct";
-			constexpr static const char *sEndpoints = "endpoints";
-
 			// replicated state
 			LString hostName;
 			IpList ip4;
@@ -662,7 +664,7 @@ struct LCommsBusPriv :
 					LJson j(blk->data);
 
 					// find matching host and replicate state:
-					if (auto host = j.Get(LPeer::sHostname))
+					if (auto host = j.Get(LCommsBusPriv::sHostname))
 					{
 						if (auto p = peers.Find(host))
 						{
@@ -801,22 +803,13 @@ struct LCommsBusPriv :
 			return a;
 		}
 
-		LArray<LJson> EndpointsToJson()
-		{
-			LMutex::Auto lck(d, _FL);
-			LArray<LJson> a;
-			for (auto ep: d->endpoints)
-				a.Add(ep.ToJson());
-			return a;
-		}
-
 		// This is sent via UDP broadcast to peers during discovery
 		LString CreatePingData()
 		{
 			LJson j;
 
-			j.Set(LPeer::sIp, GetIps(interfaces));
-			j.Set(LPeer::sHostname, LHostName());
+			j.Set(LCommsBusPriv::sIp, GetIps(interfaces));
+			j.Set(LCommsBusPriv::sHostname, LHostName());
 
 			return j.GetJson();
 		}
@@ -826,10 +819,10 @@ struct LCommsBusPriv :
 		{
 			LJson j;
 
-			j.Set(LPeer::sIp, GetIps(interfaces));
-			j.Set(LPeer::sHostname, LHostName());
-			j.Set(LPeer::sPeers, PeersToJson());
-			j.Set(LPeer::sEndpoints, EndpointsToJson());
+			j.Set(LCommsBusPriv::sIp, GetIps(interfaces));
+			j.Set(LCommsBusPriv::sHostname, LHostName());
+			j.Set(LCommsBusPriv::sPeers, PeersToJson());
+			j.Set(LCommsBusPriv::sEndpoints, d->EndpointsToJson());
 
 			return j.GetJson();
 		}
@@ -892,7 +885,7 @@ struct LCommsBusPriv :
 		{
 			// Inter-server discovery...
 
-			LOG("Server: start timeslice...\n");
+			// LOG("Server: start timeslice...\n");
 
 			// For inter-server connection discovery, get a list of interfaces to broadcast to
 			LArray<LSocket::Interface> curIntf;
@@ -908,7 +901,7 @@ struct LCommsBusPriv :
 			auto diff = GetIps(curIntf) != GetIps(interfaces);
 			bool debug = false;
 
-			LOG("Server: timeslice diff=%i\n", diff);
+			//LOG("Server: timeslice diff=%i\n", diff);
 			if (diff)
 			{
 				interfaces = curIntf;
@@ -918,7 +911,7 @@ struct LCommsBusPriv :
 			// Check for incoming broadcasts:
 			if (listener)
 			{
-				LOG("Server: listener timeslice..\n");
+				// LOG("Server: listener timeslice..\n");
 
 				// Listen for packets...
 				#if USE_TRANSPORT
@@ -934,10 +927,10 @@ struct LCommsBusPriv :
 					}
 				#endif
 
-				LOG("Server: listener timeslice done.\n");
+				// LOG("Server: listener timeslice done.\n");
 			}
 
-			LOG("Server: timeslice - delete peers?\n");
+			// LOG("Server: timeslice - delete peers?\n");
 			// Check for peers that we haven't seen in a while
 			auto now = LCurrentTime();
 			LString::Array deletedPeers;
@@ -955,14 +948,14 @@ struct LCommsBusPriv :
 				peers.Delete(host);
 
 			// Check peers for connections and data
-			LOG("Server: timeslice - check peers for data\n");
+			// LOG("Server: timeslice - check peers for data\n");
 			for (auto it: peers)
 			{
 				LPeer *p = it.value;
 				if (p->IsConnected())
 				{
 					// Check for data on the connection:
-					LOG("Server: timeslice - peer read..\n");
+					// LOG("Server: timeslice - peer read..\n");
 					p->Read
 					(
 						// On message:
@@ -1001,7 +994,7 @@ struct LCommsBusPriv :
 				}
 			}
 
-			LOG("Server: timeslice - broadcast udp..\n");
+			// LOG("Server: timeslice - broadcast udp..\n");
 			now = LCurrentTime();
 			if (now - broadcastTime >= 10000)
 			{
@@ -1012,7 +1005,7 @@ struct LCommsBusPriv :
 
 			if (debug)
 			{
-				LOG("Server: timeslice - debug state..\n");
+				// LOG("Server: timeslice - debug state..\n");
 				if (d->commsState)
 					d->commsState->RunCallback([view=d->commsState, state=ServerStateData()]()
 					{
@@ -1026,7 +1019,8 @@ struct LCommsBusPriv :
 						ServerStateData().Get());
 				*/
 			}
-			LOG("Server: timeslice - end..\n");
+			
+			// LOG("Server: timeslice - end..\n");
 		}
 	};
 
@@ -1067,7 +1061,16 @@ struct LCommsBusPriv :
 		Cancel();
 		WaitForExit();
 	}
-	
+
+	LArray<LJson> EndpointsToJson()
+	{
+		LMutex::Auto lck(this, _FL);
+		LArray<LJson> a;
+		for (auto ep: endpoints)
+			a.Add(ep.ToJson());
+		return a;
+	}
+
 	void NotifyState(LCommsBus::TState state)
 	{
 		LMutex::Auto lck(this, _FL);
@@ -1327,17 +1330,17 @@ struct LCommsBusPriv :
 		bool hasConnections = false;
 		NotifyState(LCommsBus::TDisconnectedServer);
 
-		LOG("Server: starting loop...\n");
+		// LOG("Server: starting loop...\n");
 
 		while (!IsCancelled())
 		{
-			LOG("Server: peers timeslice...\n");
+			// LOG("Server: peers timeslice...\n");
 			peers->Timeslice();
-			LOG("Server: peers timeslice done.\n");
+			// LOG("Server: peers timeslice done.\n");
 
 			if (listen.IsReadable(10))
 			{
-				LOG("Server: is readable...\n");
+				// LOG("Server: is readable...\n");
 
 				// Setup a new incoming TCP connection. Connections
 				// start off as a client, but may in fact be a server
@@ -1407,12 +1410,12 @@ struct LCommsBusPriv :
 					}
 				}
 
-				LOG("Server: post accept...\n");
+				// LOG("Server: post accept...\n");
 			}
 			else
 			{
 				// Check connections for incoming data:
-				LOG("Server: clients=%i\n", (int)clients.Length());
+				// LOG("Server: clients=%i\n", (int)clients.Length());
 				for (auto c: clients)
 				{
 					if (!c->Valid())
@@ -1535,8 +1538,8 @@ struct LCommsBusPriv :
 				NotifyState(hasConnections ? LCommsBus::TConnectedServer : LCommsBus::TDisconnectedServer);
 			}
 
-			LOG("Server: post loop...\n");
-			LSleep(500);
+			// LOG("Server: post loop...\n");
+			// LSleep(500);
 		}
 		
 		LOG("Server: clients delete...\n");
@@ -1578,6 +1581,24 @@ struct LCommsBusPriv :
 		}
 	}
 
+	LString ClientStateData(Connection &conn)
+	{
+		LJson j;
+
+		j.Set(LCommsBusPriv::sHostname, LHostName());
+		j.Set(LCommsBusPriv::sEndpoints, EndpointsToJson());
+		if (conn.GetSock())
+		{
+			j.Set(LCommsBusPriv::sConnection, conn.GetSock()->IsOpen());
+			
+			char remoteIp[32] = {};
+			conn.GetSock()->GetRemoteIp(remoteIp);
+			j.Set("remoteIp", remoteIp);
+		}
+
+		return j.GetJson();
+	}
+
 	int Client()
 	{
 		LAutoPtr<LSocket> initSocket(new LSocket);
@@ -1604,33 +1625,30 @@ struct LCommsBusPriv :
 					{
 						LOG("%s write failed.\n", Describe().Get());
 					}
-					else
+					else if (Lock(_FL))
 					{
 						// Also tell the server about our local endpoints
-						if (Lock(_FL))
+						LOG("clientConnect: has %i endpoints\n", (int)endpoints.Length());
+						for (auto &ep: endpoints)
 						{
-							LOG("clientConnect: has %i endpoints\n", (int)endpoints.Length());
-							for (auto &ep: endpoints)
+							if (ep.local)
 							{
-								if (ep.local)
+								LOG("clientConnect: send local ep %s\n", ep.addr.Get());
+								if (auto blk = ep.MakeMsg(GetUid()))
 								{
-									LOG("clientConnect: send local ep %s\n", ep.addr.Get());
-									if (auto blk = ep.MakeMsg(GetUid()))
-									{
-										auto sent = c.Write(blk);
-										if (!sent)
-											LOG("%s:%i - %s error sending endpoint %s, %i bytes\n'%s'\n",
-												_FL, Describe().Get(), ep.addr.Get(), blk->GetSize(), blk->GetBody().Get());
-									}
+									auto sent = c.Write(blk);
+									if (!sent)
+										LOG("%s:%i - %s error sending endpoint %s, %i bytes\n'%s'\n",
+											_FL, Describe().Get(), ep.addr.Get(), blk->GetSize(), blk->GetBody().Get());
 								}
 							}
-							Unlock();
 						}
+						Unlock();
 					}
 				}
 				else
 				{
-					Sleep(1000);
+					Sleep(2000);
 					if (connectErrs++ > 5)
 						// If there enough errors connecting to the server, maybe this object should be the server?
 						// Back out of the client code and restart as the server.
@@ -1729,6 +1747,13 @@ struct LCommsBusPriv :
 			{
 				hasConnection = c.connected;
 				NotifyState(hasConnection ? LCommsBus::TConnectedClient : LCommsBus::TDisconnectedClient);
+
+				if (commsState)
+					commsState->RunCallback([view=commsState, state=ClientStateData(c)]()
+					{
+						view->Name(state);
+					},
+					_FL);
 			}
 		}		
 

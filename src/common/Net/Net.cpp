@@ -886,7 +886,10 @@ int LSocket::Open(const char *HostAddr, int Port)
 						else
 						#endif
 
-						LOG_INDENT("%s:%i," LPrintSock " =%i, err=%i\n", _FUNC, d->Socket, err, e);
+						LOG_INDENT("%s:%i," LPrintSock " =%i, err=%i, block=%i\n", _FUNC, d->Socket, err, e, Block);
+						if (e == ECONNREFUSED)
+							// not a recoverable error code
+							break;
 					}
 					else
 					{
@@ -907,13 +910,14 @@ int LSocket::Open(const char *HostAddr, int Port)
 					break;
 				}
 
-				/*
 				if (!Block)
 				{
+					LSleep(10); // don't hammer CPU core...
+					/*
 					LOG_INDENT("%s:%i," LPrintSock " non-blocking, so exit connect loop..\n", _FUNC, d->Socket);
 					break;
+					*/
 				}
-				*/
 			}
 
 			// Restore blocking option
@@ -1020,7 +1024,7 @@ bool LSocket::Listen(int Port)
 	a->sin_addr.OsAddr = INADDR_ANY;
 
 	auto result = bind(d->Socket, &Addr, sizeof(Addr));
-	LOG_INDENT("%s:%i," LPrintSock " - bind=%i\n", _FUNC, d->Socket, result);
+	LOG_INDENT("%s:%i," LPrintSock " - bind=%i, errno=%i\n", _FUNC, d->Socket, result, errno);
 	if (result < 0)
 	{
 		Error();
