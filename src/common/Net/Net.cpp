@@ -71,11 +71,14 @@
 	#define CONSOLE_LOGGING		0
 	#define SOCKET_LOG_FILE		"${app.PathAppInstall}/socket-${handle}.log" // any variable in here needs to be supported by LSocket::GetValue
 	#define _FUNC				__func__, __LINE__
+	static LStream *systemSocketLog	= nullptr;
 	#ifdef SOCKET_LOG_FILE
 		// Print to preOpenLog until the socket has a handle (for the file name)
-		#define LOG(...)		if (d->socketLog) d->socketLog->Print(__VA_ARGS__);        \
+		#define LOG(...)		if (systemSocketLog) systemSocketLog->Print(__VA_ARGS__);			\
+								else if (d->socketLog) d->socketLog->Print(__VA_ARGS__);			\
 								else d->preOpenLog.Print(__VA_ARGS__)
-		#define LOG_INDENT(...)	if (d->socketLog) d->socketLog->Print("    " __VA_ARGS__); \
+		#define LOG_INDENT(...)	if (systemSocketLog) systemSocketLog->Print("    " __VA_ARGS__);	\
+								else if (d->socketLog) d->socketLog->Print("    " __VA_ARGS__); 	\
 								else d->preOpenLog.Print("    " __VA_ARGS__)
 	#elif CONSOLE_LOGGING
 		#define LOG(...)		printf(__VA_ARGS__)
@@ -114,6 +117,13 @@
 #ifdef WIN32
 static bool SocketsOpen = false;
 #endif
+
+void LSetNetworkLog(LStream *log)
+{
+	#if SOCKET_LOGGING
+	systemSocketLog = log;
+	#endif
+}
 
 static int getError()
 {
@@ -399,7 +409,7 @@ public:
 		// call in a much smaller timeout and a loop so that we can respond to Cancel being set
 		// in a timely manner.
 		auto Now = LCurrentTime();
-		auto End = TimeoutMs < 0 ? 0 : Now + TimeoutMs;
+		auto End = TimeoutMs <= 0 ? 0 : Now + TimeoutMs;
 
 		// Non-blocking, no timeout: check once, don't loop
 		// Non-blocking, timeout: check until timeout expires
@@ -897,11 +907,13 @@ int LSocket::Open(const char *HostAddr, int Port)
 					break;
 				}
 
+				/*
 				if (!Block)
 				{
 					LOG_INDENT("%s:%i," LPrintSock " non-blocking, so exit connect loop..\n", _FUNC, d->Socket);
 					break;
 				}
+				*/
 			}
 
 			// Restore blocking option

@@ -260,8 +260,13 @@ public:
 	{
 		// Check for data
 		if (!sock ||
-			!sock->IsReadable())
+			!sock->IsReadable(10))
+		{
+			LOG("Server: client not readable...\n");
 			return false;
+		}
+
+		LOG("Server: client readable...\n");
 
 		// Read some data:
 		auto rd = sock->Read(readBuf.AddressOf() + used, readBuf.Length() - used);
@@ -887,6 +892,8 @@ struct LCommsBusPriv :
 		{
 			// Inter-server discovery...
 
+			LOG("Server: start timeslice...\n");
+
 			// For inter-server connection discovery, get a list of interfaces to broadcast to
 			LArray<LSocket::Interface> curIntf;
 			LSocket::EnumInterfaces(curIntf);
@@ -897,10 +904,11 @@ struct LCommsBusPriv :
 			}
 			// sort so we can compare properly:
 			curIntf.Sort([](auto *a, auto *b) { return a->Ip4 - b->Ip4; });
-			
+
 			auto diff = GetIps(curIntf) != GetIps(interfaces);
 			bool debug = false;
 
+			LOG("Server: timeslice diff=%i\n", diff);
 			if (diff)
 			{
 				interfaces = curIntf;
@@ -910,6 +918,8 @@ struct LCommsBusPriv :
 			// Check for incoming broadcasts:
 			if (listener)
 			{
+				LOG("Server: listener timeslice..\n");
+
 				// Listen for packets...
 				#if USE_TRANSPORT
 					listener->TimeSlice();
@@ -923,8 +933,11 @@ struct LCommsBusPriv :
 							OnPeerUdp(ip, msg);
 					}
 				#endif
+
+				LOG("Server: listener timeslice done.\n");
 			}
 
+			LOG("Server: timeslice - delete peers?\n");
 			// Check for peers that we haven't seen in a while
 			auto now = LCurrentTime();
 			LString::Array deletedPeers;
@@ -942,12 +955,14 @@ struct LCommsBusPriv :
 				peers.Delete(host);
 
 			// Check peers for connections and data
+			LOG("Server: timeslice - check peers for data\n");
 			for (auto it: peers)
 			{
 				LPeer *p = it.value;
 				if (p->IsConnected())
 				{
 					// Check for data on the connection:
+					LOG("Server: timeslice - peer read..\n");
 					p->Read
 					(
 						// On message:
@@ -986,6 +1001,7 @@ struct LCommsBusPriv :
 				}
 			}
 
+			LOG("Server: timeslice - broadcast udp..\n");
 			now = LCurrentTime();
 			if (now - broadcastTime >= 10000)
 			{
@@ -996,6 +1012,7 @@ struct LCommsBusPriv :
 
 			if (debug)
 			{
+				LOG("Server: timeslice - debug state..\n");
 				if (d->commsState)
 					d->commsState->RunCallback([view=d->commsState, state=ServerStateData()]()
 					{
@@ -1009,6 +1026,7 @@ struct LCommsBusPriv :
 						ServerStateData().Get());
 				*/
 			}
+			LOG("Server: timeslice - end..\n");
 		}
 	};
 
@@ -1211,9 +1229,11 @@ struct LCommsBusPriv :
 						bool timedOut = info.firstSendTs && ((now - info.firstSendTs) >= SEND_TIMEOUT);
 						if (timedOut)
 						{
+							/*
 							LOG("Deleting expired msg: %s\n%s\n",
 								info.blk->FirstLine().Get(),
 								peers->ServerStateData().Get());
+							*/
 							writeQue.DeleteAt(i--, true);
 						}
 						else if (!info.firstSendTs || (now - info.recentSendTs) > RESEND_TIMEOUT)
@@ -1307,12 +1327,18 @@ struct LCommsBusPriv :
 		bool hasConnections = false;
 		NotifyState(LCommsBus::TDisconnectedServer);
 
+		LOG("Server: starting loop...\n");
+
 		while (!IsCancelled())
 		{
+			LOG("Server: peers timeslice...\n");
 			peers->Timeslice();
+			LOG("Server: peers timeslice done.\n");
 
-			if (listen.IsReadable())
+			if (listen.IsReadable(10))
 			{
+				LOG("Server: is readable...\n");
+
 				// Setup a new incoming TCP connection. Connections
 				// start off as a client, but may in fact be a server
 				// on a different host
@@ -1326,6 +1352,8 @@ struct LCommsBusPriv :
 					}
 					else if (!peers->IsLocalIp(remoteIp))
 					{
+						LOG("Server: New connection from %s...\n", LIpToStr(remoteIp).Get());
+
 						// server connection..
 						bool found = false;
 						for (auto it: peers->peers)
@@ -1378,10 +1406,13 @@ struct LCommsBusPriv :
 							conn->GetSock()->Handle());
 					}
 				}
+
+				LOG("Server: post accept...\n");
 			}
 			else
 			{
 				// Check connections for incoming data:
+				LOG("Server: clients=%i\n", (int)clients.Length());
 				for (auto c: clients)
 				{
 					if (!c->Valid())
@@ -1503,8 +1534,12 @@ struct LCommsBusPriv :
 				hasConnections = connected;
 				NotifyState(hasConnections ? LCommsBus::TConnectedServer : LCommsBus::TDisconnectedServer);
 			}
+
+			LOG("Server: post loop...\n");
+			LSleep(500);
 		}
 		
+		LOG("Server: clients delete...\n");
 		clients.DeleteObjects();
 
 		LOG("%s closing listen port: " LPrintfSock "\n", Describe().Get(), listen.Handle());

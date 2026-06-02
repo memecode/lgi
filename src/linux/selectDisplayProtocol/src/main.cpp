@@ -6,7 +6,7 @@
 
 //////////////////////////////////////////////////////////////////
 // Running action as root:
-// https://pardus.github.io/wiki/development/linux/polkit
+// https://pardus.github.io/wiki/linux/polkit/
 //
 // The file 'com.memecode.selectDisplay.policy' needs to be
 // installed to '/usr/share/polkit-1/actions/'

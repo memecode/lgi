@@ -70,6 +70,7 @@ LgiExtern LString LHostName();
 LgiExtern LString LIpToStr(uint32_t ip);
 LgiExtern uint32_t LIpToInt(LString str); // Convert IP as string to host order int
 LgiExtern uint32_t LHostnameToIp(const char *HostName); // Hostname lookup (DNS), returns IP in host order or 0 on error
+LgiExtern void LSetNetworkLog(LStream *log);
 
 class LgiClass LHostnameAsync
 {
