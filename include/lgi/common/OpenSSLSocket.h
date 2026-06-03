@@ -34,7 +34,7 @@ protected:
 	SSL *Ssl = NULL;
 	LString ErrMsg;
 	LStream *log = NULL;
-	bool DebugLogging = false;
+	bool DebugLogging = true;
 
 	// Local stuff
 	virtual void Log(const char *Str, ssize_t Bytes, SocketMsgType Type);

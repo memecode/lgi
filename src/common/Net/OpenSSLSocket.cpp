@@ -941,11 +941,11 @@ DebugTrace("%s:%i - BIO_get_ssl=%p\n", _FL, Ssl);
 							// Library->SSL_CTX_set_timeout()
 							Library->BIO_set_conn_hostname(Bio, HostAddr);
 							#if OPENSSL_VERSION_NUMBER < 0x10100000L
-							Library->BIO_set_conn_int_port(Bio, &Port);
+								Library->BIO_set_conn_int_port(Bio, &Port);
 							#else
-							LString sPort;
-							sPort.Printf("%i", Port);
-							Library->BIO_set_conn_port(Bio, sPort.Get());
+								LString sPort;
+								sPort.Printf("%i", Port);
+								Library->BIO_set_conn_port(Bio, sPort.Get());
 							#endif
 
 							// Do non-block connect
@@ -955,7 +955,7 @@ DebugTrace("%s:%i - BIO_get_ssl=%p\n", _FL, Ssl);
 							IsBlocking(false);
 							
 							r = Library->SSL_connect(Ssl);
-DebugTrace("%s:%i - initial SSL_connect=%i\n", _FL, r);
+DebugTrace("%s:%i - initial SSL_connect=%i, err=%i\n", _FL, r, Library->SSL_get_error(Ssl, r));
 							while (r != 1 && !d->Cancel->IsCancelled())
 							{
 								int err = Library->SSL_get_error(Ssl, r);
@@ -974,7 +974,9 @@ DebugTrace("%s:%i - SSL_get_error=%i\n", _FL, err);
 										LMutex::Auto lck(Library, _FL);
 									#endif
 									auto startTs = LCurrentTime();
+DebugTrace("%s:%i - calling SSL_connect...\n", _FL);
 									r = Library->SSL_connect(Ssl);
+DebugTrace("%s:%i - SSL_connect=%i\n", _FL, r);
 									auto elapsedTs = LCurrentTime() - startTs;
 									if (elapsedTs > 200)
 									{
