@@ -55,12 +55,38 @@ class LIniFile
 				}
 			}			
 		}
+		
+		if (rng.Start >= 0 && rng.Len == 0)
+		{
+			// Last section, still needs the size.
+			rng.Len = lines.Length() - rng.Start;
+		}
 
 		return rng;
 	}
+	
+	ssize_t FindLine(LString section, LString var)
+	{
+		auto rng = GetSection(section);
+		if (!rng)
+			return -1;
+
+		for (ssize_t i=rng.Start; i<=rng.End(); i++)
+		{
+			auto &ln = lines[i];
+			auto p = ln.SplitDelimit("=", 1);
+			if (p.Length() == 2 &&
+				p[0].Strip() == var)
+			{
+				return i;
+			}
+		}
+
+		return -1;
+	}
 
 public:
-	LIniFile(LSsh *Ssh, const char *Path = NULL)
+	LIniFile(LSsh *Ssh, const char *Path = nullptr)
 	{
 		ssh = Ssh;
 		if (Path)
@@ -94,14 +120,15 @@ public:
 		return true;
 	}
 
-	bool Write(const char *Path = NULL)
+	bool Write(const char *Path = nullptr)
 	{
 		if (Path)
 			filePath = Path;
 		if (!filePath)
 			return false;
 
-		auto content = LString("\n").Join(lines);
+		LString nl("\n");
+		auto content = nl.Join(lines) + nl;
 		if (ssh)
 		{
 			LMemStream wrapper(content.Get(), content.Length(), false);
@@ -120,28 +147,34 @@ public:
 
 	LString Get(LString section, LString var)
 	{
-		auto rng = GetSection(section);
-		if (!rng)
+		ssize_t line = FindLine(section, var);
+		if (line < 0)
 			return LString();
 
-		for (ssize_t i=rng.Start; i<=rng.End(); i++)
+		auto p = lines[line].SplitDelimit("=", 1);
+		if (p.Length() == 2)
 		{
-			auto &ln = lines[i];
-			auto p = ln.SplitDelimit("=", 1);
-			if (p.Length() == 2 &&
-				p[0].Strip() == var)
-			{
-				return p[1].Strip();
-			}
+			LAssert(p[0].Strip() == var);
+			return p[1].Strip();
 		}
 
 		return LString();
+	}
+	
+	bool Delete(LString section, LString var)
+	{
+		ssize_t line = FindLine(section, var);
+		if (line < 0)
+			return false;
+		
+		lines.DeleteAt(line, true);
+		return true;
 	}
 
 	bool Set(LString section, LString var, LString value)
 	{
 		auto rng = GetSection(section);
-		auto newVar = LString::Fmt("%s=%s", var.Get(), value.Get());
+		auto newVar = LString::Fmt("%s = %s", var.Get(), value.Get());
 
 		if (rng)
 		{

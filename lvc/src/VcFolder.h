@@ -426,6 +426,7 @@ public:
 	LString GetFilePart(const char *uri);
 	void FilterCurrentFiles();
 	void GetRemoteUrl(ParseParams::TCallback Callback);
+	void SetRemoteUrl(LString newUrl, ParseParams::TCallback Callback = nullptr);
 	void SelectCommit(LWindow *Parent, LString Commit, LString Path);
 	void Checkout(const char *Rev, bool isBranch);
 	void Delete(const char *Path, bool KeepLocal = true);

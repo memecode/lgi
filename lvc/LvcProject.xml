@@ -17,6 +17,7 @@
 		<Node Name="Lgi" Type="1" Platforms="15" Id="5">
 			<Node File="../src/common/Widgets/ControlTree.cpp" Type="2" Platforms="15" />
 			<Node File="../src/common/Net/Http.cpp" Type="2" Platforms="15" />
+			<Node File="../include/lgi/common/IniFile.h" Type="3" Platforms="15" />
 			<Node File="../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="15" />
 			<Node File="../src/common/Net/OpenSSLSocket.cpp" Type="2" Platforms="15" />
 			<Node File="../src/common/Text/RemoveAnsi.cpp" Type="2" Platforms="15" />
@@ -189,6 +190,7 @@ HAS_LIBSSH=1</Release>
 			<Environment />
 			<DebugAdmin />
 			<InitialDir />
+			<Debugger />
 		</Debug>
 		<Remote>
 			<RemoteUri />

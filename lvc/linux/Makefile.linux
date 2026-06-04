@@ -32,14 +32,14 @@ ifeq ($(Build),Debug)
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-I../include/lgi/linux \
 		-I../include \
-		-I../../../../../../usr/include/gstreamer-1.0 \
-		-I./src \
-		-I./resources \
+		-I../include/lgi/linux \
 		-I../include/lgi/linux/Gtk \
-		-I../../../../../../usr/include/libssh \
-		`pkg-config --cflags gtk+-3.0`
+		-I/usr/include/gstreamer-1.0 \
+		-I/usr/include/libssh \
+		`pkg-config --cflags gtk+-3.0` \
+		-Iresources \
+		-Isrc
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
@@ -53,33 +53,33 @@ else
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		`pkg-config --cflags gtk+-3.0` \
-		-I../../../../../../usr/include/libssh \
-		-I./src \
-		-I./resources \
+		-I../include \
 		-I../include/lgi/linux \
 		-I../include/lgi/linux/Gtk \
-		-I../include \
-		-I../../../../../../usr/include/gstreamer-1.0
+		-I/usr/include/gstreamer-1.0 \
+		-I/usr/include/libssh \
+		`pkg-config --cflags gtk+-3.0` \
+		-Iresources \
+		-Isrc
 endif
 
 # Dependencies
-Source =	src/DropDownBtn.cpp \
-			../src/common/Lgi/LgiMain.cpp \
-			../src/common/Net/Http.cpp \
-			src/VcFolder.cpp \
-			../src/common/Widgets/ControlTree.cpp \
-			src/SshConnection.cpp \
-			src/Main.cpp \
-			src/BrowseUi.cpp \
-			../src/common/Net/OpenSSLSocket.cpp \
+Source =	../src/common/Lgi/LgiMain.cpp \
 			../src/common/Lgi/StructuredLog.cpp \
-			../src/common/Text/RemoveAnsi.cpp \
-			src/PatchViewer.cpp \
+			../src/common/Net/Http.cpp \
+			../src/common/Net/OpenSSLSocket.cpp \
 			../src/common/Net/Ssh.cpp \
+			../src/common/Text/RemoveAnsi.cpp \
 			../src/common/Text/XmlTreeUi.cpp \
+			../src/common/Widgets/ControlTree.cpp \
+			src/BrowseUi.cpp \
+			src/DropDownBtn.cpp \
+			src/Main.cpp \
+			src/PatchViewer.cpp \
+			src/SshConnection.cpp \
 			src/VcCommit.cpp \
-			src/VcFile.cpp
+			src/VcFile.cpp \
+			src/VcFolder.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -108,8 +108,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 		$(Target) $(Objects) $(Libs)
 	@echo Done.
 
-../$(BuildDir)/liblgi-gtk3$(Tag).so : \
-	../include/lgi/common/App.h \
+../$(BuildDir)/liblgi-gtk3$(Tag).so : ../include/lgi/common/App.h \
 	../include/lgi/common/Array.h \
 	../include/lgi/common/AutoPtr.h \
 	../include/lgi/common/Base64.h \

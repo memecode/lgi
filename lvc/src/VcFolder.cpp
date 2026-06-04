@@ -22,13 +22,54 @@
 #define PROF(s)
 #endif
 
+class LRemoteUrl : public LDialog
+{
+public:
+	LString url;
+
+	LRemoteUrl(LView *parent, LString init)
+	{
+		SetParent(parent);
+		url = init;
+		
+		LoadFromResource(ID_REMOTE_DLG);
+		SetCtrlName(ID_URL, url);
+	}
+	
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override
+	{
+		switch (Ctrl->GetId())
+		{
+			case ID_COPY:
+			{
+				LClipBoard clip(this);
+				clip.Text(url = GetCtrlName(ID_URL));
+				break;
+			}
+			case ID_CHANGE:
+			{
+				url = GetCtrlName(ID_URL);
+				EndModal(true);
+				break;
+			}
+			case IDOK:
+			{
+				EndModal(false);
+				break;
+			}
+		}
+		
+		return 0;
+	}
+};
+
 class TmpFile : public LFile
 {
 	int Status;
 	LString Hint;
 	
 public:
-	TmpFile(const char *hint = NULL)
+	TmpFile(const char *hint = nullptr)
 	{
 		Status = 0;
 		if (hint)
@@ -706,6 +747,48 @@ void VcFolder::GetRemoteUrl(ParseParams::TCallback Callback)
 			break;
 		}
 		default:
+			NoImplementation(_FL);
+			break;
+	}
+}
+
+void VcFolder::SetRemoteUrl(LString newUrl, ParseParams::TCallback Callback)
+{
+	LAutoPtr<ParseParams> p;
+	if (Callback)
+		p.Reset(new ParseParams(std::move(Callback)));
+
+	switch (GetType())
+	{
+		case VcGit:
+		{
+			// git remote set-url origin <NEW_GIT_URL_HERE>
+			auto args = LString::Fmt("remote set-url origin %s", newUrl.Get());
+			StartCmd(args, NULL, p.Release());
+			break;
+		}
+		case VcHg:
+		{
+			GetConfigFile(true, false, [this, newUrl](auto configPath)
+				{
+					LIniFile config(nullptr, configPath);
+					if (config.Set("paths", "default", newUrl))
+						config.Write();
+					else
+						LPopupNotification::Message(GetTree()->GetWindow(), "Failed to set path.");
+				});
+
+			break;
+		}
+		/*
+		case VcSvn:
+		{
+			StartCmd("info --show-item=url", NULL, p.Release());
+			break;
+		}
+		*/
+		default:
+			NoImplementation(_FL);
 			break;
 	}
 }
@@ -1165,12 +1248,8 @@ bool VcFolder::GetAuthor(bool local, std::function<void(TAuthor &author)> callba
 
 bool VcFolder::SetAuthor(bool local, TAuthor author)
 {
-	if (!author.name || !author.email)
-	{
-		d->Log->Print("%s:%i - No user/email given.\n", _FL);
-		return false;
-	}
-
+	// NULL author name / email means delete the author details...
+	
 	auto scope = local ? "--local" : "--global";
 	auto target = local ? &AuthorLocal : &AuthorGlobal;
 
@@ -1180,10 +1259,19 @@ bool VcFolder::SetAuthor(bool local, TAuthor author)
 	{
 		case VcGit:
 		{
-			auto args = LString::Fmt("config %s user.name \"%s\"", scope, author.name.Get());
+			LString args;
+			
+			if (author.name)
+				args = LString::Fmt("config %s user.name \"%s\"", scope, author.name.Get());
+			else
+				args = LString::Fmt("config %s --unset user.name", scope);
 			StartCmd(args);
 
-			args = LString::Fmt("config %s user.email \"%s\"", scope, author.email.Get());
+			if (author.email)
+				args = LString::Fmt("config %s user.email \"%s\"", scope, author.email.Get());
+			else
+				args = LString::Fmt("config %s --unset user.email", scope);
+			
 			StartCmd(args);
 			break;
 		}
@@ -1194,15 +1282,23 @@ bool VcFolder::SetAuthor(bool local, TAuthor author)
 					if (!config)
 						return;
 
-					LString s;
-					s.Printf("%s <%s>", author.name.Get(), author.email.Get());
-
 					SshConnection *conn = nullptr;
 					if (!Uri.IsFile())
 						conn = d->GetConnection(Uri.ToString(), RemotePrompt);
 
 					LIniFile data(conn, config);
-					data.Set("ui", "username", s);
+
+					if (author)
+					{
+						LString s;
+						s.Printf("%s <%s>", author.name.Get(), author.email.Get());
+						data.Set("ui", "username", s);
+					}
+					else
+					{
+						data.Delete("ui", "username");
+					}
+
 					data.Write();
 				});
 		}
@@ -3167,7 +3263,7 @@ void VcFolder::OnMouseClick(LMouse &m)
 		s.AppendItem("Goto Item", ID_GOTO_ITEM);
 		s.AppendSeparator();
 		s.AppendItem("Remove", IDM_REMOVE);
-		s.AppendItem("Remote URL", IDM_REMOTE_URL);
+		s.AppendItem("Remote URL", ID_REMOTE_URL);
 		if (!Uri.IsFile())
 		{
 			s.AppendSeparator();
@@ -3238,20 +3334,20 @@ void VcFolder::OnMouseClick(LMouse &m)
 				});
 				break;
 			}
-			case IDM_REMOTE_URL:
+			case ID_REMOTE_URL:
 			{
 				GetRemoteUrl([this](auto code, auto str)
 				{
 					LString Url = str.Strip();
 					if (Url)
 					{
-						auto a = new LAlert(GetTree(), "Remote Url", Url, "Copy", "Ok");
-						a->DoModal([this, Url](auto dlg, auto code)
+						auto remoteDlg = new LRemoteUrl(GetTree(), Url);
+						remoteDlg->DoModal([this, remoteDlg](auto dlg, auto code)
 						{
-							if (code == 1)
+							if (code)
 							{
-								LClipBoard c(GetTree());
-								c.Text(Url);
+								// user wants to change the URL
+								SetRemoteUrl(remoteDlg->url);
 							}
 						});
 					}

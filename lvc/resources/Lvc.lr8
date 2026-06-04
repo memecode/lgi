@@ -127,6 +127,13 @@
 		<String Ref="178" Cid="178" Define="ID_MESSAGE" />
 		<String Ref="179" Cid="-1" Define="IDC_STATIC" en="Parent commit:" />
 		<String Ref="180" Cid="180" Define="ID_COPY_NAME" en="Copy Name" />
+		<String Ref="181" Cid="536" Define="ID_REMOTE_DLG" en="Remote URL" />
+		<String Ref="182" Cid="182" Define="IDC_182" />
+		<String Ref="183" Cid="-1" Define="IDC_STATIC" en="Remote URL:" />
+		<String Ref="188" Cid="188" Define="ID_URL" />
+		<String Ref="189" Cid="189" Define="ID_COPY" en="Copy" />
+		<String Ref="190" Cid="190" Define="ID_CHANGE" en="Change" />
+		<String Ref="191" Cid="1" Define="IDOK" en="Close" />
 	</string-group>
 	<string-group Name="General">
 		<String Ref="84" Cid="84" Define="IDS_CREATE_NEW_BRANCH" en="Push will create a new remote branch. Is that ok?" />
@@ -468,6 +475,28 @@
 				<td addr="0,6" colspan="4" align="Max">
 					<Button Pos="252,250,314,277" image="" toggle="0" ref="34" />
 					<Button Pos="329,250,391,277" image="" toggle="0" ref="35" />
+				</td>
+			</tr>
+		</TableLayout>
+	</Dialog>
+	<Dialog pos="8,8,463,118" ref="181">
+		<TableLayout pos="7,7,440,83" ref="182" cols="0.240,0.349,0.411" rows="0.500,0.500">
+			<tr>
+				<td addr="0,0" valign="Max">
+					<StaticText pos="0,0,73,23" ref="183" />
+				</td>
+				<td addr="1,0">
+					<EditBox Pos="112,0,195,23" ref="188" />
+				</td>
+				<td addr="2,0">
+					<Button Pos="266,3,328,23" toggle="0" ref="189" />
+				</td>
+			</tr>
+			<tr>
+				<td addr="0,1" />
+				<td addr="1,1" colspan="2" align="Max">
+					<Button Pos="140,36,209,56" toggle="0" ref="190" />
+					<Button Pos="245,36,314,56" toggle="0" ref="191" />
 				</td>
 			</tr>
 		</TableLayout>

@@ -95,6 +95,10 @@
 #define ID_DATE									175
 #define ID_MESSAGE								178
 #define ID_COPY_NAME							180
+#define IDC_182									182
+#define ID_URL									188
+#define ID_COPY									189
+#define ID_CHANGE								190
 #define ID_TABLE								500
 #define IDC_COMMIT								501
 #define ID_PULL									502
@@ -131,3 +135,4 @@
 #define ID_CLOSE								533
 #define ID_BRANCH_EDIT							534
 #define IDS_NEW_BRANCH_Q						535
+#define ID_REMOTE_DLG							536
