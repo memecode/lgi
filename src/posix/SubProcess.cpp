@@ -127,7 +127,8 @@ struct LSubProcessPriv
 	int UserId = -1;
 	int GrpId = -1;
 
-	LSubProcessPriv(bool pseudoConsole)
+	LSubProcessPriv(bool pseudoConsole) :
+		PseudoConsole(pseudoConsole)
 	{
 	}
 
