@@ -1668,18 +1668,18 @@ DebugTrace("%s:%i - Ssl is NULL\n", _FL);
 			while (HasntTimedOut())
 			{
 				r = Library->BIO_read(Bio, Data, (int)Len);
-DebugTrace("%s:%i - BIO_read(%p,%i)=%i\n", _FL, Data, Len, r);
+// DebugTrace("%s:%i - BIO_read(%p,%i)=%i\n", _FL, Data, Len, r);
 				if (r < 0)
 				{
 					auto Retry = Library->BIO_should_retry(Bio);
-DebugTrace("%s:%i - BIO_should_retry=%i IsBlocking=%i\n", _FL, Retry, d->IsBlocking);
+// DebugTrace("%s:%i - BIO_should_retry=%i IsBlocking=%i\n", _FL, Retry, d->IsBlocking);
 					if (!Retry)
 					{
 						Library->BIO_get_retry_reason(Bio);
 						break;
 					}
 					if (d->IsBlocking)
-						LSleep(1);
+						LSleep(10);
 					else
 						break;
 				}

@@ -330,9 +330,15 @@ void j_skip_input_data(j_decompress_ptr cinfo, long num_bytes)
 
 boolean j_resync_to_restart(j_decompress_ptr cinfo, int desired)
 {
-    // JpegStream *s = (JpegStream*)cinfo->client_data;
-    LAssert(0); // not impl
-    return false;
+    auto s = (JpegStream*)cinfo->client_data;
+    if (!s || !s->f)
+    {
+    	LAssert(!"invalid ptr");
+    	return false;
+    }
+    
+    s->f->SetPos(0);
+    return true;
 }
 
 void j_term_source(j_decompress_ptr cinfo)

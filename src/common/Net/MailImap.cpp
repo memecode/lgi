@@ -896,7 +896,7 @@ bool MailIMap::Read(LStreamI *Out, int Timeout)
 			}
 			else
 			{
-				if (End - St < Timeout - 20)
+				if (!d->Cancel->IsCancelled() && End - St < Timeout - 20)
 					LgiTrace("%s:%i - IsReadable broken (again), Timeout=%i, Elapsed=%i\n",
 						_FL, Timeout, (int)(End - St));
 				return false;
