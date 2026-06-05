@@ -431,8 +431,8 @@ public:
 			const char *GetFile() { return File; }
 		};
 
-		DesktopInfo *GetDesktopInfo();
-		bool SetApplicationIcon(const char *FileName);
+		DesktopInfo *GetDesktopInfo(const char *gnomeAppType);
+		bool SetApplicationIcon(const char *FileName, const char *gnomeAppType);
 		static bool IsGui();
 	
 	#elif LGI_COCOA && defined(__OBJC__)

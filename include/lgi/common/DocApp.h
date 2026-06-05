@@ -72,11 +72,11 @@ public:
 	LDocApp
 	(
 		/// The name of the application
-		const char *appname = 0,
+		const char *appname = nullptr,
 		/// [Optional] The icon resource for the window.
-		LIcon icon = 0,
+		LIcon icon = nullptr,
 		/// [Optional] Options file base name..
-		char *optsname = 0
+		char *optsname = nullptr
 	);
 	~LDocApp();
 

@@ -1837,7 +1837,7 @@ AppWnd::AppWnd()
 	#if WINNATIVE
 		SetIcon((char*)MAKEINTRESOURCE(IDI_APP));
 	#else
-		SetIcon("icon64.png");
+		SetIcon("icon64.png", "Development;IDE;");
 	#endif
 
 	if (!Attach(0))

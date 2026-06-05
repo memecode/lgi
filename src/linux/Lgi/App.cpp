@@ -1176,7 +1176,7 @@ bool LApp::DesktopInfo::Serialize(bool Write)
 		f.SetSize(0);
 		for (unsigned i=0; i<Data.Length(); i++)
 		{
-			Section &s = Data[i];
+			auto &s = Data[i];
 			if (s.Name)
 				f.Print("[%s]\n", s.Name.Get());
 			for (unsigned n=0; n<s.Values.Length(); n++)
@@ -1276,11 +1276,11 @@ bool LApp::DesktopInfo::Set(const char *Field, const char *Value, const char *Se
 	if (!Field)
 		return false;
 
-	Section *s = GetSection(Sect ? Sect : DefaultSection, true);
+	auto s = GetSection(Sect ? Sect : DefaultSection, true);
 	if (!s)
 		return false;
 
-	KeyPair *kp = s->Get(Field, true, Dirty);
+	auto kp = s->Get(Field, true, Dirty);
 	if (!kp)
 		return false;
 
@@ -1292,7 +1292,7 @@ bool LApp::DesktopInfo::Set(const char *Field, const char *Value, const char *Se
 	return true;
 }
 
-LApp::DesktopInfo *LApp::GetDesktopInfo()
+LApp::DesktopInfo *LApp::GetDesktopInfo(const char *gnomeAppType)
 {
 	auto sExe = LGetExeFile();
 	LFile::Path Exe(sExe);
@@ -1306,35 +1306,29 @@ LApp::DesktopInfo *LApp::GetDesktopInfo()
 	const char *Ex = Exe;
 	const char *Fn = Desktop;
 
+	printf("%s:%i - desktop file='%s'\n", _FL, Desktop.GetFull().Get());
+
 	if (d->DesktopInfo.Reset(new DesktopInfo(Desktop)))
 	{
 		// Do a sanity check...
-		LString s = d->DesktopInfo->Get("Name");
-		if (!s && Name())
-			d->DesktopInfo->Set("Name", Name());
-		
-		s = d->DesktopInfo->Get("Exec");
-		if (!s || s != (const char*)sExe)
-			d->DesktopInfo->Set("Exec", sExe);
-		
-		s = d->DesktopInfo->Get("Type");
-		if (!s) d->DesktopInfo->Set("Type", "Application");
+		d->DesktopInfo->Set("Name", Name());		
+		d->DesktopInfo->Set("Exec", sExe);		
+		d->DesktopInfo->Set("Type", "Application");
+		if (gnomeAppType)
+			d->DesktopInfo->Set("Categories", gnomeAppType);
+		else
+			LAssert(!"no app type?");
 
-		s = d->DesktopInfo->Get("Categories");
-		if (!s) d->DesktopInfo->Set("Categories", "Application;");
-
-		s = d->DesktopInfo->Get("Terminal");
-		if (!s) d->DesktopInfo->Set("Terminal", "false");
-		
+		d->DesktopInfo->Set("Terminal", "false");		
 		d->DesktopInfo->Update();
 	}
 	
 	return d->DesktopInfo;
 }
 
-bool LApp::SetApplicationIcon(const char *FileName)
+bool LApp::SetApplicationIcon(const char *FileName, const char *gnomeAppType)
 {
-	DesktopInfo *di = GetDesktopInfo();
+	auto di = GetDesktopInfo(gnomeAppType);
 	if (!di)
 		return false;
 	

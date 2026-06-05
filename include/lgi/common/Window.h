@@ -135,7 +135,7 @@ public:
 	void SetMenu(LMenu *m) { Menu = m; }
 	
 	/// Set the window's icon
-	bool SetIcon(const char *FileName);
+	bool SetIcon(const char *FileName, const char *gnomeAppType);
 
 	/// Don't show title bar
 	bool SetTitleBar(bool ShowTitleBar);

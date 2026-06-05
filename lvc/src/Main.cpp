@@ -1205,7 +1205,7 @@ public:
 		#ifdef WINDOWS
 			SetIcon(MAKEINTRESOURCEA(IDI_ICON1));
 		#else
-			SetIcon("icon32.png");
+			SetIcon("icon32.png", "Development;RevisionControl;");
 		#endif
 
 		ImgLst.Reset(LLoadImageList("image-list.png", 16, 16));

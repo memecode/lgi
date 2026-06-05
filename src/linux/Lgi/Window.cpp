@@ -69,7 +69,7 @@ public:
 	LKey LastKey = {};
 	LArray<HookInfo> Hooks;
 	bool SnapToEdge = false;
-	LString Icon;
+	LString Icon, gnomeAppType;
 	LRect Decor;
 	gulong DestroySig = 0;
 	LAutoPtr<LSurface> IconImg;
@@ -180,7 +180,7 @@ int LWindow::WaitThread()
 	return 0; // Nop for linux
 }
 
-bool LWindow::SetIcon(const char *FileName)
+bool LWindow::SetIcon(const char *FileName, const char *gnomeAppType)
 {
 	LString a;
 	if (Wnd)
@@ -191,7 +191,6 @@ bool LWindow::SetIcon(const char *FileName)
 				FileName = a;
 		}
 
-
 		if (!LFileExists(FileName))
 		{
 			LgiTrace("%s:%i - SetIcon failed to find '%s'\n", _FL, FileName);
@@ -200,23 +199,24 @@ bool LWindow::SetIcon(const char *FileName)
 		else
 		{
 			#if defined(LINUX)
-			LAppInst->SetApplicationIcon(FileName);
+			if (gnomeAppType)
+				LAppInst->SetApplicationIcon(FileName, gnomeAppType);
 			#endif
 			
 			#if _MSC_VER
-			GError *error = NULL;
-			if (gtk_window_set_icon_from_file(Wnd, FileName, &error))
-				return true;
+				GError *error = NULL;
+				if (gtk_window_set_icon_from_file(Wnd, FileName, &error))
+					return true;
 			#else
-			// On windows this is giving a red for blue channel swap error...
-			if (d->IconImg.Reset(GdcD->Load(FileName)))
-				gtk_window_set_icon(Wnd, d->IconImg->CreatePixBuf());
+				// On windows this is giving a red for blue channel swap error...
+				if (d->IconImg.Reset(GdcD->Load(FileName)))
+					gtk_window_set_icon(Wnd, d->IconImg->CreatePixBuf());
 			#endif
 		}
 	}
 	
-	if (FileName != d->Icon.Get())
-		d->Icon = FileName;
+	d->Icon = FileName;
+	d->gnomeAppType = gnomeAppType;
 
 	return d->Icon != NULL;
 }
@@ -1219,7 +1219,7 @@ bool LWindow::Attach(LViewI *p)
 		// Add icon
 		if (d->Icon)
 		{
-			SetIcon(d->Icon);
+			SetIcon(d->Icon, d->gnomeAppType);
 			d->Icon.Empty();
 		}
 

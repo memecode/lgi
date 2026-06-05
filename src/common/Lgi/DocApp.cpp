@@ -217,7 +217,7 @@ LDocApp<OptionsFmt>::LDocApp(const char *appname, LIcon icon, char *optsname)
 	if (icon)
 	{
 		#if defined WIN32
-			LWindowsClass *c = LWindowsClass::Create(d->AppName);
+			auto c = LWindowsClass::Create(d->AppName);
 			if (c)
 			{
 				if (icon < 0x10000)
@@ -226,7 +226,7 @@ LDocApp<OptionsFmt>::LDocApp(const char *appname, LIcon icon, char *optsname)
 					c->Class.hIcon = LoadIcon(LProcessInst(), (TCHAR*)(size_t)icon);
 			}
 		#else
-			SetIcon(icon);
+			SetIcon(icon, "Utility;TextEditor;");
 		#endif
 	}
 }

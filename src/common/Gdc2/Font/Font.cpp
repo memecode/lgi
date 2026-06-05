@@ -1028,7 +1028,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 							}
 						}
 						
-						Gtk::pango_coverage_unref(c);
+						g_object_unref(c);
 					}
 					
 					g_object_unref(fnt);

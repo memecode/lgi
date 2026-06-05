@@ -78,7 +78,7 @@ public:
 		LFile::Path iconPath(LSP_EXE);
 		iconPath += "resources/icon.svg";
 		if (iconPath.Exists())
-			SetIcon(iconPath);
+			SetIcon(iconPath, "Utility;");
 
 		int y = 0;
 		LTextLabel *label;
