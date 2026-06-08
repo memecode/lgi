@@ -36,10 +36,10 @@ class LDocApp :
 public:
 	#ifdef _WIN32
 	typedef int LIcon;
-	constexpr static int NO_ICON = 0;
+	constexpr static LIcon NO_ICON = 0;
 	#else
 	typedef const char *LIcon;
-	constexpr static int NO_ICON = nullptr;
+	constexpr static LIcon NO_ICON = nullptr;
 	#endif
 
 private:
