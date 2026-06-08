@@ -29,7 +29,7 @@ public:
 	bool				Dirty;
 	GDocAppInstallMode	Mode;
 
-	LDocAppPrivate(LWindow *app, char *param)
+	LDocAppPrivate(LWindow *app, const char *param)
 	{
 		App = app;
 		OptionsParam = param;
@@ -183,7 +183,7 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////////////////
 template <typename OptionsFmt>
-LDocApp<OptionsFmt>::LDocApp(const char *appname, LIcon icon, char *optsname)
+LDocApp<OptionsFmt>::LDocApp(const char *appname, LIcon icon, const char *optsname)
 {
 	Options = 0;
 	_LangOptsName = 0;
