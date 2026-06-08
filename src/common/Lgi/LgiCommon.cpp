@@ -3071,7 +3071,7 @@ LString LExpandVars(const char* in, LDom* source)
 
 			LString var(s, e - s);
 			LVariant val;
-			if (source->GetValue(var, val))
+			if (source->GetValue(var.Strip(), val))
 			{
 				p.Write(val.Str());
 			}
