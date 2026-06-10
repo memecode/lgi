@@ -21,6 +21,14 @@ public:
 		AuthDigest,
 	};
 
+	enum TRequestType
+	{
+		HttpNone,
+		HttpGet,
+		HttpPost,
+		HttpOther,
+	};
+
 protected:
 	LString Proxy;
 	int ProxyPort = 0;
@@ -37,6 +45,15 @@ protected:
 	LString AuthUser, AuthPassword, AuthRealm;
 	TAuth AuthType = AuthPlain;
 	LError err;
+	LStream *log = nullptr;
+
+	// Digest auth:
+	struct DigestRealm {
+		LString realm, nonce, opaque, algorithm, qop;
+		DigestRealm(LString wwwAuthHdr);
+	};
+	LHashTbl<ConstStrKey<char,false>, DigestRealm*> realms;
+	LHashTbl<ConstStrKey<char>, int> nonceCounter;
 
 public:
 	Progress *Meter = nullptr;
@@ -48,7 +65,8 @@ public:
 	void SetProxy(const char *p, int Port);
 	void SetNoCache(bool i) { NoCache = i; }
 	void SetPlainAuth(const char *User = nullptr, const char *Pass = nullptr);
-	void SetDigestAuth(const char *User, const char *Pass, const char *Realm);
+	void SetDigestAuth(const char *User, const char *Pass);
+	void SetLog(LStream *logger) { log = logger; }
 
 	// Data
 	LSocketI *Handle() { return Socket; }
@@ -63,7 +81,7 @@ public:
 	LError &GetError() { return err; }
 
 	// General
-	bool Request(	const char *Type,
+	bool Request(	const char *Method,
 					const char *Uri,
 					int *ProtocolStatus,
 					const char *InHeaders,

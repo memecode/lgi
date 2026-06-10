@@ -51,6 +51,7 @@
 #endif
 #include "lgi/common/Library.h"
 #include "lgi/common/Net.h"
+#include "../src/common/Hash/md5/md5.h"
 #ifdef MAC
 	#include "lgi/common/Uri.h"
 #endif
@@ -3082,4 +3083,37 @@ LString LExpandVars(const char* in, LDom* source)
 	}
 
 	return p.NewLStr();
+}
+
+
+LString LMd5(LString s)
+{
+	md5_state_t state;
+	md5_init(&state);
+	md5_append(&state, (md5_byte_t*)s.Get(), s.Length());
+
+	LString ret;
+	if (ret.Length(16))
+		md5_finish(&state, ret.Get());
+
+	return ret;
+}
+
+LString LHex(LString s)
+{
+	LString ret;
+	if (!ret.Length(s.Length() << 1))
+		return ret;
+
+	const char map[] = "0123456789abcdef";
+	auto o = ret.Get();
+	auto p = (uint8_t*)s.Get();
+	for (auto e = p + s.Length(); p<e; p++)
+	{
+		*o++ = map[*p >> 4];
+		*o++ = map[*p & 0xf];
+	}
+	*o++ = 0;
+
+	return ret; 
 }

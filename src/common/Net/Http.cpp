@@ -182,7 +182,7 @@ void LHttp::SetPlainAuth(const char *User, const char *Pass)
 	AuthType = AuthPlain;
 }
 
-void LHttp::SetDigestAuth(const char *User, const char *Pass, const char *Realm)
+void LHttp::SetDigestAuth(const char *User, const char *Pass)
 {
 	AuthUser = User;
 	AuthPassword = Pass;
@@ -241,17 +241,33 @@ bool LHttp::IsOpen()
 	return Socket != NULL;
 }
 
-enum HttpRequestType
+LHttp::DigestRealm::DigestRealm(LString wwwAuthHdr)
 {
-	HttpNone,
-	HttpGet,
-	HttpPost,
-	HttpOther,
-};
+	auto fields = wwwAuthHdr.SplitDelimit(",");
+	for (auto &f: fields)
+	{
+		auto v = f.Strip().SplitDelimit("=", 1);
+		if (v.Length() != 2)
+			continue;
+
+		if (v[0].Find("realm") >= 0)
+			realm = v[1].Strip("\'\"");
+		else if (v[0].Find("nonce") >= 0)
+			nonce = v[1].Strip("\'\"");
+		else if (v[0].Find("opaque") >= 0)
+			opaque = v[1].Strip("\'\"");
+		else if (v[0].Find("algorithm") >= 0)
+			algorithm = v[1].Strip("\'\"");
+		else if (v[0].Find("qop") >= 0)
+			qop = v[1].Strip("\'\"");
+		else
+			LgiTrace("%s:%i - unexpected wwwAuth field: %s=%s\n", _FL, v[0].Get(), v[1].Get());
+	}
+}
 
 bool LHttp::Request
 (
-	const char *Type,
+	const char *Method,
 	const char *Uri,
 	int *ProtocolStatus,
 	const char *InHeaders,
@@ -262,10 +278,10 @@ bool LHttp::Request
 )
 {
 	// Input validation
-	if (!Socket || !Uri || !Out || !Type)
+	if (!Socket || !Uri || !Out || !Method)
 	{
 		err.Set(LErrorInvalidParam,
-				LString::Fmt("%s:%i - missing param %p,%p,%p,%p", _FL, Socket.Get(), Uri, Out, Type));
+				LString::Fmt("%s:%i - missing param %p,%p,%p,%p", _FL, Socket.Get(), Uri, Out, Method));
 		return false;
 	}
 
@@ -273,10 +289,10 @@ bool LHttp::Request
 	LStringPipe Log;
 	#endif
 
-	HttpRequestType ReqType = HttpNone;
-	if (!_stricmp(Type, "GET"))
+	TRequestType ReqType = HttpNone;
+	if (!Stricmp(Method, "GET"))
 		ReqType = HttpGet;
-	else if (!_stricmp(Type, "POST"))
+	else if (!Stricmp(Method, "POST"))
 		ReqType = HttpPost;
 	else
 		ReqType = HttpOther;
@@ -284,8 +300,9 @@ bool LHttp::Request
 	// Generate the request string
 	LStringPipe Cmd;
 	LUri u(Uri);
-	bool IsHTTPS = u.sProtocol && !_stricmp(u.sProtocol, "https");
-	LString EncPath = u.EncodeStr(u.sPath.Get() ? u.sPath.Get() : (char*)"/"), Mem;
+	bool IsHTTPS = u.sProtocol.Equals("https");
+	LString Path = u.sPath ? u.sPath : "/";
+	LString EncPath = u.EncodeStr(Path), Mem;
 	char s[1024];
 	LHtmlLinePrefix EndHeaders("\r\n");
 	LStringPipe Headers;
@@ -297,10 +314,9 @@ bool LHttp::Request
 					"\r\n",
 					u.sHost.Get(), u.Port ? u.Port : HTTPS_PORT,
 					u.sHost.Get());
-		LAutoString c(Cmd.NewStr());
-		size_t cLen = strlen(c);
-		ssize_t r = Socket->Write(c, cLen);
-		if (r == cLen)
+		auto connectCmd = Cmd.NewLStr();
+		ssize_t r = Socket->Write(connectCmd);
+		if (r == connectCmd.Length())
 		{
 			ssize_t Length = 0;
 			while (Out)
@@ -325,7 +341,7 @@ bool LHttp::Request
 				else break;
 			}
 			
-			LAutoString Hdr(Headers.NewStr());
+			// LAutoString Hdr(Headers.NewStr());
 
 			LVariant v;
 			if (Socket)
@@ -336,7 +352,7 @@ bool LHttp::Request
 		else return false;
 	}
 
-	Cmd.Print("%s %s HTTP/1.1\r\n", Type, (Proxy && !IsHTTPS) ? Uri : EncPath.Get());
+	Cmd.Print("%s %s HTTP/1.1\r\n", Method, (Proxy && !IsHTTPS) ? Uri : EncPath.Get());
 	Cmd.Print("Host: %s\r\n", u.sHost.Get());
 	if (InHeaders)
 		Cmd.Write(InHeaders, strlen(InHeaders));
@@ -360,9 +376,93 @@ bool LHttp::Request
 			case AuthDigest:
 			{
 				// Digest authentication
-				// Not implemented yet...
-				err.Set(LErrorNotSupported, "Digest authentication not impl.");
-				LAssert(!"Not impl.");
+				auto dr = realms.Find(AuthRealm);
+				if (!dr)
+				{
+					err.Set(LErrorPathNotFound,
+						LString::Fmt("%s:%i - realm '%s' not found", _FL, AuthRealm.Get()));
+					return false;
+				}
+
+				auto nonceCount = nonceCounter.Find(dr->nonce);
+				LAssert(nonceCount > 0);
+
+				LString HA1, HA2, response, nonceCountStr, cnonce /* client generated random string */;
+				cnonce.Printf(LPrintfUInt64 "%u", LCurrentTime(), LRand());
+				nonceCountStr.Printf("%8.8x", nonceCount);
+				if (log)
+					log->Print("..nonceCountStr=%s\n", nonceCountStr.Get());
+
+				if (dr->algorithm == "MD5")
+				{
+					auto s = AuthUser + ":" + AuthRealm + ":" + AuthPassword;
+					if (log)
+						log->Print("..HA1.in=%s\n", s.Get());
+					HA1 = LMd5(s);
+					if (log)
+						log->Print("..HA1.out=%s\n", LHex(HA1).Get());
+				}
+				else
+				{
+					LAssert(!"not impl");
+					err.Set(LErrorInvalidParam,
+						LString::Fmt("%s:%i - unsupported algorithm '%s'", _FL, dr->algorithm.Get()));
+					return false;
+				}
+
+				if (dr->qop.IsEmpty() || dr->qop == "auth")
+				{
+					LString s = LString(Method) + ":" + Path;
+					if (log)
+						log->Print("..HA2.in=%s\n", s.Get());
+					HA2 = LMd5(s);
+					if (log)
+						log->Print("..HA2.out=%s\n", LHex(HA2).Get());
+				}
+				else
+				{
+					LAssert(!"not impl");
+					err.Set(LErrorInvalidParam,
+						LString::Fmt("%s:%i - unsupported qop '%s'", _FL, dr->qop.Get()));
+					return false;
+				}
+
+				if (dr->qop == "auth" || dr->qop == "auth-int")
+				{
+					auto s = LHex(HA1) + ":" + dr->nonce + ":" + nonceCountStr + ":" + cnonce + ":" + dr->qop + ":" + LHex(HA2);
+					if (log)
+						log->Print("..resp.in=%s\n", s.Get());
+					response = LMd5(s);
+					if (log)
+						log->Print("..resp.out=%s\n", LHex(response).Get());
+				}
+				else
+				{
+					LAssert(!"not impl");
+					err.Set(LErrorInvalidParam,
+						LString::Fmt("%s:%i - unsupported qop '%s'", _FL, dr->qop.Get()));
+					return false;
+				}
+
+				Cmd.Print("Authorization: Digest username=\"%s\", "
+					"realm=\"%s\", "
+					"nonce=\"%s\", "
+					"uri=\"%s\", "
+					"qop=%s, "
+					"nc=\"%s\", "
+					"cnonce=\"%s\", "
+					"opaque=\"%s\", "
+					"response=\"%s\", "
+					"algorithm=MD5\r\n",
+					AuthUser.Get(),
+					dr->realm.Get(),
+					dr->nonce.Get(),
+					Path.Get(),
+					dr->qop.Get(),
+					nonceCountStr.Get(),
+					cnonce.Get(),
+					dr->opaque.Get(),
+					LHex(response).Get());
 				break;
 			}
 		}
@@ -370,6 +470,8 @@ bool LHttp::Request
 	Cmd.Push("\r\n");
 	
 	auto c = Cmd.NewLStr();
+	// if (log) log->Print("..cmd=%s\n", c.Get());
+
 	#if DEBUG_LOGGING
 	Log.Print("HTTP req.hdrs=%s\n-------------------------------------\nHTTP req.body=", c.Get());
 	#endif
@@ -448,6 +550,7 @@ bool LHttp::Request
 			}
 			else
 			{
+				// Process the headers...
 				#if DEBUG_LOGGING
 				Log.Print("HTTP res.hdrs=%s\n-------------------------------------\nHTTP res.body=", h);
 				#endif
@@ -479,9 +582,39 @@ bool LHttp::Request
 				}				
 				if (HttpStatus / 100 == 3)
 					FileLocation = LGetHeaderField(h, "Location");
+
+				if (auto sAuthenticate = LGetHeaderField(h, "WWW-Authenticate"))
+				{
+					if (log)
+						log->Print("..WWW-Authenticate: %s\n", sAuthenticate.Get());
+
+					if (auto dr = new DigestRealm(sAuthenticate))
+					{
+						if (auto existing = realms.Find(dr->realm))
+						{
+							*existing = *dr;
+							delete dr;
+							dr = existing;
+						}
+						else realms.Add(dr->realm, dr);
+
+						auto count = nonceCounter.Find(dr->nonce);
+						nonceCounter.Add(dr->nonce, count + 1);
+						AuthRealm = dr->realm;
+
+						if (log)
+						{
+							log->Print("..dr.realm: %s\n", dr->realm.Get());
+							log->Print("..dr.nonce: %s\n", dr->nonce.Get());
+							log->Print("..dr.opaque: %s\n", dr->opaque.Get());
+							log->Print("..dr.algorithm: %s\n", dr->algorithm.Get());
+							log->Print("..dr.qop: %s\n", dr->qop.Get());
+						}
+					}
+				}
 				
 				if (OutHeaders)
-					OutHeaders->Write(h.Get(), h.Length());
+					OutHeaders->Write(h);
 
 				if (IsChunked)
 				{

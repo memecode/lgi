@@ -75,6 +75,12 @@ LgiExtern LString LGetAppForMimeType
 /// \return a formatted file size
 LgiExtern LString LFormatSize(int64_t Size);
 
+/// Create an MD5 hash of the input data
+LgiExtern LString LMd5(LString data);
+
+/// Convert the input data to a hex string:
+LgiExtern LString LHex(LString data);
+
 /// URL encode a string
 LgiExtern LString LUrlEncode(const char *s, const char *delim);
 
