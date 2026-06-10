@@ -169,16 +169,24 @@ LHttp::~LHttp()
 	DeleteArray(Buffer);
 }
 
-void LHttp::SetProxy(char *p, int Port)
+void LHttp::SetProxy(const char *p, int Port)
 {
 	Proxy = p;
 	ProxyPort = Port;
 }
 
-void LHttp::SetAuth(char *User, char *Pass)
+void LHttp::SetPlainAuth(const char *User, const char *Pass)
 {
 	AuthUser = User;
 	AuthPassword = Pass;
+	AuthType = AuthPlain;
+}
+
+void LHttp::SetDigestAuth(const char *User, const char *Pass, const char *Realm)
+{
+	AuthUser = User;
+	AuthPassword = Pass;
+	AuthType = AuthDigest;
 }
 
 bool LHttp::Open(LAutoPtr<LSocketI> S, const char *RemoteHost, int Port)
@@ -250,7 +258,7 @@ bool LHttp::Request
 	LStreamI *InBody,
 	LStreamI *Out,
 	LStreamI *OutHeaders,
-	ContentEncoding *OutEncoding
+	TContentEncoding *OutEncoding
 )
 {
 	// Input validation
@@ -335,25 +343,29 @@ bool LHttp::Request
 
 	if (AuthUser && AuthPassword)
 	{
-		#if 1
+		switch (AuthType)
 		{
-			// Basic authentication
-			char Raw[128];
-			sprintf_s(Raw, sizeof(Raw), "%s:%s", AuthUser.Get(), AuthPassword.Get());
-			char Base64[128];
-			ZeroObj(Base64);
-			ConvertBinaryToBase64(Base64, sizeof(Base64)-1, (uchar*)Raw, strlen(Raw));
-			
-			Cmd.Print("Authorization: Basic %s\r\n", Base64);
+			case AuthPlain:
+			{
+				// Basic authentication
+				char Raw[128];
+				sprintf_s(Raw, sizeof(Raw), "%s:%s", AuthUser.Get(), AuthPassword.Get());
+				char Base64[128];
+				ZeroObj(Base64);
+				ConvertBinaryToBase64(Base64, sizeof(Base64)-1, (uchar*)Raw, strlen(Raw));
+				
+				Cmd.Print("Authorization: Basic %s\r\n", Base64);
+				break;
+			}
+			case AuthDigest:
+			{
+				// Digest authentication
+				// Not implemented yet...
+				err.Set(LErrorNotSupported, "Digest authentication not impl.");
+				LAssert(!"Not impl.");
+				break;
+			}
 		}
-		#else
-		{
-			// Digest authentication
-			// Not implemented yet...
-			err.Set(LErrorNotSupported, "Digest authentication not impl.");
-			LAssert(!"Not impl.");
-		}
-		#endif
 	}
 	Cmd.Push("\r\n");
 	
@@ -452,7 +464,7 @@ bool LHttp::Request
 					Out->SetSize(0);
 				}
 				auto sContentEncoding = LGetHeaderField(h, "Content-Encoding");
-				ContentEncoding Encoding = EncodeRaw;
+				TContentEncoding Encoding = EncodeRaw;
 				if (sContentEncoding.Equals("gzip"))
 					Encoding = EncodeGZip;
 				if (OutEncoding)
@@ -926,7 +938,7 @@ bool LGetUri(LCancel *Cancel, LStreamI *Out, LError *OutError, const char *InUri
 		}
 
 		int Status = 0;
-		LHttp::ContentEncoding Enc;
+		LHttp::TContentEncoding Enc;
 		LStringPipe OutHeaders;
 		LStringPipe TmpFile(4 << 10);
 		Http.Get(InUri, InHeaders ? InputHeaders : DefaultHeaders, &Status, &TmpFile, &Enc, &OutHeaders);

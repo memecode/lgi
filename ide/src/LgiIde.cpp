@@ -1984,16 +1984,16 @@ AppWnd::AppWnd()
 				event == BreakPointStore::TBreakPointDeleted)
 			{
 				auto bp = d->BreakPoints.Get(id);
-				if (bp.File)
+				if (bp.relFile)
 				{
 					// Tell the document about the break point...
-					if (auto doc = FindOpenFile(bp.File))
+					if (auto doc = FindOpenFile(bp.relFile))
 					{
 						auto added = event == BreakPointStore::TBreakPointAdded;
-						printf("OnBreakPoint(%s, %i)\n", bp.File.Get(), added);
+						printf("OnBreakPoint(%s, %i)\n", bp.relFile.Get(), added);
 						doc->OnBreakPoint(id, added);
 					}
-					else printf("%s:%i - no file '%s'\n", _FL, bp.File.Get());					
+					else printf("%s:%i - no file '%s'\n", _FL, bp.relFile.Get());					
 				}
 			}
 		});

@@ -3503,10 +3503,10 @@ void IdeProject::OnBackendReady()
 			for (auto id: all)
 			{
 				auto bp = store->Get(id);
-				if (bp.File.Find("~") >= 0)
+				if (bp.relFile.Find("~") >= 0)
 				{
 					LString::Array hints;
-					d->Backend->ResolvePath(bp.File, hints,
+					d->Backend->ResolvePath(bp.relFile, hints,
 						[store, id](auto path, auto err)
 						{
 							if (err)
@@ -3518,7 +3518,7 @@ void IdeProject::OnBackendReady()
 								auto bp = store->Get(id);
 								if (bp)
 								{
-									bp.File = path;
+									bp.relFile = path;
 									store->Update(id, bp);
 								}
 							}
@@ -3923,8 +3923,8 @@ bool IdeProject::LoadBreakPoints(IdeDoc *doc)
 		for (auto id: d->UserBreakpoints)
 		{
 			auto bp = store->Get(id);
-			bool sameLeaf = !Stricmp(LGetLeaf(bp.File), fnLeaf);
-			LString normalized = bp.File;
+			bool sameLeaf = !Stricmp(LGetLeaf(bp.relFile), fnLeaf);
+			LString normalized = bp.relFile;
 
 			if (d->Backend)
 			{

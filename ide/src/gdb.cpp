@@ -43,13 +43,6 @@ const char sPrompt[] = "(gdb) ";
 #define LOG(...)
 #endif
 
-// Breakpoint logging
-#if 0
-#define BP_LOG(...)	printf(__VA_ARGS__)
-#else
-#define BP_LOG(...)
-#endif
-
 // Command loggins
 #if 0
 #define CMD_LOG(...) printf(__VA_ARGS__)
@@ -1380,9 +1373,9 @@ public:
 	{
 		char cmd[MAX_PATH_LEN];		
 		auto bp = bpStore->Get(id);
-		if (bp.File)
+		if (bp.relFile)
 		{
-			LString file = bp.File;
+			LString file = bp.relFile;
 			if (!Strncmp(file.Get(), InitDir.Get(), InitDir.Length()))
 			{
 				// We can remove the init dir from the start of file

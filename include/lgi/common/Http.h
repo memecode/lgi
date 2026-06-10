@@ -7,38 +7,48 @@
 // HTTP[S] client class:
 class LHttp
 {
-	LString Proxy;
-	int ProxyPort = 0;
-
-	int BufferLen = 16 << 10;
-	char *Buffer = NULL;
-	
-	LCancel *Cancel = NULL;
-	LAutoPtr<LSocketI> Socket;	// commands
-	size_t ResumeFrom = 0;
-	LString FileLocation;
-	char *Headers = NULL;
-	bool NoCache = false;
-	LString AuthUser, AuthPassword;
-	LError err;
-
 public:
-	enum ContentEncoding
+	enum TContentEncoding
 	{
 		EncodeNone,
 		EncodeRaw,
 		EncodeGZip,
 	};
+	
+	enum TAuth
+	{
+		AuthPlain,
+		AuthDigest,
+	};
 
-	Progress *Meter = NULL;
+protected:
+	LString Proxy;
+	int ProxyPort = 0;
 
-	LHttp(LCancel *cancel = NULL);
+	int BufferLen = 16 << 10;
+	char *Buffer = nullptr;
+	
+	LCancel *Cancel = nullptr;
+	LAutoPtr<LSocketI> Socket;	// commands
+	size_t ResumeFrom = 0;
+	LString FileLocation;
+	char *Headers = nullptr;
+	bool NoCache = false;
+	LString AuthUser, AuthPassword, AuthRealm;
+	TAuth AuthType = AuthPlain;
+	LError err;
+
+public:
+	Progress *Meter = nullptr;
+
+	LHttp(LCancel *cancel = nullptr);
 	virtual ~LHttp();
 
 	void SetResume(size_t i) { ResumeFrom = i; }
-	void SetProxy(char *p, int Port);
+	void SetProxy(const char *p, int Port);
 	void SetNoCache(bool i) { NoCache = i; }
-	void SetAuth(char *User = 0, char *Pass = 0);
+	void SetPlainAuth(const char *User = nullptr, const char *Pass = nullptr);
+	void SetDigestAuth(const char *User, const char *Pass, const char *Realm);
 
 	// Data
 	LSocketI *Handle() { return Socket; }
@@ -60,13 +70,13 @@ public:
 					LStreamI *InBody,
 					LStreamI *Out,
 					LStreamI *OutHeaders,
-					ContentEncoding *OutEncoding);
+					TContentEncoding *OutEncoding);
 
 	bool Get(		const char *Uri,
 					const char *InHeaders,
 					int *ProtocolStatus,
 					LStreamI *Out,
-					ContentEncoding *OutEncoding,
+					TContentEncoding *OutEncoding,
 					LStreamI *OutHeaders = 0)
 	{
 		return Request("GET",
