@@ -263,7 +263,7 @@ bool MailPhp::Get(LSocketI *S, char *Uri, LStream &Out, bool MailTransfer)
 			LHttp Http;
 			if (d->UserName && d->UserPass)
 			{
-				Http.SetAuth(d->UserName, d->UserPass);
+				Http.SetPlainAuth(d->UserName, d->UserPass);
 			}
 			if (d->ProxyServer)
 			{
@@ -275,7 +275,7 @@ bool MailPhp::Get(LSocketI *S, char *Uri, LStream &Out, bool MailTransfer)
 			{
 				LStringPipe Buf;
 				int Code = 0;
-				LHttp::ContentEncoding Enc;
+				LHttp::TContentEncoding Enc;
 				if (Http.Get(Uri, 0, &Code, &Buf, &Enc))
 				{
 					auto Start = Buf.Peek(256);

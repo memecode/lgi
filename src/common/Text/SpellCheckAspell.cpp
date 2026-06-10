@@ -692,7 +692,7 @@ public:
 			Out.SetSize(0);
 
 			int Status = 0;
-			LHttp::ContentEncoding Enc;
+			LHttp::TContentEncoding Enc;
 			if (!Http.Get(InUrl, NULL, &Status, &Out, &Enc, NULL))
 			{
 				Out.Close();

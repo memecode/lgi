@@ -369,7 +369,7 @@ int LBrowserThread::Main()
 				LAutoPtr<LSocketI> Sock(new LSocket);
 				if (d->Http.Open(Sock, u.sHost, u.Port))
 				{
-					LHttp::ContentEncoding Enc;
+					LHttp::TContentEncoding Enc;
 					bool b = d->Http.Get(Uri, "Cache-Control:no-cache", &Status, p, &Enc);
 					LBrowserPriv::FilePtr f = d->Lock();
 					if (!b)

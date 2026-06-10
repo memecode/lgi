@@ -127,7 +127,7 @@ struct LSoftwareUpdatePriv
 				return Complete(-2);
 			}
 
-			LHttp::ContentEncoding Enc;
+			LHttp::TContentEncoding Enc;
 			if (!http.Get(GetUri, NULL, &ProtocolStatus, &RawXml, &Enc))
 			{
 				d->SetError(L_ERROR_HTTP_FAILED, sHttpDownloadFailed);
@@ -303,7 +303,7 @@ struct LSoftwareUpdatePriv
 				Http.SetProxy(Proxy->sHost, Proxy->Port?Proxy->Port:HTTP_PORT);
 
 			LAutoPtr<LSocketI> s(new LSocket);
-			LHttp::ContentEncoding Enc;
+			LHttp::TContentEncoding Enc;
 			if (!Http.Open(s, Uri->sHost, Uri->Port))
 			{
 				*Err = LLoadString(L_ERROR_CONNECT_FAILED, sSocketConnectFailed);

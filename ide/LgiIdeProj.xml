@@ -308,10 +308,7 @@ _GNU_SOURCE</Release>
 		<Debug>
 			<Environment />
 			<Arguments>
-				<All>
-					<Debug>/home/matthew/code/lgi/trunk/ide/LgiIdeProj.xml</Debug>
-					<Release>/home/matthew/code/lgi/trunk/ide/LgiIdeProj.xml</Release>
-				</All>
+				<All />
 			</Arguments>
 			<DebugAdmin />
 			<InitialDir />

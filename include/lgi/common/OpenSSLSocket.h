@@ -30,11 +30,11 @@ class SslSocket :
 	
 protected:
 	LMutex Lock;
-	BIO *Bio = NULL;
-	SSL *Ssl = NULL;
+	BIO *Bio = nullptr;
+	SSL *Ssl = nullptr;
 	LString ErrMsg;
-	LStream *log = NULL;
-	bool DebugLogging = true;
+	LStream *log = nullptr;
+	bool DebugLogging = false;
 
 	// Local stuff
 	virtual void Log(const char *Str, ssize_t Bytes, SocketMsgType Type);

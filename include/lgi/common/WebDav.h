@@ -31,7 +31,7 @@ protected:
 	{
 		bool Status;
 		int ProtocolStatus;
-		LHttp::ContentEncoding Encoding;
+		LHttp::TContentEncoding Encoding;
 		LString InHdrs, InBody;
 		LString OutHdrs, OutBody;
 

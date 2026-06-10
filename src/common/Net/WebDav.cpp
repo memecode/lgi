@@ -55,7 +55,7 @@ bool LWebdav::Request(Req &r, const char *Name, LString Resource)
 		auto Full = u.ToString();
 		LMemStream In(r.InBody.Get(), r.InBody.Length(), false);
 
-		http.SetAuth(User, Pass);
+		http.SetPlainAuth(User, Pass);
 		r.Status = http.Request(Name, Full, &r.ProtocolStatus, r.InHdrs, r.InBody ? &In : NULL, &OutPipe, &OutHdrsPipe, &r.Encoding);
 		r.OutHdrs = OutHdrsPipe.NewLStr();
 		r.OutBody = OutPipe.NewLStr();
