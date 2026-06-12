@@ -80,7 +80,7 @@ struct LGraphPriv
 		MaxY.Empty();
 	}
 
-	LVariantType GuessType(char *s)
+	LVariantType GuessType(const char *s)
 	{
 		bool Dot = false;
 		bool Num = false;
@@ -115,7 +115,7 @@ struct LGraphPriv
 		}
 	}
 
-	bool Convert(LVariant &v, LVariantType type, char *in)
+	bool Convert(LVariant &v, LVariantType type, const char *in)
 	{
 		if (!in)
 			return false;
@@ -132,6 +132,7 @@ struct LGraphPriv
 				v = &dt;
 				break;
 			}
+			case GV_INT32:
 			case GV_INT64:
 				v = (int64_t)atoi64(in);
 				break;
@@ -256,9 +257,10 @@ struct LGraphPriv
 				max.Value.Date->Get(Max);
 				v.Value.Date->Get(Val);
 				int64 Range = Max - Min;
-				LAssert(Range > 0);
+				//LAssert(Range > 0);
 
-				return (int) ((Val - Min) * (pixels - 1) / Range);
+				if (Range)
+					return (int) ((Val - Min) * (pixels - 1) / Range);
 				break;
 			}
 			case GV_INT64:
@@ -269,9 +271,9 @@ struct LGraphPriv
 				Val = v.CastInt64();
 
 				int64 Range = Max - Min;
-				LAssert(Range > 0);
-
-				return (int) ((Val - Min) * (pixels - 1) / Range);
+				// LAssert(Range > 0);
+				if (Range)
+					return (int) ((Val - Min) * (pixels - 1) / Range);
 				break;
 			}
 			case GV_DOUBLE:
@@ -282,9 +284,9 @@ struct LGraphPriv
 				Val = v.CastDouble();
 
 				double Range = Max - Min;
-				LAssert(Range > 0);
-
-				return (int) ((Val - Min) * (pixels - 1) / Range);
+				// LAssert(Range > 0);
+				if (Range)
+					return (int) ((Val - Min) * (pixels - 1) / Range);
 				break;
 			}
 			default:
@@ -397,11 +399,14 @@ struct LGraphPriv
 							p++;
 							rng /= 10;
 						}
+						/*
 						while (rng < 1)
 						{
 							p--;
 							rng *= 10;
 						}
+						*/
+						
 						int64_inc = (int64) pow(10.0, p);
 						int64 d = (int64)((v.CastInt64() + int64_inc) / int64_inc);
 						v = d * int64_inc;
@@ -422,12 +427,12 @@ struct LGraphPriv
 						if (std::abs(rng - 0.0) > 0.0001)
 						{
 							int p = 0;
-							while (rng > 10)
+							while (rng > 10.0)
 							{
 								p++;
 								rng /= 10;
 							}
-							while (rng < 1)
+							while (rng > 0.0 && rng < 1.0)
 							{
 								p--;
 								rng *= 10;
@@ -511,7 +516,13 @@ void LGraph::DataSeries::SetColour(LColour c)
 	d->colour = c;
 }
 
-bool LGraph::DataSeries::AddPair(char *x, char *y, void *UserData)
+void LGraph::DataSeries::SetTypes(LVariantType x, LVariantType y)
+{
+	priv->XType = x;
+	priv->YType = y;
+}
+
+bool LGraph::DataSeries::AddPair(const char *x, const char *y, void *UserData)
 {
 	if (!x || !y)
 		return false;
@@ -521,7 +532,7 @@ bool LGraph::DataSeries::AddPair(char *x, char *y, void *UserData)
 	if (priv->YType == GV_NULL)
 		priv->YType = priv->GuessType(y);
 
-	Pair &p = d->values.New();
+	auto &p = d->values.New();
 	p.UserData = UserData;
 	
 	if (priv->Convert(p.x, priv->XType, x))

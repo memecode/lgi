@@ -39,13 +39,14 @@ public:
 
 		LColour GetColour();
 		void SetColour(LColour c);
+		void SetTypes(LVariantType x, LVariantType y);		
 		bool SetDataSource(	/// Source of records
 							LDbRecordset *Rs,
 							/// Index into the data source of the X axis value
 							int XAxis = AUTO_AXIS,
 							/// Index into the data source of the Y axis value
 							int YAxis = AUTO_AXIS);
-		bool AddPair(char *x, char *y, void *UserData = NULL);
+		bool AddPair(const char *x, const char *y, void *UserData = NULL);
 	};
     
 	LGraph(	/// Control identifier
