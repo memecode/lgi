@@ -1367,7 +1367,7 @@ public:
 	/// The bitdepth of the image (8, 15, 16, 24, 32).
 	int Bits;
 	/// Pointer to the raw data.
-	uint32_t *Data;
+	const uint32_t *Data;
 
 	/// Creates a memory DC of the image.
 	LSurface *Create(uint32_t TransparentPx = 0xffffffff);

@@ -948,99 +948,122 @@ bool LColourSpaceTest()
 ////////////////////////////////////////////////////////////////////////
 LSurface *LInlineBmp::Create(uint32_t TransparentPx)
 {
-	LSurface *pDC = new LMemDC(_FL);
-	if (pDC->Create(X, Y, System32BitColourSpace, LSurface::SurfaceRequireExactCs))
+	LAutoPtr<LSurface> pDC(new LMemDC(_FL));
+	if (!pDC->Create(X, Y, System32BitColourSpace, LSurface::SurfaceRequireExactCs))
+		return nullptr;
+	
+	LBmpMem Src, Dst;
+	
+	Src.Base = (uint8_t*)Data;
+	Src.Line = (X * Bits) >> 3;
+	Src.x = X;
+	Src.y = Y;
+	switch (Bits)
 	{
-		LBmpMem Src, Dst;
-		
-		Src.Base = (uint8_t*)Data;
-		Src.Line = X * Bits >> 3;
-		Src.x = X;
-		Src.y = Y;
-		switch (Bits)
+		case 8: Src.Cs = CsIndex8; break;
+		case 15: Src.Cs = CsRgb15; break;
+		case 16: Src.Cs = CsRgb16; break;
+		case 24: Src.Cs = CsRgb24; break;
+		case 32: Src.Cs = CsRgba32; break;
+		default: Src.Cs = CsNone; break;
+	}
+	
+	Dst.Base = (*pDC)[0];
+	Dst.Line = pDC->GetRowStep();
+	Dst.x = pDC->X();
+	Dst.y = pDC->Y();
+	Dst.Cs = pDC->GetColourSpace();
+	
+	LRopUniversal(&Dst, &Src, false);
+	
+	/* Debug code:
+	for (int y=0; y<Y; y++)
+	{
+		auto in = (LRgb16*)(Src.Base + (y * Src.Line));
+		auto out = (LRgba32*)(*pDC)[y];
+	
+		for (int x=0; x<X; x++)
 		{
-			case 8: Src.Cs = CsIndex8; break;
-			case 15: Src.Cs = CsRgb15; break;
-			case 16: Src.Cs = CsRgb16; break;
-			case 24: Src.Cs = CsRgb24; break;
-			case 32: Src.Cs = CsRgba32; break;
-			default: Src.Cs = CsNone; break;
+			LgiTrace("%i,%i,%i->%i,%i,%i,%i  ",
+				in->r << 3, in->g << 2, in->b << 3,
+				out->r, out->g, out->b, out->a);
+			in++;
+			out++;
 		}
 		
-		Dst.Base = (*pDC)[0];
-		Dst.Line = pDC->GetRowStep();
-		Dst.x = pDC->X();
-		Dst.y = pDC->Y();
-		Dst.Cs = pDC->GetColourSpace();
-		
-		LRopUniversal(&Dst, &Src, false);
-		
-		if (TransparentPx != 0xffffffff)
+		LgiTrace("\n");
+	}
+	*/
+	
+	#if 1
+	if (TransparentPx != 0xffffffff)
+	{
+		for (int y=0; y<Y; y++)
 		{
-			for (int y=0; y<Y; y++)
+			LPointer s;
+			s.u8 = (uint8_t*)Data + (y * Src.Line);
+			uint32_t *d = (uint32_t*)(*pDC)[y];
+			
+			switch (Bits >> 3)
 			{
-				LPointer s;
-				s.u8 = (uint8_t*)Data + (y * Src.Line);
-				uint32_t *d = (uint32_t*)(*pDC)[y];
-				
-				switch (Bits >> 3)
+				case 1:
 				{
-					case 1:
+					for (int x=0; x<X; x++)
 					{
-						for (int x=0; x<X; x++)
-						{
-							if (s.u8[x] == TransparentPx)
-								d[x] = 0;
-						}
-						break;
+						if (s.u8[x] == TransparentPx)
+							d[x] = 0;
 					}
-					case 2:
+					break;
+				}
+				case 2:
+				{
+					for (int x=0; x<X; x++)
 					{
-						for (int x=0; x<X; x++)
-						{
-							if (s.u16[x] == TransparentPx)
-								d[x] = 0;
-						}
-						break;
+						if (s.u16[x] == TransparentPx)
+							d[x] = 0;
 					}
-					case 3:
+					break;
+				}
+				case 3:
+				{
+					uint8_t r = R24(TransparentPx);
+					uint8_t g = G24(TransparentPx);
+					uint8_t b = B24(TransparentPx);
+					auto px = (LRgb24*) s.u8;
+					auto e = px + X;
+					while (px < e)
 					{
-						REG uint8_t r = R24(TransparentPx);
-						REG uint8_t g = G24(TransparentPx);
-						REG uint8_t b = B24(TransparentPx);
-						REG LRgb24 *px = (LRgb24*) s.u8;
-						REG LRgb24 *e = px + X;
-						while (px < e)
+						if (px->r == r &&
+							px->g == g &&
+							px->b == b)
 						{
-							if (px->r == r &&
-								px->g == g &&
-								px->b == b)
-							{
-								*d = 0;
-							}
-							d++;
+							*d = 0;
 						}
-						break;
+						d++;
+						px++;
 					}
-					case 4:
+					break;
+				}
+				case 4:
+				{
+					for (int x=0; x<X; x++)
 					{
-						for (int x=0; x<X; x++)
-						{
-							if (s.u32[x] == TransparentPx)
-								d[x] = 0;
-						}
-						break;
+						if (s.u32[x] == TransparentPx)
+							d[x] = 0;
 					}
+					break;
 				}
 			}
 		}
 	}
-	else
-	{
-		DeleteObj(pDC);
-	}
+	#endif
 
-	return pDC;
+	#if 1
+	static int count = 1;
+	GdcD->Save(LFile::Path(LSP_APP_INSTALL) / LString::Fmt("inline_%i.bmp", count++), pDC.Get());
+	#endif
+
+	return pDC.Release();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
