@@ -91,7 +91,7 @@
 		3457FE472081CB3D00014BE4 /* VcFolder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VcFolder.cpp; path = ../Src/VcFolder.cpp; sourceTree = "<group>"; };
 		3457FE482081CB3D00014BE4 /* VcFolder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VcFolder.h; path = ../Src/VcFolder.h; sourceTree = "<group>"; };
 		3457FE4F2081CBE500014BE4 /* SubProcess.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = SubProcess.cpp; path = ../../src/posix/SubProcess.cpp; sourceTree = "<group>"; };
-		3457FE512081CC4800014BE4 /* Lvc.lr8 */ = {isa = PBXFileReference; explicitFileType = text; fileEncoding = 4; name = Lvc.lr8; path = ../Resources/Lvc.lr8; sourceTree = "<group>"; };
+		3457FE512081CC4800014BE4 /* Lvc.lr8 */ = {isa = PBXFileReference; explicitFileType = text; fileEncoding = 4; name = Lvc.lr8; path = ../resources/Lvc.lr8; sourceTree = SOURCE_ROOT; };
 		3465A7E22B2AB1BF00084F66 /* PostBuildStep.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = PostBuildStep.py; sourceTree = "<group>"; };
 		347D1488252D453300422DA9 /* DeEscape.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DeEscape.cpp; path = ../../src/common/Text/DeEscape.cpp; sourceTree = "<group>"; };
 		3485E7F4294F13F70020C14D /* PatchViewer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PatchViewer.cpp; path = ../Src/PatchViewer.cpp; sourceTree = "<group>"; };
