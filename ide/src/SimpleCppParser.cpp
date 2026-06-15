@@ -450,7 +450,8 @@ struct CppContext
 				}
 			}
 			else if (Compare(t, "LgiClass", true) ||
-					 Compare(t, "ScribeClass", true))
+					 Compare(t, "ScribeClass", true) ||
+					 Compare(t, "FILE_SELECT_CLS", true))
 			{
 				// Ignore these...
 				DeleteArray(t);
