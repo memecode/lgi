@@ -480,7 +480,7 @@ bool LWindow::SetTitleBar(bool ShowTitleBar)
 	return true;
 }
 
-bool LWindow::SetIcon(const char *FileName)
+bool LWindow::SetIcon(const char *FileName, const char *gnomeAppType)
 {
 	#warning "Impl LWindow::SetIcon"
 	return false;
