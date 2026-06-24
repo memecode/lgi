@@ -23,7 +23,7 @@ class LRadioGroupPrivate : public LMutex, public LStringLayout
 	
 public:
 	static int NextId;
-	int Val;
+	int64_t Val;
 	int MaxLayoutWidth;
 	LHashTbl<PtrKey<LViewI*>,LViewLayoutInfo*> Info;
 

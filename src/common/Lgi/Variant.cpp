@@ -436,7 +436,7 @@ LVariant &LVariant::operator =(const char16 *s)
 LVariant &LVariant::operator =(LString s)
 {
 	Empty();
-	if (Value.LStr = new LString)
+	if ((Value.LStr = new LString))
 	{
 		Type = GV_LSTRING;
 		*Value.LStr = s;
@@ -909,6 +909,8 @@ LString LVariant::LStr() const
 			break;
 		case GV_WSTRING:
 			return LString(Value.WString);
+		default:
+			break;
 	}
 
 	return LString();
@@ -931,6 +933,9 @@ const char *LVariant::ConstStr() const
 		case GV_WSTRING:
 			// Can't convert from wstring to char?
 			break;
+		default:
+			break;
+
 	}
 
 	return nullptr;
@@ -957,6 +962,8 @@ char *LVariant::Str()
 				return Value.LStr->Get();
 			break;
 		}
+		default:
+			break;
 	}
 
 	return nullptr;
@@ -994,6 +1001,8 @@ char16 *LVariant::WStr()
 			}
 			break;
 		}
+		default:
+			break;
 	}
 
 	return nullptr;

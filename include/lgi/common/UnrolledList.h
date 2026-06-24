@@ -321,7 +321,7 @@ protected:
 		if (Index < 0)
 			Index = i->Count;
 		else if (Index < i->Count)
-			memmove(i->Obj+Index+1, i->Obj+Index, (i->Count-Index) * sizeof(p));
+			memmove((uint8_t*)(i->Obj+Index+1), i->Obj+Index, (i->Count-Index) * sizeof(p));
 		i->Obj[Index] = p;
 		i->Count++;
 		Items++;
@@ -490,7 +490,7 @@ public:
 		int &Index = Pos.Cur;
 		LstBlk *&i = Pos.i;
 		if (Index < i->Count-1)
-			memmove(i->Obj+Index, i->Obj+Index+1, (i->Count-Index-1) * sizeof(T));
+			memmove((uint8_t*)(i->Obj+Index), i->Obj+Index+1, (i->Count-Index-1) * sizeof(T));
 
 		Items--;
 		if (--i->Count == 0)

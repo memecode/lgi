@@ -629,7 +629,7 @@ int LItemContainer::OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
 
 void LItemContainer::SetDragItem(ItemDragFlags flags)
 {
-	if (DragItem = flags)
+	if ((DragItem = flags))
 	{
 		DropTarget(this);
 		DropTarget(true);

@@ -1354,7 +1354,7 @@ class PointStack {
 		{
 			Size += s;
 			Used = MIN(Size, Used);
-			memcpy(Next, Stack, sizeof(LPoint)*Used);
+			memcpy((uint8_t*)Next, Stack, sizeof(LPoint)*Used);
 			DeleteArray(Stack);
 			Stack = Next;
 			return true;

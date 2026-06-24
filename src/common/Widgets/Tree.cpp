@@ -356,7 +356,7 @@ bool LTreeNode::ForEach(std::function<bool(LTreeItem*)> Fn, int *count)
 			return false;
 			
 		if (count)
-			*count++;
+			(*count)++;
 		
 		if (!t->ForEach(Fn, count))
 			return false;

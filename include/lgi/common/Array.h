@@ -88,7 +88,7 @@ public:
 			p = (Type*) malloc(Bytes);
 			if (p)
 			{
-				memset(p, 0, Bytes);
+				memset((uint8_t*)p, 0, Bytes);
 			}
 			else
 			{
@@ -210,11 +210,11 @@ public:
 					return false;
 				}
 
-				memset(np + len, 0, (nalloc - len) * sizeof(Type));
+				memset((uint8_t*)(np + len), 0, (nalloc - len) * sizeof(Type));
 				if (p)
 				{
 					// copy across common elements
-					memcpy(np, p, MIN(len, i) * sizeof(Type));
+					memcpy((uint8_t*)np, p, MIN(len, i) * sizeof(Type));
 					free(p);
 				}
 				p = np;
@@ -224,7 +224,7 @@ public:
 			if (i > len)
 			{
 				// zero new elements
-				memset(p + len, 0, sizeof(Type) * (nalloc - len));
+				memset((uint8_t*)(p + len), 0, sizeof(Type) * (nalloc - len));
 			}
 			else if (i < len)
 			{
@@ -375,11 +375,11 @@ public:
 			if (np)
 			{
 				// clear new cells
-				memset(np + len, 0, (nalloc - len) * sizeof(Type));
+				memset((uint8_t*)(np + len), 0, (nalloc - len) * sizeof(Type));
 				if (p)
 				{
 					// copy across old cells
-					memcpy(np, p, len * sizeof(Type));
+					memcpy((uint8_t*)np, p, len * sizeof(Type));
 					
 					// clear old array
 					free(p);
@@ -508,7 +508,7 @@ public:
 			if (index < len - 1)
 			{
 				if (Ordered)
-					memmove(p + index, p + index + 1, (len - index - 1) * sizeof(Type) );
+					memmove((uint8_t*)(p + index), p + index + 1, (len - index - 1) * sizeof(Type) );
 				else
 					p[index] = p[len-1];
 			}
@@ -517,7 +517,7 @@ public:
 			len--;
 
 			// Kill the element at the end... otherwise New() returns non-zero data.
-			memset(p + len, 0, sizeof(Type));
+			memset((uint8_t*)(p + len), 0, sizeof(Type));
 			return true;
 		}
 		
@@ -653,13 +653,13 @@ public:
 
 		if (index >= 0 && index < len - 1)
 			// Shift elements after insert point up one
-			memmove(p + index + 1, p + index, (len - index - 1) * sizeof(Type) );
+			memmove((uint8_t*)(p + index + 1), p + index, (len - index - 1) * sizeof(Type) );
 		else
 			// Add at the end, not after the end...
 			index = len - 1;
 
 		// Insert item
-		memset(p + index, 0, sizeof(*p));
+		memset((uint8_t*)(p + index), 0, sizeof(*p));
 		p[index] = n;
 
 		return true;
@@ -685,13 +685,13 @@ public:
 
 		if (index < len - 1)
 			// Shift elements after insert point up one
-			memmove(p + index + a.Length(), p + index, (len - index - a.Length()) * sizeof(Type) );
+			memmove((uint8_t*)(p + index + a.Length()), p + index, (len - index - a.Length()) * sizeof(Type) );
 		else
 			// Add at the end, not after the end...
 			index = len - a.Length();
 
 		// Insert items
-		memset(p + index, 0, a.Length() * sizeof(*p));
+		memset((uint8_t*)(p + index), 0, a.Length() * sizeof(*p));
 		for (size_t i=0; i<a.Length(); i++)
 			p[index+i] = a.ItemAt(i);
 

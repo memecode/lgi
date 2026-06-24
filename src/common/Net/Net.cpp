@@ -2561,7 +2561,7 @@ struct LHostnameAsyncPriv
 						buf.w16(0); // Z: cannot handle DNSSEC
 						buf.w16(0); // data len?
 						
-						auto wr = sock.WriteUdp(buf.msg, buf.size(), 0, dnsServer, DNS_PORT);
+						auto wr = sock.WriteUdp(buf.msg, (int)buf.size(), 0, dnsServer, DNS_PORT);
 						// printf("dns write=%i\n", wr);
 					}
 				}
