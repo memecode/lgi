@@ -326,6 +326,7 @@ protected:
 	LColour BranchColour(const char *Name);
 	void UpdateBranchUi();
 	LString DiffContextOption();
+	bool BlameInternal(const char *Path, ParseFn Parser);
 
 	bool ParseDiffs(LString s, LString Rev, bool IsWorking);
 	
@@ -344,6 +345,7 @@ protected:
 	bool ParseResolveList(int Result, LString s, ParseParams *Params);
 	bool ParseResolve(int Result, LString s, ParseParams *Params);
 	bool ParseBlame(int Result, LString s, ParseParams *Params);
+	bool ParseListAuthors(int Result, LString s, ParseParams *Params);
 	bool ParseSaveAs(int Result, LString s, ParseParams *Params);
 	bool ParseBranches(int Result, LString s, ParseParams *Params);
 	bool ParseStatus(int Result, LString s, ParseParams *Params);
@@ -409,6 +411,7 @@ public:
 	bool Resolve(const char *Path, LvcResolve Type);
 	bool AddFile(const char *Path, bool AsBinary = true);
 	bool Blame(const char *Path);
+	bool ListAuthors(const char *Path);
 	bool SaveFileAs(const char *Path, const char *Revision);
 	void ReadDir(LTreeItem *Parent, const char *Uri);
 	void SetEol(const char *Path, int Type);

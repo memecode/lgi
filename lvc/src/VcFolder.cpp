@@ -5896,6 +5896,13 @@ bool VcFolder::ParseBlame(int Result, LString s, ParseParams *Params)
 
 bool VcFolder::Blame(const char *Path)
 {
+	return BlameInternal(Path, &VcFolder::ParseBlame);
+}
+
+/// This is called by both 'Blame' and 'ListAuthors' to get a line by line listing of the
+/// authorship of the file.
+bool VcFolder::BlameInternal(const char *Path, ParseFn Parser)
+{
 	if (!Path)
 		return false;
 
@@ -5909,21 +5916,21 @@ bool VcFolder::Blame(const char *Path)
 		{
 			LString a;
 			a.Printf("blame \"%s\"", file.Get());
-			return StartCmd(a, &VcFolder::ParseBlame, Params.Release());
+			return StartCmd(a, Parser, Params.Release());
 			break;
 		}
 		case VcHg:
 		{
 			LString a;
 			a.Printf("annotate -un \"%s\"", file.Get());
-			return StartCmd(a, &VcFolder::ParseBlame, Params.Release());
+			return StartCmd(a, Parser, Params.Release());
 			break;
 		}
 		case VcSvn:
 		{
 			LString a;
 			a.Printf("blame \"%s\"", file.Get());
-			return StartCmd(a, &VcFolder::ParseBlame, Params.Release());
+			return StartCmd(a, Parser, Params.Release());
 			break;
 		}
 		default:
@@ -5934,6 +5941,94 @@ bool VcFolder::Blame(const char *Path)
 	}
 
 	return true;
+}
+
+struct ListAuthorUi : public LWindow
+{
+	LTableLayout *tbl = nullptr;
+	LList *lst = nullptr;
+	
+	enum Columns {
+		cAuthor,
+		cLines,
+		cPercent,
+	};
+	
+	ListAuthorUi(VcFolder *f, LString path, LArray<BlameLine> &lines)
+	{
+		AddView(tbl = new LTableLayout(ID_TABLE));
+		tbl->SetPourLargest(true);
+		auto c = tbl->GetCell(0, 0);
+		c->Add(new LTextLabel(ID_STATIC, 0, 0, -1, -1, "Path:"));
+		c = tbl->GetCell(1, 0);
+		c->Add(new LEdit(ID_PATH, path));
+		c = tbl->GetCell(0, 1, true, 2);
+		c->Add(lst = new LList(ID_AUTHORS));
+		lst->AddColumn("Author");
+		lst->AddColumn("Lines");
+		lst->AddColumn("Percent");
+	
+		LRect r(0, 0, 1000, 500);
+		SetPos(r);
+		if (f)
+			if (auto t = f->GetTree())
+				if (auto w = t->GetWindow())
+					MoveSameScreen(w);
+		
+		LHashTbl<ConstStrKey<char, false>, int> count;
+		for (auto &ln: lines)
+		{
+			auto cur = count.Find(ln.user);
+			count.Add(ln.user, cur+1);
+		}
+		for (auto p: count)
+		{
+			auto item = new LListItem;
+			item->SetText(p.key, cAuthor);
+			item->SetText(LString::Fmt("%i", p.value), cLines);
+			item->SetText(LString::Fmt("%.2f", (double)p.value * 100.0 / lines.Length()), cPercent);
+			lst->Insert(item);
+		}
+		lst->ResizeColumnsToContent();
+		lst->Sort([](auto a, auto b)
+			{
+				auto av = a->GetText(cLines);
+				auto bv = b->GetText(cLines);
+				auto diff = Atoi(bv) - Atoi(av);
+				if (!diff)
+					return b - a;
+				return diff;
+			});
+		
+		if (Attach(nullptr))
+		{
+			Visible(true);
+		}
+	}
+};
+
+bool VcFolder::ParseListAuthors(int Result, LString s, ParseParams *Params)
+{
+	if (!Params)
+	{
+		LAssert(!"Need the path in the params.");
+		return false;
+	}
+
+	LArray<BlameLine> lines;
+	if (!BlameLine::Parse(GetType(), lines, s))
+	{
+		NoImplementation(_FL);
+		return false;
+	}
+	
+	new ListAuthorUi(this, Params->Str, lines);
+	return false;
+}
+
+bool VcFolder::ListAuthors(const char *Path)
+{
+	return BlameInternal(Path, &VcFolder::ParseListAuthors);
 }
 
 bool VcFolder::SaveFileAs(const char *Path, const char *Revision)
@@ -6247,11 +6342,11 @@ void VcLeaf::OnMouseClick(LMouse &m)
 		s.AppendItem(LLoadString(IDS_BLAME), IDM_BLAME, !Folder);
 		s.AppendSeparator();
 		s.AppendItem(LLoadString(IDS_BROWSE_TO), IDM_BROWSE_FOLDER);
-		s.AppendItem(LLoadString(ID_TERMINAL_AT), IDM_TERMINAL);
+		s.AppendItem(LLoadString(IDS_TERMINAL_AT), IDM_TERMINAL);
 		
 		auto full = Full();
-		int Cmd = s.Float(GetTree(), m - _ScrollPos());
-		switch (Cmd)
+		auto cmd = s.Float(GetTree(), m - _ScrollPos());
+		switch (cmd)
 		{
 			case IDM_LOG:
 			{

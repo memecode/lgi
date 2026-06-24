@@ -88,7 +88,7 @@
 #define ID_CLEAR_FILTER							156
 #define ID_CHECKOUT								157
 #define ID_DIFF_PAD								159
-#define ID_TERMINAL_AT							161
+#define IDS_TERMINAL_AT							161
 #define ID_CHERRY_PICK							162
 #define ID_BRANCH								166
 #define ID_PARENT_COMMITS						173
@@ -96,6 +96,7 @@
 #define ID_MESSAGE								178
 #define ID_COPY_NAME							180
 #define IDC_182									182
+#define IDS_LIST_AUTHORS						184
 #define ID_URL									188
 #define ID_COPY									189
 #define ID_CHANGE								190

@@ -126,6 +126,9 @@ enum AppIds
 	ID_GOTO_ITEM,
 	ID_REWRITE_AUTHOR,
 	ID_REMOTE_URL,
+	ID_LIST_AUTHORS,
+	ID_PATH,
+	ID_AUTHORS,
 };
 
 enum AppMessages

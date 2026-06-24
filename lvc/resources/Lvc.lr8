@@ -164,8 +164,9 @@
 		<String Ref="126" Cid="126" Define="IDS_AUTO" en="Auto" />
 		<String Ref="127" Cid="127" Define="IDS_COPY_FMT" en="Copy &apos;%s&apos;" />
 		<String Ref="128" Cid="128" Define="IDS_ERR_NO_PATH_FMT" en="Can&apos;t find path &apos;%s&apos;." />
-		<String Ref="161" Cid="161" Define="ID_TERMINAL_AT" en="Terminal At" />
+		<String Ref="161" Cid="161" Define="IDS_TERMINAL_AT" en="Terminal At" />
 		<String Ref="173" Cid="535" Define="IDS_NEW_BRANCH_Q" en="Do you want to start a new branch?" />
+		<String Ref="184" Cid="184" Define="IDS_LIST_AUTHORS" en="List Authors" />
 	</string-group>
 	<Dialog pos="8,8,410,217" ref="93">
 		<TableLayout pos="7,7,391,181" ref="94" cols="0.333,0.333,0.333" rows="0.143,0.143,0.143,0.143,0.143,0.143,0.143">

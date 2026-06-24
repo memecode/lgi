@@ -162,6 +162,7 @@ void VcFile::OnMouseClick(LMouse &m)
 			s.AppendItem(LLoadString(IDS_REVERT_THIS), ID_REVERT_TO_REV, Status != SClean);
 			s.AppendItem(LLoadString(IDS_REVERT_BEFORE), ID_REVERT_TO_BEFORE, Status != SClean);
 			s.AppendItem(LLoadString(IDS_BLAME), IDM_BLAME);
+			s.AppendItem(LLoadString(IDS_LIST_AUTHORS), ID_LIST_AUTHORS);
 			s.AppendItem(LLoadString(IDS_SAVE_AS), IDM_SAVE_AS);
 			s.AppendItem(LLoadString(IDS_LOG), IDM_LOG_FILE);
 		}
@@ -210,6 +211,7 @@ void VcFile::OnMouseClick(LMouse &m)
 			s.AppendItem(LLoadString(IDS_BROWSE_TO), IDM_BROWSE, !LocalPath.IsEmpty());
 			s.AppendItem(LLoadString(IDS_LOG), IDM_LOG_FILE);
 			s.AppendItem(LLoadString(IDS_BLAME), IDM_BLAME);
+			s.AppendItem(LLoadString(IDS_LIST_AUTHORS), ID_LIST_AUTHORS);
 			s.AppendSeparator();
 			if (Status == SMissing)
 			{
@@ -324,6 +326,11 @@ void VcFile::OnMouseClick(LMouse &m)
 			case IDM_BLAME:
 			{
 				Owner->Blame(Uris[0]);
+				break;
+			}
+			case ID_LIST_AUTHORS:
+			{
+				Owner->ListAuthors(Uris[0]);
 				break;
 			}
 			case IDM_SAVE_AS:
