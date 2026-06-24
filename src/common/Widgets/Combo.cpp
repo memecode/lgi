@@ -548,7 +548,7 @@ void LCombo::OnPaint(LSurface *pDC)
 			d->SetText(new LDisplayString(GetFont(), n), _FL);
 	}
 
-	LColour cBack = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
+	auto cBack = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
 
 	if (LApp::SkinEngine &&
 		TestFlag(LApp::SkinEngine->GetFeatures(), GSKIN_COMBO))

@@ -648,9 +648,7 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 		callbacks->DeleteObjects();
 	}
 	
-	// printf("IdleWrapper end\n");
 	return i->cb != NULL;
-	// return false;
 }
 
 static GtkIdle idle = {0};

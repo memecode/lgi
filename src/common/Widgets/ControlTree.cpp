@@ -16,12 +16,7 @@
 class LControlTreePriv
 {
 public:
-    LResources *Factory;
-    
-    LControlTreePriv()
-    {
-        Factory = 0;
-    }
+    LResources *Factory = nullptr;
 };
 
 LControlTree::Item::Item(int ctrlId, char *Txt, const char *opt, LVariantType type, LArray<LControlTree::EnumValue> *pEnum)
@@ -33,8 +28,6 @@ LControlTree::Item::Item(int ctrlId, char *Txt, const char *opt, LVariantType ty
 	Enum.Reset(pEnum);
 	SetText(Txt);
 	Type = type;
-	Ctrl = 0;
-	Browse = 0;
 }
 
 LControlTree::Item::~Item()
@@ -52,34 +45,33 @@ void LControlTree::Item::OnVisible(bool v)
 	if (Ctrl)
 	{
 		if (v)
+		{
 			PositionControls();
+		}
 		else
 		{
 			Ctrl->Visible(false);
-			if (Browse) Browse->Visible(false);
+			if (Browse)
+				Browse->Visible(false);
 		}
 	}
 }
 
 LControlTree::Item *LControlTree::Item::Find(const char *opt)
 {
-	if (Opt && !_stricmp(Opt, opt))
-	{
+	if (!Stricmp(Opt.Get(), opt))
 		return this;
-	}
 
 	for (LTreeItem *i = GetChild(); i; i = i->GetNext())
 	{
-		LControlTree::Item *ci = dynamic_cast<LControlTree::Item*>(i);
-		if (ci)
+		if (auto *ci = dynamic_cast<LControlTree::Item*>(i))
 		{
-			LControlTree::Item *f = ci->Find(opt);
-			if (f)
+			if (auto f = ci->Find(opt))
 				return f;
 		}
 	}
 
-	return 0;
+	return nullptr;
 }
 
 bool LControlTree::Item::Serialize(LDom *Store, bool Write)
@@ -125,8 +117,8 @@ LRect &LControlTree::Item::GetRect()
 {
 	static LRect r;
 	r.ZOff(-1, -1);
-	LRect *p = _GetRect(TreeItemText);
-	if (p)
+	
+	if (auto p = _GetRect(TreeItemText))
 	{
 		bool HasBrowse = (Flags & TYPE_FILE) != 0;
 		int x = p->x2 + 5;
@@ -136,6 +128,7 @@ LRect &LControlTree::Item::GetRect()
 		r.y1 = (p->y1 + (p->Y()/2)) - (Cy / 2);
 		r.y2 = r.y1 + Cy - 1;
 	}
+	
 	return r;
 }
 
@@ -167,14 +160,13 @@ void LControlTree::Item::Save()
 			}
 			default:
 			{
-				int Idx = (int)Ctrl->Value();
-
-				if (Enum && Enum->Length())
+				auto Idx = Ctrl->Value();
+				if (Enum)
 				{
-					if (Idx >= 0 && Idx < (int)Enum->Length())
+					if (Idx >= 0 && Idx < Enum->Length())
 					{
-						LControlTree::EnumValue &e = (*Enum)[Idx];
-						if (e.Value.Type == GV_STRING)
+						auto &e = (*Enum)[Idx];
+						if (e.Value.IsString())
 						{
 							if (Stricmp(Value.Str(), e.Value.Str()))
 							{
@@ -185,10 +177,10 @@ void LControlTree::Item::Save()
 						else if (Idx != Value.CastInt32())
 						{
 							Value = Idx;
+							printf("%s:%i - enum saved as index = %i\n", _FL, (int)Idx);
 							Tree->SendNotify(LNotifyValueChanged);
 						}
 					}
-					else LAssert(0);
 				}
 				else if (Idx != Value.CastInt32())
 				{
@@ -205,11 +197,11 @@ void LControlTree::Item::Select(bool b)
 {
 	LTreeItem::Select(b);
 
-	if ((Ctrl != 0) ^ b)
+	if ((Ctrl != nullptr) ^ b)
 	{
 		if (b)
 		{
-			LAssert(Ctrl == 0);
+			LAssert(Ctrl == nullptr);
 			int FontY = LSysFont->GetHeight();
 			int CtrlY = FontY + (FontY >> 1);
 
@@ -232,6 +224,8 @@ void LControlTree::Item::Select(bool b)
 						Ctrl->Value(Value.CastInt32());
 					break;
 				case GV_INT32:
+				{
+					LRect r(0, 0, 60, CtrlY);
 					if (Enum)
 					{
 						LCombo *Cbo;
@@ -241,7 +235,7 @@ void LControlTree::Item::Select(bool b)
 
 							for (unsigned i=0; i<Enum->Length(); i++)
 							{
-								EnumValue &e = (*Enum)[i];
+								auto &e = (*Enum)[i];
 								Cbo->Insert(e.Name);
 								if (e.Value == Value)
 									Idx = i;
@@ -249,28 +243,27 @@ void LControlTree::Item::Select(bool b)
 
 							if (Idx >= 0)
 								Ctrl->Value(Idx);
+							Ctrl->SetPos(r);
 						}
 					}
 					else if ((Ctrl = new LEdit(CtrlId)))
 					{
-						LRect r(0, 0, 60, CtrlY);
 						Ctrl->SetPos(r);
 						Ctrl->Value(Value.CastInt32());
 					}
 					break;
+				}
 			}
 
 			if (Ctrl)
 			{
-				LColour Ws = LColour(L_WORKSPACE);
+				LColour Ws(L_WORKSPACE);
 				Ctrl->SetColour(Ws, false);
-				Ctrl->Visible(false);
 				Ctrl->Attach(GetTree());
 
 				if (Browse)
 				{
 					Browse->SetColour(Ws, false);
-					Browse->Visible(false);
 					Browse->Attach(GetTree());
 				}
 
@@ -323,29 +316,55 @@ void LControlTree::Item::OnPaint(ItemPaintCtx &Ctx)
 				break;
 			case GV_INT32:
 			{
-				char s[32], *Disp = 0;
+				char s[32], *Disp = nullptr;
+				LString errMsg;
 				if (Enum)
 				{
-					for (unsigned i=0; i<Enum->Length(); i++)
+					if (Value.IsString())
 					{
-						EnumValue &e = (*Enum)[i];
-						
-						#if 0
-						LString s1 = e.Value.ToString();
-						LString s2 = Value.ToString();
-						LgiTrace("EnumMatch %s: %s - %s\n", e.Name, s1.Get(), s2.Get());
-						#endif
-						
-						if (e.Value == Value)
+						bool found = false;
+						for (unsigned i=0; i<Enum->Length(); i++)
 						{
+							auto &e = (*Enum)[i];
+							
+							#if 0
+							LString s1 = e.Value.ToString();
+							LString s2 = Value.ToString();
+							LgiTrace("EnumMatch %s: %s - %s\n", e.Name, s1.Get(), s2.Get());
+							#endif
+							
+							if (e.Value == Value)
+							{
+								Disp = e.Name;
+								found = true;
+								break;
+							}
+						}
+						
+						if (!found)
+							errMsg.Printf("string value '%s' not valid", Value.Str());
+					}
+					else if (Value.IsInt())
+					{
+						auto i = Value.CastInt64();
+						if (i >= 0 && i < Enum->Length())
+						{
+							auto &e = (*Enum)[i];
 							Disp = e.Name;
-							break;
 						}
 					}
+					else if (!Value.IsNull())
+						LAssert(!"unexpected value type");
 
 					if (Disp)
 					{
 						LDisplayString ds(LSysBold, Disp);
+						ds.Draw(Ctx.pDC, p.x1 + 8, p.y1 + 1);
+					}
+					else if (errMsg)
+					{
+						LDisplayString ds(LSysFont, errMsg);
+						LSysFont->Colour(LColour::Red, LColour(L_WORKSPACE));
 						ds.Draw(Ctx.pDC, p.x1 + 8, p.y1 + 1);
 					}
 					else
@@ -501,26 +520,25 @@ LControlTree::Item *LControlTree::Resolve(bool Create, const char *Path, int Ctr
 					}
 				}
 
-				return 0;
+				return nullptr;
 			}
 		}
 
 		return dynamic_cast<LControlTree::Item*>(Cur);
 	}
 
-	return 0;
+	return nullptr;
 }
 
 LTreeItem *LControlTree::Insert(const char *DomPath, int CtrlId, LVariantType Type, LVariant *Value, LArray<EnumValue> *Enum)
 {
-	LControlTree::Item *c = Resolve(true, DomPath, CtrlId, Type, Enum);
-	if (c)
+	if (auto c = Resolve(true, DomPath, CtrlId, Type, Enum))
 	{
 		if (Value)
 			c->SetValue(*Value);
 	}
 
-	return 0;
+	return nullptr;
 }
 
 void LControlTree::ReadTree(LXmlTag *t, LTreeNode *n)
@@ -608,8 +626,7 @@ int LControlTree::OnNotify(LViewI *c, const LNotification &n)
 	{
 		case IDC_BROWSE:
 		{
-			Item *i = dynamic_cast<Item*>(Selection());
-			if (i)
+			if (auto i = dynamic_cast<Item*>(Selection()))
 			{
 				auto s = new LFileSelect;
 				s->Parent(this);
@@ -634,12 +651,10 @@ class LControlTree_Factory : public LViewFactory
 {
 	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
-		if (_stricmp(Class, "LControlTree") == 0)
-		{
+		if (!Stricmp(Class, "LControlTree"))
 			return new LControlTree;
-		}
 
-		return 0;
+		return nullptr;
 	}
 
-} ControlTree_Factory;
+}	ControlTree_Factory;
