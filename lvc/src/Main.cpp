@@ -125,44 +125,52 @@ VersionCtrl AppPriv::DetectVcs(VcFolder *Fld)
 
 	if (!u.IsFile() || !u.sPath)
 	{
-		#if HAS_LIBSSH
-			auto c = GetConnection(u.ToString(), Fld->GetRemotePrompt());
-			if (!c)
-				return VcError;
-			
-			auto type = c->Types.Find(u.sPath);
-			if (type)
-				return type;
-
-			c->DetectVcs(Fld);
-			Fld->GetCss(true)->Color(LColour::Blue);
-			Fld->Update();
-			return VcPending;
-		#else
+		#if !HAS_LIBSSH
 			return VcError;
 		#endif
+		auto c = GetConnection(u.ToString(), Fld->GetRemotePrompt());
+		if (!c)
+			return VcError;
+			
+		auto type = c->Types.Find(u.sPath);
+		if (type)
+			return type;
+
+		c->DetectVcs(Fld);
+		Fld->GetCss(true)->Color(LColour::Blue);
+		Fld->Update();
+
+		return VcPending;
 	}
 
-	auto Path = u.sPath.RStrip("/");
+	LgiTrace("%s:%i - u.sPath='%s'\n", _FL, u.sPath.Get());
+	auto Path = LUri::DecodeStr(u.sPath).RStrip("/");
+	LgiTrace("%s:%i - Path='%s'\n", _FL, Path.Get());
 	#if WINDOWS
 	Path = Path.LStrip("/");
+	LgiTrace("%s:%i - Path='%s'\n", _FL, Path.Get());
 	#endif
+	if (!Path)
+	{
+		LgiTrace("%s:%i - empty Path for '%s'\n", _FL, u.ToString().Get());
+		return VcError;
+	}
 
-	auto simpleCheck = [&](LString Path)
+	auto simpleCheck = [&](LString in)
 		{
-			if (LMakePath(p, sizeof(p), Path, ".git") &&
+			if (LMakePath(p, sizeof(p), in, ".git") &&
 				LDirExists(p))
 				return VcGit;
 
-			if (LMakePath(p, sizeof(p), Path, ".svn") &&
+			if (LMakePath(p, sizeof(p), in, ".svn") &&
 				LDirExists(p))
 				return VcSvn;
 
-			if (LMakePath(p, sizeof(p), Path, ".hg") &&
+			if (LMakePath(p, sizeof(p), in, ".hg") &&
 				LDirExists(p))
 				return VcHg;
 
-			if (LMakePath(p, sizeof(p), Path, "CVS") &&
+			if (LMakePath(p, sizeof(p), in, "CVS") &&
 				LDirExists(p))
 				return VcCvs;
 
@@ -1183,7 +1191,7 @@ class App :
 
 			return true;
 		}
-
+      
 		return false;
 	}
 
