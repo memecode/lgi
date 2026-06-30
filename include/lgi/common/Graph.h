@@ -75,8 +75,9 @@ public:
 	void Empty();
 
     // Impl
-	void OnPaint(LSurface *pDC);
-	void OnMouseClick(LMouse &m);
-	void OnMouseMove(LMouse &m);
-	bool OnMouseWheel(double Lines);
+	void OnPaint(LSurface *pDC) override;
+	void OnMouseClick(LMouse &m) override;
+	void OnMouseMove(LMouse &m) override;
+	bool OnMouseWheel(double Lines) override;
+	bool OnLayout(LViewLayoutInfo &Inf) override;
 };
