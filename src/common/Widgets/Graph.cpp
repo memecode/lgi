@@ -875,6 +875,21 @@ bool LGraph::OnMouseWheel(double Lines)
 	return true;
 }
 
+bool LGraph::OnLayout(LViewLayoutInfo &Inf)
+{
+	if (!Inf.Width.Min)
+	{
+		Inf.Width.Min = -1;
+		Inf.Width.Max = -1;
+	}
+	else
+	{
+		Inf.Height.Min = -1;
+		Inf.Height.Max = -1;
+	}
+	return true;
+}
+
 void LGraph::OnPaint(LSurface *pDC)
 {
 	LAutoPtr<LDoubleBuffer> DoubleBuf;
