@@ -36,7 +36,8 @@ endif()
 add_library(${LIBNAME} SHARED
     ${SRC}/source/lib/iconv.c
     ${SRC}/source/libcharset/lib/localcharset.c
-    ${SRC}/source/lib/relocatable.c
+    ${SRC}/source/srclib/relocatable.h
+    ${SRC}/source/srclib/relocatable.c
     )
 target_include_directories(${LIBNAME}
     BEFORE PRIVATE
