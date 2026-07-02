@@ -492,7 +492,7 @@ public:
 	void Sort
 	(
 		/// The comparison function. Should return a integer greater then > 0 if the first item item is greater in value.
-		std::function<int(LListItem*, LListItem*)> compare
+		std::function<int64_t(LListItem*, LListItem*)> compare
 	)
 	{
 		if (!compare || !Lock(_FL))

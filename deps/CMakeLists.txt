@@ -19,6 +19,7 @@ if(HAIKU OR APPLE)
     set(WITH_SIMD FALSE)
 endif()
 
+set(BUILD_SHARED_LIBS ON)
 set(EXTRA_ARGS
     -DBUILD_SHARED_LIBS=ON
     -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}
@@ -174,6 +175,14 @@ if (NOT HAIKU)
     endfunction()
 
     GitProject(libssh "https://git.libssh.org/projects/libssh.git" "libssh-0.12.0" TRUE)
+    if(NOT TARGET ssh)
+        message(FATAL_ERROR "libssh should be a target at this point.")
+    endif()
+    # override the output folders:
+    install(TARGETS ssh
+            RUNTIME DESTINATION ${CMAKE_BINARY_DIR}/bin
+            LIBRARY DESTINATION ${CMAKE_BINARY_DIR}/lib
+            ARCHIVE DESTINATION ${CMAKE_BINARY_DIR}/lib)
 endif()
 
 if (NOT USE_SYSTEM_PNG)

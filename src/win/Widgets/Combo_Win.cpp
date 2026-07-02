@@ -10,8 +10,10 @@
 #include "lgi/common/Combo.h"
 
 #define DEBUG_COMBOBOX	1365
+#define BORDER_PX		4
+#define DROP_DOWN_PX	16
 
-LRect LCombo::Pad(4, 4, 4, 4);
+LRect LCombo::Pad(BORDER_PX, BORDER_PX, DROP_DOWN_PX + BORDER_PX, BORDER_PX);
 
 class LComboPrivate
 {
@@ -465,21 +467,26 @@ bool LCombo::OnLayout(LViewLayoutInfo &Inf)
 	if (!Inf.Width.Max)
 	{
 		// Width calc
-		int mx = 0;
+		int minX = d->Strs.Length() ? 10000 : 0, maxX = 0;
 		for (auto &s: d->Strs)
 		{
 			LDisplayString ds(fnt, s);
-			mx = MAX(mx, ds.X());
+			minX = MIN(minX, ds.X());
+			maxX = MAX(maxX, ds.X());
 		}
-		Inf.Width.Min =
-			Inf.Width.Max =
-			mx + LCombo::Pad.x1 + LCombo::Pad.x2;
+		int padX = LCombo::Pad.x1 + LCombo::Pad.x2;
+		Inf.Width.Min = minX + padX;
+		Inf.Width.Max = maxX + padX;
+
+		// LgiTrace("Combo layout width: %i, %i, %i, %i\n", minX, maxX, Inf.Width.Min, Inf.Width.Max);
 	}
 	else if (!Inf.Height.Max)
 	{
 		Inf.Height.Min =
 			Inf.Height.Max =
-			fnt->GetHeight() + 8;
+			fnt->GetHeight() + LCombo::Pad.y1 + LCombo::Pad.y2;
+
+		// LgiTrace("Combo layout height: %i, %i\n", Inf.Height.Min, Inf.Height.Max);
 	}
 
 	return true;

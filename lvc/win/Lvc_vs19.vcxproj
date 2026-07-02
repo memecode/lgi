@@ -75,6 +75,7 @@
     <OutDir>$(Platform)$(Configuration)14\</OutDir>
     <IntDir>$(Platform)$(Configuration)14\</IntDir>
     <LinkIncremental>true</LinkIncremental>
+    <TargetName>Lvc</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(Platform)$(Configuration)14\</OutDir>
@@ -85,6 +86,7 @@
     <OutDir>$(Platform)$(Configuration)14\</OutDir>
     <IntDir>$(Platform)$(Configuration)14\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <TargetName>Lvc</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -110,7 +112,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\src;..\resources;..\..\include;..\..\include\lgi\win;..\..\..\deps\build-x64\include;..\..\..\..\..\CodeLib\libssh\build\include;..\..\..\..\..\CodeLib\libssh\include;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\src;..\resources;..\..\include;..\..\include\lgi\win;..\..\..\deps\build-x64\include;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>HAS_LIBSSH=1;WIN32;_DEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -126,7 +128,7 @@
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
-      <AdditionalLibraryDirectories>..\..\..\..\..\CodeLib\libssh\build\src\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\deps\build-x64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -151,7 +153,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\src;..\resources;..\..\include;..\..\include\lgi\win;..\..\..\deps\build-x64\include;..\..\..\..\..\CodeLib\libssh\build\include;..\..\..\..\..\CodeLib\libssh\include;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\src;..\resources;..\..\include;..\..\include\lgi\win;..\..\..\deps\build-x64\include;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>HAS_LIBSSH=1;WIN32;NDEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -168,7 +170,7 @@
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
-      <AdditionalLibraryDirectories>..\..\..\..\..\CodeLib\libssh\build\src\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\deps\build-x64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -212,7 +214,7 @@
     <None Include="..\installer-zip.py" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\win\Lgi_vs2019.vcxproj">
+    <ProjectReference Include="..\..\win\Lgi_vs19.vcxproj">
       <Project>{95df9ca4-6d37-4a85-a648-80c2712e0da1}</Project>
     </ProjectReference>
   </ItemGroup>
