@@ -170,6 +170,7 @@ public:
 	DynFunc3(int, SSL_write, SSL*, ssl, const void*, buf, int, num);
 	DynFunc3(int, SSL_read, SSL*, ssl, const void*, buf, int, num);
 	DynFunc1(int, SSL_pending, SSL*, ssl);
+	DynFunc1(int, SSL_has_pending, SSL*, ssl);
 	DynFunc1(BIO *,	SSL_get_rbio, const SSL *, s);
 	DynFunc1(int, SSL_accept, SSL *, ssl);
 	DynFunc3(int, SSL_peek, SSL*, ssl, void*, buf, int, num);
@@ -178,6 +179,7 @@ public:
 	DynFunc3(int, SSL_CTX_load_verify_locations, SSL_CTX*, ctx, const char*, CAfile, const char*, CApath);
 	DynFunc3(int, SSL_CTX_use_certificate_file, SSL_CTX*, ctx, const char*, file, int, type);
 	DynFunc3(int, SSL_CTX_use_PrivateKey_file, SSL_CTX*, ctx, const char*, file, int, type);
+	DynFunc2(int, SSL_CTX_set_cipher_list, SSL_CTX*, ctx, const char*, str);
 	DynFunc1(int, SSL_CTX_check_private_key, const SSL_CTX*, ctx);
 	DynFunc1(int, SSL_CTX_free, SSL_CTX*, ctx);
 
@@ -468,15 +470,22 @@ public:
 		if (!Server)
 		{
 			bool status = false;
+			bool ciphersOk = true;
 			
 			Server = SSL_CTX_new(DEFAULT_METHOD);
 			if (Server)
 			{
+				// OpenSSL 3 defaults can fail legacy clients with "no shared cipher".
+				// Keep server compatibility broad for existing clients.
+				ciphersOk = SSL_CTX_set_cipher_list(Server, "DEFAULT:@SECLEVEL=0") == 1;
+				if (!ciphersOk)
+					ciphersOk = SSL_CTX_set_cipher_list(Server, "ALL:@SECLEVEL=0") == 1;
+
 				if (CertFile)
 					SSL_CTX_use_certificate_file(Server, CertFile, SSL_FILETYPE_PEM);
 				if (KeyFile)
 					SSL_CTX_use_PrivateKey_file(Server, KeyFile, SSL_FILETYPE_PEM);
-				status = SSL_CTX_check_private_key(Server);
+				status = ciphersOk && SSL_CTX_check_private_key(Server);
  			}
 
 			if (!status && sock)
@@ -484,7 +493,10 @@ public:
 				long e = ERR_get_error();
 				char *Msg = ERR_error_string(e, 0);
 				LStringPipe p;
-				p.Print("%s:%i - SSL_CTX_new(server) failed with '%s' (%i)\n", _FL, Msg, e);
+				if (!ciphersOk)
+					p.Print("%s:%i - SSL_CTX_new(server) failed to configure cipher list ('%s', %i)\n", _FL, Msg ? Msg : "unknown", e);
+				else
+					p.Print("%s:%i - SSL_CTX_new(server) failed with '%s' (%i)\n", _FL, Msg ? Msg : "unknown", e);
 				ErrorMsg = p.NewLStr();
 				sock->DebugTrace("%s", ErrorMsg.Get());
 			}
@@ -1318,7 +1330,7 @@ bool SslSocket::CanAccept(int TimeoutMs)
 
 bool SslSocket::Accept(LSocketI *sock)
 {
-	SslSocket *sslSock = dynamic_cast<SslSocket*>(sock);
+	auto sslSock = dynamic_cast<SslSocket*>(sock);
 	if (!sslSock)
 	{
 		OnError(0, "No sock param.");
@@ -1365,9 +1377,18 @@ bool SslSocket::Accept(LSocketI *sock)
 		auto result = Library->SSL_accept(sslSock->Ssl);
 		if (result <= 0)
 		{
-			char Buf[256] = "";
 			auto code = Library->SSL_get_error(sslSock->Ssl, result);
-			OnError(code, Library->ERR_error_string(code, Buf));
+			LString details;
+
+			if (code == SSL_ERROR_SSL || code == SSL_ERROR_SYSCALL)
+			{
+				details = SslGetErrorAsString(Library).Strip();
+			}
+
+			if (!details)
+				details.Printf("SSL_get_error=%i", code);
+
+			OnError(code, LString::Fmt("SSL_accept failed (result=%i): %s", result, details.Get()));
 			return false;
 		}
 	}
@@ -1405,9 +1426,13 @@ bool SslSocket::IsReadable(int TimeoutMs)
 {
 	if (Ssl)
 	{
-		char byte;
-		int peek = Library->SSL_peek(Ssl, &byte, 1);
-		if (peek > 0)
+		if (!Library)
+		{
+			LgiTrace("%s:%i - No library\n", _FL);
+			return false;
+		}
+
+		if (Library->SSL_has_pending(Ssl) || Library->SSL_pending(Ssl) > 0)
 			return true;
 	}
 

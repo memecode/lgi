@@ -562,21 +562,6 @@ LString LOAuth2::GetAccessToken()
 	return LString();
 }
 
-bool CheckVersion(LString ver, LString minVer)
-{
-	auto stripChars = "v\r\n\t ";
-	auto v = ver.Strip(stripChars).SplitDelimit(".");
-	auto minV = minVer.LStrip(stripChars).SplitDelimit(".");
-	if (v.Length() < 2 ||
-		minV.Length() < 2)
-		return false;
-	if (v[0].Int() < minV[0].Int())
-		return false;
-	if (v[1].Int() < minV[1].Int())
-		return false;
-	return true;
-}
-
 bool LOAuth2::Params::ScanForKeyAndCert(const char* folder)
 {
 	LDirectory dir;
@@ -610,7 +595,7 @@ bool LOAuth2::Params::CheckRequirement(const char *req)
 		LStringPipe out;
 		if (sub.Communicate(&out))
 			return false;		
-		if (!CheckVersion(out.NewLStr(), "1.4"))
+		if (!LCheckVersion(out.NewLStr(), "1.4"))
 			return false;
 		
 		return true;

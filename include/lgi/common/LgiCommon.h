@@ -293,6 +293,9 @@ LgiExtern int LGetOs(LArray<int> *Ver = 0);
 /// \ingroup Base
 LgiExtern const char *LGetOsName();
 
+/// Check versions
+LgiExtern bool LCheckVersion(LString ver, LString minVer);
+
 // System
 
 /// Initializes the random number generator

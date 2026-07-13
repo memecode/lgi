@@ -369,6 +369,24 @@ const char *LGetOsName()
 	return "error";
 }
 
+bool LCheckVersion(LString ver, LString minVer)
+{
+	auto stripChars = "v\r\n\t ";
+	auto v = ver.Strip(stripChars).SplitDelimit(".");
+	auto minV = minVer.LStrip(stripChars).SplitDelimit(".");
+	
+	int common = MIN(v.Length(), minV.Length());
+	for (int i=0; i<common; i++)
+	{
+		if (v[i].Int() < minV[i].Int())
+			return false;
+		else if (v[i].Int() > minV[i].Int())
+			return true;
+	}
+	
+	return common > 0;
+}
+
 #ifdef WIN32
 #define RecursiveFileSearch_Wildcard "*.*"
 #else // unix'ish OS

@@ -234,6 +234,8 @@ public:
 		virtual bool IsDelayed() { return true; }
 		/// Set the send delay setting
 		virtual void IsDelayed(bool Delay) {}
+		/// Sets the reuse address option on the socket. This allows multiple sockets to bind to the same port.
+		virtual bool SetReuseAddress(bool reuse) { return false; }
 
 // UDP
 	
