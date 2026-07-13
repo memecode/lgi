@@ -513,7 +513,7 @@ void LResources::AddLang(LLanguageId id)
 	Languages.Add(id);
 }
 
-char *LResources::GetFileName()
+const char *LResources::GetFileName()
 {
 	return d->File;
 }

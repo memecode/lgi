@@ -2334,7 +2334,7 @@ void VcFolder::UpdateBranchUi()
 VcFile *AppPriv::FindFile(const char *Path)
 {
 	if (!Path)
-		return NULL;
+		return nullptr;
 
 	LArray<VcFile*> files;
 	if (Files->GetAll(files))
@@ -2349,7 +2349,7 @@ VcFile *AppPriv::FindFile(const char *Path)
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 VcFile *VcFolder::FindFile(const char *Path)
@@ -2663,13 +2663,12 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 {
 	LAssert(IsWorking || Rev.Get() != NULL);
 
-	printf("s='%s'\n", s.Get());
-
 	switch (GetType())
 	{
 		case VcGit:
 		{
-			enum TState {
+			enum TState
+			{
 				TNone,
 				TAdded,
 				TNotStaged,
@@ -2678,37 +2677,65 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 				TUnmerged,
 			}	state = TNone;
 		
-			struct PathStatus {
+			struct PathStatus
+			{
 				LString op, path;
-				void set(LString::Array &a) {
+				
+				void set(LString::Array &a)
+				{
 					if (a.Length() != 2)
+					{
 						LgiTrace("%s:%i - error: wrong part count.\n", _FL);
+					}
 					else
 					{
 						op = a[0].Strip();
 						path = a[1].Strip();
 					}
 				}
+				
 				LString toString() const
 				{
 					return LString::Fmt("op=%s, path='%s'", op.Get(), path.Get());
 				}
 			};
-			LArray<PathStatus> added, notStaged, untracked, conflicted;
+			
+			// printf("s='%s'\n", s.Get());
+
+			using PathStatusArr = LArray<PathStatus>;
+			PathStatusArr added, notStaged, untracked, conflicted;
 		
 			List<LListItem> Files;
 			LStringPipe Diffs(16 << 10);
 			VcFile *f = nullptr;
 
-			auto findPath = [&](LString path) -> PathStatus* {
-				for (auto &i: added)
-					if (path == i.path)
-						return &i;
-				for (auto &i: notStaged)
-					if (path == i.path)
-						return &i;
-				return nullptr;
-			};
+			auto findPath = [&](LString path) -> PathStatus*
+				{
+					PathStatusArr *a[] = { &added, &notStaged, &untracked, &conflicted };
+
+					for (int i=0; i<CountOf(a); i++)
+						for (auto &i: *a[i])
+							if (path == i.path)
+								return &i;
+
+					return nullptr;
+				};
+				
+			auto findFile = [&](LString path) -> VcFile*
+				{
+					path = path.Replace(DIR_STR, "/");
+					
+					for (auto f: Files)
+					{
+						if (auto item = dynamic_cast<VcFile*>(f))
+						{
+							if (path.Equals(item->GetFileName()))
+								return item;
+						}
+					}
+					
+					return nullptr;
+				};
 			
 			auto lines = s.Split("\n");
 			for (auto &line: lines)
@@ -2723,7 +2750,7 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 					state = TUntracked;
 				else if (!Stricmp(txt, "Unmerged paths:"))
 					state = TUnmerged;
-				else if (!_strnicmp(txt, "diff", 4))
+				else if (!Strnicmp(txt, "diff", 4))
 				{
 					state = TDiffs;
 					if (f)
@@ -2744,27 +2771,13 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 						State = "C";
 
 					auto half = paths.Length() / 2;
-					/*
-					for (auto &pth: paths)
-						printf("pth='%s'\n", pth.Get());
-					*/
 					auto lastPath = LString(" ").Join(paths.Slice(half, -1));
-					// printf("lastPath='%s'\n", lastPath.Get());
 					if (IsAlpha(lastPath(0)) && lastPath(1) == '/')
 						Fn = lastPath(2, -1);
 					else
 						Fn = lastPath;
-					// printf("Fn='%s'\n", Fn.Get());
 					
-					auto p = findPath(Fn);
-					// d->Log->Print("    Fn='%s' p='%s'\n", Fn.Get(), p ? p->path.Get() : "null");
-					if (!p)
-					{
-						// Maybe it's just a single path?
-						// Fn = header.Last()(2, -1); // strip off the 'a/' prefix
-					}
-
-					f = FindFile(Fn);
+					f = findFile(Fn);
 					if (!f)
 					{
 						f = new VcFile(d, this, Rev, IsWorking);
@@ -2772,7 +2785,6 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 						f->SetText(State, COL_STATE);
 						f->SetText(Fn.Replace("\\","/"), COL_FILENAME);
 						f->GetStatus();
-						// printf("s.get()=%p\n", s.Get());
 						Files.Insert(f);
 					}
 				}
