@@ -366,31 +366,44 @@ bool LFontType::GetSystemFont(const char *Which)
 			
 			if (!ConfigFontUsed && LApp::IsGui())
 			{	
-				auto s = Gtk::gtk_style_new();
-				if (s)
+				auto settings = Gtk::gtk_settings_get_default();
+				if (settings)
 				{
-					const char *fam = Gtk::pango_font_description_get_family(s->font_desc);
-					if (fam)
+					Gtk::gchararray fontName = NULL;
+					Gtk::g_object_get(settings, "gtk-font-name", &fontName, NULL);
+					if (fontName)
 					{
-						strcpy_s(DefFont, sizeof(DefFont), fam);
-					}
-					else printf("%s:%i - pango_font_description_get_family failed.\n", _FL);
+						auto desc = Gtk::pango_font_description_from_string(fontName);
+						if (desc)
+						{
+							const char *fam = Gtk::pango_font_description_get_family(desc);
+							if (fam)
+							{
+								strcpy_s(DefFont, sizeof(DefFont), fam);
+							}
+							else printf("%s:%i - pango_font_description_get_family failed.\n", _FL);
 
-					if (Gtk::pango_font_description_get_size_is_absolute(s->font_desc))
-					{
-						float Px = Gtk::pango_font_description_get_size(s->font_desc) / PANGO_SCALE;
-						float Dpi = (float)LScreenDpi().x;
-						DefSize = (Px * 72.0) / Dpi;
-						printf("pango px=%f, Dpi=%f\n", Px, Dpi);
+							if (Gtk::pango_font_description_get_size_is_absolute(desc))
+							{
+								float Px = (float)Gtk::pango_font_description_get_size(desc) / (float)PANGO_SCALE;
+								float Dpi = (float)LScreenDpi().x;
+								DefSize = (Px * 72.0) / Dpi;
+								printf("pango px=%f, Dpi=%f\n", Px, Dpi);
+							}
+							else
+							{
+								DefSize = Gtk::pango_font_description_get_size(desc) / PANGO_SCALE;
+							}
+
+							Gtk::pango_font_description_free(desc);
+						}
+						else printf("%s:%i - pango_font_description_from_string failed.\n", _FL);
+
+						Gtk::g_free(fontName);
 					}
-					else
-					{
-						DefSize = Gtk::pango_font_description_get_size(s->font_desc) / PANGO_SCALE;
-					}
-					
-					g_object_unref(s);
+					else printf("%s:%i - g_object_get(gtk-font-name) failed.\n", _FL);
 				}
-				else printf("%s:%i - gtk_style_new failed.\n", _FL);
+				else printf("%s:%i - gtk_settings_get_default failed.\n", _FL);
 			}
 			
 			First = false;

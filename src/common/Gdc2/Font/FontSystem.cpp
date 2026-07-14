@@ -57,9 +57,9 @@ public:
 			if (!Map)
 				LAssert(!"pango_cairo_font_map_get_default failed.\n");
 		
-			Ctx = Gtk::pango_cairo_font_map_create_context((Gtk::PangoCairoFontMap*)Map);
+			Ctx = Gtk::pango_font_map_create_context((Gtk::PangoFontMap*)Map);
 			if (!Ctx)
-				LAssert(!"pango_cairo_font_map_create_context failed.\n");
+				LAssert(!"pango_font_map_create_context failed.\n");
 		}
 	#else
 		LFontSystemPrivate() : LMutex("LFontSystemPrivate.Lock")

@@ -61,6 +61,12 @@ static LArray<SignalInfo> ExistingSignals;
 
 void RemoveExistingSignals(OsView w)
 {
+	if (w)
+	{
+		// Ensure stale source pointers are never left on the widget.
+		g_object_set_data(G_OBJECT(w), "DragDropSource", NULL);
+	}
+
 	for (unsigned i=0; i<ExistingSignals.Length(); i++)
 	{
 		SignalInfo &Si = ExistingSignals[i];
@@ -245,6 +251,11 @@ LDndSrc_DragEnd(GtkWidget      *widget,
 	{
 		DND_ERROR("%s:%i - no source.\n", _FL);
 		return false;
+	}
+
+	if (widget)
+	{
+		g_object_set_data(G_OBJECT(widget), "DragDropSource", NULL);
 	}
 
 	DND_LOG("%s:%i - %s\n", _FL, __func__);
