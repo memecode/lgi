@@ -139,6 +139,7 @@ LgiDragDataGet(GtkWidget        *widget,
                gpointer          user_data)
 {
 	auto Src = (LDragDropSource*)user_data;
+	DND_LOG("%s:%i - LgiDragDataGet %p\n", _FL, Src);
 	if (!Src)
 	{
 		DND_ERROR("%s:%i - no source.\n", _FL);
@@ -234,10 +235,10 @@ LgiDragDataGet(GtkWidget        *widget,
 }
 
 gboolean
-DragEnd(	GtkWidget      *widget,
-			GdkDragContext *context,
-			GtkDragResult   result,
-			gpointer        user_data)
+LDndSrc_DragEnd(GtkWidget      *widget,
+				GdkDragContext *context,
+				GtkDragResult   result,
+				gpointer        user_data)
 {
 	auto Src = (LDragDropSource*)user_data;
 	if (!Src)
@@ -270,12 +271,12 @@ uint32_t DefaultIcon[] = {
 };
 LInlineBmp DefIcon = { 32, 32, 32, DefaultIcon };
 
-int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface *Icon)
+int LDragDropSource::Drag(LView *sourceView, OsEvent Event, int Effect, LSurface *Icon)
 {
-	LAssert(SourceWnd);
-	if (!SourceWnd
+	LAssert(sourceView);
+	if (!sourceView
 		#if LGI_VIEW_HANDLE
-		|| !SourceWnd->Handle()
+		|| !sourceView->Handle()
 		#endif
 		)
 	{
@@ -303,7 +304,7 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 	
 	auto Targets = Gtk::gtk_target_list_new(e.AddressOf(), e.Length());
 	auto Action = EffectToDragAction(Effect);
-	auto w = SourceWnd->GetWindow();
+	auto w = sourceView->GetWindow();
 	if (!w)
 	{
 		DND_ERROR("%s:%i - No Window.\n", _FL);
@@ -321,21 +322,25 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 	{
 		RemoveExistingSignals(d->SignalWnd);
 
+		// Store the source so LWindowDragDataGet can find it without walking the view tree.
+		g_object_set_data(G_OBJECT(d->SignalWnd), "DragDropSource", this);
+
 		{
 			auto &Si = ExistingSignals.New();
 			Si.Wnd = d->SignalWnd;
-			Si.Sig = g_signal_connect(G_OBJECT(d->SignalWnd), "drag-data-get", G_CALLBACK(LgiDragDataGet), this);
+			Si.Sig = g_signal_connect(G_OBJECT(d->SignalWnd), "drag-end", G_CALLBACK(LDndSrc_DragEnd), this);
 		}
-		{
-			auto &Si = ExistingSignals.New();
-			Si.Wnd = d->SignalWnd;
-			Si.Sig = g_signal_connect(G_OBJECT(d->SignalWnd), "drag-end", G_CALLBACK(DragEnd), this);
-		}
+
+		DND_LOG("%s:%i - added signals to %s\n", _FL, w->GetClass());
 	}
-	else DND_ERROR("%s:%i - No signal window?\n", _FL);
+	else
+	{
+		DND_ERROR("%s:%i - No signal window?\n", _FL);
+		return -1;
+	}
 
 	LMouse m;
-	SourceWnd->GetMouse(m);
+	sourceView->GetMouse(m);
 	int btn = 0;
 	if (m.Left()) btn = 1;
 	else if (m.Middle()) btn = 2;

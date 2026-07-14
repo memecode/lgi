@@ -101,15 +101,15 @@ uint32_t DefaultIcon[] = {
 };
 LInlineBmp DefIcon = { 32, 32, 32, DefaultIcon };
 
-int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface *Icon)
+int LDragDropSource::Drag(LView *sourceView, OsEvent Event, int Effect, LSurface *Icon)
 {
-	LAssert(SourceWnd);
-	if (!SourceWnd)
+	LAssert(sourceView);
+	if (!sourceView)
 		return -1;
 
-	if (!SourceWnd
+	if (!sourceView
 		#if LGI_VIEW_HANDLE
-		|| !SourceWnd->Handle()
+		|| !sourceView->Handle()
 		#endif
 		)
 	{
