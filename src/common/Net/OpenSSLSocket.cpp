@@ -163,6 +163,7 @@ public:
 	DynFunc1(SSL*, SSL_new, SSL_CTX*, ctx);
 	DynFunc1(BIO*, BIO_new_ssl_connect, SSL_CTX*, ctx);
 	DynFunc1(X509*, SSL_get_peer_certificate, SSL*, s);
+	DynFunc3(int, SSL_set_verify, SSL*, s, int, mode, SSL_verify_cb, callback);
 	DynFunc1(int, SSL_set_connect_state, SSL*, s);
 	DynFunc1(int, SSL_set_accept_state, SSL*, s);
 	DynFunc2(int, SSL_get_error, SSL*, s, int, ret_code);
@@ -179,9 +180,13 @@ public:
 	DynFunc3(int, SSL_CTX_load_verify_locations, SSL_CTX*, ctx, const char*, CAfile, const char*, CApath);
 	DynFunc3(int, SSL_CTX_use_certificate_file, SSL_CTX*, ctx, const char*, file, int, type);
 	DynFunc3(int, SSL_CTX_use_PrivateKey_file, SSL_CTX*, ctx, const char*, file, int, type);
+	DynFunc1(int, SSL_CTX_set_default_verify_paths, SSL_CTX*, ctx);
 	DynFunc2(int, SSL_CTX_set_cipher_list, SSL_CTX*, ctx, const char*, str);
 	DynFunc1(int, SSL_CTX_check_private_key, const SSL_CTX*, ctx);
 	DynFunc1(int, SSL_CTX_free, SSL_CTX*, ctx);
+	DynFunc2(int, SSL_set1_host, SSL*, s, const char*, hostname);
+	DynFunc1(long, SSL_get_verify_result, const SSL*, s);
+	DynFunc1(const char*, X509_verify_cert_error_string, long, n);
 
 #ifdef WIN32
 // If this is freaking you out then good... openssl-win32 ships 
@@ -432,6 +437,14 @@ public:
 			char *Msg = ERR_error_string(e, 0);
 			
 			Err.Print("%s:%i - SSL_CTX_new(client) failed with '%s' (%i)\n", _FL, Msg, e);
+			goto OnError;
+		}
+
+		if (!SSL_CTX_set_default_verify_paths(Client))
+		{
+			long e = ERR_get_error();
+			char *Msg = ERR_error_string(e, 0);
+			Err.Print("%s:%i - SSL_CTX_set_default_verify_paths failed with '%s' (%i)\n", _FL, Msg ? Msg : "unknown", e);
 			goto OnError;
 		}
 		
@@ -947,8 +960,16 @@ DebugTrace("%s:%i - BIO_new_ssl_connect=%p\n", _FL, Bio);
 DebugTrace("%s:%i - BIO_get_ssl=%p\n", _FL, Ssl);
 						if (Ssl)
 						{
+							Library->SSL_set_verify(Ssl, SSL_VERIFY_PEER, NULL);
+
 							// SNI setup
 							Library->SSL_set_tlsext_host_name(Ssl, HostAddr);
+							if (!Library->SSL_set1_host(Ssl, HostAddr))
+							{
+								SslError(_FL, "SSL_set1_host failed.");
+							}
+							else
+							{
 					
 							// Library->SSL_CTX_set_timeout()
 							Library->BIO_set_conn_hostname(Bio, HostAddr);
@@ -1015,15 +1036,24 @@ DebugTrace("%s:%i - open loop finished, r=%i, Cancelled=%i\n", _FL, r, d->Cancel
 
 							if (r == 1)
 							{
-								IsBlocking(true);
-								Library->SSL_set_mode(Ssl, SSL_MODE_AUTO_RETRY);
-								Status = true;
-								
-								if (d->Banner)
+								long verify = Library->SSL_get_verify_result(Ssl);
+								if (verify != X509_V_OK)
 								{
-									char m[256];
-									sprintf_s(m, sizeof(m), "Connected to '%.220s' using SSL", h);
-									OnInformation(m);
+									const char *msg = Library->X509_verify_cert_error_string(verify);
+									SslError(_FL, LString::Fmt("TLS peer verify failed (%li): %s", verify, msg ? msg : "unknown").Get());
+								}
+								else
+								{
+									IsBlocking(true);
+									Library->SSL_set_mode(Ssl, SSL_MODE_AUTO_RETRY);
+									Status = true;
+									
+									if (d->Banner)
+									{
+										char m[256];
+										sprintf_s(m, sizeof(m), "Connected to '%.220s' using SSL", h);
+										OnInformation(m);
+									}
 								}
 							}
 							else if (!d->Cancel->IsCancelled())
@@ -1032,6 +1062,7 @@ DebugTrace("%s:%i - open loop finished, r=%i, Cancelled=%i\n", _FL, r, d->Cancel
 								if (!Err)
 									Err.Printf("BIO_do_connect(%s:%i) failed.", HostAddr, Port);
 								SslError(_FL, Err);
+							}
 							}
 						}
 						else SslError(_FL, "BIO_get_ssl failed.");
@@ -1240,12 +1271,7 @@ int SslSocket::Close()
 	}
 	else if (Bio)
 	{
-		auto res = Library->BIO_free_all(Bio);
-		Library->BIO_free(Bio);
-		/*
-		if (result != 1)
-			printf("%s:%i result =%i\n", _FL, result);
-		*/
+		Library->BIO_free_all(Bio);
 		Bio = nullptr;
 	}	
 
