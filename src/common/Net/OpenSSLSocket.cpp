@@ -24,6 +24,7 @@
 #endif
 #include "lgi/common/Variant.h"
 #include "lgi/common/Net.h"
+#include "lgi/common/Json.h"
 
 #define PATH_OFFSET					"../"
 
@@ -162,7 +163,15 @@ public:
 	DynFunc2(int, SSL_set_fd, SSL*, s, int, fd);
 	DynFunc1(SSL*, SSL_new, SSL_CTX*, ctx);
 	DynFunc1(BIO*, BIO_new_ssl_connect, SSL_CTX*, ctx);
-	DynFunc1(X509*, SSL_get_peer_certificate, SSL*, s);
+	// SSL_get_peer_certificate is a macro in OpenSSL 3.x (=> SSL_get1_peer_certificate);
+	// Undef so DynFunc stringifies and looks up the real 3.x exported symbol.
+	#ifdef SSL_get_peer_certificate
+		#undef SSL_get_peer_certificate
+		DynFunc1(X509*, SSL_get1_peer_certificate, SSL*, s);
+		#define SSL_get_peer_certificate SSL_get1_peer_certificate
+	#else
+		DynFunc1(X509*, SSL_get_peer_certificate, SSL*, s);
+	#endif
 	DynFunc3(int, SSL_set_verify, SSL*, s, int, mode, SSL_verify_cb, callback);
 	DynFunc1(int, SSL_set_connect_state, SSL*, s);
 	DynFunc1(int, SSL_set_accept_state, SSL*, s);
@@ -255,6 +264,9 @@ public:
 
 	DynFunc3(char*, X509_NAME_oneline, X509_NAME*, a, char*, buf, int, size);
 	DynFunc1(X509_NAME*, X509_get_subject_name, X509*, a);
+	DynFunc4(int, X509_digest, const X509*, data, const EVP_MD*, type, unsigned char*, md, unsigned int*, len);
+	DynFunc0(const EVP_MD*, EVP_sha256);
+	DynFunc1(int, X509_free, X509*, a);
 	DynFunc2(char*, ERR_error_string, unsigned long, e, char*, buf);
 	DynFunc0(unsigned long, ERR_get_error);
 
@@ -959,7 +971,7 @@ DebugTrace("%s:%i - BIO_new_ssl_connect=%p\n", _FL, Bio);
 DebugTrace("%s:%i - BIO_get_ssl=%p\n", _FL, Ssl);
 					if (Ssl)
 					{
-						Library->SSL_set_verify(Ssl, SSL_VERIFY_PEER, NULL);
+						Library->SSL_set_verify(Ssl, SSL_VERIFY_NONE, NULL); // handshake completes; result checked via SSL_get_verify_result
 
 						// SNI setup
 						Library->SSL_set_tlsext_host_name(Ssl, HostAddr);
@@ -1037,20 +1049,49 @@ DebugTrace("%s:%i - SSL connect timeout, to=%i\n", _FL, To);
 							}
 DebugTrace("%s:%i - open loop finished, r=%i, Cancelled=%i\n", _FL, r, d->Cancel->IsCancelled());
 
+
+							auto getCertJson = [&](long verify) -> LString
+								{
+									LJson j;
+									j.Set(JSON_HOST, HostAddr);
+									j.Set(JSON_MESSAGE, Library->X509_verify_cert_error_string(verify));
+									
+									// Get certificate fingerprint
+									X509 *cert = Library->SSL_get_peer_certificate(Ssl);
+									if (cert)
+									{
+										unsigned char md[64];
+										unsigned int mdLen = 0;
+										if (Library->X509_digest(cert, Library->EVP_sha256(), md, &mdLen) && mdLen > 0)
+										{
+											LStringPipe fp;
+											char hex[4];
+											for (unsigned i = 0; i < mdLen; i++)
+											{
+												sprintf_s(hex, sizeof(hex), i ? ":%02X" : "%02X", md[i]);
+												fp.Write(hex, strlen(hex));
+											}
+											j.Set(JSON_CERT, fp.NewLStr());
+										}
+										Library->X509_free(cert);
+									}
+									if (UserRef)
+										j.Set(JSON_REF, UserRef);
+									return j.GetJson();
+								};
+
 							if (r == 1)
 							{
 								long verify = Library->SSL_get_verify_result(Ssl);
 								if (verify != X509_V_OK)
 								{
-									const char *msg = Library->X509_verify_cert_error_string(verify);
 									if (d->Caps)
-									{
-										LString param;
-										param.Printf("%s|%s", HostAddr, msg ? msg : "unknown");
-										d->Caps->NeedsCapability("ssl-cert-error", param);
-									}
+										d->Caps->NeedsCapability(CAPS_CERT_ERROR, getCertJson(verify));
 									else
+									{
+										auto msg = Library->X509_verify_cert_error_string(verify);
 										HandleError(_FL, LString::Fmt("TLS peer verify failed (%li): %s", verify, msg ? msg : "unknown").Get());
+									}
 								}
 								else
 								{
@@ -1071,10 +1112,8 @@ DebugTrace("%s:%i - open loop finished, r=%i, Cancelled=%i\n", _FL, r, d->Cancel
 								long verify = Library->SSL_get_verify_result(Ssl);
 								if (verify != X509_V_OK && d->Caps)
 								{
-									d->Caps->NeedsCapability("SslCertError",
-										LString::Fmt("%s: %s",
-													HostAddr,
-													Library->X509_verify_cert_error_string(verify)));
+									d->Caps->NeedsCapability(CAPS_CERT_ERROR,
+										getCertJson(verify));
 								}
 								else
 								{
@@ -1242,7 +1281,8 @@ DebugTrace("%s:%i - SSL_get_peer_certificate=%p\n", _FL, ServerCert);
 							if (ServerCert)
 							{
 								char Txt[256] = "";
-								Library->X509_NAME_oneline(Library->X509_get_subject_name(ServerCert), Txt, sizeof(Txt));
+								Library->X509_NAME_oneline(	Library->X509_get_subject_name(ServerCert),
+															Txt, sizeof(Txt));
 DebugTrace("%s:%i - X509_NAME_oneline=%s\n", _FL, Txt);
 								OnInformation(Txt);
 							}

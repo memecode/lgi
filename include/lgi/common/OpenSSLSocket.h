@@ -46,6 +46,14 @@ protected:
 public:
 	static LString Random(int Len);
 
+	// These constants are used to call LCapabilityClient when there is a certificate issue:
+	LString UserRef;
+	constexpr static const char *CAPS_CERT_ERROR = "SslCertError";
+	constexpr static const char *JSON_HOST       = "host";
+	constexpr static const char *JSON_MESSAGE    = "msg";
+	constexpr static const char *JSON_CERT       = "certId";
+	constexpr static const char *JSON_REF        = "ref"; // the 'UserRef' if set
+
 	SslSocket(LStream *logger = NULL, LCapabilityClient *caps = NULL, bool SslOnConnect = false, bool RawLFCheck = false, bool banner = true);
 	~SslSocket();
 
