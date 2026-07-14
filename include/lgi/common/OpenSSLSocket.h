@@ -54,6 +54,9 @@ public:
 	constexpr static const char *JSON_CERT       = "certId";
 	constexpr static const char *JSON_REF        = "ref"; // the 'UserRef' if set
 
+	using TCertData = LArray<uint8_t>;
+	using TCertCallback = std::function<bool(const char *host, TCertData *id)>;
+
 	SslSocket(LStream *logger = NULL, LCapabilityClient *caps = NULL, bool SslOnConnect = false, bool RawLFCheck = false, bool banner = true);
 	~SslSocket();
 
@@ -64,6 +67,7 @@ public:
 	void SetSslOnConnect(bool b);
 	LCancel *GetCancel() override;
 	void SetCancel(LCancel *c) override;
+	void SetCertCallback(TCertCallback certCallback);
 	
 	// Socket
 	OsSocket Handle(OsSocket Set = INVALID_SOCKET) override;

@@ -341,6 +341,10 @@ public:
 	virtual LStreamI *GetLogger(LDataStoreI *store) { return 0; }
 	/// Search for a object by type and name
 	virtual bool Match(LDataStoreI *store, LDataPropI *Addr, int ObjectType, LArray<LDom*> &Matches) { return 0; }
+
+	// SSL:
+	// Allow certificate overrides
+	virtual bool AllowSslCert(const char *Host, LArray<uint8_t> *certId) { return false; }
 };
 
 /// The virtual mail storage interface from which all mail stores inherit from.

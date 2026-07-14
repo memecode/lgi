@@ -104,9 +104,9 @@ public:
 	LXmlTag
 	(
 		/// [Optional] Start with this name
-		const char *tag = 0,
+		const char *tag = nullptr,
 		/// [Optional] Use this allocator
-		LXmlAlloc *alloc = 0
+		LXmlAlloc *alloc = nullptr
 	);	
 	/// Construct the object
 	LXmlTag(const LXmlTag &t);	

@@ -646,6 +646,7 @@ struct SslSocketPriv : public LCancel
 	bool IsBlocking = true;
 	bool Banner = true;
 	LCancel *Cancel = NULL;
+	SslSocket::TCertCallback certCallback;
 
 	// Server:
 	LString CertFile;
@@ -751,6 +752,11 @@ void SslSocket::SetLog(LStream *logger)
 LStreamI *SslSocket::GetLog()
 {
 	return log;
+}
+
+void SslSocket::SetCertCallback(TCertCallback certCallback)
+{
+	d->certCallback = certCallback;
 }
 
 bool SslSocket::GetRemoteIp(char *IpAddr)
@@ -1049,34 +1055,38 @@ DebugTrace("%s:%i - SSL connect timeout, to=%i\n", _FL, To);
 							}
 DebugTrace("%s:%i - open loop finished, r=%i, Cancelled=%i\n", _FL, r, d->Cancel->IsCancelled());
 
+							auto getCert = [&]() -> TCertData
+								{
+									TCertData id;
+
+									// Get certificate fingerprint
+									if (auto cert = Library->SSL_get_peer_certificate(Ssl))
+									{
+										unsigned char md[64];
+										unsigned int mdLen = 0;
+										if (Library->X509_digest(cert, Library->EVP_sha256(), md, &mdLen) && mdLen > 0)
+											id.Add(md, mdLen);
+										Library->X509_free(cert);
+									}
+
+									return id;
+								};
 
 							auto getCertJson = [&](long verify) -> LString
 								{
 									LJson j;
 									j.Set(JSON_HOST, HostAddr);
 									j.Set(JSON_MESSAGE, Library->X509_verify_cert_error_string(verify));
-									
-									// Get certificate fingerprint
-									X509 *cert = Library->SSL_get_peer_certificate(Ssl);
-									if (cert)
+
+									auto certId = getCert();
+									if (certId.Length())
 									{
-										unsigned char md[64];
-										unsigned int mdLen = 0;
-										if (Library->X509_digest(cert, Library->EVP_sha256(), md, &mdLen) && mdLen > 0)
-										{
-											LStringPipe fp;
-											char hex[4];
-											for (unsigned i = 0; i < mdLen; i++)
-											{
-												sprintf_s(hex, sizeof(hex), i ? ":%02X" : "%02X", md[i]);
-												fp.Write(hex, strlen(hex));
-											}
-											j.Set(JSON_CERT, fp.NewLStr());
-										}
-										Library->X509_free(cert);
-									}
+										auto certIdHex = LHex(LString((const char*)certId.AddressOf(), certId.Length()));
+										j.Set(JSON_CERT, certIdHex);
+									}									
 									if (UserRef)
 										j.Set(JSON_REF, UserRef);
+
 									return j.GetJson();
 								};
 
@@ -1085,8 +1095,22 @@ DebugTrace("%s:%i - open loop finished, r=%i, Cancelled=%i\n", _FL, r, d->Cancel
 								long verify = Library->SSL_get_verify_result(Ssl);
 								if (verify != X509_V_OK)
 								{
+									// Check if the app has stored an override for this certificate
+									if (d->certCallback)
+									{
+										auto certId = getCert();
+										if (certId.Length() &&
+											d->certCallback(HostAddr, &certId))
+										{
+											// Override the cert issue and connect anyway...
+											goto HandleConnect;
+										}
+									}
+
 									if (d->Caps)
+									{
 										d->Caps->NeedsCapability(CAPS_CERT_ERROR, getCertJson(verify));
+									}
 									else
 									{
 										auto msg = Library->X509_verify_cert_error_string(verify);
@@ -1095,6 +1119,7 @@ DebugTrace("%s:%i - open loop finished, r=%i, Cancelled=%i\n", _FL, r, d->Cancel
 								}
 								else
 								{
+								HandleConnect:
 									IsBlocking(true);
 									Library->SSL_set_mode(Ssl, SSL_MODE_AUTO_RETRY);
 									Status = true;
