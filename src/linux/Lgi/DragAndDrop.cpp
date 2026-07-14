@@ -21,20 +21,12 @@ using namespace Gtk;
 
 GdkDragAction DropEffectToAction(int DropEffect)
 {
-	GdkDragAction action = GDK_ACTION_DEFAULT;
-	switch (DropEffect)
-	{
-		case DROPEFFECT_COPY:
-			action = GDK_ACTION_COPY;
-			break;
-		case DROPEFFECT_MOVE:
-			action = GDK_ACTION_MOVE;
-			break;
-		case DROPEFFECT_LINK:
-			action = GDK_ACTION_LINK;
-			break;
-	}
-	return action;
+	int action = 0;
+	if (DropEffect & DROPEFFECT_COPY) action |= (int)GDK_ACTION_COPY;
+	if (DropEffect & DROPEFFECT_MOVE) action |= (int)GDK_ACTION_MOVE;
+	if (DropEffect & DROPEFFECT_LINK) action |= (int)GDK_ACTION_LINK;
+	if (!action) action = (int)GDK_ACTION_DEFAULT;
+	return (GdkDragAction)action;
 }
 
 int GtkGetDndType(const char *Format)
@@ -130,18 +122,12 @@ bool LDragDropSource::CreateFileDrop(LDragData *OutputData, LMouse &m, LString::
 
 Gtk::GdkDragAction EffectToDragAction(int Effect)
 {
-	switch (Effect)
-	{
-		default:
-		case DROPEFFECT_NONE:
-			return Gtk::GDK_ACTION_DEFAULT;
-		case DROPEFFECT_COPY:
-			return Gtk::GDK_ACTION_COPY;
-		case DROPEFFECT_MOVE:
-			return Gtk::GDK_ACTION_MOVE;
-		case DROPEFFECT_LINK:
-			return Gtk::GDK_ACTION_LINK;
-	}
+	int action = 0;
+	if (Effect & DROPEFFECT_COPY) action |= (int)Gtk::GDK_ACTION_COPY;
+	if (Effect & DROPEFFECT_MOVE) action |= (int)Gtk::GDK_ACTION_MOVE;
+	if (Effect & DROPEFFECT_LINK) action |= (int)Gtk::GDK_ACTION_LINK;
+	if (!action) action = (int)Gtk::GDK_ACTION_DEFAULT;
+	return (Gtk::GdkDragAction)action;
 }
 
 void 
@@ -355,7 +341,7 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 	else if (m.Middle()) btn = 2;
 	else if (m.Right()) btn = 3;
 	
-	d->Ctx = gtk_drag_begin_with_coordinates(d->SignalWnd, Targets, Action, btn, NULL, m.x, m.y);
+	d->Ctx = gtk_drag_begin_with_coordinates(d->SignalWnd, Targets, Action, btn, Event, m.x, m.y);
 	gtk_target_list_unref(Targets);
 	
 	#if 0 // Not working, who the fuck knows why. GTK is suck.
