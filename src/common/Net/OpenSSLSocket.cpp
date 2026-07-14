@@ -1378,7 +1378,7 @@ bool SslSocket::Accept(LSocketI *sock)
 
 	struct sockaddr_in addr;
 	socklen_t len = sizeof(addr);
-	auto client = accept(d->ListenSocket, (struct sockaddr*)&addr, &len);
+	OsSocket client = accept(d->ListenSocket, (struct sockaddr*)&addr, &len);
 	if (client < 0)
 	{
 		OnError(0, "Unable to accept");
@@ -1389,13 +1389,13 @@ bool SslSocket::Accept(LSocketI *sock)
 	if (!sslSock->Ssl)
 	{
 		OnError(0, "SSL_new failed.");
-		return false;
+		goto OnError;
 	}
 	
 	if (!Library->SSL_set_fd(sslSock->Ssl, (int)client))
 	{
 		OnError(0, "SSL_set_fd failed.");
-		return false;
+		goto OnError;
 	}
 
 	if (d->SslOnConnect)
@@ -1415,7 +1415,7 @@ bool SslSocket::Accept(LSocketI *sock)
 				details.Printf("SSL_get_error=%i", code);
 
 			OnError(code, LString::Fmt("SSL_accept failed (result=%i): %s", result, details.Get()));
-			return false;
+			goto OnError;
 		}
 	}
 	
@@ -1423,11 +1423,31 @@ bool SslSocket::Accept(LSocketI *sock)
 	if (!sslSock->Bio)
 	{
 		OnError(0, "SSL_get_rbio failed.");
-		return false;
+		goto OnError;
 	}
 
 	sslSock->d->UseSSLrw = true;
 	return true;
+
+OnError:
+	if (sslSock->Ssl)
+	{
+		Library->SSL_free(sslSock->Ssl);
+		sslSock->Ssl = nullptr;
+		sslSock->Bio = nullptr;
+	}
+
+	if (client != INVALID_SOCKET)
+	{
+		#if defined WIN32
+			closesocket(client);
+		#else
+			close(client);
+		#endif
+	}
+
+	sslSock->d->UseSSLrw = false;
+	return false;
 }
 
 bool SslSocket::IsBlocking()
