@@ -852,7 +852,7 @@ const char *SslSocket::GetErrorString()
 	return ErrMsg;
 }
 
-void SslSocket::SslError(const char *file, int line, const char *Msg)
+void SslSocket::HandleError(const char *file, int line, const char *Msg)
 {
 	char *Part = strrchr((char*)file, DIR_CHAR);
 	#ifndef WIN32
@@ -914,15 +914,19 @@ bool SslSocket::IsOpen()
 	return Bio != 0 && !d->Cancel->IsCancelled();
 }
 
-LString SslGetErrorAsString(OpenSSL *Library)
+LString SslSocket::GetSslErr()
 {
-	BIO *bio = Library->BIO_new (Library->BIO_s_mem());
-	Library->ERR_print_errors (bio);
-	
-	char *buf = NULL;
-	size_t len = Library->BIO_get_mem_data (bio, &buf);
-	LString s(buf, len);
-	Library->BIO_free (bio);
+	LString s;
+
+	if (auto bio = Library->BIO_new(Library->BIO_s_mem()))
+	{
+		Library->ERR_print_errors(bio);	
+		char *buf = NULL;
+		size_t len = Library->BIO_get_mem_data(bio, &buf);
+		s.Set(buf, len);
+		Library->BIO_free(bio);
+	}
+
 	return s;
 }
 
@@ -947,30 +951,24 @@ DebugTrace("%s:%i - SslSocket::Open(%s,%i)\n", _FL, HostAddr, Port);
 			d->IsSSL = true;
 			if (Library->Client)
 			{
-				const char *CertDir = "/u/matthew/cert";
-				int r = Library->SSL_CTX_load_verify_locations(Library->Client, 0, CertDir);
-DebugTrace("%s:%i - SSL_CTX_load_verify_locations=%i\n", _FL, r);
-				if (r > 0)
-				{
-					Bio = Library->BIO_new_ssl_connect(Library->Client);
+				Bio = Library->BIO_new_ssl_connect(Library->Client);
 DebugTrace("%s:%i - BIO_new_ssl_connect=%p\n", _FL, Bio);
-					if (Bio)
-					{
-						Library->BIO_get_ssl(Bio, &Ssl);
+				if (Bio)
+				{
+					Library->BIO_get_ssl(Bio, &Ssl);
 DebugTrace("%s:%i - BIO_get_ssl=%p\n", _FL, Ssl);
-						if (Ssl)
-						{
-							Library->SSL_set_verify(Ssl, SSL_VERIFY_PEER, NULL);
+					if (Ssl)
+					{
+						Library->SSL_set_verify(Ssl, SSL_VERIFY_PEER, NULL);
 
-							// SNI setup
-							Library->SSL_set_tlsext_host_name(Ssl, HostAddr);
-							if (!Library->SSL_set1_host(Ssl, HostAddr))
-							{
-								SslError(_FL, "SSL_set1_host failed.");
-							}
-							else
-							{
-					
+						// SNI setup
+						Library->SSL_set_tlsext_host_name(Ssl, HostAddr);
+						if (!Library->SSL_set1_host(Ssl, HostAddr))
+						{
+							HandleError(_FL, "SSL_set1_host failed.");
+						}
+						else
+						{
 							// Library->SSL_CTX_set_timeout()
 							Library->BIO_set_conn_hostname(Bio, HostAddr);
 							#if OPENSSL_VERSION_NUMBER < 0x10100000L
@@ -987,15 +985,20 @@ DebugTrace("%s:%i - BIO_get_ssl=%p\n", _FL, Ssl);
 							
 							IsBlocking(false);
 							
-							r = Library->SSL_connect(Ssl);
+							int r = Library->SSL_connect(Ssl);
+							int err = 0;
 DebugTrace("%s:%i - initial SSL_connect=%i, err=%i\n", _FL, r, Library->SSL_get_error(Ssl, r));
 							while (r != 1 && !d->Cancel->IsCancelled())
 							{
-								int err = Library->SSL_get_error(Ssl, r);
-								if (err != SSL_ERROR_WANT_CONNECT)
-								{
+								err = Library->SSL_get_error(Ssl, r);
 DebugTrace("%s:%i - SSL_get_error=%i\n", _FL, err);
-								}
+								// Break immediately on fatal errors; only WANT_* codes are retryable
+								if (err != SSL_ERROR_WANT_READ &&
+									err != SSL_ERROR_WANT_WRITE &&
+									err != SSL_ERROR_WANT_CONNECT &&
+									err != SSL_ERROR_WANT_X509_LOOKUP &&
+									err != SSL_ERROR_WANT_RETRY_VERIFY)
+									break;
 
 								LSleep(50);
 
@@ -1028,7 +1031,7 @@ DebugTrace("%s:%i - SSL_connect=%i (%i of %i ms)\n", _FL, r, (int)(LCurrentTime(
 								if (TimeOut)
 								{
 DebugTrace("%s:%i - SSL connect timeout, to=%i\n", _FL, To);
-									SslError(_FL, "Connection timeout.");
+									HandleError(_FL, "Connection timeout.");
 									break;
 								}
 							}
@@ -1040,7 +1043,14 @@ DebugTrace("%s:%i - open loop finished, r=%i, Cancelled=%i\n", _FL, r, d->Cancel
 								if (verify != X509_V_OK)
 								{
 									const char *msg = Library->X509_verify_cert_error_string(verify);
-									SslError(_FL, LString::Fmt("TLS peer verify failed (%li): %s", verify, msg ? msg : "unknown").Get());
+									if (d->Caps)
+									{
+										LString param;
+										param.Printf("%s|%s", HostAddr, msg ? msg : "unknown");
+										d->Caps->NeedsCapability("ssl-cert-error", param);
+									}
+									else
+										HandleError(_FL, LString::Fmt("TLS peer verify failed (%li): %s", verify, msg ? msg : "unknown").Get());
 								}
 								else
 								{
@@ -1058,20 +1068,29 @@ DebugTrace("%s:%i - open loop finished, r=%i, Cancelled=%i\n", _FL, r, d->Cancel
 							}
 							else if (!d->Cancel->IsCancelled())
 							{
-								LString Err = SslGetErrorAsString(Library).Strip();
-								if (!Err)
-									Err.Printf("BIO_do_connect(%s:%i) failed.", HostAddr, Port);
-								SslError(_FL, Err);
-							}
+								long verify = Library->SSL_get_verify_result(Ssl);
+								if (verify != X509_V_OK && d->Caps)
+								{
+									d->Caps->NeedsCapability("SslCertError",
+										LString::Fmt("%s: %s",
+													HostAddr,
+													Library->X509_verify_cert_error_string(verify)));
+								}
+								else
+								{
+									auto errMsg = LString::Fmt("err=%i, %s", err, GetSslErr().Strip().Get());
+									if (!errMsg)
+										errMsg.Printf("SSL_connect(%s:%i) failed.", HostAddr, Port);
+									HandleError(_FL, errMsg);
+								}
 							}
 						}
-						else SslError(_FL, "BIO_get_ssl failed.");
 					}
-					else SslError(_FL, "BIO_new_ssl_connect failed.");
+					else HandleError(_FL, "BIO_get_ssl failed.");
 				}
-				else SslError(_FL, "SSL_CTX_load_verify_locations failed.");
+				else HandleError(_FL, "BIO_new_ssl_connect failed.");
 			}
-			else SslError(_FL, "No Ctx.");
+			else HandleError(_FL, "No Ctx.");
 		}
 		else
 		{
@@ -1119,9 +1138,9 @@ DebugTrace("%s:%i - open loop finished=%i\n", _FL, r);
 					OnInformation(m);
 				}
 				else
-					SslError(_FL, "BIO_do_connect failed");
+					HandleError(_FL, "BIO_do_connect failed");
 			}
-			else SslError(_FL, "BIO_new_connect failed");
+			else HandleError(_FL, "BIO_new_connect failed");
 		}
 	}
 	
@@ -1186,7 +1205,7 @@ bool SslSocket::SetVariant(const char *Name, LVariant &Value, const char *Arr)
 			{
 				if (!Library->Client)
 				{
-					SslError(_FL, "Library->Client is null.");
+					HandleError(_FL, "Library->Client is null.");
 				}
 				else
 				{
@@ -1194,7 +1213,7 @@ bool SslSocket::SetVariant(const char *Name, LVariant &Value, const char *Arr)
 DebugTrace("%s:%i - SSL_new=%p\n", _FL, Ssl);
 					if (!Ssl)
 					{
-						SslError(_FL, "SSL_new failed.");
+						HandleError(_FL, "SSL_new failed.");
 					}
 					else
 					{
@@ -1232,7 +1251,7 @@ DebugTrace("%s:%i - X509_NAME_oneline=%s\n", _FL, Txt);
 						}
 						else
 						{
-							SslError(_FL, "SSL_connect failed.");
+							HandleError(_FL, "SSL_connect failed.");
 
 							r = Library->SSL_get_error(Ssl, r);
 							char *Msg = Library->ERR_error_string(r, 0);
@@ -1408,7 +1427,7 @@ bool SslSocket::Accept(LSocketI *sock)
 
 			if (code == SSL_ERROR_SSL || code == SSL_ERROR_SYSCALL)
 			{
-				details = SslGetErrorAsString(Library).Strip();
+				details = GetSslErr().Strip();
 			}
 
 			if (!details)

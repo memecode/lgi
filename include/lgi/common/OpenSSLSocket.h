@@ -38,7 +38,8 @@ protected:
 
 	// Local stuff
 	virtual void Log(const char *Str, ssize_t Bytes, SocketMsgType Type);
-	void SslError(const char *file, int line, const char *Msg);
+	void HandleError(const char *file, int line, const char *Msg);
+	LString GetSslErr();
 	LStream *GetLogStream();
 	void DebugTrace(const char *fmt, ...);
 

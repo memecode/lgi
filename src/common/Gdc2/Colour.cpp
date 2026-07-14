@@ -8,31 +8,26 @@ const LColour LColour::White(255, 255, 255);
 const LColour LColour::Red(255, 0, 0);
 const LColour LColour::Green(0, 192, 0);
 const LColour LColour::Blue(0, 0, 255);
+const LColour LColour::Orange(230, 115, 0);
 
 LColour::LColour()
 {
-	space = CsNone;
 	flat = 0;
-	pal = NULL;
 }
 
 LColour::LColour(const char *Str)
 {
-	space = CsNone;
 	flat = 0;
-	pal = NULL;
 	SetStr(Str);
 }
 
 LColour::LColour(uint8_t idx8, LPalette *palette)
 {
-	pal = NULL;
 	c8(idx8, palette);
 }
 
 LColour::LColour(int r, int g, int b, int a)
 {
-	pal = NULL;
 	space = System32BitColourSpace;
 	rgb.r = limit(r, 0, 255);
 	rgb.g = limit(g, 0, 255);
@@ -42,7 +37,6 @@ LColour::LColour(int r, int g, int b, int a)
 
 LColour::LColour(uint32_t c, int bits, LPalette *palette)
 {
-	pal = NULL;
 	Set(c, bits, palette);
 }
 
