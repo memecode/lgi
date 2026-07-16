@@ -16,10 +16,8 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Mail.h"
 #include "lgi/common/Base64.h"
-#include "lgi/common/DateTime.h"
-#include "lgi/common/DocView.h"
+#include "lgi/common/OpenSSLSocket.h"
 #include "lgi/common/Store3Defs.h"
-#include "lgi/common/LgiRes.h"
 #include "lgi/common/TextConvert.h"
 #include "lgi/common/Mime.h"
 #include "../Hash/md5/md5.h"
@@ -949,293 +947,299 @@ bool MailSmtp::Open(LSocketI *S,
 					int Port,
 					int Flags)
 {
+	if (!RemoteHost)
+	{
+		Error(_FL, "No remote SMTP host.\n");
+		return false;
+	}
+
 	char Str[256] = "";
 	bool Status = false;
-
-	if (!RemoteHost)
-		Error(_FL, "No remote SMTP host.\n");
-	else
+	strcpy_s(Str, sizeof(Str), RemoteHost);
+	char *Colon = strchr(Str, ':');
+	if (Colon)
 	{
-		strcpy_s(Str, sizeof(Str), RemoteHost);
-		char *Colon = strchr(Str, ':');
-		if (Colon)
+		*Colon = 0;
+		Colon++;
+		Port = atoi(Colon);
+	}
+	if (Port == 0)
+	{
+		if (Flags & MAIL_SSL)
+			Port = SMTP_SSL_PORT;
+		else
+			Port = SMTP_PORT;
+	}
+
+	auto Server = LString(Str).Strip();
+	if (Server)
+	{
+		if (SocketLock.Lock(_FL))
 		{
-			*Colon = 0;
-			Colon++;
-			Port = atoi(Colon);
-		}
-		if (Port == 0)
-		{
-			if (Flags & MAIL_SSL)
-				Port = SMTP_SSL_PORT;
-			else
-				Port = SMTP_PORT;
+			Socket.Reset(S);
+			SocketLock.Unlock();
 		}
 
-		auto Server = LString(Str).Strip();
-		if (Server)
+		Socket->SetTimeout(30 * 1000);
+
+		if (sslCertCallback)
 		{
-			if (SocketLock.Lock(_FL))
+			if (auto sslSock = dynamic_cast<SslSocket*>(Socket.Get()))
+				sslSock->SetCertCallback(sslCertCallback);
+		}
+
+		char Msg[256];
+		sprintf_s(Msg, sizeof(Msg), "Connecting to %s:%i...", Server.Get(), Port);
+		Log(Msg, LSocketI::SocketMsgInfo);
+
+		if (!Socket->Open(Server, Port))
+			Error(_FL, "Failed to connect socket to %s:%i\n", Server.Get(), Port);
+		else
+		{
+			LStringPipe Str;
+
+			// receive signon message
+			VERIFY_RET_VAL(ReadReply("220"));
+
+			// Rfc 2554 ESMTP authentication
+			SmtpHello:
+			sprintf_s(Buffer, sizeof(Buffer), "EHLO %s\r\n", (ValidNonWSStr(LocalDomain)) ? LocalDomain : "default");
+			VERIFY_RET_VAL(Write(0, true));
+			/*bool HasSmtpExtensions =*/ ReadReply("250", &Str);
+
+			bool Authed = false;
+			bool NoAuthTypes = false;
+			bool SupportsStartTLS = false;
+			LArray<LString> AuthTypes;
+
+			// Look through the response for the auth line
+			LString Response = Str.NewLStr();
+			if (Response)
 			{
-				Socket.Reset(S);
-				SocketLock.Unlock();
+				auto Lines = Response.SplitDelimit("\n");
+				for (auto &l: Lines)
+				{
+					char *AuthStr = stristr(l, "AUTH");
+					if (AuthStr)
+					{
+						// walk through AUTH types
+						auto Types = LString(AuthStr + 4).SplitDelimit(" ,;");
+						for (auto &t: Types)
+							AuthTypes.Add(t);
+					}
+					if (stristr(l, "STARTTLS"))
+						SupportsStartTLS = true;
+				}
 			}
 
-			Socket->SetTimeout(30 * 1000);
-
-			char Msg[256];
-			sprintf_s(Msg, sizeof(Msg), "Connecting to %s:%i...", Server.Get(), Port);
-			Log(Msg, LSocketI::SocketMsgInfo);
-	
-			if (!Socket->Open(Server, Port))
-				Error(_FL, "Failed to connect socket to %s:%i\n", Server.Get(), Port);
-			else
+			if (SupportsStartTLS && TestFlag(Flags, MAIL_USE_STARTTLS))
 			{
-				LStringPipe Str;
-
-				// receive signon message
-				VERIFY_RET_VAL(ReadReply("220"));
-
-				// Rfc 2554 ESMTP authentication
-				SmtpHello:
-				sprintf_s(Buffer, sizeof(Buffer), "EHLO %s\r\n", (ValidNonWSStr(LocalDomain)) ? LocalDomain : "default");
+				strcpy_s(Buffer, sizeof(Buffer), "STARTTLS\r\n");
 				VERIFY_RET_VAL(Write(0, true));
-				/*bool HasSmtpExtensions =*/ ReadReply("250", &Str);
+				VERIFY_RET_VAL(ReadReply("220", &Str));
 
-				bool Authed = false;
-				bool NoAuthTypes = false;
-				bool SupportsStartTLS = false;
-				LArray<LString> AuthTypes;
-
-				// Look through the response for the auth line
-				LString Response = Str.NewLStr();
-				if (Response)
+				LVariant v;
+				if (Socket->SetValue(LSocket_Protocol, v="SSL"))
 				{
-					auto Lines = Response.SplitDelimit("\n");
-					for (auto &l: Lines)
-					{
-						char *AuthStr = stristr(l, "AUTH");
-						if (AuthStr)
-						{
-							// walk through AUTH types
-							auto Types = LString(AuthStr + 4).SplitDelimit(" ,;");
-							for (auto &t: Types)
-								AuthTypes.Add(t);
-						}
-						if (stristr(l, "STARTTLS"))
-							SupportsStartTLS = true;
-					}
+					Flags &= ~MAIL_USE_STARTTLS;
+					goto SmtpHello;
+				}
+				else
+				{
+					// SSL init failed... what to do here?
+					return false;
+				}
+			}
+
+
+			if (TestFlag(Flags, MAIL_USE_AUTH))
+			{
+				if (!ValidStr(UserName))
+				{
+					// We need a user name in all authentication types.
+					SetError(L_ERROR_ESMTP_NO_USERNAME, "No username for authentication.");
+					return false;
 				}
 
-				if (SupportsStartTLS && TestFlag(Flags, MAIL_USE_STARTTLS))
+				if (AuthTypes.Length() == 0)
 				{
-					strcpy_s(Buffer, sizeof(Buffer), "STARTTLS\r\n");
-					VERIFY_RET_VAL(Write(0, true));
-					VERIFY_RET_VAL(ReadReply("220", &Str));
-
-					LVariant v;
-					if (Socket->SetValue(LSocket_Protocol, v="SSL"))
-					{
-						Flags &= ~MAIL_USE_STARTTLS;
-						goto SmtpHello;
-					}
+					// No auth types? huh?
+					if (TestFlag(Flags, MAIL_USE_PLAIN))
+						// Force plain type
+						AuthTypes.Add("PLAIN");
+					else if (TestFlag(Flags, MAIL_USE_LOGIN))
+						// Force login type
+						AuthTypes.Add("LOGIN");
+					else if (TestFlag(Flags, MAIL_USE_CRAM_MD5))
+						// Force CRAM MD5 type
+						AuthTypes.Add("CRAM-MD5");
+					else if (TestFlag(Flags, MAIL_USE_OAUTH2))
+						// Force OAUTH2 type
+						AuthTypes.Add("XOAUTH2");
 					else
 					{
-						// SSL init failed... what to do here?
-						return false;
+						// Try all
+						AuthTypes.Add("PLAIN");
+						AuthTypes.Add("LOGIN");
+						AuthTypes.Add("CRAM-MD5");
+						AuthTypes.Add("XOAUTH2");
 					}
 				}
-
-
-				if (TestFlag(Flags, MAIL_USE_AUTH))
+				else
 				{
-					if (!ValidStr(UserName))
-					{
-						// We need a user name in all authentication types.
-						SetError(L_ERROR_ESMTP_NO_USERNAME, "No username for authentication.");
-						return false;
-					}
+					// Force user preference
+					if (TestFlag(Flags, MAIL_USE_PLAIN))
+						Reorder(AuthTypes, "PLAIN");
+					else if (TestFlag(Flags, MAIL_USE_LOGIN))
+						Reorder(AuthTypes, "LOGIN");
+					else if (TestFlag(Flags, MAIL_USE_CRAM_MD5))
+						Reorder(AuthTypes, "CRAM-MD5");
+					else if (TestFlag(Flags, MAIL_USE_OAUTH2))
+						Reorder(AuthTypes, "XOAUTH2");
+				}
 
-					if (AuthTypes.Length() == 0)
+				for (auto Auth : AuthTypes)
+				{
+					// Try all their auth types against our internally support types
+					if (Auth.Equals("LOGIN"))
 					{
-						// No auth types? huh?
-						if (TestFlag(Flags, MAIL_USE_PLAIN))
-							// Force plain type
-							AuthTypes.Add("PLAIN");
-						else if (TestFlag(Flags, MAIL_USE_LOGIN))
-							// Force login type
-							AuthTypes.Add("LOGIN");
-						else if (TestFlag(Flags, MAIL_USE_CRAM_MD5))
-							// Force CRAM MD5 type
-							AuthTypes.Add("CRAM-MD5");
-						else if (TestFlag(Flags, MAIL_USE_OAUTH2))
-							// Force OAUTH2 type
-							AuthTypes.Add("XOAUTH2");
-						else
+						VERIFY_RET_VAL(Write("AUTH LOGIN\r\n", true));
+						VERIFY_RET_VAL(ReadReply("334"));
+
+						ZeroObj(Buffer);
+						ConvertBinaryToBase64(Buffer, sizeof(Buffer), (uchar*)UserName, strlen(UserName));
+						strcat(Buffer, "\r\n");
+						VERIFY_RET_VAL(Write(0, true));
+						if (ReadReply("334") && Password)
 						{
-							// Try all
-							AuthTypes.Add("PLAIN");
-							AuthTypes.Add("LOGIN");
-							AuthTypes.Add("CRAM-MD5");
-							AuthTypes.Add("XOAUTH2");
-						}
-					}
-					else
-					{
-						// Force user preference
-						if (TestFlag(Flags, MAIL_USE_PLAIN))
-							Reorder(AuthTypes, "PLAIN");
-						else if (TestFlag(Flags, MAIL_USE_LOGIN))
-							Reorder(AuthTypes, "LOGIN");
-						else if (TestFlag(Flags, MAIL_USE_CRAM_MD5))
-							Reorder(AuthTypes, "CRAM-MD5");
-						else if (TestFlag(Flags, MAIL_USE_OAUTH2))
-							Reorder(AuthTypes, "XOAUTH2");
-					}
-
-					for (auto Auth : AuthTypes)
-					{
-						// Try all their auth types against our internally support types
-						if (Auth.Equals("LOGIN"))
-						{
-							VERIFY_RET_VAL(Write("AUTH LOGIN\r\n", true));
-							VERIFY_RET_VAL(ReadReply("334"));
-
 							ZeroObj(Buffer);
-							ConvertBinaryToBase64(Buffer, sizeof(Buffer), (uchar*)UserName, strlen(UserName));
+							ConvertBinaryToBase64(Buffer, sizeof(Buffer), (uchar*)Password, strlen(Password));
 							strcat(Buffer, "\r\n");
 							VERIFY_RET_VAL(Write(0, true));
-							if (ReadReply("334") && Password)
+							if (ReadReply("235"))
+								Authed = true;
+						}
+					}
+					else if (Auth.Equals("PLAIN"))
+					{
+						char Ascii[512];
+						int ch = sprintf_s(Ascii, sizeof(Ascii), "%c%s%c%s", 0, UserName, 0, Password);
+						char Base64[512] = {0};
+						ConvertBinaryToBase64(Base64, sizeof(Base64), (uint8_t*)Ascii, ch);
+
+						sprintf_s(Buffer, sizeof(Buffer), "AUTH PLAIN %s\r\n", Base64);
+						VERIFY_RET_VAL(Write(0, true));
+						if (ReadReply("235"))
+						{
+							Authed = true;
+						}
+					}
+					else if (Auth.Equals("CRAM-MD5"))
+					{
+						sprintf_s(Buffer, sizeof(Buffer), "AUTH CRAM-MD5\r\n");
+						VERIFY_RET_VAL(Write(0, true));
+						if (ReadReply("334"))
+						{
+							auto Sp = strchr(Buffer, ' ');
+							if (Sp)
 							{
-								ZeroObj(Buffer);
-								ConvertBinaryToBase64(Buffer, sizeof(Buffer), (uchar*)Password, strlen(Password));
-								strcat(Buffer, "\r\n");
+								Sp++;
+
+								// Decode the server response:
+								uint8_t Txt[128];
+								auto InLen = strlen(Sp);
+								ssize_t TxtLen = ConvertBase64ToBinary(Txt, sizeof(Txt), Sp, InLen);
+
+								// Calc the hash:
+								// https://tools.ietf.org/html/rfc2104
+								char Key[64] = {0};
+								memcpy(Key, Password, MIN(strlen(Password), sizeof(Key)));
+								uint8_t iKey[256];
+								char oKey[256];
+								for (unsigned i=0; i<64; i++)
+								{
+									iKey[i] = Key[i] ^ 0x36;
+									oKey[i] = Key[i] ^ 0x5c;
+								}
+								memcpy(iKey+64, Txt, TxtLen);
+								md5_state_t md5;
+								md5_init(&md5);
+								md5_append(&md5, iKey, 64 + TxtLen);
+								md5_finish(&md5, oKey + 64);
+
+								md5_init(&md5);
+								md5_append(&md5, (uint8_t*)oKey, 64 + 16);
+								char digest[16];
+								md5_finish(&md5, digest);
+
+								char r[256];
+								int ch = sprintf_s(r, sizeof(r), "%s ", UserName);
+								for (unsigned i=0; i<16; i++)
+									ch += sprintf_s(r+ch, sizeof(r)-ch, "%02x", (uint8_t)digest[i]);
+
+								// Base64 encode
+								ssize_t Len = ConvertBinaryToBase64(Buffer, sizeof(Buffer), (uint8_t*)r, ch);
+								Buffer[Len++] = '\r';
+								Buffer[Len++] = '\n';
+								Buffer[Len++] = 0;
 								VERIFY_RET_VAL(Write(0, true));
 								if (ReadReply("235"))
 									Authed = true;
 							}
 						}
-						else if (Auth.Equals("PLAIN"))
-						{
-							char Ascii[512];
-							int ch = sprintf_s(Ascii, sizeof(Ascii), "%c%s%c%s", 0, UserName, 0, Password);
-							char Base64[512] = {0};
-							ConvertBinaryToBase64(Base64, sizeof(Base64), (uint8_t*)Ascii, ch);
-
-							sprintf_s(Buffer, sizeof(Buffer), "AUTH PLAIN %s\r\n", Base64);
-							VERIFY_RET_VAL(Write(0, true));
-							if (ReadReply("235"))
-							{
-								Authed = true;
-							}
-						}
-						else if (Auth.Equals("CRAM-MD5"))
-						{
-							sprintf_s(Buffer, sizeof(Buffer), "AUTH CRAM-MD5\r\n");
-							VERIFY_RET_VAL(Write(0, true));
-							if (ReadReply("334"))
-							{
-								auto Sp = strchr(Buffer, ' ');
-								if (Sp)
-								{
-									Sp++;
-
-									// Decode the server response:
-									uint8_t Txt[128];
-									auto InLen = strlen(Sp);
-									ssize_t TxtLen = ConvertBase64ToBinary(Txt, sizeof(Txt), Sp, InLen);
-
-									// Calc the hash:
-									// https://tools.ietf.org/html/rfc2104
-									char Key[64] = {0};
-									memcpy(Key, Password, MIN(strlen(Password), sizeof(Key)));
-									uint8_t iKey[256];
-									char oKey[256];
-									for (unsigned i=0; i<64; i++)
-									{
-										iKey[i] = Key[i] ^ 0x36;
-										oKey[i] = Key[i] ^ 0x5c;
-									}
-									memcpy(iKey+64, Txt, TxtLen);
-									md5_state_t md5;
-									md5_init(&md5);
-									md5_append(&md5, iKey, 64 + TxtLen);
-									md5_finish(&md5, oKey + 64);
-
-									md5_init(&md5);
-									md5_append(&md5, (uint8_t*)oKey, 64 + 16);
-									char digest[16];
-									md5_finish(&md5, digest);
-
-									char r[256];
-									int ch = sprintf_s(r, sizeof(r), "%s ", UserName);
-									for (unsigned i=0; i<16; i++)
-										ch += sprintf_s(r+ch, sizeof(r)-ch, "%02x", (uint8_t)digest[i]);
-
-									// Base64 encode
-									ssize_t Len = ConvertBinaryToBase64(Buffer, sizeof(Buffer), (uint8_t*)r, ch);
-									Buffer[Len++] = '\r';
-									Buffer[Len++] = '\n';
-									Buffer[Len++] = 0;
-									VERIFY_RET_VAL(Write(0, true));
-									if (ReadReply("235"))
-										Authed = true;
-								}
-							}
-						}
-						else if (Auth.Equals("XOAUTH2"))
-						{
-							auto Log = dynamic_cast<LStream*>(Socket->GetLog());
-							LOAuth2 Authenticator(OAuth2, UserName, SettingStore, Socket->GetCancel(), Log);
-							auto Tok = Authenticator.GetAccessToken();
-							if (Tok)
-							{
-								LString s;
-								s.Printf("user=%s\001auth=Bearer %s\001\001\0", UserName, Tok.Get());
-								s = LToBase64(s);
-
-								sprintf_s(Buffer, sizeof(Buffer), "AUTH %s %s\r\n", Auth.Get(), s.Get());
-								VERIFY_RET_VAL(Write(0, true));
-								Authed = ReadReply("235");
-								if (!Authed)
-								{
-									Authenticator.Refresh();
-								}
-							}
-						}
-						else
-						{
-							LgiTrace("%s:%i - Unsupported auth type '%s'\n", _FL, Auth.Get());
-						}
-
-						if (Authed)
-							break;
 					}
-
-					if (!Authed)
+					else if (Auth.Equals("XOAUTH2"))
 					{
-						if (NoAuthTypes)
-							SetError(L_ERROR_ESMTP_NO_AUTHS, "The server didn't return the authentication methods it supports.");
-						else
+						auto Log = dynamic_cast<LStream*>(Socket->GetLog());
+						LOAuth2 Authenticator(OAuth2, UserName, SettingStore, Socket->GetCancel(), Log);
+						auto Tok = Authenticator.GetAccessToken();
+						if (Tok)
 						{
-							LString p;
-							for (auto i : AuthTypes)
-							{
-								if (p.Get())
-									p += ", ";
-								p += i;
-							}
+							LString s;
+							s.Printf("user=%s\001auth=Bearer %s\001\001\0", UserName, Tok.Get());
+							s = LToBase64(s);
 
-							SetError(L_ERROR_UNSUPPORTED_AUTH, "Authentication failed, types available:\n\t%s", p);
+							sprintf_s(Buffer, sizeof(Buffer), "AUTH %s %s\r\n", Auth.Get(), s.Get());
+							VERIFY_RET_VAL(Write(0, true));
+							Authed = ReadReply("235");
+							if (!Authed)
+							{
+								Authenticator.Refresh();
+							}
 						}
 					}
+					else
+					{
+						LgiTrace("%s:%i - Unsupported auth type '%s'\n", _FL, Auth.Get());
+					}
 
-					Status = Authed;
+					if (Authed)
+						break;
 				}
-				else
+
+				if (!Authed)
 				{
-					Status = true;
+					if (NoAuthTypes)
+						SetError(L_ERROR_ESMTP_NO_AUTHS, "The server didn't return the authentication methods it supports.");
+					else
+					{
+						LString p;
+						for (auto i : AuthTypes)
+						{
+							if (p.Get())
+								p += ", ";
+							p += i;
+						}
+
+						SetError(L_ERROR_UNSUPPORTED_AUTH, "Authentication failed, types available:\n\t%s", p);
+					}
 				}
+
+				Status = Authed;
+			}
+			else
+			{
+				Status = true;
 			}
 		}
 	}
@@ -1961,9 +1965,7 @@ LString MailReceiveFolder::GetHeaders(int Message)
 //////////////////////////////////////////////////////////////////////////////////////////////////
 MailPop3::MailPop3()
 {
-	End = "\r\n.\r\n";
 	Marker = End;
-	Messages = -1;
 }
 
 MailPop3::~MailPop3()
@@ -1992,11 +1994,11 @@ CleanUp:
 int MailPop3::GetInt()
 {
 	char Buf[32];
-	char *Start = strchr(Buffer, ' ');
+	auto Start = strchr(Buffer, ' ');
 	if (Start)
 	{
 		Start++;
-		char *End = strchr(Start, ' ');
+		auto End = strchr(Start, ' ');
 		if (End)
 		{
 			int Len = (int) (End - Start);
@@ -2010,37 +2012,37 @@ int MailPop3::GetInt()
 
 bool MailPop3::ReadReply()
 {
+	if (!Socket)
+		return false;
+
 	bool Status = false;
-	if (Socket)
+	ssize_t Pos = 0;
+	ZeroObj(Buffer);
+	do
 	{
-		ssize_t Pos = 0;
-		ZeroObj(Buffer);
-		do
+		ssize_t Result = Socket->Read(Buffer+Pos, sizeof(Buffer)-Pos, 0);
+		if (Result <= 0) // an error?
 		{
-			ssize_t Result = Socket->Read(Buffer+Pos, sizeof(Buffer)-Pos, 0);
-			if (Result <= 0) // an error?
-			{
-				// Leave the loop...
-				break;
-			}
-
-			Pos += Result;
-    	}
-		while (	!strstr(Buffer, "\r\n") &&
-				sizeof(Buffer)-Pos > 0);
-
-		Status = (Buffer[0] == '+') && strstr(Buffer, "\r\n");
-
-		char *Cr = strchr(Buffer, '\r');
-		if (Cr) *Cr = 0;
-		if (ValidStr(Buffer))
-			Log(Buffer, (Status) ? LSocketI::SocketMsgReceive : LSocketI::SocketMsgError);
-		if (Cr) *Cr = '\r';
-
-		if (!Status)
-		{
-			SetError(L_ERROR_GENERIC, "Error: %s", Buffer);
+			// Leave the loop...
+			break;
 		}
+
+		Pos += Result;
+	}
+	while (	!strstr(Buffer, "\r\n") &&
+			sizeof(Buffer)-Pos > 0);
+
+	Status = (Buffer[0] == '+') && strstr(Buffer, "\r\n");
+
+	char *Cr = strchr(Buffer, '\r');
+	if (Cr) *Cr = 0;
+	if (ValidStr(Buffer))
+		Log(Buffer, (Status) ? LSocketI::SocketMsgReceive : LSocketI::SocketMsgError);
+	if (Cr) *Cr = '\r';
+
+	if (!Status)
+	{
+		SetError(L_ERROR_GENERIC, "Error: %s", Buffer);
 	}
 
 	return Status;
@@ -2075,188 +2077,196 @@ bool MailPop3::ListCmd(const char *Cmd, LHashTbl<ConstStrKey<char,false>, bool> 
 
 bool MailPop3::Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, LDom *SettingStore, int Flags)
 {
-	bool Status = false;
-	char *Apop = nullptr;
-
 	if (!RemoteHost)
-		Error(_FL, "No remote POP host.\n");
-	else 
 	{
-		LXmlTag LocalStore;
-		if (!SettingStore)
-			SettingStore = &LocalStore;
-
-		if (Port < 1)
-		{
-			LVariant IsSsl;
-			if (S->GetValue("IsSSL", IsSsl) &&
-				IsSsl.CastInt32())
-				Port = POP3_SSL_PORT;
-			else
-				Port = POP3_PORT;
-		}
-
-		LString Server = RemoteHost;
-		auto parts = Server.SplitDelimit(":");
-		if (parts.Length() > 1)
-		{
-			Server = parts[0].Strip();
-			Port = (int) parts[1].Int();
-		}
-		else 
-
-		if (S &&
-			User &&
-			Password &&
-			Server)
-		{
-			S->SetTimeout(30 * 1000);
-
-			ReStartConnection:
-			
-			if (SocketLock.Lock(_FL))
-			{
-				Socket.Reset(S);
-				SocketLock.Unlock();
-			}
-
-			if (Socket &&
-				Socket->Open(Server, Port) &&
-				ReadReply())
-			{
-				LVariant NoAPOP = false;
-				if (SettingStore)
-					SettingStore->GetValue(OPT_Pop3NoApop, NoAPOP);
-				if (!NoAPOP.CastInt32())
-				{
-					char *s = strchr(Buffer + 3, '<');
-					if (s)
-					{
-						char *e = strchr(s + 1, '>');
-						if (e)
-						{
-							Apop = NewStr(s, e - s + 1);
-						}
-					}
-				}
-
-				// login
-				bool Authed = false;
-				char *user = (char*) LNewConvertCp("iso-8859-1", User, "utf-8");
-				char *pass = (char*) LNewConvertCp("iso-8859-1", Password, "utf-8");
-
-				if (user && pass)
-				{
-					bool SecurityError = false;
-
-					if (TestFlag(Flags, MAIL_USE_STARTTLS))
-					{
-						strcpy_s(Buffer, sizeof(Buffer), "STARTTLS\r\n");
-						VERIFY_RET_VAL(Write(0, true));
-						VERIFY_RET_VAL(ReadReply());
-
-						LVariant v;
-						if (Socket->SetValue(LSocket_Protocol, v="SSL"))
-						{
-							Flags &= ~MAIL_USE_STARTTLS;
-						}
-						else
-						{
-							SecurityError = true;
-						}
-					}
-
-					if (!SecurityError && Apop) // GotKey, not implemented
-					{
-						// using encrypted password
-						unsigned char Digest[16];
-						char HexDigest[33];
-
-						// append password
-						char Key[256];
-						sprintf_s(Key, sizeof(Key), "%s%s", Apop, pass);
-
-						ZeroObj(Digest);
-						MDStringToDigest(Digest, Key);
-						for (int i = 0; i < 16; i++)
-							sprintf_s(HexDigest + (i*2), 3, "%2.2x", Digest[i]);
-						HexDigest[32] = 0;
-
-						sprintf_s(Buffer, sizeof(Buffer), "APOP %s %s\r\n", user, HexDigest);
-						VERIFY_ONERR(Write(0, true));
-						Authed = ReadReply();
-
-						if (!Authed)
-						{
-							DeleteArray(Apop);
-							LVariant NoAPOP = true;
-							if (SettingStore)
-								SettingStore->SetValue(OPT_Pop3NoApop, NoAPOP);
-							S->Close();
-							goto ReStartConnection;
-						}
-					}
-
-					/*
-					if (!SecurityError && SecureAuth)
-					{
-						LHashTbl<ConstStrKey<char,false>, bool> AuthTypes, Capabilities;
-						if (ListCmd("AUTH", AuthTypes) &&
-							ListCmd("CAPA", Capabilities))
-						{
-							if (AuthTypes.Find("GSSAPI"))
-							{
-								sprintf_s(Buffer, sizeof(Buffer), "AUTH GSSAPI\r\n");
-								VERIFY_ONERR(Write(0, true));
-								VERIFY_ONERR(ReadReply());
-
-								// http://www.faqs.org/rfcs/rfc2743.html
-							}
-						}
-					}					
-					else 
-					*/
-					if (!SecurityError && !Authed)
-					{
-						// have to use non-key method
-						sprintf_s(Buffer, sizeof(Buffer), "USER %s\r\n", user);
-						VERIFY_ONERR(Write(0, true));
-						VERIFY_ONERR(ReadReply());
-
-						sprintf_s(Buffer, sizeof(Buffer), "PASS %s\r\n", pass);
-						VERIFY_ONERR(Write(0, false));
-						Log("PASS *******", LSocketI::SocketMsgSend);
-
-						Authed = ReadReply();
-					}
-
-					DeleteArray(user);
-					DeleteArray(pass);
-				}
-
-				if (Authed)
-				{
-					Status = true;
-				}
-				else
-				{
-					if (SocketLock.Lock(_FL))
-					{
-						Socket.Reset(0);
-						SocketLock.Unlock();
-					}
-					LgiTrace("%s:%i - Failed auth.\n", _FL);
-				}
-			}
-			else
-				Error(_FL, "Failed to open socket to %s:%i and read reply.\n", Server.Get(), Port);
-		}
-		else Error(_FL, "No user/pass.\n");
+		Error(_FL, "No remote POP host.\n");
+		return false;
 	}
 
-CleanUp:
-	DeleteArray(Apop);
+	bool Status = false;
+	LString Apop;
+	SslSocket *sslSock = nullptr;
+	LXmlTag LocalStore;
 
+	if (!SettingStore)
+		SettingStore = &LocalStore;
+
+	if (Port < 1)
+	{
+		LVariant IsSsl;
+		if (S->GetValue("IsSSL", IsSsl) &&
+			IsSsl.CastInt32())
+		{
+			Port = POP3_SSL_PORT;
+			sslSock = dynamic_cast<SslSocket*>(S);
+			if (sslSock && sslCertCallback)
+			{
+				sslSock->SetCertCallback(sslCertCallback);
+			}
+		}
+		else
+		{
+			Port = POP3_PORT;
+		}
+	}
+
+	LString Server = RemoteHost;
+	auto parts = Server.SplitDelimit(":");
+	if (parts.Length() > 1)
+	{
+		Server = parts[0].Strip();
+		Port = (int) parts[1].Int();
+	}
+
+	if (S &&
+		User &&
+		Password &&
+		Server)
+	{
+		S->SetTimeout(30 * 1000);
+
+		ReStartConnection:
+		
+		if (SocketLock.Lock(_FL))
+		{
+			Socket.Reset(S);
+			SocketLock.Unlock();
+		}
+
+		if (Socket &&
+			Socket->Open(Server, Port) &&
+			ReadReply())
+		{
+			LVariant NoAPOP = false;
+			if (SettingStore)
+				SettingStore->GetValue(OPT_Pop3NoApop, NoAPOP);
+			if (!NoAPOP.CastInt32())
+			{
+				char *s = strchr(Buffer + 3, '<');
+				if (s)
+				{
+					char *e = strchr(s + 1, '>');
+					if (e)
+					{
+						Apop.Set(s, e - s + 1);
+					}
+				}
+			}
+
+			// login
+			bool Authed = false;
+			auto user = (char*) LNewConvertCp("iso-8859-1", User, "utf-8");
+			auto pass = (char*) LNewConvertCp("iso-8859-1", Password, "utf-8");
+
+			if (user && pass)
+			{
+				bool SecurityError = false;
+
+				if (TestFlag(Flags, MAIL_USE_STARTTLS))
+				{
+					strcpy_s(Buffer, sizeof(Buffer), "STARTTLS\r\n");
+					VERIFY_RET_VAL(Write(0, true));
+					VERIFY_RET_VAL(ReadReply());
+
+					LVariant v;
+					if (Socket->SetValue(LSocket_Protocol, v="SSL"))
+					{
+						Flags &= ~MAIL_USE_STARTTLS;
+					}
+					else
+					{
+						SecurityError = true;
+					}
+				}
+
+				if (!SecurityError && Apop) // GotKey, not implemented
+				{
+					// using encrypted password
+					unsigned char Digest[16];
+					char HexDigest[33];
+
+					// append password
+					char Key[256];
+					sprintf_s(Key, sizeof(Key), "%s%s", Apop.Get(), pass);
+
+					ZeroObj(Digest);
+					MDStringToDigest(Digest, Key);
+					for (int i = 0; i < 16; i++)
+						sprintf_s(HexDigest + (i*2), 3, "%2.2x", Digest[i]);
+					HexDigest[32] = 0;
+
+					sprintf_s(Buffer, sizeof(Buffer), "APOP %s %s\r\n", user, HexDigest);
+					VERIFY_ONERR(Write(0, true));
+					Authed = ReadReply();
+
+					if (!Authed)
+					{
+						Apop.Empty();
+						LVariant NoAPOP = true;
+						if (SettingStore)
+							SettingStore->SetValue(OPT_Pop3NoApop, NoAPOP);
+						S->Close();
+						goto ReStartConnection;
+					}
+				}
+
+				/*
+				if (!SecurityError && SecureAuth)
+				{
+					LHashTbl<ConstStrKey<char,false>, bool> AuthTypes, Capabilities;
+					if (ListCmd("AUTH", AuthTypes) &&
+						ListCmd("CAPA", Capabilities))
+					{
+						if (AuthTypes.Find("GSSAPI"))
+						{
+							sprintf_s(Buffer, sizeof(Buffer), "AUTH GSSAPI\r\n");
+							VERIFY_ONERR(Write(0, true));
+							VERIFY_ONERR(ReadReply());
+
+							// http://www.faqs.org/rfcs/rfc2743.html
+						}
+					}
+				}					
+				else 
+				*/
+				if (!SecurityError && !Authed)
+				{
+					// have to use non-key method
+					sprintf_s(Buffer, sizeof(Buffer), "USER %s\r\n", user);
+					VERIFY_ONERR(Write(0, true));
+					VERIFY_ONERR(ReadReply());
+
+					sprintf_s(Buffer, sizeof(Buffer), "PASS %s\r\n", pass);
+					VERIFY_ONERR(Write(0, false));
+					Log("PASS *******", LSocketI::SocketMsgSend);
+
+					Authed = ReadReply();
+				}
+
+				DeleteArray(user);
+				DeleteArray(pass);
+			}
+
+			if (Authed)
+			{
+				Status = true;
+			}
+			else
+			{
+				if (SocketLock.Lock(_FL))
+				{
+					Socket.Reset(0);
+					SocketLock.Unlock();
+				}
+				LgiTrace("%s:%i - Failed auth.\n", _FL);
+			}
+		}
+		else
+			Error(_FL, "Failed to open socket to %s:%i and read reply.\n", Server.Get(), Port);
+	}
+	else Error(_FL, "No user/pass.\n");
+
+CleanUp:
 	return Status;
 }
 
@@ -2281,6 +2291,93 @@ bool MailPop3::MailIsEnd(LString &s)
 	}
 
 	return false;
+}
+
+// States for Pop3ProcessBody
+enum Pop3ParseState { Pop3LineStart, Pop3Body, Pop3SawDot, Pop3SawDotCr };
+
+/// Process a chunk of raw POP3 multi-line body data, writing unstuffed message
+/// content to Dst (RFC 1939 §3 Transparency) and detecting the \r\n.\r\n
+/// terminator without writing any of its bytes to the stream.
+///
+/// State must start as Pop3LineStart and be preserved across calls when the
+/// response spans multiple reads.
+///
+/// Returns the number of bytes of Data consumed up to and including the
+/// terminator's final \n when the terminator is found, or -1 if not yet seen.
+static ssize_t Pop3ProcessBody(LStreamI *Dst, const char *Data, ssize_t Len,
+								Pop3ParseState &State)
+{
+	const char *Chunk = Data;
+	const char *End = Data + Len;
+
+	for (const char *p = Data; p < End; p++)
+	{
+		char c = *p;
+		switch (State)
+		{
+			case Pop3Body:
+				if (c == '\n')
+					State = Pop3LineStart;
+				break;
+
+			case Pop3LineStart:
+				if (c == '.')
+				{
+					// Flush content up to (not including) this dot, then skip it.
+					if (p > Chunk)
+						Dst->Write(Chunk, p - Chunk);
+					Chunk = p + 1;
+					State = Pop3SawDot;
+				}
+				else
+				{
+					State = (c == '\n') ? Pop3LineStart : Pop3Body;
+				}
+				break;
+
+			case Pop3SawDot:
+				// We stripped the leading '.'; decide if it's the terminator or content.
+				if (c == '\r')
+				{
+					// Flush any content written after the stripped dot, then skip \r.
+					if (p > Chunk)
+						Dst->Write(Chunk, p - Chunk);
+					Chunk = p + 1;
+					State = Pop3SawDotCr;
+				}
+				else
+				{
+					// Not the terminator pattern — the skipped dot was a stuffing dot;
+					// Chunk already points past it so content is included automatically.
+					State = (c == '\n') ? Pop3LineStart : Pop3Body;
+				}
+				break;
+
+			case Pop3SawDotCr:
+				if (c == '\n')
+				{
+					// Terminator \r\n.\r\n complete — flush any content between
+					// the skipped \r and this \n (normally nothing), then stop.
+					if (p > Chunk)
+						Dst->Write(Chunk, p - Chunk);
+					return p - Data + 1;
+				}
+				else
+				{
+					// The \r we held back was not part of the terminator; emit it.
+					Dst->Write("\r", 1);
+					// Chunk is already at p (= held \r + 1), so current char is included.
+					State = (c == '\n') ? Pop3LineStart : Pop3Body;
+				}
+				break;
+		}
+	}
+
+	if (End > Chunk)
+		Dst->Write(Chunk, End - Chunk);
+
+	return -1; // terminator not seen yet
 }
 
 bool MailPop3::Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks)
@@ -2343,8 +2440,6 @@ bool MailPop3::Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks
 					}
 					VERIFY_RET_VAL(Write(0, true));
 
-					LHtmlLinePrefix End(".\r\n");
-
 					if (Transfer)
 					{
 						Transfer->Value = 0;
@@ -2358,20 +2453,18 @@ bool MailPop3::Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks
 					ssize_t Used = 0;
 					bool Ok = false;
 					bool Finished = false;
-					int64 DataPos = 0;
+					Pop3ParseState BodyState = Pop3LineStart;
 					while (Socket->IsOpen())
 					{
 						ssize_t r = Socket->Read(Buffer+Used, sizeof(Buffer)-Used-1, 0);
 						if (r > 0)
 						{
 							DeNullText(Buffer + Used, r);
-							
-							if (Transfer)
-							{
-								Transfer->Value += r;
-							}
 
-							char *Eol = strchr(Buffer, '\n');
+							if (Transfer)
+								Transfer->Value += r;
+
+							auto Eol = strchr(Buffer, '\n');
 							if (Eol)
 							{
 								Eol++;
@@ -2379,27 +2472,18 @@ bool MailPop3::Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks
 								if (Ok)
 								{
 									// Log(Buffer, LSocketI::SocketMsgReceive);
-
-									// The Buffer was zero'd at the beginning garrenteeing
-									// NULL termination
-									size_t Len = strlen(Eol);
-									ssize_t EndPos = End.IsEnd(Eol, Len);
-									if (EndPos >= 0)
+									// Buffer was zero'd so strlen gives exact body length.
+									ssize_t Len = strlen(Eol);
+									if (Pop3ProcessBody(Msg, Eol, Len, BodyState) >= 0)
 									{
-										Msg->Write(Eol, EndPos - 3);
 										Status = Trans[n]->Status = true;
 										Finished = true;
-									}
-									else
-									{
-										Msg->Write(Eol, Len);
-										DataPos += Len;
 									}
 								}
 								else
 								{
 									Log(Buffer, LSocketI::SocketMsgError);
-									Finished = true;								
+									Finished = true;
 								}
 								break;
 							}
@@ -2420,49 +2504,21 @@ bool MailPop3::Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks
 								if (r > 0)
 								{
 									DeNullText(Buffer, r);
-									
+
 									if (Transfer)
-									{
 										Transfer->Value += r;
-									}
 
-									ssize_t EndPos = End.IsEnd(Buffer, r);
-									if (EndPos >= 0)
+									if (Pop3ProcessBody(Msg, Buffer, r, BodyState) >= 0)
 									{
-										ssize_t Actual = EndPos - DataPos - 3;
-										if (Actual > 0)
-										{
-											#ifdef _DEBUG
-											ssize_t w =
-											#endif
-											Msg->Write(Buffer, Actual);
-											LAssert(w == Actual);
-										}
-										// else the end point was in the last buffer
-
 										Status = Trans[n]->Status = true;
 										break;
 									}
-									else
-									{
-										#ifdef _DEBUG
-										ssize_t w =
-										#endif
-										Msg->Write(Buffer, r);
-										LAssert(w == r);
-										DataPos += r;
-									}
 								}
-								else
-								{
-									break;
-								}
+								else break;
 							}
-							
+
 							if (!Status)
-							{
 								LgiTrace("%s:%i - Didn't get end-of-mail marker.\n", _FL);
-							}
 						}
 						else
 						{
@@ -2653,7 +2709,32 @@ LString MailPop3::ReadMultiLineReply()
 
 	// Strip off the first line...
 	auto FirstNewLen = a.Find("\n");
-	return FirstNewLen >= 0 ? a(FirstNewLen, -1) : LString();
+	if (FirstNewLen < 0)
+		return LString();
+
+	// Apply RFC 1939 §3 dot-unstuffing: each line the server prefixed with an
+	// extra '.' to avoid confusion with the terminator needs that dot removed.
+	LString body = a(FirstNewLen, -1); // starts with the \n that ended +OK line
+	const char *p = body.Get();
+	if (!p)
+		return LString();
+
+	LStringPipe out;
+	const char *Chunk = p;
+	bool AtLineStart = false; // first char is \n (end of +OK line), not content
+	for (; *p; p++)
+	{
+		if (AtLineStart && *p == '.')
+		{
+			if (p > Chunk)
+				out.Write(Chunk, p - Chunk);
+			Chunk = p + 1;
+		}
+		AtLineStart = (*p == '\n');
+	}
+	if (p > Chunk)
+		out.Write(Chunk, p - Chunk);
+	return out.NewLStr();
 }
 
 bool MailPop3::Close()

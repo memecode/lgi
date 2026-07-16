@@ -6,6 +6,7 @@
 #include "lgi/common/vCard-vCal.h"
 #include "lgi/common/Json.h"
 #include "lgi/common/TextConvert.h"
+#include "lgi/common/Base64.h"
 #include "ScribeDefs.h"
 
 #define DEBUG_LOGGING			0

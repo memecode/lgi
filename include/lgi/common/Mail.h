@@ -7,12 +7,9 @@
 
 #include <functional>
 
-#include "lgi/common/Net.h"
-#include "lgi/common/Base64.h"
-#include "lgi/common/Progress.h"
-#include "lgi/common/Variant.h"
 #include "lgi/common/OAuth2.h"
 #include "lgi/common/Store3Defs.h"	
+#include "lgi/common/OpenSSLSocket.h"
 
 #ifndef GPL_COMPATIBLE
 #define GPL_COMPATIBLE						0
@@ -188,6 +185,9 @@ protected:
 	virtual void OnUserMessage(char *Str) {}
 
 public:
+	/// Handle asking the user about a certificate that didn't validiate
+	SslSocket::TCertCallback sslCertCallback;
+
 	// Logging
 	LStreamI *Logger = NULL;
 	void Log(const char *Str, LSocketI::SocketMsgType type);
@@ -577,9 +577,9 @@ protected:
 	bool MailIsEnd(LString &s);
 	bool ListCmd(const char *Cmd, LHashTbl<ConstStrKey<char,false>, bool> &Results);
 
-	const char *End;
-	const char *Marker;
-	int Messages;
+	const char *End = "\r\n.\r\n";
+	const char *Marker = nullptr;
+	int Messages = -1;
 
 public:
 	MailPop3();
