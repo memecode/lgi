@@ -769,7 +769,7 @@ bool DndPointMap(LViewI *&view, LPoint &localPt, LDragDropTarget *&t, LWindow *W
 	view = Wnd->ViewFromPoint(mousePt - cli.TopLeft(), &localPt, param);
 	if (!view)
 	{
-		DND_ERROR("%s:%i - <no view> @ %s\n", _FL, mousePt.GetStr().Get());
+		// DND_ERROR("%s:%i - <no view> @ %s\n", _FL, mousePt.GetStr().Get());
 		return false;
 	}
 
@@ -947,8 +947,10 @@ int GetAcceptFmts(LString::Array &Formats, GdkDragContext *context, LViewI *v, L
 	}
 	else
 	{
+		/*
 		DND_ERROR("%s:%i - %s no supported formats in '%s'\n",
 			_FL, t->GetClass(), formats.ToString().Get());
+		*/
 	}
 	
 	return Flags;
@@ -1134,6 +1136,11 @@ void
 LWindowDragLeave(GtkWidget *widget, GdkDragContext *context, guint time, LWindow *Wnd)
 {
 	DND_LOG("%s:%i - LWindowDragLeave cls=%s\n", _FL, Wnd->GetClass());
+	if (Wnd->curDndViewHnd)
+	{
+		PostThreadEvent(Wnd->curDndViewHnd, M_DND_EXIT);
+		Wnd->curDndViewHnd = 0;
+	}
 }
 
 gboolean
@@ -1148,6 +1155,10 @@ LWindowDragMotion(GtkWidget *widget, GdkDragContext *context, gint x, gint y, gu
 
 	if (!DndPointMap(v, p, t, Wnd, mousePt))
 	{
+		if (Wnd->curDndViewHnd)
+			PostThreadEvent(Wnd->curDndViewHnd, M_DND_EXIT);
+		Wnd->curDndViewHnd = 0;
+
 		// DND_ERROR("%s:%i - DndPointMap failed\n", _FL);
 		return false;
 	}
@@ -1157,6 +1168,15 @@ LWindowDragMotion(GtkWidget *widget, GdkDragContext *context, gint x, gint y, gu
 	auto hnd = v->AddDispatch();
 	if (LDragDropTarget::Handles.IndexOf(hnd) < 0)
 		LDragDropTarget::Handles.Add(hnd);
+
+	if (hnd != Wnd->curDndViewHnd)
+	{
+		if (Wnd->curDndViewHnd)
+			PostThreadEvent(Wnd->curDndViewHnd, M_DND_EXIT);
+		Wnd->curDndViewHnd = hnd;
+		if (Wnd->curDndViewHnd)
+			PostThreadEvent(Wnd->curDndViewHnd, M_DND_ENTER);
+	}
 
 	t->acceptedFormats.Empty();
 	int Flags = GetAcceptFmts(t->acceptedFormats, context, v, t, p);

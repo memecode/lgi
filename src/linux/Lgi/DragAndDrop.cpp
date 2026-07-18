@@ -12,6 +12,7 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/DragAndDrop.h"
+#include "lgi/common/Uri.h"
 
 static int NextDndType = 600;
 static LHashTbl<ConstStrKey<char,false>, int> DndTypes(0, -1);
@@ -112,7 +113,12 @@ bool LDragDropSource::CreateFileDrop(LDragData *OutputData, LMouse &m, LString::
 
 	LString::Array a;
 	for (auto f : Files)
-		a.New().Printf("file://%s", f.Get());
+	{
+		LUri u;
+		u.sProtocol = "file";
+		u.sPath = f;
+		a.New() = u.ToString();
+	}
 
 	auto s = LString("\n").Join(a);
 	if (!s)

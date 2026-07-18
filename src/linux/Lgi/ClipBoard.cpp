@@ -2,6 +2,7 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Variant.h"
 #include "lgi/common/ClipBoard.h"
+#include "lgi/common/Uri.h"
 
 #define DEBUG_CLIPBOARD					0
 #define VAR_COUNT						16
@@ -521,7 +522,12 @@ bool LClipBoard::Files(LString::Array &a, bool AutoEmpty)
 	   				{
 	   					LString f;
 	   					if (LFileExists(a))
-	   						f.Printf("file://%s\n", a.Get());
+						{
+							LUri u;
+							u.sProtocol = "file";
+							u.sPath = a;
+	   						f = u.ToString();
+						}
 	   					else
 	   						printf("%s:%i - File '%s' doesn't exist.\n", _FL, a.Get());
 	   					data += f;

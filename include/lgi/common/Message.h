@@ -72,6 +72,10 @@ enum LgiMessages
 		M_DND_END,
 		/// Update the dnd formats on the GtkWindow
 		M_DND_UPDATE_FORMATS,
+		/// Dnd entered a view. Call LDragDropTarget::OnDragEnter
+		M_DND_ENTER,
+		/// Dnd left a view. Call LDragDropTarget::OnDragExit
+		M_DND_EXIT,
 		
 	#elif defined(WINNATIVE)
 

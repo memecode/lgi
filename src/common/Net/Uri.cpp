@@ -294,10 +294,13 @@ LString LUri::EncodeStr(const char *s, const char *ExtraCharsToEncode)
 	{
 		while (*s)
 		{
-			if (*s == ' ' || (ExtraCharsToEncode && strchr(ExtraCharsToEncode, *s)))
+			// Percent-encode UTF-8 bytes and control chars so non-ASCII paths are valid URIs.
+			auto c = (uchar)*s;
+			if (c < 0x20 || c >= 0x7F || c == '%' || c == ' ' || (ExtraCharsToEncode && strchr(ExtraCharsToEncode, *s)))
 			{
 				char h[4];
-				sprintf_s(h, sizeof(h), "%%%2.2X", (uint32_t)(uchar)*s++);
+				sprintf_s(h, sizeof(h), "%%%2.2X", (uint32_t)c);
+				s++;
 				p.Write(h, 3);
 			}
 			else

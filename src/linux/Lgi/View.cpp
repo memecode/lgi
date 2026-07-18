@@ -790,9 +790,20 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 			return OnCommand(Msg->A(), 0, (OsView) Msg->B());
 		}
 		case M_DND_END:
+		case M_DND_EXIT:
 		{
 			if (auto target = DropTarget())
 				target->OnDragExit();
+
+			LgiTrace("%s:%i - M_DND_EXIT for %s\n", _FL, GetClass());
+			break;
+		}
+		case M_DND_ENTER:
+		{
+			if (auto target = DropTarget())
+				target->OnDragEnter();
+
+			LgiTrace("%s:%i - M_DND_ENTER for %s\n", _FL, GetClass());
 			break;
 		}
 	}

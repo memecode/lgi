@@ -74,8 +74,12 @@ protected:
 		friend class LMenu;
 		friend void lgi_widget_size_allocate(Gtk::GtkWidget *widget, Gtk::GtkAllocation *allocation);
 		friend void GtkRootResize(Gtk::GtkWidget *widget, Gtk::GdkRectangle *r, LView *This);
+		friend Gtk::gboolean LWindowDragMotion(Gtk::GtkWidget *widget, Gtk::GdkDragContext *context, Gtk::gint x, Gtk::gint y, Gtk::guint time, LWindow *Wnd);
+		friend void LWindowDragLeave(Gtk::GtkWidget *widget, Gtk::GdkDragContext *context, Gtk::guint time, LWindow *Wnd);
+
 	
-		Gtk::GtkWidget *_Root = NULL, *_VBox = NULL, *_MenuBar = NULL;
+		int curDndViewHnd = 0;
+		Gtk::GtkWidget *_Root = nullptr, *_VBox = nullptr, *_MenuBar = nullptr;
 		LRect _RootAlloc;
 		void OnGtkDelete();
 		Gtk::gboolean OnGtkEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event);
