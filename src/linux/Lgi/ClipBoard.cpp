@@ -240,6 +240,7 @@ bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 	}	
 
 	gtk_clipboard_set_image(d->c, pb);
+	g_object_unref(pb);
 	return true; // have to assume it worked...
 }
 
@@ -421,6 +422,9 @@ bool LClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmp
 	if (!Ptr || Len <= 0)
 		return false;
 
+	if (AutoEmpty)
+		Empty();
+
 	LVariant *p = NULL;
 	if (Data.Lock(_FL))
 	{
@@ -478,7 +482,11 @@ void LClipBoard::Files(FilesCb Callback)
 									if (uris)
 									{
 										for (int i=0; uris[i]; i++)
-											files.Add(uris[i]);
+										{
+											LUri uri(uris[i]);
+											auto path = uri.LocalPath();
+											files.Add(path ? path.Get() : uris[i]);
+										}
 									}
 									
 									(*cb)(files, LString());

@@ -2082,7 +2082,7 @@ bool LTextView4::ScrollToOffset(size_t Off)
 	if (To)
 	{
 		LRect Client = GetClient();
-		int DisplayLines = Client.Y() / LineY;
+		int DisplayLines = (Client.Y() + LineY - 1) / LineY;
 
 		if (VScroll)
 		{

@@ -219,6 +219,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/Net.h \
 	../include/lgi/common/Notifications.h \
 	../include/lgi/common/OAuth2.h \
+	../include/lgi/common/OpenSSLSocket.h \
 	../include/lgi/common/OptionsFile.h \
 	../include/lgi/common/Palette.h \
 	../include/lgi/common/Panel.h \

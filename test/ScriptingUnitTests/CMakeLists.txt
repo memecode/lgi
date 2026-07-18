@@ -19,7 +19,7 @@ add_executable(LgiScript ${APP_TYPE}
     ${LGI_DIR}/src/common/Coding/ScriptLibrary.cpp
     ${LGI_DIR}/src/common/Coding/ScriptVM.cpp
     ${LGI_DIR}/src/common/Lgi/LgiMain.cpp
-    Main.cpp
+    src/Main.cpp
 	${APP_MANIFEST}
 	)
 

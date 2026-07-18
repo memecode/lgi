@@ -4,10 +4,6 @@ set(CMAKE_CXX_STANDARD 14)
 
 project (LgiIde)
 
-if (NOT DEFINED LIBPNG_TARGET OR NOT TARGET ${LIBPNG_TARGET})
-	message(FATAL_ERROR "Find the libpng target (see parent folder cmake)")
-endif()
-
 if (APPLE)
 
 	set(CMAKE_OSX_ARCHITECTURES "x86_64")
@@ -50,7 +46,6 @@ set (CommonSource
 	src/SimpleCppParser.cpp
 	src/WebFldDlg.cpp
 	src/IdeCommon.cpp
-	src/AddFtpFile.cpp
 	src/ProjectNode.cpp
 	src/IdeDoc.cpp
 	src/IdeProject.cpp
@@ -61,11 +56,9 @@ set (CommonSource
 	src/SpaceTabConv.cpp
 	src/SysCharSupport.cpp
 	src/DebugContext.cpp
-	src/Debugger.cpp
 	src/History.cpp
 	src/IdeFindInFiles.cpp
 	src/FindSymbol.cpp
-	src/FtpThread.cpp
 	src/DocEdit.cpp
 	src/PythonParser.cpp
 	src/MissingFiles.cpp
@@ -84,11 +77,9 @@ set (CommonSource
 	)
 
 list(APPEND ResourceFiles
-	Resources/cmds-32px.png
-	Resources/icons.png
-	Resources/cmds-16px.png
-	Resources/LgiIde.lr8
-	Resources/icon64.png
+	resources/icons.png
+	resources/LgiIde.lr8
+	resources/icon64.png
 	)
 
 if (APPLE)
@@ -144,7 +135,7 @@ if (NOT MSVC)
 endif()
 
 # Create a resources sub-folder and copy over the resource files (images and lr8)
-file(COPY ${CMAKE_CURRENT_LIST_DIR}/Resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_LIST_DIR}/resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 target_include_directories (LgiIde PUBLIC
 							Code

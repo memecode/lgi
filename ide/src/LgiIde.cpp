@@ -6,7 +6,6 @@
 #include "lgi/common/Mdi.h"
 #include "lgi/common/Token.h"
 #include "lgi/common/XmlTree.h"
-#include "lgi/common/Panel.h"
 #include "lgi/common/Button.h"
 #include "lgi/common/TabView.h"
 #include "lgi/common/ClipBoard.h"
@@ -29,12 +28,10 @@
 #include "lgi/common/PopupNotification.h"
 #include "lgi/common/CommsBus.h"
 #include "lgi/common/RemoveAnsi.h"
-#include "lgi/common/RemoteFileSelect.h"
 #include "lgi/common/Uri.h"
 
 #include "LgiIde.h"
 #include "FindSymbol.h"
-#include "Debugger.h"
 #include "ProjectNode.h"
 #include "IdeFindInFiles.h"
 #include "resdefs.h"
@@ -692,22 +689,17 @@ public:
 		if (Dur > 300)
 		{
 			// Yo homes, too much text bro...
-			Name(NULL);
+			Name(nullptr);
 		}
 		else
 		{
 			for (auto l: Line)
 			{
-				char16 *t = Text + l->Start;
-				
+				auto t = Text + l->Start;				
 				if (l->Len > 5 && !StrnicmpW(t, L"(gdb)", 5))
-				{
 					l->c.Rgb(0, 160, 0);
-				}
 				else if (l->Len > 1 && t[0] == '[')
-				{
 					l->c.Rgb(192, 192, 192);
-				}
 			}
 		}
 	}

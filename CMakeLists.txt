@@ -723,5 +723,4 @@ else()
 	# other subfolders of smaller utils and tests
 	add_subdirectory(utils)
 	add_subdirectory(test)
-	add_subdirectory(src/common/Net/libntlm-0.4.2)
 endif()

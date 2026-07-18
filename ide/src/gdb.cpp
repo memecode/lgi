@@ -368,6 +368,9 @@ class Gdb :
 		char Buf[512];
 		int Ch = vsprintf_s(Buf, sizeof(Buf), Fmt, Arg);
 		va_end(Arg);
+
+		if (Ch <= 0)
+			return;
 			
 		Events->Write(Buf, Ch);
 
@@ -2109,9 +2112,12 @@ public:
 			while (*s)
 			{
 				while (*s && strchr(LWhiteSpace, *s)) s++;
-				uint32_t word = atoi(s);
+				char *endNum = nullptr;
+				uint32_t word = (uint32_t)strtoul(s, &endNum, 0);
+				if (endNum == s)
+					break;
 				*ptr++ = word;
-				while (*s && !strchr(LWhiteSpace, *s)) s++;
+				s = endNum;
 				
 				if (ptr >= end)
 					break;
