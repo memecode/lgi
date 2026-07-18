@@ -526,7 +526,7 @@ bool LClipBoard::Files(LString::Array &a, bool AutoEmpty)
 							LUri u;
 							u.sProtocol = "file";
 							u.sPath = a;
-	   						f = u.ToString();
+	   						f = u.ToString() + "\n";
 						}
 	   					else
 	   						printf("%s:%i - File '%s' doesn't exist.\n", _FL, a.Get());
