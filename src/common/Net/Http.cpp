@@ -988,7 +988,13 @@ void ZLibFree(voidpf opaque, voidpf address)
 	// Do nothing... the memory is owned by an autoptr
 }
 
-bool LGetUri(LCancel *Cancel, LStreamI *Out, LError *OutError, const char *InUri, const char *InHeaders, LUri *InProxy)
+bool LGetUri(LCancel *Cancel,
+			LStreamI *Out,
+			LError *OutError,
+			const char *InUri,
+			const char *InHeaders,
+			LUri *InProxy,
+			SslSocket::TCertCallback certCallback)
 {
 	if (!InUri || !Out)
 	{
@@ -1020,6 +1026,9 @@ bool LGetUri(LCancel *Cancel, LStreamI *Out, LError *OutError, const char *InUri
 			SslSocket *ssl;
 			s.Reset(ssl = new SslSocket());
 			ssl->SetSslOnConnect(true);
+			
+			if (certCallback)
+				ssl->SetCertCallback(certCallback);
 		}
 		else
 		{

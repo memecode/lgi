@@ -3,6 +3,7 @@
 
 #include "lgi/common/Net.h"
 #include "lgi/common/Uri.h"
+#include "lgi/common/OpenSSLSocket.h"
 
 // HTTP[S] client class:
 class LHttp
@@ -146,9 +147,11 @@ bool LGetUri
 	/// The input URI to retreive
 	const char *InUri,
 	/// [Optional] Extra headers to use
-	const char *InHeaders = NULL,
+	const char *InHeaders = nullptr,
 	/// [Optional] The proxy to use
-	LUri *InProxy = NULL
+	LUri *InProxy = nullptr,
+	/// [Optional] Invalid certificate handler
+	SslSocket::TCertCallback certCallback = nullptr
 );
 
 #endif
