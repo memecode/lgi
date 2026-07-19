@@ -1539,8 +1539,27 @@ int LSocket::WriteUdp(void *Buffer, int Size, int Flags, uint32_t Ip, uint16_t P
 
 	CreateUdpSocket();
 
+	// Multicast addresses are in the range 224.0.0.0 - 239.255.255.255
+	bool isMulticast = (Ip & 0xF0000000) == 0xE0000000;
 	if (ttl > 0)
-		setsockopt(d->Socket, IPPROTO_IP, IP_TTL, (const char*)&ttl, sizeof(ttl));
+	{
+		if (isMulticast)
+		{
+			unsigned char mttl = (unsigned char)ttl;
+			setsockopt(d->Socket, IPPROTO_IP, IP_MULTICAST_TTL, (const char*)&mttl, sizeof(mttl));
+		}
+		else
+		{
+			setsockopt(d->Socket, IPPROTO_IP, IP_TTL, (const char*)&ttl, sizeof(ttl));
+		}
+	}
+	else if (isMulticast)
+	{
+		// Default TTL for multicast must be at least 1 for the kernel to
+		// allow sending; without it Linux returns EPERM on sendto.
+		unsigned char mttl = 1;
+		setsockopt(d->Socket, IPPROTO_IP, IP_MULTICAST_TTL, (const char*)&mttl, sizeof(mttl));
+	}
 
 	sockaddr_in a;
 	ZeroObj(a);

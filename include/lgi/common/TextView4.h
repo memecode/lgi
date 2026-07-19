@@ -36,6 +36,8 @@ class LgiClass LTextView4 :
 
 public:
 	constexpr static int ALLOC_BLOCK = 64;
+	constexpr static int INVALID_IDX = -1;
+	constexpr static int FROM_CARET = -2;
 
 	enum Messages
 	{
@@ -263,7 +265,7 @@ protected:
 
 	LFont *FixedFont = NULL;
 	int LineY = -1;
-	ssize_t SelStart = -1, SelEnd = -1;
+	ssize_t SelStart = INVALID_IDX, SelEnd = INVALID_IDX;
 	int DocOffset = 0;
 	int MaxX = 0;
 	bool Blink = true;

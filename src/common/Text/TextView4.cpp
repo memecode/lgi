@@ -139,7 +139,7 @@ public:
 	
 	// If the scroll position is set before we get a scroll bar, store the index
 	// here and set it when the LNotifyScrollBarCreate arrives.
-	ssize_t VScrollCache = -1;
+	ssize_t VScrollCache = LTextView4::INVALID_IDX;
 
 	// Find/Replace Params
 	bool OwnFindReplaceParams = true;
@@ -932,10 +932,10 @@ void LTextView4::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 		#endif
 		while (Pos < Size)
 		{
-			LTextLine *l = new LTextLine(_FL);
+			auto l = new LTextLine(_FL);
 			l->Start = Pos;
-			char16 *c = Text + Pos;
-			char16 *e = c;
+			auto c = Text + Pos;
+			auto e = c;
 			while (*e && *e != '\n')
 				e++;
 			l->Len = e - c;
@@ -1187,7 +1187,8 @@ void LTextView4::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 	}
 
 	bool ScrollYNeeded = Client.Y() < (Line.Length() * LineY);
-	bool ScrollChange = ScrollYNeeded ^ (VScroll != NULL);
+	bool ScrollChange = ScrollYNeeded ^ (VScroll != nullptr);
+	printf("%s:%i - ScrollYNeeded=%i, VScroll=%p, ScrollChange=%i\n", _FL, ScrollYNeeded, VScroll, ScrollChange);
 	d->LayoutDirty = WrapType != L_WRAP_NONE && ScrollChange;
 	#if PROFILE_POUR
 	static LString _s;
@@ -2056,9 +2057,7 @@ bool LTextView4::GetLineColumnAtIndex(LPoint &Pt, ssize_t Index)
 ssize_t LTextView4::GetCaret(bool Cur)
 {
 	if (Cur)
-	{
 		return Cursor;
-	}
 
 	return 0;
 }
@@ -2078,20 +2077,21 @@ bool LTextView4::ScrollToOffset(size_t Off)
 {
 	bool ForceFullUpdate = false;
 	ssize_t ToIndex = 0;
-	LTextLine *To = GetTextLine(Off, &ToIndex);
-	if (To)
-	{
-		LRect Client = GetClient();
-		int DisplayLines = (Client.Y() + LineY - 1) / LineY;
 
+	if (auto To = GetTextLine(Off, &ToIndex))
+	{
+		auto Client = GetClient();
+		printf("%s:%i - ScrollToOffset: ToIndex=%i, VScroll=%p, VScroll->Value()=%i\n",
+				_FL, (int)ToIndex, VScroll, VScroll ? (int)VScroll->Value() : -1);
 		if (VScroll)
 		{
+			auto page = VScroll->Page();
 			if (ToIndex < VScroll->Value())
 			{
-				// Above the visible region...
+				// Before the visible region...
 				if (d->CenterCursor)
 				{
-					ssize_t i = ToIndex - (DisplayLines >> 1);
+					ssize_t i = ToIndex - (page >> 1);
 					VScroll->Value(MAX(0, i));
 				}
 				else
@@ -2100,12 +2100,19 @@ bool LTextView4::ScrollToOffset(size_t Off)
 				}
 				ForceFullUpdate = true;
 			}
+			else printf("%s:%i - ScrollToOffset: no scroll needed, ToIndex=%i, VScroll->Value()=%i, page=%i\n",
+					_FL, (int)ToIndex, (int)VScroll->Value(), (int)page);
 
-			if (ToIndex >= VScroll->Value() + DisplayLines)
+			if (ToIndex >= VScroll->Value() + page)
 			{
-				int YOff = d->CenterCursor ? DisplayLines >> 1 : DisplayLines;
-			
-				ssize_t v = MIN(ToIndex - YOff + 1, (ssize_t)Line.Length() - DisplayLines);
+				// After the visible region...
+				auto YOff = d->CenterCursor ? page >> 1 : page;			
+				auto v = MIN(ToIndex - YOff + 1, (ssize_t)Line.Length() - page);
+				printf("%s:%i - ScrollToOffset v=%i, VScroll->Value()=%i, a=%i, b=%i, page=%i\n",
+						_FL, (int)v, (int)VScroll->Value(),
+					(int)(ToIndex - YOff + 1),
+					(int)(Line.Length() - page),
+					(int)page);
 				if (v != VScroll->Value())
 				{
 					// Below the visible region
@@ -2113,23 +2120,35 @@ bool LTextView4::ScrollToOffset(size_t Off)
 					ForceFullUpdate = true;
 				}
 			}
+			else printf("%s:%i - ScrollToOffset: no scroll needed, ToIndex=%i, VScroll->Value()=%i, page=%i\n",
+					_FL, (int)ToIndex, (int)VScroll->Value(), (int)page);
 		}
 		else
 		{
+			printf("%s:%i - ScrollToOffset: no VScroll\n", _FL);
 			d->VScrollCache = ToIndex;
 		}
 	}
+	else printf("%s:%i - ScrollToOffset: no line for offset %i\n", _FL, (int)Off);
 
 	return ForceFullUpdate;
 }
 
 void LTextView4::SetCaret(size_t i, bool Select, bool ForceFullUpdate)
 {
+	bool debug = GetId() == 703;
+
+	if (debug) printf("%s:%i - SetCaret(%i, %i, %i)\n", _FL, (int)i, (int)Select, (int)ForceFullUpdate);
+
     // int _Start = LCurrentTime();
 	Blink = true;
 
 	// Bound the new cursor position to the document
-	if ((ssize_t)i > Size) i = Size;
+	if ((ssize_t)i > Size)
+	{
+		if (debug) printf("    limit to size=%i\n", (int)Size);
+		i = Size;
+	}
 
 	// Store the old selection and cursor
 	ssize_t s = SelStart, e = SelEnd, c = Cursor;
@@ -2154,21 +2173,32 @@ void LTextView4::SetCaret(size_t i, bool Select, bool ForceFullUpdate)
 	}
 
 	ssize_t FromIndex = 0;
-	LTextLine *From = GetTextLine(Cursor, &FromIndex);
+	auto From = GetTextLine(Cursor, &FromIndex);
+	if (debug) printf("    From=%p\n", From);
 
 	Cursor = i;
 
 	// check the cursor is on the screen
-	ForceFullUpdate |= ScrollToOffset(Cursor);
+	bool needsScroll = ScrollToOffset(Cursor);
+	ForceFullUpdate |= needsScroll;
 
 	// check whether we need to update the screen
 	ssize_t ToIndex = 0;
-	LTextLine *To = GetTextLine(Cursor, &ToIndex);
+	auto To = GetTextLine(Cursor, &ToIndex);
+	if (!To)
+	{
+		// no layout for that line yet..
+		d->VScrollCache = FROM_CARET;
+		printf("###### setting FROM_CARET, d->LayoutDirty=%i\n", d->LayoutDirty);
+	}
+
+	if (debug) printf("    To=%p, needsScroll=%i\n", To, needsScroll);
 	if (ForceFullUpdate ||
 		!To ||
 		!From)
 	{
 		// need full update
+		if (debug) printf("    full invalidate\n");
 		Invalidate();
 	}
 	else if
@@ -2180,6 +2210,8 @@ void LTextView4::SetCaret(size_t i, bool Select, bool ForceFullUpdate)
 		)
 	)
 	{
+		if (debug) printf("    sel update\n");
+
 		// Update just the selection bounds
 		LRect Client = GetClient();
 		size_t Start, End;
@@ -2203,8 +2235,8 @@ void LTextView4::SetCaret(size_t i, bool Select, bool ForceFullUpdate)
 		}
 		else return;
 
-		LTextLine *SLine = GetTextLine(Start);
-		LTextLine *ELine = GetTextLine(End);
+		auto SLine = GetTextLine(Start);
+		auto ELine = GetTextLine(End);
 		LRect u;
 		if (SLine && ELine)
 		{
@@ -2245,6 +2277,7 @@ void LTextView4::SetCaret(size_t i, bool Select, bool ForceFullUpdate)
 	else if (Cursor != c)
 	{
 		// just the cursor has moved
+		if (debug) printf("    cursor update\n");
 
 		// update the line the cursor moved to
 		LRect r = To->r;
@@ -2268,9 +2301,6 @@ void LTextView4::SetCaret(size_t i, bool Select, bool ForceFullUpdate)
 		// Send off notify
 		SendNotify(LNotifyCursorChanged);
 	}
-
-//int _Time = LCurrentTime() - _Start;
-//printf("Setcursor=%ims\n", _Time);
 }
 
 void LTextView4::SetBorder(int b)
@@ -2689,16 +2719,37 @@ void LTextView4::UpdateScrollBars(bool Reset)
 				Inval = true;
 			}
 
+			printf("d->VScrollCache=%i, Reset=%i\n", (int)d->VScrollCache, (int)Reset);			
 			if (Reset)
 			{
 				VScroll->Value(0);
 				SelStart = SelEnd = -1;
 			}
+			else if (d->VScrollCache == FROM_CARET)
+			{
+				d->VScrollCache = INVALID_IDX;
+
+				ssize_t ToIndex = 0;
+				auto To = GetTextLine(Cursor, &ToIndex);
+				LTextLine *last = nullptr;
+				if (!To && Line.Length() > 0)
+				{
+					last = Line.Last();
+					// If the cursor is beyond the last line, scroll to the last line
+				}
+				
+				printf("####### process FROM_CARET, to=%p, idx=%i, size=%i, cursor=%i, last=%s\n",
+					To, (int)ToIndex, (int)Size, (int)Cursor, last ? last->GetStr() : "null");
+				if (To)
+				{
+					ScrollToOffset(Cursor);
+				}
+			}
 			else if (d->VScrollCache >= 0)
 			{
 				VScroll->Value(d->VScrollCache);
-				d->VScrollCache = -1;
-				SelStart = SelEnd = -1;
+				d->VScrollCache = INVALID_IDX;
+				SelStart = SelEnd = INVALID_IDX;
 			}
 
 			LRect After = GetClient();
@@ -4892,6 +4943,7 @@ void LTextView4::OnPaint(LSurface *pDC)
 	LProfile Prof(s);
 	#endif
 
+	printf("%s:%i - LTextView4::OnPaint d->LayoutDirty=%i\n", _FL, d->LayoutDirty);
 		if (d->LayoutDirty)
 		{
 	#if PROFILE_PAINT
@@ -4904,6 +4956,10 @@ void LTextView4::OnPaint(LSurface *pDC)
 			PourStyle(d->DirtyStart, d->DirtyLen);
 			
 			d->LayoutDirty = false;
+		}
+		else if (d->VScrollCache == FROM_CARET)
+		{
+			UpdateScrollBars();
 		}
 
 	#if PROFILE_PAINT

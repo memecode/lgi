@@ -21,7 +21,7 @@ Monitoring:
 #define USE_TRANSPORT		0
 #define MAX_MSG_SIZE		(1 << 20) // MiB
 
-#if 0
+#if 1
 #define LOG(...)			
 #else
 #define LOG(...)			if (log) { log->Print(__VA_ARGS__); } // printf(__VA_ARGS__)
@@ -845,6 +845,8 @@ struct LCommsBusPriv :
 			}
 		}
 
+		LArray<uint32_t> broadcastBlacklist;
+
 		void BroadcastUdp()
 		{
 			broadcastTime = LCurrentTime();
@@ -854,9 +856,15 @@ struct LCommsBusPriv :
 
 			for (auto &intf: interfaces)
 			{
+				if (broadcastBlacklist.HasItem(intf.Ip4))
+					continue;
+
 				LUdpBroadcast bc(intf.Ip4);
-				// LOG("broadcast to %s\n", LIpToStr(intf.Ip4).Get());
-				bc.BroadcastPacket(pkt, broadcastIp, DEFAULT_COMMS_PORT);
+				auto status = bc.BroadcastPacket(pkt, broadcastIp, DEFAULT_COMMS_PORT);
+				LOG("broadcast to %s = %i\n", LIpToStr(intf.Ip4).Get(), status);
+				if (!status)
+					// This happens with virtual or VPN interfaces that aren't 'up'.
+					broadcastBlacklist.Add(intf.Ip4);
 			}
 
 			// Also unicast them... in case the broadcast is only working in one direction...

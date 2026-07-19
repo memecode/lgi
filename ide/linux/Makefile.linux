@@ -85,7 +85,6 @@ Source =	../src/common/Coding/LexCpp.cpp \
 			../src/common/Text/HtmlParser.cpp \
 			../src/common/Text/RemoveAnsi.cpp \
 			../src/common/Text/TextConvert.cpp \
-			../src/common/Text/TextView4.cpp \
 			src/DebugContext.cpp \
 			src/DocEdit.cpp \
 			src/DocEditStyling.cpp \

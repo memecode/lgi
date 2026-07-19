@@ -17,10 +17,7 @@
 			<Node File="../src/common/Text/HtmlParser.cpp" Type="2" Platforms="15" />
 			<Node File="../include/lgi/common/HtmlParser.h" Type="3" Platforms="15" />
 		</Node>
-		<Node Name="TextView" Type="1" Platforms="15" Id="3">
-			<Node File="../src/common/Text/TextView4.cpp" Type="2" Platforms="15" />
-			<Node File="../include/lgi/common/TextView4.h" Type="3" Platforms="15" />
-		</Node>
+		<Node File="../include/lgi/common/TextLog.h" Type="3" Platforms="15" />
 		<Node File="../src/common/Text/DocView.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Text/Homoglyphs/Homoglyphs.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Text/Homoglyphs/HomoglyphsTable.cpp" Type="2" Platforms="15" />
@@ -35,7 +32,6 @@
 		<Node File="../src/common/Text/RemoveAnsi.cpp" Type="2" Platforms="15" />
 		<Node File="../include/lgi/common/RemoveAnsi.h" Type="3" Platforms="15" />
 		<Node File="../src/common/Text/TextConvert.cpp" Type="2" Platforms="15" />
-		<Node File="../include/lgi/common/TextLog.h" Type="3" Platforms="15" />
 	</Node>
 	<Node Name="Resources" Type="1" Platforms="15" Open="1" Id="8">
 		<Node File="./resources/LgiIde.lr8" Type="5" Platforms="15" />

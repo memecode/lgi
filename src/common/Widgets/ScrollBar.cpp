@@ -479,16 +479,19 @@ public:
 		if (i < Min)
 		{
 			i = Min;
+			printf("scroll clamp to min %i -> %i\n", (int)i, (int)Min);
 		}
 
 		if (IsValid() && i > Max - Page + 1)
 		{
 			i = MAX(Min, Max - Page + 1);
+			printf("scroll clamp to max %i -> %i\n", (int)i, (int)(MAX(Min, Max - Page + 1)));
 		}
 		
 		if (Value != i)
 		{
 			Value = i;
+			printf("scroll set value %i\n", (int)Value);
 
 			CalcRegions();
 			Widget->Invalidate();			

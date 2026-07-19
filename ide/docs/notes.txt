@@ -8,3 +8,18 @@ Arguments in project settings not passed to processing being debugged:
 	They do get passed to the Debugger instance, but not used?
 	Gdb::Load
 		
+
+Debug log (id=703) doesn't scroll to the cursor.
+	LTextView4::SetCaret:
+		does it set the cursor to the last line properly?
+		I think so?
+		maybe the "keep the cursor in view" is a bit off?
+			where is that code?
+			LTextView4::ScrollToOffset
+				however there is layout line for the target caret yet...
+				we have to catch that later on after the layout and fix
+				the scroll there
+		where is the layout completed?
+
+		LTextView4::UpdateScrollBars should catch the scroll up to the cursor?
+			

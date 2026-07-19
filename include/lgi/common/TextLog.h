@@ -112,7 +112,11 @@ public:
 		TView::Invalidate();
 
 		if (AtEnd)
+		{
+			if (TView::GetId() == 703)
+				printf("%s:%i - debug log caret=%i\n", _FL, (int)TView::Size);
 			TView::SetCaret(TView::Size, false);
+		}
 	}
 
 	int64 SetSize(int64 s) override

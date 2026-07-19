@@ -530,7 +530,7 @@ class Gdb :
 
 		if (ParseState == ParseNone)
 		{
-			printf("OnLine '%.*s' -> ParseNone\n", (int)Length-1, Start);
+			// printf("OnLine '%.*s' -> ParseNone\n", (int)Length-1, Start);
 
 			if (Stristr(Start, "received signal SIGSEGV"))
 			{

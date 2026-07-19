@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.18)
 
 project(Lgi)
-
+set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 if (WIN32)
 	set(CMAKE_SYSTEM_VERSION 10.0.19041.0)
 endif()

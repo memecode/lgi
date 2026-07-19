@@ -1157,61 +1157,61 @@ public:
 
 		for (int Channel = 0; Channel<CountOf(Buf); Channel++)
 		{
-			int64 Size = Buf[Channel].Length();
-			if (Size)
+			auto Size = Buf[Channel].Length();
+			if (!Size)
+				continue;
+
+			auto Utf = &Buf[Channel][0];
+			LAutoPtr<char16, true> w;
+
+			if (!LIsUtf8(Utf, (ssize_t)Size))
 			{
-				char *Utf = &Buf[Channel][0];
-				LAutoPtr<char16, true> w;
-
-				if (!LIsUtf8(Utf, (ssize_t)Size))
-				{
-					LgiTrace("Ch %i not utf len=" LPrintfInt64 "\n", Channel, Size);
-					
-					// Clear out the invalid UTF?
-					uint8_t *u = (uint8_t*) Utf, *e = u + Size;
-					ssize_t len = Size;
-					LArray<wchar_t> out;
-					while (u < e)
-					{
-						int32 u32 = LgiUtf8To32(u, len);
-						if (u32)
-						{
-							out.Add(u32);
-						}
-						else
-						{
-							out.Add(0xFFFD);
-							u++;
-						}
-					}
-					out.Add(0);
-					w.Reset(out.Release());
-				}
-				else
-				{
-					RemoveAnsi(Buf[Channel]);
-					w.Reset(Utf8ToWide(Utf, (ssize_t)Size));
-				}
+				LgiTrace("Ch %i not utf len=" LPrintfInt64 "\n", Channel, Size);
 				
-				// auto OldText = Txt[Channel]->NameW();
-				ssize_t OldLen = Txt[Channel]->Length();
-
-				auto Cur = Txt[Channel]->GetCaret();
-				Txt[Channel]->Insert(OldLen, w, StrlenW(w));
-				if (Cur > OldLen - 1)
-					Txt[Channel]->SetCaret(OldLen + StrlenW(w), false);
-				else
-					printf("Caret move: %i, %i = %i\n", (int)Cur, (int)OldLen, Cur > OldLen - 1);
-				Changed = Channel;
-				Buf[Channel].Length(0);
-				Txt[Channel]->Invalidate();
+				// Clear out the invalid UTF?
+				uint8_t *u = (uint8_t*) Utf, *e = u + Size;
+				ssize_t len = Size;
+				LArray<wchar_t> out;
+				while (u < e)
+				{
+					int32 u32 = LgiUtf8To32(u, len);
+					if (u32)
+					{
+						out.Add(u32);
+					}
+					else
+					{
+						out.Add(0xFFFD);
+						u++;
+					}
+				}
+				out.Add(0);
+				w.Reset(out.Release());
 			}
+			else
+			{
+				RemoveAnsi(Buf[Channel]);
+				w.Reset(Utf8ToWide(Utf, (ssize_t)Size));
+			}
+			
+			auto OldLen = Txt[Channel]->Length();
+
+			auto Cur = Txt[Channel]->GetCaret();
+			printf("existing caret: %i, oldlen=%i\n", (int)Cur, (int)OldLen);
+			Txt[Channel]->Insert(OldLen, w, StrlenW(w));
+			if (Cur > OldLen - 1)
+			{
+				printf("Caret move: %i, %i = %i\n", (int)Cur, (int)OldLen, Cur > OldLen - 1);
+				Txt[Channel]->SetCaret(OldLen + StrlenW(w), false);
+			}
+			else
+			{
+				printf("Caret not move: %i, %i = %i\n", (int)Cur, (int)OldLen, Cur > OldLen - 1);
+			}
+			Changed = Channel;
+			Buf[Channel].Length(0);
+			Txt[Channel]->Invalidate();
 		}
-		
-		/*
-		if (Changed >= 0)
-			Value(Changed);
-		*/
 	}
 };
 
