@@ -6,6 +6,29 @@
 
 static char White[] = " \t\r\n";
 
+class ScopedDefaultFont
+{
+	LFontCache *Cache = nullptr;
+	LFont *Prev = nullptr;
+
+public:
+	ScopedDefaultFont(LFontCache *cache, LFont *font)
+	{
+		if (cache && font)
+		{
+			Cache = cache;
+			Prev = cache->GetDefaultFont();
+			Cache->SetDefaultFont(font);
+		}
+	}
+
+	~ScopedDefaultFont()
+	{
+		if (Cache)
+			Cache->SetDefaultFont(Prev);
+	}
+};
+
 ////////////////////////////////////////////////////////////////////////////////////
 void LLayoutString::Set(int LineIdx, int FixX, int YPx, LLayoutRun *Lr, ssize_t Start)
 {
@@ -30,6 +53,7 @@ void LLayoutString::Set(int LineIdx, int FixX, int YPx, LLayoutRun *Lr, ssize_t 
 LStringLayout::LStringLayout(LFontCache *fc)
 {
 	FontCache = fc;
+	BaseFont = nullptr;
 	Empty();
 }
 	
@@ -136,13 +160,15 @@ uint32_t LStringLayout::PrevChar(char *s)
 
 LFont *LStringLayout::GetBaseFont()
 {
+	if (BaseFont)
+		return BaseFont;
+
 	return FontCache && FontCache->GetDefaultFont() ? FontCache->GetDefaultFont() : LSysFont;
 }
 
 void LStringLayout::SetBaseFont(LFont *f)
 {
-	if (FontCache)
-		FontCache->SetDefaultFont(f);
+	BaseFont = f;
 }
 
 LFont *LStringLayout::GetFont()
@@ -157,6 +183,8 @@ typedef LArray<LLayoutString*> LayoutArray;
 // Pre-layout min/max calculation
 void LStringLayout::DoPreLayout(int32 &MinX, int32 &MaxX)
 {
+	ScopedDefaultFont ScopedFont(FontCache, BaseFont);
+
 	MinX = 0;
 	MaxX = 0;
 		
@@ -260,6 +288,8 @@ struct Break
 // Create the lines from text
 bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 {
+	ScopedDefaultFont ScopedFont(FontCache, BaseFont);
+
 	#if DEBUG_PROFILE_LAYOUT
 	LProfile Prof("LStringLayout::DoLayout");
 	char Buf[1024];
