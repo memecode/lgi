@@ -2366,3 +2366,7 @@
 # define DLL_VARIABLE
 #endif
 
+#ifndef _MSC_VER
+   #include <stdint.h>
+   typedef int32_t __int32;
+#endif

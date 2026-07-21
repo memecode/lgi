@@ -53,10 +53,6 @@ set(LGI_DIR "${CMAKE_CURRENT_LIST_DIR}")
 # External libs:
 get_filename_component(CODE ../.. ABSOLUTE)
 get_filename_component(DEPS ${CMAKE_CURRENT_LIST_DIR}/../deps ABSOLUTE)
-get_filename_component(CODELIB ${CODE}/../codelib ABSOLUTE)
-if(hasParent)
-	set(CODELIB "${CODELIB}" PARENT_SCOPE)
-endif()
 
 if(WIN32)
 	set(DEPS_BUILD "${DEPS}/build-x64")

@@ -20,20 +20,17 @@ elseif (LINUX)
 endif()
 
 if (NOT TARGET ssh_shared)
-    get_filename_component(LIBSSH_DIR "${CODELIB}/libssh" ABSOLUTE)
-    if (EXISTS ${LIBSSH_DIR})
-        add_subdirectory(${LIBSSH_DIR} libssh)
-    else()
-        find_path(LIBSSH_INCLUDE_DIR libssh.h PATH /usr/include/libssh)
-        if (NOT LIBSSH_INCLUDE_DIR)
-            message(FATAL_ERROR "libssh not found.")
-        endif()
-        add_library(ssh_shared INTERFACE)
-        set_target_properties(ssh_shared
-            PROPERTIES
-                INTERFACE_INCLUDE_DIRECTORIES ${LIBSSH_INCLUDE_DIR}
-                INTERFACE_LINK_LIBRARIES "ssh")
+    find_path(LIBSSH_INCLUDE_DIR libssh.h
+        PATH /usr/include/libssh
+        PATH /system/develop/headers/libssh) # this is the HAIKU location
+    if (NOT LIBSSH_INCLUDE_DIR)
+        message(FATAL_ERROR "libssh not found.")
     endif()
+    add_library(ssh_shared INTERFACE)
+    set_target_properties(ssh_shared
+        PROPERTIES
+            INTERFACE_INCLUDE_DIRECTORIES ${LIBSSH_INCLUDE_DIR}
+            INTERFACE_LINK_LIBRARIES "ssh")
 endif()
 
 add_executable(Lvc ${APP_TYPE}

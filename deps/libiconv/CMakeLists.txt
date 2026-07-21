@@ -59,8 +59,9 @@ target_compile_definitions(${LIBNAME}
         IN_LIBRARY
         NO_XMALLOC        
         set_relocation_prefix=libiconv_set_relocation_prefix
-        relocate=libiconv_relocate
         ${PRIVATE_DEFS})
+
+#relocate=libiconv_relocate
 if(HAIKU)
     target_compile_options(${LIBNAME}
         PRIVATE
