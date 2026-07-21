@@ -282,7 +282,6 @@ enum MessageBoxType
 #define L_ALL_KEYS() \
 	/* The keyboard syms have been cleverly chosen to map to ASCII */ \
 	_(LK_UNKNOWN, 0) \
-	_(LK_FIRST, 0) \
 	_(LK_BACKSPACE, B_BACKSPACE) \
 	_(LK_TAB, B_TAB) \
 	_(LK_RETURN, B_RETURN) \

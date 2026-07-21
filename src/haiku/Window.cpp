@@ -971,7 +971,7 @@ bool LWindow::SetTitleBar(bool ShowTitleBar)
 	return r == B_OK;
 }
 
-bool LWindow::SetIcon(const char *FileName)
+bool LWindow::SetIcon(const char *FileName, const char *gnomeAppType)
 {
 	LString a;
 	if (!LFileExists(FileName))

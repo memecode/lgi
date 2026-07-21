@@ -33,12 +33,11 @@ ifeq ($(Build),Debug)
 		-lnetwork \
 		-lbe
 	Inc =  \
-		-I../deps/build-x64-debug/include \
 		-I./private/common \
 		-I./include \
 		-I./private/haiku \
 		-I./include/lgi/haiku \
-		-I../../../../system/develop/headers
+		-I../deps/build-x64-debug/include
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
@@ -57,7 +56,6 @@ else
 		-I./private/haiku \
 		-I./include \
 		-I./include/lgi/haiku \
-		-I../../../../system/develop/headers \
 		-I../deps/build-x64-release/include
 endif
 

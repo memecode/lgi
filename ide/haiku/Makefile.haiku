@@ -95,11 +95,12 @@ Source =	../src/common/Text/HtmlCommon.cpp \
 			src/SimpleCppParser.cpp \
 			src/MemDumpViewer.cpp \
 			src/DocEdit.cpp \
-			src/Debugger.cpp \
 			src/IdeDoc.cpp \
 			src/History.cpp \
 			src/LgiUtils.cpp \
 			src/LgiIde.cpp \
+			src/gdb.cpp \
+			src/lldb.cpp \
 			../src/common/Text/Homoglyphs/HomoglyphsTable.cpp
 
 SourceC    := $(filter %.c,$(Source))
