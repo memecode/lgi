@@ -967,6 +967,23 @@ int VcFolder::IndexOfCommitField(CommitField fld)
 	return (int)Fields.IndexOf(fld);
 }
 
+int DefaultFieldWidth(CommitField fld)
+{
+	switch (fld)
+	{
+		case LGraph:      return 60;
+		case LIndex:      return 60;
+		case LBranch:     return 100;
+		case LRevision:   return 100;
+		case LAuthor:     return 240;
+		case LTime:       return 130;
+		case LMessageTxt: return 700;
+		default:
+			LAssert(!"Unknown field");
+			return 100;
+	}
+}
+
 void VcFolder::UpdateColumns(LList *lst)
 {
 	if (!lst)
@@ -978,14 +995,15 @@ void VcFolder::UpdateColumns(LList *lst)
 	{
 		switch (c)
 		{
-			case LGraph:      lst->AddColumn("---",      60); break;
-			case LIndex:      lst->AddColumn("Index",    60); break;
-			case LBranch:     lst->AddColumn("Branch",   60); break;
-			case LRevision:   lst->AddColumn("Revision", 60); break;
-			case LAuthor:     lst->AddColumn("Author",   240); break;
-			case LTime:       lst->AddColumn("Date",     130); break;
-			case LMessageTxt: lst->AddColumn("Message",  700); break;
-			default: LAssert(0); break;
+			case LGraph:      lst->AddColumn("---",      DefaultFieldWidth(c)); break;
+			case LIndex:      lst->AddColumn("Index",    DefaultFieldWidth(c)); break;
+			case LBranch:     lst->AddColumn("Branch",   DefaultFieldWidth(c)); break;
+			case LRevision:   lst->AddColumn("Revision", DefaultFieldWidth(c)); break;
+			case LAuthor:     lst->AddColumn("Author",   DefaultFieldWidth(c)); break;
+			case LTime:       lst->AddColumn("Date",     DefaultFieldWidth(c)); break;
+			case LMessageTxt: lst->AddColumn("Message",  DefaultFieldWidth(c)); break;
+			default:
+				LAssert(0); break;
 		}
 	}
 }
@@ -1326,29 +1344,22 @@ void VcFolder::OnSelectWithType()
 
 void VcFolder::OnSelectUpdateItems()
 {
-	if (d->Commits->Length() > MAX_AUTO_RESIZE_ITEMS)
+	auto commitLen = d->Commits->Length();
+	if (commitLen > MAX_AUTO_RESIZE_ITEMS)
 	{
 		int i = 0;
-		if (GetType() == VcHg && d->Commits->GetColumns() >= 7)
+		for (auto c: Fields)
 		{
-			d->Commits->ColumnAt(i++)->Width(60);  // LGraph
-			d->Commits->ColumnAt(i++)->Width(40);  // LIndex
-			d->Commits->ColumnAt(i++)->Width(100); // LRevision
-			d->Commits->ColumnAt(i++)->Width(60);  // LBranch
-			d->Commits->ColumnAt(i++)->Width(240); // LAuthor
-			d->Commits->ColumnAt(i++)->Width(130); // LTimeStamp
-			d->Commits->ColumnAt(i++)->Width(400); // LMessage
-		}
-		else if (d->Commits->GetColumns() >= 5)
-		{
-			d->Commits->ColumnAt(i++)->Width(40);  // LGraph
-			d->Commits->ColumnAt(i++)->Width(270); // LRevision
-			d->Commits->ColumnAt(i++)->Width(240); // LAuthor
-			d->Commits->ColumnAt(i++)->Width(130); // LTimeStamp
-			d->Commits->ColumnAt(i++)->Width(400); // LMessage
+			if (auto col = d->Commits->ColumnAt(i++))
+				col->Width(DefaultFieldWidth(c));
+			else
+				break;
 		}
 	}
-	else d->Commits->ResizeColumnsToContent();
+	else
+	{
+		d->Commits->ResizeColumnsToContent();
+	}
 
 	d->Commits->UpdateAllItems();
 }
@@ -1480,7 +1491,7 @@ void VcFolder::Select(bool b)
 						break;
 					}
 					default:
-						l->SetCurrent(!_stricmp(CurrentCommit, l->GetRev()));
+						l->SetCurrent(CurrentCommit.Equals(l->GetRev()));
 						break;
 				}
 			}

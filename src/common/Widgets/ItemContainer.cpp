@@ -40,10 +40,10 @@ public:
 	COLUMN_FLAGS()
 	#undef _
 
-	LItemContainer *Parent = NULL;
+	LItemContainer *Parent = nullptr;
+	LSurface *cIcon = nullptr;
 	LString cName;
 	int cWidth = 0;
-	LSurface *cIcon = NULL;
 	int cImage = -1;
 	bool OwnIcon = false;
 	bool CanResize = true;
@@ -241,8 +241,7 @@ LItemColumn *LItemContainer::AddColumn(const char *Name, int Width, int Where)
 
 	if (Lock(_FL))
 	{
-		c = new LItemColumn(this, Name, Width);
-		if (c)
+		if (c = new LItemColumn(this, Name, Width))
 		{
 			Columns.SetFixedLength(false);
 			Columns.AddAt(Where, c);
@@ -877,32 +876,16 @@ void LItemColumn::Width(int i)
 	if (d->cWidth != i)
 	{
 		d->cWidth = i;
-		
-		// If we are attached to a list...
-		if (d->Parent)
+		LgiTrace("%s:%i - resize col '%s' to %i\n", _FL, d->cName.Get(), i);
+
+		if (d->cName.Equals("Branch") && i == 240)
 		{
-			/* FIXME
-			 int MyIndex = GetIndex();
-			// Clear all the cached strings for this column
-			for (List<LListItem>::I it=d->Parent->Items.Start(); it.In(); it++)
-			{
-				DeleteObj((*it)->d->Display[MyIndex]);
-			}
-
-			if (d->Parent->IsAttached())
-			{
-				// Update the screen from this column across
-				LRect Up = d->Parent->GetClient();
-				Up.x1 = d->Pos.x1;
-				d->Parent->Invalidate(&Up);
-			}
-			*/
+			int asd=0;
 		}
-
+		
 		// Notify listener
-		auto p = d->Parent;
-		if (p)
-			p->SendNotify(LNotifyItemColumnsResized);
+		if (d->Parent)
+			d->Parent->SendNotify(LNotifyItemColumnsResized);
 	}
 }
 
