@@ -375,8 +375,8 @@ bool LCheckVersion(LString ver, LString minVer)
 	auto v = ver.Strip(stripChars).SplitDelimit(".");
 	auto minV = minVer.LStrip(stripChars).SplitDelimit(".");
 	
-	int common = MIN(v.Length(), minV.Length());
-	for (int i=0; i<common; i++)
+	size_t common = MIN(v.Length(), minV.Length());
+	for (size_t i=0; i<common; i++)
 	{
 		if (v[i].Int() < minV[i].Int())
 			return false;

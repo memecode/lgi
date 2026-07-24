@@ -195,7 +195,6 @@ public:
 	DynFunc1(int, SSL_CTX_free, SSL_CTX*, ctx);
 	DynFunc2(int, SSL_set1_host, SSL*, s, const char*, hostname);
 	DynFunc1(long, SSL_get_verify_result, const SSL*, s);
-	DynFunc1(const char*, X509_verify_cert_error_string, long, n);
 
 #ifdef WIN32
 // If this is freaking you out then good... openssl-win32 ships 
@@ -267,6 +266,8 @@ public:
 	DynFunc4(int, X509_digest, const X509*, data, const EVP_MD*, type, unsigned char*, md, unsigned int*, len);
 	DynFunc0(const EVP_MD*, EVP_sha256);
 	DynFunc1(int, X509_free, X509*, a);
+	DynFunc1(const char*, X509_verify_cert_error_string, long, n);
+
 	DynFunc2(char*, ERR_error_string, unsigned long, e, char*, buf);
 	DynFunc0(unsigned long, ERR_get_error);
 
@@ -1076,7 +1077,9 @@ DebugTrace("%s:%i - open loop finished, r=%i, Cancelled=%i\n", _FL, r, d->Cancel
 								{
 									LJson j;
 									j.Set(JSON_HOST, HostAddr);
-									j.Set(JSON_MESSAGE, Library->X509_verify_cert_error_string(verify));
+									auto msg = Library->X509_verify_cert_error_string(verify);
+									LAssert(msg);
+									j.Set(JSON_MESSAGE, msg);
 
 									auto certId = getCert();
 									if (certId.Length())
@@ -1114,6 +1117,23 @@ DebugTrace("%s:%i - open loop finished, r=%i, Cancelled=%i\n", _FL, r, d->Cancel
 									else
 									{
 										auto msg = Library->X509_verify_cert_error_string(verify);
+										if (!msg)
+										{
+											switch ((int)verify)
+											{
+												case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
+													msg = "self-signed certificate";
+													break;
+
+												case X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN:
+													msg = "self-signed certificate in certificate chain";
+													break;
+
+												default:
+													msg = "unknown certificate verification error";
+													break;
+											}
+										}
 										HandleError(_FL, LString::Fmt("TLS peer verify failed (%li): %s", verify, msg ? msg : "unknown").Get());
 									}
 								}
