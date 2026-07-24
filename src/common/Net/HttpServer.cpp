@@ -37,7 +37,7 @@ class LHttpServer_TraceSocket : public Base
 public:
 	void OnInformation(const char *Str) override
 	{
-		LgiTrace("%s:%i - info: %s\n", _FL, Str);
+		LgiTrace("%s:%i - info: %s", _FL, Str);
 	}
 
 	void OnError(int ErrorCode, const char *ErrorDescription) override
@@ -179,8 +179,12 @@ public:
 				}
 				else
 				{
-					LOG_HTTP("%s:%i - configuring certs for domains: %s\n",
-							_FL, LString(",").Join(secureSockets.domains).Get());
+					LOG_HTTP("%s:%i - configuring certs for domains: %s\n"
+							"	cert='%s'\n"
+							"	key='%s'\n",
+							_FL, LString(",").Join(secureSockets.domains).Get(),
+							secureSockets.certFile.Get(),
+							secureSockets.keyFile.Get());
 					sslSock->SetCert(secureSockets.certFile, secureSockets.keyFile);
 				}
 			}
@@ -621,6 +625,71 @@ bool LHttpServer::Callback::ParseHtmlWithDom(LVariant &Out, LDom *Dom, const cha
 	return true;
 }
 
+bool LHttpServer::SecureSockets::configureCertFolder(const char *folder)
+{
+	LDirectory dir;
+	for (auto b=dir.First(folder); b; b=dir.Next())
+	{
+		if (dir.IsDir())
+			continue;
+
+		auto nm = dir.GetName();
+		auto ext = LGetExtension(nm);
+		if (Stricmp(ext, "pem"))
+			continue;
+		
+		if (Stristr(nm, "fullchain"))
+		{
+			certFile = dir.FullPath();
+		}
+		else if (Stristr(nm, "key"))
+		{
+			keyFile = dir.FullPath();
+		}
+	}
+
+	printf("certFile = '%s'\n", certFile.Get());
+	printf("keyFile = '%s'\n", keyFile.Get());
+	if (certFile)
+	{
+		// See what domains it's for...
+		LSubProcess p("openssl", LString::Fmt("x509 -in %s -text -noout", certFile.Get()));
+		if (!p.Start())
+		{
+			LgiTrace("%s:%i - failed to start openssl\n", _FL);
+			return false;
+		}
+		
+		LStringPipe out;
+		p.Communicate(&out);
+		printf("%s:%i - got %i bytes from openssl\n", _FL, (int)out.GetSize());
+
+		bool isAltName = false;
+		for (auto &ln: out.NewLStr().SplitDelimit("\r\n"))
+		{
+			if (ln.Find("Subject Alternative Name:") >= 0)
+			{
+				isAltName = true;
+			}
+			else if (isAltName)
+			{
+				auto parts = ln.Strip().SplitDelimit(",");
+				for (auto &p: parts)
+				{
+					auto var = p.Strip().SplitDelimit(":", 1);
+					if (var[0].Equals("DNS"))
+						domains.Add(var[1]);
+				}
+				isAltName = false;
+			}
+		}
+
+		LgiTrace("%s:%i - got domains: %s\n", _FL, LString(", ").Join(domains).Get());
+	}
+
+	return true;
+}
+
 bool LHttpServer::SecureSockets::configureDefaultDomains()
 {
 	const char *localHosts[] = {"localhost", "127.0.0.1", "::1"};
@@ -648,6 +717,10 @@ bool LHttpServer::SecureSockets::configureDefaultDomains()
 
 bool LHttpServer::SecureSockets::setupCerts()
 {
+	if (LFileExists(certFile) &&
+		LFileExists(keyFile))
+		return true;
+
 	return	checkRequirement(CapMkcert) &&
 			checkRequirement(CapHttpsCert);
 }
