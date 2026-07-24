@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
+set(CMAKE_POLICY_DEFAULT_CMP0091 NEW)
 project(lgiDeps)
 enable_language( C CXX ASM )
 if(UNIX AND NOT APPLE)
@@ -178,6 +179,17 @@ if (NOT HAIKU)
     if(NOT TARGET ssh)
         message(FATAL_ERROR "libssh should be a target at this point.")
     endif()
+
+    # Force CRT selection explicitly for libssh and keep the common ssh.lib in sync
+    # with the currently built configuration to avoid stale Release artifacts in Debug.
+    if(MSVC)
+        set_property(TARGET ssh PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+        add_custom_target(sync_ssh_lib ALL
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/lib"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_LINKER_FILE:ssh>" "${CMAKE_BINARY_DIR}/lib/ssh.lib"
+            DEPENDS ssh)
+    endif()
+
     # override the output folders:
     install(TARGETS ssh
             RUNTIME DESTINATION ${CMAKE_BINARY_DIR}/bin
