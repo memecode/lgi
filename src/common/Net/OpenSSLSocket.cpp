@@ -28,7 +28,12 @@
 
 #define PATH_OFFSET					"../"
 
-#define DEFAULT_METHOD				TLS_server_method()
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	#define DEFAULT_METHOD				TLS_server_method()
+#else
+	#define DEFAULT_METHOD				SSLv23_server_method()
+#endif
+// Alternative methods if needed:
 // #define DEFAULT_METHOD			SSLv23_server_method()
 // #define DEFAULT_METHOD			SSLv3_server_method()
 
@@ -188,11 +193,14 @@ public:
   	DynFunc1(SSL_CTX*, SSL_CTX_new, const SSL_METHOD*, meth);	
 	DynFunc3(int, SSL_CTX_load_verify_locations, SSL_CTX*, ctx, const char*, CAfile, const char*, CApath);
 	DynFunc3(int, SSL_CTX_use_certificate_file, SSL_CTX*, ctx, const char*, file, int, type);
+	DynFunc2(int, SSL_CTX_use_certificate_chain_file, SSL_CTX*, ctx, const char*, file);
 	DynFunc3(int, SSL_CTX_use_PrivateKey_file, SSL_CTX*, ctx, const char*, file, int, type);
 	DynFunc1(int, SSL_CTX_set_default_verify_paths, SSL_CTX*, ctx);
 	DynFunc2(int, SSL_CTX_set_cipher_list, SSL_CTX*, ctx, const char*, str);
 	DynFunc1(int, SSL_CTX_check_private_key, const SSL_CTX*, ctx);
 	DynFunc1(int, SSL_CTX_free, SSL_CTX*, ctx);
+	DynFunc4(long, SSL_CTX_ctrl, SSL_CTX*, ctx, int, cmd, long, arg1, void*, arg2);
+	DynFunc2(int, SSL_CTX_set_ciphersuites, SSL_CTX*, ctx, const char*, str);
 	DynFunc2(int, SSL_set1_host, SSL*, s, const char*, hostname);
 	DynFunc1(long, SSL_get_verify_result, const SSL*, s);
 
@@ -351,6 +359,8 @@ class OpenSSL :
 	public LMutex
 {
 	SSL_CTX *Server;
+	LString ServerCertFile;
+	LString ServerKeyFile;
 
 public:
 	SSL_CTX *Client;
@@ -443,7 +453,11 @@ public:
 			goto OnError;
 		}
 		
-		Client = SSL_CTX_new(SSLv23_client_method());
+		#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+			Client = SSL_CTX_new(TLS_client_method());
+		#else
+			Client = SSL_CTX_new(SSLv23_client_method());
+		#endif
 		if (!Client)
 		{
 			long e = ERR_get_error();
@@ -466,7 +480,7 @@ public:
 	OnError:
 		ErrorMsg = Err.NewLStr();
 		if (sock)
-			sock->DebugTrace("%s", ErrorMsg.Get());
+			sock->DebugTrace("%s\n", ErrorMsg.Get());
 		return false;
     }
 
@@ -493,38 +507,148 @@ public:
 	
 	SSL_CTX *GetServer(SslSocket *sock, const char *CertFile, const char *KeyFile)
 	{
+		auto Library = this;
+		
+		sock->DebugLogging = true;
+		if (Server)
+		{
+			Library->SSL_CTX_free(Server);
+			Server = nullptr;
+		}
+		
 		if (!Server)
 		{
 			bool status = false;
-			bool ciphersOk = true;
+			bool credentialsLoaded = true;
 			
-			Server = SSL_CTX_new(DEFAULT_METHOD);
-			if (Server)
+			Server = Library->SSL_CTX_new(DEFAULT_METHOD);
+			if (!Server)
 			{
-				// OpenSSL 3 defaults can fail legacy clients with "no shared cipher".
-				// Keep server compatibility broad for existing clients.
-				ciphersOk = SSL_CTX_set_cipher_list(Server, "DEFAULT:@SECLEVEL=0") == 1;
-				if (!ciphersOk)
-					ciphersOk = SSL_CTX_set_cipher_list(Server, "ALL:@SECLEVEL=0") == 1;
+				if (sock)
+				{
+					long e = Library->ERR_get_error();
+					auto Msg = Library->ERR_error_string(e, 0);
+					sock->DebugTrace("%s:%i - SSL_CTX_new failed: %s (%i)\n", _FL, Msg ? Msg : "unknown", e);
+				}
+				return nullptr;
+			}
+			
+			// Load certificate and key FIRST before configuring ciphers
+			if (CertFile)
+			{
+				int certStatus;
+				if (Stristr(CertFile, "fullchain"))
+					certStatus = Library->SSL_CTX_use_certificate_chain_file(Server, CertFile);
+				else
+					certStatus = Library->SSL_CTX_use_certificate_file(Server, CertFile, SSL_FILETYPE_PEM);
+				if (sock)
+					sock->DebugTrace("Loading certificate '%s' -> %i\n", CertFile, certStatus);
+				if (certStatus != 1 && sock)
+				{
+					credentialsLoaded = false;
+					long e = Library->ERR_get_error();
+					char *Msg = Library->ERR_error_string(e, 0);
+					sock->DebugTrace("%s:%i - Failed to load certificate file '%s': %s (%i)\n",
+							_FL, CertFile, Msg ? Msg : "unknown", e);
+				}
+			}
+			if (KeyFile)
+			{
+				int keyStatus = Library->SSL_CTX_use_PrivateKey_file(Server, KeyFile, SSL_FILETYPE_PEM);
+				if (sock)
+					sock->DebugTrace("Loading private key '%s' -> %i\n", KeyFile, keyStatus);
+				if (keyStatus != 1 && sock)
+				{
+					credentialsLoaded = false;
+					long e = Library->ERR_get_error();
+					auto Msg = Library->ERR_error_string(e, 0);
+					sock->DebugTrace("%s:%i - Failed to load private key file '%s': %s (%i)\n",
+							_FL, KeyFile, Msg ? Msg : "unknown", e);
+				}
+			}
 
-				if (CertFile)
-					SSL_CTX_use_certificate_file(Server, CertFile, SSL_FILETYPE_PEM);
-				if (KeyFile)
-					SSL_CTX_use_PrivateKey_file(Server, KeyFile, SSL_FILETYPE_PEM);
-				status = ciphersOk && SSL_CTX_check_private_key(Server);
- 			}
+			if (!credentialsLoaded)
+			{
+				if (sock)
+					sock->DebugTrace("%s:%i - Aborting SSL context setup: certificate/private key could not be loaded.\n", _FL);
+				Library->SSL_CTX_free(Server);
+				Server = nullptr;
+				return nullptr;
+			}
+			
+			status = Library->SSL_CTX_check_private_key(Server) == 1;
+			if (sock)
+				sock->DebugTrace("Private key check -> %i\n", status);
+			if (!status && sock)
+			{
+				long e = Library->ERR_get_error();
+				auto Msg = Library->ERR_error_string(e, 0);
+				sock->DebugTrace("%s:%i - Private key does not match certificate: %s (%i)\n",
+								_FL, Msg ? Msg : "unknown", e);
+			}
+			
+			// NOW configure TLS versions
+			#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+				#ifndef TLS1_2_VERSION
+					#define TLS1_2_VERSION 0x0303
+				#endif
+				Library->SSL_CTX_ctrl(Server, SSL_CTRL_SET_MIN_PROTO_VERSION, TLS1_2_VERSION, NULL);
+				if (sock)
+					sock->DebugTrace("Set minimum TLS version to 1.2\n");
+			#endif
+
+			// Configure TLS 1.3 ciphersuites (if supported) - optional, not critical
+			#if OPENSSL_VERSION_NUMBER >= 0x10101000L
+				// Try to set TLS 1.3 ciphers but don't fail if it's not available
+				Library->SSL_CTX_set_ciphersuites(Server, "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256");
+			#endif
+
+			// Configure TLS 1.2 and earlier ciphersuites.
+			// Use a broad, compatible list that modern browsers accept.
+			int result = Library->SSL_CTX_set_cipher_list(Server, "HIGH:!aNULL:!MD5:!3DES:!RC4:!EXPORT");
+			if (sock)
+				sock->DebugTrace("SSL_CTX_set_cipher_list('HIGH:!aNULL:!MD5:!3DES:!RC4:!EXPORT') -> %i\n", result);
+			
+			if (result != 1)
+			{
+				result = Library->SSL_CTX_set_cipher_list(Server, "DEFAULT");
+				if (sock)
+					sock->DebugTrace("SSL_CTX_set_cipher_list('DEFAULT') -> %i\n", result);
+			}
+			
+			if (result != 1)
+			{
+				// If DEFAULT fails (very unlikely), try ALL
+				result = Library->SSL_CTX_set_cipher_list(Server, "ALL");
+				if (sock)
+					sock->DebugTrace("SSL_CTX_set_cipher_list('ALL') -> %i\n", result);
+			}
+			
+			if (result != 1)
+			{
+				// If still failing, try with reduced security level
+				result = Library->SSL_CTX_set_cipher_list(Server, "DEFAULT:@SECLEVEL=0");
+				if (sock)
+					sock->DebugTrace("SSL_CTX_set_cipher_list('DEFAULT:@SECLEVEL=0') -> %i\n", result);
+			}
+			
+			if (result != 1 && sock)
+			{
+				sock->DebugTrace("%s:%i - WARNING: Failed to set any cipher list! This will likely cause SSL_accept to fail.\n", _FL);
+			}
+			else if (sock)
+			{
+				sock->DebugTrace("Successfully configured ciphers\n");
+			}
 
 			if (!status && sock)
 			{
-				long e = ERR_get_error();
-				char *Msg = ERR_error_string(e, 0);
-				LStringPipe p;
-				if (!ciphersOk)
-					p.Print("%s:%i - SSL_CTX_new(server) failed to configure cipher list ('%s', %i)\n", _FL, Msg ? Msg : "unknown", e);
-				else
-					p.Print("%s:%i - SSL_CTX_new(server) failed with '%s' (%i)\n", _FL, Msg ? Msg : "unknown", e);
-				ErrorMsg = p.NewLStr();
-				sock->DebugTrace("%s", ErrorMsg.Get());
+				long e = Library->ERR_get_error();
+				auto Msg = Library->ERR_error_string(e, 0);
+				sock->DebugTrace("%s:%i - SSL context validation failed: %s (%i)\n", _FL, Msg ? Msg : "unknown", e);
+				Library->SSL_CTX_free(Server);
+				Server = nullptr;
+				return nullptr;
 			}
 		}
 		
@@ -555,7 +679,7 @@ public:
 	}
 };
 
-static OpenSSL *Library = NULL;
+static OpenSSL *Library = nullptr;
 
 #if 0
 #define SSL_DEBUG_LOCKING
@@ -898,6 +1022,7 @@ OsSocket SslSocket::Handle(OsSocket Set)
 		{
 			r = Library->SSL_set_fd(Ssl, (int) Set);
 			Bio = Library->SSL_get_rbio(Ssl);
+			Library->SSL_set_accept_state(Ssl);
 			r = Library->SSL_accept(Ssl);
 			if (r <= 0)
 				IsError = true;
@@ -1395,10 +1520,27 @@ int SslSocket::Close()
 	return true;
 }
 
-void SslSocket::SetCert(LString certFile, LString keyFile)
+bool SslSocket::SetCert(LString certFile, LString keyFile)
 {
 	d->CertFile = certFile;
 	d->KeyFile = keyFile;
+
+	// Check if the files are readable.
+	auto cert = LReadFile(d->CertFile);
+	if (!cert)
+	{
+		LgiTrace("%s:%i - Unable to read certificate file '%s'\n", _FL, d->CertFile.Get());
+		return false;
+	}
+
+	auto key = LReadFile(d->KeyFile);
+	if (!key)
+	{
+		LgiTrace("%s:%i - Unable to read private key file '%s'\n", _FL, d->KeyFile.Get());
+		return false;
+	}
+
+	return true;
 }
 
 bool SslSocket::Listen(int Port)
@@ -1412,7 +1554,7 @@ bool SslSocket::Listen(int Port)
 	auto ctx = Library->GetServer(this, d->CertFile, d->KeyFile);
 	if (!ctx)
 	{
-		LgiTrace("%s:%i - No library\n", _FL);
+		LgiTrace("%s:%i - Failed to create SSL server context.\n", _FL);
 		return false;
 	}
 	
@@ -1476,7 +1618,7 @@ bool SslSocket::Accept(LSocketI *sock)
 	auto ctx = Library->GetServer(this, d->CertFile, d->KeyFile);
 	if (!ctx)
 	{
-		LgiTrace("%s:%i - No library\n", _FL);
+		LgiTrace("%s:%i - Failed to create SSL server context.\n", _FL);
 		return false;
 	}
 
@@ -1501,6 +1643,11 @@ bool SslSocket::Accept(LSocketI *sock)
 		OnError(0, "SSL_set_fd failed.");
 		goto OnError;
 	}
+
+	Library->SSL_set_accept_state(sslSock->Ssl);
+
+	// Enable automatic retry mode for handshake
+	Library->SSL_ctrl(sslSock->Ssl, SSL_CTRL_SET_READ_AHEAD, 1, NULL);
 
 	if (d->SslOnConnect)
 	{
@@ -1815,7 +1962,7 @@ DebugTrace("%s:%i - SSL_read(%p,%i)=%i\n", _FL, Data, Len, r);
 					{
 						if (!Library->BIO_should_retry(Bio))
 						{
-DebugTrace("%s:%i - BIO_should_retry is false\n", _FL);
+						DebugTrace("%s:%i - BIO_should_retry is false\n", _FL);
 							break;
 						}
 						if (d->IsBlocking)
@@ -1916,7 +2063,7 @@ void SslSocket::DebugTrace(const char *fmt, ...)
 		
 		if (Ch > 0)
 		{
-			#if 1
+			#if 0
 			LgiTrace("SSL:%p: %s", this, Buffer);
 			#else
 			OnInformation(Buffer);

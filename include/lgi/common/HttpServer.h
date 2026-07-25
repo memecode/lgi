@@ -72,6 +72,9 @@ public:
 		// Add the localhost domains and any private IP's to the list of domains.
 		bool configureDefaultDomains();
 
+		// Configure an external cert folder:
+		bool configureCertFolder(const char *folder);
+
 		// Configure a cert and key file.
 		bool setupCerts();
 
