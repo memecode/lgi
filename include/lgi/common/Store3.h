@@ -601,7 +601,9 @@ extern LDataStoreI *OpenMapiStore
 	/// The account ID
 	uint64 AccountId,
 	/// Event interface,
-	LDataEventsI *Callback
+	LDataEventsI *Callback,
+	/// The logging stream.
+	LStream *Log
 );
 #endif
 

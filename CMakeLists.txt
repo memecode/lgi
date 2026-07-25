@@ -29,7 +29,8 @@ endif()
 if (WIN32)
 	message("CMAKE_GENERATOR=${CMAKE_GENERATOR}")
 	message("CMAKE_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}")
-	if (CMAKE_GENERATOR MATCHES "Win64" OR
+	if (CMAKE_GENERATOR MATCHES "Ninja" OR
+		CMAKE_GENERATOR MATCHES "Win64" OR
 		CMAKE_GENERATOR_PLATFORM MATCHES "x64")
 		set(WORDSIZE 64)
 		set(OPENSSL_DIR "c:/Program Files/OpenSSL-Win64")
@@ -603,7 +604,8 @@ elseif (MSVC)
 		PUBLIC
 			include/lgi/win
 		PRIVATE
-			private/win)
+			private/win
+            "C:\\Program Files\\OpenSSL-Win64\\include")
 	
 	target_link_libraries(lgi
 		PUBLIC
