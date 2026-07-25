@@ -6,6 +6,7 @@
 #include "lgi/common/HashTable.h"
 #include "lgi/common/RefCount.h"
 #include "lgi/common/Dom.h"
+#include "lgi/common/Progress.h"
 
 /// Runtime option: Don't encode entities
 #define GXT_NO_ENTITIES						0x0001

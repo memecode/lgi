@@ -21,6 +21,8 @@
 #define SslSocket_KeyFile				"KeyFile"
 #define SslSocket_SslOnConnect			"SslOnConnect"
 
+class LCapabilityClient;
+
 class SslSocket :
 	public LSocketI,
 	virtual public LDom

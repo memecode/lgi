@@ -10,6 +10,8 @@
 #include "lgi/common/OAuth2.h"
 #include "lgi/common/Store3Defs.h"	
 #include "lgi/common/OpenSSLSocket.h"
+#include "lgi/common/File.h"
+#include "lgi/common/DateTime.h"
 
 #ifndef GPL_COMPATIBLE
 #define GPL_COMPATIBLE						0
