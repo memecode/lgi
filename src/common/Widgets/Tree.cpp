@@ -1109,8 +1109,11 @@ void LTreeItem::OnPaint(ItemPaintCtx &Ctx)
 	// text: other columns
 	Ctx.Fore = f.Type == LCss::ColorRgb ? (LColour)f : Fore;
 	Ctx.TxtBack = b.Type == LCss::ColorRgb ? (LColour)b : Ctx.Back;
-	for (int i=1; i<Ctx.Columns; i++)
+	for (size_t i=1; i<Ctx.Columns; i++)
 	{
+		if (Ctx.ColPx[i] <= 0)
+			continue;
+
 		Ctx.Set(x, Pos.y1, x + Ctx.ColPx[i] - 1, Pos.y2);
 		OnPaintColumn(Ctx, i, Tree->Columns[i]);
 		x = Ctx.x2 + 1;
@@ -2010,8 +2013,13 @@ void LTree::OnPaint(LSurface *pDC)
 	if (Columns.Length() > 0)
 	{
 		Ctx.Columns = (int)Columns.Length();
-		for (int i=0; i<Columns.Length(); i++)
-			ColPx[i] = Columns[i]->Width();
+		for (size_t i=0; i<Columns.Length(); i++)
+		{
+			if (Columns[i]->Display() == LCss::DispNone)
+				ColPx[i] = 0;
+			else
+				ColPx[i] = Columns[i]->Width();
+		}
 	}
 	else
 	{
@@ -2034,7 +2042,7 @@ void LTree::OnPaint(LSurface *pDC)
 	// paint items
 	ZeroObj(d->LineFlags);
 	List<LTreeItem>::I it = Items.begin();
-	for (LTreeItem *i = *it; i; i=*++it)
+	for (auto i = *it; i; i=*++it)
 		i->OnPaint(Ctx);
 
 	pDC->SetOrigin(Ox, Oy);
@@ -2248,7 +2256,7 @@ int LTree::GetContentSize(int ColumnIdx)
 	int MaxPx = 0;
 	
 	List<LTreeItem>::I it = Items.begin();
-	for (LTreeItem *i = *it; i; i=*++it)
+	for (auto i = *it; i; i=*++it)
 	{
 		int ItemPx = i->GetColumnSize(ColumnIdx);
 		MaxPx = MAX(ItemPx, MaxPx);

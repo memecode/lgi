@@ -1276,10 +1276,10 @@ public:
 	virtual ~LCss();
 
 	#define Accessor(PropName, Type, Default, BaseProp) \
-		Type PropName() { Type *Member = (Type*)Props.Find(Prop##PropName); \
-							if (Member) return *Member; \
-							else if ((Member = (Type*)Props.Find(BaseProp))) return *Member; \
-							return Default; } \
+		Type PropName() const { Type *Member = (Type*)Props.Find(Prop##PropName); \
+								if (Member) return *Member; \
+								else if ((Member = (Type*)Props.Find(BaseProp))) return *Member; \
+								return Default; } \
 		void PropName(Type t) {	LAssert(!ReadOnly); \
 								Type *Member = (Type*)Props.Find(Prop##PropName); \
 								if (Member) *Member = t; \

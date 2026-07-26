@@ -1085,7 +1085,8 @@ int LDirectory::First(const char *Name, const char *Pattern)
 	d->dir = opendir(d->path);
 	if (!d->dir)
 	{
-		if (errno != ENOENT)
+		if (errno != ENOENT &&
+		    errno != EACCES)
 			LgiTrace("%s:%i - opendir(%s) failed: %i\n", _FL, Name, errno);
 	}
 	else
@@ -1095,18 +1096,18 @@ int LDirectory::First(const char *Name, const char *Pattern)
 			LgiTrace("%s:%i - readdir failed: %i\n", _FL, errno);
 		else
 		{
-			char s[MaxPathLen];
-			LMakePath(s, sizeof(s), d->path, GetName());
-			if (lstat(s, &d->stat))
-			{
-				printf("%s:%i - lstat failed: %i\n", _FL, errno);
-				return false;
-			}
-
 			if (d->Ignore())
 			{
 				if (Next())
 					return true;
+				return false;
+			}
+
+			char s[MaxPathLen];
+			LMakePath(s, sizeof(s), d->path, GetName());
+			if (lstat(s, &d->stat))
+			{
+			    printf("%s:%i - lstat(%s) failed: %i\n", _FL, s, errno);
 				return false;
 			}
 		}
@@ -1131,7 +1132,8 @@ int LDirectory::Next()
 			// printf("%s:%i - next '%s' + '%s' = '%s'\n", _FL, d->path, GetName(), s);
 			if (lstat(s, &d->stat))
 			{
-				printf("%s:%i - lstat failed %i\n", _FL, errno);
+			    if (errno != ENOENT)
+				    printf("%s:%i - lstat failed %i\n", _FL, errno);
 				break;
 			}
 

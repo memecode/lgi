@@ -87,6 +87,8 @@ public:
 			x2 != 0 ||
 			y2 != 0;
 	}
+
+	static const LRect EMPTY() { return LRect(0, 0, -1, -1); }
 	
 	LPoint Origin() { return LPoint(x1, y1); }
 	LPoint Center() { return LPoint(x1 + (X()/2), y1 + (Y()/2)); }
