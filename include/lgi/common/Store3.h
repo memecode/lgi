@@ -603,7 +603,7 @@ extern LDataStoreI *OpenMapiStore
 	/// Event interface,
 	LDataEventsI *Callback,
 	/// The logging stream.
-	LStream *Log
+	LStream *Log = nullptr
 );
 #endif
 

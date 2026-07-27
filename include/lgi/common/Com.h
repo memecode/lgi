@@ -400,7 +400,7 @@ class LComPtr
 public:
 	LComPtr()
 	{
-		ptr = NULL;
+		ptr = nullptr;
 	}
 
 	~LComPtr()
@@ -413,7 +413,7 @@ public:
 		if (ptr)
 		{
 			ptr->Release();
-			ptr = NULL;
+			ptr = nullptr;
 		}
 	}
 
@@ -424,7 +424,7 @@ public:
 
 	T* operator->() const
 	{
-		LAssert(ptr != NULL); 
+		LAssert(ptr != nullptr); 
 		return ptr;
 	}
 
