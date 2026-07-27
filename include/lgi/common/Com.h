@@ -422,6 +422,11 @@ public:
 		return &ptr;
 	}
 
+	LPUNKNOWN *Unknown()
+	{
+		return (LPUNKNOWN*)&ptr;
+	}
+
 	T* operator->() const
 	{
 		LAssert(ptr != nullptr); 
