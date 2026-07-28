@@ -316,7 +316,7 @@ int LItemContainer::ColumnAtX(int x, LItemColumn **Col, int *Offset)
 	for (c=0; c<Columns.Length(); c++)
 	{
 		*Col = Columns[c];
-		if (*Col && (*Col)->Display() != LCss::DispNone)
+		if (*Col && (*Col)->Display() == LCss::DispNone)
 		{
 			continue;
 		}
@@ -413,7 +413,7 @@ void LItemContainer::GetColumnSizes(ColSizes &cs)
 	// Read in the current sizes
 	cs.FixedPx = 0;
 	cs.ResizePx = 0;
-	for (size_t i=0; i<Columns.Length(); i++)
+	for (int i=0; i<Columns.Length(); i++)
 	{
 		auto c = Columns[i];
 		if (!c->Visible())
