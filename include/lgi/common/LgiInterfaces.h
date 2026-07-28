@@ -194,7 +194,7 @@ public:
 	virtual void SetCancel(LCancel *c) { }
 
 	// Logging and utility
-	virtual class LStreamI *GetLog() { return NULL; }
+	virtual class LStreamI *GetLog() { return nullptr; }
 
 	// Host/Port meta data
 		/// Returns the IP at this end of the socket

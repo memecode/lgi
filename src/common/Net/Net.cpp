@@ -330,6 +330,7 @@ public:
 	LString		ErrStr;
 
 	// Application level logging:
+	LStreamI	*log = nullptr;
 	LString		LogFile;
 	int			LogType = NET_LOG_NONE;
 
@@ -338,7 +339,8 @@ public:
 	LAutoPtr<LFile> socketLog;
 	LStringPipe preOpenLog; // collect logs in memory before 'open'
 
-	LSocketImplPrivate()
+	LSocketImplPrivate(LStreamI *logger)
+		: log(logger)
 	{	
 		Cancel    = this;
 		Blocking  = true;
@@ -450,13 +452,18 @@ public:
 LSocket::LSocket(LStreamI *logger, void *unused_param)
 {
 	StartNetworkStack();
-	d = new LSocketImplPrivate;
+	d = new LSocketImplPrivate(logger);
 }
 
 LSocket::~LSocket()
 {
 	Close();
 	DeleteObj(d);
+}
+
+LStreamI *LSocket::GetLog()
+{
+	return d->log;
 }
 
 bool LSocket::IsOK()

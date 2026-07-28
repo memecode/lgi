@@ -129,6 +129,9 @@ public:
 	/// Destroys the class
 	~LSocket();
 
+	/// Return log
+	LStreamI *GetLog() override;
+
 	/// Gets the active cancellation object
 	LCancel *GetCancel() override;
 
