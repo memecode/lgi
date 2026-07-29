@@ -520,6 +520,8 @@ struct LGraphPriv
 		}
 		Values.Add(max);
 
+		int prevLabelPx = xaxis ? -100 : r.Y() + 100;
+		int padPx = 4;
 		for (int i=0; i<Values.Length(); i++)
 		{
 			v = Values[i];
@@ -529,12 +531,34 @@ struct LGraphPriv
 
 			auto s = DataToString(v, dateFmt);
 
+			// Draw the text...
 			LDisplayString ds(LSysFont, s);
 			if (xaxis)
-				ds.Draw(pDC, dx - (ds.X()/2), dy + AxisMarkPx);
-			else
-				ds.Draw(pDC, dx - ds.X() - AxisMarkPx, dy - (ds.Y() / 2));
+			{
+				auto half = ds.X() / 2;
+				if (dx - half < prevLabelPx + padPx)
+				{
+					printf("skip x: %s, dx: %d, prevLabelPx: %d\n", s.Get(), dx-half, prevLabelPx);
+					continue;
+				}
 
+				ds.Draw(pDC, dx - half, dy + AxisMarkPx);
+				prevLabelPx = dx + half;
+			}
+			else
+			{
+				auto half = ds.Y() / 2;
+				if (dy + half > prevLabelPx - padPx)
+				{
+					printf("skip y: %s, dy: %d, prevLabelPx: %d\n", s.Get(), dy+half, prevLabelPx);
+					continue;
+				}
+
+				ds.Draw(pDC, dx - ds.X() - AxisMarkPx, dy - half);
+				prevLabelPx = dy - half;
+			}
+
+			// Draw the tick mark
 			if (xaxis)
 				pDC->Line(dx, dy, dx, dy + 5);
 			else
