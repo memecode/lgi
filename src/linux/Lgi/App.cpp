@@ -400,15 +400,35 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 			// Check alternate location for development builds
 			Dl_info dlInfo;
     		dladdr((const void*)LgiCrashHandler, &dlInfo);
-    		if (dlInfo.dli_sname != NULL && dlInfo.dli_saddr != NULL)
+    		if (dlInfo.dli_sname != nullptr && dlInfo.dli_saddr != nullptr)
     		{
-    			p = dlInfo.dli_fname;
-				p += "../../src/linux/CrashHandler";
-				p += programName;
-				printf("Alternative path %s: %s\n",
-					p.Exists() ? "found" : "missing",
-					p.GetFull().Get());
+				const char *relPaths[] = {
+					"../../src/linux/CrashHandler",
+					"~/code/lgi/trunk/src/linux/CrashHandler",
+				};
+
+				for (int i=0; i<CountOf(relPaths); i++)
+				{
+					if (relPaths[i][0] == '~')
+					{
+						char path[MAX_PATH_LEN];
+						if (LMakePath(path, sizeof(path), relPaths[i], programName))
+							p = path;
+						else
+							continue;
+					}
+					else
+					{
+						p = dlInfo.dli_fname;
+						p += relPaths[i];
+						p += programName;
+					}
+					// printf("Alternative path %i: %s\n", p.Exists(), p.GetFull().Get());
+					if (p.Exists())
+						break;
+				}
     		}
+			else printf("%s:%i - dladdr failed: %s\n", _FL, dlerror());
 		}		
 		
 		if (p.Exists())

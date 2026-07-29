@@ -92,7 +92,7 @@ class LgiClass LTabPage :
 	public ResObject
 {
 	friend class LTabView;
-	struct LTabPagePriv *d;
+	class LTabPagePriv *d;
 	bool Attach(LViewI *parent) override;
 
 	// Vars

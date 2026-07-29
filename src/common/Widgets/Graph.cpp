@@ -538,7 +538,7 @@ struct LGraphPriv
 				auto half = ds.X() / 2;
 				if (dx - half < prevLabelPx + padPx)
 				{
-					printf("skip x: %s, dx: %d, prevLabelPx: %d\n", s.Get(), dx-half, prevLabelPx);
+					// printf("skip x: %s, dx: %d, prevLabelPx: %d\n", s.Get(), dx-half, prevLabelPx);
 					continue;
 				}
 
@@ -550,7 +550,7 @@ struct LGraphPriv
 				auto half = ds.Y() / 2;
 				if (dy + half > prevLabelPx - padPx)
 				{
-					printf("skip y: %s, dy: %d, prevLabelPx: %d\n", s.Get(), dy+half, prevLabelPx);
+					// printf("skip y: %s, dy: %d, prevLabelPx: %d\n", s.Get(), dy+half, prevLabelPx);
 					continue;
 				}
 

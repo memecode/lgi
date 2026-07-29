@@ -160,15 +160,26 @@ public:
 	}
 };
 
-struct LTabPagePriv
+class LTabPagePriv
 {
-	LTabPage *Tab;
-	bool NonDefaultFont;
 	LAutoPtr<LDisplayString> Ds;
 
-	LTabPagePriv(LTabPage *t) : Tab(t)
+public:
+	LTabPage *Tab = nullptr;
+	bool NonDefaultFont = false;
+
+	LTabPagePriv(LTabPage *t) 
+		: Tab(t)
 	{
-		NonDefaultFont = false;
+	}
+
+	void Reset(LDisplayString *newDs = nullptr)
+	{
+		Ds.Reset(newDs);
+		if (Ds)
+		{
+			LAssert(Ds->GetFont());
+		}
 	}
 
 	LDisplayString *GetDs()
@@ -176,8 +187,9 @@ struct LTabPagePriv
 		auto Text = Tab->Name();
 		if (Text && !Ds)
 		{
-			LFont *f = NULL;
+			LFont *f = nullptr;
 			auto s = Tab->GetCss();
+			
 			NonDefaultFont = s ? s->HasFontStyle() : false;
 			if (NonDefaultFont)
 			{
@@ -201,6 +213,7 @@ struct LTabPagePriv
 			else
 				LAssert(!"no font.");
 		}
+		else LAssert(!"no text.");
 
 		return Ds;
 	}
@@ -844,7 +857,7 @@ void LTabView::OnPaint(LSurface *pDC)
 		{
 			auto Tab = it[i];
 			auto Foc = Focus();
-			LDisplayString *ds = Tab->d->GetDs();
+			auto ds = Tab->d->GetDs();
 			bool First = i == 0;
 			bool Last = i == it.Length() - 1;
 			bool IsCurrent = d->Current == i;
@@ -979,7 +992,19 @@ void LTabView::OnPaint(LSurface *pDC)
 
 			#endif
 			
-			LFont *tf = ds->GetFont();
+			if (!ds)
+			{
+				LAssert(!"no display string for tab");
+				continue;
+			}
+
+			auto tf = ds->GetFont();
+			if (!tf)
+			{
+				LAssert(!"no font for tab");
+				continue;
+			}
+
 			int BaselineOff = (int) (d->TabsBaseline - tf->Ascent());
 			tf->Transparent(true);
 
@@ -1302,7 +1327,7 @@ const char *LTabPage::Name()
 bool LTabPage::Name(const char *name)
 {
 	bool Status = LView::Name(name);
-	d->Ds.Reset();
+	d->Reset();
 	if (GetParent())
 		GetParent()->Invalidate();
 	return Status;
@@ -1470,7 +1495,7 @@ void LTabPage::OnStyleChange()
 
 void LTabPage::SetFont(LFont *Font, bool OwnIt)
 {
-	d->Ds.Reset();
+	d->Reset();
 	Invalidate();
 	return LView::SetFont(Font, OwnIt);
 }
