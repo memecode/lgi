@@ -24,6 +24,12 @@ struct LGraphPriv
 {
 	constexpr static int AxisMarkPx = 8;
 
+	enum TFormatHint {
+		TFmtDateTime,
+		TFmtDate,
+		TFmtTime,
+	};
+
 	LGraph *View = NULL;
 	int XAxis = 0, YAxis = 0;
 	LVariantType XType, YType;
@@ -299,18 +305,25 @@ struct LGraphPriv
 		return 0;
 	}
 
-	LString DataToString(LVariant &v)
+	LString DataToString(LVariant &v, TFormatHint fmt = TFmtDateTime)
 	{
 		LString s;
 		switch (v.Type)
 		{
 			case GV_DATETIME:
 			{
-				if (v.Value.Date->Hours() ||
-					v.Value.Date->Minutes())
-					s = v.Value.Date->Get();
-				else
-					s = v.Value.Date->GetDate();
+				switch (fmt)
+				{
+					case TFmtDateTime:
+						s = v.Value.Date->Get();
+						break;
+					case TFmtDate:
+						s = v.Value.Date->GetDate();
+						break;
+					case TFmtTime:
+						s = v.Value.Date->GetTime();
+						break;
+				}
 				break;
 			}
 			case GV_INT64:
@@ -337,7 +350,7 @@ struct LGraphPriv
 		return s;
 	}
 
-	void DrawAxis(LSurface *pDC, LRect &r, int xaxis, LVariant &min, LVariant &max, LString &label)
+	void DrawAxis(LSurface *pDC, LRect &r, bool xaxis, LVariant &min, LVariant &max, LString &label)
 	{
 		LVariant v = min;
 		bool First = true;
@@ -353,11 +366,12 @@ struct LGraphPriv
 		int64 int_range = 0;
 		double dbl_inc = 0.0;
 		int64 int64_inc = 0;
-		int date_inc = 1;
+		int dateIncSeconds = LDateTime::MinuteLength;
+		TFormatHint dateFmt = TFmtDateTime;
 
 		auto Fnt = View->GetFont();
 		Fnt->Colour(L_TEXT, L_WORKSPACE);
-
+		
 		LArray<LVariant> Values;
 		while (Loop)
 		{
@@ -372,20 +386,68 @@ struct LGraphPriv
 				}
 				case GV_DATETIME:
 				{
+					enum TTruncate {
+						TrunNone,
+						TrunHrMinSec,
+						TrunMinSec,
+						TrunSec,
+					}	truc = TrunNone;
+
+					auto old = v.Value.Date;
+					double days = 0.0;
+					double minutes = 0.0;
+
 					if (First)
 					{
 						LTimeStamp s, e;
 						min.Value.Date->Get(s);
 						max.Value.Date->Get(e);
-						int64 period = e - s;
-						double days = (double)period / LDateTime::DayLength;
+						auto period = e.Unix() - s.Unix(); // seconds
+						days = (double)period / LDateTime::DayLength;
 						if (days > 7)
-							date_inc = (int) (days / 5);
+						{
+							dateIncSeconds = (int) (days / 5) * LDateTime::DayLength;
+							truc = TrunHrMinSec;
+							dateFmt = TFmtDate;
+						}
+						else if (days > 1)
+						{
+							dateIncSeconds = LDateTime::DayLength;
+							truc = TrunHrMinSec;
+							dateFmt = TFmtDate;
+						}
 						else
-							date_inc = 1;
-						v.Value.Date->SetTime("0:0:0");
+						{
+							minutes = (double)period / LDateTime::MinuteLength;
+							if (minutes > 60)
+							{
+								dateIncSeconds = LDateTime::HourLength;
+								truc = TrunMinSec;
+							}
+							else
+							{
+								dateIncSeconds = LDateTime::MinuteLength;
+								truc = TrunSec;
+							}
+							dateFmt = TFmtTime;
+						}
 					}
-					v.Value.Date->AddDays(date_inc);
+					v.Value.Date->AddSeconds(dateIncSeconds);
+					switch (truc)
+					{
+						case TrunHrMinSec:
+							v.Value.Date->SetTime("0:0:0");
+							break;
+						case TrunMinSec:
+							v.Value.Date->Minutes(0);
+							v.Value.Date->Seconds(0);
+							break;
+						case TrunSec:
+							v.Value.Date->Seconds(0);
+							break;
+						default:
+							break;
+					}
 					Loop = *v.Value.Date < *max.Value.Date;
 					break;
 				}
@@ -465,7 +527,7 @@ struct LGraphPriv
 			int dx = (int)(x + (xaxis ? Offset : 0));
 			int dy = (int)(y - (xaxis ? 0 : Offset));
 
-			LString s = DataToString(v);
+			auto s = DataToString(v, dateFmt);
 
 			LDisplayString ds(LSysFont, s);
 			if (xaxis)
@@ -482,7 +544,10 @@ struct LGraphPriv
 		if (label)
 		{
 			LDisplayString ds(Fnt, label);
-			ds.Draw(pDC, r.Center().x, r.y2-ds.Y());
+			if (xaxis)
+				ds.Draw(pDC, r.Center().x, r.y2-ds.Y());
+			else
+				ds.Draw(pDC, r.x1, r.Center().y - (ds.Y()/2));
 		}
 	}
 
@@ -909,13 +974,13 @@ void LGraph::OnPaint(LSurface *pDC)
 	LColour cBorder(222, 222, 222);
 	LRect c = GetClient();
 	LRect data = c;
-	data.Inset(20, 20);
+	data.Inset(10, 10);
 	data.x2 -= 40;
 	data.SetSize((int)(d->Zoom * data.X()), (int)(d->Zoom * data.Y()));
 	data.Offset((int)(d->Px * data.X()), (int)(d->Py * data.Y()));
 	
 	LRect y = data;
-	y.x2 = y.x1 + 60;
+	y.x2 = y.x1 + 80;
 	data.x1 = y.x2 + 1;
 	LRect x = data;
 	x.y1 = x.y2 - 60;
