@@ -33,26 +33,42 @@ if (NOT TARGET ssh_shared)
             INTERFACE_LINK_LIBRARIES "ssh")
 endif()
 
-add_executable(Lvc ${APP_TYPE}
-    ../src/common/Lgi/LgiMain.cpp
-    ../src/common/Text/DeEscape.cpp
-    ../src/common/Text/XmlTreeUi.cpp
-    ../src/common/Widgets/ControlTree.cpp
-    src/BrowseUi.cpp
-    src/DropDownBtn.cpp
-    src/Main.cpp
-    src/SshConnection.cpp
-    src/VcCommit.cpp
-    src/VcFile.cpp
-    src/VcFolder.cpp
-    src/PatchViewer.cpp
-	${APP_ICON}
-    ${APP_RESOURCES}
-	${APP_MANIFEST}
-	)
+add_executable(Lvc
+    ${APP_TYPE}
+        src/BrowseUi.cpp
+        src/DropDownBtn.cpp
+        src/Main.cpp
+        src/SshConnection.cpp
+        src/VcCommit.cpp
+        src/VcFile.cpp
+        src/VcFolder.cpp
+        src/PatchViewer.cpp
+        
+        ${LGI_DIR}/src/common/Net/Ssh.cpp
+        ${LGI_DIR}/src/common/Text/RemoveAnsi.cpp
+        ${LGI_DIR}/src/common/Net/Http.cpp
+        ${LGI_DIR}/src/common/Lgi/LgiMain.cpp
+        ${LGI_DIR}/src/common/Text/DeEscape.cpp
+        ${LGI_DIR}/src/common/Text/XmlTreeUi.cpp
+        ${LGI_DIR}/src/common/Widgets/ControlTree.cpp
+        ${LGI_DIR}/src/common/Net/OpenSSLSocket.cpp
+        
+        ${APP_ICON}
+        ${APP_RESOURCES}
+        ${APP_MANIFEST})
 
-target_link_libraries(Lvc lgi libpng16 ssh_shared)
-target_include_directories(Lvc PUBLIC resources)
+target_link_libraries(Lvc
+    PRIVATE
+        lgi
+        ssh_shared)
+
+target_include_directories(Lvc
+    PUBLIC
+        resources)
+        
+target_compile_definitions(Lvc
+    PRIVATE
+        HAS_LIBSSH=1)
 
 if (APPLE)
     macBundlePostBuild(Lvc)
