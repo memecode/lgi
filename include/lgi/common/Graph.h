@@ -26,6 +26,13 @@ public:
 	{
 		LVariant Min, Max;
 	};
+	
+	struct Guide
+	{
+		bool horizontal = true;
+		LVariant value;
+		LColour before, after;
+	};
 
 	class DataSeries : public LBase
 	{
@@ -46,7 +53,7 @@ public:
 							int XAxis = AUTO_AXIS,
 							/// Index into the data source of the Y axis value
 							int YAxis = AUTO_AXIS);
-		bool AddPair(const char *x, const char *y, void *UserData = NULL);
+		bool AddPair(const char *x, const char *y, void *UserData = nullptr);
 	};
     
 	LGraph(	/// Control identifier
@@ -71,6 +78,7 @@ public:
 	void SetLabel(bool XAxis, const char *Label);
 	Range GetRange(bool XAxis);
 	void SetRange(bool XAxis, Range r);
+	void AddGuide(Guide g);
 
 	void Empty();
 

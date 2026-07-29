@@ -37,6 +37,8 @@ struct LGraphPriv
 	bool ShowCursor = false;
 	LString LabelX, LabelY;
 	double Zoom = 1.0, Px = 0.0, Py = 0.0;
+
+	LArray<LGraph::Guide> guides;
 	
 	// Averages
 	bool Average;
@@ -852,6 +854,11 @@ void LGraph::SetRange(bool XAxis, Range r)
 	Invalidate();
 }
 
+void LGraph::AddGuide(Guide g)
+{
+	d->guides.Add(g);
+}
+
 void LGraph::OnMouseMove(LMouse &m)
 {
 	d->MouseLoc = m;
@@ -937,6 +944,34 @@ void LGraph::OnPaint(LSurface *pDC)
 			pDC->HLine(data.x1 - d->AxisMarkPx, data.x2, d->MouseLoc.y);
 			LDisplayString dsY(GetFont(), d->DataToString(yCur));
 			dsY.Draw(pDC, data.x1 - d->AxisMarkPx - dsY.X(), d->MouseLoc.y - (dsY.Y() >> 1));
+		}
+	}
+	
+	// Draw guides
+	pDC->Colour(cBorder);
+	for (auto &g: d->guides)
+	{
+		if (g.horizontal)
+		{
+			if (g.value.Type != d->MinY.Type)
+			{
+				if (!d->MinY.Type)
+					continue; // wait for the type to be set...
+			
+				// Are they compatible at least?
+				if (g.value.Type == GV_INT32 &&
+					d->MinY.Type == GV_INT64)
+				{
+					// Convert...
+					g.value = g.value.CastInt64();
+				}
+			}
+			
+			int yy = (int)d->DataToView(g.value, y.Y(), d->MinY, d->MaxY);
+			if (yy >= data.y1 && yy <= data.y2)
+			{
+				pDC->HLine(data.x1, data.x2, data.y2 - yy);
+			}
 		}
 	}
 
