@@ -426,18 +426,23 @@ LDisplayString *LListItem::GetDs(int Col, int FitTo)
 {
 	if (!d->Display[Col])
 	{
-		LFont *f = GetFont();
-		if (!f && Parent) f = Parent->GetFont();
-		if (!f) f = LSysFont;
+		auto f = GetFont();
+		if (!f && Parent)
+			f = Parent->GetFont();
+		if (!f)
+			f = LSysFont;
 
-		const char *Text = d->Str[Col] ? d->Str[Col] : GetText(Col);
+		auto Text = d->Str[Col] ? d->Str[Col] : GetText(Col);
 		LAssert((NativeInt)Text != 0xcdcdcdcd &&
-				  (NativeInt)Text != 0xfdfdfdfd);
+		        (NativeInt)Text != 0xfdfdfdfd);
+
+		if (!LIsUtf8(Text))
+			Text = "#errInvalidUtf8";
+
 		d->Display[Col] = new LDisplayString(f, Text?Text:(char*)"");
+
 		if (d->Display[Col] && FitTo > 0)
-		{
 			d->Display[Col]->TruncateWithDots(FitTo);
-		}
 	}
 	return d->Display[Col];
 }
