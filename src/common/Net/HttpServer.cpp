@@ -399,7 +399,7 @@ int LHttpThread::Main()
 			LgiTrace("%s:%i - uri='%s'\n", _FL, Uri);
 			#endif
 
-			char *Protocol = strrchr(Uri, ' ');
+			auto Protocol = strrchr(Uri, ' ');
 			if (Protocol)
 			{
 				*Protocol++ = 0;
@@ -425,36 +425,43 @@ int LHttpThread::Main()
 					{
 						LOG_HTTP("%s:%i - Code=%i\n", _FL, Code);
 
-						auto stream = dynamic_cast<LSocket*>(req.sock.Get());
-						stream->Print("HTTP/1.0 %i Ok\r\n", Code);
-
-						if (resp.body)
+						auto stream = dynamic_cast<LSocketI*>(req.sock.Get());
+						if (!stream)
 						{
-							auto len = resp.body->GetSize();
-							if (len >= 0)
+							LOG_HTTP("%s:%i - error: req.sock is not a stream.\n", _FL);
+						}
+						else
+						{							 
+							LStreamPrint(stream, "HTTP/1.0 %i Ok\r\n", Code);
+
+							if (resp.body)
 							{
-								// Make sure we have a Content-Length
-								auto contentLen = resp.GetHeader(LHttpServerPriv::sContentLength);
-								if (!contentLen)
-									resp.SetHeader(LHttpServerPriv::sContentLength, LString::Fmt(LPrintfInt64, len));
+								auto len = resp.body->GetSize();
+								if (len >= 0)
+								{
+									// Make sure we have a Content-Length
+									auto contentLen = resp.GetHeader(LHttpServerPriv::sContentLength);
+									if (!contentLen)
+										resp.SetHeader(LHttpServerPriv::sContentLength, LString::Fmt(LPrintfInt64, len));
+								}
 							}
-						}
 
-						if (auto hdrs = resp.headers.Strip())
-						{
-							stream->Print("%s\r\n", hdrs.Get());
-						}
-						stream->Print("\r\n");
-						
-						if (resp.body)
-						{
-							auto bytes = resp.body->GetSize();
-							LOG_HTTP("%s:%i - Response len=%i\n", _FL, (int)bytes);
+							if (auto hdrs = resp.headers.Strip())
+							{
+								LStreamPrint(stream, "%s\r\n", hdrs.Get());
+							}
+							LStreamPrint(stream, "\r\n");
 							
-							LCopyStreamer cp(256 << 10);
-							auto copied = cp.Copy(resp.body, stream);
-							if (copied != bytes)
-								LOG_HTTP("%s:%i - body copy failed! " LPrintfSizeT " -> " LPrintfSSizeT "\n", _FL, bytes, copied);
+							if (resp.body)
+							{
+								auto bytes = resp.body->GetSize();
+								LOG_HTTP("%s:%i - Response len=%i\n", _FL, (int)bytes);
+								
+								LCopyStreamer cp(256 << 10);
+								auto copied = cp.Copy(resp.body, stream);
+								if (copied != bytes)
+									LOG_HTTP("%s:%i - body copy failed! " LPrintfSizeT " -> " LPrintfSSizeT "\n", _FL, bytes, copied);
+							}
 						}
 					}
 				}
