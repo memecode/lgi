@@ -572,6 +572,14 @@ void VcCommit::OnMouseClick(LMouse &m)
 			}
 			case ID_REVERT_COMMIT:
 			{
+				auto f = GetFolder();
+				if (!f)
+				{
+					LAssert(!"No folder?");
+					break;
+				}
+
+				f->RevertCommit(Rev);
 				break;
 			}
 		}

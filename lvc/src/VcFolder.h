@@ -419,6 +419,7 @@ public:
 	void Diff(VcFile *file);
 	void DiffRange(const char *FromRev, const char *ToRev);
 	void MergeToLocal(LString Rev);
+	void RevertCommit(const char *Rev);
 	void Refresh();
 	void GetCurrentRevision(ParseParams *Params = NULL);
 	void CountToTip();

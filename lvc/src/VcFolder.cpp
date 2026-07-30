@@ -5299,6 +5299,122 @@ void VcFolder::MergeToLocal(LString Rev)
 	}
 }
 
+void VcFolder::RevertCommit(const char *Rev)
+{
+	if (!Rev || !*Rev)
+		return;
+
+	switch (GetType())
+	{
+		case VcGit:
+		{
+			int parentCount = 0;
+			for (auto c : Log)
+			{
+				if (c && c->IsRev(Rev))
+				{
+					parentCount = c->GetParents()->Length();
+					break;
+				}
+			}
+
+			LString args;
+			if (parentCount > 1)
+			{
+				auto q = LString::Fmt(
+					"Commit %s is a merge commit.\nRevert using first parent (-m 1)?",
+					Rev);
+				if (LgiMsg(GetTree(), q, AppName, MB_YESNO) != IDYES)
+					return;
+
+				args.Printf("revert --no-edit -m 1 %s", Rev);
+			}
+			else
+			{
+				args.Printf("revert --no-edit %s", Rev);
+			}
+
+			auto p = new ParseParams;
+			if (p)
+			{
+				p->Callback = [this](auto code, auto out)
+					{
+						d->Log->Print("%s:%i - revert handler: %i, %s\n", _FL, code, out.Get());
+						if (code == 0)
+						{
+							CommitListDirty = true;
+							ListWorkingFolder();
+							SetColourType(TColNone);
+						}
+						else
+						{
+							OnCmdError(out, "Failed to revert commit.");
+						}
+					};
+			}
+
+			StartCmd(args, NULL, p, LogNormal);
+			break;
+		}
+		case VcHg:
+		{
+			LString args;
+			args.Printf("backout -r %s -m \"Backout %s\"", Rev, Rev);
+
+			auto p = new ParseParams;
+			if (p)
+			{
+				p->Callback = [this](auto code, auto out)
+					{
+						if (code == 0)
+						{
+							CommitListDirty = true;
+							ListWorkingFolder();
+							SetColourType(TColNone);
+						}
+						else
+						{
+							OnCmdError(out, "Failed to revert commit.");
+						}
+					};
+			}
+
+			StartCmd(args, NULL, p, LogNormal);
+			break;
+		}
+		case VcSvn:
+		{
+			LString args;
+			args.Printf("merge -c -%s .", Rev);
+
+			auto p = new ParseParams;
+			if (p)
+			{
+				p->Callback = [this](auto code, auto out)
+					{
+						if (code == 0)
+						{
+							ListWorkingFolder();
+							SetColourType(TColNone);
+						}
+						else
+						{
+							OnCmdError(out, "Failed to revert commit.");
+						}
+					};
+			}
+
+			StartCmd(args, NULL, p, LogNormal);
+			break;
+		}
+		default:
+		{
+			NoImplementation(_FL);
+			break;
+		}
+	}
+}
+
 bool VcFolder::ParseMerge(int Result, LString s, ParseParams *Params)
 {
 	switch (GetType())
