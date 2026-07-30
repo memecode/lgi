@@ -143,6 +143,7 @@ struct AnsiParser
 						*s == cBELL)
 					{
 						emitAnsi();
+						echoChars = true;
 						state = TNon;
 					}
 					break;

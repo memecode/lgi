@@ -1161,7 +1161,7 @@ public:
 		return LPrintf(*this, Fmt, Arg);
 	}
 	
-	static LString Escape(const char *In, ssize_t Len = -1, const char *Chars = "\r\n\b\\\'\"", char hexMode = 'x')
+	static LString Escape(const char *In, ssize_t Len = -1, const char *Chars = "\r\n\b\a\\\'\"\x1b", char hexMode = 'x')
 	{
 		LString s;
 	
@@ -1196,6 +1196,7 @@ public:
 						EscChar('\a', 'a');
 						EscChar('\t', 't');
 						EscChar('\v', 'v');
+						EscChar('\x1b', 'e');
 						EscChar('\'', '\'');
 						EscChar('\"', '\"');
 						EscChar('&', '&');
@@ -1286,9 +1287,17 @@ public:
 					case 'B':
 						*Out++ = '\b';
 						break;
+					case 'a':
+					case 'A':
+						*Out++ = '\a';
+						break;
 					case 't':
 					case 'T':
 						*Out++ = '\t';
+						break;
+					case 'e':
+					case 'E':
+						*Out++ = '\x1b';
 						break;
 					default:
 						*Out++ = *In;
