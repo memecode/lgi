@@ -20,17 +20,21 @@ elseif (LINUX)
 endif()
 
 if (NOT TARGET ssh_shared)
-    find_path(LIBSSH_INCLUDE_DIR libssh.h
-        PATH /usr/include/libssh
-        PATH /system/develop/headers/libssh) # this is the HAIKU location
-    if (NOT LIBSSH_INCLUDE_DIR)
+    find_path(LIBSSH_HEADER libssh.h
+        PATH /usr/include/libssh                # this is the Linux location
+        PATH /system/develop/headers/libssh     # this is the Haiku location
+        PATH ${LGI_DEPS_BUILD}/include/libssh)  # this is the Windows location
+    if (NOT LIBSSH_HEADER)
         message(FATAL_ERROR "libssh not found.")
     endif()
     add_library(ssh_shared INTERFACE)
+    cmake_path( GET LIBSSH_HEADER
+                PARENT_PATH LIBSSH_INCLUDE_DIR)
     set_target_properties(ssh_shared
         PROPERTIES
             INTERFACE_INCLUDE_DIRECTORIES ${LIBSSH_INCLUDE_DIR}
             INTERFACE_LINK_LIBRARIES "ssh")
+    # message("LIBSSH_INCLUDE_DIR: ${LIBSSH_INCLUDE_DIR}")
 endif()
 
 add_executable(Lvc
@@ -69,6 +73,13 @@ target_include_directories(Lvc
 target_compile_definitions(Lvc
     PRIVATE
         HAS_LIBSSH=1)
+
+if(WIN32)
+    target_link_directories(Lvc
+		PRIVATE
+			${LGI_DEPS_BUILD}/lib
+			"C:\\Program Files\\OpenSSL-Win64\\lib")
+endif()
 
 if (APPLE)
     macBundlePostBuild(Lvc)

@@ -108,10 +108,16 @@ add_executable(LgiIde
 		${CommonSource}
 		${ResourceFiles})
 
+if(WIN32)
+	set(LLDB_LIB "liblldb.lib")
+else()
+	set(LLDB_LIB "lldb")
+endif()
+
 target_link_libraries(LgiIde
 	PRIVATE
 		lgi
-		lldb
+		${LLDB_LIB}
 		ssh_shared)
 
 target_include_directories(LgiIde
@@ -136,12 +142,25 @@ if (APPLE)
 
 elseif (MSVC)
 
-	target_link_libraries(LgiIde ComCtl32.lib Ws2_32.lib UxTheme.lib imm32.lib)
+	target_link_libraries(LgiIde
+		PRIVATE
+			ComCtl32.lib
+			Ws2_32.lib
+			UxTheme.lib
+			imm32.lib
+			)
+
+	target_link_directories(LgiIde
+		PRIVATE
+			${LGI_DEPS_BUILD}/lib
+			"C:\\Program Files\\LLVM\\lib")
+
 	add_custom_command(TARGET LgiIde POST_BUILD 
 					COMMAND "${CMAKE_COMMAND}" -E copy 
 						"$<TARGET_FILE:lgi>"
 						"$<TARGET_FILE_DIR:LgiIde>/$<TARGET_FILE_NAME:lgi>" 
 					COMMENT "Copying Lgi to output directory")
+					
 	if (EXISTS ${PNG_DLL})
 		add_custom_command(TARGET LgiIde POST_BUILD 
 					COMMAND "${CMAKE_COMMAND}" -E copy 
