@@ -184,8 +184,10 @@ public:
 
 	LDisplayString *GetDs()
 	{
-		auto Text = Tab->Name();
-		if (Text && !Ds)
+		if (Ds)
+			return Ds;
+
+		if (auto Text = Tab->Name())
 		{
 			LFont *f = nullptr;
 			auto s = Tab->GetCss();
@@ -213,7 +215,10 @@ public:
 			else
 				LAssert(!"no font.");
 		}
-		else LAssert(!"no text.");
+		else
+		{
+			LAssert(!"no text.");
+		}
 
 		return Ds;
 	}

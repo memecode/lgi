@@ -23,7 +23,7 @@ SshConnection::SshConnection(LTextLog *log, const char *uri, const char *prompt)
 	LAssert(prompt);
 	Prompt = prompt;
 	Host.Set(Uri = uri);
-	d = NULL;
+	d = nullptr;
 
 	LScriptArguments Args(NULL);
 	if (Wnd->CallMethod(METHOD_GetContext, Args))
