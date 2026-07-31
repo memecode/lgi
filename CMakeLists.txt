@@ -546,6 +546,8 @@ elseif (LINUX)
 			${GTK3_INCLUDE_DIRS}
 			${GST_INCLUDE_DIRS}
 		PRIVATE
+			$<$<CONFIG:Debug>:${LGI_DEPS_DEBUG}/include>
+			$<$<CONFIG:Release>:${LGI_DEPS_RELEASE}/include>			
 			private/linux
 			/usr/include/libayatana-appindicator3-0.1
 		)
