@@ -23,7 +23,9 @@ SshConnection::SshConnection(LTextLog *log, const char *uri, const char *prompt)
 	LAssert(prompt);
 	Prompt = prompt;
 	Host.Set(Uri = uri);
-	d = NULL;
+	d = nullptr;
+
+	log->Print("%s:%i - conn with prompt = '%s'\n", _FL, prompt);
 
 	LScriptArguments Args(NULL);
 	if (Wnd->CallMethod(METHOD_GetContext, Args))
@@ -176,8 +178,6 @@ LString LastLine(LStringPipe &input)
 		},
 		true);
 
-	// if (!ln.Get())
-	// 	ln = s;
 	LAssert(ln.Find("\n") < 0);
 	RemoveAnsi(ln);
 	return ln;
@@ -222,6 +222,7 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data, const char *Debug, i
 			// Got some data... keep asking for more:
 			LString tmp((char*)buf.ptr, rd);
 SSH_SLOG("waitPrompt data:", rd, tmp);
+// SSH_LOG("waitPrompt data: %i, '%s'\n", (int)rd, tmp.Get());
 
 			BytesRead += rd;
 			buf.Commit(rd);
@@ -237,6 +238,7 @@ SSH_SLOG("waitPrompt data:", rd, tmp);
 			auto sz = out.GetSize();
 SSH_SLOG("waitPrompt out:", sz, &out);
 			auto last = LastLine(out);
+// SSH_LOG("waitPrompt out: %i, last='%s'\n", (int)sz, last.Get());
 
 			// Does the buffer end with a ':' on a line by itself?
 			// Various version control CLI's do that to paginate data.
@@ -268,6 +270,7 @@ SSH_SLOG("waitPrompt out:", sz, &out);
 		PROFILE("matchstr");
 		auto result = MatchStr(Prompt, last);
 SSH_SLOG("waitPrompt result:", result, Prompt, last);
+// SSH_LOG("waitPrompt result: %i, prompt='%s', last='%s'\n", result, Prompt.Get(), LString::Escape(last).Get());
 		if (Debug)
 		{
 			LgiTrace("WaitPrompt.%s match='%s' with '%s' = %i\n", Debug, Prompt.Get(), last.Get(), result);

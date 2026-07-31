@@ -129,6 +129,7 @@ enum AppIds
 	ID_LIST_AUTHORS,
 	ID_PATH,
 	ID_AUTHORS,
+	ID_REVERT_COMMIT
 };
 
 enum AppMessages
@@ -189,14 +190,14 @@ typedef bool (VcFolder::*ParseFn)(int, LString, ParseParams*);
 
 struct AppPriv
 {
-	VcFolder		*CurFolder	= NULL;
-	LTree			*Tree		= NULL;
-	LList			*Commits	= NULL;
-	LList			*Files		= NULL;
-	LEdit			*Msg		= NULL;
-	LTextLog		*Diff		= NULL;
-	LTextLog		*Log		= NULL;
-	LTabView		*Tabs		= NULL;
+	VcFolder		*CurFolder	= nullptr;
+	LTree			*Tree		= nullptr;
+	LList			*Commits	= nullptr;
+	LList			*Files		= nullptr;
+	LEdit			*Msg		= nullptr;
+	LTextLog		*Diff		= nullptr;
+	LTextLog		*Log		= nullptr;
+	LTabView		*Tabs		= nullptr;
 	VersionCtrl		PrevType	= VcNone;
 	LOptionsFile	Opts;
 	LStructuredLog	sLog;

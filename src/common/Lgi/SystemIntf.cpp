@@ -2022,10 +2022,10 @@ public:
 	// Reading and writing:
 	LString ConvertPath(LString s)
 	{
-		LString unix = s.Replace("\\", "/");
-		if (unix(0) == '.' && unix.Length() > 1)
-			return unix(1, -1);
-		return unix;
+		LString unixPath = s.Replace("\\", "/");
+		if (unixPath(0) == '.' && unixPath.Length() > 1)
+			return unixPath(1, -1);
+		return unixPath;
 	}
 
 	bool SetRemote(LString s, LError *err)

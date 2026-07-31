@@ -507,13 +507,14 @@ void VcCommit::OnMouseClick(LMouse &m)
 		if (Index >= 0)
 			s.AppendItem("Copy Index", IDM_COPY_INDEX);
 		s.AppendItem("Rename Branch", IDM_RENAME_BRANCH);
+		s.AppendItem("Revert Commit", ID_REVERT_COMMIT);
 		
 		int Cmd = s.Float(GetList(), m);
 		switch (Cmd)
 		{
 			case IDM_MERGE:
 			{
-				VcFolder *f = GetFolder();
+				auto f = GetFolder();
 				if (!f)
 				{
 					LAssert(!"No folder?");
@@ -567,6 +568,18 @@ void VcCommit::OnMouseClick(LMouse &m)
 						}
 					});
 				}
+				break;
+			}
+			case ID_REVERT_COMMIT:
+			{
+				auto f = GetFolder();
+				if (!f)
+				{
+					LAssert(!"No folder?");
+					break;
+				}
+
+				f->RevertCommit(Rev);
 				break;
 			}
 		}

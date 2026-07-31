@@ -1,4 +1,4 @@
-#if defined(WIN32)
+#if defined(WINDOWS)
 #include <direct.h>
 #else
 #include <unistd.h>

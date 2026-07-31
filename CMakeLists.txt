@@ -1,6 +1,7 @@
 cmake_minimum_required (VERSION 3.18)
 
 project(Lgi)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if (WIN32)
 	set(CMAKE_SYSTEM_VERSION 10.0.19041.0)
@@ -56,12 +57,12 @@ get_filename_component(CODE ../.. ABSOLUTE)
 get_filename_component(DEPS ${CMAKE_CURRENT_LIST_DIR}/../deps ABSOLUTE)
 
 if(WIN32)
-	set(DEPS_BUILD "${DEPS}/build-x64")
-	if (NOT EXISTS "${DEPS_BUILD}")
-		message(FATAL_ERROR "Expecting external libraries in: ${DEPS_BUILD}")
+	set(LGI_DEPS_BUILD "${DEPS}/build-x64")
+	if (NOT EXISTS "${LGI_DEPS_BUILD}")
+		message(FATAL_ERROR "Expecting external libraries in: ${LGI_DEPS_BUILD}")
 	endif()
 	if (hasParent)
-		set(LGI_DEPS_BUILD "${DEPS_BUILD}" PARENT_SCOPE)
+		set(LGI_DEPS_BUILD "${LGI_DEPS_BUILD}" PARENT_SCOPE)
 	endif()
 else()
 	if(LINUX OR HAIKU)
@@ -69,17 +70,17 @@ else()
 	else()
 		set(DEPS_ARCH "")
 	endif()
-	set(DEPS_DEBUG "${DEPS}/build${DEPS_ARCH}-debug")
-	if (NOT EXISTS "${DEPS_DEBUG}")
-		message(FATAL_ERROR "Expecting debug external libraries in: ${DEPS_DEBUG}")
+	set(LGI_DEPS_DEBUG "${DEPS}/build${DEPS_ARCH}-debug")
+	if (NOT EXISTS "${LGI_DEPS_DEBUG}")
+		message(FATAL_ERROR "Expecting debug external libraries in: ${LGI_DEPS_DEBUG}")
 	endif()
-	set(DEPS_RELEASE "${DEPS}/build${DEPS_ARCH}-release")
-	if (NOT EXISTS "${DEPS_RELEASE}")
-		message(FATAL_ERROR "Expecting release external libraries in: ${DEPS_RELEASE}")
+	set(LGI_DEPS_RELEASE "${DEPS}/build${DEPS_ARCH}-release")
+	if (NOT EXISTS "${LGI_DEPS_RELEASE}")
+		message(FATAL_ERROR "Expecting release external libraries in: ${LGI_DEPS_RELEASE}")
 	endif()
 	if (hasParent)
-		set(LGI_DEPS_DEBUG "${DEPS_DEBUG}" PARENT_SCOPE)
-		set(LGI_DEPS_RELEASE "${DEPS_RELEASE}" PARENT_SCOPE)
+		set(LGI_DEPS_DEBUG "${LGI_DEPS_DEBUG}" PARENT_SCOPE)
+		set(LGI_DEPS_RELEASE "${LGI_DEPS_RELEASE}" PARENT_SCOPE)
 	endif()
 endif()
 
@@ -609,6 +610,7 @@ elseif (MSVC)
 			include/lgi/win
 		PRIVATE
 			private/win
+			${LGI_DEPS_BUILD}/include
             "C:\\Program Files\\OpenSSL-Win64\\include")
 	
 	target_link_libraries(lgi
@@ -618,12 +620,18 @@ elseif (MSVC)
 			UxTheme.lib
 			imm32.lib)
 
+	target_link_directories(lgi
+		PRIVATE
+			${LGI_DEPS_BUILD}/lib
+			"C:\\Program Files\\OpenSSL-Win64\\lib")
+
 	target_sources(lgi-stub
 		PRIVATE
 		    src/win/General/File.cpp
 			src/win/General/Mem.cpp
 			src/win/Lgi/General.cpp
 			src/win/Lgi/Thread.cpp)
+
 	target_include_directories(lgi-stub
 		PUBLIC
 			include/lgi/win)

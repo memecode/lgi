@@ -264,7 +264,7 @@ bool LUri::Set(const char *uri)
 
 	if (hasPath)
 	{
-		sPath = LString(hasPath).Replace("\\", "/");
+		sPath = LUri::DecodeStr(hasPath).Replace("\\", "/");
 		if (IsFile() &&
 			LDirExists(LocalPath()))
 		{

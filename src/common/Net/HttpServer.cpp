@@ -37,7 +37,7 @@ class LHttpServer_TraceSocket : public Base
 public:
 	void OnInformation(const char *Str) override
 	{
-		LgiTrace("%s:%i - info: %s", _FL, Str);
+		// LgiTrace("%s:%i - info: %s", _FL, Str);
 	}
 
 	void OnError(int ErrorCode, const char *ErrorDescription) override

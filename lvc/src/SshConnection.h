@@ -54,7 +54,8 @@
 			console.Write(cmd + "\n");
 			LStringPipe out;
 			char buf[512];
-			while (!console.s->AtPrompt(out))
+			while (	!console.s->AtPrompt(out) &&
+					!GetCancel()->IsCancelled())
 			{
 				auto rd = console.Read(buf, sizeof(buf));
 				if (rd > 0) out.Write(buf, rd);
@@ -70,7 +71,8 @@
 				p.out = p.out(first + 1, last);
 
 			console.Write("echo $?\n");
-			while (!console.s->AtPrompt(out))
+			while (	!console.s->AtPrompt(out) &&
+					!GetCancel()->IsCancelled())
 			{
 				auto rd = console.Read(buf, sizeof(buf));
 				if (rd > 0) out.Write(buf, rd);
