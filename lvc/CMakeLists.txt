@@ -33,7 +33,8 @@ if (NOT TARGET ssh_shared)
             INTERFACE_LINK_LIBRARIES "ssh")
 endif()
 
-add_executable(Lvc ${APP_TYPE}
+add_executable(Lvc
+    ${APP_TYPE}
     ../src/common/Lgi/LgiMain.cpp
     ../src/common/Text/DeEscape.cpp
     ../src/common/Text/XmlTreeUi.cpp
@@ -53,6 +54,7 @@ add_executable(Lvc ${APP_TYPE}
 
 target_link_libraries(Lvc lgi libpng16 ssh_shared)
 target_include_directories(Lvc PUBLIC resources)
+target_compile_definitions(Lvc PRIVATE "HAS_LIBSSH=1")
 
 if (APPLE)
     macBundlePostBuild(Lvc)

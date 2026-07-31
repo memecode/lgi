@@ -1,5 +1,7 @@
 #pragma once
 
+#include "lgi/common/Ssh.h"
+
 class LIniFile
 {
 	LSsh *ssh = nullptr;

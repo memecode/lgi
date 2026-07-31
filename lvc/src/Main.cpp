@@ -1949,7 +1949,7 @@ public:
 			{
 				if (n.Type == LNotifyValueChanged)
 				{
-					VcFolder *f = dynamic_cast<VcFolder*>(Tree->Selection());
+					auto f = dynamic_cast<VcFolder*>(Tree->Selection());
 					auto branch = c->Name();
 					if (!f || !branch)
 					{

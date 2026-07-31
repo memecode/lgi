@@ -627,6 +627,9 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 	#endif
 
 	GtkIdle *i = (GtkIdle*) data;
+	if (!i)
+		return false;
+
 	if (i->cb)
 		i->cb(i->param);
 	
@@ -658,14 +661,21 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 		}
 	}
 	
-	if (auto callbacks = i->d->callbacks.Lock(_FL))
+	LAppPrivate::TCallbackArr pending;
+	if (i->d)
 	{
-		for (auto &cb: *callbacks.Get())
+		if (auto callbacks = i->d->callbacks.Lock(_FL))
 		{
-			if (cb->cb)
-				cb->cb();
+			pending = *callbacks.Get();
+			callbacks->Empty();
 		}
-		callbacks->DeleteObjects();
+	}
+
+	for (auto cb : pending)
+	{
+		if (cb && cb->cb)
+			cb->cb();
+		DeleteObj(cb);
 	}
 	
 	return i->cb != NULL;
@@ -675,8 +685,14 @@ static GtkIdle idle = {0};
 
 bool LApp::RunCallback(std::function<void()> Callback, const char *file, int line)
 {
-	auto cb = d->callbacks.Lock(file, line);
-	if (!cb)
+	if (!d)
+		return false;
+
+	if (!idle.d)
+		idle.d = d;
+
+	auto callbacks = d->callbacks.Lock(file, line);
+	if (!callbacks)
 		return false;
 		
 	if (auto cb = new LAppPrivate::TCallback)
@@ -684,6 +700,7 @@ bool LApp::RunCallback(std::function<void()> Callback, const char *file, int lin
 		cb->file = file;
 		cb->line = line;
 		cb->cb = std::move(Callback);
+		callbacks->Add(cb);
 	}
 	else return false;
 	return true;
@@ -772,6 +789,9 @@ bool LApp::PostEvent(LViewI *View, int Msg, LMessage::Param a, LMessage::Param b
 	#endif
 
 	MsgQue.Unlock();
+
+	if (!idle.d)
+		idle.d = d;
 	
 	// g_idle_add((GSourceFunc)IdleWrapper, &idle);
 	g_idle_add_full(G_PRIORITY_HIGH_IDLE, (GSourceFunc)IdleWrapper, &idle, NULL);

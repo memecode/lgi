@@ -1319,6 +1319,7 @@ bool VcFolder::SetAuthor(bool local, TAuthor author)
 
 					data.Write();
 				});
+			break;
 		}
 		default:
 		{

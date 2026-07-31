@@ -213,7 +213,6 @@ public:
 			else
 				LAssert(!"no font.");
 		}
-		else LAssert(!"no text.");
 
 		return Ds;
 	}
@@ -736,8 +735,7 @@ LRect &LTabView::CalcInset()
 	TabIterator Tabs(Children);
 	for (auto t : Tabs)
 	{
-		auto Ds = t->d->GetDs();
-		if (Ds)
+		if (auto Ds = t->d->GetDs())
 		{
 			TabTextY = MAX(TabTextY, Ds->Y());
 			auto Fnt = Ds->GetFont();

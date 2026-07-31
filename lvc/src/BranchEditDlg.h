@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lgi/common/ClipBoard.h"
+#include "lgi/common/List.h"
 
 class BranchEditDlg : public LDialog
 {
@@ -36,11 +37,7 @@ public:
 				{
 					item->SetText(p.key);
 					lst->Insert(item);
-					
-					bool eq = curBranch.Equals(p.key);
-					printf("cmp '%s' '%s' = %i", curBranch.Get(), p.key, eq);
-					if (eq)
-						item->Select(true);
+					item->Select(curBranch.Equals(p.key));
 				}
 			}
 			
