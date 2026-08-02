@@ -12,21 +12,24 @@
 class LgiClass LEventSinkMap : public LMutex
 {
 protected:
-	LHashTbl<IntKey<int>,LEventSinkI*> ToPtr;
-	LHashTbl<PtrKey<void*>,int> ToHnd;
+	LHashTbl<IntKey<int>,LEventSinkI*,true> ToPtr;
+	LHashTbl<PtrKey<void*>,int,true> ToHnd;
 
 public:
 	static LEventSinkMap Dispatch;
+	constexpr static int InvalidHandle = 0;
 
 	LEventSinkMap(int SizeHint = 0) :
         LMutex("LEventSinkMap"),
-		ToPtr(SizeHint),
-		ToHnd(SizeHint)
+		ToPtr(SizeHint, nullptr),
+		ToHnd(SizeHint, InvalidHandle)
 	{
+		printf("%s:%i - LEventSinkMap() Thread=%i\n", _FL, LCurrentThreadId());
 	}
 
 	virtual ~LEventSinkMap()
 	{
+		printf("%s:%i - ~LEventSinkMap() Thread=%i\n", _FL, LCurrentThreadId());
 	}
 
 	int AddSink(LEventSinkI *s)
@@ -34,10 +37,47 @@ public:
 		if (!s || !Lock(_FL))
 			return ToPtr.GetNullKey();
 
+		// If this trips, the table object is likely corrupted or compiled with
+		// a mismatched layout in the calling TU.
+		if (ToPtr.Length() == 0)
+		{
+			auto probe = ToPtr.Find(1);
+			if (probe != nullptr)
+			{
+				LgiTrace("%s:%i - LEventSinkMap corruption suspected: empty table but Find(1)=%p (this=%p, ToPtr=%p, ToHnd=%p, sizeof(ToPtr)=%zu, sizeof(*this)=%zu).\n",
+					_FL,
+					probe,
+					this,
+					&ToPtr,
+					&ToHnd,
+					sizeof(ToPtr),
+					sizeof(*this));
+				Unlock();
+				LAssert(!"LEventSinkMap::ToPtr returned non-null from an empty table.");
+				return ToPtr.GetNullKey();
+			}
+		}
+
 		// Find free handle...
 		int Hnd;
-		while (ToPtr.Find(Hnd = LRand(10000) + 1))
-			;
+		printf("%s:%i - AddSink() s=%p\n", _FL, s);
+		LEventSinkI *existing;
+		int found = 0;
+		while (existing = ToPtr.Find(Hnd = LRand(10000) + 1, true))
+		{
+			printf("ToPtr=%i Hnd=%i existing=%p\n", ToPtr.Length(), Hnd, existing);
+			LSleep(5);
+			if (found++ > 500)
+			{
+				LgiTrace("%s:%i - AddSink() couldn't find free random handle after %i attempts (len=%i).\n",
+					_FL,
+					found,
+					(int)ToPtr.Length());
+				Unlock();
+				return ToPtr.GetNullKey();
+			}
+		}
+		printf("%s:%i - AddSink() Hnd=%i\n", _FL, Hnd);
 
 		// Add the new sink
 		ToPtr.Add(Hnd, s);
@@ -146,11 +186,11 @@ public:
 		if (!Lock(_FL))
 			return false;
 		
-		LEventSinkI *s = (LEventSinkI*)ToPtr.Find(Hnd);
+		auto s = (LEventSinkI*)ToPtr.Find(Hnd);
 		bool Status = false;
 		if (s)
 		{
-			LCancel *c = dynamic_cast<LCancel*>(s);
+			auto c = dynamic_cast<LCancel*>(s);
 			if (c)
 			{
 				Status = c->Cancel(true);

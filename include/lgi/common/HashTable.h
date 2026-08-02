@@ -227,7 +227,7 @@ public:
 };
 
 /// General hash table container for O(1) access to table data.
-template<typename KeyTrait, typename Value>
+template<typename KeyTrait, typename Value, bool ExternalLocking = false>
 class LHashTbl : public KeyTrait
 {
 public:
@@ -294,7 +294,8 @@ protected:
 
 	void InitializeTable(Pair *e, ssize_t len)
 	{
-		if (!e || len < 1) return;
+		if (!e || len < 1)
+			return;
 		while (len--)
 		{
 			e->key = this->NullKey;
@@ -303,13 +304,19 @@ protected:
 		}
 	}
 	
-	void THREAD_UNSAFE() const
+	void THREAD_UNSAFE()
 	{
-		if (!ownThread)
+		if (ExternalLocking)
 			return;
-		
+
 		auto curThread = LCurrentThreadId();
-		LAssert(ownThread != curThread);
+		if (!ownThread)
+			ownThread = curThread;
+		else if (ownThread != curThread)
+		{
+			printf("%s:%i - Thread safety violation. ownThread=%i, curThread=%i\n", _FL, ownThread, curThread);
+			LAssert(!"invalid thread access.");
+		}
 	}
 
 public:
@@ -330,9 +337,10 @@ public:
 		Used = 0;
 		Version = 0;
 		MaxSize = LHASHTBL_MAX_SIZE;
+		Table = NULL;
 		// LAssert(Size <= MaxSize);
-		
-		if ((Table = new Pair[Size]))
+
+		if (Size > 0 && (Table = new Pair[Size]))
 		{
 			InitializeTable(Table, Size);
 		}
@@ -345,7 +353,8 @@ public:
 		Used = 0;
 		Version = 0;
 		MaxSize = LHASHTBL_MAX_SIZE;
-		if ((Table = new Pair[Size]))
+		Table = NULL;
+		if (Size > 0 && (Table = new Pair[Size]))
 		{
 			for (size_t i=0; i<Size; i++)
 			{
@@ -474,7 +483,11 @@ public:
 						#ifndef __llvm__
 						this != 0 &&
 						#endif
-						Table != 0;
+						(
+							(Size == 0 && Used == 0 && Table == 0)
+							||
+							(Size > 0 && Table != 0 && Used <= Size)
+						);
 		if (!Status)
 		{
 			#ifndef LGI_STATIC
@@ -619,14 +632,26 @@ public:
 	}
 
 	/// Returns the value at 'key'
-	Value Find(const Key k) const
+	Value Find(const Key k, bool debug = false) const
 	{
 		THREAD_UNSAFE();
 
 		ssize_t Index = -1;
-		if (IsOk() && GetEntry(k, Index))
+		if (!IsOk())
 		{
+			if (debug)
+				printf("%s:%i - IsOk() failed.\n", _FL);
+		}
+		else if (GetEntry(k, Index))
+		{
+			if (debug)
+				printf("%s:%i - Found entry for key: %i.\n", _FL, (int)Index);
 			return Table[Index].value;
+		}
+		else
+		{
+			if (debug)
+				printf("%s:%i - No entry: null=%p &=%p sizeof=%zu\n", _FL, (int)Index, NullValue, &NullValue, sizeof(*this));
 		}
 
 		return NullValue;

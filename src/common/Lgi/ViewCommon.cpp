@@ -1381,6 +1381,11 @@ bool LView::Enabled()
 
 void LView::Enabled(bool i)
 {
+	if (!InThread())
+	{
+		LgiTrace("%s:%i - Enabled(%i) called from wrong thread.\n", _FL, i);
+		return;
+	}
 	ThreadCheck();
 
 	if (!i) SetFlag(LViewFlags, GWF_DISABLED);
@@ -2208,7 +2213,7 @@ bool LView::InThread()
 		OsThreadId Me = LCurrentThreadId();
 		OsThreadId Gui = LAppInst ? LAppInst->GetGuiThreadId() : 0;
 		
-		#if 0
+		#if 1
 		if (Gui != Me)
 		    LgiTrace("%s:%i - %s Out of thread:"
 				    #ifdef LGI_COCOA

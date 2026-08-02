@@ -24,9 +24,16 @@ void *ThreadEntryPoint(void *i)
 		Thread->ThreadId = LCurrentThreadId();
 		LThread::RegisterThread(Thread->ThreadId, Thread->Name);
 
-		// Make sure we have finished executing the setup
-		while (Thread->State == LThread::THREAD_INIT)
+		// Wait briefly for creator thread to publish RUNNING; avoid an infinite spin.
+		int waits = 0;
+		while (__atomic_load_n((int*)&Thread->State, __ATOMIC_ACQUIRE) == LThread::THREAD_INIT)
 		{
+			if (++waits >= 500)
+			{
+				LgiTrace("%s:%i - warning: thread '%s' still in INIT after %i ms, continuing\n",
+					_FL, Thread->Name.Get(), waits);
+				break;
+			}
 			LSleep(1);
 		}
 		
@@ -49,7 +56,7 @@ void *ThreadEntryPoint(void *i)
 		Thread->OnAfterMain();
 
 		// Shutdown...
-		Thread->State = LThread::THREAD_EXITED;
+		__atomic_store_n((int*)&Thread->State, LThread::THREAD_EXITED, __ATOMIC_RELEASE);
 		if (Thread->DeleteOnExit)
 		{
 			DeleteObj(Thread);
@@ -81,7 +88,7 @@ int LThread::ExitCode()
 
 bool LThread::IsExited()
 {
-	return State == LThread::THREAD_EXITED;
+	return __atomic_load_n((int*)&State, __ATOMIC_ACQUIRE) == THREAD_EXITED;
 }
 
 void LThread::Run()
@@ -90,14 +97,14 @@ void LThread::Run()
 	
 	if (!hThread)
 	{
-		State = LThread::THREAD_INIT;
+		__atomic_store_n((int*)&State, THREAD_INIT, __ATOMIC_RELEASE);
 
 		static int Creates = 0;
 		int e;
 		if (!(e = pthread_create(&hThread, NULL, ThreadEntryPoint, (void*)this)))
 		{
 			Creates++;
-			State = LThread::THREAD_RUNNING;
+			__atomic_store_n((int*)&State, THREAD_RUNNING, __ATOMIC_RELEASE);
 		}
 		else
 		{
@@ -111,7 +118,7 @@ void LThread::Run()
 			}
 			printf("%s,%i - pthread_create failed with the error %i (%s) (After %i creates)\n", __FILE__, __LINE__, e, Err, Creates);
 			
-			State = LThread::THREAD_EXITED;
+			__atomic_store_n((int*)&State, THREAD_EXITED, __ATOMIC_RELEASE);
 		}
 	}
 }
@@ -121,7 +128,7 @@ void LThread::Terminate()
 	if (hThread &&
 		pthread_cancel(hThread) == 0)
 	{
-		State = LThread::THREAD_EXITED;
+		__atomic_store_n((int*)&State, THREAD_EXITED, __ATOMIC_RELEASE);
 		hThread = 0;
 	}
 }

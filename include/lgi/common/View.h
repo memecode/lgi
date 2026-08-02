@@ -459,17 +459,23 @@ protected:
 			}			
 
 			bool status = false;
-			if (CallbackInfo *info = map.Find(id))
+			if (auto info = map.Find(id))
 			{
+				Unlock();	// don't hold the lock while calling the callback,
+							// it may call back into this class.
 				info->cb();
-				if (map.Delete(id))
+				if (Lock(_FL))
 				{
-					delete info;
-					status = true;
-					// printf("%i: CbStore.Call %i\n", LCurrentThreadId(), id);
+					if (map.Delete(id))
+					{
+						delete info;
+						status = true;
+						// printf("%i: CbStore.Call %i\n", LCurrentThreadId(), id);
+					}
 				}
+				else return false;
 			}
-
+			
 			Unlock();
 			return status;
 		}

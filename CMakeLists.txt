@@ -416,6 +416,16 @@ endif()
 
 add_library(lgi SHARED ${Source})
 
+set_target_properties(lgi PROPERTIES
+	CXX_VISIBILITY_PRESET default
+	VISIBILITY_INLINES_HIDDEN NO)
+
+target_compile_definitions(lgi
+	PUBLIC
+		LGI_LIBRARY
+    PRIVATE
+        $<$<CONFIG:Debug>:_DEBUG>)
+
 add_library(lgi-stub STATIC
     src/common/Gdc2/Font/Charset.cpp
     src/common/General/Containers.cpp
@@ -437,6 +447,7 @@ add_library(lgi-stub STATIC
 target_compile_definitions(lgi-stub
 	PRIVATE
 		LGI_LIBRARY
+		$<$<CONFIG:Debug>:_DEBUG>
 	PUBLIC
 		LGI_STATIC)
 

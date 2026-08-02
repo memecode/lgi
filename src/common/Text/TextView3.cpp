@@ -18,6 +18,7 @@
 #include "lgi/common/FileSelect.h"
 #include "lgi/common/Menu.h"
 #include "lgi/common/DropFiles.h"
+#include "lgi/common/TextLog.h"
 #include "ViewPriv.h"
 
 #undef max
@@ -38,6 +39,8 @@
 #define WRAP_POUR_TIMEOUT			90 // ms
 #define PULSE_TIMEOUT				500 // ms
 #define CURSOR_BLINK				1000 // ms
+
+template class LTsTextView<LTextView3>;
 
 #define ALLOC_BLOCK					64
 #define IDC_VS						1000

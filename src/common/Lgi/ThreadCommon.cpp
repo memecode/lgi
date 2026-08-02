@@ -25,7 +25,7 @@ void LThread::WaitForExit(int WarnAfterMs)
 
 struct LThreadNames : public LMutex
 {
-	LHashTbl<IntKey<OsThreadId>,LString> map;
+	LHashTbl<IntKey<OsThreadId>,LString,true> map;
 	LThreadNames() : LMutex("LThreadNames") {}
 };
 static LThreadNames ThreadNames;
