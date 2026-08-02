@@ -2,6 +2,7 @@ cmake_minimum_required (VERSION 3.18)
 
 project(Lgi)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_STANDARD 17)
 
 if (WIN32)
 	set(CMAKE_SYSTEM_VERSION 10.0.19041.0)
@@ -19,7 +20,6 @@ endif()
 include(build.cmake)
 
 # set(CMAKE_OSX_ARCHITECTURES "x86_64")
-set(CMAKE_CXX_STANDARD 14)
 set(LGI_VERSION_MAJOR 1)
 set(LGI_VERSION_MINOR 0)
 
@@ -423,8 +423,7 @@ set_target_properties(lgi PROPERTIES
 target_compile_definitions(lgi
 	PUBLIC
 		LGI_LIBRARY
-    PRIVATE
-        $<$<CONFIG:Debug>:_DEBUG>)
+		$<$<CONFIG:Debug>:_DEBUG>)
 
 add_library(lgi-stub STATIC
     src/common/Gdc2/Font/Charset.cpp
@@ -445,11 +444,10 @@ add_library(lgi-stub STATIC
     src/common/Text/Unicode.cpp)
 
 target_compile_definitions(lgi-stub
-	PRIVATE
-		LGI_LIBRARY
-		$<$<CONFIG:Debug>:_DEBUG>
 	PUBLIC
-		LGI_STATIC)
+		LGI_LIBRARY		
+		LGI_STATIC
+		$<$<CONFIG:Debug>:_DEBUG>)
 
 target_include_directories(lgi-stub
 	PUBLIC
