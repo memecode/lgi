@@ -41,6 +41,7 @@ public:
 		return a == b;
 	}
 	size_t TotalSize() { return 0; }
+	void Swap(IntKey<T,DefaultNull> &other) {}
 };
 
 template<typename T, T DefaultNull = (T)nullptr>

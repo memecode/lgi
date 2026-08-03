@@ -1436,7 +1436,7 @@ LString LToNativeCp(const char *In, ssize_t InLen)
 	LString s;
 
 	#ifdef WIN32
-	LCharset *CpInfo = LGetCharsetInfo(Cp);
+	auto CpInfo = LGetCharsetInfo(Cp);
 	if (!CpInfo || CpInfo->Type == CpWindowsDb)
 	{
 		if (In)
@@ -1475,7 +1475,7 @@ LString LFromNativeCp(const char *In, ssize_t InLen)
 	LString s;
 
 	#ifdef WIN32
-	LCharset *CpInfo = LGetCharsetInfo(Cp);
+	auto CpInfo = LGetCharsetInfo(Cp);
 	if (!CpInfo || CpInfo->Type == CpWindowsDb)
 	{
 		if (In)
