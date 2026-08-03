@@ -238,17 +238,18 @@
 				<Node File="./include/lgi/common/PixelRops.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Font" Type="1" Platforms="15" Open="0" Id="49">
+				<Node File="./src/common/Gdc2/Font/Charset.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/Charset.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Gdc2/Font/DisplayString.cpp" Type="2" Platforms="15" />
 				<Node File="./include/lgi/common/DisplayString.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Gdc2/Font/Font.cpp" Type="2" Platforms="15" />
 				<Node File="./include/lgi/common/Font.h" Type="3" Platforms="15" />
-				<Node File="./include/lgi/common/StringLayout.h" Type="3" Platforms="15" />
 				<Node File="./include/lgi/common/FontCache.h" Type="3" Platforms="15" />
-				<Node File="./src/common/Gdc2/Font/Charset.cpp" Type="2" Platforms="15" />
 				<Node File="./src/common/Gdc2/Font/FontSystem.cpp" Type="2" Platforms="15" />
-				<Node File="./src/common/Gdc2/Font/StringLayout.cpp" Type="2" Platforms="15" />
-				<Node File="./src/common/Gdc2/Font/TypeFace.cpp" Type="2" Platforms="15" />
 				<Node File="./src/common/Gdc2/Font/FontType.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/Font/StringLayout.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/StringLayout.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Gdc2/Font/TypeFace.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Applicators" Type="1" Platforms="15" Open="0" Id="50">
 				<Node File="./src/common/Gdc2/15Bit.cpp" Type="2" Platforms="15" />
@@ -646,6 +647,7 @@ _GNU_SOURCE</Release>
 			</Arguments>
 			<DebugAdmin />
 			<InitialDir />
+			<Debugger />
 		</Debug>
 		<Editor>
 			<TabSize />

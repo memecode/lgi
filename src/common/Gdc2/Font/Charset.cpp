@@ -579,12 +579,12 @@ bool LCharset::IsUnicode()
 			(Type == CpUtf32);
 }
 
-const char *LCharset::GetIconvName()
+const char *LCharset::GetIconvName() const
 {
 	return IconvName ? IconvName : Charset;
 }
 
-bool LCharset::IsAvailable()
+bool LCharset::IsAvailable() const
 {
 	if (Type != CpIconv)
 		return true;
@@ -703,7 +703,7 @@ LCharsetSystem *LCharsetSystem::Inst()
 	return &CharsetSystem;
 }
 
-LCharset *LGetCharsetInfo(const char *Cs)
+const LCharset *LGetCharsetInfo(const char *Cs)
 {
 	return CharsetSystem.GetCsInfo(Cs);
 }
@@ -729,8 +729,8 @@ ssize_t LBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, const void *
 
 	if (Out && OutCp && In && InCp)
 	{
-		LCharset *InInfo = LGetCharsetInfo(InCp);
-		LCharset *OutInfo = LGetCharsetInfo(OutCp);
+		auto InInfo = LGetCharsetInfo(InCp);
+		auto OutInfo = LGetCharsetInfo(OutCp);
 
 		if (InInfo && OutInfo)
 		{
@@ -997,8 +997,8 @@ LString LStrConvertCp(const char *OutCp, const void *In, const char *InCp, ssize
 	if (!OutCp || !In || !InCp)
 		return LString();
 
-	LCharset *InInfo = LGetCharsetInfo(InCp);
-	LCharset *OutInfo = LGetCharsetInfo(OutCp);
+	auto InInfo = LGetCharsetInfo(InCp);
+	auto OutInfo = LGetCharsetInfo(OutCp);
 	if (!InInfo || !OutInfo)
 		return LString();
 
@@ -1182,7 +1182,7 @@ int LCharLen(const void *Str, const char *Cp, int Bytes)
 {
 	if (Str && Cp)
 	{
-		LCharset *InInfo = LGetCharsetInfo(Cp);
+		auto InInfo = LGetCharsetInfo(Cp);
 		if (InInfo)
 		{
 			switch (InInfo->Type)
@@ -1385,7 +1385,7 @@ const char *LUnicodeToCharset(const char *Utf8, ssize_t Len, LString::Array *Pre
 		{
 			for (auto p: *Prefs)
 			{
-				LCharset *Cp = CharsetSystem.GetCsInfo(p);
+				auto Cp = CharsetSystem.GetCsInfo(p);
 				if (Cp &&
 					stricmp(Cp->Charset, "us-ascii") != 0 &&
 					Cp->UnicodeMap)

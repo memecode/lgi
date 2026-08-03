@@ -8426,7 +8426,7 @@ void LHtml::OnMouseClick(LMouse &m)
 			if (Cs)
 			{
 				int n=0;
-				for (LCharset *c = LGetCsList(); c->Charset; c++, n++)
+				for (auto c = LGetCsList(); c->Charset; c++, n++)
 				{
 					Cs->AppendItem(c->Charset, IDM_CHARSET_BASE + n, c->IsAvailable());
 				}
@@ -8644,7 +8644,7 @@ void LHtml::OnMouseClick(LMouse &m)
 					{
 						if (Id >= IDM_CHARSET_BASE)
 						{
-							LCharset *c = LGetCsList() + (Id - IDM_CHARSET_BASE);
+							auto c = LGetCsList() + (Id - IDM_CHARSET_BASE);
 							if (c->Charset)
 							{
 								Charset = c->Charset;

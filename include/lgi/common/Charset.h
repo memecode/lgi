@@ -37,9 +37,9 @@ public:
 	/// Returns true if the charset is a unicode variant
 	bool IsUnicode();
 	/// Gets the iconv name
-	const char *GetIconvName();
+	const char *GetIconvName() const;
 	/// Returns whether Lgi can convert to/from this charset at the moment.
-	bool IsAvailable();
+	bool IsAvailable() const;
 };
 
 /// Charset table manager class

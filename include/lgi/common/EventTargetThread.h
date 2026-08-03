@@ -60,24 +60,9 @@ public:
 
 		// Find free handle...
 		int Hnd;
-		printf("%s:%i - AddSink() s=%p\n", _FL, s);
 		LEventSinkI *existing;
-		int found = 0;
-		while (existing = ToPtr.Find(Hnd = LRand(10000) + 1, true))
-		{
-			printf("ToPtr=%i Hnd=%i existing=%p\n", ToPtr.Length(), Hnd, existing);
-			LSleep(5);
-			if (found++ > 500)
-			{
-				LgiTrace("%s:%i - AddSink() couldn't find free random handle after %i attempts (len=%i).\n",
-					_FL,
-					found,
-					(int)ToPtr.Length());
-				Unlock();
-				return ToPtr.GetNullKey();
-			}
-		}
-		printf("%s:%i - AddSink() Hnd=%i\n", _FL, Hnd);
+		while (existing = ToPtr.Find(Hnd = LRand(10000) + 1))
+			;
 
 		// Add the new sink
 		ToPtr.Add(Hnd, s);

@@ -319,6 +319,19 @@ protected:
 		}
 	}
 
+	void THREAD_UNSAFE() const
+	{
+		if (ExternalLocking)
+			return;
+
+		auto curThread = LCurrentThreadId();
+		if (ownThread != curThread)
+		{
+			printf("%s:%i - Thread safety violation. ownThread=%i, curThread=%i\n", _FL, ownThread, curThread);
+			LAssert(!"invalid thread access.");
+		}
+	}
+
 public:
 	constexpr static size_t Unlimited = 0;
 	OsThreadId ownThread = 0; // set check for thread safety
@@ -636,26 +649,17 @@ public:
 	}
 
 	/// Returns the value at 'key'
-	Value Find(const Key k, bool debug = false) const
+	Value Find(const Key k) const
 	{
 		THREAD_UNSAFE();
 
 		ssize_t Index = -1;
 		if (!IsOk())
 		{
-			if (debug)
-				printf("%s:%i - IsOk() failed.\n", _FL);
 		}
 		else if (GetEntry(k, Index))
 		{
-			if (debug)
-				printf("%s:%i - Found entry for key: %i.\n", _FL, (int)Index);
 			return Table[Index].value;
-		}
-		else
-		{
-			if (debug)
-				printf("%s:%i - No entry: null=%p &=%p sizeof=%zu\n", _FL, (int)Index, NullValue, &NullValue, sizeof(*this));
 		}
 
 		return NullValue;
