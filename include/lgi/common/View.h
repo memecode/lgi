@@ -418,7 +418,7 @@ protected:
 
 	class CallbackStore : public LMutex
 	{
-		LHashTbl<IntKey<int>, CallbackInfo*> map;
+		LHashTbl<IntKey<int>, CallbackInfo*,true> map;
 
 	public:
 		CallbackStore() : LMutex("CallbackStore")

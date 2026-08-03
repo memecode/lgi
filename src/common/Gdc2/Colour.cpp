@@ -731,7 +731,7 @@ void LColour::OnChange()
 		Gtk::g_free(Value);
 		g_object_unref(set);
 
-		LHashTbl<ConstStrKey<char,false>, int> Colours(0, -1);
+		LHashTbl<ConstStrKey<char,false>, int, true> Colours(0, -1);
 		auto ScreenBits = GdcD->GetBits();
 		for (int i=0; i<Lines.Length(); i++)
 		{

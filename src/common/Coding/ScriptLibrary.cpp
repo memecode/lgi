@@ -135,12 +135,10 @@ int LScriptUtils::htoi(char16 *s)
 //////////////////////////////////////////////////////////////////////////////////////
 SystemFunctions::SystemFunctions()
 {
-	int asd=0;
 }
 
 SystemFunctions::~SystemFunctions()
 {
-	LgiTrace("%p::~SystemFunctions\n", this);
 }
 
 LStream *SystemFunctions::GetLog()
@@ -150,7 +148,6 @@ LStream *SystemFunctions::GetLog()
 
 bool SystemFunctions::SetLog(LStream *log)
 {
-	LAssert(Log == NULL);
 	Log = log;
 	return true;
 }

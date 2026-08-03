@@ -153,6 +153,7 @@ public:
 			TView::PostEvent(M_LOG_TEXT);
 		}
 
+		printf("%s:%i - LTextLog::Write(%i)\n", _FL, (int)Size);
 		return Size;
 	}
 
@@ -162,6 +163,7 @@ public:
 		{
 			case M_LOG_TEXT:
 			{
+				printf("%s:%i - LTextLog::OnEvent(M_LOG_TEXT)\n", _FL);
 				ProcessTxt();
 				break;
 			}

@@ -705,7 +705,13 @@ LCharsetSystem *LCharsetSystem::Inst()
 
 const LCharset *LGetCharsetInfo(const char *Cs)
 {
-	return CharsetSystem.GetCsInfo(Cs);
+	auto cs = CharsetSystem.GetCsInfo(Cs);
+	if (!cs)
+	{
+		printf("Charset not found: %s\n", Cs);
+		exit(-1);
+	}
+	return cs;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1576,15 +1582,19 @@ LCharsetSystem::LCharsetSystem()
 		{
 			strcpy_s(l, sizeof(l), a[n]);
 			#ifdef _MSC_VER
-			_strlwr_s(l, sizeof(l));
+				_strlwr_s(l, sizeof(l));
 			#else
-			strlwr(l);
+				strlwr(l);
 			#endif
 
 			tmp.Add(l, Cs);
 		}
 	}
+
 	d->Charsets.Swap(tmp);
+
+	if (!d->Charsets.Find("utf-32"))
+		LAssert(!"CharsetSystem failed find utf-32.");
 }
 
 LCharsetSystem::~LCharsetSystem()
@@ -1595,7 +1605,10 @@ LCharsetSystem::~LCharsetSystem()
 const LCharset *LCharsetSystem::GetCsInfo(const char *Cp)
 {
 	if (!Cp || !d)
+	{
+		printf("%s:%i - LCharsetSystem::GetCsInfo err: %p,%p.\n", _FL, Cp, d);
 		return nullptr;
+	}
 
 	// Lookup the charset in the hash table
 	char l[256];
@@ -1611,7 +1624,16 @@ const LCharset *LCharsetSystem::GetCsInfo(const char *Cp)
 	else if (!stricmp(l, "utf-16"))
 		return d->Utf16;
 	
-	return d->Charsets.Find(l);
+	auto cs = d->Charsets.Find(l);
+	if (!cs)
+	{
+		printf("%s:%i - GetCsInfo failed to find charset: %s in %i\n", _FL, Cp, (int)d->Charsets.Length());
+		for (auto p: d->Charsets)
+		{
+			printf("  %s\n", p.key);
+		}
+	}
+	return cs;
 }
 
 const LCharset *LGetCsInfo(const char *Cs)

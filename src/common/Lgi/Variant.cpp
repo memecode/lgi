@@ -1900,10 +1900,12 @@ struct LDomPropMap
 			return;
 
 		#if defined(_DEBUG) // Check for duplicates.
-		auto existing_prop = ToProp.Find(s);
-		LAssert(existing_prop == ObjNone);
-		auto existing_str = ToString.Find(p);
-		LAssert(existing_str == NULL);
+			ToProp.Sizeof(); // this sets the 'owner' thread...
+			ToString.Sizeof();
+			auto existing_prop = ToProp.Find(s);
+			LAssert(existing_prop == ObjNone);
+			auto existing_str = ToString.Find(p);
+			LAssert(existing_str == NULL);
 		#endif
 
 		ToProp.Add(s, p);

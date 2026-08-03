@@ -125,7 +125,7 @@ LViewI *LView::_Over = nullptr;
 
 struct ViewTbl : public LMutex
 {
-	typedef LHashTbl<PtrKey<LViewI*>, bool> T;
+	typedef LHashTbl<PtrKey<LViewI*>, bool, true> T;
 	
 private:
 	T Map;

@@ -24,12 +24,10 @@ public:
 		ToPtr(SizeHint, nullptr),
 		ToHnd(SizeHint, InvalidHandle)
 	{
-		printf("%s:%i - LEventSinkMap() Thread=%i\n", _FL, LCurrentThreadId());
 	}
 
 	virtual ~LEventSinkMap()
 	{
-		printf("%s:%i - ~LEventSinkMap() Thread=%i\n", _FL, LCurrentThreadId());
 	}
 
 	int AddSink(LEventSinkI *s)

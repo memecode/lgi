@@ -43,7 +43,7 @@ public:
 	size_t TotalSize() { return 0; }
 };
 
-template<typename T, T DefaultNull = (T)NULL>
+template<typename T, T DefaultNull = (T)nullptr>
 class PtrKey
 {
 public:
@@ -68,7 +68,7 @@ public:
 	size_t TotalSize() { return 0; }
 };
 
-template<typename T, bool CaseSen = true, T *DefaultNull = (T*)NULL>
+template<typename T, bool CaseSen = true, T *DefaultNull = (T*)nullptr>
 class StrKey
 {
 public:
@@ -107,6 +107,11 @@ protected:
 		if (!Mem.Length() || Mem.Last().Free() < Sz)
 			Mem.New().Length(PoolSize);
 		return Mem.Last().Free() >= Sz ? &Mem.Last() : NULL;
+	}
+
+	void Swap(KeyPool<T,BlockSize> &h)
+	{
+		Mem.Swap(h.Mem);
 	}
 
 public:
@@ -322,6 +327,8 @@ protected:
 	void THREAD_UNSAFE() const
 	{
 		if (ExternalLocking)
+			return;
+		if (!ownThread) // This is a const method, so we can't set ownThread here. Just return.
 			return;
 
 		auto curThread = LCurrentThreadId();
@@ -787,12 +794,14 @@ public:
 		THREAD_UNSAFE();
 
 		LSwap(this->NullKey, h.NullKey);
-		LSwap(NullValue, h.NullValue);
-		LSwap(Used, h.Used);
-		LSwap(Size, h.Size);
-		LSwap(MaxSize, h.MaxSize);
-		LSwap(Version, h.Version);
-		LSwap(Table, h.Table);
+		KeyTrait::Swap(h);
+
+		LSwap(this->NullValue, h.NullValue);
+		LSwap(this->Used, h.Used);
+		LSwap(this->Size, h.Size);
+		LSwap(this->MaxSize, h.MaxSize);
+		LSwap(this->Version, h.Version);
+		LSwap(this->Table, h.Table);
 	}
 
 	struct PairIterator
