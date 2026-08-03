@@ -232,7 +232,7 @@ class LHashTbl : public KeyTrait
 {
 public:
 	typedef typename KeyTrait::Type Key;
-	typedef LHashTbl<KeyTrait,Value> HashTable;
+	typedef LHashTbl<KeyTrait,Value,ExternalLocking> HashTable;
 	const int DefaultSize = 256;
 
 	struct Pair
@@ -367,7 +367,11 @@ public:
 	/// Deletes the hash table removing all contents from memory
 	virtual ~LHashTbl()
 	{
-		THREAD_UNSAFE();
+		// One could argue that this is not thread safe, but most
+		// of this code is pretty good at shutting down threads before
+		// destroying all the member variables.
+		ownThread = LCurrentThreadId();
+		
 		if (Table)
 		{
 			Empty();
@@ -774,7 +778,7 @@ public:
 	}
 
 	/// Swaps the objects
-	void Swap(LHashTbl<KeyTrait,Value> &h)
+	void Swap(LHashTbl<KeyTrait,Value,ExternalLocking> &h)
 	{
 		THREAD_UNSAFE();
 
@@ -789,12 +793,12 @@ public:
 
 	struct PairIterator
 	{
-		LHashTbl<KeyTrait,Value> *t;
+		LHashTbl<KeyTrait,Value,ExternalLocking> *t;
 		ssize_t Idx;
 		int Version;
 
 	public:
-		PairIterator(LHashTbl<KeyTrait,Value> *tbl, ssize_t i)
+		PairIterator(LHashTbl<KeyTrait,Value,ExternalLocking> *tbl, ssize_t i)
 		{
 			t = tbl;
 			Version = t->Version;

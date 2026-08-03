@@ -57,16 +57,16 @@ public:
 	std::function<LString(LString)> DetectCharset;
 
 	// Get the charset info
-	LCharset *GetCsInfo(const char *Cp);
-	LCharset *GetCsList();
+	const LCharset *GetCsInfo(const char *Cp);
+	const LCharset *GetCsList();
 };
 
 /// Returns information about a charset.
-LgiFunc LCharset *LGetCsInfo(const char *Cs);
+LgiFunc const LCharset *LGetCsInfo(const char *Cs);
 
 /// Returns the start of an array of supported charsets, terminated by
 /// one with a NULL 'Charset' member. 
-LgiFunc LCharset *LGetCsList();
+LgiFunc const LCharset *LGetCsList();
 
 /// Returns the charset that best fits the input data
 LgiFunc const char *LUnicodeToCharset

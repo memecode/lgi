@@ -421,8 +421,9 @@ set_target_properties(lgi PROPERTIES
 	VISIBILITY_INLINES_HIDDEN NO)
 
 target_compile_definitions(lgi
-	PUBLIC
+	PRIVATE
 		LGI_LIBRARY
+	PUBLIC
 		$<$<CONFIG:Debug>:_DEBUG>)
 
 add_library(lgi-stub STATIC
@@ -444,8 +445,9 @@ add_library(lgi-stub STATIC
     src/common/Text/Unicode.cpp)
 
 target_compile_definitions(lgi-stub
-	PUBLIC
+	PRIVATE
 		LGI_LIBRARY		
+	PUBLIC
 		LGI_STATIC
 		$<$<CONFIG:Debug>:_DEBUG>)
 

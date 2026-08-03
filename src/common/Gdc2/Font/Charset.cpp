@@ -1531,16 +1531,17 @@ LString LFromNativeCp(const char *In, ssize_t InLen)
 }
 
 ///////////////////////////////////////////////////////////////////////////
+// Technically this is not externally locked, but once constructed... it's
+// read only and thus thread safe.
+using CsHash = LHashTbl<ConstStrKeyPool<char,false>, LCharset*, true>;
 struct LCharsetSystemPriv
 {
-	LCharset *Utf8;
-	LCharset *Utf16; 
-	LHashTbl<ConstStrKeyPool<char,false>, LCharset*> Charsets;
+	LCharset *Utf8 = nullptr;
+	LCharset *Utf16 = nullptr;
+	CsHash Charsets;
 
 	LCharsetSystemPriv() : Charsets(512)
 	{
-		Utf8 = 0;
-		Utf16 = 0;
 	}
 };
 
@@ -1553,13 +1554,14 @@ LCharsetSystem::LCharsetSystem()
 	d = new LCharsetSystemPriv;
 	LAssert(LgiCharsets->Charset != NULL);
 
-	for (LCharset *Cs = LgiCharsets; Cs->Charset; Cs++)
+	CsHash tmp; // construct in a temp variable for thread safety.
+	for (auto Cs = LgiCharsets; Cs->Charset; Cs++)
 	{
 		strcpy_s(l, sizeof(l), Cs->Charset);
 		#ifdef _MSC_VER
-		_strlwr_s(l, sizeof(l));
+			_strlwr_s(l, sizeof(l));
 		#else
-		strlwr(l);
+			strlwr(l);
 		#endif
 		
 		if (!stricmp(l, "utf-8"))
@@ -1567,7 +1569,7 @@ LCharsetSystem::LCharsetSystem()
 		else if (!stricmp(l, "utf-16"))
 			d->Utf16 = Cs;
 
-		d->Charsets.Add(l, Cs);
+		tmp.Add(l, Cs);
 
 		auto a = LString(Cs->AlternateNames).SplitDelimit(",");
 		for (int n=0; n<a.Length(); n++)
@@ -1579,9 +1581,10 @@ LCharsetSystem::LCharsetSystem()
 			strlwr(l);
 			#endif
 
-			d->Charsets.Add(l, Cs);
+			tmp.Add(l, Cs);
 		}
 	}
+	d->Charsets.Swap(tmp);
 }
 
 LCharsetSystem::~LCharsetSystem()
@@ -1589,50 +1592,39 @@ LCharsetSystem::~LCharsetSystem()
 	DeleteObj(d);
 }
 
-LCharset *LCharsetSystem::GetCsInfo(const char *Cp)
+const LCharset *LCharsetSystem::GetCsInfo(const char *Cp)
 {
-	if (Cp && d)
-	{
-		// Lookup the charset in the hash table
-		char l[256];
-		strcpy_s(l, sizeof(l), Cp);
-		#ifdef _MSC_VER
+	if (!Cp || !d)
+		return nullptr;
+
+	// Lookup the charset in the hash table
+	char l[256];
+	strcpy_s(l, sizeof(l), Cp);
+	#ifdef _MSC_VER
 		_strlwr_s(l, sizeof(l));
-		#else
+	#else
 		strlwr(l);
-		#endif
+	#endif
 
-		if (!stricmp(l, "utf-8"))
-			return d->Utf8;
-		else if (!stricmp(l, "utf-16"))
-			return d->Utf16;
-		
-		LCharset *Cs = (LCharset*) d->Charsets.Find(l);
-		if (Cs)
-		{
-			return Cs;
-		}
-		else
-		{
-			// printf("%s:%i - No charset '%s' in font sub system.\n", __FILE__, __LINE__, l);
-			// printf("Charsets=%i\n", Charsets->GetUsed());
-		}
-	}
-
-	return 0;
+	if (!stricmp(l, "utf-8"))
+		return d->Utf8;
+	else if (!stricmp(l, "utf-16"))
+		return d->Utf16;
+	
+	return d->Charsets.Find(l);
 }
 
-LCharset *LGetCsInfo(const char *Cs)
+const LCharset *LGetCsInfo(const char *Cs)
 {
 	return CharsetSystem.GetCsInfo(Cs);
 }
 
-LCharset *LCharsetSystem::GetCsList()
+const LCharset *LCharsetSystem::GetCsList()
 {
 	return LgiCharsets;
 }
 
-LCharset *LGetCsList()
+const LCharset *LGetCsList()
 {
 	return LgiCharsets;
 }

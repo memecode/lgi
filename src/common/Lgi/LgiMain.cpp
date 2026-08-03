@@ -141,7 +141,12 @@ int main(int Args, const char **Arg)
 
 		#endif
 
-		Gtk::gtk_init_check(&Args, (char***)&Arg);
+		auto result = Gtk::gtk_init_check(&Args, (char***)&Arg);
+		if (!result)
+		{
+			LgiTrace("%s:%i - gtk_init_check failed\n", _FL);
+			return 1;
+		}
 
 	#endif
 
