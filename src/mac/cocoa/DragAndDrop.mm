@@ -20,75 +20,129 @@ Useful info:
 #include "ViewPriv.h"
 
 // #define DND_DEBUG_TRACE
-class LDndSourcePriv;
+#define DND_DEBUG_TRACE
+
+#ifdef DND_DEBUG_TRACE
+    #define DND_DLOG(...) LgiTrace(__VA_ARGS__)
+    static void DndLogPasteboardTypes(NSArray<NSPasteboardType> *types, const char *tag)
+    {
+        if (!types)
+        {
+            LgiTrace("%s: (null types)\n", tag ? tag : "DND");
+            return;
+        }
+
+        LgiTrace("%s: %ld type(s)\n", tag ? tag : "DND", (long)types.count);
+        for (NSPasteboardType t in types)
+        {
+            const char *s = t.UTF8String ? t.UTF8String : "<null>";
+            LgiTrace("  - %s\n", s);
+        }
+    }
+#else
+    #define DND_DLOG(...)
+    static void DndLogPasteboardTypes(NSArray<NSPasteboardType> *, const char *) {}
+#endif
 
 const char *LMimeToUti(const char *Mime)
 {
-	if (!Mime) return NULL;
-	
-	#define _(m, u) if (!Stricmp(Mime, m)) return u;
-	_("message/rfc822", "public.email-message")
-	_("text/vcard", "public.contact")
-	_("text/vcalendar", "public.calendar")
-	_("text/html", "public.html")
-	_("text/xml", "public.xml")
-	
-	LAssert(!"Impl me");
-	return "public.item";
+    if (!Mime || !*Mime)
+        return "public.data";
+
+    // Trim MIME params: "type/subtype; charset=utf-8" -> "type/subtype"
+    LString m(Mime);
+    auto semi = strchr(m.Get(), ';');
+    if (semi)
+        *semi = 0;
+    m = m.Strip();
+
+    #define _(mm, u) if (!Stricmp(m.Get(), mm)) return u;
+    _("message/rfc822", "public.email-message")
+    _("text/vcard", "public.contact")
+    _("text/vcalendar", "public.calendar")
+    _("text/html", "public.html")
+    _("text/xml", "public.xml")
+    #undef _
+
+    return "public.data";
 }
 
-@interface LDragItem : NSPasteboardItem
-@property (nonatomic, readonly) LString path;
-@property (nonatomic, weak) NSImage *icon;
-@property (nonatomic) LAutoPtr<LStreamI> src;
-- (LDragItem*) initWithItem:(LString)item source:(LStreamI*)src;
-- (void)dealloc;
-@end
-
-@implementation LDragItem
+static LString PromiseSafeName(const LString &inName, const LString &uti)
 {
+    // basename only
+    LString name = inName;
+    const char *s = name.Get();
+    const char *p1 = strrchr(s, '/');
+    const char *p2 = strrchr(s, '\\');
+    const char *base = p1 > p2 ? p1 : p2;
+    if (base && base[0])
+        name = base + 1;
+
+    // replace problematic characters
+    for (char *p = name.Get(); p && *p; ++p)
+    {
+        if (*p == '/' || *p == '\\' || *p == ':')
+            *p = '_';
+    }
+
+    // ensure non-empty
+    if (name.IsEmpty())
+        name = "Untitled";
+
+    // add extension for known UTIs if missing
+    if (!strchr(name.Get(), '.'))
+    {
+        if (!Stricmp(uti.Get(), "public.email-message")) name += ".eml";
+        else if (!Stricmp(uti.Get(), "public.contact"))  name += ".vcf";
+        else if (!Stricmp(uti.Get(), "public.calendar")) name += ".ics";
+        else if (!Stricmp(uti.Get(), "public.html"))     name += ".html";
+        else if (!Stricmp(uti.Get(), "public.xml"))      name += ".xml";
+    }
+
+    return name;
 }
 
-- (LDragItem*) initWithItem:(LString)item source:(LStreamI*)src
+static bool CopyStreamToFileSync(const LString &dst, LStreamI *src)
 {
-	if ((self = [super init]) != nil)
-	{
-		self->_path = item;
-		self->_src.Reset(src);
-		self->_icon = NULL;
-		
-		// for File URL Promise. need to check if this is necessary
-        [self setString:(NSString*)kUTTypeData
-                forType:(NSString *)kPasteboardTypeFilePromiseContent];
-	}
-	
-	return self;
+    if (!src)
+        return false;
+
+    LFile out;
+    if (!out.Open(dst, O_WRITE))
+    {
+        LgiTrace("%s:%i - can't open '%s' for writing.\n", _FL, dst.Get());
+        return false;
+    }
+
+    out.SetSize(0);
+
+    for (;;)
+    {
+        char buf[64 * 1024];
+        auto rd = src->Read(buf, sizeof(buf));
+        if (rd <= 0)
+            break;
+
+        auto wr = out.Write(buf, rd);
+        if (wr < rd)
+        {
+            LgiTrace("%s:%i - short write to '%s'.\n", _FL, dst.Get());
+            return false;
+        }
+    }
+
+    return true;
 }
 
-- (void)dealloc
+static NSString *PromiseExtForUti(const LString &uti)
 {
-	self->_src.Reset();
-	[super dealloc];
+    if (!Stricmp(uti.Get(), "public.email-message")) return @"eml";
+    if (!Stricmp(uti.Get(), "public.contact"))       return @"vcf";
+    if (!Stricmp(uti.Get(), "public.calendar"))      return @"ics";
+    if (!Stricmp(uti.Get(), "public.html"))          return @"html";
+    if (!Stricmp(uti.Get(), "public.xml"))           return @"xml";
+    return @"dat";
 }
-
-@end
-
-@interface LDragSource : NSObject<NSDraggingSource, NSPasteboardItemDataProvider>
-{
-	LArray<LDragItem*> Items;
-	LView *SourceWnd;
-}
-
-@property LDndSourcePriv *d;
-
-- (id)init:(LDndSourcePriv*)view wnd:(LView*)Wnd;
-- (void)addItem:(LDragItem*)i;
-
-- (NSDragOperation)draggingSession:(nonnull NSDraggingSession *)session sourceOperationMaskForDraggingContext:(NSDraggingContext)context;
-- (void)pasteboard:(nullable NSPasteboard *)pasteboard item:(NSPasteboardItem *)item provideDataForType:(NSPasteboardType)type;
-- (void)pasteboardFinishedWithDataProvider:(NSPasteboard *)pasteboard;
-
-@end
 
 class LDndSourcePriv
 {
@@ -109,6 +163,69 @@ public:
 		ExternSubRgn.ZOff(-1, -1);
 	}
 };
+
+
+@interface LDragItem : NSPasteboardItem
+@property (nonatomic, readonly) LString path;
+@property (nonatomic, readonly) LString uti;
+@property (nonatomic, weak) NSImage *icon;
+@property (nonatomic) LAutoPtr<LStreamI> src;
+- (LDragItem*) initWithItem:(LString)item mime:(const char*)mime source:(LStreamI*)src;
+- (void)dealloc;
+@end
+
+@implementation LDragItem
+{
+}
+
+- (LDragItem*) initWithItem:(LString)item mime:(const char*)mime source:(LStreamI*)src
+{
+    if ((self = [super init]) != nil)
+    {
+        self->_src.Reset(src);
+        self->_icon = NULL;
+
+        const char *mapped = LMimeToUti(mime);
+        if (!mapped) mapped = "public.data";
+        self->_uti = mapped;
+        self->_path = PromiseSafeName(item, self->_uti);
+
+        NSString *utiStr = [NSString stringWithUTF8String:self->_uti.Get()];
+        if (utiStr)
+            [self setString:utiStr forType:(NSString *)kPasteboardTypeFilePromiseContent];
+
+        // Legacy Finder/Desktop promise hint
+        NSString *ext = PromiseExtForUti(self->_uti);
+        if (ext)
+            [self setPropertyList:@[ext] forType:(NSString *)NSFilesPromisePboardType];
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    self->_src.Reset();
+    [super dealloc];
+}
+
+@end
+
+@interface LDragSource : NSObject<NSDraggingSource, NSPasteboardItemDataProvider>
+{
+	LArray<LDragItem*> Items;
+	LView *SourceWnd;
+}
+
+@property LDndSourcePriv *d;
+
+- (id)init:(LDndSourcePriv*)view wnd:(LView*)Wnd;
+- (void)addItem:(LDragItem*)i;
+
+- (NSDragOperation)draggingSession:(nonnull NSDraggingSession *)session sourceOperationMaskForDraggingContext:(NSDraggingContext)context;
+- (void)pasteboard:(nullable NSPasteboard *)pasteboard item:(NSPasteboardItem *)item provideDataForType:(NSPasteboardType)type;
+- (void)pasteboardFinishedWithDataProvider:(NSPasteboard *)pasteboard;
+- (NSArray<NSString*> *)namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination;
+@end
 
 static NSURL *ExtractPromiseDropLocation(NSPasteboard *_pasteboard)
 {
@@ -251,42 +368,56 @@ public:
 
 - (void)pasteboard:(nullable NSPasteboard *)sender item:(NSPasteboardItem *)item provideDataForType:(NSPasteboardType)type
 {
+    DND_DLOG("%s:%i provideDataForType requested='%s'\n", _FL, type.UTF8String ? type.UTF8String : "<null>");
+    if (sender)
+        DndLogPasteboardTypes(sender.types, "sender.types");
+
     if (![type isEqualToString:(NSString*)kPasteboardTypeFileURLPromise])
-    	return;
+        return;
 
-	if (auto drop_url = ExtractPromiseDropLocation(sender))
-	{
-		LFile::Path path(drop_url.path.fileSystemRepresentation);
-		auto di = objc_dynamic_cast(LDragItem, item);
-		if (!di)
-		{
-			LgiTrace("%s:%i - not a LDragItem object.\n", _FL);
-			return;
-		}
-		
-		path += di.path;
-		new LFileCopy(self->SourceWnd, path.GetFull(), di.src);
+    auto di = objc_dynamic_cast(LDragItem, item);
+    if (!di)
+    {
+        LgiTrace("%s:%i - not a LDragItem object.\n", _FL);
+        return;
+    }
 
-		/*
-		if (written < len)
-		{
-			LgiTrace("%s:%i - write failed.\n", _FL);
-			return;
-		}
-		else
-		*/
-		{
-			const auto url = [NSURL fileURLWithPath:[NSString stringWithUTF8String:path.GetFull()]
-										isDirectory:false
-									  	relativeToURL:nil];
-			if (url)
-			{
-				// NB! keep this in dumb form!
-				// [url writeToPasteboard:sender] doesn't work.
-				[sender writeObjects:@[url]];
-			}
-		}
-	}
+    NSURL *drop_url = ExtractPromiseDropLocation(sender);
+    DND_DLOG("%s:%i drop_url(initial)='%s'\n", _FL,
+             drop_url ? (drop_url.path.UTF8String ? drop_url.path.UTF8String : "<null>") : "<nil>");
+
+    // Fallback when Finder doesn't expose paste location.
+    if (!drop_url)
+    {
+        NSString *tmp = NSTemporaryDirectory();
+        if (tmp.length)
+            drop_url = [NSURL fileURLWithPath:tmp isDirectory:YES];
+        DND_DLOG("%s:%i drop_url(fallback tmp)='%s'\n", _FL,
+                 drop_url ? (drop_url.path.UTF8String ? drop_url.path.UTF8String : "<null>") : "<nil>");
+    }
+
+    if (!drop_url)
+        return;
+
+    LFile::Path path(drop_url.path.fileSystemRepresentation);
+    path += di.path;
+
+    DND_DLOG("%s:%i writing promised file to '%s'\n", _FL, path.GetFull().Get());
+
+    if (!CopyStreamToFileSync(path.GetFull(), di.src))
+    {
+        DND_DLOG("%s:%i CopyStreamToFileSync failed '%s'\n", _FL, path.GetFull().Get());
+        return;
+    }
+
+    const auto url = [NSURL fileURLWithPath:[NSString stringWithUTF8String:path.GetFull().Get()]
+                                 isDirectory:false
+                               relativeToURL:nil];
+    if (url)
+    {
+        DND_DLOG("%s:%i publishing promised URL '%s'\n", _FL, url.path.UTF8String ? url.path.UTF8String : "<null>");
+        [sender writeObjects:@[url]];
+    }
 }
 
 - (void)pasteboardFinishedWithDataProvider:(NSPasteboard *)pasteboard
@@ -294,7 +425,6 @@ public:
 }
 
 @end
-
 
 /////////////////////////////////////////////////////////////////////////////////////////
 LDragDropSource::LDragDropSource()
@@ -429,7 +559,7 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 	
 	auto pt = Event.p.locationInWindow;
 	pt.y -= Mem->Y();
-	
+
 	LDragFormats Formats(true);
 	if (!GetFormats(Formats))
 		return DROPEFFECT_NONE;
@@ -444,8 +574,11 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 	
 	auto drag_items = [[NSMutableArray alloc] init];
 
-	auto pasteboard_types = @[(NSString *)kPasteboardTypeFileURLPromise];
-	auto position = [h.p.contentView convertPoint:Event.p.locationInWindow fromView:nil];
+	auto pasteboard_types = @[
+        (NSString *)kPasteboardTypeFileURLPromise,
+        (NSString *)NSFilesPromisePboardType
+    ];
+    DndLogPasteboardTypes(pasteboard_types, "provider types");
 
 	for (auto &dd: Data)
 	{
@@ -460,14 +593,16 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 				
 				if (File && MimeType && Stream)
 				{
-					auto item = [[LDragItem alloc] initWithItem:File source:Stream];
+					DND_DLOG("%s:%i queue file-stream drag file='%s' mime='%s'\n",
+							 _FL, File, MimeType);
+					auto item = [[LDragItem alloc] initWithItem:File mime:MimeType source:Stream];
 					v.Value.Stream.Ptr = NULL; // So we take ownership of it.
 					[item setDataProvider:DragSrc forTypes:pasteboard_types];
 			
 					[DragSrc addItem:item];
 			
 					auto drag_item = [[NSDraggingItem alloc] initWithPasteboardWriter:item];
-					drag_item.draggingFrame = NSMakeRect(floor(position.x), floor(position.y), 32, 32);
+					drag_item.draggingFrame = NSMakeRect(floor(pt.x), floor(pt.y), 32, 32);
 
 					[drag_items addObject:drag_item];
 			
@@ -493,7 +628,7 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 					[item setString:str.NsStr() forType:dd.Format.NsStr()];
 
 					auto drag_item = [[NSDraggingItem alloc] initWithPasteboardWriter:item];
-					drag_item.draggingFrame = NSMakeRect(floor(position.x), floor(position.y), 32, 32);
+					drag_item.draggingFrame = NSMakeRect(floor(pt.x), floor(pt.y), 32, 32);
 					[drag_items addObject:drag_item];
 
 					printf("Adding string '%s' to drag...\n", dd.Format.Get());
@@ -514,7 +649,7 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 					[item setData:data forType:dd.Format.NsStr()];
 
 					auto drag_item = [[NSDraggingItem alloc] initWithPasteboardWriter:item];
-					drag_item.draggingFrame = NSMakeRect(floor(position.x), floor(position.y), 32, 32);
+					drag_item.draggingFrame = NSMakeRect(floor(pt.x), floor(pt.y), 32, 32);
 					[drag_items addObject:drag_item];
 
 					DND_LOG("Adding binary '%s' to drag...\n", dd.Format.Get());
@@ -596,3 +731,4 @@ bool LDragFormats::CheckUti(const char *uti)
 
 	return false;
 }
+

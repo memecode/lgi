@@ -2540,21 +2540,21 @@ LPoint &LView::GetWindowBorderSize()
 {
 	static LPoint s;
 
-	ZeroObj(s);
+	s.Set(0, 0);
 
 	#if WINNATIVE
-	if (_View)
-	{
-		RECT Wnd, Client;
-		GetWindowRect(Handle(), &Wnd);
-		GetClientRect(Handle(), &Client);
-		s.x = (Wnd.right-Wnd.left) - (Client.right-Client.left);
-		s.y = (Wnd.bottom-Wnd.top) - (Client.bottom-Client.top);
-	}
+		if (_View)
+		{
+			RECT Wnd, Client;
+			GetWindowRect(Handle(), &Wnd);
+			GetClientRect(Handle(), &Client);
+			s.x = (Wnd.right-Wnd.left) - (Client.right-Client.left);
+			s.y = (Wnd.bottom-Wnd.top) - (Client.bottom-Client.top);
+		}
 	#elif defined __GTK_H__
 	#elif defined MAC
-	s.x = 0;
-	s.y = 22;
+		s.x = 0;
+		s.y = 22;
 	#endif
 
 	return s;

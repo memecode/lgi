@@ -300,6 +300,7 @@ if (APPLE)
 		src/mac/cocoa/View.mm
 		src/mac/cocoa/Widgets.mm
 		src/mac/cocoa/Window.mm
+		include/lgi/mac/cocoa/LCocoaView.h
 		src/mac/cocoa/CocoaView.mm
 		src/mac/cocoa/Gdc2.mm
 		)

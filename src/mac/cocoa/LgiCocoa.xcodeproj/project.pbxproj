@@ -1267,6 +1267,7 @@
 					"../../../../deps/build-debug/include",
 					../../../../deps/libjpeg,
 					"../../../../deps/build-release/jpeg-x86_64",
+					/opt/local/libexec/openssl3/include,
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
@@ -1326,6 +1327,7 @@
 					"../../../../deps/build-debug/include",
 					../../../../deps/libjpeg,
 					"../../../../deps/build-release/jpeg-x86_64",
+					/opt/local/libexec/openssl3/include,
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";

@@ -421,6 +421,16 @@ LKey KeyEvent(NSEvent *ev)
 		self.w->OnKey(k);
 }
 
+- (BOOL)canBecomeFirstResponder
+{
+    return YES;
+}
+
+- (BOOL)acceptsFirstResponder
+{
+    return YES;
+}
+
 - (void)userEvent:(LCocoaMsg*)msg
 {
 	LAutoPool Pool;
@@ -610,11 +620,6 @@ void UpdateAccepted(DndEvent &e, id <NSDraggingInfo> sender)
 - (void)draggingEnded:(nullable id <NSDraggingInfo>)sender
 {
 	DND_LOG("%s:%i draggingEnded\n", _FL);
-}
-
-- (BOOL) acceptsFirstResponder
-{
-    return YES;
 }
 
 @end

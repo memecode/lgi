@@ -201,7 +201,7 @@ public:
 	int Close() override;
 
 	/// Sets the SO_REUSEADDR option.
-	bool SetReuseAddress(bool reuse);
+	bool SetReuseAddress(bool reuse) override;
 
 	/// Binds on a given port.
 	bool Bind(int Port, bool reuseAddr = true);

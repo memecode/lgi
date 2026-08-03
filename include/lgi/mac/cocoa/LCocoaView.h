@@ -78,6 +78,7 @@ LgiExtern LRect LScreenFlip(LRect r);
 - (void)keyDown:(NSEvent*)event;
 - (void)keyUp:(NSEvent*)event;
 - (BOOL)acceptsFirstResponder;
+- (BOOL)canBecomeFirstResponder;
 
 // Message handling
 - (void)userEvent:(LCocoaMsg*)ev;
@@ -112,6 +113,7 @@ LgiExtern LRect LScreenFlip(LRect r);
 - (id)init:(LWindowPrivate*)priv Frame:(NSRect)rc;
 - (void)dealloc;
 - (BOOL)canBecomeKeyWindow;
+- (BOOL)canBecomeMainWindow;
 - (LWindow*)getWindow;
 - (void)onQuit;
 - (void)onDelete:(LCloseContext)ctx;

@@ -111,8 +111,8 @@ LRect LScreenFlip(LRect r)
 class HookInfo
 {
 public:
-	int Flags;
-	LView *Target;
+	int Flags = 0;
+	LView *Target = nullptr;
 };
 
 @interface LWindowDelegate : NSObject<NSWindowDelegate>
@@ -236,6 +236,7 @@ public:
 		self->ReqClose = CSNone;
 		
 		self.contentView = [[LCocoaView alloc] init:priv->Wnd];
+		printf("%s:%i - setting contentView\n", _FL);
 		[self makeFirstResponder:self.contentView];
 		self.acceptsMouseMovedEvents = true;
 		self.ignoresMouseEvents = false;
@@ -268,7 +269,20 @@ public:
 
 - (BOOL)canBecomeKeyWindow
 {
+	printf("self.canFocus=%i\n", self.canFocus);
 	return self.canFocus;
+}
+
+- (BOOL)canBecomeMainWindow
+{
+	printf("canBecomeMainWindow=true\n");
+	return TRUE;
+}
+
+- (BOOL)canBecomeFirstResponder
+{
+    printf("canBecomeFirstResponder: canFocus=%i\n", self.canFocus);
+    return self.canFocus;
 }
 
 - (void)onQuit
@@ -378,7 +392,10 @@ public:
 {
 	LNsWindow *w = event.object;
 	if (w && w.d)
+	{
+        [w.contentView becomeFirstResponder];
 		w.d->Wnd->OnFrontSwitch(true);
+	}
 }
 
 - (void)windowDidResignMain:(NSNotification*)event
@@ -398,11 +415,11 @@ public:
 #endif
 
 LWindow::LWindow(OsWindow wnd) :
-	LView(NULL)
+	LView(nullptr)
 {
 	d = new LWindowPrivate(this);
 	_QuitOnClose = false;
-	Wnd = NULL;
+	Wnd = nullptr;
 	Menu = 0;
 	_Default = 0;
 	_Window = this;
@@ -727,7 +744,11 @@ void LWindow::Visible(bool i)
 		PourAll();
 
 		if (GetWillFocus())
+		{
+			[NSApp activateIgnoringOtherApps:YES];
 			[Wnd.p makeKeyAndOrderFront:NULL];
+			[Wnd.p makeFirstResponder:Wnd.p.contentView];
+		}
 		else
 		{
 			[Wnd.p setLevel:NSScreenSaverWindowLevel + 1];
