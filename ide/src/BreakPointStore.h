@@ -158,8 +158,8 @@ private:
 		BreakPoint obj;
 	};
 
-	LHashTbl<IntKey<int>, Bp*> BreakPoints;
-	LHashTbl<IntKey<int>, TCallback*> Callbacks;
+	LHashTbl<IntKey<int>, Bp*, true> BreakPoints;
+	LHashTbl<IntKey<int>, TCallback*, true> Callbacks;
 
 	template<typename T>
 	int AllocId(T &tbl)

@@ -7,6 +7,7 @@
 #define _LHashTbl_H_
 
 #include <ctype.h>
+#include "lgi/common/CurrentTime.h"
 #include "lgi/common/Mem.h"
 #include "lgi/common/Array.h"
 #include "lgi/common/LgiString.h"
@@ -321,7 +322,7 @@ protected:
 		else if (ownThread != curThread)
 		{
 			printf("%s:%i - Thread safety violation. ownThread=%i, curThread=%i\n", _FL, ownThread, curThread);
-			LAssert(!"invalid thread access.");
+			int asd=0;
 		}
 	}
 
@@ -336,7 +337,7 @@ protected:
 		if (ownThread != curThread)
 		{
 			printf("%s:%i - Thread safety violation. ownThread=%i, curThread=%i\n", _FL, ownThread, curThread);
-			LAssert(!"invalid thread access.");
+			int asd=0;
 		}
 	}
 

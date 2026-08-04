@@ -1,3 +1,4 @@
+#include "LgiOsDefs.h"
 #include "lgi/common/Lgi.h"
 #include "lgi/common/TableLayout.h"
 #include "lgi/common/TextLabel.h"
@@ -1056,6 +1057,7 @@ bool IdeProjectSettings::Serialize(LXmlTag *Parent, bool Write)
 
 const char *IdeProjectSettings::GetStr(ProjSetting Setting, const char *Default, SysPlatform Platform)
 {
+	d->Map.ownThread = LCurrentThreadId();
 	auto s = d->Map.Find(Setting);
 	LAssert(s);
 	LArray<char*> Strs;

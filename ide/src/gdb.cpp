@@ -118,7 +118,7 @@ class Gdb :
 		std::function<void(int,BpInfo*)> onHit;		// the break point was hit
 		std::function<void(int)> onDelete;			// the bp is deleted from gdb
 	};
-	LHashTbl<IntKey<int>, BpInfo*> BreakPoints; // requires locking
+	LHashTbl<IntKey<int>, BpInfo*, true> BreakPoints; // requires locking
 	BreakPoint mainBreakPoint;
 	LString mainBreakPointCmd;
 

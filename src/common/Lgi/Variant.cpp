@@ -1883,8 +1883,10 @@ LDom *LDom::ResolveObject(const char *Var, LString &Name, LString &Array)
 
 struct LDomPropMap
 {
-	LHashTbl<ConstStrKey<char,false>, LDomProperty> ToProp;
-	LHashTbl<IntKey<LDomProperty,ObjNone>, const char *> ToString;
+	// These are static tables, so long as they don't change, they are
+	// thread safe.
+	LHashTbl<ConstStrKey<char,false>, LDomProperty, true> ToProp;
+	LHashTbl<IntKey<LDomProperty,ObjNone>, const char *, true> ToString;
 
 	LDomPropMap()
 	{
