@@ -1736,7 +1736,7 @@ void VcFolder::LogFilter(const char *Filter)
 		}
 		case VcHg:
 		{
-			auto args = LString::Fmt("log %s", Filter);
+			auto args = LString::Fmt("log -k \"%s\"", Filter);
 			ClearLog();
 			StartCmd(args, &VcFolder::ParseLog);
 			break;
@@ -1900,10 +1900,7 @@ bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 				if (!strnicmp(i, "commit ", 7))
 				{
 					if (i > prev)
-					{
 						c.New().Set(prev, i - prev);
-						// LgiTrace("commit=%i\n", (int)(i - prev));
-					}
 					prev = i;
 				}
 
@@ -5348,7 +5345,7 @@ void VcFolder::RevertCommit(const char *Rev)
 	{
 		case VcGit:
 		{
-			int parentCount = 0;
+			size_t parentCount = 0;
 			for (auto c : Log)
 			{
 				if (c && c->IsRev(Rev))

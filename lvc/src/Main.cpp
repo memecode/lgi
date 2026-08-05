@@ -1722,13 +1722,13 @@ public:
 		{
 			case IDC_CLEAR_FILTER_FOLDERS:
 			{
-				SetCtrlName(IDC_FILTER_FOLDERS, NULL);
+				SetCtrlName(IDC_FILTER_FOLDERS, nullptr);
 				// Fall through
 			}
 			case IDC_FILTER_FOLDERS:
 			{
 				if (n.Type == LNotifyEscapeKey)
-					SetCtrlName(IDC_FILTER_FOLDERS, NULL);
+					SetCtrlName(IDC_FILTER_FOLDERS, nullptr);
 					
 				LString n = GetCtrlName(IDC_FILTER_FOLDERS);
 				if (n != FolderFilter)
@@ -1740,31 +1740,32 @@ public:
 			}
 			case IDC_CLEAR_FILTER_COMMITS:
 			{
-				SetCtrlName(IDC_FILTER_COMMITS, NULL);
+				SetCtrlName(IDC_FILTER_COMMITS, nullptr);
 				// Fall through
 			}
 			case IDC_FILTER_COMMITS:
 			{
 				if (n.Type == LNotifyEscapeKey)
-					SetCtrlName(IDC_FILTER_COMMITS, NULL);
+					SetCtrlName(IDC_FILTER_COMMITS, nullptr);
 
 				LString txt = GetCtrlName(IDC_FILTER_COMMITS);
 				if (txt != CommitFilter)
 					CommitFilter = txt;
 
-				if (n.Type == LNotifyReturnKey)
+				if (n.Type == LNotifyReturnKey ||
+					n.Type == LNotifyItemClick)
 					OnFilterCommits();
 				break;
 			}
 			case IDC_CLEAR_FILTER_FILES:
 			{
-				SetCtrlName(IDC_FILTER_FILES, NULL);
+				SetCtrlName(IDC_FILTER_FILES, nullptr);
 				// Fall through
 			}
 			case IDC_FILTER_FILES:
 			{
 				if (n.Type == LNotifyEscapeKey)
-					SetCtrlName(IDC_FILTER_FILES, NULL);
+					SetCtrlName(IDC_FILTER_FILES, nullptr);
 
 				LString n = GetCtrlName(IDC_FILTER_FILES);
 				if (n != FileFilter)
