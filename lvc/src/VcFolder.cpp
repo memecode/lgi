@@ -5201,6 +5201,45 @@ bool VcFolder::ParsePull(int Result, LString s, ParseParams *Params)
 		{
 			// Git does a merge by default, so the current commit changes...
 			CurrentCommit.Empty();
+
+			bool HasUpdates = false;
+			auto Lines = s.SplitDelimit("\n");
+			for (auto Ln : Lines)
+			{
+				auto p = Ln.Strip();
+				if (!p)
+					continue;
+
+				if (p.Find("Already up to date") >= 0 ||
+					p.Find("Already up-to-date") >= 0)
+				{
+					continue;
+				}
+
+				// fetch output: skip pure no-op tracking lines.
+				if (p.Find("->") >= 0)
+				{
+					if (p.Find("[up to date]") >= 0)
+						continue;
+
+					HasUpdates = true;
+					break;
+				}
+
+				// pull output: merge or fast-forward applied.
+				if (p.Find("Updating ") == 0 ||
+					p.Find("Fast-forward") >= 0 ||
+					p.Find("files changed") >= 0)
+				{
+					HasUpdates = true;
+					break;
+				}
+			}
+
+			if (HasUpdates)
+				SetColourType(TColSuccess);
+			else
+				SetColourType(TColNone);
 			break;
 		}
 		case VcHg:
