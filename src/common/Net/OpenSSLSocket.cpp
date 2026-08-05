@@ -14,6 +14,7 @@
 #pragma comment(lib,"Ws2_32.lib")
 #else
 #include <unistd.h>
+#include <fcntl.h>
 #endif
 
 #include "lgi/common/Lgi.h"
@@ -43,6 +44,26 @@ typedef int socklen_t;
 #else
 #define SystemErrorCode				errno
 #endif
+
+static bool SetSocketBlockingMode(OsSocket sock, bool blocking)
+{
+	if (!ValidSocket(sock))
+		return false;
+
+	#if defined WIN32
+		ulong nonBlocking = blocking ? 0 : 1;
+		return ioctlsocket(sock, FIONBIO, &nonBlocking) == 0;
+	#else
+		auto flags = fcntl(sock, F_GETFL, 0);
+		if (flags < 0)
+			return false;
+		if (blocking)
+			flags &= ~O_NONBLOCK;
+		else
+			flags |= O_NONBLOCK;
+		return fcntl(sock, F_SETFL, flags) == 0;
+	#endif
+}
 
 LString LibName(const char *Fmt)
 {
@@ -1597,7 +1618,7 @@ bool SslSocket::Listen(int Port)
 
 bool SslSocket::CanAccept(int TimeoutMs)
 {
-	return IsWritable(TimeoutMs);
+	return IsReadable(TimeoutMs);
 }
 
 bool SslSocket::Accept(LSocketI *sock)
@@ -1651,16 +1672,82 @@ bool SslSocket::Accept(LSocketI *sock)
 
 	if (d->SslOnConnect)
 	{
-		auto result = Library->SSL_accept(sslSock->Ssl);
-		if (result <= 0)
+		if (!SetSocketBlockingMode(client, false))
 		{
-			auto code = Library->SSL_get_error(sslSock->Ssl, result);
-			LString details;
+			OnError(SystemErrorCode, "Failed to set accepted socket non-blocking mode.");
+			goto OnError;
+		}
 
-			if (code == SSL_ERROR_SSL || code == SSL_ERROR_SYSCALL)
+		auto start = LCurrentTime();
+		auto timeoutMs = sslSock->GetTimeout();
+		auto result = -1;
+		auto code = 0;
+		LString details;
+		bool handshakeOk = false;
+
+		while (!sslSock->d->Cancel->IsCancelled())
+		{
+			result = Library->SSL_accept(sslSock->Ssl);
+			if (result == 1)
 			{
-				details = GetSslErr().Strip();
+				handshakeOk = true;
+				break;
 			}
+
+			code = Library->SSL_get_error(sslSock->Ssl, result);
+			if (code != SSL_ERROR_WANT_READ &&
+				code != SSL_ERROR_WANT_WRITE &&
+				code != SSL_ERROR_WANT_CONNECT &&
+				code != SSL_ERROR_WANT_X509_LOOKUP &&
+				code != SSL_ERROR_WANT_RETRY_VERIFY)
+			{
+				break;
+			}
+
+			if (timeoutMs >= 0)
+			{
+				auto elapsed = LCurrentTime() - start;
+				if (elapsed >= timeoutMs)
+				{
+					code = SSL_ERROR_SYSCALL;
+					details = "TLS handshake timeout.";
+					break;
+				}
+			}
+
+			fd_set set;
+			FD_ZERO(&set);
+			FD_SET(client, &set);
+
+			int waitMs = 50;
+			if (timeoutMs >= 0)
+			{
+				auto remaining = timeoutMs - (LCurrentTime() - start);
+				if (remaining <= 0)
+					remaining = 1;
+				waitMs = MIN(waitMs, remaining);
+			}
+
+			struct timeval tv = {waitMs / 1000, (waitMs % 1000) * 1000};
+			int sel = 0;
+			if (code == SSL_ERROR_WANT_WRITE)
+				sel = select((int)client + 1, NULL, &set, NULL, &tv);
+			else
+				sel = select((int)client + 1, &set, NULL, NULL, &tv);
+
+			if (sel < 0)
+			{
+				code = SSL_ERROR_SYSCALL;
+				break;
+			}
+		}
+
+		SetSocketBlockingMode(client, true);
+
+		if (!handshakeOk)
+		{
+			if (!details && (code == SSL_ERROR_SSL || code == SSL_ERROR_SYSCALL))
+				details = GetSslErr().Strip();
 
 			if (!details)
 				details.Printf("SSL_get_error=%i", code);

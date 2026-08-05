@@ -3709,7 +3709,11 @@ LCompiledCode *LScriptEngine::GetCurrentCode()
 	return d->Code;
 }
 
-bool LScriptEngine::Compile(LAutoPtr<LCompiledCode> &Obj, LScriptContext *UserContext, const char *Script, const char *FileName, LDom *Args)
+bool LScriptEngine::Compile(LAutoPtr<LCompiledCode> &Obj,
+							LScriptContext *UserContext,
+							const char *Script,
+							const char *FileName,
+							LDom *Args)
 {
 	if (!Script)
 	{
