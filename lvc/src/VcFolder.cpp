@@ -4396,15 +4396,11 @@ bool VcFolder::UpdateSubs()
 
 bool VcFolder::ParseUpdateSubs(int Result, LString s, ParseParams *Params)
 {
-	switch (GetType())
+	if (auto sel = d->Commits->GetSelected())
 	{
-		default:
-		case VcSvn:
-		case VcHg:
-		case VcCvs:
-			return false;
-		case VcGit:
-			break;
+		if (auto uncommit = dynamic_cast<VcFolder::UncommitedItem*>(sel))
+			// update working folder after updating the subs...
+			ListWorkingFolder();
 	}
 
 	return false;
@@ -6298,17 +6294,15 @@ void VcFolder::UncommitedItem::Select(bool b)
 	LListItem::Select(b);
 	if (b)
 	{
-		LTreeItem *i = d->Tree->Selection();
-		VcFolder *f = dynamic_cast<VcFolder*>(i);
-		if (f)
+		auto i = d->Tree->Selection();
+		if (auto f = dynamic_cast<VcFolder*>(i))
 			f->ListWorkingFolder();
 
 		if (d->Msg)
 		{
-			d->Msg->Name(NULL);
+			d->Msg->Name(nullptr);
 
-			auto *w = d->Msg->GetWindow();
-			if (w)
+			if (auto w = d->Msg->GetWindow())
 			{
 				w->SetCtrlEnabled(IDC_COMMIT, true);
 				w->SetCtrlEnabled(IDC_COMMIT_AND_PUSH, true);
