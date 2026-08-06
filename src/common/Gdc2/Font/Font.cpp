@@ -117,6 +117,7 @@
 #elif defined(__GTK_H__)
 
 	#include <pango/pangocairo.h>
+	#include <harfbuzz/hb.h>
 
 #elif MAC
 
@@ -1009,31 +1010,62 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 
 				Gtk::pango_font_metrics_unref(m);
 
-				#if 1
+				// auto startTs = LMicroTime();
 				auto fnt = pango_font_map_load_font(Gtk::pango_cairo_font_map_get_default(), EffectiveCtx, d->hFont);
 				if (fnt)
 				{
-					auto c = Gtk::pango_font_get_coverage(fnt, Gtk::pango_language_get_default());
-					if (c)
-					{
-						uint Bytes = (MAX_UNICODE + 1) >> 3;
-						if ((d->GlyphMap = new uchar[Bytes]))
-						{
-							memset(d->GlyphMap, 0, Bytes);
+					#if 1
 
-							for (int i=0; i<MAX_UNICODE; i++)
+						// new range coverage code (about 10x faster):
+						using namespace Gtk;
+						if (auto hb_font = pango_font_get_hb_font(fnt))
+						{
+							if (auto hb_face = hb_font_get_face(hb_font))
 							{
-								if (pango_coverage_get(c, i))
-									d->GlyphMap[i>>3] |= 1 << (i & 0x7);
+								if (auto unicode_set = hb_set_create())
+								{
+									hb_face_collect_unicodes(hb_face, unicode_set);
+									hb_codepoint_t start = HB_SET_VALUE_INVALID;
+									hb_codepoint_t end = HB_SET_VALUE_INVALID;
+
+									uint Bytes = (MAX_UNICODE + 1) >> 3;
+									if ((d->GlyphMap = new uchar[Bytes]))
+									{
+										while (hb_set_next_range(unicode_set, &start, &end))
+										{
+											for (int i=start; i<=end; i++)
+												d->GlyphMap[i>>3] |= 1 << (i & 0x7);
+										}
+									}
+
+									hb_set_destroy(unicode_set);
+								}
 							}
 						}
-						
-						g_object_unref(c);
-					}
+					#else
+						// old per character coverage code:
+						auto c = Gtk::pango_font_get_coverage(fnt, Gtk::pango_language_get_default());
+						if (c)
+						{
+							uint Bytes = (MAX_UNICODE + 1) >> 3;
+							if ((d->GlyphMap = new uchar[Bytes]))
+							{
+								memset(d->GlyphMap, 0, Bytes);
+
+								for (int i=0; i<MAX_UNICODE; i++)
+								{
+									if (pango_coverage_get(c, i))
+										d->GlyphMap[i>>3] |= 1 << (i & 0x7);
+								}
+							}
+							
+							g_object_unref(c);
+						}
+					#endif
 					
 					g_object_unref(fnt);
 				}
-				#endif
+				// printf("%s:%i - font coverage: %.2gms\n", _FL, (double)(LMicroTime()-startTs)/1000.0);
 				
 				return true;
 			}

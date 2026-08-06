@@ -527,7 +527,7 @@ public:
 			{
 				LinkerFlags = ",-soname,$(TargetFile)";
 			}
-			LinkerFlags += ",-export-dynamic,-R.";
+			LinkerFlags += ",-export-dynamic,-R.,--build-id";
 		}
 
 		auto Base = Proj->GetBasePath();
@@ -929,8 +929,8 @@ public:
 		// Debug specific
 		m.Print("\n"
 				"ifeq ($(Build),Debug)\n"
-				"	CFlags += -g%s\n"
-				"	CppFlags += -g%s\n"
+				"	CFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer%s\n"
+				"	CppFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer%s\n"
 				"	Tag = d\n"
 				"	Defs = -D_DEBUG %s\n"
 				"	Libs = %s\n"
@@ -943,8 +943,8 @@ public:
 		
 		// Release specific
 		m.Print("else\n"
-				"	CFlags += -s -Os%s\n"
-				"	CppFlags += -s -Os%s\n"
+				"	CFlags += -g -Os%s\n"
+				"	CppFlags += -g -Os%s\n"
 				"	Defs = %s\n"
 				"	Libs = %s\n"
 				"	Inc = %s\n"
@@ -1150,7 +1150,8 @@ public:
 							"		$(Target) $(Objects) $(Libs)\n",
 							ExtraLinkFlags,
 							ExeFlags,
-							ValidStr(LinkerFlags) ? "-Wl" : "", LinkerFlags.Get());
+							ValidStr(LinkerFlags) ? "-Wl" : "",
+							LinkerFlags.Get());
 					
 					EmbedAppIcon(m);
 					
@@ -1226,7 +1227,7 @@ public:
 							"$(TargetFile) : $(Objects)\n"
 							"	mkdir -p $(BuildDir)\n"
 							"	@echo Linking $(TargetFile) [$(Build)]...\n"
-							"	$(CPP)$s -shared \\\n"
+							"	$(CPP) -shared \\\n"
 							"		%s%s \\\n"
 							"		-o $(BuildDir)/$(TargetFile) \\\n"
 							"		$(Objects) \\\n"

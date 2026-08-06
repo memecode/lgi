@@ -19,8 +19,8 @@ CFlags = -MMD -MP -fPIC -fno-inline
 CppFlags = $(CFlags) -fpermissive -std=c++17
 
 ifeq ($(Build),Debug)
-	CFlags += -g -Wno-format-truncation
-	CppFlags += -g -Wno-format-truncation
+	CFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer -Wno-format-truncation
+	CppFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer -Wno-format-truncation
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DLGI_LIBRARY -DLGI_UNIT_TESTS
 	Libs =  \
@@ -44,8 +44,8 @@ ifeq ($(Build),Debug)
 		`pkg-config --cflags gstreamer-1.0` \
 		`pkg-config --cflags gtk+-3.0`
 else
-	CFlags += -s -Os -Wno-format-truncation
-	CppFlags += -s -Os -Wno-format-truncation
+	CFlags += -g -Os -Wno-format-truncation
+	CppFlags += -g -Os -Wno-format-truncation
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DLGI_LIBRARY -DLGI_UNIT_TESTS
 	Libs =  \
 		-L../deps/build-x64-release/lib \
@@ -220,7 +220,7 @@ TargetFile = lib$(Target)$(Tag).so
 $(TargetFile) : $(Objects)
 	mkdir -p $(BuildDir)
 	@echo Linking $(TargetFile) [$(Build)]...
-	$(CPP)$s -shared \
+	$(CPP) -shared \
 		 \
 		-o $(BuildDir)/$(TargetFile) \
 		$(Objects) \
