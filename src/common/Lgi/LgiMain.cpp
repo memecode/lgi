@@ -11,6 +11,10 @@
 #include <SDL.h>
 #endif
 
+#if defined(LINUX) && defined(__GTK_H__)
+#include <stdlib.h>
+#endif
+
 /** \brief The main entry point of a Lgi program
 
 	To hide the differences between the different OS's standard entry points for programs
@@ -123,6 +127,12 @@ int main(int Args, const char **Arg)
 	int Status = 0;
 
 	#ifdef __GTK_H__
+		bool needsGtkInit = true;
+
+		#if defined(LINUX)
+			// Allow headless Linux services to continue into LApp's existing non-GUI mode.
+			needsGtkInit = getenv("DISPLAY") != nullptr || getenv("WAYLAND_DISPLAY") != nullptr;
+		#endif
 
 		#if 0 && defined(_DEBUG)
 		
@@ -141,11 +151,14 @@ int main(int Args, const char **Arg)
 
 		#endif
 
-		auto result = Gtk::gtk_init_check(&Args, (char***)&Arg);
-		if (!result)
+		if (needsGtkInit)
 		{
-			LgiTrace("%s:%i - gtk_init_check failed\n", _FL);
-			return 1;
+			auto result = Gtk::gtk_init_check(&Args, (char***)&Arg);
+			if (!result)
+			{
+				LgiTrace("%s:%i - gtk_init_check failed\n", _FL);
+				return 1;
+			}
 		}
 
 	#endif
