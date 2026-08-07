@@ -1,5 +1,6 @@
 #include "Lvc.h"
 #include "lgi/common/ClipBoard.h"
+#include "lgi/common/Charset.h"
 #include "resdefs.h"
 
 VcFile::VcFile(AppPriv *priv, VcFolder *owner, LString revision, bool working)
@@ -90,12 +91,42 @@ int VcFile::Checked(int Set)
 	return (int)Chk->Value();
 }
 
+void VcFile::SetCharset(LString cs)
+{
+}
+
+void VcFile::ShowDiff()
+{
+	#ifdef HAIKU
+	if (Diff.Length() > (16 << 10))
+		d->Diff->Name(Diff(0, 16 << 10));
+	else
+	#endif
+	if (!Charset && LIsUtf8(Diff))
+	{
+		d->Diff->Name(Diff);
+	}
+	else
+	{
+		if (auto csSys = LCharsetSystem::Inst())
+		{
+			if (!Charset && csSys->DetectCharset)
+				Charset = csSys->DetectCharset(Diff);
+		}
+		LAutoString utf((char*)LNewConvertCp("utf-8",
+						Diff.Get(),
+						Charset ? Charset : "ISO-8859-1",
+						Diff.Length()));
+		d->Diff->Name(utf ? utf : "-InvalidUtf8");
+	}
+}
+
 void VcFile::SetDiff(LString diff)
 {
 	auto n = LFromNativeCp(diff);
 	Diff = n;
 	if (LListItem::Select())
-		d->Diff->Name(Diff);
+		ShowDiff();
 }
 
 void VcFile::Select(bool b)
@@ -115,12 +146,7 @@ void VcFile::Select(bool b)
 		}
 		else
 		{
-			#ifdef HAIKU
-			if (Diff.Length() > (16 << 10))
-				d->Diff->Name(Diff(0, 16 << 10));
-			else
-			#endif
-				d->Diff->Name(Diff);
+			ShowDiff();
 		}
 	}
 }

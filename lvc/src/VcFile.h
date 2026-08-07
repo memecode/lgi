@@ -25,11 +25,14 @@ private:
 	VcFolder *Owner = NULL;
 	bool LoadDiff = false;
 	LString Diff;
+	LString Charset;
 	LString Revision;
 	LUri Uri;
 	LListItemCheckBox *Chk = NULL;
 	FileStatus Status = SUnknown;
 	bool Staged = false;
+
+	void ShowDiff();
 
 public:
 	VcFile(AppPriv *priv, VcFolder *owner, LString revision, bool working = false);
@@ -42,7 +45,9 @@ public:
 	FileStatus GetStatus();
 	bool GetStaged() { return Staged; }
 	LString GetUri();
+	LString GetCharset() { return Charset; }
 	void SetUri(LString uri);
+	void SetCharset(LString cs);
 	void SetStatus(FileStatus s);
 	
 	void SetDiff(LString d);
