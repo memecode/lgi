@@ -1,5 +1,4 @@
-#ifndef _GTHREADEVENT_H_
-#define _GTHREADEVENT_H_
+#pragma once
 
 #if defined(CARBON)
 	#define USE_MACH_SEM		1
@@ -54,4 +53,3 @@ public:
 	uint32_t GetError();
 };
 
-#endif
