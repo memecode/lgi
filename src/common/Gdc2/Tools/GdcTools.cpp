@@ -108,9 +108,9 @@ bool GreyScaleDC(LSurface *pDest, LSurface *pSrc)
 					uchar BMap[256];
 					for (int i=0; i<256; i++)
 					{
-						RMap[i] = ((i << 16) * FP_RED_TO_GREY) >> 16;
-						LMap[i] = ((i << 16) * FP_GREEN_TO_GREY) >> 16;
-						BMap[i] = ((i << 16) * FP_BLUE_TO_GREY) >> 16;
+						RMap[i] = (((uint32_t) i << 16) * FP_RED_TO_GREY) >> 16;
+						LMap[i] = (((uint32_t) i << 16) * FP_GREEN_TO_GREY) >> 16;
+						BMap[i] = (((uint32_t) i << 16) * FP_BLUE_TO_GREY) >> 16;
 					}
 					
 					int SBits = pSrc->GetBits();

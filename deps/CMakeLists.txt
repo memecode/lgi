@@ -6,12 +6,6 @@ project(lgiDeps)
 enable_language( C CXX ASM )
 if(UNIX AND NOT APPLE)
     set(LINUX TRUE)
-    set(USE_SYSTEM_ZLIB TRUE) # having zlib in the path can conflict with say apt Firefox
-                              # so turning this off can make Lgi more compatible on Linux
-    set(USE_SYSTEM_PNG TRUE)
-else()
-    set(USE_SYSTEM_ZLIB FALSE)
-    set(USE_SYSTEM_PNG FALSE)
 endif()
 
 get_filename_component(DEPS "${CMAKE_CURRENT_LIST_DIR}/../../deps" ABSOLUTE)
@@ -135,7 +129,7 @@ if (1)
     endif()
 endif()
 
-if (NOT USE_SYSTEM_ZLIB)
+if (1)
     # zlib
     set(ZLIB_BUILD_SHARED TRUE)
     GitProject(zlib "https://github.com/madler/zlib.git" "develop" TRUE)
@@ -148,7 +142,7 @@ if (NOT USE_SYSTEM_ZLIB)
     message("ZLIB_ROOT=${ZLIB_ROOT}")
 endif()
 
-if (NOT USE_SYSTEM_PNG)
+if (1)
     # libpng
     set(PNG_HARDWARE_OPTIMIZATIONS 0)
     set(PNG_ARM_NEON off)
@@ -180,6 +174,14 @@ if (NOT HAIKU)
         message(FATAL_ERROR "libssh should be a target at this point.")
     endif()
 
+    # Keep libssh build output separate from the install destination.
+    # Installing into the same folder as the built .so can clobber the
+    # versioned file when CMake handles symlinks.
+    if(LINUX)
+        set_target_properties(ssh PROPERTIES
+            LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/libssh-out")
+    endif()
+
     # Force CRT selection explicitly for libssh and keep the common ssh.lib in sync
     # with the currently built configuration to avoid stale Release artifacts in Debug.
     if(MSVC)
@@ -197,7 +199,7 @@ if (NOT HAIKU)
             ARCHIVE DESTINATION ${CMAKE_BINARY_DIR}/lib)
 endif()
 
-if (NOT USE_SYSTEM_PNG)
+if (1)
     GitProject(libpng  "https://github.com/memecode/libpng.git" "libpng16" TRUE)
     install(TARGETS png_shared
         RUNTIME
