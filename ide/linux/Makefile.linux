@@ -19,8 +19,8 @@ CFlags = -MMD -MP -fPIC -fno-inline
 CppFlags = $(CFlags) -fpermissive -std=c++17
 
 ifeq ($(Build),Debug)
-	CFlags += -g -Wno-format-truncation
-	CppFlags += -g -Wno-format-truncation
+	CFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer -Wno-format-truncation
+	CppFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer -Wno-format-truncation
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DHAS_LIBSSH -DSSH_SUPPRESS_DEPRECATED
 	Libs =  \
@@ -42,8 +42,8 @@ ifeq ($(Build),Debug)
 		-I/usr/include/lldb \
 		`pkg-config --cflags gtk+-3.0`
 else
-	CFlags += -s -Os -Wno-format-truncation
-	CppFlags += -s -Os -Wno-format-truncation
+	CFlags += -g -Os -Wno-format-truncation
+	CppFlags += -g -Os -Wno-format-truncation
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DHAS_LIBSSH -DSSH_SUPPRESS_DEPRECATED
 	Libs =  \
 		-lssh \
@@ -134,7 +134,7 @@ $(BuildDir)/%.o: %.cpp
 $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	mkdir -p $(BuildDir)
 	@echo Linking $(Target) [$(Build)]...
-	$(CPP) -Wl,-export-dynamic,-R. -o \
+	$(CPP) -Wl,-export-dynamic,-R.,--build-id -o \
 		$(Target) $(Objects) $(Libs)
 	@echo Done.
 

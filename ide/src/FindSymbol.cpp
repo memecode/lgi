@@ -170,46 +170,58 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 	
 	// Back end call handling:
 	bool waitBackendReady = false;
-	int backendCalls = 0;
-	LHashTbl<ConstStrKey<char,false>,int> backendCallers;
+	struct BackendInfo
+	{
+		int backendCalls = 0;
+		LHashTbl<ConstStrKey<char,false>,int,true> backendCallers;
+	};
+	LThreadSafeInterface<BackendInfo, true> backendInfo;
 
 	std::function<void()> onShutdown;
+	
 	bool IncCalls(const char *file, int line)
 	{
 		if (onShutdown)
 			return false;
 		
-		backendCalls++;
+		if (auto info = backendInfo.Lock(_FL))
+		{
+			info->backendCalls++;
 
-		auto ref = LString::Fmt("%s:%i", file, line);
-		int calls = backendCallers.Find(ref);
-		backendCallers.Add(ref, calls + 1);
-		// LgiTrace("inc backendCalls=%i %s:%i\n", backendCalls, file, line);
+			auto ref = LString::Fmt("%s:%i", file, line);
+			int calls = info->backendCallers.Find(ref);
+			info->backendCallers.Add(ref, calls + 1);
+			// LgiTrace("inc backendCalls=%i %s:%i\n", backendCalls, file, line);
+		}
+		else return false;
 		
 		return true;
 	}
+	
 	void DecCalls(const char *file, int line)
 	{
-		//LAssert(backendCalls > 0);
-		if (backendCalls > 0)
-			backendCalls--;
-		else
-			LgiTrace("%s:%i - backendCalls mismatched.\n", _FL);
-		
-		auto ref = LString::Fmt("%s:%i", file, line);
-		int calls = backendCallers.Find(ref);
-		if (calls > 1)
-			backendCallers.Add(ref, calls - 1);
-		else if (calls == 1)
-			backendCallers.Delete(ref);
-		else
-			LgiTrace("dec backendCalls=%i %s:%i\n", backendCalls, file, line);
-		
-		if (!backendCalls && onShutdown)
+		if (auto info = backendInfo.Lock(_FL))
 		{
-			onShutdown();
-			onShutdown = nullptr;
-			backend = nullptr;
+			if (info->backendCalls > 0)
+				info->backendCalls--;
+			else
+				LgiTrace("%s:%i - backendCalls mismatched.\n", _FL);
+			
+			auto ref = LString::Fmt("%s:%i", file, line);
+			int calls = info->backendCallers.Find(ref);
+			if (calls > 1)
+				info->backendCallers.Add(ref, calls - 1);
+			else if (calls == 1)
+				info->backendCallers.Delete(ref);
+			else
+				LgiTrace("dec backendCalls=%i %s:%i\n", info->backendCalls, file, line);
+			
+			if (!info->backendCalls && onShutdown)
+			{
+				onShutdown();
+				onShutdown = nullptr;
+				backend = nullptr;
+			}
 		}
 	}
 	
@@ -225,7 +237,8 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 	
 	FindSymbolSystemPriv(int appSinkHnd) :
 		LEventTargetThread("FindSymSys"),
-		hApp(appSinkHnd)	
+		hApp(appSinkHnd),
+		backendInfo(new BackendInfo)
 	{
 		for (auto &e: LString(KNOWN_EXT).SplitDelimit(","))
 			KnownExt.Add(e, true);
@@ -237,6 +250,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		EndThread();
 
 		// Clean up mem
+		Files.ownThread = LCurrentThreadId();
 		Files.DeleteObjects();
 	}
 
@@ -567,9 +581,12 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 	{
 		if (onShutdown)
 		{
-			LogNetwork("Shutdown callers active: %i\n", backendCalls);
-			for (auto p: backendCallers)
-				LogNetwork("	%s = %i\n", p.key, p.value);
+			if (auto info = backendInfo.Lock(_FL))
+			{
+				LogNetwork("Shutdown callers active: %i\n", info->backendCalls);
+				for (auto p: info->backendCallers)
+					LogNetwork("	%s = %i\n", p.key, p.value);
+			}
 
 			if (backend->IsFinished())
 			{
@@ -1141,17 +1158,21 @@ void FindSymbolSystem::Shutdown(std::function<void()> callback)
 		return;
 	}
 		
-	if (d->backendCalls)
+	if (auto info = d->backendInfo.Lock(_FL))
 	{
-		d->onShutdown = callback;
-		if (d->backend)
-			d->backend->Cancel();
-		d->SetPulse(1000);
+		if (info->backendCalls)
+		{
+			d->onShutdown = callback;
+			if (d->backend)
+				d->backend->Cancel();
+			d->SetPulse(1000);
+		}
+		else
+		{
+			callback();
+		}
 	}
-	else
-	{
-		callback();
-	}
+	else LAssert(0);
 }
 
 void FindSymbolSystem::OpenSearchDlg(LViewI *Parent, std::function<void(FindSymResult&)> Callback)

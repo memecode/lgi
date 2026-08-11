@@ -1747,7 +1747,7 @@ class FtpBackend :
 		IFtpEntry entry;
 	};
 	LAutoPtr<IFtp> ftp;
-	LHashTbl<StrKey<char>, TCache*> cache;
+	LHashTbl<StrKey<char>, TCache*, true> cache;
 
 	class FtpDir : public LArray<IFtpEntry*>, public LDirectory
 	{
