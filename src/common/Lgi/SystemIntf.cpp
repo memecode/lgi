@@ -2185,7 +2185,7 @@ public:
 					if (!c)
 					{
 						cache.Add(full, c = new TCache);
-						LgiTrace("Adding cache '%s'\n", full.Get());
+						// LgiTrace("Adding cache '%s'\n", full.Get());
 					}
 					if (c)
 						c->entry = *e;

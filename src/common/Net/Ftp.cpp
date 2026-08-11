@@ -1347,7 +1347,7 @@ bool IFtp::ConnectData()
 		if (d->UseTLS && d->Host)
 			connectHost = d->Host.Get();
 
-		Socket->OnInformation(LString::Fmt("connect data to '%s' %i", connectHost, Port));
+		// Socket->OnInformation(LString::Fmt("connect data to '%s' %i", connectHost, Port));
 		auto result = d->Data->Open((char*)connectHost, Port);
 		if (result)
 			return true;
