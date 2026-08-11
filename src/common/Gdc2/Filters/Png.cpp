@@ -629,6 +629,23 @@ void ReadAlpha32_24(Out *o, In *i, int Len)
 	}
 }
 
+// special case that sets the 'pad' to 255
+template<typename Out, typename In>
+void ReadAlpha32_25(Out *o, In *i, int Len)
+{
+	In *e = i + Len;
+
+	while (i < e)
+	{
+		o->r = i->r;
+		o->g = i->g;
+		o->b = i->b;
+		o->pad = 0xff;
+		o++;
+		i++;
+	}
+}
+
 template<typename Out, typename In>
 void ReadAlpha64_24(Out *o, In *i, int Len)
 {
@@ -638,6 +655,22 @@ void ReadAlpha64_24(Out *o, In *i, int Len)
 		o->r = i->r >> 8;
 		o->g = i->g >> 8;
 		o->b = i->b >> 8;
+		o++;
+		i++;
+	}
+}
+
+// special case that sets the 'pad' to 255
+template<typename Out, typename In>
+void ReadAlpha64_25(Out *o, In *i, int Len)
+{
+	In *e = i + Len;
+	while (i < e)
+	{
+		o->r = i->r >> 8;
+		o->g = i->g >> 8;
+		o->b = i->b >> 8;
+		o->pad = 0xff;
 		o++;
 		i++;
 	}
@@ -920,42 +953,79 @@ LFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 							}
 							case 32:
 							{
-							    switch (pDC->GetColourSpace())
-							    {
-									#define Read32Case(name, bits) \
-										case Cs##name: \
-										{ \
-											if (LIBPNG png_get_bit_depth(png_ptr, info_ptr) == 16) \
+								if (LIBPNG png_get_bit_depth(png_ptr, info_ptr) == 16)
+								{
+								    switch (pDC->GetColourSpace())
+								    {
+										#define Read64Case(name, bits) \
+											case Cs##name: \
+											{ \
 												ReadAlpha64_##bits((L##name*)Scan, (Png64*)Scan0[y], pDC->X()); \
-											else \
+												break; \
+											}
+
+										Read64Case(Rgb16, 16);
+										Read64Case(Bgr16, 16);
+
+										Read64Case(Rgb24, 24);
+										Read64Case(Bgr24, 24);
+										Read64Case(Xrgb32, 25);
+										Read64Case(Rgbx32, 25);
+										Read64Case(Xbgr32, 25);
+										Read64Case(Bgrx32, 25);
+
+										Read64Case(Rgba32, 32);
+										Read64Case(Bgra32, 32);
+										Read64Case(Argb32, 32);
+										Read64Case(Abgr32, 32);
+										default:
+											LgiTrace("%s:%i - Unsupported colour space: 0x%x (%s)\n",
+													_FL,	
+													pDC->GetColourSpace(),
+													LColourSpaceToString(pDC->GetColourSpace()));
+											LAssert(!"Not impl.");
+											if (Props)
+												Props->SetValue(LGI_FILTER_ERROR, v = "Missing scan convertor");
+											Error = true;
+											break;
+									}
+								}
+								else
+								{								
+								    switch (pDC->GetColourSpace())
+								    {
+										#define Read32Case(name, bits) \
+											case Cs##name: \
+											{ \
 												ReadAlpha32_##bits((L##name*)Scan, (Png32*)Scan0[y], pDC->X()); \
-											break; \
-										}
+												break; \
+											}
 
-									Read32Case(Rgb16, 16);
-									Read32Case(Bgr16, 16);
+										Read32Case(Rgb16, 16);
+										Read32Case(Bgr16, 16);
 
-									Read32Case(Rgb24, 24);
-									Read32Case(Bgr24, 24);
-									Read32Case(Xrgb32, 24);
-									Read32Case(Rgbx32, 24);
-									Read32Case(Xbgr32, 24);
-									Read32Case(Bgrx32, 24);
+										Read32Case(Rgb24, 24);
+										Read32Case(Bgr24, 24);
+										Read32Case(Xrgb32, 25);
+										Read32Case(Rgbx32, 25);
+										Read32Case(Xbgr32, 25);
+										Read32Case(Bgrx32, 25);
 
-									Read32Case(Rgba32, 32);
-									Read32Case(Bgra32, 32);
-									Read32Case(Argb32, 32);
-									Read32Case(Abgr32, 32);
-									default:
-										LgiTrace("%s:%i - Unsupported colour space: 0x%x (%s)\n",
-												_FL,	
-												pDC->GetColourSpace(),
-												LColourSpaceToString(pDC->GetColourSpace()));
-										LAssert(!"Not impl.");
-										if (Props)
-											Props->SetValue(LGI_FILTER_ERROR, v = "Missing scan convertor");
-										Error = true;
-										break;
+										Read32Case(Rgba32, 32);
+										Read32Case(Bgra32, 32);
+										Read32Case(Argb32, 32);
+										Read32Case(Abgr32, 32);
+										default:
+											LgiTrace("%s:%i - Unsupported colour space: 0x%x (%s)\n",
+													_FL,	
+													pDC->GetColourSpace(),
+													LColourSpaceToString(pDC->GetColourSpace()));
+											LAssert(!"Not impl.");
+											if (Props)
+												Props->SetValue(LGI_FILTER_ERROR, v = "Missing scan convertor");
+											Error = true;
+											break;
+									}
 								}
 								break;
 							}

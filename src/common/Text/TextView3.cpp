@@ -114,7 +114,7 @@ static LArray<LTextView3*> Ctrls;
 #endif
 
 //////////////////////////////////////////////////////////////////////
-class LDocFindReplaceParams3 :
+class LTextView3FindReplaceParams :
 	public LDocFindReplaceParams,
 	public LMutex
 {
@@ -127,7 +127,7 @@ public:
 	bool SelectionOnly;
 	bool SearchUpwards;
 	
-	LDocFindReplaceParams3() : LMutex("LDocFindReplaceParams3")
+	LTextView3FindReplaceParams() : LMutex("LTextView3FindReplaceParams")
 	{
 		MatchCase = false;
 		MatchWord = false;
@@ -161,7 +161,7 @@ public:
 
 	// Find/Replace Params
 	bool OwnFindReplaceParams = true;
-	LDocFindReplaceParams3 *FindReplaceParams = nullptr;
+	LTextView3FindReplaceParams *FindReplaceParams = nullptr;
 
 	// Map buffer
 	LArray<char16> MapBuf;
@@ -181,7 +181,7 @@ public:
 	{
 		UrlColour.Rgb(0, 0, 255);		
 		LColour::GetConfigColour("colour.L_URL", UrlColour);
-		FindReplaceParams = new LDocFindReplaceParams3;
+		FindReplaceParams = new LTextView3FindReplaceParams;
 	}
 	
 	~LTextView3Private()
@@ -2811,7 +2811,7 @@ void LTextView3::DoGoto(std::function<void(bool)> Callback)
 
 LDocFindReplaceParams *LTextView3::CreateFindReplaceParams()
 {
-	return new LDocFindReplaceParams3;
+	return new LTextView3FindReplaceParams;
 }
 
 void LTextView3::SetFindReplaceParams(LDocFindReplaceParams *Params)
@@ -2824,7 +2824,7 @@ void LTextView3::SetFindReplaceParams(LDocFindReplaceParams *Params)
 		}
 		
 		d->OwnFindReplaceParams = false;
-		d->FindReplaceParams = (LDocFindReplaceParams3*) Params;
+		d->FindReplaceParams = (LTextView3FindReplaceParams*) Params;
 	}
 }
 

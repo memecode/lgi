@@ -1031,6 +1031,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 									uint Bytes = (MAX_UNICODE + 1) >> 3;
 									if ((d->GlyphMap = new uchar[Bytes]))
 									{
+										memset(d->GlyphMap, 0, Bytes);
 										while (hb_set_next_range(unicode_set, &start, &end))
 										{
 											for (int i=start; i<=end; i++)
