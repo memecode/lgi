@@ -635,31 +635,38 @@ int LSocket::GetLocalPort()
 
 bool LSocket::GetLocalIp(char *IpAddr)
 {
-	if (IpAddr)
+	if (!IpAddr)
 	{
-		struct sockaddr_in addr;
-		socklen_t size;
-		
-		size = sizeof(addr);
-		if ((getsockname(Handle(), (sockaddr*)&addr, &size)) < 0)
-			return false;
-		
-		if (addr.sin_addr.s_addr == INADDR_ANY)
-			return false;
-		
-		uchar *a = (uchar*)&addr.sin_addr.s_addr;
-		sprintf_s(	IpAddr,
-					16,
-					"%i.%i.%i.%i",
-					a[0],
-					a[1],
-					a[2],
-					a[3]);
-	
-		return true;
+		LAssert(!"no dest buffer supplied");
+		return false;
 	}
 
-	return false;
+	struct sockaddr_in addr;
+	socklen_t size;
+	
+	size = sizeof(addr);
+	if ((getsockname(Handle(), (sockaddr*)&addr, &size)) < 0)
+	{
+		OnError(errno, "getsockname failed");
+		return false;
+	}
+	
+	if (addr.sin_addr.s_addr == INADDR_ANY)
+	{
+		OnError(errno, "s_addr != INADDR_ANY");
+		return false;
+	}
+	
+	uchar *a = (uchar*)&addr.sin_addr.s_addr;
+	sprintf_s(	IpAddr,
+				16,
+				"%i.%i.%i.%i",
+				a[0],
+				a[1],
+				a[2],
+				a[3]);
+
+	return true;
 }
 
 bool LSocket::GetRemoteIp(uint32_t *IpAddr)
@@ -1262,6 +1269,11 @@ void LSocket::OnError(int ErrorCode, const char *ErrorDescription)
 	d->ErrStr.Printf("Error(%i): %s", ErrorCode, ErrorDescription);
 }
 
+LError LSocket::GetError()
+{
+	return LError(d->LastError, d->ErrStr);
+}
+
 const char *LSocket::GetErrorString()
 {
 	return d->ErrStr;
@@ -1277,112 +1289,6 @@ int LSocket::Error(void *HostEntParam /* optional HOSTENT ptr */)
 	if (d->LastError == LErrorWouldBlock ||
 		d->LastError == EISCONN)
 		return 0;
-
-	/* This is probably redundant...
-	static class ErrorMsg {
-	public:
-		int Code;
-		const char *Msg;
-	}
-	ErrorCodes[] =
-	{
-		{0,					"Socket disconnected."},
-		{LErrorWouldBlock,	"Operation would block."},
-
-		#if defined WIN32
-		{WSAEACCES,			"Permission denied."},
-		{WSAEADDRINUSE,		"Address already in use."},
-		{WSAEADDRNOTAVAIL,	"Cannot assign requested address."},
-		{WSAEAFNOSUPPORT,	"Address family not supported by protocol family."},
-		{WSAEALREADY,		"Operation already in progress."},
-		{WSAECONNABORTED,	"Software caused connection abort."},
-		{WSAECONNREFUSED,	"Connection refused."},
-		{WSAECONNRESET,		"Connection reset by peer."},
-		{WSAEDESTADDRREQ,	"Destination address required."},
-		{WSAEFAULT,			"Bad address."},
-		{WSAEHOSTDOWN,		"Host is down."},
-		{WSAEHOSTUNREACH,	"No route to host."},
-		{WSAEINPROGRESS,	"Operation now in progress."},
-		{WSAEINTR,			"Interrupted function call."},
-		{WSAEINVAL,			"Invalid argument."},
-		{WSAEISCONN,		"Socket is already connected."},
-		{WSAEMFILE,			"Too many open files."},
-		{WSAEMSGSIZE,		"Message too long."},
-		{WSAENETDOWN,		"Network is down."},
-		{WSAENETRESET,		"Network dropped connection on reset."},
-		{WSAENETUNREACH,	"Network is unreachable."},
-		{WSAENOBUFS,		"No buffer space available."},
-		{WSAENOPROTOOPT,	"Bad protocol option."},
-		{WSAENOTCONN,		"Socket is not connected."},
-		{WSAENOTSOCK,		"Socket operation on non-socket."},
-		{WSAEOPNOTSUPP,		"Operation not supported."},
-		{WSAEPFNOSUPPORT,	"Protocol family not supported."},
-		{WSAEPROCLIM,		"Too many processes."},
-		{WSAEPROTONOSUPPORT,"Protocol not supported."},
-		{WSAEPROTOTYPE,		"Protocol wrong type for socket."},
-		{WSAESHUTDOWN,		"Cannot send after socket shutdown."},
-		{WSAESOCKTNOSUPPORT,"Socket type not supported."},
-		{WSAETIMEDOUT,		"Connection timed out."},
-		{WSAHOST_NOT_FOUND,	"Host not found."},
-		{WSANOTINITIALISED,	"Successful WSAStartup not yet performed."},
-		{WSANO_DATA,		"Valid name, no data record of requested type."},
-		{WSANO_RECOVERY,	"This is a non-recoverable error."},
-		{WSASYSNOTREADY,	"Network subsystem is unavailable."},
-		{WSATRY_AGAIN,		"Non-authoritative host not found."},
-		{WSAVERNOTSUPPORTED,"WINSOCK.DLL version out of range."},
-		{WSAEDISCON,		"Graceful shutdown in progress."},
-		#else
-		{EACCES,			"Permission denied."},
-		{EADDRINUSE,		"Address already in use."},
-		{EADDRNOTAVAIL,		"Cannot assign requested address."},
-		{EAFNOSUPPORT,		"Address family not supported by protocol family."},
-		{EALREADY,			"Operation already in progress."},
-		{ECONNABORTED,		"Software caused connection abort."},
-		{ECONNREFUSED,		"Connection refused."},
-		{ECONNRESET,		"Connection reset by peer."},
-		{EFAULT,			"Bad address."},
-		{EHOSTUNREACH,		"No route to host."},
-		{EINPROGRESS,		"Operation now in progress."},
-		{EINTR,				"Interrupted function call."},
-		{EINVAL,			"Invalid argument."},
-		{EISCONN,			"Socket is already connected."},
-		{EMFILE,			"Too many open files."},
-		{EMSGSIZE,			"Message too long."},
-		{ENETDOWN,			"Network is down."},
-		{ENETRESET,			"Network dropped connection on reset."},
-		{ENETUNREACH,		"Network is unreachable."},
-		{ENOBUFS,			"No buffer space available."},
-		{ENOPROTOOPT,		"Bad protocol option."},
-		{ENOTCONN,			"Socket is not connected."},
-		{ENOTSOCK,			"Socket operation on non-socket."},
-		{EOPNOTSUPP,		"Operation not supported."},
-		{EPFNOSUPPORT,		"Protocol family not supported."},
-		{EPROTONOSUPPORT,	"Protocol not supported."},
-		{EPROTOTYPE,		"Protocol wrong type for socket."},
-		{ESHUTDOWN,			"Cannot send after socket shutdown."},
-		{ETIMEDOUT,			"Connection timed out."},
-		{EWOULDBLOCK,		"Resource temporarily unavailable."},
-		{HOST_NOT_FOUND,	"Host not found."},
-		{NO_DATA,			"Valid name, no data record of requested type."},
-		{NO_RECOVERY,		"This is a non-recoverable error."},
-		{TRY_AGAIN,			"Non-authoritative host not found."},
-		{ETIMEOUT,			"Operation timed out."},
-		{EDESTADDRREQ,		"Destination address required."},
-		{EHOSTDOWN,			"Host is down."},
-		#ifndef HAIKU
-		{ESOCKTNOSUPPORT,	"Socket type not supported."},
-		#endif
-		
-		#endif
-		{-1, 0}
-	};
-
-	ErrorMsg *Error = ErrorCodes;
-	while (Error->Code >= 0 && Error->Code != d->LastError)
-	{
-		Error++;
-	}
-	*/
 
 	LString errMsg = LErrorCodeToString(d->LastError);
 
@@ -1400,7 +1306,6 @@ int LSocket::Error(void *HostEntParam /* optional HOSTENT ptr */)
 	{
 		OnError(d->LastError, errMsg ? errMsg.Get() : "<unknown error>");
 	}
-
 
 	switch (d->LastError)
 	{

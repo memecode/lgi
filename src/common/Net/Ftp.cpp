@@ -1280,22 +1280,32 @@ bool IFtp::SetupData(bool Binary, bool Debug)
 			}
 
 			// Ok, no PASV so we use the PORT command
-
 			// Port command
-			// static int p = (4<<8) | 27;
 
 			bool ListenStatus = false;
 			d->Listen.Reset(new LSocket);			// listen
 			if (d->Listen)
 			{
-				int To = Socket->GetTimeout();
+				auto To = Socket->GetTimeout();
 				d->Listen->SetTimeout(To);
 				if (d->Listen->Listen())
 				{
-					Socket->GetLocalIp(Ip);				// get current IP
-					Port = d->Listen->GetLocalPort();		// get current port
+					if (Socket->GetLocalIp(Ip)) // get current IP
+					{
+					    Socket->OnInformation(LString::Fmt("local ip=%s", Ip));
+					    Port = d->Listen->GetLocalPort();		// get current port
 
-					ListenStatus = true;
+    					ListenStatus = true;
+    				}
+    				else
+    				{
+    				    Socket->OnError(LErrorFuncFailed, "GetLocalIp failed.");
+    				}
+				}
+				else
+				{
+					d->Err = d->Listen->GetError();
+					Socket->OnError(d->Err.GetCode(), d->Err.GetMsg());
 				}
 			}
 
@@ -1331,12 +1341,19 @@ bool IFtp::ConnectData()
 {
 	if (PassiveMode)
 	{
-		auto result = d->Data->Open(Ip, Port);
+		// For FTPS, verify the data channel certificate against the original control host.
+		// PASV replies often return a raw IP that does not match certificate SAN/CN.
+		const char *connectHost = Ip;
+		if (d->UseTLS && d->Host)
+			connectHost = d->Host.Get();
+
+		Socket->OnInformation(LString::Fmt("connect data to '%s' %i", connectHost, Port));
+		auto result = d->Data->Open((char*)connectHost, Port);
 		if (result)
 			return true;
 		
 		if (!d->Err)
-			d->Err.Set(LErrorFuncFailed, LString::Fmt("Failed to open socket to '%s:%i'", Ip, Port));
+			d->Err.Set(LErrorFuncFailed, LString::Fmt("Failed to open socket to '%s:%i'", connectHost, Port));
 	}
 	else
 	{

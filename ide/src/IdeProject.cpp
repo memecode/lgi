@@ -118,23 +118,21 @@ bool FindInPath(LString &Exe)
 	return false;
 }
 
-LAutoString ToNativeStr(const char *s)
+LString ToNativeStr(const char *s)
 {
-	LAutoString a(NewStr(s));
+	LString a = s;
 	if (a)
 	{
-		if (strnicmp(a, "ftp://", 6))
+		if (!Strnicmp(a.Get(), "ftp://", 6) ||
+			!Strnicmp(a.Get(), "sftp://", 7))
+			; // don't remap the dir chars...
+		else
 		{
-			for (char *c = a; *c; c++)
-			{
-				#ifdef WIN32
-				if (*c == '/')
-					*c = '\\';
-				#else
-				if (*c == '\\')
-					*c = '/';
-				#endif
-			}
+			#ifdef WIN32
+			a = a.Replace("/", "\\");
+			#else
+			a = a.Replace("\\", "/");
+			#endif
 		}
 	}
 	return a;
@@ -873,7 +871,8 @@ public:
 						Inc.Add(pn, true);
 				}
 			}
-			const char *SysIncludes = d->Settings.GetStr(ProjSystemIncludes, NULL, Platform);
+			
+			auto SysIncludes = d->Settings.GetStr(ProjSystemIncludes, NULL, Platform);
 			if (ValidStr(SysIncludes))
 			{
 				// Add settings include paths.

@@ -361,6 +361,62 @@ static const char *FileLeaf(const char *f)
 	return l ? l + 1 : f;
 }
 
+static void NormalizeTlsHost(const char *in, char *out, size_t outSize)
+{
+	if (!out || outSize == 0)
+		return;
+
+	out[0] = 0;
+	if (!ValidStr(in))
+		return;
+
+	const char *host = in;
+	if (auto scheme = strstr(host, "://"))
+		host = scheme + 3;
+
+	if (auto at = strrchr(host, '@'))
+		host = at + 1;
+
+	auto len = strcspn(host, "/?#");
+	if (len >= outSize)
+		len = outSize - 1;
+
+	memcpy(out, host, len);
+	out[len] = 0;
+	if (!out[0])
+		return;
+
+	// Handle bracketed IPv6 host forms like [::1]:443.
+	if (out[0] == '[')
+	{
+		if (auto close = strchr(out, ']'))
+		{
+			auto v6Len = (size_t) (close - (out + 1));
+			memmove(out, out + 1, v6Len);
+			out[v6Len] = 0;
+		}
+		return;
+	}
+
+	// If this is host:port (single ':' and numeric suffix), strip the port.
+	char *firstColon = strchr(out, ':');
+	char *lastColon = strrchr(out, ':');
+	if (lastColon && firstColon == lastColon)
+	{
+		bool numericPort = lastColon[1] != 0;
+		for (char *p = lastColon + 1; *p; p++)
+		{
+			if (!IsDigit(*p))
+			{
+				numericPort = false;
+				break;
+			}
+		}
+		if (numericPort)
+			*lastColon = 0;
+	}
+}
+
 #undef _FL
 #define _FL FileLeaf(__FILE__), __LINE__
 
@@ -867,7 +923,14 @@ SslSocket::~SslSocket()
 
 LStreamI *SslSocket::Clone()
 {
-	return new SslSocket(log, d->Caps, true, false, false);
+	auto s = new SslSocket(log, d->Caps, true, false, false);
+	if (s)
+	{
+		s->SetTimeout(GetTimeout());
+		s->SetCertCallback(d->certCallback);
+		s->UserRef = UserRef;
+	}
+	return s;
 }
 
 LCancel *SslSocket::GetCancel()
@@ -903,6 +966,29 @@ LStreamI *SslSocket::GetLog()
 void SslSocket::SetCertCallback(TCertCallback certCallback)
 {
 	d->certCallback = certCallback;
+}
+
+bool SslSocket::GetLocalIp(char *IpAddr)
+{
+	if (!IpAddr)
+		return false;
+
+	auto sock = Library->SSL_get_fd(Ssl);
+	if (sock == INVALID_SOCKET)
+		return false;
+
+	struct sockaddr_in a;
+	socklen_t addrlen = sizeof(a);
+	if (getsockname(sock, (sockaddr*)&a, &addrlen))
+		return false;
+
+	auto ip = ntohl(a.sin_addr.s_addr);
+	auto str = LIpToStr(ip);
+	if (!str)
+		return false;
+
+	strcpy_s(IpAddr, 32, str);
+	return true;
 }
 
 bool SslSocket::GetRemoteIp(char *IpAddr)
@@ -1125,10 +1211,13 @@ DebugTrace("%s:%i - BIO_get_ssl=%p\n", _FL, Ssl);
 					if (Ssl)
 					{
 						Library->SSL_set_verify(Ssl, SSL_VERIFY_NONE, NULL); // handshake completes; result checked via SSL_get_verify_result
+						char tlsHost[256] = "";
+						NormalizeTlsHost(HostAddr, tlsHost, sizeof(tlsHost));
+						const char *verifyHost = tlsHost[0] ? tlsHost : HostAddr;
 
 						// SNI setup
-						Library->SSL_set_tlsext_host_name(Ssl, HostAddr);
-						if (!Library->SSL_set1_host(Ssl, HostAddr))
+						Library->SSL_set_tlsext_host_name(Ssl, verifyHost);
+						if (!Library->SSL_set1_host(Ssl, verifyHost))
 						{
 							HandleError(_FL, "SSL_set1_host failed.");
 						}
@@ -1219,6 +1308,19 @@ DebugTrace("%s:%i - open loop finished, r=%i, Cancelled=%i\n", _FL, r, d->Cancel
 									return id;
 								};
 
+							auto getPeerSubject = [&]() -> LString
+								{
+									LString subject;
+									if (auto cert = Library->SSL_get_peer_certificate(Ssl))
+									{
+										char txt[512] = "";
+										if (Library->X509_NAME_oneline(Library->X509_get_subject_name(cert), txt, sizeof(txt)))
+											subject = txt;
+										Library->X509_free(cert);
+									}
+									return subject;
+								};
+
 							auto getCertJson = [&](long verify) -> LString
 								{
 									LJson j;
@@ -1280,7 +1382,15 @@ DebugTrace("%s:%i - open loop finished, r=%i, Cancelled=%i\n", _FL, r, d->Cancel
 													break;
 											}
 										}
-										HandleError(_FL, LString::Fmt("TLS peer verify failed (%li): %s", verify, msg ? msg : "unknown").Get());
+										auto certSubject = getPeerSubject();
+										HandleError(_FL, LString::Fmt(
+											"TLS peer verify failed (%li): %s (verifyHost='%s', connectHost='%s', certSubject='%s')",
+											verify,
+											msg ? msg : "unknown",
+											verifyHost ? verifyHost : "",
+											HostAddr ? HostAddr : "",
+											certSubject ? certSubject.Get() : "")
+											.Get());
 									}
 								}
 								else

@@ -80,6 +80,7 @@ public:
 	void OnInformation(const char *Str) override;
 	int GetTimeout() override;
 	void SetTimeout(int ms) override;
+	bool GetLocalIp(char *IpAddr) override;
 	bool GetRemoteIp(char *IpAddr) override;
 
 	// Server

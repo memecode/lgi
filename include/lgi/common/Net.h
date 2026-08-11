@@ -247,7 +247,8 @@ public:
 	)	override;
 
 	/// Returns the last error or 0.
-	int Error(void *Param = 0) override;
+	int Error(void *Param = nullptr) override;
+	LError GetError();
 	const char *GetErrorString() override;
 
 	/// Not supported

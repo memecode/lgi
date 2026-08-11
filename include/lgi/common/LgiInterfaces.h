@@ -202,7 +202,7 @@ public:
 		(
 			/// Ptr to a buffer of at least 16 bytes
 			char *IpAddr
-		) { return false; }
+		)   = 0;
 		/// Return the port at this end of the connection
 		virtual int GetLocalPort() { return 0; }
 		/// Gets the remote IP

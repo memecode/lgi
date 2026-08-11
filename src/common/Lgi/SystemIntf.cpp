@@ -2723,7 +2723,9 @@ LAutoPtr<SystemIntf> CreateSystemInterface(	LView *parent,
 	LUri u(uri);
 	if (u.IsProtocol("ssh"))
 		backend.Reset(new SshBackend(parent, uri, log, readyCallback));
-	else if (u.IsProtocol("ftp"))
+	else if (u.IsProtocol("ftp") ||
+			 u.IsProtocol("sftp") ||
+			 u.IsProtocol("ftps"))
 		backend.Reset(new FtpBackend(parent, uri, log, readyCallback));
 	else	
 		backend.Reset(new LocalBackend(parent, uri, log, readyCallback));
