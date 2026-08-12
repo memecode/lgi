@@ -1606,7 +1606,7 @@ const LCharset *LCharsetSystem::GetCsInfo(const char *Cp)
 {
 	if (!Cp || !d)
 	{
-		printf("%s:%i - LCharsetSystem::GetCsInfo err: %p,%p.\n", _FL, Cp, d);
+		LStackTrace("%s:%i - LCharsetSystem::GetCsInfo err: %p,%p.\n", _FL, Cp, d);
 		return nullptr;
 	}
 

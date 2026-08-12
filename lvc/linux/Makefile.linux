@@ -19,8 +19,8 @@ CFlags = -MMD -MP -fPIC -fno-inline
 CppFlags = $(CFlags) -fpermissive -std=c++17
 
 ifeq ($(Build),Debug)
-	CFlags += -g
-	CppFlags += -g
+	CFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer -Wno-format-truncation
+	CppFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer -Wno-format-truncation
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DHAS_LIBSSH
 	Libs =  \
