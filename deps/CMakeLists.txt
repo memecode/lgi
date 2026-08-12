@@ -134,6 +134,7 @@ endif()
 if (1)
     # zlib
     set(ZLIB_BUILD_SHARED TRUE)
+    set(ZLIB_BUILD_STATIC FALSE)
     GitProject(zlib "https://github.com/madler/zlib.git" "develop" TRUE)
     if(LINUX)
         set_target_properties(zlib PROPERTIES
