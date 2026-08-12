@@ -49,7 +49,9 @@ def hasPackage(pkg):
 
 arch = []
 gen = ["Ninja"] # the default is ninja, except for Windows, which uses Visual Studio
+
 configs = ["Debug", "Release"]
+
 singleConfig = True
 universalCheck = []
 universalArchs = []

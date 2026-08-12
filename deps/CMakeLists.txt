@@ -6,6 +6,7 @@ project(lgiDeps)
 enable_language( C CXX ASM )
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
+
 if(UNIX AND NOT APPLE)
     set(LINUX TRUE)
 endif()
@@ -39,7 +40,7 @@ if (APPLE)
     list(APPEND EXTRA_ARGS "-DCMAKE_OSX_ARCHITECTURES=${CMAKE_OSX_ARCHITECTURES_}")
 endif()
 
-function(GitProject NAME URI BRANCH ADDTARGET)
+function(GitProject NAME URI BRANCH ADDTARGET CLONE_ERR_FATAL)
 
     set(DIR "${DEPS}/${NAME}")
     message(STATUS "${NAME} = ${DIR}")
@@ -48,8 +49,13 @@ function(GitProject NAME URI BRANCH ADDTARGET)
             RESULT_VARIABLE clone_result
             OUTPUT_VARIABLE clone_out)
         if(NOT ${clone_result} MATCHES "^[0-9]+$" OR ${clone_result})
-            message("git clone --recurse-submodules -b ${BRANCH} ${URI} ${DIR}")
-            message(FATAL_ERROR "${NAME} clone failed: ${clone_result} ${clone_out}")
+            message(STATUS "git clone --recurse-submodules -b ${BRANCH} ${URI} ${DIR}")
+            if(${CLONE_ERR_FATAL})
+                message(FATAL_ERROR "${NAME} clone failed: ${clone_result} ${clone_out}")
+            else()
+                message(WARNING "${NAME} clone failed: ${clone_result} ${clone_out}")
+                return()
+            endif()
         endif()
     endif()
 
@@ -84,7 +90,7 @@ if (1)
     else()
         set(ADD_JPEG_TARGET 1)
     endif()
-    GitProject(libjpeg "https://github.com/memecode/libjpeg.git" "memecode" ADD_JPEG_TARGET)
+    GitProject(libjpeg "https://github.com/memecode/libjpeg.git" "memecode" ADD_JPEG_TARGET TRUE)
     if(APPLE)
         
         # this is a hack to build each architecture of libjpeg separately and then combine them into a universal dylib
@@ -135,10 +141,13 @@ if (1)
     # zlib
     set(ZLIB_BUILD_SHARED TRUE)
     set(ZLIB_BUILD_STATIC FALSE)
-    GitProject(zlib "https://github.com/madler/zlib.git" "develop" TRUE)
+    GitProject(zlib "https://github.com/madler/zlib.git" "develop" TRUE TRUE)
     if(LINUX)
+        # this disambiguates the zlib target from the system zlib
         set_target_properties(zlib PROPERTIES
-            OUTPUT_NAME zlib-lgi)
+            OUTPUT_NAME z-lgi
+            VERSION "1.3.1"
+            SOVERSION "1")
     endif()
     install(TARGETS zlib # all of these should just be in the ./lib sub-folder
         RUNTIME
@@ -161,7 +170,7 @@ endif()
 if (NOT HAIKU)
     # used by ide/lvc
     set(WITH_ZLIB TRUE)
-    if (NOT USE_SYSTEM_ZLIB)
+    if (NOT USE_SYSTEM_ZLIB AND WIN32)
         # hack libssh's cmake into thinking zlib is available, when in reality it hasn't been built yet:
         set(ZLIB_LIBRARY "${DEPS}/build-x64/lib/zlib.dll")
     endif()
@@ -176,7 +185,11 @@ if (NOT HAIKU)
         _add_custom_target(${ARGV})
     endfunction()
 
-    GitProject(libssh "https://git.libssh.org/projects/libssh.git" "libssh-0.12.0" TRUE)
+    GitProject(libssh "https://git.libssh.org/projects/libssh.git" "libssh-0.12.0" TRUE FALSE)
+    if(NOT TARGET ssh)
+        message(STATUS "libssh main repo failed, falling back to github: https://github.com/libssh/libssh.git")
+        GitProject(libssh "https://github.com/memecode/libssh.git" "libssh-0.12.0" TRUE TRUE)
+    endif()
     if(NOT TARGET ssh)
         message(FATAL_ERROR "libssh should be a target at this point.")
     endif()
@@ -207,7 +220,7 @@ if (NOT HAIKU)
 endif()
 
 if (1)
-    GitProject(libpng  "https://github.com/memecode/libpng.git" "libpng16" TRUE)
+    GitProject(libpng  "https://github.com/memecode/libpng.git" "libpng16" TRUE TRUE)
     if(LINUX)
         set_target_properties(png_shared PROPERTIES
             OUTPUT_NAME png16-lgi)
@@ -221,18 +234,18 @@ endif()
 
 if (1)
     # lunasvg
-    GitProject(lunasvg "https://github.com/sammycage/lunasvg.git" "master" TRUE)
+    GitProject(lunasvg "https://github.com/sammycage/lunasvg.git" "master" TRUE TRUE)
     if(LINUX)
         target_compile_options(lunasvg PRIVATE -fPIC)
         target_compile_options(plutovg PRIVATE -fPIC)
     endif()
 
     # libiconv
-    GitProject(libiconv "https://github.com/winlibs/libiconv.git" "master" TRUE)
+    GitProject(libiconv "https://github.com/winlibs/libiconv.git" "master" TRUE TRUE)
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/libiconv)
 
     # libntlm
-    GitProject(libntlm "https://gitlab.com/gsasl/libntlm.git" "master" TRUE)
+    GitProject(libntlm "https://gitlab.com/gsasl/libntlm.git" "master" TRUE TRUE)
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/libntlm)
 endif()
 
@@ -240,7 +253,7 @@ if (1)
     if(WIN32)
         if(CMAKE_GENERATOR STREQUAL "Visual Studio 16 2019")
             # vs2019 doesn't have 'stdatomic.h', grab one from here:
-            GitProject(simple-stdatomic "https://github.com/zenny-chen/simple-stdatomic-for-VS-Clang.git" "master" FALSE)
+            GitProject(simple-stdatomic "https://github.com/zenny-chen/simple-stdatomic-for-VS-Clang.git" "master" FALSE TRUE)
             set(STDATOMIC_ROOT "${DEPS}/simple-stdatomic")
             set(EMSCRIPTEN FALSE)
 
@@ -254,7 +267,7 @@ if (1)
     endif()
 
     # unused at the moment, but might replace Lgi's native scripting language sometime
-    GitProject(quickjs-ng "https://github.com/quickjs-ng/quickjs.git" "master" TRUE)
+    GitProject(quickjs-ng "https://github.com/quickjs-ng/quickjs.git" "master" TRUE TRUE)
 
     if(DEFINED STDATOMIC_ROOT)
         # add custom header path:
