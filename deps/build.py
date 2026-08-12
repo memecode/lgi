@@ -233,3 +233,11 @@ for n in range(len(subfolders)):
                     print("output:", output)
                     sys.exit(-1)
 
+if platform.system() == "Linux":
+    renameLink = os.path.join(curFolder, "libpng", "rename_link.py")
+    print("Running:", renameLink)
+    p = subprocess.run(["python3", renameLink, depsFolder], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    print("Output:", p.stdout.decode())
+    if p.returncode:
+        print("Error: rename_link.py failed.")
+        sys.exit(-1)

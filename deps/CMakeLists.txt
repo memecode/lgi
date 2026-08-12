@@ -4,6 +4,8 @@ set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(CMAKE_POLICY_DEFAULT_CMP0091 NEW)
 project(lgiDeps)
 enable_language( C CXX ASM )
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+
 if(UNIX AND NOT APPLE)
     set(LINUX TRUE)
 endif()
@@ -133,6 +135,10 @@ if (1)
     # zlib
     set(ZLIB_BUILD_SHARED TRUE)
     GitProject(zlib "https://github.com/madler/zlib.git" "develop" TRUE)
+    if(LINUX)
+        set_target_properties(zlib PROPERTIES
+            OUTPUT_NAME zlib-lgi)
+    endif()
     install(TARGETS zlib # all of these should just be in the ./lib sub-folder
         RUNTIME
             DESTINATION ${CMAKE_BINARY_DIR}/lib
@@ -201,6 +207,10 @@ endif()
 
 if (1)
     GitProject(libpng  "https://github.com/memecode/libpng.git" "libpng16" TRUE)
+    if(LINUX)
+        set_target_properties(png_shared PROPERTIES
+            OUTPUT_NAME png16-lgi)
+    endif()
     install(TARGETS png_shared
         RUNTIME
             DESTINATION ${CMAKE_BINARY_DIR}/bin
