@@ -143,12 +143,9 @@ VersionCtrl AppPriv::DetectVcs(VcFolder *Fld)
 		return VcPending;
 	}
 
-	LgiTrace("%s:%i - u.sPath='%s'\n", _FL, u.sPath.Get());
 	auto Path = LUri::DecodeStr(u.sPath).RStrip("/");
-	LgiTrace("%s:%i - Path='%s'\n", _FL, Path.Get());
 	#if WINDOWS
 	Path = Path.LStrip("/");
-	LgiTrace("%s:%i - Path='%s'\n", _FL, Path.Get());
 	#endif
 	if (!Path)
 	{
