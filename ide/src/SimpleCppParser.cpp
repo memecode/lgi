@@ -105,7 +105,7 @@ bool ParseFunction(LRange &Return, LRange &Name, LRange &Args, const char *Defn)
 				Depth--;
 			else
 			{
-				LgiTrace("%s:%i - Fn parse error '%s' (%i)\n", _FL, Defn, (int)(c - Defn));
+				// LgiTrace("%s:%i - Fn parse error '%s' (%i)\n", _FL, Defn, (int)(c - Defn));
 				return false;
 			}
 		}

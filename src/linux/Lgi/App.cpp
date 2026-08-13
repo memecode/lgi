@@ -1367,8 +1367,10 @@ LApp::DesktopInfo *LApp::GetDesktopInfo(const char *gnomeAppType)
 			LgiTrace("%s:%i - Failed to update desktop file '%s'\n", _FL, Desktop.GetFull().Get());
 			return NULL;
 		}
+		
+		system("update-desktop-database ~/.local/share/applications");	
 	}
-	
+
 	return d->DesktopInfo;
 }
 

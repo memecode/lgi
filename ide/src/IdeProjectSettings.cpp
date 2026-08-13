@@ -194,7 +194,7 @@ struct IdeProjectSettingsPriv
 
 public:
 	IdeProject *Project = NULL;
-	LHashTbl<IntKey<int>, SettingInfo*> Map;
+	LHashTbl<IntKey<int>, SettingInfo*, true/* FIXME: locking...? */> Map;
 	IdeProjectSettings *Parent = NULL;
 	LXmlTag Active;
 	LXmlTag Editing;
@@ -1113,7 +1113,7 @@ int IdeProjectSettings::GetInt(ProjSetting Setting, int Default, SysPlatform Pla
 {
 	int Status = Default;
 
-	SettingInfo *s = d->Map.Find(Setting);
+	auto s = d->Map.Find(Setting);
 	LAssert(s);
 	
 	if (!s->Flag.PlatformSpecific)
