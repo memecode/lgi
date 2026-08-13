@@ -685,6 +685,7 @@ public:
 				BuildModeName);
 		m.Print("MakeDir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))\n");
 		
+		LString sVariables; // global makefile vars
 		LString sDefines[BuildMax];
 		LString sLibs[BuildMax];
 		LString sIncludes[BuildMax];
@@ -767,7 +768,7 @@ public:
 			LString PLibPaths = d->Settings.GetStr(ProjLibraryPaths, NULL, Platform);
 			if (ValidStr(PLibPaths))
 			{
-				LString::Array LibPaths = PLibPaths.Split("\n");
+				auto LibPaths = PLibPaths.Split("\n");
 				for (auto i: LibPaths)
 				{
 					LString s, in = i.Strip();
@@ -797,7 +798,7 @@ public:
 				}
 			}
 
-			const char *PLibs = d->Settings.GetStr(ProjLibraries, NULL, Platform);
+			auto PLibs = d->Settings.GetStr(ProjLibraries, NULL, Platform);
 			if (ValidStr(PLibs))
 			{
 				LToken Libs(PLibs, "\r\n");
@@ -821,15 +822,14 @@ public:
 			{
 				if (!dep)
 					continue;
-				LString Target = dep->GetTargetName(Platform);
-				if (Target)
+				
+				if (auto Target = dep->GetTargetName(Platform))
 				{
 					char t[MAX_PATH_LEN];
 					strcpy_s(t, sizeof(t), Target);
 					if (!strnicmp(t, "lib", 3))
 						memmove(t, t + 3, strlen(t + 3) + 1);
-					char *dot = strrchr(t, '.');
-					if (dot)
+					if (auto dot = strrchr(t, '.'))
 						*dot = 0;
 													
 					LString s, sTarget = t;
@@ -837,8 +837,7 @@ public:
 					s.Printf(" \\\n\t\t-l%s$(Tag)", ToUnixPath(sTarget));
 					sLibs[Cfg] += s;
 
-					auto DepBase = dep->GetBasePath();
-					if (DepBase)
+					if (auto DepBase = dep->GetBasePath())
 					{
 						LString DepPath = DepBase.Get();
 						
@@ -848,6 +847,15 @@ public:
 						Proj->CheckExists(Final);
 						s.Printf(" \\\n\t\t-L%s/$(BuildDir)", ToUnixPath(Final.RStrip("/\\")));
 						sLibs[Cfg] += s;
+
+						sVariables += LString::Fmt("%s_DIR=%s\n", sTarget.Upper().Get(), Rel.Get());
+
+						/* FIXME: this needs to be added in somewhere for lgi:
+							
+							-L../../deps/build-x64-debug/lib \
+							-Wl,-rpath-link,../../deps/build-x64-debug/lib \
+							-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/../../deps/build-x64-debug/lib' \
+						*/
 					}
 				}
 			}
@@ -924,6 +932,8 @@ public:
 		}
 
 		// Output the defs section for Debug and Release
+		if (sVariables)
+			m.Print("%s", sVariables.Get());
 
 		// Debug specific
 		m.Print("\n"
@@ -3784,6 +3794,19 @@ LString IdeProject::GetBuildFolder() const
 void IdeProject::SetBuildFolder(LString folder)
 {
 	d->BuildFolder = folder;
+}
+
+LString IdeProject::GetExternalDependancyRPath(BuildConfig Config, SysPlatform Platform)
+{
+	if (Platform == PlatformLinux)
+	{
+		// FIXME: if (LGI) return the deps build folder... for linux
+		if (auto cfg = toString(Config))
+		{
+		}
+	}
+
+	return LString();
 }
 
 void IdeProject::Refresh()

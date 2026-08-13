@@ -181,6 +181,7 @@ public:
 	LString GetBuildFolder() const;
 	void SetBuildFolder(LString folder);
 	void Refresh();
+	LString GetExternalDependancyRPath(BuildConfig Config, SysPlatform Platform);
 
 	// User file settings
 	bool GetExpanded(int Id);

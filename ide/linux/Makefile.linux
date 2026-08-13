@@ -24,6 +24,9 @@ ifeq ($(Build),Debug)
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DHAS_LIBSSH -DSSH_SUPPRESS_DEPRECATED
 	Libs =  \
+		-L../../deps/build-x64-debug/lib \
+		-Wl,-rpath-link,../../deps/build-x64-debug/lib \
+		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/../../deps/build-x64-debug/lib' \
 		-lssh \
 		-lmagic \
 		-lpthread \
@@ -46,6 +49,9 @@ else
 	CppFlags += -g -Os -Wno-format-truncation
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DHAS_LIBSSH -DSSH_SUPPRESS_DEPRECATED
 	Libs =  \
+		-L../../deps/build-x64-debug/lib \
+		-Wl,-rpath-link,../../deps/build-x64-debug/lib \
+		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/../../deps/build-x64-debug/lib' \
 		-lssh \
 		-lmagic \
 		-lpthread \

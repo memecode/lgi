@@ -59,7 +59,14 @@ typedef LRgba64 	Png64;
 const char *LinuxLibName()
 {
 	static char lib[64];
-	sprintf_s(lib, sizeof(lib), "libpng%i", PNG_LIBPNG_VER_SONUM);
+	sprintf_s(lib, sizeof(lib), "libpng%i-lgi%s",
+		PNG_LIBPNG_VER_SONUM,
+		#ifdef _DEBUG
+		"d");
+		#else
+		"");
+		#endif
+		
 	printf("png lib name = '%s'\n", lib);
 	return lib;
 }
@@ -479,7 +486,7 @@ void PNGAPI LibPngWrite(png_structp Png, png_bytep Ptr, png_size_t Size)
 						#if LIBPNG_SHARED
 						CurrentLibPng.Get()->
 						#endif
-						png_get_io_ptr(Png);
+												png_get_io_ptr(Png);
 	if (i)
 	{
 		i->s->Write(Ptr, Size);

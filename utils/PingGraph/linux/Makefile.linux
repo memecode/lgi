@@ -24,6 +24,9 @@ ifeq ($(Build),Debug)
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
+		-L../../../deps/build-x64-debug/lib \
+		-Wl,-rpath-link,../../../deps/build-x64-debug/lib \
+		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/../../../deps/build-x64-debug/lib' \
 		`pkg-config --libs gtk+-3.0` \
 		-llgi-gtk3$(Tag) \
 		-L../../$(BuildDir)
@@ -37,6 +40,9 @@ else
 	CppFlags += -s -Os
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
+		-L../../../deps/build-x64-debug/lib \
+		-Wl,-rpath-link,../../../deps/build-x64-debug/lib \
+		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/../../../deps/build-x64-debug/lib' \
 		`pkg-config --libs gtk+-3.0` \
 		-llgi-gtk3$(Tag) \
 		-L../../$(BuildDir)

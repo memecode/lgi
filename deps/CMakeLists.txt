@@ -146,8 +146,8 @@ if (1)
         # this disambiguates the zlib target from the system zlib
         set_target_properties(zlib PROPERTIES
             OUTPUT_NAME z-lgi
-            VERSION "1.3.1"
-            SOVERSION "1")
+            BUILD_RPATH "$ORIGIN"
+            INSTALL_RPATH "$ORIGIN")
     endif()
     install(TARGETS zlib # all of these should just be in the ./lib sub-folder
         RUNTIME
@@ -222,8 +222,13 @@ endif()
 if (1)
     GitProject(libpng  "https://github.com/memecode/libpng.git" "libpng16" TRUE TRUE)
     if(LINUX)
+        target_link_options(png_shared PRIVATE
+            "LINKER:-Bsymbolic-functions"
+        )
         set_target_properties(png_shared PROPERTIES
-            OUTPUT_NAME png16-lgi)
+            OUTPUT_NAME png16-lgi
+            BUILD_RPATH "$ORIGIN"
+            INSTALL_RPATH "$ORIGIN")
     endif()
     install(TARGETS png_shared
         RUNTIME
@@ -237,7 +242,14 @@ if (1)
     GitProject(lunasvg "https://github.com/sammycage/lunasvg.git" "master" TRUE TRUE)
     if(LINUX)
         target_compile_options(lunasvg PRIVATE -fPIC)
+        set_target_properties(lunasvg PROPERTIES
+            BUILD_RPATH "$ORIGIN"
+            INSTALL_RPATH "$ORIGIN")
+
         target_compile_options(plutovg PRIVATE -fPIC)
+        set_target_properties(plutovg PROPERTIES
+            BUILD_RPATH "$ORIGIN"
+            INSTALL_RPATH "$ORIGIN")
     endif()
 
     # libiconv
