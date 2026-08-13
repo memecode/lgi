@@ -1338,6 +1338,11 @@ LApp::DesktopInfo *LApp::GetDesktopInfo(const char *gnomeAppType)
 	Leaf.Printf("%s.desktop", Exe.Last().Get());
 	
 	Desktop += ".local/share/applications";
+	if (!Desktop.IsFolder() && !d->FileSystem->CreateFolder(Desktop, true))
+	{
+		LgiTrace("%s:%i - Failed to create desktop applications folder '%s'\n", _FL, Desktop.GetFull().Get());
+		return NULL;
+	}
 	Desktop += Leaf;
 	
 	const char *Ex = Exe;
@@ -1357,7 +1362,11 @@ LApp::DesktopInfo *LApp::GetDesktopInfo(const char *gnomeAppType)
 			LAssert(!"no app type?");
 
 		d->DesktopInfo->Set("Terminal", "false");		
-		d->DesktopInfo->Update();
+		if (!d->DesktopInfo->Update())
+		{
+			LgiTrace("%s:%i - Failed to update desktop file '%s'\n", _FL, Desktop.GetFull().Get());
+			return NULL;
+		}
 	}
 	
 	return d->DesktopInfo;
