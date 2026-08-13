@@ -17,23 +17,24 @@ BuildDir = $(Build)
 
 CFlags = -MMD -MP -fPIC -fno-inline
 CppFlags = $(CFlags) -fpermissive -std=c++17
+LGI_GTK3_DIR=..
 
 ifeq ($(Build),Debug)
-	CFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer -Wno-format-truncation
-	CppFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer -Wno-format-truncation
+	CFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer
+	CppFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DHAS_LIBSSH
 	Libs =  \
-		-L../../deps/build-x64-debug/lib \
-		-Wl,-rpath-link,../../deps/build-x64-debug/lib \
-		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/../../deps/build-x64-debug/lib' \
 		-lmagic \
 		-lssh \
 		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0` \
 		-pthread \
 		-llgi-gtk3$(Tag) \
-		-L../$(BuildDir)
+		-L../$(BuildDir) \
+		-L$(LGI_GTK3_DIR)/../deps/build-x64-debug/lib \
+		-Wl,-rpath-link,$(LGI_GTK3_DIR)/../deps/build-x64-debug/lib \
+		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/../deps/build-x64-debug/lib'
 	Inc =  \
 		-I../include \
 		-I../include/lgi/linux \
@@ -44,20 +45,20 @@ ifeq ($(Build),Debug)
 		-Iresources \
 		-Isrc
 else
-	CFlags += -s -Os
-	CppFlags += -s -Os
+	CFlags += -g -Os
+	CppFlags += -g -Os
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DHAS_LIBSSH
 	Libs =  \
-		-L../../deps/build-x64-release/lib \
-		-Wl,-rpath-link,../../deps/build-x64-release/lib \
-		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/../../deps/build-x64-release/lib' \
 		-lmagic \
 		-lssh \
 		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0` \
 		-pthread \
 		-llgi-gtk3$(Tag) \
-		-L../$(BuildDir)
+		-L../$(BuildDir) \
+		-L$(LGI_GTK3_DIR)/../deps/build-x64-release/lib \
+		-Wl,-rpath-link,$(LGI_GTK3_DIR)/../deps/build-x64-release/lib \
+		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/../deps/build-x64-release/lib'
 	Inc =  \
 		-I../include \
 		-I../include/lgi/linux \
@@ -110,7 +111,7 @@ $(BuildDir)/%.o: %.cpp
 $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	mkdir -p $(BuildDir)
 	@echo Linking $(Target) [$(Build)]...
-	$(CPP) -Wl,-export-dynamic,-R. -o \
+	$(CPP) -Wl,-export-dynamic,-R.,--build-id -o \
 		$(Target) $(Objects) $(Libs)
 	@echo Done.
 
@@ -195,6 +196,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/Net.h \
 	../include/lgi/common/Notifications.h \
 	../include/lgi/common/OAuth2.h \
+	../include/lgi/common/OpenSSLSocket.h \
 	../include/lgi/common/OptionsFile.h \
 	../include/lgi/common/Palette.h \
 	../include/lgi/common/Panel.h \

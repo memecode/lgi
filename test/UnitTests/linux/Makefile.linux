@@ -15,61 +15,62 @@ endif
 MakeDir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 BuildDir = $(Build)
 
-CFlags = -MMD -MP -g -fPIC -fno-inline
+CFlags = -MMD -MP -fPIC -fno-inline
 CppFlags = $(CFlags) -fpermissive -std=c++17
+LGI_GTK3_DIR=../..
 
 ifeq ($(Build),Debug)
-	CFlags += -g
-	CppFlags += -g
+	CFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer
+	CppFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DLGI_UNIT_TESTS
 	Libs =  \
-		-L../../../deps/build-x64-debug/lib \
-		-Wl,-rpath-link,../../../deps/build-x64-debug/lib \
-		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/../../../deps/build-x64-debug/lib' \
 		-lpthread \
 		`pkg-config --libs gtk+-3.0` \
 		-static-libgcc \
 		-llgi-gtk3$(Tag) \
-		-L../../$(BuildDir)
+		-L../../$(BuildDir) \
+		-L$(LGI_GTK3_DIR)/../deps/build-x64-debug/lib \
+		-Wl,-rpath-link,$(LGI_GTK3_DIR)/../deps/build-x64-debug/lib \
+		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/../deps/build-x64-debug/lib'
 	Inc =  \
-		`pkg-config --cflags gtk+-3.0` \
-		-I../../include/lgi/linux/Gtk \
+		-I../../include \
 		-I../../include/lgi/linux \
-		-I../../include
+		-I../../include/lgi/linux/Gtk \
+		`pkg-config --cflags gtk+-3.0`
 else
-	CFlags += -s -Os
-	CppFlags += -s -Os
+	CFlags += -g -Os
+	CppFlags += -g -Os
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DLGI_UNIT_TESTS
 	Libs =  \
-		-L../../../deps/build-x64-debug/lib \
-		-Wl,-rpath-link,../../../deps/build-x64-debug/lib \
-		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/../../../deps/build-x64-debug/lib' \
 		-lpthread \
 		`pkg-config --libs gtk+-3.0` \
 		-static-libgcc \
 		-llgi-gtk3$(Tag) \
-		-L../../$(BuildDir)
+		-L../../$(BuildDir) \
+		-L$(LGI_GTK3_DIR)/../deps/build-x64-release/lib \
+		-Wl,-rpath-link,$(LGI_GTK3_DIR)/../deps/build-x64-release/lib \
+		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/../deps/build-x64-release/lib'
 	Inc =  \
-		`pkg-config --cflags gtk+-3.0` \
-		-I../../include/lgi/linux/Gtk \
+		-I../../include \
 		-I../../include/lgi/linux \
-		-I../../include
+		-I../../include/lgi/linux/Gtk \
+		`pkg-config --cflags gtk+-3.0`
 endif
 
 # Dependencies
-Source =	src/XmlTest.cpp \
-			src/UnitTests.cpp \
-			src/StringTests.cpp \
-			src/StringClassTests.cpp \
-			src/RangeTest.cpp \
-			src/NetworkTests.cpp \
-			src/MatrixTest.cpp \
-			src/JsonTest.cpp \
-			src/CssTest.cpp \
-			src/ContainerTests.cpp \
+Source =	src/AutoPtrTest.cpp \
 			src/BitsTest.cpp \
-			src/AutoPtrTest.cpp
+			src/ContainerTests.cpp \
+			src/CssTest.cpp \
+			src/JsonTest.cpp \
+			src/MatrixTest.cpp \
+			src/NetworkTests.cpp \
+			src/RangeTest.cpp \
+			src/StringClassTests.cpp \
+			src/StringTests.cpp \
+			src/UnitTests.cpp \
+			src/XmlTest.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -94,7 +95,7 @@ $(BuildDir)/%.o: %.cpp
 $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	mkdir -p $(BuildDir)
 	@echo Linking $(Target) [$(Build)]...
-	$(CPP) -Wl,-export-dynamic,-R. -o \
+	$(CPP) -Wl,-export-dynamic,-R.,--build-id -o \
 		$(Target) $(Objects) $(Libs)
 	@echo Done.
 
@@ -115,6 +116,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/ColourSpace.h \
 	../../include/lgi/common/Com.h \
 	../../include/lgi/common/Combo.h \
+	../../include/lgi/common/CommsBus.h \
 	../../include/lgi/common/Containers.h \
 	../../include/lgi/common/Core.h \
 	../../include/lgi/common/Css.h \
@@ -147,6 +149,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/ImageList.h \
 	../../include/lgi/common/Input.h \
 	../../include/lgi/common/ItemContainer.h \
+	../../include/lgi/common/Jpeg.h \
 	../../include/lgi/common/Json.h \
 	../../include/lgi/common/Layout.h \
 	../../include/lgi/common/Lgi.h \
@@ -165,6 +168,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/ListItemCheckBox.h \
 	../../include/lgi/common/ListItemRadioBtn.h \
 	../../include/lgi/common/LMallocArray.h \
+	../../include/lgi/common/Lzw.h \
 	../../include/lgi/common/Mail.h \
 	../../include/lgi/common/Matrix.h \
 	../../include/lgi/common/Mem.h \
@@ -176,6 +180,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/Net.h \
 	../../include/lgi/common/Notifications.h \
 	../../include/lgi/common/OAuth2.h \
+	../../include/lgi/common/OpenSSLSocket.h \
 	../../include/lgi/common/OptionsFile.h \
 	../../include/lgi/common/Palette.h \
 	../../include/lgi/common/Panel.h \
@@ -200,10 +205,12 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/RegKey.h \
 	../../include/lgi/common/Res.h \
 	../../include/lgi/common/Rops.h \
+	../../include/lgi/common/Roster.h \
 	../../include/lgi/common/ScrollBar.h \
 	../../include/lgi/common/SkinEngine.h \
 	../../include/lgi/common/Slider.h \
 	../../include/lgi/common/Splitter.h \
+	../../include/lgi/common/Stat.h \
 	../../include/lgi/common/StatusBar.h \
 	../../include/lgi/common/Store3Defs.h \
 	../../include/lgi/common/Stream.h \
@@ -219,6 +226,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/TextLabel.h \
 	../../include/lgi/common/TextLog.h \
 	../../include/lgi/common/TextView3.h \
+	../../include/lgi/common/TextView4.h \
 	../../include/lgi/common/Thread.h \
 	../../include/lgi/common/ThreadEvent.h \
 	../../include/lgi/common/TimeZoneInfo.h \
@@ -228,6 +236,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/TrayIcon.h \
 	../../include/lgi/common/Tree.h \
 	../../include/lgi/common/TypeToString.h \
+	../../include/lgi/common/UdpTransport.h \
 	../../include/lgi/common/Undo.h \
 	../../include/lgi/common/Unicode.h \
 	../../include/lgi/common/UnicodeString.h \
@@ -260,6 +269,11 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/common/Gdc2/Alpha.cpp \
 	../../src/common/Gdc2/Colour.cpp \
 	../../src/common/Gdc2/Filters/Filter.cpp \
+	../../src/common/Gdc2/Filters/Gif.cpp \
+	../../src/common/Gdc2/Filters/Jpeg.cpp \
+	../../src/common/Gdc2/Filters/Lzw.cpp \
+	../../src/common/Gdc2/Filters/Png.cpp \
+	../../src/common/Gdc2/Filters/Svg.cpp \
 	../../src/common/Gdc2/Font/Charset.cpp \
 	../../src/common/Gdc2/Font/DisplayString.cpp \
 	../../src/common/Gdc2/Font/Font.cpp \
@@ -280,6 +294,8 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/common/General/FileCommon.cpp \
 	../../src/common/General/Password.cpp \
 	../../src/common/General/Properties.cpp \
+	../../src/common/General/SubProcessCommon.cpp \
+	../../src/common/General/TimeZone.cpp \
 	../../src/common/Hash/md5/md5.c \
 	../../src/common/Hash/md5/md5.h \
 	../../src/common/Hash/sha1/sha1.c \
@@ -315,6 +331,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/common/Lgi/ViewCommon.cpp \
 	../../src/common/Lgi/WindowCommon.cpp \
 	../../src/common/Net/Base64.cpp \
+	../../src/common/Net/CommsBus.cpp \
 	../../src/common/Net/MDStringToDigest.cpp \
 	../../src/common/Net/Net.cpp \
 	../../src/common/Net/Uri.cpp \
@@ -325,6 +342,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/common/Text/String.cpp \
 	../../src/common/Text/TextConvert.cpp \
 	../../src/common/Text/TextView3.cpp \
+	../../src/common/Text/TextView4.cpp \
 	../../src/common/Text/Token.cpp \
 	../../src/common/Text/Unicode.cpp \
 	../../src/common/Text/Utf8.cpp \
@@ -361,6 +379,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/linux/Gtk/ScreenDC.cpp \
 	../../src/linux/Lgi/App.cpp \
 	../../src/linux/Lgi/ClipBoard.cpp \
+	../../src/linux/Lgi/Dialog.cpp \
 	../../src/linux/Lgi/DragAndDrop.cpp \
 	../../src/linux/Lgi/General.cpp \
 	../../src/linux/Lgi/Layout.cpp \
@@ -368,8 +387,8 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/linux/Lgi/Printer.cpp \
 	../../src/linux/Lgi/Thread.cpp \
 	../../src/linux/Lgi/View.cpp \
-	../../src/linux/Lgi/Dialog.cpp \
 	../../src/linux/Lgi/Window.cpp \
+	../../src/posix/Roster.cpp \
 	../../src/posix/SubProcess.cpp
 	export Build=$(Build); \
 	$(MAKE) -C ../../ -f ./linux/Makefile.linux

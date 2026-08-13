@@ -17,52 +17,53 @@ BuildDir = $(Build)
 
 CFlags = -MMD -MP -fPIC -fno-inline
 CppFlags = $(CFlags) -fpermissive -std=c++17
+LGI_GTK3_DIR=../..
 
 ifeq ($(Build),Debug)
-	CFlags += -g
-	CppFlags += -g
+	CFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer
+	CppFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
-		-L../../../deps/build-x64-debug/lib \
-		-Wl,-rpath-link,../../../deps/build-x64-debug/lib \
-		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/../../../deps/build-x64-debug/lib' \
 		-lmagic \
 		-lpthread \
 		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0` \
 		-llgi-gtk3$(Tag) \
-		-L../../$(BuildDir)
+		-L../../$(BuildDir) \
+		-L$(LGI_GTK3_DIR)/../deps/build-x64-debug/lib \
+		-Wl,-rpath-link,$(LGI_GTK3_DIR)/../deps/build-x64-debug/lib \
+		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/../deps/build-x64-debug/lib'
 	Inc =  \
 		-I../../include \
-		`pkg-config --cflags gtk+-3.0` \
+		-I../../include/lgi/linux/Gtk \
 		`pkg-config --cflags gstreamer-1.0` \
-		-I../../include/lgi/linux/Gtk
+		`pkg-config --cflags gtk+-3.0`
 else
-	CFlags += -s -Os
-	CppFlags += -s -Os
+	CFlags += -g -Os
+	CppFlags += -g -Os
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
-		-L../../../deps/build-x64-debug/lib \
-		-Wl,-rpath-link,../../../deps/build-x64-debug/lib \
-		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/../../../deps/build-x64-debug/lib' \
 		-lmagic \
 		-lpthread \
 		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0` \
 		-llgi-gtk3$(Tag) \
-		-L../../$(BuildDir)
+		-L../../$(BuildDir) \
+		-L$(LGI_GTK3_DIR)/../deps/build-x64-release/lib \
+		-Wl,-rpath-link,$(LGI_GTK3_DIR)/../deps/build-x64-release/lib \
+		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/../deps/build-x64-release/lib'
 	Inc =  \
 		-I../../include \
-		`pkg-config --cflags gtk+-3.0` \
 		-I../../include/lgi/linux/Gtk \
-		`pkg-config --cflags gstreamer-1.0`
+		`pkg-config --cflags gstreamer-1.0` \
+		`pkg-config --cflags gtk+-3.0`
 endif
 
 # Dependencies
-Source =	src/Main.cpp \
-			../../src/common/Db/DbTable.cpp \
-			../../src/common/Lgi/LgiMain.cpp
+Source =	../../src/common/Db/DbTable.cpp \
+			../../src/common/Lgi/LgiMain.cpp \
+			src/Main.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -87,12 +88,11 @@ $(BuildDir)/%.o: %.cpp
 $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	mkdir -p $(BuildDir)
 	@echo Linking $(Target) [$(Build)]...
-	$(CPP) -Wl,-export-dynamic,-R. -o \
+	$(CPP) -Wl,-export-dynamic,-R.,--build-id -o \
 		$(Target) $(Objects) $(Libs)
 	@echo Done.
 
-../../$(BuildDir)/liblgi-gtk3$(Tag).so : \
-	../../include/lgi/common/App.h \
+../../$(BuildDir)/liblgi-gtk3$(Tag).so : ../../include/lgi/common/App.h \
 	../../include/lgi/common/Array.h \
 	../../include/lgi/common/AutoPtr.h \
 	../../include/lgi/common/Base64.h \
@@ -173,6 +173,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/Net.h \
 	../../include/lgi/common/Notifications.h \
 	../../include/lgi/common/OAuth2.h \
+	../../include/lgi/common/OpenSSLSocket.h \
 	../../include/lgi/common/OptionsFile.h \
 	../../include/lgi/common/Palette.h \
 	../../include/lgi/common/Panel.h \
@@ -286,6 +287,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/common/General/FileCommon.cpp \
 	../../src/common/General/Password.cpp \
 	../../src/common/General/Properties.cpp \
+	../../src/common/General/SubProcessCommon.cpp \
 	../../src/common/General/TimeZone.cpp \
 	../../src/common/Hash/md5/md5.c \
 	../../src/common/Hash/md5/md5.h \
@@ -398,6 +400,6 @@ cleanall :
 	+make -C "../../" -f ./linux/Makefile.linux clean
 
 VPATH=$(BuildDir) \
-	../../src/common/Lgi \
 	./src \
+	../../src/common/Lgi \
 	../../src/common/Db

@@ -17,69 +17,70 @@ BuildDir = $(Build)
 
 CFlags = -MMD -MP -fPIC -fno-inline
 CppFlags = $(CFlags) -fpermissive -std=c++17
+LGI_GTK3_DIR=../..
 
 ifeq ($(Build),Debug)
-	CFlags += -g
-	CppFlags += -g
+	CFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer
+	CppFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
-		-L../../../deps/build-x64-debug/lib \
-		-Wl,-rpath-link,../../../deps/build-x64-debug/lib \
-		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/../../../deps/build-x64-debug/lib' \
 		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0` \
 		-llgi-gtk3$(Tag) \
-		-L../../$(BuildDir)
+		-L../../$(BuildDir) \
+		-L$(LGI_GTK3_DIR)/../deps/build-x64-debug/lib \
+		-Wl,-rpath-link,$(LGI_GTK3_DIR)/../deps/build-x64-debug/lib \
+		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/../deps/build-x64-debug/lib'
 	Inc =  \
-		-I../../../../../../../usr/include/gstreamer-1.0 \
 		-I../../include \
-		-I../../private/common \
-		-I./resources \
+		-I../../include/lgi/linux \
 		-I../../include/lgi/linux/Gtk \
+		-I../../private/common \
+		-I/usr/include/gstreamer-1.0 \
 		`pkg-config --cflags gtk+-3.0` \
-		-I../../include/lgi/linux
+		-Iresources
 else
-	CFlags += -s -Os
-	CppFlags += -s -Os
+	CFlags += -g -Os
+	CppFlags += -g -Os
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
-		-L../../../deps/build-x64-debug/lib \
-		-Wl,-rpath-link,../../../deps/build-x64-debug/lib \
-		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/../../../deps/build-x64-debug/lib' \
 		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0` \
 		-llgi-gtk3$(Tag) \
-		-L../../$(BuildDir)
+		-L../../$(BuildDir) \
+		-L$(LGI_GTK3_DIR)/../deps/build-x64-release/lib \
+		-Wl,-rpath-link,$(LGI_GTK3_DIR)/../deps/build-x64-release/lib \
+		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/../deps/build-x64-release/lib'
 	Inc =  \
 		-I../../include \
-		-I../../include/lgi/linux/Gtk \
 		-I../../include/lgi/linux \
-		-I./resources \
+		-I../../include/lgi/linux/Gtk \
 		-I../../private/common \
-		-I../../../../../../../usr/include/gstreamer-1.0 \
-		`pkg-config --cflags gtk+-3.0`
+		-I/usr/include/gstreamer-1.0 \
+		`pkg-config --cflags gtk+-3.0` \
+		-Iresources
 endif
 
 # Dependencies
-Source =	../../src/common/Lgi/LgiMain.cpp \
-			../../src/common/Net/Http.cpp \
-			../../src/common/Text/Html.cpp \
-			../../src/common/Text/HtmlCommon.cpp \
-			src/TestSuite.cpp \
-			../../src/common/Images/Compare/ImageComparison.cpp \
-			../../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
-			../../src/common/Coding/ScriptVM.cpp \
-			../../src/common/Text/HtmlParser.cpp \
-			../../src/common/Coding/ScriptLibrary.cpp \
-			../../src/common/Text/Emoji/EmojiMap.cpp \
+Source =	../../src/common/Coding/LexCpp.cpp \
 			../../src/common/Coding/ScriptCompiler.cpp \
-			../../src/common/Coding/LexCpp.cpp \
+			../../src/common/Coding/ScriptLibrary.cpp \
+			../../src/common/Coding/ScriptVM.cpp \
 			../../src/common/Gdc2/Font/EmojiFont.cpp \
+			../../src/common/Images/Compare/ImageComparison.cpp \
+			../../src/common/Lgi/LgiMain.cpp \
+			../../src/common/Net/Http.cpp \
+			../../src/common/Net/OpenSSLSocket.cpp \
+			../../src/common/Text/Emoji/EmojiMap.cpp \
 			../../src/common/Text/Emoji/EmojiTools.cpp \
 			../../src/common/Text/Homoglyphs/Homoglyphs.cpp \
-			../../src/common/Net/OpenSSLSocket.cpp \
-			../../src/common/Widgets/ZoomView.cpp
+			../../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
+			../../src/common/Text/Html.cpp \
+			../../src/common/Text/HtmlCommon.cpp \
+			../../src/common/Text/HtmlParser.cpp \
+			../../src/common/Widgets/ZoomView.cpp \
+			src/TestSuite.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -104,12 +105,11 @@ $(BuildDir)/%.o: %.cpp
 $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	mkdir -p $(BuildDir)
 	@echo Linking $(Target) [$(Build)]...
-	$(CPP) -Wl,-export-dynamic,-R. -o \
+	$(CPP) -Wl,-export-dynamic,-R.,--build-id -o \
 		$(Target) $(Objects) $(Libs)
 	@echo Done.
 
-../../$(BuildDir)/liblgi-gtk3$(Tag).so : \
-	../../include/lgi/common/App.h \
+../../$(BuildDir)/liblgi-gtk3$(Tag).so : ../../include/lgi/common/App.h \
 	../../include/lgi/common/Array.h \
 	../../include/lgi/common/AutoPtr.h \
 	../../include/lgi/common/Base64.h \
@@ -190,6 +190,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/Net.h \
 	../../include/lgi/common/Notifications.h \
 	../../include/lgi/common/OAuth2.h \
+	../../include/lgi/common/OpenSSLSocket.h \
 	../../include/lgi/common/OptionsFile.h \
 	../../include/lgi/common/Palette.h \
 	../../include/lgi/common/Panel.h \
@@ -303,6 +304,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/common/General/FileCommon.cpp \
 	../../src/common/General/Password.cpp \
 	../../src/common/General/Properties.cpp \
+	../../src/common/General/SubProcessCommon.cpp \
 	../../src/common/General/TimeZone.cpp \
 	../../src/common/Hash/md5/md5.c \
 	../../src/common/Hash/md5/md5.h \

@@ -685,7 +685,7 @@ public:
 				BuildModeName);
 		m.Print("MakeDir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))\n");
 		
-		LString sVariables; // global makefile vars
+		LHashTbl<ConstStrKey<char,true>, LString> hVariables; // global makefile vars
 		LString sDefines[BuildMax];
 		LString sLibs[BuildMax];
 		LString sIncludes[BuildMax];
@@ -823,6 +823,7 @@ public:
 				if (!dep)
 					continue;
 				
+				const char *nextLine = " \\\n\t\t";
 				if (auto Target = dep->GetTargetName(Platform))
 				{
 					char t[MAX_PATH_LEN];
@@ -834,7 +835,7 @@ public:
 													
 					LString s, sTarget = t;
 					Proj->CheckExists(sTarget);
-					s.Printf(" \\\n\t\t-l%s$(Tag)", ToUnixPath(sTarget));
+					s.Printf("%s-l%s$(Tag)", nextLine, ToUnixPath(sTarget));
 					sLibs[Cfg] += s;
 
 					if (auto DepBase = dep->GetBasePath())
@@ -845,17 +846,21 @@ public:
 
 						LString Final = Rel ? Rel.Get() : DepPath.Get();
 						Proj->CheckExists(Final);
-						s.Printf(" \\\n\t\t-L%s/$(BuildDir)", ToUnixPath(Final.RStrip("/\\")));
+						s.Printf("%s-L%s/$(BuildDir)", nextLine, ToUnixPath(Final.RStrip("/\\")));
 						sLibs[Cfg] += s;
 
-						sVariables += LString::Fmt("%s_DIR=%s\n", sTarget.Upper().Get(), Rel.Get());
+						auto varName = LString::Fmt("%s_DIR", sTarget.Replace("-", "_").Upper().Get());
+						auto relStrip = Rel.RStrip("/\\");
+						if (!hVariables.Find(varName))
+							hVariables.Add(varName, relStrip);
 
-						/* FIXME: this needs to be added in somewhere for lgi:
-							
-							-L../../deps/build-x64-debug/lib \
-							-Wl,-rpath-link,../../deps/build-x64-debug/lib \
-							-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/../../deps/build-x64-debug/lib' \
-						*/
+						if (auto rpath = dep->GetExternalDependancyRPath((BuildConfig)Cfg, Platform))
+						{
+							auto depPath = LString::Fmt("$(%s)/%s", varName.Get(), rpath.Get());
+							sLibs[Cfg] += LString::Fmt("%s-L%s", nextLine, depPath.Get());
+							sLibs[Cfg] += LString::Fmt("%s-Wl,-rpath-link,%s", nextLine, depPath.Get());
+							sLibs[Cfg] += LString::Fmt("%s-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/%s'", nextLine, depPath.Get());
+						}
 					}
 				}
 			}
@@ -932,8 +937,10 @@ public:
 		}
 
 		// Output the defs section for Debug and Release
-		if (sVariables)
-			m.Print("%s", sVariables.Get());
+		for (auto p: hVariables)
+			m.Print("%s=%s", p.key, p.value.Get());
+		if (hVariables.Length())
+			m.Print("\n");
 
 		// Debug specific
 		m.Print("\n"
@@ -3800,9 +3807,13 @@ LString IdeProject::GetExternalDependancyRPath(BuildConfig Config, SysPlatform P
 {
 	if (Platform == PlatformLinux)
 	{
-		// FIXME: if (LGI) return the deps build folder... for linux
-		if (auto cfg = toString(Config))
+		auto target = GetTargetName(Platform);
+		if (target.Equals("lgi-gtk3"))
 		{
+			if (auto cfg = toString(Config))
+			{
+				return LString::Fmt("../deps/build-x64-%s/lib", LString(cfg).Lower().Get());
+			}
 		}
 	}
 
