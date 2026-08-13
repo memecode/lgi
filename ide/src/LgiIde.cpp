@@ -2288,7 +2288,7 @@ public:
 
 void AppWnd::OnReceiveFiles(LArray<const char*> &Files)
 {
-	for (int i=0; i<Files.Length(); i++)
+	for (unsigned i=0; i<Files.Length(); i++)
 	{
 		auto f = Files[i];
 		
@@ -2334,10 +2334,16 @@ void AppWnd::OnReceiveFiles(LArray<const char*> &Files)
 	
 	if (LAppInst->GetOption("createMakeFiles"))
 	{
-		IdeProject *p = RootProject();
-		if (p)
+		if (auto p = RootProject())
 		{
-			p->CreateMakefile(PlatformCurrent, false);
+			p->CreateMakefile(PlatformCurrent,
+				false,
+				[this](auto status)
+				{
+					if (status &&
+						LAppInst->GetOption("exitAfter"))
+						LCloseApp();
+				});
 		}
 	}
 }
@@ -5036,7 +5042,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				IdeProject *p = RootProject();
 				if (p)
 				{
-					p->CreateMakefile(PlatIdx, false);
+					p->CreateMakefile(PlatIdx, false, nullptr);
 				}
 			}
 			break;
@@ -5420,8 +5426,8 @@ int LgiMain(OsAppArguments &AppArgs)
 		a.AppWnd = new AppWnd;
 
 		// LPlaySound("~/code/mixkit-happy-bells-notification-937.wav");
-		LArray<int> ver;
-		LGetOs(&ver);
+		// LArray<int> ver;
+		// LGetOs(&ver);
 
 		// auto testFile = "/boot/home/code/lgi/trunk/CMakeLists.txt";
 		// LShowFileProperties(a.AppWnd->Handle(), testFile);
@@ -5433,9 +5439,9 @@ int LgiMain(OsAppArguments &AppArgs)
 		LHeaderUnitTests();
 		// LHostnameAsync::UnitTests();
 
-		auto myIp = LIpToStr(FilterIps());
-		auto hostName = LHostName();
-		printf("ip=%s, hostname=%s\n", myIp.Get(), hostName.Get());
+		// auto myIp = LIpToStr(FilterIps());
+		// auto hostName = LHostName();
+		// printf("ip=%s, hostname=%s\n", myIp.Get(), hostName.Get());
 
 		a.Run();
 	}

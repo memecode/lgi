@@ -370,12 +370,13 @@ LString ToPlatformPath(const char *s, SysPlatform platform)
 
 class MakefileThread : public LThread, public LCancel
 {
-	IdeProjectPrivate *d;
-	IdeProject *Proj;
-	SysPlatform Platform;
-	LStream *Log;
-	bool BuildAfterwards;
-	bool HasError;
+	IdeProjectPrivate *d = nullptr;
+	IdeProject *Proj = nullptr;
+	SysPlatform Platform = PlatformUnknown;
+	LStream *Log = nullptr;
+	bool BuildAfterwards = false;
+	bool HasError = false;
+	std::function<void(bool)> callback;
 	
 	void ToNativePath(char *in)
 	{
@@ -395,7 +396,12 @@ class MakefileThread : public LThread, public LCancel
 public:
 	static int Instances;
 
-	MakefileThread(IdeProjectPrivate *priv, SysPlatform platform, bool Build) : LThread("MakefileThread")
+	MakefileThread(	IdeProjectPrivate *priv,
+					SysPlatform platform,
+					bool Build,
+					std::function<void(bool)> postCb)
+		: LThread("MakefileThread")
+		, callback(postCb)
 	{
 		Instances++;
 
@@ -415,6 +421,9 @@ public:
 		while (!IsExited())
 			LSleep(1);
 		Instances--;
+		
+		if (callback)
+			callback(!HasError);
 	}
 	
 	void OnError(const char *Fmt, ...)
@@ -828,23 +837,20 @@ public:
 				
 				if (LString sTarget = Proj->GetTargetName(Platform))
 				{
-					printf("%s:%i - sTarget='%s'\n", _FL, sTarget.Get());
-					
 					auto varName = LString::Fmt("%s_DIR", sTarget.Replace("-", "_").Upper().Get());
 					if (auto Rel = LMakeRelativePath(Base, rpath))
 					{						
-						printf("%s:%i - Base='%s' sTarget='%s'\n", _FL, Base.Get(), sTarget.Get());
-						printf("%s:%i - DepPath='%s'\n", _FL, rpath.Get());
-						printf("%s:%i - Rel='%s'\n", _FL, Rel.Get());
-
 						auto relStrip = Rel.RStrip("/\\");
 						if (!hVariables.Find(varName))
 							hVariables.Add(varName, relStrip);
 								
 						auto depPath = LString::Fmt("$(%s)/%s", varName.Get(), rpath.Get());
-						sLibs[Cfg] += LString::Fmt("%s-L%s", nextLine2t, depPath.Get());
-						sLibs[Cfg] += LString::Fmt("%s-Wl,-rpath-link,%s", nextLine2t, depPath.Get());
-						sLibs[Cfg] += LString::Fmt("%s-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/%s'", nextLine2t, depPath.Get());
+						sLibs[Cfg] += LString::Fmt(	"%s-L%s",
+													nextLine2t, depPath.Get());
+						sLibs[Cfg] += LString::Fmt(	"%s-Wl,-rpath-link,%s",
+													nextLine2t, depPath.Get());
+						sLibs[Cfg] += LString::Fmt(	"%s-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/%s'",
+													nextLine2t, depPath.Get());
 					}
 				}
 			}
@@ -894,6 +900,8 @@ public:
 							sLibs[Cfg] += LString::Fmt("%s-L%s", nextLine2t, depPath.Get());
 							sLibs[Cfg] += LString::Fmt("%s-Wl,-rpath-link,%s", nextLine2t, depPath.Get());
 							sLibs[Cfg] += LString::Fmt("%s-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/%s'", nextLine2t, depPath.Get());
+							sLibs[Cfg] += LString::Fmt(	"%s-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(%s)/$(BuildDir)'",
+														nextLine2t, varName.Get(), depPath.Get());
 						}
 					}
 				}
@@ -1110,7 +1118,7 @@ public:
 					for (Dep=*It; Dep && !IsCancelled(); Dep=*(++It), Count++)
 					{
 						// Get dependency to create it's own makefile...
-						Dep->CreateMakefile(Platform, false);
+						Dep->CreateMakefile(Platform, false, nullptr);
 					
 						// Build a rule to make the dependency if any of the source changes...
 						auto DepBase = Dep->GetBasePath();
@@ -3302,7 +3310,7 @@ void IdeProject::BuildForPlatform(bool All, BuildConfig Config, SysPlatform Plat
 
 		if (!IsMakefileUpToDate())
 		{
-			CreateMakefile(Platform, true);
+			CreateMakefile(Platform, true, nullptr);
 		}
 		else
 		{
@@ -5094,12 +5102,14 @@ bool IdeProject::GetDependencies(const char *InSourceFile, LString::Array &IncPa
 
 int MakefileThread::Instances = 0;
 
-bool IdeProject::CreateMakefile(SysPlatform Platform, bool BuildAfterwards)
+bool IdeProject::CreateMakefile(SysPlatform Platform, bool BuildAfterwards, std::function<void(bool)> callback)
 {
 	if (d->CreateMakefile)
 	{
 		if (d->CreateMakefile->IsExited())
+		{
 			d->CreateMakefile.Reset();
+		}
 		else
 		{
 			d->App->GetBuildLog()->Print("%s:%i - Makefile thread still running.\n", _FL);
@@ -5110,7 +5120,7 @@ bool IdeProject::CreateMakefile(SysPlatform Platform, bool BuildAfterwards)
 	if (Platform == PlatformCurrent)
 		Platform = GetCurrentPlatform();
 
-	return d->CreateMakefile.Reset(new MakefileThread(d, Platform, BuildAfterwards));
+	return d->CreateMakefile.Reset(new MakefileThread(d, Platform, BuildAfterwards, callback));
 }
 
 void IdeProject::OnMakefileCreated()

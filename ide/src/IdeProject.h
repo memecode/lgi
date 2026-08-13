@@ -168,7 +168,7 @@ public:
 	const char *GetFunctionComment();
 	bool IsMakefileUpToDate();
 	bool IsMakefileAScript();
-	bool CreateMakefile(SysPlatform Platform, bool BuildAfterwards);
+	bool CreateMakefile(SysPlatform Platform, bool BuildAfterwards, std::function<void(bool)> callback);
 	LString GetTargetName(SysPlatform Platform);
 	LString GetTargetFile(SysPlatform Platform);
 	bool BuildIncludePaths(LString::Array &Paths, LString::Array *SysPaths, bool Recurse, bool IncludeSystem, SysPlatform Platform);
