@@ -15,28 +15,28 @@ endif
 MakeDir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 BuildDir = $(Build)
 
-CFlags = -MMD -MP -g -fPIC -fno-inline
+CFlags = -MMD -MP -fPIC -fno-inline
 CppFlags = $(CFlags) -fpermissive -std=c++17
 
 ifeq ($(Build),Debug)
-	CFlags += -g
-	CppFlags += -g
+	CFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer
+	CppFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DLGI_STATIC
 	Libs = 
 	Inc =  \
-		`pkg-config --cflags gtk+-3.0` \
+		-I../../../include \
 		-I../../../include/lgi/linux/Gtk \
-		-I../../../include
+		`pkg-config --cflags gtk+-3.0`
 else
-	CFlags += -s -Os
-	CppFlags += -s -Os
+	CFlags += -g -Os
+	CppFlags += -g -Os
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DLGI_STATIC
 	Libs = 
 	Inc =  \
-		`pkg-config --cflags gtk+-3.0` \
+		-I../../../include \
 		-I../../../include/lgi/linux/Gtk \
-		-I../../../include
+		`pkg-config --cflags gtk+-3.0`
 endif
 
 # Dependencies
@@ -65,7 +65,7 @@ $(BuildDir)/%.o: %.cpp
 $(Target) : $(Objects)
 	mkdir -p $(BuildDir)
 	@echo Linking $(Target) [$(Build)]...
-	$(CPP) -Wl,-export-dynamic,-R. -o \
+	$(CPP) -Wl,-export-dynamic,-R.,--build-id -o \
 		$(Target) $(Objects) $(Libs)
 	@echo Done.
 
