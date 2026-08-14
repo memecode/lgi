@@ -96,7 +96,7 @@ elseif (LINUX)
 	find_package(PkgConfig)
 	pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
 	pkg_check_modules(GST REQUIRED gstreamer-1.0>=1.4)
-	set(PUBLIC_LIBS pthread crypt zlib-lgi)
+	set(PUBLIC_LIBS pthread crypt z-lgi)
 
 endif()
 
@@ -573,8 +573,9 @@ elseif (LINUX)
 			iconv
 			ayatana-appindicator3
 		)
+
 	target_link_directories(lgi
-		PRIVATE
+		PUBLIC
 			${DEPS}/build-x64-release/lib
 		)
 

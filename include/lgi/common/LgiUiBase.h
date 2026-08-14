@@ -56,8 +56,11 @@ LgiExtern LString LTraceGetFilePath(bool clearContents = false);
 LgiFunc void LgiTrace(const char *Format, ...);
 
 #ifndef LGI_STATIC
-/// Same as LgiTrace but writes a stack trace as well.
-LgiFunc void LStackTrace(const char *Format, ...);
+	/// Same as LgiTrace but writes a stack trace as well.
+	LgiFunc void LStackTrace(const char *Format, ...);
+#else
+	// Fall back to regular tracing.
+	#define LStackTrace LgiTrace
 #endif
 
 // Template hash function:
