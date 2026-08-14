@@ -535,7 +535,7 @@ protected:
 	int Select(LArray<LSocketI*> &Results, bool Rd, bool Wr, int TimeoutMs);
 
 public:
-	LSelect(LSocket *sock = NULL);
+	LSelect(LSocket *sock = nullptr);
 	
 	LSelect &operator +=(LSocketI *sock);
 	

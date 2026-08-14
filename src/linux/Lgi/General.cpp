@@ -100,6 +100,7 @@ enum AssertBtn {
 	AB_QUIT,
 	AB_IGNORE,
 	AB_WAITING_RESPONSE,
+	AB_RECURSIVE_BLOCK
 };
 
 AssertBtn GtkAssertDlg(const char *File, int Line, const char *Msg)
@@ -130,75 +131,85 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 {
 	static bool Asserting = false;
 
-	if (!b && !Asserting)
+	if (!b)
 	{
-		Asserting = true;
-
 		printf("%s:%i - Assert failed:\n%s\n", file, line, test);
 
 		#ifdef LGI_SDL
-		exit(-1);
+			exit(-1);
 		#else
-		AssertBtn Result = AB_NONE;
-		
-		#if 1
-		if (LAppInst->InThread())
-		{
-			Result = GtkAssertDlg(file, line, test);
-		}
-		else
-		{
-			// This may or may not work, depending on whether the GUI thread is
-			// actually running. If it's deadlocked, this will fail.
-			LAppInst->RunCallback([pResult = &Result, file, line, test]()
-				{
-					// Tell the calling thread we've got the callback and we're
-					// waiting on the user.
-					*pResult = AB_WAITING_RESPONSE;
+			AssertBtn Result = AB_NONE;
 
-					// Actually ASK the user for input:
-					*pResult = GtkAssertDlg(file, line, test);
-				},
-				_FL);
-
-			auto startTs = LCurrentTime();
-			while (Result == AB_NONE)
+			if (!Asserting)
 			{
-				if (LCurrentTime() - startTs >= 5000 &&
-					Result == AB_NONE)
+				Asserting = true;
+				if (LAppInst->InThread())
 				{
-					// GUI thread is deadlocked!
-					// Assume the user wants 'Ignore'
-					Result = AB_IGNORE;
+					Result = GtkAssertDlg(file, line, test);
+				}
+				else
+				{
+					// This may or may not work, depending on whether the GUI thread is
+					// actually running. If it's deadlocked, this will fail.
+					LAppInst->RunCallback([pResult = &Result, file, line, test]()
+						{
+							// Tell the calling thread we've got the callback and we're
+							// waiting on the user.
+							*pResult = AB_WAITING_RESPONSE;
+
+							// Actually ASK the user for input:
+							*pResult = GtkAssertDlg(file, line, test);
+						},
+						_FL);
+
+					auto startTs = LCurrentTime();
+					while (Result == AB_NONE)
+					{
+						if (LCurrentTime() - startTs >= 5000 &&
+							Result == AB_NONE)
+						{
+							// GUI thread is deadlocked!
+							// Assume the user wants 'Ignore'
+							Result = AB_IGNORE;
+							break;
+						}
+						LSleep(10);
+					}
+				}
+				Asserting = false;
+			}
+
+			switch (Result)
+			{
+				case AB_BREAK:
+				{
+					// Try and bring the debugger up:
+					int *i = nullptr;
+					*i = 0;
 					break;
 				}
-				LSleep(10);
+				case AB_QUIT:
+				{
+					// Hard exit:
+					exit(-1);
+					break;
+				}
+				case AB_IGNORE:
+				{
+					printf("%s:%i - assert '%s' ignored.\n", _FL, test);
+					break;
+				}
+				default:
+				{
+					// Block thread... user wasn't able to respond
+					while (true)
+					{
+						LSleep(2000);
+						printf("%s:%i - thread %i blocked by assert.\n", _FL, (int)LCurrentThreadId());
+					}
+					break;
+				}
 			}
-		}
-		#endif
-
-		switch (Result)
-		{
-			case AB_BREAK:
-			{
-				// Try and bring the debugger up:
-				int *i = nullptr;
-				*i = 0;
-				break;
-			}
-			case AB_QUIT:
-			{
-				// Hard exit:
-				exit(-1);
-				break;
-			}
-			default:
-			case AB_IGNORE:
-			{
-				printf("%s:%i - assert '%s' ignored.\n", _FL, test);
-				break;
-			}
-		}
 		#endif
 
 		Asserting = false;

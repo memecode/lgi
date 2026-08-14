@@ -411,7 +411,7 @@ bool LRecursiveFileSearch(const char *Root,
 	// enumerate the directory contents
 	for (auto Found = Dir.First(Root); Found && (!Cancel || !Cancel->IsCancelled()); Found = Dir.Next())
 	{
-		char Name[300];
+		char Name[MAX_PATH_LEN];
 		if (!Dir.Path(Name, sizeof(Name)))
 			continue;
 

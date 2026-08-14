@@ -44,7 +44,7 @@ protected:
 	LString GetSslErr();
 	LStream *GetLogStream();
 	void DebugTrace(const char *fmt, ...);
-
+	OsSocket GetRawSocket(BIO* bio);
 public:
 	static LString Random(int Len);
 
