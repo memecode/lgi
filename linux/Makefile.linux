@@ -17,7 +17,6 @@ BuildDir = $(Build)
 
 CFlags = -MMD -MP -fPIC -fno-inline
 CppFlags = $(CFlags) -fpermissive -std=c++17
-LGI_GTK3_DIR=../deps/build-x64-debug/lib
 
 ifeq ($(Build),Debug)
 	CFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer -Wno-format-truncation
@@ -34,9 +33,9 @@ ifeq ($(Build),Debug)
 		-lgstreamer-1.0 \
 		`pkg-config --libs gtk+-3.0` \
 		`pkg-config --libs ayatana-appindicator3-0.1` \
-		-L$(LGI_GTK3_DIR)//home/matthew/code/lgi/deps/build-x64-debug/lib \
-		-Wl,-rpath-link,$(LGI_GTK3_DIR)//home/matthew/code/lgi/deps/build-x64-debug/lib \
-		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)//home/matthew/code/lgi/deps/build-x64-debug/lib'
+		-L../deps/build-x64-debug/lib \
+		-Wl,-rpath-link,../deps/build-x64-debug/lib \
+		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/../deps/build-x64-debug/lib'
 	Inc =  \
 		-I../deps/build-x64-debug/include \
 		-I./include \
@@ -61,9 +60,9 @@ else
 		-lgstreamer-1.0 \
 		`pkg-config --libs gtk+-3.0` \
 		`pkg-config --libs ayatana-appindicator3-0.1` \
-		-L$(LGI_GTK3_DIR)//home/matthew/code/lgi/deps/build-x64-release/lib \
-		-Wl,-rpath-link,$(LGI_GTK3_DIR)//home/matthew/code/lgi/deps/build-x64-release/lib \
-		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)//home/matthew/code/lgi/deps/build-x64-release/lib'
+		-L../deps/build-x64-release/lib \
+		-Wl,-rpath-link,../deps/build-x64-release/lib \
+		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/../deps/build-x64-release/lib'
 	Inc =  \
 		-I../deps/build-x64-release/include \
 		-I./include \

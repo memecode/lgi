@@ -830,29 +830,27 @@ public:
 			const char *nextLine2t = " \\\n\t\t";
 			if (auto rpath = Proj->GetExternalDependancyRPath((BuildConfig)Cfg, Platform))
 			{
+				// printf("%s:%i - base=%s\n", _FL, Base.Get());
+				// printf("%s:%i - rpath=%s\n", _FL, rpath.Get());
 				if (LIsRelativePath(rpath))
 				{
 					rpath = LFile::Path(Base, rpath).Absolute();
+					// printf("%s:%i - rpath abs=%s\n", _FL, rpath.Get());
 				}
 				
-				if (LString sTarget = Proj->GetTargetName(Platform))
+				if (auto Rel = LMakeRelativePath(Base, rpath))
 				{
-					auto varName = LString::Fmt("%s_DIR", sTarget.Replace("-", "_").Upper().Get());
-					if (auto Rel = LMakeRelativePath(Base, rpath))
-					{						
-						auto relStrip = Rel.RStrip("/\\");
-						if (!hVariables.Find(varName))
-							hVariables.Add(varName, relStrip);
-								
-						auto depPath = LString::Fmt("$(%s)/%s", varName.Get(), rpath.Get());
-						sLibs[Cfg] += LString::Fmt(	"%s-L%s",
-													nextLine2t, depPath.Get());
-						sLibs[Cfg] += LString::Fmt(	"%s-Wl,-rpath-link,%s",
-													nextLine2t, depPath.Get());
-						sLibs[Cfg] += LString::Fmt(	"%s-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/%s'",
-													nextLine2t, depPath.Get());
-					}
+					Rel = Rel.RStrip("/\\");
+					// printf("%s:%i - Rel=%s\n", _FL, Rel.Get());
+
+					sLibs[Cfg] += LString::Fmt(	"%s-L%s",
+												nextLine2t, Rel.Get());
+					sLibs[Cfg] += LString::Fmt(	"%s-Wl,-rpath-link,%s",
+												nextLine2t, Rel.Get());
+					sLibs[Cfg] += LString::Fmt(	"%s-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/%s'",
+												nextLine2t, Rel.Get());
 				}
+				else LAssert(0);
 			}
 
 			for (auto dep: Deps)
@@ -879,10 +877,10 @@ public:
 						LString DepPath = DepBase.Get();
 						
 						auto Rel = LMakeRelativePath(Base, DepPath);
-						printf("%s:%i - DepBase='%s'\n", _FL, DepBase.Get());
-						printf("%s:%i - Base='%s'\n", _FL, Base.Get());
-						printf("%s:%i - DepPath='%s'\n", _FL, DepPath.Get());
-						printf("%s:%i - Rel='%s'\n", _FL, Rel.Get());
+						// printf("%s:%i - DepBase='%s'\n", _FL, DepBase.Get());
+						// printf("%s:%i - Base='%s'\n", _FL, Base.Get());
+						// printf("%s:%i - DepPath='%s'\n", _FL, DepPath.Get());
+						// printf("%s:%i - Rel='%s'\n", _FL, Rel.Get());
 
 						LString Final = Rel ? Rel.Get() : DepPath.Get();
 						Proj->CheckExists(Final);
