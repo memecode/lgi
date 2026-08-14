@@ -650,7 +650,7 @@ void LStackTrace(const char *Msg, ...)
 	#ifndef HAIKU
 		LSymLookup::Addr Stack[STACK_SIZE];
 		ZeroObj(Stack);
-		LSymLookup *Lu = LAppInst ? LAppInst->GetSymLookup() : NULL;
+		auto Lu = LAppInst ? LAppInst->GetSymLookup() : nullptr;
 		if (!Lu)
 		{
 			printf("%s:%i - Failed to get sym lookup object.\n", _FL);
@@ -667,13 +667,13 @@ void LStackTrace(const char *Msg, ...)
 			va_end(Arg);
 			if (Ch > 0 && Buffer[Ch-1] != '\n')
 				Buffer[Ch++] = '\n';
-			Lu->Lookup(Buffer+Ch, sizeof(Buffer)-Ch-1, Stack, Frames);
+			Lu->Lookup(Buffer+Ch, sizeof(Buffer)-Ch-1, Stack, Frames, "    ");
 
 			#ifdef WIN32
 				bool locked = Trace.Lock(_FL, true);
 			#endif
 			#ifdef LGI_TRACE_TO_FILE
-				LStreamI *Output = Trace.GetStream();
+				auto Output = Trace.GetStream();
 				if (Output &&
 					Trace.Open())
 				{

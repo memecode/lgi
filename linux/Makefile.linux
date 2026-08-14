@@ -226,7 +226,7 @@ TargetFile = lib$(Target)$(Tag).so
 $(TargetFile) : $(Objects)
 	mkdir -p $(BuildDir)
 	@echo Linking $(TargetFile) [$(Build)]...
-	$(CPP) -shared \
+	$(CPP) -shared -Wl,-export-dynamic \
 		 \
 		-o $(BuildDir)/$(TargetFile) \
 		$(Objects) \

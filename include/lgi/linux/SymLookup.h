@@ -39,27 +39,18 @@ public:
 		/// The address
 		Addr *Ip,
 		/// The number of addresses passed
-		int IpLen
+		int IpLen,
+		/// [Optional] prefix for each line
+		const char *Prefix = nullptr
 	)
 	{
-		void *ip = (void*) Ip;
-		char **Sym = backtrace_symbols((void* const*)&ip, IpLen);
+		auto Sym = backtrace_symbols((void * const *)Ip, IpLen);
 		if (!Sym)
 			return false;
 
+		int ch = 0;
 		for (int i=0; Sym[i] && i<IpLen; i++)
-		{
-			auto CopyLen = strlen(Sym[i]);
-			strcpy_s(buf, buflen, Sym[i]);
-			buflen -= CopyLen;
-			buf += CopyLen;
-			
-			if (buflen > 1)
-			{
-				*buf++ = '\n';
-				*buf = 0;
-			}
-		}
+			ch += snprintf(buf+ch, buflen-ch, "%s%p: %s\n", Prefix ? Prefix : "", (void*)Ip[i], Sym[i]);
 		
 		free(Sym);
 		return true;
