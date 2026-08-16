@@ -413,7 +413,8 @@ public:
 			else if (s == LThreadEvent::WaitError)
 			{
 				LgiTrace("%s:%i - Event.Wait failed.\n", _FL);
-				break;
+				// Maybe we SHOULDN'T break here, but continue to try and process events?
+				// break;
 			}
 		}
 		

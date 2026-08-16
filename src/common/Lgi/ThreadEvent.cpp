@@ -32,7 +32,7 @@
 	}
 #endif
 
-#define DEBUG_THREADING     0
+#define DEBUG_THREADING     1
 #define USE_NAMED_SEM		0
 
 LThreadEvent::LThreadEvent(const char *name)
@@ -353,7 +353,9 @@ LThreadEvent::WaitStatus LThreadEvent::Wait(int32 Timeout)
 				return WaitTimeout;
 			if (r)
 			{
-				// printf("%s:%i - sem_wait failed with %i.\n", _FL, errno);
+				#if DEBUG_THREADING
+				printf("%s:%i - sem_wait failed with %i.\n", _FL, errno);
+				#endif
 				return WaitError;
 			}
 		}
