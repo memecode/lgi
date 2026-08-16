@@ -879,8 +879,6 @@ SslSocket::SslSocket(LStream *logger, LCapabilityClient *caps, bool sslonconnect
 	d->Caps = caps;
 	d->Banner = banner;
 	
-	DebugLogging = true;
-	
 	LString ErrMsg;
 	if (StartSSL(ErrMsg, this))
 	{

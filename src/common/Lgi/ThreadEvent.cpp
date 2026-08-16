@@ -32,7 +32,7 @@
 	}
 #endif
 
-#define DEBUG_THREADING     1
+#define DEBUG_THREADING     0
 #define USE_NAMED_SEM		0
 
 LThreadEvent::LThreadEvent(const char *name)
