@@ -341,13 +341,17 @@ LThreadEvent::WaitStatus LThreadEvent::Wait(int32 Timeout)
 			TimeoutToTimespec(to, Timeout);
 
 			#if DEBUG_THREADING
-			printf("%s:%i - starting sem_timedwait(%i) in %i\n", _FL, Sem, LCurrentThreadId());
+			// printf("%s:%i - starting sem_timedwait(%i) in %i\n", _FL, Sem, LCurrentThreadId());
 			#endif
 			r = sem_timedwait(Sem, &to);
 			int ErrCode = r ? errno : 0;
 			#if DEBUG_THREADING
-			LError Err(ErrCode);
-			printf("%s:%i - sem_timedwait(%i) = %i (in %i, errno=%s)\n", _FL, Sem, r, LCurrentThreadId(), Err.GetMsg().Get());
+			if (ErrCode && ErrCode != LErrorTimedOut)
+			{
+				LError Err(ErrCode);
+				printf("%s:%i - sem_timedwait(%u) = %i (thread %i, errno=%s)\n",
+						_FL, Sem, ErrCode, (int)LCurrentThreadId(), Err.GetMsg().Get());
+			}
 			#endif
 			if (ErrCode == ETIMEDOUT)
 				return WaitTimeout;
