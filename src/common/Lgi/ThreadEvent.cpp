@@ -24,7 +24,7 @@
 		to.tv_nsec = (tv.tv_usec + ((TimeoutMs % 1000) * 1000)) * 1000;
 		
 		int sec = 1000000000;
-		while (to.tv_nsec > sec)
+		while (to.tv_nsec >= sec)
 		{
 			to.tv_nsec -= sec;
 			to.tv_sec++;
