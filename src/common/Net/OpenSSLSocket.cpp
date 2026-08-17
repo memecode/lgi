@@ -808,8 +808,9 @@ bool StartSSL(LString &ErrorMsg, SslSocket *sock)
 	static LMutex Lock("StartSSL");
 	
 	#ifdef WINDOWS
-	{	// Make sure we call WSAStartup
-		LSocket s;
+	{ 	// Make sure we call WSAStartup without creating an LSocket.
+		WSADATA WsaData;
+		WSAStartup(MAKEWORD(2, 2), &WsaData);
 	}
 	#endif
 
@@ -1990,30 +1991,26 @@ void SslSocket::IsBlocking(bool block)
 	if (Ssl)
 	{
 		// 1. Configure OpenSSL internal non-blocking mode flags
-		if (!block) {
+		if (!block)
 			// These symbols are exportable functions, check if they are bound in your Library wrapper
 			Library->SSL_set_mode(Ssl, SSL_MODE_ENABLE_PARTIAL_WRITE | SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
-		}
 
 		// 2. Fetch the read and write BIOs
-		BIO* rbio = Library->SSL_get_rbio(Ssl);
-		BIO* wbio = Library->SSL_get_wbio(Ssl);
+		auto rbio = Library->SSL_get_rbio(Ssl);
+		auto wbio = Library->SSL_get_wbio(Ssl);
 
 		if (rbio) Library->BIO_set_nbio(rbio, !block);
 		if (wbio && wbio != rbio) Library->BIO_set_nbio(wbio, !block);
 
 		// 3. Extract the file descriptor safely using raw BIO_ctrl and update OS state
 		auto fd = GetRawSocket(rbio);
-		if (fd < 0) {
+		if (fd < 0)
 			fd = GetRawSocket(wbio);
-		}
 		
-		if (fd >= 0) {
+		if (fd >= 0)
 			applySocketNbio(fd);
-		}
 
-		if (DebugLogging)
-			printf("Ssl object updated: IsBlocking(%i), FD=%d\n", block, fd);
+		DebugTrace("Ssl object updated: IsBlocking(%i), FD=" LPrintfSock "\n", block, fd);
 	}
 	else if (Bio)
 	{
@@ -2026,13 +2023,9 @@ void SslSocket::IsBlocking(bool block)
 			applySocketNbio(fd);
 		}
 
-		if (DebugLogging)
-			printf("BIO_set_nbio(%i)=%li, FD=%d\n", block, r, fd);
+		DebugTrace("BIO_set_nbio(%i)=%li, FD=" LPrintfSock "\n", block, r, fd);
 	}
-	else if (DebugLogging)
-	{
-		printf("IsBlocking(%i) with no Bio or Ssl.\n", block);
-	}
+	else DebugTrace("IsBlocking(%i) with no Bio or Ssl.\n", block);
 }
 
 bool SslSocket::IsReadable(int TimeoutMs)

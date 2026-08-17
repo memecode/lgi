@@ -176,7 +176,9 @@ public:
 		/// The address
 		Addr *Ip,
 		/// Cound of IP's
-		int IpLen
+		int IpLen,
+		/// [Optional] prefix for lines
+		const char *Prefix = nullptr
 	)
 	{
 		if (!buf || buffer_len < 1 || !Ip || IpLen < 1)
@@ -187,6 +189,9 @@ public:
 		#else
 		#define Sprintf snprintf
 		#endif
+
+		if (!Prefix)
+			Prefix = "";
 
 		bool Status = true;
 		char *buf_end = buf + buffer_len;
@@ -234,7 +239,7 @@ public:
 					if (SymGetLineFromAddr(hProcess, (DWORD_PTR)Ip[i], &symDisplacement, &Line))
 				#endif
 					{
-						int Ch = Sprintf(buf, buf_end-buf, "    %p: " TCHAR_FORMAT ", %s:%i", (void*)Ip[i], mod, Line.FileName, Line.LineNumber);
+						int Ch = Sprintf(buf, buf_end-buf, "%s%p: " TCHAR_FORMAT ", %s:%i", Prefix, (void*)Ip[i], mod, Line.FileName, Line.LineNumber);
 						if (Ch > 0)
 							buf += Ch;
 						else
@@ -243,7 +248,7 @@ public:
 					}
 					else if (pSymbol->Name[0] != '$')
 					{
-						int Ch = Sprintf(buf, buf_end-buf, "    %p: " TCHAR_FORMAT ", %s+0x%x", (void*)Ip[i], mod, pSymbol->Name, (int)symDisplacement);
+						int Ch = Sprintf(buf, buf_end-buf, "%s%p: " TCHAR_FORMAT ", %s+0x%x", Prefix, (void*)Ip[i], mod, pSymbol->Name, (int)symDisplacement);
 						if (Ch > 0)
 							buf += Ch;
 						else
