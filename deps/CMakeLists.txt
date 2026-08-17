@@ -3,7 +3,11 @@ cmake_minimum_required(VERSION 3.20)
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(CMAKE_POLICY_DEFAULT_CMP0091 NEW)
 project(lgiDeps)
-enable_language( C CXX ASM )
+if(WIN32)
+    enable_language( C CXX ASM_NASM )
+else()
+    enable_language( C CXX ASM )
+endif()
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
 
