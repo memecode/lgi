@@ -143,7 +143,7 @@ using namespace Html1;
 namespace Html1
 {
 
-class LHtmlPrivate
+class LHtmlPrivate1
 {
 public:
 	LHashTbl<ConstStrKey<char>, LTag*> Loading;
@@ -176,7 +176,7 @@ public:
 	LAutoWString FindText;
 	bool MatchCase;
 	
-	LHtmlPrivate()
+	LHtmlPrivate1()
 	{
 		IsLoaded = false;
 		StyleDirty = false;
@@ -204,10 +204,6 @@ public:
 		else
 			DecodeEmoji = false;
 	}
-
-	~LHtmlPrivate()
-	{
-	}
 };
 
 class InputButton : public LButton
@@ -223,214 +219,6 @@ public:
 	void OnClick(const LMouse &m)
 	{
 		Tag->OnClick(m);
-	}
-};
-
-class LFontCache
-{
-	LHtml *Owner;
-	List<LFont> Fonts;
-
-public:
-	LFontCache(LHtml *owner)
-	{
-		Owner = owner;
-	}
-
-	~LFontCache()
-	{
-		Fonts.DeleteObjects();
-	}
-
-	LFont *FontAt(int i)
-	{
-		return Fonts.ItemAt(i);
-	}
-	
-	LFont *FindMatch(LFont *m)
-	{
-		for (auto f: Fonts)
-		{
-			if (*f == *m)
-			{
-				return f;
-			}
-		}
-		
-		return 0;
-	}
-
-	LFont *GetFont(LCss *Style)
-	{
-		if (!Style)
-			return NULL;
-		
-		auto Default = Owner->GetFont();
-		auto Face = Style->FontFamily();
-		if (Face.Length() < 1 || !ValidStr(Face.Names[0]))
-		{
-			Face.Empty();
-			const char *DefFace = Default->Face();
-			LAssert(ValidStr(DefFace));
-			Face.Names.New() = DefFace;
-		}
-		LAssert(ValidStr(Face.Names[0]));
-		LCss::Len Size = Style->FontSize();
-		LCss::FontWeightType Weight = Style->FontWeight();
-		bool IsBold =	Weight == LCss::FontWeightBold ||
-						Weight == LCss::FontWeightBolder ||
-						Weight > LCss::FontWeight400;
-		bool IsItalic = Style->FontStyle() == LCss::FontStyleItalic;
-		bool IsUnderline = Style->TextDecoration() == LCss::TextDecorUnderline;
-
-		if (Size.Type == LCss::LenInherit ||
-			Size.Type == LCss::LenNormal)
-		{
-			Size.Type = LCss::LenPt;
-			Size.Value = (float)Default->PointSize();
-		}
-
-		auto Scale = Owner->GetDpiScale();
-		if (Size.Type == LCss::LenPx)
-		{
-			Size.Value *= (float) Scale.y;
-		    int RequestPx = (int) Size.Value;
-
-			// Look for cached fonts of the right size...
-			for (auto f: Fonts)
-			{
-				if (f->Face() &&
-					_stricmp(f->Face(), Face.Names[0]) == 0 &&
-					f->Bold() == IsBold &&
-					f->Italic() == IsItalic &&
-					f->Underline() == IsUnderline)
-				{
-				    int Px = FontPxHeight(f);
-				    int Diff = Px - RequestPx;
-					if (Diff >= 0 && Diff <= 2)
-						return f;
-				}
-			}
-		}
-		else if (Size.Type == LCss::LenPt)
-		{
-			double Pt = Size.Value;
-			for (auto f: Fonts)
-			{
-				if (!f->Face() || Face.Length() == 0)
-				{
-					LAssert(0);
-					break;
-				}
-				
-				auto FntSz = f->Size();
-				if (f->Face() &&
-					_stricmp(f->Face(), Face.Names[0]) == 0 &&
-					FntSz.Type == LCss::LenPt &&
-					std::abs(FntSz.Value - Pt) < FLOAT_TOLERANCE &&
-					f->Bold() == IsBold &&
-					f->Italic() == IsItalic &&
-					f->Underline() == IsUnderline)
-				{
-					// Return cached font
-					return f;
-				}
-			}
-		}
-		else if (Size.Type == LCss::LenPercent)
-		{
-			// Most of the percentages will be resolved in the "Apply" stage
-			// of the CSS calculations, any that appear here have no "font-size"
-			// in their parent tree, so we just use the default font size times
-			// the requested percent
-			Size.Type = LCss::LenPt;
-			Size.Value *= Default->PointSize() / 100.0f;
-			if (Size.Value < MinimumPointSize)
-				Size.Value = MinimumPointSize;
-		}
-		else if (Size.Type == LCss::LenEm)
-		{
-			// Most of the relative sizes will be resolved in the "Apply" stage
-			// of the CSS calculations, any that appear here have no "font-size"
-			// in their parent tree, so we just use the default font size times
-			// the requested percent
-			Size.Type = LCss::LenPt;
-			Size.Value *= Default->PointSize();
-			if (Size.Value < MinimumPointSize)
-				Size.Value = MinimumPointSize;
-		}
-		else if (Size.Type == LCss::SizeXXSmall ||
-				 Size.Type == LCss::SizeXSmall  ||
-				 Size.Type == LCss::SizeSmall   ||
-				 Size.Type == LCss::SizeMedium  ||
-				 Size.Type == LCss::SizeLarge   ||
-				 Size.Type == LCss::SizeXLarge  ||
-				 Size.Type == LCss::SizeXXLarge)
-		{
-			int Idx = Size.Type-LCss::SizeXXSmall;
-			LAssert(Idx >= 0 && Idx < CountOf(LCss::FontSizeTable));
-			Size.Type = LCss::LenPt;
-			Size.Value = Default->PointSize() * LCss::FontSizeTable[Idx];
-			if (Size.Value < MinimumPointSize)
-				Size.Value = MinimumPointSize;
-		}
-		else if (Size.Type == LCss::SizeSmaller)
-		{
-			Size.Type = LCss::LenPt;
-			Size.Value = (float)(Default->PointSize() - 1);
-		}
-		else if (Size.Type == LCss::SizeLarger)
-		{
-			Size.Type = LCss::LenPt;
-			Size.Value = (float)(Default->PointSize() + 1);
-		}
-		else LAssert(!"Not impl.");
-
-		LFont *f;
-		if ((f = new LFont))
-		{
-			auto ff = ValidStr(Face.Names[0]) ? Face.Names[0].Get() : Default->Face();
-			f->Face(ff);
-			f->Size(Size ? Size : Default->Size());
-			f->Bold(IsBold);
-			f->Italic(IsItalic);
-			f->Underline(IsUnderline);
-			
-			// printf("Add cache font %s,%i %i,%i,%i\n", f->Face(), f->PointSize(), f->Bold(), f->Italic(), f->Underline());
-			if (std::abs(Size.Value) < FLOAT_TOLERANCE)
-				;
-			else if (!f->Create((char*)0, 0))
-			{
-				// Broken font...
-				f->Face(Default->Face());
-				LFont *DefMatch = FindMatch(f);
-				// printf("Falling back to default face for '%s:%i', DefMatch=%p\n", ff, f->PointSize(), DefMatch);
-				if (DefMatch)
-				{
-					DeleteObj(f);
-					return DefMatch;
-				}
-				else
-				{
-					if (!f->Create((char*)0, 0))
-					{
-						DeleteObj(f);
-						return Fonts[0];
-					}
-				}
-			}
-
-			// Not already cached
-			Fonts.Insert(f);
-			if (!f->Face())
-			{
-				LAssert(0);
-			}
-			
-			return f;
-		}
-
-		return 0;
 	}
 };
 
@@ -2722,6 +2510,8 @@ void LTag::ImageLoaded(char *uri, LAutoPtr<LSurface> Img, int &Used)
 	}
 }
 
+namespace {
+
 struct LTagElementCallback : public LCss::ElementCallback<LTag>
 {
 	const char *Val;
@@ -2740,6 +2530,12 @@ struct LTagElementCallback : public LCss::ElementCallback<LTag>
 	
 	bool GetClasses(LString::Array &Classes, LTag *obj) 
 	{
+	    if (obj->Class.Length() > 1000)
+	    {
+	        printf("%s:%i - invalid class size.\n", _FL);
+	        return false;
+	    }
+	    
 		Classes = obj->Class;
 		return Classes.Length() > 0;
 	}
@@ -2757,6 +2553,8 @@ struct LTagElementCallback : public LCss::ElementCallback<LTag>
 		return c;
 	}
 };
+
+} // namespace
 
 void LTag::RestyleAll()
 {
@@ -4277,6 +4075,8 @@ void LHtmlTableLayout::AllocatePx(int StartCol, int Cols, int MinPx, bool HasToF
 	}
 }
 
+namespace {
+
 struct ColInfo
 {
 	int Large;
@@ -4284,6 +4084,8 @@ struct ColInfo
 	int Idx;
 	int Px;
 };
+
+} // namespace
 
 static int ColInfoCmp(ColInfo *a, ColInfo *b)
 {
@@ -6076,6 +5878,8 @@ void LTag::BoundParents()
 	}
 }
 
+namespace {
+
 struct DrawBorder
 {
 	LSurface *pDC;
@@ -6155,6 +5959,8 @@ struct DrawBorder
 	}
 };
 
+} // namespace
+
 void LTag::GetInlineRegion(LRegion &rgn, int ox, int oy)
 {
 	if (TagId == TAG_IMG)
@@ -6179,6 +5985,8 @@ void LTag::GetInlineRegion(LRegion &rgn, int ox, int oy)
 		ch->GetInlineRegion(rgn, ox + Pos.x, oy + Pos.y);
 	}
 }
+
+namespace {
 
 class CornersImg : public LMemDC
 {
@@ -6296,6 +6104,8 @@ public:
 		}
 	}
 };
+
+} // namespace
 
 void LTag::PaintBorderAndBackground(LSurface *pDC, LColour &Back, LRect *BorderPx)
 {
@@ -7018,7 +6828,7 @@ LHtml::LHtml(int id, int x, int y, int cx, int cy, LDocumentEnv *e) :
 	LHtmlParser(NULL)
 {
 	View = this;
-	d = new LHtmlPrivate;
+	d = new LHtmlPrivate1;
 	SetReadOnly(true);
 	SetId(id);
 	LRect r(x, y, x+cx, y+cy);
@@ -7062,7 +6872,7 @@ void LHtml::_New()
 	}
 	#endif
 	
-	FontCache = new LFontCache(this);	
+	FontCache = new LHtmlFontCache(GetFont(), GetDpiScale().y);	
 	SetScrollBars(false, false);
 }
 
@@ -9159,6 +8969,8 @@ bool LHtml::GetMaxPaintTimeout()
 }
 
 ////////////////////////////////////////////////////////////////////////
+namespace {
+
 class LHtml_Factory : public LViewFactory
 {
 	LView *NewView(const char *Class, LRect *Pos, const char *Text)
@@ -9291,6 +9103,8 @@ struct BuildContext
 		return RetReattach;
 	}
 };
+
+} // namespace
 
 LHtmlTableLayout::LHtmlTableLayout(LTag *table)
 {

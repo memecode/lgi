@@ -43,10 +43,10 @@ static OsChar LDisplayStringDots[] = {'.', '.', '.', 0};
 #endif
 
 #if defined(__GTK_H__)
-struct Block : public LRect
+struct DspStrBlock : public LRect
 {
 	/// This points to somewhere in Ds->Str
-	OsChar *Str = NULL;
+	OsChar *Str = nullptr;
 	
 	/// Bytes in this block
 	int Bytes = 0;
@@ -55,12 +55,12 @@ struct Block : public LRect
 	int Chars = 0;
 	
 	/// Alternative font to get characters from (NULL if using the display string's font)
-	LFont *Fnt = NULL;
+	LFont *Fnt = nullptr;
 	
 	/// Layout for this block. Shouldn't ever be NULL. But shouldn't crash otherwise.
-	Gtk::PangoLayout *Hnd = NULL;
+	Gtk::PangoLayout *Hnd = nullptr;
 
-	~Block()
+	~DspStrBlock()
 	{
 		if (Hnd)
 			g_object_unref(Hnd);
@@ -70,7 +70,7 @@ struct Block : public LRect
 struct LDisplayStringPriv
 {
 	LDisplayString *Ds;
-	LArray<Block> Blocks;
+	LArray<DspStrBlock> Blocks;
 	bool Debug;
 	int LastTabOffset;
 
@@ -100,7 +100,7 @@ struct LDisplayStringPriv
 		if (Tbl)
 		{
 			int32 w;
-			Block *b = NULL;
+			DspStrBlock *b = nullptr;
 			auto DisplayCtx = LFontSystem::Inst()->GetContext();
 
 			while ((w = (int32)p))

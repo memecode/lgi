@@ -1,5 +1,4 @@
 #include "lgi/common/Lgi.h"
-#include "lgi/common/Html.h"
 #include "lgi/common/List.h"
 #include "lgi/common/DateTime.h"
 #include "lgi/common/ClipBoard.h"
@@ -7,7 +6,6 @@
 #include "lgi/common/Box.h"
 #include "lgi/common/TextView3.h"
 #include "lgi/common/ProgressDlg.h"
-#include "lgi/common/Combo.h"
 #include "lgi/common/Net.h"
 #include "lgi/common/Filter.h"
 #include "lgi/common/ImageComparison.h"
@@ -19,8 +17,14 @@
 #include "lgi/common/TabView.h"
 #include "lgi/common/Tree.h"
 #include "lgi/common/TextLog.h"
-#include "../src/common/Text/HtmlPriv.h"
+#include "lgi/common/Uri.h"
 #include "lgi/common/Http.h"
+
+#include "lgi/common/Html.h"
+#include "../src/common/Text/HtmlPriv.h"
+
+#include "lgi/common/Html2.h"
+#include "../src/common/Text/HtmlPriv2.h"
 
 #include "resdefs.h"
 
@@ -38,8 +42,8 @@ enum Controls
 	ID_TAG_DETAIL
 };
 
-#ifdef _LHTML2_H
-using THtmlClass = Html2::LHtml2;
+#if 1
+using THtmlClass = Html2::LHtml;
 using THtmlTag = Html2::LTag;
 #else
 using THtmlClass = Html1::LHtml;
@@ -622,16 +626,16 @@ public:
 				#endif
 				
 				#ifdef MAC
-				#define TIME_TO_DATE(ts) ((ts) / 1000)
+				    #define TIME_TO_DATE(ts) ((ts) / 1000)
 				#else
-				#define TIME_TO_DATE(ts) (ts)
+				    #define TIME_TO_DATE(ts) (ts)
 				#endif
 				
 				LFile::Path files(LSP_APP_INSTALL);
 				#if defined(MAC) && defined(_DEBUG)
-				files += "../../../../";
+				    files += "../../../../..";
 				#endif
-				files += "../files";
+				files += "files";
 				if (!files.Exists())
 					LgiTrace("%s:%i - files folder '%s' doesn't exist", _FL, files.GetFull().Get());
 				else

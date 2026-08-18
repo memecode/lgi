@@ -13,7 +13,6 @@ namespace Html2
 {
 
 class LTag;
-class LFontCache;
 
 /// A lightwight scripting safe HTML control. It has limited CSS support, renders
 /// most tables, even when nested. You can provide support for loading external
@@ -37,11 +36,11 @@ class LHtml :
 	friend class LTag;
 	friend class LFlowRegion;
 
-	class LHtmlPrivate *d;
+	class LHtmlPrivate2 *d;
 
 protected:	
 	// Data
-	LFontCache			*FontCache = nullptr;
+	LHtmlFontCache		*FontCache = nullptr;
 	LTag				*Tag = nullptr;			// Tree root
 	LTag				*Cursor = nullptr;		// Cursor location..
 	LTag				*Selection = nullptr;	// Edge of selection or NULL

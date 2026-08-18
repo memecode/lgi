@@ -2,6 +2,180 @@
 #include "lgi/common/HtmlCommon.h"
 #include "lgi/common/DocView.h"
 
+#ifdef MAC
+static constexpr float HtmlMinimumPointSize = 9.0f;
+#else
+static constexpr float HtmlMinimumPointSize = 8.0f;
+#endif
+static constexpr float HtmlFloatTolerance = 0.001f;
+
+#define FontPxHeight(fnt) (fnt->GetHeight() - (int)(fnt->Leading() + 0.5))
+
+LHtmlFontCache::LHtmlFontCache(LFont *defaultFont, float dpiScaleY) :
+	DefaultFont(defaultFont),
+	DpiScaleY(dpiScaleY)
+{
+}
+
+LHtmlFontCache::~LHtmlFontCache()
+{
+	Fonts.DeleteObjects();
+}
+
+LFont *LHtmlFontCache::FontAt(int i)
+{
+	return Fonts.ItemAt(i);
+}
+
+LFont *LHtmlFontCache::FindMatch(LFont *m)
+{
+	for (auto f: Fonts)
+	{
+		if (*f == *m)
+			return f;
+	}
+
+	return nullptr;
+}
+
+LFont *LHtmlFontCache::GetFont(LCss *Style)
+{
+	if (!Style || !DefaultFont)
+		return nullptr;
+
+	auto Face = Style->FontFamily();
+	if (Face.Length() < 1 || !ValidStr(Face.Names[0]))
+	{
+		Face.Empty();
+		const char *DefFace = DefaultFont->Face();
+		LAssert(ValidStr(DefFace));
+		Face.Names.New() = DefFace;
+	}
+	LAssert(ValidStr(Face.Names[0]));
+	LCss::Len Size = Style->FontSize();
+	LCss::FontWeightType Weight = Style->FontWeight();
+	bool IsBold = Weight == LCss::FontWeightBold ||
+		Weight == LCss::FontWeightBolder ||
+		Weight > LCss::FontWeight400;
+	bool IsItalic = Style->FontStyle() == LCss::FontStyleItalic;
+	bool IsUnderline = Style->TextDecoration() == LCss::TextDecorUnderline;
+
+	if (Size.Type == LCss::LenInherit || Size.Type == LCss::LenNormal)
+	{
+		Size.Type = LCss::LenPt;
+		Size.Value = (float)DefaultFont->PointSize();
+	}
+
+	if (Size.Type == LCss::LenPx)
+	{
+		Size.Value *= DpiScaleY;
+		int RequestPx = (int)Size.Value;
+		for (auto f: Fonts)
+		{
+			if (f->Face() &&
+				_stricmp(f->Face(), Face.Names[0]) == 0 &&
+				f->Bold() == IsBold &&
+				f->Italic() == IsItalic &&
+				f->Underline() == IsUnderline)
+			{
+				int Px = FontPxHeight(f);
+				int Diff = Px - RequestPx;
+				if (Diff >= 0 && Diff <= 2)
+					return f;
+			}
+		}
+	}
+	else if (Size.Type == LCss::LenPt)
+	{
+		double Pt = Size.Value;
+		for (auto f: Fonts)
+		{
+			if (!f->Face() || Face.Length() == 0)
+			{
+				LAssert(0);
+				break;
+			}
+
+			auto FntSz = f->Size();
+			if (_stricmp(f->Face(), Face.Names[0]) == 0 &&
+				FntSz.Type == LCss::LenPt &&
+				std::abs(FntSz.Value - Pt) < HtmlFloatTolerance &&
+				f->Bold() == IsBold &&
+				f->Italic() == IsItalic &&
+				f->Underline() == IsUnderline)
+				return f;
+		}
+	}
+	else if (Size.Type == LCss::LenPercent)
+	{
+		Size.Type = LCss::LenPt;
+		Size.Value *= DefaultFont->PointSize() / 100.0f;
+		if (Size.Value < HtmlMinimumPointSize)
+			Size.Value = HtmlMinimumPointSize;
+	}
+	else if (Size.Type == LCss::LenEm)
+	{
+		Size.Type = LCss::LenPt;
+		Size.Value *= DefaultFont->PointSize();
+		if (Size.Value < HtmlMinimumPointSize)
+			Size.Value = HtmlMinimumPointSize;
+	}
+	else if (Size.Type >= LCss::SizeXXSmall && Size.Type <= LCss::SizeXXLarge)
+	{
+		int Idx = Size.Type - LCss::SizeXXSmall;
+		LAssert(Idx >= 0 && Idx < CountOf(LCss::FontSizeTable));
+		Size.Type = LCss::LenPt;
+		Size.Value = DefaultFont->PointSize() * LCss::FontSizeTable[Idx];
+		if (Size.Value < HtmlMinimumPointSize)
+			Size.Value = HtmlMinimumPointSize;
+	}
+	else if (Size.Type == LCss::SizeSmaller)
+	{
+		Size.Type = LCss::LenPt;
+		Size.Value = (float)(DefaultFont->PointSize() - 1);
+	}
+	else if (Size.Type == LCss::SizeLarger)
+	{
+		Size.Type = LCss::LenPt;
+		Size.Value = (float)(DefaultFont->PointSize() + 1);
+	}
+	else
+		LAssert(!"Not impl.");
+
+	LFont *f = new LFont;
+	if (f)
+	{
+		auto ff = ValidStr(Face.Names[0]) ? Face.Names[0].Get() : DefaultFont->Face();
+		f->Face(ff);
+		f->Size(Size ? Size : DefaultFont->Size());
+		f->Bold(IsBold);
+		f->Italic(IsItalic);
+		f->Underline(IsUnderline);
+
+		if (std::abs(Size.Value) >= HtmlFloatTolerance && !f->Create((char*)0, 0))
+		{
+			f->Face(DefaultFont->Face());
+			LFont *DefMatch = FindMatch(f);
+			if (DefMatch)
+			{
+				DeleteObj(f);
+				return DefMatch;
+			}
+			if (!f->Create((char*)0, 0))
+			{
+				DeleteObj(f);
+				return Fonts[0];
+			}
+		}
+
+		Fonts.Insert(f);
+		LAssert(f->Face() != nullptr);
+		return f;
+	}
+
+	return nullptr;
+}
+
 static LHtmlElemInfo TagInfo[] =
 {
 	{TAG_B,				"b",			0,			LHtmlElemInfo::TI_NONE},

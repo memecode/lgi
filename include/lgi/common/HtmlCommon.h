@@ -4,6 +4,23 @@
 #include "lgi/common/Css.h"
 #include "lgi/common/HashTable.h"
 
+class LFont;
+
+class LHtmlFontCache
+{
+	LFont *DefaultFont = nullptr;
+	float DpiScaleY = 1.0f;
+	List<LFont> Fonts;
+
+public:
+	LHtmlFontCache(LFont *defaultFont, float dpiScaleY);
+	~LHtmlFontCache();
+
+	LFont *FontAt(int i);
+	LFont *FindMatch(LFont *m);
+	LFont *GetFont(LCss *Style);
+};
+
 extern char16 LHtmlListItem[];
 extern char16 htmlConvertHex(char16 c);
 

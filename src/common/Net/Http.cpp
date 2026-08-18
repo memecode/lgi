@@ -116,12 +116,13 @@ LError LHttp::ReadChunked(LSocketI *sock, LStream *output, char *buf, ssize_t bu
 
 
 ///////////////////////////////////////////////////////////////////
-class ILogProxy : public LSocketI
+/*
+class HttpLogProxy : public LSocketI
 {
 	LSocketI *Dest;
 
 public:
-	ILogProxy(LSocketI *dest)
+	HttpLogProxy(LSocketI *dest)
 	{
 		Dest = dest;
 	}
@@ -154,6 +155,7 @@ public:
 		}
 	}
 };
+*/
 
 ///////////////////////////////////////////////////////////////////
 LHttp::LHttp(LCancel *cancel)

@@ -93,7 +93,7 @@ static LString Indent(LString s, int depth = 4)
 }
 
 // A malloc'd block of memory for messages.
-class Block
+class CommsBlock
 {
 	// The message ID in network byte order
 	uint32_t id;
@@ -109,12 +109,12 @@ public:
 	constexpr static int nullSz = 1;
 
 	// An auto pointer to manage a Block reference
-	using Auto = LAutoPtr<Block, false, true /* use 'free' instead of 'delete' */>;
+	using Auto = LAutoPtr<CommsBlock, false, true /* use 'free' instead of 'delete' */>;
 	
 	// Creates a new block of the given size
 	static Auto New(uint32_t msgId, uint32_t bytes)
 	{
-		Auto b((Block*) malloc(sizeof(Block) + bytes));
+		Auto b((CommsBlock*) malloc(sizeof(CommsBlock) + bytes));
 		if (b)
 		{
 			b->id = htonl(msgId);
@@ -137,8 +137,8 @@ public:
 	Auto Clone()
 	{
 		Auto b;
-		auto bytes = sizeof(Block) + GetSize();
-		if (b.Reset((Block*) malloc(bytes)))
+		auto bytes = sizeof(CommsBlock) + GetSize();
+		if (b.Reset((CommsBlock*) malloc(bytes)))
 		{
 			memcpy(b.Get(), this, bytes);
 		}
@@ -256,7 +256,7 @@ public:
 		return p.NewLStr();
 	}
 
-	bool Read(std::function<void(Block*)> onMsg, std::function<void()> onDisconnect)
+	bool Read(std::function<void(CommsBlock*)> onMsg, std::function<void()> onDisconnect)
 	{
 		// Check for data
 		if (!sock ||
@@ -285,12 +285,12 @@ public:
 		
 		// Check if there is a full msg
 		bool status = false;
-		while (used >= sizeof(Block))
+		while (used >= sizeof(CommsBlock))
 		{
 			// ie there is at least enough data to check the Block size
-			if (auto b = (Block*) readBuf.AddressOf())
+			if (auto b = (CommsBlock*) readBuf.AddressOf())
 			{
-				ssize_t bytes = b->GetSize() + sizeof(Block); // Total message size
+				ssize_t bytes = b->GetSize() + sizeof(CommsBlock); // Total message size
 				if (used >= bytes)
 				{
 					// LOG("read: got msg %i bytes\n", (int)bytes);
@@ -324,7 +324,7 @@ public:
 						}
 						else
 						{					
-							LOG("read: not enough bytes for msg %i < %i, sizeof(Block)=%i\n", (int)used, (int)bytes, (int)sizeof(Block));
+							LOG("read: not enough bytes for msg %i < %i, sizeof(Block)=%i\n", (int)used, (int)bytes, (int)sizeof(CommsBlock));
 							LOG("read:\n%s\n", Dump((uint8_t*) readBuf.AddressOf(), used).Get());
 						}
 					}	
@@ -343,12 +343,12 @@ public:
 		return status;
 	}
 	
-	bool Write(Block *b)
+	bool Write(CommsBlock *b)
 	{
 		if (!b)
 			return false;
 
-		size_t bytes = b->GetSize() + sizeof(Block);
+		size_t bytes = b->GetSize() + sizeof(CommsBlock);
 		auto ptr = (char*)b;
 		size_t i = 0;
 		
@@ -409,10 +409,10 @@ struct Endpoint
 	std::function< void(LString) > local;
 
 	// Create an end point message
-	Block::Auto MakeMsg(const char *Uid)
+	CommsBlock::Auto MakeMsg(const char *Uid)
 	{
 		auto data = LString::Fmt("%s\n%s", addr.Get(), Uid);
-		return Block::New(MCreateEndpoint, data);		
+		return CommsBlock::New(MCreateEndpoint, data);		
 	}
 
 	// Json IO
@@ -462,7 +462,7 @@ struct BlockInfo
 	uint64_t recentSendTs = 0;
 
 	// A block ptr owned by this object
-	Block *blk = NULL;
+	CommsBlock *blk = NULL;
 
 	~BlockInfo()
 	{
@@ -655,7 +655,7 @@ struct LCommsBusPriv :
 			return false;
 		}
 
-		void OnPeerTcp(LPeer *p, Block *blk)
+		void OnPeerTcp(LPeer *p, CommsBlock *blk)
 		{
 			switch (blk->GetId())
 			{
@@ -836,7 +836,7 @@ struct LCommsBusPriv :
 				if (p->IsConnected())
 				{
 					// LOG("Sending MServerState to %s\n%s\n", p->hostName.Get(), state.Get());
-					if (auto blk = Block::New(MServerState, (uint32_t) state.Length()))
+					if (auto blk = CommsBlock::New(MServerState, (uint32_t) state.Length()))
 					{
 						memcpy(blk->data, state.Get(), blk->GetSize());
 						p->Write(blk);
@@ -959,7 +959,7 @@ struct LCommsBusPriv :
 					p->Read
 					(
 						// On message:
-						[this, p](Block *blk)
+						[this, p](CommsBlock *blk)
 						{
 							OnPeerTcp(p, blk);
 						},
@@ -1051,7 +1051,7 @@ struct LCommsBusPriv :
 		log(Log),
 		commsState(commsstate)
 	{
-		LAssert(sizeof(Block) == 9);
+		LAssert(sizeof(CommsBlock) == 9);
 		hostName = LHostName();
 		Run();
 	}
@@ -1092,7 +1092,7 @@ struct LCommsBusPriv :
 		return LString::Fmt("%s:%s", isServer ? "server" : "client", GetUid());
 	}
 
-	bool Que(Block::Auto &blk)
+	bool Que(CommsBlock::Auto &blk)
 	{
 		if (blk->GetSize() >= MAX_MSG_SIZE)
 		{
@@ -1112,7 +1112,7 @@ struct LCommsBusPriv :
 		return true;
 	}
 
-	bool ServerSend(Block *blk, bool localOnly)
+	bool ServerSend(CommsBlock *blk, bool localOnly)
 	{
 		bool status = false;
 
@@ -1620,7 +1620,7 @@ struct LCommsBusPriv :
 					(int)endpoints.Length());
 				if (c.connected)
 				{
-					auto blk = Block::New(MUid, GetUid());
+					auto blk = CommsBlock::New(MUid, GetUid());
 					if (!c.Write(blk))
 					{
 						LOG("%s write failed.\n", Describe().Get());
@@ -1817,7 +1817,7 @@ bool LCommsBus::SendMsg(LString endPoint, LString data)
 	LAssert(endPoint);
 
 	auto bytes = (uint32_t) (endPoint.Length() + data.Length() + 1);
-	if (auto msg = Block::New(MSendMsg, bytes))
+	if (auto msg = CommsBlock::New(MSendMsg, bytes))
 	{
 		char *c = msg->data;
 		memcpy(c, endPoint.Get(), endPoint.Length());
@@ -1869,7 +1869,7 @@ bool LCommsBus::Listen(LString endPoint, std::function<void(LString)> cb)
 		!d->isServer) // The server doesn't need to tell anyone else about endpoints
 	{
 	    LOG("%s:%i - MCreateEndpoint queued: '%s'\n", _FL, msg.Get());
-		if (auto blk = Block::New(MCreateEndpoint, msg))
+		if (auto blk = CommsBlock::New(MCreateEndpoint, msg))
 		{
 			LOG("%s: queuing MCreateEndpoint\n", __FUNCTION__);
 			d->Que(blk);

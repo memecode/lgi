@@ -174,12 +174,13 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////
-class ILogProxy : public LSocketI
+/*
+class SmbLogProxy : public LSocketI
 {
 	LSocketI *Dest;
 
 public:
-	ILogProxy(LSocketI *dest)
+	SmbLogProxy(LSocketI *dest)
 	{
 		Dest = dest;
 	}
@@ -212,6 +213,7 @@ public:
 		}
 	}
 };
+*/
 
 ///////////////////////////////////////////////////////////////////
 ISmb::ISmb()

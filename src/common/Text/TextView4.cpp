@@ -205,7 +205,7 @@ enum UndoType
 	UndoDelete, UndoInsert, UndoChange
 };
 
-struct Change : public LRange
+struct Change4 : public LRange
 {
 	UndoType Type;
 	LArray<char16> Txt;
@@ -214,7 +214,7 @@ struct Change : public LRange
 struct LTextView4Undo : public LUndoEvent
 {
 	LTextView4 *View;
-	LArray<Change> Changes;
+	LArray<Change4> Changes;
 
 	LTextView4Undo(LTextView4 *view)
 	{
@@ -223,7 +223,7 @@ struct LTextView4Undo : public LUndoEvent
 
 	void AddChange(ssize_t At, ssize_t Len, UndoType Type)
 	{
-		Change &c = Changes.New();
+		auto &c = Changes.New();
 		c.Start = At;
 		c.Len = Len;
 		c.Txt.Add(View->Text + At, Len);
