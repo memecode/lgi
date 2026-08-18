@@ -965,13 +965,25 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 			auto Sz = Size();
 			LString sFace = Face();
 			Gtk::pango_font_description_set_family(d->hFont, sFace);
+
+			auto size = Sz.Value * DpiScale;
+			if (!std::isfinite(size) || size < 0.0f)
+			{
+				LStackTrace("%s:%i - Invalid font size %fpt, %i dpi\n", _FL, Sz.Value, Dpi.x);
+				return false;
+			}
+
 			if (Sz.Type == LCss::LenPt)
-				Gtk::pango_font_description_set_size(d->hFont, Sz.Value * DpiScale * PANGO_SCALE);
+			{
+				Gtk::pango_font_description_set_size(d->hFont, size * PANGO_SCALE);
+			}
 			else if (Sz.Type == LCss::LenPx)
-				Gtk::pango_font_description_set_absolute_size(d->hFont, Sz.Value * DpiScale * PANGO_SCALE);
+			{
+				Gtk::pango_font_description_set_absolute_size(d->hFont, size * PANGO_SCALE);
+			}
 			else
 			{
-				LAssert(0);
+				LAssert(!"invalid font size type");
 				return false;
 			}
 			

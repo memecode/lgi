@@ -393,7 +393,7 @@ bool LCss::ToEnum(FontFamilyType &e, const char *str)
 	return false;
 }
 
-int LCss::Len::ToPx(int Box, LFont *Font, int Dpi)
+int LCss::Len::ToPx(int Box, LFont *Font, int Dpi) const
 {
 	switch (Type)
 	{

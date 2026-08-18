@@ -517,7 +517,7 @@ public:
 			LFont *Font = 0,
 			/// The DPI of the relevant device if known, or -1 if unknown
 			int Dpi = -1
-		);
+		)	const;
 
 		Len operator *(const Len &l) const;
 	};

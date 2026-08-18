@@ -1807,17 +1807,15 @@ LArray<LTextView4::LTextLine*>::I LTextView4::GetTextLineIt(ssize_t Offset, ssiz
 		else mid = s + ((e - s) >> 1);
 		
 		auto l = Line[mid];
-		auto end = l->EndNewLine();
 
 		if (Offset < l->Start)
 			e = mid - 1;
-		else if (Offset > end)
+		else if (!l->Overlap(Offset))
+			// Offset is at or past the end of this line: the position at the
+			// end of a line with a '\n' belongs to the following line.
 			s = mid + 1;
 		else
 		{
-			if (!Line[mid]->Overlap(Offset))
-				goto OnError;
-
 			if (Index)
 				*Index = mid;
 			return Line.begin(mid);
@@ -3962,7 +3960,7 @@ bool LTextView4::OnKey(LKey &k)
 		Blink = true;
 	}
 
-	// k.Trace("LTextView4::OnKey");
+	k.Trace("LTextView4::OnKey");
 
 	if (k.IsContextMenu())
 	{
@@ -4408,7 +4406,10 @@ bool LTextView4::OnKey(LKey &k)
 			case LK_UP:
 			{
 				if (k.Alt())
+				{
+					// printf("%s:%i - ignoring Alt+Up\n", _FL);
 					return false;
+				}
 
 				if (k.Down())
 				{
@@ -4433,8 +4434,12 @@ bool LTextView4::OnKey(LKey &k)
 
 							SetCaret(Prev->Start + MIN(CharX, Prev->Len), k.Shift());
 						}
+						// else printf("%s:%i - no previous line\n", _FL);
 					}
+					// else printf("%s:%i - no line at cursor\n", _FL);
 				}
+				// else printf("%s:%i - ignoring Up key release\n", _FL);
+
 				return true;
 				break;
 			}
