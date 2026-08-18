@@ -127,7 +127,7 @@ struct LHtmlTableLayout
 	void Dump();
 };
 
-class LTag : public LHtmlElement
+class LTag : public LHtmlElement, public LCssBox
 {
 	friend struct LHtmlTableLayout;
 	friend class ::HtmlEdit;
@@ -320,12 +320,11 @@ public:
 	LTag *GetBlockParent(ssize_t *Idx = NULL);
 	LFont *GetFont();
 
-	// Style
+	// Pos and Size should NOT include the CSS margin, but include the border and padding.
 	LPoint Pos;
 	LPoint Size;
-	LFont *Font = NULL;
+	LFont *Font = nullptr;
 	int LineHeightCache = -1;
-	LRect PadPx;
 	
 	// Images
 	bool ImageResized = false;

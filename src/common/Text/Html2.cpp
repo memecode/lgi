@@ -5307,9 +5307,8 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 	Size.x = 0;
 	Size.y = 0;
 	
-	LCssTools Tools(this, f);
 	LRect rc(Flow->X(), Html->Y());
-	PadPx = Tools.GetPadding(rc);
+	LCssBox::SetStyle(f, this, rc);
 
 	if (TipId)
 	{
@@ -5320,12 +5319,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 	if (IsTable())
 	{
 		Flow->EndBlock();
-		
-		auto left   = GetCssLen(MarginLeft, Margin);
-		auto top    = GetCssLen(MarginTop, Margin);
-		auto right  = GetCssLen(MarginRight, Margin);
-		auto bottom = GetCssLen(MarginBottom, Margin);
-		Flow->Indent(this, left, top, right, bottom, true);
+		Flow->Indent(margin, true);
 
 		LayoutTable(Flow, Depth + 1);
 
@@ -5335,7 +5329,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 		Flow->my = 0;
 		Flow->MAX.y = MAX(Flow->MAX.y, Flow->y2);
 
-		Flow->Outdent(this, left, top, right, bottom, true);
+		Flow->Outdent(margin, true);
 		BoundParents();
 		return;
 	}
@@ -5353,7 +5347,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 		{
 			LFlowRegion Temp = *Flow;
 			Flow->EndBlock();
-			Flow->Indent(this, MarginLeft(), MarginTop(), MarginRight(), MarginBottom(), true);
+			Flow->Indent(margin, true);
 
 			// Flow children
 			for (unsigned i=0; i<Children.Length(); i++)
@@ -5367,7 +5361,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 				}
 			}
 
-			Flow->Outdent(this, MarginLeft(), MarginTop(), MarginRight(), MarginBottom(), true);
+			Flow->Outdent(margin, true);
 			BoundParents();
 			return;
 			break;
@@ -5533,11 +5527,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 		BlockFlowWidth = Flow->X();
 		
 		// Indent the margin...
-		auto left = GetCssLen(MarginLeft, Margin);
-		auto top = GetCssLen(MarginTop, Margin);
-		auto right = GetCssLen(MarginRight, Margin);
-		auto bottom = GetCssLen(MarginBottom, Margin);
-		Flow->Indent(this, left, top, right, bottom, true);
+		Flow->Indent(margin, true);
 
 		// Set the width if any
 		auto Wid = Width();
@@ -5578,8 +5568,8 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 			Flow->x2 = Flow->x1 + Size.x;
 			Flow->cx -= Pos.x;
 
-			Flow->Indent(this, LCss::BorderLeft(), LCss::BorderTop(), LCss::BorderRight(), LCss::BorderBottom(), false);
-			Flow->Indent(PadPx, false);
+			Flow->Indent(border, false);
+			Flow->Indent(padding, false);
 		}
 		else
 		{
@@ -5590,8 +5580,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 					_FL, Tag.Get(), Flow->X(), Flow->cx, Flow->x2);
 			#endif
 
-			Flow->x1 =	Flow->ResolveX(BorderLeft(), this, true) +
-						Flow->ResolveX(PaddingLeft(), this, true);
+			Flow->x1 = border.x1 + padding.x1;
 			Flow->cx = Flow->x1;
 
 			#ifdef _DEBUG
@@ -5600,8 +5589,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 					_FL, Tag.Get(), Flow->x1);
 			#endif			
 
-			Flow->y1 += Flow->ResolveY(BorderTop(), this, true) +
-						Flow->ResolveY(PaddingTop(), this, true);
+			Flow->y1 += border.y1 + padding.y1;
 			Flow->y2 = Flow->y1;
 
 			if (!IsTableTag())
@@ -5610,7 +5598,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 	}
 	else
 	{
-		Flow->Indent(PadPx, false);
+		Flow->Indent(padding, false);
 	}
 
 	if (f)
@@ -5843,12 +5831,12 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 			Flow->EndBlock();
 
 			int OldFlowSize = Flow->x2 - Flow->x1 + 1;
-			Flow->Outdent(this, PaddingLeft(), PaddingTop(), PaddingRight(), PaddingBottom(), false);
-			Flow->Outdent(this, LCss::BorderLeft(), LCss::BorderTop(), LCss::BorderRight(), LCss::BorderBottom(), false);
+			Flow->Outdent(padding, false);
+			Flow->Outdent(border, false);
 
 			Size.y = Flow->y2 > 0 ? Flow->y2 : 0;
 
-			Flow->Outdent(this, MarginLeft(), MarginTop(), MarginRight(), MarginBottom(), true);
+			Flow->Outdent(margin, true);
 			
 			int NewFlowSize = Flow->x2 - Flow->x1 + 1;
 			int Diff = NewFlowSize - OldFlowSize;
@@ -5864,11 +5852,10 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 			int WidPx = Wid ? Flow->ResolveX(Wid, this, true) : 0;
 			
 			Size.x = MAX(WidPx, Size.x);
-			Size.x += Flow->ResolveX(PaddingRight(), this, true);
-			Size.x += Flow->ResolveX(BorderRight(), this, true);
+			Size.x += padding.x2 + border.x2;
 
-			int MarginR = Flow->ResolveX(MarginRight(), this, true);
-			int MarginB = Flow->ResolveX(MarginBottom(), this, true);
+			int MarginR = margin.x2;
+			int MarginB = margin.y2;
 
 			// Detect when there is not enough space for the inline element and
 			// start a new line....
@@ -5894,8 +5881,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 			}
 			else
 			{
-				Flow->y2 += Flow->ResolveX(PaddingBottom(), this, true);
-				Flow->y2 += Flow->ResolveX(BorderBottom(), this, true);
+				Flow->y2 += padding.y2 + border.y2;
 				Size.y = Flow->y2;
 			}
 
@@ -5908,7 +5894,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 	}
 	else
 	{
-		Flow->Outdent(PadPx, false);
+		Flow->Outdent(padding, false);
 		
 		switch (TagId)
 		{
@@ -6354,10 +6340,10 @@ void LTag::PaintBorderAndBackground(LSurface *pDC, LColour &Back, LRect *BorderP
 					for (int i=0; i<rgn.Length(); i++)
 					{
 						LRect *r = rgn[i];
-						r->x1 -= BorderPx->x1 + PadPx.x1;
-						r->y1 -= BorderPx->y1 + PadPx.y1;
-						r->x2 += BorderPx->x2 + PadPx.x2;
-						r->y2 += BorderPx->y2 + PadPx.y2;
+						r->x1 -= BorderPx->x1 + padding.x1;
+						r->y1 -= BorderPx->y1 + padding.y1;
+						r->x2 += BorderPx->x2 + padding.x2;
+						r->y2 += BorderPx->y2 + padding.y2;
 					}
 				}
 
