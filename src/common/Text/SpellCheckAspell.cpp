@@ -198,8 +198,6 @@ public:
 	{
 		if (SpellConfig)
 			delete_aspell_config(SpellConfig);
-			
-		LgiTrace("%s:%i - %p::~ASpell(), SpellParams:%p\n", _FL, this, SpellParams.Get());
 	}
 
 	virtual void OnMissingDictionary() {}
@@ -823,7 +821,7 @@ public:
 			}
 			else if (!_stricmp(Ext, "cwl"))
 			{
-				LString Out = File;
+				LString Out = File.Get();
 				auto Dot = Out.RFind(".");
 				if (Dot < 0)
 					return false;
@@ -839,6 +837,7 @@ public:
 				else
 				{
 					LgiTrace("%s:%i - %s\n", _FL, Err);
+					LgiTrace("	File=%s, Out=%s, r=%i\n", File.Get(), Out.Get(), r);
 				}
 			}
 		}

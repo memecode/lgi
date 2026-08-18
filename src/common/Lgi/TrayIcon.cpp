@@ -431,6 +431,9 @@ void LTrayIcon::Value(int64 v)
 	if (d->Val != v)
 	{
 		d->Val = v;
+
+		if (d->Val < 0)
+			LStackTrace("%s:%i - set invalid index.\n", _FL);
 		
 		#if WINNATIVE
 		
