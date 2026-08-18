@@ -1,23 +1,13 @@
-#ifndef _GHTML2_PRIV_H_
-#define _GHTML2_PRIV_H_
+#pragma once
 
 #include "lgi/common/Css.h"
-#include "lgi/common/Token.h"
+#include "lgi/common/HtmlParser.h"
+
+class HtmlEdit;
 
 namespace Html2
 {
-
-//////////////////////////////////////////////////////////////////////////////////
-// Enums                                                                        //
-//////////////////////////////////////////////////////////////////////////////////
-enum TagInfoFlags
-{
-	TI_NONE			= 0x00,
-	TI_NEVER_CLOSES	= 0x01,
-	TI_NO_TEXT		= 0x02,
-	TI_BLOCK		= 0x04,
-	TI_TABLE		= 0x08,
-};
+#define DefaultTextColour			LColour(L_TEXT)
 
 //////////////////////////////////////////////////////////////////////////////////
 // Structs & Classes                                                            //
@@ -25,55 +15,22 @@ enum TagInfoFlags
 class LFlowRect;
 class LFlowRegion;
 
+#define ToTag(t)					dynamic_cast<LTag*>(t)
+
 struct LTagHit
 {
-	LTag *Hit; // Tag that was hit, or nearest tag, otherwise NULL
-	int Near; // 0 if a direct hit, >0 is near miss, -1 if invalid.
+	LTag *Direct = nullptr;			// Tag directly under cursor
+	LTag *NearestText = nullptr;	// Nearest tag with text
+	int Near = -1;					// How close in px was the position to NearestText.
+									// 0 if a direct hit, >0 is near miss, -1 if invalid.
+	bool NearSameRow = false;		// True if 'NearestText' on the same row as click.
+	LPoint LocalCoords{-1, -1};		// The position in local co-ords of the tag
 
-	LFlowRect *Block; // Text block hit
-	int Index; // If Block!=NULL then index into text, otherwise -1.
+	LFlowRect *Block = nullptr;		// Text block hit
+	ssize_t Index = -1;				// If Block!=NULL then index into text, otherwise -1.
 
-	LTagHit()
-	{
-		Hit = 0;
-		Block = 0;
-		Near = -1;
-		Index = -1;
-	}
-
-	/// Return true if the current object is a closer than 'h'
-	bool operator <(LTagHit &h)
-	{
-		// We didn't hit anything, so we can't be closer
-		if (!Hit)
-			return false;
-
-		// We did hit something, and 'h' isn't an object yet
-		// or 'h' is a block hit with no text ref... in which
-		// case we are closer... because we have a text hit
-		if (!h.Hit || (Near >= 0 && h.Near < 0))
-			return true;
-
-		LAssert(Near >= 0);
-
-		if (Near < h.Near)
-			return true;
-
-		return false;
-	}
-};
-
-struct GInfo
-{
-public:
-	HtmlTag Id;
-	const char *Tag;
-	const char *ReattachTo;
-	int Flags;
-
-	bool NeverCloses()	{ return TestFlag(Flags, TI_NEVER_CLOSES); }
-	bool NoText()		{ return TestFlag(Flags, TI_NO_TEXT); }
-	bool Block()		{ return TestFlag(Flags, TI_BLOCK); }
+	LString ToString();
+	void Dump(const char *Desc);
 };
 
 class LHtmlLength
@@ -115,20 +72,9 @@ public:
 class LFlowRect : public LRect
 {
 public:
-	LTag *Tag;
-	char16 *Text;
-	int Len;
-
-	LFlowRect()
-	{
-		Tag = 0;
-		Text = 0;
-		Len = 0;
-	}
-
-	~LFlowRect()
-	{
-	}
+	LTag *Tag = NULL;
+	char16 *Text = NULL;
+	ssize_t Len = 0;
 
 	int Start();
 	bool OverlapX(int x) { return x >= x1 && x <= x2; }
@@ -137,34 +83,55 @@ public:
 	bool OverlapY(LFlowRect *b) { return !(b->y2 < y1 || b->y1 > y2); }
 };
 
-class LHtmlArea : public List<LFlowRect>
+class LHtmlArea : public LArray<LFlowRect*>
 {
 public:
 	~LHtmlArea();
 
+	void Empty() { DeleteObjects(); }
 	LRect Bounds();
 	LRect *TopRect(LRegion *c);
-	void FlowText(LTag *Tag, LFlowRegion *c, LFont *Font, char16 *Text, LCss::LengthType Align);
+	void FlowText(LTag *Tag, LFlowRegion *c, LFont *Font, int LineHeight, char16 *Text, LCss::LengthType Align, bool Debug = false);
 };
 
-class LCellStore
+struct LHtmlTableLayout
 {
 	typedef LArray<LTag*> CellArray;
 	LArray<CellArray> c;
+	LTag *Table;
+	LPoint s;
+	LCss::Len TableWidth;
+	
+	// Various pixels sizes
+	int AvailableX;
+	int CellSpacing;
+	int BorderX1, BorderX2;
+	LRect TableBorder, TablePadding; // in Px
 
-public:
-	LCellStore(LTag *Table);
+	// The col and row sizes
+	LArray<int> MinCol, MaxCol, MaxRow;
+	LArray<LCss::Len> SizeCol;
+
+	LHtmlTableLayout(LTag *table);
 
 	void GetSize(int &x, int &y);
 	void GetAll(List<LTag> &All);
 	LTag *Get(int x, int y);
 	bool Set(LTag *t);
+
+	int GetTotalX(int StartCol = 0, int Cols = -1);
+	void AllocatePx(int StartCol, int Cols, int MinPx, bool FillWidth);
+	void DeallocatePx(int StartCol, int Cols, int MaxPx);
+	void LayoutTable(LFlowRegion *f, uint16 Depth);
 	
 	void Dump();
 };
 
-class LTag : public GDom, public LCss
+class LTag : public LHtmlElement
 {
+	friend struct LHtmlTableLayout;
+	friend class ::HtmlEdit;
+	
 public:
 	enum HtmlControlType
 	{
@@ -178,19 +145,144 @@ public:
 		CtrlHidden,
 	};
 
-protected:
-	static bool Selected;
-	friend class HtmlEdit;
+	class TextConvertState
+	{
+		LStream *Out;
+		ssize_t PrevLineLen;
+		LArray<char> Buf;
+	
+	public:
+		int Depth;
+		ssize_t CharsOnLine;
+		
+		TextConvertState(LStream *o)
+		{
+			Out = o;
+			Depth = 0;
+			CharsOnLine = 0;
+			PrevLineLen = 0;
+		}
+		
+		~TextConvertState()
+		{
+			if (CharsOnLine)
+				NewLine();
+		}
+		
+		ssize_t _Write(const void *Ptr, ssize_t Bytes)
+		{
+			// Check if we have enough space to store the string..
+			size_t Total = CharsOnLine + Bytes;
+			if (Buf.Length() < Total)
+			{
+				// Extend the memory buffer
+				if (!Buf.Length(Total + 32))
+					return -1;
+			}
+			
+			// Store the string into a line buffer
+			memcpy(&Buf[CharsOnLine], Ptr, Bytes);
+			CharsOnLine += Bytes;
 
+			return Bytes;
+		}
+		
+		ssize_t Write(const void *Ptr, ssize_t Bytes)
+		{
+			char *start = (char*) Ptr, *cur;
+			char *end = start + Bytes;
+			const char *eol = "\r\n";
+			while (start < end)
+			{
+				for (cur = start; *cur && cur < end && !strchr(eol, *cur); cur++)
+					;
+				
+				if (!*cur || cur >= end)
+					break;
+				
+				_Write(start, (int) (cur - start));
+				
+				start = cur;
+				while (*start && start < end && strchr(eol, *start))
+					start++;
+			}
+			
+			return _Write(start, (int) (end - start));
+		}
+
+		ssize_t Write(LString s)
+		{
+			return Write(s.Get(), s.Length());
+		}
+		
+		ssize_t GetPrev()
+		{
+			return PrevLineLen;
+		}
+		
+		void NewLine()
+		{
+			bool Valid = false;
+			const uint8_t Ws[] = {' ', '\t', 0xa0, 0};
+			
+			LUtf8Ptr p(&Buf[0]);
+			uint8_t *End = (uint8_t*) &Buf[CharsOnLine];
+			while (p.GetPtr() < End)
+			{
+				if (!strchr((char*)Ws, p))
+				{
+					Valid = true;
+					break;
+				}
+				p++;
+			}
+			if (!Valid)
+				CharsOnLine = 0;
+
+			Buf[CharsOnLine] = 0;
+			if (CharsOnLine || PrevLineLen)
+			{
+				Out->Write(&Buf[0], CharsOnLine);
+				Out->Write("\n", 1);
+				PrevLineLen = CharsOnLine;
+				CharsOnLine = 0;
+			}
+		}
+	};
+
+protected:
+	/// A hash table of attributes.
+	///
+	/// All strings stored in here should be in UTF-8. Each string is allocated on the heap.
 	LHashTbl<ConstStrKey<char,false>, char*> Attr;
 
+	// Post flow alignment
+	struct AlignInfo
+	{
+		DisplayType Disp;
+		LCss::LengthType XAlign;
+		LTag *t;
+
+		bool Overlap(LTag *b)
+		{
+			LRange tRng(t->Pos.y, t->Size.y);
+			LRange bRng(b->Pos.y, b->Size.y);
+			return tRng.Overlap(bRng).Valid();
+		}
+	};
+	struct AlignGroup : public LArray<AlignInfo>
+	{
+		int x1, x2;
+	};
+	LArray<AlignGroup> PostFlowAlign;
+
 	// Forms
-	LViewI *Ctrl;
+	LViewI *Ctrl = NULL;
 	LVariant CtrlValue;
-	HtmlControlType CtrlType;
+	HtmlControlType CtrlType = CtrlNone;
 
 	// Text
-	LAutoWString Txt, PreTxt;
+	LAutoWString PreTxt;
 
 	// Debug stuff
 	void _Dump(LStringPipe &Buf, int Depth);
@@ -198,84 +290,104 @@ protected:
 
 	// Private methods
 	LFont *NewFont();
-	int NearestChar(LFlowRect *Fr, int x, int y);
+	ssize_t NearestChar(LFlowRect *Fr, int x, int y);
 	LTag *HasOpenTag(char *t);
 	LTag *PrevTag();
 	LRect ChildBounds();
-	bool GetWidthMetrics(uint16 &Min, uint16 &Max);
-	void LayoutTable(LFlowRegion *f);
+	bool GetWidthMetrics(LTag *Table, int32_t &Min, int32_t &Max);
+	void LayoutTable(LFlowRegion *f, uint32_t Depth);
 	void BoundParents();
 	bool PeekTag(char *s, char *tag);
 	LTag *GetTable();
 	char *NextTag(char *s);
 	void ZeroTableElements();
 	bool OnUnhandledColor(LCss::ColorDef *def, const char *&s);
-	
-	COLOUR _Colour(bool Fore);
-	COLOUR GetFore() { return _Colour(true); }
-	COLOUR GetBack() { return _Colour(false); }
+	// void CenterText();
+	bool Serialize(LXmlTag *t, bool Write);
+	LColour _Colour(bool Fore);
 
 public:
 	// Object
-	HtmlTag TagId;
-	char *Tag; // My tag
-
-	LToken Class;
-	const char *HtmlId;
+	LString::Array Class;
+	const char *HtmlId = NULL;
 
 	LAutoString Condition;
-	GInfo *Info;
-	int TipId;
-	bool WasClosed;
-	DisplayType Disp;
+	int TipId = 0;
 
-	// Heirarchy
-	LHtml2 *Html;
-	LTag *Parent;
-	List<LTag> Tags;
-	bool HasChild(LTag *c);
-	bool Attach(LTag *Child, int Idx = -1);
-	void Detach();
-	LTag *GetBlockParent(int *Idx = 0);
+	// Hierarchy
+	LHtml *Html = NULL;
+	bool IsBlock() { return SupportedDisplay() == LCss::DispBlock; }
+	LTag *GetBlockParent(ssize_t *Idx = NULL);
 	LFont *GetFont();
 
 	// Style
 	LPoint Pos;
 	LPoint Size;
-	LFont *Font;
+	LFont *Font = NULL;
+	int LineHeightCache = -1;
+	LRect PadPx;
 	
 	// Images
+	bool ImageResized = false;
 	LAutoPtr<LSurface> Image;
-	void SetImage(const char *uri, LSurface *i);
+	void SetImage(const char *uri, LAutoPtr<LSurface> Img);
 	void LoadImage(const char *Uri); // Load just this URI
 	void LoadImages(); // Recursive load all image URI's
-	void ImageLoaded(char *uri, LSurface *img, int &Used);
+	void ImageLoaded(char *uri, LAutoPtr<LSurface> Img, int &Used);
+	void ClearToolTips();
 
 	// Table stuff
-	LPoint Cell;
-	LPoint Span;
-	uint16 MinContent, MaxContent;
-	LCss::LengthType XAlign;
-	LCellStore *Cells;
+	struct TblCell
+	{
+		LPoint Pos;
+		LPoint Span;
+		LRect BorderPx;
+		LRect PaddingPx;
+		int32_t MinContent, MaxContent;
+		LCss::LengthType XAlign;
+		LHtmlTableLayout *Cells;
+		
+		TblCell()
+		{
+			Cells = NULL;
+			MinContent = 0;
+			MaxContent = 0;
+			XAlign = LCss::LenInherit;
+			BorderPx.ZOff(0, 0);
+			PaddingPx.ZOff(0, 0);
+		}
+		
+		~TblCell()
+		{
+			DeleteObj(Cells);
+		}
+		
+	}	*Cell = NULL;
+
 	#ifdef _DEBUG
-	int Debug;
+	int Debug = false;
 	#endif
 
 	// Text
-	int Cursor; // index into text of the cursor
-	int Selection; // index into the text of the selection edge
+	ssize_t Cursor = -1; // index into text of the cursor
+	ssize_t Selection = -1; // index into the text of the selection edge
 	LHtmlArea TextPos;
 
-	LTag(LHtml2 *h, LTag *p);
+	LTag(LHtml *h, LHtmlElement *p);
 	~LTag();
 
 	// Events
 	void OnChange(PropType Prop);
-	bool OnClick();
+	bool OnClick(const LMouse &m);
 
 	// Attributes
-	bool Get(const char *attr, const char *&val) { val = Attr.Find(attr); return val != 0; }
+	bool Get(const char *attr, const char *&val) { val = Attr.Find(attr); return val != NULL; }
 	void Set(const char *attr, const char *val);
+	void AllAttr(std::function<void(const char*attr, const char*val)> cb)
+	{
+		for (auto p: Attr)
+			cb(p.key, p.value);
+	}
 
 	// Methods
 	char16 *Text() { return Txt; }
@@ -283,51 +395,62 @@ public:
 	char16 *PreText() { return PreTxt; }
 	void PreText(char16 *t) { PreTxt.Reset(t); TextPos.Empty(); }
 
-	int GetTextStart();
-	char *Dump();
-	char16 *CleanText(const char *s, int len, bool ConversionAllowed = true, bool KeepWhiteSpace = false);
-	char *ParseHtml(char *Doc, int Depth, bool InPreTag = false, bool *BackOut = 0);
+	ssize_t GetTextStart();
+	LAutoWString DumpW();
+	LAutoString DescribeElement();
+	char16 *CleanText(const char *s, ssize_t len, const char *SourceCs, bool ConversionAllowed = true, bool KeepWhiteSpace = false);
 	char *ParseText(char *Doc);
+	bool ConvertToText(TextConvertState &State);
 	
+	/// Sets up the default style for a tag before classes, id's and style attributes are applied
+	void SetDefaultCss();
+	/// Sets styles based on the element's attributes... these take precedence over CSS
+	void SetAttributeStyles();
 	/// Configures the tag's styles.
 	void SetStyle();
 	/// Called to apply CSS selectors on initialization and also when properties change at runtime.
 	void Restyle();
-	/// Match a simple CSS selector against the current object
-	bool MatchSimpleSelector(LCss::Selector *Sel, int PartIdx);
-	/// Match all the CSS selectors against the current object (calls MatchSimpleSelector one or more times)
-	bool MatchFullSelector(LCss::Selector *Sel);
-	
+	/// Recursively call restyle on all nodes in the doc tree
+	void RestyleAll();
+
+	/// Return the supported display setting (only support some of them)
+	LCss::DisplayType SupportedDisplay();
 	/// Takes the CSS styles, parses and stores them in the current object,
 	//// overwriting any duplicate properties.
 	void SetCssStyle(const char *Style);
+	/// Event received by scripts change CSS properties.
+	void OnStyleChange(const char *name);
 	/// Positions the tag according to the flow region passed in
-	void OnFlow(LFlowRegion *Flow);
-	/// Paints the border of the tag
-	void OnPaintBorder(
+	void OnFlow(LFlowRegion *Flow, uint16 Depth);
+	/// Paints the border and background of the tag
+	void PaintBorderAndBackground(
 		/// The surface to paint on
 		LSurface *pDC,
+		/// The background colour (transparent is OK)
+		LColour &Back,
 		/// [Optional] The size of the border painted
 		LRect *Px = NULL);
-	void OnPaint(LSurface *pDC);
+	/// This fills 'rgn' with all the rectangles making up the inline tags region
+	void GetInlineRegion(LRegion &rgn, int ox = 0, int oy = 0);
+	void OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth);
 	void SetSize(LPoint &s);
 	void SetTag(const char *Tag);
-	void GetTagByPos(LTagHit &hit, int x, int y);
+	void GetTagByPos(LTagHit &TagHit, int x, int y, int Depth, bool InBody, bool DebugLog = false);
 	LTag *GetTagByName(const char *Name);
-	void CopyClipboard(LMemQueue &p);
-	LTag *IsAnchor(LAutoString *Uri);
+	void CopyClipboard(LMemQueue &p, bool &InSelection);
+	LTag *IsAnchor(LString *Uri);
 	bool CreateSource(LStringPipe &p, int Depth = 0, bool LastWasBlock = true);
 	void Find(int TagType, LArray<LTag*> &Tags);
 	LTag *GetAnchor(char *Name);
 
 	// Control handling
 	LTag *FindCtrlId(int Id);
-	int OnNotify(int f);
+	int OnNotify(const LNotification &n);
 	void CollectFormValues(LHashTbl<ConstStrKey<char,false>,char*> &f);
 
-	// GDom impl
-	bool GetVariant(const char *Name, LVariant &Value, char *Array = 0);
-	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0);
+	// LDom impl
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
 
 	// Window
 	bool OnMouseClick(LMouse &m);
@@ -336,16 +459,18 @@ public:
 	// Positioning
 	int RelX() { return Pos.x + (int)MarginLeft().Value; }
 	int RelY() { return Pos.y + (int)MarginTop().Value; }
-	int AbsX();
-	int AbsY();
+	LPoint AbsolutePos();
+	inline int AbsX() { return AbsolutePos().x; }
+	inline int AbsY() { return AbsolutePos().y; }
 	LRect GetRect(bool Client = true);
 	LCss::LengthType GetAlign(bool x);
 
 	// Tables
 	LTag *GetTableCell(int x, int y);
 	LPoint GetTableSize();
+	void ResetCaches();
 };
 
 }
 
-#endif
+

@@ -3,10 +3,19 @@
 	<Node Name="Lgi" Type="1" Open="1" Platforms="7" Id="4">
 		<Node Name="Html" Type="1" Platforms="7" Open="1" Id="2">
 			<Node File="../../src/common/Text/Html.cpp" Type="2" Platforms="15" />
-			<Node File="../../src/common/Text/HtmlCommon.cpp" Type="2" Platforms="15" />
-			<Node File="../../src/common/Text/HtmlParser.cpp" Type="2" Platforms="15" />
 			<Node File="../../src/common/Text/HtmlPriv.h" Type="3" Platforms="7" />
 			<Node File="../../include/lgi/common/Http.h" Type="3" Platforms="7" />
+		</Node>
+		<Node Name="Html2" Type="1" Platforms="15" Id="1">
+			<Node File="../../src/common/Text/Html2.cpp" Type="2" Platforms="15" />
+			<Node File="../../include/lgi/common/Html2.h" Type="3" Platforms="15" />
+			<Node File="../../src/common/Text/HtmlPriv2.h" Type="3" Platforms="15" />
+		</Node>
+		<Node Name="HtmlCommon" Type="1" Platforms="15" Id="2">
+			<Node File="../../src/common/Text/HtmlCommon.cpp" Type="2" Platforms="15" />
+			<Node File="../../include/lgi/common/HtmlCommon.h" Type="3" Platforms="15" />
+			<Node File="../../src/common/Text/HtmlParser.cpp" Type="2" Platforms="15" />
+			<Node File="../../include/lgi/common/HtmlParser.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Scripting" Type="1" Platforms="15" Id="1">
 			<Node File="../../src/common/Coding/ScriptLibrary.cpp" Type="2" Platforms="15" />
@@ -75,7 +84,6 @@
 					<Release>-static-libgcc 
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
-				<All />
 			</Libraries>
 			<TargetName>
 				<Linux>
@@ -83,19 +91,9 @@
 					<Release>lgi-html-test-suite</Release>
 				</Linux>
 			</TargetName>
-			<Defines>
-				<All />
-				<Linux />
-			</Defines>
-			<LibraryPaths>
-				<All />
-				<Linux />
-			</LibraryPaths>
-			<Options>
-				<All />
-				<Linux />
-			</Options>
-			<ApplicationIcon />
+			<Defines />
+			<LibraryPaths />
+			<Options />
 		</Build>
 		<General>
 			<Makefile>
@@ -108,35 +106,14 @@
 					<Release>./HtmlTestSuite</Release>
 				</Linux>
 			</Executable>
-			<Compiler />
-			<CCrossCompiler />
-			<CppCrossCompiler />
 		</General>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
+		<Remote />
 		<Debug>
-			<Arguments>
-				<All />
-			</Arguments>
-			<Environment />
-			<DebugAdmin />
-			<InitialDir />
+			<Arguments />
 		</Debug>
-		<Editor>
-			<TabSize />
-			<IndentSize />
-			<ShowWhiteSpace />
-			<UseHardTabs />
-			<CommentFile />
-			<CommentFunction />
-		</Editor>
+		<Editor />
 		<Advanced>
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
-			<OtherMakefileRules />
+			<PostBuildCommands />
 		</Advanced>
 	</Settings>
 </Project>

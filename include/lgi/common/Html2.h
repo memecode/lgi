@@ -1,10 +1,13 @@
 /// \file
 /// \author Matthew Allen
-#ifndef _LHTML2_H
-#define _LHTML2_H
+#pragma once
 
 #include "lgi/common/DocView.h"
 #include "lgi/common/HtmlCommon.h"
+#include "lgi/common/HtmlParser.h"
+#include "lgi/common/Capabilities.h"
+#include "lgi/common/ToolTip.h"
+#include "lgi/common/FindReplaceDlg.h"
 
 namespace Html2
 {
@@ -20,134 +23,151 @@ class LFontCache;
 /// environment if set. Likewise any content inside active scripting tags, e.g. &lt;? ?&gt;
 /// will be striped out of the document and passed to LDocumentEnv::OnDynamicContent, which
 /// should return the relevant HTML that the script resolves to. A reasonable default
-/// implementation of the LDocumentEnv interface is the GDefaultDocumentEnv object.
+/// implementation of the LDocumentEnv interface is the LDefaultDocumentEnv object.
 ///
 /// You can set the content of the control through the LHtml2::Name method.
 ///
 /// Retreive any selected content through LHtml2::GetSelection.
-class LHtml2 :
+class LHtml :
 	public LDocView,
-	public ResObject
+	public ResObject,
+	public LHtmlParser,
+	public LCapabilityClient
 {
 	friend class LTag;
 	friend class LFlowRegion;
 
-	class LHtmlPrivate2 *d;
+	class LHtmlPrivate *d;
 
 protected:	
 	// Data
-	LFontCache			*FontCache;
-	LTag				*Tag;				// Tree root
-	LTag				*Cursor;			// Cursor location..
-	LTag				*Selection;			// Edge of selection or NULL
-	List<LTag>			OpenTags;
-	char				*Source;
-	char				*DocCharSet;
-	char				IsHtml;
-	int					ViewWidth;
+	LFontCache			*FontCache = nullptr;
+	LTag				*Tag = nullptr;			// Tree root
+	LTag				*Cursor = nullptr;		// Cursor location..
+	LTag				*Selection = nullptr;	// Edge of selection or NULL
+	char				IsHtml = false;
+	int					ViewWidth = -1;
+	uint64_t			PaintStart = 0;
 	LToolTip			Tip;
-	LTag				*PrevTip;
 	LCss::Store			CssStore;
+	LHashTbl<ConstStrKey<char,false>, bool> CssHref;
 	
 	// Display
-	LSurface			*MemDC;
+	LAutoPtr<LSurface>	MemDC;
 
 	// This lock is separate from the window lock to avoid deadlocks.
-	struct GJobSem : public LMutex
+	struct LJobSem : public LMutex
 	{
     	// Data that has to be accessed under Lock
-	    LArray<LDocumentEnv::LoadJob*> Jobs;	    
-	    GJobSem() : LMutex("GJobSem") {}
-	} JobSem;
+	    LArray<LDocumentEnv::LoadJob*> Jobs;
+	    LJobSem() : LMutex("LJobSem") {}
+	}	JobSem;
 
 	// Methods
 	void _New();
-	void _Delete();
+	void _Delete() override;
 	LFont *DefFont();
-	LTag *GetOpenTag(char *Tag);
 	void CloseTag(LTag *t);
-	void Parse();
-	void AddCss(char *Css);
+	void ParseDocument(const char *Doc);
+	void OnAddStyle(const char *MimeType, const char *Styles) override;
 	int ScrollY();
 	void SetCursorVis(bool b);
 	bool GetCursorVis();
 	LRect *GetCursorPos();
 	bool IsCursorFirst();
+	bool CompareTagPos(LTag *a, ssize_t AIdx, LTag *b, ssize_t BIdx);
 	int GetTagDepth(LTag *Tag);
 	LTag *PrevTag(LTag *t);
 	LTag *NextTag(LTag *t);
 	LTag *GetLastChild(LTag *t);
+	void _SelectAll(LTag *t, LTag *&last);
 
 public:
-	LHtml2(int Id, int x, int y, int cx, int cy, LDocumentEnv *system = 0);
-	~LHtml2();
+	LHtml(int Id, int x, int y, int cx, int cy, LDocumentEnv *system = 0);
+	~LHtml();
 
 	// Html
-	const char *GetClass() { return "LHtml2"; }
-	bool GetFormattedContent(const char *MimeType, LString &Out, LArray<LDocView::ContentMedia> *Media = 0);
+	const char *GetClass() override { return "LHtml"; }
+	bool GetFormattedContent(const char *MimeType, LString &Out, LArray<LDocView::ContentMedia> *Media = 0) override;
 
 	/// Get the tag at an x,y location
-	LTag *GetTagByPos(int x, int y, int *Index);
+	LTag *GetTagByPos(	int x, int y,
+						ssize_t *Index,
+						LPoint *LocalCoords = NULL,
+						bool DebugLog = false);
 	/// Layout content and return size.
-	LPoint Layout();
+	LPoint Layout(bool ForceLayout = false);
+	bool OnLayout(LViewLayoutInfo &Inf) override;
 
 	// Options
 	bool GetLinkDoubleClick();
 	void SetLinkDoubleClick(bool b);
-	void SetLoadImages(bool i);
+	void SetLoadImages(bool i) override;
 	bool GetEmoji();
 	void SetEmoji(bool i);
+	void SetMaxPaintTime(int Ms);
+	bool GetMaxPaintTimeout();
 
 	// LDocView
-	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0);
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
 	
 	/// Copy the selection to the clipboard
-	bool Copy();
+	bool Copy() override;
 	/// Returns true if there is a selection
-	bool HasSelection();
+	bool HasSelection() override;
 	/// Unselect all the text in the control
-	void UnSelectAll();
+	void UnSelectAll() override;
 	/// Select all the text in the control (not impl)
-	void SelectAll();
+	void SelectAll() override;
 	/// Return the selection in a dynamically allocated string
-	char *GetSelection();
+	LString GetSelection() override;
 	
 	// Prop
 
 	// Window
 
 	/// Sets the HTML content of the control
-	bool Name(const char *s);
+	bool Name(const char *s) override;
 	/// Returns the HTML content
-	char *Name();
+	const char *Name() override;
 	/// Sets the HTML content of the control
-	bool NameW(const char16 *s);
+	bool NameW(const char16 *s) override;
 	/// Returns the HTML content
-	char16 *NameW();
+	const char16 *NameW() override;
 
 	// Impl
-	void OnPaint(LSurface *pDC);
-	void OnMouseClick(LMouse &m);
-	void OnMouseMove(LMouse &m);
-	LCursor GetCursor(int x, int y);
-	bool OnMouseWheel(double Lines);
-	bool OnKey(LKey &k);
-	int OnNotify(LViewI *c, int f);
-	void OnPosChange();
-	void OnPulse();
-	LMessage::Result OnEvent(LMessage *Msg);
-	const char *GetMimeType() { return "text/html"; }
-	void OnContent(LDocumentEnv::LoadJob *Res);
+	void OnPaint(LSurface *pDC) override;
+	void OnMouseClick(LMouse &m) override;
+	void OnMouseMove(LMouse &m) override;
+	LCursor GetCursor(int x, int y) override;
+	bool OnMouseWheel(double Lines) override;
+	bool OnKey(LKey &k) override;
+	int OnNotify(LViewI *c, const LNotification &n) override;
+	void OnPosChange() override;
+	void OnPulse() override;
+	LMessage::Result OnEvent(LMessage *Msg) override;
+	const char *GetMimeType() override { return "text/html"; }
+	void OnContent(LDocumentEnv::LoadJob *Res) override;
 	bool GotoAnchor(char *Name);
+	LHtmlElement *CreateElement(LHtmlElement *Parent) override;
+	bool EvaluateCondition(const char *Cond) override;
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
+	void DoFind(std::function<void(bool)> Callback) override;
+	LPointF GetDpiScale();
+	void SetVScroll(int64 v);
 
 	// Javascript handlers
-	GDom *getElementById(char *Id);
+	LDom *getElementById(char *Id);
 
 	// Events
-	bool OnFind(class LFindReplaceCommon *Params);
+	bool OnFind(LFindReplaceCommon *Params);
 	virtual bool OnSubmitForm(LTag *Form);
 	virtual void OnCursorChanged() {}
+	virtual void OnLoad();
+	virtual bool OnContextMenuCreate(struct LTagHit &Hit, LSubMenu &RClick) { return true; }
+	virtual void OnContextMenuCommand(struct LTagHit &Hit, int Cmd) {}
+	virtual void OnPaintFinished(LSurface *pDC) {}
+	virtual void DebugTagInfo(LTag *tag);
 };
 
 }
-#endif

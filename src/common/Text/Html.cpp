@@ -4285,7 +4285,7 @@ struct ColInfo
 	int Px;
 };
 
-int ColInfoCmp(ColInfo *a, ColInfo *b)
+static int ColInfoCmp(ColInfo *a, ColInfo *b)
 {
 	int LDiff = b->Large - a->Large;
 	int LGrow = b->Growable - a->Growable;
@@ -5090,18 +5090,6 @@ void LHtmlArea::FlowText(LTag *Tag,
 	SetFixedLength(true);
 }
 
-char16 htoi(char16 c)
-{
-	if (c >= '0' && c <= '9')
-		return c - '0';
-	if (c >= 'a' && c <= 'f')
-		return c - 'a' + 10;
-	if (c >= 'A' && c <= 'F')
-		return c - 'A' + 10;
-	LAssert(0);
-	return 0;
-}
-
 bool LTag::Serialize(LXmlTag *t, bool Write)
 {
 	LRect pos;
@@ -5191,7 +5179,7 @@ bool LTag::Serialize(LXmlTag *t, bool Write)
 					for (int i=0; i<4 && *c; i++)
 					{
 						ch <<= 4;
-						ch |= htoi(*++c);
+						ch |= htmlConvertHex(*++c);
 					}
 				}
 				else ch = *c;

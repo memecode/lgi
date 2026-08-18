@@ -5,6 +5,7 @@
 #include "lgi/common/HashTable.h"
 
 extern char16 LHtmlListItem[];
+extern char16 htmlConvertHex(char16 c);
 
 #define SkipWhiteSpace(s)			while (*s && IsWhite(*s)) s++;
 

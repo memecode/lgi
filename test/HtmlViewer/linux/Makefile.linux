@@ -79,6 +79,7 @@ Source =	../../src/common/Coding/LexCpp.cpp \
 			../../src/common/Text/Homoglyphs/Homoglyphs.cpp \
 			../../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
 			../../src/common/Text/Html.cpp \
+			../../src/common/Text/Html2.cpp \
 			../../src/common/Text/HtmlCommon.cpp \
 			../../src/common/Text/HtmlParser.cpp \
 			../../src/common/Widgets/ZoomView.cpp \

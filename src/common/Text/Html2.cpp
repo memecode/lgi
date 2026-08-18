@@ -2,22 +2,50 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <math.h>
+#include <cmath>
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Html2.h"
-#include "lgi/common/HtmlPriv2.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/ScrollBar.h"
 #include "lgi/common/Variant.h"
 #include "lgi/common/FindReplaceDlg.h"
+#include "lgi/common/Unicode.h"
 #include "lgi/common/Emoji.h"
 #include "lgi/common/ClipBoard.h"
 #include "lgi/common/Button.h"
 #include "lgi/common/Edit.h"
 #include "lgi/common/Combo.h"
+#include "lgi/common/GdcTools.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/Palette.h"
+#include "lgi/common/Path.h"
+#include "lgi/common/CssTools.h"
+#include "lgi/common/LgiRes.h"
+#include "lgi/common/Net.h"
+#include "lgi/common/Base64.h"
+#include "lgi/common/Menu.h"
+#include "lgi/common/FindReplaceDlg.h"
+#include "lgi/common/Homoglyphs.h"
+#include "lgi/common/Charset.h"
+#include "lgi/common/Uri.h"
 
-#define DEBUG_TABLE_LAYOUT			0
-#define LUIS_DEBUG					0
+#include "HtmlPriv2.h"
+
+#define DEBUG_TABLE_LAYOUT			1
+#define DEBUG_DRAW_TD				0
+#define DEBUG_RESTYLE				0
+#define DEBUG_TAG_BY_POS			0
+#define DEBUG_SELECTION				0
+#define DEBUG_TEXT_AREA				0
+#define PROFILE_FLOW				0
+
+#define ENABLE_IMAGE_RESIZING		1
+#define DOCUMENT_LOAD_IMAGES		1
+#define MAX_RECURSION_DEPTH			300
+#define ALLOW_TABLE_GROWTH			1
+#define LGI_HTML_MAXPAINT_TIME		350 // ms
+#define FLOAT_TOLERANCE				0.001
+
 #define CRASH_TRACE					0
 #ifdef MAC
 #define HTML_USE_DOUBLE_BUFFER		0
@@ -28,11 +56,10 @@
 #ifndef IDC_HAND
 #define IDC_HAND					MAKEINTRESOURCE(32649)
 #endif
-#define M_JOBS_LOADED				(M_USER+4000)
 
 #undef CellSpacing
 #define DefaultCellSpacing			0
-#define DefaultCellPadding			3
+#define DefaultCellPadding			1
 
 #ifdef MAC
 #define MinimumPointSize			9
@@ -42,23 +69,32 @@
 #define MinimumBodyFontSize			11
 #endif
 
-#define DefaultPointSize			11
+// #define DefaultFont					"font-family: Times; font-size: 16pt;"
 #define DefaultBodyMargin			"5px"
-#define DefaultImgSize				17
+#define DefaultImgSize				16
 #define DefaultMissingCellColour	GT_TRANSPARENT // Rgb32(0xf0,0xf0,0xf0)
-#ifdef _DEBUG
+#define ShowNbsp					0
+
+#define FontPxHeight(fnt)			(fnt->GetHeight() - (int)(fnt->Leading() + 0.5))
+
+#if 0 // def _DEBUG
 #define DefaultTableBorder			Rgb32(0xf8, 0xf8, 0xf8)
 #else
 #define DefaultTableBorder			GT_TRANSPARENT
 #endif
-#define DefaultTextColour			Rgb32(0, 0, 0)
-#define ShowNbsp					0
+
+#if defined(_DEBUG) && DEBUG_TABLE_LAYOUT
+#define DEBUG_LOG(...)				if (Table->Debug) LgiTrace(__VA_ARGS__)
+#else
+#define DEBUG_LOG(...)
+#endif
+
+#define GetCssLen(a, b)				a().Type == LCss::LenInherit ? b() : a()
 
 static char WordDelim[]	=			".,<>/?[]{}()*&^%$#@!+|\'\"";
 static char16 WhiteW[] =			{' ', '\t', '\r', '\n', 0};
 
-#define SkipWhiteSpace(s)			while (*s && IsWhiteSpace(*s)) s++;
-
+#if 0
 static char DefaultCss[] = {
 "a				{ color: blue; text-decoration: underline; }"
 "body			{ margin: 8px; }"
@@ -74,15 +110,32 @@ static char DefaultCss[] = {
 "menu            { margin: 1.12em 0px; }"
 "h5              { font-size: .83em; margin: 1.5em 0px; }"
 "h6              { font-size: .75em; margin: 1.67em 0px; }"
-"strike, del		{ text-decoration: line-through; }"
+"strike, del     { text-decoration: line-through; }"
 "hr              { border: 1px inset; }"
 "center          { text-align: center; }"
 "h1, h2, h3, h4,"
 "h5, h6, b,"
 "strong          { font-weight: bolder; }"
 };
+#endif
 
-#define IsBlock(d)		((d) == DispBlock)
+template<typename T>
+void RemoveChars(T *str, T *remove_list)
+{
+	T *i = str, *o = str, *c;
+	while (*i)
+	{
+		for (c = remove_list; *c; c++)
+		{
+			if (*c == *i)
+				break;
+		}
+		if (*c == 0)
+			*o++ = *i;
+		i++;
+	}
+	*o++ = NULL;
+}
 
 //////////////////////////////////////////////////////////////////////
 using namespace Html2;
@@ -90,52 +143,60 @@ using namespace Html2;
 namespace Html2
 {
 
-class LHtmlPrivate2
+class LHtmlPrivate
 {
 public:
-	LHashTbl<ConstStrKey<char,false>, bool> Loading;
+	LHashTbl<ConstStrKey<char>, LTag*> Loading;
 	LHtmlStaticInst Inst;
 	bool CursorVis;
 	LRect CursorPos;
-	bool WordSelectMode;
 	LPoint Content;
+	bool WordSelectMode;
 	bool LinkDoubleClick;
 	LAutoString OnLoadAnchor;
 	bool DecodeEmoji;
 	LAutoString EmojiImg;
-	bool IsParsing;
 	int NextCtrlId;
-	
-	// Refresh
-	int RefreshTime;
-	LAutoString RefreshUri;
-	
-	// This UID is used to match data load events with their source document.
-	// Sometimes data will arrive after the document that asked for it has
-	// already been unloaded. So by assigned each document an UID we can check
-	// the job UID against it and discard old data.
-	uint32 DocumentUid;
+	uint64 SetScrollTime;
+	int DeferredLoads;
+	int FlowedTags = 0;
+	#if PROFILE_FLOW
+	LHashTbl<ConstStrKey<char,false>, uint64_t> FlowTimes;
+	#endif
 
-	LHtmlPrivate2()
+	bool IsParsing;
+	bool IsLoaded;
+	bool StyleDirty;
+
+	// Paint time limits...
+	bool MaxPaintTimeout = false;
+	int MaxPaintTime = LGI_HTML_MAXPAINT_TIME;
+	
+	// Find settings
+	LAutoWString FindText;
+	bool MatchCase;
+	
+	LHtmlPrivate()
 	{
+		IsLoaded = false;
+		StyleDirty = false;
 		IsParsing = false;
-		DocumentUid = 0;
 		LinkDoubleClick = true;
 		WordSelectMode = false;
 		NextCtrlId = 2000;
+		SetScrollTime = 0;
 		CursorVis = false;
 		CursorPos.ZOff(-1, -1);
-		RefreshTime = -1;
+		DeferredLoads = 0;
 
 		char EmojiPng[MAX_PATH_LEN];
 		#ifdef MAC
-		LgiGetExeFile(EmojiPng, sizeof(EmojiPng));
-		LMakePath(EmojiPng, sizeof(EmojiPng), EmojiPng, "Contents/Resources/Emoji.png");
+		LMakePath(EmojiPng, sizeof(EmojiPng), LGetExeFile(), "Contents/Resources/Emoji.png");
 		#else
 		LGetSystemPath(LSP_APP_INSTALL, EmojiPng, sizeof(EmojiPng));
 		LMakePath(EmojiPng, sizeof(EmojiPng), EmojiPng, "resources/emoji.png");
 		#endif
-		if (FileExists(EmojiPng))
+		if (LFileExists(EmojiPng))
 		{
 			DecodeEmoji = true;
 			EmojiImg.Reset(NewStr(EmojiPng));
@@ -144,221 +205,10 @@ public:
 			DecodeEmoji = false;
 	}
 
-	~LHtmlPrivate2()
+	~LHtmlPrivate()
 	{
 	}
 };
-
-};
-
-//////////////////////////////////////////////////////////////////////
-static LHashTbl<ConstStrKey<char,false>, GInfo*> TagMap(TAG_LAST * 3);
-static GInfo *UnknownTag = NULL;
-
-static GInfo *GetTagInfo(const char *Tag)
-{
-	GInfo *i;
-
-	if (!Tag)
-		return 0;
-
-    if (TagMap.Length() == 0)
-    {
-	    for (i = TagInfo; i->Tag; i++)
-	    {
-	        TagMap.Add(i->Tag, i);
-
-	        if (i->Id == TAG_TD)
-	            TagMap.Add("th", i);
-	    }
-	    
-	    UnknownTag = i;
-	    LAssert(UnknownTag->Id == TAG_UNKNOWN);
-	}
-
-	i = TagMap.Find(Tag);
-	return i ? i : UnknownTag;
-}
-
-static bool Is8Bit(char *s)
-{
-	while (*s)
-	{
-		if (((uchar)*s) & 0x80)
-			return true;
-		s++;
-	}
-	return false;
-}
-
-static char *ParseName(char *s, char **Name)
-{
-	SkipWhiteSpace(s);
-	char *Start = s;
-	while (*s && (IsAlpha(*s) || strchr("!-:", *s) || IsDigit(*s)))
-	{
-		s++;
-	}
-	if (Name)
-	{
-		int Len = s - Start;
-		if (Len > 0)
-		{
-			*Name = NewStr(Start, Len);
-		}
-	}
-	
-	return s;
-}
-
-static bool ParseColour(const char *s, LCss::ColorDef &c)
-{
-	if (s)
-	{
-		int m;
-
-		if (*s == '#')
-		{
-			s++;
-
-			ParseHexColour:
-			int i = htoi(s);
-			int l = strlen(s);
-			if (l == 3)
-			{
-				int r = i >> 8;
-				int g = (i >> 4) & 0xf;
-				int b = i & 0xf;
-
-				c.Type = LCss::ColorRgb;
-				c.Rgb32 = Rgb32(r | (r<<4), g | (g << 4), b | (b << 4));
-			}
-			else if (l == 4)
-			{
-				int r = (i >> 12) & 0xf;
-				int g = (i >> 8) & 0xf;
-				int b = (i >> 4) & 0xf;
-				int a = i & 0xf;
-				c.Type = LCss::ColorRgb;
-				c.Rgb32 = Rgba32(	r | (r <<4 ),
-									g | (g << 4),
-									b | (b << 4),
-									a | (a << 4));
-			}
-			else if (l == 6)
-			{
-				c.Type = LCss::ColorRgb;
-				c.Rgb32 = Rgb32(i >> 16, (i >> 8) & 0xff, i & 0xff);
-			}
-			else if (l == 8)
-			{
-				c.Type = LCss::ColorRgb;
-				c.Rgb32 = Rgba32(i >> 24, (i >> 16) & 0xff, (i >> 8) & 0xff, i & 0xff);
-			}
-			else
-			{
-				return false;
-			}
-			
-			return true;
-		}
-		else if ((m = LHtmlStatic::Inst->ColourMap.Find(s)) >= 0)
-		{
-			c.Type = LCss::ColorRgb;
-			c.Rgb32 = Rgb24To32(m);
-			return true;
-		}
-		else if (!strnicmp(s, "rgb", 3))
-		{
-			s += 3;
-			SkipWhiteSpace(s);
-			if (*s == '(')
-			{
-				s++;
-				LArray<uint8> Col;
-				while (Col.Length() < 3)
-				{
-					SkipWhiteSpace(s);
-					if (IsDigit(*s))
-					{
-						Col.Add(atoi(s));
-						while (*s && IsDigit(*s)) s++;
-						SkipWhiteSpace(s);
-						if (*s == ',') s++;
-					}
-					else break;
-				}
-
-				SkipWhiteSpace(s);
-				if (*s == ')' && Col.Length() == 3)
-				{
-					c.Type = LCss::ColorRgb;
-					c.Rgb32 = Rgb32(Col[0], Col[1], Col[2]);
-					return true;
-				}
-			}
-		}
-		else if (IsDigit(*s) || (tolower(*s) >= 'a' && tolower(*s) <= 'f'))
-		{
-			goto ParseHexColour;
-		}
-	}
-
-	return false;
-}
-
-static char *ParsePropList(char *s, LTag *Obj, bool &Closed)
-{
-	while (s && *s && *s != '>')
-	{
-		while (*s && IsWhiteSpace(*s)) s++;
-		if (*s == '>') break;
-
-		// get name
-		char *Name = 0;
-		char *n = ParseName(s, &Name);		
-		if (*n == '/')
-		{
-			Closed = true;
-		}		
-		if (n == s)
-		{
-			s = ++n;
-		}
-		else
-		{
-			s = n;
-		}
-
-		while (*s && IsWhiteSpace(*s)) s++;
-
-		if (*s == '=')
-		{
-			// get value
-			s++;
-			while (*s && IsWhiteSpace(*s)) s++;
-
-			char *Value = 0;
-			s = ParsePropValue(s, Value);
-
-			if (Value && Name)
-			{
-				Obj->Set(Name,  Value);
-			}
-
-			DeleteArray(Value);
-		}
-
-		DeleteArray(Name);
-	}
-
-	if (*s == '>') s++;
-
-	return s;
-}
-
-//////////////////////////////////////////////////////////////////////
-namespace Html2 {
 
 class InputButton : public LButton
 {
@@ -370,19 +220,19 @@ public:
 		Tag = tag;
 	}
 	
-	void OnClick()
+	void OnClick(const LMouse &m)
 	{
-		Tag->OnClick();
+		Tag->OnClick(m);
 	}
 };
 
 class LFontCache
 {
-	LHtml2 *Owner;
+	LHtml *Owner;
 	List<LFont> Fonts;
 
 public:
-	LFontCache(LHtml2 *owner)
+	LFontCache(LHtml *owner)
 	{
 		Owner = owner;
 	}
@@ -399,7 +249,7 @@ public:
 	
 	LFont *FindMatch(LFont *m)
 	{
-		for (LFont *f = Fonts.First(); f; f = Fonts.Next())
+		for (auto f: Fonts)
 		{
 			if (*f == *m)
 			{
@@ -413,15 +263,18 @@ public:
 	LFont *GetFont(LCss *Style)
 	{
 		if (!Style)
-			return false;
+			return NULL;
 		
-		LFont *Default = Owner->GetFont();
-		LCss::StringsDef Face = Style->FontFamily();
-		if (Face.Length() < 1 || !ValidStr(Face[0]))
+		auto Default = Owner->GetFont();
+		auto Face = Style->FontFamily();
+		if (Face.Length() < 1 || !ValidStr(Face.Names[0]))
 		{
 			Face.Empty();
-			Face.Add(NewStr(Default->Face()));
+			const char *DefFace = Default->Face();
+			LAssert(ValidStr(DefFace));
+			Face.Names.New() = DefFace;
 		}
+		LAssert(ValidStr(Face.Names[0]));
 		LCss::Len Size = Style->FontSize();
 		LCss::FontWeightType Weight = Style->FontWeight();
 		bool IsBold =	Weight == LCss::FontWeightBold ||
@@ -429,106 +282,52 @@ public:
 						Weight > LCss::FontWeight400;
 		bool IsItalic = Style->FontStyle() == LCss::FontStyleItalic;
 		bool IsUnderline = Style->TextDecoration() == LCss::TextDecorUnderline;
-		double PtSize = 0.0;
 
-		if (Size.Type == LCss::LenInherit)
+		if (Size.Type == LCss::LenInherit ||
+			Size.Type == LCss::LenNormal)
 		{
 			Size.Type = LCss::LenPt;
 			Size.Value = (float)Default->PointSize();
 		}
 
-		LFont *f = 0;
+		auto Scale = Owner->GetDpiScale();
 		if (Size.Type == LCss::LenPx)
 		{
-		    int RequestPx = (int)Size.Value;
-			LArray<int> Map; // map of point-sizes to heights
-			int NearestPoint = 0;
-			int Diff = 1000;
-			#define PxHeight(fnt) (fnt->GetHeight() - (int)(fnt->Leading() + 0.5))
+			Size.Value *= (float) Scale.y;
+		    int RequestPx = (int) Size.Value;
 
 			// Look for cached fonts of the right size...
-			for (f=Fonts.First(); f; f=Fonts.Next())
+			for (auto f: Fonts)
 			{
 				if (f->Face() &&
-					stricmp(f->Face(), Face[0]) == 0 &&
+					_stricmp(f->Face(), Face.Names[0]) == 0 &&
 					f->Bold() == IsBold &&
 					f->Italic() == IsItalic &&
 					f->Underline() == IsUnderline)
 				{
-				    int PtSize = f->PointSize();
-				    int Height = PxHeight(f);
-					Map[PtSize] = Height;
-
-					if (!NearestPoint)
-						NearestPoint = f->PointSize();
-					else
-					{
-						int NearDiff = abs(Map[NearestPoint] - RequestPx);
-						int CurDiff = abs(f->GetHeight() - RequestPx);
-						if (CurDiff < NearDiff)
-						{
-							NearestPoint = f->PointSize();
-						}
-					}
-					
-					if (RequestPx < PxHeight(f) &&
-					    f->PointSize() == MinimumPointSize)
-				    {
-				        return f;
-				    }
-
-					Diff = PxHeight(f) - RequestPx;
-					if (abs(Diff) < 2)
-					{
+				    int Px = FontPxHeight(f);
+				    int Diff = Px - RequestPx;
+					if (Diff >= 0 && Diff <= 2)
 						return f;
-					}
 				}
 			}
-
-			// Find the correct font size...
-			PtSize = Size.Value;
-			if (PtSize < MinimumPointSize)
-				PtSize = MinimumPointSize;
-			do
-			{
-				LAutoPtr<LFont> Tmp(new LFont);
-				
-				Tmp->Bold(IsBold);
-				Tmp->Italic(IsItalic);
-				Tmp->Underline(IsUnderline);
-				
-				if (!Tmp->Create(Face[0], (int)PtSize))
-					break;
-				
-				int ActualHeight = PxHeight(Tmp);
-				Diff = ActualHeight - RequestPx;
-				if (abs(Diff) <= 1)
-				{
-					Fonts.Insert(f = Tmp.Release());
-					LAssert(f->Face());
-					return f;
-				}
-
-				if (Diff > 0)
-				{
-					if (PtSize > MinimumPointSize)
-						PtSize--;
-					else
-					    break;
-				}
-				else
-					PtSize++;
-			}
-			while (PtSize > MinimumPointSize && PtSize < 100);
 		}
 		else if (Size.Type == LCss::LenPt)
 		{
-			double Pt = max(MinimumPointSize, Size.Value);
-			for (f=Fonts.First(); f; f=Fonts.Next())
+			double Pt = Size.Value;
+			for (auto f: Fonts)
 			{
+				if (!f->Face() || Face.Length() == 0)
+				{
+					LAssert(0);
+					break;
+				}
+				
+				auto FntSz = f->Size();
 				if (f->Face() &&
-					stricmp(f->Face(), Face[0]) == 0 &&
-					f->PointSize() == Pt &&
+					_stricmp(f->Face(), Face.Names[0]) == 0 &&
+					FntSz.Type == LCss::LenPt &&
+					std::abs(FntSz.Value - Pt) < FLOAT_TOLERANCE &&
 					f->Bold() == IsBold &&
 					f->Italic() == IsItalic &&
 					f->Underline() == IsUnderline)
@@ -537,8 +336,6 @@ public:
 					return f;
 				}
 			}
-
-			PtSize = Pt;
 		}
 		else if (Size.Type == LCss::LenPercent)
 		{
@@ -546,9 +343,10 @@ public:
 			// of the CSS calculations, any that appear here have no "font-size"
 			// in their parent tree, so we just use the default font size times
 			// the requested percent
-			PtSize = Size.Value * Default->PointSize() / 100.0;
-			if (PtSize < MinimumPointSize)
-				PtSize = MinimumPointSize;
+			Size.Type = LCss::LenPt;
+			Size.Value *= Default->PointSize() / 100.0f;
+			if (Size.Value < MinimumPointSize)
+				Size.Value = MinimumPointSize;
 		}
 		else if (Size.Type == LCss::LenEm)
 		{
@@ -556,60 +354,52 @@ public:
 			// of the CSS calculations, any that appear here have no "font-size"
 			// in their parent tree, so we just use the default font size times
 			// the requested percent
-			PtSize = Size.Value * Default->PointSize();
-			if (PtSize < MinimumPointSize)
-				PtSize = MinimumPointSize;
-		}
-		else if (Size.Type == LCss::LenNormal)
-		{
-			return Fonts.First();
+			Size.Type = LCss::LenPt;
+			Size.Value *= Default->PointSize();
+			if (Size.Value < MinimumPointSize)
+				Size.Value = MinimumPointSize;
 		}
 		else if (Size.Type == LCss::SizeXXSmall ||
-				Size.Type == LCss::SizeXSmall ||
-				Size.Type == LCss::SizeSmall ||
-				Size.Type == LCss::SizeMedium ||
-				Size.Type == LCss::SizeLarge ||
-				Size.Type == LCss::SizeXLarge ||
-				Size.Type == LCss::SizeXXLarge)
+				 Size.Type == LCss::SizeXSmall  ||
+				 Size.Type == LCss::SizeSmall   ||
+				 Size.Type == LCss::SizeMedium  ||
+				 Size.Type == LCss::SizeLarge   ||
+				 Size.Type == LCss::SizeXLarge  ||
+				 Size.Type == LCss::SizeXXLarge)
 		{
-			double Table[] =
-			{
-				0.4, // SizeXXSmall
-				0.5, // SizeXSmall
-				0.7, // SizeSmall
-				1.0, // SizeMedium
-				1.3, // SizeLarge
-				1.7, // SizeXLarge
-				2.0, // SizeXXLarge
-			};
-
 			int Idx = Size.Type-LCss::SizeXXSmall;
-			LAssert(Idx >= 0 && Idx < CountOf(Table));
-			PtSize = Default->PointSize() * Table[Idx];
-			if (PtSize < MinimumPointSize)
-				PtSize = MinimumPointSize;
+			LAssert(Idx >= 0 && Idx < CountOf(LCss::FontSizeTable));
+			Size.Type = LCss::LenPt;
+			Size.Value = Default->PointSize() * LCss::FontSizeTable[Idx];
+			if (Size.Value < MinimumPointSize)
+				Size.Value = MinimumPointSize;
 		}
 		else if (Size.Type == LCss::SizeSmaller)
 		{
-			PtSize = Default->PointSize() - 1;
+			Size.Type = LCss::LenPt;
+			Size.Value = (float)(Default->PointSize() - 1);
 		}
 		else if (Size.Type == LCss::SizeLarger)
 		{
-			PtSize = Default->PointSize() + 1;
+			Size.Type = LCss::LenPt;
+			Size.Value = (float)(Default->PointSize() + 1);
 		}
 		else LAssert(!"Not impl.");
 
-		if (f = new LFont)
+		LFont *f;
+		if ((f = new LFont))
 		{
-			char *ff = ValidStr(Face[0]) ? Face[0] : Default->Face();
+			auto ff = ValidStr(Face.Names[0]) ? Face.Names[0].Get() : Default->Face();
 			f->Face(ff);
-			f->PointSize((int) (PtSize ? PtSize : Default->PointSize()));
+			f->Size(Size ? Size : Default->Size());
 			f->Bold(IsBold);
 			f->Italic(IsItalic);
 			f->Underline(IsUnderline);
 			
 			// printf("Add cache font %s,%i %i,%i,%i\n", f->Face(), f->PointSize(), f->Bold(), f->Italic(), f->Underline());
-			if (!f->Create((char*)0, 0))
+			if (std::abs(Size.Value) < FLOAT_TOLERANCE)
+				;
+			else if (!f->Create((char*)0, 0))
 			{
 				// Broken font...
 				f->Face(Default->Face());
@@ -625,14 +415,18 @@ public:
 					if (!f->Create((char*)0, 0))
 					{
 						DeleteObj(f);
-						return Fonts.First();
+						return Fonts[0];
 					}
 				}
 			}
 
 			// Not already cached
 			Fonts.Insert(f);
-			LAssert(f->Face());
+			if (!f->Face())
+			{
+				LAssert(0);
+			}
+			
 			return f;
 		}
 
@@ -642,40 +436,47 @@ public:
 
 class LFlowRegion
 {
+	LCss::LengthType Align = LCss::LenInherit;
 	List<LFlowRect> Line;	// These pointers aren't owned by the flow region
 							// When the line is finish, all the tag regions
 							// will need to be vertically aligned
 
-	struct GFlowStack
+	struct LFlowStack
 	{
 		int LeftAbs;
 		int RightAbs;
 		int TopAbs;
 	};
-	LArray<GFlowStack> Stack;
+	LArray<LFlowStack> Stack;
 
 public:
-	LHtml2 *Html;
+	LHtml *Html;
 	int x1, x2;					// Left and right margins
 	int y1;						// Current y position
 	int y2;						// Maximum used y position
 	int cx;						// Current insertion point
 	int my;						// How much of the area above y2 was just margin
-	int max_cx;					// Max value of cx
+	LPoint MAX;					// Max dimensions
+	int Inline;
+	int InBody;
 
-	LFlowRegion(LHtml2 *html)
+	LFlowRegion(LHtml *html, bool inbody)
 	{
 		Html = html;
-		x1 = x2 = y1 = y2 = cx = my = max_cx = 0;
+		x1 = x2 = y1 = y2 = cx = my = 0;
+		Inline = 0;
+		InBody = inbody;
 	}
 
-	LFlowRegion(LHtml2 *html, LRect r)
+	LFlowRegion(LHtml *html, LRect r, bool inbody)
 	{
 		Html = html;
-		max_cx = cx = x1 = r.x1;
-		y1 = y2 = r.y1;
+		MAX.x = cx = x1 = r.x1;
+		MAX.y = y1 = y2 = r.y1;
 		x2 = r.x2;
 		my = 0;
+		Inline = 0;
+		InBody = inbody;
 	}
 
 	LFlowRegion(LFlowRegion &r)
@@ -684,14 +485,21 @@ public:
 		x1 = r.x1;
 		x2 = r.x2;
 		y1 = r.y1;
-		y2 = r.y2;
-		max_cx = cx = r.cx;
+		MAX.x = cx = r.cx;
+		MAX.y = y2 = r.y2;
 		my = r.my;
+		Inline = r.Inline;
+		InBody = r.InBody; 
 	}
-	
-	int Width()
+
+	LString ToString()
 	{
-		return x2 - x1 + 1;
+		LString s;
+		s.Printf("Flow: x=%i(%i)%i y=%i,%i my=%i inline=%i",
+			x1, cx, x2,
+			y1, y2, my,
+			Inline);
+		return s;
 	}
 
 	int X()
@@ -702,6 +510,11 @@ public:
 	void X(int newx)
 	{
 		x2 = x1 + newx - 1;
+	}
+
+	int Width()
+	{
+		return x2 - x1 + 1;
 	}
 
 	LFlowRegion &operator +=(LRect r)
@@ -726,12 +539,13 @@ public:
 		return *this;
 	}
 	
+	void AlignText();
 	void FinishLine(bool Margin = false);
 	void EndBlock();
-	void Insert(LFlowRect *Tr);
+	void Insert(LFlowRect *Tr, LCss::LengthType Align);
 	LRect *LineBounds();
 
-	void Indent(LFont *Font,
+	void Indent(LTag *Tag,
 				LCss::Len Left,
 				LCss::Len Top,
 				LCss::Len Right,
@@ -739,11 +553,11 @@ public:
 				bool IsMargin)
 	{
 		LFlowRegion This(*this);
-		GFlowStack &Fs = Stack.New();
+		LFlowStack &Fs = Stack.New();
 
-		Fs.LeftAbs = Left.IsValid() ? ResolveX(Left, Font, IsMargin) : 0;
-		Fs.RightAbs = Right.IsValid() ? ResolveX(Right, Font, IsMargin) : 0;
-		Fs.TopAbs = Top.IsValid() ? ResolveY(Top, Font, IsMargin) : 0;
+		Fs.LeftAbs = Left ? ResolveX(Left, Tag, IsMargin) : 0;
+		Fs.RightAbs = Right ? ResolveX(Right, Tag, IsMargin) : 0;
+		Fs.TopAbs = Top ? ResolveY(Top, Tag, IsMargin) : 0;
 
 		x1 += Fs.LeftAbs;
 		cx += Fs.LeftAbs;
@@ -754,7 +568,51 @@ public:
 			my += Fs.TopAbs;
 	}
 
-	void Outdent(LFont *Font,
+	void Indent(LRect &Px,
+				bool IsMargin)
+	{
+		LFlowRegion This(*this);
+		LFlowStack &Fs = Stack.New();
+
+		Fs.LeftAbs = Px.x1;
+		Fs.RightAbs = Px.x2;
+		Fs.TopAbs = Px.y1;
+
+		x1 += Fs.LeftAbs;
+		cx += Fs.LeftAbs;
+		x2 -= Fs.RightAbs;
+		y1 += Fs.TopAbs;
+		y2 += Fs.TopAbs;
+		
+		if (IsMargin)
+			my += Fs.TopAbs;
+	}
+
+	void Outdent(LRect &Px,
+				bool IsMargin)
+	{
+		LFlowRegion This = *this;
+
+		ssize_t len = Stack.Length();
+		if (len > 0)
+		{
+			LFlowStack &Fs = Stack[len-1];
+
+			int &BottomAbs = Px.y2;
+
+			x1 -= Fs.LeftAbs;
+			cx -= Fs.LeftAbs;
+			x2 += Fs.RightAbs;
+			y2 += BottomAbs;
+			if (IsMargin)
+				my += BottomAbs;
+
+			Stack.Length(len-1);
+		}
+		else LAssert(!"Nothing to pop.");
+	}
+
+	void Outdent(LTag *Tag,
 				LCss::Len Left,
 				LCss::Len Top,
 				LCss::Len Right,
@@ -763,30 +621,16 @@ public:
 	{
 		LFlowRegion This = *this;
 
-		#if 0
-		int LeftAbs = Left.GetPrevAbs();
-		int RightAbs = Right.GetPrevAbs();
-		int BottomAbs = Bottom.Get(&This, Font);
-
-		x1 -= LeftAbs;
-		cx -= LeftAbs;
-		x2 += RightAbs;
-		// y1 += BottomAbs;
-		y2 += BottomAbs;
-		if (Margin)
-			my += BottomAbs;
-		#else
-		int len = Stack.Length();
+		ssize_t len = Stack.Length();
 		if (len > 0)
 		{
-			GFlowStack &Fs = Stack[len-1];
+			LFlowStack &Fs = Stack[len-1];
 
-			int BottomAbs = Bottom.IsValid() ? ResolveY(Bottom, Font, IsMargin) : 0;
+			int BottomAbs = Bottom ? ResolveY(Bottom, Tag, IsMargin) : 0;
 
 			x1 -= Fs.LeftAbs;
 			cx -= Fs.LeftAbs;
 			x2 += Fs.RightAbs;
-			// y1 += Fs.BottomAbs;
 			y2 += BottomAbs;
 			if (IsMargin)
 				my += BottomAbs;
@@ -794,25 +638,23 @@ public:
 			Stack.Length(len-1);
 		}
 		else LAssert(!"Nothing to pop.");
-		#endif
 	}
 
-	int ResolveX(LCss::Len l, LFont *f, bool IsMargin)
+	int ResolveX(LCss::Len l, LTag *t, bool IsMargin)
 	{
-		int ScreenDpi = 96; // Haha, where should I get this from?
-
+		LFont *f = t->GetFont();
 		switch (l.Type)
 		{
 			default:
 			case LCss::LenInherit:
-				return X();
-				
+				return IsMargin ? 0 : X();
 			case LCss::LenPx:
-				return min((int)l.Value, X());
+				// return MIN((int)l.Value, X());
+				return (int)l.Value;
 			case LCss::LenPt:
-				return (int) (l.Value * ScreenDpi / 72.0);
+				return (int) (l.Value * LScreenDpi().x / 72.0);
 			case LCss::LenCm:
-				return (int) (l.Value * ScreenDpi / 2.54);
+				return (int) (l.Value * LScreenDpi().x / 2.54);
 			case LCss::LenEm:
 			{
 				if (!f)
@@ -845,15 +687,50 @@ public:
 					return X();
 				break;
 			}
+			case LCss::SizeSmall:
+			{
+				return 1; // px
+			}
+			case LCss::SizeMedium:
+			{
+				return 2; // px
+			}
+			case LCss::SizeLarge:
+			{
+				return 3; // px
+			}
 		}
 
 		return 0;
 	}
-
-	int ResolveY(LCss::Len l, LFont *f, bool IsMargin)
+	
+	bool LimitX(int &x, LCss::Len Min, LCss::Len Max, LFont *f)
 	{
-		int ScreenDpi = 96; // Haha, where should I get this from?
+		bool Limited = false;
+		if (Min)
+		{
+			int Px = Min.ToPx(x2 - x1 + 1, f, false);
+			if (Px > x)
+			{
+				x = Px;
+				Limited = true;
+			}
+		}
+		if (Max)
+		{
+			int Px = Max.ToPx(x2 - x1 + 1, f, false);
+			if (Px < x)
+			{
+				x = Px;
+				Limited = true;
+			}
+		}
+		return Limited;
+	}
 
+	int ResolveY(LCss::Len l, LTag *t, bool IsMargin)
+	{
+		auto f = t->GetFont();
 		switch (l.Type)
 		{
 			case LCss::LenInherit:
@@ -861,15 +738,11 @@ public:
 			case LCss::LenNormal:
 			case LCss::LenPx:
 				return (int)l.Value;
-
 			case LCss::LenPt:
-			{
-				return (int) (l.Value * ScreenDpi / 72.0);
-			}
+				return (int) (l.Value * LScreenDpi().y / 72.0);
 			case LCss::LenCm:
-			{
-				return (int) (l.Value * ScreenDpi / 2.54);
-			}
+				return (int) (l.Value * LScreenDpi().y / 2.54);
+
 			case LCss::LenEm:
 			{
 				if (!f)
@@ -889,12 +762,121 @@ public:
 				return (int) (l.Value * f->GetHeight() / 2); // More haha, who uses 'ex' anyway?
 			}
 			case LCss::LenPercent:
-				return (int)l.Value;
+			{
+				// Walk up tree of tags to find an absolute size...
+				LCss::Len Ab;
+				for (LTag *p = ToTag(t->Parent); p; p = ToTag(p->Parent))
+				{
+					auto h = p->Height();
+					if (h && !h.IsDynamic())
+					{
+						Ab = h;
+						break;
+					}
+				}
+
+				if (!Ab)
+				{
+					LAssert(Html != NULL);
+					Ab.Type = LCss::LenPx;
+					Ab.Value = (float)Html->Y();
+				}
+
+				LCss::Len m = Ab * l;
+				
+				return (int)m.ToPx(0, f);;
+			}
+			case LCss::SizeSmall:
+			{
+				return 1; // px
+			}
+			case LCss::SizeMedium:
+			{
+				return 2; // px
+			}
+			case LCss::SizeLarge:
+			{
+				return 3; // px
+			}
+			case LCss::AlignLeft:
+			case LCss::AlignRight:
+			case LCss::AlignCenter:
+			case LCss::AlignJustify:
+			case LCss::VerticalBaseline:
+			case LCss::VerticalSub:
+			case LCss::VerticalSuper:
+			case LCss::VerticalTop:
+			case LCss::VerticalTextTop:
+			case LCss::VerticalMiddle:
+			case LCss::VerticalBottom:
+			case LCss::VerticalTextBottom:
+			{
+				// Meaningless in this context
+				break;
+			}
 			default:
+			{
 				LAssert(!"Not supported.");
+				break;
+			}
 		}
 
 		return 0;
+	}
+
+	bool LimitY(int &y, LCss::Len Min, LCss::Len Max, LFont *f)
+	{
+		bool Limited = false;
+		int TotalY = Html ? Html->Y() : 0;
+		if (Min)
+		{
+			int Px = Min.ToPx(TotalY, f, false);
+			if (Px > y)
+			{
+				y = Px;
+				Limited = true;
+			}
+		}
+		if (Max)
+		{
+			int Px = Max.ToPx(TotalY, f, false);
+			if (Px < y)
+			{
+				y = Px;
+				Limited = true;
+			}
+		}
+		return Limited;
+	}
+
+	LRect ResolveMargin(LCss *Src, LTag *Tag)
+	{
+		LRect r;
+		r.x1 = ResolveX(Src->MarginLeft(), Tag, true);
+		r.y1 = ResolveY(Src->MarginTop(), Tag, true);
+		r.x2 = ResolveX(Src->MarginRight(), Tag, true);
+		r.y2 = ResolveY(Src->MarginBottom(), Tag, true);
+		return r;
+	}
+
+	LRect ResolveBorder(LCss *Src, LTag *Tag)
+	{
+		LRect r;
+		r.x1 = ResolveX(Src->BorderLeft(), Tag, true);
+		r.y1 = ResolveY(Src->BorderTop(), Tag, true);
+		r.x2 = ResolveX(Src->BorderRight(), Tag, true);
+		r.y2 = ResolveY(Src->BorderBottom(), Tag, true);
+		return r;
+	}
+
+	LRect ResolvePadding(LCss *Src, LTag *Tag)
+	{
+		LRect r;
+		r.x1 = ResolveX(Src->PaddingLeft(), Tag, true);
+		r.y1 = ResolveY(Src->PaddingTop(), Tag, true);
+		r.x2 = ResolveX(Src->PaddingRight(), Tag, true);
+		r.y2 = ResolveY(Src->PaddingBottom(), Tag, true);
+		return r;
 	}
 };
 
@@ -906,15 +888,15 @@ static bool ParseDistance(char *s, float &d, char *units = 0)
 	if (!s)
 		return false;
 
-	while (*s && IsWhiteSpace(*s)) s++;
+	while (*s && IsWhite(*s)) s++;
 
 	if (!IsDigit(*s) && !strchr("-.", *s))
 		return false;
 
-	d = atof(s);
+	d = (float)atof(s);
 
 	while (*s && (IsDigit(*s) || strchr("-.", *s))) s++;
-	while (*s && IsWhiteSpace(*s)) s++;
+	while (*s && IsWhite(*s)) s++;
 	
 	char _units[128];
 	char *o = units = units ? units : _units;
@@ -1008,6 +990,7 @@ float LHtmlLength::Get(LFlowRegion *Flow, LFont *Font, bool Lock)
 {
 	switch (u)
 	{
+		default: break;
 		case LCss::LenEm:
 		{
 			return PrevAbs = d * (Font ? Font->GetHeight() : 14);
@@ -1032,8 +1015,8 @@ float LHtmlLength::Get(LFlowRegion *Flow, LFont *Font, bool Lock)
 		}
 	}
 
-	double FlowX = Flow ? Flow->X() : d;
-	return PrevAbs = min(FlowX, d);
+	float FlowX = Flow ? Flow->X() : d;
+	return PrevAbs = MIN(FlowX, d);
 }
 
 LHtmlLine::LHtmlLine()
@@ -1054,12 +1037,12 @@ LHtmlLine &LHtmlLine::operator =(int i)
 
 void LHtmlLine::Set(char *s)
 {
-	LToken t(s, " \t");
+	auto t = LString(s).SplitDelimit(" \t");
 	LineReset = 0x80000000;
 	LineStyle = -1;
 	char *Style = 0;
 
-	for (int i=0; i<t.Length(); i++)
+	for (unsigned i=0; i<t.Length(); i++)
 	{
 		char *c = t[i];
 		if
@@ -1069,35 +1052,35 @@ void LHtmlLine::Set(char *s)
 			LHtmlStatic::Inst->ColourMap.Find(c)
 		)
 		{
-			ParseColour(c, Colour);
+			LHtmlParser::ParseColour(c, Colour);
 		}
-		else if (strnicmp(c, "rgb(", 4) == 0)
+		else if (_strnicmp(c, "rgb(", 4) == 0)
 		{
 			char Buf[256];
-			strcpy(Buf, c);
+			strcpy_s(Buf, sizeof(Buf), c);
 			while (!strchr(c, ')') &&
 					(c = t[++i]))
 			{
 				strcat(Buf, c);
 			}
-			ParseColour(Buf, Colour);
+			LHtmlParser::ParseColour(Buf, Colour);
 		}
 		else if (IsDigit(*c))
 		{
 			LHtmlLength::Set(c);
 		}
-		else if (stricmp(c, "none") == 0)
+		else if (_stricmp(c, "none") == 0)
 		{
 			Style = 0;
 		}
-		else if (	stricmp(c, "dotted") == 0 ||
-					stricmp(c, "dashed") == 0 ||
-					stricmp(c, "solid") == 0 ||
-					stricmp(c, "float") == 0 ||
-					stricmp(c, "groove") == 0 ||
-					stricmp(c, "ridge") == 0 ||
-					stricmp(c, "inset") == 0 ||
-					stricmp(c, "outse") == 0)
+		else if (	_stricmp(c, "dotted") == 0 ||
+					_stricmp(c, "dashed") == 0 ||
+					_stricmp(c, "solid") == 0 ||
+					_stricmp(c, "float") == 0 ||
+					_stricmp(c, "groove") == 0 ||
+					_stricmp(c, "ridge") == 0 ||
+					_stricmp(c, "inset") == 0 ||
+					_stricmp(c, "outse") == 0)
 		{
 			Style = c;
 		}
@@ -1107,7 +1090,7 @@ void LHtmlLine::Set(char *s)
 		}
 	}
 
-	if (Style && stricmp(Style, "dotted") == 0)
+	if (Style && _stricmp(Style, "dotted") == 0)
 	{
 		switch ((int)d)
 		{
@@ -1171,7 +1154,7 @@ LRect LTag::GetRect(bool Client)
 	LRect r(Pos.x, Pos.y, Pos.x + Size.x - 1, Pos.y + Size.y - 1);
 	if (!Client)
 	{
-		for (LTag *p = Parent; p; p=p->Parent)
+		for (LTag *p = ToTag(Parent); p; p=ToTag(p->Parent))
 		{
 			r.Offset(p->Pos.x, p->Pos.y);
 		}
@@ -1181,20 +1164,20 @@ LRect LTag::GetRect(bool Client)
 
 LCss::LengthType LTag::GetAlign(bool x)
 {
-	for (LTag *t = this; t; t = t->Parent)
+	for (LTag *t = this; t; t = ToTag(t->Parent))
 	{
 		LCss::Len l;
 		
 		if (x)
 		{
-			if (TagId == TAG_TD && XAlign)
-				l.Type = XAlign;
+			if (IsTableCell() && Cell && Cell->XAlign)
+				l.Type = Cell->XAlign;
 			else
-				l = TextAlign();
+				l = t->TextAlign();
 		}
 		else
 		{
-			l = VerticalAlign();
+			l = t->VerticalAlign();
 		}
 		
 		if (l.Type != LenInherit)
@@ -1202,7 +1185,7 @@ LCss::LengthType LTag::GetAlign(bool x)
 			return l.Type;
 		}
 
-		if (t->TagId == TAG_TABLE)
+		if (t->IsTable())
 			break;
 	}
 	
@@ -1210,76 +1193,40 @@ LCss::LengthType LTag::GetAlign(bool x)
 }
 
 //////////////////////////////////////////////////////////////////////
-bool LTag::HasChild(LTag *c)
-{
-	List<LTag>::I it = Tags.Start();
-	for (LTag *t = *it; t; t = *++it)
-	{
-		if (t == c || t->HasChild(c))
-			return true;
-	}
-	return false;
-}
-
-bool LTag::Attach(LTag *Child, int Idx)
-{
-	if (TagId == CONTENT)
-	{
-		LAssert(!"Can't nest content tags.");
-		return false;
-	}
-
-	if (!Child)
-	{
-		LAssert(!"Can't insert NULL tag.");
-		return false;
-	}
-
-	Child->Detach();
-	Child->Parent = this;
-	if (!Tags.HasItem(Child))
-	{
-		Tags.Insert(Child, Idx);
-	}
-
-	return true;
-}
-
-void LTag::Detach()
-{
-	if (Parent)
-	{
-		Parent->Tags.Delete(this);
-		Parent = 0;
-	}
-}
-
-//////////////////////////////////////////////////////////////////////
 void LFlowRegion::EndBlock()
 {
 	if (cx > x1)
-	{
 		FinishLine();
+}
+
+void LFlowRegion::AlignText()
+{
+	if (Align != LCss::AlignLeft)
+	{
+		int Used = 0;
+		for (auto l : Line)
+			Used += l->X();
+		int Total = x2 - x1 + 1;
+		if (Used < Total)
+		{
+			int Offset = 0;
+			if (Align == LCss::AlignCenter)
+				Offset = (Total - Used) / 2;
+			else if (Align == LCss::AlignRight)
+				Offset = Total - Used;
+			if (Offset)
+				for (auto l : Line)
+				{
+					if (l->Tag->SupportedDisplay() != LCss::DispInlineBlock)
+						l->Offset(Offset, 0);
+				}
+		}
 	}
 }
 
 void LFlowRegion::FinishLine(bool Margin)
 {
-	/*
-	LRect *b = LineBounds();
-	if (b)
-	{
-		for (LFlowRect *Tr=Line.First(); Tr; Tr=Line.Next())
-		{
-			LRect n = *Tr;
-			// int Base = b->y1 - n.y1;
-			int Oy = Tr->Tag->AbsY();
-			n.Offset(0, Oy);
-			Tr->Offset(0, b->y2 - n.y2); // - Base
-			// y2 = max(y2, Tr->y2);
-		}
-	}
-	*/
+	// AlignText();
 
 	if (y2 > y1)
 	{
@@ -1300,7 +1247,8 @@ void LFlowRegion::FinishLine(bool Margin)
 
 LRect *LFlowRegion::LineBounds()
 {
-	LFlowRect *Prev = Line.First();
+	auto It = Line.begin();
+	LFlowRect *Prev = *It;
 	LFlowRect *r=Prev;
 	if (r)
 	{
@@ -1312,7 +1260,7 @@ LRect *LFlowRegion::LineBounds()
 		b.Offset(Ox, Oy);
 
 		// int Ox = 0, Oy = 0;
-		while (r = Line.Next())
+		while ((r = *(++It) ))
 		{
 			LRect c = *r;
 			Ox = r->Tag->AbsX();
@@ -1337,49 +1285,22 @@ LRect *LFlowRegion::LineBounds()
 	return 0;
 }
 
-void LFlowRegion::Insert(LFlowRect *Tr)
+void LFlowRegion::Insert(LFlowRect *Tr, LCss::LengthType align)
 {
 	if (Tr)
 	{
+		Align = align;
 		Line.Insert(Tr);
-		// y2 = max(y2, Tr->y2);
 	}
 }
 
 //////////////////////////////////////////////////////////////////////
-bool LTag::Selected = false;
-
-LTag::LTag(LHtml2 *h, LTag *p) : Attr(0, false)
+LTag::LTag(LHtml *h, LHtmlElement *p) :
+	LHtmlElement(p),
+	Attr(8)
 {
-	Ctrl = 0;
-	CtrlType = CtrlNone;
-	TipId = 0;
-	Disp = DispInline;
+	Display(DispInline);
 	Html = h;
-	Parent = p;
-	if (Parent)
-	{
-		Parent->Tags.Insert(this);
-	}
-	
-	XAlign = LCss::LenInherit;
-	Cursor = -1;
-	Selection = -1;
-	Font = 0;
-	Tag = 0;
-	HtmlId = NULL;
-	// TableBorder = 0;
-	Cells = 0;
-	WasClosed = false;
-	TagId = CONTENT;
-	Info = 0;
-	MinContent = 0;
-	MaxContent = 0;
-	Pos.x = Pos.y = 0;
-
-	#ifdef _DEBUG
-	Debug = false;
-	#endif
 }
 
 LTag::~LTag()
@@ -1392,24 +1313,18 @@ LTag::~LTag()
 	{
 		Html->Selection = 0;
 	}
-	if (Html->PrevTip == this)
-	{
-		Html->PrevTip = 0;
-	}
 
 	DeleteObj(Ctrl);
-	Tags.DeleteObjects();
 	Attr.DeleteArrays();
 
-	DeleteArray(Tag);
-	DeleteObj(Cells);
+	DeleteObj(Cell);
 }
 
 void LTag::OnChange(PropType Prop)
 {
 }
 
-bool LTag::OnClick()
+bool LTag::OnClick(const LMouse &m)
 {
 	if (!Html->Environment)
 		return false;
@@ -1417,11 +1332,11 @@ bool LTag::OnClick()
 	const char *OnClick = NULL;
 	if (Get("onclick", OnClick))
 	{
-		Html->Environment->OnExecuteScript((char*)OnClick);
+		Html->Environment->OnExecuteScript(Html, (char*)OnClick);
 	}
 	else
 	{
-		OnNotify(0);
+		OnNotify(LNotification(m));
 	}
 
 	return true;
@@ -1436,62 +1351,110 @@ void LTag::Set(const char *attr, const char *val)
 		Attr.Add(attr, NewStr(val));
 }
 
-bool LTag::GetVariant(const char *Name, LVariant &Value, char *Array)
+bool LTag::GetVariant(const char *Name, LVariant &Value, const char *Array)
 {
+	LDomProperty Fld = LStringToDomProp(Name);
+	switch (Fld)
+	{
+		case ObjStyle: // Type: LCssStyle
+		{
+			Value = &StyleDom;
+			return true;
+		}
+		case ObjTextContent: // Type: String
+		{
+			Value = Text();
+			return true;
+		}
+		default:
+		{
+			char *a = Attr.Find(Name);
+			if (a)
+			{
+				Value = a;
+				return true;
+			}
+			break;
+		}
+	}
+	
 	return false;
 }
 
-bool LTag::SetVariant(const char *Name, LVariant &Value, char *Array)
+bool LTag::SetVariant(const char *Name, LVariant &Value, const char *Array)
 {
-	if (!Name)
-		return false;
-
-	if (!stricmp(Name, "innerHTML"))
+	LDomProperty Fld = LStringToDomProp(Name);
+	switch (Fld)
 	{
-		// Clear out existing tags..
-		Tags.DeleteObjects();
-	
-		char *Doc = Value.CastString();
-		if (Doc)
+		case ObjStyle:
 		{
-			// Create new tags...
-			bool BackOut = false;
-			
-			while (Doc && *Doc)
-			{
-				LTag *t = new LTag(Html, this);
-				if (t)
-				{
-					Doc = t->ParseHtml(Doc, 1, false, &BackOut);
-					if (!Doc)
-						break;
-				}
-				else break;
-			}
+			const char *Defs = Value.Str();
+			if (!Defs)
+				return false;
+				
+			return Parse(Defs, ParseRelaxed);
 		}
-	}
-	else
-	{
-		Set(Name, Value.CastString());
-		SetStyle();
+		case ObjTextContent:
+		{
+			const char *s = Value.Str();
+			if (s)
+			{
+				LAutoWString w(CleanText(s, strlen(s), "utf-8", true, true));
+				Txt = w;
+				return true;
+			}
+			break;
+		}
+		case ObjInnerHtml: // Type: String
+		{
+			// Clear out existing tags..
+			Children.DeleteObjects();
+		
+			char *Doc = Value.CastString();
+			if (Doc)
+			{
+				// Create new tags...
+				bool BackOut = false;
+				
+				while (Doc && *Doc)
+				{
+					LTag *t = new LTag(Html, this);
+					if (t)
+					{
+						Doc = Html->ParseHtml(t, Doc, 1, false, &BackOut);
+						if (!Doc)
+							break;
+					}
+					else break;
+				}
+			}
+			else return false;
+			break;
+		}
+		default:
+		{
+			Set(Name, Value.CastString());
+			SetStyle();
+			break;
+		}
 	}
 
 	Html->ViewWidth = -1;
 	return true;
 }
 
-int LTag::GetTextStart()
+ssize_t LTag::GetTextStart()
 {
-	if (PreText())
+	if (PreText() && TextPos.Length() > 1)
 	{
 		LFlowRect *t = TextPos[1];
 		if (t)
 			return t->Text - Text();
 	}
-	else
+	else if (TextPos.Length() > 0)
 	{
 		LFlowRect *t = TextPos[0];
-		if (t)
+		if (t && Text())
 		{
 			LAssert(t->Text >= Text() && t->Text <= Text()+2);
 			return t->Text - Text();
@@ -1501,19 +1464,19 @@ int LTag::GetTextStart()
 	return 0;
 }
 
-bool TextToStream(LStream &Out, char16 *Text)
+static bool TextToStream(LStream &Out, char16 *Text)
 {
 	if (!Text)
 		return true;
 
-	uint8 Buf[256];
-	uint8 *s = Buf;
-	int Len = sizeof(Buf);
+	uint8_t Buf[256];
+	uint8_t *s = Buf;
+	ssize_t Len = sizeof(Buf);
 	while (*Text)
 	{
 		#define WriteExistingContent() \
 			if (s > Buf) \
-				Out.Write(Buf, s - Buf); \
+				Out.Write(Buf, (int)(s - Buf)); \
 			s = Buf; \
 			Len = sizeof(Buf); \
 			Buf[0] = 0;
@@ -1548,39 +1511,114 @@ bool TextToStream(LStream &Out, char16 *Text)
 
 bool LTag::CreateSource(LStringPipe &p, int Depth, bool LastWasBlock)
 {
-	// char *t8 = LgiNewUtf16To8(Text());
 	char *Tabs = new char[Depth+1];
 	memset(Tabs, '\t', Depth);
 	Tabs[Depth] = 0;
 
-	if (Tag)
+	if (ValidStr(Tag))
 	{
-		if (IsBlock(Disp))
+		if (IsBlock())
 		{
-			p.Print("\n%s<%s", Tabs, Tag);
+			p.Print("%s%s<%s", TagId != TAG_HTML ? "\n" : "", Tabs, Tag.Get());
 		}
 		else
 		{
-			p.Print("<%s", Tag);
+			p.Print("<%s", Tag.Get());
 		}
-	}
 
-	if (Attr.Length())
-	{
-		const char *a;
-		for (char *v = Attr.First(&a); v; v = Attr.Next(&a))
+		if (Attr.Length())
 		{
-			if (stricmp(a, "style"))
-				p.Print(" %s=\"%s\"", a, v);
+			// const char *a;
+			// for (char *v = Attr.First(&a); v; v = Attr.Next(&a))
+			for (auto v : Attr)
+			{
+				if (_stricmp(v.key, "style"))
+					p.Print(" %s=\"%s\"", v.key, v.value);
+			}
+		}
+		if (Props.Length())
+		{
+			LCss *Css = this;
+			LCss Tmp;
+			#define DelProp(p) \
+				if (Css == this) { Tmp = *Css; Css = &Tmp; } \
+				Css->DeleteProp(p);
+			
+			// Clean out any default CSS properties where we can...
+			LHtmlElemInfo *i = LHtmlStatic::Inst->GetTagInfo(Tag);
+			if (i)
+			{
+				if (Props.Find(PropDisplay)
+					&&
+					(
+						(!i->Block() && SupportedDisplay() == DispInline)
+						||
+						(i->Block() && SupportedDisplay() == DispBlock)
+					))
+				{
+					DelProp(PropDisplay);
+				}
+				switch (TagId)
+				{
+					default:
+						break;
+					case TAG_A:
+					{
+						LCss::ColorDef Blue(LCss::ColorRgb, Rgb32(0, 0, 255));
+						if (Props.Find(PropColor) && Color() == Blue)
+							DelProp(PropColor);
+						if (Props.Find(PropTextDecoration) && TextDecoration() == LCss::TextDecorUnderline)
+							DelProp(PropTextDecoration)
+						break;
+					}
+					case TAG_BODY:
+					{
+						LCss::Len FivePx(LCss::LenPx, 5.0f);
+						if (Props.Find(PropPaddingLeft) && PaddingLeft() == FivePx)
+							DelProp(PropPaddingLeft)
+						if (Props.Find(PropPaddingTop) && PaddingTop() == FivePx)
+							DelProp(PropPaddingTop)
+						if (Props.Find(PropPaddingRight) && PaddingRight() == FivePx)
+							DelProp(PropPaddingRight)
+						break;
+					}
+					case TAG_B:
+					{
+						if (Props.Find(PropFontWeight) && FontWeight() == LCss::FontWeightBold)
+							DelProp(PropFontWeight);
+						break;
+					}
+					case TAG_U:
+					{
+						if (Props.Find(PropTextDecoration) && TextDecoration() == LCss::TextDecorUnderline)
+							DelProp(PropTextDecoration);
+						break;
+					}
+					case TAG_I:
+					{
+						if (Props.Find(PropFontStyle) && FontStyle() == LCss::FontStyleItalic)
+							DelProp(PropFontStyle);
+						break;
+					}
+				}
+			}
+			
+			// Convert CSS props to a string and emit them...
+			auto s = Css->ToLString();
+			if (ValidStr(s))
+			{			
+				// Clean off any trailing whitespace...
+				char *e = s ? s.Get() + s.Length() : NULL;
+				while (e && strchr(LWhiteSpace, e[-1]))
+					*--e = 0;
+				
+				// Print them to the tags attributes...
+				p.Print(" style=\"%s\"", s.Get());
+			}
 		}
 	}
-	if (Props.Length())
-	{
-		LAutoString s = ToString();
-		p.Print(" style=\"%s\"", s.Get());
-	}
 
-	if (Tags.Length())
+	if (Children.Length() || TagId == TAG_STYLE) // <style> tags always have </style>
 	{
 		if (Tag)
 		{
@@ -1588,23 +1626,23 @@ bool LTag::CreateSource(LStringPipe &p, int Depth, bool LastWasBlock)
 			TextToStream(p, Text());
 		}
 
-		bool Last = IsBlock(Disp);
-		for (LTag *c = Tags.First(); c; c = Tags.Next())
+		bool Last = IsBlock();
+		for (unsigned i=0; i<Children.Length(); i++)
 		{
+			LTag *c = ToTag(Children[i]);
 			c->CreateSource(p, Parent ? Depth+1 : 0, Last);
-			Last = IsBlock(c->Disp);
+			Last = c->IsBlock();
 		}
 
 		if (Tag)
 		{
-			if (IsBlock(Disp))
+			if (IsBlock())
 			{
-				p.Print("\n%s</%s>\n", Tabs, Tag);
+				if (Children.Length())
+					p.Print("\n%s", Tabs);
 			}
-			else
-			{
-				p.Print("</%s>", Tag);
-			}
+
+			p.Print("</%s>", Tag.Get());
 		}
 	}
 	else if (Tag)
@@ -1613,7 +1651,7 @@ bool LTag::CreateSource(LStringPipe &p, int Depth, bool LastWasBlock)
 		{
 			p.Write((char*)">", 1);
 			TextToStream(p, Text());
-			p.Print("</%s>", Tag);
+			p.Print("</%s>", Tag.Get());
 		}
 		else
 		{
@@ -1632,111 +1670,111 @@ bool LTag::CreateSource(LStringPipe &p, int Depth, bool LastWasBlock)
 
 void LTag::SetTag(const char *NewTag)
 {
-	DeleteArray(Tag);
-	Tag = NewStr(NewTag);
+	Tag.Reset(NewStr(NewTag));
 
-	if (Info = GetTagInfo(Tag))
+	if (NewTag)
 	{
-		TagId = Info->Id;
-		Disp = (Info->Flags & TI_BLOCK) ? DispBlock : DispInline;
-		SetStyle();
-	}
-}
-
-void LTag::_TraceOpenTags()
-{
-	LStringPipe p;
-	for (LTag *t=Html->OpenTags.First(); t; t=Html->OpenTags.Next())
-	{
-		p.Print(", %s", t->Tag);
-		if (t->HtmlId)
+		Info = Html->GetTagInfo(Tag);
+		if (Info)
 		{
-			p.Print("#%s", t->HtmlId);
+			TagId = Info->Id;
+			Display(Info->Flags & LHtmlElemInfo::TI_BLOCK ? LCss::DispBlock : LCss::DispInline);
 		}
 	}
-	char *s = p.NewStr();
-	if (s)
+	else
 	{
-		LgiTrace("Open tags = '%s'\n", s + 2);
-		DeleteArray(s);
+		Info = NULL;
+		TagId = CONTENT;
 	}
+
+	SetStyle();
 }
 
-COLOUR LTag::_Colour(bool f)
+LColour LTag::_Colour(bool f)
 {
-	for (LTag *t = this; t; t = t->Parent)
+	for (LTag *t = this; t; t = ToTag(t->Parent))
 	{
 		ColorDef c = f ? t->Color() : t->BackgroundColor();
 		if (c.Type != ColorInherit)
 		{
-			return c.Rgb32;
+			return LColour(c.Rgb32, 32);
 		}
 
-		if (!f && t->TagId == TAG_TABLE)
+		#if 1
+		if (!f && t->IsTable())
 			break;
+		#else
+		/*	This implements some basic level of colour inheritance for
+			background colours. See test case 'cisra-cqs.html'. */
+		if (!f && t->IsTable())
+			break;
+		#endif
 	}
 
-	return GT_TRANSPARENT;
+	return LColour();
 }
 
-void LTag::CopyClipboard(GBytePipe &p)
+void LTag::CopyClipboard(LMemQueue &p, bool &InSelection)
 {
-	if (!Parent)
-	{
-		Selected = false;
-	}
-
-	int Min = -1;
-	int Max = -1;
+	ssize_t Min = -1;
+	ssize_t Max = -1;
 
 	if (Cursor >= 0 && Selection >= 0)
 	{
-		Min = min(Cursor, Selection);
-		Max = max(Cursor, Selection);
+		Min = MIN(Cursor, Selection);
+		Max = MAX(Cursor, Selection);
 	}
-	else if (Selected)
+	else if (InSelection)
 	{
-		Max = max(Cursor, Selection);
+		Max = MAX(Cursor, Selection);
 	}
 	else
 	{
-		Min = max(Cursor, Selection);
+		Min = MAX(Cursor, Selection);
 	}
 
-	int Off = -1;
-	int Chars = 0;
+	ssize_t Off = -1;
+	ssize_t Chars = 0;
+	auto Start = GetTextStart();
+	auto t = Text() + Start;
 	if (Min >= 0 && Max >= 0)
 	{
-		Off = Min;
+		Off = Min + Start;
 		Chars = Max - Min;
 	}
 	else if (Min >= 0)
 	{
-		Off = Min;
-		Chars = StrlenW(Text()) - Min;
-		Selected = true;
+		Off = Min + Start;
+		Chars = StrlenW(t) - Min;
+		InSelection = true;
 	}
 	else if (Max >= 0)
 	{
-		Off = 0;
+		Off = Start;
 		Chars = Max;
-		Selected = false;
+		InSelection = false;
 	}
-	else if (Selected)
+	else if (InSelection)
 	{
-		Off = 0;
-		Chars = StrlenW(Text());
+		Off = Start;
+		Chars = StrlenW(t);
 	}
 
 	if (Off >= 0 && Chars > 0)
 	{
-		p.Write((uchar*) (Text() + Off), Chars * sizeof(char16));
+		#ifdef _DEBUG
+		for (int i=0; i<Chars; i++)
+			LAssert(t[i] != 0);
+		#endif
+
+		p.Write(t + Off, Chars * sizeof(char16));
 	}
 
-	if (Selected)
+	if (InSelection)
 	{
 		switch (TagId)
 		{
+			default: break;
 			case TAG_BR:
 			{
 				char16 NL[] = {'\n', 0};
@@ -1752,9 +1790,10 @@ void LTag::CopyClipboard(GBytePipe &p)
 		}
 	}
 
-	for (LTag *c = Tags.First(); c; c = Tags.Next())
+	for (unsigned i=0; i<Children.Length(); i++)
 	{
-		c->CopyClipboard(p);
+		LTag *c = ToTag(Children[i]);
+		c->CopyClipboard(p, InSelection);
 	}
 }
 
@@ -1763,32 +1802,57 @@ char*
 _DumpColour(LCss::ColorDef c)
 {
 	static char Buf[4][32];
+	#ifdef _MSC_VER
+	static LONG Cur = 0;
+	LONG Idx = InterlockedIncrement(&Cur);
+	#else
 	static int Cur = 0;
-	char *b = Buf[Cur++];
-	if (Cur == 4) Cur = 0;
-
+	int Idx = __sync_fetch_and_add(&Cur, 1);
+	#endif
+	char *b = Buf[Idx % 4];
+	
 	if (c.Type == LCss::ColorInherit)
-		strcpy(b, "Inherit");
+		strcpy_s(b, 32, "Inherit");
 	else
-		sprintf(b, "%2.2x,%2.2x,%2.2x(%2.2x)", R32(c.Rgb32),G32(c.Rgb32),B32(c.Rgb32),A32(c.Rgb32));
+		sprintf_s(b, 32, "%2.2x,%2.2x,%2.2x(%2.2x)", R32(c.Rgb32),G32(c.Rgb32),B32(c.Rgb32),A32(c.Rgb32));
 
 	return b;
 }
 
 void LTag::_Dump(LStringPipe &Buf, int Depth)
 {
-	char Tab[64];
-	char s[1024];
-	memset(Tab, '\t', Depth);
-	Tab[Depth] = 0;
+	LString Tabs;
+	Tabs.Set(NULL, Depth);
+	memset(Tabs.Get(), '\t', Depth);	
 
-	char Trs[1024] = "";
-	for (LFlowRect *Tr=TextPos.First(); Tr; Tr=TextPos.Next())
+	const char *Empty = "";
+	char *ElementName = TagId == CONTENT ? (char*)"Content" :
+				(TagId == ROOT ? (char*)"Root" : Tag);
+
+	Buf.Print(	"%s%s(%p)%s%s%s (%i) Pos=%i,%i Size=%i,%i Color=%s/%s",
+				Tabs.Get(),
+				ElementName,
+				this,
+				HtmlId ? "#" : Empty,
+				HtmlId ? HtmlId : Empty,
+				#ifdef _DEBUG
+				Debug ? " debug" : Empty,
+				#else
+				Empty,
+				#endif
+				WasClosed,
+				Pos.x, Pos.y,
+				Size.x, Size.y,
+				_DumpColour(Color()), _DumpColour(BackgroundColor()));
+
+	for (unsigned i=0; i<TextPos.Length(); i++)
 	{
-		LAutoString Utf8(LgiNewUtf16To8(Tr->Text, Tr->Len*sizeof(char16)));
+		LFlowRect *Tr = TextPos[i];
+		
+		LAutoString Utf8(WideToUtf8(Tr->Text, Tr->Len));
 		if (Utf8)
 		{
-			int Len = strlen(Utf8);
+			size_t Len = strlen(Utf8);
 			if (Len > 40)
 			{
 				Utf8[40] = 0;
@@ -1799,44 +1863,42 @@ void LTag::_Dump(LStringPipe &Buf, int Depth)
 			Utf8.Reset(NewStr(""));
 		}
 
-		int Len = strlen(Trs);
-		snprintf(Trs+Len, sizeof(Trs)-Len-1, "Tr(%i,%i %ix%i '%s') ", Tr->x1, Tr->y1, Tr->X(), Tr->Y(), Utf8.Get());
+		Buf.Print("Tr(%i,%i %ix%i '%s') ", Tr->x1, Tr->y1, Tr->X(), Tr->Y(), Utf8.Get());
 	}
 	
-	char *ElementName = TagId == CONTENT ? (char*)"Content" :
-				(TagId == ROOT ? (char*)"Root" : Tag);
-
-	snprintf(s, sizeof(s)-1,
-			"%sStartTag=%s%c%s (%i) Pos=%i,%i Size=%i,%i Color=%s/%s %s\r\n",
-			Tab,
-			ElementName,
-			HtmlId ? '#' : ' ',
-			HtmlId ? HtmlId : (char*)"",
-			WasClosed,
-			Pos.x, Pos.y,
-			Size.x, Size.y,
-			_DumpColour(Color()), _DumpColour(BackgroundColor()),
-			Trs);
-	Buf.Push(s);
-
-	for (LTag *t=Tags.First(); t; t=Tags.Next())
+	Buf.Print("\r\n");
+	
+	for (unsigned i=0; i<Children.Length(); i++)
 	{
+		LTag *t = ToTag(Children[i]);
 		t->_Dump(Buf, Depth+1);
 	}
 
-	if (Tags.Length())
+	if (Children.Length())
 	{
-		snprintf(s, sizeof(s)-1, "%sEnd '%s'\r\n", Tab, ElementName);
-		Buf.Push(s);
+		Buf.Print("%s/%s\r\n", Tabs.Get(), ElementName);
 	}
 }
 
-char *LTag::Dump()
+LAutoWString LTag::DumpW()
 {
 	LStringPipe Buf;
-	Buf.Print("Html pos=%s\n", Html?Html->GetPos().GetStr():0);
+	// Buf.Print("Html pos=%s\n", Html?Html->GetPos().GetStr():0);
 	_Dump(Buf, 0);
-	return (char*)Buf.New(1);
+	LAutoString a(Buf.NewStr());
+	LAutoWString w(Utf8ToWide(a));
+	return w;
+}
+
+LAutoString LTag::DescribeElement()
+{
+	LStringPipe s(256);
+	s.Print("%s", Tag ? Tag.Get() : "CONTENT");
+	if (HtmlId)
+		s.Print("#%s", HtmlId);
+	for (unsigned i=0; i<Class.Length(); i++)
+		s.Print(".%s", Class[i].Get());
+	return LAutoString(s.NewStr());
 }
 
 LFont *LTag::NewFont()
@@ -1862,8 +1924,8 @@ LFont *LTag::GetFont()
 			FontWeight()                != FontWeightInherit    ||
 			TextDecoration()            != TextDecorInherit)
 		{
-			LCss c = *this;
-
+			LCss c;
+			
             LCss::PropMap Map;
             Map.Add(PropFontFamily, new LCss::PropArray);
 			Map.Add(PropFontSize, new LCss::PropArray);
@@ -1872,8 +1934,10 @@ LFont *LTag::GetFont()
 			Map.Add(PropFontWeight, new LCss::PropArray);
 			Map.Add(PropTextDecoration, new LCss::PropArray);
 
-			for (LTag *t = Parent; t; t = t->Parent)
+			for (LTag *t = this; t; t = ToTag(t->Parent))
 			{
+				if (t->TagId == TAG_IFRAME)
+					break;
 				if (!c.InheritCollect(*t, Map))
 					break;
 			}
@@ -1882,7 +1946,7 @@ LFont *LTag::GetFont()
 			
 			Map.DeleteObjects();
 
-			if (Font = Html->FontCache->GetFont(&c))
+			if ((Font = Html->FontCache->GetFont(&c)))
 				return Font;
 		}
 		else
@@ -1890,7 +1954,7 @@ LFont *LTag::GetFont()
 			LTag *t = this;
 			while (!t->Font && t->Parent)
 			{
-				t = t->Parent;
+				t = ToTag(t->Parent);
 			}
 
 			if (t->Font)
@@ -1907,10 +1971,10 @@ LTag *LTag::PrevTag()
 {
 	if (Parent)
 	{
-		int i = Parent->Tags.IndexOf(this);
+		ssize_t i = Parent->Children.IndexOf(this);
 		if (i >= 0)
 		{
-			return Parent->Tags.ItemAt(i-1);
+			return ToTag(Parent->Children[i - 1]);
 		}
 	}
 
@@ -1920,17 +1984,17 @@ LTag *LTag::PrevTag()
 void LTag::Invalidate()
 {
 	LRect p = GetRect();
-	for (LTag *t=Parent; t; t=t->Parent)
+	for (LTag *t=ToTag(Parent); t; t=ToTag(t->Parent))
 	{
 		p.Offset(t->Pos.x, t->Pos.y);
 	}
 	Html->Invalidate(&p);
 }
 
-LTag *LTag::IsAnchor(LAutoString *Uri)
+LTag *LTag::IsAnchor(LString *Uri)
 {
 	LTag *a = 0;
-	for (LTag *t = this; t; t = t->Parent)
+	for (LTag *t = this; t; t = ToTag(t->Parent))
 	{
 		if (t->TagId == TAG_A)
 		{
@@ -1944,10 +2008,10 @@ LTag *LTag::IsAnchor(LAutoString *Uri)
 		const char *u = 0;
 		if (a->Get("href", u))
 		{
-			LAutoWString w(CleanText(u, strlen(u)));
+			LAutoWString w(CleanText(u, strlen(u), "utf-8"));
 			if (w)
 			{
-				Uri->Reset(LgiNewUtf16To8(w));
+				*Uri = w;
 			}
 		}
 	}
@@ -1955,27 +2019,101 @@ LTag *LTag::IsAnchor(LAutoString *Uri)
 	return a;
 }
 
+void LHtml::DebugTagInfo(LTag *tag)
+{
+	if (!tag)
+		return;
+
+	auto Style = tag->ToLString();
+	LStringPipe p(256);
+	p.Print("Tag: %s\n", tag->Tag ? tag->Tag.Get() : "CONTENT");
+	if (tag->Class.Length())
+	{
+		p.Print("Class(es): ");
+		for (unsigned i=0; i<tag->Class.Length(); i++)
+		{
+			p.Print("%s%s", i?", ":"", tag->Class[i].Get());
+		}
+		p.Print("\n");
+	}
+	if (tag->HtmlId)
+	{
+		p.Print("Id: %s\n", tag->HtmlId);
+	}
+	p.Print("Pos: %i,%i   Size: %i,%i\n\n", tag->Pos.x, tag->Pos.y, tag->Size.x, tag->Size.y);
+	p.Print("Style:\n", Style.Get());
+			
+	auto s = Style.SplitDelimit("\n");
+	for (unsigned i=0; i<s.Length(); i++)
+		p.Print("    %s\n", s[i].Get());
+			
+	p.Print("\nParent tags:\n");
+	LDisplayString Sp(LSysFont, " ");
+	for (LTag *t=ToTag(tag->Parent); t && t->Parent; t=ToTag(t->Parent))
+	{
+		LStringPipe Tmp;
+		Tmp.Print("    %s", t->Tag ? t->Tag.Get() : "CONTENT");
+		if (t->HtmlId)
+		{
+			Tmp.Print("#%s", t->HtmlId);
+		}
+		for (unsigned i=0; i<t->Class.Length(); i++)
+		{
+			Tmp.Print(".%s", t->Class[i].Get());
+		}
+		LAutoString Txt(Tmp.NewStr());
+		p.Print("%s", Txt.Get());
+		LDisplayString Ds(LSysFont, Txt);
+		int Px = 170 - Ds.X();
+		int Chars = Px / Sp.X();
+		for (int c=0; c<Chars; c++)
+			p.Print(" ");
+
+		p.Print("(%i,%i)-(%i,%i)\n",
+			t->Pos.x,
+			t->Pos.y,
+			t->Size.x,
+			t->Size.y);
+	}
+			
+	LAutoString a(p.NewStr());
+			
+	LgiMsg(	this,
+			"%s",
+			GetClass(),
+			MB_OK,
+			a.Get());
+}
+
 bool LTag::OnMouseClick(LMouse &m)
 {
 	bool Processed = false;
 
-	// char msg[256];
 	if (m.IsContextMenu())
 	{
-		LAutoString Uri;
+		LString Uri;
+		const char *ImgSrc = NULL;
 		LTag *a = IsAnchor(&Uri);
-		if (a && ValidStr(Uri))
+		bool IsImg = TagId == TAG_IMG;
+		if (IsImg)
+			Get("src", ImgSrc);
+		bool IsAnchor = a && ValidStr(Uri);
+		if (IsAnchor || IsImg)
 		{
 			LSubMenu RClick;
 
 			#define IDM_COPY_LINK	100
+			#define IDM_COPY_IMG	101
 			if (Html->GetMouse(m, true))
 			{
 				int Id = 0;
 
-				RClick.AppendItem(LLoadString(L_COPY_LINK_LOCATION, "&Copy Link Location"), IDM_COPY_LINK, Uri != 0);
+				if (IsAnchor)
+					RClick.AppendItem(LLoadString(L_COPY_LINK_LOCATION, "&Copy Link Location"), IDM_COPY_LINK, Uri != NULL);
+				if (IsImg)
+					RClick.AppendItem("Copy Image Location", IDM_COPY_IMG, ImgSrc != NULL);
 				if (Html->GetEnv())
-					Html->GetEnv()->AppendItems(&RClick);
+					Html->GetEnv()->AppendItems(&RClick, Uri);
 
 				switch (Id = RClick.Float(Html, m.x, m.y))
 				{
@@ -1985,12 +2123,16 @@ bool LTag::OnMouseClick(LMouse &m)
 						Clip.Text(Uri);
 						break;
 					}
+					case IDM_COPY_IMG:
+					{
+						LClipBoard Clip(Html);						
+						Clip.Text(ImgSrc);
+						break;
+					}
 					default:
 					{
 						if (Html->GetEnv())
-						{
 							Html->GetEnv()->OnMenu(Html, Id, a);
-						}
 						break;
 					}
 				}
@@ -2003,63 +2145,35 @@ bool LTag::OnMouseClick(LMouse &m)
 	{
 		#ifdef _DEBUG
 		if (m.Ctrl())
-		{
-			const char *Id = NULL;
-			LAutoString Style = ToString();
-			LStringPipe p;
-
-			p.Print("Tag: %s", Tag ? Tag : "CONTENT");
-			if (Get("id", Id))
-				p.Print("#%s", Id);
-			for (int i=0; i<Class.Length(); i++)
-				p.Print(".%s", Class[i]);
-			
-			p.Print("\n"
-					"Pos: %i,%i\n"
-					"Size: %i,%i\n"
-					"\n"
-					"Style:\n%s\n"
-					"Parents:\n",
-					Pos.x, Pos.y, Size.x, Size.y,
-					Style.Get());
-			
-			for (LTag *t = Parent; t; t = t->Parent)
-			{
-				t->Get("id", Id);
-				p.Print("\t%s", t->Tag ? t->Tag : "CONTENT");
-				if (Id) p.Print("#%s", Id);
-				for (int i=0; i<t->Class.Length(); i++)
-					p.Print(".%s", t->Class[i]);
-				p.Print(" (%i,%i)-(%i,%i)\n", t->Pos.x, t->Pos.y, t->Size.x, t->Size.y);
-			}
-			
-			LAutoString m(p.NewStr());
-			
-			LgiMsg(	Html,
-					"%s",
-					Html->GetClass(),
-					MB_OK,
-					m.Get());
-		}
+			Html->DebugTagInfo(this);
 		else
 		#endif
 		{
-			LAutoString Uri;
+			LString Uri;
 			
 			if (Html &&
 				Html->Environment)
 			{
 				if (IsAnchor(&Uri))
 				{
-					if (!Html->d->LinkDoubleClick || m.Double())
+					if (Uri)
 					{
-						Html->Environment->OnNavigate(Uri);
-						Processed = true;
+						if (!Html->d->LinkDoubleClick || m.Double())
+						{
+							Html->Environment->OnNavigate(Html, Uri);
+							Processed = true;
+						}
+					}
+					
+					const char *OnClk = NULL;
+					if (!Processed && Get("onclick", OnClk))
+					{
+						Html->Environment->OnExecuteScript(Html, (char*)OnClk);
 					}
 				}
 				else
 				{
-					Processed = OnClick();
+					Processed = OnClick(m);
 				}
 			}
 		}
@@ -2068,9 +2182,9 @@ bool LTag::OnMouseClick(LMouse &m)
 	return Processed;
 }
 
-LTag *LTag::GetBlockParent(int *Idx)
+LTag *LTag::GetBlockParent(ssize_t *Idx)
 {
-	if (IsBlock(Disp))
+	if (IsBlock())
 	{
 		if (Idx)
 			*Idx = 0;
@@ -2078,16 +2192,16 @@ LTag *LTag::GetBlockParent(int *Idx)
 		return this;
 	}
 
-	for (LTag *t = this; t; t = t->Parent)
+	for (LTag *t = this; t; t = ToTag(t->Parent))
 	{
-		if (IsBlock(t->Parent->Disp))
+		if (ToTag(t->Parent)->IsBlock())
 		{
 			if (Idx)
 			{
-				*Idx = t->Parent->Tags.IndexOf(t);
+				*Idx = t->Parent->Children.IndexOf(t);
 			}
 
-			return t->Parent;
+			return ToTag(t->Parent);
 		}
 	}
 
@@ -2100,14 +2214,14 @@ LTag *LTag::GetAnchor(char *Name)
 		return 0;
 
 	const char *n;
-	if (IsAnchor(0) && Get("name", n) && n && !stricmp(Name, n))
+	if (IsAnchor(0) && Get("name", n) && n && !_stricmp(Name, n))
 	{
 		return this;
 	}
 
-	List<LTag>::I it = Tags.Start();
-	for (LTag *t=*it; t; t=*++it)
+	for (unsigned i=0; i<Children.Length(); i++)
 	{
+		LTag *t = ToTag(Children[i]);
 		LTag *Result = t->GetAnchor(Name);
 		if (Result) return Result;
 	}
@@ -2119,13 +2233,14 @@ LTag *LTag::GetTagByName(const char *Name)
 {
 	if (Name)
 	{
-		if (Tag && stricmp(Tag, Name) == 0)
+		if (Tag && _stricmp(Tag, Name) == 0)
 		{
 			return this;
 		}
 
-		for (LTag *t=Tags.First(); t; t=Tags.Next())
+		for (unsigned i=0; i<Children.Length(); i++)
 		{
+			LTag *t = ToTag(Children[i]);
 			LTag *Result = t->GetTagByName(Name);
 			if (Result) return Result;
 		}
@@ -2192,13 +2307,13 @@ static int IsNearRect(LRect *r, int x, int y)
 	return (int) sqrt( (double) ( (dx * dx) + (dy * dy) ) );
 }
 
-int LTag::NearestChar(LFlowRect *Tr, int x, int y)
+ssize_t LTag::NearestChar(LFlowRect *Tr, int x, int y)
 {
 	LFont *f = GetFont();
 	if (f)
 	{
 		LDisplayString ds(f, Tr->Text, Tr->Len);
-		int c = ds.CharAt(x - Tr->x1);
+		ssize_t c = ds.CharAt(x - Tr->x1);
 		
 		if (Tr->Text == PreText())
 		{
@@ -2207,7 +2322,7 @@ int LTag::NearestChar(LFlowRect *Tr, int x, int y)
 		else
 		{
 			char16 *t = Tr->Text + c;
-			int Len = StrlenW(Text());
+			size_t Len = StrlenW(Text());
 			if (t >= Text() &&
 				t <= Text() + Len)
 			{
@@ -2223,58 +2338,119 @@ int LTag::NearestChar(LFlowRect *Tr, int x, int y)
 	return -1;
 }
 
-void LTag::GetTagByPos(LTagHit &hit, int x, int y)
+void LTag::GetTagByPos(LTagHit &TagHit, int x, int y, int Depth, bool InBody, bool DebugLog)
 {
-	LTagHit r;
-
-	for (LTag *t=Tags.First(); t; t=Tags.Next())
-	{
-		if (t->Pos.x >= 0 && t->Pos.y >= 0)
-			t->GetTagByPos(hit, x - t->Pos.x, y - t->Pos.y);
-	}
+	/*
+	InBody: Originally I had this test in the code but it seems that some test cases
+	have actual content after the body. And testing for "InBody" breaks functionality
+	for those cases (see "spam4.html" and the unsubscribe link at the end of the doc).	
+	*/
 
 	if (TagId == TAG_IMG)
 	{
 		LRect img(0, 0, Size.x - 1, Size.y - 1);
-		if (img.Overlap(x, y))
+		if (/*InBody &&*/ img.Overlap(x, y))
 		{
-			hit.Hit = this;
-			hit.Block = 0;
-			hit.Near = 0;
+			TagHit.Direct = this;
+			TagHit.Block = 0;
 		}
 	}
-	else if (x >= 0 &&
-			 x < Size.x &&
-			 y >= 0 &&
-			 y < Size.y)
+	else if (/*InBody &&*/ TextPos.Length())
 	{
-		if (!hit.Hit)
+		for (unsigned i=0; i<TextPos.Length(); i++)
 		{
-			hit.Hit = this;
-		}
-
-		if (Text())
-		{
-			for (LFlowRect *Tr=TextPos.First(); Tr; Tr=TextPos.Next())
+			LFlowRect *Tr = TextPos[i];
+			if (!Tr)
+				break;
+			
+			bool SameRow = y >= Tr->y1 && y <= Tr->y2;			
+			int Near = IsNearRect(Tr, x, y);
+			if (Near >= 0 && Near < 100)
 			{
-				LTagHit Tmp;
-				Tmp.Hit = this;
-				Tmp.Block = Tr;
-				Tmp.Near = IsNearRect(Tr, x, y);
-				LAssert(Tmp.Near >= 0);
-				if (Tmp < hit)
+				if
+				(
+					!TagHit.NearestText
+					||
+					(
+						SameRow
+						&&
+						!TagHit.NearSameRow
+					)
+					||
+					(
+						SameRow == TagHit.NearSameRow
+						&&
+						Near < TagHit.Near
+					)
+				)
 				{
-					hit = Tmp;
-					hit.Index = NearestChar(Tr, x, y);
+					TagHit.NearestText = this;
+					TagHit.NearSameRow = SameRow;
+					TagHit.Block = Tr;
+					TagHit.Near = Near;
+					TagHit.Index = NearestChar(Tr, x, y);
+					
+					if (DebugLog)
+					{
+						LgiTrace("%i:GetTagByPos HitText %s #%s, idx=%i, near=%i, txt='%S'\n",
+							Depth,
+							Tag.Get(),
+							HtmlId,
+							TagHit.Index,
+							TagHit.Near,
+							Tr->Text);
+					}
+
+					if (!TagHit.Near)
+					{
+						TagHit.Direct = this;
+						TagHit.LocalCoords.x = x;
+						TagHit.LocalCoords.y = y;
+					}
 				}
 			}
 		}
 	}
+	else if
+	(
+		!IsTableRow() &&
+		Tag &&
+		x >= 0 &&
+		y >= 0 &&
+		x < Size.x &&
+		y < Size.y
+		// && InBody
+	)
+	{
+		// Direct hit
+		TagHit.Direct = this;
+		TagHit.LocalCoords.x = x;
+		TagHit.LocalCoords.y = y;
+
+		if (DebugLog)
+		{
+			LgiTrace("%i:GetTagByPos DirectHit %s #%s, idx=%i, near=%i\n",
+				Depth,
+				Tag.Get(),
+				HtmlId,
+				TagHit.Index,
+				TagHit.Near);
+		}
+	}
+	
+	if (TagId == TAG_BODY)
+		InBody = true;
+
+	for (unsigned i=0; i<Children.Length(); i++)
+	{
+		if (auto t = ToTag(Children[i]))
+			t->GetTagByPos(TagHit, x - t->Pos.x, y - t->Pos.y, Depth + 1, InBody, DebugLog);
+	}
 }
 
-int LTag::OnNotify(int f)
+int LTag::OnNotify(const LNotification &n)
 {
-	if (!Ctrl)
+	if (!Ctrl || !Html->InThread())
 		return 0;
 	
 	switch (CtrlType)
@@ -2283,7 +2459,7 @@ int LTag::OnNotify(int f)
 		{
 			LTag *Form = this;
 			while (Form && Form->TagId != TAG_FORM)
-				Form = Form->Parent;
+				Form = ToTag(Form->Parent);
 			if (Form)
 				Html->OnSubmitForm(Form);
 			break;
@@ -2298,7 +2474,7 @@ int LTag::OnNotify(int f)
 	return 0;
 }
 
-void LTag::CollectFormValues(GHashTbl<const char*,char*> &f)
+void LTag::CollectFormValues(LHashTbl<ConstStrKey<char,false>,char*> &f)
 {
 	if (CtrlType != CtrlNone)
 	{
@@ -2331,8 +2507,9 @@ void LTag::CollectFormValues(GHashTbl<const char*,char*> &f)
 		}
 	}
 
-	for (LTag *t=Tags.First(); t; t=Tags.Next())
+	for (unsigned i=0; i<Children.Length(); i++)
 	{
+		LTag *t = ToTag(Children[i]);
 		t->CollectFormValues(f);
 	}
 }
@@ -2342,8 +2519,9 @@ LTag *LTag::FindCtrlId(int Id)
 	if (Ctrl && Ctrl->GetId() == Id)
 		return this;
 
-	for (LTag *t=Tags.First(); t; t=Tags.Next())
+	for (unsigned i=0; i<Children.Length(); i++)
 	{
+		LTag *t = ToTag(Children[i]);
 		LTag *f = t->FindCtrlId(Id);
 		if (f)
 			return f;
@@ -2358,13 +2536,14 @@ void LTag::Find(int TagType, LArray<LTag*> &Out)
 	{
 		Out.Add(this);
 	}
-	for (LTag *t=Tags.First(); t; t=Tags.Next())
+	for (unsigned i=0; i<Children.Length(); i++)
 	{
+		LTag *t = ToTag(Children[i]);
 		t->Find(TagType, Out);
 	}
 }
 
-void LTag::SetImage(const char *Uri, LSurface *Img)
+void LTag::SetImage(const char *Uri, LAutoPtr<LSurface> Img)
 {
 	if (Img)
 	{
@@ -2375,17 +2554,27 @@ void LTag::SetImage(const char *Uri, LSurface *Img)
 			{
 				Def->Type = ImageOwn;
 				DeleteObj(Def->Img);
-				Def->Img = Img;
+				Def->Img = Img.Release();
 			}
 		}
 		else
 		{
-			Image.Reset(Img);
+			if (Img->GetColourSpace() == CsIndex8)
+			{
+				if (Image.Reset(new LMemDC(_FL, Img->X(), Img->Y(), System32BitColourSpace)))
+				{
+					Image->Colour(0, 32);
+					Image->Rectangle();
+					Image->Blt(0, 0, Img);
+				}
+				else LgiTrace("%s:%i - SetImage can't promote 8bit image to 32bit.\n", _FL);
+			}
+			else Image = Img;
 			
 			LRect r = XSubRect();
 			if (r.Valid())
 			{
-				LAutoPtr<LSurface> t(new LMemDC(r.X(), r.Y(), Image->GetBits()));
+				LAutoPtr<LSurface> t(new LMemDC(_FL, r.X(), r.Y(), Image->GetColourSpace()));
 				if (t)
 				{
 					t->Blt(0, 0, Image, &r);
@@ -2394,10 +2583,14 @@ void LTag::SetImage(const char *Uri, LSurface *Img)
 			}
 		}		
 
-		for (LTag *t = this; t; t = t->Parent)
+		for (unsigned i=0; i<Children.Length(); i++)
 		{
-			t->MinContent = 0;
-			t->MaxContent = 0;
+			LTag *t = ToTag(Children[i]);
+			if (t->Cell)
+			{
+				t->Cell->MinContent = 0;
+				t->Cell->MaxContent = 0;
+			}
 		}
 	}
 	else
@@ -2408,22 +2601,77 @@ void LTag::SetImage(const char *Uri, LSurface *Img)
 
 void LTag::LoadImage(const char *Uri)
 {
-	#if 1
-	LDocumentEnv::LoadJob *j = Html->Environment->NewJob();
+	#if DOCUMENT_LOAD_IMAGES
+	if (!Html->Environment)
+		return;
+
+	LUri u(Uri);
+	bool LdImg = Html->GetLoadImages();
+	bool IsRemote = u.sProtocol &&
+					(
+						!_stricmp(u.sProtocol, "http") ||
+						!_stricmp(u.sProtocol, "https") ||
+						!_stricmp(u.sProtocol, "ftp")
+					);
+	if (IsRemote && !LdImg)
+	{
+		Html->NeedsCapability("RemoteContent");
+		return;
+	}
+	else if (u.IsProtocol("data"))
+	{
+		if (!u.sPath)
+			return;
+
+		const char *s = u.sPath;
+		if (*s++ != '/')
+			return;
+		LAutoString Type(LTokStr(s));
+		if (*s++ != ',')
+			return;
+		auto p = LString(Type).SplitDelimit(",;:");
+		if (p.Length() != 2 || !p.Last().Equals("base64"))
+			return;
+		LString Name = LString("name.") + p[0];
+		auto Filter = LFilterFactory::New(Name, FILTER_CAP_READ, NULL);
+		if (!Filter)
+			return;
+
+		auto slen = strlen(s);
+		auto blen = BufferLen_64ToBin(slen);
+		LMemStream bin;
+		bin.SetSize(blen);
+		ConvertBase64ToBinary((uint8_t*)bin.GetBasePtr(), blen, s, slen);
+		
+		bin.SetPos(0);
+		if (!Image.Reset(new LMemDC(_FL)))
+			return;
+		auto result = Filter->ReadImage(Image, &bin);
+		if (result != LFilter::IoSuccess)
+			Image.Reset();
+		return;
+	}
+
+	auto j = Html->Environment->NewJob();
 	if (j)
 	{
-		LAssert(Html);
+		LAssert(Html != NULL);
 		j->Uri.Reset(NewStr(Uri));
-		j->View = Html;
+		j->Env = Html->Environment;
 		j->UserData = this;
-		j->UserUid = Html->d->DocumentUid;
+		j->UserUid = Html->GetDocumentUid();
 
-		LDocumentEnv::LoadType Result = Html->Environment->GetContent(j);
+		// LgiTrace("%s:%i - new job %p, %p\n", _FL, j, j->UserData);
+
+		auto Result = Html->Environment->GetContent(j);
 		if (Result == LDocumentEnv::LoadImmediate)
 		{
-			SetImage(Uri, j->pDC.Release());
+			SetImage(Uri, j->pDC);
 		}
-		DeleteObj(j);
+		else if (Result == LDocumentEnv::LoadDeferred)
+		{
+			Html->d->DeferredLoads++;
+		}
 	}
 	#endif
 }
@@ -2432,21 +2680,23 @@ void LTag::LoadImages()
 {
 	const char *Uri = 0;
 	if (Html->Environment &&
-		!Image &&
-		Get("src", Uri))
+		TagId == TAG_IMG &&
+		!Image)
 	{
-		LoadImage(Uri);
+		if (Get("src", Uri))
+			LoadImage(Uri);
 	}
 
-	for (LTag *t=Tags.First(); t; t=Tags.Next())
+	for (unsigned i=0; i<Children.Length(); i++)
 	{
+		LTag *t = ToTag(Children[i]);
 		t->LoadImages();
 	}
 }
 
-void LTag::ImageLoaded(char *uri, LSurface *Img, int &Used)
+void LTag::ImageLoaded(char *uri, LAutoPtr<LSurface> Img, int &Used)
 {
-	const char *Uri = 0;
+	const char *Uri = NULL;
 	if (!Image &&
 		Get("src", Uri))
 	{
@@ -2458,245 +2708,100 @@ void LTag::ImageLoaded(char *uri, LSurface *Img, int &Used)
 			}
 			else
 			{
-				SetImage(Uri, new LMemDC(Img));
+				LAutoPtr<LSurface> Copy(new LMemDC(_FL, Img));
+				SetImage(Uri, Copy);
 			}
 			Used++;
 		}
 	}
 
-	for (LTag *t=Tags.First(); t; t=Tags.Next())
+	for (unsigned i=0; i<Children.Length(); i++)
 	{
+		LTag *t = ToTag(Children[i]);
 		t->ImageLoaded(uri, Img, Used);
 	}
 }
 
-/// This code matches a all the parts of a selector
-bool LTag::MatchFullSelector(LCss::Selector *Sel)
+struct LTagElementCallback : public LCss::ElementCallback<LTag>
 {
-	bool Complex = Sel->Combs.Length() > 0;
-	int CombIdx = Complex ? Sel->Combs.Length() - 1 : 0;
-	int StartIdx = (Complex) ? Sel->Combs[CombIdx] + 1 : 0;
-	
-	bool Match = MatchSimpleSelector(Sel, StartIdx);
-	if (!Match)
-		return false;
+	const char *Val;
 
-	if (Complex)
+	const char *GetElement(LTag *obj)
 	{
-		LTag *CurrentParent = Parent;
-		
-		for (; CombIdx >= 0; CombIdx--)
-		{
-			if (CombIdx >= Sel->Combs.Length())
-				break;
-
-			StartIdx = Sel->Combs[CombIdx];
-			LAssert(StartIdx > 0);
-
-			if (StartIdx >= Sel->Parts.Length())
-				break;
-			
-			LCss::Selector::Part &p = Sel->Parts[StartIdx];
-			switch (p.Type)
-			{
-				case LCss::Selector::CombChild:
-				{
-					// LAssert(!"Not impl.");
-					return false;
-					break;
-				}
-				case LCss::Selector::CombAdjacent:
-				{
-					// LAssert(!"Not impl.");
-					return false;
-					break;
-				}
-				case LCss::Selector::CombDesc:
-				{
-					// Does the parent match the previous simple selector
-					int PrevIdx = StartIdx - 1;
-					while (PrevIdx > 0 && Sel->Parts[PrevIdx-1].IsSel())
-					{
-						PrevIdx--;
-					}
-					bool ParMatch = false;
-					for (; !ParMatch && CurrentParent; CurrentParent = CurrentParent->Parent)
-					{
-						ParMatch = CurrentParent->MatchSimpleSelector(Sel, PrevIdx);
-					}
-					if (!ParMatch)
-						return false;
-					break;
-				}
-				default:
-				{
-					LAssert(!"This must be a comb.");
-					return false;
-					break;
-				}
-			}
-		}
-	}
-
-	return Match;
-}
-
-/// This code matches a simple part of a selector, i.e. no combinatorial operators involved.
-bool LTag::MatchSimpleSelector
-(
-	/// The full selector.
-	LCss::Selector *Sel,
-	/// The start index of the simple selector parts. Stop at the first comb operator or the end of the parts.
-	int PartIdx
-)
-{
-	for (int n = PartIdx; n<Sel->Parts.Length(); n++)
-	{
-		LCss::Selector::Part &p = Sel->Parts[n];
-		switch (p.Type)
-		{
-			case LCss::Selector::SelType:
-			{
-				if (!Tag || stricmp(Tag, p.Value))
-					return false;
-				break;
-			}
-			case LCss::Selector::SelUniversal:
-			{
-				// Match everything
-				return true;
-				break;
-			}
-			case LCss::Selector::SelAttrib:
-			{
-				if (!p.Value)
-					return false;
-
-				char *e = strchr(p.Value, '=');
-				if (!e)
-					return false;
-
-				LAutoString Var(NewStr(p.Value, e - p.Value));
-				const char *TagVal;
-				if (!Get(Var, TagVal))
-					return false;
-
-				LAutoString Val(NewStr(e + 1));
-				if (stricmp(Val, TagVal))
-					return false;
-				break;
-			}
-			case LCss::Selector::SelClass:
-			{
-				// Check the class matches
-				if (Class.Length() == 0)
-					return false;
-
-				bool Match = false;
-				for (int i=0; i<Class.Length(); i++)
-				{
-					if (!stricmp(Class[i], p.Value))
-					{
-						Match = true;
-						break;
-					}
-				}
-				if (!Match)
-					return false;
-				break;
-			}
-			case LCss::Selector::SelMedia:
-			{
-				return false;
-				break;
-			}
-			case LCss::Selector::SelID:
-			{
-				const char *Id;
-				if (!Get("id", Id) || stricmp(Id, p.Value))
-					return false;
-				break;
-			}
-			case LCss::Selector::SelPseudo:
-			{
-				const char *Href = NULL;
-				if
-				(
-					(
-						TagId == TAG_A
-						&&
-						p.Value && !stricmp(p.Value, "link")
-						&&
-						Get("href", Href)
-					)
-					||
-					(
-						p.Value
-						&&
-						*p.Value == '-'
-					)
-				)
-					break;
-					
-				return false;
-				break;
-			}
-			default:
-			{
-				// Comb operator, so return the current match value
-				return true;
-			}
-		}
+		return obj->Tag;
 	}
 	
-	return true;
+	const char *GetAttr(LTag *obj, const char *Attr)
+	{
+		if (obj->Get(Attr, Val))
+			return Val;
+		return NULL;
+	}
+	
+	bool GetClasses(LString::Array &Classes, LTag *obj) 
+	{
+		Classes = obj->Class;
+		return Classes.Length() > 0;
+	}
+	
+	LTag *GetParent(LTag *obj)
+	{
+		return ToTag(obj->Parent);
+	}
+	
+	LArray<LTag*> GetChildren(LTag *obj)
+	{
+		LArray<LTag*> c;
+		for (unsigned i=0; i<obj->Children.Length(); i++)
+			c.Add(ToTag(obj->Children[i]));
+		return c;
+	}
+};
+
+void LTag::RestyleAll()
+{
+	Restyle();
+	for (unsigned i=0; i<Children.Length(); i++)
+	{
+		LHtmlElement *c = Children[i];
+		LTag *t = ToTag(c);
+		if (t)
+			t->RestyleAll();
+	}
 }
 
 // After CSS has changed this function scans through the CSS and applies any rules
 // that match the current tag.
 void LTag::Restyle()
 {
-	int i;
-
-	LArray<LCss::SelArray*> Maps;
-	LCss::SelArray *s;
-	if (s = Html->CssStore.TypeMap.Find(Tag))
-		Maps.Add(s);
-	for (i=0; i<Class.Length(); i++)
+	// Use the matching built into the LCss Store.
+	LCss::SelArray Styles;
+	LTagElementCallback Context;
+	if (Html->CssStore.Match(Styles, &Context, this))
 	{
-		if (s = Html->CssStore.ClassMap.Find(Class[i]))
-			Maps.Add(s);
-	}
-	if (HtmlId && (s = Html->CssStore.IdMap.Find(HtmlId)))
-		Maps.Add(s);
-
-	for (i=0; i<Maps.Length(); i++)
-	{
-		LCss::SelArray *s = Maps[i];
-		for (int i=0; i<s->Length(); i++)
+		for (unsigned i=0; i<Styles.Length(); i++)
 		{
-			LCss::Selector *Sel = (*s)[i];
-			
-			if (MatchFullSelector(Sel))
-			{
-				SetCssStyle(Sel->Style);
-			}
+			LCss::Selector *s = Styles[i];
+			if (s)
+				SetCssStyle(s->Style);
 		}
 	}
 	
-	if (Display() != DispInherit)
-		Disp = Display();	
+	// Do the element specific styles
+	const char *s;
+	if (Get("style", s))
+		SetCssStyle(s);
 
-	#if 1 && defined(_DEBUG)
+	#if DEBUG_RESTYLE && defined(_DEBUG)
 	if (Debug)
 	{
-		LAutoString Style = ToString();
-		LgiTrace(">>>> %s <<<<:\n%s\n\n", Tag, Style.Get());
+		auto Style = ToString();
+		LgiTrace(">>>> %s <<<<:\n%s\n\n", Tag.Get(), Style.Get());
 	}
 	#endif
 }
 
-void LTag::SetStyle()
+void LTag::SetDefaultCss()
 {
 	const static float FntMul[] =
 	{
@@ -2709,83 +2814,74 @@ void LTag::SetStyle()
 		3.0f	// size=7
 	};
 
-	const char *s = 0;
-	#ifdef _DEBUG
-	if (Get("debug", s))
-		Debug = atoi(s);
-	#endif
-
-	if (Get("Color", s))
-	{
-		ColorDef Def;
-		if (ParseColour(s, Def))
-		{
-			Color(Def);
-		}
-	}
-
-	if (Get("Background", s) ||
-		Get("bgcolor", s))
-	{
-		ColorDef Def;
-		if (ParseColour(s, Def))
-		{
-			BackgroundColor(Def);
-		}
-		else
-		{
-			LCss::ImageDef Img;
-			
-			Img.Type = ImageUri;
-			Img.Uri.Reset(NewStr(s));
-			
-			BackgroundImage(Img);
-			BackgroundRepeat(RepeatBoth);
-		}
-	}
+	const char *s = nullptr;
 
 	switch (TagId)
 	{
+		default:
+		{
+			if (!Stricmp(Tag.Get(), "o:p"))
+				Display(LCss::DispNone);
+			break;
+		}
+		case TAG_PRE:
+		{
+			LFontType Type;
+			if (Type.GetSystemFont("Fixed"))
+			{
+				LAssert(ValidStr(Type.GetFace()));
+				FontFamily(Type.GetFace());
+			}
+			break;
+		}
+	    case TAG_BIG:
+	    {
+            LCss::Len l;
+            l.Type = SizeLarger;
+	        FontSize(l);
+	        break;
+	    }
 		case TAG_LINK:
 		{
 			const char *Type, *Href;
 			if (Html->Environment &&
 				Get("type", Type) &&
-				Get("href", Href))
+				Get("href", Href) &&
+				!Stricmp(Type, "text/css") &&
+				!Html->CssHref.Find(Href))
 			{
-				if (!stricmp(Type, "text/css"))
+				auto j = Html->Environment->NewJob();
+				if (j)
 				{
-					LDocumentEnv::LoadJob *j = Html->Environment->NewJob();
-					if (j)
+					LAssert(Html != NULL);
+					LTag *t = this;
+					
+					j->Uri.Reset(NewStr(Href));
+					j->Env = Html->Environment;
+					j->UserData = t;
+					j->UserUid = Html->GetDocumentUid();
+
+					LDocumentEnv::LoadType Result = Html->Environment->GetContent(j);
+					if (Result == LDocumentEnv::LoadImmediate)
 					{
-						LAssert(Html);
-						LTag *t = this;
-						
-						j->Uri.Reset(NewStr(Href));
-						j->View = Html;
-						j->UserData = t;
-						j->UserUid = Html->d->DocumentUid;
-						// j->Pref = LDocumentEnv::LoadJob::FmtFilename;
-
-						LDocumentEnv::LoadType Result = Html->Environment->GetContent(j);
-						if (Result == LDocumentEnv::LoadImmediate)
+						LStreamI *s = j->GetStream();							
+						if (s)
 						{
-							if (j->Stream)
+							int Len = (int)s->GetSize();
+							if (Len > 0)
 							{
-								uint64 Len = j->Stream->GetSize();
-								if (Len > 0)
-								{
-									LAutoString a(new char[Len+1]);
-									int r = j->Stream->Read(a, Len);
-									a[r] = 0;
+								LAutoString a(new char[Len+1]);
+								ssize_t r = s->Read(a, Len);
+								a[r] = 0;
 
-									Html->AddCss(a.Release());
-								}
+								Html->CssHref.Add(Href, true);
+								Html->OnAddStyle("text/css", a);
 							}
-							else LAssert(!"Not impl.");
 						}
-
-						DeleteObj(j);
+					}
+					else if (Result == LDocumentEnv::LoadDeferred)
+					{
+						Html->d->DeferredLoads++;
 					}
 				}
 			}
@@ -2799,15 +2895,17 @@ void LTag::SetStyle()
 
 			if (Get("Type", s))
 			{
-				if (stricmp(s, "cite") == 0)
+				if (_stricmp(s, "cite") == 0)
 				{
-					BorderLeft(BorderDef("1px solid blue"));
+					BorderLeft(BorderDef(this, "1px solid blue"));
 					PaddingLeft(Len("0.5em"));
 					
+					/*
 					ColorDef Def;
 					Def.Type = ColorRgb;
 					Def.Rgb32 = Rgb32(0x80, 0x80, 0x80);
 					Color(Def);
+					*/
 				}
 			}
 			break;
@@ -2827,22 +2925,20 @@ void LTag::SetStyle()
 				c.Rgb32 = Rgb32(0, 0, 255);
 				Color(c);
 				TextDecoration(TextDecorUnderline);
-
-				/* FIXME
-				if (s = Html->CssMap.Find("a"))
-					SetCssStyle(s);
-				if (s = Html->CssMap.Find("a:link"))
-					SetCssStyle(s);
-				*/
 			}
 			break;
 		}
 		case TAG_TABLE:
 		{
+			Len l;
+
+			if (!Cell)
+				Cell = new TblCell;
+
 			if (Get("border", s))
 			{
 				BorderDef b;
-				if (b.Parse(s))
+				if (b.Parse(this, s))
 				{
 					BorderLeft(b);
 					BorderRight(b);
@@ -2850,29 +2946,61 @@ void LTag::SetStyle()
 					BorderBottom(b);
 				}
 			}
+
+			if (Get("cellspacing", s) &&
+				l.Parse(s, PropBorderSpacing, ParseRelaxed))
+			{
+				BorderSpacing(l);
+			}
+			else
+			{
+				// BorderSpacing(LCss::Len(LCss::LenPx, 2.0f));
+			}
+
+			if (Get("cellpadding", s) &&
+				l.Parse(s, Prop_CellPadding, ParseRelaxed))
+			{
+				_CellPadding(l);
+			}
+
+			if (Get("align", s))
+			{
+				Len l;
+				if (l.Parse(s))
+					Cell->XAlign = l.Type;
+			}
 			break;
 		}
 		case TAG_TD:
+		case TAG_TH:
 		{
+			if (!Cell)
+				Cell = new TblCell;
+
 			LTag *Table = GetTable();
 			if (Table)
 			{
-				const char *s = "1px";
 				Len l = Table->_CellPadding();
-				if (!l.IsValid())
-					l.Parse(s);
+				if (!l)
+				{
+					l.Type = LCss::LenPx;
+					l.Value = DefaultCellPadding;
+				}
 				PaddingLeft(l);
 				PaddingRight(l);
 				PaddingTop(l);
 				PaddingBottom(l);
 			}
+			
+			if (TagId == TAG_TH)
+				FontWeight(LCss::FontWeightBold);
 			break;
 		}
 		case TAG_BODY:
 		{
-			MarginLeft(Len(DefaultBodyMargin));
-			MarginTop(Len(DefaultBodyMargin));
-			MarginRight(Len(DefaultBodyMargin));
+			MarginLeft(Len(Get("leftmargin", s) ? s : DefaultBodyMargin));
+			MarginTop(Len(Get("topmargin", s) ? s : DefaultBodyMargin));
+			MarginRight(Len(Get("rightmargin", s) ? s : DefaultBodyMargin));
 			
 			if (Get("text", s))
 			{
@@ -2888,301 +3016,6 @@ void LTag::SetStyle()
 		case TAG_UL:
 		{
 			MarginLeft(Len("16px"));
-			break;
-		}
-	}
-
-	if (Get("width", s))
-	{
-		Len l;
-		if (l.Parse(s, PropWidth, ParseRelaxed))
-			Width(l);
-	}
-	if (Get("height", s))
-	{
-		Len l;
-		if (l.Parse(s, PropHeight, ParseRelaxed))
-			Height(l);
-	}
-	if (Get("align", s))
-	{
-		if (stricmp(s, "left") == 0) TextAlign(Len(AlignLeft));
-		else if (stricmp(s, "right") == 0) TextAlign(Len(AlignRight));
-		else if (stricmp(s, "center") == 0) TextAlign(Len(AlignCenter));
-	}
-	if (Get("valign", s))
-	{
-		if (stricmp(s, "top") == 0) VerticalAlign(Len(VerticalTop));
-		else if (stricmp(s, "middle") == 0) VerticalAlign(Len(VerticalMiddle));
-		else if (stricmp(s, "bottom") == 0) VerticalAlign(Len(VerticalBottom));
-	}
-
-	Get("id", HtmlId);
-
-	if (Get("class", s))
-	{
-		Class.Parse(s);
-	}
-
-	Restyle();
-
-	if (Get("style", s))
-	{
-		SetCssStyle(s);
-	}
-
-	switch (TagId)
-	{
-		case TAG_NOSCRIPT:
-		{
-			Disp = DispNone;
-			break;
-		}
-	    case TAG_BIG:
-	    {
-            LCss::Len l;
-            l.Type = SizeLarger;
-	        FontSize(l);
-	        break;
-	    }
-		case TAG_META:
-		{
-			char *Cs = NULL;
-			const char *Http = NULL, *Name = NULL, *Content = NULL, *Charset = NULL;
-			Get("http-equiv", Http);
-			Get("name", Name);
-			Get("content", Content);
-			
-			if (Http && Content)
-			{
-				if (!stricmp(Http, "content-type"))
-				{
-					char *CharSet = stristr(Content, "charset=");
-					if (CharSet)
-						ParsePropValue(CharSet + 8, Cs);
-				}
-				else if (!stricmp(Http, "refresh"))
-				{
-					#define SkipWs(c) while (*c && IsWhiteSpace(*c)) c++
-					SkipWs(Content);
-
-					char *Val = strchr((char*)Content, ';');
-					if (Val)
-					{
-						*Val++ = 0;
-						SkipWs(Val);
-						
-						if (IsDigit(*Content))
-							Html->d->RefreshTime = atoi(Content);
-
-						char *Eq;							
-						if (Eq = strchr(Val, '='))
-						{
-							*Eq++ = 0;
-							SkipWs(Eq);
-
-							if (!stricmp(Val, "url"))
-							{
-								LAutoWString clean(CleanText(Eq, strlen(Eq)));
-								Html->d->RefreshUri.Reset(LgiNewUtf16To8(clean));
-							}
-						}
-					}
-					else
-					{
-						Html->d->RefreshTime = atoi(Content);
-					}
-					Html->SetPulse(1000);
-				}
-			}
-			
-			if (Name &&
-				Content &&
-				stricmp(Name, "charset") == 0)
-			{
-				Cs = NewStr(s);
-			}
-			else if (Get("charset", Charset))
-			{
-				Cs = NewStr(Charset);
-			}
-			if (Cs)
-			{
-				if (Cs &&
-					stricmp(Cs, "utf-16") != 0 &&
-					stricmp(Cs, "utf-32") != 0 &&
-					LGetCsInfo(Cs))
-				{
-					DeleteArray(Html->DocCharSet);
-					Html->DocCharSet = NewStr(Cs);
-				}
-
-				DeleteArray(Cs);
-			}
-			break;
-		}
-		case TAG_BODY:
-		{
-			if (BackgroundColor().Type != ColorInherit)
-			{
-				Html->SetBackColour(BackgroundColor().Rgb32);
-			}
-			
-			LFont *f = GetFont();
-			if (FontSize().Type == LenInherit)
-			{
-       		    FontSize(Len(LenPt, (float)f->PointSize()));
-			}
-
-			const char *Back;
-			if (Get("background", Back) && Html->Environment)
-			{
-				LoadImage(Back);
-			}
-			break;
-		}
-		case TAG_HEAD:
-		{
-			Display(Disp = DispNone);
-			break;
-		}
-		case TAG_PRE:
-		{
-			LFontType Type;
-			if (Type.GetSystemFont("Fixed"))
-			{
-				LAssert(ValidStr(Type.GetFace()));
-				FontFamily(StringsDef(Type.GetFace()));
-			}
-			break;
-		}
-		case TAG_TABLE:
-		{
-			Len l;
-			const char *s;
-			if (Get("cellspacing", s) &&
-				l.Parse(s, PropBorderSpacing, ParseRelaxed))
-			{
-				BorderSpacing(l);
-			}
-			if (Get("cellpadding", s) &&
-				l.Parse(s, Prop_CellPadding, ParseRelaxed))
-			{
-				_CellPadding(l);
-			}
-
-			if (Get("align", s))
-			{
-				Len l;
-				if (l.Parse(s))
-					XAlign = l.Type;
-			}
-			break;
-		}
-		case TAG_TR:
-			break;
-		case TAG_TD:
-		{
-			const char *s;
-			if (Get("colspan", s))
-				Span.x = atoi(s);
-			else
-				Span.x = 1;
-			if (Get("rowspan", s))
-				Span.y = atoi(s);
-			else
-				Span.y = 1;
-			
-			if (Get("align", s))
-			{
-				Len l;
-				if (l.Parse(s))
-					XAlign = l.Type;
-			}
-			break;
-		}
-		case TAG_IMG:
-		{
-			const char *Uri;
-			if (Html->Environment &&
-				Get("src", Uri))
-			{
-				LoadImage(Uri);
-			}
-			break;
-		}
-		case TAG_H1:
-		{
-			char s[32];
-			sprintf(s, "%ipt", (int)((float)Html->DefFont()->PointSize() * FntMul[5]));
-			FontSize(Len(s));
-			FontWeight(FontWeightBold);
-			break;
-		}
-		case TAG_H2:
-		{
-			char s[32];
-			sprintf(s, "%ipt", (int)((float)Html->DefFont()->PointSize() * FntMul[4]));
-			FontSize(Len(s));
-			FontWeight(FontWeightBold);
-			break;
-		}
-		case TAG_H3:
-		{
-			char s[32];
-			sprintf(s, "%ipt", (int)((float)Html->DefFont()->PointSize() * FntMul[3]));
-			FontSize(Len(s));
-			FontWeight(FontWeightBold);
-			break;
-		}
-		case TAG_H4:
-		{
-			char s[32];
-			sprintf(s, "%ipt", (int)((float)Html->DefFont()->PointSize() * FntMul[2]));
-			FontSize(Len(s));
-			FontWeight(FontWeightBold);
-			break;
-		}
-		case TAG_H5:
-		{
-			char s[32];
-			sprintf(s, "%ipt", (int)((float)Html->DefFont()->PointSize() * FntMul[1]));
-			FontSize(Len(s));
-			FontWeight(FontWeightBold);
-			break;
-		}
-		case TAG_H6:
-		{
-			char s[32];
-			sprintf(s, "%ipt", (int)((float)Html->DefFont()->PointSize() * FntMul[0]));
-			FontSize(Len(s));
-			FontWeight(FontWeightBold);
-			break;
-		}
-		case TAG_FONT:
-		{
-			const char *s = 0;
-			if (Get("Face", s))
-			{
-				char16 *cw = CleanText(s, strlen(s), true);
-				char *c8 = LgiNewUtf16To8(cw);
-				DeleteArray(cw);
-				LToken Faces(c8, ",");
-				DeleteArray(c8);
-				char *face = TrimStr(Faces[0]);
-				if (ValidStr(face))
-				{
-					FontFamily(face);
-					DeleteArray(face);
-				}
-				else
-				{
-					LgiTrace("%s:%i - No face for font tag.\n", __FILE__, __LINE__);
-				}
-			}
-
-			if (Get("Size", s))
-				FontSize(Len(s));
 			break;
 		}
 		case TAG_STRONG:
@@ -3201,33 +3034,251 @@ void LTag::SetStyle()
 			TextDecoration(TextDecorUnderline);
 			break;
 		}
+		case TAG_SUP:
+		{
+			VerticalAlign(VerticalSuper);
+			FontSize(SizeSmaller);
+			break;
+		}
+		case TAG_SUB:
+		{
+			VerticalAlign(VerticalSub);
+			FontSize(SizeSmaller);
+			break;
+		}
+		case TAG_TITLE:
+		{
+			Display(LCss::DispNone);
+			break;
+		}
+		case TAG_H1:
+		{
+			char s[32];
+			sprintf_s(s, sizeof(s), "%ipt", (int)((float)Html->DefFont()->PointSize() * FntMul[5]));
+			FontSize(Len(s));
+			FontWeight(FontWeightBold);
+			break;
+		}
+		case TAG_H2:
+		{
+			char s[32];
+			sprintf_s(s, sizeof(s), "%ipt", (int)((float)Html->DefFont()->PointSize() * FntMul[4]));
+			FontSize(Len(s));
+			FontWeight(FontWeightBold);
+			break;
+		}
+		case TAG_H3:
+		{
+			char s[32];
+			sprintf_s(s, sizeof(s), "%ipt", (int)((float)Html->DefFont()->PointSize() * FntMul[3]));
+			FontSize(Len(s));
+			FontWeight(FontWeightBold);
+			break;
+		}
+		case TAG_H4:
+		{
+			char s[32];
+			sprintf_s(s, sizeof(s), "%ipt", (int)((float)Html->DefFont()->PointSize() * FntMul[2]));
+			FontSize(Len(s));
+			FontWeight(FontWeightBold);
+			break;
+		}
+		case TAG_H5:
+		{
+			char s[32];
+			sprintf_s(s, sizeof(s), "%ipt", (int)((float)Html->DefFont()->PointSize() * FntMul[1]));
+			FontSize(Len(s));
+			FontWeight(FontWeightBold);
+			break;
+		}
+		case TAG_H6:
+		{
+			char s[32];
+			sprintf_s(s, sizeof(s), "%ipt", (int)((float)Html->DefFont()->PointSize() * FntMul[0]));
+			FontSize(Len(s));
+			FontWeight(FontWeightBold);
+			break;
+		}
+	}
+}
+
+void LTag::SetAttributeStyles()
+{
+	const char *s = nullptr;
+
+	if (IsTable())
+	{
+		if (!Cell)
+			Cell = new TblCell;
+	}
+	else if (IsTableCell())
+	{
+		if (!Cell)
+			Cell = new TblCell;
+
+		if (Get("colspan", s))
+			Cell->Span.x = atoi(s);
+		else
+			Cell->Span.x = 1;
+		if (Get("rowspan", s))
+			Cell->Span.y = atoi(s);
+		else
+			Cell->Span.y = 1;
+		
+		Cell->Span.x = MAX(Cell->Span.x, 1);
+		Cell->Span.y = MAX(Cell->Span.y, 1);
+		
+		auto disp = SupportedDisplay();
+		if (disp == DispInline ||
+			disp == DispInlineBlock)
+		{
+			Display(DispTableCell); // Inline-block TD??? Nope.
+		}
+	}
+
+	if (Get("Color", s))
+	{
+		ColorDef Def;
+		if (LHtmlParser::ParseColour(s, Def))
+			Color(Def);
+	}
+
+	if (Get("Background", s) ||
+		Get("bgcolor", s))
+	{
+		ColorDef Def;
+		if (LHtmlParser::ParseColour(s, Def))
+		{
+			BackgroundColor(Def);
+		}
+		else
+		{
+			LCss::ImageDef Img;
+			
+			Img.Type = ImageUri;
+			Img.Uri = s;
+			
+			BackgroundImage(Img);
+			BackgroundRepeat(RepeatBoth);
+		}
+	}
+
+	if (Get("width", s))
+	{
+		Len l;
+		if (l.Parse(s, PropWidth, ParseRelaxed))
+			Width(l);
+	}
+	if (Get("height", s))
+	{
+		Len l;
+		if (l.Parse(s, PropHeight, ParseRelaxed))
+			Height(l);
+	}
+	if (Get("align", s))
+	{
+		if (_stricmp(s, "left") == 0) TextAlign(Len(AlignLeft));
+		else if (_stricmp(s, "right") == 0) TextAlign(Len(AlignRight));
+		else if (_stricmp(s, "center") == 0) TextAlign(Len(AlignCenter));
+	}
+	if (Get("valign", s))
+	{
+		if (_stricmp(s, "top") == 0) VerticalAlign(Len(VerticalTop));
+		else if (_stricmp(s, "middle") == 0) VerticalAlign(Len(VerticalMiddle));
+		else if (_stricmp(s, "bottom") == 0) VerticalAlign(Len(VerticalBottom));
+	}
+
+	switch (TagId)
+	{
+		case TAG_IMG:
+		{
+			const char *Uri;
+			if (Html->Environment &&
+				Get("src", Uri))
+			{
+				// printf("Uri: %s\n", Uri);
+				LoadImage(Uri);
+			}
+			break;
+		}
+		case TAG_FONT:
+		{
+			const char *s = 0;
+			if (Get("Face", s))
+			{
+				LAutoWString cw(CleanText(s, strlen(s), "utf-8", true));
+				LAutoString c8(WideToUtf8(cw));
+				
+				auto Faces = LString(c8).SplitDelimit(",");
+				auto Face = Faces[0].Strip();
+				if (ValidStr(Face))
+					FontFamily(c8.Get());
+				else
+					LgiTrace("%s:%i - No face for font tag.\n", _FL);
+			}
+
+			if (Get("Size", s))
+			{
+				bool Digit = false, NonW = false;
+				for (auto *c = s; *c; c++)
+				{
+					if (IsDigit(*c) || *c == '-') Digit = true;
+					else if (!IsWhite(*c)) NonW = true;
+				}
+				if (Digit && !NonW)
+				{
+					auto Sz = atoi(s);
+					switch (Sz)
+					{
+						case 1: FontSize(Len(LCss::LenEm, 0.63f)); break;
+						case 2: FontSize(Len(LCss::LenEm, 0.82f)); break;
+						case 3: FontSize(Len(LCss::LenEm, 1.0f)); break;
+						case 4: FontSize(Len(LCss::LenEm, 1.13f)); break;
+						case 5: FontSize(Len(LCss::LenEm, 1.5f)); break;
+						case 6: FontSize(Len(LCss::LenEm, 2.0f)); break;
+						case 7: FontSize(Len(LCss::LenEm, 3.0f)); break;
+					}
+				}
+				else
+				{
+					FontSize(Len(s));
+				}
+			}
+			break;
+		}
 		case TAG_SELECT:
 		{
+			if (!Html->InThread())
+				break;
+
 			LAssert(!Ctrl);
-			Ctrl = new LCombo(Html->d->NextCtrlId++, 0, 0, 100, LSysFont->GetHeight() + 8, NULL);
+			Ctrl = new LCombo(Html->d->NextCtrlId++);
 			CtrlType = CtrlSelect;
 			break;
 		}
 		case TAG_INPUT:
 		{
+			if (!Html->InThread())
+				break;
+
 			LAssert(!Ctrl);
 
 			const char *Type, *Value = NULL;
 			Get("value", Value);
-			LAutoWString CleanValue(Value ? CleanText(Value, strlen(Value), true, true) : NULL);
+			LAutoWString CleanValue(Value ? CleanText(Value, strlen(Value), "utf-8", true, true) : NULL);
 			if (CleanValue)
 			{
-				CtrlValue = CleanValue;
+				CtrlValue = CleanValue.Get();
 			}
 			
 			if (Get("type", Type))
 			{
-				if (!stricmp(Type, "password")) CtrlType = CtrlPassword;
-				else if (!stricmp(Type, "email")) CtrlType = CtrlEmail;
-				else if (!stricmp(Type, "text")) CtrlType = CtrlText;
-				else if (!stricmp(Type, "button")) CtrlType = CtrlButton;
-				else if (!stricmp(Type, "submit")) CtrlType = CtrlSubmit;
-				else if (!stricmp(Type, "hidden")) CtrlType = CtrlHidden;
+				if (!_stricmp(Type, "password")) CtrlType = CtrlPassword;
+				else if (!_stricmp(Type, "email")) CtrlType = CtrlEmail;
+				else if (!_stricmp(Type, "text")) CtrlType = CtrlText;
+				else if (!_stricmp(Type, "button")) CtrlType = CtrlButton;
+				else if (!_stricmp(Type, "submit")) CtrlType = CtrlSubmit;
+				else if (!_stricmp(Type, "hidden")) CtrlType = CtrlHidden;
 
 				DeleteObj(Ctrl);
 				if (CtrlType == CtrlEmail ||
@@ -3235,9 +3286,12 @@ void LTag::SetStyle()
 					CtrlType == CtrlPassword)
 				{
 					LEdit *Ed;
-					LAutoString UtfCleanValue(LgiNewUtf16To8(CleanValue));
-					if (Ctrl = Ed = new LEdit(Html->d->NextCtrlId++, 0, 0, 60, LSysFont->GetHeight() + 8, UtfCleanValue))
+					LAutoString UtfCleanValue(WideToUtf8(CleanValue));
+					Ctrl = Ed = new LEdit(Html->d->NextCtrlId++, UtfCleanValue);
+					if (Ctrl)
 					{
+						LRect r(0, 0, 60, LSysFont->GetHeight() + 8);
+						Ed->SetPos(r);
 						Ed->Sunken(false);
 						Ed->Password(CtrlType == CtrlPassword);
 					}						
@@ -3245,7 +3299,7 @@ void LTag::SetStyle()
 				else if (CtrlType == CtrlButton ||
 						 CtrlType == CtrlSubmit)
 				{
-					LAutoString UtfCleanValue(LgiNewUtf16To8(CleanValue));
+					LAutoString UtfCleanValue(WideToUtf8(CleanValue));
 					if (UtfCleanValue)
 					{
 						Ctrl = new InputButton(this, Html->d->NextCtrlId++, UtfCleanValue);
@@ -3254,22 +3308,76 @@ void LTag::SetStyle()
 			}
 			break;
 		}
+		default:
+			break;
+	}
+}
+
+void LTag::SetStyle()
+{
+	const char *s = nullptr;
+	#ifdef _DEBUG
+	if (Get("debug", s))
+	{
+		if ((Debug = atoi(s)))
+		{
+			LgiTrace("Debug Tag: %p '%s'\n", this, Tag ? Tag.Get() : "CONTENT");
+		}
+	}
+	#endif
+
+	SetDefaultCss();
+
+	Get("id", HtmlId);
+	if (Get("class", s))
+		Class = LString(s).SplitDelimit(" \t");
+	Restyle();
+
+	SetAttributeStyles();
+
+	switch (TagId)
+	{
+		default:
+			break;
+		case TAG_BODY:
+		{
+			LCss::ColorDef Bk = BackgroundColor();
+			if (Bk.Type != ColorInherit)
+			{
+				// Copy the background up to the LHtml wrapper
+				Html->GetCss(true)->BackgroundColor(Bk);
+			}
+			break;
+		}
+		case TAG_HEAD:
+		{
+			Display(DispNone);
+			break;
+		}
+	}
+
+	if (IsBlock())
+	{
+		LCss::ImageDef bk = BackgroundImage();
+		if (bk.Type == LCss::ImageUri &&
+			ValidStr(bk.Uri) &&
+			!bk.Uri.Equals("transparent"))
+		{
+			LoadImage(bk.Uri);
+		} 
 	}
 	
 	if (Ctrl)
-	{
-		LFont *f = GetFont();
-		if (f)
+		if (auto f = GetFont())
 			Ctrl->SetFont(f, false);
-	}
+}
 
-	if (Disp == DispBlock && Html->Environment)
+void LTag::OnStyleChange(const char *name)
+{
+	if (!Stricmp(name, "display") && Html)
 	{
-		LCss::ImageDef Img = BackgroundImage();
-		if (Img.Type == ImageUri)
-		{
-			LoadImage(Img.Uri);
-		}
+		Html->Layout(true);
+		Html->Invalidate();
 	}
 }
 
@@ -3278,192 +3386,169 @@ void LTag::SetCssStyle(const char *Style)
 	if (Style)
 	{
 		// Strip out comments
-		char *Comment = 0;
-		while (Comment = strstr((char*)Style, "/*"))
+		char *Comment = NULL;
+		while ((Comment = strstr((char*)Style, "/*")))
 		{
 			char *End = strstr(Comment+2, "*/");
 			if (!End)
 				break;
-			for (char *c = Comment; c<=End+2; c++)
+			for (char *c = Comment; c<End+2; c++)
 				*c = ' ';
 		}
 
 		// Parse CSS
-		LCss::Parse(Style, LCss::ParseRelaxed);
-
-		// Update display setting cache
-		if (Display() != DispInherit)
-			Disp = Display();	
+		const char *Ptr = Style;
+		LCss::Parse(Ptr, LCss::ParseRelaxed);
 	}
 }
 
-char16 *LTag::CleanText(const char *s, int Len, bool ConversionAllowed, bool KeepWhiteSpace)
+char16 *LTag::CleanText(const char *s, ssize_t Len, const char *SourceCs,  bool ConversionAllowed, bool KeepWhiteSpace)
 {
+	if (!s || Len <= 0)
+		return NULL;
+
 	static const char *DefaultCs = "iso-8859-1";
 	char16 *t = 0;
-
-	if (s && Len > 0)
+	bool DocAndCsTheSame = false;
+	if (Html->DocCharSet && Html->Charset)
 	{
-		bool Has8 = false;
-		if (Len >= 0)
-		{
-			for (int n = 0; n < Len; n++)
-			{
-				if (s[n] & 0x80)
-				{
-					Has8 = true;
-					break;
-				}
-			}
-		}
-		else
-		{
-			for (int n = 0; s[n]; n++)
-			{
-				if (s[n] & 0x80)
-				{
-					Has8 = true;
-					break;
-				}
-			}
-		}
-		
-		bool DocAndCsTheSame = false;
-		if (Html->DocCharSet && Html->Charset)
-		{
-			DocAndCsTheSame = stricmp(Html->DocCharSet, Html->Charset) == 0;
-		}
+		DocAndCsTheSame = _stricmp(Html->DocCharSet, Html->Charset) == 0;
+	}
 
-		if (Html->DocCharSet &&
-			Html->Charset &&
-			!Html->OverideDocCharset)
-		{
-			char *DocText = (char*)LNewConvertCp(Html->DocCharSet, s, Html->Charset, Len);
-			t = (char16*) LNewConvertCp(LGI_WideCharset, DocText, Html->DocCharSet, -1);
-			DeleteArray(DocText);
-		}
-		else if (Html->DocCharSet)
-		{
-			t = (char16*) LNewConvertCp(LGI_WideCharset, s, Html->DocCharSet, Len);
-		}
-		else
-		{
-			t = (char16*) LNewConvertCp(LGI_WideCharset, s, Html->Charset ? Html->Charset : DefaultCs, Len);
-		}
+	if (SourceCs)
+	{
+		t = (char16*) LNewConvertCp(LGI_WideCharset, s, SourceCs, Len);
+	}
+	else if (Html->DocCharSet &&
+		Html->Charset &&
+		!DocAndCsTheSame &&
+		!Html->OverideDocCharset)
+	{
+		char *DocText = (char*)LNewConvertCp(Html->DocCharSet, s, Html->Charset, Len);
+		t = (char16*) LNewConvertCp(LGI_WideCharset, DocText, Html->DocCharSet, -1);
+		DeleteArray(DocText);
+	}
+	else if (Html->DocCharSet)
+	{
+		t = (char16*) LNewConvertCp(LGI_WideCharset, s, Html->DocCharSet, Len);
+	}
+	else
+	{
+		t = (char16*) LNewConvertCp(LGI_WideCharset, s, Html->Charset.Get() ? Html->Charset.Get() : DefaultCs, Len);
+	}
 
-		if (t && ConversionAllowed)
+	if (t && ConversionAllowed)
+	{
+		char16 *o = t;
+		for (char16 *i=t; *i; )
 		{
-			char16 *o = t;
-			for (char16 *i=t; *i; )
+			switch (*i)
 			{
-				switch (*i)
+				case '&':
 				{
-					case '&':
+					i++;
+					
+					if (*i == '#')
 					{
+						// Unicode Number
+						char n[32] = "", *p = n;
+						
 						i++;
 						
-						if (*i == '#')
+						if (*i == 'x' || *i == 'X')
 						{
-							// Unicode Number
-							char n[32] = "", *p = n;
-							
+							// Hex number
 							i++;
-							
-							if (*i == 'x' || *i == 'X')
+							while (	*i &&
+									(
+										IsDigit(*i) ||
+										(*i >= 'A' && *i <= 'F') ||
+										(*i >= 'a' && *i <= 'f')
+									) &&
+									(p - n) < 31)
 							{
-								// Hex number
-								i++;
-								while (	*i &&
-										(
-											IsDigit(*i) ||
-											(*i >= 'A' && *i <= 'F') ||
-											(*i >= 'a' && *i <= 'f')
-										) &&
-										(p - n) < 31)
-								{
-									*p++ = *i++;
-								}
+								*p++ = (char)*i++;
 							}
-							else
-							{
-								// Decimal number
-								while (*i && IsDigit(*i) && (p - n) < 31)
-								{
-									*p++ = *i++;
-								}
-							}
-							*p++ = 0;
-							
-							char16 Ch = atoi(n);
-							if (Ch)
-							{
-								*o++ = Ch;
-							}
-							
-							if (*i && *i != ';')
-								i--;
 						}
 						else
 						{
-							// Named Char
-							char16 *e = i;
-							while (*e && IsAlpha(*e) && *e != ';')
+							// Decimal number
+							while (*i && IsDigit(*i) && (p - n) < 31)
 							{
-								e++;
-							}
-							
-							LAutoWString Var(NewStrW(i, e-i));							
-							char16 Char = LHtmlStatic::Inst->VarMap.Find(Var);
-							if (Char)
-							{
-								*o++ = Char;
-								i = e;
-							}
-							else
-							{
-								i--;
-								*o++ = *i;
+								*p++ = (char)*i++;
 							}
 						}
-						break;
-					}
-					case '\r':
-					{
-						break;
-					}
-					case ' ':
-					case '\t':
-					case '\n':
-					{
-						if (KeepWhiteSpace)
+						*p++ = 0;
+						
+						char16 Ch = atoi(n);
+						if (Ch)
 						{
+							*o++ = Ch;
+						}
+						
+						if (*i && *i != ';')
+							i--;
+					}
+					else
+					{
+						// Named Char
+						char16 *e = i;
+						while (*e && IsAlpha(*e) && *e != ';')
+						{
+							e++;
+						}
+						
+						LAutoWString Var(NewStrW(i, e-i));							
+						char16 Char = LHtmlStatic::Inst->VarMap.Find(Var);
+						if (Char)
+						{
+							*o++ = Char;
+							i = e;
+						}
+						else
+						{
+							i--;
 							*o++ = *i;
 						}
-						else
-						{
-							*o++ = ' ';
-
-							// Skip furthur whitespace
-							while (i[1] && IsWhiteSpace(i[1]))
-							{
-								i++;
-							}
-						}
-						break;
 					}
-					default:
-					{
-						// Normal char
-						*o++ = *i;
-						break;
-					}
+					break;
 				}
+				case '\r':
+				{
+					break;
+				}
+				case ' ':
+				case '\t':
+				case '\n':
+				{
+					if (KeepWhiteSpace)
+					{
+						*o++ = *i;
+					}
+					else
+					{
+						*o++ = ' ';
 
-				if (*i) i++;
-				else break;
+						// Skip furthur whitespace
+						while (i[1] && IsWhite(i[1]))
+						{
+							i++;
+						}
+					}
+					break;
+				}
+				default:
+				{
+					// Normal char
+					*o++ = *i;
+					break;
+				}
 			}
-			*o++ = 0;
+
+			if (*i) i++;
+			else break;
 		}
+		*o++ = 0;
 	}
 
 	if (t && !*t)
@@ -3478,19 +3563,17 @@ char *LTag::ParseText(char *Doc)
 {
 	ColorDef c;
 	c.Type = ColorRgb;
-	c.Rgb32 = LC_WORKSPACE;
+	c.Rgb32 = LColour(L_WORKSPACE).c32();
 	BackgroundColor(c);
 	
 	TagId = TAG_BODY;
-	Tag = NewStr("body");
-	Info = GetTagInfo(Tag);
-	char *OriginalCp = NewStr(Html->Charset);
+	Tag.Reset(NewStr("body"));
+	Info = Html->GetTagInfo(Tag);
+	LString OriginalCp = Html->Charset;
 
-	Html->SetBackColour(Rgb24To32(LC_WORKSPACE));
-	
 	LStringPipe Utf16;
 	char *s = Doc;
-	while (true)
+	while (s)
 	{
 		if (*s == '\r')
 		{
@@ -3515,8 +3598,7 @@ char *LTag::ParseText(char *Doc)
 
 			// Output tag
 			Html->SetCharset("iso-8859-1");
-			char16 *t = CleanText(s, e - s, false);
-			if (t)
+			if (auto t = CleanText(s, e - s, NULL, false))
 			{
 				Utf16.Push(t);
 				DeleteArray(t);
@@ -3526,13 +3608,11 @@ char *LTag::ParseText(char *Doc)
 		else if (!*s || *s == '\n')
 		{
 			// Output previous line
-			char16 *Line = Utf16.NewStrW();
-			if (Line)
+			if (auto Line = Utf16.NewStrW())
 			{
-				LTag *t = new LTag(Html, this);
-				if (t)
+				if (auto t = new LTag(Html, this))
 				{
-					t->Color(ColorDef(LC_TEXT));
+					t->Color(LColour(L_TEXT));
 					t->Text(Line);
 				}
 			}
@@ -3540,12 +3620,12 @@ char *LTag::ParseText(char *Doc)
 			if (*s == '\n')
 			{
 				s++;
-				LTag *t = new LTag(Html, this);
-				if (t)
+
+				if (auto t = new LTag(Html, this))
 				{
 					t->TagId = TAG_BR;
-					t->Tag = NewStr("br");
-					t->Info = GetTagInfo(t->Tag);
+					t->Tag.Reset(NewStr("br"));
+					t->Info = Html->GetTagInfo(t->Tag);
 				}
 			}
 			else break;
@@ -3554,11 +3634,12 @@ char *LTag::ParseText(char *Doc)
 		{
 			// Seek end of text
 			char *e = s;
-			while (*e && *e != '\r' && *e != '\n' && *e != '<') e++;
+			while (*e && *e != '\r' && *e != '\n' && *e != '<')
+				e++;
 			
 			// Output text
 			Html->SetCharset(OriginalCp);
-			LAutoWString t(CleanText(s, e - s, false));
+			LAutoWString t(CleanText(s, e - s, NULL, false));
 			if (t)
 			{
 				Utf16.Push(t);
@@ -3568,9 +3649,119 @@ char *LTag::ParseText(char *Doc)
 	}
 	
 	Html->SetCharset(OriginalCp);
-	DeleteArray(OriginalCp);
 
 	return 0;
+}
+
+bool LTag::ConvertToText(TextConvertState &State)
+{
+	const static char *Rule = "------------------------------------------------------";
+	int DepthInc = 0;
+
+	switch (TagId)
+	{
+		default: break;
+		case TAG_P:
+			if (State.GetPrev())
+				State.NewLine();
+			break;
+		case TAG_UL:
+		case TAG_OL:
+			DepthInc = 2;
+			break;
+		case TAG_IMG:
+		{
+			const char *ImgSrc = NULL;
+			Get("src", ImgSrc);
+			if (ImgSrc)
+				State.Write(LString::Fmt("[img=%s]", ImgSrc));
+			else
+				State.Write("[img]");
+			break;
+		}
+	}
+
+	if (TagId != TAG_SCRIPT &&
+		TagId != TAG_STYLE &&
+		ValidStrW(Txt))
+	{
+		for (int i=0; i<State.Depth; i++)
+			State.Write("  ", 2);
+		
+		if (TagId == TAG_LI)
+			State.Write("* ", 2);
+
+		LFont *f = GetFont();
+		LAutoString u;
+		if (f)
+			u = f->ConvertToUnicode(Txt);
+		else
+			u.Reset(WideToUtf8(Txt));
+		if (u)
+		{
+			size_t u_len = strlen(u);
+			State.Write(u, u_len);
+		}
+	}
+	
+	State.Depth += DepthInc;
+	
+	for (unsigned i=0; i<Children.Length(); i++)
+	{
+		LTag *c = ToTag(Children[i]);
+		c->ConvertToText(State);
+	}
+
+	State.Depth -= DepthInc;
+	
+	if (IsBlock())
+	{
+		if (State.CharsOnLine)
+			State.NewLine();
+	}
+	else
+	{
+		switch (TagId)
+		{
+			case TAG_A:
+			{
+				// Emit the link to the anchor if it's different from the text of the span...
+				const char *Href;
+				if (Get("href", Href) &&
+					ValidStrW(Txt))
+				{
+					if (_strnicmp(Href, "mailto:", 7) == 0)
+						Href += 7;
+						
+					size_t HrefLen = strlen(Href);
+					LAutoWString h(CleanText(Href, HrefLen, "utf-8"));
+					if (h && StrcmpW(h, Txt) != 0)
+					{
+						// Href different from the text of the link
+						State.Write(" (", 2);
+						State.Write(Href, HrefLen);
+						State.Write(")", 1);
+					}
+				}
+				break;
+			}
+			case TAG_HR:
+			{
+				State.Write(Rule, strlen(Rule));
+				State.NewLine();
+				break;
+			}
+			case TAG_BR:
+			{
+				State.NewLine();
+				break;
+			}
+			default:
+				break;
+		}
+	}
+	
+	return true;
 }
 
 char *LTag::NextTag(char *s)
@@ -3596,659 +3787,12 @@ char *LTag::NextTag(char *s)
 	return 0;
 }
 
-void LHtml2::CloseTag(LTag *t)
+void LHtml::CloseTag(LTag *t)
 {
 	if (!t)
 		return;
 
 	OpenTags.Delete(t);
-}
-
-void SkipNonDisplay(char *&s)
-{
-	while (*s)
-	{
-		SkipWhiteSpace(s);
-
-		if (s[0] == '<' &&
-			s[1] == '!' &&
-			s[2] == '-' &&
-			s[3] == '-')
-		{
-			s += 4;
-			char *e = strstr(s, "-->");
-			if (e)
-				s = e + 3;
-			else
-			{
-				s += strlen(s);
-				break;
-			}
-		}
-		else break;
-	}
-}
-
-char *LTag::ParseHtml(char *Doc, int Depth, bool InPreTag, bool *BackOut)
-{
-	#if CRASH_TRACE
-	LgiTrace("::ParseHtml Doc='%.10s'\n", Doc);
-	#endif
-
-	if (Depth >= 1024)
-	{
-		// Bail
-		return Doc + strlen(Doc);
-	}
-
-	bool IsFirst = true;
-	for (char *s=Doc; s && *s; )
-	{
-		char *StartTag = s;
-
-		if (*s == '<')
-		{
-			if (s[1] == '?')
-			{
-				// Dynamic content
-				s += 2;
-				while (*s && IsWhiteSpace(*s)) s++;
-
-				if (strnicmp(s, "xml:namespace", 13) == 0)
-				{
-					// Ignore Outlook generated HTML tag
-					char *e = strchr(s, '/');
-					while (e)
-					{
-						if (e[1] == '>'
-							||
-							(e[1] == '?' && e[2] == '>'))
-						{
-							if (e[1] == '?')
-								s = e + 3;
-							else
-								s = e + 2;
-							break;
-						}
-
-						e = strchr(e + 1, '/');
-					}
-
-					if (!e)
-						LAssert(0);
-				}
-				else
-				{
-					char *Start = s;
-					while (*s && (!(s[0] == '?' && s[1] == '>')))
-					{
-						if (strchr("\'\"", *s))
-						{
-							char d = *s++;
-							s = strchr(s, d);
-							if (s) s++;
-							else break;
-						}
-						else s++;
-					}
-
-					if (s)
-					{
-						if (s[0] == '?' &&
-							s[1] == '>' &&
-							Html->Environment)
-						{
-							char *e = s - 1;
-							while (e > Start && IsWhiteSpace(*e)) e--;
-							e++;
-							char *Code = NewStr(Start, e - Start);
-							if (Code)
-							{
-								char *Result = Html->Environment->OnDynamicContent(Code);
-								if (Result)
-								{
-									char *p = Result;
-									do
-									{
-										LTag *c = new LTag(Html, this);
-										if (c)
-										{
-											p = c->ParseHtml(p, Depth + 1, InPreTag);
-										}
-										else break;
-									}
-									while (ValidStr(p));
-
-									DeleteArray(Result);
-								}
-
-								DeleteArray(Code);
-							}
-
-							s += 2;
-						}
-					}
-				}
-			}
-			else if (s[1] == '!' &&
-					s[2] == '-' &&
-					s[3] == '-')
-			{
-				// Comment
-				s = strstr(s, "-->");
-				if (s) s += 3;
-			}
-			else if (s[1] == '!' &&
-					s[2] == '[')
-			{
-				// Parse conditional...
-				char *StartTag = s;
-				s += 3;
-				char *Cond = 0;
-				s = ParseName(s, &Cond);
-				if (!Cond)
-				{
-					while (*s && *s != ']')
-						s++;
-					if (*s == ']') s++;
-					if (*s == '>') s++;
-					return s;
-				}
-
-				bool IsEndIf = false;
-				if (!stricmp(Cond, "if"))
-				{
-					if (!IsFirst)
-					{
-						DeleteArray(Cond);
-						s = StartTag;
-						goto DoChildTag;
-					}
-
-					TagId = CONDITIONAL;
-					SkipWhiteSpace(s);
-					char *Start = s;
-					while (*s && *s != ']')
-						s++;
-					Condition.Reset(NewStr(Start, s-Start));
-					Tag = NewStr("[if]");
-					Info = GetTagInfo(Tag);
-					Disp = DispInline;
-				}
-				else if (!stricmp(Cond, "endif"))
-				{
-					IsEndIf = true;
-				}
-				DeleteArray(Cond);
-				if (*s == ']') s++;
-				if (*s == '>') s++;
-				if (IsEndIf)
-					return s;
-			}
-			else if (s[1] == '!')
-			{
-				s += 2;
-				s = strchr(s, '>');
-				if (s)
-					s++;
-				else
-					return NULL;
-			}
-			else if (IsAlpha(s[1]))
-			{
-				// Start tag
-				if (Parent && IsFirst)
-				{
-					// My tag
-					s = ParseName(++s, &Tag);
-					if (!Tag)
-					{
-					    if (BackOut)
-						    *BackOut = true;
-						return s;
-					}
-
-					bool TagClosed = false;
-					s = ParsePropList(s, this, TagClosed);
-
-					if (stricmp("th", Tag) == 0)
-					{
-						DeleteArray(Tag);
-						Tag = NewStr("td");
-					}
-					
-					Info = GetTagInfo(Tag);
-					if (Info)
-					{
-						TagId = Info->Id;
-						Disp = TestFlag(Info->Flags, TI_BLOCK) || (Tag && Tag[0] == '!') ? DispBlock : DispInline;
-						if (TagId == TAG_PRE)
-						{
-							InPreTag = true;
-						}
-					}
-
-					if (IsBlock(Disp) || TagId == TAG_BR)
-					{
-						SkipNonDisplay(s);
-					}
-
-					switch (TagId)
-					{
-						case TAG_SCRIPT:
-						{
-							char *End = stristr(s, "</script>");
-							if (End)
-							{
-								if (Html->Environment)
-								{
-									*End = 0;
-									const char *Lang = 0, *Type = 0;
-									Get("language", Lang);
-									Get("type", Type);
-									Html->Environment->OnCompileScript(s, Lang, Type);
-									*End = '<';
-								}
-
-								s = End;
-							}
-							break;
-						}
-						case TAG_TABLE:
-						{
-							if (Parent->TagId == TAG_TABLE)
-							{
-								// Um no...
-								if (BackOut)
-								{
-									LTag *l = Html->OpenTags.Last();
-									if (l && l->TagId == TAG_TABLE)
-									{
-										Html->CloseTag(l);
-									}
-
-									*BackOut = true;
-									return StartTag;
-								}
-							}
-							break;
-						}
-						case TAG_IFRAME:
-						{
-							const char *Src;
-							if (Get("src", Src))
-							{
-								LDocumentEnv::LoadJob *j = Html->Environment->NewJob();
-								if (j)
-								{
-									LAssert(Html);
-									j->Uri.Reset(NewStr(Src));
-									j->View = Html;
-									j->UserData = this;
-									j->UserUid = Html->d->DocumentUid;
-
-									LDocumentEnv::LoadType Result = Html->Environment->GetContent(j);
-									if (Result == LDocumentEnv::LoadImmediate)
-									{
-										if (j->Stream)
-										{
-											uint64 Len = j->Stream->GetSize();
-											if (Len > 0)
-											{
-												LAutoString a(new char[Len+1]);
-												int r = j->Stream->Read(a, Len);
-												a[r] = 0;
-												
-												LTag *Child = new LTag(Html, this);
-												if (Child)
-												{
-													bool BackOut = false;
-													Child->ParseHtml(a, Depth + 1, false, &BackOut);
-												}
-											}
-										}
-									}
-									DeleteObj(j);
-								}
-							}
-							break;
-						}
-					}
-					
-					SetStyle();
-
-					if (TagId == TAG_STYLE)
-					{
-						char *End = stristr(s, "</style>");
-						if (End)
-						{
-							char *Css = NewStr(s, End - s);
-							if (Css)
-							{
-								Html->AddCss(Css);
-							}
-
-							s = End;
-						}
-						else
-						{
-							// wtf?
-						}
-					}
-
-					/* FIXME???
-					if (TagId == TAG_P)
-					{
-						LTag *p;
-						if (p = Html->GetOpenTag("p"))
-						{
-							return s;
-						}
-					}
-					*/
-
-					if (TagClosed || Info->NeverCloses())
-					{
-						return s;
-					}
-
-					if (Info->ReattachTo)
-					{
-						LToken T(Info->ReattachTo, ",");
-						const char *Reattach = Info->ReattachTo;
-						for (int i=0; i<T.Length(); i++)
-						{
-							if (Parent->Tag &&
-								stricmp(Parent->Tag, T[i]) == 0)
-							{
-								Reattach = 0;
-								break;
-							}
-						}
-
-						if (Reattach)
-						{
-							if (TagId == TAG_HEAD)
-							{
-								// Ignore it..
-								return s;
-							}
-							else
-							{
-								LTag *Last = 0;
-								for (LTag *t=Html->OpenTags.Last(); t; t=Html->OpenTags.Prev())
-								{
-									if (t->Tag)
-									{
-										if (stricmp(t->Tag, Tag) == 0)
-										{
-											Html->CloseTag(t);
-											t = Html->OpenTags.Current();
-											if (!t) t = Html->OpenTags.Last();
-										}
-
-										if (t && t->Tag && stricmp(t->Tag, Reattach) == 0)
-										{
-											Last = t;
-											break;
-										}
-									}
-
-									if (!t || t->TagId == TAG_TABLE)
-										break;
-								}
-
-								if (Last)
-								{
-									Last->Attach(this);
-								}
-							}
-						}
-					}
-
-					Html->OpenTags.Insert(this);
-				}
-				else
-				{
-					// Child tag
-					DoChildTag:
-					LTag *c = new LTag(Html, this);
-					if (c)
-					{
-						bool BackOut = false;
-
-						s = c->ParseHtml(s, Depth + 1, InPreTag, &BackOut);
-						if (BackOut)
-						{
-							c->Detach();
-							DeleteObj(c);
-							return s;
-						}
-						else if (IsBlock(c->Disp))
-						{
-							LTag *Last;
-							while (c->Tags.Length())
-							{
-								Last = c->Tags.Last();
-
-								if (Last->TagId == CONTENT &&
-									!ValidStrW(Last->Text()))
-								{
-									Last->Detach();
-									DeleteObj(Last);
-								}
-								else break;
-							}
-						}
-					}
-				}
-			}
-			else if (s[1] == '/')
-			{
-				// End tag
-				char *PreTag = s;
-				s += 2;
-
-				// This code segment detects out of order HTML tags
-				// and skips them. If we didn't do this then the parser
-				// would get stuck on a Tag which has already been closed
-				// and would return to the very top of the recursion.
-				//
-				// e.g.
-				//		<font>
-				//			<b>
-				//			</font>
-				//		</b>
-				char *EndBracket = strchr(s, '>');
-				if (EndBracket)
-				{
-					char *e = EndBracket;
-					while (e > s && strchr(WhiteSpace, e[-1]))
-						e--;
-					char Prev = *e;
-					*e = 0;
-					LTag *Open = Html->GetOpenTag(s);
-					*e = Prev;
-					
-					if (Open)
-					{
-						Open->WasClosed = true;
-					}
-					else
-					{
-						s = EndBracket + 1;
-						continue;
-					}
-				}
-				else
-				{
-					s += strlen(s);
-					continue;
-				}
-
-				if (Tag)
-				{
-					// Compare against our tag
-					char *t = Tag;
-					while (*s && *t && toupper(*s) == toupper(*t))
-					{
-						s++;
-						t++;
-					}
-
-					SkipWhiteSpace(s);
-
-					if (*s == '>')
-					{
-						LTag *t;
-						while (t = Html->OpenTags.Last())
-						{
-							Html->CloseTag(t);
-							if (t == this)
-							{
-								break;
-							}
-						}
-						s++;
-
-						if (IsBlock(Disp) || TagId == TAG_BR)
-						{
-							SkipNonDisplay(s);
-						}
-
-						if (Parent)
-						{
-							return s;
-						}
-					}
-				}
-				else
-					LAssert(!"This should not happen?");
-
-				if (Parent)
-				{
-					return PreTag;
-				}
-			}
-			else
-			{
-				goto PlainText;
-			}
-		}
-		else if (*s)
-		{
-			// Text child
-			PlainText:
-			char *n = NextTag(s);
-			int Len = n ? n - s : strlen(s);
-			LAutoWString Txt(CleanText(s, Len, true, InPreTag));
-			if (Txt && *Txt)
-			{
-				// This loop processes the text into lengths that need different treatment
-				enum TxtClass
-				{
-					TxtNone,
-					TxtEmoji,
-					TxtEol,
-					TxtNull,
-				};
-
-				char16 *Start = Txt;
-				LTag *Child;
-				for (char16 *c = Txt; true; c++)
-				{
-					TxtClass Cls = TxtNone;
-					if (Html->d->DecodeEmoji && *c >= EMOJI_START && *c <= EMOJI_END)
-						Cls = TxtEmoji;
-					else if (InPreTag && *c == '\n')
-						Cls = TxtEol;
-					else if (!*c)
-						Cls = TxtNull;
-
-					if (Cls)
-					{
-						if (c > Start)
-						{
-							// Emit the text before the point of interest...
-							LAutoWString Cur;
-							if (Start == Txt && !*c)
-							{
-								// Whole string
-								Cur = Txt;
-							}
-							else
-							{
-								// Sub-string
-								Cur.Reset(NewStrW(Start, c - Start));
-							}
-
-							if (Tags.Length() == 0 &&
-								(!Info || !Info->NoText()) &&
-								!Text())
-							{
-								Text(Cur.Release());
-							}
-							else if (Child = new LTag(Html, this))
-							{
-								Child->Text(Cur.Release());
-							}
-						}
-
-						// Now process the text of interest...
-						if (Cls == TxtEmoji)
-						{
-							// Emit the emoji image
-							LTag *img = new LTag(Html, this);
-							if (img)
-							{
-								img->Tag = NewStr("img");
-								if (img->Info = GetTagInfo(img->Tag))
-									img->TagId = img->Info->Id;
-
-								LRect rc;
-								EMOJI_CH2LOC(*c, rc);
-
-								img->Set("src", Html->d->EmojiImg);
-
-								char css[256];
-								sprintf(css, "x-rect: rect(%i,%i,%i,%i);", rc.y1, rc.x2, rc.y2, rc.x1);
-								img->Set("style", css);
-								img->SetStyle();
-							}
-							Start = c + 1;
-						}
-						else if (Cls == TxtEol)
-						{
-							// Emit the <br> tag
-							LTag *br = new LTag(Html, this);
-							if (br)
-							{
-								br->Tag = NewStr("br");
-								if (br->Info = GetTagInfo(br->Tag))
-									br->TagId = br->Info->Id;
-							}
-							Start = c + 1;
-						}
-					}
-					
-					// Check for the end of string...
-					if (!*c)
-						break;
-				}
-
-			}
-
-			s = n;
-		}
-
-		IsFirst = false;
-	}
-
-	#if CRASH_TRACE
-	LgiTrace("::ParseHtml end\n");
-	#endif
-
-	return 0;
 }
 
 bool LTag::OnUnhandledColor(LCss::ColorDef *def, const char *&s)
@@ -4258,7 +3802,7 @@ bool LTag::OnUnhandledColor(LCss::ColorDef *def, const char *&s)
 		e++;
 
 	char tmp[256];
-	int len = e - s;
+	ssize_t len = e - s;
 	memcpy(tmp, s, len);
 	tmp[len] = 0;
 	int m = LHtmlStatic::Inst->ColourMap.Find(tmp);
@@ -4276,29 +3820,46 @@ bool LTag::OnUnhandledColor(LCss::ColorDef *def, const char *&s)
 
 void LTag::ZeroTableElements()
 {
-	if (TagId == TAG_TABLE ||
-		TagId == TAG_TR ||
-		TagId == TAG_TD)
+	if (IsTableTag())
 	{
 		Size.x = 0;
 		Size.y = 0;
-		MinContent = 0;
-		MaxContent = 0;
-
-		for (LTag *t = Tags.First(); t; t = Tags.Next())
+		if (Cell)
 		{
-			t->ZeroTableElements();
+			Cell->MinContent = 0;
+			Cell->MaxContent = 0;
+		}
+
+		for (unsigned i=0; i<Children.Length(); i++)
+		{
+			if (auto t = ToTag(Children[i]))
+				t->ZeroTableElements();
 		}
 	}
+}
+
+void LTag::ResetCaches()
+{
+	/*
+	If during the parse process a callback causes a layout to happen then it's possible
+	to have partial information in the LHtmlTableLayout structure, like missing TD cells.
+	Because they haven't been parsed yet.
+	This is called at the end of the parsing to reset all the cached info in LHtmlTableLayout.
+	That way when the first real layout happens all the data is there.
+	*/
+	if (Cell)
+		DeleteObj(Cell->Cells);
+	for (size_t i=0; i<Children.Length(); i++)
+		ToTag(Children[i])->ResetCaches();
 }
 
 LPoint LTag::GetTableSize()
 {
 	LPoint s(0, 0);
 	
-	if (Cells)
+	if (Cell && Cell->Cells)
 	{
-		Cells->GetSize(s.x, s.y);
+		Cell->Cells->GetSize(s.x, s.y);
 	}
 
 	return s;
@@ -4308,75 +3869,186 @@ LTag *LTag::GetTableCell(int x, int y)
 {
 	LTag *t = this;
 	while (	t &&
-			!t->Cells &&
+			!t->Cell &&
+			!t->Cell->Cells &&
 			t->Parent)
 	{
-		t = t->Parent;
+		t = ToTag(t->Parent);
 	}
 	
-	if (t && t->Cells)
+	if (t && t->Cell && t->Cell->Cells)
 	{
-		return t->Cells->Get(x, y);
+		return t->Cell->Cells->Get(x, y);
 	}
 
 	return 0;
 }
 
-// This function gets the largest and smallest peice of content
+// This function gets the largest and smallest piece of content
 // in this cell and all it's children.
-bool LTag::GetWidthMetrics(uint16 &Min, uint16 &Max)
+bool LTag::GetWidthMetrics(LTag *Table, int32_t &Min, int32_t &Max)
 {
 	bool Status = true;
+	int MarginPx = 0;
+	int LineWidth = 0;
+	auto disp = SupportedDisplay();
+
+	if (disp == LCss::DispNone)
+		return true;
 
 	// Break the text into words and measure...
 	if (Text())
 	{
 		int MinContent = 0;
 		int MaxContent = 0;
-		
-		LFont *f = GetFont();
+
+		auto f = GetFont();
 		if (f)
 		{
-			for (char16 *s = Text(); s && *s; )
+			for (auto s = Text(); s && *s; )
 			{
 				// Skip whitespace...
-				while (*s && StrchrW(WhiteW, *s)) s++;
+				while (*s && StrchrW(WhiteW, *s))
+					s++;
 				
 				// Find end of non-whitespace
 				char16 *e = s;
-				while (*e && !StrchrW(WhiteW, *e)) e++;
+				while (*e && !StrchrW(WhiteW, *e))
+					e++;
 				
 				// Find size of the word
-				int Len = e - s;
-				LDisplayString ds(f, s, Len);
-				int X = ds.X();
-				MinContent = max(MinContent, X);
-				MaxContent += X + 4;
+				ssize_t Len = e - s;
+				if (Len > 0)
+				{
+					LDisplayString ds(f, s, Len);
+					MinContent = MAX(MinContent, ds.X());
+				}
 				
 				// Move to the next word.
 				s = (*e) ? e + 1 : 0;
 			}
+
+			LDisplayString ds(f, Text());
+			LineWidth = MaxContent = ds.X();
 		}
+
+		#if 0//def _DEBUG
+		if (Debug)
+		{
+			LgiTrace("GetWidthMetrics Font=%p Sz=%i,%i\n", f, MinContent, MaxContent);
+		}
+		#endif
 		
-		int Add = (int)(MarginLeft().Value +
-					MarginRight().Value +
-					PaddingLeft().Value +
-					PaddingRight().Value);
-		Min = max(Min, MinContent) + Add;
-		Max =	max(Max, MaxContent) + Add;
+		Min = MAX(Min, MinContent);
+		Max = MAX(Max, MaxContent);
 	}
 
 	// Specific tag handling?
-	switch (TagId)
+	if (IsTable())
 	{
+		Len w = Width();
+		if (w && !w.IsDynamic())
+		{
+			// Fixed width table...
+			int CellSpacing = BorderSpacing().ToPx(Min, GetFont());
+			
+			int Px = ((int)w.Value) + (CellSpacing << 1);
+			Min = MAX(Min, Px);
+			Max = MAX(Max, Px);
+			return true;
+		}
+		else
+		{
+			LPoint s;
+			LHtmlTableLayout c(this);
+			c.GetSize(s.x, s.y);
+
+			// Auto layout table
+			LArray<int> ColMin, ColMax;
+			for (int y=0; y<s.y; y++)
+			{
+				for (int x=0; x<s.x;)
+				{
+					LTag *t = c.Get(x, y);
+					if (t)
+					{
+						int32_t a = 0, b = 0;							
+						if (t->GetWidthMetrics(Table, a, b))
+						{
+							ColMin[x] = MAX(ColMin[x], a);
+							ColMax[x] = MAX(ColMax[x], b);
+						}
+						
+						x += t->Cell->Span.x;
+					}
+					else break;
+				}
+			}
+			
+			int MinSum = 0, MaxSum = 0;
+			for (int i=0; i<s.x; i++)
+			{
+				MinSum += ColMin[i];
+				MaxSum += ColMax[i];
+			}
+			
+			Min = MAX(Min, MinSum);
+			Max = MAX(Max, MaxSum);
+			return true;
+		}
+	}
+	else if (IsTableCell())
+	{
+		Len w = Width();
+		if (w)
+		{
+			if (w.IsDynamic())
+			{
+				Min = MAX(Min, (int)w.Value);
+				Max = MAX(Max, (int)w.Value);
+			}
+			else
+			{
+				Max = w.ToPx(0, GetFont());
+			}
+		}
+		else
+		{
+			LCss::BorderDef BLeft = BorderLeft();
+			LCss::BorderDef BRight = BorderRight();
+			LCss::Len PLeft = PaddingLeft();
+			LCss::Len PRight = PaddingRight();
+			
+			MarginPx = (int)(PLeft.ToPx()  +
+							PRight.ToPx()  +
+							BLeft.ToPx());
+			
+			if (Table->BorderCollapse() == LCss::CollapseCollapse)
+				MarginPx += BRight.ToPx();
+		}
+	}
+	else switch (TagId)
+	{
+		default:
+		{			
+			if (disp == LCss::DispBlock ||
+				disp == LCss::DispInlineBlock)
+			{
+				MarginPx = (int)(BorderLeft().ToPx() +
+								BorderRight().ToPx() +
+								PaddingLeft().ToPx() +
+								PaddingRight().ToPx());
+			}
+			break;
+		}
 		case TAG_IMG:
 		{
 			Len w = Width();
-			if (w.IsValid())
+			if (w)
 			{
 				int x = (int) w.Value;
-				Min = max(Min, x);
-				Max = max(Max, x);
+				Min = MAX(Min, x);
+				Max = MAX(Max, x);
 			}
 			else if (Image)
 			{
@@ -4384,126 +4056,32 @@ bool LTag::GetWidthMetrics(uint16 &Min, uint16 &Max)
 			}
 			else
 			{
-				Min = max(Min, Size.x);
-				Max = max(Max, Size.x);
-			}
-			break;
-		}
-		case TAG_TD:
-		{
-			Len w = Width();
-			if (w.IsValid())
-			{
-				if (w.IsDynamic())
-				{
-					Min = max(Min, (int)w.Value);
-					Max = max(Max, (int)w.Value);
-				}
-				else
-				{
-					Min = Max = (int)w.Value;
-				}
-			}
-			break;
-		}
-		case TAG_TABLE:
-		{
-			Len w = Width();
-			if (w.IsValid() && !w.IsDynamic())
-			{
-				// Fixed width table...
-				Min = Max = (int)w.Value;
-				return true;
-			}
-			else
-			{
-				LPoint s;
-				LCellStore c(this);
-				c.GetSize(s.x, s.y);
-
-				// Auto layout table
-				LArray<int> ColMin, ColMax;
-				for (int y=0; y<s.y; y++)
-				{
-					for (int x=0; x<s.x;)
-					{
-						LTag *t = c.Get(x, y);
-						if (t)
-						{
-							uint16 a = 0, b = 0;
-							if (t->GetWidthMetrics(a, b))
-							{
-								ColMin[x] = max(ColMin[x], a);
-								ColMax[x] = max(ColMax[x], b);
-							}
-							
-							x += t->Span.x;
-						}
-						else break;
-					}
-				}
-				
-				int MinSum = 0, MaxSum = 0;
-				for (int i=0; i<s.x; i++)
-				{
-					MinSum += ColMin[i];
-					MaxSum += ColMax[i];
-				}
-				
-				Min = max(Min, MinSum);
-				Max = max(Max, MaxSum);
-				return true;
-			}
-			break;
-		}
-		default:
-		{
-			if (Disp == DispInlineBlock ||
-				Disp == DispBlock)
-			{
-				Len w = Width();
-				if (w.IsValid())
-				{
-					int x = w.ToPx(0, GetFont());
-					Min = max(Min, x);
-					Max = max(Max, x);
-				}
+				Size.x = Size.y = DefaultImgSize;
+				Min = MAX(Min, Size.x);
+				Max = MAX(Max, Size.x);
 			}
 			break;
 		}
 	}
 
-	LTag *c;
-	if (c = Tags.First())
+	for (unsigned i = 0; i < Children.Length(); i++)
 	{
-		uint16 Width = 0;
-		for (; c; c = Tags.Next())
+		auto c = ToTag(Children[i]);
+		int32_t TagMax = 0;
+		
+		Status &= c->GetWidthMetrics(Table, Min, TagMax);
+		LineWidth += TagMax;
+		if (c->TagId == TAG_BR ||
+			c->TagId == TAG_LI)
 		{
-			uint16 x = 0;
-			Status &= c->GetWidthMetrics(Min, x);
-			if (c->TagId == TAG_BR)
-			{
-				Max = max(Max, Width);
-				Width = 0;
-			}
-			else
-			{
-				Width += x;
-			}
+			Max = MAX(Max, LineWidth);
+			LineWidth = 0;
 		}
-		Max = max(Max, Width);
 	}
+	Max = MAX(Max, LineWidth);
 
-	switch (TagId)
-	{
-		case TAG_TD:
-		{
-			int Add = (int) (PaddingLeft().Value + PaddingRight().Value);
-			Min += Add;
-			Max += Add;
-			break;
-		}
-	}
+	Min += MarginPx;
+	Max += MarginPx;
 	
 	return Status;
 }
@@ -4536,623 +4114,762 @@ template <class T>
 T Sum(LArray<T> &a)
 {
 	T s = 0;
-	for (int i=0; i<a.Length(); i++)
+	for (unsigned i=0; i<a.Length(); i++)
 		s += a[i];
 	return s;
 }
 
-void LTag::LayoutTable(LFlowRegion *f)
+void LTag::LayoutTable(LFlowRegion *f, uint32_t Depth)
 {
-	LPoint s;
-
-	if (!Cells)
-	{
-		Cells = new LCellStore(this);
-		#if defined(_DEBUG) && DEBUG_TABLE_LAYOUT
-		if (Cells && Debug)
-			Cells->Dump();
-		#endif
-	}
-	if (Cells)
-	{
-		Cells->GetSize(s.x, s.y);
-		if (s.x == 0 || s.y == 0)
-		{
-			return;
-		}
-
-		ZeroTableElements();
-		Len BdrSpacing = BorderSpacing();
-		int CellSpacing = BdrSpacing.IsValid() ? (int)BdrSpacing.Value : 0;
-		int AvailableX = f->ResolveX(Width(), Font, false);
+	if (!Cell && IsTableTag())
+		Cell = new TblCell;
 		
-		if (MaxWidth().IsValid())
-		{
-		    int m = f->ResolveX(MaxWidth(), Font, false);
-		    if (m < AvailableX)
-		        AvailableX = m;
-		}
-		
-		LCss::Len Border = BorderLeft();
-		int BorderX1 = Border.IsValid() ? f->ResolveX(Border, Font, false) : 0;
-		Border = BorderRight();
-		int BorderX2 = Border.IsValid() ? f->ResolveX(Border, Font, false) : 0;
+	if (!Cell->Cells)
+	{
 		#if defined(_DEBUG) && DEBUG_TABLE_LAYOUT
 		if (Debug)
-			LgiTrace("AvailableX=%i, BorderX1=%i, BorderX2=%i\n", AvailableX, BorderX1, BorderX2);
-		#endif
-
-		// The col and row sizes
-		LArray<int> MinCol, MaxCol, MaxRow;
-		LArray<bool> FixedCol;
-		
-		// Size detection pass
-		int y;
-		for (y=0; y<s.y; y++)
 		{
-			for (int x=0; x<s.x; )
-			{
-				LTag *t = Cells->Get(x, y);
-				if (t)
-				{
-					if (t->Cell.x == x && t->Cell.y == y)
-					{
-						Len Wid = t->Width();
-						if (!Wid.IsDynamic() &&
-							!t->MinContent &&
-							!t->MaxContent)
-						{
-							if (FixedCol.Length() < x)
-							{
-								FixedCol[x] = false;
-							}
-							
-							if (t->Width().IsValid())
-							{
-								t->MinContent = t->MaxContent = f->ResolveX(t->Width(), GetFont(), false);
-								FixedCol[x] = true;
-							}
-							else if (!t->GetWidthMetrics(t->MinContent, t->MaxContent))
-							{
-								t->MinContent = 16;
-								t->MaxContent = 16;
-							}
-							
-							#if defined(_DEBUG) && DEBUG_TABLE_LAYOUT
-							if (Debug)
-								LgiTrace("Content[%i,%i] min=%i max=%i\n", x, y, t->MinContent, t->MaxContent);
-							#endif
-						}
+			//int asd=0;
+		}
+		#endif
+		Cell->Cells = new LHtmlTableLayout(this);
+		#if defined(_DEBUG) && DEBUG_TABLE_LAYOUT
+		if (Cell->Cells && Debug)
+			Cell->Cells->Dump();
+		#endif
+	}
+	if (Cell->Cells)
+		Cell->Cells->LayoutTable(f, Depth);
+}
 
-						if (t->Span.x == 1)
-						{
-							MinCol[x] = max(MinCol[x], t->MinContent);
-							MaxCol[x] = max(MaxCol[x], t->MaxContent);
-						}
-					}
-					
-					x += t->Span.x;
-				}
-				else break;
+void LHtmlTableLayout::AllocatePx(int StartCol, int Cols, int MinPx, bool HasToFillAllAvailable)
+{
+	// Get the existing total size and size of the column set
+	int CurrentTotalX = GetTotalX();
+	int CurrentSpanX = GetTotalX(StartCol, Cols);
+	int MaxAdditionalPx = AvailableX - CurrentTotalX;
+	if (MaxAdditionalPx <= 0)
+		return;
+
+	// Calculate the maximum space we have for this column set
+	int AvailPx = (CurrentSpanX + MaxAdditionalPx) - BorderX1 - BorderX2;
+	
+	// Allocate any remaining space...
+	int RemainingPx = MaxAdditionalPx;
+	LArray<int> Growable, NonGrowable, SizeInherit;
+	int GrowablePx = 0;
+	for (int x=StartCol; x<StartCol+Cols; x++)
+	{
+		int DiffPx = MaxCol[x] - MinCol[x];
+		if (DiffPx > 0)
+		{
+			GrowablePx += DiffPx;
+			Growable.Add(x);
+		}
+		else if (MinCol[x] > 0)
+		{
+			NonGrowable.Add(x);
+		}
+		else if (MinCol[x] == 0 && CurrentSpanX < AvailPx)
+		{
+			// Growable.Add(x);
+		}
+		
+		if (SizeCol[x].Type == LCss::LenInherit)
+			SizeInherit.Add(x);
+	}
+	if (GrowablePx < RemainingPx && HasToFillAllAvailable)
+	{
+		if (Growable.Length() == 0)
+		{
+			// Add any suitable non-growable columns as well
+			for (unsigned i=0; i<NonGrowable.Length(); i++)
+			{
+				int Col = NonGrowable[i];
+				
+				LCss::Len c = SizeCol[Col];
+				if (c.Type != LCss::LenPercent && c.IsDynamic())
+					Growable.Add(Col);
 			}
 		}
 		
-		// How much space used so far?
-		int TotalX = BorderX1 + BorderX2 + CellSpacing;
-		int x;
-		for (x=0; x<s.x; x++)
+		if (Growable.Length() == 0)
 		{
-			TotalX += MinCol[x] + CellSpacing;
+			// Still nothing to grow... so just pick the largest column
+			int Largest = -1;
+			for (int i=StartCol; i<StartCol+Cols; i++)
+			{
+				if (Largest < 0 || MinCol[i] > MinCol[Largest])
+					Largest = i;
+			}
+			Growable.Add(Largest);
+		}
+	}
+	
+	if (Growable.Length())
+	{
+		// Some growable columns...
+		int Added = 0;
+
+		// Reasonably increase the size of the columns...
+		for (unsigned i=0; i<Growable.Length(); i++)
+		{
+			int x = Growable[i];
+			int DiffPx = MaxCol[x] - MinCol[x];
+			int AddPx = 0;
+			if (GrowablePx < RemainingPx && DiffPx > 0)
+			{
+				AddPx = DiffPx;
+			}
+			else if (DiffPx > 0)
+			{
+				double Ratio = (double)DiffPx / GrowablePx;
+				AddPx = (int) (Ratio * RemainingPx);
+			}
+			else
+			{
+				AddPx = RemainingPx / (int)Growable.Length();
+			}
+								
+			LAssert(AddPx >= 0);
+			MinCol[x] += AddPx;
+			LAssert(MinCol[x] >= 0);
+			Added += AddPx;
 		}
 
-		#if defined(_DEBUG) && DEBUG_TABLE_LAYOUT
-		if (Debug)
-			LgiTrace("Detect: TotalX=%i\n", TotalX);
-		#endif
-		
-		// Process dynamic width cells
-		LArray<float> Percents;
-		for (y=0; y<s.y; y++)
+		if (Added < RemainingPx && HasToFillAllAvailable)
 		{
-			for (int x=0; x<s.x; )
+			// Still more to add, so
+			if (SizeInherit.Length())
 			{
-				LTag *t = Cells->Get(x, y);
-				if (t)
+				Growable = SizeInherit;
+			}
+			else
+			{
+				int Largest = -1;
+				for (unsigned i=0; i<Growable.Length(); i++)
 				{
-					if (t->Cell.x == x && t->Cell.y == y)
+					int x = Growable[i];
+					if (Largest < 0 || MinCol[x] > MinCol[Largest])
+						Largest = x;
+				}
+				Growable.Length(1);
+				Growable[0] = Largest;
+			}
+
+			int AddPx = (RemainingPx - Added) / (int)Growable.Length();
+			for (unsigned i=0; i<Growable.Length(); i++)
+			{
+				int x = Growable[i];
+				if (i == Growable.Length() - 1)
+				{
+					MinCol[x] += RemainingPx - Added;
+					LAssert(MinCol[x] >= 0);
+				}
+				else
+				{
+					MinCol[x] += AddPx;
+					LAssert(MinCol[x] >= 0);
+					Added += AddPx;
+				}
+			}
+		}
+	}
+}
+
+struct ColInfo
+{
+	int Large;
+	int Growable;
+	int Idx;
+	int Px;
+};
+
+static int ColInfoCmp(ColInfo *a, ColInfo *b)
+{
+	int LDiff = b->Large - a->Large;
+	int LGrow = b->Growable - a->Growable;
+	int LSize = b->Px - a->Px;
+	return LDiff + LGrow + LSize;
+}
+
+void LHtmlTableLayout::DeallocatePx(int StartCol, int Cols, int MaxPx)
+{
+	int TotalPx = GetTotalX(StartCol, Cols);
+	if (TotalPx <= MaxPx || MaxPx == 0)
+		return;
+	
+	int TrimPx = TotalPx - MaxPx;
+	LArray<ColInfo> Inf;
+	int HalfMax = MaxPx >> 1;
+	unsigned Interesting = 0;
+	int InterestingPx = 0;
+	
+	for (int x=StartCol; x<StartCol+Cols; x++)
+	{
+		ColInfo &ci = Inf.New();
+		ci.Idx = x;
+		ci.Px = MinCol[x];
+		ci.Large = MinCol[x] > HalfMax;
+		ci.Growable = MinCol[x] < MaxCol[x];
+		if (ci.Large || ci.Growable)
+		{
+			Interesting++;
+			InterestingPx += ci.Px;
+		}
+	}
+	
+	Inf.Sort(ColInfoCmp);
+	
+	if (InterestingPx > 0)
+	{
+		for (unsigned i=0; i<Interesting; i++)
+		{
+			ColInfo &ci = Inf[i];
+			double r = (double)ci.Px / InterestingPx;
+			int DropPx = (int) (r * TrimPx);
+			if (DropPx < MinCol[ci.Idx])
+			{
+				MinCol[ci.Idx] -= DropPx;
+				LAssert(MinCol[ci.Idx] >= 0);
+			}
+			else
+				break;
+		}
+	}
+}
+
+int LHtmlTableLayout::GetTotalX(int StartCol, int Cols)
+{
+	if (Cols < 0)
+		Cols = s.x;
+	
+	int TotalX = BorderX1 + BorderX2 + CellSpacing;
+	for (int x=StartCol; x<Cols; x++)
+		TotalX += MinCol[x] + CellSpacing;
+	
+	return TotalX;
+}
+
+void LHtmlTableLayout::LayoutTable(LFlowRegion *f, uint16 Depth)
+{
+	GetSize(s.x, s.y);
+	if (s.x == 0 || s.y == 0)
+	{
+		return;
+	}
+
+	Table->ZeroTableElements();
+	MinCol.Length(0);
+	MaxCol.Length(0);
+	MaxRow.Length(0);
+	SizeCol.Length(0);
+	
+	LCss::Len BdrSpacing = Table->BorderSpacing();
+	CellSpacing = BdrSpacing ? (int)BdrSpacing.Value : 0;
+
+	// Resolve total table width.
+	TableWidth = Table->Width();
+	if (TableWidth)
+		AvailableX = f->ResolveX(TableWidth, Table, false);
+	else
+		AvailableX = f->X();
+
+	LCss::Len MaxWidth = Table->MaxWidth();
+	if (MaxWidth)
+	{
+	    int Px = f->ResolveX(MaxWidth, Table, false);
+	    if (Px < AvailableX)
+	        AvailableX = Px;
+	}
+	
+	TableBorder = f->ResolveBorder(Table, Table);
+	if (Table->BorderCollapse() != LCss::CollapseCollapse)
+		TablePadding = f->ResolvePadding(Table, Table);
+	else
+		TablePadding.ZOff(0, 0);
+	
+	BorderX1 = TableBorder.x1 + TablePadding.x1;
+	BorderX2 = TableBorder.x2 + TablePadding.x2;
+	
+	#if defined(_DEBUG) && DEBUG_TABLE_LAYOUT
+	if (Table->Debug)
+		LgiTrace("AvailableX=%i, BorderX1=%i, BorderX2=%i\n", AvailableX, BorderX1, BorderX2);
+	#endif
+
+	#ifdef _DEBUG
+	if (Table->Debug)
+	{
+		printf("Table Debug\n");
+	}
+	#endif
+
+	// Size detection pass
+	int y;
+	for (y=0; y<s.y; y++)
+	{
+		for (int x=0; x<s.x; )
+		{
+			LTag *t = Get(x, y);
+			if (t)
+			{
+				// This is needed for the metrics...
+				t->GetFont();
+				t->Cell->BorderPx = f->ResolveBorder(t, t);
+				t->Cell->PaddingPx = f->ResolvePadding(t, t);
+
+				if (t->Cell->Pos.x == x && t->Cell->Pos.y == y)
+				{
+					LCss::DisplayType Disp = t->SupportedDisplay();
+					if (Disp == LCss::DispNone)
+						continue;
+
+					LCss::Len Content = t->Width();
+					if (Content && t->Cell->Span.x == 1)
 					{
-						Len Wid = t->Width();
-						if (Wid.IsDynamic() &&
-							!t->MinContent &&
-							!t->MaxContent)
-						{	
-							if (Wid.Type == LenPercent)
+						if (SizeCol[x])
+						{
+							int OldPx = f->ResolveX(SizeCol[x], t, false);
+							int NewPx = f->ResolveX(Content, t, false);
+							if (NewPx > OldPx)
 							{
-								Percents[t->Cell.x] = max(Wid.Value, Percents[t->Cell.x]);
+								SizeCol[x] = Content;
 							}
-							
-							float Total = Sum<float>(Percents);
-							if (Total > 100.0)
-							{
-								// Yarrrrh. The web be full of incongruity.
-								float Sub = Total - 100.0;
-								Percents[Percents.Length()-1] -= Sub;
-
-								char p[32];
-								const char *s = p;
-								sprintf(p, "%.1f%%", Percents[Percents.Length()-1]);
-								t->Width().Parse(s);
-							}
-
-							t->GetWidthMetrics(t->MinContent, t->MaxContent);
-							
-							int x = Wid.IsValid() ? f->ResolveX(Wid, Font, false) : 0;
-							//t->MinContent = max(x, t->MinContent);
-							t->MaxContent = max(x, t->MaxContent);
-							
-							#if defined(_DEBUG) && DEBUG_TABLE_LAYOUT
-							if (Debug)
-								LgiTrace("DynWidth [%i,%i] = %i->%i\n", t->Cell.x, t->Cell.y, t->MinContent, t->MaxContent);
-							#endif
 						}
 						else
 						{
-							uint16 Min = t->MinContent;
-							uint16 Max = t->MaxContent;
-							t->GetWidthMetrics(Min, Max);
-							if (Min > t->MinContent)
-								t->MinContent = Min;
-							if (Min > t->MaxContent)
-								t->MaxContent = Min;
-						}
-
-						if (t->Span.x == 1)
-						{
-							MinCol[x] = max(MinCol[x], t->MinContent);
-							MaxCol[x] = max(MaxCol[x], t->MaxContent);
+							SizeCol[x] = Content;
 						}
 					}
 					
-					x += t->Span.x;
-				}
-				else break;
-			}
-		}
-
-		TotalX = BorderX1 + BorderX2 + CellSpacing;
-		for (x=0; x<s.x; x++)
-		{
-			TotalX += MinCol[x] + CellSpacing;
-		}
-
-		#if defined(_DEBUG) && DEBUG_TABLE_LAYOUT
-		if (Debug)
-			LgiTrace("Dynamic: TotalX=%i\n", TotalX);
-		
-		#define DumpCols() \
-		if (Debug) \
-		{ \
-			LgiTrace("%s:%i - Columns TotalX=%i AvailableX=%i\n", _FL, TotalX, AvailableX); \
-			for (int i=0; i<MinCol.Length(); i++) \
-			{ \
-				LgiTrace("\t[%i] = %i/%i\n", i, MinCol[i], MaxCol[i]); \
-			} \
-		}
-
-		DumpCols();
-		#else
-		#define DumpCols()
-		#endif
-
-		// Process spanned cells
-		if (TotalX < AvailableX)
-		{
-			for (y=0; y<s.y; y++)
-			{
-				for (int x=0; x<s.x; )
-				{
-					LTag *t = Cells->Get(x, y);
-					if (t && t->Cell.x == x && t->Cell.y == y)
+					if (!t->GetWidthMetrics(Table, t->Cell->MinContent, t->Cell->MaxContent))
 					{
-						if (t->Span.x > 1 || t->Span.y > 1)
-						{
-							int i;
-							int ColMin = -CellSpacing;
-							int ColMax = -CellSpacing;
-							for (i=0; i<t->Span.x; i++)
-							{
-								ColMin += MinCol[x + i] + CellSpacing;
-								ColMax += MaxCol[x + i] + CellSpacing;
-							}
-
-							// Generate an array of unfixed column indexes
-							LArray<int> Unfixed;
-							for (i = 0; i < t->Span.x; i++)
-							{
-								if (!FixedCol[x+i])
-								{
-									Unfixed[Unfixed.Length()] = x + i;
-								}
-							}
-							
-							// Bump out minimums
-							if (ColMin < t->MinContent)
-							{
-								int Total = t->MinContent - ColMin;
-
-								if (Unfixed.Length())
-								{
-									int Add = Total / Unfixed.Length();
-									for (i=0; i<Unfixed.Length(); i++)
-									{
-										int a = i ? Add : Total - (Add * (Unfixed.Length() - 1));
-										
-										MinCol[Unfixed[i]] = MinCol[Unfixed[i]] + a;
-										TotalX += a;
-									}
-								}
-								else
-								{
-									int Add = Total / t->Span.x;
-									for (i=0; i<t->Span.x; i++)
-									{
-										int a = i ? Add : Total - (Add * (t->Span.x - 1));
-										MinCol[x + i] = MinCol[x + i] + a;
-										TotalX += a;
-									}
-								}
-							}
-
-							// Bump out maximums
-							if (t->MaxContent > ColMin)
-							{
-								int MaxAdd = t->MaxContent - ColMin;
-								int MaxAvail = AvailableX > TotalX ? AvailableX - TotalX : 0;
-								int Total = min(MaxAdd, MaxAvail);
-								
-								/*
-								printf("bumpmax %i,%i mincol=%i add=%i avail=%i total=%i Unfixed=%i\n",
-									x, y,
-									ColMin,
-									MaxAdd,
-									MaxAvail,
-									Total,
-									Unfixed.Length());
-								*/
-
-								if (Unfixed.Length())
-								{
-									int Add = Total / Unfixed.Length();
-									for (i=0; i<Unfixed.Length(); i++)
-									{
-										int a = i ? Add : Total - (Add * (Unfixed.Length() - 1));
-
-										MinCol[Unfixed[i]] = MinCol[Unfixed[i]] + a;
-										TotalX += a;
-									}
-								}
-								else
-								{
-									int Add = Total / t->Span.x;
-									for (i=0; i<t->Span.x; i++)
-									{
-										int a = i ? Add : Total - (Add * (t->Span.x - 1));
-										MinCol[x + i] = MinCol[x + i] + a;
-										TotalX += a;
-									}
-								}
-							}
-						}
-
-						x += t->Span.x;
-					}
-					else break;
-				}
-			}
-		}
-
-		DumpCols();
-		
-		// Deallocate space if overused
-		if (TotalX > AvailableX)
-		{
-			// Take some from the largest column
-			int Largest = 0;
-			for (int i=0; i<s.x; i++)
-			{
-				if (MinCol[i] > MinCol[Largest])
-				{
-					Largest = i;
-				}
-			}
-			int Take = TotalX - AvailableX;
-			if (Take < MinCol[Largest])
-			{
-				MinCol[Largest] = MinCol[Largest] - Take;
-				TotalX -= Take;
-			}
-		}
-
-		DumpCols();
-
-		#if 0
-		// Allocate any unused but available space...
-		if (TotalX < AvailableX)
-		{
-			// Some available space still
-			// printf("Alloc unused space, Total=%i Available=%i\n", TotalX, AvailableX);
-
-			// Allocate to columns that fully fit
-			int LaidOut = 0;
-			for (int x=0; x<s.x; x++)
-			{
-				int NeedsX = MaxCol[x] - MinCol[x];
-				// printf("Max-Min: %i-%i = %i\n", MaxCol[x], MinCol[x], NeedsX);
-				if (NeedsX > 0 && NeedsX < AvailableX - TotalX)
-				{
-					MinCol[x] = MinCol[x] + NeedsX;
-					TotalX += NeedsX;
-					LaidOut++;
-				}
-			}
-
-			// Allocate to columns that still need room
-			int RemainingCols = s.x - LaidOut;
-			if (RemainingCols > 0)
-			{
-				int SpacePerCol = (AvailableX - TotalX) / RemainingCols;
-				if (SpacePerCol > 0)
-				{
-					for (int x=0; x<s.x; x++)
-					{
-						int NeedsX = MaxCol[x] - MinCol[x];
-						if (NeedsX > 0)
-						{
-							MinCol[x] = MinCol[x] + SpacePerCol;
-							TotalX += SpacePerCol;
-						}
-					}
-				}
-			}
-			
-			#if 1
-			if (TotalX < AvailableX)
-			#else
-			if (TotalX < AvailableX && Width().IsValid())
-			#endif
-			{
-				// Force allocation of space
-
-				// Add some to the largest column
-				int Largest = 0;
-				for (int i=0; i<s.x; i++)
-				{
-					if (MinCol[i] > MinCol[Largest])
-					{
-						Largest = i;
-					}
-				}
-				int Add = AvailableX - TotalX;
-				MinCol[Largest] = MinCol[Largest] + Add;
-				TotalX += Add;
-			}
-		}
-
-		DumpCols();
-		#endif
-
-		// Allocate remaining space if explicit table width
-		if (Width().IsValid() &&
-			TotalX < AvailableX)
-		{
-			int Add = (AvailableX - TotalX) / s.x;
-			for (int x=0; x<s.x; x++)
-			{
-				MinCol[x] = MinCol[x] + Add;
-				TotalX += Add;
-			}
-		}
-
-		DumpCols();
-		
-		// Layout cell contents to get the height of all the cells
-		for (y=0; y<s.y; y++)
-		{
-			for (int x=0; x<s.x; )
-			{
-				LTag *t = Cells->Get(x, y);
-				if (t)
-				{
-					if (t->Cell.x == x && t->Cell.y == y)
-					{
-						LRect Box(0, 0, -CellSpacing, 0);
-						for (int i=0; i<t->Span.x; i++)
-						{
-							Box.x2 += MinCol[x+i] + CellSpacing;
-						}
-						
-						LFlowRegion r(Html, Box);
-						// int Rx = r.X();
-						t->OnFlow(&r);
-						// t->Size.y += t->PaddingBottom().Value;
-						
-						if (t->Height().IsValid() &&
-							t->Height().Type != LenPercent)
-						{
-							int h = f->ResolveY(t->Height(), Font, false);
-							t->Size.y = max(h, t->Size.y);
-
-							DistributeSize(MaxRow, y, t->Span.y, t->Size.y, CellSpacing);
-						}
-
-						#if defined(_DEBUG) && DEBUG_TABLE_LAYOUT
-						if (Debug)
-							LgiTrace("[%i,%i]=%i,%i Rx=%i\n", t->Cell.x, t->Cell.y, t->Size.x, t->Size.y, Rx);
-						#endif
-					}
-
-					x += t->Span.x;
-				}
-				else break;
-			}
-		}
-
-		// Calculate row height
-		for (y=0; y<s.y; y++)
-		{
-			for (int x=0; x<s.x; )
-			{
-				LTag *t = Cells->Get(x, y);
-				if (t)
-				{
-					if (t->Cell.x == x && t->Cell.y == y)
-					{
-						if (!(t->Height().IsValid() && t->Height().Type != LenPercent))
-						{
-							DistributeSize(MaxRow, y, t->Span.y, t->Size.y, CellSpacing);
-						}
-					}
-
-					x += t->Span.x;
-				}
-				else break;
-			}			
-		}
-		
-		// Cell positioning
-		int LeftMargin = (int) (BorderLeft().Value + CellSpacing);
-		int Cx = LeftMargin;
-		int Cy = (int) (BorderTop().Value + CellSpacing);
-		
-		for (y=0; y<s.y; y++)
-		{
-			LTag *Prev = 0;
-			for (int x=0; x<s.x; )
-			{
-				LTag *t = Cells->Get(x, y);
-				if (!t && Prev)
-				{
-					// Add missing cell
-					LTag *Row = Prev->Parent;
-					if (Row && Row->TagId == TAG_TR)
-					{
-						t = new LTag(Html, Row);
-						if (t)
-						{
-							t->TagId = TAG_TD;
-							t->Tag = NewStr("td");
-							t->Info = GetTagInfo("td");
-							t->Cell.x = x;
-							t->Cell.y = y;
-							t->Span.x = 1;
-							t->Span.y = 1;
-							t->BackgroundColor(ColorDef(DefaultMissingCellColour));
-
-							Cells->Set(this);
-						}
-						else break;
-					}
-					else break;
-				}
-				if (t)
-				{
-					if (t->Cell.x == x && t->Cell.y == y)
-					{
-						t->Pos.x = Cx;
-						t->Pos.y = Cy;
-						t->Size.x = -CellSpacing;
-						for (int i=0; i<t->Span.x; i++)
-						{
-							int w = MinCol[x + i] + CellSpacing;
-							t->Size.x += w;
-							Cx += w;
-						}
-						t->Size.y = -CellSpacing;						
-						for (int n=0; n<t->Span.y; n++)
-						{
-							t->Size.y += MaxRow[y+n] + CellSpacing;
-						}
-						
-						Size.x = max(Cx + (int)BorderRight().Value, Size.x);
-					}
-					else
-					{
-						Cx += t->Size.x + CellSpacing;
+						t->Cell->MinContent = 16;
+						t->Cell->MaxContent = 16;
 					}
 					
-					x += t->Span.x;
+					#if defined(_DEBUG) && DEBUG_TABLE_LAYOUT
+					if (Table->Debug)
+						LgiTrace("Content[%i,%i] MIN=%i MAX=%i\n", x, y, t->Cell->MinContent, t->Cell->MaxContent);
+					#endif
+
+					if (t->Cell->Span.x == 1)
+					{
+						int BoxPx = t->Cell->BorderPx.x1 +
+									t->Cell->BorderPx.x2 +
+									t->Cell->PaddingPx.x1 +
+									t->Cell->PaddingPx.x2;
+
+						MinCol[x] = MAX(MinCol[x], t->Cell->MinContent + BoxPx);
+						LAssert(MinCol[x] >= 0);
+						MaxCol[x] = MAX(MaxCol[x], t->Cell->MaxContent + BoxPx);
+					}
 				}
-				else break;
-				Prev = t;
+				
+				x += t->Cell->Span.x;
 			}
-			
-			Cx = LeftMargin;
-			Cy += MaxRow[y] + CellSpacing;
+			else break;
 		}
-
-		DumpCols();
-
-		switch (XAlign ? XAlign : Parent->GetAlign(true))
-		{
-			case AlignCenter:
-			{
-				int Ox = (f->X()-Size.x) >> 1;
-				Pos.x = f->x1 + max(Ox, 0);
-				break;
-			}
-			case AlignRight:
-			{
-				Pos.x = f->x2 - Size.x;
-				break;
-			}
-			default:
-			{
-				Pos.x = f->x1;
-				break;
-			}
-		}
-		Pos.y = f->y1;
-
-		Size.y = Cy + (int)BorderBottom().Value;
 	}
+	
+	// How much space used so far?
+	int TotalX = GetTotalX();
+	if (TotalX > AvailableX)
+	{
+		// FIXME:
+		// Off -> 'cisra-cqs.html' renders correctly.
+		// On -> 'cisra_outage.html', 'steam1.html' renders correctly.
+		#if 1
+		DeallocatePx(0, (int)MinCol.Length(), AvailableX);
+		TotalX = GetTotalX();
+		#endif
+	}
+
+	#if defined(_DEBUG) && DEBUG_TABLE_LAYOUT
+	#define DumpCols(msg) \
+		if (Table->Debug) \
+		{ \
+			LgiTrace("%s Ln%i - TotalX=%i AvailableX=%i\n", msg, __LINE__, TotalX, AvailableX); \
+			for (unsigned i=0; i<MinCol.Length(); i++) \
+				LgiTrace("\t[%i] = %i/%i\n", i, MinCol[i], MaxCol[i]); \
+		}
+
+	#else
+	#define DumpCols(msg)
+	#endif
+
+	DumpCols("AfterSingleCells");
+
+	#ifdef _DEBUG
+	if (Table->Debug)
+	{
+		printf("TableDebug\n");
+	}
+	#endif
+
+	// Process spanned cells
+	for (y=0; y<s.y; y++)
+	{
+		for (int x=0; x<s.x; )
+		{
+			LTag *t = Get(x, y);
+			if (t && t->Cell->Pos.x == x && t->Cell->Pos.y == y)
+			{
+				if (t->Cell->Span.x > 1 || t->Cell->Span.y > 1)
+				{
+					int i;
+					int ColMin = -CellSpacing;
+					int ColMax = -CellSpacing;
+					for (i=0; i<t->Cell->Span.x; i++)
+					{
+						ColMin += MinCol[x + i] + CellSpacing;
+						ColMax += MaxCol[x + i] + CellSpacing;
+					}
+					
+					LCss::Len Width = t->Width();
+					if (Width)
+					{
+						int Px = f->ResolveX(Width, t, false);
+						t->Cell->MinContent = MAX(t->Cell->MinContent, Px);
+						t->Cell->MaxContent = MAX(t->Cell->MaxContent, Px);
+					}
+
+					#if defined(_DEBUG) && DEBUG_TABLE_LAYOUT
+					if (Table->Debug)
+						LgiTrace("Content[%i,%i] MIN=%i MAX=%i\n", x, y, t->Cell->MinContent, t->Cell->MaxContent);
+					#endif
+
+					if (t->Cell->MinContent > ColMin)
+						AllocatePx(t->Cell->Pos.x, t->Cell->Span.x, t->Cell->MinContent, false);
+					if (t->Cell->MaxContent > ColMax)
+						DistributeSize(MaxCol, t->Cell->Pos.x, t->Cell->Span.x, t->Cell->MaxContent, CellSpacing);
+				}
+
+				x += t->Cell->Span.x;
+			}
+			else break;
+		}
+	}
+
+	TotalX = GetTotalX();
+	DumpCols("AfterSpannedCells");
+
+	// Sometimes the web page specifies too many percentages:
+	// Scale them all.	
+	float PercentSum = 0.0f;
+	for (int i=0; i<s.x; i++)
+	{
+		if (SizeCol[i].Type == LCss::LenPercent)
+			PercentSum += SizeCol[i].Value;
+	}	
+	if (PercentSum > 100.0)
+	{
+		float Ratio = PercentSum / 100.0f;
+		for (int i=0; i<s.x; i++)
+		{
+			if (SizeCol[i].Type == LCss::LenPercent)
+				SizeCol[i].Value /= Ratio;
+		}
+	}
+	
+	// Do minimum column size from CSS values
+	if (TotalX < AvailableX)
+	{
+		for (int x=0; x<s.x; x++)
+		{
+			LCss::Len w = SizeCol[x];
+			if (w)
+			{
+				int Px = f->ResolveX(w, Table, false);
+				
+				if (w.Type == LCss::LenPercent)
+				{
+					MaxCol[x] = Px;
+				}
+				else if (Px > MinCol[x])
+				{
+					int RemainingPx = AvailableX - TotalX;
+					int AddPx = Px - MinCol[x];
+					AddPx = MIN(RemainingPx, AddPx);
+					
+					TotalX += AddPx;
+					MinCol[x] += AddPx;
+					LAssert(MinCol[x] >= 0);
+				}
+			}
+		}
+	}
+
+	TotalX = GetTotalX();
+	DumpCols("AfterCssNonPercentageSizes");
+	
+	if (TotalX > AvailableX)
+	{
+		#if !ALLOW_TABLE_GROWTH
+		// Deallocate space if overused
+		// Take some from the largest column
+		int Largest = 0;
+		for (int i=0; i<s.x; i++)
+		{
+			if (MinCol[i] > MinCol[Largest])
+			{
+				Largest = i;
+			}
+		}
+		int Take = TotalX - AvailableX;
+		if (Take < MinCol[Largest])
+		{
+			MinCol[Largest] = MinCol[Largest] - Take;
+			LAssert(MinCol[Largest] >= 0);
+			TotalX -= Take;
+		}
+
+		DumpCols("AfterSpaceDealloc");
+		#endif
+	}
+	else if (TotalX < AvailableX)
+	{
+		AllocatePx(0, s.x, AvailableX, TableWidth);
+		DumpCols("AfterRemainingAlloc");
+	}
+
+	// Layout cell horizontally and then flow the contents to get 
+	// the height of all the cells
+	LArray<LRect> RowPad;
+	MaxRow.Length(s.y);
+	for (y=0; y<s.y; y++)
+	{
+		int XPos = CellSpacing;
+		for (int x=0; x<s.x; )
+		{
+			auto t = Get(x, y);
+			if (!t)
+			{
+				x++;
+				continue;
+			}
+
+			if (t->Cell->Pos.x == x && t->Cell->Pos.y == y)
+			{
+				t->Pos.x = XPos;
+				t->Size.x = -CellSpacing;
+				XPos -= CellSpacing;
+					
+				RowPad[y].y1 = MAX(RowPad[y].y1, t->Cell->BorderPx.y1 + t->Cell->PaddingPx.y1);
+				RowPad[y].y2 = MAX(RowPad[y].y2, t->Cell->BorderPx.y2 + t->Cell->PaddingPx.y2);
+					
+				LRect Box(0, 0, -CellSpacing, 0);
+				for (int i=0; i<t->Cell->Span.x; i++)
+				{
+					int ColSize = MinCol[x + i] + CellSpacing;
+					LAssert(ColSize >= 0);
+					if (ColSize < 0)
+						break;
+					t->Size.x += ColSize;
+					XPos += ColSize;
+					Box.x2 += ColSize;
+				}
+					
+				LCss::Len Ht = t->Height();
+				LFlowRegion r(Table->Html, Box, true);
+
+				t->OnFlow(&r, Depth+1);
+
+				if (r.MAX.y > r.y2)
+				{
+					t->Size.y = MAX(r.MAX.y, t->Size.y);
+				}
+
+					
+				if (Ht &&
+					Ht.Type != LCss::LenPercent &&
+					Ht.Type != LCss::LenMinContent) // Make no sense to resolve that here
+				{
+					int h = f->ResolveY(Ht, t, false);
+					t->Size.y = MAX(h, t->Size.y);
+
+					DistributeSize(MaxRow, y, t->Cell->Span.y, t->Size.y, CellSpacing);
+				}
+			}
+
+			x += t->Cell->Span.x;
+		}
+	}
+
+	#if defined(_DEBUG)
+	DEBUG_LOG("%s:%i - AfterCellFlow\n", _FL);
+	for (unsigned i=0; i<MaxRow.Length(); i++)
+		DEBUG_LOG("[%i] = %i\n", i, MaxRow[i]);
+	#endif
+
+	// Calculate row height
+	for (y=0; y<s.y; y++)
+	{
+		for (int x=0; x<s.x; )
+		{
+			LTag *t = Get(x, y);
+			if (t)
+			{
+				if (t->Cell->Pos.x == x && t->Cell->Pos.y == y)
+				{
+					LCss::Len Ht = t->Height();
+					if (!(Ht && Ht.Type != LCss::LenPercent))
+					{
+						DistributeSize(MaxRow, y, t->Cell->Span.y, t->Size.y, CellSpacing);
+					}
+				}
+
+				x += t->Cell->Span.x;
+			}
+			else break;
+		}			
+	}
+	
+	// Cell positioning
+	int Cx = BorderX1 + CellSpacing;
+	int Cy = TableBorder.y1 + TablePadding.y1 + CellSpacing;
+	
+	for (y=0; y<s.y; y++)
+	{
+		LTag *Prev = nullptr;
+		for (int x=0; x<s.x; )
+		{
+			auto t = Get(x, y);
+			if (!t && Prev)
+			{
+				// Add missing cell
+				LTag *Row = ToTag(Prev->Parent);
+				if (Row && Row->IsTableRow())
+				{
+					t = new LTag(Table->Html, Row);
+					if (t)
+					{
+						t->TagId = TAG_TD;
+						t->Tag.Reset(NewStr("td"));
+						t->Info = Table->Html->GetTagInfo(t->Tag);
+						if ((t->Cell = new LTag::TblCell))
+						{
+							t->Cell->Pos.x = x;
+							t->Cell->Pos.y = y;
+							t->Cell->Span.x = 1;
+							t->Cell->Span.y = 1;
+						}
+						t->BackgroundColor(LCss::ColorDef(LCss::ColorRgb, DefaultMissingCellColour));
+
+						Set(Table);
+					}
+					else break;
+				}
+				else break;
+			}
+			if (t)
+			{
+				if (t->Cell->Pos.x == x && t->Cell->Pos.y == y)
+				{
+					int RowPadOffset =	RowPad[y].y1 -
+										t->Cell->BorderPx.y1 -
+										t->Cell->PaddingPx.y1;
+					
+					t->Pos.x = Cx;
+					t->Pos.y = Cy + RowPadOffset;
+					
+					t->Size.x = -CellSpacing;
+					for (int i=0; i<t->Cell->Span.x; i++)
+					{
+						int w = MinCol[x + i] + CellSpacing;
+						t->Size.x += w;
+						Cx += w;
+					}
+					t->Size.y = -CellSpacing;						
+					for (int n=0; n<t->Cell->Span.y; n++)
+					{
+						t->Size.y += MaxRow[y+n] + CellSpacing;
+					}
+					
+					Table->Size.x = MAX(Cx + BorderX2, Table->Size.x);
+
+					#if defined(_DEBUG) && DEBUG_TABLE_LAYOUT
+					if (Table->Debug)
+					{
+						LgiTrace("cell(%i,%i) = pos(%i,%i)+size(%i,%i)\n",
+							t->Cell->Pos.x, t->Cell->Pos.y,
+							t->Pos.x, t->Pos.y,
+							t->Size.x, t->Size.y);
+					}
+					#endif
+				}
+				else
+				{
+					Cx += t->Size.x + CellSpacing;
+				}
+				
+				x += t->Cell->Span.x;
+			}
+			else break;
+			Prev = t;
+		}
+		
+		Cx = BorderX1 + CellSpacing;
+		Cy += MaxRow[y] + CellSpacing;
+	}
+
+	switch (Table->Cell->XAlign ? Table->Cell->XAlign : ToTag(Table->Parent)->GetAlign(true))
+	{
+		case LCss::AlignCenter:
+		{
+			int fx = f->X();
+			int Ox = (fx-Table->Size.x) >> 1;
+			Table->Pos.x = f->x1 + MAX(Ox, 0);
+			DEBUG_LOG("%s:%i - AlignCenter fx=%i ox=%i pos.x=%i size.x=%i\n", _FL, fx, Ox, Table->Pos.x, Table->Size.x);
+			break;
+		}
+		case LCss::AlignRight:
+		{
+			Table->Pos.x = f->x2 - Table->Size.x;
+			DEBUG_LOG("%s:%i - AlignRight f->x2=%i size.x=%i pos.x=%i\n", _FL, f->x2, Table->Size.x, Table->Pos.x);
+			break;
+		}
+		default:
+		{
+			Table->Pos.x = f->x1;
+			DEBUG_LOG("%s:%i - AlignLeft f->x1=%i size.x=%i pos.x=%i\n", _FL, f->x2, Table->Size.x, Table->Pos.x);
+			break;
+		}
+	}
+	
+	Table->Pos.y = f->y1;
+	Table->Size.y = Cy + TablePadding.y2 + TableBorder.y2;
 }
 
 LRect LTag::ChildBounds()
 {
 	LRect b(0, 0, -1, -1);
 
-	LTag *t = Tags.First();
-	if (t)
+	for (unsigned i=0; i<Children.Length(); i++)
 	{
-		b = t->GetRect();
-		while (t = Tags.Next())
+		LTag *t = ToTag(Children[i]);
+		if (i)
 		{
 			LRect c = t->GetRect();
 			b.Union(&c);
+		}
+		else
+		{
+			b = t->GetRect();
 		}
 	}
 
 	return b;
 }
 
-int LTag::AbsX()
+LPoint LTag::AbsolutePos()
 {
-	int a = 0;
-	for (LTag *t=this; t; t=t->Parent)
+	LPoint p;
+	for (LTag *t=this; t; t=ToTag(t->Parent))
 	{
-		a += t->Pos.x;
+		p += t->Pos;
 	}
-	return a;
-}
-
-int LTag::AbsY()
-{
-	int a = 0;
-	for (LTag *t=this; t; t=t->Parent)
-	{
-		a += t->Pos.y;
-	}
-	return a;
+	return p;
 }
 
 void LTag::SetSize(LPoint &s)
@@ -5167,17 +4884,21 @@ LHtmlArea::~LHtmlArea()
 
 LRect LHtmlArea::Bounds()
 {
-	LFlowRect *r = First();
-	if (r)
+	LRect n(0, 0, -1, -1);
+
+	for (unsigned i=0; i<Length(); i++)
 	{
-		LRect n = *r;
-		while (r = Next())
+		LFlowRect *r = (*this)[i];
+		if (r)
 		{
-			n.Union(r);
+			if (i)
+				n.Union(r);
+			else
+				n = r;
 		}
-		return n;
 	}
-	return LRect(0, 0, -1, -1);
+	
+	return n;
 }
 
 LRect *LHtmlArea::TopRect(LRegion *c)
@@ -5196,30 +4917,43 @@ LRect *LHtmlArea::TopRect(LRegion *c)
 	return Top;
 }
 
-void LHtmlArea::FlowText(LTag *Tag, LFlowRegion *Flow, LFont *Font, char16 *Text, LCss::LengthType Align)
+void LHtmlArea::FlowText(LTag *Tag,
+						LFlowRegion *Flow,
+						LFont *Font,
+						int LineHeight,
+						char16 *Text,
+						LCss::LengthType Align,
+						bool Debug)
 {
 	if (!Flow || !Text || !Font)
 		return;
 
+	SetFixedLength(false);
 	char16 *Start = Text;
-	int FullLen = StrlenW(Text);
+	size_t FullLen = StrlenW(Text);
 
 	#if 1
 	if (!Tag->Html->GetReadOnly() && !*Text)
 	{
+		// Insert a text rect for this tag, even though it's empty.
+		// This allows the user to place the cursor on a blank line.
 		LFlowRect *Tr = new LFlowRect;
 		Tr->Tag = Tag;
 		Tr->Text = Text;
-		Tr->x1 = Tr->x2 = Flow->cx;
+		Tr->x1 = Flow->cx;
+		Tr->x2 = Tr->x1 + 1;
 		Tr->y1 = Flow->y1;
 		Tr->y2 = Tr->y1 + Font->GetHeight();
-		Flow->y2 = max(Flow->y2, Tr->y2+1);
-		Insert(Tr);
-		Flow->Insert(Tr);
+		LAssert(Tr->y2 >= Tr->y1);
+		Flow->y2 = MAX(Flow->y2, Tr->y2+1);
+		Flow->cx = Tr->x2 + 1;
+
+		Add(Tr);
+		Flow->Insert(Tr, Align);
 		return;				
 	}
 	#endif
-
+	
 	while (*Text)
 	{
 		LFlowRect *Tr = new LFlowRect;
@@ -5233,8 +4967,8 @@ void LHtmlArea::FlowText(LTag *Tag, LFlowRegion *Flow, LFont *Font, char16 *Text
 
 		#if 1 // I removed this at one stage but forget why.
 		
-		// Remove white space at start of line.
-		if (Flow->x1 == Flow->cx && *Text == ' ')
+		// Remove white space at start of line if not in edit mode..
+		if (Tag->Html->GetReadOnly() && Flow->x1 == Flow->cx && *Text == ' ')
 		{
 			Text++;
 			if (!*Text)
@@ -5247,15 +4981,16 @@ void LHtmlArea::FlowText(LTag *Tag, LFlowRegion *Flow, LFont *Font, char16 *Text
 		
 		Tr->Text = Text;
 
-		LDisplayString ds(Font, Text, min(1024, FullLen - (Text-Start)));
-		int Chars = ds.CharAt(Flow->X());
+		LDisplayString ds(Font, Text, MIN(1024, FullLen - (Text-Start)));
+		auto flowX = Flow->X();
+		ssize_t Chars = ds.CharAt(flowX);
 		bool Wrap = false;
 		if (Text[Chars])
 		{
 			// Word wrap
 
 			// Seek back to the nearest break opportunity
-			int n = Chars;
+			ssize_t n = Chars;
 			while (n > 0 && !StrchrW(WhiteW, Text[n]))
 				n--;
 
@@ -5268,37 +5003,57 @@ void LHtmlArea::FlowText(LTag *Tag, LFlowRegion *Flow, LFont *Font, char16 *Text
 
 					// Seek to the end of the word
 					for (Tr->Len = Chars; Text[Tr->Len] && !StrchrW(WhiteW, Text[Tr->Len]); Tr->Len++)
-					{
-					}
+						;
 
 					// Wrap...
-					if (*Text == ' ') Text++;
+					if (*Text == ' ')
+						Text++;
+
+					#if 0
+					if (Debug)
+						LgiTrace("%s:%i wrapped-overflow: flowX=%i, ds.X=%i, chars=%i, len=%i, text='%S'\n",
+							_FL, flowX, ds.X(), Chars, Tr->Len, Text);
+					#endif
 				}
 				else
 				{
 					// Not at the start of the margin
-					Flow->FinishLine();							
+					Flow->FinishLine();
 					goto Restart;
 				}
 			}
 			else
 			{
 				Tr->Len = n;
+
+				#if 0
+				if (Debug)
+					LgiTrace("%s:%i wrapped: flowX=%i, ds.X=%i, chars=%i, len=%i, text='%S'\n",
+						_FL, flowX, ds.X(), Chars, Tr->Len, Text);
+				#endif
+
 				LAssert(Tr->Len > 0);
+				Wrap = true;
 			}
 
-			Wrap = true;
 		}
 		else
 		{
 			// Fits..
 			Tr->Len = Chars;
+
+			#if 0
+			if (Debug)
+				LgiTrace("%s:%i fits: flowX=%i, chars=%i, len=%i, text='%S'\n", _FL, flowX, Chars, Tr->Len, Text);
+			#endif
+
 			LAssert(Tr->Len > 0);
 		}
 
 		LDisplayString ds2(Font, Tr->Text, Tr->Len);
 		Tr->x2 = ds2.X();
-		Tr->y2 = ds2.Y();
+		Tr->y2 = LineHeight > 0 ? LineHeight - 1 : 0;
+		
 		if (Wrap)
 		{
 			Flow->cx = Flow->x1;
@@ -5311,10 +5066,10 @@ void LHtmlArea::FlowText(LTag *Tag, LFlowRegion *Flow, LFont *Font, char16 *Text
 			Flow->cx = Tr->x2 + 1;
 		}
 		Tr->y2 += Tr->y1;
-		Flow->y2 = max(Flow->y2, Tr->y2 + 1);
+		Flow->y2 = MAX(Flow->y2, Tr->y2 + 1);
 		
-		Insert(Tr);
-		Flow->Insert(Tr);
+		Add(Tr);
+		Flow->Insert(Tr, Align);
 		
 		Text += Tr->Len;
 		if (Wrap)
@@ -5323,97 +5078,430 @@ void LHtmlArea::FlowText(LTag *Tag, LFlowRegion *Flow, LFont *Font, char16 *Text
 				Text++;
 		}
 
-		Tag->Size.x = max(Tag->Size.x, Tr->x2);
-		Tag->Size.y = max(Tag->Size.y, Tr->y2);
-		Flow->max_cx = max(Flow->max_cx, Tr->x2);
+		Tag->Size.x = MAX(Tag->Size.x, Tr->x2 + 1);
+		Tag->Size.y = MAX(Tag->Size.y, Tr->y2 + 1);
+		Flow->MAX.x = MAX(Flow->MAX.x, Tr->x2);
+		Flow->MAX.y = MAX(Flow->MAX.y, Tr->y2);
 
 		if (Tr->Len == 0)
 			break;
 	}
+	
+	SetFixedLength(true);
 }
 
-void LTag::OnFlow(LFlowRegion *InputFlow)
+bool LTag::Serialize(LXmlTag *t, bool Write)
 {
+	LRect pos;
+	if (Write)
+	{
+		// Obj -> Tag
+		if (Tag) t->SetAttr("tag", Tag);
+		pos.ZOff(Size.x, Size.y);
+		pos.Offset(Pos.x, Pos.y);
+		t->SetAttr("pos", pos.GetStr());
+		t->SetAttr("tagid", TagId);		
+		if (Txt)
+		{
+			LStringPipe p(256);
+			for (char16 *c = Txt; *c; c++)
+			{
+				if (*c > ' ' &&
+					*c < 127 &&
+					!strchr("%<>\'\"", *c))
+					p.Print("%c", (char)*c);
+				else
+					p.Print("%%%.4x", *c);
+			}
+			
+			LAutoString Tmp(p.NewStr());
+			t->SetContent(Tmp);
+		}
+		if (Props.Length())
+		{
+			auto CssStyles = ToLString();
+			LAssert(!strchr(CssStyles, '\"'));
+			t->SetAttr("style", CssStyles);
+		}
+		if (Html->Cursor == this)
+		{
+			LAssert(Cursor >= 0);
+			t->SetAttr("cursor", (int64)Cursor);
+		}
+		else LAssert(Cursor < 0);
+		if (Html->Selection == this)
+		{
+			LAssert(Selection >= 0);
+			t->SetAttr("selection", (int64)Selection);
+		}
+		else LAssert(Selection < 0);
+		
+		for (unsigned i=0; i<Children.Length(); i++)
+		{
+			LXmlTag *child = new LXmlTag("e");
+			LTag *tag = ToTag(Children[i]);
+			if (!child || !tag)
+			{
+				LAssert(0);
+				return false;
+			}
+			t->InsertTag(child);
+			if (!tag->Serialize(child, Write))
+			{
+				return false;
+			}
+		}
+	}
+	else
+	{
+		// Tag -> Obj
+		Tag.Reset(NewStr(t->GetAttr("tag")));
+		TagId = (HtmlTag) t->GetAsInt("tagid");
+		pos.SetStr(t->GetAttr("pos"));
+		if (pos.Valid())
+		{
+			Pos.x = pos.x1;
+			Pos.y = pos.y1;
+			Size.x = pos.x2;
+			Size.y = pos.y2;
+		}
+		if (ValidStr(t->GetContent()))
+		{
+			LStringPipe p(256);
+			char *c = t->GetContent();
+			SkipWhiteSpace(c);
+			for (; *c && *c > ' '; c++)
+			{
+				char16 ch;
+				if (*c == '%')
+				{
+					ch = 0;
+					for (int i=0; i<4 && *c; i++)
+					{
+						ch <<= 4;
+						ch |= htmlConvertHex(*++c);
+					}
+				}
+				else ch = *c;
+				p.Write(&ch, sizeof(ch));
+			}
+			Txt.Reset(p.NewStrW());
+		}
+		const char *s = t->GetAttr("style");
+		if (s)
+			Parse(s, ParseRelaxed);
+		s = t->GetAttr("cursor");
+		if (s)
+		{
+			LAssert(Html->Cursor == NULL);
+			Html->Cursor = this;
+			Cursor = atoi(s);
+			LAssert(Cursor >= 0);			
+		}
+		s = t->GetAttr("selection");
+		if (s)
+		{
+			LAssert(Html->Selection == NULL);
+			Html->Selection = this;
+			Selection = atoi(s);
+			LAssert(Selection >= 0);			
+		}
+		#ifdef _DEBUG
+		s = t->GetAttr("debug");
+		if (s && atoi(s) != 0)
+			Debug = true;
+		#endif
+		
+		for (int i=0; i<t->Children.Length(); i++)
+		{
+			LXmlTag *child = t->Children[i];
+			if (child->IsTag("e"))
+			{
+				LTag *tag = new LTag(Html, NULL);
+				if (!tag)
+				{
+					LAssert(0);
+					return false;
+				}
+				
+				if (!tag->Serialize(child, Write))
+				{
+					return false;
+				}
+				
+				Attach(tag);
+			}
+		}
+	}
+	
+	return true;
+}
+
+LCss::DisplayType LTag::SupportedDisplay()
+{
+	auto disp = Display();
+	switch (disp)
+	{
+		// Map to block?
+		case LCss::DispContents:
+		case LCss::DispFlex:
+		case LCss::DispGrid:
+		case LCss::DispListItem:
+		case LCss::DispRunIn:
+		case LCss::DispTableCaption:
+		case LCss::DispTableColumnGroup:
+		case LCss::DispTableHeaderGroup:
+		case LCss::DispTableFooterGroup:
+		case LCss::DispTableRowGroup:
+		case LCss::DispTableColumn:
+		case LCss::DispInitial:
+		case LCss::DispInlineTable:
+			return LCss::DispBlock;
+			
+		// Map to inline?
+		case LCss::DispInlineFlex:
+		case LCss::DispInlineGrid:
+			return LCss::DispInline;
+
+		// Supported table values:
+		case LCss::DispTable:
+		case LCss::DispTableCell:
+		case LCss::DispTableRow:
+			return disp;
+
+		// Fully supported:
+		case LCss::DispInherit:
+		case LCss::DispInline:
+		case LCss::DispBlock:
+		case LCss::DispInlineBlock:
+		case LCss::DispNone:
+			return disp;
+
+		default:
+			LAssert(0);
+			break;
+	}
+
+	return LCss::DispInherit;
+}
+
+void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
+{
+	if (Depth >= MAX_RECURSION_DEPTH)
+		return;
+
+	auto Disp = SupportedDisplay();
 	if (Disp == DispNone)
 		return;
 
-	LFlowRegion *Flow = InputFlow;
-	LFont *f = GetFont();
-	LFlowRegion Local(Html);
+	Html->d->FlowedTags++;
+	auto FlowStart = LMicroTime();
+	uint64_t FlowTime = 0;
+
+	auto f = GetFont();
+	LFlowRegion Local(*Flow);
 	bool Restart = true;
 	int BlockFlowWidth = 0;
 	const char *ImgAltText = NULL;
-	int BlockInlineX[3];
 
 	Size.x = 0;
 	Size.y = 0;
+	
+	LCssTools Tools(this, f);
+	LRect rc(Flow->X(), Html->Y());
+	PadPx = Tools.GetPadding(rc);
+
+	if (TipId)
+	{
+		Html->Tip.DeleteTip(TipId);
+		TipId = 0;
+	}
+
+	if (IsTable())
+	{
+		Flow->EndBlock();
+		
+		auto left   = GetCssLen(MarginLeft, Margin);
+		auto top    = GetCssLen(MarginTop, Margin);
+		auto right  = GetCssLen(MarginRight, Margin);
+		auto bottom = GetCssLen(MarginBottom, Margin);
+		Flow->Indent(this, left, top, right, bottom, true);
+
+		LayoutTable(Flow, Depth + 1);
+
+		Flow->y1 += Size.y;
+		Flow->y2 = Flow->y1;
+		Flow->cx = Flow->x1;
+		Flow->my = 0;
+		Flow->MAX.y = MAX(Flow->MAX.y, Flow->y2);
+
+		Flow->Outdent(this, left, top, right, bottom, true);
+		BoundParents();
+		return;
+	}
 
 	switch (TagId)
 	{
+		default:
+			break;
+		case TAG_BODY:
+		{
+			Flow->InBody++;
+			break;
+		}
 		case TAG_IFRAME:
 		{
 			LFlowRegion Temp = *Flow;
 			Flow->EndBlock();
-			Flow->Indent(f, MarginLeft(), MarginTop(), MarginRight(), MarginBottom(), true);
+			Flow->Indent(this, MarginLeft(), MarginTop(), MarginRight(), MarginBottom(), true);
 
 			// Flow children
-			for (LTag *t=Tags.First(); t; t=Tags.Next())
+			for (unsigned i=0; i<Children.Length(); i++)
 			{
-				t->OnFlow(&Temp);
+				LTag *t = ToTag(Children[i]);
+				t->OnFlow(&Temp, Depth + 1);
 
-				if (TagId == TAG_TR)
+				if (IsTableRow())
 				{
-					Temp.x2 -= min(t->Size.x, Temp.X());
+					Temp.x2 -= MIN(t->Size.x, Temp.X());
 				}
 			}
 
-			Flow->Outdent(f, MarginLeft(), MarginTop(), MarginRight(), MarginBottom(), true);
+			Flow->Outdent(this, MarginLeft(), MarginTop(), MarginRight(), MarginBottom(), true);
 			BoundParents();
 			return;
 			break;
 		}
+		case TAG_TR:
+		{
+			Size.x = Flow->X();
+			break;
+		}
 		case TAG_IMG:
 		{
-			Restart = false;
-
-			Pos.y = Flow->y1;
+			Size.x = Size.y = 0;
 			
-			if (Width().IsValid())
+			auto w    = Width();
+			auto h    = Height();
+			auto MinY = MinHeight();
+			auto MaxY = MaxHeight();
+			LAutoPtr<LDisplayString> a;
+			int ImgX, ImgY;		
+			if (Image)
 			{
-				Size.x = Flow->ResolveX(Width(), GetFont(), false);
-			}
-			else if (Image)
-			{
-				Size.x = Image->X();
+				ImgX = Image->X();
+				ImgY = Image->Y();
 			}
 			else if (Get("alt", ImgAltText) && ValidStr(ImgAltText))
 			{
-				LDisplayString a(Html->GetFont(), ImgAltText);
-				Size.x = a.X() + 4;
+				LDisplayString a(f, ImgAltText);
+				ImgX = a.X() + 4;
+				ImgY = a.Y() + 4;
 			}
 			else
 			{
-				Size.x = DefaultImgSize;
+				ImgX = DefaultImgSize;
+				ImgY = DefaultImgSize;
 			}
 			
-			LCss::LengthType a = GetAlign(true);
-			switch (a)
+			double AspectRatio = ImgY != 0 ? (double)ImgX / ImgY : 1.0;
+			bool XLimit = false, YLimit = false;
+			double Scale = 1.0;
+
+			if (w && w.Type != LenAuto)
 			{
-				case AlignCenter:
+				Size.x = Flow->ResolveX(w, this, false);
+				XLimit = true;
+			}
+			else
+			{
+				int Fx = Flow->x2 - Flow->x1 + 1;
+				if (ImgX > Fx)
 				{
-					int Fx = Flow->x2 - Flow->x1;
-					Pos.x = Flow->x1 + ((Fx - Size.x) / 2);
-					break;
+					Size.x = Fx; //  * 0.8;
+					if (Image)
+						Scale = (double) Fx / ImgX;
 				}
-				case AlignRight:
+				else
 				{
-					Pos.x = Flow->x2 - Size.x;
-					break;
+					Size.x = ImgX;
 				}
-				default:
+			}
+			XLimit |= Flow->LimitX(Size.x, MinWidth(), MaxWidth(), f);
+
+			if (h && h.Type != LenAuto)
+			{
+				Size.y = Flow->ResolveY(h, this, false);
+				YLimit = true;
+			}
+			else
+			{
+				Size.y = (int) (ImgY * Scale);
+			}
+			YLimit |= Flow->LimitY(Size.y, MinHeight(), MaxHeight(), f);
+
+			if
+			(
+				(XLimit ^ YLimit)
+				&&
+				Image
+			)
+			{
+				if (XLimit)
 				{
-					Pos.x = Flow->cx;
-					break;
+					Size.y = (int) ceil((double)Size.x / AspectRatio);
+				}
+				else
+				{
+					Size.x = (int) ceil((double)Size.y * AspectRatio);
+				}
+			}
+			if (MinY)
+			{
+				auto Px = Flow->ResolveY(MinY, this, false);
+				if (Size.y < Px)
+					Size.y = Px;
+			}
+			if (MaxY)
+			{
+				auto Px = Flow->ResolveY(MaxY, this, false);
+				if (Size.y > Px)
+					Size.y = Px;
+			}
+
+			if (Disp == DispInline ||
+				Disp == DispInlineBlock)
+			{
+				Restart = false;
+
+				if (Flow->cx > Flow->x1 &&
+					Size.x > Flow->X())
+				{
+					Flow->FinishLine();
+				}
+
+				Pos.y = Flow->y1;
+				Flow->y2 = MAX(Flow->y1, Pos.y + Size.y - 1);
+
+				auto a = GetAlign(true);
+				switch (a)
+				{
+					case AlignCenter:
+					{
+						int Fx = Flow->x2 - Flow->x1;
+						Pos.x = Flow->x1 + ((Fx - Size.x) / 2);
+						break;
+					}
+					case AlignRight:
+					{
+						Pos.x = Flow->x2 - Size.x;
+						break;
+					}
+					default:
+					{
+						Pos.x = Flow->cx;
+						break;
+					}
 				}
 			}
 			break;
@@ -5434,78 +5522,52 @@ void LTag::OnFlow(LFlowRegion *InputFlow)
 			return;
 			break;
 		}
-		case TAG_TABLE:
-		{
-			Flow->EndBlock();
-
-			Flow->Indent(f, MarginLeft(), MarginTop(), MarginRight(), MarginBottom(), true);
-
-			LayoutTable(Flow);
-
-			Flow->y2 += Size.y - 1;
-			Flow->cx = Flow->x1;
-
-			Flow->Outdent(f, MarginLeft(), MarginTop(), MarginRight(), MarginBottom(), true);
-			BoundParents();
-			return;
-		}
 	}
 
-	#ifdef _DEBUG
-	if (Debug)
-	{
-		int asd=0;
-	}
-	#endif
-	
-	int OldFlowMy = Flow->my;
-	PositionType PosType = Position();
 	if (Disp == DispBlock || Disp == DispInlineBlock)
 	{
 		// This is a block level element, so end the previous non-block elements
-		if (Disp == DispBlock &&
-			PosType != PosAbsolute)
-		{		
+		if (Disp == DispBlock)
 			Flow->EndBlock();
-		}
 		
 		BlockFlowWidth = Flow->X();
-		if (TagId == TAG_P)
-		{
-			if (!OldFlowMy && Text())
-			{
-				Flow->FinishLine(true);
-			}
-		}
-
+		
 		// Indent the margin...
-		Flow->Indent(f, MarginLeft(), MarginTop(), MarginRight(), MarginBottom(), true);
+		auto left = GetCssLen(MarginLeft, Margin);
+		auto top = GetCssLen(MarginTop, Margin);
+		auto right = GetCssLen(MarginRight, Margin);
+		auto bottom = GetCssLen(MarginBottom, Margin);
+		Flow->Indent(this, left, top, right, bottom, true);
 
 		// Set the width if any
-		if (Disp == DispBlock)
+		auto Wid = Width();
+		if (!IsTableCell() && Wid)
+			Size.x = Flow->ResolveX(Wid, this, false);
+		else if (TagId != TAG_IMG)
 		{
-			if (TagId != TAG_TD && Width().IsValid())
-				Size.x = Flow->ResolveX(Width(), f, false);
-			else if (PosType != PosAbsolute)
+			if (Disp == DispInlineBlock) // Flow->Inline)
+				Size.x = 0; // block inside inline-block default to fit the content
+			else
 				Size.x = Flow->X();
-
-			if (MaxWidth().IsValid())
-			{
-				int Px = Flow->ResolveX(MaxWidth(), GetFont(), false);
-				if (Size.x > Px)
-					Size.x = Px;
-			}
-
-			if (PosType != PosAbsolute)
-				Pos.x = Flow->x1;
 		}
-		else
+		else if (Disp == DispInlineBlock)
+			Size.x = 0;
+
+		if (MaxWidth())
 		{
-			Pos.x = Flow->cx;
+			int Px = Flow->ResolveX(MaxWidth(), this, false);
+			if (Size.x > Px)
+				Size.x = Px;
+		}
+		if (MinWidth())
+		{
+			int Px = Flow->ResolveX(MinWidth(), this, false);
+			if (Size.x < Px)
+				Size.x = Px;
 		}
 
-		if (PosType != PosAbsolute)
-			Pos.y = Flow->y1;
+		Pos.x = Disp == DispInlineBlock ? Flow->cx : Flow->x1;
+		Pos.y = Flow->y1;
 
 		Flow->y1 -= Pos.y;
 		Flow->y2 -= Pos.y;
@@ -5513,258 +5575,399 @@ void LTag::OnFlow(LFlowRegion *InputFlow)
 		if (Disp == DispBlock)
 		{
 			Flow->x1 -= Pos.x;
-			if (PosType != PosAbsolute)
-				Flow->x2 = Flow->x1 + Size.x;
+			Flow->x2 = Flow->x1 + Size.x;
 			Flow->cx -= Pos.x;
 
-			Flow->Indent(f, LCss::BorderLeft(), LCss::BorderTop(), LCss::BorderRight(), LCss::BorderBottom(), false);
-			Flow->Indent(f, PaddingLeft(), PaddingTop(), PaddingRight(), PaddingBottom(), false);
+			Flow->Indent(this, LCss::BorderLeft(), LCss::BorderTop(), LCss::BorderRight(), LCss::BorderBottom(), false);
+			Flow->Indent(PadPx, false);
 		}
 		else
 		{
-			BlockInlineX[0] = Flow->x1;
-			BlockInlineX[1] = Flow->cx;
-			BlockInlineX[2] = Flow->x2;
-			
-			Flow->x2 -= Flow->x1;
-			Flow->x1 = 0;
-			Flow->cx =	BorderLeft().ToPx(Flow->Width(), GetFont()) +
-						PaddingLeft().ToPx(Flow->Width(), GetFont());			
-			Flow->y1 += Flow->ResolveY(BorderTop(), GetFont(), false);		
-			Flow->y1 += Flow->ResolveY(PaddingTop(), GetFont(), false);
+			Flow->x2 = Flow->X();
+			#ifdef _DEBUG
+			if (Debug)
+				LgiTrace("%s:%i '%s' flow.x=%i (%i,%i)\n",
+					_FL, Tag.Get(), Flow->X(), Flow->cx, Flow->x2);
+			#endif
+
+			Flow->x1 =	Flow->ResolveX(BorderLeft(), this, true) +
+						Flow->ResolveX(PaddingLeft(), this, true);
+			Flow->cx = Flow->x1;
+
+			#ifdef _DEBUG
+			if (Debug)
+				LgiTrace("%s:%i '%s' flow.x1=%i\n",
+					_FL, Tag.Get(), Flow->x1);
+			#endif			
+
+			Flow->y1 += Flow->ResolveY(BorderTop(), this, true) +
+						Flow->ResolveY(PaddingTop(), this, true);
+			Flow->y2 = Flow->y1;
+
+			if (!IsTableTag())
+				Flow->Inline++;
 		}
+	}
+	else
+	{
+		Flow->Indent(PadPx, false);
 	}
 
 	if (f)
 	{
 		// Clear the previous text layout...
 		TextPos.DeleteObjects();
-		
-		if (TagId == TAG_LI)
+
+		switch (TagId)
 		{
-			// Insert the list marker
-			if (!PreText())
+			default:
+				break;
+			case TAG_LI:
 			{
-				LCss::ListStyleTypes s = Parent->ListStyleType();
-				if (s == ListInherit)
+				// Insert the list marker
+				if (!PreText())
 				{
-					if (Parent->TagId == TAG_OL)
-						s = ListDecimal;
-					else if (Parent->TagId == TAG_UL)
-						s = ListDisc;
-				}
-				
-				switch (s)
-				{
-					case ListDecimal:
+					auto s = Parent->ListStyleType();
+					if (s == ListInherit)
 					{
-						int Index = Parent->Tags.IndexOf(this);
-						char Txt[32];
-						sprintf(Txt, "%i. ", Index + 1);
-						PreText(LgiNewUtf8To16(Txt));
-						break;
+						if (Parent->TagId == TAG_OL)
+							s = ListDecimal;
+						else if (Parent->TagId == TAG_UL)
+							s = ListDisc;
 					}
-					case ListDisc:
+					
+					switch (s)
 					{
-						PreText(NewStrW(LHtmlListItem));
+						default: break;
+						case ListDecimal:
+						{
+							ssize_t Index = Parent->Children.IndexOf(this);
+							char Txt[32];
+							sprintf_s(Txt, sizeof(Txt), "%i. ", (int)(Index + 1));
+							PreText(Utf8ToWide(Txt));
+							break;
+						}
+						case ListDisc:
+						{
+							PreText(NewStrW(LHtmlListItem));
+							break;
+						}
+					}
+				}
+
+				if (PreText())
+					TextPos.FlowText(this, Flow, f, f->GetHeight(), PreText(), AlignLeft);
+				break;
+			}
+			case TAG_IMG:
+			{
+				if (Disp == DispBlock)
+				{
+					Flow->cx += Size.x;
+					Flow->y2 += Size.y;
+				}
+				break;
+			}
+		}
+
+		if (Text() && Flow->InBody)
+		{
+			// Setup the line height cache
+			if (LineHeightCache < 0)
+			{
+				LCss::Len LineHt;
+				LFont *LineFnt = GetFont();
+
+				for (LTag *t = this; t && !LineHt; t = ToTag(t->Parent))
+				{
+					LineHt = t->LineHeight();
+					if (t->IsTable())
 						break;
+				}
+
+				if (LineFnt)
+				{
+					int FontPx = LineFnt->GetHeight();
+					
+					if (!LineHt ||
+						LineHt.Type == LCss::LenAuto ||
+						LineHt.Type == LCss::LenNormal)
+					{
+						LineHeightCache = FontPx;
+						// LgiTrace("LineHeight FontPx=%i Px=%i Auto\n", FontPx, LineHeightCache);
+					}
+					else if (LineHt.Type == LCss::LenPx)
+					{
+						auto Scale = Html->GetDpiScale().y;
+						LineHt.Value *= (float)Scale;
+						LineHeightCache = LineHt.ToPx(FontPx, f);
+						// LgiTrace("LineHeight FontPx=%i Px=%i (Scale=%f)\n", FontPx, LineHeightCache, Scale);
+					}
+					else
+					{
+						LineHeightCache = LineHt.ToPx(FontPx, f);
+						// LgiTrace("LineHeight FontPx=%i Px=%i ToPx\n", FontPx, LineHeightCache);
 					}
 				}
 			}
 
-			if (PreText())
-				TextPos.FlowText(this, Flow, f, PreText(), AlignLeft);
-		}
-
-		if (Text())
-		{
 			// Flow in the rest of the text...
-			TextPos.FlowText(this, Flow, f, Text(), GetAlign(true));
+			auto Txt = Text();
+			auto Align = GetAlign(true);
+			TextPos.FlowText(this, Flow, f, LineHeightCache, Txt, Align,
+				#ifdef _DEBUG
+				Debug);
+				#else
+				false);
+				#endif
 		}
 	}
 
 	// Flow children
-	for (LTag *t=Tags.First(); t; t=Tags.Next())
+	PostFlowAlign.Length(0);
+
+	FlowTime += LMicroTime() - FlowStart;
+
+	for (unsigned i=0; i<Children.Length(); i++)
 	{
-		PositionType PosType = t->Position();
-		if (PosType == PosAbsolute)
+		auto t = ToTag(Children[i]);
+		switch (t->Position())
 		{
-			LFlowRegion Tmp(Html);
-			Tmp.x2 = Html->X() - 1;
-			t->OnFlow(&Tmp);
-		}
-		else
-		{
-			t->OnFlow(Flow);
+			case PosStatic:
+			case PosAbsolute:
+			case PosFixed:
+			{
+				LFlowRegion old = *Flow;
+				t->OnFlow(Flow, Depth + 1);
+				
+				// Try and reset the flow to how it was before...
+				Flow->x1 = old.x1;
+				Flow->x2 = old.x2;
+				Flow->cx = old.cx;
+				Flow->y1 = old.y1;
+				Flow->y2 = old.y2;
+				Flow->MAX.x = MAX(Flow->MAX.x, old.MAX.x);
+				Flow->MAX.y = MAX(Flow->MAX.y, old.MAX.y);
+				break;
+			}
+			default:
+			{
+				t->OnFlow(Flow, Depth + 1);
+
+				#if 0
+				if (Debug)
+					LgiTrace("%s:%i '%s' child '%s' flow: x=%i size.x=%i\n", _FL, Tag.Get(), t->Tag.Get(), Flow->X(), Size.x);
+				#endif
+				break;
+			}
 		}
 
-		if (TagId == TAG_TR)
+		if (IsTableRow())
 		{
-			Flow->x2 -= min(t->Size.x, Flow->X());
+			Flow->x2 -= MIN(t->Size.x, Flow->X());
 		}
 	}
 
-	switch (TagId)
+	FlowStart = LMicroTime();
+
+	LCss::LengthType XAlign = GetAlign(true);
+	int FlowSz = Flow->Width();
+
+	// Align the children...
+	for (auto &group: PostFlowAlign)
 	{
-		case TAG_SELECT:
-		case TAG_INPUT:
+		int MinX = FlowSz, MaxX = 0;
+		for (auto &a: group)
 		{
-			if (Ctrl)
-			{
-				LRect r = Ctrl->GetPos();
+			MinX = MIN(MinX, a.t->Pos.x);
+			MaxX = MAX(MaxX, a.t->Pos.x + a.t->Size.x - 1);
+		}
+		int TotalX = MaxX - MinX + 1;
+		int FirstX = group.Length() ? group[0].t->Pos.x : 0;
 
-				if (Width().IsValid())
-					Size.x = Flow->ResolveX(Width(), GetFont(), false);
-				else
-					Size.x = r.X();
-				if (Height().IsValid())
-					Size.y = Flow->ResolveY(Height(), GetFont(), false);
-				else
-					Size.y = r.Y();
-				
-				if (!Ctrl->IsAttached())
-					Ctrl->Attach(Html);
-			}
-
-			Flow->cx += Size.x;
-			Flow->y2 = max(Flow->y2, Flow->y1 + Size.y - 1);
-			break;
-		}
-		case TAG_IMG:
+		for (auto &a: group)
 		{
-			if (Height().IsValid())
+			if (a.XAlign == LCss::AlignCenter)
 			{
-				if (Image)
-					Size.y = Height().ToPx(Image->Y(), GetFont());
-				else
-					Size.y = Flow->ResolveY(Height(), f, false);
+				int OffX = (Size.x - TotalX) >> 1;
+				if (OffX > 0)
+				{
+					a.t->Pos.x += OffX;
+				}
 			}
-			else if (Image)
+			else if (a.XAlign == LCss::AlignRight)
 			{
-				Size.y = Image->Y();
+				int OffX = FlowSz - FirstX - TotalX;
+				if (OffX > 0)
+				{
+					a.t->Pos.x += OffX;
+				}
 			}
-			else if (ValidStr(ImgAltText))
-			{
-				Size.y = Html->GetFont()->GetHeight() + 4;
-			}
-			else
-			{
-				Size.y = DefaultImgSize;
-			}
-
-			Flow->cx += Size.x;
-			Flow->y2 = max(Flow->y2, Flow->y1 + Size.y - 1);
-			break;
-		}
-		case TAG_TR:
-		{
-			Flow->x2 = Flow->x1 + Local.X();
-			break;
-		}
-		case TAG_BR:
-		{
-			int OldFlowY2 = Flow->y2;
-			Flow->FinishLine();
-			Size.y = Flow->y2 - OldFlowY2;
-			Flow->y2 = max(Flow->y2, Flow->y1 + Size.y - 1);
-			break;
-		}
-		case TAG_TD:
-		{
-			Size.x = Flow->X();
-			break;
 		}
 	}
 
 	if (Disp == DispBlock || Disp == DispInlineBlock)
 	{		
 		LCss::Len Ht = Height();
-		if (Ht.IsValid())
-		{			
-			int HtPx = Flow->ResolveY(Ht, GetFont(), false);
-			if (HtPx > Flow->y2)
-				Flow->y2 = HtPx;
-		}
-		
-		if (PosType == PosAbsolute)
+		LCss::Len MaxHt = MaxHeight();
+
+		// I dunno, there should be a better way... :-(
+		if (MarginLeft().Type == LenAuto &&
+			MarginRight().Type == LenAuto)
 		{
-			LRect c = Html->GetClient();
+			XAlign = LCss::AlignCenter;
+		}
 
-			if (Left().IsValid())
-				Pos.x = Left().ToPx(c.X(), GetFont());
-			else if (Right().IsValid())
-				Pos.x = max(c.X() - Size.x - Right().ToPx(c.X(), GetFont()), 0);
-
-			if (Top().IsValid())
-				Pos.y = Top().ToPx(c.Y(), GetFont());
-			else if (Bottom().IsValid())
-				Pos.y = max(c.Y() - Size.y - Bottom().ToPx(c.Y(), GetFont()), 0);
+		bool AcceptHt = !IsTableCell() && Ht.Type != LenPercent;
+		if (AcceptHt)
+		{
+			if (Ht)
+			{
+				int HtPx = Flow->ResolveY(Ht, this, false);
+				if (HtPx > Flow->y2)
+					Flow->y2 = HtPx;
+			}
+			if (MaxHt)
+			{
+				int MaxHtPx = Flow->ResolveY(MaxHt, this, false);
+				if (MaxHtPx < Flow->y2)
+				{
+					Flow->y2 = MaxHtPx;
+					Flow->MAX.y = MIN(Flow->y2, Flow->MAX.y);
+				}
+			}
 		}
 
 		if (Disp == DispBlock)
 		{
 			Flow->EndBlock();
-			
+
 			int OldFlowSize = Flow->x2 - Flow->x1 + 1;
-			Flow->Outdent(f, PaddingLeft(), PaddingTop(), PaddingRight(), PaddingBottom(), false);
-			Flow->Outdent(f, LCss::BorderLeft(), LCss::BorderTop(), LCss::BorderRight(), LCss::BorderBottom(), false);
-			Flow->Outdent(f, MarginLeft(), MarginTop(), MarginRight(), MarginBottom(), true);
+			Flow->Outdent(this, PaddingLeft(), PaddingTop(), PaddingRight(), PaddingBottom(), false);
+			Flow->Outdent(this, LCss::BorderLeft(), LCss::BorderTop(), LCss::BorderRight(), LCss::BorderBottom(), false);
+
+			Size.y = Flow->y2 > 0 ? Flow->y2 : 0;
+
+			Flow->Outdent(this, MarginLeft(), MarginTop(), MarginRight(), MarginBottom(), true);
 			
 			int NewFlowSize = Flow->x2 - Flow->x1 + 1;
 			int Diff = NewFlowSize - OldFlowSize;
 			if (Diff)
-				Flow->max_cx += Diff;
+				Flow->MAX.x += Diff;
 			
-			Size.y = Flow->y2;
 			Flow->y1 = Flow->y2;
 			Flow->x2 = Flow->x1 + BlockFlowWidth;
-
-			// I dunno, there should be a better way... :-(
-			if (MarginLeft().Type == LenAuto &&
-				MarginRight().Type == LenAuto)
-			{
-				int OffX = (Flow->x2 - Flow->x1 - Size.x) >> 1;
-				if (OffX > 0)
-					Pos.x += OffX;
-			}
 		}
 		else
 		{
-			Flow->cx += PaddingRight().ToPx(Flow->Width(), GetFont()) +
-						BorderRight().ToPx(Flow->Width(), GetFont());
+			LCss::Len Wid = Width();
+			int WidPx = Wid ? Flow->ResolveX(Wid, this, true) : 0;
 			
-			Size.x = max(Size.x, Flow->cx);
-			if (MinWidth().IsValid())
-			{
-				Len MinX = MinWidth();
-				int Px = MinX.ToPx(Flow->X(), GetFont());
-				if (Size.x < Px)
-					Size.x = Px;
-			}
-			
-			
-			Flow->cx += MarginRight().ToPx(Flow->Width(), GetFont());
-			Flow->x1 = BlockInlineX[0] - Pos.x;
-			Flow->cx = BlockInlineX[1] + Flow->cx - Pos.x;
-			Flow->x2 = BlockInlineX[2] - Pos.x;
+			Size.x = MAX(WidPx, Size.x);
+			Size.x += Flow->ResolveX(PaddingRight(), this, true);
+			Size.x += Flow->ResolveX(BorderRight(), this, true);
 
-			if (Height().IsValid())
+			int MarginR = Flow->ResolveX(MarginRight(), this, true);
+			int MarginB = Flow->ResolveX(MarginBottom(), this, true);
+
+			// Detect when there is not enough space for the inline element and
+			// start a new line....
+			if (Flow->cx + Size.x > Flow->x2)
 			{
-				Size.y = Flow->ResolveY(Height(), GetFont(), false);
-				int MarginY2 = Flow->ResolveX(MarginBottom(), GetFont(), true);
-				Flow->y2 = max(Flow->y1 + Size.y + MarginY2 - 1, Flow->y2);
+				Local.EndBlock();
+				Pos.x = Local.x1;
+				Pos.y = Local.y2;
+			}
+
+			Flow->x1 = Local.x1 - Pos.x;
+			Flow->cx = Local.cx + Size.x + MarginR - Pos.x;
+			Flow->x2 = Local.x2 - Pos.x;
+
+			if (!IsTableTag())
+				Flow->Inline--;
+
+
+			if (Height())
+			{
+				Size.y = Flow->ResolveY(Height(), this, false);
+				Flow->y2 = MAX(Flow->y1 + Size.y + MarginB - 1, Flow->y2);
 			}
 			else
 			{
-				Flow->y2 += Flow->ResolveY(PaddingBottom(), GetFont(), false);
-				Flow->y2 += Flow->ResolveY(BorderBottom(), GetFont(), false);
-				Size.y = Flow->y2 - Flow->y1 + 1;
+				Flow->y2 += Flow->ResolveX(PaddingBottom(), this, true);
+				Flow->y2 += Flow->ResolveX(BorderBottom(), this, true);
+				Size.y = Flow->y2;
+			}
+
+			Flow->y1 = Local.y1 - Pos.y;
+			Flow->y2 = MAX(Local.y2, Flow->y1+Size.y-1);
+		}
+
+		// Can't do alignment here because pos is used to
+		// restart the parents flow region...
+	}
+	else
+	{
+		Flow->Outdent(PadPx, false);
+		
+		switch (TagId)
+		{
+			default: break;
+			case TAG_SELECT:
+			case TAG_INPUT:
+			{
+				if (Html->InThread() && Ctrl)
+				{
+					LRect r = Ctrl->GetPos();
+
+					if (Width())
+						Size.x = Flow->ResolveX(Width(), this, false);
+					else
+						Size.x = r.X();
+					if (Height())
+						Size.y = Flow->ResolveY(Height(), this, false);
+					else
+						Size.y = r.Y();
+					
+					if (Html->IsAttached() && !Ctrl->IsAttached())
+						Ctrl->Attach(Html);
+				}
+
+				Flow->cx += Size.x;
+				Flow->y2 = MAX(Flow->y2, Flow->y1 + Size.y - 1);
+				break;
+			}
+			case TAG_IMG:
+			{
+				Flow->cx += Size.x;
+				Flow->y2 = MAX(Flow->y2, Flow->y1 + Size.y - 1);
+				break;
+			}
+			case TAG_BR:
+			{
+				int OldFlowY2 = Flow->y2;
+				Flow->FinishLine();
+				Size.y = Flow->y2 - OldFlowY2;
+				Flow->y2 = MAX(Flow->y2, Flow->y1 + Size.y - 1);
+				break;
+			}
+			case TAG_CENTER:
+			{
+				int Px = Flow->X();
+				for (auto e: Children)
+				{
+					LTag *t = ToTag(e);
+					if (t && t->IsBlock() && t->Size.x < Px)
+					{
+						t->Pos.x = (Px - t->Size.x) >> 1;
+					}
+				}
+				break;
 			}
 		}
 	}
 
-	if (PosType != PosAbsolute)
-		BoundParents();
+	BoundParents();
 
 	if (Restart)
 	{
@@ -5774,7 +5977,55 @@ void LTag::OnFlow(LFlowRegion *InputFlow)
 
 		Flow->y1 += Pos.y;
 		Flow->y2 += Pos.y;
+		Flow->MAX.y = MAX(Flow->MAX.y, Flow->y2);
 	}
+
+	if (Disp == DispBlock || Disp == DispInlineBlock)
+	{
+		if (XAlign == LCss::AlignCenter ||
+			XAlign == LCss::AlignRight)
+		{
+			int Match = 0;
+			auto parent = ToTag(Parent);
+			for (auto &grp: parent->PostFlowAlign)
+			{
+				bool Overlaps = false;
+				for (auto &a: grp)
+				{
+					if (a.Overlap(this))
+					{
+						Overlaps = true;
+						break;
+					}
+				}
+
+				if (!Overlaps)
+					Match++;
+			}
+			
+			auto &grp = parent->PostFlowAlign[Match];
+			if (grp.Length() == 0)
+			{
+				grp.x1 = Flow->x1;
+				grp.x2 = Flow->x2;
+			}
+			auto &pf = grp.New();
+			pf.Disp = Disp;
+			pf.XAlign = XAlign;
+			pf.t = this;
+		}
+	}
+
+	if (TagId == TAG_BODY && Flow->InBody > 0)
+	{
+		Flow->InBody--;
+	}
+
+	#if PROFILE_FLOW
+	FlowTime += LMicroTime() - FlowStart;
+	auto CurFlowTotal = Html->d->FlowTimes.Find(Tag);
+	Html->d->FlowTimes.Add(Tag ? Tag : "NONE", CurFlowTotal + FlowTime);
+	#endif
 }
 
 bool LTag::PeekTag(char *s, char *tag)
@@ -5786,10 +6037,10 @@ bool LTag::PeekTag(char *s, char *tag)
 		if (*s == '<')
 		{
 			char *t = 0;
-			ParseName(++s, &t);
+			Html->ParseName(++s, &t);
 			if (t)
 			{
-				Status = stricmp(t, tag) == 0;
+				Status = _stricmp(t, tag) == 0;
 			}
 
 			DeleteArray(t);
@@ -5801,34 +6052,36 @@ bool LTag::PeekTag(char *s, char *tag)
 
 LTag *LTag::GetTable()
 {
-	LTag *t = 0;
-	for (t=Parent; t && t->TagId != TAG_TABLE; t = t->Parent);
+	LTag *t = nullptr;
+	for (t=ToTag(Parent); t && !t->IsTable(); t = ToTag(t->Parent))
+		;
 	return t;
 }
 
 void LTag::BoundParents()
 {
-	if (Parent)
+	if (!Parent)
+		return;
+
+	LTag *np;
+	for (LTag *n=this; n; n = np)
 	{
-		for (LTag *n=this; n; n=n->Parent)
-		{
-			if (n->Parent)
-			{
-				if (n->Parent->TagId == TAG_IFRAME)
-					break;
-				n->Parent->Size.x = max(n->Parent->Size.x, n->Pos.x + n->Size.x);
-				n->Parent->Size.y = max(n->Parent->Size.y, n->Pos.y + n->Size.y);
-			}
-		}
+		np = ToTag(n->Parent);
+
+		if (!np || np->TagId == TAG_IFRAME)
+			break;
+				
+		np->Size.x = MAX(np->Size.x, n->Pos.x + n->Size.x);
+		np->Size.y = MAX(np->Size.y, n->Pos.y + n->Size.y);
 	}
 }
 
 struct DrawBorder
 {
 	LSurface *pDC;
-	uint32 LineStyle;
-	uint32 LineReset;
-	uint32 OldStyle;
+	uint32_t LineStyle;
+	uint32_t LineReset;
+	uint32_t OldStyle;
 
 	DrawBorder(LSurface *pdc, LCss::BorderDef &d)
 	{
@@ -5902,91 +6155,339 @@ struct DrawBorder
 	}
 };
 
-void LTag::OnPaintBorder(LSurface *pDC, LRect *Px)
+void LTag::GetInlineRegion(LRegion &rgn, int ox, int oy)
 {
-	LArray<LRect> r;
-
-	switch (Disp)
+	if (TagId == TAG_IMG)
 	{
-		case DispInlineBlock:
-		case DispBlock:
+		LRect rc(0, 0, Size.x-1, Size.y-1);
+		rc.Offset(ox + Pos.x, oy + Pos.y);
+		rgn.Union(&rc);
+	}
+	else
+	{
+		for (unsigned i=0; i<TextPos.Length(); i++)
 		{
-			r[0].ZOff(Size.x-1, Size.y-1);
-			break;
-		}
-		case DispInline:
-		{
-			for (LFlowRect *f=TextPos.First(); f; f=TextPos.Next())
-			{
-				r.New() = *f;
-			}
-			break;
+			LRect rc = *(TextPos[i]);
+			rc.Offset(ox + Pos.x, oy + Pos.y);
+			rgn.Union(&rc);
 		}
 	}
-
-	if (Px)
-		Px->ZOff(0, 0);
-
-	for (int i=0; i<r.Length(); i++)
+	
+	for (unsigned c=0; c<Children.Length(); c++)
 	{
-		LRect &rc = r[i];
-		
-		BorderDef b;
-		if ((b = BorderLeft()).IsValid())
-		{
-			pDC->Colour(b.Color.Rgb32, 32);
-			DrawBorder db(pDC, b);
-			for (int i=0; i<b.Value; i++)
-			{
-				pDC->LineStyle(db.LineStyle, db.LineReset);
-				pDC->Line(rc.x1 + i, rc.y1, rc.x1 + i, rc.y2);
-				if (Px)
-					Px->x1++;
-			}
-		}
-		if ((b = BorderTop()).IsValid())
-		{
-			pDC->Colour(b.Color.Rgb32, 32);
-			DrawBorder db(pDC, b);
-			for (int i=0; i<b.Value; i++)
-			{
-				pDC->LineStyle(db.LineStyle, db.LineReset);
-				pDC->Line(rc.x1, rc.y1 + i, rc.x2, rc.y1 + i);
-				if (Px)
-					Px->y1++;
-			}
-		}
-		if ((b = BorderRight()).IsValid())
-		{
-			pDC->Colour(b.Color.Rgb32, 32);
-			DrawBorder db(pDC, b);
-			for (int i=0; i<b.Value; i++)
-			{
-				pDC->LineStyle(db.LineStyle, db.LineReset);
-				pDC->Line(rc.x2 - i, rc.y1, rc.x2 - i, rc.y2);
-				if (Px)
-					Px->x2++;
-			}			
-		}
-		if ((b = BorderBottom()).IsValid())
-		{
-			pDC->Colour(b.Color.Rgb32, 32);
-			DrawBorder db(pDC, b);
-			for (int i=0; i<b.Value; i++)
-			{
-				pDC->LineStyle(db.LineStyle, db.LineReset);
-				pDC->Line(rc.x1, rc.y2 - i, rc.x2, rc.y2 - i);
-				if (Px)
-					Px->y2++;
-			}
-		}
+		LTag *ch = ToTag(Children[c]);
+		ch->GetInlineRegion(rgn, ox + Pos.x, oy + Pos.y);
 	}
 }
 
-void FillRectWithImage(LSurface *pDC, LRect *r, LSurface *Image, LCss::RepeatType Repeat)
+class CornersImg : public LMemDC
+{
+public:
+	int Px, Px2;
+
+	CornersImg(	const char *file, int line,
+				float RadPx,
+				LRect *BorderPx,
+				LCss::BorderDef **defs,
+				LColour &Back,
+				bool DrawBackground)
+		: LMemDC(file, line)
+	{
+		Px = 0;
+		Px2 = 0;
+
+		//Radius.Type != LCss::LenInherit &&			
+		if (RadPx > 0.0f)
+		{
+			Px = (int)ceil(RadPx);
+			Px2 = Px << 1;
+			
+			if (Create(Px2, Px2, System32BitColourSpace))
+			{
+				#if 1
+				Colour(0, 32);
+				#else
+				Colour(LColour(255, 0, 255));
+				#endif
+				Rectangle();
+
+				LPointF ctr(Px, Px);
+				LPointF LeftPt(0.0, Px);
+				LPointF TopPt(Px, 0.0);
+				LPointF RightPt(X(), Px);
+				LPointF BottomPt(Px, Y());
+				int x_px[4] = {BorderPx->x1, BorderPx->x2, BorderPx->x2, BorderPx->x1};
+				int y_px[4] = {BorderPx->y1, BorderPx->y1, BorderPx->y2, BorderPx->y2};
+				LPointF *pts[4] = {&LeftPt, &TopPt, &RightPt, &BottomPt};
+				
+				// Draw border parts..
+				for (int i=0; i<4; i++)
+				{
+					int k = (i + 1) % 4;
+
+					// Setup the stops					
+					LBlendStop stops[2] = { {0.0, 0}, {1.0, 0} };
+					uint32_t iColour = defs[i]->Color.IsValid() ? defs[i]->Color.Rgb32 : Back.c32();
+					uint32_t kColour = defs[k]->Color.IsValid() ? defs[k]->Color.Rgb32 : Back.c32();
+					if (*defs[i] && *defs[k])
+					{
+						stops[0].c32 = iColour;
+						stops[1].c32 = kColour;
+					}
+					else if (*defs[i])
+					{
+						stops[0].c32 = stops[1].c32 = iColour;
+					}
+					else
+					{
+						stops[0].c32 = stops[1].c32 = kColour;
+					}
+					
+					// Create a brush
+					LLinearBlendBrush br
+					(
+						*pts[i],
+						*pts[k],
+						2,
+						stops
+					);
+					
+					// Setup the clip
+					LRect clip(	(int)MIN(pts[i]->x, pts[k]->x),
+								(int)MIN(pts[i]->y, pts[k]->y),
+								(int)MAX(pts[i]->x, pts[k]->x)-1,
+								(int)MAX(pts[i]->y, pts[k]->y)-1);
+					ClipRgn(&clip);
+					
+					// Draw the arc...
+					LPath p;
+					p.Circle(ctr, Px);
+					if (*defs[i] || *defs[k])
+						p.Fill(this, br);
+					
+					// Fill the background
+					p.Empty();
+					p.Ellipse(ctr, Px-x_px[i], Px-y_px[i]);
+					if (DrawBackground)
+					{
+						LSolidBrush br(Back);
+						p.Fill(this, br);					
+					}
+					else
+					{
+						LEraseBrush br;
+						p.Fill(this, br);
+					}
+					
+					ClipRgn(NULL);
+				}
+				
+				#ifdef MAC
+				ConvertPreMulAlpha(true);
+				#endif
+				
+				#if 0
+				static int count = 0;
+				LString file;
+				file.Printf("c:\\temp\\img-%i.bmp", ++count);
+				GdcD->Save(file, Corners);
+				#endif
+			}
+		}
+	}
+};
+
+void LTag::PaintBorderAndBackground(LSurface *pDC, LColour &Back, LRect *BorderPx)
+{
+	LArray<LRect> r;
+	LRect BorderPxRc;
+	bool DrawBackground = !Back.IsTransparent();
+
+	#ifdef _DEBUG
+	if (Debug)
+	{
+		//int asd=0;
+	}
+	#endif
+
+	if (!BorderPx)
+		BorderPx = &BorderPxRc;
+	BorderPx->ZOff(0, 0);
+
+	// Get all the border info and work out the pixel sizes.
+	LFont *f = GetFont();
+	
+	#define DoEdge(coord, axis, name) \
+		BorderDef name = Border##name(); \
+		BorderPx->coord = name.Style != LCss::BorderNone ? name.ToPx(Size.axis, f) : 0;
+	#define BorderValid(name) \
+		((name) && (name).Style != LCss::BorderNone)
+	
+	DoEdge(x1, x, Left);
+	DoEdge(y1, y, Top);
+	DoEdge(x2, x, Right);
+	DoEdge(y2, y, Bottom);
+	
+	LCss::BorderDef *defs[4] = {&Left, &Top, &Right, &Bottom};
+
+	if (BorderValid(Left) ||
+		BorderValid(Right) ||
+		BorderValid(Top) ||
+		BorderValid(Bottom) ||
+		DrawBackground)
+	{
+		// Work out the rectangles
+		switch (SupportedDisplay())
+		{
+			case DispInlineBlock:
+			case DispBlock:
+			{
+				r[0].ZOff(Size.x-1, Size.y-1);
+				break;
+			}
+			case DispInline:
+			{
+				LRegion rgn;
+				GetInlineRegion(rgn);
+				if (BorderPx)
+				{
+					for (int i=0; i<rgn.Length(); i++)
+					{
+						LRect *r = rgn[i];
+						r->x1 -= BorderPx->x1 + PadPx.x1;
+						r->y1 -= BorderPx->y1 + PadPx.y1;
+						r->x2 += BorderPx->x2 + PadPx.x2;
+						r->y2 += BorderPx->y2 + PadPx.y2;
+					}
+				}
+
+				r.Length(rgn.Length());
+				auto p = r.AddressOf();
+				for (auto i = rgn.First(); i; i = rgn.Next())
+					*p++ = *i;
+				break;
+			}
+			default:
+				return;
+		}
+
+		// If we are drawing rounded corners, draw them into a memory context
+		LAutoPtr<CornersImg> Corners;
+		int Px = 0, Px2 = 0;
+		LCss::Len Radius = BorderRadius();
+		float RadPx = Radius.Type == LCss::LenPx ? Radius.Value : Radius.ToPx(Size.x, GetFont());
+		bool HasRadius = Radius.Type != LCss::LenInherit && RadPx > 0.0f;
+
+		// Loop over the rectangles and draw everything
+		int Op = pDC->Op(GDC_ALPHA);
+
+		for (unsigned i=0; i<r.Length(); i++)
+		{
+			LRect rc = r[i];
+			if (HasRadius)
+			{
+				Px = (int)ceil(RadPx);
+				Px2 = Px << 1;
+				if (Px2 > rc.Y())
+				{
+					Px = rc.Y() / 2;
+					Px2 = Px << 1;
+				}			
+				if (!Corners || Corners->Px2 != Px2)
+				{
+					Corners.Reset(new CornersImg(_FL, (float)Px, BorderPx, defs, Back, DrawBackground));
+				}
+			
+				// top left
+				LRect r(0, 0, Px-1, Px-1);
+				pDC->Blt(rc.x1, rc.y1, Corners, &r);
+			
+				// top right
+				r.Set(Px, 0, Corners->X()-1, Px-1);
+				pDC->Blt(rc.x2-Px+1, rc.y1, Corners, &r);
+			
+				// bottom left
+				r.Set(0, Px, Px-1, Corners->Y()-1);
+				pDC->Blt(rc.x1, rc.y2-Px+1, Corners, &r);
+			
+				// bottom right
+				r.Set(Px, Px, Corners->X()-1, Corners->Y()-1);
+				pDC->Blt(rc.x2-Px+1, rc.y2-Px+1, Corners, &r);
+			
+				#if 1
+				pDC->Colour(Back);
+				pDC->Rectangle(rc.x1+Px, rc.y1, rc.x2-Px, rc.y2);
+				pDC->Rectangle(rc.x1, rc.y1+Px, rc.x1+Px-1, rc.y2-Px);
+				pDC->Rectangle(rc.x2-Px+1, rc.y1+Px, rc.x2, rc.y2-Px);
+				#else
+				pDC->Colour(LColour(255, 0, 0, 0x80));
+				pDC->Rectangle(rc.x1+Px, rc.y1, rc.x2-Px, rc.y2);
+				pDC->Colour(LColour(0, 255, 0, 0x80));
+				pDC->Rectangle(rc.x1, rc.y1+Px, rc.x1+Px-1, rc.y2-Px);
+				pDC->Colour(LColour(0, 0, 255, 0x80));
+				pDC->Rectangle(rc.x2-Px+1, rc.y1+Px, rc.x2, rc.y2-Px);
+				#endif
+			}
+			else if (DrawBackground)
+			{
+				pDC->Colour(Back);
+				pDC->Rectangle(&rc);
+			}
+
+			LCss::BorderDef *b;
+			if ((b = &Left) && BorderValid(*b))
+			{
+				pDC->Colour(b->Color.Rgb32, 32);
+				DrawBorder db(pDC, *b);
+				for (int i=0; i<b->Value; i++)
+				{
+					pDC->LineStyle(db.LineStyle, db.LineReset);
+					pDC->Line(rc.x1 + i, rc.y1+Px, rc.x1+i, rc.y2-Px);
+				}
+			}
+			if ((b = &Top) && BorderValid(*b))
+			{
+				pDC->Colour(b->Color.Rgb32, 32);
+				DrawBorder db(pDC, *b);
+				for (int i=0; i<b->Value; i++)
+				{
+					pDC->LineStyle(db.LineStyle, db.LineReset);
+					pDC->Line(rc.x1+Px, rc.y1+i, rc.x2-Px, rc.y1+i);
+				}
+			}
+			if ((b = &Right) && BorderValid(*b))
+			{
+				pDC->Colour(b->Color.Rgb32, 32);
+				DrawBorder db(pDC, *b);
+				for (int i=0; i<b->Value; i++)
+				{
+					pDC->LineStyle(db.LineStyle, db.LineReset);
+					pDC->Line(rc.x2-i, rc.y1+Px, rc.x2-i, rc.y2-Px);
+				}			
+			}
+			if ((b = &Bottom) && BorderValid(*b))
+			{
+				pDC->Colour(b->Color.Rgb32, 32);
+				DrawBorder db(pDC, *b);
+				for (int i=0; i<b->Value; i++)
+				{
+					pDC->LineStyle(db.LineStyle, db.LineReset);
+					pDC->Line(rc.x1+Px, rc.y2-i, rc.x2-Px, rc.y2-i);
+				}
+			}
+		}
+
+		pDC->Op(Op);
+	}
+}
+
+static void FillRectWithImage(LSurface *pDC, LRect *r, LSurface *Image, LCss::RepeatType Repeat)
 {
 	int Px = 0, Py = 0;
 	int Old = pDC->Op(GDC_ALPHA);
+
+	if (!Image)
+		return;
 
 	switch (Repeat)
 	{
@@ -6028,12 +6529,42 @@ void FillRectWithImage(LSurface *pDC, LRect *r, LSurface *Image, LCss::RepeatTyp
 	pDC->Op(Old);
 }
 
-void LTag::OnPaint(LSurface *pDC)
+void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 {
-	if (Display() == DispNone) return;
+	auto disp = SupportedDisplay();
+	if (Depth >= MAX_RECURSION_DEPTH ||
+		disp == DispNone)
+		return;
+	if (
+		#ifdef _DEBUG
+		!Html->_Debug &&
+		#endif
+		LCurrentTime() - Html->PaintStart > Html->d->MaxPaintTime)
+	{
+		Html->d->MaxPaintTimeout = true;
+		return;
+	}
 
 	int Px, Py;
 	pDC->GetOrigin(Px, Py);
+	
+	#if 0
+	if (Debug)
+	{
+		Gtk::cairo_matrix_t mx;
+		Gtk::cairo_get_matrix(pDC->Handle(), &mx);
+		LPoint Offset;
+		Html->WindowVirtualOffset(&Offset);
+		LRect cli;
+		pDC->GetClient(&cli);
+		printf("\tTag paint mx=%g,%g off=%i,%i p=%i,%i Pos=%i,%i cli=%s\n",
+			mx.x0, mx.y0,
+			Offset.x, Offset.y,
+			Px, Py,
+			Pos.x, Pos.y,
+			cli.GetStr());
+	}
+	#endif
 
 	switch (TagId)
 	{
@@ -6042,14 +6573,15 @@ void LTag::OnPaint(LSurface *pDC)
 		{
 			if (Ctrl)
 			{
-				int Sx = 0, Sy = 0;
-				int LineY = GetFont()->GetHeight();
+				int64 Sx = 0, Sy = 0;
+				int64 LineY = GetFont()->GetHeight();
 				Html->GetScrollPos(Sx, Sy);
 				Sx *= LineY;
 				Sy *= LineY;
 				
 				LRect r(0, 0, Size.x-1, Size.y-1), Px;
-				OnPaintBorder(pDC, &Px);
+				LColour back = _Colour(false);
+				PaintBorderAndBackground(pDC, back, &Px);
 				if (!dynamic_cast<LButton*>(Ctrl))
 				{
 					r.x1 += Px.x1;
@@ -6057,7 +6589,7 @@ void LTag::OnPaint(LSurface *pDC)
 					r.x2 -= Px.x2;
 					r.y2 -= Px.y2;
 				}
-				r.Offset(AbsX() - Sx, AbsY() - Sy);
+				r.Offset(AbsX() - (int)Sx, AbsY() - (int)Sy);
 				Ctrl->SetPos(r);
 			}
 			
@@ -6067,17 +6599,14 @@ void LTag::OnPaint(LSurface *pDC)
 		}
 		case TAG_BODY:
 		{
-			Selected = false;
-			
+			auto b = _Colour(false);
+			if (!b.IsTransparent())
+			{
+				pDC->Colour(b);
+				pDC->Rectangle(Pos.x, Pos.y, Pos.x+Size.x, Pos.y+Size.y);
+			}
 			if (Image)
 			{
-				COLOUR b = GetBack();
-				if (b != GT_TRANSPARENT)
-				{
-					pDC->Colour(b, 32);
-					// pDC->Rectangle(Pos.x, Pos.y, Pos.x+Size.x, Pos.y+Size.y);
-				}
-
 				LRect r;
 				r.ZOff(Size.x-1, Size.y-1);
 				FillRectWithImage(pDC, &r, Image, BackgroundRepeat());
@@ -6091,7 +6620,7 @@ void LTag::OnPaint(LSurface *pDC)
 		}
 		case TAG_HR:
 		{
-			pDC->Colour(LC_MED, 24);
+			pDC->Colour(L_MED);
 			pDC->Rectangle(0, 0, Size.x - 1, Size.y - 1);
 			break;
 		}
@@ -6109,6 +6638,34 @@ void LTag::OnPaint(LSurface *pDC)
 			
 			if (Image)
 			{
+				#if ENABLE_IMAGE_RESIZING
+				if
+				(
+					!ImageResized &&
+					(				
+						Size.x != Image->X() ||
+						Size.y != Image->Y()
+					)
+				)
+				{
+					ImageResized = true;
+
+					LColourSpace Cs = Image->GetColourSpace();
+					if (Cs == CsIndex8 &&
+						Image->AlphaDC())
+						Cs = System32BitColourSpace;
+					
+					LAutoPtr<LSurface> r(new LMemDC(_FL, Size.x, Size.y, Cs));
+					if (r)
+					{
+						if (Cs == CsIndex8)
+							r->Palette(new LPalette(Image->Palette()));
+						ResampleDC(r, Image);
+						Image = r;
+					}
+				}
+				#endif
+
 				int Old = pDC->Op(GDC_ALPHA);
 				pDC->Blt(0, 0, Image);
 				pDC->Op(Old);
@@ -6116,20 +6673,20 @@ void LTag::OnPaint(LSurface *pDC)
 			else if (Size.x > 1 && Size.y > 1)
 			{
 				LRect b(0, 0, Size.x-1, Size.y-1);
-				LColour Fill(GdcMixColour(LC_MED, LC_LIGHT, 0.2f), 24);
-				LColour Border(LC_MED, 24);
+				LColour Fill(LColour(L_MED).Mix(LColour(L_LIGHT), 0.2f));
+				LColour Border(L_MED);
 
 				// Border
 				pDC->Colour(Border);
 				pDC->Box(&b);
-				b.Size(1, 1);
+				b.Inset(1, 1);
 				pDC->Box(&b);
-				b.Size(1, 1);
+				b.Inset(1, 1);
 				pDC->Colour(Fill);
 				pDC->Rectangle(&b);
 
 				const char *Alt;
-				LColour Red(GdcMixColour(Rgb24(255, 0, 0), Fill.c24(), 0.3f), 24);
+				LColour Red(LColour(255, 0, 0).Mix(Fill, 0.3f));
 				if (Get("alt", Alt) && ValidStr(Alt))
 				{
 					LDisplayString Ds(Html->GetFont(), Alt);
@@ -6153,180 +6710,105 @@ void LTag::OnPaint(LSurface *pDC)
 				}
 			}
 			
-			pDC->ClipRgn(0);
-			break;
-		}
-		case TAG_TABLE:
-		{
-			if (Html->Environment)
-			{
-				LCss::ImageDef Img = BackgroundImage();
-				if (Img.Type >= ImageOwn)
-				{
-					LRect Clip(0, 0, Size.x-1, Size.y-1);
-					pDC->ClipRgn(&Clip);
-					
-					LRect r;
-					r.ZOff(Size.x-1, Size.y-1);
-					FillRectWithImage(pDC, &r, Img.Img, BackgroundRepeat());
-				}
-			}
-
-			OnPaintBorder(pDC);
-
-			if (DefaultTableBorder != GT_TRANSPARENT)
-			{
-				LRect r((int)BorderLeft().Value,
-				        (int)BorderTop().Value,
-				        Size.x-(int)BorderRight().Value-1,
-				        Size.y-(int)BorderBottom().Value-1); 
-
-				#if 1
-				LRegion c(r);
-				
-				if (Cells)
-				{
-					List<LTag> AllTd;
-					Cells->GetAll(AllTd);
-					for (LTag *t=AllTd.First(); t; t=AllTd.Next())
-					{
-						r.Set(0, 0, t->Size.x-1, t->Size.y-1);
-						for (; t && t!=this; t=t->Parent)
-						{
-							r.Offset(t->Pos.x, t->Pos.y);
-						}
-						c.Subtract(&r);
-					}
-				}
-
-				if (BackgroundColor().Type == ColorInherit)
-					pDC->Colour(DefaultTableBorder, 32);
-				else
-					pDC->Colour(BackgroundColor().Rgb32, 32);
-				
-				for (LRect *p=c.First(); p; p=c.Next())
-				{
-					pDC->Rectangle(p);
-				}
-				
-				#else
-				
-				pDC->Colour(DefaultTableBorder, 32);
-				pDC->Rectangle(&r);
-
-				#endif				
-			}
+			pDC->ClipRgn(nullptr);
 			break;
 		}
 		default:
 		{
-			ColorDef _back = BackgroundColor();
-			COLOUR fore = GetFore();
-			COLOUR back = (_back.Type == ColorInherit && Disp == DispBlock) ? GetBack() : _back.Rgb32;
+			LColour fore = _Colour(true);
+			LColour back = _Colour(false);
 
-			if (Disp == DispBlock && Html->Environment)
+			if (disp == DispBlock && Html->Environment)
 			{
 				LCss::ImageDef Img = BackgroundImage();
 				if (Img.Img)
 				{
 					LRect Clip(0, 0, Size.x-1, Size.y-1);
-					pDC->ClipRgn(&Clip);
-					
-					LRect r;
-					r.ZOff(Size.x-1, Size.y-1);
-					FillRectWithImage(pDC, &r, Img.Img, BackgroundRepeat());
-					
-					back = GT_TRANSPARENT;
+					pDC->ClipRgn(&Clip);					
+					FillRectWithImage(pDC, &Clip, Img.Img, BackgroundRepeat());					
+					pDC->ClipRgn(nullptr);
+
+					back.Empty();
 				}
 			}
 
-			if (back != GT_TRANSPARENT)
-			{
-				bool IsAlpha = A32(back) < 0xff;
-				int Op = GDC_SET;
-				if (IsAlpha)
-				{
-					Op = pDC->Op(GDC_ALPHA);
-				}
-				pDC->Colour(back, 32);
+			PaintBorderAndBackground(pDC, back, NULL);
 
-				if (Disp == DispBlock || Disp == DispInlineBlock)
-				{
-					pDC->Rectangle(0, 0, Size.x-1, Size.y-1);
-				}
-				else
-				{
-					for (LFlowRect *Tr=TextPos.First(); Tr; Tr=TextPos.Next())
-					{
-						pDC->Rectangle(Tr);
-					}
-				}
-
-				if (IsAlpha)
-				{
-					pDC->Op(Op);
-				}
-			}
-
-			OnPaintBorder(pDC);
-
-			LFont *f = GetFont();
+			auto f = GetFont();
+			#if DEBUG_TEXT_AREA
+			bool IsEditor = Html ? !Html->GetReadOnly() : false;
+			#else
+			bool IsEditor = false;
+			#endif
 			if (f && TextPos.Length())
 			{
-				LCss::Len LineHt = LineHeight();
-				int LineHtPx = LineHt.ToPx(Size.y, f);
-				int FontHt = f->GetHeight();
-				int LineHtOff = LineHtPx > FontHt ? max(0, ((LineHtPx - FontHt) >> 1) - 1) : 0;
+				// This is the non-display part of the font bounding box
+				int LeadingPx = (int)(f->Leading() + 0.5);
 				
-				#define FontColour(s) \
-				f->Transparent(!s); \
-				if (s) \
-					f->Colour(LC_FOCUS_SEL_FORE, LC_FOCUS_SEL_BACK); \
-				else \
-					f->Colour(	fore != GT_TRANSPARENT ? Rgb32To24(fore) : Rgb32To24(DefaultTextColour), \
-								_back.Type != ColorInherit ? Rgb32To24(_back.Rgb32) : Rgb32To24(LC_WORKSPACE));
+				// This is the displayable part of the font
+				int FontPx = f->GetHeight() - LeadingPx;
+				
+				// This is the pixel height we're aiming to fill
+				int EffectiveLineHt = LineHeightCache >= 0 ? MAX(FontPx, LineHeightCache) : FontPx;
+				
+				// This gets added to the y coord of each piece of text
+				int LineHtOff = ((EffectiveLineHt - FontPx + 1) >> 1) - LeadingPx;
+								
+				#define FontColour(InSelection) \
+					f->Transparent(!InSelection && !IsEditor); \
+					if (InSelection) \
+						f->Colour(L_FOCUS_SEL_FORE, L_FOCUS_SEL_BACK); \
+					else \
+					{ \
+						LColour bk(back.IsTransparent() ? LColour(L_WORKSPACE) : back);			\
+						LColour fr(fore.IsTransparent() ? LColour(DefaultTextColour) : fore);		\
+						if (IsEditor)																\
+							bk = bk.Mix(LColour::Black, 0.05f);									\
+						f->Colour(fr, bk);															\
+					}
 
 				if (Html->HasSelection() &&
 					(Selection >= 0 || Cursor >= 0) &&
 					Selection != Cursor)
 				{
-					int Min = -1;
-					int Max = -1;
+					ssize_t Min = -1;
+					ssize_t Max = -1;
 
-					int Base = GetTextStart();
+					ssize_t Base = GetTextStart();
 					if (Cursor >= 0 && Selection >= 0)
 					{
-						Min = min(Cursor, Selection) + Base;
-						Max = max(Cursor, Selection) + Base;
+						Min = MIN(Cursor, Selection) + Base;
+						Max = MAX(Cursor, Selection) + Base;
 					}
-					else if (Selected)
+					else if (InSelection)
 					{
-						Max = max(Cursor, Selection) + Base;
+						Max = MAX(Cursor, Selection) + Base;
 					}
 					else
 					{
-						Min = max(Cursor, Selection) + Base;
+						Min = MAX(Cursor, Selection) + Base;
 					}
 
 					LRect CursorPos;
 					CursorPos.ZOff(-1, -1);
 
-					for (LFlowRect *Tr=TextPos.First(); Tr; Tr=TextPos.Next())
+					for (unsigned i=0; i<TextPos.Length(); i++)
 					{
-						int Start = Tr->Text - Text();
-						int Done = 0;
+						LFlowRect *Tr = TextPos[i];
+						ssize_t Start = Tr->Text - Text();
+						ssize_t Done = 0;
 						int x = Tr->x1;
 
 						if (Tr->Len == 0)
 						{
 							// Is this a selection edge point?
-							if (!Selected && Min == 0)
+							if (!InSelection && Min == 0)
 							{
-								Selected = !Selected;
+								InSelection = !InSelection;
 							}
-							else if (Selected && Max == 0)
+							else if (InSelection && Max == 0)
 							{
-								Selected = !Selected;
+								InSelection = !InSelection;
 							}
 
 							if (Cursor >= 0)
@@ -6348,45 +6830,53 @@ void LTag::OnPaint(LSurface *pDC)
 
 						while (Done < Tr->Len)
 						{
-							int c = Tr->Len - Done;
+							ssize_t c = Tr->Len - Done;
 
-							FontColour(Selected);
+							FontColour(InSelection);
 
 							// Is this a selection edge point?
-							if (		!Selected &&
+							if (		!InSelection &&
 										Min - Start >= Done &&
 										Min - Start < Done + Tr->Len)
 							{
-								Selected = !Selected;
+								InSelection = !InSelection;
 								c = Min - Start - Done;
 							}
-							else if (	Selected &&
+							else if (	InSelection &&
 										Max - Start >= Done &&
 										Max - Start <= Tr->Len)
 							{
-								Selected = !Selected;
+								InSelection = !InSelection;
 								c = Max - Start - Done;
 							}
 
 							// Draw the text run
 							LDisplayString ds(f, Tr->Text + Done, c);
-							ds.Draw(pDC, x, Tr->y1 + LineHtOff);
+							if (IsEditor)
+							{
+								LRect r(x, Tr->y1, x + ds.X() - 1, Tr->y2);
+								ds.Draw(pDC, x, Tr->y1 + LineHtOff, &r);
+							}
+							else
+							{
+								ds.Draw(pDC, x, Tr->y1 + LineHtOff);
+							}
 							x += ds.X();
 							Done += c;
-
+							
 							// Is this is end of the tag?
 							if (Tr->Len == Done)
 							{
 								// Is it also a selection edge?
-								if (		!Selected &&
+								if (		!InSelection &&
 											Min - Start == Done)
 								{
-									Selected = !Selected;
+									InSelection = !InSelection;
 								}
-								else if (	Selected &&
+								else if (	InSelection &&
 											Max - Start == Done)
 								{
-									Selected = !Selected;
+									InSelection = !InSelection;
 								}
 							}
 
@@ -6410,21 +6900,25 @@ void LTag::OnPaint(LSurface *pDC)
 
 					if (Html->d->CursorVis && CursorPos.Valid())
 					{
-						pDC->Colour(LC_TEXT, 24);
+						pDC->Colour(L_TEXT);
 						pDC->Rectangle(&CursorPos);
 					}
 				}
 				else if (Cursor >= 0)
 				{
-					FontColour(Selected);
+					FontColour(InSelection);
 
-					int Base = GetTextStart();
-					for (LFlowRect *Tr=TextPos.First(); Tr; Tr=TextPos.Next())
+					ssize_t Base = GetTextStart();
+					for (unsigned i=0; i<TextPos.Length(); i++)
 					{
-						int Pos = (Tr->Text - Text()) - Base;
+						auto Tr = TextPos[i];
+						if (!Tr)
+							break;
+						ssize_t Pos = (Tr->Text - Text()) - Base;
 
+						LAssert(Tr->y2 >= Tr->y1);
 						LDisplayString ds(f, Tr->Text, Tr->Len);
-						ds.Draw(pDC, Tr->x1, Tr->y1 + LineHtOff);
+						ds.Draw(pDC, Tr->x1, Tr->y1 + LineHtOff, IsEditor ? Tr : NULL);
 
 						if
 						(
@@ -6441,8 +6935,8 @@ void LTag::OnPaint(LSurface *pDC)
 							)
 						)
 						{
-							int Off = Tr->Text == PreText() ? StrlenW(PreText()) : Cursor - Pos;
-							pDC->Colour(LC_TEXT, 24);
+							ssize_t Off = Tr->Text == PreText() ? StrlenW(PreText()) : Cursor - Pos;
+							pDC->Colour(L_TEXT);
 							LRect c;
 							if (Off)
 							{
@@ -6465,65 +6959,78 @@ void LTag::OnPaint(LSurface *pDC)
 				}
 				else
 				{
-					FontColour(Selected);
+					FontColour(InSelection);
 
-					for (LFlowRect *Tr=TextPos.First(); Tr; Tr=TextPos.Next())
+					for (auto &Tr: TextPos)
 					{
 						LDisplayString ds(f, Tr->Text, Tr->Len);
-						ds.Draw(pDC, Tr->x1, Tr->y1 + LineHtOff);
-						
-						#if 0
-						int Y = ds.Y();
-						pDC->Colour(LColour(0, 0, 255));
-						pDC->Box(Tr->x1, Tr->y1 + LineHtOff, Tr->x2, Tr->y1 + LineHtOff + Y - 1);
-						#endif
+						ds.Draw(pDC, Tr->x1, Tr->y1 + LineHtOff, IsEditor ? Tr : NULL);
 					}
 				}
 			}
 			break;
 		}
 	}
-
-	List<LTag>::I TagIt = Tags.Start();
-	for (LTag *t=*TagIt; t; t=*++TagIt)
+	
+	#if DEBUG_TABLE_LAYOUT && 0
+	if (IsTableCell(TagId))
 	{
-		PositionType PosType = t->Position();
-		if (PosType == PosAbsolute)
-			pDC->SetOrigin(0, 0);
-		else
-			pDC->SetOrigin(Px - t->Pos.x, Py - t->Pos.y);
+		LTag *Tbl = this;
+		while (!Tbl->IsTable() && Tbl->Parent)
+			Tbl = Tbl->Parent;
+		if (Tbl && Tbl->IsTable() && Tbl->Debug)
+		{
+			pDC->Colour(LColour(255, 0, 0));
+			pDC->Box(0, 0, Size.x-1, Size.y-1);
+		}
+	}
+	#endif
 
-		t->OnPaint(pDC);
+	for (unsigned i=0; i<Children.Length(); i++)
+	{
+		auto t = ToTag(Children[i]);
+		pDC->SetOrigin(Px - t->Pos.x, Py - t->Pos.y);
+		t->OnPaint(pDC, InSelection, Depth + 1);
 		pDC->SetOrigin(Px, Py);
 	}
+	
+	#if DEBUG_DRAW_TD
+	if (TagId == TAG_TD)
+	{
+		LTag *Tbl = this;
+		while (Tbl && !Tbl->IsTable())
+			Tbl = ToTag(Tbl->Parent);
+		if (Tbl && Tbl->Debug)
+		{
+			int Ls = pDC->LineStyle(LSurface::LineDot);
+			pDC->Colour(LColour::Blue);
+			pDC->Box(0, 0, Size.x-1, Size.y-1);
+			pDC->LineStyle(Ls);
+		}
+	}
+	#endif
 }
 
 //////////////////////////////////////////////////////////////////////
-LHtml2::LHtml2(int id, int x, int y, int cx, int cy, LDocumentEnv *e)
-	:
+LHtml::LHtml(int id, int x, int y, int cx, int cy, LDocumentEnv *e) :
 	LDocView(e),
-	ResObject(Res_Custom)
+	ResObject(Res_Custom),
+	LHtmlParser(NULL)
 {
-	d = new LHtmlPrivate2;
+	View = this;
+	d = new LHtmlPrivate;
 	SetReadOnly(true);
-	ViewWidth = -1;
-	MemDC = 0;
 	SetId(id);
 	LRect r(x, y, x+cx, y+cy);
 	SetPos(r);
-	Cursor = 0;
-	Selection = 0;
-	SetBackColour(Rgb24To32(LC_WORKSPACE));
-	PrevTip = 0;
-	DocCharSet = 0;
+	DocumentUid = 0;
 
 	_New();
 }
 
-LHtml2::~LHtml2()
+LHtml::~LHtml()
 {
 	_Delete();
-	DeleteArray(DocCharSet);
 	DeleteObj(d);
 
 	if (JobSem.Lock(_FL))
@@ -6533,161 +7040,220 @@ LHtml2::~LHtml2()
 	}
 }
 
-void LHtml2::_New()
+void LHtml::_New()
 {
-	#if LUIS_DEBUG
-	LgiTrace("%s:%i html(%p).src(%p)'\n", __FILE__, __LINE__, this, Source);
-	#endif
-
+	d->StyleDirty = false;
+	d->IsLoaded = false;
 	d->Content.x = d->Content.y = 0;
+	d->DeferredLoads = 0;
 	Tag = 0;
-	Source = 0;
-	DeleteArray(DocCharSet);
-	// if (!Charset) Charset = NewStr("utf-8");
+	DocCharSet.Reset();
 
 	IsHtml = true;
-	FontCache = new LFontCache(this);
+	
+	#ifdef DefaultFont
+	LFont *Def = new LFont;
+	if (Def)
+	{
+		if (Def->CreateFromCss(DefaultFont))
+			SetFont(Def, true);
+		else
+			DeleteObj(Def);
+	}
+	#endif
+	
+	FontCache = new LFontCache(this);	
 	SetScrollBars(false, false);
 }
 
-void LHtml2::_Delete()
+void LHtml::_Delete()
 {
-	#if LUIS_DEBUG
-	LgiTrace("%s:%i html(%p).src(%p)='%30.30s'\n", _FL, this, Source, Source);
-	#endif
-
 	LAssert(!d->IsParsing);
 
-	SetBackColour(Rgb24To32(LC_WORKSPACE));
-
 	CssStore.Empty();
-	OpenTags.Empty();
-	DeleteArray(Source);
+	CssHref.Empty();
+	OpenTags.Length(0);
+	Source.Reset();
 	DeleteObj(Tag);
 	DeleteObj(FontCache);
-	DeleteObj(MemDC);
 }
 
-LFont *LHtml2::DefFont()
+LFont *LHtml::DefFont()
 {
 	return GetFont();
 }
 
-void LHtml2::AddCss(char *Css)
+void LHtml::OnAddStyle(const char *MimeType, const char *Styles)
 {
-	const char *c = Css;
-	CssStore.Parse(c);
-	DeleteArray(Css);
+	if (Styles)
+	{
+		const char *c = Styles;
+		bool Status = CssStore.Parse(c);
+		if (Status)
+		{
+			d->StyleDirty = true;
+		}
+
+		#if 0 // def _DEBUG
+		bool LogCss = false;
+		if (!Status)
+		{
+			char p[MAX_PATH_LEN];
+			sprintf_s(p, sizeof(p), "c:\\temp\\css_parse_failure_%i.txt", LRand());
+			LFile f;
+			if (f.Open(p, O_WRITE))
+			{
+				f.SetSize(0);
+				if (CssStore.Error)
+					f.Print("Error: %s\n\n", CssStore.Error.Get());
+				f.Write(Styles, strlen(Styles));
+				f.Close();
+			}
+		}
+
+		if (LogCss)
+		{
+			LStringPipe p;
+			CssStore.Dump(p);
+			LAutoString a(p.NewStr());
+			LFile f;
+			if (f.Open("C:\\temp\\css.txt", O_WRITE))
+			{
+				f.Write(a, strlen(a));
+				f.Close();
+			}
+		}
+		#endif
+	}
 }
 
-void LHtml2::Parse()
+void LHtml::ParseDocument(const char *Doc)
 {
 	if (!Tag)
 	{
 		Tag = new LTag(this, 0);
 	}
 
-	SetBackColour(Rgb24To32(LC_WORKSPACE));
+	if (GetCss())
+		GetCss()->DeleteProp(LCss::PropBackgroundColor);
 	if (Tag)
 	{
 		Tag->TagId = ROOT;
-		OpenTags.Empty();
+		OpenTags.Length(0);
 
 		if (IsHtml)
 		{
-			LTag *c;
-
-			Tag->ParseHtml(Source, 0);
+			Parse(Tag, Doc);
 
 			// Add body tag if not specified...
-			LTag *Html = Tag->GetTagByName("html");
-			if (!Html)
+			auto Html = Tag->GetTagByName("html");
+			auto Body = Tag->GetTagByName("body");
+
+			if (!Html && !Body)
 			{
-				if (Html = new LTag(this, 0))
-				{
+				if ((Html = new LTag(this, 0)))
 					Html->SetTag("html");
-					
-					while (c = Tag->Tags.First())
-						Html->Attach(c);
-					
-					Tag->Attach(Html);
+				if ((Body = new LTag(this, Html)))
+					Body->SetTag("body");
+				
+				Html->Attach(Body);
+
+				if (Tag->Text())
+				{
+					LTag *Content = new LTag(this, Body);
+					if (Content)
+					{
+						Content->TagId = CONTENT;
+						Content->Text(NewStrW(Tag->Text()));
+					}
 				}
+				while (Tag->Children.Length())
+				{
+					LTag *t = ToTag(Tag->Children.First());
+					Body->Attach(t, Body->Children.Length());
+				}
+				DeleteObj(Tag);
+				
+				Tag = Html;
 			}
-
-			if (Html)
+			else if (!Body)
 			{
-				LTag *Body = Tag->GetTagByName("body");
-				if (!Body)
+				if ((Body = new LTag(this, Html)))
+					Body->SetTag("body");
+					
+				for (unsigned i=0; i<Html->Children.Length(); i++)
 				{
-					if (Body = new LTag(this, 0))
+					LTag *t = ToTag(Html->Children[i]);
+					if (t->TagId != TAG_HEAD)
 					{
-						Body->SetTag("body");
-						Html->Attach(Body);
+						Body->Attach(t);
+						i--;
 					}
 				}
-
-				if (Body)
+				
+				Html->Attach(Body);
+			}
+			
+			if (Html && Body)
+			{
+				auto t = Tag->Text();
+				if (t)
 				{
-					if (Body->Parent != Html)
-					{
-						Html->Attach(Body);
-					}
-
-					if (Tag->Text())
+					if (ValidStrW(t))
 					{
 						LTag *Content = new LTag(this, 0);
 						if (Content)
 						{
 							Content->Text(NewStrW(Tag->Text()));
-							Tag->Text(0);
 							Body->Attach(Content, 0);
 						}
 					}
+					Tag->Text(0);
+				}
 
-					#if 1
-					for (LTag *t = Html->Tags.First(); t; )
+				#if 0 // Enabling this breaks the test file 'gw2.html'.
+				for (LTag *t = Html->Tags.First(); t; )
+				{
+					if (t->Tag && t->Tag[0] == '!')
 					{
-						if (t->Tag && t->Tag[0] == '!')
+						Tag->Attach(t, 0);
+						t = Html->Tags.Current();
+					}
+					else if (t->TagId != TAG_HEAD &&
+							t != Body)
+					{
+						if (t->TagId == TAG_HTML)
 						{
-							Tag->Attach(t, 0);
-							t = Html->Tags.Current();
-						}
-						else if (t->TagId != TAG_HEAD &&
-								t != Body)
-						{
-							if (t->TagId == TAG_HTML)
+							LTag *c;
+							while ((c = t->Tags.First()))
 							{
-								LTag *c;
-								while (c = t->Tags.First())
-								{
-									Html->Attach(c, 0);
-								}
-
-								t->Detach();
-								DeleteObj(t);
-							}
-							else
-							{
-								t->Detach();
-								Body->Attach(t);
+								Html->Attach(c, 0);
 							}
 
-							t = Html->Tags.Current();
+							t->Detach();
+							DeleteObj(t);
 						}
 						else
 						{
-							t = Html->Tags.Next();
+							t->Detach();
+							Body->Attach(t);
 						}
-					}
-					#endif					
 
-					if (Environment)
+						t = Html->Tags.Current();
+					}
+					else
 					{
-						const char *OnLoad;
-						if (Body->Get("onload", OnLoad))
-						{
-							Environment->OnExecuteScript((char*)OnLoad);
-						}
+						t = Html->Tags.Next();
+					}
+				}
+				#endif					
+
+				if (Environment)
+				{
+					const char *OnLoad;
+					if (Body->Get("onload", OnLoad))
+					{
+						Environment->OnExecuteScript(this, (char*)OnLoad);
 					}
 				}
 			}
@@ -6699,100 +7265,84 @@ void LHtml2::Parse()
 	}
 
 	ViewWidth = -1;
+	if (Tag)
+		Tag->ResetCaches();
 	Invalidate();
 }
 
-bool LHtml2::NameW(const char16 *s)
+bool LHtml::NameW(const char16 *s)
 {
-	LAutoPtr<char, true> utf(LgiNewUtf16To8(s));
+	LAutoPtr<char, true> utf(WideToUtf8(s));
 	return Name(utf);
 }
 
-char16 *LHtml2::NameW()
+const char16 *LHtml::NameW()
 {
 	LBase::Name(Source);
 	return LBase::NameW();
 }
 
-bool LHtml2::Name(const char *s)
+bool LHtml::Name(const char *s)
 {
-	d->DocumentUid++;
-
-	#if 0
-	LFile Out;
-	if (s && Out.Open("~\\Desktop\\html-input.html", O_WRITE))
-	{
-		Out.SetSize(0);
-		Out.Write(s, strlen(s));
-		Out.Close();
-	}
-	#endif
-
-	LAssert(LAppInst->GetGuiThread() == LCurrentThreadHnd());
+	int Uid = -1;
+	if (Environment)
+		Uid = Environment->NextUid();
+	if (Uid < 0)
+		Uid = GetDocumentUid() + 1;
+	SetDocumentUid(Uid);
 
 	_Delete();
 	_New();
 
-	Source = NewStr(s);
+	IsHtml = false;
 
-	if (Source)
+	// Detect HTML
+	const char *c = s;
+	while ((c = strchr(c, '<')))
 	{
-		IsHtml = false;
-
-		// Detect HTML
-		char *s = Source;
-		while (s = strchr(s, '<'))
+		char *t = 0;
+		c = ParseName((char*) ++c, &t);
+		if (t && GetTagInfo(t))
 		{
-			char *t = 0;
-			s = ParseName(++s, &t);
-			if (t && GetTagInfo(t))
-			{
-				DeleteArray(t);
-				IsHtml = true;
-				break;
-			}
 			DeleteArray(t);
+			IsHtml = true;
+			break;
 		}
-
-		#if 0
-		LFile f;
-		f.Open("c:\\temp\\broken.html", O_WRITE);
-		{
-			f.Write(Source, strlen(Source));
-			f.Close();
-		}
-		#endif
-
-		// Parse
-		d->IsParsing = true;
-		Parse();
-		d->IsParsing = false;
+		DeleteArray(t);
 	}
 
+	// Parse
+	d->IsParsing = true;
+	ParseDocument(s);
+	d->IsParsing = false;
+
+	if (Tag && d->StyleDirty)
+	{
+		d->StyleDirty = false;
+		Tag->RestyleAll();
+	}
+
+	OnLoad();
 	Invalidate();	
 
 	return true;
 }
 
-char *LHtml2::Name()
+const char *LHtml::Name()
 {
-	#if LUIS_DEBUG
-	LgiTrace("%s:%i html(%p).src(%p)='%30.30s'\n", _FL, this, Source, Source);
-	#endif
-
-	if (!Source)
+	if (!Source && Tag)
 	{
 		LStringPipe s(1024);
 		Tag->CreateSource(s);
-		Source = s.NewStr();
+		Source.Reset(s.NewStr());
 	}
 
 	return Source;
 }
 
-LMessage::Result LHtml2::OnEvent(LMessage *Msg)
+LMessage::Result LHtml::OnEvent(LMessage *Msg)
 {
-	switch (MsgCode(Msg))
+	switch (Msg->Msg())
 	{
 		case M_COPY:
 		{
@@ -6802,49 +7352,103 @@ LMessage::Result LHtml2::OnEvent(LMessage *Msg)
 		case M_JOBS_LOADED:
 		{
 			bool Update = false;
+			int InitDeferredLoads = d->DeferredLoads;
 			
 			if (JobSem.Lock(_FL))
 			{
-				for (int i=0; i<JobSem.Jobs.Length(); i++)
+				for (unsigned i=0; i<JobSem.Jobs.Length(); i++)
 				{
 					LDocumentEnv::LoadJob *j = JobSem.Jobs[i];
-					LDocView *Me = this;
+					int MyUid = GetDocumentUid();
+
+					// LgiTrace("%s:%i - Receive job %p, %p\n", _FL, j, j->UserData);
 					
-					if (j->View == Me &&
-						j->UserUid == d->DocumentUid &&
+					if (j->UserUid == MyUid &&
 						j->UserData != NULL)
 					{
 						Html2::LTag *r = static_cast<Html2::LTag*>(j->UserData);
+						
+						if (d->DeferredLoads > 0)
+							d->DeferredLoads--;
 						
 						// Check the tag is still in our tree...
 						if (Tag->HasChild(r))
 						{
 							// Process the returned data...
-							if (r->TagId == TAG_IMG && j->pDC)
+							if (r->TagId == TAG_IMG)
 							{
-								r->SetImage(j->Uri, j->pDC.Release());
-								ViewWidth = 0;
-								Update = true;
-							}
-							else if (r->TagId == TAG_LINK && j->Stream)
-							{
-								int64 Size = j->Stream->GetSize();
-								LAutoString Style(new char[Size+1]);
-								int rd = j->Stream->Read(Style, Size);
-								if (rd > 0)
+								if (j->pDC)
 								{
-									Style[rd] = 0;									
-									AddCss(Style.Release());									
+									r->SetImage(j->Uri, j->pDC);
 									ViewWidth = 0;
 									Update = true;
 								}
+								else if (j->Stream)
+								{
+									LAutoPtr<LSurface> pDC(GdcD->Load(dynamic_cast<LStream*>(j->Stream.Get())));
+									if (pDC)
+									{
+										r->SetImage(j->Uri, pDC);
+										ViewWidth = 0;
+										Update = true;
+									}
+									else LgiTrace("%s:%i - Image decode failed for '%s'\n", _FL, j->Uri.Get());
+								}
+								else if (j->Status == LDocumentEnv::LoadJob::JobOk)
+									LgiTrace("%s:%i - Unexpected job type for '%s'\n", _FL, j->Uri.Get());
 							}
+							else if (r->TagId == TAG_LINK)
+							{
+								if (!CssHref.Find(j->Uri))
+								{
+									LStreamI *s = j->GetStream();
+									if (s)
+									{
+										s->ChangeThread();
+
+										int Size = (int)s->GetSize();
+										LAutoString Style(new char[Size+1]);
+										ssize_t rd = s->Read(Style, Size);
+										if (rd > 0)
+										{
+											Style[rd] = 0;
+											CssHref.Add(j->Uri, true);
+											OnAddStyle("text/css", Style);									
+											ViewWidth = 0;
+											Update = true;
+										}
+									}
+								}
+							}
+							else if (r->TagId == TAG_IFRAME)
+							{
+								// Remote IFRAME loading not support for security reasons.
+							}
+							else LgiTrace("%s:%i - Unexpected tag '%s' for URI '%s'\n", _FL,
+								r->Tag.Get(),
+								j->Uri.Get());
+						}
+						else
+						{
+							/*
+							Html2::LTag *p = ToTag(r->Parent);
+							while (p && p->Parent)
+								p = ToTag(p->Parent);
+							*/
+							LgiTrace("%s:%i - No child tag for job.\n", _FL);
 						}
 					}
 					// else it's from another (historical) HTML control, ignore
 				}
 				JobSem.Jobs.DeleteObjects();
 				JobSem.Unlock();
+			}
+			
+			if (InitDeferredLoads > 0 && d->DeferredLoads <= 0)
+			{
+				LAssert(d->DeferredLoads == 0);
+				d->DeferredLoads = 0;
+				OnLoad();
 			}
 
 			if (Update)
@@ -6859,12 +7463,26 @@ LMessage::Result LHtml2::OnEvent(LMessage *Msg)
 	return LDocView::OnEvent(Msg);
 }
 
-int LHtml2::OnNotify(LViewI *c, int f)
+int LHtml::OnNotify(LViewI *c, const LNotification &n)
 {
 	switch (c->GetId())
 	{
 		case IDC_VSCROLL:
 		{
+			int LineY = GetFont()->GetHeight();
+
+			if (Tag)
+				Tag->ClearToolTips();
+
+			if (n.Type == LNotifyScrollBarCreate && VScroll && LineY > 0)
+			{
+				int y = Y();
+				int p = MAX(y / LineY, 1);
+				int fy = d->Content.y / LineY;
+				VScroll->SetPage(p);
+				VScroll->SetRange(fy);
+			}
+			
 			Invalidate();
 			break;
 		}
@@ -6872,15 +7490,15 @@ int LHtml2::OnNotify(LViewI *c, int f)
 		{
 			LTag *Ctrl = Tag ? Tag->FindCtrlId(c->GetId()) : NULL;
 			if (Ctrl)
-				return Ctrl->OnNotify(f);
+				return Ctrl->OnNotify(n);
 			break;
 		}
 	}
 
-	return LLayout::OnNotify(c, f);
+	return LLayout::OnNotify(c, n);
 }
 
-void LHtml2::OnPosChange()
+void LHtml::OnPosChange()
 {
 	LLayout::OnPosChange();
 	if (ViewWidth != X())
@@ -6889,137 +7507,195 @@ void LHtml2::OnPosChange()
 	}
 }
 
-LPoint LHtml2::Layout()
+bool LHtml::OnLayout(LViewLayoutInfo &Inf)
+{
+	if (!Inf.Width.Min)
+	{
+		Inf.Width.Min = Inf.FILL;
+		Inf.Width.Max = Inf.FILL;
+	}
+	else
+	{
+		Inf.Height.Min = Inf.FILL;
+		Inf.Height.Max = Inf.FILL;
+	}
+
+	return true;
+}
+
+LPoint LHtml::Layout(bool ForceLayout)
 {
 	LRect Client = GetClient();
-	if (IsAttached() && ViewWidth != Client.X())
+	if (Tag && (ViewWidth != Client.X() || ForceLayout))
 	{
-		LRect Client = GetClient();
-		LFlowRegion f(this, Client);
+		LFlowRegion f(this, Client, false);
 
 		// Flow text, width is different
-		Tag->OnFlow(&f);
-		// f.FinishLine();
-		ViewWidth = Client.X();;
-		d->Content.x = f.max_cx + 1;
-		d->Content.y = f.y2;
+		d->FlowedTags = 0;
+		Tag->OnFlow(&f, 0);
+
+		#if PROFILE_FLOW
+		for (auto p: d->FlowTimes)
+			LgiTrace("%s=" LPrintfInt64 "\n", p.key, p.value);
+		#endif
 		
+		ViewWidth = Client.X();
+		d->Content.x = f.MAX.x + 1;
+		d->Content.y = f.MAX.y + 1;
 
 		// Set up scroll box
-		int Sy = f.y2 > Y();
+		bool Sy = f.y2 > Y();
 		int LineY = GetFont()->GetHeight();
-		
-		SetScrollBars(false, Sy);
-		if (Sy && VScroll)
+
+		uint64 Now = LCurrentTime();
+		if (Now - d->SetScrollTime > 100)
 		{
-			int y = Y();
-			int p = max(y / LineY, 1);
-			int fy = f.y2 / LineY;
-			VScroll->SetPage(p);
-			VScroll->SetLimits(0, fy);
+			d->SetScrollTime = Now;
+			SetScrollBars(false, Sy);
+			
+			if (Sy && VScroll && LineY > 0)
+			{
+				int y = Y();
+				int p = MAX(y / LineY, 1);
+				int fy = f.y2 / LineY;
+				VScroll->SetPage(p);
+				VScroll->SetRange(fy);
+			}
+		}
+		else
+		{
+			// LgiTrace("%s - Dropping SetScroll, loop detected: %i ms\n", GetClass(), (int)(Now - d->SetScrollTime));
 		}
 	}
 
 	return d->Content;
 }
 
-void LHtml2::OnPaint(LSurface *ScreenDC)
+LPointF LHtml::GetDpiScale()
 {
-	#if LGI_EXCEPTIONS
-	try
-	{
+	LPointF Scale(1.0, 1.0);
+	auto Wnd = GetWindow();
+	if (Wnd)
+		Scale = Wnd->GetDpiScale();
+	return Scale;
+}
+
+#define PROFILE_PAINT 0
+#if PROFILE_PAINT
+	#define PROF(...) Prof.Add(__VA_ARGS__)
+#else
+	#define PROF(...)
+#endif
+
+void LHtml::OnPaint(LSurface *ScreenDC)
+{
+	#if PROFILE_PAINT
+		LProfile Prof("LHtml::OnPaint");
+		Prof.HideResultsIfBelow(200);
 	#endif
+
+	#if HTML_USE_DOUBLE_BUFFER
 		LRect Client = GetClient();
-		LRect p = GetPos();
-
-		#if HTML_USE_DOUBLE_BUFFER
-		if (!MemDC ||
-			(MemDC->X() < Client.X() || MemDC->Y() < Client.Y()))
+		if (ScreenDC->IsScreen())
 		{
-			DeleteObj(MemDC);
-			MemDC = new LMemDC;
-			if (MemDC && !MemDC->Create(Client.X() + 10, Client.Y() + 10, 32)) // GdcD->GetBits()
+			if (!MemDC ||
+				(MemDC->X() < Client.X() || MemDC->Y() < Client.Y()))
 			{
-				DeleteObj(MemDC);
+				if (MemDC.Reset(new LMemDC(_FL)))
+				{
+					int Sx = Client.X() + 10;
+					int Sy = Client.Y() + 10;
+					PROF("CreateMemDC");
+					if (!MemDC->Create(Sx, Sy, System32BitColourSpace))
+					{
+						MemDC.Reset();
+					}
+				}
+			}
+			if (MemDC)
+			{
+				MemDC->ClipRgn(nullptr);
+				#if 0//def _DEBUG
+					MemDC->Colour(LColour(255, 0, 255));
+					MemDC->Rectangle();
+				#endif
 			}
 		}
-		#endif
+	#endif
 
-		LSurface *pDC = MemDC ? MemDC : ScreenDC;
+	LSurface *pDC = MemDC ? MemDC : ScreenDC;
 
-		COLOUR Back = GetBackColour();
-		pDC->Colour(Back, 32);
-		pDC->Rectangle();
+	#if 0
+		Gtk::cairo_matrix_t mx;
+		Gtk::cairo_get_matrix(pDC->Handle(), &mx);
+		LPoint Offset;
+		WindowVirtualOffset(&Offset);
+		printf("\tHtml paint mx=%g,%g off=%i,%i\n",
+			mx.x0, mx.y0,
+			Offset.x, Offset.y);
+	#endif
 
-		if (Tag)
+	PROF("Background");
+	LColour cBack;
+	if (GetCss())
+	{
+		LCss::ColorDef Bk = GetCss()->BackgroundColor();
+		if (Bk.Type == LCss::ColorRgb)
+			cBack = Bk;
+	}
+	if (!cBack.IsValid())
+		cBack = LColour(Enabled() ? L_WORKSPACE : L_MED);
+	pDC->Colour(cBack);
+	pDC->Rectangle();
+
+	if (Tag)
+	{
+		PROF("Layout");
+		Layout();
+
+		if (VScroll)
 		{
-			Layout();
-
-			if (VScroll)
-			{
-				int LineY = GetFont()->GetHeight();
-				int Vs = VScroll->Value();
-				pDC->SetOrigin(0, Vs * LineY);
-			}
-
-			Tag->OnPaint(pDC);
+			PROF("VScroll");
+			int LineY = GetFont()->GetHeight();
+			int Vs = (int)VScroll->Value();
+			pDC->SetOrigin(0, Vs * LineY);
 		}
 
-		#if HTML_USE_DOUBLE_BUFFER
+		bool InSelection = false;
+		PaintStart = LCurrentTime();
+		d->MaxPaintTimeout = false;
+
+		PROF("TagPaint.Before");
+		Tag->OnPaint(pDC, InSelection, 0);
+
+		PROF("TagPaint.After");
+		if (d->MaxPaintTimeout)
+		{
+			LgiTrace("%s:%i - Html max paint time reached: %i ms.\n", _FL, LCurrentTime() - PaintStart);
+		}
+	}
+
+	OnPaintFinished(pDC);
+
+	#if HTML_USE_DOUBLE_BUFFER
 		if (MemDC)
 		{
 			pDC->SetOrigin(0, 0);
-			#if 0
-			pDC->Colour(Rgb24(255, 0, 0), 24);
-			pDC->Line(0, 0, X()-1, Y()-1);
-			pDC->Line(X()-1, 0, 0, Y()-1);
-			#endif
+			PROF("Blt");
 			ScreenDC->Blt(0, 0, MemDC);
 		}
-		#endif
-	#if LGI_EXCEPTIONS
-	}
-	catch (...)
-	{
-		LgiTrace("LHtml2 paint crash\n");
-	}
 	#endif
 
 	if (d->OnLoadAnchor && VScroll)
 	{
 		LAutoString a = d->OnLoadAnchor;
+		PROF("GotoAnchor");
 		GotoAnchor(a);
 		LAssert(d->OnLoadAnchor == 0);
 	}
 }
 
-LTag *LHtml2::GetOpenTag(char *Tag)
-{
-	if (Tag)
-	{
-		for (LTag *t=OpenTags.Last(); t; t=OpenTags.Prev())
-		{
-			if (t->Tag)
-			{
-				if (stricmp(t->Tag, Tag) == 0)
-				{
-					return t;
-				}
-
-				if (stricmp(t->Tag, "table") == 0)
-				{
-					// stop looking... we don't close tags outside
-					// the table from inside.
-					break;
-				}				
-			}
-		}
-	}
-
-	return 0;
-}
-
-bool LHtml2::HasSelection()
+bool LHtml::HasSelection()
 {
 	if (Cursor && Selection)
 	{
@@ -7031,17 +7707,19 @@ bool LHtml2::HasSelection()
 	return false;
 }
 
-void LHtml2::UnSelectAll()
+void LHtml::UnSelectAll()
 {
 	bool i = false;
 	if (Cursor)
 	{
 		Cursor->Cursor = -1;
+		Cursor = NULL;
 		i = true;
 	}
 	if (Selection)
 	{
 		Selection->Selection = -1;
+		Selection = NULL;
 		i = true;
 	}
 	if (i)
@@ -7050,17 +7728,62 @@ void LHtml2::UnSelectAll()
 	}
 }
 
-void LHtml2::SelectAll()
+void LHtml::_SelectAll(LTag *t, LTag *&last)
 {
+	if (auto txt = t->GetText())
+	{
+		if (!Selection)
+		{
+			Selection = t;
+			Selection->Selection = 0;
+		}
+		else
+		{
+			last = t;
+		}
+	}
+
+	for (auto c: t->Children)
+		_SelectAll(ToTag(c), last);
 }
 
-LTag *LHtml2::GetLastChild(LTag *t)
+void LHtml::SelectAll()
 {
-	if (t)
+	if (!Tag)
+		return;
+
+	UnSelectAll();
+
+	LArray<LTag*> results;
+	Tag->Find(TAG_BODY, results);
+	if (results.Length() == 0)
+		return;
+
+	if (auto body = results[0])
 	{
-		for (LTag *i = t->Tags.Last(); i; )
+		LTag *last = nullptr;
+		_SelectAll(body, last);
+
+		if (last)
 		{
-			LTag *c = i->Tags.Last();
+			Cursor = last;
+			Cursor->Cursor = Strlen(Cursor->GetText());
+		}
+
+		LgiTrace("%p.%i - %p.%i\n", Selection, Selection->Selection, Cursor, Cursor->Cursor);
+
+
+		Invalidate();
+	}
+}
+
+LTag *LHtml::GetLastChild(LTag *t)
+{
+	if (t && t->Children.Length())
+	{
+		for (LTag *i = ToTag(t->Children.Last()); i; )
+		{
+			LTag *c = i->Children.Length() ? ToTag(i->Children.Last()) : NULL;
 			if (c)
 				i = c;
 			else
@@ -7071,20 +7794,21 @@ LTag *LHtml2::GetLastChild(LTag *t)
 	return 0;
 }
 
-LTag *LHtml2::PrevTag(LTag *t)
+LTag *LHtml::PrevTag(LTag *t)
 {
 	// This returns the previous tag in the tree as if all the tags were
 	// listed via recursion using "in order".
 
 	// Walk up the parent chain looking for a prev
-	for (LTag *p = t; p; p = p->Parent)
+	for (LTag *p = t; p; p = ToTag(p->Parent))
 	{
 		// Does this tag have a parent?
 		if (p->Parent)
 		{
 			// Prev?
-			int Idx = p->Parent->Tags.IndexOf(p);
-			LTag *Prev = p->Parent->Tags[Idx - 1];
+			LTag *pp = ToTag(p->Parent);
+			ssize_t Idx = pp->Children.IndexOf(p);
+			LTag *Prev = Idx > 0 ? ToTag(pp->Children[Idx - 1]) : NULL;
 			if (Prev)
 			{
 				LTag *Last = GetLastChild(Prev);
@@ -7092,7 +7816,7 @@ LTag *LHtml2::PrevTag(LTag *t)
 			}
 			else
 			{
-				return p->Parent;
+				return ToTag(p->Parent);
 			}
 		}
 	}
@@ -7100,26 +7824,28 @@ LTag *LHtml2::PrevTag(LTag *t)
 	return 0;
 }
 
-LTag *LHtml2::NextTag(LTag *t)
+LTag *LHtml::NextTag(LTag *t)
 {
 	// This returns the next tag in the tree as if all the tags were
 	// listed via recursion using "in order".
 
 	// Does this have a child tag?
-	if (t->Tags.First())
+	if (t->Children.Length() > 0)
 	{
-		return t->Tags.First();
+		return ToTag(t->Children.First());
 	}
 	else
 	{
 		// Walk up the parent chain
-		for (LTag *p = t; p; p = p->Parent)
+		for (LTag *p = t; p; p = ToTag(p->Parent))
 		{
 			// Does this tag have a next?
 			if (p->Parent)
 			{
-				int Idx = p->Parent->Tags.IndexOf(p);
-				LTag *Next = p->Parent->Tags[Idx + 1];
+				LTag *pp = ToTag(p->Parent);
+				size_t Idx = pp->Children.IndexOf(p);
+				
+				LTag *Next = pp->Children.Length() > Idx + 1 ? ToTag(pp->Children[Idx + 1]) : NULL;
 				if (Next)
 				{
 					return Next;
@@ -7131,62 +7857,63 @@ LTag *LHtml2::NextTag(LTag *t)
 	return 0;
 }
 
-int LHtml2::GetTagDepth(LTag *Tag)
+int LHtml::GetTagDepth(LTag *Tag)
 {
 	// Returns the depth of the tag in the tree.
 	int n = 0;
-	for (LTag *t = Tag; t; t = t->Parent)
+	for (LTag *t = Tag; t; t = ToTag(t->Parent))
 	{
 		n++;
 	}
 	return n;
 }
 
-bool LHtml2::IsCursorFirst()
+bool LHtml::IsCursorFirst()
 {
-	// Returns true if the cursor is before the selection point.
-	//
-	// There are 2 points in the selection, the start and the end, the
-	// cursor can be the start or the end, there selection is always the
-	// other end of the block.
-	if (Cursor && Selection)
+	if (!Cursor || !Selection)
+		return false;
+	return CompareTagPos(Cursor, Cursor->Cursor, Selection, Selection->Selection);
+}
+
+bool LHtml::CompareTagPos(LTag *a, ssize_t AIdx, LTag *b, ssize_t BIdx)
+{
+	// Returns true if the 'a' is before 'b' point.
+	if (!a || !b)
+		return false;
+
+	if (a == b)
 	{
-		if (Cursor == Selection)
+		return AIdx < BIdx;
+	}
+	else
+	{
+		LArray<LTag*> ATree, BTree;
+		for (LTag *t = a; t; t = ToTag(t->Parent))
+			ATree.AddAt(0, t);
+		for (LTag *t = b; t; t = ToTag(t->Parent))
+			BTree.AddAt(0, t);
+
+		ssize_t Depth = MIN(ATree.Length(), BTree.Length());
+		for (int i=0; i<Depth; i++)
 		{
-			return Cursor->Cursor < Selection->Selection;
-		}
-		else
-		{
-			int CDepth = GetTagDepth(Cursor);
-			int SDepth = GetTagDepth(Selection);
-			LTag *Cur = Cursor;
-			LTag *Sel = Selection;
-			while (Sel && SDepth > CDepth)
+			LTag *at = ATree[i];
+			LTag *bt = BTree[i];
+			if (at != bt)
 			{
-				Sel = Sel->Parent;
-				SDepth--;
+				LAssert(i > 0);
+				LTag *p = ATree[i-1];
+				LAssert(BTree[i-1] == p);
+				ssize_t ai = p->Children.IndexOf(at);
+				ssize_t bi = p->Children.IndexOf(bt);
+				return ai < bi;
 			}
-			while (Cur && CDepth > SDepth)
-			{
-				Cur = Cur->Parent;
-				CDepth--;
-			}
-			if (Cur && Sel)
-			{
-				int CIdx = Cur->Parent ? Cur->Parent->Tags.IndexOf(Cur) : 0;
-				int SIdx = Sel->Parent ? Sel->Parent->Tags.IndexOf(Sel) : 0;
-				if (CIdx < SIdx)
-				{
-					return true;
-				}
-			}
-		}
+		}		
 	}
 
 	return false;
 }
 
-void LHtml2::SetLoadImages(bool i)
+void LHtml::SetLoadImages(bool i)
 {
 	if (i ^ GetLoadImages())
 	{
@@ -7200,55 +7927,76 @@ void LHtml2::SetLoadImages(bool i)
 	}
 }
 
-char *LHtml2::GetSelection()
+LString LHtml::GetSelection()
 {
-	char *s = 0;
+	LString s;
 
-	GBytePipe p;
-
-	Tag->CopyClipboard(p);
-
-	int Len = p.GetSize();
-	if (Len > 0)
+	if (Cursor && Selection)
 	{
-		char16 *t = (char16*)p.New(sizeof(char16));
-		if (t)
+		LMemQueue p;
+		bool InSelection = false;
+		Tag->CopyClipboard(p, InSelection);
+
+		auto Len = p.GetSize();
+		if (Len > 0)
 		{
-			int Len = StrlenW(t);
-			for (int i=0; i<Len; i++)
+			auto t = (char16*)p.New(sizeof(char16));
+			if (t)
 			{
-				if (t[i] == 0xa0) t[i] = ' ';
+				size_t Len = StrlenW(t);
+				for (int i=0; i<Len; i++)
+				{
+					if (t[i] == 0xa0)
+						t[i] = ' ';
+				}
+				s = t;
+				DeleteArray(t);
 			}
-			s = LgiNewUtf16To8(t);
-			DeleteArray(t);
 		}
 	}
 
 	return s;
 }
 
-bool LHtml2::SetVariant(const char *Name, LVariant &Value, char *Array)
+bool LHtml::SetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	if (!Name)
 		return false;
-	if (!stricmp(Name, "ShowImages"))
+	if (!_stricmp(Name, "ShowImages"))
 	{
-		SetLoadImages(Value.CastBool());
+		SetLoadImages(Value.CastInt32() != 0);
 	}
 	else return false;
 	
 	return true;
 }
 
-bool LHtml2::Copy()
+bool LHtml::Copy()
 {
-	LAutoString s(GetSelection());
-	if (s)
+	if (auto s = GetSelection())
 	{
+		RemoveZeroWidthCharacters(s);
+
+		if (HasHomoglyphs(s, -1))
+		{
+			if (LgiMsg(	this,
+						LLoadString(L_TEXTCTRL_HOMOGLYPH_WARNING,
+									"Text contains homoglyph characters that maybe a phishing attack.\n"
+									"Do you really want to copy it?"),
+						LLoadString(L_TEXTCTRL_WARNING, "Warning"),
+						MB_YESNO)
+				== IDNO)
+				return false;
+		}
+	
 		LClipBoard c(this);
 		
-		LAutoWString w(LgiNewUtf8To16(s));
+		LAutoWString w;
+		#ifndef MAC
+		w.Reset(Utf8ToWide(s));
 		if (w) c.TextW(w);
+		#endif
+
 		c.Text(s, w == 0);
 
 		return true;
@@ -7258,17 +8006,12 @@ bool LHtml2::Copy()
 	return false;
 }
 
-static bool FindCallback(LFindReplaceCommon *Dlg, bool Replace, void *User)
-{
-	LHtml2 *h = (LHtml2*)User;
-	return h->OnFind(Dlg);
-}
-
 void BuildTagList(LArray<LTag*> &t, LTag *Tag)
 {
 	t.Add(Tag);
-	for (LTag *c = Tag->Tags.First(); c; c = Tag->Tags.Next())
+	for (unsigned i=0; i<Tag->Children.Length(); i++)
 	{
+		LTag *c = ToTag(Tag->Children[i]);
 		BuildTagList(t, c);
 	}
 }
@@ -7295,7 +8038,7 @@ static void FormEncode(LStringPipe &p, const char *c)
 	}
 }
 
-bool LHtml2::OnSubmitForm(LTag *Form)
+bool LHtml::OnSubmitForm(LTag *Form)
 {
 	if (!Form || !Environment)
 	{
@@ -7312,38 +8055,34 @@ bool LHtml2::OnSubmitForm(LTag *Form)
 		return false;
 	}
 		
-	GHashTbl<const char*,char*> f;
+	LHashTbl<ConstStrKey<char,false>,char*> f;
 	Form->CollectFormValues(f);
 	bool Status = false;
-	if (!stricmp(Method, "post"))
+	if (!_stricmp(Method, "post"))
 	{
 		LStringPipe p(256);
-		const char *Field;
 		bool First = true;
-		for (char *Val = f.First(&Field); Val; Val = f.Next(&Field))
+
+		// const char *Field;
+		// for (char *Val = f.First(&Field); Val; Val = f.Next(&Field))
+		for (auto v : f)
 		{
 			if (First)
 				First = false;
 			else
 				p.Write("&", 1);
 			
-			FormEncode(p, Field);
+			FormEncode(p, v.key);
 			p.Write("=", 1);
-			
-			if (!stricmp(Field, "checkConnection"))
-				p.Print("youtube%%3A1996%%3A1");
-			else if (!stricmp(Field, "pstMsg"))
-				p.Print("1");
-			else
-				FormEncode(p, Val);
+			FormEncode(p, v.value);
 		}
 		
 		LAutoPtr<const char, true> Data(p.NewStr());
-		Status = Environment->OnPostForm(Action, Data);
+		Status = Environment->OnPostForm(this, Action, Data);
 	}
-	else if (!stricmp(Method, "get"))
+	else if (!_stricmp(Method, "get"))
 	{
-		Status = Environment->OnNavigate(Action);
+		Status = Environment->OnNavigate(this, Action);
 	}
 	else
 	{
@@ -7354,35 +8093,40 @@ bool LHtml2::OnSubmitForm(LTag *Form)
 	return Status;
 }
 
-bool LHtml2::OnFind(class LFindReplaceCommon *Params)
+bool LHtml::OnFind(LFindReplaceCommon *Params)
 {
 	bool Status = false;
 
-	if (!Params->Find)
-		return Status;
+	if (Params)
+	{
+		if (!Params->Find)
+			return Status;
+
+		d->FindText.Reset(Utf8ToWide(Params->Find));
+		d->MatchCase = Params->MatchCase;
+	}		
 
 	if (!Cursor)
 		Cursor = Tag;
 
-	char16 *Find = LgiNewUtf8To16(Params->Find);
-	if (Cursor && Find)
+	if (Cursor && d->FindText)
 	{
 		LArray<LTag*> Tags;
 		BuildTagList(Tags, Tag);
-		int Start = Tags.IndexOf(Cursor);
-		for (int i=0; i<Tags.Length(); i++)
+		ssize_t Start = Tags.IndexOf(Cursor);
+		for (unsigned i=1; i<Tags.Length(); i++)
 		{
-			int Idx = (Start + i) % Tags.Length();
+			ssize_t Idx = (Start + i) % Tags.Length();
 			LTag *s = Tags[Idx];
 
 			if (s->Text())
 			{
 				char16 *Hit;
 				
-				if (Params->MatchCase)
-					Hit = StrstrW(s->Text(), Find);
+				if (d->MatchCase)
+					Hit = StrstrW(s->Text(), d->FindText);
 				else
-					Hit = StristrW(s->Text(), Find);
+					Hit = StristrW(s->Text(), d->FindText);
 				
 				if (Hit)
 				{
@@ -7391,8 +8135,18 @@ bool LHtml2::OnFind(class LFindReplaceCommon *Params)
 
 					Selection = Cursor = s;
 					Cursor->Cursor = Hit - s->Text();
-					Selection->Selection = Cursor->Cursor + StrlenW(Find);
-					OnCursorChanged();					
+					Selection->Selection = Cursor->Cursor + StrlenW(d->FindText);
+					OnCursorChanged();
+					
+					if (VScroll)
+					{
+						// Scroll the tag into view...
+						int y = s->AbsY();
+						int LineY = GetFont()->GetHeight();
+						int Val = y / LineY;
+						SetVScroll(Val);
+					}
+					
 					Invalidate();
 					Status = true;
 					break;
@@ -7400,107 +8154,136 @@ bool LHtml2::OnFind(class LFindReplaceCommon *Params)
 			}
 		}
 	}
-	DeleteArray(Find);
 
 	return Status;
 }
 
-bool LHtml2::OnKey(LKey &k)
+void LHtml::DoFind(std::function<void(bool)> Callback)
+{
+	LFindDlg *Dlg = new LFindDlg(this,
+		[this](auto dlg, auto action)
+		{
+			OnFind(dlg);
+		});
+	
+	Dlg->DoModal(NULL);
+}
+
+bool LHtml::OnKey(LKey &k)
 {
 	bool Status = false;
-	
+
+	// k.Trace("LHtml::OnKey");
+
 	if (k.Down())
 	{
 		int Dy = 0;
 		int LineY = GetFont()->GetHeight();
 		int Page = GetClient().Y() / LineY;
 
-		switch (k.c16)
+		switch (k.vkey)
 		{
-			case 'f':
-			case 'F':
+			case LK_F3:
 			{
-				if (k.Modifier())
-				{
-					LFindDlg Dlg(this, 0, FindCallback, this);
-					Dlg.DoModal();
-					Status = true;
-				}
+				OnFind(NULL);
 				break;
 			}
-			case 'c':
-			case 'C':
 			#ifdef WIN32
-			case VK_INSERT:
+			case LK_INSERT:
+				goto DoCopy;
 			#endif
-			{
-				printf("Got 'c', mod=%i\n", k.Modifier());
-				if (k.Modifier())
-				{
-					Copy();
-					Status = true;
-				}
-				break;
-			}
-			case VK_UP:
+			case LK_UP:
 			{
 				Dy = -1;
 				Status = true;
 				break;
 			}
-			case VK_DOWN:
+			case LK_DOWN:
 			{
 				Dy = 1;
 				Status = true;
 				break;
 			}
-			case VK_PAGEUP:
+			case LK_PAGEUP:
 			{
 				Dy = -Page;
 				Status = true;
 				break;
 			}
-			case VK_PAGEDOWN:
+			case LK_PAGEDOWN:
 			{
 				Dy = Page;
 				Status = true;
 				break;
 			}
-			case VK_HOME:
+			case LK_HOME:
 			{
-				Dy = VScroll ? -VScroll->Value() : 0;
+				Dy = (int) (VScroll ? -VScroll->Value() : 0);
 				Status = true;
 				break;
 			}
-			case VK_END:
+			case LK_END:
 			{
 				if (VScroll)
 				{
-					int64 Low, High;
-					VScroll->Limits(Low, High);
-					Dy = (High - Page) - VScroll->Value();
+					LRange r = VScroll->GetRange();
+					Dy = (int)(r.End() - Page);
 				}
 				Status = true;
+				break;
+			}
+			default:
+			{
+				switch (k.c16)
+				{
+					case 'f':
+					case 'F':
+					{
+						if (k.CtrlCmd())
+						{
+							DoFind(NULL);
+							Status = true;
+						}
+						break;
+					}
+					case 'c':
+					case 'C':
+					{
+						#ifdef WIN32
+						DoCopy:
+						#endif
+						if (k.CtrlCmd())
+						{
+							Copy();
+							Status = true;
+						}
+						break;
+					}
+					case 'a':
+					case 'A':
+					{
+						if (k.CtrlCmd())
+							SelectAll();
+						break;
+					}
+				}
 				break;
 			}
 		}
 
 		if (Dy && VScroll)
-		{
-			VScroll->Value(VScroll->Value() + Dy);
-			Invalidate();
-		}
+			SetVScroll(VScroll->Value() + Dy);
 	}
 
 	return Status;
 }
 
-int LHtml2::ScrollY()
+int LHtml::ScrollY()
 {
-	return GetFont()->GetHeight() * (VScroll ? VScroll->Value() : 0);
+	return GetFont()->GetHeight() * (VScroll ? (int)VScroll->Value() : 0);
 }
 
-void LHtml2::OnMouseClick(LMouse &m)
+void LHtml::OnMouseClick(LMouse &m)
 {
 	Capture(m.Down());
 	SetPulse(m.Down() ? 200 : -1);
@@ -7511,9 +8294,16 @@ void LHtml2::OnMouseClick(LMouse &m)
 
 		int Offset = ScrollY();
 		bool TagProcessedClick = false;
-		int Index = -1;
 
-		LTag *Over = GetTagByPos(m.x, m.y + Offset, &Index);
+		LTagHit Hit;
+		if (Tag)
+		{
+			Tag->GetTagByPos(Hit, m.x, m.y + Offset, 0, false, DEBUG_TAG_BY_POS);
+			#if DEBUG_TAG_BY_POS
+			Hit.Dump("MouseClick");
+			#endif
+		}
+		
 		if (m.Left() && !m.IsContextMenu())
 		{
 			if (m.Double())
@@ -7522,13 +8312,13 @@ void LHtml2::OnMouseClick(LMouse &m)
 
 				if (Cursor)
 				{
-					// Extend the selection out to the current word's boundries.
+					// Extend the selection out to the current word's boundaries.
 					Selection = Cursor;
 					Selection->Selection = Cursor->Cursor;
 
 					if (Cursor->Text())
 					{
-						int Base = Cursor->GetTextStart();
+						ssize_t Base = Cursor->GetTextStart();
 						char16 *Text = Cursor->Text() + Base;
 						while (Text[Cursor->Cursor])
 						{
@@ -7542,7 +8332,7 @@ void LHtml2::OnMouseClick(LMouse &m)
 					}
 					if (Selection->Text())
 					{
-						int Base = Selection->GetTextStart();
+						ssize_t Base = Selection->GetTextStart();
 						char16 *Sel = Selection->Text() + Base;
 						while (Selection->Selection > 0)
 						{
@@ -7556,314 +8346,400 @@ void LHtml2::OnMouseClick(LMouse &m)
 					}
 
 					Invalidate();
+					SendNotify(LNotifySelectionChanged);
 				}
 			}
-			else if (Over)
+			else if (Hit.NearestText)
 			{
 				d->WordSelectMode = false;
 				UnSelectAll();
-				Selection = Cursor = Over;
-				if (Cursor)
-				{
-					Selection->Selection = Cursor->Cursor = Index;
-				}
+
+				Cursor = Hit.NearestText;
+				Cursor->Cursor = Hit.Index;
+
+				#if DEBUG_SELECTION
+				LgiTrace("StartSelect Near='%20S' Idx=%i\n", Hit.NearestText->Text(), Hit.Index);
+				#endif
+
 				OnCursorChanged();
+				SendNotify(LNotifySelectionChanged);
+			}
+			else
+			{
+				#if DEBUG_SELECTION
+				LgiTrace("StartSelect no text hit %p, %p\n", Cursor, Selection);
+				#endif
 			}
 		}
 
-		if (Over)
+		if (Hit.NearestText && Hit.Near == 0)
 		{
-			TagProcessedClick = Over->OnMouseClick(m);
+			TagProcessedClick = Hit.NearestText->OnMouseClick(m);
 		}
+		else if (Hit.Direct)
+		{
+			TagProcessedClick = Hit.Direct->OnMouseClick(m);
+		}
+		#ifdef _DEBUG
+		else if (m.Left() && m.Ctrl())
+		{
+			LgiMsg(this, "No tag under the cursor.", GetClass());
+		}
+		#endif
 
 		if (!TagProcessedClick &&
 			m.IsContextMenu())
 		{
-			LSubMenu *RClick = new LSubMenu;
-			if (RClick)
+			LSubMenu RClick;
+
+			enum ContextMenuCmds
 			{
-				#define IDM_DUMP			100
-				#define IDM_COPY_SRC		101
-				#define IDM_VIEW_SRC		102
-				#define IDM_EXTERNAL		103
-				#define IDM_COPY			104
-				#define IDM_VIEW_IMAGES		105
-				#define IDM_CHARSET_BASE	1000
+				IDM_DUMP = 100,
+				IDM_COPY_SRC,
+				IDM_VIEW_SRC,
+				IDM_EXTERNAL,
+				IDM_COPY,
+				IDM_VIEW_IMAGES,
+			};
+			#define IDM_CHARSET_BASE	10000
 
-				RClick->AppendItem					(LLoadString(L_TEXTCTRL_COPY, "Copy"), IDM_COPY, HasSelection());
-				LMenuItem *Vs = RClick->AppendItem	(LLoadString(L_VIEW_SOURCE, "View Source"), IDM_VIEW_SRC, Source != 0);
-				RClick->AppendItem					(LLoadString(L_COPY_SOURCE, "Copy Source"), IDM_COPY_SRC, Source != 0);
-				LMenuItem *Load = RClick->AppendItem(LLoadString(L_VIEW_IMAGES, "View External Images"), IDM_VIEW_IMAGES, true);
-				if (Load) Load->Checked(GetLoadImages());
-				RClick->AppendItem					(LLoadString(L_VIEW_IN_DEFAULT_BROWSER, "View in Default Browser"), IDM_EXTERNAL, Source != 0);
-				LSubMenu *Cs = RClick->AppendSub	(LLoadString(L_CHANGE_CHARSET, "Change Charset"));
-				if (Cs)
+			RClick.AppendItem					(LLoadString(L_TEXTCTRL_COPY, "Copy"), IDM_COPY, HasSelection());
+			auto ViewSrc = RClick.AppendItem	(LLoadString(L_VIEW_SOURCE, "View Source"), IDM_VIEW_SRC, Source != 0);
+			RClick.AppendItem					(LLoadString(L_COPY_SOURCE, "Copy Source"), IDM_COPY_SRC, Source != 0);
+			auto Load = RClick.AppendItem	(LLoadString(L_VIEW_IMAGES, "View External Images"), IDM_VIEW_IMAGES, true);
+			if (Load) Load->Checked(GetLoadImages());
+			RClick.AppendItem					(LLoadString(L_VIEW_IN_DEFAULT_BROWSER, "View in Default Browser"), IDM_EXTERNAL, Source != 0);
+			LSubMenu *Cs = RClick.AppendSub		(LLoadString(L_CHANGE_CHARSET, "Change Charset"));
+
+			if (Cs)
+			{
+				int n=0;
+				for (auto c = LGetCsList(); c->Charset; c++, n++)
 				{
-					int n=0;
-					for (LCharset *c = LGetCsList(); c->Charset; c++, n++)
-					{
-						Cs->AppendItem(c->Charset, IDM_CHARSET_BASE + n, c->IsAvailable());
-					}
+					Cs->AppendItem(c->Charset, IDM_CHARSET_BASE + n, c->IsAvailable());
 				}
-				
+			}
+			
+			if (!GetReadOnly() || // Is editor
 				#ifdef _DEBUG
-				RClick->AppendSeparator();
-				RClick->AppendItem("Dump", IDM_DUMP, Tag != 0);
+				1
+				#else
+				0
 				#endif
+				)
+			{
+				RClick.AppendSeparator();
+				RClick.AppendItem("Dump Layout", IDM_DUMP, Tag != 0);
+			}
 
-				if (Vs)
+			if (ViewSrc)
+				ViewSrc->Checked(!IsHtml);
+			
+			if (OnContextMenuCreate(Hit, RClick) &&
+				GetMouse(m, true))
+			{
+				int Id = RClick.Float(this, m.x, m.y);
+				switch (Id)
 				{
-					Vs->Checked(!IsHtml);
-				}
-
-				if (GetMouse(m, true))
-				{
-					int Id = RClick->Float(this, m.x, m.y);
-					switch (Id)
+					case IDM_COPY:
 					{
-						case IDM_COPY:
+						Copy();
+						break;
+					}
+					case IDM_VIEW_SRC:
+					{
+						if (!ViewSrc)
+							break;
+
+						DeleteObj(Tag);
+						IsHtml = !IsHtml;
+						ParseDocument(Source);
+						break;
+					}
+					case IDM_COPY_SRC:
+					{
+						if (!Source)
+							break;
+
+						LClipBoard c(this);
+						auto ViewCs = GetCharset();
+						if (ViewCs)
 						{
-							Copy();
+							LAutoWString w((char16*)LNewConvertCp(LGI_WideCharset, Source, ViewCs));
+							if (w)
+								c.TextW(w);
+						}
+						else c.Text(Source);
+						break;
+					}
+					case IDM_VIEW_IMAGES:
+					{
+						SetLoadImages(!GetLoadImages());
+						break;
+					}
+					case IDM_DUMP:
+					{
+						if (!Tag)
+							break;
+
+						if (auto s = Tag->DumpW())
+						{
+							LClipBoard c(this);
+							c.TextW(s);
+						}
+						break;
+					}
+					case IDM_EXTERNAL:
+					{
+						if (!Source)
+						{
+							LgiTrace("%s:%i - No HTML source code.\n", _FL);
 							break;
 						}
-						case IDM_VIEW_SRC:
+
+						char Path[MAX_PATH_LEN];
+						if (!LGetSystemPath(LSP_TEMP, Path, sizeof(Path)))
 						{
-							LCheckHeap();
-							if (Vs)
+							LgiTrace("%s:%i - Failed to get the system path.\n", _FL);
+							break;
+						}
+						
+						char f[32];
+						sprintf_s(f, sizeof(f), "_%i.html", LRand(1000000));
+						LMakePath(Path, sizeof(Path), Path, f);
+						
+						LFile F;
+						if (!F.Open(Path, O_WRITE))
+						{
+							LgiTrace("%s:%i - Failed to open '%s' for writing.\n", _FL, Path);
+							break;
+						}
+
+						LStringPipe Ex;
+						bool Error = false;
+						
+						F.SetSize(0);
+
+						LAutoWString SrcMem;
+						const char *ViewCs = GetCharset();
+						if (ViewCs)
+							SrcMem.Reset((char16*)LNewConvertCp(LGI_WideCharset, Source, ViewCs));
+						else
+							SrcMem.Reset(Utf8ToWide(Source));						
+
+						for (char16 *s=SrcMem; s && *s;)
+						{
+							char16 *cid = StristrW(s, L"cid:");
+							while (cid && !strchr("\'\"", cid[-1]))
 							{
-								DeleteObj(Tag);
-								IsHtml = !IsHtml;
-								Parse();
+								cid = StristrW(cid+1, L"cid:");
 							}
-							LCheckHeap();
-							break;
-						}
-						case IDM_COPY_SRC:
-						{
-							if (Source)
+
+							if (cid)
 							{
-								LClipBoard c(this);
-								if (Is8Bit(Source))
+								char16 Delim = cid[-1];
+								char16 *e = StrchrW(cid, Delim);
+								if (e)
 								{
-									LAutoWString w((char16*)LNewConvertCp(LGI_WideCharset, Source, DocCharSet ? DocCharSet : (char*)"windows-1252"));
-									if (w)
-										c.TextW(w);
+									*e = 0;
+									if (StrchrW(cid, '\n'))
+									{
+										*e = Delim;
+										Error = true;
+										break;
+									}
+									else
+									{
+										char File[MAX_PATH_LEN] = "";
+										if (Environment)
+										{
+											auto j = Environment->NewJob();
+											if (j)
+											{
+												j->Uri.Reset(WideToUtf8(cid));
+												j->Env = Environment;
+												j->Pref = LDocumentEnv::LoadJob::FmtFilename;
+												j->UserUid = GetDocumentUid();
+
+												LDocumentEnv::LoadType Result = Environment->GetContent(j);
+												if (Result == LDocumentEnv::LoadImmediate)
+												{
+													if (j->Filename)
+														strcpy_s(File, sizeof(File), j->Filename);
+												}
+												else if (Result == LDocumentEnv::LoadDeferred)
+												{
+													d->DeferredLoads++;
+												}
+											}
+										}
+										
+										*e = Delim;
+										Ex.Push(s, cid - s);
+										if (File[0])
+										{
+											char *d;
+											while ((d = strchr(File, '\\')))
+											{
+												*d = '/';
+											}
+											
+											Ex.Push(L"file:///");
+											
+											LAutoWString w(Utf8ToWide(File));
+											Ex.Push(w);
+										}
+										s = e;
+									}
 								}
 								else
 								{
-									c.Text(Source);
+									Error = true;
+									break;
 								}
 							}
-							break;
-						}
-						case IDM_VIEW_IMAGES:
-						{
-							SetLoadImages(!GetLoadImages());
-							break;
-						}
-						case IDM_DUMP:
-						{
-							if (Tag)
+							else
 							{
-								char *s = Tag->Dump();
-								if (s)
-								{
-									LClipBoard c(this);
-									c.Text(s);
-									DeleteObj(s);
-								}
+								Ex.Push(s);
+								break;
 							}
-							break;
 						}
-						case IDM_EXTERNAL:
+
+						if (!Error)
 						{
-							char Path[256];
-							if (Source && LgiGetSystemPath(LSP_TEMP, Path, sizeof(Path)))
+							int64 WideChars = Ex.GetSize() / sizeof(char16);
+							LAutoWString w(Ex.NewStrW());
+							
+							LAutoString u(WideToUtf8(w, WideChars));
+							if (u)
+								F.Write(u, strlen(u));
+							F.Close();
+							
+							LError Err;
+							if (!LExecute(Path, NULL, NULL, &Err))
 							{
-								char f[32];
-								sprintf(f, "_%i.html", LRand(1000000));
-								LMakePath(Path, sizeof(Path), Path, f);
-								
-								LCheckHeap();
-
-								LFile F;
-								if (F.Open(Path, O_WRITE))
-								{
-									LStringPipe Ex;
-									bool Error = false;
-									
-									F.SetSize(0);
-
-									for (char *s=Source; s && *s;)
-									{
-										char *cid = stristr(s, "cid:");
-										while (cid && !strchr("\'\"", cid[-1]))
-										{
-											cid = stristr(cid+1, "cid:");
-										}
-
-										if (cid)
-										{
-											char Delim = cid[-1];
-											char *e = strchr(cid, Delim);
-											if (e)
-											{
-												*e = 0;
-												if (strchr(cid, '\n'))
-												{
-													*e = Delim;
-													Error = true;
-													break;
-												}
-												else
-												{
-													char File[MAX_PATH_LEN] = "";
-													if (Environment)
-													{
-														LDocumentEnv::LoadJob *j = Environment->NewJob();
-														if (j)
-														{
-															j->Uri.Reset(NewStr(cid));
-															j->View = this;
-															j->Pref = LDocumentEnv::LoadJob::FmtFilename;
-															j->UserUid = d->DocumentUid;
-
-															LDocumentEnv::LoadType Result = Environment->GetContent(j);
-															if (Result == LDocumentEnv::LoadImmediate)
-															{
-																if (j->Filename)
-																	strsafecpy(File, j->Filename, sizeof(File));
-															}
-															DeleteObj(j);
-														}
-													}
-													
-													*e = Delim;
-													Ex.Push(s, cid - s);
-													if (File[0])
-													{
-														char *d;
-														while (d = strchr(File, '\\'))
-														{
-															*d = '/';
-														}
-														
-														Ex.Push("file:///");
-														Ex.Push(File);
-													}
-													s = e;
-												}
-											}
-											else
-											{
-												Error = true;
-												break;
-											}
-										}
-										else
-										{
-											Ex.Push(s);
-											break;
-										}
-									}
-
-									LCheckHeap();
-
-									if (!Error)
-									{
-										char *Final = Ex.NewStr();
-										if (Final)
-										{
-											F.Write(Final, strlen(Final));
-											DeleteArray(Final);
-											F.Close();
-											LExecute(Path);
-										}
-									}
-								}
+								LgiMsg(	this,
+										"Failed to open '%s'\n%s",
+										LAppInst ? LAppInst->LBase::Name() : GetClass(),
+										MB_OK,
+										Path,
+										Err.ToString().Get());
 							}
-							break;
 						}
-						default:
+						break;
+					}
+					default:
+					{
+						if (Id >= IDM_CHARSET_BASE)
 						{
-							if (Id >= IDM_CHARSET_BASE)
+							auto c = LGetCsList() + (Id - IDM_CHARSET_BASE);
+							if (c->Charset)
 							{
-								LCharset *c = LGetCsList() + (Id - IDM_CHARSET_BASE);
-								if (c->Charset)
-								{
-									Charset.Reset(NewStr(c->Charset));
-									OverideDocCharset = true;
+								Charset = c->Charset;
+								OverideDocCharset = true;
 
-									char *Src = Source;
-									Source = 0;
-									_Delete();
-									_New();
-									Source = Src;
-									Parse();
+								char *Src = Source.Release();
+								_Delete();
+								_New();
+								Source.Reset(Src);
+								ParseDocument(Source);
 
-									Invalidate();
+								Invalidate();
 
-									SendNotify(LNotifyCharsetChanged);
-								}								
-							}
-							break;
+								SendNotify(LNotifyCharsetChanged);
+							}								
 						}
+						else
+						{
+							OnContextMenuCommand(Hit, Id);
+						}
+						break;
 					}
 				}
-
-				DeleteObj(RClick);
 			}
 		}
 	}
 	else // Up Click
 	{
-		if (Selection && Cursor &&
+		if (Selection &&
+			Cursor &&
 			Selection == Cursor &&
 			Selection->Selection == Cursor->Cursor)
 		{
 			Selection->Selection = -1;
 			Selection = 0;
+			SendNotify(LNotifySelectionChanged);
+
+			#if DEBUG_SELECTION
+			LgiTrace("NoSelect on release\n");
+			#endif
 		}
 	}
 }
 
-LTag *LHtml2::GetTagByPos(int x, int y, int *Index)
+void LHtml::OnLoad()
 {
-	if (Tag)
-	{
-		LTagHit Hit;
-
-		Tag->GetTagByPos(Hit, x, y);
-
-		if (Hit.Hit && Index)
-			*Index = Hit.Near < 30 ? Hit.Index : -1;
-
-		return Hit.Hit;
-	}
-
-	return 0;
+	d->IsLoaded = true;
+	SendNotify(LNotifyDocLoaded);
 }
 
-bool LHtml2::OnMouseWheel(double Lines)
+LTag *LHtml::GetTagByPos(int x, int y, ssize_t *Index, LPoint *LocalCoords, bool DebugLog)
+{
+	LTag *Status = NULL;
+
+	if (Tag)
+	{
+		if (DebugLog)
+			LgiTrace("GetTagByPos starting...\n");
+
+		LTagHit Hit;
+		Tag->GetTagByPos(Hit, x, y, 0, DebugLog);
+
+		if (DebugLog)
+			LgiTrace("GetTagByPos Hit=%s, %i, %i...\n\n", Hit.Direct ? Hit.Direct->Tag.Get() : 0, Hit.Index, Hit.Near);
+		
+		Status = Hit.NearestText && Hit.Near == 0 ? Hit.NearestText : Hit.Direct;
+		if (Hit.NearestText && Hit.Near < 30)
+		{
+			if (Index) *Index = Hit.Index;
+			if (LocalCoords) *LocalCoords = Hit.LocalCoords;
+		}
+	}
+
+	return Status;
+}
+
+void LHtml::SetVScroll(int64 v)
+{
+	if (!VScroll)
+		return;
+	
+	if (Tag)
+		Tag->ClearToolTips();
+
+	VScroll->Value(v);
+	Invalidate();
+}
+
+bool LHtml::OnMouseWheel(double Lines)
 {
 	if (VScroll)
-	{
-		VScroll->Value(VScroll->Value() + (int)Lines);
-		Invalidate();
-	}
-	
+		SetVScroll(VScroll->Value() + (int64)Lines);
 	return true;
 }
 
-LCursor LHtml2::GetCursor(int x, int y)
+LCursor LHtml::GetCursor(int x, int y)
 {
 	int Offset = ScrollY();
-	int Index = -1;
-	LTag *Tag = GetTagByPos(x, y + Offset, &Index);
+	ssize_t Index = -1;
+	LPoint LocalCoords;
+	LTag *Tag = GetTagByPos(x, y + Offset, &Index, &LocalCoords);
 	if (Tag)
 	{
-		LAutoString Uri;
-		if (Tag->IsAnchor(&Uri))
+		LString Uri;
+		if (LocalCoords.x >= 0 &&
+			LocalCoords.y >= 0 &&
+			Tag->IsAnchor(&Uri))
 		{
 			LRect c = GetClient();
 			c.Offset(-c.x1, -c.y1);
@@ -7877,108 +8753,124 @@ LCursor LHtml2::GetCursor(int x, int y)
 	return LCUR_Normal;
 }
 
-void LHtml2::OnMouseMove(LMouse &m)
+void LTag::ClearToolTips()
 {
-	int Offset = ScrollY();
-	int Index = -1;
-	LTag *Tag = GetTagByPos(m.x, m.y + Offset, &Index);
-	if (Tag)
+	if (TipId)
 	{
-		if (PrevTip &&
-			PrevTip != Tag)
-		{			
-			Tip.DeleteTip(PrevTip->TipId);
-			PrevTip->TipId = 0;
-			PrevTip = 0;
+		Html->Tip.DeleteTip(TipId);
+		TipId = 0;
+	}
+
+	for (auto c: Children)
+		ToTag(c)->ClearToolTips();
+}
+
+
+void LHtml::OnMouseMove(LMouse &m)
+{
+	if (!Tag)
+		return;
+
+	int Offset = ScrollY();
+	LTagHit Hit;
+	Tag->GetTagByPos(Hit, m.x, m.y + Offset, 0, false);
+	if (!Hit.Direct && !Hit.NearestText)
+		return;
+
+	LString Uri;
+	auto HitTag = Hit.NearestText && Hit.Near == 0 ? Hit.NearestText : Hit.Direct;
+	if (HitTag &&
+		HitTag->TipId == 0 &&
+		Hit.LocalCoords.x >= 0 &&
+		Hit.LocalCoords.y >= 0 &&
+		HitTag->IsAnchor(&Uri) &&
+		Uri)
+	{
+		if (!Tip.GetParent())
+		{
+			Tip.Attach(this);
 		}
 
-		LAutoString Uri;
-		if (Tag->IsAnchor(&Uri))
+		LRect r = HitTag->GetRect(false);
+		r.Offset(0, -Offset);
+		if (!HitTag->TipId)
+			HitTag->TipId = Tip.NewTip(Uri, r);
+		// LgiTrace("NewTip: %s @ %s, ID=%i\n", Uri.Get(), r.GetStr(), HitTag->TipId);
+	}
+
+	if (IsCapturing() &&
+		Cursor &&
+		Hit.NearestText)
+	{
+		if (!Selection)
 		{
-			/*
-			LRect c = GetClient();
-			c.Offset(-c.x1, -c.y1);
-			if (c.Overlap(m.x, m.y) && ValidStr(Uri))
-			{
-				LLayout::SetCursor(LCUR_PointingHand);
-			}
-			*/
+			Selection = Cursor;
+			Selection->Selection = Cursor->Cursor;
+			Cursor = Hit.NearestText;
+			Cursor->Cursor = Hit.Index;
+			OnCursorChanged();
+			Invalidate();
+			
+			SendNotify(LNotifySelectionChanged);
 
-			if (Uri)
-			{
-				if (!Tip.GetParent())
-				{
-					Tip.Attach(this);
-				}
-
-				LRect r = Tag->GetRect(false);
-				r.Offset(0, -Offset);
-				PrevTip = Tag;
-				PrevTip->TipId = Tip.NewTip(Uri, r);
-			}
+			#if DEBUG_SELECTION
+			LgiTrace("CreateSelection '%20S' %i\n", Hit.NearestText->Text(), Hit.Index);
+			#endif
 		}
-
-		if (Cursor && Tag->TagId != TAG_BODY && IsCapturing())
+		else if ((Cursor != Hit.NearestText) ||
+				 (Cursor->Cursor != Hit.Index))
 		{
-			if (!Selection)
+			// Move the cursor to track the mouse
+			if (Cursor)
 			{
-				Selection = Cursor;
-				Selection->Selection = Cursor->Cursor;
-				Cursor = Tag;
-				Cursor->Cursor = Index;
-				OnCursorChanged();
-				Invalidate();
+				Cursor->Cursor = -1;
 			}
-			else if ((Cursor != Tag) ||
-					 (Cursor->Selection != Index))
+
+			Cursor = Hit.NearestText;
+			Cursor->Cursor = Hit.Index;
+			#if DEBUG_SELECTION
+			LgiTrace("ExtendSelection '%20S' %i\n", Hit.NearestText->Text(), Hit.Index);
+			#endif
+
+			if (d->WordSelectMode && Cursor->Text())
 			{
-				if (Cursor)
+				ssize_t Base = Cursor->GetTextStart();
+				if (IsCursorFirst())
 				{
-					Cursor->Cursor = -1;
-				}
-
-				Cursor = Tag;
-				Cursor->Cursor = Index;
-
-				if (d->WordSelectMode && Cursor->Text())
-				{
-					int Base = Cursor->GetTextStart();
-					if (IsCursorFirst())
+					// Extend the cursor up the document to include the whole word
+					while (Cursor->Cursor > 0)
 					{
-						// Extend the cursor up the document to include the whole word
-						while (Cursor->Cursor > 0)
-						{
-							char16 c = Cursor->Text()[Base + Cursor->Cursor - 1];
+						char16 c = Cursor->Text()[Base + Cursor->Cursor - 1];
 
-							if (strchr(WordDelim, c) || StrchrW(WhiteW, c))
-								break;
+						if (strchr(WordDelim, c) || StrchrW(WhiteW, c))
+							break;
 
-							Cursor->Cursor--;
-						}
-					}
-					else
-					{
-						// Extend the cursor down the document to include the whole word
-						while (Cursor->Text()[Base + Cursor->Cursor])
-						{
-							char16 c = Cursor->Text()[Base + Cursor->Cursor];
-
-							if (strchr(WordDelim, c) || StrchrW(WhiteW, c))
-								break;
-
-							Cursor->Cursor++;
-						}
+						Cursor->Cursor--;
 					}
 				}
+				else
+				{
+					// Extend the cursor down the document to include the whole word
+					while (Cursor->Text()[Base + Cursor->Cursor])
+					{
+						char16 c = Cursor->Text()[Base + Cursor->Cursor];
 
-				OnCursorChanged();
-				Invalidate();
+						if (strchr(WordDelim, c) || StrchrW(WhiteW, c))
+							break;
+
+						Cursor->Cursor++;
+					}
+				}
 			}
+
+			OnCursorChanged();
+			Invalidate();
+			SendNotify(LNotifySelectionChanged);
 		}
 	}
 }
 
-void LHtml2::OnPulse()
+void LHtml::OnPulse()
 {
 	if (VScroll && IsCapturing())
 	{
@@ -8000,32 +8892,18 @@ void LHtml2::OnPulse()
 				Lines = (m.y - c.y2 + Fy - 1) / Fy;
 			}
 			
-			if (Lines)
-			{
-				VScroll->Value(VScroll->Value() +  Lines);
-				Invalidate();
-			}
+			if (Lines && VScroll)
+				SetVScroll(VScroll->Value() +  Lines);
 		}
-	}
-	
-	if (Environment && d->RefreshTime >= 0)
-	{
-		d->RefreshTime--;
-		if (!d->RefreshTime)
-		{
-			LAutoString a = d->RefreshUri;
-			d->RefreshTime = -1;
-			Environment->OnNavigate(a);
-		}		
 	}
 }
 
-LRect *LHtml2::GetCursorPos()
+LRect *LHtml::GetCursorPos()
 {
 	return &d->CursorPos;
 }
 
-void LHtml2::SetCursorVis(bool b)
+void LHtml::SetCursorVis(bool b)
 {
 	if (d->CursorVis ^ b)
 	{
@@ -8034,22 +8912,23 @@ void LHtml2::SetCursorVis(bool b)
 	}
 }
 
-bool LHtml2::GetCursorVis()
+bool LHtml::GetCursorVis()
 {
 	return d->CursorVis;
 }
 
-GDom *ElementById(LTag *t, char *id)
+LDom *ElementById(LTag *t, char *id)
 {
 	if (t && id)
 	{
 		const char *i;
-		if (t->Get("id", i) && stricmp(i, id) == 0)
+		if (t->Get("id", i) && _stricmp(i, id) == 0)
 			return t;
 
-		for (LTag *c = t->Tags.First(); c; c = t->Tags.Next())
+		for (unsigned i=0; i<t->Children.Length(); i++)
 		{
-			GDom *n = ElementById(c, id);
+			LTag *c = ToTag(t->Children[i]);
+			LDom *n = ElementById(c, id);
 			if (n) return n;
 		}
 	}
@@ -8057,30 +8936,30 @@ GDom *ElementById(LTag *t, char *id)
 	return 0;
 }
 
-GDom *LHtml2::getElementById(char *Id)
+LDom *LHtml::getElementById(char *Id)
 {
 	return ElementById(Tag, Id);
 }
 
-bool LHtml2::GetLinkDoubleClick()
+bool LHtml::GetLinkDoubleClick()
 {
 	return d->LinkDoubleClick;
 }
 
-void LHtml2::SetLinkDoubleClick(bool b)
+void LHtml::SetLinkDoubleClick(bool b)
 {
 	d->LinkDoubleClick = b;
 }
 
-bool LHtml2::GetFormattedContent(char *MimeType, LAutoString &Out, LArray<LDocView::ContentMedia> *Media)
+bool LHtml::GetFormattedContent(const char *MimeType, LString &Out, LArray<LDocView::ContentMedia> *Media)
 {
 	if (!MimeType)
 	{
-		LAssert(0);
+		LAssert(!"No MIME type for getting formatted content");
 		return false;
 	}
 
-	if (stricmp(MimeType, "text/html"))
+	if (!Stricmp(MimeType, "text/html"))
 	{
 		// We can handle this type...
 		LArray<LTag*> Imgs;
@@ -8090,15 +8969,18 @@ bool LHtml2::GetFormattedContent(char *MimeType, LAutoString &Out, LArray<LDocVi
 			Tag->Find(TAG_IMG, Imgs);
 
 			// Give them CID's if they don't already have them
-			for (int i=0; Imgs.Length(); i++)
+			for (unsigned i=0; i<Imgs.Length(); i++)
 			{
 				LTag *Img = Imgs[i];
-				const char *Cid, *Src;
+				if (!Img)
+					continue;
+				
+				const char *Cid = NULL, *Src;
 				if (Img->Get("src", Src) &&
 					!Img->Get("cid", Cid))
 				{
 					char id[256];
-					sprintf(id, "%x.%x", (unsigned)LCurrentTime(), (unsigned)LRand());
+					sprintf_s(id, sizeof(id), "%x.%x", (unsigned)LCurrentTime(), (unsigned)LRand());
 					Img->Set("cid", id);
 					Img->Get("cid", Cid);
 				}
@@ -8112,7 +8994,7 @@ bool LHtml2::GetFormattedContent(char *MimeType, LAutoString &Out, LArray<LDocVi
 						{
 							// Add the exported image stream to the media array
 							LDocView::ContentMedia &m = Media->New();
-							m.Id.Reset(NewStr(Cid));
+							m.Id = Cid;
 							m.Stream.Reset(f);
 						}
 					}
@@ -8121,31 +9003,119 @@ bool LHtml2::GetFormattedContent(char *MimeType, LAutoString &Out, LArray<LDocVi
 		}
 
 		// Export the HTML, including the CID's from the first step
-		Out.Reset(NewStr(Name()));
+		Out = Name();
 	}
-	else if (stricmp(MimeType, "text/plain"))
+	else if (!Stricmp(MimeType, "text/plain"))
 	{
 		// Convert DOM tree down to text instead...
-		// FIXME
-        #ifdef _MSC_VER
-        #pragma message(__LOC__"no DOM to text support.")
-        #endif
+		LStringPipe p(512);
+		if (Tag)
+		{
+			LTag::TextConvertState State(&p);
+			Tag->ConvertToText(State);
+		}
+		Out = p.NewLStr();
 	}
 
 	return false;
 }
 
-void LHtml2::OnContent(LDocumentEnv::LoadJob *Res)
+void LHtml::OnContent(LDocumentEnv::LoadJob *Res)
 {
 	if (JobSem.Lock(_FL))
 	{
 		JobSem.Jobs.Add(Res);
-		JobSem.Unlock();
+		JobSem.Unlock();		
 		PostEvent(M_JOBS_LOADED);
 	}
 }
 
-bool LHtml2::GotoAnchor(char *Name)
+LHtmlElement *LHtml::CreateElement(LHtmlElement *Parent)
+{
+	return new LTag(this, Parent);
+}
+
+bool LHtml::GetVariant(const char *Name, LVariant &Value, const char *Array)
+{
+	if (!_stricmp(Name, "supportLists")) // Type: Bool
+		Value = false;
+	else if (!_stricmp(Name, "vml")) // Type: Bool
+		// Vector Markup Language
+		Value = false;
+	else if (!_stricmp(Name, "mso")) // Type: Bool
+		// mso = Microsoft Office
+		Value = false;
+	else
+		return false;
+
+	return true;
+}
+
+bool LHtml::EvaluateCondition(const char *Cond)
+{
+	if (!Cond)
+		return true;
+	
+	// This is a really bad attempt at writing an expression evaluator.
+	// I could of course use the scripting language but that would pull
+	// in a fairly large dependency on the HTML control. However user
+	// apps that already have that could reimplement this virtual function
+	// if they feel like it.
+	LArray<char*> Str;
+	for (const char *c = Cond; *c; )
+	{
+		if (IsAlpha(*c))
+		{
+			Str.Add(LTokStr(c));
+		}
+		else if (IsWhite(*c))
+		{
+			c++;
+		}
+		else
+		{
+			const char *e = c;
+			while (*e && !IsWhite(*e) && !IsAlpha(*e))
+				e++;
+			Str.Add(NewStr(c, e - c));
+			LAssert(e > c);
+			if (e > c)
+				c = e;
+			else
+				break;
+		}
+	}
+
+	bool Result = true;
+	bool Not = false;
+	for (unsigned i=0; i<Str.Length(); i++)
+	{
+		char *s = Str[i];
+		if (!_stricmp(s, "!"))
+			Not = true;
+		else
+		{
+			LVariant v;
+			if (GetValue(s, v))
+			{
+				Result = v.CastInt32() != 0;
+				if (Not) Result = !Result;
+			}
+			else
+			{
+				// If this fires: update LHtml::GetVariant with the variable.
+				// LgiTrace("%s:%i - Unsupported variable '%s'\n", _FL, s);
+			}
+			Not = false;
+		}
+	}
+	
+	Str.DeleteArrays();
+	
+	return Result;
+}
+
+bool LHtml::GotoAnchor(char *Name)
 {
 	if (Tag)
 	{
@@ -8157,7 +9127,7 @@ bool LHtml2::GotoAnchor(char *Name)
 				int LineY = GetFont()->GetHeight();
 				int Ay = a->AbsY();
 				int Scr = Ay / LineY;
-				VScroll->Value(Scr);
+				SetVScroll(Scr);
 				VScroll->SendNotify();
 			}
 			else
@@ -8168,44 +9138,185 @@ bool LHtml2::GotoAnchor(char *Name)
 	return false;
 }
 
-bool LHtml2::GetEmoji()
+bool LHtml::GetEmoji()
 {
 	return d->DecodeEmoji;
 }
 
-void LHtml2::SetEmoji(bool i)
+void LHtml::SetEmoji(bool i)
 {
 	d->DecodeEmoji = i;
 }
 
+void LHtml::SetMaxPaintTime(int Ms)
+{
+	d->MaxPaintTime = Ms;
+}
+
+bool LHtml::GetMaxPaintTimeout()
+{
+	return d->MaxPaintTimeout;
+}
+
 ////////////////////////////////////////////////////////////////////////
-class LHtml_Factory2 : public LViewFactory
+class LHtml2_Factory : public LViewFactory
 {
 	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
-		if (stricmp(Class, "LHtml2") == 0)
+		if (_stricmp(Class, "LHtml2") == 0)
 		{
-			return new LHtml2(-1, 0, 0, 100, 100, new GDefaultDocumentEnv);
+			return new Html2::LHtml(-1, 0, 0, 100, 100, new LDefaultDocumentEnv);
 		}
 
 		return 0;
 	}
 
-} LHtml_Factory2;
+} LHtml2_Factory;
 
 //////////////////////////////////////////////////////////////////////
-LCellStore::LCellStore(LTag *Table)
+struct BuildContext
 {
+	LHtmlTableLayout *Layout;
+	LTag *Table;
+	LTag *TBody;
+	LTag *CurTr;
+	LTag *CurTd;
+	int cx, cy;
+	
+	BuildContext()
+	{
+		Layout = NULL;
+		cx = cy = 0;
+
+		Table = NULL;
+		TBody = NULL;
+		CurTr = NULL;
+		CurTd = NULL;
+	}
+
+	bool Build(LTag *t, int Depth)
+	{
+		bool RetReattach = false;
+		
+		if (t->IsTable())
+		{
+			if (!Table)
+				Table = t;
+			else
+				return false;
+		}
+		else if (t->IsTableRow())
+		{
+			CurTr = t;
+		}
+		else if (t->IsTableCell())
+		{
+			CurTd = t;
+			if (t->Parent != CurTr)
+			{
+				if
+				(
+					!CurTr &&
+					(Table || TBody)
+				)
+				{
+					LTag *p = TBody ? TBody : Table;
+					CurTr = new LTag(p->Html, p);
+					if (CurTr)
+					{
+						CurTr->Tag.Reset(NewStr("tr"));
+						CurTr->TagId = TAG_TR;
+						
+
+						ssize_t Idx = t->Parent->Children.IndexOf(t);
+						t->Parent->Attach(CurTr, Idx);
+					}
+				}
+				
+				if (CurTr)
+				{
+					CurTr->Attach(t);
+					RetReattach = true;
+				}
+				else
+				{
+					LAssert(0);
+					return false;
+				}
+			}
+			
+			t->Cell->Pos.x = cx;
+			t->Cell->Pos.y = cy;
+			Layout->Set(t);
+		}
+		else switch (t->TagId)
+		{
+			case TAG_TBODY:
+			{
+				if (TBody)
+					return false;
+				TBody = t;
+				break;
+			}
+			default:
+			{
+				if (CurTd == t->Parent)
+					return false;
+				break;
+			}
+		}
+
+		for (unsigned n=0; n<t->Children.Length(); n++)
+		{
+			LTag *c = ToTag(t->Children[n]);
+			bool Reattached = Build(c, Depth+1);
+			if (Reattached)
+				n--;
+		}
+		
+		if (t->TagId == TAG_TR)
+		{
+			CurTr = NULL;
+			cy++;
+			cx = 0;
+			Layout->s.y = cy;
+		}
+		if (t->TagId == TAG_TD)
+		{
+			CurTd = NULL;
+			cx += t->Cell->Span.x;
+			Layout->s.x = MAX(cx, Layout->s.x);
+		}
+		
+		return RetReattach;
+	}
+};
+
+LHtmlTableLayout::LHtmlTableLayout(LTag *table)
+{
+	Table = table;
 	if (!Table)
 		return;
+
+	#if 0
+
+	BuildContext Ctx;
+	Ctx.Layout = this;
+	Ctx.Build(table, 0);
+
+	#else
 
 	int y = 0;
 	LTag *FakeRow = 0;
 	LTag *FakeCell = 0;
 
 	LTag *r;
-	for (r=Table->Tags.First(); r; r=Table->Tags.Next())
+	for (size_t i=0; i<Table->Children.Length(); i++)
 	{
+		r = ToTag(Table->Children[i]);
+		if (r->SupportedDisplay() == LCss::DispNone)
+			continue;
+			
 		if (r->TagId == TAG_TR)
 		{
 			FakeRow = 0;
@@ -8213,84 +9324,143 @@ LCellStore::LCellStore(LTag *Table)
 		}
 		else if (r->TagId == TAG_TBODY)
 		{
-			int Index = Table->Tags.IndexOf(r);
-			for (LTag *t = r->Tags.First(); t; t = r->Tags.Next())
+			ssize_t Index = Table->Children.IndexOf(r);
+			for (size_t n=0; n<r->Children.Length(); n++)
 			{
-				Table->Tags.Insert(t, ++Index);
+				LTag *t = ToTag(r->Children[n]);
+				Table->Children.AddAt(++Index, t);
 				t->Parent = Table;
+				
+				/*
+				LgiTrace("Moving '%s'(%p) from TBODY(%p) into '%s'(%p)\n",
+					t->Tag, t,
+					r,
+					t->Parent->Tag, t->Parent);
+				*/
 			}
-			r->Tags.Empty();
+			r->Children.Length(0);
 		}
 		else
 		{
 			if (!FakeRow)
 			{
-				if (FakeRow = new LTag(Table->Html, 0))
+				if ((FakeRow = new LTag(Table->Html, 0)))
 				{
-					FakeRow->Tag = NewStr("tr");
+					FakeRow->Tag.Reset(NewStr("tr"));
 					FakeRow->TagId = TAG_TR;
 
-					int Idx = Table->Tags.IndexOf(r);
+					ssize_t Idx = Table->Children.IndexOf(r);
 					Table->Attach(FakeRow, Idx);
 				}
 			}
 			if (FakeRow)
 			{
-				if (r->TagId != TAG_TD && !FakeCell)
+				if (!r->IsTableCell() && !FakeCell)
 				{
-					if (FakeCell = new LTag(Table->Html, FakeRow))
+					if ((FakeCell = new LTag(Table->Html, FakeRow)))
 					{
-						FakeCell->Tag = NewStr("td");
+						FakeCell->Tag.Reset(NewStr("td"));
 						FakeCell->TagId = TAG_TD;
-						FakeCell->Span.x = 1;
-						FakeCell->Span.y = 1;
+						if ((FakeCell->Cell = new LTag::TblCell))
+						{
+							FakeCell->Cell->Span.x = 1;
+							FakeCell->Cell->Span.y = 1;
+						}
 					}
 				}
 
-				int Idx = Table->Tags.IndexOf(r);
+				ssize_t Idx = Table->Children.IndexOf(r);
 				r->Detach();
 
-				if (r->TagId == TAG_TD)
+				if (r->IsTableCell())
 				{
 					FakeRow->Attach(r);
 				}
 				else
 				{
-					LAssert(FakeCell);
+					LAssert(FakeCell != NULL);
 					FakeCell->Attach(r);
 				}
-				Table->Tags[Idx-1];
+				i = Idx - 1;
 			}
 		}
 	}
 
-	for (r=Table->Tags.First(); r; r=Table->Tags.Next())
+	FakeCell = NULL;
+	for (size_t n=0; n<Table->Children.Length(); n++)
 	{
-		if (r->TagId == TAG_TR)
+		LTag *r = ToTag(Table->Children[n]);
+		if (r->IsTableRow())
 		{
 			int x = 0;
-			for (LTag *c=r->Tags.First(); c; c=r->Tags.Next())
+			for (size_t i=0; i<r->Children.Length(); i++)
 			{
-				if (c->TagId == TAG_TD)
+				auto cell = ToTag(r->Children[i]);
+				if (!cell->IsTableCell())
 				{
+					if (!FakeCell)
+					{
+						// Make a fake TD cell
+						FakeCell = new LTag(Table->Html, NULL);
+						FakeCell->Tag.Reset(NewStr("td"));
+						FakeCell->TagId = TAG_TD;
+						if ((FakeCell->Cell = new LTag::TblCell))
+						{
+							FakeCell->Cell->Span.x = 1;
+							FakeCell->Cell->Span.y = 1;
+						}
+						
+						// Join the fake TD into the TR
+						r->Children[i] = FakeCell;
+						FakeCell->Parent = r;
+					}
+					else
+					{
+						// Not the first non-TD tag, so delete it from the TR. Only the
+						// fake TD will remain in the TR.
+						r->Children.DeleteAt(i--, true);
+					}
+					
+					// Insert the tag into it as a child
+					FakeCell->Children.Add(cell);
+					cell->Parent = FakeCell;
+					cell = FakeCell;
+				}
+				else
+				{
+					FakeCell = NULL;
+				}
+				
+				if (cell->IsTableCell())
+				{
+					if (cell->SupportedDisplay() == LCss::DispNone)
+						continue;
+						
 					while (Get(x, y))
 					{
 						x++;
 					}
 
-					c->Cell.x = x;
-					c->Cell.y = y;
-					Set(c);
-					x += c->Span.x;
+					if (cell->Cell)
+					{
+						cell->Cell->Pos.x = x;
+						cell->Cell->Pos.y = y;
+						Set(cell);
+						x += cell->Cell->Span.x;
+					}
+					else LgiTrace("%s:%i - no Cell ptr?\n", _FL);
 				}
 			}
 
 			y++;
+			FakeCell = NULL;
 		}
 	}
+	
+	#endif
 }
 
-void LCellStore::Dump()
+void LHtmlTableLayout::Dump()
 {
 	int Sx, Sy;
 	GetSize(Sx, Sy);
@@ -8308,7 +9478,7 @@ void LCellStore::Dump()
 		for (x=0; x<Sx; x++)
 		{
 			LTag *t = Get(x, y);
-			LgiTrace("%p ", t);
+			LgiTrace("%-10p", t);
 		}
 		LgiTrace("\n");
 
@@ -8317,9 +9487,7 @@ void LCellStore::Dump()
 			LTag *t = Get(x, y);
 			char s[256] = "";
 			if (t)
-			{
-				sprintf(s, "%i,%i-%i,%i", t->Cell.x, t->Cell.y, t->Span.x, t->Span.y);
-			}
+				sprintf_s(s, sizeof(s), "%i,%i-%i,%i", t->Cell->Pos.x, t->Cell->Pos.y, t->Cell->Span.x, t->Cell->Span.y);
 			LgiTrace("%-10s", s);
 		}
 		LgiTrace("\n");
@@ -8328,13 +9496,13 @@ void LCellStore::Dump()
 	LgiTrace("\n");
 }
 
-void LCellStore::GetAll(List<LTag> &All)
+void LHtmlTableLayout::GetAll(List<LTag> &All)
 {
-	GHashTbl<void*, bool> Added;
-	for (int y=0; y<c.Length(); y++)
+	LHashTbl<PtrKey<void*>, bool> Added;
+	for (size_t y=0; y<c.Length(); y++)
 	{
 		CellArray &a = c[y];
-		for (int x=0; x<a.Length(); x++)
+		for (size_t x=0; x<a.Length(); x++)
 		{
 			LTag *t = a[x];
 			if (t && !Added.Find(t))
@@ -8346,42 +9514,79 @@ void LCellStore::GetAll(List<LTag> &All)
 	}
 }
 
-void LCellStore::GetSize(int &x, int &y)
+void LHtmlTableLayout::GetSize(int &x, int &y)
 {
 	x = 0;
-	y = c.Length();
+	y = (int)c.Length();
 
-	for (int i=0; i<c.Length(); i++)
+	for (size_t i=0; i<c.Length(); i++)
 	{
-		x = max(x, c[i].Length());
+		x = MAX(x, (int) c[i].Length());
 	}
 }
 
-LTag *LCellStore::Get(int x, int y)
+LTag *LHtmlTableLayout::Get(int x, int y)
 {
-	if (y >= c.Length())
+	if (y >= (int) c.Length())
 		return NULL;
 	
 	CellArray &a = c[y];
-	if (x >= a.Length())
+	if (x >= (int) a.Length())
 		return NULL;
 	
 	return a[x];
 }
 
-bool LCellStore::Set(LTag *t)
+bool LHtmlTableLayout::Set(LTag *t)
 {
 	if (!t)
 		return false;
 
-	for (int y=0; y<t->Span.y; y++)
+	for (int y=0; y<t->Cell->Span.y; y++)
 	{
-		for (int x=0; x<t->Span.x; x++)
+		for (int x=0; x<t->Cell->Span.x; x++)
 		{
 			// LAssert(!c[y][x]);
-			c[t->Cell.y + y][t->Cell.x + x] = t;
+			c[t->Cell->Pos.y + y][t->Cell->Pos.x + x] = t;
 		}
 	}
 
 	return true;
 }
+
+LString LTagHit::ToString()
+{
+	LStringPipe out;
+	LArray<LTag*> d, n;
+	LTag *t = Direct;
+	unsigned i;
+	for (i=0; i<6 && t; t = ToTag(t->Parent), i++)
+	{
+		d.AddAt(0, t);
+	}
+	t = NearestText;
+	for (i=0; i<3 && t; t = ToTag(t->Parent), i++)
+	{
+		n.AddAt(0, t);
+	}
+	
+	out.Print("Direct: ");
+	for (i=0; i<d.Length(); i++)
+		out.Print(">%s", d[i]->Tag ? d[i]->Tag.Get() : "CONTENT");
+	out.Print(" Nearest: ");
+	for (i=0; i<n.Length(); i++)
+		out.Print(">%s", n[i]->Tag ? n[i]->Tag.Get() : "CONTENT");
+	out.Print(" Local: %ix%i Index: %i Block: %s '%.10S'",
+		LocalCoords.x, LocalCoords.y,
+		Index,
+		Block ? Block->GetStr() : NULL,
+		Block ? Block->Text + Index : NULL);
+
+	return out.NewLStr();
+}
+
+void LTagHit::Dump(const char *Desc)
+{
+	LgiTrace("Hit: %s %s\n", Desc, ToString().Get());
+}
+
