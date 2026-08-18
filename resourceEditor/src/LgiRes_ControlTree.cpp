@@ -148,12 +148,12 @@ public:
 
 			m.ToScreen();
 
-			int Cmd;
-			if ((Cmd = s.Float(GetTree(), m.x, m.y)))
+			auto pos = m - _ScrollPos();
+			if (auto cmd = s.Float(GetTree(), pos.x, pos.y))
 			{
 				d->DiscardClick = true;
 
-				switch (Cmd)
+				switch (cmd)
 				{
 					case ID_UP:
 					{

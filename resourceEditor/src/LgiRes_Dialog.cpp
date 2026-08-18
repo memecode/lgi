@@ -530,7 +530,7 @@ bool ResDialogCtrl::Serialize(FieldTree &Fields)
 	Fields.Serialize(this, VAL_Enabled, e, true);
 	Fields.Serialize(this, VAL_Class, CssClass);
 	Fields.Serialize(this, VAL_Style, CssStyle);
-	LgiTrace("%s:%i - %s style='%s'\n", _FL, GetStr()->GetDefine(), CssStyle.Get());
+	// LgiTrace("%s:%i - %s style='%s'\n", _FL, GetStr()->GetDefine(), CssStyle.Get());
 
 	if (Fields.GetMode() == FieldTree::UiToObj ||
 		Fields.GetMode() == FieldTree::StoreToObj)

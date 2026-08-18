@@ -167,6 +167,7 @@ enum LSocketLogTypes
 	/// Log just the bytes
 	NET_LOG_ALL_BYTES = 2
 };
+LgiFunc const char *toString(LSocketLogTypes v);
 
 /// Virtual base class for a socket. See the documentation for LSocket for a more
 /// through treatment of this object's API.

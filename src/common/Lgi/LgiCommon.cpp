@@ -3135,3 +3135,14 @@ LString LHex(LString s)
 
 	return ret; 
 }
+
+const char *toString(LSocketLogTypes v)
+{
+	switch (v)
+	{
+		case NET_LOG_NONE: return LLoadString(IDS_NO_LOG);
+		case NET_LOG_HEX_DUMP: return LLoadString(IDS_HEX_LOG);
+		case NET_LOG_ALL_BYTES: return LLoadString(IDS_BYTE_LOG);
+	}
+	return nullptr;
+}

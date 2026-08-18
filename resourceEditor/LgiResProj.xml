@@ -61,6 +61,8 @@
 					<Release>/home/matthew/Code/MidiHw/mc4/resources/mc4.lr8</Release>
 				</All>
 			</Arguments>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -108,6 +110,7 @@ be</Debug>
 					<Release>gnu
 be</Release>
 				</Haiku>
+				<All />
 			</Libraries>
 			<SystemIncludes>
 				<Linux>
@@ -126,7 +129,18 @@ be</Release>
 					<Debug>_GNU_SOURCE</Debug>
 					<Release>_GNU_SOURCE</Release>
 				</Haiku>
+				<All />
+				<Linux />
 			</Defines>
+			<Options>
+				<All />
+				<Linux />
+			</Options>
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
+			<ApplicationIcon />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -141,14 +155,30 @@ be</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
+			<CommentFile />
+			<CommentFunction />
 		</Editor>
 		<Debug>
 			<Arguments>
 				<All>
-					<Debug>/home/matthew/code/soundunitedtools/resources/SoundUnitedTools.lr8</Debug>
-					<Release>/home/matthew/code/soundunitedtools/resources/SoundUnitedTools.lr8</Release>
+					<Debug>/home/matthew/code/scribe/trunk_os/resources/Scribe.lr8</Debug>
+					<Release>/home/matthew/code/scribe/trunk_os/resources/Scribe.lr8</Release>
 				</All>
 			</Arguments>
+			<Environment />
+			<DebugAdmin />
+			<InitialDir />
+			<Debugger />
 		</Debug>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
+		<Advanced>
+			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+		</Advanced>
 	</Settings>
 </Project>
