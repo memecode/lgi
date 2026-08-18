@@ -3136,13 +3136,25 @@ LString LHex(LString s)
 	return ret; 
 }
 
+static const char *LSocketLogTypesStr[NET_LOG_MAX] = {};
+void setString(LSocketLogTypes v, const char *name)
+{
+	if (v < NET_LOG_MAX)
+		LSocketLogTypesStr[v] = name;
+	else
+		LAssert(!"out of range");
+}
+
 const char *toString(LSocketLogTypes v)
 {
+	if (LSocketLogTypesStr[v])
+		return LSocketLogTypesStr[v];
+
 	switch (v)
 	{
-		case NET_LOG_NONE: return LLoadString(IDS_NO_LOG);
-		case NET_LOG_HEX_DUMP: return LLoadString(IDS_HEX_LOG);
-		case NET_LOG_ALL_BYTES: return LLoadString(IDS_BYTE_LOG);
+		case NET_LOG_NONE: return "No log";
+		case NET_LOG_HEX_DUMP: return "Hex log";
+		case NET_LOG_ALL_BYTES: return "Byte log";
 	}
 	return nullptr;
 }

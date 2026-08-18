@@ -1,7 +1,7 @@
 #pragma once
 
 class LiteHtmlView :
-	public LLayout
+	public LDocView
 {
 protected:
 	struct LiteHtmlViewPriv *d;
@@ -35,4 +35,7 @@ public:
 	void OnMouseClick(LMouse &m) override;
 	void OnMouseMove(LMouse &m) override;
 	LMessage::Result OnEvent(LMessage *Msg) override;
+
+	// LDocView impl:
+	const char *GetMimeType() override { return "text/html"; }
 };

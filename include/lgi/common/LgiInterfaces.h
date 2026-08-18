@@ -165,9 +165,12 @@ enum LSocketLogTypes
 	/// Log a hex dump of everything
 	NET_LOG_HEX_DUMP = 1,
 	/// Log just the bytes
-	NET_LOG_ALL_BYTES = 2
+	NET_LOG_ALL_BYTES = 2,
+	/// Always last
+	NET_LOG_MAX
 };
 LgiFunc const char *toString(LSocketLogTypes v);
+LgiFunc void setString(LSocketLogTypes v, const char *name);
 
 /// Virtual base class for a socket. See the documentation for LSocket for a more
 /// through treatment of this object's API.
