@@ -414,7 +414,7 @@ int LHttpThread::Main()
 					req.action = Action;
 					req.uri = Uri;
 					req.headers = Eol;
-					req.body = Eoh + 4;
+					req.body = Eoh ? Eoh + 4 : nullptr;
 
 					LStringPipe *RespBody = nullptr;
 					LHttpServer::Response resp;
