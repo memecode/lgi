@@ -26,6 +26,10 @@ public:
 	// Set the page name in the title bar of the window.
 	virtual void SetCaption(LString name) {}
 
+	// LView impl:
+	const char *Name() override;
+	bool Name(const char *n) override;
+
 	// LLayout impl
 	void OnAttach() override;
 	LCursor GetCursor(int x, int y) override;

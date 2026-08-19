@@ -1,4 +1,3 @@
-
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Box.h"
 #include "lgi/common/Edit.h"
@@ -48,7 +47,7 @@ struct LiteHtmlViewPriv :
 		TCallback callback;
 
 		NetworkThread(LView *View, const char *Url, TCallback cb) :
-			LThread("LiteHtmlViewPriv.NetworkThread")
+			LThread("LiteHtml.Th")
 		{
 			view = View;
 			url = Url;
@@ -90,6 +89,7 @@ struct LiteHtmlViewPriv :
 	LiteHtmlView *view = NULL;
 	LWindow *wnd = NULL;
 	litehtml::document::ptr doc;
+	LString html;
 	LRect client;
 	LRect clip;
 	bool clipSet = false; // Need to update the clipping region on the DC
@@ -798,6 +798,7 @@ bool LiteHtmlView::LoadCurrent()
 		auto html_text = LReadFile(u.LocalPath());
 		if (!html_text)
 			return false;
+		d->html = html_text;
 
 		d->client = GetClient();
 		d->doc = litehtml::document::createFromString(html_text.Get(), d);
@@ -812,6 +813,7 @@ bool LiteHtmlView::LoadCurrent()
 			{
 				if (data)
 				{
+					d->html = data;
 					d->doc = litehtml::document::createFromString(data.Get(), d);
 					OnNavigate(url);
 					Invalidate();
@@ -837,6 +839,25 @@ bool LiteHtmlView::SetUrl(LString url)
 	return LoadCurrent();
 }
 
+const char *LiteHtmlView::Name()
+{
+	return d->html;
+}
+
+bool LiteHtmlView::Name(const char *n)
+{
+	d->Empty();
+	d->html = n;
+	
+	printf("set name=%s\n", d->html.Get());
+	
+	d->client = GetClient();
+	if (d->html)
+		d->doc = litehtml::document::createFromString(d->html.Get(), d);
+	Invalidate();
+	return d->doc != nullptr || d->html.IsEmpty();
+}
+
 void LiteHtmlView::OnPaint(LSurface *pDC)
 {
 	#ifdef WINDOWS
@@ -850,7 +871,9 @@ void LiteHtmlView::OnPaint(LSurface *pDC)
 		pDC->Rectangle();
 
 		auto width = pDC->X();
+		printf("%s:%i - render(%i)\n", _FL, width);
 		int r = d->doc->render(width);
+		printf("%s:%i - render=%i\n", _FL, r);
 		if (r)
 		{
 			auto width = d->doc->width();
