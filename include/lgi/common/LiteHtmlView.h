@@ -42,4 +42,5 @@ public:
 
 	// LDocView impl:
 	const char *GetMimeType() override { return "text/html"; }
+	void SetCharset(const char *s) override;
 };

@@ -11,6 +11,7 @@
 #include "lgi/common/PopupNotification.h"
 #include "lgi/common/Path.h"
 #include "lgi/common/ClipBoard.h"
+#include "lgi/common/FontCache.h"
 
 #undef min
 #undef max
@@ -94,7 +95,8 @@ struct LiteHtmlViewPriv :
 	LRect clip;
 	bool clipSet = false; // Need to update the clipping region on the DC
 	LString cursorName;
-	LHashTbl<IntKey<litehtml::uint_ptr>, LFont*> fontMap;
+	// LHashTbl<IntKey<litehtml::uint_ptr>, LFont*> fontMap;
+	LFontCache fontCache;
 	LHashTbl<ConstStrKey<char, false>, Image*> imageCache;
 
 	// Url history state
@@ -103,6 +105,7 @@ struct LiteHtmlViewPriv :
 
 	LiteHtmlViewPriv(LiteHtmlView *v) : view(v)
 	{
+		fontCache.SetAllocIds(true);
 	}
 
 	~LiteHtmlViewPriv()
@@ -121,7 +124,7 @@ struct LiteHtmlViewPriv :
 
 		// Clean up caches
 		imageCache.DeleteObjects();
-		fontMap.DeleteObjects();
+		// fontMap.DeleteObjects();
 
 		// Reset to go state...
 		Cancel(false);
@@ -185,44 +188,34 @@ struct LiteHtmlViewPriv :
 		}
 	}
 
-	litehtml::uint_ptr create_font(const litehtml::font_description &descr,
+	litehtml::uint_ptr create_font(	const litehtml::font_description &descr,
 									const litehtml::document *doc,
 									litehtml::font_metrics *fm)
 	{
-		const char *faceName = descr.family.c_str();
-		int size = (int)descr.size.value();
-		int weight = descr.weight;
-		auto italic = descr.style;
-		unsigned int decoration = descr.decoration_line;
-		litehtml::uint_ptr hnd;
-		do 
-		{
-			hnd = LRand(10000);
-		}
-		while (fontMap.Find(hnd) != NULL);
+		const char *fontFamily = descr.family.c_str();
+		auto faceNames = LString(fontFamily).SplitDelimit(",");
 
-		auto faceNames = LString(faceName).SplitDelimit(",");
+		printf("create_font('%s', %g, %i, %i, %i)\n",
+			fontFamily,
+			descr.size.value(),
+			descr.weight,
+			descr.style,
+			descr.decoration_line);
 
-		printf("create_font('%s', %i, %i, %i, %i)\n",
-			faceName,
-			size,
-			weight,
-			italic,
-			decoration);
-
-		LFont *fnt = new LFont;
-		fnt->Bold(weight > 400);
-		if (italic == litehtml::font_style_italic)
-			fnt->Italic(true);
-
+		LFont *fnt = nullptr;
 		for (auto face: faceNames)
 		{
-			bool status = fnt->Create(face, LCss::Len(LCss::LenPt, size) );
-			if (status)
+			fnt = fontCache.AddFont(face,
+									LCss::Len(LCss::LenPt, (int) descr.size.value()),
+									descr.weight > 400							? LCss::FontWeightBold		: LCss::FontWeightNormal,
+									descr.style == litehtml::font_style_italic	? LCss::FontStyleItalic		: LCss::FontStyleInherit,
+									descr.decoration_line						? LCss::TextDecorUnderline	: LCss::TextDecorInherit);
+			if (fnt)
 				break;
-			LgiTrace("%s:%i - failed to create font(%s,%i)\n", _FL, faceName, size);
+
+			LgiTrace("%s:%i - failed to create font(%s,%g)\n",
+					_FL, face.Get(), descr.size.value());			
 		}
-		fontMap.Add(hnd, fnt);
 
 		if (fm)
 		{
@@ -237,24 +230,24 @@ struct LiteHtmlViewPriv :
 				(float)fm->height, (float)fm->ascent, (float)fm->descent, (float)fm->x_height);
 		}
 
-		return hnd;
+		LAssert(fnt->GetId() >= 0);
+		return fnt->GetId();
 	}
 
 	void delete_font(litehtml::uint_ptr hFont)
 	{
-		auto fnt = fontMap.Find(hFont);
-		if (fnt)
-		{
-			delete fnt;
-			fontMap.Delete(hFont);
-		}		
+		auto result = fontCache.DeleteById(hFont);
+		LAssert(result);
 	}
 
 	litehtml::pixel_t text_width(const char* text, litehtml::uint_ptr hFont)
 	{
-		auto fnt = fontMap.Find(hFont);
+		auto fnt = fontCache.FontFromId(hFont);
 		if (!fnt)
+		{
+			LAssert(!"font object not found");
 			return 0;
+		}
 		
 		LDisplayString ds(fnt, text);
 		return ds.X();
@@ -269,7 +262,7 @@ struct LiteHtmlViewPriv :
 		}
 
 		auto pDC = Convert(hdc);
-		auto Fnt = fontMap.Find(hFont);
+		auto Fnt = fontCache.FontFromId(hFont);
 		if (!pDC || !Fnt)
 			return;
 
@@ -298,7 +291,7 @@ struct LiteHtmlViewPriv :
 	void draw_list_marker(litehtml::uint_ptr hdc, const litehtml::list_marker &marker)
 	{
 		auto pDC = Convert(hdc);
-		auto Fnt = fontMap.Find(marker.font);
+		auto Fnt = fontCache.FontFromId(marker.font);
 		if (!pDC)
 			return;
 
@@ -844,12 +837,19 @@ const char *LiteHtmlView::Name()
 	return d->html;
 }
 
+void LiteHtmlView::SetCharset(const char *cs)
+{
+	LDocView::SetCharset(cs);
+	printf("set charset, cs=%s\n", cs);
+}
+
 bool LiteHtmlView::Name(const char *n)
 {
 	d->Empty();
 	d->html = n;
 	
-	printf("set name=%s\n", d->html.Get());
+	auto cs = GetCharset();
+	printf("set name, cs=%s\n", cs);
 	
 	d->client = GetClient();
 	if (d->html)
@@ -871,9 +871,7 @@ void LiteHtmlView::OnPaint(LSurface *pDC)
 		pDC->Rectangle();
 
 		auto width = pDC->X();
-		printf("%s:%i - render(%i)\n", _FL, width);
 		int r = d->doc->render(width);
-		printf("%s:%i - render=%i\n", _FL, r);
 		if (r)
 		{
 			auto width = d->doc->width();

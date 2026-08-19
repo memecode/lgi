@@ -344,6 +344,16 @@ CFDictionaryRef LFont::GetAttributes()
 }
 #endif
 
+int LFont::GetId()
+{
+	return d->Id;
+}
+
+void LFont::SetId(int id)
+{
+	d->Id = id;
+}
+
 uchar *LFont::GetGlyphMap()
 {
 	return d->GlyphMap;

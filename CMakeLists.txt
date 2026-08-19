@@ -19,13 +19,13 @@ endif()
 
 include(build.cmake)
 
-# set(CMAKE_OSX_ARCHITECTURES "x86_64")
 set(LGI_VERSION_MAJOR 1)
 set(LGI_VERSION_MINOR 0)
 
 if (UNIX AND NOT APPLE AND NOT HAIKU)
 	set(LINUX TRUE)
 endif()
+
 
 if (WIN32)
 	message("CMAKE_GENERATOR=${CMAKE_GENERATOR}")
@@ -558,8 +558,7 @@ elseif (LINUX)
 			${GTK3_INCLUDE_DIRS}
 			${GST_INCLUDE_DIRS}
 		PRIVATE
-			$<$<CONFIG:Debug>:${LGI_DEPS_DEBUG}/include>
-			$<$<CONFIG:Release>:${LGI_DEPS_RELEASE}/include>			
+			$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},Release>,${LGI_DEPS_RELEASE}/include,${LGI_DEPS_DEBUG}/include>
 			private/linux
 			/usr/include/libayatana-appindicator3-0.1
 		)

@@ -2,12 +2,15 @@
 
 #include "lgi/common/App.h"
 #include "lgi/common/Font.h"
+#include "lgi/common/LgiCommon.h"
 
 class LFontCache
 {
+	bool allocIds = false;
 	LFont *DefaultFont = nullptr;
 	LSurface *DrawContext = nullptr;
 	LArray<LFont*> Fonts;
+	LHashTbl<IntKey<int>, LFont*> idMap;
 	LHashTbl<ConstStrKey<char>, LString> FontName;
 	
 public:
@@ -49,6 +52,34 @@ public:
 			FontName.Add(Label, LString(FontFace));
 	}
 	
+	/// Turn on/off ID allocation for each font:
+	void SetAllocIds(bool alloc)
+	{
+		allocIds = alloc;
+	}
+	
+	/// Get the font by id:
+	LFont *FontFromId(int id)
+	{
+		LAssert(allocIds); // it's not going to work otherwise
+		return idMap.Find(id);
+	}
+	
+	/// Delete by id:
+	bool DeleteById(int id)
+	{
+		LAssert(allocIds); // it's not going to work otherwise
+		auto f = idMap.Find(id);
+		if (!f)
+			return false;
+		
+		idMap.Delete(id);
+		Fonts.Delete(f);
+		delete f;
+		return true;
+	}
+	
+	/// Get a font object by characteristics:
 	LFont *AddFont(	const char *Face,
 					LCss::Len Size,
 					LCss::FontWeightType Weight,
@@ -61,8 +92,7 @@ public:
 			auto f = Fonts[i];
 			if
 			(
-				f->Face() && Face &&
-				!_stricmp(f->Face(), Face) &&
+				!Stricmp(f->Face(), Face) &&
 				f->Size() == Size &&
 				f->Bold() == (Weight == LCss::FontWeightBold) &&
 				f->Italic() == (Style == LCss::FontStyleItalic) &&
@@ -99,6 +129,16 @@ public:
 			}
 			
 			Fonts.Add(f);
+			
+			if (allocIds)
+			{
+				int id;
+				while (auto f = idMap.Find(id = LRand(10000)))
+					;
+				
+				idMap.Add(id, f);
+				f->SetId(id);
+			}
 		}
 		
 		return f;
