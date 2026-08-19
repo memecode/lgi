@@ -97,6 +97,7 @@ struct LiteHtmlViewPriv :
 	LString cursorName;
 	// LHashTbl<IntKey<litehtml::uint_ptr>, LFont*> fontMap;
 	LFontCache fontCache;
+	LHashTbl<IntKey<int>, int> fontRefs;
 	LHashTbl<ConstStrKey<char, false>, Image*> imageCache;
 
 	// Url history state
@@ -165,10 +166,12 @@ struct LiteHtmlViewPriv :
 		auto pdc = (LSurface*)hdc;
 		if (clipSet)
 		{
+			/*
 			if (clip.Valid())
 				pdc->ClipRgn(&clip);
 			else
-				pdc->ClipRgn(NULL);
+				pdc->ClipRgn(nullptr);
+			*/
 			clipSet = false;
 		}
 		return pdc;
@@ -195,18 +198,11 @@ struct LiteHtmlViewPriv :
 		const char *fontFamily = descr.family.c_str();
 		auto faceNames = LString(fontFamily).SplitDelimit(",");
 
-		printf("create_font('%s', %g, %i, %i, %i)\n",
-			fontFamily,
-			descr.size.value(),
-			descr.weight,
-			descr.style,
-			descr.decoration_line);
-
 		LFont *fnt = nullptr;
 		for (auto face: faceNames)
 		{
 			fnt = fontCache.AddFont(face,
-									LCss::Len(LCss::LenPt, (int) descr.size.value()),
+									LCss::Len(LCss::LenPt, descr.size.value() * 0.7f),
 									descr.weight > 400							? LCss::FontWeightBold		: LCss::FontWeightNormal,
 									descr.style == litehtml::font_style_italic	? LCss::FontStyleItalic		: LCss::FontStyleInherit,
 									descr.decoration_line						? LCss::TextDecorUnderline	: LCss::TextDecorInherit);
@@ -216,6 +212,17 @@ struct LiteHtmlViewPriv :
 			LgiTrace("%s:%i - failed to create font(%s,%g)\n",
 					_FL, face.Get(), descr.size.value());			
 		}
+
+		int refs = fontRefs.Find(fnt->GetId());
+		fontRefs.Add(fnt->GetId(), ++refs);
+		printf("create_font('%s', %g, %i, %i, %i) = %i x %i\n",
+			fontFamily,
+			descr.size.value(),
+			descr.weight,
+			descr.style,
+			descr.decoration_line,
+			fnt->GetId(),
+			refs);
 
 		if (fm)
 		{
@@ -236,8 +243,19 @@ struct LiteHtmlViewPriv :
 
 	void delete_font(litehtml::uint_ptr hFont)
 	{
-		auto result = fontCache.DeleteById(hFont);
-		LAssert(result);
+		int refs = fontRefs.Find(hFont);
+		if (refs == 0)
+		{
+			LAssert(!"there should be 1 ref..?");
+			return;
+		}
+		fontRefs.Add(hFont, --refs);
+		if (refs == 0)
+		{
+			// last ref... delete:
+			auto result = fontCache.DeleteById(hFont);
+			LAssert(result);
+		}
 	}
 
 	litehtml::pixel_t text_width(const char* text, litehtml::uint_ptr hFont)

@@ -574,8 +574,7 @@ bool LFontSystem::AddFont(LAutoPtr<LFont> Fnt)
 
 	Fnt->Create();
 
-	auto *Map = Fnt->GetGlyphMap();
-	if (Map)
+	if (auto Map = Fnt->GetGlyphMap())
 	{
 		uint8_t Used = d->Used;
 

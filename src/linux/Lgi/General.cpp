@@ -86,11 +86,9 @@ void LSleep(uint32_t i)
 	request.tv_sec = i / 1000;
 	request.tv_nsec = (i % 1000) * 1000000;
 
-	//printf("%i LSleep(%i)\n", LCurrentThreadHnd(), i);
 	while (nanosleep(&request, &remain) == -1)
 	{
 		request = remain;
-		//printf("\t%i Resleeping=%i\n", LCurrentThreadHnd(), request.tv_sec*1000 + request.tv_nsec/1000);
 	}
 }
 
