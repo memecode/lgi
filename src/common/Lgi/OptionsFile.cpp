@@ -85,7 +85,7 @@ bool LOptionsFile::SetMode(PortableType mode, const char *BaseName)
 		mode = GuessMode();
 	Mode = mode;
 
-	if (!LGetSystemPath(Mode == DesktopMode ? LSP_APP_ROOT : LSP_APP_INSTALL, FullPath, sizeof(FullPath)))
+	if (!LGetSystemPath(Mode == DesktopMode ? LSP_APP_CONFIG : LSP_APP_INSTALL, FullPath, sizeof(FullPath)))
 	{
 		// LgiTrace("%s:%i - LGetSystemPath failed.\n", _FL);
 		return false;

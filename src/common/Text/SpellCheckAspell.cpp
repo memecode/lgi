@@ -215,7 +215,7 @@ public:
 		if (SpellParams->OptionsPath)
 			LMakePath(Dir, sizeof(Dir), SpellParams->OptionsPath, "..");
 		else
-			LGetSystemPath(SpellParams->IsPortable ? LSP_APP_INSTALL : LSP_APP_ROOT, Dir, sizeof(Dir));
+			LGetSystemPath(SpellParams->IsPortable ? LSP_APP_INSTALL : LSP_APP_DATA, Dir, sizeof(Dir));
 		LMakePath(Dir, sizeof(Dir), Dir, "Aspell");
 		AspellPath = Dir;
 		CheckCreateFolder(AspellPath);		

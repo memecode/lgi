@@ -555,7 +555,7 @@ struct LTracingSupport : public LMutex
 		else if (auto Dir = strrchr(LogPath, DIR_CHAR))
 		{
 			LString Leaf = Dir + 1;
-			LFile::Path p(LSP_APP_ROOT);
+			LFile::Path p(LSP_APP_DATA);
 			if (!p.Exists())
 				FileDev->CreateFolder(p);
 			p += Leaf;
@@ -948,13 +948,17 @@ LString LFile::Path::PrintAll()
 	_(LSP_COMMON_APP_DATA)
 	_(LSP_USER_APP_DATA)
 	_(LSP_LOCAL_APP_DATA)
+	_(LSP_SYS_MOUNT_POINT)
+	_(LSP_USER_MOUNT_POINT)
 	_(LSP_DESKTOP)
 	_(LSP_HOME)
 	_(LSP_USER_APPS)
 	_(LSP_EXE)
 	_(LSP_TRASH)
 	_(LSP_APP_INSTALL)
-	_(LSP_APP_ROOT)
+	_(LSP_APP_DATA)
+	_(LSP_APP_CONFIG)
+	_(LSP_APP_CACHE)
 	_(LSP_USER_DOCUMENTS)
 	_(LSP_USER_MUSIC)
 	_(LSP_USER_VIDEO)
@@ -1018,6 +1022,50 @@ LString LFile::Path::PrintAll()
 	#endif
 
 	return p.NewLStr();
+}
+
+static LString AppName()
+{
+	const char *Name = nullptr;
+	
+	// Try and get the configured app name:
+	if (LAppInst)
+		Name = LAppInst->LBase::Name();
+	
+	if (!Name)
+	{
+		// Use the exe name?
+		LString Exe = LGetExeFile();
+		if (auto l = LGetLeaf(Exe))
+		{
+			#ifdef WIN32
+				// Trim '.exe' off the end of the name
+				char *d = strrchr(l, '.');
+				*d = NULL;
+			#endif
+			Name = l;
+		}
+	}
+
+	return Name;
+}
+
+/// This joins base with 'AppName()' and then creates the folder if it doesn't exist.
+/// Returns the full path to the folder.
+static LString AppSpecificFolder(LString base)
+{
+	LString name = AppName();
+	if (!name)
+		return LString();
+
+	char Buf[MAX_PATH_LEN];
+	if (!LMakePath(Buf, sizeof(Buf), base, name))
+		return LString();
+	
+	if (!LDirExists(Buf))
+		FileDev->CreateFolder(Buf, true);
+
+	return Buf;
 }
 
 LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
@@ -1439,83 +1487,23 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			}
 			break;
 		}
-		case LSP_APP_ROOT:
+		case LSP_APP_DATA:
 		{
-			#ifndef LGI_STATIC
-			const char *Name = NULL;
-			
-			// Try and get the configured app name:
-			if (LAppInst)
-				Name = LAppInst->LBase::Name();
-			
-			if (!Name)
-			{
-				// Use the exe name?
-				LString Exe = LGetExeFile();
-				char *l = LGetLeaf(Exe);
-				if (l)
-				{
-					#ifdef WIN32
-					char *d = strrchr(l, '.');
-					*d = NULL;
-					#endif
-					Name = l;
-					// printf("%s:%i - name '%s'\n", _FL, Name);
-				}
-			}
-			
-			if (!Name)
-			{
-				LAssert(0);
-				break;
-			}
-
+			LString p;
 			#if defined MAC
 
-				#if LGI_COCOA
-			
-					NSArray *paths = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES);
-					if (paths)
-						Path = [[paths objectAtIndex:0] UTF8String];
-			
-				#elif LGI_CARBON
-			
-					FSRef Ref;
-					OSErr e = FSFindFolder(kUserDomain, kDomainLibraryFolderType, kDontCreateFolder, &Ref);
-					if (e)
-					{
-						printf("%s:%i - FSFindFolder failed e=%i\n", _FL, e);
-						LAssert(0);
-					}
-					else
-					{
-						LAutoString Base = FSRefPath(Ref);
-						Path = Base.Get();
-					}
-			
-				#else
-
-					struct passwd *pw = getpwuid(getuid());
-					if (!pw)
-						return false;
-					Path.Printf("%s/Library", pw->pw_dir);
-			
-				#endif
+				NSSearchPathDirectory directory = NSApplicationSupportDirectory;
+				if (auto paths = NSSearchPathForDirectoriesInDomains(directory, NSUserDomainMask, YES))
+					p = [[paths objectAtIndex:0] UTF8String];
 
 			#elif defined WIN32
 
-				Path = WinGetSpecialFolderPath(CSIDL_APPDATA);
+				p = WinGetSpecialFolderPath(CSIDL_LOCAL_APPDATA);
 
 			#elif defined LINUX
 
-				char Dot[128];
-				snprintf(Dot, sizeof(Dot), ".%s", Name);
-				Name = Dot;
-				struct passwd *pw = getpwuid(getuid());
-				if (pw)
-					Path = pw->pw_dir;
-				else
-					LAssert(0);
+				if (auto pw = getpwuid(getuid()))
+					p.Printf("%s/.local/share", pw->pw_dir);
 
 			#elif defined(HAIKU)
 
@@ -1524,12 +1512,12 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 
 				if (find_directory(B_USER_SETTINGS_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
 				{
-					Path = path;
+					p = path;
 					// printf("B_USER_SETTINGS_DIRECTORY=%s\n", Path.Get());
 				}
 				else if (find_directory(B_USER_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
 				{
-					Path.Printf("%s/config/settings", path);
+					p.Printf("%s/config/settings", path);
 					// printf("B_USER_DIRECTORY=%s\n", Path.Get());
 				}
 					
@@ -1539,12 +1527,101 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 
 			#endif
 
-			if (Path)
-			{
-				Path += DIR_STR;
-				Path += Name;
-			}
+			Path = AppSpecificFolder(p);
+			break;
+		}
+		case LSP_APP_CONFIG:
+		{
+			LString p;
+			#if defined MAC
+
+				NSSearchPathDirectory directory = NSLibraryDirectory;
+				NSArray *paths = NSSearchPathForDirectoriesInDomains(directory, NSUserDomainMask, YES);
+				if (paths)
+				{
+					p = [[paths objectAtIndex:0] UTF8String];
+					p += DIR_STR "Preferences";
+				}
+
+			#elif defined WIN32
+
+				p = WinGetSpecialFolderPath(CSIDL_APPDATA);
+
+			#elif defined LINUX
+
+				if (auto pw = getpwuid(getuid()))
+					p.Printf("%s%s%s", pw->pw_dir, DIR_STR, ".config");
+
+			#elif defined(HAIKU)
+
+				dev_t volume = dev_for_path("/boot");
+				char path[MAX_PATH_LEN] = "";
+
+				if (find_directory(B_USER_SETTINGS_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
+				{
+					p = path;
+					// printf("B_USER_SETTINGS_DIRECTORY=%s\n", p.Get());
+				}
+				else if (find_directory(B_USER_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
+				{
+					p.Printf("%s/config/settings", path);
+					// printf("B_USER_DIRECTORY=%s\n", p.Get());
+				}
+					
+			#else
+
+				LAssert(0);
+
 			#endif
+
+			Path = AppSpecificFolder(p);
+			break;
+		}
+		case LSP_APP_CACHE:
+		{
+			LString p;
+			#if defined MAC
+
+				NSSearchPathDirectory directory = NSLibraryDirectory;
+				NSArray *paths = NSSearchPathForDirectoriesInDomains(directory, NSUserDomainMask, YES);
+				if (paths)
+				{
+					p = [[paths objectAtIndex:0] UTF8String];
+					p += DIR_STR "Caches";
+				}
+
+			#elif defined WIN32
+
+				p = WinGetSpecialFolderPath(CSIDL_LOCAL_APPDATA);
+
+			#elif defined LINUX
+
+				if (auto pw = getpwuid(getuid()))
+					p.Printf("%s%s%s", pw->pw_dir, DIR_STR, ".cache");
+
+			#elif defined(HAIKU)
+
+				dev_t volume = dev_for_path("/boot");
+				char path[MAX_PATH_LEN] = "";
+
+				if (find_directory(B_USER_SETTINGS_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
+				{
+					p = path;
+					// printf("B_USER_SETTINGS_DIRECTORY=%s\n", p.Get());
+				}
+				else if (find_directory(B_USER_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
+				{
+					p.Printf("%s/config/settings", path);
+					// printf("B_USER_DIRECTORY=%s\n", p.Get());
+				}
+					
+			#else
+
+				LAssert(0);
+
+			#endif
+
+			Path = AppSpecificFolder(p);
 			break;
 		}
 		case LSP_OS:
@@ -1771,11 +1848,13 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			
 			#elif defined LGI_COCOA
 			
-				NSArray *paths = NSSearchPathForDirectoriesInDomains( NSLibraryDirectory, NSUserDomainMask, YES);
-				if (paths)
-				{
+				if (auto paths = NSSearchPathForDirectoriesInDomains( NSLibraryDirectory, NSUserDomainMask, YES))
 					Path = [paths objectAtIndex:0];
-				}
+			
+			#elif defined(LINUX)
+			
+				LFile::Path p("~/.local/share");
+				Path = p.Absolute().GetFull();
 			
 			#else
 			
@@ -1863,16 +1942,14 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			
 			#elif defined LGI_COCOA
 			
-				NSString *home = NSHomeDirectory();
-				if (home)
+				if (auto home = NSHomeDirectory())
 					Path = home;
 				else
 					LAssert(!"No home path?");
 
 			#elif defined POSIX
 
-				struct passwd *pw = getpwuid(getuid());
-				if (pw)
+				if (auto pw = getpwuid(getuid()))
 					Path = pw->pw_dir;
 			
 			#else
@@ -1991,6 +2068,53 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			#elif defined(WIN32)
 
 				LAssert(0);
+
+			#endif
+			break;
+		}
+
+		case LSP_SYS_MOUNT_POINT:
+		{
+			#if defined(LINUX)
+
+				Path = "/mnt";
+
+			#elif defined(MAC)
+
+				Path = "/Volumes";
+
+			#elif defined(WINDOWS)
+
+				Path = "\\";
+
+			#else
+
+				#error "Impl me."
+
+			#endif
+			break;
+		}
+
+		case LSP_USER_MOUNT_POINT:
+		{
+			#if defined(LINUX)
+
+				if (auto pw = getpwuid(getuid()))
+					Path.Printf("/media/%s", pw->pw_name);
+				else
+					LAssert(!"Unable to determine current user");
+
+			#elif defined(MAC)
+
+				Path = "/Volumes";
+
+			#elif defined(WINDOWS)
+
+				Path = "\\";
+
+			#else
+
+				#error "Impl me."
 
 			#endif
 			break;

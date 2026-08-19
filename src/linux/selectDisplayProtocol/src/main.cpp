@@ -46,7 +46,7 @@ LString getDataFilePath()
 		return appInst.GetFull();
 	}
 	
-	LFile::Path appRoot(LSP_APP_ROOT);
+	LFile::Path appRoot(LSP_APP_DATA);
 	appRoot += sDataFile;	
 	preExist = appRoot.Exists();
 	// printf("appRoot: %s\n", appRoot.GetFull().Get());

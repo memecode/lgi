@@ -632,7 +632,7 @@ struct LVolumePriv
 	{
 		if (SysPath == LSP_DESKTOP && !NextVol)
 		{
-			NextVol = new LVolume(LSP_MOUNT_POINT, "Mounts");
+			NextVol = new LVolume(LSP_SYS_MOUNT_POINT, "Mounts");
 
 			// Get mount list
 			// this is just a hack at this stage to establish some base

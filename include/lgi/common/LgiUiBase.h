@@ -40,7 +40,7 @@ class LDialog;
 // Tracing:
 
 /// Sets the output stream for the LgiTrace statement. By default the stream output
-/// is to <app_name>.txt in the executables folder or $LSP_APP_ROOT\<app_name>.txt if
+/// is to <app_name>.txt in the executables folder or $LSP_APP_DATA\<app_name>.txt if
 /// that is not writable. If the stream is set to something then normal file output is
 /// directed to the specified stream instead.
 LgiFunc void LTraceSetStream(class LStreamI *stream);
@@ -52,7 +52,7 @@ LgiExtern LString LTraceGetFilePath(bool clearContents = false);
 /// then to a log file (see LgiTraceSetStream for details)
 ///
 /// Default path is ./<app_name>.txt relative to the executable.
-/// Fall back path is LgiGetSystemPath(LSP_APP_ROOT).
+/// Fall back path is LGetSystemPath(LSP_APP_DATA).
 LgiFunc void LgiTrace(const char *Format, ...);
 
 #ifndef LGI_STATIC

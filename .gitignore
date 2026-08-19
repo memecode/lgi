@@ -36,3 +36,4 @@ utils/PingGraph/ping_graph.txt
 utils/SlogViewer/makefile
 utils/SlogViewer/slogviewer
 utils/SlogViewer/slogviewer.txt
+.aider*

@@ -456,7 +456,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 		auto cfm = PANGO_CAIRO_FONT_MAP(fm);
 		double Dpi = 96.0;
 
-		LFile::Path p(LSP_APP_ROOT);
+		LFile::Path p(LSP_APP_DATA);
 		p += "lgi-conf.json";
 		if (p.IsFile())
 		{

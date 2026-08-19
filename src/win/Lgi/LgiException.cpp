@@ -106,7 +106,7 @@ LONG __stdcall LApp::_ExceptionFilter(LPEXCEPTION_POINTERS e, char *ProductId)
 									// do it.
 
 	char p[MAX_PATH_LEN];
-	LGetSystemPath(LSP_APP_ROOT, p, sizeof(p));
+	LGetSystemPath(LSP_APP_DATA, p, sizeof(p));
 	if (!LDirExists(p))
 		FileDev->CreateFolder(p);
 

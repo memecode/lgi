@@ -84,7 +84,7 @@ public:
 				}
 				else
 				{
-					if (LGetSystemPath(LSP_APP_ROOT, p, sizeof(p)) &&
+					if (LGetSystemPath(LSP_APP_DATA, p, sizeof(p)) &&
 						!LDirExists(p))
 					{
 						FileDev->CreateFolder(p);

@@ -783,7 +783,7 @@ bool LHttpServer::SecureSockets::checkRequirement(const char *req)
 		}
 
 		// Check the cert folder exists:
-		LFile::Path appRoot(LSP_APP_ROOT);
+		LFile::Path appRoot(LSP_APP_DATA);
 		auto certFolder = appRoot / "certs";
 		if (!LDirExists(certFolder))
 		{
