@@ -1121,7 +1121,7 @@ OsSocket SslSocket::GetRawSocket(BIO* bio)
 	if (!bio)
 		return INVALID_SOCKET;
 	
-	int socket_fd = INVALID_SOCKET;
+	OsSocket socket_fd = INVALID_SOCKET;
 	// BIO_get_fd(b, c) expands to: BIO_ctrl(b, BIO_C_GET_FD, 0, (char *)c)
 	auto result = Library->BIO_ctrl(bio, BIO_C_GET_FD, 0, &socket_fd);
 	return (result >= 0) ? socket_fd : INVALID_SOCKET;
@@ -1275,7 +1275,7 @@ DebugTrace("%s:%i - starting SSL_ERROR_WANT_CONNECT loop\n", _FL);
 											FD_ZERO(&write_fds);
 											FD_SET(fd, &write_fds);
 											timeval tv = { 0, SLEEP_MS*1000 };
-											result = select(fd + 1, NULL, &write_fds, NULL, &tv);
+											result = select(0, NULL, &write_fds, NULL, &tv);
 										#else
 											struct pollfd pfd;
 											pfd.fd = fd;
@@ -1877,9 +1877,9 @@ bool SslSocket::Accept(LSocketI *sock)
 			int waitMs = 50;
 			if (timeoutMs >= 0)
 			{
-				auto remaining = timeoutMs - (LCurrentTime() - start);
-				if (remaining <= 0)
-					remaining = 1;
+				auto elapsed = LCurrentTime() - start;
+				int remaining = elapsed >= static_cast<uint64_t>(timeoutMs) ?
+					1 : timeoutMs - static_cast<int>(elapsed);
 				waitMs = MIN(waitMs, remaining);
 			}
 
@@ -1970,12 +1970,12 @@ void SslSocket::IsBlocking(bool block)
 	d->IsBlocking = block;
 
 	// Helper lambda to change OS-level socket flags
-	auto applySocketNbio = [this, block](int socket_fd) {
-		if (socket_fd < 0) return;
+	auto applySocketNbio = [this, block](OsSocket socket_fd) {
+		if (!ValidSocket(socket_fd)) return;
 		
 #if defined(_WIN32)
 		u_long mode = block ? 0 : 1;
-		ioctlsocket(static_cast<SOCKET>(socket_fd), FIONBIO, &mode);
+		ioctlsocket(socket_fd, FIONBIO, &mode);
 #else
 		int flags = fcntl(socket_fd, F_GETFL, 0);
 		if (flags != -1) {
@@ -2004,10 +2004,10 @@ void SslSocket::IsBlocking(bool block)
 
 		// 3. Extract the file descriptor safely using raw BIO_ctrl and update OS state
 		auto fd = GetRawSocket(rbio);
-		if (fd < 0)
+		if (!ValidSocket(fd))
 			fd = GetRawSocket(wbio);
 		
-		if (fd >= 0)
+		if (ValidSocket(fd))
 			applySocketNbio(fd);
 
 		DebugTrace("Ssl object updated: IsBlocking(%i), FD=" LPrintfSock "\n", block, fd);
@@ -2018,8 +2018,8 @@ void SslSocket::IsBlocking(bool block)
 		long r = Library->BIO_set_nbio(Bio, !d->IsBlocking);
 		
 		// 2. Extract the file descriptor safely using raw BIO_ctrl and update OS state
-		int fd = GetRawSocket(Bio);
-		if (fd >= 0) {
+		auto fd = GetRawSocket(Bio);
+		if (ValidSocket(fd)) {
 			applySocketNbio(fd);
 		}
 

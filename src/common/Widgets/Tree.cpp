@@ -1115,7 +1115,7 @@ void LTreeItem::OnPaint(ItemPaintCtx &Ctx)
 			continue;
 
 		Ctx.Set(x, Pos.y1, x + Ctx.ColPx[i] - 1, Pos.y2);
-		OnPaintColumn(Ctx, i, Tree->Columns[i]);
+		OnPaintColumn(Ctx, (int)i, Tree->Columns[i]);
 		x = Ctx.x2 + 1;
 	}
 	

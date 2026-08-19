@@ -1029,8 +1029,10 @@ static LString AppName()
 	const char *Name = nullptr;
 	
 	// Try and get the configured app name:
+	#ifndef LGI_STATIC
 	if (LAppInst)
 		Name = LAppInst->LBase::Name();
+	#endif
 	
 	if (!Name)
 	{

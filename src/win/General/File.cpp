@@ -508,7 +508,7 @@ struct LVolumePriv
 				for (unsigned i=0; i<CountOf(Paths); i++)
 					Insert(new LVolume(Paths[i], Names[i]));
 			}
-			else if (SysPath == LSP_MOUNT_POINT)
+			else if (SysPath == LSP_SYS_MOUNT_POINT)
 			{
 				// Get drive list
 				char Str[512];
@@ -525,7 +525,7 @@ struct LVolumePriv
 	{
 		if (SysPath == LSP_DESKTOP && !NextVol)
 		{
-			NextVol = new LVolume(LSP_MOUNT_POINT, "Drives");
+			NextVol = new LVolume(LSP_SYS_MOUNT_POINT, "Drives");
 		}
 
 		return NextVol;

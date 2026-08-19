@@ -1,5 +1,7 @@
 #pragma once
 
+#include "lgi/common/DocView.h"
+
 class LiteHtmlView :
 	public LDocView
 {
