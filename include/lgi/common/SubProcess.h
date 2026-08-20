@@ -121,6 +121,7 @@ public:
 	void SetNewGroup(bool ng);
 	ProcessId Handle();
 	bool IsRunning();
+	LError &GetError();
 	uint32_t GetErrorCode();
 	int32 GetExitValue();
 	void Connect(LSubProcess *child);

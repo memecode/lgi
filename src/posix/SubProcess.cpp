@@ -38,6 +38,13 @@
 #define INVALID_PID			-1
 #define ClosePipe			close
 
+#define SET_ERROR(code, msg) \
+	do { \
+		d->Error.Set(code, msg); \
+		d->Error.SetSource(_FL); \
+		LgiTrace("%s:%i - %s\n", _FL, d->Error.GetMsg().Get()); \
+	} while (0)
+
 #include <pwd.h>
 #if defined(LINUX) // !mac and !haiku
 	#include <crypt.h>
@@ -117,7 +124,7 @@ struct LSubProcessPriv
 	bool PseudoConsole = false;
 	bool EnvironmentChanged = false;
 	LArray<LSubProcess::Variable> Environment;
-	uint32_t ErrorCode = 0;
+	LError Error;
 
 	LSubProcess::PipeHandle ExternIn = NULL_PIPE, ExternOut = NULL_PIPE;
 	LSubProcess::ProcessId ChildPid = INVALID_PID;
@@ -259,9 +266,14 @@ bool LSubProcess::IsRunning()
 	return d->ChildPid != INVALID_PID;
 }
 
+LError &LSubProcess::GetError()
+{
+	return d->Error;
+}
+
 uint32_t LSubProcess::GetErrorCode()
 {
-	return d->ErrorCode;
+	return d->Error.GetCode();
 }
 
 int32 LSubProcess::GetExitValue()
@@ -457,14 +469,14 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 	int in[2];
 	if (pipe(in) == -1)
 	{
-		printf("parent: Failed to create stdin pipe");
+		SET_ERROR(errno, "parent: Failed to create stdin pipe");
 		return false;
 	}
 
 	int out[2];
 	if (pipe(out) == -1)
 	{
-		printf("parent: Failed to create stdout pipe");
+		SET_ERROR(errno, "parent: Failed to create stdout pipe");
 		return false;
 	}
 	
@@ -474,35 +486,43 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 		// We are in the child process.
 		if (d->InitialFolder)
 		{
-			chdir(d->InitialFolder);
+			if (chdir(d->InitialFolder))
+				printf(	"%s,%s:%i - chdir(%s) failed.\n",
+						sErrorStr, _FL, d->InitialFolder.Get());
 		}
 
 		// Child shouldn't write to its stdin.
 		if (close(in[1]))
-			printf("%s:%i - close failed.\n", _FL);
+			printf(	"%s,%s:%i - close failed.\n",
+					sErrorStr, _FL);
 
 		// Child shouldn't read from its stdout.
 		if (close(out[0]))
-			printf("%s:%i - close failed.\n", _FL);
+			printf(	"%s,%s:%i - close failed.\n",
+					sErrorStr, _FL);
 
 		// Redirect stdin and stdout for the child process.
 		if (dup2(in[0], fileno(stdin)) == -1)
 		{
-			printf("%s:%i - child[pre-exec]: Failed to redirect stdin for child\n", _FL);
+			printf(	"%s,%s:%i - child[pre-exec]: Failed to redirect stdin for child\n",
+					sErrorStr, _FL);
 			return false;
 		}
 		if (close(in[0]))
-			printf("%s:%i - close failed.\n", _FL);
+			printf(	"%s,%s:%i - close failed.\n",
+					sErrorStr, _FL);
 		
 		if (dup2(out[1], fileno(stdout)) == -1)
 		{
-			printf("%s:%i - child[pre-exec]: Failed to redirect stdout for child\n", _FL);
+			printf(	"%s,%s:%i - child[pre-exec]: Failed to redirect stdout for child\n",
+					sErrorStr, _FL);
 			return false;
 		}
 
 		if (dup2(out[1], fileno(stderr)) == -1)
 		{
-			printf("%s:%i - child[pre-exec]: Failed to redirect stderr for child\n", _FL);
+			printf("%s,%s:%i - child[pre-exec]: Failed to redirect stderr for child\n",
+					sErrorStr, _FL);
 			return false;
 		}
 		close(out[1]);
@@ -528,10 +548,10 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 			}
 		}
 		
-		if (d->UserId >= 0)
-			setuid(d->UserId);
-		if (d->GrpId >= 0)
-			setgid(d->GrpId);
+		if (d->UserId >= 0 && setuid(d->UserId))
+			printf("%s,%s:%i - setuid(%d) failed.\n", sErrorStr, _FL, d->UserId);
+		if (d->GrpId >= 0 && setgid(d->GrpId))
+			printf("%s,%s:%i - setgid(%d) failed.\n", sErrorStr, _FL, d->GrpId);
  				
 		if (d->Environment.Length())
 		{
@@ -572,8 +592,8 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 		#if defined(MAC) || defined(HAIKU)
 			// While 'exit' would be nice and clean it does cause crashes in free the global InitLibPng object
 			// We HAVE to call exec??? to replace the process... anything will do... 'ls' will just quit quickly
-			char *a= {0};
-			execv("/bin/ls", &a);
+			char *a[] = {0};
+			execv("/bin/ls", a);
 		#else
 			exit(LSUBPROCESS_ERROR);
 		#endif
@@ -583,17 +603,17 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 		// We are in the parent process.
 		if (d->ChildPid == -1)
 		{
-			printf("%s:%i - parent: Failed to create child", _FL);
+			SET_ERROR(LErrorInvalidParam, "parent: fork() failed");
 			return false;
 		}
 
 		// Parent shouldn't read from child's stdin.
 		if (close(in[0]))
-			printf("%s:%i - close failed.\n", _FL);
+			SET_ERROR(errno, "parent: close(0) failed");
 
 		// Parent shouldn't write to child's stdout.
 		if (close(out[1]))
-			printf("%s:%i - close failed.\n", _FL);
+			SET_ERROR(errno, "parent: close(1) failed");
 
 		d->Io.Read = out[0];
 		d->Io.Write = in[1];
@@ -670,7 +690,7 @@ int LSubProcess::Wait()
 	if (d->ChildPid != INVALID_PID)
 	{
 		pid_t r = waitpid(d->ChildPid, &Status, 0);
-		printf("%s:%i - waitpid=%i pid=%i\n", _FL, r, d->ChildPid);
+		// printf("%s:%i - waitpid=%i pid=%i\n", _FL, r, d->ChildPid);
 		if (r == d->ChildPid)
 		{
 			d->ChildPid = INVALID_PID;
@@ -678,7 +698,7 @@ int LSubProcess::Wait()
 				d->ExitValue = WEXITSTATUS(Status);
 			else
 				d->ExitValue = 255;
-			printf("%s:%i - wait, r=%i, ExitValue=%i\n", _FL, r, d->ExitValue);
+			// printf("%s:%i - wait, r=%i, ExitValue=%i\n", _FL, r, d->ExitValue);
 		}
 	}
 	else printf("%s:%i - wait: invalid PID.\n", _FL);
@@ -695,17 +715,15 @@ bool LSubProcess::Signal(int which)
 {
 	if (d->ChildPid == INVALID_PID)
 	{
-		// printf("%s:%i - child pid doesn't exist (%s).\n", _FL, d->Exe.Get());
+		SET_ERROR(LErrorInvalidParam, "child pid doesn't exist");
 		return false;
 	}
 
 	if (kill(d->ChildPid, which))
 	{
-		printf("%s:%i - kill(%i, %i) failed.\n", _FL, d->ChildPid, which);
+		SET_ERROR(errno, LString::Fmt("kill(%i, %i) failed.", d->ChildPid, which));
 		return false;
 	}
-
-	printf("%s:%i - kill(%i, %i).\n", _FL, d->ChildPid, which);
 
 	return true;
 }
