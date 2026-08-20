@@ -10,7 +10,7 @@ class LFontCache
 	LFont *DefaultFont = nullptr;
 	LSurface *DrawContext = nullptr;
 	LArray<LFont*> Fonts;
-	LHashTbl<IntKey<int>, LFont*> idMap;
+	LHashTbl<IntKey<size_t>, LFont*> idMap;
 	LHashTbl<ConstStrKey<char>, LString> FontName;
 	
 public:
@@ -59,14 +59,14 @@ public:
 	}
 	
 	/// Get the font by id:
-	LFont *FontFromId(int id)
+	LFont *FontFromId(size_t id)
 	{
 		LAssert(allocIds); // it's not going to work otherwise
 		return idMap.Find(id);
 	}
 	
 	/// Delete by id:
-	bool DeleteById(int id)
+	bool DeleteById(size_t id)
 	{
 		LAssert(allocIds); // it's not going to work otherwise
 		auto f = idMap.Find(id);

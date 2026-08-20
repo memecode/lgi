@@ -6852,7 +6852,7 @@ void LHtml::_New()
 	}
 	#endif
 	
-	FontCache = new LHtmlFontCache(GetFont(), GetDpiScale().y);	
+	FontCache = new LHtmlFontCache(GetFont(), (float) GetDpiScale().y);	
 	SetScrollBars(false, false);
 }
 

@@ -17,6 +17,7 @@
 	#include "lgi/common/RegKey.h"
 	#include <sys/types.h>
 	#include <sys/stat.h>
+	#include <sddl.h>
 #else
 	#include <unistd.h>
 	#define _getcwd getcwd
@@ -2069,7 +2070,33 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 
 			#elif defined(WIN32)
 
-				LAssert(0);
+				// Since Vista the recycle bin is a per-volume virtual folder with no CSIDL/KNOWNFOLDERID
+				// support, so build the real on-disk path '<drive>\$Recycle.Bin\<user SID>' manually.
+				HANDLE hToken = NULL;
+				if (OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken))
+				{
+					DWORD Len = 0;
+					GetTokenInformation(hToken, TokenUser, NULL, 0, &Len);
+					LArray<uint8_t> Buf;
+					if (Len > 0 && Buf.Length(Len) &&
+						GetTokenInformation(hToken, TokenUser, Buf.AddressOf(), Len, &Len))
+					{
+						auto User = (TOKEN_USER*)Buf.AddressOf();
+						LPWSTR Sid = NULL;
+						if (ConvertSidToStringSidW(User->User.Sid, &Sid))
+						{
+							LAutoString a(WideToUtf8(Sid));
+							LString Home = WinGetSpecialFolderPath(CSIDL_PROFILE);
+							if (a && Home.Length() >= 2)
+								Path.Printf("%.2s\\$Recycle.Bin\\%s", Home.Get(), a.Get());
+							LocalFree(Sid);
+						}
+					}
+					CloseHandle(hToken);
+				}
+
+				if (!Path)
+					LAssert(!"Failed to build Recycle Bin path.");
 
 			#endif
 			break;

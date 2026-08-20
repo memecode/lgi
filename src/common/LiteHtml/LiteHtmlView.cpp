@@ -97,7 +97,7 @@ struct LiteHtmlViewPriv :
 	LString cursorName;
 	// LHashTbl<IntKey<litehtml::uint_ptr>, LFont*> fontMap;
 	LFontCache fontCache;
-	LHashTbl<IntKey<int>, int> fontRefs;
+	LHashTbl<IntKey<litehtml::uint_ptr>, int> fontRefs;
 	LHashTbl<ConstStrKey<char, false>, Image*> imageCache;
 
 	// Url history state
@@ -932,7 +932,7 @@ bool LiteHtmlView::OnMouseWheel(double Lines)
 {
 	if (!VScroll)
 		return false;
-	VScroll->Value(VScroll->Value() + (Lines * LSysFont->GetHeight()));
+	VScroll->Value(VScroll->Value() + (int64)(Lines * LSysFont->GetHeight()));
 	return true;
 }
 
