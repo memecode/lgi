@@ -2412,7 +2412,8 @@ static void _LFindFile(const char *Name, LString *GStr, LAutoString *AStr)
 	LOG_DEBUG("%s:%i - Exe='%s'\n", _FL, Exe.Get());
 
 	char CurWorking[MAX_PATH_LEN];
-	_getcwd(CurWorking, sizeof(CurWorking));
+	if (!_getcwd(CurWorking, sizeof(CurWorking)))
+		CurWorking[0] = 0;
 	const char *PrefPath[] =
 	{
 		".",
@@ -2499,7 +2500,7 @@ static void _LFindFile(const char *Name, LString *GStr, LAutoString *AStr)
 	{
 		if (GStr)
 			*GStr = Files[0];
-		else
+		else if (AStr)
 		{
 			AStr->Reset(Files[0]);
 			Files.DeleteAt(0);
