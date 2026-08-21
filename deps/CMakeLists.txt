@@ -61,6 +61,14 @@ function(GitProject NAME URI BRANCH ADDTARGET CLONE_ERR_FATAL)
                 return()
             endif()
         endif()
+    else()
+        execute_process(COMMAND git pull
+            WORKING_DIRECTORY ${DIR}
+            RESULT_VARIABLE pull_result
+            OUTPUT_VARIABLE pull_out)
+        if(NOT ${pull_result} MATCHES "^[0-9]+$" OR ${pull_result})
+            message(WARNING "${NAME} pull failed: ${pull_result} ${pull_out}")
+        endif()
     endif()
 
     if(${ADDTARGET})
