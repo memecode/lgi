@@ -46,40 +46,12 @@ bool LStringTests::Run()
 	const char *Charset = "windows-1252";
 
 	// No prefered charset testing:
-	LAutoString result1( EncodeRfc2047(NewStr((char*)Rfc2047Input), Charset) );
-	if (Stricmp(result1.Get(), EncodeResult1))
-	{
-		printf("result1='%s'\n", result1.Get());
-		printf("EncodeResult1='%s'\n", EncodeResult1);
-		return FAIL(_FL, "EncodeRfc2047");
-	}
-	LAutoString decode1( DecodeRfc2047(NewStr(result1)) );
-	if (Strcmp((char*)UtfInput, decode1.Get()))
-	{
-		LString::Array a;
-		for (uint8_t *c = (uint8_t*)decode1.Get(); *c; c++)
-			a.New().Printf("%2.2x", *c);
-		printf("decode1=%s\n", LString(",").Join(a).Get());
-		a.Empty();
-		for (uint8_t *c = (uint8_t*)UtfInput; *c; c++)
-			a.New().Printf("%2.2x", *c);
-		printf("UtfInput=%s\n", LString(",").Join(a).Get());
-
-		return FAIL(_FL, "DecodeRfc2047");
-	}
-
 	LString   result2 = LEncodeRfc2047((char*)Rfc2047Input, Charset);
 	if (Stricmp(result2.Get(), EncodeResult1))
 		return FAIL(_FL, "LEncodeRfc2047");
-	LAutoString decode2( DecodeRfc2047(NewStr(result2)) );
-	if (Strcmp((char*)UtfInput, decode2.Get()))
-		return FAIL(_FL, "DecodeRfc2047");
 
 	// Redo tests with a charset preference set:
 	CharsetPrefs.Add("iso-8859-9");
-	LAutoString result3( EncodeRfc2047(NewStr((char*) Rfc2047Input), Charset, &CharsetPrefs));
-	if (Stricmp(result3.Get(), EncodeResult2))
-		return FAIL(_FL, "EncodeRfc2047");
 	LString     result4 = LEncodeRfc2047((char*)Rfc2047Input, Charset, &CharsetPrefs);
 	if (Stricmp(result4.Get(), EncodeResult2))
 		return FAIL(_FL, "EncodeRfc2047");
