@@ -290,6 +290,19 @@ if (1)
         endif()
     endif()
 
+    # libjpeg's vendored cmakescripts/GNUInstallDirs.cmake stashes unresolved
+    # "<CMAKE_INSTALL_DATAROOTDIR>" placeholders into these shared CACHE vars;
+    # resolve them here so later projects (e.g. quickjs-ng) that use the
+    # regular GNUInstallDirs module don't fail to expand them.
+    foreach(_dir DATADIR INFODIR MANDIR LOCALEDIR DOCDIR)
+        if(CMAKE_INSTALL_${_dir} MATCHES "<CMAKE_INSTALL_DATAROOTDIR>")
+            string(REPLACE "<CMAKE_INSTALL_DATAROOTDIR>" "${CMAKE_INSTALL_DATAROOTDIR}"
+                _fixed_install_dir "${CMAKE_INSTALL_${_dir}}")
+            set(CMAKE_INSTALL_${_dir} "${_fixed_install_dir}" CACHE PATH "" FORCE)
+            message("Fixed CMAKE_INSTALL_${_dir}=${CMAKE_INSTALL_${_dir}}")
+        endif()
+    endforeach()
+
     # unused at the moment, but might replace Lgi's native scripting language sometime
     GitProject(quickjs-ng "https://github.com/quickjs-ng/quickjs.git" "master" TRUE TRUE)
 
