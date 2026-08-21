@@ -163,7 +163,8 @@ bool LWindow::MoveSameScreen(LViewI *View)
 	LRect p = Wnd ? Wnd->GetPos() : View->GetPos();
 	if (!p.Valid())
 	{
-		LAssert(!"MoveSameScreen: No valid parent position");
+		// This is really just a warning:
+		printf("%s:%i - MoveSameScreen: No valid parent position\n", _FL);
 		return false;
 	}
 	
