@@ -3997,7 +3997,9 @@ int AppWnd::OnNotify(LViewI *Ctrl, const LNotification &n)
 					{
 						LAutoString File;
 						int Line;
-						if (d->DbgContext->ParseFrameReference(item->GetText(1), File, Line))
+						auto stack = item->GetText(1);
+						printf("select call stack: %s\n", stack);
+						if (d->DbgContext->ParseFrameReference(stack, File, Line))
 						{
 							LAutoString Full;
 							if (d->FindSource(Full, File, NULL))
@@ -4008,7 +4010,9 @@ int AppWnd::OnNotify(LViewI *Ctrl, const LNotification &n)
 								if (sFrame && IsDigit(*sFrame))
 									d->DbgContext->SetFrame(atoi(sFrame));
 							}
+							else printf("%s:%i - FindSource(%s) failed.\n", _FL, File.Get());
 						}
+						else printf("%s:%i - ParseFrameReference(%s) failed.\n", _FL, stack);
 					}
 				}
 			}

@@ -619,10 +619,10 @@ bool LDebugContext::ParseFrameReference(const char *Frame, LAutoString &File, in
 		return false;
 	
 	const char *At = NULL, *s = Frame;
-	while ((s = stristr(s, "at")))
+	while ((s = stristr(s, " at ")))
 	{
 		At = s;
-		s += 2;
+		s += 4;
 	}
 
 	if (!At)
