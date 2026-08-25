@@ -1279,9 +1279,8 @@ public:
 		c = CommitsLayout->GetCell(1, 1);
 			c->Add(new LButton(IDC_CLEAR_FILTER_COMMITS, 0, 0, -1, -1, "x"));
 		c = CommitsLayout->GetCell(2, 1);
-			c->VerticalAlign(LCss::VerticalMiddle);
-			c->PaddingRight("2px");
-			c->Add(new LTextLabel(-1, 0, 0, -1, -1, "Note: @author"));
+			c->PaddingRight("8px");
+			c->Add(new LButton(ID_FILTER_BY_AUTHOR, 0, 0, -1, -1, "@author"));
 		CommitsLayout->Attach(CommitsBox);
 		CommitsLayout->GetCss(true)->Height("40%");
 
@@ -1713,6 +1712,23 @@ public:
 		return dynamic_cast<VcFolder*>(Tree->Selection());
 	}
 
+	void SetAuthorFilter(LString email)
+	{
+		Log->Print("%s:%i - got author '%s'.\n",
+			_FL, email.Get());
+
+		if (!email)
+			return;
+
+		LViewI *filt;
+		if (GetViewById(IDC_FILTER_COMMITS, filt))
+		{
+			auto p = email.SplitDelimit("@");
+			filt->Name(LString("@") + p[0]);
+			OnNotify(filt, LNotifyItemClick);
+		}
+	}
+
 	int OnNotify(LViewI *c, const LNotification &n) override
 	{
 		switch (c->GetId())
@@ -1733,6 +1749,26 @@ public:
 					FolderFilter = n;
 					OnFilterFolders();
 				}
+				break;
+			}
+			case ID_FILTER_BY_AUTHOR:
+			{
+				if (auto f = GetCurrent())
+				{
+					Log->Print("%s:%i - getting author...\n", _FL);
+
+					f->GetAuthor(true, [this, f](auto author)
+						{
+							if (!author.email)
+								f->GetAuthor(false, [this](auto &author)
+									{
+										SetAuthorFilter(author.email);
+									});
+							else
+								SetAuthorFilter(author.email);
+						});
+				}
+				else Log->Print("%s:%i - no current folder.\n", _FL);
 				break;
 			}
 			case IDC_CLEAR_FILTER_COMMITS:
