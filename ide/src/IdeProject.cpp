@@ -821,6 +821,54 @@ public:
 			}
 
 			const char *nextLine2t = " \\\n\t\t";
+			auto AddRPaths = [&](IdeProject *Project, const char *ProjectBase, LString varName)
+			{
+				if (!hVariables.Find(varName))
+				{
+					auto relBase = LMakeRelativePath(Base, ProjectBase);
+					hVariables.Add(varName, relBase ? relBase.RStrip("/\\") : "");
+				}
+
+				auto RPath = Project->GetSettings()->GetStr(ProjRPath, NULL, Platform, Cfg);
+				if (ValidStr(RPath))
+				{
+					auto Paths = LString(RPath).SplitDelimit("\r\n");
+					for (auto &p: Paths)
+					{
+						LString Path = LString(p).Strip();
+						if (!Path.Length())
+							continue;
+
+						auto RPathValue = LString::Fmt("$(%s)/%s", varName.Get(), Path.Get());
+						sLibs[Cfg] += LString::Fmt("%s-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/%s'",
+											nextLine2t, RPathValue.Get());
+					}
+				}
+
+				auto RPathLinks = Project->GetSettings()->GetStr(ProjRPathLink, NULL, Platform, Cfg);
+				if (ValidStr(RPathLinks))
+				{
+					auto Paths = LString(RPathLinks).SplitDelimit("\r\n");
+					for (auto &p: Paths)
+					{
+						LString Path = LString(p).Strip();
+						if (!Path.Length())
+							continue;
+
+						auto LinkPath = LString::Fmt("$(%s)/%s", varName.Get(), Path.Get());
+						sLibs[Cfg] += LString::Fmt("%s-L%s", nextLine2t, LinkPath.Get());
+						sLibs[Cfg] += LString::Fmt("%s-Wl,-rpath-link,%s", nextLine2t, LinkPath.Get());
+						sLibs[Cfg] += LString::Fmt("%s-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(%s)/$(BuildDir)'",
+											nextLine2t, varName.Get());
+					}
+				}
+			};
+
+			if (auto Target = Proj->GetTargetName(Platform))
+			{
+				LString varName = LString::Fmt("%s_DIR", LString(Target).Replace("-", "_").Upper().Get());
+				AddRPaths(Proj, Base, varName);
+			}
 
 			for (auto dep: Deps)
 			{
@@ -861,38 +909,7 @@ public:
 						if (!hVariables.Find(varName))
 							hVariables.Add(varName, relStrip);
 
-						auto RPath = dep->GetSettings()->GetStr(ProjRPath, NULL, Platform, Cfg);
-						auto RPathLinks = dep->GetSettings()->GetStr(ProjRPathLink, NULL, Platform, Cfg);
-						if (ValidStr(RPath))
-						{
-							auto Paths = LString(RPath).SplitDelimit("\r\n");
-							for (auto &p: Paths)
-							{
-								LString Path = LString(p).Strip();
-								if (!Path.Length())
-									continue;
-
-								auto RPathValue = LString::Fmt("$(%s)/%s", varName.Get(), Path.Get());
-								sLibs[Cfg] += LString::Fmt("%s-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/%s'",
-													nextLine2t, RPathValue.Get());
-							}
-						}
-						if (ValidStr(RPathLinks))
-						{
-							auto Paths = LString(RPathLinks).SplitDelimit("\r\n");
-							for (auto &p: Paths)
-							{
-								LString Path = LString(p).Strip();
-								if (!Path.Length())
-									continue;
-
-								auto LinkPath = LString::Fmt("$(%s)/%s", varName.Get(), Path.Get());
-								sLibs[Cfg] += LString::Fmt("%s-L%s", nextLine2t, LinkPath.Get());
-								sLibs[Cfg] += LString::Fmt("%s-Wl,-rpath-link,%s", nextLine2t, LinkPath.Get());
-								sLibs[Cfg] += LString::Fmt("%s-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(%s)/$(BuildDir)'",
-													nextLine2t, varName.Get());
-							}
-						}
+						AddRPaths(dep, DepBase, varName);
 					}
 				}
 			}
