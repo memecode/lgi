@@ -901,11 +901,8 @@ void VcFolder::OnBranchesChange()
 			if (!stricmp(b.key, "default") ||
 				!stricmp(b.key, "trunk"))
 				Default = b.key;
-			/*
-			else
-				printf("Other=%s\n", b.key);
-			*/
 		}
+
 		int Idx = 1;
 		for (auto b: Branches)
 		{
@@ -1372,8 +1369,8 @@ void VcFolder::Select(bool b)
 	#endif
 	if (!b)
 	{
-		auto *w = d->Tree->GetWindow();
-		w->SetCtrlName(IDC_BRANCH, NULL);
+		if (auto w = d->Tree->GetWindow())
+			w->SetCtrlName(IDC_BRANCH, NULL);
 	}
 
 	PROF("Parent.Select");
@@ -2317,6 +2314,20 @@ void VcFolder::UpdateBranchUi()
 			auto it = Branches.begin();
 			if (it != Branches.end())
 				b->Name((*it).key);
+		}
+
+		LString branch = b->Name();
+		LString key = "branches/DMS-";
+		if (!Strnicmp(branch.Get(), key.Get(), key.Length()))
+		{
+			auto msg = w->GetCtrlName(IDC_MSG);
+			if (!msg)
+			{
+				auto ref = branch.SplitDelimit("/", 1)[-1];
+				auto parts = ref.SplitDelimit("-");
+				if (parts.Length() > 1)
+					w->SetCtrlName(IDC_MSG, LString::Fmt("%s-%s: ", parts[0].Get(), parts[1].Get()));
+			}
 		}
 	}
 
