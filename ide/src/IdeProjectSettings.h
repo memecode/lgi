@@ -19,6 +19,8 @@ enum ProjSetting
 	ProjSystemIncludes,
 	ProjLibraries,
 	ProjLibraryPaths,
+	ProjRPath,
+	ProjRPathLink,
 	ProjTargetType,
 	ProjTargetName,
 	ProjEditorTabSize,

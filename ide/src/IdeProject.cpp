@@ -114,7 +114,6 @@ bool FindInPath(LString &Exe)
 			return true;
 		}
 	}
-	
 	return false;
 }
 
@@ -828,30 +827,34 @@ public:
 			}
 
 			const char *nextLine2t = " \\\n\t\t";
-			if (auto rpath = Proj->GetExternalDependancyRPath((BuildConfig)Cfg, Platform))
+			auto AddRPathLinks = [&](IdeProject *Project, const char *ProjectBase)
 			{
-				// printf("%s:%i - base=%s\n", _FL, Base.Get());
-				// printf("%s:%i - rpath=%s\n", _FL, rpath.Get());
-				if (LIsRelativePath(rpath))
-				{
-					rpath = LFile::Path(Base, rpath).Absolute();
-					// printf("%s:%i - rpath abs=%s\n", _FL, rpath.Get());
-				}
-				
-				if (auto Rel = LMakeRelativePath(Base, rpath))
-				{
-					Rel = Rel.RStrip("/\\");
-					// printf("%s:%i - Rel=%s\n", _FL, Rel.Get());
+				auto RPathLinks = Project->GetSettings()->GetStr(ProjRPathLink, NULL, Platform);
+				if (!ValidStr(RPathLinks))
+					return;
 
-					sLibs[Cfg] += LString::Fmt(	"%s-L%s",
-												nextLine2t, Rel.Get());
-					sLibs[Cfg] += LString::Fmt(	"%s-Wl,-rpath-link,%s",
-												nextLine2t, Rel.Get());
-					sLibs[Cfg] += LString::Fmt(	"%s-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/%s'",
-												nextLine2t, Rel.Get());
+				LToken Paths(RPathLinks, "\r\n");
+				for (int i=0; i<Paths.Length(); i++)
+				{
+					LString Path = LString(Paths[i]).Strip();
+					if (!Path.Length())
+						continue;
+
+					if (LIsRelativePath(Path))
+						Path = LFile::Path(ProjectBase, Path).Absolute();
+
+					if (auto Rel = LMakeRelativePath(Base, Path))
+					{
+						Rel = Rel.RStrip("/\\");
+						sLibs[Cfg] += LString::Fmt("%s-Wl,-rpath-link,%s",
+												nextLine2t, ToUnixPath(Rel.Get()));
+					}
+					else
+						LAssert(0);
 				}
-				else LAssert(0);
-			}
+			};
+
+			AddRPathLinks(Proj, Base);
 
 			for (auto dep: Deps)
 			{
@@ -892,15 +895,7 @@ public:
 						if (!hVariables.Find(varName))
 							hVariables.Add(varName, relStrip);
 
-						if (auto rpath = dep->GetExternalDependancyRPath((BuildConfig)Cfg, Platform))
-						{
-							auto depPath = LString::Fmt("$(%s)/%s", varName.Get(), rpath.Get());
-							sLibs[Cfg] += LString::Fmt("%s-L%s", nextLine2t, depPath.Get());
-							sLibs[Cfg] += LString::Fmt("%s-Wl,-rpath-link,%s", nextLine2t, depPath.Get());
-							sLibs[Cfg] += LString::Fmt("%s-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/%s'", nextLine2t, depPath.Get());
-							sLibs[Cfg] += LString::Fmt(	"%s-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(%s)/$(BuildDir)'",
-														nextLine2t, varName.Get(), depPath.Get());
-						}
+						AddRPathLinks(dep, DepBase);
 					}
 				}
 			}
@@ -3839,31 +3834,6 @@ LString IdeProject::GetBuildFolder() const
 void IdeProject::SetBuildFolder(LString folder)
 {
 	d->BuildFolder = folder;
-}
-
-LString IdeProject::GetExternalDependancyRPath(BuildConfig Config, SysPlatform Platform)
-{
-	if (Platform == PlatformLinux)
-	{
-		auto target = GetTargetName(Platform);
-		if (target.Equals("lgi-gtk3"))
-		{
-			if (auto cfg = toString(Config))
-			{
-				return LString::Fmt("../deps/build-x64-%s/lib", LString(cfg).Lower().Get());
-			}
-		}
-		else if (target.Equals("scribeproj"))
-		{
-			if (auto cfg = toString(Config))
-			{
-				return LString::Fmt("../libs/build-x64-%s/lib", LString(cfg).Lower().Get());
-			}
-		}
-		else printf("%s:%i - unsupported target='%s'\n", _FL, target.Get());
-	}
-
-	return LString();
 }
 
 void IdeProject::Refresh()
