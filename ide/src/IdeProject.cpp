@@ -8,10 +8,6 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/DragAndDrop.h"
 #include "lgi/common/Token.h"
-#include "lgi/common/Combo.h"
-#include "lgi/common/Net.h"
-#include "lgi/common/ListItemCheckBox.h"
-#include "lgi/common/ClipBoard.h"
 #include "lgi/common/DropFiles.h"
 #include "lgi/common/SubProcess.h"
 #include "lgi/common/Css.h"
@@ -21,10 +17,8 @@
 #include "lgi/common/RegKey.h"
 #include "lgi/common/FileSelect.h"
 #include "lgi/common/Menu.h"
-#include "lgi/common/PopupNotification.h"
 #include "lgi/common/RemoveAnsi.h"
 #include "lgi/common/Uri.h"
-#include "lgi/common/StructuredLog.h"
 
 #include "LgiIde.h"
 #include "resdefs.h"
@@ -827,34 +821,6 @@ public:
 			}
 
 			const char *nextLine2t = " \\\n\t\t";
-			auto AddRPathLinks = [&](IdeProject *Project, const char *ProjectBase)
-			{
-				auto RPathLinks = Project->GetSettings()->GetStr(ProjRPathLink, NULL, Platform);
-				if (!ValidStr(RPathLinks))
-					return;
-
-				LToken Paths(RPathLinks, "\r\n");
-				for (int i=0; i<Paths.Length(); i++)
-				{
-					LString Path = LString(Paths[i]).Strip();
-					if (!Path.Length())
-						continue;
-
-					if (LIsRelativePath(Path))
-						Path = LFile::Path(ProjectBase, Path).Absolute();
-
-					if (auto Rel = LMakeRelativePath(Base, Path))
-					{
-						Rel = Rel.RStrip("/\\");
-						sLibs[Cfg] += LString::Fmt("%s-Wl,-rpath-link,%s",
-												nextLine2t, ToUnixPath(Rel.Get()));
-					}
-					else
-						LAssert(0);
-				}
-			};
-
-			AddRPathLinks(Proj, Base);
 
 			for (auto dep: Deps)
 			{
@@ -895,7 +861,38 @@ public:
 						if (!hVariables.Find(varName))
 							hVariables.Add(varName, relStrip);
 
-						AddRPathLinks(dep, DepBase);
+						auto RPath = dep->GetSettings()->GetStr(ProjRPath, NULL, Platform, Cfg);
+						auto RPathLinks = dep->GetSettings()->GetStr(ProjRPathLink, NULL, Platform, Cfg);
+						if (ValidStr(RPath))
+						{
+							auto Paths = LString(RPath).SplitDelimit("\r\n");
+							for (auto &p: Paths)
+							{
+								LString Path = LString(p).Strip();
+								if (!Path.Length())
+									continue;
+
+								auto RPathValue = LString::Fmt("$(%s)/%s", varName.Get(), Path.Get());
+								sLibs[Cfg] += LString::Fmt("%s-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/%s'",
+													nextLine2t, RPathValue.Get());
+							}
+						}
+						if (ValidStr(RPathLinks))
+						{
+							auto Paths = LString(RPathLinks).SplitDelimit("\r\n");
+							for (auto &p: Paths)
+							{
+								LString Path = LString(p).Strip();
+								if (!Path.Length())
+									continue;
+
+								auto LinkPath = LString::Fmt("$(%s)/%s", varName.Get(), Path.Get());
+								sLibs[Cfg] += LString::Fmt("%s-L%s", nextLine2t, LinkPath.Get());
+								sLibs[Cfg] += LString::Fmt("%s-Wl,-rpath-link,%s", nextLine2t, LinkPath.Get());
+								sLibs[Cfg] += LString::Fmt("%s-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(%s)/$(BuildDir)'",
+													nextLine2t, varName.Get());
+							}
+						}
 					}
 				}
 			}

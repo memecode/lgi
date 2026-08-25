@@ -636,6 +636,18 @@ _GNU_SOURCE</Release>
 				<Linux />
 			</LibraryPaths>
 			<ApplicationIcon />
+			<RPath>
+				<Linux>
+					<Debug>../deps/build-x64-debug/lib</Debug>
+					<Release>../deps/build-x64-release/lib</Release>
+				</Linux>
+			</RPath>
+			<RPathLink>
+				<Linux>
+					<Debug>../deps/build-x64-debug/lib</Debug>
+					<Release>../deps/build-x64-release/lib</Release>
+				</Linux>
+			</RPathLink>
 		</Build>
 		<Remote>
 			<RemoteUri />

@@ -32,10 +32,7 @@ ifeq ($(Build),Debug)
 		-lcrypt \
 		-lgstreamer-1.0 \
 		`pkg-config --libs gtk+-3.0` \
-		`pkg-config --libs ayatana-appindicator3-0.1` \
-		-L../deps/build-x64-debug/lib \
-		-Wl,-rpath-link,../deps/build-x64-debug/lib \
-		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/../deps/build-x64-debug/lib'
+		`pkg-config --libs ayatana-appindicator3-0.1`
 	Inc =  \
 		-I../deps/build-x64-debug/include \
 		-I./include \
@@ -59,10 +56,7 @@ else
 		-lcrypt \
 		-lgstreamer-1.0 \
 		`pkg-config --libs gtk+-3.0` \
-		`pkg-config --libs ayatana-appindicator3-0.1` \
-		-L../deps/build-x64-release/lib \
-		-Wl,-rpath-link,../deps/build-x64-release/lib \
-		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/../deps/build-x64-release/lib'
+		`pkg-config --libs ayatana-appindicator3-0.1`
 	Inc =  \
 		-I../deps/build-x64-release/include \
 		-I./include \

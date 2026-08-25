@@ -1078,7 +1078,7 @@ bool IdeProjectSettings::Serialize(LXmlTag *Parent, bool Write)
 	return false;
 }
 
-const char *IdeProjectSettings::GetStr(ProjSetting Setting, const char *Default, SysPlatform Platform)
+const char *IdeProjectSettings::GetStr(ProjSetting Setting, const char *Default, SysPlatform Platform, int Config)
 {
 	d->Map.ownThread = LCurrentThreadId();
 	auto s = d->Map.Find(Setting);
@@ -1087,7 +1087,7 @@ const char *IdeProjectSettings::GetStr(ProjSetting Setting, const char *Default,
 	int Bytes = 0;
 	if (!s->Flag.PlatformSpecific)
 	{
-		auto path = d->BuildPath(Setting, 0, Platform);
+		auto path = d->BuildPath(Setting, 0, Platform, Config);
 		auto t = d->Active.GetChildTag(path);
 		if (t)
 		{
@@ -1101,7 +1101,7 @@ const char *IdeProjectSettings::GetStr(ProjSetting Setting, const char *Default,
 	}
 	if (!s->Flag.CrossPlatform)
 	{
-		auto path = d->BuildPath(Setting, SF_PLATFORM_SPECIFC, Platform);
+		auto path = d->BuildPath(Setting, SF_PLATFORM_SPECIFC, Platform, Config);
 		auto t = d->Active.GetChildTag(path);
 		if (t)
 		{
