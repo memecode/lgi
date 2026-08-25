@@ -1192,6 +1192,12 @@ bool VcFolder::GetAuthor(bool local, std::function<void(TAuthor &author)> callba
 		{
 			if (target->InProgress)
 				return true;
+			if (target->Loaded)
+			{
+				if (callback)
+					callback(*target);
+				return true;
+			}
 
 			auto params = new ParseParams;
 			params->Callback = [this, callback, target](auto code, auto s)
@@ -1208,6 +1214,7 @@ bool VcFolder::GetAuthor(bool local, std::function<void(TAuthor &author)> callba
 					}
 				}
 
+				target->Loaded = true;
 				target->InProgress = false;
 				if (callback)
 					callback(*target);
@@ -1274,6 +1281,7 @@ bool VcFolder::SetAuthor(bool local, TAuthor author)
 	{
 		case VcGit:
 		{
+			target->Loaded = true;
 			LString args;
 			
 			if (author.name)
@@ -1390,6 +1398,11 @@ void VcFolder::Select(bool b)
 		else
 			OnSelectWithType();
 
+		PROF("GetBranches");
+		if (GetBranches(false))
+			OnBranchesChange();
+		GetCurrentRevision();
+
 		PROF("UpdateCommitList");
 		if ((Log.Length() == 0 || CommitListDirty) && !IsLogging)
 		{
@@ -1447,10 +1460,6 @@ void VcFolder::Select(bool b)
 
 			CommitListDirty = false;
 		}
-
-		PROF("GetBranches");
-		if (GetBranches(false))
-			OnBranchesChange();
 
 		if (d->CurFolder != this)
 		{
@@ -1511,8 +1520,6 @@ void VcFolder::Select(bool b)
 		if (GetType() != VcPending)
 			OnSelectUpdateItems();
 
-		PROF("GetCur");
-		GetCurrentRevision();
 	}
 }
 
@@ -3235,6 +3242,8 @@ void VcFolder::Empty()
 	CurrentCommit.Empty();
 	RepoUrl.Empty();
 	VcCmd.Empty();
+	AuthorLocal = TAuthor();
+	AuthorGlobal = TAuthor();
 	Uncommit.Reset();
 	Log.DeleteObjects();
 

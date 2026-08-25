@@ -154,6 +154,7 @@ public:
 	struct TAuthor
 	{
 		bool InProgress = false;
+		bool Loaded = false;
 		LString name, email;
 		
 		TAuthor() {}
