@@ -1008,6 +1008,7 @@ public:
 		m.Print("else\n"
 				"	CFlags += -g -Os%s\n"
 				"	CppFlags += -g -Os%s\n"
+				"	Tag =\n"
 				"	Defs = %s\n"
 				"	Libs = %s\n"
 				"	Inc = %s\n"
