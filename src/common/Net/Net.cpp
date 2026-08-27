@@ -1201,7 +1201,7 @@ ssize_t LSocket::Write(const void *Data, ssize_t Len, int Flags)
 	if (Status < 0)
 		Error();
 	else if (Status == 0)
-		OnDisconnect();
+		Close(); // Peer closed the connection: invalidate the socket so IsOpen()/IsOnline() reflect it, instead of re-firing OnDisconnect() forever.
 	else
 	{
 		if (Status < Len)
@@ -1248,7 +1248,7 @@ ssize_t LSocket::Read(void *Data, ssize_t Len, int Flags)
 	if (Status < 0)
 		Error();
 	else if (Status == 0)
-		OnDisconnect();
+		Close(); // Peer closed the connection: invalidate the socket so IsOpen()/IsOnline() reflect it, instead of re-firing OnDisconnect() forever.
 	else
 	{
 		if (Status < Len)
