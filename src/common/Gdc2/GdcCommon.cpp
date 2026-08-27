@@ -1058,7 +1058,7 @@ LSurface *LInlineBmp::Create(uint32_t TransparentPx)
 	}
 	#endif
 
-	#if 1
+	#if 0
 	static int count = 1;
 	GdcD->Save(LFile::Path(LSP_APP_INSTALL) / LString::Fmt("inline_%i.bmp", count++), pDC.Get());
 	#endif
