@@ -35,6 +35,11 @@ template<typename Base>
 class LHttpServer_TraceSocket : public Base
 {
 public:
+	LHttpServer_TraceSocket(LCancel *c)
+	{
+		SetCancel(c);
+	}
+
 	void OnInformation(const char *Str) override
 	{
 		// LgiTrace("%s:%i - info: %s", _FL, Str);
@@ -151,7 +156,7 @@ public:
 	{
 		if (secureSockets)
 		{
-			if (auto s = new LHttpServer_TraceSocket<SslSocket>())
+			if (auto s = new LHttpServer_TraceSocket<SslSocket>(cancel))
 			{
 				s->SetSslOnConnect(true);
 				return s;
@@ -159,7 +164,7 @@ public:
 			return nullptr;
 		}
 		
-		return new LHttpServer_TraceSocket<LSocket>();
+		return new LHttpServer_TraceSocket<LSocket>(cancel);
 	}
 
 	int Main()
