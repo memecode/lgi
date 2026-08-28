@@ -328,7 +328,7 @@ struct LiteHtmlViewPriv :
 				pDC->Box(marker.pos.x-2, marker.pos.y-2, marker.pos.x+2, marker.pos.y+2);
 				break;
 			default:
-				LgiTrace("%s:%i - draw_list_marker %i not impl\n", marker.marker_type);
+				LgiTrace("%s:%i - draw_list_marker %i not impl\n", _FL, marker.marker_type);
 				break;
 		}
 	}
