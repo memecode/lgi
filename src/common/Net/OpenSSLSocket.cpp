@@ -850,6 +850,7 @@ struct SslSocketPriv : public LCancel
 	#endif
 	bool IsBlocking = true;
 	bool Banner = true;
+	bool NoDisconnectEvent = false;
 	LCancel *Cancel = NULL;
 	SslSocket::TCertCallback certCallback;
 
@@ -1531,7 +1532,10 @@ DebugTrace("%s:%i - open loop finished=%i\n", _FL, r);
 	
 	if (!Status)
 	{
+		// A failed connect isn't a disconnect.
+		d->NoDisconnectEvent = true;
 		Close();
+		d->NoDisconnectEvent = false;
 	}
 
 DebugTrace("%s:%i - SslSocket::Open status=%i\n", _FL, Status);
@@ -1667,6 +1671,8 @@ int SslSocket::Close()
 		return false;
 	}
 
+	bool WasConnected = Ssl != nullptr || Bio != nullptr;
+
 	if (Ssl)
 	{
 		auto res = Library->SSL_shutdown(Ssl);
@@ -1692,6 +1698,9 @@ int SslSocket::Close()
 	}
 
 	d->Cancel->Cancel(Prev);
+
+	if (WasConnected && !d->NoDisconnectEvent)
+		OnDisconnect();
 
 	return true;
 }
@@ -2257,6 +2266,7 @@ ssize_t SslSocket::Read(void *Data, ssize_t Len, int Flags)
 	if (Bio)
 	{
 		int r = 0;
+		bool DidIo = false;
 		if (d->UseSSLrw)
 		{
 			if (Ssl)
@@ -2266,6 +2276,7 @@ ssize_t SslSocket::Read(void *Data, ssize_t Len, int Flags)
 				while (HasntTimedOut())
 				{
 					r = Library->SSL_read(Ssl, Data, (int)Len);
+					DidIo = true;
 DebugTrace("%s:%i - SSL_read(%p,%i)=%i\n", _FL, Data, Len, r);
 					if (r < 0)
 					{
@@ -2299,6 +2310,7 @@ DebugTrace("%s:%i - Ssl is NULL\n", _FL);
 			while (HasntTimedOut())
 			{
 				r = Library->BIO_read(Bio, Data, (int)Len);
+				DidIo = true;
 // DebugTrace("%s:%i - BIO_read(%p,%i)=%i\n", _FL, Data, Len, r);
 				if (r < 0)
 				{
@@ -2329,17 +2341,19 @@ DebugTrace("%s:%i - Ssl is NULL\n", _FL);
 			if (l)
 				l->Write(Data, r);
 		}
-		else if (Ssl)
+		else if (Ssl && DidIo)
 		{
 			int Err = Library->SSL_get_error(Ssl, r);
 DebugTrace("%s:%i - SSL_get_error = %i\n", _FL, Err);
-			if (Err == SSL_ERROR_ZERO_RETURN)
+			// SSL_ERROR_SYSCALL here is the peer vanishing without a close_notify,
+			// which has to invalidate the socket or IsOpen() lies forever.
+			if (Err == SSL_ERROR_ZERO_RETURN ||
+				Err == SSL_ERROR_SYSCALL)
 			{
 				DebugTrace("%s:%i - ::Read closing %i\n", _FL, r);
 				Close();
 			}
-			else if (Err != SSL_ERROR_WANT_READ &&
-					 Err != SSL_ERROR_SYSCALL)
+			else if (Err != SSL_ERROR_WANT_READ)
 			{
 				char Buf[256];
 				char *e = Library->ERR_error_string(Err, Buf);
