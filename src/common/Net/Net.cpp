@@ -360,7 +360,7 @@ public:
 			ulong NonBlocking = !block;
 			return ioctlsocket(Socket, FIONBIO, &NonBlocking);
 		#elif defined POSIX
-			return fcntl(Socket, F_SETFL, Blocking ? 0 : O_NONBLOCK);
+			return fcntl(Socket, F_SETFL, block ? 0 : O_NONBLOCK);
 		#else
 			#error Impl me.
 			return -1;
@@ -895,15 +895,20 @@ int LSocket::Open(const char *HostAddr, int Port)
 						auto e = getError();
 						#if WINDOWS
 						if (e == WSAEISCONN)
-							// Sigh
-							err = 0;
-						else
+						#else
+						if (e == EISCONN)
 						#endif
-
-						LOG_INDENT("%s:%i," LPrintSock " =%i, err=%i, block=%i\n", _FUNC, d->Socket, err, e, Block);
-						if (e == ECONNREFUSED)
-							// not a recoverable error code
-							break;
+						{
+							// A re-connect on an already connected non-blocking socket: that's success.
+							err = 0;
+						}
+						else
+						{
+							LOG_INDENT("%s:%i," LPrintSock " =%i, err=%i, block=%i\n", _FUNC, d->Socket, err, e, Block);
+							if (e == ECONNREFUSED)
+								// not a recoverable error code
+								break;
+						}
 					}
 					else
 					{
