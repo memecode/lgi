@@ -1174,7 +1174,11 @@ void VcFolder::GetAuthors(std::function<void(TAuthor &local, TAuthor &global)> c
 				{
 					if (debug) d->Log->Print("%s:%i - getAuthors(false) cb=%s\n", _FL, global.Get().Get());
 
-					callback(local, global);
+					GetTree()->RunCallback([callback=std::move(callback), local, global]() mutable
+						{
+							callback(local, global);
+						},
+						_FL);
 				},
 				debug);
 		},
