@@ -3306,6 +3306,7 @@ const char *toString(LSocketLogTypes v)
 
 	switch (v)
 	{
+		default:
 		case NET_LOG_NONE: return "No log";
 		case NET_LOG_HEX_DUMP: return "Hex log";
 		case NET_LOG_ALL_BYTES: return "Byte log";

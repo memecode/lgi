@@ -71,7 +71,7 @@ elif platform.system() == "Darwin":
     universalCheck.append("lib/libjpeg.62.4.0.dylib")
     universalCheck.append("lib/libpng16$tag.dylib")
     universalCheck.append("lib/libz.dylib")
-    universalCheck.append("lib/liblunasvg.a")
+    universalCheck.append("lib/liblunasvg.dylib")
     universalArchs.append('x86_64')
     universalArchs.append('arm64')
 elif platform.system() == "Linux":

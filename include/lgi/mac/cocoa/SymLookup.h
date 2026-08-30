@@ -233,7 +233,9 @@ public:
 		/// The addresses
 		Addr *Ip,
 		/// Numbers of addresses
-		int IpLen
+		int IpLen,
+		/// [Optional] prefix for printing each line
+		const char *Prefix = nullptr
 	)
 	{
 		#if 0

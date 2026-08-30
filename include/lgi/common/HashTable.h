@@ -321,8 +321,7 @@ protected:
 			ownThread = curThread;
 		else if (ownThread != curThread)
 		{
-			printf("%s:%i - Thread safety violation. ownThread=%i, curThread=%i\n", _FL, ownThread, curThread);
-			int asd=0;
+			printf("%s:%i - Thread safety violation. ownThread=" LPrintfThreadId ", curThread=" LPrintfThreadId "\n", _FL, ownThread, curThread);
 		}
 	}
 
@@ -336,8 +335,7 @@ protected:
 		auto curThread = LCurrentThreadId();
 		if (ownThread != curThread)
 		{
-			printf("%s:%i - Thread safety violation. ownThread=%i, curThread=%i\n", _FL, ownThread, curThread);
-			int asd=0;
+			printf("%s:%i - Thread safety violation. ownThread=" LPrintfThreadId ", curThread=" LPrintfThreadId "\n", _FL, ownThread, curThread);
 		}
 	}
 

@@ -131,7 +131,9 @@ target_compile_definitions(LgiIde
 
 if (APPLE)
 
-	target_link_libraries(LgiIde ${EXTRA_LIBS})
+	target_link_libraries(LgiIde
+		PRIVATE
+			${EXTRA_LIBS})
 	set_target_properties(LgiIde PROPERTIES
 		MACOSX_BUNDLE TRUE
 		MACOSX_FRAMEWORK_IDENTIFIER com.memecode.LgiIde

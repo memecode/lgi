@@ -1659,7 +1659,7 @@ bool LView::DropTarget(bool t)
 					if (auto a = [[NSMutableArray<NSString*> alloc] init])
 					{
 						// Receive generic file items:
-						[a addObject:(NSString*)kUTTypeItem];
+						[a addObject:@"public.item"];
 						
 						// Receive file promises:
 						for (id item in NSFilePromiseReceiver.readableDraggedTypes)

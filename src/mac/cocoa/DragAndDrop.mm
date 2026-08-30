@@ -168,7 +168,6 @@ public:
 @interface LDragItem : NSPasteboardItem
 @property (nonatomic, readonly) LString path;
 @property (nonatomic, readonly) LString uti;
-@property (nonatomic, weak) NSImage *icon;
 @property (nonatomic) LAutoPtr<LStreamI> src;
 - (LDragItem*) initWithItem:(LString)item mime:(const char*)mime source:(LStreamI*)src;
 - (void)dealloc;
@@ -183,7 +182,6 @@ public:
     if ((self = [super init]) != nil)
     {
         self->_src.Reset(src);
-        self->_icon = NULL;
 
         const char *mapped = LMimeToUti(mime);
         if (!mapped) mapped = "public.data";
@@ -197,7 +195,7 @@ public:
         // Legacy Finder/Desktop promise hint
         NSString *ext = PromiseExtForUti(self->_uti);
         if (ext)
-            [self setPropertyList:@[ext] forType:(NSString *)NSFilesPromisePboardType];
+			[self setPropertyList:@[ext] forType:@"NSFilesPromisePboardType"];
     }
     return self;
 }
@@ -364,6 +362,28 @@ public:
 
 	return NSDragOperationNone;
 	*/
+}
+
+- (NSArray<NSString*> *)namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination
+{
+	auto names = [NSMutableArray<NSString*> array];
+	const char *destination = dropDestination.path.fileSystemRepresentation;
+	if (!destination)
+		return names;
+
+	for (auto item : self->Items)
+	{
+		LFile::Path path(destination);
+		path += item.path;
+		if (CopyStreamToFileSync(path.GetFull(), item.src))
+		{
+			auto name = [NSString stringWithUTF8String:item.path.Get()];
+			if (name)
+				[names addObject:name];
+		}
+	}
+
+	return names;
 }
 
 - (void)pasteboard:(nullable NSPasteboard *)sender item:(NSPasteboardItem *)item provideDataForType:(NSPasteboardType)type
@@ -576,7 +596,7 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 
 	auto pasteboard_types = @[
         (NSString *)kPasteboardTypeFileURLPromise,
-        (NSString *)NSFilesPromisePboardType
+	@"NSFilesPromisePboardType"
     ];
     DndLogPasteboardTypes(pasteboard_types, "provider types");
 

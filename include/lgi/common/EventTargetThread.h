@@ -59,7 +59,7 @@ public:
 		// Find free handle...
 		int Hnd;
 		LEventSinkI *existing;
-		while (existing = ToPtr.Find(Hnd = LRand(10000) + 1))
+		while ((existing = ToPtr.Find(Hnd = LRand(10000) + 1)))
 			;
 
 		// Add the new sink

@@ -2,7 +2,9 @@
 set(APP_RESOURCES
     resources/Lvc.lr8
     resources/image-list.png)
+
 set(APP_MANIFEST)
+
 if (WIN32)
 	set(APP_TYPE WIN32)
 	set(APP_ICON resources/Lvc.rc)
@@ -20,11 +22,28 @@ elseif (LINUX)
 endif()
 
 if (NOT TARGET ssh_shared)
-    find_path(LIBSSH_HEADER libssh.h
-        PATH /usr/include/libssh                # this is the Linux location
-        PATH /system/develop/headers/libssh     # this is the Haiku location
-        PATH ${LGI_DEPS_BUILD}/include/libssh)  # this is the Windows location
-    if (NOT LIBSSH_HEADER)
+    if (APPLE)
+        find_path(LIBSSH_HEADER_RELEASE libssh.h PATHS "${LGI_DEPS_RELEASE}/include/libssh" NO_DEFAULT_PATH)
+        find_path(LIBSSH_HEADER_DEBUG   libssh.h PATHS "${LGI_DEPS_DEBUG}/include/libssh"   NO_DEFAULT_PATH)
+        if (NOT LIBSSH_HEADER_RELEASE AND NOT LIBSSH_HEADER_DEBUG)
+            message(FATAL_ERROR "libssh not found.")
+        endif()
+        if (CMAKE_BUILD_TYPE STREQUAL "Release")
+            set(LIBSSH_HEADER ${LIBSSH_HEADER_RELEASE})
+        else()
+            set(LIBSSH_HEADER ${LIBSSH_HEADER_DEBUG})
+        endif()
+    elseif (WIN32)
+        find_path(LIBSSH_HEADER libssh.h
+            PATH ${LGI_DEPS_BUILD}/include/libssh       # this is the Windows location
+            )
+    else()
+        find_path(LIBSSH_HEADER libssh.h
+            PATH /usr/include/libssh                # this is the Linux location
+            PATH /system/develop/headers/libssh     # this is the Haiku location
+            )
+    endif()
+    if (NOT APPLE AND NOT LIBSSH_HEADER)
         message(FATAL_ERROR "libssh not found.")
     endif()
     add_library(ssh_shared INTERFACE)

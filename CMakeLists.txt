@@ -480,6 +480,7 @@ if (APPLE)
 			include/lgi/mac/cocoa
 			/opt/local/include
 		PRIVATE
+			$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},Release>,${LGI_DEPS_RELEASE}/include,${LGI_DEPS_DEBUG}/include>
 			private/mac
 			)
 	target_compile_definitions(lgi
@@ -493,6 +494,10 @@ if (APPLE)
 	target_compile_options(lgi
 		PUBLIC
 			-Wno-nullability-completeness)
+	target_link_directories(lgi
+		PUBLIC
+			$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},Release>,${LGI_DEPS_RELEASE}/lib,${LGI_DEPS_DEBUG}/lib>
+		)
 
 	# lgi stub settings
 	target_include_directories(lgi-stub

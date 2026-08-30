@@ -254,7 +254,7 @@ LItemColumn *LItemContainer::AddColumn(const char *Name, int Width, int Where)
 
 	if (Lock(_FL))
 	{
-		if (c = new LItemColumn(this, Name, Width))
+		if ((c = new LItemColumn(this, Name, Width)))
 		{
 			Columns.SetFixedLength(false);
 			Columns.AddAt(Where, c);
@@ -923,11 +923,6 @@ void LItemColumn::Width(int i)
 		d->cWidth = i;
 		// LgiTrace("%s:%i - resize col '%s' to %i\n", _FL, d->cName.Get(), i);
 
-		if (d->cName.Equals("Branch") && i == 240)
-		{
-			int asd=0;
-		}
-		
 		// Notify listener
 		if (d->Parent)
 			d->Parent->SendNotify(LNotifyItemColumnsResized);
