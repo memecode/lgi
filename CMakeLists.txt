@@ -467,6 +467,8 @@ endif()
 
 if (APPLE)
 
+	find_library(UT_FRAMEWORK UniformTypeIdentifiers)
+
 	set_target_properties(lgi
 		PROPERTIES
 		XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_WEAK "YES"
@@ -490,7 +492,10 @@ if (APPLE)
 		)
 	target_link_libraries(lgi
 		PUBLIC
-			${EXTRA_LIBS})
+			${EXTRA_LIBS}
+		PRIVATE
+			"${UT_FRAMEWORK}"
+		)
 	target_compile_options(lgi
 		PUBLIC
 			-Wno-nullability-completeness)
