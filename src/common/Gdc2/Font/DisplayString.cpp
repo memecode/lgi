@@ -71,16 +71,10 @@ struct LDisplayStringPriv
 {
 	LDisplayString *Ds;
 	LArray<DspStrBlock> Blocks;
-	bool Debug;
 	int LastTabOffset;
 
 	LDisplayStringPriv(LDisplayString *str) : Ds(str)
 	{
-		#if 0
-		Debug = Stristr(Ds->Str, "(Jumping).wma") != 0;
-		#else
-		Debug = false;
-		#endif
 		LastTabOffset = -1;
 	}
 
@@ -157,7 +151,7 @@ struct LDisplayStringPriv
 				b->Chars = Chars;
 			}
 				
-			if (Debug)
+			if (Ds->_debug)
 			{
 				// Print the block array
 				for (size_t i=0; i<Blocks.Length(); i++)
@@ -1073,31 +1067,36 @@ ssize_t LDisplayString::CharAt(int Px, LPxToIndexType Type)
 	
 		int Fx = 0;
 		int Fpos = Px << FShift;
+		int Foffset_y = (Font->GetHeight() / 2) << FShift;
 		Status = 0;
+
+		pango_context_set_font_description(LFontSystem::Inst()->GetContext(), Font->Handle());
+
 		for (auto &b: d->Blocks)
 		{
 			int Index = 0, Trailing = 0;
 			int Foffset = Fpos - Fx;
 			
-			if (b.Hnd && Gtk::pango_layout_xy_to_index(b.Hnd, Foffset, 0, &Index, &Trailing))
+			if (b.Hnd && pango_layout_xy_to_index(b.Hnd, Foffset, Foffset_y, &Index, &Trailing))
 			{
-				if (d->Debug)
+				if (_debug)
 					printf("CharAt(%g) x=%g Status=%i Foffset=%g index=%i trailing=%i\n",
 						(double)Fpos/FScale, (double)b.X()/FScale, Status,
 						(double)Foffset/FScale, Index, Trailing);
 
-				LUtf8Str u(Str);
-				while ((OsChar*)u.GetPtr() < Str + Index + Trailing)
+				LUtf8Str u(b.Str);
+				while ((OsChar*)u.GetPtr() < b.Str + Index)
 				{
 					u++;
 					Status++;
 				}
+				Status += Trailing;
 				
 				return Status;
 			}
 			else
 			{
-				if (d->Debug)
+				if (_debug)
 					printf("CharAt(%g) x=%g Status=%i Chars=%i\n",
 						(double)Fpos/FScale, (double)b.X()/FScale, Status, b.Chars);
 					

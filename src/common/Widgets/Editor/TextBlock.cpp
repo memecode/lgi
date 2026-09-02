@@ -608,7 +608,7 @@ bool LRichTextPriv::TextBlock::HitTest(HitTestResult &htr)
 	ssize_t CharPos = 0;
 	for (unsigned i=0; i<Layout.Length(); i++)
 	{
-		TextLine *tl = Layout[i];
+		auto tl = Layout[i];
 		PtrCheckBreak(tl);
 		// int InitCharPos = CharPos;
 
@@ -632,7 +632,7 @@ bool LRichTextPriv::TextBlock::HitTest(HitTestResult &htr)
 		int InputX = IntToFixed(htr.In.x - Pos.x1 - tl->PosOff.x1);
 		for (unsigned n=0; n<tl->Strs.Length(); n++)
 		{
-			DisplayStr *ds = tl->Strs[n];
+			auto ds = tl->Strs[n];
 			int dsFixX = ds->FX();
 			
 			if (Over &&
@@ -642,8 +642,9 @@ bool LRichTextPriv::TextBlock::HitTest(HitTestResult &htr)
 				int OffFix = InputX - FixX;
 				int OffPx = FixedToInt(OffFix);
 				ssize_t OffChar = ds->PosToIndex(OffPx, true);
-				// printf("%s: offchar=%i offpx=%i\n", __FUNCTION__, (int)OffChar, (int)OffPx);
 
+				//printf("%s:%i - OffChar=%i x=%i fnt=%p\n", _FL,
+				//	(int)OffChar, (int)OffPx, ds->GetFont());
 				// d->DebugRects[0].Set(Pos.x1, r.y1, Pos.x1 + InputX+1, r.y2);
 						
 				htr.Blk = this;
@@ -792,7 +793,7 @@ void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 
 	for (unsigned i=0; i<Layout.Length(); i++)
 	{
-		TextLine *Line = Layout[i];
+		auto Line = Layout[i];
 
 		LRect LinePos = Line->PosOff;
 		LinePos.Offset(Pos.x1, Pos.y1);
@@ -822,9 +823,9 @@ void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 
 		for (unsigned n=0; n<Line->Strs.Length(); n++)
 		{
-			DisplayStr *Ds = Line->Strs[n];
-			LFont *DsFnt = Ds->GetFont();
-			ColourPair &Cols = Ds->Src->Colours;
+			auto Ds = Line->Strs[n];
+			auto DsFnt = Ds->GetFont();
+			auto &Cols = Ds->Src->Colours;
 			if (DsFnt && DsFnt != Fnt)
 			{
 				Fnt = DsFnt;
@@ -860,6 +861,9 @@ void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 				}
 			}
 			#endif
+
+			if (Ds->_debug)
+				printf("%s:%i - paint debug ds, fnt=%p\n", _FL, DsFnt);
 
 			if (CurEndPoint < EndPoints &&
 				EndPoint[CurEndPoint] >= CharPos &&

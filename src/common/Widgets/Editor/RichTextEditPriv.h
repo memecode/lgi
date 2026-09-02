@@ -964,7 +964,7 @@ public:
 		
 		virtual ssize_t PosToIndex(int x, bool Nearest)
 		{
-			return CharAt(x);
+			return CharAt(x, Nearest ? LgiNearest : LgiTruncate);
 		}
 	};
 	
