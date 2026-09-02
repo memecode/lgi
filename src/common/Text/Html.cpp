@@ -6937,8 +6937,10 @@ void LHtml::OnAddStyle(const char *MimeType, const char *Styles)
 	}
 }
 
-void LHtml::ParseDocument(const char *Doc)
+bool LHtml::ParseDocument(const char *Doc)
 {
+	bool Status = true;
+
 	if (!Tag)
 	{
 		Tag = new LTag(this, 0);
@@ -6953,7 +6955,7 @@ void LHtml::ParseDocument(const char *Doc)
 
 		if (IsHtml)
 		{
-			Parse(Tag, Doc);
+			Status = Parse(Tag, Doc);
 
 			// Add body tag if not specified...
 			auto Html = Tag->GetTagByName("html");
@@ -7078,6 +7080,8 @@ void LHtml::ParseDocument(const char *Doc)
 	if (Tag)
 		Tag->ResetCaches();
 	Invalidate();
+
+	return Status;
 }
 
 bool LHtml::NameW(const char16 *s)
@@ -7123,7 +7127,7 @@ bool LHtml::Name(const char *s)
 
 	// Parse
 	d->IsParsing = true;
-	ParseDocument(s);
+	auto Status = ParseDocument(s);
 	d->IsParsing = false;
 
 	if (Tag && d->StyleDirty)
@@ -7135,7 +7139,7 @@ bool LHtml::Name(const char *s)
 	OnLoad();
 	Invalidate();	
 
-	return true;
+	return Status;
 }
 
 const char *LHtml::Name()

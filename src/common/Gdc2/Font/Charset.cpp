@@ -4,6 +4,7 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Font.h"
+#include "lgi/common/LgiUiBase.h"
 #include "lgi/common/Charset.h"
 
 struct UnicodeMappings
@@ -707,10 +708,7 @@ const LCharset *LGetCharsetInfo(const char *Cs)
 {
 	auto cs = CharsetSystem.GetCsInfo(Cs);
 	if (!cs)
-	{
-		printf("Charset not found: %s\n", Cs);
-		exit(-1);
-	}
+		LgiTrace("Charset not found: %s\n", Cs);
 	return cs;
 }
 
@@ -1628,10 +1626,10 @@ const LCharset *LCharsetSystem::GetCsInfo(const char *Cp)
 	if (!cs)
 	{
 		printf("%s:%i - GetCsInfo failed to find charset: %s in %i\n", _FL, Cp, (int)d->Charsets.Length());
+		/*
 		for (auto p: d->Charsets)
-		{
 			printf("  %s\n", p.key);
-		}
+		*/
 	}
 	return cs;
 }

@@ -7,6 +7,7 @@
 
 #define FEATURE_REATTACH_ELEMENTS		1
 #define IsBlock(d)						((d) == LCss::DispBlock)
+#define MAX_PARSE_ERROR_NOTES			32
 
 char *LHtmlParser::NextTag(char *s)
 {
@@ -374,11 +375,6 @@ char *LHtmlParser::ParsePropList(char *s, LHtmlElement *Obj, bool &Closed)
 				// looks like tag delimiters, so just ignore the quote...
 				s++;
 			}
-			else if (IsAlpha(*after) || strchr("_-,", *after))
-			{
-				// looks like a name or attribute value...
-				goto ProcessAttrValue;
-			}
 			else if (IsQuote(*after))
 			{
 				// 2 quotes together is an empty string?
@@ -386,9 +382,9 @@ char *LHtmlParser::ParsePropList(char *s, LHtmlElement *Obj, bool &Closed)
 			}
 			else
 			{
-				// What to do here? IDK
-				LAssert(!"Check what should happen here...");
-				s++;
+				// Some sort of attribute value: a name, a colour '#000000', a number etc.
+				OnParseError(_FL, "Attribute value '%.20s' has no name.", s);
+				goto ProcessAttrValue;
 			}
 		}
 		else if (*s == ':')
@@ -440,6 +436,26 @@ LHtmlElemInfo *LHtmlParser::GetTagInfo(const char *Tag)
 	return LHtmlStatic::Inst->GetTagInfo(Tag);
 }
 
+void LHtmlParser::OnParseError(const char *file, int line, const char *fmt, ...)
+{
+	char buf[512] = {0};
+	va_list arg;
+	va_start(arg, fmt);
+	vsprintf_s(buf, sizeof(buf), fmt, arg);
+	va_end(arg);
+
+	if (!Error)
+	{
+		// Keep the first error, it's the most likely to be useful.
+		Error.Set(LErrorInvalidParam, buf);
+		Error.SetSource(file, line);
+	}
+	else if (Error.DevNotes.Length() < MAX_PARSE_ERROR_NOTES)
+	{
+		Error.AddNote(file, line, "%s", buf);
+	}
+}
+
 void DumpDomTree(LHtmlElement *e, int Depth = 0)
 {
 	char Sp[256];
@@ -464,6 +480,7 @@ bool LHtmlParser::Parse(LHtmlElement *Root, const char *Doc)
 	}
 	*/
 
+	Error.Empty();
 	SourceData.Empty();
 	CurrentSrc = Doc;
 	OpenTags.Length(0);
@@ -474,7 +491,7 @@ bool LHtmlParser::Parse(LHtmlElement *Root, const char *Doc)
 	if (CurrentSrc)
 		SourceData.Write(CurrentSrc, strlen(CurrentSrc));	
 	Source.Reset(SourceData.NewStr());
-	return true;
+	return !Error;
 }
 
 char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPreTag, bool *BackOut)
@@ -531,7 +548,7 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 					}
 
 					if (!e)
-						LAssert(0);
+						OnParseError(_FL, "Unterminated xml:namespace tag.");
 				}
 				else
 				{
@@ -1033,7 +1050,7 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 														// LgiTrace("Inserted new TAG_TR: %p\n", NewRow);
 													}
 												}
-												else LAssert(!"Alloc error");
+												else OnParseError(_FL, "Couldn't allocate implicit <tr>.");
 											}
 											// else LAssert(!"What now?");											
 											break;
