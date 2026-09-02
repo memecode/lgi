@@ -67,7 +67,7 @@ protected:
 	void _Delete() override;
 	LFont *DefFont();
 	void CloseTag(LTag *t);
-	void ParseDocument(const char *Doc);
+	bool ParseDocument(const char *Doc);
 	void OnAddStyle(const char *MimeType, const char *Styles) override;
 	int ScrollY();
 	void SetCursorVis(bool b);
