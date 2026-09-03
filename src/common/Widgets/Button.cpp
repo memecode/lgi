@@ -11,6 +11,8 @@
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/StringLayout.h"
 #include "lgi/common/CssTools.h"
+#include "lgi/common/Uri.h"
+#include "lgi/common/GdcTools.h"
 
 #define DOWN_MOUSE		0x1
 #define DOWN_KEY		0x2
@@ -34,20 +36,32 @@ LPoint LButton::Overhead =
         6
     );
 
+enum ImageLoadState
+{
+	TCheckCss,
+	TLoadFailed,
+	TImgReferenced,
+	TImgOwned,
+};
+
 class LButtonPrivate : public LStringLayout
 {
 public:
+	LButton *view;
 	int Pressed = 0;
 	bool KeyDown = false;
 	bool Over = false;
 	bool WantsDefault = false;
 	bool Toggle = false;
+
+	LRect TxtSz, DefaultPad, Pad, Border;
+	LPoint imgSz; // scaled image size
+	LSurface *Img = nullptr;
+	ImageLoadState ImgState = TCheckCss;
 	
-	LRect TxtSz;
-	LSurface *Image = NULL;
-	bool OwnImage = false;
-	
-	LButtonPrivate() : LStringLayout(NULL)
+	LButtonPrivate(LButton *v)
+		: LStringLayout(nullptr)
+		, view(v)
 	{
 		AmpersandToUnderline = true;
 		SetWrap(false);
@@ -56,8 +70,8 @@ public:
 
 	~LButtonPrivate()
 	{
-		if (OwnImage)
-			DeleteObj(Image);
+		if (ImgState == TImgOwned)
+			DeleteObj(Img);
 	}
 
 	void Layout(LCss *css, const char *s)
@@ -74,12 +88,64 @@ public:
 		DoLayout(MaxX);
 		TxtSz = GetBounds();
 	}
+
+	void CheckImage()
+	{
+		auto css = view->GetCss();
+		if (ImgState != TCheckCss || !css)
+			return;
+
+		auto backgroundImage = css->BackgroundImage();
+		switch (backgroundImage.Type)
+		{
+			case LCss::ImageUri:
+			{
+				// Try and load the image..
+				LUri u(backgroundImage.Uri);
+				if (!u.sProtocol || u.IsProtocol("file"))
+				{
+					LString path = u.sPath ? u.sPath : u.sHost;
+					if (!LFileExists(path))
+						path = LFindFile(path);
+					if (!LFileExists(path))
+					{
+						ImgState = TLoadFailed;
+						return;
+					}
+					Img = GdcD->Load(path);
+					ImgState = Img ? TImgOwned : TLoadFailed;						
+				}
+				else
+				{
+					LAssert(!"impl network fetch?");
+				}
+				break;
+			}
+			case LCss::ImageOwn:
+			{
+				// Take ownership of the image
+				ImgState = TImgOwned;
+				backgroundImage.Type = LCss::ImageRef;
+				Img = backgroundImage.Img;
+				css->BackgroundImage(backgroundImage);
+				break;
+			}
+			case LCss::ImageRef:
+			{
+				ImgState = TImgReferenced;
+				Img = backgroundImage.Img;
+				break;
+			}
+			default:
+				break;
+		}
+	}
 };
 
 LButton::LButton(int id, int x, int y, int cx, int cy, const char *name) :
 	ResObject(Res_Button)
 {
-	d = new LButtonPrivate;
+	d = new LButtonPrivate(this);
 	Name(name);
 	
 	LRect r(x,
@@ -308,13 +374,9 @@ bool LButton::OnKey(LKey &k)
 			{
 				d->KeyDown = k.Down();
 				if (k.Down())
-				{
 					d->Pressed++;
-				}
 				else
-				{
 					d->Pressed--;
-				}
 
 				Invalidate();
 
@@ -349,97 +411,87 @@ void LButton::OnFocus(bool f)
 
 void LButton::OnPaint(LSurface *pDC)
 {
-	#if defined LGI_CARBON
-
-		LColour NoPaintColour = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
-		if (!NoPaintColour.IsTransparent())
+	// Do we need a scaled form of the image?
+	LSurface *img = nullptr;
+	LAutoPtr<LMemDC> memDC;
+	if (d->Img)
+	{
+		float scale = 1.0f;
+		if (d->imgSz.x < d->Img->X() ||
+			d->imgSz.y < d->Img->Y())
 		{
-			pDC->Colour(NoPaintColour);
-			pDC->Rectangle();
-		}
-	
-		LRect rc = GetClient();
-		rc.x1 += 2;
-		rc.y2 -= 1;
-		rc.x2 -= 1;
-		HIRect Bounds = rc;
-		HIThemeButtonDrawInfo Info;
-		HIRect LabelRect;
-
-		Info.version = 0;
-		Info.state = d->Pressed ? kThemeStatePressed : (Enabled() ? kThemeStateActive : kThemeStateInactive);
-		Info.kind = kThemePushButton;
-		Info.value = /*Default() ? kThemeButtonOn :*/ kThemeButtonOff;
-		Info.adornment = Focus() ? kThemeAdornmentFocus : kThemeAdornmentNone;
-
-		OSStatus e = HIThemeDrawButton(	  &Bounds,
-										  &Info,
-										  pDC->Handle(),
-										  kHIThemeOrientationNormal,
-										  &LabelRect);
-
-		if (e) printf("%s:%i - HIThemeDrawButton failed %li\n", _FL, e);
-		else
-		{
-			LPoint pt;
-			LRect r = GetClient();
-			pt.x = r.x1 + ((r.X()-d->TxtSz.X())/2) + (d->Pressed != 0);
-			pt.y = r.y1 + ((r.Y()-d->TxtSz.Y())/2) + (d->Pressed != 0);
-			d->Paint(pDC, pt, LColour(), r, Enabled(), Info.state == kThemeStatePressed);
+			// scale the image down to fit...
+			scale = std::min((float)d->imgSz.x / d->Img->X(),
+							 (float)d->imgSz.y / d->Img->Y());
 		}
 
-	// #elif defined(HAIKU)
-	
-		// FIXME:
-		// Use BControlLook to do the drawing...
-	
-	#else
-
-		if (LApp::SkinEngine &&
-			TestFlag(LApp::SkinEngine->GetFeatures(), GSKIN_BUTTON))
+		if (scale != 1.0f)
 		{
-			LSkinState State;
-			State.pScreen = pDC;
-			State.MouseOver = d->Over;
-
-			State.Image = d->Image;
-			
-			if (X() < GdcD->X() && Y() < GdcD->Y())
-				LApp::SkinEngine->OnPaint_LButton(this, &State);
-			
-			LPoint pt;
-			LRect r = GetClient();
-			pt.x = r.x1 + ((r.X()-d->TxtSz.X())/2) + (d->Pressed != 0);
-			pt.y = r.y1 + ((r.Y()-d->TxtSz.Y())/2) + (d->Pressed != 0);
-			d->Paint(pDC, pt, LColour(), r, Enabled(), false);
-			if (Focus())
+			if (memDC.Reset(new LMemDC(	_FL,
+										(int)(d->Img->X() * scale),
+										(int)(d->Img->Y() * scale),
+										System32BitColourSpace)))
 			{
-				LRect r = GetClient();
-				r.Inset(5, 3);
-				pDC->Colour(LColour(180, 180, 180));
-				pDC->LineStyle(LSurface::LineAlternate);
-				pDC->Box(&r);
+				if (ResampleDC(memDC.Get(), d->Img))
+				{
+					img = memDC.Get();
+				}
+				else
+				{
+					memDC.Reset();
+					img = d->Img;
+				}
 			}
 		}
 		else
 		{
-			LColour Back(d->Over ? L_HIGH : L_MED);
-			LRect r(0, 0, X()-1, Y()-1);
-			if (Default())
-			{
-				pDC->Colour(L_BLACK);
-				pDC->Box(&r);
-				r.Inset(1, 1);
-			}
-			LWideBorder(pDC, r, d->Pressed ? DefaultSunkenEdge : DefaultRaisedEdge);
-
-			LPoint pt;
-			pt.x = r.x1 + ((r.X()-d->TxtSz.X())/2) + (d->Pressed != 0);
-			pt.y = r.y1 + ((r.Y()-d->TxtSz.Y())/2) + (d->Pressed != 0);
-			d->Paint(pDC, pt, Back, r, Enabled(), false);
+			img = d->Img; // no scaling
 		}
-	
-	#endif
+	}
+
+	if (LApp::SkinEngine &&
+		TestFlag(LApp::SkinEngine->GetFeatures(), GSKIN_BUTTON))
+	{
+		LSkinState State;
+		State.pScreen = pDC;
+		State.MouseOver = d->Over;
+
+		State.Image = img;
+		
+		if (X() < GdcD->X() && Y() < GdcD->Y())
+			LApp::SkinEngine->OnPaint_LButton(this, &State);
+		
+		LPoint pt;
+		LRect r = GetClient();
+		pt.x = r.x1 + ((r.X()-d->TxtSz.X())/2) + (d->Pressed != 0);
+		pt.y = r.y1 + ((r.Y()-d->TxtSz.Y())/2) + (d->Pressed != 0);
+		d->Paint(pDC, pt, LColour(), r, Enabled(), false);
+		if (Focus())
+		{
+			LRect r = GetClient();
+			r.Inset(5, 3);
+			pDC->Colour(LColour(180, 180, 180));
+			pDC->LineStyle(LSurface::LineAlternate);
+			pDC->Box(&r);
+		}
+	}
+	else
+	{
+		LColour Back(d->Over ? L_HIGH : L_MED);
+		LRect r(0, 0, X()-1, Y()-1);
+		if (Default())
+		{
+			pDC->Colour(L_BLACK);
+			pDC->Box(&r);
+			r.Inset(1, 1);
+		}
+		LWideBorder(pDC, r, d->Pressed ? DefaultSunkenEdge : DefaultRaisedEdge);
+
+		LPoint pt;
+		pt.x = r.x1 + ((r.X()-d->TxtSz.X())/2) + (d->Pressed != 0);
+		pt.y = r.y1 + ((r.Y()-d->TxtSz.Y())/2) + (d->Pressed != 0);
+		d->Paint(pDC, pt, Back, r, Enabled(), false);
+	}
 }
 
 int64 LButton::Value()
@@ -476,9 +528,9 @@ void LButton::SetPreferredSize(int x, int y)
 {
 	LRect r = GetPos();
 
-	int Ix = d->Image ? d->Image->X() : 0;
-	int Iy = d->Image ? d->Image->Y() : 0;
-	int Cx = d->TxtSz.X() + Ix + (d->TxtSz.X() && d->Image ? LTableLayout::CellSpacing : 0);
+	int Ix = d->Img ? d->Img->X() : 0;
+	int Iy = d->Img ? d->Img->Y() : 0;
+	int Cx = d->TxtSz.X() + Ix + (d->TxtSz.X() && d->Img ? LTableLayout::CellSpacing : 0);
 	int Cy = MAX(d->TxtSz.Y(), Iy);
 	
 	r.SetSize((x > 0 ? x : Cx + Overhead.x),
@@ -489,62 +541,91 @@ void LButton::SetPreferredSize(int x, int y)
 
 bool LButton::OnLayout(LViewLayoutInfo &Inf)
 {
-	LPoint Dpi(96, 96);
+	d->CheckImage();
+	
 	auto Css = GetCss();
 	auto Font = GetFont();
 	LCssTools Tools(Css, Font);
 	auto c = GetClient();
 	auto TxtMin = d->GetMin();
 	auto TxtMax = d->GetMax();
+	const int MAX_SIZE = 100000;
 
 	auto Wnd = GetWindow();
-	if (Wnd)
-		Dpi = Wnd->GetDpi();
+	auto Dpi = Wnd ? Wnd->GetDpi() : LScreenDpi();
 	double Scale = (double)Dpi.x / 96.0;
 
-	LRect DefaultPad((int)(Scale*Overhead.x/2),
-					 (int)(Scale*Overhead.y/2),
-					 (int)(Scale*Overhead.x/2),
-					 (int)(Scale*Overhead.y/2));
-	LRect Pad = Tools.GetPadding(c, &DefaultPad), Border = Tools.GetBorder(c);
+	d->DefaultPad.Set((int)(Scale*Overhead.x/2),
+					  (int)(Scale*Overhead.y/2),
+					  (int)(Scale*Overhead.x/2),
+					  (int)(Scale*Overhead.y/2));
+	d->Pad = Tools.GetPadding(c, &d->DefaultPad);
+	d->Border = Tools.GetBorder(c);
+
+	LCss::Len MinX, MaxX, Wid;
+	LCss::Len MinY, MaxY, Height;
+	if (Css)
+	{
+		Wid = Css->Width();
+		MinX = Css->MinWidth();
+		MaxX = Css->MaxWidth();
+
+		Height = Css->Height();
+		MinY = Css->MinHeight();
+		MaxY = Css->MaxHeight();
+	}
+
+	int baseX = d->Pad.x1 + d->Pad.x2 + d->Border.x1 + d->Border.x2;
+	int baseY = d->Pad.y1 + d->Pad.y2 + d->Border.y1 + d->Border.y2;
+	if (d->Img)
+	{
+		d->imgSz.x = d->Img->X();
+		d->imgSz.y = d->Img->Y();
+	}
+	else
+	{
+		d->imgSz.Set(0, 0);
+	}
+
+	int contentX = Wid ? Wid.ToPx(c.X(), Font) - baseX : MAX(d->imgSz.x, TxtMin.x);
+	int spaceY = d->imgSz.y && TxtMin.y ? LTableLayout::CellSpacing : 0;
+	int contentY = Height ? Height.ToPx(c.Y(), Font) - baseY : d->imgSz.y + spaceY + TxtMin.y;
+	
+	if (d->Img)
+	{
+		if (contentX < d->Img->X() || contentY < d->Img->Y())
+		{
+			// scale the image down to fit...
+			auto scale = std::min((float)contentX / d->Img->X(), (float)contentY / d->Img->Y());
+			d->imgSz.x = (int)(d->Img->X() * scale);
+			d->imgSz.y = (int)(d->Img->Y() * scale);
+		}
+	}
 
 	if (!Inf.Width.Min)
 	{
-		int BaseX = Pad.x1 + Pad.x2 + Border.x1 + Border.x2;
-		int ImgX = d->Image ? d->Image->X() + 4/*img->text spacer*/ : 0;
-		LCss::Len MinX, MaxX;
-		if (Css)
-		{
-			MinX = Css->MinWidth();
-			MaxX = Css->MaxWidth();
-		}
+		int contentX = Wid ? Wid.ToPx(c.X(), Font) : baseX + MAX(d->imgSz.x, TxtMin.x);
+		int minX = MinX ? MinX.ToPx(c.X(), Font) : 0;
+		int maxX = MaxX ? MaxX.ToPx(c.X(), Font) : MAX_SIZE;
 
-		Inf.Width.Min = MinX ? MinX.ToPx(c.X(), Font) : BaseX + ImgX + TxtMin.x;
-		Inf.Width.Max = MaxX ? MaxX.ToPx(c.X(), Font) : BaseX + ImgX + TxtMax.x;
+		Inf.Width.Min = MAX(minX, contentX);
+		Inf.Width.Max = MIN(maxX, contentX);
 		
 		#if 0
 		LgiTrace("%i.Layout.Btn.x = %i, %i  valid=%i,%i c=%s, base=%i, img=%i\n", GetId(), 
 			Inf.Width.Min, Inf.Width.Max,
 			(bool)MinX, (bool)MaxX,
 			c.GetStr(),
-			BaseX, ImgX);
+			baseX, d->imgSz.x);
 		#endif
 	}
 	else
 	{
-		int BaseY = Pad.y1 + Pad.y2 + Border.y1 + Border.y2;
-		int ImgY = d->Image ? d->Image->Y() : 0;
-		LCss::Len MinY, MaxY;
-		if (Css)
-		{
-			MinY = Css->MinHeight();
-			MaxY = Css->MaxHeight();
-		}
-
-		Inf.Height.Min = MinY ? MinY.ToPx(c.Y(), Font) : BaseY + MAX(ImgY, TxtMin.y);
-		Inf.Height.Max = MaxY ? MaxY.ToPx(c.Y(), Font) : BaseY + MAX(ImgY, TxtMax.y);
-
-		// LgiTrace("%i.Layout.Btn.y = %i, %i\n", GetId(), Inf.Height.Min, Inf.Height.Max);
+		int contentY = Height ? Height.ToPx(c.Y(), Font) : baseY + d->imgSz.y + spaceY + TxtMin.y;
+		int minY = MinY ? MinY.ToPx(c.Y(), Font) : 0;
+		int maxY = MaxY ? MaxY.ToPx(c.Y(), Font) : MAX_SIZE;
+		Inf.Height.Min = MAX(minY, contentY);
+		Inf.Height.Max = MIN(maxY, contentY);
 	}
 
 	return true;
