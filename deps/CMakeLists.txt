@@ -28,6 +28,7 @@ set(EXTRA_ARGS
     )
 
 if (APPLE)
+
     execute_process(COMMAND xcodebuild -version
         OUTPUT_VARIABLE XcodeOut)
     separate_arguments(XcodeParts UNIX_COMMAND ${XcodeOut})
@@ -42,6 +43,24 @@ if (APPLE)
     set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment version")
     string(REPLACE ";" "$<SEMICOLON>" CMAKE_OSX_ARCHITECTURES_ "${CMAKE_OSX_ARCHITECTURES}")
     list(APPEND EXTRA_ARGS "-DCMAKE_OSX_ARCHITECTURES=${CMAKE_OSX_ARCHITECTURES_}")
+
+elseif (WIN32)
+
+    set(OPENSSL_ROOT_DIR "C:/Program Files/OpenSSL-Win64" CACHE PATH "Path to OpenSSL root" FORCE)
+    set(OPENSSL_CRYPTO_LIBRARY "C:/Program Files/OpenSSL-Win64/lib/VC/x64/MD/libcrypto.lib" CACHE FILEPATH "Path to OpenSSL crypto library" FORCE)
+    set(OPENSSL_SSL_LIBRARY "C:/Program Files/OpenSSL-Win64/lib/VC/x64/MD/libssl.lib" CACHE FILEPATH "Path to OpenSSL SSL library" FORCE)
+    set(OPENSSL_USE_STATIC_LIBS OFF CACHE BOOL "Use static OpenSSL libraries" FORCE)
+
+    find_package(OpenSSL 3.5 REQUIRED)
+
+
+    # '/FS' - Forces writes to the PDB file to be serialized through MSPDBSRV.EXE.
+    add_compile_options(/FS)
+
+    # fix the slashs in CMAKE_INSTALL_DOCDIR
+    string(REPLACE "\\" "/" CMAKE_INSTALL_DOCDIR "${CMAKE_INSTALL_DOCDIR}")
+    message("Fixed CMAKE_INSTALL_DOCDIR=${CMAKE_INSTALL_DOCDIR}")
+
 endif()
 
 function(GitProject NAME URI BRANCH ADDTARGET CLONE_ERR_FATAL)
@@ -85,15 +104,6 @@ endfunction()
 
 set(LIB_FOLDER ${CMAKE_BINARY_DIR}/lib)
 file(MAKE_DIRECTORY ${LIB_FOLDER})
-
-if(WIN32)
-    # '/FS' - Forces writes to the PDB file to be serialized through MSPDBSRV.EXE.
-    add_compile_options(/FS)
-
-    # fix the slashs in CMAKE_INSTALL_DOCDIR
-    string(REPLACE "\\" "/" CMAKE_INSTALL_DOCDIR "${CMAKE_INSTALL_DOCDIR}")
-    message("Fixed CMAKE_INSTALL_DOCDIR=${CMAKE_INSTALL_DOCDIR}")
-endif()
 
 if (1)
     # libjpeg
