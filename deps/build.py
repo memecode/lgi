@@ -16,6 +16,7 @@ useVsVer = 2022
 first = True
 clean = False
 installPaths = False
+haikuCrossCompile = False
 for arg in sys.argv:
     if arg == "--help":
         sys.exit(0)
@@ -25,6 +26,8 @@ for arg in sys.argv:
         installPaths = True
     elif arg == "2019":
         useVsVer = 2019
+    elif arg == "haiku":
+        haikuCrossCompile = True
 
 def checkPackage(pkg):
     p = subprocess.run(["dpkg", "-l", pkg], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -76,17 +79,20 @@ elif platform.system() == "Darwin":
     universalArchs.append('arm64')
 elif platform.system() == "Linux":
     subfolders = ["build-x64"]
-    packages = ["build-essential",
-                "mercurial",
-                "libmagic-dev", 
-                "libgtk3.0-dev",
-                "libgtk-3-dev",
-                "libgstreamer1.0-dev",
-                "libayatana-appindicator3-dev",
-                "libssh-dev",
-                "cmake",
-                "ninja-build",
-                "git" ]
+    if not haikuCrossCompile:
+        packages = ["build-essential",
+                    "mercurial",
+                    "libmagic-dev", 
+                    "libgtk3.0-dev",
+                    "libgtk-3-dev",
+                    "libgstreamer1.0-dev",
+                    "libayatana-appindicator3-dev",
+                    "libssh-dev",
+                    "cmake",
+                    "ninja-build",
+                    "git" ]
+    else:
+        packages = []
     needs = []
     print("Checking required packages:")
     for pkg in packages:
@@ -187,6 +193,10 @@ for n in range(len(subfolders)):
             args += ["-DBUILD_SHARED_LIBS=OFF"]
             args += ["-DCMAKE_INSTALL_MANDIR="+path]
             args += ["-DCMAKE_INSTALL_DOCDIR="+path]
+
+            if haikuCrossCompile:
+                args += ["-DCMAKE_TOOLCHAIN_FILE=../src/haiku/haiku-toolchain.cmake"]
+
             if len(extraCmakeArgs) > 0:
                 args += extraCmakeArgs
             args += [curFolder]
