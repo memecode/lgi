@@ -2116,6 +2116,10 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 
 				Path = "\\";
 
+			#elif HAIKU
+			
+				Path = "/";
+
 			#else
 
 				#error "Impl me."
@@ -2140,6 +2144,10 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			#elif defined(WINDOWS)
 
 				Path = "\\";
+				
+			#elif HAIKU
+			
+				Path = "/";
 
 			#else
 

@@ -366,7 +366,7 @@ struct LVolumePriv
 	{
 		if (SysPath == LSP_DESKTOP && !NextVol)
 		{
-			NextVol = new LVolume(LSP_MOUNT_POINT, "Mounts");
+			NextVol = new LVolume(LSP_SYS_MOUNT_POINT, "Mounts");
 
 			LHashTbl<StrKey<char,false>, bool> Map;
 			
