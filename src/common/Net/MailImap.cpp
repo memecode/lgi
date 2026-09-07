@@ -897,8 +897,16 @@ bool MailIMap::Read(LStreamI *Out, int Timeout)
 			else
 			{
 				if (!d->Cancel->IsCancelled() && End - St < Timeout - 20)
-					LgiTrace("%s:%i - IsReadable broken (again), Timeout=%i, Elapsed=%i\n",
-						_FL, Timeout, (int)(End - St));
+				{
+					static uint64_t lastLogTs = 0;
+					auto now = LCurrentTime();
+					if (now - lastLogTs > 2000)
+					{
+						lastLogTs = now;
+						LgiTrace("%s:%i - IsReadable broken (again), Timeout=%i, Elapsed=%i\n",
+							_FL, Timeout, (int)(End - St));
+					}
+				}
 				return false;
 			}
 		}

@@ -1256,6 +1256,10 @@ DebugTrace("%s:%i - BIO_get_ssl=%p\n", _FL, Ssl);
 							const int SLEEP_MS = 50;
 							int r = Library->SSL_connect(Ssl);
 							int err = 0;
+							// SSL_ERROR_WANT_CONNECT represents the asynchronous TCP connect,
+							// rather than a TLS protocol error. Retain its OS error separately
+							// because OpenSSL's error queue is normally empty in that case.
+							int tcpConnectError = 0;
 DebugTrace("%s:%i - initial SSL_connect=%i, err=%i\n", _FL, r, Library->SSL_get_error(Ssl, r));
 							while (r != 1 && !d->Cancel->IsCancelled())
 							{
@@ -1265,11 +1269,19 @@ DebugTrace("%s:%i - SSL_get_error=%i\n", _FL, err);
 								if (err == SSL_ERROR_WANT_CONNECT)
 								{
 									// This MUST wait until the OS reports this file descriptor is WRITABLE
-									// before it can call SSL_connect again...
-									auto fd = GetRawSocket(Bio);
+									// before it can call SSL_connect again. Bio is an SSL filter BIO here;
+									// BIO_C_GET_FD on that outer filter does not reliably return its
+									// underlying socket on Windows. SSL_get_fd resolves the transport BIO.
+									auto fd = Library->SSL_get_fd(Ssl);
 									int result = -1;
-DebugTrace("%s:%i - starting SSL_ERROR_WANT_CONNECT loop\n", _FL);
-									while (!d->Cancel->IsCancelled())
+									if (!ValidSocket(fd))
+									{
+										DebugTrace("%s:%i - SSL_ERROR_WANT_CONNECT but BIO has no valid socket.\n", _FL);
+										break;
+									}
+
+DebugTrace("%s:%i - starting SSL_ERROR_WANT_CONNECT loop, fd=" LPrintfSock "\n", _FL, fd);
+									while (!d->Cancel->IsCancelled() && HasntTimedOut())
 									{
 										#if defined(_WIN32)
 											fd_set write_fds;
@@ -1283,13 +1295,31 @@ DebugTrace("%s:%i - starting SSL_ERROR_WANT_CONNECT loop\n", _FL);
 											pfd.events = POLLOUT; // Wait for write capability
 											result = poll(&pfd, 1, SLEEP_MS);
 										#endif
-										// select and poll have the same structure for their return value.
-										if (result != 0)
-											break; // success or fail... leave the loop
-										// else result == 0: timeout, keep looping..
+										if (result < 0)
+										{
+											tcpConnectError = SystemErrorCode;
+											DebugTrace("%s:%i - TCP connect wait failed, error=%i.\n", _FL, tcpConnectError);
+											break;
+										}
+										if (result == 0)
+											continue;
+
+										// A writable socket may mean either that connect succeeded or that
+										// it failed. SO_ERROR provides the definitive result on both cases.
+										socklen_t errorLength = sizeof(tcpConnectError);
+										if (getsockopt(fd, SOL_SOCKET, SO_ERROR, (char*)&tcpConnectError, &errorLength) != 0)
+										{
+											tcpConnectError = SystemErrorCode;
+											DebugTrace("%s:%i - getsockopt(SO_ERROR) failed, error=%i.\n", _FL, tcpConnectError);
+										}
+										else
+										{
+											DebugTrace("%s:%i - TCP connect wait completed, SO_ERROR=%i.\n", _FL, tcpConnectError);
+										}
+										break;
 									}
 DebugTrace("%s:%i - result=%i, cancel=%i\n", _FL, result, d->Cancel->IsCancelled());
-									if (result < 0 || d->Cancel->IsCancelled())
+									if (result < 0 || tcpConnectError != 0 || d->Cancel->IsCancelled() || !HasntTimedOut())
 										break; // error or cancelled
 									// success: continue on to call SSL_connect again.
 								}
@@ -1464,9 +1494,28 @@ DebugTrace("%s:%i - open loop finished, r=%i, Cancelled=%i\n", _FL, r, d->Cancel
 								}
 								else
 								{
-									auto errMsg = LString::Fmt("err=%i, %s", err, GetSslErr().Strip().Get());
-									if (!errMsg)
-										errMsg.Printf("SSL_connect(%s:%i) failed.", HostAddr, Port);
+									// Get the classification for the final SSL_connect call; err may
+									// otherwise describe a prior retry attempt.
+									err = Library->SSL_get_error(Ssl, r);
+									auto sslErr = GetSslErr().Strip();
+									LString errMsg;
+									if (tcpConnectError != 0)
+									{
+										LError systemError(tcpConnectError);
+										errMsg.Printf("SSL_connect(%s:%i) failed before TLS handshake: "
+											"SSL_get_error=%i, socket error=%i (%s)",
+											HostAddr, Port, err, tcpConnectError, systemError.GetMsg().Get());
+									}
+									else if (sslErr)
+									{
+										errMsg.Printf("SSL_connect(%s:%i) failed: SSL_get_error=%i, %s",
+											HostAddr, Port, err, sslErr.Get());
+									}
+									else
+									{
+										errMsg.Printf("SSL_connect(%s:%i) failed: SSL_get_error=%i "
+											"(OpenSSL error queue was empty)", HostAddr, Port, err);
+									}
 									HandleError(_FL, errMsg);
 								}
 							}
