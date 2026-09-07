@@ -66,6 +66,17 @@ static bool SetSocketBlockingMode(OsSocket sock, bool blocking)
 	#endif
 }
 
+static OsSocket OpenSslSocketHandle(int socketFd)
+{
+	#ifdef WINDOWS
+	if (socketFd == -1)
+		return INVALID_SOCKET;
+	return (OsSocket)(uint32_t)socketFd;
+	#else
+	return socketFd;
+	#endif
+}
+
 LString LibName(const char *Fmt)
 {
 	LString s;
@@ -1122,10 +1133,10 @@ OsSocket SslSocket::GetRawSocket(BIO* bio)
 	if (!bio)
 		return INVALID_SOCKET;
 	
-	OsSocket socket_fd = INVALID_SOCKET;
+	int socketFd = -1;
 	// BIO_get_fd(b, c) expands to: BIO_ctrl(b, BIO_C_GET_FD, 0, (char *)c)
-	auto result = Library->BIO_ctrl(bio, BIO_C_GET_FD, 0, &socket_fd);
-	return (result >= 0) ? socket_fd : INVALID_SOCKET;
+	auto result = Library->BIO_ctrl(bio, BIO_C_GET_FD, 0, &socketFd);
+	return (result >= 0) ? OpenSslSocketHandle(socketFd) : INVALID_SOCKET;
 };
 
 OsSocket SslSocket::Handle(OsSocket Set)
@@ -1272,7 +1283,8 @@ DebugTrace("%s:%i - SSL_get_error=%i\n", _FL, err);
 									// before it can call SSL_connect again. Bio is an SSL filter BIO here;
 									// BIO_C_GET_FD on that outer filter does not reliably return its
 									// underlying socket on Windows. SSL_get_fd resolves the transport BIO.
-									auto fd = Library->SSL_get_fd(Ssl);
+									int socketFd = Library->SSL_get_fd(Ssl);
+									auto fd = OpenSslSocketHandle(socketFd);
 									int result = -1;
 									if (!ValidSocket(fd))
 									{
@@ -2097,7 +2109,10 @@ bool SslSocket::IsReadable(int TimeoutMs)
 		}
 
 		if (Library->SSL_has_pending(Ssl) || Library->SSL_pending(Ssl) > 0)
+		{
+			// LgiTrace("%s:%i - No pending\n", _FL);
 			return true;
+		}
 	}
 
 	// Assign to local var to avoid a thread changing it
@@ -2124,6 +2139,12 @@ bool SslSocket::IsReadable(int TimeoutMs)
 		}
 		else if (v < 0)
 		{
+			#if 0 && WINDOWS
+			int error = SystemErrorCode;
+			LError systemError(error);
+			LgiTrace("%s:%i - select failed for socket=" LPrintfSock ": %i (%s)\n",
+				_FL, s, error, systemError.GetMsg().Get());
+			#endif
 			// Error();
 		}
 	}
