@@ -566,7 +566,7 @@ void LView::OnAttach()
 	{
 		if (auto wnd = GetWindow())
 		{
-			auto Status = wnd->OnGtkDropTarget(this, true);
+			auto Status = wnd->GtkDropTarget(this, true);
 			if (!d->DropTarget)
 				d->DropTarget = GetWindow();
 		}
@@ -1615,7 +1615,7 @@ bool LView::DropTarget(bool t)
 		{
 			if (!DropTarget())
 				d->DropTarget = t ? GetWindow() : nullptr;
-			Status = wnd->OnGtkDropTarget(this, t);
+			Status = wnd->GtkDropTarget(this, t);
 		}
 		
 	#elif WINNATIVE

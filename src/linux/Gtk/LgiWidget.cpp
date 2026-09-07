@@ -813,7 +813,7 @@ lgi_widget_realize(GtkWidget *widget)
 
 	auto gv = w->target->GetLView();
 	if (gv)
-		gv->OnGtkRealize();
+		gv->GtkRealize();
 	else
 		w->target->OnCreate();
 }

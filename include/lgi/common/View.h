@@ -45,10 +45,10 @@ class LgiClass LView : virtual public LViewI, virtual public LBase
 		friend Gtk::gboolean PopupEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event, class LPopup *This);
 		friend Gtk::gboolean GtkViewCallback(Gtk::GtkWidget *widget, Gtk::GdkEvent *event, LView *This);
 	
-		virtual Gtk::gboolean OnGtkEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event);
+		virtual Gtk::gboolean GtkEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event);
 public:
-		virtual void OnGtkRealize();
-		virtual void OnGtkDelete();
+		virtual void GtkRealize();
+		virtual void GtkDelete();
 
 private:
 	#endif

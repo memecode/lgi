@@ -30,11 +30,6 @@ using namespace Gtk;
 #define DEBUG_INVALIDATE(...)
 #endif
 
-#define ADJ_LEFT					1
-#define ADJ_RIGHT					2
-#define ADJ_UP						3
-#define ADJ_DOWN					4
-
 #if GtkVer(2, 14)
 #else
 #define gtk_widget_get_window(widget) ((widget)->window)
@@ -153,7 +148,7 @@ LViewPrivate::~LViewPrivate()
 		DeleteObj(Font);
 }
 
-void LView::OnGtkRealize()
+void LView::GtkRealize()
 {
 	if (!d->GotOnCreate)
 	{
@@ -173,7 +168,7 @@ void LView::OnGtkRealize()
 	{
 		auto gv = c->GetLView();
 		if (gv)
-			gv->OnGtkRealize();
+			gv->GtkRealize();
 	}
 }
 
@@ -518,12 +513,12 @@ gboolean GtkViewCallback(GtkWidget *widget, GdkEvent *event, LView *This)
 		return false;
 	}
 
-	return This->OnGtkEvent(widget, event);
+	return This->GtkEvent(widget, event);
 }
 
-gboolean LView::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
+gboolean LView::GtkEvent(GtkWidget *widget, GdkEvent *event)
 {
-	printf("LView::OnGtkEvent ?????\n");
+	printf("LView::GtkEvent ?????\n");
 	return false;
 }
 
@@ -789,9 +784,15 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 		{
 			return OnCommand(Msg->A(), 0, (OsView) Msg->B());
 		}
-		case M_DND_END:
 		case M_DND_EXIT:
 		{
+			if (GetWindow()->GtkDropInProgress())
+				break;
+			// fall through
+		}
+		case M_DND_END:
+		{
+
 			if (auto target = DropTarget())
 				target->OnDragExit();
 
@@ -1004,7 +1005,7 @@ bool LView::Attach(LViewI *parent)
 		}
 
 		if (_Window)
-			OnGtkRealize();
+			GtkRealize();
 	}
 	
 	return Status;
@@ -1066,14 +1067,13 @@ LCursor LView::GetCursor(int x, int y)
 	return LCUR_Normal;
 }
 
-void LView::OnGtkDelete()
+void LView::GtkDelete()
 {
 	List<LViewI>::I it = Children.begin();
 	for (LViewI *c = *it; c; c = *++it)
 	{
-		LView *v = c->GetLView();
-		if (v)
-			v->OnGtkDelete();
+		if (auto v = c->GetLView())
+			v->GtkDelete();
 	}
 }
 

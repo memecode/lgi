@@ -1408,7 +1408,7 @@ void VcFolder::Select(bool b)
 		GetCurrentRevision();
 
 		PROF("UpdateCommitList");
-		if ((Log.Length() == 0 || CommitListDirty) && !IsLogging)
+		if ((!LogLoaded || CommitListDirty) && !IsLogging)
 		{
 			switch (GetType())
 			{
@@ -1676,7 +1676,8 @@ bool VcFolder::ParseRevList(int Result, LString s, ParseParams *Params)
 	}
 
 	IsLogging = false;
-	return Errors == 0;
+	LogLoaded = Result == 0 && Errors == 0;
+	return LogLoaded;
 }
 
 LString VcFolder::GetFilePart(const char *uri)
@@ -1693,6 +1694,7 @@ void VcFolder::ClearLog()
 {
 	Uncommit.Reset();
 	Log.DeleteObjects();
+	LogLoaded = false;
 }
 
 void VcFolder::LogFilter(const char *Filter)
@@ -3235,6 +3237,7 @@ void VcFolder::Empty()
 	IsUpdate = false;
 	IsFilesCmd = false;
 	CommitListDirty = false;
+	LogLoaded = false;
 	IsUpdatingCounts = false;
 	IsBranches = StatusNone;
 	IsIdent = StatusNone;

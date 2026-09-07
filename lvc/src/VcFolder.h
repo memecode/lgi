@@ -258,6 +258,7 @@ protected:
 	LAutoPtr<UncommitedItem> Uncommit;
 	LString Cache, NewRev;
 	bool CommitListDirty = false;
+	bool LogLoaded = false;
 	int Unpushed = -1, Unpulled = -1;
 	LString CountCache;
 	LTreeItem *Tmp = NULL;

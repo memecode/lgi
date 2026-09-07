@@ -79,11 +79,12 @@ protected:
 
 	
 		int curDndViewHnd = 0;
+		bool dndDropInProgress = false;
 		Gtk::GtkWidget *_Root = nullptr, *_VBox = nullptr, *_MenuBar = nullptr;
 		LRect _RootAlloc;
-		void OnGtkDelete();
-		Gtk::gboolean OnGtkEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event);
-		bool OnGtkDropTarget(LView *view, bool isTarget);
+		void GtkDelete();
+		Gtk::gboolean GtkEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event);
+		bool GtkDropTarget(LView *view, bool isTarget);
 
 	#elif defined(LGI_CARBON)
 
@@ -336,14 +337,18 @@ public:
 	
 	#elif defined __GTK_H__
 	
-		void OnGtkRealize();
-		bool IsAttached();
-		void Quit(bool DontDelete = false);
+		bool IsAttached() override;
+		void Quit(bool DontDelete = false) override;
+		void SetParent(LViewI *p) override;
+
+		LViewI *WindowFromPoint(int x, int y, bool Debug = false);
 		LRect *GetDecorSize();
 		bool TranslateMouse(LMouse &m);
-		LViewI *WindowFromPoint(int x, int y, bool Debug = false);
-		void _OnViewDelete();
-		void SetParent(LViewI *p) override;
+
+		void GtkRealize() override;
+		void GtkViewDelete();
+		bool GtkDropInProgress() const { return dndDropInProgress; }
+		void GtkDropInProgress(bool inProgress) { dndDropInProgress = inProgress; }
 	
 	#elif defined(MAC)
 	

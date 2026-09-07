@@ -269,27 +269,26 @@ bool LWindow::Obscured()
 			d->State == GDK_WINDOW_STATE_ICONIFIED;
 }
 
-void LWindow::_OnViewDelete()
+void LWindow::GtkViewDelete()
 {
 	delete this;
 }
 
-void LWindow::OnGtkRealize()
+void LWindow::GtkRealize()
 {
 	d->AttachState = LAttached;
-	LView::OnGtkRealize();
+	LView::GtkRealize();
 }
 
-void LWindow::OnGtkDelete()
+void LWindow::GtkDelete()
 {
 	// Delete everything we own...
 
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
-		LViewI *c = Children[i];
-		LView *v = c->GetLView();
-		if (v)
-			v->OnGtkDelete();
+		if (auto c = Children[i])
+			if (auto v = c->GetLView())
+				v->GtkDelete();
 	}
 	
 	// These will be destroyed by GTK after returning from LWindowCallback
@@ -356,7 +355,7 @@ bool LWindow::TranslateMouse(LMouse &m)
 	return true;
 }
 
-bool LWindow::OnGtkDropTarget(LView *view, bool isTarget)
+bool LWindow::GtkDropTarget(LView *view, bool isTarget)
 {
 	if (!view)
 		return false;
@@ -390,7 +389,7 @@ bool LWindow::OnGtkDropTarget(LView *view, bool isTarget)
 	{
 		bool has = d->dndFormats.Find(fmt);
 		
-		// printf("OnGtkDropTarget for %s, fmt=%s, %i %i\n",
+		// printf("GtkDropTarget for %s, fmt=%s, %i %i\n",
 		// 	view->GetClass(), fmt.Get(), has, isTarget);
 		
 		if (isTarget ^ has)
@@ -413,7 +412,7 @@ bool LWindow::OnGtkDropTarget(LView *view, bool isTarget)
 	return true;
 }
 
-gboolean LWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
+gboolean LWindow::GtkEvent(GtkWidget *widget, GdkEvent *event)
 {
 	if (!event)
 	{
@@ -423,7 +422,7 @@ gboolean LWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 
 	#if 0
 	if (event->type != 28)
-		LgiTrace("%s::OnGtkEvent(%i) name=%s\n", GetClass(), event->type, Name());
+		LgiTrace("%s::GtkEvent(%i) name=%s\n", GetClass(), event->type, Name());
 	#endif
 	switch (event->type)
 	{
@@ -438,7 +437,7 @@ gboolean LWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 				if (sx && sy)
 					d->lastKnownSize = LPoint(sx, sy);
 				
-				OnGtkDelete();
+				GtkDelete();
 			}
 			return !Close;
 		}
@@ -734,7 +733,7 @@ GtkWindowRealize(GtkWidget *widget, LWindow *This)
 		This, (NativeInt)This > 0x1000 ? This->GetClass() : 0, (NativeInt)This > 0x1000 ? This->Name() : 0);
 	#endif
 
-	This->OnGtkRealize();
+	This->GtkRealize();
 }
 
 void
@@ -1080,6 +1079,8 @@ struct LGtkDrop : public LView::ViewEventTarget
 	{
 		DND_LOG("%s:%i - OnComplete(%i)\n", _FL, isTimeout);
 		t->OnDrop(t->Data, p, KeyState);
+		wnd->GtkDropInProgress(false);
+		t->OnDragExit();
 		delete this;
 	}
 };
@@ -1088,6 +1089,7 @@ gboolean
 LWindowDragDataDrop(GtkWidget *widget, GdkDragContext *context, gint x, gint y, guint time, LWindow *Wnd)
 {
 	LPoint mousePt(x, y);
+	Wnd->GtkDropInProgress(true);
 	auto obj = new LGtkDrop(widget, context, mousePt, time, Wnd);
 	DND_LOG("%s:%i - LWindowDragDataDrop LGtkDrop: %p\n", _FL, obj);
 	return obj != NULL;

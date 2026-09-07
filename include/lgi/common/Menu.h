@@ -352,7 +352,7 @@ protected:
 		bool Replace(Gtk::GtkWidget *newWid);
 	public:
 		void Handle(Gtk::GtkMenuItem *mi);
-		void OnGtkEvent(LString Event);
+		void GtkEvent(LString Event);
 		void PaintIcon(Gtk::cairo_t *cr);
 	protected:
 	#else
