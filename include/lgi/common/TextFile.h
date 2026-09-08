@@ -106,7 +106,7 @@ public:
 				{
 					const char *Cs = GetTypeString();
 					if (Cs)
-						Ret.Reset((char16*)LNewConvertCp(LGI_WideCharset, Buf, Cs, Sz));
+						Ret.Reset((char16*)LNewConvertCp(LGI_WideCharset, Buf, Cs, Rd));
 				}
 			}
 		}
@@ -142,27 +142,27 @@ public:
 
 				uint8_t *buf = (uint8_t*)Buffer;
 				uint8_t *start = buf;
-				if (Used > 2 && buf[0] == 0xEF && buf[1] == 0xBB && buf[2] == 0xBF)
+				if (Rd > 2 && buf[0] == 0xEF && buf[1] == 0xBB && buf[2] == 0xBF)
 				{
 					Type = Utf8;
 					start += 3;
 				}
-				else if (Used > 1 && buf[0] == 0xFE && buf[1] == 0xFF)
+				else if (Rd > 1 && buf[0] == 0xFE && buf[1] == 0xFF)
 				{
 					Type = Utf16BE;
 					start += 2;
 				}
-				else if (Used > 1 && buf[0] == 0xFF && buf[1] == 0xFE)
+				else if (Rd > 1 && buf[0] == 0xFF && buf[1] == 0xFE)
 				{
 					Type = Utf16LE;
 					start += 2;
 				}
-				else if (Used > 3 && buf[0] == 0x00 && buf[1] == 0x00 && buf[2] == 0xFE && buf[3] == 0xFF)
+				else if (Rd > 3 && buf[0] == 0x00 && buf[1] == 0x00 && buf[2] == 0xFE && buf[3] == 0xFF)
 				{
 					Type = Utf32BE;
 					start += 4;
 				}
-				else if (Used > 3 && buf[0] == 0xFF && buf[1] == 0xFE && buf[2] == 0x00 && buf[3] == 0x00)
+				else if (Rd > 3 && buf[0] == 0xFF && buf[1] == 0xFE && buf[2] == 0x00 && buf[3] == 0x00)
 				{
 					Type = Utf32LE;
 					start += 4;

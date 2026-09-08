@@ -879,8 +879,14 @@ ssize_t LBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, const void *
 						}
 						case CpUtf32:
 						{
+							if (InLen < (ssize_t)sizeof(uint32_t))
+							{
+								InLen = 0;
+								break;
+							}
+
 							Utf32 = *((uint32_t*&)In8)++;
-							InLen -= 4;
+							InLen -= sizeof(uint32_t);
 							break;
 						}
 						default:

@@ -85,6 +85,7 @@ public:
 
 	void Move(int Dir)
 	{
+		auto WasSelected = Select();
 		auto Cur = IndexOf();
 		LTreeNode *p = GetParent();
 		if (!p)
@@ -100,6 +101,9 @@ public:
 			Remove();
 			p->Insert(this, Cur+1);
 		}
+
+		if (WasSelected)
+			Select(true);
 	}
 
 	bool OnKey(LKey &k)

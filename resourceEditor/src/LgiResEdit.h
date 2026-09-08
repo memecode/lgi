@@ -338,21 +338,17 @@ public:
 	struct Field
 	{
 		// Global
-		FieldTree *Tree;
-		LAutoString Label;
-		LAutoString Name;
-		int Type;
-		int Id;
-		bool Multiline;
-		void *Token;
+		FieldTree *Tree = nullptr;
+		LString Label;
+		LString Name;
+		int Type = 0;
+		int Id = 0;
+		bool Multiline = false;
+		void *Token = nullptr;
 
 		Field(FieldTree *tree)
 		{
 			Tree = tree;
-			Type = 0;
-			Id = 0;
-			Token = 0;
-			Multiline = false;
 		}
 	};
 
@@ -360,48 +356,47 @@ public:
 
 protected:
 	int &NextId;
-	FieldMode Mode;
-	LViewI *View;
-	LDom *Store;
-	bool Deep;
+	FieldMode Mode = None;
+	LViewI *View = nullptr;
+	LDom *Store = nullptr;
+	bool Deep = false;
 
 	LHashTbl<PtrKey<void*>, FieldArr*> f;
 
 	FieldArr *Get(void *Token, bool Create = false)
 	{
-		FieldArr *a = f.Find(Token);
+		auto a = f.Find(Token);
 		if (!a)
 		{
 			if (Create)
 				f.Add(Token, a = new FieldArr);
 			else
-				LAssert(0);
+				LgiTrace("%s:%i - failed to Get field array for token", _FL);
 		}
 		return a;
 	}
 
 	Field *GetField(void *Token, const char *FieldName)
 	{
-		if (!Token || !FieldName) return 0;
+		if (!Token || !FieldName)
+			return nullptr;
 
-		FieldArr *a = Get(Token);
-		if (!a) return 0;
+		auto a = Get(Token);
+		if (!a)
+			return nullptr;
 
-		for (int i=0; i<a->Length(); i++)
+		for (size_t i=0; i<a->Length(); i++)
 		{
 			if (!stricmp((*a)[i]->Name, FieldName))
 				return (*a)[i];
 		}
 
-		return 0;
+		return nullptr;
 	}
 
 public:
 	FieldTree(int &next, bool deep) : NextId(next)
 	{
-		Mode = None;
-		View = 0;
-		Store = 0;
 		Deep = deep;
 	}
 
@@ -448,16 +443,15 @@ public:
 
 	void Insert(void *Token, int Type, int Reserved, const char *Name, const char *Label, int Idx = -1, bool Multiline = false)
 	{
-		FieldArr *a = Get(Token, true);
-		if (!a) return;
+		auto a = Get(Token, true);
+		if (!a)
+			return;
 
-		Field *n = new Field(this);
-		if (n)
+		if (auto n = new Field(this))
 		{
 			n->Token = Token;
-			n->Label.Reset(NewStr(Label));
-			n->Name.Reset(NewStr(Name));
-			n->Id = NextId++;
+			n->Label = Label;
+			n->Name = Name;
 			n->Type = Type;
 			n->Multiline = Multiline;
 			a->Add(n);
@@ -466,10 +460,11 @@ public:
 
 	void Serialize(void *Token, const char *FieldName, int &i)
 	{
-		Field *f = GetField(Token, FieldName);
-		if (!f) return;
+		auto f = GetField(Token, FieldName);
+		if (!f)
+			return;
+		
 		LVariant v;
-
 		switch (Mode)
 		{
 			case ObjToUi:
@@ -487,15 +482,17 @@ public:
 				break;
 			default:
 				LAssert(0);
+				break;
 		}
 	}
 
 	void Serialize(void *Token, const char *FieldName, bool &b, int Default = -1)
 	{
-		Field *f = GetField(Token, FieldName);
-		if (!f) return;
+		auto f = GetField(Token, FieldName);
+		if (!f)
+			return;
+		
 		LVariant i;
-
 		switch (Mode)
 		{
 			case ObjToUi:
@@ -518,6 +515,7 @@ public:
 				break;
 			default:
 				LAssert(0);
+				break;
 		}
 	}
 
