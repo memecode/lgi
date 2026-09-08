@@ -258,7 +258,6 @@ protected:
 	LAutoPtr<UncommitedItem> Uncommit;
 	LString Cache, NewRev;
 	bool CommitListDirty = false;
-	bool LogLoaded = false;
 	int Unpushed = -1, Unpulled = -1;
 	LString CountCache;
 	LTreeItem *Tmp = NULL;
@@ -307,8 +306,18 @@ protected:
 	LAutoPtr<GitCommit> PostAdd;
 	void GitAdd();
 
+	enum class LogState
+	{
+		None,
+		Logging,
+		Loaded,
+		Error,
+	};
+
 	LArray<Cmd*> Cmds;
-	bool IsLogging = false, IsUpdate = false, IsFilesCmd = false;
+	LogState LogStatus = LogState::None;
+	
+	bool IsUpdate = false, IsFilesCmd = false;
 	bool IsCommit = false, IsUpdatingCounts = false;
 	bool IsListingWorking = false;
 	LvcStatus IsBranches = StatusNone, IsIdent = StatusNone;

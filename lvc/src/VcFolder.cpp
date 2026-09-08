@@ -1408,7 +1408,8 @@ void VcFolder::Select(bool b)
 		GetCurrentRevision();
 
 		PROF("UpdateCommitList");
-		if ((!LogLoaded || CommitListDirty) && !IsLogging)
+		if ((LogStatus != LogState::Loaded || CommitListDirty) &&
+			LogStatus != LogState::Logging)
 		{
 			switch (GetType())
 			{
@@ -1424,7 +1425,7 @@ void VcFolder::Select(bool b)
 						cmd += s;
 					}
 					
-					IsLogging = StartCmd(cmd, &VcFolder::ParseRevList);
+					LogStatus = StartCmd(cmd, &VcFolder::ParseRevList) ? LogState::Logging : LogState::Error;
 					break;
 				}
 				case VcSvn:
@@ -1434,7 +1435,7 @@ void VcFolder::Select(bool b)
 
 					if (CommitListDirty)
 					{
-						IsLogging = StartCmd("up", &VcFolder::ParsePull, new ParseParams("log"));
+						LogStatus = StartCmd("up", &VcFolder::ParsePull, new ParseParams("log")) ? LogState::Logging : LogState::Error;
 						break;
 					}
 					
@@ -1443,12 +1444,14 @@ void VcFolder::Select(bool b)
 						s.Printf("log --limit %i", Limit.CastInt32());
 					else
 						s = "log";
-					IsLogging = StartCmd(s, &VcFolder::ParseLog);
+					LogStatus = StartCmd(s, &VcFolder::ParseLog) ? LogState::Logging : LogState::Error;
 					break;
 				}
 				case VcHg:
 				{
-					IsLogging = StartCmd("log", &VcFolder::ParseLog);
+					printf("%s:%i - starting 'log'..\n", _FL);
+					LogStatus = StartCmd("log", &VcFolder::ParseLog) ? LogState::Logging : LogState::Error;
+					printf("%s:%i - LogStatus=%i\n", _FL, (int)LogStatus);
 					break;
 				}
 				case VcPending:
@@ -1457,7 +1460,7 @@ void VcFolder::Select(bool b)
 				}
 				default:
 				{
-					IsLogging = StartCmd("log", &VcFolder::ParseLog);
+					LogStatus = StartCmd("log", &VcFolder::ParseLog) ? LogState::Logging : LogState::Error;
 					break;
 				}
 			}
@@ -1675,9 +1678,9 @@ bool VcFolder::ParseRevList(int Result, LString s, ParseParams *Params)
 			break;
 	}
 
-	IsLogging = false;
-	LogLoaded = Result == 0 && Errors == 0;
-	return LogLoaded;
+	LogStatus = Result == 0 && Errors == 0 ? LogState::Loaded : LogState::Error;
+	printf("%s:%i - LogStatus=%i\n", _FL, (int)LogStatus);
+	return LogStatus == LogState::Loaded;
 }
 
 LString VcFolder::GetFilePart(const char *uri)
@@ -1694,7 +1697,7 @@ void VcFolder::ClearLog()
 {
 	Uncommit.Reset();
 	Log.DeleteObjects();
-	LogLoaded = false;
+	LogStatus = LogState::None;
 }
 
 void VcFolder::LogFilter(const char *Filter)
@@ -1738,7 +1741,8 @@ void VcFolder::LogFilter(const char *Filter)
 						args.Printf("log -n %i --author \"%s\"", Limit.CastInt32(), LString(Filter).LStrip("@").Get());
 					else
 						args.Printf("log -n %i --grep \"%s\"", Limit.CastInt32(), Filter.Get());
-					IsLogging = StartCmd(args, &VcFolder::ParseLog);
+					LogStatus = StartCmd(args, &VcFolder::ParseLog) ? LogState::Logging : LogState::Error;
+					printf("%s:%i - LogStatus=%i\n", _FL, (int)LogStatus);
 				}
 			};
 			StartCmd(args, NULL, params);
@@ -1763,7 +1767,7 @@ void VcFolder::LogFile(const char *uri, BrowseUi *existingUi)
 {
 	LString Args;
 	
-	if (IsLogging)
+	if (LogStatus == LogState::Logging)
 	{
 		d->Log->Print("%s:%i - already logging.\n", _FL);
 		return;
@@ -1788,7 +1792,8 @@ void VcFolder::LogFile(const char *uri, BrowseUi *existingUi)
 			{
 				params->browseUi = existingUi;
 				Args.Printf("log \"%s\"", FileToSelect.Get());
-				IsLogging = StartCmd(Args, &VcFolder::ParseLog, params, LogNormal);
+				LogStatus = StartCmd(Args, &VcFolder::ParseLog, params, LogNormal) ? LogState::Logging : LogState::Error;
+				printf("%s:%i - LogStatus=%i\n", _FL, (int)LogStatus);
 			}
 			break;
 		}
@@ -1901,6 +1906,7 @@ bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 			if (!s)
 			{
 				OnCmdError(s, "No output from command.");
+				LogStatus = LogState::Error;
 				return false;
 			}
 
@@ -2113,8 +2119,8 @@ bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 			browseUi->ParseLog(BrowseLog, s);
 	}
 
-	// LgiTrace("%s:%i - ParseLog: Skip=%i, Error=%i\n", _FL, Skipped, Errors);
-	IsLogging = false;
+	LogStatus = Result == 0 && Errors == 0 ? LogState::Loaded : LogState::Error;
+	printf("%s:%i - LogStatus=%i\n", _FL, (int)LogStatus);
 
 	return !Result;
 }
@@ -3233,11 +3239,10 @@ void VcFolder::Empty()
 	Type = VcNone;
 	
 	IsCommit = false;
-	IsLogging = false;
 	IsUpdate = false;
 	IsFilesCmd = false;
 	CommitListDirty = false;
-	LogLoaded = false;
+	LogStatus = LogState::None;
 	IsUpdatingCounts = false;
 	IsBranches = StatusNone;
 	IsIdent = StatusNone;
@@ -5210,6 +5215,9 @@ bool VcFolder::ParsePull(int Result, LString s, ParseParams *Params)
 	GetTree()->SendNotify((LNotifyType)LvcCommandEnd);
 	if (Result)
 	{
+		if (Params && Params->Str.Equals("log"))
+			LogStatus = LogState::Error;
+
 		OnCmdError(s, "Pull failed.");
 		return false;
 	}
@@ -5320,9 +5328,10 @@ bool VcFolder::ParsePull(int Result, LString s, ParseParams *Params)
 				if (Limit.CastInt32() > 0)
 					Args.Printf("log --limit %i", Limit.CastInt32());
 				else
-					Args = "log";				
+					Args = "log";
 				
-				IsLogging = StartCmd(Args, &VcFolder::ParseLog);
+				LogStatus = StartCmd(Args, &VcFolder::ParseLog) ? LogState::Logging : LogState::Error;
+				printf("%s:%i - LogStatus=%i\n", _FL, (int)LogStatus);
 				return false;
 			}
 			break;
