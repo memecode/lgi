@@ -37,7 +37,7 @@ class LHttpServer_TraceSocket : public Base
 public:
 	LHttpServer_TraceSocket(LCancel *c)
 	{
-		SetCancel(c);
+		Base::SetCancel(c);
 	}
 
 	void OnInformation(const char *Str) override

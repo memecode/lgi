@@ -1971,7 +1971,8 @@ AppWnd::AppWnd()
 	
 	d->DocBpCallback = d->BreakPoints.AddCallback([this](auto event, auto id)
 		{
-			printf("%s:%i - event=%i\n", _FL, event);
+			BP_LOG("%s:%i - event=%s\n", _FL, BreakPointStore::toString(event));
+
 			if (event == BreakPointStore::TBreakPointAdded ||
 				event == BreakPointStore::TBreakPointDeleted)
 			{
@@ -1982,10 +1983,11 @@ AppWnd::AppWnd()
 					if (auto doc = FindOpenFile(bp.relFile))
 					{
 						auto added = event == BreakPointStore::TBreakPointAdded;
-						printf("OnBreakPoint(%s, %i)\n", bp.relFile.Get(), added);
+						BP_LOG("OnBreakPoint(%s, %i)\n", bp.relFile.Get(), added);
 						doc->OnBreakPoint(id, added);
 					}
-					else printf("%s:%i - no file '%s'\n", _FL, bp.relFile.Get());					
+					// This isn't an error:
+					// else BP_LOG("%s:%i - no open file '%s'\n", _FL, bp.relFile.Get());					
 				}
 			}
 		});

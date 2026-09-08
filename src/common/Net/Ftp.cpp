@@ -1063,7 +1063,7 @@ bool IFtp::TransferFile(LStream *Stream, const char *Remote, int64 Size, bool Up
 										ssize_t WriteLen = 0;
 											
 										if (d->Data)
-											WriteLen = d->Data->Write((char*) Temp, Len, 0);
+											WriteLen = d->Data->Write((char*) Temp + i, Len - i, 0);
 										else
 											break;
 

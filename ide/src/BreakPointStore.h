@@ -146,6 +146,21 @@ public:
 		TBreakPointModified,
 	};
 
+	static const char *toString(TEvent e)
+	{
+		switch (e)
+		{
+			case TStoreDeleted:       return "StoreDeleted";
+			case TBreakPointAdded:    return "BreakPointAdded";
+			case TBreakPointDeleted:  return "BreakPointDeleted";
+			case TBreakPointEnabled:  return "BreakPointEnabled";
+			case TBreakPointDisabled: return "BreakPointDisabled";
+			case TBreakPointModified: return "BreakPointModified";
+		}
+
+		return nullptr;
+	}
+
 	using TStatusCb = std::function<void(bool)>;
 	using TCallback = std::function<void(TEvent,int)>;
 	using TLock = LMutex::Auto;
@@ -448,3 +463,4 @@ public:
 		return BreakPoints.Find(id);
 	}
 };
+
