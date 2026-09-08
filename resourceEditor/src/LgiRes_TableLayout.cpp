@@ -93,8 +93,8 @@ public:
 	LArray<ResDialogCtrl*> Ctrls;
 	TableAlign AlignX;
 	TableAlign AlignY;
-	LAutoString Class; // CSS class for styling
-	LAutoString Style; // CSS styles
+	LString Class; // CSS class for styling
+	LString Style; // CSS styles
 
 	ResTableCell(CtrlTable *table, ssize_t cx, ssize_t cy)
 	{
@@ -255,11 +255,11 @@ public:
 		}
 		else if (stricmp(Name, VAL_Class) == 0)
 		{
-			Class.Reset(Value.ReleaseStr());
+			Class = Value.LStr();
 		}
 		else if (stricmp(Name, VAL_Style) == 0)
 		{
-			Style.Reset(Value.ReleaseStr());
+			Style = Value.LStr();
 		}
 		else
 		{
@@ -271,67 +271,62 @@ public:
 	
 	void OnMouseClick(LMouse &m)
 	{
-		if (m.Down() && m.Right())
+		if (!m.Down() || !m.Right())
+			return;
+
+		LSubMenu RClick;
+		LSubMenu *s = RClick.AppendSub("Horizontal Align");
+		if (s)
 		{
-			LSubMenu *RClick = new LSubMenu;
-			if (RClick)
-			{
-				LSubMenu *s = RClick->AppendSub("Horizontal Align");
-				if (s)
-				{
-					s->AppendItem("Left", IDM_ALIGN_X_MIN, AlignX != AlignMin);
-					s->AppendItem("Center", IDM_ALIGN_X_CTR, AlignX != AlignCenter);
-					s->AppendItem("Right", IDM_ALIGN_X_MAX, AlignX != AlignMax);
-				}
-				s = RClick->AppendSub("Vertical Align");
-				if (s)
-				{
-					s->AppendItem("Top", IDM_ALIGN_Y_MIN, AlignY != AlignMin);
-					s->AppendItem("Center", IDM_ALIGN_Y_CTR, AlignY != AlignCenter);
-					s->AppendItem("Bottom", IDM_ALIGN_Y_MAX, AlignY != AlignMax);
-				}
-				RClick->AppendItem("Unmerge", IDM_UNMERGE, Cell.X() > 1 || Cell.Y() > 1);
-				RClick->AppendItem("Fix Missing Cells", IDM_FIX_TABLE, true);
-				RClick->AppendItem("Insert Row", IDM_INSERT_ROW, true);
-				RClick->AppendItem("Insert Column", IDM_INSERT_COL, true);
+			s->AppendItem("Left", IDM_ALIGN_X_MIN, AlignX != AlignMin);
+			s->AppendItem("Center", IDM_ALIGN_X_CTR, AlignX != AlignCenter);
+			s->AppendItem("Right", IDM_ALIGN_X_MAX, AlignX != AlignMax);
+		}
+		s = RClick.AppendSub("Vertical Align");
+		if (s)
+		{
+			s->AppendItem("Top", IDM_ALIGN_Y_MIN, AlignY != AlignMin);
+			s->AppendItem("Center", IDM_ALIGN_Y_CTR, AlignY != AlignCenter);
+			s->AppendItem("Bottom", IDM_ALIGN_Y_MAX, AlignY != AlignMax);
+		}
+		RClick.AppendItem("Unmerge", IDM_UNMERGE, Cell.X() > 1 || Cell.Y() > 1);
+		RClick.AppendItem("Fix Missing Cells", IDM_FIX_TABLE, true);
+		RClick.AppendItem("Insert Row", IDM_INSERT_ROW, true);
+		RClick.AppendItem("Insert Column", IDM_INSERT_COL, true);
 
-				m.ToScreen();
-				switch (RClick->Float(Table, m.x, m.y))
-				{
-					case IDM_ALIGN_X_MIN:
-						AlignX = AlignMin;
-						break;
-					case IDM_ALIGN_X_CTR:
-						AlignX = AlignCenter;
-						break;
-					case IDM_ALIGN_X_MAX:
-						AlignX = AlignMax;
-						break;
-					case IDM_ALIGN_Y_MIN:
-						AlignY = AlignMin;
-						break;
-					case IDM_ALIGN_Y_CTR:
-						AlignY = AlignCenter;
-						break;
-					case IDM_ALIGN_Y_MAX:
-						AlignY = AlignMax;
-						break;
-					case IDM_UNMERGE:
-						Table->UnMerge(this);
-						break;
-					case IDM_FIX_TABLE:
-						Table->Fix();
-						break;
-					case IDM_INSERT_ROW:
-						Table->InsertRow(Cell.y1);
-						break;
-					case IDM_INSERT_COL:
-						Table->InsertCol(Cell.x1);
-						break;
-				}
-
-				DeleteObj(RClick);
-			}
+		m.ToScreen();
+		switch (RClick.Float(Table, m.x, m.y))
+		{
+			case IDM_ALIGN_X_MIN:
+				AlignX = AlignMin;
+				break;
+			case IDM_ALIGN_X_CTR:
+				AlignX = AlignCenter;
+				break;
+			case IDM_ALIGN_X_MAX:
+				AlignX = AlignMax;
+				break;
+			case IDM_ALIGN_Y_MIN:
+				AlignY = AlignMin;
+				break;
+			case IDM_ALIGN_Y_CTR:
+				AlignY = AlignCenter;
+				break;
+			case IDM_ALIGN_Y_MAX:
+				AlignY = AlignMax;
+				break;
+			case IDM_UNMERGE:
+				Table->UnMerge(this);
+				break;
+			case IDM_FIX_TABLE:
+				Table->Fix();
+				break;
+			case IDM_INSERT_ROW:
+				Table->InsertRow(Cell.y1);
+				break;
+			case IDM_INSERT_COL:
+				Table->InsertCol(Cell.x1);
+				break;
 		}
 	}
 };
@@ -751,8 +746,9 @@ bool CtrlTable::GetFields(FieldTree &Fields)
 	if (d->GetSelected(s) == 1)
 	{
 		int Id = 150;
-		Fields.Insert(this, DATA_STR, Id++, VAL_CellClass, "Cell Class");
-		Fields.Insert(this, DATA_STR, Id++, VAL_CellStyle, "Cell Style", -1, true);
+		auto c = s[0];
+		Fields.Insert(c, DATA_STR, Id++, VAL_CellClass, "Cell Class");
+		Fields.Insert(c, DATA_STR, Id++, VAL_CellStyle, "Cell Style", -1, true);
 	}
 	
 	return Status;
@@ -763,11 +759,13 @@ bool CtrlTable::Serialize(FieldTree &Fields)
 	bool Status = ResDialogCtrl::Serialize(Fields);
 	
 	LArray<ResTableCell*> s;
-	ResTableCell *c;
-	if (d->GetSelected(s) == 1 && ((c = s[0])) != NULL)
+	if (d->GetSelected(s) == 1)
 	{
-		Fields.Serialize(this, VAL_CellClass, c->Class);
-		Fields.Serialize(this, VAL_CellStyle, c->Style);
+		if (auto c = s[0])
+		{
+			Fields.Serialize(c, VAL_CellClass, c->Class);
+			Fields.Serialize(c, VAL_CellStyle, c->Style);
+		}
 	}
 	
 	return Status;

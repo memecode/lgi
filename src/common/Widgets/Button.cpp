@@ -6,7 +6,6 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/SkinEngine.h"
 #include "lgi/common/Button.h"
-#include "lgi/common/DisplayString.h"
 #include "lgi/common/TableLayout.h"
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/StringLayout.h"
@@ -547,7 +546,6 @@ bool LButton::OnLayout(LViewLayoutInfo &Inf)
 	auto Font = GetFont();
 	LCssTools Tools(Css, Font);
 	auto c = GetClient();
-	auto TxtMin = d->GetMin();
 	auto TxtMax = d->GetMax();
 	const int MAX_SIZE = 100000;
 
@@ -587,29 +585,34 @@ bool LButton::OnLayout(LViewLayoutInfo &Inf)
 		d->imgSz.Set(0, 0);
 	}
 
-	int contentX = Wid ? Wid.ToPx(c.X(), Font) - baseX : MAX(d->imgSz.x, TxtMin.x);
-	int spaceY = d->imgSz.y && TxtMin.y ? LTableLayout::CellSpacing : 0;
-	int contentY = Height ? Height.ToPx(c.Y(), Font) - baseY : d->imgSz.y + spaceY + TxtMin.y;
+	int contentSpacing = d->imgSz.x && TxtMax.x ? LTableLayout::CellSpacing : 0;
+	int contentX = d->imgSz.x + contentSpacing + TxtMax.x;
+	int contentY = MAX(d->imgSz.y, TxtMax.y);
+	int availableX = Wid ? Wid.ToPx(c.X(), Font) - baseX : contentX;
+	int availableY = Height ? Height.ToPx(c.Y(), Font) - baseY : contentY;
 	
 	if (d->Img)
 	{
-		if (contentX < d->Img->X() || contentY < d->Img->Y())
+		if (availableX < d->Img->X() || availableY < d->Img->Y())
 		{
 			// scale the image down to fit...
-			auto scale = std::min((float)contentX / d->Img->X(), (float)contentY / d->Img->Y());
+			auto scale = std::min((float)availableX / d->Img->X(), (float)availableY / d->Img->Y());
 			d->imgSz.x = (int)(d->Img->X() * scale);
 			d->imgSz.y = (int)(d->Img->Y() * scale);
+			contentSpacing = d->imgSz.x && TxtMax.x ? LTableLayout::CellSpacing : 0;
+			contentX = d->imgSz.x + contentSpacing + TxtMax.x;
+			contentY = MAX(d->imgSz.y, TxtMax.y);
 		}
 	}
 
 	if (!Inf.Width.Min)
 	{
-		int contentX = Wid ? Wid.ToPx(c.X(), Font) : baseX + MAX(d->imgSz.x, TxtMin.x);
+		int width = Wid ? Wid.ToPx(c.X(), Font) : baseX + contentX;
 		int minX = MinX ? MinX.ToPx(c.X(), Font) : 0;
 		int maxX = MaxX ? MaxX.ToPx(c.X(), Font) : MAX_SIZE;
 
-		Inf.Width.Min = MAX(minX, contentX);
-		Inf.Width.Max = MIN(maxX, contentX);
+		Inf.Width.Min = MAX(minX, width);
+		Inf.Width.Max = MIN(maxX, width);
 		
 		#if 0
 		LgiTrace("%i.Layout.Btn.x = %i, %i  valid=%i,%i c=%s, base=%i, img=%i\n", GetId(), 
@@ -621,11 +624,11 @@ bool LButton::OnLayout(LViewLayoutInfo &Inf)
 	}
 	else
 	{
-		int contentY = Height ? Height.ToPx(c.Y(), Font) : baseY + d->imgSz.y + spaceY + TxtMin.y;
+		int height = Height ? Height.ToPx(c.Y(), Font) : baseY + contentY;
 		int minY = MinY ? MinY.ToPx(c.Y(), Font) : 0;
 		int maxY = MaxY ? MaxY.ToPx(c.Y(), Font) : MAX_SIZE;
-		Inf.Height.Min = MAX(minY, contentY);
-		Inf.Height.Max = MIN(maxY, contentY);
+		Inf.Height.Min = MAX(minY, height);
+		Inf.Height.Max = MIN(maxY, height);
 	}
 
 	return true;

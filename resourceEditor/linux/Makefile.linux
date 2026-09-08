@@ -18,6 +18,7 @@ BuildDir = $(Build)
 CFlags = -MMD -MP -fPIC -fno-inline
 CppFlags = $(CFlags) -fpermissive -std=c++17
 LGI_GTK3_DIR=..
+LGIRES_DIR=.
 
 ifeq ($(Build),Debug)
 	CFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer
@@ -31,9 +32,9 @@ ifeq ($(Build),Debug)
 		`pkg-config --libs gtk+-3.0` \
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir) \
+		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/../deps/build-x64-debug/lib' \
 		-L$(LGI_GTK3_DIR)/../deps/build-x64-debug/lib \
 		-Wl,-rpath-link,$(LGI_GTK3_DIR)/../deps/build-x64-debug/lib \
-		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/../deps/build-x64-debug/lib' \
 		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/$(BuildDir)'
 	Inc =  \
 		-I../include \
@@ -44,6 +45,7 @@ ifeq ($(Build),Debug)
 else
 	CFlags += -g -Os
 	CppFlags += -g -Os
+	Tag =
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
 		-lmagic \
@@ -52,9 +54,9 @@ else
 		`pkg-config --libs gtk+-3.0` \
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir) \
+		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/../deps/build-x64-release/lib' \
 		-L$(LGI_GTK3_DIR)/../deps/build-x64-release/lib \
 		-Wl,-rpath-link,$(LGI_GTK3_DIR)/../deps/build-x64-release/lib \
-		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/../deps/build-x64-release/lib' \
 		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/$(BuildDir)'
 	Inc =  \
 		-I../include \

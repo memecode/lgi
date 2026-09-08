@@ -51,6 +51,7 @@ ifeq ($(Build),Debug)
 else
 	CFlags += -g -Os -Wno-format-truncation
 	CppFlags += -g -Os -Wno-format-truncation
+	Tag =
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DLGI_LIBRARY -DLGI_UNIT_TESTS
 	Libs =  \
 		-L../deps/build-x64-release/lib \

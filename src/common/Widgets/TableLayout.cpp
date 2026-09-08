@@ -10,7 +10,6 @@
 #include "lgi/common/Combo.h"
 #include "lgi/common/List.h"
 #include "lgi/common/Tree.h"
-#include "lgi/common/CheckBox.h"
 #include "lgi/common/RadioGroup.h"
 #include "lgi/common/Bitmap.h"
 #include "lgi/common/TabView.h"
@@ -33,10 +32,10 @@ enum CellFlag
 };
 
 #define Izza(c)				dynamic_cast<c*>(v)
-// #define DEBUG_LAYOUT		100
+// #define DEBUG_LAYOUT		1556
 #define DEBUG_PROFILE		0
 #define DEBUG_DRAW_CELLS	0
-// #define DEBUG_CTRL_ID		12
+// #define DEBUG_CTRL_ID		970
 
 #ifdef DEBUG_CTRL_ID
 static LString Indent(int Depth)
@@ -787,7 +786,7 @@ void TableCell::LayoutWidth(int Depth, int &MinX, int &MaxX, CellFlag &Flag)
 	auto MinWid = MinWidth();
 	auto MaxWid = MaxWidth();
 	auto Fnt = Table->GetFont();
-	int Tx = Table->X();
+	int Tx = Table->X() - (((int)Table->d->Cols.Length() - 1) * Table->d->BorderSpacing);
 
 	if (MinWid)
 		Min = MAX(Min, MinWid.ToPx(Tx, Fnt));
@@ -1424,7 +1423,20 @@ void TableCell::LayoutPost(int Depth)
 	#if DEBUG_LAYOUT
 	if (Table->d->DebugLayout)
 	{
-		Log().Print("\tCell[%i,%i]=%s (%ix%i)\n", Cell.x1, Cell.y1, Pos.GetStr(), Pos.X(), Pos.Y());
+		LStringPipe p;
+		TextAlign().ToString(p);
+		auto xAlign = p.NewLStr();
+		VerticalAlign().ToString(p);
+		auto yAlign = p.NewLStr();
+
+		Log().Print("\tCell[%i,%i]=%s (%ix%i) align=%s,%s\n",
+			Cell.x1, Cell.y1,
+			Pos.GetStr(),
+			Pos.X(), Pos.Y(),
+			xAlign.Get(), yAlign.Get());
+
+		Log().Print("\t\tOffsetX=%i, Pos.X()=%i Wid=%i\n", 
+			OffsetX, Pos.X(), Wid);
 	}
 	#endif
 	for (n=0; n<Children.Length(); n++)
