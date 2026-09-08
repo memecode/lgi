@@ -587,11 +587,8 @@ void LTreeItem::_SetTreePtr(LTree *t)
 	{
 		// Clearing tree pointer, must remove all references to this item that
 		// the tree might still have.
-		if (d->Selected)
-		{
-			Tree->d->Selection.Delete(this);
-			d->Selected = false;
-		}
+		Tree->d->Selection.Delete(this);
+		d->Selected = false;
 		if (Tree->d->LastHit == this)
 			Tree->d->LastHit = NULL;
 		if (Tree->d->DropTarget == this)
@@ -1721,7 +1718,11 @@ bool LTree::OnKey(LKey &k)
 
 	if (i && i != (LTreeItem*)this)
 	{
-		if (!i->OnKey(k) &&
+		if (!d->Selection.HasItem(i))
+		{
+			LgiTrace("%s:%i - item no longer in selection, was it deleted?\n", _FL);
+		}
+		else if (!i->OnKey(k) &&
 			d->searchTerm)
 		{
 			// Tree item didn't use key... so use the search term to look through the children and select one...
