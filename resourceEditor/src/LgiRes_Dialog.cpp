@@ -274,6 +274,8 @@ ResDialogCtrl::ResDialogCtrl(ResDialog *dlg, const char *CtrlTypeName, LXmlTag *
 	Dlg = dlg;
 	Client.ZOff(-1, -1);
 	SelectStart.ZOff(-1, -1);
+	for (auto &Goober: Goobers)
+		Goober.ZOff(-1, -1);
 	
 	if (load)
 	{
