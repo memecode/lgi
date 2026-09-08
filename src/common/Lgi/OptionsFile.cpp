@@ -68,6 +68,17 @@ LOptionsFile::PortableType LOptionsFile::GuessMode()
 			a[2].Equals("apps"))
 			return DesktopMode;
 
+	#elif defined(LINUX)
+
+		// System install locations on typical distros (Ubuntu, Redhat, etc):
+		// /usr/bin, /usr/local/bin, /usr/lib*, /opt/*, /bin, /sbin, /snap/*
+		if (a[0].Equals("usr") ||
+			a[0].Equals("opt") ||
+			a[0].Equals("bin") ||
+			a[0].Equals("sbin") ||
+			a[0].Equals("snap"))
+			return DesktopMode;
+
 	#else
 
 		#warning "Impl me."
