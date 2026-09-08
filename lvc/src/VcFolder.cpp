@@ -1449,9 +1449,7 @@ void VcFolder::Select(bool b)
 				}
 				case VcHg:
 				{
-					printf("%s:%i - starting 'log'..\n", _FL);
 					LogStatus = StartCmd("log", &VcFolder::ParseLog) ? LogState::Logging : LogState::Error;
-					printf("%s:%i - LogStatus=%i\n", _FL, (int)LogStatus);
 					break;
 				}
 				case VcPending:
@@ -1679,7 +1677,6 @@ bool VcFolder::ParseRevList(int Result, LString s, ParseParams *Params)
 	}
 
 	LogStatus = Result == 0 && Errors == 0 ? LogState::Loaded : LogState::Error;
-	printf("%s:%i - LogStatus=%i\n", _FL, (int)LogStatus);
 	return LogStatus == LogState::Loaded;
 }
 
@@ -2120,8 +2117,6 @@ bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 	}
 
 	LogStatus = Result == 0 && Errors == 0 ? LogState::Loaded : LogState::Error;
-	printf("%s:%i - LogStatus=%i\n", _FL, (int)LogStatus);
-
 	return !Result;
 }
 
