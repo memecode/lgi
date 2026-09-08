@@ -452,6 +452,7 @@ public:
 			n->Token = Token;
 			n->Label = Label;
 			n->Name = Name;
+			n->Id = NextId++;
 			n->Type = Type;
 			n->Multiline = Multiline;
 			a->Add(n);

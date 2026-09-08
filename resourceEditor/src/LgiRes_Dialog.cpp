@@ -14,8 +14,6 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Button.h"
-#include "lgi/common/Variant.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/DisplayString.h"
 #include "lgi/common/ClipBoard.h"
 #include "lgi/common/Menu.h"
@@ -2793,7 +2791,7 @@ void ResDialog::Copy(bool Delete)
 				char16 *w = Utf8ToWide(s);
 				Clip.TextW(w);
 				Status = Clip.Text(s, false);
-				DeleteObj(w);
+				DeleteArray(w);
 				#endif
 			}
 
