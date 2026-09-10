@@ -85,8 +85,12 @@ set (CommonSource
 list(APPEND ResourceFiles
 	resources/icons.png
 	resources/LgiIde.lr8
-	resources/icon64.png
-	)
+	resources/icon64.png)
+
+if(NOT HAIKU)
+	list(APPEND CommonSource
+		src/lldb.cpp)
+endif()
 
 if (APPLE)
 
@@ -110,6 +114,8 @@ add_executable(LgiIde
 
 if(WIN32)
 	set(LLDB_LIB "liblldb.lib")
+elseif(HAIKU)
+	set(LLDB_LIB)
 else()
 	set(LLDB_LIB "lldb")
 endif()

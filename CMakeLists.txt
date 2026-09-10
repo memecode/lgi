@@ -698,7 +698,7 @@ elseif (HAIKU)
 			network
 			be)
 	target_link_directories(lgi
-		PUBLIC
+		PRIVATE
 			$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},Release>,${LGI_DEPS_RELEASE}/lib,${LGI_DEPS_DEBUG}/lib>)
 
 endif()
