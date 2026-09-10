@@ -214,6 +214,13 @@ struct LBView : public Parent
 		auto k = ConvertKey(bytes, numBytes);
 		k.Down(true);
 
+		#if DEBUG_SETFOCUS
+		printf("%s:%i - LBView::KeyDown bytes[0]=%i(%c) numBytes=%i c16=%i vkey=%i ischar=%i\n",
+			_FL,
+			(uint8_t)bytes[0], bytes[0] >= ' ' ? bytes[0] : ' ',
+			numBytes, k.c16, k.vkey, k.IsChar);
+		#endif
+
 		auto m = MakeMessage(LMessage::KeyDown);
 		auto keyMsg = k.Archive();
 		m.AddMessage("key", &keyMsg);
@@ -224,6 +231,13 @@ struct LBView : public Parent
 	{
 		auto k = ConvertKey(bytes, numBytes);
 		k.Down(false);
+
+		#if DEBUG_SETFOCUS
+		printf("%s:%i - LBView::KeyUp bytes[0]=%i(%c) numBytes=%i c16=%i vkey=%i ischar=%i\n",
+			_FL,
+			(uint8_t)bytes[0], bytes[0] >= ' ' ? bytes[0] : ' ',
+			numBytes, k.c16, k.vkey, k.IsChar);
+		#endif
 
 		auto m = MakeMessage(LMessage::KeyUp);
 		auto keyMsg = k.Archive();
@@ -340,6 +354,10 @@ struct LBView : public Parent
 		LLocker lck(this, _FL);
 		if (lck.Lock())
 		{
+			#if DEBUG_SETFOCUS
+			printf("%s:%i - LBView::MakeFocus(%i) wnd=%p\n", _FL, focus, wnd);
+			#endif
+
 			Parent::MakeFocus(focus);
 
 			auto m = MakeMessage(LMessage::MakeFocus);
@@ -385,6 +403,9 @@ public:
 	LWindow *ModalChild = nullptr;
 	bool ShowTitleBar = true;
 	bool ThreadMsgDone = false;
+
+	// The LViewI that currently has Lgi-level keyboard focus
+	LViewI *Focus = nullptr;
 	
 	LString MakeName(LWindow *w)
 	{
@@ -804,7 +825,19 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 			
 			LKey k(&msg);
 			if (auto wnd = GetWindow())
-				wnd->HandleViewKey(this, k);
+			{
+				auto focus = wnd->GetFocus();
+				auto target = focus ? focus->GetLView() : nullptr;
+				#if DEBUG_SETFOCUS
+				printf("%s:%i - %s dispatching key c16=%i to focus=%p/%s (target=%p/%s)\n",
+					_FL,
+					event == LMessage::KeyDown ? "KeyDown" : "KeyUp",
+					k.c16,
+					focus, focus ? focus->GetClass() : "(null)",
+					target ? target : this, (target ? target : this)->GetClass());
+				#endif
+				wnd->HandleViewKey(target ? target : this, k);
+			}
 			else
 				OnKey(k);
 			break;
@@ -1130,6 +1163,14 @@ bool LWindow::Attach(LViewI *p)
 		LOG("%s:%i attach %p to %p\n", _FL, rootView, wnd);
 		wnd->AddChild(rootView);
 		UpdateRootView();
+
+		// There's only one native BView per window (everything else is drawn
+		// virtually inside it), so it must hold Haiku's keyboard focus or the
+		// app_server never delivers KeyDown/KeyUp to us at all.
+		#if DEBUG_SETFOCUS
+		printf("%s:%i - calling rootView->MakeFocus(true)\n", _FL);
+		#endif
+		rootView->MakeFocus(true);
 	}
 	else
 	{
@@ -1895,16 +1936,63 @@ bool LWindow::SetWillFocus(bool f)
 
 LViewI *LWindow::GetFocus()
 {
-	// FIXME: add focus support
-	return NULL;
+	return d->Focus;
 }
 
 void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 {
-	if (!ctrl)
-		return;
-		
-	// FIXME: add focus support
+	#if DEBUG_SETFOCUS
+	const char *TypeName = type == GainFocus ? "GainFocus" : type == LoseFocus ? "LoseFocus" : "ViewDelete";
+	printf("%s:%i - LWindow::SetFocus(%p/%s, %s) cur=%p/%s\n",
+		_FL,
+		ctrl, ctrl ? ctrl->GetClass() : "(null)",
+		TypeName,
+		d->Focus, d->Focus ? d->Focus->GetClass() : "(null)");
+	#endif
+
+	switch (type)
+	{
+		case GainFocus:
+		{
+			if (!ctrl || d->Focus == ctrl)
+			{
+				#if DEBUG_SETFOCUS
+				printf("%s:%i - SetFocus: no-op (ctrl=%p, already focused=%i)\n", _FL, ctrl, d->Focus == ctrl);
+				#endif
+				return;
+			}
+
+			if (auto old = d->Focus)
+			{
+				#if DEBUG_SETFOCUS
+				printf("%s:%i - SetFocus: blurring %p/%s\n", _FL, old, old->GetClass());
+				#endif
+				d->Focus = nullptr;
+				old->OnFocus(false);
+			}
+
+			d->Focus = ctrl;
+			#if DEBUG_SETFOCUS
+			printf("%s:%i - SetFocus: focusing %p/%s\n", _FL, ctrl, ctrl->GetClass());
+			#endif
+			ctrl->OnFocus(true);
+			break;
+		}
+		case LoseFocus:
+		case ViewDelete:
+		{
+			if (ctrl && ctrl == d->Focus)
+			{
+				#if DEBUG_SETFOCUS
+				printf("%s:%i - SetFocus: clearing focus on %p/%s (%s)\n", _FL, ctrl, ctrl->GetClass(), TypeName);
+				#endif
+				d->Focus = nullptr;
+				if (type == LoseFocus)
+					ctrl->OnFocus(false);
+			}
+			break;
+		}
+	}
 }
 
 void LWindow::SetDragHandlers(bool On)
