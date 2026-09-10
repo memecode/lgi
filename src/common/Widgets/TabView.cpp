@@ -807,8 +807,6 @@ void LTabView::OnPaint(LSurface *pDC)
 	if (d->Current >= it.Length())
 		Value(it.Length() - 1);
 
-	printf("%s:%i - Tabs=%i\n", _FL, (int)it.Length());
-
 	if (d->Style == TvMac)
 	{
 		CalcInset();
