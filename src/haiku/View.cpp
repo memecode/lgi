@@ -415,7 +415,7 @@ bool LView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 	auto hnd = wnd->WindowHandle();
 	if (!hnd)
 	{
-		printf("%s:%i - no handle.\n", _FL);
+		// printf("%s:%i - no handle.\n", _FL);
 		return false;
 	}
 	

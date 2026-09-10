@@ -468,7 +468,6 @@ bool LTabView::Append(LTabPage *Page, int Where)
 		return false;
 
 	Page->TabCtrl = this;
-	Page->_Window = _Window;
 	AddView(Page, Where);
 
 	TabIterator tabs(Children);
@@ -497,12 +496,11 @@ LTabPage *LTabView::Append(const char *name, int Where)
 	if (Page)
 	{
 		Page->TabCtrl = this;
-		Page->_Window = _Window;
-		Page->SetParent(this);
 
 		if (IsAttached() && Children.Length() == 0)
 		{
 			Page->Attach(this);
+			Page->Visible(true); // Haiku's LTabPage ctor defaults to hidden
 			OnPosChange();
 		}
 		else
@@ -808,6 +806,8 @@ void LTabView::OnPaint(LSurface *pDC)
 	TabIterator it(Children);
 	if (d->Current >= it.Length())
 		Value(it.Length() - 1);
+
+	printf("%s:%i - Tabs=%i\n", _FL, (int)it.Length());
 
 	if (d->Style == TvMac)
 	{
