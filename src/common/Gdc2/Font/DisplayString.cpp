@@ -1894,6 +1894,12 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 			cx += i.X;
 		}
 
+		// Force the app_server to finish processing the draw commands above before
+		// anyone (eg column header double buffering) reads the pixels back out of
+		// the bitmap/view directly (DrawBitmap, Bits() etc), otherwise the text can
+		// be missing because it hasn't been rasterized into the backing store yet.
+		view->Sync();
+
 		if (locked)		
 			view->UnlockLooper();
 	

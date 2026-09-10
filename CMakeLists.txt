@@ -686,6 +686,7 @@ elseif (HAIKU)
 		PUBLIC
 			include/lgi/haiku
 		PRIVATE
+			$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},Release>,${LGI_DEPS_RELEASE}/include,${LGI_DEPS_DEBUG}/include>
 			private/haiku)
 	target_compile_definitions(lgi
 		PUBLIC
@@ -696,6 +697,9 @@ elseif (HAIKU)
 			gnu
 			network
 			be)
+	target_link_directories(lgi
+		PUBLIC
+			$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},Release>,${LGI_DEPS_RELEASE}/lib,${LGI_DEPS_DEBUG}/lib>)
 
 endif()
 
