@@ -3,13 +3,13 @@
 qemu-system-x86_64 \
     -machine pc,accel=kvm \
     -cpu SandyBridge \
-    -cdrom "ssh_files.iso" \
+    -cdrom "haiku-r1beta6-x86_64-anyboot.iso" \
     -boot menu=on \
     -drive file="hd.img" \
     -smp 12 \
     -m 16G \
     -usbdevice tablet \
     -net nic \
-    -net user,hostfwd=tcp::2222-:22,hostfwd=tcp::8443-:8443
+    -net user,hostfwd=tcp::2200-:22,hostfwd=tcp::8443-:8443
 
 
