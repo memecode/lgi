@@ -5182,7 +5182,10 @@ void VcFolder::Pull(int AndUpdate, LoggingType Logging)
 			Status = StartCmd(AndUpdate ? "pull -u" : "pull", &VcFolder::ParsePull, NULL, Logging);
 			break;
 		case VcGit:
-			Status = StartCmd(AndUpdate ? "pull" : "fetch", &VcFolder::ParsePull, NULL, Logging);
+			Status = StartCmd(	AndUpdate ? "pull" : "fetch",
+								&VcFolder::ParsePull,
+								new ParseParams(AndUpdate ? "update" : ""),
+								Logging);
 			break;
 		case VcSvn:
 			Status = StartCmd("up", &VcFolder::ParsePull, NULL, Logging);
@@ -5212,6 +5215,61 @@ bool VcFolder::ParsePull(int Result, LString s, ParseParams *Params)
 	{
 		if (Params && Params->Str.Equals("log"))
 			LogStatus = LogState::Error;
+
+		if (GetType() == VcGit && s.Find("would be overwritten by merge") >= 0)
+		{
+			// Pick out the indented file names between the error header and the "Please move..." hint.
+			LString::Array Files;
+			bool Collect = false;
+			for (auto Ln: s.SplitDelimit("\n"))
+			{
+				if (Ln.Find("would be overwritten by merge") >= 0)
+				{
+					Collect = true;
+					continue;
+				}
+
+				if (!Collect)
+					continue;
+
+				auto p = Ln.Strip();
+				if (!p || p.Find("Please move or remove") >= 0 || p.Find("Aborting") >= 0)
+					break;
+
+				Files.Add(p);
+			}
+
+			if (Files.Length() > 0)
+			{
+				LString Msg;
+				const int MAX_FILES = 5;
+
+				auto fileStr = LString("\n").Join(Files.Length() > MAX_FILES ? Files.Slice(0, MAX_FILES) : Files);
+				if (Files.Length() > MAX_FILES)
+					fileStr += "\n...etc...";
+
+				Msg.Printf("Pull failed because these untracked files would be overwritten by the merge:\n\n%s\n\nDelete them (move to trash) and retry the pull?",
+							fileStr.Get());
+				if (LgiMsg(GetTree(), Msg, AppName, MB_YESNO) == IDYES)
+				{
+					LFile::Path Base(LocalPath());
+					for (auto &f: Files)
+					{
+						LFile::Path p(Base);
+						p += f;
+						LError err;
+						if (!FileDev->Delete(p.GetFull(), &err))
+						{
+							LgiTrace("%s:%i - delete(%s) failed with: %s\n", _FL, p.GetFull().Get(), err.ToString().Get());
+						}
+					}
+
+					bool AndUpdate = Params && Params->Str.Equals("update");
+					Pull(AndUpdate, LogNormal);
+					return false;
+				}
+			}
+		}
 
 		OnCmdError(s, "Pull failed.");
 		return false;
