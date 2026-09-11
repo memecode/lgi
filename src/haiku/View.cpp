@@ -274,7 +274,22 @@ bool LView::_Mouse(LMouse &m, bool Move)
 				_Over->OnMouseEnter(lgi_adjust_click(m, _Over));
 		}
 		
-		int cursor = GetCursor(m.x, m.y);
+	}
+		
+	LView *Target = NULL;
+	if (_Capturing)
+		Target = dynamic_cast<LView*>(_Capturing);
+	else
+		Target = dynamic_cast<LView*>(_Over ? _Over : this);
+	if (!Target)
+		return false;
+
+	LRect Client = Target->LView::GetClient(false);
+	
+	m = lgi_adjust_click(m, Target, !Move);
+	if (!Client.Valid() || Client.Overlap(m.x, m.y) || _Capturing)
+	{
+		int cursor = Target->GetCursor(m.x, m.y);
 		if (cursor >= 0)
 		{
 			BCursorID haikuId = LgiToHaiku((LCursor)cursor);
@@ -295,21 +310,7 @@ bool LView::_Mouse(LMouse &m, bool Move)
 				}
 			}
 		}
-	}
-		
-	LView *Target = NULL;
-	if (_Capturing)
-		Target = dynamic_cast<LView*>(_Capturing);
-	else
-		Target = dynamic_cast<LView*>(_Over ? _Over : this);
-	if (!Target)
-		return false;
 
-	LRect Client = Target->LView::GetClient(false);
-	
-	m = lgi_adjust_click(m, Target, !Move);
-	if (!Client.Valid() || Client.Overlap(m.x, m.y) || _Capturing)
-	{
 		if (Move)
 			Target->OnMouseMove(m);
 		else
@@ -611,7 +612,6 @@ bool LView::Attach(LViewI *parent)
 	bool Debug = false; // !Stricmp(GetClass(), "LScrollBar");
 
 	// Parent handling
-	auto wasAttached = IsAttached();
 	LView *oldParent = d->GetParent();
 	if (oldParent && oldParent != parent)
 	{
@@ -662,7 +662,7 @@ bool LView::Attach(LViewI *parent)
 		d->Parent->OnChildrenChanged(this, true);
 	}
 	
-	if (IsAttached() && !wasAttached && !d->onCreateEvent)
+	if (IsAttached() && !d->onCreateEvent)
 	{
 		d->onCreateEvent = true;
 		OnCreate();

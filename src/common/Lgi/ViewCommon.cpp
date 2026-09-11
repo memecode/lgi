@@ -180,15 +180,9 @@ LView::LView(OsView view) :
 	_Margin(0, 0, 0, 0),
 	_Border(0, 0, 0, 0)
 {
+	d = new LViewPrivate(this);
 	#ifdef _DEBUG
     _Debug = false;
-	#endif
-
-	d = new LViewPrivate(this);
-	#ifdef LGI_SDL
-	_View = this;
-	#elif LGI_VIEW_HANDLE && !defined(HAIKU)
-	_View = view;
 	#endif
 	Pos.ZOff(-1, -1);
 	WndFlags = GWF_VISIBLE;
@@ -237,6 +231,7 @@ bool LView::CommonEvents(LMessage::Result &result, LMessage *Msg)
 		}
 		case M_PULSE:
 		{
+			// printf("%s:%i - M_PULSE on %s, targets=%i\n", _FL, GetClass(), (int)d->EventTargets.Length());
 			OnPulse();
 
 			for (auto t: d->EventTargets)
@@ -1952,8 +1947,16 @@ bool LView::AttachChildren()
 {
 	for (auto c: Children)
 	{
+		#ifdef HAIKU
+		if (auto v = c->GetLView())
+		{
+			if (v->d->onCreateEvent)
+				continue;
+		}
+		#else
 		if (c->IsAttached())
 			continue;
+		#endif
 		if (!c->Attach(this))
 		{
 			LgiTrace("%s:%i - failed to attach %s\n", _FL, c->GetClass());

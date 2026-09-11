@@ -87,11 +87,13 @@ public:
 		Length = len;
 		ViewClass = View->GetClass();
 		
+		// printf("%s:%i LPulseThread run\n", _FL);
 		Run();
 	}
 	
 	~LPulseThread()
 	{
+		// printf("%s:%i LPulseThread destr\n", _FL);
 		View = NULL;
 		Cancel();
 		Event.Signal();
@@ -104,12 +106,17 @@ public:
 		{
 			auto s = Event.Wait(Length);
 			if (!View || IsCancelled() || s == LThreadEvent::WaitError)
+			{
+				// printf("%s:%i LPulseThread cancel\n", _FL);
 				break;
+			}
 			
+			// printf("%s:%i LPulseThread sending M_PULSE\n", _FL);
 			if (!View->PostEvent(M_PULSE, 0, 0, 50/*milliseconds*/))
 			{
 				printf("%s:%i - pulse post event failed: %s\n", _FL, ViewClass.Get());
 				return -1;
+
 				/*
 				auto now = LCurrentTime();
 				if (now - WarnTs >= 5000)

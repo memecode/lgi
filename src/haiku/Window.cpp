@@ -528,6 +528,15 @@ public:
 	{
 		switch (message->what)
 		{
+			case M_PULSE:
+			{
+				// Route view pulses through the app event dispatcher.
+				// printf("%s:%i - M_PULSE rec bwnd\n", _FL);
+				auto m = MakeMessage(LMessage::General);
+				m.AddMessage("message", message);
+				LAppPrivate::Post(&m);
+				break;
+			}
 			case M_LWINDOW_DELETE:
 			{
 				Quit();

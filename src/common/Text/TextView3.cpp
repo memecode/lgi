@@ -3488,7 +3488,7 @@ void LTextView3::OnCreate()
 	SetWindow(this);
 	DropTarget(true);
 
-	#ifndef WINDOWS
+	#if !defined(WINDOWS)
 		if (Ctrls.Length() == 0)
 			SetPulse(PULSE_TIMEOUT);
 		Ctrls.Add(this);
@@ -5483,7 +5483,7 @@ void LTextView3::InternalPulse()
 
 			LRect p = CursorPos;
 			p.Offset(-ScrollX, 0);
-			Invalidate(&p);
+			Invalidate(&p, false, true);
 			BlinkTs = Now;
 		}
 	}
@@ -5494,7 +5494,7 @@ void LTextView3::InternalPulse()
 
 void LTextView3::OnPulse()
 {
-	#ifdef WINDOWS
+	#if defined(WINDOWS)
 		InternalPulse();
 	#else
 		for (auto c: Ctrls)
