@@ -725,7 +725,6 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 			}
 			
 			Pos.Offset(pos.x - Pos.x1, pos.y - Pos.y1);
-			printf("%s:%i - frame moved to %i,%i\n", _FL, Pos.x1, Pos.y1);
 			OnPosChange();
 			break;
 		}
@@ -1619,8 +1618,6 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 
 LRect &LWindow::GetPos()
 {
-	printf("%s:%i - getpos %i,%i\n", _FL, Pos.x1, Pos.y1);
-
 	return Pos;
 }
 
@@ -1633,8 +1630,6 @@ bool LWindow::SetPos(LRect &p, bool Repaint)
 	{
 		d->MoveTo(Pos.x1, Pos.y1);
 		d->ResizeTo(Pos.X(), Pos.Y());
-
-		printf("%s:%i - moveto %i,%i\n", _FL, Pos.x1, Pos.y1);
 	}
 	else printf("%s:%i - Failed to lock.\n", _FL);
 
