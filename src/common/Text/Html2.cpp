@@ -6941,6 +6941,18 @@ bool LHtml::ParseDocument(const char *Doc)
 			auto Html = Tag->GetTagByName("html");
 			auto Body = Tag->GetTagByName("body");
 
+			// If the <html> tag we found isn't a direct child of the root then it's
+			// nested inside other content (e.g. a quoted reply embeds a whole
+			// sub-document). That leaves the real top-level content outside of any
+			// <body>, so Flow->InBody never gets set for it and it never gets flowed
+			// or painted. Treat this the same as if no <html>/<body> was found at all
+			// so everything gets wrapped in a synthetic body.
+			if (Html && Tag->Children.IndexOf(Html) < 0)
+			{
+				Html = NULL;
+				Body = NULL;
+			}
+
 			if (!Html && !Body)
 			{
 				if ((Html = new LTag(this, 0)))
