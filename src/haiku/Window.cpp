@@ -247,9 +247,11 @@ struct LBView : public Parent
 
 	void FrameMoved(BPoint p)
 	{
+		/* This view should never move from 0,22 (menu)
 		auto m = MakeMessage(LMessage::FrameMoved);
 		m.AddPoint("pos", p);
 		LAppPrivate::Post(&m);		
+		*/
 	}
 
 	void FrameResized(float width, float height) override;
@@ -723,6 +725,7 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 			}
 			
 			Pos.Offset(pos.x - Pos.x1, pos.y - Pos.y1);
+			printf("%s:%i - frame moved to %i,%i\n", _FL, Pos.x1, Pos.y1);
 			OnPosChange();
 			break;
 		}
@@ -1582,13 +1585,13 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 				}
 			}
 			
+			SetZoom(State);
+
 			if (Position.Valid())
 			{
 				SERIALIZE_LOG("SerializeState setpos %s\n", Position.GetStr());
 				SetPos(Position);
 			}
-			
-			SetZoom(State);
 		}
 		else
 		{
@@ -1616,6 +1619,8 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 
 LRect &LWindow::GetPos()
 {
+	printf("%s:%i - getpos %i,%i\n", _FL, Pos.x1, Pos.y1);
+
 	return Pos;
 }
 
@@ -1628,6 +1633,8 @@ bool LWindow::SetPos(LRect &p, bool Repaint)
 	{
 		d->MoveTo(Pos.x1, Pos.y1);
 		d->ResizeTo(Pos.X(), Pos.Y());
+
+		printf("%s:%i - moveto %i,%i\n", _FL, Pos.x1, Pos.y1);
 	}
 	else printf("%s:%i - Failed to lock.\n", _FL);
 
