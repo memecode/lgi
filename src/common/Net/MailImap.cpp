@@ -1682,14 +1682,13 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 									if (s) *s = 0;
 
 									int Nc = 1;
-									char *Realm = Map.Find("realm");
-									char DigestUri[256];
-									sprintf_s(DigestUri, sizeof(DigestUri), "imap/%s", Realm ? Realm : RemoteHost);
+									auto Realm = Map.Find("realm");
+									auto DigestUri = LString::Fmt("imap/%s", Realm ? Realm : RemoteHost);
 
 									LStringPipe p;
 									p.Print("username=\"%s\"", User);
 									p.Print(",nc=%08.8i", Nc);
-									p.Print(",digest-uri=\"%s\"", DigestUri);
+									p.Print(",digest-uri=\"%s\"", DigestUri.Get());
 									p.Print(",cnonce=\"%s\"", Cnonce);
 									char *Nonce = Map.Find("nonce");
 									if (Nonce)
@@ -1728,10 +1727,10 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 
 									// Calculate 
 									char a2[256];
-									if (Qop && (_stricmp(Qop, "auth-int") == 0 || _stricmp(Qop, "auth-conf") == 0))
-										sprintf_s(a2, sizeof(a2), "AUTHENTICATE:%s:00000000000000000000000000000000", DigestUri);
+									if (Qop && (Stricmp(Qop, "auth-int") == 0 || Stricmp(Qop, "auth-conf") == 0))
+										sprintf_s(a2, sizeof(a2), "AUTHENTICATE:%s:00000000000000000000000000000000", DigestUri.Get());
 									else
-										sprintf_s(a2, sizeof(a2), "AUTHENTICATE:%s", DigestUri);
+										sprintf_s(a2, sizeof(a2), "AUTHENTICATE:%s", DigestUri.Get());
 									MDStringToDigest(md5, a2);
 									char a2hex[256];
 									Hex(a2hex, sizeof(a2hex), (uchar*)md5, sizeof(md5));

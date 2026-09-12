@@ -81,7 +81,7 @@ public:
 							TrimNewline(Line2);
 							if (Line1[0] && Line2[0] && strcmp(Line1, "??") != 0 && strcmp(Line2, "0") != 0)
 							{
-								char Src[1024];
+								char Src[1028];
 								snprintf(Src, sizeof(Src), "%s: %s", Line2, Line1);
 								if (buflen-ch > 0)
 									ch += snprintf(buf+ch, buflen-ch, "%s%s\n", Prefix ? Prefix : "", Src);

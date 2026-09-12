@@ -555,9 +555,7 @@ elseif (LINUX)
 	target_compile_options(lgi
 		PUBLIC
 			-fPIC
-			-w
 			-fno-inline
-			-fpermissive
 			-rdynamic
 		)
 
@@ -603,9 +601,7 @@ elseif (LINUX)
 	target_compile_options(lgi-stub
 		PUBLIC
 			-fPIC
-			-w
 			-fno-inline
-			-fpermissive
 			-rdynamic
 		)
 
