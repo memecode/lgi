@@ -163,7 +163,7 @@ void LControlTree::Item::Save()
 				auto Idx = Ctrl->Value();
 				if (Enum)
 				{
-					if (Idx >= 0 && Idx < Enum->Length())
+					if (Idx >= 0 && Idx < (decltype(Idx))Enum->Length())
 					{
 						auto &e = (*Enum)[Idx];
 						if (e.Value.IsString())
@@ -347,7 +347,7 @@ void LControlTree::Item::OnPaint(ItemPaintCtx &Ctx)
 					else if (Value.IsInt())
 					{
 						auto i = Value.CastInt64();
-						if (i >= 0 && i < Enum->Length())
+						if (i >= 0 && i < (decltype(i))Enum->Length())
 						{
 							auto &e = (*Enum)[i];
 							Disp = e.Name;

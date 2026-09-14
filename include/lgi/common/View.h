@@ -85,11 +85,11 @@ protected:
 	class LViewPrivate	*d = NULL;
 
 	#if LGI_VIEW_HANDLE && !defined(HAIKU)
-	OsView				_View; // OS specific handle to view object
+	OsView				_View = nullptr; // OS specific handle to view object
 	#endif
 
-	LView				*_Window = NULL;
-	LMutex				*_Lock = NULL;
+	LView				*_Window = nullptr;
+	LMutex				*_Lock = nullptr;
 	uint16				_IsToolBar = 0;
 	int					WndFlags = 0;
 	LRect				_Margin, _Border;
