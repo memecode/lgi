@@ -261,7 +261,32 @@ endif()
 
 if (1)
     # lunasvg
+    # Disable system font scanning - the SVG being loaded (commands.svg) has
+    # <text> elements, which pulls in font lookup/loading (stb_truetype) at
+    # parse time. This is a suspect for the heap corruption seen freeing
+    # lunasvg::Document even with CRTs matched, so rule it out first.
+    set(LUNASVG_DISABLE_LOAD_SYSTEM_FONTS ON CACHE BOOL "Disable automatic loading of fonts from system directories" FORCE)
     GitProject(lunasvg "https://github.com/sammycage/lunasvg.git" "master" TRUE TRUE)
+
+    # Force CRT selection explicitly so lunasvg/plutovg allocate/free on the same
+    # heap as the rest of Lgi - a mismatch here causes heap corruption crashes
+    # (e.g. deleting a lunasvg::Document from Lgi's CRT) that only surface later.
+    if(MSVC)
+        set_property(TARGET lunasvg PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+        if(TARGET plutovg)
+            set_property(TARGET plutovg PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+        endif()
+
+        # Debug and Release both install into the same shared bin/lib folder, so give
+        # the Debug artifacts a distinct 'd' suffix - otherwise whichever config was
+        # built/installed last silently clobbers the other's .dll/.lib on disk, and
+        # the app can end up loading a mismatched-CRT, symbol-less Release binary.
+        set_target_properties(lunasvg PROPERTIES DEBUG_POSTFIX "d")
+        if(TARGET plutovg)
+            set_target_properties(plutovg PROPERTIES DEBUG_POSTFIX "d")
+        endif()
+    endif()
+
     if(LINUX)
         target_compile_options(lunasvg PRIVATE -fPIC)
         set_target_properties(lunasvg PROPERTIES
