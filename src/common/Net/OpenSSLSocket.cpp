@@ -27,6 +27,10 @@
 #include "lgi/common/Variant.h"
 #include "lgi/common/Net.h"
 #include "lgi/common/Json.h"
+#ifdef WINDOWS
+	#include <wincrypt.h>
+	#pragma comment(lib, "Crypt32.lib")
+#endif
 
 #define PATH_OFFSET					"../"
 
@@ -230,6 +234,7 @@ public:
 	DynFunc2(int, SSL_CTX_use_certificate_chain_file, SSL_CTX*, ctx, const char*, file);
 	DynFunc3(int, SSL_CTX_use_PrivateKey_file, SSL_CTX*, ctx, const char*, file, int, type);
 	DynFunc1(int, SSL_CTX_set_default_verify_paths, SSL_CTX*, ctx);
+	DynFunc1(X509_STORE*, SSL_CTX_get_cert_store, SSL_CTX*, ctx);
 	DynFunc2(int, SSL_CTX_set_cipher_list, SSL_CTX*, ctx, const char*, str);
 	DynFunc1(int, SSL_CTX_check_private_key, const SSL_CTX*, ctx);
 	DynFunc1(int, SSL_CTX_free, SSL_CTX*, ctx);
@@ -309,6 +314,8 @@ public:
 	DynFunc0(const EVP_MD*, EVP_sha256);
 	DynFunc1(int, X509_free, X509*, a);
 	DynFunc1(const char*, X509_verify_cert_error_string, long, n);
+	DynFunc3(X509*, d2i_X509, X509**, px, const unsigned char**, in, long, len);
+	DynFunc2(int, X509_STORE_add_cert, X509_STORE*, store, X509*, x);
 
 	DynFunc2(char*, ERR_error_string, unsigned long, e, char*, buf);
 	DynFunc0(unsigned long, ERR_get_error);
@@ -564,6 +571,37 @@ public:
 			Err.Print("%s:%i - SSL_CTX_set_default_verify_paths failed with '%s' (%i)\n", _FL, Msg ? Msg : "unknown", e);
 			goto OnError;
 		}
+
+		#ifdef WINDOWS
+		{
+			// OpenSSL doesn't know about the Windows certificate store, so without
+			// this the default verify paths above find no CA certs on most Windows
+			// installs and every TLS connection fails with
+			// "unable to get local issuer certificate".
+			X509_STORE *store = SSL_CTX_get_cert_store(Client);
+			static const char *SysStoreNames[] = { "ROOT", "CA" };
+			for (auto storeName : SysStoreNames)
+			{
+				HCERTSTORE sysStore = CertOpenSystemStoreA(0, storeName);
+				if (!sysStore)
+					continue;
+
+				PCCERT_CONTEXT certCtx = NULL;
+				while ((certCtx = CertEnumCertificatesInStore(sysStore, certCtx)) != NULL)
+				{
+					const unsigned char *encoded = certCtx->pbCertEncoded;
+					X509 *x509 = d2i_X509(NULL, &encoded, certCtx->cbCertEncoded);
+					if (x509)
+					{
+						X509_STORE_add_cert(store, x509);
+						X509_free(x509);
+					}
+				}
+
+				CertCloseStore(sysStore, 0);
+			}
+		}
+		#endif
 		
 		return true;
 

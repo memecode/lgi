@@ -150,6 +150,13 @@ if (1)
         file(CREATE_LINK ./libjpeg.62.dylib ${LIB_FOLDER}/libjpeg.dylib SYMBOLIC)
 
     else()
+        # Debug and Release land in the same shared bin/lib folder, so disambiguate
+        # Debug with a 'd' suffix - otherwise whichever config built last clobbers
+        # the other's .dll/.lib/.pdb on disk (see lunasvg/ssh above).
+        if(MSVC)
+            set_target_properties(jpeg PROPERTIES DEBUG_POSTFIX "d")
+        endif()
+
         install(TARGETS jpeg
             RUNTIME
                 DESTINATION ${CMAKE_BINARY_DIR}/bin
@@ -228,9 +235,14 @@ if (NOT HAIKU)
     # with the currently built configuration to avoid stale Release artifacts in Debug.
     if(MSVC)
         set_property(TARGET ssh PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+
+        # Debug and Release both land in the same shared bin/lib folder, so give
+        # Debug a distinct 'd' suffix - otherwise whichever config was built last
+        # silently clobbers the other's .dll/.lib/.pdb on disk (see lunasvg above).
+        set_target_properties(ssh PROPERTIES DEBUG_POSTFIX "d")
         add_custom_target(sync_ssh_lib ALL
             COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/lib"
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_LINKER_FILE:ssh>" "${CMAKE_BINARY_DIR}/lib/ssh.lib"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_LINKER_FILE:ssh>" "${CMAKE_BINARY_DIR}/lib/$<TARGET_LINKER_FILE_NAME:ssh>"
             DEPENDS ssh)
     endif()
 
@@ -268,10 +280,10 @@ if (1)
     set(LUNASVG_DISABLE_LOAD_SYSTEM_FONTS ON CACHE BOOL "Disable automatic loading of fonts from system directories" FORCE)
     GitProject(lunasvg "https://github.com/sammycage/lunasvg.git" "master" TRUE TRUE)
 
-    # Force CRT selection explicitly so lunasvg/plutovg allocate/free on the same
-    # heap as the rest of Lgi - a mismatch here causes heap corruption crashes
-    # (e.g. deleting a lunasvg::Document from Lgi's CRT) that only surface later.
     if(MSVC)
+        # Force CRT selection explicitly so lunasvg/plutovg allocate/free on the same
+        # heap as the rest of Lgi - a mismatch here causes heap corruption crashes
+        # (e.g. deleting a lunasvg::Document from Lgi's CRT) that only surface later.
         set_property(TARGET lunasvg PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
         if(TARGET plutovg)
             set_property(TARGET plutovg PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
@@ -285,9 +297,7 @@ if (1)
         if(TARGET plutovg)
             set_target_properties(plutovg PROPERTIES DEBUG_POSTFIX "d")
         endif()
-    endif()
-
-    if(LINUX)
+    elseif(LINUX)
         target_compile_options(lunasvg PRIVATE -fPIC)
         set_target_properties(lunasvg PROPERTIES
             BUILD_RPATH "$ORIGIN"

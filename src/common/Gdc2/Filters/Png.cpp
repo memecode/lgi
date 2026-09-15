@@ -86,10 +86,8 @@ const char *sLibrary =
 			"cygpng12"
 		#else
 			"libpng16"
-			#ifdef _MSC_VER_STR
-				#ifdef _DEBUG
-					"d"
-				#endif
+			#if defined(WINDOWS) && defined(_DEBUG)
+				"d"
 			#endif
 		#endif
 	#endif

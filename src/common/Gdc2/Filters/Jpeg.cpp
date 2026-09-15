@@ -36,6 +36,9 @@
 			"libjpeg.62"
 		#else
 			"jpeg62"
+			#if defined(WINDOWS) && defined(_DEBUG)
+			"d"
+			#endif
 		#endif
 		;
 #else

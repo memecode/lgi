@@ -52,7 +52,9 @@ if (NOT TARGET ssh_shared)
     set_target_properties(ssh_shared
         PROPERTIES
             INTERFACE_INCLUDE_DIRECTORIES ${LIBSSH_INCLUDE_DIR}
-            INTERFACE_LINK_LIBRARIES "ssh")
+            # Debug ssh.lib is built as 'sshd' (see deps/CMakeLists.txt) to avoid
+            # colliding with the Release artifact in the shared output folder.
+            INTERFACE_LINK_LIBRARIES "$<IF:$<AND:$<BOOL:${WIN32}>,$<CONFIG:Debug>>,sshd,ssh>")
     # message("LIBSSH_INCLUDE_DIR: ${LIBSSH_INCLUDE_DIR}")
 endif()
 
