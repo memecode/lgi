@@ -33,6 +33,7 @@
 		343874B6230F46B200CF96B4 /* View.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B2230F46B200CF96B4 /* View.h */; };
 		343874B7230F46B200CF96B4 /* App.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B3230F46B200CF96B4 /* App.h */; };
 		343874B8230F46B200CF96B4 /* Layout.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B4230F46B200CF96B4 /* Layout.h */; };
+		3438B74B3044509D003F94F4 /* UniformTypeIdentifiers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3438B74A3044509D003F94F4 /* UniformTypeIdentifiers.framework */; };
 		343BE8C72355D0CE00742E21 /* PopupList.h in Headers */ = {isa = PBXBuildFile; fileRef = 343BE8C62355D0CE00742E21 /* PopupList.h */; };
 		344412152E223F220072DADA /* PopupNotification.h in Headers */ = {isa = PBXBuildFile; fileRef = 344412142E223F220072DADA /* PopupNotification.h */; };
 		344991912CB1E6D400E96737 /* XmlTree.h in Headers */ = {isa = PBXBuildFile; fileRef = 344991902CB1E6D400E96737 /* XmlTree.h */; };
@@ -186,11 +187,11 @@
 		34D795FC2BFD771800904325 /* Colour.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D795F92BFD771800904325 /* Colour.h */; };
 		34D795FD2BFD771800904325 /* CssTools.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D795FA2BFD771800904325 /* CssTools.h */; };
 		34D795FE2BFD771800904325 /* Css.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D795FB2BFD771800904325 /* Css.h */; };
-		34E75B052D1E1C3600AC2107 /* liblunasvg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 34E75AFF2D1E1C3600AC2107 /* liblunasvg.a */; };
-		34E75B0A2D1E1C3600AC2107 /* libplutovg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 34E75B042D1E1C3600AC2107 /* libplutovg.a */; };
-		34E75B0D2D1E1C7300AC2107 /* libpng16.16.45.git.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34E75B002D1E1C3600AC2107 /* libpng16.16.45.git.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		34E75B052D1E1C3600AC2107 /* liblunasvg.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 34E75AFF2D1E1C3600AC2107 /* liblunasvg.3.dylib */; };
+		34E75B0A2D1E1C3600AC2107 /* libplutovg.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 34E75B042D1E1C3600AC2107 /* libplutovg.1.dylib */; };
+		34E75B0D2D1E1C7300AC2107 /* libpng16.16.59.git.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34E75B002D1E1C3600AC2107 /* libpng16.16.59.git.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34E75B0E2D1E1C7A00AC2107 /* libjpeg.62.4.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34E75B0B2D1E1C5800AC2107 /* libjpeg.62.4.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		34E75B0F2D1E1C8400AC2107 /* libz.1.4.1.1.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34E75B032D1E1C3600AC2107 /* libz.1.4.1.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		34E75B0F2D1E1C8400AC2107 /* libz.1.3.2.1.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34E75B032D1E1C3600AC2107 /* libz.1.3.2.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34E75B102D1E1C8C00AC2107 /* libiconv.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34E75B012D1E1C3600AC2107 /* libiconv.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34EE8BB12748A55600F12915 /* TextFile.h in Headers */ = {isa = PBXBuildFile; fileRef = 34EE8BB02748A55600F12915 /* TextFile.h */; };
 		34F3EC4329BD374E00BB9B58 /* Rect.h in Headers */ = {isa = PBXBuildFile; fileRef = 34F3EC4229BD374E00BB9B58 /* Rect.h */; };
@@ -207,9 +208,9 @@
 			dstSubfolderSpec = 10;
 			files = (
 				34E75B102D1E1C8C00AC2107 /* libiconv.dylib in CopyFiles */,
-				34E75B0F2D1E1C8400AC2107 /* libz.1.4.1.1.dylib in CopyFiles */,
+				34E75B0F2D1E1C8400AC2107 /* libz.1.3.2.1.dylib in CopyFiles */,
 				34E75B0E2D1E1C7A00AC2107 /* libjpeg.62.4.0.dylib in CopyFiles */,
-				34E75B0D2D1E1C7300AC2107 /* libpng16.16.45.git.dylib in CopyFiles */,
+				34E75B0D2D1E1C7300AC2107 /* libpng16.16.59.git.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -243,6 +244,7 @@
 		343874B2230F46B200CF96B4 /* View.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = View.h; path = ../../../include/lgi/common/View.h; sourceTree = "<group>"; };
 		343874B3230F46B200CF96B4 /* App.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = App.h; path = ../../../include/lgi/common/App.h; sourceTree = SOURCE_ROOT; };
 		343874B4230F46B200CF96B4 /* Layout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Layout.h; path = ../../../include/lgi/common/Layout.h; sourceTree = "<group>"; };
+		3438B74A3044509D003F94F4 /* UniformTypeIdentifiers.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UniformTypeIdentifiers.framework; path = System/Library/Frameworks/UniformTypeIdentifiers.framework; sourceTree = SDKROOT; };
 		343BE8C62355D0CE00742E21 /* PopupList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PopupList.h; path = ../../../include/lgi/common/PopupList.h; sourceTree = "<group>"; };
 		344412142E223F220072DADA /* PopupNotification.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PopupNotification.h; sourceTree = "<group>"; };
 		344991902CB1E6D400E96737 /* XmlTree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XmlTree.h; path = ../../../include/lgi/common/XmlTree.h; sourceTree = SOURCE_ROOT; };
@@ -399,11 +401,11 @@
 		34D795F92BFD771800904325 /* Colour.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Colour.h; path = ../../../include/lgi/common/Colour.h; sourceTree = "<group>"; };
 		34D795FA2BFD771800904325 /* CssTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CssTools.h; path = ../../../include/lgi/common/CssTools.h; sourceTree = "<group>"; };
 		34D795FB2BFD771800904325 /* Css.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Css.h; path = ../../../include/lgi/common/Css.h; sourceTree = "<group>"; };
-		34E75AFF2D1E1C3600AC2107 /* liblunasvg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblunasvg.a; path = "../../../../deps/build-release/lib/liblunasvg.a"; sourceTree = "<group>"; };
-		34E75B002D1E1C3600AC2107 /* libpng16.16.45.git.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng16.16.45.git.dylib; path = "../../../../deps/build-release/lib/libpng16.16.45.git.dylib"; sourceTree = "<group>"; };
+		34E75AFF2D1E1C3600AC2107 /* liblunasvg.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = liblunasvg.3.dylib; path = "../../../../deps/build-release/lib/liblunasvg.3.dylib"; sourceTree = "<group>"; };
+		34E75B002D1E1C3600AC2107 /* libpng16.16.59.git.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng16.16.59.git.dylib; path = "../../../../deps/build-release/lib/libpng16.16.59.git.dylib"; sourceTree = "<group>"; };
 		34E75B012D1E1C3600AC2107 /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = "../../../../deps/build-release/lib/libiconv.dylib"; sourceTree = "<group>"; };
-		34E75B032D1E1C3600AC2107 /* libz.1.4.1.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.4.1.1.dylib; path = "../../../../../lgi/deps/build-release/lib/libz.1.4.1.1.dylib"; sourceTree = "<group>"; };
-		34E75B042D1E1C3600AC2107 /* libplutovg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libplutovg.a; path = "../../../../deps/build-release/lib/libplutovg.a"; sourceTree = "<group>"; };
+		34E75B032D1E1C3600AC2107 /* libz.1.3.2.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.3.2.1.dylib; path = "../../../../deps/build-release/lib/libz.1.3.2.1.dylib"; sourceTree = "<group>"; };
+		34E75B042D1E1C3600AC2107 /* libplutovg.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libplutovg.1.dylib; path = "../../../../deps/build-release/lib/libplutovg.1.dylib"; sourceTree = "<group>"; };
 		34E75B0B2D1E1C5800AC2107 /* libjpeg.62.4.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libjpeg.62.4.0.dylib; path = "../../../../deps/build-release/lib/libjpeg.62.4.0.dylib"; sourceTree = "<group>"; };
 		34E75B112D1E1FAC00AC2107 /* libntlm.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libntlm.dylib; path = "../../../../deps/build-release/lib/libntlm.dylib"; sourceTree = "<group>"; };
 		34EE8BB02748A55600F12915 /* TextFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TextFile.h; path = ../../../include/lgi/common/TextFile.h; sourceTree = "<group>"; };
@@ -418,8 +420,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				34E75B0A2D1E1C3600AC2107 /* libplutovg.a in Frameworks */,
-				34E75B052D1E1C3600AC2107 /* liblunasvg.a in Frameworks */,
+				3438B74B3044509D003F94F4 /* UniformTypeIdentifiers.framework in Frameworks */,
+				34E75B0A2D1E1C3600AC2107 /* libplutovg.1.dylib in Frameworks */,
+				34E75B052D1E1C3600AC2107 /* liblunasvg.3.dylib in Frameworks */,
 				3477C3501CC0C3D60028B84B /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -466,6 +469,7 @@
 		345BABCE2B78952D005795A0 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				3438B74A3044509D003F94F4 /* UniformTypeIdentifiers.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -821,10 +825,10 @@
 				34E75B112D1E1FAC00AC2107 /* libntlm.dylib */,
 				34E75B0B2D1E1C5800AC2107 /* libjpeg.62.4.0.dylib */,
 				34E75B012D1E1C3600AC2107 /* libiconv.dylib */,
-				34E75AFF2D1E1C3600AC2107 /* liblunasvg.a */,
-				34E75B042D1E1C3600AC2107 /* libplutovg.a */,
-				34E75B002D1E1C3600AC2107 /* libpng16.16.45.git.dylib */,
-				34E75B032D1E1C3600AC2107 /* libz.1.4.1.1.dylib */,
+				34E75AFF2D1E1C3600AC2107 /* liblunasvg.3.dylib */,
+				34E75B042D1E1C3600AC2107 /* libplutovg.1.dylib */,
+				34E75B002D1E1C3600AC2107 /* libpng16.16.59.git.dylib */,
+				34E75B032D1E1C3600AC2107 /* libz.1.3.2.1.dylib */,
 				345598FA2D08E3B100680A5F /* PostBuild.py */,
 				3477C34F1CC0C3D60028B84B /* Cocoa.framework */,
 			);

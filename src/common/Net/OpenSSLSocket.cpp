@@ -1303,7 +1303,15 @@ DebugTrace("%s:%i - BIO_get_ssl=%p\n", _FL, Ssl);
 							IsBlocking(false);
 							
 							const int SLEEP_MS = 50;
-							int r = Library->SSL_connect(Ssl);
+							int r;
+							#ifdef MAC
+							{
+								LMutex::Auto lck(Library, _FL);
+								r = Library->SSL_connect(Ssl);
+							}
+							#else
+							r = Library->SSL_connect(Ssl);
+							#endif
 							int err = 0;
 							// SSL_ERROR_WANT_CONNECT represents the asynchronous TCP connect,
 							// rather than a TLS protocol error. Retain its OS error separately
@@ -1712,7 +1720,14 @@ DebugTrace("%s:%i - SSL_set_bio=%i\n", _FL, r);
 						int To = GetTimeout();
 						while (HasntTimedOut())
 						{
+							#ifdef MAC
+							{
+								LMutex::Auto lck(Library, _FL);
+								r = Library->SSL_connect(Ssl);
+							}
+							#else
 							r = Library->SSL_connect(Ssl);
+							#endif
 DebugTrace("%s:%i - SSL_connect=%i\n", _FL, r);
 							if (r < 0)
 								LSleep(100);

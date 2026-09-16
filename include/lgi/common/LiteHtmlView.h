@@ -37,7 +37,7 @@ public:
 	LCursor GetCursor(int x, int y) override;
 	void OnPaint(LSurface *pDC) override;
 	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
-	bool OnMouseWheel(double Lines);
+	bool OnMouseWheel(double Lines) override;
 	void OnMouseClick(LMouse &m) override;
 	void OnMouseMove(LMouse &m) override;
 	LMessage::Result OnEvent(LMessage *Msg) override;
