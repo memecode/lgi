@@ -194,6 +194,9 @@
 		34E75B0F2D1E1C8400AC2107 /* libz.1.3.2.1.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34E75B032D1E1C3600AC2107 /* libz.1.3.2.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34E75B102D1E1C8C00AC2107 /* libiconv.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34E75B012D1E1C3600AC2107 /* libiconv.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34EE8BB12748A55600F12915 /* TextFile.h in Headers */ = {isa = PBXBuildFile; fileRef = 34EE8BB02748A55600F12915 /* TextFile.h */; };
+		34F3216E305AC3F70073C5E7 /* GdcTools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34F3216D305AC3F70073C5E7 /* GdcTools.cpp */; };
+		34F32186305AC8FA0073C5E7 /* libplutovg.1.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34E75B042D1E1C3600AC2107 /* libplutovg.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		34F32187305AC9000073C5E7 /* liblunasvg.3.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34E75AFF2D1E1C3600AC2107 /* liblunasvg.3.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34F3EC4329BD374E00BB9B58 /* Rect.h in Headers */ = {isa = PBXBuildFile; fileRef = 34F3EC4229BD374E00BB9B58 /* Rect.h */; };
 		34F6151F27E55C5D00FE5B0C /* Thread.h in Headers */ = {isa = PBXBuildFile; fileRef = 34F6151D27E55C5D00FE5B0C /* Thread.h */; };
 		34F6152027E55C5D00FE5B0C /* ThreadEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = 34F6151E27E55C5D00FE5B0C /* ThreadEvent.h */; };
@@ -207,6 +210,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				34F32187305AC9000073C5E7 /* liblunasvg.3.dylib in CopyFiles */,
+				34F32186305AC8FA0073C5E7 /* libplutovg.1.dylib in CopyFiles */,
 				34E75B102D1E1C8C00AC2107 /* libiconv.dylib in CopyFiles */,
 				34E75B0F2D1E1C8400AC2107 /* libz.1.3.2.1.dylib in CopyFiles */,
 				34E75B0E2D1E1C7A00AC2107 /* libjpeg.62.4.0.dylib in CopyFiles */,
@@ -409,6 +414,7 @@
 		34E75B0B2D1E1C5800AC2107 /* libjpeg.62.4.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libjpeg.62.4.0.dylib; path = "../../../../deps/build-release/lib/libjpeg.62.4.0.dylib"; sourceTree = "<group>"; };
 		34E75B112D1E1FAC00AC2107 /* libntlm.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libntlm.dylib; path = "../../../../deps/build-release/lib/libntlm.dylib"; sourceTree = "<group>"; };
 		34EE8BB02748A55600F12915 /* TextFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TextFile.h; path = ../../../include/lgi/common/TextFile.h; sourceTree = "<group>"; };
+		34F3216D305AC3F70073C5E7 /* GdcTools.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = GdcTools.cpp; path = ../../common/Gdc2/Tools/GdcTools.cpp; sourceTree = SOURCE_ROOT; };
 		34F3EC4229BD374E00BB9B58 /* Rect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Rect.h; path = ../../../include/lgi/common/Rect.h; sourceTree = SOURCE_ROOT; };
 		34F6151D27E55C5D00FE5B0C /* Thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Thread.h; path = ../../../include/lgi/common/Thread.h; sourceTree = SOURCE_ROOT; };
 		34F6151E27E55C5D00FE5B0C /* ThreadEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ThreadEvent.h; path = ../../../include/lgi/common/ThreadEvent.h; sourceTree = SOURCE_ROOT; };
@@ -561,6 +567,7 @@
 				3413170F230694D1008CE982 /* Gel.cpp */,
 				34D6AA1622D3749A005D739E /* Gdc2.h */,
 				34D1B3C021748A2800BC6B58 /* Path.cpp */,
+				34F3216D305AC3F70073C5E7 /* GdcTools.cpp */,
 				3477C3211CC04DA00028B84B /* Colour.cpp */,
 				3477C2BA1CBF97C80028B84B /* GdcCommon.cpp */,
 				3477C3121CC04CB10028B84B /* Rect.cpp */,
@@ -1091,6 +1098,7 @@
 				3477C3321CC04E120028B84B /* 64Bit.cpp in Sources */,
 				3477C3041CC04BF00028B84B /* Edit.cpp in Sources */,
 				3477C3361CC04E120028B84B /* 48Bit.cpp in Sources */,
+				34F3216E305AC3F70073C5E7 /* GdcTools.cpp in Sources */,
 				3477C3261CC04DE20028B84B /* Mutex.cpp in Sources */,
 				3477C2851CBF086A0028B84B /* Printer.mm in Sources */,
 				3477C33D1CC088590028B84B /* FileCommon.cpp in Sources */,

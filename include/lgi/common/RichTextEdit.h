@@ -173,7 +173,7 @@ public:
 	bool Open(const char *Name, const char *Cs = nullptr) override;
 	bool Open(LStream *stream, const char *Cs = nullptr);
 	bool Save(const char *Name, const char *Cs = nullptr) override;
-	bool Save(LStream *stream, const char *Cs = nullptr);
+	bool Save(LStream *stream, const char *Cs = nullptr) override;
 
 	// Clipboard IO
 	bool Cut() override;
