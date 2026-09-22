@@ -792,42 +792,46 @@ public:
 	bool SupportsAlphaCompositing() override;
 	LPoint GetDpi() override;
 
+	// Dom:
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
+
 	#ifndef LGI_SDL
-	uchar *operator[](int y) override { return NULL; }
+		uchar *operator[](int y) override { return NULL; }
 
-	LPoint GetOrigin() override;
-	void SetOrigin(LPoint pt) override;
-	LRect ClipRgn() override;
-	LRect ClipRgn(LRect *Rgn) override;
-	COLOUR Colour() override;
-	COLOUR Colour(COLOUR c, int Bits = 0) override;
-	LColour Colour(LColour c) override;
-	LString Dump() override;
+		LPoint GetOrigin() override;
+		void SetOrigin(LPoint pt) override;
+		LRect ClipRgn() override;
+		LRect ClipRgn(LRect *Rgn) override;
+		COLOUR Colour() override;
+		COLOUR Colour(COLOUR c, int Bits = 0) override;
+		LColour Colour(LColour c) override;
+		LString Dump() override;
 
-	int Op() override;
-	int Op(int Op, NativeInt Param = -1) override;
+		int Op() override;
+		int Op(int Op, NativeInt Param = -1) override;
 
-	// Primitives
-	void Set(int x, int y) override;
-	COLOUR Get(int x, int y) override;
-	void HLine(int x1, int x2, int y) override;
-	void VLine(int x, int y1, int y2) override;
-	void Line(int x1, int y1, int x2, int y2) override;
-	void Circle(double cx, double cy, double radius) override;
-	void FilledCircle(double cx, double cy, double radius) override;
-	void Arc(double cx, double cy, double radius, double start, double end) override;
-	void FilledArc(double cx, double cy, double radius, double start, double end) override;
-	void Ellipse(double cx, double cy, double x, double y) override;
-	void FilledEllipse(double cx, double cy, double x, double y) override;
-	void Box(int x1, int y1, int x2, int y2) override;
-	void Box(LRect *a) override;
-	void Rectangle(int x1, int y1, int x2, int y2) override;
-	void Rectangle(LRect *a = NULL) override;
-	void Blt(int x, int y, LSurface *Src, LRect *a = NULL) override;
-	void StretchBlt(LRect *d, LSurface *Src, LRect *s = NULL) override;
-	void Polygon(int Points, LPoint *Data) override;
-	void Bezier(int Threshold, LPoint *Pt) override;
-	void FloodFill(int x, int y, int Mode, COLOUR Border = 0, LRect *Bounds = NULL) override;
+		// Primitives
+		void Set(int x, int y) override;
+		COLOUR Get(int x, int y) override;
+		void HLine(int x1, int x2, int y) override;
+		void VLine(int x, int y1, int y2) override;
+		void Line(int x1, int y1, int x2, int y2) override;
+		void Circle(double cx, double cy, double radius) override;
+		void FilledCircle(double cx, double cy, double radius) override;
+		void Arc(double cx, double cy, double radius, double start, double end) override;
+		void FilledArc(double cx, double cy, double radius, double start, double end) override;
+		void Ellipse(double cx, double cy, double x, double y) override;
+		void FilledEllipse(double cx, double cy, double x, double y) override;
+		void Box(int x1, int y1, int x2, int y2) override;
+		void Box(LRect *a) override;
+		void Rectangle(int x1, int y1, int x2, int y2) override;
+		void Rectangle(LRect *a = NULL) override;
+		void Blt(int x, int y, LSurface *Src, LRect *a = NULL) override;
+		void StretchBlt(LRect *d, LSurface *Src, LRect *s = NULL) override;
+		void Polygon(int Points, LPoint *Data) override;
+		void Bezier(int Threshold, LPoint *Pt) override;
+		void FloodFill(int x, int y, int Mode, COLOUR Border = 0, LRect *Bounds = NULL) override;
 	#endif
 };
 

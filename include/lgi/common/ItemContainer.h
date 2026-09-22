@@ -479,11 +479,11 @@ protected:
 	LRect ColumnHeader;
 	int ColClick = -1;
 	LMouse ColMouse;
-	LItemEdit *ItemEdit = NULL;
+	LItemEdit *ItemEdit = nullptr;
 
 	LArray<LItemColumn *> Columns;
 	LAutoPtr<LItemColumn> IconCol;
-	class LDragColumn *DragCol = NULL;
+	class LDragColumn *DragCol = nullptr;
 
 	/// Returns size information for columns
 	void GetColumnSizes(ColSizes &cs);
@@ -619,24 +619,29 @@ public:                                                                        \
 class LDragColumn
 	: public LWindow
 {
-	LItemContainer *List;
-	LItemColumn *Col;
-	int Index;
-	int Offset;
+	LItemContainer *List = nullptr;
+	LItemColumn *Col = nullptr;
+	int Index = -1;
+	int Offset = 0;
 	LPoint ListScrPos;
+	bool Embedded = false;
+	bool PaintingEmbedded = false;
 
 #ifdef LINUX
-  	LSurface *Back;
+  	LSurface *Back = nullptr;
 #endif
 
 public:
 	int GetOffset() { return Offset; }
 	int GetIndex() { return Index; }
 	LItemColumn *GetColumn() { return Col; }
+	bool IsEmbedded() { return Embedded; }
 
 	LDragColumn(LItemContainer *list, int col);
 	~LDragColumn();
 
+	void SetDragPos(LRect &Pos);
+	void PaintEmbedded(LSurface *pScreen);
 	void OnPaint(LSurface *pScreen);
 };
 

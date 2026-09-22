@@ -28,8 +28,8 @@ class LMemDCPrivate
 public:
 	LArray<LRect> Client;
 	LColourSpace CreateCs = CsNone;
-	BBitmap *Bmp = NULL;
-	BView *View = NULL;
+	BBitmap *Bmp = nullptr;
+	BView *View = nullptr;
 	int LockCount = 0;
 	bool debug = false;
 

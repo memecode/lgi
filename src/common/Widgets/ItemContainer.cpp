@@ -694,10 +694,6 @@ LDragColumn::LDragColumn(LItemContainer *list, int col)
 {
 	List = list;
 	Index = col;
-	Offset = 0;
-	#ifdef LINUX
-	Back = 0;
-	#endif
 	Col = List->ColumnAt(Index);
 	if (Col)
 	{
@@ -723,10 +719,9 @@ LDragColumn::LDragColumn(LItemContainer *list, int col)
 		{
 			SetExStyle(GetExStyle() | WS_EX_LAYERED | WS_EX_TRANSPARENT);
 		}
+		Attach(0);
 		
 		#endif
-
-		Attach(0);
 
 		#if WINNATIVE
 		
@@ -747,13 +742,23 @@ LDragColumn::LDragColumn(LItemContainer *list, int col)
 		
 		#elif defined(__GTK_H__)
 
-		Gtk::GtkWindow *w = WindowHandle();
-		if (w)
+		auto Display = Gtk::gdk_display_get_default();
+		auto DisplayName = Display ? Gtk::gdk_display_get_name(Display) : nullptr;
+		Embedded = DisplayName && !strncmp(DisplayName, "wayland", 7);
+		if (!Embedded)
 		{
-			gtk_window_set_decorated(w, FALSE);
-			gtk_widget_set_opacity(GtkCast(w, gtk_widget, GtkWidget), DRAG_COL_ALPHA / 255.0);
+			Attach(0);
+			if (auto w = WindowHandle())
+			{
+				gtk_window_set_decorated(w, FALSE);
+				gtk_widget_set_opacity(GtkCast(w, gtk_widget, GtkWidget), DRAG_COL_ALPHA / 255.0);
+			}
 		}
 		
+		#else
+
+		Attach(0);
+
 		#endif
 
 		LMouse m;
@@ -763,14 +768,24 @@ LDragColumn::LDragColumn(LItemContainer *list, int col)
 		List->PointToScreen(ListScrPos);
 		r.Offset(ListScrPos.x, ListScrPos.y);
 
-		SetPos(r);
-		Visible(true);
+		SetDragPos(r);
+		if (!Embedded)
+			Visible(true);
 	}
 }
 
 LDragColumn::~LDragColumn()
 {
-	Visible(false);
+	if (Embedded)
+	{
+		LRect r = GetPos();
+		r.Offset(-ListScrPos.x, -ListScrPos.y);
+		List->Invalidate(&r);
+	}
+	else
+	{
+		Visible(false);
+	}
 
 	if (Col)
 	{
@@ -778,6 +793,54 @@ LDragColumn::~LDragColumn()
 	}
 
 	List->Invalidate();
+}
+
+void LDragColumn::SetDragPos(LRect &r)
+{
+	if (Embedded)
+	{
+		LRect old = GetPos();
+		old.Offset(-ListScrPos.x, -ListScrPos.y);
+		List->Invalidate(&old);
+	}
+
+	SetPos(r, true);
+
+	if (Embedded)
+	{
+		LRect current = GetPos();
+		current.Offset(-ListScrPos.x, -ListScrPos.y);
+		List->Invalidate(&current);
+	}
+}
+
+void LDragColumn::PaintEmbedded(LSurface *pScreen)
+{
+	if (!Embedded || PaintingEmbedded || !pScreen || !Col)
+		return;
+
+	LRect source = Col->d->Pos;
+	source.y1 = 0;
+	source.y2 = List->Y() - 1;
+	LRect destination = GetPos();
+	destination.Offset(-ListScrPos.x, -ListScrPos.y);
+
+	LMemDC preview(_FL, source.X(), source.Y(), GdcD->GetColourSpace());
+	preview.SetOrigin(LPoint(source.x1, 0));
+	PaintingEmbedded = true;
+	Col->d->Drag = false;
+	List->OnPaint(&preview);
+	Col->d->Drag = true;
+	PaintingEmbedded = false;
+	preview.SetOrigin(LPoint(0, 0));
+
+	auto alphaVar = LDomPropToString(SurfaceConstAlpha);
+	LVariant previousAlpha;
+	pScreen->GetValue(alphaVar, previousAlpha);
+	LVariant dragAlpha = DRAG_COL_ALPHA;
+	pScreen->SetValue(alphaVar, dragAlpha);
+	pScreen->Blt(destination.x1, destination.y1, &preview);
+	pScreen->SetValue(alphaVar, previousAlpha);
 }
 
 #if LINUX_TRANS_COL

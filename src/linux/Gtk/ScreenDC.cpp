@@ -17,25 +17,20 @@ using namespace Gtk;
 class LScreenPrivate
 {
 public:
-	int x, y, Bits;
-	bool Own;
+	int x = 0, y = 0, Bits = 0;
+	bool Own = false;
 	LColour Col;
 	LRect Client;
+	int ConstAlpha = 255;
 
-	LView *View;
-	OsView v;
-	OsDrawable *d;
-	cairo_t *cr;
+	LView *View = nullptr;
+	OsView v = nullptr;
+	OsDrawable *d = nullptr;
+	cairo_t *cr = nullptr;
 	cairo_matrix_t matrix;
 
 	LScreenPrivate()
 	{
-		View = NULL;
-		x = y = Bits = 0;
-		Own = false;
-		v = 0;
-		d = NULL;
-		cr = NULL;
 		Client.ZOff(-1, -1);
 	}
 	
@@ -139,6 +134,34 @@ LString LScreenDC::Dump()
 	LString s;
 	s.Printf("LScreenDC size=%i,%i\n", d->x, d->y);
 	return s;
+}
+
+bool LScreenDC::GetVariant(const char *Name, LVariant &Value, const char *Array)
+{
+	switch (LStringToDomProp(Name))
+	{
+		case SurfaceConstAlpha:
+		{
+			Value = d->ConstAlpha;
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+bool LScreenDC::SetVariant(const char *Name, LVariant &Value, const char *Array)
+{
+	switch (LStringToDomProp(Name))
+	{
+		case SurfaceConstAlpha:
+		{
+			d->ConstAlpha = Value.CastInt32();
+			return true;
+		}
+	}
+	
+	return false;
 }
 
 bool LScreenDC::SupportsAlphaCompositing()
@@ -563,8 +586,7 @@ void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 		auto Sub = Mem->GetSubImage(br.SrcClip);
 		if (Sub)
 		{
-			cairo_pattern_t *Pat = cairo_pattern_create_for_surface(Sub);
-			if (Pat)
+			if (auto Pat = cairo_pattern_create_for_surface(Sub))
 			{
 				/*
 				{
@@ -580,14 +602,23 @@ void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 						OriginX, OriginY);
 				}
 				*/
-
+				
 				cairo_save(d->cr);
 				cairo_translate(d->cr, br.DstClip.x1, br.DstClip.y1);
 				cairo_set_source(d->cr, Pat);
 		
 				cairo_new_path(d->cr);
 				cairo_rectangle(d->cr, 0, 0, br.DstClip.X(), br.DstClip.Y());
-				cairo_fill(d->cr);
+				if (d->ConstAlpha < 255)
+				{
+					cairo_clip(d->cr);
+					auto alpha = MAX(0, d->ConstAlpha) / 255.0;
+					cairo_paint_with_alpha(d->cr, alpha);
+				}
+				else
+				{
+					cairo_fill(d->cr);
+				}
 		
 				cairo_restore(d->cr);
 					

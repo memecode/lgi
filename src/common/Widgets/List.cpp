@@ -1641,8 +1641,15 @@ void LList::OnMouseClick(LMouse &m)
 							UpdateAllItems();
 						}
 
-						DragCol->Quit();
-						DragCol = NULL;
+						if (DragCol->IsEmbedded())
+						{
+							DeleteObj(DragCol);
+						}
+						else
+						{
+							DragCol->Quit();
+							DragCol = NULL;
+						}
 					}
 
 					Invalidate();
@@ -1892,7 +1899,7 @@ void LList::OnMouseMove(LMouse &m)
 				if (r.x2 > X()-1) r.Offset((X()-1)-r.x2, 0);
 
 				r.Offset(p.x, p.y); // back to screen co-ord
-				DragCol->SetPos(r, true);
+				DragCol->SetDragPos(r);
 				r = DragCol->GetPos();
 			}
 			break;
@@ -2716,6 +2723,9 @@ void LList::OnPaint(LSurface *pDC)
 	}
 
 	Unlock();
+
+	if (DragCol && DragCol->IsEmbedded())
+		DragCol->PaintEmbedded(pDC);
 
 	#if LList_ONPAINT_PROFILE
 	int64 End = LCurrentTime();

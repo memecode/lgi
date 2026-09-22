@@ -56,6 +56,7 @@ _(SurfaceY, "Y")
 _(SurfaceBits, "Bits")
 _(SurfaceColourSpace, "ColourSpace")
 _(SurfaceIncludeCursor, "IncludeCursor")
+_(SurfaceConstAlpha, "ConstAlpha")
 	
 // List GHashTbl/LHashTbl
 _(ContainerAdd, "Add")
@@ -120,7 +121,7 @@ _(PathExe,				"PathExe")
 _(PathTrash,			"PathTrash")
 _(PathAppInstall,		"PathAppInstall")
 _(PathAppData,			"PathAppData")
-_(PathAppConfig,			"PathAppConfig")
+_(PathAppConfig,		"PathAppConfig")
 _(PathAppCache,			"PathAppCache")
 _(PathAppRoot,			"PathAppRoot")
 
