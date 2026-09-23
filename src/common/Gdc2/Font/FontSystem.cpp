@@ -8,6 +8,9 @@
 #if defined(LGI_STATIC)
 #undef HAS_ICONV
 #endif
+#if defined __GTK_H__
+using namespace Gtk;
+#endif
 
 #define DEBUG_ICONV_LOG			0
 
@@ -48,16 +51,16 @@ public:
 	bool LibCheck = false;
 	
 	#ifdef __GTK_H__
-		Gtk::PangoFontMap *Map;
-		Gtk::PangoContext *Ctx;
+		PangoFontMap *Map;
+		PangoContext *Ctx;
 	
 		LFontSystemPrivate() : LMutex("LFontSystemPrivate.Lock")
 		{
-			Map = Gtk::pango_cairo_font_map_get_default();
+			Map = pango_cairo_font_map_get_default();
 			if (!Map)
 				LAssert(!"pango_cairo_font_map_get_default failed.\n");
 		
-			Ctx = Gtk::pango_font_map_create_context((Gtk::PangoFontMap*)Map);
+			Ctx = pango_font_map_create_context((PangoFontMap*)Map);
 			if (!Ctx)
 				LAssert(!"pango_font_map_create_context failed.\n");
 		}
@@ -149,12 +152,12 @@ LFontSystem::~LFontSystem()
 }
 
 #ifdef __GTK_H__
-Gtk::PangoFontMap *LFontSystem::GetFontMap()
+PangoFontMap *LFontSystem::GetFontMap()
 {
 	return d->Map;
 }
 
-Gtk::PangoContext *LFontSystem::GetContext()
+PangoContext *LFontSystem::GetContext()
 {
 	return d->Ctx;
 }
@@ -225,21 +228,21 @@ bool LFontSystem::EnumerateFonts(LString::Array &Fonts)
 
 		#elif defined __GTK_H__
 
-			Gtk::PangoFontFamily **families;
+			PangoFontFamily **families;
 			int n_families;
-			Gtk::PangoFontMap * fontmap;
+			PangoFontMap * fontmap;
 
-			fontmap = Gtk::pango_cairo_font_map_get_default();
-			Gtk::pango_font_map_list_families (fontmap, & families, & n_families);
+			fontmap = pango_cairo_font_map_get_default();
+			pango_font_map_list_families (fontmap, & families, & n_families);
 			for (int i = 0; i < n_families; i++)
 			{
-				Gtk::PangoFontFamily * family = families[i];
+				PangoFontFamily * family = families[i];
 				const char * family_name;
 
-				family_name = Gtk::pango_font_family_get_name (family);
+				family_name = pango_font_family_get_name (family);
 				AllFonts.New() = family_name;
 			}
-			Gtk::g_free (families);
+			g_free (families);
 
 		#elif LGI_COCOA
 

@@ -1,6 +1,10 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/FontSelect.h"
 
+#if defined __GTK_H__
+using namespace Gtk;
+#endif
+
 LFontType::LFontType(const char *face, int pointsize)
 {
 	#if defined WINNATIVE
@@ -366,40 +370,40 @@ bool LFontType::GetSystemFont(const char *Which)
 			
 			if (!ConfigFontUsed && LApp::IsGui())
 			{	
-				auto settings = Gtk::gtk_settings_get_default();
+				auto settings = gtk_settings_get_default();
 				if (settings)
 				{
-					Gtk::gchararray fontName = NULL;
-					Gtk::g_object_get(settings, "gtk-font-name", &fontName, NULL);
+					gchararray fontName = NULL;
+					g_object_get(settings, "gtk-font-name", &fontName, NULL);
 					if (fontName)
 					{
-						auto desc = Gtk::pango_font_description_from_string(fontName);
+						auto desc = pango_font_description_from_string(fontName);
 						if (desc)
 						{
-							const char *fam = Gtk::pango_font_description_get_family(desc);
+							const char *fam = pango_font_description_get_family(desc);
 							if (fam)
 							{
 								strcpy_s(DefFont, sizeof(DefFont), fam);
 							}
 							else printf("%s:%i - pango_font_description_get_family failed.\n", _FL);
 
-							if (Gtk::pango_font_description_get_size_is_absolute(desc))
+							if (pango_font_description_get_size_is_absolute(desc))
 							{
-								float Px = (float)Gtk::pango_font_description_get_size(desc) / (float)PANGO_SCALE;
+								float Px = (float)pango_font_description_get_size(desc) / (float)PANGO_SCALE;
 								float Dpi = (float)LScreenDpi().x;
 								DefSize = (Px * 72.0) / Dpi;
 								printf("pango px=%f, Dpi=%f\n", Px, Dpi);
 							}
 							else
 							{
-								DefSize = Gtk::pango_font_description_get_size(desc) / PANGO_SCALE;
+								DefSize = pango_font_description_get_size(desc) / PANGO_SCALE;
 							}
 
-							Gtk::pango_font_description_free(desc);
+							pango_font_description_free(desc);
 						}
 						else printf("%s:%i - pango_font_description_from_string failed.\n", _FL);
 
-						Gtk::g_free(fontName);
+						g_free(fontName);
 					}
 					else printf("%s:%i - g_object_get(gtk-font-name) failed.\n", _FL);
 				}
