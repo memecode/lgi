@@ -726,6 +726,8 @@ public:
 		LMemDC *Temp = nullptr;
 		LMemDC *&Mem = Back.IsValid() ? Temp : CheckBox[Flags];
 
+		LgiTrace("%s:%i - Back=%s\n", _FL, Back.GetStr());
+
 		if (Mem && (Mem->X() != State->Rect.X() || Mem->Y() != State->Rect.Y()))
 			DeleteObj(Mem);
 		if (!Mem)
@@ -733,14 +735,17 @@ public:
 			Mem = new LMemDC(_FL);
 			if (Mem && Mem->Create(State->Rect.X(), State->Rect.Y(), OsDefaultCs))
 			{
+				Mem->Colour(Back);
+				Mem->Rectangle();
+
 				LRect Box(0, 0, Mem->X()-1, Mem->Y()-1);
-				DrawIndicator(Mem, Box,
-							workSpace,
-							Ctrl->Value() != 0,
-							Ctrl->Enabled(),
-							4.0f,
-							false,
-							TCheckMark);
+				DrawIndicator(	Mem, Box,
+								workSpace,
+								Ctrl->Value() != 0,
+								Ctrl->Enabled(),
+								4.0f,
+								false,
+								TCheckMark);
 			}
 		}
 
@@ -808,6 +813,9 @@ public:
 			Mem = new LMemDC(_FL);
 			if (Mem && Mem->Create(State->Rect.X(), State->Rect.Y(), OsDefaultCs))
 			{
+				Mem->Colour(Back);
+				Mem->Rectangle();
+				
 				LRect Box(0, 0, Mem->X()-1, Mem->Y()-1);
 				DrawIndicator(Mem, Box,
 							workSpace,

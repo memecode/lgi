@@ -14,6 +14,7 @@
 #include "lgi/common/Gdc2.h"
 #include "lgi/common/GdiLeak.h"
 #include "lgi/common/Palette.h"
+#include "lgi/common/Variant.h"
 
 class LScreenPrivate
 {

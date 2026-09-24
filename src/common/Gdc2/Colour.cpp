@@ -524,7 +524,7 @@ uint32_t LColour::GetNative()
 	return c32();
 }
 
-char *LColour::GetStr() const
+const char *LColour::GetStr() const
 {
 	#define STR_BUFS	8
 	#define BUF_LEN		32
