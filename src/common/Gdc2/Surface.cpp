@@ -631,7 +631,7 @@ void LSurface::Line(int x1, int y1, int x2, int y2)
 	}
 }
 
-void LSurface::Circle(double Cx, double Cy, double radius)
+void LSurface::Circle(float Cx, float Cy, float radius)
 {
 	#if defined WINNATIVE
 
@@ -708,7 +708,7 @@ void LSurface::Circle(double Cx, double Cy, double radius)
 	Update(GDC_BITS_CHANGE);
 }
 
-void LSurface::FilledCircle(double Cx, double Cy, double radius)
+void LSurface::FilledCircle(float Cx, float Cy, float radius)
 {
 	#if defined WINNATIVE
 
@@ -842,7 +842,7 @@ void LSurface::Rectangle(int x1, int y1, int x2, int y2)
 	Rectangle(&a);
 }
 
-void LSurface::Ellipse(double Cx, double Cy, double radiusX, double radiusY)
+void LSurface::Ellipse(float Cx, float Cy, float radiusX, float radiusY)
 {
 	#if defined WINNATIVE
 
@@ -929,7 +929,7 @@ void LSurface::Ellipse(double Cx, double Cy, double radiusX, double radiusY)
 	Update(GDC_BITS_CHANGE);
 }
 
-void LSurface::FilledEllipse(double Cx, double Cy, double radiusX, double radiusY)
+void LSurface::FilledEllipse(float Cx, float Cy, float radiusX, float radiusY)
 {
 	#if defined WINNATIVE
 
@@ -1341,252 +1341,14 @@ void LSurface::Bezier(int Threshold, LPoint *Pt)
 	}
 }
 
-class PointStack {
 
-	int Used;
-	int Size;
-	LPoint *Stack;
 
-	bool SetSize(int s)
-	{
-		LPoint *Next = new LPoint[Size + s];
-		if (Next)
-		{
-			Size += s;
-			Used = MIN(Size, Used);
-			memcpy((uint8_t*)Next, Stack, sizeof(LPoint)*Used);
-			DeleteArray(Stack);
-			Stack = Next;
-			return true;
-		}
-		return false;
-	}
 
-public:
-	PointStack()
-	{
-		Used = 0;
-		Size = 1024;
-		Stack = new LPoint[Size];
-	}
 
-	~PointStack()
-	{
-		DeleteArray(Stack);
-	}
 
-	int GetSize() { return Used; }
 
-	void Push(int x, int y)
-	{
-		if (Used >= Size)
-		{
-			SetSize(Size+1024);
-		}
-
-		if (Stack)
-		{
-			Stack[Used].x = x;
-			Stack[Used].y = y;
-			Used++;
-		}
-	}
-
-	void Pop(int &x, int &y)
-	{
-		if (Stack && Used > 0)
-		{
-			Used--;
-			x = Stack[Used].x;
-			y = Stack[Used].y;
-		}
-	}
-};
-
-// This should return true if 'Pixel' is in the region being filled.
-typedef bool (*FillMatchProc)(COLOUR Seed, COLOUR Pixel, COLOUR Border, int Bits);
-
-bool FillMatch_Diff(COLOUR Seed, COLOUR Pixel, COLOUR Border, int Bits)
-{
-	return Seed == Pixel;
-}
-
-bool FillMatch_Near(COLOUR Seed, COLOUR Pixel, COLOUR Border, int Bits)
-{
-	COLOUR s24 = CBit(24, Seed, Bits);
-	COLOUR p24 = CBit(24, Pixel, Bits);
-	int Dr = R24(s24) - R24(p24);
-	int Dg = G24(s24) - G24(p24);
-	int Db = B24(s24) - B24(p24);
-
-	return	((unsigned)abs(Dr) < Border) &&
-			((unsigned)abs(Dg) < Border) &&
-			((unsigned)abs(Db) < Border);
-}
-
-void LSurface::FloodFill(int StartX, int StartY, int Mode, COLOUR Border, LRect *FillBounds)
-{
-	COLOUR Seed = Get(StartX, StartY);
-	if (Seed == 0xffffffff) return; // Doesn't support get pixel
-
-	PointStack Ps;
-	LRect Bounds;
-	FillMatchProc Proc = 0;
-	int Bits = GetBits();
-
-	Bounds.x1 = X();
-	Bounds.y1 = Y();
-	Bounds.x2 = 0;
-	Bounds.y2 = 0;
-
-	Ps.Push(StartX, StartY);
-
-	switch (Mode)
-	{
-		case GDC_FILL_TO_DIFFERENT:
-		{
-			Proc = FillMatch_Diff;
-			break;
-		}
-		case GDC_FILL_TO_BORDER:
-		{
-			break;
-		}
-		case GDC_FILL_NEAR:
-		{
-			Proc = FillMatch_Near;
-			break;
-		}
-	}
-
-	if (Proc)
-	{
-		COLOUR Start = Colour();
-		
-		if (!Proc(Seed, Start, Border, Bits))
-		{
-			while (Ps.GetSize() > 0)
-			{
-				bool Above = true;
-				bool Below = true;
-				int Ox, Oy;
-				Ps.Pop(Ox, Oy);
-				int x = Ox, y = Oy;
-
-				// move right loop
-				COLOUR c = Get(x, y);
-
-				while (x < X() && Proc(Seed, c, Border, Bits))
-				{
-					Set(x, y);
-					Bounds.Union(x, y);
-
-					if (y > 0)
-					{
-						c = Get(x, y - 1);
-
-						if (Above)
-						{
-							if (Proc(Seed, c, Border, Bits))
-							{
-								Ps.Push(x, y - 1);
-								Above = false;
-							}
-						}
-						else if (!Proc(Seed, c, Border, Bits))
-						{
-							Above = true;
-						}
-					}
-
-					if (y < Y() - 1)
-					{
-						c = Get(x, y + 1);
-
-						if (Below)
-						{
-							if (Proc(Seed, c, Border, Bits))
-							{
-								Ps.Push(x, y + 1);
-								Below = false;
-							}
-						}
-						else if (!Proc(Seed, c, Border, Bits))
-						{
-							Below = true;
-						}
-					}
-
-					x++;
-					c = Get(x, y);
-				}
-
-				// move left loop
-				x = Ox;
-
-				Above = !((y > 0) && (Get(x, y - 1) == Seed));
-				Below = !((y < Y() - 1) && (Get(x, y + 1) == Seed));
-
-				x--;
-				c = Get(x, y);
-
-				while (x >= 0 && Proc(Seed, c, Border, Bits))
-				{
-					Set(x, y);
-					Bounds.Union(x, y);
-
-					if (y > 0)
-					{
-						c = Get(x, y - 1);
-
-						if (Above)
-						{
-							if (Proc(Seed, c, Border, Bits))
-							{
-								Ps.Push(x, y - 1);
-								Above = false;
-							}
-						}
-						else if (!Proc(Seed, c, Border, Bits))
-						{
-							Above = true;
-						}
-					}
-
-					if (y < Y() - 1)
-					{
-						c = Get(x, y + 1);
-
-						if (Below)
-						{
-							if (Proc(Seed, c, Border, Bits))
-							{
-								Ps.Push(x, y + 1);
-								Below = false;
-							}
-						}
-						else if (!Proc(Seed, c, Border, Bits))
-						{
-							Below = true;
-						}
-					}
-
-					x--;
-					c = Get(x, y);
-				}
-			}
-		}
-	}
-
-	if (FillBounds)
-	{
-		*FillBounds = Bounds;
-	}
-	Update(GDC_BITS_CHANGE);
-}
-
-void LSurface::Arc(double cx, double cy, double radius, double start, double end) {}
-void LSurface::FilledArc(double cx, double cy, double radius, double start, double end) {}
+void LSurface::Arc(float cx, float cy, float radius, float start, float end) {}
+void LSurface::FilledArc(float cx, float cy, float radius, float start, float end) {}
 void LSurface::StretchBlt(LRect *d, LSurface *Src, LRect *s) {}
 
 bool LSurface::AntiAlias()

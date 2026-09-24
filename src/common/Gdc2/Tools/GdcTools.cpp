@@ -822,3 +822,252 @@ bool ResampleDC(LSurface *pDest, LSurface *pSrc, LRect *fromRect, Progress *Prog
 }
 
 #endif
+
+class PointStack {
+
+	int Used;
+	int Size;
+	LPoint *Stack;
+
+	bool SetSize(int s)
+	{
+		LPoint *Next = new LPoint[Size + s];
+		if (Next)
+		{
+			Size += s;
+			Used = MIN(Size, Used);
+			memcpy((uint8_t*)Next, Stack, sizeof(LPoint)*Used);
+			DeleteArray(Stack);
+			Stack = Next;
+			return true;
+		}
+		return false;
+	}
+
+public:
+	PointStack()
+	{
+		Used = 0;
+		Size = 1024;
+		Stack = new LPoint[Size];
+	}
+
+	~PointStack()
+	{
+		DeleteArray(Stack);
+	}
+
+	int GetSize() { return Used; }
+
+	void Push(int x, int y)
+	{
+		if (Used >= Size)
+		{
+			SetSize(Size+1024);
+		}
+
+		if (Stack)
+		{
+			Stack[Used].x = x;
+			Stack[Used].y = y;
+			Used++;
+		}
+	}
+
+	void Pop(int &x, int &y)
+	{
+		if (Stack && Used > 0)
+		{
+			Used--;
+			x = Stack[Used].x;
+			y = Stack[Used].y;
+		}
+	}
+};
+
+// This should return true if 'Pixel' is in the region being filled.
+typedef bool (*FillMatchProc)(COLOUR Seed, COLOUR Pixel, COLOUR Border, int Bits);
+
+bool FillMatch_Diff(COLOUR Seed, COLOUR Pixel, COLOUR Border, int Bits)
+{
+	return Seed == Pixel;
+}
+
+bool FillMatch_Near(COLOUR Seed, COLOUR Pixel, COLOUR Border, int Bits)
+{
+	COLOUR s24 = CBit(24, Seed, Bits);
+	COLOUR p24 = CBit(24, Pixel, Bits);
+	int Dr = R24(s24) - R24(p24);
+	int Dg = G24(s24) - G24(p24);
+	int Db = B24(s24) - B24(p24);
+
+	return	((unsigned)abs(Dr) < Border) &&
+			((unsigned)abs(Dg) < Border) &&
+			((unsigned)abs(Db) < Border);
+}
+
+void LFloodFill(LSurface *pDC, LPoint startPt, TFloodFillMode Mode, COLOUR Border, LRect *Bounds)
+{
+	if (!pDC)
+		return;
+
+	COLOUR Seed = pDC->Get(startPt.x, startPt.y);
+	if (Seed == 0xffffffff)
+		return; // Doesn't support get pixel
+
+	PointStack Ps;
+	LRect FillBounds;
+	FillMatchProc Proc = 0;
+	int Bits = pDC->GetBits();
+
+	FillBounds.x1 = pDC->X();
+	FillBounds.y1 = pDC->Y();
+	FillBounds.x2 = 0;
+	FillBounds.y2 = 0;
+
+	Ps.Push(startPt.x, startPt.y);
+
+	switch (Mode)
+	{
+		case GDC_FILL_TO_DIFFERENT:
+		{
+			Proc = FillMatch_Diff;
+			break;
+		}
+		case GDC_FILL_TO_BORDER:
+		{
+			break;
+		}
+		case GDC_FILL_NEAR:
+		{
+			Proc = FillMatch_Near;
+			break;
+		}
+	}
+
+	if (Proc)
+	{
+		COLOUR Start = pDC->Colour();
+		
+		if (!Proc(Seed, Start, Border, Bits))
+		{
+			while (Ps.GetSize() > 0)
+			{
+				bool Above = true;
+				bool Below = true;
+				int Ox, Oy;
+				Ps.Pop(Ox, Oy);
+				int x = Ox, y = Oy;
+
+				// move right loop
+				COLOUR c = pDC->Get(x, y);
+
+				while (x < pDC->X() && Proc(Seed, c, Border, Bits))
+				{
+					pDC->Set(x, y);
+					FillBounds.Union(x, y);
+
+					if (y > 0)
+					{
+						c = pDC->Get(x, y - 1);
+
+						if (Above)
+						{
+							if (Proc(Seed, c, Border, Bits))
+							{
+								Ps.Push(x, y - 1);
+								Above = false;
+							}
+						}
+						else if (!Proc(Seed, c, Border, Bits))
+						{
+							Above = true;
+						}
+					}
+
+					if (y < pDC->Y() - 1)
+					{
+						c = pDC->Get(x, y + 1);
+
+						if (Below)
+						{
+							if (Proc(Seed, c, Border, Bits))
+							{
+								Ps.Push(x, y + 1);
+								Below = false;
+							}
+						}
+						else if (!Proc(Seed, c, Border, Bits))
+						{
+							Below = true;
+						}
+					}
+
+					x++;
+					c = pDC->Get(x, y);
+				}
+
+				// move left loop
+				x = Ox;
+
+				Above = !((y > 0) && (pDC->Get(x, y - 1) == Seed));
+				Below = !((y < pDC->Y() - 1) && (pDC->Get(x, y + 1) == Seed));
+
+				x--;
+				c = pDC->Get(x, y);
+
+				while (x >= 0 && Proc(Seed, c, Border, Bits))
+				{
+					pDC->Set(x, y);
+					FillBounds.Union(x, y);
+
+					if (y > 0)
+					{
+						c = pDC->Get(x, y - 1);
+
+						if (Above)
+						{
+							if (Proc(Seed, c, Border, Bits))
+							{
+								Ps.Push(x, y - 1);
+								Above = false;
+							}
+						}
+						else if (!Proc(Seed, c, Border, Bits))
+						{
+							Above = true;
+						}
+					}
+
+					if (y < pDC->Y() - 1)
+					{
+						c = pDC->Get(x, y + 1);
+
+						if (Below)
+						{
+							if (Proc(Seed, c, Border, Bits))
+							{
+								Ps.Push(x, y + 1);
+								Below = false;
+							}
+						}
+						else if (!Proc(Seed, c, Border, Bits))
+						{
+							Below = true;
+						}
+					}
+
+					x--;
+					c = pDC->Get(x, y);
+				}
+			}
+		}
+	}
+
+	if (Bounds)
+	{
+		*Bounds = FillBounds;
+	}
+
+	pDC->Update(GDC_BITS_CHANGE);
+}

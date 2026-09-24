@@ -10,6 +10,7 @@ qemu-system-x86_64 \
     -m 16G \
     -usbdevice tablet \
     -net nic \
-    -net user,hostfwd=tcp::2200-:22,hostfwd=tcp::8443-:8443
+    -net user,hostfwd=tcp:0.0.0.0:2200-:22
+
 
 

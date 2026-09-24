@@ -580,7 +580,7 @@ int GdcDevice::Y()
 	return d->ScrY;
 }
 
-void GdcDevice::SetGamma(double Gamma)
+void GdcDevice::SetGamma(float Gamma)
 {
 	d->GammaCorrection = Gamma;
 	for (int i=0; i<256; i++)
@@ -589,7 +589,7 @@ void GdcDevice::SetGamma(double Gamma)
 	}
 }
 
-double GdcDevice::GetGamma()
+float GdcDevice::GetGamma()
 {
 	return d->GammaCorrection;
 }

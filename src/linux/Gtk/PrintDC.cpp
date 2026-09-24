@@ -163,34 +163,66 @@ void LPrintDC::Line(int x1, int y1, int x2, int y2)
 	}
 }
 
-void LPrintDC::Circle(double cx, double cy, double radius)
+void LPrintDC::Circle(float cx, float cy, float radius)
 {
-	LAssert(!"Not impl.");
+	if (d->cr)
+	{
+		cairo_arc(d->cr, cx, cy, radius, 0.0, 2.0 * LGI_PI);
+		cairo_stroke(d->cr);
+	}
 }
 
-void LPrintDC::FilledCircle(double cx, double cy, double radius)
+void LPrintDC::FilledCircle(float cx, float cy, float radius)
 {
-	LAssert(!"Not impl.");
+	if (d->cr)
+	{
+		cairo_arc(d->cr, cx, cy, radius, 0.0, 2.0 * LGI_PI);
+		cairo_fill(d->cr);
+	}
 }
 
-void LPrintDC::Arc(double cx, double cy, double radius, double start, double end)
+void LPrintDC::Arc(float cx, float cy, float radius, float start, float end)
 {
-	LAssert(!"Not impl.");
+	if (d->cr)
+	{
+		cairo_arc(d->cr, cx, cy, radius, start, end);
+		cairo_stroke(d->cr);
+	}
 }
 
-void LPrintDC::FilledArc(double cx, double cy, double radius, double start, double end)
+void LPrintDC::FilledArc(float cx, float cy, float radius, float start, float end)
 {
-	LAssert(!"Not impl.");
+	if (d->cr)
+	{
+		cairo_arc(d->cr, cx, cy, radius, start, end);
+		cairo_fill(d->cr);
+	}
 }
 
-void LPrintDC::Ellipse(double cx, double cy, double x, double y)
+void LPrintDC::Ellipse(float cx, float cy, float x, float y)
 {
-	LAssert(!"Not impl.");
+	if (d->cr)
+	{
+		cairo_save(d->cr);
+		cairo_translate(d->cr, cx, cy);
+		cairo_scale(d->cr, x, y);
+		cairo_arc(d->cr, 0.0, 0.0, 1.0, 0.0, 2.0 * LGI_PI);
+		cairo_stroke(d->cr);
+		cairo_restore(d->cr);
+	}
 }
 
-void LPrintDC::FilledEllipse(double cx, double cy, double x, double y)
+void LPrintDC::FilledEllipse(float cx, float cy, float x, float y)
 {
-	LAssert(!"Not impl.");
+	if (d->cr)
+	{
+		cairo_save(d->cr);
+		cairo_translate(d->cr, cx, cy);
+		cairo_scale(d->cr, x, y);
+		cairo_arc(d->cr, 0.0, 0.0, 1.0, 0.0, 2.0 * LGI_PI);
+		cairo_fill(d->cr);
+		cairo_restore(d->cr);
+	}
 }
 
 void LPrintDC::Box(int x1, int y1, int x2, int y2)

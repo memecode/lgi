@@ -106,15 +106,6 @@
 #define GDC_PAL_CHANGE				0x1
 #define GDC_BITS_CHANGE				0x2
 
-// Flood fill types
-
-/// LSurface::FloodFill to a different colour
-#define GDC_FILL_TO_DIFFERENT		0
-/// LSurface::FloodFill to a certain colour
-#define GDC_FILL_TO_BORDER			1
-/// LSurface::FloodFill while colour is near to the seed colour
-#define GDC_FILL_NEAR				2
-
 // Gdc options
 
 /// Used in GdcApp8Set::Blt when doing colour depth reduction to 8 bit.
@@ -599,13 +590,13 @@ public:
 	/// Some surfaces only support specific line styles (e.g. GDI/Win)
 	enum LineStyles
 	{
-		LineNone = 0x0,
-		LineSolid = 0xffffffff,
-		LineAlternate = 0xaaaaaaaa,
-		LineDash = 0xf0f0f0f0,
-		LineDot = 0xcccccccc,
-		LineDashDot = 0xF33CCF30,
-		LineDashDotDot = 0xf0ccf0cc,
+		LineNone 		= 0x0,
+		LineSolid 		= 0xffffffff,
+		LineAlternate 	= 0xaaaaaaaa,
+		LineDash 		= 0xf0f0f0f0,
+		LineDot 		= 0xcccccccc,
+		LineDashDot		= 0xF33CCF30,
+		LineDashDotDot 	= 0xf0ccf0cc,
 	};
 	
 	virtual uint LineStyle(uint32_t Bits, uint32_t Reset = 0x80000000)
@@ -620,17 +611,17 @@ public:
 	// Curve
 
 	/// Stroke a circle in the current colour
-	virtual void Circle(double cx, double cy, double radius);
+	virtual void Circle(float cx, float cy, float radius);
 	/// Fill a circle in the current colour
-	virtual void FilledCircle(double cx, double cy, double radius);
+	virtual void FilledCircle(float cx, float cy, float radius);
 	/// Stroke an arc in the current colour
-	virtual void Arc(double cx, double cy, double radius, double start, double end);
+	virtual void Arc(float cx, float cy, float radius, float start, float end);
 	/// Fill an arc in the current colour
-	virtual void FilledArc(double cx, double cy, double radius, double start, double end);
+	virtual void FilledArc(float cx, float cy, float radius, float start, float end);
 	/// Stroke an ellipse in the current colour
-	virtual void Ellipse(double cx, double cy, double x, double y);
+	virtual void Ellipse(float cx, float cy, float x, float y);
 	/// Fill an ellipse in the current colour
-	virtual void FilledEllipse(double cx, double cy, double x, double y);
+	virtual void FilledEllipse(float cx, float cy, float x, float y);
 
 	// Rectangular
 
@@ -640,7 +631,7 @@ public:
 	virtual void Box
 	(
 		/// The rectangle, or NULL to stroke the edge of the entire surface
-		LRect *a = NULL
+		LRect *a = nullptr
 	);
 	/// Fill a rectangle in the current colour
 	virtual void Rectangle(int x1, int y1, int x2, int y2);
@@ -648,7 +639,7 @@ public:
 	virtual void Rectangle
 	(
 		/// The rectangle, or NULL to fill the entire surface
-		LRect *a = NULL
+		LRect *a = nullptr
 	);
 	/// Copy an image onto the surface
 	virtual void Blt
@@ -660,7 +651,7 @@ public:
 		/// The source surface
 		LSurface *Src,
 		/// The optional area of the source to use, if not specified the whole source is used
-		LRect *a = NULL
+		LRect *a = nullptr
 	);
 	void Blt(int x, int y, LSurface *Src, LRect a) { Blt(x, y, Src, &a); }
 	/// Not implemented
@@ -672,20 +663,7 @@ public:
 	virtual void Polygon(int Points, LPoint *Data);
 	/// Stroke a bezier in the current colour
 	virtual void Bezier(int Threshold, LPoint *Pt);
-	/// Flood fill in the current colour (doesn't work on a LScreenDC)
-	virtual void FloodFill
-	(
-		/// Start x coordinate
-		int x,
-		/// Start y coordinate
-		int y,
-		/// Use #GDC_FILL_TO_DIFFERENT, #GDC_FILL_TO_BORDER or #GDC_FILL_NEAR
-		int Mode,
-		/// Fill colour
-		COLOUR Border = 0,
-		/// The bounds of the filled area or NULL if you don't care
-		LRect *Bounds = NULL
-	);
+
 	
 	/// Describes the image
 	virtual LString GetStr();
@@ -817,12 +795,12 @@ public:
 		void HLine(int x1, int x2, int y) override;
 		void VLine(int x, int y1, int y2) override;
 		void Line(int x1, int y1, int x2, int y2) override;
-		void Circle(double cx, double cy, double radius) override;
-		void FilledCircle(double cx, double cy, double radius) override;
-		void Arc(double cx, double cy, double radius, double start, double end) override;
-		void FilledArc(double cx, double cy, double radius, double start, double end) override;
-		void Ellipse(double cx, double cy, double x, double y) override;
-		void FilledEllipse(double cx, double cy, double x, double y) override;
+		void Circle(float cx, float cy, float radius) override;
+		void FilledCircle(float cx, float cy, float radius) override;
+		void Arc(float cx, float cy, float radius, float start, float end) override;
+		void FilledArc(float cx, float cy, float radius, float start, float end) override;
+		void Ellipse(float cx, float cy, float x, float y) override;
+		void FilledEllipse(float cx, float cy, float x, float y) override;
 		void Box(int x1, int y1, int x2, int y2) override;
 		void Box(LRect *a) override;
 		void Rectangle(int x1, int y1, int x2, int y2) override;
@@ -831,7 +809,6 @@ public:
 		void StretchBlt(LRect *d, LSurface *Src, LRect *s = NULL) override;
 		void Polygon(int Points, LPoint *Data) override;
 		void Bezier(int Threshold, LPoint *Pt) override;
-		void FloodFill(int x, int y, int Mode, COLOUR Border = 0, LRect *Bounds = NULL) override;
 	#endif
 };
 
@@ -1129,12 +1106,12 @@ public:
 		void VLine(int x, int y1, int y2) override;
 		void Line(int x1, int y1, int x2, int y2) override;
 	
-		void Circle(double cx, double cy, double radius) override;
-		void FilledCircle(double cx, double cy, double radius) override;
-		void Arc(double cx, double cy, double radius, double start, double end) override;
-		void FilledArc(double cx, double cy, double radius, double start, double end) override;
-		void Ellipse(double cx, double cy, double x, double y) override;
-		void FilledEllipse(double cx, double cy, double x, double y) override;
+		void Circle(float cx, float cy, float radius) override;
+		void FilledCircle(float cx, float cy, float radius) override;
+		void Arc(float cx, float cy, float radius, float start, float end) override;
+		void FilledArc(float cx, float cy, float radius, float start, float end) override;
+		void Ellipse(float cx, float cy, float x, float y) override;
+		void FilledEllipse(float cx, float cy, float x, float y) override;
 	
 		void Box(int x1, int y1, int x2, int y2) override;
 		void Box(LRect *a = NULL) override;
@@ -1175,7 +1152,7 @@ public:
 	bool RemapBitmap(LSurface *pDC);
 };
 
-/// This class is useful for double buffering in an OnPaint handler...
+/// This class is useful for float buffering in an OnPaint handler...
 class LDoubleBuffer
 {
 	LSurface **In;
@@ -1276,8 +1253,8 @@ public:
 	uchar *GetDiv255();
 
 	// Palette/Colour
-	void SetGamma(double Gamma);
-	double GetGamma();
+	void SetGamma(float Gamma);
+	float GetGamma();
 
 	// Palette
 	void SetSystemPalette(int Start, int Size, LPalette *Pal);

@@ -452,31 +452,31 @@ void LScreenDC::Line(int x1, int y1, int x2, int y2)
 	cairo_fill(d->cr);
 }
 
-void LScreenDC::Circle(double cx, double cy, double radius)
+void LScreenDC::Circle(float cx, float cy, float radius)
 {
 	cairo_arc(d->cr, cx, cy, radius, 0, 2 * LGI_PI);
 	cairo_stroke(d->cr);
 }
 
-void LScreenDC::FilledCircle(double cx, double cy, double radius)
+void LScreenDC::FilledCircle(float cx, float cy, float radius)
 {
 	cairo_arc(d->cr, cx, cy, radius, 0, 2 * LGI_PI);
 	cairo_fill(d->cr);
 }
 
-void LScreenDC::Arc(double cx, double cy, double radius, double start, double end)
+void LScreenDC::Arc(float cx, float cy, float radius, float start, float end)
 {
 	cairo_arc(d->cr, cx, cy, radius, start, end);
 	cairo_stroke(d->cr);
 }
 
-void LScreenDC::FilledArc(double cx, double cy, double radius, double start, double end)
+void LScreenDC::FilledArc(float cx, float cy, float radius, float start, float end)
 {
 	cairo_arc(d->cr, cx, cy, radius, start, end);
 	cairo_fill(d->cr);
 }
 
-void LScreenDC::Ellipse(double cx, double cy, double x, double y)
+void LScreenDC::Ellipse(float cx, float cy, float x, float y)
 {
 	cairo_save(d->cr);
 	cairo_translate(d->cr, cx, cy);
@@ -486,7 +486,7 @@ void LScreenDC::Ellipse(double cx, double cy, double x, double y)
 	cairo_restore(d->cr);
 }
 
-void LScreenDC::FilledEllipse(double cx, double cy, double x, double y)
+void LScreenDC::FilledEllipse(float cx, float cy, float x, float y)
 {
 	cairo_save(d->cr);
 	cairo_translate(d->cr, cx, cy);
@@ -634,11 +634,6 @@ void LScreenDC::StretchBlt(LRect *d, LSurface *Src, LRect *s)
 }
 
 void LScreenDC::Bezier(int Threshold, LPoint *Pt)
-{
-	LAssert(0);
-}
-
-void LScreenDC::FloodFill(int x, int y, int Mode, COLOUR Border, LRect *Bounds)
 {
 	LAssert(0);
 }
