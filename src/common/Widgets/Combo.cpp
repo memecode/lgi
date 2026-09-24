@@ -14,6 +14,7 @@ class LComboPrivate
 	LAutoPtr<LDisplayString> Text;
 
 public:
+	LCombo *view = nullptr;
 	ssize_t Current = 0;
 	bool SortItems = false;
 	LVariantType SubMenuType = GV_NULL;
@@ -24,12 +25,14 @@ public:
 	LAutoPtr<LSubMenu> Menu;
 	LCombo::SelectedState SelState = LCombo::SelectedDisable;
 	bool LayoutDirty = false;
+	bool Pressed = false;
 
 	#if defined LGI_CARBON
 	ThemeButtonDrawInfo Cur;
 	#endif
 
-	LComboPrivate()
+	LComboPrivate(LCombo *ctrl) :
+		view(ctrl)
 	{
 		#if defined LGI_CARBON
 			Cur.state = kThemeStateInactive;
@@ -52,6 +55,15 @@ public:
 	{
 		return &Text;
 	}
+
+	void SetPressed(bool p)
+	{
+		if (p != Pressed)
+		{
+			Pressed = p;
+			view->Invalidate();
+		}
+	}
 };
 
 LRect LCombo::Pad(8, 4, 24, 4);
@@ -59,7 +71,7 @@ LRect LCombo::Pad(8, 4, 24, 4);
 LCombo::LCombo(int id, LRect *pos) :
 	ResObject(Res_ComboBox)
 {
-	d = new LComboPrivate;
+	d = new LComboPrivate(this);
 	
 	SetId(id);
 	SetTabStop(true);
@@ -228,7 +240,9 @@ void LCombo::DoMenu()
 
 	if (d->Menu)
 	{
+		d->SetPressed(true);
 		int Result = d->Menu->Float(this, p.x, p.y, LSubMenu::BtnLeft);
+		d->SetPressed(false);
 		if (Result)
 		{
 			GetWindow()->OnCommand(Result, 0,
@@ -379,7 +393,9 @@ void LCombo::DoMenu()
 			RClick.AppendItem("", Base+i, false);
 		}
 
+		d->SetPressed(true);
 		int Result = RClick.Float(this, p.x, p.y, LSubMenu::BtnLeft);
+		d->SetPressed(false);
 		if (Result >= Base)
 		{
 			d->Current = Result - Base;
@@ -557,6 +573,7 @@ void LCombo::OnPaint(LSurface *pDC)
 		State.pScreen = pDC;
 		State.ptrText = d->GetTextPtr();
 		State.Enabled = Enabled();
+		State.Value = d->Pressed;
 		LApp::SkinEngine->OnPaint_LCombo(this, &State);
 	}
 	else

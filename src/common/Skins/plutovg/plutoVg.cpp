@@ -94,13 +94,10 @@ class PlutoVgSkin : public LSkinEngine
 	}
 
 	// Same vertical 4/5 stop gradient look as the native Gel skin, rendered via plutovg.
-	void FillPath(LPath *Path, LSurface *pDC, LColour Back, bool Down, bool Enabled = true)
+	// 'Canvas' is created by the caller so it can be reused for further drawing without rebinding to pDC's pixels.
+	void FillPathCanvas(LPath *Path, LSurface *pDC, PVCanvas &Canvas, LColour Back, bool Down, bool Enabled = true)
 	{
-		if (!pDC)
-			return;
-
-		PVCanvas Canvas(pDC);
-		if (!Canvas)
+		if (!pDC || !Canvas)
 			return;
 
 		LRect r(0, 0, pDC->X()-1, pDC->Y()-1);
@@ -161,13 +158,17 @@ class PlutoVgSkin : public LSkinEngine
 		plutovg_canvas_stroke(Canvas);
 	}
 
-	// Same rounded, gradient shaded button look as the native Gel skin, rendered via plutovg.
-	void DrawBtn(LSurface *pDC, LRect &r, LColour Back, bool Down, bool Enabled, bool Default = false)
+	// Matches LSkinEngine's virtual signature, for external/polymorphic callers that don't have a canvas to share.
+	void FillPath(LPath *Path, LSurface *pDC, LColour Back, bool Down, bool Enabled = true) override
 	{
-		if (!pDC)
-			return;
-
 		PVCanvas Canvas(pDC);
+		FillPathCanvas(Path, pDC, Canvas, Back, Down, Enabled);
+	}
+
+	// Same rounded, gradient shaded button look as the native Gel skin, rendered via plutovg.
+	// 'Canvas' is created by the caller so it can be reused for further drawing without recreating it.
+	void DrawBtnCanvas(PVCanvas &Canvas, LRect &r, LColour Back, bool Down, bool Enabled, bool Default = false)
+	{
 		if (!Canvas)
 			return;
 
@@ -193,6 +194,8 @@ class PlutoVgSkin : public LSkinEngine
 			}
 			float Radius = (float)(6 - Resize);
 
+			#if DRAWBTN_GRADIENT
+
 			LColour Top = Tint(Back, 253.0 / 240.0);
 			LColour Mid = Tint(Back, 232.0 / 240.0);
 			LColour Mid2 = Tint(Back, 222.0 / 240.0);
@@ -205,8 +208,6 @@ class PlutoVgSkin : public LSkinEngine
 				Mid2 = Tint(Mid2, Amt);
 				Bot = Tint(Bot, Amt);
 			}
-
-			#if DRAWBTN_GRADIENT
 
 			if (Down)
 			{
@@ -270,6 +271,13 @@ class PlutoVgSkin : public LSkinEngine
 		}
 	}
 
+	// Matches LSkinEngine's pure virtual signature, for external/polymorphic callers that don't have a canvas to share.
+	void DrawBtn(LSurface *pDC, LRect &r, LColour Back, bool Down, bool Enabled, bool Default = false) override
+	{
+		PVCanvas Canvas(pDC);
+		DrawBtnCanvas(Canvas, r, Back, Down, Enabled, Default);
+	}
+
 	enum TMarkType
 	{
 		TNoMark,
@@ -278,9 +286,9 @@ class PlutoVgSkin : public LSkinEngine
 	};
 
 	// Flat rounded-rect indicator (checkbox/radio) with an optional check/radio mark, all via plutovg.
-	void DrawIndicator(LSurface *pDC, LRect &r, LColour Back, bool Down, bool Enabled, float radius, bool Default = false, TMarkType MarkType = TNoMark)
+	// 'Canvas' is created by the caller so it can be reused for further drawing without rebinding to pDC's pixels.
+	void DrawIndicator(PVCanvas &Canvas, LRect &r, LColour Back, bool Down, bool Enabled, float radius, bool Default = false, TMarkType MarkType = TNoMark)
 	{
-		PVCanvas Canvas(pDC);
 		if (!Canvas)
 			return;
 
@@ -511,7 +519,8 @@ public:
 			Mem.Colour(0, 32);
 		Mem.Rectangle();
 
-		DrawBtn(&Mem,
+		PVCanvas Canvas(&Mem);
+		DrawBtnCanvas(Canvas,
 				Ctrl->GetClient(),
 				Back,
 				Ctrl->Value() != 0,
@@ -601,7 +610,8 @@ public:
 
 		// FillPath ignores its path parameter and fills the whole surface, so no LPath is needed here.
 		static bool LastEnabled = true;
-		FillPath(nullptr, &Mem, Back, State ? State->Value != 0 : false, State ? LastEnabled = State->Enabled : LastEnabled);
+		PVCanvas Canvas(&Mem);
+		FillPathCanvas(nullptr, &Mem, Canvas, Back, State ? State->Value != 0 : false, State ? LastEnabled = State->Enabled : LastEnabled);
 		if (State && State->Value)
 		{
 			Mem.Colour(Rgb24(0xc0, 0xc0, 0xc0), 24);
@@ -642,7 +652,9 @@ public:
 			Mem.Rectangle();
 		}
 
-		DrawBtn(&Mem, Ctrl->GetClient(), BackDefault, false, State->Enabled);
+		auto Offset = State->Value ? 1 : 0;
+		PVCanvas Canvas(&Mem);
+		DrawBtnCanvas(Canvas, Ctrl->GetClient(), BackDefault, Offset, State->Enabled);
 
 		int n = 22;
 		LColour DkGrey(L_DKGREY);
@@ -655,7 +667,7 @@ public:
 				int tx = LCombo::Pad.x1;
 				int ty = (Ctrl->Y()-sy+1) >> 1;
 
-				int Off = 0;
+				int Off = Offset;
 				LRect c = Ctrl->GetClient();
 				c.x1 += 8;
 				c.x2 -= n + 3;
@@ -697,16 +709,21 @@ public:
 			}
 
 			// Draw separator
+			int x = Mem.X() - n + Offset;
 			Mem.Colour(Rgba32(180, 180, 180, 255), 32);
-			Mem.Line(Mem.X()-n, 1, Mem.X()-n, Mem.Y()-2);
+			Mem.Line(x, 1, x, Mem.Y()-2);
 		}
 
-		Mem.Colour(State->Enabled ? Fore : DkGrey);
-		int Bx = Mem.X() < 26 ? Mem.X()/2 : Mem.X()-13, By = (Mem.Y() + 4) >> 1;
-		for (int i=0; i<5; i++)
-		{
-			Mem.Line(Bx-i, By-i, Bx+i, By-i);
-		}
+		// Downward pointing arrow, apex at (Bx,By), base 10px wide, 5px above.
+		float Bx = (float)(Mem.X() < 26 ? Mem.X() / 2 : Mem.X() - 12) + Offset;
+		float By = (float)((Mem.Y() + 5) >> 1) + Offset;
+		auto ArrowColour = PVColour(State->Enabled ? Fore : DkGrey);
+		plutovg_canvas_set_color(Canvas, &ArrowColour);
+		plutovg_canvas_move_to(Canvas, Bx-5, By-5);
+		plutovg_canvas_line_to(Canvas, Bx+5, By-5);
+		plutovg_canvas_line_to(Canvas, Bx, By);
+		plutovg_canvas_close_path(Canvas);
+		plutovg_canvas_fill(Canvas);
 
 		State->pScreen->Blt(0, 0, &Mem);
 	}
@@ -739,7 +756,8 @@ public:
 				Mem->Rectangle();
 
 				LRect Box(0, 0, Mem->X()-1, Mem->Y()-1);
-				DrawIndicator(	Mem, Box,
+				PVCanvas Canvas(Mem);
+				DrawIndicator(	Canvas, Box,
 								workSpace,
 								Ctrl->Value() != 0,
 								Ctrl->Enabled(),
@@ -817,7 +835,8 @@ public:
 				Mem->Rectangle();
 				
 				LRect Box(0, 0, Mem->X()-1, Mem->Y()-1);
-				DrawIndicator(Mem, Box,
+				PVCanvas Canvas(Mem);
+				DrawIndicator(Canvas, Box,
 							workSpace,
 							Ctrl->Value() != 0,
 							Ctrl->Enabled(),
