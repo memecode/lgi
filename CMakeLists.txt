@@ -703,8 +703,8 @@ target_link_libraries(lgi
 	PUBLIC
 		${PUBLIC_LIBS}
 	PRIVATE
-		$<IF:$<CONFIG:Debug>,lunasvgd,lunasvg>
-		$<IF:$<CONFIG:Debug>,plutovgd,plutovg>)
+		$<IF:$<AND:$<CONFIG:Debug>,$<BOOL:${WIN32}>>,lunasvgd,lunasvg>
+		$<IF:$<AND:$<CONFIG:Debug>,$<BOOL:${WIN32}>>,plutovgd,plutovg>)
 
 target_compile_definitions(lgi
 	PUBLIC
