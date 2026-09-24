@@ -78,11 +78,6 @@ class PlutoVgSkin : public LSkinEngine
 	LApp *App;
 	LColour c80;
 	LColour c160;
-	LColour c172;
-	LColour c222;
-	LColour c232;
-	LColour c253;
-	LColour c255;
 	LMemDC *CheckBox[Btn_Max];
 	LMemDC *RadioBtn[Btn_Max];
 
@@ -318,7 +313,6 @@ class PlutoVgSkin : public LSkinEngine
 			float Cx = (float)(CheckBox.x1 + (CheckBox.X() / 2));
 			float Cy = (float)(CheckBox.y1 + (CheckBox.Y() / 2));
 			float A = (float)CheckBox.X() / 6.0f;
-			float B = (float)(CheckBox.X() / 2) - A;
 
 			LColour Mark = Enabled ? c80 : c160;
 			auto MarkC = PVColour(Mark);
@@ -334,25 +328,17 @@ class PlutoVgSkin : public LSkinEngine
 				else
 				{
 					plutovg_path_move_to(Path, (float)CheckBox.x1, (float)CheckBox.y1);
-					plutovg_path_line_to(Path, (float)CheckBox.x1 + A, (float)CheckBox.y1);
-					plutovg_path_line_to(Path, Cx, (float)CheckBox.y1 + B);
-					plutovg_path_line_to(Path, (float)CheckBox.x2 - A, (float)CheckBox.y1);
-					plutovg_path_line_to(Path, (float)CheckBox.x2, (float)CheckBox.y1);
-					plutovg_path_line_to(Path, (float)CheckBox.x2, (float)CheckBox.y1 + A);
-					plutovg_path_line_to(Path, (float)CheckBox.x2 - B, Cy);
-					plutovg_path_line_to(Path, (float)CheckBox.x2, (float)CheckBox.y2 - A);
 					plutovg_path_line_to(Path, (float)CheckBox.x2, (float)CheckBox.y2);
-					plutovg_path_line_to(Path, (float)CheckBox.x2 - A, (float)CheckBox.y2);
-					plutovg_path_line_to(Path, Cx, (float)CheckBox.y2 - B);
-					plutovg_path_line_to(Path, (float)CheckBox.x1 + A, (float)CheckBox.y2);
+					plutovg_path_move_to(Path, (float)CheckBox.x2, (float)CheckBox.y1);
 					plutovg_path_line_to(Path, (float)CheckBox.x1, (float)CheckBox.y2);
-					plutovg_path_line_to(Path, (float)CheckBox.x1, (float)CheckBox.y2 - A);
-					plutovg_path_line_to(Path, (float)CheckBox.x1 + B, Cy);
-					plutovg_path_line_to(Path, (float)CheckBox.x1, (float)CheckBox.y1 + A);
-					plutovg_path_close(Path);
+					plutovg_canvas_set_line_width(Canvas, (float)(A * sqrt(2.0)));
+					plutovg_canvas_set_line_cap(Canvas, PLUTOVG_LINE_CAP_BUTT);
 				}
 				plutovg_canvas_add_path(Canvas, Path);
-				plutovg_canvas_fill_path(Canvas, Path);
+				if (MarkType == TRadioMark)
+					plutovg_canvas_fill_path(Canvas, Path);
+				else
+					plutovg_canvas_stroke_path(Canvas, Path);
 				plutovg_path_destroy(Path);
 			}
 		}
@@ -438,11 +424,6 @@ public:
 		double Nominal = 240.0;
 		c80 = Tint(Med, 80.0/Nominal);
 		c160 = Tint(Med, 160.0/Nominal);
-		c172 = Tint(Med, 172.0/Nominal);
-		c222 = Tint(Med, 222.0/Nominal);
-		c232 = Tint(Med, 232.0/Nominal);
-		c253 = Tint(Med, 252.0/Nominal);
-		c255 = Tint(Med, 255.0/Nominal);
 	}
 
 	~PlutoVgSkin()
