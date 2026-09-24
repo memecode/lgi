@@ -743,8 +743,6 @@ public:
 		LMemDC *Temp = nullptr;
 		LMemDC *&Mem = Back.IsValid() ? Temp : CheckBox[Flags];
 
-		LgiTrace("%s:%i - Back=%s\n", _FL, Back.GetStr());
-
 		if (Mem && (Mem->X() != State->Rect.X() || Mem->Y() != State->Rect.Y()))
 			DeleteObj(Mem);
 		if (!Mem)
