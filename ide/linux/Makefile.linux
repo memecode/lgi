@@ -18,6 +18,7 @@ BuildDir = $(Build)
 CFlags = -MMD -MP -fPIC -fno-inline
 CppFlags = $(CFlags) -fpermissive -std=c++17
 LGI_GTK3_DIR=..
+LGIIDE_DIR=.
 
 ifeq ($(Build),Debug)
 	CFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer -Wno-format-truncation
@@ -49,6 +50,7 @@ ifeq ($(Build),Debug)
 else
 	CFlags += -g -Os -Wno-format-truncation
 	CppFlags += -g -Os -Wno-format-truncation
+	Tag =
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DHAS_LIBSSH -DSSH_SUPPRESS_DEPRECATED
 	Libs =  \
 		-lssh \

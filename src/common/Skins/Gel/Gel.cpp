@@ -39,6 +39,10 @@
 // #endif
 
 #define CUSTOM_COLOURS			0
+#define DEBUG_PLUTOVG			1
+#if DEBUG_PLUTOVG
+#include "plutovg/plutovg.h"
+#endif
 
 class GelSkin : public LSkinEngine
 {
@@ -253,6 +257,76 @@ class GelSkin : public LSkinEngine
 		
 		#endif
 	}
+
+	#if DEBUG_PLUTOVG
+	void DrawBtnPluto(LSurface *pDC, LRect &r, LColour Back, bool Down, bool Enabled, bool Default = false)
+	{
+		if (!pDC || pDC->GetBits() != 32 || !(*pDC)[0])
+			return;
+
+		/*
+		bool WasPreMul = pDC->IsPreMultipliedAlpha();
+		if (!WasPreMul && !pDC->ConvertPreMulAlpha(true))
+			return;
+			*/
+
+		auto Surface = plutovg_surface_create_for_data(
+			(*pDC)[0], pDC->X(), pDC->Y(), (int)pDC->GetRowStep());
+		if (!Surface)
+			return;
+			
+		auto Canvas = plutovg_canvas_create(Surface);
+		if (Canvas)
+		{
+			LColour Edge = Default ? LColour(40, 40, 40) : LColour(114, 114, 114);
+			LColour Fill = Enabled ? Back : Tint(Back, 230.0 / 240.0);
+			plutovg_canvas_set_rgba(Canvas,
+				(float)Edge.r() / 255.0f,
+				(float)Edge.g() / 255.0f,
+				(float)Edge.b() / 255.0f,
+				1.0f);
+
+			auto Path = plutovg_path_create();
+			if (Path)
+			{
+				plutovg_path_add_round_rect(Path,
+					(float)r.x1, (float)r.y1,
+					(float)r.X(), (float)r.Y(), 6.0f, 6.0f);
+				plutovg_canvas_add_path(Canvas, Path);
+				plutovg_canvas_fill_path(Canvas, Path);
+				plutovg_path_destroy(Path);
+			}
+
+			plutovg_canvas_set_rgba(Canvas,
+				(float)Fill.r() / 255.0f,
+				(float)Fill.g() / 255.0f,
+				(float)Fill.b() / 255.0f,
+				1.0f);
+			Path = plutovg_path_create();
+			if (Path)
+			{
+				int Inset = Default ? 2 : 1;
+				plutovg_path_add_round_rect(Path,
+					(float)(r.x1 + Inset), (float)(r.y1 + Inset),
+					(float)(r.X() - Inset * 2), (float)(r.Y() - Inset * 2),
+					(float)(6 - Inset), (float)(6 - Inset));
+				plutovg_canvas_add_path(Canvas, Path);
+				plutovg_canvas_fill_path(Canvas, Path);
+				plutovg_path_destroy(Path);
+			}
+		}
+
+		if (Canvas)
+			plutovg_canvas_destroy(Canvas);
+		if (Surface)
+			plutovg_surface_destroy(Surface);
+
+		/*		
+		if (!WasPreMul)
+			pDC->ConvertPreMulAlpha(false);
+		*/
+	}
+	#endif
 
 	LMemDC *DrawCtrl(LViewI *Ctrl, LRect *Sz, int Flags, bool Round)
 	{
@@ -637,12 +711,21 @@ public:
 			Mem.Colour(0, 32);
 		Mem.Rectangle();
 		
+		#if DEBUG_PLUTOVG
+		DrawBtnPluto(&Mem,
+					 Ctrl->GetClient(),
+					 Back,
+					 Ctrl->Value() != 0,
+					 Ctrl->Enabled(),
+					 Ctrl->Default());
+		#else
 		DrawBtn(&Mem,
 				Ctrl->GetClient(),
 				Back,
 				Ctrl->Value() != 0,
 				Ctrl->Enabled(),
 				Ctrl->Default());
+		#endif
 		
 		LSurface *Out = &Mem;
 		
