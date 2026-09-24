@@ -259,7 +259,15 @@ class GelSkin : public LSkinEngine
 	}
 
 	#if DEBUG_PLUTOVG
-	void DrawBtnPluto(LSurface *pDC, LRect &r, LColour Back, bool Down, bool Enabled, bool Default = false)
+
+	enum TMarkType
+	{
+		TNoMark,
+		TCheckMark, // check mark for check boxes
+		TRadioMark, // circle for radio button state
+	};
+
+	void DrawBtnPluto(LSurface *pDC, LRect &r, LColour Back, bool Down, bool Enabled, float radius, bool Default = false, TMarkType MarkType = TNoMark)
 	{
 		if (!pDC || pDC->GetBits() != 32 || !(*pDC)[0])
 			return;
@@ -291,7 +299,7 @@ class GelSkin : public LSkinEngine
 			{
 				plutovg_path_add_round_rect(Path,
 					(float)r.x1, (float)r.y1,
-					(float)r.X(), (float)r.Y(), 6.0f, 6.0f);
+					(float)r.X(), (float)r.Y(), radius, radius);
 				plutovg_canvas_add_path(Canvas, Path);
 				plutovg_canvas_fill_path(Canvas, Path);
 				plutovg_path_destroy(Path);
@@ -309,10 +317,61 @@ class GelSkin : public LSkinEngine
 				plutovg_path_add_round_rect(Path,
 					(float)(r.x1 + Inset), (float)(r.y1 + Inset),
 					(float)(r.X() - Inset * 2), (float)(r.Y() - Inset * 2),
-					(float)(6 - Inset), (float)(6 - Inset));
+					(float)(radius - Inset), (float)(radius - Inset));
 				plutovg_canvas_add_path(Canvas, Path);
 				plutovg_canvas_fill_path(Canvas, Path);
 				plutovg_path_destroy(Path);
+			}
+
+			if (MarkType != TNoMark && Down)
+			{
+				LRectF CheckBox = r;
+				int Px = (int)(CheckBox.X() / 6);
+				CheckBox.Size(CHECK_BORDER + Px, CHECK_BORDER + Px);
+
+				float Cx = (float)(CheckBox.x1 + (CheckBox.X() / 2));
+				float Cy = (float)(CheckBox.y1 + (CheckBox.Y() / 2));
+				float A = (float)CheckBox.X() / 6.0f;
+				float B = (float)(CheckBox.X() / 2) - A;
+
+				LColour Mark = Enabled ? c80 : c160;
+				plutovg_canvas_set_rgba(Canvas,
+					(float)Mark.r() / 255.0f,
+					(float)Mark.g() / 255.0f,
+					(float)Mark.b() / 255.0f,
+					1.0f);
+
+				auto CheckPath = plutovg_path_create();
+				if (CheckPath)
+				{
+					if (MarkType == TRadioMark)
+					{
+						plutovg_path_add_circle(CheckPath, Cx, Cy, (float)CheckBox.X() / 2.0f);
+					}
+					else
+					{
+						plutovg_path_move_to(CheckPath, (float)CheckBox.x1, (float)CheckBox.y1);
+						plutovg_path_line_to(CheckPath, (float)CheckBox.x1 + A, (float)CheckBox.y1);
+						plutovg_path_line_to(CheckPath, Cx, (float)CheckBox.y1 + B);
+						plutovg_path_line_to(CheckPath, (float)CheckBox.x2 - A, (float)CheckBox.y1);
+						plutovg_path_line_to(CheckPath, (float)CheckBox.x2, (float)CheckBox.y1);
+						plutovg_path_line_to(CheckPath, (float)CheckBox.x2, (float)CheckBox.y1 + A);
+						plutovg_path_line_to(CheckPath, (float)CheckBox.x2 - B, Cy);
+						plutovg_path_line_to(CheckPath, (float)CheckBox.x2, (float)CheckBox.y2 - A);
+						plutovg_path_line_to(CheckPath, (float)CheckBox.x2, (float)CheckBox.y2);
+						plutovg_path_line_to(CheckPath, (float)CheckBox.x2 - A, (float)CheckBox.y2);
+						plutovg_path_line_to(CheckPath, Cx, (float)CheckBox.y2 - B);
+						plutovg_path_line_to(CheckPath, (float)CheckBox.x1 + A, (float)CheckBox.y2);
+						plutovg_path_line_to(CheckPath, (float)CheckBox.x1, (float)CheckBox.y2);
+						plutovg_path_line_to(CheckPath, (float)CheckBox.x1, (float)CheckBox.y2 - A);
+						plutovg_path_line_to(CheckPath, (float)CheckBox.x1 + B, Cy);
+						plutovg_path_line_to(CheckPath, (float)CheckBox.x1, (float)CheckBox.y1 + A);
+						plutovg_path_close(CheckPath);
+					}
+					plutovg_canvas_add_path(Canvas, CheckPath);
+					plutovg_canvas_fill_path(Canvas, CheckPath);
+					plutovg_path_destroy(CheckPath);
+				}
 			}
 		}
 
@@ -717,6 +776,7 @@ public:
 					 Back,
 					 Ctrl->Value() != 0,
 					 Ctrl->Enabled(),
+					 6.0f,
 					 Ctrl->Default());
 		#else
 		DrawBtn(&Mem,
@@ -930,15 +990,33 @@ public:
 		
 		// Create the bitmaps in cache if not already there
 		LCssTools Tools(Ctrl);
+		LColour workSpace(L_WORKSPACE);
 		LColour &Back = Tools.GetBack();
 
-		LMemDC *Temp = 0;
+		LMemDC *Temp = nullptr;
 		LMemDC *&Mem = Back.IsValid() ? Temp : CheckBox[Flags];
 		
 		if (Mem && (Mem->X() != State->Rect.X() || Mem->Y() != State->Rect.Y()))
 			DeleteObj(Mem);
 		if (!Mem)
+		#if DEBUG_PLUTOVG
+		{
+			Mem = new LMemDC(_FL);
+			if (Mem && Mem->Create(State->Rect.X(), State->Rect.Y(), OsDefaultCs))
+			{
+				LRect Box(0, 0, Mem->X()-1, Mem->Y()-1);
+				DrawBtnPluto(Mem, Box,
+							workSpace,
+							Ctrl->Value() != 0,
+							Ctrl->Enabled(),
+							4.0f,
+							false,
+							TCheckMark);
+			}
+		}
+		#else
 			Mem = DrawCtrl(Ctrl, &State->Rect, Flags, false);
+		#endif
 
 		LRect TxtBounds = State->TextBounds();
 
@@ -992,13 +1070,31 @@ public:
 	{
 		int Flags = (Ctrl->Value() ? Btn_Value : 0) |
 					(Ctrl->Enabled() ? Btn_Enabled : 0);
+		LCssTools Tools(Ctrl);
+		LColour workSpace(L_WORKSPACE);
+		LColour &Back = Tools.GetBack();
 		
 		// Create the bitmaps in cache if not already there
 		LMemDC *&Mem = RadioBtn[Flags];
 		if (!Mem || State->ForceUpdate)
 		{
 			DeleteObj(Mem);
+		#if DEBUG_PLUTOVG
+			Mem = new LMemDC(_FL);
+			if (Mem && Mem->Create(State->Rect.X(), State->Rect.Y(), OsDefaultCs))
+			{
+				LRect Box(0, 0, Mem->X()-1, Mem->Y()-1);
+				DrawBtnPluto(Mem, Box,
+							workSpace,
+							Ctrl->Value() != 0,
+							Ctrl->Enabled(),
+							(float)Mem->X() / 2.0f,
+							false,
+							TRadioMark);
+			}
+		#else
 			Mem = DrawCtrl(Ctrl, &State->Rect, Flags, true);
+		#endif
 		}
 
 		// Output to screen
@@ -1006,8 +1102,6 @@ public:
 		{
 			// Draw icon
 			LRect ico;
-			LCssTools Tools(Ctrl);
-			LColour &Back = Tools.GetBack();
 
 			ico.ZOff(Mem->X()-1, Mem->Y()-1);
 		    if (ico.Y() < Ctrl->Y())

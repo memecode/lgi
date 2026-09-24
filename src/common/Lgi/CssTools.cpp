@@ -84,7 +84,9 @@ LColour &LCssTools::GetBack(LColour *Default, int Depth)
 
 		if (View)
 		{
-			Back = View->StyleColour(LCss::PropBackgroundColor, Back, Depth >= 0 ? Depth : 6);
+			auto viewBk = View->StyleColour(LCss::PropBackgroundColor, Back, Depth >= 0 ? Depth : 6);
+			if (viewBk)
+				Back = viewBk;
 		}
 		else if (Css)
 		{
