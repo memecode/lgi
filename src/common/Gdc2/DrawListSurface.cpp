@@ -381,32 +381,32 @@ uint LDrawListSurface::LineStyle(uint32_t Bits, uint32_t Reset)
 	return 0;
 }
 
-void LDrawListSurface::Circle(double cx, double cy, double radius)
+void LDrawListSurface::Circle(float cx, float cy, float radius)
 {
 	LAssert(!"Impl me.");
 }
 
-void LDrawListSurface::FilledCircle(double cx, double cy, double radius)
+void LDrawListSurface::FilledCircle(float cx, float cy, float radius)
 {
 	LAssert(!"Impl me.");
 }
 
-void LDrawListSurface::Arc(double cx, double cy, double radius, double start, double end)
+void LDrawListSurface::Arc(float cx, float cy, float radius, float start, float end)
 {
 	LAssert(!"Impl me.");
 }
 
-void LDrawListSurface::FilledArc(double cx, double cy, double radius, double start, double end)
+void LDrawListSurface::FilledArc(float cx, float cy, float radius, float start, float end)
 {
 	LAssert(!"Impl me.");
 }
 
-void LDrawListSurface::Ellipse(double cx, double cy, double x, double y)
+void LDrawListSurface::Ellipse(float cx, float cy, float x, float y)
 {
 	LAssert(!"Impl me.");
 }
 
-void LDrawListSurface::FilledEllipse(double cx, double cy, double x, double y)
+void LDrawListSurface::FilledEllipse(float cx, float cy, float x, float y)
 {
 	LAssert(!"Impl me.");
 }
@@ -487,11 +487,6 @@ void LDrawListSurface::Polygon(int Points, LPoint *Data)
 }
 
 void LDrawListSurface::Bezier(int Threshold, LPoint *Pt)
-{
-	LAssert(!"Impl me.");
-}
-
-void LDrawListSurface::FloodFill(int x, int y, int Mode, COLOUR Border, LRect *Bounds)
 {
 	LAssert(!"Impl me.");
 }

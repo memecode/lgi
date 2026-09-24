@@ -42,12 +42,12 @@ public:
 	void VLine(int x, int y1, int y2) override;
 	void Line(int x1, int y1, int x2, int y2) override;
 	uint LineStyle(uint32_t Bits, uint32_t Reset = 0x80000000) override;
-	void Circle(double cx, double cy, double radius) override;
-	void FilledCircle(double cx, double cy, double radius) override;
-	void Arc(double cx, double cy, double radius, double start, double end) override;
-	void FilledArc(double cx, double cy, double radius, double start, double end) override;
-	void Ellipse(double cx, double cy, double x, double y) override;
-	void FilledEllipse(double cx, double cy, double x, double y) override;
+	void Circle(float cx, float cy, float radius) override;
+	void FilledCircle(float cx, float cy, float radius) override;
+	void Arc(float cx, float cy, float radius, float start, float end) override;
+	void FilledArc(float cx, float cy, float radius, float start, float end) override;
+	void Ellipse(float cx, float cy, float x, float y) override;
+	void FilledEllipse(float cx, float cy, float x, float y) override;
 	void Box(int x1, int y1, int x2, int y2) override;
 	void Box(LRect *a = NULL) override;
 	void Rectangle(int x1, int y1, int x2, int y2) override;
@@ -56,7 +56,6 @@ public:
 	void StretchBlt(LRect *d, LSurface *Src, LRect *s) override;
 	void Polygon(int Points, LPoint *Data) override;
 	void Bezier(int Threshold, LPoint *Pt) override;
-	void FloodFill(int x, int y, int Mode, COLOUR Border = 0, LRect *Bounds = NULL) override;	
 
 
 	// Stubs that don't work here..
