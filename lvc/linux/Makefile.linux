@@ -18,6 +18,7 @@ BuildDir = $(Build)
 CFlags = -MMD -MP -fPIC -fno-inline
 CppFlags = $(CFlags) -fpermissive -std=c++17
 LGI_GTK3_DIR=..
+LVCPROJECT_DIR=.
 
 ifeq ($(Build),Debug)
 	CFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer
@@ -48,6 +49,7 @@ ifeq ($(Build),Debug)
 else
 	CFlags += -g -Os
 	CppFlags += -g -Os
+	Tag =
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DHAS_LIBSSH
 	Libs =  \
 		-lmagic \
@@ -355,7 +357,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/common/Net/Uri.cpp \
 	../src/common/Resource/LgiRes.cpp \
 	../src/common/Resource/Res.cpp \
-	../src/common/Skins/Gel/Gel.cpp \
+	../src/common/Skins/plutovg/plutoVg.cpp \
 	../src/common/Text/DocView.cpp \
 	../src/common/Text/String.cpp \
 	../src/common/Text/TextConvert.cpp \

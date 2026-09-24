@@ -3960,7 +3960,7 @@ bool LTextView4::OnKey(LKey &k)
 		Blink = true;
 	}
 
-	k.Trace("LTextView4::OnKey");
+	// k.Trace("LTextView4::OnKey");
 
 	if (k.IsContextMenu())
 	{

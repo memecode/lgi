@@ -153,7 +153,7 @@ Source =	src/common/Gdc2/15Bit.cpp \
 			src/common/Net/Uri.cpp \
 			src/common/Resource/LgiRes.cpp \
 			src/common/Resource/Res.cpp \
-			src/common/Skins/Gel/Gel.cpp \
+			src/common/Skins/plutovg/plutoVg.cpp \
 			src/common/Text/DocView.cpp \
 			src/common/Text/String.cpp \
 			src/common/Text/TextConvert.cpp \
@@ -251,7 +251,7 @@ VPATH=$(BuildDir) \
 	./src/linux/General \
 	./src/common/Widgets \
 	./src/common/Text \
-	./src/common/Skins/Gel \
+	./src/common/Skins/plutovg \
 	./src/common/Resource \
 	./src/common/Net \
 	./src/common/Lgi \

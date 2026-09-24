@@ -213,7 +213,7 @@ set (CommonSource
 	include/lgi/common/LgiRes.h
 	src/common/Resource/LgiRes.cpp
 	src/common/Resource/Res.cpp
-	src/common/Skins/Gel/Gel.cpp
+	src/common/Skins/plutovg/plutoVg.cpp
 	include/lgi/common/DocView.h
 	src/common/Text/DocView.cpp
 	include/lgi/common/StringClass.h

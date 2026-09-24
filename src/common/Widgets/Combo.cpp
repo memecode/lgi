@@ -508,7 +508,7 @@ bool LCombo::OnLayout(LViewLayoutInfo &Inf)
 	{
 		Inf.Height.Min =
 			Inf.Height.Max =
-			fnt->GetHeight() + 8;
+			fnt->GetHeight() + 6;
 	}
 
 	return true;
