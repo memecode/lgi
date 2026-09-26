@@ -274,10 +274,6 @@ struct LiteHtmlViewPriv :
 	void draw_text(litehtml::uint_ptr hdc, const char* text, litehtml::uint_ptr hFont, litehtml::web_color color, const litehtml::position& pos)
 	{
 		bool debug = Stricmp(text, "Open") == 0;
-		if (debug)
-		{
-			int asd=0;
-		}
 
 		auto pDC = Convert(hdc);
 		auto Fnt = fontCache.FontFromId(hFont);

@@ -206,44 +206,6 @@ VersionCtrl AppPriv::DetectVcs(VcFolder *Fld)
 	return VcNone;
 }
 
-
-class DiffView : public LTextLog
-{
-public:
-	DiffView(int id) : LTextLog(id)
-	{
-	}
-
-	void PourStyle(size_t Start, ssize_t Length)
-	{
-		for (auto ln : LTextView3::Line)
-		{
-			if (!ln->c.IsValid())
-			{
-				char16 *t = Text + ln->Start;
-				
-				if (*t == '+')
-				{
-					ln->c = LColour::Green;
-					ln->Back.Rgb(245, 255, 245);
-				}
-				else if (*t == '-')
-				{
-					ln->c = LColour::Red;
-					ln->Back.Rgb(255, 245, 245);
-				}
-				else if (*t == '@')
-				{
-					ln->c.Rgb(128, 128, 128);
-					ln->Back.Rgb(235, 235, 235);
-				}
-				else
-					ln->c = LColour(L_TEXT);
-			}
-		}
-	}
-};
-
 class EditAuthor : public LDialog
 {
 	VcFolder *folder = NULL;
@@ -808,7 +770,7 @@ public:
 		Select(true);
 	}
 	
-	void OnPulse()
+	void OnPulse() override
 	{
 		LDirectory dir;
 		if (dir.First(File))
@@ -829,7 +791,7 @@ public:
 		// else LgiTrace("%s:%i couldn't get stat for '%s'\n", _FL, File.Get());
 	}
 	
-	void OnMouseClick(LMouse &m)
+	void OnMouseClick(LMouse &m) override
 	{
 		if (m.IsContextMenu())
 		{
@@ -1106,7 +1068,7 @@ class App :
 	LBox *FoldersBox = NULL;
 	LAutoPtr<SshTestThread> Test;
 
-	bool CallMethod(const char *MethodName, LScriptArguments &Args)
+	bool CallMethod(const char *MethodName, LScriptArguments &Args) override
 	{
 		if (!Stricmp(MethodName, METHOD_GetContext))
 		{
@@ -1235,7 +1197,7 @@ public:
 		WaitThread();
 	}
 	
-	void OnCreate()
+	void OnCreate() override
 	{
 		if ((Menu = new LMenu))
 		{
@@ -1250,7 +1212,7 @@ public:
 
 		auto Tools = new ToolBar;
 
-		auto result = ToolsBox->Attach(this);
+		ToolsBox->Attach(this);
 		Tools->Attach(ToolsBox);
 		FoldersBox->Attach(ToolsBox);
 
@@ -1421,7 +1383,7 @@ public:
 		Opts.SerializeFile(true);
 	}
 
-	LMessage::Result OnEvent(LMessage *Msg)
+	LMessage::Result OnEvent(LMessage *Msg) override
 	{
 		switch (Msg->Msg())
 		{
@@ -1444,7 +1406,7 @@ public:
 		return LWindow::OnEvent(Msg);
 	}
 
-	void OnReceiveFiles(LArray<const char*> &Files)
+	void OnReceiveFiles(LArray<const char*> &Files) override
 	{
 		for (auto f : Files)
 		{
@@ -1453,7 +1415,7 @@ public:
 		}
 	}
 
-	int OnCommand(int Cmd, int Event, OsView Wnd)
+	int OnCommand(int Cmd, int Event, OsView Wnd) override
 	{
 		switch (Cmd)
 		{
@@ -1574,7 +1536,7 @@ public:
 		return 0;
 	}
 
-	void OnPulse()
+	void OnPulse() override
 	{
 		if (Tree)
 		{
@@ -2307,6 +2269,8 @@ const char* toString(VersionCtrl v)
 
 		case VcPending: return "VcPending";
 		case VcError: return "VcError";
+		
+		default: break;
 	}
 
 	return "VcNone";

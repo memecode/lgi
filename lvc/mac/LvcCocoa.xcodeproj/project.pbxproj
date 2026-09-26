@@ -26,7 +26,6 @@
 		346F5AC72BA507C000D64829 /* libssh.4.9.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 34DB96442BA5060A0058A51D /* libssh.4.9.6.dylib */; };
 		347D1489252D453300422DA9 /* DeEscape.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 347D1488252D453300422DA9 /* DeEscape.cpp */; };
 		3485E7F5294F13F70020C14D /* PatchViewer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3485E7F4294F13F70020C14D /* PatchViewer.cpp */; };
-		3492DE852D1CC7340003BE0F /* libpng16d.16.45.git.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3492DE832D1CC7260003BE0F /* libpng16d.16.45.git.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34BD35B120C5484A0001838A /* ControlTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34BD35B020C5484A0001838A /* ControlTree.cpp */; };
 		34BD35B320C548710001838A /* XmlTreeUi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34BD35B220C548710001838A /* XmlTreeUi.cpp */; };
 		34C032B32319CDE900470DF2 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C032B22319CDE900470DF2 /* Cocoa.framework */; };
@@ -62,7 +61,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				3492DE852D1CC7340003BE0F /* libpng16d.16.45.git.dylib in CopyFiles */,
 				34DB96462BA5061E0058A51D /* libssh.4.9.6.dylib in CopyFiles */,
 				34C032BE2319CEF200470DF2 /* LgiCocoa.framework in CopyFiles */,
 			);
@@ -93,10 +91,10 @@
 		3457FE4F2081CBE500014BE4 /* SubProcess.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = SubProcess.cpp; path = ../../src/posix/SubProcess.cpp; sourceTree = "<group>"; };
 		3457FE512081CC4800014BE4 /* Lvc.lr8 */ = {isa = PBXFileReference; explicitFileType = text; fileEncoding = 4; name = Lvc.lr8; path = ../resources/Lvc.lr8; sourceTree = SOURCE_ROOT; };
 		3465A7E22B2AB1BF00084F66 /* PostBuildStep.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = PostBuildStep.py; sourceTree = "<group>"; };
+		347CEB20305C038700A20E23 /* ConflictUi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ConflictUi.h; path = ../src/ConflictUi.h; sourceTree = SOURCE_ROOT; };
 		347D1488252D453300422DA9 /* DeEscape.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DeEscape.cpp; path = ../../src/common/Text/DeEscape.cpp; sourceTree = "<group>"; };
 		3485E7F4294F13F70020C14D /* PatchViewer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PatchViewer.cpp; path = ../src/PatchViewer.cpp; sourceTree = "<group>"; };
 		3488EE99233C16AF00756838 /* en */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		3492DE832D1CC7260003BE0F /* libpng16d.16.45.git.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng16d.16.45.git.dylib; path = "../../../deps/build-debug/lib/libpng16d.16.45.git.dylib"; sourceTree = "<group>"; };
 		34BD35B020C5484A0001838A /* ControlTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ControlTree.cpp; path = ../../src/common/Widgets/ControlTree.cpp; sourceTree = "<group>"; };
 		34BD35B220C548710001838A /* XmlTreeUi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XmlTreeUi.cpp; path = ../../src/common/Text/XmlTreeUi.cpp; sourceTree = "<group>"; };
 		34C032B22319CDE900470DF2 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = ../../../../../../../System/Library/Frameworks/Cocoa.framework; sourceTree = "<group>"; };
@@ -145,6 +143,7 @@
 		20286C2AFDCF999611CA2CEA /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				347CEB20305C038700A20E23 /* ConflictUi.h */,
 				3457FE412081CB3D00014BE4 /* Main.cpp */,
 				3457FE432081CB3D00014BE4 /* VcCommit.cpp */,
 				3457FE452081CB3D00014BE4 /* VcFile.cpp */,
@@ -177,7 +176,6 @@
 		20286C32FDCF999611CA2CEA /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				3492DE832D1CC7260003BE0F /* libpng16d.16.45.git.dylib */,
 				34DB96442BA5060A0058A51D /* libssh.4.9.6.dylib */,
 				34C032B42319CDFE00470DF2 /* LgiCocoa.xcodeproj */,
 				34C032B22319CDE900470DF2 /* Cocoa.framework */,
@@ -416,7 +414,6 @@
 					../../include,
 					../../include/lgi/mac/cocoa,
 					"../../../deps/build-debug",
-					../../../../../codelib/libssh/include,
 					/opt/local/include,
 				);
 				INFOPLIST_FILE = Info.plist;
@@ -424,7 +421,6 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"../../../../../codelib/libssh/build/**",
 					/opt/local/lib,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
@@ -452,7 +448,6 @@
 					../../include,
 					../../include/lgi/mac/cocoa,
 					"../../../deps/build-debug",
-					../../../../../codelib/libssh/include,
 					/opt/local/include,
 				);
 				INFOPLIST_FILE = Info.plist;
@@ -460,7 +455,6 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"../../../../../codelib/libssh/build/**",
 					/opt/local/lib,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;

@@ -535,6 +535,8 @@ SshConnection::LoggingType Convert(LoggingType t)
 			return SshConnection::LogInfo;
 		case LogDebug:
 			return SshConnection::LogDebug;
+		default:
+			break;
 	}
 	return SshConnection::LogNone;
 }
@@ -702,12 +704,14 @@ bool VcFolder::ParseBranches(int Result, LString s, ParseParams *Params)
 			
 				auto name = b(0, 28).Strip();
 				auto refs = b(28, -1).SplitDelimit()[0].SplitDelimit(":");
-
-				auto branch = Branches.Find(name);
-				if (branch)
-					branch->Hash = refs.Last();
-				else
-					Branches.Add(name, new VcBranch(name, refs.Last()));
+				if (refs.Length())
+				{
+					auto branch = Branches.Find(name);
+					if (branch)
+						branch->Hash = refs.Last();
+					else
+						Branches.Add(name, new VcBranch(name, refs.Last()));
+				}
 			}
 
 			if (Params && Params->Str.Equals("CountToTip"))
@@ -1828,7 +1832,7 @@ VcLeaf *VcFolder::FindLeaf(LString Path, bool OpenTree)
 			printf("%i: p='%s' name='%s' = %i\n", idx, p.Get(), name, match);
 			if (match)
 			{
-				if (leaf = dynamic_cast<VcLeaf*>(c))
+				if ((leaf = dynamic_cast<VcLeaf*>(c)))
 				{
 					if (OpenTree)
 						leaf->DoExpand();
@@ -3147,8 +3151,7 @@ void VcFolder::OnPulse()
 				}
 				else if (c->PostOp)
 				{
-					if (s.Length() == 18 &&
-						s.Equals("LSUBPROCESS_ERROR\n"))
+					if (!Strncmp(s.Get(), "LSUBPROCESS_ERROR\n", 18))
 					{
 						OnCmdError(s, "Sub process failed.");
 					}
@@ -3548,7 +3551,7 @@ void VcFolder::CherryPick(LString hash, int parentIdx, std::function<void(bool)>
 			ParseParams *p = nullptr;
 			if (callback)
 			{
-				if (p = new ParseParams)
+				if ((p = new ParseParams))
 				{
 					p->Callback = [this, callback](auto code, auto str)
 						{
@@ -3747,6 +3750,8 @@ bool VcFolder::ParseDelete(int Result, LString s, ParseParams *Params)
 		{			
 			break;
 		}
+		default:
+			break;
 	}
 
 	return true;
@@ -4054,7 +4059,7 @@ void VcFolder::ListCommit(VcCommit *c)
 		switch (GetType())
 		{
 			case VcGit:
-				Args.Printf("show%s %s^..%s", DiffContextOption().Get(), c->GetRev(), c->GetRev());
+				Args.Printf("show%s  --ignore-cr-at-eol %s^..%s", DiffContextOption().Get(), c->GetRev(), c->GetRev());
 				IsFilesCmd = StartCmd(Args, &VcFolder::ParseFiles, new ParseParams(c->GetRev()));
 				break;
 			case VcSvn:
@@ -4150,6 +4155,13 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 	bool ShowUntracked = d->Wnd()->GetCtrlValue(ID_UNTRACKED) != 0;
 	bool IsWorking = Params ? Params->IsWorking : false;
 	List<LListItem> Ins;
+
+	if (!Strncmp(s.Get(), LSubProcess::sErrorStr, Strlen(LSubProcess::sErrorStr)))
+	{
+		auto msg = s.SplitDelimit("\n", 1)[-1];
+		OnCmdError(s, msg);
+		return false;
+	}
 
 	switch (GetType())
 	{
@@ -5134,6 +5146,8 @@ bool VcFolder::ParsePush(int Result, LString s, ParseParams *Params)
 									 s.Find("has no upstream branch") >= 0;
 				break;
 			}
+			default:
+				break;
 		}
 
 		if (needsNewBranchPerm &&
@@ -5956,6 +5970,102 @@ bool VcFolder::ParseResolve(int Result, LString s, ParseParams *Params)
 	return true;
 }
 
+bool VcFolder::GetConflict(const char *Path, VcFolder::TConflictCb callback)
+{
+	if (!Path || !callback)
+		return false;
+		
+	switch (GetType())
+	{
+		case VcGit:
+		{
+			enum THashType {
+				TBase = 1,
+				TOurs = 2,
+				TTheirs = 3,
+			};
+			
+			LString args;
+			auto local = GetFilePart(Path);
+			LAutoPtr<ParseParams> params(new ParseParams(
+				[this, callback, uri=LString(Path)](auto code, auto str)
+				{
+					TConflictInfo info;
+					
+					if (!code)
+					{
+						info.uri = uri;
+						
+						auto lines = str.SplitDelimit("\n");
+						for (auto &ln: lines)
+						{
+							auto p = ln.SplitDelimit(" \t", 3);
+							
+							if (p.Length() == 4)
+							{
+								switch (p[2].Int())
+								{
+									case TBase:
+										info.base = p[1];
+										break;
+									case TOurs:
+										info.ours = p[1];
+										break;
+									case TTheirs:
+										info.theirs = p[1];
+										break;
+								}
+							}
+						}
+					}
+					
+					callback(info);
+				}));
+
+			args.Printf("ls-files -u \"%s\"", local.Get());
+
+			return StartCmd(args, nullptr, params.Release());
+		}
+		case VcHg:
+		case VcSvn:
+		case VcCvs:
+		default:
+		{
+			NoImplementation(_FL);
+			break;
+		}
+	}
+
+	return false;
+}
+
+bool VcFolder::ConflictDiff(VcFolder::TConflictInfo &info, LString rev, ParseParams::TCallback callback)
+{
+	if (!rev || !callback)
+		return false;
+
+	switch (GetType())
+	{
+		case VcGit:
+		{
+			LString args;
+			args.Printf("diff --ignore-cr-at-eol %s %s", info.base.Get(), rev.Get());
+
+			return StartCmd(args, nullptr, new ParseParams(std::move(callback)));
+		}
+		case VcHg:
+		case VcSvn:
+		case VcCvs:
+		default:
+		{
+			NoImplementation(_FL);
+			break;
+		}
+	}
+
+	return false;
+}
+
 bool VcFolder::Resolve(const char *Path, LvcResolve Type)
 {
 	if (!Path)
@@ -6059,7 +6169,7 @@ bool BlameLine::Parse(VersionCtrl type, LArray<BlameLine> &out, LString in)
 		{
 			for (auto &ln: lines)
 			{
-				auto s = ln.Get();
+				// auto s = ln.Get();
 				auto open = ln.Find("(");
 				auto close = ln.Find(")", open);
 				if (open > 0 && close > open)
@@ -6092,10 +6202,6 @@ bool BlameLine::Parse(VersionCtrl type, LArray<BlameLine> &out, LString in)
 					o.user = LString(" ").Join(name);
 					o.date = dt.Get();
 					o.src = ln(close + 1, -1);
-				}
-				else if (ln.Length() > 0)
-				{
-					int asd=0;
 				}
 			}
 			break;
@@ -6251,7 +6357,7 @@ struct ListAuthorUi : public LWindow
 			lst->Insert(item);
 		}
 		lst->ResizeColumnsToContent();
-		lst->Sort([](auto a, auto b)
+		lst->Sort([](auto a, auto b) -> int64_t
 			{
 				auto av = a->GetText(cLines);
 				auto bv = b->GetText(cLines);

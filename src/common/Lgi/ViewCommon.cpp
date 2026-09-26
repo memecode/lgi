@@ -2216,7 +2216,7 @@ bool LView::InThread()
 		OsThreadId Me = LCurrentThreadId();
 		OsThreadId Gui = LAppInst ? LAppInst->GetGuiThreadId() : 0;
 		
-		#if 1
+		#if 0
 		if (Gui != Me)
 		    LgiTrace("%s:%i - %s Out of thread:"
 				    #ifdef LGI_COCOA

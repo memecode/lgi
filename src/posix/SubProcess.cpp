@@ -31,7 +31,7 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/SubProcess.h"
 
-#define DEBUG_SUBPROCESS	0
+#define DEBUG_SUBPROCESS	1
 #define DEBUG_ARGS			0
 
 #define NULL_PIPE			-1
@@ -186,10 +186,12 @@ extern char **environ;
 
 LString LSubProcess::FindInPath(const char *exe)
 {
-	for (auto path: LGetPath())
+	auto paths = LGetPath();
+	for (auto path: paths)
 	{
 		LFile::Path p(path);
 		p = p / exe;
+		// printf("%s:%i - FindInPath(%s): %s = %i\n", _FL, exe, p.GetFull().Get(), p.Exists());
 		if (p.Exists())
 			return p.GetFull();
 	}
@@ -445,11 +447,13 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 {
 	bool Status = false;
 
-	#ifdef HAIKU
+	#if defined(HAIKU) || defined(LGI_COCOA)
 		// Haiku has issues when you try and execute something that doesn't exist:
 		//		https://dev.haiku-os.org/ticket/18576
-		// This is to try and work around that issue. I tried just execvp'ing 'ls' but
-		// it doesn't work. The locks are still all messed up.
+		//
+		// And MacOSX doesn't have a useful PATH environment variable for GUI apps.
+		//
+		// This is to try and work around that issue.
 		if (!LFileExists(d->Exe))
 		{
 			auto exe = FindInPath(d->Exe);
@@ -458,6 +462,7 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 				LgiTrace("%s:%i - '%s' not found.\n", _FL, d->Exe.Get());
 				return false;
 			}
+			// printf("%s:%i - Mapped '%s' to '%s'.\n", _FL, d->Exe.Get(), exe.Get());
 			d->Exe = exe;
 		}
 	#endif
@@ -591,9 +596,9 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 
 		#if defined(MAC) || defined(HAIKU)
 			// While 'exit' would be nice and clean it does cause crashes in free the global InitLibPng object
-			// We HAVE to call exec??? to replace the process... anything will do... 'ls' will just quit quickly
-			char *a[] = {0};
-			execv("/bin/ls", a);
+			// We HAVE to call exec??? to replace the process. false exits silently with a failure status.
+			const char *a[] = {"/usr/bin/false",0};
+			execv("/usr/bin/false", (char**)a);
 		#else
 			exit(LSUBPROCESS_ERROR);
 		#endif

@@ -1247,8 +1247,6 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 					Sect.Rule = Data;
 				else if (IsVar(Field, "RDATE"))
 					Sect.RecurDate = Data;
-
-				int asd=0;
 			}			
 			else if (IsVar(Field, "TZID"))
 			{

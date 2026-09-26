@@ -40,7 +40,7 @@ LError LHttp::ReadChunked(LSocketI *sock, LStream *output, char *buf, ssize_t bu
 		char *end;
 		do
 		{
-			if (end = Strnstr(buf, "\r\n", used))
+			if ((end = Strnstr(buf, "\r\n", used)))
 				// We found the end of the chunk header line
 				break;
 

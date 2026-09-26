@@ -13,9 +13,9 @@ class LPrinterPrivate
 {
 public:
 	LString Printer;
+	LString JobName;
 	LString Err;
 	NSPrintInfo *PrintInfo = nil;
-	NSPrintOperation *PrintOp = nil;
 	
 	LPrinterPrivate()
 	{
@@ -24,8 +24,6 @@ public:
 	
 	~LPrinterPrivate()
 	{
-		if (PrintOp)
-			[PrintOp release];
 		if (PrintInfo)
 			[PrintInfo release];
 	}
@@ -47,11 +45,11 @@ bool LPrinter::Browse(LView *Parent, PageOrientation Po)
 {
 	NSPrintInfo *info = d->PrintInfo ? d->PrintInfo : [NSPrintInfo sharedPrintInfo];
 	if (Po == PoLandscape)
-		[info setOrientation:NSLandscapeOrientation];
+		[info setOrientation:NSPaperOrientationLandscape];
 	else if (Po == PoPortrait)
-		[info setOrientation:NSPortraitOrientation];
+		[info setOrientation:NSPaperOrientationPortrait];
 	else
-		[info setOrientation:NSPortraitOrientation];
+		[info setOrientation:NSPaperOrientationPortrait];
 	
 	NSPrintPanel *panel = [NSPrintPanel printPanel];
 	NSInteger result = [panel runModalWithPrintInfo:info];
@@ -74,14 +72,14 @@ bool LPrinter::Serialize(LString &Str, bool Write)
 		j.Set("printer", d->Printer);
 		if (d->PrintInfo)
 		{
-			if (auto job = [d->PrintInfo jobName])
-				j.Set("jobName", [[job description] UTF8String]);
+			if (!d->JobName.IsEmpty())
+				j.Set("jobName", d->JobName);
 
-			NSPrintingOrientation orient = [d->PrintInfo orientation];
+			NSPaperOrientation orient = [d->PrintInfo orientation];
 			const char *orientName = "default";
-			if (orient == NSLandscapeOrientation)
+			if (orient == NSPaperOrientationLandscape)
 				orientName = "landscape";
-			else if (orient == NSPortraitOrientation)
+			else if (orient == NSPaperOrientationPortrait)
 				orientName = "portrait";
 			j.Set("orientation", orientName);
 
@@ -89,7 +87,9 @@ bool LPrinter::Serialize(LString &Str, bool Write)
 			j.Set("paperWidth", (int64_t)paper.width);
 			j.Set("paperHeight", (int64_t)paper.height);
 			j.Set("scalingFactor", [d->PrintInfo scalingFactor]);
-			j.Set("copies", (int64_t)[d->PrintInfo copies]);
+			NSNumber *copies = [[d->PrintInfo dictionary] objectForKey:NSPrintCopies];
+			if (copies)
+				j.Set("copies", (int64_t)[copies integerValue]);
 		}
 		Str = j.GetJson();
 		return true;
@@ -103,15 +103,15 @@ bool LPrinter::Serialize(LString &Str, bool Write)
 
 		LString orient = j.Get("orientation");
 		if (orient == "landscape")
-			[d->PrintInfo setOrientation:NSLandscapeOrientation];
+			[d->PrintInfo setOrientation:NSPaperOrientationLandscape];
 		else if (orient == "portrait")
-			[d->PrintInfo setOrientation:NSPortraitOrientation];
+			[d->PrintInfo setOrientation:NSPaperOrientationPortrait];
 		else
-			[d->PrintInfo setOrientation:NSPortraitOrientation];
+			[d->PrintInfo setOrientation:NSPaperOrientationPortrait];
 
 		LString jobName = j.Get("jobName");
 		if (!jobName.IsEmpty())
-			[d->PrintInfo setJobName:[NSString stringWithUTF8String:jobName.Get()]];
+			d->JobName = jobName;
 
 		LString w = j.Get("paperWidth");
 		if (!w.IsEmpty())
@@ -119,7 +119,7 @@ bool LPrinter::Serialize(LString &Str, bool Write)
 
 		LString copies = j.Get("copies");
 		if (!copies.IsEmpty())
-			[d->PrintInfo setCopies:(NSInteger)copies.Int()];
+			[[d->PrintInfo dictionary] setObject:[NSNumber numberWithInteger:(NSInteger)copies.Int()] forKey:NSPrintCopies];
 
 		LString scale = j.Get("scalingFactor");
 		if (!scale.IsEmpty())
@@ -161,20 +161,17 @@ void LPrinter::Print(
 
 	NSPrintInfo *info = d->PrintInfo ? d->PrintInfo : [[NSPrintInfo sharedPrintInfo] retain];
 	if (PrintJobName && *PrintJobName)
-		[info setJobName:[NSString stringWithUTF8String:PrintJobName]];
+		d->JobName = PrintJobName;
 	if (!d->PrintInfo)
 		d->PrintInfo = info;
-	if (d->PrintOp)
-		[d->PrintOp release];
-	d->PrintOp = [[NSPrintOperation printOperationWithPrintInfo:info] retain];
 	
 	switch (Events->GetOrientation())
 	{
 		case PoPortrait:
-			[info setOrientation:NSPortraitOrientation];
+			[info setOrientation:NSPaperOrientationPortrait];
 			break;
 		case PoLandscape:
-			[info setOrientation:NSLandscapeOrientation];
+			[info setOrientation:NSPaperOrientationLandscape];
 			break;
 		default:
 			break;

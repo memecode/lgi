@@ -131,6 +131,14 @@ enum AppIds
 	ID_AUTHORS,
 	ID_REVERT_COMMIT,
 	ID_FILTER_BY_AUTHOR,
+	ID_VIEW_BOTH,
+	ID_TABLE,
+	ID_HASH0,
+	ID_HASH1,
+	ID_CODE0,
+	ID_CODE1,
+	ID_SELECT0,
+	ID_SELECT1
 };
 
 enum AppMessages
@@ -342,5 +350,42 @@ extern LColour GetPaletteColour(int i);
 #include "VcFile.h"
 #include "VcCommit.h"
 #include "VcFolder.h"
+
+class DiffView : public LTextLog
+{
+public:
+	DiffView(int id) : LTextLog(id)
+	{
+	}
+
+	void PourStyle(size_t Start, ssize_t Length)
+	{
+		for (auto ln : LTextView3::Line)
+		{
+			if (!ln->c.IsValid())
+			{
+				char16 *t = Text + ln->Start;
+				
+				if (*t == '+')
+				{
+					ln->c = LColour::Green;
+					ln->Back.Rgb(245, 255, 245);
+				}
+				else if (*t == '-')
+				{
+					ln->c = LColour::Red;
+					ln->Back.Rgb(255, 245, 245);
+				}
+				else if (*t == '@')
+				{
+					ln->c.Rgb(128, 128, 128);
+					ln->Back.Rgb(235, 235, 235);
+				}
+				else
+					ln->c = LColour(L_TEXT);
+			}
+		}
+	}
+};
 
 #endif

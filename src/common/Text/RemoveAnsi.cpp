@@ -26,10 +26,10 @@ struct AnsiParser
 				size_t length)
 	{
 		auto s = (uint8_t*) in;
-		auto *out = in;
+		// auto *out = in;
 		auto e = s + length;
 		uint8_t *startNon = nullptr;
-		int u = 0;
+		// int u = 0;
 		
 		auto emitNonAnsi = [&]()
 			{

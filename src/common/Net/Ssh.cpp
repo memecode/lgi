@@ -462,7 +462,7 @@ LError LSsh::DownloadFile(LStream *To, const char *From)
 					Meter.Value(i);
 				}
 
-				bool status = i == Len;
+				// bool status = i == Len;
 				// Log->Print("%s:%i - Download %s.\n", _FL, status ? "Successful" : "Error");
 			}
 		}

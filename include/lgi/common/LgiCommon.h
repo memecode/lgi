@@ -94,7 +94,7 @@ LgiExtern LString LCurrentUserName();
 LgiExtern LString LGetEnv(const char *Var);
 
 /// Gets the system path..
-LgiExtern LString::Array LGetPath();
+LgiExtern const LString::Array LGetPath();
 
 /// Check for a valid email string
 LgiExtern bool LIsValidEmail(LString Email);

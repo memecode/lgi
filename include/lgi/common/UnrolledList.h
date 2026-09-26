@@ -879,8 +879,9 @@ public:
 		}
 		inline T& operator[](difference_type rhs) const
 		{
-			LAssert(IsValid() && rhs >= 0 && rhs < u->Items);
-			return Map->Blocks[rhs>>Shift]->Obj[rhs&Mask];
+			const auto index = Idx + rhs;
+			LAssert(index >= 0 && index < (ssize_t)u->Items);
+			return Map->Blocks[index>>Shift]->Obj[index&Mask];
 		}
 
 		inline It& operator+=(difference_type rhs) {Idx += rhs; return *this;}
@@ -921,8 +922,8 @@ public:
 			Start, End,
 			[Compare](auto &a, auto &b)->bool
 			{
-				auto c = Compare(a, b);
-				return c ? c < 0 : &a < &b;
+				LAssert(Compare(a, a) == 0);
+				return Compare(a, b) < 0;
 			}
 		);
 	}

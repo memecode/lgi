@@ -435,7 +435,7 @@ public:
 			DeleteObj(RadioBtn[i]);
 	}
 
-	uint32_t GetFeatures()
+	uint32_t GetFeatures() override
 	{
 		return
 				#if CUSTOM_COLOURS
@@ -448,7 +448,7 @@ public:
 				GSKIN_RADIO;
 	}
 
-	void OnPaint_LButton(LButton *Ctrl, LSkinState *State)
+	void OnPaint_LButton(LButton *Ctrl, LSkinState *State) override
 	{
 		LMemDC Mem(_FL);
 		if (!Mem.Create(Ctrl->X(), Ctrl->Y(), OsDefaultCs))
@@ -576,7 +576,7 @@ public:
 		State->pScreen->Op(Op);
 	}
 
-	void OnPaint_ListColumn(ProcColumnPaint Callback, void *UserData, LSkinState *State)
+	void OnPaint_ListColumn(ProcColumnPaint Callback, void *UserData, LSkinState *State) override
 	{
 		// Setup memory context
 		LRect r = State->Rect;
@@ -609,7 +609,7 @@ public:
 		State->pScreen->Blt(State->Rect.x1, State->Rect.y1, &Mem);
 	}
 
-	void OnPaint_LCombo(LCombo *Ctrl, LSkinState *State)
+	void OnPaint_LCombo(LCombo *Ctrl, LSkinState *State) override
 	{
 		LMemDC Mem(_FL);
 		if (!Mem.Create(Ctrl->X(), Ctrl->Y(), OsDefaultCs))
@@ -711,7 +711,7 @@ public:
 
 	#define DEBUG_CHECKBOX 0
 
-	void OnPaint_LCheckBox(LCheckBox *Ctrl, LSkinState *State)
+	void OnPaint_LCheckBox(LCheckBox *Ctrl, LSkinState *State) override
 	{
 		int Flags = (Ctrl->Value()   ? Btn_Value   : 0) |
 					(Ctrl->Enabled() ? Btn_Enabled : 0);
@@ -794,7 +794,7 @@ public:
 		DeleteObj(Temp);
 	}
 
-	void OnPaint_LRadioButton(LRadioButton *Ctrl, LSkinState *State)
+	void OnPaint_LRadioButton(LRadioButton *Ctrl, LSkinState *State) override
 	{
 		int Flags = (Ctrl->Value() ? Btn_Value : 0) |
 					(Ctrl->Enabled() ? Btn_Enabled : 0);
@@ -873,7 +873,7 @@ public:
 		}
 	}
 
-	LFont *GetDefaultFont(char *Class)
+	LFont *GetDefaultFont(char *Class) override
 	{
 		if (Class && stricmp(Class, Res_Button) == 0)
 		{

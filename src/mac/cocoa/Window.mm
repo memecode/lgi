@@ -269,13 +269,11 @@ public:
 
 - (BOOL)canBecomeKeyWindow
 {
-	printf("self.canFocus=%i\n", self.canFocus);
 	return self.canFocus;
 }
 
 - (BOOL)canBecomeMainWindow
 {
-	printf("canBecomeMainWindow=true\n");
 	return TRUE;
 }
 

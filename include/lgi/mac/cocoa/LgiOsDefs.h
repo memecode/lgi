@@ -167,6 +167,8 @@ enum LDialogIds
 	/// Standard ID for a "No" button.
 	/// \sa LgiMsg
 	IDNO,
+	/// Retry an action:
+	IDRETRY,
 
 	/// Standard message box with an Ok button.
 	/// \sa LgiMsg

@@ -1246,7 +1246,7 @@ LString SslSocket::GetSslErr()
 int SslSocket::Open(const char *HostAddr, int Port)
 {
 	bool Status = false;
-	auto startTs = LCurrentTime();
+	// auto startTs = LCurrentTime();
 	LMutex::Auto Lck(&Lock, _FL);
 
 DebugTrace("%s:%i - SslSocket::Open(%s,%i)\n", _FL, HostAddr, Port);
@@ -1789,7 +1789,7 @@ int SslSocket::Close()
 
 	if (Ssl)
 	{
-		auto res = Library->SSL_shutdown(Ssl);
+		Library->SSL_shutdown(Ssl);
 		Library->SSL_free(Ssl);
 		Ssl = nullptr;
 		Bio = nullptr;

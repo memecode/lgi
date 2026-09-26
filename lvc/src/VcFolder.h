@@ -419,7 +419,6 @@ public:
 	void Pull(int AndUpdate = -1, LoggingType Logging = LogNormal);
 	void Clean();
 	bool Revert(LString::Array &uris, const char *Revision = NULL, bool RevertToBefore = false);
-	bool Resolve(const char *Path, LvcResolve Type);
 	bool AddFile(const char *Path, bool AsBinary = true);
 	bool Blame(const char *Path);
 	bool ListAuthors(const char *Path);
@@ -447,7 +446,18 @@ public:
 	void Delete(const char *Path, bool KeepLocal = true);
 	void RewriteAuthor(RewriteInfo info);
 	void GotoItem(LString path);
-	
+
+	// Conflicts:
+	struct TConflictInfo
+	{
+		LString uri;
+		LString base, ours, theirs;
+	};
+	using TConflictCb = std::function<void(TConflictInfo&)>;
+	bool Resolve(const char *Path, LvcResolve Type);
+	bool GetConflict(const char *Path, TConflictCb callback);
+	bool ConflictDiff(TConflictInfo &info, LString rev, ParseParams::TCallback callback);
+
 	struct TCommitInfo
 	{
 		LString hash, message, dateStr;
@@ -503,13 +513,13 @@ public:
 	VcLeaf *FindLeaf(LString Path, bool OpenTree, int depth = 0);
 	void OnBrowse();
 	void AfterBrowse();
-	void OnExpand(bool b);
-	const char *GetText(int Col);
-	int GetImage(int Flags);
+	void OnExpand(bool b) override;
+	const char *GetText(int Col) override;
+	int GetImage(int Flags) override;
 	int Compare(LTreeItem *To, ssize_t Field = 0) override;
-	bool Select();
-	void Select(bool b);
-	void OnMouseClick(LMouse &m);
+	bool Select() override;
+	void Select(bool b) override;
+	void OnMouseClick(LMouse &m) override;
 	void ShowLog();
 };
 

@@ -182,7 +182,7 @@ struct LOAuth2Priv
 
 		void SetPriv(LOAuth2Priv *priv)
 		{
-			if (d = priv)
+			if ((d = priv))
 			{
 				if (d->Params.SslKey && d->Params.SslCert)
 					Listen.SetCert(d->Params.SslCert, d->Params.SslKey);

@@ -65,7 +65,7 @@ struct BrowseUiPriv
 	LColour *NewColour()
 	{
 		LColour *hls;
-		if (hls = new LColour)
+		if ((hls = new LColour))
 			hls->SetHLS(NextHue, NextLum, 128);
 		NextHue += 30;
 		if (NextHue >= 360)
@@ -383,7 +383,7 @@ void BrowseUi::ParseLog(LArray<VcCommit*> &commits, LString raw)
 	{
 		commit->extraCommands.Add("Save As", new VcCommit::TCommitCb([this](auto commit)
 			{
-				int asd=0;
+				// FIXME: What goes here?
 			}));
 		d->Log->Insert(commit);
 	}
@@ -430,7 +430,7 @@ int BrowseUi::OnNotify(LViewI *Ctrl, const LNotification &n)
 				size_t matches = 0;
 				for (auto i: items)
 				{
-					auto ln = i->GetText(TLine);
+					// auto ln = i->GetText(TLine);
 					auto src = i->GetText(TSrc);
 					auto match = Stristr(src, f) != NULL;
 					i->Select(match);
@@ -492,7 +492,6 @@ int BrowseUi::OnNotify(LViewI *Ctrl, const LNotification &n)
 						case TabBlame:
 						{
 							// Refresh blame tab:
-							int asd=0;
 							break;
 						}
 						case TabLog:
@@ -506,6 +505,8 @@ int BrowseUi::OnNotify(LViewI *Ctrl, const LNotification &n)
 							break;
 					}
 				}
+				default:
+					break;
 			}
 			break;
 		}

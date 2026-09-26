@@ -21,14 +21,14 @@ public:
 	};
 
 private:
-	AppPriv *d = NULL;
-	VcFolder *Owner = NULL;
+	AppPriv *d = nullptr;
+	VcFolder *Owner = nullptr;
 	bool LoadDiff = false;
 	LString Diff;
 	LString Charset;
 	LString Revision;
 	LUri Uri;
-	LListItemCheckBox *Chk = NULL;
+	LListItemCheckBox *Chk = nullptr;
 	FileStatus Status = SUnknown;
 	bool Staged = false;
 

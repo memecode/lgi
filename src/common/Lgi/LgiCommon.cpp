@@ -2783,7 +2783,7 @@ LString LGetEnv(const char *Var)
 #endif
 }
 
-LString::Array LGetPath()
+const LString::Array LGetPath()
 {
 	LString::Array Paths;
 
@@ -2793,50 +2793,58 @@ LString::Array LGetPath()
 		// The GUI application path is NOT the same as what is configured for the terminal.
 		// At least in 10.12. And I don't know how to make them the same. This works around
 		// that for the time being.
-		
-		LFile EctPaths("/etc/paths", O_READ);
-		Paths = EctPaths.Read().Split("\n");
-
-		LFile::Path home(LSP_HOME);
-		auto profile = home / ".profile";
-		auto zprofile = home / ".zprofile";
-		auto path = profile.Exists() ?
-						profile.GetFull() :
-						zprofile.Exists() ? zprofile.GetFull() : LString();
-		if (path)
+		static bool loaded = false;
+		static LString::Array paths;
+		if (!loaded)
 		{
-			auto lines = LReadFile(path).Split("\n");
-			// printf("path: reading '%s' got %i lines\n", path.Get(), (int)lines.Length());
-			for (auto Ln: lines)
+			loaded = true; // only calculate this once.
+		
+			LFile EctPaths("/etc/paths", O_READ);
+			paths = EctPaths.Read().Split("\n");
+
+			LFile::Path home(LSP_HOME);
+			LString profileFiles[] = {
+				(home / ".profile").GetFull(),
+				(home / ".zprofile").GetFull()
+			};
+			for (auto path: profileFiles) // for each profile file:
 			{
-				auto p = Ln.SplitDelimit(" =", 2);
-				if (p.Length() == 3 &&
-					p[0].Equals("export") &&
-					p[1].Equals("PATH"))
+				auto lines = LReadFile(path).Split("\n");
+				// printf("path: reading '%s' got %i lines\n", path.Get(), (int)lines.Length());
+				for (auto Ln: lines)
 				{
-					LString::Array existing;
-					existing.Swap(Paths);
-					Paths.SetFixedLength(false);
-					
-					auto parts = p.Last().Strip("\"").SplitDelimit(LGI_PATH_SEPARATOR);
-					for (auto &p: parts)
+					auto p = Ln.SplitDelimit(" =", 2);
+					if (p.Length() == 3 &&
+						p[0].Equals("export") &&
+						p[1].Equals("PATH"))
 					{
-						if (p.Equals("$PATH"))
+						LString::Array existing;
+						existing.Swap(paths);
+						paths.SetFixedLength(false);
+						
+						auto parts = p.Last().Strip("\"").SplitDelimit(LGI_PATH_SEPARATOR);
+						for (auto &p: parts)
 						{
-							// printf("existing paths='%s'\n", LString(",").Join(existing).Get());
-							Paths += existing;
+							if (p.Equals("$PATH"))
+							{
+								// printf("existing paths='%s'\n", LString(",").Join(existing).Get());
+								paths += existing;
+							}
+							else
+							{
+								// printf("literal path='%s'\n", p.Get());
+								paths.Add(p);
+							}
 						}
-						else
-						{
-							// printf("literal path='%s'\n", p.Get());
-							Paths.Add(p);
-						}
+						break;
 					}
-					break;
 				}
 			}
 		}
-		
+
+		// Make a copy of 'paths' for thread safety
+		for (auto &p: paths)
+			Paths.New() = p.Get();
 	#else
 		auto Path = LGetEnv("PATH");
 		// printf("Path='%s'\n", Path.Get());

@@ -1,6 +1,8 @@
 #include "Lvc.h"
 #include "lgi/common/ClipBoard.h"
 #include "lgi/common/Charset.h"
+
+#include "ConflictUi.h"
 #include "resdefs.h"
 
 VcFile::VcFile(AppPriv *priv, VcFolder *owner, LString revision, bool working)
@@ -72,10 +74,6 @@ LString VcFile::GetUri()
 
 void VcFile::SetUri(LString uri)
 {
-	if (uri.Equals("ile://"))
-	{
-		int asd=0;
-	}
 	printf("VcFile::SetUri '%s'\n", uri.Get());
 	Uri.Set(uri);
 }
@@ -216,6 +214,7 @@ void VcFile::OnMouseClick(LMouse &m)
 					menu->AppendItem(LLoadString(IDS_LOCAL), IDM_RESOLVE_LOCAL);
 					menu->AppendItem(LLoadString(IDS_INCOMING), IDM_RESOLVE_INCOMING);
 					menu->AppendItem(LLoadString(IDS_TOOL), IDM_RESOLVE_TOOL);
+					menu->AppendItem("View Both", ID_VIEW_BOTH);
 					break;
 				}
 				case SUntracked:
@@ -303,6 +302,11 @@ void VcFile::OnMouseClick(LMouse &m)
 			case IDM_RESOLVE_TOOL:
 			{
 				Owner->Resolve(Uris[0], ResolveTool);
+				break;
+			}
+			case ID_VIEW_BOTH:
+			{
+				new ConflictUi(Owner, Uris[0]);
 				break;
 			}
 			case IDM_ADD_FILE:

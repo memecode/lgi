@@ -63,7 +63,7 @@ bool SshConnection::DetectVcs(VcFolder *Fld)
 
 bool SshConnection::Command(VcFolder *Fld, LString Exe, LString Args, ParseFn Parser, ParseParams *Params, LoggingType LogType)
 {
-	bool HasCallback = Params && Params->Callback;
+	// bool HasCallback = Params && Params->Callback;
 	if (!Fld || Exe.IsEmpty())
 	{
 		LAssert(!"Missing param.");
@@ -104,7 +104,7 @@ LSsh::SshConsole *SshConnection::GetConsole()
 	}
 	if (Connected && !console)
 	{
-		if (console = CreateConsole())
+		if ((console = CreateConsole()))
 		{		
 			// Get log in preamble
 			WaitPrompt(console);
@@ -425,7 +425,7 @@ LMessage::Result SshConnection::OnEvent(LMessage *Msg)
 				ls.Printf("find %s -maxdepth 1 -printf \"%%f\n\"\n", path.Get());
 SSH_SLOG("detectVcs:", ls);
 				con->Write(ls, ls.Length());
-				auto pr = WaitPrompt(con, &out, nullptr, 3000);
+				WaitPrompt(con, &out, nullptr, 3000);
 				lines = out.SplitDelimit("\r\n");
 
 				for (auto ln: lines)
