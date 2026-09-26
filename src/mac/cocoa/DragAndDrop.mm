@@ -487,6 +487,7 @@ bool LDragDropSource::CreateFileDrop(LDragData *OutputData, LMouse &m, LString::
 	return false;
 }
 
+/*
 static NSArray* BuildImageComponentsForItem(NSPasteboardItem *_item)
 {
 	NSDraggingImageComponent *ic = [[NSDraggingImageComponent alloc] initWithKey:NSDraggingImageComponentIconKey];
@@ -521,6 +522,7 @@ static NSArray* BuildImageComponentsForItem(NSPasteboardItem *_item)
 
 	return @[ic];
 }
+*/
 
 int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface *Icon)
 {

@@ -10,8 +10,9 @@ else()
 endif()
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
-
-if(UNIX AND NOT APPLE)
+if(APPLE)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Minimum OS X deployment version")
+elseif(UNIX)
     set(LINUX TRUE)
 endif()
 
