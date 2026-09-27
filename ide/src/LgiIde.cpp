@@ -5202,7 +5202,7 @@ bool AppWnd::GetSystemIncludePaths(LString::Array &Paths)
 		}
 
 		bool InIncludeList = false;
-		while (Buf = p.Pop())
+		while ((Buf = p.Pop()))
 		{
 			if (stristr(Buf, "#include"))
 			{

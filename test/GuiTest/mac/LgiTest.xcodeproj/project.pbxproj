@@ -345,8 +345,9 @@
 				DEVELOPMENT_TEAM = "";
 				GCC_C_LANGUAGE_STANDARD = c11;
 				HEADER_SEARCH_PATHS = (
-					../../../include/lgi/mac/cocoa,
 					../../../include,
+					../../../include/lgi/mac/cocoa,
+					"/opt/homebrew/Cellar/openssl@3/3.6.2/include",
 				);
 				INFOPLIST_FILE = ./Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -372,8 +373,9 @@
 				DEVELOPMENT_TEAM = "";
 				GCC_C_LANGUAGE_STANDARD = c11;
 				HEADER_SEARCH_PATHS = (
-					../../../include/lgi/mac/cocoa,
 					../../../include,
+					../../../include/lgi/mac/cocoa,
+					"/opt/homebrew/Cellar/openssl@3/3.6.2/include",
 				);
 				INFOPLIST_FILE = ./Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";

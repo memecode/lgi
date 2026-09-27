@@ -52,8 +52,6 @@
 		34D21CE8217978C4003D1EA6 /* LgiMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D21CE7217978C4003D1EA6 /* LgiMain.cpp */; };
 		34D21CEA217978DA003D1EA6 /* Base64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D21CE9217978DA003D1EA6 /* Base64.cpp */; };
 		34D625802CA78EE400FF505C /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 345B20D1217968820079E3C9 /* LgiCocoa.framework */; };
-		34F442F22DFC3D13001DBEF5 /* libpng16.16.45.git.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34F442EE2DFC3C05001DBEF5 /* libpng16.16.45.git.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		34F442F32DFC3D13001DBEF5 /* libz.1.4.1.1.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34F442F02DFC3C14001DBEF5 /* libz.1.4.1.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34F566AB237BD55F0027133A /* JavascriptParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34F566A0237BD55F0027133A /* JavascriptParser.cpp */; };
 /* End PBXBuildFile section */
 
@@ -81,8 +79,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				34F442F22DFC3D13001DBEF5 /* libpng16.16.45.git.dylib in CopyFiles */,
-				34F442F32DFC3D13001DBEF5 /* libz.1.4.1.1.dylib in CopyFiles */,
 				34148AFC2349ECA200D5E495 /* LgiCocoa.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -103,7 +99,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		340BE2302D14B5FB007003B5 /* commands.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = commands.svg; path = ../resources/commands.svg; sourceTree = "<group>"; };
+		340BE2302D14B5FB007003B5 /* commands.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = commands.svg; path = ../resources/commands.svg; sourceTree = SOURCE_ROOT; };
 		3411DB712AB86D6700CB3837 /* PostBuildStep.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = PostBuildStep.py; sourceTree = "<group>"; };
 		341C7AC721A752DC0083C9CE /* About.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = About.cpp; path = ../../src/common/Lgi/About.cpp; sourceTree = "<group>"; };
 		341DF5D82F92EA3200AFED9A /* Ssh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Ssh.h; path = /Users/matthew/code/lgi/trunk/include/lgi/common/Ssh.h; sourceTree = "<absolute>"; };
@@ -173,8 +169,6 @@
 		34D21CE32179788B003D1EA6 /* Http.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Http.cpp; path = ../../src/common/Net/Http.cpp; sourceTree = "<group>"; };
 		34D21CE7217978C4003D1EA6 /* LgiMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiMain.cpp; path = ../../src/common/Lgi/LgiMain.cpp; sourceTree = "<group>"; };
 		34D21CE9217978DA003D1EA6 /* Base64.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Base64.cpp; path = ../../src/common/Net/Base64.cpp; sourceTree = "<group>"; };
-		34F442EE2DFC3C05001DBEF5 /* libpng16.16.45.git.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng16.16.45.git.dylib; path = "../../../deps/build-release/lib/libpng16.16.45.git.dylib"; sourceTree = "<group>"; };
-		34F442F02DFC3C14001DBEF5 /* libz.1.4.1.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.4.1.1.dylib; path = "../../../deps/build-release/lib/libz.1.4.1.1.dylib"; sourceTree = "<group>"; };
 		34F566A0237BD55F0027133A /* JavascriptParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JavascriptParser.cpp; path = ../src/JavascriptParser.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -234,8 +228,6 @@
 			isa = PBXGroup;
 			children = (
 				34872EB62FAAA9E300E22EBF /* liblldb.dylib */,
-				34F442EE2DFC3C05001DBEF5 /* libpng16.16.45.git.dylib */,
-				34F442F02DFC3C14001DBEF5 /* libz.1.4.1.1.dylib */,
 				343688CA2CA793210009E57A /* libssh.4.9.6.dylib */,
 				345B20C3217967760079E3C9 /* LgiCocoa.xcodeproj */,
 			);

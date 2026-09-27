@@ -1495,7 +1495,7 @@ public:
 	
 	void OnDialog(LDialogRes *Dlg);
 	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
-    LMessage::Param OnEvent(LMessage *m);
+    LMessage::Param OnEvent(LMessage *m) override;
 };
 
 class DlgItem : public LTreeItem

@@ -29,6 +29,7 @@
 		343FB8952386621600797ABC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 343FB8942386621600797ABC /* Assets.xcassets */; };
 		343FB8AB238662C500797ABC /* LgiMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 343FB8AA238662C500797ABC /* LgiMain.cpp */; };
 		343FB8DC2386642A00797ABC /* OptionsFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 343FB8DB2386642A00797ABC /* OptionsFile.cpp */; };
+		34A6E5E63068E9DA0078C038 /* Html2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34A6E5E43068E9DA0078C038 /* Html2.cpp */; };
 		34A7A5F52E7E77D800A46B7B /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34A7A5F42E7E777900A46B7B /* LgiCocoa.framework */; };
 		34A7A5F82E7E77FB00A46B7B /* LgiCocoa.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34A7A5F42E7E777900A46B7B /* LgiCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		34C81A5825DA09770053F93A /* Http.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C81A5725DA09770053F93A /* Http.cpp */; };
@@ -91,6 +92,8 @@
 		343FB8A42386627A00797ABC /* LgiCocoa.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LgiCocoa.xcodeproj; path = ../../../src/mac/cocoa/LgiCocoa.xcodeproj; sourceTree = "<group>"; };
 		343FB8AA238662C500797ABC /* LgiMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiMain.cpp; path = ../../../src/common/Lgi/LgiMain.cpp; sourceTree = "<group>"; };
 		343FB8DB2386642A00797ABC /* OptionsFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OptionsFile.cpp; path = ../../../src/common/Lgi/OptionsFile.cpp; sourceTree = "<group>"; };
+		34A6E5E43068E9DA0078C038 /* Html2.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Html2.cpp; path = /Users/matthew/code/lgi/trunk/src/common/Text/Html2.cpp; sourceTree = "<absolute>"; };
+		34A6E5E53068E9DA0078C038 /* HtmlPriv2.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = HtmlPriv2.h; path = /Users/matthew/code/lgi/trunk/src/common/Text/HtmlPriv2.h; sourceTree = "<absolute>"; };
 		34C81A5725DA09770053F93A /* Http.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Http.cpp; path = ../../../src/common/Net/Http.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -138,6 +141,8 @@
 		343FB8A32386626700797ABC /* Lgi */ = {
 			isa = PBXGroup;
 			children = (
+				34A6E5E43068E9DA0078C038 /* Html2.cpp */,
+				34A6E5E53068E9DA0078C038 /* HtmlPriv2.h */,
 				3416FADA2748AA070062D3B8 /* Homoglyphs.cpp */,
 				3416FAD92748AA070062D3B8 /* HomoglyphsTable.cpp */,
 				34C81A5725DA09770053F93A /* Http.cpp */,
@@ -295,6 +300,7 @@
 				3431903A238DF9C600DDE1F5 /* ScriptCompiler.cpp in Sources */,
 				34319040238DFA4B00DDE1F5 /* ZoomView.cpp in Sources */,
 				34319044238DFA7300DDE1F5 /* StatusBar.cpp in Sources */,
+				34A6E5E63068E9DA0078C038 /* Html2.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -450,7 +456,10 @@
 					"$(OTHER_CFLAGS)",
 					"-Wno-nullability-completeness",
 				);
-				OTHER_LDFLAGS = "$(inherited) -lffi";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-lffi",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.memecode.htmltest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -486,7 +495,10 @@
 					"$(OTHER_CFLAGS)",
 					"-Wno-nullability-completeness",
 				);
-				OTHER_LDFLAGS = "$(inherited) -lffi";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-lffi",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.memecode.htmltest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

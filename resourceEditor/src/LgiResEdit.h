@@ -703,11 +703,11 @@ public:
 
 	void Serialize(bool Write);
 
-	void OnPosChange();
+	void OnPosChange() override;
 	void OnSelect(FieldSource *s);
 	void OnDelete(FieldSource *s);
-	LMessage::Result OnEvent(LMessage *m);
-	void OnPaint(LSurface *pDC);
+	LMessage::Result OnEvent(LMessage *m) override;
+	void OnPaint(LSurface *pDC) override;
 	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
 };
 
@@ -754,7 +754,7 @@ protected:
 	LHashTbl<ConstStrKey<char,false>, bool> ShowLanguages;
 
 	void SortDialogs();
-	void GetFileTypes(LFileSelect *Dlg, bool Write);
+	void GetFileTypes(LFileSelect *Dlg, bool Write) override;
 
 public:
 	AppWnd();
@@ -780,7 +780,7 @@ public:
 	ResString *GetStrFromRef(int Ref);
 	ResStringGroup *GetDialogSymbols();
 
-	bool Empty();
+	bool Empty() override;
 	void OnObjChange(FieldSource *r);
 	void OnObjSelect(FieldSource *r);
 	void OnObjDelete(FieldSource *r);
@@ -807,16 +807,16 @@ public:
 	void Compare();
 	bool WriteDefines(LStream &Defs);
 
-	void OpenFile(const char *FileName, bool Ro, std::function<void(bool status)> Callback);
-	void SaveFile(const char *FileName, std::function<void(LString fileName, bool status)> Callback);
+	void OpenFile(const char *FileName, bool Ro, std::function<void(bool status)> Callback) override;
+	void SaveFile(const char *FileName, std::function<void(LString fileName, bool status)> Callback) override;
 
 	// ---------------------------------------------------------------------
 	// Window
 	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
-	LMessage::Result OnEvent(LMessage *m);
-	int OnCommand(int Cmd, int Event, OsView Handle);
-	void OnReceiveFiles(LArray<const char*> &Files);
-	void OnCreate();
+	LMessage::Result OnEvent(LMessage *m) override;
+	int OnCommand(int Cmd, int Event, OsView Handle) override;
+	void OnReceiveFiles(LArray<const char*> &Files) override;
+	void OnCreate() override;
 };
 
 #define INVALID_INT			-10000
@@ -888,7 +888,7 @@ public:
 	Results(AppWnd *app, Search *search);
 	~Results();
 
-	void OnPosChange();
+	void OnPosChange() override;
 	int OnNotify(LViewI *v, const LNotification &n) override;
 
 };

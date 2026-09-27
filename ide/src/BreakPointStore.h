@@ -246,7 +246,7 @@ public:
 
 	void SetUi(LList *lst)
 	{
-		if (ui = lst)
+		if ((ui = lst))
 		{
 			List<LListItem> items;
 
