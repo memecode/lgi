@@ -167,7 +167,7 @@ bool LUri::Set(const char *uri)
 
 	// Scan ahead and check for protocol...
 	const char *hasProto = NULL;
-	const char *hasAuth = NULL;
+	// const char *hasAuth = NULL;
 	const char *hasAt = NULL;
 	const char *hasPath = NULL;
 	const char *hasColon = NULL;

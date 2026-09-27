@@ -51,7 +51,6 @@ static LString DescribeView(LViewI *v)
 {
 	if (!v)
 		return GString();
-
 	char s[512];
 	int ch = 0;
 	LArray<LViewI*> p;
@@ -497,8 +496,27 @@ bool LWindow::SetTitleBar(bool ShowTitleBar)
 
 bool LWindow::SetIcon(const char *FileName, const char *gnomeAppType)
 {
-	#warning "Impl LWindow::SetIcon"
-	return false;
+	if (!FileName || !*FileName)
+		return false;
+
+	LString Resolved;
+	if (!LFileExists(FileName) && (Resolved = LFindFile(FileName)))
+		FileName = Resolved;
+
+	if (!LFileExists(FileName))
+		return false;
+
+	NSString *Path = [NSString stringWithUTF8String:FileName];
+	if (!Path)
+		return false;
+
+	NSImage *Icon = [[NSImage alloc] initWithContentsOfFile:Path];
+	if (!Icon)
+		return false;
+
+	[[NSApplication sharedApplication] setApplicationIconImage:Icon];
+	[Icon release];
+	return true;
 }
 
 bool LWindow::GetWillFocus()

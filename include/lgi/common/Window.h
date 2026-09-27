@@ -140,6 +140,8 @@ public:
 	void SetMenu(LMenu *m) { Menu = m; }
 	
 	/// Set the window's icon
+	///
+	/// Note on OSX: The icon will be set for the application, not just this window.
 	bool SetIcon(const char *FileName, const char *gnomeAppType
 		#ifndef LINUX
 		= nullptr // not used on other platforms, just ignore

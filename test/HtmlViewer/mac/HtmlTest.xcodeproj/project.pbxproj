@@ -450,6 +450,7 @@
 					"$(OTHER_CFLAGS)",
 					"-Wno-nullability-completeness",
 				);
+				OTHER_LDFLAGS = "$(inherited) -lffi";
 				PRODUCT_BUNDLE_IDENTIFIER = com.memecode.htmltest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -485,6 +486,7 @@
 					"$(OTHER_CFLAGS)",
 					"-Wno-nullability-completeness",
 				);
+				OTHER_LDFLAGS = "$(inherited) -lffi";
 				PRODUCT_BUNDLE_IDENTIFIER = com.memecode.htmltest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

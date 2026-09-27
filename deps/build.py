@@ -120,12 +120,21 @@ if not os.path.exists(depsFolder):
     os.mkdir(depsFolder)
 
 def remove_readonly(func, path, excinfo):
-    os.chmod(path, stat.S_IWRITE)
+    # Add write perms to the entry and its parent (needed to unlink from the dir),
+    # without clobbering read/execute bits that directories need to be traversed.
+    for p in (os.path.dirname(path), path):
+        try:
+            os.chmod(p, os.stat(p).st_mode | stat.S_IRWXU)
+        except OSError:
+            pass
     func(path)
 
 if clean:
-    shutil.rmtree(depsFolder, onerror=remove_readonly)
-    print("deleted:", depsFolder)
+    if os.path.exists(depsFolder):
+        shutil.rmtree(depsFolder, onerror=remove_readonly)
+        print("deleted:", depsFolder)
+    else:
+        print("nothing to delete:", depsFolder)
     sys.exit(0)
 
 if installPaths:

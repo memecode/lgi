@@ -465,7 +465,7 @@ int LHttpThread::Main()
 								LCopyStreamer cp(256 << 10);
 								auto copied = cp.Copy(resp.body, stream);
 								if (copied != bytes)
-									LOG_HTTP("%s:%i - body copy failed! " LPrintfSizeT " -> " LPrintfSSizeT "\n", _FL, bytes, copied);
+									LOG_HTTP("%s:%i - body copy failed! " LPrintfInt64 " -> " LPrintfSSizeT "\n", _FL, bytes, copied);
 							}
 						}
 					}

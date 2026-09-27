@@ -2,6 +2,13 @@ cmake_minimum_required(VERSION 3.20)
 
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(CMAKE_POLICY_DEFAULT_CMP0091 NEW)
+
+# Must be set before project()/enable_language, otherwise the toolchain has
+# already been probed with the host SDK's default minimum version.
+if(CMAKE_HOST_APPLE)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Minimum OS X deployment version" FORCE)
+endif()
+
 project(lgiDeps)
 if(WIN32)
     enable_language( C CXX ASM_NASM )
@@ -10,9 +17,7 @@ else()
 endif()
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
-if(APPLE)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Minimum OS X deployment version")
-elseif(UNIX)
+if(UNIX AND NOT APPLE)
     set(LINUX TRUE)
 endif()
 
@@ -41,9 +46,9 @@ if (APPLE)
     endif()
     message("XCODE_VER=${XCODE_VER} CMAKE_OSX_ARCHITECTURES=${CMAKE_OSX_ARCHITECTURES}")
 
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment version")
     string(REPLACE ";" "$<SEMICOLON>" CMAKE_OSX_ARCHITECTURES_ "${CMAKE_OSX_ARCHITECTURES}")
     list(APPEND EXTRA_ARGS "-DCMAKE_OSX_ARCHITECTURES=${CMAKE_OSX_ARCHITECTURES_}")
+    list(APPEND EXTRA_ARGS "-DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}")
 
 elseif (WIN32)
 
@@ -124,7 +129,7 @@ if (1)
             set(JPEG_BIN ${CMAKE_BINARY_DIR}/jpeg-${ARCH})
             message("JPEG_BIN=${JPEG_BIN}")
             file(MAKE_DIRECTORY ${JPEG_BIN})
-            execute_process(COMMAND cmake -G Ninja -DCMAKE_OSX_ARCHITECTURES=${ARCH} ${DEPS}/libjpeg
+            execute_process(COMMAND cmake -G Ninja -DCMAKE_OSX_ARCHITECTURES=${ARCH} -DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET} ${DEPS}/libjpeg
                 WORKING_DIRECTORY ${JPEG_BIN}
                 RESULT_VARIABLE ConfigureResult
                 COMMAND_ERROR_IS_FATAL ANY)

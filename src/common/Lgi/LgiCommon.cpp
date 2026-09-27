@@ -2783,7 +2783,7 @@ LString LGetEnv(const char *Var)
 #endif
 }
 
-const LString::Array LGetPath()
+LString::Array LGetPath()
 {
 	LString::Array Paths;
 
