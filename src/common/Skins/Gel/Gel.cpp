@@ -987,6 +987,20 @@ public:
 		}
 	}
 
+	void OnPaint_LRadioButton(LSkinState *State) override
+	{
+		if (!State || !State->pScreen)
+			return;
+
+		int Flags = (State->Value ? Btn_Value : 0) | (State->Enabled ? Btn_Enabled : 0);
+		LMemDC *Mem = DrawCtrl(nullptr, &State->Rect, Flags, true, &State->parentBackground);
+		if (Mem)
+		{
+			State->pScreen->Blt(State->Rect.x1, State->Rect.y1, Mem);
+			DeleteObj(Mem);
+		}
+	}
+
 	LFont *GetDefaultFont(char *Class)
 	{
 		if (Class && stricmp(Class, Res_Button) == 0)

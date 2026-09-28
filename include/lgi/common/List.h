@@ -57,6 +57,7 @@ protected:
 
 public:
 	LListItemColumn(LListItem *item, int col);
+	~LListItemColumn() override;
 
 	// Other objects
 	LListItem *GetItem() { return _Item; }

@@ -140,6 +140,7 @@ public:
 	virtual void OnPaint_LCheckBox    (LSkinState *State) {}
 	virtual void OnPaint_LRadioGroup  (LRadioGroup *Ctrl,  LSkinState *State) {};
 	virtual void OnPaint_LRadioButton (LRadioButton *Ctrl, LSkinState *State) {};
+	virtual void OnPaint_LRadioButton (LSkinState *State) {}
 	virtual void OnPaint_LTabView     (LTabView *Ctrl,     LSkinState *State) {};
 	virtual void OnPaint_LSlider      (LSlider *Ctrl,      LSkinState *State) {};
 	virtual void OnPaint_LCombo       (LCombo *Ctrl,       LSkinState *State) {};

@@ -97,6 +97,7 @@ public:
 class LListItemPrivate
 {
 public:
+	bool Destroying = false;
 	bool Selected = false;
 	bool Visible = true;
 	int ListItem_Image = -1;
@@ -107,6 +108,7 @@ public:
 
 	~LListItemPrivate()
 	{
+		Destroying = true;
 		Cols.DeleteObjects();
 		EmptyStrings();
 		EmptyDisplay();
@@ -129,6 +131,12 @@ LListItemColumn::LListItemColumn(LListItem *item, int col)
 	_Column = col;
 	_Item = item;
 	_Item->d->Cols.Insert(this);
+}
+
+LListItemColumn::~LListItemColumn()
+{
+	if (_Item && _Item->d && !_Item->d->Destroying)
+		_Item->d->Cols.Delete(this);
 }
 
 LList *LListItemColumn::GetList()

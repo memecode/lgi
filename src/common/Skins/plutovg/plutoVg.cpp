@@ -895,6 +895,29 @@ public:
 		}
 	}
 
+	void OnPaint_LRadioButton(LSkinState *State) override
+	{
+		if (!State || !State->pScreen)
+			return;
+
+		LMemDC Mem(_FL);
+		if (!Mem.Create(State->Rect.X(), State->Rect.Y(), OsDefaultCs))
+			return;
+
+		LColour back = State->parentBackground.IsValid() ? State->parentBackground : LColour(L_WORKSPACE);
+		Mem.Colour(back);
+		Mem.Rectangle();
+
+		LRect Box(0, 0, Mem.X()-1, Mem.Y()-1);
+		PVCanvas Canvas(&Mem);
+		if (!Canvas)
+			return;
+
+		DrawIndicator(Canvas, Box, LColour(L_WORKSPACE), State->Value != 0, State->Enabled,
+			(float)Mem.X() / 2.0f, false, TRadioMark);
+		State->pScreen->Blt(State->Rect.x1, State->Rect.y1, &Mem);
+	}
+
 	LFont *GetDefaultFont(char *Class) override
 	{
 		if (Class && stricmp(Class, Res_Button) == 0)
