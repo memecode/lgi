@@ -31,7 +31,7 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/SubProcess.h"
 
-#define DEBUG_SUBPROCESS	1
+#define DEBUG_SUBPROCESS	0
 #define DEBUG_ARGS			0
 
 #define NULL_PIPE			-1

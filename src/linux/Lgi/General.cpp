@@ -23,7 +23,7 @@
 
 #include <pwd.h>
 
-#if 1
+#if 0
 #define MT_APPS_LOG(...)		LgiTrace(__VA_ARGS__)
 #else
 #define MT_APPS_LOG(...)
