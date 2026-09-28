@@ -6,6 +6,7 @@
 #define __LList_ITEM_CHECKBOX_H
 
 #include "lgi/common/List.h"
+#include "lgi/common/SkinEngine.h"
 
 /// A checkbox suitable for a LListItem.
 class LListItemCheckBox : public LListItemColumn
@@ -32,6 +33,18 @@ public:
 		int pad = (int)((float)Ctx.Y() * 0.1f);
 		LRect c(0, 0, px-1, px-1);
 		c.Offset(Ctx.x1 + ((Ctx.X()-c.X())/2), Ctx.y1 + ((Ctx.Y()-c.Y())/2));
+
+		if (LApp::SkinEngine &&
+			TestFlag(LApp::SkinEngine->GetFeatures(), GSKIN_CHECKBOX))
+		{
+			LSkinState State;
+			State.pScreen = pDC;
+			State.Rect = c;
+			State.parentBackground = Ctx.Back;
+			State.Value = Value();
+			LApp::SkinEngine->OnPaint_LCheckBox(&State);
+			return;
+		}
 
 		// Box
 		pDC->Colour(LColour(L_TEXT));

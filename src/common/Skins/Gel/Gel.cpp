@@ -254,17 +254,22 @@ class GelSkin : public LSkinEngine
 		#endif
 	}
 
-	LMemDC *DrawCtrl(LViewI *Ctrl, LRect *Sz, int Flags, bool Round)
+	LMemDC *DrawCtrl(LViewI *Ctrl, LRect *Sz, int Flags, bool Round, LColour *Background = nullptr)
 	{
 		LMemDC *Mem = new LMemDC(_FL);
 		if (Mem && Mem->Create(Sz ? Sz->X() : 14, Sz ? Sz->Y() : 14, OsDefaultCs))
 		{
 			// blank out background
-			LColour Back = Ctrl->GetLView()->StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
+			LColour Back = Background && Background->IsValid()
+				? *Background
+				: Ctrl
+					? Ctrl->GetLView()->StyleColour(LCss::PropBackgroundColor, LColour(L_MED))
+					: LColour(L_MED);
 			Mem->Colour(Back);
 			Mem->Rectangle();
 			
 			LRectF Box(0, 0, Mem->X(), Mem->Y());
+
 			double Radius = Box.X()/2;
 			LPointF Center(Box.X()/2, Box.Y()/2);
 
@@ -409,6 +414,20 @@ class GelSkin : public LSkinEngine
 		}
 		
 		return Mem;
+	}
+
+	void OnPaint_LCheckBox(LSkinState *State) override
+	{
+		if (!State || !State->pScreen)
+			return;
+
+		int Flags = (State->Value ? Btn_Value : 0) | (State->Enabled ? Btn_Enabled : 0);
+		LMemDC *Mem = DrawCtrl(nullptr, &State->Rect, Flags, false, &State->parentBackground);
+		if (Mem)
+		{
+			State->pScreen->Blt(State->Rect.x1, State->Rect.y1, Mem);
+			DeleteObj(Mem);
+		}
 	}
 
 	void DrawText(LSkinState *State, int x, int y, LRect &rcFill, bool Enabled, LView *Ctrl, LCssTools &Tools, bool Debug = false)

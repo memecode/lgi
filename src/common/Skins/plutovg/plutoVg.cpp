@@ -794,6 +794,28 @@ public:
 		DeleteObj(Temp);
 	}
 
+	void OnPaint_LCheckBox(LSkinState *State) override
+	{
+		if (!State || !State->pScreen)
+			return;
+
+		LMemDC Mem(_FL);
+		if (!Mem.Create(State->Rect.X(), State->Rect.Y(), OsDefaultCs))
+			return;
+
+		LColour back = State->parentBackground.IsValid() ? State->parentBackground : LColour(L_WORKSPACE);
+		Mem.Colour(back);
+		Mem.Rectangle();
+
+		LRect Box(0, 0, Mem.X()-1, Mem.Y()-1);
+		PVCanvas Canvas(&Mem);
+		if (!Canvas)
+			return;
+
+		DrawIndicator(Canvas, Box, LColour(L_WORKSPACE), State->Value != 0, State->Enabled, 4.0f, false, TCheckMark);
+		State->pScreen->Blt(State->Rect.x1, State->Rect.y1, &Mem);
+	}
+
 	void OnPaint_LRadioButton(LRadioButton *Ctrl, LSkinState *State) override
 	{
 		int Flags = (Ctrl->Value() ? Btn_Value : 0) |
