@@ -337,7 +337,7 @@ void LTrayIcon::Visible(bool v)
 					d->appind = APP_INDICATOR(g_object_new(APP_INDICATOR_TYPE,
 						"id", id.Get(),
 						"icon-name", "indicator-messages",
-						"category", APP_INDICATOR_CATEGORY_COMMUNICATIONS,
+						"category", "Communications", // string property, not the enum
 						NULL));
 					printf("%s:%i - app indicator created (%s, %s) = %p\n",
 						_FL,
