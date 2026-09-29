@@ -119,17 +119,23 @@ public:
 
 		Array &operator +=(const Array &a)
 		{
-			SetFixedLength(false);
+			auto oldFixed = fixed;
+			fixed = false;
+
 			Add(a);
-			SetFixedLength(true);
+
+			fixed = oldFixed;
 			return *this;
 		}
 
 		Array &operator +=(const LArray<LString> &a)
 		{
-			SetFixedLength(false);
+			auto oldFixed = fixed;
+			fixed = false;
+			
 			Add(a);
-			SetFixedLength(true);
+			
+			fixed = oldFixed;
 			return *this;
 		}
 	};
