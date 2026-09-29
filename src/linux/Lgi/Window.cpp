@@ -2044,8 +2044,10 @@ LMessage::Param LWindow::OnEvent(LMessage *m)
 						
 				if (targets.Length())
 				{
+					/*
 					LgiTrace("%s:%i - gtk_drag_dest_set on %s, fmt=%s\n",
 						_FL, GetClass(), LString(", ").Join(fmts).Get());
+					*/
 
 					Gtk::gtk_drag_dest_set(	wid,
 											Gtk::GTK_DEST_DEFAULT_DROP,
