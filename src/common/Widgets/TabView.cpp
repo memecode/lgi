@@ -435,11 +435,6 @@ void LTabView::Value(int64 i)
 
 			Invalidate();
 		}
-		else
-		{
-			LgiTrace("%s:%i - tab page not attached\n", _FL);
-			LAssert(!"probably meant to attach the tabs view first?");
-		}			
 
 		LNotification n(LNotifyValueChanged, _FL);
 		n.Int[0] = d->Current;

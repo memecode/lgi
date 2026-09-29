@@ -334,8 +334,12 @@ void LTrayIcon::Visible(bool v)
 					static int count = 0;
 					
 					auto id = LString::Fmt("%s-appindicator-%d", name, count++);
-					d->appind = app_indicator_new(id, "indicator-messages", APP_INDICATOR_CATEGORY_COMMUNICATIONS);
-					printf("%s:%i - app_indicator_new(%s, %s) = %p\n",
+					d->appind = APP_INDICATOR(g_object_new(APP_INDICATOR_TYPE,
+						"id", id.Get(),
+						"icon-name", "indicator-messages",
+						"category", APP_INDICATOR_CATEGORY_COMMUNICATIONS,
+						NULL));
+					printf("%s:%i - app indicator created (%s, %s) = %p\n",
 						_FL,
 						id.Get(),
 						iconRef.Get(),
@@ -344,7 +348,7 @@ void LTrayIcon::Visible(bool v)
 					if (d->appind)
 					{
 						app_indicator_set_status(d->appind, APP_INDICATOR_STATUS_ACTIVE);
-						app_indicator_set_icon(d->appind, iconRef);
+						app_indicator_set_icon_full(d->appind, iconRef, name);
 						app_indicator_set_title(d->appind, name);
 
 						printf("%s:%i - app_indicator_set_status(ACTIVE) called: %i, %s, %s\n",
@@ -461,7 +465,7 @@ void LTrayIcon::Value(int64 v)
 			if (d->appind)
 			{
 				if (d->Icon.IdxCheck(d->Val))
-					app_indicator_set_icon(d->appind, d->Icon[d->Val]);
+					app_indicator_set_icon_full(d->appind, d->Icon[d->Val], app_indicator_get_title(d->appind));
 				else
 					LgiTrace("%s:%i - index out of range: " LPrintfInt64 "/" LPrintfSizeT ".\n",
 						_FL, d->Val, d->Icon.Length());
