@@ -1348,7 +1348,7 @@ LApp::DesktopInfo *LApp::GetDesktopInfo(const char *gnomeAppType)
 	const char *Ex = Exe;
 	const char *Fn = Desktop;
 
-	printf("%s:%i - desktop file='%s'\n", _FL, Desktop.GetFull().Get());
+	// printf("%s:%i - desktop file='%s'\n", _FL, Desktop.GetFull().Get());
 
 	if (d->DesktopInfo.Reset(new DesktopInfo(Desktop)))
 	{

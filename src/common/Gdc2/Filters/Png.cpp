@@ -67,7 +67,6 @@ const char *LinuxLibName()
 		"");
 		#endif
 		
-	printf("png lib name = '%s'\n", lib);
 	return lib;
 }
 #endif

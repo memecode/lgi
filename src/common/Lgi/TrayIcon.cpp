@@ -339,11 +339,13 @@ void LTrayIcon::Visible(bool v)
 						"icon-name", "indicator-messages",
 						"category", "Communications", // string property, not the enum
 						NULL));
+					/*
 					printf("%s:%i - app indicator created (%s, %s) = %p\n",
 						_FL,
 						id.Get(),
 						iconRef.Get(),
 						d->appind.obj);
+					*/
 
 					if (d->appind)
 					{
@@ -351,11 +353,13 @@ void LTrayIcon::Visible(bool v)
 						app_indicator_set_icon_full(d->appind, iconRef, name);
 						app_indicator_set_title(d->appind, name);
 
+						/*
 						printf("%s:%i - app_indicator_set_status(ACTIVE) called: %i, %s, %s\n",
 							_FL,
 							app_indicator_get_status(d->appind),
 							app_indicator_get_icon(d->appind),
 							app_indicator_get_title(d->appind));
+						*/
 							
 						// Setup some event to capture the menu being made visible
 						// g_signal_connect(d->menuRoot, "map-event", G_CALLBACK(menuMapped), NULL);
