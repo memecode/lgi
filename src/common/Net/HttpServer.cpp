@@ -167,33 +167,17 @@ public:
 		return new LHttpServer_TraceSocket<LSocket>(cancel);
 	}
 
-	int Main()
+	bool SetupListenSock()
 	{
-	    LOG_HTTP("Attempting to listen on port %i...\n", port);
-	    
-		Listen.Reset(CreateSocket());
+		if (!Listen.Reset(CreateSocket()))
+			return false;
+
 		Listen->SetReuseAddress(true);
 
 		if (secureSockets)
 		{
-			if (auto sslSock = dynamic_cast<SslSocket*>(Listen.Get()))
-			{
-				if (!secureSockets.setupCerts())
-				{
-					LOG_HTTP("%s:%i - error: failed to set certs.\n", _FL);
-				}
-				else
-				{
-					LOG_HTTP("%s:%i - configuring certs for domains: %s\n"
-							"	cert='%s'\n"
-							"	key='%s'\n",
-							_FL, LString(",").Join(secureSockets.domains).Get(),
-							secureSockets.certFile.Get(),
-							secureSockets.keyFile.Get());
-					sslSock->SetCert(secureSockets.certFile, secureSockets.keyFile);
-				}
-			}
-			else LOG_HTTP("%s:%i - error: secureSockets.domains is set but Listen is not a SslSocket.\n", _FL);
+			if (auto sslListen = dynamic_cast<SslSocket*>(Listen.Get()))
+				sslListen->SetCert(secureSockets.certFile, secureSockets.keyFile);
 		}
 
 	    LAutoPtr<LSubProcess::IoThread> netstat;
@@ -256,6 +240,41 @@ public:
 			}
 		}
 
+		return true;
+	}
+
+	int Main()
+	{
+	    LOG_HTTP("Attempting to listen on port %i...\n", port);
+	    
+		if (secureSockets)
+		{
+			if (auto sslSock = dynamic_cast<SslSocket*>(Listen.Get()))
+			{
+				if (!secureSockets.setupCerts())
+				{
+					LOG_HTTP("%s:%i - error: failed to set certs.\n", _FL);
+				}
+				else
+				{
+					LOG_HTTP("%s:%i - configuring certs for domains: %s\n"
+							"	cert='%s'\n"
+							"	key='%s'\n",
+							_FL, LString(",").Join(secureSockets.domains).Get(),
+							secureSockets.certFile.Get(),
+							secureSockets.keyFile.Get());
+					sslSock->SetCert(secureSockets.certFile, secureSockets.keyFile);
+				}
+			}
+			else LOG_HTTP("%s:%i - error: secureSockets.domains is set but Listen is not a SslSocket.\n", _FL);
+		}
+
+		if (!SetupListenSock())
+		{
+			LOG_HTTP("%s:%i - error: failed to set up listen socket.\n", _FL);
+			return -1;
+		}
+
 		LgiTrace("Listening on port %i.\n", port);
 		auto logTs = LCurrentTime();
 		int readableCalls = 0;
@@ -272,7 +291,8 @@ public:
 			readableCalls++;
 			*/
 		
-			if (Listen->IsReadable(20))
+			if (Listen &&
+				Listen->IsReadable(20))
 			{
 				LAutoPtr<LSocketI> s(CreateSocket());
 				if (s)
@@ -282,6 +302,12 @@ public:
 					{
 						LOG_HTTP("Got new connection...\n");
 						new LHttpThread(s, this);
+					}
+					else if (Listen->IsReadable())
+					{
+						// If this is still readable it might mean there is a
+						// problem with certificates that will not be resolved
+						SetupListenSock();
 					}
 				}
 			}

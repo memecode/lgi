@@ -636,13 +636,28 @@ public:
 	SSL_CTX *GetServer(SslSocket *sock, const char *CertFile, const char *KeyFile)
 	{
 		auto Library = this;
+		LMutex::Auto lock(this, _FL);
+		LString certFile = CertFile ? CertFile : "";
+		LString keyFile = KeyFile ? KeyFile : "";
 		
-		sock->DebugLogging = true;
-		if (Server)
+		if (Server && (!ServerCertFile.Equals(certFile) || !ServerKeyFile.Equals(keyFile)))
 		{
 			Library->SSL_CTX_free(Server);
 			Server = nullptr;
 		}
+
+		auto handleErr = [&](const char *file, int line, const char *msg)
+		{
+			if (sock)
+			{
+				long e = Library->ERR_get_error();
+				auto errMsg = LString::Fmt("%s: %s (%i)", msg, Library->ERR_error_string(e, 0), e);
+				LgiTrace("%s:%i - %s\n", file, line, errMsg.Get());
+				LgiTrace("	certFile='%s'\n", certFile.Get());
+				LgiTrace("	keyFile='%s'\n", keyFile.Get());
+				sock->DebugTrace("%s:%i - %s\n", file, line, errMsg.Get());
+			}
+		};
 		
 		if (!Server)
 		{
@@ -652,12 +667,7 @@ public:
 			Server = Library->SSL_CTX_new(DEFAULT_METHOD);
 			if (!Server)
 			{
-				if (sock)
-				{
-					long e = Library->ERR_get_error();
-					auto Msg = Library->ERR_error_string(e, 0);
-					sock->DebugTrace("%s:%i - SSL_CTX_new failed: %s (%i)\n", _FL, Msg ? Msg : "unknown", e);
-				}
+				handleErr(_FL, "SSL_CTX_new failed");
 				return nullptr;
 			}
 			
@@ -669,30 +679,24 @@ public:
 					certStatus = Library->SSL_CTX_use_certificate_chain_file(Server, CertFile);
 				else
 					certStatus = Library->SSL_CTX_use_certificate_file(Server, CertFile, SSL_FILETYPE_PEM);
-				if (sock)
-					sock->DebugTrace("Loading certificate '%s' -> %i\n", CertFile, certStatus);
-				if (certStatus != 1 && sock)
+				if (certStatus != 1)
 				{
 					credentialsLoaded = false;
-					long e = Library->ERR_get_error();
-					char *Msg = Library->ERR_error_string(e, 0);
-					sock->DebugTrace("%s:%i - Failed to load certificate file '%s': %s (%i)\n",
-							_FL, CertFile, Msg ? Msg : "unknown", e);
+					handleErr(_FL, "Failed to load certificate file");
 				}
+				else if (sock)
+					sock->DebugTrace("Loading certificate '%s' -> %i\n", CertFile, certStatus);
 			}
 			if (KeyFile)
 			{
 				int keyStatus = Library->SSL_CTX_use_PrivateKey_file(Server, KeyFile, SSL_FILETYPE_PEM);
-				if (sock)
-					sock->DebugTrace("Loading private key '%s' -> %i\n", KeyFile, keyStatus);
-				if (keyStatus != 1 && sock)
+				if (keyStatus != 1)
 				{
 					credentialsLoaded = false;
-					long e = Library->ERR_get_error();
-					auto Msg = Library->ERR_error_string(e, 0);
-					sock->DebugTrace("%s:%i - Failed to load private key file '%s': %s (%i)\n",
-							_FL, KeyFile, Msg ? Msg : "unknown", e);
+					handleErr(_FL, "Failed to load private key file");
 				}
+				else if (sock)
+					sock->DebugTrace("Loading private key '%s' -> %i\n", KeyFile, keyStatus);
 			}
 
 			if (!credentialsLoaded)
@@ -705,15 +709,10 @@ public:
 			}
 			
 			status = Library->SSL_CTX_check_private_key(Server) == 1;
-			if (sock)
+			if (!status)
+				handleErr(_FL, "Private key does not match certificate");
+			else if (sock)
 				sock->DebugTrace("Private key check -> %i\n", status);
-			if (!status && sock)
-			{
-				long e = Library->ERR_get_error();
-				auto Msg = Library->ERR_error_string(e, 0);
-				sock->DebugTrace("%s:%i - Private key does not match certificate: %s (%i)\n",
-								_FL, Msg ? Msg : "unknown", e);
-			}
 			
 			// NOW configure TLS versions
 			#if OPENSSL_VERSION_NUMBER >= 0x10100000L
@@ -771,13 +770,14 @@ public:
 
 			if (!status && sock)
 			{
-				long e = Library->ERR_get_error();
-				auto Msg = Library->ERR_error_string(e, 0);
-				sock->DebugTrace("%s:%i - SSL context validation failed: %s (%i)\n", _FL, Msg ? Msg : "unknown", e);
+				handleErr(_FL, "SSL context validation failed");
 				Library->SSL_CTX_free(Server);
 				Server = nullptr;
 				return nullptr;
 			}
+
+			ServerCertFile = certFile;
+			ServerKeyFile = keyFile;
 		}
 		
 		return Server;
@@ -1918,6 +1918,7 @@ bool SslSocket::Accept(LSocketI *sock)
 	if (!ctx)
 	{
 		LgiTrace("%s:%i - Failed to create SSL server context.\n", _FL);
+		OnError(0, "GetServer failed");
 		return false;
 	}
 
