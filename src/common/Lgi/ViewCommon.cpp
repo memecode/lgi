@@ -197,6 +197,10 @@ LView::LView(OsView view) :
 
 LView::~LView()
 {
+	// Mark this view as tearing down so ancestors/descendants unwinding
+	// through their own teardown don't touch our (partially destructed) state.
+	WndFlags |= GWF_DESTRUCTOR;
+
 	if (d->SinkHnd >= 0)
 	{
 		LEventSinkMap::Dispatch.RemoveSink(this);
@@ -2056,7 +2060,9 @@ bool LView::WindowVirtualOffset(LPoint *Offset)
 					break;
 					
 				LRect r = view->GetPos();
-				if (auto parent = view->GetParent())
+				auto parent = view->GetParent();
+				auto parentView = parent ? dynamic_cast<LView*>(parent) : nullptr;
+				if (parent && (!parentView || !(parentView->WndFlags & GWF_DESTRUCTOR)))
 				{
 					LRect c = parent->GetClient(false);
 					Offset->x += r.x1 + c.x1;

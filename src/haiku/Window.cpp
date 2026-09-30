@@ -1182,6 +1182,12 @@ void LWindow::UpdateRootView()
 	rootView->SetResizingMode(B_FOLLOW_ALL_SIDES);
 }
 
+bool LWindow::IsAttached()
+{
+	auto wnd = WindowHandle();
+	return wnd && d->view && d->view->Window() == wnd;
+}
+
 bool LWindow::Attach(LViewI *p)
 {
 	LLocker lck(d, _FL);
@@ -1582,6 +1588,10 @@ LPointF LWindow::GetDpiScale()
 
 LRect &LWindow::GetClient(bool ClientSpace)
 {
+	// 'd' can be null if WaitThread() has already torn down the window.
+	static LRect Empty(0, 0, -1, -1);
+	if (!d)
+		return Empty;
 	return d->client;
 }
 

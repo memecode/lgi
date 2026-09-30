@@ -119,8 +119,6 @@ LViewPrivate::LViewPrivate(LView *view) :
 
 LViewPrivate::~LViewPrivate()
 {
-	View->d = NULL;
-
 	MsgQue.DeleteObjects();
 
 	if (Font && FontOwnType == GV_FontOwned)
@@ -128,6 +126,9 @@ LViewPrivate::~LViewPrivate()
 
 	while (EventTargets.Length())
 		delete EventTargets[0];
+
+	// ViewEventTarget dtors above still need View->d, so clear it last.
+	View->d = NULL;
 }
 
 void LView::SetFlagAll(int flag, bool add)
@@ -690,7 +691,11 @@ bool LView::Detach()
 		// Events
 		Par->DelView(this);
 		Par->OnChildrenChanged(this, false);
-		Par->Invalidate(&Pos);
+
+		// Don't invalidate a parent that is itself being torn down.
+		auto ParView = dynamic_cast<LView*>(Par);
+		if (!ParView || !(ParView->WndFlags & GWF_DESTRUCTOR))
+			Par->Invalidate(&Pos);
 	}
 	
 	d->Parent = 0;

@@ -328,6 +328,7 @@ public:
 	
 	#if HAIKU
 	
+		bool IsAttached() override;
 		LWindow *GetModalParent();
 		bool SetModalParent(LWindow *dlg);
 		void UpdateRootView();
