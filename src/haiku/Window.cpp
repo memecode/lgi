@@ -77,7 +77,7 @@ struct LBView : public Parent
 	BMessage MakeMessage(LMessage::Events e)
 	{
 		BMessage m(M_HAIKU_WND_EVENT);
-		m.AddPointer(LMessage::PropWindow, (void*)wnd);
+		m.AddPointer(LMessage::PropWindow, (void*)static_cast<LViewI*>(wnd));
 		m.AddInt32(LMessage::PropEvent, e);
 		return m;
 	}
@@ -487,7 +487,7 @@ public:
 	BMessage MakeMessage(LMessage::Events e)
 	{
 		BMessage m(M_HAIKU_WND_EVENT);
-		m.AddPointer(LMessage::PropWindow, (void*)wnd);
+		m.AddPointer(LMessage::PropWindow, (void*)static_cast<LViewI*>(wnd));
 		m.AddInt32(LMessage::PropEvent, e);
 		return m;
 	}
@@ -1947,11 +1947,15 @@ bool LWindow::SetWillFocus(bool f)
 
 LViewI *LWindow::GetFocus()
 {
-	return d->Focus;
+	return d ? d->Focus : nullptr;
 }
 
 void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 {
+	// 'd' is null after WaitThread() during window destruction.
+	if (!d)
+		return;
+
 	#if DEBUG_SETFOCUS
 	const char *TypeName = type == GainFocus ? "GainFocus" : type == LoseFocus ? "LoseFocus" : "ViewDelete";
 	printf("%s:%i - LWindow::SetFocus(%p/%s, %s) cur=%p/%s\n",

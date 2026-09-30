@@ -98,6 +98,38 @@ LString LScreenDC::Dump()
 	return s;
 }
 
+bool LScreenDC::GetVariant(const char *Name, LVariant &Value, const char *Array)
+{
+	switch (LStringToDomProp(Name))
+	{
+		case SurfaceConstAlpha:
+		{
+			Value = (int64_t)d->Alpha;
+			return true;
+		}
+		default:
+			break;
+	}
+	
+	return false;
+}
+
+bool LScreenDC::SetVariant(const char *Name, LVariant &Value, const char *Array)
+{
+	switch (LStringToDomProp(Name))
+	{
+		case SurfaceConstAlpha:
+		{
+			d->Alpha = Value.CastInt32();
+			return true;
+		}
+		default:
+			break;
+	}
+	
+	return false;
+}
+
 bool LScreenDC::SupportsAlphaCompositing()
 {
 	return true;
