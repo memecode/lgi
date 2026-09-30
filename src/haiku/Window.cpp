@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <atomic>
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/DragAndDrop.h"
@@ -512,17 +513,28 @@ public:
 
 	bool QuitRequested()
 	{
-		int result = -1;
+		std::atomic<int> result(-1);
 		
 		auto m = MakeMessage(LMessage::QuitRequested);
-		m.AddPointer("result", (void*)&result);
-		LAppPrivate::Post(&m);
+		m.AddPointer("result", &result);
+		bool posted = LAppPrivate::Post(&m);
+		LgiTrace("%s:%i QuitRequested posted: thread=%i looper-locker=%i posted=%i\n",
+			_FL, LCurrentThreadId(), LockingThread(), posted);
+		if (!posted)
+			return false;
+		Unlock();
 		
 		// Wait for the GUI thread to respond:
-		while (result < 0)
+		while (result.load(std::memory_order_acquire) < 0)
 			LSleep(1);
+		int closeResult = result.load(std::memory_order_acquire);
+		bool relocked = Lock();
+		LgiTrace("%s:%i QuitRequested response: thread=%i result=%i\n",
+			_FL, LCurrentThreadId(), closeResult);
+		if (!relocked)
+			return false;
 		
-		return result > 0;
+		return closeResult > 0;
 	}
 
 	void MessageReceived(BMessage *message)
@@ -694,13 +706,18 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 	{
 		case LMessage::QuitRequested:
 		{
-			int *result = nullptr;
+			std::atomic<int> *result = nullptr;
 			if (m->FindPointer("result", (void**)&result) != B_OK)
 			{
 				printf("%s:%i - error: no result ptr.\n", _FL);
 				return;
 			}
-			*result = OnRequestClose(false);
+			LgiTrace("%s:%i QuitRequested dispatch: thread=%i window=%p\n",
+				_FL, LCurrentThreadId(), this);
+			int closeResult = OnRequestClose(false) ? 1 : 0;
+			result->store(closeResult, std::memory_order_release);
+			LgiTrace("%s:%i QuitRequested complete: thread=%i result=%i\n",
+				_FL, LCurrentThreadId(), closeResult);
 			break;
 		}
 		case LMessage::General:
