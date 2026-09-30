@@ -130,6 +130,7 @@
 		<String Ref="181" Cid="536" Define="ID_REMOTE_DLG" en="Remote URL" />
 		<String Ref="182" Cid="182" Define="IDC_182" />
 		<String Ref="183" Cid="-1" Define="IDC_STATIC" en="Remote URL:" />
+		<String Ref="185" Cid="-1" Define="IDC_STATIC" en="Almost always, choose merge parent &apos;1&apos;..." />
 		<String Ref="188" Cid="188" Define="ID_URL" />
 		<String Ref="189" Cid="189" Define="ID_COPY" en="Copy" />
 		<String Ref="190" Cid="190" Define="ID_CHANGE" en="Change" />
@@ -290,7 +291,7 @@
 		</TableLayout>
 	</Dialog>
 	<Dialog pos="8,8,718,501" ref="129">
-		<TableLayout pos="7,7,708,465" ref="164" cols="0.263,0.737" rows="0.113,0.117,0.068,0.098,0.116,0.390,0.097">
+		<TableLayout pos="7,7,708,465" ref="164" cols="0.263,0.737" rows="0.103,0.107,0.062,0.089,0.106,0.356,0.089,0.089">
 			<tr>
 				<td addr="0,0">
 					<StaticText pos="4,14,122,34" ref="165" />
@@ -301,49 +302,55 @@
 			</tr>
 			<tr>
 				<td addr="0,1">
-					<StaticText pos="11,66,122,79" ref="167" />
+					<StaticText pos="11,62,122,75" ref="167" />
 				</td>
 				<td addr="1,1">
-					<EditBox Pos="187,58,319,78" ref="168" />
+					<EditBox Pos="187,54,319,74" ref="168" />
 				</td>
 			</tr>
 			<tr>
 				<td addr="0,2">
-					<StaticText pos="7,108,83,128" ref="171" />
+					<StaticText pos="7,98,83,118" ref="171" />
 				</td>
 				<td addr="1,2">
-					<EditBox Pos="197,102,455,128" Enabled="0" ref="172" />
+					<EditBox Pos="197,93,455,118" Enabled="0" ref="172" />
 				</td>
 			</tr>
 			<tr>
 				<td addr="0,3">
-					<StaticText pos="14,140,76,160" ref="174" />
+					<StaticText pos="14,128,76,148" ref="174" />
 				</td>
 				<td addr="1,3">
-					<EditBox Pos="197,140,392,167" Enabled="0" ref="175" />
+					<EditBox Pos="197,128,392,155" Enabled="0" ref="175" />
 				</td>
 			</tr>
 			<tr>
 				<td addr="0,4">
-					<StaticText pos="14,181,83,201" ref="176" />
+					<StaticText pos="14,165,83,185" ref="176" />
 				</td>
 				<td addr="1,4">
-					<EditBox Pos="197,188,420,215" Enabled="0" MultiLine="1" ref="178" />
+					<EditBox Pos="197,172,420,199" Enabled="0" MultiLine="1" ref="178" />
 				</td>
 			</tr>
 			<tr>
 				<td addr="0,5">
-					<StaticText pos="14,245,90,265" ref="179" />
+					<StaticText pos="14,225,90,245" ref="179" />
 				</td>
 				<td addr="1,5">
-					<ListView pos="189,238,664,370" ref="177" />
+					<ListView pos="189,218,664,350" ref="177" />
 				</td>
 			</tr>
 			<tr>
 				<td addr="0,6" />
 				<td addr="1,6">
-					<Button Pos="208,414,284,434" toggle="0" ref="169" />
-					<Button Pos="302,407,371,427" toggle="0" ref="170" />
+					<StaticText pos="196,371,580,391" ref="185" />
+				</td>
+			</tr>
+			<tr>
+				<td addr="0,7" />
+				<td addr="1,7">
+					<Button Pos="208,418,284,438" toggle="0" ref="169" />
+					<Button Pos="302,411,371,431" toggle="0" ref="170" />
 				</td>
 			</tr>
 		</TableLayout>

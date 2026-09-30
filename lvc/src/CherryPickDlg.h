@@ -106,7 +106,7 @@ public:
 				
 				if (parents)
 					for (unsigned i=0; i<info.mergeParents.Length(); i++)
-						parents->Insert(new MergeParent(i, folder, info.mergeParents[i]));
+						parents->Insert(new MergeParent(i + 1, folder, info.mergeParents[i]));
 			});
 	}
 	
