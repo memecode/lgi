@@ -378,8 +378,9 @@ public:
 	
 	// The root view that tracks all the events
 	BView *view = nullptr;
-	LRect client;	// bounds of view... so there is no need to lock the 
-					// BWindow to get the client rect.
+	LRect client = LRect::EMPTY(); // bounds of view... so there is no need to lock the 
+					// BWindow to get the client rect. Starts empty until the
+					// first FrameResized event arrives.
 	
 	// When invalidate is called on a view, it sends LMessage::Invalidate
 	// to LWindow::HaikuEvent. This will check 'viewDirty' to see if something
@@ -775,6 +776,12 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 			// Anything that needs to lock the window needs to be BEFORE getting the memory DC lock...
 			auto c = GetClient();
 			// printf("%s draw %s (%i)\n", GetClass(), c.GetStr(), DRAW_COUNT++);
+
+			if (c.X() <= 0 || c.Y() <= 0)
+			{
+				// No FrameResized event has arrived yet, nothing to draw.
+				break;
+			}
 
 			// Don't lock the window AFTER this:
 			auto memDC = d->mem.Lock(_FL);
@@ -1172,7 +1179,15 @@ bool LWindow::Attach(LViewI *p)
 	if (rootView && wnd)
 	{
 		LOG("%s:%i attach %p to %p\n", _FL, rootView, wnd);
-		wnd->AddChild(rootView);
+		auto parent = rootView->Parent();
+		auto attachedWindow = rootView->Window();
+		if (!parent && !attachedWindow)
+			wnd->AddChild(rootView);
+		else if (parent || attachedWindow != wnd)
+		{
+			LOG("%s:%i root view %p is already attached (parent=%p, window=%p)\n", _FL, rootView, parent, attachedWindow);
+			return false;
+		}
 		UpdateRootView();
 
 		// There's only one native BView per window (everything else is drawn

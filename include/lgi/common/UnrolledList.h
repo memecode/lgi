@@ -910,13 +910,7 @@ public:
 		if (Items == 0)
 			return;
 		RandomAccessIter Start(this, 0);
-		RandomAccessIter End(Start,
-			#if WINDOWS || MAC || LINUX
-				Items
-			#else
-				Items - 1
-			#endif
-			);
+		RandomAccessIter End(Start, Items);
 		std::sort
 		(
 			Start, End,

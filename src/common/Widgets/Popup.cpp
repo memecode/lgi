@@ -728,10 +728,15 @@ bool LPopup::Attach(LViewI *p)
 		#if defined(HAIKU)
 
 			// This gets the thread started but doesn't show the window yet...
-			// Allowing other configuration like position etc to work.		
+			// Allowing other configuration like position etc to work.
+			// Guard against calling Run() twice if this popup is shown more
+			// than once (BLooper::Run aborts if the thread is already running).
 			auto hwnd = WindowHandle();
-			hwnd->Lock();
-			hwnd->Run();
+			if (hwnd->Thread() < B_OK)
+			{
+				hwnd->Lock();
+				hwnd->Run();
+			}
 			
 		#endif
 		auto status = LWindow::Attach(NULL);

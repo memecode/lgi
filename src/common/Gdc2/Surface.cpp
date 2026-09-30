@@ -1571,8 +1571,7 @@ LColour LSurface::Colour(LColour c)
 		// This seems to happen when windows runs out of handles.
 		// Maybe there is a GDI leak somewhere? IDK
 		// But at least don't crash....
-		LAssert(!"No applicator");
-		return cPrev;
+		return c;
 	}
 
 	uint32_t c32 = c.c32();
