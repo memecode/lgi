@@ -415,10 +415,12 @@ void LTrayIcon::Visible(bool v)
 				if (d->appind)
 				{
 					app_indicator_set_status(d->appind, APP_INDICATOR_STATUS_PASSIVE);
+					/*
 					printf("%s:%i - app_indicator_set_status(PASSIVE) called: %i, %s\n",
 						_FL,
 						app_indicator_get_status(d->appind),
 						app_indicator_get_icon(d->appind));
+					*/
 				}
 				else printf("%s:%i Error: no app indicator.\n", _FL);
 				
