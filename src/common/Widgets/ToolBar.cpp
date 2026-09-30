@@ -582,7 +582,12 @@ void LToolButton::Layout()
 
 	// Text
 	auto s = Name();
-	if (!ToolBar->d->ShowTextLabels() || !s)
+	bool ShowLabels = ToolBar->d->ShowTextLabels();
+	#if HAIKU
+	LgiTrace("%s:%i - Toolbar button layout: name='%s' enabled=%i font=%p\n",
+		_FL, s ? s : "", ShowLabels, ToolBar->d->Font);
+	#endif
+	if (!ShowLabels || !s)
 		return;
 
 	// Write each word centered on a different line
@@ -619,6 +624,10 @@ void LToolButton::Layout()
 			}
 		}
 	}
+	#if HAIKU
+	LgiTrace("%s:%i - Toolbar button labels created: name='%s' count=%i\n",
+		_FL, s, d->Text.Length());
+	#endif
 }
 
 void LToolButton::OnPaint(LSurface *pDC)
@@ -1038,7 +1047,8 @@ LToolBar::LToolBar()
 
 	// Setup tool button font
 	LFontType SysFontType;
-	if (SysFontType.GetSystemFont("Small"))
+	bool HasSmallFont = SysFontType.GetSystemFont("Small");
+	if (HasSmallFont)
 	{
 		d->Font = SysFontType.Create();
 		if (d->Font)
@@ -1049,6 +1059,9 @@ LToolBar::LToolBar()
 			d->Font->Transparent(true);
 		}
 	}
+	#if HAIKU
+	LgiTrace("%s:%i - Toolbar small font: lookup=%i font=%p\n", _FL, HasSmallFont, d->Font);
+	#endif
 
 	d->LastIndex = 0;
 	d->OwnImgList = false;
@@ -1090,93 +1103,93 @@ void LToolBar::ContextMenu(LMouse &m)
 {
 	if (IsCustomizable())
 	{
-		LSubMenu *Sub = new LSubMenu;
-		if (Sub)
+		LSubMenu Sub;
+		int n = 1;
+		for (auto it = Children.begin(); it != Children.end(); it++, n++)
 		{
-			int n = 1;
-			for (auto it = Children.begin(); it != Children.end(); it++, n++)
-			{
-				LViewI *v = *it;
+			LViewI *v = *it;
 
-				LToolButton *Btn = dynamic_cast<LToolButton*>(v);
-				if (Btn && Btn->Separator())
+			LToolButton *Btn = dynamic_cast<LToolButton*>(v);
+			if (Btn && Btn->Separator())
+			{
+				Sub.AppendSeparator();
+			}
+			else
+			{
+				auto Item = Sub.AppendItem(v->Name(), n, true);
+				if (Item)
 				{
-					Sub->AppendSeparator();
-				}
-				else
-				{
-					auto Item = Sub->AppendItem(v->Name(), n, true);
-					if (Item)
-					{
-						Item->Checked(v->Visible());
-					}
+					Item->Checked(v->Visible());
 				}
 			}
-			Sub->AppendSeparator();
-			auto Txt = Sub->AppendItem(LLoadString(L_TOOLBAR_SHOW_TEXT, "Show Text Labels"), 1000, true);
-			Txt->Checked(d->Text);
+		}
+		Sub.AppendSeparator();
+		auto Txt = Sub.AppendItem(LLoadString(L_TOOLBAR_SHOW_TEXT, "Show Text Labels"), 1000, true);
+		Txt->Checked(d->Text);
 
-			bool Save = false;
-			int Pick = Sub->Float(this, m);
-			switch (Pick)
+		bool Save = false;
+		int Pick = Sub.Float(this, m);
+		switch (Pick)
+		{
+			case 1000:
 			{
-				case 1000:
+				d->Text = !d->Text;
+				Save = true;
+				#if HAIKU
+				LgiTrace("%s:%i - Toolbar labels toggled: text=%i font=%p show=%i\n",
+					_FL, d->Text, d->Font, d->ShowTextLabels());
+				#endif
+				printf("Sending toolbar LNotifyTableLayoutRefresh\n");
+				SendNotify(LNotifyTableLayoutRefresh);
+				break;
+			}
+			default:
+			{
+				LViewI *Ctrl = Children[Pick - 1];
+				if (Ctrl)
 				{
-					d->Text = !d->Text;
+					Ctrl->Visible(!Ctrl->Visible());
 					Save = true;
-					SendNotify(LNotifyTableLayoutRefresh);
-					break;
 				}
-				default:
-				{
-					LViewI *Ctrl = Children[Pick - 1];
-					if (Ctrl)
-					{
-						Ctrl->Visible(!Ctrl->Visible());
-						Save = true;
-					}
-					break;
-				}
+				break;
 			}
-			
-			DeleteObj(Sub);
-			
-			if (Save)
+		}
+		
+		if (Save)
+		{
+			LStringPipe p(256);
+			p.Push((char*) (d->Text ? "text" : "no"));
+			for (auto v: Children)
 			{
-				LStringPipe p(256);
-				p.Push((char*) (d->Text ? "text" : "no"));
-				for (auto v: Children)
+				if (v->Visible())
 				{
-					if (v->Visible())
-					{
-						p.Print(",%i", v->GetId());
-					}
+					p.Print(",%i", v->GetId());
 				}
-				char *o = p.NewStr();
-				if (o)
-				{
-					if (d->CustomDom)
-					{
-						LVariant v(o);
-						d->CustomDom->SetValue(d->CustomProp, v);
-					}
-					DeleteArray(o);
-				}
-				
-				d->FixSeparators(this);
-
-				for (auto v: Children)
-				{
-					LToolButton *b = dynamic_cast<LToolButton*>(v);
-					if (b && b->TipId >= 0)
-					{
-						d->Tip->DeleteTip(b->TipId);
-						b->TipId = -1;
-					}
-				}
-
-				GetWindow()->PourAll();
 			}
+			char *o = p.NewStr();
+			if (o)
+			{
+				if (d->CustomDom)
+				{
+					LVariant v(o);
+					d->CustomDom->SetValue(d->CustomProp, v);
+				}
+				DeleteArray(o);
+			}
+			
+			d->FixSeparators(this);
+
+			for (auto v: Children)
+			{
+				LToolButton *b = dynamic_cast<LToolButton*>(v);
+				if (b && b->TipId >= 0)
+				{
+					d->Tip->DeleteTip(b->TipId);
+					b->TipId = -1;
+				}
+			}
+
+			GetWindow()->PourAll();
 		}
 	}
 }

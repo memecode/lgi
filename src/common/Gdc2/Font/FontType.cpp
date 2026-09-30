@@ -607,6 +607,15 @@ bool LFontType::GetSystemFont(const char *Which)
 			Info.Face(DefFont);
 			Info.PointSize(DefSize-1);
 			Status = true;
+
+			#elif defined(HAIKU)
+
+				font_family family = {0};
+				font_style style = {0};
+				be_plain_font->GetFamilyAndStyle(&family, &style);
+				Info.PointSize(be_plain_font->Size() - 1);
+				Info.Face(family);
+				Status = true;
 			
 			#elif defined MAC
 			

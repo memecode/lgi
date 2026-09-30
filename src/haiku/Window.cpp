@@ -16,7 +16,7 @@
 #define DEBUG_SETFOCUS			0
 #define DEBUG_HANDLEVIEWKEY		0
 #define DEBUG_WAIT_THREAD		0
-#define DEBUG_SERIALIZE_STATE	0
+#define DEBUG_SERIALIZE_STATE	1
 
 #if DEBUG_WAIT_THREAD
 	#define WAIT_LOG(...)		LgiTrace(__VA_ARGS__)
@@ -201,8 +201,6 @@ struct LBView : public Parent
 				(k.c16 >= ' ' && k.c16 < LK_DELETE)
 				||
 				k.c16 == LK_BACKSPACE
-				||
-				k.c16 == LK_TAB
 				||
 				k.c16 == LK_RETURN
 			);
@@ -701,6 +699,21 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 {
 	if (!m)
 		return;
+
+	auto GetNativePos = [this](LRect &Position)
+	{
+		LLocker lck(d, _FL);
+		if (!lck.Lock() || d->IsHidden())
+			return false;
+
+		auto Frame = d->Frame();
+		auto Bounds = d->Bounds();
+		Position.Set((int)Frame.left,
+					 (int)Frame.top,
+					 (int)Frame.left + (int)Bounds.Width() - 1,
+					 (int)Frame.top + (int)Bounds.Height() - 1);
+		return true;
+	};
 		
 	switch (event)
 	{
@@ -744,15 +757,12 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 		}
 		case LMessage::FrameMoved:
 		{
-			BPoint pos;
-			if (m->FindPoint("pos", &pos) != B_OK)
+			LRect Position;
+			if (GetNativePos(Position) && Position != Pos)
 			{
-				printf("%s:%i - no pos.\n", _FL);
-				return;
+				Pos = Position;
+				OnPosChange();
 			}
-			
-			Pos.Offset(pos.x - Pos.x1, pos.y - Pos.y1);
-			OnPosChange();
 			break;
 		}
 		case LMessage::Invalidate:
@@ -767,19 +777,12 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 		}
 		case LMessage::FrameResized:
 		{
-			float fx = 0.0f, fy = 0.0f;
-			if (m->FindFloat("width",  &fx) != B_OK ||
-				m->FindFloat("height", &fy) != B_OK)
+			LRect Position;
+			if (!GetNativePos(Position))
+				break;
+			if (Position != Pos)
 			{
-				printf("%s:%i - missing width/height param.\n", _FL);
-				return;
-			}
-
-			int x = (int)floor(fx);
-			int y = (int)floor(fy);
-			if (Pos.X() != x || Pos.Y() != y)
-			{
-				Pos.SetSize(x, y);
+				Pos = Position;
 				OnPosChange();
 			}
 			else break;
@@ -1619,7 +1622,7 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 			for (auto var: vars)
 			{
 				auto parts = var.SplitDelimit("=", 1);
-				SERIALIZE_LOG("SerializeState: parts=%i\n", (int)parts.Length());
+				// SERIALIZE_LOG("SerializeState: parts=%i\n", (int)parts.Length());
 				if (parts.Length() == 2)
 				{
 					if (parts[0].Equals("State"))
@@ -1642,6 +1645,7 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 				SERIALIZE_LOG("SerializeState setpos %s\n", Position.GetStr());
 				SetPos(Position);
 			}
+			else SERIALIZE_LOG("Invalid position.\n");
 		}
 		else
 		{
@@ -1653,7 +1657,18 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 	{
 		char s[256];
 		LWindowZoom State = GetZoom();
-		sprintf_s(s, sizeof(s), "State=%i;Pos=%s", State, GetPos().GetStr());
+		LRect Position = GetPos();
+		LLocker lck(d, _FL);
+		if (IsAttached() && lck.Lock())
+		{
+			auto Frame = d->Frame();
+			auto Bounds = d->Bounds();
+			Position.Set((int)Frame.left,
+						 (int)Frame.top,
+						 (int)Frame.left + (int)Bounds.Width() - 1,
+						 (int)Frame.top + (int)Bounds.Height() - 1);
+		}
+		sprintf_s(s, sizeof(s), "State=%i;Pos=%s", State, Position.GetStr());
 
 		LVariant v = s;
 		SERIALIZE_LOG("SerializeState: saving '%s' = '%s'\n", FieldName, s);
@@ -1733,7 +1748,10 @@ void LWindow::OnPosChange()
 					menu->GetPreferredSize(&x, &y);
 					// printf("Pref=%g,%g\n", x, y);
 					if (y > 0.0f)
+					{
 						menu->ResizeTo(frame.Width(), y);
+						menuPos = menu->Frame();
+					}
 				}
 			}	
 			int rootTop = menu ? menuPos.bottom + 1 : 0;
@@ -1744,7 +1762,7 @@ void LWindow::OnPosChange()
 					ToString(frame).Get(), menu, menu?menu->IsHidden():0, ToString(menuPos).Get(), ToString(rootPos).Get(), rootTop);
 				#endif
 				d->view->MoveTo(0, rootTop);
-				d->view->ResizeTo(rootPos.Width(), frame.Height() - menuPos.Height());
+				d->view->ResizeTo(rootPos.Width(), frame.Height() - rootTop);
 			}
 		
 			lck.Unlock();		
@@ -2025,6 +2043,8 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 				printf("%s:%i - SetFocus: blurring %p/%s\n", _FL, old, old->GetClass());
 				#endif
 				d->Focus = nullptr;
+				if (auto v = old->GetLView())
+					v->_Focus(false);
 				old->OnFocus(false);
 			}
 
@@ -2032,6 +2052,8 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 			#if DEBUG_SETFOCUS
 			printf("%s:%i - SetFocus: focusing %p/%s\n", _FL, ctrl, ctrl->GetClass());
 			#endif
+			if (auto v = ctrl->GetLView())
+				v->_Focus(true);
 			ctrl->OnFocus(true);
 			break;
 		}
@@ -2045,7 +2067,11 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 				#endif
 				d->Focus = nullptr;
 				if (type == LoseFocus)
+				{
+					if (auto v = ctrl->GetLView())
+						v->_Focus(false);
 					ctrl->OnFocus(false);
+				}
 			}
 			break;
 		}
