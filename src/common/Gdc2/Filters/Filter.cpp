@@ -1342,6 +1342,9 @@ LFilterFactory::~LFilterFactory()
 	else
 	{
 		LFilterFactory *i = First;
+		if (!i)
+			return;
+
 		int idx = 0;
 		while (i->Next && i->Next != this)
 		{
@@ -1353,7 +1356,7 @@ LFilterFactory::~LFilterFactory()
 				break;
 			}
 		}
-		if (i->Next == this)
+		if (i && i->Next == this)
 		{
 			i->Next = Next;
 		}

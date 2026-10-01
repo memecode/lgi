@@ -75,11 +75,9 @@ resources</Release>
 				</All>
 				<Linux>
 					<Debug>../include/lgi/linux
-../include/lgi/linux/Gtk
-../../../../vcpkg/installed/x64-linux/include</Debug>
+../include/lgi/linux/Gtk</Debug>
 					<Release>../include/lgi/linux
-../include/lgi/linux/Gtk
-../../../../vcpkg/installed/x64-linux/include</Release>
+../include/lgi/linux/Gtk</Release>
 				</Linux>
 				<Windows>
 					<Debug>../include/lgi/win</Debug>
@@ -95,16 +93,16 @@ resources</Release>
 			</TargetType>
 			<Libraries>
 				<Linux>
-					<Debug>magic
+					<Debug>-fuse-ld=mold
+magic
 pthread
 -static-libgcc 
-`pkg-config --libs gtk+-3.0`
-`PKG_CONFIG_PATH=../../../../vcpkg/installed/x64-linux/lib/pkgconfig pkg-config --libs google_cloud_cpp_translate`</Debug>
-					<Release>magic
+`pkg-config --libs gtk+-3.0`</Debug>
+					<Release>-fuse-ld=mold
+magic
 pthread
 -static-libgcc 
-`pkg-config --libs gtk+-3.0`
-`PKG_CONFIG_PATH=../../../../vcpkg/installed/x64-linux/lib/pkgconfig pkg-config --libs google_cloud_cpp_translate`</Release>
+`pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
 				<Haiku>
 					<Debug>gnu
@@ -112,6 +110,7 @@ be</Debug>
 					<Release>gnu
 be</Release>
 				</Haiku>
+				<All />
 			</Libraries>
 			<SystemIncludes>
 				<Linux>
@@ -132,11 +131,12 @@ be</Release>
 				</Haiku>
 			</Defines>
 			<LibraryPaths>
-				<Linux>
-					<Debug>../../../../vcpkg/installed/x64-linux/lib</Debug>
-					<Release>../../../../vcpkg/installed/x64-linux/lib</Release>
-				</Linux>
+				<Linux />
+				<All />
 			</LibraryPaths>
+			<Options />
+			<RPath />
+			<RPathLink />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -160,5 +160,9 @@ be</Release>
 				</All>
 			</Arguments>
 		</Debug>
+		<Remote />
+		<Advanced>
+			<PostBuildCommands />
+		</Advanced>
 	</Settings>
 </Project>

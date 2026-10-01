@@ -23,7 +23,7 @@
 // Defines
 
 // version
-#define APP_VER						"4.1"
+#define APP_VER						"5.0"
 
 // window messages
 enum Ids
@@ -125,16 +125,36 @@ enum IconTypes {
     ICON_CSS
 };
 
+typedef std::function<void(bool, LString)> TStrCallback;
+#define DomGoogleCloudProject "GoogleCloudProject"
+
 class LAutoTranslate
 {
 public:
 	static LArray<LAutoTranslate*> engines;
 
 	LString name;
-	virtual ~LAutoTranslate() {}
+	LAutoTranslate()
+	{
+		engines.Add(this);
+	}
+	
+	virtual ~LAutoTranslate()
+	{
+		engines.Delete(this);
+	}
 
-	virtual bool Translate(LString english, LString newLang, std::function<void(bool, LString)> callback) = 0;
+	virtual bool Translate(LString english, LString newLang, TStrCallback callback) = 0;
 };
+
+class LTranslationPlugin
+{
+public:
+	virtual ~LTranslationPlugin() {}
+	virtual bool Translate(LString english, LString newLang, TStrCallback callback) = 0;
+};
+
+typedef LTranslationPlugin *(*pCreateTranslator)(LDom *params);
 
 #define OPT_ShowLanguages			"ShowLang"
 
