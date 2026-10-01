@@ -85,7 +85,7 @@ struct LBView : public Parent
 
 	void AttachedToWindow()
 	{
-		LOG("%s:%i %s wnd=%p\n", _FL, __FUNCTION__, wnd);
+		// LOG("%s:%i %s wnd=%p\n", _FL, __FUNCTION__, wnd);
 		if (!wnd)
 			return;
 
@@ -710,8 +710,8 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 		auto Bounds = d->Bounds();
 		Position.Set((int)Frame.left,
 					 (int)Frame.top,
-					 (int)Frame.left + (int)Bounds.Width() - 1,
-					 (int)Frame.top + (int)Bounds.Height() - 1);
+					 (int)Frame.left + Bounds.IntegerWidth() - 1,
+					 (int)Frame.top + Bounds.IntegerHeight() - 1);
 		return true;
 	};
 		
@@ -1204,7 +1204,7 @@ bool LWindow::Attach(LViewI *p)
 	auto wnd = WindowHandle();
 	if (rootView && wnd)
 	{
-		LOG("%s:%i attach %p to %p\n", _FL, rootView, wnd);
+		// LOG("%s:%i attach %p to %p\n", _FL, rootView, wnd);
 		auto parent = rootView->Parent();
 		auto attachedWindow = rootView->Window();
 		if (!parent && !attachedWindow)

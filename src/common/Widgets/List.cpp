@@ -2,7 +2,7 @@
 **		FILE:			LList.cpp
 **		AUTHOR:			Matthew Allen
 **		DATE:			14/2/2000
-**		DESCRIPTION:	Lgi self-drawn listbox
+**		DESCRIPTION:	Lgi owner-drawn listbox
 **
 **		Copyright (C) 2000 Matthew Allen
 **				fret@memecode.com
