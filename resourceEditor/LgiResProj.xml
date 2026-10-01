@@ -12,7 +12,10 @@
 		<Node File="../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Gdc2/Filters/Lzw.cpp" Type="2" Platforms="15" />
 	</Node>
-	<Node Name="Objects" Type="1" Open="1" Platforms="7" Id="2">
+	<Node Name="App" Type="1" Open="1" Platforms="7" Id="2">
+		<Node Name="AutoTranslate" Type="1" Platforms="15" Id="1">
+			<Node File="./src/translate/googleTranslate.cpp" Type="2" Platforms="15" />
+		</Node>
 		<Node Name="Css" Type="1" Platforms="15" Id="8">
 			<Node File="./src/LgiRes_Css.cpp" Type="2" Platforms="15" />
 		</Node>
@@ -61,8 +64,6 @@
 					<Release>/home/matthew/Code/MidiHw/mc4/resources/mc4.lr8</Release>
 				</All>
 			</Arguments>
-			<CCrossCompiler />
-			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -110,7 +111,6 @@ be</Debug>
 					<Release>gnu
 be</Release>
 				</Haiku>
-				<All />
 			</Libraries>
 			<SystemIncludes>
 				<Linux>
@@ -129,18 +129,11 @@ be</Release>
 					<Debug>_GNU_SOURCE</Debug>
 					<Release>_GNU_SOURCE</Release>
 				</Haiku>
-				<All />
-				<Linux />
 			</Defines>
-			<Options>
-				<All />
-				<Linux />
-			</Options>
-			<LibraryPaths>
-				<All />
-				<Linux />
-			</LibraryPaths>
-			<ApplicationIcon />
+			<Options />
+			<LibraryPaths />
+			<RPathLink />
+			<RPath />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -155,8 +148,6 @@ be</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
-			<CommentFile />
-			<CommentFunction />
 		</Editor>
 		<Debug>
 			<Arguments>
@@ -165,20 +156,10 @@ be</Release>
 					<Release>/home/matthew/code/scribe/trunk_os/resources/Scribe.lr8</Release>
 				</All>
 			</Arguments>
-			<Environment />
-			<DebugAdmin />
-			<InitialDir />
-			<Debugger />
 		</Debug>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
+		<Remote />
 		<Advanced>
-			<OtherMakefileRules />
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
+			<PostBuildCommands />
 		</Advanced>
 	</Settings>
 </Project>

@@ -81,7 +81,8 @@ Source =	../src/common/Gdc2/Filters/Gif.cpp \
 			src/LgiRes_TableLayout.cpp \
 			src/LgiResApp.cpp \
 			src/Search.cpp \
-			src/ShowLanguages.cpp
+			src/ShowLanguages.cpp \
+			src/translate/googleTranslate.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -348,7 +349,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/common/Net/Uri.cpp \
 	../src/common/Resource/LgiRes.cpp \
 	../src/common/Resource/Res.cpp \
-	../src/common/Skins/Gel/Gel.cpp \
+	../src/common/Skins/plutovg/plutoVg.cpp \
 	../src/common/Text/DocView.cpp \
 	../src/common/Text/String.cpp \
 	../src/common/Text/TextConvert.cpp \
@@ -418,6 +419,7 @@ cleanall :
 	+make -C "../" -f ./linux/Makefile.linux clean
 
 VPATH=$(BuildDir) \
+	./src/translate \
 	./src \
 	../src/common/Lgi \
 	../src/common/Gdc2/Filters

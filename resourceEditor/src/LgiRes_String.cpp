@@ -548,7 +548,14 @@ bool ResString::GetFields(FieldTree &Fields)
 		{
 			if (Group->App()->ShowLang(Group->Lang[i]->Id))
 			{
-				Fields.Insert(this, DATA_STR, 202+i, Group->Lang[i]->Name, Group->Lang[i]->Name);
+				Fields.Insert(this,
+					DATA_STR,
+					202+i,
+					Group->Lang[i]->Name,
+					Group->Lang[i]->Name,
+					-1,
+					false,
+					stricmp(Group->Lang[i]->Id, "en") != 0);
 			}
 		}
 	}

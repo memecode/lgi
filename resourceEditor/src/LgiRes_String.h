@@ -185,10 +185,10 @@ public:
 
 class ResStringUi : public LBox
 {
-	LToolBar *Tools = NULL;
-	ResStringGroup *StringGrp = NULL;
-	LStatusBar *Status = NULL;
-	LStatusPane *StatusInfo = NULL;
+	LToolBar *Tools = nullptr;
+	ResStringGroup *StringGrp = nullptr;
+	LStatusBar *Status = nullptr;
+	LStatusPane *StatusInfo = nullptr;
 
 public:
 	ResStringUi(ResStringGroup *Res);

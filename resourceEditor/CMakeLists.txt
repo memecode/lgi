@@ -32,6 +32,7 @@ add_executable(LgiRes ${APP_TYPE}
 	src/LgiRes_TableLayout.cpp
 	src/Search.cpp
 	src/ShowLanguages.cpp
+	src/translate/googleTranslate.cpp
 
 	${LGI_DIR}/src/common/Lgi/About.cpp
 	${LGI_DIR}/src/common/Lgi/DocApp.cpp

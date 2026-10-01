@@ -16,6 +16,7 @@ public:
 		LRect Pos; // Position on screen in view coords
 		LColour Colour; // Colour of the spacer
 		uint32_t SizePx; // Size in pixels
+		bool Fixed; // True if an adjacent view sizes itself, i.e. not draggable
 	};
 
 	LBox(int Id = -1, bool Vertical = false, const char *name = NULL);

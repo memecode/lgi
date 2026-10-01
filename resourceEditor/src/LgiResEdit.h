@@ -125,6 +125,17 @@ enum IconTypes {
     ICON_CSS
 };
 
+class LAutoTranslate
+{
+public:
+	static LArray<LAutoTranslate*> engines;
+
+	LString name;
+	virtual ~LAutoTranslate() {}
+
+	virtual bool Translate(LString english, LString newLang, std::function<void(LString)> callback) = 0;
+};
+
 #define OPT_ShowLanguages			"ShowLang"
 
 #define StrDialogSymbols			"_Dialog Symbols_"
@@ -344,6 +355,7 @@ public:
 		int Type = 0;
 		int Id = 0;
 		bool Multiline = false;
+		bool AutoTranslate = false;
 		void *Token = nullptr;
 
 		Field(FieldTree *tree)
@@ -441,7 +453,14 @@ public:
 		View = 0;
 	}
 
-	void Insert(void *Token, int Type, int Reserved, const char *Name, const char *Label, int Idx = -1, bool Multiline = false)
+	void Insert(void *Token,
+				int Type,
+				int Reserved,
+				const char *Name,
+				const char *Label,
+				int Idx = -1,
+				bool Multiline = false,
+				bool AutoTranslate = false)
 	{
 		auto a = Get(Token, true);
 		if (!a)
@@ -455,6 +474,7 @@ public:
 			n->Id = NextId++;
 			n->Type = Type;
 			n->Multiline = Multiline;
+			n->AutoTranslate = AutoTranslate;
 			a->Add(n);
 		}
 	}

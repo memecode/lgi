@@ -55,6 +55,8 @@ const char *TypeNames[] = {
 	"Menu",
 	0};
 
+LArray<LAutoTranslate*> LAutoTranslate::engines;
+
 //////////////////////////////////////////////////////////////////////////////
 ResFileFormat GetFormat(const char *File)
 {
@@ -751,7 +753,7 @@ void FieldView::OnSelect(FieldSource *s)
 			LFontType Sys;
 			Sys.GetSystemFont("System");
 
-			LTableLayout *t = new LTableLayout(ID_TABLE);
+			auto t = new LTableLayout(ID_TABLE);
 
 			int Row = 0;
 			LLayoutCell *Cell;
@@ -777,7 +779,7 @@ void FieldView::OnSelect(FieldSource *s)
 							Cell->Add(new LTextLabel(-1, 0, 0, -1, -1, c->Label));
 
 							TextViewEdit *Tv;
-							Cell = t->GetCell(1, Row, true, c->Type == DATA_FILENAME ? 1 : 2);
+							Cell = t->GetCell(1, Row, true, c->Type == DATA_FILENAME || c->AutoTranslate ? 1 : 2);
 							Cell->Add(Tv = new TextViewEdit(c->Id, 0, 0, 100, 20, &Sys));
 							if (Tv)
 							{
@@ -790,7 +792,14 @@ void FieldView::OnSelect(FieldSource *s)
 							if (c->Type == DATA_FILENAME)
 							{
 								Cell = t->GetCell(2, Row);
-								Cell->Add(new LButton(-c->Id, 0, 0, 21, 21, "..."));
+								Cell->Add(new LButton(-c->Id, 0, 0, -1, -1, "..."));
+							}
+							else if (c->AutoTranslate)
+							{
+								Cell = t->GetCell(2, Row);
+								auto Button = new LButton(-c->Id, 0, 0, -1, -1, "T");
+								Button->Enabled(LAutoTranslate::engines.Length() > 0);
+								Cell->Add(Button);
 							}
 							break;
 						}
@@ -884,6 +893,9 @@ int FieldView::OnNotify(LViewI *Ctrl, const LNotification &n)
 				}
 				else if (c->Id == -Ctrl->GetId())
 				{
+					if (c->AutoTranslate)
+						return 0;
+
 					auto s = new LFileSelect(this);
 					s->Open([this, c, s](auto dlg, auto status)
 					{
