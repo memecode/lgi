@@ -44,11 +44,11 @@ public:
         if (!ProjectId || !*ProjectId)
             return Fail("GOOGLE_CLOUD_PROJECT is not set");
 
-        namespace translate = ::google::cloud::translate_v3;
-        auto Client = translate::TranslationServiceClient(
-            translate::MakeTranslationServiceConnection());
+        namespace translate_v3 = ::google::cloud::translate_v3;
+        auto Client = translate_v3::TranslationServiceClient(
+            translate_v3::MakeTranslationServiceConnection());
 
-        google::cloud::translate::v3::TranslateTextRequest Request;
+        google::cloud::translation::v3::TranslateTextRequest Request;
         Request.set_parent(std::string("projects/") + ProjectId + "/locations/global");
         Request.set_target_language_code(newLang.Get());
         Request.set_mime_type("text/plain");
@@ -70,5 +70,9 @@ public:
 };
 
 GoogleTranslate GoogleTranslateEngine;
+
+#else
+
+#warning "No Google Translate support"
 
 #endif

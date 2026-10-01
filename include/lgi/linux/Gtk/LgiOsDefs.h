@@ -296,6 +296,7 @@ LgiFunc void LSleep(uint32_t i);
 #define ODS_CHECKED					0x4
 #endif
 
+/*
 /// Edge type: Sunken
 #define SUNKEN						1
 /// Edge type: Raised
@@ -304,6 +305,7 @@ LgiFunc void LSleep(uint32_t i);
 #define CHISEL						3
 /// Edge type: Flat
 #define FLAT						4
+*/
 
 #ifdef WIN32
 	/// The directory separator character on Linux as a char

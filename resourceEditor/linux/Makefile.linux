@@ -26,10 +26,12 @@ ifeq ($(Build),Debug)
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
+		-L../../../../vcpkg/installed/x64-linux/lib \
 		-lmagic \
 		-lpthread \
 		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0` \
+		`PKG_CONFIG_PATH=../../../../vcpkg/installed/x64-linux/lib/pkgconfig pkg-config --libs google_cloud_cpp_translate` \
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir) \
 		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/../deps/build-x64-debug/lib' \
@@ -37,6 +39,7 @@ ifeq ($(Build),Debug)
 		-Wl,-rpath-link,$(LGI_GTK3_DIR)/../deps/build-x64-debug/lib \
 		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/$(BuildDir)'
 	Inc =  \
+		-I../../../../vcpkg/installed/x64-linux/include \
 		-I../include \
 		-I../include/lgi/linux \
 		-I../include/lgi/linux/Gtk \
@@ -48,10 +51,12 @@ else
 	Tag =
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
+		-L../../../../vcpkg/installed/x64-linux/lib \
 		-lmagic \
 		-lpthread \
 		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0` \
+		`PKG_CONFIG_PATH=../../../../vcpkg/installed/x64-linux/lib/pkgconfig pkg-config --libs google_cloud_cpp_translate` \
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir) \
 		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/../deps/build-x64-release/lib' \
@@ -59,6 +64,7 @@ else
 		-Wl,-rpath-link,$(LGI_GTK3_DIR)/../deps/build-x64-release/lib \
 		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/$(BuildDir)'
 	Inc =  \
+		-I../../../../vcpkg/installed/x64-linux/include \
 		-I../include \
 		-I../include/lgi/linux \
 		-I../include/lgi/linux/Gtk \
