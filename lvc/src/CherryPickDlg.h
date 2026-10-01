@@ -114,6 +114,11 @@ public:
 	{
 		switch (Ctrl->GetId())
 		{
+			case ID_EDIT_MSG:
+			{
+				SetCtrlEnabled(ID_MESSAGE, GetCtrlValue(ID_EDIT_MSG) != 0);
+				break;
+			}
 			case IDOK:
 			{
 				if (parents)
@@ -128,6 +133,12 @@ public:
 						}
 						else LAssert(!"invalid count");
 					}	
+				}
+
+				if (GetCtrlValue(ID_EDIT_MSG))
+				{
+					// User wants to override the commit message:
+					commit.message = GetCtrlName(ID_MESSAGE);
 				}
 			
 				// fall through

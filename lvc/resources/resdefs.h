@@ -97,6 +97,7 @@
 #define ID_COPY_NAME							180
 #define IDC_182									182
 #define IDS_LIST_AUTHORS						184
+#define ID_EDIT_MSG								186
 #define ID_URL									188
 #define ID_COPY									189
 #define ID_CHANGE								190

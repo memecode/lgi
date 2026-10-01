@@ -465,7 +465,7 @@ public:
 		LString::Array mergeParents;
 	};
 	void GetCommit(LString hash, std::function<void(TCommitInfo&)> callback);
-	void CherryPick(LString hash, int parentIdx = -1, std::function<void(bool)> callback = nullptr);
+	void CherryPick(LString hash, LString newMessage, int parentIdx = -1, std::function<void(bool)> callback = nullptr);
 
 	enum TColourType {
 		TColNone,

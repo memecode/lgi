@@ -122,7 +122,6 @@
 		<String Ref="172" Cid="93" Define="ID_AUTHOR" />
 		<String Ref="174" Cid="-1" Define="IDC_STATIC" en="Date:" />
 		<String Ref="175" Cid="175" Define="ID_DATE" />
-		<String Ref="176" Cid="-1" Define="IDC_STATIC" en="Message:" />
 		<String Ref="177" Cid="173" Define="ID_PARENT_COMMITS" />
 		<String Ref="178" Cid="178" Define="ID_MESSAGE" />
 		<String Ref="179" Cid="-1" Define="IDC_STATIC" en="Parent commit:" />
@@ -131,6 +130,7 @@
 		<String Ref="182" Cid="182" Define="IDC_182" />
 		<String Ref="183" Cid="-1" Define="IDC_STATIC" en="Remote URL:" />
 		<String Ref="185" Cid="-1" Define="IDC_STATIC" en="Almost always, choose merge parent &apos;1&apos;..." />
+		<String Ref="186" Cid="186" Define="ID_EDIT_MSG" en="Edit message:" />
 		<String Ref="188" Cid="188" Define="ID_URL" />
 		<String Ref="189" Cid="189" Define="ID_COPY" en="Copy" />
 		<String Ref="190" Cid="190" Define="ID_CHANGE" en="Change" />
@@ -326,7 +326,7 @@
 			</tr>
 			<tr>
 				<td addr="0,4">
-					<StaticText pos="14,165,83,185" ref="176" />
+					<CheckBox pos="14,168,132,188" ref="186" />
 				</td>
 				<td addr="1,4">
 					<EditBox Pos="197,172,420,199" Enabled="0" MultiLine="1" ref="178" />
@@ -349,8 +349,8 @@
 			<tr>
 				<td addr="0,7" />
 				<td addr="1,7">
-					<Button Pos="208,418,284,438" toggle="0" ref="169" />
-					<Button Pos="302,411,371,431" toggle="0" ref="170" />
+					<Button Pos="196,413,272,433" toggle="0" ref="169" />
+					<Button Pos="287,413,356,433" toggle="0" ref="170" />
 				</td>
 			</tr>
 		</TableLayout>

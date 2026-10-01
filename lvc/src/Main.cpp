@@ -1982,7 +1982,7 @@ public:
 								if (!code)
 									return;
 								
-								folder->CherryPick(dlg->commit.hash, dlg->mergeParentIdx);
+								folder->CherryPick(dlg->commit.hash, dlg->commit.message, dlg->mergeParentIdx);
 							});
 				}
 				else LPopupNotification::Message(this, "Select a folder first...");

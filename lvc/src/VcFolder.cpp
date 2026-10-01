@@ -3531,7 +3531,13 @@ void VcFolder::GetCommit(LString hash, std::function<void(TCommitInfo&)> callbac
 	}
 }
 
-void VcFolder::CherryPick(LString hash, int parentIdx, std::function<void(bool)> callback)
+void VcFolder::CherryPick(	LString hash,
+							/// This is an optional NEW commit message:
+							LString newMessage,
+							/// THe parent index to use: 1=main branch, 2=feature branch
+							int parentIdx,
+							/// Optional callback for status
+							std::function<void(bool)> callback)
 {
 	switch (GetType())
 	{
@@ -3543,23 +3549,59 @@ void VcFolder::CherryPick(LString hash, int parentIdx, std::function<void(bool)>
 		case VcGit:
 		{
 			LString args;
-			if (parentIdx >= 0)
-				args = LString::Fmt("cherry-pick -m %u %s", parentIdx, hash.Get());
-			else
-				args = LString::Fmt("cherry-pick %s", hash.Get());
-			
-			ParseParams *p = nullptr;
-			if (callback)
+			LString mergeOpt = parentIdx >= 0 ? LString::Fmt(" -m %u", parentIdx) : LString();
+
+			if (newMessage)
 			{
-				if ((p = new ParseParams))
-				{
-					p->Callback = [this, callback](auto code, auto str)
+				// Apply the changes without committing, then commit with the supplied message.
+				args = LString::Fmt("cherry-pick --no-commit%s %s", mergeOpt.Get(), hash.Get());
+
+				auto msg = newMessage.Replace("\"", "\\\"");
+
+				auto p = new ParseParams;
+				p->Callback = [this, msg, callback](auto code, auto str)
+					{
+						if (code)
 						{
-							callback(code == 0);					
-						};
-				}
+							if (callback)
+								callback(false);
+							return;
+						}
+
+						auto commitArgs = LString::Fmt("commit -m \"%s\"", msg.Get());
+
+						ParseParams *cp = nullptr;
+						if (callback)
+						{
+							if ((cp = new ParseParams))
+							{
+								cp->Callback = [this, callback](auto code, auto str)
+									{
+										callback(code == 0);
+									};
+							}
+						}
+						StartCmd(commitArgs, nullptr, cp);
+					};
+				StartCmd(args, nullptr, p);
 			}
-			StartCmd(args, nullptr, p);
+			else
+			{
+				args = LString::Fmt("cherry-pick%s %s", mergeOpt.Get(), hash.Get());
+
+				ParseParams *p = nullptr;
+				if (callback)
+				{
+					if ((p = new ParseParams))
+					{
+						p->Callback = [this, callback](auto code, auto str)
+							{
+								callback(code == 0);					
+							};
+					}
+				}
+				StartCmd(args, nullptr, p);
+			}
 			break;
 		}
 	}
