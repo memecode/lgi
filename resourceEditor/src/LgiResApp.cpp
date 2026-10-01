@@ -894,30 +894,58 @@ int FieldView::OnNotify(LViewI *Ctrl, const LNotification &n)
 				else if (c->Id == -Ctrl->GetId())
 				{
 					if (c->AutoTranslate)
-						return 0;
-
-					auto s = new LFileSelect(this);
-					s->Open([this, c, s](auto dlg, auto status)
 					{
-						if (status)
-						{
-							auto File = App->GetCurFile();
-							if (File)
-							{
-								LFile::Path p = File;
-								auto Rel = LMakeRelativePath(p / "..", dlg->Name());
-								if (Rel)
-									SetCtrlName(c->Id, Rel);
-								else
-									SetCtrlName(c->Id, dlg->Name());
-							}
-							else SetCtrlName(c->Id, dlg->Name());
+						auto String = static_cast<ResString*>(c->Token);
+						auto Lang = LFindLang(0, c->Name);
+						if (!String || !Lang || LAutoTranslate::engines.Length() == 0)
+							return 0;
 
-							Fields.SetMode(FieldTree::UiToObj);
-							Fields.SetView(this);
-							Source->Serialize(Fields);
-						}
-					});
+						auto English = String->Get("en");
+						if (!English)
+							return 0;
+
+						auto Engine = LAutoTranslate::engines[0];
+						Engine->Translate(English, Lang->Id,
+							[this, c](bool Status, LString Text)
+							{
+								if (Status)
+								{
+									SetCtrlName(c->Id, Text);
+									Fields.SetMode(FieldTree::UiToObj);
+									Fields.SetView(this);
+									Source->Serialize(Fields);
+								}
+								else
+								{
+									LgiMsg(this, "%s", AppName, MB_OK, Text.Get());
+								}
+							});
+					}
+					else
+					{
+						auto s = new LFileSelect(this);
+						s->Open([this, c, s](auto dlg, auto status)
+						{
+							if (status)
+							{
+								auto File = App->GetCurFile();
+								if (File)
+								{
+									LFile::Path p = File;
+									auto Rel = LMakeRelativePath(p / "..", dlg->Name());
+									if (Rel)
+										SetCtrlName(c->Id, Rel);
+									else
+										SetCtrlName(c->Id, dlg->Name());
+								}
+								else SetCtrlName(c->Id, dlg->Name());
+
+								Fields.SetMode(FieldTree::UiToObj);
+								Fields.SetView(this);
+								Source->Serialize(Fields);
+							}
+						});
+					}
 				}
 			}
 		}

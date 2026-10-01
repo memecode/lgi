@@ -133,7 +133,7 @@ public:
 	LString name;
 	virtual ~LAutoTranslate() {}
 
-	virtual bool Translate(LString english, LString newLang, std::function<void(LString)> callback) = 0;
+	virtual bool Translate(LString english, LString newLang, std::function<void(bool, LString)> callback) = 0;
 };
 
 #define OPT_ShowLanguages			"ShowLang"
