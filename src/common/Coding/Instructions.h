@@ -2177,8 +2177,12 @@ case IDebug:
 			__debugbreak();
 		#elif defined MAC
 			__builtin_trap();
+		#elif defined HAIKU
+			debugger("Lgi script debugger instruction");
 		#elif defined LINUX
 			Gtk::raise(SIGINT);
+		#elif defined HAIKU
+			debugger("Lgi script debugger instruction");
 		#else
 			#warning "Not impl."
 		#endif

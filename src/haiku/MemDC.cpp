@@ -11,14 +11,14 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "Screen.h"
-#include "Region.h"
+#include <Screen.h>
+#include <Region.h>
+#include <Bitmap.h>
 
 #include "lgi/common/Gdc2.h"
 #include "lgi/common/LgiString.h"
 #include "lgi/common/Variant.h"
 
-#include <Bitmap.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 #define ROUND_UP(bits) (((bits) + 7) / 8)

@@ -17,6 +17,10 @@
 #include <ffi/ffi.h>
 #endif
 
+#if defined(HAIKU)
+#include <OS.h>
+#endif
+
 #define TIME_INSTRUCTIONS		0
 #define POST_EXECUTE_STATE		0
 

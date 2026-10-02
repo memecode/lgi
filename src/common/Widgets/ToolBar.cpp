@@ -588,10 +588,6 @@ void LToolButton::Layout()
 	// Text
 	auto s = Name();
 	bool ShowLabels = ToolBar->d->ShowTextLabels();
-	#if HAIKU
-	LgiTrace("%s:%i - Toolbar button layout: name='%s' enabled=%i font=%p\n",
-		_FL, s ? s : "", ShowLabels, ToolBar->d->Font);
-	#endif
 	if (!ShowLabels || !s)
 		return;
 
@@ -629,10 +625,6 @@ void LToolButton::Layout()
 			}
 		}
 	}
-	#if HAIKU
-	LgiTrace("%s:%i - Toolbar button labels created: name='%s' count=%i\n",
-		_FL, s, d->Text.Length());
-	#endif
 }
 
 void LToolButton::OnPaint(LSurface *pDC)
@@ -1064,9 +1056,6 @@ LToolBar::LToolBar()
 			d->Font->Transparent(true);
 		}
 	}
-	#if HAIKU
-	LgiTrace("%s:%i - Toolbar small font: lookup=%i font=%p\n", _FL, HasSmallFont, d->Font);
-	#endif
 
 	d->LastIndex = 0;
 	d->OwnImgList = false;

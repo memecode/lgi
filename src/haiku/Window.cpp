@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <atomic>
+#include <Bitmap.h>
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/DragAndDrop.h"
@@ -16,7 +17,7 @@
 #define DEBUG_SETFOCUS			0
 #define DEBUG_HANDLEVIEWKEY		0
 #define DEBUG_WAIT_THREAD		0
-#define DEBUG_SERIALIZE_STATE	1
+#define DEBUG_SERIALIZE_STATE	0
 
 #if DEBUG_WAIT_THREAD
 	#define WAIT_LOG(...)		LgiTrace(__VA_ARGS__)
@@ -507,6 +508,16 @@ public:
 		m.AddFloat("height", height);
 		LAppPrivate::Post(&m);
 		BWindow::FrameResized(width, height);
+
+		if (view)
+		{
+			auto menu = KeyMenuBar();
+			BRect menuPos = menu ? menu->Frame() : BRect(0, 0, 0, 0);
+			// Why am I adding 1 to each dimension? I don't know? But it
+			// works right? Otherwise you get a 1px unpainted border along 
+			// the right/bottom edge.
+			view->ResizeTo(width+1, height-menuPos.Height()+1);
+		}
 	}
 
 	bool QuitRequested()
@@ -642,9 +653,7 @@ void LBView<Parent>::Draw(BRect updateRect)
 	Parent::FillRect(f);
 	#endif
 
-	// Parent::UnlockLooper(); // holding the lock on the BWindow can cause a deadlock, so unlock it here
 	auto memDc = wnd->d->mem.Lock(_FL);
-	// Parent::LockLooper(); // relock it now... to do drawing
 
 	if (!memDc || !memDc.Get())
 	{
@@ -818,6 +827,11 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 				// Create a memory context big enough
 				#define ROUNDUP(i) ( (i) - ((i) % 32) + 32 )
 				memDC.Set(new LMemDC(_FL, ROUNDUP(c.X()), ROUNDUP(c.Y()), System32BitColourSpace));
+
+				#if 0 // coverage testing
+				memDC->Colour(LColour(255, 0, 255));
+				memDC->Rectangle();
+				#endif
 			}
 			if (!memDC.Get())
 			{
@@ -1106,8 +1120,6 @@ void LWindow::Visible(bool i)
 			d->ResizeTo(Pos.X(), Pos.Y());
 			d->Show();
 		}
-		else
-			printf("%s already shown\n", GetClass());
 	}
 	else
 	{
@@ -1175,14 +1187,6 @@ void LWindow::UpdateRootView()
 
 		rootView->Show();
 	}
-	
-	auto menu = wnd->KeyMenuBar();
-	BRect menuPos = menu ? menu->Frame() : BRect(0, 0, 0, 0);
-	
-	auto f = wnd->Frame();
-	rootView->ResizeTo(f.Width(), f.Height() - menuPos.Height());
-	// if (menu) rootView->MoveTo(0, menuPos.Height());
-	rootView->SetResizingMode(B_FOLLOW_ALL_SIDES);
 }
 
 bool LWindow::IsAttached()

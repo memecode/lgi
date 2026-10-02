@@ -103,7 +103,7 @@ bool LPanel::Attach(LViewI *Wnd)
 bool LPanel::Pour(LRegion &rgn)
 {
 	int Sx = CalcWidth();
-	LRect *Best = 0;
+	LRect *Best = nullptr;
 	if (Open())
 	{
 		Best = FindLargest(rgn);
@@ -121,7 +121,7 @@ bool LPanel::Pour(LRegion &rgn)
 
 	if (!Best)
 	{
-		LgiTrace("%s:%i - No best rect.\n", _FL);
+		// LgiTrace("%s:%i - No best rect, open=%i\n", _FL, Open());
 		return false;
 	}
 	
