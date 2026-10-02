@@ -2,6 +2,7 @@
 
 #include "google/cloud/translate/v3/translation_client.h"
 #include "google/cloud/project.h"
+#include "google/cloud/common_options.h" 
 #include <cstdlib>
 #include <iostream>
 #include <string>
@@ -21,6 +22,11 @@ public:
     {
     }
 	
+    // https://console.cloud.google.com/cloud-hub/home
+    // https://docs.cloud.google.com/sdk/docs/install-sdk
+    // needs:
+    //      gcloud auth application-default login
+    //      gcloud auth application-default set-quota-project <PROJECT_ID>
     bool Translate(LString english, LString newLang, TStrCallback callback) override
     {
         auto Fail = [&callback](const char *Message)
@@ -45,8 +51,12 @@ public:
         }
 
         namespace translate_v3 = ::google::cloud::translate_v3;
+
+        auto options = google::cloud::Options{}
+            .set<google::cloud::UserProjectOption>(ProjectId);
+
         auto Client = translate_v3::TranslationServiceClient(
-            translate_v3::MakeTranslationServiceConnection());
+            translate_v3::MakeTranslationServiceConnection(options));
 
         google::cloud::translation::v3::TranslateTextRequest Request;
         Request.set_parent(std::string("projects/") + ProjectId + "/locations/global");

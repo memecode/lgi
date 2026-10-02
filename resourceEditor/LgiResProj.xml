@@ -8,9 +8,10 @@
 		<Node File="../src/common/Lgi/About.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Lgi/DocApp.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Gdc2/Filters/Gif.cpp" Type="2" Platforms="15" />
-		<Node File="../src/common/Lgi/OptionsFile.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Gdc2/Filters/Lzw.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Lgi/OptionsFile.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Text/XmlTreeUi.cpp" Type="2" Platforms="15" />
 	</Node>
 	<Node Name="App" Type="1" Open="1" Platforms="7" Id="2">
 		<Node Name="AutoTranslate" Type="1" Platforms="15" Id="3">
@@ -110,7 +111,6 @@ be</Debug>
 					<Release>gnu
 be</Release>
 				</Haiku>
-				<All />
 			</Libraries>
 			<SystemIncludes>
 				<Linux>
@@ -130,13 +130,6 @@ be</Release>
 					<Release>_GNU_SOURCE</Release>
 				</Haiku>
 			</Defines>
-			<LibraryPaths>
-				<Linux />
-				<All />
-			</LibraryPaths>
-			<Options />
-			<RPath />
-			<RPathLink />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -154,15 +147,8 @@ be</Release>
 		</Editor>
 		<Debug>
 			<Arguments>
-				<All>
-					<Debug>/home/matthew/code/scribe/trunk_os/resources/Scribe.lr8</Debug>
-					<Release>/home/matthew/code/scribe/trunk_os/resources/Scribe.lr8</Release>
-				</All>
+				<All />
 			</Arguments>
 		</Debug>
-		<Remote />
-		<Advanced>
-			<PostBuildCommands />
-		</Advanced>
 	</Settings>
 </Project>

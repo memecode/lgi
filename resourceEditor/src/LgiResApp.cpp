@@ -27,6 +27,7 @@
 #include "lgi/common/StatusBar.h"
 
 #include "resdefs.h"
+#include "OptionsDlg.h"
 
 char AppName[]					= "Lgi Resource Editor";
 char HelpFile[]					= "Help.html";
@@ -896,8 +897,7 @@ int FieldView::OnNotify(LViewI *Ctrl, const LNotification &n)
 					if (c->AutoTranslate)
 					{
 						auto String = static_cast<ResString*>(c->Token);
-						auto Lang = LFindLang(0, c->Name);
-						if (!String || !Lang || LAutoTranslate::engines.Length() == 0)
+						if (!String || LAutoTranslate::engines.Length() == 0)
 							return 0;
 
 						auto English = String->Get("en");
@@ -905,7 +905,8 @@ int FieldView::OnNotify(LViewI *Ctrl, const LNotification &n)
 							return 0;
 
 						auto Engine = LAutoTranslate::engines[0];
-						Engine->Translate(English, Lang->Id,
+						printf("%s:%i - starting translation to '%s'...\n", _FL, c->AutoTranslate);
+						Engine->Translate(English, c->AutoTranslate,
 							[this, c](bool Status, LString Text)
 							{
 								if (Status)
@@ -917,6 +918,7 @@ int FieldView::OnNotify(LViewI *Ctrl, const LNotification &n)
 								}
 								else
 								{
+									LgiTrace("%s:%i - translation failed: %s\n", _FL, Text.Get());
 									LgiMsg(this, "%s", AppName, MB_OK, Text.Get());
 								}
 							});
@@ -1325,6 +1327,12 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 	SerialiseContext Ctx;
 	switch (Cmd)
 	{
+		case ID_OPTIONS:
+		{
+			if (auto Dlg = new OptionsDlg(this, GetOptions()))
+				Dlg->DoModal(NULL);
+			break;
+		}
 		case IDM_SHOW_LANG:
 		{
 			auto Dlg = new ShowLanguagesDlg(this);

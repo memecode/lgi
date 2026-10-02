@@ -75,6 +75,7 @@ Source =	../src/common/Gdc2/Filters/Gif.cpp \
 			../src/common/Lgi/DocApp.cpp \
 			../src/common/Lgi/LgiMain.cpp \
 			../src/common/Lgi/OptionsFile.cpp \
+			../src/common/Text/XmlTreeUi.cpp \
 			src/LgiRes_ControlTree.cpp \
 			src/LgiRes_Css.cpp \
 			src/LgiRes_Dialog.cpp \
@@ -423,5 +424,6 @@ cleanall :
 VPATH=$(BuildDir) \
 	./src/translate \
 	./src \
+	../src/common/Text \
 	../src/common/Lgi \
 	../src/common/Gdc2/Filters

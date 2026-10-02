@@ -375,7 +375,7 @@ public:
 		int Type = 0;
 		int Id = 0;
 		bool Multiline = false;
-		bool AutoTranslate = false;
+		LLanguageId AutoTranslate = nullptr;
 		void *Token = nullptr;
 
 		Field(FieldTree *tree)
@@ -417,10 +417,10 @@ protected:
 		if (!a)
 			return nullptr;
 
-		for (size_t i=0; i<a->Length(); i++)
+		for (auto fld: *a)
 		{
-			if (!stricmp((*a)[i]->Name, FieldName))
-				return (*a)[i];
+			if (!stricmp(fld->Label, FieldName))
+				return fld;
 		}
 
 		return nullptr;
@@ -480,7 +480,7 @@ public:
 				const char *Label,
 				int Idx = -1,
 				bool Multiline = false,
-				bool AutoTranslate = false)
+				LLanguageId AutoTranslate = nullptr)
 	{
 		auto a = Get(Token, true);
 		if (!a)
@@ -563,7 +563,11 @@ public:
 	void Serialize(void *Token, const char *FieldName, char *&s)
 	{
 		Field *f = GetField(Token, FieldName);
-		if (!f) return;
+		if (!f)
+		{
+			f = GetField(Token, FieldName);
+			return;
+		}
 		LVariant v;
 
 		switch (Mode)

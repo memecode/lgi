@@ -1,6 +1,7 @@
-#include "lgi/common/Dom.h"
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Library.h"
+#include "lgi/common/App.h"
+#include "lgi/common/Dom.h"
 
 #include "../LgiResEdit.h"
 
@@ -84,8 +85,13 @@ public:
     {
         if (!Stricmp(Name, DomGoogleCloudProject))
         {
-            // Value = googleCloudProject;
-            // return true;
+            if (auto app = dynamic_cast<AppWnd*>(LAppInst->AppWnd))
+            {
+                auto res = app->GetOptions()->GetValue(DomGoogleCloudProject, Value);
+                printf("%s:%i - got cloud '%s' = %i\n", _FL, Value.Str(), res);
+                return res;
+            }
+            else printf("%s:%i - failed to find app wnd.\n", _FL);
         }
         return false;
     }
