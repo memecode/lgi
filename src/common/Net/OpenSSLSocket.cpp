@@ -1786,6 +1786,7 @@ int SslSocket::Close()
 	}
 
 	bool WasConnected = Ssl != nullptr || Bio != nullptr;
+	OsSocket socket = GetRawSocket(Bio);
 
 	if (Ssl)
 	{
@@ -1799,6 +1800,15 @@ int SslSocket::Close()
 		Library->BIO_free_all(Bio);
 		Bio = nullptr;
 	}	
+
+	if (socket != INVALID_SOCKET && socket != d->ListenSocket)
+	{
+		#if defined WIN32
+			closesocket(socket);
+		#else
+			close(socket);
+		#endif
+	}
 
 	if (d->ListenSocket != INVALID_SOCKET)
 	{
