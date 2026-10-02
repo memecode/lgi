@@ -623,7 +623,7 @@
 		</TableLayout>
 	</Dialog>
 	<Dialog pos="7,7,1108,134" ref="1">
-		<TableLayout pos="7,7,972,97" ref="2" cols="0.102,0.106,0.099,0.067,0.050,0.167,0.102,0.102,0.102,0.102" rows="1.000">
+		<TableLayout pos="7,7,972,97" ref="2" Style="padding-top: 3px;" CellStyle="padding-left: 4px;&#10;padding-right: 1em;" cols="0.102,0.106,0.099,0.067,0.050,0.167,0.102,0.102,0.102,0.102" rows="1.000">
 			<tr>
 				<td addr="0,0" valign="Center" style="padding-left: 4px;&#10;padding-right: 1em;">
 					<Button Pos="7,21,83,48" image="" toggle="0" ref="18" />
