@@ -510,6 +510,9 @@ bool LGetDriveInfo(
 #include <sys/types.h>
 #include <sys/statvfs.h>
 #include <pwd.h>
+#include <set>
+#include <string>
+#include <mntent.h>
 
 #define DEBUG_VOLUMES       0
 #if DEBUG_VOLUMES
@@ -525,7 +528,10 @@ struct LVolumePriv
 	LVolumeTypes Type = VT_NONE;
 	int Flags = 0;
 	LSystemPath SysPath = LSP_ROOT;
-	LString Name, Path;
+	LString Name, Path, Device;
+	bool Mounted = true;
+	std::set<std::string> MountedDevs; // every mounted block device, listed or not
+	bool SizeKnown = true;
 	LVolume *NextVol = NULL, *ChildVol = NULL;
 
 	LVolumePriv(LVolume *owner, const char *path) : Owner(owner)
@@ -594,6 +600,298 @@ struct LVolumePriv
 		}
 	}
 
+	static bool IsNetworkFs(const char *fs)
+	{
+		static const char *net[] = {"nfs", "nfs4", "cifs", "smb3", "smbfs", "afs", "ceph", "9p", "davfs", NULL};
+		for (auto n = net; *n; n++)
+			if (!strcmp(fs, *n))
+				return true;
+		return !strncmp(fs, "fuse.", 5) && strcmp(fs, "fuse.fusermount");
+	}
+
+	// statvfs can block for a long time on dead network mounts, so it's done lazily.
+	void UpdateSize()
+	{
+		if (SizeKnown || !Mounted || !Path)
+			return;
+		SizeKnown = true;
+		struct statvfs s = {0};
+		auto startTs = LCurrentTime();
+		int r = statvfs(Path, &s);
+		auto endTs = LCurrentTime();
+		if (endTs - startTs > 20)
+			LgiTrace("%s:%i - statvfs(%s) took " LPrintfInt64 "ms.\n", _FL, Path.Get(), endTs-startTs);
+		if (r)
+			LgiTrace("%s:%i - statvfs(%s) failed.\n", _FL, Path.Get());
+		else
+		{
+			Size = (uint64_t)s.f_blocks * s.f_frsize;
+			Free = (uint64_t)s.f_bfree * s.f_frsize;
+		}
+	}
+
+	static LString ReadSysFile(const char *p)
+	{
+		LString r;
+		FILE *f = fopen(p, "r");
+		if (f)
+		{
+			char buf[256];
+			if (fgets(buf, sizeof(buf), f))
+				r = LString(buf).Strip();
+			fclose(f);
+		}
+		return r;
+	}
+
+	static LVolumeTypes TypeFromDevice(const char *Dev, bool Removable)
+	{
+		if (stristr(Dev, "cdrom") || stristr(Dev, "/sr"))
+			return VT_CDROM;
+		if (stristr(Dev, "/fd"))
+			return VT_FLOPPY;
+		if (Removable)
+			return VT_USB_FLASH;
+		return VT_HARDDISK;
+	}
+
+	bool IsRemovable(const char *Dev)
+	{
+		// Partitions inherit "removable" from the parent disk
+		auto Leaf = strrchr(Dev, '/');
+		if (!Leaf)
+			return false;
+		char p[300];
+		LString Base = Leaf + 1;
+		for (int pass = 0; pass < 2; pass++)
+		{
+			snprintf(p, sizeof(p), "/sys/class/block/%s/removable", Base.Get());
+			auto v = ReadSysFile(p);
+			if (v)
+				return v == "1";
+			// Strip partition suffix: sdb1 -> sdb, nvme0n1p2 -> nvme0n1
+			char *b = Base.Get();
+			ssize_t e = (ssize_t)strlen(b);
+			while (e > 0 && isdigit((uchar)b[e-1])) e--;
+			if (e > 0 && b[e-1] == 'p' && e > 1 && isdigit((uchar)b[e-2])) e--;
+			Base = Base(0, e);
+		}
+		return false;
+	}
+
+	// EFI system partitions aren't useful to the user
+	static bool IsEfi(const char *Dev)
+	{
+		char *Real = realpath(Dev, NULL);
+		if (!Real)
+		{
+			VLOG("Volumes: IsEfi(%s) realpath failed\n", Dev);
+			return false;
+		}
+		LString Target = Real;
+		free(Real);
+
+		char *Esp = realpath("/dev/disk/by-parttypeuuid/c12a7328-f81f-11d2-ba4b-00a0c93ec93b", NULL);
+		if (Esp)
+		{
+			bool Match = Target.Equals(Esp);
+			VLOG("Volumes: IsEfi(%s) by-parttypeuuid=%s match=%i\n", Target.Get(), Esp, Match);
+			free(Esp);
+			if (Match)
+				return true;
+		}
+		else
+			VLOG("Volumes: IsEfi(%s) no by-parttypeuuid link\n", Target.Get());
+
+		auto Leaf = strrchr(Target.Get(), '/');
+		if (!Leaf)
+			return false;
+		Leaf++;
+
+		// The udev database holds the GPT type GUID: /run/udev/data/b<major>:<minor>
+		char p[300];
+		snprintf(p, sizeof(p), "/sys/class/block/%s/dev", Leaf);
+		auto MajMin = ReadSysFile(p);
+		if (MajMin)
+		{
+			snprintf(p, sizeof(p), "/run/udev/data/b%s", MajMin.Get());
+			FILE *f = fopen(p, "r");
+			if (f)
+			{
+				char ln[512];
+				bool Found = false;
+				while (fgets(ln, sizeof(ln), f))
+					if (stristr(ln, "ID_PART_ENTRY_TYPE=c12a7328-f81f-11d2-ba4b-00a0c93ec93b"))
+						Found = true;
+				fclose(f);
+				VLOG("Volumes: IsEfi(%s) udev db %s found=%i\n", Target.Get(), p, Found);
+				if (Found)
+					return true;
+			}
+			else
+				VLOG("Volumes: IsEfi(%s) can't open %s\n", Target.Get(), p);
+		}
+
+		// Partition label, e.g. "EFI system partition"
+		auto Dir = opendir("/dev/disk/by-partlabel");
+		if (Dir)
+		{
+			struct dirent *de;
+			while ((de = readdir(Dir)))
+			{
+				if (de->d_name[0] == '.' || !stristr(de->d_name, "EFI"))
+					continue;
+				snprintf(p, sizeof(p), "/dev/disk/by-partlabel/%s", de->d_name);
+				char *r = realpath(p, NULL);
+				if (r)
+				{
+					bool Match = Target.Equals(r);
+					free(r);
+					if (Match)
+					{
+						VLOG("Volumes: IsEfi(%s) matched partlabel '%s'\n", Target.Get(), de->d_name);
+						closedir(Dir);
+						return true;
+					}
+				}
+			}
+			closedir(Dir);
+		}
+
+		VLOG("Volumes: IsEfi(%s) -> not EFI\n", Target.Get());
+		return false;
+	}
+
+	// Mounted volumes come from the kernel's live table, no disk access needed.
+	void EnumMounts()
+	{
+		auto fp = setmntent("/proc/self/mounts", "r");
+		if (!fp)
+		{
+			LgiTrace("%s:%i - failed to read /proc/self/mounts\n", _FL);
+			return;
+		}
+
+		std::set<std::string> Seen;
+		struct mntent *m;
+		while ((m = getmntent(fp)))
+		{
+			LString Dev = m->mnt_fsname, Mnt = m->mnt_dir, Fs = m->mnt_type;
+			bool Net = IsNetworkFs(Fs);
+			bool Block = Dev.Find("/dev/") == 0 && Dev.Find("/dev/loop") != 0;
+			if (Block)
+			{
+				char *rp = realpath(Dev, NULL);
+				MountedDevs.insert(rp ? rp : Dev.Get());
+				free(rp);
+			}
+			VLOG("Volumes: mount dev=%s mnt=%s fs=%s block=%i net=%i\n", Dev.Get(), Mnt.Get(), Fs.Get(), Block, Net);
+
+			if (!(Block || Net) ||
+				Mnt.Length() <= 1 ||
+				Fs.Equals("swap") ||
+				Fs.Equals("squashfs") ||
+				Mnt.Find("/snap/") == 0 ||
+				Mnt.Find("/boot") == 0 ||
+				Mnt.Equals("/efi") ||
+				(Block && IsEfi(Dev)) ||
+				Mnt.Find("/var/lib/") == 0 ||
+				!Seen.insert(Mnt.Get()).second)
+				continue;
+
+			VLOG("Volumes:   -> listing mount %s\n", Mnt.Get());
+			auto v = new LVolume(0);
+			if (!v)
+				continue;
+			auto MountName = strrchr(Mnt, '/');
+			v->d->Name = (MountName && MountName[1]) ? MountName + 1 : Mnt.Get();
+			v->d->Path = Mnt;
+			v->d->Device = Dev;
+			v->d->SizeKnown = false;
+			v->d->Type = Net ? VT_NETWORK_SHARE : TypeFromDevice(Dev, IsRemovable(Dev));
+			if (Net)
+				v->d->SizeKnown = true; // never stat network mounts just to list them
+			Insert(NextVol, v);
+		}
+		endmntent(fp);
+	}
+
+	// Partitions with a filesystem that aren't currently mounted
+	void EnumUnmounted()
+	{
+		auto Dir = opendir("/dev/disk/by-uuid");
+		if (!Dir)
+			return;
+
+		struct dirent *de;
+		while ((de = readdir(Dir)))
+		{
+			if (de->d_name[0] == '.')
+				continue;
+
+			char link[512];
+			snprintf(link, sizeof(link), "/dev/disk/by-uuid/%s", de->d_name);
+			char *Dev = realpath(link, NULL);
+			if (!Dev)
+				continue;
+			LString DevStr = Dev;
+			free(Dev);
+
+			VLOG("Volumes: unmounted candidate %s (%s)\n", DevStr.Get(), de->d_name);
+			if (MountedDevs.find(DevStr.Get()) != MountedDevs.end() ||
+				DevStr.Find("/dev/loop") == 0 ||
+				DevStr.Find("/dev/dm-") == 0 ||
+				DevStr.Find("/dev/ram") == 0 ||
+				DevStr.Find("/dev/zram") == 0 ||
+				IsEfi(DevStr))
+				continue;
+
+			auto Leaf = strrchr(DevStr.Get(), '/') + 1;
+			char p[300];
+
+			// Prefer the filesystem label for the display name
+			LString Label;
+			auto LabelDir = opendir("/dev/disk/by-label");
+			if (LabelDir)
+			{
+				struct dirent *ld;
+				while ((ld = readdir(LabelDir)))
+				{
+					if (ld->d_name[0] == '.')
+						continue;
+					snprintf(p, sizeof(p), "/dev/disk/by-label/%s", ld->d_name);
+					char *r = realpath(p, NULL);
+					if (r)
+					{
+						bool Match = DevStr.Equals(r);
+						free(r);
+						if (Match)
+						{
+							Label = ld->d_name;
+							break;
+						}
+					}
+				}
+				closedir(LabelDir);
+			}
+
+			snprintf(p, sizeof(p), "/sys/class/block/%s/size", Leaf);
+			auto Sectors = ReadSysFile(p);
+
+			auto v = new LVolume(0);
+			if (!v)
+				continue;
+			v->d->Name = Label ? Label : LString(Leaf);
+			v->d->Device = DevStr;
+			v->d->Mounted = false;
+			v->d->Type = TypeFromDevice(DevStr, IsRemovable(DevStr));
+			if (Sectors)
+				v->d->Size = Sectors.Int() * 512;
+			Insert(NextVol, v);
+		}
+		closedir(Dir);
+	}
+
 	LVolume *First()
 	{
 		if (SysPath == LSP_DESKTOP && !ChildVol)
@@ -634,84 +932,8 @@ struct LVolumePriv
 		{
 			NextVol = new LVolume(LSP_SYS_MOUNT_POINT, "Mounts");
 
-			// Get mount list
-			// this is just a hack at this stage to establish some base
-			// functionality. I would appreciate someone telling me how
-			// to do this properly. Till then...
-			LFile f;
-			auto fstabFile = "/etc/fstab";
-			if (!f.Open(fstabFile, O_READ))
-			{
-			    VLOG("%s:%i - failed to read '%s'\n", _FL, fstabFile);
-			}
-			else
-			{
-				auto Buf = f.Read();
-				f.Close();
-
-				auto Lines = Buf.SplitDelimit("\r\n");
-				for (auto ln : Lines)
-				{
-					auto M = ln.Strip().SplitDelimit(" \t");
-					if (M[0](0) == '#')
-					{
-					    VLOG("fstab: comment line: %s\n", ln.Get());
-					}
-					else if (M.Length() <= 2)
-					{
-					    VLOG("fstab: not enough tokens: %s\n", ln.Get());
-					}
-					else
-					{
-						auto &Device = M[0];
-						auto &Mount = M[1];
-						auto &FileSys = M[2];
-
-					    VLOG("fstab: dev=%s mnt=%s fs=%s\n", Device.Get(), Mount.Get(), FileSys.Get());
-
-						if (
-							(Device.Find("/dev/") == 0 || Mount.Find("/mnt/") == 0) &&
-							Device.Lower().Find("/by-uuid/") < 0 &&
-							Mount.Length() > 1 &&
-							!FileSys.Equals("swap"))
-						{
-							auto v = new LVolume(0);
-							if (v)
-							{
-								char *MountName = strrchr(Mount, '/');
-								v->d->Name = (MountName ? MountName + 1 : Mount.Get());
-								v->d->Path = Mount;
-								v->d->Type = VT_HARDDISK;
-
-								struct statvfs s = {0};
-								auto startTs = LCurrentTime();
-								int r = statvfs(Mount, &s);
-								auto endTs = LCurrentTime();
-								if (endTs - startTs > 20)
-									LgiTrace("%s:%i - statvfs(%s) took " LPrintfInt64 "ms.\n", _FL, Mount.Get(), endTs-startTs);
-								
-								if (r)
-								{
-									LgiTrace("%s:%i - statvfs(%s) failed.\n", _FL, Mount.Get());
-								}
-								else
-								{
-									v->d->Size = (uint64_t)s.f_blocks * s.f_frsize;
-									v->d->Free = (uint64_t)s.f_bfree * s.f_frsize;
-								}
-
-								char *Device = M[0];
-								if (stristr(Device, "fd"))
-									v->d->Type = VT_FLOPPY;
-								else if (stristr(Device, "cdrom"))
-									v->d->Type = VT_CDROM;
-
-								Insert(NextVol, v);
-							}
-						}
-					}
-				}
-			}
+			EnumMounts();
+			EnumUnmounted();
 		}
 
 		return NextVol;
@@ -755,11 +977,13 @@ int LVolume::Flags() const
 
 uint64 LVolume::Size() const
 {
+	d->UpdateSize();
 	return d->Size;
 }
 
 uint64 LVolume::Free() const
 {
+	d->UpdateSize();
 	return d->Free;
 }
 
@@ -770,12 +994,51 @@ LSurface *LVolume::Icon() const
 
 bool LVolume::IsMounted() const
 {
-	return true;
+	return d->Mounted;
 }
 
 bool LVolume::SetMounted(bool Mount)
 {
-	return Mount;
+	if (Mount == d->Mounted)
+		return true;
+	if (!d->Device)
+		return false;
+
+	// udisks mounts without root and picks the standard /run/media/$USER location
+	LString Cmd;
+	Cmd.Printf("udisksctl %s -b '%s' 2>&1", Mount ? "mount" : "unmount", d->Device.Get());
+	FILE *p = popen(Cmd, "r");
+	if (!p)
+		return false;
+	LString Out;
+	char buf[512];
+	while (fgets(buf, sizeof(buf), p))
+		Out += buf;
+	if (pclose(p) != 0)
+	{
+		LgiTrace("%s:%i - '%s' failed: %s\n", _FL, Cmd.Get(), Out.Get());
+		return false;
+	}
+
+	if (Mount)
+	{
+		// Output: "Mounted /dev/sdb1 at /run/media/user/LABEL."
+		auto At = Out.Find(" at ");
+		if (At < 0)
+			return false;
+		LString Mnt = Out(At + 4, -1).Strip();
+		if (Mnt.Length() && Mnt(-1) == '.')
+			Mnt = Mnt(0, -1);
+		d->Path = Mnt;
+		d->SizeKnown = false;
+	}
+	else
+	{
+		d->Path.Empty();
+		d->SizeKnown = true;
+	}
+	d->Mounted = Mount;
+	return true;
 }
 
 LVolume *LVolume::First()
