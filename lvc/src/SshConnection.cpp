@@ -9,24 +9,8 @@
 #define PROFILE_OnEvent			0
 
 //////////////////////////////////////////////////////////////////
-SshConnection::SshConnection(LTextLog *log, const char *uri, const char *prompt) :
-	LSsh(	[this, log](auto msg, auto type)
-			{
-				auto wnd = log->GetWindow();
-				int result = IDRETRY;
-				
-				wnd->RunCallback([wnd, msg, pResult=&result]()
-					{				
-						*pResult = LgiMsg(wnd, "Ssh connection: %s\n\nConnect?", AppName, MB_YESNO, msg);
-					},
-					_FL);
-					
-				while (result == IDRETRY)
-					LSleep(10);
-				
-				return result == IDYES ? SshConnect : SshDisconnect;
-			},
-			log),
+SshConnection::SshConnection(LSsh::KnownHostCallback callback, LTextLog *log, const char *uri, const char *prompt) :
+	LSsh(callback, log),
 	LEventTargetThread("SshConn")
 {
 	auto Wnd = log->GetWindow();

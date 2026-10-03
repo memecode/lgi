@@ -27,6 +27,7 @@
 			<Node File="../src/common/Text/XmlTreeUi.cpp" Type="2" Platforms="15" />
 		</Node>
 		<Node Name="Ssh" Type="1" Platforms="15" Id="6">
+			<Node File="../include/lgi/common/MissingCapsBar.h" Type="3" Platforms="15" />
 			<Node File="../src/common/Net/Ssh.cpp" Type="2" Platforms="15" />
 			<Node File="../include/lgi/common/Ssh.h" Type="3" Platforms="15" />
 			<Node File="./src/SshConnection.cpp" Type="2" Platforms="15" />
@@ -168,6 +169,12 @@ HAS_LIBSSH=1</Release>
 			<TargetName>
 				<Linux />
 			</TargetName>
+			<RPath>
+				<Linux />
+			</RPath>
+			<RPathLink>
+				<Linux />
+			</RPathLink>
 		</Build>
 		<Editor>
 			<TabSize>

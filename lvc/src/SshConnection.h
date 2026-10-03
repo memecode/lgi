@@ -30,7 +30,7 @@
 		LHashTbl<StrKey<char,false>,VersionCtrl> Types;
 		LArray<VcFolder*> TypeNotify;
 	
-		SshConnection(LTextLog *log, const char *uri, const char *prompt);
+		SshConnection(LSsh::KnownHostCallback callback, LTextLog *log, const char *uri, const char *prompt);
 		~SshConnection();
 		bool DetectVcs(VcFolder *Fld);
 		bool Command(VcFolder *Fld, LString Exe, LString Args, ParseFn Parser, ParseParams *Params, LoggingType Logging);

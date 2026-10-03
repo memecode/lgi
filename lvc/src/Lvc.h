@@ -15,6 +15,7 @@
 #include "lgi/common/EventTargetThread.h"
 #include "lgi/common/StructuredLog.h"
 #include "lgi/common/CommsBus.h"
+#include "lgi/common/MissingCapsBar.h"
 
 #define OPT_Folders			"Folders"
 #define OPT_Folder			"Folder"
@@ -199,6 +200,7 @@ typedef bool (VcFolder::*ParseFn)(int, LString, ParseParams*);
 
 struct AppPriv
 {
+	LBox			*MainBox	= nullptr;
 	VcFolder		*CurFolder	= nullptr;
 	LTree			*Tree		= nullptr;
 	LList			*Commits	= nullptr;
@@ -212,6 +214,9 @@ struct AppPriv
 	LStructuredLog	sLog;
 	int				Resort = -1;
 	LAutoPtr<LCommsBus> CommsBus;
+	
+	LMissingCapsBar *capsBar	= nullptr;
+	LSsh::KnownHostCallback SshCallback;
 
 	// Filtering
 	LString			FolderFilter, CommitFilter, FileFilter;
@@ -220,16 +225,7 @@ struct AppPriv
 	LHashTbl<StrKey<char,false>,class SshConnection*> Connections;
 	#endif
 	
-	AppPriv() :
-		Opts(LOptionsFile::DesktopMode, AppName),		
-		#if 1 // network structured logging:
-			sLog(LStructuredLog::TNetworkEndpoint, LStructuredLog::sDefaultEndpoint, true)
-		#else // file structured logging:
-			sLog(LStructuredLog::TFile, "Lvc.slog")
-		#endif
-	{		
-		sLog.Clear();
-	}	
+	AppPriv();
 	~AppPriv();
 
 	#if HAS_LIBSSH

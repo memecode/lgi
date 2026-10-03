@@ -9,6 +9,7 @@
 #include "lgi/common/PopupNotification.h"
 #include "lgi/common/TextLabel.h"
 #include "lgi/common/PopupNotification.h"
+#include "lgi/common/ThreadEvent.h"
 
 #include "Lvc.h"
 #include "resdefs.h"
@@ -23,6 +24,75 @@ const char *AppName =			"Lvc";
 #define DEFAULT_BUILD_FIX_MSG	"Build fix."
 #define OPT_Hosts				"Hosts"
 #define OPT_Host				"Host"
+
+AppPriv::AppPriv() :
+	Opts(LOptionsFile::DesktopMode, AppName),		
+	#if 1 // network structured logging:
+		sLog(LStructuredLog::TNetworkEndpoint, LStructuredLog::sDefaultEndpoint, true)
+	#else // file structured logging:
+		sLog(LStructuredLog::TFile, "Lvc.slog")
+	#endif
+{		
+	sLog.Clear();
+
+	// This is NOT called in the GUI thread:
+	SshCallback = [this](auto msg, auto type)
+	{
+		auto wnd = Log->GetWindow();
+		int result = IDRETRY;
+		LThreadEvent event;
+		
+		wnd->RunCallback([&]()
+			{
+				printf("%s:%i - gui: msg...\n", _FL);
+				
+				if (!capsBar)
+					if (capsBar = new LMissingCapsBar())
+					{
+						capsBar->Set("SshCert", msg);
+						capsBar->GetCss(true)->BackgroundColor("orange");
+						MainBox->AddView(capsBar, 1);
+						MainBox->AttachChildren();
+						if (auto w = MainBox->GetWindow())
+						{
+							w->PourAll();
+							w->Invalidate();
+						}
+
+						capsBar->Action("Accept Cert", [this, pResult = &result, pEvent = &event]()
+							{
+								// Handle the accept cert action here
+								*pResult = IDYES;
+								pEvent->Signal();
+							});
+
+						capsBar->Action("Disconnect", [this, pResult = &result, pEvent = &event]()
+							{
+								// Handle the accept cert action here
+								*pResult = IDNO;
+								pEvent->Signal();
+							});
+					}
+			},
+			_FL);
+			
+		event.Wait();
+		
+		wnd->RunCallback([&]()
+			{
+				DeleteObj(capsBar);
+				if (auto w = MainBox->GetWindow())
+				{
+					w->PourAll();
+					w->Invalidate();
+				}
+			},
+			_FL);
+		
+		return result == IDYES ? LSsh::SshConnect : LSsh::SshDisconnect;
+	};
+}
+
 
 AppPriv::~AppPriv()
 {
@@ -52,7 +122,7 @@ SshConnection *AppPriv::GetConnection(const char *Uri, const char *Prompt, bool 
 				u.sPass = "*******";
 			Log->Print("Warning: No remote prompt defined for '%s'\n", u.ToString().Get());
 		}
-		Connections.Add(s, Conn = new SshConnection(Log, s, Prompt ? Prompt : "*$ "));
+		Connections.Add(s, Conn = new SshConnection(SshCallback, Log, s, Prompt ? Prompt : "*$ "));
 	}
 	return Conn;
 }
@@ -1206,15 +1276,15 @@ public:
 			Menu->Load(this, "IDM_MENU");
 		}
 
-		auto ToolsBox   = new LBox(IDC_TOOLS_BOX,   true,  "ToolsBox");
+		MainBox      	= new LBox(IDC_TOOLS_BOX,   true,  "ToolsBox");
 		FoldersBox      = new LBox(IDC_FOLDERS_BOX, false, "FoldersBox");
 		auto CommitsBox = new LBox(IDC_COMMITS_BOX, true,  "CommitsBox");
 
 		auto Tools = new ToolBar;
 
-		ToolsBox->Attach(this);
-		Tools->Attach(ToolsBox);
-		FoldersBox->Attach(ToolsBox);
+		MainBox->Attach(this);
+		Tools->Attach(MainBox);
+		FoldersBox->Attach(MainBox);
 
 		auto FolderLayout = new LTableLayout(IDC_FOLDER_TBL);
 		auto c = FolderLayout->GetCell(0, 0, true, 2);
@@ -1332,8 +1402,8 @@ public:
 		}
 		
 		FoldersBox->Value(MAX(320, px + 20));
-        
-        // new TestThread();
+		
+		// new TestThread();
 
 		// Process command line options
 		LString selectFolder;
@@ -2307,4 +2377,3 @@ int LgiMain(OsAppArguments &AppArgs)
 	LAssert(VcCommit::Instances == 0);
 	return 0;
 }
-
