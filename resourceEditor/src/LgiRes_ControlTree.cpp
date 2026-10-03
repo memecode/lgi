@@ -301,7 +301,7 @@ bool CtrlControlTree::Serialize(FieldTree &Fields)
 
 void WriteTree(LXmlTag *t, LTreeNode *n)
 {
-	CtNode *ct = dynamic_cast<CtNode*>(n);
+	auto ct = dynamic_cast<CtNode*>(n);
 	if (ct)
 	{
 		t->SetAttr("Ref", ct->Str->GetRef());
@@ -309,12 +309,14 @@ void WriteTree(LXmlTag *t, LTreeNode *n)
 		t->SetAttr(VAL_ControlTag, ct->Tag);
 	}
 
-	for (LTreeNode *c = n->GetChild(); c; c = c->GetNext())
+	for (auto c = n->GetChild(); c; c = c->GetNext())
 	{
-		LXmlTag *h = new LXmlTag;
-		WriteTree(h, c);
-		h->SetTag("Control");
-		t->InsertTag(h);
+		if (auto h = new LXmlTag)
+		{
+			WriteTree(h, c);
+			h->SetTag("Control");
+			t->InsertTag(h);
+		}
 	}
 }
 

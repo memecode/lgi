@@ -25,8 +25,8 @@ class ResDialogCtrl;
 ////////////////////////////////////////////////////////////////
 class StrLang
 {
-	LLanguageId Lang;
-	char *Str;
+	LLanguageId Lang = nullptr;
+	char *Str = nullptr;
 
 public:
 	StrLang();
@@ -200,11 +200,11 @@ public:
 
 class LangDlg : public LDialog
 {
-	LCombo *Sel;
+	LCombo *Sel = nullptr;
 	List<LLanguage> Langs;
 
 public:
-	LLanguage *Lang;
+	LLanguage *Lang = nullptr;
 
 	LangDlg(LView *parent, List<LLanguage> &l, int Init = -1);
 	int OnNotify(LViewI *Ctrl, const LNotification &n) override;

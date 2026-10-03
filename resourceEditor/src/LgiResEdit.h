@@ -419,7 +419,7 @@ protected:
 
 		for (auto fld: *a)
 		{
-			if (!stricmp(fld->Label, FieldName))
+			if (!stricmp(fld->Name, FieldName))
 				return fld;
 		}
 
@@ -476,7 +476,9 @@ public:
 	void Insert(void *Token,
 				int Type,
 				int Reserved,
+				// Internal field name:
 				const char *Name,
+				// User-visible label:
 				const char *Label,
 				int Idx = -1,
 				bool Multiline = false,

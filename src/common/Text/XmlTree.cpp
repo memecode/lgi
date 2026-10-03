@@ -708,7 +708,7 @@ bool LXmlTag::RemoveTag()
 		return true;
 	
 	Parent->Children.SetFixedLength(false);
-	bool Status = Parent->Children.Delete(this);
+	bool Status = Parent->Children.Delete(this, true);
 	Parent->Children.SetFixedLength(true);
 	Parent = nullptr;
 	return Status;
