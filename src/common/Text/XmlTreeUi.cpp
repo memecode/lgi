@@ -16,7 +16,7 @@
 struct Mapping
 {
 	int Id = 0;
-	int Hint = GV_NULL;
+	LVariantType Hint = GV_NULL;
 	std::function<LItem*()> Callback;
 	LString ChildElementName;
 	LXmlTreeUi::EnumMap EnumMap;
@@ -105,13 +105,12 @@ bool LXmlTreeUi::IsMapped(const char *Attr)
 	return d->Maps.Find(Attr) != NULL;
 }
 
-void LXmlTreeUi::Map(const char *Attr, int UiIdent, int Type)
+void LXmlTreeUi::Map(const char *Attr, int UiIdent, LVariantType Type)
 {
 	if (UiIdent > 0 &&
 		(Attr != NULL || Type == GV_DOM))
 	{		
-		Mapping *m = new Mapping;
-		if (m)
+		if (auto m = new Mapping)
 		{
 			m->Id = UiIdent;
 			m->Hint = Type;
@@ -336,9 +335,18 @@ bool LXmlTreeUi::Convert(LDom *Tag, LViewI *Ui, bool ToUI)
 						}
 						else // no value, so set to blank
 						{
-							LEdit *e;
-							if (Ui->GetViewById(m->Id, e))
-								e->Name("");
+							if (m->Hint == GV_BOOL)
+							{
+								LCheckBox *chk;
+								if (Ui->GetViewById(m->Id, chk))
+									chk->Value(0);
+							}
+							else
+							{
+								LView *v;
+								if (Ui->GetViewById(m->Id, v))
+									v->Name("");
+							}
 						}
 						break;
 					}
