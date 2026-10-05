@@ -6,6 +6,7 @@
 #define __LLIST_ITEM_RADIO_H
 
 #include "lgi/common/SkinEngine.h"
+#include "lgi/common/List.h"
 
 /// A radio button control for use in a LListItem. It will select one option amongst many rows.
 /// (Not one option amongst many columns)
