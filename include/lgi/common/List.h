@@ -49,7 +49,7 @@ class LgiClass LListItemColumn : public LBase, public LItem, public LListItemPai
 	int _Column;
 	int64 _Value = 0;
 
-	void OnPaint(ItemPaintCtx &Ctx) {}
+	void OnPaint(ItemPaintCtx &Ctx) override {}
 
 protected:
 	LListT *GetAllItems();
@@ -62,7 +62,7 @@ public:
 	// Other objects
 	LListItem *GetItem() { return _Item; }
 	LList *GetList();
-	LItemContainer *GetContainer();
+	LItemContainer *GetContainer() override;
 
 	// Props
 	int GetColumn() { return _Column; }

@@ -44,7 +44,7 @@ struct CssImageCache
 	}
 }	Cache;
 
-LColour &LCssTools::GetFore(LColour *Default)
+LColour &LCssTools::GetFore(const LColour *Default)
 {
 	if (!ForeInit)
 	{
@@ -71,7 +71,7 @@ LColour &LCssTools::GetFore(LColour *Default)
 	return Fore;
 }
 	
-LColour &LCssTools::GetBack(LColour *Default, int Depth)
+LColour &LCssTools::GetBack(const LColour *Default, int Depth)
 {
 	if (!BackInit)
 	{

@@ -47,7 +47,7 @@ AppPriv::AppPriv() :
 				printf("%s:%i - gui: msg...\n", _FL);
 				
 				if (!capsBar)
-					if (capsBar = new LMissingCapsBar())
+					if ((capsBar = new LMissingCapsBar()))
 					{
 						capsBar->Set("SshCert", msg);
 						capsBar->GetCss(true)->BackgroundColor("orange");
