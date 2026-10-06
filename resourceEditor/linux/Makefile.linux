@@ -26,7 +26,6 @@ ifeq ($(Build),Debug)
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
-		-fuse-ld=mold \
 		-lmagic \
 		-lpthread \
 		-static-libgcc  \
@@ -49,7 +48,6 @@ else
 	Tag =
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
-		-fuse-ld=mold \
 		-lmagic \
 		-lpthread \
 		-static-libgcc  \

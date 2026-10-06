@@ -8,33 +8,38 @@
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/Thread.h"
 
+#if 0
+	#define LOG(...) LgiTrace(__VA_ARGS__)
+#else
+	#define LOG(...)
+#endif
+
 static char sHttpDownloadFailed[] = "HTTP download failed.";
 static char sSocketConnectFailed[] = "Socket connect failed.";
 static char sNoUpdateUri[] = "No update URI.";
 static char sXmlParsingFailed[] = "XML parsing failed.";
 static char sUnexpectedXml[] = "Unexpected XML.";
-static char sUpdateError[] = "Update script error: %s";
 
 struct LSoftwareUpdatePriv
 {
 	LString Name;
 	LString UpdateUri;
 	LString Proxy;
-	LString Error;
+	LError Error;
 	LString TempPath;
 
-	bool SetError(int Id, const char *Def = 0)
+	bool SetError(int Id, const char *Def = nullptr)
 	{
-		Error = LLoadString(Id, Def);
+		Error.Set(LErrorFuncFailed, LLoadString(Id, Def));
 		return false;
 	}
 
 	class UpdateThread :
 		public LThread
 	{
-		LSoftwareUpdate *update = NULL;
-		LSoftwareUpdatePriv *d = NULL;
-		LSocket *s = NULL;
+		LSoftwareUpdate *update = nullptr;
+		LSoftwareUpdatePriv *d = nullptr;
+		LSocket *s = nullptr;
 		LHttp http;
 		bool incBetas = false;
 
@@ -46,7 +51,7 @@ struct LSoftwareUpdatePriv
 		UpdateThread(LSoftwareUpdate *softwareUpdate,
 					bool betas,
 					LSoftwareUpdate::UpdateCb cb) :
-		    LThread("SoftwareUpdateThread")
+		    LThread("SoftUpdate.Th")
 		{
 			update = softwareUpdate;
 			d = update->d;
@@ -73,7 +78,7 @@ struct LSoftwareUpdatePriv
 
 			if (callback)
 			{
-				callback(Ret == 0 ? &info : NULL, update->GetErrorMessage());
+				callback(Ret == 0 ? &info : nullptr, update->GetError());
 				DeleteOnExit = true;
 				delete update;
 			}
@@ -90,7 +95,6 @@ struct LSoftwareUpdatePriv
 			}
 
 			LUri Uri(d->UpdateUri);
-			char Dir[256];
 			int WordSize = sizeof(size_t) << 3;
 			LString OsName = LGetOsName();
 			int Os = LGetOs();
@@ -101,14 +105,10 @@ struct LSoftwareUpdatePriv
 				OsName.Printf("Win%i", WordSize);
 			}
 
-			sprintf_s(Dir, sizeof(Dir), "%s?name=%s&os=%s&betas=%i", Uri.sPath.Get(), (char*)d->Name, OsName.Get(), incBetas);
-			Uri.sPath = Dir;
+			Uri.sPath.Printf("%s?name=%s&os=%s&betas=%i", Uri.sPath.Get(), (char*)d->Name, OsName.Get(), incBetas);
 
 			LString GetUri = Uri.ToString();
-				
-			#ifdef _DEBUG
-			LgiTrace("UpdateURI=%s\n", GetUri.Get());
-			#endif
+			LOG("UpdateURI=%s\n", GetUri.Get());
 				
 			if (d->Proxy)
 			{
@@ -123,15 +123,29 @@ struct LSoftwareUpdatePriv
 			if (!http.Open(s, Uri.sHost, Uri.Port))
 			{
 				d->SetError(L_ERROR_CONNECT_FAILED, sSocketConnectFailed);
-				LgiTrace("%s:%i - Bad connect: %s:%i\n", _FL, Uri.sHost.Get(), Uri.Port);
+				LOG("%s:%i - Bad connect: %s:%i\n", _FL, Uri.sHost.Get(), Uri.Port);
 				return Complete(-2);
 			}
 
 			LHttp::TContentEncoding Enc;
-			if (!http.Get(GetUri, NULL, &ProtocolStatus, &RawXml, &Enc))
+			LStringPipe outHdrs;
+			const char *requestHeaders = "User-Agent: Lgi-SoftwareUpdate/1.0\r\n"
+									 "Accept: application/xml, text/xml\r\n";
+			if (!http.Get(GetUri, requestHeaders, &ProtocolStatus, &RawXml, &Enc, &outHdrs))
 			{
 				d->SetError(L_ERROR_HTTP_FAILED, sHttpDownloadFailed);
-				LgiTrace("%s:%i - Bad URI: %s\n", _FL, GetUri.Get());
+				LOG("%s:%i - http get failed, uri: %s\n", _FL, GetUri.Get());
+				return Complete(-3);
+			}
+			
+			LOG("%s:%i - ProtocolStatus=%i\n", _FL, ProtocolStatus);
+			LOG("%s:%i - RawXml.Len=%i\n", _FL, (int)RawXml.GetSize());
+			// LOG("%s:%i - outHdrs=%s\n", _FL, outHdrs.NewLStr().Get());
+
+			if (ProtocolStatus < 200 || ProtocolStatus >= 300)
+			{
+				d->Error.Set(LErrorFuncFailed,
+					LString::Fmt("%s HTTP status: %i", LLoadString(L_ERROR_HTTP_FAILED, sHttpDownloadFailed), ProtocolStatus));
 				return Complete(-3);
 			}
 
@@ -142,21 +156,24 @@ struct LSoftwareUpdatePriv
 			if (!Tree.Read(&Root, &XmlStream))
 			{
 				d->SetError(L_ERROR_XML_PARSE, sXmlParsingFailed);
-				LgiTrace("%s:%i - Bad XML: %s\n", _FL, Xml.Get());
+				LOG("%s:%i - Bad XML: %s\n", _FL, Xml.Get());
 				return Complete(-4);
 			}
+
+			LOG("%s:%i - XML: %s\n", _FL, Xml.Get());
 
 			LXmlTag *StatusCode;
 			if (!Root.IsTag("software") ||
 				!(StatusCode = Root.GetChildTag("status")))
 			{
 				d->SetError(L_ERROR_UNEXPECTED_XML, sUnexpectedXml);
-				LgiTrace("%s:%i - Bad XML: %s\n", _FL, Xml.Get());
+				LOG("%s:%i - no status in XML: %s\n", _FL, Xml.Get());
 				return Complete(-5);
 			}
 
-			if (StatusCode->GetContent() &&
-				atoi(StatusCode->GetContent()) > 0)
+			auto status = Atoi(StatusCode->GetContent());
+			LOG("%s:%i - status: %i\n", _FL, (int)status);
+			if (status > 0)
 			{
 				LXmlTag *t;
 				if ((t = Root.GetChildTag("version")))
@@ -175,11 +192,12 @@ struct LSoftwareUpdatePriv
 			}
 			else
 			{
-				LXmlTag *Msg = Root.GetChildTag("msg");
-				LStringPipe p;
-				p.Print(LLoadString(L_ERROR_UPDATE, sUpdateError), Msg?Msg->GetContent():(char*)"Unknown");
-				d->Error = p.NewLStr();
-				LgiTrace("UpdateURI=%s\n", GetUri.Get());
+				auto msgTag = Root.GetChildTag("msg");
+				auto errMsg = msgTag ? msgTag->GetContent() : (char*)"Unknown";
+				LOG("%s:%i - errMsg=%s\n", _FL, errMsg);
+				
+				d->Error.Set(LErrorFuncFailed, errMsg);
+				return Complete(-6);
 			}
 
 			return Complete(0);
@@ -200,20 +218,20 @@ struct LSoftwareUpdatePriv
 			Name("Software Update");
 
 			LRect c = GetClient();
-			LTextLabel *t = new LTextLabel(	-1,
-											10, 10,
-											c.X()-20,
-											-1,
-											LLoadString(L_SOFTUP_CHECKING, "Checking for software update..."));
+			auto t = new LTextLabel(-1,
+									10, 10,
+									c.X()-20,
+									-1,
+									LLoadString(L_SOFTUP_CHECKING, "Checking for software update..."));
 			if (t)
 			{
 				AddView(t);
-				LButton *btn = new LButton(	IDCANCEL,
-											(c.X()-70)/2,
-											t->GetPos().y2 + 10,
-											70,
-											-1,
-											LLoadString(L_BTN_CANCEL, "Cancel"));
+				auto btn = new LButton(	IDCANCEL,
+										(c.X()-70)/2,
+										t->GetPos().y2 + 10,
+										70,
+										-1,
+										LLoadString(L_BTN_CANCEL, "Cancel"));
 				if (btn)
 				{
 					AddView(btn);
@@ -255,31 +273,31 @@ struct LSoftwareUpdatePriv
 
 	class UpdateDownload : public LThread, public LProxyStream
 	{
+		LSoftwareUpdatePriv *d;
 		const LSoftwareUpdate::UpdateInfo *Info;
 		LUri *Uri;
 		LUri *Proxy;
 		LStream *Local;
-		LString *Err;
 		int *Status;
 
 	public:
-		int64 Progress, Total;
+		int64 Progress = 0, Total = 0;
 
-		UpdateDownload( const LSoftwareUpdate::UpdateInfo *info,
+		UpdateDownload( LSoftwareUpdatePriv *priv,
+						const LSoftwareUpdate::UpdateInfo *info,
 		                LUri *uri,
 		                LUri *proxy,		                
 		                LStream *local,
-		                LString *err,
-		                int *status) : LThread("UpdateDownload"), LProxyStream(local)
+		                int *status)
+			: LThread("UpdateDownload")
+			, LProxyStream(local)
+			, Info(info)
+			, d(priv)
+			, Uri(uri)
+			, Proxy(proxy)
+			, Local(local)
+			, Status(status)
 		{
-			Info = info;
-			Uri = uri;
-			Proxy = proxy;
-			Local = local;
-			Err = err;
-			Status = status;
-			Progress = Total = 0;
-
 			Run();
 		}
 
@@ -306,11 +324,11 @@ struct LSoftwareUpdatePriv
 			LHttp::TContentEncoding Enc;
 			if (!Http.Open(s, Uri->sHost, Uri->Port))
 			{
-				*Err = LLoadString(L_ERROR_CONNECT_FAILED, sSocketConnectFailed);
+				d->Error.Set(LErrorFuncFailed, LLoadString(L_ERROR_CONNECT_FAILED, sSocketConnectFailed));
 			}
 			else if (!Http.Get(Info->Uri, 0, Status, this, &Enc))
 			{
-				*Err = LLoadString(L_ERROR_HTTP_FAILED, sHttpDownloadFailed);
+				d->Error.Set(LErrorFuncFailed, LLoadString(L_ERROR_HTTP_FAILED, sHttpDownloadFailed));
 			}
 
 			return 0;
@@ -346,7 +364,7 @@ void LSoftwareUpdate::CheckForUpdate(UpdateCb callback,
 		s->DoModal([callback, thread, this](auto dlg, auto code)
 		{
 			if (callback)
-				callback(&thread->info, d->Error);
+				callback(thread->ExitCode() == 0 ? &thread->info : nullptr, d->Error);
 
 			delete thread;
 			delete this;
@@ -358,10 +376,10 @@ class ApplyUpdateState : public LProgressDlg
 {
 	LSoftwareUpdatePriv *d;
 
-	const LSoftwareUpdate::UpdateInfo *Info = NULL;
+	const LSoftwareUpdate::UpdateInfo *Info = nullptr;
 	LUri Uri;
 	LFile Local;
-	char *File = NULL;
+	char *File = nullptr;
 	char Tmp[MAX_PATH_LEN];
 	bool ApplyStatus = false;
 	bool DownloadOnly = false;
@@ -403,10 +421,11 @@ public:
 
 			LUri Proxy(d->Proxy);
 			
-			if (!Thread.Reset(new LSoftwareUpdatePriv::UpdateDownload(Info, &Uri, &Proxy, &Local, &d->Error, &HttpStatus)))
+			if (!Thread.Reset(new LSoftwareUpdatePriv::UpdateDownload(d, Info, &Uri, &Proxy, &Local, &HttpStatus)))
 			{
 				d->SetError(L_ERROR_NO_MEMORY, "Alloc failed.");
-				if (Callback) Callback(false);
+				if (Callback)
+					Callback(false);
 				Thread.Reset(); // Just bail
 			}
 		}
@@ -525,7 +544,7 @@ void LSoftwareUpdate::ApplyUpdate(	const UpdateInfo *Info,
 	new ApplyUpdateState(d, Info, Uri, DownloadOnly, Callback);
 }
 
-const char *LSoftwareUpdate::GetErrorMessage()
+LError LSoftwareUpdate::GetError()
 {
 	return d->Error;
 }
