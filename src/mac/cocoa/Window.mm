@@ -235,7 +235,6 @@ public:
 		self->ReqClose = CSNone;
 		
 		self.contentView = [[LCocoaView alloc] init:priv->Wnd];
-		printf("%s:%i - setting contentView\n", _FL);
 		[self makeFirstResponder:self.contentView];
 		self.acceptsMouseMovedEvents = true;
 		self.ignoresMouseEvents = false;
