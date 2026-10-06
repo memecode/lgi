@@ -124,7 +124,8 @@ bool TerminalAt(LString Path)
 			return LExecute(p);
 		}
 	#elif defined(LINUX)
-		LExecute("gnome-terminal", NULL, Path);
+	    if (!LExecute("xdg-terminal-exec", nullptr, Path))
+			LExecute("gnome-terminal", nullptr, Path);
 	#endif
 
 	return false;
