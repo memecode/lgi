@@ -224,7 +224,7 @@ class SshBackend :
 				LCancel *cancelObj,
 				std::function<void(int)> cb) :
 			LThread("Ssh.Process.Thread"),
-			LSsh([this](auto Msg, auto Type)
+			LSsh([this](auto &hostInfo)
 				{
 					return SshConnect;
 				},
@@ -356,7 +356,7 @@ class SshBackend :
 	{
 		if (!ssh)
 		{
-			if (ssh.Reset(new LSsh( [this](auto msg, auto hostType) -> LSsh::CallbackResponse
+			if (ssh.Reset(new LSsh( [this](auto &hostInfo) -> LSsh::CallbackResponse
 				{
 					return LSsh::SshConnect;
 				},
