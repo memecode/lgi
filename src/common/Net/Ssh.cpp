@@ -208,9 +208,51 @@ bool LSsh::Open(const char *Host, const char *Username, const char *Password, bo
 	
 	{
 		// We don't know of the host... ask the user to confirm.
-		CallbackResponse response = SshDisconnect;			
+		auto response = SshDisconnect;			
 		if (HostCb)
 		{
+			THostInfo hostInfo;
+			hostInfo.hostName = Host;
+			hostInfo.cancel = CancelObj;
+
+			unsigned char *hash = nullptr;
+			size_t hashLen = 0;
+			#if IS_SSH_VER(0, 8)
+				ssh_key serverKey = nullptr;
+				if (ssh_get_server_publickey(Ssh, &serverKey) != SSH_OK)
+				{
+					SSH_LOG("%s:%i - Failed to get server public key: %s\n", _FL, ssh_get_error(Ssh));
+					return false;
+				}
+
+				auto hashResult = ssh_get_publickey_hash(serverKey, SSH_PUBLICKEY_HASH_SHA256, &hash, &hashLen);
+				ssh_key_free(serverKey);
+				if (hashResult != SSH_OK)
+				{
+					SSH_LOG("%s:%i - Failed to hash server public key: %s\n", _FL, ssh_get_error(Ssh));
+					ssh_clean_pubkey_hash(&hash);
+					return false;
+				}
+			#else
+				auto hashResult = ssh_get_pubkey_hash(Ssh, &hash);
+				if (hashResult < 0)
+				{
+					SSH_LOG("%s:%i - Failed to get server public key hash: %s\n", _FL, ssh_get_error(Ssh));
+					ssh_clean_pubkey_hash(&hash);
+					return false;
+				}
+				hashLen = (size_t)hashResult;
+			#endif
+
+			if (!hash || !hashLen || !hostInfo.certId.Length(hashLen))
+			{
+				SSH_LOG("%s:%i - Failed to store server public key hash.\n", _FL);
+				ssh_clean_pubkey_hash(&hash);
+				return false;
+			}
+			memcpy(hostInfo.certId.AddressOf(), hash, hashLen);
+			ssh_clean_pubkey_hash(&hash);
+			
 			switch (State)
 			{
 				#if IS_SSH_VER(0, 8)
@@ -218,32 +260,36 @@ bool LSsh::Open(const char *Host, const char *Username, const char *Password, bo
 				#else
 				case SSH_SERVER_KNOWN_CHANGED:
 				#endif
-					response = HostCb(	"The server key has changed. Either you are under attack or the administrator changed the key. You HAVE to warn the user about a possible attack.",
-										SshHostChanged);
+					hostInfo.type = SshHostChanged;
+					hostInfo.msg = "The server key has changed. Either you are under attack or the administrator changed the key. This could be a possible attack.";
+					response = HostCb(hostInfo);
 					break;
 				#if IS_SSH_VER(0, 8)
 				case SSH_KNOWN_HOSTS_OTHER:
 				#else
 				case SSH_SERVER_FOUND_OTHER:
 				#endif
-					response = HostCb(	"The server gave use a key of a type while we had an other type recorded. It is a possible attack.",
-										SshHostOther);
+					hostInfo.type = SshHostOther;
+					hostInfo.msg = "The server gave use a key of a type while we had an other type recorded. It is a possible attack.";
+					response = HostCb(hostInfo);
 					break;
 				#if IS_SSH_VER(0, 8)
 				case SSH_KNOWN_HOSTS_UNKNOWN:
 				#else
 				case SSH_SERVER_NOT_KNOWN:
 				#endif
-					response = HostCb(	"The server is unknown. You should confirm the public key hash is correct.",
-										SshUnknown);
+					hostInfo.type = SshUnknown;
+					hostInfo.msg = "The server is unknown. You should confirm the public key hash is correct.";
+					response = HostCb(hostInfo);
 					break;
 				#if IS_SSH_VER(0, 8)
 				case SSH_KNOWN_HOSTS_NOT_FOUND:
 				#else
 				case SSH_SERVER_FILE_NOT_FOUND:
 				#endif
-					response = HostCb(	"Host list not found.",
-										SshNotFound);
+					hostInfo.type = SshNotFound;
+					hostInfo.msg = "Host list not found.";
+					response = HostCb(hostInfo);
 					break;
 				default:
 				#if IS_SSH_VER(0, 8)
@@ -251,8 +297,9 @@ bool LSsh::Open(const char *Host, const char *Username, const char *Password, bo
 				#else
 				case SSH_SERVER_ERROR:
 				#endif
-					response = HostCb(	"There had been an error checking the host.",
-										SshError);
+					hostInfo.type = SshError;
+					hostInfo.msg = "There had been an error checking the host.";
+					response = HostCb(hostInfo);
 					break;
 			}
 		}

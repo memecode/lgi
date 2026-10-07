@@ -36,7 +36,10 @@ public:
 	// Set the name of the missing capability and the message
 	void Set(const char *CapName, const char *Message)
 	{
-		Name(LString::Fmt("Missing '%s': %s", CapName, Message));
+		if (CapName)
+			Name(LString::Fmt("Missing '%s': %s", CapName, Message));
+		else
+			Name(Message);
 		Visible(true);
 	}
 
@@ -60,7 +63,8 @@ public:
 		int x = (int) (client.X() - (actions.Length() * space) - btnWid);
 		for (auto &a: actions)
 		{
-			LRect r(x, 2, x + a.btn->X() - 1, client.Y() - 3);
+			int padY = 4;
+			LRect r(x, padY, x + a.btn->X() - 1, client.Y() - padY - 1);
 			a.btn->SetPos(r);
 			x += a.btn->X() + space;
 		}

@@ -59,7 +59,11 @@ public:
 	using TCertData = LArray<uint8_t>;
 	using TCertCallback = std::function<bool(const char *host, TCertData *id)>;
 
-	SslSocket(LStream *logger = NULL, LCapabilityClient *caps = NULL, bool SslOnConnect = false, bool RawLFCheck = false, bool banner = true);
+	SslSocket(	LStream *logger = nullptr,
+				LCapabilityClient *caps = nullptr,
+				bool SslOnConnect = false,
+				bool RawLFCheck = false,
+				bool banner = true);
 	~SslSocket();
 
 	const char *GetClass() override { return "SslSocket"; }
@@ -99,8 +103,8 @@ public:
 	bool IsBlocking() override;
 	void IsBlocking(bool block) override;
 
-	bool SetVariant(const char *Name, LVariant &Val, const char *Arr = NULL) override;
-	bool GetVariant(const char *Name, LVariant &Val, const char *Arr = NULL) override;
+	bool SetVariant(const char *Name, LVariant &Val, const char *Arr = nullptr) override;
+	bool GetVariant(const char *Name, LVariant &Val, const char *Arr = nullptr) override;
 
 	LStreamI *Clone() override;
 	const char *GetErrorString() override;

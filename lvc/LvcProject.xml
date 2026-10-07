@@ -20,6 +20,7 @@
 			<Node File="../include/lgi/common/IniFile.h" Type="3" Platforms="15" />
 			<Node File="../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="15" />
 			<Node File="../src/common/Net/OpenSSLSocket.cpp" Type="2" Platforms="15" />
+			<Node File="../include/lgi/common/OpenSSLSocket.h" Type="3" Platforms="15" />
 			<Node File="../src/common/Text/RemoveAnsi.cpp" Type="2" Platforms="15" />
 			<Node File="../include/lgi/common/RemoveAnsi.h" Type="3" Platforms="15" />
 			<Node File="../src/common/Lgi/StructuredLog.cpp" Type="2" Platforms="15" />

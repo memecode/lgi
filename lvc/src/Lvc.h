@@ -16,6 +16,7 @@
 #include "lgi/common/StructuredLog.h"
 #include "lgi/common/CommsBus.h"
 #include "lgi/common/MissingCapsBar.h"
+#include "lgi/common/ThreadEvent.h"
 
 #define OPT_Folders			"Folders"
 #define OPT_Folder			"Folder"
@@ -200,7 +201,7 @@ typedef bool (VcFolder::*ParseFn)(int, LString, ParseParams*);
 
 struct AppPriv
 {
-	LBox			*MainBox	= nullptr;
+	LBox			*mainBox	= nullptr;
 	VcFolder		*CurFolder	= nullptr;
 	LTree			*Tree		= nullptr;
 	LList			*Commits	= nullptr;
@@ -215,8 +216,33 @@ struct AppPriv
 	int				Resort = -1;
 	LAutoPtr<LCommsBus> CommsBus;
 	
+	struct TSshConn
+	{
+		LSsh::THostInfo info;
+		
+		struct TThread
+		{
+			LCancel *cancel = nullptr;
+			LThreadEvent event;
+			TThread(LCancel *c) : cancel(c) {}
+		};
+		LHashTbl<IntKey<OsThreadId>, TThread*> events;
+		int result = IDCANCEL;
+	
+		~TSshConn()
+		{
+			events.DeleteObjects();
+		}
+		
+		void setResult(int id);
+	};
+	
 	LMissingCapsBar *capsBar	= nullptr;
-	LSsh::KnownHostCallback SshCallback;
+	LArray<TSshConn*> sshConnections;
+	LSsh::KnownHostCallback sshCallback;
+	
+	TSshConn *GetConn(LSsh::THostInfo *c);
+	void AlwaysAcceptCert(LArray<uint8_t> &certId);
 
 	// Filtering
 	LString			FolderFilter, CommitFilter, FileFilter;
