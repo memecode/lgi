@@ -1129,13 +1129,14 @@ bool SystemFunctions::Execute(LScriptArguments &Args)
 		return false;
 	}
 
-	LStringPipe p;
-	char *Exe = Args[0]->CastString();
-	char *Arguments = Args[1]->CastString();
+	auto Exe = Args[0]->CastString();
+	auto Arguments = Args[1]->CastString();
+	
 	LSubProcess e(Exe, Arguments);
 	bool Status = e.Start();
 	if (Status)
 	{
+		LStringPipe p;
 		e.Communicate(&p);
 		*Args.GetReturn() = p.NewLStr();
 	}
@@ -1147,6 +1148,7 @@ bool SystemFunctions::Execute(LScriptArguments &Args)
 			Log->Print("Error: Execute(\"%s\",\"%s\") failed with '%s'\n", Exe, Arguments, ErrMsg.Get());
 		else
 			Log->Print("Error: Execute(\"%s\",\"%s\") failed with '0x%x'\n", Exe, Arguments, ErrCode);
+		Args.GetReturn()->Empty();
 	}
 	
 	return Status;
