@@ -26,6 +26,7 @@
 			<Node File="../src/common/Lgi/StructuredLog.cpp" Type="2" Platforms="15" />
 			<Node File="../include/lgi/common/StructuredLog.h" Type="3" Platforms="15" />
 			<Node File="../src/common/Text/XmlTreeUi.cpp" Type="2" Platforms="15" />
+			<Node File="../include/lgi/common/XmlTreeUi.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Ssh" Type="1" Platforms="15" Id="6">
 			<Node File="../include/lgi/common/MissingCapsBar.h" Type="3" Platforms="15" />
@@ -77,8 +78,6 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
-			<CCrossCompiler />
-			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -138,7 +137,6 @@ be</Debug>
 ssh
 be</Release>
 				</Haiku>
-				<All />
 			</Libraries>
 			<TargetType>
 				<All>Executable</All>
@@ -154,28 +152,15 @@ HAS_LIBSSH=1</Debug>
 					<Release>_GNU_SOURCE
 HAS_LIBSSH=1</Release>
 				</Haiku>
-				<All />
 			</Defines>
 			<ApplicationIcon>
 				<Haiku>./resources/icon.hvif</Haiku>
 			</ApplicationIcon>
-			<Options>
-				<All />
-				<Linux />
-			</Options>
-			<LibraryPaths>
-				<All />
-				<Linux />
-			</LibraryPaths>
-			<TargetName>
-				<Linux />
-			</TargetName>
-			<RPath>
-				<Linux />
-			</RPath>
-			<RPathLink>
-				<Linux />
-			</RPathLink>
+			<Options />
+			<LibraryPaths />
+			<TargetName />
+			<RPath />
+			<RPathLink />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -187,28 +172,13 @@ HAS_LIBSSH=1</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
-			<ShowWhiteSpace />
-			<CommentFile />
-			<CommentFunction />
 		</Editor>
 		<Debug>
-			<Arguments>
-				<All />
-			</Arguments>
-			<Environment />
-			<DebugAdmin />
-			<InitialDir />
-			<Debugger />
+			<Arguments />
 		</Debug>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
+		<Remote />
 		<Advanced>
-			<OtherMakefileRules />
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
+			<PostBuildCommands />
 		</Advanced>
 	</Settings>
 </Project>

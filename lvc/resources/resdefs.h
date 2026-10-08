@@ -98,9 +98,12 @@
 #define IDC_182									182
 #define IDS_LIST_AUTHORS						184
 #define ID_EDIT_MSG								186
+#define ID_CERT_LST								187
 #define ID_URL									188
 #define ID_COPY									189
 #define ID_CHANGE								190
+#define ID_DEL_CERT								192
+#define ID_CLEAR_ALL_CERTS						193
 #define ID_TABLE								500
 #define IDC_COMMIT								501
 #define ID_PULL									502

@@ -242,7 +242,8 @@ struct AppPriv
 	LSsh::KnownHostCallback sshCallback;
 	
 	TSshConn *GetConn(LSsh::THostInfo *c);
-	void AlwaysAcceptCert(LArray<uint8_t> &certId);
+	bool IsCertAccepted(LSsh::THostInfo &certId);
+	void AlwaysAcceptCert(LSsh::THostInfo &certId);
 
 	// Filtering
 	LString			FolderFilter, CommitFilter, FileFilter;

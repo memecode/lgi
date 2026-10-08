@@ -23,6 +23,68 @@ const char *AppName =			"Lvc";
 #define DEFAULT_BUILD_FIX_MSG	"Build fix."
 #define OPT_Hosts				"Hosts"
 #define OPT_Host				"Host"
+#define OPT_AcceptCert			"AcceptCert"
+
+LString toHex(LArray<unsigned char> &certId);
+
+struct AcceptedCerts
+{
+	LOptionsFile &options;
+	LXmlTag *tag;
+
+	AcceptedCerts(LOptionsFile &opts) : options(opts), tag(options.LockTag(OPT_AcceptCert, _FL)) {}
+	~AcceptedCerts()
+	{
+		if (tag)
+			options.Unlock();
+	}
+
+	AcceptedCerts(const AcceptedCerts&) = delete;
+	AcceptedCerts& operator=(const AcceptedCerts&) = delete;
+
+	LXmlTag *FindHost(const char *hostName)
+	{
+		if (!tag)
+			return nullptr;
+
+		for (auto c: tag->Children)
+		{
+			if (!c->IsTag(OPT_Host))
+				continue;
+			if (auto name = c->GetAttr("name"))
+			{
+				if (LString(hostName).Equals(name))
+					return c;
+			}
+		}
+		return nullptr;
+	}
+
+	bool Has(const char *hostName, LArray<unsigned char> &certId)
+	{
+		auto hostTag = FindHost(hostName);
+		return hostTag &&
+			hostTag->GetContent() &&
+			LString(toHex(certId)).Equals(hostTag->GetContent());
+	}
+
+	bool Set(const char *hostName, LArray<unsigned char> &certId)
+	{
+		if (!tag)
+			return false;
+
+		auto hostTag = FindHost(hostName);
+		if (!hostTag)
+		{
+			hostTag = new LXmlTag(OPT_Host);
+			hostTag->SetAttr("name", hostName);
+			tag->Children.Add(hostTag);
+		}
+		if (hostTag)
+			hostTag->SetContent(toHex(certId));
+		return true;
+	}
+};
 
 LString toHex(LArray<unsigned char> &certId)
 {
@@ -75,6 +137,9 @@ AppPriv::AppPriv() :
 	// This is NOT called in the GUI thread:
 	sshCallback = [this](auto &hostInfo)
 	{
+		if (IsCertAccepted(hostInfo))
+			return LSsh::SshConnect;
+
 		auto wnd = Log->GetWindow();
 		auto threadId = LCurrentThreadId();
 		auto conn = GetConn(&hostInfo);		
@@ -108,7 +173,7 @@ AppPriv::AppPriv() :
 						capsBar->Action("Accept Always", [this, conn]()
 							{
 								conn->setResult(IDYES);
-								AlwaysAcceptCert(conn->info.certId);
+								AlwaysAcceptCert(conn->info);
 							});
 							
 						capsBar->Action("Disconnect", [this, conn]()
@@ -171,9 +236,14 @@ AppPriv::~AppPriv()
 		CurFolder->Empty();
 }
 
-void AppPriv::AlwaysAcceptCert(LArray<unsigned char> &certId)
+bool AppPriv::IsCertAccepted(LSsh::THostInfo &certId)
 {
-	LAssert(!"impl me.");
+	return AcceptedCerts(Opts).Has(certId.hostName, certId.certId);
+}
+
+void AppPriv::AlwaysAcceptCert(LSsh::THostInfo &hostInfo)
+{
+	AcceptedCerts(Opts).Set(hostInfo.hostName, hostInfo.certId);
 }
 	
 #if HAS_LIBSSH
@@ -509,6 +579,39 @@ LString::Array GetProgramsInPath(const char *Program)
 class OptionsDlg : public LDialog, public LXmlTreeUi
 {
 	LOptionsFile &Opts;
+	LList *CertLst = nullptr;
+
+	struct HostItem : public LListItem
+	{
+		LString host, cert;
+		
+		bool XmlIo(class LXmlTag *tag, bool write) override
+		{
+			if (write)
+			{
+				tag->SetContent(cert);
+				tag->SetAttr("host", host);
+			}
+			else
+			{
+				host = tag->GetAttr("host");
+				cert = tag->GetContent();
+			}
+			
+			return false;
+		}
+		
+		const char *GetText(int col) override
+		{
+			switch (col)
+			{
+				case 0: return host;
+				case 1: return cert;
+				default: break;
+			}
+			return nullptr;
+		}
+	};
 
 public:
 	OptionsDlg(LViewI *Parent, LOptionsFile &opts) : Opts(opts)
@@ -528,10 +631,23 @@ public:
 		Map(OPT_CvsLimit, IDC_CVS_LIMIT);
 
 		Map(OPT_DiffPad, ID_DIFF_PAD);
+		
+		Map(OPT_AcceptCert, ID_CERT_LST, OPT_Host,
+			[this]()
+			{
+				return new HostItem();
+			});
 
 		if (LoadFromResource(ID_OPTIONS))
 		{
-			MoveSameScreen(Parent);
+			MoveSameScreen(Parent);			
+			
+			if (GetViewById(ID_CERT_LST, CertLst))
+			{
+				CertLst->AddColumn("host");
+				CertLst->AddColumn("cert");
+			}
+			
 			Convert(&Opts, this, true);
 		}
 	}
@@ -2238,8 +2354,7 @@ RemoteFolderDlg::RemoteFolderDlg(App *application) : app(application), root(NULL
 	Ui.Map("User", ID_USER);
 	Ui.Map("Password", ID_PASS);
 
-	LXmlTag *hosts = app->Opts.LockTag(OPT_Hosts, _FL);
-	if (hosts)
+	if (auto hosts = app->Opts.LockTag(OPT_Hosts, _FL))
 	{
 		SshHost *h;
 		for (auto c: hosts->Children)

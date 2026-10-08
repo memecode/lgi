@@ -122,6 +122,7 @@
 		<String Ref="172" Cid="93" Define="ID_AUTHOR" />
 		<String Ref="174" Cid="-1" Define="IDC_STATIC" en="Date:" />
 		<String Ref="175" Cid="175" Define="ID_DATE" />
+		<String Ref="176" Cid="-1" Define="IDC_STATIC" en="Saved certificates:" />
 		<String Ref="177" Cid="173" Define="ID_PARENT_COMMITS" />
 		<String Ref="178" Cid="178" Define="ID_MESSAGE" />
 		<String Ref="179" Cid="-1" Define="IDC_STATIC" en="Parent commit:" />
@@ -131,10 +132,13 @@
 		<String Ref="183" Cid="-1" Define="IDC_STATIC" en="Remote URL:" />
 		<String Ref="185" Cid="-1" Define="IDC_STATIC" en="Almost always, choose merge parent &apos;1&apos;..." />
 		<String Ref="186" Cid="186" Define="ID_EDIT_MSG" en="Edit message:" />
+		<String Ref="187" Cid="187" Define="ID_CERT_LST" />
 		<String Ref="188" Cid="188" Define="ID_URL" />
 		<String Ref="189" Cid="189" Define="ID_COPY" en="Copy" />
 		<String Ref="190" Cid="190" Define="ID_CHANGE" en="Change" />
 		<String Ref="191" Cid="1" Define="IDOK" en="Close" />
+		<String Ref="195" Cid="192" Define="ID_DEL_CERT" en="-" />
+		<String Ref="197" Cid="193" Define="ID_CLEAR_ALL_CERTS" en="Clear All Certs" />
 	</string-group>
 	<string-group Name="General">
 		<String Ref="84" Cid="84" Define="IDS_CREATE_NEW_BRANCH" en="Push will create a new remote branch. Is that ok?" />
@@ -400,8 +404,8 @@
 			</tr>
 		</TableLayout>
 	</Dialog>
-	<Dialog pos="7,7,505,343" ref="22">
-		<TableLayout pos="14,7,461,307" ref="23" cols="0.222,0.472,0.153,0.153" rows="0.143,0.143,0.143,0.143,0.143,0.143,0.143">
+	<Dialog pos="7,7,505,467" ref="22">
+		<TableLayout pos="14,7,461,419" ref="23" cols="0.222,0.472,0.153,0.153" rows="0.111,0.111,0.111,0.111,0.111,0.111,0.111,0.111,0.111">
 			<tr>
 				<td addr="0,0" />
 				<td addr="1,0">
@@ -414,75 +418,89 @@
 			</tr>
 			<tr>
 				<td addr="0,1" valign="Center">
-					<StaticText pos="14,49,76,62" ref="24" />
+					<StaticText pos="14,52,76,65" ref="24" />
 				</td>
 				<td addr="1,1">
-					<EditBox Pos="96,46,286,66" ref="25" />
+					<EditBox Pos="96,49,286,69" ref="25" />
 				</td>
 				<td addr="2,1">
-					<Button Pos="321,47,341,67" toggle="0" ref="26" />
+					<Button Pos="321,50,341,70" toggle="0" ref="26" />
 				</td>
 				<td addr="3,1" style="width:100px;">
-					<EditBox Pos="378,46,412,66" ref="79" />
+					<EditBox Pos="378,49,412,69" ref="79" />
 				</td>
 			</tr>
 			<tr>
 				<td addr="0,2" valign="Center">
-					<StaticText pos="14,95,76,108" ref="27" />
+					<StaticText pos="14,101,76,114" ref="27" />
 				</td>
 				<td addr="1,2">
-					<EditBox Pos="96,90,286,110" ref="28" />
+					<EditBox Pos="96,96,286,116" ref="28" />
 				</td>
 				<td addr="2,2">
-					<Button Pos="321,88,341,108" toggle="0" ref="29" />
+					<Button Pos="321,94,341,114" toggle="0" ref="29" />
 				</td>
 				<td addr="3,2" style="width:100px;">
-					<EditBox Pos="378,85,412,105" ref="80" />
+					<EditBox Pos="378,91,412,111" ref="80" />
 				</td>
 			</tr>
 			<tr>
 				<td addr="0,3" valign="Center">
-					<StaticText pos="14,136,76,149" ref="30" />
+					<StaticText pos="14,145,76,158" ref="30" />
 				</td>
 				<td addr="1,3">
-					<EditBox Pos="96,131,286,151" ref="32" />
+					<EditBox Pos="96,140,286,160" ref="32" />
 				</td>
 				<td addr="2,3">
-					<Button Pos="321,129,341,149" toggle="0" ref="36" />
+					<Button Pos="321,138,341,158" toggle="0" ref="36" />
 				</td>
 				<td addr="3,3" style="width:100px;">
-					<EditBox Pos="378,131,405,151" ref="81" />
+					<EditBox Pos="378,140,405,160" ref="81" />
 				</td>
 			</tr>
 			<tr>
 				<td addr="0,4" valign="Center">
-					<StaticText pos="14,176,69,189" ref="31" />
+					<StaticText pos="14,188,69,201" ref="31" />
 				</td>
 				<td addr="1,4">
-					<EditBox Pos="96,170,286,190" ref="33" />
+					<EditBox Pos="96,182,286,202" ref="33" />
 				</td>
 				<td addr="2,4">
-					<Button Pos="321,170,341,190" toggle="0" ref="37" />
+					<Button Pos="321,182,341,202" toggle="0" ref="37" />
 				</td>
 				<td addr="3,4" style="width:100px;">
-					<EditBox Pos="378,170,405,190" ref="82" />
+					<EditBox Pos="378,182,405,202" ref="82" />
 				</td>
 			</tr>
 			<tr>
 				<td addr="0,5" valign="Center">
-					<StaticText pos="7,210,69,223" ref="158" />
+					<StaticText pos="7,225,69,238" ref="158" />
 				</td>
 				<td addr="1,5">
-					<EditBox Pos="102,213,234,233" ref="159" />
+					<EditBox Pos="102,228,234,248" ref="159" />
 				</td>
 				<td addr="2,5" colspan="2" valign="Center">
-					<StaticText pos="314,213,369,233" ref="160" />
+					<StaticText pos="314,228,369,248" ref="160" />
 				</td>
 			</tr>
 			<tr>
 				<td addr="0,6" colspan="4" align="Max">
-					<Button Pos="252,250,314,277" image="" toggle="0" ref="34" />
-					<Button Pos="329,250,391,277" image="" toggle="0" ref="35" />
+					<Button Pos="252,267,314,294" image="" toggle="0" ref="34" />
+					<Button Pos="329,267,391,294" image="" toggle="0" ref="35" />
+				</td>
+			</tr>
+			<tr>
+				<td addr="0,7">
+					<StaticText pos="7,322,69,342" ref="176" />
+				</td>
+				<td addr="1,7" colspan="3">
+					<ListView pos="105,315,349,342" ref="187" />
+				</td>
+			</tr>
+			<tr>
+				<td addr="0,8" colspan="4" align="Max">
+					<Button Pos="259,364,286,384" toggle="0" ref="195" />
+					<Button Pos="308,364,412,384" toggle="0" ref="197" />
 				</td>
 			</tr>
 		</TableLayout>
@@ -623,7 +641,7 @@
 		</TableLayout>
 	</Dialog>
 	<Dialog pos="7,7,1108,134" ref="1">
-		<TableLayout pos="7,7,972,97" ref="2" Style="padding-top: 3px;" CellStyle="padding-left: 4px;&#10;padding-right: 1em;" cols="0.102,0.106,0.099,0.067,0.050,0.167,0.102,0.102,0.102,0.102" rows="1.000">
+		<TableLayout pos="7,7,972,97" ref="2" Style="padding-top: 3px;" cols="0.102,0.106,0.099,0.067,0.050,0.167,0.102,0.102,0.102,0.102" rows="1.000">
 			<tr>
 				<td addr="0,0" valign="Center" style="padding-left: 4px;&#10;padding-right: 1em;">
 					<Button Pos="7,21,83,48" image="" toggle="0" ref="18" />

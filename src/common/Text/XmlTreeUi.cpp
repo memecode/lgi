@@ -126,8 +126,7 @@ void LXmlTreeUi::Map(const char *Attr, int UiIdent, const char *ChildElementName
 {
 	if (Attr && UiIdent > 0 && Callback && ChildElementName)
 	{
-		Mapping *m = new Mapping;
-		if (m)
+		if (auto m = new Mapping)
 		{
 			m->Id = UiIdent;
 			m->Callback = Callback;
@@ -273,8 +272,7 @@ bool LXmlTreeUi::Convert(LDom *Tag, LViewI *Ui, bool ToUI)
 						container->Empty();
 						for (auto c: t->Children)
 						{
-							auto i = dynamic_cast<LList::TItem*>(m->Callback());
-							if (i)
+							if (auto i = dynamic_cast<LList::TItem*>(m->Callback()))
 							{
 								if (i->XmlIo(c, false))
 									container->Insert(i);
