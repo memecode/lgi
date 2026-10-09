@@ -28,6 +28,13 @@ public:
 		init = true;
 	}
 
+	LRectF(float width, float height)
+	{
+		x1 = 0.0f; y1 = 0.0f;
+		x2 = width; y2 = height;
+		init = true;
+	}
+
 	void Set(float X1, float Y1, float X2, float Y2)
 	{
 		x1 = X1; y1 = Y1;

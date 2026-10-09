@@ -1467,7 +1467,7 @@ public:
 		padding.ZOff(0, 0);
 	}
 	
-	void SetStyle(LFont *fnt, LCss *css, LRect &parentBox)
+	void SetStyle(LFont *fnt, LCss *css, LRectF &parentBox)
 	{
 		if (fnt == nullptr || css == nullptr)
 		{

@@ -5111,7 +5111,7 @@ void LTag::OldFlow(LOldFlow *Flow, int Depth)
 	Size.x = 0;
 	Size.y = 0;
 	
-	LRect rc(Flow->X(), Html->Y());
+	LRectF rc(Flow->X(), Html->Y());
 	LCssBox::SetStyle(f, this, rc);
 
 	if (TipId)
