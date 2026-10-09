@@ -352,7 +352,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/common/Net/Uri.cpp \
 	../../src/common/Resource/LgiRes.cpp \
 	../../src/common/Resource/Res.cpp \
-	../../src/common/Skins/Gel/Gel.cpp \
+	../../src/common/Skins/plutovg/plutoVg.cpp \
 	../../src/common/Text/DocView.cpp \
 	../../src/common/Text/String.cpp \
 	../../src/common/Text/TextConvert.cpp \

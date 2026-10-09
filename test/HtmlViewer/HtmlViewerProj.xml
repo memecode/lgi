@@ -30,6 +30,7 @@
 		<Node File="../../src/common/Text/Homoglyphs/HomoglyphsTable.cpp" Type="2" Platforms="15" />
 		<Node File="../../src/common/Net/Http.cpp" Type="2" Platforms="15" />
 		<Node File="../../src/common/Images/Compare/ImageComparison.cpp" Type="2" Platforms="15" />
+		<Node File="../../include/lgi/common/ImageThreadManager.h" Type="3" Platforms="15" />
 		<Node File="../../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="7" />
 		<Node File="../../src/common/Net/OpenSSLSocket.cpp" Type="2" Platforms="15" />
 		<Node File="../../src/common/Widgets/ZoomView.cpp" Type="2" Platforms="15" />
