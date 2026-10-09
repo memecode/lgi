@@ -775,7 +775,7 @@ class LFileSelectDlg :
 {
 	LRect OldPos;
 	LRect MinSize;
-	LString::Array Links;
+	LArray<LUserLink> Links;
 	LArray<LFolderItem*> Hidden;
 	LHashTbl<ConstStrKey<char,false>, bool> pathsAdded;
 
@@ -852,7 +852,7 @@ public:
 		
 		for (unsigned n=0; n<Links.Length(); n++)
 		{
-			if (Path && !Stricmp(Path, Links[n].Get()))
+			if (Path && !Stricmp(Path, Links[n].path.Get()))
 			{
 				Links.DeleteAt(n--);
 				break;
@@ -1093,14 +1093,16 @@ void LFileSelectDlg::OnCreate()
 			for (auto &i: Links)
 			{
 				// This removes any paths already added by the LVolume tree...
-				if (i &&
-					!pathsAdded.Find(i.RStrip("/")))
+				if (i.path &&
+					!pathsAdded.Find(i.path.RStrip("/")))
 				{
-					printf("notAdded: %s\n", i.Get());
 					if (auto ci = new LTreeItem)
 					{
-						ci->SetText(LGetLeaf(i.RStrip("/")), 0);
-						ci->SetText(i, 1);
+						if (i.name)
+							ci->SetText(i.name, 0);
+						else
+							ci->SetText(LGetLeaf(i.path.RStrip("/")), 0);
+						ci->SetText(i.path, 1);
 						ti->Insert(ci);
 					}
 				}
@@ -2409,7 +2411,7 @@ void LFileSelect::Save(SelectCb Cb)
 #if defined(LINUX)
 #include "lgi/common/Net.h"
 #endif
-bool LGetUsersLinks(LString::Array &Links)
+bool LGetUsersLinks(LArray<LUserLink> &Links)
 {
 	LFile::Path p(LSP_USER_LINKS);
 	if (p.Length() == 0)
@@ -2427,15 +2429,13 @@ bool LGetUsersLinks(LString::Array &Links)
 				if (d.Path(lnk, sizeof(lnk)) &&
 					LResolveShortcut(lnk, lnk, sizeof(lnk)))
 				{
-					Links.New() = lnk;
+					Links.New().path = lnk;
 				}
 			}
 		}		
 		
 	#elif defined(LINUX)
 	
-		printf("p=%s\n", p.GetFull().Get());
-
 		auto gtk3bookmarks = p / "bookmarks";
 		auto kdeUserPlaces = p / "user-places.xbel";
 		
@@ -2451,9 +2451,15 @@ bool LGetUsersLinks(LString::Array &Links)
 			auto lines = Txt.SplitDelimit("\r\n");
 			for (auto line: lines)
 			{
-				LUri u(line);
+				auto parts = line.SplitDelimit(" ", 1);
+				LUri u(parts[0]);
 				if (u.sProtocol.Equals("file"))
-					Links.New() = u.sPath;
+				{
+					auto &ul = Links.New();
+					if (parts.Length() > 1)
+						ul.name = parts[1];
+					ul.path = u.sPath;
+				}
 			}
 		}
 		else if (kdeUserPlaces.Exists())
@@ -2475,11 +2481,10 @@ bool LGetUsersLinks(LString::Array &Links)
 					LUri u(href);
 					if (u.IsProtocol("file"))
 					{
-						auto titleTag = c->GetChildTag("title");
-						auto title = titleTag ? titleTag->GetContent() : nullptr;
-						// printf("tag: %s = %s\n", title, href);
-
-						Links.New() = u.sPath;
+						auto &lnk = Links.New();
+						if (auto titleTag = c->GetChildTag("title"))
+							lnk.name = titleTag->GetContent();
+						lnk.path = u.sPath;
 					}
 				}
 			}
