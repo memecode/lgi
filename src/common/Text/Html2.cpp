@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <cmath>
+#include <vector>
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Html2.h"
@@ -219,63 +220,269 @@ public:
 	}
 };
 
+// Block, inline and table layout that follows the CSS 2.1 rules, the aim being to
+// produce the same boxes as a browser. See Refactor-HTML2-layout.md
+//
+// During layout all positions are absolute (relative to the document origin). The final
+// pass converts them to be relative to the parent tag, which is what LTag::Pos expects.
 class LNewFlow
 {
-	struct Region
+	enum Kind
 	{
-		int Left, Right;
-		int X, Y;
-		int LineHeight;
+		KHidden,
+		KInline,
+		KImg,
+		KBlock,
+		KTable,
+		KRow,
+		KGroup,
+		KCell,
+	};
+
+	struct Item
+	{
+		LFlowRect *Run = nullptr;
+		LTag *Atom = nullptr;
+		int Asc = 0;		// Space above the baseline used in the line box
+		int Desc = 0;		// Space below the baseline used in the line box
+		int BoxAsc = 0;		// Distance from the top of the box to the baseline
+		int BoxH = 0;		// Height of the box
+	};
+
+	struct Ctx
+	{
+		int Left = 0, Right = 0;
+		int X = 0, y = 0;
+		int pend = 0;		// Collapsed margin that hasn't been applied to 'y' yet
+		bool Content = false;
+		int StrutAsc = 0, StrutDesc = 0;
+		LCss::LengthType Align = LCss::AlignLeft;
+		LArray<Item> Items;
+	};
+
+	struct Frame
+	{
+		int Top = 0;
+		bool Resolved = false;
+	};
+
+	struct MinMax
+	{
+		int Min = 0, Max = 0;
+	};
+
+	struct TCell
+	{
+		LTag *T = nullptr;
+		int Row = 0, Col = 0, CS = 1, RS = 1;
+	};
+
+	struct TGrid
+	{
+		std::vector<LTag*> Rows;
+		std::vector<TCell> Cells;
+		int NCols = 0;
+	};
+
+	struct TCols
+	{
+		std::vector<int> Min, Max;
+		std::vector<int> Pct;		// -1 if not set
+		std::vector<bool> Fixed;
+		int Spacing = 0;
 	};
 
 	LHtml *Html;
 	LRect View;
+	Frame *Stack[MAX_RECURSION_DEPTH + 2];
+	int Sp = 0;
 
-	void FinishLine(Region &r, int DefaultLineHeight)
+	static int Collapse(int a, int b)
 	{
-		r.Y += MAX(r.LineHeight, DefaultLineHeight);
-		r.X = r.Left;
-		r.LineHeight = 0;
+		if (a >= 0 && b >= 0) return MAX(a, b);
+		if (a <= 0 && b <= 0) return MIN(a, b);
+		return a + b;
 	}
 
-	void AddTextRun(LTag *tag, char16 *text, ssize_t length, int width, Region &r)
-	{
-		if (length <= 0)
-			return;
+	static LTag *Child(LHtmlElement *e) { return ToTag(e); }
 
-		auto run = new LFlowRect;
-		if (!run)
+	static Kind KindOf(LTag *t)
+	{
+		switch (t->TagId)
+		{
+			case TAG_HEAD:
+			case TAG_STYLE:
+			case TAG_SCRIPT:
+			case TAG_META:
+			case TAG_TITLE:
+			case TAG_LINK:
+				return KHidden;
+			case TAG_IMG: return t->SupportedDisplay() == LCss::DispBlock ? KBlock : KImg;
+			case TAG_TABLE: return KTable;
+			case TAG_TR: return KRow;
+			case TAG_TD:
+			case TAG_TH: return KCell;
+			case TAG_TBODY: return KGroup;
+			default: break;
+		}
+
+		switch (t->SupportedDisplay())
+		{
+			case LCss::DispNone: return KHidden;
+			case LCss::DispBlock: return KBlock;
+			case LCss::DispTable: return KTable;
+			case LCss::DispTableRow: return KRow;
+			case LCss::DispTableCell: return KCell;
+			default: break;
+		}
+		return KInline;
+	}
+
+	static bool IsBlockLevel(Kind k)
+	{
+		return k == KBlock || k == KTable || k == KRow || k == KGroup || k == KCell;
+	}
+
+	LFont *FontOf(LTag *tag)
+	{
+		auto font = tag->GetFont();
+		return font ? font : Html->DefFont();
+	}
+
+	static LCss::LengthType AlignOf(LTag *t, LCss::LengthType inherited)
+	{
+		// The 'align' attribute on a table positions the table, it doesn't align the content
+		if (t->TagId == TAG_TABLE)
+			return inherited;
+		auto a = t->TextAlign();
+		if (a.Type == LCss::AlignLeft || a.Type == LCss::AlignRight ||
+			a.Type == LCss::AlignCenter || a.Type == LCss::AlignJustify)
+			return a.Type;
+		return inherited;
+	}
+
+	// asc/desc are the line box contribution (taking line-height into account),
+	// boxAsc/boxH describe the font's content area.
+	void Metrics(LTag *tag, LFont *font, int &asc, int &desc, int &boxAsc, int &boxH)
+	{
+		boxH = MAX((int)font->GetHeight(), 1);
+		boxAsc = MIN(MAX((int)(font->Ascent() + 0.5), 0), boxH);
+		asc = boxAsc;
+		desc = boxH - boxAsc;
+
+		for (LTag *t = tag; t; t = ToTag(t->Parent))
+		{
+			auto lh = t->LineHeight();
+			if (!lh)
+				continue;
+			if (lh.Type != LCss::LenAuto && lh.Type != LCss::LenNormal)
+			{
+				int px = MAX(lh.ToPx(boxH, font), 0);
+				int half = (px - boxH) / 2;
+				asc = boxAsc + half;
+				desc = px - asc;
+			}
+			break;
+		}
+	}
+
+	void ApplyPend(Ctx &c)
+	{
+		c.y += c.pend;
+		c.pend = 0;
+		for (int i = 0; i < Sp; i++)
+		{
+			if (!Stack[i]->Resolved)
+			{
+				Stack[i]->Resolved = true;
+				Stack[i]->Top = c.y;
+			}
+		}
+	}
+
+	void StartLine(Ctx &c)
+	{
+		if (!c.Content)
+		{
+			ApplyPend(c);
+			c.Content = true;
+		}
+	}
+
+	void FinishLine(Ctx &c)
+	{
+		if (!c.Content)
+		{
+			c.Items.Length(0);
+			c.X = c.Left;
 			return;
+		}
+
+		int asc = c.StrutAsc, desc = c.StrutDesc;
+		for (auto &i: c.Items)
+		{
+			asc = MAX(asc, i.Asc);
+			desc = MAX(desc, i.Desc);
+		}
+
+		int shift = 0;
+		int free = c.Right - c.X;
+		if (free > 0)
+		{
+			if (c.Align == LCss::AlignCenter)
+				shift = free / 2;
+			else if (c.Align == LCss::AlignRight)
+				shift = free;
+		}
+
+		for (auto &i: c.Items)
+		{
+			int top = c.y + asc - i.BoxAsc;
+			if (i.Run)
+			{
+				i.Run->x1 += shift;
+				i.Run->x2 += shift;
+				i.Run->y1 = top;
+				i.Run->y2 = top + i.BoxH - 1;
+			}
+			else if (i.Atom)
+			{
+				i.Atom->Pos.x += shift;
+				i.Atom->Pos.y = top;
+			}
+		}
+
+		c.y += asc + desc;
+		c.X = c.Left;
+		c.Content = false;
+		c.Items.Length(0);
+	}
+
+	void AddRun(LTag *tag, char16 *text, ssize_t length, int width, Ctx &c, LFont *font)
+	{
+		auto run = new LFlowRect;
 		run->Tag = tag;
 		run->Text = text;
 		run->Len = length;
-
-		auto tagPos = tag->AbsolutePos();
-		run->x1 = r.X - tagPos.x;
-		run->y1 = r.Y - tagPos.y;
-		run->x2 = run->x1 + MAX(width, 1) - 1;
-		run->y2 = run->y1 + MAX(r.LineHeight, 1) - 1;
+		run->x1 = c.X;
+		run->x2 = c.X + MAX(width, 1) - 1;
+		run->y1 = run->y2 = 0;
 		tag->TextPos.Add(run);
 
-		tag->Size.x = MAX(tag->Size.x, run->x2 + 1);
-		tag->Size.y = MAX(tag->Size.y, run->y2 + 1);
-		MAX.x = MAX(MAX.x, tagPos.x + run->x2);
-		MAX.y = MAX(MAX.y, tagPos.y + run->y2);
+		Item i;
+		i.Run = run;
+		Metrics(tag, font, i.Asc, i.Desc, i.BoxAsc, i.BoxH);
+		c.Items.Add(i);
 	}
 
-	void FlowText(LTag *tag, char16 *text, Region &r, LFont *font)
+	void FlowText(LTag *tag, char16 *text, Ctx &c, LFont *font)
 	{
 		if (!text || !font)
 			return;
 
-		int defaultLineHeight = MAX(font->GetHeight(), 1);
-		auto lineHeight = tag->LineHeight();
-		if (lineHeight && lineHeight.Type != LCss::LenAuto && lineHeight.Type != LCss::LenNormal)
-			defaultLineHeight = MAX(lineHeight.ToPx(defaultLineHeight, font), 1);
-
 		while (*text)
 		{
-			if (r.X == r.Left && StrchrW(WhiteW, *text))
+			if ((!c.Content || c.X == c.Left) && StrchrW(WhiteW, *text))
 			{
 				text++;
 				continue;
@@ -283,7 +490,7 @@ class LNewFlow
 
 			ssize_t remaining = StrlenW(text);
 			LDisplayString display(font, text, MIN(remaining, 1024));
-			ssize_t length = display.CharAt(MAX(r.Right - r.X, 1));
+			ssize_t length = display.CharAt(MAX(c.Right - c.X, 1));
 			bool wrapped = text[length] != 0;
 			if (wrapped)
 			{
@@ -293,9 +500,9 @@ class LNewFlow
 
 				if (breakAt == 0)
 				{
-					if (r.X > r.Left)
+					if (c.X > c.Left)
 					{
-						FinishLine(r, defaultLineHeight);
+						FinishLine(c);
 						continue;
 					}
 					while (text[length] && !StrchrW(WhiteW, text[length]))
@@ -311,186 +518,883 @@ class LNewFlow
 				continue;
 			}
 
+			StartLine(c);
 			LDisplayString runDisplay(font, text, length);
-			r.LineHeight = MAX(r.LineHeight, defaultLineHeight);
-			AddTextRun(tag, text, length, runDisplay.X(), r);
-			r.X += runDisplay.X();
+			AddRun(tag, text, length, runDisplay.X(), c, font);
+			c.X += runDisplay.X();
 			text += length;
 
 			if (wrapped)
 			{
-				FinishLine(r, defaultLineHeight);
+				FinishLine(c);
 				while (*text && StrchrW(WhiteW, *text))
 					text++;
 			}
 		}
 	}
 
-	void LayoutInline(LTag *tag, int parentX, int parentY, Region &r, int depth)
+	LPoint ImageSize(LTag *tag, LFont *font, int availW)
 	{
-		if (!tag || depth >= MAX_RECURSION_DEPTH || tag->SupportedDisplay() == LCss::DispNone)
-			return;
-
-		auto font = tag->GetFont();
-		if (!font)
-			font = Html->DefFont();
-		if (!font)
-			return;
-
-		tag->Pos.x = tag->Pos.y = 0;
-		tag->Size.x = tag->Size.y = 0;
-		tag->TextPos.DeleteObjects();
-		LRectF parentBox(r.Right - r.Left, View.Y());
-		tag->LCssBox::SetStyle(font, tag, parentBox);
-
-		int outerStartX = r.X + (int)tag->margin.x1;
-		int outerStartY = r.Y + (int)tag->margin.y1;
-		if (tag->TagId == TAG_IMG)
-		{
-			int width = tag->Image ? tag->Image->X() : font->GetHeight();
-			int height = tag->Image ? tag->Image->Y() : font->GetHeight();
-			auto cssWidth = tag->Width();
-			auto cssHeight = tag->Height();
-			if (cssWidth && cssWidth.Type != LCss::LenAuto)
-				width = MAX(cssWidth.ToPx(r.Right - r.Left, font), 0);
-			if (cssHeight && cssHeight.Type != LCss::LenAuto)
-				height = MAX(cssHeight.ToPx(View.Y(), font), 0);
-			if (cssWidth && !cssHeight && tag->Image && tag->Image->X() > 0)
-				height = (int)((double)width * tag->Image->Y() / tag->Image->X() + 0.5);
-			else if (cssHeight && !cssWidth && tag->Image && tag->Image->Y() > 0)
-				width = (int)((double)height * tag->Image->X() / tag->Image->Y() + 0.5);
-
-			int outerWidth = width + (int)tag->margin.x1 + (int)tag->margin.x2 + tag->border.x1 + tag->border.x2 + tag->padding.x1 + tag->padding.x2;
-			if (r.X > r.Left && r.X + outerWidth > r.Right)
-			{
-				FinishLine(r, MAX(font->GetHeight(), 1));
-				outerStartX = r.X + (int)tag->margin.x1;
-				outerStartY = r.Y + (int)tag->margin.y1;
-			}
-
-			tag->Pos.Set(outerStartX - parentX, outerStartY - parentY);
-			tag->Size.x = width + tag->border.x1 + tag->border.x2 + tag->padding.x1 + tag->padding.x2;
-			tag->Size.y = height + tag->border.y1 + tag->border.y2 + tag->padding.y1 + tag->padding.y2;
-			r.X = outerStartX + tag->Size.x + (int)tag->margin.x2;
-			r.LineHeight = MAX(r.LineHeight, tag->Size.y);
-			MAX.x = MAX(MAX.x, outerStartX + tag->Size.x - 1);
-			MAX.y = MAX(MAX.y, outerStartY + tag->Size.y - 1);
-			return;
-		}
-
-		tag->Pos.Set(outerStartX - parentX, outerStartY - parentY);
-		int contentX = outerStartX + tag->border.x1 + tag->padding.x1;
-		r.X = contentX;
-		if (tag->TagId == TAG_BR)
-			FinishLine(r, MAX(font->GetHeight(), 1));
-		else
-		{
-			FlowText(tag, tag->Text(), r, font);
-			for (auto element: tag->Children)
-			{
-				auto child = ToTag(element);
-				if (!child || child->SupportedDisplay() == LCss::DispNone)
-					continue;
-				auto display = child->SupportedDisplay();
-				if (display == LCss::DispBlock || display == LCss::DispTable || display == LCss::DispTableRow || display == LCss::DispTableCell)
-				{
-					if (r.X > r.Left || r.LineHeight)
-						FinishLine(r, MAX(font->GetHeight(), 1));
-					r.Y = LayoutBlock(child, outerStartX, outerStartY, r.Left, r.Y, r.Right - r.Left, depth + 1);
-					r.X = r.Left;
-					r.LineHeight = 0;
-				}
-				else
-					LayoutInline(child, outerStartX, outerStartY, r, depth + 1);
-			}
-		}
-
-		int right = r.X + tag->padding.x2 + tag->border.x2;
-		tag->Size.x = MAX(tag->Size.x, right - outerStartX);
-		int usedBottom = r.Y + (r.LineHeight ? r.LineHeight : MAX(font->GetHeight(), 1));
-		tag->Size.y = MAX(tag->Size.y, usedBottom - outerStartY + tag->padding.y1 + tag->padding.y2 + tag->border.y1 + tag->border.y2);
-		r.X = right + (int)tag->margin.x2;
-		r.LineHeight = MAX(r.LineHeight, tag->Size.y);
-		MAX.x = MAX(MAX.x, outerStartX + tag->Size.x - 1);
-		MAX.y = MAX(MAX.y, outerStartY + tag->Size.y - 1);
+		int width = tag->Image ? tag->Image->X() : font->GetHeight();
+		int height = tag->Image ? tag->Image->Y() : font->GetHeight();
+		auto cssWidth = tag->Width();
+		auto cssHeight = tag->Height();
+		bool hasW = cssWidth && cssWidth.Type != LCss::LenAuto;
+		bool hasH = cssHeight && cssHeight.Type != LCss::LenAuto;
+		if (hasW)
+			width = MAX(cssWidth.ToPx(availW, font), 0);
+		if (hasH)
+			height = MAX(cssHeight.ToPx(View.Y(), font), 0);
+		if (hasW && !hasH && tag->Image && tag->Image->X() > 0)
+			height = (int)((double)width * tag->Image->Y() / tag->Image->X() + 0.5);
+		else if (hasH && !hasW && tag->Image && tag->Image->Y() > 0)
+			width = (int)((double)height * tag->Image->X() / tag->Image->Y() + 0.5);
+		return LPoint(width, height);
 	}
 
-	int LayoutBlock(LTag *tag, int parentX, int parentY, int left, int y, int availableWidth, int depth)
+	static int HEdges(LTag *t)
 	{
-		if (!tag || depth >= MAX_RECURSION_DEPTH || tag->SupportedDisplay() == LCss::DispNone)
-			return y;
+		return (int)(t->border.x1 + t->border.x2 + t->padding.x1 + t->padding.x2);
+	}
 
-		auto font = tag->GetFont();
-		if (!font)
-			font = Html->DefFont();
-		if (!font)
-			return y;
+	static int VEdges(LTag *t)
+	{
+		return (int)(t->border.y1 + t->border.y2 + t->padding.y1 + t->padding.y2);
+	}
 
-		tag->Pos.x = tag->Pos.y = 0;
-		tag->Size.x = tag->Size.y = 0;
-		tag->TextPos.DeleteObjects();
-
-		LRectF parentBox(availableWidth, View.Y());
-		tag->LCssBox::SetStyle(font, tag, parentBox);
-
-		auto width = tag->Width();
-		int horizontalEdges = tag->border.x1 + tag->border.x2 + tag->padding.x1 + tag->padding.x2;
-		int contentWidth = MAX(availableWidth - tag->margin.x1 - tag->margin.x2 - horizontalEdges, 0);
-		if (width && width.Type != LCss::LenAuto)
-			contentWidth = MAX(width.ToPx(availableWidth, font), 0);
-		if (tag->MinWidth())
-			contentWidth = MAX(contentWidth, tag->MinWidth().ToPx(availableWidth, font));
-		if (tag->MaxWidth())
-			contentWidth = MIN(contentWidth, tag->MaxWidth().ToPx(availableWidth, font));
-
-		int autoSpace = MAX(availableWidth - contentWidth - horizontalEdges - tag->margin.x1 - tag->margin.x2, 0);
-		int marginLeft = (int)tag->margin.x1;
-		if (tag->MarginLeft().Type == LCss::LenAuto && tag->MarginRight().Type == LCss::LenAuto)
-			marginLeft = (int)tag->margin.x1 + autoSpace / 2;
-		else if (tag->MarginLeft().Type == LCss::LenAuto)
-			marginLeft = (int)tag->margin.x1 + autoSpace;
-		int boxX = left + marginLeft;
-		int boxY = y + (int)tag->margin.y1;
-		tag->Pos.Set(boxX - parentX, boxY - parentY);
-
-		int contentLeft = boxX + tag->border.x1 + tag->padding.x1;
-		int contentTop = boxY + tag->border.y1 + tag->padding.y1;
-		Region region = { contentLeft, contentLeft + contentWidth, contentLeft, contentTop, 0 };
-		FlowText(tag, tag->Text(), region, font);
+	void FlowChildren(LTag *tag, Ctx &c, LFont *font, int depth)
+	{
+		FlowText(tag, tag->Text(), c, font);
 
 		for (auto element: tag->Children)
 		{
-			auto child = ToTag(element);
-			if (!child || child->SupportedDisplay() == LCss::DispNone)
+			auto child = Child(element);
+			if (!child)
 				continue;
-
-			auto display = child->SupportedDisplay();
-			if (display == LCss::DispBlock || display == LCss::DispTable || display == LCss::DispTableRow || display == LCss::DispTableCell)
+			auto k = KindOf(child);
+			if (k == KHidden)
+				continue;
+			if (k == KTable)
+				LayoutTable(child, c, depth + 1);
+			else if (IsBlockLevel(k))
 			{
-				if (region.X > region.Left || region.LineHeight)
-					FinishLine(region, MAX(font->GetHeight(), 1));
-				region.Y = LayoutBlock(child, boxX, boxY, contentLeft, region.Y, contentWidth, depth + 1);
-				region.X = region.Left;
-				region.LineHeight = 0;
+				FinishLine(c);
+				LayoutBlock(child, c, depth + 1);
 			}
 			else
-				LayoutInline(child, boxX, boxY, region, depth + 1);
+				LayoutInline(child, c, depth + 1);
+		}
+	}
+
+	void LayoutInline(LTag *tag, Ctx &c, int depth)
+	{
+		if (depth >= MAX_RECURSION_DEPTH)
+			return;
+		auto font = FontOf(tag);
+		if (!font)
+			return;
+
+		LRectF parentBox(c.Right - c.Left, View.Y());
+		tag->LCssBox::SetStyle(font, tag, parentBox);
+		tag->Pos.x = c.X;
+		tag->Pos.y = c.y + c.pend;
+
+		if (tag->TagId == TAG_BR)
+		{
+			StartLine(c);
+			Item i;
+			i.Atom = tag;
+			Metrics(tag, font, i.Asc, i.Desc, i.BoxAsc, i.BoxH);
+			i.BoxH = 0;
+			tag->Pos.x = c.X;
+			c.Items.Add(i);
+			FinishLine(c);
+			return;
 		}
 
-		int contentHeight = region.Y - contentTop + (region.LineHeight ? region.LineHeight : 0);
-		auto height = tag->Height();
-		if (height && height.Type != LCss::LenAuto)
-			contentHeight = MAX(contentHeight, height.ToPx(View.Y(), font));
-		if (tag->MinHeight())
-			contentHeight = MAX(contentHeight, tag->MinHeight().ToPx(View.Y(), font));
-		if (tag->MaxHeight())
-			contentHeight = MIN(contentHeight, tag->MaxHeight().ToPx(View.Y(), font));
+		int ml = (int)tag->margin.x1, mr = (int)tag->margin.x2;
+		if (KindOf(tag) == KImg)
+		{
+			auto sz = ImageSize(tag, font, c.Right - c.Left);
+			int w = sz.x + (int)(tag->border.x1 + tag->border.x2 + tag->padding.x1 + tag->padding.x2);
+			int h = sz.y + (int)(tag->border.y1 + tag->border.y2 + tag->padding.y1 + tag->padding.y2);
+			if (c.Content && c.X > c.Left && c.X + ml + w + mr > c.Right)
+				FinishLine(c);
 
-		tag->Size.x = contentWidth + horizontalEdges;
-		tag->Size.y = MAX(contentHeight, 0) + tag->border.y1 + tag->border.y2 + tag->padding.y1 + tag->padding.y2;
-		MAX.x = MAX(MAX.x, boxX + tag->Size.x - 1);
-		MAX.y = MAX(MAX.y, boxY + tag->Size.y - 1);
-		return boxY + tag->Size.y + tag->margin.y2;
+			StartLine(c);
+			tag->Pos.x = c.X + ml;
+			tag->Size.x = w;
+			tag->Size.y = h;
+			Item i;
+			i.Atom = tag;
+			i.BoxH = h;
+			i.BoxAsc = h + (int)tag->margin.y2;
+			i.Asc = i.BoxAsc + (int)tag->margin.y1;
+			c.Items.Add(i);
+			c.X += ml + w + mr;
+			return;
+		}
+
+		c.X += ml + (int)(tag->border.x1 + tag->padding.x1);
+		FlowChildren(tag, c, font, depth);
+		c.X += (int)(tag->border.x2 + tag->padding.x2) + mr;
+	}
+
+	void LayoutBlock(LTag *tag, Ctx &pc, int depth, int forcedW = -1)
+	{
+		if (depth >= MAX_RECURSION_DEPTH)
+			return;
+		auto font = FontOf(tag);
+		if (!font)
+			return;
+
+		bool cell = forcedW >= 0;
+		int availW = pc.Right - pc.Left;
+		LRectF parentBox(availW, View.Y());
+		tag->LCssBox::SetStyle(font, tag, parentBox);
+		if (cell)
+			tag->margin.x1 = tag->margin.x2 = tag->margin.y1 = tag->margin.y2 = 0;
+
+		bool bfc = cell || !tag->Parent || tag->TagId == TAG_HTML;
+		int hEdges = HEdges(tag);
+		int contentW;
+		int marginLeft = (int)tag->margin.x1;
+		if (cell)
+			contentW = MAX(forcedW - hEdges, 0);
+		else
+		{
+			contentW = MAX(availW - (int)(tag->margin.x1 + tag->margin.x2) - hEdges, 0);
+			auto width = tag->Width();
+			if (width && width.Type != LCss::LenAuto)
+				contentW = MAX(width.ToPx(availW, font), 0);
+			if (tag->MinWidth())
+				contentW = MAX(contentW, tag->MinWidth().ToPx(availW, font));
+			if (tag->MaxWidth())
+				contentW = MIN(contentW, tag->MaxWidth().ToPx(availW, font));
+
+			int autoSpace = MAX(availW - contentW - hEdges - (int)(tag->margin.x1 + tag->margin.x2), 0);
+			if (tag->MarginLeft().Type == LCss::LenAuto && tag->MarginRight().Type == LCss::LenAuto)
+				marginLeft += autoSpace / 2;
+			else if (tag->MarginLeft().Type == LCss::LenAuto)
+				marginLeft += autoSpace;
+		}
+
+		Ctx c;
+		c.y = pc.y;
+		c.pend = pc.pend;
+		c.Align = AlignOf(tag, pc.Align);
+
+		Frame f;
+		Stack[Sp++] = &f;
+
+		int mt = (int)tag->margin.y1, mb = (int)tag->margin.y2;
+		c.pend = Collapse(c.pend, mt);
+		bool topEdge = bfc || tag->border.y1 + tag->padding.y1 > 0;
+		bool bottomEdge = bfc || tag->border.y2 + tag->padding.y2 > 0;
+		int contentTop = 0;
+		if (topEdge)
+		{
+			ApplyPend(c);
+			c.y += (int)(tag->border.y1 + tag->padding.y1);
+			contentTop = c.y;
+		}
+
+		int boxX = pc.Left + marginLeft;
+		c.Left = boxX + (int)(tag->border.x1 + tag->padding.x1);
+		c.Right = c.Left + contentW;
+		c.X = c.Left;
+		int asc, desc, ba, bh;
+		Metrics(tag, font, asc, desc, ba, bh);
+		c.StrutAsc = asc;
+		c.StrutDesc = desc;
+
+		bool replaced = tag->TagId == TAG_IMG;
+		int replacedH = 0;
+		if (replaced)
+		{
+			auto sz = ImageSize(tag, font, availW);
+			contentW = sz.x;
+			c.Right = c.Left + contentW;
+			replacedH = sz.y;
+			StartLine(c);
+			c.y += replacedH;
+			c.Content = false;
+		}
+		else
+		{
+			FlowChildren(tag, c, font, depth);
+			FinishLine(c);
+		}
+
+		int specH = -1, minH = 0;
+		auto height = tag->Height();
+		if (height && height.Type != LCss::LenAuto && height.Type != LCss::LenPercent)
+			specH = MAX(height.ToPx(View.Y(), font), 0);
+		if (tag->MinHeight() && tag->MinHeight().Type != LCss::LenPercent)
+			minH = tag->MinHeight().ToPx(View.Y(), font);
+
+		bool through = !bottomEdge && specH < 0 && minH <= 0;
+		if (!through)
+			ApplyPend(c);
+
+		bool empty = !f.Resolved;
+		int top = empty ? c.y + c.pend : f.Top;
+		if (!topEdge)
+			contentTop = top;
+		int contentH = empty ? 0 : c.y - contentTop;
+		if (specH >= 0)
+			contentH = cell ? MAX(contentH, specH) : specH;
+		contentH = MAX(contentH, minH);
+		if (tag->MaxHeight() && tag->MaxHeight().Type != LCss::LenPercent)
+			contentH = MIN(contentH, tag->MaxHeight().ToPx(View.Y(), font));
+
+		int bottom = top + (int)(tag->border.y1 + tag->padding.y1) + contentH + (int)(tag->border.y2 + tag->padding.y2);
+		tag->Pos.x = boxX;
+		tag->Pos.y = top;
+		tag->Size.x = contentW + hEdges;
+		tag->Size.y = bottom - top;
+
+		if (!(through && empty))
+			c.y = bottom;
+		c.pend = Collapse(through ? c.pend : 0, mb);
+		Sp--;
+
+		pc.y = c.y;
+		pc.pend = c.pend;
+	}
+
+	// ---- Tables ----
+
+	void BuildGrid(LTag *table, TGrid &g)
+	{
+		for (auto e: table->Children)
+		{
+			auto ch = Child(e);
+			if (!ch)
+				continue;
+			auto k = KindOf(ch);
+			if (k == KRow)
+				g.Rows.push_back(ch);
+			else if (k == KGroup)
+			{
+				for (auto e2: ch->Children)
+				{
+					auto r = Child(e2);
+					if (r && KindOf(r) == KRow)
+						g.Rows.push_back(r);
+				}
+			}
+		}
+
+		std::vector<std::vector<bool>> used(g.Rows.size() + 1);
+		for (size_t r = 0; r < g.Rows.size(); r++)
+		{
+			int col = 0;
+			for (auto e: g.Rows[r]->Children)
+			{
+				auto cell = Child(e);
+				if (!cell || KindOf(cell) != KCell)
+					continue;
+
+				TCell tc;
+				tc.T = cell;
+				tc.Row = (int)r;
+				if (cell->Cell)
+				{
+					tc.CS = MAX(cell->Cell->Span.x, 1);
+					tc.RS = MAX(cell->Cell->Span.y, 1);
+				}
+				tc.RS = MIN(tc.RS, (int)(g.Rows.size() - r));
+
+				while (col < (int)used[r].size() && used[r][col])
+					col++;
+				tc.Col = col;
+				for (int rr = 0; rr < tc.RS; rr++)
+				{
+					auto &u = used[r + rr];
+					if ((int)u.size() < col + tc.CS)
+						u.resize(col + tc.CS, false);
+					for (int cc = 0; cc < tc.CS; cc++)
+						u[col + cc] = true;
+				}
+				col += tc.CS;
+				g.NCols = MAX(g.NCols, col);
+				g.Cells.push_back(tc);
+			}
+		}
+	}
+
+	int SpacingOf(LTag *table)
+	{
+		if (table->BorderCollapse() == LCss::CollapseCollapse)
+			return 0;
+		auto s = table->BorderSpacing();
+		if (s && s.Type != LCss::LenAuto)
+			return MAX(s.ToPx(0, FontOf(table)), 0);
+		return 2;
+	}
+
+	static int Distribute(std::vector<int> &v, int from, int count, int extra)
+	{
+		if (extra <= 0 || count <= 0)
+			return 0;
+		int total = 0;
+		for (int i = 0; i < count; i++)
+			total += MAX(v[from + i], 1);
+		int given = 0;
+		for (int i = 0; i < count; i++)
+		{
+			int add = i == count - 1 ? extra - given : (int)((int64_t)extra * MAX(v[from + i], 1) / total);
+			v[from + i] += add;
+			given += add;
+		}
+		return given;
+	}
+
+	MinMax MeasureText(char16 *text, LFont *font)
+	{
+		MinMax r;
+		if (!text || !font)
+			return r;
+		int space = LDisplayString(font, L" ", 1).X();
+		int words = 0;
+		while (*text)
+		{
+			while (*text && StrchrW(WhiteW, *text))
+				text++;
+			char16 *e = text;
+			while (*e && !StrchrW(WhiteW, *e))
+				e++;
+			if (e > text)
+			{
+				int w = LDisplayString(font, text, e - text).X();
+				r.Min = MAX(r.Min, w);
+				r.Max += w + (words ? space : 0);
+				words++;
+			}
+			text = e;
+		}
+		return r;
+	}
+
+	// Outer (margin box) min/max content widths of a tag
+	MinMax Measure(LTag *tag, int depth)
+	{
+		MinMax r;
+		if (!tag || depth >= MAX_RECURSION_DEPTH)
+			return r;
+		auto k = KindOf(tag);
+		if (k == KHidden)
+			return r;
+		auto font = FontOf(tag);
+		if (!font)
+			return r;
+
+		LRectF parentBox(View.X(), View.Y());
+		tag->LCssBox::SetStyle(font, tag, parentBox);
+		if (k == KCell)
+			tag->margin.x1 = tag->margin.x2 = tag->margin.y1 = tag->margin.y2 = 0;
+		int edges = (int)(tag->margin.x1 + tag->margin.x2) + HEdges(tag);
+
+		MinMax in;
+		if (k == KImg)
+		{
+			in.Min = in.Max = ImageSize(tag, font, 0).x;
+		}
+		else if (k == KTable)
+		{
+			in = MeasureTable(tag, depth + 1);
+		}
+		else
+		{
+			in = MeasureText(tag->Text(), font);
+			int run = in.Max;
+			in.Max = 0;
+			for (auto e: tag->Children)
+			{
+				auto ch = Child(e);
+				if (!ch)
+					continue;
+				auto ck = KindOf(ch);
+				if (ck == KHidden)
+					continue;
+				if (ch->TagId == TAG_BR)
+				{
+					in.Max = MAX(in.Max, run);
+					run = 0;
+					continue;
+				}
+				auto m = Measure(ch, depth + 1);
+				in.Min = MAX(in.Min, m.Min);
+				if (IsBlockLevel(ck))
+				{
+					in.Max = MAX(in.Max, run);
+					in.Max = MAX(in.Max, m.Max);
+					run = 0;
+				}
+				else
+					run += m.Max;
+			}
+			in.Max = MAX(in.Max, run);
+		}
+
+		auto width = tag->Width();
+		if (k != KTable && width && width.Type != LCss::LenAuto && width.Type != LCss::LenPercent)
+			in.Min = in.Max = MAX(width.ToPx(0, font), 0);
+
+		r.Min = in.Min + edges;
+		r.Max = in.Max + edges;
+		return r;
+	}
+
+	void ColumnMetrics(TGrid &g, TCols &cols, int depth)
+	{
+		int n = g.NCols;
+		cols.Min.assign(n, 0);
+		cols.Max.assign(n, 0);
+		cols.Pct.assign(n, -1);
+		cols.Fixed.assign(n, false);
+
+		std::vector<MinMax> cm(g.Cells.size());
+		for (size_t i = 0; i < g.Cells.size(); i++)
+		{
+			auto &tc = g.Cells[i];
+			auto font = FontOf(tc.T);
+			auto m = Measure(tc.T, depth);
+			auto w = tc.T->Width();
+			if (w && w.Type == LCss::LenPx)
+			{
+				int spec = MAX((int)w.Value, 0) + HEdges(tc.T);
+				m.Max = MAX(m.Min, spec);
+				if (tc.CS == 1)
+					cols.Fixed[tc.Col] = true;
+			}
+			else if (w && w.Type == LCss::LenPercent && tc.CS == 1)
+				cols.Pct[tc.Col] = MAX(cols.Pct[tc.Col], (int)w.Value);
+			else if (w && w.Type != LCss::LenAuto && w.Type != LCss::LenPercent)
+			{
+				int spec = MAX(w.ToPx(0, font), 0) + HEdges(tc.T);
+				m.Max = MAX(m.Min, spec);
+			}
+			cm[i] = m;
+			if (tc.CS == 1)
+			{
+				cols.Min[tc.Col] = MAX(cols.Min[tc.Col], m.Min);
+				cols.Max[tc.Col] = MAX(cols.Max[tc.Col], m.Max);
+			}
+		}
+
+		for (size_t i = 0; i < g.Cells.size(); i++)
+		{
+			auto &tc = g.Cells[i];
+			if (tc.CS < 2)
+				continue;
+			int sMin = 0, sMax = 0;
+			for (int c = 0; c < tc.CS; c++)
+			{
+				sMin += cols.Min[tc.Col + c];
+				sMax += cols.Max[tc.Col + c];
+			}
+			int gaps = cols.Spacing * (tc.CS - 1);
+			Distribute(cols.Min, tc.Col, tc.CS, cm[i].Min - gaps - sMin);
+			Distribute(cols.Max, tc.Col, tc.CS, cm[i].Max - gaps - sMax);
+		}
+
+		for (int c = 0; c < n; c++)
+			cols.Max[c] = MAX(cols.Max[c], cols.Min[c]);
+	}
+
+	// Min/max width of the table excluding its own border/margin
+	MinMax MeasureTable(LTag *table, int depth)
+	{
+		MinMax r;
+		TGrid g;
+		BuildGrid(table, g);
+		if (g.NCols == 0)
+			return r;
+
+		TCols cols;
+		cols.Spacing = SpacingOf(table);
+		ColumnMetrics(g, cols, depth);
+		int extra = cols.Spacing * (g.NCols + 1);
+		for (int c = 0; c < g.NCols; c++)
+		{
+			r.Min += cols.Min[c];
+			r.Max += cols.Max[c];
+		}
+		r.Min += extra;
+		r.Max += extra;
+
+		auto width = table->Width();
+		if (width && width.Type == LCss::LenPx)
+		{
+			int w = MAX((int)width.Value - (int)(table->border.x1 + table->border.x2), r.Min);
+			r.Min = r.Max = w;
+		}
+		return r;
+	}
+
+	void SolveColumns(TCols &cols, int T, std::vector<int> &w)
+	{
+		int n = (int)cols.Min.size();
+		std::vector<int> pref(n);
+		int sumMin = 0, sumPref = 0;
+		for (int i = 0; i < n; i++)
+		{
+			pref[i] = cols.Pct[i] >= 0 ? MAX(cols.Min[i], T * cols.Pct[i] / 100) : cols.Max[i];
+			sumMin += cols.Min[i];
+			sumPref += pref[i];
+		}
+
+		w = cols.Min;
+		if (T <= sumMin)
+			return;
+
+		if (T >= sumPref)
+		{
+			w = pref;
+			int extra = T - sumPref;
+			if (extra > 0)
+			{
+				std::vector<int> idx;
+				for (int i = 0; i < n; i++)
+					if (cols.Pct[i] < 0 && !cols.Fixed[i])
+						idx.push_back(i);
+				if (idx.empty())
+					for (int i = 0; i < n; i++)
+						idx.push_back(i);
+				int total = 0;
+				for (int i: idx)
+					total += MAX(cols.Max[i], 1);
+				int given = 0;
+				for (size_t k = 0; k < idx.size(); k++)
+				{
+					int i = idx[k];
+					int add = k + 1 == idx.size() ? extra - given : (int)((int64_t)extra * MAX(cols.Max[i], 1) / total);
+					w[i] += add;
+					given += add;
+				}
+			}
+			return;
+		}
+
+		int avail = T - sumMin;
+		int range = sumPref - sumMin;
+		int given = 0, lastGrow = -1;
+		for (int i = 0; i < n; i++)
+			if (pref[i] > cols.Min[i])
+				lastGrow = i;
+		for (int i = 0; i < n; i++)
+		{
+			int grow = pref[i] - cols.Min[i];
+			if (grow <= 0)
+				continue;
+			int add = i == lastGrow ? avail - given : (int)((int64_t)avail * grow / range);
+			w[i] = cols.Min[i] + add;
+			given += add;
+		}
+	}
+
+	static void Shift(LTag *tag, int dx, int dy)
+	{
+		for (auto e: tag->Children)
+		{
+			auto ch = Child(e);
+			if (!ch)
+				continue;
+			ch->Pos.x += dx;
+			ch->Pos.y += dy;
+			for (auto r: ch->TextPos)
+			{
+				r->x1 += dx; r->x2 += dx;
+				r->y1 += dy; r->y2 += dy;
+			}
+			Shift(ch, dx, dy);
+		}
+		for (auto r: tag->TextPos)
+		{
+			r->x1 += dx; r->x2 += dx;
+			r->y1 += dy; r->y2 += dy;
+		}
+	}
+
+	static LCss::LengthType VAlignOf(LTag *cell)
+	{
+		for (LTag *t = cell; t; t = ToTag(t->Parent))
+		{
+			auto v = t->VerticalAlign();
+			if (v.Type == LCss::VerticalTop || v.Type == LCss::VerticalMiddle ||
+				v.Type == LCss::VerticalBottom || v.Type == LCss::VerticalBaseline)
+				return v.Type;
+			if (t->TagId == TAG_TABLE)
+				break;
+		}
+		return LCss::VerticalMiddle;
+	}
+
+	static void PlaceCell(LTag *cell, int h, int rowH)
+	{
+		auto v = VAlignOf(cell);
+		int dy = 0;
+		if (v == LCss::VerticalMiddle)
+			dy = (rowH - h) / 2;
+		else if (v == LCss::VerticalBottom)
+			dy = rowH - h;
+		if (dy > 0)
+			Shift(cell, 0, dy);
+		cell->Size.y = MAX(rowH, h);
+	}
+
+	void LayoutTable(LTag *table, Ctx &pc, int depth)
+	{
+		if (depth >= MAX_RECURSION_DEPTH)
+			return;
+		auto font = FontOf(table);
+		if (!font)
+			return;
+
+		int availW = pc.Right - pc.Left;
+		LRectF parentBox(availW, View.Y());
+		table->LCssBox::SetStyle(font, table, parentBox);
+
+		TGrid g;
+		BuildGrid(table, g);
+		TCols cols;
+		cols.Spacing = SpacingOf(table);
+		int spacing = cols.Spacing;
+		int n = g.NCols;
+		int bx = (int)(table->border.x1 + table->border.x2);
+		int by = (int)(table->border.y1 + table->border.y2);
+		int mx = (int)(table->margin.x1 + table->margin.x2);
+		int outerAvail = MAX(availW - mx, 0);
+
+		ColumnMetrics(g, cols, depth);
+		int sumMin = 0, sumMax = 0;
+		for (int i = 0; i < n; i++)
+		{
+			sumMin += cols.Min[i];
+			sumMax += cols.Max[i];
+		}
+		int fixedExtra = spacing * (n + 1) + bx;
+		int W;
+		auto width = table->Width();
+		if (width && width.Type != LCss::LenAuto)
+			W = MAX(width.ToPx(availW, font), sumMin + fixedExtra);
+		else
+			W = MAX(MIN(sumMax + fixedExtra, outerAvail), sumMin + fixedExtra);
+		if (n == 0)
+			W = (width && width.Type != LCss::LenAuto) ? W : bx;
+
+		std::vector<int> cw;
+		if (n)
+			SolveColumns(cols, W - fixedExtra, cw);
+
+		int marginLeft = (int)table->margin.x1;
+		int free = MAX(outerAvail - W, 0);
+		auto xalign = table->Cell ? table->Cell->XAlign : LCss::LenInherit;
+		if (table->MarginLeft().Type == LCss::LenAuto && table->MarginRight().Type == LCss::LenAuto)
+			marginLeft += free / 2;
+		else if (table->MarginLeft().Type == LCss::LenAuto)
+			marginLeft += free;
+		else if (xalign == LCss::AlignCenter || (xalign == LCss::LenInherit && pc.Align == LCss::AlignCenter))
+			marginLeft += free / 2;
+		else if (xalign == LCss::AlignRight || (xalign == LCss::LenInherit && pc.Align == LCss::AlignRight))
+			marginLeft += free;
+
+		pc.pend = Collapse(pc.pend, (int)table->margin.y1);
+		FinishLine(pc);
+		ApplyPend(pc);
+
+		int x0 = pc.Left + marginLeft;
+		int y0 = pc.y;
+		int rowTop = y0 + (int)table->border.y1 + spacing;
+		std::vector<int> colX(n);
+		int cx = x0 + (int)table->border.x1 + spacing;
+		for (int i = 0; i < n; i++)
+		{
+			colX[i] = cx;
+			cx += cw[i] + spacing;
+		}
+
+		struct Spanned { TCell *tc; int h; int top; };
+		std::vector<Spanned> spanned;
+		std::vector<int> rowTops(g.Rows.size() + 1), rowHs(g.Rows.size());
+		LCss::LengthType align = AlignOf(table, pc.Align);
+		int tableInner = 0;
+		for (int i = 0; i < n; i++)
+			tableInner += cw[i];
+		tableInner += spacing * (n - 1);
+
+		for (size_t r = 0; r < g.Rows.size(); r++)
+		{
+			rowTops[r] = rowTop;
+			auto row = g.Rows[r];
+			LRectF rb(tableInner, View.Y());
+			row->LCssBox::SetStyle(FontOf(row), row, rb);
+
+			int rowH = 0;
+			std::vector<std::pair<TCell*, int>> single;
+			for (auto &tc: g.Cells)
+			{
+				if (tc.Row != (int)r)
+					continue;
+				int cellW = spacing * (tc.CS - 1);
+				for (int c = 0; c < tc.CS; c++)
+					cellW += cw[tc.Col + c];
+
+				Ctx cc;
+				cc.Left = colX[tc.Col];
+				cc.Right = cc.Left + cellW;
+				cc.y = rowTop;
+				cc.Align = align;
+				LayoutBlock(tc.T, cc, depth + 1, cellW);
+				int h = tc.T->Size.y;
+				if (tc.RS == 1)
+				{
+					rowH = MAX(rowH, h);
+					single.push_back({&tc, h});
+				}
+				else
+					spanned.push_back({&tc, h, rowTop});
+			}
+
+			auto rh = row->Height();
+			if (rh && rh.Type == LCss::LenPx)
+				rowH = MAX(rowH, rh.ToPx(0, font));
+			for (auto &s: single)
+				PlaceCell(s.first->T, s.second, rowH);
+
+			rowHs[r] = rowH;
+			row->Pos.x = x0 + (int)table->border.x1 + spacing;
+			row->Pos.y = rowTop;
+			row->Size.x = tableInner;
+			row->Size.y = rowH;
+			rowTop += rowH + spacing;
+		}
+		rowTops[g.Rows.size()] = rowTop;
+
+		for (auto &s: spanned)
+		{
+			int last = s.tc->Row + s.tc->RS;
+			int total = rowTops[last] - spacing - s.top;
+			PlaceCell(s.tc->T, s.h, total);
+		}
+
+		// Row groups wrap their rows
+		for (auto e: table->Children)
+		{
+			auto grp = Child(e);
+			if (!grp || KindOf(grp) != KGroup)
+				continue;
+			int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+			bool any = false;
+			for (auto e2: grp->Children)
+			{
+				auto r = Child(e2);
+				if (!r || KindOf(r) != KRow)
+					continue;
+				if (!any)
+				{
+					x1 = r->Pos.x; y1 = r->Pos.y; x2 = r->Pos.x + r->Size.x; y2 = r->Pos.y + r->Size.y;
+					any = true;
+				}
+				else
+				{
+					x1 = MIN(x1, r->Pos.x); y1 = MIN(y1, r->Pos.y);
+					x2 = MAX(x2, r->Pos.x + r->Size.x); y2 = MAX(y2, r->Pos.y + r->Size.y);
+				}
+			}
+			grp->Pos.Set(x1, y1);
+			grp->Size.Set(x2 - x1, y2 - y1);
+		}
+
+		int H = g.Rows.empty() ? by : rowTop - y0 + (int)table->border.y2;
+		auto height = table->Height();
+		if (height && height.Type == LCss::LenPx)
+			H = MAX(H, height.ToPx(0, font));
+		table->Pos.Set(x0, y0);
+		table->Size.Set(W, H);
+
+		pc.y = y0 + H;
+		pc.pend = (int)table->margin.y2;
+	}
+
+	// ---- Final passes ----
+
+	void Reset(LTag *tag)
+	{
+		tag->Pos.x = tag->Pos.y = 0;
+		tag->Size.x = tag->Size.y = 0;
+		tag->TextPos.DeleteObjects();
+		for (auto e: tag->Children)
+			if (auto ch = Child(e))
+				Reset(ch);
+	}
+
+	// Inline boxes are the union of their text runs and children
+	void FixInline(LTag *tag)
+	{
+		if (KindOf(tag) == KHidden)
+			return;
+		for (auto e: tag->Children)
+			if (auto ch = Child(e))
+				FixInline(ch);
+
+		if (KindOf(tag) != KInline)
+			return;
+
+		bool any = false;
+		int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+		auto add = [&](int a, int b, int c, int d)
+		{
+			if (!any)
+			{
+				x1 = a; y1 = b; x2 = c; y2 = d;
+				any = true;
+			}
+			else
+			{
+				x1 = MIN(x1, a); y1 = MIN(y1, b);
+				x2 = MAX(x2, c); y2 = MAX(y2, d);
+			}
+		};
+		for (auto r: tag->TextPos)
+			add(r->x1, r->y1, r->x2 + 1, r->y2 + 1);
+		for (auto e: tag->Children)
+		{
+			auto ch = Child(e);
+			if (ch && KindOf(ch) != KHidden && (ch->Size.x || ch->Size.y))
+				add(ch->Pos.x, ch->Pos.y, ch->Pos.x + ch->Size.x, ch->Pos.y + ch->Size.y);
+		}
+		if (!any)
+			return;
+
+		tag->Pos.x = x1 - (int)(tag->border.x1 + tag->padding.x1);
+		tag->Pos.y = y1 - (int)(tag->border.y1 + tag->padding.y1);
+		tag->Size.x = x2 - x1 + HEdges(tag);
+		tag->Size.y = y2 - y1 + VEdges(tag);
+	}
+
+	void Rebase(LTag *tag, int ox, int oy)
+	{
+		int ax = tag->Pos.x, ay = tag->Pos.y;
+		MAX.x = MAX(MAX.x, ax + tag->Size.x - 1);
+		MAX.y = MAX(MAX.y, ay + tag->Size.y - 1);
+		tag->Pos.x -= ox;
+		tag->Pos.y -= oy;
+		for (auto r: tag->TextPos)
+		{
+			MAX.x = MAX(MAX.x, r->x2);
+			MAX.y = MAX(MAX.y, r->y2);
+			r->x1 -= ax; r->x2 -= ax;
+			r->y1 -= ay; r->y2 -= ay;
+		}
+		for (auto e: tag->Children)
+		{
+			auto ch = Child(e);
+			if (ch && KindOf(ch) != KHidden)
+				Rebase(ch, ax, ay);
+		}
 	}
 
 public:
@@ -501,10 +1405,36 @@ public:
 		MAX.x = MAX.y = 0;
 	}
 
+	static const char *DisplayOf(LTag *tag)
+	{
+		switch (KindOf(tag))
+		{
+			case KHidden: return "none";
+			case KBlock: return "block";
+			case KTable: return "table";
+			case KRow: return "table-row";
+			case KGroup: return "table-row-group";
+			case KCell: return "table-cell";
+			default: break;
+		}
+		return tag->SupportedDisplay() == LCss::DispInlineBlock ? "inline-block" : "inline";
+	}
+
 	void Layout(LTag *root)
 	{
-		if (root)
-			LayoutBlock(root, 0, 0, View.x1, View.y1, View.X(), 0);
+		if (!root)
+			return;
+
+		Reset(root);
+		Sp = 0;
+
+		Ctx c;
+		c.Left = View.x1;
+		c.Right = View.x1 + View.X();
+		c.y = View.y1;
+		LayoutBlock(root, c, 0);
+		FixInline(root);
+		Rebase(root, 0, 0);
 	}
 };
 
@@ -1968,17 +2898,7 @@ void LTag::_DumpJson(LStringPipe &Buf, const char *ParentPath, int Index, int Of
 		else
 			Path.Printf("%s/%s[%i]", ParentPath, Name.Get(), Index);
 
-		const char *Disp = "inline";
-		switch (SupportedDisplay())
-		{
-			case LCss::DispBlock: Disp = "block"; break;
-			case LCss::DispNone: Disp = "none"; break;
-			case LCss::DispInlineBlock: Disp = "inline-block"; break;
-			case LCss::DispTable: Disp = "table"; break;
-			case LCss::DispTableRow: Disp = "table-row"; break;
-			case LCss::DispTableCell: Disp = "table-cell"; break;
-			default: break;
-		}
+		const char *Disp = LNewFlow::DisplayOf(this);
 
 		Buf.Print("%s {\n  \"path\": \"%s\",\n  \"tag\": \"%s\",\n  \"x\": %i,\n  \"y\": %i,\n  \"w\": %i,\n  \"h\": %i,\n"
 				"  \"display\": \"%s\",\n  \"margin\": [\n   \"%gpx\",\n   \"%gpx\",\n   \"%gpx\",\n   \"%gpx\"\n  ]\n }",
@@ -3466,9 +4386,9 @@ void LTag::SetStyle()
 	Get("id", HtmlId);
 	if (Get("class", s))
 		Class = LString(s).SplitDelimit(" \t");
-	Restyle();
-
+	// Presentational attributes have lower precedence than author CSS
 	SetAttributeStyles();
+	Restyle();
 
 	switch (TagId)
 	{
