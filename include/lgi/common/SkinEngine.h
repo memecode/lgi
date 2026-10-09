@@ -39,6 +39,7 @@ public:
 	LArray<LDisplayString*> *aText = nullptr; // Array of display strings for the view
 	LAutoPtr<LDisplayString> *ptrText = nullptr; // Ptr to ptr for display string
 	LRect Rect;						// Region to paint (if relevant)
+	LColour parentBackground;			// Background of the parent item, if relevant
 	bool MouseOver = false;			// TRUE if the mouse is over the view
 	int64 Value = 0;				// Value of the control if available
 	bool Enabled = true;			// TRUE if the control is enabled
@@ -136,8 +137,10 @@ public:
 	virtual void OnPaint_LButton      (LButton *Ctrl,      LSkinState *State) {};
 	virtual void OnPaint_LEdit        (LEdit *Ctrl,        LSkinState *State) {};
 	virtual void OnPaint_LCheckBox    (LCheckBox *Ctrl,    LSkinState *State) {};
+	virtual void OnPaint_LCheckBox    (LSkinState *State) {}
 	virtual void OnPaint_LRadioGroup  (LRadioGroup *Ctrl,  LSkinState *State) {};
 	virtual void OnPaint_LRadioButton (LRadioButton *Ctrl, LSkinState *State) {};
+	virtual void OnPaint_LRadioButton (LSkinState *State) {}
 	virtual void OnPaint_LTabView     (LTabView *Ctrl,     LSkinState *State) {};
 	virtual void OnPaint_LSlider      (LSlider *Ctrl,      LSkinState *State) {};
 	virtual void OnPaint_LCombo       (LCombo *Ctrl,       LSkinState *State) {};

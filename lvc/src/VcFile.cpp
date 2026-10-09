@@ -1,5 +1,8 @@
 #include "Lvc.h"
 #include "lgi/common/ClipBoard.h"
+#include "lgi/common/Charset.h"
+
+#include "ConflictUi.h"
 #include "resdefs.h"
 
 VcFile::VcFile(AppPriv *priv, VcFolder *owner, LString revision, bool working)
@@ -71,6 +74,7 @@ LString VcFile::GetUri()
 
 void VcFile::SetUri(LString uri)
 {
+	printf("VcFile::SetUri '%s'\n", uri.Get());
 	Uri.Set(uri);
 }
 
@@ -85,12 +89,42 @@ int VcFile::Checked(int Set)
 	return (int)Chk->Value();
 }
 
+void VcFile::SetCharset(LString cs)
+{
+}
+
+void VcFile::ShowDiff()
+{
+	#ifdef HAIKU
+	if (Diff.Length() > (16 << 10))
+		d->Diff->Name(Diff(0, 16 << 10));
+	else
+	#endif
+	if (!Charset && LIsUtf8(Diff))
+	{
+		d->Diff->Name(Diff);
+	}
+	else
+	{
+		if (auto csSys = LCharsetSystem::Inst())
+		{
+			if (!Charset && csSys->DetectCharset)
+				Charset = csSys->DetectCharset(Diff);
+		}
+		LAutoString utf((char*)LNewConvertCp("utf-8",
+						Diff.Get(),
+						Charset ? Charset : "ISO-8859-1",
+						Diff.Length()));
+		d->Diff->Name(utf ? utf : "-InvalidUtf8");
+	}
+}
+
 void VcFile::SetDiff(LString diff)
 {
 	auto n = LFromNativeCp(diff);
 	Diff = n;
 	if (LListItem::Select())
-		d->Diff->Name(Diff);
+		ShowDiff();
 }
 
 void VcFile::Select(bool b)
@@ -110,12 +144,7 @@ void VcFile::Select(bool b)
 		}
 		else
 		{
-			#ifdef HAIKU
-			if (Diff.Length() > (16 << 10))
-				d->Diff->Name(Diff(0, 16 << 10));
-			else
-			#endif
-				d->Diff->Name(Diff);
+			ShowDiff();
 		}
 	}
 }
@@ -157,6 +186,7 @@ void VcFile::OnMouseClick(LMouse &m)
 			s.AppendItem(LLoadString(IDS_REVERT_THIS), ID_REVERT_TO_REV, Status != SClean);
 			s.AppendItem(LLoadString(IDS_REVERT_BEFORE), ID_REVERT_TO_BEFORE, Status != SClean);
 			s.AppendItem(LLoadString(IDS_BLAME), IDM_BLAME);
+			s.AppendItem(LLoadString(IDS_LIST_AUTHORS), ID_LIST_AUTHORS);
 			s.AppendItem(LLoadString(IDS_SAVE_AS), IDM_SAVE_AS);
 			s.AppendItem(LLoadString(IDS_LOG), IDM_LOG_FILE);
 		}
@@ -184,6 +214,7 @@ void VcFile::OnMouseClick(LMouse &m)
 					menu->AppendItem(LLoadString(IDS_LOCAL), IDM_RESOLVE_LOCAL);
 					menu->AppendItem(LLoadString(IDS_INCOMING), IDM_RESOLVE_INCOMING);
 					menu->AppendItem(LLoadString(IDS_TOOL), IDM_RESOLVE_TOOL);
+					menu->AppendItem("View Both", ID_VIEW_BOTH);
 					break;
 				}
 				case SUntracked:
@@ -205,6 +236,7 @@ void VcFile::OnMouseClick(LMouse &m)
 			s.AppendItem(LLoadString(IDS_BROWSE_TO), IDM_BROWSE, !LocalPath.IsEmpty());
 			s.AppendItem(LLoadString(IDS_LOG), IDM_LOG_FILE);
 			s.AppendItem(LLoadString(IDS_BLAME), IDM_BLAME);
+			s.AppendItem(LLoadString(IDS_LIST_AUTHORS), ID_LIST_AUTHORS);
 			s.AppendSeparator();
 			if (Status == SMissing)
 			{
@@ -272,6 +304,11 @@ void VcFile::OnMouseClick(LMouse &m)
 				Owner->Resolve(Uris[0], ResolveTool);
 				break;
 			}
+			case ID_VIEW_BOTH:
+			{
+				new ConflictUi(Owner, Uris[0]);
+				break;
+			}
 			case IDM_ADD_FILE:
 			{
 				Owner->AddFile(Uris[0], false);
@@ -321,6 +358,11 @@ void VcFile::OnMouseClick(LMouse &m)
 				Owner->Blame(Uris[0]);
 				break;
 			}
+			case ID_LIST_AUTHORS:
+			{
+				Owner->ListAuthors(Uris[0]);
+				break;
+			}
 			case IDM_SAVE_AS:
 			{
 				Owner->SaveFileAs(Uris[0], Revision);
@@ -335,7 +377,7 @@ void VcFile::OnMouseClick(LMouse &m)
 			}
 			case IDM_LOG_FILE:
 			{
-				Owner->LogFile(Uris[0]);
+				Owner->LogFile(Uris[0], nullptr);
 				break;
 			}
 			case IDM_COPY_LEAF:

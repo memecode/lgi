@@ -97,8 +97,8 @@ protected:
 	bool AcceptChildren = false;
 	bool Movable = true;
 	bool Vis = true;
-	LAutoString CssClass;
-	LAutoString CssStyle;
+	LString CssClass;
+	LString CssStyle;
 
 	LMouse MapToDialog(LMouse m);
 

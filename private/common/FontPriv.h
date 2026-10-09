@@ -55,7 +55,6 @@ public:
 class LFontPrivate
 {
 public:
-
 	// Data
 	OsFont			hFont = NULL;
 	int				Height = 0;
@@ -64,6 +63,9 @@ public:
 	LSurface		*pSurface = NULL;
 	bool			OwnerUnderline = false;
 	bool			WarnOnDelete = false;
+	
+	// LFontCache:
+	int				Id = -1;
 
 	// Glyph substitution
 	uchar			*GlyphMap = NULL;

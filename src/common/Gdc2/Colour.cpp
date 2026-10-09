@@ -3,36 +3,35 @@
 #include "lgi/common/SkinEngine.h"
 #include "lgi/common/Json.h"
 
+#if defined __GTK_H__
+using namespace Gtk;
+#endif
+
 const LColour LColour::Black(0, 0, 0);
 const LColour LColour::White(255, 255, 255);
 const LColour LColour::Red(255, 0, 0);
 const LColour LColour::Green(0, 192, 0);
 const LColour LColour::Blue(0, 0, 255);
+const LColour LColour::Orange(230, 115, 0);
 
 LColour::LColour()
 {
-	space = CsNone;
 	flat = 0;
-	pal = NULL;
 }
 
 LColour::LColour(const char *Str)
 {
-	space = CsNone;
 	flat = 0;
-	pal = NULL;
 	SetStr(Str);
 }
 
 LColour::LColour(uint8_t idx8, LPalette *palette)
 {
-	pal = NULL;
 	c8(idx8, palette);
 }
 
 LColour::LColour(int r, int g, int b, int a)
 {
-	pal = NULL;
 	space = System32BitColourSpace;
 	rgb.r = limit(r, 0, 255);
 	rgb.g = limit(g, 0, 255);
@@ -42,12 +41,11 @@ LColour::LColour(int r, int g, int b, int a)
 
 LColour::LColour(uint32_t c, int bits, LPalette *palette)
 {
-	pal = NULL;
 	Set(c, bits, palette);
 }
 
 #ifdef __GTK_H__
-LColour::LColour(Gtk::GdkRGBA gtk)
+LColour::LColour(GdkRGBA gtk)
 {
 	pal = NULL;
 	Rgb(gtk.red * 255.0, gtk.green * 255.0, gtk.blue * 255.0, gtk.alpha * 255.0);
@@ -526,7 +524,7 @@ uint32_t LColour::GetNative()
 	return c32();
 }
 
-char *LColour::GetStr() const
+const char *LColour::GetStr() const
 {
 	#define STR_BUFS	8
 	#define BUF_LEN		32
@@ -676,7 +674,7 @@ bool LColour::GetConfigColour(const char *Tag, LColour &c)
 
 ////////////////////////////////////////////////////////////////////////////
 #ifdef __GTK_H__
-COLOUR ColTo24(Gtk::GdkColor &c)
+COLOUR ColTo24(GdkColor &c)
 {
 	return Rgb24(c.red >> 8, c.green >> 8, c.blue >> 8);
 }
@@ -723,7 +721,7 @@ void LColour::OnChange()
 	
 	#elif defined __GTK_H__
 
-		Gtk::GtkSettings *set = Gtk::gtk_settings_get_default();
+		GtkSettings *set = gtk_settings_get_default();
 		if (!set)
 		{
 			printf("%s:%i - gtk_settings_get_for_screen failed.\n", _FL);
@@ -731,13 +729,13 @@ void LColour::OnChange()
 		}
 		
 		char PropName[] = "gtk-color-scheme";
-		Gtk::gchararray Value = 0;
-		Gtk::g_object_get(set, PropName, &Value, NULL);
+		gchararray Value = 0;
+		g_object_get(set, PropName, &Value, NULL);
 		LString::Array Lines = LString(Value).SplitDelimit("\n");
-		Gtk::g_free(Value);
+		g_free(Value);
 		g_object_unref(set);
 
-		LHashTbl<ConstStrKey<char,false>, int> Colours(0, -1);
+		LHashTbl<ConstStrKey<char,false>, int, true> Colours(0, -1);
 		auto ScreenBits = GdcD->GetBits();
 		for (int i=0; i<Lines.Length(); i++)
 		{

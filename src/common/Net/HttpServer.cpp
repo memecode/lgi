@@ -3,6 +3,8 @@
 #include "lgi/common/Net.h"
 #include "lgi/common/Thread.h"
 #include "lgi/common/SubProcess.h"
+#include "lgi/common/OpenSSLSocket.h"
+#include "lgi/common/SubProcess.h"
 
 struct LHttpServerPriv;
 
@@ -29,17 +31,23 @@ public:
 	int Main();
 };
 
-class LHttpServer_TraceSocket : public LSocket
+template<typename Base>
+class LHttpServer_TraceSocket : public Base
 {
 public:
+	LHttpServer_TraceSocket(LCancel *c)
+	{
+		Base::SetCancel(c);
+	}
+
 	void OnInformation(const char *Str) override
 	{
-		LgiTrace("SocketInfo: %s\n", Str);
+		// LgiTrace("%s:%i - info: %s", _FL, Str);
 	}
 
 	void OnError(int ErrorCode, const char *ErrorDescription) override
 	{
-		LgiTrace("SocketError %i: %s\n", ErrorCode, ErrorDescription);
+		LgiTrace("%s:%i error %i: %s\n", _FL, ErrorCode, ErrorDescription);
 	}
 };
 
@@ -56,10 +64,12 @@ public:
 
 	LHttpServer *server = nullptr;
 	LHttpServer::Callback *callback;
-	LHttpServer_TraceSocket Listen;
+	LAutoPtr<LSocketI> Listen;
 	int port;
+	LHttpServer::SecureSockets secureSockets;
 	LCancel *cancel = nullptr;
 	LCancel localCancel;
+	LCapabilityTarget *capTarget = nullptr;
 	
 	// Lock before using
 	using LMsgArray = LArray<LMessage*>;
@@ -68,23 +78,28 @@ public:
 	LHttpServerPriv(LHttpServer *httpServer,
 					LHttpServer::Callback *cb,
 					int portVal,
-					LCancel *cancelObj) :
+					LHttpServer::SecureSockets *SecureSockets,
+					LCancel *cancelObj,
+					LCapabilityTarget *caps) :
 		LThread("HttpSrvPrv.Th"),
 		LMutex("LHttpServerPriv.Lock"),
 		server(httpServer),
 		callback(cb),
+		capTarget(caps),
 		port(portVal),
 		cancel(cancelObj ? cancelObj : &localCancel),
 		messages(new LMsgArray, "messages.lock")
 	{
+		if (SecureSockets)
+			secureSockets = *SecureSockets;
 		Run();
 	}
 
 	~LHttpServerPriv()
 	{
-		Listen.Close();
 		cancel->Cancel();
 		WaitForExit();
+		Listen.Reset(); // do this AFTER the thread is finished.
 	}
 
 	LMessage::Result OnEvent(LMessage *Msg)
@@ -122,6 +137,7 @@ public:
 				Auto lck(this, _FL);
 				if (auto msg = Msg->AutoA<LString>())
 				{
+					// LOG_HTTP("%s:%i - broadcasting %s to %i sockets.\n", _FL, msg->Get(), (int)webSockets.Length());
 					for (auto ws: webSockets)
 					{
 						ws->SendMessage(*msg);
@@ -135,15 +151,38 @@ public:
 		return 0;
 	}
 
-	int Main()
+	// Creates a socket of the right type, taking into account whether SSL is enabled or not.
+	LSocketI *CreateSocket()
 	{
-	    LOG_HTTP("Attempting to listen on port %i...\n", port);
-	    
-		Listen.SetReuseAddress(true);
+		if (secureSockets)
+		{
+			if (auto s = new LHttpServer_TraceSocket<SslSocket>(cancel))
+			{
+				s->SetSslOnConnect(true);
+				return s;
+			}
+			return nullptr;
+		}
+		
+		return new LHttpServer_TraceSocket<LSocket>(cancel);
+	}
+
+	bool SetupListenSock()
+	{
+		if (!Listen.Reset(CreateSocket()))
+			return false;
+
+		Listen->SetReuseAddress(true);
+
+		if (secureSockets)
+		{
+			if (auto sslListen = dynamic_cast<SslSocket*>(Listen.Get()))
+				sslListen->SetCert(secureSockets.certFile, secureSockets.keyFile);
+		}
 
 	    LAutoPtr<LSubProcess::IoThread> netstat;
 		while (	!cancel->IsCancelled() &&
-				!Listen.Listen(port))
+				!Listen->Listen(port))
 		{
 			LOG_HTTP("...can't listen on port %i.\n", port);
 			
@@ -201,6 +240,41 @@ public:
 			}
 		}
 
+		return true;
+	}
+
+	int Main()
+	{
+	    LOG_HTTP("Attempting to listen on port %i...\n", port);
+	    
+		if (secureSockets)
+		{
+			if (auto sslSock = dynamic_cast<SslSocket*>(Listen.Get()))
+			{
+				if (!secureSockets.setupCerts())
+				{
+					LOG_HTTP("%s:%i - error: failed to set certs.\n", _FL);
+				}
+				else
+				{
+					LOG_HTTP("%s:%i - configuring certs for domains: %s\n"
+							"	cert='%s'\n"
+							"	key='%s'\n",
+							_FL, LString(",").Join(secureSockets.domains).Get(),
+							secureSockets.certFile.Get(),
+							secureSockets.keyFile.Get());
+					sslSock->SetCert(secureSockets.certFile, secureSockets.keyFile);
+				}
+			}
+			else LOG_HTTP("%s:%i - error: secureSockets.domains is set but Listen is not a SslSocket.\n", _FL);
+		}
+
+		if (!SetupListenSock())
+		{
+			LOG_HTTP("%s:%i - error: failed to set up listen socket.\n", _FL);
+			return -1;
+		}
+
 		LgiTrace("Listening on port %i.\n", port);
 		auto logTs = LCurrentTime();
 		int readableCalls = 0;
@@ -217,16 +291,23 @@ public:
 			readableCalls++;
 			*/
 		
-			if (Listen.IsReadable(20))
+			if (Listen &&
+				Listen->IsReadable(20))
 			{
-				LAutoPtr<LSocketI> s(new LSocket);
+				LAutoPtr<LSocketI> s(CreateSocket());
 				if (s)
 				{
 					LOG_HTTP("Accepting...\n");
-					if (Listen.Accept(s))
+					if (Listen->Accept(s))
 					{
 						LOG_HTTP("Got new connection...\n");
 						new LHttpThread(s, this);
+					}
+					else if (Listen->IsReadable())
+					{
+						// If this is still readable it might mean there is a
+						// problem with certificates that will not be resolved
+						SetupListenSock();
 					}
 				}
 			}
@@ -247,8 +328,8 @@ public:
 			msgArr.DeleteObjects();			
 		}
 
-		printf("Closing listen socket: %i\n", (int)Listen.Handle());
-		Listen.Close();
+		printf("Closing listen socket: %i\n", (int)Listen->Handle());
+		Listen->Close();
 		return 0;
 	}
 };
@@ -349,7 +430,7 @@ int LHttpThread::Main()
 			LgiTrace("%s:%i - uri='%s'\n", _FL, Uri);
 			#endif
 
-			char *Protocol = strrchr(Uri, ' ');
+			auto Protocol = strrchr(Uri, ' ');
 			if (Protocol)
 			{
 				*Protocol++ = 0;
@@ -364,7 +445,7 @@ int LHttpThread::Main()
 					req.action = Action;
 					req.uri = Uri;
 					req.headers = Eol;
-					req.body = Eoh + 4;
+					req.body = Eoh ? Eoh + 4 : nullptr;
 
 					LStringPipe *RespBody = nullptr;
 					LHttpServer::Response resp;
@@ -375,36 +456,43 @@ int LHttpThread::Main()
 					{
 						LOG_HTTP("%s:%i - Code=%i\n", _FL, Code);
 
-						auto stream = dynamic_cast<LSocket*>(req.sock.Get());
-						stream->Print("HTTP/1.0 %i Ok\r\n", Code);
-
-						if (resp.body)
+						auto stream = dynamic_cast<LSocketI*>(req.sock.Get());
+						if (!stream)
 						{
-							auto len = resp.body->GetSize();
-							if (len >= 0)
+							LOG_HTTP("%s:%i - error: req.sock is not a stream.\n", _FL);
+						}
+						else
+						{							 
+							LStreamPrint(stream, "HTTP/1.0 %i Ok\r\n", Code);
+
+							if (resp.body)
 							{
-								// Make sure we have a Content-Length
-								auto contentLen = resp.GetHeader(LHttpServerPriv::sContentLength);
-								if (!contentLen)
-									resp.SetHeader(LHttpServerPriv::sContentLength, LString::Fmt(LPrintfInt64, len));
+								auto len = resp.body->GetSize();
+								if (len >= 0)
+								{
+									// Make sure we have a Content-Length
+									auto contentLen = resp.GetHeader(LHttpServerPriv::sContentLength);
+									if (!contentLen)
+										resp.SetHeader(LHttpServerPriv::sContentLength, LString::Fmt(LPrintfInt64, len));
+								}
 							}
-						}
 
-						if (auto hdrs = resp.headers.Strip())
-						{
-							stream->Print("%s\r\n", hdrs.Get());
-						}
-						stream->Print("\r\n");
-						
-						if (resp.body)
-						{
-							auto bytes = resp.body->GetSize();
-							LOG_HTTP("%s:%i - Response len=%i\n", _FL, (int)bytes);
+							if (auto hdrs = resp.headers.Strip())
+							{
+								LStreamPrint(stream, "%s\r\n", hdrs.Get());
+							}
+							LStreamPrint(stream, "\r\n");
 							
-							LCopyStreamer cp(256 << 10);
-							auto copied = cp.Copy(resp.body, stream);
-							if (copied != bytes)
-								LOG_HTTP("%s:%i - body copy failed! " LPrintfSizeT " -> " LPrintfSSizeT "\n", _FL, bytes, copied);
+							if (resp.body)
+							{
+								auto bytes = resp.body->GetSize();
+								LOG_HTTP("%s:%i - Response len=%i\n", _FL, (int)bytes);
+								
+								LCopyStreamer cp(256 << 10);
+								auto copied = cp.Copy(resp.body, stream);
+								if (copied != bytes)
+									LOG_HTTP("%s:%i - body copy failed! " LPrintfInt64 " -> " LPrintfSSizeT "\n", _FL, bytes, copied);
+							}
 						}
 					}
 				}
@@ -418,9 +506,9 @@ int LHttpThread::Main()
 	return 0;
 }
 
-LHttpServer::LHttpServer(LHttpServer::Callback *cb, int port, LCancel *cancel)
+LHttpServer::LHttpServer(LHttpServer::Callback *cb, int port, SecureSockets *secureSockets, LCancel *cancel, LCapabilityTarget *capTarget)
 {
-	d = new LHttpServerPriv(this, cb, port, cancel);
+	d = new LHttpServerPriv(this, cb, port, secureSockets, cancel, capTarget);
 }
 
 LHttpServer::~LHttpServer()
@@ -471,7 +559,10 @@ bool LHttpServer::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64
 {
 	auto msgs = d->messages.Lock(_FL);
 	if (!msgs)
+	{
+		LOG_HTTP("%s:%i - error: can't lock messages.\n", _FL);
 		return false;
+	}
 
 	msgs->Add(new LMessage(Cmd, a, b));	
 	return true;
@@ -572,3 +663,214 @@ bool LHttpServer::Callback::ParseHtmlWithDom(LVariant &Out, LDom *Dom, const cha
 	return true;
 }
 
+bool LHttpServer::SecureSockets::configureCertFolder(const char *folder)
+{
+	LDirectory dir;
+	for (auto b=dir.First(folder); b; b=dir.Next())
+	{
+		if (dir.IsDir())
+			continue;
+
+		auto nm = dir.GetName();
+		auto ext = LGetExtension(nm);
+		if (Stricmp(ext, "pem"))
+			continue;
+		
+		if (Stristr(nm, "fullchain"))
+		{
+			certFile = dir.FullPath();
+		}
+		else if (Stristr(nm, "key"))
+		{
+			keyFile = dir.FullPath();
+		}
+	}
+
+	printf("certFile = '%s'\n", certFile.Get());
+	printf("keyFile = '%s'\n", keyFile.Get());
+	if (certFile)
+	{
+		// See what domains it's for...
+		LSubProcess p("openssl", LString::Fmt("x509 -in %s -text -noout", certFile.Get()));
+		if (!p.Start())
+		{
+			LgiTrace("%s:%i - failed to start openssl\n", _FL);
+			return false;
+		}
+		
+		LStringPipe out;
+		p.Communicate(&out);
+		printf("%s:%i - got %i bytes from openssl\n", _FL, (int)out.GetSize());
+
+		bool isAltName = false;
+		for (auto &ln: out.NewLStr().SplitDelimit("\r\n"))
+		{
+			if (ln.Find("Subject Alternative Name:") >= 0)
+			{
+				isAltName = true;
+			}
+			else if (isAltName)
+			{
+				auto parts = ln.Strip().SplitDelimit(",");
+				for (auto &p: parts)
+				{
+					auto var = p.Strip().SplitDelimit(":", 1);
+					if (var[0].Equals("DNS"))
+						domains.Add(var[1]);
+				}
+				isAltName = false;
+			}
+		}
+
+		LgiTrace("%s:%i - got domains: %s\n", _FL, LString(", ").Join(domains).Get());
+	}
+
+	return true;
+}
+
+bool LHttpServer::SecureSockets::configureDefaultDomains()
+{
+	const char *localHosts[] = {"localhost", "127.0.0.1", "::1"};
+	for (auto h: localHosts)
+	{
+		if (!domains.HasItem(h))
+			domains.Add(h);
+	}
+
+	LArray<LSocket::Interface> intf;
+	if (!LSocket::EnumInterfaces(intf))
+	{
+		LOG_HTTP("%s:%i - failed to enumerate interfaces.\n", _FL);
+		return false;
+	}
+
+	for (auto &i: intf)
+	{
+		if (i.Ip4 && i.IsPrivate())
+			domains.Add(LIpToStr(i.Ip4));
+	}
+
+	return true;
+}
+
+bool LHttpServer::SecureSockets::setupCerts()
+{
+	if (LFileExists(certFile) &&
+		LFileExists(keyFile))
+		return true;
+
+	return	checkRequirement(CapMkcert) &&
+			checkRequirement(CapHttpsCert);
+}
+
+bool LHttpServer::SecureSockets::ScanForKeyAndCert(const char* folder)
+{
+	LDirectory dir;
+	for (auto b = dir.First(folder); b; b = dir.Next())
+	{
+		if (dir.IsDir())
+			continue;
+		auto name = dir.GetName();
+		auto ext = LGetExtension(name);
+		if (!Stricmp(ext, "pem"))
+		{
+			if (Stristr(name, "key.pem"))
+				keyFile = dir.FullPath();
+			else
+				certFile = dir.FullPath();
+		}
+	}
+
+	return	LFileExists(keyFile) &&
+			LFileExists(certFile);
+}
+
+bool LHttpServer::SecureSockets::checkRequirement(const char *req)
+{
+	if (!Stricmp(req, CapMkcert))
+	{
+		// Check if mkcert is installed and available to call...
+		LSubProcess sub("mkcert", "--version");
+		LStringPipe out;
+		if (!sub.Start() ||
+			sub.Communicate(&out) ||
+			!LCheckVersion(out.NewLStr(), "1.4"))
+		{
+			if (caps)
+				caps->NeedsCapability(CapMkcert);
+			return false;
+		}
+		
+		return true;
+	}
+	else if (!Stricmp(req, CapHttpsCert))
+	{
+		// Check that we have SSL certs for the HTTPS server:
+		if (LFileExists(keyFile) &&
+			LFileExists(certFile))
+		{
+			// Probably ok? Can we validate them somehow?
+			return true;
+		}
+
+		// Check the cert folder exists:
+		LFile::Path appRoot(LSP_APP_DATA);
+		auto certFolder = appRoot / "certs";
+		if (!LDirExists(certFolder))
+		{
+			if (!FileDev->CreateFolder(certFolder, true))
+			{
+				LOG_HTTP("%s:%i - Can't create cert folder '%s'\n", _FL, certFolder.GetFull().Get());
+				return false;
+			}
+		}
+		if (!LDirExists(certFolder))
+		{
+			LOG_HTTP("%s:%i - Cert folder '%s' missing\n", _FL, certFolder.GetFull().Get());
+			return false;
+		}
+
+		// If the cert files exist... then ok, return success
+		if (ScanForKeyAndCert(certFolder))
+			return true;
+
+		{
+			// Then make sure the CA is installed into the browser(s):
+			LSubProcess sub("mkcert", "-install");
+			if (!sub.Start())
+				return false;
+			LStringPipe out;
+			if (sub.Communicate(&out))
+				return false;
+		}
+
+		{
+			// Create the certificate with mkcert:
+			auto arg = LString(" ").Join(domains);
+			LSubProcess sub("mkcert", arg);
+			sub.SetInitFolder(certFolder);
+			if (!sub.Start())
+			{
+				LOG_HTTP("%s:%i - Failed to start 'mkcert'\n", _FL);
+				return false;
+			}
+
+			LStringPipe out;
+			if (sub.Communicate(&out))
+			{
+				LOG_HTTP("%s:%i - Failed to read 'mkcert' output\n", _FL);
+				return false;
+			}
+
+			LOG_HTTP("%s:%i - mkcert ok for '%s'\n", _FL, arg.Get());
+		}
+
+		return ScanForKeyAndCert(certFolder);
+	}
+	else
+	{
+		LAssert(!"unknown capability");
+	}
+	
+	return false;
+}

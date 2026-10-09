@@ -4,34 +4,17 @@
 class LPrintDCPrivate
 {
 public:
-	bool PageOpen;
-	bool DocOpen;
+	bool PageOpen = false;
+	bool DocOpen = false;
 	LString OutputFileName;
-
-	LPrintDCPrivate()
-	{
-		PageOpen = false;
-		DocOpen = false;
-	}
 };
-
-/*
-BOOL CALLBACK LAbortProc(HDC hdc, int iError)
-{
-	return true;
-}
-*/
 
 LPrintDC::LPrintDC(void *Handle, const char *PrintJobName, const char *PrinterName)
 {
 	d = new LPrintDCPrivate;
-	hDC = (HDC) Handle;
 
-	// Does this even do anything useful?
-	// SetAbortProc(hDC, LAbortProc);
-	
 	// Start document
-	if (hDC)
+	if (hDC = (HDC) Handle)
 	{
 		DOCINFO Info;
 		LAutoWString OutName;
@@ -76,8 +59,6 @@ LPrintDC::LPrintDC(void *Handle, const char *PrintJobName, const char *PrinterNa
 
 LPrintDC::~LPrintDC()
 {
-	// EndPage();
-
     if (hDC)
     {
 		if (d->DocOpen)
@@ -86,7 +67,7 @@ LPrintDC::~LPrintDC()
 		}
 
 	    DeleteDC(hDC);
-		hDC = 0;
+		hDC = nullptr;
     }
 }
 

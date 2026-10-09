@@ -343,21 +343,21 @@ char *TrimStr(const char *s, const char *Delim)
 
 bool ValidStr(const char *s)
 {
-	if (s)
-	{
-		while (*s)
-		{
-			if (*s != ' ' &&
-				*s != '\t' &&
-				*s != '\r' &&
-				*s != '\n' &&
-				((uchar)*s) != 0xa0)
-			{
-				return true;
-			}
+	if (!s)
+		return false;
 
-			s++;
+	while (*s)
+	{
+		if (*s != ' ' &&
+			*s != '\t' &&
+			*s != '\r' &&
+			*s != '\n' &&
+			((uchar)*s) != 0xa0)
+		{
+			return true;
 		}
+
+		s++;
 	}
 
 	return false;

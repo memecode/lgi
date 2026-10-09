@@ -195,6 +195,7 @@ class LgiClass LFont :
 {
 	friend class LFontSystem;
 	friend class LDisplayString;
+	friend class LFontCache;
 
 protected:
 	class LFontPrivate *d;
@@ -204,6 +205,9 @@ protected:
 	void _OnPropChange(bool Change);
 	char16 *_ToUnicode(char *In, ssize_t &Len);
 	bool GetOwnerUnderline();
+
+	/// LFontCache: can set the id
+	void SetId(int id);
 
 	virtual void _Measure(int &x, int &y, OsChar *Str, int Len);
 	virtual int _CharAt(int x, OsChar *Str, int Len, LPxToIndexType Type);
@@ -270,6 +274,9 @@ public:
 
 	/// Converts printable characters to unicode.
 	LAutoString ConvertToUnicode(char16 *Input, ssize_t Len = -1);
+
+	/// LFontCache: get the font's id
+	int GetId();
 	
 	#if MAC
 		CFDictionaryRef GetAttributes();

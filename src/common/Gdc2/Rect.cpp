@@ -469,7 +469,7 @@ bool LRegion::SetLength(int s)
 		if (Temp)
 		{
 			int Common = MIN(Size, s);
-			memcpy(Temp, a, sizeof(LRect)*Common);
+			memcpy((uint8_t*)Temp, a, sizeof(LRect)*Common);
 			DeleteArray(a);
 			a = Temp;
 			Size = s;
@@ -499,7 +499,7 @@ bool LRegion::Delete(int i)
 	{
 		if (i != Size - 1)
 		{
-			memmove(a + i, a + (i + 1), sizeof(LRect) * (Size - i - 1));
+			memmove((uint8_t*)(a + i), a + (i + 1), sizeof(LRect) * (Size - i - 1));
 		}
 		Size--;
 		return true;

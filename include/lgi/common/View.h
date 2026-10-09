@@ -45,10 +45,10 @@ class LgiClass LView : virtual public LViewI, virtual public LBase
 		friend Gtk::gboolean PopupEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event, class LPopup *This);
 		friend Gtk::gboolean GtkViewCallback(Gtk::GtkWidget *widget, Gtk::GdkEvent *event, LView *This);
 	
-		virtual Gtk::gboolean OnGtkEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event);
+		virtual Gtk::gboolean GtkEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event);
 public:
-		virtual void OnGtkRealize();
-		virtual void OnGtkDelete();
+		virtual void GtkRealize();
+		virtual void GtkDelete();
 
 private:
 	#endif
@@ -85,11 +85,11 @@ protected:
 	class LViewPrivate	*d = NULL;
 
 	#if LGI_VIEW_HANDLE && !defined(HAIKU)
-	OsView				_View; // OS specific handle to view object
+	OsView				_View = nullptr; // OS specific handle to view object
 	#endif
 
-	LView				*_Window = NULL;
-	LMutex				*_Lock = NULL;
+	LView				*_Window = nullptr;
+	LMutex				*_Lock = nullptr;
 	uint16				_IsToolBar = 0;
 	int					WndFlags = 0;
 	LRect				_Margin, _Border;
@@ -418,7 +418,7 @@ protected:
 
 	class CallbackStore : public LMutex
 	{
-		LHashTbl<IntKey<int>, CallbackInfo*> map;
+		LHashTbl<IntKey<int>, CallbackInfo*,true> map;
 
 	public:
 		CallbackStore() : LMutex("CallbackStore")
@@ -459,17 +459,23 @@ protected:
 			}			
 
 			bool status = false;
-			if (CallbackInfo *info = map.Find(id))
+			if (auto info = map.Find(id))
 			{
+				Unlock();	// don't hold the lock while calling the callback,
+							// it may call back into this class.
 				info->cb();
-				if (map.Delete(id))
+				if (Lock(_FL))
 				{
-					delete info;
-					status = true;
-					// printf("%i: CbStore.Call %i\n", LCurrentThreadId(), id);
+					if (map.Delete(id))
+					{
+						delete info;
+						status = true;
+						// printf("%i: CbStore.Call %i\n", LCurrentThreadId(), id);
+					}
 				}
+				else return false;
 			}
-
+			
 			Unlock();
 			return status;
 		}

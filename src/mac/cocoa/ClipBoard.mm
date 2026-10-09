@@ -339,7 +339,7 @@ struct LBinaryData_Hdr
 
 - (NSArray<NSString *> *)writableTypesForPasteboard:(NSPasteboard *)pasteboard
 {
-	return [NSArray arrayWithObjects:LBinaryDataPBoardType, kUTTypeData, nil];
+	return [NSArray arrayWithObjects:LBinaryDataPBoardType, @"public.data", nil];
 }
 
 + (NSPasteboardReadingOptions)readingOptionsForType:(NSString *)type pasteboard:(NSPasteboard *)pasteboard
@@ -349,7 +349,7 @@ struct LBinaryData_Hdr
 
 + (NSArray<NSString *> *)readableTypesForPasteboard:(NSPasteboard *)pasteboard
 {
-	return [NSArray arrayWithObjects:LBinaryDataPBoardType, kUTTypeData, nil];
+	return [NSArray arrayWithObjects:LBinaryDataPBoardType, @"public.data", nil];
 }
 @end
 

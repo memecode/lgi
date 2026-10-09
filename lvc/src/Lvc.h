@@ -15,6 +15,8 @@
 #include "lgi/common/EventTargetThread.h"
 #include "lgi/common/StructuredLog.h"
 #include "lgi/common/CommsBus.h"
+#include "lgi/common/MissingCapsBar.h"
+#include "lgi/common/ThreadEvent.h"
 
 #define OPT_Folders			"Folders"
 #define OPT_Folder			"Folder"
@@ -28,6 +30,8 @@
 #define OPT_CvsPath			"cvs-path"
 #define OPT_CvsLimit		"cvs-limit"
 #define OPT_RemotePrompt	"remotePrompt"
+
+#define OPT_DiffPad			"diffPad"
 
 #define METHOD_GetContext	"GetContext"
 
@@ -115,7 +119,6 @@ enum AppIds
 	IDM_COPY_PATH,
 	IDM_COPY_LEAF,
 	IDM_EDIT,
-	IDM_REMOTE_URL,
 	IDM_DELETE,
 	IDC_TABS,
 	IDC_BLAME,
@@ -123,7 +126,21 @@ enum AppIds
 	IDM_FORGET,
 	ID_RESTORE,
 	ID_GOTO_ITEM,
-	ID_REWRITE_AUTHOR
+	ID_REWRITE_AUTHOR,
+	ID_REMOTE_URL,
+	ID_LIST_AUTHORS,
+	ID_PATH,
+	ID_AUTHORS,
+	ID_REVERT_COMMIT,
+	ID_FILTER_BY_AUTHOR,
+	ID_VIEW_BOTH,
+	ID_TABLE,
+	ID_HASH0,
+	ID_HASH1,
+	ID_CODE0,
+	ID_CODE1,
+	ID_SELECT0,
+	ID_SELECT1
 };
 
 enum AppMessages
@@ -162,6 +179,7 @@ struct ParseParams
 	LString Str;
 	LString AltInitPath;
 	class VcLeaf *Leaf = nullptr;
+	class BrowseUi *browseUi = nullptr;
 	bool IsWorking = false;
 
 	// This callback is called AFTER the parsing function... you
@@ -183,19 +201,49 @@ typedef bool (VcFolder::*ParseFn)(int, LString, ParseParams*);
 
 struct AppPriv
 {
-	VcFolder		*CurFolder	= NULL;
-	LTree			*Tree		= NULL;
-	LList			*Commits	= NULL;
-	LList			*Files		= NULL;
-	LEdit			*Msg		= NULL;
-	LTextLog		*Diff		= NULL;
-	LTextLog		*Log		= NULL;
-	LTabView		*Tabs		= NULL;
+	LBox			*mainBox	= nullptr;
+	VcFolder		*CurFolder	= nullptr;
+	LTree			*Tree		= nullptr;
+	LList			*Commits	= nullptr;
+	LList			*Files		= nullptr;
+	LEdit			*Msg		= nullptr;
+	LTextLog		*Diff		= nullptr;
+	LTextLog		*Log		= nullptr;
+	LTabView		*Tabs		= nullptr;
 	VersionCtrl		PrevType	= VcNone;
 	LOptionsFile	Opts;
 	LStructuredLog	sLog;
 	int				Resort = -1;
 	LAutoPtr<LCommsBus> CommsBus;
+	
+	struct TSshConn
+	{
+		LSsh::THostInfo info;
+		
+		struct TThread
+		{
+			LCancel *cancel = nullptr;
+			LThreadEvent event;
+			TThread(LCancel *c) : cancel(c) {}
+		};
+		LHashTbl<IntKey<OsThreadId>, TThread*> events;
+		int result = IDCANCEL;
+	
+		~TSshConn()
+		{
+			events.DeleteObjects();
+		}
+		
+		void setResult(int id);
+	};
+	
+	LMissingCapsBar *capsBar	= nullptr;
+	LArray<TSshConn*> sshConnections;
+	LSsh::KnownHostCallback sshCallback;
+	
+	TSshConn *GetConn(LSsh::THostInfo *c);
+	bool IsCertAccepted(LSsh::THostInfo &certId);
+	void AlwaysAcceptCert(LSsh::THostInfo &certId);
 
 	// Filtering
 	LString			FolderFilter, CommitFilter, FileFilter;
@@ -204,16 +252,7 @@ struct AppPriv
 	LHashTbl<StrKey<char,false>,class SshConnection*> Connections;
 	#endif
 	
-	AppPriv() :
-		Opts(LOptionsFile::DesktopMode, AppName),		
-		#if 1 // network structured logging:
-			sLog(LStructuredLog::TNetworkEndpoint, LStructuredLog::sDefaultEndpoint, true)
-		#else // file structured logging:
-			sLog(LStructuredLog::TFile, "Lvc.slog")
-		#endif
-	{		
-		sLog.Clear();
-	}	
+	AppPriv();
 	~AppPriv();
 
 	#if HAS_LIBSSH
@@ -309,6 +348,7 @@ public:
 	void ParseBlame(LArray<BlameLine> &lines, LString raw);
 	void ParseLog(LArray<VcCommit*> &commits, LString raw);
 	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
+	void OnLeafLog(VcLeaf *file);
 };
 
 class DropDownBtn : public LDropDown, public ResObject
@@ -333,5 +373,42 @@ extern LColour GetPaletteColour(int i);
 #include "VcFile.h"
 #include "VcCommit.h"
 #include "VcFolder.h"
+
+class DiffView : public LTextLog
+{
+public:
+	DiffView(int id) : LTextLog(id)
+	{
+	}
+
+	void PourStyle(size_t Start, ssize_t Length)
+	{
+		for (auto ln : LTextView3::Line)
+		{
+			if (!ln->c.IsValid())
+			{
+				char16 *t = Text + ln->Start;
+				
+				if (*t == '+')
+				{
+					ln->c = LColour::Green;
+					ln->Back.Rgb(245, 255, 245);
+				}
+				else if (*t == '-')
+				{
+					ln->c = LColour::Red;
+					ln->Back.Rgb(255, 245, 245);
+				}
+				else if (*t == '@')
+				{
+					ln->c.Rgb(128, 128, 128);
+					ln->Back.Rgb(235, 235, 235);
+				}
+				else
+					ln->c = LColour(L_TEXT);
+			}
+		}
+	}
+};
 
 #endif

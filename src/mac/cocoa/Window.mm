@@ -27,12 +27,12 @@ Deleting a LWindow senarios:
  
 	Users clicks close:
         NSWindowDelegate::windowWillClose
-            GWindowPrivate::OnClose(CloseUser)
+            LWindowPrivate::OnClose(CloseUser)
                 LNsWindow::onDelete
 
     Something deletes the LWindow programmatically:
         LWindow::~LWindow
-			GWindowPriv::OnClose(CloseDestructor)
+			LWindowPriv::OnClose(CloseDestructor)
 				LNsWindow::onDelete
 					self.close
 						windowWillClose -> block
@@ -41,7 +41,7 @@ Deleting a LWindow senarios:
 		LNsWindow::onQuit (async)
 			self.close
 				NSWindowDelegate::windowWillClose
-					GWindowPrivate::OnClose(CloseUser)
+					LWindowPrivate::OnClose(CloseUser)
 						LNsWindow::onDelete
 
 */
@@ -51,7 +51,6 @@ static LString DescribeView(LViewI *v)
 {
 	if (!v)
 		return GString();
-
 	char s[512];
 	int ch = 0;
 	LArray<LViewI*> p;
@@ -111,8 +110,8 @@ LRect LScreenFlip(LRect r)
 class HookInfo
 {
 public:
-	int Flags;
-	LView *Target;
+	int Flags = 0;
+	LView *Target = nullptr;
 };
 
 @interface LWindowDelegate : NSObject<NSWindowDelegate>
@@ -135,11 +134,11 @@ LWindowDelegate *Delegate = nil;
 class LWindowPrivate
 {
 public:
-	LWindow *Wnd = NULL;
-	LWindow *ChildDlg = NULL;
-	LMenu *EmptyMenu = NULL;
-	LViewI *Focus = NULL;
-	NSView *ContentCache = NULL;
+	LWindow *Wnd = nullptr;
+	LWindow *ChildDlg = nullptr;
+	LMenu *EmptyMenu = nullptr;
+	LViewI *Focus = nullptr;
+	NSView *ContentCache = nullptr;
 
 	int Sx = -1, Sy = -1;
 
@@ -271,6 +270,17 @@ public:
 	return self.canFocus;
 }
 
+- (BOOL)canBecomeMainWindow
+{
+	return TRUE;
+}
+
+- (BOOL)canBecomeFirstResponder
+{
+    printf("canBecomeFirstResponder: canFocus=%i\n", self.canFocus);
+    return self.canFocus;
+}
+
 - (void)onQuit
 {
 	#if DEBUG_LOGGING
@@ -345,6 +355,7 @@ public:
 
 - (void)windowDidMove:(NSNotification*)event
 {
+	/*
 	LNsWindow *w = event.object;
 	LRect r = w.frame;
 	printf("windowDidMove: %s\n", r.GetStr());
@@ -354,6 +365,7 @@ public:
 		LRect frame = s.frame;
 		LgiTrace("	frame=%s\n", frame.GetStr());
 	}
+	*/
 }
 
 - (BOOL)windowShouldClose:(NSWindow*)sender
@@ -376,7 +388,10 @@ public:
 {
 	LNsWindow *w = event.object;
 	if (w && w.d)
+	{
+        [w.contentView becomeFirstResponder];
 		w.d->Wnd->OnFrontSwitch(true);
+	}
 }
 
 - (void)windowDidResignMain:(NSNotification*)event
@@ -396,11 +411,11 @@ public:
 #endif
 
 LWindow::LWindow(OsWindow wnd) :
-	LView(NULL)
+	LView(nullptr)
 {
 	d = new LWindowPrivate(this);
 	_QuitOnClose = false;
-	Wnd = NULL;
+	Wnd = nullptr;
 	Menu = 0;
 	_Default = 0;
 	_Window = this;
@@ -478,10 +493,29 @@ bool LWindow::SetTitleBar(bool ShowTitleBar)
 	return true;
 }
 
-bool LWindow::SetIcon(const char *FileName)
+bool LWindow::SetIcon(const char *FileName, const char *gnomeAppType)
 {
-	#warning "Impl LWindow::SetIcon"
-	return false;
+	if (!FileName || !*FileName)
+		return false;
+
+	LString Resolved;
+	if (!LFileExists(FileName) && (Resolved = LFindFile(FileName)))
+		FileName = Resolved;
+
+	if (!LFileExists(FileName))
+		return false;
+
+	NSString *Path = [NSString stringWithUTF8String:FileName];
+	if (!Path)
+		return false;
+
+	NSImage *Icon = [[NSImage alloc] initWithContentsOfFile:Path];
+	if (!Icon)
+		return false;
+
+	[[NSApplication sharedApplication] setApplicationIconImage:Icon];
+	[Icon release];
+	return true;
 }
 
 bool LWindow::GetWillFocus()
@@ -725,7 +759,11 @@ void LWindow::Visible(bool i)
 		PourAll();
 
 		if (GetWillFocus())
+		{
+			[NSApp activateIgnoringOtherApps:YES];
 			[Wnd.p makeKeyAndOrderFront:NULL];
+			[Wnd.p makeFirstResponder:Wnd.p.contentView];
+		}
 		else
 		{
 			[Wnd.p setLevel:NSScreenSaverWindowLevel + 1];
@@ -1261,7 +1299,7 @@ void LWindow::OnPosChange()
 		d->Sy = Y();
 	}
 	
-	LgiTrace("%s::OnPosChange %s\n", GetClass(), GetPos().GetStr());
+	// LgiTrace("%s::OnPosChange %s\n", GetClass(), GetPos().GetStr());
 }
 
 #define IsTool(v) \

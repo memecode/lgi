@@ -143,7 +143,7 @@ using namespace Html1;
 namespace Html1
 {
 
-class LHtmlPrivate
+class LHtmlPrivate1
 {
 public:
 	LHashTbl<ConstStrKey<char>, LTag*> Loading;
@@ -176,7 +176,7 @@ public:
 	LAutoWString FindText;
 	bool MatchCase;
 	
-	LHtmlPrivate()
+	LHtmlPrivate1()
 	{
 		IsLoaded = false;
 		StyleDirty = false;
@@ -204,10 +204,6 @@ public:
 		else
 			DecodeEmoji = false;
 	}
-
-	~LHtmlPrivate()
-	{
-	}
 };
 
 class InputButton : public LButton
@@ -223,214 +219,6 @@ public:
 	void OnClick(const LMouse &m)
 	{
 		Tag->OnClick(m);
-	}
-};
-
-class LFontCache
-{
-	LHtml *Owner;
-	List<LFont> Fonts;
-
-public:
-	LFontCache(LHtml *owner)
-	{
-		Owner = owner;
-	}
-
-	~LFontCache()
-	{
-		Fonts.DeleteObjects();
-	}
-
-	LFont *FontAt(int i)
-	{
-		return Fonts.ItemAt(i);
-	}
-	
-	LFont *FindMatch(LFont *m)
-	{
-		for (auto f: Fonts)
-		{
-			if (*f == *m)
-			{
-				return f;
-			}
-		}
-		
-		return 0;
-	}
-
-	LFont *GetFont(LCss *Style)
-	{
-		if (!Style)
-			return NULL;
-		
-		auto Default = Owner->GetFont();
-		auto Face = Style->FontFamily();
-		if (Face.Length() < 1 || !ValidStr(Face.Names[0]))
-		{
-			Face.Empty();
-			const char *DefFace = Default->Face();
-			LAssert(ValidStr(DefFace));
-			Face.Names.New() = DefFace;
-		}
-		LAssert(ValidStr(Face.Names[0]));
-		LCss::Len Size = Style->FontSize();
-		LCss::FontWeightType Weight = Style->FontWeight();
-		bool IsBold =	Weight == LCss::FontWeightBold ||
-						Weight == LCss::FontWeightBolder ||
-						Weight > LCss::FontWeight400;
-		bool IsItalic = Style->FontStyle() == LCss::FontStyleItalic;
-		bool IsUnderline = Style->TextDecoration() == LCss::TextDecorUnderline;
-
-		if (Size.Type == LCss::LenInherit ||
-			Size.Type == LCss::LenNormal)
-		{
-			Size.Type = LCss::LenPt;
-			Size.Value = (float)Default->PointSize();
-		}
-
-		auto Scale = Owner->GetDpiScale();
-		if (Size.Type == LCss::LenPx)
-		{
-			Size.Value *= (float) Scale.y;
-		    int RequestPx = (int) Size.Value;
-
-			// Look for cached fonts of the right size...
-			for (auto f: Fonts)
-			{
-				if (f->Face() &&
-					_stricmp(f->Face(), Face.Names[0]) == 0 &&
-					f->Bold() == IsBold &&
-					f->Italic() == IsItalic &&
-					f->Underline() == IsUnderline)
-				{
-				    int Px = FontPxHeight(f);
-				    int Diff = Px - RequestPx;
-					if (Diff >= 0 && Diff <= 2)
-						return f;
-				}
-			}
-		}
-		else if (Size.Type == LCss::LenPt)
-		{
-			double Pt = Size.Value;
-			for (auto f: Fonts)
-			{
-				if (!f->Face() || Face.Length() == 0)
-				{
-					LAssert(0);
-					break;
-				}
-				
-				auto FntSz = f->Size();
-				if (f->Face() &&
-					_stricmp(f->Face(), Face.Names[0]) == 0 &&
-					FntSz.Type == LCss::LenPt &&
-					std::abs(FntSz.Value - Pt) < FLOAT_TOLERANCE &&
-					f->Bold() == IsBold &&
-					f->Italic() == IsItalic &&
-					f->Underline() == IsUnderline)
-				{
-					// Return cached font
-					return f;
-				}
-			}
-		}
-		else if (Size.Type == LCss::LenPercent)
-		{
-			// Most of the percentages will be resolved in the "Apply" stage
-			// of the CSS calculations, any that appear here have no "font-size"
-			// in their parent tree, so we just use the default font size times
-			// the requested percent
-			Size.Type = LCss::LenPt;
-			Size.Value *= Default->PointSize() / 100.0f;
-			if (Size.Value < MinimumPointSize)
-				Size.Value = MinimumPointSize;
-		}
-		else if (Size.Type == LCss::LenEm)
-		{
-			// Most of the relative sizes will be resolved in the "Apply" stage
-			// of the CSS calculations, any that appear here have no "font-size"
-			// in their parent tree, so we just use the default font size times
-			// the requested percent
-			Size.Type = LCss::LenPt;
-			Size.Value *= Default->PointSize();
-			if (Size.Value < MinimumPointSize)
-				Size.Value = MinimumPointSize;
-		}
-		else if (Size.Type == LCss::SizeXXSmall ||
-				 Size.Type == LCss::SizeXSmall  ||
-				 Size.Type == LCss::SizeSmall   ||
-				 Size.Type == LCss::SizeMedium  ||
-				 Size.Type == LCss::SizeLarge   ||
-				 Size.Type == LCss::SizeXLarge  ||
-				 Size.Type == LCss::SizeXXLarge)
-		{
-			int Idx = Size.Type-LCss::SizeXXSmall;
-			LAssert(Idx >= 0 && Idx < CountOf(LCss::FontSizeTable));
-			Size.Type = LCss::LenPt;
-			Size.Value = Default->PointSize() * LCss::FontSizeTable[Idx];
-			if (Size.Value < MinimumPointSize)
-				Size.Value = MinimumPointSize;
-		}
-		else if (Size.Type == LCss::SizeSmaller)
-		{
-			Size.Type = LCss::LenPt;
-			Size.Value = (float)(Default->PointSize() - 1);
-		}
-		else if (Size.Type == LCss::SizeLarger)
-		{
-			Size.Type = LCss::LenPt;
-			Size.Value = (float)(Default->PointSize() + 1);
-		}
-		else LAssert(!"Not impl.");
-
-		LFont *f;
-		if ((f = new LFont))
-		{
-			auto ff = ValidStr(Face.Names[0]) ? Face.Names[0].Get() : Default->Face();
-			f->Face(ff);
-			f->Size(Size ? Size : Default->Size());
-			f->Bold(IsBold);
-			f->Italic(IsItalic);
-			f->Underline(IsUnderline);
-			
-			// printf("Add cache font %s,%i %i,%i,%i\n", f->Face(), f->PointSize(), f->Bold(), f->Italic(), f->Underline());
-			if (std::abs(Size.Value) < FLOAT_TOLERANCE)
-				;
-			else if (!f->Create((char*)0, 0))
-			{
-				// Broken font...
-				f->Face(Default->Face());
-				LFont *DefMatch = FindMatch(f);
-				// printf("Falling back to default face for '%s:%i', DefMatch=%p\n", ff, f->PointSize(), DefMatch);
-				if (DefMatch)
-				{
-					DeleteObj(f);
-					return DefMatch;
-				}
-				else
-				{
-					if (!f->Create((char*)0, 0))
-					{
-						DeleteObj(f);
-						return Fonts[0];
-					}
-				}
-			}
-
-			// Not already cached
-			Fonts.Insert(f);
-			if (!f->Face())
-			{
-				LAssert(0);
-			}
-			
-			return f;
-		}
-
-		return 0;
 	}
 };
 
@@ -2722,6 +2510,8 @@ void LTag::ImageLoaded(char *uri, LAutoPtr<LSurface> Img, int &Used)
 	}
 }
 
+namespace {
+
 struct LTagElementCallback : public LCss::ElementCallback<LTag>
 {
 	const char *Val;
@@ -2740,6 +2530,12 @@ struct LTagElementCallback : public LCss::ElementCallback<LTag>
 	
 	bool GetClasses(LString::Array &Classes, LTag *obj) 
 	{
+	    if (obj->Class.Length() > 1000)
+	    {
+	        printf("%s:%i - invalid class size.\n", _FL);
+	        return false;
+	    }
+	    
 		Classes = obj->Class;
 		return Classes.Length() > 0;
 	}
@@ -2757,6 +2553,8 @@ struct LTagElementCallback : public LCss::ElementCallback<LTag>
 		return c;
 	}
 };
+
+} // namespace
 
 void LTag::RestyleAll()
 {
@@ -4277,6 +4075,8 @@ void LHtmlTableLayout::AllocatePx(int StartCol, int Cols, int MinPx, bool HasToF
 	}
 }
 
+namespace {
+
 struct ColInfo
 {
 	int Large;
@@ -4285,7 +4085,9 @@ struct ColInfo
 	int Px;
 };
 
-int ColInfoCmp(ColInfo *a, ColInfo *b)
+} // namespace
+
+static int ColInfoCmp(ColInfo *a, ColInfo *b)
 {
 	int LDiff = b->Large - a->Large;
 	int LGrow = b->Growable - a->Growable;
@@ -5090,18 +4892,6 @@ void LHtmlArea::FlowText(LTag *Tag,
 	SetFixedLength(true);
 }
 
-char16 htoi(char16 c)
-{
-	if (c >= '0' && c <= '9')
-		return c - '0';
-	if (c >= 'a' && c <= 'f')
-		return c - 'a' + 10;
-	if (c >= 'A' && c <= 'F')
-		return c - 'A' + 10;
-	LAssert(0);
-	return 0;
-}
-
 bool LTag::Serialize(LXmlTag *t, bool Write)
 {
 	LRect pos;
@@ -5191,7 +4981,7 @@ bool LTag::Serialize(LXmlTag *t, bool Write)
 					for (int i=0; i<4 && *c; i++)
 					{
 						ch <<= 4;
-						ch |= htoi(*++c);
+						ch |= htmlConvertHex(*++c);
 					}
 				}
 				else ch = *c;
@@ -6088,6 +5878,8 @@ void LTag::BoundParents()
 	}
 }
 
+namespace {
+
 struct DrawBorder
 {
 	LSurface *pDC;
@@ -6167,6 +5959,8 @@ struct DrawBorder
 	}
 };
 
+} // namespace
+
 void LTag::GetInlineRegion(LRegion &rgn, int ox, int oy)
 {
 	if (TagId == TAG_IMG)
@@ -6191,6 +5985,8 @@ void LTag::GetInlineRegion(LRegion &rgn, int ox, int oy)
 		ch->GetInlineRegion(rgn, ox + Pos.x, oy + Pos.y);
 	}
 }
+
+namespace {
 
 class CornersImg : public LMemDC
 {
@@ -6308,6 +6104,8 @@ public:
 		}
 	}
 };
+
+} // namespace
 
 void LTag::PaintBorderAndBackground(LSurface *pDC, LColour &Back, LRect *BorderPx)
 {
@@ -7030,7 +6828,7 @@ LHtml::LHtml(int id, int x, int y, int cx, int cy, LDocumentEnv *e) :
 	LHtmlParser(NULL)
 {
 	View = this;
-	d = new LHtmlPrivate;
+	d = new LHtmlPrivate1;
 	SetReadOnly(true);
 	SetId(id);
 	LRect r(x, y, x+cx, y+cy);
@@ -7074,7 +6872,7 @@ void LHtml::_New()
 	}
 	#endif
 	
-	FontCache = new LFontCache(this);	
+	FontCache = new LHtmlFontCache(GetFont(), (float)GetDpiScale().y);	
 	SetScrollBars(false, false);
 }
 
@@ -7139,8 +6937,10 @@ void LHtml::OnAddStyle(const char *MimeType, const char *Styles)
 	}
 }
 
-void LHtml::ParseDocument(const char *Doc)
+bool LHtml::ParseDocument(const char *Doc)
 {
+	bool Status = true;
+
 	if (!Tag)
 	{
 		Tag = new LTag(this, 0);
@@ -7155,11 +6955,23 @@ void LHtml::ParseDocument(const char *Doc)
 
 		if (IsHtml)
 		{
-			Parse(Tag, Doc);
+			Status = Parse(Tag, Doc);
 
 			// Add body tag if not specified...
 			auto Html = Tag->GetTagByName("html");
 			auto Body = Tag->GetTagByName("body");
+
+			// If the <html> tag we found isn't a direct child of the root then it's
+			// nested inside other content (e.g. a quoted reply embeds a whole
+			// sub-document). That leaves the real top-level content outside of any
+			// <body>, so Flow->InBody never gets set for it and it never gets flowed
+			// or painted. Treat this the same as if no <html>/<body> was found at all
+			// so everything gets wrapped in a synthetic body.
+			if (Html && Tag->Children.IndexOf(Html) < 0)
+			{
+				Html = NULL;
+				Body = NULL;
+			}
 
 			if (!Html && !Body)
 			{
@@ -7280,6 +7092,8 @@ void LHtml::ParseDocument(const char *Doc)
 	if (Tag)
 		Tag->ResetCaches();
 	Invalidate();
+
+	return Status;
 }
 
 bool LHtml::NameW(const char16 *s)
@@ -7325,7 +7139,7 @@ bool LHtml::Name(const char *s)
 
 	// Parse
 	d->IsParsing = true;
-	ParseDocument(s);
+	auto Status = ParseDocument(s);
 	d->IsParsing = false;
 
 	if (Tag && d->StyleDirty)
@@ -7337,7 +7151,7 @@ bool LHtml::Name(const char *s)
 	OnLoad();
 	Invalidate();	
 
-	return true;
+	return Status;
 }
 
 const char *LHtml::Name()
@@ -7939,9 +7753,9 @@ void LHtml::SetLoadImages(bool i)
 	}
 }
 
-char *LHtml::GetSelection()
+LString LHtml::GetSelection()
 {
-	char *s = 0;
+	LString s;
 
 	if (Cursor && Selection)
 	{
@@ -7949,18 +7763,19 @@ char *LHtml::GetSelection()
 		bool InSelection = false;
 		Tag->CopyClipboard(p, InSelection);
 
-		int Len = (int)p.GetSize();
+		auto Len = p.GetSize();
 		if (Len > 0)
 		{
-			char16 *t = (char16*)p.New(sizeof(char16));
+			auto t = (char16*)p.New(sizeof(char16));
 			if (t)
 			{
 				size_t Len = StrlenW(t);
 				for (int i=0; i<Len; i++)
 				{
-					if (t[i] == 0xa0) t[i] = ' ';
+					if (t[i] == 0xa0)
+						t[i] = ' ';
 				}
-				s = WideToUtf8(t);
+				s = t;
 				DeleteArray(t);
 			}
 		}
@@ -7984,8 +7799,7 @@ bool LHtml::SetVariant(const char *Name, LVariant &Value, const char *Array)
 
 bool LHtml::Copy()
 {
-	LAutoString s(GetSelection());
-	if (s)
+	if (auto s = GetSelection())
 	{
 		RemoveZeroWidthCharacters(s);
 
@@ -8416,7 +8230,7 @@ void LHtml::OnMouseClick(LMouse &m)
 			#define IDM_CHARSET_BASE	10000
 
 			RClick.AppendItem					(LLoadString(L_TEXTCTRL_COPY, "Copy"), IDM_COPY, HasSelection());
-			auto Vs = RClick.AppendItem	(LLoadString(L_VIEW_SOURCE, "View Source"), IDM_VIEW_SRC, Source != 0);
+			auto ViewSrc = RClick.AppendItem	(LLoadString(L_VIEW_SOURCE, "View Source"), IDM_VIEW_SRC, Source != 0);
 			RClick.AppendItem					(LLoadString(L_COPY_SOURCE, "Copy Source"), IDM_COPY_SRC, Source != 0);
 			auto Load = RClick.AppendItem	(LLoadString(L_VIEW_IMAGES, "View External Images"), IDM_VIEW_IMAGES, true);
 			if (Load) Load->Checked(GetLoadImages());
@@ -8426,7 +8240,7 @@ void LHtml::OnMouseClick(LMouse &m)
 			if (Cs)
 			{
 				int n=0;
-				for (LCharset *c = LGetCsList(); c->Charset; c++, n++)
+				for (auto c = LGetCsList(); c->Charset; c++, n++)
 				{
 					Cs->AppendItem(c->Charset, IDM_CHARSET_BASE + n, c->IsAvailable());
 				}
@@ -8444,10 +8258,8 @@ void LHtml::OnMouseClick(LMouse &m)
 				RClick.AppendItem("Dump Layout", IDM_DUMP, Tag != 0);
 			}
 
-			if (Vs)
-			{
-				Vs->Checked(!IsHtml);
-			}
+			if (ViewSrc)
+				ViewSrc->Checked(!IsHtml);
 			
 			if (OnContextMenuCreate(Hit, RClick) &&
 				GetMouse(m, true))
@@ -8462,28 +8274,28 @@ void LHtml::OnMouseClick(LMouse &m)
 					}
 					case IDM_VIEW_SRC:
 					{
-						if (Vs)
-						{
-							DeleteObj(Tag);
-							IsHtml = !IsHtml;
-							ParseDocument(Source);
-						}
+						if (!ViewSrc)
+							break;
+
+						DeleteObj(Tag);
+						IsHtml = !IsHtml;
+						ParseDocument(Source);
 						break;
 					}
 					case IDM_COPY_SRC:
 					{
-						if (Source)
+						if (!Source)
+							break;
+
+						LClipBoard c(this);
+						auto ViewCs = GetCharset();
+						if (ViewCs)
 						{
-							LClipBoard c(this);
-							const char *ViewCs = GetCharset();
-							if (ViewCs)
-							{
-								LAutoWString w((char16*)LNewConvertCp(LGI_WideCharset, Source, ViewCs));
-								if (w)
-									c.TextW(w);
-							}
-							else c.Text(Source);
+							LAutoWString w((char16*)LNewConvertCp(LGI_WideCharset, Source, ViewCs));
+							if (w)
+								c.TextW(w);
 						}
+						else c.Text(Source);
 						break;
 					}
 					case IDM_VIEW_IMAGES:
@@ -8493,14 +8305,13 @@ void LHtml::OnMouseClick(LMouse &m)
 					}
 					case IDM_DUMP:
 					{
-						if (Tag)
+						if (!Tag)
+							break;
+
+						if (auto s = Tag->DumpW())
 						{
-							LAutoWString s = Tag->DumpW();
-							if (s)
-							{
-								LClipBoard c(this);
-								c.TextW(s);
-							}
+							LClipBoard c(this);
+							c.TextW(s);
 						}
 						break;
 					}
@@ -8647,7 +8458,7 @@ void LHtml::OnMouseClick(LMouse &m)
 					{
 						if (Id >= IDM_CHARSET_BASE)
 						{
-							LCharset *c = LGetCsList() + (Id - IDM_CHARSET_BASE);
+							auto c = LGetCsList() + (Id - IDM_CHARSET_BASE);
 							if (c->Charset)
 							{
 								Charset = c->Charset;
@@ -9174,6 +8985,8 @@ bool LHtml::GetMaxPaintTimeout()
 }
 
 ////////////////////////////////////////////////////////////////////////
+namespace {
+
 class LHtml_Factory : public LViewFactory
 {
 	LView *NewView(const char *Class, LRect *Pos, const char *Text)
@@ -9306,6 +9119,8 @@ struct BuildContext
 		return RetReattach;
 	}
 };
+
+} // namespace
 
 LHtmlTableLayout::LHtmlTableLayout(LTag *table)
 {

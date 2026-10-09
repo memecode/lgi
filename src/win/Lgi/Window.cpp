@@ -159,7 +159,7 @@ bool LWindow::SetTitleBar(bool ShowTitleBar)
 	return true;
 }
 
-bool LWindow::SetIcon(const char *Icon)
+bool LWindow::SetIcon(const char *Icon, const char */*gnomeAppType*/)
 {
 	return CreateClassW32(LAppInst->Name(), LoadIcon(LProcessInst(), (LPCWSTR)Icon)) != 0;
 }

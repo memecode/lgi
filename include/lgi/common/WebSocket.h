@@ -21,7 +21,7 @@ public:
 		WsPing     = 9,
 		WsPong     = 10,
 	};
-	const char *ToString(WsOpCode op);
+	static const char *ToString(WsOpCode op);
 	LString ToString(uint64 i);
 	LString TimestampString(uint64 i);
 

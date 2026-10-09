@@ -35,9 +35,15 @@ struct _LgiWidget
 LViewI *LWidgetToView(GtkWidget *widget)
 {
 	if (!LGI_IS_WIDGET(widget))
-		return NULL;
+	{
+		if (GTK_IS_WINDOW(widget))
+			return (LViewI*)g_object_get_data(G_OBJECT(widget), "LViewI");
+
+		return nullptr;
+	}
+	
 	auto p = LGI_WIDGET(widget);
-	return p ? p->target : NULL;
+	return p ? p->target : nullptr;
 }
 
 static void lgi_widget_class_init(LgiWidgetClass *klass);
@@ -807,7 +813,7 @@ lgi_widget_realize(GtkWidget *widget)
 
 	auto gv = w->target->GetLView();
 	if (gv)
-		gv->OnGtkRealize();
+		gv->GtkRealize();
 	else
 		w->target->OnCreate();
 }

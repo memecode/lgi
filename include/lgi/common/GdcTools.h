@@ -82,4 +82,25 @@ extern bool FlipYDC(LSurface *pDC, Progress *Prog = NULL);
 // resample the dc
 extern bool ResampleDC(LSurface *pTo, LSurface *pFrom, LRect *FromRgn = 0, Progress *Prog = NULL);
 
+enum TFloodFillMode
+{
+	GDC_FILL_TO_DIFFERENT,
+	GDC_FILL_TO_BORDER,
+	GDC_FILL_NEAR
+};
+
+/// Flood fill in the current colour (doesn't work on a LScreenDC)
+extern void LFloodFill(
+	// Surface to fill:
+	LSurface *pDC,
+	// Start point:
+	LPoint startPt,
+	/// Use #GDC_FILL_TO_DIFFERENT, #GDC_FILL_TO_BORDER or #GDC_FILL_NEAR
+	TFloodFillMode Mode,
+	/// Fill colour
+	COLOUR Border = 0,
+	/// The bounds of the filled area or NULL if you don't care
+	LRect *Bounds = nullptr
+);
+
 #endif

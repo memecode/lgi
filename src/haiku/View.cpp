@@ -21,7 +21,7 @@
 #include "AppPriv.h"
 #include <Cursor.h>
 
-#define DEBUG_MOUSE_EVENTS			1
+#define DEBUG_MOUSE_EVENTS			0
 
 #if 0
 #define DEBUG_INVALIDATE(...)		printf(__VA_ARGS__)
@@ -119,8 +119,6 @@ LViewPrivate::LViewPrivate(LView *view) :
 
 LViewPrivate::~LViewPrivate()
 {
-	View->d = NULL;
-
 	MsgQue.DeleteObjects();
 
 	if (Font && FontOwnType == GV_FontOwned)
@@ -128,6 +126,9 @@ LViewPrivate::~LViewPrivate()
 
 	while (EventTargets.Length())
 		delete EventTargets[0];
+
+	// ViewEventTarget dtors above still need View->d, so clear it last.
+	View->d = NULL;
 }
 
 void LView::SetFlagAll(int flag, bool add)
@@ -274,7 +275,22 @@ bool LView::_Mouse(LMouse &m, bool Move)
 				_Over->OnMouseEnter(lgi_adjust_click(m, _Over));
 		}
 		
-		int cursor = GetCursor(m.x, m.y);
+	}
+		
+	LView *Target = NULL;
+	if (_Capturing)
+		Target = dynamic_cast<LView*>(_Capturing);
+	else
+		Target = dynamic_cast<LView*>(_Over ? _Over : this);
+	if (!Target)
+		return false;
+
+	LRect Client = Target->LView::GetClient(false);
+	
+	m = lgi_adjust_click(m, Target, !Move);
+	if (!Client.Valid() || Client.Overlap(m.x, m.y) || _Capturing)
+	{
+		int cursor = Target->GetCursor(m.x, m.y);
 		if (cursor >= 0)
 		{
 			BCursorID haikuId = LgiToHaiku((LCursor)cursor);
@@ -295,21 +311,7 @@ bool LView::_Mouse(LMouse &m, bool Move)
 				}
 			}
 		}
-	}
-		
-	LView *Target = NULL;
-	if (_Capturing)
-		Target = dynamic_cast<LView*>(_Capturing);
-	else
-		Target = dynamic_cast<LView*>(_Over ? _Over : this);
-	if (!Target)
-		return false;
 
-	LRect Client = Target->LView::GetClient(false);
-	
-	m = lgi_adjust_click(m, Target, !Move);
-	if (!Client.Valid() || Client.Overlap(m.x, m.y) || _Capturing)
-	{
 		if (Move)
 			Target->OnMouseMove(m);
 		else
@@ -415,13 +417,13 @@ bool LView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 	auto hnd = wnd->WindowHandle();
 	if (!hnd)
 	{
-		printf("%s:%i - no handle.\n", _FL);
+		// printf("%s:%i - no handle.\n", _FL);
 		return false;
 	}
 	
 	// Ask the LWindow to paint the area, and then invalidate itself:
 	BMessage m(M_HAIKU_WND_EVENT);
-	m.AddPointer(LMessage::PropWindow, (void*)wnd);
+	m.AddPointer(LMessage::PropWindow, (void*)static_cast<LViewI*>(wnd));
 	m.AddInt32(LMessage::PropEvent, LMessage::Invalidate);
 	m.AddRect("rect", r);
 	LAppPrivate::Post(&m);
@@ -611,7 +613,6 @@ bool LView::Attach(LViewI *parent)
 	bool Debug = false; // !Stricmp(GetClass(), "LScrollBar");
 
 	// Parent handling
-	auto wasAttached = IsAttached();
 	LView *oldParent = d->GetParent();
 	if (oldParent && oldParent != parent)
 	{
@@ -662,7 +663,7 @@ bool LView::Attach(LViewI *parent)
 		d->Parent->OnChildrenChanged(this, true);
 	}
 	
-	if (IsAttached() && !wasAttached && !d->onCreateEvent)
+	if (IsAttached() && !d->onCreateEvent)
 	{
 		d->onCreateEvent = true;
 		OnCreate();
@@ -690,7 +691,11 @@ bool LView::Detach()
 		// Events
 		Par->DelView(this);
 		Par->OnChildrenChanged(this, false);
-		Par->Invalidate(&Pos);
+
+		// Don't invalidate a parent that is itself being torn down.
+		auto ParView = dynamic_cast<LView*>(Par);
+		if (!ParView || !(ParView->WndFlags & GWF_DESTRUCTOR))
+			Par->Invalidate(&Pos);
 	}
 	
 	d->Parent = 0;

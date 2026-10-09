@@ -165,8 +165,12 @@ enum LSocketLogTypes
 	/// Log a hex dump of everything
 	NET_LOG_HEX_DUMP = 1,
 	/// Log just the bytes
-	NET_LOG_ALL_BYTES = 2
+	NET_LOG_ALL_BYTES = 2,
+	/// Always last
+	NET_LOG_MAX
 };
+LgiFunc const char *toString(LSocketLogTypes v);
+LgiFunc void setString(LSocketLogTypes v, const char *name);
 
 /// Virtual base class for a socket. See the documentation for LSocket for a more
 /// through treatment of this object's API.
@@ -194,7 +198,7 @@ public:
 	virtual void SetCancel(LCancel *c) { }
 
 	// Logging and utility
-	virtual class LStreamI *GetLog() { return NULL; }
+	virtual class LStreamI *GetLog() { return nullptr; }
 
 	// Host/Port meta data
 		/// Returns the IP at this end of the socket
@@ -202,7 +206,7 @@ public:
 		(
 			/// Ptr to a buffer of at least 16 bytes
 			char *IpAddr
-		) { return false; }
+		)   = 0;
 		/// Return the port at this end of the connection
 		virtual int GetLocalPort() { return 0; }
 		/// Gets the remote IP
@@ -234,6 +238,8 @@ public:
 		virtual bool IsDelayed() { return true; }
 		/// Set the send delay setting
 		virtual void IsDelayed(bool Delay) {}
+		/// Sets the reuse address option on the socket. This allows multiple sockets to bind to the same port.
+		virtual bool SetReuseAddress(bool reuse) { return false; }
 
 // UDP
 	
@@ -268,7 +274,9 @@ public:
 	virtual void OnInformation(const char *Str) {}
 
 	/// Process an error
-	virtual int Error(void *Param) { return 0; }
+	virtual int Error(
+		/// Optional HOSTENT ptr
+		void *Param = nullptr)	{ return 0; }
 	virtual const char *GetErrorString() { return NULL; }
 	
 	LString LocalIp()
@@ -278,7 +286,7 @@ public:
 	}
 };
 
-class LAppI
+class LAppI : public LDomI
 {
 public:
 	/// The idle function should return false to wait for more

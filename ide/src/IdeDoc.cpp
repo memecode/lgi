@@ -1229,12 +1229,14 @@ void IdeDocPrivate::LoadBreakPoints()
 			{
 				if (auto be = Project->GetBackend())
 				{
+					/*
 					if (auto abs = be->MakeAbsolute(bp.File))
 					{
 						if (abs == FileName)
 							match = true;
 					}
-					if (auto rel = be->MakeRelative(bp.File))
+					*/
+					if (auto rel = be->MakeRelative(bp.relFile))
 					{
 						if (rel == FileName)
 							match = true;
@@ -1242,7 +1244,7 @@ void IdeDocPrivate::LoadBreakPoints()
 				}
 			}
 			if (!match)	
-				match = bp.File == FileName;
+				match = bp.relFile == FileName;
 
 			// Fuzzy match 'bp.File' against 'FileName'
 			if (match)

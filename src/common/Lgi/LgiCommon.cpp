@@ -17,6 +17,7 @@
 	#include "lgi/common/RegKey.h"
 	#include <sys/types.h>
 	#include <sys/stat.h>
+	#include <sddl.h>
 #else
 	#include <unistd.h>
 	#define _getcwd getcwd
@@ -51,6 +52,7 @@
 #endif
 #include "lgi/common/Library.h"
 #include "lgi/common/Net.h"
+#include "../src/common/Hash/md5/md5.h"
 #ifdef MAC
 	#include "lgi/common/Uri.h"
 #endif
@@ -368,6 +370,24 @@ const char *LGetOsName()
 	return "error";
 }
 
+bool LCheckVersion(LString ver, LString minVer)
+{
+	auto stripChars = "v\r\n\t ";
+	auto v = ver.Strip(stripChars).SplitDelimit(".");
+	auto minV = minVer.LStrip(stripChars).SplitDelimit(".");
+	
+	size_t common = MIN(v.Length(), minV.Length());
+	for (size_t i=0; i<common; i++)
+	{
+		if (v[i].Int() < minV[i].Int())
+			return false;
+		else if (v[i].Int() > minV[i].Int())
+			return true;
+	}
+	
+	return common > 0;
+}
+
 #ifdef WIN32
 #define RecursiveFileSearch_Wildcard "*.*"
 #else // unix'ish OS
@@ -392,7 +412,7 @@ bool LRecursiveFileSearch(const char *Root,
 	// enumerate the directory contents
 	for (auto Found = Dir.First(Root); Found && (!Cancel || !Cancel->IsCancelled()); Found = Dir.Next())
 	{
-		char Name[300];
+		char Name[MAX_PATH_LEN];
 		if (!Dir.Path(Name, sizeof(Name)))
 			continue;
 
@@ -536,7 +556,7 @@ struct LTracingSupport : public LMutex
 		else if (auto Dir = strrchr(LogPath, DIR_CHAR))
 		{
 			LString Leaf = Dir + 1;
-			LFile::Path p(LSP_APP_ROOT);
+			LFile::Path p(LSP_APP_DATA);
 			if (!p.Exists())
 				FileDev->CreateFolder(p);
 			p += Leaf;
@@ -602,7 +622,11 @@ void LgiTrace(const char *Msg, ...)
 			auto Output = Trace.GetStream();
 			if (Output && Trace.Open())
 			{
-				Output->Write(Buffer, Ch);
+				Output->Write(Buffer,
+					// vsnprintf returns the total amount of space it needs, which can be LONGER
+					// than the size of 'Buffer'. So truncate that here, so that the trace stream
+					// doesn't crash!
+					MIN(sizeof(Buffer)-1, Ch));
 				Trace.Close();
 			}
 		}
@@ -627,7 +651,7 @@ void LStackTrace(const char *Msg, ...)
 	#ifndef HAIKU
 		LSymLookup::Addr Stack[STACK_SIZE];
 		ZeroObj(Stack);
-		LSymLookup *Lu = LAppInst ? LAppInst->GetSymLookup() : NULL;
+		auto Lu = LAppInst ? LAppInst->GetSymLookup() : nullptr;
 		if (!Lu)
 		{
 			printf("%s:%i - Failed to get sym lookup object.\n", _FL);
@@ -644,13 +668,13 @@ void LStackTrace(const char *Msg, ...)
 			va_end(Arg);
 			if (Ch > 0 && Buffer[Ch-1] != '\n')
 				Buffer[Ch++] = '\n';
-			Lu->Lookup(Buffer+Ch, sizeof(Buffer)-Ch-1, Stack, Frames);
+			Lu->Lookup(Buffer+Ch, sizeof(Buffer)-Ch-1, Stack, Frames, "    ");
 
 			#ifdef WIN32
 				bool locked = Trace.Lock(_FL, true);
 			#endif
 			#ifdef LGI_TRACE_TO_FILE
-				LStreamI *Output = Trace.GetStream();
+				auto Output = Trace.GetStream();
 				if (Output &&
 					Trace.Open())
 				{
@@ -925,13 +949,17 @@ LString LFile::Path::PrintAll()
 	_(LSP_COMMON_APP_DATA)
 	_(LSP_USER_APP_DATA)
 	_(LSP_LOCAL_APP_DATA)
+	_(LSP_SYS_MOUNT_POINT)
+	_(LSP_USER_MOUNT_POINT)
 	_(LSP_DESKTOP)
 	_(LSP_HOME)
 	_(LSP_USER_APPS)
 	_(LSP_EXE)
 	_(LSP_TRASH)
 	_(LSP_APP_INSTALL)
-	_(LSP_APP_ROOT)
+	_(LSP_APP_DATA)
+	_(LSP_APP_CONFIG)
+	_(LSP_APP_CACHE)
 	_(LSP_USER_DOCUMENTS)
 	_(LSP_USER_MUSIC)
 	_(LSP_USER_VIDEO)
@@ -995,6 +1023,52 @@ LString LFile::Path::PrintAll()
 	#endif
 
 	return p.NewLStr();
+}
+
+static LString AppName()
+{
+	const char *Name = nullptr;
+	
+	// Try and get the configured app name:
+	#ifndef LGI_STATIC
+	if (LAppInst)
+		Name = LAppInst->LBase::Name();
+	#endif
+	
+	if (!Name)
+	{
+		// Use the exe name?
+		LString Exe = LGetExeFile();
+		if (auto l = LGetLeaf(Exe))
+		{
+			#ifdef WIN32
+				// Trim '.exe' off the end of the name
+				char *d = strrchr(l, '.');
+				*d = NULL;
+			#endif
+			Name = l;
+		}
+	}
+
+	return Name;
+}
+
+/// This joins base with 'AppName()' and then creates the folder if it doesn't exist.
+/// Returns the full path to the folder.
+static LString AppSpecificFolder(LString base)
+{
+	LString name = AppName();
+	if (!name)
+		return LString();
+
+	char Buf[MAX_PATH_LEN];
+	if (!LMakePath(Buf, sizeof(Buf), base, name))
+		return LString();
+	
+	if (!LDirExists(Buf))
+		FileDev->CreateFolder(Buf, true);
+
+	return Buf;
 }
 
 LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
@@ -1416,83 +1490,23 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			}
 			break;
 		}
-		case LSP_APP_ROOT:
+		case LSP_APP_DATA:
 		{
-			#ifndef LGI_STATIC
-			const char *Name = NULL;
-			
-			// Try and get the configured app name:
-			if (LAppInst)
-				Name = LAppInst->LBase::Name();
-			
-			if (!Name)
-			{
-				// Use the exe name?
-				LString Exe = LGetExeFile();
-				char *l = LGetLeaf(Exe);
-				if (l)
-				{
-					#ifdef WIN32
-					char *d = strrchr(l, '.');
-					*d = NULL;
-					#endif
-					Name = l;
-					// printf("%s:%i - name '%s'\n", _FL, Name);
-				}
-			}
-			
-			if (!Name)
-			{
-				LAssert(0);
-				break;
-			}
-
+			LString p;
 			#if defined MAC
 
-				#if LGI_COCOA
-			
-					NSArray *paths = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES);
-					if (paths)
-						Path = [[paths objectAtIndex:0] UTF8String];
-			
-				#elif LGI_CARBON
-			
-					FSRef Ref;
-					OSErr e = FSFindFolder(kUserDomain, kDomainLibraryFolderType, kDontCreateFolder, &Ref);
-					if (e)
-					{
-						printf("%s:%i - FSFindFolder failed e=%i\n", _FL, e);
-						LAssert(0);
-					}
-					else
-					{
-						LAutoString Base = FSRefPath(Ref);
-						Path = Base.Get();
-					}
-			
-				#else
-
-					struct passwd *pw = getpwuid(getuid());
-					if (!pw)
-						return false;
-					Path.Printf("%s/Library", pw->pw_dir);
-			
-				#endif
+				NSSearchPathDirectory directory = NSApplicationSupportDirectory;
+				if (auto paths = NSSearchPathForDirectoriesInDomains(directory, NSUserDomainMask, YES))
+					p = [[paths objectAtIndex:0] UTF8String];
 
 			#elif defined WIN32
 
-				Path = WinGetSpecialFolderPath(CSIDL_APPDATA);
+				p = WinGetSpecialFolderPath(CSIDL_LOCAL_APPDATA);
 
 			#elif defined LINUX
 
-				char Dot[128];
-				snprintf(Dot, sizeof(Dot), ".%s", Name);
-				Name = Dot;
-				struct passwd *pw = getpwuid(getuid());
-				if (pw)
-					Path = pw->pw_dir;
-				else
-					LAssert(0);
+				if (auto pw = getpwuid(getuid()))
+					p.Printf("%s/.local/share", pw->pw_dir);
 
 			#elif defined(HAIKU)
 
@@ -1501,12 +1515,12 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 
 				if (find_directory(B_USER_SETTINGS_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
 				{
-					Path = path;
+					p = path;
 					// printf("B_USER_SETTINGS_DIRECTORY=%s\n", Path.Get());
 				}
 				else if (find_directory(B_USER_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
 				{
-					Path.Printf("%s/config/settings", path);
+					p.Printf("%s/config/settings", path);
 					// printf("B_USER_DIRECTORY=%s\n", Path.Get());
 				}
 					
@@ -1516,12 +1530,101 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 
 			#endif
 
-			if (Path)
-			{
-				Path += DIR_STR;
-				Path += Name;
-			}
+			Path = AppSpecificFolder(p);
+			break;
+		}
+		case LSP_APP_CONFIG:
+		{
+			LString p;
+			#if defined MAC
+
+				NSSearchPathDirectory directory = NSLibraryDirectory;
+				NSArray *paths = NSSearchPathForDirectoriesInDomains(directory, NSUserDomainMask, YES);
+				if (paths)
+				{
+					p = [[paths objectAtIndex:0] UTF8String];
+					p += DIR_STR "Preferences";
+				}
+
+			#elif defined WIN32
+
+				p = WinGetSpecialFolderPath(CSIDL_APPDATA);
+
+			#elif defined LINUX
+
+				if (auto pw = getpwuid(getuid()))
+					p.Printf("%s%s%s", pw->pw_dir, DIR_STR, ".config");
+
+			#elif defined(HAIKU)
+
+				dev_t volume = dev_for_path("/boot");
+				char path[MAX_PATH_LEN] = "";
+
+				if (find_directory(B_USER_SETTINGS_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
+				{
+					p = path;
+					// printf("B_USER_SETTINGS_DIRECTORY=%s\n", p.Get());
+				}
+				else if (find_directory(B_USER_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
+				{
+					p.Printf("%s/config/settings", path);
+					// printf("B_USER_DIRECTORY=%s\n", p.Get());
+				}
+					
+			#else
+
+				LAssert(0);
+
 			#endif
+
+			Path = AppSpecificFolder(p);
+			break;
+		}
+		case LSP_APP_CACHE:
+		{
+			LString p;
+			#if defined MAC
+
+				NSSearchPathDirectory directory = NSLibraryDirectory;
+				NSArray *paths = NSSearchPathForDirectoriesInDomains(directory, NSUserDomainMask, YES);
+				if (paths)
+				{
+					p = [[paths objectAtIndex:0] UTF8String];
+					p += DIR_STR "Caches";
+				}
+
+			#elif defined WIN32
+
+				p = WinGetSpecialFolderPath(CSIDL_LOCAL_APPDATA);
+
+			#elif defined LINUX
+
+				if (auto pw = getpwuid(getuid()))
+					p.Printf("%s%s%s", pw->pw_dir, DIR_STR, ".cache");
+
+			#elif defined(HAIKU)
+
+				dev_t volume = dev_for_path("/boot");
+				char path[MAX_PATH_LEN] = "";
+
+				if (find_directory(B_USER_SETTINGS_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
+				{
+					p = path;
+					// printf("B_USER_SETTINGS_DIRECTORY=%s\n", p.Get());
+				}
+				else if (find_directory(B_USER_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
+				{
+					p.Printf("%s/config/settings", path);
+					// printf("B_USER_DIRECTORY=%s\n", p.Get());
+				}
+					
+			#else
+
+				LAssert(0);
+
+			#endif
+
+			Path = AppSpecificFolder(p);
 			break;
 		}
 		case LSP_OS:
@@ -1748,11 +1851,13 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			
 			#elif defined LGI_COCOA
 			
-				NSArray *paths = NSSearchPathForDirectoriesInDomains( NSLibraryDirectory, NSUserDomainMask, YES);
-				if (paths)
-				{
+				if (auto paths = NSSearchPathForDirectoriesInDomains( NSLibraryDirectory, NSUserDomainMask, YES))
 					Path = [paths objectAtIndex:0];
-				}
+			
+			#elif defined(LINUX)
+			
+				LFile::Path p("~/.local/share");
+				Path = p.Absolute().GetFull();
 			
 			#else
 			
@@ -1840,16 +1945,14 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			
 			#elif defined LGI_COCOA
 			
-				NSString *home = NSHomeDirectory();
-				if (home)
+				if (auto home = NSHomeDirectory())
 					Path = home;
 				else
 					LAssert(!"No home path?");
 
 			#elif defined POSIX
 
-				struct passwd *pw = getpwuid(getuid());
-				if (pw)
+				if (auto pw = getpwuid(getuid()))
 					Path = pw->pw_dir;
 			
 			#else
@@ -1967,7 +2070,88 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 
 			#elif defined(WIN32)
 
-				LAssert(0);
+				// Since Vista the recycle bin is a per-volume virtual folder with no CSIDL/KNOWNFOLDERID
+				// support, so build the real on-disk path '<drive>\$Recycle.Bin\<user SID>' manually.
+				HANDLE hToken = NULL;
+				if (OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken))
+				{
+					DWORD Len = 0;
+					GetTokenInformation(hToken, TokenUser, NULL, 0, &Len);
+					LArray<uint8_t> Buf;
+					if (Len > 0 && Buf.Length(Len) &&
+						GetTokenInformation(hToken, TokenUser, Buf.AddressOf(), Len, &Len))
+					{
+						auto User = (TOKEN_USER*)Buf.AddressOf();
+						LPWSTR Sid = NULL;
+						if (ConvertSidToStringSidW(User->User.Sid, &Sid))
+						{
+							LAutoString a(WideToUtf8(Sid));
+							LString Home = WinGetSpecialFolderPath(CSIDL_PROFILE);
+							if (a && Home.Length() >= 2)
+								Path.Printf("%.2s\\$Recycle.Bin\\%s", Home.Get(), a.Get());
+							LocalFree(Sid);
+						}
+					}
+					CloseHandle(hToken);
+				}
+
+				if (!Path)
+					LAssert(!"Failed to build Recycle Bin path.");
+
+			#endif
+			break;
+		}
+
+		case LSP_SYS_MOUNT_POINT:
+		{
+			#if defined(LINUX)
+
+				Path = "/mnt";
+
+			#elif defined(MAC)
+
+				Path = "/Volumes";
+
+			#elif defined(WINDOWS)
+
+				Path = "\\";
+
+			#elif HAIKU
+			
+				Path = "/";
+
+			#else
+
+				#error "Impl me."
+
+			#endif
+			break;
+		}
+
+		case LSP_USER_MOUNT_POINT:
+		{
+			#if defined(LINUX)
+
+				if (auto pw = getpwuid(getuid()))
+					Path.Printf("/media/%s", pw->pw_name);
+				else
+					LAssert(!"Unable to determine current user");
+
+			#elif defined(MAC)
+
+				Path = "/Volumes";
+
+			#elif defined(WINDOWS)
+
+				Path = "\\";
+				
+			#elif HAIKU
+			
+				Path = "/";
+
+			#else
+
+				#error "Impl me."
 
 			#endif
 			break;
@@ -2236,7 +2420,8 @@ static void _LFindFile(const char *Name, LString *GStr, LAutoString *AStr)
 	LOG_DEBUG("%s:%i - Exe='%s'\n", _FL, Exe.Get());
 
 	char CurWorking[MAX_PATH_LEN];
-	_getcwd(CurWorking, sizeof(CurWorking));
+	if (!_getcwd(CurWorking, sizeof(CurWorking)))
+		CurWorking[0] = 0;
 	const char *PrefPath[] =
 	{
 		".",
@@ -2323,7 +2508,7 @@ static void _LFindFile(const char *Name, LString *GStr, LAutoString *AStr)
 	{
 		if (GStr)
 			*GStr = Files[0];
-		else
+		else if (AStr)
 		{
 			AStr->Reset(Files[0]);
 			Files.DeleteAt(0);
@@ -2608,50 +2793,58 @@ LString::Array LGetPath()
 		// The GUI application path is NOT the same as what is configured for the terminal.
 		// At least in 10.12. And I don't know how to make them the same. This works around
 		// that for the time being.
-		
-		LFile EctPaths("/etc/paths", O_READ);
-		Paths = EctPaths.Read().Split("\n");
-
-		LFile::Path home(LSP_HOME);
-		auto profile = home / ".profile";
-		auto zprofile = home / ".zprofile";
-		auto path = profile.Exists() ?
-						profile.GetFull() :
-						zprofile.Exists() ? zprofile.GetFull() : LString();
-		if (path)
+		static bool loaded = false;
+		static LString::Array paths;
+		if (!loaded)
 		{
-			auto lines = LReadFile(path).Split("\n");
-			// printf("path: reading '%s' got %i lines\n", path.Get(), (int)lines.Length());
-			for (auto Ln: lines)
+			loaded = true; // only calculate this once.
+		
+			LFile EctPaths("/etc/paths", O_READ);
+			paths = EctPaths.Read().Split("\n");
+
+			LFile::Path home(LSP_HOME);
+			LString profileFiles[] = {
+				(home / ".profile").GetFull(),
+				(home / ".zprofile").GetFull()
+			};
+			for (auto path: profileFiles) // for each profile file:
 			{
-				auto p = Ln.SplitDelimit(" =", 2);
-				if (p.Length() == 3 &&
-					p[0].Equals("export") &&
-					p[1].Equals("PATH"))
+				auto lines = LReadFile(path).Split("\n");
+				// printf("path: reading '%s' got %i lines\n", path.Get(), (int)lines.Length());
+				for (auto Ln: lines)
 				{
-					LString::Array existing;
-					existing.Swap(Paths);
-					Paths.SetFixedLength(false);
-					
-					auto parts = p.Last().Strip("\"").SplitDelimit(LGI_PATH_SEPARATOR);
-					for (auto &p: parts)
+					auto p = Ln.SplitDelimit(" =", 2);
+					if (p.Length() == 3 &&
+						p[0].Equals("export") &&
+						p[1].Equals("PATH"))
 					{
-						if (p.Equals("$PATH"))
+						LString::Array existing;
+						existing.Swap(paths);
+						paths.SetFixedLength(false);
+						
+						auto parts = p.Last().Strip("\"").SplitDelimit(LGI_PATH_SEPARATOR);
+						for (auto &p: parts)
 						{
-							// printf("existing paths='%s'\n", LString(",").Join(existing).Get());
-							Paths += existing;
+							if (p.Equals("$PATH"))
+							{
+								// printf("existing paths='%s'\n", LString(",").Join(existing).Get());
+								paths += existing;
+							}
+							else
+							{
+								// printf("literal path='%s'\n", p.Get());
+								paths.Add(p);
+							}
 						}
-						else
-						{
-							// printf("literal path='%s'\n", p.Get());
-							Paths.Add(p);
-						}
+						break;
 					}
-					break;
 				}
 			}
 		}
-		
+
+		// Make a copy of 'paths' for thread safety
+		for (auto &p: paths)
+			Paths.New() = p.Get();
 	#else
 		auto Path = LGetEnv("PATH");
 		// printf("Path='%s'\n", Path.Get());
@@ -3033,3 +3226,106 @@ LString LGetAppForProtocol(const char *Protocol)
 	return App;
 }
 
+LString LExpandVars(const char* in, LDom* source)
+{
+	LStringPipe p;
+
+	LAssert(in);
+	LAssert(source);
+	if (!in || !source)
+		return LString();
+
+	auto *s = in;
+	while (true)
+	{
+		auto *e = s;
+		while (*e && e[0] != '$' && e[1] != '{')
+			e++;
+
+		if (e > s)
+			// write any non-var section before this
+			p.Write(s, e - s);
+
+		if (e[0] == '$' && e[1] == '{')
+		{
+			// start var...
+			s = e + 2;
+			for (e = s; *e && *e != '}'; e++)
+				;
+			if (!*e)
+			{
+				LAssert(!"variable not terminated correctly");
+				break;
+			}
+
+			LString var(s, e - s);
+			LVariant val;
+			if (source->GetValue(var.Strip(), val))
+			{
+				p.Write(val.Str());
+			}
+
+			s = e + 1;
+		}
+		else break;
+	}
+
+	return p.NewLStr();
+}
+
+
+LString LMd5(LString s)
+{
+	md5_state_t state;
+	md5_init(&state);
+	md5_append(&state, (md5_byte_t*)s.Get(), s.Length());
+
+	LString ret;
+	if (ret.Length(16))
+		md5_finish(&state, ret.Get());
+
+	return ret;
+}
+
+LString LHex(LString s)
+{
+	LString ret;
+	if (!ret.Length(s.Length() << 1))
+		return ret;
+
+	const char map[] = "0123456789abcdef";
+	auto o = ret.Get();
+	auto p = (uint8_t*)s.Get();
+	for (auto e = p + s.Length(); p<e; p++)
+	{
+		*o++ = map[*p >> 4];
+		*o++ = map[*p & 0xf];
+	}
+	*o++ = 0;
+
+	return ret; 
+}
+
+static const char *LSocketLogTypesStr[NET_LOG_MAX] = {};
+void setString(LSocketLogTypes v, const char *name)
+{
+	if (v < NET_LOG_MAX)
+		LSocketLogTypesStr[v] = name;
+	else
+		LAssert(!"out of range");
+}
+
+const char *toString(LSocketLogTypes v)
+{
+	if (LSocketLogTypesStr[v])
+		return LSocketLogTypesStr[v];
+
+	switch (v)
+	{
+		default:
+		case NET_LOG_NONE: return "No log";
+		case NET_LOG_HEX_DUMP: return "Hex log";
+		case NET_LOG_ALL_BYTES: return "Byte log";
+	}
+	return nullptr;
+}

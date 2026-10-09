@@ -74,13 +74,13 @@ class LMime
 	// Data info
 	ssize_t DataPos = 0;
 	ssize_t DataSize = 0;
-	LMutex *DataLock = NULL;
-	LStreamI *DataStore = NULL;
+	LMutex *DataLock = nullptr;
+	LStreamI *DataStore = nullptr;
 	bool OwnDataStore = false;
 
 	// Other info
-	char *TmpPath = NULL;
-	LMime *Parent = NULL;
+	char *TmpPath = nullptr;
+	LMime *Parent = nullptr;
 	LArray<LMime*> Children;
 
 	// Private methods
@@ -172,7 +172,7 @@ public:
 			void Empty();
 		}	Encode;
 
-	} Text;
+	}	Text;
 
 	friend class LMime::LMimeText::LMimeDecode;
 	friend class LMime::LMimeText::LMimeEncode;
@@ -195,7 +195,7 @@ public:
 			void Empty();
 		} Write;
 
-	} Binary;
+	}	Binary;
 
 	friend class LMime::LMimeBinary::LMimeRead;
 	friend class LMime::LMimeBinary::LMimeWrite;

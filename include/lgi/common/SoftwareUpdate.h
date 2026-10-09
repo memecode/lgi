@@ -21,7 +21,7 @@ public:
 		bool HasUpdate = false;
 	};
 
-	typedef std::function<void(UpdateInfo*,const char*)> UpdateCb;
+	typedef std::function<void(UpdateInfo*,LError)> UpdateCb;
 
 	LSoftwareUpdate(const char *SoftwareName, const char *UpdateUri, const char *ProxyUri, const char *OptionalTempPath = NULL);
 	virtual ~LSoftwareUpdate();
@@ -41,7 +41,7 @@ public:
 
 	void ApplyUpdate(const UpdateInfo *Info, bool DownloadOnly, LViewI *WithUi, std::function<void(bool)> Callback);
 
-	const char *GetErrorMessage();
+	LError GetError();
 };
 
 #endif

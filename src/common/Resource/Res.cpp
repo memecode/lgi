@@ -909,37 +909,36 @@ LgiFunc char *_LgiGenLangLookup()
 #endif
 
 ////////////////////////////////////////////////////////////////////
-const char Res_Dialog[]		= "Dialog";
-const char Res_Table[]		= "TableLayout";
+const char Res_Dialog[]			= "Dialog";
+const char Res_Table[]			= "TableLayout";
 const char Res_ControlTree[]	= "ControlTree";
-const char Res_StaticText[]	= "StaticText";
+const char Res_StaticText[]		= "StaticText";
 const char Res_EditBox[]		= "EditBox";
 const char Res_CheckBox[]		= "CheckBox";
-const char Res_Button[]		= "Button";
-const char Res_Group[]		= "Group";
+const char Res_Button[]			= "Button";
+const char Res_Group[]			= "Group";
 const char Res_RadioBox[]		= "RadioBox";
 const char Res_TabView[]		= "TabView";
 const char Res_Tab[]			= "Tab";
 const char Res_ListView[]		= "ListView";
-const char Res_Column[]		= "Column";
+const char Res_Column[]			= "Column";
 const char Res_ComboBox[]		= "ComboBox";
 const char Res_TreeView[]		= "TreeView";
-const char Res_Bitmap[]		= "Bitmap";
+const char Res_Bitmap[]			= "Bitmap";
 const char Res_Progress[]		= "Progress";
-const char Res_Slider[]		= "Slider";
-const char Res_ScrollBar[]	= "ScrollBar";
-const char Res_Custom[]		= "Custom";
+const char Res_Slider[]			= "Slider";
+const char Res_ScrollBar[]		= "ScrollBar";
+const char Res_Custom[]			= "Custom";
 
 ////////////////////////////////////////////////////////////////////
 class ResObjectImpl
 {
 protected:
 	static int TabDepth;
-	ResFactory *Factory;
+	ResFactory *Factory = nullptr;
 
 	void TabString(char *Str);
 	char *ReadInt(char *s, int &Value);
-	// bool IsEndTag(LXmlTag *Tag, char *ObjName);
 
 public:
 	enum SStatus
@@ -949,10 +948,13 @@ public:
 		SExclude,
 	};
 
-	ResObject *Object;
+	constexpr static const char *attrStyle = "style";
+	constexpr static const char *attrClass = "class";
+
+	ResObject *Object = nullptr;
 	ResObjectImpl *GetImpl(ResObject *o)
 	{
-		return (o) ? o->GetObjectImpl(Factory) : 0;
+		return (o) ? o->GetObjectImpl(Factory) : nullptr;
 	}
 
 	ResObjectImpl(ResFactory *factory, ResObject *object);
@@ -1199,16 +1201,16 @@ bool ResFactory::Res_Read(ResObject *Obj, LXmlTag *Tag, ResReadCtx &Ctx)
 
 bool ResFactory::Res_Write(ResObject *Obj, LXmlTag *Tag)
 {
-	if (Obj)
+	if (!Obj)
 	{
-		ResObjectImpl *Impl = Obj->GetObjectImpl(this);
-		if (Impl)
-		{
-			return Impl->Res_Write(Tag) >= ResObjectImpl::SOk;
-		}
-		else LAssert(0);
+		LAssert(!"no object");
+		return false;
 	}
-	else LAssert(0);
+	
+	if (auto Impl = Obj->GetObjectImpl(this))
+		return Impl->Res_Write(Tag) >= ResObjectImpl::SOk;
+	else
+		LAssert(0);
 	
 	return false;
 }
@@ -1245,13 +1247,11 @@ ResObjectImpl::SStatus ResObjectImpl::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 			return SExclude;
 		Res_SetFlags(Tag);
 
-		const char *Style = Tag->GetAttr("style");
-		if (Style)
+		if (auto Style = Tag->GetAttr(attrStyle))
 		{
 			LVariant v = Style;
-			LDom *d = Factory->Res_GetDom(Object);
-			if (d)
-				d->SetValue("style", v);
+			if (auto d = Factory->Res_GetDom(Object))
+				d->SetValue(attrStyle, v);
 		}
 
 		return SOk;
@@ -1268,9 +1268,21 @@ ResObjectImpl::SStatus ResObjectImpl::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 ResObjectImpl::SStatus ResObjectImpl::Res_Write(LXmlTag *t)
 {
 	t->SetTag(Object->GetObjectName());
+	
 	WritePos(t);
 	WriteStrRef(t);
 	WriteFlags(t);
+
+	if (auto d = Factory->Res_GetDom(Object))
+	{
+		LVariant v;
+		if (d->GetValue(attrStyle, v))
+		{
+			auto style = v.Str();
+			if (Strlen(style) > 0)
+				t->SetAttr(attrStyle, v.Str());
+		}
+	}
 
 	return SOk;
 }
@@ -1305,13 +1317,9 @@ void ResObjectImpl::Res_SetFlags(LXmlTag *t)
 
 void ResObjectImpl::WriteStrRef(LXmlTag *t)
 {
-	int Ref = Factory->Res_GetStrRef(Object);
+	auto Ref = Factory->Res_GetStrRef(Object);
 	if (Ref >= 0)
-	{
-		char s[32];
-		sprintf_s(s, sizeof(s), "%i", Ref);
-		t->SetAttr("ref", s);
-	}
+		t->SetAttr("ref", Ref);
 }
 
 void ResObjectImpl::WriteFlags(LXmlTag *t)
@@ -1387,8 +1395,7 @@ char *ResObjectImpl::ReadInt(char *s, int &Value)
 
 void ResObjectImpl::Res_SetPos(LXmlTag *t)
 {
-	char *Str = t->GetAttr("pos");
-	if (Str)
+	if (auto Str = t->GetAttr("pos"))
 	{
 		char s[256];
 		strcpy_s(s, sizeof(s), Str);
@@ -1509,13 +1516,13 @@ ResObjectImpl::SStatus ResTableLayout::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 		return SExclude;
 	Res_SetFlags(Tag);
 
-	const char *Style = Tag->GetAttr("style");
+	const char *Style = Tag->GetAttr(attrStyle);
 	if (Style)
 	{
 		LVariant v = Style;
 		LDom *d = Factory->Res_GetDom(Object);
 		if (d)
-			d->SetValue("style", v);
+			d->SetValue(attrStyle, v);
 	}
 
 	LDom *d = Factory->Res_GetDom(Object);
@@ -1537,9 +1544,9 @@ ResObjectImpl::SStatus ResTableLayout::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 			d->SetValue("rows", v);
 			Cy = CountNumbers(s);
 		}
-		v = Tag->GetAttr("style");
+		v = Tag->GetAttr(attrStyle);
 		if (v.Str())
-			d->SetValue("style", v);
+			d->SetValue(attrStyle, v);
 
 		LRect Bounds(0, 0, Cx-1, Cy-1);
 		int PadCellX = Cx << 1;
@@ -1591,10 +1598,10 @@ ResObjectImpl::SStatus ResTableLayout::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 						Cell->SetValue("align", v = s);
 					if ((s = Td->GetAttr("valign")))
 						Cell->SetValue("valign", v = s);
-					if ((s = Td->GetAttr("class")))
-						Cell->SetValue("class", v = s);
-					if ((s = Td->GetAttr("style")))
-						Cell->SetValue("style", v = s);
+					if ((s = Td->GetAttr(attrClass)))
+						Cell->SetValue(attrClass, v = s);
+					if ((s = Td->GetAttr(attrStyle)))
+						Cell->SetValue(attrStyle, v = s);
 
 					if (v.SetList())
 					{
@@ -1714,31 +1721,29 @@ ResObjectImpl::SStatus ResTableLayout::Res_Write(LXmlTag *t)
 										{
 											Td->SetAttr("valign", v.Str());
 										}
-										if (c->GetValue("class", v) && ValidStr(v.Str()))
-											Td->SetAttr("class", v.Str());
-										if (c->GetValue("style", v) && ValidStr(v.Str()))
-											Td->SetAttr("style", v.Str());
+										if (c->GetValue(attrClass, v) && ValidStr(v.Str()))
+											Td->SetAttr(attrClass, v.Str());
+										if (c->GetValue(attrStyle, v) && ValidStr(v.Str()))
+											Td->SetAttr(attrStyle, v.Str());
 
 										if (c->GetValue("children", v) &&
 											v.Type == GV_LIST)
 										{
 											for (auto n: *v.Value.Lst)
 											{
-												if (n->Type == GV_VOID_PTR)
+												if (n->Type != GV_VOID_PTR)
+													continue;
+
+												if (auto Obj = (ResObject*) n->Value.Ptr)
 												{
-													ResObject *Obj = (ResObject*) n->Value.Ptr;
-													if (Obj)
+													if (auto Impl = Obj->GetObjectImpl(Factory))
 													{
-														ResObjectImpl *Impl = Obj->GetObjectImpl(Factory);
-														if (Impl)
+ 														auto a = new LXmlTag;
+														if (a && Impl->Res_Write(a))
 														{
- 															LXmlTag *a = new LXmlTag;
-															if (a && Impl->Res_Write(a))
-															{
-																Td->InsertTag(a);
-															}
-															else DeleteObj(a);
+															Td->InsertTag(a);
 														}
+														else DeleteObj(a);
 													}
 												}
 											}
@@ -1792,7 +1797,7 @@ ResObjectImpl::SStatus ResButton::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 {
 	bool Status = false;
 
-	if (!Stricmp(Tag ? Tag->GetTag() : NULL, Res_Button))
+	if (!Stricmp(Tag ? Tag->GetTag() : nullptr, Res_Button))
 	{
 		Status = true;
 

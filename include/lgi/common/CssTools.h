@@ -36,10 +36,10 @@ public:
 	}
 		
 	/// Gets the foreground colour for text
-	LColour &GetFore(LColour *Default = NULL);
+	LColour &GetFore(const LColour *Default = NULL);
 	
 	/// Gets the background colour for filling
-	LColour &GetBack(LColour *Default = NULL, int Depth = -1);
+	LColour &GetBack(const LColour *Default = NULL, int Depth = -1);
 
 	/// Gets the background image for filling
 	LSurface *GetBackImage();

@@ -4,6 +4,7 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Font.h"
+#include "lgi/common/LgiUiBase.h"
 #include "lgi/common/Charset.h"
 
 struct UnicodeMappings
@@ -579,12 +580,12 @@ bool LCharset::IsUnicode()
 			(Type == CpUtf32);
 }
 
-const char *LCharset::GetIconvName()
+const char *LCharset::GetIconvName() const
 {
 	return IconvName ? IconvName : Charset;
 }
 
-bool LCharset::IsAvailable()
+bool LCharset::IsAvailable() const
 {
 	if (Type != CpIconv)
 		return true;
@@ -703,9 +704,12 @@ LCharsetSystem *LCharsetSystem::Inst()
 	return &CharsetSystem;
 }
 
-LCharset *LGetCharsetInfo(const char *Cs)
+const LCharset *LGetCharsetInfo(const char *Cs)
 {
-	return CharsetSystem.GetCsInfo(Cs);
+	auto cs = CharsetSystem.GetCsInfo(Cs);
+	if (!cs)
+		LgiTrace("Charset not found: %s\n", Cs);
+	return cs;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -729,8 +733,8 @@ ssize_t LBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, const void *
 
 	if (Out && OutCp && In && InCp)
 	{
-		LCharset *InInfo = LGetCharsetInfo(InCp);
-		LCharset *OutInfo = LGetCharsetInfo(OutCp);
+		auto InInfo = LGetCharsetInfo(InCp);
+		auto OutInfo = LGetCharsetInfo(OutCp);
 
 		if (InInfo && OutInfo)
 		{
@@ -875,8 +879,14 @@ ssize_t LBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, const void *
 						}
 						case CpUtf32:
 						{
+							if (InLen < (ssize_t)sizeof(uint32_t))
+							{
+								InLen = 0;
+								break;
+							}
+
 							Utf32 = *((uint32_t*&)In8)++;
-							InLen -= 4;
+							InLen -= sizeof(uint32_t);
 							break;
 						}
 						default:
@@ -997,8 +1007,8 @@ LString LStrConvertCp(const char *OutCp, const void *In, const char *InCp, ssize
 	if (!OutCp || !In || !InCp)
 		return LString();
 
-	LCharset *InInfo = LGetCharsetInfo(InCp);
-	LCharset *OutInfo = LGetCharsetInfo(OutCp);
+	auto InInfo = LGetCharsetInfo(InCp);
+	auto OutInfo = LGetCharsetInfo(OutCp);
 	if (!InInfo || !OutInfo)
 		return LString();
 
@@ -1182,7 +1192,7 @@ int LCharLen(const void *Str, const char *Cp, int Bytes)
 {
 	if (Str && Cp)
 	{
-		LCharset *InInfo = LGetCharsetInfo(Cp);
+		auto InInfo = LGetCharsetInfo(Cp);
 		if (InInfo)
 		{
 			switch (InInfo->Type)
@@ -1385,7 +1395,7 @@ const char *LUnicodeToCharset(const char *Utf8, ssize_t Len, LString::Array *Pre
 		{
 			for (auto p: *Prefs)
 			{
-				LCharset *Cp = CharsetSystem.GetCsInfo(p);
+				auto Cp = CharsetSystem.GetCsInfo(p);
 				if (Cp &&
 					stricmp(Cp->Charset, "us-ascii") != 0 &&
 					Cp->UnicodeMap)
@@ -1430,7 +1440,7 @@ LString LToNativeCp(const char *In, ssize_t InLen)
 	LString s;
 
 	#ifdef WIN32
-	LCharset *CpInfo = LGetCharsetInfo(Cp);
+	auto CpInfo = LGetCharsetInfo(Cp);
 	if (!CpInfo || CpInfo->Type == CpWindowsDb)
 	{
 		if (In)
@@ -1469,7 +1479,7 @@ LString LFromNativeCp(const char *In, ssize_t InLen)
 	LString s;
 
 	#ifdef WIN32
-	LCharset *CpInfo = LGetCharsetInfo(Cp);
+	auto CpInfo = LGetCharsetInfo(Cp);
 	if (!CpInfo || CpInfo->Type == CpWindowsDb)
 	{
 		if (In)
@@ -1531,16 +1541,17 @@ LString LFromNativeCp(const char *In, ssize_t InLen)
 }
 
 ///////////////////////////////////////////////////////////////////////////
+// Technically this is not externally locked, but once constructed... it's
+// read only and thus thread safe.
+using CsHash = LHashTbl<ConstStrKeyPool<char,false>, LCharset*, true>;
 struct LCharsetSystemPriv
 {
-	LCharset *Utf8;
-	LCharset *Utf16; 
-	LHashTbl<ConstStrKeyPool<char,false>, LCharset*> Charsets;
+	LCharset *Utf8 = nullptr;
+	LCharset *Utf16 = nullptr;
+	CsHash Charsets;
 
 	LCharsetSystemPriv() : Charsets(512)
 	{
-		Utf8 = 0;
-		Utf16 = 0;
 	}
 };
 
@@ -1553,13 +1564,14 @@ LCharsetSystem::LCharsetSystem()
 	d = new LCharsetSystemPriv;
 	LAssert(LgiCharsets->Charset != NULL);
 
-	for (LCharset *Cs = LgiCharsets; Cs->Charset; Cs++)
+	CsHash tmp; // construct in a temp variable for thread safety.
+	for (auto Cs = LgiCharsets; Cs->Charset; Cs++)
 	{
 		strcpy_s(l, sizeof(l), Cs->Charset);
 		#ifdef _MSC_VER
-		_strlwr_s(l, sizeof(l));
+			_strlwr_s(l, sizeof(l));
 		#else
-		strlwr(l);
+			strlwr(l);
 		#endif
 		
 		if (!stricmp(l, "utf-8"))
@@ -1567,21 +1579,26 @@ LCharsetSystem::LCharsetSystem()
 		else if (!stricmp(l, "utf-16"))
 			d->Utf16 = Cs;
 
-		d->Charsets.Add(l, Cs);
+		tmp.Add(l, Cs);
 
 		auto a = LString(Cs->AlternateNames).SplitDelimit(",");
 		for (int n=0; n<a.Length(); n++)
 		{
 			strcpy_s(l, sizeof(l), a[n]);
 			#ifdef _MSC_VER
-			_strlwr_s(l, sizeof(l));
+				_strlwr_s(l, sizeof(l));
 			#else
-			strlwr(l);
+				strlwr(l);
 			#endif
 
-			d->Charsets.Add(l, Cs);
+			tmp.Add(l, Cs);
 		}
 	}
+
+	d->Charsets.Swap(tmp);
+
+	if (!d->Charsets.Find("utf-32"))
+		LAssert(!"CharsetSystem failed find utf-32.");
 }
 
 LCharsetSystem::~LCharsetSystem()
@@ -1589,50 +1606,51 @@ LCharsetSystem::~LCharsetSystem()
 	DeleteObj(d);
 }
 
-LCharset *LCharsetSystem::GetCsInfo(const char *Cp)
+const LCharset *LCharsetSystem::GetCsInfo(const char *Cp)
 {
-	if (Cp && d)
+	if (!Cp || !d)
 	{
-		// Lookup the charset in the hash table
-		char l[256];
-		strcpy_s(l, sizeof(l), Cp);
-		#ifdef _MSC_VER
-		_strlwr_s(l, sizeof(l));
-		#else
-		strlwr(l);
-		#endif
-
-		if (!stricmp(l, "utf-8"))
-			return d->Utf8;
-		else if (!stricmp(l, "utf-16"))
-			return d->Utf16;
-		
-		LCharset *Cs = (LCharset*) d->Charsets.Find(l);
-		if (Cs)
-		{
-			return Cs;
-		}
-		else
-		{
-			// printf("%s:%i - No charset '%s' in font sub system.\n", __FILE__, __LINE__, l);
-			// printf("Charsets=%i\n", Charsets->GetUsed());
-		}
+		LStackTrace("%s:%i - LCharsetSystem::GetCsInfo err: %p,%p.\n", _FL, Cp, d);
+		return nullptr;
 	}
 
-	return 0;
+	// Lookup the charset in the hash table
+	char l[256];
+	strcpy_s(l, sizeof(l), Cp);
+	#ifdef _MSC_VER
+		_strlwr_s(l, sizeof(l));
+	#else
+		strlwr(l);
+	#endif
+
+	if (!stricmp(l, "utf-8"))
+		return d->Utf8;
+	else if (!stricmp(l, "utf-16"))
+		return d->Utf16;
+	
+	auto cs = d->Charsets.Find(l);
+	if (!cs)
+	{
+		printf("%s:%i - GetCsInfo failed to find charset: %s in %i\n", _FL, Cp, (int)d->Charsets.Length());
+		/*
+		for (auto p: d->Charsets)
+			printf("  %s\n", p.key);
+		*/
+	}
+	return cs;
 }
 
-LCharset *LGetCsInfo(const char *Cs)
+const LCharset *LGetCsInfo(const char *Cs)
 {
 	return CharsetSystem.GetCsInfo(Cs);
 }
 
-LCharset *LCharsetSystem::GetCsList()
+const LCharset *LCharsetSystem::GetCsList()
 {
 	return LgiCharsets;
 }
 
-LCharset *LGetCsList()
+const LCharset *LGetCsList()
 {
 	return LgiCharsets;
 }

@@ -18,6 +18,7 @@
 #include "lgi/common/FileSelect.h"
 #include "lgi/common/Menu.h"
 #include "lgi/common/DropFiles.h"
+#include "lgi/common/TextLog.h"
 #include "ViewPriv.h"
 
 #undef max
@@ -38,6 +39,8 @@
 #define WRAP_POUR_TIMEOUT			90 // ms
 #define PULSE_TIMEOUT				500 // ms
 #define CURSOR_BLINK				1000 // ms
+
+template class LTsTextView<LTextView3>;
 
 #define ALLOC_BLOCK					64
 #define IDC_VS						1000
@@ -111,7 +114,7 @@ static LArray<LTextView3*> Ctrls;
 #endif
 
 //////////////////////////////////////////////////////////////////////
-class LDocFindReplaceParams3 :
+class LTextView3FindReplaceParams :
 	public LDocFindReplaceParams,
 	public LMutex
 {
@@ -124,7 +127,7 @@ public:
 	bool SelectionOnly;
 	bool SearchUpwards;
 	
-	LDocFindReplaceParams3() : LMutex("LDocFindReplaceParams3")
+	LTextView3FindReplaceParams() : LMutex("LTextView3FindReplaceParams")
 	{
 		MatchCase = false;
 		MatchWord = false;
@@ -158,7 +161,7 @@ public:
 
 	// Find/Replace Params
 	bool OwnFindReplaceParams = true;
-	LDocFindReplaceParams3 *FindReplaceParams = nullptr;
+	LTextView3FindReplaceParams *FindReplaceParams = nullptr;
 
 	// Map buffer
 	LArray<char16> MapBuf;
@@ -178,7 +181,7 @@ public:
 	{
 		UrlColour.Rgb(0, 0, 255);		
 		LColour::GetConfigColour("colour.L_URL", UrlColour);
-		FindReplaceParams = new LDocFindReplaceParams3;
+		FindReplaceParams = new LTextView3FindReplaceParams;
 	}
 	
 	~LTextView3Private()
@@ -258,7 +261,7 @@ enum UndoType
 	UndoDelete, UndoInsert, UndoChange
 };
 
-struct Change : public LRange
+struct Change3 : public LRange
 {
 	UndoType Type;
 	LArray<char16> Txt;
@@ -267,7 +270,7 @@ struct Change : public LRange
 struct LTextView3Undo : public LUndoEvent
 {
 	LTextView3 *View;
-	LArray<Change> Changes;
+	LArray<Change3> Changes;
 
 	LTextView3Undo(LTextView3 *view)
 	{
@@ -276,7 +279,7 @@ struct LTextView3Undo : public LUndoEvent
 
 	void AddChange(ssize_t At, ssize_t Len, UndoType Type)
 	{
-		Change &c = Changes.New();
+		auto &c = Changes.New();
 		c.Start = At;
 		c.Len = Len;
 		c.Txt.Add(View->Text + At, Len);
@@ -1972,15 +1975,15 @@ LRange LTextView3::GetSelectionRange()
 	return r;
 }
 
-char *LTextView3::GetSelection()
+LString LTextView3::GetSelection()
 {
-	LRange s = GetSelectionRange();
-	if (s.Len > 0)
+	LString ret;
+	if (auto s = GetSelectionRange())
 	{
-		return (char*)LNewConvertCp("utf-8", Text + s.Start, LGI_WideCharset, s.Len*sizeof(Text[0]) );
+		LAutoString txt((char*)LNewConvertCp("utf-8", Text + s.Start, LGI_WideCharset, s.Len*sizeof(Text[0]) ));
+		ret = txt.Get();
 	}
-
-	return 0;
+	return ret;
 }
 
 bool LTextView3::HasSelection()
@@ -2808,7 +2811,7 @@ void LTextView3::DoGoto(std::function<void(bool)> Callback)
 
 LDocFindReplaceParams *LTextView3::CreateFindReplaceParams()
 {
-	return new LDocFindReplaceParams3;
+	return new LTextView3FindReplaceParams;
 }
 
 void LTextView3::SetFindReplaceParams(LDocFindReplaceParams *Params)
@@ -2821,7 +2824,7 @@ void LTextView3::SetFindReplaceParams(LDocFindReplaceParams *Params)
 		}
 		
 		d->OwnFindReplaceParams = false;
-		d->FindReplaceParams = (LDocFindReplaceParams3*) Params;
+		d->FindReplaceParams = (LTextView3FindReplaceParams*) Params;
 	}
 }
 
@@ -2909,7 +2912,7 @@ void LTextView3::DoReplace(std::function<void(bool)> Callback)
 		}
 	}
 
-	auto LastFind8 = SingleLineSelection ? GetSelection() : WideToUtf8(d->FindReplaceParams->LastFind);
+	auto LastFind8 = SingleLineSelection ? GetSelection() : LString(d->FindReplaceParams->LastFind);
 	auto LastReplace8 = WideToUtf8(d->FindReplaceParams->LastReplace);
 	
 	auto Dlg = new LReplaceDlg(this, [this, LastFind8, LastReplace8](auto Dlg, auto Action)
@@ -3485,7 +3488,7 @@ void LTextView3::OnCreate()
 	SetWindow(this);
 	DropTarget(true);
 
-	#ifndef WINDOWS
+	#if !defined(WINDOWS)
 		if (Ctrls.Length() == 0)
 			SetPulse(PULSE_TIMEOUT);
 		Ctrls.Add(this);
@@ -5480,7 +5483,7 @@ void LTextView3::InternalPulse()
 
 			LRect p = CursorPos;
 			p.Offset(-ScrollX, 0);
-			Invalidate(&p);
+			Invalidate(&p, false, true);
 			BlinkTs = Now;
 		}
 	}
@@ -5491,7 +5494,7 @@ void LTextView3::InternalPulse()
 
 void LTextView3::OnPulse()
 {
-	#ifdef WINDOWS
+	#if defined(WINDOWS)
 		InternalPulse();
 	#else
 		for (auto c: Ctrls)

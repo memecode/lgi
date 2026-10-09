@@ -18,7 +18,7 @@
 		</Advanced>
 		<General>
 			<Makefile>
-				<Linux>Makefile.linux</Linux>
+				<Linux>linux/Makefile.linux</Linux>
 			</Makefile>
 			<Executable>
 				<Linux>

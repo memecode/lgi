@@ -35,6 +35,7 @@ enum LErrorCodes
 	LErrorAddrNotAvail  = WSAEADDRNOTAVAIL,
 	LErrorConnectRefused = WSAECONNREFUSED,
 	LErrorNetUnreachable = WSAENETUNREACH,
+	LErrorWouldBlock	= WSAEWOULDBLOCK,
 #elif defined(POSIX)
 	LErrorNone			= 0,
 	LErrorAccessDenied	= EACCES,
@@ -56,6 +57,7 @@ enum LErrorCodes
 	LErrorAddrNotAvail  = EADDRNOTAVAIL,
 	LErrorConnectRefused = ECONNREFUSED,
 	LErrorNetUnreachable = ENETUNREACH,
+	LErrorWouldBlock	= EWOULDBLOCK,
 #else
 	#warning "Impl me."
 #endif

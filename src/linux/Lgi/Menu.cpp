@@ -522,15 +522,15 @@ static LAutoString MenuItemParse(const char *s)
 
 static void MenuItemActivate(GtkMenuItem *MenuItem, LMenuItem *Item)
 {
-	Item->OnGtkEvent("activate");
+	Item->GtkEvent("activate");
 }
 
 static void MenuItemDestroy(GtkWidget *widget, LMenuItem *Item)
 {
-	Item->OnGtkEvent("destroy");
+	Item->GtkEvent("destroy");
 }
 
-void LMenuItem::OnGtkEvent(LString Event)
+void LMenuItem::GtkEvent(LString Event)
 {
 	if (Event.Equals("activate"))
 	{
@@ -1366,6 +1366,8 @@ bool LMenu::SetPrefAndAboutItems(int a, int b)
 
 bool LMenu::OnKey(LView *v, LKey &k)
 {
+	// LOG("LMenu::OnKey k=%s\n", k.ToString().Get());
+
 	if (k.Down())
 	{
 		for (auto a: Accel)

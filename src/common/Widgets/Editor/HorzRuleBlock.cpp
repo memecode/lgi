@@ -23,7 +23,7 @@ bool LRichTextPriv::HorzRuleBlock::IsValid()
 	return true;
 }
 
-int LRichTextPriv::HorzRuleBlock::GetLines() const
+int LRichTextPriv::HorzRuleBlock::GetLines()
 {
 	return 1;
 }
@@ -81,14 +81,13 @@ bool LRichTextPriv::HorzRuleBlock::GetPosFromIndex(BlockCursor *Cursor)
 	return true;
 }
 
-bool LRichTextPriv::HorzRuleBlock::HitTest(ssize_t blkOffset, HitTestResult &htr)
+bool LRichTextPriv::HorzRuleBlock::HitTest(HitTestResult &htr)
 {
 	if (htr.In.y < Pos.y1 || htr.In.y > Pos.y2)
 		return false;
 
 	htr.Near = false;
 	htr.LineHint = 0;
-	htr.BlkOffset = blkOffset;
 
 	int Cx = Pos.x1 + (Pos.X() / 2);
 	if (htr.In.x < Cx)
@@ -187,6 +186,20 @@ bool LRichTextPriv::HorzRuleBlock::Seek(SeekType To, BlockCursor &Cursor)
 	return true;
 }
 
+ssize_t LRichTextPriv::HorzRuleBlock::FindAt(ssize_t StartIdx, const uint32_t *Str, LFindReplaceCommon *Params)
+{
+	return 0;
+}
+
+void LRichTextPriv::HorzRuleBlock::IncAllStyleRefs()
+{
+}
+
+bool LRichTextPriv::HorzRuleBlock::DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool TopOfMenu)
+{
+	return false;
+}
+
 #ifdef _DEBUG
 void LRichTextPriv::HorzRuleBlock::DumpNodes(LTreeItem *Ti)
 {
@@ -197,6 +210,11 @@ void LRichTextPriv::HorzRuleBlock::DumpNodes(LTreeItem *Ti)
 LRichTextPriv::Block *LRichTextPriv::HorzRuleBlock::Clone()
 {
 	return new HorzRuleBlock(this);
+}
+
+LMessage::Result LRichTextPriv::HorzRuleBlock::OnEvent(LMessage *Msg)
+{
+	return false;
 }
 
 bool LRichTextPriv::HorzRuleBlock::AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars, LNamedStyle *Style)
@@ -215,6 +233,11 @@ ssize_t LRichTextPriv::HorzRuleBlock::DeleteAt(Transaction *Trans, ssize_t BlkOf
 	if (IsDeleted)
 		return true;
 
+	return false;
+}
+
+bool LRichTextPriv::HorzRuleBlock::DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper)
+{
 	return false;
 }
 

@@ -15,7 +15,7 @@
 template <class T>
 class LUnknownImpl : public T
 {
-	int Count;
+	int Count = 0;
 
 	class Interface
 	{
@@ -32,7 +32,7 @@ class LUnknownImpl : public T
 	List<Interface> Interfaces;
 
 protected:
-	bool TraceRefs;
+	bool TraceRefs = false;
 
 	void AddInterface(REFIID iid, void *pvObject)
 	{
@@ -46,8 +46,6 @@ protected:
 public:
 	LUnknownImpl()
 	{
-		Count = 0;
-		TraceRefs = false;
 	}
 
 	virtual ~LUnknownImpl()
@@ -402,7 +400,7 @@ class LComPtr
 public:
 	LComPtr()
 	{
-		ptr = NULL;
+		ptr = nullptr;
 	}
 
 	~LComPtr()
@@ -415,7 +413,7 @@ public:
 		if (ptr)
 		{
 			ptr->Release();
-			ptr = NULL;
+			ptr = nullptr;
 		}
 	}
 
@@ -424,9 +422,14 @@ public:
 		return &ptr;
 	}
 
+	LPUNKNOWN *Unknown()
+	{
+		return (LPUNKNOWN*)&ptr;
+	}
+
 	T* operator->() const
 	{
-		LAssert(ptr != NULL); 
+		LAssert(ptr != nullptr); 
 		return ptr;
 	}
 

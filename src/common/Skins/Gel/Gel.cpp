@@ -82,7 +82,7 @@ class GelSkin : public LSkinEngine
 		return back.Mix(Mixer, (float)(1.0f - amt));
 	}
 
-	void FillPath(LPath *Path, LSurface *pDC, LColour Back, bool Down, bool Enabled = true)
+	void FillPath(LPath *Path, LSurface *pDC, LColour Back, bool Down, bool Enabled = true) override
 	{
 		if (pDC)
 		{
@@ -141,7 +141,7 @@ class GelSkin : public LSkinEngine
 		}
 	}
 	
-	void DrawBtn(LSurface *pDC, LRect &r, LColour Back, bool Down, bool Enabled, bool Default = false)
+	void DrawBtn(LSurface *pDC, LRect &r, LColour Back, bool Down, bool Enabled, bool Default = false) override
 	{
 		if (!pDC)
 			return;
@@ -254,17 +254,22 @@ class GelSkin : public LSkinEngine
 		#endif
 	}
 
-	LMemDC *DrawCtrl(LViewI *Ctrl, LRect *Sz, int Flags, bool Round)
+	LMemDC *DrawCtrl(LViewI *Ctrl, LRect *Sz, int Flags, bool Round, LColour *Background = nullptr)
 	{
 		LMemDC *Mem = new LMemDC(_FL);
 		if (Mem && Mem->Create(Sz ? Sz->X() : 14, Sz ? Sz->Y() : 14, OsDefaultCs))
 		{
 			// blank out background
-			LColour Back = Ctrl->GetLView()->StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
+			LColour Back = Background && Background->IsValid()
+				? *Background
+				: Ctrl
+					? Ctrl->GetLView()->StyleColour(LCss::PropBackgroundColor, LColour(L_MED))
+					: LColour(L_MED);
 			Mem->Colour(Back);
 			Mem->Rectangle();
 			
 			LRectF Box(0, 0, Mem->X(), Mem->Y());
+
 			double Radius = Box.X()/2;
 			LPointF Center(Box.X()/2, Box.Y()/2);
 
@@ -411,6 +416,20 @@ class GelSkin : public LSkinEngine
 		return Mem;
 	}
 
+	void OnPaint_LCheckBox(LSkinState *State) override
+	{
+		if (!State || !State->pScreen)
+			return;
+
+		int Flags = (State->Value ? Btn_Value : 0) | (State->Enabled ? Btn_Enabled : 0);
+		LMemDC *Mem = DrawCtrl(nullptr, &State->Rect, Flags, false, &State->parentBackground);
+		if (Mem)
+		{
+			State->pScreen->Blt(State->Rect.x1, State->Rect.y1, Mem);
+			DeleteObj(Mem);
+		}
+	}
+
 	void DrawText(LSkinState *State, int x, int y, LRect &rcFill, bool Enabled, LView *Ctrl, LCssTools &Tools, bool Debug = false)
 	{
 		LCss::ColorDef CssFore, CssBack;
@@ -508,7 +527,7 @@ public:
 			DeleteObj(RadioBtn[i]);
 	}
 
-	uint32_t GetFeatures()
+	uint32_t GetFeatures() override
 	{
 		return
 				#if CUSTOM_COLOURS
@@ -583,7 +602,7 @@ public:
 	}
 	#endif
 	
-	void OnPaint_LButton(LButton *Ctrl, LSkinState *State)
+	void OnPaint_LButton(LButton *Ctrl, LSkinState *State) override
 	{
 		LMemDC Mem(_FL);
 		if (!Mem.Create(Ctrl->X(), Ctrl->Y(), OsDefaultCs))
@@ -712,7 +731,7 @@ public:
 		State->pScreen->Op(Op);
 	}
 
-	void OnPaint_ListColumn(ProcColumnPaint Callback, void *UserData, LSkinState *State)
+	void OnPaint_ListColumn(ProcColumnPaint Callback, void *UserData, LSkinState *State) override
 	{
 		// Setup memory context
 		LRect r = State->Rect;
@@ -745,7 +764,7 @@ public:
 		State->pScreen->Blt(State->Rect.x1, State->Rect.y1, &Mem);
 	}
 
-	void OnPaint_LCombo(LCombo *Ctrl, LSkinState *State)
+	void OnPaint_LCombo(LCombo *Ctrl, LSkinState *State) override
 	{
 		LMemDC Mem(_FL);
 		if (!Mem.Create(Ctrl->X(), Ctrl->Y(), OsDefaultCs))
@@ -840,7 +859,7 @@ public:
 
 	#define DEBUG_CHECKBOX 0
 
-	void OnPaint_LCheckBox(LCheckBox *Ctrl, LSkinState *State)
+	void OnPaint_LCheckBox(LCheckBox *Ctrl, LSkinState *State) override
 	{
 		int Flags = (Ctrl->Value()   ? Btn_Value   : 0) |
 					(Ctrl->Enabled() ? Btn_Enabled : 0);
@@ -849,7 +868,7 @@ public:
 		LCssTools Tools(Ctrl);
 		LColour &Back = Tools.GetBack();
 
-		LMemDC *Temp = 0;
+		LMemDC *Temp = nullptr;
 		LMemDC *&Mem = Back.IsValid() ? Temp : CheckBox[Flags];
 		
 		if (Mem && (Mem->X() != State->Rect.X() || Mem->Y() != State->Rect.Y()))
@@ -905,10 +924,12 @@ public:
 		DeleteObj(Temp);
 	}
 
-	void OnPaint_LRadioButton(LRadioButton *Ctrl, LSkinState *State)
+	void OnPaint_LRadioButton(LRadioButton *Ctrl, LSkinState *State) override
 	{
 		int Flags = (Ctrl->Value() ? Btn_Value : 0) |
 					(Ctrl->Enabled() ? Btn_Enabled : 0);
+		LCssTools Tools(Ctrl);
+		LColour &Back = Tools.GetBack();
 		
 		// Create the bitmaps in cache if not already there
 		LMemDC *&Mem = RadioBtn[Flags];
@@ -923,8 +944,6 @@ public:
 		{
 			// Draw icon
 			LRect ico;
-			LCssTools Tools(Ctrl);
-			LColour &Back = Tools.GetBack();
 
 			ico.ZOff(Mem->X()-1, Mem->Y()-1);
 		    if (ico.Y() < Ctrl->Y())
@@ -968,7 +987,21 @@ public:
 		}
 	}
 
-	LFont *GetDefaultFont(char *Class)
+	void OnPaint_LRadioButton(LSkinState *State) override
+	{
+		if (!State || !State->pScreen)
+			return;
+
+		int Flags = (State->Value ? Btn_Value : 0) | (State->Enabled ? Btn_Enabled : 0);
+		LMemDC *Mem = DrawCtrl(nullptr, &State->Rect, Flags, true, &State->parentBackground);
+		if (Mem)
+		{
+			State->pScreen->Blt(State->Rect.x1, State->Rect.y1, Mem);
+			DeleteObj(Mem);
+		}
+	}
+
+	LFont *GetDefaultFont(char *Class) override
 	{
 		if (Class && stricmp(Class, Res_Button) == 0)
 		{

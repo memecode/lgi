@@ -40,15 +40,9 @@ void LApp::CommonCleanup()
 
 LString LApp::GetConfigPath()
 {
-	#if defined(LINUX)
-		LFile::Path p(LSP_HOME);
-		p += ".config";
-	#else
-		LFile::Path p(LSP_USER_APP_DATA);
-		p += "MemecodeLgi";
-		if (!p.Exists())
-			FileDev->CreateFolder(p);
-	#endif
+	LFile::Path p(LSP_APP_CONFIG);
+	if (!p.Exists())
+		FileDev->CreateFolder(p);
 
 	if (p.Exists())
 	{
@@ -447,3 +441,45 @@ void LPopupNotification::OnPulse()
 	}
 }
 
+bool LApp::GetVariant(const char *Name, LVariant &Value, const char *Array)
+{
+	switch (LStringToDomProp(Name))
+	{
+		#define PATH(sym, lsp) \
+			case sym: \
+				Value = LGetSystemPath(lsp); \
+				return true;
+
+		PATH(PathRoot, LSP_ROOT)
+		PATH(PathOs, LSP_OS)
+		PATH(PathOsLib, LSP_OS_LIB)
+		PATH(PathTemp, LSP_TEMP)
+		PATH(PathCommonAppData, LSP_COMMON_APP_DATA)
+		PATH(PathUserAppData, LSP_USER_APP_DATA)
+		PATH(PathLocalAppData, LSP_LOCAL_APP_DATA)
+		PATH(PathDesktop, LSP_DESKTOP)
+		PATH(PathHome, LSP_HOME)
+		PATH(PathUserApps, LSP_USER_APPS)
+		PATH(PathExe, LSP_EXE)
+		PATH(PathTrash, LSP_TRASH)
+		PATH(PathAppInstall, LSP_APP_INSTALL)
+		PATH(PathAppData, LSP_APP_DATA)
+		PATH(PathAppConfig, LSP_APP_CONFIG)
+		PATH(PathAppCache, LSP_APP_CACHE)
+		PATH(PathAppRoot, LSP_APP_DATA)
+		PATH(PathUserDocuments, LSP_USER_DOCUMENTS)
+		PATH(PathUserMusic, LSP_USER_MUSIC)
+		PATH(PathUserVideo, LSP_USER_VIDEO)
+		PATH(PathUserDownloads, LSP_USER_DOWNLOADS)
+		PATH(PathUserLinks, LSP_USER_LINKS)
+		PATH(PathUserPictures, LSP_USER_PICTURES)
+		PATH(PathSysMountPoint, LSP_SYS_MOUNT_POINT)
+		PATH(PathUserMountPoint, LSP_USER_MOUNT_POINT)
+
+		default:
+			LgiTrace("%s:%i - unsupported field '%s'\n", _FL, Name);
+			break;
+	}
+
+	return false;
+}

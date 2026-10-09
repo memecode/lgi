@@ -14,6 +14,7 @@
 #include "lgi/common/Gdc2.h"
 #include "lgi/common/GdiLeak.h"
 #include "lgi/common/Palette.h"
+#include "lgi/common/Variant.h"
 
 class LScreenPrivate
 {
@@ -440,6 +441,34 @@ LString LScreenDC::Dump()
 	LString s;
 	s.Printf("LScreenDC hnd=%p size=%i,%i\n", hDC, d->Sx, d->Sy);
 	return s;
+}
+
+bool LScreenDC::GetVariant(const char *Name, LVariant &Value, const char *Array)
+{
+	switch (LStringToDomProp(Name))
+	{
+		case SurfaceConstAlpha:
+		{
+			Value = d->ConstAlpha;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool LScreenDC::SetVariant(const char *Name, LVariant &Value, const char *Array)
+{
+	switch (LStringToDomProp(Name))
+	{
+		case SurfaceConstAlpha:
+		{
+			d->ConstAlpha = Value.CastInt32();
+			return true;
+		}
+	}
+
+	return false;
 }
 
 int LScreenDC::Op(int Op, NativeInt Param)

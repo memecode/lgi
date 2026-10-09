@@ -1,6 +1,8 @@
 cmake_minimum_required (VERSION 3.18)
 
 project(Lgi)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_STANDARD 17)
 
 if (WIN32)
 	set(CMAKE_SYSTEM_VERSION 10.0.19041.0)
@@ -17,8 +19,6 @@ endif()
 
 include(build.cmake)
 
-# set(CMAKE_OSX_ARCHITECTURES "x86_64")
-set(CMAKE_CXX_STANDARD 14)
 set(LGI_VERSION_MAJOR 1)
 set(LGI_VERSION_MINOR 0)
 
@@ -26,10 +26,12 @@ if (UNIX AND NOT APPLE AND NOT HAIKU)
 	set(LINUX TRUE)
 endif()
 
+
 if (WIN32)
 	message("CMAKE_GENERATOR=${CMAKE_GENERATOR}")
 	message("CMAKE_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}")
-	if (CMAKE_GENERATOR MATCHES "Win64" OR
+	if (CMAKE_GENERATOR MATCHES "Ninja" OR
+		CMAKE_GENERATOR MATCHES "Win64" OR
 		CMAKE_GENERATOR_PLATFORM MATCHES "x64")
 		set(WORDSIZE 64)
 		set(OPENSSL_DIR "c:/Program Files/OpenSSL-Win64")
@@ -53,15 +55,14 @@ set(LGI_DIR "${CMAKE_CURRENT_LIST_DIR}")
 # External libs:
 get_filename_component(CODE ../.. ABSOLUTE)
 get_filename_component(DEPS ${CMAKE_CURRENT_LIST_DIR}/../deps ABSOLUTE)
-get_filename_component(CODELIB ${CODE}/../codelib ABSOLUTE)
-if(hasParent)
-	set(CODELIB "${CODELIB}" PARENT_SCOPE)
-endif()
 
 if(WIN32)
-	set(DEPS_BUILD "${DEPS}/build-x64")
-	if (NOT EXISTS "${DEPS_BUILD}")
-		message(WARNING "Expecting external libraries in: ${DEPS_BUILD}")
+	set(LGI_DEPS_BUILD "${DEPS}/build-x64")
+	if (NOT EXISTS "${LGI_DEPS_BUILD}")
+		message(FATAL_ERROR "Expecting external libraries in: ${LGI_DEPS_BUILD}")
+	endif()
+	if (hasParent)
+		set(LGI_DEPS_BUILD "${LGI_DEPS_BUILD}" PARENT_SCOPE)
 	endif()
 else()
 	if(LINUX OR HAIKU)
@@ -69,16 +70,17 @@ else()
 	else()
 		set(DEPS_ARCH "")
 	endif()
-	set(DEPS_DEBUG "${DEPS}/build${DEPS_ARCH}-debug")
-	if (NOT EXISTS "${DEPS_DEBUG}")
-		message(WARNING "Expecting debug external libraries in: ${DEPS_DEBUG}")
+	set(LGI_DEPS_DEBUG "${DEPS}/build${DEPS_ARCH}-debug")
+	if (NOT EXISTS "${LGI_DEPS_DEBUG}")
+		message(FATAL_ERROR "Expecting debug external libraries in: ${LGI_DEPS_DEBUG}")
 	endif()
-	set(DEPS_RELEASE "${DEPS}/build${DEPS_ARCH}-release")
-	if (NOT EXISTS "${DEPS_RELEASE}")
-		message(WARNING "Expecting release external libraries in: ${DEPS_RELEASE}")
+	set(LGI_DEPS_RELEASE "${DEPS}/build${DEPS_ARCH}-release")
+	if (NOT EXISTS "${LGI_DEPS_RELEASE}")
+		message(FATAL_ERROR "Expecting release external libraries in: ${LGI_DEPS_RELEASE}")
 	endif()
-	if(hasParent)
-		set(DEPS "${DEPS}" PARENT_SCOPE)
+	if (hasParent)
+		set(LGI_DEPS_DEBUG "${LGI_DEPS_DEBUG}" PARENT_SCOPE)
+		set(LGI_DEPS_RELEASE "${LGI_DEPS_RELEASE}" PARENT_SCOPE)
 	endif()
 endif()
 
@@ -94,7 +96,7 @@ elseif (LINUX)
 	find_package(PkgConfig)
 	pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
 	pkg_check_modules(GST REQUIRED gstreamer-1.0>=1.4)
-	set(PUBLIC_LIBS pthread crypt z)
+	set(PUBLIC_LIBS pthread crypt z-lgi)
 
 endif()
 
@@ -211,7 +213,7 @@ set (CommonSource
 	include/lgi/common/LgiRes.h
 	src/common/Resource/LgiRes.cpp
 	src/common/Resource/Res.cpp
-	src/common/Skins/Gel/Gel.cpp
+	src/common/Skins/plutovg/plutoVg.cpp
 	include/lgi/common/DocView.h
 	src/common/Text/DocView.cpp
 	include/lgi/common/StringClass.h
@@ -298,6 +300,7 @@ if (APPLE)
 		src/mac/cocoa/View.mm
 		src/mac/cocoa/Widgets.mm
 		src/mac/cocoa/Window.mm
+		include/lgi/mac/cocoa/LCocoaView.h
 		src/mac/cocoa/CocoaView.mm
 		src/mac/cocoa/Gdc2.mm
 		)
@@ -339,6 +342,9 @@ elseif (MSVC)
 
 	set(Source
 		${CommonSource}
+		include/lgi/win/LgiOs.h
+		include/lgi/win/LgiOsDefs.h
+		include/lgi/win/LgiOsClasses.h
 		src/win/General/Lgi.manifest
 		src/win/Gdc2/Gdc2.cpp
 		src/win/Gdc2/GdiLeak.cpp
@@ -411,6 +417,16 @@ endif()
 
 add_library(lgi SHARED ${Source})
 
+set_target_properties(lgi PROPERTIES
+	CXX_VISIBILITY_PRESET default
+	VISIBILITY_INLINES_HIDDEN NO)
+
+target_compile_definitions(lgi
+	PRIVATE
+		LGI_LIBRARY
+	PUBLIC
+		$<$<CONFIG:Debug>:_DEBUG>)
+
 add_library(lgi-stub STATIC
     src/common/Gdc2/Font/Charset.cpp
     src/common/General/Containers.cpp
@@ -431,9 +447,10 @@ add_library(lgi-stub STATIC
 
 target_compile_definitions(lgi-stub
 	PRIVATE
-		LGI_LIBRARY
+		LGI_LIBRARY		
 	PUBLIC
-		LGI_STATIC)
+		LGI_STATIC
+		$<$<CONFIG:Debug>:_DEBUG>)
 
 target_include_directories(lgi-stub
 	PUBLIC
@@ -450,6 +467,8 @@ endif()
 
 if (APPLE)
 
+	find_library(UT_FRAMEWORK UniformTypeIdentifiers)
+
 	set_target_properties(lgi
 		PROPERTIES
 		XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_WEAK "YES"
@@ -463,6 +482,7 @@ if (APPLE)
 			include/lgi/mac/cocoa
 			/opt/local/include
 		PRIVATE
+			$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},Release>,${LGI_DEPS_RELEASE}/include,${LGI_DEPS_DEBUG}/include>
 			private/mac
 			)
 	target_compile_definitions(lgi
@@ -472,10 +492,17 @@ if (APPLE)
 		)
 	target_link_libraries(lgi
 		PUBLIC
-			${EXTRA_LIBS})
+			${EXTRA_LIBS}
+		PRIVATE
+			"${UT_FRAMEWORK}"
+		)
 	target_compile_options(lgi
 		PUBLIC
 			-Wno-nullability-completeness)
+	target_link_directories(lgi
+		PUBLIC
+			$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},Release>,${LGI_DEPS_RELEASE}/lib,${LGI_DEPS_DEBUG}/lib>
+		)
 
 	# lgi stub settings
 	target_include_directories(lgi-stub
@@ -528,9 +555,7 @@ elseif (LINUX)
 	target_compile_options(lgi
 		PUBLIC
 			-fPIC
-			-w
 			-fno-inline
-			-fpermissive
 			-rdynamic
 		)
 
@@ -541,6 +566,7 @@ elseif (LINUX)
 			${GTK3_INCLUDE_DIRS}
 			${GST_INCLUDE_DIRS}
 		PRIVATE
+			$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},Release>,${LGI_DEPS_RELEASE}/include,${LGI_DEPS_DEBUG}/include>
 			private/linux
 			/usr/include/libayatana-appindicator3-0.1
 		)
@@ -554,8 +580,9 @@ elseif (LINUX)
 			iconv
 			ayatana-appindicator3
 		)
+
 	target_link_directories(lgi
-		PRIVATE
+		PUBLIC
 			${DEPS}/build-x64-release/lib
 		)
 
@@ -574,9 +601,7 @@ elseif (LINUX)
 	target_compile_options(lgi-stub
 		PUBLIC
 			-fPIC
-			-w
 			-fno-inline
-			-fpermissive
 			-rdynamic
 		)
 
@@ -596,11 +621,17 @@ elseif (MSVC)
 			/W2
 		)
 
+	target_compile_definitions(lgi
+		PRIVATE
+			$<$<CONFIG:Debug>:_DEBUG>)
+
 	target_include_directories(lgi
 		PUBLIC
 			include/lgi/win
 		PRIVATE
-			private/win)
+			private/win
+			${LGI_DEPS_BUILD}/include
+            "C:\\Program Files\\OpenSSL-Win64\\include")
 	
 	target_link_libraries(lgi
 		PUBLIC
@@ -609,12 +640,18 @@ elseif (MSVC)
 			UxTheme.lib
 			imm32.lib)
 
+	target_link_directories(lgi
+		PRIVATE
+			${LGI_DEPS_BUILD}/lib
+			"C:\\Program Files\\OpenSSL-Win64\\lib")
+
 	target_sources(lgi-stub
 		PRIVATE
 		    src/win/General/File.cpp
 			src/win/General/Mem.cpp
 			src/win/Lgi/General.cpp
 			src/win/Lgi/Thread.cpp)
+
 	target_include_directories(lgi-stub
 		PUBLIC
 			include/lgi/win)
@@ -624,6 +661,10 @@ elseif (MSVC)
 			WINDOWS
 			_UNICODE
 			UNICODE)
+
+	target_compile_definitions(lgi-stub
+		PRIVATE
+			$<$<CONFIG:Debug>:_DEBUG>)
 
 elseif (HAIKU)
 
@@ -641,6 +682,7 @@ elseif (HAIKU)
 		PUBLIC
 			include/lgi/haiku
 		PRIVATE
+			$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},Release>,${LGI_DEPS_RELEASE}/include,${LGI_DEPS_DEBUG}/include>
 			private/haiku)
 	target_compile_definitions(lgi
 		PUBLIC
@@ -651,6 +693,9 @@ elseif (HAIKU)
 			gnu
 			network
 			be)
+	target_link_directories(lgi
+		PRIVATE
+			$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},Release>,${LGI_DEPS_RELEASE}/lib,${LGI_DEPS_DEBUG}/lib>)
 
 endif()
 
@@ -658,8 +703,8 @@ target_link_libraries(lgi
 	PUBLIC
 		${PUBLIC_LIBS}
 	PRIVATE
-		lunasvg
-		plutovg)
+		$<IF:$<AND:$<CONFIG:Debug>,$<BOOL:${WIN32}>>,lunasvgd,lunasvg>
+		$<IF:$<AND:$<CONFIG:Debug>,$<BOOL:${WIN32}>>,plutovgd,plutovg>)
 
 target_compile_definitions(lgi
 	PUBLIC
@@ -712,5 +757,4 @@ else()
 	# other subfolders of smaller utils and tests
 	add_subdirectory(utils)
 	add_subdirectory(test)
-	add_subdirectory(src/common/Net/libntlm-0.4.2)
 endif()

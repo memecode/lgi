@@ -25,11 +25,11 @@ class LgiClass LTreeNode
 	friend class LTreeItem;
 	
 protected:
-	LTree *Tree = NULL;
-	LTreeNode *Parent = NULL;
+	LTree *Tree = nullptr;
+	LTreeNode *Parent = nullptr;
 	List<LTreeItem> Items;
 
-	virtual LRect *Pos() { return NULL; }
+	virtual LRect *Pos() { return nullptr; }
 	virtual void _ClearDs(int Col);
 	void _Visible(bool v);
 	void SetLayoutDirty();
@@ -267,6 +267,11 @@ public:
 	~LTree();
 
 	const char *GetClass() override { return "LTree"; }
+	
+	// This setting is for optimizing large updates of the control. It can turn off
+	// updating the screen until such time as the items are fully populated
+	bool GetShowUpdates();
+	void SetShowUpdates(bool update);
 
 	/// Called when an item is clicked
 	virtual void OnItemClick(LTreeItem *Item, LMouse &m);

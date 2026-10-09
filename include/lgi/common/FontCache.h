@@ -2,11 +2,15 @@
 
 #include "lgi/common/App.h"
 #include "lgi/common/Font.h"
+#include "lgi/common/LgiCommon.h"
 
 class LFontCache
 {
-	LFont *DefaultFont;
+	bool allocIds = false;
+	LFont *DefaultFont = nullptr;
+	LSurface *DrawContext = nullptr;
 	LArray<LFont*> Fonts;
+	LHashTbl<IntKey<size_t>, LFont*> idMap;
 	LHashTbl<ConstStrKey<char>, LString> FontName;
 	
 public:
@@ -15,10 +19,12 @@ public:
 	(
 		/// This is an externally owned default font... or optionally 
 		/// NULL if there is no default.
-		LFont *DefFnt = NULL
+		LFont *DefFnt = nullptr,
+		LSurface *Context = nullptr
 	)
 	{
 		DefaultFont = DefFnt;
+		DrawContext = Context;
 	}
 	
 	~LFontCache()
@@ -46,6 +52,34 @@ public:
 			FontName.Add(Label, LString(FontFace));
 	}
 	
+	/// Turn on/off ID allocation for each font:
+	void SetAllocIds(bool alloc)
+	{
+		allocIds = alloc;
+	}
+	
+	/// Get the font by id:
+	LFont *FontFromId(size_t id)
+	{
+		LAssert(allocIds); // it's not going to work otherwise
+		return idMap.Find(id);
+	}
+	
+	/// Delete by id:
+	bool DeleteById(size_t id)
+	{
+		LAssert(allocIds); // it's not going to work otherwise
+		auto f = idMap.Find(id);
+		if (!f)
+			return false;
+		
+		idMap.Delete(id);
+		Fonts.Delete(f);
+		delete f;
+		return true;
+	}
+	
+	/// Get a font object by characteristics:
 	LFont *AddFont(	const char *Face,
 					LCss::Len Size,
 					LCss::FontWeightType Weight,
@@ -58,8 +92,7 @@ public:
 			auto f = Fonts[i];
 			if
 			(
-				f->Face() && Face &&
-				!_stricmp(f->Face(), Face) &&
+				!Stricmp(f->Face(), Face) &&
 				f->Size() == Size &&
 				f->Bold() == (Weight == LCss::FontWeightBold) &&
 				f->Italic() == (Style == LCss::FontStyleItalic) &&
@@ -88,7 +121,7 @@ public:
 				Sz.Value--;
 			}
 
-			if (!f->Create(Face, Sz))
+			if (!f->Create(Face, Sz, DrawContext))
 			{
 				LAssert(0);
 				DeleteObj(f);
@@ -96,6 +129,16 @@ public:
 			}
 			
 			Fonts.Add(f);
+			
+			if (allocIds)
+			{
+				int id;
+				while (auto f = idMap.Find(id = LRand(10000)))
+					;
+				
+				idMap.Add(id, f);
+				f->SetId(id);
+			}
 		}
 		
 		return f;

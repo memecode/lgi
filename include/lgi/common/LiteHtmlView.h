@@ -1,7 +1,9 @@
 #pragma once
 
+#include "lgi/common/DocView.h"
+
 class LiteHtmlView :
-	public LLayout
+	public LDocView
 {
 protected:
 	struct LiteHtmlViewPriv *d;
@@ -26,13 +28,21 @@ public:
 	// Set the page name in the title bar of the window.
 	virtual void SetCaption(LString name) {}
 
+	// LView impl:
+	const char *Name() override;
+	bool Name(const char *n) override;
+
 	// LLayout impl
 	void OnAttach() override;
 	LCursor GetCursor(int x, int y) override;
 	void OnPaint(LSurface *pDC) override;
-	int OnNotify(LViewI *c, LNotification n) override;
-	bool OnMouseWheel(double Lines);
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
+	bool OnMouseWheel(double Lines) override;
 	void OnMouseClick(LMouse &m) override;
 	void OnMouseMove(LMouse &m) override;
 	LMessage::Result OnEvent(LMessage *Msg) override;
+
+	// LDocView impl:
+	const char *GetMimeType() override { return "text/html"; }
+	void SetCharset(const char *s) override;
 };

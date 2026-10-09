@@ -38,10 +38,11 @@ public:
 	int64 Value = 0;
 	
 	double scaling = 1.0;
-	LSurface *Img = NULL;
+	LSurface *Img = nullptr;
 	ImageLoadState ImgState = TCheckCss;
 
-	LButtonPrivate(LButton *v) : view(v)
+	LButtonPrivate(LButton *v)
+		: view(v)
 	{
 	}
 

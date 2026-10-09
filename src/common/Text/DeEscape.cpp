@@ -10,7 +10,7 @@ char *SkipEscape(char *c)
 		return NULL;
 	}
 
-	char *Start = c;
+	// auto Start = c;
 	c++;
 
 	if (*c == ']')

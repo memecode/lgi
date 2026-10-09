@@ -16,11 +16,13 @@ MakeDir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 BuildDir = $(Build)
 
 CFlags = -MMD -MP -fPIC -fno-inline
-CppFlags = $(CFlags) -fpermissive -std=c++14
+CppFlags = $(CFlags) -fpermissive -std=c++17
+LGI_GTK3_DIR=..
+LVCPROJECT_DIR=.
 
 ifeq ($(Build),Debug)
-	CFlags += -g
-	CppFlags += -g
+	CFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer
+	CppFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DHAS_LIBSSH
 	Libs =  \
@@ -30,19 +32,24 @@ ifeq ($(Build),Debug)
 		`pkg-config --libs gtk+-3.0` \
 		-pthread \
 		-llgi-gtk3$(Tag) \
-		-L../$(BuildDir)
+		-L../$(BuildDir) \
+		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/../deps/build-x64-debug/lib' \
+		-L$(LGI_GTK3_DIR)/../deps/build-x64-debug/lib \
+		-Wl,-rpath-link,$(LGI_GTK3_DIR)/../deps/build-x64-debug/lib \
+		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/$(BuildDir)'
 	Inc =  \
-		-I../../../../../../usr/include/gstreamer-1.0 \
 		-I../include \
-		-I./src \
-		-I../include/lgi/linux/Gtk \
 		-I../include/lgi/linux \
-		-I./resources \
-		-I../../../../../../usr/include/libssh \
-		`pkg-config --cflags gtk+-3.0`
+		-I../include/lgi/linux/Gtk \
+		-I/usr/include/gstreamer-1.0 \
+		-I/usr/include/libssh \
+		`pkg-config --cflags gtk+-3.0` \
+		-Iresources \
+		-Isrc
 else
-	CFlags += -s -Os
-	CppFlags += -s -Os
+	CFlags += -g -Os
+	CppFlags += -g -Os
+	Tag =
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DHAS_LIBSSH
 	Libs =  \
 		-lmagic \
@@ -51,35 +58,39 @@ else
 		`pkg-config --libs gtk+-3.0` \
 		-pthread \
 		-llgi-gtk3$(Tag) \
-		-L../$(BuildDir)
+		-L../$(BuildDir) \
+		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/../deps/build-x64-release/lib' \
+		-L$(LGI_GTK3_DIR)/../deps/build-x64-release/lib \
+		-Wl,-rpath-link,$(LGI_GTK3_DIR)/../deps/build-x64-release/lib \
+		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/$(BuildDir)'
 	Inc =  \
-		`pkg-config --cflags gtk+-3.0` \
-		-I./src \
 		-I../include \
-		-I../../../../../../usr/include/libssh \
 		-I../include/lgi/linux \
-		-I../../../../../../usr/include/gstreamer-1.0 \
 		-I../include/lgi/linux/Gtk \
-		-I./resources
+		-I/usr/include/gstreamer-1.0 \
+		-I/usr/include/libssh \
+		`pkg-config --cflags gtk+-3.0` \
+		-Iresources \
+		-Isrc
 endif
 
 # Dependencies
-Source =	src/DropDownBtn.cpp \
+Source =	../src/common/Lgi/LgiMain.cpp \
+			../src/common/Lgi/StructuredLog.cpp \
+			../src/common/Net/Http.cpp \
+			../src/common/Net/OpenSSLSocket.cpp \
+			../src/common/Net/Ssh.cpp \
+			../src/common/Text/RemoveAnsi.cpp \
 			../src/common/Text/XmlTreeUi.cpp \
 			../src/common/Widgets/ControlTree.cpp \
-			src/VcFile.cpp \
-			../src/common/Lgi/LgiMain.cpp \
-			../src/common/Net/Http.cpp \
+			src/BrowseUi.cpp \
+			src/DropDownBtn.cpp \
 			src/Main.cpp \
-			src/SshConnection.cpp \
-			../src/common/Net/OpenSSLSocket.cpp \
-			../src/common/Lgi/StructuredLog.cpp \
-			../src/common/Text/RemoveAnsi.cpp \
 			src/PatchViewer.cpp \
-			src/VcFolder.cpp \
-			../src/common/Net/Ssh.cpp \
+			src/SshConnection.cpp \
 			src/VcCommit.cpp \
-			src/BrowseUi.cpp
+			src/VcFile.cpp \
+			src/VcFolder.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -104,27 +115,18 @@ $(BuildDir)/%.o: %.cpp
 $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	mkdir -p $(BuildDir)
 	@echo Linking $(Target) [$(Build)]...
-	$(CPP) -Wl,-export-dynamic,-R. -o \
+	$(CPP) -Wl,-export-dynamic,-R.,--build-id -o \
 		$(Target) $(Objects) $(Libs)
 	@echo Done.
 
-../$(BuildDir)/liblgi-gtk3$(Tag).so : ../../deps/build-x64-debug/include/iconv.h \
-	../../deps/build-x64-debug/include/jconfig.h \
-	../../deps/build-x64-debug/include/jerror.h \
-	../../deps/build-x64-debug/include/jmorecfg.h \
-	../../deps/build-x64-debug/include/jpeglib.h \
-	../../deps/build-x64-debug/include/lunasvg/lunasvg.h \
-	../../deps/build-x64-debug/include/png.h \
-	../include/lgi/common/App.h \
+../$(BuildDir)/liblgi-gtk3$(Tag).so : ../include/lgi/common/App.h \
 	../include/lgi/common/Array.h \
 	../include/lgi/common/AutoPtr.h \
 	../include/lgi/common/Base64.h \
 	../include/lgi/common/Bitmap.h \
 	../include/lgi/common/Box.h \
 	../include/lgi/common/Button.h \
-	../include/lgi/common/CairoSurface.h \
 	../include/lgi/common/Cancel.h \
-	../include/lgi/common/Capabilities.h \
 	../include/lgi/common/Charset.h \
 	../include/lgi/common/CheckBox.h \
 	../include/lgi/common/ClipBoard.h \
@@ -134,10 +136,8 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/Combo.h \
 	../include/lgi/common/CommsBus.h \
 	../include/lgi/common/Containers.h \
-	../include/lgi/common/Core.h \
 	../include/lgi/common/Css.h \
 	../include/lgi/common/CssTools.h \
-	../include/lgi/common/CurrentTime.h \
 	../include/lgi/common/DataDlg.h \
 	../include/lgi/common/DateTime.h \
 	../include/lgi/common/Dialog.h \
@@ -148,7 +148,6 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/DragAndDrop.h \
 	../include/lgi/common/DropFiles.h \
 	../include/lgi/common/Edit.h \
-	../include/lgi/common/Emoji.h \
 	../include/lgi/common/Error.h \
 	../include/lgi/common/EventTargetThread.h \
 	../include/lgi/common/File.h \
@@ -165,7 +164,6 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/ImageList.h \
 	../include/lgi/common/Input.h \
 	../include/lgi/common/ItemContainer.h \
-	../include/lgi/common/Jpeg.h \
 	../include/lgi/common/Json.h \
 	../include/lgi/common/Layout.h \
 	../include/lgi/common/Lgi.h \
@@ -183,10 +181,6 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/List.h \
 	../include/lgi/common/ListItemCheckBox.h \
 	../include/lgi/common/ListItemRadioBtn.h \
-	../include/lgi/common/LMallocArray.h \
-	../include/lgi/common/Lzw.h \
-	../include/lgi/common/Mail.h \
-	../include/lgi/common/Matrix.h \
 	../include/lgi/common/Mem.h \
 	../include/lgi/common/Menu.h \
 	../include/lgi/common/Message.h \
@@ -195,10 +189,8 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/Mutex.h \
 	../include/lgi/common/Net.h \
 	../include/lgi/common/Notifications.h \
-	../include/lgi/common/OAuth2.h \
 	../include/lgi/common/OptionsFile.h \
 	../include/lgi/common/Palette.h \
-	../include/lgi/common/Panel.h \
 	../include/lgi/common/Password.h \
 	../include/lgi/common/Path.h \
 	../include/lgi/common/PixelRops.h \
@@ -207,7 +199,6 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/PopupList.h \
 	../include/lgi/common/PopupNotification.h \
 	../include/lgi/common/Printer.h \
-	../include/lgi/common/Profile.h \
 	../include/lgi/common/Progress.h \
 	../include/lgi/common/ProgressDlg.h \
 	../include/lgi/common/ProgressView.h \
@@ -215,19 +206,13 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/RadioGroup.h \
 	../include/lgi/common/Range.h \
 	../include/lgi/common/Rect.h \
-	../include/lgi/common/RectF.h \
 	../include/lgi/common/RefCount.h \
-	../include/lgi/common/RegKey.h \
 	../include/lgi/common/Res.h \
-	../include/lgi/common/Rops.h \
 	../include/lgi/common/Roster.h \
 	../include/lgi/common/ScrollBar.h \
 	../include/lgi/common/SkinEngine.h \
 	../include/lgi/common/Slider.h \
-	../include/lgi/common/Splitter.h \
 	../include/lgi/common/Stat.h \
-	../include/lgi/common/StatusBar.h \
-	../include/lgi/common/Store3Defs.h \
 	../include/lgi/common/Stream.h \
 	../include/lgi/common/StringClass.h \
 	../include/lgi/common/StringLayout.h \
@@ -236,7 +221,6 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/SubProcess.h \
 	../include/lgi/common/TableLayout.h \
 	../include/lgi/common/TabView.h \
-	../include/lgi/common/TextConvert.h \
 	../include/lgi/common/TextFile.h \
 	../include/lgi/common/TextLabel.h \
 	../include/lgi/common/TextLog.h \
@@ -250,11 +234,8 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/ToolTip.h \
 	../include/lgi/common/TrayIcon.h \
 	../include/lgi/common/Tree.h \
-	../include/lgi/common/TypeToString.h \
 	../include/lgi/common/UdpTransport.h \
-	../include/lgi/common/Undo.h \
 	../include/lgi/common/Unicode.h \
-	../include/lgi/common/UnicodeString.h \
 	../include/lgi/common/UnrolledList.h \
 	../include/lgi/common/Uri.h \
 	../include/lgi/common/Variant.h \
@@ -352,7 +333,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/common/Net/Uri.cpp \
 	../src/common/Resource/LgiRes.cpp \
 	../src/common/Resource/Res.cpp \
-	../src/common/Skins/Gel/Gel.cpp \
+	../src/common/Skins/plutovg/plutoVg.cpp \
 	../src/common/Text/DocView.cpp \
 	../src/common/Text/String.cpp \
 	../src/common/Text/TextConvert.cpp \

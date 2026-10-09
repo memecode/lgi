@@ -28,10 +28,10 @@ struct LLayoutString : public LDisplayString
 	ssize_t Offset;
 	LLayoutRun *Src;
 	
-	LLayoutString(LFont *f,
-				const char *s,
-				ssize_t l = -1,
-				LSurface *pdc = 0) :
+	LLayoutString(	LFont *f,
+					const char *s,
+					ssize_t l = -1,
+					LSurface *pdc = 0) :
 		LDisplayString(f, s, l, pdc)
 	{
 		Offset = 0;
@@ -40,9 +40,9 @@ struct LLayoutString : public LDisplayString
 		Src = NULL;
 	}
 
-	LLayoutString(LLayoutString *Ls,
-				const char *s,
-				ssize_t l = -1) :
+	LLayoutString(	LLayoutString *Ls,
+					const char *s,
+					ssize_t l = -1) :
 		LDisplayString(Ls->GetFont(), s, l)
 	{
 		Fx = Ls->Fx;
@@ -62,7 +62,8 @@ struct LLayoutString : public LDisplayString
 class LgiClass LStringLayout
 {
 protected:
-	LFontCache *FontCache = NULL;
+	LFontCache *FontCache = nullptr;
+	LFont *BaseFont = nullptr;
 
 	// Min and max bounds (in pixels)
 	LPoint Min, Max;

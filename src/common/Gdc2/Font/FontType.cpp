@@ -1,6 +1,10 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/FontSelect.h"
 
+#if defined __GTK_H__
+using namespace Gtk;
+#endif
+
 LFontType::LFontType(const char *face, int pointsize)
 {
 	#if defined WINNATIVE
@@ -366,31 +370,44 @@ bool LFontType::GetSystemFont(const char *Which)
 			
 			if (!ConfigFontUsed && LApp::IsGui())
 			{	
-				auto s = Gtk::gtk_style_new();
-				if (s)
+				auto settings = gtk_settings_get_default();
+				if (settings)
 				{
-					const char *fam = Gtk::pango_font_description_get_family(s->font_desc);
-					if (fam)
+					gchararray fontName = NULL;
+					g_object_get(settings, "gtk-font-name", &fontName, NULL);
+					if (fontName)
 					{
-						strcpy_s(DefFont, sizeof(DefFont), fam);
-					}
-					else printf("%s:%i - pango_font_description_get_family failed.\n", _FL);
+						auto desc = pango_font_description_from_string(fontName);
+						if (desc)
+						{
+							const char *fam = pango_font_description_get_family(desc);
+							if (fam)
+							{
+								strcpy_s(DefFont, sizeof(DefFont), fam);
+							}
+							else printf("%s:%i - pango_font_description_get_family failed.\n", _FL);
 
-					if (Gtk::pango_font_description_get_size_is_absolute(s->font_desc))
-					{
-						float Px = Gtk::pango_font_description_get_size(s->font_desc) / PANGO_SCALE;
-						float Dpi = (float)LScreenDpi().x;
-						DefSize = (Px * 72.0) / Dpi;
-						printf("pango px=%f, Dpi=%f\n", Px, Dpi);
+							if (pango_font_description_get_size_is_absolute(desc))
+							{
+								float Px = (float)pango_font_description_get_size(desc) / (float)PANGO_SCALE;
+								float Dpi = (float)LScreenDpi().x;
+								DefSize = (Px * 72.0) / Dpi;
+								printf("pango px=%f, Dpi=%f\n", Px, Dpi);
+							}
+							else
+							{
+								DefSize = pango_font_description_get_size(desc) / PANGO_SCALE;
+							}
+
+							pango_font_description_free(desc);
+						}
+						else printf("%s:%i - pango_font_description_from_string failed.\n", _FL);
+
+						g_free(fontName);
 					}
-					else
-					{
-						DefSize = Gtk::pango_font_description_get_size(s->font_desc) / PANGO_SCALE;
-					}
-					
-					g_object_unref(s);
+					else printf("%s:%i - g_object_get(gtk-font-name) failed.\n", _FL);
 				}
-				else printf("%s:%i - gtk_style_new failed.\n", _FL);
+				else printf("%s:%i - gtk_settings_get_default failed.\n", _FL);
 			}
 			
 			First = false;
@@ -590,6 +607,15 @@ bool LFontType::GetSystemFont(const char *Which)
 			Info.Face(DefFont);
 			Info.PointSize(DefSize-1);
 			Status = true;
+
+			#elif defined(HAIKU)
+
+				font_family family = {0};
+				font_style style = {0};
+				be_plain_font->GetFamilyAndStyle(&family, &style);
+				Info.PointSize(be_plain_font->Size() - 1);
+				Info.Face(family);
+				Status = true;
 			
 			#elif defined MAC
 			

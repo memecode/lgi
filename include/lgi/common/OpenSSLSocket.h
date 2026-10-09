@@ -21,6 +21,8 @@
 #define SslSocket_KeyFile				"KeyFile"
 #define SslSocket_SslOnConnect			"SslOnConnect"
 
+class LCapabilityClient;
+
 class SslSocket :
 	public LSocketI,
 	virtual public LDom
@@ -30,22 +32,38 @@ class SslSocket :
 	
 protected:
 	LMutex Lock;
-	BIO *Bio = NULL;
-	SSL *Ssl = NULL;
+	BIO *Bio = nullptr;
+	SSL *Ssl = nullptr;
 	LString ErrMsg;
-	LStream *log = NULL;
+	LStream *log = nullptr;
 	bool DebugLogging = false;
 
 	// Local stuff
 	virtual void Log(const char *Str, ssize_t Bytes, SocketMsgType Type);
-	void SslError(const char *file, int line, const char *Msg);
+	void HandleError(const char *file, int line, const char *Msg);
+	LString GetSslErr();
 	LStream *GetLogStream();
 	void DebugTrace(const char *fmt, ...);
-
+	OsSocket GetRawSocket(BIO* bio);
 public:
 	static LString Random(int Len);
 
-	SslSocket(LStream *logger = NULL, LCapabilityClient *caps = NULL, bool SslOnConnect = false, bool RawLFCheck = false, bool banner = true);
+	// These constants are used to call LCapabilityClient when there is a certificate issue:
+	LString UserRef;
+	constexpr static const char *CAPS_CERT_ERROR = "SslCertError";
+	constexpr static const char *JSON_HOST       = "host";
+	constexpr static const char *JSON_MESSAGE    = "msg";
+	constexpr static const char *JSON_CERT       = "certId";
+	constexpr static const char *JSON_REF        = "ref"; // the 'UserRef' if set
+
+	using TCertData = LArray<uint8_t>;
+	using TCertCallback = std::function<bool(const char *host, TCertData *id)>;
+
+	SslSocket(	LStream *logger = nullptr,
+				LCapabilityClient *caps = nullptr,
+				bool SslOnConnect = false,
+				bool RawLFCheck = false,
+				bool banner = true);
 	~SslSocket();
 
 	const char *GetClass() override { return "SslSocket"; }
@@ -55,6 +73,7 @@ public:
 	void SetSslOnConnect(bool b);
 	LCancel *GetCancel() override;
 	void SetCancel(LCancel *c) override;
+	void SetCertCallback(TCertCallback certCallback);
 	
 	// Socket
 	OsSocket Handle(OsSocket Set = INVALID_SOCKET) override;
@@ -65,10 +84,11 @@ public:
 	void OnInformation(const char *Str) override;
 	int GetTimeout() override;
 	void SetTimeout(int ms) override;
+	bool GetLocalIp(char *IpAddr) override;
 	bool GetRemoteIp(char *IpAddr) override;
 
 	// Server
-	void SetCert(LString certFile, LString keyFile);
+	bool SetCert(LString certFile, LString keyFile);
 	bool Listen(int Port = 0) override;
 	bool CanAccept(int TimeoutMs = 0) override;
 	bool Accept(LSocketI *c) override;
@@ -83,8 +103,8 @@ public:
 	bool IsBlocking() override;
 	void IsBlocking(bool block) override;
 
-	bool SetVariant(const char *Name, LVariant &Val, const char *Arr = NULL) override;
-	bool GetVariant(const char *Name, LVariant &Val, const char *Arr = NULL) override;
+	bool SetVariant(const char *Name, LVariant &Val, const char *Arr = nullptr) override;
+	bool GetVariant(const char *Name, LVariant &Val, const char *Arr = nullptr) override;
 
 	LStreamI *Clone() override;
 	const char *GetErrorString() override;

@@ -84,10 +84,4 @@ public:
 	virtual void UserCommand(const char *Cmd, TStatusCb cb) = 0;
 };
 
-extern LDebugger *CreateGdbDebugger(BreakPointStore *bpStore,
-									LStream *Log,
-									class SystemIntf *Backend,
-									SysPlatform platform,
-									LStream *networkLog);
-
 #endif

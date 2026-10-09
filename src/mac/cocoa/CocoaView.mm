@@ -348,19 +348,6 @@ struct DndEvent
 		t->OnMouseWheel(-diff);
 }
 
-const char *LVirtualKeyToString(LVirtualKeys c)
-{
-	switch (c)
-	{
-		#define _(k,v) case LK_ ##k: return "LK_" #k;
-		MacKeyDef()
-		#undef _
-		default:
-			break;
-	}
-	return "#undef";
-}
-
 LKey KeyEvent(NSEvent *ev)
 {
 	LAutoPool Pool;
@@ -378,7 +365,7 @@ LKey KeyEvent(NSEvent *ev)
 	k.vkey = ev.keyCode;
 	k.SetModifer((uint32_t)mod);
 
-	// printf("MacKeyToStr %i/%s/%i -> %s\n", u32, s.Get(), k.vkey, LVirtualKeyToString((LVirtualKeys)k.vkey));
+	// printf("MacKeyToStr %i/%s/%i -> %s\n", u32, s.Get(), k.vkey, LKey::KeyName(k.vkey));
 	switch (ev.keyCode)
 	{
 		case LK_KEYPADENTER:
@@ -432,6 +419,16 @@ LKey KeyEvent(NSEvent *ev)
 		wnd->HandleViewKey(NULL, k);
 	else
 		self.w->OnKey(k);
+}
+
+- (BOOL)canBecomeFirstResponder
+{
+    return YES;
+}
+
+- (BOOL)acceptsFirstResponder
+{
+    return YES;
 }
 
 - (void)userEvent:(LCocoaMsg*)msg
@@ -623,11 +620,6 @@ void UpdateAccepted(DndEvent &e, id <NSDraggingInfo> sender)
 - (void)draggingEnded:(nullable id <NSDraggingInfo>)sender
 {
 	DND_LOG("%s:%i draggingEnded\n", _FL);
-}
-
-- (BOOL) acceptsFirstResponder
-{
-    return YES;
 }
 
 @end

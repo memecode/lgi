@@ -3,25 +3,23 @@
 // #include <cups/cups.h>
 
 #define PS_SCALE			10
+#define DEFAULT_BITS		24
 
 ///////////////////////////////////////////////////////////////////////////////////////
 class LPrintDCPrivate // : public GCups
 {
 public:
-	class PrintPainter *p;
-	Gtk::GtkPrintContext *Handle;
+	class PrintPainter *p = nullptr;
+	Gtk::GtkPrintContext *Handle = nullptr;
 	LString PrintJobName;
 	LString PrinterName;
-	int Pages;
+	int Pages = 0;
 	LColour c;
 	LRect Clip;
-	Gtk::cairo_t *cr;
+	Gtk::cairo_t *cr = nullptr;
 	
 	LPrintDCPrivate(Gtk::GtkPrintContext *handle)
 	{
-		cr = NULL;
-		p = 0;
-		Pages = 0;
 		Handle = handle;
 	}
 	
@@ -60,6 +58,20 @@ Gtk::GtkPrintContext *LPrintDC::GetPrintContext()
 	return d->Handle;
 }
 
+OsPainter LPrintDC::Handle()
+{
+	return d->cr;
+}
+
+void LPrintDC::SetHandle(OsPainter hnd)
+{
+	if (d->cr != hnd)
+	{
+		LgiTrace("%s:%i - LPrintDC updating handle to %p\n", _FL, hnd);
+		d->cr = hnd;
+	}
+}
+
 int LPrintDC::X()
 {
 	return gtk_print_context_get_width(d->Handle);
@@ -72,7 +84,7 @@ int LPrintDC::Y()
 
 int LPrintDC::GetBits()
 {
-	return 24;
+	return DEFAULT_BITS;
 }
 
 LPoint LPrintDC::GetDpi()
@@ -103,7 +115,7 @@ COLOUR LPrintDC::Colour()
 
 COLOUR LPrintDC::Colour(COLOUR c, int Bits)
 {
-	LColour col(c, Bits);
+	LColour col(c, Bits ? Bits : DEFAULT_BITS);
 	return Colour(col).c24();
 }
 
@@ -151,34 +163,66 @@ void LPrintDC::Line(int x1, int y1, int x2, int y2)
 	}
 }
 
-void LPrintDC::Circle(double cx, double cy, double radius)
+void LPrintDC::Circle(float cx, float cy, float radius)
 {
-	LAssert(!"Not impl.");
+	if (d->cr)
+	{
+		cairo_arc(d->cr, cx, cy, radius, 0.0, 2.0 * LGI_PI);
+		cairo_stroke(d->cr);
+	}
 }
 
-void LPrintDC::FilledCircle(double cx, double cy, double radius)
+void LPrintDC::FilledCircle(float cx, float cy, float radius)
 {
-	LAssert(!"Not impl.");
+	if (d->cr)
+	{
+		cairo_arc(d->cr, cx, cy, radius, 0.0, 2.0 * LGI_PI);
+		cairo_fill(d->cr);
+	}
 }
 
-void LPrintDC::Arc(double cx, double cy, double radius, double start, double end)
+void LPrintDC::Arc(float cx, float cy, float radius, float start, float end)
 {
-	LAssert(!"Not impl.");
+	if (d->cr)
+	{
+		cairo_arc(d->cr, cx, cy, radius, start, end);
+		cairo_stroke(d->cr);
+	}
 }
 
-void LPrintDC::FilledArc(double cx, double cy, double radius, double start, double end)
+void LPrintDC::FilledArc(float cx, float cy, float radius, float start, float end)
 {
-	LAssert(!"Not impl.");
+	if (d->cr)
+	{
+		cairo_arc(d->cr, cx, cy, radius, start, end);
+		cairo_fill(d->cr);
+	}
 }
 
-void LPrintDC::Ellipse(double cx, double cy, double x, double y)
+void LPrintDC::Ellipse(float cx, float cy, float x, float y)
 {
-	LAssert(!"Not impl.");
+	if (d->cr)
+	{
+		cairo_save(d->cr);
+		cairo_translate(d->cr, cx, cy);
+		cairo_scale(d->cr, x, y);
+		cairo_arc(d->cr, 0.0, 0.0, 1.0, 0.0, 2.0 * LGI_PI);
+		cairo_stroke(d->cr);
+		cairo_restore(d->cr);
+	}
 }
 
-void LPrintDC::FilledEllipse(double cx, double cy, double x, double y)
+void LPrintDC::FilledEllipse(float cx, float cy, float x, float y)
 {
-	LAssert(!"Not impl.");
+	if (d->cr)
+	{
+		cairo_save(d->cr);
+		cairo_translate(d->cr, cx, cy);
+		cairo_scale(d->cr, x, y);
+		cairo_arc(d->cr, 0.0, 0.0, 1.0, 0.0, 2.0 * LGI_PI);
+		cairo_fill(d->cr);
+		cairo_restore(d->cr);
+	}
 }
 
 void LPrintDC::Box(int x1, int y1, int x2, int y2)

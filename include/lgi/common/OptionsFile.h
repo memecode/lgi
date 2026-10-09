@@ -65,12 +65,11 @@ public:
 	 If the return value is not NULL you have to Unlock the object
 	 when you're done with the tag. e.g:
 	 
-		LXmlTag *t = Options.LockTag("MyTagName");
-		if (t)
-		{
-			// Doing something with tag here...
-			Options.Unlock();
-		}
+	if (auto t = Options.LockTag("MyTagName"))
+	{
+		// Doing something with tag here...
+		Options.Unlock();
+	}
 	*/
 	LXmlTag *LockTag(const char *Name, const char *File, int Line);
 };

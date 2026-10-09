@@ -43,10 +43,10 @@ static OsChar LDisplayStringDots[] = {'.', '.', '.', 0};
 #endif
 
 #if defined(__GTK_H__)
-struct Block : public LRect
+struct DspStrBlock : public LRect
 {
 	/// This points to somewhere in Ds->Str
-	OsChar *Str = NULL;
+	OsChar *Str = nullptr;
 	
 	/// Bytes in this block
 	int Bytes = 0;
@@ -55,12 +55,12 @@ struct Block : public LRect
 	int Chars = 0;
 	
 	/// Alternative font to get characters from (NULL if using the display string's font)
-	LFont *Fnt = NULL;
+	LFont *Fnt = nullptr;
 	
 	/// Layout for this block. Shouldn't ever be NULL. But shouldn't crash otherwise.
-	Gtk::PangoLayout *Hnd = NULL;
+	Gtk::PangoLayout *Hnd = nullptr;
 
-	~Block()
+	~DspStrBlock()
 	{
 		if (Hnd)
 			g_object_unref(Hnd);
@@ -70,17 +70,11 @@ struct Block : public LRect
 struct LDisplayStringPriv
 {
 	LDisplayString *Ds;
-	LArray<Block> Blocks;
-	bool Debug;
+	LArray<DspStrBlock> Blocks;
 	int LastTabOffset;
 
 	LDisplayStringPriv(LDisplayString *str) : Ds(str)
 	{
-		#if 0
-		Debug = Stristr(Ds->Str, "(Jumping).wma") != 0;
-		#else
-		Debug = false;
-		#endif
 		LastTabOffset = -1;
 	}
 
@@ -100,7 +94,7 @@ struct LDisplayStringPriv
 		if (Tbl)
 		{
 			int32 w;
-			Block *b = NULL;
+			DspStrBlock *b = nullptr;
 			auto DisplayCtx = LFontSystem::Inst()->GetContext();
 
 			while ((w = (int32)p))
@@ -157,7 +151,7 @@ struct LDisplayStringPriv
 				b->Chars = Chars;
 			}
 				
-			if (Debug)
+			if (Ds->_debug)
 			{
 				// Print the block array
 				for (size_t i=0; i<Blocks.Length(); i++)
@@ -1073,31 +1067,36 @@ ssize_t LDisplayString::CharAt(int Px, LPxToIndexType Type)
 	
 		int Fx = 0;
 		int Fpos = Px << FShift;
+		int Foffset_y = (Font->GetHeight() / 2) << FShift;
 		Status = 0;
+
+		pango_context_set_font_description(LFontSystem::Inst()->GetContext(), Font->Handle());
+
 		for (auto &b: d->Blocks)
 		{
 			int Index = 0, Trailing = 0;
 			int Foffset = Fpos - Fx;
 			
-			if (b.Hnd && Gtk::pango_layout_xy_to_index(b.Hnd, Foffset, 0, &Index, &Trailing))
+			if (b.Hnd && pango_layout_xy_to_index(b.Hnd, Foffset, Foffset_y, &Index, &Trailing))
 			{
-				if (d->Debug)
+				if (_debug)
 					printf("CharAt(%g) x=%g Status=%i Foffset=%g index=%i trailing=%i\n",
 						(double)Fpos/FScale, (double)b.X()/FScale, Status,
 						(double)Foffset/FScale, Index, Trailing);
 
-				LUtf8Str u(Str);
-				while ((OsChar*)u.GetPtr() < Str + Index + Trailing)
+				LUtf8Str u(b.Str);
+				while ((OsChar*)u.GetPtr() < b.Str + Index)
 				{
 					u++;
 					Status++;
 				}
+				Status += Trailing;
 				
 				return Status;
 			}
 			else
 			{
-				if (d->Debug)
+				if (_debug)
 					printf("CharAt(%g) x=%g Status=%i Chars=%i\n",
 						(double)Fpos/FScale, (double)b.X()/FScale, Status, b.Chars);
 					
@@ -1894,6 +1893,12 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 			
 			cx += i.X;
 		}
+
+		// Force the app_server to finish processing the draw commands above before
+		// anyone (eg column header double buffering) reads the pixels back out of
+		// the bitmap/view directly (DrawBitmap, Bits() etc), otherwise the text can
+		// be missing because it hasn't been rasterized into the backing store yet.
+		view->Sync();
 
 		if (locked)		
 			view->UnlockLooper();

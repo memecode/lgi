@@ -5,6 +5,7 @@
 #include "lgi/common/OAuth2.h"
 #include "lgi/common/Json.h"
 #include "lgi/common/Http.h"
+#include "lgi/common/SubProcess.h"
 
 //////////////////////////////////////////////////////////////////
 #define LOCALHOST_PORT		54900
@@ -181,7 +182,7 @@ struct LOAuth2Priv
 
 		void SetPriv(LOAuth2Priv *priv)
 		{
-			if (d = priv)
+			if ((d = priv))
 			{
 				if (d->Params.SslKey && d->Params.SslCert)
 					Listen.SetCert(d->Params.SslCert, d->Params.SslKey);
@@ -254,8 +255,6 @@ struct LOAuth2Priv
 		}
 	};
 	
-	static LAutoPtr<OAuth2Server> httpsServer;
-
 	LString Base64(LString s)
 	{
 		LString b;
@@ -310,9 +309,7 @@ struct LOAuth2Priv
 					RedirEnc.Get(),
 					CodeVerifier.Get(),
 					Scope.Get());
-		if (Log)
-			Log->Print("%s:%i - Uri: %s\n", _FL, Uri.Get());
-
+		LOG("%s:%i - Uri: %s\n", _FL, Uri.Get());
 		LOG("%s: open browser: %s\n", __func__, Uri.Get());
 		LExecute(Uri); // Open browser for user to auth
 
@@ -321,8 +318,6 @@ struct LOAuth2Priv
 		{
 			Token = httpsServer->Params.Find("code");
 			LOG("%s: Token='%s'\n", __func__, Token.Get());
-			if (Log)
-				Log->Print("%s:%i - Token='%s'\n", _FL, Token.Get());
 			LOG("%s: sending resp...\n", __func__);
 			httpsServer->Response(Token ? "Ok: Got token. You can close this window/tab now." : "Error: No token.");
 			LOG("%s: sent resp.\n", __func__);
@@ -457,6 +452,8 @@ struct LOAuth2Priv
 		return AccessToken.Get() != NULL;
 	}
 
+	LAutoPtr<OAuth2Server> httpsServer;
+
 	LOAuth2Priv(LOAuth2::Params &params, const char *account, LDom *store, LStream *log, LCancel *cancel)
 	{
 		Params = params;
@@ -495,8 +492,6 @@ struct LOAuth2Priv
 		return true;
 	}
 };
-
-LAutoPtr<LOAuth2Priv::OAuth2Server> LOAuth2Priv::httpsServer;
 
 LOAuth2::LOAuth2(LOAuth2::Params &params, const char *account, LDom *store, LCancel *cancel, LStream *log)
 {
@@ -565,4 +560,111 @@ LString LOAuth2::GetAccessToken()
 	else d->Log->Print("No token.\n");
 
 	return LString();
+}
+
+bool LOAuth2::Params::ScanForKeyAndCert(const char* folder)
+{
+	LDirectory dir;
+	for (auto b = dir.First(folder); b; b = dir.Next())
+	{
+		if (dir.IsDir())
+			continue;
+		auto name = dir.GetName();
+		auto ext = LGetExtension(name);
+		if (!Stricmp(ext, "pem"))
+		{
+			if (Stristr(name, "key.pem"))
+				SslKey = dir.FullPath();
+			else
+				SslCert = dir.FullPath();
+		}
+	}
+
+	return	LFileExists(SslKey) &&
+			LFileExists(SslCert);
+}
+
+bool LOAuth2::Params::CheckRequirement(const char *req)
+{
+	if (!Stricmp(req, CapMkcert))
+	{
+		// Check if mkcert is installed and available to call...
+		LSubProcess sub("mkcert", "--version");
+		if (!sub.Start())
+			return false;
+		LStringPipe out;
+		if (sub.Communicate(&out))
+			return false;		
+		if (!LCheckVersion(out.NewLStr(), "1.4"))
+			return false;
+		
+		return true;
+	}
+	else if (!Stricmp(req, CapHttpsCert))
+	{
+		// Check that we have SSL certs for the HTTPS server:
+		if (LFileExists(SslKey) &&
+			LFileExists(SslCert))
+		{
+			// Probably ok? Can we validate them somehow?
+			return true;
+		}
+
+		// Check the cert folder exists:
+		LFile::Path appRoot(LSP_APP_DATA);
+		auto certFolder = appRoot / "certs";
+		if (!LDirExists(certFolder))
+		{
+			if (!FileDev->CreateFolder(certFolder, true))
+			{
+				LgiTrace("%s:%i - Can't create cert folder '%s'\n", _FL, certFolder.GetFull().Get());
+				return false;
+			}
+		}
+		if (!LDirExists(certFolder))
+		{
+			LgiTrace("%s:%i - Cert folder '%s' missing\n", _FL, certFolder.GetFull().Get());
+			return false;
+		}
+
+		// If the cert files exist... then ok, return success
+		if (ScanForKeyAndCert(certFolder))
+			return true;
+
+		{
+			// Then make sure the CA is installed into the browser(s):
+			LSubProcess sub("mkcert", "-install");
+			if (!sub.Start())
+				return false;
+			LStringPipe out;
+			if (sub.Communicate(&out))
+				return false;
+		}
+
+		{
+			// Create the certificate with mkcert:
+			LSubProcess sub("mkcert", LString::Fmt("localhost 127.0.0.1 ::1"));
+			sub.SetInitFolder(certFolder);
+			if (!sub.Start())
+			{
+				LgiTrace("%s:%i - Failed to start 'mkcert'\n", _FL);
+				return false;
+			}
+
+			LStringPipe out;
+			if (sub.Communicate(&out))
+			{
+				LgiTrace("%s:%i - Failed to read 'mkcert' output\n", _FL);
+				return false;
+			}
+		}
+
+		return ScanForKeyAndCert(certFolder);
+	}
+	else
+	{
+		LAssert(!"unknown capability");
+	}
+	
+	return false;
 }

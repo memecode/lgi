@@ -36,8 +36,8 @@ LString LKey::utf8() const
 	char buf[8] = "";
 	auto out = (uint8_t*)buf;
 	ssize_t outSize = sizeof(buf);
-	ssize_t inSize = sizeof(c16);
 	#if WINDOWS
+		ssize_t inSize = sizeof(c16);
 		auto in = (const uint16_t*)&c16;
 		LgiUtf16To8(in, inSize, out, outSize);
 	#else
@@ -49,6 +49,17 @@ LString LKey::utf8() const
 bool LKey::IsContextMenu() const
 {
 	return !IsChar && vkey == LK_CONTEXTKEY;
+}
+
+const char *LKey::KeyName(char16 vkey)
+{
+	switch (vkey)
+	{
+		#define _(name, val) case val: return #name;
+		L_ALL_KEYS()
+		#undef _
+	}
+	return nullptr;
 }
 
 #ifdef HAIKU

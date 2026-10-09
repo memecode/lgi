@@ -500,7 +500,7 @@ enum LSystemPath
 	LSP_COMMON_APP_DATA,
 
 	/// User specific application data
-	///		[Win32] = ~\Application Data
+	///		[Win32] = ~\AppData
 	///		[Mac] = ~/Library
 	///		[Linux] = /usr
 	///		[Haiku] = ?
@@ -509,7 +509,7 @@ enum LSystemPath
 	/// Machine + user specific application data (probably should not use)
 	///		[Win32] = ~\Local Settings\Application Data
 	///		[Mac] = ~/Library
-	///		[Linux] = /usr/local
+	///		[Linux] = ~/.local/share
 	LSP_LOCAL_APP_DATA,
 
 	/// Desktop dir
@@ -528,36 +528,74 @@ enum LSystemPath
 	LSP_USER_APPS,
 
 	/// The running application's path.
-	/// [Mac] This doesn't include the "Contents/MacOS" part of the path inside the bundle.
+	///		[Mac] This doesn't include the "Contents/MacOS" part of the path inside the bundle.
 	LSP_EXE,
 
 	/// The system trash folder.
 	LSP_TRASH,
 
+	/// Where system wide file systems are mounted:
+	///		[Win32] = n/a
+	///		[Mac]   = /Volumes
+	///		[Linux] = /mnt
+	///		[Haiku] = ?
+	LSP_SYS_MOUNT_POINT,
+
+	/// Where user specific file systems are mounted:
+	///		[Win32] = ?
+	///		[Mac]   = ?
+	///		[Linux] = /media/$USER
+	///		[Haiku] = ?
+	LSP_USER_MOUNT_POINT,
+
 	/// The app's install folder.
 	///		[Win32] = $ExePath (sans '\Release' or '\Debug')
-	///		[Mac/Linux] = $ExePath
+	///		[Mac]   = $ExePath
+	///		[Linux] = $ExePath
+	///		[Haiku] = $ExePath
 	/// Where $ExePath is the folder the application is running from
 	LSP_APP_INSTALL,
 
-	/// The app's root folder (Where config and data should be stored)
-	/// LOptionsFile uses LSP_APP_ROOT as the default location.
-	///		[Win32] = ~\Application Data\Roaming\$AppName
-	///		[Mac] = ~/Library/$AppName
-	///		[Linux] = ~/.$AppName
-	///		[Haiku] = ~/settings/$AppName
-	/// Where $AppName = LApp::GetName.
-	/// If the given folder doesn't exist it will be created.
-	LSP_APP_ROOT,
+	//////////////////////////////////////////////////////////
+	// App name specific folders:
+	//			Where $AppName = LApp::GetName.
+	//			If the given folder doesn't exist it will be created.
+
+		/// The app's data folder.
+		///		[Win32] = ~\AppData\Local\$AppName
+		///		[Mac]   = ~/Library/Application Support/$AppName
+		///		[Linux] = ~/.local/share/$AppName
+		///		[Haiku] = ~/settings/$AppName
+		LSP_APP_DATA,
+
+		/// The app's configuration folder.
+		///		[Win32] = ~\AppData\Roaming\$AppName
+		///		[Mac]   = ~/Library/Application Support/$AppName
+		///		[Linux] = ~/.config/$AppName
+		///		[Haiku] = ~/settings/$AppName
+		LSP_APP_CONFIG,
+
+		/// The app's cache folder. This can be removed to save space:
+		///		[Win32] = ~\AppData\Local\$AppName\Cache\
+		///		[Mac]   = ~/Library/Caches/$AppName
+		///		[Linux] = ~/.cache/$AppName
+		///		[Haiku] = ~/settings/$AppName/cache
+		LSP_APP_CACHE,
+
+	//////////////////////////////////////////////////////////
 
 	/// This is the user's documents folder
-	///		[Win32] ~\My Documents
-	///		[Mac] ~\Documents
+	///		[Win32] = ~\My Documents
+	///		[Mac]   = ~\Documents
+	///		[Linux] = ~\Documents
+	///		[Haiku] = ~\Documents
 	LSP_USER_DOCUMENTS,
 
 	/// This is the user's music folder
-	///		[Win32] ~\My Music
-	///		[Mac] ~\Music
+	///		[Win32] = ~\My Music
+	///		[Mac]   = ~\Music
+	///		[Linux] = ~\Music
+	///		[Haiku] = ~\Music
 	LSP_USER_MUSIC,
 
 	/// This is the user's video folder
@@ -573,15 +611,15 @@ enum LSystemPath
 	///		[Win32] = ~\Links
 	///		[Mac]   = ???
 	///		[Linux] = ???
+	///		[Haiku] = ???
 	LSP_USER_LINKS,
 
 	/// User's pictures/photos folder
-	LSP_USER_PICTURES,
-	///		[Win32] = C:\Users\%HOME%\Pictures
-	///		[Mac]   = ???
+	///		[Win32] = ~\Pictures
+	///		[Mac]   = ~\Pictures
 	///		[Linux] = ~\Pictures
-	
-	LSP_MOUNT_POINT,
+	///		[Haiku] = ~\Pictures
+	LSP_USER_PICTURES,
 };
 
 #ifdef _DEBUG

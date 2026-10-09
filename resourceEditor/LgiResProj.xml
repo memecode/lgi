@@ -8,25 +8,29 @@
 		<Node File="../src/common/Lgi/About.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Lgi/DocApp.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Gdc2/Filters/Gif.cpp" Type="2" Platforms="15" />
-		<Node File="../src/common/Lgi/OptionsFile.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Gdc2/Filters/Lzw.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Lgi/OptionsFile.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Text/XmlTreeUi.cpp" Type="2" Platforms="15" />
 	</Node>
-	<Node Name="Objects" Type="1" Open="1" Platforms="7" Id="2">
+	<Node Name="App" Type="1" Open="1" Platforms="7" Id="2">
+		<Node Name="AutoTranslate" Type="1" Platforms="15" Id="3">
+			<Node File="./src/translate/googleTranslate.cpp" Type="2" Platforms="15" />
+		</Node>
 		<Node Name="Css" Type="1" Platforms="15" Id="8">
 			<Node File="./src/LgiRes_Css.cpp" Type="2" Platforms="15" />
 		</Node>
-		<Node Name="Dialog" Type="1" Open="0" Platforms="7" Id="3">
+		<Node Name="Dialog" Type="1" Open="0" Platforms="7" Id="4">
 			<Node File="./src/LgiRes_ControlTree.cpp" Type="2" Platforms="15" />
 			<Node File="./src/LgiRes_Dialog.cpp" Type="2" Platforms="15" />
 			<Node File="./src/LgiRes_Dialog.h" Type="3" Platforms="15" />
 			<Node File="./src/LgiRes_TableLayout.cpp" Type="2" Platforms="15" />
 		</Node>
-		<Node Name="Menu" Type="1" Open="0" Platforms="7" Id="4">
+		<Node Name="Menu" Type="1" Open="0" Platforms="7" Id="5">
 			<Node File="./src/LgiRes_Menu.cpp" Type="2" Platforms="15" />
 			<Node File="./src/LgiRes_Menu.h" Type="3" Platforms="15" />
 		</Node>
-		<Node Name="String" Type="1" Open="0" Platforms="7" Id="5">
+		<Node Name="String" Type="1" Open="0" Platforms="7" Id="7">
 			<Node File="./src/LgiRes_String.cpp" Type="2" Platforms="15" />
 			<Node File="./src/LgiRes_String.h" Type="3" Platforms="15" />
 		</Node>
@@ -35,7 +39,7 @@
 		<Node File="./src/Search.cpp" Type="2" Platforms="15" />
 		<Node File="./src/ShowLanguages.cpp" Type="2" Platforms="15" />
 	</Node>
-	<Node Name="Resources" Type="1" Open="0" Platforms="7" Id="7">
+	<Node Name="Resources" Type="1" Open="0" Platforms="7" Id="9">
 		<Node File="./resources/lgires.lr8" Type="5" Platforms="15" />
 	</Node>
 	<Node File="../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
@@ -61,6 +65,8 @@
 					<Release>/home/matthew/Code/MidiHw/mc4/resources/mc4.lr8</Release>
 				</All>
 			</Arguments>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -72,12 +78,9 @@ resources</Release>
 				</All>
 				<Linux>
 					<Debug>../include/lgi/linux
-../include/lgi/linux/Gtk
-
-</Debug>
+../include/lgi/linux/Gtk</Debug>
 					<Release>../include/lgi/linux
-../include/lgi/linux/Gtk
-</Release>
+../include/lgi/linux/Gtk</Release>
 				</Linux>
 				<Windows>
 					<Debug>../include/lgi/win</Debug>
@@ -108,6 +111,7 @@ be</Debug>
 					<Release>gnu
 be</Release>
 				</Haiku>
+				<All />
 			</Libraries>
 			<SystemIncludes>
 				<Linux>
@@ -126,7 +130,24 @@ be</Release>
 					<Debug>_GNU_SOURCE</Debug>
 					<Release>_GNU_SOURCE</Release>
 				</Haiku>
+				<All />
+				<Linux />
 			</Defines>
+			<Options>
+				<All />
+				<Linux />
+			</Options>
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
+			<RPath>
+				<Linux />
+			</RPath>
+			<RPathLink>
+				<Linux />
+			</RPathLink>
+			<ApplicationIcon />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -141,14 +162,27 @@ be</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
+			<CommentFile />
+			<CommentFunction />
 		</Editor>
 		<Debug>
 			<Arguments>
-				<All>
-					<Debug>/home/matthew/code/soundunitedtools/resources/SoundUnitedTools.lr8</Debug>
-					<Release>/home/matthew/code/soundunitedtools/resources/SoundUnitedTools.lr8</Release>
-				</All>
+				<All />
 			</Arguments>
+			<Environment />
+			<DebugAdmin />
+			<InitialDir />
+			<Debugger />
 		</Debug>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
+		<Advanced>
+			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+		</Advanced>
 	</Settings>
 </Project>

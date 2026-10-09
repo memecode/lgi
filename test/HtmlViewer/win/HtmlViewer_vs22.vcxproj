@@ -189,6 +189,7 @@
     <ClCompile Include="..\..\..\src\common\Text\Homoglyphs\Homoglyphs.cpp" />
     <ClCompile Include="..\..\..\src\common\Text\Homoglyphs\HomoglyphsTable.cpp" />
     <ClCompile Include="..\..\..\src\common\Text\Html.cpp" />
+    <ClCompile Include="..\..\..\src\common\Text\Html2.cpp" />
     <ClCompile Include="..\..\..\src\common\Text\HtmlCommon.cpp" />
     <ClCompile Include="..\..\..\src\common\Text\HtmlParser.cpp" />
     <ClCompile Include="..\..\..\src\common\Widgets\ZoomView.cpp" />
@@ -196,10 +197,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\lgi\common\Html.h" />
+    <ClInclude Include="..\..\..\include\lgi\common\Html2.h" />
     <ClInclude Include="..\..\..\include\lgi\common\HtmlCommon.h" />
     <ClInclude Include="..\..\..\include\lgi\common\HtmlParser.h" />
     <ClInclude Include="..\..\..\src\common\Coding\ScriptingPriv.h" />
     <ClInclude Include="..\..\..\src\common\Text\HtmlPriv.h" />
+    <ClInclude Include="..\..\..\src\common\Text\HtmlPriv2.h" />
   </ItemGroup>
   <ItemGroup>
     <MASM Include="..\..\..\src\common\Coding\ExternCall.asm">

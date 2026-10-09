@@ -5,6 +5,9 @@
 #ifndef __LLIST_ITEM_RADIO_H
 #define __LLIST_ITEM_RADIO_H
 
+#include "lgi/common/SkinEngine.h"
+#include "lgi/common/List.h"
+
 /// A radio button control for use in a LListItem. It will select one option amongst many rows.
 /// (Not one option amongst many columns)
 class LListItemRadioBtn : public LListItemColumn
@@ -37,21 +40,37 @@ public:
 	void OnPaintColumn(ItemPaintCtx &r, int i, LItemColumn *Col)
 	{
 		LSurface *pDC = r.pDC;
-		LRect c(0, 0, 10, 10);
+		int px = (int)((float)r.Y() * 0.8f);
+		LRect c(0, 0, px-1, px-1);
 		c.Offset(r.x1 + ((r.X()-c.X())/2), r.y1 + ((r.Y()-c.Y())/2));
 
+		if (LApp::SkinEngine &&
+			TestFlag(LApp::SkinEngine->GetFeatures(), GSKIN_RADIO))
+		{
+			LSkinState State;
+			State.pScreen = pDC;
+			State.Rect = c;
+			State.parentBackground = r.Back;
+			State.Value = Value();
+			LApp::SkinEngine->OnPaint_LRadioButton(&State);
+			return;
+		}
+
 		// Box
+		int cx = c.x1 + (c.X() / 2);
+		int cy = c.y1 + (c.Y() / 2);
+		int radius = c.X() / 2;
 		pDC->Colour(L_WORKSPACE);
-		pDC->FilledCircle(c.x1 + 5, c.y1 + 5, 5);
+		pDC->FilledCircle(cx, cy, radius);
 
 		pDC->Colour(L_TEXT);
-		pDC->Circle(c.x1 + 5, c.y1 + 5, 5);
+		pDC->Circle(cx, cy, radius);
 
 		// Value
 		if (Value())
 		{
 			pDC->Colour(L_TEXT);
-			pDC->FilledCircle(c.x1 + 5, c.y1 + 5, 2);
+			pDC->FilledCircle(cx, cy, radius / 2);
 		}
 	}
 

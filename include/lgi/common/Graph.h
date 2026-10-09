@@ -26,6 +26,13 @@ public:
 	{
 		LVariant Min, Max;
 	};
+	
+	struct Guide
+	{
+		bool horizontal = true;
+		LVariant value;
+		LColour before, after;
+	};
 
 	class DataSeries : public LBase
 	{
@@ -39,13 +46,14 @@ public:
 
 		LColour GetColour();
 		void SetColour(LColour c);
+		void SetTypes(LVariantType x, LVariantType y);		
 		bool SetDataSource(	/// Source of records
 							LDbRecordset *Rs,
 							/// Index into the data source of the X axis value
 							int XAxis = AUTO_AXIS,
 							/// Index into the data source of the Y axis value
 							int YAxis = AUTO_AXIS);
-		bool AddPair(char *x, char *y, void *UserData = NULL);
+		bool AddPair(const char *x, const char *y, void *UserData = nullptr);
 	};
     
 	LGraph(	/// Control identifier
@@ -70,12 +78,14 @@ public:
 	void SetLabel(bool XAxis, const char *Label);
 	Range GetRange(bool XAxis);
 	void SetRange(bool XAxis, Range r);
+	void AddGuide(Guide g);
 
 	void Empty();
 
     // Impl
-	void OnPaint(LSurface *pDC);
-	void OnMouseClick(LMouse &m);
-	void OnMouseMove(LMouse &m);
-	bool OnMouseWheel(double Lines);
+	void OnPaint(LSurface *pDC) override;
+	void OnMouseClick(LMouse &m) override;
+	void OnMouseMove(LMouse &m) override;
+	bool OnMouseWheel(double Lines) override;
+	bool OnLayout(LViewLayoutInfo &Inf) override;
 };

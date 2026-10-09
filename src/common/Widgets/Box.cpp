@@ -78,6 +78,9 @@ public:
 		for (int i=0; i<Spacers.Length(); i++)
 		{
 			LBox::Spacer &s = Spacers[i];
+			if (s.Fixed)
+				continue;
+
 			LRect Pos = s.Pos;
 			if (Vertical)
 			{
@@ -141,6 +144,7 @@ LBox::Spacer *LBox::GetSpacer(int idx)
 		{
 			Spacer &s = d->Spacers.New();
 			s.SizePx = DEFAULT_SPACER_PX;
+			s.Fixed = false;
 			// s.Colour.c24(DEFAULT_SPACER_COLOUR24);
 		}
 	}
@@ -303,11 +307,13 @@ struct BoxRange
 	int MinPx, MaxPx;
 	LCss::Len Size, Min, Max;
 	LViewI *View;
+	bool SelfSized; // Size came from the view's own layout, not CSS
 	
 	BoxRange &Init()
 	{
 		MinPx = MaxPx = DEFAULT_MINIMUM_SIZE_PX;
 		View = NULL;
+		SelfSized = false;
 		return *this;
 	}
 
@@ -414,14 +420,20 @@ void LBox::OnPosChange()
 				if (IsVertical())
 				{
 					if (info.Height.Max != LViewLayoutInfo::FILL)
+					{
 						// View has given us a height to use...
 						box.Size = LCss::Len(LCss::LenPx, info.Height.Max);
+						box.SelfSized = true;
+					}
 				}
 				else
 				{
 					if (info.Width.Max != LViewLayoutInfo::FILL)
+					{
 						// View has given has a width to use...
 						box.Size = LCss::Len(LCss::LenPx, info.Width.Max);
+						box.SelfSized = true;
+					}
 				}
 			}
 		}
@@ -608,6 +620,7 @@ void LBox::OnPosChange()
 		if (i < Sizes.Length() - 1)
 		{
 			Spacer &s = d->Spacers[i];
+			s.Fixed = box.SelfSized || Sizes[i+1].SelfSized;
 			s.Pos = content;
 			if (d->Vertical)
 			{

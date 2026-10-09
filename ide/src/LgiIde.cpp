@@ -6,7 +6,6 @@
 #include "lgi/common/Mdi.h"
 #include "lgi/common/Token.h"
 #include "lgi/common/XmlTree.h"
-#include "lgi/common/Panel.h"
 #include "lgi/common/Button.h"
 #include "lgi/common/TabView.h"
 #include "lgi/common/ClipBoard.h"
@@ -29,12 +28,10 @@
 #include "lgi/common/PopupNotification.h"
 #include "lgi/common/CommsBus.h"
 #include "lgi/common/RemoveAnsi.h"
-#include "lgi/common/RemoteFileSelect.h"
 #include "lgi/common/Uri.h"
 
 #include "LgiIde.h"
 #include "FindSymbol.h"
-#include "Debugger.h"
 #include "ProjectNode.h"
 #include "IdeFindInFiles.h"
 #include "resdefs.h"
@@ -692,22 +689,17 @@ public:
 		if (Dur > 300)
 		{
 			// Yo homes, too much text bro...
-			Name(NULL);
+			Name(nullptr);
 		}
 		else
 		{
 			for (auto l: Line)
 			{
-				char16 *t = Text + l->Start;
-				
+				auto t = Text + l->Start;				
 				if (l->Len > 5 && !StrnicmpW(t, L"(gdb)", 5))
-				{
 					l->c.Rgb(0, 160, 0);
-				}
 				else if (l->Len > 1 && t[0] == '[')
-				{
 					l->c.Rgb(192, 192, 192);
-				}
 			}
 		}
 	}
@@ -1238,16 +1230,16 @@ struct FileLoc
 class AppWndPrivate
 {
 public:
-	AppWnd *App = NULL;
+	AppWnd *App = nullptr;
 	int Platform = 0;
-	LMdiParent *Mdi = NULL;
+	LMdiParent *Mdi = nullptr;
 	LOptionsFile Options;
-	LBox *HBox = NULL, *VBox = NULL;
+	LBox *HBox = nullptr, *VBox = nullptr;
 	List<IdeDoc> Docs;
 	List<IdeProject> Projects;
-	LImageList *Icons = NULL;
-	LTree *Tree = NULL;
-	IdeOutput *Output = NULL;
+	LImageList *Icons = nullptr;
+	LTree *Tree = nullptr;
+	IdeOutput *Output = nullptr;
 	bool Debugging = false;
 	bool Running = false;
 	bool Building = false;
@@ -1837,7 +1829,7 @@ AppWnd::AppWnd()
 	#if WINNATIVE
 		SetIcon((char*)MAKEINTRESOURCE(IDI_APP));
 	#else
-		SetIcon("icon64.png");
+		SetIcon("icon64.png", "Development;IDE;");
 	#endif
 
 	if (!Attach(0))
@@ -1979,21 +1971,23 @@ AppWnd::AppWnd()
 	
 	d->DocBpCallback = d->BreakPoints.AddCallback([this](auto event, auto id)
 		{
-			printf("%s:%i - event=%i\n", _FL, event);
+			BP_LOG("%s:%i - event=%s\n", _FL, BreakPointStore::toString(event));
+
 			if (event == BreakPointStore::TBreakPointAdded ||
 				event == BreakPointStore::TBreakPointDeleted)
 			{
 				auto bp = d->BreakPoints.Get(id);
-				if (bp.File)
+				if (bp.relFile)
 				{
 					// Tell the document about the break point...
-					if (auto doc = FindOpenFile(bp.File))
+					if (auto doc = FindOpenFile(bp.relFile))
 					{
 						auto added = event == BreakPointStore::TBreakPointAdded;
-						printf("OnBreakPoint(%s, %i)\n", bp.File.Get(), added);
+						BP_LOG("OnBreakPoint(%s, %i)\n", bp.relFile.Get(), added);
 						doc->OnBreakPoint(id, added);
 					}
-					else printf("%s:%i - no file '%s'\n", _FL, bp.File.Get());					
+					// This isn't an error:
+					// else BP_LOG("%s:%i - no open file '%s'\n", _FL, bp.relFile.Get());					
 				}
 			}
 		});
@@ -2296,7 +2290,7 @@ public:
 
 void AppWnd::OnReceiveFiles(LArray<const char*> &Files)
 {
-	for (int i=0; i<Files.Length(); i++)
+	for (unsigned i=0; i<Files.Length(); i++)
 	{
 		auto f = Files[i];
 		
@@ -2342,10 +2336,16 @@ void AppWnd::OnReceiveFiles(LArray<const char*> &Files)
 	
 	if (LAppInst->GetOption("createMakeFiles"))
 	{
-		IdeProject *p = RootProject();
-		if (p)
+		if (auto p = RootProject())
 		{
-			p->CreateMakefile(PlatformCurrent, false);
+			p->CreateMakefile(PlatformCurrent,
+				false,
+				[this](auto status)
+				{
+					if (status &&
+						LAppInst->GetOption("exitAfter"))
+						LCloseApp();
+				});
 		}
 	}
 }
@@ -2898,8 +2898,7 @@ struct SaveState
 	{
 		if (Docs.Length())
 		{
-			auto doc = Docs[0];
-			Docs.DeleteAt(0);
+			auto doc = Docs.PopFirst();
 			
 			SAVE_LOG("Saving doc...\n");
 			doc->SetClean([this, doc](bool ok)
@@ -2920,8 +2919,7 @@ struct SaveState
 		}
 		else if (Projects.Length())
 		{
-			auto proj = Projects[0];
-			Projects.DeleteAt(0);
+			auto proj = Projects.PopFirst();
 			
 			SAVE_LOG("Saving proj...\n");
 			proj->SetClean([this, proj](bool ok)
@@ -3695,7 +3693,11 @@ LMessage::Result AppWnd::OnEvent(LMessage *m)
 		{
 			if (!d->Output)
 				break;
+				
+			
 			d->Output->Value(m->A());
+			if (m->B() && m->A() >= 0 && m->A() < AppWnd::Channels::ChannelMax)
+				d->Output->Txt[m->A()]->Name(nullptr);
 			break;
 		}
 		case M_DEBUG_ON_STATE:
@@ -3997,7 +3999,9 @@ int AppWnd::OnNotify(LViewI *Ctrl, const LNotification &n)
 					{
 						LAutoString File;
 						int Line;
-						if (d->DbgContext->ParseFrameReference(item->GetText(1), File, Line))
+						auto stack = item->GetText(1);
+						printf("select call stack: %s\n", stack);
+						if (d->DbgContext->ParseFrameReference(stack, File, Line))
 						{
 							LAutoString Full;
 							if (d->FindSource(Full, File, NULL))
@@ -4008,7 +4012,9 @@ int AppWnd::OnNotify(LViewI *Ctrl, const LNotification &n)
 								if (sFrame && IsDigit(*sFrame))
 									d->DbgContext->SetFrame(atoi(sFrame));
 							}
+							else printf("%s:%i - FindSource(%s) failed.\n", _FL, File.Get());
 						}
+						else printf("%s:%i - ParseFrameReference(%s) failed.\n", _FL, stack);
 					}
 				}
 			}
@@ -4429,7 +4435,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				auto Edit = dynamic_cast<LTextView3*>(Focus);
 				if (Edit && Edit->HasSelection())
 				{
-					LAutoString a(Edit->GetSelection());
+					auto a = Edit->GetSelection();
 					Dlg->Params->Text = a;
 				}
 			}
@@ -4467,7 +4473,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 					if (auto backend = p->GetBackend())
 					{
 						backend->FindInFiles(d->FindParameters, GetFindLog());
-						PostThreadEvent(d->AppHnd, M_SELECT_TAB, AppWnd::FindTab);
+						PostThreadEvent(d->AppHnd, M_SELECT_TAB, AppWnd::FindTab, true);
 					}
 					else // local find in the files:
 					{
@@ -4776,7 +4782,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			if (!d->DbgContext)
 			{
 				// Create an empty context for attaching to a random process:
-				d->DbgContext = new LDebugContext(this, NULL, GetCurrentPlatform(), NULL, NULL, false, NULL, NULL);
+				d->DbgContext = new LDebugContext(this, nullptr, GetCurrentPlatform(), nullptr, nullptr, false, nullptr, nullptr);
 			}
 		}
 		case IDM_PAUSE_DEBUG:
@@ -5042,7 +5048,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				IdeProject *p = RootProject();
 				if (p)
 				{
-					p->CreateMakefile(PlatIdx, false);
+					p->CreateMakefile(PlatIdx, false, nullptr);
 				}
 			}
 			break;
@@ -5196,7 +5202,7 @@ bool AppWnd::GetSystemIncludePaths(LString::Array &Paths)
 		}
 
 		bool InIncludeList = false;
-		while (Buf = p.Pop())
+		while ((Buf = p.Pop()))
 		{
 			if (stristr(Buf, "#include"))
 			{
@@ -5426,8 +5432,8 @@ int LgiMain(OsAppArguments &AppArgs)
 		a.AppWnd = new AppWnd;
 
 		// LPlaySound("~/code/mixkit-happy-bells-notification-937.wav");
-		LArray<int> ver;
-		LGetOs(&ver);
+		// LArray<int> ver;
+		// LGetOs(&ver);
 
 		// auto testFile = "/boot/home/code/lgi/trunk/CMakeLists.txt";
 		// LShowFileProperties(a.AppWnd->Handle(), testFile);
@@ -5439,9 +5445,9 @@ int LgiMain(OsAppArguments &AppArgs)
 		LHeaderUnitTests();
 		// LHostnameAsync::UnitTests();
 
-		auto myIp = LIpToStr(FilterIps());
-		auto hostName = LHostName();
-		printf("ip=%s, hostname=%s\n", myIp.Get(), hostName.Get());
+		// auto myIp = LIpToStr(FilterIps());
+		// auto hostName = LHostName();
+		// printf("ip=%s, hostname=%s\n", myIp.Get(), hostName.Get());
 
 		a.Run();
 	}

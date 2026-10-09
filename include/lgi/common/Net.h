@@ -70,6 +70,7 @@ LgiExtern LString LHostName();
 LgiExtern LString LIpToStr(uint32_t ip);
 LgiExtern uint32_t LIpToInt(LString str); // Convert IP as string to host order int
 LgiExtern uint32_t LHostnameToIp(const char *HostName); // Hostname lookup (DNS), returns IP in host order or 0 on error
+LgiExtern void LSetNetworkLog(LStream *log);
 
 class LgiClass LHostnameAsync
 {
@@ -109,6 +110,7 @@ LgiFunc void MDStringToDigest
 /// Implementation of a network socket
 class LgiClass LSocket :
 	public LSocketI,
+	virtual public LDom,
 	public LStream
 {
 protected:
@@ -119,13 +121,16 @@ protected:
 	bool CreateUdpSocket();
 
 public:
-	ssize_t	BytesRead, BytesWritten;
+	ssize_t	BytesRead = 0, BytesWritten = 0;
 
 	/// Creates the class
 	LSocket(LStreamI *logger = NULL, void *unused_param = NULL);
 	
 	/// Destroys the class
 	~LSocket();
+
+	/// Return log
+	LStreamI *GetLog() override;
 
 	/// Gets the active cancellation object
 	LCancel *GetCancel() override;
@@ -196,7 +201,7 @@ public:
 	int Close() override;
 
 	/// Sets the SO_REUSEADDR option.
-	bool SetReuseAddress(bool reuse);
+	bool SetReuseAddress(bool reuse) override;
 
 	/// Binds on a given port.
 	bool Bind(int Port, bool reuseAddr = true);
@@ -242,7 +247,8 @@ public:
 	)	override;
 
 	/// Returns the last error or 0.
-	int Error(void *Param = 0) override;
+	int Error(void *Param = nullptr) override;
+	LError GetError();
 	const char *GetErrorString() override;
 
 	/// Not supported
@@ -299,6 +305,8 @@ public:
 			s->SetCancel(GetCancel());
 		return s;
 	}
+
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = nullptr) override;
 
 	// Statics
 
@@ -527,7 +535,7 @@ protected:
 	int Select(LArray<LSocketI*> &Results, bool Rd, bool Wr, int TimeoutMs);
 
 public:
-	LSelect(LSocket *sock = NULL);
+	LSelect(LSocket *sock = nullptr);
 	
 	LSelect &operator +=(LSocketI *sock);
 	

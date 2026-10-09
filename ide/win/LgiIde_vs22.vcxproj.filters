@@ -129,15 +129,18 @@
     <ClInclude Include="..\..\include\lgi\common\Ssh.h">
       <Filter>Source Files\System Backends</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\gdb.h">
+      <Filter>Source Files\Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lldb.h">
+      <Filter>Source Files\Debugger</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\common\Lgi\About.cpp">
       <Filter>Lgi</Filter>
     </ClCompile>
     <ClCompile Include="..\src\DebugContext.cpp">
-      <Filter>Source Files\Debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\Debugger.cpp">
       <Filter>Source Files\Debugger</Filter>
     </ClCompile>
     <ClCompile Include="..\src\DocEdit.cpp">
@@ -241,6 +244,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\common\Net\Ssh.cpp">
       <Filter>Source Files\System Backends</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gdb.cpp">
+      <Filter>Source Files\Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lldb.cpp">
+      <Filter>Source Files\Debugger</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

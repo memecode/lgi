@@ -204,7 +204,7 @@ bool LLayout::_SetScrollBars(bool x, bool y)
 	}
 	else
 	{
-		LgiTrace("%s:%i - _SetScrollBars is processing???!?!\n", _FL);
+		LgiTrace("%s:%i - _SetScrollBars is processing!\n", _FL);
 	}
 	
 	return true;

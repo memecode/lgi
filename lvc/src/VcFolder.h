@@ -8,6 +8,11 @@
 
 #include "SshConnection.h"
 
+#define DEBUG_SLOG				0
+#if DEBUG_SLOG
+#include "lgi/common/StructuredLog.h"
+#endif
+
 class VcLeaf;
 
 enum LoggingType
@@ -57,6 +62,10 @@ class ReaderThread : public LThread
 	LStream *Out;
 	LAutoPtr<LSubProcess> Process;
 	int FilterCount;
+
+	#if DEBUG_SLOG
+	LStructuredLog sLog;
+	#endif
 
 	int OnLine(char *s, ssize_t len);
 	bool OnData(char *Buf, ssize_t &r);
@@ -142,15 +151,28 @@ class VcFolder : public LTreeItem
 public:
 	using TBranchHash = LHashTbl<ConstStrKey<char>,VcBranch*>;
 
-	struct Author
+	struct TAuthor
 	{
 		bool InProgress = false;
+		bool Loaded = false;
 		LString name, email;
 		
-		Author() {}
-		Author(const char *n, const char *e) { name = n; email = e; }
+		TAuthor() {}
+		TAuthor(const char *n, const char *e) { name = n; email = e; }
+		
 		operator bool() const { return !name.IsEmpty() && !email.IsEmpty(); }
-		LString ToString() { return LString::Fmt("%s <%s>", name.Get(), email.Get()); }
+		LString Get() { return LString::Fmt("%s <%s>", name.Get(), email.Get()); }
+		bool Set(LString s)
+		{
+			auto start = s.Find("<");
+			auto end = s.Find(">", start);
+			if (start < 0 || end < 0)
+				return 0;
+			
+			name = s(0, start).Strip();
+			email = s(start + 1, end).Strip();
+			return true;
+		}
 	};
 
 protected:
@@ -243,9 +265,13 @@ protected:
 	LArray<CommitField> Fields;
 	LArray<std::function<void()>> OnVcsTypeEvents;
 	LAutoPtr<LThread> rewriteThread;
+	
+	// Sub modules:
+	LString parentRepo; // if non-null, this is a sub-module of 'parentRepo'
+	LString subRepoPath; // if non-null, a relative path to the sub repo
 
 	// Author name/email
-	Author AuthorLocal, AuthorGlobal;
+	TAuthor AuthorLocal, AuthorGlobal;
 	bool IsGettingAuthor = false;
 	bool preCommitCheck = true;
 
@@ -280,8 +306,18 @@ protected:
 	LAutoPtr<GitCommit> PostAdd;
 	void GitAdd();
 
+	enum class LogState
+	{
+		None,
+		Logging,
+		Loaded,
+		Error,
+	};
+
 	LArray<Cmd*> Cmds;
-	bool IsLogging = false, IsUpdate = false, IsFilesCmd = false;
+	LogState LogStatus = LogState::None;
+	
+	bool IsUpdate = false, IsFilesCmd = false;
 	bool IsCommit = false, IsUpdatingCounts = false;
 	bool IsListingWorking = false;
 	LvcStatus IsBranches = StatusNone, IsIdent = StatusNone;
@@ -300,6 +336,8 @@ protected:
 	void CurrentRev(std::function<void(LString)> Callback);
 	LColour BranchColour(const char *Name);
 	void UpdateBranchUi();
+	LString DiffContextOption();
+	bool BlameInternal(const char *Path, ParseFn Parser);
 
 	bool ParseDiffs(LString s, LString Rev, bool IsWorking);
 	
@@ -318,6 +356,7 @@ protected:
 	bool ParseResolveList(int Result, LString s, ParseParams *Params);
 	bool ParseResolve(int Result, LString s, ParseParams *Params);
 	bool ParseBlame(int Result, LString s, ParseParams *Params);
+	bool ParseListAuthors(int Result, LString s, ParseParams *Params);
 	bool ParseSaveAs(int Result, LString s, ParseParams *Params);
 	bool ParseBranches(int Result, LString s, ParseParams *Params);
 	bool ParseStatus(int Result, LString s, ParseParams *Params);
@@ -346,7 +385,7 @@ public:
 	LString LocalPath();
 	const char *NoPipeOpt();
 	LUri GetUri();
-	VcLeaf *FindLeaf(const char *Path, bool OpenTree);
+	VcLeaf *FindLeaf(LString Path, bool OpenTree);
 	void DefaultFields();
 	void UpdateColumns(LList *lst = NULL);
 	int IndexOfCommitField(CommitField fld);
@@ -360,9 +399,10 @@ public:
 	void GetConfigFile(bool local, bool createIfMissing, std::function<void(LString)> callback, bool debug = false);
 	LString GetRemotePrompt() { return RemotePrompt; }
 	void SetRemotePrompt(LString p) { RemotePrompt = p; }
-	bool GetAuthor(bool local, std::function<void(Author &author)> callback, bool debug = false);
-	void GetAuthors(std::function<void(Author &local, Author &global)> callback, bool debug = false);
-	bool SetAuthor(bool local, Author author);
+	void SetParentRepo(LString folder, LString relPath) { parentRepo = folder; subRepoPath = relPath; }
+	bool GetAuthor(bool local, std::function<void(TAuthor &author)> callback, bool debug = false);
+	void GetAuthors(std::function<void(TAuthor &local, TAuthor &global)> callback, bool debug = false);
+	bool SetAuthor(bool local, TAuthor author);
 	void ShowAuthor();
 	void UpdateAuthorUi();
 	void Empty();
@@ -379,9 +419,9 @@ public:
 	void Pull(int AndUpdate = -1, LoggingType Logging = LogNormal);
 	void Clean();
 	bool Revert(LString::Array &uris, const char *Revision = NULL, bool RevertToBefore = false);
-	bool Resolve(const char *Path, LvcResolve Type);
 	bool AddFile(const char *Path, bool AsBinary = true);
 	bool Blame(const char *Path);
+	bool ListAuthors(const char *Path);
 	bool SaveFileAs(const char *Path, const char *Revision);
 	void ReadDir(LTreeItem *Parent, const char *Uri);
 	void SetEol(const char *Path, int Type);
@@ -389,20 +429,43 @@ public:
 	void Diff(VcFile *file);
 	void DiffRange(const char *FromRev, const char *ToRev);
 	void MergeToLocal(LString Rev);
+	void RevertCommit(const char *Rev);
 	void Refresh();
 	void GetCurrentRevision(ParseParams *Params = NULL);
 	void CountToTip();
 	bool UpdateSubs(); // Clone/checkout any sub-repositories.
 	void LogFilter(const char *Filter);
-	void LogFile(const char *Path);
+	void LogFile(const char *Path, BrowseUi *existingUi);
 	void ClearLog();
 	LString GetFilePart(const char *uri);
 	void FilterCurrentFiles();
 	void GetRemoteUrl(ParseParams::TCallback Callback);
+	void SetRemoteUrl(LString newUrl, ParseParams::TCallback Callback = nullptr);
 	void SelectCommit(LWindow *Parent, LString Commit, LString Path);
 	void Checkout(const char *Rev, bool isBranch);
 	void Delete(const char *Path, bool KeepLocal = true);
 	void RewriteAuthor(RewriteInfo info);
+	void GotoItem(LString path);
+
+	// Conflicts:
+	struct TConflictInfo
+	{
+		LString uri;
+		LString base, ours, theirs;
+	};
+	using TConflictCb = std::function<void(TConflictInfo&)>;
+	bool Resolve(const char *Path, LvcResolve Type);
+	bool GetConflict(const char *Path, TConflictCb callback);
+	bool ConflictDiff(TConflictInfo &info, LString rev, ParseParams::TCallback callback);
+
+	struct TCommitInfo
+	{
+		LString hash, message, dateStr;
+		TAuthor author;
+		LString::Array mergeParents;
+	};
+	void GetCommit(LString hash, std::function<void(TCommitInfo&)> callback);
+	void CherryPick(LString hash, LString newMessage, int parentIdx = -1, std::function<void(bool)> callback = nullptr);
 
 	enum TColourType {
 		TColNone,
@@ -439,8 +502,6 @@ class VcLeaf : public LTreeItem
 	LString Leaf;
 	LTreeItem *Tmp = NULL;
 
-	void DoExpand();
-
 public:
 	LArray<VcCommit*> Log;
 
@@ -448,16 +509,17 @@ public:
 	~VcLeaf();
 
 	LString Full();
-	VcLeaf *FindLeaf(const char *Path, bool OpenTree, int depth = 0);
+	void DoExpand();
+	VcLeaf *FindLeaf(LString Path, bool OpenTree, int depth = 0);
 	void OnBrowse();
 	void AfterBrowse();
-	void OnExpand(bool b);
-	const char *GetText(int Col);
-	int GetImage(int Flags);
+	void OnExpand(bool b) override;
+	const char *GetText(int Col) override;
+	int GetImage(int Flags) override;
 	int Compare(LTreeItem *To, ssize_t Field = 0) override;
-	bool Select();
-	void Select(bool b);
-	void OnMouseClick(LMouse &m);
+	bool Select() override;
+	void Select(bool b) override;
+	void OnMouseClick(LMouse &m) override;
 	void ShowLog();
 };
 

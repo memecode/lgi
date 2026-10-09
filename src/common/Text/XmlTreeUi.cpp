@@ -16,7 +16,7 @@
 struct Mapping
 {
 	int Id = 0;
-	int Hint = GV_NULL;
+	LVariantType Hint = GV_NULL;
 	std::function<LItem*()> Callback;
 	LString ChildElementName;
 	LXmlTreeUi::EnumMap EnumMap;
@@ -105,13 +105,12 @@ bool LXmlTreeUi::IsMapped(const char *Attr)
 	return d->Maps.Find(Attr) != NULL;
 }
 
-void LXmlTreeUi::Map(const char *Attr, int UiIdent, int Type)
+void LXmlTreeUi::Map(const char *Attr, int UiIdent, LVariantType Type)
 {
 	if (UiIdent > 0 &&
 		(Attr != NULL || Type == GV_DOM))
 	{		
-		Mapping *m = new Mapping;
-		if (m)
+		if (auto m = new Mapping)
 		{
 			m->Id = UiIdent;
 			m->Hint = Type;
@@ -127,8 +126,7 @@ void LXmlTreeUi::Map(const char *Attr, int UiIdent, const char *ChildElementName
 {
 	if (Attr && UiIdent > 0 && Callback && ChildElementName)
 	{
-		Mapping *m = new Mapping;
-		if (m)
+		if (auto m = new Mapping)
 		{
 			m->Id = UiIdent;
 			m->Callback = Callback;
@@ -274,8 +272,7 @@ bool LXmlTreeUi::Convert(LDom *Tag, LViewI *Ui, bool ToUI)
 						container->Empty();
 						for (auto c: t->Children)
 						{
-							auto i = dynamic_cast<LList::TItem*>(m->Callback());
-							if (i)
+							if (auto i = dynamic_cast<LList::TItem*>(m->Callback()))
 							{
 								if (i->XmlIo(c, false))
 									container->Insert(i);
@@ -336,9 +333,18 @@ bool LXmlTreeUi::Convert(LDom *Tag, LViewI *Ui, bool ToUI)
 						}
 						else // no value, so set to blank
 						{
-							LEdit *e;
-							if (Ui->GetViewById(m->Id, e))
-								e->Name("");
+							if (m->Hint == GV_BOOL)
+							{
+								LCheckBox *chk;
+								if (Ui->GetViewById(m->Id, chk))
+									chk->Value(0);
+							}
+							else
+							{
+								LView *v;
+								if (Ui->GetViewById(m->Id, v))
+									v->Name("");
+							}
 						}
 						break;
 					}
@@ -348,9 +354,9 @@ bool LXmlTreeUi::Convert(LDom *Tag, LViewI *Ui, bool ToUI)
 		else
 		{
 			// UI -> Xml
-			for (auto Map : d->Maps)
+			for (auto Map: d->Maps)
 			{
-				Mapping *m = Map.value;
+				auto m = Map.value;
 				if (m->Hint == GV_HASHTABLE)
 				{
 					for (auto e: m->EnumMap)
@@ -364,8 +370,9 @@ bool LXmlTreeUi::Convert(LDom *Tag, LViewI *Ui, bool ToUI)
 				}
 				else
 				{
-					LViewI *c = Ui->FindControl(m->Id);
-					if (c)
+					bool debug = m->Id == 1200;
+					
+					if (auto c = Ui->FindControl(m->Id))
 					{
 						int Type = m->Hint ? m->Hint : GetCtrlType(c);
 
@@ -373,11 +380,14 @@ bool LXmlTreeUi::Convert(LDom *Tag, LViewI *Ui, bool ToUI)
 						{
 							case GV_LIST:
 							{
-								if (!Xml) break;
-								LXmlTag *Child = Xml->GetChildTag(Map.key, true);
-								if (!Child) break;
-								LList *Lst = dynamic_cast<LList*>(c);
-								if (!Lst) break;
+								if (!Xml)
+									break;
+								auto Child = Xml->GetChildTag(Map.key, true);
+								if (!Child)
+									break;
+								auto Lst = dynamic_cast<LList*>(c);
+								if (!Lst)
+									break;
 								Child->Empty(true);
 								Child->SetTag(Map.key);
 
@@ -397,13 +407,15 @@ bool LXmlTreeUi::Convert(LDom *Tag, LViewI *Ui, bool ToUI)
 							}
 							case GV_CUSTOM: // LTree
 							{
-								if (!Xml) break;
-								LXmlTag *Child = Xml->GetChildTag(Map.key, true);
-							
-								if (!Child) break;
-								LTree *Tree = dynamic_cast<LTree*>(c);
-							
-								if (!Tree) break;
+								if (!Xml)
+									break;
+								auto Child = Xml->GetChildTag(Map.key, true);
+								if (!Child)
+									break;
+								auto Tree = dynamic_cast<LTree*>(c);
+								if (!Tree)
+									break;
+									
 								Child->Empty(true);
 								Child->SetTag(Map.key);
 							

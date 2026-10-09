@@ -69,7 +69,7 @@ public:
 	LKey LastKey = {};
 	LArray<HookInfo> Hooks;
 	bool SnapToEdge = false;
-	LString Icon;
+	LString Icon, gnomeAppType;
 	LRect Decor;
 	gulong DestroySig = 0;
 	LAutoPtr<LSurface> IconImg;
@@ -180,7 +180,7 @@ int LWindow::WaitThread()
 	return 0; // Nop for linux
 }
 
-bool LWindow::SetIcon(const char *FileName)
+bool LWindow::SetIcon(const char *FileName, const char *gnomeAppType)
 {
 	LString a;
 	if (Wnd)
@@ -191,7 +191,6 @@ bool LWindow::SetIcon(const char *FileName)
 				FileName = a;
 		}
 
-
 		if (!LFileExists(FileName))
 		{
 			LgiTrace("%s:%i - SetIcon failed to find '%s'\n", _FL, FileName);
@@ -200,23 +199,24 @@ bool LWindow::SetIcon(const char *FileName)
 		else
 		{
 			#if defined(LINUX)
-			LAppInst->SetApplicationIcon(FileName);
+			if (gnomeAppType)
+				LAppInst->SetApplicationIcon(FileName, gnomeAppType);
 			#endif
 			
 			#if _MSC_VER
-			GError *error = NULL;
-			if (gtk_window_set_icon_from_file(Wnd, FileName, &error))
-				return true;
+				GError *error = NULL;
+				if (gtk_window_set_icon_from_file(Wnd, FileName, &error))
+					return true;
 			#else
-			// On windows this is giving a red for blue channel swap error...
-			if (d->IconImg.Reset(GdcD->Load(FileName)))
-				gtk_window_set_icon(Wnd, d->IconImg->CreatePixBuf());
+				// On windows this is giving a red for blue channel swap error...
+				if (d->IconImg.Reset(GdcD->Load(FileName)))
+					gtk_window_set_icon(Wnd, d->IconImg->CreatePixBuf());
 			#endif
 		}
 	}
 	
-	if (FileName != d->Icon.Get())
-		d->Icon = FileName;
+	d->Icon = FileName;
+	d->gnomeAppType = gnomeAppType;
 
 	return d->Icon != NULL;
 }
@@ -269,27 +269,26 @@ bool LWindow::Obscured()
 			d->State == GDK_WINDOW_STATE_ICONIFIED;
 }
 
-void LWindow::_OnViewDelete()
+void LWindow::GtkViewDelete()
 {
 	delete this;
 }
 
-void LWindow::OnGtkRealize()
+void LWindow::GtkRealize()
 {
 	d->AttachState = LAttached;
-	LView::OnGtkRealize();
+	LView::GtkRealize();
 }
 
-void LWindow::OnGtkDelete()
+void LWindow::GtkDelete()
 {
 	// Delete everything we own...
 
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
-		LViewI *c = Children[i];
-		LView *v = c->GetLView();
-		if (v)
-			v->OnGtkDelete();
+		if (auto c = Children[i])
+			if (auto v = c->GetLView())
+				v->GtkDelete();
 	}
 	
 	// These will be destroyed by GTK after returning from LWindowCallback
@@ -356,7 +355,7 @@ bool LWindow::TranslateMouse(LMouse &m)
 	return true;
 }
 
-bool LWindow::OnGtkDropTarget(LView *view, bool isTarget)
+bool LWindow::GtkDropTarget(LView *view, bool isTarget)
 {
 	if (!view)
 		return false;
@@ -390,7 +389,7 @@ bool LWindow::OnGtkDropTarget(LView *view, bool isTarget)
 	{
 		bool has = d->dndFormats.Find(fmt);
 		
-		// printf("OnGtkDropTarget for %s, fmt=%s, %i %i\n",
+		// printf("GtkDropTarget for %s, fmt=%s, %i %i\n",
 		// 	view->GetClass(), fmt.Get(), has, isTarget);
 		
 		if (isTarget ^ has)
@@ -413,7 +412,7 @@ bool LWindow::OnGtkDropTarget(LView *view, bool isTarget)
 	return true;
 }
 
-gboolean LWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
+gboolean LWindow::GtkEvent(GtkWidget *widget, GdkEvent *event)
 {
 	if (!event)
 	{
@@ -423,7 +422,7 @@ gboolean LWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 
 	#if 0
 	if (event->type != 28)
-		LgiTrace("%s::OnGtkEvent(%i) name=%s\n", GetClass(), event->type, Name());
+		LgiTrace("%s::GtkEvent(%i) name=%s\n", GetClass(), event->type, Name());
 	#endif
 	switch (event->type)
 	{
@@ -438,7 +437,7 @@ gboolean LWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 				if (sx && sy)
 					d->lastKnownSize = LPoint(sx, sy);
 				
-				OnGtkDelete();
+				GtkDelete();
 			}
 			return !Close;
 		}
@@ -734,7 +733,7 @@ GtkWindowRealize(GtkWidget *widget, LWindow *This)
 		This, (NativeInt)This > 0x1000 ? This->GetClass() : 0, (NativeInt)This > 0x1000 ? This->Name() : 0);
 	#endif
 
-	This->OnGtkRealize();
+	This->GtkRealize();
 }
 
 void
@@ -769,7 +768,7 @@ bool DndPointMap(LViewI *&view, LPoint &localPt, LDragDropTarget *&t, LWindow *W
 	view = Wnd->ViewFromPoint(mousePt - cli.TopLeft(), &localPt, param);
 	if (!view)
 	{
-		DND_ERROR("%s:%i - <no view> @ %s\n", _FL, mousePt.GetStr().Get());
+		// DND_ERROR("%s:%i - <no view> @ %s\n", _FL, mousePt.GetStr().Get());
 		return false;
 	}
 
@@ -808,13 +807,62 @@ LWindowDragBegin(GtkWidget *widget, GdkDragContext *context, LWindow *Wnd)
 void
 LWindowDragDataDelete(GtkWidget *widget, GdkDragContext *context, LWindow *Wnd)
 {
-	DND_LOG("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
+	auto fmts = gtk_context_targets(context);
+	DND_LOG("%s:%i - %s %s, targets=%s\n", _FL, Wnd->GetClass(), __func__, LString(",").Join(fmts).Get());
 }
 
 void
-LWindowDragDataGet(GtkWidget *widget, GdkDragContext *context, GtkSelectionData *data, guint info, guint time, LWindow *Wnd)
+LWindowDragDataGet(GtkWidget *widget, GdkDragContext *context, GtkSelectionData *sel, guint info, guint time, LWindow *Wnd)
 {
-	DND_LOG("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
+	auto dropSrc = (LDragDropSource*)g_object_get_data(G_OBJECT(widget), "DragDropSource");
+
+	// GTK calls this once per requested format; get the specific format being asked for.
+	auto requestedFmt = gdk_atom_name(gtk_selection_data_get_target(sel));
+
+	DND_LOG("%s:%i - %s %s, dropSrc=%p, requested=%s\n",
+		_FL,
+		Wnd->GetClass(), __func__,
+		dropSrc,
+		requestedFmt);
+
+	if (!dropSrc || !requestedFmt)
+	{
+		DND_ERROR("%s:%i - missing param: %p,%p\n", _FL, dropSrc, requestedFmt);
+		return;
+	}
+
+	LArray<LDragData> dragData;
+	dragData.New().Format = requestedFmt;
+
+	if (!dropSrc->GetData(dragData) ||
+		dragData.Length() == 0 ||
+		dragData[0].Data.Length() == 0)
+	{
+		DND_ERROR("%s:%i - GetData failed for '%s'\n", _FL, requestedFmt);
+		return;
+	}
+
+	LVariant &v = dragData[0].Data[0];
+	auto type_atom = gdk_atom_intern(requestedFmt, false);
+	switch (v.Type)
+	{
+		case GV_STRING:
+		{
+			auto s = v.Str();
+			if (s)
+				gtk_selection_data_set(sel, type_atom, 8, (Gtk::guchar*)s, strlen(s) + 1);
+			break;
+		}
+		case GV_BINARY:
+		{
+			if (v.Value.Binary.Data)
+				gtk_selection_data_set(sel, type_atom, 8, (Gtk::guchar*)v.Value.Binary.Data, v.Value.Binary.Length);
+			break;
+		}
+		default:
+			DND_ERROR("%s:%i - unhandled data type %i for '%s'\n", _FL, v.Type, requestedFmt);
+			break;
+	}
 }
 
 void
@@ -825,8 +873,9 @@ LWindowDragDataReceived(GtkWidget *widget, GdkDragContext *context, gint x, gint
 	LDragDropTarget *t = nullptr;
 	auto wView = LWidgetToView(widget);
 	
-	printf("%s:%i - LWindowDragDataReceived wid=%p/%s wnd=%s\n",
-		_FL, widget, wView?wView->GetClass():nullptr, Wnd?Wnd->GetClass():nullptr);
+	printf("%s:%i - LWindowDragDataReceived wid=%p/%s wnd=%s type=%s\n",
+		_FL, wView, wView?wView->GetClass():nullptr, Wnd?Wnd->GetClass():nullptr,
+		widget?g_type_name(G_TYPE_FROM_INSTANCE(widget)):"null");
 	
 	if (!DndPointMap(v, p, t, Wnd, mousePt))
 	{
@@ -834,35 +883,43 @@ LWindowDragDataReceived(GtkWidget *widget, GdkDragContext *context, gint x, gint
 		return;
 	}
 	
-	bool matched = false;
 	auto type = gdk_atom_name(gtk_selection_data_get_data_type(data));
+	LDragData *dropData = nullptr;
 	for (auto &d: t->Data)
 	{
 		if (d.Format.Equals(type))
 		{
-			matched = true;
-			
-			gint length = 0;
-			auto ptr = gtk_selection_data_get_data_with_length(data, &length);
-			if (ptr)
-			{
-				LgiTrace("%s:%i - LWindowDragDataReceived got data '%s', bytes=%i\n",
-						_FL, type, (int)length);
-				d.Data[0].SetBinary(length, (void*)ptr, false);
-			}
-			else
-			{
-				LgiTrace("%s:%i - LWindowDragDataReceived: gtk_selection_data_get_data_with_length failed for '%s'.\n", _FL, type);
-			}
+			dropData = &d;
 			break;
 		}
 	}
 
-	if (!matched)
-		LgiTrace("%s:%i - LWindowDragDataReceived: no matching data '%s'.\n", _FL, type);
+	if (!dropData)
+	{
+		// Create a data for this drop:
+		if (dropData = &t->Data.New())
+			dropData->Format = type;
+	}
 
-	DND_LOG("%s:%i - t=%p t->Data.len=%i\n", _FL, t, (int)t->Data.Length());
-	Wnd->PostEvent(M_DND_DATA_RECEIVED);
+	if (!dropData)
+	{
+		DND_ERROR("%s:%i - no dropData.\n", _FL);
+	}
+
+	gint length = 0;
+	if (auto ptr = gtk_selection_data_get_data_with_length(data, &length))
+	{
+		LgiTrace("%s:%i - LWindowDragDataReceived got data '%s', bytes=%i\n",
+				_FL, type, (int)length);
+		dropData->Data[0].SetBinary(length, (void*)ptr, false);
+
+		DND_LOG("%s:%i - t=%p t->Data.len=%i\n", _FL, t, (int)t->Data.Length());
+		Wnd->PostEvent(M_DND_DATA_RECEIVED);
+	}
+	else
+	{
+		LgiTrace("%s:%i - LWindowDragDataReceived: gtk_selection_data_get_data_with_length failed for '%s'.\n", _FL, type);
+	}
 }
 
 int GetAcceptFmts(LString::Array &Formats, GdkDragContext *context, LViewI *v, LDragDropTarget *t, LPoint &p, int debugLog = false)
@@ -889,8 +946,10 @@ int GetAcceptFmts(LString::Array &Formats, GdkDragContext *context, LViewI *v, L
 	}
 	else
 	{
+		/*
 		DND_ERROR("%s:%i - %s no supported formats in '%s'\n",
 			_FL, t->GetClass(), formats.ToString().Get());
+		*/
 	}
 	
 	return Flags;
@@ -922,7 +981,6 @@ struct LGtkDrop : public LView::ViewEventTarget
 		, context(Context)
 		, time(Time)
 	{
-		DND_LOG("%s:%i - LGtkDrop created...\n", _FL);
 		Start = LCurrentTime();
 		
 		// Map the point to a view...
@@ -932,6 +990,8 @@ struct LGtkDrop : public LView::ViewEventTarget
 			return;
 		}
 			
+		DND_LOG("%s:%i - LGtkDrop created, v=%p/%s\n", _FL, v, v?v->GetClass():nullptr);
+
 		t->Data.Length(0);
 		
 		// Request the data...
@@ -980,8 +1040,8 @@ struct LGtkDrop : public LView::ViewEventTarget
 						firstEmpty = d.Format;
 				}
 
-				DND_LOG("%s:%i - Got M_DND_DATA_RECEIVED %i of %i\n",
-					_FL, (int)HasData, (int)t->Data.Length());
+				DND_LOG("%s:%i - Got M_DND_DATA_RECEIVED %i of %i, firstEmpty=%p\n",
+					_FL, (int)HasData, (int)t->Data.Length(), firstEmpty);
 					
 				if (HasData >= t->Data.Length())
 				{
@@ -994,6 +1054,10 @@ struct LGtkDrop : public LView::ViewEventTarget
 					auto hnd = GTK_WIDGET(wnd->WindowHandle());
 					DND_LOG("%s:%i gtk_drag_get_data: %s\n", _FL, firstEmpty);
 					gtk_drag_get_data(hnd, context, gdk_atom_intern(firstEmpty, true), time);
+				}
+				else
+				{
+					DND_ERROR("%s:%i - no empty data slot?\n", _FL);
 				}
 				break;
 			}
@@ -1015,6 +1079,8 @@ struct LGtkDrop : public LView::ViewEventTarget
 	{
 		DND_LOG("%s:%i - OnComplete(%i)\n", _FL, isTimeout);
 		t->OnDrop(t->Data, p, KeyState);
+		wnd->GtkDropInProgress(false);
+		t->OnDragExit();
 		delete this;
 	}
 };
@@ -1023,8 +1089,9 @@ gboolean
 LWindowDragDataDrop(GtkWidget *widget, GdkDragContext *context, gint x, gint y, guint time, LWindow *Wnd)
 {
 	LPoint mousePt(x, y);
+	Wnd->GtkDropInProgress(true);
 	auto obj = new LGtkDrop(widget, context, mousePt, time, Wnd);
-	DND_LOG("%s:%i - LWindowDragDataDrop = %p\n", _FL, obj);
+	DND_LOG("%s:%i - LWindowDragDataDrop LGtkDrop: %p\n", _FL, obj);
 	return obj != NULL;
 }
 
@@ -1032,6 +1099,9 @@ void
 LWindowDragEnd(GtkWidget *widget, GdkDragContext *context, LWindow *Wnd)
 {
 	DND_LOG("%s:%i - LWindowDragEnd (cls=%s, hnds=%i)\n", _FL, Wnd->GetClass(), (int)LDragDropTarget::Handles.Length());
+
+	// Clear the active drag source stored at drag-begin time.
+	g_object_set_data(G_OBJECT(widget), "DragDropSource", nullptr);
 
 	for (auto hnd: LDragDropTarget::Handles)
 		PostThreadEvent(hnd, M_DND_END);
@@ -1068,6 +1138,11 @@ void
 LWindowDragLeave(GtkWidget *widget, GdkDragContext *context, guint time, LWindow *Wnd)
 {
 	DND_LOG("%s:%i - LWindowDragLeave cls=%s\n", _FL, Wnd->GetClass());
+	if (Wnd->curDndViewHnd)
+	{
+		PostThreadEvent(Wnd->curDndViewHnd, M_DND_EXIT);
+		Wnd->curDndViewHnd = 0;
+	}
 }
 
 gboolean
@@ -1082,6 +1157,10 @@ LWindowDragMotion(GtkWidget *widget, GdkDragContext *context, gint x, gint y, gu
 
 	if (!DndPointMap(v, p, t, Wnd, mousePt))
 	{
+		if (Wnd->curDndViewHnd)
+			PostThreadEvent(Wnd->curDndViewHnd, M_DND_EXIT);
+		Wnd->curDndViewHnd = 0;
+
 		// DND_ERROR("%s:%i - DndPointMap failed\n", _FL);
 		return false;
 	}
@@ -1091,6 +1170,15 @@ LWindowDragMotion(GtkWidget *widget, GdkDragContext *context, gint x, gint y, gu
 	auto hnd = v->AddDispatch();
 	if (LDragDropTarget::Handles.IndexOf(hnd) < 0)
 		LDragDropTarget::Handles.Add(hnd);
+
+	if (hnd != Wnd->curDndViewHnd)
+	{
+		if (Wnd->curDndViewHnd)
+			PostThreadEvent(Wnd->curDndViewHnd, M_DND_EXIT);
+		Wnd->curDndViewHnd = hnd;
+		if (Wnd->curDndViewHnd)
+			PostThreadEvent(Wnd->curDndViewHnd, M_DND_ENTER);
+	}
 
 	t->acceptedFormats.Empty();
 	int Flags = GetAcceptFmts(t->acceptedFormats, context, v, t, p);
@@ -1170,13 +1258,16 @@ bool LWindow::Attach(LViewI *p)
 
 		g_signal_connect(Obj, "drag-begin",				G_CALLBACK(LWindowDragBegin), i);
 		g_signal_connect(Obj, "drag-data-delete",		G_CALLBACK(LWindowDragDataDelete), i);
-		g_signal_connect(Obj, "drag-data-get",			G_CALLBACK(LWindowDragDataGet), i);
 		g_signal_connect(Obj, "drag-data-received",		G_CALLBACK(LWindowDragDataReceived), i);
 		g_signal_connect(Obj, "drag-drop",				G_CALLBACK(LWindowDragDataDrop), i);
-		g_signal_connect(Obj, "drag-end",				G_CALLBACK(LWindowDragEnd), i);
 		g_signal_connect(Obj, "drag-failed",			G_CALLBACK(LWindowDragFailed), i);
 		g_signal_connect(Obj, "drag-leave",				G_CALLBACK(LWindowDragLeave), i);
 		g_signal_connect(Obj, "drag-motion",			G_CALLBACK(LWindowDragMotion), i);
+
+		// These are implemented by 'LDragDropSource::Drag' with the specific source that has
+		// the data:
+		g_signal_connect(Obj, "drag-data-get",			G_CALLBACK(LWindowDragDataGet), i);
+		//		g_signal_connect(Obj, "drag-end",				G_CALLBACK(LWindowDragEnd), i);
 
 		#if 0
 		g_signal_connect(Obj, "button-press-event",		G_CALLBACK(GtkViewCallback), i);
@@ -1219,7 +1310,7 @@ bool LWindow::Attach(LViewI *p)
 		// Add icon
 		if (d->Icon)
 		{
-			SetIcon(d->Icon);
+			SetIcon(d->Icon, d->gnomeAppType);
 			d->Icon.Empty();
 		}
 
@@ -1293,14 +1384,17 @@ bool LWindow::HandleViewKey(LView *v, LKey &k)
 	LViewI *Ctrl = 0;
 	
 	#if DEBUG_HANDLEVIEWKEY
-	bool Debug = 1; // k.vkey == LK_RETURN;
+	bool Debug = k.vkey != LK_LSHIFT && k.vkey != LK_LCTRL;
 	char SafePrint = k.c16 < ' ' ? ' ' : k.c16;
 	
 	// if (Debug)
 	{
-		LgiTrace("%s/%p::HandleViewKey=%i ischar=%i %s%s%s%s (d->Focus=%s/%p)\n",
+		auto keyName = LKey::KeyName(k.vkey);
+		auto keyVal = IsAlpha(k.vkey) ? LString::Fmt("'%c'", k.vkey) : LString::Fmt("%i", k.vkey);
+
+		LgiTrace("%s/%p::HandleViewKey vkey=%s c16=%i ischar=%i %s%s%s%s (d->Focus=%s/%p)\n",
 			v->GetClass(), v,
-			k.c16,
+			keyName ? keyName : keyVal.Get(), k.c16,
 			k.IsChar,
 			(char*)(k.Down()?" Down":" Up"),
 			(char*)(k.Shift()?" Shift":""),
@@ -1311,8 +1405,7 @@ bool LWindow::HandleViewKey(LView *v, LKey &k)
 	#endif
 
 	// Any window in a popup always gets the key...
-	LViewI *p;
-	for (p = v->GetParent(); p; p = p->GetParent())
+	for (auto p = v->GetParent(); p; p = p->GetParent())
 	{
 		if (dynamic_cast<LPopup*>(p))
 		{
@@ -1400,7 +1493,6 @@ bool LWindow::HandleViewKey(LView *v, LKey &k)
 		}
 	}
 
-	// printf("Ctrl=%p\n", Ctrl);
 	if (Ctrl)
 	{
 		if (Ctrl->Enabled())
@@ -1952,8 +2044,10 @@ LMessage::Param LWindow::OnEvent(LMessage *m)
 						
 				if (targets.Length())
 				{
+					/*
 					LgiTrace("%s:%i - gtk_drag_dest_set on %s, fmt=%s\n",
 						_FL, GetClass(), LString(", ").Join(fmts).Get());
+					*/
 
 					Gtk::gtk_drag_dest_set(	wid,
 											Gtk::GTK_DEST_DEFAULT_DROP,

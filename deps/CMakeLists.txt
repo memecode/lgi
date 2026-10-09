@@ -1,14 +1,24 @@
 cmake_minimum_required(VERSION 3.20)
 
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
+set(CMAKE_POLICY_DEFAULT_CMP0091 NEW)
+
+# Must be set before project()/enable_language, otherwise the toolchain has
+# already been probed with the host SDK's default minimum version.
+if(CMAKE_HOST_APPLE)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Minimum OS X deployment version" FORCE)
+endif()
+
 project(lgiDeps)
-enable_language( C CXX ASM )
+if(WIN32)
+    enable_language( C CXX ASM_NASM )
+else()
+    enable_language( C CXX ASM )
+endif()
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+
 if(UNIX AND NOT APPLE)
     set(LINUX TRUE)
-    set(USE_SYSTEM_ZLIB TRUE) # having zlib in the path can conflict with say apt Firefox
-                              # so turning this off can make Lgi more compatible on Linux
-else()
-    set(USE_SYSTEM_ZLIB FALSE)
 endif()
 
 get_filename_component(DEPS "${CMAKE_CURRENT_LIST_DIR}/../../deps" ABSOLUTE)
@@ -17,12 +27,14 @@ if(HAIKU OR APPLE)
     set(WITH_SIMD FALSE)
 endif()
 
+set(BUILD_SHARED_LIBS ON)
 set(EXTRA_ARGS
     -DBUILD_SHARED_LIBS=ON
     -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}
     )
 
 if (APPLE)
+
     execute_process(COMMAND xcodebuild -version
         OUTPUT_VARIABLE XcodeOut)
     separate_arguments(XcodeParts UNIX_COMMAND ${XcodeOut})
@@ -34,12 +46,30 @@ if (APPLE)
     endif()
     message("XCODE_VER=${XCODE_VER} CMAKE_OSX_ARCHITECTURES=${CMAKE_OSX_ARCHITECTURES}")
 
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment version")
     string(REPLACE ";" "$<SEMICOLON>" CMAKE_OSX_ARCHITECTURES_ "${CMAKE_OSX_ARCHITECTURES}")
     list(APPEND EXTRA_ARGS "-DCMAKE_OSX_ARCHITECTURES=${CMAKE_OSX_ARCHITECTURES_}")
+    list(APPEND EXTRA_ARGS "-DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}")
+
+elseif (WIN32)
+
+    set(OPENSSL_ROOT_DIR "C:/Program Files/OpenSSL-Win64" CACHE PATH "Path to OpenSSL root" FORCE)
+    set(OPENSSL_CRYPTO_LIBRARY "C:/Program Files/OpenSSL-Win64/lib/VC/x64/MD/libcrypto.lib" CACHE FILEPATH "Path to OpenSSL crypto library" FORCE)
+    set(OPENSSL_SSL_LIBRARY "C:/Program Files/OpenSSL-Win64/lib/VC/x64/MD/libssl.lib" CACHE FILEPATH "Path to OpenSSL SSL library" FORCE)
+    set(OPENSSL_USE_STATIC_LIBS OFF CACHE BOOL "Use static OpenSSL libraries" FORCE)
+
+    find_package(OpenSSL 3.5 REQUIRED)
+
+
+    # '/FS' - Forces writes to the PDB file to be serialized through MSPDBSRV.EXE.
+    add_compile_options(/FS)
+
+    # fix the slashs in CMAKE_INSTALL_DOCDIR
+    string(REPLACE "\\" "/" CMAKE_INSTALL_DOCDIR "${CMAKE_INSTALL_DOCDIR}")
+    message("Fixed CMAKE_INSTALL_DOCDIR=${CMAKE_INSTALL_DOCDIR}")
+
 endif()
 
-function(GitProject NAME URI BRANCH ADDTARGET)
+function(GitProject NAME URI BRANCH ADDTARGET CLONE_ERR_FATAL)
 
     set(DIR "${DEPS}/${NAME}")
     message(STATUS "${NAME} = ${DIR}")
@@ -48,8 +78,21 @@ function(GitProject NAME URI BRANCH ADDTARGET)
             RESULT_VARIABLE clone_result
             OUTPUT_VARIABLE clone_out)
         if(NOT ${clone_result} MATCHES "^[0-9]+$" OR ${clone_result})
-            message("git clone --recurse-submodules -b ${BRANCH} ${URI} ${DIR}")
-            message(FATAL_ERROR "${NAME} clone failed: ${clone_result} ${clone_out}")
+            message(STATUS "git clone --recurse-submodules -b ${BRANCH} ${URI} ${DIR}")
+            if(${CLONE_ERR_FATAL})
+                message(FATAL_ERROR "${NAME} clone failed: ${clone_result} ${clone_out}")
+            else()
+                message(WARNING "${NAME} clone failed: ${clone_result} ${clone_out}")
+                return()
+            endif()
+        endif()
+    else()
+        execute_process(COMMAND git pull
+            WORKING_DIRECTORY ${DIR}
+            RESULT_VARIABLE pull_result
+            OUTPUT_VARIABLE pull_out)
+        if(NOT ${pull_result} MATCHES "^[0-9]+$" OR ${pull_result})
+            message(WARNING "${NAME} pull failed: ${pull_result} ${pull_out}")
         endif()
     endif()
 
@@ -68,15 +111,6 @@ endfunction()
 set(LIB_FOLDER ${CMAKE_BINARY_DIR}/lib)
 file(MAKE_DIRECTORY ${LIB_FOLDER})
 
-if(WIN32)
-    # '/FS' - Forces writes to the PDB file to be serialized through MSPDBSRV.EXE.
-    add_compile_options(/FS)
-
-    # fix the slashs in CMAKE_INSTALL_DOCDIR
-    string(REPLACE "\\" "/" CMAKE_INSTALL_DOCDIR "${CMAKE_INSTALL_DOCDIR}")
-    message("Fixed CMAKE_INSTALL_DOCDIR=${CMAKE_INSTALL_DOCDIR}")
-endif()
-
 if (1)
     # libjpeg
     if(APPLE)
@@ -84,7 +118,7 @@ if (1)
     else()
         set(ADD_JPEG_TARGET 1)
     endif()
-    GitProject(libjpeg "https://github.com/memecode/libjpeg.git" "memecode" ADD_JPEG_TARGET)
+    GitProject(libjpeg "https://github.com/memecode/libjpeg.git" "memecode" ADD_JPEG_TARGET TRUE)
     if(APPLE)
         
         # this is a hack to build each architecture of libjpeg separately and then combine them into a universal dylib
@@ -95,7 +129,7 @@ if (1)
             set(JPEG_BIN ${CMAKE_BINARY_DIR}/jpeg-${ARCH})
             message("JPEG_BIN=${JPEG_BIN}")
             file(MAKE_DIRECTORY ${JPEG_BIN})
-            execute_process(COMMAND cmake -G Ninja -DCMAKE_OSX_ARCHITECTURES=${ARCH} ${DEPS}/libjpeg
+            execute_process(COMMAND cmake -G Ninja -DCMAKE_OSX_ARCHITECTURES=${ARCH} -DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET} ${DEPS}/libjpeg
                 WORKING_DIRECTORY ${JPEG_BIN}
                 RESULT_VARIABLE ConfigureResult
                 COMMAND_ERROR_IS_FATAL ANY)
@@ -122,6 +156,13 @@ if (1)
         file(CREATE_LINK ./libjpeg.62.dylib ${LIB_FOLDER}/libjpeg.dylib SYMBOLIC)
 
     else()
+        # Debug and Release land in the same shared bin/lib folder, so disambiguate
+        # Debug with a 'd' suffix - otherwise whichever config built last clobbers
+        # the other's .dll/.lib/.pdb on disk (see lunasvg/ssh above).
+        if(MSVC)
+            set_target_properties(jpeg PROPERTIES DEBUG_POSTFIX "d")
+        endif()
+
         install(TARGETS jpeg
             RUNTIME
                 DESTINATION ${CMAKE_BINARY_DIR}/bin
@@ -131,10 +172,18 @@ if (1)
     endif()
 endif()
 
-if (NOT USE_SYSTEM_ZLIB)
+if (1)
     # zlib
     set(ZLIB_BUILD_SHARED TRUE)
-    GitProject(zlib "https://github.com/madler/zlib.git" "develop" TRUE)
+    set(ZLIB_BUILD_STATIC FALSE)
+    GitProject(zlib "https://github.com/madler/zlib.git" "develop" TRUE TRUE)
+    if(LINUX)
+        # this disambiguates the zlib target from the system zlib
+        set_target_properties(zlib PROPERTIES
+            OUTPUT_NAME z-lgi
+            BUILD_RPATH "$ORIGIN"
+            INSTALL_RPATH "$ORIGIN")
+    endif()
     install(TARGETS zlib # all of these should just be in the ./lib sub-folder
         RUNTIME
             DESTINATION ${CMAKE_BINARY_DIR}/lib
@@ -144,17 +193,19 @@ if (NOT USE_SYSTEM_ZLIB)
     message("ZLIB_ROOT=${ZLIB_ROOT}")
 endif()
 
-# libpng
-set(PNG_HARDWARE_OPTIMIZATIONS 0)
-set(PNG_ARM_NEON off)
-set(PNG_STATIC off)
-set(PNG_SHARED on)
-set(PNG_BUILD_ZLIB OFF)
-
 if (1)
+    # libpng
+    set(PNG_HARDWARE_OPTIMIZATIONS 0)
+    set(PNG_ARM_NEON off)
+    set(PNG_STATIC off)
+    set(PNG_SHARED on)
+    set(PNG_BUILD_ZLIB OFF)
+endif()
+
+if (NOT HAIKU)
     # used by ide/lvc
     set(WITH_ZLIB TRUE)
-    if (NOT USE_SYSTEM_ZLIB)
+    if (NOT USE_SYSTEM_ZLIB AND WIN32)
         # hack libssh's cmake into thinking zlib is available, when in reality it hasn't been built yet:
         set(ZLIB_LIBRARY "${DEPS}/build-x64/lib/zlib.dll")
     endif()
@@ -169,31 +220,107 @@ if (1)
         _add_custom_target(${ARGV})
     endfunction()
 
-    GitProject(libssh "https://git.libssh.org/projects/libssh.git" "libssh-0.12.0" TRUE)
+    GitProject(libssh "https://git.libssh.org/projects/libssh.git" "libssh-0.12.0" TRUE FALSE)
+    if(NOT TARGET ssh)
+        message(STATUS "libssh main repo failed, falling back to github: https://github.com/libssh/libssh.git")
+        GitProject(libssh "https://github.com/memecode/libssh.git" "libssh-0.12.0" TRUE TRUE)
+    endif()
+    if(NOT TARGET ssh)
+        message(FATAL_ERROR "libssh should be a target at this point.")
+    endif()
+
+    # Keep libssh build output separate from the install destination.
+    # Installing into the same folder as the built .so can clobber the
+    # versioned file when CMake handles symlinks.
+    if(LINUX)
+        set_target_properties(ssh PROPERTIES
+            LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/libssh-out")
+    endif()
+
+    # Force CRT selection explicitly for libssh and keep the common ssh.lib in sync
+    # with the currently built configuration to avoid stale Release artifacts in Debug.
+    if(MSVC)
+        set_property(TARGET ssh PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+
+        # Debug and Release both land in the same shared bin/lib folder, so give
+        # Debug a distinct 'd' suffix - otherwise whichever config was built last
+        # silently clobbers the other's .dll/.lib/.pdb on disk (see lunasvg above).
+        set_target_properties(ssh PROPERTIES DEBUG_POSTFIX "d")
+        add_custom_target(sync_ssh_lib ALL
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/lib"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_LINKER_FILE:ssh>" "${CMAKE_BINARY_DIR}/lib/$<TARGET_LINKER_FILE_NAME:ssh>"
+            DEPENDS ssh)
+    endif()
+
+    # override the output folders:
+    install(TARGETS ssh
+            RUNTIME DESTINATION ${CMAKE_BINARY_DIR}/bin
+            LIBRARY DESTINATION ${CMAKE_BINARY_DIR}/lib
+            ARCHIVE DESTINATION ${CMAKE_BINARY_DIR}/lib)
 endif()
 
-
-GitProject(libpng  "https://github.com/memecode/libpng.git" "libpng16" TRUE)
-install(TARGETS png_shared
-    RUNTIME
-        DESTINATION ${CMAKE_BINARY_DIR}/bin
-    LIBRARY
-        DESTINATION ${CMAKE_BINARY_DIR}/lib)
+if (1)
+    GitProject(libpng  "https://github.com/memecode/libpng.git" "libpng16" TRUE TRUE)
+    if(LINUX)
+        target_link_options(png_shared PRIVATE
+            "LINKER:-Bsymbolic-functions"
+        )
+        set_target_properties(png_shared PROPERTIES
+            OUTPUT_NAME png16-lgi
+            BUILD_RPATH "$ORIGIN"
+            INSTALL_RPATH "$ORIGIN")
+    endif()
+    install(TARGETS png_shared
+        RUNTIME
+            DESTINATION ${CMAKE_BINARY_DIR}/bin
+        LIBRARY
+            DESTINATION ${CMAKE_BINARY_DIR}/lib)
+endif()
 
 if (1)
     # lunasvg
-    GitProject(lunasvg "https://github.com/sammycage/lunasvg.git" "master" TRUE)
-    if(LINUX)
+    # Disable system font scanning - the SVG being loaded (commands.svg) has
+    # <text> elements, which pulls in font lookup/loading (stb_truetype) at
+    # parse time. This is a suspect for the heap corruption seen freeing
+    # lunasvg::Document even with CRTs matched, so rule it out first.
+    set(LUNASVG_DISABLE_LOAD_SYSTEM_FONTS ON CACHE BOOL "Disable automatic loading of fonts from system directories" FORCE)
+    GitProject(lunasvg "https://github.com/sammycage/lunasvg.git" "master" TRUE TRUE)
+
+    if(MSVC)
+        # Force CRT selection explicitly so lunasvg/plutovg allocate/free on the same
+        # heap as the rest of Lgi - a mismatch here causes heap corruption crashes
+        # (e.g. deleting a lunasvg::Document from Lgi's CRT) that only surface later.
+        set_property(TARGET lunasvg PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+        if(TARGET plutovg)
+            set_property(TARGET plutovg PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+        endif()
+
+        # Debug and Release both install into the same shared bin/lib folder, so give
+        # the Debug artifacts a distinct 'd' suffix - otherwise whichever config was
+        # built/installed last silently clobbers the other's .dll/.lib on disk, and
+        # the app can end up loading a mismatched-CRT, symbol-less Release binary.
+        set_target_properties(lunasvg PROPERTIES DEBUG_POSTFIX "d")
+        if(TARGET plutovg)
+            set_target_properties(plutovg PROPERTIES DEBUG_POSTFIX "d")
+        endif()
+    elseif(LINUX)
         target_compile_options(lunasvg PRIVATE -fPIC)
+        set_target_properties(lunasvg PROPERTIES
+            BUILD_RPATH "$ORIGIN"
+            INSTALL_RPATH "$ORIGIN")
+
         target_compile_options(plutovg PRIVATE -fPIC)
+        set_target_properties(plutovg PROPERTIES
+            BUILD_RPATH "$ORIGIN"
+            INSTALL_RPATH "$ORIGIN")
     endif()
 
     # libiconv
-    GitProject(libiconv "https://github.com/winlibs/libiconv.git" "master" TRUE)
+    GitProject(libiconv "https://github.com/winlibs/libiconv.git" "master" TRUE TRUE)
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/libiconv)
 
     # libntlm
-    GitProject(libntlm "https://gitlab.com/gsasl/libntlm.git" "master" TRUE)
+    GitProject(libntlm "https://gitlab.com/gsasl/libntlm.git" "master" TRUE TRUE)
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/libntlm)
 endif()
 
@@ -201,7 +328,7 @@ if (1)
     if(WIN32)
         if(CMAKE_GENERATOR STREQUAL "Visual Studio 16 2019")
             # vs2019 doesn't have 'stdatomic.h', grab one from here:
-            GitProject(simple-stdatomic "https://github.com/zenny-chen/simple-stdatomic-for-VS-Clang.git" "master" FALSE)
+            GitProject(simple-stdatomic "https://github.com/zenny-chen/simple-stdatomic-for-VS-Clang.git" "master" FALSE TRUE)
             set(STDATOMIC_ROOT "${DEPS}/simple-stdatomic")
             set(EMSCRIPTEN FALSE)
 
@@ -214,8 +341,21 @@ if (1)
         endif()
     endif()
 
+    # libjpeg's vendored cmakescripts/GNUInstallDirs.cmake stashes unresolved
+    # "<CMAKE_INSTALL_DATAROOTDIR>" placeholders into these shared CACHE vars;
+    # resolve them here so later projects (e.g. quickjs-ng) that use the
+    # regular GNUInstallDirs module don't fail to expand them.
+    foreach(_dir DATADIR INFODIR MANDIR LOCALEDIR DOCDIR)
+        if(CMAKE_INSTALL_${_dir} MATCHES "<CMAKE_INSTALL_DATAROOTDIR>")
+            string(REPLACE "<CMAKE_INSTALL_DATAROOTDIR>" "${CMAKE_INSTALL_DATAROOTDIR}"
+                _fixed_install_dir "${CMAKE_INSTALL_${_dir}}")
+            set(CMAKE_INSTALL_${_dir} "${_fixed_install_dir}" CACHE PATH "" FORCE)
+            message("Fixed CMAKE_INSTALL_${_dir}=${CMAKE_INSTALL_${_dir}}")
+        endif()
+    endforeach()
+
     # unused at the moment, but might replace Lgi's native scripting language sometime
-    GitProject(quickjs-ng "https://github.com/quickjs-ng/quickjs.git" "master" TRUE)
+    GitProject(quickjs-ng "https://github.com/quickjs-ng/quickjs.git" "master" TRUE TRUE)
 
     if(DEFINED STDATOMIC_ROOT)
         # add custom header path:

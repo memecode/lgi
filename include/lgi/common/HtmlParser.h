@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lgi/common/DocView.h"
+#include "lgi/common/Error.h"
 #include "lgi/common/HtmlCommon.h"
 
 class LHtmlParser
@@ -14,6 +15,10 @@ protected:
 	LArray<LHtmlElement*> OpenTags;
 	LAutoString DocCharSet;
 	bool DocAndCsTheSame;
+
+	/// Records malformed input instead of asserting. HTML comes from
+	/// untrusted sources, so a bad document is an error, not a bug.
+	void OnParseError(const char *file, int line, const char *fmt, ...);
 
 	void CloseTag(LHtmlElement *t)
 	{
@@ -29,6 +34,9 @@ protected:
 	char16 *DecodeEntities(const char *s, ssize_t len);
 
 public:
+	/// Set by Parse() when the document is malformed. Cleared on entry to Parse().
+	LError Error;
+
 	LHtmlParser(LDocView *view = NULL)
 	{
 		View = view;
@@ -38,7 +46,8 @@ public:
 	LDocView *GetView() { return View; }
 	void SetView(LDocView *v) { View = v; }
 
-	// Main entry point
+	/// Main entry point
+	/// \returns false if the document had errors, see 'Error' for details.
 	bool Parse(LHtmlElement *Root, const char *Doc);
 	
 	// Tool methods

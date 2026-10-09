@@ -422,8 +422,7 @@ void LMemDC::Blt(int x, int y, LSurface *Src, LRect *a)
 		if (pMem->Base)
 		{
 			// Screen -> Memory
-			GdkWindow *root_window = gdk_get_default_root_window();
-			if (root_window)
+			if (auto root_window = gdk_get_default_root_window())
 			{
 				LAssert(!"Gtk3 FIXME");
 				

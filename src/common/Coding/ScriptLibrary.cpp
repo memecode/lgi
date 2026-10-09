@@ -135,12 +135,6 @@ int LScriptUtils::htoi(char16 *s)
 //////////////////////////////////////////////////////////////////////////////////////
 SystemFunctions::SystemFunctions()
 {
-	Engine = NULL;
-	Log = NULL;
-
-	#ifdef WINNATIVE
-	Brk = NULL;
-	#endif
 }
 
 SystemFunctions::~SystemFunctions()
@@ -154,14 +148,8 @@ LStream *SystemFunctions::GetLog()
 
 bool SystemFunctions::SetLog(LStream *log)
 {
-	LAssert(Log == NULL);
 	Log = log;
 	return true;
-}
-
-void SystemFunctions::SetEngine(LScriptEngine *Eng)
-{
-	Engine = Eng;
 }
 
 bool SystemFunctions::Assert(LScriptArguments &Args)
@@ -607,9 +595,9 @@ bool SystemFunctions::Lgi4CC(LScriptArguments &Args)
 
 bool SystemFunctions::Print(LScriptArguments &Args)
 {
-	LStream *Out = Log ? Log : (Engine ? Engine->GetConsole() : NULL);
+	LAssert(Log);
 
-	for (unsigned n=0; Out && n<Args.Length(); n++)
+	for (unsigned n=0; Log && n<Args.Length(); n++)
 	{
 		if (!Args[n])
 			continue;
@@ -625,7 +613,7 @@ bool SystemFunctions::Print(LScriptArguments &Args)
 			case GV_LKEY:
 			case GV_STREAM:
 			{
-				Out->Print("%s", v.ToString().Get());
+				Log->Print("%s", v.ToString().Get());
 				break;
 			}
 			default:
@@ -634,11 +622,11 @@ bool SystemFunctions::Print(LScriptArguments &Args)
 				if (f)
 				{
 					size_t Len = strlen(f);
-					Out->Write(f, Len);
+					Log->Write(f, Len);
 				}
 				else
 				{
-					Out->Write("NULL", 4);
+					Log->Write("NULL", 4);
 				}
 				break;
 			}
@@ -683,7 +671,7 @@ bool SystemFunctions::New(LScriptArguments &Args)
 	}
 
 	Args.GetReturn()->Empty();
-	char *sType = Args[0]->CastString();
+	auto sType = Args[0]->CastString();
 	if (!sType)
 		return false;
 
@@ -697,8 +685,8 @@ bool SystemFunctions::New(LScriptArguments &Args)
 		return Args.GetReturn()->SetBinary(Bytes, new char[Bytes], true);
 	}
 
-	LVariant *Ret = Args.GetReturn();
-	LDomProperty Type = LStringToDomProp(sType);
+	auto Ret = Args.GetReturn();
+	auto Type = LStringToDomProp(sType);
 	switch (Type)
 	{	
 		case TypeList:
@@ -753,7 +741,8 @@ bool SystemFunctions::New(LScriptArguments &Args)
 		{
 			Ret->Empty();
 
-			LCompiledCode *c = Engine ? Engine->GetCurrentCode() : NULL;
+			/*
+			auto c = Engine ? Engine->GetCurrentCode() : nullptr;
 			if (!c)
 				return false;
 
@@ -761,7 +750,7 @@ bool SystemFunctions::New(LScriptArguments &Args)
 			LCustomType *t = c->GetType(o);
 			if (t)
 			{
-				int ArrayLength = Args.Length() > 1 ? Args[1]->CastInt32() : 1;
+				auto ArrayLength = Args.Length() > 1 ? Args[1]->CastInt32() : 1;
 				if (ArrayLength > 0)
 				{
 					Ret->Type = GV_CUSTOM;
@@ -769,6 +758,8 @@ bool SystemFunctions::New(LScriptArguments &Args)
 					Ret->Value.Custom.Data = new uint8_t[t->Sizeof() * ArrayLength];
 				}
 			}
+			*/
+			break;
 		}
 	}
 
@@ -890,6 +881,7 @@ bool SystemFunctions::DeleteFile(LScriptArguments &Args)
 
 bool SystemFunctions::CurrentScript(LScriptArguments &Args)
 {
+	/*
 	LCompiledCode *Code;
 	if (Engine &&
 		(Code = Engine->GetCurrentCode()))
@@ -897,6 +889,7 @@ bool SystemFunctions::CurrentScript(LScriptArguments &Args)
 		*Args.GetReturn() = Code->GetFileName();
 		return true;
 	}
+	*/
 	return false;
 }
 
@@ -1136,13 +1129,14 @@ bool SystemFunctions::Execute(LScriptArguments &Args)
 		return false;
 	}
 
-	LStringPipe p;
-	char *Exe = Args[0]->CastString();
-	char *Arguments = Args[1]->CastString();
+	auto Exe = Args[0]->CastString();
+	auto Arguments = Args[1]->CastString();
+	
 	LSubProcess e(Exe, Arguments);
 	bool Status = e.Start();
 	if (Status)
 	{
+		LStringPipe p;
 		e.Communicate(&p);
 		*Args.GetReturn() = p.NewLStr();
 	}
@@ -1154,6 +1148,7 @@ bool SystemFunctions::Execute(LScriptArguments &Args)
 			Log->Print("Error: Execute(\"%s\",\"%s\") failed with '%s'\n", Exe, Arguments, ErrMsg.Get());
 		else
 			Log->Print("Error: Execute(\"%s\",\"%s\") failed with '0x%x'\n", Exe, Arguments, ErrCode);
+		Args.GetReturn()->Empty();
 	}
 	
 	return Status;
@@ -1248,7 +1243,7 @@ LHostFunc SystemLibrary[] =
 	DefFn(OsVersion),
 
 	// End of list marker
-	LHostFunc(0, 0, 0),
+	LHostFunc(),
 };
 
 LHostFunc *SystemFunctions::GetCommands()

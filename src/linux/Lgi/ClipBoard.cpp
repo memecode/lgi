@@ -2,6 +2,7 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Variant.h"
 #include "lgi/common/ClipBoard.h"
+#include "lgi/common/Uri.h"
 
 #define DEBUG_CLIPBOARD					0
 #define VAR_COUNT						16
@@ -239,11 +240,24 @@ bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 	}	
 
 	gtk_clipboard_set_image(d->c, pb);
+	g_object_unref(pb);
 	return true; // have to assume it worked...
 }
 
 static void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LClipBoard::BitmapCb *Cb)
 {
+	LAutoPtr<LClipBoard::BitmapCb> callback(Cb);
+	if (!Clipboard)
+	{		
+		(*callback)(LAutoPtr<LSurface>(), "Clipboard is null");
+		return;
+	}
+	if (!Img)
+	{
+		(*callback)(LAutoPtr<LSurface>(), "Clipboard image is null");
+		return;
+	}
+
 	auto chan = gdk_pixbuf_get_n_channels(Img);
 	auto alpha = gdk_pixbuf_get_has_alpha(Img);
 	LColourSpace cs = System32BitColourSpace;
@@ -268,8 +282,7 @@ static void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LCli
 	{
 		LString s;
 		s.Printf("Unexpected colourspace: %i channels.", (int)chan);
-		(*Cb)(Out, s);
-		delete Cb;
+		(*callback)(Out, s);
 		return;
 	}
 
@@ -277,8 +290,7 @@ static void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LCli
 	LAutoPtr<LMemDC> m(new LMemDC(_FL, x, y, cs));
 	if (!m)
 	{
-		(*Cb)(Out, "Alloc failed");
-		delete Cb;
+		(*callback)(Out, "Alloc failed");
 		return;
 	}
 	
@@ -328,6 +340,14 @@ static void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LCli
 			Rop32(Argb32, Rgba32);
 			Rop32(Abgr32, Rgba32);
 
+			case CsIndex8:
+			{
+				auto in = (uchar*)(px + (yy*row));
+				auto out = (uchar*) ((*m)[yy]);
+				memcpy(out, in, x);
+				break;
+			}
+
 			default:
 				LAssert(!"Unsupported colour space.");
 				yy = y;
@@ -336,8 +356,7 @@ static void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LCli
 	}
 
 	Out.Reset(m.Release());
-	(*Cb)(Out, LString());
-	delete Cb;
+	(*callback)(Out, LString());
 }
 
 void LClipBoard::Bitmap(LClipBoard::BitmapCb Callback)
@@ -403,6 +422,9 @@ bool LClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmp
 	if (!Ptr || Len <= 0)
 		return false;
 
+	if (AutoEmpty)
+		Empty();
+
 	LVariant *p = NULL;
 	if (Data.Lock(_FL))
 	{
@@ -426,8 +448,9 @@ bool LClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmp
 		return false;
 	}
 	
+	LString fmt = Format ? FmtToStr(Format) : LString(LGI_CLIP_BINARY);
 	GtkTargetEntry te;
-	te.target = (char*)LGI_CLIP_BINARY;
+	te.target = (char*)(fmt ? fmt.Get() : LGI_CLIP_BINARY);
 	te.flags = 0; // GTK_TARGET_SAME_APP?
 	te.info = GV_BINARY; // App defined data type ID
 	Gtk::gboolean r = gtk_clipboard_set_with_data(d->c,
@@ -456,8 +479,15 @@ void LClipBoard::Files(FilesCb Callback)
 									LAutoPtr<FilesCb> cb((FilesCb*)data);
 									
 									LString::Array files;
-									for (int i=0; uris[i]; i++)
-										files.Add(uris[i]);
+									if (uris)
+									{
+										for (int i=0; uris[i]; i++)
+										{
+											LUri uri(uris[i]);
+											auto path = uri.LocalPath();
+											files.Add(path ? path.Get() : uris[i]);
+										}
+									}
 									
 									(*cb)(files, LString());
 								},
@@ -521,7 +551,12 @@ bool LClipBoard::Files(LString::Array &a, bool AutoEmpty)
 	   				{
 	   					LString f;
 	   					if (LFileExists(a))
-	   						f.Printf("file://%s\n", a.Get());
+						{
+							LUri u;
+							u.sProtocol = "file";
+							u.sPath = a;
+	   						f = u.ToString() + "\n";
+						}
 	   					else
 	   						printf("%s:%i - File '%s' doesn't exist.\n", _FL, a.Get());
 	   					data += f;
@@ -536,7 +571,12 @@ bool LClipBoard::Files(LString::Array &a, bool AutoEmpty)
 	   				{
 	   					LString f;
 	   					if (LFileExists(a))
-	   						f.Printf("\nfile://%s", a.Get());
+						{
+							LUri u;
+							u.sProtocol = "file";
+							u.sPath = a;
+	   						f = LString("\n") + u.ToString();
+						}
 	   					else
 	   						printf("%s:%i - File '%s' doesn't exist.\n", _FL, a.Get());
 	   					data += f;
@@ -573,7 +613,7 @@ bool LClipBoard::Files(LString::Array &a, bool AutoEmpty)
 		   	gpointer user_data)
 		{
 			auto cb = (LClipBoard*)user_data;
-			cb->Empty();
+			cb->d->files.Empty();
 		},
 		this);
 		
@@ -584,12 +624,14 @@ void LClipBoard::Binary(FormatType Format, BinaryCb Callback)
 {
 	if (!Callback)
 		return;
+
+	auto atom = Format ? Format : gdk_atom_intern(LGI_CLIP_BINARY, false);
 		
 	gtk_clipboard_request_contents(
 		// The clipboard
 		d->c,
 		// The atom to return
-		gdk_atom_intern(LGI_CLIP_BINARY, false),
+		atom,
 		// Lambda callback to receive the data
 		[](auto clipboard, auto data, auto ptr)
 		{

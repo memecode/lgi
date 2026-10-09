@@ -13,6 +13,7 @@
 #include "lgi/common/LgiString.h"
 #include "lgi/common/HashTable.h"
 #include "lgi/common/Colour.h"
+#include "lgi/common/RectF.h"
 
 #ifndef LINUX
 #pragma pack(push, 1)
@@ -517,7 +518,7 @@ public:
 			LFont *Font = 0,
 			/// The DPI of the relevant device if known, or -1 if unknown
 			int Dpi = -1
-		);
+		)	const;
 
 		Len operator *(const Len &l) const;
 	};
@@ -1276,10 +1277,10 @@ public:
 	virtual ~LCss();
 
 	#define Accessor(PropName, Type, Default, BaseProp) \
-		Type PropName() { Type *Member = (Type*)Props.Find(Prop##PropName); \
-							if (Member) return *Member; \
-							else if ((Member = (Type*)Props.Find(BaseProp))) return *Member; \
-							return Default; } \
+		Type PropName() const { Type *Member = (Type*)Props.Find(Prop##PropName); \
+								if (Member) return *Member; \
+								else if ((Member = (Type*)Props.Find(BaseProp))) return *Member; \
+								return Default; } \
 		void PropName(Type t) {	LAssert(!ReadOnly); \
 								Type *Member = (Type*)Props.Find(Prop##PropName); \
 								if (Member) *Member = t; \
@@ -1310,10 +1311,10 @@ public:
 	Accessor(Left, Len, Len(), PropNull);
 
 	Accessor(Margin, Len, Len(), PropNull);
-	Accessor(MarginTop, Len, Len(), PropNull);
-	Accessor(MarginRight, Len, Len(), PropNull);
-	Accessor(MarginBottom, Len, Len(), PropNull);
-	Accessor(MarginLeft, Len, Len(), PropNull);
+	Accessor(MarginTop, Len, Len(), PropMargin);
+	Accessor(MarginRight, Len, Len(), PropMargin);
+	Accessor(MarginBottom, Len, Len(), PropMargin);
+	Accessor(MarginLeft, Len, Len(), PropMargin);
 
 	Accessor(Padding, Len, Len(), PropNull);
 	Accessor(PaddingTop, Len, Len(), PropPadding);
@@ -1457,7 +1458,7 @@ protected:
 class LCssBox
 {
 public:
-	LRect margin, border, padding;
+	LRectF margin, border, padding;
 	
 	LCssBox()
 	{
@@ -1466,7 +1467,7 @@ public:
 		padding.ZOff(0, 0);
 	}
 	
-	void SetStyle(LFont *fnt, LCss *css, LRect &parentBox)
+	void SetStyle(LFont *fnt, LCss *css, LRectF &parentBox)
 	{
 		if (fnt == nullptr || css == nullptr)
 		{

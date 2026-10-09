@@ -225,7 +225,7 @@ bool BlockCursorState::Apply(LRichTextPriv *Ctx, bool Forward)
 
 	int Index;
 	LRichTextPriv::Block *b;
-	if (!Ctx->container.GetBlockByUid(b, BlockUid, &Index))
+	if (!Ctx->GetBlockByUid(b, BlockUid, &Index))
 		return false;
 
 	if (b != Bc->Blk)
@@ -260,12 +260,12 @@ bool CompleteTextBlockState::Apply(LRichTextPriv *Ctx, bool Forward)
 {
 	int Index;
 	LRichTextPriv::TextBlock *b;
-	if (!Ctx->container.GetBlockByUid(b, Uid, &Index))
+	if (!Ctx->GetBlockByUid(b, Uid, &Index))
 		return false;
 
 	// Swap the local state with the block in the ctx
 	Blk->UpdateSpellingAndLinks(NULL, LRange(0, Blk->Length()));
-	Ctx->container.Add(Blk.Release(), Index);
+	Ctx->Blocks[Index] = Blk.Release();
 	Blk.Reset(b);
 
 	// Update cursors
@@ -294,7 +294,7 @@ bool MultiBlockState::Apply(LRichTextPriv *Ctx, bool Forward)
 	
 	// Undo: Swap 'Length' blocks Ctx->Blocks with Blks
 	ssize_t OldLen = Blks.Length();
-	bool Status = Blks.SwapRange(LRange(0, OldLen), Ctx->container.GetBlocks(), LRange(Index, Length));
+	bool Status = Blks.SwapRange(LRange(0, OldLen), Ctx->Blocks, LRange(Index, Length));
 	if (Status)
 		Length = OldLen;
 	
@@ -303,10 +303,10 @@ bool MultiBlockState::Apply(LRichTextPriv *Ctx, bool Forward)
 
 bool MultiBlockState::Copy(ssize_t Idx)
 {
-	if (!Ctx->container.GetBlocks().AddressOf(Idx))
+	if (!Ctx->Blocks.AddressOf(Idx))
 		return false;
 
-	auto b = Ctx->container.GetBlocks()[Idx]->Clone();
+	LRichTextPriv::Block *b = Ctx->Blocks[Idx]->Clone();
 	if (!b)
 		return false;
 
@@ -316,19 +316,22 @@ bool MultiBlockState::Copy(ssize_t Idx)
 
 bool MultiBlockState::Cut(ssize_t Idx)
 {
-	auto b = Ctx->container.GetBlocks()[Idx];
+	if (!Ctx->Blocks.AddressOf(Idx))
+		return false;
+
+	LRichTextPriv::Block *b = Ctx->Blocks[Idx];
 	if (!b)
 		return false;
 
 	Blks.Add(b);
-	return b->Remove();
+
+	return Ctx->Blocks.DeleteAt(Idx, true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 LRichTextPriv::LRichTextPriv(LRichTextEdit *view, LRichTextPriv **Ptr) :
 	LHtmlParser(view),
-	LFontCache(LSysFont),
-	container(this)
+	LFontCache(LSysFont)
 {
 	if (Ptr) *Ptr = this;
 	View = view;
@@ -435,11 +438,11 @@ bool LRichTextPriv::DeleteSelection(Transaction *Trans, char16 **Cut)
 	{
 		// In the same block... just delete the text
 		ssize_t Len = End->Offset - Start->Offset;
-		auto NextBlk = Start->Blk->Next();
+		LRichTextPriv::Block *NextBlk = Next(Start->Blk);
 		if (Len >= Start->Blk->Length() && NextBlk)
 		{
 			// Delete entire block
-			ssize_t i = container.GetBlocks().IndexOf(Start->Blk);
+			ssize_t i = Blocks.IndexOf(Start->Blk);
 			LAutoPtr<MultiBlockState> MultiState(new MultiBlockState(this, i));
 			MultiState->Cut(i);
 			MultiState->Length = 0;
@@ -454,8 +457,8 @@ bool LRichTextPriv::DeleteSelection(Transaction *Trans, char16 **Cut)
 	else
 	{
 		// Multi-block delete...
-		ssize_t i = container.GetBlocks().IndexOf(Start->Blk);
-		ssize_t e = container.GetBlocks().IndexOf(End->Blk);
+		ssize_t i = Blocks.IndexOf(Start->Blk);
+		ssize_t e = Blocks.IndexOf(End->Blk);
 		LAutoPtr<MultiBlockState> MultiState(new MultiBlockState(this, i));
 
 		// 1) Delete all the content to the end of the first block
@@ -484,9 +487,9 @@ bool LRichTextPriv::DeleteSelection(Transaction *Trans, char16 **Cut)
 		// 2) Delete any blocks between 'Start' and 'End'
 		if (i >= 0)
 		{
-			while (container.GetBlocks()[i] != End->Blk && i < (int)container.GetBlocks().Length())
+			while (Blocks[i] != End->Blk && i < (int)Blocks.Length())
 			{
-				auto b = container.GetBlocks()[i];
+				LRichTextPriv::Block *b = Blocks[i];
 				b->CopyAt(0, -1, DelTxt);
 				printf("%s:%i - inter, %i\n", _FL, (int)i);
 				MultiState->Cut(i);
@@ -527,6 +530,24 @@ bool LRichTextPriv::DeleteSelection(Transaction *Trans, char16 **Cut)
 	return true;
 }
 
+
+LRichTextPriv::Block *LRichTextPriv::Next(Block *b)
+{
+	ssize_t Idx = Blocks.IndexOf(b);
+	if (Idx < 0)
+		return NULL;
+	if (++Idx >= (int)Blocks.Length())
+		return NULL;
+	return Blocks[Idx];
+}
+
+LRichTextPriv::Block *LRichTextPriv::Prev(Block *b)
+{
+	ssize_t Idx = Blocks.IndexOf(b);
+	if (Idx <= 0)
+		return NULL;
+	return Blocks[--Idx];
+}
 
 bool LRichTextPriv::AddTrans(LAutoPtr<Transaction> &t)
 {
@@ -607,7 +628,12 @@ ApplyError:
 
 bool LRichTextPriv::IsBusy(bool Stop)
 {
-	return container.IsBusy(Stop);
+	for (unsigned i=0; i<Blocks.Length(); i++)
+	{
+		if (Blocks[i]->IsBusy(Stop))
+			return true;
+	}
+	return false;
 }
 
 bool LRichTextPriv::Error(const char *file, int line, const char *fmt, ...)
@@ -712,9 +738,8 @@ void LRichTextPriv::InvalidateDoc(LRect *r)
 void LRichTextPriv::EmptyDoc()
 {
 	if (auto Def = new TextBlock(this))
-	{	
-		container.Empty();
-		container.Add(Def);
+	{			
+		Blocks.Add(Def);
 		Cursor.Reset(new BlockCursor(Def, 0, 0));
 		UpdateStyleUI();
 	}
@@ -727,13 +752,13 @@ void LRichTextPriv::Empty()
 	Selection.Reset();
 		
 	// Clear the block list..
-	container.Empty();
+	Blocks.DeleteObjects();
 }
 
 bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 {
-	if (!In || !In->Blk || container.GetBlocks().Length() == 0)
-		return Error(_FL, "Not a valid 'In' cursor, Blks=%i", container.GetBlocks().Length());
+	if (!In || !In->Blk || Blocks.Length() == 0)
+		return Error(_FL, "Not a valid 'In' cursor, Blks=%i", Blocks.Length());
 		
 	LAutoPtr<BlockCursor> c;
 
@@ -757,11 +782,11 @@ bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 			{
 				// No more lines in the current block...
 				// Move to the next block.
-				auto CurIdx = container.GetBlocks().IndexOf(b);
-				auto NewIdx = CurIdx - 1;
+				ssize_t CurIdx = Blocks.IndexOf(b);
+				ssize_t NewIdx = CurIdx - 1;
 				if (NewIdx >= 0)
 				{
-					auto b = container.GetBlocks()[NewIdx];
+					Block *b = Blocks[NewIdx];
 					if (!b)
 						return Error(_FL, "No block at %i", NewIdx);
 						
@@ -774,11 +799,11 @@ bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 			{
 				// No more lines in the current block...
 				// Move to the next block.
-				ssize_t CurIdx = container.GetBlocks().IndexOf(b);
+				ssize_t CurIdx = Blocks.IndexOf(b);
 				ssize_t NewIdx = CurIdx + 1;
-				if ((unsigned)NewIdx < container.GetBlocks().Length())
+				if ((unsigned)NewIdx < Blocks.Length())
 				{
-					auto b = container.GetBlocks()[NewIdx];
+					Block *b = Blocks[NewIdx];
 					if (!b)
 						return Error(_FL, "No block at %i", NewIdx);
 						
@@ -791,7 +816,7 @@ bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 		}
 		case SkDocStart:
 		{
-			if (!c.Reset(new BlockCursor(container.GetBlocks()[0], 0, 0)))
+			if (!c.Reset(new BlockCursor(Blocks[0], 0, 0)))
 				break;
 
 			Status = true;
@@ -799,10 +824,10 @@ bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 		}
 		case SkDocEnd:
 		{
-			if (container.GetBlocks().Length() == 0)
+			if (Blocks.Length() == 0)
 				break;
 
-			auto l = container.GetBlocks().Last();
+			Block *l = Blocks.Last();
 			if (!c.Reset(new BlockCursor(l, l->Length(), -1)))
 				break;
 
@@ -835,14 +860,26 @@ bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 			else // Seek to previous block
 			{
 				SeekPrevBlock:
-				auto prev = c->Blk->Prev();
-				if (!prev)
+				ssize_t Idx = Blocks.IndexOf(c->Blk);
+				if (Idx < 0)
+				{
+					LAssert(0);
+					break;
+				}
+
+				if (Idx == 0)
 					break; // Beginning of document
 				
-				if (!c.Reset(new BlockCursor(prev, prev->Length(), prev->GetLines()-1)))
+				Block *b = Blocks[--Idx];
+				if (!b)
+				{
+					LAssert(0);
+					break;
+				}
+
+				if (!c.Reset(new BlockCursor(b, b->Length(), b->GetLines()-1)))
 					break;
 
-				prev->Seek(SkSeekEnter, *c);
 				Status = true;
 			}
 			break;
@@ -884,7 +921,6 @@ bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 
 			if (c->Offset < c->Blk->Length())
 			{
-				// seek internally in the block
 				LArray<int> Ln;
 				if (c->Blk->OffsetToLine(c->Offset, NULL, &Ln) &&
 					Ln.Length() == 2 &&
@@ -904,14 +940,20 @@ bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 			else // Seek to next block
 			{
 				SeekNextBlock:
-				auto next = c->Blk->Next();
-				if (!next)
+				ssize_t Idx = Blocks.IndexOf(c->Blk);
+				if (Idx < 0)
+					return Error(_FL, "Block ptr index error.");
+
+				if (Idx >= (int)Blocks.Length() - 1)
 					break; // End of document
 				
-				if (!c.Reset(new BlockCursor(next, 0, 0)))
+				Block *b = Blocks[++Idx];
+				if (!b)
+					return Error(_FL, "No block at %i.", Idx);
+
+				if (!c.Reset(new BlockCursor(b, 0, 0)))
 					break;
 
-				next->Seek(SkSeekEnter, *c);
 				Status = true;
 			}
 			break;
@@ -953,7 +995,7 @@ bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 			LRect &Content = Areas[LRichTextEdit::ContentArea];
 			int LineHint = -1;
 			int TargetY = In->Pos.y1 - Content.Y();
-			ssize_t Idx = HitTest(LPoint(In->Pos.x1, MAX(TargetY, 0)), LineHint);
+			ssize_t Idx = HitTest(In->Pos.x1, MAX(TargetY, 0), LineHint);
 			if (Idx >= 0)
 			{
 				ssize_t Offset = -1;
@@ -973,13 +1015,13 @@ bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 			LRect &Content = Areas[LRichTextEdit::ContentArea];
 			int LineHint = -1;
 			int TargetY = In->Pos.y1 + Content.Y();
-			ssize_t Idx = HitTest(LPoint(In->Pos.x1, MIN(TargetY, DocumentExtent.y-1)), LineHint);
+			ssize_t Idx = HitTest(In->Pos.x1, MIN(TargetY, DocumentExtent.y-1), LineHint);
 			if (Idx >= 0)
 			{
 				ssize_t Offset = -1;
 				int BlkIdx = -1;
-				auto CursorBlkIdx = container.GetBlocks().IndexOf(Cursor->Blk);
-				auto b = GetBlockByIndex(Idx, &Offset, &BlkIdx);
+				ssize_t CursorBlkIdx = Blocks.IndexOf(Cursor->Blk);
+				Block *b = GetBlockByIndex(Idx, &Offset, &BlkIdx);
 
 				if (!b ||
 					BlkIdx < CursorBlkIdx ||
@@ -1016,8 +1058,8 @@ bool LRichTextPriv::CursorFirst()
 	if (!Cursor || !Selection)
 		return true;
 		
-	ssize_t CIdx = container.GetBlocks().IndexOf(Cursor->Blk);
-	ssize_t SIdx = container.GetBlocks().IndexOf(Selection->Blk);
+	ssize_t CIdx = Blocks.IndexOf(Cursor->Blk);
+	ssize_t SIdx = Blocks.IndexOf(Selection->Blk);
 	if (CIdx != SIdx)
 		return CIdx < SIdx;
 		
@@ -1122,9 +1164,9 @@ ssize_t LRichTextPriv::IndexOfCursor(BlockCursor *c)
 	}
 
 	ssize_t CharPos = 0;
-	for (unsigned i=0; i<container.GetBlocks().Length(); i++)
+	for (unsigned i=0; i<Blocks.Length(); i++)
 	{
-		auto b = container.GetBlocks()[i];
+		Block *b = Blocks[i];
 		if (c->Blk == b)
 			return CharPos + c->Offset;			
 		CharPos += b->Length();
@@ -1158,7 +1200,7 @@ bool LRichTextPriv::Merge(Transaction *Trans, Block *a, Block *b)
 	ta->Len += tb->Len;
 	tb->Txt.Length(0);
 
-	b->Remove();
+	Blocks.Delete(b, true);
 	Dirty = true;
 
 	return true;
@@ -1188,31 +1230,31 @@ LSurface *LEmojiImage::GetEmojiImage()
 	return EmojiImg;
 }
 
-ssize_t LRichTextPriv::HitTest(LPoint pt, int &LineHint, Block **Blk, ssize_t *BlkOffset)
+ssize_t LRichTextPriv::HitTest(int x, int y, int &LineHint, Block **Blk, ssize_t *BlkOffset)
 {
 	ssize_t CharPos = 0;
-	HitTestResult r(pt);
+	HitTestResult r(x, y);
 
-	if (container.GetBlocks().Length() == 0)
+	if (Blocks.Length() == 0)
 	{
 		Error(_FL, "No blocks.");
 		return -1;
 	}
 
-	auto b = container.GetBlocks().First();
+	Block *b = Blocks.First();
 	LRect rc = b->GetPos();
-	if (pt.y < rc.y1)
+	if (y < rc.y1)
 	{
 		if (Blk) *Blk = b;
 		return 0;
 	}
 
-	for (unsigned i=0; i<container.GetBlocks().Length(); i++)
+	for (unsigned i=0; i<Blocks.Length(); i++)
 	{
-		b = container.GetBlocks()[i];
+		b = Blocks[i];
 		LRect p = b->GetPos();
-		bool Over = pt.y >= p.y1 && pt.y <= p.y2;
-		if (b->HitTest(CharPos, r))
+		bool Over = y >= p.y1 && y <= p.y2;
+		if (b->HitTest(r))
 		{
 			LineHint = r.LineHint;
 
@@ -1225,15 +1267,15 @@ ssize_t LRichTextPriv::HitTest(LPoint pt, int &LineHint, Block **Blk, ssize_t *B
 		}
 		else if (Over)
 		{
-			Error(_FL, "Block failed to hit, i=%i, pos=%s, y=%i.", i, p.GetStr(), pt.y);
+			Error(_FL, "Block failed to hit, i=%i, pos=%s, y=%i.", i, p.GetStr(), y);
 		}
 			
 		CharPos += b->Length();
 	}
 
-	b = container.GetBlocks().Last();
+	b = Blocks.Last();
 	rc = b->GetPos();
-	if (pt.y > rc.y2)
+	if (y > rc.y2)
 	{
 		if (Blk) *Blk = b;
 		return CharPos + b->Length();
@@ -1242,19 +1284,28 @@ ssize_t LRichTextPriv::HitTest(LPoint pt, int &LineHint, Block **Blk, ssize_t *B
 	return -1;
 }
 	
-bool LRichTextPriv::CursorFromPos(LPoint pt, LAutoPtr<BlockCursor> *Cursor, ssize_t *GlobalIdx)
+bool LRichTextPriv::CursorFromPos(int x, int y, LAutoPtr<BlockCursor> *Cursor, ssize_t *GlobalIdx)
 {
-	HitTestResult r(pt);
-	if (!container.HitTest(0, r))
-		return false;
+	ssize_t CharPos = 0;
+	HitTestResult r(x, y);
 
-	LAssert(r.Blk != nullptr);
-	if (Cursor)
-		Cursor->Reset(new BlockCursor(r.Blk, r.Idx, r.LineHint));
-	if (GlobalIdx)
-		*GlobalIdx = r.Idx;
+	for (unsigned i=0; i<Blocks.Length(); i++)
+	{
+		Block *b = Blocks[i];
+		if (b->HitTest(r))
+		{
+			if (Cursor)
+				Cursor->Reset(new BlockCursor(b, r.Idx, r.LineHint));
+			if (GlobalIdx)
+				*GlobalIdx = CharPos + r.Idx;
+
+			return true;
+		}
+			
+		CharPos += b->Length();
+	}
 		
-	return true;
+	return false;
 }
 
 LRichTextPriv::Block *LRichTextPriv::GetBlockByIndex(ssize_t Index, ssize_t *Offset, int *BlockIdx, int *LineCount)
@@ -1262,9 +1313,9 @@ LRichTextPriv::Block *LRichTextPriv::GetBlockByIndex(ssize_t Index, ssize_t *Off
 	ssize_t CharPos = 0;
 	int Lines = 0;
 		
-	for (unsigned i=0; i<container.GetBlocks().Length(); i++)
+	for (unsigned i=0; i<Blocks.Length(); i++)
 	{
-		Block *b = container.GetBlocks()[i];
+		Block *b = Blocks[i];
 		ssize_t Len = b->Length();
 		int Ln = b->GetLines();
 
@@ -1282,11 +1333,11 @@ LRichTextPriv::Block *LRichTextPriv::GetBlockByIndex(ssize_t Index, ssize_t *Off
 		Lines += Ln;
 	}
 
-	Block *b = container.GetBlocks().Last();
+	Block *b = Blocks.Last();
 	if (Offset)
 		*Offset = b->Length();
 	if (BlockIdx)
-		*BlockIdx = (int)container.GetBlocks().Length() - 1;
+		*BlockIdx = (int)Blocks.Length() - 1;
 	if (LineCount)
 		*LineCount = Lines;
 
@@ -1312,9 +1363,9 @@ bool LRichTextPriv::Layout(LScrollBar *&ScrollY)
 	f.Right = Content.x2;
 	f.Top = f.CurY = Content.y1;
 
-	for (unsigned i=0; i<container.GetBlocks().Length(); i++)
+	for (unsigned i=0; i<Blocks.Length(); i++)
 	{
-		Block *b = container.GetBlocks()[i];
+		Block *b = Blocks[i];
 		b->OnLayout(f);
 
 		if ((f.CurY > Client.Y()) && ScrollY==NULL && !ScrollChange)
@@ -1431,12 +1482,12 @@ bool LRichTextPriv::ChangeSelectionStyle(LCss *Style, bool Add)
 		Start->Blk->ChangeStyle(Trans, Start->Offset, -1, Style, Add);
 
 		// 2) Change style on blocks between 'Start' and 'End'
-		ssize_t i = container.GetBlocks().IndexOf(Start->Blk);
+		ssize_t i = Blocks.IndexOf(Start->Blk);
 		if (i >= 0)
 		{
-			for (++i; container.GetBlocks()[i] != End->Blk && i < (int)container.GetBlocks().Length(); i++)
+			for (++i; Blocks[i] != End->Blk && i < (int)Blocks.Length(); i++)
 			{
-				LRichTextPriv::Block *&b = container.GetBlocks()[i];
+				LRichTextPriv::Block *&b = Blocks[i];
 				if (!b->ChangeStyle(Trans, 0, -1, Style, Add))
 					return false;
 			}
@@ -1804,7 +1855,7 @@ bool LRichTextPriv::InsertHorzRule()
 
 	DeleteSelection(Trans, NULL);
 
-	ssize_t InsertIdx = container.GetBlocks().IndexOf(tb) + 1;
+	ssize_t InsertIdx = Blocks.IndexOf(tb) + 1;
 	LRichTextPriv::Block *After = NULL;
 	if (Cursor->Offset == 0)
 	{
@@ -1822,9 +1873,9 @@ bool LRichTextPriv::InsertHorzRule()
 	if (!Hr)
 		return false;
 
-	container.Add(Hr, InsertIdx++);
+	Blocks.AddAt(InsertIdx++, Hr);
 	if (After)
-		container.Add(After, InsertIdx++);
+		Blocks.AddAt(InsertIdx++, After);
 
 	AddTrans(Trans);
 	InvalidateDoc(NULL);
@@ -1951,9 +2002,9 @@ void LRichTextPriv::Paint(LSurface *pDC, LScrollBar *&ScrollY)
 		Ctx.Colours[Selected].Back.Set(L_NON_FOCUS_SEL_BACK);
 	}
 		
-	for (unsigned i=0; i<container.GetBlocks().Length(); i++)
+	for (unsigned i=0; i<Blocks.Length(); i++)
 	{
-		auto b = container.GetBlocks()[i];
+		Block *b = Blocks[i];
 		if (b)
 		{
 			b->OnPaint(Ctx);
@@ -1999,7 +2050,7 @@ LHtmlElement *LRichTextPriv::CreateElement(LHtmlElement *Parent)
 bool LRichTextPriv::ToHtml(LArray<LDocView::ContentMedia> *Media, BlockCursor *From, BlockCursor *To)
 {
 	UtfNameCache.Reset();
-	if (!container.GetBlocks().Length())
+	if (!Blocks.Length())
 		return false;
 
 	LStringPipe p(256);
@@ -2010,14 +2061,14 @@ bool LRichTextPriv::ToHtml(LArray<LDocView::ContentMedia> *Media, BlockCursor *F
 	
 	ZeroRefCounts();
 
-	ssize_t Start = From ? container.GetBlocks().IndexOf(From->Blk) : 0;
-	ssize_t End = To ? container.GetBlocks().IndexOf(To->Blk) : container.GetBlocks().Length() - 1;
+	ssize_t Start = From ? Blocks.IndexOf(From->Blk) : 0;
+	ssize_t End = To ? Blocks.IndexOf(To->Blk) : Blocks.Length() - 1;
 	ssize_t StartIdx = From ? From->Offset : 0;
-	ssize_t EndIdx = To ? To->Offset : container.GetBlocks().Last()->Length();
+	ssize_t EndIdx = To ? To->Offset : Blocks.Last()->Length();
 
 	for (ssize_t i=Start; i<=End; i++)
 	{
-		container.GetBlocks()[i]->IncAllStyleRefs();
+		Blocks[i]->IncAllStyleRefs();
 	}
 
 	if (GetStyles())
@@ -2032,7 +2083,7 @@ bool LRichTextPriv::ToHtml(LArray<LDocView::ContentMedia> *Media, BlockCursor *F
 		
 	for (ssize_t i=Start; i<=End; i++)
 	{
-		auto b = container.GetBlocks()[i];
+		Block *b = Blocks[i];
 		LRange r;
 		if (i == Start)
 			r.Start = StartIdx;
@@ -2050,10 +2101,10 @@ bool LRichTextPriv::ToHtml(LArray<LDocView::ContentMedia> *Media, BlockCursor *F
 	
 void LRichTextPriv::DumpBlocks()
 {
-	LgiTrace("LRichTextPriv Blocks=%i\n", container.GetBlocks().Length());
-	for (unsigned i=0; i<container.GetBlocks().Length(); i++)
+	LgiTrace("LRichTextPriv Blocks=%i\n", Blocks.Length());
+	for (unsigned i=0; i<Blocks.Length(); i++)
 	{
-		Block *b = container.GetBlocks()[i];
+		Block *b = Blocks[i];
 		LgiTrace("%p::%s style=%p/%s {\n",
 			b,
 			b->GetClass(),
@@ -2100,9 +2151,15 @@ struct HtmlElementCb : public LCss::ElementCallback<LHtmlElement>
 
 bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentStyle, int Depth)
 {
-	for (auto c: e->Children)
+	char Sp[48];
+	int SpLen = MIN(Depth << 1, sizeof(Sp) - 1);
+	memset(Sp, ' ', SpLen);
+	Sp[SpLen] = 0;
+		
+	for (unsigned i = 0; i < e->Children.Length(); i++)
 	{
-		LAutoPtr<LCss> Style; // this is the style of the current element, initially NULL
+		LHtmlElement *c = e->Children[i];
+		LAutoPtr<LCss> Style;
 		if (ParentStyle)
 			Style.Reset(new LCss(*ParentStyle));
 
@@ -2112,7 +2169,7 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 			Matches.Length() > 0 &&
 			(Style.Get() || Style.Reset(new LCss)))
 		{
-			for (auto s: Matches)
+			for (auto s : Matches)
 			{
 				const char *p = s->Style;
 				Style->Parse(p, LCss::ParseRelaxed);
@@ -2121,18 +2178,15 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 			
 		// Check to see if the element is block level and end the previous
 		// paragraph if so.
-		c->Info = c->Tag ? LHtmlStatic::Inst->GetTagInfo(c->Tag) : nullptr;
-		bool IsBlock =	c->Info && c->Info->Block();
+		c->Info = c->Tag ? LHtmlStatic::Inst->GetTagInfo(c->Tag) : NULL;
+		bool IsBlock =	c->Info != NULL && c->Info->Block();
 		switch (c->TagId) 
 		{
 			case TAG_STYLE:
 			{
-				LAutoString utf(WideToUtf8(e->GetText()));
-				if (utf)
-				{
-					const char *s = utf.Get();
-					ctx.StyleStore.Parse(s);
-				}
+				char16 *Style = e->GetText();
+				if (ValidStrW(Style))
+					LAssert(!"Impl me.");
 				continue;
 				break;
 			}
@@ -2158,9 +2212,9 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 					Style.Reset(new LCss);
 				if (Style)
 				{
-					Style->MarginTop(    LCss::Len("0.5em") );
-					Style->MarginBottom( LCss::Len("0.5em") );
-					Style->MarginLeft(   LCss::Len("1em"  ) );
+					Style->MarginTop(LCss::Len("0.5em"));
+					Style->MarginBottom(LCss::Len("0.5em"));
+					Style->MarginLeft(LCss::Len("1em"));
 					if (ctx.Tb)
 						ctx.Tb->StripLast(NoTransaction);
 				}
@@ -2185,7 +2239,7 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 			}
 			case TAG_IMG:
 			{
-				ctx.Tb = nullptr;
+				ctx.Tb = NULL;
 				IsBlock = true;
 				break;
 			}
@@ -2195,7 +2249,7 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 			}
 		}
 			
-		const char *Css = nullptr, *Class = nullptr;
+		const char *Css, *Class;
 		if (c->Get("style", Css))
 		{
 			if (!Style)
@@ -2209,20 +2263,26 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 			LRichEditElemContext StyleCtx;
 			if (ctx.StyleStore.Match(Selectors, &StyleCtx, dynamic_cast<LRichEditElem*>(c)))
 			{
-				for (auto sel: Selectors)
+				for (unsigned n=0; n<Selectors.Length(); n++)
 				{
-					if (const char *s = sel->Style)
+					LCss::Selector *sel = Selectors[n];
+					if (sel)
 					{
-						if (!Style)
-							Style.Reset(new LCss);
-						if (Style)
-							Style->Parse(s, LCss::ParseRelaxed);
+						const char *s = sel->Style;
+						if (s)
+						{
+							if (!Style)
+								Style.Reset(new LCss);
+							if (Style)
+								Style->Parse(s, LCss::ParseRelaxed);
+						}
 					}
 				}
 			}
 		}
 
-		auto CachedStyle = AddStyleToCache(Style);
+		LNamedStyle *CachedStyle = AddStyleToCache(Style);			
+
 		if
 		(
 			(IsBlock && ctx.LastChar != '\n')
@@ -2232,15 +2292,14 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 		{
 			if (!ctx.Tb && c->TagId == TAG_BR)
 			{
-				// Don't do this for IMG and HR layout.  (<-- this comment doesn't make sense?)
-				container.Add(ctx.Tb = new TextBlock(this));
+				// Don't do this for IMG and HR layout.
+				Blocks.Add(ctx.Tb = new TextBlock(this));
 				if (CachedStyle && ctx.Tb)
 					ctx.Tb->SetStyle(CachedStyle);
 			}
 
 			if (ctx.Tb)
 			{
-				// Add a new line to the current text block to implement moving to the next block level element
 				const uint32_t Nl[] = {'\n', 0};
 				ctx.Tb->AddText(NoTransaction, -1, Nl, 1, NULL);
 				ctx.LastChar = '\n';
@@ -2250,18 +2309,11 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 		
 		bool EndStyleChange = false;
 
-		if (c->TagId == TAG_LI)
-		{
-			if (ctx.Lst)
-				ctx.Lst->StartItem();
-		}
-
 		if (c->TagId == TAG_IMG)
 		{
-			if (ctx.Ib = new ImageBlock(this))
+			Blocks.Add(ctx.Ib = new ImageBlock(this));
+			if (ctx.Ib)
 			{
-				container.Add(ctx.Ib);
-
 				const char *s;
 				if (c->Get("src", s))
 					ctx.Ib->Source = s;
@@ -2288,8 +2340,7 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 		}
 		else if (c->TagId == TAG_HR)
 		{
-			if (ctx.Hrb = new HorzRuleBlock(this))
-				container.Add(ctx.Hrb);
+			Blocks.Add(ctx.Hrb = new HorzRuleBlock(this));
 		}
 		else if (c->TagId == TAG_A)
 		{
@@ -2298,7 +2349,7 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 			if (ctx.Tb &&
 				ctx.Tb->Txt.Length())
 			{
-				auto st = ctx.Tb->Txt.Last();
+				StyleText *st = ctx.Tb->Txt.Last();
 
 				st->Element = TAG_A;
 			
@@ -2306,35 +2357,6 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 				if (c->Get("href", Link))
 					st->Param = Link;
 			}
-		}
-		else if (c->TagId == TAG_UL ||
-				 c->TagId == TAG_OL)
-		{
-			EndStyleChange = true;
-
-			LCss::ListStyleTypes type = LCss::ListStyleTypes::ListInherit;
-			if (Style)
-				type = Style->ListStyleType();
-			if (c->TagId == TAG_OL && type == LCss::ListStyleTypes::ListInherit)
-			{
-				const char *s;
-				if (c->Get("type", s))
-				{
-					if (!Stricmp(s, "1"))
-						type = LCss::ListStyleTypes::ListDecimal;
-					else if (!Stricmp(s, "A"))
-						type = LCss::ListStyleTypes::ListUpperAlpha;
-					else if (!Stricmp(s, "a"))
-						type = LCss::ListStyleTypes::ListLowerAlpha;
-					else if (!Stricmp(s, "I"))
-						type = LCss::ListStyleTypes::ListUpperRoman;
-					else if (!Stricmp(s, "i"))
-						type = LCss::ListStyleTypes::ListLowerRoman;
-				}
-			}
-
-			if (ctx.Lst = new ListBlock(this, type))
-				container.Add(ctx.Lst);
 		}
 		else
 		{
@@ -2350,12 +2372,12 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 					{
 						// Start a new block because the styles are different...
 						EndStyleChange = true;
-						auto Idx = container.GetBlocks().IndexOf(ctx.Tb);
+						auto Idx = Blocks.IndexOf(ctx.Tb);
 						ctx.Tb = new TextBlock(this);
 						if (Idx >= 0)
-							container.Add(ctx.Tb, Idx+1);
+							Blocks.AddAt(Idx+1, ctx.Tb);
 						else
-							container.Add(ctx.Tb);
+							Blocks.Add(ctx.Tb);
 
 						if (CachedStyle)
 							ctx.Tb->SetStyle(CachedStyle);
@@ -2363,7 +2385,7 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 				}
 			}
 
-			auto Txt = c->GetText();
+			char16 *Txt = c->GetText();
 			if
 			(
 				Txt
@@ -2375,6 +2397,12 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 				)
 			)
 			{
+				if (!ctx.Tb)
+				{
+					Blocks.Add(ctx.Tb = new TextBlock(this));
+					ctx.Tb->SetStyle(CachedStyle);
+				}
+
 				#ifdef __GTK_H__
 				for (auto *i = Txt; *i; i++)
 					if (*i == 0xa0)
@@ -2390,11 +2418,7 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 			return false;
 			
 		if (EndStyleChange)
-		{
-			ctx.Tb = nullptr;
-			ctx.Lst = nullptr;
-		}
-		
+			ctx.Tb = NULL;
 		if (IsBlock)
 			ctx.StartOfLine = true;
 	}
@@ -2435,13 +2459,13 @@ bool LRichTextPriv::GetSelection(LArray<char16> *Text, LAutoString *Html)
 			Start->Blk->CopyAt(Start->Offset, -1, &Utf32);
 
 			// 2) Copy any blocks between 'Start' and 'End'
-			ssize_t i = container.GetBlocks().IndexOf(Start->Blk);
-			ssize_t EndIdx = container.GetBlocks().IndexOf(End->Blk);
+			ssize_t i = Blocks.IndexOf(Start->Blk);
+			ssize_t EndIdx = Blocks.IndexOf(End->Blk);
 			if (i >= 0 && EndIdx >= i)
 			{
-				for (++i; container.GetBlocks()[i] != End->Blk && i < (int)container.GetBlocks().Length(); i++)
+				for (++i; Blocks[i] != End->Blk && i < (int)Blocks.Length(); i++)
 				{
-					LRichTextPriv::Block *&b = container.GetBlocks()[i];
+					LRichTextPriv::Block *&b = Blocks[i];
 					b->CopyAt(0, -1, &Utf32);
 				}
 			}
@@ -2484,7 +2508,10 @@ LRichTextEdit::RectType LRichTextPriv::PosToButton(LMouse &m)
 
 void LRichTextPriv::OnComponentInstall(LString Name)
 {
-	container.OnComponentInstall(Name);
+	for (unsigned i=0; i<Blocks.Length(); i++)
+	{
+		Blocks[i]->OnComponentInstall(Name);
+	}
 }
 
 #ifdef _DEBUG
@@ -2497,7 +2524,7 @@ void LRichTextPriv::DumpNodes(LTree *Root)
 		PrintNode(ti, "Offset=%i", Cursor->Offset);
 		PrintNode(ti, "Pos=%s", Cursor->Pos.GetStr());
 		PrintNode(ti, "LineHint=%i", Cursor->LineHint);
-		PrintNode(ti, "Blk=%i", Cursor->Blk ? container.GetBlocks().IndexOf(Cursor->Blk) : -2);
+		PrintNode(ti, "Blk=%i", Cursor->Blk ? Blocks.IndexOf(Cursor->Blk) : -2);
 		Root->Insert(ti);
 	}
 	if (Selection)
@@ -2507,16 +2534,20 @@ void LRichTextPriv::DumpNodes(LTree *Root)
 		PrintNode(ti, "Offset=%i", Selection->Offset);
 		PrintNode(ti, "Pos=%s", Selection->Pos.GetStr());
 		PrintNode(ti, "LineHint=%i", Selection->LineHint);
-		PrintNode(ti, "Blk=%i", Selection->Blk ? container.GetBlocks().IndexOf(Selection->Blk) : -2);
+		PrintNode(ti, "Blk=%i", Selection->Blk ? Blocks.IndexOf(Selection->Blk) : -2);
 		Root->Insert(ti);
 	}
 
-	for (unsigned i=0; i<container.GetBlocks().Length(); i++)
+	for (unsigned i=0; i<Blocks.Length(); i++)
 	{
-		auto ti = new LTreeItem;
-		auto b = container.GetBlocks()[i];
+		LTreeItem *ti = new LTreeItem;
+		Block *b = Blocks[i];
 		b->DumpNodes(ti);
-		ti->SetText(LString::Fmt("[%i] %s", i, ti->GetText()));
+
+		LString s;
+		s.Printf("[%i] %s", i, ti->GetText());
+		ti->SetText(s);
+
 		Root->Insert(ti);
 	}
 }
@@ -2539,26 +2570,3 @@ LTreeItem *PrintNode(LTreeItem *Parent, const char *Fmt, ...)
 
 #endif
 
-void LRichTextPriv::Block::SetLine(int Line)
-{
-	int Count = 0;
-
-	// Count lines in blocks before the cursor...
-	for (size_t i = 0; i < blocks.Length(); i++)
-	{
-		auto b = blocks[i];
-		int Lines = b->GetLines();
-		if (Line >= Count && Line < Count + Lines)
-		{
-			auto BlockLine = Line - Count;
-			auto Offset = b->LineToOffset(BlockLine);
-			if (Offset >= 0)
-			{
-				AutoCursor c(new BlkCursor(b, Offset, BlockLine));
-				d->SetCursor(c);
-				break;
-			}
-		}
-		Count += Lines;
-	}
-}

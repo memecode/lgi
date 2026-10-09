@@ -209,18 +209,18 @@ LString LErrorCodeToString(uint32_t ErrorCode)
 	return e;
 }
 
-bool LExecute(const char *File, const char *Args, const char *Dir, LString *Error)
+bool LExecute(const char *File, const char *Args, const char *Dir, LError *Error)
 {
 	if (File)
 	{
 		bool IsUrl = false;
 
-		char App[MAX_PATH_LEN] = "";
+		LString App;
 		if (strnicmp(File, "http://", 7) == 0 ||
 			strnicmp(File, "https://", 8) == 0)
 		{
 			IsUrl = true;
-			LGetAppForMimeType("text/html", App, sizeof(App));
+			App = LGetAppForMimeType("text/html");
 		}
 		else
 		{
@@ -251,7 +251,7 @@ bool LExecute(const char *File, const char *Args, const char *Dir, LString *Erro
 				if (S_ISDIR(f.st_mode))
 				{
 					// open the directory in the current browser
-					LGetAppForMimeType("inode/directory", App, sizeof(App));
+					App = LGetAppForMimeType("inode/directory");
 				}
 				else
 				{
@@ -275,7 +275,8 @@ bool LExecute(const char *File, const char *Args, const char *Dir, LString *Erro
 						else
 						{
 							// got the mime type
-							if (!LGetAppForMimeType(Mime, App, sizeof(App)))
+							App = LGetAppForMimeType(Mime);
+							if (!App)
 							{
 								// printf("%s:%i: LExecute - LgiGetAppForMimeType failed to return the app for '%s'\n", _FL, File);
 								goto TreatAsExe;
@@ -292,27 +293,26 @@ bool LExecute(const char *File, const char *Args, const char *Dir, LString *Erro
 				}
 			}
 			else if (Error)
-				Error->Printf("'%s' doesn't exist.\n", File);
+				Error->Set(LErrorPathNotFound, LString::Fmt("'%s' doesn't exist.\n", File));
 		}
 
-		if (App[0])
+		if (App)
 		{
 			bool FileAdded = false;
 			LString AppPath;
 			LString EscFile = LString::Escape(File, -1, " &");
 
-			LString a = App;
 			int Pos;
-			while ((Pos = a.Find("%")) >= 0)
+			while ((Pos = App.Find("%")) >= 0)
 			{
-				char *s = a.Get() + Pos;
-				printf("a='%s'\n", a.Get());
+				char *s = App.Get() + Pos;
+				printf("a='%s'\n", App.Get());
 				switch (s[1])
 				{			
 					case 'f':
 					case 'F':
 					{
-						a = a(0,Pos) + EscFile + a(Pos+2,-1);
+						App = App(0,Pos) + EscFile + App(Pos+2,-1);
 						FileAdded = true;
 						break;
 					}
@@ -320,37 +320,37 @@ bool LExecute(const char *File, const char *Args, const char *Dir, LString *Erro
 					case 'U':
 					{
 						if (IsUrl)
-							a = a(0,Pos) + EscFile + a(Pos+2,-1);
+							App = App(0,Pos) + EscFile + App(Pos+2,-1);
 						else
-							a = a(0,Pos) + LString("file:") + EscFile + a(Pos+2,-1);
+							App = App(0,Pos) + LString("file:") + EscFile + App(Pos+2,-1);
 						FileAdded = true;
 						break;
 					}
 					default:
 					{
 						// we don't understand this command
-						a = a(0,Pos) + a(Pos+2,-1);
+						App = App(0,Pos) + App(Pos+2,-1);
 						break;
 					}
 				}
-				printf("a='%s'\n", a.Get());
+				printf("a='%s'\n", App.Get());
 			}
 
 			if (!FileAdded)
 			{
-				a += " ";
-				a += EscFile;
+				App += " ";
+				App += EscFile;
 			}
 
-			a += " > /dev/null 2> /dev/null &";
+			App += " > /dev/null 2> /dev/null &";
 
 			int e;
 			if (Dir) chdir(Dir);
-			printf("a=\n%s\n", a.Get());
-			if (e = system(a))
+			printf("a=\n%s\n", App.Get());
+			if (e = system(App))
 			{
 				if (Error)
-					*Error = LErrorCodeToString(errno);
+					Error->Set(errno);
 				return false;
 			}
 

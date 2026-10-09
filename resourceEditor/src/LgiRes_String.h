@@ -25,8 +25,8 @@ class ResDialogCtrl;
 ////////////////////////////////////////////////////////////////
 class StrLang
 {
-	LLanguageId Lang;
-	char *Str;
+	LLanguageId Lang = nullptr;
+	char *Str = nullptr;
 
 public:
 	StrLang();
@@ -81,7 +81,7 @@ public:
 	int Compare(LListItem *To, ssize_t Field);
 	void CopyText();
 	void PasteText();
-	char *GetDefine() { return Define; }
+	const char *GetDefine() { return Define; }
 	void SetDefine(const char *s);
 	
 	// Item
@@ -141,7 +141,7 @@ public:
 	ResString *FindRef(int Ref);
 	int FindId(int Id, List<ResString*> &Strs);
 	int UniqueRef();
-	int UniqueId(char *Define = 0);
+	int UniqueId(const char *Define = nullptr);
 	int OnCommand(int Cmd, int Event, OsView hWnd);
 	void SetLanguages();
 	int GetLanguages() { return (int)Lang.Length(); }
@@ -185,10 +185,10 @@ public:
 
 class ResStringUi : public LBox
 {
-	LToolBar *Tools = NULL;
-	ResStringGroup *StringGrp = NULL;
-	LStatusBar *Status = NULL;
-	LStatusPane *StatusInfo = NULL;
+	LToolBar *Tools = nullptr;
+	ResStringGroup *StringGrp = nullptr;
+	LStatusBar *Status = nullptr;
+	LStatusPane *StatusInfo = nullptr;
 
 public:
 	ResStringUi(ResStringGroup *Res);
@@ -200,11 +200,11 @@ public:
 
 class LangDlg : public LDialog
 {
-	LCombo *Sel;
+	LCombo *Sel = nullptr;
 	List<LLanguage> Langs;
 
 public:
-	LLanguage *Lang;
+	LLanguage *Lang = nullptr;
 
 	LangDlg(LView *parent, List<LLanguage> &l, int Init = -1);
 	int OnNotify(LViewI *Ctrl, const LNotification &n) override;

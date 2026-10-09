@@ -8,12 +8,12 @@
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-LSubProcess::IoThread::IoThread(const char *exe, const char *args) :
+LSubProcess::IoThread::IoThread(const char *exe, const char *args, const char *initFolder) :
 	LThread("SubProcIoThread"),
 	LMutex( "LSubProcess.IoThread.Lock")
 {
 	if (exe)
-		Create(exe, args);
+		Create(exe, args, initFolder);
 }
 
 LSubProcess::IoThread::~IoThread()
@@ -22,12 +22,14 @@ LSubProcess::IoThread::~IoThread()
 	WaitForExit();
 }
 
-bool LSubProcess::IoThread::Create(const char *exe, const char *args)
+bool LSubProcess::IoThread::Create(const char *exe, const char *args, const char *initFolder)
 {
 	Auto lck(this, _FL);
-	if (!exe)
-		return false;
-	return process.Reset(new LSubProcess(exe, args));
+	if (!exe || !process.Reset(new LSubProcess(exe, args)))
+		return false;		
+	if (initFolder)
+		process->SetInitFolder(initFolder);
+	return true;
 }
 
 bool LSubProcess::IoThread::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdout)

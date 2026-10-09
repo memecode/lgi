@@ -6,7 +6,7 @@
 
 //////////////////////////////////////////////////////////////////
 // Running action as root:
-// https://pardus.github.io/wiki/development/linux/polkit
+// https://pardus.github.io/wiki/linux/polkit/
 //
 // The file 'com.memecode.selectDisplay.policy' needs to be
 // installed to '/usr/share/polkit-1/actions/'
@@ -46,7 +46,7 @@ LString getDataFilePath()
 		return appInst.GetFull();
 	}
 	
-	LFile::Path appRoot(LSP_APP_ROOT);
+	LFile::Path appRoot(LSP_APP_DATA);
 	appRoot += sDataFile;	
 	preExist = appRoot.Exists();
 	// printf("appRoot: %s\n", appRoot.GetFull().Get());
@@ -78,7 +78,7 @@ public:
 		LFile::Path iconPath(LSP_EXE);
 		iconPath += "resources/icon.svg";
 		if (iconPath.Exists())
-			SetIcon(iconPath);
+			SetIcon(iconPath, "Utility;");
 
 		int y = 0;
 		LTextLabel *label;

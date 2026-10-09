@@ -24,6 +24,12 @@ struct LGraphPriv
 {
 	constexpr static int AxisMarkPx = 8;
 
+	enum TFormatHint {
+		TFmtDateTime,
+		TFmtDate,
+		TFmtTime,
+	};
+
 	LGraph *View = NULL;
 	int XAxis = 0, YAxis = 0;
 	LVariantType XType, YType;
@@ -37,6 +43,8 @@ struct LGraphPriv
 	bool ShowCursor = false;
 	LString LabelX, LabelY;
 	double Zoom = 1.0, Px = 0.0, Py = 0.0;
+
+	LArray<LGraph::Guide> guides;
 	
 	// Averages
 	bool Average;
@@ -80,7 +88,7 @@ struct LGraphPriv
 		MaxY.Empty();
 	}
 
-	LVariantType GuessType(char *s)
+	LVariantType GuessType(const char *s)
 	{
 		bool Dot = false;
 		bool Num = false;
@@ -115,7 +123,7 @@ struct LGraphPriv
 		}
 	}
 
-	bool Convert(LVariant &v, LVariantType type, char *in)
+	bool Convert(LVariant &v, LVariantType type, const char *in)
 	{
 		if (!in)
 			return false;
@@ -132,6 +140,7 @@ struct LGraphPriv
 				v = &dt;
 				break;
 			}
+			case GV_INT32:
 			case GV_INT64:
 				v = (int64_t)atoi64(in);
 				break;
@@ -256,9 +265,10 @@ struct LGraphPriv
 				max.Value.Date->Get(Max);
 				v.Value.Date->Get(Val);
 				int64 Range = Max - Min;
-				LAssert(Range > 0);
+				//LAssert(Range > 0);
 
-				return (int) ((Val - Min) * (pixels - 1) / Range);
+				if (Range)
+					return (int) ((Val - Min) * (pixels - 1) / Range);
 				break;
 			}
 			case GV_INT64:
@@ -269,9 +279,9 @@ struct LGraphPriv
 				Val = v.CastInt64();
 
 				int64 Range = Max - Min;
-				LAssert(Range > 0);
-
-				return (int) ((Val - Min) * (pixels - 1) / Range);
+				// LAssert(Range > 0);
+				if (Range)
+					return (int) ((Val - Min) * (pixels - 1) / Range);
 				break;
 			}
 			case GV_DOUBLE:
@@ -282,9 +292,9 @@ struct LGraphPriv
 				Val = v.CastDouble();
 
 				double Range = Max - Min;
-				LAssert(Range > 0);
-
-				return (int) ((Val - Min) * (pixels - 1) / Range);
+				// LAssert(Range > 0);
+				if (Range)
+					return (int) ((Val - Min) * (pixels - 1) / Range);
 				break;
 			}
 			default:
@@ -295,18 +305,25 @@ struct LGraphPriv
 		return 0;
 	}
 
-	LString DataToString(LVariant &v)
+	LString DataToString(LVariant &v, TFormatHint fmt = TFmtDateTime)
 	{
 		LString s;
 		switch (v.Type)
 		{
 			case GV_DATETIME:
 			{
-				if (v.Value.Date->Hours() ||
-					v.Value.Date->Minutes())
-					s = v.Value.Date->Get();
-				else
-					s = v.Value.Date->GetDate();
+				switch (fmt)
+				{
+					case TFmtDateTime:
+						s = v.Value.Date->Get();
+						break;
+					case TFmtDate:
+						s = v.Value.Date->GetDate();
+						break;
+					case TFmtTime:
+						s = v.Value.Date->GetTime();
+						break;
+				}
 				break;
 			}
 			case GV_INT64:
@@ -333,7 +350,7 @@ struct LGraphPriv
 		return s;
 	}
 
-	void DrawAxis(LSurface *pDC, LRect &r, int xaxis, LVariant &min, LVariant &max, LString &label)
+	void DrawAxis(LSurface *pDC, LRect &r, bool xaxis, LVariant &min, LVariant &max, LString &label)
 	{
 		LVariant v = min;
 		bool First = true;
@@ -349,11 +366,12 @@ struct LGraphPriv
 		int64 int_range = 0;
 		double dbl_inc = 0.0;
 		int64 int64_inc = 0;
-		int date_inc = 1;
+		int dateIncSeconds = LDateTime::MinuteLength;
+		TFormatHint dateFmt = TFmtDateTime;
 
 		auto Fnt = View->GetFont();
 		Fnt->Colour(L_TEXT, L_WORKSPACE);
-
+		
 		LArray<LVariant> Values;
 		while (Loop)
 		{
@@ -368,20 +386,68 @@ struct LGraphPriv
 				}
 				case GV_DATETIME:
 				{
+					enum TTruncate {
+						TrunNone,
+						TrunHrMinSec,
+						TrunMinSec,
+						TrunSec,
+					}	truc = TrunNone;
+
+					auto old = v.Value.Date;
+					double days = 0.0;
+					double minutes = 0.0;
+
 					if (First)
 					{
 						LTimeStamp s, e;
 						min.Value.Date->Get(s);
 						max.Value.Date->Get(e);
-						int64 period = e - s;
-						double days = (double)period / LDateTime::DayLength;
+						auto period = e.Unix() - s.Unix(); // seconds
+						days = (double)period / LDateTime::DayLength;
 						if (days > 7)
-							date_inc = (int) (days / 5);
+						{
+							dateIncSeconds = (int) (days / 5) * LDateTime::DayLength;
+							truc = TrunHrMinSec;
+							dateFmt = TFmtDate;
+						}
+						else if (days > 1)
+						{
+							dateIncSeconds = LDateTime::DayLength;
+							truc = TrunHrMinSec;
+							dateFmt = TFmtDate;
+						}
 						else
-							date_inc = 1;
-						v.Value.Date->SetTime("0:0:0");
+						{
+							minutes = (double)period / LDateTime::MinuteLength;
+							if (minutes > 60)
+							{
+								dateIncSeconds = LDateTime::HourLength;
+								truc = TrunMinSec;
+							}
+							else
+							{
+								dateIncSeconds = LDateTime::MinuteLength;
+								truc = TrunSec;
+							}
+							dateFmt = TFmtTime;
+						}
 					}
-					v.Value.Date->AddDays(date_inc);
+					v.Value.Date->AddSeconds(dateIncSeconds);
+					switch (truc)
+					{
+						case TrunHrMinSec:
+							v.Value.Date->SetTime("0:0:0");
+							break;
+						case TrunMinSec:
+							v.Value.Date->Minutes(0);
+							v.Value.Date->Seconds(0);
+							break;
+						case TrunSec:
+							v.Value.Date->Seconds(0);
+							break;
+						default:
+							break;
+					}
 					Loop = *v.Value.Date < *max.Value.Date;
 					break;
 				}
@@ -397,11 +463,14 @@ struct LGraphPriv
 							p++;
 							rng /= 10;
 						}
+						/*
 						while (rng < 1)
 						{
 							p--;
 							rng *= 10;
 						}
+						*/
+						
 						int64_inc = (int64) pow(10.0, p);
 						int64 d = (int64)((v.CastInt64() + int64_inc) / int64_inc);
 						v = d * int64_inc;
@@ -422,12 +491,12 @@ struct LGraphPriv
 						if (std::abs(rng - 0.0) > 0.0001)
 						{
 							int p = 0;
-							while (rng > 10)
+							while (rng > 10.0)
 							{
 								p++;
 								rng /= 10;
 							}
-							while (rng < 1)
+							while (rng > 0.0 && rng < 1.0)
 							{
 								p--;
 								rng *= 10;
@@ -451,6 +520,8 @@ struct LGraphPriv
 		}
 		Values.Add(max);
 
+		int prevLabelPx = xaxis ? -100 : r.Y() + 100;
+		int padPx = 4;
 		for (int i=0; i<Values.Length(); i++)
 		{
 			v = Values[i];
@@ -458,14 +529,36 @@ struct LGraphPriv
 			int dx = (int)(x + (xaxis ? Offset : 0));
 			int dy = (int)(y - (xaxis ? 0 : Offset));
 
-			LString s = DataToString(v);
+			auto s = DataToString(v, dateFmt);
 
+			// Draw the text...
 			LDisplayString ds(LSysFont, s);
 			if (xaxis)
-				ds.Draw(pDC, dx - (ds.X()/2), dy + AxisMarkPx);
-			else
-				ds.Draw(pDC, dx - ds.X() - AxisMarkPx, dy - (ds.Y() / 2));
+			{
+				auto half = ds.X() / 2;
+				if (dx - half < prevLabelPx + padPx)
+				{
+					// printf("skip x: %s, dx: %d, prevLabelPx: %d\n", s.Get(), dx-half, prevLabelPx);
+					continue;
+				}
 
+				ds.Draw(pDC, dx - half, dy + AxisMarkPx);
+				prevLabelPx = dx + half;
+			}
+			else
+			{
+				auto half = ds.Y() / 2;
+				if (dy + half > prevLabelPx - padPx)
+				{
+					// printf("skip y: %s, dy: %d, prevLabelPx: %d\n", s.Get(), dy+half, prevLabelPx);
+					continue;
+				}
+
+				ds.Draw(pDC, dx - ds.X() - AxisMarkPx, dy - half);
+				prevLabelPx = dy - half;
+			}
+
+			// Draw the tick mark
 			if (xaxis)
 				pDC->Line(dx, dy, dx, dy + 5);
 			else
@@ -475,7 +568,10 @@ struct LGraphPriv
 		if (label)
 		{
 			LDisplayString ds(Fnt, label);
-			ds.Draw(pDC, r.Center().x, r.y2-ds.Y());
+			if (xaxis)
+				ds.Draw(pDC, r.Center().x, r.y2-ds.Y());
+			else
+				ds.Draw(pDC, r.x1, r.Center().y - (ds.Y()/2));
 		}
 	}
 
@@ -511,7 +607,13 @@ void LGraph::DataSeries::SetColour(LColour c)
 	d->colour = c;
 }
 
-bool LGraph::DataSeries::AddPair(char *x, char *y, void *UserData)
+void LGraph::DataSeries::SetTypes(LVariantType x, LVariantType y)
+{
+	priv->XType = x;
+	priv->YType = y;
+}
+
+bool LGraph::DataSeries::AddPair(const char *x, const char *y, void *UserData)
 {
 	if (!x || !y)
 		return false;
@@ -521,7 +623,7 @@ bool LGraph::DataSeries::AddPair(char *x, char *y, void *UserData)
 	if (priv->YType == GV_NULL)
 		priv->YType = priv->GuessType(y);
 
-	Pair &p = d->values.New();
+	auto &p = d->values.New();
 	p.UserData = UserData;
 	
 	if (priv->Convert(p.x, priv->XType, x))
@@ -841,6 +943,11 @@ void LGraph::SetRange(bool XAxis, Range r)
 	Invalidate();
 }
 
+void LGraph::AddGuide(Guide g)
+{
+	d->guides.Add(g);
+}
+
 void LGraph::OnMouseMove(LMouse &m)
 {
 	d->MouseLoc = m;
@@ -864,6 +971,21 @@ bool LGraph::OnMouseWheel(double Lines)
 	return true;
 }
 
+bool LGraph::OnLayout(LViewLayoutInfo &Inf)
+{
+	if (!Inf.Width.Min)
+	{
+		Inf.Width.Min = -1;
+		Inf.Width.Max = -1;
+	}
+	else
+	{
+		Inf.Height.Min = -1;
+		Inf.Height.Max = -1;
+	}
+	return true;
+}
+
 void LGraph::OnPaint(LSurface *pDC)
 {
 	LAutoPtr<LDoubleBuffer> DoubleBuf;
@@ -876,13 +998,13 @@ void LGraph::OnPaint(LSurface *pDC)
 	LColour cBorder(222, 222, 222);
 	LRect c = GetClient();
 	LRect data = c;
-	data.Inset(20, 20);
+	data.Inset(10, 10);
 	data.x2 -= 40;
 	data.SetSize((int)(d->Zoom * data.X()), (int)(d->Zoom * data.Y()));
 	data.Offset((int)(d->Px * data.X()), (int)(d->Py * data.Y()));
 	
 	LRect y = data;
-	y.x2 = y.x1 + 60;
+	y.x2 = y.x1 + 80;
 	data.x1 = y.x2 + 1;
 	LRect x = data;
 	x.y1 = x.y2 - 60;
@@ -911,6 +1033,34 @@ void LGraph::OnPaint(LSurface *pDC)
 			pDC->HLine(data.x1 - d->AxisMarkPx, data.x2, d->MouseLoc.y);
 			LDisplayString dsY(GetFont(), d->DataToString(yCur));
 			dsY.Draw(pDC, data.x1 - d->AxisMarkPx - dsY.X(), d->MouseLoc.y - (dsY.Y() >> 1));
+		}
+	}
+	
+	// Draw guides
+	pDC->Colour(cBorder);
+	for (auto &g: d->guides)
+	{
+		if (g.horizontal)
+		{
+			if (g.value.Type != d->MinY.Type)
+			{
+				if (!d->MinY.Type)
+					continue; // wait for the type to be set...
+			
+				// Are they compatible at least?
+				if (g.value.Type == GV_INT32 &&
+					d->MinY.Type == GV_INT64)
+				{
+					// Convert...
+					g.value = g.value.CastInt64();
+				}
+			}
+			
+			int yy = (int)d->DataToView(g.value, y.Y(), d->MinY, d->MaxY);
+			if (yy >= data.y1 && yy <= data.y2)
+			{
+				pDC->HLine(data.x1, data.x2, data.y2 - yy);
+			}
 		}
 	}
 

@@ -36,8 +36,10 @@ class LDocApp :
 public:
 	#ifdef _WIN32
 	typedef int LIcon;
+	constexpr static LIcon NO_ICON = 0;
 	#else
 	typedef const char *LIcon;
+	constexpr static LIcon NO_ICON = nullptr;
 	#endif
 
 private:
@@ -72,11 +74,11 @@ public:
 	LDocApp
 	(
 		/// The name of the application
-		const char *appname = 0,
+		const char *appname = nullptr,
 		/// [Optional] The icon resource for the window.
-		LIcon icon = 0,
+		LIcon icon = NO_ICON,
 		/// [Optional] Options file base name..
-		char *optsname = 0
+		const char *optsname = nullptr
 	);
 	~LDocApp();
 

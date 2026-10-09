@@ -22,13 +22,54 @@
 #define PROF(s)
 #endif
 
+class LRemoteUrl : public LDialog
+{
+public:
+	LString url;
+
+	LRemoteUrl(LView *parent, LString init)
+	{
+		SetParent(parent);
+		url = init;
+		
+		LoadFromResource(ID_REMOTE_DLG);
+		SetCtrlName(ID_URL, url);
+	}
+	
+	int OnNotify(LViewI *Ctrl, const LNotification &n) override
+	{
+		switch (Ctrl->GetId())
+		{
+			case ID_COPY:
+			{
+				LClipBoard clip(this);
+				clip.Text(url = GetCtrlName(ID_URL));
+				break;
+			}
+			case ID_CHANGE:
+			{
+				url = GetCtrlName(ID_URL);
+				EndModal(true);
+				break;
+			}
+			case IDOK:
+			{
+				EndModal(false);
+				break;
+			}
+		}
+		
+		return 0;
+	}
+};
+
 class TmpFile : public LFile
 {
 	int Status;
 	LString Hint;
 	
 public:
-	TmpFile(const char *hint = NULL)
+	TmpFile(const char *hint = nullptr)
 	{
 		Status = 0;
 		if (hint)
@@ -83,7 +124,8 @@ bool TerminalAt(LString Path)
 			return LExecute(p);
 		}
 	#elif defined(LINUX)
-		LExecute("gnome-terminal", NULL, Path);
+	    if (!LExecute("xdg-terminal-exec", nullptr, Path))
+			LExecute("gnome-terminal", nullptr, Path);
 	#endif
 
 	return false;
@@ -119,7 +161,11 @@ int ToolVersion[VcMax] = {0};
 	#define LOG_READER(...)
 #endif
 
-ReaderThread::ReaderThread(VersionCtrl vcs, LAutoPtr<LSubProcess> p, LStream *out) : LThread("ReaderThread")
+ReaderThread::ReaderThread(VersionCtrl vcs, LAutoPtr<LSubProcess> p, LStream *out)
+	: LThread("ReaderThread")
+	#if DEBUG_SLOG
+	, sLog(LStructuredLog::TNetworkEndpoint, LStructuredLog::sDefaultEndpoint, true)
+	#endif
 {
 	Vcs = vcs;
 	Process = p;
@@ -175,7 +221,11 @@ int ReaderThread::OnLine(char *s, ssize_t len)
 
 bool ReaderThread::OnData(char *Buf, ssize_t &r)
 {
+	#if DEBUG_SLOG
+	sLog.Log("OnData:", LString(Buf, r));
+	#else
 	LOG_READER("OnData %i\n", (int)r);
+	#endif
 	
 	#if 1
 	char *Start = Buf;
@@ -221,17 +271,32 @@ int ReaderThread::Main()
 		return ErrSubProcessFailed;
 	}
 
-	char Buf[1024];
+	char Buf[4 << 10];
 	ssize_t r;
 	
+	#if DEBUG_SLOG
+	sLog.Log("ReaderThread starting loop", LCurrentThreadId());
+	#else
 	LOG_READER("%s:%i - starting reader loop, pid=%i\n", _FL, Process->Handle());
+	#endif
 	while (Process->IsRunning())
 	{
 		if (Out)
 		{
+			#if DEBUG_SLOG
+			sLog.Log("starting read.");
+			#else
 			LOG_READER("%s:%i - starting read.\n", _FL);
+			#endif
+			
 			r = Process->Read(Buf, sizeof(Buf));
+			
+			#if DEBUG_SLOG
+			sLog.Log("read:", LString(Buf, r));
+			#else
 			LOG_READER("%s:%i - read=%i.\n", _FL, (int)r);
+			#endif
+			
 			if (r > 0)
 			{
 				if (!OnData(Buf, r))
@@ -246,18 +311,37 @@ int ReaderThread::Main()
 		}
 	}
 
+	#if DEBUG_SLOG
+	sLog.Log("process loop done");
+	#else
 	LOG_READER("%s:%i - process loop done.\n", _FL);
+	#endif
 	if (Out)
 	{
 		while ((r = Process->Read(Buf, sizeof(Buf))) > 0)
+		{
+			#if DEBUG_SLOG
+			sLog.Log("post loop read:", LString(Buf, r));
+			#endif
 			OnData(Buf, r);
+		}
 	}
 
+	#if DEBUG_SLOG
+	sLog.Log("loop done");
+	#else
 	LOG_READER("%s:%i - loop done.\n", _FL);
+	#endif
 	Result = (int) Process->GetExitValue();
 	#if _DEBUG
 	if (Result)
+	{
+		#if DEBUG_SLOG
+		sLog.Log("process exit code:", Result);
+		#else
 		printf("%s:%i - Process err: %i 0x%x\n", _FL, Result, Result);
+		#endif
+	}
 	#endif
 	
 	return Result;
@@ -452,6 +536,8 @@ SshConnection::LoggingType Convert(LoggingType t)
 			return SshConnection::LogInfo;
 		case LogDebug:
 			return SshConnection::LogDebug;
+		default:
+			break;
 	}
 	return SshConnection::LogNone;
 }
@@ -619,12 +705,14 @@ bool VcFolder::ParseBranches(int Result, LString s, ParseParams *Params)
 			
 				auto name = b(0, 28).Strip();
 				auto refs = b(28, -1).SplitDelimit()[0].SplitDelimit(":");
-
-				auto branch = Branches.Find(name);
-				if (branch)
-					branch->Hash = refs.Last();
-				else
-					Branches.Add(name, new VcBranch(name, refs.Last()));
+				if (refs.Length())
+				{
+					auto branch = Branches.Find(name);
+					if (branch)
+						branch->Hash = refs.Last();
+					else
+						Branches.Add(name, new VcBranch(name, refs.Last()));
+				}
 			}
 
 			if (Params && Params->Str.Equals("CountToTip"))
@@ -664,8 +752,64 @@ void VcFolder::GetRemoteUrl(ParseParams::TCallback Callback)
 			break;
 		}
 		default:
+			NoImplementation(_FL);
 			break;
 	}
+}
+
+void VcFolder::SetRemoteUrl(LString newUrl, ParseParams::TCallback Callback)
+{
+	LAutoPtr<ParseParams> p;
+	if (Callback)
+		p.Reset(new ParseParams(std::move(Callback)));
+
+	switch (GetType())
+	{
+		case VcGit:
+		{
+			// git remote set-url origin <NEW_GIT_URL_HERE>
+			auto args = LString::Fmt("remote set-url origin %s", newUrl.Get());
+			StartCmd(args, NULL, p.Release());
+			break;
+		}
+		case VcHg:
+		{
+			GetConfigFile(true, false, [this, newUrl](auto configPath)
+				{
+					LIniFile config(nullptr, configPath);
+					if (config.Set("paths", "default", newUrl))
+						config.Write();
+					else
+						LPopupNotification::Message(GetTree()->GetWindow(), "Failed to set path.");
+				});
+
+			break;
+		}
+		/*
+		case VcSvn:
+		{
+			StartCmd("info --show-item=url", NULL, p.Release());
+			break;
+		}
+		*/
+		default:
+			NoImplementation(_FL);
+			break;
+	}
+}
+
+LString VcFolder::DiffContextOption()
+{
+	LString opt = "";
+	
+	LVariant diffPad;
+	if (d->Opts.GetValue(OPT_DiffPad, diffPad) &&
+		!diffPad.IsNull())
+	{
+		opt.Printf(" -U%i", diffPad.CastInt32());
+	}
+	
+	return opt;
 }
 
 void VcFolder::SelectCommit(LWindow *Parent, LString Commit, LString Path)
@@ -704,13 +848,13 @@ void VcFolder::SelectCommit(LWindow *Parent, LString Commit, LString Path)
 		{
 			case VcGit:
 			{
-				a.Printf("diff %s~ %s", Commit.Get(), Commit.Get());
+				a.Printf("diff%s %s~ %s", DiffContextOption().Get(), Commit.Get(), Commit.Get());
 				StartCmd(a, &VcFolder::ParseSelectCommit);
 				break;
 			}
 			case VcHg:
 			{
-				a.Printf("log -p -r %s", Commit.Get());
+				a.Printf("log%s -p -r %s", DiffContextOption().Get(), Commit.Get());
 				StartCmd(a, &VcFolder::ParseSelectCommit);
 				break;
 			}
@@ -762,11 +906,8 @@ void VcFolder::OnBranchesChange()
 			if (!stricmp(b.key, "default") ||
 				!stricmp(b.key, "trunk"))
 				Default = b.key;
-			/*
-			else
-				printf("Other=%s\n", b.key);
-			*/
 		}
+
 		int Idx = 1;
 		for (auto b: Branches)
 		{
@@ -828,6 +969,23 @@ int VcFolder::IndexOfCommitField(CommitField fld)
 	return (int)Fields.IndexOf(fld);
 }
 
+int DefaultFieldWidth(CommitField fld)
+{
+	switch (fld)
+	{
+		case LGraph:      return 60;
+		case LIndex:      return 60;
+		case LBranch:     return 100;
+		case LRevision:   return 100;
+		case LAuthor:     return 240;
+		case LTime:       return 130;
+		case LMessageTxt: return 700;
+		default:
+			LAssert(!"Unknown field");
+			return 100;
+	}
+}
+
 void VcFolder::UpdateColumns(LList *lst)
 {
 	if (!lst)
@@ -839,14 +997,15 @@ void VcFolder::UpdateColumns(LList *lst)
 	{
 		switch (c)
 		{
-			case LGraph:      lst->AddColumn("---",      60); break;
-			case LIndex:      lst->AddColumn("Index",    60); break;
-			case LBranch:     lst->AddColumn("Branch",   60); break;
-			case LRevision:   lst->AddColumn("Revision", 60); break;
-			case LAuthor:     lst->AddColumn("Author",   240); break;
-			case LTime:       lst->AddColumn("Date",     130); break;
-			case LMessageTxt: lst->AddColumn("Message",  700); break;
-			default: LAssert(0); break;
+			case LGraph:      lst->AddColumn("---",      DefaultFieldWidth(c)); break;
+			case LIndex:      lst->AddColumn("Index",    DefaultFieldWidth(c)); break;
+			case LBranch:     lst->AddColumn("Branch",   DefaultFieldWidth(c)); break;
+			case LRevision:   lst->AddColumn("Revision", DefaultFieldWidth(c)); break;
+			case LAuthor:     lst->AddColumn("Author",   DefaultFieldWidth(c)); break;
+			case LTime:       lst->AddColumn("Date",     DefaultFieldWidth(c)); break;
+			case LMessageTxt: lst->AddColumn("Message",  DefaultFieldWidth(c)); break;
+			default:
+				LAssert(0); break;
 		}
 	}
 }
@@ -889,9 +1048,9 @@ void VcFolder::ShowAuthor()
 void VcFolder::UpdateAuthorUi()
 {
 	if (AuthorLocal)
-		d->Wnd()->SetCtrlName(IDC_AUTHOR, AuthorLocal.ToString());
+		d->Wnd()->SetCtrlName(IDC_AUTHOR, AuthorLocal.Get());
 	else if (AuthorGlobal)
-		d->Wnd()->SetCtrlName(IDC_AUTHOR, AuthorGlobal.ToString());
+		d->Wnd()->SetCtrlName(IDC_AUTHOR, AuthorGlobal.Get());
 }
 
 void VcFolder::GetConfigFile(bool local, bool createIfMissing, std::function<void(LString)> callback, bool debug)
@@ -1005,7 +1164,7 @@ void VcFolder::GetConfigFile(bool local, bool createIfMissing, std::function<voi
 	}
 }
 
-void VcFolder::GetAuthors(std::function<void(Author &local, Author &global)> callback, bool debug)
+void VcFolder::GetAuthors(std::function<void(TAuthor &local, TAuthor &global)> callback, bool debug)
 {
 	if (!callback)
 		return;
@@ -1014,20 +1173,24 @@ void VcFolder::GetAuthors(std::function<void(Author &local, Author &global)> cal
 	
 	GetAuthor(true, [this, callback, debug](auto local)
 		{
-			if (debug) d->Log->Print("%s:%i - getAuthors(true) cb=%s\n", _FL, local.ToString().Get());
+			if (debug) d->Log->Print("%s:%i - getAuthors(true) cb=%s\n", _FL, local.Get().Get());
 			
 			GetAuthor(false, [this, callback, local, debug](auto global) mutable
 				{
-					if (debug) d->Log->Print("%s:%i - getAuthors(false) cb=%s\n", _FL, global.ToString().Get());
+					if (debug) d->Log->Print("%s:%i - getAuthors(false) cb=%s\n", _FL, global.Get().Get());
 
-					callback(local, global);
+					GetTree()->RunCallback([callback=std::move(callback), local, global]() mutable
+						{
+							callback(local, global);
+						},
+						_FL);
 				},
 				debug);
 		},
 		debug);
 }
 
-bool VcFolder::GetAuthor(bool local, std::function<void(Author &author)> callback, bool debug)
+bool VcFolder::GetAuthor(bool local, std::function<void(TAuthor &author)> callback, bool debug)
 {
 	auto scope = local ? "--local" : "--global";
 	auto target = local ? &AuthorLocal : &AuthorGlobal;
@@ -1038,6 +1201,12 @@ bool VcFolder::GetAuthor(bool local, std::function<void(Author &author)> callbac
 		{
 			if (target->InProgress)
 				return true;
+			if (target->Loaded)
+			{
+				if (callback)
+					callback(*target);
+				return true;
+			}
 
 			auto params = new ParseParams;
 			params->Callback = [this, callback, target](auto code, auto s)
@@ -1054,6 +1223,7 @@ bool VcFolder::GetAuthor(bool local, std::function<void(Author &author)> callbac
 					}
 				}
 
+				target->Loaded = true;
 				target->InProgress = false;
 				if (callback)
 					callback(*target);
@@ -1107,14 +1277,10 @@ bool VcFolder::GetAuthor(bool local, std::function<void(Author &author)> callbac
 	return true;
 }
 
-bool VcFolder::SetAuthor(bool local, Author author)
+bool VcFolder::SetAuthor(bool local, TAuthor author)
 {
-	if (!author.name || !author.email)
-	{
-		d->Log->Print("%s:%i - No user/email given.\n", _FL);
-		return false;
-	}
-
+	// NULL author name / email means delete the author details...
+	
 	auto scope = local ? "--local" : "--global";
 	auto target = local ? &AuthorLocal : &AuthorGlobal;
 
@@ -1124,10 +1290,20 @@ bool VcFolder::SetAuthor(bool local, Author author)
 	{
 		case VcGit:
 		{
-			auto args = LString::Fmt("config %s user.name \"%s\"", scope, author.name.Get());
+			target->Loaded = true;
+			LString args;
+			
+			if (author.name)
+				args = LString::Fmt("config %s user.name \"%s\"", scope, author.name.Get());
+			else
+				args = LString::Fmt("config %s --unset user.name", scope);
 			StartCmd(args);
 
-			args = LString::Fmt("config %s user.email \"%s\"", scope, author.email.Get());
+			if (author.email)
+				args = LString::Fmt("config %s user.email \"%s\"", scope, author.email.Get());
+			else
+				args = LString::Fmt("config %s --unset user.email", scope);
+			
 			StartCmd(args);
 			break;
 		}
@@ -1138,17 +1314,26 @@ bool VcFolder::SetAuthor(bool local, Author author)
 					if (!config)
 						return;
 
-					LString s;
-					s.Printf("%s <%s>", author.name.Get(), author.email.Get());
-
 					SshConnection *conn = nullptr;
 					if (!Uri.IsFile())
 						conn = d->GetConnection(Uri.ToString(), RemotePrompt);
 
 					LIniFile data(conn, config);
-					data.Set("ui", "username", s);
+
+					if (author)
+					{
+						LString s;
+						s.Printf("%s <%s>", author.name.Get(), author.email.Get());
+						data.Set("ui", "username", s);
+					}
+					else
+					{
+						data.Delete("ui", "username");
+					}
+
 					data.Write();
 				});
+			break;
 		}
 		default:
 		{
@@ -1174,29 +1359,22 @@ void VcFolder::OnSelectWithType()
 
 void VcFolder::OnSelectUpdateItems()
 {
-	if (d->Commits->Length() > MAX_AUTO_RESIZE_ITEMS)
+	auto commitLen = d->Commits->Length();
+	if (commitLen > MAX_AUTO_RESIZE_ITEMS)
 	{
 		int i = 0;
-		if (GetType() == VcHg && d->Commits->GetColumns() >= 7)
+		for (auto c: Fields)
 		{
-			d->Commits->ColumnAt(i++)->Width(60);  // LGraph
-			d->Commits->ColumnAt(i++)->Width(40);  // LIndex
-			d->Commits->ColumnAt(i++)->Width(100); // LRevision
-			d->Commits->ColumnAt(i++)->Width(60);  // LBranch
-			d->Commits->ColumnAt(i++)->Width(240); // LAuthor
-			d->Commits->ColumnAt(i++)->Width(130); // LTimeStamp
-			d->Commits->ColumnAt(i++)->Width(400); // LMessage
-		}
-		else if (d->Commits->GetColumns() >= 5)
-		{
-			d->Commits->ColumnAt(i++)->Width(40);  // LGraph
-			d->Commits->ColumnAt(i++)->Width(270); // LRevision
-			d->Commits->ColumnAt(i++)->Width(240); // LAuthor
-			d->Commits->ColumnAt(i++)->Width(130); // LTimeStamp
-			d->Commits->ColumnAt(i++)->Width(400); // LMessage
+			if (auto col = d->Commits->ColumnAt(i++))
+				col->Width(DefaultFieldWidth(c));
+			else
+				break;
 		}
 	}
-	else d->Commits->ResizeColumnsToContent();
+	else
+	{
+		d->Commits->ResizeColumnsToContent();
+	}
 
 	d->Commits->UpdateAllItems();
 }
@@ -1208,8 +1386,8 @@ void VcFolder::Select(bool b)
 	#endif
 	if (!b)
 	{
-		auto *w = d->Tree->GetWindow();
-		w->SetCtrlName(IDC_BRANCH, NULL);
+		if (auto w = d->Tree->GetWindow())
+			w->SetCtrlName(IDC_BRANCH, NULL);
 	}
 
 	PROF("Parent.Select");
@@ -1229,8 +1407,14 @@ void VcFolder::Select(bool b)
 		else
 			OnSelectWithType();
 
+		PROF("GetBranches");
+		if (GetBranches(false))
+			OnBranchesChange();
+		GetCurrentRevision();
+
 		PROF("UpdateCommitList");
-		if ((Log.Length() == 0 || CommitListDirty) && !IsLogging)
+		if ((LogStatus != LogState::Loaded || CommitListDirty) &&
+			LogStatus != LogState::Logging)
 		{
 			switch (GetType())
 			{
@@ -1246,7 +1430,7 @@ void VcFolder::Select(bool b)
 						cmd += s;
 					}
 					
-					IsLogging = StartCmd(cmd, &VcFolder::ParseRevList);
+					LogStatus = StartCmd(cmd, &VcFolder::ParseRevList) ? LogState::Logging : LogState::Error;
 					break;
 				}
 				case VcSvn:
@@ -1256,7 +1440,7 @@ void VcFolder::Select(bool b)
 
 					if (CommitListDirty)
 					{
-						IsLogging = StartCmd("up", &VcFolder::ParsePull, new ParseParams("log"));
+						LogStatus = StartCmd("up", &VcFolder::ParsePull, new ParseParams("log")) ? LogState::Logging : LogState::Error;
 						break;
 					}
 					
@@ -1265,12 +1449,12 @@ void VcFolder::Select(bool b)
 						s.Printf("log --limit %i", Limit.CastInt32());
 					else
 						s = "log";
-					IsLogging = StartCmd(s, &VcFolder::ParseLog);
+					LogStatus = StartCmd(s, &VcFolder::ParseLog) ? LogState::Logging : LogState::Error;
 					break;
 				}
 				case VcHg:
 				{
-					IsLogging = StartCmd("log", &VcFolder::ParseLog);
+					LogStatus = StartCmd("log", &VcFolder::ParseLog) ? LogState::Logging : LogState::Error;
 					break;
 				}
 				case VcPending:
@@ -1279,17 +1463,13 @@ void VcFolder::Select(bool b)
 				}
 				default:
 				{
-					IsLogging = StartCmd("log", &VcFolder::ParseLog);
+					LogStatus = StartCmd("log", &VcFolder::ParseLog) ? LogState::Logging : LogState::Error;
 					break;
 				}
 			}
 
 			CommitListDirty = false;
 		}
-
-		PROF("GetBranches");
-		if (GetBranches(false))
-			OnBranchesChange();
 
 		if (d->CurFolder != this)
 		{
@@ -1328,7 +1508,7 @@ void VcFolder::Select(bool b)
 						break;
 					}
 					default:
-						l->SetCurrent(!_stricmp(CurrentCommit, l->GetRev()));
+						l->SetCurrent(CurrentCommit.Equals(l->GetRev()));
 						break;
 				}
 			}
@@ -1350,8 +1530,6 @@ void VcFolder::Select(bool b)
 		if (GetType() != VcPending)
 			OnSelectUpdateItems();
 
-		PROF("GetCur");
-		GetCurrentRevision();
 	}
 }
 
@@ -1503,8 +1681,8 @@ bool VcFolder::ParseRevList(int Result, LString s, ParseParams *Params)
 			break;
 	}
 
-	IsLogging = false;
-	return Errors == 0;
+	LogStatus = Result == 0 && Errors == 0 ? LogState::Loaded : LogState::Error;
+	return LogStatus == LogState::Loaded;
 }
 
 LString VcFolder::GetFilePart(const char *uri)
@@ -1521,6 +1699,7 @@ void VcFolder::ClearLog()
 {
 	Uncommit.Reset();
 	Log.DeleteObjects();
+	LogStatus = LogState::None;
 }
 
 void VcFolder::LogFilter(const char *Filter)
@@ -1564,7 +1743,8 @@ void VcFolder::LogFilter(const char *Filter)
 						args.Printf("log -n %i --author \"%s\"", Limit.CastInt32(), LString(Filter).LStrip("@").Get());
 					else
 						args.Printf("log -n %i --grep \"%s\"", Limit.CastInt32(), Filter.Get());
-					IsLogging = StartCmd(args, &VcFolder::ParseLog);
+					LogStatus = StartCmd(args, &VcFolder::ParseLog) ? LogState::Logging : LogState::Error;
+					printf("%s:%i - LogStatus=%i\n", _FL, (int)LogStatus);
 				}
 			};
 			StartCmd(args, NULL, params);
@@ -1572,7 +1752,7 @@ void VcFolder::LogFilter(const char *Filter)
 		}
 		case VcHg:
 		{
-			auto args = LString::Fmt("log %s", Filter);
+			auto args = LString::Fmt("log -k \"%s\"", Filter);
 			ClearLog();
 			StartCmd(args, &VcFolder::ParseLog);
 			break;
@@ -1585,11 +1765,11 @@ void VcFolder::LogFilter(const char *Filter)
 	}
 }
 
-void VcFolder::LogFile(const char *uri)
+void VcFolder::LogFile(const char *uri, BrowseUi *existingUi)
 {
 	LString Args;
 	
-	if (IsLogging)
+	if (LogStatus == LogState::Logging)
 	{
 		d->Log->Print("%s:%i - already logging.\n", _FL);
 		return;
@@ -1610,9 +1790,13 @@ void VcFolder::LogFile(const char *uri)
 					FileToSelect = Abs;
 			}
 
-			ParseParams *Params = new ParseParams(uri);
-			Args.Printf("log \"%s\"", FileToSelect.Get());
-			IsLogging = StartCmd(Args, &VcFolder::ParseLog, Params, LogNormal);
+			if (auto params = new ParseParams(uri))
+			{
+				params->browseUi = existingUi;
+				Args.Printf("log \"%s\"", FileToSelect.Get());
+				LogStatus = StartCmd(Args, &VcFolder::ParseLog, params, LogNormal) ? LogState::Logging : LogState::Error;
+				printf("%s:%i - LogStatus=%i\n", _FL, (int)LogStatus);
+			}
 			break;
 		}
 		default:
@@ -1621,28 +1805,71 @@ void VcFolder::LogFile(const char *uri)
 	}
 }
 
-VcLeaf *VcFolder::FindLeaf(const char *Path, bool OpenTree)
+VcLeaf *VcFolder::FindLeaf(LString Path, bool OpenTree)
 {
-	VcLeaf *r = NULL;	
-	
-	if (OpenTree)
-		DoExpand();
-	
-	for (auto n = GetChild(); !r && n; n = n->GetNext())
+	LString rel = LMakeRelativePath(Uri.sPath, Path);
+	auto parts = rel.SplitDelimit("/\\");
+	for (size_t i=0; i<parts.Length(); i++)
 	{
-		auto l = dynamic_cast<VcLeaf*>(n);
-		if (l)
-			r = l->FindLeaf(Path, OpenTree);
+		if (parts[i].Equals("."))
+			parts.DeleteAt(i--, true);
+		else
+			printf("p='%s'\n", parts[i].Get());
 	}
 	
-	return r;
+	if (Tmp && OpenTree)
+		DoExpand();
+	
+	LTreeItem *i = this;
+	int idx = 0;
+	for (auto p: parts)
+	{
+		// Find the current child item matching the current path segment
+		VcLeaf *leaf = nullptr;
+		for (auto c = i->GetChild(); c; c = c->GetNext())
+		{
+			auto name = c->GetText();
+			auto match = !Stricmp(name, p.Get());
+			printf("%i: p='%s' name='%s' = %i\n", idx, p.Get(), name, match);
+			if (match)
+			{
+				if ((leaf = dynamic_cast<VcLeaf*>(c)))
+				{
+					if (OpenTree)
+						leaf->DoExpand();
+				}
+				else
+				{
+					printf("%s: c not a leaf?\n", __func__);
+					return nullptr;
+				}				
+				break;
+			}
+		}
+		if (leaf)
+		{
+			i = leaf;
+		}
+		else
+		{
+			leaf = dynamic_cast<VcLeaf*>(i);
+			printf("%s: can't find path seg '%s' at '%s'\n", __func__, p.Get(), leaf ? leaf->Full().Get() : nullptr);
+		}
+		idx++;
+	}
+	
+	auto result = dynamic_cast<VcLeaf*>(i);
+	printf("%s: result=%p\n", __func__, result);
+	return result;
 }
 
 bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 {
 	int Skipped = 0, Errors = 0;
 	bool LoggingFile = Params ? Params->Str != NULL : false;
-	VcLeaf *File = LoggingFile ? FindLeaf(Params->Str, true) : NULL; // This may be NULL even if we are logging a file...
+	GetTree()->SetShowUpdates(false);
+	auto File = LoggingFile ? FindLeaf(Params->Str, true) : NULL; // This may be NULL even if we are logging a file...
+	GetTree()->SetShowUpdates(true);
 	
 	LArray<VcCommit*> *Out, BrowseLog;
 	if (File)
@@ -1681,6 +1908,7 @@ bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 			if (!s)
 			{
 				OnCmdError(s, "No output from command.");
+				LogStatus = LogState::Error;
 				return false;
 			}
 
@@ -1690,10 +1918,7 @@ bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 				if (!strnicmp(i, "commit ", 7))
 				{
 					if (i > prev)
-					{
 						c.New().Set(prev, i - prev);
-						// LgiTrace("commit=%i\n", (int)(i - prev));
-					}
 					prev = i;
 				}
 
@@ -1884,17 +2109,19 @@ bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 
 	if (File)
 	{
-		File->ShowLog();
+		if (Params && Params->browseUi)
+			Params->browseUi->OnLeafLog(File);
+		else
+			File->ShowLog();
 	}
 	else if (LoggingFile)
 	{
-		if (auto ui = new BrowseUi(BrowseUi::TLog, d, this, Params->Str))
-			ui->ParseLog(BrowseLog, s);
+		auto browseUi = Params->browseUi ? Params->browseUi : new BrowseUi(BrowseUi::TLog, d, this, Params->Str);
+		if (browseUi)
+			browseUi->ParseLog(BrowseLog, s);
 	}
 
-	// LgiTrace("%s:%i - ParseLog: Skip=%i, Error=%i\n", _FL, Skipped, Errors);
-	IsLogging = false;
-
+	LogStatus = Result == 0 && Errors == 0 ? LogState::Loaded : LogState::Error;
 	return !Result;
 }
 
@@ -2107,6 +2334,20 @@ void VcFolder::UpdateBranchUi()
 			if (it != Branches.end())
 				b->Name((*it).key);
 		}
+
+		LString branch = b->Name();
+		LString key = "branches/DMS-";
+		if (!Strnicmp(branch.Get(), key.Get(), key.Length()))
+		{
+			auto msg = w->GetCtrlName(IDC_MSG);
+			if (!msg)
+			{
+				auto ref = branch.SplitDelimit("/", 1)[-1];
+				auto parts = ref.SplitDelimit("-");
+				if (parts.Length() > 1)
+					w->SetCtrlName(IDC_MSG, LString::Fmt("%s-%s: ", parts[0].Get(), parts[1].Get()));
+			}
+		}
 	}
 
 	LCombo *Cbo;
@@ -2132,7 +2373,7 @@ void VcFolder::UpdateBranchUi()
 VcFile *AppPriv::FindFile(const char *Path)
 {
 	if (!Path)
-		return NULL;
+		return nullptr;
 
 	LArray<VcFile*> files;
 	if (Files->GetAll(files))
@@ -2147,7 +2388,7 @@ VcFile *AppPriv::FindFile(const char *Path)
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 VcFile *VcFolder::FindFile(const char *Path)
@@ -2465,36 +2706,75 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 	{
 		case VcGit:
 		{
-			enum TState {
+			enum TState
+			{
 				TNone,
 				TAdded,
 				TNotStaged,
 				TUntracked,
 				TDiffs,
+				TUnmerged,
 			}	state = TNone;
 		
-			struct PathStatus {
+			struct PathStatus
+			{
 				LString op, path;
-				void set(LString::Array &a) {
-					op = a[0].Strip();
-					path = a[1].Strip();
+				
+				void set(LString::Array &a)
+				{
+					if (a.Length() != 2)
+					{
+						LgiTrace("%s:%i - error: wrong part count.\n", _FL);
+					}
+					else
+					{
+						op = a[0].Strip();
+						path = a[1].Strip();
+					}
+				}
+				
+				LString toString() const
+				{
+					return LString::Fmt("op=%s, path='%s'", op.Get(), path.Get());
 				}
 			};
-			LArray<PathStatus> added, notStaged, untracked;			
+			
+			// printf("s='%s'\n", s.Get());
+
+			using PathStatusArr = LArray<PathStatus>;
+			PathStatusArr added, notStaged, untracked, conflicted;
 		
 			List<LListItem> Files;
 			LStringPipe Diffs(16 << 10);
 			VcFile *f = nullptr;
 
-			auto findPath = [&](LString path) -> PathStatus* {
-				for (auto &i: added)
-					if (path == i.path)
-						return &i;
-				for (auto &i: notStaged)
-					if (path == i.path)
-						return &i;
-				return nullptr;
-			};
+			auto findPath = [&](LString path) -> PathStatus*
+				{
+					PathStatusArr *a[] = { &added, &notStaged, &untracked, &conflicted };
+
+					for (int i=0; i<CountOf(a); i++)
+						for (auto &i: *a[i])
+							if (path == i.path)
+								return &i;
+
+					return nullptr;
+				};
+				
+			auto findFile = [&](LString path) -> VcFile*
+				{
+					path = path.Replace(DIR_STR, "/");
+					
+					for (auto f: Files)
+					{
+						if (auto item = dynamic_cast<VcFile*>(f))
+						{
+							if (path.Equals(item->GetFileName()))
+								return item;
+						}
+					}
+					
+					return nullptr;
+				};
 			
 			auto lines = s.Split("\n");
 			for (auto &line: lines)
@@ -2507,7 +2787,9 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 					state = TNotStaged;
 				else if (!Stricmp(txt, "Untracked files:"))
 					state = TUntracked;
-				else if (!_strnicmp(txt, "diff", 4))
+				else if (!Stricmp(txt, "Unmerged paths:"))
+					state = TUnmerged;
+				else if (!Strnicmp(txt, "diff", 4))
 				{
 					state = TDiffs;
 					if (f)
@@ -2516,9 +2798,10 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 
 					auto header = line.SplitDelimit(nullptr, 2);
 					
-					if (0)
-						for (int i=0; i<header.Length(); i++)
-							d->Log->Print("hdr[%i]='%s'\n", i, header[i].Get());
+					#if 0
+					for (int i=0; i<header.Length(); i++)
+						d->Log->Print("hdr[%i]='%s'\n", i, header[i].Get());
+					#endif
 					
 					auto paths = header.Last().SplitDelimit();
 					
@@ -2528,27 +2811,26 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 
 					auto half = paths.Length() / 2;
 					auto lastPath = LString(" ").Join(paths.Slice(half, -1));
-					Fn = lastPath(2, -1);
+					if (IsAlpha(lastPath(0)) && lastPath(1) == '/')
+						Fn = lastPath(2, -1);
+					else
+						Fn = lastPath;
 					
-					auto p = findPath(Fn);
-					// d->Log->Print("    Fn='%s' p='%s'\n", Fn.Get(), p ? p->path.Get() : "null");
-					if (!p)
-					{
-						// Maybe it's just a single path?
-						// Fn = header.Last()(2, -1); // strip off the 'a/' prefix
-					}
-
-					f = FindFile(Fn);
+					f = findFile(Fn);
 					if (!f)
+					{
 						f = new VcFile(d, this, Rev, IsWorking);
 
-					f->SetText(State, COL_STATE);
-					f->SetText(Fn.Replace("\\","/"), COL_FILENAME);
-					f->GetStatus();
-					Files.Insert(f);
+						f->SetText(State, COL_STATE);
+						f->SetText(Fn.Replace("\\","/"), COL_FILENAME);
+						f->GetStatus();
+						Files.Insert(f);
+					}
 				}
 				else switch (state)
 				{
+					default:
+						break;
 					case TAdded:
 					{
 						if (*txt == '\t')
@@ -2556,6 +2838,16 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 							auto parts = line.Strip().SplitDelimit(":", 1);
 							if (parts.Length() == 2)
 								added.New().set(parts);
+						}
+						break;
+					}
+					case TUnmerged:
+					{
+						if (*txt == '\t')
+						{
+							auto parts = line.Strip().SplitDelimit(":", 1);
+							if (parts.Length() == 2)
+								conflicted.New().set(parts);
 						}
 						break;
 					}
@@ -2612,6 +2904,20 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 			{
 				f->SetDiff(Diffs.NewLStr());
 				Diffs.Empty();
+			}
+			
+			for (auto &ns: conflicted)
+			{
+				auto f = FindFile(ns.path);
+				if (!f)
+				{
+					f = new VcFile(d, this, Rev, IsWorking);
+
+					f->SetText("C", COL_STATE);
+					f->SetText(ns.path.Replace("\\","/"), COL_FILENAME);
+					f->GetStatus();
+					Files.Insert(f);
+				}
 			}
 
 			InsertFiles(Files);
@@ -2846,8 +3152,7 @@ void VcFolder::OnPulse()
 				}
 				else if (c->PostOp)
 				{
-					if (s.Length() == 18 &&
-						s.Equals("LSUBPROCESS_ERROR\n"))
+					if (!Strncmp(s.Get(), "LSUBPROCESS_ERROR\n", 18))
 					{
 						OnCmdError(s, "Sub process failed.");
 					}
@@ -2933,10 +3238,10 @@ void VcFolder::Empty()
 	Type = VcNone;
 	
 	IsCommit = false;
-	IsLogging = false;
 	IsUpdate = false;
 	IsFilesCmd = false;
 	CommitListDirty = false;
+	LogStatus = LogState::None;
 	IsUpdatingCounts = false;
 	IsBranches = StatusNone;
 	IsIdent = StatusNone;
@@ -2948,6 +3253,8 @@ void VcFolder::Empty()
 	CurrentCommit.Empty();
 	RepoUrl.Empty();
 	VcCmd.Empty();
+	AuthorLocal = TAuthor();
+	AuthorGlobal = TAuthor();
 	Uncommit.Reset();
 	Log.DeleteObjects();
 
@@ -3008,7 +3315,7 @@ void VcFolder::OnMouseClick(LMouse &m)
 		s.AppendItem("Goto Item", ID_GOTO_ITEM);
 		s.AppendSeparator();
 		s.AppendItem("Remove", IDM_REMOVE);
-		s.AppendItem("Remote URL", IDM_REMOTE_URL);
+		s.AppendItem("Remote URL", ID_REMOTE_URL);
 		if (!Uri.IsFile())
 		{
 			s.AppendSeparator();
@@ -3079,20 +3386,20 @@ void VcFolder::OnMouseClick(LMouse &m)
 				});
 				break;
 			}
-			case IDM_REMOTE_URL:
+			case ID_REMOTE_URL:
 			{
 				GetRemoteUrl([this](auto code, auto str)
 				{
 					LString Url = str.Strip();
 					if (Url)
 					{
-						auto a = new LAlert(GetTree(), "Remote Url", Url, "Copy", "Ok");
-						a->DoModal([this, Url](auto dlg, auto code)
+						auto remoteDlg = new LRemoteUrl(GetTree(), Url);
+						remoteDlg->DoModal([this, remoteDlg](auto dlg, auto code)
 						{
-							if (code == 1)
+							if (code)
 							{
-								LClipBoard c(GetTree());
-								c.Text(Url);
+								// user wants to change the URL
+								SetRemoteUrl(remoteDlg->url);
 							}
 						});
 					}
@@ -3112,8 +3419,7 @@ void VcFolder::OnMouseClick(LMouse &m)
 
 						if (auto path = inp->GetStr())
 						{
-							pathParts = path.SplitDelimit("\\/");
-							PathSeek();
+							GotoItem(path);
 						}
 					});
 				break;
@@ -3133,6 +3439,12 @@ void VcFolder::OnMouseClick(LMouse &m)
 				break;
 		}
 	}
+}
+
+void VcFolder::GotoItem(LString path)
+{
+	pathParts = path.SplitDelimit("\\/");
+	PathSeek();
 }
 
 void VcFolder::PathSeek()
@@ -3166,6 +3478,133 @@ void VcFolder::PathSeek()
 		if (!item->Select())
 			item->Select(true);
 		item->ScrollTo();
+	}
+}
+
+void VcFolder::GetCommit(LString hash, std::function<void(TCommitInfo&)> callback)
+{
+	switch (GetType())
+	{
+		default:
+		{
+			NoImplementation(_FL);
+			break;
+		}
+		case VcGit:
+		{
+			auto args = LString::Fmt("show %s", hash.Get());
+			ParseParams *p = new ParseParams;
+			p->Callback = [this, callback=std::move(callback)](auto code, auto str)
+				{
+					// process the show command
+					auto doubleNl = str.Find("\n\n");
+					if (doubleNl >= 0)
+					{
+						TCommitInfo inf;
+						auto hdrs = str(0, doubleNl);
+						inf.message = str(doubleNl + 2, -1).Strip();
+						for (auto ln: hdrs.SplitDelimit("\n"))
+						{
+							auto var = ln.SplitDelimit(" \t:", 1);
+							if (var.Length() == 2)
+							{
+								if (var[0].Equals("commit"))
+									inf.hash = var[1].Strip();
+								else if (var[0].Equals("Merge"))
+									inf.mergeParents = var[1].Strip().SplitDelimit();
+								else if (var[0].Equals("Author"))
+									inf.author.Set(var[1].Strip());
+								else if (var[0].Equals("Date"))
+									inf.dateStr = var[1].Strip();
+							}
+						}
+						
+						if (inf.hash)
+						{
+							callback(inf);
+						}
+					}
+					else LAssert(!"unexpected fmt");
+				};
+			StartCmd(args, nullptr, p);
+			break;
+		}
+	}
+}
+
+void VcFolder::CherryPick(	LString hash,
+							/// This is an optional NEW commit message:
+							LString newMessage,
+							/// THe parent index to use: 1=main branch, 2=feature branch
+							int parentIdx,
+							/// Optional callback for status
+							std::function<void(bool)> callback)
+{
+	switch (GetType())
+	{
+		default:
+		{
+			NoImplementation(_FL);
+			break;
+		}
+		case VcGit:
+		{
+			LString args;
+			LString mergeOpt = parentIdx >= 0 ? LString::Fmt(" -m %u", parentIdx) : LString();
+
+			if (newMessage)
+			{
+				// Apply the changes without committing, then commit with the supplied message.
+				args = LString::Fmt("cherry-pick --no-commit%s %s", mergeOpt.Get(), hash.Get());
+
+				auto msg = newMessage.Replace("\"", "\\\"");
+
+				auto p = new ParseParams;
+				p->Callback = [this, msg, callback](auto code, auto str)
+					{
+						if (code)
+						{
+							if (callback)
+								callback(false);
+							return;
+						}
+
+						auto commitArgs = LString::Fmt("commit -m \"%s\"", msg.Get());
+
+						ParseParams *cp = nullptr;
+						if (callback)
+						{
+							if ((cp = new ParseParams))
+							{
+								cp->Callback = [this, callback](auto code, auto str)
+									{
+										callback(code == 0);
+									};
+							}
+						}
+						StartCmd(commitArgs, nullptr, cp);
+					};
+				StartCmd(args, nullptr, p);
+			}
+			else
+			{
+				args = LString::Fmt("cherry-pick%s %s", mergeOpt.Get(), hash.Get());
+
+				ParseParams *p = nullptr;
+				if (callback)
+				{
+					if ((p = new ParseParams))
+					{
+						p->Callback = [this, callback](auto code, auto str)
+							{
+								callback(code == 0);					
+							};
+					}
+				}
+				StartCmd(args, nullptr, p);
+			}
+			break;
+		}
 	}
 }
 
@@ -3354,6 +3793,8 @@ bool VcFolder::ParseDelete(int Result, LString s, ParseParams *Params)
 		{			
 			break;
 		}
+		default:
+			break;
 	}
 
 	return true;
@@ -3547,12 +3988,14 @@ void VcFolder::ReadDir(LTreeItem *Parent, const char *ReadUri)
 			parentUri += "/";
 
 		auto localPath = u.LocalPath();
+		/*
 		auto debug = "C:\\code\\lgi\\trunk\\.hg\\store\\data\\templates\\mac\\basic__gui\\"; //%name%.xcodeproj
 		if (!Stricmp(localPath.Get(), debug))
 		{
 			int asd=0;
 		}
 		LgiTrace("localPath: %s\n", localPath.Get());
+		*/
 
 		for (int b = Dir.First(localPath); b; b = Dir.Next())
 		{
@@ -3659,7 +4102,7 @@ void VcFolder::ListCommit(VcCommit *c)
 		switch (GetType())
 		{
 			case VcGit:
-				Args.Printf("show %s^..%s", c->GetRev(), c->GetRev());
+				Args.Printf("show%s  --ignore-cr-at-eol %s^..%s", DiffContextOption().Get(), c->GetRev(), c->GetRev());
 				IsFilesCmd = StartCmd(Args, &VcFolder::ParseFiles, new ParseParams(c->GetRev()));
 				break;
 			case VcSvn:
@@ -3684,7 +4127,7 @@ void VcFolder::ListCommit(VcCommit *c)
 			}
 			case VcHg:
 			{
-				Args.Printf("diff --change %s", c->GetRev());
+				Args.Printf("diff%s --change %s", DiffContextOption().Get(), c->GetRev());
 				IsFilesCmd = StartCmd(Args, &VcFolder::ParseFiles, new ParseParams(c->GetRev()));
 				break;
 			}
@@ -3755,6 +4198,13 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 	bool ShowUntracked = d->Wnd()->GetCtrlValue(ID_UNTRACKED) != 0;
 	bool IsWorking = Params ? Params->IsWorking : false;
 	List<LListItem> Ins;
+
+	if (!Strncmp(s.Get(), LSubProcess::sErrorStr, Strlen(LSubProcess::sErrorStr)))
+	{
+		auto msg = s.SplitDelimit("\n", 1)[-1];
+		OnCmdError(s, msg);
+		return false;
+	}
 
 	switch (GetType())
 	{
@@ -3871,7 +4321,7 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 						else
 						{
 							auto path = p[6];
-							if (f = new VcFile(d, this, path, IsWorking))
+							if ((f = new VcFile(d, this, path, IsWorking)))
 							{
 								auto state = p[1].Strip(".");
 								auto pos = p[1].Find(state);
@@ -3887,7 +4337,7 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 					else if (Fmt == 1)
 					{
 						LString::Array p = Ln.SplitDelimit(" ");
-						if (f = new VcFile(d, this, LString(), IsWorking))
+						if ((f = new VcFile(d, this, LString(), IsWorking)))
 						{
 							f->SetText(p[0], COL_STATE);
 							f->SetText(p.Last(), COL_FILENAME);
@@ -3896,7 +4346,7 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 				}
 				else if (ShowUntracked)
 				{
-					if (f = new VcFile(d, this, LString(), IsWorking))
+					if ((f = new VcFile(d, this, LString(), IsWorking)))
 					{
 						f->SetText("?", COL_STATE);
 						f->SetText(Ln(2,-1), COL_FILENAME);
@@ -4028,15 +4478,11 @@ bool VcFolder::UpdateSubs()
 
 bool VcFolder::ParseUpdateSubs(int Result, LString s, ParseParams *Params)
 {
-	switch (GetType())
+	if (auto sel = d->Commits->GetSelected())
 	{
-		default:
-		case VcSvn:
-		case VcHg:
-		case VcCvs:
-			return false;
-		case VcGit:
-			break;
+		if (auto uncommit = dynamic_cast<VcFolder::UncommitedItem*>(sel))
+			// update working folder after updating the subs...
+			ListWorkingFolder();
 	}
 
 	return false;
@@ -4175,12 +4621,12 @@ void VcFolder::ListWorkingFolder()
 			Arg = "status";
 			break;
 		case VcGit:
-			Arg = "status -vv";
+			Arg.Printf("status -vv");
 			if (Untracked)
 				Arg += " -u";
 			break;
 		case VcHg:
-			Arg = "status -mard";
+			Arg.Printf("status -mard");
 			break;
 		default:
 			return;
@@ -4485,7 +4931,11 @@ void VcFolder::Commit(const char *Msg, const char *Branch, bool AndPush)
 	if (CurrentBranch && Branch &&
 		!CurrentBranch.Equals(Branch))
 	{
-		int Response = LgiMsg(GetTree(), "Do you want to start a new branch?", AppName, MB_YESNO);
+		auto Msg = LString::Fmt("%s\ncur=%s new=%s",
+			LLoadString(IDS_NEW_BRANCH_Q),
+			CurrentBranch.Get(),
+			Branch);
+		auto Response = LgiMsg(GetTree(), Msg, AppName, MB_YESNO);
 		if (Response != IDYES)
 			return;
 
@@ -4739,6 +5189,8 @@ bool VcFolder::ParsePush(int Result, LString s, ParseParams *Params)
 									 s.Find("has no upstream branch") >= 0;
 				break;
 			}
+			default:
+				break;
 		}
 
 		if (needsNewBranchPerm &&
@@ -4787,7 +5239,10 @@ void VcFolder::Pull(int AndUpdate, LoggingType Logging)
 			Status = StartCmd(AndUpdate ? "pull -u" : "pull", &VcFolder::ParsePull, NULL, Logging);
 			break;
 		case VcGit:
-			Status = StartCmd(AndUpdate ? "pull" : "fetch", &VcFolder::ParsePull, NULL, Logging);
+			Status = StartCmd(	AndUpdate ? "pull" : "fetch",
+								&VcFolder::ParsePull,
+								new ParseParams(AndUpdate ? "update" : ""),
+								Logging);
 			break;
 		case VcSvn:
 			Status = StartCmd("up", &VcFolder::ParsePull, NULL, Logging);
@@ -4815,6 +5270,64 @@ bool VcFolder::ParsePull(int Result, LString s, ParseParams *Params)
 	GetTree()->SendNotify((LNotifyType)LvcCommandEnd);
 	if (Result)
 	{
+		if (Params && Params->Str.Equals("log"))
+			LogStatus = LogState::Error;
+
+		if (GetType() == VcGit && s.Find("would be overwritten by merge") >= 0)
+		{
+			// Pick out the indented file names between the error header and the "Please move..." hint.
+			LString::Array Files;
+			bool Collect = false;
+			for (auto Ln: s.SplitDelimit("\n"))
+			{
+				if (Ln.Find("would be overwritten by merge") >= 0)
+				{
+					Collect = true;
+					continue;
+				}
+
+				if (!Collect)
+					continue;
+
+				auto p = Ln.Strip();
+				if (!p || p.Find("Please move or remove") >= 0 || p.Find("Aborting") >= 0)
+					break;
+
+				Files.Add(p);
+			}
+
+			if (Files.Length() > 0)
+			{
+				LString Msg;
+				const int MAX_FILES = 5;
+
+				auto fileStr = LString("\n").Join(Files.Length() > MAX_FILES ? Files.Slice(0, MAX_FILES) : Files);
+				if (Files.Length() > MAX_FILES)
+					fileStr += "\n...etc...";
+
+				Msg.Printf("Pull failed because these untracked files would be overwritten by the merge:\n\n%s\n\nDelete them (move to trash) and retry the pull?",
+							fileStr.Get());
+				if (LgiMsg(GetTree(), Msg, AppName, MB_YESNO) == IDYES)
+				{
+					LFile::Path Base(LocalPath());
+					for (auto &f: Files)
+					{
+						LFile::Path p(Base);
+						p += f;
+						LError err;
+						if (!FileDev->Delete(p.GetFull(), &err))
+						{
+							LgiTrace("%s:%i - delete(%s) failed with: %s\n", _FL, p.GetFull().Get(), err.ToString().Get());
+						}
+					}
+
+					bool AndUpdate = Params && Params->Str.Equals("update");
+					Pull(AndUpdate, LogNormal);
+					return false;
+				}
+			}
+		}
+
 		OnCmdError(s, "Pull failed.");
 		return false;
 	}
@@ -4826,6 +5339,45 @@ bool VcFolder::ParsePull(int Result, LString s, ParseParams *Params)
 		{
 			// Git does a merge by default, so the current commit changes...
 			CurrentCommit.Empty();
+
+			bool HasUpdates = false;
+			auto Lines = s.SplitDelimit("\n");
+			for (auto Ln : Lines)
+			{
+				auto p = Ln.Strip();
+				if (!p)
+					continue;
+
+				if (p.Find("Already up to date") >= 0 ||
+					p.Find("Already up-to-date") >= 0)
+				{
+					continue;
+				}
+
+				// fetch output: skip pure no-op tracking lines.
+				if (p.Find("->") >= 0)
+				{
+					if (p.Find("[up to date]") >= 0)
+						continue;
+
+					HasUpdates = true;
+					break;
+				}
+
+				// pull output: merge or fast-forward applied.
+				if (p.Find("Updating ") == 0 ||
+					p.Find("Fast-forward") >= 0 ||
+					p.Find("files changed") >= 0)
+				{
+					HasUpdates = true;
+					break;
+				}
+			}
+
+			if (HasUpdates)
+				SetColourType(TColSuccess);
+			else
+				SetColourType(TColNone);
 			break;
 		}
 		case VcHg:
@@ -4886,9 +5438,10 @@ bool VcFolder::ParsePull(int Result, LString s, ParseParams *Params)
 				if (Limit.CastInt32() > 0)
 					Args.Printf("log --limit %i", Limit.CastInt32());
 				else
-					Args = "log";				
+					Args = "log";
 				
-				IsLogging = StartCmd(Args, &VcFolder::ParseLog);
+				LogStatus = StartCmd(Args, &VcFolder::ParseLog) ? LogState::Logging : LogState::Error;
+				printf("%s:%i - LogStatus=%i\n", _FL, (int)LogStatus);
 				return false;
 			}
 			break;
@@ -4922,6 +5475,122 @@ void VcFolder::MergeToLocal(LString Rev)
 		default:
 			LgiMsg(GetTree(), LLoadString(IDS_ERR_NO_IMPL_FOR_TYPE), AppName);
 			break;
+	}
+}
+
+void VcFolder::RevertCommit(const char *Rev)
+{
+	if (!Rev || !*Rev)
+		return;
+
+	switch (GetType())
+	{
+		case VcGit:
+		{
+			size_t parentCount = 0;
+			for (auto c : Log)
+			{
+				if (c && c->IsRev(Rev))
+				{
+					parentCount = c->GetParents()->Length();
+					break;
+				}
+			}
+
+			LString args;
+			if (parentCount > 1)
+			{
+				auto q = LString::Fmt(
+					"Commit %s is a merge commit.\nRevert using first parent (-m 1)?",
+					Rev);
+				if (LgiMsg(GetTree(), q, AppName, MB_YESNO) != IDYES)
+					return;
+
+				args.Printf("revert --no-edit -m 1 %s", Rev);
+			}
+			else
+			{
+				args.Printf("revert --no-edit %s", Rev);
+			}
+
+			auto p = new ParseParams;
+			if (p)
+			{
+				p->Callback = [this](auto code, auto out)
+					{
+						d->Log->Print("%s:%i - revert handler: %i, %s\n", _FL, code, out.Get());
+						if (code == 0)
+						{
+							CommitListDirty = true;
+							ListWorkingFolder();
+							SetColourType(TColNone);
+						}
+						else
+						{
+							OnCmdError(out, "Failed to revert commit.");
+						}
+					};
+			}
+
+			StartCmd(args, NULL, p, LogNormal);
+			break;
+		}
+		case VcHg:
+		{
+			LString args;
+			args.Printf("backout -r %s -m \"Backout %s\"", Rev, Rev);
+
+			auto p = new ParseParams;
+			if (p)
+			{
+				p->Callback = [this](auto code, auto out)
+					{
+						if (code == 0)
+						{
+							CommitListDirty = true;
+							ListWorkingFolder();
+							SetColourType(TColNone);
+						}
+						else
+						{
+							OnCmdError(out, "Failed to revert commit.");
+						}
+					};
+			}
+
+			StartCmd(args, NULL, p, LogNormal);
+			break;
+		}
+		case VcSvn:
+		{
+			LString args;
+			args.Printf("merge -c -%s .", Rev);
+
+			auto p = new ParseParams;
+			if (p)
+			{
+				p->Callback = [this](auto code, auto out)
+					{
+						if (code == 0)
+						{
+							ListWorkingFolder();
+							SetColourType(TColNone);
+						}
+						else
+						{
+							OnCmdError(out, "Failed to revert commit.");
+						}
+					};
+			}
+
+			StartCmd(args, NULL, p, LogNormal);
+			break;
+		}
+		default:
+		{
+			NoImplementation(_FL);
+			break;
+		}
 	}
 }
 
@@ -5344,6 +6013,102 @@ bool VcFolder::ParseResolve(int Result, LString s, ParseParams *Params)
 	return true;
 }
 
+bool VcFolder::GetConflict(const char *Path, VcFolder::TConflictCb callback)
+{
+	if (!Path || !callback)
+		return false;
+		
+	switch (GetType())
+	{
+		case VcGit:
+		{
+			enum THashType {
+				TBase = 1,
+				TOurs = 2,
+				TTheirs = 3,
+			};
+			
+			LString args;
+			auto local = GetFilePart(Path);
+			LAutoPtr<ParseParams> params(new ParseParams(
+				[this, callback, uri=LString(Path)](auto code, auto str)
+				{
+					TConflictInfo info;
+					
+					if (!code)
+					{
+						info.uri = uri;
+						
+						auto lines = str.SplitDelimit("\n");
+						for (auto &ln: lines)
+						{
+							auto p = ln.SplitDelimit(" \t", 3);
+							
+							if (p.Length() == 4)
+							{
+								switch (p[2].Int())
+								{
+									case TBase:
+										info.base = p[1];
+										break;
+									case TOurs:
+										info.ours = p[1];
+										break;
+									case TTheirs:
+										info.theirs = p[1];
+										break;
+								}
+							}
+						}
+					}
+					
+					callback(info);
+				}));
+
+			args.Printf("ls-files -u \"%s\"", local.Get());
+
+			return StartCmd(args, nullptr, params.Release());
+		}
+		case VcHg:
+		case VcSvn:
+		case VcCvs:
+		default:
+		{
+			NoImplementation(_FL);
+			break;
+		}
+	}
+
+	return false;
+}
+
+bool VcFolder::ConflictDiff(VcFolder::TConflictInfo &info, LString rev, ParseParams::TCallback callback)
+{
+	if (!rev || !callback)
+		return false;
+
+	switch (GetType())
+	{
+		case VcGit:
+		{
+			LString args;
+			args.Printf("diff --ignore-cr-at-eol %s %s", info.base.Get(), rev.Get());
+
+			return StartCmd(args, nullptr, new ParseParams(std::move(callback)));
+		}
+		case VcHg:
+		case VcSvn:
+		case VcCvs:
+		default:
+		{
+			NoImplementation(_FL);
+			break;
+		}
+	}
+
+	return false;
+}
+
 bool VcFolder::Resolve(const char *Path, LvcResolve Type)
 {
 	if (!Path)
@@ -5447,7 +6212,7 @@ bool BlameLine::Parse(VersionCtrl type, LArray<BlameLine> &out, LString in)
 		{
 			for (auto &ln: lines)
 			{
-				auto s = ln.Get();
+				// auto s = ln.Get();
 				auto open = ln.Find("(");
 				auto close = ln.Find(")", open);
 				if (open > 0 && close > open)
@@ -5480,10 +6245,6 @@ bool BlameLine::Parse(VersionCtrl type, LArray<BlameLine> &out, LString in)
 					o.user = LString(" ").Join(name);
 					o.date = dt.Get();
 					o.src = ln(close + 1, -1);
-				}
-				else if (ln.Length() > 0)
-				{
-					int asd=0;
 				}
 			}
 			break;
@@ -5545,6 +6306,13 @@ bool VcFolder::ParseBlame(int Result, LString s, ParseParams *Params)
 
 bool VcFolder::Blame(const char *Path)
 {
+	return BlameInternal(Path, &VcFolder::ParseBlame);
+}
+
+/// This is called by both 'Blame' and 'ListAuthors' to get a line by line listing of the
+/// authorship of the file.
+bool VcFolder::BlameInternal(const char *Path, ParseFn Parser)
+{
 	if (!Path)
 		return false;
 
@@ -5558,21 +6326,21 @@ bool VcFolder::Blame(const char *Path)
 		{
 			LString a;
 			a.Printf("blame \"%s\"", file.Get());
-			return StartCmd(a, &VcFolder::ParseBlame, Params.Release());
+			return StartCmd(a, Parser, Params.Release());
 			break;
 		}
 		case VcHg:
 		{
 			LString a;
 			a.Printf("annotate -un \"%s\"", file.Get());
-			return StartCmd(a, &VcFolder::ParseBlame, Params.Release());
+			return StartCmd(a, Parser, Params.Release());
 			break;
 		}
 		case VcSvn:
 		{
 			LString a;
 			a.Printf("blame \"%s\"", file.Get());
-			return StartCmd(a, &VcFolder::ParseBlame, Params.Release());
+			return StartCmd(a, Parser, Params.Release());
 			break;
 		}
 		default:
@@ -5583,6 +6351,94 @@ bool VcFolder::Blame(const char *Path)
 	}
 
 	return true;
+}
+
+struct ListAuthorUi : public LWindow
+{
+	LTableLayout *tbl = nullptr;
+	LList *lst = nullptr;
+	
+	enum Columns {
+		cAuthor,
+		cLines,
+		cPercent,
+	};
+	
+	ListAuthorUi(VcFolder *f, LString path, LArray<BlameLine> &lines)
+	{
+		AddView(tbl = new LTableLayout(ID_TABLE));
+		tbl->SetPourLargest(true);
+		auto c = tbl->GetCell(0, 0);
+		c->Add(new LTextLabel(ID_STATIC, 0, 0, -1, -1, "Path:"));
+		c = tbl->GetCell(1, 0);
+		c->Add(new LEdit(ID_PATH, path));
+		c = tbl->GetCell(0, 1, true, 2);
+		c->Add(lst = new LList(ID_AUTHORS));
+		lst->AddColumn("Author");
+		lst->AddColumn("Lines");
+		lst->AddColumn("Percent");
+	
+		LRect r(0, 0, 1000, 500);
+		SetPos(r);
+		if (f)
+			if (auto t = f->GetTree())
+				if (auto w = t->GetWindow())
+					MoveSameScreen(w);
+		
+		LHashTbl<ConstStrKey<char, false>, int> count;
+		for (auto &ln: lines)
+		{
+			auto cur = count.Find(ln.user);
+			count.Add(ln.user, cur+1);
+		}
+		for (auto p: count)
+		{
+			auto item = new LListItem;
+			item->SetText(p.key, cAuthor);
+			item->SetText(LString::Fmt("%i", p.value), cLines);
+			item->SetText(LString::Fmt("%.2f", (double)p.value * 100.0 / lines.Length()), cPercent);
+			lst->Insert(item);
+		}
+		lst->ResizeColumnsToContent();
+		lst->Sort([](auto a, auto b) -> int64_t
+			{
+				auto av = a->GetText(cLines);
+				auto bv = b->GetText(cLines);
+				auto diff = Atoi(bv) - Atoi(av);
+				if (!diff)
+					return b - a;
+				return diff;
+			});
+		
+		if (Attach(nullptr))
+		{
+			Visible(true);
+		}
+	}
+};
+
+bool VcFolder::ParseListAuthors(int Result, LString s, ParseParams *Params)
+{
+	if (!Params)
+	{
+		LAssert(!"Need the path in the params.");
+		return false;
+	}
+
+	LArray<BlameLine> lines;
+	if (!BlameLine::Parse(GetType(), lines, s))
+	{
+		NoImplementation(_FL);
+		return false;
+	}
+	
+	new ListAuthorUi(this, Params->Str, lines);
+	return false;
+}
+
+bool VcFolder::ListAuthors(const char *Path)
+{
+	return BlameInternal(Path, &VcFolder::ParseListAuthors);
 }
 
 bool VcFolder::SaveFileAs(const char *Path, const char *Revision)
@@ -5676,17 +6532,15 @@ void VcFolder::UncommitedItem::Select(bool b)
 	LListItem::Select(b);
 	if (b)
 	{
-		LTreeItem *i = d->Tree->Selection();
-		VcFolder *f = dynamic_cast<VcFolder*>(i);
-		if (f)
+		auto i = d->Tree->Selection();
+		if (auto f = dynamic_cast<VcFolder*>(i))
 			f->ListWorkingFolder();
 
 		if (d->Msg)
 		{
-			d->Msg->Name(NULL);
+			d->Msg->Name(nullptr);
 
-			auto *w = d->Msg->GetWindow();
-			if (w)
+			if (auto w = d->Msg->GetWindow())
 			{
 				w->SetCtrlEnabled(IDC_COMMIT, true);
 				w->SetCtrlEnabled(IDC_COMMIT_AND_PUSH, true);
@@ -5757,10 +6611,9 @@ void VcLeaf::OnBrowse()
 			if (Dir.IsDir())
 				continue;
 
-			VcFile *f = new VcFile(d, Parent, LString(), true);
-			if (f)
+			if (auto f = new VcFile(d, Parent, LString(), true))
 			{
-				f->SetUri(LString("file://") + full);
+				f->SetUri(full.ToString());
 				f->SetText(Dir.GetName(), COL_FILENAME);
 				Files->Insert(f);
 			}
@@ -5780,7 +6633,7 @@ void VcLeaf::AfterBrowse()
 {
 }
 
-VcLeaf *VcLeaf::FindLeaf(const char *Path, bool OpenTree, int depth)
+VcLeaf *VcLeaf::FindLeaf(LString Path, bool OpenTree, int depth)
 {
 	if (depth > 32)
 	{
@@ -5789,11 +6642,13 @@ VcLeaf *VcLeaf::FindLeaf(const char *Path, bool OpenTree, int depth)
 	}
 
 	auto full = Full();
-	if (!Stricmp(Path, full.Get()))
+	if (Path.Equals(full))
 		return this;
-
+	
+	/*
 	if (OpenTree)
 		DoExpand();
+	*/
 
 	for (auto n = GetChild(); n; n = n->GetNext())
 	{
@@ -5891,33 +6746,34 @@ void VcLeaf::OnMouseClick(LMouse &m)
 	if (m.IsContextMenu())
 	{
 		LSubMenu s;
-		s.AppendItem("Log", IDM_LOG);
-		s.AppendItem("Blame", IDM_BLAME, !Folder);
+		s.AppendItem(LLoadString(IDS_LOG), IDM_LOG);
+		s.AppendItem(LLoadString(IDS_BLAME), IDM_BLAME, !Folder);
 		s.AppendSeparator();
-		s.AppendItem("Browse To", IDM_BROWSE_FOLDER);
-		s.AppendItem("Terminal At", IDM_TERMINAL);
+		s.AppendItem(LLoadString(IDS_BROWSE_TO), IDM_BROWSE_FOLDER);
+		s.AppendItem(LLoadString(IDS_TERMINAL_AT), IDM_TERMINAL);
 		
-		int Cmd = s.Float(GetTree(), m - _ScrollPos());
-		switch (Cmd)
+		auto full = Full();
+		auto cmd = s.Float(GetTree(), m - _ScrollPos());
+		switch (cmd)
 		{
 			case IDM_LOG:
 			{
-				Parent->LogFile(Full());
+				Parent->LogFile(full, nullptr);
 				break;
 			}
 			case IDM_BLAME:
 			{
-				Parent->Blame(Full());
+				Parent->Blame(full);
 				break;
 			}
 			case IDM_BROWSE_FOLDER:
 			{
-				LBrowseToFile(Full());
+				LBrowseToFile(full);
 				break;
 			}
 			case IDM_TERMINAL:
 			{
-				TerminalAt(Full());
+				TerminalAt(full);
 				break;
 			}
 		}

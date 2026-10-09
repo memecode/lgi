@@ -13,6 +13,14 @@
 #include "lgi/common/Menu.h"
 #include "ScriptingPriv.h"
 
+#if defined(MAC) && LGI_COCOA
+#include <ffi/ffi.h>
+#endif
+
+#if defined(HAIKU)
+#include <OS.h>
+#endif
+
 #define TIME_INSTRUCTIONS		0
 #define POST_EXECUTE_STATE		0
 
@@ -217,8 +225,14 @@ LExecutionStatus LExternFunc::Call(LScriptContext *Ctx, LScriptArguments &Args)
 	LArray<NativeInt> Val;
 	LArray<char*> Mem;
 	bool UnsupportedArg = false;
+	#if LGI_COCOA
+	LArray<ffi_type*> FfiTypes;
+	LArray<void*> FfiValues;
+	FfiTypes.Length(Args.Length());
+	FfiValues.Length(Args.Length());
+	#endif
 
-	Val.Length(Args.Length() << 1);
+	Val.Length((Args.Length() ? Args.Length() : 1) << 1);
 	LPointer Ptr;
 	Ptr.ni = &Val[0];
 	for (unsigned i=0; !UnsupportedArg && i<Args.Length(); i++)
@@ -227,6 +241,11 @@ LExecutionStatus LExternFunc::Call(LScriptContext *Ctx, LScriptArguments &Args)
 		ExternType &t = ArgType[i];
 		if (!v)
 			return ScriptError;
+		#if defined(MAC) && LGI_COCOA
+		FfiValues[i] = Ptr.ni;
+		FfiTypes[i] = t.Ptr ? &ffi_type_pointer :
+			(t.Base == GV_INT64 ? &ffi_type_sint64 : &ffi_type_sint32);
+		#endif
 		
 		if (t.Ptr)
 		{
@@ -273,7 +292,7 @@ LExecutionStatus LExternFunc::Call(LScriptContext *Ctx, LScriptArguments &Args)
 			{
 				case GV_INT32:
 				{
-					#if defined(_WIN64)
+					#if defined(_WIN64) || (defined(MAC) && LGI_COCOA)
 					*Ptr.s64++ = v->CastInt32();
 					#else
 					*Ptr.s32++ = v->CastInt32();
@@ -292,6 +311,11 @@ LExecutionStatus LExternFunc::Call(LScriptContext *Ctx, LScriptArguments &Args)
 				}
 			}
 		}
+	}
+	if (UnsupportedArg)
+	{
+		Mem.DeleteArrays();
+		return ScriptError;
 	}
 
 	LLibrary Library(Lib);
@@ -342,28 +366,71 @@ LExecutionStatus LExternFunc::Call(LScriptContext *Ctx, LScriptArguments &Args)
 		#endif
 	#elif defined(MAC)
 		#if LGI_COCOA
-		#warning FIXME
+			ffi_cif cif;
+			ffi_type *ResultType;
+			if (ReturnType.Ptr)
+				ResultType = &ffi_type_pointer;
+			else switch (ReturnType.Base)
+			{
+				case GV_INT32:
+					ResultType = &ffi_type_sint32;
+					break;
+				case GV_INT64:
+					ResultType = &ffi_type_sint64;
+					break;
+				case GV_NULL:
+					ResultType = &ffi_type_void;
+					break;
+				default:
+					Mem.DeleteArrays();
+					return ScriptError;
+			}
+			if (ffi_prep_cif(&cif,
+							FFI_DEFAULT_ABI,
+							(unsigned)Args.Length(),
+							ResultType,
+							Args.Length() ? &FfiTypes[0] : NULL)
+				!= FFI_OK)
+			{
+				Mem.DeleteArrays();
+				return ScriptError;
+			}
+			ffi_call(&cif, FFI_FN(c), &r, Args.Length() ? &FfiValues[0] : NULL);
 		#elif LGI_32BIT
-		// 32bit only
-		void *b = Ptr.ni - 1;
-        asm (	"movl %2, %%ecx;"
-				"movl %3, %%ebx;"
-				"label1:"
-				"pushl (%%ebx);"
-				"subl %%ebx, 4;"
-				"loop label1;"
-				"call *%1;"
-				:"=a"(r)				/* output */
-				:"r"(c), "r"(a), "r"(b)	/* input */
-				:/*"%eax",*/ "%ecx", "%ebx"	/* clobbered register */
-				);
+			// 32bit only
+			void *b = Ptr.ni - 1;
+			asm (	"movl %2, %%ecx;"
+					"movl %3, %%ebx;"
+					"label1:"
+					"pushl (%%ebx);"
+					"subl %%ebx, 4;"
+					"loop label1;"
+					"call *%1;"
+					:"=a"(r)				/* output */
+					:"r"(c), "r"(a), "r"(b)	/* input */
+					:/*"%eax",*/ "%ecx", "%ebx"	/* clobbered register */
+					);
 		#endif
 	#else
 		// Not implemented, gcc???
 		LAssert(0);
 	#endif
 
+	#if defined(MAC) && LGI_COCOA
+	if (ReturnType.Ptr)
+	{
+		if (ReturnType.Base == GV_STRING)
+			*Args.GetReturn() = (const char*)r;
+		else
+			*Args.GetReturn() = (void*)r;
+	}
+	else if (ReturnType.Base == GV_INT64)
+		*Args.GetReturn() = (int64)r;
+	else
+		*Args.GetReturn() = (int)r;
+	#else
 	*Args.GetReturn() = (int) r;
+	#endif
 	for (unsigned i=0; i<Args.Length(); i++)
 	{
 		LVariant *v = Args[i];
@@ -1104,7 +1171,7 @@ LExecutionStatus LVirtualMachine::ExecuteFunction(LCompiledCode *Code, LFunction
 	d->ArgsOutput = ArgsOut;
 	auto Prev = Args.Vm;
 	Args.Vm = this;
-	LExecutionStatus r = d->Run(LVirtualMachinePriv::RunContinue);
+	auto r = d->Run(LVirtualMachinePriv::RunContinue);
 	Args.Vm = Prev;
 
 	return r;

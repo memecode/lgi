@@ -1,8 +1,10 @@
 
 set(APP_RESOURCES
-    Resources/Lvc.lr8
-    Resources/image-list.png)
+    resources/Lvc.lr8
+    resources/image-list.png)
+
 set(APP_MANIFEST)
+
 if (WIN32)
 	set(APP_TYPE WIN32)
 	set(APP_ICON resources/Lvc.rc)
@@ -16,51 +18,94 @@ elseif (APPLE)
 		PROPERTIES
 			MACOSX_PACKAGE_LOCATION "Resources")
 elseif (LINUX)
-	set(APP_ICON Resources/icon128.png)
+	set(APP_ICON resources/icon128.png)
 endif()
 
 if (NOT TARGET ssh_shared)
-    get_filename_component(LIBSSH_DIR "${CODELIB}/libssh" ABSOLUTE)
-    if (EXISTS ${LIBSSH_DIR})
-        add_subdirectory(${LIBSSH_DIR} libssh)
-    else()
-        find_path(LIBSSH_INCLUDE_DIR libssh.h PATH /usr/include/libssh)
-        if (NOT LIBSSH_INCLUDE_DIR)
+    if (APPLE)
+        find_path(LIBSSH_HEADER_RELEASE libssh.h PATHS "${LGI_DEPS_RELEASE}/include/libssh" NO_DEFAULT_PATH)
+        find_path(LIBSSH_HEADER_DEBUG   libssh.h PATHS "${LGI_DEPS_DEBUG}/include/libssh"   NO_DEFAULT_PATH)
+        if (NOT LIBSSH_HEADER_RELEASE AND NOT LIBSSH_HEADER_DEBUG)
             message(FATAL_ERROR "libssh not found.")
         endif()
-        add_library(ssh_shared INTERFACE)
-        set_target_properties(ssh_shared
-            PROPERTIES
-                INTERFACE_INCLUDE_DIRECTORIES ${LIBSSH_INCLUDE_DIR}
-                INTERFACE_LINK_LIBRARIES "ssh")
+        if (CMAKE_BUILD_TYPE STREQUAL "Release")
+            set(LIBSSH_HEADER ${LIBSSH_HEADER_RELEASE})
+        else()
+            set(LIBSSH_HEADER ${LIBSSH_HEADER_DEBUG})
+        endif()
+    elseif (WIN32)
+        find_path(LIBSSH_HEADER libssh.h
+            PATH ${LGI_DEPS_BUILD}/include/libssh       # this is the Windows location
+            )
+    else()
+        find_path(LIBSSH_HEADER libssh.h
+            PATH /usr/include/libssh                # this is the Linux location
+            PATH /system/develop/headers/libssh     # this is the Haiku location
+            )
     endif()
+    if (NOT APPLE AND NOT LIBSSH_HEADER)
+        message(FATAL_ERROR "libssh not found.")
+    endif()
+    add_library(ssh_shared INTERFACE)
+    cmake_path( GET LIBSSH_HEADER
+                PARENT_PATH LIBSSH_INCLUDE_DIR)
+    set_target_properties(ssh_shared
+        PROPERTIES
+            INTERFACE_INCLUDE_DIRECTORIES ${LIBSSH_INCLUDE_DIR}
+            # Debug ssh.lib is built as 'sshd' (see deps/CMakeLists.txt) to avoid
+            # colliding with the Release artifact in the shared output folder.
+            INTERFACE_LINK_LIBRARIES "$<IF:$<AND:$<BOOL:${WIN32}>,$<CONFIG:Debug>>,sshd,ssh>")
+    # message("LIBSSH_INCLUDE_DIR: ${LIBSSH_INCLUDE_DIR}")
 endif()
 
-add_executable(Lvc ${APP_TYPE}
-    ../src/common/Lgi/LgiMain.cpp
-    ../src/common/Text/DeEscape.cpp
-    ../src/common/Text/XmlTreeUi.cpp
-    ../src/common/Widgets/ControlTree.cpp
-    Src/BrowseUi.cpp
-    Src/DropDownBtn.cpp
-    Src/Main.cpp
-    Src/SshConnection.cpp
-    Src/VcCommit.cpp
-    Src/VcFile.cpp
-    Src/VcFolder.cpp
-    Src/PatchViewer.cpp
-	${APP_ICON}
-    ${APP_RESOURCES}
-	${APP_MANIFEST}
-	)
+add_executable(Lvc
+    ${APP_TYPE}
+        src/BrowseUi.cpp
+        src/DropDownBtn.cpp
+        src/Main.cpp
+        src/SshConnection.cpp
+        src/VcCommit.cpp
+        src/VcFile.cpp
+        src/VcFolder.cpp
+        src/PatchViewer.cpp
+        
+        ${LGI_DIR}/src/common/Net/Ssh.cpp
+        ${LGI_DIR}/src/common/Text/RemoveAnsi.cpp
+        ${LGI_DIR}/src/common/Net/Http.cpp
+        ${LGI_DIR}/src/common/Lgi/LgiMain.cpp
+        ${LGI_DIR}/src/common/Text/DeEscape.cpp
+        ${LGI_DIR}/src/common/Text/XmlTreeUi.cpp
+        ${LGI_DIR}/src/common/Widgets/ControlTree.cpp
+        ${LGI_DIR}/src/common/Net/OpenSSLSocket.cpp
+        
+        ${APP_ICON}
+        ${APP_RESOURCES}
+        ${APP_MANIFEST})
 
-target_link_libraries(Lvc lgi libpng16 ssh_shared)
-target_include_directories(Lvc PUBLIC resources)
+target_link_libraries(Lvc
+    PRIVATE
+        lgi
+        ssh_shared)
+
+target_include_directories(Lvc
+    PUBLIC
+        resources)
+        
+target_compile_definitions(Lvc
+    PRIVATE
+        HAS_LIBSSH=1)
+
+if(WIN32)
+    target_link_directories(Lvc
+		PRIVATE
+			${LGI_DEPS_BUILD}/lib
+			"C:\\Program Files\\OpenSSL-Win64\\lib")
+endif()
 
 if (APPLE)
     macBundlePostBuild(Lvc)
 else()
-    file(COPY ${CMAKE_CURRENT_LIST_DIR}/Resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    file(COPY ${CMAKE_CURRENT_LIST_DIR}/resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
 set_target_properties(Lvc PROPERTIES EXCLUDE_FROM_ALL TRUE)

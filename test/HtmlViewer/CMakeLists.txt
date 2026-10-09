@@ -16,33 +16,42 @@ elseif (LINUX)
 	set(APP_ICON)
 endif()
 
+set(LGI_COMMON "${LGI_DIR}/src/common")
+
 add_executable(HtmlTest ${APP_TYPE}
 
     src/TestSuite.cpp
-    ${LGI_DIR}/src/common/Coding/LexCpp.cpp
-    ${LGI_DIR}/src/common/Coding/ScriptCompiler.cpp
-    ${LGI_DIR}/src/common/Coding/ScriptLibrary.cpp
-    ${LGI_DIR}/src/common/Coding/ScriptVM.cpp
-    ${LGI_DIR}/src/common/Coding/ScriptingPriv.h
+    ${LGI_COMMON}/Coding/LexCpp.cpp
+    ${LGI_COMMON}/Coding/ScriptCompiler.cpp
+    ${LGI_COMMON}/Coding/ScriptLibrary.cpp
+    ${LGI_COMMON}/Coding/ScriptVM.cpp
+    ${LGI_COMMON}/Coding/ScriptingPriv.h
 
-    ${LGI_DIR}/src/common/Gdc2/Font/EmojiFont.cpp
-    ${LGI_DIR}/src/common/Gdc2/Tools/GdcTools.cpp
+    ${LGI_COMMON}/Gdc2/Font/EmojiFont.cpp
+    ${LGI_COMMON}/Gdc2/Tools/GdcTools.cpp
 
-    ${LGI_DIR}/src/common/Images/Compare/ImageComparison.cpp
+    ${LGI_COMMON}/Images/Compare/ImageComparison.cpp
 
-    ${LGI_DIR}/src/common/Net/Http.cpp
-    ${LGI_DIR}/src/common/Net/OpenSSLSocket.cpp
+    ${LGI_COMMON}/Net/Http.cpp
+    ${LGI_COMMON}/Net/OpenSSLSocket.cpp
 
-    ${LGI_DIR}/src/common/Lgi/LgiMain.cpp
+    ${LGI_COMMON}/Lgi/LgiMain.cpp
 
-    ${LGI_DIR}/src/common/Text/Emoji/EmojiMap.cpp
-    ${LGI_DIR}/src/common/Text/Homoglyphs/Homoglyphs.cpp
-    ${LGI_DIR}/src/common/Text/Homoglyphs/HomoglyphsTable.cpp
-    ${LGI_DIR}/src/common/Text/Html.cpp
-    ${LGI_DIR}/src/common/Text/HtmlCommon.cpp
-    ${LGI_DIR}/src/common/Text/HtmlParser.cpp
+    ${LGI_COMMON}/Text/Emoji/EmojiMap.cpp
+    ${LGI_COMMON}/Text/Homoglyphs/Homoglyphs.cpp
+    ${LGI_COMMON}/Text/Homoglyphs/HomoglyphsTable.cpp
+    
+	# Html1
+	${LGI_COMMON}/Text/Html.cpp
+	${LGI_DIR}/include/lgi/common/Html.h
+	${LGI_COMMON}/Text/Html2.cpp
+	${LGI_DIR}/include/lgi/common/Html2.h
 
-    ${LGI_DIR}/src/common/Widgets/ZoomView.cpp
+	# Html common:
+    ${LGI_COMMON}/Text/HtmlCommon.cpp
+    ${LGI_COMMON}/Text/HtmlParser.cpp
+
+    ${LGI_COMMON}/Widgets/ZoomView.cpp
 
 	${APP_MANIFEST})
 
@@ -52,16 +61,14 @@ endif()
 
 target_include_directories(HtmlTest
 	PRIVATE
-		Code
-		Resources
+		src
+		resources
 		${OPENSSL_INCLUDE_DIR}
 		../../private/common)
 
 target_link_libraries(HtmlTest
 	PRIVATE
-		lgi
-		libpng16
-		libjpeg9a)
+		lgi)
 
 if (APPLE)
     macBundlePostBuild(HtmlTest)

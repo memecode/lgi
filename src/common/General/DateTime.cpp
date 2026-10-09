@@ -1332,9 +1332,14 @@ bool LDateTime::Serialize(ObjProperties *Props, char *Name, bool Write)
 
 int LDateTime::Compare(const LDateTime *Date) const
 {
+	const bool ThisValid = IsValid();
+	const bool DateValid = Date && Date->IsValid();
+	if (!ThisValid || !DateValid)
+		return ThisValid == DateValid ? 0 : ThisValid ? 1 : -1;
+
 	// this - *Date
-	auto ThisTs = IsValid() ? Ts() : LTimeStamp();
-	auto DateTs = Date->IsValid() ? Date->Ts() : LTimeStamp();
+	auto ThisTs = Ts();
+	auto DateTs = Date->Ts();
 
 	if (ThisTs.Get() & 0x800000000000000)
 	{

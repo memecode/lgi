@@ -49,7 +49,7 @@ class LgiClass LListItemColumn : public LBase, public LItem, public LListItemPai
 	int _Column;
 	int64 _Value = 0;
 
-	void OnPaint(ItemPaintCtx &Ctx) {}
+	void OnPaint(ItemPaintCtx &Ctx) override {}
 
 protected:
 	LListT *GetAllItems();
@@ -57,11 +57,12 @@ protected:
 
 public:
 	LListItemColumn(LListItem *item, int col);
+	~LListItemColumn() override;
 
 	// Other objects
 	LListItem *GetItem() { return _Item; }
 	LList *GetList();
-	LItemContainer *GetContainer();
+	LItemContainer *GetContainer() override;
 
 	// Props
 	int GetColumn() { return _Column; }
@@ -492,7 +493,7 @@ public:
 	void Sort
 	(
 		/// The comparison function. Should return a integer greater then > 0 if the first item item is greater in value.
-		std::function<int(LListItem*, LListItem*)> compare
+		std::function<int64_t(LListItem*, LListItem*)> compare
 	)
 	{
 		if (!compare || !Lock(_FL))

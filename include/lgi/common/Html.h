@@ -13,7 +13,6 @@ namespace Html1
 {
 
 class LTag;
-class LFontCache;
 
 /// A lightwight scripting safe HTML control. It has limited CSS support, renders
 /// most tables, even when nested. You can provide support for loading external
@@ -37,11 +36,11 @@ class LHtml :
 	friend class LTag;
 	friend class LFlowRegion;
 
-	class LHtmlPrivate *d;
+	class LHtmlPrivate1 *d;
 
 protected:	
 	// Data
-	LFontCache			*FontCache = nullptr;
+	LHtmlFontCache		*FontCache = nullptr;
 	LTag				*Tag = nullptr;			// Tree root
 	LTag				*Cursor = nullptr;		// Cursor location..
 	LTag				*Selection = nullptr;	// Edge of selection or NULL
@@ -56,19 +55,19 @@ protected:
 	LAutoPtr<LSurface>	MemDC;
 
 	// This lock is separate from the window lock to avoid deadlocks.
-	struct GJobSem : public LMutex
+	struct LJobSem : public LMutex
 	{
     	// Data that has to be accessed under Lock
 	    LArray<LDocumentEnv::LoadJob*> Jobs;
-	    GJobSem() : LMutex("GJobSem") {}
-	} JobSem;
+	    LJobSem() : LMutex("LJobSem") {}
+	}	JobSem;
 
 	// Methods
 	void _New();
 	void _Delete() override;
 	LFont *DefFont();
 	void CloseTag(LTag *t);
-	void ParseDocument(const char *Doc);
+	bool ParseDocument(const char *Doc);
 	void OnAddStyle(const char *MimeType, const char *Styles) override;
 	int ScrollY();
 	void SetCursorVis(bool b);
@@ -120,7 +119,7 @@ public:
 	/// Select all the text in the control (not impl)
 	void SelectAll() override;
 	/// Return the selection in a dynamically allocated string
-	char *GetSelection() override;
+	LString GetSelection() override;
 	
 	// Prop
 

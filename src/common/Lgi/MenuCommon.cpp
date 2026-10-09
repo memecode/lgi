@@ -62,3 +62,15 @@ bool LSubMenu::CallMethod(const char *MethodName, LScriptArguments &Args)
 	}
 	return true;
 }
+
+LString LAccelerator::ToString() const
+{
+	return LString::Fmt("vkey=%i chr=%i flags=%x id=%i\n",
+		Vkey, Chr, Flags, Id);
+}
+
+void LAccelerator::Trace(const char *Msg) const
+{
+	LgiTrace("%s Accelerator %s\n", Msg, ToString().Get());
+}
+

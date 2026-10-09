@@ -223,7 +223,7 @@ public:
 
 	bool Apply()
 	{
-		auto patch = out->NameW();
+		// auto patch = out->NameW();
 		auto lines = GetLines(out->NameW());
 		LArray<FilePatch> Patches;
 

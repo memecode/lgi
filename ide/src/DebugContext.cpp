@@ -9,12 +9,18 @@
 #include "IdeProject.h"
 #include "resdefs.h"
 
+// Supported debuggers:
+#include "gdb.h"
+#include "lldb.h"
+
 #ifdef LINUX
 namespace Gtk {
 	#include "gdk/gdkx.h"
 	#undef Bool
 }
 #endif
+
+typedef LDebugger *(*pCreateDebugger)(BreakPointStore *bpStore, LStream *Log, SystemIntf *Backend, SysPlatform platform, LStream *networkLog);
 
 
 enum TIds
@@ -108,15 +114,16 @@ public:
 			case ID_FILTER:
 			{
 				LArray<LListItem*> all;
-				if (lst->GetAll(all))
+				if (!lst->GetAll(all))
+					break;
+
+				for (auto i: all)
 				{
-					for (auto i: all)
-					{
-						auto process = i->GetText(ColProcess);
-						bool vis = Stristr(process, c->Name());
-						i->GetCss(true)->Display(vis ? LCss::DispBlock : LCss::DispNone);
-					}
+					auto process = i->GetText(ColProcess);
+					bool vis = Stristr(process, c->Name());
+					i->GetCss(true)->Display(vis ? LCss::DispBlock : LCss::DispNone);
 				}
+				lst->UpdateAllItems();
 				break;
 			}
 			case ID_PROCESSES:
@@ -327,9 +334,26 @@ LDebugContext::LDebugContext(AppWnd *App,
 	d->Proj = Proj;
 	d->Exe = Exe;
 
+#ifdef MAC
+	pCreateDebugger createDebugger = CreateLldbDebugger;
+#else
+	pCreateDebugger createDebugger = CreateGdbDebugger;
+#endif
+	if (Proj)
+	{
+		// Check if the user is overriding the debugger:
+		if (auto dbgType = Proj->GetSettings()->GetStr(ProjDebugger, NULL, Platform))
+		{
+			if (!Stricmp(dbgType, "gdb"))
+				createDebugger = CreateGdbDebugger;
+			else if (!Stricmp(dbgType, "lldb"))
+				createDebugger = CreateLldbDebugger;
+		}
+	}
+
 	auto log = App->GetDebugLog();
 	LAssert(log);
-	if (d->Db.Reset(CreateGdbDebugger(App->GetBreakPointStore(), log, Proj->GetBackend(), Platform, d->App->GetNetworkLog())))
+	if (d->Db.Reset(createDebugger(App->GetBreakPointStore(), log, Proj ? Proj->GetBackend() : nullptr, Platform, d->App->GetNetworkLog())))
 	{
 		LFile::Path p;
 		if (InitDir)
@@ -595,10 +619,10 @@ bool LDebugContext::ParseFrameReference(const char *Frame, LAutoString &File, in
 		return false;
 	
 	const char *At = NULL, *s = Frame;
-	while ((s = stristr(s, "at")))
+	while ((s = stristr(s, " at ")))
 	{
 		At = s;
-		s += 2;
+		s += 4;
 	}
 
 	if (!At)

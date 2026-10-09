@@ -23,7 +23,7 @@
 // Defines
 
 // version
-#define APP_VER						"4.1"
+#define APP_VER						"5.0"
 
 // window messages
 enum Ids
@@ -124,6 +124,37 @@ enum IconTypes {
     ICON_DISABLED,
     ICON_CSS
 };
+
+typedef std::function<void(bool, LString)> TStrCallback;
+#define DomGoogleCloudProject "GoogleCloudProject"
+
+class LAutoTranslate
+{
+public:
+	static LArray<LAutoTranslate*> engines;
+
+	LString name;
+	LAutoTranslate()
+	{
+		engines.Add(this);
+	}
+	
+	virtual ~LAutoTranslate()
+	{
+		engines.Delete(this);
+	}
+
+	virtual bool Translate(LString english, LString newLang, TStrCallback callback) = 0;
+};
+
+class LTranslationPlugin
+{
+public:
+	virtual ~LTranslationPlugin() {}
+	virtual bool Translate(LString english, LString newLang, TStrCallback callback) = 0;
+};
+
+typedef LTranslationPlugin *(*pCreateTranslator)(LDom *params);
 
 #define OPT_ShowLanguages			"ShowLang"
 
@@ -338,21 +369,18 @@ public:
 	struct Field
 	{
 		// Global
-		FieldTree *Tree;
-		LAutoString Label;
-		LAutoString Name;
-		int Type;
-		int Id;
-		bool Multiline;
-		void *Token;
+		FieldTree *Tree = nullptr;
+		LString Label;
+		LString Name;
+		int Type = 0;
+		int Id = 0;
+		bool Multiline = false;
+		LLanguageId AutoTranslate = nullptr;
+		void *Token = nullptr;
 
 		Field(FieldTree *tree)
 		{
 			Tree = tree;
-			Type = 0;
-			Id = 0;
-			Token = 0;
-			Multiline = false;
 		}
 	};
 
@@ -360,48 +388,47 @@ public:
 
 protected:
 	int &NextId;
-	FieldMode Mode;
-	LViewI *View;
-	LDom *Store;
-	bool Deep;
+	FieldMode Mode = None;
+	LViewI *View = nullptr;
+	LDom *Store = nullptr;
+	bool Deep = false;
 
 	LHashTbl<PtrKey<void*>, FieldArr*> f;
 
 	FieldArr *Get(void *Token, bool Create = false)
 	{
-		FieldArr *a = f.Find(Token);
+		auto a = f.Find(Token);
 		if (!a)
 		{
 			if (Create)
 				f.Add(Token, a = new FieldArr);
 			else
-				LAssert(0);
+				LgiTrace("%s:%i - failed to Get field array for token", _FL);
 		}
 		return a;
 	}
 
 	Field *GetField(void *Token, const char *FieldName)
 	{
-		if (!Token || !FieldName) return 0;
+		if (!Token || !FieldName)
+			return nullptr;
 
-		FieldArr *a = Get(Token);
-		if (!a) return 0;
+		auto a = Get(Token);
+		if (!a)
+			return nullptr;
 
-		for (int i=0; i<a->Length(); i++)
+		for (auto fld: *a)
 		{
-			if (!stricmp((*a)[i]->Name, FieldName))
-				return (*a)[i];
+			if (!stricmp(fld->Name, FieldName))
+				return fld;
 		}
 
-		return 0;
+		return nullptr;
 	}
 
 public:
 	FieldTree(int &next, bool deep) : NextId(next)
 	{
-		Mode = None;
-		View = 0;
-		Store = 0;
 		Deep = deep;
 	}
 
@@ -446,30 +473,41 @@ public:
 		View = 0;
 	}
 
-	void Insert(void *Token, int Type, int Reserved, const char *Name, const char *Label, int Idx = -1, bool Multiline = false)
+	void Insert(void *Token,
+				int Type,
+				int Reserved,
+				// Internal field name:
+				const char *Name,
+				// User-visible label:
+				const char *Label,
+				int Idx = -1,
+				bool Multiline = false,
+				LLanguageId AutoTranslate = nullptr)
 	{
-		FieldArr *a = Get(Token, true);
-		if (!a) return;
+		auto a = Get(Token, true);
+		if (!a)
+			return;
 
-		Field *n = new Field(this);
-		if (n)
+		if (auto n = new Field(this))
 		{
 			n->Token = Token;
-			n->Label.Reset(NewStr(Label));
-			n->Name.Reset(NewStr(Name));
+			n->Label = Label;
+			n->Name = Name;
 			n->Id = NextId++;
 			n->Type = Type;
 			n->Multiline = Multiline;
+			n->AutoTranslate = AutoTranslate;
 			a->Add(n);
 		}
 	}
 
 	void Serialize(void *Token, const char *FieldName, int &i)
 	{
-		Field *f = GetField(Token, FieldName);
-		if (!f) return;
+		auto f = GetField(Token, FieldName);
+		if (!f)
+			return;
+		
 		LVariant v;
-
 		switch (Mode)
 		{
 			case ObjToUi:
@@ -487,15 +525,17 @@ public:
 				break;
 			default:
 				LAssert(0);
+				break;
 		}
 	}
 
 	void Serialize(void *Token, const char *FieldName, bool &b, int Default = -1)
 	{
-		Field *f = GetField(Token, FieldName);
-		if (!f) return;
+		auto f = GetField(Token, FieldName);
+		if (!f)
+			return;
+		
 		LVariant i;
-
 		switch (Mode)
 		{
 			case ObjToUi:
@@ -518,13 +558,18 @@ public:
 				break;
 			default:
 				LAssert(0);
+				break;
 		}
 	}
 
 	void Serialize(void *Token, const char *FieldName, char *&s)
 	{
 		Field *f = GetField(Token, FieldName);
-		if (!f) return;
+		if (!f)
+		{
+			f = GetField(Token, FieldName);
+			return;
+		}
 		LVariant v;
 
 		switch (Mode)
@@ -704,11 +749,11 @@ public:
 
 	void Serialize(bool Write);
 
-	void OnPosChange();
+	void OnPosChange() override;
 	void OnSelect(FieldSource *s);
 	void OnDelete(FieldSource *s);
-	LMessage::Result OnEvent(LMessage *m);
-	void OnPaint(LSurface *pDC);
+	LMessage::Result OnEvent(LMessage *m) override;
+	void OnPaint(LSurface *pDC) override;
 	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
 };
 
@@ -755,7 +800,7 @@ protected:
 	LHashTbl<ConstStrKey<char,false>, bool> ShowLanguages;
 
 	void SortDialogs();
-	void GetFileTypes(LFileSelect *Dlg, bool Write);
+	void GetFileTypes(LFileSelect *Dlg, bool Write) override;
 
 public:
 	AppWnd();
@@ -777,11 +822,11 @@ public:
 	bool ListObjects(List<Resource> &Lst);
 	int GetUniqueStrRef(int Start = 1);
 	int GetUniqueCtrlId();
-	void FindStrings(List<ResString> &Strs, char *Define = 0, int *CtrlId = 0);
+	void FindStrings(List<ResString> &Strs, const char *Define = nullptr, int *CtrlId = nullptr);
 	ResString *GetStrFromRef(int Ref);
 	ResStringGroup *GetDialogSymbols();
 
-	bool Empty();
+	bool Empty() override;
 	void OnObjChange(FieldSource *r);
 	void OnObjSelect(FieldSource *r);
 	void OnObjDelete(FieldSource *r);
@@ -808,16 +853,16 @@ public:
 	void Compare();
 	bool WriteDefines(LStream &Defs);
 
-	void OpenFile(const char *FileName, bool Ro, std::function<void(bool status)> Callback);
-	void SaveFile(const char *FileName, std::function<void(LString fileName, bool status)> Callback);
+	void OpenFile(const char *FileName, bool Ro, std::function<void(bool status)> Callback) override;
+	void SaveFile(const char *FileName, std::function<void(LString fileName, bool status)> Callback) override;
 
 	// ---------------------------------------------------------------------
 	// Window
 	int OnNotify(LViewI *Ctrl, const LNotification &n) override;
-	LMessage::Result OnEvent(LMessage *m);
-	int OnCommand(int Cmd, int Event, OsView Handle);
-	void OnReceiveFiles(LArray<const char*> &Files);
-	void OnCreate();
+	LMessage::Result OnEvent(LMessage *m) override;
+	int OnCommand(int Cmd, int Event, OsView Handle) override;
+	void OnReceiveFiles(LArray<const char*> &Files) override;
+	void OnCreate() override;
 };
 
 #define INVALID_INT			-10000
@@ -889,7 +934,7 @@ public:
 	Results(AppWnd *app, Search *search);
 	~Results();
 
-	void OnPosChange();
+	void OnPosChange() override;
 	int OnNotify(LViewI *v, const LNotification &n) override;
 
 };

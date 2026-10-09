@@ -641,7 +641,7 @@ case IGreaterThanEqual:
 }
 case ICallMethod:
 {
-	LFunc *Meth = *c.fn++;
+	auto Meth = *c.fn++;
 	if (!Meth)
 	{
 		Log->Print(	"%s ICallMethod error: No method struct.\n",
@@ -661,7 +661,7 @@ case ICallMethod:
 	#endif
 	
 	LResolveRef(Ret) Resolve();
-	uint16 Args = *c.u16++;
+	int Args = *c.u16++;
 
 	#ifdef VM_EXECUTE			
 	LScriptArguments Arg(Vm, Ret, NULL, CurrentScriptAddress);
@@ -688,7 +688,7 @@ case ICallMethod:
 	#endif
 	
 	#if VM_EXECUTE
-		LHostFunc *Hf = dynamic_cast<LHostFunc*>(Meth);
+		auto Hf = dynamic_cast<LHostFunc*>(Meth);
 		if (Hf)
 		{
 			if (!(Hf->Context->*(Hf->Func))(Arg))
@@ -2177,8 +2177,12 @@ case IDebug:
 			__debugbreak();
 		#elif defined MAC
 			__builtin_trap();
+		#elif defined HAIKU
+			debugger("Lgi script debugger instruction");
 		#elif defined LINUX
 			Gtk::raise(SIGINT);
+		#elif defined HAIKU
+			debugger("Lgi script debugger instruction");
 		#else
 			#warning "Not impl."
 		#endif

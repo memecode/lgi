@@ -63,7 +63,7 @@ public:
 			{
 				if (!charset)
 					charset = "utf-8";
-				for (LCharset *cs = LGetCsList(); cs->Charset; cs++)
+				for (auto cs = LGetCsList(); cs->Charset; cs++)
 				{
 					c->Insert(cs->Charset);
 					if (!Stricmp(charset, cs->Charset))
@@ -945,6 +945,15 @@ bool ProjectNode::OnKey(LKey &k)
 	}
 	
 	return false;
+}
+
+void ProjectNode::OnProjectDelete(IdeProject *p)
+{
+	// This should be Dep
+	if (p == Dep)
+		Dep = nullptr;
+	else
+		LAssert(!"wrong pointer?");
 }
 
 void ProjectNode::OnPulse()

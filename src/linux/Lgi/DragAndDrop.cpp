@@ -12,6 +12,7 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/DragAndDrop.h"
+#include "lgi/common/Uri.h"
 
 static int NextDndType = 600;
 static LHashTbl<ConstStrKey<char,false>, int> DndTypes(0, -1);
@@ -21,20 +22,12 @@ using namespace Gtk;
 
 GdkDragAction DropEffectToAction(int DropEffect)
 {
-	GdkDragAction action = GDK_ACTION_DEFAULT;
-	switch (DropEffect)
-	{
-		case DROPEFFECT_COPY:
-			action = GDK_ACTION_COPY;
-			break;
-		case DROPEFFECT_MOVE:
-			action = GDK_ACTION_MOVE;
-			break;
-		case DROPEFFECT_LINK:
-			action = GDK_ACTION_LINK;
-			break;
-	}
-	return action;
+	int action = 0;
+	if (DropEffect & DROPEFFECT_COPY) action |= (int)GDK_ACTION_COPY;
+	if (DropEffect & DROPEFFECT_MOVE) action |= (int)GDK_ACTION_MOVE;
+	if (DropEffect & DROPEFFECT_LINK) action |= (int)GDK_ACTION_LINK;
+	if (!action) action = (int)GDK_ACTION_DEFAULT;
+	return (GdkDragAction)action;
 }
 
 int GtkGetDndType(const char *Format)
@@ -69,6 +62,12 @@ static LArray<SignalInfo> ExistingSignals;
 
 void RemoveExistingSignals(OsView w)
 {
+	if (w)
+	{
+		// Ensure stale source pointers are never left on the widget.
+		g_object_set_data(G_OBJECT(w), "DragDropSource", NULL);
+	}
+
 	for (unsigned i=0; i<ExistingSignals.Length(); i++)
 	{
 		SignalInfo &Si = ExistingSignals[i];
@@ -114,7 +113,12 @@ bool LDragDropSource::CreateFileDrop(LDragData *OutputData, LMouse &m, LString::
 
 	LString::Array a;
 	for (auto f : Files)
-		a.New().Printf("file://%s", f.Get());
+	{
+		LUri u;
+		u.sProtocol = "file";
+		u.sPath = f;
+		a.New() = u.ToString();
+	}
 
 	auto s = LString("\n").Join(a);
 	if (!s)
@@ -130,18 +134,12 @@ bool LDragDropSource::CreateFileDrop(LDragData *OutputData, LMouse &m, LString::
 
 Gtk::GdkDragAction EffectToDragAction(int Effect)
 {
-	switch (Effect)
-	{
-		default:
-		case DROPEFFECT_NONE:
-			return Gtk::GDK_ACTION_DEFAULT;
-		case DROPEFFECT_COPY:
-			return Gtk::GDK_ACTION_COPY;
-		case DROPEFFECT_MOVE:
-			return Gtk::GDK_ACTION_MOVE;
-		case DROPEFFECT_LINK:
-			return Gtk::GDK_ACTION_LINK;
-	}
+	int action = 0;
+	if (Effect & DROPEFFECT_COPY) action |= (int)Gtk::GDK_ACTION_COPY;
+	if (Effect & DROPEFFECT_MOVE) action |= (int)Gtk::GDK_ACTION_MOVE;
+	if (Effect & DROPEFFECT_LINK) action |= (int)Gtk::GDK_ACTION_LINK;
+	if (!action) action = (int)Gtk::GDK_ACTION_DEFAULT;
+	return (Gtk::GdkDragAction)action;
 }
 
 void 
@@ -153,6 +151,7 @@ LgiDragDataGet(GtkWidget        *widget,
                gpointer          user_data)
 {
 	auto Src = (LDragDropSource*)user_data;
+	DND_LOG("%s:%i - LgiDragDataGet %p\n", _FL, Src);
 	if (!Src)
 	{
 		DND_ERROR("%s:%i - no source.\n", _FL);
@@ -248,16 +247,21 @@ LgiDragDataGet(GtkWidget        *widget,
 }
 
 gboolean
-DragEnd(	GtkWidget      *widget,
-			GdkDragContext *context,
-			GtkDragResult   result,
-			gpointer        user_data)
+LDndSrc_DragEnd(GtkWidget      *widget,
+				GdkDragContext *context,
+				GtkDragResult   result,
+				gpointer        user_data)
 {
 	auto Src = (LDragDropSource*)user_data;
 	if (!Src)
 	{
 		DND_ERROR("%s:%i - no source.\n", _FL);
 		return false;
+	}
+
+	if (widget)
+	{
+		g_object_set_data(G_OBJECT(widget), "DragDropSource", NULL);
 	}
 
 	DND_LOG("%s:%i - %s\n", _FL, __func__);
@@ -284,12 +288,12 @@ uint32_t DefaultIcon[] = {
 };
 LInlineBmp DefIcon = { 32, 32, 32, DefaultIcon };
 
-int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface *Icon)
+int LDragDropSource::Drag(LView *sourceView, OsEvent Event, int Effect, LSurface *Icon)
 {
-	LAssert(SourceWnd);
-	if (!SourceWnd
+	LAssert(sourceView);
+	if (!sourceView
 		#if LGI_VIEW_HANDLE
-		|| !SourceWnd->Handle()
+		|| !sourceView->Handle()
 		#endif
 		)
 	{
@@ -317,7 +321,7 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 	
 	auto Targets = Gtk::gtk_target_list_new(e.AddressOf(), e.Length());
 	auto Action = EffectToDragAction(Effect);
-	auto w = SourceWnd->GetWindow();
+	auto w = sourceView->GetWindow();
 	if (!w)
 	{
 		DND_ERROR("%s:%i - No Window.\n", _FL);
@@ -335,27 +339,31 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 	{
 		RemoveExistingSignals(d->SignalWnd);
 
+		// Store the source so LWindowDragDataGet can find it without walking the view tree.
+		g_object_set_data(G_OBJECT(d->SignalWnd), "DragDropSource", this);
+
 		{
 			auto &Si = ExistingSignals.New();
 			Si.Wnd = d->SignalWnd;
-			Si.Sig = g_signal_connect(G_OBJECT(d->SignalWnd), "drag-data-get", G_CALLBACK(LgiDragDataGet), this);
+			Si.Sig = g_signal_connect(G_OBJECT(d->SignalWnd), "drag-end", G_CALLBACK(LDndSrc_DragEnd), this);
 		}
-		{
-			auto &Si = ExistingSignals.New();
-			Si.Wnd = d->SignalWnd;
-			Si.Sig = g_signal_connect(G_OBJECT(d->SignalWnd), "drag-end", G_CALLBACK(DragEnd), this);
-		}
+
+		DND_LOG("%s:%i - added signals to %s\n", _FL, w->GetClass());
 	}
-	else DND_ERROR("%s:%i - No signal window?\n", _FL);
+	else
+	{
+		DND_ERROR("%s:%i - No signal window?\n", _FL);
+		return -1;
+	}
 
 	LMouse m;
-	SourceWnd->GetMouse(m);
+	sourceView->GetMouse(m);
 	int btn = 0;
 	if (m.Left()) btn = 1;
 	else if (m.Middle()) btn = 2;
 	else if (m.Right()) btn = 3;
 	
-	d->Ctx = gtk_drag_begin_with_coordinates(d->SignalWnd, Targets, Action, btn, NULL, m.x, m.y);
+	d->Ctx = gtk_drag_begin_with_coordinates(d->SignalWnd, Targets, Action, btn, Event, m.x, m.y);
 	gtk_target_list_unref(Targets);
 	
 	#if 0 // Not working, who the fuck knows why. GTK is suck.

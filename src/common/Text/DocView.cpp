@@ -39,18 +39,17 @@ int LDocumentEnv::NextUid()
 
 void LDocumentEnv::OnDone(LAutoPtr<LThreadJob> j)
 {
-	LoadJob *ld = dynamic_cast<LoadJob*>(j.Get());
+	auto ld = dynamic_cast<LoadJob*>(j.Get());
 	if (ld)
 	{
 		if (Lock(_FL))
 		{
-			LDocView *View = NULL;
-			for (unsigned i=0; i<Viewers.Length(); i++)
+			LDocView *View = nullptr;
+			for (auto v: Viewers)
 			{
-				auto Uid = Viewers[i]->GetDocumentUid();
-				if (Uid == ld->UserUid)
+				if (v->GetDocumentUid() == ld->UserUid)
 				{
-					View = Viewers[i];
+					View = v;
 					break;
 				}
 			}
@@ -60,8 +59,16 @@ void LDocumentEnv::OnDone(LAutoPtr<LThreadJob> j)
 				View->OnContent(ld);
 				j.Release();
 			}
+			else
+			{
+				LgiTrace("%s:%i - no view with Uid=%i in %i viewers:\n",
+					_FL, ld->UserUid, (int)Viewers.Length());
+				for (auto v: Viewers)
+					LgiTrace("  viewer Uid=%i\n", v->GetDocumentUid());
+			}
 			Unlock();
 		}
+		else LgiTrace("%s:%i - failed to lock\n", _FL);
 	}
 	else LAssert(!"RTTI failed.");
 }

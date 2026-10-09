@@ -352,7 +352,7 @@ protected:
 		bool Replace(Gtk::GtkWidget *newWid);
 	public:
 		void Handle(Gtk::GtkMenuItem *mi);
-		void OnGtkEvent(LString Event);
+		void GtkEvent(LString Event);
 		void PaintIcon(Gtk::cairo_t *cr);
 	protected:
 	#else
@@ -444,6 +444,8 @@ public:
 	LAccelerator(int flags, int vkey, int chr, int id);
 	
 	int GetId() { return Id; }
+	LString ToString() const;
+	void Trace(const char *Msg) const;
 
 	/// See if the accelerator matchs a keyboard event
 	bool Match(LKey &k);

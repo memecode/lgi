@@ -392,12 +392,13 @@ void LApp::OnReceiveFiles(LArray<const char*> &Files)
 		LAssert(!"You probably want to set 'AppWnd' before calling LApp::Run... maybe.");
 }
 
-const char *LApp::GetArgumentAt(int n)
+/*
+LString LApp::GetArgumentAt(size_t n)
 {
-	return n >= 0 && n < d->Args.Args ? NewStr(d->Args.Arg[n]) : 0;
+	return n >= 0 && n < d->Args.Args ? LString(d->Args.Arg[n]) : LString();
 }
 
-bool LApp::GetOption(const char *Option, char *Dest, int DestLen)
+bool LApp::GetOption(const char *Option, char *Dest, size_t DestLen)
 {
 	LString Buf;
 	if (GetOption(Option, Buf))
@@ -470,6 +471,7 @@ bool LApp::GetOption(const char *Option, LString &Buf)
 
 	return false;
 }
+*/
 
 void LApp::OnCommandLine()
 {
@@ -549,6 +551,38 @@ int LApp::GetCpuCount()
 	system_info info;
 	auto result = get_system_info(&info);
 	return result == B_OK ? info.cpu_count : 1;
+}
+
+bool LApp::PostEvent(LViewI *View, int Msg, LMessage::Param a, LMessage::Param b)
+{
+	if (!View)
+	{
+		printf("%s:%i - No view.\n", _FL);
+		return false;
+	}
+
+	auto Wnd = View->WindowHandle();
+	if (!Wnd)
+	{
+		printf("%s:%i - No window handle.\n", _FL);
+		return false;
+	}
+
+	BMessage m(Msg);
+	auto r = m.AddInt64(LMessage::PropA, a);
+	if (r != B_OK)
+		printf("%s:%i - AddInt64(PropA) failed.\n", _FL);
+	r = m.AddInt64(LMessage::PropB, b);
+	if (r != B_OK)
+		printf("%s:%i - AddInt64(PropB) failed.\n", _FL);
+	r = m.AddPointer(LMessage::PropView, dynamic_cast<LView*>(View));
+	if (r != B_OK)
+		printf("%s:%i - AddPointer failed.\n", _FL);
+
+	r = Wnd->PostMessage(&m);
+	if (r != B_OK)
+		printf("%s:%i - PostMessage failed.\n", _FL);
+	return r == B_OK;
 }
 
 LFontCache *LApp::GetFontCache()

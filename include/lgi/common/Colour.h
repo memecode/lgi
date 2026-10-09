@@ -53,14 +53,14 @@ enum LSystemColour
 class LgiClass LColour
 {
 protected:
-	class LPalette *pal;
+	class LPalette *pal = nullptr;
 	union {
 		uint32_t flat;
 		uint8_t  index;
 		System32BitPixel rgb;
 		LHls32 hls;
 	};
-	LColourSpace space;
+	LColourSpace space = CsNone;
 
 	int HlsValue(double fN1, double fN2, double fHue) const;
 
@@ -70,6 +70,7 @@ public:
 	static const LColour Red;
 	static const LColour Green;
 	static const LColour Blue;
+	static const LColour Orange;
 
 	/// Call if the system defined colours changed.
 	static void OnChange();
@@ -182,7 +183,7 @@ public:
 	uint32_t GetNative();
 	
 	// String IO
-	char *GetStr() const;
+	const char *GetStr() const;
 	bool SetStr(const char *Str);
 	
 	#ifdef HAIKU

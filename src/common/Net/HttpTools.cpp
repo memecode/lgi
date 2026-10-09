@@ -715,7 +715,7 @@ char *HttpTools::Fetch(char *uri, LStream *Log, LViewI *Dump, CookieJar *Cookies
 			LStringPipe p, hdr;
 
 			auto Enc = u.ToString();
-			LHttp::ContentEncoding type;
+			LHttp::TContentEncoding type;
 			if (h.Get(Enc, DefHeaders, &ProtocolStatus, &p, &type, &hdr))
 			{
 				if (Cookies)
@@ -1104,7 +1104,7 @@ LSurface *GetHttpImage(char *Uri)
 		{
 			LStringPipe Data;
 			int Code = 0;
-			LHttp::ContentEncoding enc;
+			LHttp::TContentEncoding enc;
 			if (Http.Get(Uri, 0, &Code, &Data, &enc))
 			{
 				if (Code == 200)

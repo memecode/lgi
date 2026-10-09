@@ -2,20 +2,30 @@
 #include "lgi/common/List.h"
 #include "lgi/common/Button.h"
 #include "lgi/common/Printer.h"
+#include "lgi/common/Json.h"
+
+#include <algorithm>
+
+#import <Cocoa/Cocoa.h>
 
 ////////////////////////////////////////////////////////////////////
 class LPrinterPrivate
 {
 public:
 	LString Printer;
+	LString JobName;
 	LString Err;
+	NSPrintInfo *PrintInfo = nil;
 	
 	LPrinterPrivate()
 	{
+		PrintInfo = [[NSPrintInfo sharedPrintInfo] retain];
 	}
 	
 	~LPrinterPrivate()
 	{
+		if (PrintInfo)
+			[PrintInfo release];
 	}
 };
 
@@ -31,8 +41,26 @@ LPrinter::~LPrinter()
 	DeleteObj(d);
 }
 
-bool LPrinter::Browse(LView *Parent)
+bool LPrinter::Browse(LView *Parent, PageOrientation Po)
 {
+	NSPrintInfo *info = d->PrintInfo ? d->PrintInfo : [NSPrintInfo sharedPrintInfo];
+	if (Po == PoLandscape)
+		[info setOrientation:NSPaperOrientationLandscape];
+	else if (Po == PoPortrait)
+		[info setOrientation:NSPaperOrientationPortrait];
+	else
+		[info setOrientation:NSPaperOrientationPortrait];
+	
+	NSPrintPanel *panel = [NSPrintPanel printPanel];
+	NSInteger result = [panel runModalWithPrintInfo:info];
+	if (result == NSModalResponseOK)
+	{
+		d->PrintInfo = info;
+		if (auto p = [info printer])
+			d->Printer = [[p name] UTF8String];
+		return true;
+	}
+	
 	return false;
 }
 
@@ -40,14 +68,67 @@ bool LPrinter::Serialize(LString &Str, bool Write)
 {
 	if (Write)
 	{
-		Str = d->Printer;
+		LJson j;
+		j.Set("printer", d->Printer);
+		if (d->PrintInfo)
+		{
+			if (!d->JobName.IsEmpty())
+				j.Set("jobName", d->JobName);
+
+			NSPaperOrientation orient = [d->PrintInfo orientation];
+			const char *orientName = "default";
+			if (orient == NSPaperOrientationLandscape)
+				orientName = "landscape";
+			else if (orient == NSPaperOrientationPortrait)
+				orientName = "portrait";
+			j.Set("orientation", orientName);
+
+			NSSize paper = [d->PrintInfo paperSize];
+			j.Set("paperWidth", (int64_t)paper.width);
+			j.Set("paperHeight", (int64_t)paper.height);
+			j.Set("scalingFactor", [d->PrintInfo scalingFactor]);
+			NSNumber *copies = [[d->PrintInfo dictionary] objectForKey:NSPrintCopies];
+			if (copies)
+				j.Set("copies", (int64_t)[copies integerValue]);
+		}
+		Str = j.GetJson();
+		return true;
 	}
 	else
 	{
-		d->Printer = Str;
+		LJson j(Str);
+		d->Printer = j.Get("printer");
+		if (!d->PrintInfo)
+			d->PrintInfo = [[NSPrintInfo sharedPrintInfo] retain];
+
+		LString orient = j.Get("orientation");
+		if (orient == "landscape")
+			[d->PrintInfo setOrientation:NSPaperOrientationLandscape];
+		else if (orient == "portrait")
+			[d->PrintInfo setOrientation:NSPaperOrientationPortrait];
+		else
+			[d->PrintInfo setOrientation:NSPaperOrientationPortrait];
+
+		LString jobName = j.Get("jobName");
+		if (!jobName.IsEmpty())
+			d->JobName = jobName;
+
+		LString w = j.Get("paperWidth");
+		if (!w.IsEmpty())
+			[d->PrintInfo setPaperSize:NSMakeSize(w.Float(), j.Get("paperHeight").Float())];
+
+		LString copies = j.Get("copies");
+		if (!copies.IsEmpty())
+			[[d->PrintInfo dictionary] setObject:[NSNumber numberWithInteger:(NSInteger)copies.Int()] forKey:NSPrintCopies];
+
+		LString scale = j.Get("scalingFactor");
+		if (!scale.IsEmpty())
+			[d->PrintInfo setScalingFactor:scale.Float()];
+
+		if (auto p = [d->PrintInfo printer])
+			d->Printer = [[p name] UTF8String];
+		return true;
 	}
-	
-	return true;
 }
 
 LString LPrinter::GetErrorMsg()
@@ -55,21 +136,20 @@ LString LPrinter::GetErrorMsg()
 	return d->Err;
 }
 
-#define ErrCheck(fn) \
-if (e != noErr) \
-{ \
-	d->Err.Printf("%s:%i - %s failed with %i\n", _FL, fn, e); \
-	LgiTrace(d->Err); \
-	goto OnError; \
-}
-
-void LPrinter::Print(LPrintEvents *Events,
-					std::function<void(int)> callback,
-					const char *PrintJobName,
-					int MaxPages,
-					LView *Parent)
+void LPrinter::Print(
+		/// The event callback for pagination and printing of pages
+		Context *Events,
+		/// The status callback
+		std::function<void(int)> callback,
+		/// [Optional] The name of the print job
+		const char *PrintJobName,
+		/// [Optional] The maximum number of pages to print
+		int Pages,
+		/// [Optional] The parent window for the printer selection dialog
+		LView *Parent
+		)
 {
-	int Status = LPrintEvents::OnBeginPrintError;
+	int Status = LPrinter::Context::OnBeginPrintError;
 
 	if (!Events)
 	{
@@ -79,109 +159,58 @@ void LPrinter::Print(LPrintEvents *Events,
 		return;
 	}
 
-	#if LGI_COCOA
-
-		#warning "No Cocoa Printing Impl."
-
-	#elif LGI_CARBON // Carbon printing code?
-
-		PMPrintSession ps = NULL;
-		PMPageFormat PageFmt = NULL;
-		PMPrintSettings PrintSettings = NULL;
-		auto Wnd = Parent ? Parent->GetWindow() : NULL;
-		Boolean Accepted = false;
-		Boolean Changed = false;
-		LAutoPtr<LPrintDC> dc;
-		int Pages;
-		LPrintDcParams Params;
-		double paperWidth, paperHeight;
-		PMPaper Paper = NULL;
-		UInt32 ResCount;
-		PMPrinter CurrentPrinter = NULL;
-		
-		OSStatus e = PMCreateSession(&ps);
-		ErrCheck("PMCreateSession");
-		
-		e = PMCreatePageFormat(&PageFmt);
-		ErrCheck("PMCreatePageFormat");
-		
-		e = PMSessionDefaultPageFormat(ps, PageFmt);
-		ErrCheck("PMSessionDefaultPageFormat");
-		
-		e = PMCreatePrintSettings(&PrintSettings);
-		ErrCheck("PMCreatePrintSettings");
-		
-	#if 0
-		e = PMSessionUseSheets(ps, Wnd ? Wnd->WindowHandle() : NULL, NULL /*PMSheetDoneUPP sheetDoneProc*/);
-		ErrCheck("PMSessionUseSheets");
-	#endif
-		
-		e = PMSessionPrintDialog(ps, PrintSettings, PageFmt, &Accepted);
-		ErrCheck("PMSessionPrintDialog");
-		
-		e = PMSessionValidatePrintSettings(ps, PrintSettings, &Changed);
-		e = PMSessionValidatePageFormat(ps, PageFmt, &Changed);
-		
-		e = PMSessionBeginCGDocumentNoDialog(ps, PrintSettings, PageFmt);
-		ErrCheck("PMSessionBeginCGDocumentNoDialog");
-		
-		e = PMSessionBeginPageNoDialog(ps, PageFmt, NULL);
-		ErrCheck("PMSessionBeginPageNoDialog");
-		
-		e = PMGetAdjustedPaperRect(PageFmt, &Params.Page); //PMGetUnadjustedPageRect
-		ErrCheck("PMGetAdjustedPaperRect");
-		
-		e = PMSessionGetCGGraphicsContext(ps, &Params.Ctx);
-		ErrCheck("PMSessionGetCGGraphicsContext");
-		
-		e = PMSessionGetCurrentPrinter(ps, &CurrentPrinter);
-		ErrCheck("PMSessionGetCurrentPrinter");
-		
-		e = PMGetPageFormatPaper(PageFmt, &Paper);
-		e = PMPaperGetWidth(Paper, &paperWidth);
-		e = PMPaperGetHeight(Paper, &paperHeight);
-		
-		e = PMPrinterGetPrinterResolutionCount(CurrentPrinter, &ResCount);
-		ErrCheck("PMPrinterGetPrinterResolutionCount");
-		
-		for (unsigned i=0; i<ResCount; i++)
-		{
-			e = PMPrinterGetIndexedPrinterResolution(CurrentPrinter, i, &Params.Dpi);
-		}
-		
-		e = PMPrinterSetOutputResolution(CurrentPrinter, PrintSettings, &Params.Dpi);
-		ErrCheck("PMPrinterSetOutputResolution");
-		
-		dc.Reset(new GPrintDC(&Params, PrintJobName));
-		Pages = Events->OnBeginPrint(dc);
-		for (int Page = 0; Page < Pages; Page++)
-		{
-			if (Page > 0)
-			{
-				e = PMSessionBeginPage(ps, PageFmt, NULL);
-				ErrCheck("PMSessionBeginPage");
-				
-				e = PMSessionGetCGGraphicsContext(ps, &Params.Ctx);
-				ErrCheck("PMSessionGetCGGraphicsContext");
-				
-				dc.Reset(new GPrintDC(&Params, PrintJobName));
-			}
-			
-			Status |= Events->OnPrintPage(dc, Page);
-			PMSessionEndPage(ps);
-		}
-		
-		e = PMSessionEndDocumentNoDialog(ps);
-		ErrCheck("PMSessionEndDocumentNoDialog");
-		
-		return Status;
-		
-	OnError:
-		PMRelease(PrintSettings);
-		PMRelease(ps);
-		
-	#endif
+	NSPrintInfo *info = d->PrintInfo ? d->PrintInfo : [[NSPrintInfo sharedPrintInfo] retain];
+	if (PrintJobName && *PrintJobName)
+		d->JobName = PrintJobName;
+	if (!d->PrintInfo)
+		d->PrintInfo = info;
 	
-	if (callback)
-		callback(Status);
+	switch (Events->GetOrientation())
+	{
+		case PoPortrait:
+			[info setOrientation:NSPaperOrientationPortrait];
+			break;
+		case PoLandscape:
+			[info setOrientation:NSPaperOrientationLandscape];
+			break;
+		default:
+			break;
+	}
+
+	// Create a minimal print DC object for the callback-based LPrintDC lifecycle.
+	// The actual Cocoa page context is produced by NSPrintOperation during the
+	// print run, and a real CGContext-backed LPrintDC implementation would need
+	// to be added to the mac/ Cocoa path as a follow-up.
+	auto *dc = new LPrintDC(nullptr, PrintJobName ? PrintJobName : "Lgi Print Job", d->Printer ? d->Printer : "");
+	if (!dc)
+	{
+		if (callback)
+			callback(Status);
+		return;
+	}
+
+	Events->OnBeginPrint(dc,
+		[this, Events, callback, dc, Pages](int JobPages)
+		{
+			if (JobPages <= LPrinter::Context::OnBeginPrintCancel)
+			{
+				if (callback)
+					callback(JobPages);
+				delete dc;
+				return;
+			}
+		
+			int PageCount = (Pages > 0) ? std::min(JobPages, Pages) : JobPages;
+			auto *Ranges = Events->GetPageRanges();
+			for (int i = 0; i < PageCount; ++i)
+			{
+				if (Ranges && !Ranges->InRanges(i + 1))
+					continue;
+				Events->OnPrintPage(dc, i);
+			}
+		
+			if (callback)
+				callback(JobPages);
+			delete dc;
+		});
 }

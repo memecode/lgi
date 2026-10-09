@@ -1,12 +1,8 @@
 cmake_minimum_required (VERSION 3.18)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 project (LgiIde)
-
-if (NOT DEFINED LIBPNG_TARGET OR NOT TARGET ${LIBPNG_TARGET})
-	message(FATAL_ERROR "Find the libpng target (see parent folder cmake)")
-endif()
 
 if (APPLE)
 
@@ -50,7 +46,6 @@ set (CommonSource
 	src/SimpleCppParser.cpp
 	src/WebFldDlg.cpp
 	src/IdeCommon.cpp
-	src/AddFtpFile.cpp
 	src/ProjectNode.cpp
 	src/IdeDoc.cpp
 	src/IdeProject.cpp
@@ -61,35 +56,41 @@ set (CommonSource
 	src/SpaceTabConv.cpp
 	src/SysCharSupport.cpp
 	src/DebugContext.cpp
-	src/Debugger.cpp
+	src/gdb.cpp
+	src/lldb.cpp
 	src/History.cpp
 	src/IdeFindInFiles.cpp
 	src/FindSymbol.cpp
-	src/FtpThread.cpp
 	src/DocEdit.cpp
 	src/PythonParser.cpp
 	src/MissingFiles.cpp
 	src/DocEditStyling.cpp
 	src/JavascriptParser.cpp
 	src/NewProjectFromTemplate.cpp
-	../src/common/Net/OpenSSLSocket.cpp
-	../src/common/Net/Http.cpp
-	../src/common/Net/Ftp.cpp
-	../src/common/Lgi/About.cpp
-	../src/common/Lgi/Mdi.cpp
-	../src/common/Lgi/LgiMain.cpp
-	../src/common/Widgets/ControlTree.cpp
-	../src/common/Coding/ParseCpp.cpp
-	../src/common/Coding/LexCpp.cpp
-	)
+
+	${LGI_DIR}/src/common/Net/OpenSSLSocket.cpp
+	${LGI_DIR}/src/common/Net/Http.cpp
+	${LGI_DIR}/src/common/Net/Ftp.cpp
+	${LGI_DIR}/src/common/Net/Ssh.cpp
+	${LGI_DIR}/src/common/Lgi/About.cpp
+	${LGI_DIR}/src/common/Lgi/Mdi.cpp
+	${LGI_DIR}/src/common/Lgi/LgiMain.cpp
+	${LGI_DIR}/src/common/Lgi/SystemIntf.cpp
+	${LGI_DIR}/src/common/Lgi/RemoteFileSelect.cpp
+	${LGI_DIR}/src/common/Widgets/ControlTree.cpp
+	${LGI_DIR}/src/common/Coding/ParseCpp.cpp
+	${LGI_DIR}/src/common/Coding/LexCpp.cpp
+	${LGI_DIR}/src/common/Text/RemoveAnsi.cpp)
 
 list(APPEND ResourceFiles
-	Resources/cmds-32px.png
-	Resources/icons.png
-	Resources/cmds-16px.png
-	Resources/LgiIde.lr8
-	Resources/icon64.png
-	)
+	resources/icons.png
+	resources/LgiIde.lr8
+	resources/icon64.png)
+
+if(NOT HAIKU)
+	list(APPEND CommonSource
+		src/lldb.cpp)
+endif()
 
 if (APPLE)
 
@@ -106,13 +107,39 @@ elseif (MSVC)
 
 endif ()
 
-add_executable(LgiIde ${APP_TYPE} ${CommonSource} ${ResourceFiles})
-target_link_libraries(LgiIde lgi ${LIBPNG_TARGET} ${ZLIB_TARGET})
-target_include_directories(LgiIde PRIVATE Code Resources)
+add_executable(LgiIde
+	${APP_TYPE}
+		${CommonSource}
+		${ResourceFiles})
+
+if(WIN32)
+	set(LLDB_LIB "liblldb.lib")
+elseif(HAIKU)
+	set(LLDB_LIB)
+else()
+	set(LLDB_LIB "lldb")
+endif()
+
+target_link_libraries(LgiIde
+	PRIVATE
+		lgi
+		${LLDB_LIB}
+		ssh_shared)
+
+target_include_directories(LgiIde
+	PRIVATE
+		src
+		resources)
+
+target_compile_definitions(LgiIde
+	PRIVATE
+		HAS_LIBSSH=1)
 
 if (APPLE)
 
-	target_link_libraries(LgiIde ${EXTRA_LIBS})
+	target_link_libraries(LgiIde
+		PRIVATE
+			${EXTRA_LIBS})
 	set_target_properties(LgiIde PROPERTIES
 		MACOSX_BUNDLE TRUE
 		MACOSX_FRAMEWORK_IDENTIFIER com.memecode.LgiIde
@@ -123,12 +150,25 @@ if (APPLE)
 
 elseif (MSVC)
 
-	target_link_libraries(LgiIde ComCtl32.lib Ws2_32.lib UxTheme.lib imm32.lib)
+	target_link_libraries(LgiIde
+		PRIVATE
+			ComCtl32.lib
+			Ws2_32.lib
+			UxTheme.lib
+			imm32.lib
+			)
+
+	target_link_directories(LgiIde
+		PRIVATE
+			${LGI_DEPS_BUILD}/lib
+			"C:\\Program Files\\LLVM\\lib")
+
 	add_custom_command(TARGET LgiIde POST_BUILD 
 					COMMAND "${CMAKE_COMMAND}" -E copy 
 						"$<TARGET_FILE:lgi>"
 						"$<TARGET_FILE_DIR:LgiIde>/$<TARGET_FILE_NAME:lgi>" 
 					COMMENT "Copying Lgi to output directory")
+					
 	if (EXISTS ${PNG_DLL})
 		add_custom_command(TARGET LgiIde POST_BUILD 
 					COMMAND "${CMAKE_COMMAND}" -E copy 
@@ -144,7 +184,7 @@ if (NOT MSVC)
 endif()
 
 # Create a resources sub-folder and copy over the resource files (images and lr8)
-file(COPY ${CMAKE_CURRENT_LIST_DIR}/Resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_LIST_DIR}/resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 target_include_directories (LgiIde PUBLIC
 							Code

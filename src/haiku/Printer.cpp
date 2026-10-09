@@ -11,18 +11,9 @@ public:
 	LString Printer;
 	LString Err;
 	LString PrinterName;
-	LPrintEvents *Events;
+	LPrinter::Context *Events = nullptr;
 	
 	LAutoPtr<LPrintDC> PrintDC;
-	
-	LPrinterPrivate()
-	{
-		Events = NULL;
-	}
-	
-	~LPrinterPrivate()
-	{
-	}
 };
 
 ////////////////////////////////////////////////////////////////////
@@ -36,7 +27,7 @@ LPrinter::~LPrinter()
 	DeleteObj(d);
 }
 
-bool LPrinter::Browse(LView *Parent)
+bool LPrinter::Browse(LView *Parent, PageOrientation Po)
 {
 	return false;
 }
@@ -57,7 +48,7 @@ LString LPrinter::GetErrorMsg()
 	return d->Err;
 }
 	
-void LPrinter::Print(LPrintEvents *Events,
+void LPrinter::Print(LPrinter::Context *Events,
 					std::function<void(int)> callback,
 					const char *PrintJobName,
 					int Pages,

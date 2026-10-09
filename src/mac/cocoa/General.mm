@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
+#import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 
 // #define _POSIX_TIMERS
 #include <time.h>
@@ -287,37 +288,78 @@ bool _GetIniField(char *Grp, char *Field, char *In, char *Out, int OutSize)
 	return false;
 }
 
-bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
-{
-	auto mt = Utf8ToCFString(Mime);
-	if (mt)
+#if 1
+
+	bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 	{
-		auto uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mt, NULL);
-		if (uti)
-		{
-			CFURLRef appUrl = LSCopyDefaultApplicationURLForContentType(uti, kLSRolesAll, nil);
-			if (appUrl)
+		@autoreleasepool {
+			NSString *mimeString = [NSString stringWithUTF8String:Mime];
+			
+			// Use the modern UTType API to find the type by MIME type
+			UTType *type = [UTType typeWithMIMEType:mimeString];
+			
+			if (type)
 			{
-				NSString *path = [(__bridge NSURL *)appUrl path];
-				NSString *name = [[NSFileManager defaultManager] displayNameAtPath:path];
-				if (path && name)
-				{
-					auto &a = Apps.New();
-					a.Path = path;
-					a.Name = name;
-				}
+				// Extract the UTI string identifier (e.g., "public.html")
+				CFStringRef uti = (__bridge CFStringRef)type.identifier;
 				
-				CFRelease(appUrl);
-				if (path) [path release];
-				if (name) [name release];
+				CFURLRef appUrl = LSCopyDefaultApplicationURLForContentType(uti, kLSRolesAll, nil);
+				if (appUrl)
+				{
+					NSString *path = [(__bridge NSURL *)appUrl path];
+					NSString *name = [[NSFileManager defaultManager] displayNameAtPath:path];
+					if (path && name)
+					{
+						auto &a = Apps.New();
+						a.Path = path;
+						a.Name = name;
+					}
+					
+					CFRelease(appUrl);
+					// CRITICAL FIX: Do NOT manually release 'path' and 'name' here.
+					// They are managed by ARC/Autorelease pool.
+				}
 			}
-			CFRelease(uti);
 		}
-		CFRelease(mt);
+		
+		return Apps.Length() > 0;
 	}
-	
-	return Apps.Length() > 0;
-}
+
+#else
+
+	bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
+	{
+		auto mt = Utf8ToCFString(Mime);
+		if (mt)
+		{
+			auto uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mt, NULL);
+			if (uti)
+			{
+				CFURLRef appUrl = LSCopyDefaultApplicationURLForContentType(uti, kLSRolesAll, nil);
+				if (appUrl)
+				{
+					NSString *path = [(__bridge NSURL *)appUrl path];
+					NSString *name = [[NSFileManager defaultManager] displayNameAtPath:path];
+					if (path && name)
+					{
+						auto &a = Apps.New();
+						a.Path = path;
+						a.Name = name;
+					}
+					
+					CFRelease(appUrl);
+					if (path) [path release];
+					if (name) [name release];
+				}
+				CFRelease(uti);
+			}
+			CFRelease(mt);
+		}
+		
+		return Apps.Length() > 0;
+	}
+
+#endif
 
 LString LGetAppForMimeType(const char *Mime)
 {

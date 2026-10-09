@@ -22,7 +22,7 @@ public:
 	virtual ~LXmlTreeUi();
 
 	/// Create attribute <-> UI element mapping for generic control
-	void Map(const char *Attr, int UiIdent, int Type = GV_NULL);
+	void Map(const char *Attr, int UiIdent, LVariantType Type = GV_NULL);
 	/// Create attribute <-> UI element mapping for LItemContainer control
 	void Map(const char *Attr,
 			int UiIdent,

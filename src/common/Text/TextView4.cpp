@@ -205,7 +205,7 @@ enum UndoType
 	UndoDelete, UndoInsert, UndoChange
 };
 
-struct Change : public LRange
+struct Change4 : public LRange
 {
 	UndoType Type;
 	LArray<char16> Txt;
@@ -214,7 +214,7 @@ struct Change : public LRange
 struct LTextView4Undo : public LUndoEvent
 {
 	LTextView4 *View;
-	LArray<Change> Changes;
+	LArray<Change4> Changes;
 
 	LTextView4Undo(LTextView4 *view)
 	{
@@ -223,7 +223,7 @@ struct LTextView4Undo : public LUndoEvent
 
 	void AddChange(ssize_t At, ssize_t Len, UndoType Type)
 	{
-		Change &c = Changes.New();
+		auto &c = Changes.New();
 		c.Start = At;
 		c.Len = Len;
 		c.Txt.Add(View->Text + At, Len);
@@ -1807,17 +1807,15 @@ LArray<LTextView4::LTextLine*>::I LTextView4::GetTextLineIt(ssize_t Offset, ssiz
 		else mid = s + ((e - s) >> 1);
 		
 		auto l = Line[mid];
-		auto end = l->EndNewLine();
 
 		if (Offset < l->Start)
 			e = mid - 1;
-		else if (Offset > end)
+		else if (!l->Overlap(Offset))
+			// Offset is at or past the end of this line: the position at the
+			// end of a line with a '\n' belongs to the following line.
 			s = mid + 1;
 		else
 		{
-			if (!Line[mid]->Overlap(Offset))
-				goto OnError;
-
 			if (Index)
 				*Index = mid;
 			return Line.begin(mid);
@@ -1991,15 +1989,16 @@ LRange LTextView4::GetSelectionRange()
 	return r;
 }
 
-char *LTextView4::GetSelection()
+LString LTextView4::GetSelection()
 {
-	LRange s = GetSelectionRange();
-	if (s.Len > 0)
+	LString ret;
+	if (auto s = GetSelectionRange())
 	{
-		return (char*)LNewConvertCp("utf-8", Text + s.Start, LGI_WideCharset, s.Len*sizeof(Text[0]) );
+		LAutoString txt((char*) LNewConvertCp("utf-8", Text + s.Start, LGI_WideCharset, s.Len*sizeof(Text[0]) ));
+		ret = txt.Get();
 	}
 
-	return 0;
+	return ret;
 }
 
 bool LTextView4::HasSelection()
@@ -2081,7 +2080,7 @@ bool LTextView4::ScrollToOffset(size_t Off)
 	if (To)
 	{
 		LRect Client = GetClient();
-		int DisplayLines = Client.Y() / LineY;
+		int DisplayLines = (Client.Y() + LineY - 1) / LineY;
 
 		if (VScroll)
 		{
@@ -2895,7 +2894,7 @@ void LTextView4::DoReplace(std::function<void(bool)> Callback)
 		}
 	}
 
-	LAutoString LastFind8(SingleLineSelection ? GetSelection() : WideToUtf8(d->FindReplaceParams->LastFind));
+	LString LastFind8(SingleLineSelection ? GetSelection() : LString(d->FindReplaceParams->LastFind));
 	LAutoString LastReplace8(WideToUtf8(d->FindReplaceParams->LastReplace));
 	
 	auto Dlg = new LReplaceDlg(this,
@@ -4407,7 +4406,10 @@ bool LTextView4::OnKey(LKey &k)
 			case LK_UP:
 			{
 				if (k.Alt())
+				{
+					// printf("%s:%i - ignoring Alt+Up\n", _FL);
 					return false;
+				}
 
 				if (k.Down())
 				{
@@ -4432,8 +4434,12 @@ bool LTextView4::OnKey(LKey &k)
 
 							SetCaret(Prev->Start + MIN(CharX, Prev->Len), k.Shift());
 						}
+						// else printf("%s:%i - no previous line\n", _FL);
 					}
+					// else printf("%s:%i - no line at cursor\n", _FL);
 				}
+				// else printf("%s:%i - ignoring Up key release\n", _FL);
+
 				return true;
 				break;
 			}

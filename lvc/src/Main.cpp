@@ -8,10 +8,12 @@
 #include "lgi/common/StructuredLog.h"
 #include "lgi/common/PopupNotification.h"
 #include "lgi/common/TextLabel.h"
+#include "lgi/common/PopupNotification.h"
 
 #include "Lvc.h"
 #include "resdefs.h"
 #include "BranchEditDlg.h"
+#include "CherryPickDlg.h"
 #ifdef WINDOWS
 #include "resource.h"
 #endif
@@ -21,6 +23,207 @@ const char *AppName =			"Lvc";
 #define DEFAULT_BUILD_FIX_MSG	"Build fix."
 #define OPT_Hosts				"Hosts"
 #define OPT_Host				"Host"
+#define OPT_AcceptCert			"AcceptCert"
+
+LString toHex(LArray<unsigned char> &certId);
+
+struct AcceptedCerts
+{
+	LOptionsFile &options;
+	LXmlTag *tag;
+
+	AcceptedCerts(LOptionsFile &opts) : options(opts), tag(options.LockTag(OPT_AcceptCert, _FL)) {}
+	~AcceptedCerts()
+	{
+		if (tag)
+			options.Unlock();
+	}
+
+	AcceptedCerts(const AcceptedCerts&) = delete;
+	AcceptedCerts& operator=(const AcceptedCerts&) = delete;
+
+	LXmlTag *FindHost(const char *hostName)
+	{
+		if (!tag)
+			return nullptr;
+
+		for (auto c: tag->Children)
+		{
+			if (!c->IsTag(OPT_Host))
+				continue;
+			if (auto name = c->GetAttr("name"))
+			{
+				if (LString(hostName).Equals(name))
+					return c;
+			}
+		}
+		return nullptr;
+	}
+
+	bool Has(const char *hostName, LArray<unsigned char> &certId)
+	{
+		auto hostTag = FindHost(hostName);
+		return hostTag &&
+			hostTag->GetContent() &&
+			LString(toHex(certId)).Equals(hostTag->GetContent());
+	}
+
+	bool Set(const char *hostName, LArray<unsigned char> &certId)
+	{
+		if (!tag)
+			return false;
+
+		auto hostTag = FindHost(hostName);
+		if (!hostTag)
+		{
+			hostTag = new LXmlTag(OPT_Host);
+			hostTag->SetAttr("name", hostName);
+			tag->Children.Add(hostTag);
+		}
+		if (hostTag)
+			hostTag->SetContent(toHex(certId));
+		return true;
+	}
+};
+
+LString toHex(LArray<unsigned char> &certId)
+{
+	return LHex(LString((char*)certId.AddressOf(), certId.Length()));
+}
+
+AppPriv::TSshConn *AppPriv::GetConn(LSsh::THostInfo *conn)
+{
+	TSshConn *res = nullptr;
+	for (auto c: sshConnections)
+	{
+		if (c->info.hostName.Equals(conn->hostName))
+		{
+			res = c;
+			break;
+		}
+	}
+		
+	if (!res)
+	{	
+		if (res = new TSshConn)
+		{
+			res->info = *conn;
+			sshConnections.Add(res);
+		}
+		else return nullptr;
+	}
+	
+	res->events.Add(LCurrentThreadId(), new TSshConn::TThread(conn->cancel));
+	return res;
+}
+
+void AppPriv::TSshConn::setResult(int id)
+{
+	result = id;
+	for (auto p: events)
+		p.value->event.Signal();
+}
+
+AppPriv::AppPriv() :
+	Opts(LOptionsFile::DesktopMode, AppName),		
+	#if 1 // network structured logging:
+		sLog(LStructuredLog::TNetworkEndpoint, LStructuredLog::sDefaultEndpoint, true)
+	#else // file structured logging:
+		sLog(LStructuredLog::TFile, "Lvc.slog")
+	#endif
+{		
+	sLog.Clear();
+
+	// This is NOT called in the GUI thread:
+	sshCallback = [this](auto &hostInfo)
+	{
+		if (IsCertAccepted(hostInfo))
+			return LSsh::SshConnect;
+
+		auto wnd = Log->GetWindow();
+		auto threadId = LCurrentThreadId();
+		auto conn = GetConn(&hostInfo);		
+		if (!conn)
+		{
+			LAssert(!"No connect obj.");
+			return LSsh::SshDisconnect;
+		}
+		
+		wnd->RunCallback([this, conn, threadId]()
+			{
+				printf("%s:%i - gui: msg...\n", _FL);
+				
+				if (!capsBar)
+					if ((capsBar = new LMissingCapsBar()))
+					{
+						capsBar->Set(nullptr,
+							LString::Fmt("%s: %s (key=%s)",
+										conn->info.hostName.Get(),
+										conn->info.msg.Get(),
+										toHex(conn->info.certId).Get())
+						);
+										
+						capsBar->GetCss(true)->BackgroundColor("orange");
+
+						capsBar->Action("Accept Once", [this, conn]()
+							{
+								conn->setResult(IDYES);
+							});
+						
+						capsBar->Action("Accept Always", [this, conn]()
+							{
+								conn->setResult(IDYES);
+								AlwaysAcceptCert(conn->info);
+							});
+							
+						capsBar->Action("Disconnect", [this, conn]()
+							{
+								conn->setResult(IDNO);
+							});
+							
+						mainBox->AddView(capsBar, 1);
+						mainBox->AttachChildren();
+						if (auto w = mainBox->GetWindow())
+						{
+							w->PourAll();
+							w->Invalidate();
+						}
+					}
+			},
+			_FL);
+			
+		if (auto threadObj = conn->events.Find(threadId))
+		{
+			printf("sshConn %i: waiting on %p...\n", threadId, &threadObj->event);
+			LThreadEvent::WaitStatus res;
+			while (!threadObj->cancel || !threadObj->cancel->IsCancelled())
+			{
+				res = threadObj->event.Wait(50);
+				if (res != LThreadEvent::WaitStatus::WaitTimeout)
+					break;
+			}			
+			printf("sshConn %i: wait %p = %i.\n", threadId, &threadObj->event, res);
+		}
+		else
+		{
+			LAssert(!"No event?");
+			return LSsh::SshDisconnect;
+		}
+		
+		wnd->RunCallback([&]()
+			{
+				DeleteObj(capsBar);
+				if (auto w = mainBox->GetWindow())
+				{
+					w->PourAll();
+					w->Invalidate();
+				}
+			},
+			_FL);
+		
+		return conn->result == IDYES ? LSsh::SshConnect : LSsh::SshDisconnect;
+	};
+}
 
 AppPriv::~AppPriv()
 {
@@ -31,6 +234,16 @@ AppPriv::~AppPriv()
 
 	if (CurFolder)
 		CurFolder->Empty();
+}
+
+bool AppPriv::IsCertAccepted(LSsh::THostInfo &certId)
+{
+	return AcceptedCerts(Opts).Has(certId.hostName, certId.certId);
+}
+
+void AppPriv::AlwaysAcceptCert(LSsh::THostInfo &hostInfo)
+{
+	AcceptedCerts(Opts).Set(hostInfo.hostName, hostInfo.certId);
 }
 	
 #if HAS_LIBSSH
@@ -50,7 +263,7 @@ SshConnection *AppPriv::GetConnection(const char *Uri, const char *Prompt, bool 
 				u.sPass = "*******";
 			Log->Print("Warning: No remote prompt defined for '%s'\n", u.ToString().Get());
 		}
-		Connections.Add(s, Conn = new SshConnection(Log, s, Prompt ? Prompt : "*$ "));
+		Connections.Add(s, Conn = new SshConnection(sshCallback, Log, s, Prompt ? Prompt : "*$ "));
 	}
 	return Conn;
 }
@@ -123,86 +336,86 @@ VersionCtrl AppPriv::DetectVcs(VcFolder *Fld)
 
 	if (!u.IsFile() || !u.sPath)
 	{
-		#if HAS_LIBSSH
-			auto c = GetConnection(u.ToString(), Fld->GetRemotePrompt());
-			if (!c)
-				return VcError;
-			
-			auto type = c->Types.Find(u.sPath);
-			if (type)
-				return type;
-
-			c->DetectVcs(Fld);
-			Fld->GetCss(true)->Color(LColour::Blue);
-			Fld->Update();
-			return VcPending;
-		#else
+		#if !HAS_LIBSSH
 			return VcError;
 		#endif
+		auto c = GetConnection(u.ToString(), Fld->GetRemotePrompt());
+		if (!c)
+			return VcError;
+			
+		auto type = c->Types.Find(u.sPath);
+		if (type)
+			return type;
+
+		c->DetectVcs(Fld);
+		Fld->GetCss(true)->Color(LColour::Blue);
+		Fld->Update();
+
+		return VcPending;
 	}
 
-	auto Path = u.sPath.Get();
-	#ifdef WINDOWS
-		if (*Path == '/')
-			Path++;
+	auto Path = LUri::DecodeStr(u.sPath).RStrip("/");
+	#if WINDOWS
+	Path = Path.LStrip("/");
 	#endif
-
-	if (LMakePath(p, sizeof(p), Path, ".git") &&
-		LDirExists(p))
-		return VcGit;
-
-	if (LMakePath(p, sizeof(p), Path, ".svn") &&
-		LDirExists(p))
-		return VcSvn;
-
-	if (LMakePath(p, sizeof(p), Path, ".hg") &&
-		LDirExists(p))
-		return VcHg;
-
-	if (LMakePath(p, sizeof(p), Path, "CVS") &&
-		LDirExists(p))
-		return VcCvs;
-
-	return VcNone;
-}
-
-
-class DiffView : public LTextLog
-{
-public:
-	DiffView(int id) : LTextLog(id)
+	if (!Path)
 	{
+		LgiTrace("%s:%i - empty Path for '%s'\n", _FL, u.ToString().Get());
+		return VcError;
 	}
 
-	void PourStyle(size_t Start, ssize_t Length)
-	{
-		for (auto ln : LTextView3::Line)
+	auto simpleCheck = [&](LString in)
 		{
-			if (!ln->c.IsValid())
+			if (LMakePath(p, sizeof(p), in, ".git") &&
+				LDirExists(p))
+				return VcGit;
+
+			if (LMakePath(p, sizeof(p), in, ".svn") &&
+				LDirExists(p))
+				return VcSvn;
+
+			if (LMakePath(p, sizeof(p), in, ".hg") &&
+				LDirExists(p))
+				return VcHg;
+
+			if (LMakePath(p, sizeof(p), in, "CVS") &&
+				LDirExists(p))
+				return VcCvs;
+
+			return VcNone;
+		};
+	
+	auto vcs = simpleCheck(Path);
+	if (vcs != VcNone)
+		return vcs;
+
+	// Check all the parent folders... submodule?
+	LFile::Path parent(Path);
+	while (parent.PopLast())
+	{
+		vcs = simpleCheck(parent.GetFull());
+		if (vcs == VcGit)
+		{
+			// Is it a sub-module?
+			if (auto modules = LReadFile(parent / ".gitmodules"))
 			{
-				char16 *t = Text + ln->Start;
-				
-				if (*t == '+')
+				for (auto subs: modules.Split("[submodule"))
 				{
-					ln->c = LColour::Green;
-					ln->Back.Rgb(245, 255, 245);
+					const char *s = subs.Get();
+					auto relPath = LTokLStr(s);
+					auto fullPath = (parent / relPath).GetFull().Strip("/");
+					if (fullPath.Equals(Path))
+					{
+						Fld->SetParentRepo(parent.GetFull(), relPath);
+						return vcs;
+					}
 				}
-				else if (*t == '-')
-				{
-					ln->c = LColour::Red;
-					ln->Back.Rgb(255, 245, 245);
-				}
-				else if (*t == '@')
-				{
-					ln->c.Rgb(128, 128, 128);
-					ln->Back.Rgb(235, 235, 235);
-				}
-				else
-					ln->c = LColour(L_TEXT);
 			}
 		}
 	}
-};
+
+	return VcNone;
+}
 
 class EditAuthor : public LDialog
 {
@@ -366,6 +579,39 @@ LString::Array GetProgramsInPath(const char *Program)
 class OptionsDlg : public LDialog, public LXmlTreeUi
 {
 	LOptionsFile &Opts;
+	LList *CertLst = nullptr;
+
+	struct HostItem : public LListItem
+	{
+		LString host, cert;
+		
+		bool XmlIo(class LXmlTag *tag, bool write) override
+		{
+			if (write)
+			{
+				tag->SetContent(cert);
+				tag->SetAttr("host", host);
+			}
+			else
+			{
+				host = tag->GetAttr("host");
+				cert = tag->GetContent();
+			}
+			
+			return false;
+		}
+		
+		const char *GetText(int col) override
+		{
+			switch (col)
+			{
+				case 0: return host;
+				case 1: return cert;
+				default: break;
+			}
+			return nullptr;
+		}
+	};
 
 public:
 	OptionsDlg(LViewI *Parent, LOptionsFile &opts) : Opts(opts)
@@ -384,9 +630,24 @@ public:
 		Map(OPT_CvsPath, IDC_CVS, GV_STRING);
 		Map(OPT_CvsLimit, IDC_CVS_LIMIT);
 
+		Map(OPT_DiffPad, ID_DIFF_PAD);
+		
+		Map(OPT_AcceptCert, ID_CERT_LST, OPT_Host,
+			[this]()
+			{
+				return new HostItem();
+			});
+
 		if (LoadFromResource(ID_OPTIONS))
 		{
-			MoveSameScreen(Parent);
+			MoveSameScreen(Parent);			
+			
+			if (GetViewById(ID_CERT_LST, CertLst))
+			{
+				CertLst->AddColumn("host");
+				CertLst->AddColumn("cert");
+			}
+			
 			Convert(&Opts, this, true);
 		}
 	}
@@ -766,7 +1027,7 @@ public:
 		Select(true);
 	}
 	
-	void OnPulse()
+	void OnPulse() override
 	{
 		LDirectory dir;
 		if (dir.First(File))
@@ -787,7 +1048,7 @@ public:
 		// else LgiTrace("%s:%i couldn't get stat for '%s'\n", _FL, File.Get());
 	}
 	
-	void OnMouseClick(LMouse &m)
+	void OnMouseClick(LMouse &m) override
 	{
 		if (m.IsContextMenu())
 		{
@@ -1030,7 +1291,7 @@ public:
 	
 	int Main()
 	{
-		LSsh ssh([this](const char *Msg, LSsh::HostType Type)
+		LSsh ssh([this](auto &hostInfo)
 			{
 				return LSsh::SshConnect;
 			},
@@ -1064,7 +1325,7 @@ class App :
 	LBox *FoldersBox = NULL;
 	LAutoPtr<SshTestThread> Test;
 
-	bool CallMethod(const char *MethodName, LScriptArguments &Args)
+	bool CallMethod(const char *MethodName, LScriptArguments &Args) override
 	{
 		if (!Stricmp(MethodName, METHOD_GetContext))
 		{
@@ -1146,7 +1407,7 @@ class App :
 
 			return true;
 		}
-
+      
 		return false;
 	}
 
@@ -1168,7 +1429,7 @@ public:
 		#ifdef WINDOWS
 			SetIcon(MAKEINTRESOURCEA(IDI_ICON1));
 		#else
-			SetIcon("icon32.png");
+			SetIcon("icon32.png", "Development;RevisionControl;");
 		#endif
 
 		ImgLst.Reset(LLoadImageList("image-list.png", 16, 16));
@@ -1193,7 +1454,7 @@ public:
 		WaitThread();
 	}
 	
-	void OnCreate()
+	void OnCreate() override
 	{
 		if ((Menu = new LMenu))
 		{
@@ -1202,15 +1463,15 @@ public:
 			Menu->Load(this, "IDM_MENU");
 		}
 
-		auto ToolsBox   = new LBox(IDC_TOOLS_BOX,   true,  "ToolsBox");
+		mainBox      	= new LBox(IDC_TOOLS_BOX,   true,  "ToolsBox");
 		FoldersBox      = new LBox(IDC_FOLDERS_BOX, false, "FoldersBox");
 		auto CommitsBox = new LBox(IDC_COMMITS_BOX, true,  "CommitsBox");
 
 		auto Tools = new ToolBar;
 
-		auto result = ToolsBox->Attach(this);
-		Tools->Attach(ToolsBox);
-		FoldersBox->Attach(ToolsBox);
+		mainBox->Attach(this);
+		Tools->Attach(mainBox);
+		FoldersBox->Attach(mainBox);
 
 		auto FolderLayout = new LTableLayout(IDC_FOLDER_TBL);
 		auto c = FolderLayout->GetCell(0, 0, true, 2);
@@ -1237,9 +1498,8 @@ public:
 		c = CommitsLayout->GetCell(1, 1);
 			c->Add(new LButton(IDC_CLEAR_FILTER_COMMITS, 0, 0, -1, -1, "x"));
 		c = CommitsLayout->GetCell(2, 1);
-			c->VerticalAlign(LCss::VerticalMiddle);
-			c->PaddingRight("2px");
-			c->Add(new LTextLabel(-1, 0, 0, -1, -1, "Note: @author"));
+			c->PaddingRight("8px");
+			c->Add(new LButton(ID_FILTER_BY_AUTHOR, 0, 0, -1, -1, "@author"));
 		CommitsLayout->Attach(CommitsBox);
 		CommitsLayout->GetCss(true)->Height("40%");
 
@@ -1302,34 +1562,58 @@ public:
 			Opts.CreateTag(OPT_Folders);
 			f = Opts.LockTag(OPT_Folders, _FL);
 		}
-		if (f)
-		{
-			new GetVcsVersions(this);
+		if (!f)
+			return;
 
-			for (auto c: f->Children)
+		new GetVcsVersions(this);
+
+		for (auto c: f->Children)
+		{
+			if (c->IsTag(OPT_Folder))
 			{
-				if (c->IsTag(OPT_Folder))
+				auto f = new VcFolder(this, c);
+				Tree->Insert(f);
+			}
+		}
+		Opts.Unlock();
+		
+		LRect Large(0, 0, 2000, 200);
+		Tree->SetPos(Large);
+		Tree->ResizeColumnsToContent();
+		
+		LItemColumn *col;
+		int i = 0, px = 0;
+		while ((col = Tree->ColumnAt(i++)))
+		{
+			px += col->Width();
+		}
+		
+		FoldersBox->Value(MAX(320, px + 20));
+		
+		// new TestThread();
+
+		// Process command line options
+		LString selectFolder;
+		if (LAppInst->GetOption("select", selectFolder))
+		{
+			for (auto item = Tree->GetChild(); item; item = item->GetNext())
+			{
+				if (auto f = dynamic_cast<VcFolder*>(item))
 				{
-					auto f = new VcFolder(this, c);
-					Tree->Insert(f);
+					auto local = f->GetUri().sPath.RStrip("/");
+					printf("paths: '%s' - '%s'\n", local.Get(), selectFolder.Get());
+					if (local == selectFolder)
+					{
+						f->Select(true);
+						
+						LString gotoItem;
+						if (LAppInst->GetOption("goto", gotoItem))
+						{
+							f->GotoItem(gotoItem);
+						}
+					}
 				}
 			}
-			Opts.Unlock();
-			
-			LRect Large(0, 0, 2000, 200);
-			Tree->SetPos(Large);
-			Tree->ResizeColumnsToContent();
-			
-			LItemColumn *c;
-			int i = 0, px = 0;
-			while ((c = Tree->ColumnAt(i++)))
-			{
-				px += c->Width();
-			}
-			
-			FoldersBox->Value(MAX(320, px + 20));
-            
-            // new TestThread();
 		}
 	}
 	
@@ -1356,7 +1640,7 @@ public:
 		Opts.SerializeFile(true);
 	}
 
-	LMessage::Result OnEvent(LMessage *Msg)
+	LMessage::Result OnEvent(LMessage *Msg) override
 	{
 		switch (Msg->Msg())
 		{
@@ -1379,7 +1663,7 @@ public:
 		return LWindow::OnEvent(Msg);
 	}
 
-	void OnReceiveFiles(LArray<const char*> &Files)
+	void OnReceiveFiles(LArray<const char*> &Files) override
 	{
 		for (auto f : Files)
 		{
@@ -1388,7 +1672,7 @@ public:
 		}
 	}
 
-	int OnCommand(int Cmd, int Event, OsView Wnd)
+	int OnCommand(int Cmd, int Event, OsView Wnd) override
 	{
 		switch (Cmd)
 		{
@@ -1509,7 +1793,7 @@ public:
 		return 0;
 	}
 
-	void OnPulse()
+	void OnPulse() override
 	{
 		if (Tree)
 		{
@@ -1647,19 +1931,36 @@ public:
 		return dynamic_cast<VcFolder*>(Tree->Selection());
 	}
 
+	void SetAuthorFilter(LString email)
+	{
+		Log->Print("%s:%i - got author '%s'.\n",
+			_FL, email.Get());
+
+		if (!email)
+			return;
+
+		LViewI *filt;
+		if (GetViewById(IDC_FILTER_COMMITS, filt))
+		{
+			auto p = email.SplitDelimit("@");
+			filt->Name(LString("@") + p[0]);
+			OnNotify(filt, LNotifyItemClick);
+		}
+	}
+
 	int OnNotify(LViewI *c, const LNotification &n) override
 	{
 		switch (c->GetId())
 		{
 			case IDC_CLEAR_FILTER_FOLDERS:
 			{
-				SetCtrlName(IDC_FILTER_FOLDERS, NULL);
+				SetCtrlName(IDC_FILTER_FOLDERS, nullptr);
 				// Fall through
 			}
 			case IDC_FILTER_FOLDERS:
 			{
 				if (n.Type == LNotifyEscapeKey)
-					SetCtrlName(IDC_FILTER_FOLDERS, NULL);
+					SetCtrlName(IDC_FILTER_FOLDERS, nullptr);
 					
 				LString n = GetCtrlName(IDC_FILTER_FOLDERS);
 				if (n != FolderFilter)
@@ -1669,33 +1970,54 @@ public:
 				}
 				break;
 			}
+			case ID_FILTER_BY_AUTHOR:
+			{
+				if (auto f = GetCurrent())
+				{
+					Log->Print("%s:%i - getting author...\n", _FL);
+
+					f->GetAuthor(true, [this, f](auto author)
+						{
+							if (!author.email)
+								f->GetAuthor(false, [this](auto &author)
+									{
+										SetAuthorFilter(author.email);
+									});
+							else
+								SetAuthorFilter(author.email);
+						});
+				}
+				else Log->Print("%s:%i - no current folder.\n", _FL);
+				break;
+			}
 			case IDC_CLEAR_FILTER_COMMITS:
 			{
-				SetCtrlName(IDC_FILTER_COMMITS, NULL);
+				SetCtrlName(IDC_FILTER_COMMITS, nullptr);
 				// Fall through
 			}
 			case IDC_FILTER_COMMITS:
 			{
 				if (n.Type == LNotifyEscapeKey)
-					SetCtrlName(IDC_FILTER_COMMITS, NULL);
+					SetCtrlName(IDC_FILTER_COMMITS, nullptr);
 
 				LString txt = GetCtrlName(IDC_FILTER_COMMITS);
 				if (txt != CommitFilter)
 					CommitFilter = txt;
 
-				if (n.Type == LNotifyReturnKey)
+				if (n.Type == LNotifyReturnKey ||
+					n.Type == LNotifyItemClick)
 					OnFilterCommits();
 				break;
 			}
 			case IDC_CLEAR_FILTER_FILES:
 			{
-				SetCtrlName(IDC_FILTER_FILES, NULL);
+				SetCtrlName(IDC_FILTER_FILES, nullptr);
 				// Fall through
 			}
 			case IDC_FILTER_FILES:
 			{
 				if (n.Type == LNotifyEscapeKey)
-					SetCtrlName(IDC_FILTER_FILES, NULL);
+					SetCtrlName(IDC_FILTER_FILES, nullptr);
 
 				LString n = GetCtrlName(IDC_FILTER_FILES);
 				if (n != FileFilter)
@@ -1880,7 +2202,7 @@ public:
 			{
 				if (n.Type == LNotifyValueChanged)
 				{
-					VcFolder *f = dynamic_cast<VcFolder*>(Tree->Selection());
+					auto f = dynamic_cast<VcFolder*>(Tree->Selection());
 					auto branch = c->Name();
 					if (!f || !branch)
 					{
@@ -1904,6 +2226,23 @@ public:
 						dlg->DoModal(nullptr);
 					}
 				}
+				break;
+			}
+			case ID_CHERRY_PICK:
+			{
+				LArray<VcFolder*> sel;
+				if (Tree->GetSelection(sel))
+				{
+					if (auto dlg = new CherryPickDlg(sel.First()))
+						dlg->DoModal([this, dlg, folder = sel.First()](auto autoPtr, auto code)
+							{
+								if (!code)
+									return;
+								
+								folder->CherryPick(dlg->commit.hash, dlg->commit.message, dlg->mergeParentIdx);
+							});
+				}
+				else LPopupNotification::Message(this, "Select a folder first...");
 				break;
 			}
 			case IDC_LIST:
@@ -2015,8 +2354,7 @@ RemoteFolderDlg::RemoteFolderDlg(App *application) : app(application), root(NULL
 	Ui.Map("User", ID_USER);
 	Ui.Map("Password", ID_PASS);
 
-	LXmlTag *hosts = app->Opts.LockTag(OPT_Hosts, _FL);
-	if (hosts)
+	if (auto hosts = app->Opts.LockTag(OPT_Hosts, _FL))
 	{
 		SshHost *h;
 		for (auto c: hosts->Children)
@@ -2187,6 +2525,8 @@ const char* toString(VersionCtrl v)
 
 		case VcPending: return "VcPending";
 		case VcError: return "VcError";
+		
+		default: break;
 	}
 
 	return "VcNone";
@@ -2223,4 +2563,3 @@ int LgiMain(OsAppArguments &AppArgs)
 	LAssert(VcCommit::Instances == 0);
 	return 0;
 }
-

@@ -49,12 +49,13 @@ class LgiClass LSubProcess : public LStream
 {
 public:
 	#if defined(WIN32)
-	typedef HANDLE PipeHandle;
-	typedef DWORD ProcessId;
+		typedef HANDLE PipeHandle;
+		typedef DWORD ProcessId;
 	#else
-	typedef int PipeHandle;
-	typedef pid_t ProcessId;
+		typedef int PipeHandle;
+		typedef pid_t ProcessId;
 	#endif
+	static LStream *debugLog;
 
 	union Pipe
 	{
@@ -93,6 +94,9 @@ protected:
 	LSubProcess *Parent, *Child;
 
 public:
+	/// This is printed when the sub-process fails to start.
+	constexpr static const char *sErrorStr = "LSUBPROCESS_ERROR_STR";
+
 	// Object
 	LSubProcess(const char *exe, const char *args = NULL, bool pseudoConsole = false);
 	~LSubProcess();
@@ -117,6 +121,7 @@ public:
 	void SetNewGroup(bool ng);
 	ProcessId Handle();
 	bool IsRunning();
+	LError &GetError();
 	uint32_t GetErrorCode();
 	int32 GetExitValue();
 	void Connect(LSubProcess *child);
@@ -125,6 +130,7 @@ public:
 	bool Interrupt();
 	bool Kill();
 	bool Signal(int which);
+	/// \returns the exit code of the process
 	int32 Communicate(LStreamI *Out, LStreamI *In = NULL, LCancel *Cancel = NULL);
 	
 	// IO
@@ -165,11 +171,11 @@ public:
 		std::function<void(int exitValue)> onComplete;
 		
 		// Object		
-		IoThread(const char *exe = nullptr, const char *args = nullptr);
+		IoThread(const char *exe = nullptr, const char *args = nullptr, const char *initFolder = nullptr);
 		~IoThread();
 		
 		// Methods:
-		bool Create(const char *exe, const char *args = nullptr);
+		bool Create(const char *exe, const char *args = nullptr, const char *initFolder = nullptr);
 		bool Start(bool ReadAccess = true, bool WriteAccess = false, bool MapStderrToStdout = true);
 		LSubProcess *GetProcess() const { return process; }
 		bool IsRunning() { return process ? process->IsRunning() : false; }

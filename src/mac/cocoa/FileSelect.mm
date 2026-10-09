@@ -182,8 +182,6 @@ void LFileSelect::Open(SelectCb Cb)
 			d->Files.New() = [url path];
 		}
 	}
-
-	return result == NSModalResponseOK;
 }
 
 void LFileSelect::OpenFolder(SelectCb Cb)
@@ -206,8 +204,6 @@ void LFileSelect::OpenFolder(SelectCb Cb)
 			d->Files.New() = [url path];
 		}
 	}
-
-	return result == NSModalResponseOK;
 }
 
 void LFileSelect::Save(SelectCb Cb)
@@ -223,7 +219,5 @@ void LFileSelect::Save(SelectCb Cb)
 		d->Files.Empty();
 		d->Files.New() = [[saveDlg URL] path];
 	}
-
-	return result == NSModalResponseOK;
 }
 

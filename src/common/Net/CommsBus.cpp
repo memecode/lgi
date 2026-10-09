@@ -19,6 +19,7 @@ Monitoring:
 #define DEFAULT_COMMS_PORT	45454
 #define RETRY_SERVER		-2
 #define USE_TRANSPORT		0
+#define MAX_MSG_SIZE		(1 << 20) // MiB
 
 #if 0
 #define LOG(...)			
@@ -92,7 +93,7 @@ static LString Indent(LString s, int depth = 4)
 }
 
 // A malloc'd block of memory for messages.
-class Block
+class CommsBlock
 {
 	// The message ID in network byte order
 	uint32_t id;
@@ -108,12 +109,12 @@ public:
 	constexpr static int nullSz = 1;
 
 	// An auto pointer to manage a Block reference
-	using Auto = LAutoPtr<Block, false, true /* use 'free' instead of 'delete' */>;
+	using Auto = LAutoPtr<CommsBlock, false, true /* use 'free' instead of 'delete' */>;
 	
 	// Creates a new block of the given size
 	static Auto New(uint32_t msgId, uint32_t bytes)
 	{
-		Auto b((Block*) malloc(sizeof(Block) + bytes));
+		Auto b((CommsBlock*) malloc(sizeof(CommsBlock) + bytes));
 		if (b)
 		{
 			b->id = htonl(msgId);
@@ -136,8 +137,8 @@ public:
 	Auto Clone()
 	{
 		Auto b;
-		auto bytes = sizeof(Block) + GetSize();
-		if (b.Reset((Block*) malloc(bytes)))
+		auto bytes = sizeof(CommsBlock) + GetSize();
+		if (b.Reset((CommsBlock*) malloc(bytes)))
 		{
 			memcpy(b.Get(), this, bytes);
 		}
@@ -191,13 +192,16 @@ public:
 #pragma pack(pop)
 #endif
 
-struct Connection
+class Connection
 {
+protected:
 	LAutoPtr<LSocket> sock;
+
+public:
 	LArray<char> readBuf;
 	ssize_t used = 0;
 	bool connected = false;
-	LStream *log = NULL;
+	LStream *log = nullptr;
 	
 	Connection(LStream *l) :
 		readBuf(8 << 10),
@@ -210,10 +214,30 @@ struct Connection
 		readBuf(8 << 10),
 		log(l)
 	{
+		if (sock)
+			sock->IsBlocking(false);
+	}
+
+	LSocket *GetSock() const
+	{
+		return sock;
+	}
+
+	bool SetSock(LAutoPtr<LSocket> s)
+	{
+		sock = s;
+		if (sock)
+			sock->IsBlocking(false);
+		else
+			return false;
+		return true;
 	}
 
 	bool Valid()
 	{
+		if (!sock)
+			return false;
+		LAssert(!sock->IsBlocking());
 		return sock && ValidSocket(sock->Handle());
 	}
 	
@@ -232,15 +256,21 @@ struct Connection
 		return p.NewLStr();
 	}
 
-	bool Read(std::function<void(Block*)> onMsg, std::function<void()> onDisconnect)
+	bool Read(std::function<void(CommsBlock*)> onMsg, std::function<void()> onDisconnect)
 	{
 		// Check for data
 		if (!sock ||
-			!sock->IsReadable())
+			!sock->IsReadable(10))
+		{
+			// LOG("Connection: not readable...\n");
 			return false;
+		}
+
+		// LOG("Connection: readable...\n");
 
 		// Read some data:
 		auto rd = sock->Read(readBuf.AddressOf() + used, readBuf.Length() - used);
+		// LOG("Connection: read=%i\n", (int)rd);
 		if (rd <= 0)
 		{
 			// printf("read disconnected: %i\n", (int)rd);
@@ -255,12 +285,12 @@ struct Connection
 		
 		// Check if there is a full msg
 		bool status = false;
-		while (used >= sizeof(Block))
+		while (used >= sizeof(CommsBlock))
 		{
 			// ie there is at least enough data to check the Block size
-			if (auto b = (Block*) readBuf.AddressOf())
+			if (auto b = (CommsBlock*) readBuf.AddressOf())
 			{
-				ssize_t bytes = b->GetSize() + sizeof(Block); // Total message size
+				ssize_t bytes = b->GetSize() + sizeof(CommsBlock); // Total message size
 				if (used >= bytes)
 				{
 					// LOG("read: got msg %i bytes\n", (int)bytes);
@@ -294,7 +324,7 @@ struct Connection
 						}
 						else
 						{					
-							LOG("read: not enough bytes for msg %i < %i, sizeof(Block)=%i\n", (int)used, (int)bytes, (int)sizeof(Block));
+							LOG("read: not enough bytes for msg %i < %i, sizeof(Block)=%i\n", (int)used, (int)bytes, (int)sizeof(CommsBlock));
 							LOG("read:\n%s\n", Dump((uint8_t*) readBuf.AddressOf(), used).Get());
 						}
 					}	
@@ -313,18 +343,35 @@ struct Connection
 		return status;
 	}
 	
-	bool Write(Block *b)
+	bool Write(CommsBlock *b)
 	{
 		if (!b)
 			return false;
 
-		size_t bytes = b->GetSize() + sizeof(Block);
-		char *ptr = (char*)b;
+		size_t bytes = b->GetSize() + sizeof(CommsBlock);
+		auto ptr = (char*)b;
 		size_t i = 0;
+		
+		if (sock->IsBlocking())
+		{
+			LAssert(!"shouldn't be blocking?");
+		}
 
 		while (i < bytes)
 		{
-			auto wr = sock->Write(ptr, bytes - i);
+			auto startTs = LCurrentTime();
+			auto wr = sock->Write(ptr, bytes - i
+				#ifdef LINUX
+				// Not sure why this is needed on a non-blocking socket, but otherwise it CAN block?!?
+				, MSG_DONTWAIT
+				#endif
+				);
+			auto elapsed = LCurrentTime() - startTs;
+			if (elapsed >= 100)
+			{
+				LgiTrace("%s:%i write too %i ms?\n", _FL, (int)elapsed);
+			}			
+			
 			if (wr > 0)
 			{
 				i += wr;
@@ -362,10 +409,10 @@ struct Endpoint
 	std::function< void(LString) > local;
 
 	// Create an end point message
-	Block::Auto MakeMsg(const char *Uid)
+	CommsBlock::Auto MakeMsg(const char *Uid)
 	{
 		auto data = LString::Fmt("%s\n%s", addr.Get(), Uid);
-		return Block::New(MCreateEndpoint, data);		
+		return CommsBlock::New(MCreateEndpoint, data);		
 	}
 
 	// Json IO
@@ -415,7 +462,7 @@ struct BlockInfo
 	uint64_t recentSendTs = 0;
 
 	// A block ptr owned by this object
-	Block *blk = NULL;
+	CommsBlock *blk = NULL;
 
 	~BlockInfo()
 	{
@@ -434,6 +481,13 @@ struct LCommsBusPriv :
 	constexpr static int UNSEEN_TIMEOUT		= SECONDS(30);
 	constexpr static int CONNECT_ATTEMPT	= SECONDS(1);
 	constexpr static int PEER_TIMEOUT		= SECONDS(5);
+
+	constexpr static const char *sHostname	= "hostname";
+	constexpr static const char *sIp		= "ip";
+	constexpr static const char *sPeers		= "peers";
+	constexpr static const char *sDirect	= "direct";
+	constexpr static const char *sEndpoints	= "endpoints";
+	constexpr static const char *sConnection = "connection";
 
 	struct ServerPeers
 	{
@@ -456,12 +510,6 @@ struct LCommsBusPriv :
 		// Peer info
 		struct LPeer : public Connection
 		{
-			constexpr static const char *sHostname = "hostname";
-			constexpr static const char *sIp = "ip";
-			constexpr static const char *sPeers = "peers";
-			constexpr static const char *sDirect = "direct";
-			constexpr static const char *sEndpoints = "endpoints";
-
 			// replicated state
 			LString hostName;
 			IpList ip4;
@@ -607,7 +655,7 @@ struct LCommsBusPriv :
 			return false;
 		}
 
-		void OnPeerTcp(LPeer *p, Block *blk)
+		void OnPeerTcp(LPeer *p, CommsBlock *blk)
 		{
 			switch (blk->GetId())
 			{
@@ -616,7 +664,7 @@ struct LCommsBusPriv :
 					LJson j(blk->data);
 
 					// find matching host and replicate state:
-					if (auto host = j.Get(LPeer::sHostname))
+					if (auto host = j.Get(LCommsBusPriv::sHostname))
 					{
 						if (auto p = peers.Find(host))
 						{
@@ -755,22 +803,13 @@ struct LCommsBusPriv :
 			return a;
 		}
 
-		LArray<LJson> EndpointsToJson()
-		{
-			LMutex::Auto lck(d, _FL);
-			LArray<LJson> a;
-			for (auto ep: d->endpoints)
-				a.Add(ep.ToJson());
-			return a;
-		}
-
 		// This is sent via UDP broadcast to peers during discovery
 		LString CreatePingData()
 		{
 			LJson j;
 
-			j.Set(LPeer::sIp, GetIps(interfaces));
-			j.Set(LPeer::sHostname, LHostName());
+			j.Set(LCommsBusPriv::sIp, GetIps(interfaces));
+			j.Set(LCommsBusPriv::sHostname, LHostName());
 
 			return j.GetJson();
 		}
@@ -780,10 +819,10 @@ struct LCommsBusPriv :
 		{
 			LJson j;
 
-			j.Set(LPeer::sIp, GetIps(interfaces));
-			j.Set(LPeer::sHostname, LHostName());
-			j.Set(LPeer::sPeers, PeersToJson());
-			j.Set(LPeer::sEndpoints, EndpointsToJson());
+			j.Set(LCommsBusPriv::sIp, GetIps(interfaces));
+			j.Set(LCommsBusPriv::sHostname, LHostName());
+			j.Set(LCommsBusPriv::sPeers, PeersToJson());
+			j.Set(LCommsBusPriv::sEndpoints, d->EndpointsToJson());
 
 			return j.GetJson();
 		}
@@ -797,7 +836,7 @@ struct LCommsBusPriv :
 				if (p->IsConnected())
 				{
 					// LOG("Sending MServerState to %s\n%s\n", p->hostName.Get(), state.Get());
-					if (auto blk = Block::New(MServerState, (uint32_t) state.Length()))
+					if (auto blk = CommsBlock::New(MServerState, (uint32_t) state.Length()))
 					{
 						memcpy(blk->data, state.Get(), blk->GetSize());
 						p->Write(blk);
@@ -846,6 +885,8 @@ struct LCommsBusPriv :
 		{
 			// Inter-server discovery...
 
+			// LOG("Server: start timeslice...\n");
+
 			// For inter-server connection discovery, get a list of interfaces to broadcast to
 			LArray<LSocket::Interface> curIntf;
 			LSocket::EnumInterfaces(curIntf);
@@ -856,10 +897,11 @@ struct LCommsBusPriv :
 			}
 			// sort so we can compare properly:
 			curIntf.Sort([](auto *a, auto *b) { return a->Ip4 - b->Ip4; });
-			
+
 			auto diff = GetIps(curIntf) != GetIps(interfaces);
 			bool debug = false;
 
+			//LOG("Server: timeslice diff=%i\n", diff);
 			if (diff)
 			{
 				interfaces = curIntf;
@@ -869,6 +911,8 @@ struct LCommsBusPriv :
 			// Check for incoming broadcasts:
 			if (listener)
 			{
+				// LOG("Server: listener timeslice..\n");
+
 				// Listen for packets...
 				#if USE_TRANSPORT
 					listener->TimeSlice();
@@ -882,8 +926,11 @@ struct LCommsBusPriv :
 							OnPeerUdp(ip, msg);
 					}
 				#endif
+
+				// LOG("Server: listener timeslice done.\n");
 			}
 
+			// LOG("Server: timeslice - delete peers?\n");
 			// Check for peers that we haven't seen in a while
 			auto now = LCurrentTime();
 			LString::Array deletedPeers;
@@ -901,16 +948,18 @@ struct LCommsBusPriv :
 				peers.Delete(host);
 
 			// Check peers for connections and data
+			// LOG("Server: timeslice - check peers for data\n");
 			for (auto it: peers)
 			{
 				LPeer *p = it.value;
 				if (p->IsConnected())
 				{
 					// Check for data on the connection:
+					// LOG("Server: timeslice - peer read..\n");
 					p->Read
 					(
 						// On message:
-						[this, p](Block *blk)
+						[this, p](CommsBlock *blk)
 						{
 							OnPeerTcp(p, blk);
 						},
@@ -925,19 +974,19 @@ struct LCommsBusPriv :
 				{
 					// Try and setup a TCP connection:
 					p->connectTs = now;
-					if (!p->sock)
+					if (!p->GetSock())
 					{
-						if (p->sock.Reset(new LSocket))
+						LAutoPtr<LSocket> sock(new LSocket);
+						if (p->SetSock(sock))
 						{
-							p->sock->SetTimeout(PEER_TIMEOUT);
-							p->sock->IsBlocking(false);
+							p->GetSock()->SetTimeout(PEER_TIMEOUT);
 						}
 					}
-					if (p->sock)
+					if (p->GetSock())
 					{
 						auto addr = LIpToStr(p->effectiveIp);
 						LOG("peer connecting: %s/%s\n", addr.Get(), p->hostName.Get());
-						auto result = p->sock->Open(addr, DEFAULT_COMMS_PORT);
+						auto result = p->GetSock()->Open(addr, DEFAULT_COMMS_PORT);
 						LOG("\tconnected: %i\n", result);
 						if (result)
 							SetDirty("newPeerTcpConnection");
@@ -945,6 +994,7 @@ struct LCommsBusPriv :
 				}
 			}
 
+			// LOG("Server: timeslice - broadcast udp..\n");
 			now = LCurrentTime();
 			if (now - broadcastTime >= 10000)
 			{
@@ -955,6 +1005,7 @@ struct LCommsBusPriv :
 
 			if (debug)
 			{
+				// LOG("Server: timeslice - debug state..\n");
 				if (d->commsState)
 					d->commsState->RunCallback([view=d->commsState, state=ServerStateData()]()
 					{
@@ -968,6 +1019,8 @@ struct LCommsBusPriv :
 						ServerStateData().Get());
 				*/
 			}
+			
+			// LOG("Server: timeslice - end..\n");
 		}
 	};
 
@@ -998,7 +1051,7 @@ struct LCommsBusPriv :
 		log(Log),
 		commsState(commsstate)
 	{
-		LAssert(sizeof(Block) == 9);
+		LAssert(sizeof(CommsBlock) == 9);
 		hostName = LHostName();
 		Run();
 	}
@@ -1008,7 +1061,16 @@ struct LCommsBusPriv :
 		Cancel();
 		WaitForExit();
 	}
-	
+
+	LArray<LJson> EndpointsToJson()
+	{
+		LMutex::Auto lck(this, _FL);
+		LArray<LJson> a;
+		for (auto ep: endpoints)
+			a.Add(ep.ToJson());
+		return a;
+	}
+
 	void NotifyState(LCommsBus::TState state)
 	{
 		LMutex::Auto lck(this, _FL);
@@ -1030,8 +1092,14 @@ struct LCommsBusPriv :
 		return LString::Fmt("%s:%s", isServer ? "server" : "client", GetUid());
 	}
 
-	void Que(Block::Auto &blk)
+	bool Que(CommsBlock::Auto &blk)
 	{
+		if (blk->GetSize() >= MAX_MSG_SIZE)
+		{
+			LAssert(!"block over size");
+			return false;
+		}
+	
 		Auto lck(this, _FL);
 
 		// LOG("%s que msg '%s'\n", Describe().Get(), blk->ToString().Get());
@@ -1040,16 +1108,11 @@ struct LCommsBusPriv :
 		info.firstSendTs = 0;
 		info.recentSendTs = 0;
 		info.blk = blk.Release();
-
-		/*
-		for (auto &i: writeQue)
-		{
-			LOG("	writeque: %s\n", i.blk->ToString().Get());
-		}
-		*/
+		
+		return true;
 	}
 
-	bool ServerSend(Block *blk, bool localOnly)
+	bool ServerSend(CommsBlock *blk, bool localOnly)
 	{
 		bool status = false;
 
@@ -1169,9 +1232,11 @@ struct LCommsBusPriv :
 						bool timedOut = info.firstSendTs && ((now - info.firstSendTs) >= SEND_TIMEOUT);
 						if (timedOut)
 						{
+							/*
 							LOG("Deleting expired msg: %s\n%s\n",
 								info.blk->FirstLine().Get(),
 								peers->ServerStateData().Get());
+							*/
 							writeQue.DeleteAt(i--, true);
 						}
 						else if (!info.firstSendTs || (now - info.recentSendTs) > RESEND_TIMEOUT)
@@ -1265,12 +1330,18 @@ struct LCommsBusPriv :
 		bool hasConnections = false;
 		NotifyState(LCommsBus::TDisconnectedServer);
 
+		// LOG("Server: starting loop...\n");
+
 		while (!IsCancelled())
 		{
+			// LOG("Server: peers timeslice...\n");
 			peers->Timeslice();
+			// LOG("Server: peers timeslice done.\n");
 
-			if (listen.IsReadable())
+			if (listen.IsReadable(10))
 			{
+				// LOG("Server: is readable...\n");
+
 				// Setup a new incoming TCP connection. Connections
 				// start off as a client, but may in fact be a server
 				// on a different host
@@ -1284,6 +1355,8 @@ struct LCommsBusPriv :
 					}
 					else if (!peers->IsLocalIp(remoteIp))
 					{
+						LOG("Server: New connection from %s...\n", LIpToStr(remoteIp).Get());
+
 						// server connection..
 						bool found = false;
 						for (auto it: peers->peers)
@@ -1301,7 +1374,7 @@ struct LCommsBusPriv :
 								}
 								else
 								{
-									p->sock = sock;
+									p->SetSock(sock);
 									found = true;
 									peers->SetDirty("acceptedServerTcp");
 	
@@ -1333,16 +1406,19 @@ struct LCommsBusPriv :
 						conn->OnConnect();
 						LOG("%s got new client connection, sock=" LPrintfSock "\n",
 							Describe().Get(),
-							conn->sock->Handle());
+							conn->GetSock()->Handle());
 					}
 				}
+
+				// LOG("Server: post accept...\n");
 			}
 			else
 			{
 				// Check connections for incoming data:
+				// LOG("Server: clients=%i\n", (int)clients.Length());
 				for (auto c: clients)
 				{
-					if (!ValidSocket(c->sock->Handle()))
+					if (!c->Valid())
 					{
 						clients.Delete(c);
 						delete c;
@@ -1461,8 +1537,12 @@ struct LCommsBusPriv :
 				hasConnections = connected;
 				NotifyState(hasConnections ? LCommsBus::TConnectedServer : LCommsBus::TDisconnectedServer);
 			}
+
+			// LOG("Server: post loop...\n");
+			// LSleep(500);
 		}
 		
+		LOG("Server: clients delete...\n");
 		clients.DeleteObjects();
 
 		LOG("%s closing listen port: " LPrintfSock "\n", Describe().Get(), listen.Handle());
@@ -1501,6 +1581,24 @@ struct LCommsBusPriv :
 		}
 	}
 
+	LString ClientStateData(Connection &conn)
+	{
+		LJson j;
+
+		j.Set(LCommsBusPriv::sHostname, LHostName());
+		j.Set(LCommsBusPriv::sEndpoints, EndpointsToJson());
+		if (conn.GetSock())
+		{
+			j.Set(LCommsBusPriv::sConnection, conn.GetSock()->IsOpen());
+			
+			char remoteIp[32] = {};
+			conn.GetSock()->GetRemoteIp(remoteIp);
+			j.Set("remoteIp", remoteIp);
+		}
+
+		return j.GetJson();
+	}
+
 	int Client()
 	{
 		LAutoPtr<LSocket> initSocket(new LSocket);
@@ -1514,7 +1612,7 @@ struct LCommsBusPriv :
 			if (!c.connected)
 			{
 				// Connect to the server...
-				c.connected = c.sock->Open("localhost", DEFAULT_COMMS_PORT);
+				c.connected = c.GetSock()->Open("localhost", DEFAULT_COMMS_PORT);
 				LOG("%s connected=%i, que=%i, ep=%i\n",
 					Describe().Get(),
 					c.connected,
@@ -1522,38 +1620,35 @@ struct LCommsBusPriv :
 					(int)endpoints.Length());
 				if (c.connected)
 				{
-					auto blk = Block::New(MUid, GetUid());
+					auto blk = CommsBlock::New(MUid, GetUid());
 					if (!c.Write(blk))
 					{
 						LOG("%s write failed.\n", Describe().Get());
 					}
-					else
+					else if (Lock(_FL))
 					{
 						// Also tell the server about our local endpoints
-						if (Lock(_FL))
+						LOG("clientConnect: has %i endpoints\n", (int)endpoints.Length());
+						for (auto &ep: endpoints)
 						{
-							LOG("clientConnect: has %i endpoints\n", (int)endpoints.Length());
-							for (auto &ep: endpoints)
+							if (ep.local)
 							{
-								if (ep.local)
+								LOG("clientConnect: send local ep %s\n", ep.addr.Get());
+								if (auto blk = ep.MakeMsg(GetUid()))
 								{
-									LOG("clientConnect: send local ep %s\n", ep.addr.Get());
-									if (auto blk = ep.MakeMsg(GetUid()))
-									{
-										auto sent = c.Write(blk);
-										if (!sent)
-											LOG("%s:%i - %s error sending endpoint %s, %i bytes\n'%s'\n",
-												_FL, Describe().Get(), ep.addr.Get(), blk->GetSize(), blk->GetBody().Get());
-									}
+									auto sent = c.Write(blk);
+									if (!sent)
+										LOG("%s:%i - %s error sending endpoint %s, %i bytes\n'%s'\n",
+											_FL, Describe().Get(), ep.addr.Get(), blk->GetSize(), blk->GetBody().Get());
 								}
 							}
-							Unlock();
 						}
+						Unlock();
 					}
 				}
 				else
 				{
-					Sleep(1000);
+					Sleep(2000);
 					if (connectErrs++ > 5)
 						// If there enough errors connecting to the server, maybe this object should be the server?
 						// Back out of the client code and restart as the server.
@@ -1606,12 +1701,24 @@ struct LCommsBusPriv :
 				if (Lock(_FL))
 				{
 					// Write any outgoing messages
+					auto startTs = LCurrentTime();
 					for (size_t i=0; i<writeQue.Length(); i++)
 					{
 						auto now = LCurrentTime();
+						if (now - startTs > 1000)
+						{
+							printf("%s:%i - writing taking a long time...\n", _FL);
+							break;
+						}
+
 						auto &info = writeQue[i];
 						if (!info.firstSendTs || (now - info.recentSendTs >= SEND_TIMEOUT))
 						{
+							if (info.blk->GetSize() >= MAX_MSG_SIZE)
+							{
+								LAssert(!"over size msg");
+							}
+							
 							if (c.Write(info.blk))
 							{
 								#if 0
@@ -1640,6 +1747,13 @@ struct LCommsBusPriv :
 			{
 				hasConnection = c.connected;
 				NotifyState(hasConnection ? LCommsBus::TConnectedClient : LCommsBus::TDisconnectedClient);
+
+				if (commsState)
+					commsState->RunCallback([view=commsState, state=ClientStateData(c)]()
+					{
+						view->Name(state);
+					},
+					_FL);
 			}
 		}		
 
@@ -1703,7 +1817,7 @@ bool LCommsBus::SendMsg(LString endPoint, LString data)
 	LAssert(endPoint);
 
 	auto bytes = (uint32_t) (endPoint.Length() + data.Length() + 1);
-	if (auto msg = Block::New(MSendMsg, bytes))
+	if (auto msg = CommsBlock::New(MSendMsg, bytes))
 	{
 		char *c = msg->data;
 		memcpy(c, endPoint.Get(), endPoint.Length());
@@ -1755,7 +1869,7 @@ bool LCommsBus::Listen(LString endPoint, std::function<void(LString)> cb)
 		!d->isServer) // The server doesn't need to tell anyone else about endpoints
 	{
 	    LOG("%s:%i - MCreateEndpoint queued: '%s'\n", _FL, msg.Get());
-		if (auto blk = Block::New(MCreateEndpoint, msg))
+		if (auto blk = CommsBlock::New(MCreateEndpoint, msg))
 		{
 			LOG("%s: queuing MCreateEndpoint\n", __FUNCTION__);
 			d->Que(blk);

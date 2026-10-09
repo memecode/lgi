@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Project TabSize="4" IndentSize="4" UseTabs="1" Makefile="./Makefile.linux" Exe="./lgiide" ShowWhitespace="0" BuildType="0" TargetType="0" TargetName="lgiide" Compiler="0">
 	<Node Name="Build" Type="1" Platforms="15" Id="1">
-		<Node File="./haiku/buildHaiku.py" Type="8" Platforms="15" />
+		<Node File="./haiku/buildHaiku.py" Type="8" Platforms="8" />
 		<Node File="./CMakeLists.txt" Type="8" Platforms="15" />
-		<Node File="./haiku/Makefile.haiku" Type="9" Platforms="15" />
-		<Node File="./linux/Makefile.linux" Type="9" Platforms="15" />
-		<Node File="./win/Makefile.windows" Type="9" Platforms="15" />
+		<Node File="./haiku/Makefile.haiku" Type="9" Platforms="8" />
+		<Node File="./linux/Makefile.linux" Type="9" Platforms="2" />
+		<Node File="./win/Makefile.windows" Type="9" Platforms="1" />
 		<Node File="./docs/notes.txt" Type="8" Platforms="15" />
 	</Node>
 	<Node Name="Lgi" Type="1" Platforms="15" Open="1" Id="7">
@@ -46,8 +46,11 @@
 			<Node File="./src/BreakPointStore.h" Type="3" Platforms="15" />
 			<Node File="./src/DebugContext.cpp" Type="2" Platforms="15" />
 			<Node File="./src/DebugContext.h" Type="3" Platforms="15" />
-			<Node File="./src/Debugger.cpp" Type="2" Platforms="15" />
-			<Node File="./src/Debugger.h" Type="3" Platforms="7" />
+			<Node File="./src/Debugger.h" Type="3" Platforms="15" />
+			<Node File="./src/gdb.cpp" Type="2" Platforms="15" />
+			<Node File="./src/gdb.h" Type="3" Platforms="15" />
+			<Node File="./src/lldb.cpp" Type="2" Platforms="15" />
+			<Node File="./src/lldb.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Dialogs" Type="1" Platforms="15" Open="0" Id="6">
 			<Node File="./src/WebFldDlg.h" Type="3" Platforms="15" />
@@ -109,11 +112,11 @@
 		<Node File="./src/MemDumpViewer.cpp" Type="2" Platforms="15" />
 		<Node File="./src/SpaceTabConv.cpp" Type="2" Platforms="15" />
 	</Node>
-	<Node File="../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
+	<Node File="..\Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
 	<Settings>
 		<General>
 			<Makefile>
-				<Windows>.\haiku\buildHaiku.py</Windows>
+				<Windows>.\win\LgiIde_vs22.sln</Windows>
 				<Linux>./linux/Makefile.linux</Linux>
 				<Mac>./mac/LgiIde.xcodeproj</Mac>
 				<Haiku>./haiku/Makefile.haiku</Haiku>
@@ -156,8 +159,6 @@ WINNATIVE</Release>
 					<Debug>/home/matthew/Code/Lgi/trunk/Ide/Code/IdeProjectSettings.cpp</Debug>
 				</All>
 			</Arguments>
-			<CCrossCompiler />
-			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -180,10 +181,9 @@ WINNATIVE</Release>
 				<Linux>
 					<Debug>../include/lgi/linux
 ../include/lgi/linux/Gtk
-../../../../codelib/openssl/include</Debug>
+</Debug>
 					<Release>../include/lgi/linux
 ../include/lgi/linux/Gtk
-../../../../codelib/openssl/include
 </Release>
 				</Linux>
 				<Haiku>
@@ -203,9 +203,11 @@ WINNATIVE</Release>
 				<Linux>
 					<Debug>magic
 pthread
+lldb
 `pkg-config --libs gtk+-3.0`</Debug>
 					<Release>magic
 pthread
+lldb
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
 				<Haiku>
@@ -259,25 +261,25 @@ _GNU_SOURCE</Release>
 			<SystemIncludes>
 				<Linux>
 					<Debug>`pkg-config --cflags gtk+-3.0`
-/usr/include/libssh</Debug>
+/usr/include/libssh
+/usr/include/lldb</Debug>
 					<Release>`pkg-config --cflags gtk+-3.0`
-/usr/include/libssh</Release>
+/usr/include/libssh
+/usr/include/lldb</Release>
 				</Linux>
 			</SystemIncludes>
-			<LibraryPaths>
-				<All />
-				<Linux />
-			</LibraryPaths>
-			<ApplicationIcon>
-				<Haiku>./resources/icon.hvif</Haiku>
-			</ApplicationIcon>
 			<Options>
 				<Linux>
 					<Debug>-Wno-format-truncation</Debug>
 					<Release>-Wno-format-truncation</Release>
 				</Linux>
-				<All />
 			</Options>
+			<ApplicationIcon>
+				<Haiku>./resources/icon.hvif</Haiku>
+			</ApplicationIcon>
+			<LibraryPaths />
+			<RPath />
+			<RPathLink />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -292,28 +294,16 @@ _GNU_SOURCE</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
-			<CommentFile />
-			<CommentFunction />
 		</Editor>
+		<Remote />
 		<Debug>
-			<Environment>
-				<All>SOME_TEST=testing</All>
-			</Environment>
-			<Arguments>
-				<All />
-			</Arguments>
-			<DebugAdmin />
-			<InitialDir />
+			<Debugger>
+				<All>gdb</All>
+			</Debugger>
+			<Arguments />
 		</Debug>
 		<Advanced>
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
-			<OtherMakefileRules />
+			<PostBuildCommands />
 		</Advanced>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
 	</Settings>
 </Project>

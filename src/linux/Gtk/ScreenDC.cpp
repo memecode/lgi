@@ -17,25 +17,20 @@ using namespace Gtk;
 class LScreenPrivate
 {
 public:
-	int x, y, Bits;
-	bool Own;
+	int x = 0, y = 0, Bits = 0;
+	bool Own = false;
 	LColour Col;
 	LRect Client;
+	int ConstAlpha = 255;
 
-	LView *View;
-	OsView v;
-	OsDrawable *d;
-	cairo_t *cr;
+	LView *View = nullptr;
+	OsView v = nullptr;
+	OsDrawable *d = nullptr;
+	cairo_t *cr = nullptr;
 	cairo_matrix_t matrix;
 
 	LScreenPrivate()
 	{
-		View = NULL;
-		x = y = Bits = 0;
-		Own = false;
-		v = 0;
-		d = NULL;
-		cr = NULL;
 		Client.ZOff(-1, -1);
 	}
 	
@@ -139,6 +134,34 @@ LString LScreenDC::Dump()
 	LString s;
 	s.Printf("LScreenDC size=%i,%i\n", d->x, d->y);
 	return s;
+}
+
+bool LScreenDC::GetVariant(const char *Name, LVariant &Value, const char *Array)
+{
+	switch (LStringToDomProp(Name))
+	{
+		case SurfaceConstAlpha:
+		{
+			Value = d->ConstAlpha;
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+bool LScreenDC::SetVariant(const char *Name, LVariant &Value, const char *Array)
+{
+	switch (LStringToDomProp(Name))
+	{
+		case SurfaceConstAlpha:
+		{
+			d->ConstAlpha = Value.CastInt32();
+			return true;
+		}
+	}
+	
+	return false;
 }
 
 bool LScreenDC::SupportsAlphaCompositing()
@@ -429,31 +452,31 @@ void LScreenDC::Line(int x1, int y1, int x2, int y2)
 	cairo_fill(d->cr);
 }
 
-void LScreenDC::Circle(double cx, double cy, double radius)
+void LScreenDC::Circle(float cx, float cy, float radius)
 {
 	cairo_arc(d->cr, cx, cy, radius, 0, 2 * LGI_PI);
 	cairo_stroke(d->cr);
 }
 
-void LScreenDC::FilledCircle(double cx, double cy, double radius)
+void LScreenDC::FilledCircle(float cx, float cy, float radius)
 {
 	cairo_arc(d->cr, cx, cy, radius, 0, 2 * LGI_PI);
 	cairo_fill(d->cr);
 }
 
-void LScreenDC::Arc(double cx, double cy, double radius, double start, double end)
+void LScreenDC::Arc(float cx, float cy, float radius, float start, float end)
 {
 	cairo_arc(d->cr, cx, cy, radius, start, end);
 	cairo_stroke(d->cr);
 }
 
-void LScreenDC::FilledArc(double cx, double cy, double radius, double start, double end)
+void LScreenDC::FilledArc(float cx, float cy, float radius, float start, float end)
 {
 	cairo_arc(d->cr, cx, cy, radius, start, end);
 	cairo_fill(d->cr);
 }
 
-void LScreenDC::Ellipse(double cx, double cy, double x, double y)
+void LScreenDC::Ellipse(float cx, float cy, float x, float y)
 {
 	cairo_save(d->cr);
 	cairo_translate(d->cr, cx, cy);
@@ -463,7 +486,7 @@ void LScreenDC::Ellipse(double cx, double cy, double x, double y)
 	cairo_restore(d->cr);
 }
 
-void LScreenDC::FilledEllipse(double cx, double cy, double x, double y)
+void LScreenDC::FilledEllipse(float cx, float cy, float x, float y)
 {
 	cairo_save(d->cr);
 	cairo_translate(d->cr, cx, cy);
@@ -563,8 +586,7 @@ void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 		auto Sub = Mem->GetSubImage(br.SrcClip);
 		if (Sub)
 		{
-			cairo_pattern_t *Pat = cairo_pattern_create_for_surface(Sub);
-			if (Pat)
+			if (auto Pat = cairo_pattern_create_for_surface(Sub))
 			{
 				/*
 				{
@@ -580,14 +602,23 @@ void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 						OriginX, OriginY);
 				}
 				*/
-
+				
 				cairo_save(d->cr);
 				cairo_translate(d->cr, br.DstClip.x1, br.DstClip.y1);
 				cairo_set_source(d->cr, Pat);
 		
 				cairo_new_path(d->cr);
 				cairo_rectangle(d->cr, 0, 0, br.DstClip.X(), br.DstClip.Y());
-				cairo_fill(d->cr);
+				if (d->ConstAlpha < 255)
+				{
+					cairo_clip(d->cr);
+					auto alpha = MAX(0, d->ConstAlpha) / 255.0;
+					cairo_paint_with_alpha(d->cr, alpha);
+				}
+				else
+				{
+					cairo_fill(d->cr);
+				}
 		
 				cairo_restore(d->cr);
 					
@@ -603,11 +634,6 @@ void LScreenDC::StretchBlt(LRect *d, LSurface *Src, LRect *s)
 }
 
 void LScreenDC::Bezier(int Threshold, LPoint *Pt)
-{
-	LAssert(0);
-}
-
-void LScreenDC::FloodFill(int x, int y, int Mode, COLOUR Border, LRect *Bounds)
 {
 	LAssert(0);
 }

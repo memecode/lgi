@@ -514,12 +514,21 @@ char *EncodeImapString(const char *s)
 {
 	LStringPipe p;
 	ssize_t Len = s ? strlen(s) : 0;
-	
+
 	while (s && *s)
 	{
-		int c = LgiUtf8To32((uint8*&)s, Len);
+		auto c = LgiUtf8To32((uint8_t*&)s, Len);
 
 		DoNextChar:
+		if (c == 0)
+		{
+			// This should never happen, but it did occur with gcc 13.3.0 in optimized code
+			// The inline version of LgiUtf8To32 didn't modify the 's' parameter like it should.
+			// Causing c to be 0 and s to still point to the START of the string.
+			printf("%s:%i warning: null char?\n", _FL);
+			break;
+		}
+		
 		if ((c >= ' ' && c < 0x80) ||
 			c == '\n' ||
 			c == '\t' ||
@@ -553,6 +562,7 @@ char *EncodeImapString(const char *s)
 			{
 				Str[i] = (Str[i]>>8) | ((Str[i]&0xff)<<8);
 			}
+			
 			ssize_t BinLen = Str.Length() << 1;
 			ssize_t BaseLen = BufferLen_BinTo64(BinLen);
 			char *Base64 = new char[BaseLen+1];
@@ -565,7 +575,6 @@ char *EncodeImapString(const char *s)
 					Bytes--;
 				}
 				Base64[Bytes] = 0;
-
 				p.Print("&%s-", Base64);
 				DeleteArray(Base64);
 			}
@@ -887,8 +896,17 @@ bool MailIMap::Read(LStreamI *Out, int Timeout)
 			}
 			else
 			{
-				if (End - St < Timeout - 20)
-					LgiTrace("%s:%i - IsReadable broken (again)\n", _FL);
+				if (!d->Cancel->IsCancelled() && End - St < Timeout - 20)
+				{
+					static uint64_t lastLogTs = 0;
+					auto now = LCurrentTime();
+					if (now - lastLogTs > 2000)
+					{
+						lastLogTs = now;
+						LgiTrace("%s:%i - IsReadable broken (again), Timeout=%i, Elapsed=%i\n",
+							_FL, Timeout, (int)(End - St));
+					}
+				}
 				return false;
 			}
 		}
@@ -1245,6 +1263,9 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 		if (Flags == MAIL_SSL)
 			v = "SSL";
 		Socket->SetValue(LSocket_Protocol, v);
+
+		if (d->Cancel)
+			Socket->SetCancel(d->Cancel);
 
 		// connect
 		if (Socket->Open(Remote, Port))
@@ -1661,14 +1682,13 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 									if (s) *s = 0;
 
 									int Nc = 1;
-									char *Realm = Map.Find("realm");
-									char DigestUri[256];
-									sprintf_s(DigestUri, sizeof(DigestUri), "imap/%s", Realm ? Realm : RemoteHost);
+									auto Realm = Map.Find("realm");
+									auto DigestUri = LString::Fmt("imap/%s", Realm ? Realm : RemoteHost);
 
 									LStringPipe p;
 									p.Print("username=\"%s\"", User);
 									p.Print(",nc=%08.8i", Nc);
-									p.Print(",digest-uri=\"%s\"", DigestUri);
+									p.Print(",digest-uri=\"%s\"", DigestUri.Get());
 									p.Print(",cnonce=\"%s\"", Cnonce);
 									char *Nonce = Map.Find("nonce");
 									if (Nonce)
@@ -1707,10 +1727,10 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 
 									// Calculate 
 									char a2[256];
-									if (Qop && (_stricmp(Qop, "auth-int") == 0 || _stricmp(Qop, "auth-conf") == 0))
-										sprintf_s(a2, sizeof(a2), "AUTHENTICATE:%s:00000000000000000000000000000000", DigestUri);
+									if (Qop && (Stricmp(Qop, "auth-int") == 0 || Stricmp(Qop, "auth-conf") == 0))
+										sprintf_s(a2, sizeof(a2), "AUTHENTICATE:%s:00000000000000000000000000000000", DigestUri.Get());
 									else
-										sprintf_s(a2, sizeof(a2), "AUTHENTICATE:%s", DigestUri);
+										sprintf_s(a2, sizeof(a2), "AUTHENTICATE:%s", DigestUri.Get());
 									MDStringToDigest(md5, a2);
 									char a2hex[256];
 									Hex(a2hex, sizeof(a2hex), (uchar*)md5, sizeof(md5));
@@ -2174,9 +2194,9 @@ int MailIMap::Fetch(bool ByUid,
 	}
 	
 	int Status = 0;
-	int Cmd = d->NextCmd++;
+	auto cmdRef = LString::Fmt("A%4.4i", d->NextCmd++);
 	LStringPipe p(256);
-	p.Print("A%4.4i %sFETCH ", Cmd, ByUid ? "UID " : "");
+	p.Print("%s %sFETCH ", cmdRef.Get(), ByUid ? "UID " : "");
 	p.Write(Seq, strlen(Seq));
 	p.Print(" (%s)\r\n", RequestParts);
 	LAutoString WrBuf(p.NewStr());
@@ -2193,20 +2213,17 @@ int MailIMap::Fetch(bool ByUid,
 		Buf.Length(1024 + (SizeHint>0?(uint32)SizeHint:0));
 		ssize_t Used = 0;
 		ssize_t MsgSize;
-		// int64 Start = LCurrentTime();
 		int64 Bytes = 0;
 		bool Done = false;
-		
-		// uint64 TotalTs = 0;
 
-		bool Blocking = Socket->IsBlocking();
+		auto Blocking = Socket->IsBlocking();
 		Socket->IsBlocking(false);
 
 		#if DEBUG_FETCH
 		LgiTrace("%s:%i - Fetch: Starting loop\n", _FL);
 		#endif
 
-		uint64 LastActivity = LCurrentTime();
+		auto LastActivity = LCurrentTime();
 		bool Debug = false;
 		while (!Done)
 		{
@@ -2328,7 +2345,7 @@ int MailIMap::Fetch(bool ByUid,
 					}
 					
 					// Call the callback function
-					if (Callback(this, atoi(Param), Parts, UserData))
+					if (Callback(this, Atoi<char,int>(Param), Parts, UserData))
 					{
 						#if DEBUG_FETCH
 						LgiTrace("%s:%i - Fetch: Callback OK\n", _FL);
@@ -2366,14 +2383,13 @@ int MailIMap::Fetch(bool ByUid,
 					auto t = LString(Line).SplitDelimit(" \r\n");
 					if (t.Length() >= 2)
 					{
-						char *r = t[0];
-						if (*r == 'A')
+						if (t[0] == cmdRef)
 						{
-							bool IsOk = !_stricmp(t[1], "Ok");
-							int Response = atoi(r + 1);
+							bool IsOk = t[1].Equals("Ok");
 							Log(Line, IsOk ? LSocketI::SocketMsgReceive : LSocketI::SocketMsgError);
-							if (Response == Cmd)
+							if (IsOk)
 							{
+								Status = true;
 								Done = true;
 								break;
 							}
@@ -2405,11 +2421,13 @@ int MailIMap::Fetch(bool ByUid,
 
 	Unlock();
 
+	/* No records is not really an error...
 	if (!Status && !Error->GetCode())
 	{
 		Error->Set(ENODATA);
 		Error->AddNote(_FL, "No records received.");
 	}
+	*/
 	return Status;
 }
 

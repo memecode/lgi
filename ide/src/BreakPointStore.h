@@ -3,6 +3,13 @@
 #include "lgi/common/List.h"
 #include "lgi/common/ListItemCheckBox.h"
 
+#define BP_DEBUG_LOG		1
+#ifdef BP_DEBUG_LOG
+	#define BP_LOG(...)		LgiTrace(__VA_ARGS__)
+#else
+	#define BP_LOG(...)
+#endif
+
 struct BreakPoint
 {
 	// User has enabled the break point in the UI
@@ -11,7 +18,7 @@ struct BreakPoint
 	bool Active = false;
 
 	// Use File:Line
-		LString File;
+		LString relFile;
 		ssize_t Line = 0;
 	// -or-
 		// A symbol reference
@@ -24,17 +31,19 @@ struct BreakPoint
 	BreakPoint(const char *sym)
 	{
 		Symbol = sym;
+		BP_LOG("%s:%i - create %s\n", _FL, toString().Get());
 	}
 		
-	BreakPoint(const char *file, ssize_t line)
+	BreakPoint(const char *RelFile, ssize_t line)
 	{
-		File = file;
+		relFile = RelFile;
 		Line = line;
+		BP_LOG("%s:%i - create %s\n", _FL, toString().Get());
 	}
 		
 	operator bool() const
 	{
-		if (File && Line > 0)
+		if (relFile && Line > 0)
 			return true;
 		if (Symbol)
 			return true;
@@ -45,7 +54,7 @@ struct BreakPoint
 	{
 		Enabled = b.Enabled;
 
-		File = b.File;
+		relFile = b.relFile;
 		Line = b.Line;
 			
 		Symbol = b.Symbol;
@@ -55,7 +64,7 @@ struct BreakPoint
 		
 	bool operator ==(const BreakPoint &b)
 	{
-		if (File == b.File &&
+		if (relFile == b.relFile &&
 			Line == b.Line &&
 			Symbol == b.Symbol)
 			return true;
@@ -65,15 +74,25 @@ struct BreakPoint
 
 	void Empty()
 	{
-		File.Empty();
+		relFile.Empty();
 		Line = 0;
 		Symbol.Empty();
+	}
+	
+	LString toString() const
+	{
+		if (Symbol)
+			return LString::Fmt("sym(%s)", Symbol.Get());
+		if (relFile && Line > 0)
+			return LString::Fmt("file(%s,%i)", relFile.Get(), Line);
+		return "invalid()";
 	}
 		
 	LString Save()
 	{
-		if (File && Line > 0)
-			return LString::Fmt("file://%s:" LPrintfSSizeT, File.Get(), Line);
+		BP_LOG("%s:%i - save %s\n", _FL, toString().Get());
+		if (relFile && Line > 0)
+			return LString::Fmt("file://%s:" LPrintfSSizeT, relFile.Get(), Line);
 		else if (Symbol)
 			return LString::Fmt("symbol://%s", Symbol.Get());
 			
@@ -86,13 +105,14 @@ struct BreakPoint
 		auto sep = s.Find("://");
 		if (sep < 0)
 			return false;
+
 		auto var = s(0, sep);
 		auto value = s(sep+3, -1);
 		if (var.Equals("file"))
 		{
 			auto p = value.SplitDelimit(":");
 			LAssert(p.Length() == 2);
-			File = p[0];
+			relFile = p[0];
 			Line = p[1].Int();
 		}
 		else if (var.Equals("symbol"))
@@ -105,6 +125,7 @@ struct BreakPoint
 			return false;
 		}
 			
+		BP_LOG("%s:%i - load %s\n", _FL, toString().Get());
 		return true;			
 	}
 };
@@ -125,6 +146,21 @@ public:
 		TBreakPointModified,
 	};
 
+	static const char *toString(TEvent e)
+	{
+		switch (e)
+		{
+			case TStoreDeleted:       return "StoreDeleted";
+			case TBreakPointAdded:    return "BreakPointAdded";
+			case TBreakPointDeleted:  return "BreakPointDeleted";
+			case TBreakPointEnabled:  return "BreakPointEnabled";
+			case TBreakPointDisabled: return "BreakPointDisabled";
+			case TBreakPointModified: return "BreakPointModified";
+		}
+
+		return nullptr;
+	}
+
 	using TStatusCb = std::function<void(bool)>;
 	using TCallback = std::function<void(TEvent,int)>;
 	using TLock = LMutex::Auto;
@@ -137,8 +173,8 @@ private:
 		BreakPoint obj;
 	};
 
-	LHashTbl<IntKey<int>, Bp*> BreakPoints;
-	LHashTbl<IntKey<int>, TCallback*> Callbacks;
+	LHashTbl<IntKey<int>, Bp*, true> BreakPoints;
+	LHashTbl<IntKey<int>, TCallback*, true> Callbacks;
 
 	template<typename T>
 	int AllocId(T &tbl)
@@ -210,9 +246,7 @@ public:
 
 	void SetUi(LList *lst)
 	{
-		ui = lst;
-
-		if (ui)
+		if ((ui = lst))
 		{
 			List<LListItem> items;
 
@@ -429,3 +463,4 @@ public:
 		return BreakPoints.Find(id);
 	}
 };
+

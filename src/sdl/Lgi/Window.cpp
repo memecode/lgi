@@ -162,7 +162,7 @@ void LWindow::_SetDynamic(bool i)
 	d->Dynamic = i;
 }
 
-void LWindow::_OnViewDelete()
+void LWindow::GtkViewDelete()
 {
 	if (d->Dynamic)
 	{

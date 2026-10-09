@@ -25,12 +25,12 @@ public:
 		typedef LArray<EnumValue> EnumArr;
 
 	private:
-		int CtrlId;
+		int CtrlId = ID_STATIC;
 		LAutoString Opt;
-		LVariantType Type;
+		LVariantType Type = GV_NULL;
 		LVariant Value;
-		LViewI *Ctrl;
-		LButton *Browse;
+		LViewI *Ctrl = nullptr;
+		LButton *Browse = nullptr;
 		LAutoPtr<EnumArr> Enum;
 
 		void Save();
@@ -40,7 +40,7 @@ public:
 		{
 			TYPE_FILE = 0x1,
 		};
-		int Flags;
+		int Flags = 0;
 
 		Item(int ctrlId, char *Txt, const char *opt, LVariantType type, LArray<EnumValue> *pEnum);
 		~Item();

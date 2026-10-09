@@ -399,7 +399,12 @@ static void EncodeRfc2047_Impl(	char *Input, size_t Length,
 				{
 					auto DetectCs = LUnicodeToCharset(utf8, Strlen(utf8.Get()), OutCharsets);
 					if (DetectCs)
-						Buf = (char*)LNewConvertCp(DestCs = DetectCs, Input, InCharset, Length);
+					{
+						if (!Stricmp(DetectCs, InCharset))
+							Buf = nullptr; // no-op
+						else
+							Buf = (char*)LNewConvertCp(DestCs = DetectCs, Input, InCharset, Length);
+					}
 				}
 			}
 		}

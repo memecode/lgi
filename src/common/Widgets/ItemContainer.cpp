@@ -1,6 +1,7 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/ItemContainer.h"
 #include "lgi/common/DisplayString.h"
+#include "lgi/common/Rect.h"
 #include "lgi/common/SkinEngine.h"
 #include "lgi/common/ScrollBar.h"
 #include "lgi/common/Edit.h"
@@ -25,6 +26,12 @@
 
 // Debug defines
 #define DEBUG_EDIT_LABEL					0
+#define DEBUG_RESIZE_LOGGING				0
+#if DEBUG_RESIZE_LOGGING
+	#define LOG_RESIZE(...)					printf(__VA_ARGS__)
+#else
+	#define LOG_RESIZE(...)
+#endif
 
 // Classes
 class LItemColumnPrivate
@@ -40,10 +47,10 @@ public:
 	COLUMN_FLAGS()
 	#undef _
 
-	LItemContainer *Parent = NULL;
+	LItemContainer *Parent = nullptr;
+	LSurface *cIcon = nullptr;
 	LString cName;
 	int cWidth = 0;
-	LSurface *cIcon = NULL;
 	int cImage = -1;
 	bool OwnIcon = false;
 	bool CanResize = true;
@@ -178,16 +185,22 @@ void LItemContainer::PaintColumnHeadings(LSurface *pDC)
 	}
 
 	// Draw other columns
-	for (int i=0; i<Columns.Length(); i++)
+	for (size_t i=0; i<Columns.Length(); i++)
 	{
-		LItemColumn *c = Columns[i];
-		if (c)
+		if (auto c = Columns[i])
 		{
-			cr.x1 = cx;
-			cr.x2 = cr.x1 + c->Width() - 1;
-			c->SetPos(cr);
-			c->OnPaint(ColDC, cr);
-			cx += c->Width();
+			if (auto vis = c->Display() != LCss::DispNone)
+			{
+				cr.x1 = cx;
+				cr.x2 = cr.x1 + c->Width() - 1;
+				c->SetPos(cr);
+				c->OnPaint(ColDC, cr);
+				cx += c->Width();
+			}
+			else
+			{
+				c->SetPos(LRect::EMPTY());
+			}
 		}
 		else LAssert(0);
 	}
@@ -241,8 +254,7 @@ LItemColumn *LItemContainer::AddColumn(const char *Name, int Width, int Where)
 
 	if (Lock(_FL))
 	{
-		c = new LItemColumn(this, Name, Width);
-		if (c)
+		if ((c = new LItemColumn(this, Name, Width)))
 		{
 			Columns.SetFixedLength(false);
 			Columns.AddAt(Where, c);
@@ -296,7 +308,7 @@ void LItemContainer::DragColumn(int Index)
 
 int LItemContainer::ColumnAtX(int x, LItemColumn **Col, int *Offset)
 {
-	LItemColumn *Column = NULL;
+	LItemColumn *Column = nullptr;
 	if (!Col) Col = &Column;
 
 	int Cx = GetImageList() ? 16 : 0;
@@ -304,7 +316,11 @@ int LItemContainer::ColumnAtX(int x, LItemColumn **Col, int *Offset)
 	for (c=0; c<Columns.Length(); c++)
 	{
 		*Col = Columns[c];
-		if (x >= Cx && x < Cx + (*Col)->Width())
+		if (*Col && (*Col)->Display() == LCss::DispNone)
+		{
+			continue;
+		}
+		else if (x >= Cx && x < Cx + (*Col)->Width())
 		{
 			if (Offset)
 				*Offset = Cx;
@@ -339,7 +355,10 @@ int LItemContainer::HitColumn(int x, int y, LItemColumn *&Resize, LItemColumn *&
 		
 		for (int n = 0; n < Columns.Length(); n++)
 		{
-			LItemColumn *c = Columns[n];
+			auto c = Columns[n];
+			if (c->Display() == LCss::DispNone)
+				continue;
+
 			cx += c->Width();
 			if (abs(x-cx) < 5)
 			{
@@ -396,10 +415,18 @@ void LItemContainer::GetColumnSizes(ColSizes &cs)
 	cs.ResizePx = 0;
 	for (int i=0; i<Columns.Length(); i++)
 	{
-		LItemColumn *c = Columns[i];
-		if (c->Resizable())
+		auto c = Columns[i];
+		if (!c->Visible())
 		{
-			ColInfo &Inf = cs.Info.New();
+			auto &Inf = cs.Info.New();
+			Inf.Col = c;
+			Inf.Idx = i;
+			Inf.ContentPx = 0;
+			Inf.WidthPx = 0;
+		}
+		else if (c->Resizable())
+		{
+			auto &Inf = cs.Info.New();
 			Inf.Col = c;
 			Inf.Idx = i;
 			Inf.ContentPx = c->GetContentSize();
@@ -411,6 +438,8 @@ void LItemContainer::GetColumnSizes(ColSizes &cs)
 		{
 			cs.FixedPx += c->Width();
 		}
+
+		LOG_RESIZE("col[%i] size: %s: %i, vis=%i\n", (int)i, c->Name(), c->Width(), c->Visible());
 	}
 }
 
@@ -479,15 +508,27 @@ void LItemContainer::ResizeColumnsToContent(int Border)
 			return AGrowPx - BGrowPx;
 		});
 		
-		for (int i=0; i<Sizes.Info.Length(); i++)
+		for (size_t i=0; i<Sizes.Info.Length(); i++)
 		{
-			ColInfo &Inf = Sizes.Info[i];
+			auto &Inf = Sizes.Info[i];
 			if (Inf.Col && Inf.Col->Resizable())
 			{
+				if (!Inf.Col->Visible())
+				{
+					LOG_RESIZE("col[%i] resize vis=0\n", Inf.Idx);
+					continue;
+				}
+				
+				int minWidPx = 0;
+				if (auto minWid = Inf.Col->MinWidth())
+					minWidPx = minWid.ToPx(X(), GetFont());
+					
 				if (ExpandPx > Sizes.ResizePx)
 				{
 					// Everything fits...
-					Inf.Col->Width(Inf.ContentPx + Border);
+					auto px = MAX(minWidPx, Inf.ContentPx + Border);
+					LOG_RESIZE("col[%i] resize vis=1, contentPx=%i\n", Inf.Idx, px);
+					Inf.Col->Width(px);
 				}
 				else
 				{
@@ -495,13 +536,16 @@ void LItemContainer::ResizeColumnsToContent(int Border)
 					double Ratio = Cx ? (double)Inf.ContentPx / Cx : 1.0;
 					if (Ratio < 0.25)
 					{
-						Inf.Col->Width(Inf.ContentPx + Border);
+						int px = MAX(minWidPx, Inf.ContentPx + Border);
+						LOG_RESIZE("col[%i] resize vis=1, ratio=%i\n", Inf.Idx, px);
+						Inf.Col->Width(px);
 					}
 					else
 					{					
 						// Need to scale to fit...
-						int Px = Inf.ContentPx * ExpandPx / Sizes.ResizePx;
-						Inf.Col->Width(Px + Border);
+						int px = MAX(minWidPx, (Inf.ContentPx * ExpandPx / Sizes.ResizePx) + Border);
+						LOG_RESIZE("col[%i] resize vis=1, scale=%i\n", Inf.Idx, px);
+						Inf.Col->Width(px);
 					}
 				}
 
@@ -629,7 +673,7 @@ int LItemContainer::OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
 
 void LItemContainer::SetDragItem(ItemDragFlags flags)
 {
-	if (DragItem = flags)
+	if ((DragItem = flags))
 	{
 		DropTarget(this);
 		DropTarget(true);
@@ -650,10 +694,6 @@ LDragColumn::LDragColumn(LItemContainer *list, int col)
 {
 	List = list;
 	Index = col;
-	Offset = 0;
-	#ifdef LINUX
-	Back = 0;
-	#endif
 	Col = List->ColumnAt(Index);
 	if (Col)
 	{
@@ -679,10 +719,9 @@ LDragColumn::LDragColumn(LItemContainer *list, int col)
 		{
 			SetExStyle(GetExStyle() | WS_EX_LAYERED | WS_EX_TRANSPARENT);
 		}
+		Attach(0);
 		
 		#endif
-
-		Attach(0);
 
 		#if WINNATIVE
 		
@@ -703,13 +742,23 @@ LDragColumn::LDragColumn(LItemContainer *list, int col)
 		
 		#elif defined(__GTK_H__)
 
-		Gtk::GtkWindow *w = WindowHandle();
-		if (w)
+		auto Display = Gtk::gdk_display_get_default();
+		auto DisplayName = Display ? Gtk::gdk_display_get_name(Display) : nullptr;
+		Embedded = DisplayName && !strncmp(DisplayName, "wayland", 7);
+		if (!Embedded)
 		{
-			gtk_window_set_decorated(w, FALSE);
-			gtk_widget_set_opacity(GtkCast(w, gtk_widget, GtkWidget), DRAG_COL_ALPHA / 255.0);
+			Attach(0);
+			if (auto w = WindowHandle())
+			{
+				gtk_window_set_decorated(w, FALSE);
+				gtk_widget_set_opacity(GtkCast(w, gtk_widget, GtkWidget), DRAG_COL_ALPHA / 255.0);
+			}
 		}
 		
+		#else
+
+		Attach(0);
+
 		#endif
 
 		LMouse m;
@@ -719,14 +768,24 @@ LDragColumn::LDragColumn(LItemContainer *list, int col)
 		List->PointToScreen(ListScrPos);
 		r.Offset(ListScrPos.x, ListScrPos.y);
 
-		SetPos(r);
-		Visible(true);
+		SetDragPos(r);
+		if (!Embedded)
+			Visible(true);
 	}
 }
 
 LDragColumn::~LDragColumn()
 {
-	Visible(false);
+	if (Embedded)
+	{
+		LRect r = GetPos();
+		r.Offset(-ListScrPos.x, -ListScrPos.y);
+		List->Invalidate(&r);
+	}
+	else
+	{
+		Visible(false);
+	}
 
 	if (Col)
 	{
@@ -734,6 +793,54 @@ LDragColumn::~LDragColumn()
 	}
 
 	List->Invalidate();
+}
+
+void LDragColumn::SetDragPos(LRect &r)
+{
+	if (Embedded)
+	{
+		LRect old = GetPos();
+		old.Offset(-ListScrPos.x, -ListScrPos.y);
+		List->Invalidate(&old);
+	}
+
+	SetPos(r, true);
+
+	if (Embedded)
+	{
+		LRect current = GetPos();
+		current.Offset(-ListScrPos.x, -ListScrPos.y);
+		List->Invalidate(&current);
+	}
+}
+
+void LDragColumn::PaintEmbedded(LSurface *pScreen)
+{
+	if (!Embedded || PaintingEmbedded || !pScreen || !Col)
+		return;
+
+	LRect source = Col->d->Pos;
+	source.y1 = 0;
+	source.y2 = List->Y() - 1;
+	LRect destination = GetPos();
+	destination.Offset(-ListScrPos.x, -ListScrPos.y);
+
+	LMemDC preview(_FL, source.X(), source.Y(), GdcD->GetColourSpace());
+	preview.SetOrigin(LPoint(source.x1, 0));
+	PaintingEmbedded = true;
+	Col->d->Drag = false;
+	List->OnPaint(&preview);
+	Col->d->Drag = true;
+	PaintingEmbedded = false;
+	preview.SetOrigin(LPoint(0, 0));
+
+	auto alphaVar = LDomPropToString(SurfaceConstAlpha);
+	LVariant previousAlpha;
+	pScreen->GetValue(alphaVar, previousAlpha);
+	LVariant dragAlpha = DRAG_COL_ALPHA;
+	pScreen->SetValue(alphaVar, dragAlpha);
+	pScreen->Blt(destination.x1, destination.y1, &preview);
+	pScreen->SetValue(alphaVar, previousAlpha);
 }
 
 #if LINUX_TRANS_COL
@@ -840,7 +947,7 @@ LRect LItemColumn::GetPos()
 	return d->Pos;
 }
 
-void LItemColumn::SetPos(LRect &r)
+void LItemColumn::SetPos(const LRect &r)
 {
 	d->Pos = r;
 }
@@ -877,32 +984,11 @@ void LItemColumn::Width(int i)
 	if (d->cWidth != i)
 	{
 		d->cWidth = i;
-		
-		// If we are attached to a list...
-		if (d->Parent)
-		{
-			/* FIXME
-			 int MyIndex = GetIndex();
-			// Clear all the cached strings for this column
-			for (List<LListItem>::I it=d->Parent->Items.Start(); it.In(); it++)
-			{
-				DeleteObj((*it)->d->Display[MyIndex]);
-			}
-
-			if (d->Parent->IsAttached())
-			{
-				// Update the screen from this column across
-				LRect Up = d->Parent->GetClient();
-				Up.x1 = d->Pos.x1;
-				d->Parent->Invalidate(&Up);
-			}
-			*/
-		}
+		// LgiTrace("%s:%i - resize col '%s' to %i\n", _FL, d->cName.Get(), i);
 
 		// Notify listener
-		auto p = d->Parent;
-		if (p)
-			p->SendNotify(LNotifyItemColumnsResized);
+		if (d->Parent)
+			d->Parent->SendNotify(LNotifyItemColumnsResized);
 	}
 }
 

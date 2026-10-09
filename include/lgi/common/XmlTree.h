@@ -6,6 +6,7 @@
 #include "lgi/common/HashTable.h"
 #include "lgi/common/RefCount.h"
 #include "lgi/common/Dom.h"
+#include "lgi/common/Progress.h"
 
 /// Runtime option: Don't encode entities
 #define GXT_NO_ENTITIES						0x0001
@@ -104,9 +105,9 @@ public:
 	LXmlTag
 	(
 		/// [Optional] Start with this name
-		const char *tag = 0,
+		const char *tag = nullptr,
 		/// [Optional] Use this allocator
-		LXmlAlloc *alloc = 0
+		LXmlAlloc *alloc = nullptr
 	);	
 	/// Construct the object
 	LXmlTag(const LXmlTag &t);	

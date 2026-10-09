@@ -1,5 +1,4 @@
-#ifndef _GEVENTTARGETTHREAD_H_
-#define _GEVENTTARGETTHREAD_H_
+#pragma once
 
 #include "lgi/common/Thread.h"
 #include "lgi/common/Mutex.h"
@@ -12,16 +11,17 @@
 class LgiClass LEventSinkMap : public LMutex
 {
 protected:
-	LHashTbl<IntKey<int>,LEventSinkI*> ToPtr;
-	LHashTbl<PtrKey<void*>,int> ToHnd;
+	LHashTbl<IntKey<int>,LEventSinkI*,true> ToPtr;
+	LHashTbl<PtrKey<void*>,int,true> ToHnd;
 
 public:
 	static LEventSinkMap Dispatch;
+	constexpr static int InvalidHandle = 0;
 
 	LEventSinkMap(int SizeHint = 0) :
         LMutex("LEventSinkMap"),
-		ToPtr(SizeHint),
-		ToHnd(SizeHint)
+		ToPtr(SizeHint, nullptr),
+		ToHnd(SizeHint, InvalidHandle)
 	{
 	}
 
@@ -34,9 +34,31 @@ public:
 		if (!s || !Lock(_FL))
 			return ToPtr.GetNullKey();
 
+		// If this trips, the table object is likely corrupted or compiled with
+		// a mismatched layout in the calling TU.
+		if (ToPtr.Length() == 0)
+		{
+			auto probe = ToPtr.Find(1);
+			if (probe != nullptr)
+			{
+				LgiTrace("%s:%i - LEventSinkMap corruption suspected: empty table but Find(1)=%p (this=%p, ToPtr=%p, ToHnd=%p, sizeof(ToPtr)=%zu, sizeof(*this)=%zu).\n",
+					_FL,
+					probe,
+					this,
+					&ToPtr,
+					&ToHnd,
+					sizeof(ToPtr),
+					sizeof(*this));
+				Unlock();
+				LAssert(!"LEventSinkMap::ToPtr returned non-null from an empty table.");
+				return ToPtr.GetNullKey();
+			}
+		}
+
 		// Find free handle...
 		int Hnd;
-		while (ToPtr.Find(Hnd = LRand(10000) + 1))
+		LEventSinkI *existing;
+		while ((existing = ToPtr.Find(Hnd = LRand(10000) + 1)))
 			;
 
 		// Add the new sink
@@ -146,11 +168,11 @@ public:
 		if (!Lock(_FL))
 			return false;
 		
-		LEventSinkI *s = (LEventSinkI*)ToPtr.Find(Hnd);
+		auto s = (LEventSinkI*)ToPtr.Find(Hnd);
 		bool Status = false;
 		if (s)
 		{
-			LCancel *c = dynamic_cast<LCancel*>(s);
+			auto c = dynamic_cast<LCancel*>(s);
 			if (c)
 			{
 				Status = c->Cancel(true);
@@ -390,7 +412,8 @@ public:
 			else if (s == LThreadEvent::WaitError)
 			{
 				LgiTrace("%s:%i - Event.Wait failed.\n", _FL);
-				break;
+				// Maybe we SHOULDN'T break here, but continue to try and process events?
+				// break;
 			}
 		}
 		
@@ -445,25 +468,5 @@ public:
 		}
 		return Status;
 	}
-
-	/* Use LMessage::AutoA
-	template<typename T>
-	bool ReceiveA(LAutoPtr<T> &Obj, LMessage *m)
-	{
-		return Obj.Reset((T*)m->A());
-	}
-	*/
-
-	
-	/* Use LMessage::AutoB
-	template<typename T>
-	bool ReceiveB(LAutoPtr<T> &Obj, LMessage *m)
-	{
-		return Obj.Reset((T*)m->B());
-	}
-	*/
 };
 
-
-
-#endif

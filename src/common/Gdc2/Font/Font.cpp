@@ -117,6 +117,7 @@
 #elif defined(__GTK_H__)
 
 	#include <pango/pangocairo.h>
+	#include <harfbuzz/hb.h>
 
 #elif MAC
 
@@ -342,6 +343,16 @@ CFDictionaryRef LFont::GetAttributes()
 	return d->Attributes;
 }
 #endif
+
+int LFont::GetId()
+{
+	return d->Id;
+}
+
+void LFont::SetId(int id)
+{
+	d->Id = id;
+}
 
 uchar *LFont::GetGlyphMap()
 {
@@ -675,7 +686,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 	
 		d->pSurface = pSurface;
 		GdiAutoDC localDC;
-		HDC hDC = pSurface ? pSurface->Handle() : localDC.Get();
+		HDC hDC = pSurface && pSurface->Handle() ? pSurface->Handle() : localDC.Get();
 		auto Sz = Size();
 		int Win32Height = 0;
 		if (Sz.Type == LCss::LenPt)
@@ -964,13 +975,25 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 			auto Sz = Size();
 			LString sFace = Face();
 			Gtk::pango_font_description_set_family(d->hFont, sFace);
+
+			auto size = Sz.Value * DpiScale;
+			if (!std::isfinite(size) || size < 0.0f)
+			{
+				LStackTrace("%s:%i - Invalid font size %fpt, %i dpi\n", _FL, Sz.Value, Dpi.x);
+				return false;
+			}
+
 			if (Sz.Type == LCss::LenPt)
-				Gtk::pango_font_description_set_size(d->hFont, Sz.Value * DpiScale * PANGO_SCALE);
+			{
+				Gtk::pango_font_description_set_size(d->hFont, size * PANGO_SCALE);
+			}
 			else if (Sz.Type == LCss::LenPx)
-				Gtk::pango_font_description_set_absolute_size(d->hFont, Sz.Value * DpiScale * PANGO_SCALE);
+			{
+				Gtk::pango_font_description_set_absolute_size(d->hFont, size * PANGO_SCALE);
+			}
 			else
 			{
-				LAssert(0);
+				LAssert(!"invalid font size type");
 				return false;
 			}
 			
@@ -1009,31 +1032,63 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 
 				Gtk::pango_font_metrics_unref(m);
 
-				#if 1
+				// auto startTs = LMicroTime();
 				auto fnt = pango_font_map_load_font(Gtk::pango_cairo_font_map_get_default(), EffectiveCtx, d->hFont);
 				if (fnt)
 				{
-					auto c = Gtk::pango_font_get_coverage(fnt, Gtk::pango_language_get_default());
-					if (c)
-					{
-						uint Bytes = (MAX_UNICODE + 1) >> 3;
-						if ((d->GlyphMap = new uchar[Bytes]))
-						{
-							memset(d->GlyphMap, 0, Bytes);
+					#if 1
 
-							for (int i=0; i<MAX_UNICODE; i++)
+						// new range coverage code (about 10x faster):
+						using namespace Gtk;
+						if (auto hb_font = pango_font_get_hb_font(fnt))
+						{
+							if (auto hb_face = hb_font_get_face(hb_font))
 							{
-								if (pango_coverage_get(c, i))
-									d->GlyphMap[i>>3] |= 1 << (i & 0x7);
+								if (auto unicode_set = hb_set_create())
+								{
+									hb_face_collect_unicodes(hb_face, unicode_set);
+									hb_codepoint_t start = HB_SET_VALUE_INVALID;
+									hb_codepoint_t end = HB_SET_VALUE_INVALID;
+
+									uint Bytes = (MAX_UNICODE + 1) >> 3;
+									if ((d->GlyphMap = new uchar[Bytes]))
+									{
+										memset(d->GlyphMap, 0, Bytes);
+										while (hb_set_next_range(unicode_set, &start, &end))
+										{
+											for (int i=start; i<=end; i++)
+												d->GlyphMap[i>>3] |= 1 << (i & 0x7);
+										}
+									}
+
+									hb_set_destroy(unicode_set);
+								}
 							}
 						}
-						
-						Gtk::pango_coverage_unref(c);
-					}
+					#else
+						// old per character coverage code:
+						auto c = Gtk::pango_font_get_coverage(fnt, Gtk::pango_language_get_default());
+						if (c)
+						{
+							uint Bytes = (MAX_UNICODE + 1) >> 3;
+							if ((d->GlyphMap = new uchar[Bytes]))
+							{
+								memset(d->GlyphMap, 0, Bytes);
+
+								for (int i=0; i<MAX_UNICODE; i++)
+								{
+									if (pango_coverage_get(c, i))
+										d->GlyphMap[i>>3] |= 1 << (i & 0x7);
+								}
+							}
+							
+							g_object_unref(c);
+						}
+					#endif
 					
 					g_object_unref(fnt);
 				}
-				#endif
+				// printf("%s:%i - font coverage: %.2gms\n", _FL, (double)(LMicroTime()-startTs)/1000.0);
 				
 				return true;
 			}
@@ -1334,6 +1389,37 @@ LAutoString LFont::ConvertToUnicode(char16 *Input, ssize_t Len)
 #include "lgi/common/GdiLeak.h"
 
 /////////////////////////////////////////////////////////////////////////////
+class AutoHdc
+{
+	bool own = false;
+	HDC hdc = nullptr;
+
+public:
+	AutoHdc(LSurface *surface)
+	{
+		if (surface)
+			hdc = surface->Handle();
+
+		if (!hdc)
+		{
+			hdc = CreateCompatibleDC(NULL);
+			own = true;
+		}
+	}
+
+	~AutoHdc()
+	{
+		if (own)
+			DeleteDC(hdc);
+	}
+
+	operator HDC() const
+	{
+		LAssert(hdc);
+		return hdc;
+	}
+};
+
 void LFont::_Measure(int &x, int &y, OsChar *Str, int Len)
 {
 	if (!Handle())
@@ -1343,7 +1429,7 @@ void LFont::_Measure(int &x, int &y, OsChar *Str, int Len)
 		return;
 	}
 
-	HDC hDC = GetSurface() ? GetSurface()->Handle() : CreateCompatibleDC(0);
+	AutoHdc hDC(GetSurface());
 	HFONT hOldFont = (HFONT) SelectObject(hDC, Handle());
 
 	SIZE Size;
@@ -1368,7 +1454,7 @@ int LFont::_CharAt(int x, OsChar *Str, int Len, LPxToIndexType Type)
 		return -1;
 
 	INT Fit = 0;
-	HDC hDC = CreateCompatibleDC(GetSurface()?GetSurface()->Handle():0);
+	AutoHdc hDC(GetSurface());
 	HFONT hOldFont = (HFONT) SelectObject(hDC, Handle());
 	if (hOldFont)
 	{

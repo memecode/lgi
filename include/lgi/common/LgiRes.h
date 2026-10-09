@@ -214,7 +214,7 @@ public:
 	bool Load(const char *FileName);
 	
 	/// Gets the filename used to load the object.
-	char *GetFileName();
+	const char *GetFileName();
 	
 	/// \returns the languages in the file.
 	LArray<LLanguageId> *GetLanguages() { return &Languages; }

@@ -6,6 +6,7 @@
 #include "lgi/common/vCard-vCal.h"
 #include "lgi/common/Json.h"
 #include "lgi/common/TextConvert.h"
+#include "lgi/common/Base64.h"
 #include "ScribeDefs.h"
 
 #define DEBUG_LOGGING			0
@@ -1246,8 +1247,6 @@ bool VCal::Import(LDataPropI *c, LStreamI *In)
 					Sect.Rule = Data;
 				else if (IsVar(Field, "RDATE"))
 					Sect.RecurDate = Data;
-
-				int asd=0;
 			}			
 			else if (IsVar(Field, "TZID"))
 			{

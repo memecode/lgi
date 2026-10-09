@@ -27,7 +27,6 @@
 ////////////////////////////////////////////////////////////////////////////
 LangDlg::LangDlg(LView *parent, List<LLanguage> &l, int Init)
 {
-	Lang = 0;
 	SetParent((parent) ? parent : MainWnd);
 	LRect r(0, 0, 260, 90);
 	SetPos(r);
@@ -83,7 +82,6 @@ int LangDlg::OnNotify(LViewI *Ctrl, const LNotification &n)
 StrLang::StrLang()
 {
 	Lang = "en";
-	Str = 0;
 }
 
 StrLang::~StrLang()
@@ -147,8 +145,6 @@ ResString::ResString(ResStringGroup *grp, int init_ref)
 	{
 		LAssert(0);
 	}
-
-	// LStackTrace("%p::ResString\n", this);
 }
 
 ResString::~ResString()
@@ -263,7 +259,7 @@ void ResString::Set(const char *p, LLanguageId Lang)
 		}
 	}
 
-	StrLang *s = GetLang(Lang);
+	auto s = GetLang(Lang);
 	if (!s)
 	{
 		Items.Insert(s = new StrLang);
@@ -546,9 +542,18 @@ bool ResString::GetFields(FieldTree &Fields)
 	{
 		for (int i=0; i<Group->GetLanguages(); i++)
 		{
-			if (Group->App()->ShowLang(Group->Lang[i]->Id))
+			auto id = Group->Lang[i]->Id;
+			auto english = !Stricmp(id, "en");
+			if (Group->App()->ShowLang(id))
 			{
-				Fields.Insert(this, DATA_STR, 202+i, Group->Lang[i]->Name, Group->Lang[i]->Name);
+				Fields.Insert(this,
+								DATA_STR,
+								202+i,
+								LString("lang:") + id, // Field name (prefixed so "id" doesn't clash with "Id")
+								Group->Lang[i]->Name, // Field label
+								-1,
+								false,
+								!english ? id : nullptr);
 			}
 		}
 	}
@@ -580,7 +585,7 @@ bool ResString::Serialize(FieldTree &Fields)
 			}
 			if (s)
 			{
-				Fields.Serialize(this, Group->Lang[i]->Name, s->GetStr());
+				Fields.Serialize(this, LString("lang:") + Id, s->GetStr());
 			}
 		}
 
@@ -637,15 +642,12 @@ const char *ResString::GetText(int i)
 			int LangIdx = i - 3;
 			if (LangIdx < Group->Visible.Length())
 			{
-				LLanguage *Info = Group->Visible[LangIdx];
-				if (Info)
+				if (auto Info = Group->Visible[LangIdx])
 				{
 					for (auto s: Items)
 					{
 						if (*s == Info->Id)
-						{
-							return (s->GetStr()) ? s->GetStr() : (char*)"";
-						}
+							return s->GetStr();
 					}
 				}
 			}
@@ -653,7 +655,7 @@ const char *ResString::GetText(int i)
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void ResString::OnMouseClick(LMouse &m)
@@ -1278,7 +1280,7 @@ int ResStringGroup::UniqueRef()
 	return n + 1;
 }
 
-int ResStringGroup::UniqueId(char *Define)
+int ResStringGroup::UniqueId(const char *Define)
 {
 	int n = 1;
 

@@ -11,14 +11,14 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "Screen.h"
-#include "Region.h"
+#include <Screen.h>
+#include <Region.h>
+#include <Bitmap.h>
 
 #include "lgi/common/Gdc2.h"
 #include "lgi/common/LgiString.h"
 #include "lgi/common/Variant.h"
 
-#include <Bitmap.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 #define ROUND_UP(bits) (((bits) + 7) / 8)
@@ -28,8 +28,8 @@ class LMemDCPrivate
 public:
 	LArray<LRect> Client;
 	LColourSpace CreateCs = CsNone;
-	BBitmap *Bmp = NULL;
-	BView *View = NULL;
+	BBitmap *Bmp = nullptr;
+	BView *View = nullptr;
 	int LockCount = 0;
 	bool debug = false;
 
@@ -356,18 +356,29 @@ LRect LMemDC::ClipRgn(LRect *Rgn)
 {
 	LRect Old = Clip;
 	
-	auto bounds = Bounds();
+	// Never allow the clip to escape the current client area set by SetClient.
+	auto limit = d->Client.Length() ? d->Client.Last() : Bounds();
 	if (Rgn)
 	{
 		Clip = *Rgn;
 		Clip.Offset(-OriginX, -OriginY);
-		Clip.Bound(&bounds);
+		Clip.Bound(&limit);
 		// printf("  ClipRgn=%s\n", Clip.GetStr());
 	}
 	else
 	{
-		Clip = bounds;
+		Clip = limit;
 		// printf("  unClipRgn=%s\n", Clip.GetStr());
+	}
+
+	// Keep the BView clip (used for text) in sync with the software clip.
+	if (auto view = Handle())
+	{
+		auto locked = view->LockLooper();
+		view->ConstrainClippingRegion(NULL);
+		view->ClipToRect(Clip);
+		if (locked)
+			view->UnlockLooper();
 	}
 	
 	return Old;

@@ -27,6 +27,11 @@
 #else
 	#define SSH_SLOG(...)
 #endif
+#if 1
+	#define SSH_LOG(...)			Log ? Log->Print(__VA_ARGS__) : printf(__VA_ARGS__)
+#else
+	#define SSH_LOG(...)
+#endif
 
 class LSsh
 {
@@ -38,6 +43,7 @@ class LSsh
 public:
 	enum HostType
 	{
+		SshNull,
 		SshKnownHost,
 		SshHostChanged,
 		SshHostOther,
@@ -59,12 +65,21 @@ public:
 		SshScp,
 	};
 	
+	struct THostInfo
+	{
+		HostType type = SshNull;
+		LString hostName;
+		LArray<uint8_t> certId;
+		LString msg;
+		LCancel *cancel = nullptr;
+	};
+	
 	constexpr static int NO_TIMEOUT = -1;
-	typedef std::function<CallbackResponse(const char *Msg, HostType Type)> KnownHostCallback;
+	typedef std::function<CallbackResponse(THostInfo &info)> KnownHostCallback;
 
 protected:
-	LCancel *CancelObj = NULL;
-	ssh_session Ssh = NULL;
+	LCancel *CancelObj = nullptr;
+	ssh_session Ssh = nullptr;
 	bool Connected = false;
 	bool OverideUnknownHost = false;
 	KnownHostCallback HostCb;

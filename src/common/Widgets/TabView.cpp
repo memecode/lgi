@@ -160,24 +160,38 @@ public:
 	}
 };
 
-struct LTabPagePriv
+class LTabPagePriv
 {
-	LTabPage *Tab;
-	bool NonDefaultFont;
 	LAutoPtr<LDisplayString> Ds;
 
-	LTabPagePriv(LTabPage *t) : Tab(t)
+public:
+	LTabPage *Tab = nullptr;
+	bool NonDefaultFont = false;
+
+	LTabPagePriv(LTabPage *t) 
+		: Tab(t)
 	{
-		NonDefaultFont = false;
+	}
+
+	void Reset(LDisplayString *newDs = nullptr)
+	{
+		Ds.Reset(newDs);
+		if (Ds)
+		{
+			LAssert(Ds->GetFont());
+		}
 	}
 
 	LDisplayString *GetDs()
 	{
-		auto Text = Tab->Name();
-		if (Text && !Ds)
+		if (Ds)
+			return Ds;
+
+		if (auto Text = Tab->Name())
 		{
-			LFont *f = NULL;
+			LFont *f = nullptr;
 			auto s = Tab->GetCss();
+			
 			NonDefaultFont = s ? s->HasFontStyle() : false;
 			if (NonDefaultFont)
 			{
@@ -413,19 +427,14 @@ void LTabView::Value(int64 i)
 				p->AttachChildren();
 				p->Visible(true);
 				
+				/*
 				for (auto c: p->IterateViews())
-				{
 					printf("TabView::Value(%i) c=%s pos=%s\n", (int)i, c->GetClass(), c->GetPos().GetStr());
-				}
+				*/
 			}
 
 			Invalidate();
 		}
-		else
-		{
-			LgiTrace("%s:%i - tab page not attached\n", _FL);
-			LAssert(!"probably meant to attach the tabs view first?");
-		}			
 
 		LNotification n(LNotifyValueChanged, _FL);
 		n.Int[0] = d->Current;
@@ -454,7 +463,6 @@ bool LTabView::Append(LTabPage *Page, int Where)
 		return false;
 
 	Page->TabCtrl = this;
-	Page->_Window = _Window;
 	AddView(Page, Where);
 
 	TabIterator tabs(Children);
@@ -483,12 +491,11 @@ LTabPage *LTabView::Append(const char *name, int Where)
 	if (Page)
 	{
 		Page->TabCtrl = this;
-		Page->_Window = _Window;
-		Page->SetParent(this);
 
 		if (IsAttached() && Children.Length() == 0)
 		{
 			Page->Attach(this);
+			Page->Visible(true); // Haiku's LTabPage ctor defaults to hidden
 			OnPosChange();
 		}
 		else
@@ -723,8 +730,7 @@ LRect &LTabView::CalcInset()
 	TabIterator Tabs(Children);
 	for (auto t : Tabs)
 	{
-		auto Ds = t->d->GetDs();
-		if (Ds)
+		if (auto Ds = t->d->GetDs())
 		{
 			TabTextY = MAX(TabTextY, Ds->Y());
 			auto Fnt = Ds->GetFont();
@@ -844,7 +850,7 @@ void LTabView::OnPaint(LSurface *pDC)
 		{
 			auto Tab = it[i];
 			auto Foc = Focus();
-			LDisplayString *ds = Tab->d->GetDs();
+			auto ds = Tab->d->GetDs();
 			bool First = i == 0;
 			bool Last = i == it.Length() - 1;
 			bool IsCurrent = d->Current == i;
@@ -979,7 +985,19 @@ void LTabView::OnPaint(LSurface *pDC)
 
 			#endif
 			
-			LFont *tf = ds->GetFont();
+			if (!ds)
+			{
+				LAssert(!"no display string for tab");
+				continue;
+			}
+
+			auto tf = ds->GetFont();
+			if (!tf)
+			{
+				LAssert(!"no font for tab");
+				continue;
+			}
+
 			int BaselineOff = (int) (d->TabsBaseline - tf->Ascent());
 			tf->Transparent(true);
 
@@ -1302,7 +1320,7 @@ const char *LTabPage::Name()
 bool LTabPage::Name(const char *name)
 {
 	bool Status = LView::Name(name);
-	d->Ds.Reset();
+	d->Reset();
 	if (GetParent())
 		GetParent()->Invalidate();
 	return Status;
@@ -1470,7 +1488,7 @@ void LTabPage::OnStyleChange()
 
 void LTabPage::SetFont(LFont *Font, bool OwnIt)
 {
-	d->Ds.Reset();
+	d->Reset();
 	Invalidate();
 	return LView::SetFont(Font, OwnIt);
 }

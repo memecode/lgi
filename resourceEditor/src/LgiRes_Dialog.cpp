@@ -14,8 +14,6 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Button.h"
-#include "lgi/common/Variant.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/DisplayString.h"
 #include "lgi/common/ClipBoard.h"
 #include "lgi/common/Menu.h"
@@ -274,6 +272,8 @@ ResDialogCtrl::ResDialogCtrl(ResDialog *dlg, const char *CtrlTypeName, LXmlTag *
 	Dlg = dlg;
 	Client.ZOff(-1, -1);
 	SelectStart.ZOff(-1, -1);
+	for (auto &Goober: Goobers)
+		Goober.ZOff(-1, -1);
 	
 	if (load)
 	{
@@ -530,6 +530,7 @@ bool ResDialogCtrl::Serialize(FieldTree &Fields)
 	Fields.Serialize(this, VAL_Enabled, e, true);
 	Fields.Serialize(this, VAL_Class, CssClass);
 	Fields.Serialize(this, VAL_Style, CssStyle);
+	// LgiTrace("%s:%i - %s style='%s'\n", _FL, GetStr()->GetDefine(), CssStyle.Get());
 
 	if (Fields.GetMode() == FieldTree::UiToObj ||
 		Fields.GetMode() == FieldTree::StoreToObj)
@@ -2790,7 +2791,7 @@ void ResDialog::Copy(bool Delete)
 				char16 *w = Utf8ToWide(s);
 				Clip.TextW(w);
 				Status = Clip.Text(s, false);
-				DeleteObj(w);
+				DeleteArray(w);
 				#endif
 			}
 
@@ -3798,7 +3799,8 @@ void ResDialog::CleanSymbols()
 bool ResDialog::Write(LXmlTag *t, SerialiseContext &Ctx)
 {
 	bool Status = false;
-	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children[0]);
+	
+	auto Ctrl = dynamic_cast<ResDialogCtrl*>(Children[0]);
 	if (Ctrl)
 	{
 		// duplicates symbols should have been removed before the 

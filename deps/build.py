@@ -16,6 +16,7 @@ useVsVer = 2022
 first = True
 clean = False
 installPaths = False
+haikuCrossCompile = False
 for arg in sys.argv:
     if arg == "--help":
         sys.exit(0)
@@ -25,6 +26,8 @@ for arg in sys.argv:
         installPaths = True
     elif arg == "2019":
         useVsVer = 2019
+    elif arg == "haiku":
+        haikuCrossCompile = True
 
 def checkPackage(pkg):
     p = subprocess.run(["dpkg", "-l", pkg], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -49,7 +52,9 @@ def hasPackage(pkg):
 
 arch = []
 gen = ["Ninja"] # the default is ninja, except for Windows, which uses Visual Studio
+
 configs = ["Debug", "Release"]
+
 singleConfig = True
 universalCheck = []
 universalArchs = []
@@ -69,22 +74,25 @@ elif platform.system() == "Darwin":
     universalCheck.append("lib/libjpeg.62.4.0.dylib")
     universalCheck.append("lib/libpng16$tag.dylib")
     universalCheck.append("lib/libz.dylib")
-    universalCheck.append("lib/liblunasvg.a")
+    universalCheck.append("lib/liblunasvg.dylib")
     universalArchs.append('x86_64')
     universalArchs.append('arm64')
 elif platform.system() == "Linux":
     subfolders = ["build-x64"]
-    packages = ["build-essential",
-                "mercurial",
-                "libmagic-dev", 
-                "libgtk3.0-dev",
-                "libgtk-3-dev",
-                "libgstreamer1.0-dev",
-                "libayatana-appindicator3-dev",
-                "libssh-dev",
-                "cmake",
-                "ninja-build",
-                "git" ]
+    if not haikuCrossCompile:
+        packages = ["build-essential",
+                    "mercurial",
+                    "libmagic-dev", 
+                    "libgtk3.0-dev",
+                    "libgtk-3-dev",
+                    "libgstreamer1.0-dev",
+                    "libayatana-appindicator3-dev",
+                    "libssh-dev",
+                    "cmake",
+                    "ninja-build",
+                    "git" ]
+    else:
+        packages = []
     needs = []
     print("Checking required packages:")
     for pkg in packages:
@@ -112,12 +120,21 @@ if not os.path.exists(depsFolder):
     os.mkdir(depsFolder)
 
 def remove_readonly(func, path, excinfo):
-    os.chmod(path, stat.S_IWRITE)
+    # Add write perms to the entry and its parent (needed to unlink from the dir),
+    # without clobbering read/execute bits that directories need to be traversed.
+    for p in (os.path.dirname(path), path):
+        try:
+            os.chmod(p, os.stat(p).st_mode | stat.S_IRWXU)
+        except OSError:
+            pass
     func(path)
 
 if clean:
-    shutil.rmtree(depsFolder, onerror=remove_readonly)
-    print("deleted:", depsFolder)
+    if os.path.exists(depsFolder):
+        shutil.rmtree(depsFolder, onerror=remove_readonly)
+        print("deleted:", depsFolder)
+    else:
+        print("nothing to delete:", depsFolder)
     sys.exit(0)
 
 if installPaths:
@@ -185,6 +202,10 @@ for n in range(len(subfolders)):
             args += ["-DBUILD_SHARED_LIBS=OFF"]
             args += ["-DCMAKE_INSTALL_MANDIR="+path]
             args += ["-DCMAKE_INSTALL_DOCDIR="+path]
+
+            if haikuCrossCompile:
+                args += ["-DCMAKE_TOOLCHAIN_FILE=../src/haiku/haiku-toolchain.cmake"]
+
             if len(extraCmakeArgs) > 0:
                 args += extraCmakeArgs
             args += [curFolder]
@@ -233,3 +254,11 @@ for n in range(len(subfolders)):
                     print("output:", output)
                     sys.exit(-1)
 
+if platform.system() == "Linux":
+    renameLink = os.path.join(curFolder, "libpng", "rename_link.py")
+    print("Running:", renameLink)
+    p = subprocess.run(["python3", renameLink, depsFolder], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    print("Output:", p.stdout.decode())
+    if p.returncode:
+        print("Error: rename_link.py failed.")
+        sys.exit(-1)

@@ -13,7 +13,7 @@ elseif (APPLE)
 		PROPERTIES
 			MACOSX_PACKAGE_LOCATION "Resources")
 elseif (LINUX)
-	set(APP_ICON Resources/icon128.png)
+	set(APP_ICON resources/icon128.png)
 endif()
 
 add_executable(LgiRes ${APP_TYPE}
@@ -32,22 +32,29 @@ add_executable(LgiRes ${APP_TYPE}
 	src/LgiRes_TableLayout.cpp
 	src/Search.cpp
 	src/ShowLanguages.cpp
+	src/translate/googleTranslate.cpp
 
 	${LGI_DIR}/src/common/Lgi/About.cpp
 	${LGI_DIR}/src/common/Lgi/DocApp.cpp
 	${LGI_DIR}/src/common/Lgi/LgiMain.cpp
 
-	Resources/resdefs.h
-	Resources/resource.h
+	resources/resdefs.h
+	resources/resource.h
 	${APP_ICON})
 
-target_include_directories(LgiRes PRIVATE Code Resources)
-target_link_libraries(LgiRes lgi libpng16)
+target_include_directories(LgiRes
+	PRIVATE
+		src
+		resources)
+
+target_link_libraries(LgiRes
+	PRIVATE
+		lgi)
 
 if (APPLE)
     macBundlePostBuild(LgiRes)
 else()
-	file(COPY ${CMAKE_CURRENT_LIST_DIR}/Resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+	file(COPY ${CMAKE_CURRENT_LIST_DIR}/resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
 set_target_properties(LgiRes PROPERTIES EXCLUDE_FROM_ALL TRUE)

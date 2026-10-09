@@ -29,7 +29,7 @@ public:
 	bool				Dirty;
 	GDocAppInstallMode	Mode;
 
-	LDocAppPrivate(LWindow *app, char *param)
+	LDocAppPrivate(LWindow *app, const char *param)
 	{
 		App = app;
 		OptionsParam = param;
@@ -84,7 +84,7 @@ public:
 				}
 				else
 				{
-					if (LGetSystemPath(LSP_APP_ROOT, p, sizeof(p)) &&
+					if (LGetSystemPath(LSP_APP_DATA, p, sizeof(p)) &&
 						!LDirExists(p))
 					{
 						FileDev->CreateFolder(p);
@@ -183,7 +183,7 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////////////////
 template <typename OptionsFmt>
-LDocApp<OptionsFmt>::LDocApp(const char *appname, LIcon icon, char *optsname)
+LDocApp<OptionsFmt>::LDocApp(const char *appname, LIcon icon, const char *optsname)
 {
 	Options = 0;
 	_LangOptsName = 0;
@@ -217,7 +217,7 @@ LDocApp<OptionsFmt>::LDocApp(const char *appname, LIcon icon, char *optsname)
 	if (icon)
 	{
 		#if defined WIN32
-			LWindowsClass *c = LWindowsClass::Create(d->AppName);
+			auto c = LWindowsClass::Create(d->AppName);
 			if (c)
 			{
 				if (icon < 0x10000)
@@ -226,7 +226,7 @@ LDocApp<OptionsFmt>::LDocApp(const char *appname, LIcon icon, char *optsname)
 					c->Class.hIcon = LoadIcon(LProcessInst(), (TCHAR*)(size_t)icon);
 			}
 		#else
-			SetIcon(icon);
+			SetIcon(icon, "Utility;TextEditor;");
 		#endif
 	}
 }

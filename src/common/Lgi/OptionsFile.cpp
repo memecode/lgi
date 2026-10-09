@@ -68,6 +68,17 @@ LOptionsFile::PortableType LOptionsFile::GuessMode()
 			a[2].Equals("apps"))
 			return DesktopMode;
 
+	#elif defined(LINUX)
+
+		// System install locations on typical distros (Ubuntu, Redhat, etc):
+		// /usr/bin, /usr/local/bin, /usr/lib*, /opt/*, /bin, /sbin, /snap/*
+		if (a[0].Equals("usr") ||
+			a[0].Equals("opt") ||
+			a[0].Equals("bin") ||
+			a[0].Equals("sbin") ||
+			a[0].Equals("snap"))
+			return DesktopMode;
+
 	#else
 
 		#warning "Impl me."
@@ -85,7 +96,7 @@ bool LOptionsFile::SetMode(PortableType mode, const char *BaseName)
 		mode = GuessMode();
 	Mode = mode;
 
-	if (!LGetSystemPath(Mode == DesktopMode ? LSP_APP_ROOT : LSP_APP_INSTALL, FullPath, sizeof(FullPath)))
+	if (!LGetSystemPath(Mode == DesktopMode ? LSP_APP_CONFIG : LSP_APP_INSTALL, FullPath, sizeof(FullPath)))
 	{
 		// LgiTrace("%s:%i - LGetSystemPath failed.\n", _FL);
 		return false;

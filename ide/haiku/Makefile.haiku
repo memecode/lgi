@@ -78,6 +78,7 @@ Source =	../src/common/Text/HtmlCommon.cpp \
 			../src/common/Lgi/Mdi.cpp \
 			../src/common/Net/Ftp.cpp \
 			../src/common/Lgi/About.cpp \
+			../src/common/Net/Ssh.cpp \
 			src/MissingFiles.cpp \
 			src/IdeFindInFiles.cpp \
 			src/ProjectNode.cpp \
@@ -94,11 +95,12 @@ Source =	../src/common/Text/HtmlCommon.cpp \
 			src/SimpleCppParser.cpp \
 			src/MemDumpViewer.cpp \
 			src/DocEdit.cpp \
-			src/Debugger.cpp \
 			src/IdeDoc.cpp \
 			src/History.cpp \
 			src/LgiUtils.cpp \
 			src/LgiIde.cpp \
+			src/gdb.cpp \
+			src/lldb.cpp \
 			../src/common/Text/Homoglyphs/HomoglyphsTable.cpp
 
 SourceC    := $(filter %.c,$(Source))
@@ -124,7 +126,7 @@ $(BuildDir)/%.o: %.cpp
 $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	mkdir -p $(BuildDir)
 	@echo Linking $(Target) [$(Build)]...
-	$(CPP) -Wl,-export-dynamic,-R. -o \
+	$(CPP) -Wl,-export-dynamic,-R. -Wl,--no-demangle -o \
 		$(Target) $(Objects) $(Libs)
 	/boot/home/code/lgi/trunk/src/haiku/hvif_to_rdef.py ./resources/icon.hvif $(Build)/lgiide.rdef lgiide
 	rc $(Build)/lgiide.rdef
@@ -132,13 +134,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	xres -o $(Target) $(Build)/lgiide.rsrc
 	@echo Done.
 
-../$(BuildDir)/liblgi$(Tag).so : ../../deps/build-x64-release/include/iconv.h \
-	../../deps/build-x64-release/include/jconfig.h \
-	../../deps/build-x64-release/include/jerror.h \
-	../../deps/build-x64-release/include/jmorecfg.h \
-	../../deps/build-x64-release/include/jpeglib.h \
-	../../deps/build-x64-release/include/lunasvg/lunasvg.h \
-	../../deps/build-x64-release/include/png.h \
+../$(BuildDir)/liblgi$(Tag).so : \
 	../include/lgi/common/App.h \
 	../include/lgi/common/Array.h \
 	../include/lgi/common/AutoPtr.h \

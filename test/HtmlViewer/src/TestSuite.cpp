@@ -1,5 +1,4 @@
 #include "lgi/common/Lgi.h"
-#include "lgi/common/Html.h"
 #include "lgi/common/List.h"
 #include "lgi/common/DateTime.h"
 #include "lgi/common/ClipBoard.h"
@@ -7,7 +6,6 @@
 #include "lgi/common/Box.h"
 #include "lgi/common/TextView3.h"
 #include "lgi/common/ProgressDlg.h"
-#include "lgi/common/Combo.h"
 #include "lgi/common/Net.h"
 #include "lgi/common/Filter.h"
 #include "lgi/common/ImageComparison.h"
@@ -19,8 +17,16 @@
 #include "lgi/common/TabView.h"
 #include "lgi/common/Tree.h"
 #include "lgi/common/TextLog.h"
-#include "../src/common/Text/HtmlPriv.h"
+#include "lgi/common/Uri.h"
 #include "lgi/common/Http.h"
+#include "lgi/common/ScrollBar.h"
+#include "lgi/common/ImageThreadManager.h"
+
+#include "lgi/common/Html.h"
+#include "../src/common/Text/HtmlPriv.h"
+
+#include "lgi/common/Html2.h"
+#include "../src/common/Text/HtmlPriv2.h"
 
 #include "resdefs.h"
 
@@ -38,8 +44,8 @@ enum Controls
 	ID_TAG_DETAIL
 };
 
-#ifdef _LHTML2_H
-using THtmlClass = Html2::LHtml2;
+#if 1
+using THtmlClass = Html2::LHtml;
 using THtmlTag = Html2::LTag;
 #else
 using THtmlClass = Html1::LHtml;
@@ -359,122 +365,6 @@ LHostFunc HtmlScriptContext::Methods[] =
 	LHostFunc(0, 0, 0),
 };
 
-class HtmlImageLoader : public LThread, public LMutex, public LCancel
-{
-	LArray<LDocumentEnv::LoadJob*> In;
-
-public:
-	HtmlImageLoader() :
-		LThread("HtmlImageLoader.Thread"),
-		LMutex("HtmlImageLoader.Mutex")
-	{
-		Run();
-	}
-	
-	~HtmlImageLoader()
-	{
-		Cancel(true);
-		while (!IsExited())
-			LSleep(1);
-	}
-	
-	void Add(LAutoPtr<LDocumentEnv::LoadJob> j)
-	{
-		if (Lock(_FL))
-		{
-			In.Add(j.Release());
-			Unlock();
-		}
-	}
-	
-	LAutoPtr<LSocketI> CreateSock(const char *Proto)
-	{
-		LAutoPtr<LSocketI> s;
-		if (Proto && !_stricmp(Proto, "https"))
-		{
-			SslSocket *ss;
-			s.Reset(ss = new SslSocket);
-			ss->SetSslOnConnect(false);
-		}
-		else
-			s.Reset(new LSocket);
-		
-		return s;
-	}
-	
-	int Main()
-	{
-		while (!IsCancelled())
-		{
-			LAutoPtr<LThreadJob> j;
-			if (Lock(_FL))
-			{
-				if (In.Length())
-				{
-					j.Reset(In[0]);
-					In.DeleteAt(0, true);
-				}
-				Unlock();
-			}
-			
-			LDocumentEnv::LoadJob *Job = dynamic_cast<LDocumentEnv::LoadJob*>(j.Get());
-			if (Job)
-			{
-				LUri u(Job->Uri);
-				if (u.IsFile())
-				{
-					// Local document?
-					if (Job->pDC.Reset(GdcD->Load(Job->Uri)))
-					{
-						LDocumentEnv *e = Job->Env;
-						if (e)
-						{
-							// LgiTrace("Loaded '%s' as image %ix%i\n", u.Path, j->pDC->X(), j->pDC->Y());
-							e->OnDone(j);
-						}
-					}
-				}
-				else
-				{
-					LMemQueue p(1024);
-					LError Err;
-					auto r = LGetUri(this, &p, &Err, Job->Uri);
-					if (r)
-					{
-						auto Hint = p.Peek(16);
-						auto Filter = LFilterFactory::New(u.sPath, FILTER_CAP_READ, (uchar*)Hint.Get());
-						if (Filter)
-						{
-							LAutoPtr<LSurface> Img(new LMemDC(_FL));
-							LFilter::IoStatus Rd = Filter->ReadImage(Img, &p);
-							if (Rd == LFilter::IoSuccess)
-							{
-								Job->pDC = Img;
-								if (Job->Env)
-								{
-									// LgiTrace("Loaded '%s' as image %ix%i\n", u.Path, j->pDC->X(), j->pDC->Y());
-									Job->Env->OnDone(j);
-								}
-								else
-								{
-									LgiTrace("%s:%i - No env for '%s'\n", _FL, u.sPath.Get());
-									LAssert(0);
-								}
-							}
-							else LgiTrace("%s:%i - Failed to read '%s'\n", _FL, u.sPath.Get());
-						}
-						else LgiTrace("%s:%i - Failed to find filter for '%s'\n", _FL, u.sPath.Get());
-					}
-					else LgiTrace("%s:%i - Failed to get '%s'\n", _FL, Job->Uri.Get());
-				}
-			}
-			else LSleep(10);
-		}
-	
-		return 0;
-	}
-};
-
 bool AppContext::ValidTag(THtmlTag *t)
 {
 	return Html->ValidTag(t);
@@ -491,7 +381,7 @@ class AppWnd :
     LTextView3 *Text = nullptr;
 	LString FilesFolder;
 	LAutoPtr<LScriptEngine> Script;
-	LAutoPtr<HtmlImageLoader> Worker;
+	LAutoPtr<LImageThreadManager> Worker;
 	LAutoPtr<LEmojiFont> Emoji;
 
 	LoadType GetContent(LAutoPtr<LoadJob> &j) override
@@ -526,12 +416,12 @@ class AppWnd :
 		}		
 	
 		#if HAS_IMAGE_LOADER
-		if (!Worker)
-			Worker.Reset(new HtmlImageLoader);
-		Worker->Add(j);
-		return LoadDeferred;
+			if (!Worker)
+				Worker.Reset(new LImageThreadManager);
+			Worker->Add(j);
+			return LoadDeferred;
 		#else
-		return LoadNotImpl; // GDefaultDocumentEnv::GetContent(j);
+			return LoadNotImpl;
 		#endif
 	}
 
@@ -613,6 +503,16 @@ public:
 					box->AddView(Html = new HtmlScriptContext(ID_HTML, this, this));
 				#endif
 
+				#if 1
+				if (auto css = Html->GetCss(true))
+				{
+					LCss::Len wid(LCss::LenPx, 800 + LScrollBar::SCROLL_BAR_SIZE);
+					css->Width(wid);
+					css->MinWidth(wid);
+					css->MaxWidth(wid);
+				}
+				#endif
+
 				Script.Reset(new LScriptEngine(this, Html, NULL));
 
 				if (Html)
@@ -622,16 +522,16 @@ public:
 				#endif
 				
 				#ifdef MAC
-				#define TIME_TO_DATE(ts) ((ts) / 1000)
+				    #define TIME_TO_DATE(ts) ((ts) / 1000)
 				#else
-				#define TIME_TO_DATE(ts) (ts)
+				    #define TIME_TO_DATE(ts) (ts)
 				#endif
 				
 				LFile::Path files(LSP_APP_INSTALL);
 				#if defined(MAC) && defined(_DEBUG)
-				files += "../../../../";
+				    files += "../../../../..";
 				#endif
-				files += "../files";
+				files += "files";
 				if (!files.Exists())
 					LgiTrace("%s:%i - files folder '%s' doesn't exist", _FL, files.GetFull().Get());
 				else
@@ -676,13 +576,12 @@ public:
 			}
 			
 			
-			LRect r(0, 0, 1200, 800);
+			LRect r(0, 0, 1400, 800);
 			SetPos(r);
 			MoveToCenter();
 			AttachChildren();
 			
 			Visible(true);
-			OnNotify(FindControl(ID_LIST), LNotifyItemSelect);
 		}
 		else LExitApp();
 	}

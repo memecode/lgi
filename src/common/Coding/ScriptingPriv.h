@@ -511,10 +511,9 @@ public:
 /// Scripting engine system functions
 class SystemFunctions : public LScriptContext
 {
-	LScriptEngine *Engine;
-	LStream *Log;
+	LStream *Log = nullptr;
 	#ifdef WINNATIVE
-	HANDLE Brk;
+	HANDLE Brk = nullptr;
 	#endif
 
 	LView *CastLView(LVariant &v);
@@ -525,7 +524,6 @@ public:
 
 	LStream *GetLog() override;
 	bool SetLog(LStream *log) override;
-	void SetEngine(LScriptEngine *Eng);	
 	
 	LString GetIncludeFile(const char *FileName) override
 	{

@@ -47,6 +47,12 @@
 		<String Ref="64" Cid="-1" Define="IDC_STATIC" en="&CtrlId:" />
 		<String Ref="65" Cid="11" Define="IDC_CTRL" />
 		<String Ref="67" Cid="2" Define="IDCANCEL" en="Cancel" />
+		<String Ref="69" Cid="69" Define="IDD_OPTIONS" en="Options" />
+		<String Ref="70" Cid="70" Define="IDC_70" />
+		<String Ref="71" Cid="-1" Define="IDC_STATIC" en="Google cloud project:" />
+		<String Ref="72" Cid="72" Define="ID_GOOGLE_CLOUD_PROJ" />
+		<String Ref="73" Cid="1" Define="IDOK" en="Ok" />
+		<String Ref="74" Cid="2" Define="IDCANCEL" en="Cancel" />
 	</string-group>
 	<Dialog pos="7,7,726,687" ref="23">
 		<ListView pos="7,7,706,594" ref="24">
@@ -114,7 +120,26 @@
 			</tr>
 			<tr>
 				<td addr="0,3" colspan="2" align="Max">
-					<Button pos="336,556,412,576" ref="67" toggle="0" />
+					<Button Pos="336,556,412,576" toggle="0" ref="67" />
+				</td>
+			</tr>
+		</TableLayout>
+	</Dialog>
+	<Dialog pos="8,8,392,206" ref="69">
+		<TableLayout pos="7,7,370,174" ref="70" cols="0.500,0.500" rows="0.500,0.500">
+			<tr>
+				<td addr="0,0" valign="Center">
+					<StaticText pos="21,21,111,48" ref="71" />
+				</td>
+				<td addr="1,0">
+					<EditBox Pos="189,21,342,41" ref="72" />
+				</td>
+			</tr>
+			<tr>
+				<td addr="0,1" />
+				<td addr="1,1" align="Max">
+					<Button Pos="217,112,279,132" toggle="0" ref="73" />
+					<Button Pos="224,134,286,154" toggle="0" ref="74" />
 				</td>
 			</tr>
 		</TableLayout>
@@ -133,7 +158,7 @@
 			</tr>
 			<tr>
 				<td addr="0,1" align="Max">
-					<Button pos="623,551,706,571" ref="29" toggle="0" />
+					<Button Pos="623,551,706,571" toggle="0" ref="29" />
 				</td>
 			</tr>
 		</TableLayout>
@@ -202,8 +227,8 @@
 			</tr>
 			<tr>
 				<td addr="0,12" align="Max">
-					<Button pos="0,372,55,392" ref="11" toggle="0" />
-					<Button pos="63,372,118,392" ref="12" toggle="0" />
+					<Button Pos="0,372,55,392" toggle="0" ref="11" />
+					<Button Pos="63,372,118,392" toggle="0" ref="12" />
 				</td>
 			</tr>
 		</TableLayout>
@@ -230,6 +255,8 @@
 			<String Ref="46" Cid="526" Define="IDM_PASTE" en="Paste" />
 			<String Ref="47" Cid="527" Define="IDM_MENU_527" />
 			<String Ref="48" Cid="528" Define="IDM_SHOW_SHORTCUTS" en="Show Shortcuts" />
+			<String Ref="66" Cid="501" Define="IDM_MENU_501" />
+			<String Ref="68" Cid="503" Define="ID_OPTIONS" en="Options" />
 		</string-group>
 		<submenu Ref="15">
 			<menuitem Ref="44" Shortcut="CtrlCmd+X" />
@@ -238,6 +265,8 @@
 			<menuitem Sep="1" />
 			<menuitem Ref="17" Shortcut="CtrlCmd+F" />
 			<menuitem Ref="30" Shortcut="F3" />
+			<menuitem Sep="1" />
+			<menuitem Ref="68" />
 		</submenu>
 		<submenu Ref="32">
 			<menuitem Ref="33" />

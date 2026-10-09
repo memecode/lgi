@@ -127,20 +127,25 @@ public:
 		{
 			case M_HAIKU_WND_EVENT:
 			{
-				LWindow *wnd = nullptr;
-				if (B_OK != message->FindPointer(LMessage::PropWindow, (void**)&wnd) ||
-					!wnd)
+				LViewI *view = nullptr;
+				if (B_OK != message->FindPointer(LMessage::PropWindow, (void**)&view) ||
+					!view)
 				{
 					LAssert(0);
 					printf("%s:%i - no view/wnd in msg.\n", _FL);
 					break;
 				}
 
-				if (!LView::LockHandler(wnd, LView::OpExists))
+				// Must check existence before any cast: LViewI is a virtual base.
+				if (!LView::LockHandler(view, LView::OpExists))
 				{
-					// printf("%s:%i - %p is recently deleted\n", _FL, wnd);
+					// printf("%s:%i - %p is recently deleted\n", _FL, view);
 					break;
 				}
+
+				auto wnd = dynamic_cast<LWindow*>(view);
+				if (!wnd)
+					break;
 				
 				int32_t event = -1;
 				if (message->FindInt32(LMessage::PropEvent, &event) != B_OK)

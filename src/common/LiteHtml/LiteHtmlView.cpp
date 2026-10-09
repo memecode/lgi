@@ -1,4 +1,3 @@
-
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Box.h"
 #include "lgi/common/Edit.h"
@@ -12,10 +11,13 @@
 #include "lgi/common/PopupNotification.h"
 #include "lgi/common/Path.h"
 #include "lgi/common/ClipBoard.h"
+#include "lgi/common/FontCache.h"
 
 #undef min
 #undef max
 #include "litehtml/html.h"
+#include "litehtml/document_container.h"
+#include "litehtml/document.h"
 
 #define NOT_IMPL \
 	LgiTrace("%s:%i - %s not impl.\n", _FL, __func__);
@@ -46,7 +48,7 @@ struct LiteHtmlViewPriv :
 		TCallback callback;
 
 		NetworkThread(LView *View, const char *Url, TCallback cb) :
-			LThread("LiteHtmlViewPriv.NetworkThread")
+			LThread("LiteHtml.Th")
 		{
 			view = View;
 			url = Url;
@@ -63,14 +65,15 @@ struct LiteHtmlViewPriv :
 		int Main()
 		{
 			LStringPipe p;
-			LString err;
+			LError err;
 
-			auto result = LgiGetUri(this, &p, &err, url);
+			auto result = LGetUri(this, &p, &err, url);
 			// LgiTrace("net(%s) = %i\n", url.Get(), result);			
 			view->RunCallback([result, data=p.NewLStr(), this]()
-			{
-				callback(result, data);
-			});
+				{
+					callback(result, data);
+				},
+				_FL);
 
 			return 0;
 		}
@@ -87,11 +90,14 @@ struct LiteHtmlViewPriv :
 	LiteHtmlView *view = NULL;
 	LWindow *wnd = NULL;
 	litehtml::document::ptr doc;
+	LString html;
 	LRect client;
 	LRect clip;
 	bool clipSet = false; // Need to update the clipping region on the DC
 	LString cursorName;
-	LHashTbl<IntKey<litehtml::uint_ptr>, LFont*> fontMap;
+	// LHashTbl<IntKey<litehtml::uint_ptr>, LFont*> fontMap;
+	LFontCache fontCache;
+	LHashTbl<IntKey<litehtml::uint_ptr>, int> fontRefs;
 	LHashTbl<ConstStrKey<char, false>, Image*> imageCache;
 
 	// Url history state
@@ -100,6 +106,7 @@ struct LiteHtmlViewPriv :
 
 	LiteHtmlViewPriv(LiteHtmlView *v) : view(v)
 	{
+		fontCache.SetAllocIds(true);
 	}
 
 	~LiteHtmlViewPriv()
@@ -118,7 +125,7 @@ struct LiteHtmlViewPriv :
 
 		// Clean up caches
 		imageCache.DeleteObjects();
-		fontMap.DeleteObjects();
+		// fontMap.DeleteObjects();
 
 		// Reset to go state...
 		Cancel(false);
@@ -159,10 +166,12 @@ struct LiteHtmlViewPriv :
 		auto pdc = (LSurface*)hdc;
 		if (clipSet)
 		{
+			/*
 			if (clip.Valid())
 				pdc->ClipRgn(&clip);
 			else
-				pdc->ClipRgn(NULL);
+				pdc->ClipRgn(nullptr);
+			*/
 			clipSet = false;
 		}
 		return pdc;
@@ -182,74 +191,81 @@ struct LiteHtmlViewPriv :
 		}
 	}
 
-	litehtml::uint_ptr create_font(	const char* faceName,
-									int size,
-									int weight,
-									litehtml::font_style italic,
-									unsigned int decoration,
+	litehtml::uint_ptr create_font(	const litehtml::font_description &descr,
+									const litehtml::document *doc,
 									litehtml::font_metrics *fm)
 	{
-		litehtml::uint_ptr hnd;
-		do 
-		{
-			hnd = LRand(10000);
-		}
-		while (fontMap.Find(hnd) != NULL);
+		const char *fontFamily = descr.family.c_str();
+		auto faceNames = LString(fontFamily).SplitDelimit(",");
 
-		auto faceNames = LString(faceName).SplitDelimit(",");
-
-		printf("create_font('%s', %i, %i, %i, %i)\n",
-			faceName,
-			size,
-			weight,
-			italic,
-			decoration);
-
-		LFont *fnt = new LFont;
-		fnt->Bold(weight > 400);
-		if (italic == litehtml::font_style_italic)
-			fnt->Italic(true);
-
+		LFont *fnt = nullptr;
 		for (auto face: faceNames)
 		{
-			bool status = fnt->Create(face, LCss::Len(LCss::LenPt, size) );
-			if (status)
+			fnt = fontCache.AddFont(face,
+									LCss::Len(LCss::LenPt, descr.size.value() * 0.7f),
+									descr.weight > 400							? LCss::FontWeightBold		: LCss::FontWeightNormal,
+									descr.style == litehtml::font_style_italic	? LCss::FontStyleItalic		: LCss::FontStyleInherit,
+									descr.decoration_line						? LCss::TextDecorUnderline	: LCss::TextDecorInherit);
+			if (fnt)
 				break;
-			LgiTrace("%s:%i - failed to create font(%s,%i)\n", _FL, faceName, size);
+
+			LgiTrace("%s:%i - failed to create font(%s,%g)\n",
+					_FL, face.Get(), descr.size.value());			
 		}
-		fontMap.Add(hnd, fnt);
+
+		int refs = fontRefs.Find(fnt->GetId());
+		fontRefs.Add(fnt->GetId(), ++refs);
+		printf("create_font('%s', %g, %i, %i, %i) = %i x %i\n",
+			fontFamily,
+			descr.size.value(),
+			descr.weight,
+			descr.style,
+			descr.decoration_line,
+			fnt->GetId(),
+			refs);
 
 		if (fm)
 		{
 			LDisplayString ds(fnt, "x");
 			fm->height = fnt->GetHeight();
-			fm->ascent = ceil(fnt->Ascent());
-			fm->descent = ceil(fnt->Descent());
+			fm->ascent = (float)ceil(fnt->Ascent());
+			fm->descent = (float)ceil(fnt->Descent());
 			fm->x_height = ds.Y();
 			fm->draw_spaces = false;
 
-			printf("\tht=%i as=%i de=%i x=%i\n", 
-				fm->height, fm->ascent, fm->descent, fm->x_height);
+			printf("\tht=%g as=%g de=%g x=%g\n",
+				(float)fm->height, (float)fm->ascent, (float)fm->descent, (float)fm->x_height);
 		}
 
-		return hnd;
+		LAssert(fnt->GetId() >= 0);
+		return fnt->GetId();
 	}
 
 	void delete_font(litehtml::uint_ptr hFont)
 	{
-		auto fnt = fontMap.Find(hFont);
-		if (fnt)
+		int refs = fontRefs.Find(hFont);
+		if (refs == 0)
 		{
-			delete fnt;
-			fontMap.Delete(hFont);
-		}		
+			LAssert(!"there should be 1 ref..?");
+			return;
+		}
+		fontRefs.Add(hFont, --refs);
+		if (refs == 0)
+		{
+			// last ref... delete:
+			auto result = fontCache.DeleteById(hFont);
+			LAssert(result);
+		}
 	}
 
-	int text_width(const char* text, litehtml::uint_ptr hFont)
+	litehtml::pixel_t text_width(const char* text, litehtml::uint_ptr hFont)
 	{
-		auto fnt = fontMap.Find(hFont);
+		auto fnt = fontCache.FontFromId(hFont);
 		if (!fnt)
+		{
+			LAssert(!"font object not found");
 			return 0;
+		}
 		
 		LDisplayString ds(fnt, text);
 		return ds.X();
@@ -258,13 +274,9 @@ struct LiteHtmlViewPriv :
 	void draw_text(litehtml::uint_ptr hdc, const char* text, litehtml::uint_ptr hFont, litehtml::web_color color, const litehtml::position& pos)
 	{
 		bool debug = Stricmp(text, "Open") == 0;
-		if (debug)
-		{
-			int asd=0;
-		}
 
 		auto pDC = Convert(hdc);
-		auto Fnt = fontMap.Find(hFont);
+		auto Fnt = fontCache.FontFromId(hFont);
 		if (!pDC || !Fnt)
 			return;
 
@@ -274,16 +286,15 @@ struct LiteHtmlViewPriv :
 		ds.Draw(pDC, pos.x, pos.y);
 	}
 	
-	int pt_to_px(int pt) const
+	litehtml::pixel_t pt_to_px(float pt) const
 	{
 		auto dpi = wnd->GetDpi();
-		int px = pt * dpi.x / 72;
-		return px;
+		return (float)(pt * dpi.x / 72.0f);
 	}
 
-	int get_default_font_size() const
+	litehtml::pixel_t get_default_font_size() const
 	{
-		return LSysFont->PointSize() * 1.3;
+		return (float)(LSysFont->PointSize() * 1.3);
 	}
 
 	const char *get_default_font_name() const
@@ -294,7 +305,7 @@ struct LiteHtmlViewPriv :
 	void draw_list_marker(litehtml::uint_ptr hdc, const litehtml::list_marker &marker)
 	{
 		auto pDC = Convert(hdc);
-		auto Fnt = fontMap.Find(marker.font);
+		auto Fnt = fontCache.FontFromId(marker.font);
 		if (!pDC)
 			return;
 
@@ -313,7 +324,7 @@ struct LiteHtmlViewPriv :
 				pDC->Box(marker.pos.x-2, marker.pos.y-2, marker.pos.x+2, marker.pos.y+2);
 				break;
 			default:
-				LgiTrace("%s:%i - draw_list_marker %i not impl\n", marker.marker_type);
+				LgiTrace("%s:%i - draw_list_marker %i not impl\n", _FL, marker.marker_type);
 				break;
 		}
 	}
@@ -425,7 +436,7 @@ struct LiteHtmlViewPriv :
 		if (hasRadius(layer.border_radius))
 		{
 			LPath path;
-			LMemDC mem(pos.X(), pos.Y(), System32BitColourSpace);
+			LMemDC mem(_FL, pos.X(), pos.Y(), System32BitColourSpace);
 			mem.Colour(0, 32);
 			mem.Rectangle();
 			draw_radius(path, pos.ZeroTranslate(), layer.border_radius);
@@ -447,7 +458,7 @@ struct LiteHtmlViewPriv :
 		auto pos = Convert(layer.border_box);
 		auto origin = pos.TopLeft();
 
-		LMemDC mem(pos.X(), pos.Y(), System32BitColourSpace);
+		LMemDC mem(_FL, pos.X(), pos.Y(), System32BitColourSpace);
 		LArray<LBlendStop> stops;
 		for (auto &in: gradient.color_points)
 		{
@@ -498,19 +509,19 @@ struct LiteHtmlViewPriv :
 
 	bool hasRadius(const litehtml::border_radiuses &r)
 	{
-		return	r.top_left_x != 0 ||
-				r.top_left_y != 0 ||
-				r.top_right_x != 0 ||
-				r.top_right_y != 0 ||
-				r.bottom_right_x != 0 ||
-				r.bottom_right_y != 0 ||
-				r.bottom_left_x != 0 ||
-				r.bottom_left_y != 0;
+		return	r.top_left_x.value() != 0.0f ||
+				r.top_left_y.value() != 0.0f ||
+				r.top_right_x.value() != 0.0f ||
+				r.top_right_y.value() != 0.0f ||
+				r.bottom_right_x.value() != 0.0f ||
+				r.bottom_right_y.value() != 0.0f ||
+				r.bottom_left_x.value() != 0.0f ||
+				r.bottom_left_y.value() != 0.0f;
 	}
 
-	void draw_radius(LPath &path, LRect &b, const litehtml::border_radiuses &rad)
+	void draw_radius(LPath &path, const LRect &b, const litehtml::border_radiuses &rad)
 	{
-		#define K(rad)	(0.5522847498 * (rad))
+		#define K(rad)	((float)(0.5522847498 * (rad).value()))
 
 		path.MoveTo(b.x1 + rad.top_left_x, b.y1);
 
@@ -549,17 +560,17 @@ struct LiteHtmlViewPriv :
 		{
 			LPath path;
 			auto b = Convert(draw_pos).ZeroTranslate();
-			LMemDC mem(draw_pos.width, draw_pos.height, System32BitColourSpace);
+			LMemDC mem(_FL, draw_pos.width, draw_pos.height, System32BitColourSpace);
 
 			mem.Colour(0, 32);
 			mem.Rectangle();
 			
 			path.SetFillRule(FILLRULE_ODDEVEN);
 			draw_radius(path, b, borders.radius);
-			b.x1 += borders.left.width;
-			b.y1 += borders.top.width;
-			b.x2 -= borders.right.width;
-			b.y2 -= borders.bottom.width;
+			b.x1 += (int)borders.left.width.value();
+			b.y1 += (int)borders.top.width.value();
+			b.x2 -= (int)borders.right.width.value();
+			b.y2 -= (int)borders.bottom.width.value();
 			draw_radius(path, b, borders.radius);
 
 			LSolidBrush brush(Convert(borders.top.color));
@@ -576,7 +587,7 @@ struct LiteHtmlViewPriv :
 			auto drawEdge = [&](const litehtml::border &b, int x, int y, int dx, int dy, int ix, int iy)
 			{
 				pDC->Colour(Convert(b.color));
-				for (int i=0; i<b.width; i++)
+				for (int i=0; i<(int)b.width.value(); i++)
 				{
 					pDC->Line(x, y, x+dx, y+dy);
 					x += ix;
@@ -622,12 +633,16 @@ struct LiteHtmlViewPriv :
 		cursorName = cursor;
 	}
 
-	void transform_text(litehtml::string& text, litehtml::text_transform tt)
+	void on_mouse_event(const litehtml::element::ptr &el, litehtml::mouse_event event)
+	{
+	}
+
+	void transform_text(std::string& text, litehtml::text_transform tt)
 	{
 		NOT_IMPL
 	}
 
-	void import_css(litehtml::string& text, const litehtml::string& url, litehtml::string& baseurl)
+	void import_css(std::string& text, const std::string& url, std::string& baseurl)
 	{
 		auto cssUrl = FullUri(url.c_str(), baseurl.c_str());
 		if (cssUrl)
@@ -646,13 +661,13 @@ struct LiteHtmlViewPriv :
 			else
 			{
 				LStringPipe out;
-				LString err;			
-				if (LgiGetUri(this, &out, &err, cssUrl))
+				LError err;
+				if (LGetUri(this, &out, &err, cssUrl))
 				{
 					text = out.NewLStr().Get();
 				}
 				else LgiTrace("%s:%i - error: LgiGetUri(%s)=%s (currentUrl=%s)\n",
-					_FL, cssUrl.Get(), err.Get(), CurrentUrl().Get());
+					_FL, cssUrl.Get(), err.GetMsg().Get(), CurrentUrl().Get());
 			}
 		}
 		else LgiTrace("%s:%i - error: no uri for loading css.\n", _FL);
@@ -675,6 +690,11 @@ struct LiteHtmlViewPriv :
 		out = litehtml::position(client.x1, client.y1, client.X(), client.Y());
 	}
 
+	void get_viewport(litehtml::position &viewport) const
+	{
+		viewport = litehtml::position(client.x1, client.y1, client.X(), client.Y());
+	}
+
 	litehtml::element::ptr create_element(	const char* tag_name,
 											const litehtml::string_map& attributes,
 											const std::shared_ptr<litehtml::document>& doc)
@@ -695,16 +715,16 @@ struct LiteHtmlViewPriv :
 		media.resolution = LScreenDpi().x;
 	}
 
-	void get_language(litehtml::string& language, litehtml::string& culture) const
+	void get_language(std::string& language, std::string& culture) const
 	{
 		NOT_IMPL
 	}
 
 	/*
-	litehtml::string resolve_color(const litehtml::string &color) const
+	std::string resolve_color(const std::string &color) const
 	{
 		NOT_IMPL
-		return litehtml::string();
+		return std::string();
 	}
 	*/
 };
@@ -785,6 +805,7 @@ bool LiteHtmlView::LoadCurrent()
 		auto html_text = LReadFile(u.LocalPath());
 		if (!html_text)
 			return false;
+		d->html = html_text;
 
 		d->client = GetClient();
 		d->doc = litehtml::document::createFromString(html_text.Get(), d);
@@ -799,6 +820,7 @@ bool LiteHtmlView::LoadCurrent()
 			{
 				if (data)
 				{
+					d->html = data;
 					d->doc = litehtml::document::createFromString(data.Get(), d);
 					OnNavigate(url);
 					Invalidate();
@@ -824,6 +846,32 @@ bool LiteHtmlView::SetUrl(LString url)
 	return LoadCurrent();
 }
 
+const char *LiteHtmlView::Name()
+{
+	return d->html;
+}
+
+void LiteHtmlView::SetCharset(const char *cs)
+{
+	LDocView::SetCharset(cs);
+	printf("set charset, cs=%s\n", cs);
+}
+
+bool LiteHtmlView::Name(const char *n)
+{
+	d->Empty();
+	d->html = n;
+	
+	auto cs = GetCharset();
+	printf("set name, cs=%s\n", cs);
+	
+	d->client = GetClient();
+	if (d->html)
+		d->doc = litehtml::document::createFromString(d->html.Get(), d);
+	Invalidate();
+	return d->doc != nullptr || d->html.IsEmpty();
+}
+
 void LiteHtmlView::OnPaint(LSurface *pDC)
 {
 	#ifdef WINDOWS
@@ -840,20 +888,21 @@ void LiteHtmlView::OnPaint(LSurface *pDC)
 		int r = d->doc->render(width);
 		if (r)
 		{
-			auto width = d->doc->content_width();
-			auto height = d->doc->content_height();
-			if (height > Y())
+			auto width = d->doc->width();
+			auto height = d->doc->height();
+			if (height.value() > Y())
 			{
 				SetScrollBars(false, true);
 				if (VScroll)
 				{
-					VScroll->SetRange(height);
+					VScroll->SetRange((int)height.value());
 					VScroll->SetPage(Y());
 				}
 			}
 
 			litehtml::position clip(0, 0, pDC->X(), pDC->Y());
-			d->doc->draw((litehtml::uint_ptr)pDC, 0, VScroll?-VScroll->Value():0, &clip);
+			d->doc->draw((litehtml::uint_ptr)pDC, 0,
+				(float)(VScroll ? -VScroll->Value() : 0), &clip);
 		}
 	}
 	else
@@ -862,7 +911,7 @@ void LiteHtmlView::OnPaint(LSurface *pDC)
 	}
 }
 
-int LiteHtmlView::OnNotify(LViewI *c, LNotification n)
+int LiteHtmlView::OnNotify(LViewI *c, const LNotification &n)
 {
 	// LgiTrace("OnNotify %i=%i, %i=%i\n", c->GetId(), IDC_VSCROLL, n.Type, LNotifyValueChanged);
 	if (c->GetId() == IDC_VSCROLL &&
@@ -879,7 +928,7 @@ bool LiteHtmlView::OnMouseWheel(double Lines)
 {
 	if (!VScroll)
 		return false;
-	VScroll->Value(VScroll->Value() + (Lines * LSysFont->GetHeight()));
+	VScroll->Value(VScroll->Value() + (int64)(Lines * LSysFont->GetHeight()));
 	return true;
 }
 
@@ -890,7 +939,11 @@ void LiteHtmlView::OnMouseClick(LMouse &m)
 
 	int64_t sx, sy;
 	GetScrollPos(sx, sy);
-	litehtml::position::vector redraw_boxes;
+	auto redraw_box = [this](const litehtml::position &pos)
+	{
+		auto rect = d->Convert(pos);
+		Invalidate(&rect);
+	};
 
 	LString lnk;
 	if (d->doc)
@@ -921,9 +974,9 @@ void LiteHtmlView::OnMouseClick(LMouse &m)
 	else if (m.Left())
 	{
 		if (m.Down())
-			d->doc->on_lbutton_down(m.x+sx, m.y+sy, m.x, m.y, redraw_boxes);
+			d->doc->on_lbutton_down((float)(m.x+sx), (float)(m.y+sy), (float)m.x, (float)m.y, redraw_box);
 		else
-			d->doc->on_lbutton_up(m.x+sx, m.y+sy, m.x, m.y, redraw_boxes);
+			d->doc->on_lbutton_up((float)(m.x+sx), (float)(m.y+sy), (float)m.x, (float)m.y, redraw_box);
 	}
 	else if (m.Button1())
 	{
@@ -936,7 +989,6 @@ void LiteHtmlView::OnMouseClick(LMouse &m)
 			HistoryForward();
 	}
 
-	d->UpdateScreen(redraw_boxes);
 }
 
 void LiteHtmlView::OnMouseMove(LMouse &m)
@@ -946,10 +998,12 @@ void LiteHtmlView::OnMouseMove(LMouse &m)
 
 	int64_t sx, sy;
 	GetScrollPos(sx, sy);
-	litehtml::position::vector redraw_boxes;
-	d->doc->on_mouse_over(m.x+sx, m.y+sy, m.x, m.y, redraw_boxes);
-
-	d->UpdateScreen(redraw_boxes);
+	auto redraw_box = [this](const litehtml::position &pos)
+	{
+		auto rect = d->Convert(pos);
+		Invalidate(&rect);
+	};
+	d->doc->on_mouse_over((float)(m.x+sx), (float)(m.y+sy), (float)m.x, (float)m.y, redraw_box);
 }
 
 LMessage::Result LiteHtmlView::OnEvent(LMessage *Msg)

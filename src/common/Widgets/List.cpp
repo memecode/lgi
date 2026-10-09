@@ -2,7 +2,7 @@
 **		FILE:			LList.cpp
 **		AUTHOR:			Matthew Allen
 **		DATE:			14/2/2000
-**		DESCRIPTION:	Lgi self-drawn listbox
+**		DESCRIPTION:	Lgi owner-drawn listbox
 **
 **		Copyright (C) 2000 Matthew Allen
 **				fret@memecode.com
@@ -97,6 +97,7 @@ public:
 class LListItemPrivate
 {
 public:
+	bool Destroying = false;
 	bool Selected = false;
 	bool Visible = true;
 	int ListItem_Image = -1;
@@ -107,6 +108,7 @@ public:
 
 	~LListItemPrivate()
 	{
+		Destroying = true;
 		Cols.DeleteObjects();
 		EmptyStrings();
 		EmptyDisplay();
@@ -129,6 +131,12 @@ LListItemColumn::LListItemColumn(LListItem *item, int col)
 	_Column = col;
 	_Item = item;
 	_Item->d->Cols.Insert(this);
+}
+
+LListItemColumn::~LListItemColumn()
+{
+	if (_Item && _Item->d && !_Item->d->Destroying)
+		_Item->d->Cols.Delete(this);
 }
 
 LList *LListItemColumn::GetList()
@@ -426,18 +434,23 @@ LDisplayString *LListItem::GetDs(int Col, int FitTo)
 {
 	if (!d->Display[Col])
 	{
-		LFont *f = GetFont();
-		if (!f && Parent) f = Parent->GetFont();
-		if (!f) f = LSysFont;
+		auto f = GetFont();
+		if (!f && Parent)
+			f = Parent->GetFont();
+		if (!f)
+			f = LSysFont;
 
-		const char *Text = d->Str[Col] ? d->Str[Col] : GetText(Col);
+		auto Text = d->Str[Col] ? d->Str[Col] : GetText(Col);
 		LAssert((NativeInt)Text != 0xcdcdcdcd &&
-				  (NativeInt)Text != 0xfdfdfdfd);
+		        (NativeInt)Text != 0xfdfdfdfd);
+
+		if (!LIsUtf8(Text))
+			Text = "#errInvalidUtf8";
+
 		d->Display[Col] = new LDisplayString(f, Text?Text:(char*)"");
+
 		if (d->Display[Col] && FitTo > 0)
-		{
 			d->Display[Col]->TruncateWithDots(FitTo);
-		}
 	}
 	return d->Display[Col];
 }
@@ -1636,8 +1649,15 @@ void LList::OnMouseClick(LMouse &m)
 							UpdateAllItems();
 						}
 
-						DragCol->Quit();
-						DragCol = NULL;
+						if (DragCol->IsEmbedded())
+						{
+							DeleteObj(DragCol);
+						}
+						else
+						{
+							DragCol->Quit();
+							DragCol = NULL;
+						}
 					}
 
 					Invalidate();
@@ -1887,7 +1907,7 @@ void LList::OnMouseMove(LMouse &m)
 				if (r.x2 > X()-1) r.Offset((X()-1)-r.x2, 0);
 
 				r.Offset(p.x, p.y); // back to screen co-ord
-				DragCol->SetPos(r, true);
+				DragCol->SetDragPos(r);
 				r = DragCol->GetPos();
 			}
 			break;
@@ -2711,6 +2731,9 @@ void LList::OnPaint(LSurface *pDC)
 	}
 
 	Unlock();
+
+	if (DragCol && DragCol->IsEmbedded())
+		DragCol->PaintEmbedded(pDC);
 
 	#if LList_ONPAINT_PROFILE
 	int64 End = LCurrentTime();

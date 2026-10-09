@@ -198,8 +198,6 @@ public:
 	{
 		if (SpellConfig)
 			delete_aspell_config(SpellConfig);
-			
-		LgiTrace("%s:%i - %p::~ASpell(), SpellParams:%p\n", _FL, this, SpellParams.Get());
 	}
 
 	virtual void OnMissingDictionary() {}
@@ -217,7 +215,7 @@ public:
 		if (SpellParams->OptionsPath)
 			LMakePath(Dir, sizeof(Dir), SpellParams->OptionsPath, "..");
 		else
-			LGetSystemPath(SpellParams->IsPortable ? LSP_APP_INSTALL : LSP_APP_ROOT, Dir, sizeof(Dir));
+			LGetSystemPath(SpellParams->IsPortable ? LSP_APP_INSTALL : LSP_APP_DATA, Dir, sizeof(Dir));
 		LMakePath(Dir, sizeof(Dir), Dir, "Aspell");
 		AspellPath = Dir;
 		CheckCreateFolder(AspellPath);		
@@ -692,7 +690,7 @@ public:
 			Out.SetSize(0);
 
 			int Status = 0;
-			LHttp::ContentEncoding Enc;
+			LHttp::TContentEncoding Enc;
 			if (!Http.Get(InUrl, NULL, &Status, &Out, &Enc, NULL))
 			{
 				Out.Close();
@@ -823,7 +821,7 @@ public:
 			}
 			else if (!_stricmp(Ext, "cwl"))
 			{
-				LString Out = File;
+				LString Out = File.Get();
 				auto Dot = Out.RFind(".");
 				if (Dot < 0)
 					return false;
@@ -839,6 +837,7 @@ public:
 				else
 				{
 					LgiTrace("%s:%i - %s\n", _FL, Err);
+					LgiTrace("	File=%s, Out=%s, r=%i\n", File.Get(), Out.Get(), r);
 				}
 			}
 		}

@@ -115,7 +115,7 @@ public:
 			LAssert(!"Not open for writing.");
 			return;
 		}
-		int dummy[] = { 0, ( (void) Store(std::forward<Args>(args)), 0) ... };		
+		(void) std::initializer_list<int>{ 0, ( (void) Store(std::forward<Args>(args)), 0) ... };
 		Process();
 	}
 

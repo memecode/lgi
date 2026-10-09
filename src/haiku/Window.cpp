@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <atomic>
+#include <Bitmap.h>
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/DragAndDrop.h"
@@ -77,14 +79,14 @@ struct LBView : public Parent
 	BMessage MakeMessage(LMessage::Events e)
 	{
 		BMessage m(M_HAIKU_WND_EVENT);
-		m.AddPointer(LMessage::PropWindow, (void*)wnd);
+		m.AddPointer(LMessage::PropWindow, (void*)static_cast<LViewI*>(wnd));
 		m.AddInt32(LMessage::PropEvent, e);
 		return m;
 	}
 
 	void AttachedToWindow()
 	{
-		LOG("%s:%i %s wnd=%p\n", _FL, __FUNCTION__, wnd);
+		// LOG("%s:%i %s wnd=%p\n", _FL, __FUNCTION__, wnd);
 		if (!wnd)
 			return;
 
@@ -201,8 +203,6 @@ struct LBView : public Parent
 				||
 				k.c16 == LK_BACKSPACE
 				||
-				k.c16 == LK_TAB
-				||
 				k.c16 == LK_RETURN
 			);
 
@@ -213,6 +213,13 @@ struct LBView : public Parent
 	{
 		auto k = ConvertKey(bytes, numBytes);
 		k.Down(true);
+
+		#if DEBUG_SETFOCUS
+		printf("%s:%i - LBView::KeyDown bytes[0]=%i(%c) numBytes=%i c16=%i vkey=%i ischar=%i\n",
+			_FL,
+			(uint8_t)bytes[0], bytes[0] >= ' ' ? bytes[0] : ' ',
+			numBytes, k.c16, k.vkey, k.IsChar);
+		#endif
 
 		auto m = MakeMessage(LMessage::KeyDown);
 		auto keyMsg = k.Archive();
@@ -225,6 +232,13 @@ struct LBView : public Parent
 		auto k = ConvertKey(bytes, numBytes);
 		k.Down(false);
 
+		#if DEBUG_SETFOCUS
+		printf("%s:%i - LBView::KeyUp bytes[0]=%i(%c) numBytes=%i c16=%i vkey=%i ischar=%i\n",
+			_FL,
+			(uint8_t)bytes[0], bytes[0] >= ' ' ? bytes[0] : ' ',
+			numBytes, k.c16, k.vkey, k.IsChar);
+		#endif
+
 		auto m = MakeMessage(LMessage::KeyUp);
 		auto keyMsg = k.Archive();
 		m.AddMessage("key", &keyMsg);
@@ -233,9 +247,11 @@ struct LBView : public Parent
 
 	void FrameMoved(BPoint p)
 	{
+		/* This view should never move from 0,22 (menu)
 		auto m = MakeMessage(LMessage::FrameMoved);
 		m.AddPoint("pos", p);
 		LAppPrivate::Post(&m);		
+		*/
 	}
 
 	void FrameResized(float width, float height) override;
@@ -340,6 +356,10 @@ struct LBView : public Parent
 		LLocker lck(this, _FL);
 		if (lck.Lock())
 		{
+			#if DEBUG_SETFOCUS
+			printf("%s:%i - LBView::MakeFocus(%i) wnd=%p\n", _FL, focus, wnd);
+			#endif
+
 			Parent::MakeFocus(focus);
 
 			auto m = MakeMessage(LMessage::MakeFocus);
@@ -358,8 +378,9 @@ public:
 	
 	// The root view that tracks all the events
 	BView *view = nullptr;
-	LRect client;	// bounds of view... so there is no need to lock the 
-					// BWindow to get the client rect.
+	LRect client = LRect::EMPTY(); // bounds of view... so there is no need to lock the 
+					// BWindow to get the client rect. Starts empty until the
+					// first FrameResized event arrives.
 	
 	// When invalidate is called on a view, it sends LMessage::Invalidate
 	// to LWindow::HaikuEvent. This will check 'viewDirty' to see if something
@@ -385,6 +406,9 @@ public:
 	LWindow *ModalChild = nullptr;
 	bool ShowTitleBar = true;
 	bool ThreadMsgDone = false;
+
+	// The LViewI that currently has Lgi-level keyboard focus
+	LViewI *Focus = nullptr;
 	
 	LString MakeName(LWindow *w)
 	{
@@ -464,7 +488,7 @@ public:
 	BMessage MakeMessage(LMessage::Events e)
 	{
 		BMessage m(M_HAIKU_WND_EVENT);
-		m.AddPointer(LMessage::PropWindow, (void*)wnd);
+		m.AddPointer(LMessage::PropWindow, (void*)static_cast<LViewI*>(wnd));
 		m.AddInt32(LMessage::PropEvent, e);
 		return m;
 	}
@@ -484,27 +508,57 @@ public:
 		m.AddFloat("height", height);
 		LAppPrivate::Post(&m);
 		BWindow::FrameResized(width, height);
+
+		if (view)
+		{
+			auto menu = KeyMenuBar();
+			BRect menuPos = menu ? menu->Frame() : BRect(0, 0, 0, 0);
+			// Why am I adding 1 to each dimension? I don't know? But it
+			// works right? Otherwise you get a 1px unpainted border along 
+			// the right/bottom edge.
+			view->ResizeTo(width+1, height-menuPos.Height()+1);
+		}
 	}
 
 	bool QuitRequested()
 	{
-		int result = -1;
+		std::atomic<int> result(-1);
 		
 		auto m = MakeMessage(LMessage::QuitRequested);
-		m.AddPointer("result", (void*)&result);
-		LAppPrivate::Post(&m);
+		m.AddPointer("result", &result);
+		bool posted = LAppPrivate::Post(&m);
+		LgiTrace("%s:%i QuitRequested posted: thread=%i looper-locker=%i posted=%i\n",
+			_FL, LCurrentThreadId(), LockingThread(), posted);
+		if (!posted)
+			return false;
+		Unlock();
 		
 		// Wait for the GUI thread to respond:
-		while (result < 0)
+		while (result.load(std::memory_order_acquire) < 0)
 			LSleep(1);
+		int closeResult = result.load(std::memory_order_acquire);
+		bool relocked = Lock();
+		LgiTrace("%s:%i QuitRequested response: thread=%i result=%i\n",
+			_FL, LCurrentThreadId(), closeResult);
+		if (!relocked)
+			return false;
 		
-		return result > 0;
+		return closeResult > 0;
 	}
 
 	void MessageReceived(BMessage *message)
 	{
 		switch (message->what)
 		{
+			case M_PULSE:
+			{
+				// Route view pulses through the app event dispatcher.
+				// printf("%s:%i - M_PULSE rec bwnd\n", _FL);
+				auto m = MakeMessage(LMessage::General);
+				m.AddMessage("message", message);
+				LAppPrivate::Post(&m);
+				break;
+			}
 			case M_LWINDOW_DELETE:
 			{
 				Quit();
@@ -599,9 +653,7 @@ void LBView<Parent>::Draw(BRect updateRect)
 	Parent::FillRect(f);
 	#endif
 
-	// Parent::UnlockLooper(); // holding the lock on the BWindow can cause a deadlock, so unlock it here
 	auto memDc = wnd->d->mem.Lock(_FL);
-	// Parent::LockLooper(); // relock it now... to do drawing
 
 	if (!memDc || !memDc.Get())
 	{
@@ -656,18 +708,38 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 {
 	if (!m)
 		return;
+
+	auto GetNativePos = [this](LRect &Position)
+	{
+		LLocker lck(d, _FL);
+		if (!lck.Lock() || d->IsHidden())
+			return false;
+
+		auto Frame = d->Frame();
+		auto Bounds = d->Bounds();
+		Position.Set((int)Frame.left,
+					 (int)Frame.top,
+					 (int)Frame.left + Bounds.IntegerWidth() - 1,
+					 (int)Frame.top + Bounds.IntegerHeight() - 1);
+		return true;
+	};
 		
 	switch (event)
 	{
 		case LMessage::QuitRequested:
 		{
-			int *result = nullptr;
+			std::atomic<int> *result = nullptr;
 			if (m->FindPointer("result", (void**)&result) != B_OK)
 			{
 				printf("%s:%i - error: no result ptr.\n", _FL);
 				return;
 			}
-			*result = OnRequestClose(false);
+			LgiTrace("%s:%i QuitRequested dispatch: thread=%i window=%p\n",
+				_FL, LCurrentThreadId(), this);
+			int closeResult = OnRequestClose(false) ? 1 : 0;
+			result->store(closeResult, std::memory_order_release);
+			LgiTrace("%s:%i QuitRequested complete: thread=%i result=%i\n",
+				_FL, LCurrentThreadId(), closeResult);
 			break;
 		}
 		case LMessage::General:
@@ -694,15 +766,12 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 		}
 		case LMessage::FrameMoved:
 		{
-			BPoint pos;
-			if (m->FindPoint("pos", &pos) != B_OK)
+			LRect Position;
+			if (GetNativePos(Position) && Position != Pos)
 			{
-				printf("%s:%i - no pos.\n", _FL);
-				return;
+				Pos = Position;
+				OnPosChange();
 			}
-			
-			Pos.Offset(pos.x - Pos.x1, pos.y - Pos.y1);
-			OnPosChange();
 			break;
 		}
 		case LMessage::Invalidate:
@@ -717,19 +786,12 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 		}
 		case LMessage::FrameResized:
 		{
-			float fx = 0.0f, fy = 0.0f;
-			if (m->FindFloat("width",  &fx) != B_OK ||
-				m->FindFloat("height", &fy) != B_OK)
+			LRect Position;
+			if (!GetNativePos(Position))
+				break;
+			if (Position != Pos)
 			{
-				printf("%s:%i - missing width/height param.\n", _FL);
-				return;
-			}
-
-			int x = (int)floor(fx);
-			int y = (int)floor(fy);
-			if (Pos.X() != x || Pos.Y() != y)
-			{
-				Pos.SetSize(x, y);
+				Pos = Position;
 				OnPosChange();
 			}
 			else break;
@@ -743,6 +805,12 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 			// Anything that needs to lock the window needs to be BEFORE getting the memory DC lock...
 			auto c = GetClient();
 			// printf("%s draw %s (%i)\n", GetClass(), c.GetStr(), DRAW_COUNT++);
+
+			if (c.X() <= 0 || c.Y() <= 0)
+			{
+				// No FrameResized event has arrived yet, nothing to draw.
+				break;
+			}
 
 			// Don't lock the window AFTER this:
 			auto memDC = d->mem.Lock(_FL);
@@ -759,6 +827,11 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 				// Create a memory context big enough
 				#define ROUNDUP(i) ( (i) - ((i) % 32) + 32 )
 				memDC.Set(new LMemDC(_FL, ROUNDUP(c.X()), ROUNDUP(c.Y()), System32BitColourSpace));
+
+				#if 0 // coverage testing
+				memDC->Colour(LColour(255, 0, 255));
+				memDC->Rectangle();
+				#endif
 			}
 			if (!memDC.Get())
 			{
@@ -804,7 +877,19 @@ void LWindow::HaikuEvent(LMessage::Events event, BMessage *m)
 			
 			LKey k(&msg);
 			if (auto wnd = GetWindow())
-				wnd->HandleViewKey(this, k);
+			{
+				auto focus = wnd->GetFocus();
+				auto target = focus ? focus->GetLView() : nullptr;
+				#if DEBUG_SETFOCUS
+				printf("%s:%i - %s dispatching key c16=%i to focus=%p/%s (target=%p/%s)\n",
+					_FL,
+					event == LMessage::KeyDown ? "KeyDown" : "KeyUp",
+					k.c16,
+					focus, focus ? focus->GetClass() : "(null)",
+					target ? target : this, (target ? target : this)->GetClass());
+				#endif
+				wnd->HandleViewKey(target ? target : this, k);
+			}
 			else
 				OnKey(k);
 			break;
@@ -971,7 +1056,7 @@ bool LWindow::SetTitleBar(bool ShowTitleBar)
 	return r == B_OK;
 }
 
-bool LWindow::SetIcon(const char *FileName)
+bool LWindow::SetIcon(const char *FileName, const char *gnomeAppType)
 {
 	LString a;
 	if (!LFileExists(FileName))
@@ -1035,8 +1120,6 @@ void LWindow::Visible(bool i)
 			d->ResizeTo(Pos.X(), Pos.Y());
 			d->Show();
 		}
-		else
-			printf("%s already shown\n", GetClass());
 	}
 	else
 	{
@@ -1104,14 +1187,12 @@ void LWindow::UpdateRootView()
 
 		rootView->Show();
 	}
-	
-	auto menu = wnd->KeyMenuBar();
-	BRect menuPos = menu ? menu->Frame() : BRect(0, 0, 0, 0);
-	
-	auto f = wnd->Frame();
-	rootView->ResizeTo(f.Width(), f.Height() - menuPos.Height());
-	// if (menu) rootView->MoveTo(0, menuPos.Height());
-	rootView->SetResizingMode(B_FOLLOW_ALL_SIDES);
+}
+
+bool LWindow::IsAttached()
+{
+	auto wnd = WindowHandle();
+	return wnd && d->view && d->view->Window() == wnd;
 }
 
 bool LWindow::Attach(LViewI *p)
@@ -1127,9 +1208,25 @@ bool LWindow::Attach(LViewI *p)
 	auto wnd = WindowHandle();
 	if (rootView && wnd)
 	{
-		LOG("%s:%i attach %p to %p\n", _FL, rootView, wnd);
-		wnd->AddChild(rootView);
+		// LOG("%s:%i attach %p to %p\n", _FL, rootView, wnd);
+		auto parent = rootView->Parent();
+		auto attachedWindow = rootView->Window();
+		if (!parent && !attachedWindow)
+			wnd->AddChild(rootView);
+		else if (parent || attachedWindow != wnd)
+		{
+			LOG("%s:%i root view %p is already attached (parent=%p, window=%p)\n", _FL, rootView, parent, attachedWindow);
+			return false;
+		}
 		UpdateRootView();
+
+		// There's only one native BView per window (everything else is drawn
+		// virtually inside it), so it must hold Haiku's keyboard focus or the
+		// app_server never delivers KeyDown/KeyUp to us at all.
+		#if DEBUG_SETFOCUS
+		printf("%s:%i - calling rootView->MakeFocus(true)\n", _FL);
+		#endif
+		rootView->MakeFocus(true);
 	}
 	else
 	{
@@ -1226,7 +1323,7 @@ bool LWindow::HandleViewMouse(LView *v, LMouse &m)
 bool LWindow::HandleViewKey(LView *v, LKey &k)
 {
 	bool Status = false;
-	LViewI *Ctrl = 0;
+	LViewI *Ctrl = nullptr;
 	
 	#if DEBUG_HANDLEVIEWKEY
 	bool Debug = 1; // k.vkey == LK_RETURN;
@@ -1234,9 +1331,12 @@ bool LWindow::HandleViewKey(LView *v, LKey &k)
 	
 	// if (Debug)
 	{
-		LgiTrace("%s/%p::HandleViewKey=%i ischar=%i %s%s%s%s\n",
+		auto keyName = LKey::KeyName(k.vkey);
+		auto keyVal = LString::Fmt("%i", k.vkey);
+		
+		LgiTrace("%s/%p::HandleViewKey vkey=%s c16=%i ischar=%i %s%s%s%s\n",
 			v->GetClass(), v,
-			k.c16,
+			keyName ? keyName : keyVal.Get(), k.c16,
 			k.IsChar,
 			(char*)(k.Down()?" Down":" Up"),
 			(char*)(k.Shift()?" Shift":""),
@@ -1495,6 +1595,10 @@ LPointF LWindow::GetDpiScale()
 
 LRect &LWindow::GetClient(bool ClientSpace)
 {
+	// 'd' can be null if WaitThread() has already torn down the window.
+	static LRect Empty(0, 0, -1, -1);
+	if (!d)
+		return Empty;
 	return d->client;
 }
 
@@ -1522,7 +1626,7 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 			for (auto var: vars)
 			{
 				auto parts = var.SplitDelimit("=", 1);
-				SERIALIZE_LOG("SerializeState: parts=%i\n", (int)parts.Length());
+				// SERIALIZE_LOG("SerializeState: parts=%i\n", (int)parts.Length());
 				if (parts.Length() == 2)
 				{
 					if (parts[0].Equals("State"))
@@ -1538,13 +1642,14 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 				}
 			}
 			
+			SetZoom(State);
+
 			if (Position.Valid())
 			{
 				SERIALIZE_LOG("SerializeState setpos %s\n", Position.GetStr());
 				SetPos(Position);
 			}
-			
-			SetZoom(State);
+			else SERIALIZE_LOG("Invalid position.\n");
 		}
 		else
 		{
@@ -1556,7 +1661,18 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 	{
 		char s[256];
 		LWindowZoom State = GetZoom();
-		sprintf_s(s, sizeof(s), "State=%i;Pos=%s", State, GetPos().GetStr());
+		LRect Position = GetPos();
+		LLocker lck(d, _FL);
+		if (IsAttached() && lck.Lock())
+		{
+			auto Frame = d->Frame();
+			auto Bounds = d->Bounds();
+			Position.Set((int)Frame.left,
+						 (int)Frame.top,
+						 (int)Frame.left + (int)Bounds.Width() - 1,
+						 (int)Frame.top + (int)Bounds.Height() - 1);
+		}
+		sprintf_s(s, sizeof(s), "State=%i;Pos=%s", State, Position.GetStr());
 
 		LVariant v = s;
 		SERIALIZE_LOG("SerializeState: saving '%s' = '%s'\n", FieldName, s);
@@ -1636,7 +1752,10 @@ void LWindow::OnPosChange()
 					menu->GetPreferredSize(&x, &y);
 					// printf("Pref=%g,%g\n", x, y);
 					if (y > 0.0f)
+					{
 						menu->ResizeTo(frame.Width(), y);
+						menuPos = menu->Frame();
+					}
 				}
 			}	
 			int rootTop = menu ? menuPos.bottom + 1 : 0;
@@ -1647,7 +1766,7 @@ void LWindow::OnPosChange()
 					ToString(frame).Get(), menu, menu?menu->IsHidden():0, ToString(menuPos).Get(), ToString(rootPos).Get(), rootTop);
 				#endif
 				d->view->MoveTo(0, rootTop);
-				d->view->ResizeTo(rootPos.Width(), frame.Height() - menuPos.Height());
+				d->view->ResizeTo(rootPos.Width(), frame.Height() - rootTop);
 			}
 		
 			lck.Unlock();		
@@ -1892,16 +2011,75 @@ bool LWindow::SetWillFocus(bool f)
 
 LViewI *LWindow::GetFocus()
 {
-	// FIXME: add focus support
-	return NULL;
+	return d ? d->Focus : nullptr;
 }
 
 void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 {
-	if (!ctrl)
+	// 'd' is null after WaitThread() during window destruction.
+	if (!d)
 		return;
-		
-	// FIXME: add focus support
+
+	#if DEBUG_SETFOCUS
+	const char *TypeName = type == GainFocus ? "GainFocus" : type == LoseFocus ? "LoseFocus" : "ViewDelete";
+	printf("%s:%i - LWindow::SetFocus(%p/%s, %s) cur=%p/%s\n",
+		_FL,
+		ctrl, ctrl ? ctrl->GetClass() : "(null)",
+		TypeName,
+		d->Focus, d->Focus ? d->Focus->GetClass() : "(null)");
+	#endif
+
+	switch (type)
+	{
+		case GainFocus:
+		{
+			if (!ctrl || d->Focus == ctrl)
+			{
+				#if DEBUG_SETFOCUS
+				printf("%s:%i - SetFocus: no-op (ctrl=%p, already focused=%i)\n", _FL, ctrl, d->Focus == ctrl);
+				#endif
+				return;
+			}
+
+			if (auto old = d->Focus)
+			{
+				#if DEBUG_SETFOCUS
+				printf("%s:%i - SetFocus: blurring %p/%s\n", _FL, old, old->GetClass());
+				#endif
+				d->Focus = nullptr;
+				if (auto v = old->GetLView())
+					v->_Focus(false);
+				old->OnFocus(false);
+			}
+
+			d->Focus = ctrl;
+			#if DEBUG_SETFOCUS
+			printf("%s:%i - SetFocus: focusing %p/%s\n", _FL, ctrl, ctrl->GetClass());
+			#endif
+			if (auto v = ctrl->GetLView())
+				v->_Focus(true);
+			ctrl->OnFocus(true);
+			break;
+		}
+		case LoseFocus:
+		case ViewDelete:
+		{
+			if (ctrl && ctrl == d->Focus)
+			{
+				#if DEBUG_SETFOCUS
+				printf("%s:%i - SetFocus: clearing focus on %p/%s (%s)\n", _FL, ctrl, ctrl->GetClass(), TypeName);
+				#endif
+				d->Focus = nullptr;
+				if (type == LoseFocus)
+				{
+					if (auto v = ctrl->GetLView())
+						v->_Focus(false);
+					ctrl->OnFocus(false);
+				}
+			}
+			break;
+		}
+	}
 }
 
 void LWindow::SetDragHandlers(bool On)

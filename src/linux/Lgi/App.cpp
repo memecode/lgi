@@ -15,6 +15,8 @@
 #include "lgi/common/Variant.h"
 #include "lgi/common/Token.h"
 #include "lgi/common/FontCache.h"
+#include "lgi/common/Message.h"
+
 #include "AppPriv.h"
 
 #define DEBUG_MSG_TYPES				0
@@ -24,6 +26,59 @@
 using namespace Gtk;
 
 bool GlibWidgetSearch(GtkWidget *p, GtkWidget *w, bool Debug, int depth = 0);
+
+
+#define L_ALL_MESSAGES() \
+	_(M_SYSTEM) \
+	_(M_CLOSE) \
+	_(M_X11_REPARENT) \
+	_(M_MOUSEENTER) \
+	_(M_MOUSEEXIT) \
+	_(M_WANT_DIALOG_PROC) \
+	_(M_MENU) \
+	_(M_COMMAND) \
+	_(M_DRAG_DROP) \
+	_(M_TRAY_NOTIFY) \
+	_(M_CUT) \
+	_(M_COPY) \
+	_(M_PASTE) \
+	_(M_GTHREADWORK_COMPELTE) \
+	_(M_SET_VISIBLE) \
+	_(M_CAPTURE_PULSE) \
+	_(M_TEXT_UPDATE_NAME) \
+	_(M_DND_DATA_RECEIVED) \
+	_(M_DND_END) \
+	_(M_DND_UPDATE_FORMATS) \
+	_(M_DESCRIBE) \
+	_(M_CHANGE) \
+	_(M_DELETE) \
+	_(M_TABLE_LAYOUT) \
+	_(M_URL) \
+	_(M_LOG_TEXT) \
+	_(M_LOG_EMPTY) \
+	_(M_INVALIDATE) \
+	_(M_RESIZE_TO_CONTENT) \
+	_(M_SCROLL_TO) \
+	_(M_SET_SCROLL) \
+	_(M_JOBS_LOADED) \
+	_(M_SET_CTRL_NAME) \
+	_(M_SET_CTRL_ENABLE) \
+	_(M_SET_CTRL_VISIBLE) \
+	_(M_VIEW_RUN_CALLBACK) \
+	_(M_PULSE) \
+	_(M_USER)
+
+struct LMessageNames : public LHashTbl<IntKey<int>, const char *>
+{
+	LMessageNames()
+	{
+		#define _(name) Add(LgiMessages::name, #name);
+		L_ALL_MESSAGES()
+		#undef _
+	}
+	
+}	messageNames;
+
 
 ////////////////////////////////////////////////////////////////
 struct OsAppArgumentsPriv
@@ -318,12 +373,11 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	if (d->GuiEnv)
 	{
 		d->App = Gtk::gtk_application_new(id,
-			#if GtkVer(3, 25)
-				// definately NOT in 3.24, but not sure where it got added
-				Gtk::G_APPLICATION_DEFAULT_FLAGS
-			#else
-				Gtk::G_APPLICATION_FLAGS_NONE
-			#endif
+						#if defined(G_APPLICATION_DEFAULT_FLAGS)
+							G_APPLICATION_DEFAULT_FLAGS
+						#else
+							(GApplicationFlags) 0
+						#endif
 			);
 	}
 
@@ -345,15 +399,35 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 			// Check alternate location for development builds
 			Dl_info dlInfo;
     		dladdr((const void*)LgiCrashHandler, &dlInfo);
-    		if (dlInfo.dli_sname != NULL && dlInfo.dli_saddr != NULL)
+    		if (dlInfo.dli_sname != nullptr && dlInfo.dli_saddr != nullptr)
     		{
-    			p = dlInfo.dli_fname;
-				p += "../../src/linux/CrashHandler";
-				p += programName;
-				printf("Alternative path %s: %s\n",
-					p.Exists() ? "found" : "missing",
-					p.GetFull().Get());
+				const char *relPaths[] = {
+					"../../src/linux/CrashHandler",
+					"~/code/lgi/trunk/src/linux/CrashHandler",
+				};
+
+				for (int i=0; i<CountOf(relPaths); i++)
+				{
+					if (relPaths[i][0] == '~')
+					{
+						char path[MAX_PATH_LEN];
+						if (LMakePath(path, sizeof(path), relPaths[i], programName))
+							p = path;
+						else
+							continue;
+					}
+					else
+					{
+						p = dlInfo.dli_fname;
+						p += relPaths[i];
+						p += programName;
+					}
+					// printf("Alternative path %i: %s\n", p.Exists(), p.GetFull().Get());
+					if (p.Exists())
+						break;
+				}
     		}
+			else printf("%s:%i - dladdr failed: %s\n", _FL, dlerror());
 		}		
 		
 		if (p.Exists())
@@ -382,7 +456,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 		auto cfm = PANGO_CAIRO_FONT_MAP(fm);
 		double Dpi = 96.0;
 
-		LFile::Path p(LSP_APP_ROOT);
+		LFile::Path p(LSP_APP_DATA);
 		p += "lgi-conf.json";
 		if (p.IsFile())
 		{
@@ -552,6 +626,9 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 	#endif
 
 	GtkIdle *i = (GtkIdle*) data;
+	if (!i)
+		return false;
+
 	if (i->cb)
 		i->cb(i->param);
 	
@@ -583,27 +660,38 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 		}
 	}
 	
-	if (auto callbacks = i->d->callbacks.Lock(_FL))
+	LAppPrivate::TCallbackArr pending;
+	if (i->d)
 	{
-		for (auto &cb: *callbacks.Get())
+		if (auto callbacks = i->d->callbacks.Lock(_FL))
 		{
-			if (cb->cb)
-				cb->cb();
+			pending = *callbacks.Get();
+			callbacks->Empty();
 		}
-		callbacks->DeleteObjects();
+	}
+
+	for (auto cb : pending)
+	{
+		if (cb && cb->cb)
+			cb->cb();
+		DeleteObj(cb);
 	}
 	
-	// printf("IdleWrapper end\n");
 	return i->cb != NULL;
-	// return false;
 }
 
 static GtkIdle idle = {0};
 
 bool LApp::RunCallback(std::function<void()> Callback, const char *file, int line)
 {
-	auto cb = d->callbacks.Lock(file, line);
-	if (!cb)
+	if (!d)
+		return false;
+
+	if (!idle.d)
+		idle.d = d;
+
+	auto callbacks = d->callbacks.Lock(file, line);
+	if (!callbacks)
 		return false;
 		
 	if (auto cb = new LAppPrivate::TCallback)
@@ -611,6 +699,7 @@ bool LApp::RunCallback(std::function<void()> Callback, const char *file, int lin
 		cb->file = file;
 		cb->line = line;
 		cb->cb = std::move(Callback);
+		callbacks->Add(cb);
 	}
 	else return false;
 	return true;
@@ -688,12 +777,20 @@ bool LApp::PostEvent(LViewI *View, int Msg, LMessage::Param a, LMessage::Param b
 				MsgCounts.Add(msg.m, MsgCounts.Find(msg.m) + 1);
 
 			for (auto c: MsgCounts)
-				printf("    %i->%i\n", c.key, (int)c.value);
+			{
+				if (auto nm = messageNames.Find(c.key))
+					printf("    %s->%i\n", nm, (int)c.value);
+				else
+					printf("    %i->%i\n", c.key, (int)c.value);
+			}
 		}
 	}
 	#endif
 
 	MsgQue.Unlock();
+
+	if (!idle.d)
+		idle.d = d;
 	
 	// g_idle_add((GSourceFunc)IdleWrapper, &idle);
 	g_idle_add_full(G_PRIORITY_HIGH_IDLE, (GSourceFunc)IdleWrapper, &idle, NULL);
@@ -1116,7 +1213,7 @@ bool LApp::DesktopInfo::Serialize(bool Write)
 		f.SetSize(0);
 		for (unsigned i=0; i<Data.Length(); i++)
 		{
-			Section &s = Data[i];
+			auto &s = Data[i];
 			if (s.Name)
 				f.Print("[%s]\n", s.Name.Get());
 			for (unsigned n=0; n<s.Values.Length(); n++)
@@ -1216,11 +1313,11 @@ bool LApp::DesktopInfo::Set(const char *Field, const char *Value, const char *Se
 	if (!Field)
 		return false;
 
-	Section *s = GetSection(Sect ? Sect : DefaultSection, true);
+	auto s = GetSection(Sect ? Sect : DefaultSection, true);
 	if (!s)
 		return false;
 
-	KeyPair *kp = s->Get(Field, true, Dirty);
+	auto kp = s->Get(Field, true, Dirty);
 	if (!kp)
 		return false;
 
@@ -1232,7 +1329,7 @@ bool LApp::DesktopInfo::Set(const char *Field, const char *Value, const char *Se
 	return true;
 }
 
-LApp::DesktopInfo *LApp::GetDesktopInfo()
+LApp::DesktopInfo *LApp::GetDesktopInfo(const char *gnomeAppType)
 {
 	auto sExe = LGetExeFile();
 	LFile::Path Exe(sExe);
@@ -1241,40 +1338,45 @@ LApp::DesktopInfo *LApp::GetDesktopInfo()
 	Leaf.Printf("%s.desktop", Exe.Last().Get());
 	
 	Desktop += ".local/share/applications";
+	if (!Desktop.IsFolder() && !d->FileSystem->CreateFolder(Desktop, true))
+	{
+		LgiTrace("%s:%i - Failed to create desktop applications folder '%s'\n", _FL, Desktop.GetFull().Get());
+		return NULL;
+	}
 	Desktop += Leaf;
 	
 	const char *Ex = Exe;
 	const char *Fn = Desktop;
 
+	// printf("%s:%i - desktop file='%s'\n", _FL, Desktop.GetFull().Get());
+
 	if (d->DesktopInfo.Reset(new DesktopInfo(Desktop)))
 	{
 		// Do a sanity check...
-		LString s = d->DesktopInfo->Get("Name");
-		if (!s && Name())
-			d->DesktopInfo->Set("Name", Name());
-		
-		s = d->DesktopInfo->Get("Exec");
-		if (!s || s != (const char*)sExe)
-			d->DesktopInfo->Set("Exec", sExe);
-		
-		s = d->DesktopInfo->Get("Type");
-		if (!s) d->DesktopInfo->Set("Type", "Application");
+		d->DesktopInfo->Set("Name", Name());		
+		d->DesktopInfo->Set("Exec", sExe);		
+		d->DesktopInfo->Set("Type", "Application");
+		if (gnomeAppType)
+			d->DesktopInfo->Set("Categories", gnomeAppType);
+		else
+			LAssert(!"no app type?");
 
-		s = d->DesktopInfo->Get("Categories");
-		if (!s) d->DesktopInfo->Set("Categories", "Application;");
-
-		s = d->DesktopInfo->Get("Terminal");
-		if (!s) d->DesktopInfo->Set("Terminal", "false");
+		d->DesktopInfo->Set("Terminal", "false");		
+		if (!d->DesktopInfo->Update())
+		{
+			LgiTrace("%s:%i - Failed to update desktop file '%s'\n", _FL, Desktop.GetFull().Get());
+			return NULL;
+		}
 		
-		d->DesktopInfo->Update();
+		system("update-desktop-database ~/.local/share/applications");	
 	}
-	
+
 	return d->DesktopInfo;
 }
 
-bool LApp::SetApplicationIcon(const char *FileName)
+bool LApp::SetApplicationIcon(const char *FileName, const char *gnomeAppType)
 {
-	DesktopInfo *di = GetDesktopInfo();
+	auto di = GetDesktopInfo(gnomeAppType);
 	if (!di)
 		return false;
 	

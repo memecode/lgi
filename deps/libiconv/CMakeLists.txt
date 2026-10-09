@@ -36,7 +36,8 @@ endif()
 add_library(${LIBNAME} SHARED
     ${SRC}/source/lib/iconv.c
     ${SRC}/source/libcharset/lib/localcharset.c
-    ${SRC}/source/lib/relocatable.c
+    ${SRC}/source/srclib/relocatable.h
+    ${SRC}/source/srclib/relocatable.c
     )
 target_include_directories(${LIBNAME}
     BEFORE PRIVATE
@@ -58,8 +59,9 @@ target_compile_definitions(${LIBNAME}
         IN_LIBRARY
         NO_XMALLOC        
         set_relocation_prefix=libiconv_set_relocation_prefix
-        relocate=libiconv_relocate
         ${PRIVATE_DEFS})
+
+#relocate=libiconv_relocate
 if(HAIKU)
     target_compile_options(${LIBNAME}
         PRIVATE

@@ -19,13 +19,14 @@ add_executable(LgiScript ${APP_TYPE}
     ${LGI_DIR}/src/common/Coding/ScriptLibrary.cpp
     ${LGI_DIR}/src/common/Coding/ScriptVM.cpp
     ${LGI_DIR}/src/common/Lgi/LgiMain.cpp
-    Main.cpp
+    src/Main.cpp
 	${APP_MANIFEST}
 	)
 
 target_link_libraries(LgiScript lgi)
 
 if (APPLE)
+	target_link_libraries(LgiScript ffi)
 	macBundlePostBuild(LgiScript)
 elseif (WIN32)
 	target_sources(LgiScript PRIVATE ${LGI_DIR}/src/common/Coding/ExternCall.asm)

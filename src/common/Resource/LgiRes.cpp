@@ -245,18 +245,19 @@ bool LStringRes::Read(LXmlTag *t, ResFileFormat Format)
 class LResourcesPrivate
 {
 public:
-	bool Ok;
-	ResFileFormat Format;
+	bool Ok = false;
+	ResFileFormat Format = Lr8File;
 	LString File;
 	LString ThemeFolder;
-	LHashTbl<IntKey<int>, LStringRes*> StrRef;
-	LHashTbl<IntKey<int>, LStringRes*> Strings;
-	LHashTbl<IntKey<int>, LStringRes*> DlgStrings;
+	
+	// While these are not "locked" per se, they are static tables, and
+	// as such are reasonably safe to READ from multiple threads safely.
+	LHashTbl<IntKey<int>, LStringRes*, true> StrRef;
+	LHashTbl<IntKey<int>, LStringRes*, true> Strings;
+	LHashTbl<IntKey<int>, LStringRes*, true> DlgStrings;
 
 	LResourcesPrivate()
 	{
-		Ok = false;
-		Format = Lr8File;
 	}
 
 	~LResourcesPrivate()
@@ -513,7 +514,7 @@ void LResources::AddLang(LLanguageId id)
 	Languages.Add(id);
 }
 
-char *LResources::GetFileName()
+const char *LResources::GetFileName()
 {
 	return d->File;
 }
@@ -671,8 +672,8 @@ LStringRes *LResources::StrFromRef(int Ref)
 
 char *LResources::StringFromId(int Id)
 {
-	LStringRes *NotStr = 0;
-	LStringRes *sr;
+	LStringRes *NotStr = nullptr;
+	LStringRes *sr = nullptr;
 
 	if ((sr = d->Strings.Find(Id)))
 		return sr->Str;

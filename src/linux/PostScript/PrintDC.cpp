@@ -677,28 +677,76 @@ void LPrintDC::Line(int x1, int y1, int x2, int y2)
 	}
 }
 
-void LPrintDC::Circle(double cx, double cy, double radius)
+void LPrintDC::Circle(float cx, float cy, float radius)
 {
+	if (d->Ps.IsOpen())
+	{
+		d->Ps.Print("newpath\n"
+					"%f %f %f 0 360 arc\n"
+					"stroke\n",
+					Xc(cx), Yc(cy), radius);
+	}
 }
 
-void LPrintDC::FilledCircle(double cx, double cy, double radius)
+void LPrintDC::FilledCircle(float cx, float cy, float radius)
 {
+	if (d->Ps.IsOpen())
+	{
+		d->Ps.Print("newpath\n"
+					"%f %f %f 0 360 arc\n"
+					"fill\n",
+					Xc(cx), Yc(cy), radius);
+	}
 }
 
-void LPrintDC::Arc(double cx, double cy, double radius, double start, double end)
+void LPrintDC::Arc(float cx, float cy, float radius, float start, float end)
 {
+	if (d->Ps.IsOpen())
+	{
+		d->Ps.Print("newpath\n"
+					"%f %f %f %f %f arc\n"
+					"stroke\n",
+					Xc(cx), Yc(cy), radius, start, end);
+	}
 }
 
-void LPrintDC::FilledArc(double cx, double cy, double radius, double start, double end)
+void LPrintDC::FilledArc(float cx, float cy, float radius, float start, float end)
 {
+	if (d->Ps.IsOpen())
+	{
+		d->Ps.Print("newpath\n"
+					"%f %f %f %f %f arc\n"
+					"fill\n",
+					Xc(cx), Yc(cy), radius, start, end);
+	}
 }
 
-void LPrintDC::Ellipse(double cx, double cy, double x, double y)
+void LPrintDC::Ellipse(float cx, float cy, float x, float y)
 {
+	if (d->Ps.IsOpen())
+	{
+		d->Ps.Print("newpath\n"
+					"%f %f translate\n"
+					"%f %f scale\n"
+					"0 0 1 0 360 arc\n"
+					"stroke\n"
+					"%f %f translate\n",
+					Xc(cx), Yc(cy), x, y, -Xc(cx), -Yc(cy));
+	}
 }
 
-void LPrintDC::FilledEllipse(double cx, double cy, double x, double y)
+void LPrintDC::FilledEllipse(float cx, float cy, float x, float y)
 {
+	if (d->Ps.IsOpen())
+	{
+		d->Ps.Print("newpath\n"
+					"%f %f translate\n"
+					"%f %f scale\n"
+					"0 0 1 0 360 arc\n"
+					"fill\n"
+					"%f %f translate\n",
+					Xc(cx), Yc(cy), x, y, -Xc(cx), -Yc(cy));
+	}
 }
 
 void LPrintDC::Box(int x1, int y1, int x2, int y2)

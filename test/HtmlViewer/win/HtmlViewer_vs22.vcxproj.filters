@@ -23,6 +23,12 @@
     <Filter Include="Headers">
       <UniqueIdentifier>{682e2c92-1fcb-4ce6-875a-36e36c4f1b3f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Html\1">
+      <UniqueIdentifier>{108971da-befd-4bb9-92bb-38871062a5fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Html\2">
+      <UniqueIdentifier>{f424731c-64d8-4b5d-9cad-ae6d78c2e882}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\common\Gdc2\Font\EmojiFont.cpp">
@@ -39,9 +45,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\common\Text\Homoglyphs\HomoglyphsTable.cpp">
       <Filter>Source Files\Lgi</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\common\Text\Html.cpp">
-      <Filter>Source Files\Html</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\common\Text\HtmlCommon.cpp">
       <Filter>Source Files\Html</Filter>
@@ -79,22 +82,34 @@
     <ClCompile Include="..\src\TestSuite.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Text\Html.cpp">
+      <Filter>Source Files\Html\1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Text\Html2.cpp">
+      <Filter>Source Files\Html\2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\include\lgi\common\Html.h">
-      <Filter>Source Files\Html</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\lgi\common\HtmlCommon.h">
       <Filter>Source Files\Html</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\lgi\common\HtmlParser.h">
       <Filter>Source Files\Html</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\common\Text\HtmlPriv.h">
-      <Filter>Source Files\Html</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\common\Coding\ScriptingPriv.h">
       <Filter>Source Files\Scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\lgi\common\Html.h">
+      <Filter>Source Files\Html\1</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\common\Text\HtmlPriv.h">
+      <Filter>Source Files\Html\1</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\common\Text\HtmlPriv2.h">
+      <Filter>Source Files\Html\2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\lgi\common\Html2.h">
+      <Filter>Source Files\Html\2</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

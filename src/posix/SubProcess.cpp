@@ -31,12 +31,19 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/SubProcess.h"
 
-#define DEBUG_SUBPROCESS		0
-#define DEBUG_ARGS				0
+#define DEBUG_SUBPROCESS	0
+#define DEBUG_ARGS			0
 
-#define NULL_PIPE -1
-#define ClosePipe close
-#define INVALID_PID -1
+#define NULL_PIPE			-1
+#define INVALID_PID			-1
+#define ClosePipe			close
+
+#define SET_ERROR(code, msg) \
+	do { \
+		d->Error.Set(code, msg); \
+		d->Error.SetSource(_FL); \
+		LgiTrace("%s:%i - %s\n", _FL, d->Error.GetMsg().Get()); \
+	} while (0)
 
 #include <pwd.h>
 #if defined(LINUX) // !mac and !haiku
@@ -49,6 +56,14 @@
 #ifdef HAIKU
 #include <Roster.h>
 #endif
+
+#define DEBUG_LOG			0
+#if DEBUG_LOG
+	#define LOG(...)		if (LSubProcess::debugLog) LSubProcess::debugLog->Print(__VA_ARGS__)
+#else
+	#define LOG(...)
+#endif
+LStream *LSubProcess::debugLog = nullptr;
 
 LSubProcess::Pipe::Pipe()
 {
@@ -109,7 +124,7 @@ struct LSubProcessPriv
 	bool PseudoConsole = false;
 	bool EnvironmentChanged = false;
 	LArray<LSubProcess::Variable> Environment;
-	uint32_t ErrorCode = 0;
+	LError Error;
 
 	LSubProcess::PipeHandle ExternIn = NULL_PIPE, ExternOut = NULL_PIPE;
 	LSubProcess::ProcessId ChildPid = INVALID_PID;
@@ -119,7 +134,8 @@ struct LSubProcessPriv
 	int UserId = -1;
 	int GrpId = -1;
 
-	LSubProcessPriv(bool pseudoConsole)
+	LSubProcessPriv(bool pseudoConsole) :
+		PseudoConsole(pseudoConsole)
 	{
 	}
 
@@ -170,10 +186,12 @@ extern char **environ;
 
 LString LSubProcess::FindInPath(const char *exe)
 {
-	for (auto path: LGetPath())
+	auto paths = LGetPath();
+	for (auto path: paths)
 	{
 		LFile::Path p(path);
 		p = p / exe;
+		// printf("%s:%i - FindInPath(%s): %s = %i\n", _FL, exe, p.GetFull().Get(), p.Exists());
 		if (p.Exists())
 			return p.GetFull();
 	}
@@ -250,9 +268,14 @@ bool LSubProcess::IsRunning()
 	return d->ChildPid != INVALID_PID;
 }
 
+LError &LSubProcess::GetError()
+{
+	return d->Error;
+}
+
 uint32_t LSubProcess::GetErrorCode()
 {
-	return d->ErrorCode;
+	return d->Error.GetCode();
 }
 
 int32 LSubProcess::GetExitValue()
@@ -325,40 +348,38 @@ const char *LSubProcess::GetEnvironment(const char *Var)
 
 bool LSubProcess::SetEnvironment(const char *Var, const char *Value)
 {	
-	Variable *v = GetEnvVar(Var, true);
+	auto v = GetEnvVar(Var, true);
 	if (!v)
 		return false;
 	
 	bool IsPath = !_stricmp(Var, "PATH");
 
 	LStringPipe a;
-	const char *s = Value;
+	auto s = Value;
 	while (*s)
 	{
-		char *n = strchr(s, '%');
-		char *e = n ? strchr(n + 1, '%') : NULL;
+		auto n = strchr(s, '%');
+		auto e = n ? strchr(n + 1, '%') : NULL;
 		if (n && e)
 		{
-			a.Write(s, (int) (n-s));
+			a.Write(s, n - s);
 			
 			n++;
-			ptrdiff_t bytes = e - n;
+			auto bytes = e - n;
 			char Name[128];	
-			if (bytes > sizeof(Name) - 1) bytes = sizeof(Name)-1;			
+			if (bytes > sizeof(Name) - 1)
+				bytes = sizeof(Name)-1;
 			memcpy(Name, n, bytes);
 			Name[bytes] = 0;
 			
-			const char *existing = GetEnvironment(Name);
-			if (existing)
-			{
-				a.Write(existing, (int)strlen(existing));
-			}
+			if (auto existing = GetEnvironment(Name))
+				a.Write(existing, strlen(existing));
 
 			s = e + 1;
 		}
 		else
 		{
-			a.Write(s, (int)strlen(s));
+			a.Write(s, strlen(s));
 			break;
 		}
 	}
@@ -426,38 +447,41 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 {
 	bool Status = false;
 
-	#ifdef HAIKU
-	// Haiku has issues when you try and execute something that doesn't exist:
-	//		https://dev.haiku-os.org/ticket/18576
-	// This is to try and work around that issue. I tried just execvp'ing 'ls' but
-	// it doesn't work. The locks are still all messed up.
-	if (!LFileExists(d->Exe))
-	{
-		auto exe = FindInPath(d->Exe);
-		if (!exe)
+	#if defined(HAIKU) || defined(LGI_COCOA)
+		// Haiku has issues when you try and execute something that doesn't exist:
+		//		https://dev.haiku-os.org/ticket/18576
+		//
+		// And MacOSX doesn't have a useful PATH environment variable for GUI apps.
+		//
+		// This is to try and work around that issue.
+		if (!LFileExists(d->Exe))
 		{
-			LgiTrace("%s:%i - '%s' not found.\n", _FL, d->Exe.Get());
-			return false;
+			auto exe = FindInPath(d->Exe);
+			if (!exe)
+			{
+				LgiTrace("%s:%i - '%s' not found.\n", _FL, d->Exe.Get());
+				return false;
+			}
+			// printf("%s:%i - Mapped '%s' to '%s'.\n", _FL, d->Exe.Get(), exe.Get());
+			d->Exe = exe;
 		}
-		d->Exe = exe;
-	}
 	#endif
 
 	#if DEBUG_SUBPROCESS
-	LgiTrace("%s:%i - %p::Start(%i,%i,%i)\n", _FL, this, ReadAccess, WriteAccess, MapStderrToStdout);
+		LgiTrace("%s:%i - %p::Start(%i,%i,%i)\n", _FL, this, ReadAccess, WriteAccess, MapStderrToStdout);
 	#endif
 
 	int in[2];
 	if (pipe(in) == -1)
 	{
-		printf("parent: Failed to create stdin pipe");
+		SET_ERROR(errno, "parent: Failed to create stdin pipe");
 		return false;
 	}
 
 	int out[2];
 	if (pipe(out) == -1)
 	{
-		printf("parent: Failed to create stdout pipe");
+		SET_ERROR(errno, "parent: Failed to create stdout pipe");
 		return false;
 	}
 	
@@ -467,41 +491,49 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 		// We are in the child process.
 		if (d->InitialFolder)
 		{
-			chdir(d->InitialFolder);
+			if (chdir(d->InitialFolder))
+				printf(	"%s,%s:%i - chdir(%s) failed.\n",
+						sErrorStr, _FL, d->InitialFolder.Get());
 		}
 
 		// Child shouldn't write to its stdin.
 		if (close(in[1]))
-			printf("%s:%i - close failed.\n", _FL);
+			printf(	"%s,%s:%i - close failed.\n",
+					sErrorStr, _FL);
 
 		// Child shouldn't read from its stdout.
 		if (close(out[0]))
-			printf("%s:%i - close failed.\n", _FL);
+			printf(	"%s,%s:%i - close failed.\n",
+					sErrorStr, _FL);
 
 		// Redirect stdin and stdout for the child process.
 		if (dup2(in[0], fileno(stdin)) == -1)
 		{
-			printf("%s:%i - child[pre-exec]: Failed to redirect stdin for child\n", _FL);
+			printf(	"%s,%s:%i - child[pre-exec]: Failed to redirect stdin for child\n",
+					sErrorStr, _FL);
 			return false;
 		}
 		if (close(in[0]))
-			printf("%s:%i - close failed.\n", _FL);
+			printf(	"%s,%s:%i - close failed.\n",
+					sErrorStr, _FL);
 		
 		if (dup2(out[1], fileno(stdout)) == -1)
 		{
-			printf("%s:%i - child[pre-exec]: Failed to redirect stdout for child\n", _FL);
+			printf(	"%s,%s:%i - child[pre-exec]: Failed to redirect stdout for child\n",
+					sErrorStr, _FL);
 			return false;
 		}
 
 		if (dup2(out[1], fileno(stderr)) == -1)
 		{
-			printf("%s:%i - child[pre-exec]: Failed to redirect stderr for child\n", _FL);
+			printf("%s,%s:%i - child[pre-exec]: Failed to redirect stderr for child\n",
+					sErrorStr, _FL);
 			return false;
 		}
 		close(out[1]);
 
 		// Execute the child
-		d->Args.Add(NULL);
+		d->Args.Add(nullptr);
 		
 		LString::Array Path;
 		if (!LFileExists(d->Exe))
@@ -521,10 +553,10 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 			}
 		}
 		
-		if (d->UserId >= 0)
-			setuid(d->UserId);
-		if (d->GrpId >= 0)
-			setgid(d->GrpId);
+		if (d->UserId >= 0 && setuid(d->UserId))
+			printf("%s,%s:%i - setuid(%d) failed.\n", sErrorStr, _FL, d->UserId);
+		if (d->GrpId >= 0 && setgid(d->GrpId))
+			printf("%s,%s:%i - setgid(%d) failed.\n", sErrorStr, _FL, d->GrpId);
  				
 		if (d->Environment.Length())
 		{
@@ -532,7 +564,7 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 			LArray<char*> Env;
             
 			Vars.SetFixedLength(false);
-			for (auto v : d->Environment)
+			for (auto v: d->Environment)
 			{
 				LString &s = Vars.New();
 				s.Printf("%s=%s", v.Var.Get(), v.Val.Get());
@@ -544,10 +576,10 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 			Env.Add(NULL);
             
 			#if DEBUG_SUBPROCESS
-			printf("Exe=%s\n", d->Exe.Get());
-			printf("Env.Len=%i\n", (int)Env.Length());
-			for (int i=0; i<Env.Length(); i++)
-				printf("Env[%i]=%s\n", i, Env[i]);
+				printf("Exe=%s\n", d->Exe.Get());
+				printf("Env.Len=%i\n", (int)Env.Length());
+				for (int i=0; i<Env.Length(); i++)
+					printf("Env[%i]=%s\n", i, Env[i]);
 			#endif
 			
 			int r = execve(d->Exe, &d->Args[0], Env.AddressOf());
@@ -560,15 +592,15 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 
 		// Execution will pass to here if the 'Exe' can't run or doesn't exist
 		// So by exiting with an error the parent process can handle it.
-		printf("LSUBPROCESS_ERROR\n");
+		printf("%s\n", sErrorStr);
 
 		#if defined(MAC) || defined(HAIKU)
-		// While 'exit' would be nice and clean it does cause crashes in free the global InitLibPng object
-		// We HAVE to call exec??? to replace the process... anything will do... 'ls' will just quit quickly
-		char *a= {0};
-		execv("/bin/ls", &a);
+			// While 'exit' would be nice and clean it does cause crashes in free the global InitLibPng object
+			// We HAVE to call exec??? to replace the process. false exits silently with a failure status.
+			const char *a[] = {"/usr/bin/false",0};
+			execv("/usr/bin/false", (char**)a);
 		#else
-		exit(LSUBPROCESS_ERROR);
+			exit(LSUBPROCESS_ERROR);
 		#endif
 	}
 	else
@@ -576,17 +608,17 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 		// We are in the parent process.
 		if (d->ChildPid == -1)
 		{
-			printf("%s:%i - parent: Failed to create child", _FL);
+			SET_ERROR(LErrorInvalidParam, "parent: fork() failed");
 			return false;
 		}
 
 		// Parent shouldn't read from child's stdin.
 		if (close(in[0]))
-			printf("%s:%i - close failed.\n", _FL);
+			SET_ERROR(errno, "parent: close(0) failed");
 
 		// Parent shouldn't write to child's stdout.
 		if (close(out[1]))
-			printf("%s:%i - close failed.\n", _FL);
+			SET_ERROR(errno, "parent: close(1) failed");
 
 		d->Io.Read = out[0];
 		d->Io.Write = in[1];
@@ -608,6 +640,9 @@ int32 LSubProcess::Communicate(LStreamI *Out, LStreamI *In, LCancel *Cancel)
 	LAssert(In == NULL); // Impl me.
 	#define NOT_CANCELLED (!Cancel || !Cancel->IsCancelled())
 
+	LOG("%s: start loop...\n", __func__);
+	int noData = 0;
+	uint64_t lastPeekLog = 0;
 	while (IsRunning() && NOT_CANCELLED)
 	{
 		if (Cancel)
@@ -616,15 +651,25 @@ int32 LSubProcess::Communicate(LStreamI *Out, LStreamI *In, LCancel *Cancel)
 			// We should peek the input stream and check for input.
 			// Otherwise the Read could hang and the Cancel object wouldn't
 			// be checked for some time.
-			if (!Peek())
+			auto bytes = Peek();
+			auto now = LCurrentTime();
+			if (now - lastPeekLog >= 1000)
+			{
+				lastPeekLog = now;
+				LOG("%s: peek=%i\n", __func__, (int)bytes);
+			}
+			if (!bytes)
 			{
 				// Try not to use 100% of a CPU core.
-				LSleep(1);
+				noData++;
+				LSleep(10);
 				continue;
 			}
 		}
 		
+		LOG("%s: reading...\n", __func__);
 		r = Read(Buf, sizeof(Buf));
+		LOG("%s: read=%i buf='%.*s'\n", __func__, (int)r, (int)r, Buf);
 		if (r > 0 && Out)
 			Out->Write(Buf, r);
 	}
@@ -632,12 +677,14 @@ int32 LSubProcess::Communicate(LStreamI *Out, LStreamI *In, LCancel *Cancel)
 	while (NOT_CANCELLED)
 	{
 		r = Read(Buf, sizeof(Buf));
+		LOG("%s: post loop read=%i\n", __func__, (int)r);
 		if (r > 0 && Out)
 			Out->Write(Buf, r);
 		else
 			break;
 	}
 
+	LOG("%s: loop done.\n", __func__);
 	return GetExitValue();
 }
 
@@ -648,7 +695,7 @@ int LSubProcess::Wait()
 	if (d->ChildPid != INVALID_PID)
 	{
 		pid_t r = waitpid(d->ChildPid, &Status, 0);
-		printf("%s:%i - waitpid=%i pid=%i\n", _FL, r, d->ChildPid);
+		// printf("%s:%i - waitpid=%i pid=%i\n", _FL, r, d->ChildPid);
 		if (r == d->ChildPid)
 		{
 			d->ChildPid = INVALID_PID;
@@ -656,7 +703,7 @@ int LSubProcess::Wait()
 				d->ExitValue = WEXITSTATUS(Status);
 			else
 				d->ExitValue = 255;
-			printf("%s:%i - wait, r=%i, ExitValue=%i\n", _FL, r, d->ExitValue);
+			// printf("%s:%i - wait, r=%i, ExitValue=%i\n", _FL, r, d->ExitValue);
 		}
 	}
 	else printf("%s:%i - wait: invalid PID.\n", _FL);
@@ -673,17 +720,15 @@ bool LSubProcess::Signal(int which)
 {
 	if (d->ChildPid == INVALID_PID)
 	{
-		// printf("%s:%i - child pid doesn't exist (%s).\n", _FL, d->Exe.Get());
+		SET_ERROR(LErrorInvalidParam, "child pid doesn't exist");
 		return false;
 	}
 
 	if (kill(d->ChildPid, which))
 	{
-		printf("%s:%i - kill(%i, %i) failed.\n", _FL, d->ChildPid, which);
+		SET_ERROR(errno, LString::Fmt("kill(%i, %i) failed.", d->ChildPid, which));
 		return false;
 	}
-
-	printf("%s:%i - kill(%i, %i).\n", _FL, d->ChildPid, which);
 
 	return true;
 }
@@ -724,7 +769,7 @@ ssize_t LSubProcess::Read(void *Buf, ssize_t Size, int TimeoutMs)
 			FD_ZERO(&r);
 			FD_SET(s, &r);
 			
-			int v = select((int)s+1, &r, 0, 0, &t);
+			auto v = select((int)s+1, &r, 0, 0, &t);
 			if (v > 0 && FD_ISSET(s, &r))
 			{
 				DoRead = true;
@@ -738,7 +783,7 @@ ssize_t LSubProcess::Read(void *Buf, ssize_t Size, int TimeoutMs)
 		else LgiTrace("%s:%i - Invalid socket.\n", _FL);
 	}
 	
-	return (int)read(d->Io.Read, Buf, Size);
+	return read(d->Io.Read, Buf, Size);
 }
 
 int LSubProcess::Peek()
@@ -756,7 +801,7 @@ bool LSubProcess::Write(LString s)
 
 ssize_t LSubProcess::Write(const void *Buf, ssize_t Size, int Flags)
 {
-	return (int)write(d->Io.Write, Buf, Size);
+	return write(d->Io.Write, Buf, Size);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////

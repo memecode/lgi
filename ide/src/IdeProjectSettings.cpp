@@ -1,3 +1,4 @@
+#include "LgiOsDefs.h"
 #include "lgi/common/Lgi.h"
 #include "lgi/common/TableLayout.h"
 #include "lgi/common/TextLabel.h"
@@ -64,6 +65,13 @@ const char *sBuildTypes[] =
 	NULL
 };
 
+const char *sDebuggers[] =
+{
+	"gdb",
+	"lldb",
+	nullptr
+};
+
 static const char **GetEnumValues(ProjSetting s)
 {
 	switch (s)
@@ -72,6 +80,8 @@ static const char **GetEnumValues(ProjSetting s)
 			return sCompilers;
 		case ProjTargetType:
 			return sBuildTypes;
+		case ProjDebugger:
+			return sDebuggers;
 		default:
 			LAssert(!"Unknown enum type.");
 			break;
@@ -111,13 +121,15 @@ struct SettingInfo
 	};
 	
 	ProjSetting Setting;
-	int Type;
-	const char *Name;
-	const char *Category;
+	int Type = 0;
+	const char *Name = nullptr;
+	const char *Category = nullptr;
 	union {
 		uint32_t Flags;
 		BitFlags Flag;
 	};
+	
+	const char *Help = nullptr;
 };
 
 SettingInfo AllSettings[] =
@@ -135,6 +147,7 @@ SettingInfo AllSettings[] =
 	{ProjArgs,					GV_STRING,		"Arguments",			sDebug,		{SF_CROSSPLATFORM|SF_CONFIG_SPECIFIC}},
 	{ProjDebugAdmin,			GV_BOOL,		"DebugAdmin",			sDebug,		{SF_CROSSPLATFORM}},
 	{ProjInitDir,				GV_STRING,		"InitialDir",			sDebug,		{SF_CROSSPLATFORM|SF_FOLDER_SELECT}},
+	{ProjDebugger,				GV_INT32,		"Debugger",				sDebug,		{SF_CROSSPLATFORM|SF_ENUM}},
 	
 	{ProjDefines,				GV_STRING,		"Defines",				sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC}},
 	{ProjCompileOptions,		GV_STRING,		"Options",				sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC}},
@@ -142,6 +155,10 @@ SettingInfo AllSettings[] =
 	{ProjSystemIncludes,		GV_STRING,		"SystemIncludes",		sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC|SF_PLATFORM_SPECIFC}},
 	{ProjLibraries,				GV_STRING,		"Libraries",			sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC}},
 	{ProjLibraryPaths,			GV_STRING,		"LibraryPaths",			sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC}},
+
+	{ProjRPath,					GV_STRING,		"RPath",				sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC|SF_PLATFORM_SPECIFC}, "Extra run time paths to find libraries:"},
+	{ProjRPathLink,				GV_STRING,		"RPathLink",			sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC|SF_PLATFORM_SPECIFC}, "Extra link time paths to find dependencies:"},
+	
 	{ProjTargetType,			GV_INT32,		"TargetType",			sBuild,		{SF_CROSSPLATFORM|SF_ENUM}},
 	{ProjTargetName,			GV_STRING,		"TargetName",			sBuild,		{SF_PLATFORM_SPECIFC|SF_CONFIG_SPECIFIC}},
 	{ProjApplicationIcon,		GV_STRING,		"ApplicationIcon",		sBuild,		{SF_PLATFORM_SPECIFC|SF_FILE_SELECT}},
@@ -183,7 +200,7 @@ struct IdeProjectSettingsPriv
 
 public:
 	IdeProject *Project = NULL;
-	LHashTbl<IntKey<int>, SettingInfo*> Map;
+	LHashTbl<IntKey<int>, SettingInfo*, true/* FIXME: locking...? */> Map;
 	IdeProjectSettings *Parent = NULL;
 	LXmlTag Active;
 	LXmlTag Editing;
@@ -322,17 +339,16 @@ public:
 		d = priv;
 	}
 	
-	void AddLine(int i, int Config, SysPlatform platform)
+	void AddLine(int i, int &CellY, int Config, SysPlatform platform)
 	{
 		char *Path;
-		int CellY = i * 2;
 		
 		// Do label cell
-		auto *c = Tbl->GetCell(0, CellY);
+		auto c = Tbl->GetCell(0, CellY++);
 		c->Add(Ctrls[i].Text = new LTextLabel(IDC_TEXT_BASE + i, 0, 0, -1, -1, Path = d->BuildPath(Setting->Setting, Flags, platform, Config)));
 		
 		// Do value cell
-		c = Tbl->GetCell(0, CellY + 1);
+		c = Tbl->GetCell(0, CellY);
 
 		auto t = d->Editing.GetChildTag(Path);
 		if (Setting->Type == GV_STRING)
@@ -347,7 +363,7 @@ public:
 			if (Setting->Flag.FileSelect ||	
 				Setting->Flag.FolderSelect)
 			{
-				c = Tbl->GetCell(1, CellY + 1);
+				c = Tbl->GetCell(1, CellY);
 				int Base = Setting->Flag.FileSelect ? IDC_BROWSE_FILE : IDC_BROWSE_FOLDER;
 				if (c)
 					c->Add(new LButton(Base + i, 0, 0, -1, -1, "..."));
@@ -388,6 +404,8 @@ public:
 				Ctrls[i].Chk->Value(atoi(t->GetContent()));
 		}
 		else LAssert(!"Unknown type?");
+		
+		CellY++;
 	}
 	
 	void SetSetting(SettingInfo *setting, int flags, SysPlatform platform)
@@ -443,14 +461,28 @@ public:
 		
 		if (Setting)
 		{
+			int CellY = 0;
+
+			if (Setting->Help)
+			{
+				auto c = Tbl->GetCell(0, CellY++);
+				if (auto tl = new LTextLabel(ID_STATIC, 0, 0, -1, -1, Setting->Help))
+				{
+					c->Add(tl);
+					c->PaddingBottom("0.5em");
+					tl->GetCss(true)->Color("gray");
+					tl->OnStyleChange();
+				}
+			}
+
 			if (Setting->Flag.ConfigSpecific)
 			{
 				for (int i=0; i<d->Configs.Length(); i++)
-					AddLine(i, i, platform);
+					AddLine(i, CellY, i, platform);
 			}
 			else
 			{
-				AddLine(0, -1, platform);
+				AddLine(0, CellY, -1, platform);
 			}
 			
 			Tbl->InvalidateLayout();
@@ -519,9 +551,9 @@ public:
 			
 			if (GetViewById(IDC_SETTINGS, Tree))
 			{
-				const char *Section = NULL;
-				LTreeItem *SectionItem = NULL;
-				for (SettingInfo *i = AllSettings; i->Setting; i++)
+				const char *Section = nullptr;
+				LTreeItem *SectionItem = nullptr;
+				for (auto i = AllSettings; i->Setting; i++)
 				{
 					if (!SectionItem || (Section && stricmp(i->Category, Section)))
 					{
@@ -636,7 +668,7 @@ public:
 	void SetDefaults()
 	{
 		// Find path to Lgi...
-		IdeProject *LgiProj = NULL;
+		IdeProject *LgiProj = nullptr;
 		if (d->Project)
 		{
 			LArray<ProjectNode*> Nodes;
@@ -779,7 +811,9 @@ public:
 						}
 						else
 						{
-							LFileSelect *s = new LFileSelect;
+							auto s = new LFileSelect;
+							if (!s)
+								break;
 							s->Parent(this);
 
 							LFile::Path Path(d->Project->GetBasePath());
@@ -1044,15 +1078,16 @@ bool IdeProjectSettings::Serialize(LXmlTag *Parent, bool Write)
 	return false;
 }
 
-const char *IdeProjectSettings::GetStr(ProjSetting Setting, const char *Default, SysPlatform Platform)
+const char *IdeProjectSettings::GetStr(ProjSetting Setting, const char *Default, SysPlatform Platform, int Config)
 {
+	d->Map.ownThread = LCurrentThreadId();
 	auto s = d->Map.Find(Setting);
 	LAssert(s);
 	LArray<char*> Strs;
 	int Bytes = 0;
 	if (!s->Flag.PlatformSpecific)
 	{
-		auto path = d->BuildPath(Setting, 0, Platform);
+		auto path = d->BuildPath(Setting, 0, Platform, Config);
 		auto t = d->Active.GetChildTag(path);
 		if (t)
 		{
@@ -1066,7 +1101,7 @@ const char *IdeProjectSettings::GetStr(ProjSetting Setting, const char *Default,
 	}
 	if (!s->Flag.CrossPlatform)
 	{
-		auto path = d->BuildPath(Setting, SF_PLATFORM_SPECIFC, Platform);
+		auto path = d->BuildPath(Setting, SF_PLATFORM_SPECIFC, Platform, Config);
 		auto t = d->Active.GetChildTag(path);
 		if (t)
 		{
@@ -1101,7 +1136,7 @@ int IdeProjectSettings::GetInt(ProjSetting Setting, int Default, SysPlatform Pla
 {
 	int Status = Default;
 
-	SettingInfo *s = d->Map.Find(Setting);
+	auto s = d->Map.Find(Setting);
 	LAssert(s);
 	
 	if (!s->Flag.PlatformSpecific)

@@ -50,7 +50,7 @@ protected:
 
 	#if WINNATIVE
 
-		LWindow *_Dialog = NULL;
+		LWindow *_Dialog = nullptr;
 
 	#elif defined(HAIKU)
 		
@@ -64,7 +64,7 @@ protected:
 	
 	#else
 
-		OsWindow Wnd = NULL;
+		OsWindow Wnd = nullptr;
 		void SetDeleteOnClose(bool i);
 
 	#endif
@@ -74,12 +74,17 @@ protected:
 		friend class LMenu;
 		friend void lgi_widget_size_allocate(Gtk::GtkWidget *widget, Gtk::GtkAllocation *allocation);
 		friend void GtkRootResize(Gtk::GtkWidget *widget, Gtk::GdkRectangle *r, LView *This);
+		friend Gtk::gboolean LWindowDragMotion(Gtk::GtkWidget *widget, Gtk::GdkDragContext *context, Gtk::gint x, Gtk::gint y, Gtk::guint time, LWindow *Wnd);
+		friend void LWindowDragLeave(Gtk::GtkWidget *widget, Gtk::GdkDragContext *context, Gtk::guint time, LWindow *Wnd);
+
 	
-		Gtk::GtkWidget *_Root = NULL, *_VBox = NULL, *_MenuBar = NULL;
+		int curDndViewHnd = 0;
+		bool dndDropInProgress = false;
+		Gtk::GtkWidget *_Root = nullptr, *_VBox = nullptr, *_MenuBar = nullptr;
 		LRect _RootAlloc;
-		void OnGtkDelete();
-		Gtk::gboolean OnGtkEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event);
-		bool OnGtkDropTarget(LView *view, bool isTarget);
+		void GtkDelete();
+		Gtk::gboolean GtkEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event);
+		bool GtkDropTarget(LView *view, bool isTarget);
 
 	#elif defined(LGI_CARBON)
 
@@ -97,10 +102,10 @@ protected:
 	#endif
 
 	/// The default button
-	LViewI *_Default = NULL;
+	LViewI *_Default = nullptr;
 
 	/// The menu on the window
-	LMenu *Menu = NULL;
+	LMenu *Menu = nullptr;
 
 	void SetDragHandlers(bool On);
 	
@@ -113,11 +118,11 @@ public:
 	#endif
 
 	#ifdef __GTK_H__
-		LWindow(Gtk::GtkWidget *w = NULL);
+		LWindow(Gtk::GtkWidget *w = nullptr);
 	#elif LGI_CARBON
-		LWindow(WindowRef wr = NULL);
+		LWindow(WindowRef wr = nullptr);
 	#elif LGI_COCOA
-		LWindow(OsWindow wnd = NULL);
+		LWindow(OsWindow wnd = nullptr);
 	#else
 		LWindow();
 	#endif
@@ -135,7 +140,13 @@ public:
 	void SetMenu(LMenu *m) { Menu = m; }
 	
 	/// Set the window's icon
-	bool SetIcon(const char *FileName);
+	///
+	/// Note on OSX: The icon will be set for the application, not just this window.
+	bool SetIcon(const char *FileName, const char *gnomeAppType
+		#ifndef LINUX
+		= nullptr // not used on other platforms, just ignore
+		#endif
+		);
 
 	/// Don't show title bar
 	bool SetTitleBar(bool ShowTitleBar);
@@ -229,7 +240,7 @@ public:
 
 	/// Builds a map of keyboard short cuts.
 	typedef LHashTbl<IntKey<int>,LViewI*> ShortcutMap;
-	void BuildShortcuts(ShortcutMap &Map, LViewI *v = NULL);
+	void BuildShortcuts(ShortcutMap &Map, LViewI *v = nullptr);
 
 	////////////////////// Events ///////////////////////////////
 	
@@ -317,6 +328,7 @@ public:
 	
 	#if HAIKU
 	
+		bool IsAttached() override;
 		LWindow *GetModalParent();
 		bool SetModalParent(LWindow *dlg);
 		void UpdateRootView();
@@ -328,14 +340,18 @@ public:
 	
 	#elif defined __GTK_H__
 	
-		void OnGtkRealize();
-		bool IsAttached();
-		void Quit(bool DontDelete = false);
+		bool IsAttached() override;
+		void Quit(bool DontDelete = false) override;
+		void SetParent(LViewI *p) override;
+
+		LViewI *WindowFromPoint(int x, int y, bool Debug = false);
 		LRect *GetDecorSize();
 		bool TranslateMouse(LMouse &m);
-		LViewI *WindowFromPoint(int x, int y, bool Debug = false);
-		void _OnViewDelete();
-		void SetParent(LViewI *p) override;
+
+		void GtkRealize() override;
+		void GtkViewDelete();
+		bool GtkDropInProgress() const { return dndDropInProgress; }
+		void GtkDropInProgress(bool inProgress) { dndDropInProgress = inProgress; }
 	
 	#elif defined(MAC)
 	

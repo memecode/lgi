@@ -167,14 +167,14 @@ bool LUri::Set(const char *uri)
 
 	// Scan ahead and check for protocol...
 	const char *hasProto = NULL;
-	const char *hasAuth = NULL;
+	// const char *hasAuth = NULL;
 	const char *hasAt = NULL;
 	const char *hasPath = NULL;
 	const char *hasColon = NULL;
 
 	for (auto c = s; *c; c++)
 	{
-		if (c[0] == ':')
+		if (*c == ':')
 		{
 			if (!hasProto &&
 				!hasAt &&
@@ -185,7 +185,20 @@ bool LUri::Set(const char *uri)
 				c += 2;
 			}
 			else
-				hasColon = c; // port number or user/pass separator?
+			{
+				if (c - s == 1 &&
+					IsAlpha(s[0]) &&
+					strchr("/\\", c[1]))
+				{
+					// This looks like a windows path?
+					hasPath = s;
+					break;
+				}
+				else
+				{
+					hasColon = c; // port number or user/pass separator?
+				}
+			}
 		}
 		else if (c[0] == '@' && !hasAt)
 		{
@@ -251,7 +264,7 @@ bool LUri::Set(const char *uri)
 
 	if (hasPath)
 	{
-		sPath = LString(hasPath).Replace("\\", "/");
+		sPath = LUri::DecodeStr(hasPath).Replace("\\", "/");
 		if (IsFile() &&
 			LDirExists(LocalPath()))
 		{
@@ -281,10 +294,13 @@ LString LUri::EncodeStr(const char *s, const char *ExtraCharsToEncode)
 	{
 		while (*s)
 		{
-			if (*s == ' ' || (ExtraCharsToEncode && strchr(ExtraCharsToEncode, *s)))
+			// Percent-encode UTF-8 bytes and control chars so non-ASCII paths are valid URIs.
+			auto c = (uchar)*s;
+			if (c < 0x20 || c >= 0x7F || c == '%' || c == ' ' || (ExtraCharsToEncode && strchr(ExtraCharsToEncode, *s)))
 			{
 				char h[4];
-				sprintf_s(h, sizeof(h), "%%%2.2X", (uint32_t)(uchar)*s++);
+				sprintf_s(h, sizeof(h), "%%%2.2X", (uint32_t)c);
+				s++;
 				p.Write(h, 3);
 			}
 			else
@@ -362,6 +378,8 @@ bool LUri::UnitTests()
 		{"host:1234",                                        LUri(NULL, NULL, NULL, "host", 1234, NULL)                         },
 		{"somePath/seg/file.png",                            LUri(NULL, NULL, NULL, NULL, 0, "somePath/seg/file.png")           },
 		{"mailto:user@host.com",                             LUri("mailto", "user", NULL, "host.com", 0, NULL)                  },
+		{"C:\\windows\\",		                             LUri(NULL, NULL, NULL, NULL, 0, "C:\\windows\\")                   },
+		{"/mnt/unix/path",		                             LUri(NULL, NULL, NULL, NULL, 0, "/mnt/unix/path")                  },
 	};
 
 	for (auto &test: Parse)

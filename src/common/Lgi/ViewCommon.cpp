@@ -125,7 +125,7 @@ LViewI *LView::_Over = nullptr;
 
 struct ViewTbl : public LMutex
 {
-	typedef LHashTbl<PtrKey<LViewI*>, bool> T;
+	typedef LHashTbl<PtrKey<LViewI*>, bool, true> T;
 	
 private:
 	T Map;
@@ -180,15 +180,9 @@ LView::LView(OsView view) :
 	_Margin(0, 0, 0, 0),
 	_Border(0, 0, 0, 0)
 {
+	d = new LViewPrivate(this);
 	#ifdef _DEBUG
     _Debug = false;
-	#endif
-
-	d = new LViewPrivate(this);
-	#ifdef LGI_SDL
-	_View = this;
-	#elif LGI_VIEW_HANDLE && !defined(HAIKU)
-	_View = view;
 	#endif
 	Pos.ZOff(-1, -1);
 	WndFlags = GWF_VISIBLE;
@@ -203,6 +197,10 @@ LView::LView(OsView view) :
 
 LView::~LView()
 {
+	// Mark this view as tearing down so ancestors/descendants unwinding
+	// through their own teardown don't touch our (partially destructed) state.
+	WndFlags |= GWF_DESTRUCTOR;
+
 	if (d->SinkHnd >= 0)
 	{
 		LEventSinkMap::Dispatch.RemoveSink(this);
@@ -237,6 +235,7 @@ bool LView::CommonEvents(LMessage::Result &result, LMessage *Msg)
 		}
 		case M_PULSE:
 		{
+			// printf("%s:%i - M_PULSE on %s, targets=%i\n", _FL, GetClass(), (int)d->EventTargets.Length());
 			OnPulse();
 
 			for (auto t: d->EventTargets)
@@ -566,7 +565,7 @@ void LView::OnAttach()
 	{
 		if (auto wnd = GetWindow())
 		{
-			auto Status = wnd->OnGtkDropTarget(this, true);
+			auto Status = wnd->GtkDropTarget(this, true);
 			if (!d->DropTarget)
 				d->DropTarget = GetWindow();
 		}
@@ -1381,6 +1380,11 @@ bool LView::Enabled()
 
 void LView::Enabled(bool i)
 {
+	if (!InThread())
+	{
+		LgiTrace("%s:%i - Enabled(%i) called from wrong thread.\n", _FL, i);
+		return;
+	}
 	ThreadCheck();
 
 	if (!i) SetFlag(LViewFlags, GWF_DISABLED);
@@ -1610,7 +1614,7 @@ bool LView::DropTarget(bool t)
 		{
 			if (!DropTarget())
 				d->DropTarget = t ? GetWindow() : nullptr;
-			Status = wnd->OnGtkDropTarget(this, t);
+			Status = wnd->GtkDropTarget(this, t);
 		}
 		
 	#elif WINNATIVE
@@ -1654,7 +1658,7 @@ bool LView::DropTarget(bool t)
 					if (auto a = [[NSMutableArray<NSString*> alloc] init])
 					{
 						// Receive generic file items:
-						[a addObject:(NSString*)kUTTypeItem];
+						[a addObject:@"public.item"];
 						
 						// Receive file promises:
 						for (id item in NSFilePromiseReceiver.readableDraggedTypes)
@@ -1947,8 +1951,16 @@ bool LView::AttachChildren()
 {
 	for (auto c: Children)
 	{
+		#ifdef HAIKU
+		if (auto v = c->GetLView())
+		{
+			if (v->d->onCreateEvent)
+				continue;
+		}
+		#else
 		if (c->IsAttached())
 			continue;
+		#endif
 		if (!c->Attach(this))
 		{
 			LgiTrace("%s:%i - failed to attach %s\n", _FL, c->GetClass());
@@ -2048,7 +2060,9 @@ bool LView::WindowVirtualOffset(LPoint *Offset)
 					break;
 					
 				LRect r = view->GetPos();
-				if (auto parent = view->GetParent())
+				auto parent = view->GetParent();
+				auto parentView = parent ? dynamic_cast<LView*>(parent) : nullptr;
+				if (parent && (!parentView || !(parentView->WndFlags & GWF_DESTRUCTOR)))
 				{
 					LRect c = parent->GetClient(false);
 					Offset->x += r.x1 + c.x1;
@@ -2535,21 +2549,21 @@ LPoint &LView::GetWindowBorderSize()
 {
 	static LPoint s;
 
-	ZeroObj(s);
+	s.Set(0, 0);
 
 	#if WINNATIVE
-	if (_View)
-	{
-		RECT Wnd, Client;
-		GetWindowRect(Handle(), &Wnd);
-		GetClientRect(Handle(), &Client);
-		s.x = (Wnd.right-Wnd.left) - (Client.right-Client.left);
-		s.y = (Wnd.bottom-Wnd.top) - (Client.bottom-Client.top);
-	}
+		if (_View)
+		{
+			RECT Wnd, Client;
+			GetWindowRect(Handle(), &Wnd);
+			GetClientRect(Handle(), &Client);
+			s.x = (Wnd.right-Wnd.left) - (Client.right-Client.left);
+			s.y = (Wnd.bottom-Wnd.top) - (Client.bottom-Client.top);
+		}
 	#elif defined __GTK_H__
 	#elif defined MAC
-	s.x = 0;
-	s.y = 22;
+		s.x = 0;
+		s.y = 22;
 	#endif
 
 	return s;

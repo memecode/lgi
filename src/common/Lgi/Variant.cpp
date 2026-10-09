@@ -436,7 +436,7 @@ LVariant &LVariant::operator =(const char16 *s)
 LVariant &LVariant::operator =(LString s)
 {
 	Empty();
-	if (Value.LStr = new LString)
+	if ((Value.LStr = new LString))
 	{
 		Type = GV_LSTRING;
 		*Value.LStr = s;
@@ -686,6 +686,36 @@ LVariant &LVariant::operator =(LVariant const &i)
 	return *this;
 }
 
+int64_t LVariant::operator -(const LVariant &v) const
+{
+	if (IsString() && v.IsString())
+	{
+		auto ca = ConstStr();
+		auto cb = v.ConstStr();
+		if (ca && cb)
+			return Stricmp(ca, cb);
+			
+		return Stricmp(LStr().Get(), v.LStr().Get());
+	}
+	else if (IsInt() && v.IsInt())
+	{
+		return CastInt64() - v.CastInt64();
+	}
+	else if (IsDouble() && v.IsDouble())
+	{
+		auto cmp = v.CastDouble() - CastDouble();
+		if (cmp < 0.0)
+			return -1;
+		return cmp > 0.0 ? 1 : 0;
+	}
+	else
+	{
+		LAssert(!"Unsupported comparison type?");
+	}
+
+	return 0;
+}
+
 bool LVariant::SetDomRef(LDom *obj, char *name)
 {
 	Empty();
@@ -867,12 +897,48 @@ LString *LVariant::ReleaseLStr()
 	return nullptr;
 }
 
-LString LVariant::LStr()
+LString LVariant::LStr() const
 {
-	if (Type == GV_LSTRING && Value.LStr)
-		return LString(*Value.LStr);
+	switch (Type)
+	{
+		case GV_STRING:
+			return LString(Value.String);
+		case GV_LSTRING:
+			if (Value.LStr)
+				return *Value.LStr;
+			break;
+		case GV_WSTRING:
+			return LString(Value.WString);
+		default:
+			break;
+	}
 
-	return Str();
+	return LString();
+}
+
+const char *LVariant::ConstStr() const
+{
+	switch (Type)
+	{
+		case GV_STRING:
+		{
+			return Value.String;
+		}
+		case GV_LSTRING:
+		{
+			if (Value.LStr)
+				return Value.LStr->Get();
+			break;
+		}
+		case GV_WSTRING:
+			// Can't convert from wstring to char?
+			break;
+		default:
+			break;
+
+	}
+
+	return nullptr;
 }
 
 char *LVariant::Str()
@@ -896,9 +962,16 @@ char *LVariant::Str()
 				return Value.LStr->Get();
 			break;
 		}
+		default:
+			break;
 	}
 
 	return nullptr;
+}
+
+const char16 *LVariant::ConstWStr() const
+{
+	return Type == GV_WSTRING ? Value.WString : nullptr;
 }
 
 char16 *LVariant::WStr()
@@ -928,6 +1001,8 @@ char16 *LVariant::WStr()
 			}
 			break;
 		}
+		default:
+			break;
 	}
 
 	return nullptr;
@@ -1121,35 +1196,35 @@ int64 LVariant::Length()
 	return 0;
 }
 
-bool LVariant::IsInt()
+bool LVariant::IsInt() const
 {
 	return	Type == GV_INT32 ||
 			Type == GV_INT64;
 }
 
-bool LVariant::IsBool()
+bool LVariant::IsBool() const
 {
 	return Type == GV_BOOL;
 }
 
-bool LVariant::IsDouble()
+bool LVariant::IsDouble() const
 {
 	return Type == GV_DOUBLE;
 }
 
-bool LVariant::IsString()
+bool LVariant::IsString() const
 {
 	return	Type == GV_STRING ||
 			Type == GV_WSTRING ||
 			Type == GV_LSTRING;
 }
 
-bool LVariant::IsBinary()
+bool LVariant::IsBinary() const
 {
 	return Type == GV_BINARY;
 }
 
-bool LVariant::IsNull()
+bool LVariant::IsNull() const
 {
 	return Type == GV_NULL;
 }
@@ -1808,8 +1883,10 @@ LDom *LDom::ResolveObject(const char *Var, LString &Name, LString &Array)
 
 struct LDomPropMap
 {
-	LHashTbl<ConstStrKey<char,false>, LDomProperty> ToProp;
-	LHashTbl<IntKey<LDomProperty,ObjNone>, const char *> ToString;
+	// These are static tables, so long as they don't change, they are
+	// thread safe.
+	LHashTbl<ConstStrKey<char,false>, LDomProperty, true> ToProp;
+	LHashTbl<IntKey<LDomProperty,ObjNone>, const char *, true> ToString;
 
 	LDomPropMap()
 	{
@@ -1825,10 +1902,12 @@ struct LDomPropMap
 			return;
 
 		#if defined(_DEBUG) // Check for duplicates.
-		auto existing_prop = ToProp.Find(s);
-		LAssert(existing_prop == ObjNone);
-		auto existing_str = ToString.Find(p);
-		LAssert(existing_str == NULL);
+			ToProp.Sizeof(); // this sets the 'owner' thread...
+			ToString.Sizeof();
+			auto existing_prop = ToProp.Find(s);
+			LAssert(existing_prop == ObjNone);
+			auto existing_str = ToString.Find(p);
+			LAssert(existing_str == NULL);
 		#endif
 
 		ToProp.Add(s, p);
@@ -1898,55 +1977,52 @@ bool LDom::GetValue(const char *Var, LVariant &Value)
 	}
 
 	bool Status = false;
-
 	LString Name, Arr;
 	if (auto Object = ResolveObject(Var, Name, Arr))
 	{
 		if (Name.IsEmpty())
+		{
 			LgiTrace("%s:%i - Warning name parse failed for '%s'\n", _FL, Var);
+		}
 		else
 		{
-			bool arrEmpty = Arr.IsEmpty();
-			Status = Object->GetVariant(Name, Value, arrEmpty ? NULL : Arr.Get());
+			auto arrVal = Arr.IsEmpty() ? nullptr : Arr.Get();
+			Status = Object->GetVariant(Name, Value, arrVal);
 		}
 	}
 
 	_OnAccess(false);
-
 	return Status;
 }
 
 bool LDom::SetValue(const char *Var, LVariant &Value)
 {
-	bool Status = false;
+	if (!Var)
+		return false;
 
-	if (Var)
+	if (!_OnAccess(true))
 	{
-		// LMutex *Sem = dynamic_cast<LMutex*>(this);
-		if (_OnAccess(true))
+		LgiTrace("%s:%i - Locking error\n", _FL);
+		LAssert(0);
+		return false;
+	}
+	
+	bool Status = false;
+	LString Name, Arr;
+	if (auto Object = ResolveObject(Var, Name, Arr))
+	{
+		if (Name.IsEmpty())
 		{
-			LString Name, Arr;
-			LDom *Object = ResolveObject(Var, Name, Arr);
-			if (Object)
-			{
-				if (Name.IsEmpty())
-					LgiTrace("%s:%i - Warning name parse failed for '%s'\n", _FL, Var);
-				else
-				{
-					auto arrEmpty = Arr.IsEmpty();
-					Status = Object->SetVariant(Name, Value, arrEmpty ? NULL : Arr.Get());
-				}
-			}
-
-			_OnAccess(false);
+			LgiTrace("%s:%i - Warning name parse failed for '%s'\n", _FL, Var);
 		}
 		else
 		{
-			LgiTrace("%s:%i - Locking error\n", _FL);
-			LAssert(0);
+			auto arrVal = Arr.IsEmpty() ? nullptr : Arr.Get();
+			Status = Object->SetVariant(Name, Value, arrVal);
 		}
 	}
 
+	_OnAccess(false);
 	return Status;
 }
 

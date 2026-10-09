@@ -128,15 +128,21 @@ LToolBar *LgiLoadToolbar(LViewI *Parent, const char *File, int x, int y)
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
+#if 0
+#define LOG(...)	printf(__VA_ARGS__)
+#else
+#define LOG(...)
+#endif
+
 #define ImgLst_Empty	0x40000000
 #define IgmLst_Add		0x80000000
 
 class LImageListPriv
 {
 public:
-	LImageList *ImgLst;
-	int Sx, Sy;
-	uint8_t DisabledAlpha;
+	LImageList *ImgLst = nullptr;
+	int Sx = 0, Sy = 0;
+	uint8_t DisabledAlpha = false;
 
 	struct CacheDC : public LMemDC
 	{
@@ -165,14 +171,13 @@ public:
 				return dc;
 		}
 		
-		CacheDC *dc = new CacheDC(_FL);
+		auto dc = new CacheDC(_FL);
 		if (dc)
 		{
 			dc->Disabled = Disabled;
 			dc->Back = Back;
 			
-			bool Status = dc->Create(ImgLst->X(), ImgLst->Y(), GdcD->GetColourSpace());
-			if (Status)
+			if (dc->Create(ImgLst->X(), ImgLst->Y(), GdcD->GetColourSpace()))
 			{
 				dc->Colour(dc->Back);
 				dc->Rectangle();
@@ -230,8 +235,10 @@ static bool HasPad(LColourSpace cs)
 	return false;
 }
 
-LImageList::LImageList(const char *file, int line, int x, int y, LSurface *pDC) :
-	LMemDC(file, line)
+LImageList::LImageList(	const char *file, int line,
+						int x, int y,
+						LSurface *pDC)
+	: LMemDC(file, line)
 {
 	d = new LImageListPriv(this, x, y);
 
@@ -247,12 +254,10 @@ LImageList::LImageList(const char *file, int line, int x, int y, LSurface *pDC) 
 		Blt(0, 0, pDC);
 		Op(Old);
 		
-		#if 0
-		printf("Toolbar input image is %s, has_alpha=%i, has_pad=%i\n",
+		LOG("Toolbar input image is %s, has_alpha=%i, has_pad=%i\n",
 			LColourSpaceToString(pDC->GetColourSpace()),
 			pDC->HasAlpha(),
 			HasPad(pDC->GetColourSpace()));
-		#endif
 				
 		#if 0
 		static int Idx = 0;
@@ -582,7 +587,8 @@ void LToolButton::Layout()
 
 	// Text
 	auto s = Name();
-	if (!ToolBar->d->ShowTextLabels() || !s)
+	bool ShowLabels = ToolBar->d->ShowTextLabels();
+	if (!ShowLabels || !s)
 		return;
 
 	// Write each word centered on a different line
@@ -1038,7 +1044,8 @@ LToolBar::LToolBar()
 
 	// Setup tool button font
 	LFontType SysFontType;
-	if (SysFontType.GetSystemFont("Small"))
+	bool HasSmallFont = SysFontType.GetSystemFont("Small");
+	if (HasSmallFont)
 	{
 		d->Font = SysFontType.Create();
 		if (d->Font)
@@ -1090,93 +1097,93 @@ void LToolBar::ContextMenu(LMouse &m)
 {
 	if (IsCustomizable())
 	{
-		LSubMenu *Sub = new LSubMenu;
-		if (Sub)
+		LSubMenu Sub;
+		int n = 1;
+		for (auto it = Children.begin(); it != Children.end(); it++, n++)
 		{
-			int n = 1;
-			for (auto it = Children.begin(); it != Children.end(); it++, n++)
-			{
-				LViewI *v = *it;
+			LViewI *v = *it;
 
-				LToolButton *Btn = dynamic_cast<LToolButton*>(v);
-				if (Btn && Btn->Separator())
+			LToolButton *Btn = dynamic_cast<LToolButton*>(v);
+			if (Btn && Btn->Separator())
+			{
+				Sub.AppendSeparator();
+			}
+			else
+			{
+				auto Item = Sub.AppendItem(v->Name(), n, true);
+				if (Item)
 				{
-					Sub->AppendSeparator();
-				}
-				else
-				{
-					auto Item = Sub->AppendItem(v->Name(), n, true);
-					if (Item)
-					{
-						Item->Checked(v->Visible());
-					}
+					Item->Checked(v->Visible());
 				}
 			}
-			Sub->AppendSeparator();
-			auto Txt = Sub->AppendItem(LLoadString(L_TOOLBAR_SHOW_TEXT, "Show Text Labels"), 1000, true);
-			Txt->Checked(d->Text);
+		}
+		Sub.AppendSeparator();
+		auto Txt = Sub.AppendItem(LLoadString(L_TOOLBAR_SHOW_TEXT, "Show Text Labels"), 1000, true);
+		Txt->Checked(d->Text);
 
-			bool Save = false;
-			int Pick = Sub->Float(this, m);
-			switch (Pick)
+		bool Save = false;
+		int Pick = Sub.Float(this, m);
+		switch (Pick)
+		{
+			case 1000:
 			{
-				case 1000:
+				d->Text = !d->Text;
+				Save = true;
+				#if HAIKU
+				LgiTrace("%s:%i - Toolbar labels toggled: text=%i font=%p show=%i\n",
+					_FL, d->Text, d->Font, d->ShowTextLabels());
+				#endif
+				printf("Sending toolbar LNotifyTableLayoutRefresh\n");
+				SendNotify(LNotifyTableLayoutRefresh);
+				break;
+			}
+			default:
+			{
+				LViewI *Ctrl = Children[Pick - 1];
+				if (Ctrl)
 				{
-					d->Text = !d->Text;
+					Ctrl->Visible(!Ctrl->Visible());
 					Save = true;
-					SendNotify(LNotifyTableLayoutRefresh);
-					break;
 				}
-				default:
-				{
-					LViewI *Ctrl = Children[Pick - 1];
-					if (Ctrl)
-					{
-						Ctrl->Visible(!Ctrl->Visible());
-						Save = true;
-					}
-					break;
-				}
+				break;
 			}
-			
-			DeleteObj(Sub);
-			
-			if (Save)
+		}
+		
+		if (Save)
+		{
+			LStringPipe p(256);
+			p.Push((char*) (d->Text ? "text" : "no"));
+			for (auto v: Children)
 			{
-				LStringPipe p(256);
-				p.Push((char*) (d->Text ? "text" : "no"));
-				for (auto v: Children)
+				if (v->Visible())
 				{
-					if (v->Visible())
-					{
-						p.Print(",%i", v->GetId());
-					}
+					p.Print(",%i", v->GetId());
 				}
-				char *o = p.NewStr();
-				if (o)
-				{
-					if (d->CustomDom)
-					{
-						LVariant v(o);
-						d->CustomDom->SetValue(d->CustomProp, v);
-					}
-					DeleteArray(o);
-				}
-				
-				d->FixSeparators(this);
-
-				for (auto v: Children)
-				{
-					LToolButton *b = dynamic_cast<LToolButton*>(v);
-					if (b && b->TipId >= 0)
-					{
-						d->Tip->DeleteTip(b->TipId);
-						b->TipId = -1;
-					}
-				}
-
-				GetWindow()->PourAll();
 			}
+			char *o = p.NewStr();
+			if (o)
+			{
+				if (d->CustomDom)
+				{
+					LVariant v(o);
+					d->CustomDom->SetValue(d->CustomProp, v);
+				}
+				DeleteArray(o);
+			}
+			
+			d->FixSeparators(this);
+
+			for (auto v: Children)
+			{
+				LToolButton *b = dynamic_cast<LToolButton*>(v);
+				if (b && b->TipId >= 0)
+				{
+					d->Tip->DeleteTip(b->TipId);
+					b->TipId = -1;
+				}
+			}
+
+			GetWindow()->PourAll();
 		}
 	}
 }

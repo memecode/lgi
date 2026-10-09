@@ -83,7 +83,7 @@ public:
 	const char *GetClass() { return "GdcApp16Set"; }
 	void Set()
 	{
-		register union
+		union
 		{
 			Pixel Px;
 			uint16 u;
@@ -97,7 +97,7 @@ public:
 	
 	void VLine(int height)
 	{
-		register union
+		union
 		{
 			Pixel Px;
 			uint16 u;
@@ -115,7 +115,7 @@ public:
 
 	void Rectangle(int x, int y)
 	{
-		register union
+		union
 		{
 			Pixel Px;
 			uint16 u;

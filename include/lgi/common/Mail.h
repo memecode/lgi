@@ -7,12 +7,11 @@
 
 #include <functional>
 
-#include "lgi/common/Net.h"
-#include "lgi/common/Base64.h"
-#include "lgi/common/Progress.h"
-#include "lgi/common/Variant.h"
 #include "lgi/common/OAuth2.h"
 #include "lgi/common/Store3Defs.h"	
+#include "lgi/common/OpenSSLSocket.h"
+#include "lgi/common/File.h"
+#include "lgi/common/DateTime.h"
 
 #ifndef GPL_COMPATIBLE
 #define GPL_COMPATIBLE						0
@@ -42,6 +41,7 @@ extern void DecodeAddrName(const char *Start, LString &Name, LString &Addr, cons
 extern int MaxLineLen(char *Text);
 extern char *EncodeImapString(const char *s);
 extern char *DecodeImapString(const char *s);
+
 // Use LToBinary instead
 [[deprecated]] extern bool UnBase64Str(LString &s);
 // Use LToBase64 instead
@@ -187,6 +187,9 @@ protected:
 	virtual void OnUserMessage(char *Str) {}
 
 public:
+	/// Handle asking the user about a certificate that didn't validiate
+	SslSocket::TCertCallback sslCertCallback;
+
 	// Logging
 	LStreamI *Logger = NULL;
 	void Log(const char *Str, LSocketI::SocketMsgType type);
@@ -228,6 +231,24 @@ public:
 		ErrMsgId = ResourceId;
 		ErrMsgFmt = Fmt;
 		ErrMsgParam = Param;
+	}
+
+	// Formats a LDateTime according to RFC822:
+	static LString FormatDateTimeRfc(const LDateTime *dt)
+	{
+		if (!dt)
+			return LString();
+
+		auto tzMin = dt->GetTimeZone();
+		return LString::Fmt("%2.2i %s %4.4i %2.2i:%2.2i:%2.2i %+2.2i%2.2i", 
+			dt->Day(),
+			LDateTime::MonthsShort[dt->Month() - 1],
+			dt->Year(),
+			dt->Hours(),
+			dt->Minutes(),
+			dt->Seconds(),
+			tzMin / 60,
+			ABS(tzMin) % 60);
 	}
 };
 
@@ -558,9 +579,9 @@ protected:
 	bool MailIsEnd(LString &s);
 	bool ListCmd(const char *Cmd, LHashTbl<ConstStrKey<char,false>, bool> &Results);
 
-	const char *End;
-	const char *Marker;
-	int Messages;
+	const char *End = "\r\n.\r\n";
+	const char *Marker = nullptr;
+	int Messages = -1;
 
 public:
 	MailPop3();

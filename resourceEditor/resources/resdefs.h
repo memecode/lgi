@@ -20,8 +20,13 @@
 #define IDC_50									50
 #define IDC_54									54
 #define IDC_RESULTS								56
+#define IDD_OPTIONS								69
+#define IDC_70									70
+#define ID_GOOGLE_CLOUD_PROJ					72
 #define IDD_SEARCH								500
+#define IDM_MENU_501							501
 #define IDC_TEXT								502
+#define ID_OPTIONS								503
 #define IDC_LANG								504
 #define IDC_NOT_IN_LANG							505
 #define IDC_NOT_LANG							506

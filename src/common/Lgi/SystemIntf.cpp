@@ -209,9 +209,9 @@ class SshBackend :
 	{
 		SshBackend *backend;
 		LString dir, cmd;
-		LStream *log = NULL;
-		ProcessIo *out = NULL;
-		LCancel *cancel = NULL;
+		LStream *log = nullptr;
+		ProcessIo *out = nullptr;
+		LCancel *cancel = nullptr;
 		std::function<void(int)> exitcodeCb;
 		int32_t exitCode = -1;
 
@@ -224,7 +224,7 @@ class SshBackend :
 				LCancel *cancelObj,
 				std::function<void(int)> cb) :
 			LThread("Ssh.Process.Thread"),
-			LSsh([this](auto Msg, auto Type)
+			LSsh([this](auto &hostInfo)
 				{
 					return SshConnect;
 				},
@@ -317,9 +317,9 @@ class SshBackend :
 		}
 	};
 
-	LView *app = NULL;
+	LView *app = nullptr;
 	LUri uri;
-	LStream *log = NULL;
+	LStream *log = nullptr;
 	SysPlatform sysType = PlatformUnknown;
 	LString remoteSep;
 	LString homePath;
@@ -356,7 +356,7 @@ class SshBackend :
 	{
 		if (!ssh)
 		{
-			if (ssh.Reset(new LSsh( [this](auto msg, auto hostType) -> LSsh::CallbackResponse
+			if (ssh.Reset(new LSsh( [this](auto &hostInfo) -> LSsh::CallbackResponse
 				{
 					return LSsh::SshConnect;
 				},
@@ -1747,7 +1747,7 @@ class FtpBackend :
 		IFtpEntry entry;
 	};
 	LAutoPtr<IFtp> ftp;
-	LHashTbl<StrKey<char>, TCache*> cache;
+	LHashTbl<StrKey<char>, TCache*, true> cache;
 
 	class FtpDir : public LArray<IFtpEntry*>, public LDirectory
 	{
@@ -2022,10 +2022,10 @@ public:
 	// Reading and writing:
 	LString ConvertPath(LString s)
 	{
-		LString unix = s.Replace("\\", "/");
-		if (unix(0) == '.' && unix.Length() > 1)
-			return unix(1, -1);
-		return unix;
+		LString unixPath = s.Replace("\\", "/");
+		if (unixPath(0) == '.' && unixPath.Length() > 1)
+			return unixPath(1, -1);
+		return unixPath;
 	}
 
 	bool SetRemote(LString s, LError *err)
@@ -2185,7 +2185,7 @@ public:
 					if (!c)
 					{
 						cache.Add(full, c = new TCache);
-						LgiTrace("Adding cache '%s'\n", full.Get());
+						// LgiTrace("Adding cache '%s'\n", full.Get());
 					}
 					if (c)
 						c->entry = *e;
@@ -2723,7 +2723,9 @@ LAutoPtr<SystemIntf> CreateSystemInterface(	LView *parent,
 	LUri u(uri);
 	if (u.IsProtocol("ssh"))
 		backend.Reset(new SshBackend(parent, uri, log, readyCallback));
-	else if (u.IsProtocol("ftp"))
+	else if (u.IsProtocol("ftp") ||
+			 u.IsProtocol("sftp") ||
+			 u.IsProtocol("ftps"))
 		backend.Reset(new FtpBackend(parent, uri, log, readyCallback));
 	else	
 		backend.Reset(new LocalBackend(parent, uri, log, readyCallback));

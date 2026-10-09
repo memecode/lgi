@@ -15,7 +15,7 @@ public:
 	{
 		return
 				#ifdef WINDOWS
-                    "zlib"
+                    "z"
 					#ifdef _DEBUG
 					"d"
 					#endif

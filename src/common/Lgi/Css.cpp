@@ -393,7 +393,7 @@ bool LCss::ToEnum(FontFamilyType &e, const char *str)
 	return false;
 }
 
-int LCss::Len::ToPx(int Box, LFont *Font, int Dpi)
+int LCss::Len::ToPx(int Box, LFont *Font, int Dpi) const
 {
 	switch (Type)
 	{
@@ -1778,6 +1778,13 @@ bool LCss::Parse(const char *&s, ParsingStyle Type)
 				}
 
 				SkipWhite(s);
+
+				// Trailing junk makes the whole declaration invalid (like browsers), e.g.
+				// "margin:0 \n -webkit-foo: none" with a missing ';'
+				if (*s && *s != ';' && *s != '}' && strnicmp(s, "!important", 10))
+				{
+					Lengths.DeleteObjects();
+				}
 				
 				bool Mismatch = false;
 				switch (PropId)
@@ -1881,6 +1888,7 @@ bool LCss::Parse(const char *&s, ParsingStyle Type)
 							Lengths.Length(0);
 							OnChange(PropMargin);
 						}
+						break;
 					}
 					default:
 					{
@@ -2141,7 +2149,6 @@ bool LCss::Len::Parse(const char *&s, PropType Prop, ParsingStyle ParseType)
 	{
 		Value = (float) atof(s);
 		while (IsNumeric(s)) s++;
-		SkipWhite(s);
 		if (*s == '%')
 		{
 			Type = LenPercent;

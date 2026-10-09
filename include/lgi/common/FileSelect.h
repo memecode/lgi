@@ -11,7 +11,12 @@
 #define FILE_SELECT_FN LgiFunc
 #endif
 
-FILE_SELECT_FN bool LGetUsersLinks(LString::Array &Links);
+struct LUserLink
+{
+	LString name, path;
+};
+
+FILE_SELECT_FN bool LGetUsersLinks(LArray<LUserLink> &Links);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // File select dialog

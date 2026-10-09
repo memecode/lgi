@@ -55,8 +55,9 @@ public:
 	int64			DropSelectTime = 0;
     int8            IconTextGap = 0;
     int				LastLayoutPx = -1;
-	LMouse			*CurrentClick = NULL;
-	LTreeItem		*ScrollTo = NULL;
+	LMouse			*CurrentClick = nullptr;
+	LTreeItem		*ScrollTo = nullptr;
+	bool			showUpdates = true;
     
 	uint64_t		searchTs = 0;
 	LString			searchTerm;
@@ -67,9 +68,9 @@ public:
 	bool			JoiningLines = false;
 
 	// Pointers into items... be careful to clear when deleting items...
-	LTreeItem		*LastHit = NULL;
+	LTreeItem		*LastHit = nullptr;
 	List<LTreeItem>	Selection;
-	LTreeItem		*DropTarget = NULL;
+	LTreeItem		*DropTarget = nullptr;
 };
 
 class LTreeItemPrivate
@@ -355,7 +356,7 @@ bool LTreeNode::ForEach(std::function<bool(LTreeItem*)> Fn, int *count)
 			return false;
 			
 		if (count)
-			*count++;
+			(*count)++;
 		
 		if (!t->ForEach(Fn, count))
 			return false;
@@ -586,11 +587,8 @@ void LTreeItem::_SetTreePtr(LTree *t)
 	{
 		// Clearing tree pointer, must remove all references to this item that
 		// the tree might still have.
-		if (d->Selected)
-		{
-			Tree->d->Selection.Delete(this);
-			d->Selected = false;
-		}
+		Tree->d->Selection.Delete(this);
+		d->Selected = false;
 		if (Tree->d->LastHit == this)
 			Tree->d->LastHit = NULL;
 		if (Tree->d->DropTarget == this)
@@ -1108,10 +1106,13 @@ void LTreeItem::OnPaint(ItemPaintCtx &Ctx)
 	// text: other columns
 	Ctx.Fore = f.Type == LCss::ColorRgb ? (LColour)f : Fore;
 	Ctx.TxtBack = b.Type == LCss::ColorRgb ? (LColour)b : Ctx.Back;
-	for (int i=1; i<Ctx.Columns; i++)
+	for (size_t i=1; i<Ctx.Columns; i++)
 	{
+		if (Ctx.ColPx[i] <= 0)
+			continue;
+
 		Ctx.Set(x, Pos.y1, x + Ctx.ColPx[i] - 1, Pos.y2);
-		OnPaintColumn(Ctx, i, Tree->Columns[i]);
+		OnPaintColumn(Ctx, (int)i, Tree->Columns[i]);
 		x = Ctx.x2 + 1;
 	}
 	
@@ -1187,6 +1188,21 @@ LTree::~LTree()
 	DeleteObj(d);
 }
 
+bool LTree::GetShowUpdates()
+{
+	return d->showUpdates;
+}
+
+void LTree::SetShowUpdates(bool update)
+{
+	if (d->showUpdates != update)
+	{
+		d->showUpdates = update;
+		if (d->showUpdates)
+			UpdateAllItems();
+	}
+}
+
 void LTree::Sort(std::function<int(LTreeNode*, LTreeNode*)> compare)
 {
 	auto lck = ScopedLock(_FL);
@@ -1240,6 +1256,9 @@ List<LTreeItem>	*LTree::GetSelLst()
 
 void LTree::_Update(LRect *r, bool Now)
 {
+	if (!d->showUpdates)
+		return;
+	
 	auto lck = ScopedLock(_FL);
 	if (r)
 	{
@@ -1257,6 +1276,9 @@ void LTree::_Update(LRect *r, bool Now)
 
 void LTree::_UpdateBelow(int y, bool Now)
 {
+	if (!d->showUpdates)
+		return;
+
 	auto lck = ScopedLock(_FL);
 	LPoint s = ScrollPxPos();
 	LRect c = GetClient();
@@ -1275,6 +1297,7 @@ void LTree::ClearDs(int Col)
 LPoint LTree::ScrollPxPos()
 {
 	auto lck = ScopedLock(_FL);
+
 	LPoint Status;
 	Status.x = (HScroll) ? (int)HScroll->Value() : 0;
 	Status.y = (VScroll) ? (int)VScroll->Value() * TREE_BLOCK : 0;
@@ -1667,7 +1690,7 @@ bool LTree::OnKey(LKey &k)
 					case 'F':
 					case 'f':
 					{
-						if (k.Ctrl())
+						if (k.Ctrl() && !k.Shift())
 						{
 							SendNotify(LNotifyContainerFind);
 							return true;
@@ -1695,7 +1718,11 @@ bool LTree::OnKey(LKey &k)
 
 	if (i && i != (LTreeItem*)this)
 	{
-		if (!i->OnKey(k) &&
+		if (!d->Selection.HasItem(i))
+		{
+			LgiTrace("%s:%i - item no longer in selection, was it deleted?\n", _FL);
+		}
+		else if (!i->OnKey(k) &&
 			d->searchTerm)
 		{
 			// Tree item didn't use key... so use the search term to look through the children and select one...
@@ -1987,8 +2014,13 @@ void LTree::OnPaint(LSurface *pDC)
 	if (Columns.Length() > 0)
 	{
 		Ctx.Columns = (int)Columns.Length();
-		for (int i=0; i<Columns.Length(); i++)
-			ColPx[i] = Columns[i]->Width();
+		for (size_t i=0; i<Columns.Length(); i++)
+		{
+			if (Columns[i]->Display() == LCss::DispNone)
+				ColPx[i] = 0;
+			else
+				ColPx[i] = Columns[i]->Width();
+		}
 	}
 	else
 	{
@@ -2011,7 +2043,7 @@ void LTree::OnPaint(LSurface *pDC)
 	// paint items
 	ZeroObj(d->LineFlags);
 	List<LTreeItem>::I it = Items.begin();
-	for (LTreeItem *i = *it; i; i=*++it)
+	for (auto i = *it; i; i=*++it)
 		i->OnPaint(Ctx);
 
 	pDC->SetOrigin(Ox, Oy);
@@ -2225,7 +2257,7 @@ int LTree::GetContentSize(int ColumnIdx)
 	int MaxPx = 0;
 	
 	List<LTreeItem>::I it = Items.begin();
-	for (LTreeItem *i = *it; i; i=*++it)
+	for (auto i = *it; i; i=*++it)
 	{
 		int ItemPx = i->GetColumnSize(ColumnIdx);
 		MaxPx = MAX(ItemPx, MaxPx);
@@ -2373,6 +2405,9 @@ static void LTreeItemUpdateAll(LTreeNode *n)
 
 void LTree::UpdateAllItems()
 {
+	if (!d->showUpdates)
+		return;
+
 	auto lck = ScopedLock(_FL);
 	d->LayoutDirty = true;
 	LTreeItemUpdateAll(this);

@@ -75,6 +75,12 @@ LgiExtern LString LGetAppForMimeType
 /// \return a formatted file size
 LgiExtern LString LFormatSize(int64_t Size);
 
+/// Create an MD5 hash of the input data
+LgiExtern LString LMd5(LString data);
+
+/// Convert the input data to a hex string:
+LgiExtern LString LHex(LString data);
+
 /// URL encode a string
 LgiExtern LString LUrlEncode(const char *s, const char *delim);
 
@@ -122,10 +128,26 @@ LgiExtern LString LStrConvertCp
 LgiExtern char* LTokStr(const char*& s);
 LgiExtern LString LTokLStr(const char*& s);
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
+/// \brief Opens a file or directory.
+///
+/// If the input is an executable then it is run. If the input file
+/// is a document then an appropriate application is found to open the
+/// file and the file is passed to that application. If the input is
+/// a directory then the OS's file manager is openned to browse the
+/// directory.
+///
+/// \ingroup Base
+LgiExtern bool LExecute
+(
+	/// The file to open
+	const char *file,
+	/// The arguments to pass to the program
+	const char *arguments = "",
+	/// The directory to run in
+	const char *dir = nullptr,
+	/// An error message
+	LError *error = nullptr
+);
 
 /////////////////////////////////////////////////////////////
 // Externs
@@ -135,12 +157,12 @@ extern "C"
 /// Converts a buffer of text to a different charset
 /// \ingroup Text
 /// \returns the bytes written to the location pointed to by 'Out'
-LgiFunc ssize_t LBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, const void *&In, const char *InCp, ssize_t &InLen);
+LgiExtern ssize_t LBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, const void *&In, const char *InCp, ssize_t &InLen);
 
 /// \brief Converts a string to a new charset
 /// \return A dynamically allocate, null terminated string in the new charset
 /// \ingroup Text
-LgiFunc void *LNewConvertCp
+LgiExtern void *LNewConvertCp
 (
 	/// Output charset
 	const char *OutCharset,
@@ -154,19 +176,19 @@ LgiFunc void *LNewConvertCp
 
 /// Return true if Lgi support the charset
 /// \ingroup Text
-LgiFunc bool LIsCpImplemented(const char *Cp);
+LgiExtern bool LIsCpImplemented(const char *Cp);
 
 /// Converts the ANSI code page to a charset name
 /// \ingroup Text
-LgiFunc const char *LAnsiToLgiCp(int AnsiCodePage = -1);
+LgiExtern const char *LAnsiToLgiCp(int AnsiCodePage = -1);
 
 /// Calculate the number of characters in a string
 /// \ingroup Text
-LgiFunc int LCharLen(const void *Str, const char *Cp, int Bytes = -1);
+LgiExtern int LCharLen(const void *Str, const char *Cp, int Bytes = -1);
 
 /// Move a pointer along a utf-8 string by characters
 /// \ingroup Text
-LgiFunc char *LSeekUtf8
+LgiExtern char *LSeekUtf8
 (
 	/// Pointer to the current character
 	const char *Ptr,
@@ -178,7 +200,7 @@ LgiFunc char *LSeekUtf8
 
 /// Formats a data size into appropriate units
 /// \ingroup Base
-LgiFunc void LFormatSize
+LgiExtern void LFormatSize
 (
 	/// Output string
 	char *Str,
@@ -189,12 +211,12 @@ LgiFunc void LFormatSize
 );
 
 /// \returns true if the path is a volume root.
-LgiFunc bool LIsVolumeRoot(const char *Path);
+LgiExtern bool LIsVolumeRoot(const char *Path);
 
 /// Converts a string from URI encoding (ala %20 -> ' ')
 /// \returns a dynamically allocated string or NULL on error
 /// \ingroup Text
-LgiFunc char *LDecodeUri
+LgiExtern char *LDecodeUri
 (
 	/// The URI
 	const char *uri,
@@ -205,13 +227,16 @@ LgiFunc char *LDecodeUri
 /// Converts a string to URI encoding (ala %20 -> ' ')
 /// \returns a dynamically allocated string or NULL on error
 /// \ingroup Text
-LgiFunc char *LEncodeUri
+LgiExtern char *LEncodeUri
 (
 	/// The URI
 	const char *uri,
 	/// The length or -1 if NULL terminated
 	int len = -1
 );
+
+// Expand a strings that include ${var} names, using 'source' to fill out the values:
+LgiExtern LString LExpandVars(const char* in, LDom* source);
 
 // Path
 #if LGI_COCOA || defined(__GTK_H__) || defined(HAIKU)
@@ -220,7 +245,7 @@ LgiFunc char *LEncodeUri
 
 /// Returns the system path specified
 /// \ingroup Base
-LgiFunc bool LGetSystemPath
+LgiExtern bool LGetSystemPath
 (
 	/// Which path to retreive
 	LSystemPath Which,
@@ -233,7 +258,7 @@ LgiFunc bool LGetSystemPath
 /// \brief Recursively search for files
 /// \return Non zero if something was found
 /// \ingroup Base
-LgiFunc bool LRecursiveFileSearch
+LgiExtern bool LRecursiveFileSearch
 (
 	/// Start search in this dir
 	const char *Root,
@@ -255,51 +280,33 @@ LgiFunc bool LRecursiveFileSearch
 
 /// Gets the currently selected language
 /// \ingroup Resources
-LgiFunc struct LLanguage *LGetLanguageId();
+LgiExtern struct LLanguage *LGetLanguageId();
 
 // Os version functions
 
 /// Gets the current operating system and optionally it's version.
 /// \returns One of the defines starting with #LGI_OS_UNKNOWN in LgiDefs.h
 /// \ingroup Base
-LgiFunc int LGetOs(LArray<int> *Ver = 0);
+LgiExtern int LGetOs(LArray<int> *Ver = 0);
 
 /// Gets the current operation systems name.
 /// \ingroup Base
-LgiFunc const char *LGetOsName();
+LgiExtern const char *LGetOsName();
+
+/// Check versions
+LgiExtern bool LCheckVersion(LString ver, LString minVer);
 
 // System
 
-/// \brief Opens a file or directory.
-///
-/// If the input is an executable then it is run. If the input file
-/// is a document then an appropriate application is found to open the
-/// file and the file is passed to that application. If the input is
-/// a directory then the OS's file manager is openned to browse the
-/// directory.
-///
-/// \ingroup Base
-LgiFunc bool LExecute
-(
-	/// The file to open
-	const char *file,
-	/// The arguments to pass to the program
-	const char *arguments = "",
-	/// The directory to run in
-	const char *dir = nullptr,
-	/// An error message
-	LError *error = nullptr
-);
-
 /// Initializes the random number generator
 /// \ingroup Base
-LgiFunc void LRandomize(uint Seed);
+LgiExtern void LRandomize(uint Seed);
 
 /// Returns a random number between 0 and Max-1
 /// \ingroup Base
-LgiFunc uint LRand(uint Max = 0);
+LgiExtern uint LRand(uint Max = 0);
 
-LgiFunc bool _lgi_read_colour_config(const char *Tag, uint32_t *c);
+LgiExtern bool _lgi_read_colour_config(const char *Tag, uint32_t *c);
 
 #ifndef SND_ASYNC
 #define SND_ASYNC	0x0001
@@ -307,7 +314,7 @@ LgiFunc bool _lgi_read_colour_config(const char *Tag, uint32_t *c);
 
 /// Plays a sound
 /// \ingroup Base
-LgiFunc bool LPlaySound
+LgiExtern bool LPlaySound
 (
 	/// File name of the sound to play
 	const char *FileName,
@@ -345,7 +352,7 @@ LgiExtern bool LGetMimeTypeExtensions
 
 /// Returns the all applications that can open a given mime type.
 /// \ingroup Mime
-LgiFunc bool LGetAppsForMimeType
+LgiExtern bool LGetAppsForMimeType
 (
 	/// The type of files to match apps to.
 	///
@@ -364,7 +371,7 @@ LgiFunc bool LGetAppsForMimeType
 
 /// Returns true if the build is for release.
 /// \ingroup Base
-LgiFunc int LIsReleaseBuild();
+LgiExtern int LIsReleaseBuild();
 
 #ifndef LGI_STATIC
 LgiFunc class LAlert *LAssertDlg(LString Msg, bool canDebug, std::function<void(int)> Callback);
@@ -421,12 +428,8 @@ LgiFunc class LAlert *LAssertDlg(LString Msg, bool canDebug, std::function<void(
 
 #elif defined(__OBJC__)
 
-	LgiFunc NSCursor *LCocoaCursor(LCursor lc);
+	LgiExtern NSCursor *LCocoaCursor(LCursor lc);
 
-#endif
-
-#ifdef __cplusplus
-}
 #endif
 
 #endif

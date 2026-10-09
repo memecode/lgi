@@ -8,7 +8,7 @@
 
 class LJson
 {
-	constexpr static const char *EscapeChars = "\"\r\n\t\b";
+	constexpr static const char *EscapeChars = "\"\\\r\n\t\b";
 
 	struct Key
 	{

@@ -7,6 +7,7 @@
 #define _LHashTbl_H_
 
 #include <ctype.h>
+#include "lgi/common/CurrentTime.h"
 #include "lgi/common/Mem.h"
 #include "lgi/common/Array.h"
 #include "lgi/common/LgiString.h"
@@ -41,9 +42,10 @@ public:
 		return a == b;
 	}
 	size_t TotalSize() { return 0; }
+	void Swap(IntKey<T,DefaultNull> &other) {}
 };
 
-template<typename T, T DefaultNull = (T)NULL>
+template<typename T, T DefaultNull = (T)nullptr>
 class PtrKey
 {
 public:
@@ -68,7 +70,7 @@ public:
 	size_t TotalSize() { return 0; }
 };
 
-template<typename T, bool CaseSen = true, T *DefaultNull = (T*)NULL>
+template<typename T, bool CaseSen = true, T *DefaultNull = (T*)nullptr>
 class StrKey
 {
 public:
@@ -107,6 +109,11 @@ protected:
 		if (!Mem.Length() || Mem.Last().Free() < Sz)
 			Mem.New().Length(PoolSize);
 		return Mem.Last().Free() >= Sz ? &Mem.Last() : NULL;
+	}
+
+	void Swap(KeyPool<T,BlockSize> &h)
+	{
+		Mem.Swap(h.Mem);
 	}
 
 public:
@@ -227,12 +234,12 @@ public:
 };
 
 /// General hash table container for O(1) access to table data.
-template<typename KeyTrait, typename Value>
+template<typename KeyTrait, typename Value, bool ExternalLocking = false>
 class LHashTbl : public KeyTrait
 {
 public:
 	typedef typename KeyTrait::Type Key;
-	typedef LHashTbl<KeyTrait,Value> HashTable;
+	typedef LHashTbl<KeyTrait,Value,ExternalLocking> HashTable;
 	const int DefaultSize = 256;
 
 	struct Pair
@@ -294,7 +301,8 @@ protected:
 
 	void InitializeTable(Pair *e, ssize_t len)
 	{
-		if (!e || len < 1) return;
+		if (!e || len < 1)
+			return;
 		while (len--)
 		{
 			e->key = this->NullKey;
@@ -303,13 +311,32 @@ protected:
 		}
 	}
 	
+	void THREAD_UNSAFE()
+	{
+		if (ExternalLocking)
+			return;
+
+		auto curThread = LCurrentThreadId();
+		if (!ownThread)
+			ownThread = curThread;
+		else if (ownThread != curThread)
+		{
+			printf("%s:%i - Thread safety violation. ownThread=" LPrintfThreadId ", curThread=" LPrintfThreadId "\n", _FL, ownThread, curThread);
+		}
+	}
+
 	void THREAD_UNSAFE() const
 	{
-		if (!ownThread)
+		if (ExternalLocking)
 			return;
-		
+		if (!ownThread) // This is a const method, so we can't set ownThread here. Just return.
+			return;
+
 		auto curThread = LCurrentThreadId();
-		LAssert(ownThread != curThread);
+		if (ownThread != curThread)
+		{
+			printf("%s:%i - Thread safety violation. ownThread=" LPrintfThreadId ", curThread=" LPrintfThreadId "\n", _FL, ownThread, curThread);
+		}
 	}
 
 public:
@@ -330,9 +357,10 @@ public:
 		Used = 0;
 		Version = 0;
 		MaxSize = LHASHTBL_MAX_SIZE;
+		Table = NULL;
 		// LAssert(Size <= MaxSize);
-		
-		if ((Table = new Pair[Size]))
+
+		if (Size > 0 && (Table = new Pair[Size]))
 		{
 			InitializeTable(Table, Size);
 		}
@@ -345,7 +373,8 @@ public:
 		Used = 0;
 		Version = 0;
 		MaxSize = LHASHTBL_MAX_SIZE;
-		if ((Table = new Pair[Size]))
+		Table = NULL;
+		if (Size > 0 && (Table = new Pair[Size]))
 		{
 			for (size_t i=0; i<Size; i++)
 			{
@@ -358,7 +387,11 @@ public:
 	/// Deletes the hash table removing all contents from memory
 	virtual ~LHashTbl()
 	{
-		THREAD_UNSAFE();
+		// One could argue that this is not thread safe, but most
+		// of this code is pretty good at shutting down threads before
+		// destroying all the member variables.
+		ownThread = LCurrentThreadId();
+		
 		if (Table)
 		{
 			Empty();
@@ -474,7 +507,11 @@ public:
 						#ifndef __llvm__
 						this != 0 &&
 						#endif
-						Table != 0;
+						(
+							(Size == 0 && Used == 0 && Table == 0)
+							||
+							(Size > 0 && Table != 0 && Used <= Size)
+						);
 		if (!Status)
 		{
 			#ifndef LGI_STATIC
@@ -624,7 +661,10 @@ public:
 		THREAD_UNSAFE();
 
 		ssize_t Index = -1;
-		if (IsOk() && GetEntry(k, Index))
+		if (!IsOk())
+		{
+		}
+		else if (GetEntry(k, Index))
 		{
 			return Table[Index].value;
 		}
@@ -749,27 +789,29 @@ public:
 	}
 
 	/// Swaps the objects
-	void Swap(LHashTbl<KeyTrait,Value> &h)
+	void Swap(LHashTbl<KeyTrait,Value,ExternalLocking> &h)
 	{
 		THREAD_UNSAFE();
 
 		LSwap(this->NullKey, h.NullKey);
-		LSwap(NullValue, h.NullValue);
-		LSwap(Used, h.Used);
-		LSwap(Size, h.Size);
-		LSwap(MaxSize, h.MaxSize);
-		LSwap(Version, h.Version);
-		LSwap(Table, h.Table);
+		KeyTrait::Swap(h);
+
+		LSwap(this->NullValue, h.NullValue);
+		LSwap(this->Used, h.Used);
+		LSwap(this->Size, h.Size);
+		LSwap(this->MaxSize, h.MaxSize);
+		LSwap(this->Version, h.Version);
+		LSwap(this->Table, h.Table);
 	}
 
 	struct PairIterator
 	{
-		LHashTbl<KeyTrait,Value> *t;
+		LHashTbl<KeyTrait,Value,ExternalLocking> *t;
 		ssize_t Idx;
 		int Version;
 
 	public:
-		PairIterator(LHashTbl<KeyTrait,Value> *tbl, ssize_t i)
+		PairIterator(LHashTbl<KeyTrait,Value,ExternalLocking> *tbl, ssize_t i)
 		{
 			t = tbl;
 			Version = t->Version;

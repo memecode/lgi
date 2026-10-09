@@ -16,7 +16,6 @@
 
 #include "BreakPointStore.h"
 #include "FindSymbol.h"
-#include "Debugger.h"
 #ifdef WIN32
 #include "resource.h"
 #endif
@@ -46,7 +45,7 @@ enum IdeMessages
 	M_DEBUG_ON_STATE,
 	M_MAKEFILES_CREATED,
 	M_LAST_MAKEFILE_CREATED,
-	M_SELECT_TAB, // A=(int)tabIndex
+	M_SELECT_TAB, // A=(int)tabIndex, B=(bool)clearContent
 	
 	/// Styling is finished
 	M_STYLING_DONE,

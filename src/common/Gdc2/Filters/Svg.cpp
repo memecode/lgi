@@ -16,9 +16,21 @@ public:
 		}
 			
 		auto sz = In->GetSize();
+		if (sz <= 0)
+		{
+			LgiTrace("%s:%i - empty/invalid stream (sz=%i).\n", _FL, (int)sz);
+			return IoError;
+		}
+
 		LString str;
 		str.Length(sz);
-		In->Read(str.Get(), str.Length());
+		auto rd = In->Read(str.Get(), str.Length());
+		if (rd != (ssize_t)str.Length())
+		{
+			LgiTrace("%s:%i - short read (%i of %i).\n", _FL, (int)rd, (int)str.Length());
+			return IoError;
+		}
+
 		if (auto doc = lunasvg::Document::loadFromData(str.Get(), str.Length()))
 		{
 			int sx = -1, sy = -1;
@@ -43,7 +55,10 @@ public:
 			if (Out->Create(bmp.width(), bmp.height(), System32BitColourSpace))
 			{
 				#ifndef MAC
-				auto bytes = MIN(bmp.stride(), Out->GetRowStep());
+				// GetRowStep() can be negative for bottom-up surfaces, so take the
+				// magnitude before using it as a memcpy length.
+				auto rowStep = Out->GetRowStep();
+				auto bytes = MIN((ssize_t)bmp.stride(), rowStep < 0 ? -rowStep : rowStep);
 				#endif
 				// LgiTrace("%s:%i - strides: %i, %i\n", _FL, bmp.stride(), Out->GetRowStep());
 				for (int y=0; y<Out->Y(); y++)

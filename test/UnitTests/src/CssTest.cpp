@@ -149,6 +149,11 @@ public:
 		if (c != c2)
 			return Error("Compare failed.\n", _FL);
 
+		c.Empty();
+		if (Parse(s = "border-radius: 40px;") &&
+			!LenIs(c.BorderRadius(), 40, LCss::LenPx))
+			return Error("Border radius not set.\n", _FL);
+
 		return true;
 	}
 };

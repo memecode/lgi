@@ -1,0 +1,16 @@
+# qemu-img create -f qcow2 hd.img 256G
+
+qemu-system-x86_64 \
+    -machine pc,accel=kvm \
+    -cpu SandyBridge \
+    -cdrom "haiku-r1beta6-x86_64-anyboot.iso" \
+    -boot menu=on \
+    -drive file="hd.img" \
+    -smp 12 \
+    -m 16G \
+    -usbdevice tablet \
+    -net nic \
+    -net user,hostfwd=tcp:0.0.0.0:2200-:22
+
+
+

@@ -85,6 +85,7 @@ public:
 
 	void Move(int Dir)
 	{
+		auto WasSelected = Select();
 		auto Cur = IndexOf();
 		LTreeNode *p = GetParent();
 		if (!p)
@@ -100,6 +101,9 @@ public:
 			Remove();
 			p->Insert(this, Cur+1);
 		}
+
+		if (WasSelected)
+			Select(true);
 	}
 
 	bool OnKey(LKey &k)
@@ -148,12 +152,12 @@ public:
 
 			m.ToScreen();
 
-			int Cmd;
-			if ((Cmd = s.Float(GetTree(), m.x, m.y)))
+			auto pos = m - _ScrollPos();
+			if (auto cmd = s.Float(GetTree(), pos.x, pos.y))
 			{
 				d->DiscardClick = true;
 
-				switch (Cmd)
+				switch (cmd)
 				{
 					case ID_UP:
 					{
@@ -297,7 +301,7 @@ bool CtrlControlTree::Serialize(FieldTree &Fields)
 
 void WriteTree(LXmlTag *t, LTreeNode *n)
 {
-	CtNode *ct = dynamic_cast<CtNode*>(n);
+	auto ct = dynamic_cast<CtNode*>(n);
 	if (ct)
 	{
 		t->SetAttr("Ref", ct->Str->GetRef());
@@ -305,12 +309,14 @@ void WriteTree(LXmlTag *t, LTreeNode *n)
 		t->SetAttr(VAL_ControlTag, ct->Tag);
 	}
 
-	for (LTreeNode *c = n->GetChild(); c; c = c->GetNext())
+	for (auto c = n->GetChild(); c; c = c->GetNext())
 	{
-		LXmlTag *h = new LXmlTag;
-		WriteTree(h, c);
-		h->SetTag("Control");
-		t->InsertTag(h);
+		if (auto h = new LXmlTag)
+		{
+			WriteTree(h, c);
+			h->SetTag("Control");
+			t->InsertTag(h);
+		}
 	}
 }
 

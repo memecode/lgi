@@ -1,29 +1,26 @@
 
-#ifndef _GMESSAGE_H_
-#define _GMESSAGE_H_
+#pragma once 
 
 #ifdef HAIKU
+	#include <functional>
 
-#include <functional>
-
-// This list of events are send from the BWindow threads over
-// to the application thread for processing.
-#define L_APP_PRIV_EVENTS() \
-	_(None) \
-	_(QuitRequested) \
-	_(General) \
-	_(FrameMoved) \
-	_(FrameResized) \
-	_(AttachedToWindow) \
-	_(KeyDown) \
-	_(KeyUp) \
-	_(Draw) \
-	_(MouseDown) \
-	_(MouseUp) \
-	_(MouseMoved) \
-	_(MakeFocus) \
-	_(Invalidate)
-
+	// This list of events are send from the BWindow threads over
+	// to the application thread for processing.
+	#define L_APP_PRIV_EVENTS() \
+		_(None) \
+		_(QuitRequested) \
+		_(General) \
+		_(FrameMoved) \
+		_(FrameResized) \
+		_(AttachedToWindow) \
+		_(KeyDown) \
+		_(KeyUp) \
+		_(Draw) \
+		_(MouseDown) \
+		_(MouseUp) \
+		_(MouseMoved) \
+		_(MakeFocus) \
+		_(Invalidate)
 #endif
 
 enum LgiMessages
@@ -75,6 +72,10 @@ enum LgiMessages
 		M_DND_END,
 		/// Update the dnd formats on the GtkWindow
 		M_DND_UPDATE_FORMATS,
+		/// Dnd entered a view. Call LDragDropTarget::OnDragEnter
+		M_DND_ENTER,
+		/// Dnd left a view. Call LDragDropTarget::OnDragExit
+		M_DND_EXIT,
 		
 	#elif defined(WINNATIVE)
 
@@ -300,7 +301,7 @@ public:
 	static constexpr const char *PropA = "lgiA"; // (LMessage::Param)
 	static constexpr const char *PropB = "lgiB"; // (LMessage::Param)
 	static constexpr const char *PropView = "lgiView"; // (LView*)
-	static constexpr const char *PropWindow = "lgiWnd"; // (LWindow*)
+	static constexpr const char *PropWindow = "lgiWnd"; // (LViewI*) of an LWindow
 	static constexpr const char *PropEvent = "lgiEvent"; // LAppPrivate::Events as Int32
 	static constexpr const char *PropCallback = "lgiCallback";
 	static constexpr const char *PropNames[2] = {"lgi_a", "lgi_b"};
@@ -358,24 +359,22 @@ public:
 	bool Send(class LViewI *View);
 
 	// Wrappers for passing heap objects in parameters
-	template<typename T>
+	template<typename T, bool Arr = false>
 	LAutoPtr<T> AutoA()
 	{
-		return LAutoPtr<T>((T*)A());
+		return LAutoPtr<T, Arr>((T*)A());
 	}
 
-	template<typename T>
+	template<typename T, bool Arr = false>
 	LAutoPtr<T> AutoB()
 	{
-		return LAutoPtr<T>((T*)B());
+		return LAutoPtr<T, Arr>((T*)B());
 	}
 };
 
 #ifdef LINUX
-extern LMessage CreateMsg(int m, int a = 0, int b = 0);
+	extern LMessage CreateMsg(int m, int a = 0, int b = 0);
 #else
-#define CreateMsg(m, a, b)				LMessage(m, a, b)
+	#define CreateMsg(m, a, b)				LMessage(m, a, b)
 #endif
 
-
-#endif

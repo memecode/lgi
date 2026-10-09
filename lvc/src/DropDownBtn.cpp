@@ -41,7 +41,7 @@ public:
 		Lst->AddColumn("", x);
 	}
 
-	void OnPosChange()
+	void OnPosChange() override
 	{
 		LRect c = GetClient();
 		c.Inset(1, 1);
@@ -49,7 +49,7 @@ public:
 			Lst->SetPos(c);
 	}
 
-	void OnPaint(LSurface *pDC)
+	void OnPaint(LSurface *pDC) override
 	{
 		pDC->Colour(LColour::Black);
 		pDC->Box();

@@ -22,6 +22,7 @@ enum DefnType
 	DefnVariable = 0x40,
 	DefnScope = 0x80,
 	DefnExternC = 0x100,
+	DefnNameSpace = 0x200,
 };
 
 extern const char *toString(DefnType t);

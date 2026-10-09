@@ -98,6 +98,38 @@ LString LScreenDC::Dump()
 	return s;
 }
 
+bool LScreenDC::GetVariant(const char *Name, LVariant &Value, const char *Array)
+{
+	switch (LStringToDomProp(Name))
+	{
+		case SurfaceConstAlpha:
+		{
+			Value = (int64_t)d->Alpha;
+			return true;
+		}
+		default:
+			break;
+	}
+	
+	return false;
+}
+
+bool LScreenDC::SetVariant(const char *Name, LVariant &Value, const char *Array)
+{
+	switch (LStringToDomProp(Name))
+	{
+		case SurfaceConstAlpha:
+		{
+			d->Alpha = Value.CastInt32();
+			return true;
+		}
+		default:
+			break;
+	}
+	
+	return false;
+}
+
 bool LScreenDC::SupportsAlphaCompositing()
 {
 	return true;
@@ -349,37 +381,37 @@ void LScreenDC::Line(int x1, int y1, int x2, int y2)
 	d->v->StrokeLine(BPoint(x1, y1), BPoint(x2, y2));
 }
 
-void LScreenDC::Circle(double cx, double cy, double radius)
+void LScreenDC::Circle(float cx, float cy, float radius)
 {
 	VIEW_CHECK()
 	d->v->StrokeArc(BPoint(cx, cy), radius, radius, 0, 360);
 }
 
-void LScreenDC::FilledCircle(double cx, double cy, double radius)
+void LScreenDC::FilledCircle(float cx, float cy, float radius)
 {
 	VIEW_CHECK()
 	d->v->FillArc(BPoint(cx, cy), radius, radius, 0, 360);
 }
 
-void LScreenDC::Arc(double cx, double cy, double radius, double start, double end)
+void LScreenDC::Arc(float cx, float cy, float radius, float start, float end)
 {
 	VIEW_CHECK()
 	d->v->StrokeArc(BPoint(cx, cy), radius, radius, start, end);
 }
 
-void LScreenDC::FilledArc(double cx, double cy, double radius, double start, double end)
+void LScreenDC::FilledArc(float cx, float cy, float radius, float start, float end)
 {
 	VIEW_CHECK()
 	d->v->FillArc(BPoint(cx, cy), radius, radius, start, end);
 }
 
-void LScreenDC::Ellipse(double cx, double cy, double x, double y)
+void LScreenDC::Ellipse(float cx, float cy, float x, float y)
 {
 	VIEW_CHECK()
 	d->v->StrokeArc(BPoint(cx, cy), x, y, 0, 360);
 }
 
-void LScreenDC::FilledEllipse(double cx, double cy, double x, double y)
+void LScreenDC::FilledEllipse(float cx, float cy, float x, float y)
 {
 	VIEW_CHECK()
 	d->v->FillArc(BPoint(cx, cy), x, y, 0, 360);
@@ -507,12 +539,6 @@ void LScreenDC::StretchBlt(LRect *Dest, LSurface *Src, LRect *s)
 }
 
 void LScreenDC::Bezier(int Threshold, LPoint *Pt)
-{
-	VIEW_CHECK()
-	LAssert(0);
-}
-
-void LScreenDC::FloodFill(int x, int y, int Mode, COLOUR Border, LRect *Bounds)
 {
 	VIEW_CHECK()
 	LAssert(0);

@@ -1,4 +1,4 @@
-#if defined(WIN32)
+#if defined(WINDOWS)
 #include <direct.h>
 #else
 #include <unistd.h>
@@ -8,10 +8,6 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/DragAndDrop.h"
 #include "lgi/common/Token.h"
-#include "lgi/common/Combo.h"
-#include "lgi/common/Net.h"
-#include "lgi/common/ListItemCheckBox.h"
-#include "lgi/common/ClipBoard.h"
 #include "lgi/common/DropFiles.h"
 #include "lgi/common/SubProcess.h"
 #include "lgi/common/Css.h"
@@ -21,10 +17,8 @@
 #include "lgi/common/RegKey.h"
 #include "lgi/common/FileSelect.h"
 #include "lgi/common/Menu.h"
-#include "lgi/common/PopupNotification.h"
 #include "lgi/common/RemoveAnsi.h"
 #include "lgi/common/Uri.h"
-#include "lgi/common/StructuredLog.h"
 
 #include "LgiIde.h"
 #include "resdefs.h"
@@ -114,27 +108,24 @@ bool FindInPath(LString &Exe)
 			return true;
 		}
 	}
-	
 	return false;
 }
 
-LAutoString ToNativeStr(const char *s)
+LString ToNativeStr(const char *s)
 {
-	LAutoString a(NewStr(s));
+	LString a = s;
 	if (a)
 	{
-		if (strnicmp(a, "ftp://", 6))
+		if (!Strnicmp(a.Get(), "ftp://", 6) ||
+			!Strnicmp(a.Get(), "sftp://", 7))
+			; // don't remap the dir chars...
+		else
 		{
-			for (char *c = a; *c; c++)
-			{
-				#ifdef WIN32
-				if (*c == '/')
-					*c = '\\';
-				#else
-				if (*c == '\\')
-					*c = '/';
-				#endif
-			}
+			#ifdef WIN32
+			a = a.Replace("/", "\\");
+			#else
+			a = a.Replace("\\", "/");
+			#endif
 		}
 	}
 	return a;
@@ -372,12 +363,13 @@ LString ToPlatformPath(const char *s, SysPlatform platform)
 
 class MakefileThread : public LThread, public LCancel
 {
-	IdeProjectPrivate *d;
-	IdeProject *Proj;
-	SysPlatform Platform;
-	LStream *Log;
-	bool BuildAfterwards;
-	bool HasError;
+	IdeProjectPrivate *d = nullptr;
+	IdeProject *Proj = nullptr;
+	SysPlatform Platform = PlatformUnknown;
+	LStream *Log = nullptr;
+	bool BuildAfterwards = false;
+	bool HasError = false;
+	std::function<void(bool)> callback;
 	
 	void ToNativePath(char *in)
 	{
@@ -397,7 +389,12 @@ class MakefileThread : public LThread, public LCancel
 public:
 	static int Instances;
 
-	MakefileThread(IdeProjectPrivate *priv, SysPlatform platform, bool Build) : LThread("MakefileThread")
+	MakefileThread(	IdeProjectPrivate *priv,
+					SysPlatform platform,
+					bool Build,
+					std::function<void(bool)> postCb)
+		: LThread("MakefileThread")
+		, callback(postCb)
 	{
 		Instances++;
 
@@ -417,6 +414,9 @@ public:
 		while (!IsExited())
 			LSleep(1);
 		Instances--;
+		
+		if (callback)
+			callback(!HasError);
 	}
 	
 	void OnError(const char *Fmt, ...)
@@ -497,12 +497,12 @@ public:
 	int Main()
 	{
 		const char *PlatformName = ToString(Platform);
-		const char *PlatformLibraryExt = NULL;
-		const char *PlatformStaticLibExt = NULL;
+		const char *PlatformLibraryExt = nullptr;
+		const char *PlatformStaticLibExt = nullptr;
 		const char *PlatformExeExt = "";
 		const char *CCompilerFlags = "-MMD -MP -fPIC -fno-inline";
-		const char *CppCompilerFlags = "$(CFlags) -fpermissive -std=c++14";
-		const char *TargetType = d->Settings.GetStr(ProjTargetType, NULL, Platform);
+		const char *CppCompilerFlags = "$(CFlags) -fpermissive -std=c++17";
+		const char *TargetType = d->Settings.GetStr(ProjTargetType, nullptr, Platform);
 		const char *CompilerName = d->Settings.GetStr(ProjCompiler);
 		LString LinkerFlags;
 		LString CCompilerBinary = "gcc";
@@ -527,11 +527,21 @@ public:
 			{
 				LinkerFlags = ",-soname,$(TargetFile)";
 			}
-			LinkerFlags += ",-export-dynamic,-R.";
+			LinkerFlags += ",-export-dynamic,-R.,--build-id";
 		}
 
 		auto Base = Proj->GetBasePath();
 		auto MakeFile = Proj->GetMakefile(Platform);
+		if (auto makefileExt = LGetExtension(MakeFile))
+		{
+			if (!Stricmp(makefileExt, "ninja"))
+			{
+				// We can't overwrite a ninja build file with our makefile... quit:
+				Log->Print("%s:%i - Not updating external ninja file '%s'.\n", _FL, MakeFile.Get());
+				return -1;
+			}
+		}		
+		
 		LString MakeFilePath;
 		Proj->CheckExists(MakeFile);
 		if (!MakeFile)
@@ -677,6 +687,7 @@ public:
 				BuildModeName);
 		m.Print("MakeDir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))\n");
 		
+		LHashTbl<ConstStrKey<char,true>, LString> hVariables; // global makefile vars
 		LString sDefines[BuildMax];
 		LString sLibs[BuildMax];
 		LString sIncludes[BuildMax];
@@ -722,7 +733,6 @@ public:
 		Proj->GetChildProjects(Deps);
 		for (auto d: Deps)
 		{
-			printf("Dep is: %p\n", d);
 			if (!d)
 			{
 				LAssert(!"Dep is NULL!");
@@ -760,7 +770,7 @@ public:
 			LString PLibPaths = d->Settings.GetStr(ProjLibraryPaths, NULL, Platform);
 			if (ValidStr(PLibPaths))
 			{
-				LString::Array LibPaths = PLibPaths.Split("\n");
+				auto LibPaths = PLibPaths.Split("\n");
 				for (auto i: LibPaths)
 				{
 					LString s, in = i.Strip();
@@ -790,7 +800,7 @@ public:
 				}
 			}
 
-			const char *PLibs = d->Settings.GetStr(ProjLibraries, NULL, Platform);
+			auto PLibs = d->Settings.GetStr(ProjLibraries, NULL, Platform);
 			if (ValidStr(PLibs))
 			{
 				LToken Libs(PLibs, "\r\n");
@@ -810,38 +820,96 @@ public:
 				}
 			}
 
+			const char *nextLine2t = " \\\n\t\t";
+			auto AddRPaths = [&](IdeProject *Project, const char *ProjectBase, LString varName)
+			{
+				if (!hVariables.Find(varName))
+				{
+					auto relBase = LMakeRelativePath(Base, ProjectBase);
+					hVariables.Add(varName, relBase ? relBase.RStrip("/\\") : "");
+				}
+
+				auto RPath = Project->GetSettings()->GetStr(ProjRPath, NULL, Platform, Cfg);
+				if (ValidStr(RPath))
+				{
+					auto Paths = LString(RPath).SplitDelimit("\r\n");
+					for (auto &p: Paths)
+					{
+						LString Path = LString(p).Strip();
+						if (!Path.Length())
+							continue;
+
+						auto RPathValue = LString::Fmt("$(%s)/%s", varName.Get(), Path.Get());
+						sLibs[Cfg] += LString::Fmt("%s-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/%s'",
+											nextLine2t, RPathValue.Get());
+					}
+				}
+
+				auto RPathLinks = Project->GetSettings()->GetStr(ProjRPathLink, NULL, Platform, Cfg);
+				if (ValidStr(RPathLinks))
+				{
+					auto Paths = LString(RPathLinks).SplitDelimit("\r\n");
+					for (auto &p: Paths)
+					{
+						LString Path = LString(p).Strip();
+						if (!Path.Length())
+							continue;
+
+						auto LinkPath = LString::Fmt("$(%s)/%s", varName.Get(), Path.Get());
+						sLibs[Cfg] += LString::Fmt("%s-L%s", nextLine2t, LinkPath.Get());
+						sLibs[Cfg] += LString::Fmt("%s-Wl,-rpath-link,%s", nextLine2t, LinkPath.Get());
+						sLibs[Cfg] += LString::Fmt("%s-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(%s)/$(BuildDir)'",
+											nextLine2t, varName.Get());
+					}
+				}
+			};
+
+			if (auto Target = Proj->GetTargetName(Platform))
+			{
+				LString varName = LString::Fmt("%s_DIR", LString(Target).Replace("-", "_").Upper().Get());
+				AddRPaths(Proj, Base, varName);
+			}
+
 			for (auto dep: Deps)
 			{
-				printf("Dep2 is: %p\n", d);
 				if (!dep)
 					continue;
-				LString Target = dep->GetTargetName(Platform);
-				if (Target)
+				
+				if (auto Target = dep->GetTargetName(Platform))
 				{
 					char t[MAX_PATH_LEN];
 					strcpy_s(t, sizeof(t), Target);
 					if (!strnicmp(t, "lib", 3))
 						memmove(t, t + 3, strlen(t + 3) + 1);
-					char *dot = strrchr(t, '.');
-					if (dot)
+					if (auto dot = strrchr(t, '.'))
 						*dot = 0;
 													
 					LString s, sTarget = t;
 					Proj->CheckExists(sTarget);
-					s.Printf(" \\\n\t\t-l%s$(Tag)", ToUnixPath(sTarget));
+					s.Printf("%s-l%s$(Tag)", nextLine2t, ToUnixPath(sTarget));
 					sLibs[Cfg] += s;
 
-					auto DepBase = dep->GetBasePath();
-					if (DepBase)
+					if (auto DepBase = dep->GetBasePath())
 					{
 						LString DepPath = DepBase.Get();
 						
 						auto Rel = LMakeRelativePath(Base, DepPath);
+						// printf("%s:%i - DepBase='%s'\n", _FL, DepBase.Get());
+						// printf("%s:%i - Base='%s'\n", _FL, Base.Get());
+						// printf("%s:%i - DepPath='%s'\n", _FL, DepPath.Get());
+						// printf("%s:%i - Rel='%s'\n", _FL, Rel.Get());
 
 						LString Final = Rel ? Rel.Get() : DepPath.Get();
 						Proj->CheckExists(Final);
-						s.Printf(" \\\n\t\t-L%s/$(BuildDir)", ToUnixPath(Final.RStrip("/\\")));
+						s.Printf("%s-L%s/$(BuildDir)", nextLine2t, ToUnixPath(Final.RStrip("/\\")));
 						sLibs[Cfg] += s;
+
+						auto varName = LString::Fmt("%s_DIR", sTarget.Replace("-", "_").Upper().Get());
+						auto relStrip = Rel.RStrip("/\\");
+						if (!hVariables.Find(varName))
+							hVariables.Add(varName, relStrip);
+
+						AddRPaths(dep, DepBase, varName);
 					}
 				}
 			}
@@ -865,14 +933,14 @@ public:
 						Inc.Add(pn, true);
 				}
 			}
-			const char *SysIncludes = d->Settings.GetStr(ProjSystemIncludes, NULL, Platform);
+			
+			auto SysIncludes = d->Settings.GetStr(ProjSystemIncludes, NULL, Platform);
 			if (ValidStr(SysIncludes))
 			{
 				// Add settings include paths.
 				LToken Paths(SysIncludes, "\r\n");
-				for (int i=0; i<Paths.Length(); i++)
+				for (auto p: Paths)
 				{
-					auto p = Paths[i];
 					auto pn = ToNativeStr(p);
 					if (pn.Get()[0] != '`' && !Proj->CheckExists(pn))
 						OnError("%s:%i - System include path '%s' doesn't exist (from %s).\n",
@@ -898,6 +966,7 @@ public:
 				}
 				else
 				{
+					/* This doesn't make sense?
 					LFile::Path p;
 					if (LIsRelativePath(i))
 					{
@@ -905,8 +974,11 @@ public:
 						p += i;
 					}
 					else p = i;
+					
 					auto rel = LMakeRelativePath(Base, p.GetFull());
 					s.Printf(" \\\n\t\t-I%s", ToUnixPath(rel ? rel : i));
+					*/
+					s.Printf(" \\\n\t\t-I%s", i.Get());
 				}
 
 				sIncludes[Cfg] += s;
@@ -914,12 +986,14 @@ public:
 		}
 
 		// Output the defs section for Debug and Release
+		for (auto p: hVariables)
+			m.Print("%s=%s\n", p.key, p.value.Get());
 
 		// Debug specific
 		m.Print("\n"
 				"ifeq ($(Build),Debug)\n"
-				"	CFlags += -g%s\n"
-				"	CppFlags += -g%s\n"
+				"	CFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer%s\n"
+				"	CppFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer%s\n"
 				"	Tag = d\n"
 				"	Defs = -D_DEBUG %s\n"
 				"	Libs = %s\n"
@@ -932,8 +1006,9 @@ public:
 		
 		// Release specific
 		m.Print("else\n"
-				"	CFlags += -s -Os%s\n"
-				"	CppFlags += -s -Os%s\n"
+				"	CFlags += -g -Os%s\n"
+				"	CppFlags += -g -Os%s\n"
+				"	Tag =\n"
 				"	Defs = %s\n"
 				"	Libs = %s\n"
 				"	Inc = %s\n"
@@ -1051,7 +1126,7 @@ public:
 					for (Dep=*It; Dep && !IsCancelled(); Dep=*(++It), Count++)
 					{
 						// Get dependency to create it's own makefile...
-						Dep->CreateMakefile(Platform, false);
+						Dep->CreateMakefile(Platform, false, nullptr);
 					
 						// Build a rule to make the dependency if any of the source changes...
 						auto DepBase = Dep->GetBasePath();
@@ -1139,7 +1214,8 @@ public:
 							"		$(Target) $(Objects) $(Libs)\n",
 							ExtraLinkFlags,
 							ExeFlags,
-							ValidStr(LinkerFlags) ? "-Wl" : "", LinkerFlags.Get());
+							ValidStr(LinkerFlags) ? "-Wl" : "",
+							LinkerFlags.Get());
 					
 					EmbedAppIcon(m);
 					
@@ -1215,7 +1291,7 @@ public:
 							"$(TargetFile) : $(Objects)\n"
 							"	mkdir -p $(BuildDir)\n"
 							"	@echo Linking $(TargetFile) [$(Build)]...\n"
-							"	$(CPP)$s -shared \\\n"
+							"	$(CPP) -shared \\\n"
 							"		%s%s \\\n"
 							"		-o $(BuildDir)/$(TargetFile) \\\n"
 							"		$(Objects) \\\n"
@@ -1928,8 +2004,15 @@ void BuildThread::Step1()
 		[this, backend, callId](auto d, auto err)
 		{
 			StreamToLog log(Proj->GetApp());
-			// LOG("Step1 got folder..\n");
-			for (int i=true; i; i=d->Next())
+			
+			if (!d || err)
+			{
+				LOG("Error: %s\n", err.ToString().Get());
+				RemoveCall(callId);
+				return;
+			}
+			
+			for (int i=true; i && d; i=d->Next())
 			{
 				if (d->IsDir())
 					continue;
@@ -1974,7 +2057,9 @@ void BuildThread::Step1()
 			}
 
 			if (backendPaths.Length() > 0)
+			{
 				AddWork([this]() { Step1(); }); // Look at the next path...
+			}
 			else if (!backendProjFound)
 			{
 				LOG("Error: no project xml found.\n");
@@ -2493,6 +2578,12 @@ IdeProject::IdeProject(AppWnd *App, ProjectNode *DepParent) : IdeCommon(NULL)
 
 IdeProject::~IdeProject()
 {
+	if (d->DepParent)
+	{
+		printf("%s:%i - ~IdeProject clearing DepParent->Dep...\n", _FL);
+		d->DepParent->OnProjectDelete(this);
+	}
+
 	d->App->GetBreakPointStore()->DeleteCallback(bpStoreCb);
 
 	d->App->OnProjectDestroy(this);
@@ -3227,7 +3318,7 @@ void IdeProject::BuildForPlatform(bool All, BuildConfig Config, SysPlatform Plat
 
 		if (!IsMakefileUpToDate())
 		{
-			CreateMakefile(Platform, true);
+			CreateMakefile(Platform, true, nullptr);
 		}
 		else
 		{
@@ -3477,10 +3568,10 @@ void IdeProject::OnBackendReady()
 			for (auto id: all)
 			{
 				auto bp = store->Get(id);
-				if (bp.File.Find("~") >= 0)
+				if (bp.relFile.Find("~") >= 0)
 				{
 					LString::Array hints;
-					d->Backend->ResolvePath(bp.File, hints,
+					d->Backend->ResolvePath(bp.relFile, hints,
 						[store, id](auto path, auto err)
 						{
 							if (err)
@@ -3492,7 +3583,7 @@ void IdeProject::OnBackendReady()
 								auto bp = store->Get(id);
 								if (bp)
 								{
-									bp.File = path;
+									bp.relFile = path;
 									store->Update(id, bp);
 								}
 							}
@@ -3897,8 +3988,8 @@ bool IdeProject::LoadBreakPoints(IdeDoc *doc)
 		for (auto id: d->UserBreakpoints)
 		{
 			auto bp = store->Get(id);
-			bool sameLeaf = !Stricmp(LGetLeaf(bp.File), fnLeaf);
-			LString normalized = bp.File;
+			bool sameLeaf = !Stricmp(LGetLeaf(bp.relFile), fnLeaf);
+			LString normalized = bp.relFile;
 
 			if (d->Backend)
 			{
@@ -4696,8 +4787,7 @@ bool IdeProject::BuildIncludePaths(LString::Array &Paths, LString::Array *SysPat
 		LArray<ProjectNode*> Nodes;
 		if (p->GetAllNodes(Nodes))
 		{
-			auto NodeBase = p->GetFullPath();
-			if (NodeBase)
+			if (auto NodeBase = p->GetFullPath())
 			{
 				LTrimDir(NodeBase);
 
@@ -4879,11 +4969,20 @@ bool IdeProject::GetAllDependencies(LArray<char*> &Files, SysPlatform Platform)
 	LString::Array IncPaths;
 	BuildIncludePaths(IncPaths, NULL, false, false, Platform);
 	
-	// Add all source to dependencies
-	for (int i=0; i<Src.Length(); i++)
+	// FIXME: Filter out the LGI deps folder, there should be a better way of doing this....
+	for (int i=0; i<IncPaths.Length(); i++)
 	{
-		char *f = Src[i];
-		ProjDependency *dep = Deps.Find(f);
+		if (IncPaths[i].Find("lgi/deps/build") >= 0)
+		{
+			LgiTrace("%s:%i - Filtering LGI dep path '%s'\n", _FL, IncPaths[i].Get());
+			IncPaths.DeleteAt(i--);
+		}
+	}
+	
+	// Add all source to dependencies
+	for (auto f: Src)
+	{
+		auto dep = Deps.Find(f);
 		if (!dep)
 			Deps.Add(f, new ProjDependency(f));
 	}
@@ -4895,16 +4994,15 @@ bool IdeProject::GetAllDependencies(LArray<char*> &Files, SysPlatform Platform)
 		// Find all the unscanned dependencies
 		Unscanned.Length(0);
 
-		for (auto d : Deps)
+		for (auto d: Deps)
 		{
 			if (!d.value->Scanned)
 				Unscanned.Add(d.value);
 		}		
 
-		for (int i=0; i<Unscanned.Length(); i++)
+		for (auto d: Unscanned)
 		{
 			// Then scan source for includes...
-			ProjDependency *d = Unscanned[i];
 			d->Scanned = true;
 			
 			char *Src = d->File;
@@ -4938,10 +5036,8 @@ bool IdeProject::GetAllDependencies(LArray<char*> &Files, SysPlatform Platform)
 	}
 	while (Unscanned.Length() > 0);
 	
-	for (auto d : Deps)
-	{
+	for (auto d: Deps)
 		Files.Add(d.value->File.Release());
-	}
 	
 	Deps.DeleteObjects();
 	GetTree()->Unlock();
@@ -4989,12 +5085,14 @@ bool IdeProject::GetDependencies(const char *InSourceFile, LString::Array &IncPa
 
 int MakefileThread::Instances = 0;
 
-bool IdeProject::CreateMakefile(SysPlatform Platform, bool BuildAfterwards)
+bool IdeProject::CreateMakefile(SysPlatform Platform, bool BuildAfterwards, std::function<void(bool)> callback)
 {
 	if (d->CreateMakefile)
 	{
 		if (d->CreateMakefile->IsExited())
+		{
 			d->CreateMakefile.Reset();
+		}
 		else
 		{
 			d->App->GetBuildLog()->Print("%s:%i - Makefile thread still running.\n", _FL);
@@ -5005,7 +5103,7 @@ bool IdeProject::CreateMakefile(SysPlatform Platform, bool BuildAfterwards)
 	if (Platform == PlatformCurrent)
 		Platform = GetCurrentPlatform();
 
-	return d->CreateMakefile.Reset(new MakefileThread(d, Platform, BuildAfterwards));
+	return d->CreateMakefile.Reset(new MakefileThread(d, Platform, BuildAfterwards, callback));
 }
 
 void IdeProject::OnMakefileCreated()
