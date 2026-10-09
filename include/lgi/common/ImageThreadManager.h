@@ -2,6 +2,12 @@
 
 #include "lgi/common/EventTargetThread.h"
 
+#if 0
+#define ITM_LOG(...)	LgiTrace(__VA_ARGS__)
+#else
+#define ITM_LOG(...)
+#endif
+
 /// Thread pool to load images...
 class LImageThreadManager : public LThread, public LMutex, public LCancel
 {
@@ -42,14 +48,14 @@ class LImageThreadManager : public LThread, public LMutex, public LCancel
                     auto Job = Msg->AutoA<LDocumentEnv::LoadJob>();
         			if (!Job)
         			{
-    					LgiTrace("%s:%i - No job obj\n", _FL);
+    					ITM_LOG("%s:%i - No job obj\n", _FL);
     					LAssert(!"no job");
         			    break;
         			}
 
                     if (!Job->Env)
                     {
-    					LgiTrace("%s:%i - No env for '%s'\n", _FL, Job->Uri.Get());
+    					ITM_LOG("%s:%i - No env for '%s'\n", _FL, Job->Uri.Get());
     					LAssert(!"no env");
     					break;
     				}
@@ -63,7 +69,7 @@ class LImageThreadManager : public LThread, public LMutex, public LCancel
     					if (Job->pDC.Reset(GdcD->Load(Job->Uri)))
                     		Job->Env->OnDone(Job);
     					else
-    					    LgiTrace("%s:%i - img load failed for '%s'\n", _FL, Job->Uri.Get());
+    					    ITM_LOG("%s:%i - img load failed for '%s'\n", _FL, Job->Uri.Get());
     				}
     				else
     				{
@@ -83,7 +89,7 @@ class LImageThreadManager : public LThread, public LMutex, public LCancel
     								Job->pDC = Img;
     								if (Job->Env)
     								{
-    									LgiTrace("Loaded '%s' as image %ix%i\n", Job->Uri.Get(), Job->pDC->X(), Job->pDC->Y());
+    									ITM_LOG("Loaded '%s' as image %ix%i\n", Job->Uri.Get(), Job->pDC->X(), Job->pDC->Y());
     									Job->Env->OnDone(Job);
     								}
     								else
@@ -153,7 +159,7 @@ class LImageThreadManager : public LThread, public LMutex, public LCancel
 		    {
 		        if (auto job = GetJob())
 		        {
-		            LgiTrace("%s:%i - load '%s' with '%s'\n", _FL, job->Uri.Get(), worker->LThread::GetName());
+		            ITM_LOG("%s:%i - load '%s' with '%s'\n", _FL, job->Uri.Get(), worker->LThread::GetName());
 		            worker->PostEvent(M_LOAD_IMG, (LMessage::Param)job.Release());
 		            continue;
 		        }
@@ -164,7 +170,7 @@ class LImageThreadManager : public LThread, public LMutex, public LCancel
 		}
 
         // Cancel all the workers...
-        LgiTrace("%s:%i - cancelling workers...\n", _FL);
+        ITM_LOG("%s:%i - cancelling workers...\n", _FL);
 		for (auto t: pool)
 		    t->Cancel(true);
 		    
@@ -175,7 +181,7 @@ class LImageThreadManager : public LThread, public LMutex, public LCancel
 		    {
 		        if (t->IsExited())
 		        {
-                    LgiTrace("%s:%i - worker '%s' done\n", _FL, t->LThread::GetName());
+                    ITM_LOG("%s:%i - worker '%s' done\n", _FL, t->LThread::GetName());
 		            pool.Delete(t);
 		            break;
 		        }
@@ -183,7 +189,7 @@ class LImageThreadManager : public LThread, public LMutex, public LCancel
 		    LSleep(1);
 		}
 	
-        LgiTrace("%s:%i - ImageThreadManager main finished.\n", _FL);
+        ITM_LOG("%s:%i - ImageThreadManager main finished.\n", _FL);
 		return 0;
 	}
 

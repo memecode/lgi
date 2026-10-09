@@ -209,6 +209,7 @@ class LNewFlow
 	{
 		KHidden,
 		KInline,
+		KInlineBlock,
 		KImg,
 		KBlock,
 		KTable,
@@ -324,6 +325,7 @@ class LNewFlow
 			case LCss::DispTableRowGroup: return KGroup;
 			case LCss::DispTableRow: return KRow;
 			case LCss::DispTableCell: return KCell;
+			case LCss::DispInlineBlock: return KInlineBlock;
 			default: break;
 		}
 
@@ -622,6 +624,37 @@ class LNewFlow
 		}
 	}
 
+	bool LastTextBaseline(LTag *tag, int &baseline)
+	{
+		bool found = false;
+		for (auto run: tag->TextPos)
+		{
+			if (!run)
+				continue;
+			auto font = FontOf(run->Tag);
+			if (!font)
+				continue;
+			int y = run->y1 + (int)(font->Ascent() + 0.5);
+			if (!found || y > baseline)
+				baseline = y;
+			found = true;
+		}
+		for (auto e: tag->Children)
+		{
+			if (auto child = Child(e))
+			{
+				int childBaseline = 0;
+				if (LastTextBaseline(child, childBaseline))
+				{
+					if (!found || childBaseline > baseline)
+						baseline = childBaseline;
+					found = true;
+				}
+			}
+		}
+		return found;
+	}
+
 	void LayoutInline(LTag *tag, Ctx &c, int depth)
 	{
 		if (depth >= MAX_RECURSION_DEPTH)
@@ -649,6 +682,57 @@ class LNewFlow
 		}
 
 		int ml = (int)tag->margin.x1, mr = (int)tag->margin.x2;
+		if (KindOf(tag) == KInlineBlock)
+		{
+			float mt = tag->margin.y1, mb = tag->margin.y2;
+			auto measured = Measure(tag, depth);
+			int edges = HEdges(tag);
+			int minOuter = MAX(measured.Min - ml - mr, edges);
+			int maxOuter = MAX(measured.Max - ml - mr, minOuter);
+			int availOuter = MAX(c.Right - c.X - ml - mr, 0);
+			int outerW = MIN(MAX(availOuter, minOuter), maxOuter);
+			int contentW = MAX(outerW - edges, 0);
+
+			auto width = tag->Width();
+			if (width && width.Type != LCss::LenAuto)
+				contentW = MAX(width.ToPx(c.Right - c.Left, font), 0);
+			auto minWidth = tag->MinWidth();
+			auto maxWidth = tag->MaxWidth();
+			if (minWidth)
+				contentW = MAX(contentW, minWidth.ToPx(c.Right - c.Left, font));
+			if (maxWidth)
+				contentW = MIN(contentW, maxWidth.ToPx(c.Right - c.Left, font));
+			contentW = MAX(contentW, 0);
+			outerW = contentW + edges;
+
+			if (c.Content && c.X > c.Left && c.X + ml + outerW + mr > c.Right)
+				FinishLine(c);
+			StartLine(c);
+
+			Ctx inner;
+			inner.Left = c.X + ml;
+			inner.Right = inner.Left + outerW;
+			inner.y = c.y;
+			inner.Align = AlignOf(tag, c.Align);
+			LayoutBlock(tag, inner, depth, outerW);
+			tag->margin.x1 = (float)ml;
+			tag->margin.x2 = (float)mr;
+			tag->margin.y1 = mt;
+			tag->margin.y2 = mb;
+
+			int baseline = tag->Pos.y + tag->Size.y;
+			LastTextBaseline(tag, baseline);
+			Item i;
+			i.Atom = tag;
+			i.BoxH = tag->Size.y;
+			i.BoxAsc = MIN(MAX(baseline - tag->Pos.y, 0), i.BoxH);
+			i.Asc = i.BoxAsc + (int)mt;
+			i.Desc = i.BoxH - i.BoxAsc + (int)mb;
+			c.Items.Add(i);
+			c.X += ml + outerW + mr;
+			return;
+		}
+
 		if (KindOf(tag) == KImg)
 		{
 			auto sz = ImageSize(tag, font, c.Right - c.Left);
