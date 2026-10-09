@@ -20,6 +20,7 @@
 #include "lgi/common/Uri.h"
 #include "lgi/common/Http.h"
 #include "lgi/common/ScrollBar.h"
+#include "lgi/common/EventTargetThread.h"
 
 #include "lgi/common/Html.h"
 #include "../src/common/Text/HtmlPriv.h"
@@ -364,34 +365,19 @@ LHostFunc HtmlScriptContext::Methods[] =
 	LHostFunc(0, 0, 0),
 };
 
-class HtmlImageLoader : public LThread, public LMutex, public LCancel
-{
-	LArray<LDocumentEnv::LoadJob*> In;
+enum Messages {
+    M_LOAD_IMG = M_USER + 100,
+};
 
+class HtmlImageLoad : public LEventTargetThread
+{
 public:
-	HtmlImageLoader() :
-		LThread("HtmlImgLoad.Th"),
-		LMutex("HtmlImgLoad.Lk")
-	{
-		Run();
-	}
-	
-	~HtmlImageLoader()
-	{
-		Cancel(true);
-		while (!IsExited())
-			LSleep(1);
-	}
-	
-	void Add(LAutoPtr<LDocumentEnv::LoadJob> j)
-	{
-		if (Lock(_FL))
-		{
-			In.Add(j.Release());
-			Unlock();
-		}
-	}
-	
+    bool busy = false;
+    
+    HtmlImageLoad(LString n) : LEventTargetThread(n)
+    {
+    }
+
 	LAutoPtr<LSocketI> CreateSock(const char *Proto)
 	{
 		LAutoPtr<LSocketI> s;
@@ -406,38 +392,38 @@ public:
 		
 		return s;
 	}
-	
-	int Main()
-	{
-		while (!IsCancelled())
-		{
-			LAutoPtr<LThreadJob> j;
-			if (Lock(_FL))
-			{
-				if (In.Length())
-				{
-					j.Reset(In[0]);
-					In.DeleteAt(0, true);
+
+    LMessage::Result OnEvent(LMessage *Msg) override
+    {
+        switch (Msg->Msg())
+        {
+            case M_LOAD_IMG:
+            {
+                auto Job = Msg->AutoA<LDocumentEnv::LoadJob>();
+    			if (!Job)
+    			{
+					LgiTrace("%s:%i - No job obj\n", _FL);
+					LAssert(!"no job");
+    			    break;
+    			}
+
+                if (!Job->Env)
+                {
+					LgiTrace("%s:%i - No env for '%s'\n", _FL, Job->Uri.Get());
+					LAssert(!"no env");
+					break;
 				}
-				Unlock();
-			}
+
+				busy = true;
 			
-			LDocumentEnv::LoadJob *Job = dynamic_cast<LDocumentEnv::LoadJob*>(j.Get());
-			if (Job)
-			{
 				LUri u(Job->Uri);
 				if (u.IsFile())
 				{
 					// Local document?
 					if (Job->pDC.Reset(GdcD->Load(Job->Uri)))
-					{
-						LDocumentEnv *e = Job->Env;
-						if (e)
-						{
-							// LgiTrace("Loaded '%s' as image %ix%i\n", u.Path, j->pDC->X(), j->pDC->Y());
-							e->OnDone(j);
-						}
-					}
+                		Job->Env->OnDone(Job);
+					else
+					    LgiTrace("%s:%i - img load failed for '%s'\n", _FL, Job->Uri.Get());
 				}
 				else
 				{
@@ -457,25 +443,132 @@ public:
 								Job->pDC = Img;
 								if (Job->Env)
 								{
-									// LgiTrace("Loaded '%s' as image %ix%i\n", u.Path, j->pDC->X(), j->pDC->Y());
-									Job->Env->OnDone(j);
+									LgiTrace("Loaded '%s' as image %ix%i\n", Job->Uri.Get(), Job->pDC->X(), Job->pDC->Y());
+									Job->Env->OnDone(Job);
 								}
 								else
 								{
-									LgiTrace("%s:%i - No env for '%s'\n", _FL, u.sPath.Get());
-									LAssert(0);
 								}
 							}
-							else LgiTrace("%s:%i - Failed to read '%s'\n", _FL, u.sPath.Get());
+							else LgiTrace("%s:%i - Failed to read '%s'\n", _FL, Job->Uri.Get());
 						}
-						else LgiTrace("%s:%i - Failed to find filter for '%s'\n", _FL, u.sPath.Get());
+						else LgiTrace("%s:%i - Failed to find filter for '%s'\n", _FL, Job->Uri.Get());
 					}
 					else LgiTrace("%s:%i - Failed to get '%s'\n", _FL, Job->Uri.Get());
+    			}
+    			
+				busy = false;
+                break;
+            }
+        }
+        return 0;
+    };
+};
+
+class ImageThreadManager : public LThread, public LMutex, public LCancel
+{
+    // lock before use:
+	LArray<LDocumentEnv::LoadJob*> In;
+	
+	// no locking, this thread only:
+	LArray<HtmlImageLoad*> pool;
+
+public:
+	ImageThreadManager() :
+		LThread("HtmlImgLoad.Th"),
+		LMutex("HtmlImgLoad.Lk")
+	{
+		Run();
+	}
+	
+	~ImageThreadManager()
+	{
+		Cancel(true);
+		while (!IsExited())
+			LSleep(1);
+	}
+	
+	void Add(LAutoPtr<LDocumentEnv::LoadJob> j)
+	{
+		if (Lock(_FL))
+		{
+			In.Add(j.Release());
+			Unlock();
+		}
+	}
+	
+	LAutoPtr<LDocumentEnv::LoadJob> GetJob()
+	{
+		LAutoPtr<LDocumentEnv::LoadJob> j;
+		if (auto lck = Auto(this, _FL))
+		{
+			if (In.Length())
+			{
+			    if (auto lj = dynamic_cast<LDocumentEnv::LoadJob*>(In[0]))
+			    {
+				    j.Reset(lj);
+				    In.DeleteAt(0, true);
 				}
+				else LAssert(!"wrong obj");
 			}
-			else LSleep(10);
+		}
+		return j;
+	}
+	
+	HtmlImageLoad *GetFreeWorker()
+	{
+	    for (auto t: pool)
+	    {
+	        if (!t->busy)
+	            return t;
+	    }
+	    return nullptr;
+	}
+	
+	int Main()
+	{
+	    for (int i=0; i<8; i++)
+	    {
+	        pool.Add(new HtmlImageLoad(LString::Fmt("HtmlImgLd.%i", i)));
+	    }
+	
+		while (!IsCancelled())
+		{
+		    if (auto worker = GetFreeWorker())
+		    {
+		        if (auto job = GetJob())
+		        {
+		            LgiTrace("%s:%i - load '%s' with '%s'\n", _FL, job->Uri.Get(), worker->LThread::GetName());
+		            worker->PostEvent(M_LOAD_IMG, (LMessage::Param)job.Release());
+		            continue;
+		        }
+		    }
+			
+			// don't eat cpu...
+			LSleep(20);
+		}
+
+        // Cancel all the workers...
+        LgiTrace("%s:%i - cancelling workers...\n", _FL);
+		for (auto t: pool)
+		    t->Cancel(true);
+		    
+		// Wait for them to stop...
+		while (pool.Length())
+		{
+		    for (auto t: pool)
+		    {
+		        if (t->IsExited())
+		        {
+                    LgiTrace("%s:%i - worker '%s' done\n", _FL, t->LThread::GetName());
+		            pool.Delete(t);
+		            break;
+		        }
+		    }
+		    LSleep(1);
 		}
 	
+        LgiTrace("%s:%i - ImageThreadManager main finished.\n", _FL);
 		return 0;
 	}
 };
@@ -496,7 +589,7 @@ class AppWnd :
     LTextView3 *Text = nullptr;
 	LString FilesFolder;
 	LAutoPtr<LScriptEngine> Script;
-	LAutoPtr<HtmlImageLoader> Worker;
+	LAutoPtr<ImageThreadManager> Worker;
 	LAutoPtr<LEmojiFont> Emoji;
 
 	LoadType GetContent(LAutoPtr<LoadJob> &j) override
@@ -532,7 +625,7 @@ class AppWnd :
 	
 		#if HAS_IMAGE_LOADER
 		if (!Worker)
-			Worker.Reset(new HtmlImageLoader);
+			Worker.Reset(new ImageThreadManager);
 		Worker->Add(j);
 		return LoadDeferred;
 		#else
@@ -697,7 +790,6 @@ public:
 			AttachChildren();
 			
 			Visible(true);
-			OnNotify(FindControl(ID_LIST), LNotifyItemSelect);
 		}
 		else LExitApp();
 	}

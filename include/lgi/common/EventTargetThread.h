@@ -1,5 +1,4 @@
-#ifndef _GEVENTTARGETTHREAD_H_
-#define _GEVENTTARGETTHREAD_H_
+#pragma once
 
 #include "lgi/common/Thread.h"
 #include "lgi/common/Mutex.h"
@@ -469,25 +468,5 @@ public:
 		}
 		return Status;
 	}
-
-	/* Use LMessage::AutoA
-	template<typename T>
-	bool ReceiveA(LAutoPtr<T> &Obj, LMessage *m)
-	{
-		return Obj.Reset((T*)m->A());
-	}
-	*/
-
-	
-	/* Use LMessage::AutoB
-	template<typename T>
-	bool ReceiveB(LAutoPtr<T> &Obj, LMessage *m)
-	{
-		return Obj.Reset((T*)m->B());
-	}
-	*/
 };
 
-
-
-#endif

@@ -13,7 +13,6 @@ namespace Html2
 // Structs & Classes                                                            //
 //////////////////////////////////////////////////////////////////////////////////
 class LFlowRect;
-class LOldFlow;
 class LNewFlow;
 
 #define ToTag(t)					dynamic_cast<LTag*>(t)
@@ -52,7 +51,6 @@ public:
 	LHtmlLength &operator =(float val);
 	LCss::LengthType GetUnits();
 	void Set(char *s);
-	float Get(LOldFlow *Flow, LFont *Font, bool Lock = false);
 	float GetRaw() { return d; }
 };
 
@@ -92,45 +90,10 @@ public:
 	void Empty() { DeleteObjects(); }
 	LRect Bounds();
 	LRect *TopRect(LRegion *c);
-	void FlowText(LTag *Tag, LOldFlow *c, LFont *Font, int LineHeight, char16 *Text, LCss::LengthType Align, bool Debug = false);
-};
-
-struct LHtmlTableLayout
-{
-	typedef LArray<LTag*> CellArray;
-	LArray<CellArray> c;
-	LTag *Table;
-	LPoint s;
-	LCss::Len TableWidth;
-	
-	// Various pixels sizes
-	int AvailableX;
-	int CellSpacing;
-	int BorderX1, BorderX2;
-	LRect TableBorder, TablePadding; // in Px
-
-	// The col and row sizes
-	LArray<int> MinCol, MaxCol, MaxRow;
-	LArray<LCss::Len> SizeCol;
-
-	LHtmlTableLayout(LTag *table);
-
-	void GetSize(int &x, int &y);
-	void GetAll(List<LTag> &All);
-	LTag *Get(int x, int y);
-	bool Set(LTag *t);
-
-	int GetTotalX(int StartCol = 0, int Cols = -1);
-	void AllocatePx(int StartCol, int Cols, int MinPx, bool FillWidth);
-	void DeallocatePx(int StartCol, int Cols, int MaxPx);
-	void LayoutTable(LOldFlow *f, uint16 Depth);
-	
-	void Dump();
 };
 
 class LTag : public LHtmlElement, public LCssBox
 {
-	friend struct LHtmlTableLayout;
 	friend class ::HtmlEdit;
 	
 public:
@@ -296,13 +259,10 @@ protected:
 	LTag *HasOpenTag(char *t);
 	LTag *PrevTag();
 	LRect ChildBounds();
-	bool GetWidthMetrics(LTag *Table, int32_t &Min, int32_t &Max);
-	void LayoutTable(LOldFlow *f, uint32_t Depth);
 	void BoundParents();
 	bool PeekTag(char *s, char *tag);
 	LTag *GetTable();
 	char *NextTag(char *s);
-	void ZeroTableElements();
 	bool OnUnhandledColor(LCss::ColorDef *def, const char *&s);
 	// void CenterText();
 	bool Serialize(LXmlTag *t, bool Write);
@@ -340,30 +300,10 @@ public:
 	// Table stuff
 	struct TblCell
 	{
-		LPoint Pos;
 		LPoint Span;
-		LRect BorderPx;
-		LRect PaddingPx;
-		int32_t MinContent, MaxContent;
 		LCss::LengthType XAlign;
-		LHtmlTableLayout *Cells;
-		
-		TblCell()
-		{
-			Cells = NULL;
-			MinContent = 0;
-			MaxContent = 0;
-			XAlign = LCss::LenInherit;
-			BorderPx.ZOff(0, 0);
-			PaddingPx.ZOff(0, 0);
-		}
-		
-		~TblCell()
-		{
-			DeleteObj(Cells);
-		}
-		
-	}	*Cell = NULL;
+		TblCell() : XAlign(LCss::LenInherit) {}
+	}	*Cell = nullptr;
 
 	#ifdef _DEBUG
 	int Debug = false;
@@ -421,8 +361,6 @@ public:
 	void SetCssStyle(const char *Style);
 	/// Event received by scripts change CSS properties.
 	void OnStyleChange(const char *name);
-	/// Positions the tag according to the flow region passed in
-	void OldFlow(LOldFlow *Flow, int Depth);
 	void NewFlow(LNewFlow *flow);
 	/// Paints the border and background of the tag
 	void PaintBorderAndBackground(
@@ -467,10 +405,6 @@ public:
 	LRect GetRect(bool Client = true);
 	LCss::LengthType GetAlign(bool x);
 
-	// Tables
-	LTag *GetTableCell(int x, int y);
-	LPoint GetTableSize();
-	void ResetCaches();
 };
 
 }
