@@ -1888,6 +1888,7 @@ bool LCss::Parse(const char *&s, ParsingStyle Type)
 							Lengths.Length(0);
 							OnChange(PropMargin);
 						}
+						break;
 					}
 					default:
 					{
@@ -2148,7 +2149,6 @@ bool LCss::Len::Parse(const char *&s, PropType Prop, ParsingStyle ParseType)
 	{
 		Value = (float) atof(s);
 		while (IsNumeric(s)) s++;
-		SkipWhite(s);
 		if (*s == '%')
 		{
 			Type = LenPercent;
