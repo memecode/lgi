@@ -1778,6 +1778,13 @@ bool LCss::Parse(const char *&s, ParsingStyle Type)
 				}
 
 				SkipWhite(s);
+
+				// Trailing junk makes the whole declaration invalid (like browsers), e.g.
+				// "margin:0 \n -webkit-foo: none" with a missing ';'
+				if (*s && *s != ';' && *s != '}' && strnicmp(s, "!important", 10))
+				{
+					Lengths.DeleteObjects();
+				}
 				
 				bool Mismatch = false;
 				switch (PropId)
