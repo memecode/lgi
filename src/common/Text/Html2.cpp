@@ -2319,8 +2319,20 @@ LColour LTag::_Colour(bool f)
 {
 	if (!f)
 	{
-		ColorDef c = BackgroundColor();
-		return c.Type == ColorInherit ? LColour() : LColour(c.Rgb32, 32);
+		// Backgrounds aren't inherited, but table cells and rows are painted over
+		// their row/group background so look through those (stopping at the table).
+		for (LTag *t = this; t; t = ToTag(t->Parent))
+		{
+			ColorDef c = t->BackgroundColor();
+			if (c.Type != ColorInherit)
+				return LColour(c.Rgb32, 32);
+
+			bool structural = t->TagId == TAG_TD || t->TagId == TAG_TH ||
+							t->TagId == TAG_TR || t->TagId == TAG_TBODY;
+			if (!structural)
+				break;
+		}
+		return LColour();
 	}
 
 	for (LTag *t = this; t; t = ToTag(t->Parent))
@@ -5376,6 +5388,18 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 		{
 			LRect Clip(0, 0, Size.x-1, Size.y-1);
 			pDC->ClipRgn(&Clip);
+
+			// Size includes border and padding; the image only fills the content box
+			int ContentX = (int)(border.x1 + padding.x1);
+			int ContentY = (int)(border.y1 + padding.y1);
+			int ContentW = Size.x - (int)(border.x1 + border.x2 + padding.x1 + padding.x2);
+			int ContentH = Size.y - (int)(border.y1 + border.y2 + padding.y1 + padding.y2);
+			if (ContentW < 1 || ContentH < 1)
+			{
+				ContentX = ContentY = 0;
+				ContentW = Size.x;
+				ContentH = Size.y;
+			}
 			
 			if (Image)
 			{
@@ -5384,8 +5408,8 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 				(
 					!ImageResized &&
 					(				
-						Size.x != Image->X() ||
-						Size.y != Image->Y()
+						ContentW != Image->X() ||
+						ContentH != Image->Y()
 					)
 				)
 				{
@@ -5396,7 +5420,7 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 						Image->AlphaDC())
 						Cs = System32BitColourSpace;
 					
-					LAutoPtr<LSurface> r(new LMemDC(_FL, Size.x, Size.y, Cs));
+					LAutoPtr<LSurface> r(new LMemDC(_FL, ContentW, ContentH, Cs));
 					if (r)
 					{
 						if (Cs == CsIndex8)
@@ -5408,7 +5432,7 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 				#endif
 
 				int Old = pDC->Op(GDC_ALPHA);
-				pDC->Blt(0, 0, Image);
+				pDC->Blt(ContentX, ContentY, Image);
 				pDC->Op(Old);
 			}
 			else if (Size.x > 1 && Size.y > 1)
