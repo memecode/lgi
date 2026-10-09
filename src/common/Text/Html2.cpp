@@ -198,8 +198,7 @@ public:
 	}
 };
 
-// Block, inline and table layout that follows the CSS 2.1 rules, the aim being to
-// produce the same boxes as a browser. See Refactor-HTML2-layout.md
+// Block, inline and table layout that follows the CSS 2.1 rules
 //
 // During layout all positions are absolute (relative to the document origin). The final
 // pass converts them to be relative to the parent tag, which is what LTag::Pos expects.
@@ -408,6 +407,27 @@ class LNewFlow
 		}
 	}
 
+	void OffsetSubtree(LTag *tag, int dx, int dy)
+	{
+		tag->Pos.x += dx;
+		tag->Pos.y += dy;
+		for (auto run: tag->TextPos)
+		{
+			if (run)
+			{
+				run->x1 += dx;
+				run->x2 += dx;
+				run->y1 += dy;
+				run->y2 += dy;
+			}
+		}
+		for (auto e: tag->Children)
+		{
+			if (auto child = Child(e))
+				OffsetSubtree(child, dx, dy);
+		}
+	}
+
 	void FinishLine(Ctx &c)
 	{
 		if (!c.Content)
@@ -446,8 +466,13 @@ class LNewFlow
 			}
 			else if (i.Atom)
 			{
-				i.Atom->Pos.x += shift;
-				i.Atom->Pos.y = top;
+				if (KindOf(i.Atom) == KInlineBlock)
+					OffsetSubtree(i.Atom, shift, top - i.Atom->Pos.y);
+				else
+				{
+					i.Atom->Pos.x += shift;
+					i.Atom->Pos.y = top;
+				}
 			}
 		}
 
@@ -2292,23 +2317,17 @@ void LTag::SetTag(const char *NewTag)
 
 LColour LTag::_Colour(bool f)
 {
+	if (!f)
+	{
+		ColorDef c = BackgroundColor();
+		return c.Type == ColorInherit ? LColour() : LColour(c.Rgb32, 32);
+	}
+
 	for (LTag *t = this; t; t = ToTag(t->Parent))
 	{
-		ColorDef c = f ? t->Color() : t->BackgroundColor();
+		ColorDef c = t->Color();
 		if (c.Type != ColorInherit)
-		{
 			return LColour(c.Rgb32, 32);
-		}
-
-		#if 1
-		if (!f && t->IsTable())
-			break;
-		#else
-		/*	This implements some basic level of colour inheritance for
-			background colours. See test case 'cisra-cqs.html'. */
-		if (!f && t->IsTable())
-			break;
-		#endif
 	}
 
 	return LColour();
