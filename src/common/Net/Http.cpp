@@ -797,6 +797,8 @@ bool LHttp::Request
 					if (Written != ContentLen)
 					{
 						LgiTrace("%s:%i - HTTP length not reached: written=" LPrintfInt64 " content=" LPrintfInt64 "\n", _FL, Written, ContentLen);
+						err.Set(LErrorIoFailed,
+							LString::Fmt("HTTP response body ended after " LPrintfInt64 " of " LPrintfInt64 " bytes.", Written, ContentLen));
 					}
 					#if DEBUG_LOGGING
 					Log.Print("\n---------------------------------------------\n");
@@ -1085,7 +1087,17 @@ bool LGetUri(LCancel *Cancel,
 		LHttp::TContentEncoding Enc;
 		LStringPipe OutHeaders;
 		LStringPipe TmpFile(4 << 10);
-		Http.Get(InUri, InHeaders ? InputHeaders : DefaultHeaders, &Status, &TmpFile, &Enc, &OutHeaders);
+		if (!Http.Get(InUri, InHeaders ? InputHeaders : DefaultHeaders, &Status, &TmpFile, &Enc, &OutHeaders))
+		{
+			if (OutError)
+			{
+				if (Http.GetError())
+					*OutError = Http.GetError();
+				else
+					OutError->Set(LErrorIoFailed, "HTTP request failed.");
+			}
+			return false;
+		}
 		
 		int StatusCatagory = Status / 100;
 		if (StatusCatagory == 3)
@@ -1216,4 +1228,3 @@ bool LGetUri(LCancel *Cancel,
 	
 	return true;
 }
-

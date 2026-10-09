@@ -370,8 +370,8 @@ class HtmlImageLoader : public LThread, public LMutex, public LCancel
 
 public:
 	HtmlImageLoader() :
-		LThread("HtmlImageLoader.Thread"),
-		LMutex("HtmlImageLoader.Mutex")
+		LThread("HtmlImgLoad.Th"),
+		LMutex("HtmlImgLoad.Lk")
 	{
 		Run();
 	}

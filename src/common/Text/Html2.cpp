@@ -7,6 +7,7 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Html2.h"
+#include "lgi/common/LgiDefs.h"
 #include "lgi/common/ScrollBar.h"
 #include "lgi/common/Variant.h"
 #include "lgi/common/FindReplaceDlg.h"
@@ -9567,21 +9568,37 @@ void LHtml::OnMouseClick(LMouse &m)
 							break;
 						}
 
-						char Path[MAX_PATH_LEN];
-						if (!LGetSystemPath(LSP_TEMP, Path, sizeof(Path)))
+						#if LINUX
+						// Due to the sandboxing on Linux, we use the user's downloads directory.
+						LFile::Path path(LSP_USER_DOWNLOADS);
+						path += LAppInst->Name();
+						if (!path.Exists())
 						{
-							LgiTrace("%s:%i - Failed to get the system path.\n", _FL);
+							LError err;
+							if (!FileDev->CreateFolder(path, false, &err))
+							{
+								LgiTrace("%s:%i - Failed to create folder '%s': %s\n",
+										_FL, path.GetFull().Get(), err.ToString().Get());
+								break;
+							}
+						}
+						#else
+						LFile::Path path(LSP_APP_CACHE);
+						#endif
+						if (!path.Length())
+						{
+							LgiTrace("%s:%i - Failed to get the app cache path.\n", _FL);
 							break;
 						}
 						
-						char f[32];
-						sprintf_s(f, sizeof(f), "_%i.html", LRand(1000000));
-						LMakePath(Path, sizeof(Path), Path, f);
+						auto leaf = LString::Fmt("_%i.html", LRand(1000000));
+						auto full = (path / leaf).GetFull();
+						LgiTrace("%s:%i - external HTML: '%s'\n", _FL, full.Get());
 						
 						LFile F;
-						if (!F.Open(Path, O_WRITE))
+						if (!F.Open(full, O_WRITE))
 						{
-							LgiTrace("%s:%i - Failed to open '%s' for writing.\n", _FL, Path);
+							LgiTrace("%s:%i - Failed to open '%s' for writing.\n", _FL, full.Get());
 							break;
 						}
 
@@ -9686,13 +9703,13 @@ void LHtml::OnMouseClick(LMouse &m)
 							F.Close();
 							
 							LError Err;
-							if (!LExecute(Path, NULL, NULL, &Err))
+							if (!LExecute(full, NULL, NULL, &Err))
 							{
 								LgiMsg(	this,
 										"Failed to open '%s'\n%s",
 										LAppInst ? LAppInst->LBase::Name() : GetClass(),
 										MB_OK,
-										Path,
+										full.Get(),
 										Err.ToString().Get());
 							}
 						}
