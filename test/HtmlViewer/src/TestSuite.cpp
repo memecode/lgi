@@ -19,6 +19,7 @@
 #include "lgi/common/TextLog.h"
 #include "lgi/common/Uri.h"
 #include "lgi/common/Http.h"
+#include "lgi/common/ScrollBar.h"
 
 #include "lgi/common/Html.h"
 #include "../src/common/Text/HtmlPriv.h"
@@ -617,6 +618,16 @@ public:
 					box->AddView(Html = new HtmlScriptContext(ID_HTML, this, this));
 				#endif
 
+				#if 1
+				if (auto css = Html->GetCss(true))
+				{
+					LCss::Len wid(LCss::LenPx, 800 + LScrollBar::SCROLL_BAR_SIZE);
+					css->Width(wid);
+					css->MinWidth(wid);
+					css->MaxWidth(wid);
+				}
+				#endif
+
 				Script.Reset(new LScriptEngine(this, Html, NULL));
 
 				if (Html)
@@ -680,7 +691,7 @@ public:
 			}
 			
 			
-			LRect r(0, 0, 1200, 800);
+			LRect r(0, 0, 1400, 800);
 			SetPos(r);
 			MoveToCenter();
 			AttachChildren();

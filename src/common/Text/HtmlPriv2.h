@@ -287,6 +287,7 @@ protected:
 
 	// Debug stuff
 	void _Dump(LStringPipe &Buf, int Depth);
+	void _DumpJson(LStringPipe &Buf, const char *ParentPath, int Index, int OffX, int OffY, bool &First);
 	void _TraceOpenTags();
 
 	// Private methods

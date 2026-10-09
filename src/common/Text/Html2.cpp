@@ -10,7 +10,6 @@
 #include "lgi/common/Variant.h"
 #include "lgi/common/FindReplaceDlg.h"
 #include "lgi/common/Unicode.h"
-#include "lgi/common/Emoji.h"
 #include "lgi/common/ClipBoard.h"
 #include "lgi/common/Button.h"
 #include "lgi/common/Edit.h"
@@ -19,9 +18,7 @@
 #include "lgi/common/DisplayString.h"
 #include "lgi/common/Palette.h"
 #include "lgi/common/Path.h"
-#include "lgi/common/CssTools.h"
 #include "lgi/common/LgiRes.h"
-#include "lgi/common/Net.h"
 #include "lgi/common/Base64.h"
 #include "lgi/common/Menu.h"
 #include "lgi/common/FindReplaceDlg.h"
@@ -1952,13 +1949,75 @@ void LTag::_Dump(LStringPipe &Buf, int Depth)
 	}
 }
 
+// Emits one JSON object per element, in the same format as the Firefox
+// getBoundingClientRect() dump: path, tag, absolute x, y, w, h,
+// display and margin (top, right, bottom, left).
+void LTag::_DumpJson(LStringPipe &Buf, const char *ParentPath, int Index, int OffX, int OffY, bool &First)
+{
+	bool IsRoot = TagId == ROOT;
+	bool IsContent = TagId == CONTENT || !Tag;
+	int AbsX = OffX + (IsRoot ? 0 : Pos.x);
+	int AbsY = OffY + (IsRoot ? 0 : Pos.y);
+	LString Path;
+
+	if (!IsRoot && !IsContent)
+	{
+		LString Name = LString(Tag.Get()).Lower();
+		if (Index < 0)
+			Path = Name;
+		else
+			Path.Printf("%s/%s[%i]", ParentPath, Name.Get(), Index);
+
+		const char *Disp = "inline";
+		switch (SupportedDisplay())
+		{
+			case LCss::DispBlock: Disp = "block"; break;
+			case LCss::DispNone: Disp = "none"; break;
+			case LCss::DispInlineBlock: Disp = "inline-block"; break;
+			case LCss::DispTable: Disp = "table"; break;
+			case LCss::DispTableRow: Disp = "table-row"; break;
+			case LCss::DispTableCell: Disp = "table-cell"; break;
+			default: break;
+		}
+
+		Buf.Print("%s {\n  \"path\": \"%s\",\n  \"tag\": \"%s\",\n  \"x\": %i,\n  \"y\": %i,\n  \"w\": %i,\n  \"h\": %i,\n"
+				"  \"display\": \"%s\",\n  \"margin\": [\n   \"%gpx\",\n   \"%gpx\",\n   \"%gpx\",\n   \"%gpx\"\n  ]\n }",
+				First ? "" : ",\n", Path.Get(), Name.Get(), AbsX, AbsY, Size.x, Size.y,
+				Disp, margin.y1, margin.x2, margin.y2, margin.x1);
+		First = false;
+	}
+	else if (IsRoot)
+		Path = "";
+	else
+		return;
+
+	int ElIdx = 0;
+	for (unsigned i=0; i<Children.Length(); i++)
+	{
+		LTag *t = ToTag(Children[i]);
+		if (!t || t->TagId == CONTENT || !t->Tag)
+			continue;
+		bool Top = IsRoot;
+		t->_DumpJson(Buf, Path, Top ? -1 : ElIdx, AbsX, AbsY, First);
+		ElIdx++;
+	}
+}
+
 LAutoWString LTag::DumpW()
 {
 	LStringPipe Buf;
-	// Buf.Print("Html pos=%s\n", Html?Html->GetPos().GetStr():0);
-	_Dump(Buf, 0);
-	LAutoString a(Buf.NewStr());
+	bool First = true;
+	Buf.Print("[\n");
+	_DumpJson(Buf, "", -1, 0, 0, First);
+	Buf.Print("\n]\n");
+	LString a = Buf.NewLStr();
 	LAutoWString w(Utf8ToWide(a));
+
+	#ifdef _DEBUG
+	LFile out(LFile::Path("~/code/lgi.json").Absolute(), O_WRITE);
+	out.Write(a);
+	#endif
+
 	return w;
 }
 
@@ -8577,6 +8636,7 @@ void LHtml::OnMouseClick(LMouse &m)
 							LClipBoard c(this);
 							c.TextW(s);
 						}
+
 						break;
 					}
 					case IDM_EXTERNAL:
