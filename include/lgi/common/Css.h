@@ -13,6 +13,7 @@
 #include "lgi/common/LgiString.h"
 #include "lgi/common/HashTable.h"
 #include "lgi/common/Colour.h"
+#include "lgi/common/RectF.h"
 
 #ifndef LINUX
 #pragma pack(push, 1)
@@ -1310,10 +1311,10 @@ public:
 	Accessor(Left, Len, Len(), PropNull);
 
 	Accessor(Margin, Len, Len(), PropNull);
-	Accessor(MarginTop, Len, Len(), PropNull);
-	Accessor(MarginRight, Len, Len(), PropNull);
-	Accessor(MarginBottom, Len, Len(), PropNull);
-	Accessor(MarginLeft, Len, Len(), PropNull);
+	Accessor(MarginTop, Len, Len(), PropMargin);
+	Accessor(MarginRight, Len, Len(), PropMargin);
+	Accessor(MarginBottom, Len, Len(), PropMargin);
+	Accessor(MarginLeft, Len, Len(), PropMargin);
 
 	Accessor(Padding, Len, Len(), PropNull);
 	Accessor(PaddingTop, Len, Len(), PropPadding);
@@ -1457,7 +1458,7 @@ protected:
 class LCssBox
 {
 public:
-	LRect margin, border, padding;
+	LRectF margin, border, padding;
 	
 	LCssBox()
 	{
@@ -1474,22 +1475,19 @@ public:
 			return;
 		}
 
-		const auto marginDef = css->Margin();
-		margin.x1 = (marginDef ? marginDef : css->MarginLeft()).ToPx(parentBox.X(), fnt);
-		margin.y1 = (marginDef ? marginDef : css->MarginTop()).ToPx(parentBox.Y(), fnt);
-		margin.x2 = (marginDef ? marginDef : css->MarginRight()).ToPx(parentBox.X(), fnt);
-		margin.y2 = (marginDef ? marginDef : css->MarginBottom()).ToPx(parentBox.Y(), fnt);
+		margin.x1 = css->MarginLeft().ToPx(parentBox.X(), fnt);
+		margin.y1 = css->MarginTop().ToPx(parentBox.Y(), fnt);
+		margin.x2 = css->MarginRight().ToPx(parentBox.X(), fnt);
+		margin.y2 = css->MarginBottom().ToPx(parentBox.Y(), fnt);
 
-		const auto borderDef = css->Border();
-		border.x1 = (borderDef ? borderDef : css->BorderLeft()).ToPx(parentBox.X(), fnt);
-		border.y1 = (borderDef ? borderDef : css->BorderTop()).ToPx(parentBox.Y(), fnt);
-		border.x2 = (borderDef ? borderDef : css->BorderRight()).ToPx(parentBox.X(), fnt);
-		border.y2 = (borderDef ? borderDef : css->BorderBottom()).ToPx(parentBox.Y(), fnt);
+		border.x1 = css->BorderLeft().ToPx(parentBox.X(), fnt);
+		border.y1 = css->BorderTop().ToPx(parentBox.Y(), fnt);
+		border.x2 = css->BorderRight().ToPx(parentBox.X(), fnt);
+		border.y2 = css->BorderBottom().ToPx(parentBox.Y(), fnt);
 
-		const auto paddingDef = css->Padding();
-		padding.x1 = (paddingDef ? paddingDef : css->PaddingLeft()).ToPx(parentBox.X(), fnt);
-		padding.y1 = (paddingDef ? paddingDef : css->PaddingTop()).ToPx(parentBox.Y(), fnt);
-		padding.x2 = (paddingDef ? paddingDef : css->PaddingRight()).ToPx(parentBox.X(), fnt);
-		padding.y2 = (paddingDef ? paddingDef : css->PaddingBottom()).ToPx(parentBox.Y(), fnt);
+		padding.x1 = css->PaddingLeft().ToPx(parentBox.X(), fnt);
+		padding.y1 = css->PaddingTop().ToPx(parentBox.Y(), fnt);
+		padding.x2 = css->PaddingRight().ToPx(parentBox.X(), fnt);
+		padding.y2 = css->PaddingBottom().ToPx(parentBox.Y(), fnt);
 	}
 };

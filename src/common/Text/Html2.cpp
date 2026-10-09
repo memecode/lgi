@@ -38,6 +38,7 @@
 #define DEBUG_SELECTION				0
 #define DEBUG_TEXT_AREA				0
 #define PROFILE_FLOW				0
+#define USE_NEW_FLOW                1
 
 #define ENABLE_IMAGE_RESIZING		1
 #define DOCUMENT_LOAD_IMAGES		1
@@ -159,7 +160,6 @@ public:
 	int NextCtrlId;
 	uint64 SetScrollTime;
 	int DeferredLoads;
-	int FlowedTags = 0;
 	#if PROFILE_FLOW
 	LHashTbl<ConstStrKey<char,false>, uint64_t> FlowTimes;
 	#endif
@@ -222,7 +222,17 @@ public:
 	}
 };
 
-class LFlowRegion
+class LNewFlow
+{
+public:
+    LPoint MAX;
+    
+    LNewFlow(LHtml *html, LRect &r)
+    {
+    }
+};
+
+class LOldFlow
 {
 	LCss::LengthType Align = LCss::LenInherit;
 	List<LFlowRect> Line;	// These pointers aren't owned by the flow region
@@ -239,35 +249,32 @@ class LFlowRegion
 
 public:
 	LHtml *Html;
-	int x1, x2;					// Left and right margins
-	int y1;						// Current y position
-	int y2;						// Maximum used y position
-	int cx;						// Current insertion point
-	int my;						// How much of the area above y2 was just margin
-	LPoint MAX;					// Max dimensions
-	int Inline;
-	int InBody;
+	int x1, x2;			// Left and right margins
+	int y1;				// Current y position
+	int y2;				// Maximum used y position
+	int cx;				// Current insertion point
+	int marginY;		// How much of the area after y2 was just margin
+	LPoint MAX;			// Max dimensions
+	int InBody;			// nesting count of <BODY> tags.
 
-	LFlowRegion(LHtml *html, bool inbody)
+	LOldFlow(LHtml *html, bool inbody)
 	{
 		Html = html;
-		x1 = x2 = y1 = y2 = cx = my = 0;
-		Inline = 0;
+		x1 = x2 = y1 = y2 = cx = marginY = 0;
 		InBody = inbody;
 	}
 
-	LFlowRegion(LHtml *html, LRect r, bool inbody)
+	LOldFlow(LHtml *html, LRect r, bool inbody)
 	{
 		Html = html;
 		MAX.x = cx = x1 = r.x1;
 		MAX.y = y1 = y2 = r.y1;
 		x2 = r.x2;
-		my = 0;
-		Inline = 0;
+		marginY = 0;
 		InBody = inbody;
 	}
 
-	LFlowRegion(LFlowRegion &r)
+	LOldFlow(LOldFlow &r)
 	{
 		Html = r.Html;
 		x1 = r.x1;
@@ -275,18 +282,16 @@ public:
 		y1 = r.y1;
 		MAX.x = cx = r.cx;
 		MAX.y = y2 = r.y2;
-		my = r.my;
-		Inline = r.Inline;
+		marginY = r.marginY;
 		InBody = r.InBody; 
 	}
 
 	LString ToString()
 	{
 		LString s;
-		s.Printf("Flow: x=%i(%i)%i y=%i,%i my=%i inline=%i",
+		s.Printf("Flow: x=%i(%i)%i y=%i,%i my=%i",
 			x1, cx, x2,
-			y1, y2, my,
-			Inline);
+			y1, y2, marginY);
 		return s;
 	}
 
@@ -305,7 +310,7 @@ public:
 		return x2 - x1 + 1;
 	}
 
-	LFlowRegion &operator +=(LRect r)
+	LOldFlow &operator +=(LRect r)
 	{
 		x1 += r.x1;
 		cx += r.x1;
@@ -316,7 +321,7 @@ public:
 		return *this;
 	}
 
-	LFlowRegion &operator -=(LRect r)
+	LOldFlow &operator -=(LRect r)
 	{
 		x1 -= r.x1;
 		cx -= r.x1;
@@ -340,7 +345,7 @@ public:
 				LCss::Len Bottom,
 				bool IsMargin)
 	{
-		LFlowRegion This(*this);
+		LOldFlow This(*this);
 		LFlowStack &Fs = Stack.New();
 
 		Fs.LeftAbs = Left ? ResolveX(Left, Tag, IsMargin) : 0;
@@ -353,13 +358,13 @@ public:
 		y1 += Fs.TopAbs;
 		y2 += Fs.TopAbs;
 		if (IsMargin)
-			my += Fs.TopAbs;
+			marginY += Fs.TopAbs;
 	}
 
-	void Indent(LRect &Px,
+	void Indent(LRectF &Px,
 				bool IsMargin)
 	{
-		LFlowRegion This(*this);
+		LOldFlow This(*this);
 		LFlowStack &Fs = Stack.New();
 
 		Fs.LeftAbs = Px.x1;
@@ -373,27 +378,27 @@ public:
 		y2 += Fs.TopAbs;
 		
 		if (IsMargin)
-			my += Fs.TopAbs;
+			marginY += Fs.TopAbs;
 	}
 
-	void Outdent(LRect &Px,
+	void Outdent(LRectF &Px,
 				bool IsMargin)
 	{
-		LFlowRegion This = *this;
+		LOldFlow This = *this;
 
 		ssize_t len = Stack.Length();
 		if (len > 0)
 		{
 			LFlowStack &Fs = Stack[len-1];
 
-			int &BottomAbs = Px.y2;
+			auto &BottomAbs = Px.y2;
 
 			x1 -= Fs.LeftAbs;
 			cx -= Fs.LeftAbs;
 			x2 += Fs.RightAbs;
 			y2 += BottomAbs;
 			if (IsMargin)
-				my += BottomAbs;
+				marginY += BottomAbs;
 
 			Stack.Length(len-1);
 		}
@@ -407,7 +412,7 @@ public:
 				LCss::Len Bottom,
 				bool IsMargin)
 	{
-		LFlowRegion This = *this;
+		LOldFlow This = *this;
 
 		ssize_t len = Stack.Length();
 		if (len > 0)
@@ -421,7 +426,7 @@ public:
 			x2 += Fs.RightAbs;
 			y2 += BottomAbs;
 			if (IsMargin)
-				my += BottomAbs;
+				marginY += BottomAbs;
 
 			Stack.Length(len-1);
 		}
@@ -774,7 +779,7 @@ void LHtmlLength::Set(char *s)
 	}
 }
 
-float LHtmlLength::Get(LFlowRegion *Flow, LFont *Font, bool Lock)
+float LHtmlLength::Get(LOldFlow *Flow, LFont *Font, bool Lock)
 {
 	switch (u)
 	{
@@ -981,13 +986,13 @@ LCss::LengthType LTag::GetAlign(bool x)
 }
 
 //////////////////////////////////////////////////////////////////////
-void LFlowRegion::EndBlock()
+void LOldFlow::EndBlock()
 {
 	if (cx > x1)
 		FinishLine();
 }
 
-void LFlowRegion::AlignText()
+void LOldFlow::AlignText()
 {
 	if (Align != LCss::AlignLeft)
 	{
@@ -1012,19 +1017,19 @@ void LFlowRegion::AlignText()
 	}
 }
 
-void LFlowRegion::FinishLine(bool Margin)
+void LOldFlow::FinishLine(bool Margin)
 {
 	// AlignText();
 
 	if (y2 > y1)
 	{
-		my = Margin ? y2 - y1 : 0;
+		marginY = Margin ? y2 - y1 : 0;
 		y1 = y2;
 	}
 	else
 	{
 		int fy = Html->DefFont()->GetHeight();
-		my = Margin ? fy : 0;
+		marginY = Margin ? fy : 0;
 		y1 += fy;
 	}
 	cx = x1;
@@ -1033,7 +1038,7 @@ void LFlowRegion::FinishLine(bool Margin)
 	Line.Empty();
 }
 
-LRect *LFlowRegion::LineBounds()
+LRect *LOldFlow::LineBounds()
 {
 	auto It = Line.begin();
 	LFlowRect *Prev = *It;
@@ -1073,7 +1078,7 @@ LRect *LFlowRegion::LineBounds()
 	return 0;
 }
 
-void LFlowRegion::Insert(LFlowRect *Tr, LCss::LengthType align)
+void LOldFlow::Insert(LFlowRect *Tr, LCss::LengthType align)
 {
 	if (Tr)
 	{
@@ -3911,7 +3916,7 @@ T Sum(LArray<T> &a)
 	return s;
 }
 
-void LTag::LayoutTable(LFlowRegion *f, uint32_t Depth)
+void LTag::LayoutTable(LOldFlow *f, uint32_t Depth)
 {
 	if (!Cell && IsTableTag())
 		Cell = new TblCell;
@@ -4147,7 +4152,7 @@ int LHtmlTableLayout::GetTotalX(int StartCol, int Cols)
 	return TotalX;
 }
 
-void LHtmlTableLayout::LayoutTable(LFlowRegion *f, uint16 Depth)
+void LHtmlTableLayout::LayoutTable(LOldFlow *f, uint16 Depth)
 {
 	GetSize(s.x, s.y);
 	if (s.x == 0 || s.y == 0)
@@ -4467,9 +4472,9 @@ void LHtmlTableLayout::LayoutTable(LFlowRegion *f, uint16 Depth)
 				}
 					
 				LCss::Len Ht = t->Height();
-				LFlowRegion r(Table->Html, Box, true);
+				LOldFlow r(Table->Html, Box, true);
 
-				t->OnFlow(&r, Depth+1);
+				t->OldFlow(&r, Depth+1);
 
 				if (r.MAX.y > r.y2)
 				{
@@ -4714,7 +4719,7 @@ LRect *LHtmlArea::TopRect(LRegion *c)
 }
 
 void LHtmlArea::FlowText(LTag *Tag,
-						LFlowRegion *Flow,
+						LOldFlow *Flow,
 						LFont *Font,
 						int LineHeight,
 						char16 *Text,
@@ -5081,7 +5086,11 @@ LCss::DisplayType LTag::SupportedDisplay()
 	return LCss::DispInherit;
 }
 
-void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
+void LTag::NewFlow(LNewFlow *flow)
+{
+}
+
+void LTag::OldFlow(LOldFlow *Flow, int Depth)
 {
 	if (Depth >= MAX_RECURSION_DEPTH)
 		return;
@@ -5090,12 +5099,11 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 	if (Disp == DispNone)
 		return;
 
-	Html->d->FlowedTags++;
 	auto FlowStart = LMicroTime();
 	uint64_t FlowTime = 0;
 
 	auto f = GetFont();
-	LFlowRegion Local(*Flow);
+	LOldFlow Local(*Flow);
 	bool Restart = true;
 	int BlockFlowWidth = 0;
 	const char *ImgAltText = NULL;
@@ -5122,7 +5130,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 		Flow->y1 += Size.y;
 		Flow->y2 = Flow->y1;
 		Flow->cx = Flow->x1;
-		Flow->my = 0;
+		Flow->marginY = 0;
 		Flow->MAX.y = MAX(Flow->MAX.y, Flow->y2);
 
 		Flow->Outdent(margin, true);
@@ -5141,7 +5149,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 		}
 		case TAG_IFRAME:
 		{
-			LFlowRegion Temp = *Flow;
+			LOldFlow Temp = *Flow;
 			Flow->EndBlock();
 			Flow->Indent(margin, true);
 
@@ -5149,7 +5157,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 			for (unsigned i=0; i<Children.Length(); i++)
 			{
 				LTag *t = ToTag(Children[i]);
-				t->OnFlow(&Temp, Depth + 1);
+				t->OldFlow(&Temp, Depth + 1);
 
 				if (IsTableRow())
 				{
@@ -5387,9 +5395,6 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 
 			Flow->y1 += border.y1 + padding.y1;
 			Flow->y2 = Flow->y1;
-
-			if (!IsTableTag())
-				Flow->Inline++;
 		}
 	}
 	else
@@ -5521,8 +5526,8 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 			case PosAbsolute:
 			case PosFixed:
 			{
-				LFlowRegion old = *Flow;
-				t->OnFlow(Flow, Depth + 1);
+				LOldFlow old = *Flow;
+				t->OldFlow(Flow, Depth + 1);
 				
 				// Try and reset the flow to how it was before...
 				Flow->x1 = old.x1;
@@ -5536,7 +5541,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 			}
 			default:
 			{
-				t->OnFlow(Flow, Depth + 1);
+				t->OldFlow(Flow, Depth + 1);
 
 				#if 0
 				if (Debug)
@@ -5665,10 +5670,6 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 			Flow->x1 = Local.x1 - Pos.x;
 			Flow->cx = Local.cx + Size.x + MarginR - Pos.x;
 			Flow->x2 = Local.x2 - Pos.x;
-
-			if (!IsTableTag())
-				Flow->Inline--;
-
 
 			if (Height())
 			{
@@ -7334,11 +7335,13 @@ LPoint LHtml::Layout(bool ForceLayout)
 	LRect Client = GetClient();
 	if (Tag && (ViewWidth != Client.X() || ForceLayout))
 	{
-		LFlowRegion f(this, Client, false);
-
-		// Flow text, width is different
-		d->FlowedTags = 0;
-		Tag->OnFlow(&f, 0);
+	    #if USE_NEW_FLOW
+		LNewFlow f(this, Client);
+		Tag->NewFlow(&f);
+	    #else
+		LOldFlow f(this, Client, false);
+		Tag->OldFlow(&f, 0);
+		#endif
 
 		#if PROFILE_FLOW
 		for (auto p: d->FlowTimes)
@@ -7350,7 +7353,7 @@ LPoint LHtml::Layout(bool ForceLayout)
 		d->Content.y = f.MAX.y + 1;
 
 		// Set up scroll box
-		bool Sy = f.y2 > Y();
+		bool Sy = d->Content.y > Y();
 		int LineY = GetFont()->GetHeight();
 
 		uint64 Now = LCurrentTime();
@@ -7363,7 +7366,7 @@ LPoint LHtml::Layout(bool ForceLayout)
 			{
 				int y = Y();
 				int p = MAX(y / LineY, 1);
-				int fy = f.y2 / LineY;
+				int fy = d->Content.y / LineY;
 				VScroll->SetPage(p);
 				VScroll->SetRange(fy);
 			}

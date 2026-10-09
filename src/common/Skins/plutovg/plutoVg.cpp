@@ -181,7 +181,7 @@ class PlutoVgSkin : public LSkinEngine
 		{
 			LRectF fr(Client);
 			int Resize = Default ? 2 : 1;
-			fr.Size(Resize, Resize);
+			fr.Inset(Resize, Resize);
 			if (Down)
 			{
 				fr.x1 = fr.x1 + 1;
@@ -308,7 +308,7 @@ class PlutoVgSkin : public LSkinEngine
 		{
 			LRectF CheckBox = r;
 			int Px = (int)(CheckBox.X() / 6);
-			CheckBox.Size(CHECK_BORDER + Px, CHECK_BORDER + Px);
+			CheckBox.Inset(CHECK_BORDER + Px, CHECK_BORDER + Px);
 
 			float Cx = (float)(CheckBox.x1 + (CheckBox.X() / 2));
 			float Cy = (float)(CheckBox.y1 + (CheckBox.Y() / 2));

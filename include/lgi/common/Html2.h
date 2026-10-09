@@ -34,7 +34,8 @@ class LHtml :
 	public LCapabilityClient
 {
 	friend class LTag;
-	friend class LFlowRegion;
+	friend class LOldFlow;
+	friend class LNewFlow;
 
 	class LHtmlPrivate2 *d;
 

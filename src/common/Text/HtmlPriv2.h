@@ -13,7 +13,8 @@ namespace Html2
 // Structs & Classes                                                            //
 //////////////////////////////////////////////////////////////////////////////////
 class LFlowRect;
-class LFlowRegion;
+class LOldFlow;
+class LNewFlow;
 
 #define ToTag(t)					dynamic_cast<LTag*>(t)
 
@@ -51,7 +52,7 @@ public:
 	LHtmlLength &operator =(float val);
 	LCss::LengthType GetUnits();
 	void Set(char *s);
-	float Get(LFlowRegion *Flow, LFont *Font, bool Lock = false);
+	float Get(LOldFlow *Flow, LFont *Font, bool Lock = false);
 	float GetRaw() { return d; }
 };
 
@@ -91,7 +92,7 @@ public:
 	void Empty() { DeleteObjects(); }
 	LRect Bounds();
 	LRect *TopRect(LRegion *c);
-	void FlowText(LTag *Tag, LFlowRegion *c, LFont *Font, int LineHeight, char16 *Text, LCss::LengthType Align, bool Debug = false);
+	void FlowText(LTag *Tag, LOldFlow *c, LFont *Font, int LineHeight, char16 *Text, LCss::LengthType Align, bool Debug = false);
 };
 
 struct LHtmlTableLayout
@@ -122,7 +123,7 @@ struct LHtmlTableLayout
 	int GetTotalX(int StartCol = 0, int Cols = -1);
 	void AllocatePx(int StartCol, int Cols, int MinPx, bool FillWidth);
 	void DeallocatePx(int StartCol, int Cols, int MaxPx);
-	void LayoutTable(LFlowRegion *f, uint16 Depth);
+	void LayoutTable(LOldFlow *f, uint16 Depth);
 	
 	void Dump();
 };
@@ -277,7 +278,7 @@ protected:
 	LArray<AlignGroup> PostFlowAlign;
 
 	// Forms
-	LViewI *Ctrl = NULL;
+	LViewI *Ctrl = nullptr;
 	LVariant CtrlValue;
 	HtmlControlType CtrlType = CtrlNone;
 
@@ -295,7 +296,7 @@ protected:
 	LTag *PrevTag();
 	LRect ChildBounds();
 	bool GetWidthMetrics(LTag *Table, int32_t &Min, int32_t &Max);
-	void LayoutTable(LFlowRegion *f, uint32_t Depth);
+	void LayoutTable(LOldFlow *f, uint32_t Depth);
 	void BoundParents();
 	bool PeekTag(char *s, char *tag);
 	LTag *GetTable();
@@ -309,15 +310,15 @@ protected:
 public:
 	// Object
 	LString::Array Class;
-	const char *HtmlId = NULL;
+	const char *HtmlId = nullptr;
 
 	LAutoString Condition;
 	int TipId = 0;
 
 	// Hierarchy
-	LHtml *Html = NULL;
+	LHtml *Html = nullptr;
 	bool IsBlock() { return SupportedDisplay() == LCss::DispBlock; }
-	LTag *GetBlockParent(ssize_t *Idx = NULL);
+	LTag *GetBlockParent(ssize_t *Idx = nullptr);
 	LFont *GetFont();
 
 	// Pos and Size should NOT include the CSS margin, but include the border and padding.
@@ -420,7 +421,8 @@ public:
 	/// Event received by scripts change CSS properties.
 	void OnStyleChange(const char *name);
 	/// Positions the tag according to the flow region passed in
-	void OnFlow(LFlowRegion *Flow, uint16 Depth);
+	void OldFlow(LOldFlow *Flow, int Depth);
+	void NewFlow(LNewFlow *flow);
 	/// Paints the border and background of the tag
 	void PaintBorderAndBackground(
 		/// The surface to paint on
@@ -448,8 +450,8 @@ public:
 	void CollectFormValues(LHashTbl<ConstStrKey<char,false>,char*> &f);
 
 	// LDom impl
-	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
-	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = nullptr);
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = nullptr);
 
 	// Window
 	bool OnMouseClick(LMouse &m);
@@ -471,5 +473,3 @@ public:
 };
 
 }
-
-
