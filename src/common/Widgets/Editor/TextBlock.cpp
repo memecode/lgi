@@ -1271,8 +1271,9 @@ bool LRichTextPriv::TextBlock::OnLayout(Flow &flow)
 	if (Txt.Length() == 0)
 	{
 		// Empty node case
-		int y = Pos.y1 + flow.d->View->GetFont()->GetHeight() - 1;
-		CurLine->PosOff.y2 = Pos.y2 = MAX(Pos.y2, y);
+		// PosOff is relative to the block, Pos is in document co-ordinates
+		CurLine->PosOff.y2 = CurLine->PosOff.y1 + flow.d->View->GetFont()->GetHeight() - 1;
+		Pos.y2 = MAX(Pos.y2, Pos.y1 + CurLine->PosOff.y2);
 		LayoutSize += CurLine->Length();
 
 		Layout.Add(CurLine.Release());
