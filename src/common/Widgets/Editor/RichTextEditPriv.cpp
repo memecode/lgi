@@ -1248,21 +1248,21 @@ LSurface *LEmojiImage::GetEmojiImage()
 {
 	if (!EmojiImg)
 	{
-		LString p = LGetSystemPath(LSP_APP_INSTALL);
-		if (!p)
-		{
-			LgiTrace("%s:%i - No app install path.\n", _FL);
-			return NULL;
-		}
-
-		char File[MAX_PATH_LEN] = "";
-		LMakePath(File, sizeof(File), p, "..\\src\\common\\Text\\Emoji\\EmojiMap.png");
 		LString a;
-		if (!LFileExists(File))
+
+		// This is more for debug builds:
+		char File[MAX_PATH_LEN] = "";
+		LMakePath(File, sizeof(File), __FILE__, "../../../Text/Emoji/EmojiMap.png");
+		
+
+		// And this is release builds:
+		if (LFileExists(File))
+			a = File;
+		else
 			a = LFindFile("EmojiMap.png");
 		
-		EmojiImg.Reset(GdcD->Load(a ? a : File, false));
-		
+		if (a)
+			EmojiImg.Reset(GdcD->Load(a, false));
 	}
 
 	return EmojiImg;

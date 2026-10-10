@@ -2984,8 +2984,8 @@ EmojiMenu::EmojiMenu(LRichTextPriv *priv, LPoint p) : LPopup(priv->View)
 	LHashTbl<IntKey<int>, int> Map;
 	for (int b=0; b<CountOf(EmojiRanges); b++)
 	{
-		LRange &r = EmojiRanges[b];
-		for (int i=0; i<r.Len; i++)
+		auto &r = EmojiRanges[b];
+		for (ssize_t i=0; i<r.Len; i++)
 		{
 			uint32_t u = (int)r.Start + i;
 			auto Emoji = EmojiToIconIndex(&u, 1);
@@ -3062,8 +3062,7 @@ void EmojiMenu::OnPaint(LSurface *pDC)
 	pDC->Colour(L_MED);
 	pDC->Rectangle();
 
-	LSurface *EmojiImg = d->GetEmojiImage();
-	if (EmojiImg)
+	if (auto EmojiImg = d->GetEmojiImage())
 	{
 		pDC->Op(GDC_ALPHA);
 		
@@ -3093,8 +3092,8 @@ void EmojiMenu::OnPaint(LSurface *pDC)
 	}
 	else
 	{
-		LRect c = GetClient();
-		LDisplayString Ds(LSysFont, "Loading...");
+		auto c = GetClient();
+		LDisplayString Ds(LSysFont, "Error: loading EmojiMap.png");
 		LSysFont->Colour(L_TEXT, L_MED);
 		LSysFont->Transparent(true);
 		Ds.Draw(pDC, (c.X()-Ds.X())>>1, (c.Y()-Ds.Y())>>1);

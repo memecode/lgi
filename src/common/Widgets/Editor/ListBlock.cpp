@@ -110,7 +110,7 @@ ssize_t LRichTextPriv::ListBlock::LineToOffset(ssize_t Line)
 LNamedStyle *LRichTextPriv::ListBlock::GetStyle(ssize_t At)
 {
 	ssize_t Pos = 0;
-	for (auto b : blocks)
+	for (auto b: blocks)
 	{
 		ssize_t Len = b->Length();
 		if (At < 0 || (At >= Pos && At < Pos + Len))
