@@ -31,7 +31,12 @@
 #include "lgi/common/Emoji.h"
 #include "lgi/common/SpellCheck.h"
 
+#ifndef DEBUG_ACTIVITY
 #define DEBUG_ACTIVITY					1
+#endif
+#if DEBUG_ACTIVITY
+#include "lgi/common/Json.h"
+#endif
 #define DEBUG_LOG_CURSOR_COUNT			0
 #define DEBUG_OUTLINE_CUR_DISPLAY_STR	0
 #define DEBUG_OUTLINE_CUR_STYLE_TEXT	0
@@ -358,6 +363,18 @@ public:
 	LStream *Log;
 	bool HtmlLinkAsCid = false;
 	uint64 BlinkTs = 0;
+
+	#if DEBUG_ACTIVITY
+	bool ActivityRecording = false;
+	bool ActivityReplaying = false;
+	LString ActivityPath;
+	LJson ActivityState;
+	LJson LoadedActivity;
+	LArray<LJson> ActivityActions;
+
+	bool CaptureActivityState(bool ClearActions);
+	void RecordActivityAction(const LJson &Action);
+	#endif
 
 	// Spell check support
 	LSpellCheck *SpellCheck = nullptr;

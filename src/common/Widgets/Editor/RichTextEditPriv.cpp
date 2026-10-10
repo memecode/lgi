@@ -7,10 +7,119 @@
 
 #include "RichTextEditPriv.h"
 
+#if DEBUG_ACTIVITY
+static void SetActivityRect(LJson &j, const char *key, const LRect &r)
+{
+	LString prefix = LString(key) + ".";
+	j.Set(prefix + "x1", (int64_t)r.x1);
+	j.Set(prefix + "y1", (int64_t)r.y1);
+	j.Set(prefix + "x2", (int64_t)r.x2);
+	j.Set(prefix + "y2", (int64_t)r.y2);
+}
+
+static LJson ActivityBlockState(LRichTextPriv::Block *b)
+{
+	LJson j;
+	if (!b)
+		return j;
+
+	LRect pos = b->GetPos();
+	j.Set("uid", (int64_t)b->GetUid());
+	j.Set("type", b->GetClass());
+	j.Set("length", (int64_t)b->Length());
+	j.Set("lines", (int64_t)b->GetLines());
+	SetActivityRect(j, "bounds", pos);
+
+	LArray<LJson> children;
+	for (auto child : b->blocks)
+		children.Add(ActivityBlockState(child));
+	j.Set("children", children);
+
+	if (auto tb = dynamic_cast<LRichTextPriv::TextBlock*>(b))
+	{
+		LArray<LJson> lines;
+		for (auto line : tb->Layout)
+		{
+			LJson lineState;
+			SetActivityRect(lineState, "bounds", line->PosOff);
+			lineState.Set("newLine", (int64_t)line->NewLine);
+			lineState.Set("length", (int64_t)line->Length());
+			lineState.Set("displayStrings", (int64_t)line->Strs.Length());
+			lines.Add(lineState);
+		}
+		j.Set("lineLayout", lines);
+	}
+	else if (auto image = dynamic_cast<LRichTextPriv::ImageBlock*>(b))
+	{
+		SetActivityRect(j, "image.bounds", image->ImgPos);
+		j.Set("image.width", (int64_t)image->Size.x);
+		j.Set("image.height", (int64_t)image->Size.y);
+	}
+
+	return j;
+}
+#endif
+
 LRichTextPriv::LBlockArray::~LBlockArray()
 {
 	blocks.DeleteObjects();
 }
+
+#if DEBUG_ACTIVITY
+bool LRichTextPriv::CaptureActivityState(bool ClearActions)
+{
+	if (!ToHtml())
+		return false;
+
+	LJson state;
+	state.Set("html", UtfNameCache.Get());
+
+	if (Cursor)
+	{
+		state.Set("cursor.index", (int64_t)IndexOfCursor(Cursor));
+		state.Set("cursor.uid", (int64_t)Cursor->Blk->GetUid());
+		state.Set("cursor.offset", (int64_t)Cursor->Offset);
+		state.Set("cursor.lineHint", (int64_t)Cursor->LineHint);
+		SetActivityRect(state, "cursor.position", Cursor->Pos);
+		SetActivityRect(state, "cursor.line", Cursor->Line);
+	}
+	else
+		state.Set("cursor.index", (int64_t)-1);
+
+	if (Selection)
+	{
+		state.Set("selection.index", (int64_t)IndexOfCursor(Selection));
+		state.Set("selection.uid", (int64_t)Selection->Blk->GetUid());
+		state.Set("selection.offset", (int64_t)Selection->Offset);
+		state.Set("selection.lineHint", (int64_t)Selection->LineHint);
+		SetActivityRect(state, "selection.position", Selection->Pos);
+		SetActivityRect(state, "selection.line", Selection->Line);
+	}
+	else
+		state.Set("selection.index", (int64_t)-1);
+
+	LRect client = View->GetClient();
+	SetActivityRect(state, "view.client", client);
+	state.Set("view.documentWidth", (int64_t)DocumentExtent.x);
+	state.Set("view.documentHeight", (int64_t)DocumentExtent.y);
+
+	LArray<LJson> blocks;
+	for (auto block : Blocks)
+		blocks.Add(ActivityBlockState(block));
+	state.Set("blocks", blocks);
+
+	ActivityState = state;
+	if (ClearActions)
+		ActivityActions.Length(0);
+	return true;
+}
+
+void LRichTextPriv::RecordActivityAction(const LJson &Action)
+{
+	if (ActivityRecording && !ActivityReplaying)
+		ActivityActions.Add(Action);
+}
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool Utf16to32(LArray<uint32_t> &Out, const uint16_t *In, ssize_t WordLen)

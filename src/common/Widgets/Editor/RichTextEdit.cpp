@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <climits>
+#include <cmath>
 #ifdef WIN32
 #include <imm.h>
 #endif
@@ -23,6 +25,7 @@
 
 // If this is not found add $lgi/private/common to your include paths
 #include "ViewPriv.h"
+#include "RichTextEditPriv.h"
 
 #define DefaultCharset              "utf-8"
 
@@ -41,8 +44,6 @@
 #endif
 
 // static char SelectWordDelim[] = " \t\n.,()[]<>=?/\\{}\"\';:+=-|!@#$%^&*";
-
-#include "RichTextEditPriv.h"
 
 //////////////////////////////////////////////////////////////////////
 LRichTextEdit::LRichTextEdit(	int Id,
@@ -448,8 +449,371 @@ bool LRichTextEdit::Name(const char *s)
 		SetCursor(0, false);
 	
 	Invalidate();
+
+	#if DEBUG_ACTIVITY
+	if (Status && d->ActivityRecording && !d->ActivityReplaying)
+	{
+		d->Layout(VScroll);
+		if (!d->CaptureActivityState(true))
+			LgiTrace("%s:%i - Failed to capture rich text activity state.\n", _FL);
+	}
+	#endif
 	
 	return Status;
+}
+
+#if DEBUG_ACTIVITY
+static bool IsActivityFile(const char *path)
+{
+	if (!path)
+		return false;
+	const char *extension = strrchr(path, '.');
+	return extension && _stricmp(extension, ".rte") == 0;
+}
+
+static bool ReadActivityInt(LJson &json, const char *name, int64_t &out)
+{
+	LString value = json.Get(name);
+	if (value.IsEmpty())
+		return false;
+	char *end = nullptr;
+	out = strtoll(value.Get(), &end, 10);
+	return end != value.Get() && *end == 0;
+}
+
+static bool ReadActivityIntRange(LJson &json, const char *name,
+	int64_t min, int64_t max, int64_t &out)
+{
+	return ReadActivityInt(json, name, out) && out >= min && out <= max;
+}
+
+static bool ReadActivityDouble(LJson &json, const char *name, double &out)
+{
+	LString value = json.Get(name);
+	if (value.IsEmpty())
+		return false;
+	char *end = nullptr;
+	out = strtod(value.Get(), &end);
+	return end != value.Get() && *end == 0 && std::isfinite(out);
+}
+
+static bool ValidateActivityAction(LJson &event)
+{
+	LString type = event.Get("type");
+	int64_t field = 0;
+	if (type == "key")
+		return ReadActivityIntRange(event, "vkey", 0, UINT16_MAX, field) &&
+			ReadActivityIntRange(event, "c16", 0, UINT16_MAX, field) &&
+			ReadActivityIntRange(event, "flags", INT_MIN, INT_MAX, field) &&
+			ReadActivityIntRange(event, "data", 0, UINT32_MAX, field) &&
+			ReadActivityIntRange(event, "isChar", 0, 1, field);
+	if (type == "mouseClick" || type == "mouseMove")
+		return ReadActivityIntRange(event, "x", INT_MIN, INT_MAX, field) &&
+			ReadActivityIntRange(event, "y", INT_MIN, INT_MAX, field) &&
+			ReadActivityIntRange(event, "flags", INT_MIN, INT_MAX, field) &&
+			ReadActivityIntRange(event, "viewCoords", 0, 1, field);
+	if (type == "mouseWheel")
+	{
+		double lines = 0;
+		return ReadActivityDouble(event, "lines", lines);
+	}
+	return false;
+}
+
+static void RecordActivityMouse(LRichTextPriv *priv, const char *type, const LMouse &mouse)
+{
+	LJson action;
+	action.Set("type", type);
+	action.Set("x", (int64_t)mouse.x);
+	action.Set("y", (int64_t)mouse.y);
+	action.Set("flags", (int64_t)mouse.Flags);
+	action.Set("viewCoords", (int64_t)mouse.ViewCoords);
+	priv->RecordActivityAction(action);
+}
+#endif
+
+bool LRichTextEdit::StartActivityRecording(const char *Path)
+{
+	#if DEBUG_ACTIVITY
+	if (!IsActivityFile(Path))
+	{
+		LgiTrace("%s:%i - Activity recording path must end in .rte.\n", _FL);
+		return false;
+	}
+
+	d->ActivityRecording = false;
+	d->ActivityReplaying = false;
+	d->ActivityPath = Path;
+	d->Layout(VScroll);
+	if (!d->CaptureActivityState(true))
+	{
+		d->ActivityPath.Empty();
+		LgiTrace("%s:%i - Failed to capture rich text activity baseline.\n", _FL);
+		return false;
+	}
+	d->ActivityRecording = true;
+	return true;
+	#else
+	(void)Path;
+	return false;
+	#endif
+}
+
+bool LRichTextEdit::SaveActivityRecording()
+{
+	#if DEBUG_ACTIVITY
+	if (!d->ActivityRecording || !IsActivityFile(d->ActivityPath))
+	{
+		LgiTrace("%s:%i - No rich text activity recording is active.\n", _FL);
+		return false;
+	}
+
+	LJson initialState = d->ActivityState;
+	if (!d->CaptureActivityState(false))
+	{
+		LgiTrace("%s:%i - Failed to capture final rich text activity state.\n", _FL);
+		return false;
+	}
+	LString finalState = d->ActivityState.GetJson();
+	d->ActivityState = initialState;
+	LString initial = d->ActivityState.GetJson();
+	if (initial.IsEmpty() || finalState.IsEmpty())
+	{
+		LgiTrace("%s:%i - Rich text activity state serialization failed.\n", _FL);
+		return false;
+	}
+
+	LStringPipe output;
+	output.Print("{\n  \"format\": \"lgi-rich-text-activity\",\n"
+		"  \"version\": 1,\n  \"state\": %s,\n  \"finalState\": %s,\n  \"actions\": [",
+		initial.Get(), finalState.Get());
+	for (unsigned i = 0; i < d->ActivityActions.Length(); i++)
+	{
+		LString action = d->ActivityActions[i].GetJson();
+		output.Print("%s\n    %s", i ? "," : "", action.Get());
+	}
+	output.Print("\n  ]\n}\n");
+
+	LString contents = output.NewLStr();
+	LFile file(d->ActivityPath, O_WRITE);
+	if (!file || file.SetSize(0) < 0 || file.SetPos(0) < 0 ||
+		file.Write(contents.Get(), contents.Length()) != contents.Length())
+	{
+		LgiTrace("%s:%i - Failed to write activity file '%s'.\n", _FL, d->ActivityPath.Get());
+		return false;
+	}
+
+	d->ActivityRecording = false;
+	return true;
+	#else
+	return false;
+	#endif
+}
+
+bool LRichTextEdit::LoadActivityRecording(const char *Path)
+{
+	#if DEBUG_ACTIVITY
+	if (!IsActivityFile(Path))
+	{
+		LgiTrace("%s:%i - Activity recording path must end in .rte.\n", _FL);
+		return false;
+	}
+
+	LFile file(Path, O_READ);
+	if (!file)
+	{
+		LgiTrace("%s:%i - Unable to open activity file '%s'.\n", _FL, Path);
+		return false;
+	}
+	int64 size = file.GetSize();
+	if (size <= 0 || size >= 16 * 1024 * 1024)
+	{
+		LgiTrace("%s:%i - Unable to read activity file '%s'.\n", _FL, Path);
+		return false;
+	}
+	LArray<char> contents;
+	if (!contents.Length((size_t)size + 1) ||
+		file.Read(contents.AddressOf(), (ssize_t)size) != size)
+	{
+		LgiTrace("%s:%i - Failed to read activity file '%s'.\n", _FL, Path);
+		return false;
+	}
+	contents[(size_t)size] = 0;
+
+	LJson recording;
+	if (!recording.SetJson(contents.AddressOf()) ||
+		recording.Get("format") != "lgi-rich-text-activity" ||
+		recording.Get("version") != "1" ||
+		recording.Get("state.html").IsEmpty())
+	{
+		LgiTrace("%s:%i - Invalid or unsupported activity file '%s'.\n", _FL, Path);
+		return false;
+	}
+
+	int64_t cursor = -1, selection = -1, lineHint = 0;
+	if (!ReadActivityInt(recording, "state.cursor.index", cursor) || cursor < 0 ||
+		!ReadActivityInt(recording, "state.selection.index", selection) || selection < -1 ||
+		!ReadActivityIntRange(recording, "state.cursor.lineHint", INT_MIN, INT_MAX, lineHint) ||
+		(selection >= 0 &&
+			!ReadActivityIntRange(recording, "state.selection.lineHint",
+				INT_MIN, INT_MAX, lineHint)))
+	{
+		LgiTrace("%s:%i - Activity file has invalid cursor state.\n", _FL);
+		return false;
+	}
+	bool hasActions = false;
+	for (auto &key : recording.GetKeys())
+		hasActions |= key == "actions";
+	if (!hasActions)
+	{
+		LgiTrace("%s:%i - Activity file is missing its actions array.\n", _FL);
+		return false;
+	}
+	for (auto action : recording.GetArray("actions"))
+	{
+		LString actionJson = action.GetJson();
+		LJson event(actionJson.Get());
+		if (!ValidateActivityAction(event))
+		{
+			LgiTrace("%s:%i - Invalid or unsupported action in activity file.\n", _FL);
+			return false;
+		}
+	}
+
+	d->LoadedActivity = recording;
+	d->ActivityPath = Path;
+	d->ActivityRecording = false;
+	return true;
+	#else
+	(void)Path;
+	return false;
+	#endif
+}
+
+bool LRichTextEdit::ReplayActivityRecording()
+{
+	#if DEBUG_ACTIVITY
+	LString html = d->LoadedActivity.Get("state.html");
+	int64_t cursorIndex = -1, selectionIndex = -1;
+	int64_t cursorLineHint = 0, selectionLineHint = 0;
+	if (html.IsEmpty() ||
+		!ReadActivityInt(d->LoadedActivity, "state.cursor.index", cursorIndex) ||
+		cursorIndex < 0 ||
+		!ReadActivityInt(d->LoadedActivity, "state.selection.index", selectionIndex) ||
+		selectionIndex < -1 ||
+		!ReadActivityInt(d->LoadedActivity, "state.cursor.lineHint", cursorLineHint) ||
+		cursorLineHint < INT_MIN || cursorLineHint > INT_MAX ||
+		(selectionIndex >= 0 &&
+			(!ReadActivityInt(d->LoadedActivity, "state.selection.lineHint", selectionLineHint) ||
+			 selectionLineHint < INT_MIN || selectionLineHint > INT_MAX)))
+	{
+		LgiTrace("%s:%i - No valid activity recording is loaded.\n", _FL);
+		return false;
+	}
+
+	d->ActivityRecording = false;
+	d->ActivityReplaying = true;
+	bool success = Name(html);
+	d->Layout(VScroll);
+	auto cursorAt = [this](ssize_t index, int lineHint, bool select)
+	{
+		ssize_t offset = 0;
+		auto block = d->GetBlockByIndex(index, &offset);
+		if (!block)
+			return false;
+		AutoCursor cursor(new LRichTextPriv::BlockCursor(block, offset, lineHint));
+		return cursor && d->SetCursor(cursor, select);
+	};
+	if (success && selectionIndex >= 0)
+		success = cursorAt(selectionIndex, (int)selectionLineHint, false) &&
+			cursorAt(cursorIndex, (int)cursorLineHint, true);
+	else if (success)
+		success = cursorAt(cursorIndex, (int)cursorLineHint, false);
+
+	if (!success)
+	{
+		d->ActivityReplaying = false;
+		LgiTrace("%s:%i - Unable to restore activity baseline cursor.\n", _FL);
+		return false;
+	}
+
+	auto getLength = [](LRichTextPriv *priv)
+	{
+		ssize_t length = 0;
+		auto Visit = [&](auto &&Self, LRichTextPriv::Block *block) -> void
+		{
+			if (block->blocks.Length())
+			{
+				for (auto child : block->blocks)
+					Self(Self, child);
+			}
+			else
+				length += block->Length();
+		};
+		for (auto block : priv->Blocks)
+			Visit(Visit, block);
+		return length;
+	};
+	ssize_t documentLength = getLength(d);
+	if (cursorIndex > documentLength || selectionIndex > documentLength)
+	{
+		d->ActivityReplaying = false;
+		LgiTrace("%s:%i - Activity cursor index is outside the document.\n", _FL);
+		return false;
+	}
+
+	for (auto action : d->LoadedActivity.GetArray("actions"))
+	{
+		LString actionJson = action.GetJson();
+		LJson event(actionJson.Get());
+		LString type = event.Get("type");
+		int64_t x = 0, y = 0, flags = 0;
+		if (type == "key")
+		{
+			int64_t vkey = 0, c16 = 0, data = 0, isChar = 0;
+			ReadActivityIntRange(event, "vkey", 0, UINT16_MAX, vkey);
+			ReadActivityIntRange(event, "c16", 0, UINT16_MAX, c16);
+			ReadActivityIntRange(event, "flags", INT_MIN, INT_MAX, flags);
+			ReadActivityIntRange(event, "data", 0, UINT32_MAX, data);
+			ReadActivityIntRange(event, "isChar", 0, 1, isChar);
+			LKey key;
+			key.vkey = (char16)vkey;
+			key.c16 = (char16)c16;
+			key.Flags = (int)flags;
+			key.Data = (uint32_t)data;
+			key.IsChar = isChar != 0;
+			OnKey(key);
+		}
+		else if (type == "mouseClick" || type == "mouseMove")
+		{
+			int64_t viewCoords = 0;
+			ReadActivityIntRange(event, "x", INT_MIN, INT_MAX, x);
+			ReadActivityIntRange(event, "y", INT_MIN, INT_MAX, y);
+			ReadActivityIntRange(event, "flags", INT_MIN, INT_MAX, flags);
+			ReadActivityIntRange(event, "viewCoords", 0, 1, viewCoords);
+			LMouse mouse(this);
+			mouse.x = (int)x;
+			mouse.y = (int)y;
+			mouse.Flags = (int)flags;
+			mouse.ViewCoords = viewCoords != 0;
+			if (type == "mouseClick")
+				OnMouseClick(mouse);
+			else
+				OnMouseMove(mouse);
+		}
+		else
+		{
+			double lines = 0;
+			ReadActivityDouble(event, "lines", lines);
+			OnMouseWheel(lines);
+		}
+	}
+	d->ActivityReplaying = false;
+	Invalidate();
+	return true;
+	#else
+	return false;
+	#endif
 }
 
 const char16 *LRichTextEdit::NameW()
@@ -1245,6 +1609,16 @@ void LRichTextEdit::OnEscape(LKey &K)
 
 bool LRichTextEdit::OnMouseWheel(double l)
 {
+	#if DEBUG_ACTIVITY
+	if (!d->ActivityReplaying)
+	{
+		LJson action;
+		action.Set("type", "mouseWheel");
+		action.Set("lines", l);
+		d->RecordActivityAction(action);
+	}
+	#endif
+
 	if (VScroll)
 	{
 		VScroll->Value(VScroll->Value() + (int64)l);
@@ -1486,6 +1860,11 @@ void LRichTextEdit::DoContextMenu(LMouse &m)
 
 void LRichTextEdit::OnMouseClick(LMouse &m)
 {
+	#if DEBUG_ACTIVITY
+	if (!d->ActivityReplaying)
+		RecordActivityMouse(d, "mouseClick", m);
+	#endif
+
 	bool Processed = false;
 	RectType Clicked = 	d->PosToButton(m);
 	if (m.Down())
@@ -1569,6 +1948,11 @@ int LRichTextEdit::OnHitTest(int x, int y)
 
 void LRichTextEdit::OnMouseMove(LMouse &m)
 {
+	#if DEBUG_ACTIVITY
+	if (!d->ActivityReplaying)
+		RecordActivityMouse(d, "mouseMove", m);
+	#endif
+
 	LRichTextEdit::RectType OverBtn = d->PosToButton(m);
 	if (d->OverBtn != OverBtn)
 	{
@@ -1649,6 +2033,20 @@ void LRichTextEdit::OnMouseMove(LMouse &m)
 
 bool LRichTextEdit::OnKey(LKey &k)
 {
+	#if DEBUG_ACTIVITY
+	if (!d->ActivityReplaying)
+	{
+		LJson action;
+		action.Set("type", "key");
+		action.Set("vkey", (int64_t)k.vkey);
+		action.Set("c16", (int64_t)k.c16);
+		action.Set("flags", (int64_t)k.Flags);
+		action.Set("data", (int64_t)k.Data);
+		action.Set("isChar", (int64_t)k.IsChar);
+		d->RecordActivityAction(action);
+	}
+	#endif
+
 	if (k.Down() &&
 		d->Cursor)
 		d->Cursor->Blink = true;

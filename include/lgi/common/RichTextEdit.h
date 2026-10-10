@@ -94,6 +94,13 @@ public:
 	const char *GetCharset() override;
 	void SetCharset(const char *s) override;
 
+	// Debug activity recordings use the .rte JSON format. Saving ends a recording;
+	// loading validates a file, and replay restores its baseline before dispatching events.
+	bool StartActivityRecording(const char *Path);
+	bool SaveActivityRecording();
+	bool LoadActivityRecording(const char *Path);
+	bool ReplayActivityRecording();
+
 	ssize_t HitTest(LPoint pt);
 	bool DeleteSelection(char16 **Cut = NULL);
 	bool SetSpellCheck(class LSpellCheck *sp);
