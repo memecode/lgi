@@ -2228,6 +2228,16 @@ bool LRichTextPriv::ClickBtn(LMouse &m, LRichTextEdit::RectType t)
 			InsertHorzRule();
 			break;
 		}
+		case LRichTextEdit::UndoBtn:
+		{
+			View->Undo();
+			break;
+		}
+		case LRichTextEdit::RedoBtn:
+		{
+			View->Redo();
+			break;
+		}
 		default:
 			return false;
 	}
