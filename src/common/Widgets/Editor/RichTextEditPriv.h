@@ -292,11 +292,14 @@ class LRichTextPriv :
 	public LHtmlStaticInst,
 	public LCssCache,
 	public LFontCache,
-	public LEmojiImage
+	public LEmojiImage,
+	public LDom
 {
 	LStringPipe LogBuffer;
 
 public:
+	const char *GetClass() override { return "LRichTextPriv"; }
+
 	enum SelectModeType
 	{
 		Unselected = 0,
@@ -373,11 +376,16 @@ public:
 	
 	enum ToolbarIconIndex {
 		IconBullets,
-		IconNumbered
+		IconNumbered,
+		IconUndo,
+		IconRedo,
+		
+		IconMax,
 	};
-	LAutoPtr<LSurface> toolbarIcons;	
+	int toolbarReqHeight = 16; // default to no scaling
+	LAutoPtr<LSurface> toolbarIcons;
 	LAutoPtr<LSurface> ResizeIcon(ToolbarIconIndex index, int px);
-
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = nullptr) override;
 
 	// Scrolling
 	int ScrollLinePx = 0;

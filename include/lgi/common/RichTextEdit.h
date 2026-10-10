@@ -147,6 +147,9 @@ public:
 	
 		EmojiBtn,
 		HorzRuleBtn,
+
+		UndoBtn,
+		RedoBtn,
 		
 		MaxArea
 	};
