@@ -158,6 +158,77 @@ const char *LRichTextPriv::ListBlock::TypeToElem()
 	return nullptr;
 }
 
+bool LRichTextPriv::ListBlock::IsOrdered()
+{
+	return !strcmp(TypeToElem(), "ol");
+}
+
+static LString ToRoman(int n, bool Upper)
+{
+	static const struct { int v; const char *u, *l; } Map[] =
+	{
+		{1000, "M", "m"}, {900, "CM", "cm"}, {500, "D", "d"}, {400, "CD", "cd"},
+		{100, "C", "c"}, {90, "XC", "xc"}, {50, "L", "l"}, {40, "XL", "xl"},
+		{10, "X", "x"}, {9, "IX", "ix"}, {5, "V", "v"}, {4, "IV", "iv"}, {1, "I", "i"}
+	};
+	LString r;
+	for (auto &m : Map)
+		while (n >= m.v)
+		{
+			r += Upper ? m.u : m.l;
+			n -= m.v;
+		}
+	return r;
+}
+
+static LString ToAlpha(int n, bool Upper)
+{
+	LString r;
+	while (n > 0)
+	{
+		n--;
+		char c[2] = { (char)((Upper ? 'A' : 'a') + (n % 26)), 0 };
+		r = LString(c) + r;
+		n /= 26;
+	}
+	return r;
+}
+
+LString LRichTextPriv::ListBlock::Marker(int Index)
+{
+	int n = Index + 1;
+	LString s;
+	switch (type)
+	{
+		case TType::ListDecimal:
+		case TType::ListGeorgian:
+		case TType::ListArmenian:
+			s.Printf("%i.", n);
+			break;
+		case TType::ListDecimalLeadingZero:
+			s.Printf("%02i.", n);
+			break;
+		case TType::ListLowerRoman:
+			s = ToRoman(n, false) + ".";
+			break;
+		case TType::ListUpperRoman:
+			s = ToRoman(n, true) + ".";
+			break;
+		case TType::ListLowerAlpha:
+		case TType::ListLowerGreek:
+			s = ToAlpha(n, false) + ".";
+			break;
+		case TType::ListUpperAlpha:
+		case TType::ListUpperGreek:
+			s = ToAlpha(n, true) + ".";
+			break;
+		default:
+			s = "\xE2\x80\xA2"; // bullet
+			break;
+	}
+	return s;
+}
+
 bool LRichTextPriv::ListBlock::ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng)
 {
 	bool status = true;
@@ -235,8 +306,6 @@ void LRichTextPriv::ListBlock::OnPaint(PaintContext &Ctx)
 	auto fnt = d->View->GetFont();
 	fnt->Transparent(false);
 
-	const uint8_t bulletUtf8[] = { 0xE2, 0x80, 0xA2, 0 };
-
 	int idx = 0;
 	for (auto b: blocks)
 	{
@@ -250,8 +319,9 @@ void LRichTextPriv::ListBlock::OnPaint(PaintContext &Ctx)
 		fnt->Fore(L_TEXT);
 		fnt->Back(Back);
 
-		LDisplayString bullet(fnt, (char*)bulletUtf8);
-		bullet.Draw(Ctx.pDC, i.x1 + ((i.X() - bullet.X()) / 2), i.y1, &i);
+		LDisplayString bullet(fnt, Marker(idx - 1));
+		int bx = IsOrdered() ? i.x2 - bullet.X() - fnt->GetHeight() / 4 : i.x1 + ((i.X() - bullet.X()) / 2);
+		bullet.Draw(Ctx.pDC, MAX(bx, i.x1), i.y1, &i);
 
 		b->OnPaint(Ctx);
 	}
@@ -268,6 +338,11 @@ bool LRichTextPriv::ListBlock::OnLayout(Flow &flow)
 	
 	auto fnt = d->View->GetFont();
 	int marginX1 = fnt->GetHeight();
+	if (IsOrdered())
+	{
+		LDisplayString widest(fnt, Marker(MAX((int)blocks.Length() - 1, 0)));
+		marginX1 = MAX(marginX1, widest.X() + fnt->GetHeight() / 2);
+	}
 	flow.Left += marginX1;
 	
 	items.Length(blocks.Length());

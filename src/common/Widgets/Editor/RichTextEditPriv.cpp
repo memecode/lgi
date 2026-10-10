@@ -1837,7 +1837,7 @@ bool LRichTextPriv::MakeLink(TextBlock *tb, ssize_t Offset, ssize_t Len, LString
 
 // Converts the root level text blocks touched by the cursor/selection into a bullet list,
 // or turns the list containing the cursor back into plain paragraphs.
-bool LRichTextPriv::ToggleBullets()
+bool LRichTextPriv::ToggleList(LCss::ListStyleTypes Type)
 {
 	if (!Cursor || !Cursor->Blk)
 		return false;
@@ -1894,6 +1894,21 @@ bool LRichTextPriv::ToggleBullets()
 	auto CursorState = new BlockCursorChange(true, Cursor);
 	auto SelectionState = Selection ? new BlockCursorChange(false, Selection) : NULL;
 
+	bool Switched = false;
+	if (Unwrap && (CurList->GetListType() == Type || (CurList->IsOrdered() != (Type != LCss::ListDisc))))
+		; // Same kind of list: unwrap below
+	else if (Unwrap)
+	{
+		// Different kind of list: just switch the type
+		CurList->SetListType(Type);
+		for (auto b : CurList->blocks)
+			if (auto Tb = dynamic_cast<TextBlock*>(b))
+				Tb->LayoutDirty = true;
+		State->Length = 1;
+		Unwrap = false;
+		Switched = true;
+	}
+
 	if (Unwrap)
 	{
 		LArray<Block*> Items;
@@ -1914,9 +1929,9 @@ bool LRichTextPriv::ToggleBullets()
 		}
 		State->Length = Items.Length();
 	}
-	else
+	else if (!Switched)
 	{
-		auto List = new ListBlock(this);
+		auto List = new ListBlock(this, Type);
 		if (!List)
 		{
 			DeleteObj(State);
@@ -2084,7 +2099,12 @@ bool LRichTextPriv::ClickBtn(LMouse &m, LRichTextEdit::RectType t)
 		}
 		case LRichTextEdit::BulletsBtn:
 		{
-			ToggleBullets();
+			ToggleList(LCss::ListDisc);
+			break;
+		}
+		case LRichTextEdit::NumberedListBtn:
+		{
+			ToggleList(LCss::ListDecimal);
 			break;
 		}
 		case LRichTextEdit::ForegroundColourBtn:
@@ -2683,7 +2703,7 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 
 		LNamedStyle *CachedStyle = AddStyleToCache(Style);			
 
-		if (c->TagId == TAG_UL)
+		if (c->TagId == TAG_UL || c->TagId == TAG_OL)
 		{
 			if (!ctx.TargetBlocks)
 				return Error(_FL, "HTML list has no target block array.");
@@ -2695,7 +2715,7 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 					return Error(_FL, "Failed to end the paragraph before an HTML list.");
 			}
 
-			LCss::ListStyleTypes ListType = LCss::ListDisc;
+			LCss::ListStyleTypes ListType = c->TagId == TAG_OL ? LCss::ListDecimal : LCss::ListDisc;
 			if (Style && Style->ListStyleType() != LCss::ListInherit)
 				ListType = Style->ListStyleType();
 

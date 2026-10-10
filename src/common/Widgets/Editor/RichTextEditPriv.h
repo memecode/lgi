@@ -1075,8 +1075,13 @@ public:
 		LCss::ListStyleTypes type;
 
 		const char *TypeToElem();
+		LString Marker(int Index);
 
 	public:
+		bool IsOrdered();
+		LCss::ListStyleTypes GetListType() { return type; }
+		void SetListType(LCss::ListStyleTypes t) { type = t; }
+
 		ListBlock(LRichTextPriv *priv, LCss::ListStyleTypes listType = LCss::ListDisc);
 		ListBlock(ListBlock *Copy);
 		~ListBlock();
@@ -1322,7 +1327,7 @@ public:
 	void PaintBtn(LSurface *pDC, LRichTextEdit::RectType t);
 	bool MakeLink(TextBlock *tb, ssize_t Offset, ssize_t Len, LString Link);
 	bool ClickBtn(LMouse &m, LRichTextEdit::RectType t);
-	bool ToggleBullets();
+	bool ToggleList(LCss::ListStyleTypes Type);
 	bool InsertHorzRule();
 	void Paint(LSurface *pDC, LScrollBar *&ScrollY);
 	LHtmlElement *CreateElement(LHtmlElement *Parent);
