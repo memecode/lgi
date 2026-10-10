@@ -316,8 +316,8 @@ void LRichTextPriv::ListBlock::OnPaint(PaintContext &Ctx)
 		i.Inset(1, 1);
 		#endif
 
-		fnt->Fore(L_TEXT);
-		fnt->Back(Back);
+		fnt->Fore(Ctx.Fore());
+		fnt->Back(Ctx.Back());
 
 		LDisplayString bullet(fnt, Marker(idx - 1));
 		int bx = IsOrdered() ? i.x2 - bullet.X() - fnt->GetHeight() / 4 : i.x1 + ((i.X() - bullet.X()) / 2);

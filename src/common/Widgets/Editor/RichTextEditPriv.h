@@ -31,6 +31,7 @@
 #include "lgi/common/Emoji.h"
 #include "lgi/common/SpellCheck.h"
 
+#define DEBUG_ACTIVITY					1
 #define DEBUG_LOG_CURSOR_COUNT			0
 #define DEBUG_OUTLINE_CUR_DISPLAY_STR	0
 #define DEBUG_OUTLINE_CUR_STYLE_TEXT	0
@@ -467,24 +468,18 @@ public:
 	
 	struct PaintContext
 	{
-		int Index;
-		LSurface *pDC;
-		SelectModeType Type;
+		int Index = 0;
+		LSurface *pDC = nullptr;
+		SelectModeType Type = Unselected;
 		ColourPair Colours[2];
-		BlockCursor *Cursor, *Select;
+		BlockCursor *Cursor = nullptr, *Select = nullptr;
 
 		// Cursor stuff
-		int CurEndPoint;
+		int CurEndPoint = 0;
 		LArray<ssize_t> EndPoints;
 		
 		PaintContext()
 		{
-			Index = 0;
-			pDC = NULL;
-			Type = Unselected;
-			Cursor = NULL;
-			Select = NULL;
-			CurEndPoint = 0;
 		}
 		
 		LColour &Fore()
@@ -1042,6 +1037,7 @@ public:
 		void SetStyle(LNamedStyle *s);
 		ssize_t Length();
 		bool ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng);
+		void IncludeListMarker(LRect &Line);
 		bool GetPosFromIndex(BlockCursor *Cursor);
 		bool HitTest(HitTestResult &htr);
 		void OnPaint(PaintContext &Ctx);
