@@ -1322,6 +1322,7 @@ public:
 	void PaintBtn(LSurface *pDC, LRichTextEdit::RectType t);
 	bool MakeLink(TextBlock *tb, ssize_t Offset, ssize_t Len, LString Link);
 	bool ClickBtn(LMouse &m, LRichTextEdit::RectType t);
+	bool ToggleBullets();
 	bool InsertHorzRule();
 	void Paint(LSurface *pDC, LScrollBar *&ScrollY);
 	LHtmlElement *CreateElement(LHtmlElement *Parent);

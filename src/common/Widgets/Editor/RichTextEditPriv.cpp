@@ -1790,7 +1790,7 @@ void LRichTextPriv::PaintBtn(LSurface *pDC, LRichTextEdit::RectType t)
 			pDC->Op(GDC_ALPHA);
 			if (auto img = v.Value.Surface.Ptr)
 			{
-				pDC->Blt(r.x1, r.y1, img);
+				pDC->Blt(r.x1 + Down, r.y1 + Down, img);
 			}
 			break;
 		}
@@ -1832,6 +1832,172 @@ bool LRichTextPriv::MakeLink(TextBlock *tb, ssize_t Offset, ssize_t Len, LString
 		AddTrans(Trans);
 	}
 
+	return true;
+}
+
+// Converts the root level text blocks touched by the cursor/selection into a bullet list,
+// or turns the list containing the cursor back into plain paragraphs.
+bool LRichTextPriv::ToggleBullets()
+{
+	if (!Cursor || !Cursor->Blk)
+		return false;
+
+	auto RootOf = [](Block *b)
+	{
+		while (b && b->parent)
+			b = b->parent;
+		return b;
+	};
+
+	ssize_t First = Blocks.IndexOf(RootOf(Cursor->Blk));
+	ssize_t Last = First;
+	if (Selection && Selection->Blk)
+	{
+		ssize_t Sel = Blocks.IndexOf(RootOf(Selection->Blk));
+		if (Sel >= 0)
+		{
+			Last = MAX(First, Sel);
+			First = MIN(First, Sel);
+		}
+	}
+	if (First < 0 || Last < First)
+		return false;
+
+	auto CurList = dynamic_cast<ListBlock*>(Blocks[First]);
+	bool Unwrap = CurList != NULL;
+	if (Unwrap)
+		Last = First; // Only one list is un-wrapped at a time
+	else
+	{
+		for (ssize_t i = First; i <= Last; i++)
+			if (!dynamic_cast<TextBlock*>(Blocks[i]))
+				return false;
+	}
+
+	AutoTrans Trans(new Transaction);
+	if (!Trans)
+		return false;
+
+	ssize_t Count = Last - First + 1;
+	auto State = new MultiBlockState(this, First);
+	if (!State)
+		return false;
+	for (ssize_t i = First; i <= Last; i++)
+	{
+		if (!State->Copy(i))
+		{
+			DeleteObj(State);
+			return false;
+		}
+	}
+
+	auto CursorState = new BlockCursorChange(true, Cursor);
+	auto SelectionState = Selection ? new BlockCursorChange(false, Selection) : NULL;
+
+	if (Unwrap)
+	{
+		LArray<Block*> Items;
+		for (unsigned i = 0; i < CurList->blocks.Length(); i++)
+		{
+			Block *b = CurList->blocks[i];
+			b->parent = NULL;
+			Items.Add(b);
+		}
+		CurList->blocks.Length(0);
+		Blocks.DeleteAt(First, true);
+		delete CurList;
+		for (unsigned i = 0; i < Items.Length(); i++)
+		{
+			Blocks.AddAt(First + i, Items[i]);
+			if (auto Tb = dynamic_cast<TextBlock*>(Items[i]))
+				Tb->LayoutDirty = true;
+		}
+		State->Length = Items.Length();
+	}
+	else
+	{
+		auto List = new ListBlock(this);
+		if (!List)
+		{
+			DeleteObj(State);
+			DeleteObj(CursorState);
+			DeleteObj(SelectionState);
+			return false;
+		}
+
+		auto Tb = dynamic_cast<TextBlock*>(Blocks[First]);
+		if (!Selection && Count == 1 && Tb && Tb->Length() > 0 && Cursor->Blk == Tb)
+		{
+			// Split the block at the cursor and insert a new list item into the gap
+			ssize_t Offset = Cursor->Offset;
+			bool Splitting = Offset > 0 && Offset < Tb->Length();
+			TextBlock *Before = Offset > 0 ? Tb : NULL;
+			TextBlock *After = Offset >= Tb->Length() ? NULL : Offset > 0 ?
+								dynamic_cast<TextBlock*>(Tb->Split(Trans, Offset)) : Tb;
+			if (Splitting && !After)
+			{
+				DeleteObj(List);
+				DeleteObj(State);
+				DeleteObj(CursorState);
+				DeleteObj(SelectionState);
+				return false;
+			}
+
+			auto Item = new TextBlock(this);
+			if (!Item)
+			{
+				DeleteObj(List);
+				DeleteObj(State);
+				DeleteObj(CursorState);
+				DeleteObj(SelectionState);
+				return false;
+			}
+			if (auto Style = Tb->GetStyle())
+				Item->SetStyle(Style);
+			List->Add(Item);
+
+			if (Before && After)
+				Before->StripLast(NULL, "\n");
+
+			ssize_t Idx = First;
+			Blocks.DeleteAt(Idx, true);
+			if (Before)
+				Blocks.AddAt(Idx++, Before);
+			Blocks.AddAt(Idx++, List);
+			if (After && After != Before)
+				Blocks.AddAt(Idx++, After);
+			State->Length = Idx - First;
+			Cursor->Set(Item, 0, 0);
+			if (Before)
+				Before->LayoutDirty = true;
+			if (After)
+				After->LayoutDirty = true;
+			Count = 0;
+		}
+
+		for (ssize_t i = 0; i < Count; i++)
+		{
+			Block *b = Blocks[First];
+			Blocks.DeleteAt(First, true);
+			List->Add(b);
+			if (auto Tb = dynamic_cast<TextBlock*>(b))
+				Tb->LayoutDirty = true;
+		}
+		if (Count)
+		{
+			Blocks.AddAt(First, List);
+			State->Length = 1;
+		}
+	}
+
+	Trans->Add(State);
+	Trans->Add(CursorState);
+	if (SelectionState)
+		Trans->Add(SelectionState);
+
+	AddTrans(Trans);
+	InvalidateDoc(NULL);
+	View->SendNotify(LNotifyDocChanged);
 	return true;
 }
 
@@ -1914,6 +2080,11 @@ bool LRichTextPriv::ClickBtn(LMouse &m, LRichTextEdit::RectType t)
 			Values[t] = !Values[t].CastBool();
 			View->Invalidate(Areas+t);
 			OnStyleChange(t);
+			break;
+		}
+		case LRichTextEdit::BulletsBtn:
+		{
+			ToggleBullets();
 			break;
 		}
 		case LRichTextEdit::ForegroundColourBtn:
