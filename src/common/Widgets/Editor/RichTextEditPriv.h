@@ -330,7 +330,16 @@ public:
 	struct BlockCursor;
 	class Block;
 
-	LRichTextEdit *View;
+	struct LBlockArray
+	{
+		// Array of child blocks that we own:
+		Block *parent = nullptr;
+		LArray<Block*> blocks;
+
+		~LBlockArray();
+	};
+
+	LRichTextEdit *View = nullptr;
 	LString OriginalText;
 	LAutoWString WideNameCache;
 	LAutoString UtfNameCache;
@@ -371,7 +380,7 @@ public:
 
 
 	// Scrolling
-	int ScrollLinePx;
+	int ScrollLinePx = 0;
 	int ScrollOffsetPx = 0;
 	bool ScrollChange = false;
 
@@ -391,25 +400,19 @@ public:
 	struct Flow
 	{
 		LRichTextPriv *d;
-		LSurface *pDC;	// Used for printing.
+		LSurface *pDC = nullptr;	// Used for printing.
 
-		int Left, Right;// Left and right margin positions as measured in px
+		int Left = 0, Right = 10000;// Left and right margin positions as measured in px
 						// from the left of the page (controls client area).
-		int Top;
-		int CurY;		// Current y position down the page in document co-ords
-		bool Visible;	// true if the current block overlaps the visible page
+		int Top = 0;
+		int CurY = 0;		// Current y position down the page in document co-ords
+		bool Visible = true;	// true if the current block overlaps the visible page
 						// If false, the implementation can take short cuts and
 						// guess various dimensions.
 	
 		Flow(LRichTextPriv *priv)
 		{
 			d = priv;
-			pDC = NULL;
-			Left = 0;
-			Top = 0;
-			Right = 1000;
-			CurY = 0;
-			Visible = true;
 		}
 		
 		int X()
@@ -520,53 +523,11 @@ public:
 		// This handles calculating the selection stuff for simple "one char" blocks
 		// like images and HR. Call this at the start of the OnPaint.
 		// \return TRUE if the content should be drawn selected.
-		bool SelectBeforePaint(class LRichTextPriv::Block *b)
-		{
-			CurEndPoint = 0;
-
-			if (b->Cursors > 0 && Select)
-			{
-				// Selection end point checks...
-				if (Cursor && Cursor->Blk == b)
-					EndPoints.Add(Cursor->Offset);
-				if (Select && Select->Blk == b)
-					EndPoints.Add(Select->Offset);
-				
-				// Sort the end points
-				if (EndPoints.Length() > 1 &&
-					EndPoints[0] > EndPoints[1])
-				{
-					ssize_t ep = EndPoints[0];
-					EndPoints[0] = EndPoints[1];
-					EndPoints[1] = ep;
-				}
-			}
-
-			// Before selection end point
-			if (CurEndPoint < (ssize_t)EndPoints.Length() &&
-				EndPoints[CurEndPoint] == 0)
-			{
-				Type = Type == Selected ? Unselected : Selected;
-				CurEndPoint++;
-			}
-
-			return Type == Selected;
-		}
+		bool SelectBeforePaint(Block *b);
 
 		// Call this after the OnPaint
 		// \return TRUE if the content after the block is selected.
-		bool SelectAfterPaint(class LRichTextPriv::Block *b)
-		{
-			// After image selection end point
-			if (CurEndPoint < (ssize_t)EndPoints.Length() &&
-				EndPoints[CurEndPoint] == 1)
-			{
-				Type = Type == Selected ? Unselected : Selected;
-				CurEndPoint++;
-			}
-
-			return Type == Selected;
-		}
+		bool SelectAfterPaint(Block *b);
 	};
 
 	struct HitTestResult
@@ -636,26 +597,34 @@ public:
 	template<typename T>
 	bool GetBlockByUid(T *&Ptr, int Uid, int *Idx = NULL)
 	{
-		for (unsigned i=0; i<Blocks.Length(); i++)
+		auto Find = [&](auto &&Self, LArray<Block*> &Siblings) -> bool
 		{
-			Block *b = Blocks[i];
-			if (b->GetUid() == Uid)
+			for (unsigned i=0; i<Siblings.Length(); i++)
 			{
-				if (Idx) *Idx = i;
-				return (Ptr = dynamic_cast<T*>(b)) != NULL;
+				Block *b = Siblings[i];
+				if (b->GetUid() == Uid)
+				{
+					if (Idx) *Idx = i;
+					return (Ptr = dynamic_cast<T*>(b)) != NULL;
+				}
+				if (b->blocks.Length() && Self(Self, b->blocks))
+					return true;
 			}
-		}
+			return false;
+		};
 
+		if (Find(Find, Blocks))
+			return true;
 		if (Idx) *Idx = -1;
 		return false;
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	// A Block is like a DIV in HTML, it's as wide as the page and
-	// always starts and ends on a whole line.
+	// A Block is just a root class of all the types of content, like text, images etc.
 	class Block :
 		public LEventSinkI,
-		public LEventTargetI
+		public LEventTargetI,
+		public LBlockArray
 	{
 	protected:
 		int BlockUid;
@@ -708,6 +677,15 @@ public:
 		LMessage::Result OnEvent(LMessage *Msg)
 		{
 			return false;
+		}
+
+		bool Add(Block *b)
+		{
+			if (!b || b->parent)
+				return false;
+			b->parent = this;
+			blocks.Add(b);
+			return true;
 		}
 
 		/************************************************
@@ -1087,6 +1065,55 @@ public:
 		bool OnDictionary(Transaction *Trans);
 	};
 
+	class ListBlock : public Block
+	{
+		using TType = LCss::ListStyleTypes;
+
+		LRect pos;
+		LArray<LRect> items;
+		bool startItem = true;
+		LCss::ListStyleTypes type;
+
+		const char *TypeToElem();
+
+	public:
+		ListBlock(LRichTextPriv *priv, LCss::ListStyleTypes listType = LCss::ListDisc);
+		ListBlock(ListBlock *Copy);
+		~ListBlock();
+
+		TextBlock *GetTextBlock();
+		bool IsValid();
+
+		const char *GetClass() { return "ListBlock"; }
+		LRect GetPos() { return pos; }
+		ssize_t Length();
+		int GetLines();
+		bool OffsetToLine(ssize_t Offset, int *ColX, LArray<int> *LineY);
+		ssize_t LineToOffset(ssize_t Line);
+		LNamedStyle *GetStyle(ssize_t At = -1);
+		void SetStyle(LNamedStyle *s);
+		bool ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng);
+		bool GetPosFromIndex(BlockCursor *Cursor);
+		bool HitTest(HitTestResult &htr);
+		void OnPaint(PaintContext &Ctx);
+		bool OnLayout(Flow &flow);
+		ssize_t CopyAt(ssize_t Offset, ssize_t Chars, LArray<uint32_t> *Text);
+		bool Seek(SeekType To, BlockCursor &Cursor);
+		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, LFindReplaceCommon *Params);
+		void SetSpellingErrors(LArray<LSpellCheck::SpellingError> &Errors, LRange r);
+		void IncAllStyleRefs();
+		bool DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool TopOfMenu);
+		#ifdef _DEBUG
+		void DumpNodes(LTreeItem *blockItem);
+		#endif
+		Block *Clone();
+		bool AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars, LNamedStyle *Style);
+		bool ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, LCss *Style, bool Add);
+		ssize_t DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, LArray<uint32_t> *DeletedText);
+		bool DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper);
+		Block *Split(Transaction *Trans, ssize_t AtOffset);
+	};
+
 	class HorzRuleBlock : public Block
 	{
 		LRect Pos;
@@ -1277,7 +1304,18 @@ public:
 	ssize_t IndexOfCursor(BlockCursor *c);
 	ssize_t HitTest(int x, int y, int &LineHint, Block **Blk = NULL, ssize_t *BlkOffset = NULL);
 	bool CursorFromPos(int x, int y, LAutoPtr<BlockCursor> *Cursor, ssize_t *GlobalIdx);
-	Block *GetBlockByIndex(ssize_t Index, ssize_t *Offset = NULL, int *BlockIdx = NULL, int *LineCount = NULL);
+	Block *GetBlockByLine(ssize_t Line, ssize_t *Offset = NULL, int *LineHint = NULL);
+	int GetTreeLineCount();
+	bool GetLineOfCursor(BlockCursor *Cursor, int &Line);
+	Block *GetBlockByIndex(
+		// The input index into the 'character' array:
+		ssize_t Index,
+		// An optional output offset into the block's characters.
+		ssize_t *Offset = NULL,
+		// Optional block index, which may need to be refactored given the tree heirarchy...
+		int *BlockIdx = NULL,
+		// Optional line index for the input Index.
+		int *LineCount = NULL);
 	bool Layout(LScrollBar *&ScrollY);
 	void OnStyleChange(LRichTextEdit::RectType t);
 	bool ChangeSelectionStyle(LCss *Style, bool Add);
@@ -1302,6 +1340,8 @@ public:
 		LArray<uint32_t> Buf;
 		uint32_t LastChar;
 		LFontCache *FontCache;
+		LArray<Block*> *TargetBlocks = nullptr;
+		Block *TargetParent = nullptr;
 		LCss::Store StyleStore;
 		bool StartOfLine;
 		
@@ -1313,6 +1353,30 @@ public:
 			LastChar = '\n';
 			FontCache = fc;
 			StartOfLine = true;
+		}
+
+		bool AddBlock(Block *b)
+		{
+			if (!b || !TargetBlocks)
+				return false;
+			if (TargetParent)
+				return TargetParent->Add(b);
+			TargetBlocks->Add(b);
+			return true;
+		}
+
+		bool InsertBlock(unsigned Index, Block *b)
+		{
+			if (!b || !TargetBlocks)
+				return false;
+			if (TargetParent)
+			{
+				if (Index >= TargetParent->blocks.Length())
+					return TargetParent->Add(b);
+				b->parent = TargetParent;
+			}
+			TargetBlocks->AddAt(Index, b);
+			return true;
 		}
 		
 		bool AddText(LNamedStyle *Style, char16 *Str)
@@ -1387,6 +1451,14 @@ struct BlockCursorState
 
 	BlockCursorState(bool cursor, LRichTextPriv::BlockCursor *c);
 	bool Apply(LRichTextPriv *Ctx, bool Forward);
+};
+
+struct BlockCursorChange : public LRichTextPriv::DocChange
+{
+	BlockCursorState State;
+
+	BlockCursorChange(bool cursor, LRichTextPriv::BlockCursor *c) : State(cursor, c) {}
+	bool Apply(LRichTextPriv *Ctx, bool Forward) { return State.Apply(Ctx, Forward); }
 };
 
 struct CompleteTextBlockState : public LRichTextPriv::DocChange

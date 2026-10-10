@@ -44,11 +44,11 @@ Dictionary installation overview:
 #include "lgi/common/OptionsFile.h"
 #include "lgi/common/SpellCheck.h"
 #include "lgi/common/Db.h"
+#include "lgi/common/BZip2File.h"
 
-#include "resdefs.h"
-#include "ScribeSpellCheck.h"
-#include "ScribeDefs.h"
-#include "BZip2File.h"
+// #include "resdefs.h"
+// #include "ScribeSpellCheck.h"
+// #include "ScribeDefs.h"
 #include "aspell.h"
 
 static char AspellDelim[] =
@@ -957,11 +957,14 @@ public:
 
 ///////////////////////////////////////////////////////////////////////
 // Ui
-//#define IDC_MESSAGE					1000
-//#define IDC_LIST					1001
-#define IDC_ADD_DICT				1004
-#define IDC_IGNORE					1005
-#define IDC_REPLACE					1006
+enum Ctrls
+{
+	ID_MESSAGE = 1000,
+	ID_LIST,
+	ID_ADD_DICT,
+	ID_IGNORE,
+	ID_REPLACE,
+};	
 
 class Dlg : public LDialog
 {
@@ -997,14 +1000,14 @@ public:
 			SetPos(r);			
 		}
 
-		Children.Insert(Ctrl0 = new LTextLabel(IDC_MESSAGE, 7, 7, 300, 14, Msg));
-		Children.Insert(Ctrl1 = new LList(IDC_LIST, 7, 28, 238, 203));
+		Children.Insert(Ctrl0 = new LTextLabel(ID_MESSAGE, 7, 7, 300, 14, Msg));
+		Children.Insert(Ctrl1 = new LList(ID_LIST, 7, 28, 238, 203));
 		Ctrl1->AddColumn("Suggestion", 220);
 
 		// Button row 1
-		Children.Insert(Ctrl2 = new LButton(IDC_REPLACE, 7, 238, 63, 21, "Replace"));
-		Children.Insert(Ctrl5 = new LButton(IDC_IGNORE, 7 + 130 - 60, 238, 60, 21, "Ignore"));
-		Children.Insert(Ctrl4 = new LButton(IDC_ADD_DICT, 7, 268, 130, 21, "Add to Dictionary"));
+		Children.Insert(Ctrl2 = new LButton(ID_REPLACE, 7, 238, 63, 21, "Replace"));
+		Children.Insert(Ctrl5 = new LButton(ID_IGNORE, 7 + 130 - 60, 238, 60, 21, "Ignore"));
+		Children.Insert(Ctrl4 = new LButton(ID_ADD_DICT, 7, 268, 130, 21, "Add to Dictionary"));
 
 		// Button row 2
 		Children.Insert(Ctrl3 = new LButton(IDOK,		182, 238, 63, 21, "Finish"));
@@ -1043,18 +1046,18 @@ public:
 	{
 		switch (Ctrl->GetId())
 		{
-			case IDC_LIST:
+			case ID_LIST:
 			{
 				if (n.Type == LNotifyItemDoubleClick)
 				{
 					SetStr();
-					EndModal(IDC_REPLACE);
+					EndModal(ID_REPLACE);
 				}
 				break;
 			}
-			case IDC_REPLACE:
-			case IDC_ADD_DICT:
-			case IDC_IGNORE:
+			case ID_REPLACE:
+			case ID_ADD_DICT:
+			case ID_IGNORE:
 			{
 				SetStr();
 				// Fall thru

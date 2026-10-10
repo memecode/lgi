@@ -1,18 +1,17 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#ifdef WIN32
+#include <imm.h>
+#endif
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/RichTextEdit.h"
 #include "lgi/common/Input.h"
 #include "lgi/common/ScrollBar.h"
-#ifdef WIN32
-#include <imm.h>
-#endif
 #include "lgi/common/ClipBoard.h"
 #include "lgi/common/DisplayString.h"
 #include "lgi/common/CssTools.h"
-#include "lgi/common/FontCache.h"
 #include "lgi/common/Unicode.h"
 #include "lgi/common/DropFiles.h"
 #include "lgi/common/HtmlCommon.h"
@@ -414,6 +413,7 @@ bool LRichTextEdit::Name(const char *s)
 
 	if (!d->CreationCtx.Reset(new LRichTextPriv::CreateContext(d)))
 		return false;
+	d->CreationCtx->TargetBlocks = &d->Blocks;
 
 	if (!d->LHtmlParser::Parse(&Root, s))
 		return d->Error(_FL, "Failed to parse HTML.");
@@ -436,7 +436,7 @@ bool LRichTextEdit::Name(const char *s)
 		for (unsigned i=0; i<d->Blocks.Length(); i++)
 		{
 			LRichTextPriv::Block *b = d->Blocks[i];
-			if (b->Length() == 0)
+			if (b->Length() == 0 && !b->blocks.Length())
 			{
 				d->Blocks.DeleteAt(i--, true);
 				DeleteObj(b);
@@ -485,10 +485,16 @@ bool LRichTextEdit::HasSelection()
 
 void LRichTextEdit::SelectAll()
 {
-	AutoCursor Start(new BlkCursor(d->Blocks.First(), 0, 0));
+	auto First = d->GetBlockByIndex(0);
+	if (!First)
+		return;
+
+	AutoCursor Start(new BlkCursor(First, 0, 0));
 	d->SetCursor(Start);
 
-	LRichTextPriv::Block *Last = d->Blocks.Length() ? d->Blocks.Last() : NULL;
+	LRichTextPriv::Block *Last = First;
+	while (auto Next = d->Next(Last))
+		Last = Next;
 	if (Last)
 	{
 		AutoCursor End(new BlkCursor(Last, Last->Length(), Last->GetLines()-1));
@@ -522,13 +528,7 @@ bool LRichTextEdit::IsBusy(bool Stop)
 
 size_t LRichTextEdit::GetLines()
 {
-	uint32_t Count = 0;
-	for (size_t i=0; i<d->Blocks.Length(); i++)
-	{
-		LRichTextPriv::Block *b = d->Blocks[i];
-		Count += b->GetLines();
-	}
-	return Count;
+	return d->GetTreeLineCount();
 }
 
 int LRichTextEdit::GetLine()
@@ -536,65 +536,24 @@ int LRichTextEdit::GetLine()
 	if (!d->Cursor)
 		return -1;
 
-	ssize_t Idx = d->Blocks.IndexOf(d->Cursor->Blk);
-	if (Idx < 0)
+	int Line = -1;
+	if (!d->GetLineOfCursor(d->Cursor, Line))
 	{
-		LAssert(0);
+		LAssert(!"Can't find cursor line.");
 		return -1;
 	}
-
-	int Count = 0;
-	
-	// Count lines in blocks before the cursor...
-	for (int i=0; i<Idx; i++)
-	{
-		LRichTextPriv::Block *b = d->Blocks[i];
-		Count += b->GetLines();
-	}
-
-	// Add the lines in the cursor's block...
-	if (d->Cursor->LineHint)
-	{
-		Count += d->Cursor->LineHint;
-	}
-	else
-	{
-		LArray<int> BlockLine;
-		if (d->Cursor->Blk->OffsetToLine(d->Cursor->Offset, NULL, &BlockLine))
-			Count += BlockLine.First();
-		else
-		{
-			// Hmmm...
-			LAssert(!"Can't find block line.");
-			return -1;
-		}
-	}
-
-
-	return Count;
+	return Line;
 }
 
 void LRichTextEdit::SetLine(int Line)
 {
-	int Count = 0;
-	
-	// Count lines in blocks before the cursor...
-	for (int i=0; i<(int)d->Blocks.Length(); i++)
+	ssize_t Offset = -1;
+	int LineHint = -1;
+	auto b = d->GetBlockByLine(Line, &Offset, &LineHint);
+	if (b && Offset >= 0)
 	{
-		LRichTextPriv::Block *b = d->Blocks[i];
-		int Lines = b->GetLines();
-		if (Line >= Count && Line < Count + Lines)
-		{
-			auto BlockLine = Line - Count;
-			auto Offset = b->LineToOffset(BlockLine);
-			if (Offset >= 0)
-			{
-				AutoCursor c(new BlkCursor(b, Offset, BlockLine));
-				d->SetCursor(c);
-				break;
-			}
-		}		
-		Count += Lines;
+		AutoCursor c(new BlkCursor(b, Offset, LineHint));
+		d->SetCursor(c);
 	}
 }
 
@@ -614,7 +573,7 @@ bool LRichTextEdit::GetLineColumnAtIndex(LPoint &Pt, ssize_t Index)
 
 	int Cols;
 	LArray<int> Lines;
-	if (b->OffsetToLine(Offset, &Cols, &Lines))
+	if (!b->OffsetToLine(Offset, &Cols, &Lines) || !Lines.Length())
 		return false;
 	
 	Pt.x = Cols;
@@ -626,18 +585,7 @@ ssize_t LRichTextEdit::GetCaret(bool Cur)
 {
 	if (!d->Cursor)
 		return -1;
-		
-	ssize_t CharPos = 0;
-	for (ssize_t i=0; i<(ssize_t)d->Blocks.Length(); i++)
-	{
-		LRichTextPriv::Block *b = d->Blocks[i];
-		if (d->Cursor->Blk == b)
-			return CharPos + d->Cursor->Offset;
-		CharPos += b->Length();
-	}
-	
-	LAssert(!"Cursor block not found.");
-	return -1;
+	return d->IndexOfCursor(d->Cursor);
 }
 
 bool LRichTextEdit::IndexAt(int x, int y, ssize_t &Off, int &LineHint)
@@ -762,6 +710,7 @@ bool LRichTextEdit::Paste()
 
 			if (!d->CreationCtx.Reset(new LRichTextPriv::CreateContext(d)))
 				return false;
+			d->CreationCtx->TargetBlocks = &d->Blocks;
 
 			if (!d->LHtmlParser::Parse(&Root, Html))
 				return d->Error(_FL, "Failed to parse HTML.");
@@ -2469,8 +2418,9 @@ void LRichTextEdit::OnEnter(LKey &k)
 
 	// Enter key handling
 	bool Changed = false;
+	bool HadSelection = HasSelection();
 
-	if (HasSelection())
+	if (HadSelection)
 		Changed |= d->DeleteSelection(Trans, NULL);
 	
 	if (d->Cursor &&
@@ -2479,7 +2429,89 @@ void LRichTextEdit::OnEnter(LKey &k)
 		LRichTextPriv::Block *b = d->Cursor->Blk;
 		const uint32_t Nl[] = {'\n'};
 
-		if (b->AddText(Trans, d->Cursor->Offset, Nl, 1))
+		auto Item = dynamic_cast<LRichTextPriv::TextBlock*>(b);
+		auto List = Item ? dynamic_cast<LRichTextPriv::ListBlock*>(Item->parent) : nullptr;
+		auto Root = static_cast<LRichTextPriv::Block*>(List);
+		while (Root && Root->parent)
+			Root = Root->parent;
+		auto RootList = dynamic_cast<LRichTextPriv::ListBlock*>(Root);
+		ssize_t RootIndex = RootList ? d->Blocks.IndexOf(RootList) : -1;
+
+		if (!HadSelection && !k.Shift() && List && RootList && RootIndex >= 0)
+		{
+			ssize_t ItemIndex = List->blocks.IndexOf(Item);
+			if (ItemIndex < 0)
+				return;
+
+			auto State = new MultiBlockState(d, RootIndex);
+			if (!State || !State->Copy(RootIndex))
+			{
+				DeleteObj(State);
+				return;
+			}
+
+			auto CursorState = d->Cursor ? new BlockCursorChange(true, d->Cursor) : nullptr;
+			auto SelectionState = d->Selection ? new BlockCursorChange(false, d->Selection) : nullptr;
+			if (Item->Length() == 0 && ItemIndex + 1 == (ssize_t)List->blocks.Length())
+			{
+				auto Paragraph = new LRichTextPriv::TextBlock(d);
+				if (!Paragraph)
+				{
+					DeleteObj(State);
+					DeleteObj(CursorState);
+					DeleteObj(SelectionState);
+					return;
+				}
+
+				if (auto Style = Item->GetStyle())
+					Paragraph->SetStyle(Style);
+
+				d->Cursor->Set(Paragraph, 0, 0);
+				if (List->blocks.Length() == 1)
+				{
+					State->Length = 1;
+					d->Blocks.DeleteAt(RootIndex, true);
+					d->Blocks.AddAt(RootIndex, Paragraph);
+				}
+				else
+				{
+					State->Length = 2;
+					List->blocks.DeleteAt(ItemIndex, true);
+					d->Blocks.AddAt(RootIndex + 1, Paragraph);
+				}
+			}
+			else
+			{
+				auto After = dynamic_cast<LRichTextPriv::TextBlock*>(Item->Split(Trans, d->Cursor->Offset));
+				if (!After && d->Cursor->Offset == Item->Length())
+				{
+					After = new LRichTextPriv::TextBlock(d);
+					if (After)
+						if (auto Style = Item->GetStyle())
+							After->SetStyle(Style);
+				}
+				if (!After)
+				{
+					DeleteObj(State);
+					DeleteObj(CursorState);
+					DeleteObj(SelectionState);
+					return;
+				}
+
+				After->parent = List;
+				List->blocks.AddAt(ItemIndex + 1, After);
+				d->Cursor->Set(After, 0, 0);
+				State->Length = 1;
+			}
+
+			Trans->Add(State);
+			if (CursorState)
+				Trans->Add(CursorState);
+			if (SelectionState)
+				Trans->Add(SelectionState);
+			Changed = true;
+		}
+		else if (b->AddText(Trans, d->Cursor->Offset, Nl, 1))
 		{
 			d->Cursor->Set(d->Cursor->Offset + 1);
 			Changed = true;
