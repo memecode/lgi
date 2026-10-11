@@ -506,7 +506,7 @@ public:
 				#if 1
 				if (auto css = Html->GetCss(true))
 				{
-					LCss::Len wid(LCss::LenPx, 800 + LScrollBar::SCROLL_BAR_SIZE);
+					LCss::Len wid(LCss::LenPx, 1000 + LScrollBar::SCROLL_BAR_SIZE);
 					css->Width(wid);
 					css->MinWidth(wid);
 					css->MaxWidth(wid);
