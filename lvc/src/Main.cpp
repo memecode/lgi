@@ -32,7 +32,12 @@ struct AcceptedCerts
 	LOptionsFile &options;
 	LXmlTag *tag;
 
-	AcceptedCerts(LOptionsFile &opts) : options(opts), tag(options.LockTag(OPT_AcceptCert, _FL)) {}
+	AcceptedCerts(LOptionsFile &opts)
+		: options(opts)
+		, tag(options.LockTag(OPT_AcceptCert, _FL))
+	{
+	}
+	
 	~AcceptedCerts()
 	{
 		if (tag)
@@ -57,6 +62,7 @@ struct AcceptedCerts
 					return c;
 			}
 		}
+		
 		return nullptr;
 	}
 
@@ -80,8 +86,10 @@ struct AcceptedCerts
 			hostTag->SetAttr("name", hostName);
 			tag->Children.Add(hostTag);
 		}
+
 		if (hostTag)
 			hostTag->SetContent(toHex(certId));
+
 		return true;
 	}
 };

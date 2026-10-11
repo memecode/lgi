@@ -1229,6 +1229,12 @@ class LNewFlow
 			int w = MAX((int)width.Value - (int)(table->border.x1 + table->border.x2), r.Min);
 			r.Min = r.Max = w;
 		}
+		auto maxW = table->MaxWidth();
+		if (maxW && maxW.Type != LCss::LenAuto && maxW.Type != LCss::LenPercent)
+		{
+			int mw = MAX((int)maxW.ToPx(0, FontOf(table)), r.Min);
+			r.Max = MIN(r.Max, mw);
+		}
 		return r;
 	}
 
@@ -1380,6 +1386,12 @@ class LNewFlow
 			W = MAX(width.ToPx(availW, font), sumMin + fixedExtra);
 		else
 			W = MAX(MIN(sumMax + fixedExtra, outerAvail), sumMin + fixedExtra);
+		auto maxW = table->MaxWidth();
+		if (maxW && maxW.Type != LCss::LenAuto && (maxW.Type != LCss::LenPercent || availW > 0))
+			W = MAX(MIN(W, maxW.ToPx(availW, font)), sumMin + fixedExtra);
+		auto minW = table->MinWidth();
+		if (minW && minW.Type != LCss::LenAuto && (minW.Type != LCss::LenPercent || availW > 0))
+			W = MAX(W, minW.ToPx(availW, font));
 		if (n == 0)
 			W = (width && width.Type != LCss::LenAuto) ? W : bx;
 
