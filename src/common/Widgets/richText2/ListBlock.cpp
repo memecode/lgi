@@ -3,6 +3,8 @@
 
 #include "RichTextEditPriv.h"
 
+namespace Rte2 {
+
 #define DEBUG_COVERAGE_TEST		0
 
 LRichTextPriv::ListBlock::ListBlock(LRichTextPriv *priv, TType lstType) :
@@ -558,3 +560,5 @@ LRichTextPriv::Block *LRichTextPriv::ListBlock::Split(Transaction *Trans, ssize_
 {
 	return nullptr;
 }
+
+} // namespace Rte2

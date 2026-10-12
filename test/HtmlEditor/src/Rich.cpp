@@ -15,7 +15,7 @@
 
 #if 1
 #include "lgi/common/RichTextEdit2.h"
-typedef LRichTextEdit EditCtrl;
+typedef Rte2::LRichTextEdit EditCtrl;
 #else
 #include "LHtmlEdit.h"
 typedef LHtmlEdit EditCtrl;
@@ -523,7 +523,7 @@ public:
 		if (Edit && Caps && Status)
 		{
 			for (auto k: *Caps)
-				Edit->PostEvent(M_COMPONENT_INSTALLED, new LString(k.key));
+				Edit->PostEvent(Rte2::M_COMPONENT_INSTALLED, new LString(k.key));
 		}
 		PourAll();
 	}

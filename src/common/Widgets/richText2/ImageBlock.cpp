@@ -7,6 +7,8 @@
 
 #include "RichTextEditPriv.h"
 
+namespace Rte2 {
+
 #define LOADER_THREAD_LOGGING		1
 #if LOADER_THREAD_LOGGING
 #define LOADER_LOG(...)				LgiTrace(__VA_ARGS__)
@@ -1343,3 +1345,4 @@ void LRichTextPriv::ImageBlock::DumpNodes(LTreeItem *Ti)
 }
 #endif
 
+} // namespace Rte2

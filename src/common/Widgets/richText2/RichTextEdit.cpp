@@ -27,6 +27,8 @@
 #include "ViewPriv.h"
 #include "RichTextEditPriv.h"
 
+namespace Rte2 {
+
 #define DefaultCharset              "utf-8"
 
 #define GDCF_UTF8					-1
@@ -3560,16 +3562,18 @@ void EmojiMenu::Visible(bool i)
 	}
 }
 
+} // namespace Rte2
+
 ///////////////////////////////////////////////////////////////////////////////
-class LRichTextEdit_Factory : public LViewFactory
+class LRichTextEdit2_Factory : public LViewFactory
 {
 	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
-		if (_stricmp(Class, "LRichTextEdit") == 0)
+		if (_stricmp(Class, "LRichTextEdit2") == 0)
 		{
-			return new LRichTextEdit(-1, 0, 0, 2000, 2000);
+			return new Rte2::LRichTextEdit(-1, 0, 0, 2000, 2000);
 		}
 
 		return 0;
 	}
-}	RichTextEdit_Factory;
+}	RichTextEdit2_Factory;

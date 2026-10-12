@@ -7,6 +7,8 @@
 
 #include "RichTextEditPriv.h"
 
+namespace Rte2 {
+
 #if DEBUG_ACTIVITY
 static void SetActivityRect(LJson &j, const char *key, const LRect &r)
 {
@@ -3249,3 +3251,5 @@ LTreeItem *PrintNode(LTreeItem *Parent, const char *Fmt, ...)
 }
 
 #endif
+
+} // namespace Rte2

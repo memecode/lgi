@@ -77,6 +77,12 @@ Source =	../../src/common/Lgi/LgiMain.cpp \
 			../../src/common/Text/Html.cpp \
 			../../src/common/Text/HtmlCommon.cpp \
 			../../src/common/Text/HtmlParser.cpp \
+			../../src/common/Widgets/richText1/BlockCursor1.cpp \
+			../../src/common/Widgets/richText1/HorzRuleBlock1.cpp \
+			../../src/common/Widgets/richText1/ImageBlock1.cpp \
+			../../src/common/Widgets/richText1/RichTextEdit1.cpp \
+			../../src/common/Widgets/richText1/RichTextEditPriv1.cpp \
+			../../src/common/Widgets/richText1/TextBlock1.cpp \
 			../../src/common/Widgets/richText2/BlockCursor.cpp \
 			../../src/common/Widgets/richText2/HorzRuleBlock.cpp \
 			../../src/common/Widgets/richText2/ImageBlock.cpp \
@@ -423,6 +429,7 @@ cleanall :
 VPATH=$(BuildDir) \
 	./src \
 	../../src/common/Widgets/richText2 \
+	../../src/common/Widgets/richText1 \
 	../../src/common/Text/Homoglyphs \
 	../../src/common/Text/Emoji \
 	../../src/common/Text \

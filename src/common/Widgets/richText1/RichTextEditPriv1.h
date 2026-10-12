@@ -19,8 +19,7 @@
 - Also a horizontal rule block.
 
 */
-#ifndef _RICH_TEXT_EDIT_PRIV_H_
-#define _RICH_TEXT_EDIT_PRIV_H_
+#pragma once
 
 #include "lgi/common/HtmlCommon.h"
 #include "lgi/common/HtmlParser.h"
@@ -30,6 +29,9 @@
 #include "lgi/common/Popup.h"
 #include "lgi/common/Emoji.h"
 #include "lgi/common/SpellCheck.h"
+#include "lgi/common/Range.h"
+
+namespace Rte1 {
 
 #define DEBUG_LOG_CURSOR_COUNT			0
 #define DEBUG_OUTLINE_CUR_DISPLAY_STR	0
@@ -113,8 +115,6 @@ enum RteCommands
 #define TextColour						LColour::Black
 
 //////////////////////////////////////////////////////////////////////
-#include "lgi/common/Range.h"
-
 class LRichEditElem : public LHtmlElement
 {
 	LHashTbl<ConstStrKey<char,false>, LString> Attr;
@@ -347,7 +347,7 @@ public:
 	uint64 BlinkTs = 0;
 
 	// Spell check support
-	LSpellCheck *SpellCheck = nullptr;
+	::LSpellCheck *SpellCheck = nullptr;
 	bool SpellDictionaryLoaded = false;
 	LString SpellLang, SpellDict;
 
@@ -725,7 +725,7 @@ public:
 			virtual ssize_t LineToOffset(ssize_t Line) = 0;
 			virtual int GetLines() = 0;
 			virtual ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, LFindReplaceCommon *Params) = 0;
-			virtual void SetSpellingErrors(LArray<LSpellCheck::SpellingError> &Errors, LRange r) {}
+			virtual void SetSpellingErrors(LArray<::LSpellCheck::SpellingError> &Errors, LRange r) {}
 			virtual void IncAllStyleRefs() {}
 			virtual void Dump() {}
 			virtual LNamedStyle *GetStyle(ssize_t At = -1) = 0;
@@ -1010,9 +1010,9 @@ public:
 	class TextBlock : public Block
 	{
 		LNamedStyle *Style;
-		LArray<LSpellCheck::SpellingError> SpellingErrors;
+		LArray<::LSpellCheck::SpellingError> SpellingErrors;
 		int PaintErrIdx, ClickErrIdx;
-		LSpellCheck::SpellingError *SpErr;
+		::LSpellCheck::SpellingError *SpErr;
 		LString ClickedUri;
 
 		bool PreEdit(Transaction *Trans);
@@ -1065,7 +1065,7 @@ public:
 		bool Seek(SeekType To, BlockCursor &Cursor);
 		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, LFindReplaceCommon *Params);
 		void IncAllStyleRefs();
-		void SetSpellingErrors(LArray<LSpellCheck::SpellingError> &Errors, LRange r);
+		void SetSpellingErrors(LArray<::LSpellCheck::SpellingError> &Errors, LRange r);
 		bool DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling);
 		#ifdef _DEBUG
 		void DumpNodes(LTreeItem *Ti);
@@ -1421,4 +1421,4 @@ typedef LRichTextPriv::BlockCursor BlkCursor;
 typedef LAutoPtr<LRichTextPriv::BlockCursor> AutoCursor;
 typedef LAutoPtr<LRichTextPriv::Transaction> AutoTrans;
 
-#endif
+}

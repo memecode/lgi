@@ -1,10 +1,13 @@
 #include "lgi/common/Lgi.h"
-#include "lgi/common/RichTextEdit.h"
-#include "RichTextEditPriv.h"
 #include "lgi/common/Emoji.h"
 #include "lgi/common/DocView.h"
 #include "lgi/common/Menu.h"
 #include "lgi/common/GdcTools.h"
+#include "lgi/common/RichTextEdit1.h"
+
+#include "RichTextEditPriv1.h"
+
+namespace Rte1 {
 
 #define DEBUG_LAYOUT				0
 
@@ -697,7 +700,7 @@ void DrawDecor(LSurface *pDC, LRichTextPriv::DisplayStr *Ds, int Fx, int Fy, ssi
 	}
 }
 
-bool Overlap(LSpellCheck::SpellingError *e, ssize_t start, ssize_t len)
+bool Overlap(::LSpellCheck::SpellingError *e, ssize_t start, ssize_t len)
 {
 	if (!e)
 		return false;
@@ -1806,12 +1809,12 @@ bool DetectUrl(Char *t, ssize_t &len)
 	return true;
 }
 
-int ErrSort(LSpellCheck::SpellingError *a, LSpellCheck::SpellingError *b)
+int ErrSort(::LSpellCheck::SpellingError *a, ::LSpellCheck::SpellingError *b)
 {
 	return (int) (a->Start - b->Start);
 }
 
-void LRichTextPriv::TextBlock::SetSpellingErrors(LArray<LSpellCheck::SpellingError> &Errors, LRange r)
+void LRichTextPriv::TextBlock::SetSpellingErrors(LArray<::LSpellCheck::SpellingError> &Errors, LRange r)
 {
 	// LgiTrace("%s:%i - SetSpellingErrors " LPrintfSSizeT ", " LPrintfSSizeT ":" LPrintfSSizeT "\n", _FL, Errors.Length(), r.Start, r.End());
 
@@ -2628,3 +2631,4 @@ void LRichTextPriv::TextBlock::DumpNodes(LTreeItem *Ti)
 #endif
 
 
+}

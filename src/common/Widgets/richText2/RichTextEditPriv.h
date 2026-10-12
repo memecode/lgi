@@ -19,8 +19,7 @@
 - Also a horizontal rule block.
 
 */
-#ifndef _RICH_TEXT_EDIT_PRIV_H_
-#define _RICH_TEXT_EDIT_PRIV_H_
+#pragma once
 
 #include "lgi/common/HtmlCommon.h"
 #include "lgi/common/HtmlParser.h"
@@ -30,6 +29,8 @@
 #include "lgi/common/Popup.h"
 #include "lgi/common/Emoji.h"
 #include "lgi/common/SpellCheck.h"
+
+namespace Rte2 {
 
 #ifndef DEBUG_ACTIVITY
 #define DEBUG_ACTIVITY					1
@@ -723,7 +724,7 @@ public:
 			virtual ssize_t LineToOffset(ssize_t Line) = 0;
 			virtual int GetLines() = 0;
 			virtual ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, LFindReplaceCommon *Params) = 0;
-			virtual void SetSpellingErrors(LArray<LSpellCheck::SpellingError> &Errors, LRange r) {}
+			virtual void SetSpellingErrors(LArray<::LSpellCheck::SpellingError> &Errors, LRange r) {}
 			virtual void IncAllStyleRefs() {}
 			virtual void Dump() {}
 			virtual LNamedStyle *GetStyle(ssize_t At = -1) = 0;
@@ -1520,4 +1521,4 @@ typedef LRichTextPriv::BlockCursor BlkCursor;
 typedef LAutoPtr<LRichTextPriv::BlockCursor> AutoCursor;
 typedef LAutoPtr<LRichTextPriv::Transaction> AutoTrans;
 
-#endif
+} // namespace Rte2

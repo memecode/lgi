@@ -1,5 +1,4 @@
-#ifndef _LGI_SPELL_CHECK_H_
-#define _LGI_SPELL_CHECK_H_
+#pragma once
 
 #include "lgi/common/EventTargetThread.h"
 #include "lgi/common/OptionsFile.h"
@@ -174,4 +173,3 @@ extern LAutoPtr<LSpellCheck> CreateWindowsSpellCheck();		// Available on Windows
 extern LAutoPtr<LSpellCheck> CreateAppleSpellCheck();		// Available on Mac OS X
 extern LAutoPtr<LSpellCheck> CreateAspellObject();			// Available anywhere.
 
-#endif

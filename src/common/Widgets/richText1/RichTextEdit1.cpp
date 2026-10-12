@@ -3,7 +3,7 @@
 #include <ctype.h>
 
 #include "lgi/common/Lgi.h"
-#include "lgi/common/RichTextEdit.h"
+#include "lgi/common/RichTextEdit1.h"
 #include "lgi/common/Input.h"
 #include "lgi/common/ScrollBar.h"
 #ifdef WIN32
@@ -43,7 +43,9 @@
 
 // static char SelectWordDelim[] = " \t\n.,()[]<>=?/\\{}\"\';:+=-|!@#$%^&*";
 
-#include "RichTextEditPriv.h"
+#include "RichTextEditPriv1.h"
+
+namespace Rte1 {
 
 //////////////////////////////////////////////////////////////////////
 LRichTextEdit::LRichTextEdit(	int Id,
@@ -90,7 +92,7 @@ LRichTextEdit::~LRichTextEdit()
 	// 'd' is owned by the LView CSS autoptr.
 }
 
-bool LRichTextEdit::SetSpellCheck(LSpellCheck *sp)
+bool LRichTextEdit::SetSpellCheck(::LSpellCheck *sp)
 {
 	if ((d->SpellCheck = sp))
 	{
@@ -3131,16 +3133,18 @@ void EmojiMenu::Visible(bool i)
 	}
 }
 
+} // namespace Rte1
+
 ///////////////////////////////////////////////////////////////////////////////
-class LRichTextEdit_Factory : public LViewFactory
+class LRichTextEdit1_Factory : public LViewFactory
 {
 	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
-		if (_stricmp(Class, "LRichTextEdit") == 0)
+		if (_stricmp(Class, "LRichTextEdit1") == 0)
 		{
-			return new LRichTextEdit(-1, 0, 0, 2000, 2000);
+			return new Rte1::LRichTextEdit(-1, 0, 0, 2000, 2000);
 		}
 
 		return 0;
 	}
-}	RichTextEdit_Factory;
+}	RichTextEdit1_Factory;

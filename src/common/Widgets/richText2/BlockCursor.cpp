@@ -2,6 +2,8 @@
 #include "lgi/common/RichTextEdit2.h"
 #include "RichTextEditPriv.h"
 
+namespace Rte2 {
+
 LRichTextPriv::BlockCursor::BlockCursor(const BlockCursor &c)
 {
 	Blk = NULL;
@@ -101,3 +103,5 @@ void LRichTextPriv::BlockCursor::Set(LRichTextPriv::Block *b, ssize_t off, int l
 			
 	LAssert(Offset >= 0);
 }
+
+} // namespace Rte2

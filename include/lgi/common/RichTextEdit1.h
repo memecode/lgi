@@ -5,8 +5,7 @@
 
 // Currently this is experimental code:
 
-#ifndef _RICH_TEXT_EDIT_H_
-#define _RICH_TEXT_EDIT_H_
+#pragma once
 
 #include "lgi/common/DocView.h"
 #include "lgi/common/Undo.h"
@@ -16,6 +15,10 @@
 #if _DEBUG
 #include "lgi/common/Tree.h"
 #endif
+
+class LSpellCheck;
+
+namespace Rte1 {
 
 enum RichEditMsgs
 {
@@ -103,7 +106,7 @@ public:
 
 	ssize_t HitTest(LPoint pt);
 	bool DeleteSelection(char16 **Cut = NULL);
-	bool SetSpellCheck(class LSpellCheck *sp);
+	bool SetSpellCheck(::LSpellCheck *sp);
 	
 	bool GetFormattedContent(const char *MimeType, LString &Out, LArray<ContentMedia> *Media = NULL) override;
 
@@ -268,4 +271,4 @@ public:
 	#endif
 };
 
-#endif
+}

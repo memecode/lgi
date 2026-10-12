@@ -3,6 +3,8 @@
 #include "RichTextEditPriv.h"
 #include "lgi/common/DocView.h"
 
+namespace Rte2 {
+
 LRichTextPriv::HorzRuleBlock::HorzRuleBlock(LRichTextPriv *priv) : Block(priv)
 {
 	IsDeleted = false;
@@ -246,3 +248,4 @@ LRichTextPriv::Block *LRichTextPriv::HorzRuleBlock::Split(Transaction *Trans, ss
 	return NULL;
 }
 
+} // namespace Rte2

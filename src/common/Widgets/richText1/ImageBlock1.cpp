@@ -1,11 +1,13 @@
 #include "lgi/common/Lgi.h"
-#include "lgi/common/RichTextEdit.h"
+#include "lgi/common/RichTextEdit1.h"
 #include "lgi/common/GdcTools.h"
 #include "lgi/common/Menu.h"
 #include "lgi/common/Net.h"
 #include "lgi/common/Uri.h"
 
-#include "RichTextEditPriv.h"
+#include "RichTextEditPriv1.h"
+
+namespace Rte1 {
 
 #define LOADER_THREAD_LOGGING		1
 #if LOADER_THREAD_LOGGING
@@ -1343,3 +1345,4 @@ void LRichTextPriv::ImageBlock::DumpNodes(LTreeItem *Ti)
 }
 #endif
 
+} // namespace Rte1

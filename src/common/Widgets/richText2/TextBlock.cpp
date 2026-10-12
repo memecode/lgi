@@ -6,6 +6,8 @@
 #include "lgi/common/Menu.h"
 #include "lgi/common/GdcTools.h"
 
+namespace Rte2 {
+
 #define DEBUG_LAYOUT				0
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2639,4 +2641,4 @@ void LRichTextPriv::TextBlock::DumpNodes(LTreeItem *Ti)
 }
 #endif
 
-
+} // namespace Rte2

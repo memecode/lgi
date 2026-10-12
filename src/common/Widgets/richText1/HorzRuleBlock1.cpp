@@ -1,7 +1,10 @@
 #include "lgi/common/Lgi.h"
-#include "lgi/common/RichTextEdit.h"
-#include "RichTextEditPriv.h"
+#include "lgi/common/RichTextEdit1.h"
 #include "lgi/common/DocView.h"
+
+#include "RichTextEditPriv1.h"
+
+namespace Rte1 {
 
 LRichTextPriv::HorzRuleBlock::HorzRuleBlock(LRichTextPriv *priv) : Block(priv)
 {
@@ -246,3 +249,4 @@ LRichTextPriv::Block *LRichTextPriv::HorzRuleBlock::Split(Transaction *Trans, ss
 	return NULL;
 }
 
+} // namespace Rte1
