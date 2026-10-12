@@ -486,14 +486,6 @@ bool LRichTextPriv::TextBlock::ToHtml(LStream &s, LArray<LDocView::ContentMedia>
 	return true;
 }		
 
-// The bullet/number of a list item is painted left of the text, so it has to be part of the
-// invalidated line rect for it to repaint when the selection changes.
-void LRichTextPriv::TextBlock::IncludeListMarker(LRect &Line)
-{
-	if (auto List = dynamic_cast<ListBlock*>(parent))
-		Line.x1 = MIN(Line.x1, List->GetPos().x1);
-}
-
 bool LRichTextPriv::TextBlock::GetPosFromIndex(BlockCursor *Cursor)
 {
 	if (!Cursor)
@@ -561,7 +553,6 @@ bool LRichTextPriv::TextBlock::GetPosFromIndex(BlockCursor *Cursor)
 				Cursor->Pos.x2 = Cursor->Pos.x1 + 1;
 
 				Cursor->Line.Set(Pos.x1, r.y1, Pos.x2, r.y2);
-				IncludeListMarker(Cursor->Line);
 				return true;
 			}					
 					
@@ -587,7 +578,6 @@ bool LRichTextPriv::TextBlock::GetPosFromIndex(BlockCursor *Cursor)
 			Cursor->Pos.y2 = r.y2;
 
 			Cursor->Line.Set(Pos.x1, r.y1, Pos.x2, r.y2);
-			IncludeListMarker(Cursor->Line);
 			return true;
 		}
 				
@@ -604,7 +594,6 @@ bool LRichTextPriv::TextBlock::GetPosFromIndex(BlockCursor *Cursor)
 		Cursor->Pos.y2 = Pos.y2;
 
 		Cursor->Line = Pos;
-		IncludeListMarker(Cursor->Line);
 		return true;
 	}
 			
@@ -1282,9 +1271,8 @@ bool LRichTextPriv::TextBlock::OnLayout(Flow &flow)
 	if (Txt.Length() == 0)
 	{
 		// Empty node case
-		// PosOff is relative to the block, Pos is in document co-ordinates
-		CurLine->PosOff.y2 = CurLine->PosOff.y1 + flow.d->View->GetFont()->GetHeight() - 1;
-		Pos.y2 = MAX(Pos.y2, Pos.y1 + CurLine->PosOff.y2);
+		int y = Pos.y1 + flow.d->View->GetFont()->GetHeight() - 1;
+		CurLine->PosOff.y2 = Pos.y2 = MAX(Pos.y2, y);
 		LayoutSize += CurLine->Length();
 
 		Layout.Add(CurLine.Release());

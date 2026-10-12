@@ -1,5 +1,5 @@
 #include "lgi/common/Lgi.h"
-#include "lgi/common/RichTextEdit.h"
+#include "lgi/common/RichTextEdit2.h"
 
 #include "RichTextEditPriv.h"
 

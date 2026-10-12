@@ -14,7 +14,7 @@
 #include "lgi/common/FileSelect.h"
 
 #if 1
-#include "lgi/common/RichTextEdit.h"
+#include "lgi/common/RichTextEdit2.h"
 typedef LRichTextEdit EditCtrl;
 #else
 #include "LHtmlEdit.h"

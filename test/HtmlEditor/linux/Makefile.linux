@@ -77,13 +77,13 @@ Source =	../../src/common/Lgi/LgiMain.cpp \
 			../../src/common/Text/Html.cpp \
 			../../src/common/Text/HtmlCommon.cpp \
 			../../src/common/Text/HtmlParser.cpp \
-			../../src/common/Widgets/Editor/BlockCursor.cpp \
-			../../src/common/Widgets/Editor/HorzRuleBlock.cpp \
-			../../src/common/Widgets/Editor/ImageBlock.cpp \
-			../../src/common/Widgets/Editor/ListBlock.cpp \
-			../../src/common/Widgets/Editor/RichTextEdit.cpp \
-			../../src/common/Widgets/Editor/RichTextEditPriv.cpp \
-			../../src/common/Widgets/Editor/TextBlock.cpp \
+			../../src/common/Widgets/richText2/BlockCursor.cpp \
+			../../src/common/Widgets/richText2/HorzRuleBlock.cpp \
+			../../src/common/Widgets/richText2/ImageBlock.cpp \
+			../../src/common/Widgets/richText2/ListBlock.cpp \
+			../../src/common/Widgets/richText2/RichTextEdit.cpp \
+			../../src/common/Widgets/richText2/RichTextEditPriv.cpp \
+			../../src/common/Widgets/richText2/TextBlock.cpp \
 			src/Rich.cpp
 
 SourceC    := $(filter %.c,$(Source))
@@ -422,7 +422,7 @@ cleanall :
 
 VPATH=$(BuildDir) \
 	./src \
-	../../src/common/Widgets/Editor \
+	../../src/common/Widgets/richText2 \
 	../../src/common/Text/Homoglyphs \
 	../../src/common/Text/Emoji \
 	../../src/common/Text \
