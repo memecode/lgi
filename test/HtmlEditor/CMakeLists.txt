@@ -11,7 +11,10 @@ elseif (APPLE)
     set(SPELL_CHECK ${LGI_DIR}/src/mac/cocoa/SpellCheckMac.mm)
 elseif (LINUX)
 	set(APP_ICON)
-    set(SPELL_CHECK ${LGI_DIR}/src/common/Text/SpellCheckAspell.cpp)
+    set(SPELL_CHECK
+        ${LGI_DIR}/src/common/Text/SpellCheckAspell.cpp
+        ${LGI_DIR}/src/common/Net/Ftp.cpp
+        ${LGI_DIR}/src/common/Db/Db-Csv.cpp)
 endif()
 
 add_executable(HtmlEdit ${APP_TYPE}
@@ -33,6 +36,7 @@ add_executable(HtmlEdit ${APP_TYPE}
     ${LGI_DIR}/src/common/Widgets/Editor/RichTextEditPriv.cpp
     ${LGI_DIR}/src/common/Widgets/Editor/HorzRuleBlock.cpp
     ${LGI_DIR}/src/common/Widgets/Editor/ImageBlock.cpp
+    ${LGI_DIR}/src/common/Widgets/Editor/ListBlock.cpp
     ${LGI_DIR}/src/common/Widgets/Editor/TextBlock.cpp
     ${SPELL_CHECK}
     resources/resource.h
@@ -42,16 +46,20 @@ add_executable(HtmlEdit ${APP_TYPE}
 
 target_include_directories(HtmlEdit
 	PRIVATE
-		Code
-		Resources
+		src
+		resources
 		${OPENSSL_INCLUDE_DIR}
 		../../private/common)
 
 target_link_libraries(HtmlEdit
 	PRIVATE
-		lgi
-		libpng16
-		libjpeg9a)
+		lgi)
+
+if (LINUX)
+	find_package(BZip2 REQUIRED)
+	target_include_directories(HtmlEdit PRIVATE ${BZIP2_INCLUDE_DIRS})
+	target_link_libraries(HtmlEdit PRIVATE ${BZIP2_LIBRARIES})
+endif()
 
 if (APPLE)
     macBundlePostBuild(HtmlEdit)

@@ -43,7 +43,9 @@ public:
 					if (parts.Length() == 2)
 					{
 						sx = (int)parts[0].Int();
-						sy = (int)parts[1].Int();						
+						sy = (int)parts[1].Int();	
+						
+						
 					}
 				}
 			}
