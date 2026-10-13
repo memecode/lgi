@@ -476,6 +476,9 @@ void FlattenCubic(LPointF *&Out, LPointF &p1, LPointF &p2, LPointF &p3, LPointF 
 
 			v1 = v2;
 		}
+
+		// Accumulated error at integer endpoints can shift rasterized bounds by a pixel.
+		Out[numsteps - 1] = p4;
 	}
 }
 

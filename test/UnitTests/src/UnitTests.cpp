@@ -10,6 +10,7 @@ void UnitTests()
 	Tests.Add(new LAutoPtrTest);
 	Tests.Add(new LCssTest);
 	Tests.Add(new LMatrixTest);
+	Tests.Add(new LPathTest);
 	Tests.Add(new LStringClassTest);
 	Tests.Add(new LDateTimeTest);
 	Tests.Add(new LStringTests);

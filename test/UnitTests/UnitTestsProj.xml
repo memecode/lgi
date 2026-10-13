@@ -8,6 +8,7 @@
 		<Node File="./src/JsonTest.cpp" Type="2" Platforms="15" />
 		<Node File="./src/MatrixTest.cpp" Type="2" Platforms="15" />
 		<Node File="./src/NetworkTests.cpp" Type="2" Platforms="15" />
+		<Node File="./src/PathTest.cpp" Type="2" Platforms="15" />
 		<Node File="./src/RangeTest.cpp" Type="2" Platforms="15" />
 		<Node File="./src/StringClassTests.cpp" Type="2" Platforms="15" />
 		<Node File="./src/StringTests.cpp" Type="2" Platforms="15" />

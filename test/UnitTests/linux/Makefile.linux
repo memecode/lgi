@@ -68,6 +68,7 @@ Source =	src/AutoPtrTest.cpp \
 			src/JsonTest.cpp \
 			src/MatrixTest.cpp \
 			src/NetworkTests.cpp \
+			src/PathTest.cpp \
 			src/RangeTest.cpp \
 			src/StringClassTests.cpp \
 			src/StringTests.cpp \

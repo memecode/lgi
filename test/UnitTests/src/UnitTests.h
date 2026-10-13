@@ -42,6 +42,13 @@ DECL_TEST(LBitsTest);
 DECL_TEST(NetworkTests);
 DECL_TEST(XmlTest);
 
+class LPathTest : public UnitTest
+{
+public:
+	LPathTest() : UnitTest("LPathTest") {}
+	bool Run() override;
+};
+
 class LDateTimeTest : public UnitTest
 {
 public:
