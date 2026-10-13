@@ -64,7 +64,7 @@
 #endif
 
 // #define DefaultFont					"font-family: Times; font-size: 16pt;"
-#define DefaultBodyMargin			"5px"
+#define DefaultBodyMargin			"8px"
 #define DefaultImgSize				16
 #define ShowNbsp					0
 
@@ -349,9 +349,6 @@ class LNewFlow
 
 	static LCss::LengthType AlignOf(LTag *t, LCss::LengthType inherited)
 	{
-		// The 'align' attribute on a table positions the table, it doesn't align the content
-		if (t->TagId == TAG_TABLE)
-			return inherited;
 		auto a = t->TextAlign();
 		if (a.Type == LCss::AlignLeft || a.Type == LCss::AlignRight ||
 			a.Type == LCss::AlignCenter || a.Type == LCss::AlignJustify)
@@ -375,7 +372,10 @@ class LNewFlow
 				continue;
 			if (lh.Type != LCss::LenAuto && lh.Type != LCss::LenNormal)
 			{
-				int px = MAX(lh.ToPx(boxH, font), 0);
+				// Resolve relative line-height units against the element that sets the value.
+				auto lineFont = FontOf(t);
+				int lineBoxH = lineFont ? (int)lineFont->GetHeight() : boxH;
+				int px = MAX(lh.ToPx(lineBoxH, lineFont), 0);
 				int half = (px - boxH) / 2;
 				asc = boxAsc + half;
 				desc = px - asc;
@@ -887,6 +887,7 @@ class LNewFlow
 		if (!topEdge)
 			contentTop = top;
 		int contentH = empty ? 0 : c.y - contentTop;
+		int naturalH = contentH;
 		if (specH >= 0)
 			contentH = cell ? MAX(contentH, specH) : specH;
 		contentH = MAX(contentH, minH);
@@ -898,6 +899,15 @@ class LNewFlow
 		tag->Pos.y = top;
 		tag->Size.x = contentW + hEdges;
 		tag->Size.y = bottom - top;
+		if (cell && contentH > naturalH)
+		{
+			auto align = VAlignOf(tag);
+			int extra = contentH - naturalH;
+			if (align == LCss::VerticalMiddle)
+				Shift(tag, 0, extra / 2);
+			else if (align == LCss::VerticalBottom)
+				Shift(tag, 0, extra);
+		}
 
 		if (!(through && empty))
 			c.y = bottom;
@@ -1202,6 +1212,20 @@ class LNewFlow
 			cols.Max[c] = MAX(cols.Max[c], cols.Min[c]);
 	}
 
+	static int PreferredTableWidth(const TCols &cols)
+	{
+		int width = 0;
+		for (auto max: cols.Max)
+			width += max;
+		// A percentage column must have room for its preferred width at that percentage.
+		for (size_t c = 0; c < cols.Max.size(); c++)
+		{
+			if (cols.Pct[c] > 0)
+				width = MAX(width, (int)(((int64_t)cols.Max[c] * 100 + cols.Pct[c] - 1) / cols.Pct[c]));
+		}
+		return width;
+	}
+
 	// Min/max width of the table excluding its own border/margin
 	MinMax MeasureTable(LTag *table, int depth)
 	{
@@ -1218,10 +1242,9 @@ class LNewFlow
 		for (int c = 0; c < g.NCols; c++)
 		{
 			r.Min += cols.Min[c];
-			r.Max += cols.Max[c];
 		}
 		r.Min += extra;
-		r.Max += extra;
+		r.Max = PreferredTableWidth(cols) + extra;
 
 		auto width = table->Width();
 		if (width && width.Type == LCss::LenPx)
@@ -1308,11 +1331,6 @@ class LNewFlow
 				continue;
 			ch->Pos.x += dx;
 			ch->Pos.y += dy;
-			for (auto r: ch->TextPos)
-			{
-				r->x1 += dx; r->x2 += dx;
-				r->y1 += dy; r->y2 += dy;
-			}
 			Shift(ch, dx, dy);
 		}
 		for (auto r: tag->TextPos)
@@ -1373,12 +1391,12 @@ class LNewFlow
 		int outerAvail = MAX(availW - mx, 0);
 
 		ColumnMetrics(g, cols, depth);
-		int sumMin = 0, sumMax = 0;
+		int sumMin = 0;
 		for (int i = 0; i < n; i++)
 		{
 			sumMin += cols.Min[i];
-			sumMax += cols.Max[i];
 		}
+		int sumMax = PreferredTableWidth(cols);
 		int fixedExtra = spacing * (n + 1) + bx;
 		int W;
 		auto width = table->Width();
@@ -3600,6 +3618,12 @@ void LTag::SetDefaultCss()
 			}
 			break;
 		}
+		case TAG_CENTER:
+		{
+			Display(LCss::DispBlock);
+			TextAlign(Len(LCss::AlignCenter));
+			break;
+		}
 		case TAG_P:
 		{
 			MarginBottom(Len("1em"));
@@ -3621,6 +3645,7 @@ void LTag::SetDefaultCss()
 		case TAG_TABLE:
 		{
 			Len l;
+			TextAlign(Len(LCss::AlignLeft));
 
 			if (!Cell)
 				Cell = new TblCell;
@@ -3691,6 +3716,7 @@ void LTag::SetDefaultCss()
 			MarginLeft(Len(Get("leftmargin", s) ? s : DefaultBodyMargin));
 			MarginTop(Len(Get("topmargin", s) ? s : DefaultBodyMargin));
 			MarginRight(Len(Get("rightmargin", s) ? s : DefaultBodyMargin));
+			MarginBottom(Len(Get("bottommargin", s) ? s : DefaultBodyMargin));
 			
 			if (Get("text", s))
 			{
@@ -3739,6 +3765,12 @@ void LTag::SetDefaultCss()
 		case TAG_TITLE:
 		{
 			Display(LCss::DispNone);
+			break;
+		}
+		case TAG_INPUT:
+		{
+			if (Get("type", s) && !_stricmp(s, "hidden"))
+				Display(LCss::DispNone);
 			break;
 		}
 		case TAG_H1:
@@ -3865,7 +3897,7 @@ void LTag::SetAttributeStyles()
 		if (l.Parse(s, PropHeight, ParseRelaxed))
 			Height(l);
 	}
-	if (Get("align", s))
+	if (TagId != TAG_TABLE && Get("align", s))
 	{
 		if (_stricmp(s, "left") == 0) TextAlign(Len(AlignLeft));
 		else if (_stricmp(s, "right") == 0) TextAlign(Len(AlignRight));
