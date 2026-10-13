@@ -2456,6 +2456,13 @@ void LRichTextPriv::Paint(LSurface *pDC, LScrollBar *&ScrollY)
 		{
 			PaintBtn(pDC, (LRichTextEdit::RectType) i);
 		}
+
+		auto verColour = ToolBar.Mix(LColour::Black, 0.3f);
+		LDisplayString verDs(UiFont, "v2");
+		UiFont->Fore(verColour);
+		UiFont->Back(ToolBar);
+		UiFont->Transparent(true);
+		verDs.Draw(pDC, r.x1, r.y1);
 	}
 
 	LPoint Origin;

@@ -158,9 +158,6 @@ public:
 		EmojiBtn,
 		HorzRuleBtn,
 
-		UndoBtn,
-		RedoBtn,
-		
 		MaxArea
 	};
 	LRect GetArea(RectType Type);
