@@ -31,13 +31,22 @@ add_executable(HtmlEdit ${APP_TYPE}
     ${LGI_DIR}/src/common/Text/Html.cpp
     ${LGI_DIR}/src/common/Text/HtmlCommon.cpp
     ${LGI_DIR}/src/common/Text/HtmlParser.cpp
-    ${LGI_DIR}/src/common/Widgets/Editor/BlockCursor.cpp
-    ${LGI_DIR}/src/common/Widgets/Editor/RichTextEdit.cpp
-    ${LGI_DIR}/src/common/Widgets/Editor/RichTextEditPriv.cpp
-    ${LGI_DIR}/src/common/Widgets/Editor/HorzRuleBlock.cpp
-    ${LGI_DIR}/src/common/Widgets/Editor/ImageBlock.cpp
-    ${LGI_DIR}/src/common/Widgets/Editor/ListBlock.cpp
-    ${LGI_DIR}/src/common/Widgets/Editor/TextBlock.cpp
+
+    ${LGI_DIR}/src/common/Widgets/richText1/BlockCursor1.cpp
+    ${LGI_DIR}/src/common/Widgets/richText1/RichTextEdit1.cpp
+    ${LGI_DIR}/src/common/Widgets/richText1/RichTextEditPriv1.cpp
+    ${LGI_DIR}/src/common/Widgets/richText1/HorzRuleBlock1.cpp
+    ${LGI_DIR}/src/common/Widgets/richText1/ImageBlock1.cpp
+    ${LGI_DIR}/src/common/Widgets/richText1/TextBlock1.cpp
+
+    ${LGI_DIR}/src/common/Widgets/richText2/BlockCursor.cpp
+    ${LGI_DIR}/src/common/Widgets/richText2/RichTextEdit.cpp
+    ${LGI_DIR}/src/common/Widgets/richText2/RichTextEditPriv.cpp
+    ${LGI_DIR}/src/common/Widgets/richText2/HorzRuleBlock.cpp
+    ${LGI_DIR}/src/common/Widgets/richText2/ImageBlock.cpp
+    ${LGI_DIR}/src/common/Widgets/richText2/TextBlock.cpp
+    ${LGI_DIR}/src/common/Widgets/richText2/ListBlock.cpp
+
     ${SPELL_CHECK}
     resources/resource.h
 
