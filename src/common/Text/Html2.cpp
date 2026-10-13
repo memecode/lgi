@@ -279,8 +279,47 @@ class LNewFlow
 
 	LHtml *Html;
 	LRect View;
+	bool LegacyLineHeight = false;
 	Frame *Stack[MAX_RECURSION_DEPTH + 2];
 	int Sp = 0;
+
+	static bool UsesLegacyLineHeight(const char *doc)
+	{
+		if (!doc)
+			return false;
+		if (!strncmp(doc, "\xef\xbb\xbf", 3))
+			doc += 3;
+		for (;;)
+		{
+			while (*doc && IsWhite(*doc))
+				doc++;
+			if (strncmp(doc, "<!--", 4))
+				break;
+			auto end = strstr(doc + 4, "-->");
+			if (!end)
+				return true;
+			doc = end + 3;
+		}
+		if (_strnicmp(doc, "<!doctype", 9) || !IsWhite(doc[9]))
+			return true;
+		auto end = strchr(doc + 9, '>');
+		if (!end)
+			return true;
+		auto declaration = LString(doc, end - doc).Lower();
+		const char *legacy[] =
+		{
+			"-//w3c//dtd html 4.0 transitional//",
+			"-//w3c//dtd html 4.0 frameset//",
+			"-//w3c//dtd html 4.01 transitional//",
+			"-//w3c//dtd html 4.01 frameset//",
+			"-//w3c//dtd xhtml 1.0 transitional//",
+			"-//w3c//dtd xhtml 1.0 frameset//",
+		};
+		for (auto id: legacy)
+			if (declaration.Find(id) >= 0)
+				return true;
+		return false;
+	}
 
 	static int Collapse(int a, int b)
 	{
@@ -850,8 +889,9 @@ class LNewFlow
 		c.X = c.Left;
 		int asc, desc, ba, bh;
 		Metrics(tag, font, asc, desc, ba, bh);
-		c.StrutAsc = asc;
-		c.StrutDesc = desc;
+		// Quirks/limited-quirks documents omit the strut, so image-only lines have no text descender gap.
+		c.StrutAsc = LegacyLineHeight ? 0 : asc;
+		c.StrutDesc = LegacyLineHeight ? 0 : desc;
 
 		bool replaced = tag->TagId == TAG_IMG;
 		int replacedH = 0;
@@ -1138,7 +1178,14 @@ class LNewFlow
 
 		auto width = tag->Width();
 		if (k != KTable && width && width.Type != LCss::LenAuto && width.Type != LCss::LenPercent)
-			in.Min = in.Max = MAX(width.ToPx(0, font), 0);
+		{
+			int specified = MAX(width.ToPx(0, font), 0);
+			// Table-cell widths are preferences; only their content determines the minimum.
+			if (k == KCell)
+				in.Max = MAX(in.Max, specified);
+			else
+				in.Min = in.Max = specified;
+		}
 		if (k != KTable)
 		{
 			auto minWidth = tag->MinWidth();
@@ -1173,7 +1220,7 @@ class LNewFlow
 			if (w && w.Type == LCss::LenPx)
 			{
 				int spec = MAX((int)w.Value, 0) + HEdges(tc.T);
-				m.Max = MAX(m.Min, spec);
+				m.Max = MAX(m.Max, spec);
 				if (tc.CS == 1)
 					cols.Fixed[tc.Col] = true;
 			}
@@ -1182,7 +1229,7 @@ class LNewFlow
 			else if (w && w.Type != LCss::LenAuto && w.Type != LCss::LenPercent)
 			{
 				int spec = MAX(w.ToPx(0, font), 0) + HEdges(tc.T);
-				m.Max = MAX(m.Min, spec);
+				m.Max = MAX(m.Max, spec);
 			}
 			cm[i] = m;
 			if (tc.CS == 1)
@@ -1634,6 +1681,7 @@ public:
 
 	LNewFlow(LHtml *html, LRect &r) : Html(html), View(r)
 	{
+		LegacyLineHeight = UsesLegacyLineHeight(html->Name());
 		MAX.x = MAX.y = 0;
 	}
 
