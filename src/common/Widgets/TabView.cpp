@@ -1156,7 +1156,6 @@ void LTabView::OnPosChange()
 		return;
 
 	p->SetPos(d->TabClient, true);
-	printf("d->PourChildren=%i\n", d->PourChildren);
 	if (d->PourChildren)
 	{
 		LRect r = d->TabClient;

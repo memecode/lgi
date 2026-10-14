@@ -516,9 +516,12 @@ LAutoPtr<LSurface> LRichTextPriv::ResizeIcon(ToolbarIconIndex index, int px)
 		auto path = LFindFile(SVG_FILE);
 		if (!path)
 		{
-			LFile::Path svg(__FILE__, "../" SVG_FILE);
+			LFile::Path exe(LSP_EXE);
+			auto svg = exe / __FILE__/ ".." / SVG_FILE;
 			if (svg.Exists())
 				path = svg.GetFull();
+			else
+				LgiTrace("%s:%i - didn't find svg at '%s'\n", _FL, svg.GetFull().Get());
 		}
 		
 		if (path)
@@ -544,6 +547,7 @@ LAutoPtr<LSurface> LRichTextPriv::ResizeIcon(ToolbarIconIndex index, int px)
 			}
 		}
 	}
+	else LgiTrace("%s:%i - failed to load toolbarIcons.\n", _FL);
 	
 	return out;
 }
