@@ -186,7 +186,7 @@ public:
 		if (!Data || Width <= 0 || Height <= 0 || Width >= 32768 || Height >= 32768 ||
 			Stride > std::numeric_limits<int>::max() || Stride < -std::numeric_limits<int>::max() ||
 			(Stride >= 0 ? Stride : -Stride) < Width * 4 ||
-			(size_t)(Height - 1) > (size_t)std::numeric_limits<ssize_t>::max() /
+			(size_t)(Height - 1) > (size_t)(std::numeric_limits<int>::max() - Width * 4) /
 				(size_t)(Stride >= 0 ? Stride : -Stride))
 		{
 			LgiTrace("LSurface::Vec: inaccessible bitmap or invalid dimensions/stride.\n");
@@ -206,7 +206,7 @@ public:
 			Path = plutovg_path_create();
 		if (!Canvas || !Path)
 		{
-			LgiTrace("LSurface::Vec: could not allocate PlutoVG surface/canvas.\n");
+			LgiTrace("LSurface::Vec: could not allocate PlutoVG surface/canvas/path.\n");
 			return;
 		}
 		Clip = Target.ClipRgn();

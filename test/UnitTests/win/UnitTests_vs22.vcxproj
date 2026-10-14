@@ -260,6 +260,7 @@
     <ClCompile Include="..\src\RangeTest.cpp" />
     <ClCompile Include="..\src\StringTests.cpp" />
     <ClCompile Include="..\src\UnitTests.cpp" />
+    <ClCompile Include="..\src\VectorTest.cpp" />
     <ClCompile Include="..\src\XmlTest.cpp" />
   </ItemGroup>
   <ItemGroup>

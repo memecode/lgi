@@ -416,6 +416,9 @@
     <ClCompile Include="..\src\common\Gdc2\Surface.cpp">
       <Filter>Source Files\Graphics\Surfaces</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\common\Gdc2\Vector.cpp">
+      <Filter>Source Files\Graphics\Surfaces</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\common\Widgets\TableLayout.cpp">
       <Filter>Source Files\Widgets\Layout</Filter>
     </ClCompile>

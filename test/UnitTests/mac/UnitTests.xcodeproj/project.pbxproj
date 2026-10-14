@@ -23,6 +23,7 @@
 		349F939A2B92C590002410A2 /* CssTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 349F938E2B92C590002410A2 /* CssTest.cpp */; };
 		349F939B2B92C590002410A2 /* BitsTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 349F938F2B92C590002410A2 /* BitsTest.cpp */; };
 		506FF6E72E654C70B6A44895 /* PathTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 506FF6E72E654C70B6A44894 /* PathTest.cpp */; };
+		A0B1C2D3E4F5061728394053 /* VectorTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A0B1C2D3E4F5061728394052 /* VectorTest.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -75,6 +76,7 @@
 		349F938E2B92C590002410A2 /* CssTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CssTest.cpp; path = ../src/CssTest.cpp; sourceTree = "<group>"; };
 		349F938F2B92C590002410A2 /* BitsTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BitsTest.cpp; path = ../src/BitsTest.cpp; sourceTree = "<group>"; };
 		506FF6E72E654C70B6A44894 /* PathTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PathTest.cpp; path = ../src/PathTest.cpp; sourceTree = "<group>"; };
+		A0B1C2D3E4F5061728394052 /* VectorTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VectorTest.cpp; path = ../src/VectorTest.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -144,6 +146,7 @@
 				349F938C2B92C590002410A2 /* MatrixTest.cpp */,
 				349F93862B92C590002410A2 /* NetworkTests.cpp */,
 				506FF6E72E654C70B6A44894 /* PathTest.cpp */,
+				A0B1C2D3E4F5061728394052 /* VectorTest.cpp */,
 				349F938A2B92C590002410A2 /* RangeTest.cpp */,
 				349F93882B92C590002410A2 /* StringClassTests.cpp */,
 				349F93892B92C590002410A2 /* StringTests.cpp */,
@@ -255,6 +258,7 @@
 				349F93952B92C590002410A2 /* StringTests.cpp in Sources */,
 				349F93932B92C590002410A2 /* NetworkTests.cpp in Sources */,
 				506FF6E72E654C70B6A44895 /* PathTest.cpp in Sources */,
+				A0B1C2D3E4F5061728394053 /* VectorTest.cpp in Sources */,
 				349F93912B92C590002410A2 /* UnitTests.cpp in Sources */,
 				349F93992B92C590002410A2 /* JsonTest.cpp in Sources */,
 				349F93942B92C590002410A2 /* StringClassTests.cpp in Sources */,
