@@ -7,11 +7,10 @@
 #include <new>
 
 #include "lgi/common/Lgi.h"
-#include "Gdc2Vector.h"
 
 namespace
 {
-class QuartzVectorContext : public LSurfaceVectorContext
+class QuartzVectorContext : public LSurfaceVector
 {
 	CGContextRef Context = nullptr;
 	CGPathRef SavedPath = nullptr;
@@ -355,7 +354,7 @@ LScreenDC::~LScreenDC()
 	DeleteObj(d);
 }
 
-LSurfaceVectorContext *LScreenDC::CreateVectorContext()
+LSurfaceVector *LScreenDC::CreateVectorContext()
 {
 	return new (std::nothrow) QuartzVectorContext(d->Ctx);
 }

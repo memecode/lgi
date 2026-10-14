@@ -174,7 +174,64 @@
 //				Classes
 class LFilter;
 class LSurface;
-class LSurfaceVectorContext;
+
+/// The single vector drawing interface, implemented by each backend and by
+/// LSurface::Vector (which adds validation). Add new operations here only.
+///
+/// Backend implementations acquire and save the target's graphics state when
+/// created, then release resources and restore that state when destroyed.
+class LSurfaceVector
+{
+public:
+	virtual ~LSurfaceVector() {}
+
+	/// Returns false when the drawing context could not be created.
+	virtual bool IsValid() const = 0;
+	/// Path coordinates are in the surface's coordinate units.
+	virtual void MoveTo(float x, float y) = 0;
+	virtual void LineTo(float x, float y) = 0;
+	virtual void CubicTo(float x1, float y1, float x2, float y2, float x, float y) = 0;
+	/// Arc rotation is in degrees; flags follow SVG elliptical arc semantics.
+	virtual void ArcTo(float rx, float ry, float rotation, bool largeArc, bool sweep, float x, float y) = 0;
+	/// Adds a rectangle with width and height in surface coordinate units.
+	virtual void Rect(float x, float y, float width, float height) = 0;
+	/// Adds a closed rounded rectangle built from lines and arcs, wound clockwise.
+	/// Negative width/height are normalised and the radius is clamped to
+	/// [0, min(width, height) / 2]. Backends may override with a native version.
+	virtual void RoundRect(float x, float y, float width, float height, float radius)
+	{
+		if (width < 0) { x += width; width = -width; }
+		if (height < 0) { y += height; height = -height; }
+		float max = (width < height ? width : height) / 2;
+		float r = radius < 0 ? 0 : (radius > max ? max : radius);
+		if (r <= 0)
+		{
+			Rect(x, y, width, height);
+			return;
+		}
+
+		float right = x + width, bottom = y + height;
+		MoveTo(x + r, y);
+		LineTo(right - r, y);
+		ArcTo(r, r, 0, false, true, right, y + r);
+		LineTo(right, bottom - r);
+		ArcTo(r, r, 0, false, true, right - r, bottom);
+		LineTo(x + r, bottom);
+		ArcTo(r, r, 0, false, true, x, bottom - r);
+		LineTo(x, y + r);
+		ArcTo(r, r, 0, false, true, x + r, y);
+		ClosePath();
+	}
+	virtual void ClosePath() = 0;
+	/// Clears the current path. Fill and Stroke otherwise preserve it.
+	virtual void ClearPath() = 0;
+	/// Fills the current path using the non-zero winding rule.
+	virtual void Fill(LColour colour) = 0;
+	/// Strokes the current path; width is in surface coordinate units.
+	virtual void Stroke(LColour colour, float width) = 0;
+	/// Intersects the current clip with rect; false indicates backend failure.
+	virtual bool ClipRect(LRect rect) = 0;
+};
 
 class LgiClass LBmpMem
 {
@@ -427,13 +484,15 @@ protected:
 	#endif
 
 public:
-	class LgiClass Vector
+	/// Scoped, move-only vector drawing session. Validates input (finite coordinates,
+	/// valid session) and forwards to the backend context.
+	class LgiClass Vector final : public LSurfaceVector
 	{
 		class Private;
 		Private *d = nullptr;
 
 		explicit Vector(LSurface *Surface);
-		LSurfaceVectorContext *GetContext();
+		LSurfaceVector *GetContext();
 		friend class LSurface;
 
 	public:
@@ -443,27 +502,20 @@ public:
 		Vector &operator =(const Vector &) = delete;
 		~Vector();
 
-		/// Returns false when the drawing context could not be created.
 		explicit operator bool() const;
 
-		/// Path coordinates are in the surface's coordinate units.
-		void MoveTo(float x, float y);
-		void LineTo(float x, float y);
-		void CubicTo(float x1, float y1, float x2, float y2, float x, float y);
-		/// Arc rotation is in degrees; flags follow SVG elliptical arc semantics.
-		void ArcTo(float rx, float ry, float rotation, bool largeArc, bool sweep, float x, float y);
-		/// Adds a rectangle with width and height in surface coordinate units.
-		void Rect(float x, float y, float width, float height);
-		void ClosePath();
-		/// Clears the current path. Fill and Stroke otherwise preserve it.
-		void ClearPath();
-
-		/// Fills the current path using the non-zero winding rule.
-		void Fill(LColour colour);
-		/// Strokes the current path; width is in surface coordinate units.
-		void Stroke(LColour colour, float width);
-		/// Intersects the current clip with rect; false indicates backend failure.
-		bool ClipRect(LRect rect);
+		bool IsValid() const override;
+		void MoveTo(float x, float y) override;
+		void LineTo(float x, float y) override;
+		void CubicTo(float x1, float y1, float x2, float y2, float x, float y) override;
+		void ArcTo(float rx, float ry, float rotation, bool largeArc, bool sweep, float x, float y) override;
+		void Rect(float x, float y, float width, float height) override;
+		void RoundRect(float x, float y, float width, float height, float radius) override;
+		void ClosePath() override;
+		void ClearPath() override;
+		void Fill(LColour colour) override;
+		void Stroke(LColour colour, float width) override;
+		bool ClipRect(LRect rect) override;
 	};
 
 	LSurface();
@@ -718,7 +770,7 @@ public:
 
 protected:
 	/// Internal backend hook used by Vector. Ownership of the returned context transfers to Vector.
-	virtual LSurfaceVectorContext *CreateVectorContext();
+	virtual LSurfaceVector *CreateVectorContext();
 };
 
 #if defined(MAC) && !defined(__GTK_H__)
@@ -799,7 +851,7 @@ public:
 	#endif
 
 	// Vector API
-	LSurfaceVectorContext *CreateVectorContext() override;
+	LSurfaceVector *CreateVectorContext() override;
 
 	// Properties
 	bool GetClient(LRect *c) override;
@@ -977,7 +1029,7 @@ class LgiClass LMemDC : public LSurface
 {
 protected:
 	class LMemDCPrivate *d;
-	LSurfaceVectorContext *CreateVectorContext() override;
+	LSurfaceVector *CreateVectorContext() override;
 
 	#if defined WINNATIVE
 	PBITMAPINFO	GetInfo();

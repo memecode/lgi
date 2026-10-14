@@ -8,7 +8,6 @@
 #include <utility>
 
 #include "lgi/common/Gdc2.h"
-#include "Gdc2Vector.h"
 #include "plutovg/plutovg.h"
 
 namespace
@@ -24,7 +23,7 @@ bool FiniteCoordinates(std::initializer_list<float> coordinates)
 	return true;
 }
 
-class PlutoMemoryContext : public LSurfaceVectorContext
+class PlutoMemoryContext : public LSurfaceVector
 {
 	LMemDC &Target;
 	plutovg_surface_t *Surface = nullptr;
@@ -299,9 +298,9 @@ public:
 class LSurface::Vector::Private
 {
 public:
-	std::unique_ptr<LSurfaceVectorContext> Context;
+	std::unique_ptr<LSurfaceVector> Context;
 
-	explicit Private(std::unique_ptr<LSurfaceVectorContext> context) :
+	explicit Private(std::unique_ptr<LSurfaceVector> context) :
 		Context(std::move(context))
 	{
 	}
@@ -310,7 +309,7 @@ public:
 
 LSurface::Vector::Vector(LSurface *Surface)
 {
-	std::unique_ptr<LSurfaceVectorContext> Context;
+	std::unique_ptr<LSurfaceVector> Context;
 	if (Surface)
 		Context.reset(Surface->CreateVectorContext());
 
@@ -342,12 +341,17 @@ LSurface::Vector::~Vector()
 	d = nullptr;
 }
 
-LSurface::Vector::operator bool() const
+bool LSurface::Vector::IsValid() const
 {
 	return d && d->Context && d->Context->IsValid();
 }
 
-LSurfaceVectorContext *LSurface::Vector::GetContext()
+LSurface::Vector::operator bool() const
+{
+	return IsValid();
+}
+
+LSurfaceVector *LSurface::Vector::GetContext()
 {
 	if (*this)
 		return d->Context.get();
@@ -395,6 +399,14 @@ void LSurface::Vector::Rect(float x, float y, float width, float height)
 		context->Rect(x, y, width, height);
 }
 
+void LSurface::Vector::RoundRect(float x, float y, float width, float height, float radius)
+{
+	if (!FiniteCoordinates({x, y, width, height, radius}))
+		return;
+	if (auto context = GetContext())
+		context->RoundRect(x, y, width, height, radius);
+}
+
 void LSurface::Vector::ClosePath()
 {
 	if (auto context = GetContext())
@@ -430,13 +442,13 @@ LSurface::Vector LSurface::Vec()
 	return Vector(this);
 }
 
-LSurfaceVectorContext *LSurface::CreateVectorContext()
+LSurfaceVector *LSurface::CreateVectorContext()
 {
 	LgiTrace("LSurface::Vec: this surface has no vector backend.\n");
 	return nullptr;
 }
 
-LSurfaceVectorContext *LMemDC::CreateVectorContext()
+LSurfaceVector *LMemDC::CreateVectorContext()
 {
 	auto context = new (std::nothrow) PlutoMemoryContext(*this);
 	if (!context)

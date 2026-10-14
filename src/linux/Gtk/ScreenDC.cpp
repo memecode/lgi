@@ -14,12 +14,12 @@
 #include <new>
 
 #include "lgi/common/Lgi.h"
-#include "Gdc2Vector.h"
+
 using namespace Gtk;
 
 namespace
 {
-class CairoVectorContext : public LSurfaceVectorContext
+class CairoVectorContext : public LSurfaceVector
 {
 	cairo_t *Context = nullptr;
 	cairo_path_t *SavedPath = nullptr;
@@ -271,7 +271,7 @@ LScreenDC::~LScreenDC()
 	DeleteObj(d);
 }
 
-LSurfaceVectorContext *LScreenDC::CreateVectorContext()
+LSurfaceVector *LScreenDC::CreateVectorContext()
 {
 	return new (std::nothrow) CairoVectorContext(d->cr);
 }

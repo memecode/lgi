@@ -368,6 +368,25 @@ bool LVectorTest::Run()
 		if (reinterpret_cast<LBgra32*>(dc[0])[0].r != 255)
 			return FAIL(_FL, "A moved session must remain usable.");
 	}
+	dc.Colour(LColour(0, 0, 0, 0));
+	dc.Rectangle();
+	{
+		auto v = dc.Vec();
+		v.RoundRect(2, 2, 16, 16, 6);
+		v.Fill(LColour::Red);
+		v.ClearPath();
+		v.RoundRect(2, 2, 16, 16, std::numeric_limits<float>::infinity());
+		auto row = reinterpret_cast<LBgra32*>(dc[10]);
+		auto top = reinterpret_cast<LBgra32*>(dc[2]);
+		auto corner = reinterpret_cast<LBgra32*>(dc[2])[2];
+		if (row[2].r != 255 || row[17].r != 255 || top[10].r != 255 || corner.a)
+			return FAIL(_FL, "RoundRect must fill the body and leave the corners clear.");
+		v.ClearPath();
+		v.RoundRect(20, 20, -16, -16, 100);
+		v.Fill(LColour::Blue);
+		if (reinterpret_cast<LBgra32*>(dc[10])[10].b != 255)
+			return FAIL(_FL, "RoundRect must normalise negative sizes and clamp the radius.");
+	}
 	for (int i = 0; i < 100; i++)
 		if (!dc.Vec())
 			return FAIL(_FL, "Repeated session creation and cleanup must remain usable.");

@@ -17,14 +17,13 @@
 #include <Shape.h>
 #include <new>
 #include <cmath>
-#include "Gdc2Vector.h"
 
 #define LOGGING				0
 #define VIEW_CHECK(...)		if (!d->v) return __VA_ARGS__;
 
 namespace
 {
-class BViewVectorContext : public LSurfaceVectorContext
+class BViewVectorContext : public LSurfaceVector
 {
 	BView *View = nullptr;
 	BShape Path;
@@ -173,7 +172,7 @@ LScreenDC::~LScreenDC()
 	DeleteObj(d);
 }
 
-LSurfaceVectorContext *LScreenDC::CreateVectorContext()
+LSurfaceVector *LScreenDC::CreateVectorContext()
 {
 	if (!d->v)
 		return nullptr;
