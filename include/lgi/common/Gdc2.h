@@ -781,8 +781,6 @@ public:
 			
 			LPoint GetSize();
 	
-			LSurfaceVectorContext *CreateVectorContext() override;
-
 		#elif defined(MAC)
 	
 			LScreenDC(LWindow *wnd, void *Param = 0);
@@ -799,6 +797,9 @@ public:
 		LRect *GetClient();
 
 	#endif
+
+	// Vector API
+	LSurfaceVectorContext *CreateVectorContext() override;
 
 	// Properties
 	bool GetClient(LRect *c) override;

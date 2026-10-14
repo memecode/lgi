@@ -14,9 +14,96 @@
 #include "lgi/common/Lgi.h"
 #include <Bitmap.h>
 #include <Region.h>
+#include <Shape.h>
+#include <new>
+#include <cmath>
+#include "Gdc2Vector.h"
 
 #define LOGGING				0
 #define VIEW_CHECK(...)		if (!d->v) return __VA_ARGS__;
+
+namespace
+{
+class BViewVectorContext : public LSurfaceVectorContext
+{
+	BView *View = nullptr;
+	BShape Path;
+
+	void SetColour(LColour c)
+	{
+		View->SetDrawingMode(B_OP_ALPHA);
+		View->SetBlendingMode(B_PIXEL_ALPHA, B_ALPHA_OVERLAY);
+		View->SetHighColor(c.r(), c.g(), c.b(), c.a());
+	}
+
+public:
+	explicit BViewVectorContext(BView *view) : View(view)
+	{
+		if (!View)
+			return;
+		View->PushState();
+		View->SetFillRule(B_NONZERO);
+		View->SetLineMode(B_BUTT_CAP, B_MITER_JOIN, 10.0f);
+	}
+
+	~BViewVectorContext() override
+	{
+		if (View)
+			View->PopState();
+	}
+
+	bool IsValid() const override { return View != nullptr; }
+	void MoveTo(float x, float y) override { Path.MoveTo(BPoint(x, y)); }
+	void LineTo(float x, float y) override { Path.LineTo(BPoint(x, y)); }
+	void CubicTo(float x1, float y1, float x2, float y2, float x, float y) override
+	{
+		Path.BezierTo(BPoint(x1, y1), BPoint(x2, y2), BPoint(x, y));
+	}
+	void ArcTo(float rx, float ry, float rotation, bool largeArc, bool sweep, float x, float y) override
+	{
+		// BShape's 'counterClockWise' parameter is the SVG sweep flag passed straight through.
+		Path.ArcTo(rx, ry, rotation, largeArc, sweep, BPoint(x, y));
+	}
+	void Rect(float x, float y, float width, float height) override
+	{
+		Path.MoveTo(BPoint(x, y));
+		Path.LineTo(BPoint(x + width, y));
+		Path.LineTo(BPoint(x + width, y + height));
+		Path.LineTo(BPoint(x, y + height));
+		Path.Close();
+	}
+	void ClosePath() override { Path.Close(); }
+	void ClearPath() override { Path.Clear(); }
+
+	void Fill(LColour colour) override
+	{
+		SetColour(colour);
+		View->FillShape(&Path);
+	}
+	void Stroke(LColour colour, float width) override
+	{
+		if (!std::isfinite(width) || width <= 0)
+		{
+			LgiTrace("LSurface::Vector::Stroke: width must be finite and positive.\n");
+			return;
+		}
+		SetColour(colour);
+		View->SetPenSize(width);
+		View->StrokeShape(&Path);
+	}
+	bool ClipRect(LRect rect) override
+	{
+		if (rect.Valid())
+			View->ClipToRect(BRect(rect.x1, rect.y1, rect.x2, rect.y2));
+		else
+		{
+			BRegion empty;
+			View->ConstrainClippingRegion(&empty);
+		}
+		return IsValid();
+	}
+};
+}
 
 class LScreenPrivate
 {
@@ -84,6 +171,13 @@ LScreenDC::LScreenDC(LView *view, void *param)
 LScreenDC::~LScreenDC()
 {
 	DeleteObj(d);
+}
+
+LSurfaceVectorContext *LScreenDC::CreateVectorContext()
+{
+	if (!d->v)
+		return nullptr;
+	return new (std::nothrow) BViewVectorContext(d->v);
 }
 
 OsPainter LScreenDC::Handle()
