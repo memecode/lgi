@@ -49,6 +49,13 @@ public:
 	bool Run() override;
 };
 
+class LVectorTest : public UnitTest
+{
+public:
+	LVectorTest() : UnitTest("LVectorTest") {}
+	bool Run() override;
+};
+
 class LDateTimeTest : public UnitTest
 {
 public:

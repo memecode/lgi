@@ -13,6 +13,7 @@
 		<Node File="./src/StringClassTests.cpp" Type="2" Platforms="15" />
 		<Node File="./src/StringTests.cpp" Type="2" Platforms="15" />
 		<Node File="./src/UnitTests.cpp" Type="2" Platforms="15" />
+		<Node File="./src/VectorTest.cpp" Type="2" Platforms="15" />
 		<Node File="./src/XmlTest.cpp" Type="2" Platforms="15" />
 	</Node>
 	<Node Name="Headers" Type="1" Platforms="15" Id="2">

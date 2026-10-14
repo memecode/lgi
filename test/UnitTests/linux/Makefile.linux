@@ -73,6 +73,7 @@ Source =	src/AutoPtrTest.cpp \
 			src/StringClassTests.cpp \
 			src/StringTests.cpp \
 			src/UnitTests.cpp \
+			src/VectorTest.cpp \
 			src/XmlTest.cpp
 
 SourceC    := $(filter %.c,$(Source))

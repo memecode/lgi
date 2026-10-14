@@ -6,7 +6,7 @@
 	<Node Name="Source" Type="1" Platforms="7" Open="1" Id="1">
 		<Node File="./src/Rich.cpp" Type="2" Platforms="7" />
 		<Node Name="Rich Text Editor" Type="1" Platforms="15" Open="1" Id="2">
-			<Node Name="1" Type="1" Platforms="15" Id="2">
+			<Node Name="1" Type="1" Platforms="15" Id="3">
 				<Node File="../../src/common/Widgets/richText1/BlockCursor1.cpp" Type="2" Platforms="15" />
 				<Node File="../../src/common/Widgets/richText1/HorzRuleBlock1.cpp" Type="2" Platforms="15" />
 				<Node File="../../src/common/Widgets/richText1/ImageBlock1.cpp" Type="2" Platforms="15" />
@@ -16,7 +16,7 @@
 				<Node File="../../src/common/Widgets/richText1/RichTextEditPriv1.h" Type="3" Platforms="15" />
 				<Node File="../../src/common/Widgets/richText1/TextBlock1.cpp" Type="2" Platforms="15" />
 			</Node>
-			<Node Name="2" Type="1" Platforms="15" Id="1">
+			<Node Name="2" Type="1" Platforms="15" Id="4">
 				<Node File="../../src/common/Widgets/richText2/BlockCursor.cpp" Type="2" Platforms="15" />
 				<Node File="../../src/common/Widgets/richText2/HorzRuleBlock.cpp" Type="2" Platforms="15" />
 				<Node File="../../src/common/Widgets/richText2/ImageBlock.cpp" Type="2" Platforms="15" />
@@ -27,20 +27,20 @@
 				<Node File="../../src/common/Widgets/richText2/RichTextEditPriv.h" Type="3" Platforms="15" />
 				<Node File="../../src/common/Widgets/richText2/TextBlock.cpp" Type="2" Platforms="15" />
 			</Node>
-			<Node Name="Emoji" Type="1" Platforms="15" Open="0" Id="3">
+			<Node Name="Emoji" Type="1" Platforms="15" Open="0" Id="5">
 				<Node File="../../src/common/Text/Emoji/EmojiMap.cpp" Type="2" Platforms="15" />
 				<Node File="../../src/common/Text/Emoji/EmojiTools.cpp" Type="2" Platforms="15" />
 			</Node>
-			<Node Name="Spelling" Type="1" Platforms="15" Open="1" Id="4">
+			<Node Name="Spelling" Type="1" Platforms="15" Open="1" Id="6">
 				<Node File="../../include/lgi/common/SpellCheck.h" Type="3" Platforms="15" />
 			</Node>
 		</Node>
-		<Node Name="Html" Type="1" Platforms="15" Open="1" Id="5">
+		<Node Name="Html" Type="1" Platforms="15" Open="1" Id="8">
 			<Node File="../../src/common/Text/Html.cpp" Type="2" Platforms="15" />
 			<Node File="../../src/common/Text/HtmlCommon.cpp" Type="2" Platforms="15" />
 			<Node File="../../src/common/Text/HtmlParser.cpp" Type="2" Platforms="15" />
 		</Node>
-		<Node Name="Lgi" Type="1" Platforms="15" Id="6">
+		<Node Name="Lgi" Type="1" Platforms="15" Id="9">
 			<Node File="../../src/common/Net/OpenSSLSocket.cpp" Type="2" Platforms="15" />
 			<Node File="../../src/common/Text/Homoglyphs/Homoglyphs.cpp" Type="2" Platforms="15" />
 			<Node File="../../src/common/Text/Homoglyphs/HomoglyphsTable.cpp" Type="2" Platforms="15" />
@@ -48,7 +48,7 @@
 			<Node File="../../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="7" />
 		</Node>
 	</Node>
-	<Node Name="Tests" Type="1" Platforms="15" Id="8">
+	<Node Name="Tests" Type="1" Platforms="15" Id="10">
 		<Node File="./testcases/list.html" Type="7" Platforms="15" />
 	</Node>
 	<Node File="../../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
@@ -73,6 +73,8 @@
 					<Release>./TestCases/test.html</Release>
 				</All>
 			</Arguments>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -105,6 +107,7 @@ resources</Release>
 					<Release>pthread
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
+				<All />
 			</Libraries>
 			<SystemIncludes>
 				<Linux>
@@ -116,6 +119,28 @@ resources</Release>
 `pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
 			</SystemIncludes>
+			<Defines>
+				<All />
+				<Linux />
+			</Defines>
+			<Options>
+				<All />
+				<Linux />
+			</Options>
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
+			<RPath>
+				<Linux />
+			</RPath>
+			<RPathLink>
+				<Linux />
+			</RPathLink>
+			<TargetName>
+				<Linux />
+			</TargetName>
+			<ApplicationIcon />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -127,6 +152,9 @@ resources</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
+			<ShowWhiteSpace />
+			<CommentFile />
+			<CommentFunction />
 		</Editor>
 		<Debug>
 			<Arguments>
@@ -135,6 +163,20 @@ resources</Release>
 					<Release>/home/matthew/code/lgi/trunk/test/HtmlEditor/testcases/list.html</Release>
 				</All>
 			</Arguments>
+			<Environment />
+			<DebugAdmin />
+			<InitialDir />
+			<Debugger />
 		</Debug>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
+		<Advanced>
+			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+		</Advanced>
 	</Settings>
 </Project>

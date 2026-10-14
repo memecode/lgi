@@ -104,6 +104,7 @@
 		3477C2E31CC04A5C0028B84B /* Stream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2E21CC04A5C0028B84B /* Stream.cpp */; };
 		3477C2E51CC04A7F0028B84B /* ViewCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2E41CC04A7F0028B84B /* ViewCommon.cpp */; };
 		3477C2E71CC04B1E0028B84B /* Surface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2E61CC04B1E0028B84B /* Surface.cpp */; };
+		A0B1C2D3E4F5061728394051 /* Vector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A0B1C2D3E4F5061728394050 /* Vector.cpp */; };
 		3477C2E91CC04B5D0028B84B /* Rand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2E81CC04B5D0028B84B /* Rand.cpp */; };
 		3477C2EB1CC04B890028B84B /* Filter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2EA1CC04B890028B84B /* Filter.cpp */; };
 		3477C2EF1CC04BBB0028B84B /* ItemContainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2EC1CC04BBB0028B84B /* ItemContainer.cpp */; };
@@ -324,6 +325,7 @@
 		3477C2E21CC04A5C0028B84B /* Stream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Stream.cpp; path = ../../common/Lgi/Stream.cpp; sourceTree = SOURCE_ROOT; };
 		3477C2E41CC04A7F0028B84B /* ViewCommon.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = ViewCommon.cpp; path = ../../common/Lgi/ViewCommon.cpp; sourceTree = SOURCE_ROOT; };
 		3477C2E61CC04B1E0028B84B /* Surface.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Surface.cpp; path = ../../common/Gdc2/Surface.cpp; sourceTree = SOURCE_ROOT; };
+		A0B1C2D3E4F5061728394050 /* Vector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vector.cpp; path = ../../common/Gdc2/Vector.cpp; sourceTree = SOURCE_ROOT; };
 		3477C2E81CC04B5D0028B84B /* Rand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Rand.cpp; path = ../../common/Lgi/Rand.cpp; sourceTree = SOURCE_ROOT; };
 		3477C2EA1CC04B890028B84B /* Filter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Filter.cpp; path = ../../common/Gdc2/Filters/Filter.cpp; sourceTree = SOURCE_ROOT; };
 		3477C2EC1CC04BBB0028B84B /* ItemContainer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ItemContainer.cpp; path = ../../common/Widgets/ItemContainer.cpp; sourceTree = SOURCE_ROOT; };
@@ -684,6 +686,7 @@
 			isa = PBXGroup;
 			children = (
 				3477C2E61CC04B1E0028B84B /* Surface.cpp */,
+				A0B1C2D3E4F5061728394050 /* Vector.cpp */,
 				3477C28E1CBF08C10028B84B /* ScreenDC.cpp */,
 				3477C28C1CBF08C10028B84B /* MemDC.cpp */,
 				3477C28D1CBF08C10028B84B /* PrintDC.cpp */,
@@ -1117,6 +1120,7 @@
 				3477C2FF1CC04BF00028B84B /* Bitmap.cpp in Sources */,
 				3477C2E91CC04B5D0028B84B /* Rand.cpp in Sources */,
 				3477C2E71CC04B1E0028B84B /* Surface.cpp in Sources */,
+				A0B1C2D3E4F5061728394051 /* Vector.cpp in Sources */,
 				3477C3241CC04DD70028B84B /* Object.cpp in Sources */,
 				3477C2E31CC04A5C0028B84B /* Stream.cpp in Sources */,
 				34A3ACEA20568D9700B1D62A /* MenuCommon.cpp in Sources */,

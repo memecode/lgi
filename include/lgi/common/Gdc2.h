@@ -174,6 +174,7 @@
 //				Classes
 class LFilter;
 class LSurface;
+class LSurfaceVectorContext;
 
 class LgiClass LBmpMem
 {
@@ -426,9 +427,51 @@ protected:
 	#endif
 
 public:
+	class LgiClass Vector
+	{
+		class Private;
+		Private *d = nullptr;
+
+		explicit Vector(LSurface *Surface);
+		LSurfaceVectorContext *GetContext();
+		friend class LSurface;
+
+	public:
+		Vector(Vector &&v);
+		Vector &operator =(Vector &&v);
+		Vector(const Vector &) = delete;
+		Vector &operator =(const Vector &) = delete;
+		~Vector();
+
+		/// Returns false when the drawing context could not be created.
+		explicit operator bool() const;
+
+		/// Path coordinates are in the surface's coordinate units.
+		void MoveTo(float x, float y);
+		void LineTo(float x, float y);
+		void CubicTo(float x1, float y1, float x2, float y2, float x, float y);
+		/// Arc rotation is in degrees; flags follow SVG elliptical arc semantics.
+		void ArcTo(float rx, float ry, float rotation, bool largeArc, bool sweep, float x, float y);
+		/// Adds a rectangle with width and height in surface coordinate units.
+		void Rect(float x, float y, float width, float height);
+		void ClosePath();
+		/// Clears the current path. Fill and Stroke otherwise preserve it.
+		void ClearPath();
+
+		/// Fills the current path using the non-zero winding rule.
+		void Fill(LColour colour);
+		/// Strokes the current path; width is in surface coordinate units.
+		void Stroke(LColour colour, float width);
+		/// Intersects the current clip with rect; false indicates backend failure.
+		bool ClipRect(LRect rect);
+	};
+
 	LSurface();
 	LSurface(LSurface *pDC);
 	virtual ~LSurface();
+
+	/// Begins a scoped vector drawing session. The surface must outlive the returned object.
+	Vector Vec();
 
 	// Win32
 	#if defined(__GTK_H__)
@@ -672,6 +715,10 @@ public:
 	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
 	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
 	bool CallMethod(const char *Name, LScriptArguments &Args);
+
+protected:
+	/// Internal backend hook used by Vector. Ownership of the returned context transfers to Vector.
+	virtual LSurfaceVectorContext *CreateVectorContext();
 };
 
 #if defined(MAC) && !defined(__GTK_H__)
@@ -928,6 +975,7 @@ class LgiClass LMemDC : public LSurface
 {
 protected:
 	class LMemDCPrivate *d;
+	LSurfaceVectorContext *CreateVectorContext() override;
 
 	#if defined WINNATIVE
 	PBITMAPINFO	GetInfo();
