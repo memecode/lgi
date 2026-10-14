@@ -2,8 +2,204 @@
 /// \author Matthew Allen
 #include <stdio.h>
 #include <math.h>
+#include <algorithm>
+#include <cmath>
+#include <new>
 
 #include "lgi/common/Lgi.h"
+#include "Gdc2Vector.h"
+
+namespace
+{
+class QuartzVectorContext : public LSurfaceVectorContext
+{
+	CGContextRef Context = nullptr;
+	CGPathRef SavedPath = nullptr;
+
+	static CGPathRef CopyPath(CGContextRef context)
+	{
+		CGPathRef path = CGContextCopyPath(context);
+		return path ? path : CGPathCreateMutable();
+	}
+
+	void SetColour(LColour colour)
+	{
+		CGContextSetRGBFillColor(Context, colour.r() / 255.0, colour.g() / 255.0,
+			colour.b() / 255.0, colour.a() / 255.0);
+		CGContextSetRGBStrokeColor(Context, colour.r() / 255.0, colour.g() / 255.0,
+			colour.b() / 255.0, colour.a() / 255.0);
+	}
+
+	void DrawPreservingPath(CGPathDrawingMode mode)
+	{
+		CGPathRef path = CopyPath(Context);
+		if (!path)
+			return;
+		CGContextDrawPath(Context, mode);
+		CGContextBeginPath(Context);
+		CGContextAddPath(Context, path);
+		CGPathRelease(path);
+	}
+
+public:
+	explicit QuartzVectorContext(CGContextRef context)
+	{
+		if (!context)
+			return;
+		SavedPath = CopyPath(context);
+		if (!SavedPath)
+			return;
+
+		Context = CGContextRetain(context);
+		CGContextSaveGState(Context);
+		CGContextBeginPath(Context);
+		CGContextSetBlendMode(Context, kCGBlendModeNormal);
+		CGContextSetLineCap(Context, kCGLineCapButt);
+		CGContextSetLineJoin(Context, kCGLineJoinMiter);
+		CGContextSetMiterLimit(Context, 10.0);
+		CGContextSetShouldAntialias(Context, true);
+	}
+
+	~QuartzVectorContext() override
+	{
+		if (Context)
+		{
+			CGContextRestoreGState(Context);
+			CGContextBeginPath(Context);
+			CGContextAddPath(Context, SavedPath);
+			CGContextRelease(Context);
+		}
+		if (SavedPath)
+			CGPathRelease(SavedPath);
+	}
+
+	bool IsValid() const override { return Context != nullptr; }
+	void MoveTo(float x, float y) override { CGContextMoveToPoint(Context, x, y); }
+	void LineTo(float x, float y) override { CGContextAddLineToPoint(Context, x, y); }
+	void CubicTo(float x1, float y1, float x2, float y2, float x, float y) override
+	{
+		CGContextAddCurveToPoint(Context, x1, y1, x2, y2, x, y);
+	}
+	void ArcTo(float rx, float ry, float rotation, bool largeArc, bool sweep, float x, float y) override
+	{
+		CGFloat startX = 0, startY = 0;
+		if (CGContextIsPathEmpty(Context))
+			CGContextMoveToPoint(Context, startX, startY);
+		else
+		{
+			CGPathRef path = CopyPath(Context);
+			CGPoint point = CGPathGetCurrentPoint(path);
+			startX = point.x;
+			startY = point.y;
+			CGPathRelease(path);
+		}
+		if (startX == x && startY == y)
+			return;
+
+		double radiusX = std::fabs((double)rx), radiusY = std::fabs((double)ry);
+		if (radiusX == 0 || radiusY == 0)
+		{
+			CGContextAddLineToPoint(Context, x, y);
+			return;
+		}
+
+		double angle = std::fmod((double)rotation, 360.0) * LGI_PI / 180.0;
+		double cosine = std::cos(angle), sine = std::sin(angle);
+		double halfX = (startX - x) / 2, halfY = (startY - y) / 2;
+		double localX = cosine * halfX + sine * halfY;
+		double localY = -sine * halfX + cosine * halfY;
+		double scale = std::hypot(localX / radiusX, localY / radiusY);
+		if (scale > 1)
+		{
+			radiusX *= scale;
+			radiusY *= scale;
+		}
+		double normalX = localX / radiusX, normalY = localY / radiusY;
+		double distance = normalX * normalX + normalY * normalY;
+		double factor = std::sqrt(std::max(0.0, (1 - distance) / distance));
+		if (largeArc == sweep)
+			factor = -factor;
+		double centerX = factor * radiusX * normalY;
+		double centerY = -factor * radiusY * normalX;
+		double center = cosine * centerX - sine * centerY + (startX + x) / 2;
+		double centerYWorld = sine * centerX + cosine * centerY + (startY + y) / 2;
+		double startAngle = std::atan2((localY - centerY) / radiusY, (localX - centerX) / radiusX);
+		double endAngle = std::atan2((-localY - centerY) / radiusY, (-localX - centerX) / radiusX);
+		double delta = endAngle - startAngle;
+		if (sweep)
+		{
+			while (delta < 0)
+				delta += 2 * LGI_PI;
+		}
+		else
+		{
+			while (delta > 0)
+				delta -= 2 * LGI_PI;
+		}
+
+		auto Point = [&](double theta, double &px, double &py)
+		{
+			px = center + cosine * radiusX * std::cos(theta) - sine * radiusY * std::sin(theta);
+			py = centerYWorld + sine * radiusX * std::cos(theta) + cosine * radiusY * std::sin(theta);
+		};
+		int segments = (int)std::ceil(std::fabs(delta) / (LGI_PI / 2));
+		double step = delta / segments;
+		for (int i = 0; i < segments; i++)
+		{
+			double theta1 = startAngle + i * step, theta2 = theta1 + step;
+			double alpha = 4.0 / 3.0 * std::tan(step / 4.0);
+			double p0x, p0y, p3x, p3y;
+			Point(theta1, p0x, p0y);
+			Point(theta2, p3x, p3y);
+			double d0x = -cosine * radiusX * std::sin(theta1) - sine * radiusY * std::cos(theta1);
+			double d0y = -sine * radiusX * std::sin(theta1) + cosine * radiusY * std::cos(theta1);
+			double d1x = -cosine * radiusX * std::sin(theta2) - sine * radiusY * std::cos(theta2);
+			double d1y = -sine * radiusX * std::sin(theta2) + cosine * radiusY * std::cos(theta2);
+			CGContextAddCurveToPoint(Context,
+				p0x + alpha * d0x, p0y + alpha * d0y,
+				p3x - alpha * d1x, p3y - alpha * d1y,
+				i + 1 == segments ? x : p3x, i + 1 == segments ? y : p3y);
+		}
+	}
+	void Rect(float x, float y, float width, float height) override
+	{
+		CGContextAddRect(Context, CGRectMake(x, y, width, height));
+	}
+	void ClosePath() override { CGContextClosePath(Context); }
+	void ClearPath() override { CGContextBeginPath(Context); }
+
+	void Fill(LColour colour) override
+	{
+		SetColour(colour);
+		DrawPreservingPath(kCGPathFill);
+	}
+	void Stroke(LColour colour, float width) override
+	{
+		if (!std::isfinite(width) || width <= 0)
+		{
+			LgiTrace("LSurface::Vector::Stroke: width must be finite and positive.\n");
+			return;
+		}
+		SetColour(colour);
+		CGContextSetLineWidth(Context, width);
+		DrawPreservingPath(kCGPathStroke);
+	}
+	bool ClipRect(LRect rect) override
+	{
+		CGPathRef path = CopyPath(Context);
+		if (!path)
+			return false;
+		CGContextBeginPath(Context);
+		CGContextAddRect(Context, CGRectMake(rect.x1, rect.y1,
+			rect.Valid() ? rect.X() : 0, rect.Valid() ? rect.Y() : 0));
+		CGContextClip(Context);
+		CGContextBeginPath(Context);
+		CGContextAddPath(Context, path);
+		CGPathRelease(path);
+		return IsValid();
+	}
+};
+}
 
 class LScreenPrivate
 {
@@ -157,6 +353,11 @@ LScreenDC::LScreenDC(LView *v, void *param)
 LScreenDC::~LScreenDC()
 {
 	DeleteObj(d);
+}
+
+LSurfaceVectorContext *LScreenDC::CreateVectorContext()
+{
+	return new (std::nothrow) QuartzVectorContext(d->Ctx);
 }
 
 LString LScreenDC::Dump()
