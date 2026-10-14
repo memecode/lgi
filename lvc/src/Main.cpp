@@ -32,10 +32,12 @@ struct AcceptedCerts
 	LOptionsFile &options;
 	LXmlTag *tag;
 
-	AcceptedCerts(LOptionsFile &opts)
+	AcceptedCerts(LOptionsFile &opts, bool create = false)
 		: options(opts)
 		, tag(options.LockTag(OPT_AcceptCert, _FL))
 	{
+		if (!tag && create && options.CreateTag(OPT_AcceptCert))
+			tag = options.LockTag(OPT_AcceptCert, _FL);
 	}
 	
 	~AcceptedCerts()
@@ -84,7 +86,7 @@ struct AcceptedCerts
 		{
 			hostTag = new LXmlTag(OPT_Host);
 			hostTag->SetAttr("name", hostName);
-			tag->Children.Add(hostTag);
+			tag->InsertTag(hostTag);
 		}
 
 		if (hostTag)
@@ -180,8 +182,8 @@ AppPriv::AppPriv() :
 						
 						capsBar->Action("Accept Always", [this, conn]()
 							{
-								conn->setResult(IDYES);
 								AlwaysAcceptCert(conn->info);
+								conn->setResult(IDYES);
 							});
 							
 						capsBar->Action("Disconnect", [this, conn]()
@@ -251,7 +253,13 @@ bool AppPriv::IsCertAccepted(LSsh::THostInfo &certId)
 
 void AppPriv::AlwaysAcceptCert(LSsh::THostInfo &hostInfo)
 {
-	AcceptedCerts(Opts).Set(hostInfo.hostName, hostInfo.certId);
+	if (!AcceptedCerts(Opts, true).Set(hostInfo.hostName, hostInfo.certId))
+	{
+		Log->Print("Failed to store accepted certificate for '%s'.\n", hostInfo.hostName.Get());
+		return;
+	}
+	if (!Opts.SerializeFile(true))
+		Log->Print("Failed to save accepted certificate: %s\n", Opts.GetError());
 }
 	
 #if HAS_LIBSSH
@@ -598,11 +606,13 @@ class OptionsDlg : public LDialog, public LXmlTreeUi
 			if (write)
 			{
 				tag->SetContent(cert);
-				tag->SetAttr("host", host);
+				tag->SetAttr("name", host);
 			}
 			else
 			{
-				host = tag->GetAttr("host");
+				host = tag->GetAttr("name");
+				if (!host)
+					host = tag->GetAttr("host");
 				cert = tag->GetContent();
 			}
 			
