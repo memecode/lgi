@@ -227,7 +227,7 @@
 					<Node File="./src/haiku/Gdc2.cpp" Type="2" Platforms="8" />
 				</Node>
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="49">
-					<Node File=".\src\linux\Gtk\Gdc2.cpp" Type="2" Platforms="2" />
+					<Node File="./src/linux/Gtk/Gdc2.cpp" Type="2" Platforms="2" />
 				</Node>
 				<Node Name="Win" Type="1" Platforms="15" Open="0" Id="50">
 					<Node File=".\src\win\Gdc2\Gdc2.cpp" Type="2" Platforms="1" />
@@ -238,6 +238,7 @@
 				<Node File="./include/lgi/common/ColourSpace.h" Type="3" Platforms="15" />
 				<Node File="./include/lgi/common/Filter.h" Type="3" Platforms="15" />
 				<Node File="./include/lgi/common/Gdc2.h" Type="3" Platforms="15" />
+				<Node File="./private/common/Gdc2Vector.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Gdc2/GdcCommon.cpp" Type="2" Platforms="15" />
 				<Node File="./src/common/Gdc2/Tools/GdcTools.cpp" Type="2" Platforms="15" />
 				<Node File="./include/lgi/common/GdcTools.h" Type="3" Platforms="15" />

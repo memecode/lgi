@@ -18,6 +18,7 @@ BuildDir = $(Build)
 CFlags = -MMD -MP -fPIC -fno-inline
 CppFlags = $(CFlags) -fpermissive -std=c++17
 LGI_GTK3_DIR=../..
+GUITESTPROJECT_DIR=.
 
 ifeq ($(Build),Debug)
 	CFlags += -g3 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer
@@ -31,9 +32,9 @@ ifeq ($(Build),Debug)
 		`pkg-config --libs gtk+-3.0` \
 		-llgi-gtk3$(Tag) \
 		-L../../$(BuildDir) \
+		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/../deps/build-x64-debug/lib' \
 		-L$(LGI_GTK3_DIR)/../deps/build-x64-debug/lib \
 		-Wl,-rpath-link,$(LGI_GTK3_DIR)/../deps/build-x64-debug/lib \
-		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/../deps/build-x64-debug/lib' \
 		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/$(BuildDir)'
 	Inc =  \
 		-I../../include \
@@ -43,6 +44,7 @@ ifeq ($(Build),Debug)
 else
 	CFlags += -g -Os
 	CppFlags += -g -Os
+	Tag =
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
 		-lmagic \
@@ -51,9 +53,9 @@ else
 		`pkg-config --libs gtk+-3.0` \
 		-llgi-gtk3$(Tag) \
 		-L../../$(BuildDir) \
+		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/../deps/build-x64-release/lib' \
 		-L$(LGI_GTK3_DIR)/../deps/build-x64-release/lib \
 		-Wl,-rpath-link,$(LGI_GTK3_DIR)/../deps/build-x64-release/lib \
-		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/../deps/build-x64-release/lib' \
 		-Wl,--disable-new-dtags,-rpath,'$$ORIGIN/$(LGI_GTK3_DIR)/$(BuildDir)'
 	Inc =  \
 		-I../../include \
@@ -254,6 +256,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/mac/cocoa/ObjCWrapper.h \
 	../../include/lgi/mac/cocoa/SymLookup.h \
 	../../private/common/FontPriv.h \
+	../../private/common/Gdc2Vector.h \
 	../../private/common/ViewPriv.h \
 	../../private/linux/AppPriv.h \
 	../../src/common/Gdc2/15Bit.cpp \
@@ -283,6 +286,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/common/Gdc2/Surface.cpp \
 	../../src/common/Gdc2/Tools/ColourReduce.cpp \
 	../../src/common/Gdc2/Tools/GdcTools.cpp \
+	../../src/common/Gdc2/Vector.cpp \
 	../../src/common/General/Containers.cpp \
 	../../src/common/General/DateTime.cpp \
 	../../src/common/General/ExeCheck.cpp \
@@ -332,7 +336,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/common/Net/Uri.cpp \
 	../../src/common/Resource/LgiRes.cpp \
 	../../src/common/Resource/Res.cpp \
-	../../src/common/Skins/Gel/Gel.cpp \
+	../../src/common/Skins/plutovg/plutoVg.cpp \
 	../../src/common/Text/DocView.cpp \
 	../../src/common/Text/String.cpp \
 	../../src/common/Text/TextConvert.cpp \

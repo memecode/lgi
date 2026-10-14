@@ -1,6 +1,8 @@
 #include <array>
+#include <cmath>
 #include <cstring>
 #include <limits>
+#include <memory>
 #include <type_traits>
 #include <utility>
 
@@ -12,6 +14,100 @@ static_assert(std::is_move_constructible<LSurface::Vector>::value, "Vector sessi
 
 namespace
 {
+#if defined(__GTK_H__)
+bool TestCairoVectorContext()
+{
+	using namespace Gtk;
+	std::unique_ptr<cairo_surface_t, decltype(&cairo_surface_destroy)> surface(
+		cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 40, 40), cairo_surface_destroy);
+	std::unique_ptr<cairo_t, decltype(&cairo_destroy)> context(cairo_create(surface.get()), cairo_destroy);
+	auto cr = context.get();
+	cairo_translate(cr, 2, 3);
+	cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+	cairo_set_line_width(cr, 7);
+	cairo_move_to(cr, 1, 2);
+	cairo_line_to(cr, 3, 4);
+	LScreenDC dc(cr, 40, 40);
+	{
+		auto vector = dc.Vec();
+		if (!vector)
+			return false;
+		vector.Rect(0, 0, 20, 20);
+		if (!vector.ClipRect(LRect(4, 4, 15, 15)))
+			return false;
+		vector.Fill(LColour(0, 0, 255));
+		vector.Fill(LColour(255, 0, 0, 128));
+		vector.Stroke(LColour(0, 255, 0), 0);
+		vector.Stroke(LColour(0, 255, 0), std::numeric_limits<float>::infinity());
+		cairo_surface_flush(surface.get());
+		auto data = cairo_image_surface_get_data(surface.get());
+		auto stride = cairo_image_surface_get_stride(surface.get());
+		auto row = reinterpret_cast<const uint32_t*>(data + 10 * stride);
+		if (row[5] || row[6] != 0xff80007f || row[17] != 0xff80007f || row[18])
+			return false;
+		if (!vector.ClipRect(LRect::EMPTY()))
+			return false;
+		vector.Fill(LColour(0, 255, 0));
+		cairo_surface_flush(surface.get());
+		if (row[10] != 0xff80007f)
+			return false;
+	}
+	double currentX = 0, currentY = 0;
+	cairo_get_current_point(cr, &currentX, &currentY);
+	double left = 0, top = 0, right = 0, bottom = 0;
+	cairo_path_extents(cr, &left, &top, &right, &bottom);
+	if (currentX != 3 || currentY != 4 || left != 1 || top != 2 || right != 3 || bottom != 4 ||
+		cairo_get_operator(cr) != CAIRO_OPERATOR_SOURCE || cairo_get_line_width(cr) != 7)
+		return false;
+	cairo_clip_extents(cr, &left, &top, &right, &bottom);
+	if (left != -2 || top != -3 || right != 38 || bottom != 37)
+		return false;
+
+	for (bool largeArc : {false, true})
+		for (bool sweep : {false, true})
+		{
+			auto vector = dc.Vec();
+			vector.MoveTo(8, 16);
+			vector.ArcTo(-12, 6, 30, largeArc, sweep, 24, 16);
+			cairo_get_current_point(cr, &currentX, &currentY);
+			if (!vector || std::fabs(currentX - 24) > 0.02 || std::fabs(currentY - 16) > 0.02)
+				return false;
+			vector.ClearPath();
+			vector.MoveTo(8, 16);
+			vector.ArcTo(10, 10, 0, largeArc, sweep, 24, 16);
+			cairo_path_extents(cr, &left, &top, &right, &bottom);
+			if (largeArc ? bottom - top < 15 : bottom - top > 5)
+				return false;
+			vector.ClearPath();
+			vector.MoveTo(2, 2);
+			vector.ArcTo(0, 5, 0, largeArc, sweep, 12, 12);
+			vector.ArcTo(5, 5, 0, largeArc, sweep, 12, 12);
+			cairo_get_current_point(cr, &currentX, &currentY);
+			if (!vector || currentX != 12 || currentY != 12)
+				return false;
+			vector.ClearPath();
+			vector.MoveTo(2, 2);
+			vector.ArcTo(1, 1, 45, largeArc, sweep, 12, 12);
+			cairo_get_current_point(cr, &currentX, &currentY);
+			if (!vector || std::fabs(currentX - 12) > 0.02 || std::fabs(currentY - 12) > 0.02)
+				return false;
+			vector.ClearPath();
+			vector.MoveTo(2, 10);
+			vector.CubicTo(2, 2, 18, 2, 18, 10);
+			vector.ClosePath();
+			vector.Fill(LColour(255, 0, 0));
+			vector.Stroke(LColour(0, 0, 255), 2);
+			cairo_path_extents(cr, &left, &top, &right, &bottom);
+			if (left != 2 || top != 4 || right != 18 || bottom != 10)
+				return false;
+			vector.ClearPath();
+			if (cairo_has_current_point(cr))
+				return false;
+		}
+	return cairo_status(cr) == CAIRO_STATUS_SUCCESS;
+}
+#endif
+
 template<typename Pixel>
 bool TestAlphaFormat(LColourSpace cs, bool premul)
 {
@@ -113,6 +209,10 @@ public:
 
 bool LVectorTest::Run()
 {
+	#if defined(__GTK_H__)
+	if (!TestCairoVectorContext())
+		return FAIL(_FL, "Cairo vectors must preserve state and paths, intersect clips, and support SVG arcs.");
+	#endif
 	for (bool premul : {false, true})
 		if (!TestAlphaFormat<LRgba32>(CsRgba32, premul) ||
 			!TestAlphaFormat<LBgra32>(CsBgra32, premul) ||

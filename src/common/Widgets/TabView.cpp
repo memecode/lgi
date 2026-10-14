@@ -1156,6 +1156,7 @@ void LTabView::OnPosChange()
 		return;
 
 	p->SetPos(d->TabClient, true);
+	printf("d->PourChildren=%i\n", d->PourChildren);
 	if (d->PourChildren)
 	{
 		LRect r = d->TabClient;
@@ -1169,10 +1170,10 @@ void LTabView::OnPosChange()
 		auto It = p->IterateViews();
 		if (It.Length() == 1)
 		{
-			LTableLayout *tl = dynamic_cast<LTableLayout*>(It[0]);
+			auto tl = dynamic_cast<LTableLayout*>(It[0]);
 			if (tl)
 			{
-				LRect r = p->GetClient();
+				auto r = p->GetClient();
 				r.Inset(LTableLayout::CellSpacing, LTableLayout::CellSpacing);
 				tl->SetPos(r);
 			}

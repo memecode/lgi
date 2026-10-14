@@ -16,13 +16,18 @@ const char *AppName = "Lgi Test App";
 
 enum Ctrls
 {
-	IDC_EDIT1 = 100,
-	IDC_EDIT2,
-	IDC_BLT_TEST,
-	IDC_TXT,
+	ID_EDIT1 = 100,
+	ID_EDIT2,
+	ID_BLT_TEST,
+	ID_TXT,
 	ID_BOX,
 	ID_CLICK_TEST,
-	ID_LOG
+	ID_LOG,
+	ID_TABS,
+	ID_FONT_TABS,
+	ID_TABLE,
+	ID_BOX2,
+	ID_VECTORS
 };
 
 void LStringTest()
@@ -400,15 +405,76 @@ public:
 	}
 };
 
+class VectorTest : public LLayout
+{
+	LRect cols[2];
+
+public:
+	VectorTest(int id)
+	{
+		SetPourLargest(true);
+		SetId(id);
+	}
+
+	void Vectors(LSurface *pdc, int y)
+	{
+		if (auto v = pdc->Vec())
+		{
+			v.MoveTo(50, y+10);
+			v.LineTo(20, y+60);
+			v.LineTo(80, y+50);
+			v.ClosePath();
+			v.Fill(LColour::Blue);
+			
+			v.ClearPath();
+			v.MoveTo(80, y+30);
+			v.LineTo(40, y+80);
+			v.LineTo(110, y+60);
+			v.ClosePath();
+			v.Stroke(LColour::Red, 3.0f);
+		}
+	}
+	
+	void OnPaint(LSurface *pdc) override
+	{
+		cols[0] = GetClient();
+		cols[0].Inset(2, 2);
+		cols[1] = cols[0];
+		cols[0].x2 = (cols[0].x2 - cols[0].x1) / 2 - 2;
+		cols[1].x1 = cols[0].x2 + 4;
+		
+		pdc->Colour(L_MED);
+		pdc->Rectangle();
+		pdc->Colour(L_LOW);
+		pdc->Line(cols[0].x2, cols[0].y1, cols[0].x2, cols[0].y2);
+		
+		auto fnt = GetFont();
+		fnt->Colour(L_TEXT, L_MED);
+		fnt->Transparent(true);
+		LDisplayString ds1(fnt, "ScreenDC");
+		ds1.Draw(pdc, cols[0].x1, cols[0].y1);
+		LDisplayString ds2(fnt, "MemDC");
+		ds2.Draw(pdc, cols[1].x1, cols[1].y1);
+		
+		int y = ds1.Y() << 1;
+		
+		Vectors(pdc, y);
+		
+		LMemDC mem(_FL, 300, 300, System32BitColourSpace);
+		Vectors(&mem, 0);
+		pdc->Blt(cols[1].x1, cols[1].y1 + y, &mem);
+	}
+};
+
 class App : public LWindow
 {
 	LOptionsFile Opts;
 	LBox *box = nullptr;
 	LTextLog *log = nullptr;
-	LEdit *e = NULL;
-	LEdit *e2 = NULL;
-	LTextLabel *Txt = NULL;
-	LTableLayout *Tbl = NULL;
+	LEdit *e = nullptr;
+	LEdit *e2 = nullptr;
+	LTextLabel *Txt = nullptr;
+	LTableLayout *Tbl = nullptr;
 
 public:
 	const char *GetClass() override { return "App"; }
@@ -424,44 +490,50 @@ public:
 		Opts.SerializeFile(false);
 		SerializeState(&Opts, "WndState", true);
 		
-		if (Attach(0))
+		if (Attach(nullptr))
 		{
-			#if 0
+			auto tabs = new LTabView(ID_TABS);
+			tabs->Attach(this);
+
+			auto tab = tabs->Append("Clicks");
 
 				ClickTest *clicks;
-				AddView(box = new LBox(ID_BOX));
+				tab->AddView(box = new LBox(ID_BOX));
 				box->AddView(clicks = new ClickTest(ID_CLICK_TEST));
 				box->AddView(clicks->log = log = new LTextLog(ID_LOG));
 
-			#elif 0
+			tab = tabs->Append("Repaint");
 
 				// AddView(new OriginTest(20, 10, 0));
-				AddView(new RepaintTest(20, 100));
+				tab->AddView(new RepaintTest(20, 100));
 
-			#elif 0
+			tab = tabs->Append("TabFonts");
 
-				LTabView *t = new LTabView(100);
-				t->Attach(this);
-				t->GetCss(true)->Padding("6px");
+				auto t = new LTabView(ID_FONT_TABS);
+				tab->Append(t);
+				// t->GetCss(true)->Padding("6px");
 
-				auto *tab = t->Append("First");
-				tab->GetCss(true)->FontStyle(LCss::FontStyleItalic);
-				tab->Append(new DnDtarget());
+				auto ft = t->Append("First");
+				ft->GetCss(true)->FontStyle(LCss::FontStyleItalic);
 				
-				tab = t->Append("Second");
-				tab->GetCss(true)->FontSize("14pt");
+				ft = t->Append("Second");
+				ft->GetCss(true)->FontSize("14pt");
 				
-				tab = t->Append("Third");
-				tab->GetCss(true)->Color("red");
+				ft = t->Append("Third");
+				ft->GetCss(true)->Color("red");
 				t->OnStyleChange();
 
-			#elif 0
+			tab = tabs->Append("DndTarget");
 
-				AddView(Tbl = new LTableLayout(100));
-				GLayoutCell *c = Tbl->GetCell(0, 0);
+				tab->Append(new DnDtarget());
 
-				c->Add(Txt = new LTextLabel(IDC_TXT, 0, 0, -1, -1, "This is a test string. &For like\ntesting and stuff. "
-																	"It has multiple\nlines to test wrapping."));
+			tab = tabs->Append("Table");
+
+				tab->AddView(Tbl = new LTableLayout(ID_TABLE));
+				auto c = Tbl->GetCell(0, 0);
+
+				c->Add(Txt = new LTextLabel(ID_TXT, 0, 0, -1, -1, "This is a test string. &For like\ntesting and stuff. "
+																  "It has multiple\nlines to test wrapping."));
 				Txt->SetWrap(true);
 				//Txt->GetCss(true)->Color(LCss::ColorDef(LColour::Red));
 				// Txt->GetCss(true)->FontWeight(LCss::FontWeightBold);
@@ -470,23 +542,27 @@ public:
 				Txt->OnStyleChange();
 
 				c = Tbl->GetCell(1, 0);
-				c->Add(new LEdit(IDC_EDIT1, 0, 0, -1, -1));
+				c->Add(new LEdit(ID_EDIT1));
 
-			#elif 0
+			tab = tabs->Append("Edit");
 
-				AddView(e = new LEdit(IDC_EDIT1, 10, 10, 200, 22));
-				AddView(e2 = new LEdit(IDC_EDIT1, 10, 50, 200, 22));
-				AddView(new LButton(IDC_BLT_TEST, 10, 200, -1, -1, "Blt Test"));
+				auto box = new LBox(ID_BOX2, true);
+				tab->Append(box);
+				box->AddView(e = new LEdit(ID_EDIT1));
+				box->AddView(e2 = new LEdit(ID_EDIT2));
+				box->AddView(new LButton(ID_BLT_TEST, 10, 200, -1, -1, "Blt Test"));
 				// e->Focus(true);
 				e->Password(true);
 				e->SetEmptyText("(this is a test)");
 
-			#elif 1
+			tab = tabs->Append("DisplayStr");
 
-				AddView(new DisplayStrTest(100));
+				tab->Append(new DisplayStrTest(100));
 
-			#endif
-			
+			tab = tabs->Append("Vectors");
+
+				tab->Append(new VectorTest(ID_VECTORS));
+
 			AttachChildren();
 			// Debug();
 			Visible(true);
@@ -516,7 +592,7 @@ public:
 	{
 		switch (Ctrl->GetId())
 		{
-			case IDC_BLT_TEST:
+			case ID_BLT_TEST:
 				new BltTest();
 				break;
 		}

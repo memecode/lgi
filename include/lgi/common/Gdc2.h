@@ -779,9 +779,10 @@ public:
 			/// Constructs a DC for drawing on a cairo context
 			LScreenDC(Gtk::cairo_t *cr, int x, int y);
 			
-			// Gtk::cairo_surface_t *GetSurface(bool Render);
 			LPoint GetSize();
-		
+	
+			LSurfaceVectorContext *CreateVectorContext() override;
+
 		#elif defined(MAC)
 	
 			LScreenDC(LWindow *wnd, void *Param = 0);

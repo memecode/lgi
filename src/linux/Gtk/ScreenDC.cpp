@@ -10,9 +10,161 @@
 
 #include <stdio.h>
 #include <math.h>
+#include <cmath>
+#include <new>
 
 #include "lgi/common/Lgi.h"
+#include "Gdc2Vector.h"
 using namespace Gtk;
+
+namespace
+{
+class CairoVectorContext : public LSurfaceVectorContext
+{
+	cairo_t *Context = nullptr;
+	cairo_path_t *SavedPath = nullptr;
+
+	void SetColour(LColour colour)
+	{
+		cairo_set_source_rgba(Context, colour.r() / 255.0, colour.g() / 255.0,
+			colour.b() / 255.0, colour.a() / 255.0);
+	}
+
+public:
+	explicit CairoVectorContext(cairo_t *context)
+	{
+		if (!context || cairo_status(context) != CAIRO_STATUS_SUCCESS)
+			return;
+		SavedPath = cairo_copy_path(context);
+		if (!SavedPath || SavedPath->status != CAIRO_STATUS_SUCCESS)
+			return;
+
+		Context = cairo_reference(context);
+		cairo_save(Context);
+		cairo_new_path(Context);
+		cairo_set_operator(Context, CAIRO_OPERATOR_OVER);
+		cairo_set_fill_rule(Context, CAIRO_FILL_RULE_WINDING);
+		cairo_set_line_cap(Context, CAIRO_LINE_CAP_BUTT);
+		cairo_set_line_join(Context, CAIRO_LINE_JOIN_MITER);
+		cairo_set_miter_limit(Context, 10.0);
+		cairo_set_dash(Context, nullptr, 0, 0);
+		cairo_set_antialias(Context, CAIRO_ANTIALIAS_DEFAULT);
+	}
+
+	~CairoVectorContext() override
+	{
+		if (Context)
+		{
+			cairo_restore(Context);
+			cairo_new_path(Context);
+			cairo_append_path(Context, SavedPath);
+			cairo_destroy(Context);
+		}
+		if (SavedPath)
+			cairo_path_destroy(SavedPath);
+	}
+
+	bool IsValid() const override
+	{
+		return Context && cairo_status(Context) == CAIRO_STATUS_SUCCESS;
+	}
+
+	void MoveTo(float x, float y) override { cairo_move_to(Context, x, y); }
+	void LineTo(float x, float y) override { cairo_line_to(Context, x, y); }
+	void CubicTo(float x1, float y1, float x2, float y2, float x, float y) override
+	{
+		cairo_curve_to(Context, x1, y1, x2, y2, x, y);
+	}
+	void ArcTo(float rx, float ry, float rotation, bool largeArc, bool sweep, float x, float y) override
+	{
+		double startX = 0, startY = 0;
+		if (cairo_has_current_point(Context))
+			cairo_get_current_point(Context, &startX, &startY);
+		else
+			cairo_move_to(Context, startX, startY);
+		if (startX == x && startY == y)
+			return;
+		double radiusX = std::fabs((double)rx), radiusY = std::fabs((double)ry);
+		if (radiusX == 0 || radiusY == 0)
+		{
+			cairo_line_to(Context, x, y);
+			return;
+		}
+
+		double angle = std::fmod((double)rotation, 360.0) * LGI_PI / 180.0;
+		double cosine = std::cos(angle), sine = std::sin(angle);
+		double halfX = (startX - x) / 2, halfY = (startY - y) / 2;
+		double localX = cosine * halfX + sine * halfY;
+		double localY = -sine * halfX + cosine * halfY;
+		double scale = std::hypot(localX / radiusX, localY / radiusY);
+		if (scale > 1)
+		{
+			radiusX *= scale;
+			radiusY *= scale;
+		}
+		double normalX = localX / radiusX, normalY = localY / radiusY;
+		double distance = normalX * normalX + normalY * normalY;
+		double factor = std::sqrt(MAX(0.0, (1 - distance) / distance));
+		if (largeArc == sweep)
+			factor = -factor;
+		double centerX = factor * radiusX * normalY;
+		double centerY = -factor * radiusY * normalX;
+		double startAngle = std::atan2((localY - centerY) / radiusY, (localX - centerX) / radiusX);
+		double endAngle = std::atan2((-localY - centerY) / radiusY, (-localX - centerX) / radiusX);
+
+		cairo_save(Context);
+		cairo_translate(Context, cosine * centerX - sine * centerY + (startX + x) / 2,
+			sine * centerX + cosine * centerY + (startY + y) / 2);
+		cairo_rotate(Context, angle);
+		cairo_scale(Context, radiusX, radiusY);
+		if (sweep)
+			cairo_arc(Context, 0, 0, 1, startAngle, endAngle);
+		else
+			cairo_arc_negative(Context, 0, 0, 1, startAngle, endAngle);
+		cairo_restore(Context);
+	}
+	void Rect(float x, float y, float width, float height) override
+	{
+		cairo_rectangle(Context, x, y, width, height);
+	}
+	void ClosePath() override { cairo_close_path(Context); }
+	void ClearPath() override { cairo_new_path(Context); }
+
+	void Fill(LColour colour) override
+	{
+		SetColour(colour);
+		cairo_fill_preserve(Context);
+	}
+	void Stroke(LColour colour, float width) override
+	{
+		if (!std::isfinite(width) || width <= 0)
+		{
+			LgiTrace("LSurface::Vector::Stroke: width must be finite and positive.\n");
+			return;
+		}
+		SetColour(colour);
+		cairo_set_line_width(Context, width);
+		cairo_stroke_preserve(Context);
+	}
+	bool ClipRect(LRect rect) override
+	{
+		auto path = cairo_copy_path(Context);
+		if (!path || path->status != CAIRO_STATUS_SUCCESS)
+		{
+			if (path)
+				cairo_path_destroy(path);
+			return false;
+		}
+		cairo_new_path(Context);
+		cairo_rectangle(Context, rect.x1, rect.y1,
+			rect.Valid() ? rect.X() : 0, rect.Valid() ? rect.Y() : 0);
+		cairo_clip(Context);
+		cairo_append_path(Context, path);
+		cairo_path_destroy(path);
+		return IsValid();
+	}
+};
+}
 
 class LScreenPrivate
 {
@@ -117,6 +269,11 @@ LScreenDC::LScreenDC(LView *view, void *param)
 LScreenDC::~LScreenDC()
 {
 	DeleteObj(d);
+}
+
+LSurfaceVectorContext *LScreenDC::CreateVectorContext()
+{
+	return new (std::nothrow) CairoVectorContext(d->cr);
 }
 
 OsPainter LScreenDC::Handle()
