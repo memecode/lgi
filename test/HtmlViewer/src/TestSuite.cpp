@@ -810,11 +810,241 @@ void FontSz()
 	}
 }
 
+bool TestRoundedBorders()
+{
+	Html2::LHtml html(0, 0, 0, 80, 60);
+	Html2::LTag tag(&html, nullptr);
+	tag.Font = LSysFont;
+	tag.Display(LCss::DispBlock);
+	tag.Size = LPoint(80, 60);
+	tag.BorderRadius(LCss::Len(LCss::LenPx, 16));
+	LCss::BorderDef left, top, right, bottom;
+	auto edge = [](LCss::BorderDef &border, int width, LColour colour)
+	{
+		border.Type = LCss::LenPx;
+		border.Value = width;
+		border.Style = LCss::BorderSolid;
+		border.Color = LCss::ColorDef(colour);
+	};
+	edge(left, 6, LColour(255, 0, 0));
+	edge(top, 6, LColour(0, 255, 0));
+	edge(right, 6, LColour(0, 0, 255));
+	edge(bottom, 6, LColour(255, 165, 0));
+	auto borders = [&]()
+	{
+		tag.BorderLeft(left);
+		tag.BorderTop(top);
+		tag.BorderRight(right);
+		tag.BorderBottom(bottom);
+	};
+	borders();
+	LMemDC dc(_FL, 80, 60, CsBgra32, LSurface::SurfaceRequireExactCs);
+	if (!dc[0])
+		return false;
+	auto pixel = [&](int x, int y) { return reinterpret_cast<const LBgra32*>(dc[y])[x]; };
+	auto reset = [&]()
+	{
+		dc.ClipRgn(nullptr);
+		dc.Op(GDC_SET);
+		dc.Colour(LColour(11, 23, 37));
+		dc.Rectangle();
+	};
+	auto untouched = [&](int x, int y)
+	{
+		auto p = pixel(x, y);
+		return p.r == 11 && p.g == 23 && p.b == 37 && p.a == 255;
+	};
+	auto fail = [&](const char *message, int x, int y)
+	{
+		auto p = pixel(x, y);
+		printf("Rounded borders: %s (%i,%i = %i,%i,%i,%i)\n",
+			message, x, y, p.r, p.g, p.b, p.a);
+		return false;
+	};
+	LColour transparent(0, 0, 0, 0);
+	reset();
+	dc.Op(GDC_XOR);
+	tag.PaintBorderAndBackground(&dc, transparent);
+	auto corner = pixel(6, 6);
+	if (dc.Op() != GDC_XOR || !untouched(0, 0) || !untouched(79, 59) ||
+		!untouched(40, 30) || pixel(0, 30).r != 255 || pixel(40, 0).g != 255 ||
+		pixel(79, 30).b != 255 || pixel(40, 59).r != 255 ||
+		corner.r < 110 || corner.r > 145 || corner.g < 110 || corner.g > 145 ||
+		corner.b || corner.a != 255)
+		return fail("transparent centre, corner gradient, or state restoration", 6, 6);
+
+	reset();
+	LColour background(200, 100, 50, 128);
+	tag.PaintBorderAndBackground(&dc, background);
+	auto center = pixel(40, 30);
+	if (center.r != 105 || center.g != 61 || center.b != 43 || !untouched(0, 0))
+		return fail("translucent background must be composited once", 40, 30);
+
+	edge(left, 8, LColour(255, 0, 0));
+	edge(top, 4, LColour(0, 255, 0));
+	edge(right, 2, LColour(0, 0, 255));
+	edge(bottom, 10, LColour(255, 165, 0));
+	borders();
+	reset();
+	tag.PaintBorderAndBackground(&dc, transparent);
+	if (pixel(7, 30).r != 255 || !untouched(8, 30) ||
+		pixel(40, 3).g != 255 || !untouched(40, 4) ||
+		pixel(78, 30).b != 255 || !untouched(77, 30) ||
+		pixel(40, 50).r != 255 || !untouched(40, 49) || !untouched(40, 30))
+		return fail("unequal border widths", 7, 30);
+
+	left.Value = 20;
+	top.Style = LCss::BorderNone;
+	borders();
+	reset();
+	tag.PaintBorderAndBackground(&dc, transparent);
+	if (pixel(6, 6).r != 255 || pixel(18, 4).r != 255 ||
+		!untouched(40, 0) || !untouched(40, 30))
+		return fail("thick borders and a missing adjacent edge", 6, 6);
+
+	left.Value = 6;
+	top.Style = LCss::BorderSolid;
+	top.Value = 20;
+	borders();
+	reset();
+	tag.PaintBorderAndBackground(&dc, transparent);
+	if (untouched(10, 18) || !untouched(40, 30))
+		return fail("thick corner cells must join the straight borders", 10, 18);
+
+	tag.BorderRadius(LCss::Len(LCss::LenPx, 1000));
+	tag.Size = LPoint(20, 40);
+	edge(left, 2, LColour(255, 0, 0));
+	edge(top, 2, LColour(0, 255, 0));
+	borders();
+	reset();
+	tag.PaintBorderAndBackground(&dc, transparent);
+	if (!untouched(0, 0) || !untouched(20, 20) || !untouched(10, 20) ||
+		pixel(0, 20).r != 255)
+		return fail("radius must be clamped to both dimensions", 10, 20);
+
+	tag.Size = LPoint(80, 60);
+	tag.BorderRadius(LCss::Len(LCss::LenPx, 16));
+	left.Type = LCss::LenPt;
+	left.Value = 3;
+	borders();
+	reset();
+	LRect borderPixels;
+	tag.PaintBorderAndBackground(&dc, transparent, &borderPixels);
+	int expectedWidth = left.ToPx(tag.Size.x, LSysFont);
+	if (borderPixels.x1 != expectedWidth || pixel(expectedWidth - 1, 30).r != 255 ||
+		!untouched(expectedWidth, 30))
+		return fail("straight and curved borders must use converted pixel widths", expectedWidth - 1, 30);
+	left.Type = LCss::LenPx;
+	left.Value = 2;
+	borders();
+	reset();
+	LRect clip(10, 10, 60, 40);
+	dc.ClipRgn(&clip);
+	tag.PaintBorderAndBackground(&dc, background);
+	if (dc.ClipRgn() != clip || !untouched(0, 30) || !untouched(40, 0) ||
+		pixel(40, 30).r != 105)
+		return fail("clip preservation", 40, 30);
+
+	left.Style = LCss::BorderDotted;
+	borders();
+	reset();
+	tag.PaintBorderAndBackground(&dc, transparent);
+	int painted = 0, gaps = 0;
+	for (int y = 20; y < 40; y++)
+	{
+		if (pixel(0, y).r == 255)
+			painted++;
+		if (untouched(0, y))
+			gaps++;
+	}
+	if (!painted || !gaps)
+		return fail("dotted straight edges must retain their pattern", 0, 30);
+
+	left.Style = LCss::BorderSolid;
+	borders();
+	tag.BorderRadius(LCss::Len(LCss::LenPx, 0));
+	reset();
+	tag.PaintBorderAndBackground(&dc, transparent);
+	if (pixel(0, 0).g != 255 || !untouched(40, 30))
+		return fail("zero radius must retain square borders", 0, 0);
+
+	Html2::LTag inlineTag(&html, nullptr);
+	inlineTag.Font = LSysFont;
+	inlineTag.Display(LCss::DispInline);
+	inlineTag.BorderRadius(LCss::Len(LCss::LenPx, 6));
+	for (auto rect : {LRect(2, 2, 31, 21), LRect(42, 32, 71, 51)})
+	{
+		auto fragment = new Html2::LFlowRect;
+		fragment->Set(rect.x1, rect.y1, rect.x2, rect.y2);
+		inlineTag.TextPos.Add(fragment);
+	}
+	reset();
+	LColour solid(100, 150, 200);
+	inlineTag.PaintBorderAndBackground(&dc, solid);
+	if (!untouched(2, 2) || !untouched(42, 32) ||
+		pixel(16, 12).r != 100 || pixel(56, 42).r != 100 || !untouched(38, 25))
+		return fail("inline fragments must have separate rounded backgrounds", 16, 12);
+
+	left.Style = top.Style = right.Style = bottom.Style = LCss::BorderNone;
+	borders();
+	tag.Size = LPoint(1, 1);
+	tag.BorderRadius(LCss::Len(LCss::LenPx, 1000));
+	reset();
+	tag.PaintBorderAndBackground(&dc, solid);
+	if (pixel(0, 0).r != 100 || !untouched(1, 0) || !untouched(0, 1))
+		return fail("one-pixel boxes must not create empty corner images", 0, 0);
+
+	#if defined(__GTK_H__)
+	tag.Size = LPoint(80, 60);
+	tag.BorderRadius(LCss::Len(LCss::LenPx, 16));
+	edge(left, 6, LColour(255, 0, 0));
+	edge(top, 6, LColour(0, 255, 0));
+	edge(right, 6, LColour(0, 0, 255));
+	edge(bottom, 6, LColour(255, 165, 0));
+	borders();
+	reset();
+	tag.PaintBorderAndBackground(&dc, transparent);
+	auto surface = Gtk::cairo_image_surface_create(Gtk::CAIRO_FORMAT_ARGB32, 80, 60);
+	auto context = Gtk::cairo_create(surface);
+	Gtk::cairo_set_source_rgb(context, 11 / 255.0, 23 / 255.0, 37 / 255.0);
+	Gtk::cairo_paint(context);
+	bool matches = true;
+	{
+		LScreenDC screen(context, 80, 60);
+		tag.PaintBorderAndBackground(&screen, transparent);
+		Gtk::cairo_surface_flush(surface);
+		auto data = Gtk::cairo_image_surface_get_data(surface);
+		int stride = Gtk::cairo_image_surface_get_stride(surface);
+		const LPoint samples[] = {{0, 0}, {40, 30}, {0, 30}, {40, 0},
+			{79, 30}, {40, 59}, {6, 6}, {73, 6}, {73, 53}, {6, 53}};
+		for (auto &point : samples)
+		{
+			auto actual = reinterpret_cast<const LBgra32*>(data + point.y * stride)[point.x];
+			auto expected = pixel(point.x, point.y);
+			if (abs(int(actual.r) - expected.r) > 1 || abs(int(actual.g) - expected.g) > 1 ||
+				abs(int(actual.b) - expected.b) > 1 || actual.a != expected.a)
+				matches = false;
+		}
+	}
+	Gtk::cairo_destroy(context);
+	Gtk::cairo_surface_destroy(surface);
+	if (!matches)
+		return fail("native and memory rendering must agree", 6, 6);
+	#endif
+	return true;
+}
+
 int LgiMain(OsAppArguments &AppArgs)
 {
 	LApp a(AppArgs, "HtmlTestSuite");
 	if (a.IsOk())
 	{
+		if (a.GetOption("test-rounded-borders"))
+		{
+			bool passed = TestRoundedBorders();
+			printf("Rounded borders: %s\n", passed ? "PASS" : "FAIL");
+			return passed ? 0 : 1;
+		}
 		//FontSz();
 
 		a.AppWnd = new AppWnd;

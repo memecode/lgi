@@ -22,7 +22,6 @@
 #include "lgi/common/GdcTools.h"
 #include "lgi/common/DisplayString.h"
 #include "lgi/common/Palette.h"
-#include "lgi/common/Path.h"
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/Base64.h"
 #include "lgi/common/Menu.h"
@@ -5023,122 +5022,85 @@ void LTag::GetInlineRegion(LRegion &rgn, int ox, int oy)
 
 namespace {
 
-class CornersImg : public LMemDC
+bool PaintRoundedCorners(LSurface *dc, const LRect &rect, int radius,
+	const LRect &border, LCss::BorderDef **defs, LColour back)
 {
-public:
-	int Px, Px2;
-
-	CornersImg(	const char *file, int line,
-				float RadPx,
-				LRect *BorderPx,
-				LCss::BorderDef **defs,
-				LColour &Back,
-				bool DrawBackground)
-		: LMemDC(file, line)
+	auto vector = dc->Vec();
+	if (!vector)
 	{
-		Px = 0;
-		Px2 = 0;
+		LgiTrace("LTag::PaintBorderAndBackground: vector context unavailable; using square corners.\n");
+		return false;
+	}
 
-		//Radius.Type != LCss::LenInherit &&			
-		if (RadPx > 0.0f)
+	if (!back.IsTransparent())
+	{
+		vector.RoundRect(rect.x1, rect.y1, rect.X(), rect.Y(), radius);
+		vector.Fill(back);
+	}
+
+	const int widths[4] = {border.x1, border.y1, border.x2, border.y2};
+	const LPointF centers[4] = {
+		{double(rect.x1 + radius), double(rect.y1 + radius)},
+		{double(rect.x2 + 1 - radius), double(rect.y1 + radius)},
+		{double(rect.x2 + 1 - radius), double(rect.y2 + 1 - radius)},
+		{double(rect.x1 + radius), double(rect.y2 + 1 - radius)}
+	};
+	const LPoint directions[4] = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
+	for (int i = 0; i < 4; i++)
+	{
+		int next = (i + 1) % 4;
+		bool firstBorder = widths[i] > 0;
+		bool nextBorder = widths[next] > 0;
+		if (!firstBorder && !nextBorder)
+			continue;
+
+		auto &center = centers[i];
+		auto &from = directions[i];
+		auto &to = directions[next];
+		LPointF start(center.x + from.x * radius, center.y + from.y * radius);
+		LPointF end(center.x + to.x * radius, center.y + to.y * radius);
+		// Thick borders expand the corner cell beyond the circular arc.
+		LPointF outerStart(start.x - to.x * MAX(0, widths[next] - radius),
+			start.y - to.y * MAX(0, widths[next] - radius));
+		LPointF outerEnd(end.x - from.x * MAX(0, widths[i] - radius),
+			end.y - from.y * MAX(0, widths[i] - radius));
+		LPointF innerStart(outerStart.x - from.x * widths[i], outerStart.y - from.y * widths[i]);
+		LPointF innerEnd(outerEnd.x - to.x * widths[next], outerEnd.y - to.y * widths[next]);
+		int horizontal = i == 0 || i == 3 ? border.x1 : border.x2;
+		int vertical = i < 2 ? border.y1 : border.y2;
+		int rx = MAX(0, radius - horizontal);
+		int ry = MAX(0, radius - vertical);
+
+		vector.ClearPath();
+		vector.MoveTo(outerStart.x, outerStart.y);
+		vector.LineTo(start.x, start.y);
+		vector.ArcTo(radius, radius, 0, false, true, end.x, end.y);
+		vector.LineTo(outerEnd.x, outerEnd.y);
+		vector.LineTo(innerEnd.x, innerEnd.y);
+		if (rx > 0 && ry > 0)
+			vector.ArcTo(rx, ry, 0, false, false, innerStart.x, innerStart.y);
+		else
+			vector.LineTo(innerStart.x, innerStart.y);
+		vector.ClosePath();
+
+		auto colour = [&](int edge)
 		{
-			Px = (int)ceil(RadPx);
-			Px2 = Px << 1;
-			
-			if (Create(Px2, Px2, System32BitColourSpace))
-			{
-				#if 1
-				Colour(0, 32);
-				#else
-				Colour(LColour(255, 0, 255));
-				#endif
-				Rectangle();
-
-				LPointF ctr(Px, Px);
-				LPointF LeftPt(0.0, Px);
-				LPointF TopPt(Px, 0.0);
-				LPointF RightPt(X(), Px);
-				LPointF BottomPt(Px, Y());
-				int x_px[4] = {BorderPx->x1, BorderPx->x2, BorderPx->x2, BorderPx->x1};
-				int y_px[4] = {BorderPx->y1, BorderPx->y1, BorderPx->y2, BorderPx->y2};
-				LPointF *pts[4] = {&LeftPt, &TopPt, &RightPt, &BottomPt};
-				
-				// Draw border parts..
-				for (int i=0; i<4; i++)
-				{
-					int k = (i + 1) % 4;
-
-					// Setup the stops					
-					LBlendStop stops[2] = { {0.0, 0}, {1.0, 0} };
-					uint32_t iColour = defs[i]->Color.IsValid() ? defs[i]->Color.Rgb32 : Back.c32();
-					uint32_t kColour = defs[k]->Color.IsValid() ? defs[k]->Color.Rgb32 : Back.c32();
-					if (*defs[i] && *defs[k])
-					{
-						stops[0].c32 = iColour;
-						stops[1].c32 = kColour;
-					}
-					else if (*defs[i])
-					{
-						stops[0].c32 = stops[1].c32 = iColour;
-					}
-					else
-					{
-						stops[0].c32 = stops[1].c32 = kColour;
-					}
-					
-					// Create a brush
-					LLinearBlendBrush br
-					(
-						*pts[i],
-						*pts[k],
-						2,
-						stops
-					);
-					
-					// Setup the clip
-					LRect clip(	(int)MIN(pts[i]->x, pts[k]->x),
-								(int)MIN(pts[i]->y, pts[k]->y),
-								(int)MAX(pts[i]->x, pts[k]->x)-1,
-								(int)MAX(pts[i]->y, pts[k]->y)-1);
-					ClipRgn(&clip);
-					
-					// Draw the arc...
-					LPath p;
-					p.Circle(ctr, Px);
-					if (*defs[i] || *defs[k])
-						p.Fill(this, br);
-					
-					// Fill the background
-					p.Empty();
-					p.Ellipse(ctr, Px-x_px[i], Px-y_px[i]);
-					if (DrawBackground)
-					{
-						LSolidBrush br(Back);
-						p.Fill(this, br);					
-					}
-					else
-					{
-						LEraseBrush br;
-						p.Fill(this, br);
-					}
-					
-					ClipRgn(NULL);
-				}
-				
-				#ifdef MAC
-				ConvertPreMulAlpha(true);
-				#endif
-				
-				#if 0
-				static int count = 0;
-				LString file;
-				file.Printf("c:\\temp\\img-%i.bmp", ++count);
-				GdcD->Save(file, Corners);
-				#endif
-			}
+			return defs[edge]->Color.IsValid() ? LColour(defs[edge]->Color.Rgb32, 32) : back;
+		};
+		LColour first = colour(firstBorder ? i : next);
+		LColour last = colour(nextBorder ? next : i);
+		if (first == last)
+			vector.Fill(first);
+		else
+		{
+			LArray<LColourStop> stops;
+			stops[0].Set(0, first);
+			stops[1].Set(1, last);
+			vector.Fill(start, end, stops);
 		}
 	}
-};
+	return true;
+}
 
 } // namespace
 
@@ -5216,12 +5178,9 @@ void LTag::PaintBorderAndBackground(LSurface *pDC, LColour &Back, LRect *BorderP
 				return;
 		}
 
-		// If we are drawing rounded corners, draw them into a memory context
-		LAutoPtr<CornersImg> Corners;
-		int Px = 0, Px2 = 0;
 		LCss::Len Radius = BorderRadius();
 		float RadPx = Radius.Type == LCss::LenPx ? Radius.Value : Radius.ToPx(Size.x, GetFont());
-		bool HasRadius = Radius.Type != LCss::LenInherit && RadPx > 0.0f;
+		bool HasRadius = Radius.Type != LCss::LenInherit && std::isfinite(RadPx) && RadPx > 0.0f;
 
 		// Loop over the rectangles and draw everything
 		int Op = pDC->Op(GDC_ALPHA);
@@ -5229,95 +5188,61 @@ void LTag::PaintBorderAndBackground(LSurface *pDC, LColour &Back, LRect *BorderP
 		for (unsigned i=0; i<r.Length(); i++)
 		{
 			LRect rc = r[i];
-			if (HasRadius)
-			{
-				Px = (int)ceil(RadPx);
-				Px2 = Px << 1;
-				if (Px2 > rc.Y())
-				{
-					Px = rc.Y() / 2;
-					Px2 = Px << 1;
-				}			
-				if (!Corners || Corners->Px2 != Px2)
-				{
-					Corners.Reset(new CornersImg(_FL, (float)Px, BorderPx, defs, Back, DrawBackground));
-				}
-			
-				// top left
-				LRect r(0, 0, Px-1, Px-1);
-				pDC->Blt(rc.x1, rc.y1, Corners, &r);
-			
-				// top right
-				r.Set(Px, 0, Corners->X()-1, Px-1);
-				pDC->Blt(rc.x2-Px+1, rc.y1, Corners, &r);
-			
-				// bottom left
-				r.Set(0, Px, Px-1, Corners->Y()-1);
-				pDC->Blt(rc.x1, rc.y2-Px+1, Corners, &r);
-			
-				// bottom right
-				r.Set(Px, Px, Corners->X()-1, Corners->Y()-1);
-				pDC->Blt(rc.x2-Px+1, rc.y2-Px+1, Corners, &r);
-			
-				#if 1
-				pDC->Colour(Back);
-				pDC->Rectangle(rc.x1+Px, rc.y1, rc.x2-Px, rc.y2);
-				pDC->Rectangle(rc.x1, rc.y1+Px, rc.x1+Px-1, rc.y2-Px);
-				pDC->Rectangle(rc.x2-Px+1, rc.y1+Px, rc.x2, rc.y2-Px);
-				#else
-				pDC->Colour(LColour(255, 0, 0, 0x80));
-				pDC->Rectangle(rc.x1+Px, rc.y1, rc.x2-Px, rc.y2);
-				pDC->Colour(LColour(0, 255, 0, 0x80));
-				pDC->Rectangle(rc.x1, rc.y1+Px, rc.x1+Px-1, rc.y2-Px);
-				pDC->Colour(LColour(0, 0, 255, 0x80));
-				pDC->Rectangle(rc.x2-Px+1, rc.y1+Px, rc.x2, rc.y2-Px);
-				#endif
-			}
-			else if (DrawBackground)
+			if (!rc.Valid())
+				continue;
+			int maxRadius = MIN(rc.X(), rc.Y()) / 2;
+			int Px = HasRadius ? (int)ceil(MIN(RadPx, (float)maxRadius)) : 0;
+			bool rounded = Px > 0 && PaintRoundedCorners(pDC, rc, Px, *BorderPx, defs, Back);
+			if (!rounded && DrawBackground)
 			{
 				pDC->Colour(Back);
 				pDC->Rectangle(&rc);
 			}
 
+			LRect trim;
+			trim.Set(rounded ? MAX(Px, BorderPx->x1) : 0,
+				rounded ? MAX(Px, BorderPx->y1) : 0,
+				rounded ? MAX(Px, BorderPx->x2) : 0,
+				rounded ? MAX(Px, BorderPx->y2) : 0);
 			LCss::BorderDef *b;
-			if ((b = &Left) && BorderValid(*b))
+			if ((b = &Left) && BorderValid(*b) && rc.Y() > trim.y1 + trim.y2)
 			{
 				pDC->Colour(b->Color.Rgb32, 32);
 				DrawBorder db(pDC, *b);
-				for (int i=0; i<b->Value; i++)
+				for (int i=0; i<(rounded ? BorderPx->x1 : b->Value); i++)
 				{
 					pDC->LineStyle(db.LineStyle, db.LineReset);
-					pDC->Line(rc.x1 + i, rc.y1+Px, rc.x1+i, rc.y2-Px);
+					pDC->Line(rc.x1 + i, rc.y1+trim.y1, rc.x1+i, rc.y2-trim.y2);
 				}
 			}
-			if ((b = &Top) && BorderValid(*b))
+			if ((b = &Top) && BorderValid(*b) && rc.X() > trim.x1 + trim.x2)
 			{
 				pDC->Colour(b->Color.Rgb32, 32);
 				DrawBorder db(pDC, *b);
-				for (int i=0; i<b->Value; i++)
+				for (int i=0; i<(rounded ? BorderPx->y1 : b->Value); i++)
 				{
 					pDC->LineStyle(db.LineStyle, db.LineReset);
-					pDC->Line(rc.x1+Px, rc.y1+i, rc.x2-Px, rc.y1+i);
+					pDC->Line(rc.x1+trim.x1, rc.y1+i, rc.x2-trim.x2, rc.y1+i);
 				}
 			}
-			if ((b = &Right) && BorderValid(*b))
+			if ((b = &Right) && BorderValid(*b) && rc.Y() > trim.y1 + trim.y2)
 			{
 				pDC->Colour(b->Color.Rgb32, 32);
 				DrawBorder db(pDC, *b);
-				for (int i=0; i<b->Value; i++)
+				for (int i=0; i<(rounded ? BorderPx->x2 : b->Value); i++)
 				{
 					pDC->LineStyle(db.LineStyle, db.LineReset);
-					pDC->Line(rc.x2-i, rc.y1+Px, rc.x2-i, rc.y2-Px);
+					pDC->Line(rc.x2-i, rc.y1+trim.y1, rc.x2-i, rc.y2-trim.y2);
 				}			
 			}
-			if ((b = &Bottom) && BorderValid(*b))
+			if ((b = &Bottom) && BorderValid(*b) && rc.X() > trim.x1 + trim.x2)
 			{
 				pDC->Colour(b->Color.Rgb32, 32);
 				DrawBorder db(pDC, *b);
-				for (int i=0; i<b->Value; i++)
+				for (int i=0; i<(rounded ? BorderPx->y2 : b->Value); i++)
 				{
 					pDC->LineStyle(db.LineStyle, db.LineReset);
-					pDC->Line(rc.x1+Px, rc.y2-i, rc.x2-Px, rc.y2-i);
+					pDC->Line(rc.x1+trim.x1, rc.y2-i, rc.x2-trim.x2, rc.y2-i);
 				}
 			}
 		}
