@@ -5040,10 +5040,10 @@ bool PaintRoundedCorners(LSurface *dc, const LRect &rect, int radius,
 
 	const int widths[4] = {border.x1, border.y1, border.x2, border.y2};
 	const LPointF centers[4] = {
-		{double(rect.x1 + radius), double(rect.y1 + radius)},
-		{double(rect.x2 + 1 - radius), double(rect.y1 + radius)},
-		{double(rect.x2 + 1 - radius), double(rect.y2 + 1 - radius)},
-		{double(rect.x1 + radius), double(rect.y2 + 1 - radius)}
+		{float(rect.x1 + radius), float(rect.y1 + radius)},
+		{float(rect.x2 + 1 - radius), float(rect.y1 + radius)},
+		{float(rect.x2 + 1 - radius), float(rect.y2 + 1 - radius)},
+		{float(rect.x1 + radius), float(rect.y2 + 1 - radius)}
 	};
 	const LPoint directions[4] = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
 	for (int i = 0; i < 4; i++)
