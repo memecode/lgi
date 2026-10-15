@@ -1125,6 +1125,8 @@ void LItemColumn::OnPaint_Content(LSurface *pDC, LRect &r, bool FillBackground)
 
 		f->Transparent(!FillBackground);
 		f->Colour(cText, cMed);
+		LgiTrace("cText=%s\n", cText.GetStr());
+
 		int ty = Ds->Y();
 		int ry = r.Y();
 		int y = r.y1 + ((ry - ty) >> 1);

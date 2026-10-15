@@ -751,7 +751,7 @@ public:
 class LgiClass LPath
 {
 public:
-	class Matrix : public LMatrix<double, 3, 3>
+	class Matrix : public LMatrix<float, 3, 3>
 	{
 	public:
 		Matrix()
@@ -759,18 +759,18 @@ public:
 			SetIdentity();
 		}
 		
-		Matrix &Translate(double x, double y)
+		Matrix &Translate(float x, float y)
 		{
 			m[2][0] = x;
 			m[2][1] = y;
 			return *this;
 		}
 		
-		Matrix &Rotate(double angle, bool anti_clockwise = false)
+		Matrix &Rotate(float angle, bool anti_clockwise = false)
 		{
-			m[0][0] = m[1][1] = cos(angle);
-			m[0][1] = (anti_clockwise ? -1 : 1) * sin(angle);
-			m[1][0] = (anti_clockwise ? 1 : -1) * sin(angle);
+			m[0][0] = m[1][1] = (float)cos(angle);
+			m[0][1] = (anti_clockwise ? -1 : 1) * (float)sin(angle);
+			m[1][0] = (anti_clockwise ? 1 : -1) * (float)sin(angle);
 			return *this;
 		}
 	};
@@ -798,43 +798,43 @@ public:
 	virtual ~LPath();
 
 	// Primitives
-	void MoveTo(		double x,
-						double y);
+	void MoveTo(		float x,
+						float y);
 	void MoveTo(		LPointF &pt);
-	void LineTo(		double x,
-						double y);
+	void LineTo(		float x,
+						float y);
 	void LineTo(		LPointF &pt);
-	void QuadBezierTo(	double cx, double cy,
-						double px, double py);
+	void QuadBezierTo(	float cx, float cy,
+						float px, float py);
 	void QuadBezierTo(	LPointF &c,
 						LPointF &p);
-	void CubicBezierTo(	double c1x, double c1y,
-						double c2x, double c2y,
-						double px, double py);
+	void CubicBezierTo(	float c1x, float c1y,
+						float c2x, float c2y,
+						float px, float py);
 	void CubicBezierTo(	LPointF &c1,
 						LPointF &c2,
 						LPointF &p);
-	void Rectangle(		double x1, double y1,
-						double x2, double y2);
+	void Rectangle(		float x1, float y1,
+						float x2, float y2);
 	void Rectangle(		LPointF &tl,
 						LPointF &rb);
 	void Rectangle(		LRectF &r);
-	void RoundRect(		LRectF &b, double r);
-	void Circle(		double cx,
-						double cy,
-						double radius);
+	void RoundRect(		LRectF &b, float r);
+	void Circle(		float cx,
+						float cy,
+						float radius);
 	void Circle(		LPointF &c,
-						double radius);
-	void Ellipse(		double cx,
-						double cy,
-						double x,
-						double y);
+						float radius);
+	void Ellipse(		float cx,
+						float cy,
+						float x,
+						float y);
 	void Ellipse(		LPointF &c,
-						double x,
-						double y);
+						float x,
+						float y);
 	bool Text(			LFont *Font,
-						double x,
-						double y,
+						float x,
+						float y,
 						char *Utf8,
 						int Bytes = -1);
 

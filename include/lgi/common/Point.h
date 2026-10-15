@@ -137,14 +137,14 @@ class LgiClass LPointF
 {
 public:
 	static double Threshold;
-	double x, y;
+	float x, y;
 
 	LPointF()
 	{
 		x = y = 0;
 	}
 
-	LPointF(double X, double Y)
+	LPointF(float X, float Y)
 	{
 		x = X;
 		y = Y;
@@ -158,8 +158,8 @@ public:
 
 	LPointF(const LPoint &p)
 	{
-		x = p.x;
-		y = p.y;
+		x = (float)p.x;
+		y = (float)p.y;
 	}
 
 	LPointF &operator =(const LPointF &p)
@@ -187,9 +187,9 @@ public:
 
 	bool operator ==(const LPointF &p)
 	{
-		double dx = x - p.x;
+		float dx = x - p.x;
 		if (dx < 0) dx = -dx;
-		double dy = y - p.y;
+		float dy = y - p.y;
 		if (dy < 0) dy = -dy;
 		return dx<Threshold && dy<Threshold;
 	}
@@ -199,26 +199,26 @@ public:
 		return !(*this == p);
 	}
 
-	void Set(double X, double Y)
+	void Set(float X, float Y)
 	{
 		x = X;
 		y = Y;
 	}
 	
-	LPointF &Translate(double tx, double ty)
+	LPointF &Translate(float tx, float ty)
 	{
 		x += tx;
 		y += ty;
 		return *this;
 	}
 	
-	LPointF operator *(double scale)
+	LPointF operator *(float scale)
 	{
 		LPointF p(x * scale, y * scale);
 		return p;
 	}
 
-	LPointF &operator *=(double scale)
+	LPointF &operator *=(float scale)
 	{
 		x *= scale;
 		y *= scale;
@@ -226,12 +226,12 @@ public:
 	}
 
 	// Angle in radians
-	LPointF &Rotate(double a)
+	LPointF &Rotate(float a)
 	{
 		double ix = x;
 		double iy = y;
-		x = (cos(a)*ix) - (sin(a)*iy);
-		y = (sin(a)*ix) + (cos(a)*iy);
+		x = (float) ((cos(a)*ix) - (sin(a)*iy));
+		y = (float) ((sin(a)*ix) + (cos(a)*iy));
 		return *this;
 	}
 };

@@ -10,11 +10,321 @@
 
 #include <stdio.h>
 #include <math.h>
+#include <cmath>
+#include <memory>
+#include <new>
+#include <vector>
 
 #include "lgi/common/Gdc2.h"
 #include "lgi/common/GdiLeak.h"
 #include "lgi/common/Palette.h"
 #include "lgi/common/Variant.h"
+
+bool LgiInitGdiPlus();
+
+namespace
+{
+class GdiPlusVectorContext : public LSurfaceVector
+{
+	LSurface &Surface;
+	std::unique_ptr<Gdiplus::Graphics> OwnedGraphics;
+	Gdiplus::Graphics *Graphics = nullptr;
+	HDC Dc = nullptr;
+	Gdiplus::GraphicsState State = 0;
+	Gdiplus::GraphicsPath Path;
+	bool Saved = false;
+	bool HasCurrent = false;
+	Gdiplus::PointF Current;
+	Gdiplus::PointF FigureStart;
+
+	static Gdiplus::Color ToGdiColour(LColour colour)
+	{
+		return Gdiplus::Color((BYTE)colour.a(), (BYTE)colour.r(), (BYTE)colour.g(), (BYTE)colour.b());
+	}
+
+public:
+	explicit GdiPlusVectorContext(LSurface &surface) :
+		Surface(surface),
+		Path(Gdiplus::FillModeWinding)
+	{
+		GdiFlush();
+		Dc = Surface.StartDC();
+		if (!Dc)
+			return;
+
+		OwnedGraphics.reset(new Gdiplus::Graphics(Dc));
+		Graphics = OwnedGraphics.get();
+		if (!Graphics || Graphics->GetLastStatus() != Gdiplus::Ok)
+			return;
+
+		State = Graphics->Save();
+		Saved = Graphics->GetLastStatus() == Gdiplus::Ok;
+		if (Saved)
+		{
+			Graphics->SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
+			Graphics->SetCompositingMode(Gdiplus::CompositingModeSourceOver);
+		}
+	}
+
+	~GdiPlusVectorContext() override
+	{
+		if (Graphics && Saved)
+		{
+			Graphics->Flush(Gdiplus::FlushIntentionSync);
+			Graphics->Restore(State);
+		}
+		OwnedGraphics.reset();
+		if (Dc)
+			Surface.EndDC();
+	}
+
+	bool IsValid() const override
+	{
+		if (!Graphics)
+		{
+			return false;
+		}
+		if (!Saved)
+		{
+			return false;
+		}
+		
+		auto gfxStatus = Graphics->GetLastStatus();
+		if (gfxStatus != Gdiplus::Ok)
+		{
+			return false;
+		}
+
+		auto pathStatus = Path.GetLastStatus();
+		if (pathStatus != Gdiplus::Ok)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	void MoveTo(float x, float y) override
+	{
+		Path.StartFigure();
+		Current = FigureStart = Gdiplus::PointF(x, y);
+		HasCurrent = true;
+	}
+
+	void LineTo(float x, float y) override
+	{
+		if (!HasCurrent)
+		{
+			MoveTo(x, y);
+			return;
+		}
+		Path.AddLine(Current, Gdiplus::PointF(x, y));
+		Current = Gdiplus::PointF(x, y);
+	}
+
+	void CubicTo(float x1, float y1, float x2, float y2, float x, float y) override
+	{
+		if (!HasCurrent)
+			MoveTo(x1, y1);
+		Path.AddBezier(Current, Gdiplus::PointF(x1, y1), Gdiplus::PointF(x2, y2), Gdiplus::PointF(x, y));
+		Current = Gdiplus::PointF(x, y);
+	}
+
+	void ArcTo(float rx, float ry, float rotation, bool largeArc, bool sweep, float x, float y) override
+	{
+		if (!HasCurrent)
+			MoveTo(0, 0);
+		if (Current.X == x && Current.Y == y)
+			return;
+
+		double radiusX = std::fabs((double)rx), radiusY = std::fabs((double)ry);
+		if (radiusX == 0 || radiusY == 0)
+		{
+			LineTo(x, y);
+			return;
+		}
+
+		double angle = std::fmod((double)rotation, 360.0) * LGI_PI / 180.0;
+		double cosine = std::cos(angle), sine = std::sin(angle);
+		double halfX = (Current.X - x) / 2, halfY = (Current.Y - y) / 2;
+		double localX = cosine * halfX + sine * halfY;
+		double localY = -sine * halfX + cosine * halfY;
+		double scale = std::hypot(localX / radiusX, localY / radiusY);
+		if (scale > 1)
+		{
+			radiusX *= scale;
+			radiusY *= scale;
+		}
+		double normalX = localX / radiusX, normalY = localY / radiusY;
+		double distance = normalX * normalX + normalY * normalY;
+		double factor = std::sqrt(MAX(0.0, (1 - distance) / distance));
+		if (largeArc == sweep)
+			factor = -factor;
+		double centerX = factor * radiusX * normalY;
+		double centerY = -factor * radiusY * normalX;
+		double worldCenterX = cosine * centerX - sine * centerY + (Current.X + x) / 2;
+		double worldCenterY = sine * centerX + cosine * centerY + (Current.Y + y) / 2;
+		double startAngle = std::atan2((localY - centerY) / radiusY, (localX - centerX) / radiusX);
+		double endAngle = std::atan2((-localY - centerY) / radiusY, (-localX - centerX) / radiusX);
+		double delta = endAngle - startAngle;
+		if (sweep)
+		{
+			while (delta < 0) delta += 2 * LGI_PI;
+		}
+		else
+		{
+			while (delta > 0) delta -= 2 * LGI_PI;
+		}
+
+		auto Point = [&](double theta)
+		{
+			return Gdiplus::PointF(
+				(float)(worldCenterX + cosine * radiusX * std::cos(theta) - sine * radiusY * std::sin(theta)),
+				(float)(worldCenterY + sine * radiusX * std::cos(theta) + cosine * radiusY * std::sin(theta)));
+		};
+		int segments = (int)std::ceil(std::fabs(delta) / (LGI_PI / 2));
+		double step = delta / segments;
+		for (int i = 0; i < segments; i++)
+		{
+			double theta1 = startAngle + i * step, theta2 = theta1 + step;
+			double alpha = 4.0 / 3.0 * std::tan(step / 4.0);
+			auto p0 = Point(theta1), p3 = Point(theta2);
+			double d0x = -cosine * radiusX * std::sin(theta1) - sine * radiusY * std::cos(theta1);
+			double d0y = -sine * radiusX * std::sin(theta1) + cosine * radiusY * std::cos(theta1);
+			double d1x = -cosine * radiusX * std::sin(theta2) - sine * radiusY * std::cos(theta2);
+			double d1y = -sine * radiusX * std::sin(theta2) + cosine * radiusY * std::cos(theta2);
+			Gdiplus::PointF p1((float)(p0.X + alpha * d0x), (float)(p0.Y + alpha * d0y));
+			Gdiplus::PointF p2((float)(p3.X - alpha * d1x), (float)(p3.Y - alpha * d1y));
+			Path.AddBezier(Current, p1, p2, i + 1 == segments ? Gdiplus::PointF(x, y) : p3);
+			Current = i + 1 == segments ? Gdiplus::PointF(x, y) : p3;
+		}
+	}
+
+	void Rect(float x, float y, float width, float height) override
+	{
+		Path.StartFigure();
+		Path.AddRectangle(Gdiplus::RectF(x, y, width, height));
+		Current = FigureStart = Gdiplus::PointF(x, y);
+		HasCurrent = true;
+	}
+
+	void ClosePath() override
+	{
+		Path.CloseFigure();
+		if (HasCurrent)
+			Current = FigureStart;
+	}
+
+	void ClearPath() override
+	{
+		Path.Reset();
+		HasCurrent = false;
+	}
+
+	void Fill(LColour colour) override
+	{
+		Gdiplus::SolidBrush brush(ToGdiColour(colour));
+		if (brush.GetLastStatus() == Gdiplus::Ok)
+			Graphics->FillPath(&brush, &Path);
+	}
+
+	void Fill(const LPointF &start, const LPointF &end, const LArray<LColourStop> &stops) override
+	{
+		std::vector<Gdiplus::Color> colours;
+		std::vector<Gdiplus::REAL> positions;
+		const auto &first = stops.ItemAt(0);
+		const auto &last = stops.ItemAt(stops.Length() - 1);
+		colours.reserve(stops.Length() + 2);
+		positions.reserve(stops.Length() + 2);
+		if (first.Pos > 0)
+		{
+			colours.push_back(ToGdiColour(first.Colour));
+			positions.push_back(0);
+		}
+		for (size_t i = 0; i < stops.Length(); i++)
+		{
+			const auto &stop = stops.ItemAt(i);
+			colours.push_back(ToGdiColour(stop.Colour));
+			positions.push_back(stop.Pos);
+		}
+		if (last.Pos < 1)
+		{
+			colours.push_back(ToGdiColour(last.Colour));
+			positions.push_back(1);
+		}
+
+		Gdiplus::RectF bounds;
+		if (Path.GetBounds(&bounds) != Gdiplus::Ok)
+		{
+			LgiTrace("GdiPlusVectorContext::Fill: failed to get path bounds.\n");
+			return;
+		}
+
+		double dx = end.x - start.x, dy = end.y - start.y;
+		double lengthSquared = dx * dx + dy * dy;
+		double x1 = dx < 0 ? bounds.GetRight() : bounds.GetLeft();
+		double y1 = dy < 0 ? bounds.GetBottom() : bounds.GetTop();
+		double x2 = dx < 0 ? bounds.GetLeft() : bounds.GetRight();
+		double y2 = dy < 0 ? bounds.GetTop() : bounds.GetBottom();
+		double firstExtent = ((x1 - start.x) * dx + (y1 - start.y) * dy) / lengthSquared;
+		double lastExtent = ((x2 - start.x) * dx + (y2 - start.y) * dy) / lengthSquared;
+		if (firstExtent > 0)
+			firstExtent = 0;
+		if (lastExtent < 1)
+			lastExtent = 1;
+
+		double extent = lastExtent - firstExtent;
+		for (auto &position : positions)
+			position = (Gdiplus::REAL)((position - firstExtent) / extent);
+		if (firstExtent < 0)
+		{
+			colours.insert(colours.begin(), colours.front());
+			positions.insert(positions.begin(), 0);
+		}
+		if (lastExtent > 1)
+		{
+			colours.push_back(colours.back());
+			positions.push_back(1);
+		}
+
+		Gdiplus::PointF p1(
+			(float)(start.x + firstExtent * dx),
+			(float)(start.y + firstExtent * dy));
+		Gdiplus::PointF p2(
+			(float)(start.x + lastExtent * dx),
+			(float)(start.y + lastExtent * dy));
+		Gdiplus::LinearGradientBrush brush(p1, p2, colours.front(), colours.back());
+		auto status = brush.GetLastStatus();
+		if (status == Gdiplus::Ok)
+			status = brush.SetInterpolationColors(colours.data(), positions.data(), (INT)colours.size());
+		if (status == Gdiplus::Ok)
+			status = Graphics->FillPath(&brush, &Path);
+		if (status != Gdiplus::Ok)
+			LgiTrace("GdiPlusVectorContext::Fill: gradient fill failed: %i\n", (int)status);
+	}
+
+	void Stroke(LColour colour, float width) override
+	{
+		if (!std::isfinite(width) || width <= 0)
+			return;
+		Gdiplus::Pen pen(ToGdiColour(colour), width);
+		if (pen.GetLastStatus() != Gdiplus::Ok)
+			return;
+		pen.SetStartCap(Gdiplus::LineCapFlat);
+		pen.SetEndCap(Gdiplus::LineCapFlat);
+		pen.SetLineJoin(Gdiplus::LineJoinMiter);
+		pen.SetMiterLimit(10.0f);
+		Graphics->DrawPath(&pen, &Path);
+	}
+
+	bool ClipRect(LRect rect) override
+	{
+		Gdiplus::RectF clip((float)rect.x1, (float)rect.y1,
+			rect.Valid() ? (float)rect.X() : 0, rect.Valid() ? (float)rect.Y() : 0);
+		return Graphics->SetClip(clip, Gdiplus::CombineModeIntersect) == Gdiplus::Ok;
+	}
+};
+}
 
 class LScreenPrivate
 {
@@ -70,7 +380,7 @@ public:
 		hPen = 0;
 		hBrush = 0;
 		hOldBitmap = 0;
-		Mode = GDC_SET;
+		Mode = GDC_ALPHA;
 		Col = 0;
 		Sx = Sy = 0;
 		Release = End = false;
@@ -167,6 +477,8 @@ LScreenDC::LScreenDC(HBITMAP hbmp, int Sx, int Sy)
 
 LScreenDC::~LScreenDC()
 {
+	GdiplusGfx.Reset();
+
 	if (hDC)
 	{
 		if (d->hPen)
@@ -207,6 +519,13 @@ LScreenDC::~LScreenDC()
 	DeleteObj(d);
 }
 
+LSurfaceVector *LScreenDC::CreateVectorContext()
+{
+	if (!LgiInitGdiPlus())
+		return nullptr;
+	return new (std::nothrow) GdiPlusVectorContext(*this);
+}
+
 bool LScreenDC::GetClient(LRect *c)
 {
 	if (!c) return false;
@@ -216,6 +535,8 @@ bool LScreenDC::GetClient(LRect *c)
 
 void LScreenDC::SetClient(LRect *c)
 {
+	GdiplusGfx.Reset();
+
 	if (c)
 	{
 		SetWindowOrgEx(hDC, 0, 0, NULL);
@@ -294,6 +615,7 @@ LPoint LScreenDC::GetOrigin()
 
 void LScreenDC::SetOrigin(LPoint pt)
 {
+	GdiplusGfx.Reset();
 	LSurface::SetOrigin(pt);
 	if (hDC)
 		SetWindowOrgEx(hDC, pt.x, pt.y, NULL);
@@ -312,6 +634,7 @@ void LScreenDC::Palette(LPalette *pPal, bool bOwnIt)
 LRect LScreenDC::ClipRgn(LRect *Rgn)
 {
 	LRect Prev = Clip;
+	GdiplusGfx.Reset();
 
 	if (Rgn)
 	{
@@ -609,7 +932,7 @@ void LScreenDC::Line(int x1, int y1, int x2, int y2)
 	SetPixel(hDC, x2, y2, WinCol);
 }
 
-void LScreenDC::Circle(double cx, double cy, double radius)
+void LScreenDC::Circle(float cx, float cy, float radius)
 {
 	HBRUSH hTemp = (HBRUSH) SelectObject(hDC, d->Null.Brush);
 	::Ellipse(	hDC,
@@ -620,7 +943,7 @@ void LScreenDC::Circle(double cx, double cy, double radius)
 	SelectObject(hDC, hTemp);
 }
 
-void LScreenDC::FilledCircle(double cx, double cy, double radius)
+void LScreenDC::FilledCircle(float cx, float cy, float radius)
 {
 	::Ellipse(	hDC,
 				(int)floor(cx - radius),
@@ -629,7 +952,7 @@ void LScreenDC::FilledCircle(double cx, double cy, double radius)
 				(int)ceil(cy + radius));
 }
 
-void LScreenDC::Arc(double cx, double cy, double radius, double start, double end)
+void LScreenDC::Arc(float cx, float cy, float radius, float start, float end)
 {
 	int StartX = (int)(cx + (cos(start) * radius));
 	int StartY = (int)(cy + (int)(sin(start) * radius));
@@ -645,7 +968,7 @@ void LScreenDC::Arc(double cx, double cy, double radius, double start, double en
 			EndX, EndY);
 }
 
-void LScreenDC::FilledArc(double cx, double cy, double radius, double start, double end)
+void LScreenDC::FilledArc(float cx, float cy, float radius, float start, float end)
 {
 	int StartX = (int)(cx + (cos(start) * radius));
 	int StartY = (int)(cy + (int)(sin(start) * radius));
@@ -661,7 +984,7 @@ void LScreenDC::FilledArc(double cx, double cy, double radius, double start, dou
 			EndX, EndY);
 }
 
-void LScreenDC::Ellipse(double cx, double cy, double x, double y)
+void LScreenDC::Ellipse(float cx, float cy, float x, float y)
 {
 	HBRUSH hTemp = (HBRUSH) SelectObject(hDC, d->Null.Brush);
 	::Ellipse(	hDC,
@@ -673,7 +996,7 @@ void LScreenDC::Ellipse(double cx, double cy, double x, double y)
 	SelectObject(hDC, hTemp);
 }
 
-void LScreenDC::FilledEllipse(double cx, double cy, double x, double y)
+void LScreenDC::FilledEllipse(float cx, float cy, float x, float y)
 {
 	::Ellipse(	hDC,
 				(int)floor(cx - x),
@@ -928,9 +1251,3 @@ void LScreenDC::Polygon(int Points, LPoint *Data)
 void LScreenDC::Bezier(int Threshold, LPoint *Pt)
 {
 }
-
-void LScreenDC::FloodFill(int x, int y, int Mode, COLOUR Border, LRect *r)
-{
-	::FloodFill(hDC, x, y, d->Col);
-}
-

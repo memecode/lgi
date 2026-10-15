@@ -499,8 +499,7 @@ void LListItem::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 
 		if (!c || !c->HasImage())
 		{
-			auto Ds = GetDs(i, Ctx.X());
-			if (Ds)
+			if (auto Ds = GetDs(i, Ctx.X()))
 			{
 				Ds->GetFont()->TabSize(0);
 				Ds->GetFont()->Transparent(false);

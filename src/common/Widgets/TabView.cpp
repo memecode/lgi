@@ -115,7 +115,7 @@ public:
 		if (Dc)
 			return true;
 
-		double r = 7.0;
+		float r = 7.0f;
 		int x = (int)(r * 2.0);
 		if (!Dc.Reset(new LMemDC(_FL, x, x, System32BitColourSpace)))
 			return false;
@@ -124,14 +124,14 @@ public:
 		Dc->Rectangle();
 
 		LPath p;
-		p.Circle(r, r, r-0.7);
+		p.Circle(r, r, r-0.7f);
 		p.SetFillRule(FILLRULE_ODDEVEN);
 		LSolidBrush s(c);
 		p.Fill(Dc, s);
 		p.Empty();
 
 		p.Circle(r, r, r);
-		p.Circle(r, r, r - 1.0);
+		p.Circle(r, r, r - 1.0f);
 		p.SetFillRule(FILLRULE_ODDEVEN);
 		LBlendStop Stops[2] = {
 			{0.0, cTopEdge.c32()},

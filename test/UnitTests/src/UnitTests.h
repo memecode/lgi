@@ -42,6 +42,15 @@ DECL_TEST(LBitsTest);
 DECL_TEST(NetworkTests);
 DECL_TEST(XmlTest);
 
+#if defined WINNATIVE
+class LSkinTest : public UnitTest
+{
+public:
+	LSkinTest() : UnitTest("LSkinTest") {}
+	bool Run() override;
+};
+#endif
+
 class LPathTest : public UnitTest
 {
 public:

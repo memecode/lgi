@@ -209,7 +209,7 @@ BMessage LMouse::Archive() const
 
 LPointF LDisplayInfo::Scale()
 {
-	LPointF p((double)Dpi.x / 96.0, (double)Dpi.y / 96.0);
+	LPointF p((float)Dpi.x / 96.0f, (float)Dpi.y / 96.0f);
 	return p;
 }
 

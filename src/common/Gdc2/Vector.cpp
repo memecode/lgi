@@ -183,9 +183,9 @@ public:
 		}
 		// PlutoVG's owned surfaces and rasterizer have a 32768-pixel size ceiling.
 		if (!Data || Width <= 0 || Height <= 0 || Width >= 32768 || Height >= 32768 ||
-			Stride > std::numeric_limits<int>::max() || Stride < -std::numeric_limits<int>::max() ||
+			Stride > (std::numeric_limits<int>::max)() || Stride < -(std::numeric_limits<int>::max)() ||
 			(Stride >= 0 ? Stride : -Stride) < Width * 4 ||
-			(size_t)(Height - 1) > (size_t)(std::numeric_limits<int>::max() - Width * 4) /
+			(size_t)(Height - 1) > (size_t)((std::numeric_limits<int>::max)() - Width * 4) /
 				(size_t)(Stride >= 0 ? Stride : -Stride))
 		{
 			LgiTrace("LSurface::Vec: inaccessible bitmap or invalid dimensions/stride.\n");
@@ -208,7 +208,7 @@ public:
 			LgiTrace("LSurface::Vec: could not allocate PlutoVG surface/canvas/path.\n");
 			return;
 		}
-		Clip = Target.ClipRgn();
+		Clip = static_cast<LSurface&>(Target).ClipRgn();
 		LRect bounds = Target.Bounds();
 		Clip.Intersection(&bounds);
 		Origin = Target.GetOrigin();
@@ -456,13 +456,13 @@ void LSurface::Vector::Fill(LColour colour)
 
 void LSurface::Vector::Fill(const LPointF &start, const LPointF &end, const LArray<LColourStop> &stops)
 {
-	const double limit = std::numeric_limits<float>::max();
+	const double limit = (std::numeric_limits<float>::max)();
 	if (!std::isfinite(start.x) || !std::isfinite(start.y) ||
 		!std::isfinite(end.x) || !std::isfinite(end.y) ||
 		std::fabs(start.x) > limit || std::fabs(start.y) > limit ||
 		std::fabs(end.x) > limit || std::fabs(end.y) > limit ||
 		((float)start.x == (float)end.x && (float)start.y == (float)end.y) ||
-		stops.Length() < 2 || stops.Length() > (size_t)std::numeric_limits<int>::max())
+		stops.Length() < 2 || stops.Length() > (size_t)(std::numeric_limits<int>::max)())
 	{
 		LgiTrace("LSurface::Vector::Fill: linear gradients require distinct finite endpoints and at least two stops.\n");
 		return;

@@ -111,9 +111,9 @@ void VcCommit::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 {
 	if (i == 0)
 	{
-		double Px = 12;
+		float Px = 12;
 		int Ht = Ctx.Y();
-		double Half = 5.5;
+		float Half = 5.5;
 		#define MAP(col) ((col) * Px + Half)
 
 		LMemDC Mem(_FL, Ctx.X(), Ctx.Y(), System32BitColourSpace);
@@ -131,9 +131,8 @@ void VcCommit::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 		LListItem::OnPaintColumn(Ctx, i, c);
 		#endif
 
-		double r = Half - 1;
-
-		double x = MAP(NodeIdx);
+		float r = Half - 1;
+		float x = MAP(NodeIdx);
 		Mem.Colour(LColour::Black);
 		
 		VcCommit *Prev = NULL, *Next = NULL;
@@ -190,8 +189,8 @@ void VcCommit::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 
 		if (NodeIdx >= 0)
 		{
-			double Cx = x;
-			double Cy = Ht / 2;
+			float Cx = x;
+			float Cy = (float)Ht / 2.0f;
 			{
 				LPath p;
 				p.Circle(Cx, Cy, r + (Current ? 1 : 0));

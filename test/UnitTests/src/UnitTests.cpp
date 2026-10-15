@@ -12,6 +12,9 @@ void UnitTests()
 	Tests.Add(new LMatrixTest);
 	Tests.Add(new LPathTest);
 	Tests.Add(new LVectorTest);
+	#if defined WINNATIVE
+	Tests.Add(new LSkinTest);
+	#endif
 	Tests.Add(new LStringClassTest);
 	Tests.Add(new LDateTimeTest);
 	Tests.Add(new LStringTests);

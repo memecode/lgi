@@ -438,6 +438,42 @@ int LCss::Len::ToPx(int Box, LFont *Font, int Dpi) const
 	}
 }
 
+float LCss::Len::ToPx(float Box, LFont *Font, int Dpi) const
+{
+	switch (Type)
+	{
+		default:
+		case LenInherit:
+			return 0.0f;
+		case LenAuto:
+		case LenNormal:
+		case LenPx:
+			return (float)Value;
+		case LenPt:
+		{
+			int effectiveDpi = Dpi > 0 ? Dpi : LScreenDpi().x;
+			return (float)(Value * effectiveDpi / 72.0);
+		}
+		case LenCm:
+		{
+			int effectiveDpi = Dpi > 0 ? Dpi : LScreenDpi().x;
+			return (float)(Value * effectiveDpi / 2.54);
+		}
+		case LenEm:
+		{
+			int fontHeight = Font ? Font->GetHeight() : 18;
+			return (float)(Value * fontHeight);
+		}
+		case LenEx:
+		{
+			double fontAscent = Font ? Font->Ascent() : 18.0;
+			return (float)(Value * fontAscent);
+		}
+		case LenPercent:
+			return Box > 0 ? (float)(Box * Value / 100.0) : 0.0f;
+	}
+}
+
 LCss::Len LCss::Len::operator *(const Len &b) const
 {
 	if (b.IsDynamic())

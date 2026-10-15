@@ -255,6 +255,7 @@
     <ClCompile Include="..\src\MatrixTest.cpp" />
     <ClCompile Include="..\src\NetworkTests.cpp" />
     <ClCompile Include="..\src\PathTest.cpp" />
+    <ClCompile Include="..\src\SkinTest.cpp" />
     <ClCompile Include="..\src\StringClassTests.cpp" />
     <ClCompile Include="..\src\BitsTest.cpp" />
     <ClCompile Include="..\src\RangeTest.cpp" />

@@ -112,15 +112,30 @@ LSurface::~LSurface()
 
 #ifdef WINNATIVE
 
-Gdiplus::Graphics *LSurface::GetGfx()
+bool LgiInitGdiPlus()
 {
 	static Gdiplus::GdiplusStartupInput gdiplusStartupInput;
 	static ULONG_PTR gdiplusToken = 0;
 
+	if (!gdiplusToken)
+	{
+		auto status = GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+		if (status != Gdiplus::Ok)
+		{
+			LgiTrace("GdiplusStartup failed: %i\n", (int)status);
+			return false;
+		}
+	}
+
+	return true;
+}
+
+Gdiplus::Graphics *LSurface::GetGfx()
+{
 	#if 1
 
-	if (!gdiplusToken)
-		GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+	if (!LgiInitGdiPlus())
+		return NULL;
 
 	if (!GdiplusGfx)
 	{

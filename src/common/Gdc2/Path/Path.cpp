@@ -68,9 +68,9 @@
 
 #define DEBUG_SCALE				1.0
 
-#define FixedToDbl(i)			( ( (double) ((long*)&i)[0]) / 65536)
+#define FixedToFloat(i)			( ( (float) ((long*)&i)[0]) / 65536)
 #define ToInt(d)				((int)( (d+(0.5/SUB_SAMPLE)+0.00000001) * SUB_SAMPLE))
-#define ToDbl(i)				((double)i / SUB_SAMPLE)
+#define ToFloat(i)				((float)i / SUB_SAMPLE)
 
 double LPointF::Threshold		= 0.00000001;
 
@@ -122,7 +122,7 @@ public:
 		Bounds = p[0];
 		for (int n=1; n<Points; n++)
 		{
-			double y = p[n].y;
+			float y = p[n].y;
 			Bounds.y1 = MIN(Bounds.y1, y);
 			Bounds.y2 = MAX(Bounds.y2, y);
 		}
@@ -153,8 +153,8 @@ public:
 					{
 						PathAssert(End >= Cur);
 
-						double k = b->x - a->x;
-						double Rx;
+						float k = b->x - a->x;
+						float Rx;
 						if (k == 0.0)
 						{
 							// vertical line
@@ -175,9 +175,9 @@ public:
 						else
 						{
 							 // angled line
-							double Lm = (b->y - a->y) / k;
-							double Lb = b->y - (Lm * b->x);
-							double Ry;
+							float Lm = (b->y - a->y) / k;
+							float Lb = b->y - (Lm * b->x);
+							float Ry;
 							
 							for (int s=Cur; s<=End; s++)
 							{
@@ -185,7 +185,7 @@ public:
 
 								PathAssert(Yi < n);
 
-								Ry = ToDbl(s);
+								Ry = ToFloat(s);
 								aax[Yi].x[s&SUB_MASK] = Rx = (Ry - Lb) / Lm;
 								Bounds.x1 = MIN(Bounds.x1, Rx);
 								Bounds.x2 = MAX(Bounds.x2, Rx);
@@ -322,7 +322,7 @@ public:
 		DeleteArray(Point);
 	}
 
-	void Translate(double Dx, double Dy)
+	void Translate(float Dx, float Dy)
 	{
 		for (int i=0; i<Points; i++)
 		{
@@ -354,12 +354,12 @@ public:
 ///////////////////////////////////////////////////////////
 void FlattenQuadratic(LPointF *&Out, LPointF &p1, LPointF &p2, LPointF &p3, int numsteps)
 {
-	double xdelta, xdelta2;
-	double ydelta, ydelta2;
-	double deltastep, deltastep2;
-	double ax, ay;
-	double bx, by;
-	double i;
+	float xdelta, xdelta2;
+	float ydelta, ydelta2;
+	float deltastep, deltastep2;
+	float ax, ay;
+	float bx, by;
+	float i;
 	LPointF v1, v2, *o;
 	
 	if (!Out)
@@ -370,20 +370,20 @@ void FlattenQuadratic(LPointF *&Out, LPointF &p1, LPointF &p2, LPointF &p3, int 
 	{
 		o = Out;
 
-		deltastep = 1.0 / (double) (numsteps - 1);
+		deltastep = 1.0f / (float) (numsteps - 1);
 		deltastep2 = deltastep*deltastep;
 
-		ax = p1.x + -2.0*p2.x + p3.x;
-		ay = p1.y + -2.0*p2.y + p3.y;
+		ax = p1.x + -2.0f * p2.x + p3.x;
+		ay = p1.y + -2.0f * p2.y + p3.y;
 
-		bx = -2.0*p1.x + 2.0*p2.x;
-		by = -2.0*p1.y + 2.0*p2.y;
+		bx = -2.0f * p1.x + 2.0f * p2.x;
+		by = -2.0f * p1.y + 2.0f * p2.y;
 
 		xdelta = ax*deltastep2 + bx*deltastep;
 		ydelta = ay*deltastep2 + by*deltastep;
 
-		xdelta2 = 2.0*ax*deltastep2;
-		ydelta2 = 2.0*ay*deltastep2;
+		xdelta2 = 2.0f * ax * deltastep2;
+		ydelta2 = 2.0f * ay * deltastep2;
 
 		v1.x = p1.x;
 		v1.y = p1.y;
@@ -410,13 +410,13 @@ void FlattenQuadratic(LPointF *&Out, LPointF &p1, LPointF &p2, LPointF &p3, int 
 
 void FlattenCubic(LPointF *&Out, LPointF &p1, LPointF &p2, LPointF &p3, LPointF &p4, int numsteps)
 {
-	double xdelta, xdelta2, xdelta3;
-	double ydelta, ydelta2, ydelta3;
-	double deltastep, deltastep2, deltastep3;
-	double ax, ay;
-	double bx, by;
-	double cx, cy;
-	double i;
+	float xdelta, xdelta2, xdelta3;
+	float ydelta, ydelta2, ydelta3;
+	float deltastep, deltastep2, deltastep3;
+	float ax, ay;
+	float bx, by;
+	float cx, cy;
+	float i;
 	LPointF v1, v2, *o;
 	
 	if (!Out)
@@ -427,27 +427,27 @@ void FlattenCubic(LPointF *&Out, LPointF &p1, LPointF &p2, LPointF &p3, LPointF 
 	{
 		o = Out;
 
-		deltastep = 1.0 / (double) (numsteps - 1);
+		deltastep = 1.0f / (float) (numsteps - 1);
 		deltastep2 = deltastep*deltastep;
 		deltastep3 = deltastep2*deltastep;
 
-		ax = -p1.x + 3.0*p2.x - 3.0*p3.x + p4.x;
-		ay = -p1.y + 3.0*p2.y - 3.0*p3.y + p4.y;
+		ax = -p1.x + 3.0f * p2.x - 3.0f * p3.x + p4.x;
+		ay = -p1.y + 3.0f * p2.y - 3.0f * p3.y + p4.y;
 
-		bx = 3.0*p1.x - 6.0*p2.x + 3.0*p3.x;
-		by = 3.0*p1.y - 6.0*p2.y + 3.0*p3.y;
+		bx = 3.0f*p1.x - 6.0f*p2.x + 3.0f*p3.x;
+		by = 3.0f*p1.y - 6.0f*p2.y + 3.0f*p3.y;
 
-		cx = -3.0*p1.x + 3.0*p2.x;
-		cy = -3.0*p1.y + 3.0*p2.y;
+		cx = -3.0f*p1.x + 3.0f*p2.x;
+		cy = -3.0f*p1.y + 3.0f*p2.y;
 
 		xdelta = ax*deltastep3 + bx*deltastep2 + cx*deltastep;
 		ydelta = ay*deltastep3 + by*deltastep2 + cy*deltastep;
 
-		xdelta2 = 6.0*ax*deltastep3 + 2.0*bx*deltastep2;
-		ydelta2 = 6.0*ay*deltastep3 + 2.0*by*deltastep2;
+		xdelta2 = 6.0f*ax*deltastep3 + 2.0f*bx*deltastep2;
+		ydelta2 = 6.0f*ay*deltastep3 + 2.0f*by*deltastep2;
 
-		xdelta3 = 6.0*ax*deltastep3;
-		ydelta3 = 6.0*ay*deltastep3;
+		xdelta3 = 6.0f*ax*deltastep3;
+		ydelta3 = 6.0f*ay*deltastep3;
 
 		v1.x = p1.x;
 		v1.y = p1.y;
@@ -528,7 +528,7 @@ void LPath::Transform(Matrix &m)
 	Mat = m;
 }
 
-void LPath::MoveTo(double x, double y)
+void LPath::MoveTo(float x, float y)
 {
 	Close();
 	
@@ -546,7 +546,7 @@ void LPath::MoveTo(LPointF &pt)
 	}
 }
 
-void LPath::LineTo(double x, double y)
+void LPath::LineTo(float x, float y)
 {
 	LPointF p(x, y);
 	LineTo(p);
@@ -562,7 +562,7 @@ void LPath::LineTo(LPointF &pt)
 	}
 }
 
-void LPath::QuadBezierTo(double cx, double cy, double px, double py)
+void LPath::QuadBezierTo(float cx, float cy, float px, float py)
 {
 	LPointF c(cx, cy);
 	LPointF p(px, py);
@@ -580,7 +580,7 @@ void LPath::QuadBezierTo(LPointF &c, LPointF &p)
 	}
 }
 
-void LPath::CubicBezierTo(double c1x, double c1y, double c2x, double c2y, double px, double py)
+void LPath::CubicBezierTo(float c1x, float c1y, float c2x, float c2y, float px, float py)
 {
 	LPointF c1(c1x, c1y);
 	LPointF c2(c2x, c2y);
@@ -600,7 +600,7 @@ void LPath::CubicBezierTo(LPointF &c1, LPointF &c2, LPointF &p)
 	}
 }
 
-void LPath::Rectangle(double x1, double y1, double x2, double y2)
+void LPath::Rectangle(float x1, float y1, float x2, float y2)
 {
 	MoveTo(x1, y1);
 	LineTo(x2, y1);
@@ -623,9 +623,9 @@ void LPath::Rectangle(LRectF &r)
 	LineTo(r.x1, r.y1);
 }
 
-void LPath::RoundRect(LRectF &b, double r)
+void LPath::RoundRect(LRectF &b, float r)
 {
-	double k = 0.5522847498 * r;
+	float k = 0.5522847498f * r;
 	
 	MoveTo(b.x1 + r, b.y1);
 
@@ -657,13 +657,13 @@ void LPath::RoundRect(LRectF &b, double r)
 					c.x, c.y - r);
 }
 
-void LPath::Circle(double cx, double cy, double radius)
+void LPath::Circle(float cx, float cy, float radius)
 {
 	LPointF c(cx, cy);
 	Circle(c, radius);
 }
 
-void LPath::Circle(LPointF &c, double r)
+void LPath::Circle(LPointF &c, float r)
 {
 	/*
 	double theta;
@@ -681,7 +681,7 @@ void LPath::Circle(LPointF &c, double r)
 	}
 	*/
 	
-	double k = 0.5522847498 * r;
+	float k = 0.5522847498f * r;
 	MoveTo(c.x, c.y - r);
 	CubicBezierTo(	c.x + k, c.y - r,
 					c.x + r, c.y - k,
@@ -697,16 +697,16 @@ void LPath::Circle(LPointF &c, double r)
 					c.x, c.y - r);
 }
 
-void LPath::Ellipse(double cx, double cy, double x, double y)
+void LPath::Ellipse(float cx, float cy, float x, float y)
 {
 	LPointF c(cx, cy);
 	Ellipse(c, x, y);
 }
 
-void LPath::Ellipse(LPointF &c, double x, double y)
+void LPath::Ellipse(LPointF &c, float x, float y)
 {
-	double dx = x * 0.552;
-	double dy = y * 0.552;
+	float dx = x * 0.552f;
+	float dy = y * 0.552f;
 
 	MoveTo(c.x + x, c.y);
 	CubicBezierTo(	c.x + x, c.y - dy,
@@ -724,11 +724,11 @@ void LPath::Ellipse(LPointF &c, double x, double y)
 }
 
 #ifdef WIN32
-LPointF &PointConv(POINTFX pt, double x, double y, double Scale)
+LPointF &PointConv(POINTFX pt, float x, float y, float Scale)
 {
 	static LPointF f;
-	f.x = x + (FixedToDbl(pt.x) * Scale);
-	f.y = y - (FixedToDbl(pt.y) * Scale);
+	f.x = x + (FixedToFloat(pt.x) * Scale);
+	f.y = y - (FixedToFloat(pt.y) * Scale);
 	return f;
 }										
 #endif
@@ -742,8 +742,8 @@ void LPath::Append(LPath &p)
 }
 
 bool LPath::Text(	LFont *Font,
-					double x,
-					double y,
+					float x,
+					float y,
 					char *Utf8,
 					int Bytes)
 {
@@ -758,7 +758,7 @@ bool LPath::Text(	LFont *Font,
 			LDisplayString Sp(Font, " ");
 
 			#ifdef WIN32
-			double _x = 0, _y = 0;
+			float _x = 0, _y = 0;
 			HDC hDC = CreateCompatibleDC(0);
 			if (hDC)
 			{
@@ -770,7 +770,7 @@ bool LPath::Text(	LFont *Font,
 				Mat.eM11.value = 1;
 				Mat.eM22.value = 1;
 
-				double Scale = DEBUG_SCALE; // Font->Height();
+				float Scale = DEBUG_SCALE; // Font->Height();
 				for (char16 *In = Utf16; *In; In++)
 				{
 					if (*In == ' ')
@@ -909,8 +909,8 @@ bool LPath::Text(	LFont *Font,
 			LRectF b;
 			Temp.GetBounds(&b);
 
-			double Dx = x - b.x1;
-			double Dy = y - b.y1 - Font->Ascent();
+			float Dx = x - b.x1;
+			float Dy = y - b.y1 - (float) Font->Ascent();
 			for (auto s: Temp.Segs)
 			{
 				s->Translate(Dx, Dy);
@@ -1301,11 +1301,11 @@ void LPath::Fill(LSurface *pDC, LBrush &c)
 		int Ox = 0, Oy = 0;
 		
 		pDC->GetOrigin(Ox, Oy);
-		double OffsetX = Mat[2][0] - Ox;
-		double OffsetY = Mat[2][1] - Oy;
+		float OffsetX = Mat[2][0] - Ox;
+		float OffsetY = Mat[2][1] - Oy;
 		
 		Doc.Offset(OffsetX, OffsetY);
-		LRectF Page(0, 0, pDC->X(), pDC->Y());
+		LRectF Page(0.0f, 0.0f, (float)pDC->X(), (float)pDC->Y());
 		LRect DcClip = pDC->ClipRgn();
 		if (DcClip.Valid())
 			Page = DcClip;
@@ -1912,12 +1912,12 @@ bool LLinearBlendBrush::Start(LRopArgs &Args)
 {
 	LBlendBrush::Start(Args);
 
-	double dx = p[1].x - p[0].x;
-	double dy = p[1].y - p[0].y;
+	float dx = p[1].x - p[0].x;
+	float dy = p[1].y - p[0].y;
 	// bool Vert = (dx < 0 ? -dx : dx) < 0.0000001;
 
-	double d = sqrt( (dx*dx) + (dy*dy) );
-	double a = atan2(dy, dx);
+	float d = (float) sqrt( (dx*dx) + (dy*dy) );
+	float a = (float) atan2(dy, dx);
 
 	LPointF Origin(0, 0);
 	Origin.Translate(-p[0].x, -p[0].y);

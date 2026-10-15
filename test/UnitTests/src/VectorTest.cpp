@@ -14,6 +14,51 @@ static_assert(std::is_move_constructible<LSurface::Vector>::value, "Vector sessi
 
 namespace
 {
+#if defined(WINNATIVE)
+bool TestScreenVectorContext()
+{
+	BITMAPINFO info = {};
+	info.bmiHeader.biSize = sizeof(info.bmiHeader);
+	info.bmiHeader.biWidth = 40;
+	info.bmiHeader.biHeight = -40;
+	info.bmiHeader.biPlanes = 1;
+	info.bmiHeader.biBitCount = 32;
+	info.bmiHeader.biCompression = BI_RGB;
+	void *bits = nullptr;
+	HBITMAP bitmap = CreateDIBSection(nullptr, &info, DIB_RGB_COLORS, &bits, nullptr, 0);
+	if (!bitmap || !bits)
+	{
+		if (bitmap)
+			DeleteObject(bitmap);
+		return false;
+	}
+
+	memset(bits, 0, 40 * 40 * 4);
+	bool paintedAtClientOrigin = false;
+	{
+		LScreenDC dc(bitmap, 40, 40);
+		if (dc.Handle() && dc.GetGfx())
+		{
+			LRect client(10, 10, 29, 29);
+			dc.SetClient(&client);
+			{
+				auto vector = dc.Vec();
+				if (vector)
+				{
+					vector.Rect(0, 0, 4, 4);
+					vector.Fill(LColour::Red);
+				}
+			}
+			auto pixels = static_cast<const LBgra32*>(bits);
+			paintedAtClientOrigin = pixels[11 * 40 + 11].r == 255 &&
+				pixels[1 * 40 + 1].r == 0;
+		}
+	}
+	DeleteObject(bitmap);
+	return paintedAtClientOrigin;
+}
+#endif
+
 template<typename ReadPixel>
 bool TestLinearGradient(LSurface &dc, ReadPixel pixel)
 {
@@ -73,7 +118,7 @@ bool TestLinearGradient(LSurface &dc, ReadPixel pixel)
 	const auto before = pixel(16, 16);
 	v.Fill(LPointF(0, 0), LPointF(0, 0), stops);
 	v.Fill(LPointF(std::numeric_limits<double>::infinity(), 0), LPointF(32, 0), stops);
-	v.Fill(LPointF(0, 0), LPointF(std::numeric_limits<double>::max(), 0), stops);
+	v.Fill(LPointF(0, 0), LPointF((std::numeric_limits<double>::max)(), 0), stops);
 	stops[0].Pos = -0.1f;
 	v.Fill(LPointF(0, 0), LPointF(32, 0), stops);
 	stops[0].Pos = 0.8f;
@@ -400,6 +445,10 @@ public:
 
 bool LVectorTest::Run()
 {
+	#if defined(WINNATIVE)
+	if (!TestScreenVectorContext())
+		return FAIL(_FL, "Screen vectors must follow client changes made after the GDI+ cache is created.");
+	#endif
 	#if defined(__GTK_H__)
 	if (!TestGradientBlit())
 		return FAIL(_FL, "Gradient blits must premultiply antialiased edges without changing the source.");
@@ -441,7 +490,8 @@ bool LVectorTest::Run()
 		if (row[10].r != 255 || row[10].b != 0)
 			return FAIL(_FL, "An empty vector clip must not paint.");
 	}
-	if (dc.ClipRgn() != clip || dc.Colour() != oldColour || dc.Op() != oldOp || dc.AntiAlias())
+	if (static_cast<LSurface&>(dc).ClipRgn() != clip ||
+		dc.Colour() != oldColour || dc.Op() != oldOp || dc.AntiAlias())
 		return FAIL(_FL, "Vector sessions must preserve LSurface state.");
 	{
 		auto v = dc.Vec();

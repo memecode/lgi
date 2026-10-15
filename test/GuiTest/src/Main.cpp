@@ -416,7 +416,7 @@ public:
 		SetId(id);
 	}
 
-	void Vectors(LSurface *pdc, int y)
+	void Vectors(LSurface *pdc, float y)
 	{
 		if (auto v = pdc->Vec())
 		{
@@ -443,6 +443,10 @@ public:
 			stops[1].Set(1.0f, LColour(0, 128, 0));
 			v.Fill(LPointF(20, y+100), LPointF(80, y+100), stops);
 		}
+		else
+		{
+			LgiTrace("%s:%i - Vec failed.\n", _FL);
+		}
 	}
 	
 	void OnPaint(LSurface *pdc) override
@@ -468,10 +472,10 @@ public:
 		
 		int y = ds1.Y() << 1;
 		
-		Vectors(pdc, y);
+		Vectors(pdc, (float)y);
 		
 		LMemDC mem(_FL, 300, 300, System32BitColourSpace);
-		Vectors(&mem, 0);
+		Vectors(&mem, 0.0f);
 		pdc->Blt(cols[1].x1, cols[1].y1 + y, &mem);
 	}
 };

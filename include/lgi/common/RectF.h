@@ -177,10 +177,10 @@ public:
 
 	LRectF &operator =(LRect &f)
 	{
-		x1 = f.x1;
-		y1 = f.y1;
-		x2 = f.x2 + 1;
-		y2 = f.y2 + 1;
+		x1 = (float)f.x1;
+		y1 = (float)f.y1;
+		x2 = (float)f.x2 + 1.0f;
+		y2 = (float)f.y2 + 1.0f;
 		init = true;
 		return *this;
 	}
@@ -204,8 +204,8 @@ public:
 
 	LRectF &operator =(LPointF &p)
 	{
-		x1 = x2 = p.x;
-		y1 = y2 = p.y;
+		x1 = x2 = (float)p.x;
+		y1 = y2 = (float)p.y;
 		init = true;
 		return *this;
 	}
@@ -231,7 +231,7 @@ private:
 			d = -d;
 
 		if (d < 0.00001)
-			n = i;
+			n = (float)i;
 	}
 };
 

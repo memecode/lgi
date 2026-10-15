@@ -180,7 +180,7 @@ class PlutoVgSkin : public LSkinEngine
 		// Border / fill
 		{
 			LRectF fr(Client);
-			int Resize = Default ? 2 : 1;
+			float Resize = Default ? 2.0f : 1.0f;
 			fr.Inset(Resize, Resize);
 			if (Down)
 			{
@@ -307,7 +307,7 @@ class PlutoVgSkin : public LSkinEngine
 		if (MarkType != TNoMark && Down)
 		{
 			LRectF CheckBox = r;
-			int Px = (int)(CheckBox.X() / 6);
+			float Px = CheckBox.X() / 6;
 			CheckBox.Inset(CHECK_BORDER + Px, CHECK_BORDER + Px);
 
 			float Cx = (float)(CheckBox.x1 + (CheckBox.X() / 2));
@@ -606,6 +606,11 @@ public:
 			Mem.Op(GDC_ALPHA);
 			Callback(UserData, &Mem, r, false);
 		}
+		#if defined WINNATIVE
+		// GDI text clears alpha; the column background is fully opaque.
+		GdiFlush();
+		Mem.MakeOpaque();
+		#endif
 		State->pScreen->Blt(State->Rect.x1, State->Rect.y1, &Mem);
 	}
 

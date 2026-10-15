@@ -88,7 +88,7 @@ struct LMatrix
 		{
 			for (int x=0; x<Xs; x++)
 			{
-				m[y][x] = y == x ? 1 : 0;
+				m[y][x] = (T) (y == x ? 1 : 0);
 			}
 		}
 	}
