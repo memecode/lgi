@@ -432,6 +432,16 @@ public:
 			v.LineTo(110, y+60);
 			v.ClosePath();
 			v.Stroke(LColour::Red, 3.0f);
+
+			v.ClearPath();
+			v.MoveTo(50, y+100);
+			v.LineTo(20, y+150);
+			v.LineTo(80, y+140);
+			v.ClosePath();
+			LArray<LColourStop> stops;
+			stops[0].Set(0.0f, LColour(255, 165, 0));
+			stops[1].Set(1.0f, LColour(0, 128, 0));
+			v.Fill(LPointF(20, y+100), LPointF(80, y+100), stops);
 		}
 	}
 	

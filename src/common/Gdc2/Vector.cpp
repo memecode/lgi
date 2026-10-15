@@ -266,6 +266,35 @@ public:
 		Export();
 	}
 
+	void Fill(const LPointF &start, const LPointF &end, const LArray<LColourStop> &stops) override
+	{
+		std::unique_ptr<plutovg_gradient_stop_t[]> nativeStops(
+			new (std::nothrow) plutovg_gradient_stop_t[stops.Length()]);
+		if (!nativeStops)
+		{
+			LgiTrace("LSurface::Vector::Fill: could not allocate gradient stops.\n");
+			return;
+		}
+		for (size_t i = 0; i < stops.Length(); i++)
+		{
+			const auto &stop = stops.ItemAt(i);
+			nativeStops[i] = {stop.Pos, {stop.Colour.r() / 255.0f, stop.Colour.g() / 255.0f,
+				stop.Colour.b() / 255.0f, stop.Colour.a() / 255.0f}};
+		}
+		auto paint = plutovg_paint_create_linear_gradient(start.x, start.y, end.x, end.y,
+			PLUTOVG_SPREAD_METHOD_PAD, nativeStops.get(), (int)stops.Length(), nullptr);
+		if (!paint)
+		{
+			LgiTrace("LSurface::Vector::Fill: could not create linear gradient.\n");
+			return;
+		}
+		Import();
+		plutovg_canvas_set_paint(Canvas, paint);
+		plutovg_canvas_fill_path(Canvas, Path);
+		plutovg_paint_destroy(paint);
+		Export();
+	}
+
 	void Stroke(LColour colour, float width) override
 	{
 		if (!std::isfinite(width) || width <= 0)
@@ -423,6 +452,35 @@ void LSurface::Vector::Fill(LColour colour)
 {
 	if (auto context = GetContext())
 		context->Fill(colour);
+}
+
+void LSurface::Vector::Fill(const LPointF &start, const LPointF &end, const LArray<LColourStop> &stops)
+{
+	const double limit = std::numeric_limits<float>::max();
+	if (!std::isfinite(start.x) || !std::isfinite(start.y) ||
+		!std::isfinite(end.x) || !std::isfinite(end.y) ||
+		std::fabs(start.x) > limit || std::fabs(start.y) > limit ||
+		std::fabs(end.x) > limit || std::fabs(end.y) > limit ||
+		((float)start.x == (float)end.x && (float)start.y == (float)end.y) ||
+		stops.Length() < 2 || stops.Length() > (size_t)std::numeric_limits<int>::max())
+	{
+		LgiTrace("LSurface::Vector::Fill: linear gradients require distinct finite endpoints and at least two stops.\n");
+		return;
+	}
+	float previous = 0;
+	for (size_t i = 0; i < stops.Length(); i++)
+	{
+		float position = stops.ItemAt(i).Pos;
+		if (!std::isfinite(position) || position < 0 || position > 1 ||
+			(i && position <= previous))
+		{
+			LgiTrace("LSurface::Vector::Fill: gradient positions must be finite, strictly increasing, and in [0, 1].\n");
+			return;
+		}
+		previous = position;
+	}
+	if (auto context = GetContext())
+		context->Fill(start, end, stops);
 }
 
 void LSurface::Vector::Stroke(LColour colour, float width)

@@ -174,6 +174,7 @@
 //				Classes
 class LFilter;
 class LSurface;
+struct LColourStop;
 
 /// The single vector drawing interface, implemented by each backend and by
 /// LSurface::Vector (which adds validation). Add new operations here only.
@@ -227,6 +228,11 @@ public:
 	virtual void ClearPath() = 0;
 	/// Fills the current path using the non-zero winding rule.
 	virtual void Fill(LColour colour) = 0;
+	/// Linear gradient in surface coordinates, preserving the current path.
+	/// Requires distinct finite, float-representable endpoints and at least two stops
+	/// with strictly increasing positions in [0, 1]. Endpoint colours extend beyond the stops.
+	/// Stop colours include alpha; invalid input is logged and draws nothing.
+	virtual void Fill(const LPointF &start, const LPointF &end, const LArray<LColourStop> &stops) = 0;
 	/// Strokes the current path; width is in surface coordinate units.
 	virtual void Stroke(LColour colour, float width) = 0;
 	/// Intersects the current clip with rect; false indicates backend failure.
@@ -514,6 +520,7 @@ public:
 		void ClosePath() override;
 		void ClearPath() override;
 		void Fill(LColour colour) override;
+		void Fill(const LPointF &start, const LPointF &end, const LArray<LColourStop> &stops) override;
 		void Stroke(LColour colour, float width) override;
 		bool ClipRect(LRect rect) override;
 	};

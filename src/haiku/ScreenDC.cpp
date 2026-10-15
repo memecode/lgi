@@ -15,6 +15,7 @@
 #include <Bitmap.h>
 #include <Region.h>
 #include <Shape.h>
+#include <GradientLinear.h>
 #include <new>
 #include <cmath>
 
@@ -78,6 +79,24 @@ public:
 	{
 		SetColour(colour);
 		View->FillShape(&Path);
+	}
+	void Fill(const LPointF &start, const LPointF &end, const LArray<LColourStop> &stops) override
+	{
+		BGradientLinear gradient(start.x, start.y, end.x, end.y);
+		for (size_t i = 0; i < stops.Length(); i++)
+		{
+			const auto &stop = stops.ItemAt(i);
+			auto colour = stop.Colour;
+			rgb_color nativeColour = {colour.r(), colour.g(), colour.b(), colour.a()};
+			if (gradient.AddColor(nativeColour, stop.Pos * 255.0f) < 0)
+			{
+				LgiTrace("LSurface::Vector::Fill: could not allocate Haiku gradient stop.\n");
+				return;
+			}
+		}
+		View->SetDrawingMode(B_OP_ALPHA);
+		View->SetBlendingMode(B_PIXEL_ALPHA, B_ALPHA_OVERLAY);
+		View->FillShape(&Path, gradient);
 	}
 	void Stroke(LColour colour, float width) override
 	{
@@ -636,4 +655,3 @@ void LScreenDC::Bezier(int Threshold, LPoint *Pt)
 	VIEW_CHECK()
 	LAssert(0);
 }
-

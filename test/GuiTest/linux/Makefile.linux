@@ -256,7 +256,6 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/mac/cocoa/ObjCWrapper.h \
 	../../include/lgi/mac/cocoa/SymLookup.h \
 	../../private/common/FontPriv.h \
-	../../private/common/Gdc2Vector.h \
 	../../private/common/ViewPriv.h \
 	../../private/linux/AppPriv.h \
 	../../src/common/Gdc2/15Bit.cpp \

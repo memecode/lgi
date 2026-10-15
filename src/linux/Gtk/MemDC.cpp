@@ -86,7 +86,33 @@ LCairoSurfaceT LMemDC::GetSubImage(LRect &r)
 
 	if (d->Img)
 	{
+		cairo_surface_flush(d->Img);
 		cairo_format_t fmt = cairo_image_surface_get_format(d->Img);
+		if (fmt == CAIRO_FORMAT_ARGB32 && !IsPreMultipliedAlpha())
+		{
+			s = cairo_image_surface_create(fmt, r.X(), r.Y());
+			if (!s || cairo_surface_status(s) != CAIRO_STATUS_SUCCESS)
+			{
+				LgiTrace("LMemDC::GetSubImage: could not allocate premultiplied blit surface.\n");
+				return LCairoSurfaceT();
+			}
+			auto data = cairo_image_surface_get_data(s);
+			int stride = cairo_image_surface_get_stride(s);
+			for (int y = 0; y < r.Y(); y++)
+			{
+				auto src = reinterpret_cast<const LBgra32*>((*this)[r.y1 + y]) + r.x1;
+				auto dst = reinterpret_cast<LBgra32*>(data + y * stride);
+				for (int x = 0; x < r.X(); x++)
+				{
+					dst[x].r = (src[x].r * src[x].a + 127) / 255;
+					dst[x].g = (src[x].g * src[x].a + 127) / 255;
+					dst[x].b = (src[x].b * src[x].a + 127) / 255;
+					dst[x].a = src[x].a;
+				}
+			}
+			cairo_surface_mark_dirty(s);
+			return LCairoSurfaceT(cairo_surface_reference(s));
+		}
 		int pixel_bytes = LColourSpaceToBits(ColourSpace) >> 3;
 		return cairo_image_surface_create_for_data(	pMem->Base + (r.y1 * pMem->Line) + (r.x1 * pixel_bytes),
 													fmt,

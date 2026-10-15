@@ -14,7 +14,155 @@ static_assert(std::is_move_constructible<LSurface::Vector>::value, "Vector sessi
 
 namespace
 {
+template<typename ReadPixel>
+bool TestLinearGradient(LSurface &dc, ReadPixel pixel)
+{
+	auto expect = [&](int x, int y, uint32_t expected, int tolerance = 0)
+	{
+		uint32_t actual = pixel(x, y);
+		bool matches = true;
+		for (int shift = 0; shift < 32; shift += 8)
+			if (std::abs(int((actual >> shift) & 255) - int((expected >> shift) & 255)) > tolerance)
+				matches = false;
+		if (!matches)
+			printf("Linear gradient at %i,%i: expected %08x, got %08x\n", x, y, expected, actual);
+		return matches;
+	};
+	LArray<LColourStop> stops;
+	stops[0].Set(0.25f, LColour(255, 0, 0));
+	stops[1].Set(0.5f, LColour(0, 255, 0));
+	stops[2].Set(0.75f, LColour(0, 0, 255));
+	auto v = dc.Vec();
+	if (!v)
+		return false;
+	v.Rect(0, 0, 32, 32);
+	v.Fill(LColour(0, 0, 255));
+	v.ClearPath();
+	v.Rect(1, 1, 30, 30);
+	if (!v.ClipRect(LRect(2, 2, 29, 29)))
+		return false;
+	v.Fill(LPointF(4.5, 0), LPointF(28.5, 0), stops);
+	if (!expect(3, 16, 0xffff0000) || !expect(16, 16, 0xff00ff00, 1) ||
+		!expect(28, 16, 0xff0000ff) || !expect(1, 16, 0xff0000ff))
+		return false;
+
+	stops[0].Pos = 0;
+	stops[2].Pos = 1;
+	v.Fill(LPointF(0, 4.5), LPointF(0, 28.5), stops);
+	if (!expect(16, 4, 0xffff0000) || !expect(16, 16, 0xff00ff00, 1) ||
+		!expect(16, 28, 0xff0000ff, 1))
+		return false;
+	v.Fill(LPointF(4.5, 4.5), LPointF(28.5, 28.5), stops);
+	if (!expect(4, 4, 0xffff0000) || !expect(16, 16, 0xff00ff00, 1) ||
+		!expect(28, 28, 0xff0000ff, 1))
+		return false;
+
+	v.Fill(LColour(0, 0, 255));
+	stops.Length(2);
+	stops[0].Set(0, LColour(255, 0, 0, 128));
+	stops[1].Set(1, LColour(255, 0, 0, 128));
+	v.Fill(LPointF(0, 0), LPointF(32, 0), stops);
+	if (!expect(16, 16, 0xff80007f))
+		return false;
+	v.Fill(LColour(0, 0, 255));
+	stops[0].Colour = LColour(255, 0, 0, 0);
+	v.Fill(LPointF(0.5, 0), LPointF(32.5, 0), stops);
+	if (!expect(16, 16, 0xff4000bf, 1))
+		return false;
+
+	const auto before = pixel(16, 16);
+	v.Fill(LPointF(0, 0), LPointF(0, 0), stops);
+	v.Fill(LPointF(std::numeric_limits<double>::infinity(), 0), LPointF(32, 0), stops);
+	v.Fill(LPointF(0, 0), LPointF(std::numeric_limits<double>::max(), 0), stops);
+	stops[0].Pos = -0.1f;
+	v.Fill(LPointF(0, 0), LPointF(32, 0), stops);
+	stops[0].Pos = 0.8f;
+	stops[1].Pos = 0.2f;
+	v.Fill(LPointF(0, 0), LPointF(32, 0), stops);
+	stops[0].Pos = stops[1].Pos = 0.5f;
+	v.Fill(LPointF(0, 0), LPointF(32, 0), stops);
+	stops[0].Pos = 0;
+	stops[1].Pos = 1.1f;
+	v.Fill(LPointF(0, 0), LPointF(32, 0), stops);
+	stops[1].Pos = std::numeric_limits<float>::quiet_NaN();
+	v.Fill(LPointF(0, 0), LPointF(32, 0), stops);
+	stops.Length(1);
+	v.Fill(LPointF(0, 0), LPointF(32, 0), stops);
+	stops.Length(0);
+	v.Fill(LPointF(0, 0), LPointF(32, 0), stops);
+	if (!expect(16, 16, before))
+		return false;
+	v.Stroke(LColour(255, 255, 255), 4);
+	if (!expect(2, 16, 0xffffffff) || !expect(0, 16, 0xff0000ff))
+		return false;
+	v.Fill(LColour(255, 0, 0));
+	return expect(16, 16, 0xffff0000);
+}
+
 #if defined(__GTK_H__)
+bool TestGradientBlit()
+{
+	using namespace Gtk;
+	LMemDC source(_FL, 40, 40, System32BitColourSpace);
+	if (!source[0] || source.GetColourSpace() != CsBgra32)
+		return false;
+	source.Colour(LColour(0, 0, 0, 0));
+	source.Rectangle();
+	{
+		auto v = source.Vec();
+		if (!v)
+			return false;
+		v.MoveTo(20, 4);
+		v.LineTo(4, 32);
+		v.LineTo(36, 28);
+		v.ClosePath();
+		LArray<LColourStop> stops;
+		stops[0].Set(0, LColour(255, 165, 0));
+		stops[1].Set(1, LColour(0, 128, 0));
+		v.Fill(LPointF(4, 4), LPointF(36, 4), stops);
+	}
+	std::array<unsigned char, 40 * 40 * 4> original;
+	for (int y = 0; y < 40; y++)
+		memcpy(original.data() + y * 160, source[y], 160);
+	for (bool premul : {false, true})
+	{
+		if (premul && !source.ConvertPreMulAlpha(true))
+			return false;
+		std::unique_ptr<cairo_surface_t, decltype(&cairo_surface_destroy)> surface(
+			cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 40, 40), cairo_surface_destroy);
+		std::unique_ptr<cairo_t, decltype(&cairo_destroy)> context(cairo_create(surface.get()), cairo_destroy);
+		cairo_set_source_rgb(context.get(), 0, 0, 0);
+		cairo_paint(context.get());
+		LScreenDC dc(context.get(), 40, 40);
+		LRect sub(2, 2, 37, 37);
+		dc.Blt(2, 2, &source, &sub);
+		cairo_surface_flush(surface.get());
+		auto data = cairo_image_surface_get_data(surface.get());
+		int stride = cairo_image_surface_get_stride(surface.get());
+		int edges = 0;
+		for (int y = 2; y <= 37; y++)
+		{
+			auto src = reinterpret_cast<const LBgra32*>(source[y]);
+			auto dst = reinterpret_cast<const LBgra32*>(data + y * stride);
+			for (int x = 2; x <= 37; x++)
+			{
+				int alpha = src[x].a;
+				if (alpha > 0 && alpha < 255)
+					edges++;
+				auto expected = [&](int channel) { return premul ? channel : (channel * alpha + 127) / 255; };
+				if (dst[x].r != expected(src[x].r) || dst[x].g != expected(src[x].g) ||
+					dst[x].b != expected(src[x].b) || dst[x].a != 255)
+					return false;
+			}
+			if (!premul && memcmp(original.data() + y * 160, source[y], 160))
+				return false;
+		}
+		if (!edges || source.IsPreMultipliedAlpha() != premul)
+			return false;
+	}
+	return true;
+}
+
 bool TestCairoVectorContext()
 {
 	using namespace Gtk;
@@ -52,6 +200,14 @@ bool TestCairoVectorContext()
 		if (row[10] != 0xff80007f)
 			return false;
 	}
+	if (!TestLinearGradient(dc, [&](int x, int y)
+		{
+			cairo_surface_flush(surface.get());
+			auto data = cairo_image_surface_get_data(surface.get());
+			auto stride = cairo_image_surface_get_stride(surface.get());
+			return reinterpret_cast<const uint32_t*>(data + (y + 3) * stride)[x + 2];
+		}))
+		return false;
 	double currentX = 0, currentY = 0;
 	cairo_get_current_point(cr, &currentX, &currentY);
 	double left = 0, top = 0, right = 0, bottom = 0;
@@ -111,6 +267,18 @@ bool TestCairoVectorContext()
 template<typename Pixel>
 bool TestAlphaFormat(LColourSpace cs, bool premul)
 {
+	LMemDC gradient(_FL, 32, 32, cs, LSurface::SurfaceRequireExactCs);
+	if (!gradient[0])
+		return false;
+	for (int y = 0; y < gradient.Y(); y++)
+		memset(gradient[y], 0, gradient.X() * sizeof(Pixel));
+	if ((premul && !gradient.ConvertPreMulAlpha(true)) ||
+		!TestLinearGradient(gradient, [&](int x, int y)
+		{
+			const auto &p = reinterpret_cast<const Pixel*>(gradient[y])[x];
+			return (uint32_t(p.a) << 24) | (uint32_t(p.r) << 16) | (uint32_t(p.g) << 8) | p.b;
+		}))
+		return false;
 	LMemDC dc(_FL, 12, 12, cs, LSurface::SurfaceRequireExactCs);
 	if (!dc[0] || dc.GetColourSpace() != cs)
 		return false;
@@ -156,13 +324,22 @@ bool TestAlphaFormat(LColourSpace cs, bool premul)
 	v.Rect(2, 2, 8, 8);
 	v.Fill(LColour(255, 0, 0, 128));
 	auto pixel = reinterpret_cast<Pixel*>(dc[5])[5];
+	if (pixel.r != (premul ? 128 : 255) || pixel.g != 0 || pixel.b != 0 || pixel.a != 128)
+		return false;
+	for (int y = 0; y < dc.Y(); y++)
+		memset(dc[y], 0, dc.X() * sizeof(Pixel));
+	LArray<LColourStop> stops;
+	stops[0].Set(0, LColour(255, 0, 0, 128));
+	stops[1].Set(1, LColour(255, 0, 0, 128));
+	v.Fill(LPointF(0, 0), LPointF(12, 0), stops);
+	pixel = reinterpret_cast<Pixel*>(dc[5])[5];
 	return pixel.r == (premul ? 128 : 255) && pixel.g == 0 && pixel.b == 0 && pixel.a == 128;
 }
 
 template<typename Pixel>
 bool TestPaddingFormat(LColourSpace cs)
 {
-	LMemDC dc(_FL, 8, 8, cs, LSurface::SurfaceRequireExactCs);
+	LMemDC dc(_FL, 32, 32, cs, LSurface::SurfaceRequireExactCs);
 	if (!dc[0] || dc.GetColourSpace() != cs)
 		return false;
 	for (int y = 0; y < dc.Y(); y++)
@@ -175,13 +352,27 @@ bool TestPaddingFormat(LColourSpace cs)
 			row[x].pad = 43;
 		}
 	}
-	auto v = dc.Vec();
-	if (!v)
+	{
+		auto v = dc.Vec();
+		if (!v)
+			return false;
+		v.Rect(1, 1, 6, 6);
+		v.Fill(LColour(255, 0, 0, 128));
+		auto pixel = reinterpret_cast<Pixel*>(dc[3])[3];
+		if (pixel.r != 128 || pixel.g != 0 || pixel.b != 127 || pixel.pad != 43)
+			return false;
+	}
+	if (!TestLinearGradient(dc, [&](int x, int y)
+		{
+			const auto &p = reinterpret_cast<const Pixel*>(dc[y])[x];
+			return 0xff000000u | (uint32_t(p.r) << 16) | (uint32_t(p.g) << 8) | p.b;
+		}))
 		return false;
-	v.Rect(1, 1, 6, 6);
-	v.Fill(LColour(255, 0, 0, 128));
-	auto pixel = reinterpret_cast<Pixel*>(dc[3])[3];
-	return pixel.r == 128 && pixel.g == 0 && pixel.b == 127 && pixel.pad == 43;
+	for (int y = 0; y < dc.Y(); y++)
+		for (int x = 0; x < dc.X(); x++)
+			if (reinterpret_cast<const Pixel*>(dc[y])[x].pad != 43)
+				return false;
+	return true;
 }
 
 #if !defined(HAIKU)
@@ -210,6 +401,8 @@ public:
 bool LVectorTest::Run()
 {
 	#if defined(__GTK_H__)
+	if (!TestGradientBlit())
+		return FAIL(_FL, "Gradient blits must premultiply antialiased edges without changing the source.");
 	if (!TestCairoVectorContext())
 		return FAIL(_FL, "Cairo vectors must preserve state and paths, intersect clips, and support SVG arcs.");
 	#endif
@@ -268,6 +461,14 @@ bool LVectorTest::Run()
 		if (reinterpret_cast<LBgra32*>(dc[4])[3].g != LColour::Green.g() ||
 			reinterpret_cast<LBgra32*>(dc[3])[3].a)
 			return FAIL(_FL, "Paths and clip rectangles must apply the LSurface origin exactly once.");
+		LArray<LColourStop> stops;
+		stops[0].Set(0, LColour(255, 0, 0));
+		stops[1].Set(1, LColour(0, 0, 255));
+		v.Fill(LPointF(-0.5, 0), LPointF(1.5, 0), stops);
+		const auto &pixel = reinterpret_cast<const LBgra32*>(dc[4])[3];
+		if (std::abs(int(pixel.r) - 128) > 1 || std::abs(int(pixel.b) - 128) > 1 ||
+			pixel.g || pixel.a != 255 || reinterpret_cast<LBgra32*>(dc[3])[3].a)
+			return FAIL(_FL, "Linear gradients must apply the surface origin to endpoints and paths equally.");
 	}
 	dc.SetOrigin(LPoint(0, 0));
 	dc.Op(GDC_SET);

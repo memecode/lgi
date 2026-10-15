@@ -4,6 +4,7 @@
 #include <math.h>
 #include <algorithm>
 #include <cmath>
+#include <memory>
 #include <new>
 
 #include "lgi/common/Lgi.h"
@@ -171,6 +172,49 @@ public:
 	{
 		SetColour(colour);
 		DrawPreservingPath(kCGPathFill);
+	}
+	void Fill(const LPointF &start, const LPointF &end, const LArray<LColourStop> &stops) override
+	{
+		std::unique_ptr<CGFloat[]> locations(new (std::nothrow) CGFloat[stops.Length()]);
+		std::unique_ptr<CGFloat[]> components(new (std::nothrow) CGFloat[stops.Length() * 4]);
+		if (!locations || !components)
+		{
+			LgiTrace("LSurface::Vector::Fill: could not allocate gradient stops.\n");
+			return;
+		}
+		for (size_t i = 0; i < stops.Length(); i++)
+		{
+			const auto &stop = stops.ItemAt(i);
+			auto colour = stop.Colour;
+			locations[i] = stop.Pos;
+			components[i * 4] = colour.r() / 255.0;
+			components[i * 4 + 1] = colour.g() / 255.0;
+			components[i * 4 + 2] = colour.b() / 255.0;
+			components[i * 4 + 3] = colour.a() / 255.0;
+		}
+		auto space = CGColorSpaceCreateDeviceRGB();
+		auto gradient = space ? CGGradientCreateWithColorComponents(
+			space, components.get(), locations.get(), stops.Length()) : nullptr;
+		if (space)
+			CGColorSpaceRelease(space);
+		CGPathRef path = gradient ? CopyPath(Context) : nullptr;
+		if (!gradient || !path)
+		{
+			if (gradient)
+				CGGradientRelease(gradient);
+			LgiTrace("LSurface::Vector::Fill: could not create Quartz linear gradient or copy path.\n");
+			return;
+		}
+		CGContextSaveGState(Context);
+		CGContextClip(Context);
+		CGContextDrawLinearGradient(Context, gradient, CGPointMake(start.x, start.y),
+			CGPointMake(end.x, end.y),
+			kCGGradientDrawsBeforeStartLocation | kCGGradientDrawsAfterEndLocation);
+		CGContextRestoreGState(Context);
+		CGContextBeginPath(Context);
+		CGContextAddPath(Context, path);
+		CGPathRelease(path);
+		CGGradientRelease(gradient);
 	}
 	void Stroke(LColour colour, float width) override
 	{

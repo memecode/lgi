@@ -135,6 +135,26 @@ public:
 		SetColour(colour);
 		cairo_fill_preserve(Context);
 	}
+	void Fill(const LPointF &start, const LPointF &end, const LArray<LColourStop> &stops) override
+	{
+		auto pattern = cairo_pattern_create_linear(start.x, start.y, end.x, end.y);
+		for (size_t i = 0; i < stops.Length(); i++)
+		{
+			const auto &stop = stops.ItemAt(i);
+			auto colour = stop.Colour;
+			cairo_pattern_add_color_stop_rgba(pattern, stop.Pos, colour.r() / 255.0,
+				colour.g() / 255.0, colour.b() / 255.0, colour.a() / 255.0);
+		}
+		cairo_pattern_set_extend(pattern, CAIRO_EXTEND_PAD);
+		if (cairo_pattern_status(pattern) != CAIRO_STATUS_SUCCESS)
+			LgiTrace("LSurface::Vector::Fill: could not create Cairo linear gradient.\n");
+		else
+		{
+			cairo_set_source(Context, pattern);
+			cairo_fill_preserve(Context);
+		}
+		cairo_pattern_destroy(pattern);
+	}
 	void Stroke(LColour colour, float width) override
 	{
 		if (!std::isfinite(width) || width <= 0)
@@ -794,4 +814,3 @@ void LScreenDC::Bezier(int Threshold, LPoint *Pt)
 {
 	LAssert(0);
 }
-
