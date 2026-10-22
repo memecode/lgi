@@ -2671,6 +2671,130 @@ bool MailIMap::Append(const char *Folder, ImapMailFlags *Flags, const char *Msg,
 	return Status;
 }
 
+static bool ParseUidPlus(List<char> &Dialog, int Cmd, const char *Code, MailIMap::UidPlusResult &Result)
+{
+	auto Tag = LString::Fmt("A%04i", Cmd);
+	for (auto Line: Dialog)
+	{
+		auto Space = strchr(Line, ' ');
+		if (!Space || LString(Line, Space - Line) != Tag)
+			continue;
+		auto Start = Space;
+		while (*Start == ' ') Start++;
+		if (_strnicmp(Start, "OK ", 3))
+			continue;
+		Start += 3;
+		while (*Start == ' ') Start++;
+		if (*Start++ != '[')
+			continue;
+		auto End = strchr(Start, ']');
+		if (!End)
+			return false;
+		auto Parts = LString(Start, End - Start).SplitDelimit(" ");
+		bool Copy = !Stricmp(Code, "COPYUID");
+		if (Parts.Length() != (Copy ? 4 : 3) || !Parts[0].Equals(Code))
+			return false;
+		uint32_t Values[3] = {};
+		for (size_t Index = 1; Index < Parts.Length(); Index++)
+		{
+			uint64_t Number = 0;
+			for (auto Digit = Parts[Index].Get(); Digit && *Digit; Digit++)
+			{
+				if (*Digit < '0' || *Digit > '9')
+					return false;
+				Number = Number * 10 + (*Digit - '0');
+				if (Number > UINT32_MAX)
+					return false;
+			}
+			if (!Number)
+				return false;
+			Values[Index - 1] = (uint32_t)Number;
+		}
+		Result.UidValidity = Values[0];
+		Result.SourceUid = Copy ? Values[1] : 0;
+		Result.DestinationUid = Values[Copy ? 2 : 1];
+		return true;
+	}
+	return false;
+}
+
+static bool ValidImapCommandPath(const char *Path)
+{
+	// Existing path encoding does not quote embedded quotes or backslashes.
+	return ValidStr(Path) && strlen(Path) < MAX_PATH_LEN &&
+		!strpbrk(Path, "\r\n\"\\");
+}
+
+bool MailIMap::AppendLiteral(const char *Folder, ImapMailFlags &Flags, LStreamI &Message, UidPlusResult &Result)
+{
+	Result = UidPlusResult();
+	auto Size = Message.GetSize();
+	if (!ValidImapCommandPath(Folder) || Size < 0 || Message.SetPos(0) != 0 || !Socket || !Lock(_FL))
+		return false;
+	bool Status = false;
+	int Cmd = d->NextCmd++;
+	LAutoString Path(EncodePath(Folder));
+	auto FlagText = Flags.Get();
+	auto Command = LString::Fmt("A%04i APPEND \"%s\"%s%s%s {%" PRIi64 "}\r\n", Cmd, Path.Get(),
+		FlagText ? " (" : "", FlagText ? FlagText.Get() : "", FlagText ? ")" : "", Size);
+	ClearDialog();
+	if (WriteBuf(false, Command) && ReadResponse(Cmd, true))
+	{
+		bool Continue = false;
+		for (auto Line: Dialog)
+			if (Line[0] == '+')
+				Continue = true;
+		if (Continue)
+		{
+			bool Written = true;
+			char Block[8192];
+			for (int64 Remaining = Size; Written && Remaining > 0; )
+			{
+				auto Requested = (ssize_t)MIN(Remaining, (int64)sizeof(Block));
+				auto Count = Message.Read(Block, Requested);
+				if (Count <= 0 || Count > Requested)
+				{
+					Written = false;
+					break;
+				}
+				for (ssize_t Offset = 0; Offset < Count; )
+				{
+					auto Sent = Socket->Write(Block + Offset, Count - Offset);
+					if (Sent <= 0 || Sent > Count - Offset)
+					{
+						Written = false;
+						break;
+					}
+					Offset += Sent;
+				}
+				Remaining -= Count;
+			}
+			const char End[] = "\r\n";
+			for (ssize_t Offset = 0; Written && Offset < 2; )
+			{
+				auto Sent = Socket->Write(End + Offset, 2 - Offset);
+				if (Sent <= 0 || Sent > 2 - Offset)
+					Written = false;
+				else
+					Offset += Sent;
+			}
+			if (Written)
+			{
+				ClearDialog();
+				Status = ReadResponse(Cmd);
+				if (Status)
+					ParseUidPlus(Dialog, Cmd, "APPENDUID", Result);
+			}
+		}
+	}
+	// A partial literal or lost reply may leave the connection inside APPEND's continuation.
+	if (!Status)
+		Socket->Close();
+	CommandFinished();
+	Unlock();
+	return Status;
+}
+
 bool MailIMap::Delete(int Message)
 {
 	bool Status = false;
@@ -3064,7 +3188,7 @@ bool MailIMap::SetFlagsByUid(LArray<uint32_t> &Uids, const char *Flags)
 		{
 			for (unsigned i=0; i<Uids.Length(); i++)
 			{
-				p.Print("%s%i", i?",":"", Uids[i]);
+				p.Print("%s%u", i?",":"", Uids[i]);
 			}
 		}
 		else
@@ -3085,8 +3209,15 @@ bool MailIMap::SetFlagsByUid(LArray<uint32_t> &Uids, const char *Flags)
 	return Status;
 }
 
-bool MailIMap::CopyByUid(LArray<uint32_t> &InUids, const char *DestFolder)
+bool MailIMap::CopyByUid(LArray<uint32_t> &InUids, const char *DestFolder, UidPlusResult *Result)
 {
+	if (Result)
+		*Result = UidPlusResult();
+	if (!InUids.Length() || !ValidImapCommandPath(DestFolder) || !Socket)
+		return false;
+	for (auto Uid: InUids)
+		if (!Uid)
+			return false;
 	bool Status = false;
 
 	if (Lock(_FL))
@@ -3099,17 +3230,25 @@ bool MailIMap::CopyByUid(LArray<uint32_t> &InUids, const char *DestFolder)
 		for (unsigned i=0; i<InUids.Length(); i++)
 		{
 			if (i) p.Write((char*)",", 1);
-			p.Print("%i", InUids[i]);
+			p.Print("%u", InUids[i]);
 		}
 		p.Print(" \"%s\"\r\n", Dest.Get());
 
 		LAutoString Buffer(p.NewStr());
+		ClearDialog();
 		if (Buffer && WriteBuf(false, Buffer))
 		{
-			ClearDialog();
 			Status = ReadResponse(Cmd);
-			CommandFinished();
+			if (Status && Result && InUids.Length() == 1)
+			{
+				ParseUidPlus(Dialog, Cmd, "COPYUID", *Result);
+				if (Result->SourceUid != InUids[0])
+					*Result = UidPlusResult();
+			}
 		}
+		if (!Status)
+			Socket->Close();
+		CommandFinished();
 
 		Unlock();
 	}
@@ -3345,4 +3484,3 @@ bool MailIMap::FinishIdle()
 
 	return Status;
 }
-

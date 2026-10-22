@@ -814,6 +814,16 @@ public:
 		LString &NewUid
 	);
 
+	struct UidPlusResult
+	{
+		uint32_t UidValidity = 0;
+		uint32_t SourceUid = 0;
+		uint32_t DestinationUid = 0;
+	};
+
+	// Sends the exact literal bytes; no newline conversion or strlen on message data.
+	bool AppendLiteral(const char *Folder, ImapMailFlags &Flags, LStreamI &Message, UidPlusResult &Result);
+
 	bool GetFolders(LArray<MailImapFolder*> &Folders);
 	bool SelectFolder(const char *Path, StrMap *Values = NULL);
 	char *GetSelectedFolder();
@@ -827,7 +837,8 @@ public:
 	bool ExpungeFolder();
 	
 	// Uid methods
-	bool CopyByUid(LArray<uint32_t> &InUids, const char *DestFolder);
+	// Optional tagged COPYUID identity for a single UID; empty for batches or missing/invalid mappings.
+	bool CopyByUid(LArray<uint32_t> &InUids, const char *DestFolder, UidPlusResult *Result = NULL);
 	bool SetFlagsByUid(LArray<uint32_t> &Uids, const char *Flags);
 
 	/// Idle processing...
