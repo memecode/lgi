@@ -123,6 +123,29 @@ bool LStringClassTest::Run()
 	}
 	if (LString_RefStrCount != StartCount) return FAIL(_FL, "RefStrCount mismatch");
 	
+	// Prefix and suffix testing
+	{
+		const LString Text("Test string"), Null, Empty(""), Longer("Test string extra");
+		if (!Text.StartsWith("Test") || !Text.EndsWith("string") ||
+			!Text.StartsWith(Text) || !Text.EndsWith(Text) ||
+			Text.StartsWith("test") || Text.EndsWith("String") ||
+			Text.StartsWith("string") || Text.EndsWith("Test") ||
+			Text.StartsWith(Longer) || Text.EndsWith(Longer))
+			return FAIL(_FL, "Prefix or suffix comparison failed");
+		for (auto &Value: {Text, Null, Empty})
+			if (!Value.StartsWith(Null) || !Value.EndsWith(Null) ||
+				!Value.StartsWith(Empty) || !Value.EndsWith(Empty))
+				return FAIL(_FL, "Empty prefix or suffix failed");
+		if (Null.StartsWith(Text) || Null.EndsWith(Text) ||
+			Empty.StartsWith(Text) || Empty.EndsWith(Text))
+			return FAIL(_FL, "Empty string matched a nonempty prefix or suffix");
+		const LString Binary("a\0b", 3), Prefix("a\0", 2), Suffix("\0b", 2);
+		if (!Binary.StartsWith(Prefix) || !Binary.EndsWith(Suffix) ||
+			Binary.StartsWith(LString("a\0c", 3)) || Binary.EndsWith(LString("x\0b", 3)))
+			return FAIL(_FL, "Binary prefix or suffix comparison failed");
+	}
+	if (LString_RefStrCount != StartCount) return FAIL(_FL, "RefStrCount mismatch");
+
 	// Substring testing
 	{
 		const char *Base = "This is a test string";

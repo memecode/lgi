@@ -1051,6 +1051,20 @@ public:
 		return (prev) ? prev - Get() : -1;
 	}
 
+	/// Case-sensitive byte comparison; an empty prefix always matches, including a null string.
+	bool StartsWith(const LString &s) const
+	{
+		auto Len = s.Length();
+		return !Len || (Len <= Length() && !memcmp(Get(), s.Get(), Len));
+	}
+
+	/// Case-sensitive byte comparison; an empty suffix always matches, including a null string.
+	bool EndsWith(const LString &s) const
+	{
+		auto Len = s.Length();
+		return !Len || (Len <= Length() && !memcmp(Get() + Length() - Len, s.Get(), Len));
+	}
+
 	/// Returns a copy of the string with all the characters converted to lower case
 	LString Lower() const
 	{
@@ -1411,4 +1425,3 @@ public:
 	#endif
 
 };
-
