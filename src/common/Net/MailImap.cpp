@@ -2033,10 +2033,12 @@ bool MailIMap::SelectFolder(const char *Path, StrMap *Values)
 									if (t[i-1].IsNumeric())
 										Values->Add(t[i], t[i-1]);
 								}
-								else if (t[i].Equals("unseen"))
+								else if (t[i].Equals("unseen") ||
+									t[i].Equals("uidvalidity") ||
+									t[i].Equals("uidnext"))
 								{
 									//char *val = t[i+1];
-									if (t[i+1].IsNumeric())
+									if (i + 1 < t.Length() && t[i+1].IsNumeric())
 										Values->Add(t[i], t[i+1]);
 								}
 								else if (t[i].Equals("flags"))

@@ -6072,7 +6072,6 @@ bool LHtml::Name(const char *s)
 	if (Uid < 0)
 		Uid = GetDocumentUid() + 1;
 
-	LgiTrace("%s:%i - Setting document Uid to %i\n", _FL, Uid);
 	SetDocumentUid(Uid);
 
 	_Delete();
