@@ -3174,7 +3174,7 @@ bool MailIMap::SetFolderFlags(MailImapFolder *f)
 	return Status;
 }
 
-bool MailIMap::SetFlagsByUid(LArray<uint32_t> &Uids, const char *Flags)
+bool MailIMap::SetFlagsByUid(LArray<uint32_t> &Uids, const char *Flags, bool Add)
 {
 	bool Status = false;
 
@@ -3193,7 +3193,7 @@ bool MailIMap::SetFlagsByUid(LArray<uint32_t> &Uids, const char *Flags)
 		}
 		else
 			p.Print("1:*");
-		p.Print(" FLAGS (%s)\r\n", Flags?Flags:"");
+		p.Print(" %sFLAGS (%s)\r\n", Add?"+":"", Flags?Flags:"");
 
 		auto Buffer = p.NewLStr();
 		if (Buffer && WriteBuf(false, Buffer))

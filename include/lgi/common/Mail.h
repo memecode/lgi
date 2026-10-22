@@ -839,7 +839,8 @@ public:
 	// Uid methods
 	// Optional tagged COPYUID identity for a single UID; empty for batches or missing/invalid mappings.
 	bool CopyByUid(LArray<uint32_t> &InUids, const char *DestFolder, UidPlusResult *Result = NULL);
-	bool SetFlagsByUid(LArray<uint32_t> &Uids, const char *Flags);
+	// Add preserves existing system flags and keywords; the default replaces them.
+	bool SetFlagsByUid(LArray<uint32_t> &Uids, const char *Flags, bool Add = false);
 
 	/// Idle processing...
 	/// \returns true if something happened
