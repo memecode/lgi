@@ -216,6 +216,8 @@ LView::~LView()
 		LPopup *pu = LPopup::CurrentPopups[i];
 		if (pu->Owner == this)
 			pu->Owner = NULL;
+		if (pu->GetNotify() == this)
+			pu->SetNotify(NULL);
 	}
 
 	_Delete();
@@ -2826,4 +2828,3 @@ void LView::Debug()
 	#endif
 }
 #endif
-

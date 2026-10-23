@@ -1,5 +1,6 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/PopupNotification.h"
+#include "lgi/common/Button.h"
 
 #include "AppPriv.h"
 
@@ -292,7 +293,7 @@ LPopupNotification *LPopupNotification::Message(LWindow *ref, LString msg)
 	}
 	else
 	{
-		w = new LPopupNotification(ref, msg);
+		w = new LPopupNotification(ref, true, msg);
 		if (w)
 			PopupNotificationFactory.map.Add(ref, w);
 	}
@@ -300,11 +301,43 @@ LPopupNotification *LPopupNotification::Message(LWindow *ref, LString msg)
 	return w;
 }
 
-LPopupNotification::LPopupNotification(LWindow *ref, LString msg)
+LPopupNotification *LPopupNotification::Create(LWindow *ref, LString msg)
+{
+	if (!ref)
+		return NULL;
+
+	if (!LAppInst->InThread())
+	{
+		LAppInst->RunCallback([ref, msg]()
+			{
+				LPopupNotification::Create(ref, msg);
+			},
+			_FL);
+		return nullptr;
+	}
+	
+	auto w = PopupNotificationFactory.map.Find(ref);
+	if (w)
+	{
+		w->Add(ref, msg);
+	}
+	else
+	{
+		w = new LPopupNotification(ref, false, msg);
+		if (w)
+			PopupNotificationFactory.map.Add(ref, w);
+	}
+
+	return w;
+}
+
+LPopupNotification::LPopupNotification(LWindow *ref, bool show, LString msg)
 	#if LINUX
 	: LPopup(ref)
 	#endif
 {
+	showPopup = show;
+
 	#if 1
 		cFore = cBack = cBorder = L_TOOL_TIP;
 		if (cFore.ToHLS())
@@ -326,16 +359,30 @@ LPopupNotification::LPopupNotification(LWindow *ref, LString msg)
 	SetWillFocus(false); // Don't take focus
 	Name("Notification");
 
+	GetCss(true)->Padding(LCss::Len(LCss::LenPx, DefPaddingPx));
+
 	if (ref)
+	{
 		RefWnd = ref;
-	if (ref && msg)
-		Add(ref, msg);
+		if (msg)
+			Add(ref, msg);
+	}
 }
 
 LPopupNotification::~LPopupNotification()
 {
 	LAssert(PopupNotificationFactory.map.Find(RefWnd) == this);
 	PopupNotificationFactory.map.Delete(RefWnd);
+
+	Actions.DeleteObjects();
+}
+
+int LPopupNotification::GetPaddingPx()
+{
+	if (auto css = GetCss())
+		if (auto padding = css->Padding())
+			return padding.ToPx(X(), GetFont());
+	return DefPaddingPx;
 }
 
 LPoint LPopupNotification::CalcSize()
@@ -347,8 +394,15 @@ LPoint LPopupNotification::CalcSize()
 		p.y += ds->Y();
 	}
 
-	p.x += Border * 2 + Decor.x;
-	p.y += Border * 2 + Decor.y;
+	auto pad = GetPaddingPx();
+	p.x += pad * 2 + Decor.x;
+	p.y += pad * 2 + Decor.y;
+
+	for (auto action: Actions)
+	{
+		if (action->btn)
+			p.x += pad + action->btn->X();
+	}
 
 	return p;
 }
@@ -361,14 +415,27 @@ LString LPopupNotification::GetMsgs()
 	return LString("\n").Join(a);
 }
 
-void LPopupNotification::Init()
+void LPopupNotification::Action(LString label, std::function<void()> callback)
 {
-	if (!RefWnd)
-	{
-		LAssert(!"No reference window.");
+	if (!label || !callback)
 		return;
-	}
 
+	if (auto action = new TAction())
+	{
+		action->label = label;
+		action->callback = callback;
+		action->ctrlId = 100 + Actions.Length();
+		Actions.Add(action);
+
+		if ((action->btn = new LButton(action->ctrlId, 0, 0, -1, -1, action->label)))
+			AddView(action->btn);
+		
+		Layout();
+	}
+}
+
+void LPopupNotification::Layout()
+{
 	auto r = RefWnd->GetPos();
 	#if LINUX
 	r = r.Move(-27, -30);	// Not sure why this is needed, but if the window is fullscreen... 
@@ -380,6 +447,17 @@ void LPopupNotification::Init()
 	pos.ZOff(Sz.x - 1, Sz.y - 1);
 	pos.Offset(r.x2 - pos.X(), r.y2 - pos.Y());
 	SetPos(pos);
+}
+
+void LPopupNotification::Show()
+{
+	if (!RefWnd)
+	{
+		LAssert(!"No reference window.");
+		return;
+	}
+
+	Layout();
 
 	SetAlwaysOnTop(true);
 	SetPulse(500);		
@@ -387,8 +465,8 @@ void LPopupNotification::Init()
 		Attach(nullptr);
 	Visible(true);
 	
-	printf("%s:%i - showing LPopupNotification at %s: %s\n",
-		_FL, pos.GetStr(), GetMsgs().Get());
+	LgiTrace("%s:%i - showing LPopupNotification at %s: %s\n",
+		_FL, GetPos().GetStr(), GetMsgs().Get());
 }
 
 void LPopupNotification::Add(LWindow *ref, LString msg)
@@ -402,8 +480,10 @@ void LPopupNotification::Add(LWindow *ref, LString msg)
 	if (ref && RefWnd != ref)
 		RefWnd = ref;
 
-	if (RefWnd && Msgs.Length() > 0)
-		Init();
+	if (RefWnd &&
+		Msgs.Length() > 0 &&
+		showPopup)
+		Show();
 }
 
 void LPopupNotification::OnPaint(LSurface *pDC)
@@ -420,13 +500,49 @@ void LPopupNotification::OnPaint(LSurface *pDC)
 	f->Back(cBack);
 	f->Transparent(true);
 		
-	int x = c.x1 + Border;
-	int y = c.y1 + Border;
+	auto pad = GetPaddingPx();
+	int x = c.x1 + pad;
+	int y = c.y1 + pad;
+	int maxX = 0;
 	for (auto ds: Msgs)
 	{
 		ds->Draw(pDC, x, y);
 		y += ds->Y();
+		maxX = MAX(maxX, x + ds->X());
 	}
+
+	y = c.y1 + pad - (LButton::Overhead.y >> 1); // reset to top
+	maxX += pad;
+	for (auto a: Actions)
+	{
+		if (a->btn)
+		{
+			auto p = a->btn->GetPos();
+			p.Offset(maxX - p.x1, y - p.y1);
+			a->btn->SetPos(p);
+			maxX += a->btn->X() + pad;
+		}
+	}
+}
+
+int LPopupNotification::OnNotify(LViewI *Ctrl, const LNotification &n)
+{
+	for (auto a: Actions)
+	{
+		if (a->btn && Ctrl == a->btn)
+		{
+			if (n.Type == LNotifyItemClick)
+			{
+				if (a->callback)
+					a->callback();
+				else
+					LgiTrace("%s:%i - no callback for action '%s'\n", _FL, a->label.Get());
+				return 1;
+			}
+			else LgiTrace("%s:%i - unexpected notification type '%i'\n", _FL, (int)n.Type);
+		}
+	}
+	return 0;
 }
 
 void LPopupNotification::OnPulse()

@@ -22,6 +22,7 @@
 #include "lgi/common/FileSelect.h"
 #include "lgi/common/Menu.h"
 #include "lgi/common/Homoglyphs.h"
+#include "lgi/common/PopupNotification.h"
 
 // If this is not found add $lgi/private/common to your include paths
 #include "ViewPriv.h"
@@ -44,8 +45,6 @@ namespace Rte2 {
 #if !defined(WIN32) && !defined(toupper)
 #define toupper(c)					(((c)>='a'&&(c)<='z') ? (c)-'a'+'A' : (c))
 #endif
-
-// static char SelectWordDelim[] = " \t\n.,()[]<>=?/\\{}\"\';:+=-|!@#$%^&*";
 
 //////////////////////////////////////////////////////////////////////
 LRichTextEdit::LRichTextEdit(	int Id,
@@ -76,15 +75,6 @@ LRichTextEdit::LRichTextEdit(	int Id,
 	#endif
 	
 	SetFont(LSysFont);
-
-	#if 0 // def _DEBUG
-	Name("<html>\n"
-		"<body>\n"
-		"	This is some <b style='font-size: 20pt; color: green;'>bold text</b> to test with.<br>\n"
-		"   A second line of text for testing.\n"
-		"</body>\n"
-		"</html>\n");
-	#endif
 }
 
 LRichTextEdit::~LRichTextEdit()
@@ -98,8 +88,7 @@ bool LRichTextEdit::SetSpellCheck(LSpellCheck *sp)
 	{
 		if (IsAttached())
 			d->SpellCheck->EnumLanguages(AddDispatch());
-		// else call that OnCreate
-		
+		// else call that OnCreate		
 	}
 
 	return d->SpellCheck != NULL;
@@ -453,7 +442,9 @@ bool LRichTextEdit::Name(const char *s)
 	Invalidate();
 
 	#if DEBUG_ACTIVITY
-	if (Status && d->ActivityRecording && !d->ActivityReplaying)
+	if (Status &&
+		d->ActivityRecording &&
+		!d->ActivityReplaying)
 	{
 		d->Layout(VScroll);
 		if (!d->CaptureActivityState(true))
@@ -564,16 +555,35 @@ bool LRichTextEdit::StartActivityRecording(const char *Path)
 bool LRichTextEdit::SaveActivityRecording()
 {
 	#if DEBUG_ACTIVITY
+
+	auto reportErr = [&](const char *format, auto... args)
+	{
+		#if 1
+		auto msg = LString::Fmt(format, args...).Strip();
+		if (auto popup = LPopupNotification::Create(GetWindow(), msg))
+		{
+			popup->Action("Copy", [msg, this]()
+			{
+				LClipBoard c(this);
+				c.Text(msg);
+			});
+			popup->Show();
+		}
+		#else
+		LgiTrace(format, args...);
+		#endif
+	};
+
 	if (!d->ActivityRecording || !IsActivityFile(d->ActivityPath))
 	{
-		LgiTrace("%s:%i - No rich text activity recording is active.\n", _FL);
+		reportErr("%s:%i - No rich text activity recording is active.\n", _FL);
 		return false;
 	}
 
 	LJson initialState = d->ActivityState;
 	if (!d->CaptureActivityState(false))
 	{
-		LgiTrace("%s:%i - Failed to capture final rich text activity state.\n", _FL);
+		reportErr("%s:%i - Failed to capture final rich text activity state.\n", _FL);
 		return false;
 	}
 	LString finalState = d->ActivityState.GetJson();
@@ -581,7 +591,7 @@ bool LRichTextEdit::SaveActivityRecording()
 	LString initial = d->ActivityState.GetJson();
 	if (initial.IsEmpty() || finalState.IsEmpty())
 	{
-		LgiTrace("%s:%i - Rich text activity state serialization failed.\n", _FL);
+		reportErr("%s:%i - Rich text activity state serialization failed.\n", _FL);
 		return false;
 	}
 
@@ -601,7 +611,7 @@ bool LRichTextEdit::SaveActivityRecording()
 	if (!file || file.SetSize(0) < 0 || file.SetPos(0) < 0 ||
 		file.Write(contents.Get(), contents.Length()) != contents.Length())
 	{
-		LgiTrace("%s:%i - Failed to write activity file '%s'.\n", _FL, d->ActivityPath.Get());
+		reportErr("%s:%i - Failed to write activity file '%s'.\n", _FL, d->ActivityPath.Get());
 		return false;
 	}
 
@@ -2036,7 +2046,12 @@ void LRichTextEdit::OnMouseMove(LMouse &m)
 bool LRichTextEdit::OnKey(LKey &k)
 {
 	#if DEBUG_ACTIVITY
-	if (!d->ActivityReplaying)
+	if (k.vkey == LK_F12)
+	{
+		if (k.Down())
+			SaveActivityRecording();
+	}
+	else if (!d->ActivityReplaying)
 	{
 		LJson action;
 		action.Set("type", "key");
@@ -2053,8 +2068,14 @@ bool LRichTextEdit::OnKey(LKey &k)
 		d->Cursor)
 		d->Cursor->Blink = true;
 
-	if (k.c16 == 17)
-		return false;
+	// Ctrl is a modifier key; don't process its key events as editor input.
+	#ifdef WINDOWS
+		if (k.vkey == LK_CTRL)
+			return false;
+	#elif defined(__GTK_H__) || defined(HAIKU)
+		if (k.vkey == LK_LCTRL || k.vkey == LK_RCTRL)
+			return false;
+	#endif
 
 	#ifdef WINDOWS
 	// Wtf is this?

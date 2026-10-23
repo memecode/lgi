@@ -14,11 +14,11 @@
 #include "lgi/common/FileSelect.h"
 
 #if 1
-#include "lgi/common/RichTextEdit2.h"
-typedef Rte2::LRichTextEdit EditCtrl;
+	#include "lgi/common/RichTextEdit2.h"
+	typedef Rte2::LRichTextEdit EditCtrl;
 #else
-#include "LHtmlEdit.h"
-typedef LHtmlEdit EditCtrl;
+	#include "LHtmlEdit.h"
+	typedef LHtmlEdit EditCtrl;
 #endif
 
 enum Ctrls
@@ -92,7 +92,7 @@ public:
 		Install = new LButton(IDC_INSTALL, 0, 0, -1, -1, "Install");
 	}
 
-	bool Pour(LRegion &r)
+	bool Pour(LRegion &r) override
 	{
 		LRect *rc = FindLargestEdge(r, GV_EDGE_TOP);
 		if (!rc)
@@ -122,7 +122,7 @@ public:
 		return 0;
 	}
 
-	void OnPaint(LSurface *pDC)
+	void OnPaint(LSurface *pDC) override
 	{
 		pDC->Colour(LColour::Red);
 		pDC->Rectangle();
@@ -172,7 +172,7 @@ public:
 		AppHnd = appHnd;
 	}
 
-	LMessage::Result OnEvent(LMessage *m)
+	LMessage::Result OnEvent(LMessage *m) override
 	{
 		switch (m->Msg())
 		{
@@ -266,7 +266,7 @@ public:
 		Cm = cm;
 	}
 
-	void OnMouseClick(LMouse &m)
+	void OnMouseClick(LMouse &m) override
 	{
 		if (m.Left() && m.Double())
 		{
@@ -289,7 +289,7 @@ public:
 		}
 	}
 
-	const char *GetText(int i)
+	const char *GetText(int i) override
 	{
 		switch (i)
 		{
@@ -453,7 +453,7 @@ public:
 						p->Append(b);
 					}
 					
-					if (p = Tabs->Append("Node View"))
+					if ((p = Tabs->Append("Node View")))
 					{
 						p->AddView(Tree = new LTree(IDC_TREE, 0, 0, 100, 100));
 						Tree->SetPourLargest(true);
@@ -479,7 +479,7 @@ public:
 		Installer.Reset();
 	}
 
-	bool NeedsCapability(const char *Name, const char *Param = NULL)
+	bool NeedsCapability(const char *Name, const char *Param = NULL) override
 	{
 		if (Caps.Find(Name))
 			return true;
@@ -501,7 +501,7 @@ public:
 		return true;
 	}
 	
-	void StartInstall(CapsHash *Caps)
+	void StartInstall(CapsHash *Caps) override
 	{
 		if (!Installer)
 			Installer.Reset(new InstallThread(AddDispatch()));
@@ -517,7 +517,7 @@ public:
 		}
 	}
 
-	void OnInstall(CapsHash *Caps, bool Status)
+	void OnInstall(CapsHash *Caps, bool Status) override
 	{
 		DeleteObj(Bar);
 		if (Edit && Caps && Status)
@@ -528,13 +528,13 @@ public:
 		PourAll();
 	}
 
-	void OnCloseInstaller()
+	void OnCloseInstaller() override
 	{
 		DeleteObj(Bar);
 		PourAll();
 	}
 
-	int OnCommand(int Cmd, int Event, OsView Wnd)
+	int OnCommand(int Cmd, int Event, OsView Wnd) override
 	{
 		switch (Cmd)
 		{
@@ -694,7 +694,7 @@ public:
 		return 0;
 	}
 	
-	void OnReceiveFiles(LArray<const char*> &Files)
+	void OnReceiveFiles(LArray<const char*> &Files) override
 	{
 		if (Edit && Files.Length() > 0)
 		{
@@ -703,7 +703,7 @@ public:
 		}
 	}
 
-	LMessage::Result OnEvent(LMessage *m)
+	LMessage::Result OnEvent(LMessage *m) override
 	{
 		if (m->Msg() == M_INSTALL)
 		{
