@@ -525,6 +525,14 @@ static void RecordActivityMouse(LRichTextPriv *priv, const char *type, const LMo
 }
 #endif
 
+LString LRichTextEdit::GetRecordingPath()
+{
+	LFile::Path p(LSP_APP_CACHE);
+	LDateTime now;
+	now.SetNow();
+	return p / LString::Fmt("rte2-%s.rte", now.Iso().Replace(":", "").Get());
+}
+
 bool LRichTextEdit::StartActivityRecording(const char *Path)
 {
 	#if DEBUG_ACTIVITY
@@ -545,6 +553,7 @@ bool LRichTextEdit::StartActivityRecording(const char *Path)
 		return false;
 	}
 	d->ActivityRecording = true;
+	LPopupNotification::Message(GetWindow(), "Activity recording started.");
 	return true;
 	#else
 	(void)Path;
@@ -2049,7 +2058,12 @@ bool LRichTextEdit::OnKey(LKey &k)
 	if (k.vkey == LK_F12)
 	{
 		if (k.Down())
-			SaveActivityRecording();
+		{
+			if (d->ActivityRecording)
+				SaveActivityRecording();
+			else
+				StartActivityRecording(GetRecordingPath());
+		}
 	}
 	else if (!d->ActivityReplaying)
 	{

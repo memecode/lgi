@@ -99,6 +99,7 @@ public:
 
 	// Debug activity recordings use the .rte JSON format. Saving ends a recording;
 	// loading validates a file, and replay restores its baseline before dispatching events.
+	LString GetRecordingPath();
 	bool StartActivityRecording(const char *Path);
 	bool SaveActivityRecording();
 	bool LoadActivityRecording(const char *Path);

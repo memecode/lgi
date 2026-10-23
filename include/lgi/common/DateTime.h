@@ -323,8 +323,10 @@ public:
 	/// Sets the default format for the date when formatted as a string
 	static void SetDefaultFormat(uint16 f) { DefaultFormat = f; }
 
-	/// Gets the data and time as a LString
+	/// Gets the date and time as a LString
 	LString Get() const;
+	/// Gets as an ISO string with Z for UTC, otherwise a signed HH:MM timezone offset.
+	LString Iso() const;
 	/// Gets the date and time as a string
 	/// \sa LDateTime::GetFormat()
 	void Get(char *Str, size_t SLen) const;

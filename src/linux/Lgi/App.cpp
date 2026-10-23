@@ -432,7 +432,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 		
 		if (p.Exists())
 		{
-			CrashHandlerApp = p;
+			CrashHandlerApp = p.GetFull();
 			signal(SIGSEGV, LgiCrashHandler);
 			LgiTrace("Crash handler: '%s' installed.\n", CrashHandlerApp.Get());
 		}
@@ -1508,4 +1508,3 @@ bool LMessage::Send(LViewI *View)
 	
 	return LAppInst->PostEvent(View, m, a, b);
 }
-

@@ -601,6 +601,11 @@ public:
 			return GetFull();
 		}
 		
+		operator LString()
+		{
+			return GetFull();
+		}
+		
 		LString GetFull()
 		{
 			#if !defined(WINDOWS)

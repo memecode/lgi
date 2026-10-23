@@ -627,12 +627,21 @@ public:
 		BorderStyle Style;
 		bool Important;
 
-		BorderDef(LCss *css = 0, const char *init = 0)
+		BorderDef(LCss *css = nullptr, const char *init = nullptr)
 		{
 			Style = BorderNone;
 			Important = true;
 			if (init)
 				Parse(css, init);
+		}
+
+		BorderDef(LengthType t, float v, ColorDef col, BorderStyle style = BorderSolid)
+		{
+			Type = t;
+			Value = v;
+			Color = col;
+			Style = style;
+			Important = true;
 		}
 
 		BorderDef(const BorderDef &db) : Len(db)

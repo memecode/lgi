@@ -908,6 +908,19 @@ LString LDateTime::Get() const
 	return LString(buf, Ch);
 }
 
+LString LDateTime::Iso() const
+{
+	auto s = LString::Fmt("%04d-%02d-%02dT%02d:%02d:%02d",
+			_Year, _Month, _Day,
+			_Hours, _Minutes, _Seconds);
+	if (!_Tz)
+		return s + "Z";
+
+	int offset = abs((int)_Tz);
+	return s + LString::Fmt("%c%02d:%02d",
+		_Tz < 0 ? '-' : '+', offset / 60, offset % 60);
+}
+
 void LDateTime::Get(char *Str, size_t SLen) const
 {
 	if (Str)
@@ -2085,6 +2098,31 @@ static bool CompareDateStr(LString a, LString b)
 bool LDateTime::UnitTests()
 {
 	auto Jan1 = "1/1/2024 0:0:0a";
+
+	{
+		LDateTime iso;
+		iso.Year(2026);
+		iso.Month(10);
+		iso.Day(24);
+		iso.Hours(10);
+		iso.Minutes(31);
+		iso.Seconds(10);
+		const int offsets[] = {0, 660, -330, 345, -30, 30};
+		const char *expected[] = {
+			"2026-10-24T10:31:10Z",
+			"2026-10-24T10:31:10+11:00",
+			"2026-10-24T10:31:10-05:30",
+			"2026-10-24T10:31:10+05:45",
+			"2026-10-24T10:31:10-00:30",
+			"2026-10-24T10:31:10+00:30",
+		};
+		for (size_t n = 0; n < sizeof(offsets) / sizeof(offsets[0]); n++)
+		{
+			iso.SetTimeZone(offsets[n], false);
+			DATE_ASSERT(iso.Iso().Equals(expected[n]));
+			DATE_ASSERT(iso.GetTimeZone() == offsets[n]);
+		}
+	}
 
 	// Only allow 64bit time_t
 		time_t tt;

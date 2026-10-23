@@ -1,6 +1,7 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/PopupNotification.h"
 #include "lgi/common/Button.h"
+#include "lgi/common/CssTools.h"
 
 #include "AppPriv.h"
 
@@ -338,28 +339,30 @@ LPopupNotification::LPopupNotification(LWindow *ref, bool show, LString msg)
 {
 	showPopup = show;
 
-	#if 1
-		cFore = cBack = cBorder = L_TOOL_TIP;
-		if (cFore.ToHLS())
-		{
-			cBorder.SetHLS(cBorder.GetH(), (int)(cBorder.GetL()*0.6), cBorder.GetS());
-			cFore.SetHLS  (cFore.GetH(),   (int)(cFore.GetL()*0.4),   cFore.GetS());
-		}
-		else
-		{
-			cBorder = cBorder.Mix(LColour::Black, 0.05f);
-			cFore = cFore.Mix(LColour::Black, 0.5f);
-		}
-	#else
-		cBorder = cFore = LColour(0xd4, 0xb8, 0x62);
-		cBack = LColour(0xf7, 0xf0, 0xd5);
-	#endif
+	cFore = cBack = cBorder = L_TOOL_TIP;
+	if (cFore.ToHLS())
+	{
+		cBorder.SetHLS(cBorder.GetH(), (int)(cBorder.GetL()*0.6), cBorder.GetS());
+		cFore.SetHLS  (cFore.GetH(),   (int)(cFore.GetL()*0.4),   cFore.GetS());
+	}
+	else
+	{
+		cBorder = cBorder.Mix(LColour::Black, 0.05f);
+		cFore = cFore.Mix(LColour::Black, 0.5f);
+	}
+
+	if (auto css = GetCss(true))
+	{
+		css->Padding(LCss::Len(LCss::LenPx, DefPaddingPx));
+
+		css->Border(LCss::BorderDef(LCss::LenPx, 1.0f, cBorder));
+		css->BackgroundColor(cBack);
+		css->Color(cFore);
+	}
 
 	SetTitleBar(false);
 	SetWillFocus(false); // Don't take focus
 	Name("Notification");
-
-	GetCss(true)->Padding(LCss::Len(LCss::LenPx, DefPaddingPx));
 
 	if (ref)
 	{
@@ -488,14 +491,23 @@ void LPopupNotification::Add(LWindow *ref, LString msg)
 
 void LPopupNotification::OnPaint(LSurface *pDC)
 {
-	pDC->Colour(cBorder);
 	auto c = GetClient();
-	pDC->Box(&c);
-	c.Inset(1, 1);
-	pDC->Colour(cBack);
-	pDC->Rectangle(&c);
-
 	auto f = GetFont();
+	if (auto css = GetCss())
+	{
+		LCssTools tools(css, f);
+		c = tools.PaintBorder(pDC, c);
+		tools.PaintContent(pDC, c);
+	}
+	else
+	{
+		pDC->Colour(cBorder);
+		pDC->Box(&c);
+		c.Inset(1, 1);
+		pDC->Colour(cBack);
+		pDC->Rectangle(&c);
+	}
+
 	f->Fore(cFore);
 	f->Back(cBack);
 	f->Transparent(true);

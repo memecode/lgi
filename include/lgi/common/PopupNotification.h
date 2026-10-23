@@ -41,6 +41,7 @@ public:
 	static LPopupNotification *Message(LWindow *ref, LString msg);
 	// This just creates a popup notification without showing it.
 	// Allowing for actions to be added for calling 'Show()'.
+	// You could also override colours.
 	static LPopupNotification *Create(LWindow *ref, LString msg);
 
 	LPopupNotification(LWindow *ref, bool show, LString msg = LString());

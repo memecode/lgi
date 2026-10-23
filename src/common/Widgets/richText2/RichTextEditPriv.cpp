@@ -1332,7 +1332,7 @@ ssize_t LRichTextPriv::IndexOfCursor(BlockCursor *c)
 		if (Visit(Visit, b))
 			return CharPos + c->Offset;
 		
-	LAssert(0);
+	LgiTrace("%s:%i - IndexOfCursor failed.\n", _FL);
 	return -1;
 }
 

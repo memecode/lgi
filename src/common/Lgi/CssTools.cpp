@@ -262,6 +262,7 @@ LRect LCssTools::PaintBorder(LSurface *pDC, LRect &in)
 		case LCss::BorderSolid:
 		{
 			int Px = b.ToPx(Content.X(), Font);
+			printf("px=%i\n", Px);
 			if (SetLineStyle(pDC, b))
 			{
 				Drawn = true;
