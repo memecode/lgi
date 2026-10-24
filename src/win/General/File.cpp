@@ -1408,9 +1408,23 @@ int64 LDirectory::GetSizeOnDisk()
 		return -1;
 
 	auto ClusterSize = ClusterSizes.GetDriveCluserSize(Fp[0]);
+	LAutoWString FileName(Utf8ToWide(Fp));
+	if (!FileName)
+	{
+		*d->BaseEnd = 0;
+		LgiTrace("%s:%i - Can't convert file path to UTF-16.\n", _FL);
+		return -1;
+	}
 	DWORD HighSize = 0;
-	DWORD LoSize = GetCompressedFileSizeA(FullPath(), &HighSize);
+	SetLastError(NO_ERROR);
+	DWORD LoSize = GetCompressedFileSizeW(FileName, &HighSize);
+	auto Error = GetLastError();
 	*d->BaseEnd = 0;
+	if (LoSize == INVALID_FILE_SIZE && Error != NO_ERROR)
+	{
+		LgiTrace("%s:%i - GetCompressedFileSizeW failed for '%s': %lu\n", _FL, GetName(), Error);
+		return -1;
+	}
 	auto Size = ((uint64)HighSize << 32) | LoSize;
 	
 	return ((Size + ClusterSize - 1) / ClusterSize) * ClusterSize;
@@ -1909,6 +1923,7 @@ bool LFile::GetStatus()
 GFileOps(); 
 #undef GFileOp
 
+
 #define GFileOp(type)	LFile &LFile::operator << (type i) \
 { \
 	if (d->Swap) SwapWrite((uchar*) &i, sizeof(i)); \
@@ -1918,4 +1933,3 @@ GFileOps();
 
 GFileOps(); 
 #undef GFileOp
-
