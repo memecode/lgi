@@ -111,6 +111,7 @@ class LgiClass LDirectory
 	struct LDirectoryPriv *d;
 
 public:
+	/// Legacy buffer size; not a limit on dynamically returned directory paths.
 	constexpr static int MaxPathLen = 512;
 
 	LDirectory();
@@ -146,6 +147,8 @@ public:
 		int BufSize
 	)	const;
 
+	/// Returns an iterator-owned full path, valid until the iterator is changed.
+	/// Linux, macOS and Windows allocate this path dynamically.
 	virtual const char *FullPath();
 
 	/// Gets the current entries attributes (platform specific)

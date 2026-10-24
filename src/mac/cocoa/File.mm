@@ -1073,8 +1073,7 @@ int LeapYear(int year)
 class LDirectoryPriv
 {
 public:
-	char			BasePath[512];
-	char			*BaseEnd;
+	LString			BasePath, FullPath;
 	DIR				*Dir;
 	struct dirent	*De;
 	struct stat		Stat;
@@ -1087,9 +1086,7 @@ public:
 	{
 		Dir = NULL;
 		De = NULL;
-		BasePath[0] = 0;
 		Pattern = NULL;
-		BaseEnd = NULL;
 		CachePos = -1;
 	}
 	
@@ -1138,8 +1135,10 @@ int LDirectory::First(const char *Name, const char *Pattern)
 	
 	if (Name)
 	{
-		strcpy_s(d->BasePath, sizeof(d->BasePath), Name);
-		d->BaseEnd = d->BasePath + strlen(d->BasePath);
+		d->BasePath = Name;
+		DeleteArray(d->Pattern);
+		d->Cache.Empty();
+		d->CachePos = -1;
 		
 		if (!Pattern || stricmp(Pattern, LGI_ALL_FILES) == 0)
 		{
@@ -1148,11 +1147,11 @@ int LDirectory::First(const char *Name, const char *Pattern)
 			{
 				if (S_ISREG(S.st_mode))
 				{
-					char *Dir = strrchr(d->BasePath, DIR_CHAR);
-					if (Dir)
+					auto Dir = d->BasePath.RFind(DIR_STR);
+					if (Dir >= 0)
 					{
-						*Dir++ = 0;
-						d->Pattern = NewStr(Dir);
+						d->Pattern = NewStr(d->BasePath(Dir + 1, -1));
+						d->BasePath = d->BasePath(0, Dir ? Dir : 1);
 					}
 				}
 			}
@@ -1162,9 +1161,8 @@ int LDirectory::First(const char *Name, const char *Pattern)
 			d->Pattern = NewStr(Pattern);
 		}
 		
-		auto e = d->BasePath + strlen(d->BasePath);
-		while (e > d->BasePath && e[-1] == DIR_CHAR)
-			*--e = 0;
+		while (d->BasePath.Length() > 1 && d->BasePath.EndsWith(DIR_STR))
+			d->BasePath = d->BasePath(0, d->BasePath.Length() - 1);
 		
 		d->Dir = opendir(d->BasePath);
 		if (d->Dir)
@@ -1172,16 +1170,18 @@ int LDirectory::First(const char *Name, const char *Pattern)
 			d->De = readdir(d->Dir);
 			if (d->De)
 			{
-				char s[512];
-				LMakePath(s, sizeof(s), d->BasePath, GetName());
-				lstat(s, &d->Stat);
-				
 				if (d->Ignore())
 				{
 					if (!Next())
 					{
 						return false;
 					}
+				}
+				else if (lstat(FullPath(), &d->Stat))
+				{
+					if (errno != ENOENT)
+						LgiTrace("%s:%i - lstat failed: %i\n", _FL, errno);
+					return Next();
 				}
 			}
 		}
@@ -1193,8 +1193,7 @@ int LDirectory::First(const char *Name, const char *Pattern)
 			LStringPipe o;
 			if (p.Start() && p.Communicate(&o) == 0)
 			{
-				strcpy_s(d->BasePath, sizeof(d->BasePath), Name);
-				d->BaseEnd = d->BasePath + strlen(d->BasePath);
+				d->BasePath = Name;
 				
 				d->Cache.SetFixedLength(false);
 				auto Lines = o.NewLStr().Split("\n");
@@ -1213,13 +1212,15 @@ int LDirectory::First(const char *Name, const char *Pattern)
 				}
 				
 				d->CachePos = 0;
+				if (!d->Cache.Length())
+					return false;
 				return !lstat(d->Cache[d->CachePos], &d->Stat);
 			}
 			else printf("%s:%i - ls failed.\n", _FL);
 		}
 		else
 		{
-			printf("%s:%i - opendir(%s) failed with %i\n", _FL, d->BasePath, errno);
+			printf("%s:%i - opendir(%s) failed with %i\n", _FL, d->BasePath.Get(), errno);
 		}
 	}
 	
@@ -1229,7 +1230,6 @@ int LDirectory::First(const char *Name, const char *Pattern)
 int LDirectory::Next()
 {
 	int Status = false;
-	char s[512];
 
 	if (d->CachePos >= 0)
 	{
@@ -1238,7 +1238,6 @@ int LDirectory::Next()
 			Status = false;
 		else
 		{
-			*d->BaseEnd = 0;
 			auto &c = d->Cache[d->CachePos];
 			if (!lstat(c, &d->Stat))
 				Status = true;
@@ -1250,11 +1249,14 @@ int LDirectory::Next()
 		{
 			if ((d->De = readdir(d->Dir)))
 			{
-				*d->BaseEnd = 0;
-				LMakePath(s, sizeof(s), d->BasePath, GetName());
-				lstat(s, &d->Stat);
 				if (!d->Ignore())
 				{
+					if (lstat(FullPath(), &d->Stat))
+					{
+						if (errno != ENOENT)
+							LgiTrace("%s:%i - lstat failed: %i\n", _FL, errno);
+						continue;
+					}
 					Status = true;
 					break;
 				}
@@ -1279,12 +1281,28 @@ int LDirectory::Close()
 
 bool LDirectory::Path(char *s, int BufLen) const
 {
-	if (!s)
+	if (!s || BufLen <= 0 || !GetName())
 	{
 		return false;
 	}
 	
-	return LMakePath(s, BufLen, d->BasePath, GetName());
+	auto path = d->BasePath;
+	if (d->CachePos >= 0)
+		path = GetName();
+	else
+	{
+		if (path && !path.EndsWith(DIR_STR))
+			path += DIR_STR;
+		path += GetName();
+	}
+	if (path.Length() >= (size_t)BufLen)
+	{
+		s[0] = 0;
+		LgiTrace("%s:%i - Directory path buffer too small: %zu bytes needed.\n", _FL, path.Length() + 1);
+		return false;
+	}
+	memcpy(s, path.Get(), path.Length() + 1);
+	return true;
 }
 
 LVolumeTypes LDirectory::GetType() const
@@ -1385,13 +1403,16 @@ const char *LDirectory::FullPath()
 	if (!n)
 		return NULL;
 	
-	char *s = d->BaseEnd;
-	char *e = d->BasePath + sizeof(d->BasePath);
-	if (s > d->BasePath &&
-		s[-1] != DIR_CHAR)
-		*s++ = DIR_CHAR;
-	strncpy(s, n, e - s);
-	return d->BasePath;
+	d->FullPath = d->BasePath;
+	if (d->CachePos >= 0)
+		d->FullPath = n;
+	else
+	{
+		if (d->FullPath && !d->FullPath.EndsWith(DIR_STR))
+			d->FullPath += DIR_STR;
+		d->FullPath += n;
+	}
+	return d->FullPath;
 }
 
 LString LDirectory::FileName() const

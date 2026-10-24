@@ -1277,8 +1277,7 @@ int LeapYear(int year)
 /////////////////////////////////////////////////////////////////////////////////
 struct LDirectoryPriv
 {
-	char path[MAX_PATH_LEN] = {};
-	char *end = NULL;
+	LString path, fullPath;
 
 	DIR *dir = NULL;
 	struct dirent *entry = NULL;
@@ -1322,7 +1321,8 @@ int LDirectory::First(const char *Name, const char *Pattern)
 		return false;
 	}
 
-	strcpy_s(d->path, sizeof(d->path), Name);
+	d->path = Name;
+	d->pattern.Empty();
 	if (!Pattern || stricmp(Pattern, LGI_ALL_FILES) == 0)
 	{
 		struct stat S;
@@ -1330,11 +1330,11 @@ int LDirectory::First(const char *Name, const char *Pattern)
 		{
 			if (S_ISREG(S.st_mode)) // If it's a file...
 			{
-				auto Dir = strrchr(d->path, DIR_CHAR);
-				if (Dir)
+				auto Dir = d->path.RFind(DIR_STR);
+				if (Dir >= 0)
 				{
-					*Dir++ = 0;		  // Go up one level and make the file name
-					d->pattern = Dir; // The search pattern.
+					d->pattern = d->path(Dir + 1, -1);
+					d->path = d->path(0, Dir ? Dir : 1);
 				}
 			}
 		}
@@ -1344,7 +1344,6 @@ int LDirectory::First(const char *Name, const char *Pattern)
 		d->pattern = Pattern;
 	}
 
-	d->end = d->path + strlen(d->path);
 	d->dir = opendir(d->path);
 	if (!d->dir)
 	{
@@ -1366,12 +1365,11 @@ int LDirectory::First(const char *Name, const char *Pattern)
 				return false;
 			}
 
-			char s[MaxPathLen];
-			LMakePath(s, sizeof(s), d->path, GetName());
+			auto s = FullPath();
 			if (lstat(s, &d->stat))
 			{
 			    printf("%s:%i - lstat(%s) failed: %i\n", _FL, s, errno);
-				return false;
+				return Next();
 			}
 		}
 	}
@@ -1388,11 +1386,7 @@ int LDirectory::Next()
 			if (d->Ignore())
 				continue;
 
-			char s[MaxPathLen] = "";
-
-			*d->end = 0;
-			LMakePath(s, sizeof(s), d->path, GetName());
-			// printf("%s:%i - next '%s' + '%s' = '%s'\n", _FL, d->path, GetName(), s);
+			auto s = FullPath();
 			if (lstat(s, &d->stat))
 			{
 			    if (errno != ENOENT)
@@ -1421,19 +1415,17 @@ int LDirectory::Close()
 
 const char *LDirectory::FullPath()
 {
-	if (!d->entry || !d->end)
+	if (!d->entry)
 	{
 		LAssert(!"missing param.");
 		return NULL;
 	}
 
-	auto e = d->end;
-	if (e[-1] != DIR_CHAR)
-		*e++ = DIR_CHAR;
-	auto remainingBuf = sizeof(d->path) - (e - d->path) - 1;
-	strcpy_s(e, remainingBuf, d->entry->d_name);
-
-	return d->path;
+	d->fullPath = d->path;
+	if (d->fullPath && !d->fullPath.EndsWith(DIR_STR))
+		d->fullPath += DIR_STR;
+	d->fullPath += d->entry->d_name;
+	return d->fullPath;
 }
 
 LString LDirectory::FileName() const
@@ -1443,19 +1435,19 @@ LString LDirectory::FileName() const
 
 bool LDirectory::Path(char *s, int BufLen) const
 {
-	if (!s || BufLen <= 4)
+	if (!s || BufLen <= 0 || !GetName())
 		return false;
-
-	// We could just do LMakePath, but then it'll expand '~' names. Which
-	// would break things.
-	// return LMakePath(s, BufLen, d->BasePath, GetName());
-
-	auto end = s + BufLen;
-	strcpy_s(s, BufLen, d->path);
-	auto c = s + strlen(s);
-	if (c > s && c[-1] != DIR_CHAR)
-		*c++ = DIR_CHAR;
-	strcpy_s(c, end - c, GetName());
+	auto path = d->path;
+	if (path && !path.EndsWith(DIR_STR))
+		path += DIR_STR;
+	path += GetName();
+	if (path.Length() >= (size_t)BufLen)
+	{
+		s[0] = 0;
+		LgiTrace("%s:%i - Directory path buffer too small: %zu bytes needed.\n", _FL, path.Length() + 1);
+		return false;
+	}
+	memcpy(s, path.Get(), path.Length() + 1);
 	return true;
 }
 

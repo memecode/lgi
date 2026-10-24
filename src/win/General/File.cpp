@@ -1095,9 +1095,7 @@ LDateTime LDirectory::TsToDateTime(uint64_t timeStamp, bool convertToLocalTz)
 /////////////////////////////////////////////////////////////////////////////////
 struct LDirectoryPriv
 {
-	char			BasePath[DIR_PATH_SIZE];
-	char			*BaseEnd;
-	int				BaseRemaining;
+	LString			BasePath, FullPath;
 	LString			Utf;
 	HANDLE			Handle;
 	WIN32_FIND_DATAW Data;
@@ -1105,8 +1103,6 @@ struct LDirectoryPriv
 	LDirectoryPriv()
 	{
 		Handle = INVALID_HANDLE_VALUE;
-		BasePath[0] = 0;
-		BaseRemaining = 0;
 	}
 
 	~LDirectoryPriv()
@@ -1135,16 +1131,32 @@ const char *LDirectory::FullPath()
 	auto n = GetName();
 	if (!n)
 		return NULL;
-	strcpy_s(d->BaseEnd, d->BaseRemaining, n);
-	return d->BasePath;
+	d->FullPath = d->BasePath + n;
+	return d->FullPath;
 }
 
 bool LDirectory::Path(char *s, int BufLen) const
 {
-	auto e = d->BasePath + strlen(d->BasePath);
-	auto sep = e > d->BasePath && e[-1] == DIR_CHAR ? "" : DIR_STR;
-	auto ch = sprintf_s(s, BufLen, "%s%s%s", d->BasePath, sep, GetName());
-	return ch > 0;
+	if (!s || BufLen <= 0 || !GetName())
+		return false;
+	auto path = d->BasePath + GetName();
+	if (path.Length() >= (size_t)BufLen)
+	{
+		s[0] = 0;
+		LgiTrace("%s:%i - Directory path buffer too small: %zu bytes needed.\n", _FL, path.Length() + 1);
+		return false;
+	}
+	memcpy(s, path.Get(), path.Length() + 1);
+	return true;
+}
+
+static LString ExtendedDirectoryPath(LString path)
+{
+	if (path.StartsWith("\\\\?\\") || path.StartsWith("\\\\.\\"))
+		return path;
+	if (path.StartsWith("\\\\"))
+		return LString("\\\\?\\UNC\\") + path(2, -1);
+	return LString("\\\\?\\") + path;
 }
 
 size_t Utf8To16Cpy(uint16_t *out, ssize_t outChar, uint8_t *in, ssize_t inChar = -1)
@@ -1222,38 +1234,64 @@ int LDirectory::First(const char *InName, const char *Pattern)
 	Close();
 
     d->Utf.Empty();
+	d->BasePath.Empty();
 
 	if (!InName)
 		return false;
 
-	wchar_t wTmp[DIR_PATH_SIZE], wIn[DIR_PATH_SIZE];
-	UnicodeCpy(wTmp, CountOf(wTmp), InName);
-	auto Chars = GetFullPathNameW(wTmp, CountOf(wTmp), wIn, NULL);
-	UnicodeCpy(d->BasePath, sizeof(d->BasePath), wIn, Chars);
-
-	d->BaseEnd = d->BasePath + strlen(d->BasePath);
-	if (d->BaseEnd > d->BasePath && d->BaseEnd[-1] != DIR_CHAR)
+	LAutoWString input(Utf8ToWide(InName));
+	if (!input)
 	{
-		*d->BaseEnd++ = DIR_CHAR;
-		*d->BaseEnd = 0;
+		LgiTrace("%s:%i - Can't convert directory path to UTF-16.\n", _FL);
+		return false;
 	}
-	ssize_t Used = d->BaseEnd - d->BasePath;
-	d->BaseRemaining = (int) (sizeof(d->BasePath) - Used);
+	DWORD needed = GetFullPathNameW(input, 0, nullptr, nullptr);
+	LArray<wchar_t> absolute;
+	while (needed)
+	{
+		if (!absolute.Length(needed))
+		{
+			LgiTrace("%s:%i - Can't allocate directory path buffer.\n", _FL);
+			return false;
+		}
+		auto chars = GetFullPathNameW(input, needed, absolute.AddressOf(), nullptr);
+		if (!chars)
+		{
+			needed = 0;
+			break;
+		}
+		if (chars < needed)
+		{
+			d->BasePath = absolute.AddressOf();
+			break;
+		}
+		needed = chars;
+	}
+	if (!needed || !d->BasePath)
+	{
+		LgiTrace("%s:%i - GetFullPathNameW failed for '%s': %lu\n", _FL, InName, GetLastError());
+		return false;
+	}
 
-	char Str[DIR_PATH_SIZE];
-	wchar_t *FindArg;
+	auto search = ExtendedDirectoryPath(d->BasePath);
+	if (!d->BasePath.EndsWith(DIR_STR))
+		d->BasePath += DIR_STR;
 	if (Pattern)
 	{
-		if (!LMakePath(Str, sizeof(Str), d->BasePath, Pattern))
-			return false;
-		UnicodeCpy(FindArg = wTmp, CountOf(wTmp), Str);
-	}
-	else
-	{
-		FindArg = wIn;
+		if (!search.EndsWith(DIR_STR))
+			search += DIR_STR;
+		search += Pattern;
 	}
 
-	d->Handle = FindFirstFileW(FindArg, &d->Data);
+	LAutoWString findArg(Utf8ToWide(search));
+	if (!findArg)
+	{
+		LgiTrace("%s:%i - Can't convert directory search to UTF-16.\n", _FL);
+		return false;
+	}
+	d->Handle = FindFirstFileW(findArg, &d->Data);
+	if (d->Handle == INVALID_HANDLE_VALUE && GetLastError() != ERROR_FILE_NOT_FOUND)
+		LgiTrace("%s:%i - FindFirstFileW failed for '%s': %lu\n", _FL, InName, GetLastError());
 	if (d->Handle != INVALID_HANDLE_VALUE)
 	{
 		const char *n;
@@ -1408,10 +1446,10 @@ int64 LDirectory::GetSizeOnDisk()
 		return -1;
 
 	auto ClusterSize = ClusterSizes.GetDriveCluserSize(Fp[0]);
-	LAutoWString FileName(Utf8ToWide(Fp));
+	auto path = ExtendedDirectoryPath(Fp);
+	LAutoWString FileName(Utf8ToWide(path));
 	if (!FileName)
 	{
-		*d->BaseEnd = 0;
 		LgiTrace("%s:%i - Can't convert file path to UTF-16.\n", _FL);
 		return -1;
 	}
@@ -1419,7 +1457,6 @@ int64 LDirectory::GetSizeOnDisk()
 	SetLastError(NO_ERROR);
 	DWORD LoSize = GetCompressedFileSizeW(FileName, &HighSize);
 	auto Error = GetLastError();
-	*d->BaseEnd = 0;
 	if (LoSize == INVALID_FILE_SIZE && Error != NO_ERROR)
 	{
 		LgiTrace("%s:%i - GetCompressedFileSizeW failed for '%s': %lu\n", _FL, GetName(), Error);
