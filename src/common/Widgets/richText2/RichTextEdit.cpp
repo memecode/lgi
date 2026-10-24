@@ -625,6 +625,18 @@ bool LRichTextEdit::SaveActivityRecording()
 	}
 
 	d->ActivityRecording = false;
+
+	if (auto popup = LPopupNotification::Create(GetWindow(),
+						LString::Fmt("Saved to '%s'.", d->ActivityPath.Get())	))
+	{
+		popup->Action("Copy", [this, path=d->ActivityPath]()
+		{
+			LClipBoard c(this);
+			c.Text(path);
+		});
+		popup->Show();
+	}
+
 	return true;
 	#else
 	return false;

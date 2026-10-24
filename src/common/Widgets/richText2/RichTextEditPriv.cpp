@@ -289,33 +289,28 @@ LNamedStyle *LCssCache::AddStyleToCache(LAutoPtr<LCss> &s)
 BlockCursorState::BlockCursorState(bool cursor, LRichTextPriv::BlockCursor *c)
 {
 	Cursor = cursor;
-	Offset = c->Offset;
-	LineHint = c->LineHint;
-	BlockUid = c->Blk->GetUid();
+	Offset = c ? c->Offset : 0;
+	LineHint = c ? c->LineHint : 0;
+	BlockUid = c && c->Blk ? c->Blk->GetUid() : -1;
 }
 
 bool BlockCursorState::Apply(LRichTextPriv *Ctx, bool Forward)
 {
 	LAutoPtr<LRichTextPriv::BlockCursor> &Bc = Cursor ? Ctx->Cursor : Ctx->Selection;
-	if (!Bc)
-		return false;
+	ssize_t o = Bc ? Bc->Offset : 0;
+	int lh = Bc ? Bc->LineHint : 0;
+	int uid = Bc && Bc->Blk ? Bc->Blk->GetUid() : -1;
 
-	ssize_t o = Bc->Offset;
-	int lh = Bc->LineHint;
-	int uid = Bc->Blk->GetUid();
+	LRichTextPriv::Block *b = nullptr;
+	if (BlockUid >= 0 && !Ctx->GetBlockByUid(b, BlockUid))
+		return Ctx->Error(_FL, "Cannot restore cursor block UID %i.", BlockUid);
 
-	int Index;
-	LRichTextPriv::Block *b;
-	if (!Ctx->GetBlockByUid(b, BlockUid, &Index))
-		return false;
-
-	if (b != Bc->Blk)
+	if (!b)
+		Bc.Reset();
+	else if (!Bc)
 		Bc.Reset(new LRichTextPriv::BlockCursor(b, Offset, LineHint));
 	else
-	{
-		Bc->Offset = Offset;
-		Bc->LineHint = LineHint;
-	}
+		Bc->Set(b, Offset, LineHint);
 
 	Offset = o;
 	LineHint = lh;
@@ -360,11 +355,16 @@ bool CompleteTextBlockState::Apply(LRichTextPriv *Ctx, bool Forward)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-MultiBlockState::MultiBlockState(LRichTextPriv *ctx, ssize_t Start)
+MultiBlockState::MultiBlockState(LRichTextPriv *ctx, ssize_t Start, bool SaveCursors)
 {
 	Ctx = ctx;
 	Index = Start;
 	Length = -1;
+	if (SaveCursors)
+	{
+		Cur.Reset(new BlockCursorState(true, ctx->Cursor));
+		Sel.Reset(new BlockCursorState(false, ctx->Selection));
+	}
 }
 
 bool MultiBlockState::Apply(LRichTextPriv *Ctx, bool Forward)
@@ -379,7 +379,13 @@ bool MultiBlockState::Apply(LRichTextPriv *Ctx, bool Forward)
 	ssize_t OldLen = Blks.Length();
 	bool Status = Blks.SwapRange(LRange(0, OldLen), Ctx->Blocks, LRange(Index, Length));
 	if (Status)
+	{
 		Length = OldLen;
+		if (Cur && !Cur->Apply(Ctx, Forward))
+			return false;
+		if (Sel && !Sel->Apply(Ctx, Forward))
+			return false;
+	}
 	
 	return Status;
 }
@@ -572,7 +578,7 @@ bool LRichTextPriv::DeleteSelection(Transaction *Trans, char16 **Cut)
 		{
 			// Delete entire block
 			ssize_t i = Blocks.IndexOf(Start->Blk);
-			LAutoPtr<MultiBlockState> MultiState(new MultiBlockState(this, i));
+			LAutoPtr<MultiBlockState> MultiState(new MultiBlockState(this, i, true));
 			MultiState->Cut(i);
 			MultiState->Length = 0;
 			Start->Set(NextBlk, 0, 0);
@@ -626,7 +632,7 @@ bool LRichTextPriv::DeleteSelection(Transaction *Trans, char16 **Cut)
 
 		ssize_t i = Blocks.IndexOf(Start->Blk);
 		ssize_t e = Blocks.IndexOf(End->Blk);
-		LAutoPtr<MultiBlockState> MultiState(new MultiBlockState(this, i));
+		LAutoPtr<MultiBlockState> MultiState(new MultiBlockState(this, i, true));
 
 		// 1) Delete all the content to the end of the first block
 		ssize_t StartLen = Start->Blk->Length();

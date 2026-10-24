@@ -1505,8 +1505,9 @@ struct MultiBlockState : public LRichTextPriv::DocChange
 	ssize_t Index; // Number of blocks before the edit
 	ssize_t Length; // Of the other version currently in the Ctx stack
 	LArray<LRichTextPriv::Block*> Blks;
+	LAutoPtr<BlockCursorState> Cur, Sel;
 	
-	MultiBlockState(LRichTextPriv *ctx, ssize_t Start);
+	MultiBlockState(LRichTextPriv *ctx, ssize_t Start, bool SaveCursors = false);
 	bool Apply(LRichTextPriv *Ctx, bool Forward);
 
 	bool Copy(ssize_t Idx);
