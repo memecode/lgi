@@ -6,14 +6,14 @@ namespace Rte2 {
 
 LRichTextPriv::BlockCursor::BlockCursor(const BlockCursor &c)
 {
-	Blk = NULL;
+	Blk = nullptr;
 	Blink = true;
 	*this = c;
 }
 		
 LRichTextPriv::BlockCursor::BlockCursor(Block *b, ssize_t off, int line)
 {
-	Blk = NULL;
+	Blk = nullptr;
 	Offset = -1;
 	Pos.ZOff(-1, -1);
 	Line.ZOff(-1, -1);
@@ -26,7 +26,7 @@ LRichTextPriv::BlockCursor::BlockCursor(Block *b, ssize_t off, int line)
 		
 LRichTextPriv::BlockCursor::~BlockCursor()
 {
-	Set(NULL, 0, 0);
+	Set(nullptr, 0, 0);
 }
 		
 LRichTextPriv::BlockCursor &LRichTextPriv::BlockCursor::operator =(const BlockCursor &c)
@@ -43,7 +43,7 @@ LRichTextPriv::BlockCursor &LRichTextPriv::BlockCursor::operator =(const BlockCu
 void LRichTextPriv::BlockCursor::Set(ssize_t off)
 {
 	LArray<int> Ln;
-	if (!Blk->OffsetToLine(off, NULL, &Ln))
+	if (!Blk->OffsetToLine(off, nullptr, &Ln))
 		Ln.Add(-1);
 
 	Set(Blk, off, Ln.First());
@@ -92,10 +92,9 @@ void LRichTextPriv::BlockCursor::Set(LRichTextPriv::Block *b, ssize_t off, int l
 	if (Blk)
 	{
 		LRect Line;
-		#ifdef _DEBUG
-		ssize_t BlkLen = Blk->Length();
-		#endif
-		LAssert(off >= 0 && off <= BlkLen);
+		Blk->Assert(_FL,
+			off >= 0 && off <= Blk->Length(),
+			LString::Fmt("Invalid offset %i for block of length %i", off, Blk->Length()));
 		Blk->GetPosFromIndex(this);
 	}
 

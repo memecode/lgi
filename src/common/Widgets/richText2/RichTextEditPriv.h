@@ -375,7 +375,9 @@ public:
 
 	bool CaptureActivityState(bool ClearActions);
 	void RecordActivityAction(const LJson &Action);
+
 	#endif
+	void Assert(const char *file, int line, bool test, LString msg);
 
 	// Spell check support
 	LSpellCheck *SpellCheck = nullptr;
@@ -681,6 +683,11 @@ public:
 			LAssert(Cursors == 0);
 		}
 		
+		void Assert(const char *file, int line, bool test, LString msg)
+		{
+			d->Assert(file, line, test, msg);
+		}
+
 		// Events
 		bool PostEvent(int Cmd, LMessage::Param a = 0, LMessage::Param b = 0, int64_t TimeoutMs = -1)
 		{

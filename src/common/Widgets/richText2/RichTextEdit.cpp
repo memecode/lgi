@@ -494,6 +494,9 @@ static bool ValidateActivityAction(LJson &event)
 {
 	LString type = event.Get("type");
 	int64_t field = 0;
+	if (type == "assert")
+		return !event.Get("file").IsEmpty() &&
+			ReadActivityIntRange(event, "line", 1, INT_MAX, field);
 	if (type == "key")
 		return ReadActivityIntRange(event, "vkey", 0, UINT16_MAX, field) &&
 			ReadActivityIntRange(event, "c16", 0, UINT16_MAX, field) &&
@@ -800,6 +803,8 @@ bool LRichTextEdit::ReplayActivityRecording()
 		LString actionJson = action.GetJson();
 		LJson event(actionJson.Get());
 		LString type = event.Get("type");
+		if (type == "assert")
+			continue; // Recorded diagnostics are not input events.
 		int64_t x = 0, y = 0, flags = 0;
 		if (type == "key")
 		{

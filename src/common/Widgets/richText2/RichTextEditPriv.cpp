@@ -76,7 +76,7 @@ bool LRichTextPriv::CaptureActivityState(bool ClearActions)
 	LJson state;
 	state.Set("html", UtfNameCache.Get());
 
-	if (Cursor)
+	if (Cursor && Cursor->Blk)
 	{
 		state.Set("cursor.index", (int64_t)IndexOfCursor(Cursor));
 		state.Set("cursor.uid", (int64_t)Cursor->Blk->GetUid());
@@ -88,7 +88,7 @@ bool LRichTextPriv::CaptureActivityState(bool ClearActions)
 	else
 		state.Set("cursor.index", (int64_t)-1);
 
-	if (Selection)
+	if (Selection && Selection->Blk)
 	{
 		state.Set("selection.index", (int64_t)IndexOfCursor(Selection));
 		state.Set("selection.uid", (int64_t)Selection->Blk->GetUid());
@@ -122,6 +122,23 @@ void LRichTextPriv::RecordActivityAction(const LJson &Action)
 		ActivityActions.Add(Action);
 }
 #endif
+
+void LRichTextPriv::Assert(const char *file, int line, bool test, LString msg)
+{
+	if (test)
+		return;
+
+	#if DEBUG_ACTIVITY
+	LJson action;
+	action.Set("type", "assert");
+	action.Set("file", file);
+	action.Set("line", (int64_t)line);
+	action.Set("msg", msg);
+	RecordActivityAction(action);
+	#endif
+
+	_lgi_assert(false, LString::Fmt("Rich text assertion at %s:%i: %s", file, line, msg.Get()), file, line);
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool Utf16to32(LArray<uint32_t> &Out, const uint16_t *In, ssize_t WordLen)
@@ -613,6 +630,24 @@ bool LRichTextPriv::DeleteSelection(Transaction *Trans, char16 **Cut)
 			if (StartLeaf < 0 || EndLeaf < StartLeaf)
 				return Error(_FL, "Selection endpoints are not in document order.");
 
+			auto RootOf = [](Block *b)
+			{
+				while (b->parent)
+					b = b->parent;
+				return b;
+			};
+			ssize_t First = Blocks.IndexOf(RootOf(Start->Blk));
+			ssize_t Last = Blocks.IndexOf(RootOf(End->Blk));
+			if (First < 0 || Last < First)
+				return Error(_FL, "Selection roots are not in document order.");
+
+			// Restore all selected blocks before restoring either cursor endpoint.
+			LAutoPtr<MultiBlockState> State(new MultiBlockState(this, First, true));
+			for (ssize_t n = First; n <= Last; n++)
+				if (!State->Copy(n))
+					return Error(_FL, "Could not save nested selection block for undo.");
+			State->Length = Last - First + 1;
+
 			for (ssize_t n = StartLeaf; n <= EndLeaf; n++)
 			{
 				Block *b = Leaves[n];
@@ -620,11 +655,12 @@ bool LRichTextPriv::DeleteSelection(Transaction *Trans, char16 **Cut)
 				ssize_t To = n == EndLeaf ? End->Offset : b->Length();
 				if (To > From)
 				{
-					ssize_t Removed = b->DeleteAt(Trans, From, To - From, DelTxt);
+					ssize_t Removed = b->DeleteAt(NoTransaction, From, To - From, DelTxt);
 					if (Removed != To - From)
 						return Error(_FL, "Could not delete the full nested selection from %s.", b->GetClass());
 				}
 			}
+			Trans->Add(State.Release());
 		}
 		else
 		{
@@ -1714,11 +1750,13 @@ bool LRichTextPriv::Layout(LScrollBar *&ScrollY)
 		ScrollY->SetRange(Lines);
 	}
 		
-	if (Cursor)
+	for (auto endpoint : {Cursor.Get(), Selection.Get()})
 	{
-		LAssert(Cursor->Blk != NULL);
-		if (Cursor->Blk)
-			Cursor->Blk->GetPosFromIndex(Cursor);
+		if (!endpoint)
+			continue;
+		LAssert(endpoint->Blk != NULL);
+		if (endpoint->Blk)
+			endpoint->Blk->GetPosFromIndex(endpoint);
 	}
 
 	return true;
