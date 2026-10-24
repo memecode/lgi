@@ -1376,7 +1376,7 @@ uint64 LDirectory::GetSize() const
 
 int64 LDirectory::GetSizeOnDisk()
 {
-	return d->Stat.st_size;
+	return (int64)d->Stat.st_blocks * 512;
 }
 
 const char *LDirectory::FullPath()
@@ -1898,6 +1898,7 @@ const char *LFile::GetName()
 	}
 GFileOps();
 #undef GFileOp
+
 
 #define GFileOp(type)	LFile &LFile::operator << (type i) \
 	{ \

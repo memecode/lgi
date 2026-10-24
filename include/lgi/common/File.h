@@ -175,6 +175,8 @@ public:
 	virtual uint64 GetSize() const;
 	
 	/// Returns the size of file on disk. This can be both larger and smaller than the logical size.
+	/// On Linux and macOS, returns stat's allocated 512-byte blocks converted to bytes.
+	/// Shared blocks are not deduplicated; this is not the space freed by deleting the entry.
 	virtual int64 GetSizeOnDisk();
 
 	/// Returns true if the entry is a sub-directory.

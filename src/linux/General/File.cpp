@@ -1397,7 +1397,7 @@ int LDirectory::Next()
 			{
 			    if (errno != ENOENT)
 				    printf("%s:%i - lstat failed %i\n", _FL, errno);
-				break;
+				continue;
 			}
 
 			return true;
@@ -1547,7 +1547,7 @@ uint64 LDirectory::GetSize() const
 
 int64 LDirectory::GetSizeOnDisk()
 {
-	return d->stat.st_size;
+	return (int64)d->stat.st_blocks * 512;
 }
 
 int64_t LDirectory::TsToUnix(uint64_t timeStamp)
