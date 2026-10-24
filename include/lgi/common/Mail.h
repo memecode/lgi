@@ -521,7 +521,8 @@ public:
 	virtual bool GetSizes(LArray<int64_t> &Sizes) { return false; }
 	/// Gets the unique identifier of the message
 	virtual bool GetUid(int Message, char *Id, int IdLen) = 0;
-	/// Gets the unique identifiers of a list of messages
+	/// Gets all unique identifiers in zero-based message-number order.
+	/// Returns false if a complete list could not be obtained.
 	virtual bool GetUidList(LString::Array &Id) = 0;
 	/// Gets the headers associated with a given message
 	virtual LString GetHeaders(int Message) = 0;
@@ -580,7 +581,6 @@ protected:
 	bool ListCmd(const char *Cmd, LHashTbl<ConstStrKey<char,false>, bool> &Results);
 
 	const char *End = "\r\n.\r\n";
-	const char *Marker = nullptr;
 	int Messages = -1;
 
 public:

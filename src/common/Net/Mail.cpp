@@ -1965,7 +1965,6 @@ LString MailReceiveFolder::GetHeaders(int Message)
 //////////////////////////////////////////////////////////////////////////////////////////////////
 MailPop3::MailPop3()
 {
-	Marker = End;
 }
 
 MailPop3::~MailPop3()
@@ -2272,25 +2271,9 @@ CleanUp:
 
 bool MailPop3::MailIsEnd(LString &s)
 {
-	ssize_t Len = s.Length();
-	for (auto c = s.Get(); c && Len-- > 0; c++)
-	{
-		if (*c != *Marker)
-		{
-			Marker = End;
-		}
-
-		if (*c == *Marker)
-		{
-			Marker++;
-			if (!*Marker)
-			{
-				return true;
-			}
-		}
-	}
-
-	return false;
+	auto Len = s.Length();
+	auto EndLen = strlen(End);
+	return Len >= EndLen && !memcmp(s.Get() + Len - EndLen, End, EndLen);
 }
 
 // States for Pop3ProcessBody
@@ -2653,23 +2636,65 @@ bool MailPop3::GetUidList(LString::Array &Id)
 	if (!Socket)
 		return false;
 
+	auto Count = GetMessages();
+	if (Count < 0)
+		return false;
+
 	sprintf_s(Buffer, sizeof(Buffer), "UIDL\r\n");
 	VERIFY_RET_VAL(Write(0, true));
 	auto Str = ReadMultiLineReply();
 	if (!Str)
 		return false;
 
+	LString::Array Parsed;
+	Parsed.Length(Count);
+	ssize_t Found = 0;
 	auto lines = Str.SplitDelimit("\r\n");
 	for (auto s: lines)
 	{
-		if (s(0) != '.')
+		const char *p = s.Get();
+		ssize_t Number = 0;
+		if (!p || *p < '0' || *p > '9')
 		{
-			char *Space = strchr(s, ' ');
-			if (Space++)
-				Id.New() = Space;
+			Log("Invalid POP3 UIDL message number.", LSocketI::SocketMsgError);
+			return false;
 		}
+		while (*p >= '0' && *p <= '9')
+		{
+			auto Digit = *p++ - '0';
+			if (Number > Count / 10 || (Number == Count / 10 && Digit > Count % 10))
+			{
+				Log("POP3 UIDL message number is out of range.", LSocketI::SocketMsgError);
+				return false;
+			}
+			Number = Number * 10 + Digit;
+		}
+		if (!Number || *p != ' ' || Parsed[Number - 1])
+		{
+			Log("Invalid or duplicate POP3 UIDL message number.", LSocketI::SocketMsgError);
+			return false;
+		}
+		while (*p == ' ')
+			p++;
+
+		auto Uid = p;
+		while (*p >= '!' && *p <= '~')
+			p++;
+		if (*p || p == Uid || p - Uid > 70)
+		{
+			Log("Invalid POP3 UIDL identifier.", LSocketI::SocketMsgError);
+			return false;
+		}
+		Parsed[Number - 1] = Uid;
+		Found++;
 	}
 
+	if (Found != Count)
+	{
+		Log("Incomplete POP3 UIDL list.", LSocketI::SocketMsgError);
+		return false;
+	}
+	Id.Swap(Parsed);
 	return true;
 }
 
@@ -2699,22 +2724,32 @@ LString MailPop3::ReadMultiLineReply()
 	{
 		auto s = Socket->Read();
 		if (!s)
-			break;
+		{
+			Log("Incomplete POP3 multiline reply.", LSocketI::SocketMsgError);
+			return LString();
+		}
 
 		a += s;
 		if (!a || a[0] != '+')
+		{
+			Log("POP3 multiline command failed.", LSocketI::SocketMsgError);
 			return LString();
+		}
 	}
 	while (!MailIsEnd(a));
 
 	// Strip off the first line...
 	auto FirstNewLen = a.Find("\n");
-	if (FirstNewLen < 0)
+	if (FirstNewLen < 0 || strncmp(a.Get(), "+OK", 3) ||
+		(a[3] != ' ' && a[3] != '\r'))
+	{
+		Log("Invalid POP3 multiline response status.", LSocketI::SocketMsgError);
 		return LString();
+	}
 
 	// Apply RFC 1939 §3 dot-unstuffing: each line the server prefixed with an
 	// extra '.' to avoid confusion with the terminator needs that dot removed.
-	LString body = a(FirstNewLen, -1); // starts with the \n that ended +OK line
+	LString body = a(FirstNewLen, a.Length() - 3); // exclude the final ".\r\n"
 	const char *p = body.Get();
 	if (!p)
 		return LString();
