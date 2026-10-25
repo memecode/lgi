@@ -143,7 +143,7 @@ public:
 						p += "Common7\\IDE\\devenv.exe";
 						if (p.IsFile())
 						{
-							LExecute(p, File);
+							LExecute(p.c_str(), File);
 							LCloseApp();
 						}
 						else Log->Print("\t\tError: The file '%s' doesn't exist.", p.GetFull().Get());

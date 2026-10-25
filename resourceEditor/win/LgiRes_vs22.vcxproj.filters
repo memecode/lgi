@@ -60,6 +60,9 @@
     <ClCompile Include="..\..\src\common\Lgi\DocApp.cpp">
       <Filter>Lgi</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\common\Text\XmlTreeUi.cpp">
+      <Filter>Lgi</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\LgiRes_Dialog.h">

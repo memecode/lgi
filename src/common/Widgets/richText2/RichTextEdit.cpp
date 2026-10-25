@@ -3,11 +3,13 @@
 #include <ctype.h>
 #include <climits>
 #include <cmath>
+
+#include "lgi/common/Lgi.h"
+
 #ifdef WIN32
 #include <imm.h>
 #endif
 
-#include "lgi/common/Lgi.h"
 #include "lgi/common/RichTextEdit2.h"
 #include "lgi/common/Input.h"
 #include "lgi/common/ScrollBar.h"
@@ -3439,7 +3441,7 @@ EmojiMenu::EmojiMenu(LRichTextPriv *priv, LPoint p) : LPopup(priv->View)
 		auto &r = EmojiRanges[b];
 		for (ssize_t i=0; i<r.Len; i++)
 		{
-			uint32_t u = (int)r.Start + i;
+			uint32_t u = static_cast<uint32_t>(r.Start + i);
 			auto Emoji = EmojiToIconIndex(&u, 1);
 			if (Emoji.Index >= 0)
 			{

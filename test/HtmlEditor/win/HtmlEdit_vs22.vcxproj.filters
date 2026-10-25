@@ -18,17 +18,20 @@
     <Filter Include="Controls\Html">
       <UniqueIdentifier>{102281d9-5fed-495e-8ce7-d4232c9afda4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Controls\RichTextEdit">
-      <UniqueIdentifier>{666d6b50-f5fb-48b3-8e73-d8a90741e5ee}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Controls\RichTextEdit\Emoji">
-      <UniqueIdentifier>{62a1d4c6-9ce5-466d-a6a2-65e26f62c288}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Controls\RichTextEdit\Spelling">
-      <UniqueIdentifier>{579fa028-117b-44f0-8f9d-bf0cc8ac9187}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Test Files">
       <UniqueIdentifier>{d072fbae-b32a-44a9-9f14-9aae81a47698}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Controls\Rte1">
+      <UniqueIdentifier>{666d6b50-f5fb-48b3-8e73-d8a90741e5ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Controls\Rte1\Emoji">
+      <UniqueIdentifier>{62a1d4c6-9ce5-466d-a6a2-65e26f62c288}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Controls\Rte1\Spelling">
+      <UniqueIdentifier>{579fa028-117b-44f0-8f9d-bf0cc8ac9187}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Controls\Rte2">
+      <UniqueIdentifier>{fba2364b-2dc7-4ce8-b8d3-5c7ce0b924d7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -50,20 +53,11 @@
     <ClCompile Include="..\..\..\src\common\Net\OpenSSLSocket.cpp">
       <Filter>Lgi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\common\Widgets\Editor\HorzRuleBlock.cpp">
-      <Filter>Controls\RichTextEdit</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\common\Widgets\Editor\ImageBlock.cpp">
-      <Filter>Controls\RichTextEdit</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\common\Widgets\Editor\BlockCursor.cpp">
-      <Filter>Controls\RichTextEdit</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\common\Text\Emoji\EmojiMap.cpp">
-      <Filter>Controls\RichTextEdit\Emoji</Filter>
+      <Filter>Controls\Rte1\Emoji</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\common\Text\Emoji\EmojiTools.cpp">
-      <Filter>Controls\RichTextEdit\Emoji</Filter>
+      <Filter>Controls\Rte1\Emoji</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\common\Gdc2\Tools\GdcTools.cpp">
       <Filter>Lgi</Filter>
@@ -77,17 +71,47 @@
     <ClCompile Include="..\..\..\src\common\Lgi\LgiMain.cpp">
       <Filter>Lgi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\common\Widgets\Editor\RichTextEdit.cpp">
-      <Filter>Controls\RichTextEdit</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\common\Widgets\Editor\RichTextEditPriv.cpp">
-      <Filter>Controls\RichTextEdit</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\common\Widgets\Editor\TextBlock.cpp">
-      <Filter>Controls\RichTextEdit</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\win\Lgi\SpellCheckWindows.cpp">
-      <Filter>Controls\RichTextEdit\Spelling</Filter>
+      <Filter>Controls\Rte1\Spelling</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Widgets\richText1\BlockCursor1.cpp">
+      <Filter>Controls\Rte1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Widgets\richText1\HorzRuleBlock1.cpp">
+      <Filter>Controls\Rte1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Widgets\richText1\ImageBlock1.cpp">
+      <Filter>Controls\Rte1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Widgets\richText1\RichTextEdit1.cpp">
+      <Filter>Controls\Rte1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Widgets\richText1\RichTextEditPriv1.cpp">
+      <Filter>Controls\Rte1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Widgets\richText1\TextBlock1.cpp">
+      <Filter>Controls\Rte1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Widgets\richText2\BlockCursor.cpp">
+      <Filter>Controls\Rte2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Widgets\richText2\HorzRuleBlock.cpp">
+      <Filter>Controls\Rte2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Widgets\richText2\ImageBlock.cpp">
+      <Filter>Controls\Rte2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Widgets\richText2\ListBlock.cpp">
+      <Filter>Controls\Rte2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Widgets\richText2\RichTextEdit.cpp">
+      <Filter>Controls\Rte2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Widgets\richText2\RichTextEditPriv.cpp">
+      <Filter>Controls\Rte2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Widgets\richText2\TextBlock.cpp">
+      <Filter>Controls\Rte2</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -104,13 +128,13 @@
       <Filter>Lgi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\common\LgiSpellCheck.h">
-      <Filter>Controls\RichTextEdit\Spelling</Filter>
+      <Filter>Controls\Rte1\Spelling</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\lgi\common\RichTextEdit.h">
-      <Filter>Controls\RichTextEdit</Filter>
+    <ClInclude Include="..\..\..\src\common\Widgets\richText1\RichTextEditPriv1.h">
+      <Filter>Controls\Rte1</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\common\Widgets\Editor\RichTextEditPriv.h">
-      <Filter>Controls\RichTextEdit</Filter>
+    <ClInclude Include="..\..\..\src\common\Widgets\richText2\RichTextEditPriv.h">
+      <Filter>Controls\Rte2</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

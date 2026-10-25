@@ -241,13 +241,13 @@ LAutoPtr<LMemDC> CreateDiff(LViewI *Parent, LSurface *A, LSurface *B)
 class ThreadLoader : public LThread
 {
 	LView *Owner;
-	LAutoString File;
+	LString File;
 	
 public:
 	LAutoPtr<LSurface> Img;
 	LMessage::Param Param;
 
-	ThreadLoader(LView *owner, LAutoString file, LMessage::Param param) : LThread("ThreadLoader")
+	ThreadLoader(LView *owner, LString file, LMessage::Param param) : LThread("ThreadLoader")
 	{
 		Owner = owner;
 		File = file;
@@ -326,15 +326,9 @@ public:
 		Status->AppendPane(Pane[2] = new LStatusPane);
 		
 		if (FileA)
-		{
-			LAutoString a(NewStr(FileA));
-			Threads.Add(new ThreadLoader(this, a, 0));
-		}
+			Threads.Add(new ThreadLoader(this, FileA, 0));
 		if (FileB)
-		{
-			LAutoString a(NewStr(FileB));
-			Threads.Add(new ThreadLoader(this, a, 1));
-		}
+			Threads.Add(new ThreadLoader(this, FileB, 1));
 		
 		AddView(AName = new LEdit(IDC_A_NAME, FileA));
 		AddView(BName = new LEdit(IDC_B_NAME, FileB));			

@@ -363,7 +363,7 @@ LDebugContext::LDebugContext(AppWnd *App,
 	
 		if (Exe)
 		{
-			if (!d->Db->Load(this, Exe, Args, RunAsAdmin, p, Env))
+			if (!d->Db->Load(this, Exe, Args, RunAsAdmin, p.c_str(), Env))
 			{
 				d->Log("Failed to load '%s' into debugger.\n", d->Exe.Get());
 				d->Db.Reset();

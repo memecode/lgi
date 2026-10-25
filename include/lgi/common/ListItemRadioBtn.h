@@ -57,9 +57,9 @@ public:
 		}
 
 		// Box
-		int cx = c.x1 + (c.X() / 2);
-		int cy = c.y1 + (c.Y() / 2);
-		int radius = c.X() / 2;
+		float cx = (float)c.x1 + (c.X() / 2.0f);
+		float cy = (float)c.y1 + (c.Y() / 2.0f);
+		float radius = (float)c.X() / 2.0f;
 		pDC->Colour(L_WORKSPACE);
 		pDC->FilledCircle(cx, cy, radius);
 

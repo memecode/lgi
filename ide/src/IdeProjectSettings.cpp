@@ -821,7 +821,7 @@ public:
 							Path.Join(Cur.GetFull());
 							Path.PopLast();
 							if (Path.Exists())
-								s->InitialDir(Path);
+								s->InitialDir(Path.c_str());
 
 							auto Process = [this, e](LFileSelect *s, bool ok)
 							{
@@ -832,7 +832,7 @@ public:
 								if (Base)
 								{
 									LFile::Path p = Base;
-									Rel = LMakeRelativePath(p / "..", s->Name());
+									Rel = LMakeRelativePath((p / "..").c_str(), s->Name());
 								}
 								e->Name(Rel ? Rel.Get() : s->Name());
 							};

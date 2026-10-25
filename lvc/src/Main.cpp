@@ -413,7 +413,7 @@ VersionCtrl AppPriv::DetectVcs(VcFolder *Fld)
 		if (vcs == VcGit)
 		{
 			// Is it a sub-module?
-			if (auto modules = LReadFile(parent / ".gitmodules"))
+			if (auto modules = LReadFile((parent / ".gitmodules").c_str()))
 			{
 				for (auto subs: modules.Split("[submodule"))
 				{

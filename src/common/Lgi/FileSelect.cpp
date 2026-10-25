@@ -2420,7 +2420,7 @@ bool LGetUsersLinks(LArray<LUserLink> &Links)
 	#if defined(WINDOWS)
 	
 		LDirectory d;
-		for (int b = d.First(p); b; b = d.Next())
+		for (int b = d.First(p.c_str()); b; b = d.Next())
 		{
 			auto s = d.GetName();
 			if (s && stristr(s, ".lnk"))

@@ -121,7 +121,7 @@ bool TerminalAt(LString Path)
 			LFile::Path p = LString(w);
 			p += "system32\\cmd.exe";
 			FileDev->SetCurrentFolder(Path);
-			return LExecute(p);
+			return LExecute(p.c_str());
 		}
 	#elif defined(LINUX)
 	    if (!LExecute("xdg-terminal-exec", nullptr, Path))
@@ -1079,7 +1079,7 @@ void VcFolder::GetConfigFile(bool local, bool createIfMissing, std::function<voi
 				{
 					if (createIfMissing)
 					{
-						LFile f(p, O_WRITE);
+						LFile f(p.c_str(), O_WRITE);
 						f.SetSize(0);
 						d->Log->Print("%s:%i - created config file '%s'\n", _FL, p.GetFull().Get());
 					}
@@ -3716,7 +3716,7 @@ struct GitRewriteThread :
 		auto toolPath = LFile::Path(path) / toolLeaf;
 
 		// Is the tool installed?
-		if (LFileExists(toolPath))
+		if (LFileExists(toolPath.c_str()))
 		{
 			// Not installed so...
 			LStringPipe out;
@@ -3724,7 +3724,7 @@ struct GitRewriteThread :
 			if (!LGetUri(this, &out, &outErr, tool))
 				return Error(LString::Fmt("failed to download tool: %s", outErr.ToString().Get()));
 
-			LFile outFile(toolPath, O_WRITE);
+			LFile outFile(toolPath.c_str(), O_WRITE);
 			if (outFile)
 			{
 				outFile.SetSize(0);

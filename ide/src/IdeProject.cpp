@@ -4111,9 +4111,9 @@ bool CheckExists(LAutoString Base, T &p, Fn Setter, bool Debug)
 				auto Parent = t.GetParent();
 				
 				if (Debug)
-					printf("Searching '%s' for missing '%s'\n", Parent.GetFull().Get(), Leaf.Get());
+					printf("Searching '%s' for missing '%s'\n", Parent.c_str(), Leaf.Get());
 				
-				for (auto b=dir.First(Parent); b; b = dir.Next())
+				for (auto b=dir.First(Parent.c_str()); b; b = dir.Next())
 				{
 					if (!Stricmp(dir.GetName(), t.Last().Get()))
 					{
@@ -4134,7 +4134,7 @@ bool CheckExists(LAutoString Base, T &p, Fn Setter, bool Debug)
 			LString Old = p.Get();
 			if (WasRel)
 			{
-				auto r = LMakeRelativePath(Base, Full);
+				auto r = LMakeRelativePath(Base, Full.c_str());
 				Setter(p, r);
 			}
 			else

@@ -902,7 +902,7 @@ public:
 			auto Base = Proj->GetBasePath();
 			LFile::Path p(Base);
 			p += Fn;
-			App->GotoReference(p, 1, false, true, NULL);
+			App->GotoReference(p.c_str(), 1, false, true, NULL);
 		}
 		else
 		{

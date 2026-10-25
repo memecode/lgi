@@ -601,9 +601,10 @@ public:
 			return p;
 		}
 		
-		operator const char *()
+		const char *c_str()
 		{
-			return GetFull();
+			GetFull();
+			return Full.Get();
 		}
 		
 		operator LString()

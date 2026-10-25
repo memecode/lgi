@@ -558,7 +558,7 @@ struct LTracingSupport : public LMutex
 			LString Leaf = Dir + 1;
 			LFile::Path p(LSP_APP_DATA);
 			if (!p.Exists())
-				FileDev->CreateFolder(p);
+				FileDev->CreateFolder(p.c_str());
 			p += Leaf;
 			LogPath = p.GetFull();
 		}

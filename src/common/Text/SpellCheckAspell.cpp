@@ -227,7 +227,7 @@ public:
 		LFile::Path CsvPath(LSP_APP_INSTALL);
 		CsvPath += "Aspell";
 		CsvPath += CsvFile;
-		if (LFileExists(CsvPath))
+		if (CsvPath.Exists())
 			LanguagesCsv = CsvPath.GetFull();
 		else
 			LanguagesCsv = LFindFile(CsvFile);
@@ -291,7 +291,7 @@ public:
     				#endif
     			    "." LGI_LIBRARY_EXT;
 			#endif
-			if (!Load(p))
+			if (!Load(p.c_str()))
 				LgiTrace("%s:%i - Failed to load aspell: %s\n", _FL, p.GetFull().Get());
 		}
 		
@@ -391,7 +391,7 @@ public:
 				{
 					// Try and copy over files from the install folder...
 					if (!Data.IsFolder())
-						FileDev->CreateFolder(Data);
+						FileDev->CreateFolder(Data.c_str());
 
 					LDirectory d;
 					for (int b = d.First(Src); b; b = d.Next())

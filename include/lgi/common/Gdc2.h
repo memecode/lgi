@@ -1132,6 +1132,7 @@ public:
 	#endif
 
 	// Set new clipping region
+	LRect ClipRgn() override { return LSurface::ClipRgn(); }
 	LRect ClipRgn(LRect *Rgn) override;
 
 	bool GetClient(LRect *c) override;
@@ -1391,7 +1392,7 @@ public:
     LSurface *Load
     (
         /// The full path of the file
-        const char *FileName,
+        LString FileName,
     	/// [Optional] Enable OS based loaders
         bool UseOSLoader = true,
         /// [Optional] Dom object for options

@@ -640,7 +640,7 @@ bool DbTesting()
 	LFile::Path FileDb(BaseFolder, "Folder.db");
 	LFile::Path FileDebug(BaseFolder, "Debug.txt");
 	LFile In;
-	if (!In.Open(FileXml, O_READ))
+	if (!In.Open(FileXml.c_str(), O_READ))
 		return false;	
 	
 	// Read XML
@@ -701,13 +701,13 @@ bool DbTesting()
 	uint64 ConvertTime = LMicroTime() - Start;
 
 	Start = LMicroTime();
-	if (!Tbl.Serialize(FileDb, true))
+	if (!Tbl.Serialize(FileDb.c_str(), true))
 		return false;
 	uint64 WriteTime = LMicroTime() - Start;
 
 	LDbTable Test;
 	Start = LMicroTime();
-	if (!Test.Serialize(FileDb, false))
+	if (!Test.Serialize(FileDb.c_str(), false))
 		return false;
 	uint64 ReadTime = LMicroTime() - Start;
 
@@ -717,7 +717,7 @@ bool DbTesting()
 	if (Idx)
 	{
 		LFile Out;
-		if (Out.Open(FileDebug, O_WRITE))
+		if (Out.Open(FileDebug.c_str(), O_WRITE))
 		{
 			Out.SetSize(0);
 			for (unsigned i=0; i<Idx->Length(); i++)

@@ -273,7 +273,7 @@ public:
 			LFile::Path p(LSP_TEMP);
 			p += Cm->FileName;
 			LFile f;
-			if (f.Open(p, O_WRITE))
+			if (f.Open(p.c_str(), O_WRITE))
 			{
 				if (Cm->Stream)
 				{
@@ -285,7 +285,7 @@ public:
 				f.Close();
 			}
 
-			LExecute(p);
+			LExecute(p.c_str());
 		}
 	}
 
@@ -571,9 +571,9 @@ public:
 			{
 				LFile::Path p(LSP_TEMP);
 				p += "export.html";
-				if (Edit->Save(p))
+				if (Edit->Save(p.c_str()))
 				{
-					LExecute(p);
+					LExecute(p.c_str());
 				}
 				break;
 			}
@@ -600,10 +600,10 @@ public:
 						LFile::Path p(LSP_APP_INSTALL);
 						p += "Output";
 						if (!p.IsFolder())
-							FileDev->CreateFolder(p);
+							FileDev->CreateFolder(p.c_str());
 						p += "output.html";
 						LFile f;
-						if (f.Open(p, O_WRITE))
+						if (f.Open(p.c_str(), O_WRITE))
 						{
 							f.SetSize(0);
 							f.Write(Html);
@@ -616,7 +616,7 @@ public:
 								LDocView::ContentMedia &Cm = Media[i];
 								
 								p = (p / ".." / Cm.FileName);
-								if (f.Open(p, O_WRITE))
+								if (f.Open(p.c_str(), O_WRITE))
 								{
 									f.SetSize(0);
 									if (Cm.Data.IsBinary())

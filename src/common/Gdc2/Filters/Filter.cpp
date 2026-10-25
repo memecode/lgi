@@ -1422,7 +1422,7 @@ LSurface *LoadDC(const char *Name, bool UseOSLoader, LDom *Options)
 }
 */
 
-LSurface *GdcDevice::Load(const char *Name, bool UseOSLoader, LDom *Options)
+LSurface *GdcDevice::Load(LString Name, bool UseOSLoader, LDom *Options)
 {
 	if (!LFileExists(Name))
 	{

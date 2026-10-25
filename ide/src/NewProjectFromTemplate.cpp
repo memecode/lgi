@@ -82,7 +82,7 @@ LString GetPython3()
 			printf("Got python '%s'\n", p.GetFull().Get());
 			
 			// But what version is it?
-			LSubProcess sp(p, "--version");
+			LSubProcess sp(p.c_str(), "--version");
 			if (sp.Start())
 			{
 				LStringPipe out;
@@ -121,7 +121,7 @@ bool CreateProject(const char *Name, const char *Template, const char *Folder)
 	ScriptIn += CreateProjectPy;
 	LFile::Path ScriptOut(Folder);
 	ScriptOut += CreateProjectPy;
-	if (!FileDev->Copy(ScriptIn, ScriptOut))
+	if (!FileDev->Copy(ScriptIn.c_str(), ScriptOut.c_str()))
 	{
 		LgiTrace("%s:%i - Copy '%s' to '%s' failed.\n", _FL, ScriptIn.GetFull().Get(), ScriptOut.GetFull().Get());
 		return false;
@@ -140,7 +140,7 @@ bool CreateProject(const char *Name, const char *Template, const char *Folder)
 	p.Communicate(&Out);
 	LgiTrace("Out=%s\n", Out.NewLStr().Get());
 	
-	FileDev->Delete(ScriptOut);
+	FileDev->Delete(ScriptOut.c_str());
 	return true;
 }
 

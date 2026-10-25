@@ -44,7 +44,7 @@ LString LApp::GetConfigPath()
 {
 	LFile::Path p(LSP_APP_CONFIG);
 	if (!p.Exists())
-		FileDev->CreateFolder(p);
+		FileDev->CreateFolder(p.c_str());
 
 	if (p.Exists())
 	{
@@ -427,7 +427,7 @@ void LPopupNotification::Action(LString label, std::function<void()> callback)
 	{
 		action->label = label;
 		action->callback = callback;
-		action->ctrlId = 100 + Actions.Length();
+		action->ctrlId = 100 + (int)Actions.Length();
 		Actions.Add(action);
 
 		if ((action->btn = new LButton(action->ctrlId, 0, 0, -1, -1, action->label)))

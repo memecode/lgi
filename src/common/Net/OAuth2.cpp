@@ -613,22 +613,22 @@ bool LOAuth2::Params::CheckRequirement(const char *req)
 		// Check the cert folder exists:
 		LFile::Path appRoot(LSP_APP_DATA);
 		auto certFolder = appRoot / "certs";
-		if (!LDirExists(certFolder))
+		if (!LDirExists(certFolder.c_str()))
 		{
-			if (!FileDev->CreateFolder(certFolder, true))
+			if (!FileDev->CreateFolder(certFolder.c_str(), true))
 			{
 				LgiTrace("%s:%i - Can't create cert folder '%s'\n", _FL, certFolder.GetFull().Get());
 				return false;
 			}
 		}
-		if (!LDirExists(certFolder))
+		if (!LDirExists(certFolder.c_str()))
 		{
 			LgiTrace("%s:%i - Cert folder '%s' missing\n", _FL, certFolder.GetFull().Get());
 			return false;
 		}
 
 		// If the cert files exist... then ok, return success
-		if (ScanForKeyAndCert(certFolder))
+		if (ScanForKeyAndCert(certFolder.c_str()))
 			return true;
 
 		{
@@ -644,7 +644,7 @@ bool LOAuth2::Params::CheckRequirement(const char *req)
 		{
 			// Create the certificate with mkcert:
 			LSubProcess sub("mkcert", LString::Fmt("localhost 127.0.0.1 ::1"));
-			sub.SetInitFolder(certFolder);
+			sub.SetInitFolder(certFolder.c_str());
 			if (!sub.Start())
 			{
 				LgiTrace("%s:%i - Failed to start 'mkcert'\n", _FL);
@@ -659,7 +659,7 @@ bool LOAuth2::Params::CheckRequirement(const char *req)
 			}
 		}
 
-		return ScanForKeyAndCert(certFolder);
+		return ScanForKeyAndCert(certFolder.c_str());
 	}
 	else
 	{

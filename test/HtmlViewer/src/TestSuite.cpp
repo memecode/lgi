@@ -506,7 +506,7 @@ public:
 				#if 1
 				if (auto css = Html->GetCss(true))
 				{
-					LCss::Len wid(LCss::LenPx, 1000 + LScrollBar::SCROLL_BAR_SIZE);
+					LCss::Len wid(LCss::LenPx, 1000 + LScrollBar::GetScrollSize());
 					css->Width(wid);
 					css->MinWidth(wid);
 					css->MaxWidth(wid);
@@ -635,10 +635,10 @@ public:
 				
 				LFile::Path path(App->SaveImagePath());
 				if (!path.Exists())
-					FileDev->CreateFolder(path);
+					FileDev->CreateFolder(path.c_str());
 				path += NowStr;
 				if (!path.Exists())
-					FileDev->CreateFolder(path);
+					FileDev->CreateFolder(path.c_str());
 				OutPath = path.GetFull();
 					
 				SetDescription("Saving renders...");
@@ -745,7 +745,7 @@ public:
 						LFile::Path p(FilesFolder, s->GetText(0));
 						if (p.Exists())
 						{
-							if (auto h = LReadFile(p))
+							if (auto h = LReadFile(p.c_str()))
 							{
 								if (Html)
 									Html->Name(h);

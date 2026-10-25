@@ -185,7 +185,7 @@ void DocEdit::OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour)
 	{
 		if (Doc->d->BreakPoints.Find(Y+1) != BreakPointStore::INVALID_ID)
 		{
-			int r = l->r.Y() >> 1;
+			float r = l->r.Y() / 2.0f;
 			pDC->FilledCircle(8, l->r.y1 + r + TopPaddingPx - DocOffset, r - 1);
 		}
 	}
@@ -223,7 +223,7 @@ bool DocEdit::OnStyleClick(LStyle *style, LMouse *m)
 				auto target = p / ".." / parts[0];
 				if (target.Exists())
 				{
-					Doc->GetApp()->OpenFile(target, nullptr, true,
+					Doc->GetApp()->OpenFile(target.c_str(), nullptr, true,
 						[lineNum=(int)parts[1].Int()](auto doc)
 						{
 							doc->SetLine(lineNum, false);

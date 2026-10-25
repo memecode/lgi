@@ -934,7 +934,7 @@ int FieldView::OnNotify(LViewI *Ctrl, const LNotification &n)
 								if (File)
 								{
 									LFile::Path p = File;
-									auto Rel = LMakeRelativePath(p / "..", dlg->Name());
+									auto Rel = LMakeRelativePath((p / "..").c_str(), dlg->Name());
 									if (Rel)
 										SetCtrlName(c->Id, Rel);
 									else
@@ -3285,11 +3285,11 @@ bool AppWnd::SaveLgi(const char *FileName)
 				{
 					// Also write the header... but only if it's changed...
 					auto DefsContent = Defs.NewLStr();
-					auto OldDefsContent = LReadFile(DefsName);
+					auto OldDefsContent = LReadFile(DefsName.c_str());
 					if (Strcmp(DefsContent.Get(), OldDefsContent.Get()))
 					{
 						LFile DefsFile;
-						if (!DefsFile.Open(DefsName, O_WRITE))
+						if (!DefsFile.Open(DefsName.c_str(), O_WRITE))
 							goto FileErrorMsg;
 
 						DefsFile.SetSize(0);

@@ -82,7 +82,7 @@ LSsh::ConfigHost LSsh::ConfigHostLookup(const char *Host)
 	if (!p.Exists())
 		return c;
 	
-	LFile f(p, O_READ);
+	LFile f(p.c_str(), O_READ);
 	if (!f)
 		return c;
 	
@@ -357,7 +357,7 @@ void LSsh::Close()
 LError LSsh::DownloadFile(const char *To, const char *From)
 {
 	LFile::Path to(To);
-	LFile local(to.Absolute(), O_WRITE);
+	LFile local(to.Absolute().c_str(), O_WRITE);
 	if (!local.IsOpen())
 	{
 		Log->Print("%s:%i - Can't open '%s'.\n", _FL, To);

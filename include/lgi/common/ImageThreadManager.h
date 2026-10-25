@@ -66,7 +66,7 @@ class LImageThreadManager : public LThread, public LMutex, public LCancel
     				if (u.IsFile())
     				{
     					// Local document?
-    					if (Job->pDC.Reset(GdcD->Load(Job->Uri)))
+    					if (Job->pDC.Reset(GdcD->Load(Job->Uri.Get())))
                     		Job->Env->OnDone(Job);
     					else
     					    ITM_LOG("%s:%i - img load failed for '%s'\n", _FL, Job->Uri.Get());

@@ -451,7 +451,7 @@ void LResources::SetThemeFolder(const char *f)
 	LFile::Path Css(f, "styles.css");
 	if (Css.Exists())
 	{
-		LFile in(Css, O_READ);
+		LFile in(Css.c_str(), O_READ);
 		if (in.IsOpen())
 		{
 			auto s = in.Read();

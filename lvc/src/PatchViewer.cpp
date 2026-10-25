@@ -314,7 +314,7 @@ public:
 				return false;
 			}
 
-			LFile f(path, O_READ);
+			LFile f(path.c_str(), O_READ);
 			auto utf = f.Read();
 			size_t crlf = 0, lf = 0;
 			for (const char *s = utf; *s; s++)
@@ -544,7 +544,7 @@ public:
 					break;
 				}
 
-				if (!in->Open(p))
+				if (!in->Open(p.c_str()))
 				{
 					LgiTrace("%s:%i - failed to open file '%s'.\n", _FL, p.GetFull().Get());
 					break;

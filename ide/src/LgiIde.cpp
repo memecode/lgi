@@ -2361,7 +2361,7 @@ void AppWnd::OnReceiveFiles(LArray<const char*> &Files)
 			IdeDoc *Doc = NewDocWnd(NULL, NULL);
 			if (Doc)
 			{
-				Doc->SetFileName(Docs, false);
+				Doc->SetFileName(Docs.c_str(), false);
 				new DumpBinThread(Doc, Files[i]);
 			}
 		}
@@ -3672,7 +3672,7 @@ LMessage::Result AppWnd::OnEvent(LMessage *m)
 					LFile::Path path(full);
 					path = path / ".." / "cache";
 					if (!path.Exists())
-						FileDev->CreateFolder(path);
+						FileDev->CreateFolder(path.c_str());
 					if (path.Exists())
 						d->FindSym->PostEvent(M_GET_PROJECT_CACHE, (LMessage::Param)new LString(path.GetFull()));
 					else
@@ -5369,7 +5369,10 @@ public:
 		
 		pdc->Colour(LColour::Red);
 		pdc->Line(c.x1, c.y1, c.x2, c.y2);		
-		pdc->Ellipse(c.x1+(c.X()/2)+10, c.y1+(c.Y()/2), c.X()/2, c.Y()/2);
+		pdc->Ellipse((float)c.x1+(c.X()/2.0f)+10,
+			(float)c.y1+(c.Y()/2.0f),
+			(float)c.X()/2.0f,
+			(float)c.Y()/2.0f);
 	}
 };
 

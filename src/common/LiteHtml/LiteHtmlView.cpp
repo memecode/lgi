@@ -481,7 +481,7 @@ struct LiteHtmlViewPriv :
 		}
 		else
 		{
-			path.Rectangle(0.0, 0.0, mem.X(), mem.Y());
+			path.Rectangle(0.0f, 0.0f, (float)mem.X(), (float)mem.Y());
 		}
 
 		path.Fill(&mem, brush);
@@ -523,34 +523,35 @@ struct LiteHtmlViewPriv :
 	{
 		#define K(rad)	((float)(0.5522847498 * (rad).value()))
 
-		path.MoveTo(b.x1 + rad.top_left_x, b.y1);
+		LRectF bounds((float)b.x1, (float)b.y1, (float)b.x2, (float)b.y2);
+		path.MoveTo(bounds.x1 + rad.top_left_x, bounds.y1);
 
-		LPointF c(b.x2 - rad.top_right_x, b.y1 + rad.top_right_y);
-		path.LineTo(c.x, b.y1);
-		path.CubicBezierTo(	c.x + K(rad.top_right_x), b.y1,
-							b.x2, c.y - K(rad.top_right_y),
-							b.x2, c.y);
+		LPointF c(bounds.x2 - rad.top_right_x, bounds.y1 + rad.top_right_y);
+		path.LineTo(c.x, bounds.y1);
+		path.CubicBezierTo(	c.x + K(rad.top_right_x), bounds.y1,
+							bounds.x2, c.y - K(rad.top_right_y),
+							bounds.x2, c.y);
 
-		c.Set(b.x2 - rad.bottom_right_x, b.y2 - rad.bottom_right_y);
-		path.LineTo(b.x2, c.y);
+		c.Set(bounds.x2 - rad.bottom_right_x, bounds.y2 - rad.bottom_right_y);
+		path.LineTo(bounds.x2, c.y);
 
-		path.CubicBezierTo(	b.x2, c.y + K(rad.bottom_right_y),
-						c.x + K(rad.bottom_right_x), b.y2,
-						c.x, b.y2);
+		path.CubicBezierTo(	bounds.x2, c.y + K(rad.bottom_right_y),
+						c.x + K(rad.bottom_right_x), bounds.y2,
+						c.x, bounds.y2);
 
-		c.Set(b.x1 + rad.bottom_left_x, b.y2 - rad.bottom_left_y);
-		path.LineTo(c.x, b.y2);
+		c.Set(bounds.x1 + rad.bottom_left_x, bounds.y2 - rad.bottom_left_y);
+		path.LineTo(c.x, bounds.y2);
 
-		path.CubicBezierTo(	c.x - K(rad.bottom_left_x), b.y2,
-							b.x1, c.y + K(rad.bottom_left_y),
-							b.x1, c.y);
+		path.CubicBezierTo(	c.x - K(rad.bottom_left_x), bounds.y2,
+							bounds.x1, c.y + K(rad.bottom_left_y),
+							bounds.x1, c.y);
 
-		c.Set(b.x1 + rad.top_left_x, b.y1 + rad.top_left_y);
-		path.LineTo(b.x1, c.y);
+		c.Set(bounds.x1 + rad.top_left_x, bounds.y1 + rad.top_left_y);
+		path.LineTo(bounds.x1, c.y);
 
-		path.CubicBezierTo(	b.x1, c.y - K(rad.top_left_y),
-							c.x - K(rad.top_left_x), b.y1,
-							c.x, b.y1);
+		path.CubicBezierTo(	bounds.x1, c.y - K(rad.top_left_y),
+							c.x - K(rad.top_left_x), bounds.y1,
+							c.x, bounds.y1);
 	}
 
 	void draw_borders(litehtml::uint_ptr hdc, const litehtml::borders& borders, const litehtml::position& draw_pos, bool root)

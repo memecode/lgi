@@ -261,10 +261,10 @@ public:
 				p += LoadFileName;
 				if (p.Exists())
 				{
-					auto mt = LGetFileMimeType(p).SplitDelimit("/");
+					auto mt = LGetFileMimeType(p.c_str()).SplitDelimit("/");
 					if (mt[0].Equals("image"))
 					{
-						j->pDC.Reset(GdcD->Load(p));
+						j->pDC.Reset(GdcD->Load(p.c_str()));
 						return LoadImmediate;
 					}
 					else
@@ -272,7 +272,7 @@ public:
 						LFile *f;
 						if (j->Stream.Reset(f = new LFile))
 						{
-							if (!f->Open(p, O_READ))
+							if (!f->Open(p.c_str(), O_READ))
 							{
 								j->Stream.Reset();
 								j->Error.Set(LErrorIoFailed,

@@ -2643,7 +2643,7 @@ LAutoWString LTag::DumpW()
 	LAutoWString w(Utf8ToWide(a));
 
 	#ifdef _DEBUG
-	LFile out(LFile::Path("~/code/lgi.json").Absolute(), O_WRITE);
+	LFile out(LFile::Path("~/code/lgi.json").Absolute().c_str(), O_WRITE);
 	out.Write(a);
 	#endif
 

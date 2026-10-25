@@ -1400,13 +1400,13 @@ public:
 			return true;
 		}
 
-		bool InsertBlock(unsigned Index, Block *b)
+		bool InsertBlock(ssize_t Index, Block *b)
 		{
 			if (!b || !TargetBlocks)
 				return false;
 			if (TargetParent)
 			{
-				if (Index >= TargetParent->blocks.Length())
+				if (static_cast<size_t>(Index) >= TargetParent->blocks.Length())
 					return TargetParent->Add(b);
 				b->parent = TargetParent;
 			}
