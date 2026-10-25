@@ -1164,7 +1164,7 @@ LPoint LWindow::GetDpi() const
 LPointF LWindow::GetDpiScale()
 {
 	auto Dpi = GetDpi();
-	LPointF r( Dpi.x / 96.0, Dpi.y / 96.0 );
+	LPointF r( Dpi.x / 96.0f, Dpi.y / 96.0f );
 	return r;
 }
 

@@ -1559,8 +1559,8 @@ void LDebugView::OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour)
 	int Start = VScroll ? (int)VScroll->Value() : 0;
 	int Page = (r.Y() + Fy - 1) / Fy;
 	int Ln = Start;
-	int Rad = (Fy >> 1) - 1;
-	int PadY = GetCss(true)->PaddingTop().ToPx(Y(), f) + ((Fy - Rad) >> 1);
+	float Rad = (float)Fy / 2.0f - 1.0f;
+	auto PadY = GetCss(true)->PaddingTop().ToPx(Y(), f) + ((Fy - Rad) / 2.0f);
 
 	auto It = Line.begin(Start);
 	for (auto i = *It; i && Ln <= Start + Page; i = *(++It), Ln++)
@@ -1577,7 +1577,7 @@ void LDebugView::OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour)
 		int Addr = IsAddr(s);
 		if (BreakPts.HasItem(Addr))
 		{
-			pDC->FilledCircle(r.x1 + Rad + 2, OffY + PadY + Rad, Rad);
+			pDC->FilledCircle((float)r.x1 + Rad + 2, (float)OffY + PadY + Rad,  Rad);
 		}		
 	}
 

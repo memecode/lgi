@@ -2073,10 +2073,49 @@ LDebugContext *AppWnd::GetDebugContext()
 	return d->DbgContext;
 }
 
+LString FindDumpBin()
+{
+	#ifdef WINDOWS
+	LString ProgramFiles = LGetSystemPath(LSP_USER_APPS, 32);
+	char VsWhere[MAX_PATH_LEN];
+	if (LMakePath(VsWhere, sizeof(VsWhere), ProgramFiles, "Microsoft Visual Studio\\Installer\\vswhere.exe") &&
+		LFileExists(VsWhere))
+	{
+		LSubProcess Query(VsWhere,
+			"-latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath");
+		LStringPipe Output;
+		Query.Communicate(&Output);
+
+		LString InstallPath = Output.NewLStr().Strip();
+		if (InstallPath)
+		{
+			char Toolsets[MAX_PATH_LEN];
+			if (LMakePath(Toolsets, sizeof(Toolsets), InstallPath, "VC\\Tools\\MSVC"))
+			{
+				LDirectory Dir;
+				for (int b = Dir.First(Toolsets); b; b = Dir.Next())
+				{
+					if (Dir.IsDir())
+					{
+						LString Path;
+						Path.Printf("%s\\%s\\bin\\Hostx64\\x64\\dumpbin.exe", Toolsets, Dir.GetName());
+						if (LFileExists(Path))
+							return Path;
+					}
+				}
+			}
+		}
+	}
+	#endif
+
+	return "dumpbin.exe";
+}
+
 struct DumpBinThread : public LThread
 {
 	LStream *Out;
 	LString InFile;
+	LString Prog;
 	bool IsLib;
 
 public:
@@ -2084,6 +2123,7 @@ public:
 	{
 		Out = out;
 		InFile = file;
+		Prog = FindDumpBin();
 		DeleteOnExit = true;
 
 		auto Ext = LGetExtension(InFile);
@@ -2097,7 +2137,6 @@ public:
 		char Buf[256];
 		ssize_t Rd;
 
-		const char *Prog = "c:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\Hostx64\\x64\\dumpbin.exe";
 		LSubProcess s(Prog, Args);
 		if (!s.Start(true, false))
 		{

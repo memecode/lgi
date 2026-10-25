@@ -166,7 +166,7 @@ void NewProjectFromTemplate(LViewI *parent)
 		return;
 	}
 
-	TemplatesPath = p;
+	TemplatesPath = p.GetFull();
 
 	auto Dlg = new NewProjFromTemplate(parent);
 	Dlg->DoModal([Dlg](auto dlg, auto code)

@@ -1438,7 +1438,7 @@ bool LResources::LoadDialog(int Resource, LViewI *Parent, LRect *Pos, LString *N
 					}
 					if (Dpi.x)
 					{
-						LPointF s((double)Dpi.x / 96.0, (double)Dpi.y / 96.0);
+						LPointF s(Dpi.x / 96.0f, Dpi.y / 96.0f);
 						Pos->SetSize(	(int) (s.x * Pos->X()),
 										(int) (s.y * Pos->Y()));
 					}

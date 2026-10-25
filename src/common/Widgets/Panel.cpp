@@ -211,8 +211,8 @@ void LPanel::OnPaint(LSurface *pDC)
 {
 	auto r = GetClient();
 	LCssTools Tools(this);
-	LColour cFore = Tools.GetFore();
-	LColour cBack = Tools.GetBack();
+	auto cFore = Tools.GetFore();
+	auto cBack = Tools.GetBack();
 	Tools.PaintContent(pDC, r);
 
 	auto BackImg = Tools.GetBackImage();
@@ -233,7 +233,7 @@ void LPanel::OnPaint(LSurface *pDC)
 	{
 		// Draw thumb
 		auto scale = GetWindow()->GetDpiScale();
-		scale *= 1.2;
+		scale *= 1.2f;
 		auto sizePx = (int)(8 * scale.x);
 		if (sizePx % 2 == 0)
 			sizePx++;
