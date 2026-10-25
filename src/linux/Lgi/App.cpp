@@ -234,7 +234,7 @@ void LgiCrashHandler(int Sig)
 	if (!child)
 	{
 		LFile::Path workingDir = CrashHandlerApp;
-		chdir(workingDir / "..");
+		chdir((workingDir / "..").c_str());
 		
 		LString pidArg = "--pid";
 		char * const args[] = { CrashHandlerApp, pidArg, pid, NULL };
@@ -460,7 +460,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 		p += "lgi-conf.json";
 		if (p.IsFile())
 		{
-			LFile f(p, O_READ);
+			LFile f(p.c_str(), O_READ);
 			LJson j(f.Read());
 			auto sDpi = j.Get("DPI");
 			if (sDpi)
@@ -1338,19 +1338,19 @@ LApp::DesktopInfo *LApp::GetDesktopInfo(const char *gnomeAppType)
 	Leaf.Printf("%s.desktop", Exe.Last().Get());
 	
 	Desktop += ".local/share/applications";
-	if (!Desktop.IsFolder() && !d->FileSystem->CreateFolder(Desktop, true))
+	if (!Desktop.IsFolder() && !d->FileSystem->CreateFolder(Desktop.c_str(), true))
 	{
 		LgiTrace("%s:%i - Failed to create desktop applications folder '%s'\n", _FL, Desktop.GetFull().Get());
 		return NULL;
 	}
 	Desktop += Leaf;
 	
-	const char *Ex = Exe;
-	const char *Fn = Desktop;
+	const char *Ex = Exe.c_str();
+	const char *Fn = Desktop.c_str();
 
 	// printf("%s:%i - desktop file='%s'\n", _FL, Desktop.GetFull().Get());
 
-	if (d->DesktopInfo.Reset(new DesktopInfo(Desktop)))
+	if (d->DesktopInfo.Reset(new DesktopInfo(Desktop.c_str())))
 	{
 		// Do a sanity check...
 		d->DesktopInfo->Set("Name", Name());		

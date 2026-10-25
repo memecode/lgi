@@ -1091,8 +1091,6 @@ public:
 		
 	#else
 
-		LRect ClipRgn() override { return Clip; }
-
 		#if defined(__GTK_H__)
 
 			LPoint GetSize();

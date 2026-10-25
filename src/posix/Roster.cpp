@@ -20,7 +20,7 @@ bool LRoster::GetRunningAppInfo(PID process, AppInfo *info, LError *err) const
 	auto folder = p / LString::Fmt("%i", process);
 	
 	char full[MAX_PATH_LEN] = "#errNoLink";
-	auto resolve = LResolveShortcut(folder / "exe", full, sizeof(full));
+	auto resolve = LResolveShortcut((folder / "exe").c_str(), full, sizeof(full));
 	if (resolve)
 	{
 		// Full path to the original binary:

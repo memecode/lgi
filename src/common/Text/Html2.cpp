@@ -7280,7 +7280,7 @@ void LHtml::OnMouseClick(LMouse &m)
 						if (!path.Exists())
 						{
 							LError err;
-							if (!FileDev->CreateFolder(path, false, &err))
+							if (!FileDev->CreateFolder(path.c_str(), false, &err))
 							{
 								LgiTrace("%s:%i - Failed to create folder '%s': %s\n",
 										_FL, path.GetFull().Get(), err.ToString().Get());

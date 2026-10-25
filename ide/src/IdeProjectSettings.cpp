@@ -698,7 +698,7 @@ public:
 			LFile::Path lgiInc(lgiBase, "include");
 
 			LString lgiIncPath;
-			if (!d->Project->RelativePath(lgiIncPath, lgiInc))
+			if (!d->Project->RelativePath(lgiIncPath, lgiInc.c_str()))
 				lgiIncPath = lgiInc;
 
 			LFile::Path lgiLinuxInc(lgiIncPath, "lgi/linux");

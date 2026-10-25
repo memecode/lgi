@@ -23,7 +23,7 @@ bool XmlTest::Run()
 		LFile::Path path(LSP_APP_INSTALL);
 
 		path = path / "data" / "Folder.xml";
-		if (!f.Open(path, O_READ))
+		if (!f.Open(path.c_str(), O_READ))
 			return FAIL(_FL, "Can't open text xml file.");
 
 		if (!tree.Read(&root, &f))

@@ -2441,7 +2441,7 @@ bool LGetUsersLinks(LArray<LUserLink> &Links)
 		
 		if (gtk3bookmarks.Exists())
 		{
-			auto Txt = LReadFile(gtk3bookmarks);
+			auto Txt = LReadFile(gtk3bookmarks.c_str());
 			if (!Txt)
 			{
 				LgiTrace("%s:%i - failed to read '%s'\n", _FL, gtk3bookmarks.GetFull().Get());
@@ -2464,7 +2464,7 @@ bool LGetUsersLinks(LArray<LUserLink> &Links)
 		}
 		else if (kdeUserPlaces.Exists())
 		{
-			LFile in(kdeUserPlaces);
+			LFile in(kdeUserPlaces.c_str());
 			LXmlTag root;
 			LXmlTree t;
 			if (!t.Read(&root, &in))

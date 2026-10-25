@@ -816,22 +816,22 @@ bool LHttpServer::SecureSockets::checkRequirement(const char *req)
 		// Check the cert folder exists:
 		LFile::Path appRoot(LSP_APP_DATA);
 		auto certFolder = appRoot / "certs";
-		if (!LDirExists(certFolder))
+		if (!LDirExists(certFolder.c_str()))
 		{
-			if (!FileDev->CreateFolder(certFolder, true))
+			if (!FileDev->CreateFolder(certFolder.c_str(), true))
 			{
 				LOG_HTTP("%s:%i - Can't create cert folder '%s'\n", _FL, certFolder.GetFull().Get());
 				return false;
 			}
 		}
-		if (!LDirExists(certFolder))
+		if (!LDirExists(certFolder.c_str()))
 		{
 			LOG_HTTP("%s:%i - Cert folder '%s' missing\n", _FL, certFolder.GetFull().Get());
 			return false;
 		}
 
 		// If the cert files exist... then ok, return success
-		if (ScanForKeyAndCert(certFolder))
+		if (ScanForKeyAndCert(certFolder.c_str()))
 			return true;
 
 		{
@@ -848,7 +848,7 @@ bool LHttpServer::SecureSockets::checkRequirement(const char *req)
 			// Create the certificate with mkcert:
 			auto arg = LString(" ").Join(domains);
 			LSubProcess sub("mkcert", arg);
-			sub.SetInitFolder(certFolder);
+			sub.SetInitFolder(certFolder.c_str());
 			if (!sub.Start())
 			{
 				LOG_HTTP("%s:%i - Failed to start 'mkcert'\n", _FL);
@@ -865,7 +865,7 @@ bool LHttpServer::SecureSockets::checkRequirement(const char *req)
 			LOG_HTTP("%s:%i - mkcert ok for '%s'\n", _FL, arg.Get());
 		}
 
-		return ScanForKeyAndCert(certFolder);
+		return ScanForKeyAndCert(certFolder.c_str());
 	}
 	else
 	{

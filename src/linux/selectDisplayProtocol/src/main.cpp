@@ -37,7 +37,7 @@ LString getDataFilePath()
 	LFile f;
 	bool preExist = appInst.Exists();
 	// printf("appInst: %s\n", appInst.GetFull().Get());
-	if (f.Open(appInst, O_WRITE))
+	if (f.Open(appInst.c_str(), O_WRITE))
 	{
 		f.Close();
 		if (!preExist)
@@ -50,7 +50,7 @@ LString getDataFilePath()
 	appRoot += sDataFile;	
 	preExist = appRoot.Exists();
 	// printf("appRoot: %s\n", appRoot.GetFull().Get());
-	if (f.Open(appRoot, O_WRITE))
+	if (f.Open(appRoot.c_str(), O_WRITE))
 	{
 		f.Close();
 		if (!preExist)
@@ -78,7 +78,7 @@ public:
 		LFile::Path iconPath(LSP_EXE);
 		iconPath += "resources/icon.svg";
 		if (iconPath.Exists())
-			SetIcon(iconPath, "Utility;");
+			SetIcon(iconPath.c_str(), "Utility;");
 
 		int y = 0;
 		LTextLabel *label;
@@ -301,7 +301,7 @@ void Setup(bool install)
 	{
 		if (policyDest.Exists())
 		{
-			if (FileDev->Delete(policyDest, nullptr, false))
+			if (FileDev->Delete(policyDest.c_str(), nullptr, false))
 				printf("...success.\n");
 			else
 				printf("...error deleting: %s\n", destPath.Get());
