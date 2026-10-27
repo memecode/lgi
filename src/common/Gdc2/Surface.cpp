@@ -29,7 +29,7 @@
 
 void LSurface::Init()
 {
-	OriginX = OriginY = 0;
+	origin.x = origin.y = 0;
 	pMem = NULL;
 	pAlphaDC = 0;
 	Flags = 0;
@@ -1208,7 +1208,7 @@ void LSurface::Blt(int x, int y, LSurface *Src, LRect *a)
 	LRect S;
 	if (a)	S = *a;
 	else	S.ZOff(Src->X()-1, Src->Y()-1);
-	S.Offset(Src->OriginX, Src->OriginY);
+	S.Offset(Src->origin.x, Src->origin.y);
 
 	LRect SClip = S;
 	SClip.Bound(&Src->Clip);
@@ -1551,10 +1551,10 @@ LRect LSurface::ClipRgn(LRect *Rgn)
 	
 	if (Rgn)
 	{
-		Clip.x1 = MAX(0, Rgn->x1 - OriginX);
-		Clip.y1 = MAX(0, Rgn->y1 - OriginY);
-		Clip.x2 = MIN(X()-1, Rgn->x2 - OriginX);
-		Clip.y2 = MIN(Y()-1, Rgn->y2 - OriginY);
+		Clip.x1 = MAX(0, Rgn->x1 - origin.x);
+		Clip.y1 = MAX(0, Rgn->y1 - origin.y);
+		Clip.x2 = MIN(X()-1, Rgn->x2 - origin.x);
+		Clip.y2 = MIN(Y()-1, Rgn->y2 - origin.y);
 	}
 	else
 	{

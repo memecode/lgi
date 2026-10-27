@@ -32,7 +32,7 @@ public:
 	LPoint GetDpi() override;
 	int GetBits() override;
 	uchar *operator[](int y) override { return NULL; }
-	LPoint GetOrigin() override { return LPoint(OriginX, OriginY); }
+	LPoint GetOrigin() override { return LPoint(origin.x, origin.y); }
 	void SetOrigin(LPoint pt) override;
 	void Set(int x, int y) override;
 	COLOUR Get(int x, int y) override { return 0; }

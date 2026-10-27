@@ -262,13 +262,13 @@ LString GetClip(BView *v)
 
 LPoint LScreenDC::GetOrigin()
 {
-	LPoint p(OriginX, OriginY);
+	LPoint p(origin.x, origin.y);
 
 	#if LOGGING
 	printf("%p.GetOrigin=%i+%i=%i, %i+%i=%i\n",
 		this,
-		OriginX, d->Client.x1, p.x,
-		OriginY, d->Client.y1, p.y);
+		origin.x, d->Client.x1, p.x,
+		origin.y, d->Client.y1, p.y);
 	#endif
 
 	return p;
@@ -285,21 +285,21 @@ void LScreenDC::SetOrigin(LPoint pt)
 		d->v->ConstrainClippingRegion(NULL);
 	}
 	
-	OriginX = pt.x;
-	OriginY = pt.y;
+	origin.x = pt.x;
+	origin.y = pt.y;
 
 	#if LOGGING
 	printf("%p.SetOrigin=%i,%i (%i,%i) = %i,%i\n",
 		this,
 		x, y,
 		d->Client.x1, d->Client.y1,
-		d->Client.x1 - OriginX,
-		d->Client.y1 - OriginY);
+		d->Client.x1 - origin.x,
+		d->Client.y1 - origin.y);
 	#endif
 	
 	#if 1
-	d->v->SetOrigin( d->Client.x1 - OriginX,
-					 d->Client.y1 - OriginY);
+	d->v->SetOrigin( d->Client.x1 - origin.x,
+					 d->Client.y1 - origin.y);
 	#endif
 	
 	#if 1
@@ -307,7 +307,7 @@ void LScreenDC::SetOrigin(LPoint pt)
 	{
 		// Reset the clipping region related to the origin.
 		auto clp = d->Client.ZeroTranslate();
-		clp.Offset(OriginX, OriginY);
+		clp.Offset(origin.x, origin.y);
 		d->v->ClipToRect(clp);
 	}
 	#endif
@@ -335,14 +335,14 @@ void LScreenDC::SetClient(LRect *c)
 		#endif
 		d->v->SetOrigin(d->Client.x1, d->Client.y1);
 		auto clp = d->Client.ZeroTranslate();
-		// clp.Offset(OriginX, OriginY);
+		// clp.Offset(origin.x, origin.y);
 		d->v->ClipToRect(clp);
 
 		/*
 		BRegion r;
 		d->v->GetClippingRegion(&r);
 		LRect lr = r.Frame();
-		printf("SetClient %s = %s (%i,%i)\n", c->GetStr(), lr.GetStr(), OriginX, OriginY);
+		printf("SetClient %s = %s (%i,%i)\n", c->GetStr(), lr.GetStr(), origin.x, origin.y);
 		*/
 	}
 	else

@@ -303,6 +303,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/common/Gdc2/Surface.cpp \
 	../../src/common/Gdc2/Tools/ColourReduce.cpp \
 	../../src/common/Gdc2/Tools/GdcTools.cpp \
+	../../src/common/Gdc2/Vector.cpp \
 	../../src/common/General/Containers.cpp \
 	../../src/common/General/DateTime.cpp \
 	../../src/common/General/ExeCheck.cpp \

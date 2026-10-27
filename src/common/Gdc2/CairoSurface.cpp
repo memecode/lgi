@@ -172,7 +172,7 @@ LRect LCairoSurface::ClipRgn(LRect *Rgn)
 		LRect Dc(0, 0, X()-1, Y()-1);
 		
 		Clip = *Rgn;
-		Clip.Offset(-OriginX, -OriginY);
+		Clip.Offset(-origin.x, -origin.y);
 		Clip.Bound(&Dc);
 	}
 	else
@@ -201,8 +201,8 @@ void LCairoSurface::SetClient(LRect *c)
 		
 		Clip = r;
 		
-		OriginX = -r.x1;
-		OriginY = -r.y1;
+		origin.x = -r.x1;
+		origin.y = -r.y1;
 
 		cairo_save(d->cr);
 		// cairo_rectangle(d->cr, Clip.x1, Clip.y1, Clip.X(), Clip.Y());
@@ -218,14 +218,14 @@ void LCairoSurface::SetClient(LRect *c)
 		if (d->Client.Length())
 		{
 			auto &r = d->Client.Last();
-			OriginX = -r.x1;
-			OriginY = -r.y1;
+			origin.x = -r.x1;
+			origin.y = -r.y1;
 			Clip = r;
 		}
 		else
 		{
-			OriginX = 0;
-			OriginY = 0;
+			origin.x = 0;
+			origin.y = 0;
 			Clip.ZOff(pMem->x-1, pMem->y-1);
 		}
 	}

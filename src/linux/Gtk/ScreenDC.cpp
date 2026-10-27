@@ -365,30 +365,30 @@ LPoint LScreenDC::GetOrigin()
 {
 	if (d->Client.Valid())
 	{
-		return LPoint(OriginX + d->Client.x1,
-					  OriginY + d->Client.y1);
+		return LPoint(origin.x + d->Client.x1,
+					  origin.y + d->Client.y1);
 	}
 
-	return LPoint(OriginX, OriginY);
+	return LPoint(origin.x, origin.y);
 }
 
 void LScreenDC::SetOrigin(LPoint pt)
 {
 	if (d->Client.Valid())
 	{
-		OriginX = pt.x - d->Client.x1;
-		OriginY = pt.y - d->Client.y1;
+		origin.x = pt.x - d->Client.x1;
+		origin.y = pt.y - d->Client.y1;
 	}
 	else
 	{
-		OriginX = pt.x;
-		OriginY = pt.y;
+		origin.x = pt.x;
+		origin.y = pt.y;
 	}
 
 	cairo_matrix_t m;
 	cairo_get_matrix(d->cr, &m);
-	m.x0 = d->matrix.x0 - OriginX;
-	m.y0 = d->matrix.y0 - OriginY;
+	m.x0 = d->matrix.x0 - origin.x;
+	m.y0 = d->matrix.y0 - origin.y;
 	cairo_set_matrix(d->cr, &m);
 }
 
@@ -403,16 +403,16 @@ void LScreenDC::SetClient(LRect *c)
 		cairo_clip(d->cr);		
 		cairo_translate(d->cr, c->x1, c->y1);
 
-		OriginX = -c->x1;
-		OriginY = -c->y1;
+		origin.x = -c->x1;
+		origin.y = -c->y1;
 	}
 	else
 	{
 		if (Clip.Valid())
 			ClipRgn(NULL);
 		
-		OriginX = 0;
-		OriginY = 0;	
+		origin.x = 0;
+		origin.y = 0;	
 
 		cairo_restore(d->cr);
 
@@ -598,10 +598,10 @@ void LScreenDC::HLine(int x1, int x2, int y)
 {
 	// cairo_rectangle is not reliable if the x1 and x2 are a 
 	// long way off the edge of the screen.
-	if (x1 < OriginX)
-		x1 = OriginX;
-	if (x2 >= d->x + OriginX)
-		x2 = d->x + OriginX;
+	if (x1 < origin.x)
+		x1 = origin.x;
+	if (x2 >= d->x + origin.x)
+		x2 = d->x + origin.x;
 		
 	cairo_rectangle(d->cr, x1, y, x2-x1+1, 1);
 	cairo_fill(d->cr);
@@ -610,10 +610,10 @@ void LScreenDC::HLine(int x1, int x2, int y)
 void LScreenDC::VLine(int x, int y1, int y2)
 {
 	// stupid cairo_rectangle
-	if (y1 < OriginY)
-		y1 = OriginY;
-	if (y2 >= d->y + OriginY)
-		y2 = d->y + OriginY;
+	if (y1 < origin.y)
+		y1 = origin.y;
+	if (y2 >= d->y + origin.y)
+		y2 = d->y + origin.y;
 
 	cairo_rectangle(d->cr, x, y1, 1, y2-y1+1);
 	cairo_fill(d->cr);
@@ -776,7 +776,7 @@ void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 						ex[0]+matrix.x0, ex[1]+ex[0],
 						ex[2]+matrix.x0, ex[3]+ex[2],
 						d->Client.GetStr(),
-						OriginX, OriginY);
+						origin.x, origin.y);
 				}
 				*/
 				

@@ -153,6 +153,8 @@ bool TestGradientBlit()
 		return false;
 	source.Colour(LColour(0, 0, 0, 0));
 	source.Rectangle();
+	if (!source.ConvertPreMulAlpha(true))
+		return false;
 	{
 		auto v = source.Vec();
 		if (!v)
@@ -166,6 +168,8 @@ bool TestGradientBlit()
 		stops[1].Set(1, LColour(0, 128, 0));
 		v.Fill(LPointF(4, 4), LPointF(36, 4), stops);
 	}
+	if (!source.ConvertPreMulAlpha(false))
+		return false;
 	std::array<unsigned char, 40 * 40 * 4> original;
 	for (int y = 0; y < 40; y++)
 		memcpy(original.data() + y * 160, source[y], 160);
@@ -381,49 +385,10 @@ bool TestAlphaFormat(LColourSpace cs, bool premul)
 	return pixel.r == (premul ? 128 : 255) && pixel.g == 0 && pixel.b == 0 && pixel.a == 128;
 }
 
-template<typename Pixel>
-bool TestPaddingFormat(LColourSpace cs)
-{
-	LMemDC dc(_FL, 32, 32, cs, LSurface::SurfaceRequireExactCs);
-	if (!dc[0] || dc.GetColourSpace() != cs)
-		return false;
-	for (int y = 0; y < dc.Y(); y++)
-	{
-		auto row = reinterpret_cast<Pixel*>(dc[y]);
-		for (int x = 0; x < dc.X(); x++)
-		{
-			row[x].r = row[x].g = 0;
-			row[x].b = 255;
-			row[x].pad = 43;
-		}
-	}
-	{
-		auto v = dc.Vec();
-		if (!v)
-			return false;
-		v.Rect(1, 1, 6, 6);
-		v.Fill(LColour(255, 0, 0, 128));
-		auto pixel = reinterpret_cast<Pixel*>(dc[3])[3];
-		if (pixel.r != 128 || pixel.g != 0 || pixel.b != 127 || pixel.pad != 43)
-			return false;
-	}
-	if (!TestLinearGradient(dc, [&](int x, int y)
-		{
-			const auto &p = reinterpret_cast<const Pixel*>(dc[y])[x];
-			return 0xff000000u | (uint32_t(p.r) << 16) | (uint32_t(p.g) << 8) | p.b;
-		}))
-		return false;
-	for (int y = 0; y < dc.Y(); y++)
-		for (int x = 0; x < dc.X(); x++)
-			if (reinterpret_cast<const Pixel*>(dc[y])[x].pad != 43)
-				return false;
-	return true;
-}
-
 #if !defined(HAIKU)
 class StrideBitmap : public LMemDC
 {
-	std::array<unsigned char, 4 * 24> Storage = {};
+	alignas(uint32_t) std::array<unsigned char, 4 * 24> Storage = {};
 
 public:
 	explicit StrideBitmap(bool negative) : LMemDC(_FL)
@@ -433,7 +398,7 @@ public:
 		pMem->x = pMem->y = 4;
 		pMem->Line = negative ? -24 : 24;
 		pMem->Cs = ColourSpace = CsBgra32;
-		pMem->Flags = 0;
+		pMem->Flags = LBmpMem::BmpPreMulAlpha;
 		Clip = Bounds();
 	}
 
@@ -455,17 +420,12 @@ bool LVectorTest::Run()
 	if (!TestCairoVectorContext())
 		return FAIL(_FL, "Cairo vectors must preserve state and paths, intersect clips, and support SVG arcs.");
 	#endif
-	for (bool premul : {false, true})
-		if (!TestAlphaFormat<LRgba32>(CsRgba32, premul) ||
-			!TestAlphaFormat<LBgra32>(CsBgra32, premul) ||
-			!TestAlphaFormat<LArgb32>(CsArgb32, premul) ||
-			!TestAlphaFormat<LAbgr32>(CsAbgr32, premul))
-			return FAIL(_FL, "RGBA layouts must preserve alpha representation and source-over colours.");
-	if (!TestPaddingFormat<LRgbx32>(CsRgbx32) || !TestPaddingFormat<LBgrx32>(CsBgrx32) ||
-		!TestPaddingFormat<LXrgb32>(CsXrgb32) || !TestPaddingFormat<LXbgr32>(CsXbgr32))
-		return FAIL(_FL, "Opaque 32-bit layouts must preserve padding and composite as opaque.");
+	if (!TestAlphaFormat<LBgra32>(CsBgra32, true))
+		return FAIL(_FL, "Premultiplied native BGRA32 vectors must composite directly.");
 
 	LMemDC dc(_FL, 20, 20, CsBgra32, LSurface::SurfaceRequireExactCs);
+	if (!dc.ConvertPreMulAlpha(true))
+		return FAIL(_FL, "The native BGRA32 vector target must support premultiplied alpha.");
 	dc.Colour(LColour(0, 0, 0, 0));
 	dc.Rectangle();
 	dc.Colour(LColour(12, 34, 56));
@@ -569,8 +529,14 @@ bool LVectorTest::Run()
 	{
 		StrideBitmap bitmap(negative);
 		auto v = bitmap.Vec();
+		if (negative)
+		{
+			if (v)
+				return FAIL(_FL, "Negative strides must be rejected for direct vector surfaces.");
+			continue;
+		}
 		if (!v)
-			return FAIL(_FL, "Padded positive and negative strides must be supported.");
+			return FAIL(_FL, "Positive padded strides must be supported for direct vector surfaces.");
 		v.Rect(0, 0, 4, 4);
 		v.Fill(LColour::Red);
 		for (int y = 0; y < 4; y++)
@@ -586,9 +552,11 @@ bool LVectorTest::Run()
 		return FAIL(_FL, "Inaccessible pixel storage must reject vector setup.");
 	#endif
 	LMemDC unsupported(_FL, 4, 4, CsRgb24, LSurface::SurfaceRequireExactCs);
+	LMemDC unsupportedLayout(_FL, 4, 4, CsRgba32, LSurface::SurfaceRequireExactCs);
+	LMemDC straightAlpha(_FL, 4, 4, CsBgra32, LSurface::SurfaceRequireExactCs);
 	LMemDC empty(_FL);
-	if (unsupported.Vec() || empty.Vec())
-		return FAIL(_FL, "Unsupported formats and empty surfaces must reject vector setup.");
+	if (unsupported.Vec() || unsupportedLayout.Vec() || straightAlpha.Vec() || empty.Vec())
+		return FAIL(_FL, "Unsupported formats, straight alpha, and empty surfaces must reject vector setup.");
 	LMemDC separateAlpha(_FL, 4, 4, CsBgra32);
 	if (!separateAlpha.HasAlpha(true) || separateAlpha.Vec())
 		return FAIL(_FL, "Bitmaps with a separate alpha plane must explicitly reject vector setup.");

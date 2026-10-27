@@ -60,11 +60,9 @@
 				</All>
 				<Linux>
 					<Debug>../../include/lgi/linux
-../../include/lgi/linux/Gtk
-../../../../../codelib/openssl/include</Debug>
+../../include/lgi/linux/Gtk</Debug>
 					<Release>../../include/lgi/linux
-../../include/lgi/linux/Gtk
-../../../../../codelib/openssl/include</Release>
+../../include/lgi/linux/Gtk</Release>
 				</Linux>
 				<Windows>
 					<Debug>../../include/lgi/win</Debug>
@@ -89,6 +87,7 @@
 					<Release>-static-libgcc 
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
+				<All />
 			</Libraries>
 			<TargetName>
 				<Linux>
@@ -96,11 +95,25 @@
 					<Release>lgi-html-test-suite</Release>
 				</Linux>
 			</TargetName>
-			<Defines />
-			<Options />
-			<LibraryPaths />
-			<RPath />
-			<RPathLink />
+			<Defines>
+				<All />
+				<Linux />
+			</Defines>
+			<Options>
+				<All />
+				<Linux />
+			</Options>
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
+			<RPath>
+				<Linux />
+			</RPath>
+			<RPathLink>
+				<Linux />
+			</RPathLink>
+			<ApplicationIcon />
 		</Build>
 		<General>
 			<Makefile>
@@ -113,14 +126,36 @@
 					<Release>./HtmlTestSuite</Release>
 				</Linux>
 			</Executable>
+			<Compiler />
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Advanced>
-			<PostBuildCommands />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+			<OtherMakefileRules />
 		</Advanced>
 		<Debug>
-			<Arguments />
+			<Arguments>
+				<All />
+			</Arguments>
+			<Environment />
+			<DebugAdmin />
+			<InitialDir />
+			<Debugger />
 		</Debug>
-		<Remote />
-		<Editor />
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
+		<Editor>
+			<TabSize />
+			<IndentSize />
+			<ShowWhiteSpace />
+			<UseHardTabs />
+			<CommentFile />
+			<CommentFunction />
+		</Editor>
 	</Settings>
 </Project>

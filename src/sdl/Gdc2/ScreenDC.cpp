@@ -111,15 +111,15 @@ void LScreenDC::SetClient(LRect *c)
 		Clip = *c;
 		Clip.Bound(&Doc);
 		
-		OriginX = -c->x1;
-		OriginY = -c->y1;
+		origin.x = -c->x1;
+		origin.y = -c->y1;
 	}
 	else
 	{
 		d->Client.ZOff(-1, -1);
 
-		OriginX = 0;
-		OriginY = 0;
+		origin.x = 0;
+		origin.y = 0;
 		Clip.ZOff(pMem->x-1, pMem->y-1);
 	}
 }

@@ -557,8 +557,8 @@ LPoint LScreenDC::GetOrigin()
 
 void LScreenDC::SetOrigin(LPoint pt)
 {
-	int Ox = OriginX;
-	int Oy = OriginY;
+	int Ox = origin.x;
+	int Oy = origin.y;
 
 	LSurface::SetOrigin(pt);
 
@@ -589,7 +589,7 @@ LRect LScreenDC::ClipRgn(LRect *Rgn)
 	{
 		LRect c = *Rgn;
 		auto Client = d->Client();
-		Client.Offset(OriginX, OriginY);
+		Client.Offset(origin.x, origin.y);
 		c.Bound(&Client);
 		
 		CGContextSaveGState(d->Ctx);

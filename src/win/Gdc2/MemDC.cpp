@@ -127,10 +127,10 @@ void LMemDC::SetClient(LRect *c)
 		Clip = d->Client = *c;
 		Clip.Bound(&Doc);
 		
-		OriginX = -c->x1;
-		OriginY = -c->y1;
+		origin.x = -c->x1;
+		origin.y = -c->y1;
 
-		// LgiTrace("SetClient(%s) clip=%s, ori=%i,%i\n", c->GetStr(), Clip.GetStr(), OriginX, OriginY);
+		// LgiTrace("SetClient(%s) clip=%s, ori=%i,%i\n", c->GetStr(), Clip.GetStr(), origin.x, origin.y);
 	}
 	else
 	{
@@ -141,11 +141,11 @@ void LMemDC::SetClient(LRect *c)
 			SetWindowOrgEx(hDC, 0, 0, NULL);
 			SelectClipRgn(hDC, 0);
 		}
-		OriginX = 0;
-		OriginY = 0;
+		origin.x = 0;
+		origin.y = 0;
 		Clip.ZOff(pMem->x-1, pMem->y-1);
 
-		// LgiTrace("SetClient(NULL) clip=%s, ori=%i,%i\n", Clip.GetStr(), OriginX, OriginY);
+		// LgiTrace("SetClient(NULL) clip=%s, ori=%i,%i\n", Clip.GetStr(), origin.x, origin.y);
 	}
 }
 
@@ -203,7 +203,7 @@ HDC LMemDC::StartDC()
 		if (hDC)
 		{
 			hBmp = (HBITMAP) SelectObject(hDC, hBmp);
-			SetWindowOrgEx(hDC, OriginX, OriginY, NULL);
+			SetWindowOrgEx(hDC, origin.x, origin.y, NULL);
 		}
 	}
 
@@ -231,8 +231,8 @@ LRect LMemDC::ClipRgn(LRect *Rgn)
 		    GetWindowOrgEx(hDC, &Origin);
 		else
 		{
-			Origin.x = OriginX;
-			Origin.y = OriginY;
+			Origin.x = origin.x;
+			Origin.y = origin.y;
 		}
 
 		Clip.x1 = max(Rgn->x1 - Origin.x, 0);
@@ -806,7 +806,7 @@ void LMemDC::SetOrigin(LPoint pt)
 {
 	LSurface::SetOrigin(pt);
 	if (hDC)
-		SetWindowOrgEx(hDC, OriginX, OriginY, NULL);
+		SetWindowOrgEx(hDC, origin.x, origin.y, NULL);
 }
 
 	

@@ -18,10 +18,10 @@ struct LStat :
 	LStat(const char *path)
 	{
 		#if defined(WINDOWS)
-		LAutoWString w(Utf8ToWide(path));
-		Result = _wstat64(w, this);
+			LAutoWString w(Utf8ToWide(path));
+			Result = _wstat64(w, this);
 		#else
-		Result = ::stat(path, this);
+			Result = ::stat(path, this);
 		#endif
 	}
 
@@ -33,23 +33,25 @@ struct LStat :
 	bool IsFile() const
 	{
 		#if defined(WINDOWS)
-		return (st_mode & _S_IFREG) != 0;
+			return (st_mode & _S_IFREG) != 0;
 		#else
-		return S_ISREG(st_mode);
+			return S_ISREG(st_mode);
 		#endif
 	}
+
 	bool IsDir()  const {
 		#if defined(WINDOWS)
-		return (st_mode & _S_IFDIR) != 0;
+			return (st_mode & _S_IFDIR) != 0;
 		#else
-		return S_ISDIR(st_mode);
+			return S_ISDIR(st_mode);
 		#endif
 	}
+
 	bool IsPipe() const {
 		#if defined(WINDOWS)
-		return (st_mode & _S_IFIFO) != 0;
+			return (st_mode & _S_IFIFO) != 0;
 		#else
-		return S_ISFIFO(st_mode);
+			return S_ISFIFO(st_mode);
 		#endif
 	}
 

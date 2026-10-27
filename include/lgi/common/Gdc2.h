@@ -188,14 +188,18 @@ public:
 
 	/// Returns false when the drawing context could not be created.
 	virtual bool IsValid() const = 0;
+	
 	/// Path coordinates are in the surface's coordinate units.
 	virtual void MoveTo(float x, float y) = 0;
 	virtual void LineTo(float x, float y) = 0;
 	virtual void CubicTo(float x1, float y1, float x2, float y2, float x, float y) = 0;
+	
 	/// Arc rotation is in degrees; flags follow SVG elliptical arc semantics.
 	virtual void ArcTo(float rx, float ry, float rotation, bool largeArc, bool sweep, float x, float y) = 0;
+	
 	/// Adds a rectangle with width and height in surface coordinate units.
 	virtual void Rect(float x, float y, float width, float height) = 0;
+	
 	/// Adds a closed rounded rectangle built from lines and arcs, wound clockwise.
 	/// Negative width/height are normalised and the radius is clamped to
 	/// [0, min(width, height) / 2]. Backends may override with a native version.
@@ -223,18 +227,25 @@ public:
 		ArcTo(r, r, 0, false, true, x + r, y);
 		ClosePath();
 	}
+	
+	/// Closes the current subpath by connecting its endpoint to its starting point.
 	virtual void ClosePath() = 0;
+	
 	/// Clears the current path. Fill and Stroke otherwise preserve it.
 	virtual void ClearPath() = 0;
+	
 	/// Fills the current path using the non-zero winding rule.
 	virtual void Fill(LColour colour) = 0;
+	
 	/// Linear gradient in surface coordinates, preserving the current path.
 	/// Requires distinct finite, float-representable endpoints and at least two stops
 	/// with strictly increasing positions in [0, 1]. Endpoint colours extend beyond the stops.
 	/// Stop colours include alpha; invalid input is logged and draws nothing.
 	virtual void Fill(const LPointF &start, const LPointF &end, const LArray<LColourStop> &stops) = 0;
+	
 	/// Strokes the current path; width is in surface coordinate units.
 	virtual void Stroke(LColour colour, float width) = 0;
+	
 	/// Intersects the current clip with rect; false indicates backend failure.
 	virtual bool ClipRect(LRect rect) = 0;
 };
@@ -448,11 +459,11 @@ public:
 	LApplicator *Create(LColourSpace Cs, int Op);
 };
 
-#define OrgX(x)			x -= OriginX
-#define OrgY(y)			y -= OriginY
-#define OrgXy(x, y)		x -= OriginX; y -= OriginY
-#define OrgPt(p)		p.x -= OriginX; p.y -= OriginY
-#define OrgRgn(r)		r.Offset(-OriginX, -OriginY)
+#define OrgX(X)			X -= origin.x
+#define OrgY(Y)			Y -= origin.y
+#define OrgXy(X, Y)		X -= origin.x; Y -= origin.y
+#define OrgPt(p)		p.x -= origin.x; p.y -= origin.y
+#define OrgRgn(r)		r.Offset(-origin.x, -origin.y)
 
 /// Base class API for graphics operations
 class LgiClass LSurface : public LRefCount, public LDom
@@ -470,12 +481,12 @@ protected:
 	int				PrevOp;
 	LRect			Clip;
 	LColourSpace	ColourSpace = CsNone;
-	LBmpMem			*pMem = NULL;
-	LSurface		*pAlphaDC = NULL;
-	LPalette		*pPalette = NULL;
-	LApplicator		*pApp = NULL;
+	LBmpMem			*pMem = nullptr;
+	LSurface		*pAlphaDC = nullptr;
+	LPalette		*pPalette = nullptr;
+	LApplicator		*pApp = nullptr;
 	LApplicator		*pAppCache[GDC_CACHE_SIZE];
-	int				OriginX, OriginY;
+	LPoint			origin;
 
 	// Protected functions
 	LApplicator		*CreateApplicator(int Op, LColourSpace Cs = CsNone);
@@ -667,11 +678,11 @@ public:
 	virtual bool MakeOpaque(LRect *rc = NULL);
 
 	/// Gets the surface origin
-	virtual LPoint GetOrigin() { return LPoint(OriginX, OriginY); }
+	virtual LPoint GetOrigin() { return LPoint(origin.x, origin.y); }
 	/// Gets the surface origin
 	void GetOrigin(int &x, int &y) { auto pt = GetOrigin(); x = (int)pt.x; y = (int)pt.y; }
 	/// Sets the surface origin
-	virtual void SetOrigin(LPoint p) { OriginX = p.x; OriginY = p.y; }
+	virtual void SetOrigin(LPoint p) { origin.x = p.x; origin.y = p.y; }
 	/// Sets the surface origin
 	void SetOrigin(int x, int y) { SetOrigin(LPoint(x, y)); }
 	

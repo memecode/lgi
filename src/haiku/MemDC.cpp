@@ -161,8 +161,8 @@ void LMemDC::SetClient(LRect *c)
 				(int)d->Client.Length(),
 				before.Get(), mid.Get(), after.Get());
 		
-		OriginX = -Clip.x1;
-		OriginY = -Clip.y1;
+		origin.x = -Clip.x1;
+		origin.y = -Clip.y1;
 	}
 	else
 	{
@@ -175,15 +175,15 @@ void LMemDC::SetClient(LRect *c)
 		if (d->Client.Length())
 		{
 			Clip = d->Client.Last();
-			OriginX = -Clip.x1;
-			OriginY = -Clip.y1;
+			origin.x = -Clip.x1;
+			origin.y = -Clip.y1;
 			// d->View->SetOrigin(Clip.x1, Clip.y1);
 			d->View->ClipToRect(Clip);
 		}
 		else
 		{
-			OriginX = 0;
-			OriginY = 0;
+			origin.x = 0;
+			origin.y = 0;
 			Clip.ZOff(pMem->x-1, pMem->y-1);
 		}
 
@@ -361,7 +361,7 @@ LRect LMemDC::ClipRgn(LRect *Rgn)
 	if (Rgn)
 	{
 		Clip = *Rgn;
-		Clip.Offset(-OriginX, -OriginY);
+		Clip.Offset(-origin.x, -origin.y);
 		Clip.Bound(&limit);
 		// printf("  ClipRgn=%s\n", Clip.GetStr());
 	}
