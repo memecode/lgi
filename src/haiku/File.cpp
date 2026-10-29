@@ -635,7 +635,7 @@ bool LFileSystem::CreateFolder(const char *PathName, bool CreateParentTree, LErr
 				LFile::Path Par(dir + dir.Join(p.Slice(0, i)));
 				if (!Par.Exists())
 				{
-					const char *ParDir = Par;
+					const char *ParDir = Par.c_str();
 					r = mkdir(ParDir, S_IRWXU | S_IXGRP | S_IXOTH);
 					if (r)
 					{
