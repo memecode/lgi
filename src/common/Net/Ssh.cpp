@@ -1013,7 +1013,7 @@ LSsh::IoProgress::~IoProgress()
 {
 	if (s->Prog)
 		s->Prog->Colour(Pos == Length ? LProgressView::cNormal : LProgressView::cError);
-	if (s->TxtLabel)
+	if (s->TxtLabel && Pos != Length)
 		s->TxtLabel->Name(NULL);
 }
 
@@ -1033,7 +1033,7 @@ void LSsh::IoProgress::Value(uint64_t i)
 	if (s->TxtLabel)
 	{
 		auto Now = LCurrentTime();
-		if (Now - UpdateTs >= 500)
+		if (i == Length || Now - UpdateTs >= 500)
 		{
 			double Sec = (double)(LCurrentTime()-Start)/1000.0;
 			double Rate = (double)i / Sec;
