@@ -242,6 +242,9 @@ public:
 	DynFunc2(int, SSL_CTX_set_ciphersuites, SSL_CTX*, ctx, const char*, str);
 	DynFunc2(int, SSL_set1_host, SSL*, s, const char*, hostname);
 	DynFunc1(long, SSL_get_verify_result, const SSL*, s);
+	DynFunc0(int, SSL_get_ex_data_X509_STORE_CTX_idx);
+	DynFunc3(int, SSL_set_ex_data, SSL*, ssl, int, idx, void*, data);
+	DynFunc2(void*, SSL_get_ex_data, const SSL*, ssl, int, idx);
 
 #ifdef WIN32
 // If this is freaking you out then good... openssl-win32 ships 
@@ -310,6 +313,12 @@ public:
 
 	DynFunc3(char*, X509_NAME_oneline, X509_NAME*, a, char*, buf, int, size);
 	DynFunc1(X509_NAME*, X509_get_subject_name, X509*, a);
+	DynFunc1(X509_NAME*, X509_get_issuer_name, X509*, a);
+	DynFunc6(int, CRYPTO_get_ex_new_index, int, class_index, long, argl, void*, argp, CRYPTO_EX_new*, new_func, CRYPTO_EX_dup*, dup_func, CRYPTO_EX_free*, free_func);
+	DynFunc2(void*, X509_STORE_CTX_get_ex_data, const X509_STORE_CTX*, ctx, int, idx);
+	DynFunc1(int, X509_STORE_CTX_get_error, const X509_STORE_CTX*, ctx);
+	DynFunc1(int, X509_STORE_CTX_get_error_depth, const X509_STORE_CTX*, ctx);
+	DynFunc1(X509*, X509_STORE_CTX_get_current_cert, const X509_STORE_CTX*, ctx);
 	DynFunc4(int, X509_digest, const X509*, data, const EVP_MD*, type, unsigned char*, md, unsigned int*, len);
 	DynFunc0(const EVP_MD*, EVP_sha256);
 	DynFunc1(int, X509_free, X509*, a);
@@ -461,6 +470,7 @@ class OpenSSL :
 
 public:
 	SSL_CTX *Client;
+	int VerifyDataIndex = -1;
 	LArray<LMutex*> Locks;
 	LString ErrorMsg;
 
@@ -563,6 +573,8 @@ public:
 			Err.Print("%s:%i - SSL_CTX_new(client) failed with '%s' (%i)\n", _FL, Msg, e);
 			goto OnError;
 		}
+
+		VerifyDataIndex = CRYPTO_get_ex_new_index(CRYPTO_EX_INDEX_SSL, 0, NULL, NULL, NULL, NULL);
 
 		if (!SSL_CTX_set_default_verify_paths(Client))
 		{
@@ -1273,7 +1285,48 @@ DebugTrace("%s:%i - BIO_new_ssl_connect=%p\n", _FL, Bio);
 DebugTrace("%s:%i - BIO_get_ssl=%p\n", _FL, Ssl);
 					if (Ssl)
 					{
-						Library->SSL_set_verify(Ssl, SSL_VERIFY_NONE, NULL); // handshake completes; result checked via SSL_get_verify_result
+						const int verifyDataIndex = Library->VerifyDataIndex;
+						struct VerifyDetails
+						{
+							SSL *ssl;
+							int index;
+							long error = X509_V_OK;
+							int depth = -1;
+							LString subject, issuer;
+
+							VerifyDetails(SSL *connection, int dataIndex) : ssl(connection), index(dataIndex) {}
+							~VerifyDetails()
+							{
+								Library->SSL_set_verify(ssl, SSL_VERIFY_NONE, NULL);
+								if (index >= 0)
+									Library->SSL_set_ex_data(ssl, index, NULL);
+							}
+						} verifyDetails(Ssl, verifyDataIndex);
+						if (verifyDataIndex >= 0 && Library->SSL_set_ex_data(Ssl, verifyDataIndex, &verifyDetails))
+						{
+							Library->SSL_set_verify(Ssl, SSL_VERIFY_NONE, [](int preverifyOk, X509_STORE_CTX *ctx) -> int
+							{
+								auto ssl = (SSL*)Library->X509_STORE_CTX_get_ex_data(ctx,
+									Library->SSL_get_ex_data_X509_STORE_CTX_idx());
+								auto details = ssl ? (VerifyDetails*)Library->SSL_get_ex_data(ssl, Library->VerifyDataIndex) : NULL;
+								if (!preverifyOk && details)
+								{
+									details->error = Library->X509_STORE_CTX_get_error(ctx);
+									details->depth = Library->X509_STORE_CTX_get_error_depth(ctx);
+									if (auto cert = Library->X509_STORE_CTX_get_current_cert(ctx))
+									{
+										char txt[1024] = "";
+										if (Library->X509_NAME_oneline(Library->X509_get_subject_name(cert), txt, sizeof(txt)))
+											details->subject = txt;
+										if (Library->X509_NAME_oneline(Library->X509_get_issuer_name(cert), txt, sizeof(txt)))
+											details->issuer = txt;
+									}
+								}
+								return preverifyOk;
+							});
+						}
+						else
+							Library->SSL_set_verify(Ssl, SSL_VERIFY_NONE, NULL);
 						char tlsHost[256] = "";
 						NormalizeTlsHost(HostAddr, tlsHost, sizeof(tlsHost));
 						const char *verifyHost = tlsHost[0] ? tlsHost : HostAddr;
@@ -1442,25 +1495,22 @@ DebugTrace("%s:%i - open loop finished, r=%i, Cancelled=%i\n", _FL, r, d->Cancel
 									return id;
 								};
 
-							auto getPeerSubject = [&]() -> LString
+							auto getVerifyMessage = [&](long verify) -> LString
 								{
-									LString subject;
-									if (auto cert = Library->SSL_get_peer_certificate(Ssl))
-									{
-										char txt[512] = "";
-										if (Library->X509_NAME_oneline(Library->X509_get_subject_name(cert), txt, sizeof(txt)))
-											subject = txt;
-										Library->X509_free(cert);
-									}
-									return subject;
+									auto msg = Library->X509_verify_cert_error_string(verify);
+									bool captured = verifyDetails.error == verify && verifyDetails.depth >= 0;
+									auto depth = captured ? LString::Fmt("%i", verifyDetails.depth) : LString("unavailable");
+									return LString::Fmt("%s (verify=%li, depth=%s, subject='%s', issuer='%s')",
+										msg ? msg : "unknown certificate verification error", verify, depth.Get(),
+										captured && verifyDetails.subject ? verifyDetails.subject.Get() : "unavailable",
+										captured && verifyDetails.issuer ? verifyDetails.issuer.Get() : "unavailable");
 								};
 
 							auto getCertJson = [&](long verify) -> LString
 								{
 									LJson j;
 									j.Set(JSON_HOST, HostAddr);
-									auto msg = Library->X509_verify_cert_error_string(verify);
-									LAssert(msg);
+									auto msg = getVerifyMessage(verify);
 									j.Set(JSON_MESSAGE, msg);
 
 									auto certId = getCert();
@@ -1498,32 +1548,12 @@ DebugTrace("%s:%i - open loop finished, r=%i, Cancelled=%i\n", _FL, r, d->Cancel
 									}
 									else
 									{
-										auto msg = Library->X509_verify_cert_error_string(verify);
-										if (!msg)
-										{
-											switch ((int)verify)
-											{
-												case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
-													msg = "self-signed certificate";
-													break;
-
-												case X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN:
-													msg = "self-signed certificate in certificate chain";
-													break;
-
-												default:
-													msg = "unknown certificate verification error";
-													break;
-											}
-										}
-										auto certSubject = getPeerSubject();
+										auto msg = getVerifyMessage(verify);
 										HandleError(_FL, LString::Fmt(
-											"TLS peer verify failed (%li): %s (verifyHost='%s', connectHost='%s', certSubject='%s')",
-											verify,
-											msg ? msg : "unknown",
+											"TLS peer verify failed: %s (verifyHost='%s', connectHost='%s')",
+											msg.Get(),
 											verifyHost ? verifyHost : "",
-											HostAddr ? HostAddr : "",
-											certSubject ? certSubject.Get() : "")
+											HostAddr ? HostAddr : "")
 											.Get());
 									}
 								}

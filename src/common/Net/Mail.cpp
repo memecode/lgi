@@ -953,8 +953,9 @@ bool MailSmtp::Open(LSocketI *S,
 		return false;
 	}
 
+	bool Status = false;
 	auto parts = LString(RemoteHost).SplitDelimit(":");
-	auto host = parts[0].Get();
+	auto host = parts[0];
 	if (parts.Length() > 1 && parts[1].IsNumeric())
 		Port = (int)parts[1].Int();
 
@@ -971,7 +972,7 @@ bool MailSmtp::Open(LSocketI *S,
 	{
 		sslSock->UserRef.Printf("host=%s", host.Get());
 		if (sslCertCallback)
-			sslSock->SetCertCallback([sslCertCallback]);
+			sslSock->SetCertCallback(sslCertCallback);
 	}
 
 	auto Server = LString(host).Strip();
