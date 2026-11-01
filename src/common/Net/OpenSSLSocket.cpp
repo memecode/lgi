@@ -1803,6 +1803,40 @@ int SslSocket::Close()
 
 	if (socket != INVALID_SOCKET && socket != d->ListenSocket)
 	{
+		// Closing while input is unread or still arriving (e.g. TLS 1.3 session tickets)
+		// sends RST, which can discard data the peer has not yet read. Half-close and wait
+		// briefly for the peer's EOF instead, unless the caller cancelled the connection.
+		if (WasConnected && !Prev)
+		{
+			const int maxWaitMs = 5000;
+			int waitMs = d->Timeout > 0 ? MIN(d->Timeout, maxWaitMs) : maxWaitMs;
+			auto deadline = LCurrentTime() + waitMs;
+			char unread[4096];
+
+			#if defined WIN32
+				shutdown(socket, SD_SEND);
+			#else
+				shutdown(socket, SHUT_WR);
+			#endif
+			for (;;)
+			{
+				auto now = LCurrentTime();
+				if (now >= deadline)
+					break;
+
+				fd_set readable;
+				FD_ZERO(&readable);
+				FD_SET(socket, &readable);
+				auto remaining = deadline - now;
+				timeval tv = { (long)(remaining / 1000), (long)((remaining % 1000) * 1000) };
+				auto ready = select((int)socket + 1, &readable, nullptr, nullptr, &tv);
+				if (ready < 0 && errno == EINTR)
+					continue;
+				if (ready <= 0 || recv(socket, unread, sizeof(unread), 0) <= 0)
+					break;
+			}
+		}
+
 		#if defined WIN32
 			closesocket(socket);
 		#else

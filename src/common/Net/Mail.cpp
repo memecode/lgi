@@ -953,17 +953,12 @@ bool MailSmtp::Open(LSocketI *S,
 		return false;
 	}
 
-	char Str[256] = "";
-	bool Status = false;
-	strcpy_s(Str, sizeof(Str), RemoteHost);
-	char *Colon = strchr(Str, ':');
-	if (Colon)
-	{
-		*Colon = 0;
-		Colon++;
-		Port = atoi(Colon);
-	}
-	if (Port == 0)
+	auto parts = LString(RemoteHost).SplitDelimit(":");
+	auto host = parts[0].Get();
+	if (parts.Length() > 1 && parts[1].IsNumeric())
+		Port = (int)parts[1].Int();
+
+	if (Port <= 0)
 	{
 		if (Flags & MAIL_SSL)
 			Port = SMTP_SSL_PORT;
@@ -971,7 +966,15 @@ bool MailSmtp::Open(LSocketI *S,
 			Port = SMTP_PORT;
 	}
 
-	auto Server = LString(Str).Strip();
+	auto sslSock = dynamic_cast<SslSocket*>(S);
+	if (sslSock)
+	{
+		sslSock->UserRef.Printf("host=%s", host.Get());
+		if (sslCertCallback)
+			sslSock->SetCertCallback([sslCertCallback]);
+	}
+
+	auto Server = LString(host).Strip();
 	if (Server)
 	{
 		if (SocketLock.Lock(_FL))
@@ -981,12 +984,6 @@ bool MailSmtp::Open(LSocketI *S,
 		}
 
 		Socket->SetTimeout(30 * 1000);
-
-		if (sslCertCallback)
-		{
-			if (auto sslSock = dynamic_cast<SslSocket*>(Socket.Get()))
-				sslSock->SetCertCallback(sslCertCallback);
-		}
 
 		char Msg[256];
 		sprintf_s(Msg, sizeof(Msg), "Connecting to %s:%i...", Server.Get(), Port);
@@ -2074,7 +2071,11 @@ bool MailPop3::ListCmd(const char *Cmd, LHashTbl<ConstStrKey<char,false>, bool> 
 
 #define OPT_Pop3NoApop		"NoAPOP"
 
-bool MailPop3::Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, LDom *SettingStore, int Flags)
+bool MailPop3::Open(LSocketI *S,
+					const char *RemoteHost, int Port,
+					const char *User, const char *Password,
+					LDom *SettingStore,
+					int Flags)
 {
 	if (!RemoteHost)
 	{
@@ -2084,29 +2085,27 @@ bool MailPop3::Open(LSocketI *S, const char *RemoteHost, int Port, const char *U
 
 	bool Status = false;
 	LString Apop;
-	SslSocket *sslSock = nullptr;
+	auto sslSock = dynamic_cast<SslSocket*>(S);
 	LXmlTag LocalStore;
 
 	if (!SettingStore)
 		SettingStore = &LocalStore;
 
+	if (sslSock)
+	{
+		sslSock->UserRef.Printf("host=%s", RemoteHost);
+		if (sslCertCallback)
+			sslSock->SetCertCallback(sslCertCallback);
+	}
+			
 	if (Port < 1)
 	{
 		LVariant IsSsl;
 		if (S->GetValue("IsSSL", IsSsl) &&
 			IsSsl.CastInt32())
-		{
 			Port = POP3_SSL_PORT;
-			sslSock = dynamic_cast<SslSocket*>(S);
-			if (sslSock && sslCertCallback)
-			{
-				sslSock->SetCertCallback(sslCertCallback);
-			}
-		}
 		else
-		{
 			Port = POP3_PORT;
-		}
 	}
 
 	LString Server = RemoteHost;
