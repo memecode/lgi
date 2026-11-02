@@ -369,9 +369,8 @@ LMessage::Result LButton::OnEvent(LMessage *Msg)
 			// Get the control to draw itself into a bitmap
 			LRect c = GetPos();
 			
-			// Create a HBITMAP in the same size as the control 
-			// and the same bit depth as the screen
-			LMemDC m(_FL, c.X(), c.Y(), GdcD->GetColourSpace());
+			// Use 24bit to work around the broken text alpha channel
+			LMemDC m(_FL, c.X(), c.Y(), System24BitColourSpace);
 			m.Colour(LColour::Red);
 			m.Rectangle();
 

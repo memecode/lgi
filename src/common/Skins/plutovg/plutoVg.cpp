@@ -16,8 +16,13 @@
 
 #if defined WINNATIVE
 	#define BTN_TEXT_OFFSET_Y	-1
+
+	// because windows doesn't paint the alpha correctly on a 32bit memory dc
+	// we revert to 'set' the pixels instead of the default alpha blending.
+	#define PRE_BLT				State->pScreen->Op(GDC_SET);
 #else
 	#define BTN_TEXT_OFFSET_Y	0
+	#define PRE_BLT
 #endif
 
 #define GREY24					Rgb24(44, 44, 44)
@@ -29,7 +34,7 @@
 #define Btn_Enabled				0x2
 #define Btn_Max					((Btn_Value|Btn_Enabled)+1)
 
-// 32bit is marginally faster to render to.
+// This needs to be a supported memory context pixel format for plutovg:
 #define OsDefaultCs				System32BitColourSpace
 
 #define CUSTOM_COLOURS			0
@@ -93,7 +98,10 @@ class PlutoVgSkin : public LSkinEngine
 	void FillPathCanvas(LPath *Path, LSurface *pDC, PVCanvas &Canvas, LColour Back, bool Down, bool Enabled = true)
 	{
 		if (!pDC || !Canvas)
+		{
+			LAssert(!"invalid param");
 			return;
+		}
 
 		LRect r(0, 0, pDC->X()-1, pDC->Y()-1);
 
@@ -571,9 +579,8 @@ public:
 			}
 		}
 
-		int Op = State->pScreen->Op(GDC_ALPHA);
+		PRE_BLT
 		State->pScreen->Blt(0, 0, &Mem);
-		State->pScreen->Op(Op);
 	}
 
 	void OnPaint_ListColumn(ProcColumnPaint Callback, void *UserData, LSkinState *State) override
@@ -606,11 +613,8 @@ public:
 			Mem.Op(GDC_ALPHA);
 			Callback(UserData, &Mem, r, false);
 		}
-		#if defined WINNATIVE
-		// GDI text clears alpha; the column background is fully opaque.
-		GdiFlush();
-		Mem.MakeOpaque();
-		#endif
+		
+		PRE_BLT
 		State->pScreen->Blt(State->Rect.x1, State->Rect.y1, &Mem);
 	}
 
@@ -711,6 +715,7 @@ public:
 		plutovg_canvas_close_path(Canvas);
 		plutovg_canvas_fill(Canvas);
 
+		PRE_BLT
 		State->pScreen->Blt(0, 0, &Mem);
 	}
 
@@ -818,6 +823,8 @@ public:
 			return;
 
 		DrawIndicator(Canvas, Box, LColour(L_WORKSPACE), State->Value != 0, State->Enabled, 4.0f, false, TCheckMark);
+
+		PRE_BLT
 		State->pScreen->Blt(State->Rect.x1, State->Rect.y1, &Mem);
 	}
 
@@ -861,6 +868,7 @@ public:
 			ico.ZOff(Mem->X()-1, Mem->Y()-1);
 			if (ico.Y() < Ctrl->Y())
 				ico.Offset(0, (Ctrl->Y() - ico.Y()) >> 1);
+			PRE_BLT
 			State->pScreen->Blt(ico.x1, ico.y1, Mem);
 			if (Back.IsValid())
 			{
@@ -920,6 +928,8 @@ public:
 
 		DrawIndicator(Canvas, Box, LColour(L_WORKSPACE), State->Value != 0, State->Enabled,
 			(float)Mem.X() / 2.0f, false, TRadioMark);
+		
+		PRE_BLT
 		State->pScreen->Blt(State->Rect.x1, State->Rect.y1, &Mem);
 	}
 
