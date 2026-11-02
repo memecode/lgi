@@ -227,6 +227,16 @@ public:
 	DynFunc1(BIO *,	SSL_get_wbio, const SSL *, s);
 	DynFunc1(int, SSL_accept, SSL *, ssl);
 	DynFunc3(int, SSL_peek, SSL*, ssl, void*, buf, int, num);
+	DynFunc1(SSL_SESSION*, SSL_get1_session, SSL*, s);
+	DynFunc2(int, SSL_set_session, SSL*, s, SSL_SESSION*, session);
+	DynFunc1(int, SSL_session_reused, SSL*, s);
+	void SSL_SESSION_free(SSL_SESSION *session)
+	{
+		typedef void (CALL_TYPE *p_SSL_SESSION_free)(SSL_SESSION*);
+		auto p = (p_SSL_SESSION_free) GetAddress("SSL_SESSION_free");
+		if (p)
+			p(session);
+	}
 	
   	DynFunc1(SSL_CTX*, SSL_CTX_new, const SSL_METHOD*, meth);	
 	DynFunc3(int, SSL_CTX_load_verify_locations, SSL_CTX*, ctx, const char*, CAfile, const char*, CApath);
@@ -983,6 +993,9 @@ SslSocket::SslSocket(LStream *logger, LCapabilityClient *caps, bool sslonconnect
 SslSocket::~SslSocket()
 {
 	Close();
+	if (ResumeSession && Library)
+		Library->SSL_SESSION_free(ResumeSession);
+	ResumeSession = nullptr;
 	DeleteObj(d);
 }
 
@@ -996,6 +1009,21 @@ LStreamI *SslSocket::Clone()
 		s->UserRef = UserRef;
 	}
 	return s;
+}
+
+bool SslSocket::ResumeSessionFrom(SslSocket *control)
+{
+	if (!control || !control->Ssl || !Library)
+		return false;
+
+	auto session = Library->SSL_get1_session(control->Ssl);
+	if (!session)
+		return false;
+
+	if (ResumeSession)
+		Library->SSL_SESSION_free(ResumeSession);
+	ResumeSession = session;
+	return true;
 }
 
 LCancel *SslSocket::GetCancel()
@@ -1285,6 +1313,9 @@ DebugTrace("%s:%i - BIO_new_ssl_connect=%p\n", _FL, Bio);
 DebugTrace("%s:%i - BIO_get_ssl=%p\n", _FL, Ssl);
 					if (Ssl)
 					{
+						if (ResumeSession)
+							Library->SSL_set_session(Ssl, ResumeSession);
+
 						const int verifyDataIndex = Library->VerifyDataIndex;
 						struct VerifyDetails
 						{

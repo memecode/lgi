@@ -29,6 +29,9 @@ add_library(${LIBNAME} SHARED
     ${SRC}/smbencrypt.c
     ${CMAKE_CURRENT_BINARY_DIR}/md4.c
     ${CMAKE_CURRENT_BINARY_DIR}/des.c)
+if (WIN32)
+    set_target_properties(${LIBNAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
 target_include_directories(${LIBNAME}
     PRIVATE
         ${CMAKE_CURRENT_BINARY_DIR})
@@ -39,6 +42,8 @@ install(TARGETS ${LIBNAME}
     RUNTIME
         DESTINATION ${CMAKE_BINARY_DIR}/bin
     LIBRARY
+        DESTINATION ${CMAKE_BINARY_DIR}/lib
+    ARCHIVE
         DESTINATION ${CMAKE_BINARY_DIR}/lib)
 install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/ntlm.h

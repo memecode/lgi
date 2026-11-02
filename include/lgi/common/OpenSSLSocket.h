@@ -34,6 +34,7 @@ protected:
 	LMutex Lock;
 	BIO *Bio = nullptr;
 	SSL *Ssl = nullptr;
+	SSL_SESSION *ResumeSession = nullptr;
 	LString ErrMsg;
 	LStream *log = nullptr;
 	bool DebugLogging = false;
@@ -108,6 +109,10 @@ public:
 
 	LStreamI *Clone() override;
 	const char *GetErrorString() override;
+
+	// Use the TLS session of an established control connection when opening this
+	// socket, so FTPS data channels resume it as servers commonly require.
+	bool ResumeSessionFrom(SslSocket *control);
 };
 
 extern bool StartSSL(LString &ErrorMsg, SslSocket *Sock = nullptr);

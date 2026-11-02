@@ -1348,6 +1348,15 @@ bool IFtp::ConnectData()
 			connectHost = d->Host.Get();
 
 		// Socket->OnInformation(LString::Fmt("connect data to '%s' %i", connectHost, Port));
+		if (d->UseTLS)
+		{
+			// Resume the control channel's TLS session on the data channel, as FTPS servers often require.
+			auto controlSsl = dynamic_cast<SslSocket*>(Socket.Get());
+			auto dataSsl = dynamic_cast<SslSocket*>(d->Data.Get());
+			if (controlSsl && dataSsl)
+				dataSsl->ResumeSessionFrom(controlSsl);
+		}
+
 		auto result = d->Data->Open((char*)connectHost, Port);
 		if (result)
 			return true;
