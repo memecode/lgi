@@ -6457,6 +6457,11 @@ void LHtml::OnPaint(LSurface *ScreenDC)
 		{
 			pDC->SetOrigin(0, 0);
 			PROF("Blt");
+			#ifdef WINDOWS
+			// Windows doesn't write the correct alpha channels when doing text.
+			// This works around that by effecively ignoring the alpha
+			ScreenDC->Op(GDC_SET);
+			#endif
 			ScreenDC->Blt(0, 0, MemDC);
 		}
 	#endif

@@ -6,11 +6,8 @@
 #include "lgi/common/Box.h"
 #include "lgi/common/TextView3.h"
 #include "lgi/common/ProgressDlg.h"
-#include "lgi/common/Net.h"
-#include "lgi/common/Filter.h"
 #include "lgi/common/ImageComparison.h"
 #include "lgi/common/OpenSSLSocket.h"
-#include "lgi/common/Net.h"
 #include "lgi/common/EmojiFont.h"
 #include "lgi/common/Menu.h"
 #include "lgi/common/PopupNotification.h"
@@ -448,142 +445,146 @@ public:
 		
 		Name("Html Test Suite");
 		SetQuitOnClose(true);
-		if (Attach(0))
+		if (!Attach(0))
 		{
-			Menu = new LMenu();
-			if (Menu)
-			{
-				Menu->Attach(this);
-				Menu->Load(this, "IDM_MENU");
-			}
+			LCloseApp();
+			return;
+		}
+
+		Menu = new LMenu();
+		if (Menu)
+		{
+			Menu->Attach(this);
+			Menu->Load(this, "IDM_MENU");
+		}
 			
-			if (auto box = new LBox)
-			{
-				AddView(box);
+		if (auto box = new LBox)
+		{
+			AddView(box);
 
-				box->AddView(tabs = new LTabView(ID_TABS));
-				tabs->SetPourChildren(true);
+			box->AddView(tabs = new LTabView(ID_TABS));
+			tabs->SetPourChildren(true);
 				
-				auto tab = tabs->Append("Files");
-					tab->Append(Lst = new LList(ID_LIST, 0, 0, 100, 100));
-						Lst->Sunken(false);
-						Lst->SetPourLargest(true);
-						Lst->AddColumn("File", 400);
-						Lst->CssStyles("width: 200px;");
-				tab = tabs->Append("Debug");
-					tab->Append(debugBox = new LBox(ID_DEBUG_BOX, true));
-						debugBox->AddView(tagTree = new LTree(ID_TAG_TREE));
-						debugBox->AddView(tagDetail = new LTextLog(ID_TAG_DETAIL));
+			auto tab = tabs->Append("Files");
+				tab->Append(Lst = new LList(ID_LIST, 0, 0, 100, 100));
+					Lst->Sunken(false);
+					Lst->SetPourLargest(true);
+					Lst->AddColumn("File", 400);
+					// Lst->CssStyles("width: 200px;");
+			tab = tabs->Append("Debug");
+				tab->Append(debugBox = new LBox(ID_DEBUG_BOX, true));
+					debugBox->AddView(tagTree = new LTree(ID_TAG_TREE));
+					debugBox->AddView(tagDetail = new LTextLog(ID_TAG_DETAIL));
 
-				box->Value(350);
+			box->Value(350);
 
-				#if HAS_LOG_VIEW
-					LBox *vert = new LBox;
-					vert->SetVertical(true);
-					s->AddView(vert);
+			#if HAS_LOG_VIEW
+				LBox *vert = new LBox;
+				vert->SetVertical(true);
+				s->AddView(vert);
 
-					vert->AddView(Html = new HtmlScriptContext(IDC_HTML, this));
-					Html->SetCssStyle("height: 70%;");
+				vert->AddView(Html = new HtmlScriptContext(IDC_HTML, this));
+				Html->SetCssStyle("height: 70%;");
 
-					vert->AddView(Text = new LTextView3(IDC_LOG, 0, 0, 100, 100));
+				vert->AddView(Text = new LTextView3(IDC_LOG, 0, 0, 100, 100));
 				
-					LBox::Spacer *sp = s->GetSpacer(0);
-					if (sp)
-					{
-						sp->Colour.Rgb(64, 64, 64);
-						sp->SizePx = 2;
-					}
-					sp = vert->GetSpacer(0);
-					if (sp)
-					{
-						sp->Colour.Rgb(64, 64, 64);
-						sp->SizePx = 2;
-					}
-				#else
-					box->AddView(Html = new HtmlScriptContext(ID_HTML, this, this));
-				#endif
-
-				#if 1
-				if (auto css = Html->GetCss(true))
+				LBox::Spacer *sp = s->GetSpacer(0);
+				if (sp)
 				{
-					LCss::Len wid(LCss::LenPx, 1000 + LScrollBar::GetScrollSize());
-					css->Width(wid);
-					css->MinWidth(wid);
-					css->MaxWidth(wid);
+					sp->Colour.Rgb(64, 64, 64);
+					sp->SizePx = 2;
 				}
-				#endif
-
-				Script.Reset(new LScriptEngine(this, Html, NULL));
-
-				if (Html)
-					Html->SetEnv(this);
-				#if HAS_IMAGE_LOADER
-					Html->SetLoadImages(true);
-				#endif
-				
-				#ifdef MAC
-				    #define TIME_TO_DATE(ts) ((ts) / 1000)
-				#else
-				    #define TIME_TO_DATE(ts) (ts)
-				#endif
-				
-				LFile::Path files(LSP_APP_INSTALL);
-				#if defined(MAC) && defined(_DEBUG)
-				    files += "../../../../..";
-				#endif
-				files += "files";
-				if (!files.Exists())
-					LgiTrace("%s:%i - files folder '%s' doesn't exist", _FL, files.GetFull().Get());
-				else
+				sp = vert->GetSpacer(0);
+				if (sp)
 				{
-					FilesFolder = files.GetFull();
+					sp->Colour.Rgb(64, 64, 64);
+					sp->SizePx = 2;
+				}
+			#else
+				box->AddView(Html = new HtmlScriptContext(ID_HTML, this, this));
+			#endif
 
-					List<FileInf> Files;
-					LDirectory d;
-					for (auto b = d.First(FilesFolder); b; b = d.Next())
+			#if 1
+			if (auto css = Html->GetCss(true))
+			{
+				LCss::Len wid(LCss::LenPx, 1000 + LScrollBar::GetScrollSize());
+				css->Width(wid);
+				css->MinWidth(wid);
+				css->MaxWidth(wid);
+			}
+			#endif
+
+			Script.Reset(new LScriptEngine(this, Html, NULL));
+
+			if (Html)
+				Html->SetEnv(this);
+			#if HAS_IMAGE_LOADER
+				Html->SetLoadImages(true);
+			#endif
+				
+			#ifdef MAC
+				#define TIME_TO_DATE(ts) ((ts) / 1000)
+			#else
+				#define TIME_TO_DATE(ts) (ts)
+			#endif
+				
+			LFile::Path files(LSP_APP_INSTALL);
+			#if defined(MAC) && defined(_DEBUG)
+				files += "../../../../..";
+			#elif defined(WINDOWS)
+				files += "..";
+			#endif
+			files += "files";
+			if (!files.Exists())
+				LgiTrace("%s:%i - files folder '%s' doesn't exist\n", _FL, files.GetFull().Get());
+			else
+			{
+				FilesFolder = files.GetFull();
+
+				List<FileInf> Files;
+				LDirectory d;
+				for (auto b = d.First(FilesFolder); b; b = d.Next())
+				{
+					if (!d.IsDir() &&
+						MatchStr("*.html", d.GetName()))
 					{
-						if (!d.IsDir() &&
-							MatchStr("*.html", d.GetName()))
+						char p[256];
+						if (d.Path(p, sizeof(p)))
 						{
-							char p[256];
-							if (d.Path(p, sizeof(p)))
+							if (auto f = new FileInf)
 							{
-								if (auto f = new FileInf)
-								{
-									f->File = p;
-									f->Date.Set(TIME_TO_DATE(d.GetLastWriteTime()));
-									Files.Insert(f);
-								}
+								f->File = p;
+								f->Date.Set(TIME_TO_DATE(d.GetLastWriteTime()));
+								Files.Insert(f);
 							}
 						}
 					}
-					Files.Sort([](auto a, auto b)
-						{
-							return -a->Date.Compare(&b->Date);
-						});
-
-					for (auto f: Files)
-					{
-						if (auto d = strrchr(f->File, DIR_CHAR))
-						{
-							if (auto i = new HtmlItem(FilesFolder, d + 1))
-								Lst->Insert(i);
-						}
-					}
-
-					Files.DeleteObjects();
 				}
+				Files.Sort([](auto a, auto b)
+					{
+						return -a->Date.Compare(&b->Date);
+					});
+
+				for (auto f: Files)
+				{
+					if (auto d = strrchr(f->File, DIR_CHAR))
+					{
+						if (auto i = new HtmlItem(FilesFolder, d + 1))
+							Lst->Insert(i);
+					}
+				}
+
+				Files.DeleteObjects();
 			}
-			
-			
-			LRect r(0, 0, 1400, 800);
-			SetPos(r);
-			MoveToCenter();
-			AttachChildren();
-			
-			Visible(true);
 		}
-		else LExitApp();
+			
+			
+		LRect r(0, 0, 1400, 800);
+		SetPos(r);
+		MoveToCenter();
+		AttachChildren();
+			
+		Visible(true);
 	}
 
 	~AppWnd()

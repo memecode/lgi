@@ -153,7 +153,7 @@ bool LLayout::Pour(LRegion &r)
 		LCss::Len zero;
 		LFont *f = GetFont();
 		
-		s = css->MarginTop();
+		s = css->MarginLeft();
 		p.x1 += SelectValid(s, margin, zero).ToPx(r.X(), f);
 		
 		s = css->MarginTop();

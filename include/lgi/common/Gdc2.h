@@ -1289,6 +1289,8 @@ public:
 		Screen = pDC;
 
 		#ifdef WINDOWS
+		// Windows doesn't write the correct alpha channels when doing text.
+		// This works around that by not having alpha
 		auto cs = System24BitColourSpace;
 		#else
 		auto cs = pDC->GetColourSpace();
