@@ -61,8 +61,10 @@ void LDocumentEnv::OnDone(LAutoPtr<LThreadJob> j)
 			}
 			else
 			{
+				/*
 				LgiTrace("%s:%i - no view with Uid=%i in %i viewers:\n",
 					_FL, ld->UserUid, (int)Viewers.Length());
+				*/
 				for (auto v: Viewers)
 					LgiTrace("  viewer Uid=%i\n", v->GetDocumentUid());
 			}
