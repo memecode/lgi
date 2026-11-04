@@ -25,6 +25,13 @@ add_executable(LgiScript ${APP_TYPE}
 
 target_link_libraries(LgiScript lgi)
 
+if (LINUX)
+	add_custom_command(TARGET LgiScript POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_directory
+			${CMAKE_CURRENT_SOURCE_DIR}/resources
+			$<TARGET_FILE_DIR:LgiScript>/Resources)
+endif()
+
 if (APPLE)
 	target_link_libraries(LgiScript ffi)
 	macBundlePostBuild(LgiScript)

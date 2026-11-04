@@ -47,6 +47,26 @@ class App :
 public:
 	int Status;
 
+	bool GetValue(const char *Name, LVariant &Value) override
+	{
+		return LVmCallback::GetValue(Name, Value);
+	}
+
+	bool SetValue(const char *Name, LVariant &Value) override
+	{
+		return LVmCallback::SetValue(Name, Value);
+	}
+
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override
+	{
+		if (!strcmp(Name, "StringName"))
+		{
+			Value = LString("Test string");
+			return true;
+		}
+		return LApp::GetVariant(Name, Value, Array);
+	}
+
 	const char* GetClass() override { return "App"; }
 
 	App(OsAppArguments &AppArgs) : LApp(AppArgs, "LgiScript")
@@ -54,7 +74,7 @@ public:
 		LFile::Path p(LSP_APP_INSTALL);
 		p += "Resources";
 		p += "LgiScript.lr8";
-		LgiGetResObj(true, p);	
+		LgiGetResObj(true, p.GetFull());
 	
 		Engine = NULL;
 		Status = 0;
@@ -110,7 +130,7 @@ public:
 		}
 		
 		LAutoPtr<LCompiledCode> Obj;
-		if (!Eng.Compile(Obj, NULL, Src, File))
+		if (!Eng.Compile(Obj, NULL, Src, File, static_cast<LVmCallback*>(this)))
 		{
 			printf("Error: Compilation failed '%s'.\n", SrcFile.Get());
 			return false;

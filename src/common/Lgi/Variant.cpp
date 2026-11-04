@@ -14,6 +14,7 @@ const char *LVariant::TypeToString(LVariantType t)
 		case GV_BOOL:		return "bool";
 		case GV_DOUBLE:		return "double";
 		case GV_STRING:		return "String";
+		case GV_LSTRING:		return "LString";
 		case GV_BINARY:		return "Binary";
 		case GV_LIST:		return "List";
 		case GV_DOM:		return "Dom";

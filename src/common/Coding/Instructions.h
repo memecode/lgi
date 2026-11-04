@@ -1280,6 +1280,7 @@ case IDomGet:
 				break;
 			}
 			case GV_STRING:
+			case GV_LSTRING:
 			{
 				char *sName = Name->Str();
 				CheckParam(sName);
@@ -1817,6 +1818,7 @@ case IDomCall:
 				break;
 			}
 			case GV_STRING:
+			case GV_LSTRING:
 			{
 				if (Arg.Length() > 0 && !Arg[0])
 				{
