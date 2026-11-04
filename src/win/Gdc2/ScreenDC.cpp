@@ -62,6 +62,7 @@ public:
 		if (Saved)
 		{
 			Graphics->SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
+			Graphics->SetPixelOffsetMode(Gdiplus::PixelOffsetModeHalf);
 			Graphics->SetCompositingMode(Gdiplus::CompositingModeSourceOver);
 		}
 	}
