@@ -250,7 +250,7 @@
     <ClCompile Include="..\src\common\Gdc2\GdcCommon.cpp" />
     <ClCompile Include="..\src\common\Gdc2\Rect.cpp" />
     <ClCompile Include="..\src\common\Gdc2\Surface.cpp" />
-    <ClCompile Include="..\src\common\Gdc2\Vector.cpp" />
+    <ClCompile Include="..\src\common\Gdc2\vectorSurface.cpp" />
     <ClCompile Include="..\src\common\Gdc2\Path\Path.cpp" />
     <ClCompile Include="..\src\common\Gdc2\Tools\ColourReduce.cpp" />
     <ClCompile Include="..\src\common\Gdc2\Tools\GdcTools.cpp" />
@@ -286,7 +286,7 @@
     <ClCompile Include="..\src\common\Lgi\Object.cpp" />
     <ClCompile Include="..\src\common\Lgi\OptionsFile.cpp" />
     <ClCompile Include="..\src\common\Lgi\Stream.cpp" />
-    <ClCompile Include="..\src\common\Skins\vector\vector.cpp" />
+    <ClCompile Include="..\src\common\Skins\vector\vectorUi.cpp" />
     <ClCompile Include="..\src\common\Text\Token.cpp" />
     <ClCompile Include="..\src\win\Lgi\SubProcess.cpp" />
     <ClCompile Include="..\src\common\Lgi\ToolTip.cpp" />

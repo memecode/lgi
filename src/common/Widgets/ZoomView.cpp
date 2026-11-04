@@ -1452,19 +1452,19 @@ bool LZoomView::Convert(LPointF &p, int x, int y)
 	if (d->GetZoom() > 0)
 	{
 		// Scaled up
-		p.x = (double)Sx + ((double)x / Factor);
-		p.y = (double)Sy + ((double)y / Factor);
+		p.x = (float)Sx + ((float)x / Factor);
+		p.y = (float)Sy + ((float)y / Factor);
 	}
 	else if (d->GetZoom() < 0)
 	{
 		// Scaled down
-		p.x = (double)Sx + (x * Factor);
-		p.y = (double)Sy + (y * Factor);
+		p.x = (float)Sx + (x * Factor);
+		p.y = (float)Sy + (y * Factor);
 	}
 	else
 	{
-		p.x = (double)Sx + x;
-		p.y = (double)Sy + y;
+		p.x = (float)Sx + x;
+		p.y = (float)Sy + y;
 	}
 	
 	LSurface *Src = d->pDC;

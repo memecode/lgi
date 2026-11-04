@@ -137,7 +137,7 @@ set (CommonSource
 	include/lgi/common/Rect.h
 	src/common/Gdc2/Rect.cpp
 	src/common/Gdc2/Surface.cpp
-	src/common/Gdc2/Vector.cpp
+	src/common/Gdc2/vectorSurface.cpp
 	src/common/Gdc2/Tools/GdcTools.cpp
 	include/lgi/common/Path.h
 	src/common/Gdc2/Path/Path.cpp
@@ -214,7 +214,7 @@ set (CommonSource
 	include/lgi/common/LgiRes.h
 	src/common/Resource/LgiRes.cpp
 	src/common/Resource/Res.cpp
-	src/common/Skins/vector/vector.cpp
+	src/common/Skins/vector/vectorUi.cpp
 	include/lgi/common/DocView.h
 	src/common/Text/DocView.cpp
 	include/lgi/common/StringClass.h

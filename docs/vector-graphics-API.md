@@ -9,10 +9,10 @@ applications. It should not expose Cairo, GDI+, Cocoa, Haiku or PlutoVG types in
 its public interface.
 
 PlutoVG is bundled under `lgi/deps/lunasvg/plutovg`, is linked by the Lgi
-build, and is used by the memory backend in `src/common/Gdc2/Vector.cpp`. It is
+build, and is used by the memory backend in `src/common/Gdc2/vectorSurface.cpp`. It is
 the backend for memory surfaces. Native screen surfaces use their platform
 drawing APIs. The default skin is now the vector skin
-(`src/common/Skins/vector/vector.cpp`), which draws through `Vec()` directly
+(`src/common/Skins/vector/vectorUi.cpp`), which draws through `Vec()` directly
 rather than into memory bitmaps. The PlutoVG skin
 (`src/common/Skins/plutovg/plutoVg.cpp`) remains in the tree for comparison.
 
@@ -189,7 +189,7 @@ LD_LIBRARY_PATH=../../Debug:../../../deps/build-x64-debug/lib \
    unsupported-target handling, and lifetime constraints (the surface must
    outlive its vector session).
 2. **Add the backend-neutral implementation.** Complete: the shared session
-   implementation is in `src/common/Gdc2/Vector.cpp`, and the internal context
+  implementation is in `src/common/Gdc2/vectorSurface.cpp`, and the internal context
    contract is in `private/common/Gdc2Vector.h`. `LSurface::Vector` owns its
    context with RAII, forwards drawing calls through that interface, and
    reports setup failure through its boolean conversion. The base factory
@@ -200,7 +200,7 @@ LD_LIBRARY_PATH=../../Debug:../../../deps/build-x64-debug/lib \
    the public interface.
 3. **Implement memory surfaces with PlutoVG.** Complete: `LMemDC` overrides
    `CreateVectorContext()` with a shared PlutoVG implementation in
-   `src/common/Gdc2/Vector.cpp`. It validates bitmap access, format, dimensions
+  `src/common/Gdc2/vectorSurface.cpp`. It validates bitmap access, format, dimensions
    and stride. Compatible premultiplied native ARGB data is bound directly;
    other supported 32-bit layouts use a per-session conversion surface.
    See the memory-backend contract below for supported formats and limitations.

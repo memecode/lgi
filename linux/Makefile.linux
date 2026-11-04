@@ -106,7 +106,7 @@ Source =	src/common/Gdc2/15Bit.cpp \
 			src/common/Gdc2/Surface.cpp \
 			src/common/Gdc2/Tools/ColourReduce.cpp \
 			src/common/Gdc2/Tools/GdcTools.cpp \
-			src/common/Gdc2/Vector.cpp \
+			src/common/Gdc2/vectorSurface.cpp \
 			src/common/General/Containers.cpp \
 			src/common/General/DateTime.cpp \
 			src/common/General/ExeCheck.cpp \
@@ -154,7 +154,7 @@ Source =	src/common/Gdc2/15Bit.cpp \
 			src/common/Net/Uri.cpp \
 			src/common/Resource/LgiRes.cpp \
 			src/common/Resource/Res.cpp \
-			src/common/Skins/vector/vector.cpp \
+			src/common/Skins/vector/vectorUi.cpp \
 			src/common/Text/DocView.cpp \
 			src/common/Text/String.cpp \
 			src/common/Text/TextConvert.cpp \
