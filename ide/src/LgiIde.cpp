@@ -2140,7 +2140,7 @@ public:
 		LSubProcess s(Prog, Args);
 		if (!s.Start(true, false))
 		{
-			Out->Print("%s:%i - '%s' doesn't exist.\n", _FL, Prog);
+			Out->Print("%s:%i - '%s' doesn't exist.\n", _FL, Prog.Get());
 			return false;
 		}
 

@@ -109,7 +109,7 @@
 		3458E51D2CE7EDBB00039176 /* RemoveAnsi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RemoveAnsi.cpp; path = ../../src/common/Text/RemoveAnsi.cpp; sourceTree = "<group>"; };
 		345B206C217965E80079E3C9 /* LgiIde.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LgiIde.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		345B2077217965EA0079E3C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		345B207A217965EA0079E3C9 /* LgiIde.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LgiIde.entitlements; sourceTree = "<group>"; };
+		345B207A217965EA0079E3C9 /* LgiIde.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = LgiIde.entitlements; path = ../resources/LgiIde.entitlements; sourceTree = SOURCE_ROOT; };
 		345B20C3217967760079E3C9 /* LgiCocoa.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LgiCocoa.xcodeproj; path = ../../src/mac/cocoa/LgiCocoa.xcodeproj; sourceTree = "<group>"; };
 		345B20D52179696B0079E3C9 /* PythonParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PythonParser.cpp; path = ../src/PythonParser.cpp; sourceTree = "<group>"; };
 		345B20D62179696B0079E3C9 /* SpaceTabConv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SpaceTabConv.h; path = ../src/SpaceTabConv.h; sourceTree = "<group>"; };
@@ -147,9 +147,9 @@
 		345B20FE217969700079E3C9 /* IdeProjectSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IdeProjectSettings.cpp; path = ../src/IdeProjectSettings.cpp; sourceTree = "<group>"; };
 		345B20FF217969700079E3C9 /* MissingFiles.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MissingFiles.cpp; path = ../src/MissingFiles.cpp; sourceTree = "<group>"; };
 		345B2100217969700079E3C9 /* ParserCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ParserCommon.h; path = ../src/ParserCommon.h; sourceTree = "<group>"; };
-		345B211B217969D30079E3C9 /* mac-icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = "mac-icon.icns"; path = "../Resources/mac-icon.icns"; sourceTree = "<group>"; };
-		345B211C217969D30079E3C9 /* LgiIde.lr8 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = LgiIde.lr8; path = ../Resources/LgiIde.lr8; sourceTree = "<group>"; };
-		345B211D217969D30079E3C9 /* icons.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icons.png; path = ../Resources/icons.png; sourceTree = "<group>"; };
+		345B211B217969D30079E3C9 /* mac-icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = "mac-icon.icns"; path = "../resources/mac-icon.icns"; sourceTree = SOURCE_ROOT; };
+		345B211C217969D30079E3C9 /* LgiIde.lr8 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = LgiIde.lr8; path = ../resources/LgiIde.lr8; sourceTree = SOURCE_ROOT; };
+		345B211D217969D30079E3C9 /* icons.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icons.png; path = ../resources/icons.png; sourceTree = SOURCE_ROOT; };
 		348341382CC4B5E6002AF938 /* RemoteFileSelect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RemoteFileSelect.h; path = ../../include/lgi/common/RemoteFileSelect.h; sourceTree = "<group>"; };
 		348341392CC4B5E6002AF938 /* RemoteFileSelect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RemoteFileSelect.cpp; path = ../../src/common/Lgi/RemoteFileSelect.cpp; sourceTree = "<group>"; };
 		34872EB22FAAA4C600E22EBF /* gdb.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = gdb.h; sourceTree = "<group>"; };
