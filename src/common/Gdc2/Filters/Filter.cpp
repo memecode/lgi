@@ -1454,7 +1454,7 @@ LSurface *GdcDevice::Load(LString Name, bool UseOSLoader, LDom *Options)
 	LFile File;
 	if (!File.Open(Name, O_READ))
 	{
-		LgiTrace("%s:%i - Couldn't open '%s' for reading.\n", _FL, Name);
+		LgiTrace("%s:%i - Couldn't open '%s' for reading.\n", _FL, Name.Get());
 		return NULL;
 	}
 
