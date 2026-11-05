@@ -1889,7 +1889,9 @@ int SslSocket::Close()
 				FD_ZERO(&readable);
 				FD_SET(socket, &readable);
 				auto remaining = deadline - now;
-				timeval tv = { (long)(remaining / 1000), (long)((remaining % 1000) * 1000) };
+				timeval tv{};
+				tv.tv_sec = static_cast<decltype(tv.tv_sec)>(remaining / 1000);
+				tv.tv_usec = static_cast<decltype(tv.tv_usec)>((remaining % 1000) * 1000);
 				auto ready = select((int)socket + 1, &readable, nullptr, nullptr, &tv);
 				if (ready < 0 && errno == EINTR)
 					continue;
