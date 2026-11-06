@@ -224,7 +224,8 @@ public:
 	/// size if OnLayout returns false), painted via OnPaint and receives mouse
 	/// events. The item's Id is View->GetId() at activation time, so the view can
 	/// change it in OnMouseClick; if it's <= 0 on mouse up the menu stays open.
-	/// The menu item takes ownership of the view. (Currently only implemented for GTK)
+	/// The menu item takes ownership of the view. Implemented for GTK and Windows
+	/// popup menus; Windows Enter activates the view's current positive Id.
 	LMenuItem *AppendCustom
 	(
 		/// The view to insert

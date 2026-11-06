@@ -1403,9 +1403,19 @@ public:
 		if (!hdc)
 		{
 			hdc = CreateCompatibleDC(NULL);
-			own = true;
+			own = hdc != nullptr;
+			if (!hdc)
+			{
+				auto Error = GetLastError();
+				LgiTrace("%s:%i - CreateCompatibleDC failed: error=%lu, GDI objects=%lu\n",
+					_FL, Error, GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS));
+			}
 		}
 	}
+
+	AutoHdc(const AutoHdc &) = delete;
+	AutoHdc &operator=(const AutoHdc &) = delete;
+	explicit operator bool() const { return hdc != nullptr; }
 
 	~AutoHdc()
 	{
@@ -1430,6 +1440,11 @@ void LFont::_Measure(int &x, int &y, OsChar *Str, int Len)
 	}
 
 	AutoHdc hDC(GetSurface());
+	if (!hDC)
+	{
+		x = y = 0;
+		return;
+	}
 	HFONT hOldFont = (HFONT) SelectObject(hDC, Handle());
 
 	SIZE Size;
@@ -1444,8 +1459,6 @@ void LFont::_Measure(int &x, int &y, OsChar *Str, int Len)
 	}
 
 	SelectObject(hDC, hOldFont);
-	if (!GetSurface())
-		DeleteDC(hDC);
 }
 
 int LFont::_CharAt(int x, OsChar *Str, int Len, LPxToIndexType Type)
@@ -1455,6 +1468,8 @@ int LFont::_CharAt(int x, OsChar *Str, int Len, LPxToIndexType Type)
 
 	INT Fit = 0;
 	AutoHdc hDC(GetSurface());
+	if (!hDC)
+		return -1;
 	HFONT hOldFont = (HFONT) SelectObject(hDC, Handle());
 	if (hOldFont)
 	{
@@ -1488,7 +1503,6 @@ int LFont::_CharAt(int x, OsChar *Str, int Len, LPxToIndexType Type)
 		LAssert(0);
 	}
 
-	DeleteDC(hDC);
 	return Fit;
 }
 

@@ -185,7 +185,14 @@ public:
 				
 				if (Disabled)
 				{
-					LMemDC tmp(_FL, ImgLst->X(), ImgLst->Y(), System32BitColourSpace, LSurface::SurfaceRequireExactCs);
+					LMemDC tmp(_FL);
+					if (!tmp.Create(ImgLst->X(), ImgLst->Y(), System32BitColourSpace, LSurface::SurfaceRequireExactCs))
+					{
+						LgiTrace("%s:%i - Disabled image cache allocation failed: size=%ix%i\n",
+							_FL, ImgLst->X(), ImgLst->Y());
+						delete dc;
+						return nullptr;
+					}
 					tmp.Colour(0, 32);
 					tmp.Rectangle();
 					tmp.Op(GDC_ALPHA);
@@ -203,8 +210,17 @@ public:
 			}
 			else
 			{
+				#if WINNATIVE
+				auto Error = GetLastError();
+				LgiTrace("%s:%i - Image cache allocation failed: size=%ix%i, error=%lu, GDI objects=%lu\n",
+					_FL, ImgLst->X(), ImgLst->Y(), Error,
+					GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS));
+				#else
+				LgiTrace("%s:%i - Image cache allocation failed: size=%ix%i\n",
+					_FL, ImgLst->X(), ImgLst->Y());
+				#endif
 				delete dc;
-				LAssert(!"Create memdc failed.");
+				return nullptr;
 			}
 		}
 		
@@ -336,6 +352,18 @@ void LImageList::Draw(LSurface *pDC, int Dx, int Dy, int Image, LColour Backgrou
 	rSrc.ZOff(d->Sx-1, d->Sy-1);
 	rSrc.Offset(Image * d->Sx, 0);
 
+	if (pDC->SupportsAlphaCompositing()
+		#if HAIKU
+		&& !Disabled // Constant alpha blt not supported (yet??!)
+		#endif
+		)
+	{
+		int Old = pDC->Op(GDC_ALPHA, Disabled ? d->DisabledAlpha : -1);
+		pDC->Blt(Dx, Dy, this, &rSrc);
+		pDC->Op(Old);
+		return;
+	}
+
 	LImageListPriv::CacheDC *Cache = d->GetCache(Background, Disabled);
 	if (!Cache && Background.IsValid())
 	{
@@ -351,17 +379,7 @@ void LImageList::Draw(LSurface *pDC, int Dx, int Dy, int Image, LColour Backgrou
 		return;
 	}
 
-	if (pDC->SupportsAlphaCompositing()
-		#if HAIKU
-		&& !Disabled // Constant alpha blt not supported (yet??!)
-		#endif
-		)
-	{
-		int Old = pDC->Op(GDC_ALPHA, Disabled ? d->DisabledAlpha : -1);
-		pDC->Blt(Dx, Dy, this, &rSrc);
-		pDC->Op(Old);
-	}
-	else if (Cache)
+	if (Cache)
 	{
 		pDC->Blt(Dx, Dy, Cache, &rSrc);
 	}

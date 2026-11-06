@@ -1869,7 +1869,7 @@ int SslSocket::Close()
 		// briefly for the peer's EOF instead, unless the caller cancelled the connection.
 		if (WasConnected && !Prev)
 		{
-			const int maxWaitMs = 5000;
+			const int maxWaitMs = 1500;
 			int waitMs = d->Timeout > 0 ? MIN(d->Timeout, maxWaitMs) : maxWaitMs;
 			auto deadline = LCurrentTime() + waitMs;
 			char unread[4096];

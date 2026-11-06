@@ -192,6 +192,19 @@ LMenuItem *LSubMenu::AppendSeparator(int Where)
 	return Item;
 }
 
+LMenuItem *LSubMenu::AppendCustom(LView *View, int Where)
+{
+	if (!View)
+		return nullptr;
+
+	int Pos = (int)(Where < 0 ? Items.Length() : min(Where, Items.Length()));
+	auto Item = new LMenuItem(Menu, this, View, Pos);
+	Items.Insert(Item, Where);
+	if (Menu)
+		Menu->OnChange();
+	return Item;
+}
+
 LSubMenu *LSubMenu::AppendSub(const char *Str, int Where)
 {
 	int Pos = (int) (Where < 0 ? Items.Length() : min(Where, Items.Length()));
@@ -244,6 +257,247 @@ bool LSubMenu::RemoveItem(LMenuItem *Item)
 	return false;
 }
 
+namespace
+{
+	class CustomMenuTracking
+	{
+		static thread_local CustomMenuTracking *Active;
+		CustomMenuTracking *Previous = nullptr;
+		LSubMenu *Root = nullptr;
+		HWND Owner = nullptr;
+		HHOOK Hook = nullptr;
+		bool OwnHook = false;
+		LMenuItem *Hover = nullptr;
+		LMenuItem *Pressed = nullptr;
+		RECT HoverRect = {};
+		RECT PressedRect = {};
+		HWND HoverWindow = nullptr;
+		HWND PressedWindow = nullptr;
+		int Result = 0;
+
+		static bool HasCustom(LSubMenu *Sub)
+		{
+			for (size_t Index = 0; Index < Sub->Length(); Index++)
+			{
+				auto Item = Sub->ItemAt((int)Index);
+				if (Item->GetCustomView() || (Item->Sub() && HasCustom(Item->Sub())))
+					return true;
+			}
+			return false;
+		}
+
+		LMenuItem *HitTest(LSubMenu *Sub, POINT Point, RECT &Bounds)
+		{
+			for (size_t Index = 0; Index < Sub->Length(); Index++)
+			{
+				auto Item = Sub->ItemAt((int)Index);
+				if (Item->Sub())
+					if (auto Found = HitTest(Item->Sub(), Point, Bounds))
+						return Found;
+			}
+			int Index = MenuItemFromPoint(Owner, Sub->Handle(), Point);
+			if (Index >= 0)
+			{
+				auto Item = Sub->ItemAt(Index);
+				if (Item && Item->GetCustomView() && Item->Enabled() &&
+					GetMenuItemRect(Owner, Sub->Handle(), Index, &Bounds) &&
+					PtInRect(&Bounds, Point))
+					return Item;
+			}
+			return nullptr;
+		}
+
+		LMenuItem *Selected(LSubMenu *Sub)
+		{
+			for (size_t Index = 0; Index < Sub->Length(); Index++)
+			{
+				auto Item = Sub->ItemAt((int)Index);
+				if (Item->Sub())
+					if (auto Found = Selected(Item->Sub()))
+						return Found;
+				MENUITEMINFO State = {};
+				State.cbSize = sizeof(State);
+				State.fMask = MIIM_STATE;
+				if (Item->GetCustomView() && Item->Enabled() &&
+					GetMenuItemInfo(Sub->Handle(), (UINT)Index, true, &State) &&
+					(State.fState & MFS_HILITE) != 0)
+					return Item;
+			}
+			return nullptr;
+		}
+
+		LMouse Mouse(LMenuItem *Item, POINT Point, const RECT &Bounds)
+		{
+			LMouse Event;
+			Event.Target = Item->GetCustomView();
+			Event.x = Point.x - Bounds.left;
+			Event.y = Point.y - Bounds.top;
+			Event.Left((GetKeyState(VK_LBUTTON) & 0x8000) != 0);
+			Event.Middle((GetKeyState(VK_MBUTTON) & 0x8000) != 0);
+			Event.Right((GetKeyState(VK_RBUTTON) & 0x8000) != 0);
+			Event.Down(Event.Left() || Event.Middle() || Event.Right());
+			Event.Ctrl((GetKeyState(VK_CONTROL) & 0x8000) != 0);
+			Event.Shift((GetKeyState(VK_SHIFT) & 0x8000) != 0);
+			Event.Alt((GetKeyState(VK_MENU) & 0x8000) != 0);
+			return Event;
+		}
+
+		void Repaint(HWND Window, const RECT &Bounds)
+		{
+			wchar_t ClassName[32] = {};
+			if (Window && GetClassNameW(Window, ClassName, CountOf(ClassName)) &&
+				wcscmp(ClassName, L"#32768") == 0)
+			{
+				RECT ClientBounds = Bounds;
+				MapWindowPoints(nullptr, Window, (POINT*)&ClientBounds, 2);
+				RedrawWindow(Window, &ClientBounds, nullptr, RDW_INVALIDATE | RDW_NOERASE);
+			}
+		}
+
+		void Activate(LMenuItem *Item)
+		{
+			int Command = Item->GetCustomView()->GetId();
+			if (Command > 0 && EndMenu())
+				Result = Command;
+		}
+
+		void ReleasePressed(POINT Point, UINT Message)
+		{
+			if (!Pressed)
+				return;
+			auto Event = Mouse(Pressed, Point, PressedRect);
+			Event.Down(false);
+			Event.Left(Message == WM_LBUTTONUP);
+			Event.Middle(Message == WM_MBUTTONUP);
+			Event.Right(Message == WM_RBUTTONUP);
+			Pressed->GetCustomView()->OnMouseClick(Event);
+			Pressed = nullptr;
+			Repaint(PressedWindow, PressedRect);
+		}
+
+		bool Filter(MSG *Message)
+		{
+			if (Message->message == WM_KEYDOWN && Message->wParam == VK_RETURN)
+			{
+				if (auto Item = Selected(Root))
+				{
+					Activate(Item);
+					return true;
+				}
+			}
+			bool Move = Message->message == WM_MOUSEMOVE;
+			bool Down = Message->message == WM_LBUTTONDOWN || Message->message == WM_RBUTTONDOWN ||
+				Message->message == WM_MBUTTONDOWN || Message->message == WM_LBUTTONDBLCLK ||
+				Message->message == WM_RBUTTONDBLCLK || Message->message == WM_MBUTTONDBLCLK;
+			bool Up = Message->message == WM_LBUTTONUP || Message->message == WM_RBUTTONUP ||
+				Message->message == WM_MBUTTONUP;
+			if (!Move && !Down && !Up)
+				return false;
+
+			RECT Bounds = {};
+			auto Item = HitTest(Root, Message->pt, Bounds);
+			if (Up && Pressed && Pressed != Item)
+			{
+				ReleasePressed(Message->pt, Message->message);
+				return true;
+			}
+			if (Item != Hover)
+			{
+				if (Hover)
+				{
+					auto Event = Mouse(Hover, Message->pt, HoverRect);
+					Hover->GetCustomView()->OnMouseExit(Event);
+					Repaint(HoverWindow, HoverRect);
+				}
+				Hover = Item;
+				if (Hover)
+				{
+					auto Event = Mouse(Hover, Message->pt, Bounds);
+					Hover->GetCustomView()->OnMouseEnter(Event);
+				}
+			}
+			if (Item)
+			{
+				HoverRect = Bounds;
+				POINT Center = { (Bounds.left + Bounds.right) / 2, (Bounds.top + Bounds.bottom) / 2 };
+				HoverWindow = WindowFromPoint(Center);
+				auto Event = Mouse(Item, Message->pt, Bounds);
+				if (Move)
+				{
+					Event.Flags |= LGI_EF_MOVE;
+					Item->GetCustomView()->OnMouseMove(Event);
+				}
+				else
+				{
+					Event.Down(Down);
+					Event.Left(Message->message == WM_LBUTTONDOWN || Message->message == WM_LBUTTONUP || Message->message == WM_LBUTTONDBLCLK);
+					Event.Middle(Message->message == WM_MBUTTONDOWN || Message->message == WM_MBUTTONUP || Message->message == WM_MBUTTONDBLCLK);
+					Event.Right(Message->message == WM_RBUTTONDOWN || Message->message == WM_RBUTTONUP || Message->message == WM_RBUTTONDBLCLK);
+					Event.Double(Message->message == WM_LBUTTONDBLCLK || Message->message == WM_RBUTTONDBLCLK || Message->message == WM_MBUTTONDBLCLK);
+					if (Down)
+					{
+						Pressed = Item;
+						PressedRect = Bounds;
+						PressedWindow = HoverWindow;
+					}
+					Item->GetCustomView()->OnMouseClick(Event);
+					if (Up)
+					{
+						Pressed = nullptr;
+						Activate(Item);
+					}
+					Repaint(HoverWindow, HoverRect);
+				}
+				return !Move;
+			}
+			return false;
+		}
+
+		static LRESULT CALLBACK MenuFilter(int Code, WPARAM Param, LPARAM Data)
+		{
+			if (Code == MSGF_MENU && Active && Active->Filter((MSG*)Data))
+				return 1;
+			return CallNextHookEx(Active ? Active->Hook : nullptr, Code, Param, Data);
+		}
+
+	public:
+		CustomMenuTracking(LSubMenu *Sub, HWND Window) : Root(Sub), Owner(Window)
+		{
+			Previous = Active;
+			Active = this;
+			if (Previous && Previous->Hook)
+				Hook = Previous->Hook;
+			else if (HasCustom(Sub))
+			{
+				Hook = SetWindowsHookExW(WH_MSGFILTER, MenuFilter, nullptr, GetCurrentThreadId());
+				OwnHook = Hook != nullptr;
+			}
+		}
+
+		~CustomMenuTracking()
+		{
+			Active = Previous;
+			if (OwnHook)
+				UnhookWindowsHookEx(Hook);
+			POINT Point = {};
+			GetCursorPos(&Point);
+			ReleasePressed(Point, 0);
+			if (Hover)
+			{
+				auto Event = Mouse(Hover, Point, HoverRect);
+				Hover->GetCustomView()->OnMouseExit(Event);
+			}
+		}
+
+		CustomMenuTracking(const CustomMenuTracking &) = delete;
+		CustomMenuTracking &operator=(const CustomMenuTracking &) = delete;
+		bool Ready() { return Hook || !HasCustom(Root); }
+		int Command(int NativeCommand) { return Result > 0 ? Result : NativeCommand; }
+	};
+
+	thread_local CustomMenuTracking *CustomMenuTracking::Active = nullptr;
+}
+
 int LSubMenu::Float(LView *From, int x, int y, int Button)
 {
 	int Cmd = 0;
@@ -258,6 +512,12 @@ int LSubMenu::Float(LView *From, int x, int y, int Button)
 
 		if (Wnd && Wnd->Handle())
 		{
+			CustomMenuTracking Tracking(this, Wnd->Handle());
+			if (!Tracking.Ready())
+			{
+				LgiTrace("%s:%i - Unable to install custom menu mouse hook.\n", __FILE__, __LINE__);
+				return 0;
+			}
 			Cmd = TrackPopupMenu(	Info,
 									TPM_LEFTALIGN |
 									TPM_TOPALIGN |
@@ -268,6 +528,7 @@ int LSubMenu::Float(LView *From, int x, int y, int Button)
 									0,
 									Wnd->Handle(),
 									NULL);
+				Cmd = Tracking.Command(Cmd);
 		}
 		else
 		{
@@ -470,6 +731,19 @@ LMenuItem::LMenuItem(LMenu *m, LSubMenu *p, const char *Txt, int id, int Pos, co
 	Insert(Position);
 }
 
+LMenuItem::LMenuItem(LMenu *m, LSubMenu *p, LView *custom, int Pos) : LMenuItem()
+{
+	Menu = m;
+	Position = Pos;
+	CustomView.Reset(custom);
+	Info.fMask |= MIIM_FTYPE | MIIM_DATA;
+	Info.fType = MFT_OWNERDRAW;
+	Info.dwItemData = (ULONG_PTR)this;
+	Id(custom->GetId());
+	Parent = p;
+	Insert(Position);
+}
+
 LMenuItem::~LMenuItem()
 {
 	if (Parent)
@@ -494,7 +768,27 @@ LMenuItem::~LMenuItem()
 // the default painting behaviour if desired.
 void LMenuItem::_Measure(LPoint &Size)
 {
-	if (Separator())
+	if (CustomView)
+	{
+		LViewLayoutInfo Inf;
+		int Width = CustomView->X();
+		int Height = CustomView->Y();
+		if (CustomView->OnLayout(Inf))
+		{
+			int Preferred = Inf.Width.Max > 0 ? Inf.Width.Max : Inf.Width.Min;
+			if (Preferred > 0)
+				Width = Preferred;
+			Inf.Width.Min = Inf.Width.Max = max(Width, 1);
+			CustomView->OnLayout(Inf);
+			Preferred = Inf.Height.Max > 0 ? Inf.Height.Max : Inf.Height.Min;
+			if (Preferred > 0)
+				Height = Preferred;
+		}
+		Size.x = max(Width, 1);
+		Size.y = max(Height, 1);
+		CustomView->SetPos(LRect(0, 0, Size.x - 1, Size.y - 1));
+	}
+	else if (Separator())
 	{
 		Size.x = 8;
 		Size.y = 8;
@@ -562,6 +856,17 @@ void LMenuItem::_PaintText(LSurface *pDC, int x, int y, int Width)
 
 void LMenuItem::_Paint(LSurface *pDC, int Flags)
 {
+	if (CustomView)
+	{
+		LRect Bounds(0, 0, pDC->X() - 1, pDC->Y() - 1);
+		if (CustomView->GetPos() != Bounds)
+			CustomView->SetPos(Bounds);
+		pDC->Colour(L_MENU_BACKGROUND);
+		pDC->Rectangle();
+		CustomView->_Paint(pDC);
+		return;
+	}
+
 	bool BaseMenu = Parent == Menu;
 	int IconX = BaseMenu ? 5 : 20;
 	bool Selected = TestFlag(Flags, ODS_SELECTED);
@@ -1034,7 +1339,7 @@ void LMenuItem::Visible(bool i)
 {
 }
 
-int LMenuItem::Id() { return Info.wID; }
+int LMenuItem::Id() { return CustomView ? CustomView->GetId() : Info.wID; }
 const char *LMenuItem::Name() { return LBase::Name(); }
 bool LMenuItem::Separator() { return (Info.fType & MFT_SEPARATOR) != 0; }
 bool LMenuItem::Checked() { return (Info.fState & MF_CHECKED) != 0; }
@@ -1180,7 +1485,7 @@ int LMenu::_OnEvent(LMessage *Msg)
 		case WM_MEASUREITEM:
 		{
 			LPMEASUREITEMSTRUCT Item = (LPMEASUREITEMSTRUCT)Msg->b;
-			if (Item)
+			if (Item && Item->CtlType == ODT_MENU && Item->itemData)
 			{
 				LPoint Size;
 
@@ -1195,27 +1500,35 @@ int LMenu::_OnEvent(LMessage *Msg)
 		{
 			LPDRAWITEMSTRUCT Item = (LPDRAWITEMSTRUCT)Msg->b;
 			if (Item &&
-				Item->CtlType == ODT_MENU)
+				Item->CtlType == ODT_MENU && Item->itemData)
 			{
 				LRect r = Item->rcItem;
+				int SavedDc = SaveDC(Item->hDC);
+				if (!SavedDc)
+					return false;
+				IntersectClipRect(Item->hDC, Item->rcItem.left, Item->rcItem.top,
+					Item->rcItem.right, Item->rcItem.bottom);
 
-				LScreenDC Dc(Item->hDC, Item->hwndItem);
-				
-				// Get the original origin. We need to do this because when
-				// "animated menus" are on the offset starts at -3,-3 and throws
-				// the menu items off. This is a bug in windows, but watcha
-				// gonna do?
-				auto origin = Dc.GetOrigin();
-				
-				// Clip and offset so that the menu item draws in client co-ords.
-				Dc.SetOrigin(LPoint(origin.x-r.x1, origin.y-r.y1));
-				Dc.SetSize(r.X(), r.Y());
+				{
+					LScreenDC Dc(Item->hDC, Item->hwndItem);
+					
+					// Get the original origin. We need to do this because when
+					// "animated menus" are on the offset starts at -3,-3 and throws
+					// the menu items off. This is a bug in windows, but watcha
+					// gonna do?
+					auto origin = Dc.GetOrigin();
+					
+					// Clip and offset so that the menu item draws in client co-ords.
+					Dc.SetOrigin(LPoint(origin.x-r.x1, origin.y-r.y1));
+					Dc.SetSize(r.X(), r.Y());
 
-				// Paint the item...
-				((LMenuItem*)Item->itemData)->_Paint(&Dc, Item->itemState);
+					// Paint the item...
+					((LMenuItem*)Item->itemData)->_Paint(&Dc, Item->itemState);
 
-				// Set the origin back the original value.
-				Dc.SetOrigin(origin);
+					// Set the origin back the original value.
+					Dc.SetOrigin(origin);
+				}
+				RestoreDC(Item->hDC, SavedDc);
 				return true;
 			}
 			break;
