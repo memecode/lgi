@@ -68,6 +68,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level2</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>libzd.lib;sshd.lib;libcrypto_static.lib;Crypt32.lib;imm32.lib;Iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -92,6 +93,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level2</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Iphlpapi.lib;libz.lib;Crypt32.lib;libcrypto_static.lib;ssh.lib;imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>

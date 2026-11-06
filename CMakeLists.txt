@@ -620,7 +620,7 @@ elseif (MSVC)
 	target_compile_options(lgi
 		PRIVATE
 			/W2
-		)
+			/MP)
 
 	target_compile_definitions(lgi
 		PRIVATE
@@ -662,6 +662,11 @@ elseif (MSVC)
 			WINDOWS
 			_UNICODE
 			UNICODE)
+
+	target_compile_options(lgi-stub
+		PRIVATE
+			/W2
+			/MP)
 
 	target_compile_definitions(lgi-stub
 		PRIVATE
