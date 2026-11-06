@@ -308,9 +308,11 @@ public:
 	{
 		if (!std::isfinite(width) || width <= 0)
 			return;
+
 		Gdiplus::Pen pen(ToGdiColour(colour), width);
 		if (pen.GetLastStatus() != Gdiplus::Ok)
 			return;
+
 		pen.SetStartCap(Gdiplus::LineCapFlat);
 		pen.SetEndCap(Gdiplus::LineCapFlat);
 		pen.SetLineJoin(Gdiplus::LineJoinMiter);

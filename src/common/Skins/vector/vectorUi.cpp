@@ -24,6 +24,10 @@
 
 #define DEBUG_CHECKBOX			0
 
+static LColour cDefaultBorder(20, 20, 20); // border for buttons that are the default
+static LColour cNormalBorder(60, 60, 60); // non default border
+static LColour cDisabled(160, 160, 160); // non default border
+
 static void PaintInvalid(LSurface *pDC, LRect r)
 {
 	pDC->Colour(Rgb24(255, 0, 255), 24);
@@ -36,8 +40,6 @@ static void PaintInvalid(LSurface *pDC, LRect r)
 class VectorSkin : public LSkinEngine
 {
 	LApp *App;
-	LColour c80;
-	LColour c160;
 
 	LColour Tint(LColour back, double amt)
 	{
@@ -106,7 +108,7 @@ class VectorSkin : public LSkinEngine
 		// Edge
 		V.ClearPath();
 		V.RoundRect(ox + (float)Client.x1, oy + (float)Client.y1, (float)Client.X(), (float)Client.Y(), 6.0f);
-		V.Fill(Default ? LColour(40, 40, 40) : LColour(114, 114, 114));
+		V.Fill(Default ? cDefaultBorder : cNormalBorder);
 
 		// Border / fill
 		LRectF fr(Client);
@@ -135,7 +137,7 @@ class VectorSkin : public LSkinEngine
 	// 'r' is in the indicator's local space, shifted by (ox, oy) on the surface.
 	void DrawIndicatorVec(LSurface::Vector &V, float ox, float oy, LRect r, LColour Back, bool Down, bool Enabled, float radius, bool Default = false, TMarkType MarkType = TNoMark)
 	{
-		LColour Edge = Default ? LColour(40, 40, 40) : LColour(114, 114, 114);
+		LColour Edge = Default ? cDefaultBorder : cNormalBorder;
 		LColour Fill = Enabled ? Back : Tint(Back, 230.0 / 240.0);
 
 		float x = ox + r.x1, y = oy + r.y1;
@@ -153,13 +155,13 @@ class VectorSkin : public LSkinEngine
 		if (MarkType != TNoMark && Down)
 		{
 			LRectF CheckBox = r;
-			float Px = CheckBox.X() / 6;
+			float Px = (float)floor(CheckBox.X() / 6);
 			CheckBox.Inset(CHECK_BORDER + Px, CHECK_BORDER + Px);
 
-			float Cx = ox + (float)(CheckBox.x1 + (CheckBox.X() / 2));
-			float Cy = oy + (float)(CheckBox.y1 + (CheckBox.Y() / 2));
-			float A = (float)CheckBox.X() / 6.0f;
-			LColour Mark = Enabled ? c80 : c160;
+			float Cx = ox + CheckBox.x1 + (CheckBox.X() / 2);
+			float Cy = oy + CheckBox.y1 + (CheckBox.Y() / 2);
+			float A = CheckBox.X() / 6.0f;
+			LColour Mark = Enabled ? cNormalBorder : cDisabled;
 
 			V.ClearPath();
 			if (MarkType == TRadioMark)
@@ -174,7 +176,7 @@ class VectorSkin : public LSkinEngine
 				V.LineTo(ox + CheckBox.x2, oy + CheckBox.y2);
 				V.MoveTo(ox + CheckBox.x2, oy + CheckBox.y1);
 				V.LineTo(ox + CheckBox.x1, oy + CheckBox.y2);
-				V.Stroke(Mark, (float)(A * sqrt(2.0)));
+				V.Stroke(Mark, A * 1.7f);
 			}
 		}
 	}
@@ -255,8 +257,6 @@ public:
 
 		LColour Med = LColour(L_MED);
 		double Nominal = 240.0;
-		c80 = Tint(Med, 80.0/Nominal);
-		c160 = Tint(Med, 160.0/Nominal);
 	}
 
 	uint32_t GetFeatures() override
@@ -343,7 +343,7 @@ public:
 			if (NoPaint.IsValid())
 			{
 				V.ClearPath();
-				V.Rect(0, 0, Ctrl->X(), Ctrl->Y());
+				V.Rect(0, 0, (float)Ctrl->X(), (float)Ctrl->Y());
 				V.Fill(NoPaint);
 			}
 			DrawBtnVec(V, 0, 0, Ctrl->GetClient(), Back, Ctrl->Value() != 0, Ctrl->Enabled(), Ctrl->Default());
