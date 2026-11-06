@@ -16,6 +16,7 @@
 #include "lgi/common/ToolBar.h"
 
 using namespace Gtk;
+#include "LgiWidget.h"
 #define DEBUG_MENUS		0
 
 #if DEBUG_MENUS
@@ -199,6 +200,27 @@ LMenuItem *LSubMenu::AppendSeparator(int Where)
 	}
 
 	return nullptr;
+}
+
+LMenuItem *LSubMenu::AppendCustom(LView *View, int Where)
+{
+	if (!View)
+		return nullptr;
+
+	auto i = new LMenuItem(Menu, this, View, Where < 0 ? Items.Length() : Where);
+	Items.Insert(i, Where);
+
+	if (auto item = GTK_WIDGET(i->Handle()))
+	{
+		if (Where < 0)
+			gtk_menu_shell_append(Info, item);
+		else
+			gtk_menu_shell_insert(Info, item, Where);
+		gtk_widget_show(item);
+	}
+	else LAssert(!"no widget");
+
+	return i;
 }
 
 LSubMenu *LSubMenu::AppendSub(const char *Str, int Where)
@@ -585,6 +607,149 @@ LMenuItem::LMenuItem(LMenu *m, LSubMenu *p, const char *txt, int id, int Pos, co
 	_Id = id;
 	ShortCut = shortcut;
 	ScanForAccel();
+}
+
+static gboolean CustomItemDraw(GtkWidget *widget, cairo_t *cr, LMenuItem *mi)
+{
+	mi->PaintCustom(cr);
+	return true;
+}
+
+static gboolean CustomItemEvent(GtkWidget *widget, GdkEvent *ev, LMenuItem *mi)
+{
+	mi->CustomMouse(ev);
+	// A release with no Id means the view didn't pick anything, so keep the menu open
+	if (ev->type == GDK_BUTTON_RELEASE && mi->Id() <= 0)
+		return true;
+	return false;
+}
+
+LMenuItem::LMenuItem(LMenu *m, LSubMenu *p, LView *custom, int Pos)
+{
+	d = new LMenuItemPrivate();
+	Menu = m;
+	Parent = p;
+	Position = Pos;
+	CustomView.Reset(custom);
+	_Id = custom->GetId();
+
+	Handle(GTK_MENU_ITEM(gtk_menu_item_new()));
+
+	// GTK treats a child-less GtkMenuItem as a separator (not selectable/activatable)
+	auto placeholder = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_container_add(GTK_CONTAINER(Info.obj), placeholder);
+	gtk_widget_show(placeholder);
+
+	// Width pass, then height pass for the chosen width
+	LViewLayoutInfo Inf;
+	int w = 0, h = 0;
+	if (custom->OnLayout(Inf))
+	{
+		w = Inf.Width.Max > 0 ? Inf.Width.Max : Inf.Width.Min;
+		if (w <= 0)
+			w = custom->X();
+		Inf.Width.Min = Inf.Width.Max = w;
+		custom->OnLayout(Inf);
+		h = Inf.Height.Max > 0 ? Inf.Height.Max : Inf.Height.Min;
+	}
+	if (w <= 0) w = custom->X();
+	if (h <= 0) h = custom->Y();
+
+	LRect r(0, 0, w - 1, h - 1);
+	custom->SetPos(r);
+
+	auto wid = GTK_WIDGET(Info.obj);
+	gtk_widget_set_size_request(wid, w, h);
+	Info.Connect("draw", (GCallback)CustomItemDraw, this);
+	Info.Connect("button-press-event", (GCallback)CustomItemEvent, this);
+	Info.Connect("button-release-event", (GCallback)CustomItemEvent, this);
+	Info.Connect("motion-notify-event", (GCallback)CustomItemEvent, this);
+	Info.Connect("enter-notify-event", (GCallback)CustomItemEvent, this);
+	Info.Connect("leave-notify-event", (GCallback)CustomItemEvent, this);
+}
+
+void LMenuItem::PaintCustom(Gtk::cairo_t *cr)
+{
+	if (!CustomView || !Info)
+		return;
+
+	auto wid = GTK_WIDGET(Info.obj);
+	GtkAllocation a;
+	gtk_widget_get_allocation(wid, &a);
+
+	// The menu may allocate more width than requested (to match other items)
+	LRect r(0, 0, a.width - 1, a.height - 1);
+	if (CustomView->GetPos() != r)
+		CustomView->SetPos(r);
+
+	if (auto StyleCtx = gtk_widget_get_style_context(wid))
+		gtk_render_background(StyleCtx, cr, 0, 0, a.width, a.height);
+
+	LScreenDC Dc(cr, a.width, a.height);
+	CustomView->_Paint(&Dc);
+}
+
+void LMenuItem::CustomMouse(Gtk::GdkEvent *ev)
+{
+	if (!CustomView || !ev)
+		return;
+
+	LMouse m;
+	m.Target = CustomView;
+
+	switch (ev->type)
+	{
+		case GDK_BUTTON_PRESS:
+		case GDK_2BUTTON_PRESS:
+		case GDK_3BUTTON_PRESS:
+		case GDK_BUTTON_RELEASE:
+		{
+			auto b = &ev->button;
+			m.x = (int)b->x;
+			m.y = (int)b->y;
+			m.Down(ev->type != GDK_BUTTON_RELEASE);
+			m.Double(ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS);
+			m.Left(b->button == GDK_LEFT_BTN);
+			m.Middle(b->button == GDK_MIDDLE_BTN);
+			m.Right(b->button == GDK_RIGHT_BTN);
+			m.Ctrl((b->state & GDK_CONTROL_MASK) != 0);
+			m.Shift((b->state & GDK_SHIFT_MASK) != 0);
+			m.Alt((b->state & GDK_MOD1_MASK) != 0);
+			CustomView->OnMouseClick(m);
+			break;
+		}
+		case GDK_MOTION_NOTIFY:
+		{
+			auto mo = &ev->motion;
+			m.x = (int)mo->x;
+			m.y = (int)mo->y;
+			m.Flags |= LGI_EF_MOVE;
+			m.Left((mo->state & GDK_BUTTON1_MASK) != 0);
+			m.Middle((mo->state & GDK_BUTTON2_MASK) != 0);
+			m.Right((mo->state & GDK_BUTTON3_MASK) != 0);
+			m.Down(m.Left() || m.Middle() || m.Right());
+			CustomView->OnMouseMove(m);
+			break;
+		}
+		case GDK_ENTER_NOTIFY:
+		case GDK_LEAVE_NOTIFY:
+		{
+			auto c = &ev->crossing;
+			m.x = (int)c->x;
+			m.y = (int)c->y;
+			if (ev->type == GDK_ENTER_NOTIFY)
+				CustomView->OnMouseEnter(m);
+			else
+				CustomView->OnMouseExit(m);
+			break;
+		}
+		default:
+			return;
+	}
+
+	// The view isn't attached to a window, so LView::Invalidate can't reach us.
+	if (Info)
+		gtk_widget_queue_draw(GTK_WIDGET(Info.obj));
 }
 
 void LMenuItem::Handle(GtkMenuItem *mi)
@@ -1188,7 +1353,7 @@ void LMenuItem::Visible(bool i)
 
 int LMenuItem::Id()
 {
-	return _Id;
+	return CustomView ? CustomView->GetId() : _Id;
 }
 
 const char *LMenuItem::Name()

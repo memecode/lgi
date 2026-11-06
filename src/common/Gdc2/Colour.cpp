@@ -783,6 +783,22 @@ void LColour::OnChange()
 		_LgiColours[L_INACTIVE_TITLE_TEXT].Rgb(0x80, 0x80, 0x80); // LC_INACTIVE_TITLE_TEXT
 		_LgiColours[L_MENU_BACKGROUND] = LookupColour("bg_color", White); // LC_MENU_BACKGROUND
 		_LgiColours[L_MENU_TEXT] = _LgiColours[L_TEXT]; // LC_MENU_TEXT
+		#if GtkVer(3, 20)
+		if (gdk_display_get_default())
+		{
+			// Use real widgets so the label inherits colour through the menu's parent chain.
+			auto menu = gtk_menu_new();
+			auto item = gtk_menu_item_new_with_label("x");
+			gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
+			if (auto label = gtk_bin_get_child(GTK_BIN(item)))
+			{
+				GdkRGBA c;
+				gtk_style_context_get_color(gtk_widget_get_style_context(label), GTK_STATE_FLAG_NORMAL, &c);
+				_LgiColours[L_MENU_TEXT].Rgb((int)(c.red * 255), (int)(c.green * 255), (int)(c.blue * 255), (int)(c.alpha * 255));
+			}
+			gtk_widget_destroy(menu);
+		}
+		#endif
 		_LgiColours[L_NON_FOCUS_SEL_BACK] = _LgiColours[L_FOCUS_SEL_BACK].Mix(_LgiColours[L_WORKSPACE]); // LC_NON_FOCUS_SEL_BACK
 		_LgiColours[L_NON_FOCUS_SEL_FORE] = _LgiColours[L_TEXT]; // LC_NON_FOCUS_SEL_FORE
 		

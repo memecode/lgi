@@ -338,7 +338,8 @@ public:
 	/// Read the font from the LGI config
 	bool GetConfigFont(const char *Tag);
 	
-	/// Read the font from LGI config (if there) and then the system settings
+	/// Read the font from LGI config (if there) and then the system settings.
+	/// \param Which One of (case insensitive): "System", "Menu", "Caption", "Status", "Small" or "Fixed".
 	bool GetSystemFont(const char *Which);
 
 	/// Read from OS reference

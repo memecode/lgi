@@ -27,6 +27,7 @@ class LgiClass LView : virtual public LViewI, virtual public LBase
 	friend		class LControl;
 	friend		class LMenu;
 	friend		class LSubMenu;
+	friend		class LMenuItem;
 	friend		class LScrollBar;
 	friend		class LDialog;
 	friend		class LDragDropTarget;

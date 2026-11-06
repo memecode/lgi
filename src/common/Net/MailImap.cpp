@@ -867,25 +867,32 @@ bool MailIMap::WriteBuf(bool ObsurePass, const char *Buffer, bool Continuation)
 bool MailIMap::Read(LStreamI *Out, int Timeout)
 {
 	int Lines = 0;
+	auto Start = LCurrentTime();
 
 	while (!Lines && Socket)
 	{
+		if (Timeout > 0 && LCurrentTime() - Start >= Timeout)
+			return false;
+
 		ssize_t r = Socket->Read(Buffer, sizeof(Buffer));
 
 		if (Timeout > 0 && Socket->IsOpen() && r <= 0)
 		{
 			auto St = LCurrentTime();
-			auto Rd = Socket->IsReadable(Timeout);
+			auto Remaining = Timeout - (int)(St - Start);
+			if (Remaining <= 0)
+				return false;
+			auto Rd = Socket->IsReadable(Remaining);
 			auto End = LCurrentTime();
 
 			if (Rd)
 			{
 				r = Socket->Read(Buffer, sizeof(Buffer));
-				if (r < 0)
+				if (r <= 0)
 				{
-					Socket->Close();
-					LgiTrace("%s:%i - Wut? IsReadable/Read mismatch.\n", _FL);
-					return false;
+					if (!Socket->IsOpen())
+						return false;
+					continue;
 				}
 				#if 0
 				else if (d->ReadDebug)
@@ -896,7 +903,7 @@ bool MailIMap::Read(LStreamI *Out, int Timeout)
 			}
 			else
 			{
-				if (!d->Cancel->IsCancelled() && End - St < Timeout - 20)
+				if (!d->Cancel->IsCancelled() && End - St < Remaining - 20)
 				{
 					static uint64_t lastLogTs = 0;
 					auto now = LCurrentTime();

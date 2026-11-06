@@ -73,7 +73,7 @@ public:
 				class TagHash *TagList);
 
 	virtual LMenuItem *AppendItem(const char *Str, int Id, bool Enabled = true, int Where = -1, const char *Shortcut = nullptr) = 0;
-	virtual LSubMenu *AppendSub(const char *Str, int Where = -1) = 0;
+	virtual LSubMenu  *AppendSub(const char *Str, int Where = -1) = 0;
 	virtual LMenuItem *AppendSeparator(int Where = -1) = 0;
 };
 
@@ -109,24 +109,24 @@ class LgiClass LSubMenu :
 		friend Gtk::gboolean LSubMenuClick(LMouse *m);
 		friend void SubMenuDestroy(LSubMenu *Item);
 
-		int *_ContextMenuId = NULL;
+		int *_ContextMenuId = nullptr;
 		bool InLoop = false;
 		uint64 ActiveTs = 0;
 		bool IsContext(LMenuItem *Item);
 		void OnActivate(bool a);
 	#elif defined(WINNATIVE)
-		HWND TrackHandle = NULL;
+		HWND TrackHandle = nullptr;
 	#else
 		bool OnKey(LKey &k);
 	#endif
 
 protected:
 	/// The parent menu item or NULL if the root menu
-	LMenuItem		*Parent = NULL;
+	LMenuItem		*Parent = nullptr;
 	/// The top level window this sub menu belongs to or NULL
-	LMenu			*Menu = NULL;
+	LMenu			*Menu = nullptr;
 	/// The window that the menu belongs to or NULL.
-	LViewI			*Window = NULL;
+	LViewI			*Window = nullptr;
 	
 	void OnAttach(bool Attach);
 	void ClearHandle();
@@ -159,7 +159,7 @@ public:
 	OsSubMenu Release()
 	{
 		OsSubMenu Hnd = Info;
-		Info = NULL;
+		Info = nullptr;
 		return Hnd;
 	}
 	
@@ -219,6 +219,19 @@ public:
 	
 	/// Add a separator
 	LMenuItem *AppendSeparator(int Where = -1) override;
+
+	/// Add a custom drawn item. The view is sized via OnLayout (or its current
+	/// size if OnLayout returns false), painted via OnPaint and receives mouse
+	/// events. The item's Id is View->GetId() at activation time, so the view can
+	/// change it in OnMouseClick; if it's <= 0 on mouse up the menu stays open.
+	/// The menu item takes ownership of the view. (Currently only implemented for GTK)
+	LMenuItem *AppendCustom
+	(
+		/// The view to insert
+		LView *View,
+		/// The index to insert the item, or -1 to insert on the end
+		int Where = -1
+	);	
 	
 	/// Delete all items
 	void Empty();
@@ -346,6 +359,9 @@ protected:
 	int				_Id = 0;
 	int				_Flags = 0;
 
+	/// Custom view for items created with LSubMenu::AppendCustom
+	LAutoPtr<LView>	CustomView;
+
 	#if defined(__GTK_H__)
 		bool InSetCheck = false;
 		LAutoPtr<LMemDC> IconImg;
@@ -354,6 +370,8 @@ protected:
 		void Handle(Gtk::GtkMenuItem *mi);
 		void GtkEvent(LString Event);
 		void PaintIcon(Gtk::cairo_t *cr);
+		void PaintCustom(Gtk::cairo_t *cr);
+		void CustomMouse(Gtk::GdkEvent *ev);
 	protected:
 	#else
 		virtual void _Measure(LPoint &Size);
@@ -367,7 +385,11 @@ protected:
 public:
 	LMenuItem();
 	LMenuItem(LMenu *m, LSubMenu *p, const char *txt, int Id, int Pos, const char *Shortcut = NULL);
+	LMenuItem(LMenu *m, LSubMenu *p, LView *custom, int Pos);
 	virtual ~LMenuItem();
+
+	/// Returns the custom view (if created with LSubMenu::AppendCustom)
+	LView *GetCustomView() { return CustomView; }
 
 	const char *GetClass() override { return "LMenuItem"; }
 
