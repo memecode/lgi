@@ -112,7 +112,7 @@ public:
 
 	// Use the TLS session of an established control connection when opening this
 	// socket, so FTPS data channels resume it as servers commonly require.
-	bool ResumeSessionFrom(SslSocket *control);
+	LgiClass bool ResumeSessionFrom(SslSocket *control);
 };
 
 extern bool StartSSL(LString &ErrorMsg, SslSocket *Sock = nullptr);

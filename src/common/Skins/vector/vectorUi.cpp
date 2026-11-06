@@ -105,7 +105,7 @@ class VectorSkin : public LSkinEngine
 	{
 		// Edge
 		V.ClearPath();
-		V.RoundRect(ox + Client.x1, oy + Client.y1, Client.X(), Client.Y(), 6.0f);
+		V.RoundRect(ox + (float)Client.x1, oy + (float)Client.y1, (float)Client.X(), (float)Client.Y(), 6.0f);
 		V.Fill(Default ? LColour(40, 40, 40) : LColour(114, 114, 114));
 
 		// Border / fill
