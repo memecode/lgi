@@ -1730,7 +1730,11 @@ static bool ParseDistance(char *s, float &d, char *units = 0)
 	if (!IsDigit(*s) && !strchr("-.", *s))
 		return false;
 
-	d = (float)atof(s);
+	char *end = s;
+	d = (float)strtod(s, &end);
+	if (end == s)
+		return false;
+	s = end;
 
 	while (*s && (IsDigit(*s) || strchr("-.", *s))) s++;
 	while (*s && IsWhite(*s)) s++;
@@ -2120,8 +2124,7 @@ bool LTag::SetVariant(const char *Name, LVariant &Value, const char *Array)
 				
 				while (Doc && *Doc)
 				{
-					LTag *t = new LTag(Html, this);
-					if (t)
+					if (auto t = new LTag(Html, this))
 					{
 						Doc = Html->ParseHtml(t, Doc, 1, false, &BackOut);
 						if (!Doc)

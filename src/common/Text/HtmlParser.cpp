@@ -131,7 +131,7 @@ char16 *LHtmlParser::DecodeEntities(const char *s, ssize_t len)
 							*p++ = *i++;
 						}
 						*p++ = 0;
-						Ch = htoi(n);
+						Ch = Atoi(n, 16);
 					}
 					else
 					{
@@ -141,7 +141,7 @@ char16 *LHtmlParser::DecodeEntities(const char *s, ssize_t len)
 							*p++ = *i++;
 						}
 						*p++ = 0;
-						Ch = atoi(n);
+						Ch = Atoi(n);
 					}
 					
 					if (Ch)
@@ -438,21 +438,21 @@ LHtmlElemInfo *LHtmlParser::GetTagInfo(const char *Tag)
 
 void LHtmlParser::OnParseError(const char *file, int line, const char *fmt, ...)
 {
-	char buf[512] = {0};
+	LString msg;
 	va_list arg;
 	va_start(arg, fmt);
-	vsprintf_s(buf, sizeof(buf), fmt, arg);
+	msg.Printf(arg, fmt);
 	va_end(arg);
 
 	if (!Error)
 	{
 		// Keep the first error, it's the most likely to be useful.
-		Error.Set(LErrorInvalidParam, buf);
+		Error.Set(LErrorInvalidParam, msg);
 		Error.SetSource(file, line);
 	}
 	else if (Error.DevNotes.Length() < MAX_PARSE_ERROR_NOTES)
 	{
-		Error.AddNote(file, line, "%s", buf);
+		Error.AddNote(file, line, "%s", msg.Get());
 	}
 }
 
@@ -1466,7 +1466,7 @@ char16 *LHtmlParser::CleanText(const char *s, ssize_t Len, bool ConversionAllowe
 									*p++ = (char)*i++;
 								}
 								*p = 0;
-								Ch = htoi(n);
+								Ch = Atoi(n, 16);
 							}
 							else
 							{
@@ -1476,7 +1476,7 @@ char16 *LHtmlParser::CleanText(const char *s, ssize_t Len, bool ConversionAllowe
 									*p++ = (char)*i++;
 								}
 								*p = 0;
-								Ch = atoi(n);
+								Ch = Atoi(n);
 							}
 							
 							if (Ch)
