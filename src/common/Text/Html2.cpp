@@ -1800,7 +1800,7 @@ void LHtmlLength::Set(char *s)
 		{
 			if (!Units.IsEmpty())
 			{
-				if (Units.Find('%') >= 0)
+				if (Units.Find("%") >= 0)
 				{
 					u = LCss::LenPercent;
 				}

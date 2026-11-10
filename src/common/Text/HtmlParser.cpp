@@ -458,11 +458,8 @@ void LHtmlParser::OnParseError(const char *file, int line, const char *fmt, ...)
 
 void DumpDomTree(LHtmlElement *e, int Depth = 0)
 {
-	char Sp[256];
-	int d = Depth << 1;
-	memset(Sp, ' ', d);
-	Sp[d] = 0;
-	LgiTrace("%s%s (%p,%p)\n", Sp, e->Tag.Get(), e, e->Parent);
+	LString Sp = LString(" ") * (Depth << 1);
+	LgiTrace("%s%s (%p,%p)\n", Sp.Get(), e->Tag.Get(), e, e->Parent);
 	for (unsigned i=0; i<e->Children.Length(); i++)
 	{
 		DumpDomTree(e->Children[i], Depth+1);
