@@ -124,7 +124,13 @@ LString LUri::LocalPath()
 	#endif
 		p = DecodeStr(sPath);
 
-	return p.Replace("/", DIR_STR);
+	p = p.Replace("/", DIR_STR);
+
+	// Protect against path traversal - reject paths containing '..'
+	if (p.Find(".." DIR_STR) >= 0 || p.Find(DIR_STR "..") >= 0 || p.Equals(".."))
+		return LString();
+
+	return p;
 }
 
 LString LUri::ToString()
@@ -265,6 +271,29 @@ bool LUri::Set(const char *uri)
 	if (hasPath)
 	{
 		sPath = LUri::DecodeStr(hasPath).Replace("\\", "/");
+		
+		// Normalize path: remove '.' and '..' components for defense in depth
+		if (sPath.Find("..") >= 0 || sPath.Find("./") >= 0 || sPath.Find("/.") >= 0)
+		{
+			LArray<LString> parts = sPath.SplitDelimit("/");
+			LArray<LString> normalized;
+			for (auto &part: parts)
+			{
+				if (part.Equals(".."))
+				{
+					if (normalized.Length() > 0)
+						normalized.PopLast();
+				}
+				else if (!part.IsEmpty() && !part.Equals("."))
+				{
+					normalized.Add(part);
+				}
+			}
+			sPath = LString("/").Join(normalized);
+			if (sPath.Length() > 0 && sPath(0) == '/')
+				sPath = LString("/") + sPath;
+		}
+		
 		if (IsFile() &&
 			LDirExists(LocalPath()))
 		{

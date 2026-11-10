@@ -1720,7 +1720,7 @@ public:
 } // namespace Html2
 
 //////////////////////////////////////////////////////////////////////
-static bool ParseDistance(char *s, float &d, char *units = 0)
+static bool ParseDistance(char *s, float &d, LString *units = nullptr)
 {
 	if (!s)
 		return false;
@@ -1736,16 +1736,18 @@ static bool ParseDistance(char *s, float &d, char *units = 0)
 		return false;
 	s = end;
 
-	while (*s && (IsDigit(*s) || strchr("-.", *s))) s++;
-	while (*s && IsWhite(*s)) s++;
-	
-	char _units[128];
-	char *o = units = units ? units : _units;
-	while (*s && (IsAlpha(*s) || *s == '%'))
+	while (*s && (IsDigit(*s) || strchr("-.", *s)))
+		s++;
+	while (*s && IsWhite(*s))
+		s++;
+
+	if (units)
 	{
-		*o++ = *s++;
+		const char *start = s;
+		while (*s && (IsAlpha(*s) || *s == '%'))
+			s++;
+		units->Set(start, s - start);
 	}
-	*o++ = 0;
 
 	return true;
 }
@@ -1793,24 +1795,24 @@ void LHtmlLength::Set(char *s)
 {
 	if (ValidStr(s))
 	{
-		char Units[256] = "";
-		if (ParseDistance(s, d, Units))
+		LString Units;
+		if (ParseDistance(s, d, &Units))
 		{
-			if (Units[0])
+			if (!Units.IsEmpty())
 			{
-				if (strchr(Units, '%'))
+				if (Units.Find('%') >= 0)
 				{
 					u = LCss::LenPercent;
 				}
-				else if (stristr(Units, "pt"))
+				else if (Units.Find("pt", false) >= 0)
 				{
 					u = LCss::LenPt;
 				}
-				else if (stristr(Units, "em"))
+				else if (Units.Find("em", false) >= 0)
 				{
 					u = LCss::LenEm;
 				}
-				else if (stristr(Units, "ex"))
+				else if (Units.Find("ex", false) >= 0)
 				{
 					u = LCss::LenEx;
 				}

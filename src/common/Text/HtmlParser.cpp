@@ -525,7 +525,8 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 				
 				// Process dynamic section
 				s += 2;
-				while (*s && IsWhite(*s)) s++;
+				while (*s && IsWhite(*s))
+					s++;
 
 				if (_strnicmp(s, "xml:namespace", 13) == 0)
 				{
@@ -557,10 +558,12 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 					{
 						if (IsQuote(*s))
 						{
-							char d = *s++;
-							s = strchr(s, d);
-							if (s) s++;
-							else break;
+							char delim = *s++;
+							s = strchr(s, delim);
+							if (s)
+								s++;
+							else
+								break;
 						}
 						else s++;
 					}
@@ -572,8 +575,10 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 							View && View->GetEnv())
 						{
 							char *e = s - 1;
-							while (e > Start && IsWhite(*e)) e--;
+							while (e > Start && IsWhite(*e))
+								e--;
 							e++;
+							
 							LString Code(Start, e - Start);
 							if (Code)
 							{
