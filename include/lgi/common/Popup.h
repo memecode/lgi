@@ -33,6 +33,8 @@ class LgiClass LPopup :
     static LArray<LPopup*> CurrentPopups;
 
 protected:
+	LPopup(LView *owner, bool nativeFocus);
+
 	class LPopupPrivate *d;
 	bool Cancelled = false;
 	LView *Owner = NULL;

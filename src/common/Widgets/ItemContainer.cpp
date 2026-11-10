@@ -1253,7 +1253,7 @@ LView *LItem::EditLabel(int Col)
 {
 	auto c = GetContainer();
 	if (!c)
-		return NULL;
+		return nullptr;
 	
 	c->Capture(false);
 	if (!c->ItemEdit)
@@ -1362,7 +1362,7 @@ public:
 };
 
 LItemEdit::LItemEdit(LView *parent, LItem *item, int index, int SelStart, int SelEnd)
-	: LPopup(parent)
+	: LPopup(parent, true)
 {
 	d = new LItemEditPrivate;
 	d->Item = item;
@@ -1420,7 +1420,7 @@ LItemEdit::~LItemEdit()
 				d->Index, Str);
 			#endif
 
-			LItemContainer *c = d->Item->GetContainer();
+			auto c = d->Item->GetContainer();
 			if (d->Item->SetText(Str, d->Index))
 			{
 				d->Item->Update();
@@ -1452,6 +1452,11 @@ LItemEdit::~LItemEdit()
 LItem *LItemEdit::GetItem()
 {
 	return d->Item;
+}
+
+void LItemEdit::Cancel()
+{
+	d->Esc = true;
 }
 
 void LItemEdit::OnPaint(LSurface *pDC)
@@ -1493,6 +1498,13 @@ int LItemEdit::OnNotify(LViewI *v, const LNotification &n)
 void LItemEdit::Visible(bool i)
 {
 	LPopup::Visible(i);
+	#if defined(__GTK_H__)
+	if (i)
+	{
+		if (d->Edit)
+			d->Edit->Focus(true);
+	}
+	#endif
 	if (!i)
 	{
 		#if DEBUG_EDIT_LABEL

@@ -255,6 +255,9 @@ LRect *LListItem::GetPos(int Col)
 {
 	static LRect r;
 
+	if (Parent && !Pos.Valid())
+		Parent->PourAll();
+
 	r = Pos;
 
 	if (Parent->GetMode() == LListDetails)
@@ -2311,6 +2314,12 @@ void LList::Empty()
 {
 	if (Lock(_FL))
 	{
+		if (ItemEdit)
+		{
+			ItemEdit->Cancel();
+			DeleteObj(ItemEdit);
+		}
+
 		ForAllItems(i)
 		{
 			LAssert(i->Parent == this);

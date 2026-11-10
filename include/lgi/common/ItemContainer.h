@@ -148,6 +148,7 @@ public:
 	const char *GetClass() override { return "LItemEdit"; }
 
 	LItem *GetItem();
+	void Cancel();
 	void OnPaint(LSurface *pDC) override;
 	int OnNotify(LViewI *v, const LNotification &n) override;
 	void Visible(bool i) override;

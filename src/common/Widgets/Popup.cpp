@@ -531,11 +531,20 @@ class LPopupPrivate
 public:
 	bool TakeFocus = true;
 	bool GotOnCreate = false;
+	bool NativeFocus = false;
+	#if defined(__GTK_H__)
+	GdkSeat *FocusSeat = nullptr;
+	#endif
 };
 
 LArray<LPopup*> LPopup::CurrentPopups;
 
 LPopup::LPopup(LView *owner)
+	: LPopup(owner, false)
+{
+}
+
+LPopup::LPopup(LView *owner, bool nativeFocus)
 	#if LGI_CARBON
 		: LWindow(CreateBorderlessWindow())
 	#elif defined(__GTK_H__)
@@ -543,6 +552,7 @@ LPopup::LPopup(LView *owner)
 	#endif
 {
 	d = new LPopupPrivate;
+	d->NativeFocus = nativeFocus;
     CurrentPopups.Add(this);
 
 	#if LGI_COCOA
@@ -619,6 +629,10 @@ LPopup::LPopup(LView *owner)
 
 LPopup::~LPopup()
 {
+	#if defined(__GTK_H__)
+	if (d->FocusSeat)
+		gdk_seat_ungrab(d->FocusSeat);
+	#endif
 	CurrentPopups.Delete(this);
 	SendNotify(LNotifyPopupDelete);
 
@@ -765,7 +779,7 @@ bool LPopup::Attach(LViewI *p)
 						gtk_window_set_transient_for(WindowHandle(), h);
 				}
 			}
-			gtk_window_set_decorated(WindowHandle(), FALSE);
+			SetTitleBar(false);
 			return LWindow::Attach(p);
 
 		#endif
@@ -844,10 +858,31 @@ void LPopup::Visible(bool i)
 		        gtk_widget_show_all(GTK_WIDGET(Wnd));
 				gtk_window_move(Wnd, Pos.x1, Pos.y1);
 				gtk_window_resize(Wnd, MAX(1, Pos.X()), Pos.Y());
+				if (d->NativeFocus && d->TakeFocus && !d->FocusSeat)
+				{
+					auto surface = gtk_widget_get_window(GTK_WIDGET(Wnd));
+					auto seat = gdk_display_get_default_seat(gtk_widget_get_display(GTK_WIDGET(Wnd)));
+					if (surface && seat)
+					{
+						auto trigger = gtk_get_current_event();
+						auto status = gdk_seat_grab(seat, surface,
+							GdkSeatCapabilities(GDK_SEAT_CAPABILITY_ALL_POINTING | GDK_SEAT_CAPABILITY_KEYBOARD),
+							TRUE, nullptr, trigger, nullptr, nullptr);
+						if (trigger)
+							gdk_event_free(trigger);
+						if (status == GDK_GRAB_SUCCESS)
+							d->FocusSeat = seat;
+					}
+				}
 				// printf("%s:%i - Showing Wnd %s.\n", _FL, Pos.GetStr());
 		    }
 		    else
 		    {
+				if (d->FocusSeat)
+				{
+					gdk_seat_ungrab(d->FocusSeat);
+					d->FocusSeat = nullptr;
+				}
 		        gtk_widget_hide(GTK_WIDGET(Wnd));
 				// printf("%s:%i - Hiding Wnd.\n", _FL);
 		    }

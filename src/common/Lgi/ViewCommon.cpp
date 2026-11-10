@@ -1531,11 +1531,8 @@ void LView::Focus(bool i)
 	else
 		ClearFlag(WndFlags, GWF_FOCUS);
 
-	auto *Wnd = GetWindow();
-	if (Wnd)
-	{
+	if (auto Wnd = GetWindow())
 		Wnd->SetFocus(this, i ? LWindow::GainFocus : LWindow::LoseFocus);
-	}
 
 	#if LGI_VIEW_HANDLE && !defined(HAIKU)
 	if (_View)
