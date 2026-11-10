@@ -1321,6 +1321,7 @@ DebugTrace("%s:%i - BIO_get_ssl=%p\n", _FL, Ssl);
 						{
 							SSL *ssl;
 							int index;
+							SslSocket *sock = NULL;
 							long error = X509_V_OK;
 							int depth = -1;
 							LString subject, issuer;
@@ -1335,23 +1336,31 @@ DebugTrace("%s:%i - BIO_get_ssl=%p\n", _FL, Ssl);
 						} verifyDetails(Ssl, verifyDataIndex);
 						if (verifyDataIndex >= 0 && Library->SSL_set_ex_data(Ssl, verifyDataIndex, &verifyDetails))
 						{
+							verifyDetails.sock = this;
 							Library->SSL_set_verify(Ssl, SSL_VERIFY_NONE, [](int preverifyOk, X509_STORE_CTX *ctx) -> int
 							{
 								auto ssl = (SSL*)Library->X509_STORE_CTX_get_ex_data(ctx,
 									Library->SSL_get_ex_data_X509_STORE_CTX_idx());
 								auto details = ssl ? (VerifyDetails*)Library->SSL_get_ex_data(ssl, Library->VerifyDataIndex) : NULL;
+								char subject[1024] = "";
+								char issuer[1024] = "";
+								if (auto cert = Library->X509_STORE_CTX_get_current_cert(ctx))
+								{
+									Library->X509_NAME_oneline(Library->X509_get_subject_name(cert), subject, sizeof(subject));
+									Library->X509_NAME_oneline(Library->X509_get_issuer_name(cert), issuer, sizeof(issuer));
+								}
+								int err = Library->X509_STORE_CTX_get_error(ctx);
+								int depth = Library->X509_STORE_CTX_get_error_depth(ctx);
+								const char *errStr = Library->X509_verify_cert_error_string(err);
+								if (details && details->sock)
+									details->sock->DebugTrace("verify chain: depth=%i ok=%i error=%i(%s) cert='%s' issuer='%s'\n",
+										depth, preverifyOk, err, errStr ? errStr : "unknown", subject, issuer);
 								if (!preverifyOk && details)
 								{
-									details->error = Library->X509_STORE_CTX_get_error(ctx);
-									details->depth = Library->X509_STORE_CTX_get_error_depth(ctx);
-									if (auto cert = Library->X509_STORE_CTX_get_current_cert(ctx))
-									{
-										char txt[1024] = "";
-										if (Library->X509_NAME_oneline(Library->X509_get_subject_name(cert), txt, sizeof(txt)))
-											details->subject = txt;
-										if (Library->X509_NAME_oneline(Library->X509_get_issuer_name(cert), txt, sizeof(txt)))
-											details->issuer = txt;
-									}
+									details->error = err;
+									details->depth = depth;
+									details->subject = subject;
+									details->issuer = issuer;
 								}
 								return preverifyOk;
 							});
@@ -1575,6 +1584,7 @@ DebugTrace("%s:%i - open loop finished, r=%i, Cancelled=%i\n", _FL, r, d->Cancel
 
 									if (d->Caps)
 									{
+										DebugTrace("TLS peer verify failed: %s\n", getVerifyMessage(verify).Get());
 										d->Caps->NeedsCapability(CAPS_CERT_ERROR, getCertJson(verify));
 									}
 									else
@@ -1606,6 +1616,8 @@ DebugTrace("%s:%i - open loop finished, r=%i, Cancelled=%i\n", _FL, r, d->Cancel
 							else if (!d->Cancel->IsCancelled())
 							{
 								long verify = Library->SSL_get_verify_result(Ssl);
+								if (verify != X509_V_OK)
+									DebugTrace("handshake failed with verify error: %s\n", getVerifyMessage(verify).Get());
 								if (verify != X509_V_OK && d->Caps)
 								{
 									d->Caps->NeedsCapability(CAPS_CERT_ERROR,
@@ -2617,11 +2629,8 @@ void SslSocket::DebugTrace(const char *fmt, ...)
 		
 		if (Ch > 0)
 		{
-			#if 1
 			LgiTrace("SSL:%p: %s", this, Buffer);
-			#else
 			OnInformation(Buffer);
-			#endif
 		}
 	}
 }
