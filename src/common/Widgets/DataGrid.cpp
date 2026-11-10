@@ -16,21 +16,21 @@ enum LDataGridControls
 
 struct LDataGridPriv
 {
-	LDataGrid *This;
-	int Col;
-	LView *e;
-	LView *DeleteLater;
-	LListItem *Cur;
-	bool Dirty, PosDirty;
+	LDataGrid *This = nullptr;
+	int Col = 0;
+	LView *e = nullptr;
+	LView *DeleteLater = nullptr;
+	LListItem *Cur = nullptr;
+	bool Dirty = false, PosDirty = false;
 	LArray<LDataGrid::LDataGridFlags> Flags;
 	LArray<LVariant> ColumnArgs;
-	LListItem *NewRecord;
+	LListItem *NewRecord = nullptr;
 	LDataGrid::ItemFactory Factory;
-	void *UserData;
+	void *UserData = nullptr;
 	LDataGrid::ItemArray Dropped;
 	LDataGrid::IndexArray Deleted;
-	char *SrcFmt;
-	char *AcceptFmt;
+	char *SrcFmt = nullptr;
+	char *AcceptFmt = nullptr;
 
 	LDataGridPriv(LDataGrid *t);
 	void Save();

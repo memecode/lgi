@@ -41,6 +41,9 @@ bool LDragFormats::HasFormat(const char *Fmt)
 
 void LDragFormats::Supports(LString Fmt)
 {
+	if (Fmt.Length() == 0)
+		return;
+
 	auto debug = false; // Fmt.Equals("application/x-scribe-thing-list");
 
 	if (Source)

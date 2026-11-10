@@ -1340,6 +1340,24 @@ bool LToolBar::Pour(LRegion &r)
 					ButPos.y2 += Ty;
 				}
 			}
+			else if (But->GetId() != IDM_BREAK)
+			{
+				LViewLayoutInfo Inf;
+				if (But->OnLayout(Inf))
+				{
+					int Width = Inf.Width.Max > 0 ? Inf.Width.Max : Inf.Width.Min;
+					if (Width <= 0)
+						Width = MAX(1, ButPos.X());
+					Inf.Width.Min = Inf.Width.Max = Width;
+					ButPos.x2 = ButPos.x1 + Width - 1;
+					if (But->OnLayout(Inf))
+					{
+						int Height = Inf.Height.Max > 0 ? Inf.Height.Max : Inf.Height.Min;
+						if (Height > 0)
+							ButPos.y2 = ButPos.y1 + Height - 1;
+					}
+				}
+			}
 			
 			if (d->Vertical)
 				MaxDim = MAX(MaxDim, ButPos.X());
