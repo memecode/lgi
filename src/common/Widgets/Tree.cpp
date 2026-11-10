@@ -168,6 +168,14 @@ bool LTreeNode::ReorderPos(LItemContainer::ContainerItemDrop &drop, LPoint &pt, 
 	
 	for (auto item: Items)
 	{
+		// Hidden items (children of collapsed nodes) have no valid position,
+		// and asking for one forces a full re-pour of the tree
+		if (!item->Visible())
+		{
+			i++;
+			continue;
+		}
+
 		auto p = item->GetPos();
 		if (p->Overlap(pt))
 		{
