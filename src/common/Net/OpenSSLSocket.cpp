@@ -188,13 +188,18 @@ public:
 		DynFunc2(int, OPENSSL_init_ssl, uint64_t, opts, const OPENSSL_INIT_SETTINGS *, settings);
 		DynFunc0(const SSL_METHOD *, TLS_method);
 		DynFunc0(const SSL_METHOD *, TLS_server_method);
-		DynFunc0(const SSL_METHOD *, TLS_client_method);
 	#else
 		DynFunc0(int, SSL_library_init);
 		DynFunc0(int, SSL_load_error_strings);
-		DynFunc0(SSL_METHOD*, SSLv23_client_method);
 		DynFunc0(SSL_METHOD*, SSLv23_server_method);
 		DynFunc0(SSL_METHOD*, SSLv3_server_method);
+	#endif
+	// Resolved through GetAddress, so builds against 1.0.x headers can still
+	// call TLS_client_method when the loaded library is >= 1.1.0.
+	DynFunc0(const SSL_METHOD *, TLS_client_method);
+	#if OPENSSL_VERSION_NUMBER < 0x10100000L
+		// SSLv23_client_method is a macro alias of TLS_client_method on 1.1+.
+		DynFunc0(SSL_METHOD*, SSLv23_client_method);
 	#endif
 	DynFunc1(int, SSL_open, SSL*, s);
 	DynFunc1(int, SSL_connect, SSL*, s);
@@ -503,6 +508,7 @@ public:
 		LString::Array t;
 		int Len = 0;
 		const char *v = NULL;
+		const SSL_METHOD *method = NULL;
 
 		if (!IsLoaded())
 		{
@@ -570,11 +576,15 @@ public:
 			goto OnError;
 		}
 		
-		#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-			Client = SSL_CTX_new(TLS_client_method());
-		#else
-			Client = SSL_CTX_new(SSLv23_client_method());
-		#endif
+		// Dispatch on the runtime library version (Ver), not the header version
+		// this was compiled against. With MinimumVersion1 at 1.1.1j, the loaded
+		// library is always new enough for TLS_client_method, but the runtime
+		// check keeps ancient 1.0.x loads working via SSLv23_client_method.
+		if (Ver[0] > 1 || (Ver[0] == 1 && Ver[1] >= 1))
+			method = TLS_client_method();
+		else
+			method = SSLv23_client_method();
+		Client = SSL_CTX_new(method);
 		if (!Client)
 		{
 			long e = ERR_get_error();
