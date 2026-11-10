@@ -524,17 +524,19 @@ public:
 			HCERTSTORE rootStore = CertOpenSystemStoreA(0, "ROOT");
 			long result = X509_V_ERR_UNSPECIFIED;
 
-			CERT_CHAIN_CONTEXT *chainCtx = NULL;
+			CERT_CHAIN_PARA chainPara = {};
+			chainPara.cbSize = sizeof(chainPara);
+			PCCERT_CHAIN_CONTEXT chainCtx = NULL;
 			if (store && rootStore && CertGetCertificateChain(NULL, leafCtx, NULL, rootStore,
-				CERT_CHAIN_URL_REQUEST_BETWEEN_NODES, NULL, &chainCtx))
+				&chainPara, 0, NULL, &chainCtx))
 			{
 				if (chainCtx->cChain > 0)
 				{
 					// The first chain is the best one, leaf to root.
-					CERT_CHAIN *best = chainCtx->rgcChain[0];
+					PCERT_SIMPLE_CHAIN best = chainCtx->rgpChain[0];
 					for (unsigned i = 1; i < best->cElement; i++) // skip the leaf itself
 					{
-						PCCERT_CONTEXT elCtx = best->rgElement[i]->pCertContext;
+						PCCERT_CONTEXT elCtx = best->rgpElement[i]->pCertContext;
 						const unsigned char *encoded = elCtx->pbCertEncoded;
 						X509 *x509 = d2i_X509(NULL, &encoded, elCtx->cbCertEncoded);
 						if (x509)
