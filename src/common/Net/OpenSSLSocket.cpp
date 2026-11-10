@@ -339,7 +339,12 @@ public:
 	DynFunc1(int, X509_free, X509*, a);
 	DynFunc1(const char*, X509_verify_cert_error_string, long, n);
 	DynFunc3(X509*, d2i_X509, X509**, px, const unsigned char**, in, long, len);
+	DynFunc2(int, i2d_X509, const X509*, a, unsigned char**, out);
 	DynFunc2(int, X509_STORE_add_cert, X509_STORE*, store, X509*, x);
+	DynFunc0(X509_STORE_CTX*, X509_STORE_CTX_new);
+	DynFunc4(int, X509_STORE_CTX_init, X509_STORE_CTX*, ctx, X509_STORE*, store, X509*, x509, STACK_OF(X509)*, untrustedChain);
+	DynFunc1(int, X509_verify_cert, X509_STORE_CTX*, ctx);
+	DynFunc1(int, X509_STORE_CTX_free, X509_STORE_CTX*, ctx);
 
 	DynFunc2(char*, ERR_error_string, unsigned long, e, char*, buf);
 	DynFunc0(unsigned long, ERR_get_error);
@@ -497,6 +502,65 @@ public:
 			#endif
 			;
 	}
+
+	#ifdef WINDOWS
+		// OpenSSL can't fetch missing intermediates; CryptoAPI can, from the AIA
+		// URL on the leaf certificate. Adds whatever the chain engine found to
+		// the OpenSSL store so later connections skip the fetch, then re-verifies
+		// the leaf with the completed chain.
+		long VerifyChainWithAia(X509 *leaf)
+		{
+			unsigned char *der = NULL;
+			int derLen = i2d_X509(leaf, &der);
+			if (derLen <= 0 || !der)
+				return X509_V_ERR_UNSPECIFIED;
+
+			PCCERT_CONTEXT leafCtx = CertCreateCertificateContext(X509_ASN_ENCODING, der, derLen);
+			free(der);
+			if (!leafCtx)
+				return X509_V_ERR_UNSPECIFIED;
+
+			X509_STORE *store = SSL_CTX_get_cert_store(Client);
+			HCERTSTORE rootStore = CertOpenSystemStoreA(0, "ROOT");
+			long result = X509_V_ERR_UNSPECIFIED;
+
+			CERT_CHAIN_CONTEXT *chainCtx = NULL;
+			if (store && rootStore && CertGetCertificateChain(NULL, leafCtx, NULL, rootStore,
+				CERT_CHAIN_URL_REQUEST_BETWEEN_NODES, NULL, &chainCtx))
+			{
+				if (chainCtx->cChain > 0)
+				{
+					// The first chain is the best one, leaf to root.
+					CERT_CHAIN *best = chainCtx->rgcChain[0];
+					for (unsigned i = 1; i < best->cElement; i++) // skip the leaf itself
+					{
+						PCCERT_CONTEXT elCtx = best->rgElement[i]->pCertContext;
+						const unsigned char *encoded = elCtx->pbCertEncoded;
+						X509 *x509 = d2i_X509(NULL, &encoded, elCtx->cbCertEncoded);
+						if (x509)
+						{
+							X509_STORE_add_cert(store, x509);
+							X509_free(x509);
+						}
+					}
+
+					X509_STORE_CTX *vctx = X509_STORE_CTX_new();
+					if (vctx)
+					{
+						if (X509_STORE_CTX_init(vctx, store, leaf, NULL))
+							result = X509_verify_cert(vctx) == 1 ? X509_V_OK : X509_STORE_CTX_get_error(vctx);
+						X509_STORE_CTX_free(vctx);
+					}
+				}
+				CertFreeCertificateChain(chainCtx);
+			}
+
+			if (rootStore)
+				CertCloseStore(rootStore, 0);
+			CertFreeCertificateContext(leafCtx);
+			return result;
+		}
+	#endif
 	
 	bool InitLibrary(SslSocket *sock)
 	{
@@ -1591,6 +1655,27 @@ DebugTrace("%s:%i - open loop finished, r=%i, Cancelled=%i\n", _FL, r, d->Cancel
 											goto HandleConnect;
 										}
 									}
+
+									#ifdef WINDOWS
+									// CryptoAPI can complete partial chains by downloading missing
+									// intermediates from AIA URLs, which OpenSSL can't. If the retry
+									// verifies, accept it and connect.
+									if (verify == X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT ||
+										verify == X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY)
+									{
+										if (auto cert = Library->SSL_get_peer_certificate(Ssl))
+										{
+											long retried = Library->VerifyChainWithAia(cert);
+											Library->X509_free(cert);
+											if (retried == X509_V_OK)
+											{
+												DebugTrace("verify: chain completed via AIA, accepted\n");
+												goto HandleConnect;
+											}
+											DebugTrace("verify: AIA chain retry failed: %s\n", getVerifyMessage(retried).Get());
+										}
+									}
+									#endif
 
 									if (d->Caps)
 									{
