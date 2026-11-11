@@ -60,6 +60,7 @@ enum HtmlTag
 	TAG_STRONG,
 	TAG_BLOCKQUOTE,
 	TAG_PRE,
+	TAG_CODE,
 	TAG_H1,
 	TAG_H2,
 	TAG_H3,

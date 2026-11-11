@@ -87,7 +87,6 @@
 					<Release>-static-libgcc 
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
-				<All />
 			</Libraries>
 			<TargetName>
 				<Linux>
@@ -95,25 +94,11 @@
 					<Release>lgi-html-test-suite</Release>
 				</Linux>
 			</TargetName>
-			<Defines>
-				<All />
-				<Linux />
-			</Defines>
-			<Options>
-				<All />
-				<Linux />
-			</Options>
-			<LibraryPaths>
-				<All />
-				<Linux />
-			</LibraryPaths>
-			<RPath>
-				<Linux />
-			</RPath>
-			<RPathLink>
-				<Linux />
-			</RPathLink>
-			<ApplicationIcon />
+			<Defines />
+			<Options />
+			<LibraryPaths />
+			<RPath />
+			<RPathLink />
 		</Build>
 		<General>
 			<Makefile>
@@ -126,36 +111,14 @@
 					<Release>./HtmlTestSuite</Release>
 				</Linux>
 			</Executable>
-			<Compiler />
-			<CCrossCompiler />
-			<CppCrossCompiler />
 		</General>
 		<Advanced>
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
-			<OtherMakefileRules />
+			<PostBuildCommands />
 		</Advanced>
 		<Debug>
-			<Arguments>
-				<All />
-			</Arguments>
-			<Environment />
-			<DebugAdmin />
-			<InitialDir />
-			<Debugger />
+			<Arguments />
 		</Debug>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
-		<Editor>
-			<TabSize />
-			<IndentSize />
-			<ShowWhiteSpace />
-			<UseHardTabs />
-			<CommentFile />
-			<CommentFunction />
-		</Editor>
+		<Remote />
+		<Editor />
 	</Settings>
 </Project>

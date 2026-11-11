@@ -207,6 +207,7 @@ static LHtmlElemInfo TagInfo[] =
 	{TAG_STRONG,		"strong",		0,			LHtmlElemInfo::TI_NONE},
 	{TAG_BLOCKQUOTE,	"blockquote",	0,			LHtmlElemInfo::TI_BLOCK},
 	{TAG_PRE,			"pre",			0,			LHtmlElemInfo::TI_BLOCK},
+	{TAG_CODE,			"code",			0,			LHtmlElemInfo::TI_NONE},
 	{TAG_H1,			"h1",			0,			LHtmlElemInfo::TI_BLOCK},
 	{TAG_H2,			"h2",			0,			LHtmlElemInfo::TI_BLOCK},
 	{TAG_H3,			"h3",			0,			LHtmlElemInfo::TI_BLOCK},

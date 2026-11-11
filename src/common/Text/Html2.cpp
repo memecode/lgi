@@ -3585,6 +3585,7 @@ void LTag::SetDefaultCss()
 			break;
 		}
 		case TAG_PRE:
+		case TAG_CODE:
 		{
 			LFontType Type;
 			if (Type.GetSystemFont("Fixed"))
@@ -3592,6 +3593,8 @@ void LTag::SetDefaultCss()
 				LAssert(ValidStr(Type.GetFace()));
 				FontFamily(Type.GetFace());
 			}
+			if (TagId == TAG_CODE)
+				Display(LCss::DispInline);
 			break;
 		}
 	    case TAG_BIG:
