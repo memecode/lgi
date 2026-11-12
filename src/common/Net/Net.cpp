@@ -1493,7 +1493,7 @@ bool LSocket::GetVariant(const char *Name, LVariant &Value, const char *Array)
 	}
 	else
 	{
-		LAssert(!"unsupported field");
+		LgiTrace("%s:%i - unsupported field '%s'\n", _FL, Name);
 		return false;
 	}
 
