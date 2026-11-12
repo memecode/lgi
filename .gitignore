@@ -9,6 +9,10 @@ src/linux/CrashHandler/crash-*
 *.matthew
 inline_*.bmp
 *.log
+.DS_Store
+DerivedData
+xcuserdata
+xcshareddata
 
 ide/lgiide
 ide/makefile
