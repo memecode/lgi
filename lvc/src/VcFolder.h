@@ -34,6 +34,7 @@ enum LvcStatus
 	StatusNone,
 	StatusActive,
 	StatusError,
+	StatusLoaded,
 };
 
 enum LvcResolve
@@ -512,7 +513,6 @@ public:
 	void DoExpand();
 	VcLeaf *FindLeaf(LString Path, bool OpenTree, int depth = 0);
 	void OnBrowse();
-	void AfterBrowse();
 	void OnExpand(bool b) override;
 	const char *GetText(int Col) override;
 	int GetImage(int Flags) override;

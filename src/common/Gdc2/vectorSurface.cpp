@@ -88,6 +88,7 @@ public:
 		ColourSpace = Target.GetColourSpace();
 		PreMul = Target.IsPreMultipliedAlpha();
 		Data = Target[0];
+		const bool Opaque = ColourSpace == CsBgrx32;
 		
 		if (Target.AlphaDC() || Target.DrawOnAlpha())
 		{
@@ -97,8 +98,8 @@ public:
 		
 		const uint32_t layout = 0x01020304;
 		auto bytes = reinterpret_cast<const unsigned char*>(&layout);
-		if (ColourSpace != CsBgra32 ||
-			!PreMul ||
+		if ((ColourSpace != CsBgra32 && !Opaque) ||
+			(!Opaque && !PreMul) ||
 			bytes[offsetof(LBgra32, r)] != 2 || bytes[offsetof(LBgra32, g)] != 3 ||
 			bytes[offsetof(LBgra32, b)] != 4 || bytes[offsetof(LBgra32, a)] != 1)
 		{
@@ -127,6 +128,17 @@ public:
 			LgiTrace("LSurface::Vec: requires a positive aligned stride and pixel buffer.\n");
 			return;
 		}
+		/* Probably don't actually need this.
+		if (Opaque)
+		{
+			for (int y = 0; y < Height; y++)
+			{
+				auto row = reinterpret_cast<LBgra32*>(Data + y * Stride);
+				for (int x = 0; x < Width; x++)
+					row[x].a = 255;
+			}
+		}
+		*/
 		
 		Surface = plutovg_surface_create_for_data(Data, Width, Height, (int)Stride);
 		

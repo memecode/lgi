@@ -385,6 +385,31 @@ bool TestAlphaFormat(LColourSpace cs, bool premul)
 	return pixel.r == (premul ? 128 : 255) && pixel.g == 0 && pixel.b == 0 && pixel.a == 128;
 }
 
+bool TestOpaqueBgrxFormat()
+{
+	LMemDC dc(_FL, 12, 12, CsBgrx32, LSurface::SurfaceRequireExactCs);
+	if (!dc[0] || dc.GetColourSpace() != CsBgrx32)
+		return false;
+	for (int y = 0; y < dc.Y(); y++)
+	{
+		auto row = reinterpret_cast<LBgra32*>(dc[y]);
+		for (int x = 0; x < dc.X(); x++)
+		{
+			row[x].r = row[x].g = row[x].b = 0;
+			row[x].a = 0;
+		}
+	}
+	{
+		auto vector = dc.Vec();
+		if (!vector || reinterpret_cast<LBgra32*>(dc[0])[0].a != 255)
+			return false;
+		vector.Rect(2, 2, 8, 8);
+		vector.Fill(LColour(255, 0, 0, 128));
+	}
+	auto pixel = reinterpret_cast<LBgra32*>(dc[5])[5];
+	return pixel.r == 128 && pixel.g == 0 && pixel.b == 0 && pixel.a == 255;
+}
+
 #if !defined(HAIKU)
 class StrideBitmap : public LMemDC
 {
@@ -422,6 +447,8 @@ bool LVectorTest::Run()
 	#endif
 	if (!TestAlphaFormat<LBgra32>(CsBgra32, true))
 		return FAIL(_FL, "Premultiplied native BGRA32 vectors must composite directly.");
+	if (!TestOpaqueBgrxFormat())
+		return FAIL(_FL, "Opaque BGRX32 vectors must blend with an implicit alpha of 255.");
 
 	LMemDC dc(_FL, 20, 20, CsBgra32, LSurface::SurfaceRequireExactCs);
 	if (!dc.ConvertPreMulAlpha(true))

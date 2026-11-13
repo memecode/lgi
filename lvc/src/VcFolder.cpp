@@ -1,6 +1,5 @@
 #include "Lvc.h"
 
-#include "lgi/common/Combo.h"
 #include "lgi/common/ClipBoard.h"
 #include "lgi/common/Json.h"
 #include "lgi/common/ProgressDlg.h"
@@ -725,7 +724,7 @@ bool VcFolder::ParseBranches(int Result, LString s, ParseParams *Params)
 		}
 	}
 
-	IsBranches = Result ? StatusError : StatusNone;
+	IsBranches = Result ? StatusError : StatusLoaded;
 	OnBranchesChange();
 	return false;
 }
@@ -1590,7 +1589,9 @@ void VcFolder::GetCurrentRevision(ParseParams *Params)
 
 bool VcFolder::GetBranches(bool refresh, bool includeRemote, ParseParams *Params)
 {
-	if ((!refresh && Branches.Length() > 0) || IsBranches != StatusNone)
+	if (IsBranches == StatusActive)
+		return false;
+	if (!refresh && (Branches.Length() > 0 || IsBranches != StatusNone))
 		return true;
 
 	switch (GetType())
@@ -1607,6 +1608,7 @@ bool VcFolder::GetBranches(bool refresh, bool includeRemote, ParseParams *Params
 		case VcSvn:
 		{
 			Branches.Add("trunk", new VcBranch("trunk"));
+			IsBranches = StatusLoaded;
 			OnBranchesChange();
 			break;
 		}
@@ -2348,7 +2350,9 @@ void VcFolder::UpdateBranchUi()
 					w->SetCtrlName(IDC_MSG, LString::Fmt("%s-%s: ", parts[0].Get(), parts[1].Get()));
 			}
 		}
+		else LgiTrace("%s:%i - not DMS branch\n", _FL);
 	}
+	else LgiTrace("%s:%i - no branches\n", _FL);
 
 	LCombo *Cbo;
 	if (w->GetViewById(ID_BRANCHES, Cbo))
@@ -3618,7 +3622,8 @@ void VcFolder::SetCurrentBranch(LString name)
 	if (CurrentBranch != name)
 	{
 		CurrentBranch = name;
-		UpdateBranchUi();
+		if (IsBranches != StatusActive)
+			UpdateBranchUi();
 	}
 }
 
@@ -4450,9 +4455,6 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 	{
 		Ins.DeleteObjects();
 	}
-
-	if (Params && Params->Leaf)
-		Params->Leaf->AfterBrowse();
 
 	return false; // Don't refresh list
 }
@@ -6627,10 +6629,6 @@ void VcLeaf::OnBrowse()
 		// FIXME: add ssh support:
 		Parent->ReadDir(this, sFull);
 	}
-}
-
-void VcLeaf::AfterBrowse()
-{
 }
 
 VcLeaf *VcLeaf::FindLeaf(LString Path, bool OpenTree, int depth)
