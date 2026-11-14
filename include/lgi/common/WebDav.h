@@ -12,6 +12,9 @@ protected:
 	LString EndPoint, EndPointPath, User, Pass;
 	LCancel *Cancel = NULL;
 
+	bool ReportChecked = false;
+	bool ReportOk = false;
+
 	LAutoPtr<LSocketI> GetSocket()
 	{
 		LAutoPtr<LSocketI> s;
@@ -46,13 +49,16 @@ protected:
 	void PrettyPrint(LXmlTag &x);
 	bool Request(Req &r, const char *Name, LString Resource);
 
+	LString FullHref(const LString &Href) const;
+	LString RelativeHref(const LString &Href) const;
+
 public:
 	struct FileProps
 	{
 		LString Href, LastMod, Tag, ContentType, Data;
 		int64_t Length;
 
-		LString GetContentType()
+		LString GetContentType() const
 		{
 			return ContentType.SplitDelimit(";")[0].Strip();
 		}
@@ -70,10 +76,19 @@ public:
 		}
 	};
 
+protected:
+	void ParseMultistatus(LXmlTag &Root, LArray<FileProps> &Files, const char *DataTag);
+
+public:
 	LWebdav(LString endPoint, LString user, LString pass, LCancel *cancel);
 
 	LString::Array GetOptions(LString Resource);
+	/// True when the server advertises the RFC 3258 REPORT method
+	bool SupportsReport(LString Resource);
 	bool PropFind(LArray<FileProps> &Files, LString Resource, int Depth = 1);
+	/// Bulk fetch the content for every 'Hrefs' entry with a single request.
+	/// 'ReportType' is 'calendar-multiget' or 'addressbook-multiget'
+	bool Report(LArray<FileProps> &Files, LString Resource, const char *ReportType, LString::Array &Hrefs);
 	bool Get(const char *Resource, LString &Data);
 	bool Put(const char *Resource, LString &Data);
 	bool Delete(const char *Resource);
