@@ -1,6 +1,6 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Browser.h"
-#include "lgi/common/Html.h"
+#include "lgi/common/Html2.h"
 #include "lgi/common/Net.h"
 #include "lgi/common/Http.h"
 #include "lgi/common/Edit.h"
@@ -57,7 +57,7 @@ private:
 
 public:
 	LBrowser *Wnd = nullptr;
-	Html1::LHtml *Html = nullptr;
+	Html2::LHtml *Html = nullptr;
 	LAutoPtr<LBrowserThread> Thread;
 	LEdit *UriEdit = nullptr;
 	LEdit *SearchEdit = nullptr;
@@ -411,7 +411,7 @@ LBrowser::LBrowser(LViewI *owner, const char *Title, char *Uri)
 	AddView(d->UriEdit = new LEdit(IDC_URI));
 	AddView(d->SearchEdit = new LEdit(IDC_SEARCH_TXT));
 	AddView(d->Search = new LButton(IDC_SEARCH, 0, 0, -1, 20, "Search"));
-	AddView(d->Html = new Html1::LHtml(IDC_HTML, 0, 0, 100, 100));
+	AddView(d->Html = new Html2::LHtml(IDC_HTML, 0, 0, 100, 100));
 
 	AttachChildren();
 	OnPosChange();
