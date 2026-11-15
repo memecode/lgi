@@ -123,9 +123,44 @@ using namespace Html2;
 namespace Html2
 {
 
+struct LFixedTag
+{
+    LTag *Tag = nullptr;
+    LPoint Origin;
+};
+
+static LCss::PositionType PositionOfTag(LTag *tag)
+{
+    if (!tag)
+        return LCss::PosStatic;
+
+    // Position is not an inherited CSS property in this model. The default
+    // PosInherit value is a sentinel for "unset", so treat it as static.
+    return tag->Position();
+}
+
+static bool IsFixedTag(LTag *tag)
+{
+    return tag && PositionOfTag(tag) == LCss::PosFixed;
+}
+
+static bool IsAbsoluteTag(LTag *tag)
+{
+    return tag && PositionOfTag(tag) == LCss::PosAbsolute;
+}
+
+static bool IsPositionedAncestor(LTag *tag)
+{
+    auto p = PositionOfTag(tag);
+    return p == LCss::PosAbsolute || p == LCss::PosFixed || p == LCss::PosRelative;
+}
+
 class LHtmlPrivate2
 {
 public:
+    std::vector<LFixedTag> FixedTags;
+    bool PaintingFixed = false;
+
 	LHashTbl<ConstStrKey<char>, LTag*> Loading;
 	LHtmlStaticInst Inst;
 	bool CursorVis;
@@ -243,12 +278,20 @@ class LNewFlow
 		bool Resolved = false;
 	};
 
-	struct MinMax
-	{
-		int Min = 0, Max = 0;
-	};
+  struct MinMax
+  {
+    int Min = 0, Max = 0;
+    bool Has = false;
+  };
 
-	struct TCell
+  struct AbsRec
+  {
+    LTag *tag;
+    int statX, statY, depth;
+  };
+  std::vector<AbsRec> absQueue;
+
+  struct TCell
 	{
 		LTag *T = nullptr;
 		int Row = 0, Col = 0, CS = 1, RS = 1;
@@ -331,11 +374,14 @@ class LNewFlow
 
 	static Kind KindOf(LTag *t)
 	{
-		auto display = t->Display();
-		if (display == LCss::DispNone)
-			return KHidden;
+        auto display = t->Display();
+        if (display == LCss::DispNone)
+            return KHidden;
 
-		switch (t->TagId)
+        if (IsFixedTag(t))
+            return KBlock;
+
+        switch (t->TagId)
 		{
 			case TAG_HEAD:
 			case TAG_STYLE:
@@ -663,7 +709,7 @@ class LNewFlow
 		return (int)(t->border.y1 + t->border.y2 + t->padding.y1 + t->padding.y2);
 	}
 
-	void FlowChildren(LTag *tag, Ctx &c, LFont *font, int depth)
+	void FlowChildren(LTag *tag, Ctx &c, LFont *font, int depth, bool fixed = false)
 	{
 		FlowText(tag, tag->Text(), c, font);
 
@@ -675,6 +721,16 @@ class LNewFlow
 			auto k = KindOf(child);
 			if (k == KHidden)
 				continue;
+			if (IsFixedTag(child))
+			{
+				LayoutFixedBlock(child, c, depth + 1);
+				continue;
+			}
+			if (IsAbsoluteTag(child))
+			{
+				absQueue.push_back({child, c.X, c.y + c.pend, depth + 1});
+				continue;
+			}
 			if (k == KTable)
 				LayoutTable(child, c, depth + 1);
 			else if (IsBlockLevel(k))
@@ -823,7 +879,8 @@ class LNewFlow
 		c.X += (int)(tag->border.x2 + tag->padding.x2) + mr;
 	}
 
-	void LayoutBlock(LTag *tag, Ctx &pc, int depth, int forcedW = -1)
+    void LayoutBlock(LTag *tag, Ctx &pc, int depth, int forcedW = -1, bool fixed = false)
+
 	{
 		if (depth >= MAX_RECURSION_DEPTH)
 			return;
@@ -904,20 +961,26 @@ class LNewFlow
 			c.y += replacedH;
 			c.Content = false;
 		}
-		else
-		{
-			FlowChildren(tag, c, font, depth);
-			FinishLine(c);
-		}
+        else
+        {
+            FlowChildren(tag, c, font, depth, fixed);
+            FinishLine(c);
+        }
 
-		int specH = -1, minH = 0;
-		auto height = tag->Height();
-		if (height && height.Type != LCss::LenAuto && height.Type != LCss::LenPercent)
-			specH = MAX(height.ToPx(View.Y(), font), 0);
-		if (tag->MinHeight() && tag->MinHeight().Type != LCss::LenPercent)
-			minH = tag->MinHeight().ToPx(View.Y(), font);
 
-		bool through = !bottomEdge && specH < 0 && minH <= 0;
+        int specH = -1, minH = 0;
+        auto height = tag->Height();
+        if (height && height.Type != LCss::LenAuto && height.Type != LCss::LenPercent)
+            specH = MAX(height.ToPx(View.Y(), font), 0);
+        if (fixed && height && height.Type == LCss::LenPercent)
+            specH = MAX(height.ToPx(View.Y(), font), 0);
+        if (tag->MinHeight() && tag->MinHeight().Type != LCss::LenPercent)
+            minH = tag->MinHeight().ToPx(View.Y(), font);
+        if (fixed && tag->MinHeight() && tag->MinHeight().Type == LCss::LenPercent)
+            minH = MAX(tag->MinHeight().ToPx(View.Y(), font), 0);
+
+        bool through = !bottomEdge && specH < 0 && minH <= 0;
+
 		if (!through)
 			ApplyPend(c);
 
@@ -1152,9 +1215,12 @@ class LNewFlow
 				auto ch = Child(e);
 				if (!ch)
 					continue;
-				auto ck = KindOf(ch);
-				if (ck == KHidden)
-					continue;
+                    auto ck = KindOf(ch);
+                    if (ck == KHidden)
+                        continue;
+                    if (IsFixedTag(ch) || IsAbsoluteTag(ch))
+                        continue;
+
 				if (ch->TagId == TAG_BR)
 				{
 					in.Max = MAX(in.Max, run);
@@ -1196,12 +1262,185 @@ class LNewFlow
 			in.Max = MAX(in.Max, in.Min);
 		}
 
-		r.Min = in.Min + edges;
-		r.Max = in.Max + edges;
-		return r;
-	}
+    r.Min = in.Min + edges;
+    r.Max = in.Max + edges;
+    return r;
+  }
 
-	void ColumnMetrics(TGrid &g, TCols &cols, int depth)
+  void LayoutFixedBlock(LTag *tag, Ctx &pc, int depth)
+  {
+    if (!tag || depth >= MAX_RECURSION_DEPTH)
+      return;
+
+    auto font = FontOf(tag);
+    if (!font)
+      return;
+
+    LRectF parentBox(View.X(), View.Y());
+    tag->LCssBox::SetStyle(font, tag, parentBox);
+
+    int hEdges = HEdges(tag);
+    int ml = (int)tag->margin.x1, mr = (int)tag->margin.x2;
+    int mt = (int)tag->margin.y1, mb = (int)tag->margin.y2;
+    auto left = tag->Left();
+    auto top = tag->Top();
+
+    int originX = left && left.Type != LCss::LenAuto
+      ? View.x1 + MAX((int)left.ToPx(View.X(), font), 0) + ml
+      : pc.X + ml;
+    int originY = top && top.Type != LCss::LenAuto
+      ? View.y1 + MAX((int)top.ToPx(View.Y(), font), 0) + mt
+      : pc.y + pc.pend + mt;
+
+    int contentW = 0;
+    auto width = tag->Width();
+    if (width && width.Type != LCss::LenAuto)
+      contentW = MAX(width.ToPx(View.X(), font), 0);
+    else
+    {
+      auto m = Measure(tag, depth);
+      int minContent = MAX(m.Min - ml - mr - hEdges, 0);
+      int maxContent = MAX(m.Max - ml - mr - hEdges, minContent);
+      int availableContent = MAX(View.x1 + View.X() - originX - hEdges - mr, 0);
+      contentW = MIN(MAX(availableContent, minContent), maxContent);
+    }
+
+    auto minWidth = tag->MinWidth();
+    auto maxWidth = tag->MaxWidth();
+    if (minWidth && minWidth.Type != LCss::LenPercent)
+      contentW = MAX(contentW, MAX(minWidth.ToPx(View.X(), font), 0));
+    if (maxWidth && maxWidth.Type != LCss::LenPercent)
+      contentW = MIN(contentW, MAX(maxWidth.ToPx(View.X(), font), 0));
+    contentW = MAX(contentW, 0);
+
+    Ctx fc;
+    fc.Left = originX;
+    fc.Right = originX + contentW + hEdges;
+    fc.y = originY;
+    fc.Align = AlignOf(tag, pc.Align);
+
+    LayoutBlock(tag, fc, depth, contentW + hEdges, true);
+
+    LPoint origin = tag->Pos;
+    Html->d->FixedTags.push_back({tag, origin});
+    RebaseFixed(tag, origin.x, origin.y);
+  }
+
+  LRectF ContainingBlockRect(LTag *tag)
+  {
+    for (LTag *t = ToTag(tag->Parent); t; t = ToTag(t->Parent))
+    {
+      if (IsPositionedAncestor(t))
+      {
+        float bx1 = t->Pos.x + t->border.x1, by1 = t->Pos.y + t->border.y1;
+        float bx2 = bx1 + t->Size.x - t->border.x1 - t->border.x2;
+        float by2 = by1 + t->Size.y - t->border.y1 - t->border.y2;
+        return LRectF(bx1, by1, bx2, by2);
+      }
+    }
+    return LRectF(View.x1, View.y1, View.x1 + View.X(), View.y1 + View.Y());
+  }
+
+  void LayoutAbsoluteBlock(LTag *tag, int statX, int statY, int depth)
+  {
+    if (!tag || depth >= MAX_RECURSION_DEPTH)
+      return;
+
+    auto font = FontOf(tag);
+    if (!font)
+      return;
+
+    LRectF cb = ContainingBlockRect(tag);
+    float cbW = cb.X(), cbH = cb.Y();
+    tag->LCssBox::SetStyle(font, tag, cb);
+
+    int hEdges = HEdges(tag), vEdges = VEdges(tag);
+    int ml = (int)tag->margin.x1, mr = (int)tag->margin.x2;
+    int mt = (int)tag->margin.y1, mb = (int)tag->margin.y2;
+    auto left = tag->Left(), top = tag->Top(), right = tag->Right(), bottom = tag->Bottom();
+
+    int contentW = 0;
+    auto width = tag->Width();
+    if (width && width.Type != LCss::LenAuto)
+      contentW = MAX(width.ToPx(cbW, font), 0);
+    else
+    {
+      auto m = Measure(tag, depth);
+      int minContent = MAX(m.Min - ml - mr - hEdges, 0);
+      int maxContent = MAX(m.Max - ml - mr - hEdges, minContent);
+      int availableContent = MAX(cb.x2 - statX - hEdges - mr, 0);
+      contentW = MIN(MAX(availableContent, minContent), maxContent);
+    }
+
+    auto minW = tag->MinWidth(), maxW = tag->MaxWidth();
+    if (minW && minW.Type != LCss::LenPercent)
+      contentW = MAX(contentW, MAX(minW.ToPx(cbW, font), 0));
+    if (maxW && maxW.Type != LCss::LenPercent)
+      contentW = MIN(contentW, MAX(maxW.ToPx(cbW, font), 0));
+    contentW = MAX(contentW, 0);
+
+    int originX = left && left.Type != LCss::LenAuto
+      ? (int)cb.x1 + MAX((int)left.ToPx(cbW, font), 0) + ml
+      : (right && right.Type != LCss::LenAuto)
+        ? (int)cb.x2 - MAX((int)right.ToPx(cbW, font), 0) - contentW - hEdges - mr
+        : statX + ml;
+
+    int originY = top && top.Type != LCss::LenAuto
+      ? (int)cb.y1 + MAX((int)top.ToPx(cbH, font), 0) + mt
+      : statY + mt;
+
+    // Flow children in an isolated context so the parent flow cursor is not advanced.
+    Ctx fc;
+    fc.Left = originX;
+    fc.Right = originX + contentW + hEdges;
+    fc.y = originY;
+    fc.Align = AlignOf(tag, LCss::AlignLeft);
+    LayoutBlock(tag, fc, depth, contentW + hEdges, true);
+
+    // Finalize height and origin, then shift the flowed content if the origin moved.
+    int naturalH = tag->Size.y - vEdges;
+    int contentH = naturalH;
+    auto height = tag->Height();
+    if (height && height.Type != LCss::LenAuto)
+      contentH = MAX(height.ToPx(cbH, font), 0);
+    if ((top && top.Type != LCss::LenAuto) && (bottom && bottom.Type != LCss::LenAuto))
+      contentH = MAX((int)cbH - (int)top.ToPx(cbH, font) - (int)bottom.ToPx(cbH, font) - vEdges, 0);
+
+    auto minH = tag->MinHeight(), maxH = tag->MaxHeight();
+    if (minH) contentH = MAX(contentH, MAX(minH.ToPx(cbH, font), 0));
+    if (maxH) contentH = MIN(contentH, MAX(maxH.ToPx(cbH, font), 0));
+    contentH = MAX(contentH, 0);
+
+    int finalY = originY;
+    if (bottom && bottom.Type != LCss::LenAuto && !(top && top.Type != LCss::LenAuto))
+      finalY = (int)cb.y2 - MAX((int)bottom.ToPx(cbH, font), 0) - contentH - vEdges - mb;
+
+    tag->Size.x = contentW + hEdges;
+    tag->Size.y = vEdges + contentH;
+    if (finalY != originY)
+    {
+      int dy = finalY - originY;
+      for (auto e: tag->Children)
+        if (auto ch = Child(e))
+          OffsetSubtree(ch, 0, dy);
+      for (auto r: tag->TextPos)
+        if (r) { r->y1 += dy; r->y2 += dy; }
+    }
+    tag->Pos.y = finalY;
+  }
+
+  void ResolveAbsolute()
+  {
+    size_t i = 0;
+    while (i < absQueue.size())
+    {
+      auto r = absQueue[i++];
+      LayoutAbsoluteBlock(r.tag, r.statX, r.statY, r.depth);
+    }
+  }
+
+  void ColumnMetrics(TGrid &g, TCols &cols, int depth)
+
 	{
 		int n = g.NCols;
 		cols.Min.assign(n, 0);
@@ -1610,11 +1849,15 @@ class LNewFlow
 	}
 
 	// Inline boxes are the union of their text runs and children
-	void FixInline(LTag *tag)
-	{
-		if (KindOf(tag) == KHidden)
-			return;
-		for (auto e: tag->Children)
+  void FixInline(LTag *tag)
+  {
+    if (KindOf(tag) == KHidden)
+      return;
+    if (IsFixedTag(tag) || IsAbsoluteTag(tag))
+      return;
+
+    for (auto e: tag->Children)
+
 			if (auto ch = Child(e))
 				FixInline(ch);
 
@@ -1641,7 +1884,7 @@ class LNewFlow
 		for (auto e: tag->Children)
 		{
 			auto ch = Child(e);
-			if (ch && KindOf(ch) != KHidden && (ch->Size.x || ch->Size.y))
+			if (ch && KindOf(ch) != KHidden && !IsFixedTag(ch) && !IsAbsoluteTag(ch) && (ch->Size.x || ch->Size.y))
 				add(ch->Pos.x, ch->Pos.y, ch->Pos.x + ch->Size.x, ch->Pos.y + ch->Size.y);
 		}
 		if (!any)
@@ -1653,10 +1896,14 @@ class LNewFlow
 		tag->Size.y = y2 - y1 + VEdges(tag);
 	}
 
-	void Rebase(LTag *tag, int ox, int oy)
-	{
-		int ax = tag->Pos.x, ay = tag->Pos.y;
-		MAX.x = MAX(MAX.x, ax + tag->Size.x - 1);
+  void Rebase(LTag *tag, int ox, int oy)
+  {
+    if (IsFixedTag(tag))
+      return;
+
+    int ax = tag->Pos.x, ay = tag->Pos.y;
+    MAX.x = MAX(MAX.x, ax + tag->Size.x - 1);
+
 		MAX.y = MAX(MAX.y, ay + tag->Size.y - 1);
 		tag->Pos.x -= ox;
 		tag->Pos.y -= oy;
@@ -1673,10 +1920,44 @@ class LNewFlow
 			if (ch && KindOf(ch) != KHidden)
 				Rebase(ch, ax, ay);
 		}
-	}
+        }
+
+  void RebaseFixed(LTag *tag, int ox, int oy)
+  {
+    if (KindOf(tag) == KHidden)
+      return;
+    if (IsFixedTag(tag) && ox != tag->Pos.x)
+      return;
+
+    for (auto r: tag->TextPos)
+    {
+      if (!r)
+        continue;
+      r->x1 -= ox; r->x2 -= ox;
+      r->y1 -= oy; r->y2 -= oy;
+    }
+
+    for (auto e: tag->Children)
+    {
+      auto ch = Child(e);
+      if (!ch)
+        continue;
+      auto ck = KindOf(ch);
+      if (ck == KHidden)
+        continue;
+      if (IsFixedTag(ch))
+        continue;
+
+      int ax = ch->Pos.x, ay = ch->Pos.y;
+      ch->Pos.x -= ox;
+      ch->Pos.y -= oy;
+      RebaseFixed(ch, ax, ay);
+    }
+  }
 
 public:
 	LPoint MAX;
+
 
 	LNewFlow(LHtml *html, LRect &r) : Html(html), View(r)
 	{
@@ -1704,15 +1985,19 @@ public:
 		if (!root)
 			return;
 
-		Reset(root);
-		Sp = 0;
+        Reset(root);
+        Sp = 0;
+        Html->d->FixedTags.clear();
+        absQueue.clear();
 
-		Ctx c;
+        Ctx c;
+
 		c.Left = View.x1;
 		c.Right = View.x1 + View.X();
 		c.y = View.y1;
 		LayoutBlock(root, c, 0);
 		FixInline(root);
+		ResolveAbsolute();
 		Rebase(root, 0, 0);
 	}
 };
@@ -4118,8 +4403,15 @@ void LTag::SetStyle()
 			break;
 		case TAG_BODY:
 		{
+			// Only the background of the root document body becomes the control
+			// background. A body inside an IFRAME belongs to its own document,
+			// so its background must not paint over the whole control.
+			bool InFrame = false;
+			for (LHtmlElement *p = Parent; p; p = p->Parent)
+				if (p->TagId == TAG_IFRAME) { InFrame = true; break; }
+
 			LCss::ColorDef Bk = BackgroundColor();
-			if (Bk.Type != ColorInherit)
+			if (!InFrame && Bk.Type != ColorInherit)
 			{
 				// Copy the background up to the LHtml wrapper
 				Html->GetCss(true)->BackgroundColor(Bk);
@@ -5313,6 +5605,8 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 	if (Depth >= MAX_RECURSION_DEPTH ||
 		disp == DispNone)
 		return;
+	if (IsFixedTag(this) && (!Html->d->PaintingFixed || Depth > 0))
+		return;
 	if (
 		#ifdef _DEBUG
 		!Html->_Debug &&
@@ -6450,6 +6744,27 @@ void LHtml::OnPaint(LSurface *ScreenDC)
 
 		PROF("TagPaint.Before");
 		Tag->OnPaint(pDC, InSelection, 0);
+
+		PROF("TagPaint.Fixed");
+		if (!d->FixedTags.empty())
+		{
+			int BaseX, BaseY;
+			pDC->GetOrigin(BaseX, BaseY);
+
+			d->PaintingFixed = true;
+			for (auto &ft: d->FixedTags)
+			{
+				if (!ft.Tag)
+					continue;
+				printf("FixedPaint base=%d,%d origin=%d,%d tag=%s size=%d,%d\n", BaseX, BaseY, ft.Origin.x, ft.Origin.y, ft.Tag->Tag.Get(), ft.Tag->Size.x, ft.Tag->Size.y);
+				pDC->SetOrigin(BaseX - ft.Origin.x, BaseY - ft.Origin.y);
+				ft.Tag->OnPaint(pDC, InSelection, 0);
+				if (d->MaxPaintTimeout)
+					break;
+			}
+			pDC->SetOrigin(BaseX, BaseY);
+			d->PaintingFixed = false;
+		}
 
 		PROF("TagPaint.After");
 		if (d->MaxPaintTimeout)

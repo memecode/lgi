@@ -18,6 +18,7 @@
 #include "lgi/common/Http.h"
 #include "lgi/common/ScrollBar.h"
 #include "lgi/common/ImageThreadManager.h"
+#include "lgi/common/Stat.h"
 
 #include "lgi/common/Html.h"
 #include "../src/common/Text/HtmlPriv.h"
@@ -173,13 +174,21 @@ public:
 
 class HtmlItem : public LListItem
 {
-    char *Base;
+    LString Base;
     
 public:
-    HtmlItem(char *b, char *n)
+    HtmlItem(char *folder, char *leaf)
     {
-        Base = b;
-        SetText(n);
+        Base = folder;
+        SetText(leaf);
+    }
+
+    LString GetFolder() const { return Base; }
+
+    LString Path()
+    {
+        LFile::Path p(Base, GetText());
+        return p.GetFull();
     }
     
 	void OnMouseClick(LMouse &m)
@@ -231,6 +240,26 @@ public:
 				if (Find(child, search))
 					return true;
 		return false;
+	}
+
+	void DumpPositions(THtmlTag *tag, int depth)
+	{
+		if (!tag)
+			tag = Tag;
+		if (!tag)
+			return;
+		if (tag->TagId != HtmlTag::CONTENT)
+		{
+			LPoint a = tag->AbsolutePos();
+			printf("%*s%s pos=%d abs=%d,%d size=%d,%d\n",
+				depth * 2, "",
+				tag->Tag ? tag->Tag : "?",
+				(int)tag->Position(),
+				a.x, a.y, tag->Size.x, tag->Size.y);
+		}
+		for (auto c: tag->Children)
+			if (auto child = dynamic_cast<THtmlTag*>(c))
+				DumpPositions(child, depth + 1);
 	}
 
 	bool ValidTag(THtmlTag *t)
@@ -376,19 +405,28 @@ class AppWnd :
 	LList *Lst = nullptr;
 	LBox *debugBox = nullptr;
     LTextView3 *Text = nullptr;
-	LString FilesFolder;
 	LAutoPtr<LScriptEngine> Script;
 	LAutoPtr<LImageThreadManager> Worker;
-	LAutoPtr<LEmojiFont> Emoji;
+    LAutoPtr<LEmojiFont> Emoji;
+	bool renderPng = false;
+	bool dumpLayout = false;
+
+    LString CurFolder()
+    {
+		if (HtmlItem *item = dynamic_cast<HtmlItem*>(Lst->GetSelected()))
+			return item->GetFolder();
+		return LString();
+	}
 
 	LoadType GetContent(LAutoPtr<LoadJob> &j) override
 	{
 		LUri u(j->Uri);
 		if (!u.sProtocol)
 		{
-			char p[MAX_PATH_LEN];
-			if (LMakePath(p, sizeof(p), FilesFolder, j->Uri) &&
-				LFileExists(p))
+			char p[MAX_PATH_LEN] = "";
+			LMakePath(p, sizeof(p), CurFolder(), j->Uri);
+			printf("%s:%i - p='%s'\n", _FL, p);
+			if (LFileExists(p))
 			{
 				LString Ext = LGetExtension(p);
 				if (Ext.Equals("css") ||
@@ -527,55 +565,73 @@ public:
 			#else
 				#define TIME_TO_DATE(ts) (ts)
 			#endif
-				
-			LFile::Path files(LSP_APP_INSTALL);
-			#if defined(MAC) && defined(_DEBUG)
-				files += "../../../../..";
-			#elif defined(WINDOWS)
-				files += "..";
-			#endif
-			files += "files";
-			if (!files.Exists())
-				LgiTrace("%s:%i - files folder '%s' doesn't exist\n", _FL, files.GetFull().Get());
-			else
+			
+			List<FileInf> Files;
+			LString path;
+			renderPng = LAppInst->GetOption("render", path);
+		    printf("renderPng=%i '%s'\n", renderPng, path.Get());
+			dumpLayout = LAppInst->GetOption("dump");
+			if (renderPng)
 			{
-				FilesFolder = files.GetFull();
-
-				List<FileInf> Files;
-				LDirectory d;
-				for (auto b = d.First(FilesFolder); b; b = d.Next())
+				if (auto f = new FileInf)
 				{
-					if (!d.IsDir() &&
-						MatchStr("*.html", d.GetName()))
-					{
-						char p[256];
-						if (d.Path(p, sizeof(p)))
-						{
-							if (auto f = new FileInf)
-							{
-								f->File = p;
-								f->Date.Set(TIME_TO_DATE(d.GetLastWriteTime()));
-								Files.Insert(f);
-							}
-						}
-					}
+				    auto stat = LStat(path);
+					f->File = path;
+					f->Date.Set(TIME_TO_DATE(stat.GetLastWriteTime()));
+					Files.Insert(f);
 				}
-				Files.Sort([](auto a, auto b)
-					{
-						return -a->Date.Compare(&b->Date);
-					});
-
-				for (auto f: Files)
-				{
-					if (auto d = strrchr(f->File, DIR_CHAR))
-					{
-						if (auto i = new HtmlItem(FilesFolder, d + 1))
-							Lst->Insert(i);
-					}
-				}
-
-				Files.DeleteObjects();
 			}
+			else
+			{			
+    			LFile::Path files(LSP_APP_INSTALL);
+    			#if defined(MAC) && defined(_DEBUG)
+    				files += "../../../../..";
+    			#elif defined(WINDOWS)
+    				files += "..";
+    			#endif
+    			files += "files";
+    			if (!files.Exists())
+    				LgiTrace("%s:%i - files folder '%s' doesn't exist\n", _FL, files.GetFull().Get());
+    			else
+    			{
+    				LDirectory d;
+    				for (auto b = d.First(files.GetFull()); b; b = d.Next())
+    				{
+    					if (!d.IsDir() &&
+    						MatchStr("*.html", d.GetName()))
+    					{
+    						char p[MAX_PATH_LEN];
+    						if (d.Path(p, sizeof(p)))
+    						{
+    							if (auto f = new FileInf)
+    							{
+    								f->File = p;
+    								f->Date.Set(TIME_TO_DATE(d.GetLastWriteTime()));
+    								Files.Insert(f);
+    							}
+    						}
+    					}
+    				}
+    			}
+    			Files.Sort([](auto a, auto b)
+    				{
+    					return -a->Date.Compare(&b->Date);
+    				});
+			}
+
+			for (auto f: Files)
+			{
+			    auto parts = f->File.RSplit(DIR_STR, 1);
+				if (parts.Length() == 2)
+				{
+					printf("%s:%i - parts '%s', '%s'\n", _FL, parts[0].Get(), parts[1].Get());
+					if (auto i = new HtmlItem(parts[0], parts[1]))
+						Lst->Insert(i);
+				}
+				else printf("%s:%i - wrong parts %i\n", _FL, (int)parts.Length());
+			}
+
+			Files.DeleteObjects();
 		}
 			
 			
@@ -733,6 +789,27 @@ public:
 		return 0;
 	}
 	
+	void RenderPng(LString outFile)
+	{
+		LPoint PageSize = LPoint(800, 3000);
+
+		LMemDC Screen(_FL, PageSize.x, PageSize.y, System24BitColourSpace);
+		Screen.Colour(LColour::White);
+		Screen.Rectangle();
+		auto pos = Html->GetPos();
+		pos.SetSize(PageSize.x, PageSize.y);
+		Html->SetPos(pos);
+								Html->OnPaint(&Screen);
+								if (dumpLayout)
+									Html->DumpPositions(nullptr, 0);
+		if (!GdcD->Save(outFile, &Screen))
+		{
+			LPopupNotification::Message(this,
+				LString::Fmt("Failed to save '%s'", outFile.Get()));
+		}
+		else printf("Render: %s\n", outFile.Get());
+	}
+
 	int OnNotify(LViewI *c, const LNotification &n) override
 	{
 		switch (c->GetId())
@@ -741,15 +818,22 @@ public:
 			{
 				if (n.Type == LNotifyItemSelect)
 				{
-					if (auto s = Lst->GetSelected())
+					if (!Html)
+						break;
+					if (HtmlItem *item = dynamic_cast<HtmlItem*>(Lst->GetSelected()))
 					{
-						LFile::Path p(FilesFolder, s->GetText(0));
+						LFile::Path p(item->Path());
 						if (p.Exists())
 						{
 							if (auto h = LReadFile(p.c_str()))
 							{
-								if (Html)
-									Html->Name(h);
+								Html->Name(h);
+								if (renderPng)
+								{
+									LFile::Path out(LSP_APP_INSTALL);
+									out = out / "render.png";
+									RenderPng(out.GetFull());
+								}
 							}
 							else LPopupNotification::Message(this,
 								LString::Fmt("Failed to read '%s'", p.GetFull().Get()));
@@ -1035,11 +1119,64 @@ bool TestRoundedBorders()
 	return true;
 }
 
+bool TestIframeBodyBackground()
+{
+	Html2::LHtml html(0, 0, 0, 80, 60);
+	LColour root(255, 255, 255);
+	LColour frame(240, 240, 255);
+	LCss::ColorDef rootBk(root);
+	html.GetCss(true)->BackgroundColor(rootBk);
+
+	Html2::LTag iframe(&html, nullptr);
+	iframe.TagId = TAG_IFRAME;
+
+	Html2::LTag body(&html, nullptr);
+	body.Parent = &iframe;
+	body.TagId = TAG_BODY;
+	LCss::ColorDef frameBk(frame);
+	body.BackgroundColor(frameBk);
+	body.SetStyle();
+
+	if (html.GetCss()->BackgroundColor() != rootBk)
+	{
+		printf("Iframe body background: iframe body changed the control background\n");
+		return false;
+	}
+
+	Html2::LTag rootBody(&html, nullptr);
+	rootBody.TagId = TAG_BODY;
+	LColour alt(0, 200, 100);
+	LCss::ColorDef altBk(alt);
+	rootBody.BackgroundColor(altBk);
+	rootBody.SetStyle();
+
+	if (html.GetCss()->BackgroundColor() != altBk)
+	{
+		printf("Iframe body background: root body did not set the control background\n");
+		return false;
+	}
+
+	return true;
+}
+
 int LgiMain(OsAppArguments &AppArgs)
 {
 	LApp a(AppArgs, "HtmlTestSuite");
 	if (a.IsOk())
 	{
+		if (a.GetOption("test-iframe-background"))
+		{
+			bool passed = TestIframeBodyBackground();
+			printf("Iframe body background: %s\n", passed ? "PASS" : "FAIL");
+			return passed ? 0 : 1;
+		}
+
+	    printf("Usage: %s [args]\n"
+	        "\n"
+	        "   -test-rounded-borders   Run the rounded borders test\n"
+	        "   -render $fileName       Render the file to the 'render.png'\n",
+	        AppArgs.Arg[0]);
+	
 		if (a.GetOption("test-rounded-borders"))
 		{
 			bool passed = TestRoundedBorders();

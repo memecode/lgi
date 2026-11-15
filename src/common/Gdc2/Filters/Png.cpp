@@ -20,6 +20,7 @@
 // the define HAS_LIBPNG_ZLIB to '0' in Lgi.h
 //
 
+#include <cstddef>
 #ifndef __CYGWIN__ 
 #include "math.h"
 #include "png.h"
@@ -1167,6 +1168,7 @@ LFilter::IoStatus GdcPng::WriteImage(LStream *Out, LSurface *pDC)
 	
 	LVariant Transparent;
 	bool HasTransparency = false;
+	auto cs = pDC->GetColourSpace();
 	COLOUR Back = 0;
 	LVariant v;
 
@@ -1190,32 +1192,37 @@ LFilter::IoStatus GdcPng::WriteImage(LStream *Out, LSurface *pDC)
 	// Work out whether the image has transparency
 	if (pDC->GetBits() == 32)
 	{
-		// Check alpha channel
-		for (int y=0; y<pDC->Y() && !HasTransparency; y++)
+		if (LColourSpaceHasAlpha(cs))
 		{
-			System32BitPixel *p = (System32BitPixel*)(*pDC)[y];
-			if (!p) break;
-			System32BitPixel *e = p + pDC->X();
-			while (p < e)
+			// Check alpha channel
+			for (int y=0; y<pDC->Y(); y++)
 			{
-				if (p->a < 255)
-				{
-					HasTransparency = true;
+				auto p = (System32BitPixel*)(*pDC)[y];
+				if (!p)
 					break;
+				
+				auto e = p + pDC->X();
+				while (p < e)
+				{
+					if (p->a < 255)
+					{
+						HasTransparency = true;
+						break;
+					}
+					p++;
 				}
-				p++;
 			}
 		}
 	}
 	else if (pDC->AlphaDC())
 	{
-		LSurface *a = pDC->AlphaDC();
-		if (a)
+		if (auto a = pDC->AlphaDC())
 		{
 			for (int y=0; y<a->Y() && !HasTransparency; y++)
 			{
 				uint8_t *p = (*a)[y];
-				if (!p) break;
+				if (!p)
+					break;
 				uint8_t *e = p + a->X();
 				while (p < e)
 				{
@@ -1267,7 +1274,7 @@ LFilter::IoStatus GdcPng::WriteImage(LStream *Out, LSurface *pDC)
 				bool KeyAlpha = false;
 				bool ChannelAlpha = false;
 				
-				LMemDC *pTemp = 0;
+				LMemDC *pTemp = nullptr;
 				if (pDC->AlphaDC() && HasTransparency)
 				{
 					pTemp = new LMemDC(_FL, pDC->X(), pDC->Y(), System32BitColourSpace);
@@ -1298,13 +1305,13 @@ LFilter::IoStatus GdcPng::WriteImage(LStream *Out, LSurface *pDC)
 				int Ag = G32(Back);
 				int Ab = B32(Back);
 
-				if (pDC->GetBits() == 32)
+				if (pDC->GetBits() == 32 && LColourSpaceHasAlpha(cs))
 				{
 					if (!ChannelAlpha && !KeyAlpha)
 					{
 						for (int y=0; y<pDC->Y(); y++)
 						{
-							System32BitPixel *s = (System32BitPixel*) (*pDC)[y];
+							auto s = (System32BitPixel*) (*pDC)[y];
 							for (int x=0; x<pDC->X(); x++)
 							{
 								if (s[x].a < 0xff)
@@ -1319,6 +1326,9 @@ LFilter::IoStatus GdcPng::WriteImage(LStream *Out, LSurface *pDC)
 				}
 
 				bool ExtraAlphaChannel = ChannelAlpha || (pDC->GetBits() > 8 ? KeyAlpha : 0);
+
+				printf("%s:%i - HasTransparency=%i ExtraAlphaChannel=%i ChannelAlpha=%i\n",
+						_FL, HasTransparency, ExtraAlphaChannel, ChannelAlpha);
 
                 int ColourType;
                 if (pDC->GetBits() <= 8)
