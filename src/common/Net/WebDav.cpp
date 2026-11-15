@@ -1,6 +1,61 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/WebDav.h"
 
+#define COMP_FUNCTIONS 1
+#include "lgi/common/ZlibWrapper.h"
+
+static bool DecodeGZip(const LString &In, LString &Out)
+{
+	if (In.IsEmpty())
+		return false;
+
+	LAutoPtr<Zlib> z;
+	if (!z)
+		z.Reset(new Zlib);
+
+	if (!z)
+		return false;
+
+	if (!z->IsLoaded())
+		z->Reload();
+
+	if (!z->IsLoaded())
+		return false;
+
+	z_stream s;
+	ZeroObj(s);
+	s.next_in = const_cast<Bytef*>((const Bytef*)In.Get());
+	s.avail_in = (uInt)In.Length();
+
+	int r = z->inflateInit2_(&s, 16 + MAX_WBITS, ZLIB_VERSION, sizeof(z_stream));
+	if (r != Z_OK)
+		return false;
+
+	LStringPipe OutPipe;
+	unsigned char Buf[4096];
+	s.next_out = Buf;
+	s.avail_out = sizeof(Buf);
+
+	while (s.avail_in && (r = z->inflate(&s, Z_NO_FLUSH)) >= 0)
+	{
+		if (s.avail_out < sizeof(Buf))
+			OutPipe.Write(Buf, sizeof(Buf) - s.avail_out);
+
+		if (!s.avail_out)
+		{
+			s.next_out = Buf;
+			s.avail_out = sizeof(Buf);
+		}
+
+		if (r == Z_STREAM_END)
+			break;
+	}
+
+	z->inflateEnd(&s);
+	Out = OutPipe.NewLStr();
+	return !Out.IsEmpty();
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // The namespace prefixes used in a WebDAV response vary between servers, so
 // match on the local name of the element rather than the prefixed name.
@@ -17,9 +72,10 @@ static bool XmlNameIs(LXmlTag *t, const char *Name)
 	if (Colon)
 		Tag = Colon + 1;
 
-	const char *Want = strchr(Name, ':');
-	if (Want)
-		Want = Want + 1;
+	const char *Want = Name;
+	const char *NameColon = strchr(Name, ':');
+	if (NameColon)
+		Want = NameColon + 1;
 
 	return !Stricmp(Tag, Want);
 }
@@ -38,8 +94,25 @@ static LXmlTag *XmlChild(LXmlTag *t, const char *Name)
 
 static bool XmlStatusOk(LXmlTag *PropStat)
 {
-	auto Status = XmlChild(PropStat, "status");
-	return !Status || strstr(Status->GetContent(), "200") != NULL;
+	auto Tag = XmlChild(PropStat, "status");
+	if (!Tag)
+		return true;
+
+	const char *Text = Tag->GetContent();
+	if (!Text)
+		return true;
+
+	// The status is 'HTTP/1.1 200 OK', but some servers leave out the protocol...
+	if (!Strnicmp(Text, "HTTP/", 5))
+	{
+		auto Space = strchr(Text, ' ');
+		Text = Space ? Space + 1 : Text;
+	}
+
+	// The per-resource status is 200 or 207 depending on the server, so a literal
+	// '200' rejects the successes reported as 207. Accept any 2xx instead.
+	int Code = Atoi(Text, 10, 0);
+	return Code >= 200 && Code < 300;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -71,8 +144,8 @@ void LWebdav::PrettyPrint(LXmlTag &x)
 	LStringPipe p;
 	LXmlTree t;
 	t.Write(&x, &p);
-	auto s = p.NewLStr();
-	LgiTrace("Pretty: %s\n", s.Get());
+	while (auto s = p.Pop())
+		LgiTrace("%s\n", s.Get());
 }
 
 LString LWebdav::RelativeHref(const LString &Href) const
@@ -128,14 +201,21 @@ void LWebdav::ParseMultistatus(LXmlTag &Root, LArray<FileProps> &Files, const ch
 			if (p->Parent && XmlNameIs(p->Parent, "propstat") && !XmlStatusOk(p->Parent))
 				continue;
 
-			auto Len = XmlChild(p, "getcontentlength");
-			auto Data = DataTag ? XmlChild(p, DataTag) : NULL;
-			if (!Len && !Data)
+			// An entry is the resource the server reported, plus whatever properties it
+			// answered with. The set of properties varies between servers, so record the
+			// entry when it reported any property instead of requiring one particular
+			// property: a listing that reports only 'getcontenttype' and 'getetag' is a
+			// valid entry, and the caller uses those to decide what to fetch.
+			if (!p->Children.Length())
 				continue;
+
+			auto Data = DataTag ? XmlChild(p, DataTag) : NULL;
 
 			auto &f = Files.New();
 			f.Href = RelativeHref(Href->GetContent());
+			f.Length = 0;
 
+			auto Len = XmlChild(p, "getcontentlength");
 			if (Len)
 				f.Length = Atoi(Len->GetContent(), 10, 0);
 
@@ -164,6 +244,7 @@ bool LWebdav::Request(Req &r, const char *Name, LString Resource)
 	if (!http.Open(sock, u.sHost, u.Port ? u.Port : HTTPS_PORT))
 	{
 		r.Status = false;
+		LgiTrace("%s: failed to connect to %s\n", Name, u.sHost.Get());
 	}
 	else
 	{
@@ -181,8 +262,12 @@ bool LWebdav::Request(Req &r, const char *Name, LString Resource)
 		r.Status = http.Request(Name, Full, &r.ProtocolStatus, r.InHdrs, r.InBody ? &In : NULL, &OutPipe, &OutHdrsPipe, &r.Encoding);
 		r.OutHdrs = OutHdrsPipe.NewLStr();
 		r.OutBody = OutPipe.NewLStr();
-			
-		// LgiTrace("%s\n%s\n", r.OutHdrs.Get(), r.OutBody.Get());
+
+		// Log the trouble rather than every request, so a folder load stays quiet...
+		if (!r.Status || r.ProtocolStatus >= 400)
+			LgiTrace("%s %s -> %i\n%s\n%s\n", Name, Full.Get(), r.ProtocolStatus, r.OutHdrs.Get(), r.OutBody.Get());
+		else if (r.Encoding == LHttp::EncodeGZip)
+			LgiTrace("%s: response is gzip encoded, which is not decoded here.\n", Name);
 	}
 
 	return r.Status;
@@ -232,15 +317,54 @@ bool LWebdav::PropFind(LArray<FileProps> &Files, LString Resource, int Depth)
 	if (!Request(r, "PROPFIND", Resource))
 		return false;
 
+	// A listing is answered as 207 Multi-Status by most servers, and some answer 200...
+	if (r.ProtocolStatus != 200 && r.ProtocolStatus != 207)
+	{
+		LgiTrace("PropFindFailed: %i\n%s\n%s\n", r.ProtocolStatus, r.OutHdrs.Get(), r.OutBody.Get());
+		return false;
+	}
+
+	if (r.Encoding == LHttp::EncodeGZip)
+	{
+		LString Decoded;
+		if (!DecodeGZip(r.OutBody, Decoded))
+		{
+			LgiTrace("PropFind: gzip response could not be decoded.\n");
+			return false;
+		}
+
+		r.OutBody = Decoded;
+		r.Encoding = LHttp::EncodeRaw;
+	}
+
 	LXmlTag x;
 	LXmlTree t;
 	LMemStream m(r.OutBody.Get(), r.OutBody.Length(), false);
 	if (!t.Read(&x, &m))
+	{
+		LgiTrace("PropFindParse: %s\n", t.GetErrorMsg() ? t.GetErrorMsg() : "no error");
 		return false;
+	}
 
 	// PrettyPrint(&x);
 
 	ParseMultistatus(x, Files, NULL);
+
+	if (!Files.Length())
+	{
+		LArray<LXmlTag*> Responses;
+		if (!LFindXml(Responses, &x, "response"))
+			LgiTrace("PropFind: %i bytes produced no 'response' element. root='%s' first=%.200s\n",
+				(int)r.OutBody.Length(),
+				x.GetTag() ? x.GetTag() : "",
+				r.OutBody(0, 200).Get());
+		else
+			LgiTrace("PropFind: %i bytes produced no entries from %i responses. root='%s' first=%.200s\n",
+				(int)r.OutBody.Length(),
+				(int)Responses.Length(),
+				x.GetTag() ? x.GetTag() : "",
+				r.OutBody(0, 200).Get());
+	}
 
 	return true;
 }

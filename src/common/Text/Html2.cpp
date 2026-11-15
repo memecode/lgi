@@ -6756,7 +6756,7 @@ void LHtml::OnPaint(LSurface *ScreenDC)
 			{
 				if (!ft.Tag)
 					continue;
-				printf("FixedPaint base=%d,%d origin=%d,%d tag=%s size=%d,%d\n", BaseX, BaseY, ft.Origin.x, ft.Origin.y, ft.Tag->Tag.Get(), ft.Tag->Size.x, ft.Tag->Size.y);
+
 				pDC->SetOrigin(BaseX - ft.Origin.x, BaseY - ft.Origin.y);
 				ft.Tag->OnPaint(pDC, InSelection, 0);
 				if (d->MaxPaintTimeout)
