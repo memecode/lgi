@@ -5622,6 +5622,8 @@ void VcFolder::Refresh()
 	CurrentCommit.Empty();
 	GitNames.Empty();
 	Branches.DeleteObjects();
+	if (IsBranches != StatusActive)
+		IsBranches = StatusNone;
 	if (Uncommit && Uncommit->LListItem::Select())
 		Uncommit->Select(true);
 	
