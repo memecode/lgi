@@ -188,6 +188,10 @@ public:
 		SocketMsgError,
 	};
 
+	/// Write() flag: the data is a credential and must not be logged verbatim.
+	/// Implementations strip it before passing flags to the OS.
+	static constexpr int WriteSensitive = 0x40000000;
+
 	virtual ~LSocketI() {}
 
 	/// Returns the actual socket (as defined by the OS)

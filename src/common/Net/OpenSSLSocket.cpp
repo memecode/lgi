@@ -2573,7 +2573,12 @@ ssize_t SslSocket::Write(const void *Data, ssize_t Len, int Flags)
 	{
 		LStream *l = GetLogStream();
 		if (l)
-			l->Write(Data, wr);
+		{
+			if (Flags & WriteSensitive)
+				l->Write("********\r\n", 10);
+			else
+				l->Write(Data, wr);
+		}
 	}
 	else if (Ssl)
 	{	

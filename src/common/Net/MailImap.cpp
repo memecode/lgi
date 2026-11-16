@@ -838,7 +838,18 @@ bool MailIMap::WriteBuf(bool ObsurePass, const char *Buffer, bool Continuation)
 		}
 		*/
 
-		if (Socket->Write((void*)Buffer, Len, 0) == Len)
+		bool Written;
+		if (ObsurePass)
+		{
+			// Send the credential (after the last space) as its own flagged write.
+			auto Sp = strrchr(Buffer, ' ');
+			ssize_t PubLen = Sp ? Sp + 1 - Buffer : 0;
+			Written = (PubLen == 0 || Socket->Write(Buffer, PubLen, 0) == PubLen) &&
+					  Socket->Write(Buffer + PubLen, Len - PubLen, LSocketI::WriteSensitive) == Len - PubLen;
+		}
+		else Written = Socket->Write((void*)Buffer, Len, 0) == Len;
+
+		if (Written)
 		{
 			if (ObsurePass)
 			{
@@ -850,6 +861,7 @@ bool MailIMap::WriteBuf(bool ObsurePass, const char *Buffer, bool Continuation)
 					s.Printf("%.*s********\r\n", Sp - Buffer, Buffer);
 					Log(s.Get(), LSocketI::SocketMsgSend);
 				}
+				else Log("********\r\n", LSocketI::SocketMsgSend);
 			}
 			else Log(Buffer, LSocketI::SocketMsgSend);
 			
@@ -1471,7 +1483,7 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 							{
 								ssize_t b = ConvertBinaryToBase64(Buf, sizeof(Buf), (uchar*)s, Len);
 								strcpy_s(Buf+b, sizeof(Buf)-b, "\r\n");
-								if (WriteBuf(false, NULL, true))
+								if (WriteBuf(true, NULL, true))
 								{
 									bool Rd = ReadResponse(AuthCmd);
 									CommandFinished();
@@ -1823,7 +1835,7 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 						int AuthCmd = d->NextCmd++;
 						LString AuthStr;
 						AuthStr.Printf("A%4.4i AUTHENTICATE XOAUTH2 %s\r\n", AuthCmd, LToBase64(s).Get());
-						if (WriteBuf(false, AuthStr))
+						if (WriteBuf(true, AuthStr))
 						{
 							Dialog.DeleteArrays();
 							if (Read(NULL))

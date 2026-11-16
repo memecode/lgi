@@ -1189,7 +1189,7 @@ ssize_t LSocket::Write(const void *Data, ssize_t Len, int Flags)
 			d->Socket,
 			(char*)Data,
 			(int) Len,
-			Flags
+			(Flags & ~WriteSensitive)
 			#ifndef MAC
 			| MSG_NOSIGNAL
 			#endif
