@@ -57,6 +57,7 @@ public:
 	{
 		LString Href, LastMod, Tag, ContentType, Data;
 		int64_t Length;
+		bool Collection = false;
 
 		LString GetContentType() const
 		{
@@ -72,6 +73,7 @@ public:
 			f.ContentType = ContentType.Get();
 			f.Data = Data.Get();
 			f.Length = Length;
+			f.Collection = Collection;
 			return f;
 		}
 	};

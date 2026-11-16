@@ -214,6 +214,7 @@ void LWebdav::ParseMultistatus(LXmlTag &Root, LArray<FileProps> &Files, const ch
 			auto &f = Files.New();
 			f.Href = RelativeHref(Href->GetContent());
 			f.Length = 0;
+			f.Collection = false;
 
 			auto Len = XmlChild(p, "getcontentlength");
 			if (Len)
@@ -230,6 +231,15 @@ void LWebdav::ParseMultistatus(LXmlTag &Root, LArray<FileProps> &Files, const ch
 
 			auto contentType = XmlChild(p, "getcontenttype");
 			if (contentType) f.ContentType = contentType->GetContent();
+
+			auto resourcetype = XmlChild(p, "resourcetype");
+			if (resourcetype)
+				for (auto c: resourcetype->Children)
+					if (XmlNameIs(c, "collection"))
+					{
+						f.Collection = true;
+						break;
+					}
 
 			if (Data) f.Data = Data->GetContent();
 		}
@@ -398,7 +408,7 @@ bool LWebdav::Report(LArray<FileProps> &Files, LString Resource, const char *Rep
 
 	bool Calendar = Stricmp(ReportType, "addressbook-multiget") != 0;
 	const char *DataTag = Calendar ? "calendar-data" : "address-data";
-	const char *Namespace = Calendar ? "urn:ietf:params:xml:ns:caldav" : "urn:ietf:params:xml:ns:vcard-4.0";
+	const char *Namespace = Calendar ? "urn:ietf:params:xml:ns:caldav" : "urn:ietf:params:xml:ns:carddav";
 
 	// A very large collection can make a request the server will reject, so ask
 	// for the content a batch at a time...
@@ -421,7 +431,8 @@ bool LWebdav::Report(LArray<FileProps> &Files, LString Resource, const char *Rep
 					"<N:%s xmlns:D=\"DAV:\" xmlns:N=\"%s\">\n"
 					"	<D:prop>\n"
 					"		<D:getetag/>\n"
-					"		<N:%s/>\n",
+					"		<N:%s/>\n"
+					"	</D:prop>\n",
 					ReportType,
 					Namespace,
 					DataTag);
