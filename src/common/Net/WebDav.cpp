@@ -305,7 +305,10 @@ LString::Array LWebdav::GetOptions(LString Resource)
 		}
 	}
 
-	for (auto o: opts) LgiTrace("opt=%s\n", o.Get());
+	/*
+	for (auto o: opts)
+		printf("opt=%s\n", o.Get());
+	*/
 
 	return opts;
 }

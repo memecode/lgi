@@ -721,27 +721,26 @@ void LColour::OnChange()
 	
 	#elif defined __GTK_H__
 
-		GtkSettings *set = gtk_settings_get_default();
+		auto set = gtk_settings_get_default();
 		if (!set)
 		{
 			printf("%s:%i - gtk_settings_get_for_screen failed.\n", _FL);
 			return;
 		}
 		
-		char PropName[] = "gtk-color-scheme";
-		gchararray Value = 0;
+		auto PropName = "gtk-color-scheme";
+		gchararray Value = nullptr;
 		g_object_get(set, PropName, &Value, NULL);
-		LString::Array Lines = LString(Value).SplitDelimit("\n");
+		auto Lines = LString(Value).SplitDelimit("\n");
+		printf("Lines: %s\n", Value);
 		g_free(Value);
 		g_object_unref(set);
 
 		LHashTbl<ConstStrKey<char,false>, int, true> Colours(0, -1);
 		auto ScreenBits = GdcD->GetBits();
-		for (int i=0; i<Lines.Length(); i++)
+		for (auto var: Lines)
 		{
-			char *var = Lines[i];
-			char *col = strchr(var, ':');
-			if (col)
+			if (auto col = strchr(var, ':'))
 			{
 				*col++ = 0;
 				
@@ -752,16 +751,24 @@ void LColour::OnChange()
 				COLOUR c24 = c;
 				if (ScreenBits == 32)			
 				{
-					c24 = ((c >> 8) & 0xff) |
-							((c >> 16) & 0xff00) |
-							((c >> 24) & 0xff0000);
+					c24 = ((c >> 8)  & 0xff)   |
+						  ((c >> 16) & 0xff00) |
+						  ((c >> 24) & 0xff0000);
 				}
 
 				Colours.Add(var, c24);
-				// printf("Color %s = %x\n", var, c24);
+				printf("Color %s = %x\n", var.Get(), c24);
 			}
 		}
-		#define LookupColour(name, default) ((Colours.Find(name) >= 0) ? LColour(Colours.Find(name),24) : default)
+
+		#define LookupColour(name, default) \
+			( \
+				(Colours.Find(name) >= 0) \
+				? \
+				LColour(Colours.Find(name),24) \
+				: \
+				default \
+			)
 
 		LColour Med = LookupColour("bg_color", LColour(0xe8, 0xe8, 0xe8));
 		LColour White(255, 255, 255);
@@ -790,6 +797,15 @@ void LColour::OnChange()
 			auto menu = gtk_menu_new();
 			auto item = gtk_menu_item_new_with_label("x");
 			gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
+			GdkRGBA *bg = nullptr;
+			gtk_style_context_get(gtk_widget_get_style_context(menu), GTK_STATE_FLAG_NORMAL, "background-color", &bg, NULL);
+			if (bg)
+			{
+				_LgiColours[L_MENU_BACKGROUND] = LColour(*bg);
+				gdk_rgba_free(bg);
+			}
+			else
+				printf("%s:%i - Failed to get menu background color.\n", _FL);
 			if (auto label = gtk_bin_get_child(GTK_BIN(item)))
 			{
 				GdkRGBA c;
