@@ -2334,7 +2334,16 @@ int MailIMap::Fetch(bool ByUid,
 				char *Name = b + Ranges[1].Start;
 				Name[Ranges[1].Len()] = 0;
 
-				if (Stricmp(Name, "FETCH"))
+				if (!Stricmp(Param, "BYE"))
+				{
+					// Server is dropping the connection, report why.
+					auto Reason = LString::Fmt("* BYE %s %.*s", Name, (int)(MsgSize - Ranges[1].End - 1), b + Ranges[1].End + 1).Strip();
+					Log(Reason, LSocketI::SocketMsgError);
+					Error->Set(ECONNRESET);
+					Error->AddNote(_FL, "%s", Reason.Get());
+					Done = true;
+				}
+				else if (Stricmp(Name, "FETCH"))
 				{
 					// Not the response we're looking for.
 					#if DEBUG_FETCH
