@@ -1148,6 +1148,70 @@ public:
 		Block *Split(Transaction *Trans, ssize_t AtOffset);
 	};
 
+	class DivBlock : public Block
+	{
+	protected:
+		LRect Pos;
+		LRect Margin;
+		LRect Border;
+		LRect Padding;
+
+		LNamedStyle *Style = nullptr;
+		LFont *Fnt = nullptr;
+
+		HtmlTag TagId = CONTENT;
+		LString ElementName;
+
+	public:
+		DivBlock(LRichTextPriv *priv, HtmlTag tag = CONTENT, const char *element = nullptr);
+		DivBlock(const DivBlock *Copy);
+		~DivBlock();
+
+		TextBlock *GetTextBlock();
+		bool IsValid();
+		LNamedStyle *MakeChildStyle(LNamedStyle *ParentStyle);
+
+		const char *GetClass() { return "DivBlock"; }
+		const char *GetElementName();
+
+		LRect GetPos() { return Pos; }
+		ssize_t Length();
+		int GetLines();
+		bool OffsetToLine(ssize_t Offset, int *ColX, LArray<int> *LineY);
+		ssize_t LineToOffset(ssize_t Line);
+		LNamedStyle *GetStyle(ssize_t At = -1);
+		void SetStyle(LNamedStyle *s);
+
+		bool ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng);
+		bool GetPosFromIndex(BlockCursor *Cursor);
+		bool HitTest(HitTestResult &htr);
+		void OnPaint(PaintContext &Ctx);
+		bool OnLayout(Flow &flow);
+
+		ssize_t CopyAt(ssize_t Offset, ssize_t Chars, LArray<uint32_t> *Text);
+		bool Seek(SeekType To, BlockCursor &Cursor);
+		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, LFindReplaceCommon *Params);
+		void SetSpellingErrors(LArray<::LSpellCheck::SpellingError> &Errors, LRange r);
+		void IncAllStyleRefs();
+		bool DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool TopOfMenu);
+
+		#ifdef _DEBUG
+		void DumpNodes(LTreeItem *Ti);
+		#endif
+
+		Block *Clone();
+
+		bool AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars, LNamedStyle *Style);
+		bool ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, LCss *Style, bool Add);
+		ssize_t DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, LArray<uint32_t> *DeletedText);
+		bool DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper);
+		Block *Split(Transaction *Trans, ssize_t AtOffset);
+		bool StripLast(Transaction *Trans, const char *Set = " \t\r\n");
+		bool OnDictionary(Transaction *Trans);
+
+		void Dump();
+	};
+
 	class HorzRuleBlock : public Block
 	{
 		LRect Pos;
