@@ -125,12 +125,7 @@ LNamedStyle *LRichTextPriv::ListBlock::GetStyle(ssize_t At)
 void LRichTextPriv::ListBlock::SetStyle(LNamedStyle *s)
 {
 	for (auto b : blocks)
-	{
-		if (auto tb = dynamic_cast<TextBlock*>(b))
-			tb->SetStyle(s);
-		else if (auto list = dynamic_cast<ListBlock*>(b))
-			list->SetStyle(s);
-	}
+		b->SetStyle(s);
 }
 
 const char *LRichTextPriv::ListBlock::TypeToElem()

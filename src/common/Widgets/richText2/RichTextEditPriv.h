@@ -675,6 +675,8 @@ public:
 			Cursors = 0;
 		}
 		
+		virtual void SetStyle(LNamedStyle *s) {}
+
 		virtual ~Block()
 		{
 			// We must have removed cursors by the time we are deleted
@@ -1148,13 +1150,10 @@ public:
 		Block *Split(Transaction *Trans, ssize_t AtOffset);
 	};
 
-	class DivBlock : public Block
+	class DivBlock : public Block, public LCssBox<LRect>
 	{
 	protected:
 		LRect Pos;
-		LRect Margin;
-		LRect Border;
-		LRect Padding;
 
 		LNamedStyle *Style = nullptr;
 		LFont *Fnt = nullptr;

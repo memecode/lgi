@@ -92,7 +92,7 @@ public:
 	LRect *TopRect(LRegion *c);
 };
 
-class LTag : public LHtmlElement, public LCssBox
+class LTag : public LHtmlElement, public LCssBox<>
 {
 	friend class ::HtmlEdit;
 	

@@ -15,10 +15,8 @@ LRichTextPriv::DivBlock::DivBlock(LRichTextPriv *priv, HtmlTag tag, const char *
 
 LRichTextPriv::DivBlock::DivBlock(const DivBlock *Copy) :
 	Block(Copy),
+	LCssBox<LRect>(*Copy),
 	Pos(Copy->Pos),
-	Margin(Copy->Margin),
-	Border(Copy->Border),
-	Padding(Copy->Padding),
 	Style(Copy->Style),
 	Fnt(Copy->Fnt),
 	TagId(Copy->TagId),
@@ -111,7 +109,7 @@ const char *LRichTextPriv::DivBlock::GetElementName()
 	if (name && *name)
 		return name;
 
-	LHtmlElemInfo *Info = d->Inst.Static->GetTagInfo(TagId);
+	auto Info = d->Inst.Static->GetTagInfo(TagId);
 	if (Info && Info->Tag)
 		return Info->Tag;
 
@@ -121,7 +119,7 @@ const char *LRichTextPriv::DivBlock::GetElementName()
 ssize_t LRichTextPriv::DivBlock::Length()
 {
 	ssize_t Len = 0;
-	for (auto b : blocks)
+	for (auto b: blocks)
 		Len += b->Length();
 	return Len;
 }
@@ -208,34 +206,13 @@ void LRichTextPriv::DivBlock::SetStyle(LNamedStyle *s)
 	{
 		Fnt = d->GetFont(s);
 		LAssert(Fnt);
-
-		Margin.x1 = Style->MarginLeft().ToPx(Pos.X(), Fnt);
-		Margin.y1 = Style->MarginTop().ToPx(Pos.Y(), Fnt);
-		Margin.x2 = Style->MarginRight().ToPx(Pos.X(), Fnt);
-		Margin.y2 = Style->MarginBottom().ToPx(Pos.Y(), Fnt);
-
-		Border.x1 = Style->BorderLeft().ToPx(Pos.X(), Fnt);
-		Border.y1 = Style->BorderTop().ToPx(Pos.Y(), Fnt);
-		Border.x2 = Style->BorderRight().ToPx(Pos.X(), Fnt);
-		Border.y2 = Style->BorderBottom().ToPx(Pos.Y(), Fnt);
-
-		Padding.x1 = Style->PaddingLeft().ToPx(Pos.X(), Fnt);
-		Padding.y1 = Style->PaddingTop().ToPx(Pos.Y(), Fnt);
-		Padding.x2 = Style->PaddingRight().ToPx(Pos.X(), Fnt);
-		Padding.y2 = Style->PaddingBottom().ToPx(Pos.Y(), Fnt);
+		LCssBox<LRect>::SetStyle(Fnt, Style, Pos);
 	}
 
 	LNamedStyle *ChildStyle = MakeChildStyle(Style);
 
 	for (auto b : blocks)
-	{
-		if (auto tb = dynamic_cast<LRichTextPriv::TextBlock*>(b))
-			tb->SetStyle(ChildStyle);
-		else if (auto div = dynamic_cast<LRichTextPriv::DivBlock*>(b))
-			div->SetStyle(ChildStyle);
-		else if (auto list = dynamic_cast<LRichTextPriv::ListBlock*>(b))
-			list->SetStyle(ChildStyle);
-	}
+		b->SetStyle(ChildStyle);
 }
 
 bool LRichTextPriv::DivBlock::ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng)
@@ -360,12 +337,12 @@ void LRichTextPriv::DivBlock::OnPaint(PaintContext &Ctx)
 	LColour Back = Ctx.Back();
 	LRect r = Pos;
 
-	r.x1 -= Margin.x1;
-	r.y1 -= Margin.y1;
-	r.x2 -= Margin.x2;
-	r.y2 -= Margin.y2;
+	r.x1 -= margin.x1;
+	r.y1 -= margin.y1;
+	r.x2 -= margin.x2;
+	r.y2 -= margin.y2;
 
-	Ctx.DrawBox(r, Margin, Back);
+	Ctx.DrawBox(r, margin, Back);
 
 	LColour BorderCol(222, 222, 222);
 	if (Style && Style->BorderLeft().Style != LCss::BorderNone)
@@ -375,8 +352,8 @@ void LRichTextPriv::DivBlock::OnPaint(PaintContext &Ctx)
 			BorderCol.Set(BorderColor.Rgb32, 32);
 	}
 
-	Ctx.DrawBox(r, Border, BorderCol);
-	Ctx.DrawBox(r, Padding, Back);
+	Ctx.DrawBox(r, border, BorderCol);
+	Ctx.DrawBox(r, padding, Back);
 
 	for (auto b : blocks)
 		b->OnPaint(Ctx);
@@ -390,18 +367,18 @@ bool LRichTextPriv::DivBlock::OnLayout(Flow &flow)
 	int SavedRight = flow.Right;
 	int SavedY = flow.CurY;
 
-	flow.Left += Margin.x1;
-	flow.Right -= Margin.x2;
-	flow.CurY += Margin.y1;
+	flow.Left += margin.x1;
+	flow.Right -= margin.x2;
+	flow.CurY += margin.y1;
 
 	Pos.x1 = flow.Left;
 	Pos.y1 = flow.CurY;
 	Pos.x2 = flow.Right;
 	Pos.y2 = flow.CurY - 1;
 
-	flow.Left += Border.x1 + Padding.x1;
-	flow.Right -= Border.x2 + Padding.x2;
-	flow.CurY += Border.y1 + Padding.y1;
+	flow.Left += border.x1 + padding.x1;
+	flow.Right -= border.x2 + padding.x2;
+	flow.CurY += border.y1 + padding.y1;
 
 	for (auto b : blocks)
 	{
@@ -416,7 +393,7 @@ bool LRichTextPriv::DivBlock::OnLayout(Flow &flow)
 	if (Pos.y2 < Pos.y1)
 		Pos.y2 = Pos.y1;
 
-	Pos.y2 += Border.y2 + Padding.y2;
+	Pos.y2 += border.y2 + padding.y2;
 	flow.CurY = Pos.y2 + 1;
 
 	flow.Left = SavedLeft;

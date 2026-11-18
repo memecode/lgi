@@ -448,29 +448,29 @@ float LCss::Len::ToPx(float Box, LFont *Font, int Dpi) const
 		case LenAuto:
 		case LenNormal:
 		case LenPx:
-			return (float)Value;
+			return Value;
 		case LenPt:
 		{
 			int effectiveDpi = Dpi > 0 ? Dpi : LScreenDpi().x;
-			return (float)(Value * effectiveDpi / 72.0);
+			return Value * (float)effectiveDpi / 72.0f;
 		}
 		case LenCm:
 		{
 			int effectiveDpi = Dpi > 0 ? Dpi : LScreenDpi().x;
-			return (float)(Value * effectiveDpi / 2.54);
+			return Value * (float)effectiveDpi / 2.54f;
 		}
 		case LenEm:
 		{
 			int fontHeight = Font ? Font->GetHeight() : 18;
-			return (float)(Value * fontHeight);
+			return Value * (float)fontHeight;
 		}
 		case LenEx:
 		{
-			double fontAscent = Font ? Font->Ascent() : 18.0;
-			return (float)(Value * fontAscent);
+			float fontAscent = (float)(Font ? Font->Ascent() : 18.0);
+			return Value * fontAscent;
 		}
 		case LenPercent:
-			return Box > 0 ? (float)(Box * Value / 100.0) : 0.0f;
+			return Box > 0 ? Box * Value / 100.0f : 0.0f;
 	}
 }
 

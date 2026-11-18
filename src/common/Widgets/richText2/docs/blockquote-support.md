@@ -73,15 +73,12 @@ A quote-specific `BlockQuoteBlock` can solve the immediate blockquote case, but 
 ## Recommended Class
 
 ```text
-class DivBlock : public Block
+class DivBlock : public Block, public LCssBox<LRect>
 {
     LNamedStyle *Style = nullptr;
     int TagId = 0;
     const char *ElementName = nullptr;
 
-    LRect Margin;
-    LRect Border;
-    LRect Padding;
     LRect Pos;
 
 public:
@@ -562,7 +559,7 @@ Formatting should be separated into two concepts:
 
 1. Container styling:
    - applies to `DivBlock`
-   - uses `margin`, `border`, `padding`
+   - uses `margin`, `border`, `padding` (inherited from `LCssBox<LRect>`)
 
 2. Text styling:
    - applies to child `TextBlock`

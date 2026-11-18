@@ -1465,10 +1465,11 @@ protected:
 #pragma pack(pop)
 #endif
 
+template<typename TRect = LRectF>
 class LCssBox
 {
 public:
-	LRectF margin, border, padding;
+	TRect margin, border, padding;
 	
 	LCssBox()
 	{
@@ -1477,7 +1478,7 @@ public:
 		padding.ZOff(0, 0);
 	}
 	
-	void SetStyle(LFont *fnt, LCss *css, LRectF &parentBox)
+	void SetStyle(LFont *fnt, LCss *css, TRect &parentBox)
 	{
 		if (fnt == nullptr || css == nullptr)
 		{

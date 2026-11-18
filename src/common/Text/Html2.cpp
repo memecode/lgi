@@ -783,7 +783,7 @@ class LNewFlow
 			return;
 
 		LRectF parentBox(c.Right - c.Left, View.Y());
-		tag->LCssBox::SetStyle(font, tag, parentBox);
+		tag->LCssBox<>::SetStyle(font, tag, parentBox);
 		tag->Pos.x = c.X;
 		tag->Pos.y = c.y + c.pend;
 
@@ -891,7 +891,7 @@ class LNewFlow
 		bool cell = forcedW >= 0;
 		int availW = pc.Right - pc.Left;
 		LRectF parentBox(availW, View.Y());
-		tag->LCssBox::SetStyle(font, tag, parentBox);
+		tag->LCssBox<>::SetStyle(font, tag, parentBox);
 		if (cell)
 			tag->margin.x1 = tag->margin.x2 = tag->margin.y1 = tag->margin.y2 = 0;
 
@@ -1191,7 +1191,7 @@ class LNewFlow
 			return r;
 
 		LRectF parentBox(View.X(), View.Y());
-		tag->LCssBox::SetStyle(font, tag, parentBox);
+		tag->LCssBox<>::SetStyle(font, tag, parentBox);
 		if (k == KCell)
 			tag->margin.x1 = tag->margin.x2 = tag->margin.y1 = tag->margin.y2 = 0;
 		int edges = (int)(tag->margin.x1 + tag->margin.x2) + HEdges(tag);
@@ -1277,7 +1277,7 @@ class LNewFlow
       return;
 
     LRectF parentBox(View.X(), View.Y());
-    tag->LCssBox::SetStyle(font, tag, parentBox);
+    tag->LCssBox<>::SetStyle(font, tag, parentBox);
 
     int hEdges = HEdges(tag);
     int ml = (int)tag->margin.x1, mr = (int)tag->margin.x2;
@@ -1352,7 +1352,7 @@ class LNewFlow
 
     LRectF cb = ContainingBlockRect(tag);
     float cbW = cb.X(), cbH = cb.Y();
-    tag->LCssBox::SetStyle(font, tag, cb);
+    tag->LCssBox<>::SetStyle(font, tag, cb);
 
     int hEdges = HEdges(tag), vEdges = VEdges(tag);
     int ml = (int)tag->margin.x1, mr = (int)tag->margin.x2;
@@ -1662,7 +1662,7 @@ class LNewFlow
 
 		int availW = pc.Right - pc.Left;
 		LRectF parentBox(availW, View.Y());
-		table->LCssBox::SetStyle(font, table, parentBox);
+		table->LCssBox<>::SetStyle(font, table, parentBox);
 
 		TGrid g;
 		BuildGrid(table, g);
@@ -1746,7 +1746,7 @@ class LNewFlow
 			if (row)
 			{
 				LRectF rb(tableInner, View.Y());
-				row->LCssBox::SetStyle(FontOf(row), row, rb);
+				row->LCssBox<>::SetStyle(FontOf(row), row, rb);
 			}
 
 			int rowH = 0;
