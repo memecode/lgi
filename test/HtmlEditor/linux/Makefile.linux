@@ -84,6 +84,7 @@ Source =	../../src/common/Lgi/LgiMain.cpp \
 			../../src/common/Widgets/richText1/RichTextEditPriv1.cpp \
 			../../src/common/Widgets/richText1/TextBlock1.cpp \
 			../../src/common/Widgets/richText2/BlockCursor.cpp \
+			../../src/common/Widgets/richText2/DivBlock.cpp \
 			../../src/common/Widgets/richText2/HorzRuleBlock.cpp \
 			../../src/common/Widgets/richText2/ImageBlock.cpp \
 			../../src/common/Widgets/richText2/ListBlock.cpp \
@@ -358,7 +359,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/common/Net/Uri.cpp \
 	../../src/common/Resource/LgiRes.cpp \
 	../../src/common/Resource/Res.cpp \
-	../../src/common/Skins/plutovg/plutoVg.cpp \
+	../../src/common/Skins/vector/vectorUi.cpp \
 	../../src/common/Text/DocView.cpp \
 	../../src/common/Text/String.cpp \
 	../../src/common/Text/TextConvert.cpp \
