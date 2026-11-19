@@ -6,6 +6,8 @@
 #include <time.h>
 #include <string.h>
 #include <ctype.h>
+#include <errno.h>
+#include <string>
 
 #define LAssert assert
 
@@ -37,21 +39,6 @@ void LSleep(uint32_t i)
 	    request = remain;
 }
 
-template<typename T>
-T *strnchr(T *str, char ch, size_t len)
-{
-	if (!str)
-		return NULL;
-	T *end = str + len;
-	while (str < end)
-	{
-		if (*str == ch)
-			return str;
-		str++;
-	}
-	return NULL;
-}
-
 enum AppState
 {
 	sInit,
@@ -70,18 +57,14 @@ FILE *crashLog = NULL;
 
 void Log(const char *fmt, ...)
 {
-	va_list args;
+	va_list args, copy;
 	va_start(args, fmt);
-	char buf[1024];
-	auto ch = vsnprintf(buf, sizeof(buf), fmt, args);
+	va_copy(copy, args);
+	vprintf(fmt, args);
 	va_end(args);
-	
-	if (ch > 0)
-	{
-		printf("%.*s", (int)ch, buf);
-		if (crashLog)
-			fwrite(buf, ch, 1, crashLog);
-	}
+	if (crashLog)
+		vfprintf(crashLog, fmt, copy);
+	va_end(copy);
 }
 
 void OpenCrashLog()
@@ -291,7 +274,7 @@ void AtPrompt()
 	}
 }
 
-void OnLine(char *str)
+void OnLine(const char *str)
 {
 	// printf("line='%s'\n", str);
 	if (output)
@@ -333,12 +316,16 @@ int main(int argCount, char **arg)
 	}
 
 	auto child = fork();
+	if (child < 0)
+	{
+		perror("crash-handler: fork");
+		return 1;
+	}
 	if (child)
 	{
-		// child process..
-		char pidArg[64], gdb[] = "gdb";
+		// GDB is the collector's parent and a direct child of the target.
+		char pidArg[64];
 		snprintf(pidArg, sizeof(pidArg), "--pid=%i", pid);
-		char * const args[] = { gdb, pidArg, NULL };
 
 		// Child shouldn't write to its stdin.
 		if (close(in[hWrite]))
@@ -370,57 +357,64 @@ int main(int argCount, char **arg)
 		}
 		close(out[hWrite]);
 
-		auto child = execvp("gdb", args);
+		execlp("gdb", "gdb", "--nx", "-iex", "set pagination off", "-iex", "set confirm off",
+			"-iex", "set debuginfod enabled off", pidArg, static_cast<char *>(nullptr));
 		
 		printf("%s:%i - execvp failed.\n", _FL);
 		return -1;
 	}
 	
-	// parent process...
+	close(in[hRead]);
+	close(out[hWrite]);
+
 	char buf[512];
-	size_t used = 0;
+	std::string pending;
+	bool failed = false;
 	while (loop)
 	{
-		auto rd = read(out[hRead], buf + used, sizeof(buf) - used);
+		auto rd = read(out[hRead], buf, sizeof(buf));
 		if (rd < 0)
+		{
+			if (errno == EINTR)
+				continue;
+			perror("crash-handler: reading GDB output");
+			failed = true;
 			break;
-		used += rd;
-		
-		// printf("rd=%i\nbuf='%.*s'\n\n", (int)rd, (int)used, buf);
-		
-		char *nl;
-		while ((nl = strnchr(buf, '\n', used)) != NULL)
-		{
-			*nl++ = 0;
-			OnLine(buf);
-			
-			auto end = buf + used;
-			auto remaining = end - nl;
-			
-			if (remaining > 0)
-			{
-				memmove(buf, nl, remaining);
-				used = remaining;
-				// printf("rem=%i used=%i\n", (int)remaining, (int)used);
-			}
-			else
-			{
-				used = 0;
-				// printf("break used=%i\n", (int)used);
-				break;
-			}
 		}
-		if (used > 0)
+		if (rd == 0)
 		{
-			buf[used] = 0;
-			OnLine(buf);
-			used = 0;
+			Log("GDB exited before crash collection finished.\n");
+			failed = true;
+			break;
 		}
-		// printf("\n");
+
+		pending.append(buf, rd);
+		size_t start = 0;
+		for (size_t end; loop && (end = pending.find('\n', start)) != std::string::npos;)
+		{
+			pending[end] = '\0';
+			OnLine(pending.c_str() + start);
+			start = end + 1;
+		}
+		pending.erase(0, start);
+		// GDB's prompt has no newline and can arrive across multiple reads.
+		if (loop && pending == "(gdb) ")
+		{
+			OnLine(pending.c_str());
+			pending.clear();
+		}
 	}
-	
+
+	if (failed && output)
+	{
+		if (!pending.empty())
+			output->Add(pending.c_str());
+		DumpOutput("Incomplete GDB output");
+	}
+	close(in[hWrite]);
+	close(out[hRead]);
 	if (crashLog)
 		fclose(crashLog);
 
-	return 0;
+	return failed ? 1 : 0;
 }
