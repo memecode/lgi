@@ -2766,6 +2766,15 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 		if (ParentStyle)
 			Style.Reset(new LCss(*ParentStyle));
 
+		if (c->TagId == TAG_BLOCKQUOTE)
+		{
+			if (!Style)
+				Style.Reset(new LCss);
+			Style->MarginTop(LCss::Len("0.5em"));
+			Style->MarginBottom(LCss::Len("0.5em"));
+			Style->MarginLeft(LCss::Len("1em"));
+		}
+
 		LCss::SelArray Matches;
 		HtmlElementCb Cb;
 		if (ctx.StyleStore.Match(Matches, &Cb, c) &&
@@ -2807,20 +2816,6 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 					Style.Reset(new LCss);
 				if (Style)
 					Style->FontStyle(LCss::FontStyleItalic);
-				break;
-			}
-			case TAG_BLOCKQUOTE:
-			{
-				if (!Style)
-					Style.Reset(new LCss);
-				if (Style)
-				{
-					Style->MarginTop(LCss::Len("0.5em"));
-					Style->MarginBottom(LCss::Len("0.5em"));
-					Style->MarginLeft(LCss::Len("1em"));
-					if (ctx.Tb)
-						ctx.Tb->StripLast(NoTransaction);
-				}
 				break;
 			}
 			case TAG_A:
@@ -2885,6 +2880,69 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 		}
 
 		LNamedStyle *CachedStyle = AddStyleToCache(Style);			
+
+		if (c->TagId == TAG_BLOCKQUOTE)
+		{
+			if (!ctx.TargetBlocks)
+				return Error(_FL, "HTML blockquote has no target block array.");
+
+			if (ctx.Tb && ctx.LastChar != '\n')
+			{
+				const uint32_t NewLine[] = {'\n', 0};
+				if (!ctx.Tb->AddText(NoTransaction, -1, NewLine, 1))
+					return Error(_FL, "Failed to end the paragraph before an HTML blockquote.");
+			}
+
+			auto Quote = new DivBlock(this, TAG_BLOCKQUOTE, "blockquote");
+			if (!Quote || !ctx.AddBlock(Quote))
+			{
+				DeleteObj(Quote);
+				return Error(_FL, "Failed to create HTML blockquote.");
+			}
+			Quote->SetStyle(CachedStyle);
+			auto ChildStyle = Quote->MakeChildStyle(CachedStyle);
+
+			auto PreviousTarget = ctx.TargetBlocks;
+			auto PreviousParent = ctx.TargetParent;
+			auto PreviousText = ctx.Tb;
+			uint32_t PreviousLastChar = ctx.LastChar;
+			bool PreviousStartOfLine = ctx.StartOfLine;
+
+			ctx.TargetBlocks = &Quote->blocks;
+			ctx.TargetParent = Quote;
+			ctx.Tb = nullptr;
+			ctx.LastChar = '\n';
+			ctx.StartOfLine = true;
+
+			bool Imported = ChildStyle != nullptr;
+			if (Imported && ValidStrW(c->GetText()))
+			{
+				ctx.Tb = Quote->GetTextBlock();
+				if ((Imported = ctx.Tb != nullptr))
+				{
+					ctx.Tb->SetStyle(ChildStyle);
+					Imported = ctx.AddText(ChildStyle, c->GetText());
+					ctx.StartOfLine = false;
+				}
+			}
+			if (Imported)
+				Imported = FromHtml(c, ctx, ChildStyle, Depth + 1);
+			if (Imported && !Quote->blocks.Length())
+			{
+				auto Text = Quote->GetTextBlock();
+				if ((Imported = Text != nullptr))
+					Text->SetStyle(ChildStyle);
+			}
+
+			ctx.TargetBlocks = PreviousTarget;
+			ctx.TargetParent = PreviousParent;
+			ctx.Tb = Imported ? nullptr : PreviousText;
+			ctx.LastChar = Imported ? '\n' : PreviousLastChar;
+			ctx.StartOfLine = Imported ? true : PreviousStartOfLine;
+			if (!Imported)
+				return Error(_FL, "Failed to import HTML blockquote contents.");
+			continue;
+		}
 
 		if (c->TagId == TAG_UL || c->TagId == TAG_OL)
 		{

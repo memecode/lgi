@@ -388,6 +388,11 @@ Important:
 
 ## Paint Design
 
+HTML import creates a `DivBlock` for each `blockquote`, including nested quotes.
+The container owns the quote's margins, borders, and padding; its children inherit
+text formatting without those box properties. Author CSS overrides the default
+blockquote margins. Empty quotes retain an editable text child.
+
 `DivBlock::OnPaint()` should:
 
 1. Handle selection before painting.
@@ -404,6 +409,10 @@ Border
 Padding
 Children
 ```
+
+Before drawing margins, expand `Pos` outward: subtract the left/top margins and
+add the right/bottom margins. `DrawBox()` consumes those margins inward to
+recover the border box.
 
 Border color comes from the container style. If no border color is available, use a neutral fallback, for example:
 

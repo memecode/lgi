@@ -304,21 +304,13 @@ LRichTextPriv::ImageBlock::ImageBlock(LRichTextPriv *priv) : Block(priv)
 	Size.x = 200;
 	Size.y = 64;
 	SourceValid.ZOff(-1, -1);
-
-	Margin.ZOff(0, 0);
-	Border.ZOff(0, 0);
-	Padding.ZOff(0, 0);
 }
 
-LRichTextPriv::ImageBlock::ImageBlock(const ImageBlock *Copy) : Block(Copy->d)
+LRichTextPriv::ImageBlock::ImageBlock(const ImageBlock *Copy) : Block(Copy->d), LCssBox<LRect>(*Copy)
 {
 	LayoutDirty = true;
 	SourceImg.Reset(new LMemDC(_FL, Copy->SourceImg));
 	Size = Copy->Size;
-
-	Margin = Copy->Margin;
-	Border = Copy->Border;
-	Padding = Copy->Padding;
 }
 
 LRichTextPriv::ImageBlock::~ImageBlock()
@@ -556,21 +548,7 @@ void LRichTextPriv::ImageBlock::SetStyle(LNamedStyle *s)
 		LFont *Fnt = d->GetFont(s);
 		LayoutDirty = true;
 		LAssert(Fnt != NULL);
-
-		Margin.x1 = Style->MarginLeft().ToPx(Pos.X(), Fnt);
-		Margin.y1 = Style->MarginTop().ToPx(Pos.Y(), Fnt);
-		Margin.x2 = Style->MarginRight().ToPx(Pos.X(), Fnt);
-		Margin.y2 = Style->MarginBottom().ToPx(Pos.Y(), Fnt);
-
-		Border.x1 = Style->BorderLeft().ToPx(Pos.X(), Fnt);
-		Border.y1 = Style->BorderTop().ToPx(Pos.Y(), Fnt);
-		Border.x2 = Style->BorderRight().ToPx(Pos.X(), Fnt);
-		Border.y2 = Style->BorderBottom().ToPx(Pos.Y(), Fnt);
-
-		Padding.x1 = Style->PaddingLeft().ToPx(Pos.X(), Fnt);
-		Padding.y1 = Style->PaddingTop().ToPx(Pos.Y(), Fnt);
-		Padding.x2 = Style->PaddingRight().ToPx(Pos.X(), Fnt);
-		Padding.y2 = Style->PaddingBottom().ToPx(Pos.Y(), Fnt);
+		LCssBox<LRect>::SetStyle(Fnt, Style, Pos);
 	}
 }
 
@@ -725,10 +703,10 @@ void LRichTextPriv::ImageBlock::OnPaint(PaintContext &Ctx)
 	// Paint margins, borders and padding...
 	LRect r = Pos;
 
-	r.x1 -= Margin.x1;
-	r.y1 -= Margin.y1;
-	r.x2 -= Margin.x2;
-	r.y2 -= Margin.y2;
+	r.x1 -= margin.x1;
+	r.y1 -= margin.y1;
+	r.x2 += margin.x2;
+	r.y2 += margin.y2;
 	LCss::ColorDef BorderStyle;
 	if (Style)
 		BorderStyle = Style->BorderLeft().Color;
@@ -736,9 +714,9 @@ void LRichTextPriv::ImageBlock::OnPaint(PaintContext &Ctx)
 	if (BorderStyle.Type == LCss::ColorRgb)
 		BorderCol.Set(BorderStyle.Rgb32, 32);
 
-	Ctx.DrawBox(r, Margin, Ctx.Colours[Unselected].Back);
-	Ctx.DrawBox(r, Border, BorderCol);
-	Ctx.DrawBox(r, Padding, Ctx.Colours[Unselected].Back);
+	Ctx.DrawBox(r, margin, Ctx.Colours[Unselected].Back);
+	Ctx.DrawBox(r, border, BorderCol);
+	Ctx.DrawBox(r, padding, Ctx.Colours[Unselected].Back);
 
 	LRegion unpainted(r);
 
@@ -852,33 +830,33 @@ bool LRichTextPriv::ImageBlock::OnLayout(Flow &flow)
 {
 	LayoutDirty = false;
 
-	flow.Left += Margin.x1;
-	flow.Right -= Margin.x2;
-	flow.CurY += Margin.y1;
+	flow.Left += margin.x1;
+	flow.Right -= margin.x2;
+	flow.CurY += margin.y1;
 
 	Pos.x1 = flow.Left;
 	Pos.y1 = flow.CurY;
 	Pos.x2 = flow.Right;
 	Pos.y2 = flow.CurY-1; // Start with a 0px height.
 
-	flow.Left += Border.x1 + Padding.x1;
-	flow.Right -= Border.x2 + Padding.x2;
-	flow.CurY += Border.y1 + Padding.y1;
+	flow.Left += border.x1 + padding.x1;
+	flow.Right -= border.x2 + padding.x2;
+	flow.CurY += border.y1 + padding.y1;
 
-	ImgPos.x1 = Pos.x1 + Padding.x1;
-	ImgPos.y1 = Pos.y1 + Padding.y1;	
+	ImgPos.x1 = Pos.x1 + padding.x1;
+	ImgPos.y1 = Pos.y1 + padding.y1;	
 
 	ImgPos.x2 = ImgPos.x1 + Size.x - 1;
 	ImgPos.y2 = ImgPos.y1 + Size.y - 1;
 
-	int Px2 = ImgPos.x2 + Padding.x2;
+	int Px2 = ImgPos.x2 + padding.x2;
 	if (Px2 < Pos.x2)
-		Pos.x2 = ImgPos.x2 + Padding.x2;
-	Pos.y2 = ImgPos.y2 + Padding.y2;
+		Pos.x2 = ImgPos.x2 + padding.x2;
+	Pos.y2 = ImgPos.y2 + padding.y2;
 
-	flow.CurY = Pos.y2 + 1 + Margin.y2 + Border.y2 + Padding.y2;
-	flow.Left -= Margin.x1 + Border.x1 + Padding.x1;
-	flow.Right += Margin.x2 + Border.x2 + Padding.x2;
+	flow.CurY = Pos.y2 + 1 + margin.y2 + border.y2 + padding.y2;
+	flow.Left -= margin.x1 + border.x1 + padding.x1;
+	flow.Right += margin.x2 + border.x2 + padding.x2;
 
 	return true;
 }

@@ -1595,13 +1595,18 @@ bool LXmlTree::Output(LXmlTag *t, int Depth)
 			}
 		}
 
-		if (HasContent || HasChildren)
+		if (d->NoDom())
+		{
+			// Flat streams don't nest. Closing tags are separate entries
+			// (tag name starts with '/'), so emit only the open tag here.
+			OutputWrite(">", 1);
+			endTag.Printf("%s", Eol);
+		}
+		else if (HasContent || HasChildren)
 		{
 			OutputWrite(">", 1);
 			endTag.Printf("</%s>%s", t->Tag, Eol);
 		}
-		else if (d->NoDom())
-			endTag.Printf(">%s", Eol);
 		else
 			endTag.Printf(" />%s", Eol);
 	}

@@ -75,6 +75,10 @@ LNamedStyle *LRichTextPriv::DivBlock::MakeChildStyle(LNamedStyle *ParentStyle)
 		LCss::PropPaddingLeft,
 
 		LCss::PropBorder,
+		LCss::PropBorderTop,
+		LCss::PropBorderRight,
+		LCss::PropBorderBottom,
+		LCss::PropBorderLeft,
 		LCss::PropBorderStyle,
 		LCss::PropBorderColor,
 
@@ -339,8 +343,8 @@ void LRichTextPriv::DivBlock::OnPaint(PaintContext &Ctx)
 
 	r.x1 -= margin.x1;
 	r.y1 -= margin.y1;
-	r.x2 -= margin.x2;
-	r.y2 -= margin.y2;
+	r.x2 += margin.x2;
+	r.y2 += margin.y2;
 
 	Ctx.DrawBox(r, margin, Back);
 
@@ -365,7 +369,6 @@ bool LRichTextPriv::DivBlock::OnLayout(Flow &flow)
 {
 	int SavedLeft = flow.Left;
 	int SavedRight = flow.Right;
-	int SavedY = flow.CurY;
 
 	flow.Left += margin.x1;
 	flow.Right -= margin.x2;
@@ -386,15 +389,14 @@ bool LRichTextPriv::DivBlock::OnLayout(Flow &flow)
 			return false;
 
 		LRect ChildPos = b->GetPos();
-		Pos.y2 = MAX(Pos.y2, ChildPos.y2);
-		flow.CurY = Pos.y2 + 1;
+		Pos.y2 = MAX(Pos.y2, MAX(ChildPos.y2, flow.CurY - 1));
 	}
 
 	if (Pos.y2 < Pos.y1)
 		Pos.y2 = Pos.y1;
 
 	Pos.y2 += border.y2 + padding.y2;
-	flow.CurY = Pos.y2 + 1;
+	flow.CurY = Pos.y2 + 1 + margin.y2;
 
 	flow.Left = SavedLeft;
 	flow.Right = SavedRight;
@@ -501,6 +503,8 @@ void LRichTextPriv::DivBlock::SetSpellingErrors(LArray<::LSpellCheck::SpellingEr
 
 void LRichTextPriv::DivBlock::IncAllStyleRefs()
 {
+	if (Style)
+		Style->RefCount++;
 	for (auto b : blocks)
 		b->IncAllStyleRefs();
 }

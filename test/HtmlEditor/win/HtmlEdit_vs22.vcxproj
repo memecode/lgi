@@ -292,6 +292,7 @@
     <ClCompile Include="..\..\..\src\common\Widgets\richText2\HorzRuleBlock.cpp" />
     <ClCompile Include="..\..\..\src\common\Widgets\richText2\ImageBlock.cpp" />
     <ClCompile Include="..\..\..\src\common\Widgets\richText2\ListBlock.cpp" />
+    <ClCompile Include="..\..\..\src\common\Widgets\richText2\DivBlock.cpp" />
     <ClCompile Include="..\..\..\src\common\Widgets\richText2\RichTextEdit.cpp" />
     <ClCompile Include="..\..\..\src\common\Widgets\richText2\RichTextEditPriv.cpp" />
     <ClCompile Include="..\..\..\src\common\Widgets\richText2\TextBlock.cpp" />

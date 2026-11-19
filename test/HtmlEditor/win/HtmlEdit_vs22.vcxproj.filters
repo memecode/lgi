@@ -104,6 +104,9 @@
     <ClCompile Include="..\..\..\src\common\Widgets\richText2\ListBlock.cpp">
       <Filter>Controls\Rte2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\common\Widgets\richText2\DivBlock.cpp">
+      <Filter>Controls\Rte2</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\src\common\Widgets\richText2\RichTextEdit.cpp">
       <Filter>Controls\Rte2</Filter>
     </ClCompile>

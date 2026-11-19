@@ -1015,7 +1015,7 @@ public:
 		void LayoutOffsets(int DefaultFontHt);
 	};
 	
-	class TextBlock : public Block
+	class TextBlock : public Block, public LCssBox<LRect>
 	{
 		LNamedStyle *Style;
 		LArray<LSpellCheck::SpellingError> SpellingErrors;
@@ -1035,9 +1035,6 @@ public:
 		// True if the 'Layout' data is out of date.
 		bool LayoutDirty;
 
-		// Size of the edges
-		LRect Margin, Border, Padding;
-		
 		// Default font for the block
 		LFont *Fnt;
 		
@@ -1261,7 +1258,8 @@ public:
 	};
 
 	class ImageBlock :
-		public Block
+		public Block,
+		public LCssBox<LRect>
 	{
 	public:
 		struct ScaleInf
@@ -1327,9 +1325,9 @@ public:
 
 	public:
 		LAutoPtr<LSurface> SourceImg, DisplayImg, SelectImg;
-		LRect Margin, Border, Padding;
 		LString Source;
 		LPoint Size;
+
 		
 		bool LayoutDirty = false;
 		LRect Pos; // position in document co-ordinates
