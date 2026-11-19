@@ -3082,7 +3082,7 @@ LMessage::Result LRichTextEdit::OnEvent(LMessage *Msg)
 		{
 			auto b = (LRichTextPriv::Block*)Msg->A();
 			LAutoPtr<LMessage> msg((LMessage*)Msg->B());
-			if (d->Blocks.HasItem(b) && msg)
+			if (msg && d->ContainsBlock(b))
 			{
 				b->OnEvent(msg);
 			}

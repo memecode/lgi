@@ -862,6 +862,29 @@ bool LRichTextPriv::IsBusy(bool Stop)
 	return false;
 }
 
+bool LRichTextPriv::Block::IsBusy(bool Stop)
+{
+	for (auto b : blocks)
+		if (b->IsBusy(Stop))
+			return true;
+	return false;
+}
+
+bool LRichTextPriv::ContainsBlock(const Block *Target) const
+{
+	auto Find = [&](auto &&Self, const LArray<Block*> &Siblings) -> bool
+	{
+		for (unsigned i = 0; i < Siblings.Length(); i++)
+		{
+			auto b = Siblings.ItemAt(i);
+			if (b == Target || Self(Self, b->blocks))
+				return true;
+		}
+		return false;
+	};
+	return Find(Find, Blocks);
+}
+
 bool LRichTextPriv::Error(const char *file, int line, const char *fmt, ...)
 {
 	va_list Arg;
@@ -2879,7 +2902,26 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 			}
 		}
 
-		LNamedStyle *CachedStyle = AddStyleToCache(Style);			
+		// These containers are flattened, so their backgrounds cannot be
+		// painted as boxes. Don't turn them into highlights on descendant text.
+		if (Style)
+		{
+			switch (c->TagId)
+			{
+				case TAG_DIV:
+				case TAG_TABLE:
+				case TAG_TBODY:
+				case TAG_TR:
+				case TAG_TD:
+				case TAG_TH:
+					Style->DeleteProp(LCss::PropBackgroundColor);
+					break;
+				default:
+					break;
+			}
+		}
+
+		LNamedStyle *CachedStyle = AddStyleToCache(Style);
 
 		if (c->TagId == TAG_BLOCKQUOTE)
 		{

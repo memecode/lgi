@@ -385,6 +385,14 @@ Important:
 - Child blocks can be `TextBlock`, `ListBlock`, `ImageBlock`, `HorzRuleBlock`, or another `DivBlock`.
 - Child `TextBlock` styles should not duplicate the container `margin`, `border`, or `padding`.
 - The `DivBlock` owns the box properties.
+- The HTML importer flattens `div` and table containers. Their background
+  colors are not imported as text highlights, so the editor background shows
+  through. Explicit text highlights, such as a colored `span` or link, are
+  still imported.
+- When HTML export cannot attach an image in a quote, it keeps the original
+  image reference without adding an empty attachment.
+- Image worker replies and busy checks reach images at any nesting depth.
+  Scribe defers closing or sending while their work is pending.
 
 ## Paint Design
 

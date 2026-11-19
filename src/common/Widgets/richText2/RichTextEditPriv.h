@@ -425,6 +425,7 @@ public:
 	
 	bool Error(const char *file, int line, const char *fmt, ...);
 	bool IsBusy(bool Stop = false);
+	bool ContainsBlock(const Block *Target) const;
 
 	struct Flow
 	{
@@ -743,7 +744,7 @@ public:
 			virtual void DumpNodes(LTreeItem *Ti) = 0;
 			#endif
 			virtual bool IsValid() { return false; }
-			virtual bool IsBusy(bool Stop = false) { return false; }
+			virtual bool IsBusy(bool Stop = false);
 			virtual Block *Clone() = 0;
 			virtual void OnComponentInstall(LString Name) {}
 

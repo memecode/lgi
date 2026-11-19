@@ -4,6 +4,7 @@
 #include "lgi/common/Menu.h"
 #include "lgi/common/Net.h"
 #include "lgi/common/Uri.h"
+#include "lgi/common/XmlTree.h"
 
 #include "RichTextEditPriv.h"
 
@@ -569,7 +570,7 @@ bool LRichTextPriv::ImageBlock::ToHtml(LStream &s, LArray<LDocView::ContentMedia
 	else if (Media)
 	{
 		bool ValidSourceFile = LFileExists(Source);
-		LDocView::ContentMedia &Cm = Media->New();
+		LDocView::ContentMedia Cm;
 		
 		int Idx = LRand() % 10000;
 		if (!ContentId)
@@ -598,10 +599,7 @@ bool LRichTextPriv::ImageBlock::ToHtml(LStream &s, LArray<LDocView::ContentMedia
 			else if (Cm.MimeType.Equals("image/bmp"))
 				Cm.FileName.Printf("img%u.bmp", Idx);
 			else
-			{
-				LAssert(!"Unknown image mime type?");
 				Cm.FileName.Printf("img%u", Idx);
-			}
 		}
 		else if (ValidSourceFile)
 		{
@@ -618,13 +616,6 @@ bool LRichTextPriv::ImageBlock::ToHtml(LStream &s, LArray<LDocView::ContentMedia
 					LgiTrace("%s:%i - Failed to open link image '%s'.\n", _FL, Source.Get());
 			}
 		}
-		else
-		{
-			LAssert(!"No valid source.");
-			return false;
-		}
-
-		LAssert(Cm.MimeType != NULL);
 
 		if (DisplayImg &&
 			SourceImg &&
@@ -634,21 +625,37 @@ bool LRichTextPriv::ImageBlock::ToHtml(LStream &s, LArray<LDocView::ContentMedia
 			Style.Printf(" style=\"width:%ipx\"", Dx);
 		}
 		
-		if (Cm.Stream)
+		if (Cm.Valid())
 		{
+			LXmlTree Xml;
 			s.Print("<img%s src=\"", Style ? Style.Get() : "");
 			if (d->HtmlLinkAsCid)
-				s.Print("cid:%s", Cm.Id.Get());
+			{
+				s.Print("cid:");
+				Xml.EncodeEntities(&s, Cm.Id, Cm.Id.Length(), "\"<>");
+			}
 			else
-				s.Print("%s", Cm.FileName.Get());
+				Xml.EncodeEntities(&s, Cm.FileName, Cm.FileName.Length(), "\"<>");
 			s.Print("\">\n");
 
-			LAssert(Cm.Valid());
+			auto &Attachment = Media->New();
+			Attachment.Id = Cm.Id;
+			Attachment.FileName = Cm.FileName;
+			Attachment.MimeType = Cm.MimeType;
+			Attachment.Stream.Reset(Cm.Stream.Release());
 			return true;
 		}
+
+		LgiTrace("%s:%i - Image attachment unavailable; exporting the original reference.\n", _FL);
 	}
 
-	s.Print("<img src=\"%s\">\n", Source.Get());
+	if (Source)
+	{
+		LXmlTree Xml;
+		s.Print("<img src=\"");
+		Xml.EncodeEntities(&s, Source, Source.Length(), "\"<>");
+		s.Print("\">\n");
+	}
 	return true;
 }
 
