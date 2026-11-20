@@ -173,6 +173,18 @@ public:
 		if (!Uri)
 			return false;
 
+		if (*Uri == '#')
+		{
+			if (CurHistory < 0 || CurHistory >= (ssize_t)History.Length())
+				return false;
+			const char *current = History[CurHistory];
+			if (!current)
+				return false;
+			const char *hash = strchr(current, '#');
+			LString base(current, hash ? hash - current : -1);
+			return Wnd->SetUri(base + Uri);
+		}
+
 		LUri u(Uri);
 		char Sep, Buf[MAX_PATH_LEN];
 		if (!u.sProtocol)
@@ -187,7 +199,7 @@ public:
 			// Trim off filename...
 			char *Last = strrchr(Cur, Sep);
 			auto t = LString(Uri).SplitDelimit("\\/");
-			if (*Uri != '#' && Last)
+			if (Last)
 				sprintf_s(Buf, sizeof(Buf), "%.*s", (int) (Last - Cur), Cur);
 			else
 				strcpy_s(Buf, sizeof(Buf), Cur);
@@ -204,11 +216,6 @@ public:
 				{
 					if ((End = strrchr(Buf, Sep)))
 						*End = 0;
-				}
-				else if (t[i][0] == '#')
-				{
-					size_t len = strlen(Buf);
-					sprintf_s(Buf+len, sizeof(Buf)-len, "%s", t[i].Get());
 				}
 				else
 				{
@@ -251,7 +258,10 @@ public:
 			if (!BaseUri.sPath.IsEmpty())
 			{
 				LFile::Path p(BaseUri.sPath);
-				SearchPaths.AddAt(0, (p / "..").GetFull());
+				if (p.IsFolder())
+					SearchPaths.AddAt(0, p.GetFull());
+				else
+					SearchPaths.AddAt(0, (p / "..").GetFull());
 			}
 
 			LFile::Path p;

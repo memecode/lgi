@@ -504,6 +504,8 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 	}
 
 	bool IsFirst = true;
+	// Index of the first fallback child of a loaded <iframe>, or -1
+	ssize_t IFrameFallbackStart = -1;
 	for (char *s=Doc; s && *s; )
 	{
 		char *StartTag = s;
@@ -1073,6 +1075,7 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 					
 					if (Elem->TagId == TAG_IFRAME)
 					{
+						bool Loaded = false;
 						LVariant Src;
 						if (Elem->GetValue("src", Src) && View && View->GetEnv())
 						{
@@ -1089,39 +1092,42 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 								auto Result = View->GetEnv()->GetContent(j);
 								if (Result == LDocumentEnv::LoadImmediate)
 								{
-									LStreamI *s = j->GetStream();
-									if (s)
+									if (auto stream = j->GetStream())
 									{
-										uint64 Len = s->GetSize();
-										if (Len > 0)
+										uint64 len = stream->GetSize();
+										if (len > 0)
 										{
-											LAutoString a(new char[(size_t)Len+1]);
-											ssize_t r = s->Read(a, (int)Len);
+											LAutoString a(new char[len + 1]);
+											ssize_t r = stream->Read(a, len);
 											a[r] = 0;
 											
-											LHtmlElement *Child = CreateElement(Elem);
-											if (Child)
+											if (auto child = CreateElement(Elem))
 											{
 												bool BackOut = false;
-												LArray<LHtmlElement*> ot = OpenTags;
+												LArray<LHtmlElement*> ot;
+												ot.Swap(OpenTags); // save the open tags, to restore afterwards.
+												
 
-												ParseHtml(Child, a, Depth + 1, false, &BackOut);
+												ParseHtml(child, a, Depth + 1, false, &BackOut);
 
-												OpenTags = ot;
+												OpenTags.Swap(ot);
+												Loaded = true;
+												IFrameFallbackStart = Elem->Children.Length();
 											}
 										}
 									}
 								}
 							}
 						}
+
+						printf("%s:%i - loaded=%i\n", _FL, Loaded);
 					}
 				}
 				else
 				{
 					// Child tag
 					DoChildTag:
-					LHtmlElement *c = CreateElement(Elem);
-					if (c)
+					if (auto c = CreateElement(Elem))
 					{
 						bool BackOut = false;
 
@@ -1139,7 +1145,8 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 								LHtmlElement *Last = c->Children.Last();
 
 								if (Last->TagId == CONTENT &&
-									!ValidStrW(Last->Txt))
+									!ValidStrW(Last->Txt) &&
+									Last->Children.Length() == 0)
 								{
 									Last->Detach();
 									DeleteObj(Last);
@@ -1168,13 +1175,13 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 				//			<b>
 				//			</font>
 				//		</b>
-				char *EndBracket = strchr(s, '>');
+				auto EndBracket = strchr(s, '>');
 				if (EndBracket)
 				{
-					char *e = EndBracket;
+					auto e = EndBracket;
 					while (e > s && strchr(LWhiteSpace, e[-1]))
 						e--;
-					LAutoString Name(NewStr(s, e - s));
+					LString Name(s, e - s);
 					LHtmlElement *Open = GetOpenTag(Name);					
 					if (Open)
 					{
@@ -1218,6 +1225,19 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 						}
 						s++;
 
+						if (Elem->TagId == TAG_IFRAME && IFrameFallbackStart >= 0)
+						{
+							// After the <iframe> tag is closed, remove the 
+							// child which contains the "no iframe" inline content
+							while (Elem->Children.Length() > IFrameFallbackStart)
+							{
+								LHtmlElement *Last = Elem->Children.Last();
+								Last->Detach();
+								DeleteObj(Last);
+							}
+							IFrameFallbackStart = -1;
+						}
+
 						if (IsBlock(Elem->Display()) || Elem->TagId == TAG_BR)
 						{
 							SkipNonDisplay(s);
@@ -1251,6 +1271,7 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 			PlainText:
 			char *n = NextTag(s);
 			ssize_t Len = n ? n - s : strlen(s);
+			
 			LAutoWString WStr(CleanText(s, Len, true, InPreTag));
 			if (WStr && *WStr)
 			{
@@ -1298,7 +1319,8 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 
 							if (Elem->Children.Length() == 0 &&
 								(!Elem->Info || !Elem->Info->NoText()) &&
-								!Elem->Txt)
+								!Elem->Txt &&
+								Elem->TagId != TAG_IFRAME)
 							{
 								Elem->Txt = Cur;
 							}
@@ -1309,31 +1331,6 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 						}
 
 						// Now process the text of interest...
-						/*
-						if (Cls == TxtEmoji)
-						{
-							// Emit the emoji image
-							LHtmlElement *img = CreateElement(Elem);
-							if (img)
-							{
-								img->Tag.Reset(NewStr("img"));
-								if ((img->Info = GetTagInfo(img->Tag)))
-									img->TagId = img->Info->Id;
-
-								LRect rc;
-								EMOJI_CH2LOC(*c, rc);
-
-								img->Set("src", Html->d->EmojiImg);
-
-								char css[256];
-								sprintf_s(css, sizeof(css), "x-rect: rect(%i,%i,%i,%i);", rc.y1, rc.x2, rc.y2, rc.x1);
-								img->Set("style", css);
-								img->SetStyle();
-							}
-							Start = c + 1;
-						}
-						else
-						*/
 						if (Cls == TxtEol)
 						{
 							// Emit the <br> tag
@@ -1365,7 +1362,7 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 	LgiTrace("::ParseHtml end\n");
 	#endif
 
-	return 0;
+	return nullptr;
 }
 
 char16 *LHtmlParser::CleanText(const char *s, ssize_t Len, bool ConversionAllowed, bool KeepWhiteSpace)

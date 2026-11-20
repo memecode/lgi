@@ -151,12 +151,15 @@ LString LUri::ToString()
 		p.Print(":%i", Port);
 	if (sPath)
 	{
-		auto e = EncodeStr(sPath);
+		auto e = EncodeStr(sPath, "#");
 		char *s = e ? e : sPath;
 		p.Print("%s%s", *s == '/' ? "" : "/", s);
 	}
 	if (sAnchor)
-		p.Print("#%s", sAnchor.Get());
+	{
+		auto fragment = EncodeStr(sAnchor, "#");
+		p.Print("#%s", fragment.Get());
+	}
 		
 	return p.NewLStr();
 }
@@ -170,6 +173,16 @@ bool LUri::Set(const char *uri)
 
 	const char *s = uri;
 	SkipWs(s);
+
+	LString withoutFragment;
+	if (auto hash = strchr(s, '#'))
+	{
+		sAnchor = DecodeStr(hash + 1);
+		if (hash == s)
+			return true;
+		withoutFragment.Set(s, hash - s);
+		s = withoutFragment;
+	}
 
 	// Scan ahead and check for protocol...
 	const char *hasProto = NULL;
@@ -303,16 +316,6 @@ bool LUri::Set(const char *uri)
 		}
 	}
 
-	if (sPath)
-	{
-		auto anchor = sPath.Find("#");
-		if (anchor >= 0)
-		{
-			sAnchor = sPath(anchor, -1);
-			sPath.Length(anchor);
-		}
-	}
-		
 	return sHost || sPath;
 }
 

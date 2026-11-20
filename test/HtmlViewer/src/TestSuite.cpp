@@ -26,6 +26,10 @@
 #include "lgi/common/Html2.h"
 #include "../src/common/Text/HtmlPriv2.h"
 
+#include "lgi/common/DocView.h"
+#include "lgi/common/Stream.h"
+#include "lgi/common/Uri.h"
+
 #include "resdefs.h"
 
 #define HAS_LOG_VIEW			0
@@ -1159,11 +1163,275 @@ bool TestIframeBodyBackground()
 	return true;
 }
 
+static LHtmlElement *FindTag(LHtmlElement *e, HtmlTag id)
+{
+	if (!e)
+		return nullptr;
+	if (e->TagId == id)
+		return e;
+	for (ssize_t i = 0; i < e->Children.Length(); i++)
+	{
+		if (auto r = FindTag(e->Children[i], id))
+			return r;
+	}
+	return nullptr;
+}
+
+static LHtmlElement *FindText(LHtmlElement *e)
+{
+	if (!e)
+		return nullptr;
+	if (e->GetText() && e->GetText()[0])
+		return e;
+	for (ssize_t i = 0; i < e->Children.Length(); i++)
+	{
+		if (auto r = FindText(e->Children[i]))
+			return r;
+	}
+	return nullptr;
+}
+
+static LHtmlElement *FindTextOutside(LHtmlElement *e, LHtmlElement *exclude)
+{
+	if (!e || e == exclude)
+		return nullptr;
+	if (e->GetText() && e->GetText()[0])
+		return e;
+	for (ssize_t i = 0; i < e->Children.Length(); i++)
+	{
+		if (e->Children[i] == exclude)
+			continue;
+		if (auto r = FindTextOutside(e->Children[i], exclude))
+			return r;
+	}
+	return nullptr;
+}
+
+class TestIframeEnv : public LDocumentEnv {
+public:
+	LoadType GetContent(LAutoPtr<LoadJob> &j) override {
+		if (!j)
+			return LoadError;
+
+		const char *Content =
+			"<!DOCTYPE html><html><head></head><body class='menu'>"
+			"<table class='menu'><tr><td>Help Index<tr><td>Index"
+			"<tr><td>Introduction</table></body></html>";
+		LMemStream *Stream = new LMemStream(Content, strlen(Content));
+		if (!Stream)
+			return LoadError;
+
+		Stream->SetPos(0);
+		if (!j->Stream.Reset(Stream)) {
+			DeleteObj(Stream);
+			return LoadError;
+		}
+		return LoadImmediate;
+	}
+};
+
+class TestIframeHtml : public Html2::LHtml {
+public:
+	using Html2::LHtml::LHtml;
+
+	Html2::LTag *RootTag() { return Tag; }
+};
+
+bool TestIframeLoadedContent()
+{
+	TestIframeEnv env;
+	TestIframeHtml html(0, 0, 0, 80, 60);
+	html.SetEnv(&env);
+
+	char doc[] = "<html><body><div style='position:fixed;height:100%;width:190px;'>"
+		"<iframe style='width:190px;height:100%;' src='menu.html'>No iframe support.</iframe>"
+		"</div><table><tr><td>Outside</td></tr></table></body></html>";
+	if (!html.Name(doc))
+		return false;
+	html.Layout(true);
+
+	LHtmlElement *root = html.RootTag();
+	LHtmlElement *frame = FindTag(root, TAG_IFRAME);
+	if (!frame) {
+		printf("Iframe loaded content: no iframe element\n");
+		return false;
+	}
+
+	if (frame->GetText()) {
+		printf("Iframe loaded content: fallback text was parsed as content\n");
+		return false;
+	}
+
+	if (!frame->Children.Length()) {
+		printf("Iframe loaded content: loaded iframe content was not attached\n");
+		return false;
+	}
+
+	LHtmlElement *loaded = FindText(frame);
+	if (!loaded) {
+		printf("Iframe loaded content: loaded content text was not parsed\n");
+		return false;
+	}
+
+	auto frameTag = dynamic_cast<Html2::LTag*>(frame);
+	auto loadedTag = dynamic_cast<Html2::LTag*>(loaded);
+	if (!frameTag || frameTag->Size.y <= 0 ||
+		!loadedTag || !loadedTag->TextPos.Length())
+	{
+		printf("Iframe loaded content: loaded content was not laid out\n");
+		return false;
+	}
+
+	LMemDC screen(_FL, 80, 60, CsBgra32, LSurface::SurfaceRequireExactCs);
+	if (!screen[0])
+		return false;
+	screen.Colour(LColour::White);
+	screen.Rectangle();
+	html.OnPaint(&screen);
+
+	bool paintedText = false;
+	for (auto run: loadedTag->TextPos)
+	{
+		int x1 = MAX(loadedTag->AbsX() + run->x1, 0);
+		int y1 = MAX(loadedTag->AbsY() + run->y1, 0);
+		int x2 = MIN(loadedTag->AbsX() + run->x2, 79);
+		int y2 = MIN(loadedTag->AbsY() + run->y2, 59);
+		for (int y = y1; y <= y2 && !paintedText; y++)
+		{
+			auto pixels = reinterpret_cast<const LBgra32*>(screen[y]);
+			for (int x = x1; x <= x2; x++)
+			{
+				if (pixels[x].r < 100 && pixels[x].g < 100 && pixels[x].b < 100)
+				{
+					paintedText = true;
+					break;
+				}
+			}
+		}
+	}
+	if (!paintedText)
+	{
+		printf("Iframe loaded content: text was laid out but not painted\n");
+		return false;
+	}
+
+	LHtmlElement *outside = FindTextOutside(root, frame);
+	if (!outside) {
+		printf("Iframe loaded content: text outside the iframe was not parsed\n");
+		return false;
+	}
+
+	html.SetEnv(nullptr);
+	return true;
+}
+
+bool TestIframeFallbackContent()
+{
+	TestIframeHtml html(0, 0, 0, 80, 60);
+	char doc[] = "<html><body><div style='position:fixed;height:100%;width:190px;'>"
+		"<iframe style='width:190px;height:100%;' src='menu.html'>No iframe support.</iframe>"
+		"</div><table><tr><td>Outside</td></tr></table></body></html>";
+	if (!html.Name(doc))
+		return false;
+	html.Layout(true);
+
+	LHtmlElement *root = html.RootTag();
+	LHtmlElement *frame = FindTag(root, TAG_IFRAME);
+	if (!frame)
+	{
+		printf("Iframe fallback content: no iframe element\n");
+		return false;
+	}
+
+	if (!FindText(frame))
+	{
+		printf("Iframe fallback content: fallback text was not parsed when no content was loaded\n");
+		return false;
+	}
+
+	auto frameTag = dynamic_cast<Html2::LTag*>(frame);
+	auto fallbackTag = dynamic_cast<Html2::LTag*>(FindText(frame));
+	if (!frameTag || frameTag->Size.y <= 0 ||
+		!fallbackTag || !fallbackTag->TextPos.Length())
+	{
+		printf("Iframe fallback content: fallback text was not laid out\n");
+		return false;
+	}
+
+	LHtmlElement *outside = FindTextOutside(root, frame);
+	if (!outside)
+	{
+		printf("Iframe fallback content: text outside the iframe was not parsed\n");
+		return false;
+	}
+
+	return true;
+}
+
+static bool TestFragmentScroll()
+{
+	LUri section("/help/intro.html#section");
+	LUri details("#more%20details");
+	if (!section.sPath.Equals("/help/intro.html") ||
+		!section.sAnchor.Equals("section") ||
+		!section.ToString().Equals("/help/intro.html#section") ||
+		!details.sAnchor.Equals("more details") ||
+		!details.ToString().Equals("#more%20details"))
+	{
+		printf("Fragment scroll: URL did not round-trip\n");
+		return false;
+	}
+
+	TestIframeHtml html(0, 0, 0, 320, 100);
+	LMemDC screen(_FL, 320, 100, CsBgra32, LSurface::SurfaceRequireExactCs);
+	if (!screen[0])
+		return false;
+
+	auto jump = [&](const char *doc, LUri &uri, HtmlTag tag)
+	{
+		if (!html.Name(doc) || !html.GotoAnchor(uri.sAnchor))
+			return false;
+		html.OnPaint(&screen);
+		#if defined(__GTK_H__) || defined(HAIKU)
+		// Deliver the scrollbar creation queued by layout in an offscreen view.
+		auto scrollbar = CreateMsg(M_SET_SCROLL, 0, 1);
+		html.OnEvent(&scrollbar);
+		html.OnPaint(&screen);
+		#endif
+
+		auto target = static_cast<Html2::LTag*>(FindTag(html.RootTag(), tag));
+		int lineHeight = html.GetFont()->GetHeight();
+		int top = html.GetScrollPos().y * lineHeight;
+		if (!target || top <= 0 || target->AbsY() < top || target->AbsY() - top >= lineHeight)
+		{
+			printf("Fragment scroll: viewport top %i does not match target %i\n",
+				top, target ? target->AbsY() : -1);
+			return false;
+		}
+		return true;
+	};
+
+	// Navigate twice without delay, so the second document inherits a scrollbar.
+	return jump("<html><body><div style='height:350px'>Before</div>"
+				"<div><a name='section'>Section</a></div>"
+				"<div style='height:250px'>After</div></body></html>", section, TAG_A) &&
+		   jump("<html><body><div style='height:900px'>Before</div>"
+				"<h2 id='more details'>Details</h2>"
+				"<div style='height:250px'>After</div></body></html>", details, TAG_H2);
+}
+
 int LgiMain(OsAppArguments &AppArgs)
 {
 	LApp a(AppArgs, "HtmlTestSuite");
 	if (a.IsOk())
 	{
+		if (a.GetOption("test-fragment-scroll"))
+		{
+			bool passed = TestFragmentScroll();
+			printf("Fragment scroll: %s\n", passed ? "PASS" : "FAIL");
+			return passed ? 0 : 1;
+		}
+
 		if (a.GetOption("test-iframe-background"))
 		{
 			bool passed = TestIframeBodyBackground();
@@ -1171,9 +1439,27 @@ int LgiMain(OsAppArguments &AppArgs)
 			return passed ? 0 : 1;
 		}
 
+		if (a.GetOption("test-iframe-fallback"))
+		{
+			bool passed = TestIframeFallbackContent();
+			printf("Iframe fallback content: %s\n", passed ? "PASS" : "FAIL");
+			return passed ? 0 : 1;
+		}
+
+		if (a.GetOption("test-iframe-loaded"))
+		{
+			bool passed = TestIframeLoadedContent();
+			printf("Iframe loaded content: %s\n", passed ? "PASS" : "FAIL");
+			return passed ? 0 : 1;
+		}
+
 	    printf("Usage: %s [args]\n"
 	        "\n"
 	        "   -test-rounded-borders   Run the rounded borders test\n"
+	        "   -test-iframe-background Run the iframe body background test\n"
+	        "   -test-iframe-fallback   Run the iframe fallback content test\n"
+	        "   -test-iframe-loaded     Run the iframe loaded content test\n"
+	        "   -test-fragment-scroll  Run the fragment navigation test\n"
 	        "   -render $fileName       Render the file to the 'render.png'\n",
 	        AppArgs.Arg[0]);
 	

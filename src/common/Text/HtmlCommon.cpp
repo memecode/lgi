@@ -790,7 +790,7 @@ LHtmlElement::LHtmlElement(LHtmlElement *parent)
 
 LHtmlElement::~LHtmlElement()
 {
-	Children.DeleteObjects();
+	EmptyChildren();
 }
 
 bool LHtmlElement::Attach(LHtmlElement *Child, ssize_t Idx)
@@ -822,8 +822,13 @@ void LHtmlElement::Detach()
 	if (Parent)
 	{
 		Parent->Children.Delete(this, true);
-		Parent = NULL;
+		Parent = nullptr;
 	}
+}
+
+void LHtmlElement::EmptyChildren()
+{
+	Children.DeleteObjects();
 }
 
 bool LHtmlElement::HasChild(LHtmlElement *c)

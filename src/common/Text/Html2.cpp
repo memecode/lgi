@@ -3264,7 +3264,8 @@ LTag *LTag::GetAnchor(char *Name)
 		return 0;
 
 	const char *n;
-	if (IsAnchor(0) && Get("name", n) && n && !_stricmp(Name, n))
+	if ((Get("id", n) && n && !strcmp(Name, n)) ||
+		(TagId == TAG_A && Get("name", n) && n && !_stricmp(Name, n)))
 	{
 		return this;
 	}
@@ -6376,6 +6377,8 @@ bool LHtml::Name(const char *s)
 
 	SetDocumentUid(Uid);
 
+	d->OnLoadAnchor.Reset();
+	d->SetScrollTime = 0;
 	_Delete();
 	_New();
 
@@ -6629,19 +6632,12 @@ LPoint LHtml::Layout(bool ForceLayout)
 		{
 			d->SetScrollTime = Now;
 			SetScrollBars(false, Sy);
-			
-			if (Sy && VScroll && LineY > 0)
-			{
-				int y = Y();
-				int p = MAX(y / LineY, 1);
-				int fy = d->Content.y / LineY;
-				VScroll->SetPage(p);
-				VScroll->SetRange(fy);
-			}
 		}
-		else
+
+		if (Sy && VScroll && LineY > 0)
 		{
-			// LgiTrace("%s - Dropping SetScroll, loop detected: %i ms\n", GetClass(), (int)(Now - d->SetScrollTime));
+			VScroll->SetPage(MAX(Y() / LineY, 1));
+			VScroll->SetRange(d->Content.y / LineY);
 		}
 	}
 
@@ -6730,6 +6726,12 @@ void LHtml::OnPaint(LSurface *ScreenDC)
 		PROF("Layout");
 		Layout();
 
+		if (d->OnLoadAnchor && VScroll)
+		{
+			LAutoString anchor = d->OnLoadAnchor;
+			GotoAnchor(anchor);
+		}
+
 		if (VScroll)
 		{
 			PROF("VScroll");
@@ -6788,14 +6790,6 @@ void LHtml::OnPaint(LSurface *ScreenDC)
 			ScreenDC->Blt(0, 0, MemDC);
 		}
 	#endif
-
-	if (d->OnLoadAnchor && VScroll)
-	{
-		LAutoString a = d->OnLoadAnchor;
-		PROF("GotoAnchor");
-		GotoAnchor(a);
-		LAssert(d->OnLoadAnchor == 0);
-	}
 }
 
 bool LHtml::HasSelection()
@@ -8242,16 +8236,19 @@ bool LHtml::GotoAnchor(char *Name)
 		LTag *a = Tag->GetAnchor(Name);
 		if (a)
 		{
-			if (VScroll)
-			{
-				int LineY = GetFont()->GetHeight();
-				int Ay = a->AbsY();
-				int Scr = Ay / LineY;
-				SetVScroll(Scr);
-				VScroll->SendNotify();
-			}
-			else
+			if (ViewWidth != GetClient().X() || !VScroll)
 				d->OnLoadAnchor.Reset(NewStr(Name));
+			else
+			{
+				d->OnLoadAnchor.Reset();
+				int LineY = GetFont()->GetHeight();
+				if (LineY > 0)
+				{
+					SetVScroll(a->AbsY() / LineY);
+					VScroll->SendNotify();
+				}
+			}
+			return true;
 		}
 	}
 

@@ -193,10 +193,10 @@ protected:
 public:
 	HtmlTag TagId = CONTENT;
 	LAutoString Tag;
-	LHtmlElemInfo *Info = NULL;
+	LHtmlElemInfo *Info = nullptr;
 	LAutoString Condition;
 	
-	LHtmlElement *Parent = NULL;
+	LHtmlElement *Parent = nullptr;
 	LArray<LHtmlElement*> Children;
 	
 	LHtmlElement(LHtmlElement *parent);
@@ -211,6 +211,7 @@ public:
 	bool Attach(LHtmlElement *Child, ssize_t Idx = -1);
 	void Detach();
 	bool HasChild(LHtmlElement *Child);
+	void EmptyChildren();
 
 	// Virtuals
 	virtual bool Get(const char *attr, const char *&val) { return false; }

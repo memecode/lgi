@@ -12,7 +12,7 @@ public:
 	LString sHost;
 	int Port = 0;
 	LString sPath; // Should always have unix '/' style slashes
-	LString sAnchor;
+	LString sAnchor; // Decoded fragment, without the leading '#'.
 
 	/// Parser for URI's.
 	LUri
