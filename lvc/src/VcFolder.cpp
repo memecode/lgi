@@ -1,5 +1,10 @@
 #include "Lvc.h"
 
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
 #include "lgi/common/ClipBoard.h"
 #include "lgi/common/Json.h"
 #include "lgi/common/ProgressDlg.h"
@@ -20,6 +25,27 @@
 #else
 #define PROF(s)
 #endif
+
+static void TraceFiles(const char *event, const char *folder, const char *format, ...)
+{
+	static const bool enabled = std::getenv("LVC_TRACE_FILES") != nullptr;
+	if (!enabled)
+		return;
+
+	std::fprintf(stderr, "[lvc-files] %s folder='%s' ", event, folder ? folder : "");
+	va_list args;
+	va_start(args, format);
+	std::vfprintf(stderr, format, args);
+	va_end(args);
+	std::fputc('\n', stderr);
+}
+
+static const char *LocalGitStatusCommand(bool showUntracked)
+{
+	return showUntracked ?
+		"status --porcelain -z --untracked-files=all" :
+		"status --porcelain -z --untracked-files=no";
+}
 
 class LRemoteUrl : public LDialog
 {
@@ -1380,6 +1406,9 @@ void VcFolder::OnSelectUpdateItems()
 
 void VcFolder::Select(bool b)
 {
+	if (b && d->Files)
+		TraceFiles("Select", Uri.sPath.Get(), "rows=%zu", (size_t)d->Files->Length());
+
 	#if PROFILE_FN
 	LProfile Prof("Select");
 	#endif
@@ -2509,9 +2538,20 @@ bool VcFolder::ParseCheckout(int Result, LString s, ParseParams *Params)
 bool VcFolder::ParseWorking(int Result, LString s, ParseParams *Params)
 {
 	IsListingWorking = false;
+	TraceFiles("ParseWorking", Uri.sPath.Get(), "exit=%d selected=%d rows=%zu",
+		Result, (int)LTreeItem::Select(), (size_t)d->Files->Length());
 
 	switch (GetType())
 	{
+		case VcGit:
+			if (IsLocal())
+			{
+				ParseParams status;
+				status.IsWorking = true;
+				return ParseStatus(Result, s, &status);
+			}
+			ParseDiffs(s, LString(), true);
+			break;
 		case VcSvn:
 		case VcHg:
 		{
@@ -2641,6 +2681,58 @@ void VcFolder::Diff(VcFile *file)
 	switch (GetType())
 	{
 		case VcGit:
+		{
+			LString a;
+			if (auto rev = file->GetRevision())
+				a.Printf("diff %s --", rev);
+			else if (file->GetGitIndexOnly())
+				a = "diff --cached --";
+			else
+				a = "diff --";
+
+			d->Diff->Name(nullptr);
+			if (file->GetStatus() == VcFile::SUntracked)
+				break;
+
+			auto addPath = [&](const char *path)
+			{
+				char quote = '"';
+				#ifdef POSIX
+				if (IsLocal() && strchr(path, '"'))
+				{
+					if (strchr(path, '\''))
+						return false; // The local argument tokenizer cannot escape either quote.
+					quote = '\'';
+				}
+				#endif
+				a += LString::Fmt(" %c:(literal)%s%c", quote, path, quote);
+				return true;
+			};
+			auto original = file->GetGitOriginalPath();
+			if (!addPath(Fn) || (file->GetGitIndexOnly() && original && !addPath(original)))
+			{
+				d->Log->Print("Could not load Git diff: filename contains both quote characters.\n");
+				break;
+			}
+			TraceFiles("Diff command", Uri.sPath.Get(), "index=%d path='%s'", file->GetGitIndexOnly(), Fn);
+
+			// A refresh can remove the row before Git returns.
+			auto p = new ParseParams([this, target = file->GetDiffTarget()](auto result, auto output)
+			{
+				auto ref = target.lock();
+				if (!ref || (*ref)->GetList() != d->Files || !LTreeItem::Select())
+					return;
+				if (result)
+				{
+					OnCmdError(output, "Could not load file diff.");
+					return;
+				}
+				ParseDiffs(output, LString(), true, *ref);
+			});
+			if (!StartCmd(a, nullptr, p))
+				delete p;
+			break;
+		}
 		case VcHg:
 		{
 			LString a;
@@ -2674,7 +2766,11 @@ void VcFolder::Diff(VcFile *file)
 
 void VcFolder::InsertFiles(List<LListItem> &files)
 {
+	auto before = d->Files->Length();
+	auto incoming = files.Length();
 	d->Files->Insert(files);
+	TraceFiles("InsertFiles", Uri.sPath.Get(), "before=%zu incoming=%zu after=%zu",
+		(size_t)before, (size_t)incoming, (size_t)d->Files->Length());
 	if (FileToSelect)
 	{
 		LListItem *scroll = NULL;
@@ -2702,7 +2798,7 @@ void VcFolder::InsertFiles(List<LListItem> &files)
 	}
 }
 
-bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
+bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking, VcFile *Target)
 {
 	LAssert(IsWorking || Rev.Get() != NULL);
 
@@ -2784,6 +2880,8 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 			for (auto &line: lines)
 			{
 				const char *txt = line.Get();
+				if (line.Find("* Unmerged path ") == 0)
+					TraceFiles("ParseDiffs marker", Uri.sPath.Get(), "path='%s'", txt + sizeof("* Unmerged path ") - 1);
 				
 				if (!Stricmp(txt, "Changes to be committed:"))
 					state = TAdded;
@@ -2820,7 +2918,9 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 					else
 						Fn = lastPath;
 					
-					f = findFile(Fn);
+					f = Target ? Target : findFile(Fn);
+					TraceFiles("ParseDiffs header", Uri.sPath.Get(), "mode='%s' path='%s' reused=%d preview=%d",
+						header[1].Get() ? header[1].Get() : "", Fn.Get() ? Fn.Get() : "", f != nullptr, Target != nullptr);
 					if (!f)
 					{
 						f = new VcFile(d, this, Rev, IsWorking);
@@ -2878,12 +2978,12 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 					{
 						if (!_strnicmp(txt, "new file", 8))
 						{
-							if (f)
+							if (f && !Target)
 								f->SetText("A", COL_STATE);
 						}
 						else if (!_strnicmp(txt, "deleted file", 12))
 						{
-							if (f)
+							if (f && !Target)
 								f->SetText("D", COL_STATE);
 						}
 						else if (!_strnicmp(txt, "index", 5) ||
@@ -2909,10 +3009,19 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 				f->SetDiff(Diffs.NewLStr());
 				Diffs.Empty();
 			}
+
+			if (Target)
+			{
+				TraceFiles("ParseDiffs preview", Uri.sPath.Get(), "rows=%zu", (size_t)d->Files->Length());
+				break;
+			}
 			
 			for (auto &ns: conflicted)
 			{
-				auto f = FindFile(ns.path);
+				// Files not yet inserted into the tree are only in the local list
+				auto f = findFile(ns.path);
+				TraceFiles("ParseDiffs unmerged", Uri.sPath.Get(), "path='%s' reused=%d",
+					ns.path.Get() ? ns.path.Get() : "", f != nullptr);
 				if (!f)
 				{
 					f = new VcFile(d, this, Rev, IsWorking);
@@ -4200,6 +4309,8 @@ void VcFolder::SetColourType(TColourType t)
 
 bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 {
+	TraceFiles("ParseStatus", Uri.sPath.Get(), "exit=%d selected=%d rows=%zu",
+		Result, (int)LTreeItem::Select(), (size_t)d->Files->Length());
 	bool ShowUntracked = d->Wnd()->GetCtrlValue(ID_UNTRACKED) != 0;
 	bool IsWorking = Params ? Params->IsWorking : false;
 	List<LListItem> Ins;
@@ -4297,6 +4408,70 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 		}
 		case VcGit:
 		{
+			if (IsLocal())
+			{
+				if (Result)
+				{
+					OnCmdError(s, "Could not read Git status.");
+					return false;
+				}
+
+				size_t offset = 0;
+				auto nextRecord = [&]() -> const char *
+				{
+					auto start = s.Get() + offset;
+					auto end = static_cast<const char *>(std::memchr(start, '\0', s.Length() - offset));
+					if (!end)
+						return nullptr;
+					offset = end - s.Get() + 1;
+					return start;
+				};
+				while (offset < s.Length())
+				{
+					auto record = nextRecord();
+					if (!record || strlen(record) < 4 || record[2] != ' ')
+					{
+						Ins.DeleteObjects();
+						OnCmdError(s, "Invalid Git status record.");
+						return false;
+					}
+
+					const char x = record[0], y = record[1];
+					const char *path = record + 3;
+					const char *original = nullptr;
+					if (x == 'R' || x == 'C' || y == 'R' || y == 'C')
+					{
+						// In porcelain -z, the destination comes first, then the source.
+						original = offset < s.Length() ? nextRecord() : nullptr;
+						if (!original || !*original)
+						{
+							Ins.DeleteObjects();
+							OnCmdError(s, "Missing source path in Git status.");
+							return false;
+						}
+					}
+
+					if ((x == '?' && !ShowUntracked) || x == '!')
+						continue;
+
+					const bool conflict = x == 'U' || y == 'U' ||
+						(x == y && (x == 'A' || x == 'D'));
+					const bool staged = !conflict && x != ' ' && x != '?';
+					char state[] = { x == ' ' ? y : x, x == ' ' || y == ' ' || x == '?' ? '\0' : y, '\0' };
+					auto f = new VcFile(d, this, LString(), IsWorking);
+					f->SetText(conflict ? "C" : state, COL_STATE);
+					f->SetText(path, COL_FILENAME);
+					f->SetStaged(staged);
+					f->SetGitIndexOnly(staged && y == ' ', original);
+					if (!conflict && (x == 'C' || y == 'C' || x == 'T' || y == 'T'))
+						f->SetStatus(x == 'C' ? VcFile::SAdded : VcFile::SModified);
+					TraceFiles("ParseStatus row", Uri.sPath.Get(), "xy='%c%c' path='%s'",
+						x, y, path);
+					Ins.Insert(f);
+				}
+				break;
+			}
+
 			auto Lines = s.SplitDelimit("\r\n");
 			int Fmt = ToolVersion[VcGit] >= Ver2Int("2.8.0") ? 2 : 1;
 			for (auto Ln : Lines)
@@ -4320,7 +4495,8 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 				{
 					if (Fmt == 2)
 					{
-						LString::Array p = Ln.SplitDelimit(" ", 8);
+						// Unmerged entries ('u') have 11 fields, the rest of the entry types have 9
+						LString::Array p = Ln.SplitDelimit(" ", Type == 'u' ? 10 : 8);
 						if (p.Length() < 7)
 							d->Log->Print("%s:%i - Error: not enough tokens: '%s'\n", _FL, Ln.Get());
 						else
@@ -4359,7 +4535,13 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 				}
 
 				if (f)
+				{
+					auto path = f->GetFileName();
+					auto state = f->GetText(COL_STATE);
+					TraceFiles("ParseStatus row", Uri.sPath.Get(), "type=%c state='%s' path='%s'",
+						Type, state ? state : "", path ? path : "");
 					Ins.Insert(f);
+				}
 			}
 			break;
 		}
@@ -4447,7 +4629,10 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 	Update();
 	if (LTreeItem::Select())
 	{
-		d->Files->Insert(Ins);
+		if (GetType() == VcGit && IsLocal())
+			InsertFiles(Ins);
+		else
+			d->Files->Insert(Ins);
 		d->Log->Print("FilterCurrentFiles: %s\n", __FUNCTION__);
 		FilterCurrentFiles();
 	}
@@ -4503,6 +4688,8 @@ void VcFolder::FolderStatus(const char *uri, VcLeaf *Notify)
 		}
 	}
 
+	TraceFiles("FolderStatus", Uri.sPath.Get(), "selected=%d rows=%zu",
+		(int)LTreeItem::Select(), (size_t)d->Files->Length());
 	if (LTreeItem::Select())
 		d->ClearFiles();
 
@@ -4517,6 +4704,11 @@ void VcFolder::FolderStatus(const char *uri, VcLeaf *Notify)
 			Arg = "status -l";
 			break;
 		case VcGit:
+			if (IsLocal())
+			{
+				Arg = LocalGitStatusCommand(d->Wnd()->GetCtrlValue(ID_UNTRACKED) != 0);
+				break;
+			}
 			if (!ToolVersion[VcGit])
 				LAssert(!"Where is the version?");
 			
@@ -4541,7 +4733,8 @@ void VcFolder::FolderStatus(const char *uri, VcLeaf *Notify)
 	{
 		p->IsWorking = true;
 	}
-	StartCmd(Arg, &VcFolder::ParseStatus, p);
+	auto started = StartCmd(Arg, &VcFolder::ParseStatus, p);
+	TraceFiles("FolderStatus command", Uri.sPath.Get(), "args='%s' started=%d", Arg.Get(), started);
 
 	switch (GetType())
 	{
@@ -4597,6 +4790,8 @@ bool VcFolder::ParseCountToTip(int Result, LString s, ParseParams *Params)
 
 void VcFolder::ListWorkingFolder()
 {
+	TraceFiles("ListWorkingFolder", Uri.sPath.Get(), "inflight=%d rows=%zu",
+		IsListingWorking, (size_t)d->Files->Length());
 	if (IsListingWorking)
 		return;
 
@@ -4623,9 +4818,14 @@ void VcFolder::ListWorkingFolder()
 			Arg = "status";
 			break;
 		case VcGit:
-			Arg.Printf("status -vv");
-			if (Untracked)
-				Arg += " -u";
+			if (IsLocal())
+				Arg = LocalGitStatusCommand(Untracked);
+			else
+			{
+				Arg = "status -vv";
+				if (Untracked)
+					Arg += " -u";
+			}
 			break;
 		case VcHg:
 			Arg.Printf("status -mard");
@@ -4635,6 +4835,8 @@ void VcFolder::ListWorkingFolder()
 	}
 
 	IsListingWorking = StartCmd(Arg, &VcFolder::ParseWorking);
+	TraceFiles("ListWorkingFolder command", Uri.sPath.Get(), "args='%s' started=%d",
+		Arg.Get(), IsListingWorking);
 }
 
 bool VcFolder::ParseConflicts(int Result, LString s, ParseParams *Params)

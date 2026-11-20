@@ -340,7 +340,7 @@ protected:
 	LString DiffContextOption();
 	bool BlameInternal(const char *Path, ParseFn Parser);
 
-	bool ParseDiffs(LString s, LString Rev, bool IsWorking);
+	bool ParseDiffs(LString s, LString Rev, bool IsWorking, VcFile *Target = nullptr);
 	
 	bool ParseRevList(int Result, LString s, ParseParams *Params);
 	bool ParseLog(int Result, LString s, ParseParams *Params);
