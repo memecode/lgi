@@ -548,6 +548,19 @@ Recommended behavior:
 - If the user clicks on the container border area, hit-test should resolve to the first editable child block.
 - If the container is empty, ensure at least one placeholder `TextBlock` exists.
 
+Within a child `TextBlock`, its own top border and padding hit the first text line at the pointer's horizontal position.
+
+Deleting a selection removes fully covered child blocks, including images and
+horizontal rules, and trims partially selected text. Empty containers are
+removed unless needed to hold the editable paragraph in an empty document.
+Undo restores the original children and selection. Joining adjacent text
+blocks keeps the surviving block in its original container.
+
+Debug builds record Rte2 activity automatically unless built with
+`DEBUG_ACTIVITY=0`. On an editor error, look for `Rte2 activity log:` in the
+debug output. The `.rte` file contains document text and input events, so
+review it before sharing.
+
 Using a guaranteed editable child is simpler than allowing cursor directly on the container node.
 
 ## Splitting and Merging

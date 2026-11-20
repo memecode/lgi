@@ -10,7 +10,7 @@ LRichTextPriv::HorzRuleBlock::HorzRuleBlock(LRichTextPriv *priv) : Block(priv)
 	IsDeleted = false;
 }
 
-LRichTextPriv::HorzRuleBlock::HorzRuleBlock(const HorzRuleBlock *Copy) : Block(Copy->d)
+LRichTextPriv::HorzRuleBlock::HorzRuleBlock(const HorzRuleBlock *Copy) : Block(Copy)
 {
 	IsDeleted = Copy->IsDeleted;
 }
@@ -92,10 +92,7 @@ bool LRichTextPriv::HorzRuleBlock::HitTest(HitTestResult &htr)
 	htr.LineHint = 0;
 
 	int Cx = Pos.x1 + (Pos.X() / 2);
-	if (htr.In.x < Cx)
-		htr.Idx = 0;
-	else
-		htr.Idx = 1;
+	htr.Idx = htr.In.x < Cx ? 0 : Length();
 
 	return true;
 }

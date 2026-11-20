@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <climits>
 #include <cmath>
+#include <atomic>
 
 #include "lgi/common/Lgi.h"
 
@@ -77,6 +78,13 @@ LRichTextEdit::LRichTextEdit(	int Id,
 	#endif
 	
 	SetFont(LSysFont);
+
+	#if DEBUG_ACTIVITY
+	d->ActivityPath = GetRecordingPath();
+	d->ActivityRecording = d->CaptureActivityBaseline();
+	if (!d->ActivityRecording)
+		LgiTrace("%s:%i - Unable to start automatic Rte2 activity recording.\n", _FL);
+	#endif
 }
 
 LRichTextEdit::~LRichTextEdit()
@@ -448,8 +456,7 @@ bool LRichTextEdit::Name(const char *s)
 		d->ActivityRecording &&
 		!d->ActivityReplaying)
 	{
-		d->Layout(VScroll);
-		if (!d->CaptureActivityState(true))
+		if (!d->CaptureActivityBaseline())
 			LgiTrace("%s:%i - Failed to capture rich text activity state.\n", _FL);
 	}
 	#endif
@@ -532,10 +539,12 @@ static void RecordActivityMouse(LRichTextPriv *priv, const char *type, const LMo
 
 LString LRichTextEdit::GetRecordingPath()
 {
+	static std::atomic<unsigned> sequence{0};
 	LFile::Path p(LSP_APP_CACHE);
 	LDateTime now;
 	now.SetNow();
-	return p / LString::Fmt("rte2-%s.rte", now.Iso().Replace(":", "").Get());
+	return p / LString::Fmt("rte2-%s-%llu-%u.rte", now.Iso().Replace(":", "").Get(),
+		(unsigned long long)LGetCurrentProcess(), ++sequence);
 }
 
 bool LRichTextEdit::StartActivityRecording(const char *Path)
@@ -550,8 +559,12 @@ bool LRichTextEdit::StartActivityRecording(const char *Path)
 	d->ActivityRecording = false;
 	d->ActivityReplaying = false;
 	d->ActivityPath = Path;
+	if (LIsRelativePath(Path) && FileDev)
+		d->ActivityPath = LFile::Path(FileDev->GetCurrentFolder()) / Path;
+	else if (Path[0] == '~')
+		d->ActivityPath = LFile::Path(Path).Absolute();
 	d->Layout(VScroll);
-	if (!d->CaptureActivityState(true))
+	if (!d->CaptureActivityBaseline())
 	{
 		d->ActivityPath.Empty();
 		LgiTrace("%s:%i - Failed to capture rich text activity baseline.\n", _FL);
@@ -594,36 +607,14 @@ bool LRichTextEdit::SaveActivityRecording()
 		return false;
 	}
 
-	LJson initialState = d->ActivityState;
-	if (!d->CaptureActivityState(false))
+	auto finalState = d->SnapshotActivityState();
+	if (!d->ToHtml())
 	{
-		reportErr("%s:%i - Failed to capture final rich text activity state.\n", _FL);
+		reportErr("%s:%i - Failed to capture final rich text activity HTML.\n", _FL);
 		return false;
 	}
-	LString finalState = d->ActivityState.GetJson();
-	d->ActivityState = initialState;
-	LString initial = d->ActivityState.GetJson();
-	if (initial.IsEmpty() || finalState.IsEmpty())
-	{
-		reportErr("%s:%i - Rich text activity state serialization failed.\n", _FL);
-		return false;
-	}
-
-	LStringPipe output;
-	output.Print("{\n  \"format\": \"lgi-rich-text-activity\",\n"
-		"  \"version\": 1,\n  \"state\": %s,\n  \"finalState\": %s,\n  \"actions\": [",
-		initial.Get(), finalState.Get());
-	for (unsigned i = 0; i < d->ActivityActions.Length(); i++)
-	{
-		LString action = d->ActivityActions[i].GetJson();
-		output.Print("%s\n    %s", i ? "," : "", action.Get());
-	}
-	output.Print("\n  ]\n}\n");
-
-	LString contents = output.NewLStr();
-	LFile file(d->ActivityPath, O_WRITE);
-	if (!file || file.SetSize(0) < 0 || file.SetPos(0) < 0 ||
-		file.Write(contents.Get(), contents.Length()) != contents.Length())
+	finalState.Set("html", d->UtfNameCache.Get());
+	if (!d->WriteActivityRecording(d->ActivityPath, finalState))
 	{
 		reportErr("%s:%i - Failed to write activity file '%s'.\n", _FL, d->ActivityPath.Get());
 		return false;
@@ -2305,7 +2296,7 @@ bool LRichTextEdit::OnKey(LKey &k)
 							{
 								// Try and merge the two blocks...
 								ssize_t Len = Prev->Length();
-								d->Merge(Trans, Prev, d->Cursor->Blk);
+								Changed = d->Merge(Trans, Prev, d->Cursor->Blk);
 								
 								AutoCursor c(new BlkCursor(Prev, Len, -1));
 								d->SetCursor(c);

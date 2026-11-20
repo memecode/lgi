@@ -39,9 +39,38 @@ static LJson ActivityBlockState(LRichTextPriv::Block *b)
 
 	if (auto tb = dynamic_cast<LRichTextPriv::TextBlock*>(b))
 	{
+		j.Set("layoutDirty", (int64_t)tb->LayoutDirty);
+		LArray<LJson> runs;
+		ssize_t textLength = 0;
+		for (auto run : tb->Txt)
+		{
+			if (!run)
+				continue;
+			LJson runState;
+			auto length = run->Length();
+			textLength += length;
+			runState.Set("length", (int64_t)length);
+			runState.Set("tag", (int64_t)run->Element);
+			runState.Set("emoji", (int64_t)run->Emoji);
+			if (auto style = run->GetStyle())
+				runState.Set("style", style->Name.Get());
+			if (length)
+			{
+				LAutoString utf(static_cast<char*>(
+					LNewConvertCp("utf-8", run->At(0), "utf-32", length * sizeof(uint32_t))));
+				if (utf)
+					runState.Set("text", utf.Get());
+			}
+			runs.Add(runState);
+		}
+		j.Set("textLength", (int64_t)textLength);
+		j.Set("textRuns", runs);
+
 		LArray<LJson> lines;
 		for (auto line : tb->Layout)
 		{
+			if (!line)
+				continue;
 			LJson lineState;
 			SetActivityRect(lineState, "bounds", line->PosOff);
 			lineState.Set("newLine", (int64_t)line->NewLine);
@@ -53,6 +82,9 @@ static LJson ActivityBlockState(LRichTextPriv::Block *b)
 	}
 	else if (auto image = dynamic_cast<LRichTextPriv::ImageBlock*>(b))
 	{
+		j.Set("image.source", image->Source);
+		j.Set("image.layoutDirty", (int64_t)image->LayoutDirty);
+		j.Set("image.busy", (int64_t)image->IsBusy());
 		SetActivityRect(j, "image.bounds", image->ImgPos);
 		j.Set("image.width", (int64_t)image->Size.x);
 		j.Set("image.height", (int64_t)image->Size.y);
@@ -68,13 +100,9 @@ LRichTextPriv::LBlockArray::~LBlockArray()
 }
 
 #if DEBUG_ACTIVITY
-bool LRichTextPriv::CaptureActivityState(bool ClearActions)
+LJson LRichTextPriv::SnapshotActivityState()
 {
-	if (!ToHtml())
-		return false;
-
 	LJson state;
-	state.Set("html", UtfNameCache.Get());
 
 	if (Cursor && Cursor->Blk)
 	{
@@ -102,18 +130,79 @@ bool LRichTextPriv::CaptureActivityState(bool ClearActions)
 
 	LRect client = View->GetClient();
 	SetActivityRect(state, "view.client", client);
+	SetActivityRect(state, "view.content", Areas[LRichTextEdit::ContentArea]);
 	state.Set("view.documentWidth", (int64_t)DocumentExtent.x);
 	state.Set("view.documentHeight", (int64_t)DocumentExtent.y);
+	state.Set("view.scrollOffsetPx", (int64_t)ScrollOffsetPx);
+	state.Set("view.scrollLinePx", (int64_t)ScrollLinePx);
+	state.Set("edit.dirty", (int64_t)Dirty);
+	state.Set("edit.undoPosition", (int64_t)UndoPos);
+	state.Set("edit.undoCount", (int64_t)UndoQue.Length());
 
 	LArray<LJson> blocks;
 	for (auto block : Blocks)
 		blocks.Add(ActivityBlockState(block));
 	state.Set("blocks", blocks);
 
-	ActivityState = state;
-	if (ClearActions)
-		ActivityActions.Length(0);
+	return state;
+}
+
+bool LRichTextPriv::CaptureActivityBaseline()
+{
+	if (!ToHtml())
+		return false;
+
+	ActivityState = SnapshotActivityState();
+	ActivityState.Set("html", UtfNameCache.Get());
+	ActivityActions.Length(0);
 	return true;
+}
+
+bool LRichTextPriv::WriteActivityRecording(const char *Path, LJson &FinalState, LJson *Diagnostic)
+{
+	LString initial = ActivityState.GetJson();
+	LString final = FinalState.GetJson();
+	if (final.IsEmpty() || (initial.IsEmpty() && !Diagnostic))
+		return false;
+
+	LStringPipe output;
+	output.Print("{\n  \"format\": \"lgi-rich-text-activity\",\n"
+		"  \"version\": 1,\n  \"state\": %s,\n  \"finalState\": %s,\n",
+		initial.IsEmpty() ? "{}" : initial.Get(), final.Get());
+	if (Diagnostic)
+		output.Print("  \"diagnostic\": %s,\n", Diagnostic->GetJson().Get());
+	output.Print("  \"actions\": [");
+	for (size_t i = 0; i < ActivityActions.Length(); i++)
+		output.Print("%s\n    %s", i ? "," : "", ActivityActions[i].GetJson().Get());
+	output.Print("\n  ]\n}\n");
+
+	LString contents = output.NewLStr();
+	LFile file(Path, O_WRITE);
+	return file && file.SetSize(0) >= 0 && file.SetPos(0) >= 0 &&
+		file.Write(contents.Get(), contents.Length()) == contents.Length();
+}
+
+void LRichTextPriv::DumpActivityError(const char *File, int Line, const char *Message)
+{
+	if (ActivityDumping)
+		return;
+	ActivityDumping = true;
+
+	LString path = ActivityRecording && ActivityPath ? ActivityPath : View->GetRecordingPath();
+	LJson diagnostic;
+	diagnostic.Set("file", File);
+	diagnostic.Set("line", (int64_t)Line);
+	diagnostic.Set("msg", Message);
+	diagnostic.Set("recording", (int64_t)ActivityRecording);
+	diagnostic.Set("replaying", (int64_t)ActivityReplaying);
+
+	// The failing data may not survive HTML export or a second layout pass.
+	auto finalState = SnapshotActivityState();
+	if (WriteActivityRecording(path, finalState, &diagnostic))
+		LgiTrace("Rte2 activity log: %s\n", path.Get());
+	else
+		LgiTrace("Rte2: could not write activity log: %s\n", path.Get());
+	ActivityDumping = false;
 }
 
 void LRichTextPriv::RecordActivityAction(const LJson &Action)
@@ -135,6 +224,7 @@ void LRichTextPriv::Assert(const char *file, int line, bool test, LString msg)
 	action.Set("line", (int64_t)line);
 	action.Set("msg", msg);
 	RecordActivityAction(action);
+	DumpActivityError(file, line, msg);
 	#endif
 
 	_lgi_assert(false, LString::Fmt("Rich text assertion at %s:%i: %s", file, line, msg.Get()), file, line);
@@ -586,7 +676,121 @@ bool LRichTextPriv::DeleteSelection(Transaction *Trans, char16 **Cut)
 	bool Cf = CursorFirst();
 	LRichTextPriv::BlockCursor *Start = Cf ? Cursor : Selection;
 	LRichTextPriv::BlockCursor *End = Cf ? Selection : Cursor;
-	if (Start->Blk == End->Blk)
+	if (Start->Blk->parent || End->Blk->parent)
+	{
+		if (IndexOfCursor(Start) == IndexOfCursor(End))
+			return false;
+
+		LArray<Block*> Leaves;
+		auto CollectLeaves = [&](auto &&Self, Block *b) -> void
+		{
+			if (b->blocks.Length())
+				for (auto Child : b->blocks)
+					Self(Self, Child);
+			else
+				Leaves.Add(b);
+		};
+		for (auto b : Blocks)
+			CollectLeaves(CollectLeaves, b);
+
+		ssize_t StartLeaf = Leaves.IndexOf(Start->Blk);
+		ssize_t EndLeaf = Leaves.IndexOf(End->Blk);
+		if (StartLeaf < 0 || EndLeaf < StartLeaf)
+			return Error(_FL, "Selection endpoints are not in document order.");
+
+		auto RootOf = [](Block *b)
+		{
+			while (b->parent)
+				b = b->parent;
+			return b;
+		};
+		ssize_t First = Blocks.IndexOf(RootOf(Start->Blk));
+		ssize_t Last = Blocks.IndexOf(RootOf(End->Blk));
+		if (First < 0 || Last < First)
+			return Error(_FL, "Selection roots are not in document order.");
+
+		LAutoPtr<MultiBlockState> State(new MultiBlockState(this, First, true));
+		for (ssize_t n = First; n <= Last; n++)
+		{
+			if (Blocks[n]->IsBusy())
+			{
+				LgiTrace("%s:%i - Cannot delete while a selected block is busy.\n", _FL);
+				return false;
+			}
+		}
+		for (ssize_t n = First; n <= Last; n++)
+			if (!State->Copy(n))
+				return Error(_FL, "Could not save nested selection block for undo.");
+
+		LArray<Block*> Removed;
+		Block *Caret = nullptr;
+		ssize_t CaretOffset = 0;
+		for (ssize_t n = StartLeaf; n <= EndLeaf; n++)
+		{
+			Block *b = Leaves[n];
+			ssize_t Len = b->Length();
+			ssize_t From = n == StartLeaf ? Start->Offset : 0;
+			ssize_t To = n == EndLeaf ? End->Offset : Len;
+			if (From == 0 && To == Len && (Len > 0 || (n > StartLeaf && n < EndLeaf)))
+			{
+				if (DelTxt && Len > 0)
+					b->CopyAt(0, Len, DelTxt);
+				Removed.Add(b);
+				continue;
+			}
+			if (To > From && b->DeleteAt(NoTransaction, From, To - From, DelTxt) != To - From)
+				return Error(_FL, "Could not delete the full nested selection from %s.", b->GetClass());
+			if (!Caret)
+			{
+				Caret = b;
+				CaretOffset = From;
+			}
+		}
+		auto RootsBefore = Blocks.Length();
+		if (!Caret)
+		{
+			if (EndLeaf + 1 < (ssize_t)Leaves.Length())
+				Caret = Leaves[EndLeaf + 1];
+			else if (StartLeaf > 0)
+			{
+				Caret = Leaves[StartLeaf - 1];
+				CaretOffset = Caret->Length();
+			}
+			else
+			{
+				// Keep an editable leaf when the entire document is selected.
+				auto Parent = Leaves[StartLeaf]->parent;
+				auto Text = new TextBlock(this);
+				if (Parent)
+				{
+					if (auto Div = dynamic_cast<DivBlock*>(Parent))
+						Text->SetStyle(Div->MakeChildStyle(Div->GetStyle()));
+					Parent->Add(Text);
+				}
+				else
+					Blocks.AddAt(First, Text);
+				Caret = Text;
+			}
+		}
+
+		Cursor->Set(Caret, CaretOffset, -1);
+		Selection.Reset();
+		for (auto b : Removed)
+		{
+			// Remove empty containers as well, but keep containers with surviving children.
+			while (b)
+			{
+				Block *Parent = b->parent;
+				auto &Siblings = Parent ? Parent->blocks : Blocks;
+				Siblings.Delete(b, true);
+				delete b;
+				b = Parent && !Parent->blocks.Length() ? Parent : nullptr;
+			}
+		}
+		State->Length = Last - First + 1 + (ssize_t)Blocks.Length() - (ssize_t)RootsBefore;
+		Trans->Add(State.Release());
+	}
+	else if (Start->Blk == End->Blk)
 	{
 		// In the same block... just delete the text
 		ssize_t Len = End->Offset - Start->Offset;
@@ -608,62 +812,6 @@ bool LRichTextPriv::DeleteSelection(Transaction *Trans, char16 **Cut)
 	}
 	else
 	{
-		bool HasTreeParent = Start->Blk->parent || End->Blk->parent;
-		if (HasTreeParent)
-		{
-			LArray<Block*> Leaves;
-			auto CollectLeaves = [&](auto &&Self, Block *b) -> void
-			{
-				if (b->blocks.Length())
-				{
-					for (auto Child : b->blocks)
-						Self(Self, Child);
-				}
-				else
-					Leaves.Add(b);
-			};
-			for (auto b : Blocks)
-				CollectLeaves(CollectLeaves, b);
-
-			ssize_t StartLeaf = Leaves.IndexOf(Start->Blk);
-			ssize_t EndLeaf = Leaves.IndexOf(End->Blk);
-			if (StartLeaf < 0 || EndLeaf < StartLeaf)
-				return Error(_FL, "Selection endpoints are not in document order.");
-
-			auto RootOf = [](Block *b)
-			{
-				while (b->parent)
-					b = b->parent;
-				return b;
-			};
-			ssize_t First = Blocks.IndexOf(RootOf(Start->Blk));
-			ssize_t Last = Blocks.IndexOf(RootOf(End->Blk));
-			if (First < 0 || Last < First)
-				return Error(_FL, "Selection roots are not in document order.");
-
-			// Restore all selected blocks before restoring either cursor endpoint.
-			LAutoPtr<MultiBlockState> State(new MultiBlockState(this, First, true));
-			for (ssize_t n = First; n <= Last; n++)
-				if (!State->Copy(n))
-					return Error(_FL, "Could not save nested selection block for undo.");
-			State->Length = Last - First + 1;
-
-			for (ssize_t n = StartLeaf; n <= EndLeaf; n++)
-			{
-				Block *b = Leaves[n];
-				ssize_t From = n == StartLeaf ? Start->Offset : 0;
-				ssize_t To = n == EndLeaf ? End->Offset : b->Length();
-				if (To > From)
-				{
-					ssize_t Removed = b->DeleteAt(NoTransaction, From, To - From, DelTxt);
-					if (Removed != To - From)
-						return Error(_FL, "Could not delete the full nested selection from %s.", b->GetClass());
-				}
-			}
-			Trans->Add(State.Release());
-		}
-		else
-		{
 		// Multi-block delete...
 
 		ssize_t i = Blocks.IndexOf(Start->Blk);
@@ -723,12 +871,14 @@ bool LRichTextPriv::DeleteSelection(Transaction *Trans, char16 **Cut)
 		bool MergeOk = Merge(NoTransaction, Start->Blk, End->Blk);
 		MultiState->Length = MergeOk ? 1 : 2;
 		Trans->Add(MultiState.Release());
-		}
 	}
 
 	// Set the cursor and update the screen
-	Cursor->Set(Start->Blk, Start->Offset, Start->LineHint);
-	Selection.Reset();
+	if (Selection)
+	{
+		Cursor->Set(Start->Blk, Start->Offset, Start->LineHint);
+		Selection.Reset();
+	}
 	View->Invalidate();
 
 	if (Cut)
@@ -899,6 +1049,9 @@ bool LRichTextPriv::Error(const char *file, int line, const char *fmt, ...)
 
 	Err = LogBuffer.NewLStr();
 	LgiTrace("%.*s", Err.Length(), Err.Get());
+	#if DEBUG_ACTIVITY
+	DumpActivityError(file, line, s);
+	#endif
 		
 	LAssert(0);
 	return false;
@@ -1417,15 +1570,48 @@ bool LRichTextPriv::Merge(Transaction *Trans, Block *a, Block *b)
 {
 	TextBlock *ta = dynamic_cast<TextBlock*>(a);
 	TextBlock *tb = dynamic_cast<TextBlock*>(b);
-	if (!ta || !tb)
+	if (!ta || !tb || a == b || a->parent != b->parent)
 		return false;
 
+	auto Parent = b->parent;
+	auto &Siblings = Parent ? Parent->blocks : Blocks;
+	ssize_t Index = Siblings.IndexOf(b);
+	if (Index <= 0 || Siblings[Index - 1] != a)
+		return false;
+
+	LAutoPtr<MultiBlockState> State;
+	if (Parent && Trans)
+	{
+		auto Root = Parent;
+		while (Root->parent)
+			Root = Root->parent;
+		ssize_t RootIndex = Blocks.IndexOf(Root);
+		if (RootIndex < 0 || Root->IsBusy())
+			return false;
+		State.Reset(new MultiBlockState(this, RootIndex, true));
+		if (!State->Copy(RootIndex))
+			return Error(_FL, "Could not save nested merge for undo.");
+		State->Length = 1;
+	}
+
+	ssize_t Join = ta->Len;
 	ta->Txt.Add(tb->Txt);
 	ta->LayoutDirty = true;
 	ta->Len += tb->Len;
 	tb->Txt.Length(0);
+	tb->Len = 0;
 
-	Blocks.Delete(b, true);
+	Siblings.DeleteAt(Index, true);
+	if (Parent)
+	{
+		for (auto c : {Cursor.Get(), Selection.Get()})
+			if (c && c->Blk == b)
+				c->Set(a, Join + c->Offset, -1);
+		delete b;
+		if (State)
+			Trans->Add(State.Release());
+	}
+
 	Dirty = true;
 
 	return true;

@@ -33,7 +33,11 @@
 namespace Rte2 {
 
 #ifndef DEBUG_ACTIVITY
+#ifdef _DEBUG
 #define DEBUG_ACTIVITY					1
+#else
+#define DEBUG_ACTIVITY					0
+#endif
 #endif
 #if DEBUG_ACTIVITY
 #include "lgi/common/Json.h"
@@ -368,12 +372,16 @@ public:
 	#if DEBUG_ACTIVITY
 	bool ActivityRecording = false;
 	bool ActivityReplaying = false;
+	bool ActivityDumping = false;
 	LString ActivityPath;
 	LJson ActivityState;
 	LJson LoadedActivity;
 	LArray<LJson> ActivityActions;
 
-	bool CaptureActivityState(bool ClearActions);
+	LJson SnapshotActivityState();
+	bool CaptureActivityBaseline();
+	bool WriteActivityRecording(const char *Path, LJson &FinalState, LJson *Diagnostic = nullptr);
+	void DumpActivityError(const char *File, int Line, const char *Message);
 	void RecordActivityAction(const LJson &Action);
 
 	#endif

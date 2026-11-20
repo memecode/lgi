@@ -307,11 +307,35 @@ LRichTextPriv::ImageBlock::ImageBlock(LRichTextPriv *priv) : Block(priv)
 	SourceValid.ZOff(-1, -1);
 }
 
-LRichTextPriv::ImageBlock::ImageBlock(const ImageBlock *Copy) : Block(Copy->d), LCssBox<LRect>(*Copy)
+LRichTextPriv::ImageBlock::ImageBlock(const ImageBlock *Copy) : Block(Copy), LCssBox<LRect>(*Copy)
 {
 	LayoutDirty = true;
-	SourceImg.Reset(new LMemDC(_FL, Copy->SourceImg));
+	Style = Copy->Style;
+	Scale = Copy->Scale;
+	Source = Copy->Source;
+	SourceValid = Copy->SourceValid;
+	FileName = Copy->FileName;
+	ContentId = Copy->ContentId;
+	StreamMimeType = Copy->StreamMimeType;
+	FileMimeType = Copy->FileMimeType;
+	ResizeIdx = Copy->ResizeIdx;
+	ResizeSrc = Copy->ResizeSrc;
+	IsDeleted = Copy->IsDeleted;
 	Size = Copy->Size;
+	if (Copy->SourceImg)
+		SourceImg.Reset(new LMemDC(_FL, Copy->SourceImg));
+	if (Copy->DisplayImg)
+		DisplayImg.Reset(new LMemDC(_FL, Copy->DisplayImg));
+	for (size_t i = 0; i < Copy->Scales.Length(); i++)
+	{
+		const auto &src = Copy->Scales.ItemAt(i);
+		auto &dst = Scales.New();
+		dst.Sz = src.Sz;
+		dst.MimeType = src.MimeType;
+		dst.Percent = src.Percent;
+		if (src.Compressed)
+			dst.Compressed.Reset(new LMemStream(src.Compressed, 0, -1));
+	}
 }
 
 LRichTextPriv::ImageBlock::~ImageBlock()
@@ -695,10 +719,7 @@ bool LRichTextPriv::ImageBlock::HitTest(HitTestResult &htr)
 	htr.LineHint = 0;
 
 	int Cx = ImgPos.x1 + (ImgPos.X() / 2);
-	if (htr.In.x < Cx)
-		htr.Idx = 0;
-	else
-		htr.Idx = 1;
+	htr.Idx = htr.In.x < Cx ? 0 : Length();
 
 	return true;
 }

@@ -596,6 +596,12 @@ bool LRichTextPriv::TextBlock::HitTest(HitTestResult &htr)
 	if (htr.In.y < Pos.y1 || htr.In.y > Pos.y2)
 		return false;
 
+	// The block includes its top border and padding. Hit the first line
+	// from that area without changing the horizontal caret position.
+	int Y = htr.In.y;
+	if (Layout.Length())
+		Y = MAX(Y, Pos.y1 + Layout[0]->PosOff.y1);
+
 	ssize_t CharPos = 0;
 	for (unsigned i=0; i<Layout.Length(); i++)
 	{
@@ -605,9 +611,9 @@ bool LRichTextPriv::TextBlock::HitTest(HitTestResult &htr)
 
 		LRect r = tl->PosOff;
 		r.Offset(Pos.x1, Pos.y1);
-		bool Over = r.Overlap(htr.In.x, htr.In.y);
-		bool OnThisLine =	htr.In.y >= r.y1 &&
-							htr.In.y <= r.y2;
+		bool Over = r.Overlap(htr.In.x, Y);
+		bool OnThisLine =	Y >= r.y1 &&
+							Y <= r.y2;
 		if (OnThisLine && htr.In.x <= r.x1)
 		{
 			htr.Near = true;
@@ -1284,7 +1290,9 @@ bool LRichTextPriv::TextBlock::OnLayout(Flow &flow)
 		Layout.Add(CurLine.Release());
 	}
 	
-	LAssert(LayoutSize == Len);
+	if (LayoutSize != Len)
+		d->Error(_FL, "Text block %i: LayoutSize=" LPrintfSSizeT
+			" TextSize=" LPrintfSSizeT " Len=" LPrintfSSizeT, GetUid(), LayoutSize, TextSize, Len);
 			
 	flow.CurY = Pos.y2 + 1 + margin.y2 + border.y2 + padding.y2;
 	flow.Left -= margin.x1 + border.x1 + padding.x1;
