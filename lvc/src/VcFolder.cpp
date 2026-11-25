@@ -666,8 +666,24 @@ void VcFolder::AddGitName(LString Hash, LString Name)
 
 LString VcFolder::GetGitNames(LString Hash)
 {
-	LString Short = Hash(0, 11);
-	return GitNames.Find(Short);
+	if (!Hash)
+		return LString();
+
+	// Keys come from 'git branch -v', which reports abbreviated hashes, so a
+	// stored key can be shorter than the commit hash. Match on that prefix.
+	LString names;
+	for (auto n: GitNames)
+	{
+		if (!n.key || !n.key[0])
+			continue;
+		if (!Strnicmp(Hash.Get(), n.key, strlen(n.key)))
+		{
+			if (names)
+				names += ",";
+			names += n.value;
+		}
+	}
+	return names;
 }
 
 bool VcFolder::ParseBranches(int Result, LString s, ParseParams *Params)
@@ -711,6 +727,10 @@ bool VcFolder::ParseBranches(int Result, LString s, ParseParams *Params)
 					d->Log->Print("%s:%i - Too few parts in line '%s'\n", _FL, l.Get());
 					continue;
 				}
+
+				// Symbolic refs have no commit hash, e.g. 'origin/HEAD -> origin/master'
+				if (c.Length() < 2 || c[1].Equals("->"))
+					continue;
 
 				if (IsCur)
 					SetCurrentBranch(c[0]);
@@ -924,25 +944,25 @@ void VcFolder::OnBranchesChange()
 
 	if (Branches.Length())
 	{
-		// Set the colours up
-		LString Default;
-		for (auto b: Branches)
-		{
-			if (!stricmp(b.key, "default") ||
-				!stricmp(b.key, "trunk"))
-				Default = b.key;
-		}
-
+		// Set the colours up, keeping the default branch on the first palette colour
 		int Idx = 1;
 		for (auto b: Branches)
 		{
 			if (!b.value->Colour.IsValid())
 			{
-				if (Default && !stricmp(b.key, Default))
+				if (b.value->Default)
 					b.value->Colour = GetPaletteColour(0);
 				else
 					b.value->Colour = GetPaletteColour(Idx++);
 			}
+		}
+
+		// Ref names may arrive after the graph was linked, so re-resolve the commit colours
+		if (Log.Length())
+		{
+			AssignColours();
+			if (d->Commits && d->CurFolder == this)
+				d->Commits->UpdateAllItems();
 		}
 	}
 
@@ -1463,7 +1483,7 @@ void VcFolder::Select(bool b)
 			OnSelectWithType();
 
 		PROF("GetBranches");
-		if (GetBranches(false))
+		if (GetBranches(false, true))
 			OnBranchesChange();
 		GetCurrentRevision();
 
@@ -2208,10 +2228,7 @@ void VcFolder::LinkParents()
 		{
 			auto *p = Map.Find(pRev);
 			if (p)
-			{
-				VcEdge *e = new VcEdge(p, c);
-				e->Colour = p->NodeColour;
-			}
+				new VcEdge(p, c);
 			#if 0
 			else
 				return;
@@ -2379,6 +2396,67 @@ void VcFolder::LinkParents()
 	}
 
 	GraphLanes = MaxLanes;
+
+	AssignColours();
+}
+
+void VcFolder::AssignColours()
+{
+	// Each lane gets its own colour. A lane takes the colour of the branch named on
+	// it when there is one, so graph colours match the branch list, otherwise it uses
+	// its lane index so different lanes are still different colours.
+	LArray<LColour> Lanes;
+	for (int i = 0; i < GraphLanes; i++)
+		Lanes.Add(LColour());
+
+	if (d->Log)
+		for (auto b: Branches)
+			LgiTrace("colour-debug branch '%s' colour=%02x%02x%02x\n",
+				b.key, b.value->Colour.r(), b.value->Colour.g(), b.value->Colour.b());
+
+	int Dbg = 0;
+	for (auto c: Log)
+	{
+		int l = c->NodeIdx;
+		if (l < 0 || l >= (int)Lanes.Length() || Lanes[l].IsValid())
+			continue;
+
+		LString name = c->CommitBranch();
+		if (name)
+			Lanes[l] = BranchColour(name.Get());
+		else if (CurrentCommit && CurrentCommit.Equals(c->GetRev()))
+			// The branch we are on keeps the default colour even without a ref here
+			Lanes[l] = GetPaletteColour(0);
+
+		if (d->Log && Dbg++ < 20)
+			LgiTrace("colour-debug c=%s lane=%i name='%s' colour=%02x%02x%02x\n",
+				LString(c->GetRev())(0, 9).Get(), l, name.Get(),
+				Lanes[l].r(), Lanes[l].g(), Lanes[l].b());
+	}
+
+	for (auto c: Log)
+	{
+		LString name = c->CommitBranch();
+		LColour col = name ? BranchColour(name.Get()) : LColour();
+
+		if (!col.IsValid() &&
+			c->NodeIdx >= 0 &&
+			c->NodeIdx < (int)Lanes.Length())
+			col = Lanes[c->NodeIdx];
+
+		if (!col.IsValid() && c->NodeIdx >= 0)
+			col = GetPaletteColour(c->NodeIdx);
+
+		c->NodeColour = col;
+
+		if (d->Log && Dbg++ < 40)
+			LgiTrace("colour-debug paint c=%s lane=%i name='%s' colour=%02x%02x%02x\n",
+				LString(c->GetRev())(0, 9).Get(), c->NodeIdx, name.Get(),
+				col.r(), col.g(), col.b());
+
+		for (auto e: c->Edges)
+			e->Colour = GetGraphLineColour();
+	}
 }
 
 void VcFolder::UpdateBranchUi()
@@ -5926,7 +6004,7 @@ LColour VcFolder::BranchColour(const char *Name)
 		}
 		
 		Branches.Add(Name, b = new VcBranch(Name));
-		b->Colour = GetPaletteColour((int)Branches.Length());
+		b->Colour = b->Default ? GetPaletteColour(0) : GetPaletteColour((int)Branches.Length());
 	}
 
 	return b ? b->Colour : GetPaletteColour(0);

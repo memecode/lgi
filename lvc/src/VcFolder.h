@@ -116,9 +116,12 @@ struct VcBranch : public LString
 
 	VcBranch(LString name, LString hash = LString())
 	{
-		Default =	name.Equals("default") ||
-					name.Equals("trunk") ||
-					name.Equals("main");
+		// Remote refs keep the default colour too, e.g. 'origin/main'
+		auto base = name.Split("/").Last();
+		Default =	base.Equals("default") ||
+					base.Equals("trunk") ||
+					base.Equals("main") ||
+					base.Equals("master");
 		
 		Set(name);
 		if (hash)
@@ -334,6 +337,7 @@ protected:
 	void ClearError();
 	VcFile *FindFile(const char *Path);
 	void LinkParents();
+	void AssignColours();
 	void CurrentRev(std::function<void(LString)> Callback);
 	LColour BranchColour(const char *Name);
 	void UpdateBranchUi();

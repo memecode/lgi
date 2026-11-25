@@ -77,6 +77,7 @@ public:
 	char *GetAuthor();
 	char *GetMsg();
 	char *GetBranch();
+	LString CommitBranch();
 	LString::Array *GetParents() { return &Parents; }
 	LDateTime &GetTs() { return Ts; }
 

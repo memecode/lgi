@@ -7,6 +7,12 @@
 
 const char *sPalette[] = { "9696ff", "ff8787", "ff934b", "a8d200", "00f0c0", "87e7ff", "a5a5ff", "f3c3ff", "b40090", "00b400" };
 
+LColour GetGraphLineColour()
+{
+	// Graph lines use a standard colour, independent of the lane colours
+	return LColour(0x40, 0x40, 0x40);
+}
+
 LColour GetPaletteColour(int i)
 {
 	LColour c;
@@ -380,7 +386,37 @@ bool VcCommit::CvsParse(LDateTime &Dt, LString Auth, LString Message)
 
 void VcCommit::OnParse()
 {
-	NodeColour = Folder->BranchColour(Branch);
+	// Branch colours for git can only be resolved once the whole graph is known,
+	// so this just picks up the commits where the branch is directly known.
+	LString b = CommitBranch();
+	if (b)
+		NodeColour = Folder->BranchColour(b.Get());
+}
+
+LString VcCommit::CommitBranch()
+{
+	if (Branch)
+		return Branch;
+
+	if (Vcs == VcGit) {
+		// Git commits have no branch of their own, so use the refs pointing at this commit
+		if (!sNames)
+			sNames = Folder->GetGitNames(Rev);
+		if (!sNames)
+			return LString();
+
+		auto a = sNames.Split(",");
+		LString cur = Folder->GetCurrentBranch();
+		for (auto n: a)
+			if (n.Equals(cur))
+				return n;
+		for (auto n: a)
+			if (!n.Find("/"))
+				return n;
+		return a[0];
+	}
+
+	return LString();
 }
 
 bool VcCommit::HgParse(LString s)

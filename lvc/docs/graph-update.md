@@ -35,7 +35,9 @@ For each row we draw the band `[0, H]` (row height `H = Ctx.Y()`):
    - **Dangling** (no adjacent row contains the edge on that side): draw a muted black stub from the boundary lane to the commit circle, or from the commit circle to the boundary lane.
 3. Node drawn last so ribbon ends are covered: filled circle in the branch colour, dark outline ring, larger ring for the current/HEAD commit.
 
-Ribbons are stroked with `LSurface::Vector::Stroke`; the node uses `Fill` + `Stroke`. Bends use `CubicTo` with control points placed at the vertical midpoint, giving the classic git-graph comma/S shape. Each ribbon keeps the branch colour it belongs to (`VcEdge::Colour`), so merged branches change colour correctly.
+Ribbons are stroked with `LSurface::Vector::Stroke`; the node uses `Fill` + `Stroke`. Bends use `CubicTo` with control points placed at the vertical midpoint, giving the classic git-graph comma/S shape. Ribbons use the standard graph line colour from `GetGraphLineColour()` (`VcEdge::Colour`), independent of lane colours, so only the commit circles show branch colours.
+
+Colours are resolved in `VcFolder::AssignColours()` once the lanes are known: each lane takes the colour of the first branch-named commit down that lane, commits on that lane use the lane colour unless they name their own branch, and edges are given the standard graph line colour. Branch names come from `VcCommit::CommitBranch()`, which uses the commit's own branch for hg/cvs/svn and falls back to the git refs pointing at the commit. `OnBranchesChange()` re-runs the pass when ref names arrive after the graph was linked.
 
 Because the vector backend requires a premultiplied BGRA32 target, we draw directly onto the painting surface (`Ctx.pDC`, a cairo `LScreenDC`) using its vector context, with coordinates offset to the row origin, rather than through an intermediate `LMemDC` (which was not premultiplied).
 
