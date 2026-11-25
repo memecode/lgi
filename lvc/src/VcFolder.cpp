@@ -6083,6 +6083,19 @@ bool VcFolder::ParseAddFile(int Result, LString s, ParseParams *Params)
 			ListWorkingFolder();
 			break;
 		}
+		case VcHg:
+		case VcSvn:
+		{
+			if (Result)
+			{
+				d->Tabs->Value(1);
+				OnCmdError(s, LLoadString(IDS_ERR_ADD_FAILED));
+			}
+			else ClearError();
+
+			ListWorkingFolder();
+			break;
+		}
 		default:
 			break;
 	}
@@ -6116,6 +6129,18 @@ bool VcFolder::AddFile(const char *Path, bool AsBinary)
 		{
 			LString a;
 			a.Printf("add \"%s\"", GetFilePart(Path).Get());
+			return StartCmd(a, &VcFolder::ParseAddFile);
+		}
+		case VcHg:
+		{
+			LString a;
+			a.Printf("add%s \"%s\"", AsBinary ? " --binary" : "", GetFilePart(Path).Get());
+			return StartCmd(a, &VcFolder::ParseAddFile);
+		}
+		case VcSvn:
+		{
+			LString a;
+			a.Printf("add --force \"%s\"", GetFilePart(Path).Get());
 			return StartCmd(a, &VcFolder::ParseAddFile);
 		}
 		default:
