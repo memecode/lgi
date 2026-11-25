@@ -176,24 +176,23 @@ void VcCommit::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 		if (!col.IsValid())
 			col = NodeColour;
 		float cx = laneX(lane);
+		float nodeCx = NodeIdx >= 0 ? laneX(NodeIdx) : cx;
 
 		if (e->Parent == this)
 		{
 			int pl = Prev ? Prev->Pos.Find(e) : -1;
 			if (pl >= 0)
-				segment(laneX(pl), top, cx, midY, col);
+				segment(laneX(pl), top, nodeCx, midY, col);
 			else
-				segment(cx, top, cx, midY, LColour(0, 0, 0));
+				segment(cx, top, nodeCx, midY, LColour(0, 0, 0));
 			continue;
 		}
 
 		if (e->Child == this)
 		{
 			int nl = Next ? Next->Pos.Find(e) : -1;
-			if (nl >= 0)
-				segment(cx, midY, cx, bot, col);
-			else
-				segment(cx, midY, cx, bot, LColour(0, 0, 0));
+			LColour drawCol = nl >= 0 ? col : LColour(0, 0, 0);
+			segment(nodeCx, midY, cx, bot, drawCol);
 			continue;
 		}
 

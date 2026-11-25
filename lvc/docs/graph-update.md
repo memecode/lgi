@@ -21,7 +21,7 @@ To build Lvc use: lgi/trunk/lvc/linux/Makefile.linux
 ### Model (unchanged in spirit)
 - Each commit is a node placed on a lane (`NodeIdx`).
 - Each parent->child link is an edge assigned a lane (`VcEdge::Idx`).
-- `Pos` records, for the current row, the lane of every edge passing through or touching that commit (owning edges land on the commit's own lane; pass-through edges keep their own lane).
+- `Pos` records, for the current row, the edge lane for every edge passing through or touching that commit. The commit circle is at `NodeIdx`; endpoint drawing connects the circle to the edge lane in `Pos`, so merged edges can fan from the node.
 - `LinkParents()` computes these lanes. This is the layout; we keep it.
 
 ### Per-row rendering (the new part)
@@ -30,9 +30,9 @@ For each row we draw the band `[0, H]` (row height `H = Ctx.Y()`):
 1. Metrics derived from the row and DPI: left inset, lane pitch, node radius, ribbon stroke width.
 2. For every edge in `Pos`, draw exactly one segment for that edge in the current row:
    - **Pass-through** (edge neither parent nor child of this commit): draw from the row top boundary lane, normally the previous row lane for that edge, to the current row lane, then continue to the row bottom at the current row lane. The bottom boundary is the current row lane so the next row starts at the same lane. If the top lane differs, the segment bends to the current lane at the row midpoint; if it is the same lane, it is a straight vertical.
-   - **Parent side** (`e->Parent == this`): draw only the top half, from the row top boundary lane to the node. If the top lane differs, draw a smooth cubic bend; otherwise a straight vertical.
-   - **Child side** (`e->Child == this`): draw only the bottom half, from the node to the row bottom at the current row lane. If `Next` has a lane for the edge, use the edge colour; otherwise use a muted stub.
-   - **Dangling** (no adjacent row contains the edge on that side): draw a muted stub at that lane in black.
+   - **Parent side** (`e->Parent == this`): draw only the top half, from the row top boundary lane to the commit circle at `NodeIdx`. If `Prev` contains the edge, start at its previous `Pos` lane; otherwise start at the current `Pos` lane. If that start lane differs from the circle lane, draw a smooth cubic bend.
+   - **Child side** (`e->Child == this`): draw only the bottom half, from the commit circle at `NodeIdx` to the row bottom at the current `Pos` edge lane. If `Next` has a lane for the edge, use the edge colour; otherwise use a muted stub.
+   - **Dangling** (no adjacent row contains the edge on that side): draw a muted black stub from the boundary lane to the commit circle, or from the commit circle to the boundary lane.
 3. Node drawn last so ribbon ends are covered: filled circle in the branch colour, dark outline ring, larger ring for the current/HEAD commit.
 
 Ribbons are stroked with `LSurface::Vector::Stroke`; the node uses `Fill` + `Stroke`. Bends use `CubicTo` with control points placed at the vertical midpoint, giving the classic git-graph comma/S shape. Each ribbon keeps the branch colour it belongs to (`VcEdge::Colour`), so merged branches change colour correctly.

@@ -2239,16 +2239,22 @@ void VcFolder::LinkParents()
 		}
 
 		// Add starting edges to active set
+		bool firstChildEdge = true;
 		for (auto e:c->Edges)
 		{
 			if (e->Child == c)
 			{
-				if (c->NodeIdx < 0)
-					c->NodeIdx = (int)Active.Length();
+				int lane = firstChildEdge ? c->NodeIdx : (int)Active.Length();
+				if (lane < 0)
+					lane = (int)Active.Length();
 
-				e->Idx = c->NodeIdx;
-				c->Pos.Add(e, e->Idx);
-				Active[e->Idx].Add(e);
+				if (c->NodeIdx < 0)
+					c->NodeIdx = lane;
+
+				firstChildEdge = false;
+				e->Idx = lane;
+				c->Pos.Add(e, lane);
+				Active[lane].Add(e);
 			}
 		}
 
@@ -2264,7 +2270,8 @@ void VcFolder::LinkParents()
 				if (c == e->Child || c == e->Parent)
 				{
 					LAssert(c->NodeIdx >= 0);
-					c->Pos.Add(e, c->NodeIdx);
+					LAssert(e->Idx == (int)i);
+					c->Pos.Add(e, (int)i);
 				}
 				else
 				{
