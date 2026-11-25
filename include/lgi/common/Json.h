@@ -35,8 +35,8 @@ class LJson
 			}
 			if (create)
 			{
-				char *ArrStart = strchr(name, '[');
-				char *ArrEnd = ArrStart ? strchr(ArrStart+1, ']') : NULL;
+				auto ArrStart = strchr(name, '[');
+				auto ArrEnd = ArrStart ? strchr(ArrStart+1, ']') : NULL;
 				if (ArrStart && ArrEnd)
 				{
 					int Idx = atoi(ArrStart + 1);

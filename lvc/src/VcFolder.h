@@ -389,6 +389,9 @@ public:
 	VcLeaf *FindLeaf(LString Path, bool OpenTree);
 	void DefaultFields();
 	void UpdateColumns(LList *lst = NULL);
+	int GraphLanes = 1; // Widest lane set used by the graph, for column sizing
+	int GraphColumnWidth();
+	void ApplyGraphColumnWidth();
 	int IndexOfCommitField(CommitField fld);
 	const char *GetText(int Col);
 	LArray<CommitField> &GetFields() { return Fields; }

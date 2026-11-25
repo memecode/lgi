@@ -1011,6 +1011,17 @@ int DefaultFieldWidth(CommitField fld)
 	}
 }
 
+int VcFolder::GraphColumnWidth()
+{
+	// Matches the pitch/inset used by VcCommit::OnPaintColumn
+	const int pitch = 14;
+	const int inset = pitch * 45 / 100; // matches inset = pitch * 0.45
+	int w = pitch * GraphLanes + inset * 2;
+	if (w < pitch + inset * 2)
+		w = pitch + inset * 2;
+	return w;
+}
+
 void VcFolder::UpdateColumns(LList *lst)
 {
 	if (!lst)
@@ -1022,7 +1033,7 @@ void VcFolder::UpdateColumns(LList *lst)
 	{
 		switch (c)
 		{
-			case LGraph:      lst->AddColumn("---",      DefaultFieldWidth(c)); break;
+			case LGraph:      lst->AddColumn("---",      GraphColumnWidth()); break;
 			case LIndex:      lst->AddColumn("Index",    DefaultFieldWidth(c)); break;
 			case LBranch:     lst->AddColumn("Branch",   DefaultFieldWidth(c)); break;
 			case LRevision:   lst->AddColumn("Revision", DefaultFieldWidth(c)); break;
@@ -1391,7 +1402,7 @@ void VcFolder::OnSelectUpdateItems()
 		for (auto c: Fields)
 		{
 			if (auto col = d->Commits->ColumnAt(i++))
-				col->Width(DefaultFieldWidth(c));
+				col->Width(c == LGraph ? GraphColumnWidth() : DefaultFieldWidth(c));
 			else
 				break;
 		}
@@ -1401,7 +1412,23 @@ void VcFolder::OnSelectUpdateItems()
 		d->Commits->ResizeColumnsToContent();
 	}
 
+	// The graph is drawn, not measured, so content resize cannot size it correctly
+	ApplyGraphColumnWidth();
+
 	d->Commits->UpdateAllItems();
+}
+
+void VcFolder::ApplyGraphColumnWidth()
+{
+	if (!d->Commits)
+		return;
+
+	int idx = IndexOfCommitField(LGraph);
+	if (idx < 0)
+		return;
+
+	if (auto col = d->Commits->ColumnAt(idx))
+		col->Width(GraphColumnWidth());
 }
 
 void VcFolder::Select(bool b)
@@ -2181,7 +2208,10 @@ void VcFolder::LinkParents()
 		{
 			auto *p = Map.Find(pRev);
 			if (p)
-				new VcEdge(p, c);
+			{
+				VcEdge *e = new VcEdge(p, c);
+				e->Colour = p->NodeColour;
+			}
 			#if 0
 			else
 				return;
@@ -2193,6 +2223,7 @@ void VcFolder::LinkParents()
 	PROF("Map edges.");
 	typedef LArray<VcEdge*> EdgeArr;
 	LArray<EdgeArr> Active;
+	int MaxLanes = 1;
 	for (auto c:Log)
 	{
 		for (unsigned i=0; c->NodeIdx<0 && i<Active.Length(); i++)
@@ -2335,7 +2366,12 @@ void VcFolder::LinkParents()
 				i--;
 			}
 		}
+
+		if ((int)Active.Length() > MaxLanes)
+			MaxLanes = (int)Active.Length();
 	}
+
+	GraphLanes = MaxLanes;
 }
 
 void VcFolder::UpdateBranchUi()
@@ -2569,7 +2605,7 @@ bool VcFolder::ParseWorking(int Result, LString s, ParseParams *Params)
 		}
 		case VcCvs:
 		{
-			bool Untracked = d->IsMenuChecked(IDM_UNTRACKED);
+			bool Untracked = d->Wnd()->GetCtrlValue(ID_UNTRACKED) != 0;
 			if (Untracked)
 			{
 				auto Lines = s.SplitDelimit("\n");
@@ -4797,7 +4833,7 @@ void VcFolder::ListWorkingFolder()
 
 	d->ClearFiles();
 		
-	bool Untracked = d->IsMenuChecked(IDM_UNTRACKED);
+	bool Untracked = d->Wnd()->GetCtrlValue(ID_UNTRACKED) != 0;
 
 	LString Arg;
 	switch (GetType())
@@ -6028,6 +6064,18 @@ bool VcFolder::ParseAddFile(int Result, LString s, ParseParams *Params)
 
 			break;
 		}
+		case VcGit:
+		{
+			if (Result)
+			{
+				d->Tabs->Value(1);
+				OnCmdError(s, LLoadString(IDS_ERR_ADD_FAILED));
+			}
+			else ClearError();
+
+			ListWorkingFolder();
+			break;
+		}
 		default:
 			break;
 	}
@@ -6056,6 +6104,12 @@ bool VcFolder::AddFile(const char *Path, bool AsBinary)
 			a.Printf("add%s \"%s\"", AsBinary ? " -kb" : "", p.Length() > 1 ? p.Last().Get() : Path);
 			return StartCmd(a, &VcFolder::ParseAddFile, params);
 			break;
+		}
+		case VcGit:
+		{
+			LString a;
+			a.Printf("add \"%s\"", GetFilePart(Path).Get());
+			return StartCmd(a, &VcFolder::ParseAddFile);
 		}
 		default:
 		{
@@ -6941,6 +6995,7 @@ void VcLeaf::ShowLog()
 		d->Commits->Insert(new VcCommit(*i), -1, false);
 	d->Commits->UpdateAllItems();
 	d->Commits->ResizeColumnsToContent();
+	Parent->ApplyGraphColumnWidth();
 }
 
 void VcLeaf::OnMouseClick(LMouse &m)

@@ -1749,15 +1749,9 @@ public:
 				if (!mi)
 					break;
 
-				mi->Checked(!mi->Checked());
-				SetCtrlValue(ID_UNTRACKED, mi->Checked());
-
-				LArray<VcFolder*> Flds;
-				Tree->GetSelection(Flds);
-				for (auto f : Flds)
-				{
-					f->Refresh();
-				}
+				// The control is the source of truth: setting its value notifies
+				// OnNotify, which mirrors the menu check and refreshes the listing.
+				SetCtrlValue(ID_UNTRACKED, !mi->Checked());
 				break;
 			}
 			case IDM_REFRESH:
@@ -2292,11 +2286,19 @@ public:
 				break;
 			}
 			case ID_UNTRACKED:
-			{				
-				if (auto mi = GetMenu()->FindItem(IDM_UNTRACKED))
-					mi->Checked(c->Value() != 0);
+			{
+				if (n.Type != LNotifyValueChanged)
+					break;
 
-				// if (auto f = dynamic_cast<VcFolder*>(Tree->Selection()))				
+				if (auto m = GetMenu())
+					if (auto mi = m->FindItem(IDM_UNTRACKED))
+						mi->Checked(c->Value() != 0);
+
+				LArray<VcFolder*> Flds;
+				Tree->GetSelection(Flds);
+				for (auto f : Flds)
+					f->Refresh();
+
 				break;
 			}
 		}

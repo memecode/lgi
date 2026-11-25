@@ -3,6 +3,7 @@
 #include "lgi/common/Path.h"
 #include "lgi/common/HashTable.h"
 #include "resdefs.h"
+#include <cmath>
 
 const char *sPalette[] = { "9696ff", "ff8787", "ff934b", "a8d200", "00f0c0", "87e7ff", "a5a5ff", "f3c3ff", "b40090", "00b400" };
 
@@ -109,111 +110,127 @@ void VcCommit::SetCurrent(bool b)
 
 void VcCommit::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 {
-	if (i == 0)
+	if (i != 0)
 	{
-		float Px = 12;
-		int Ht = Ctx.Y();
-		float Half = 5.5;
-		#define MAP(col) ((col) * Px + Half)
-
-		LMemDC Mem(_FL, Ctx.X(), Ctx.Y(), System32BitColourSpace);
-		Mem.Colour(0, 32);
-		Mem.Rectangle();
-
-		#ifdef LINUX
-		{
-			LItem::ItemPaintCtx TmpCtx = Ctx;
-			TmpCtx.Offset(-TmpCtx.x1, -TmpCtx.y1);
-			TmpCtx.pDC = &Mem;
-			LListItem::OnPaintColumn(TmpCtx, i, c);
-		}
-		#else
 		LListItem::OnPaintColumn(Ctx, i, c);
-		#endif
-
-		float r = Half - 1;
-		float x = MAP(NodeIdx);
-		Mem.Colour(LColour::Black);
-		
-		VcCommit *Prev = NULL, *Next = NULL;
-		if (Folder->Log.IdxCheck(Idx - 1))
-			Prev = Folder->Log[Idx - 1];
-		if (Folder->Log.IdxCheck(Idx + 1))
-			Next = Folder->Log[Idx + 1];
-		
-		for (auto it: Pos)
-		{
-			VcEdge *e = it.key;
-			int CurIdx = it.value;
-			if (CurIdx < 0)
-			{
-				continue;
-			}
-
-			double CurX = MAP(CurIdx);
-			
-			#define I(v) ((int)(v))
-			if (e->Child != this)
-			{
-				// Line to previous commit
-				int PrevIdx = Prev ? Prev->Pos.Find(e) : -1;
-				if (PrevIdx >= 0)
-				{
-					double PrevX = MAP(PrevIdx);
-					Mem.Line(I(PrevX), I(-(Ht/2)), I(CurX), I(Ht/2));
-				}
-				else
-				{
-					Mem.Colour(LColour::Red);
-					Mem.Line(I(CurX), I(Ht/2), I(CurX), I(Ht/2-5));
-					Mem.Colour(LColour::Black);
-				}
-			}
-
-			if (e->Parent != this)
-			{
-				int NextIdx = Next ? Next->Pos.Find(e) : -1;
-				if (NextIdx >= 0)
-				{
-					double NextX = MAP(NextIdx);
-					Mem.Line(I(NextX), I(Ht+(Ht/2)), I(CurX), I(Ht/2));
-				}
-				else
-				{
-					Mem.Colour(LColour::Red);
-					Mem.Line(I(CurX), I(Ht/2), I(CurX), I(Ht/2+5));
-					Mem.Colour(LColour::Black);
-				}
-			}
-		}
-
-		if (NodeIdx >= 0)
-		{
-			float Cx = x;
-			float Cy = (float)Ht / 2.0f;
-			{
-				LPath p;
-				p.Circle(Cx, Cy, r + (Current ? 1 : 0));
-				LSolidBrush sb(LColour::Black);
-				p.Fill(&Mem, sb);
-			}
-			{
-				LPath p;
-				p.Circle(Cx, Cy, r-1);
-				LAssert(NodeColour.IsValid());
-				// LgiTrace("%s = %s\n", Branch.Get(), NodeColour.GetStr());
-				LSolidBrush sb(NodeColour);
-				p.Fill(&Mem, sb);
-			}
-		}
-
-		// Mem.ConvertPreMulAlpha(false);
-		Ctx.pDC->Op(GDC_ALPHA);
-		Ctx.pDC->Blt(Ctx.x1, Ctx.y1, &Mem);
+		return;
 	}
-	else
+
+	LListItem::OnPaintColumn(Ctx, i, c);
+
+	LSurface::Vector vec = Ctx.pDC->Vec();
+	if (!vec)
+		return;
+
+	int H = Ctx.Y();
+	float x0 = (float)Ctx.x1;
+	float y0 = (float)Ctx.y1;
+
+	VcCommit *Prev = NULL, *Next = NULL;
+	if (Folder->Log.IdxCheck(Idx - 1))
+		Prev = Folder->Log[Idx - 1];
+	if (Folder->Log.IdxCheck(Idx + 1))
+		Next = Folder->Log[Idx + 1];
+
+	float dpi = Ctx.pDC->GetDpi().x;
+	if (dpi <= 0)
+		dpi = 96;
+	dpi /= 96.0f;
+
+	float pitch = 14.0f * dpi;
+	float inset = pitch * 0.45f;
+	float midY = y0 + (float)H / 2.0f;
+	float top = y0;
+	float bot = y0 + (float)H;
+	float r = pitch * 0.34f;
+	float sw = pitch * 0.16f;
+	if (sw < 1.5f)
+		sw = 1.5f;
+
+	auto laneX = [&](int lane) -> float
 	{
-		LListItem::OnPaintColumn(Ctx, i, c);
+		return x0 + inset + (float)lane * pitch + pitch * 0.5f;
+	};
+
+	auto segment = [&](float px0, float py0, float px1, float py1, LColour col)
+	{
+		vec.MoveTo(px0, py0);
+		if (fabs(px0 - px1) < 0.5f)
+			vec.LineTo(px1, py1);
+		else
+		{
+			float my = (py0 + py1) / 2.0f;
+			vec.CubicTo(px0, my, px1, my, px1, py1);
+		}
+		vec.Stroke(col, sw);
+	};
+
+	for (auto it: Pos)
+	{
+		VcEdge *e = it.key;
+		int lane = it.value;
+		if (lane < 0)
+			continue;
+
+		LColour col = e->Colour;
+		if (!col.IsValid())
+			col = NodeColour;
+		float cx = laneX(lane);
+
+		if (e->Parent == this)
+		{
+			int pl = Prev ? Prev->Pos.Find(e) : -1;
+			if (pl >= 0)
+				segment(laneX(pl), top, cx, midY, col);
+			else
+				segment(cx, top, cx, midY, LColour(0, 0, 0));
+			continue;
+		}
+
+		if (e->Child == this)
+		{
+			int nl = Next ? Next->Pos.Find(e) : -1;
+			if (nl >= 0)
+				segment(cx, midY, cx, bot, col);
+			else
+				segment(cx, midY, cx, bot, LColour(0, 0, 0));
+			continue;
+		}
+
+		int pl = Prev ? Prev->Pos.Find(e) : -1;
+		if (pl < 0)
+		{
+			segment(cx, top, cx, bot, LColour(0, 0, 0));
+			continue;
+		}
+
+		float tx = laneX(pl);
+		if (fabs(tx - cx) < 0.5f)
+			segment(cx, top, cx, bot, col);
+		else
+		{
+			segment(tx, top, cx, midY, col);
+			segment(cx, midY, cx, bot, col);
+		}
+	}
+
+	if (NodeIdx >= 0)
+	{
+		float cx = laneX(NodeIdx);
+		float nr = r + (Current ? 1.0f : 0.0f);
+
+		auto circle = [&](float rad)
+		{
+			vec.MoveTo(cx, midY - rad);
+			vec.ArcTo(rad, rad, 0, true, true, cx, midY + rad);
+			vec.ArcTo(rad, rad, 0, true, true, cx, midY - rad);
+			vec.ClosePath();
+		};
+
+		vec.ClearPath();
+		circle(nr);
+		vec.Fill(NodeColour);
+		vec.Stroke(LColour::Black, 1.2f);
 	}
 }
 

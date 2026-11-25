@@ -21,6 +21,7 @@ struct VcEdge
 {
 	VcCommit *Parent, *Child;
 	int Idx;
+	LColour Colour;
 
 	VcEdge(VcCommit *p, VcCommit *c)
 	{
