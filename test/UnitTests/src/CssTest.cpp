@@ -1,6 +1,8 @@
 #include "lgi/common/Lgi.h"
 #include "UnitTests.h"
 #include "lgi/common/Css.h"
+#include "lgi/common/Combo.h"
+#include "lgi/common/TableLayout.h"
 
 class PrivLCssTest
 {
@@ -156,6 +158,51 @@ public:
 
 		return true;
 	}
+
+	bool TestComboMaxWidth()
+	{
+		LTableLayout table;
+		auto combo = new LCombo;
+		if (!table.GetCell(0, 0)->Add(combo))
+			return Error("Could not add combo to table.\n");
+		combo->Insert("main");
+		combo->Insert("origin/very-long-branch-name-very-long-branch-name-very-long-branch-name");
+
+		LViewLayoutInfo natural = {};
+		if (!combo->OnLayout(natural))
+			return Error("Could not measure combo.\n");
+		LRect bounds(0, 0, 999, 99);
+		table.SetPos(bounds);
+		table.OnPosChange();
+		if (combo->X() != natural.Width.Max)
+			return Error("Unconstrained combo width changed: %i != %i\n", combo->X(), natural.Width.Max);
+
+		combo->CssStyles("max-width: 10em;");
+		auto css = combo->GetCss(true);
+		int limit = css->MaxWidth().ToPx(table.X(), combo->GetFont());
+		if (natural.Width.Max <= limit)
+			return Error("Long combo test item does not exceed max-width.\n");
+		table.InvalidateLayout();
+		table.OnPosChange();
+		if (combo->X() != limit)
+			return Error("Combo exceeded max-width: %i != %i\n", combo->X(), limit);
+
+		combo->Empty();
+		combo->Insert("main");
+		natural = {};
+		combo->OnLayout(natural);
+		table.InvalidateLayout();
+		table.OnPosChange();
+		if (natural.Width.Max >= limit || combo->X() != natural.Width.Max)
+			return Error("Short combo was not sized naturally: %i != %i\n", combo->X(), natural.Width.Max);
+
+		combo->CssStyles("width: 500px; max-width: 10em;");
+		table.InvalidateLayout();
+		table.OnPosChange();
+		if (combo->X() != limit)
+			return Error("Explicit combo width exceeded max-width: %i != %i\n", combo->X(), limit);
+		return true;
+	}
 };
 
 LCssTest::LCssTest() : UnitTest("LCssTest")
@@ -171,5 +218,6 @@ LCssTest::~LCssTest()
 bool LCssTest::Run()
 {
 	return	d->Test1() &&
-			d->Test2();
+			d->Test2() &&
+			d->TestComboMaxWidth();
 }

@@ -7,6 +7,7 @@
 #include "lgi/common/Uri.h"
 
 #include "SshConnection.h"
+#include "GitRefNames.h"
 
 #define DEBUG_SLOG				0
 #if DEBUG_SLOG
@@ -289,7 +290,7 @@ protected:
 	void PathSeek();
 
 	// Git specific
-	LHashTbl<ConstStrKey<char>,LString> GitNames;
+	GitRefNames GitNames;
 	void AddGitName(LString Hash, LString Name);
 	LString GetGitNames(LString Hash);
 
@@ -394,7 +395,7 @@ public:
 	void DefaultFields();
 	void UpdateColumns(LList *lst = NULL);
 	int GraphLanes = 1; // Widest lane set used by the graph, for column sizing
-	int GraphColumnWidth();
+	static int GraphColumnWidth(int graphLanes, LList *lst);
 	void ApplyGraphColumnWidth();
 	int IndexOfCommitField(CommitField fld);
 	const char *GetText(int Col);

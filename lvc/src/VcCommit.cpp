@@ -1,4 +1,5 @@
 #include "Lvc.h"
+#include "GraphProfile.h"
 #include "lgi/common/ClipBoard.h"
 #include "lgi/common/Path.h"
 #include "lgi/common/HashTable.h"
@@ -122,11 +123,36 @@ void VcCommit::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 		return;
 	}
 
+	auto profile = GraphPaintProfile::Current;
+	auto started = profile ? LMicroTime() : 0;
 	LListItem::OnPaintColumn(Ctx, i, c);
+	auto baseDone = profile ? LMicroTime() : 0;
+	if (profile)
+	{
+		if (!profile->Rows)
+			profile->Folder = Folder->GetUri().sPath;
+		profile->Rows++;
+		profile->Base += baseDone - started;
+	}
 
 	LSurface::Vector vec = Ctx.pDC->Vec();
 	if (!vec)
+	{
+		if (profile)
+		{
+			auto done = LMicroTime();
+			profile->NoVector++;
+			profile->Setup += done - baseDone;
+			profile->MaxRow = MAX(profile->MaxRow, done - started);
+		}
 		return;
+	}
+
+	if (!vec.ClipRect(Ctx))
+	{
+		LgiTrace("%s:%i - Failed to clip graph column.\n", _FL);
+		return;
+	}
 
 	int H = Ctx.Y();
 	float x0 = (float)Ctx.x1;
@@ -160,17 +186,22 @@ void VcCommit::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 
 	auto segment = [&](float px0, float py0, float px1, float py1, LColour col)
 	{
+		if (profile)
+			profile->Segments++;
 		vec.MoveTo(px0, py0);
 		if (fabs(px0 - px1) < 0.5f)
 			vec.LineTo(px1, py1);
 		else
 		{
+			if (profile)
+				profile->Curves++;
 			float my = (py0 + py1) / 2.0f;
 			vec.CubicTo(px0, my, px1, my, px1, py1);
 		}
 		vec.Stroke(col, sw);
 	};
 
+	auto setupDone = profile ? LMicroTime() : 0;
 	for (auto it: Pos)
 	{
 		VcEdge *e = it.key;
@@ -219,6 +250,7 @@ void VcCommit::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 		}
 	}
 
+	auto edgesDone = profile ? LMicroTime() : 0;
 	if (NodeIdx >= 0)
 	{
 		float cx = laneX(NodeIdx);
@@ -239,6 +271,16 @@ void VcCommit::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 		vec.Fill(NodeColour);
 		vec.Stroke(LColour::Black, ring);
 	}
+
+	if (profile)
+	{
+		auto done = LMicroTime();
+		profile->Setup += setupDone - baseDone;
+		profile->Edges += edgesDone - setupDone;
+		profile->Nodes += done - edgesDone;
+		profile->Positions += Pos.Length();
+		profile->MaxRow = MAX(profile->MaxRow, done - started);
+	}
 }
 
 const char *VcCommit::GetFieldText(CommitField Fld)
@@ -254,8 +296,7 @@ const char *VcCommit::GetFieldText(CommitField Fld)
 		case LBranch:
 			if (Vcs == VcGit)
 			{
-				if (!sNames)
-					sNames = Folder->GetGitNames(Rev);
+				sNames = Folder->GetGitNames(Rev);
 				return sNames;
 			}
 			else
@@ -400,8 +441,7 @@ LString VcCommit::CommitBranch()
 
 	if (Vcs == VcGit) {
 		// Git commits have no branch of their own, so use the refs pointing at this commit
-		if (!sNames)
-			sNames = Folder->GetGitNames(Rev);
+		sNames = Folder->GetGitNames(Rev);
 		if (!sNames)
 			return LString();
 

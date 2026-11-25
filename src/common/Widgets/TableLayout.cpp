@@ -819,6 +819,11 @@ void TableCell::LayoutWidth(int Depth, int &MinX, int &MaxX, CellFlag &Flag)
 			{
 				int MaxPx = MaxCellWidth();
 				c->Inf.Width.Min = c->Inf.Width.Max = ChildWid.ToPx(MaxPx, v->GetFont());
+				if (Izza(LCombo) && Css->MaxWidth())
+				{
+					int px = Css->MaxWidth().ToPx(Tx, v->GetFont());
+					c->Inf.Width.Min = c->Inf.Width.Max = MIN(c->Inf.Width.Max, px);
+				}
 				Min = MAX(Min, c->Inf.Width.Min);
 				Max = MAX(Max, c->Inf.Width.Min);
 				
@@ -827,6 +832,22 @@ void TableCell::LayoutWidth(int Depth, int &MinX, int &MaxX, CellFlag &Flag)
 			}
 			else if (v->OnLayout(c->Inf))
 			{
+				#if DEBUG_LAYOUT
+				if (Table->d->DebugLayout)
+				{
+					auto maxWidth = Css ? Css->MaxWidth() : LCss::Len();
+					Log().Print("\t\tOnLayout id=%i min=%i max=%i css-max=%i px=%i\n",
+						v->GetId(), c->Inf.Width.Min, c->Inf.Width.Max,
+						maxWidth.Type, maxWidth ? maxWidth.ToPx(Tx, v->GetFont()) : -1);
+				}
+				#endif
+				if (Izza(LCombo) && Css && Css->MaxWidth())
+				{
+					int px = Css->MaxWidth().ToPx(Tx, v->GetFont());
+					c->Inf.Width.Min = MIN(c->Inf.Width.Min, px);
+					if (c->Inf.Width.Max >= 0)
+						c->Inf.Width.Max = MIN(c->Inf.Width.Max, px);
+				}
 				if (c->Inf.Width.Max < 0)
 				{
 					if (Flag != SizeFixed)
@@ -887,8 +908,21 @@ void TableCell::LayoutWidth(int Depth, int &MinX, int &MaxX, CellFlag &Flag)
 					max_x = MAX(x + 4, max_x);
 				}				
 				
-				Min = MAX(Min, min_x + PadX);
-				Max = MAX(Max, max_x + PadX);
+				int ComboMin = min_x + PadX;
+				int ComboMax = max_x + PadX;
+				if (auto ComboCss = v->GetCss())
+				{
+					auto ComboMaxWid = ComboCss->MaxWidth();
+					if (ComboMaxWid)
+					{
+						int px = ComboMaxWid.ToPx(Tx, f);
+						ComboMin = MIN(ComboMin, px);
+						ComboMax = MIN(ComboMax, px);
+					}
+				}
+
+				Min = MAX(Min, ComboMin);
+				Max = MAX(Max, ComboMax);
 				if (Flag < SizeGrow)
 					Flag = SizeGrow;
 			}

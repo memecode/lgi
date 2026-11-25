@@ -666,7 +666,7 @@
 					<StaticText pos="567,21,643,48" ref="44" />
 				</td>
 				<td addr="7,0">
-					<ComboBox pos="663,21,746,41" ref="45" />
+					<ComboBox pos="663,21,746,41" ref="45" Style="max-width: 20em;" />
 				</td>
 				<td addr="8,0">
 					<Button Pos="777,21,797,41" image="" toggle="0" ref="163" />

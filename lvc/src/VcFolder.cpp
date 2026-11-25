@@ -1,4 +1,5 @@
 #include "Lvc.h"
+#include "GraphProfile.h"
 
 #include <cstdarg>
 #include <cstdio>
@@ -657,33 +658,12 @@ void VcFolder::AddGitName(LString Hash, LString Name)
 		return;
 	}
 
-	LString Existing = GitNames.Find(Hash);
-	if (Existing)
-		GitNames.Add(Hash, Existing + "," + Name);
-	else
-		GitNames.Add(Hash, Name);		
+	GitNames.Add(Hash, Name);
 }
 
 LString VcFolder::GetGitNames(LString Hash)
 {
-	if (!Hash)
-		return LString();
-
-	// Keys come from 'git branch -v', which reports abbreviated hashes, so a
-	// stored key can be shorter than the commit hash. Match on that prefix.
-	LString names;
-	for (auto n: GitNames)
-	{
-		if (!n.key || !n.key[0])
-			continue;
-		if (!Strnicmp(Hash.Get(), n.key, strlen(n.key)))
-		{
-			if (names)
-				names += ",";
-			names += n.value;
-		}
-	}
-	return names;
+	return GitNames.Find(Hash);
 }
 
 bool VcFolder::ParseBranches(int Result, LString s, ParseParams *Params)
@@ -694,6 +674,7 @@ bool VcFolder::ParseBranches(int Result, LString s, ParseParams *Params)
 	{
 		case VcGit:
 		{
+			GitNames.Empty();
 			auto a = s.SplitDelimit("\r\n");
 			for (auto &l: a)
 			{
@@ -1031,15 +1012,16 @@ int DefaultFieldWidth(CommitField fld)
 	}
 }
 
-int VcFolder::GraphColumnWidth()
+int VcFolder::GraphColumnWidth(int graphLanes, LList *lst)
 {
 	// Matches the pitch/inset used by VcCommit::OnPaintColumn
 	const int pitch = 14;
 	const int inset = pitch * 45 / 100; // matches inset = pitch * 0.45
-	int w = pitch * GraphLanes + inset * 2;
+	int w = pitch * graphLanes + inset * 2;
 	if (w < pitch + inset * 2)
 		w = pitch + inset * 2;
-	return w;
+	int maxWidth = LCss::Len(LCss::LenEm, 15).ToPx(lst->X(), lst->GetFont());
+	return MIN(w, maxWidth);
 }
 
 void VcFolder::UpdateColumns(LList *lst)
@@ -1053,7 +1035,7 @@ void VcFolder::UpdateColumns(LList *lst)
 	{
 		switch (c)
 		{
-			case LGraph:      lst->AddColumn("---",      GraphColumnWidth()); break;
+			case LGraph:      lst->AddColumn("---",      GraphColumnWidth(GraphLanes, lst)); break;
 			case LIndex:      lst->AddColumn("Index",    DefaultFieldWidth(c)); break;
 			case LBranch:     lst->AddColumn("Branch",   DefaultFieldWidth(c)); break;
 			case LRevision:   lst->AddColumn("Revision", DefaultFieldWidth(c)); break;
@@ -1422,7 +1404,7 @@ void VcFolder::OnSelectUpdateItems()
 		for (auto c: Fields)
 		{
 			if (auto col = d->Commits->ColumnAt(i++))
-				col->Width(c == LGraph ? GraphColumnWidth() : DefaultFieldWidth(c));
+				col->Width(c == LGraph ? GraphColumnWidth(GraphLanes, d->Commits) : DefaultFieldWidth(c));
 			else
 				break;
 		}
@@ -1448,7 +1430,7 @@ void VcFolder::ApplyGraphColumnWidth()
 		return;
 
 	if (auto col = d->Commits->ColumnAt(idx))
-		col->Width(GraphColumnWidth());
+		col->Width(GraphColumnWidth(GraphLanes, d->Commits));
 }
 
 void VcFolder::Select(bool b)
@@ -1711,7 +1693,11 @@ bool VcFolder::GetBranches(bool refresh, bool includeRemote, ParseParams *Params
 
 bool VcFolder::ParseRevList(int Result, LString s, ParseParams *Params)
 {
+	TraceGraph("ParseRevList.begin", Uri.sPath.Get(), "bytes=%zu exit=%d", (size_t)s.Length(), Result);
+	auto started = GraphProfileTime();
 	Log.DeleteObjects();
+	auto cleared = GraphProfileTime();
+	uint64_t splitUs = 0, parseUs = 0, linkUs = 0;
 
 	int Errors = 0;
 	switch (GetType())
@@ -1736,6 +1722,8 @@ bool VcFolder::ParseRevList(int Result, LString s, ParseParams *Params)
 				c = nul + 1;
 			}
 
+			auto splitDone = GraphProfileTime();
+			splitUs = splitDone - cleared;
 			for (auto Commit: Commits)
 			{
 				LAutoPtr<VcCommit> Rev(new VcCommit(d, this));
@@ -1751,7 +1739,10 @@ bool VcFolder::ParseRevList(int Result, LString s, ParseParams *Params)
 				}
 			}
 
+			auto parseDone = GraphProfileTime();
+			parseUs = parseDone - splitDone;
 			LinkParents();
+			linkUs = GraphProfileTime() - parseDone;
 			break;
 		}
 		default:
@@ -1760,6 +1751,11 @@ bool VcFolder::ParseRevList(int Result, LString s, ParseParams *Params)
 	}
 
 	LogStatus = Result == 0 && Errors == 0 ? LogState::Loaded : LogState::Error;
+	TraceGraph("ParseRevList", Uri.sPath.Get(),
+		"total_ms=%.3f clear_ms=%.3f split_ms=%.3f parse_ms=%.3f link_ms=%.3f bytes=%zu commits=%zu errors=%d exit=%d",
+		(GraphProfileTime() - started) / 1000.0, (cleared - started) / 1000.0,
+		splitUs / 1000.0, parseUs / 1000.0, linkUs / 1000.0,
+		(size_t)s.Length(), (size_t)Log.Length(), Errors, Result);
 	return LogStatus == LogState::Loaded;
 }
 
@@ -2205,6 +2201,12 @@ bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 
 void VcFolder::LinkParents()
 {
+	TraceGraph("LinkParents.begin", Uri.sPath.Get(), "commits=%zu", (size_t)Log.Length());
+	auto started = GraphProfileTime();
+	const bool tracing = GraphProfileEnabled();
+	size_t edgeCount = 0, missingParents = 0, positions = 0;
+	size_t activeVisits = 0, comparisons = 0, moves = 0, collapses = 0;
+	uint64_t findUs = 0, startUs = 0, assignUs = 0, terminateUs = 0, collapseUs = 0;
 	#if PROFILE_FN
 	LProfile Prof("LinkParents");
 	#endif	
@@ -2220,6 +2222,7 @@ void VcFolder::LinkParents()
 	}
 
 	// Create all the edges...
+	auto indexed = GraphProfileTime();
 	PROF("Create edges.");
 	for (auto c:Log)
 	{
@@ -2228,7 +2231,12 @@ void VcFolder::LinkParents()
 		{
 			auto *p = Map.Find(pRev);
 			if (p)
+			{
 				new VcEdge(p, c);
+				if (tracing) edgeCount++;
+			}
+			else if (tracing)
+				missingParents++;
 			#if 0
 			else
 				return;
@@ -2237,12 +2245,14 @@ void VcFolder::LinkParents()
 	}
 
 	// Map the edges to positions
+	auto edgesCreated = GraphProfileTime();
 	PROF("Map edges.");
 	typedef LArray<VcEdge*> EdgeArr;
 	LArray<EdgeArr> Active;
 	int MaxLanes = 1;
 	for (auto c:Log)
 	{
+		auto rowStart = tracing ? LMicroTime() : 0;
 		for (unsigned i=0; c->NodeIdx<0 && i<Active.Length(); i++)
 		{
 			for (auto e:Active[i])
@@ -2256,6 +2266,8 @@ void VcFolder::LinkParents()
 		}
 
 		// Add starting edges to active set
+		auto found = tracing ? LMicroTime() : 0;
+		findUs += found - rowStart;
 		bool firstChildEdge = true;
 		for (auto e:c->Edges)
 		{
@@ -2276,6 +2288,8 @@ void VcFolder::LinkParents()
 		}
 
 		// Now for all active edges... assign positions
+		auto added = tracing ? LMicroTime() : 0;
+		startUs += added - found;
 		for (unsigned i=0; i<Active.Length(); i++)
 		{
 			EdgeArr *Edges = &Active[i];
@@ -2283,6 +2297,7 @@ void VcFolder::LinkParents()
 			{
 				LAssert(Active.PtrCheck(Edges));
 				VcEdge *e = (*Edges)[n];
+				if (tracing) activeVisits++;
 
 				if (c == e->Child || c == e->Parent)
 				{
@@ -2296,6 +2311,7 @@ void VcFolder::LinkParents()
 					bool Diff = false;
 					for (auto edge: *Edges)
 					{
+						if (tracing) comparisons++;
 						if (edge != e &&
 							edge->Child != c &&
 							edge->Parent != e->Parent)
@@ -2316,6 +2332,7 @@ void VcFolder::LinkParents()
 							bool Match = true;
 							for (auto ee: Active[ii])
 							{
+								if (tracing) comparisons++;
 								if (ee->Parent != e->Parent)
 								{
 									Match = false;
@@ -2331,6 +2348,7 @@ void VcFolder::LinkParents()
 							NewIndex = (int)Active.Length();
 
 						Edges->Delete(e);
+						if (tracing) moves++;
 						
 						auto &NewEdges = Active[NewIndex];
 						NewEdges.Add(e);
@@ -2350,6 +2368,8 @@ void VcFolder::LinkParents()
 		}
 		
 		// Process terminating edges
+		auto assigned = tracing ? LMicroTime() : 0;
+		assignUs += assigned - added;
 		for (auto e: c->Edges)
 		{
 			if (e->Parent == c)
@@ -2372,12 +2392,15 @@ void VcFolder::LinkParents()
 		}
 
 		// Collapse any empty active columns
+		auto terminated = tracing ? LMicroTime() : 0;
+		terminateUs += terminated - assigned;
 		for (unsigned i=0; i<Active.Length(); i++)
 		{
 			if (Active[i].Length() == 0)
 			{
 				// No more edges using this index, bump any higher ones down
 				Active.DeleteAt(i, true);
+				if (tracing) collapses++;
 				for (int n=i; n<Active.Length(); n++)
 				{
 					for (auto edge:Active[n])
@@ -2393,15 +2416,28 @@ void VcFolder::LinkParents()
 
 		if ((int)Active.Length() > MaxLanes)
 			MaxLanes = (int)Active.Length();
+		collapseUs += (tracing ? LMicroTime() : 0) - terminated;
+		if (tracing) positions += c->Pos.Length();
 	}
 
 	GraphLanes = MaxLanes;
 
+	auto laidOut = GraphProfileTime();
 	AssignColours();
+	auto done = GraphProfileTime();
+	TraceGraph("LinkParents", Uri.sPath.Get(),
+		"total_ms=%.3f index_ms=%.3f create_edges_ms=%.3f layout_ms=%.3f colours_ms=%.3f "
+		"find_lane_ms=%.3f start_edges_ms=%.3f assign_positions_ms=%.3f terminate_ms=%.3f collapse_ms=%.3f "
+		"commits=%zu edges=%zu missing_parents=%zu lanes=%d positions=%zu active_visits=%zu comparisons=%zu moves=%zu collapses=%zu",
+		(done - started) / 1000.0, (indexed - started) / 1000.0,
+		(edgesCreated - indexed) / 1000.0, (laidOut - edgesCreated) / 1000.0, (done - laidOut) / 1000.0,
+		findUs / 1000.0, startUs / 1000.0, assignUs / 1000.0, terminateUs / 1000.0, collapseUs / 1000.0,
+		(size_t)Log.Length(), edgeCount, missingParents, GraphLanes, positions, activeVisits, comparisons, moves, collapses);
 }
 
 void VcFolder::AssignColours()
 {
+	auto started = GraphProfileTime();
 	// Each lane gets its own colour. A lane takes the colour of the branch named on
 	// it when there is one, so graph colours match the branch list, otherwise it uses
 	// its lane index so different lanes are still different colours.
@@ -2423,6 +2459,7 @@ void VcFolder::AssignColours()
 			Lanes[l] = GetPaletteColour(0);
 	}
 
+	auto lanesDone = GraphProfileTime();
 	for (auto c: Log)
 	{
 		LString name = c->CommitBranch();
@@ -2441,6 +2478,11 @@ void VcFolder::AssignColours()
 		for (auto e: c->Edges)
 			e->Colour = GetGraphLineColour();
 	}
+	auto done = GraphProfileTime();
+	TraceGraph("AssignColours", Uri.sPath.Get(),
+		"total_ms=%.3f lane_colours_ms=%.3f commit_colours_ms=%.3f commits=%zu lanes=%d",
+		(done - started) / 1000.0, (lanesDone - started) / 1000.0, (done - lanesDone) / 1000.0,
+		(size_t)Log.Length(), GraphLanes);
 }
 
 void VcFolder::UpdateBranchUi()
@@ -2484,7 +2526,7 @@ void VcFolder::UpdateBranchUi()
 					w->SetCtrlName(IDC_MSG, LString::Fmt("%s-%s: ", parts[0].Get(), parts[1].Get()));
 			}
 		}
-		else LgiTrace("%s:%i - not DMS branch\n", _FL);
+		// else LgiTrace("%s:%i - not DMS branch\n", _FL);
 	}
 	else LgiTrace("%s:%i - no branches\n", _FL);
 

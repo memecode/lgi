@@ -42,5 +42,66 @@ Colours are resolved in `VcFolder::AssignColours()` once the lanes are known: ea
 Because the vector backend requires a premultiplied BGRA32 target, we draw directly onto the painting surface (`Ctx.pDC`, a cairo `LScreenDC`) using its vector context, with coordinates offset to the row origin, rather than through an intermediate `LMemDC` (which was not premultiplied).
 
 ### Column sizing
-The graph column must fit the widest lane set. `LinkParents()` records the peak lane count (`GraphLanes`), and `GraphColumnWidth()` sizes the column from the same pitch/inset used by the renderer. `ResizeColumnsToContent()` cannot measure a drawn column, so `ApplyGraphColumnWidth()` re-applies the correct width after content resizing (in `OnSelectUpdateItems` and `ShowLog`).
+`LinkParents()` records the peak lane count (`GraphLanes`), and `GraphColumnWidth()` sizes the column from the pitch/inset used by the renderer, capped at 15em of the list font. Lanes beyond the column are clipped; users can widen the column manually to see them. `ResizeColumnsToContent()` cannot measure a drawn column, so `ApplyGraphColumnWidth()` re-applies the automatic width after content resizing (in `OnSelectUpdateItems` and `ShowLog`).
+
+## Performance diagnostics
+
+Build from the `lvc` directory with `make -f linux/Makefile.linux`, then launch
+with graph tracing enabled:
+
+```sh
+LVC_TRACE_GRAPH=1 ./lvc 2>graph-profile.log
+```
+
+Open the repository (for example `/home/matthew/work/dev`), let its history load,
+then scroll the commit list. Ensure the configured Git history limit is large
+enough to reproduce the slowdown. Entries prefixed `[lvc-graph]` go to stderr
+and identify the repository. Unset `LVC_TRACE_GRAPH` to disable tracing; its
+presence enables it, even if set to `0`. No recompilation is needed to toggle it.
+
+- `ParseRevList`: time clearing the old graph, splitting Git output, parsing
+  commits, and linking the graph, plus input bytes, commit count and errors.
+  This measures processing after the Git command completes, not Git execution.
+- `LinkParents`: indexing, edge creation, layout and colour times. Layout is
+  further broken down into finding node lanes, starting edges, assigning edge
+  positions, terminating edges and collapsing empty lanes. Counts include
+  edges, missing parents (normal for truncated history), peak lanes, stored
+  positions, active-edge visits, untangling comparisons, lane moves and
+  collapsed columns. Large position/visit/comparison counts help explain
+  layout cost as history and branch overlap grow.
+- `AssignColours`: lane-colour and commit/edge-colour passes, including
+  assignments triggered later when branch refs arrive.
+- `Paint`: one summary per main commit-list repaint, not per row. `list_ms`
+  measures the entire list paint; `graph_ms` sums graph-column row work,
+  split into base cell painting, setup/vector acquisition, edge drawing
+  (including adjacent-row position lookups), and node drawing. It also reports
+  the slowest row, rows painted, positions visited, segments, curved segments
+  and rows lacking a vector context. Repeated repaints are counted again.
+  Backend work outside those row sections is included only in `list_ms`.
+
+All times are milliseconds from microsecond clock samples. Begin markers
+identify parsing/linking before they finish. Subphase times are nested within
+their parent totals, so do not sum totals across entries. Instrumentation adds
+clock reads and counters while enabled; compare runs using the same build,
+history limit and viewport.
+
+### Ref-name lookup
+
+Ref names are indexed by their hash and the abbreviation lengths reported by
+Git. A commit lookup probes only those lengths, rather than scanning every ref.
+Matching remains case-insensitive and includes all matching abbreviated or full
+hashes. Multiple names at the same hash retain their order; matches at different
+abbreviation lengths follow the order those lengths were first encountered.
+
+The index caches both matches and misses. Adding refs, replacing the branch
+snapshot, or refreshing the repository clears the cache. Commit display and
+colour assignment consult this cache rather than retaining stale positive
+results in individual commits.
+
+The headless regression test is `tests/GitRefNames.cpp`. It covers abbreviated
+and full hashes (including SHA-256), multiple names, mixed-case queries, and
+positive/negative cache invalidation. It can optionally benchmark against the
+previous linear scan using two files: whitespace-separated `hash name` ref
+pairs, and one commit hash per line. It verifies that both implementations
+return the same names for every supplied commit, ignoring ordering.
 

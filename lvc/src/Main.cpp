@@ -11,6 +11,7 @@
 #include "lgi/common/PopupNotification.h"
 
 #include "Lvc.h"
+#include "GraphProfile.h"
 #include "resdefs.h"
 #include "BranchEditDlg.h"
 #include "CherryPickDlg.h"
@@ -810,6 +811,12 @@ class CommitList : public LList
 public:
 	CommitList(int id) : LList(id, 0, 0, 200, 200)
 	{
+	}
+
+	void OnPaint(LSurface *pDC) override
+	{
+		GraphPaintProfile profile;
+		LList::OnPaint(pDC);
 	}
 
 	void SelectRevisions(LString::Array &Revs, const char *BranchHint = NULL)
