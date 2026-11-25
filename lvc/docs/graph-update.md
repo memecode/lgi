@@ -46,6 +46,20 @@ Because the vector backend requires a premultiplied BGRA32 target, we draw direc
 
 ## Performance diagnostics
 
+The **Local branches** checkbox and View menu's **Git history: local branches
+only** option control the same setting, enabled by default. It shows commits
+reachable from local branches; remote-only and tag-only history, and detached
+HEAD commits not reachable from a local branch, are excluded. Turn it off to
+show all refs as before. The choice is saved and applies to Git repositories,
+including repositories opened over SSH.
+
+The View menu's **Git history: first parent only** option is also enabled by
+default. It follows only the first parent of each Git commit and draws only
+those links, retaining merge commits but hiding merged side history unless
+another selected ref reaches it through its own first-parent history. Turn it
+off to see all parent histories. This setting is saved independently of the
+local-branches filter.
+
 Build from the `lvc` directory with `make -f linux/Makefile.linux`, then launch
 with graph tracing enabled:
 

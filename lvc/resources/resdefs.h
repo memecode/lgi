@@ -141,3 +141,5 @@
 #define ID_BRANCH_EDIT							534
 #define IDS_NEW_BRANCH_Q						535
 #define ID_REMOTE_DLG							536
+#define IDM_GIT_LOCAL_BRANCHES					537
+#define IDM_GIT_FIRST_PARENT					538

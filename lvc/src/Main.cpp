@@ -8,6 +8,7 @@
 #include "lgi/common/StructuredLog.h"
 #include "lgi/common/PopupNotification.h"
 #include "lgi/common/TextLabel.h"
+#include "lgi/common/CheckBox.h"
 #include "lgi/common/PopupNotification.h"
 
 #include "Lvc.h"
@@ -1486,6 +1487,10 @@ public:
 			Menu->SetPrefAndAboutItems(IDM_OPTIONS, IDM_ABOUT);
 			Menu->Attach(this);
 			Menu->Load(this, "IDM_MENU");
+			if (auto item = Menu->FindItem(IDM_GIT_LOCAL_BRANCHES))
+				item->Checked(GitLocalBranchesOnly());
+			if (auto item = Menu->FindItem(IDM_GIT_FIRST_PARENT))
+				item->Checked(GitFirstParentOnly());
 		}
 
 		mainBox      	= new LBox(IDC_TOOLS_BOX,   true,  "ToolsBox");
@@ -1514,8 +1519,9 @@ public:
 		FolderLayout->Attach(FoldersBox);
 		CommitsBox->Attach(FoldersBox);
 
+		int commitCols = 4;
 		auto CommitsLayout = new LTableLayout(IDC_COMMITS_TBL);
-		c = CommitsLayout->GetCell(0, 0, true, 3);
+		c = CommitsLayout->GetCell(0, 0, true, commitCols);
 			Commits = new CommitList(IDC_LIST);
 			c->Add(Commits);
 		c = CommitsLayout->GetCell(0, 1);
@@ -1523,6 +1529,9 @@ public:
 		c = CommitsLayout->GetCell(1, 1);
 			c->Add(new LButton(IDC_CLEAR_FILTER_COMMITS, 0, 0, -1, -1, "x"));
 		c = CommitsLayout->GetCell(2, 1);
+			c->VerticalAlign(LCss::VerticalMiddle);
+			c->Add(new LCheckBox(ID_LOCAL_BRANCHES, "Local branches", GitLocalBranchesOnly()));
+		c = CommitsLayout->GetCell(3, 1);
 			c->PaddingRight("8px");
 			c->Add(new LButton(ID_FILTER_BY_AUTHOR, 0, 0, -1, -1, "@author"));
 		CommitsLayout->Attach(CommitsBox);
@@ -1759,6 +1768,36 @@ public:
 				// The control is the source of truth: setting its value notifies
 				// OnNotify, which mirrors the menu check and refreshes the listing.
 				SetCtrlValue(ID_UNTRACKED, !mi->Checked());
+				break;
+			}
+			case IDM_GIT_LOCAL_BRANCHES:
+			{
+				auto mi = GetMenu()->FindItem(IDM_GIT_LOCAL_BRANCHES);
+				if (!mi)
+					break;
+				SetCtrlValue(ID_LOCAL_BRANCHES, !mi->Checked());
+				break;
+			}
+			case IDM_GIT_FIRST_PARENT:
+			{
+				auto mi = GetMenu()->FindItem(IDM_GIT_FIRST_PARENT);
+				if (!mi)
+					break;
+
+				bool enabled = !GitFirstParentOnly();
+				LVariant value;
+				value = enabled;
+				if (!Opts.SetValue(OPT_GitFirstParentOnly, value))
+				{
+					Log->Print("Failed to update Git history filter.\n");
+					mi->Checked(!enabled);
+					break;
+				}
+				mi->Checked(enabled);
+				if (!Opts.SerializeFile(true))
+					Log->Print("Failed to save Git history filter: %s\n", Opts.GetError());
+				if (CurFolder)
+					CurFolder->Select(true);
 				break;
 			}
 			case IDM_REFRESH:
@@ -2290,6 +2329,32 @@ public:
 					default:
 						break;
 				}
+				break;
+			}
+			case ID_LOCAL_BRANCHES:
+			{
+				if (n.Type != LNotifyValueChanged)
+					break;
+
+				bool enabled = c->Value() != 0;
+				if (enabled == GitLocalBranchesOnly())
+					break;
+
+				LVariant value;
+				value = enabled;
+				if (!Opts.SetValue(OPT_GitLocalBranchesOnly, value))
+				{
+					Log->Print("Failed to update Git history filter.\n");
+					c->Value(!enabled);
+					break;
+				}
+				if (auto m = GetMenu())
+					if (auto mi = m->FindItem(IDM_GIT_LOCAL_BRANCHES))
+						mi->Checked(enabled);
+				if (!Opts.SerializeFile(true))
+					Log->Print("Failed to save Git history filter: %s\n", Opts.GetError());
+				if (CurFolder)
+					CurFolder->Select(true);
 				break;
 			}
 			case ID_UNTRACKED:

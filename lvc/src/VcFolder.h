@@ -264,6 +264,8 @@ protected:
 	LAutoPtr<UncommitedItem> Uncommit;
 	LString Cache, NewRev;
 	bool CommitListDirty = false;
+	bool GitLogLocalBranchesOnly = true;
+	bool GitLogFirstParentOnly = true;
 	int Unpushed = -1, Unpulled = -1;
 	LString CountCache;
 	LTreeItem *Tmp = NULL;
@@ -338,7 +340,7 @@ protected:
 	void OnCmdError(LString Output, const char *Msg);
 	void ClearError();
 	VcFile *FindFile(const char *Path);
-	void LinkParents();
+	void LinkParents(bool firstParentOnly = false);
 	void AssignColours();
 	void CurrentRev(std::function<void(LString)> Callback);
 	LColour BranchColour(const char *Name);

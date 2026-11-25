@@ -1477,6 +1477,10 @@ void VcFolder::Select(bool b)
 		GetCurrentRevision();
 
 		PROF("UpdateCommitList");
+		if (GetType() == VcGit &&
+			(GitLogLocalBranchesOnly != d->GitLocalBranchesOnly() ||
+			 GitLogFirstParentOnly != d->GitFirstParentOnly()))
+			CommitListDirty = true;
 		if ((LogStatus != LogState::Loaded || CommitListDirty) &&
 			LogStatus != LogState::Logging)
 		{
@@ -1487,7 +1491,14 @@ void VcFolder::Select(bool b)
 					LVariant Limit;
 					d->Opts.GetValue(OPT_GitLimit, Limit);
 
-					LString cmd = "rev-list --all --header --timestamp --author-date-order", s;
+					GitLogLocalBranchesOnly = d->GitLocalBranchesOnly();
+					GitLogFirstParentOnly = d->GitFirstParentOnly();
+					LString cmd = GitLogLocalBranchesOnly
+						? "rev-list --branches --header --timestamp --author-date-order"
+						: "rev-list --all --header --timestamp --author-date-order";
+					if (GitLogFirstParentOnly)
+						cmd += " --first-parent";
+					LString s;
 					if (Limit.CastInt32() > 0)
 					{
 						s.Printf(" -n %i", Limit.CastInt32());
@@ -1700,6 +1711,13 @@ bool VcFolder::GetBranches(bool refresh, bool includeRemote, ParseParams *Params
 
 bool VcFolder::ParseRevList(int Result, LString s, ParseParams *Params)
 {
+	if (GitLogLocalBranchesOnly != d->GitLocalBranchesOnly() ||
+		GitLogFirstParentOnly != d->GitFirstParentOnly())
+	{
+		LogStatus = LogState::None;
+		return true;
+	}
+
 	TraceGraph("ParseRevList.begin", Uri.sPath.Get(), "bytes=%zu exit=%d", (size_t)s.Length(), Result);
 	auto started = GraphProfileTime();
 	Log.DeleteObjects();
@@ -1716,8 +1734,8 @@ bool VcFolder::ParseRevList(int Result, LString s, ParseParams *Params)
 			
 			// Split on the NULL chars...
 			auto c = s.Get();
-			auto e = c + s.Length();
-			while (c < e)
+			auto e = c ? c + s.Length() : c;
+			while (c && c < e)
 			{
 				auto nul = c;
 				while (nul < e && *nul) nul++;
@@ -1748,7 +1766,7 @@ bool VcFolder::ParseRevList(int Result, LString s, ParseParams *Params)
 
 			auto parseDone = GraphProfileTime();
 			parseUs = parseDone - splitDone;
-			LinkParents();
+			LinkParents(GitLogFirstParentOnly);
 			linkUs = GraphProfileTime() - parseDone;
 			break;
 		}
@@ -2206,7 +2224,7 @@ bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 	return !Result;
 }
 
-void VcFolder::LinkParents()
+void VcFolder::LinkParents(bool firstParentOnly)
 {
 	TraceGraph("LinkParents.begin", Uri.sPath.Get(), "commits=%zu", (size_t)Log.Length());
 	auto started = GraphProfileTime();
@@ -2234,9 +2252,9 @@ void VcFolder::LinkParents()
 	for (auto c:Log)
 	{
 		auto *Par = c->GetParents();
-		for (auto &pRev : *Par)
+		for (size_t parentIdx = 0; parentIdx < Par->Length() && (!firstParentOnly || parentIdx == 0); parentIdx++)
 		{
-			auto *p = Map.Find(pRev);
+			auto *p = Map.Find((*Par)[parentIdx]);
 			if (p)
 			{
 				new VcEdge(p, c);

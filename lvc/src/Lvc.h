@@ -25,6 +25,8 @@
 #define OPT_SvnLimit		"svn-limit"
 #define OPT_GitPath			"git-path"
 #define OPT_GitLimit		"git-limit"
+#define OPT_GitLocalBranchesOnly "git-local-branches-only"
+#define OPT_GitFirstParentOnly "git-first-parent-only"
 #define OPT_HgPath			"hg-path"
 #define OPT_HgLimit			"hg-limit"
 #define OPT_CvsPath			"cvs-path"
@@ -140,7 +142,8 @@ enum AppIds
 	ID_CODE0,
 	ID_CODE1,
 	ID_SELECT0,
-	ID_SELECT1
+	ID_SELECT1,
+	ID_LOCAL_BRANCHES
 };
 
 enum AppMessages
@@ -244,6 +247,16 @@ struct AppPriv
 	TSshConn *GetConn(LSsh::THostInfo *c);
 	bool IsCertAccepted(LSsh::THostInfo &certId);
 	void AlwaysAcceptCert(LSsh::THostInfo &certId);
+	bool GitLocalBranchesOnly()
+	{
+		LVariant value;
+		return !Opts.GetValue(OPT_GitLocalBranchesOnly, value) || value.CastInt32() != 0;
+	}
+	bool GitFirstParentOnly()
+	{
+		LVariant value;
+		return !Opts.GetValue(OPT_GitFirstParentOnly, value) || value.CastInt32() != 0;
+	}
 
 	// Filtering
 	LString			FolderFilter, CommitFilter, FileFilter;

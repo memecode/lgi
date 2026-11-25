@@ -703,6 +703,8 @@
 			<String Ref="8" Cid="505" Define="IDM_PATCH_VIEWER" en="Patch File" />
 			<String Ref="7" Cid="506" Define="IDM_MENU_506" />
 			<String Ref="17" Cid="530" Define="IDM_OPEN_DIFF" en="Diff File" />
+			<String Ref="198" Cid="537" Define="IDM_GIT_LOCAL_BRANCHES" en="Git history: local branches only" />
+			<String Ref="199" Cid="538" Define="IDM_GIT_FIRST_PARENT" en="Git history: first parent only" />
 		</string-group>
 		<submenu Ref="4">
 			<menuitem Ref="58" Shortcut="CtrlCmd+O" />
@@ -725,6 +727,8 @@
 		</submenu>
 		<submenu Ref="41">
 			<menuitem Ref="49" />
+			<menuitem Ref="198" />
+			<menuitem Ref="199" />
 			<menuitem Sep="1" />
 			<menuitem Ref="8" />
 			<menuitem Ref="17" />
