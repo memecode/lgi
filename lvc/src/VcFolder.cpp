@@ -2409,12 +2409,6 @@ void VcFolder::AssignColours()
 	for (int i = 0; i < GraphLanes; i++)
 		Lanes.Add(LColour());
 
-	if (d->Log)
-		for (auto b: Branches)
-			LgiTrace("colour-debug branch '%s' colour=%02x%02x%02x\n",
-				b.key, b.value->Colour.r(), b.value->Colour.g(), b.value->Colour.b());
-
-	int Dbg = 0;
 	for (auto c: Log)
 	{
 		int l = c->NodeIdx;
@@ -2427,11 +2421,6 @@ void VcFolder::AssignColours()
 		else if (CurrentCommit && CurrentCommit.Equals(c->GetRev()))
 			// The branch we are on keeps the default colour even without a ref here
 			Lanes[l] = GetPaletteColour(0);
-
-		if (d->Log && Dbg++ < 20)
-			LgiTrace("colour-debug c=%s lane=%i name='%s' colour=%02x%02x%02x\n",
-				LString(c->GetRev())(0, 9).Get(), l, name.Get(),
-				Lanes[l].r(), Lanes[l].g(), Lanes[l].b());
 	}
 
 	for (auto c: Log)
@@ -2448,11 +2437,6 @@ void VcFolder::AssignColours()
 			col = GetPaletteColour(c->NodeIdx);
 
 		c->NodeColour = col;
-
-		if (d->Log && Dbg++ < 40)
-			LgiTrace("colour-debug paint c=%s lane=%i name='%s' colour=%02x%02x%02x\n",
-				LString(c->GetRev())(0, 9).Get(), c->NodeIdx, name.Get(),
-				col.r(), col.g(), col.b());
 
 		for (auto e: c->Edges)
 			e->Colour = GetGraphLineColour();
