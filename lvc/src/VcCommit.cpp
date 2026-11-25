@@ -226,10 +226,12 @@ void VcCommit::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 			vec.ClosePath();
 		};
 
+		float ring = Current ? sw : 1.2f;
+
 		vec.ClearPath();
 		circle(nr);
 		vec.Fill(NodeColour);
-		vec.Stroke(LColour::Black, 1.2f);
+		vec.Stroke(LColour::Black, ring);
 	}
 }
 
