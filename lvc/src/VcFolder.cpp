@@ -713,11 +713,18 @@ bool VcFolder::ParseBranches(int Result, LString s, ParseParams *Params)
 				if (c.Length() < 2 || c[1].Equals("->"))
 					continue;
 
+				// With 'branch -a' remote refs are listed as 'remotes/<remote>/<branch>'
+				bool isRemote = c[0].Find("remotes/") == 0;
+				if (isRemote)
+					c[0] = c[0](8, -1);
+
 				if (IsCur)
 					SetCurrentBranch(c[0]);
 
 				AddGitName(c[1], c[0]);
-				Branches.Add(c[0], new VcBranch(c[0], c[1]));
+				auto branch = new VcBranch(c[0], c[1]);
+				branch->Remote = isRemote;
+				Branches.Add(c[0], branch);
 			}
 			break;
 		}
@@ -1658,7 +1665,7 @@ bool VcFolder::GetBranches(bool refresh, bool includeRemote, ParseParams *Params
 		{
 			LString args = "branch -v";
 			if (includeRemote)
-				args += " -r";
+				args += " -a";
 			if (StartCmd(args, &VcFolder::ParseBranches, Params))
 				IsBranches = StatusActive;
 			break;
@@ -2493,7 +2500,8 @@ void VcFolder::UpdateBranchUi()
 	{
 		LString::Array a;
 		for (auto b: Branches)
-			a.Add(b.key);
+			if (!b.value->Remote)
+				a.Add(b.key);
 
 		dd->SetList(IDC_BRANCH, a);
 	}
@@ -2508,9 +2516,14 @@ void VcFolder::UpdateBranchUi()
 		}
 		else
 		{
-			auto it = Branches.begin();
-			if (it != Branches.end())
-				b->Name((*it).key);
+			for (auto br: Branches)
+			{
+				if (!br.value->Remote)
+				{
+					b->Name(br.key);
+					break;
+				}
+			}
 		}
 
 		LString branch = b->Name();
@@ -2538,6 +2551,8 @@ void VcFolder::UpdateBranchUi()
 		int64 select = -1;
 		for (auto b: Branches)
 		{
+			if (b.value->Remote)
+				continue;
 			if (CurrentBranch && CurrentBranch == b.key)
 				select = Cbo->Length();
 			Cbo->Insert(b.key);

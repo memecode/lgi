@@ -112,6 +112,7 @@ public:
 struct VcBranch : public LString
 {
 	bool Default;
+	bool Remote = false;
 	LColour Colour;
 	LString Hash;
 

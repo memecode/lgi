@@ -65,6 +65,8 @@ public:
 		{
 			auto parts = ln.SplitDelimit();
 			auto branch = parts[0];
+			if (branch.Find("remotes/") == 0)
+				branch = branch(8, -1);
 			if (!map.Find(branch))
 			{
 				if (auto i = new LListItem(branch))
