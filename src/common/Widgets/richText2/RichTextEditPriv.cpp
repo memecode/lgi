@@ -3004,6 +3004,65 @@ static int ParseAttrInt(const char *s)
 	return neg ? -v : v;
 }
 
+static void StripCellInheritedBoxProps(LCss *Style)
+{
+	if (!Style)
+		return;
+
+	static const LCss::PropType CellBoxProps[] =
+	{
+		LCss::PropWidth,
+		LCss::PropMinWidth,
+		LCss::PropMaxWidth,
+		LCss::PropHeight,
+		LCss::PropMinHeight,
+		LCss::PropMaxHeight,
+
+		LCss::PropMargin,
+		LCss::PropMarginTop,
+		LCss::PropMarginRight,
+		LCss::PropMarginBottom,
+		LCss::PropMarginLeft,
+
+		LCss::PropPadding,
+		LCss::PropPaddingTop,
+		LCss::PropPaddingRight,
+		LCss::PropPaddingBottom,
+		LCss::PropPaddingLeft,
+
+		LCss::PropBorder,
+		LCss::PropBorderTop,
+		LCss::PropBorderRight,
+		LCss::PropBorderBottom,
+		LCss::PropBorderLeft,
+		LCss::PropBorderStyle,
+		LCss::PropBorderColor,
+
+		LCss::PropBorderTopStyle,
+		LCss::PropBorderRightStyle,
+		LCss::PropBorderBottomStyle,
+		LCss::PropBorderLeftStyle,
+
+		LCss::PropBorderTopWidth,
+		LCss::PropBorderRightWidth,
+		LCss::PropBorderBottomWidth,
+		LCss::PropBorderLeftWidth,
+
+		LCss::PropBorderTopColor,
+		LCss::PropBorderRightColor,
+		LCss::PropBorderBottomColor,
+		LCss::PropBorderLeftColor,
+
+		LCss::PropBorderCollapse,
+		LCss::PropBorderSpacing,
+		LCss::PropBorderRadius,
+		LCss::Prop_CellPadding
+	};
+
+	for (auto p : CellBoxProps)
+		Style->DeleteProp(p);
+}
+
 static bool AttrValueIs(const char *s, const char *v)
 {
 	return s && v && strcompare(s, v, false) == 0;
@@ -3222,6 +3281,9 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 		LAutoPtr<LCss> Style;
 		if (ParentStyle)
 			Style.Reset(new LCss(*ParentStyle));
+
+		if (c->TagId == TAG_TD || c->TagId == TAG_TH)
+			StripCellInheritedBoxProps(Style.Get());
 
 		if (c->TagId == TAG_BLOCKQUOTE)
 		{

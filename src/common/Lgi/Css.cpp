@@ -55,6 +55,75 @@ const char *LCss::PropName(PropType p)
 	return 0;
 }
 
+static const char *CssBorderStyleName(LCss::BorderStyle Style)
+{
+	switch (Style)
+	{
+		case LCss::BorderNone: return "none";
+		case LCss::BorderHidden: return "hidden";
+		case LCss::BorderDotted: return "dotted";
+		case LCss::BorderDashed: return "dashed";
+		case LCss::BorderDouble: return "double";
+		case LCss::BorderGroove: return "groove";
+		case LCss::BorderRidge: return "ridge";
+		case LCss::BorderInset: return "inset";
+		case LCss::BorderOutset: return "outset";
+		default:
+		case LCss::BorderSolid: return "solid";
+	}
+}
+
+static bool IsBorderSide(LCss::PropType Prop)
+{
+	return Prop == LCss::PropBorderTop ||
+		Prop == LCss::PropBorderRight ||
+		Prop == LCss::PropBorderBottom ||
+		Prop == LCss::PropBorderLeft;
+}
+
+static bool BorderDefEquals(LCss::BorderDef &A, const LCss::BorderDef &B)
+{
+	if (A.Type != B.Type || !FloatIsEqual(A.Value, B.Value))
+		return false;
+	if (A.Style != B.Style || A.Important != B.Important)
+		return false;
+	if (!(A.Color == B.Color))
+		return false;
+	return true;
+}
+
+static void PrintBorderDef(LStream &p, LCss::BorderDef &B, bool Shorthand)
+{
+	bool PrintStyle = true;
+
+	p.Print(" ");
+	if (B.Type == LCss::LenInherit)
+	{
+		if (B.Style == LCss::BorderNone)
+		{
+			p.Print("none");
+			PrintStyle = false;
+		}
+		else
+		{
+			p.Print("medium");
+		}
+	}
+	else
+	{
+		((LCss::Len&)B).ToString(p);
+	}
+
+	if (PrintStyle)
+		p.Print(" %s", CssBorderStyleName(B.Style));
+
+	if (B.Color.Type != LCss::ColorInherit)
+	{
+		p.Print(" ");
+		B.Color.ToString(p);
+	}
+}
+
 float LCss::FontSizeTable[7] =
 {
 	0.6f,  // SizeXXSmall
@@ -861,32 +930,16 @@ void LCss::ToStringPipe(LStringPipe &p)
 			case TypeBorder:
 			{
 				BorderDef *b = (BorderDef*)v.value;
+				if (IsBorderSide(Prop))
+				{
+					BorderDef *Shorthand = (BorderDef*)Props.Find(PropBorder);
+					if (Shorthand && BorderDefEquals(*b, *Shorthand))
+						break;
+				}
+
 				const char *Name = PropName(Prop);
-
 				p.Print("%s:", Name);
-				b->ToString(p);
-
-				const char *s = 0;
-				switch (b->Style)
-				{
-					case BorderNone: s = "none"; break;
-					case BorderHidden: s = "hidden"; break;
-					case BorderDotted: s = "dotted"; break;
-					case BorderDashed: s = "dashed"; break;
-					case BorderDouble: s = "double"; break;
-					case BorderGroove: s = "groove"; break;
-					case BorderRidge: s = "ridge"; break;
-					case BorderInset: s = "inset"; break;
-					case BorderOutset: s = "outset"; break;
-					default:
-					case BorderSolid: s = "solid"; break;
-				}
-				p.Print(" %s", s);
-				if (b->Color.Type != ColorInherit)
-				{
-					p.Print(" ");
-					b->Color.ToString(p);
-				}
+				PrintBorderDef(p, *b, Prop == PropBorder);
 				p.Print(";\n");
 				break;
 			}
@@ -2072,6 +2125,18 @@ bool LCss::Parse(const char *&s, ParsingStyle Type)
 					if (t->Parse(this, s))
 					{
 						ReleasePropOnSave(BorderDef, PropId);
+						if (PropId == PropBorder)
+						{
+							BorderDef *Shorthand = (BorderDef*)Props.Find(PropId);
+							if (Shorthand)
+							{
+								BorderDef *Side;
+								*GetOrCreate(Side, PropBorderTop) = *Shorthand;
+								*GetOrCreate(Side, PropBorderRight) = *Shorthand;
+								*GetOrCreate(Side, PropBorderBottom) = *Shorthand;
+								*GetOrCreate(Side, PropBorderLeft) = *Shorthand;
+							}
+						}
 					}
 				}
 				break;

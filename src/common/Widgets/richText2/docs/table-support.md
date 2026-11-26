@@ -14,6 +14,17 @@ How to build the RTE2 control:
 - Scribe email client:
     make -C scribe/trunk_os -f linux/Makefile.linux
 
+## Round Trip Testing:
+
+To confirm the behavior of the table support I've set up a round trip test:
+
+The input file:
+    ~/code/lgi/trunk/test/HtmlEditor/testcases/example-reply.html
+
+To call the editor:
+    cd ~/code/lgi/trunk/test/HtmlEditor
+    ./htmleditor testcases/example-reply.html -export reply-out.html
+
 ## Research notes
 
 ### Where tables are lost today
@@ -61,6 +72,28 @@ In `FromHtml()`, before the generic block path: on `TAG_TABLE` create `TableBloc
 ### Serialization
 
 `ToHtml()` must emit `<table>`, `<tr>`, `<td>`/`<th>` with `colspan`/`rowspan` restored from the grid and `class`/`style` from stored styles, using the ListBlock partial-range pattern: full range → whole table; partial range → wrapper plus only overlapped rows/cells. Recomputing the grid for a partial export must keep the original column indices, otherwise a selection covering one cell of a 3-column table serializes as a 1-column table.
+
+### Round-trip check (testcases/example-reply.html)
+
+Run through the harness as above and compared the input with `reply-out.html`.
+Aside from the span duplication fixed above, the output is structurally correct but
+not faithful:
+
+- Invalid CSS is emitted: `border:Inherit none` / `border-top:Inherit none` (browsers
+  drop the whole declaration), `cellpadding: Npx` as a CSS property (should be
+  `padding`), and `font-family: sans-serifVerdana,Geneva,Arial,Helvetica` with the
+  generic family glued to the list.
+- Cell and span styles inherit the table's `width: 600px`, and cell styles pick up
+  `border-left`/`border-top` from the `table` rule, which does not inherit borders.
+  `table.page_header td { border:none }` is lost.
+- Lost details: percentage `width` on `td` (`50%`/`100%` disappear), presentation
+  `align` on `td`/`th` (nothing in the output has `text-align: left`, the right-aligned
+  headers serialize as centre), `<font color="red">`, `&nbsp;` runs (27 → 9),
+  `<h2>`, the `div.scribe_reply`/`div.scribe_sig` wrappers, `<tr bgcolor>`,
+  `lang`/`target`/`rel`, and the named classes (all flattened to `StyleN`).
+- Artifacts: `.Style1` is emitted in the style block but never used (the input span
+  that used it lost its class), an empty `<p></p>`, and a second `<a>` wrapping only a
+  space from a source newline.
 
 ### Known hard cases to record as limitations for v1
 
@@ -299,6 +332,12 @@ Fixed in this pass:
   `TableBlock::MeasureColumns()` runs `FillMetrics()` on the nested grid, so a
   nested table contributes real column metrics to the parent measurement instead
   of being treated as plain content. Recursion is depth-limited to 16.
+- `TableBlock::ToHtml()` emits each cell once, at the first surviving column it
+  occupies (`TableGrid::Visible::Left`, filled by `ResolveVisible()`). Without an
+  origin-column check a `colspan > 1` cell was printed once per spanned column, so
+  a browser lays out phantom cells and the table visually splits in two. Verified
+  with `testcases/example-reply.html`: the `colspan='4'` cell now serializes once
+  and every row's column count matches the input.
 - Partial selection export uses grid occupancy, as described above.
 - `ListBlock` markers are counted in the cell measurement: `MeasureBlock()` adds
   the marker column width (font height for bullets, the widest marker plus half a

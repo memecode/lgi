@@ -3,7 +3,6 @@
 #include "lgi/common/Tree.h"
 #include "lgi/common/TabView.h"
 #include "lgi/common/Box.h"
-#include "resource.h"
 #include "lgi/common/SpellCheck.h"
 #include "lgi/common/DisplayString.h"
 #include "lgi/common/Button.h"
@@ -12,6 +11,8 @@
 #include "lgi/common/List.h"
 #include "lgi/common/Menu.h"
 #include "lgi/common/FileSelect.h"
+
+#include "resource.h"
 
 #if 1
 	#include "lgi/common/RichTextEdit2.h"
@@ -423,9 +424,12 @@ public:
 					LGetSystemPath(LSP_APP_INSTALL, p, sizeof(p));
 					LMakePath(p, sizeof(p), p, "Test");
 					LMakePath(p, sizeof(p), p, SrcFileName);
-					auto html = LReadFile(p);
-					if (html)
-						Edit->Name(html);
+					if (LFileExists(p))
+					{
+						auto html = LReadFile(p);
+						if (html)
+							Edit->Name(html);
+					}
 					#endif
 					#endif
 				}
@@ -696,10 +700,28 @@ public:
 	
 	void OnReceiveFiles(LArray<const char*> &Files) override
 	{
-		if (Edit && Files.Length() > 0)
+		if (Edit &&
+			Files.Length() > 0)
 		{
 			if (auto t = LReadFile(Files[0]))
+			{
 				Edit->Name(t);
+				
+				LString outFile;
+				if (LAppInst->GetOption("export", outFile))
+				{
+					// Save the processed document
+					LFile out(outFile, O_WRITE);
+					out.Write(Edit->Name());
+					
+					// And exit, deferred until the main loop is running
+					LAppInst->RunCallback([]()
+						{
+							LCloseApp();
+						},
+						_FL);
+				}
+			}
 		}
 	}
 

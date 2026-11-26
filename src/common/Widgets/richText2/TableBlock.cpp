@@ -973,7 +973,7 @@ namespace Rte2
 				for (int c = vis.MinCol; c <= vis.MaxCol; c++)
 				{
 					int k = vis.Occ[r][c];
-					if (k < 0 || vis.Top[k] != r || vis.Cols[k] <= 0)
+					if (k < 0 || vis.Top[k] != r || vis.Left[k] != c || vis.Cols[k] <= 0)
 						continue;
 
 					auto td = dynamic_cast<TdBlock*>(grid.Cells[k].Node);

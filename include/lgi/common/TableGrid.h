@@ -190,6 +190,7 @@ namespace TableGrid
         std::vector<std::vector<int>> Occ;
         std::vector<bool> EmitRow;
         std::vector<int> Top;      // First emitted row a cell is placed in, -1 if never
+        std::vector<int> Left;     // First emitted column a cell is placed in, -1 if never
         std::vector<int> Rows;     // Emitted rowspan
         std::vector<int> Cols;     // Emitted colspan
         int MinCol = 0, MaxCol = -1;
@@ -204,6 +205,7 @@ namespace TableGrid
         v.Occ.assign(rows, std::vector<int>(n, -1));
         v.EmitRow.assign(rows, false);
         v.Top.assign(g.Cells.size(), -1);
+        v.Left.assign(g.Cells.size(), -1);
         v.Rows.assign(g.Cells.size(), 0);
         v.Cols.assign(g.Cells.size(), 0);
         v.MinCol = n;
@@ -251,7 +253,11 @@ namespace TableGrid
 
             for (int c = tc.Col; c < tc.Col + tc.CS && c < n; c++)
                 if (c >= v.MinCol && c <= v.MaxCol)
+                {
+                    if (v.Left[k] < 0)
+                        v.Left[k] = c;
                     v.Cols[k]++;
+                }
         }
     }
 
