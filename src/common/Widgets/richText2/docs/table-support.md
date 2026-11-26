@@ -8,6 +8,12 @@ There are currently several HTML table style layout engines in Lgi. Perhaps one 
 
 This document is the start of a design for adding table support. A new TableBlock element will need to be created, living in a 'TableBlock.cpp' file. The parsing of HTML will need to create those as needed. Likely there may also need to be TrBlock and TdBlock? But the code for those can stay in the same TableBlock.cpp.
 
+How to build the RTE2 control:
+- Test harness:
+    make -C lgi/trunk/test/HtmlEditor -f linux/Makefile.linux
+- Scribe email client:
+    make -C scribe/trunk_os -f linux/Makefile.linux
+
 ## Research notes
 
 ### Where tables are lost today
@@ -135,6 +141,24 @@ The node type is a template parameter so `TableBlock` in RTE2 can instantiate `T
 - `lgi/trunk/src/common/Widgets/richText2/TableBlock.cpp`
   - New file for `TdBlock` and `TableBlock`.
 
+- `lgi/trunk/include/lgi/common/TableGrid.h`
+  - Adds `Cell::MinH`, `RowMinHeights()`, and the partial-export visibility model
+    (`Visible`, `BuildVisible()`, `MarkHit()`, `ResolveVisible()`). Header only, so
+    no makefile or project changes are needed.
+
+- `lgi/trunk/src/common/Widgets/richText2/RichTextEditPriv.h`
+  - `ListBlock::Marker()` is public so `TableBlock::MeasureBlock()` can measure the
+    marker column.
+  - `TdBlock` gains `OpenTag()` and `ToHtmlContent()` so `TableBlock::ToHtml()` can
+    emit an adjusted opening tag for a cell.
+  - `TableBlock` gains `FillMetrics()` and `MeasureColumns()`.
+
+- `scribe/trunk_os/linux/Makefile.linux` and `scribe/trunk_os/CMakeLists.txt`
+  - `TableBlock.cpp` entries added during this pass (they were missing).
+
+- `lgi/trunk/test/HtmlEditor/testcases/table-test.html`
+  - New manual round-trip/layout test case for the HtmlEditor GUI harness.
+
 ### Implemented HTML parsing behavior
 
 Static helpers currently inserted:
@@ -148,7 +172,9 @@ Static helpers currently inserted:
 - `ApplyVerticalAlign`
 - `ApplyLength`
 - `ApplyBorder`
+- `ApplyBackground`
 - `ApplyTablePresentation`
+- `ApplyRowPresentation`
 - `ApplyCellPresentation`
 
 Supported table tags are limited to those available in `HtmlCommon.h`:
@@ -176,7 +202,10 @@ Current parser behavior:
 Presentation attributes currently supported in `FromHtml()`:
 
 - Table `align`, `width`, `border`, `cellspacing`, `cellpadding`, `bgcolor`.
-- Cell/row `align`, `valign`, `width`, `height`, `border`, `bgcolor`.
+- Cell `align`, `valign`, `width`, `border`, `bgcolor`.
+- Row `align` and `valign` only (`ApplyRowPresentation`), because `TR` is grid metadata and cannot paint a background box.
+- `bgcolor` is resolved to `LCss::PropBackgroundColor` through `LHtmlParser::ParseColour()`, so hex (`#336699`), named (`yellow`) and `rgb()` values survive as box properties. Cell `border` is mapped to the CSS border properties through `ApplyBorder()`.
+- Cell `height` is not applied: the shared column solver has no per-row minimum height, so there is nowhere to store it yet.
 - `colspan` and `rowspan` on `TD`/`TH`.
 - `TH` default bold is applied only when font weight is inherit/not already set.
 - Presentation width behavior:
@@ -187,22 +216,23 @@ Presentation attributes currently supported in `FromHtml()`:
 ### Style behavior
 
 - `MakeChildStyle()` strips box properties from child styles.
-- `cellpadding` must remain available through `TableBlock::CellPadding`, `TdBlock::GetStyle()`, or explicit edge calculation.
-- `TD` and `TH` background properties are preserved; `DIV`, `TABLE`, `TBODY`, and `TR` backgrounds remain flattened in the parser path.
-- Serialization uses `GetElementName()` where present, otherwise tag info, so cells serialize as `td` or `th`.
+- `cellpadding` must remain available through `TableBlock::CellPadding`, `TdBlock::GetStyle()`, or explicit edge calculation. `CellEdges()` applies the `cellpadding` fallback when a cell has no padding of its own, and `MeasureBlock()` now measures cells through `CellEdges()` so column min/max match what placement uses.
+- `TD` and `TH` background properties are preserved. `TABLE` backgrounds are no longer removed because `TableBlock` is a real box that can paint them; `DIV`, `TBODY`, and `TR` are still flattened containers and their backgrounds are still removed so they do not become highlights on descendant text.
+- `MakeChildStyle()` does not strip `background-color`, so text inside a coloured cell blends glyphs with the cell colour through `Cols.Back`, which is what `TextBlock::OnPaint` uses.
+- Serialization uses `GetElementName()` where present, otherwise tag info, so cells serialize as `td` or `th`. Presentation `width` and `bgcolor` round-trip through the cached style (`class='stN'` plus `OutputStyles()`), not as HTML attributes, so `TdBlock::Pct`/`Fixed`/`FixedPx` only need to drive layout.
 
 ### Build integration
 
-Build entries for `TableBlock.cpp` have been added to the actual build systems:
+Build entries for `TableBlock.cpp` are now in the actual build systems. The Scribe entries were missing when this was re-checked (only the HtmlEditor ones were present), so Scribe would have failed to link against `TableBlock`/`TdBlock`; they have been added:
 
 - `lgi/trunk/test/HtmlEditor/linux/Makefile.linux`
   - Added after `RichTextEditPriv.cpp` and before `TextBlock.cpp`.
 - `scribe/trunk_os/linux/Makefile.linux`
-  - Added after `RichTextEditPriv.cpp` and before `TextBlock.cpp`.
+  - Added after `RichTextEditPriv.cpp` and before `TextBlock.cpp` (this was missing before).
 - `lgi/trunk/test/HtmlEditor/CMakeLists.txt`
   - Added after `ImageBlock.cpp` and before `TextBlock.cpp`.
 - `scribe/trunk_os/CMakeLists.txt`
-  - Added after `ImageBlock.cpp` and before `TextBlock.cpp`.
+  - Added after `ImageBlock.cpp` and before `TextBlock.cpp` (this was missing before).
 
 Important invocation note: these Makefiles should be invoked from the project directory, not from the `linux` subdirectory, because `VPATH` is relative to the current directory.
 
@@ -228,35 +258,74 @@ for Scribe. Direct `make` from `test/HtmlEditor/linux` or `scribe/trunk_os/linux
 
 ### Verified so far
 
-- `TableBlock.cpp` compiles with GCC C++17 `-fpermissive`.
+- `TableBlock.cpp` compiles with GCC C++17 `-fpermissive`, including a clean rebuild of `Debug/TableBlock.o` from the HtmlEditor project directory.
 - `RichTextEditPriv.cpp` compiles with GCC C++17 `-fpermissive` after the `HtmlElementCb` closing-brace fix.
-- Debug compilation passes for `RichTextEditPriv.cpp` and `TableBlock.cpp`.
-- HtmlEditor direct object build from the intended project directory works.
-  - `Debug/BlockCursor.o`, `Debug/TableBlock.o`, and `Debug/RichTextEditPriv.o` exist for HtmlEditor.
-  - Full `make -f linux/Makefile.linux` from `/home/matthew/code/lgi/trunk/test/HtmlEditor` succeeded and linked `./htmleditor`.
-  - The linked build used the existing `Debug/TableBlock.o`.
-- Scribe direct object build from the intended project directory works.
-  - `Debug/TableBlock.o` and `Debug/RichTextEditPriv.o` exist for Scribe.
-- Scribe full build was monitored but output was truncated; final exit status has not been confirmed.
+- Debug compilation passes for `RichTextEditPriv.cpp` and `TableBlock.cpp`, which exercises the `#ifdef _DEBUG` `DumpNodes()` path, so `LTreeItem` availability is confirmed for the makefile Debug builds. The CMake builds do not define `_DEBUG`, so that path is not compiled there.
+- Full HtmlEditor makefile build from the project directory succeeded and linked `./htmleditor`.
+- Full Scribe CMake build (`ninja scribe`) succeeded and linked `scribe` once `TableBlock.cpp` was added to `CMakeLists.txt`; `ninja HtmlEdit` also linked `test/HtmlEditor/HtmlEdit`.
+- Single-object builds prove both Makefile and CMake integration:
+  - `make -f linux/Makefile.linux Debug/TableBlock.o` from `scribe/trunk_os`.
+  - `HtmlEdit` and `scribe` object targets in the existing ninja build trees.
+- No `.vcxproj` files exist in this checkout, so MSVC entries are not applicable here and remain unverified.
+- `ninja HtmlEdit` builds and links after the serialization, nested-measurement, row-height and list-marker changes.
+- The header-only parts of `TableGrid.h` were exercised by a standalone C++17 test program (no Lgi link required), covering `RowMinHeights()` spanned-height distribution and the partial-export visibility model (`BuildVisible()`/`MarkHit()`/`ResolveVisible()`): span shortening for a rowspan that starts above the selection, rows without selected content not being emitted, and column trimming. The test lives outside the repo (`/tmp/kilo/tablegrid_test.cpp`) and is not part of the build.
 
-### Open issues
+### Runtime semantics review
 
-- Need verify or complete the full Scribe build.
-- Need force rebuild `TableBlock.o` from clean if a stronger proof of the actual Makefile integration is desired.
-- Need verify actual CMake builds for `HtmlEdit` and `scribe`; entries are added but configure/build output was not verified.
+Fixes applied in `TableBlock.cpp` during this pass:
+
+- `TableBlock::OnLayout()` now places cells from the table padding-box origin:
+  - `x0 = flow.Left + border.x1 + padding.x1 + spacing`
+  - `y0 = flow.CurY + border.y1 + padding.y1 + spacing`
+  and `Pos.x2`/`Pos.y2` cover the full table border box. Previously both the cell origin and `Pos` omitted the table border and padding, so painted cells could fall outside `GetPos()`.
+- `TableBlock::OnLayout()` saves and restores `flow.Left`/`flow.Right` like `DivBlock::OnLayout()`. The top-level layout loop reuses the same `Flow` for every block, so the table was leaking its insets into following blocks.
+- `MeasureBlock()` measures cells through `CellEdges()`, so the `cellpadding` fallback is counted in `cols.Min`/`cols.Max` and column widths match what the placement pass uses. Cell margins are zeroed inside `CellEdges()`.
+- `TdBlock` keeps `Pos` as the content box and `GetPos()` returns `CellBox`; `ContentH` is the content height used for the `vertical-align` shift. Row heights come from the cell measurement, and spanned cells distribute extra height with `TableGrid::Distribute()`.
+- Hit-testing resolves point → grid cell → content block (`TableBlock::HitTest`), with `TdBlock::HitTest` delegating to its children and falling back to the cell box at index 0.
+- `Split()` returns null through `DivBlock`, so Enter inside a cell grows the cell instead of splitting the table, and `GetTextBlock()` guarantees one editable leaf per cell.
+- `TableBlock::ToHtml()` exports a partial selection through a grid occupancy map
+  (`TableGrid::BuildVisible()` / `MarkHit()` / `ResolveVisible()`): only rows that
+  contain selected content survive, a `rowspan` cell that starts above the
+  selection is placed in the first surviving row with its rowspan shortened, and
+  skipped cells inside the surviving range are emitted as placeholders that keep
+  their `class`, so cell border/background survive the round trip. Children of the
+  table that are not grid cells are no longer dropped; they are emitted as their
+  own row spanning the surviving columns. Empty cells serialize as `<td></td>`
+  instead of `<td><p></p></td>`.
+
+Fixed in this pass:
+
+- Nested tables inside a cell are measured through the column solver:
+  `TableBlock::MeasureColumns()` runs `FillMetrics()` on the nested grid, so a
+  nested table contributes real column metrics to the parent measurement instead
+  of being treated as plain content. Recursion is depth-limited to 16.
+- Partial selection export uses grid occupancy, as described above.
+- `ListBlock` markers are counted in the cell measurement: `MeasureBlock()` adds
+  the marker column width (font height for bullets, the widest marker plus half a
+  font height for ordered lists), matching the indent computed in
+  `ListBlock::OnLayout()`.
+- Per-row minimum heights are supported: `TableGrid::Cell::MinH` is filled from
+  the cell `height`/`min-height`, `TableGrid::RowMinHeights()` distributes a
+  spanned cell's height over the rows it covers, and `TableBlock::OnLayout()`
+  applies the result as a lower bound on each row. The `height` presentation
+  attribute on `<td>`/`<th>` and `<tr>` is parsed through `ApplyHeight()`.
+
+Remaining semantic gaps:
+
+- `border-collapse: collapse` is simplified: spacing is forced to 0 and each cell
+  draws its own border; shared-border merging and the table's own collapsed border
+  are not implemented.
+- Percentage `height` cannot be resolved because the table height is unknown during
+  measurement, so percent heights are ignored.
+- `TAG_COL`, `TAG_COLGROUP`, `TAG_THEAD` and `TAG_TFOOT` are not represented as
+  blocks, so their attributes and styling are dropped by the parser.
+
+## Open issues
+
+- Runtime layout/paint still needs visual verification in the HtmlEditor GUI harness; a table test case was added at `lgi/trunk/test/HtmlEditor/testcases/table-test.html` covering colspan, rowspan, percent and pixel width, named and hex `bgcolor`, cellpadding/border, whitespace between cells, a list inside a cell, an empty cell, and a table inside a blockquote with a nested table.
+- `TD`/`TH`/`TABLE` background now has a full path (`ApplyBackground()` → `LCss::PropBackgroundColor` → `TdBlock::OnPaint()` / `TableBlock::OnPaint()`), pending visual confirmation.
+- Cell/row `height` is now honored as a per-row minimum through `TableGrid::Cell::MinH`
+  and `RowMinHeights()`; percentage heights remain unresolved.
+- Percent width behavior is resolved: `TdBlock` stores `Pct` only, and `Fixed`/`FixedPx` are px-only flags, which is correct for `TableGrid::ColumnMetrics()`. Width round-trips through the cached style class rather than an HTML `width` attribute.
 - MSVC entries in `RichText.vcxproj` and `RichText.vcxproj.filters` are unverified and may need to be added if MSVC builds are used.
-- `LTreeItem` availability for debug `DumpNodes()` is not fully verified.
-- Runtime semantic behavior of `TableBlock.cpp` still needs review:
-  - table grid measurement
-  - row heights
-  - cell edges
-  - vertical alignment
-  - borders
-  - serialization
-  - hit-test
-  - paint
-  - nested table contexts
-  - debug dump compatibility
-- `TD` background preservation needs end-to-end verification beyond parser style handling.
-- Percent presentation width currently stores only `Pct`, not `Fixed`/`FixedPx`; confirm intended serialization/layout behavior.
 

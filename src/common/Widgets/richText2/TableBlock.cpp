@@ -229,7 +229,7 @@ namespace Rte2
 		Ctx.Type = OldType;
 	}
 
-	bool LRichTextPriv::TdBlock::ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng)
+	void LRichTextPriv::TdBlock::OpenTag(LStream &s, int CS, int RS)
 	{
 		const char *name = GetElementName();
 
@@ -241,11 +241,26 @@ namespace Rte2
 		if (Style && Style->Name.Get() && *Style->Name.Get())
 			s.Print(" class='%s'", Style->Name.Get());
 		s.Print(">\n");
+	}
+
+	bool LRichTextPriv::TdBlock::ToHtmlContent(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng)
+	{
+		const char *name = GetElementName();
 
 		bool FullList = Rng == nullptr;
 		LRange All(0, Length());
 		if (!Rng)
 			Rng = &All;
+
+		if (FullList && blocks.Length() == 1)
+		{
+			auto tb = dynamic_cast<TextBlock*>(blocks[0]);
+			if (tb && tb->Length() == 0)
+			{
+				s.Print("</%s>\n", name);
+				return true;
+			}
+		}
 
 		bool status = true;
 		ssize_t Pos = 0;
@@ -269,6 +284,12 @@ namespace Rte2
 
 		s.Print("</%s>\n", name);
 		return status;
+	}
+
+	bool LRichTextPriv::TdBlock::ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng)
+	{
+		OpenTag(s, CS, RS);
+		return ToHtmlContent(s, Media, Rng);
 	}
 
 	#ifdef _DEBUG
@@ -398,6 +419,9 @@ namespace Rte2
 		if (!b || depth > 16)
 			return r;
 
+		if (auto nt = dynamic_cast<TableBlock*>(b))
+			return nt->MeasureColumns(MAX(avail, 1), depth + 1);
+
 		LFont *font = d->GetFont(b->GetStyle());
 		if (!font && d->View)
 			font = d->View->GetFont();
@@ -431,6 +455,41 @@ namespace Rte2
 				r.Max = MAX(r.Max, cm.Max);
 				r.Has = true;
 			}
+
+			// The marker column of a list is content too, so it has to be part of
+			// the cell measurement, as in ListBlock::OnLayout().
+			if (auto lb = dynamic_cast<ListBlock*>(b))
+			{
+				if (font)
+				{
+					int indent = font->GetHeight();
+					if (lb->IsOrdered())
+					{
+						LDisplayString widest(font, lb->Marker(MAX((int)lb->blocks.Length() - 1, 0)));
+						indent = MAX(indent, widest.X() + font->GetHeight() / 2);
+					}
+
+					r.Min += indent;
+					r.Max += indent;
+					r.Has = true;
+				}
+			}
+		}
+
+		if (auto td = dynamic_cast<TdBlock*>(b))
+		{
+			// CellEdges() applies the 'cellpadding' fallback, so the measure
+			// matches what placement uses for the cell.
+			LRect e = CellEdges(td, avail);
+			r.Min += e.x1 + e.x2;
+			r.Max += e.x1 + e.x2;
+			if (e.y1 || e.y2)
+				r.Has = true;
+
+			if (td->Fixed && td->FixedPx > r.Max)
+				r.Max = td->FixedPx;
+
+			return r;
 		}
 
 		if (auto box = dynamic_cast<LCssBox<LRect>*>(b))
@@ -442,9 +501,6 @@ namespace Rte2
 				pb.Set(0, 0, MAX(avail, 1), MAX(avail, 1));
 				box->SetStyle(font, st, pb);
 
-				if (dynamic_cast<TdBlock*>(b))
-					box->margin.ZOff(0, 0);
-
 				int ex = box->border.x1 + box->border.x2 + box->padding.x1 + box->padding.x2;
 				int ey = box->border.y1 + box->border.y2 + box->padding.y1 + box->padding.y2;
 
@@ -455,13 +511,84 @@ namespace Rte2
 					r.Has = true;
 				}
 			}
+		}
 
-			if (auto td = dynamic_cast<TdBlock*>(b))
+		return r;
+	}
+
+	void LRichTextPriv::TableBlock::FillMetrics(TableGrid::Columns &cols, int avail, int depth)
+	{
+		cols.Spacing = Spacing();
+
+		for (auto &tc : grid.Cells)
+		{
+			auto td = dynamic_cast<TdBlock*>(tc.Node);
+			if (!td)
+				continue;
+
+			tc.m = MeasureBlock(td, depth, avail);
+			if (!tc.m.Has)
+				continue;
+
+			if (td->Pct >= 0)
+				tc.Pct = td->Pct;
+
+			LNamedStyle *cs = td->GetStyle();
+			if (cs)
 			{
-				if (td->Fixed && td->FixedPx > r.Max)
-					r.Max = td->FixedPx;
+				LCss::Len w = cs->Width();
+				if (w && w.Type == LCss::LenPercent)
+					tc.Pct = MAX(tc.Pct, (int)w.Value);
+				else if (td->Fixed && w && w.Type == LCss::LenPx)
+					tc.Fixed = true;
+
+				// 'height' is a per-row minimum, so it is carried as a cell height
+				// rather than a column metric. Percentage heights cannot be resolved
+				// against an unknown table height.
+				LCss::Len h = cs->MinHeight();
+				if (!h)
+					h = cs->Height();
+				if (h && h.Type == LCss::LenPx)
+				{
+					LFont *f = d->GetFont(cs);
+					if (!f && d->View)
+						f = d->View->GetFont();
+					if (f)
+					{
+						LRect e = CellEdges(td, avail);
+						tc.MinH = MAX((int)h.ToPx(avail, f), 0) + e.y1 + e.y2;
+					}
+				}
 			}
 		}
+
+		TableGrid::ColumnMetrics(grid, cols);
+	}
+
+	TableGrid::MinMax LRichTextPriv::TableBlock::MeasureColumns(int avail, int depth)
+	{
+		TableGrid::MinMax r;
+		if (depth > 16)
+			return r;
+
+		BuildGrid();
+
+		int n = grid.NCols;
+		if (n <= 0 || grid.Cells.empty())
+			return r;
+
+		TableGrid::Columns cols;
+		FillMetrics(cols, avail, depth);
+
+		int fixedX = cols.Spacing * (n + 1) + border.x1 + border.x2 + padding.x1 + padding.x2;
+		r.Min = fixedX;
+		r.Max = fixedX;
+		for (int c = 0; c < n; c++)
+		{
+			r.Min += cols.Min[c];
+			r.Max += cols.Max[c];
+		}
+		r.Has = true;
 
 		return r;
 	}
@@ -491,36 +618,9 @@ namespace Rte2
 		if (st)
 			LCssBox<LRect>::SetStyle(font, st, pb);
 
-		int spacing = Spacing();
-
 		TableGrid::Columns cols;
-		cols.Spacing = spacing;
-
-		for (auto &tc : grid.Cells)
-		{
-			auto td = dynamic_cast<TdBlock*>(tc.Node);
-			if (!td)
-				continue;
-
-			tc.m = MeasureBlock(td, 0, avail);
-			if (!tc.m.Has)
-				continue;
-
-			if (td->Pct >= 0)
-				tc.Pct = td->Pct;
-
-			LNamedStyle *cs = td->GetStyle();
-			if (cs)
-			{
-				LCss::Len w = cs->Width();
-				if (w && w.Type == LCss::LenPercent)
-					tc.Pct = MAX(tc.Pct, (int)w.Value);
-				else if (td->Fixed && w && w.Type == LCss::LenPx)
-					tc.Fixed = true;
-			}
-		}
-
-		TableGrid::ColumnMetrics(grid, cols);
+		FillMetrics(cols, avail, 0);
+		int spacing = cols.Spacing;
 
 		int fixedX = spacing * (n + 1) + border.x1 + border.x2 + padding.x1 + padding.x2;
 		int outer = TableGrid::PreferredWidth(cols) + fixedX;
@@ -552,6 +652,17 @@ namespace Rte2
 
 		struct Spanned { int idx, top; };
 		std::vector<Spanned> spanned;
+
+		std::vector<int> rowMin;
+		TableGrid::RowMinHeights(grid, rowMin);
+
+		for (size_t r = 0; r < grid.Rows.size(); r++)
+		{
+			LNamedStyle *rs = grid.Rows[r].Node ? grid.Rows[r].Node->GetStyle() : nullptr;
+			LCss::Len h = rs ? rs->Height() : LCss::Len();
+			if (h && h.Type == LCss::LenPx)
+				rowMin[r] = MAX(rowMin[r], MAX((int)h.ToPx(avail, font), 0));
+		}
 
 		Flow mf(d);
 		mf.pDC = flow.pDC;
@@ -591,7 +702,7 @@ namespace Rte2
 					spanned.push_back({idx, (int)r});
 			}
 
-			RowH[r] = MAX(rh, font->GetHeight());
+			RowH[r] = MAX(MAX(rh, rowMin[r]), font->GetHeight());
 		}
 
 		// Give rows extra height when a spanned cell is taller than the rows it spans.
@@ -618,17 +729,20 @@ namespace Rte2
 		for (int r = 0; r < rows; r++)
 			innerH += RowH[r];
 
+		int SavedLeft = flow.Left;
+		int SavedRight = flow.Right;
+
 		flow.Left += margin.x1;
 		flow.Right -= margin.x2;
 		flow.CurY += margin.y1;
 
-		int x0 = flow.Left + spacing;
-		int y0 = flow.CurY + spacing;
+		int x0 = flow.Left + border.x1 + padding.x1 + spacing;
+		int y0 = flow.CurY + border.y1 + padding.y1 + spacing;
 
 		Pos.x1 = flow.Left;
 		Pos.y1 = flow.CurY;
-		Pos.x2 = Pos.x1 + innerW + spacing * (n - 1) + spacing * 2 - 1;
-		Pos.y2 = Pos.y1 + innerH + spacing * (rows - 1) + spacing * 2 - 1;
+		Pos.x2 = x0 + innerW + spacing * (n - 1) + spacing + padding.x2 + border.x2 - 1;
+		Pos.y2 = y0 + innerH + spacing * (rows - 1) + spacing + padding.y2 + border.y2 - 1;
 
 		if (Pos.x2 < Pos.x1)
 			Pos.x2 = Pos.x1;
@@ -682,6 +796,8 @@ namespace Rte2
 		}
 
 		flow.CurY = Pos.y2 + 1 + margin.y2;
+		flow.Left = SavedLeft;
+		flow.Right = SavedRight;
 		return true;
 	}
 
@@ -779,86 +895,134 @@ namespace Rte2
 		if (!Rng)
 			Rng = &All;
 
-		// Cell offsets are in blocks order, which is the same as grid order.
-		std::vector<ssize_t> CellOff(grid.Cells.size(), 0);
+		int nchild = MAX((int)blocks.Length(), 1);
+		int ncells = MAX((int)grid.Cells.size(), 1);
+
+		std::vector<ssize_t> ChildOff((size_t)nchild, 0);
+		std::vector<int> ChildCell((size_t)nchild, -1);
+		std::vector<int> ChildRow((size_t)nchild, 0);
+		std::vector<bool> Hit((size_t)nchild, false);
+		std::vector<int> CellChild((size_t)ncells, -1);
+
 		ssize_t Pos = 0;
-		for (unsigned i = 0; i < blocks.Length(); i++)
+		int RowSlot = 0;
+
+		for (int i = 0; i < nchild; i++)
 		{
-			auto td = dynamic_cast<TdBlock*>(blocks[i]);
-			if (!td)
+			auto b = blocks[i];
+			ChildOff[i] = Pos;
+			ChildRow[i] = RowSlot;
+
+			LRange cr = LRange(Pos, b->Length()).Overlap(*Rng);
+			Hit[i] = FullList || cr.Valid();
+
+			if (auto td = dynamic_cast<TdBlock*>(b))
+			{
+				for (int k = 0; k < ncells; k++)
+					if (grid.Cells[k].Node == td)
+					{
+						ChildCell[i] = k;
+						CellChild[k] = i;
+						break;
+					}
+
+				if (ChildCell[i] >= 0)
+					RowSlot = grid.Cells[ChildCell[i]].Row;
+			}
+
+			Pos += b->Length();
+		}
+
+		TableGrid::Visible<Block> vis;
+		TableGrid::BuildVisible(grid, vis);
+
+		for (int i = 0; i < nchild; i++)
+		{
+			if (!Hit[i])
 				continue;
 
-			for (size_t k = 0; k < grid.Cells.size(); k++)
-				if (grid.Cells[k].Node == td)
-					CellOff[k] = Pos;
+			if (ChildCell[i] >= 0)
+			{
+				TableGrid::MarkHit(grid, vis, ChildCell[i]);
+				continue;
+			}
 
-			Pos += td->Length();
+			// Content in the table that is not a grid cell spans every column.
+			if (grid.NCols > 0)
+			{
+				vis.MinCol = 0;
+				vis.MaxCol = grid.NCols - 1;
+				if (ChildRow[i] < (int)vis.EmitRow.size())
+					vis.EmitRow[ChildRow[i]] = true;
+			}
 		}
+
+		TableGrid::ResolveVisible(grid, vis);
 
 		bool status = true;
 
-		for (size_t r = 0; r < grid.Rows.size(); r++)
+		for (int r = 0; r < (int)vis.EmitRow.size(); r++)
 		{
-			auto &row = grid.Rows[r];
-			if (row.Cells.empty())
+			if (!vis.EmitRow[r])
 				continue;
 
-			std::vector<bool> Emit(row.Cells.size(), false);
-			int maxCol = 0;
-			bool any = false;
-
-			for (size_t k = 0; k < row.Cells.size(); k++)
+			if (vis.MinCol <= vis.MaxCol)
 			{
-				auto &tc = grid.Cells[row.Cells[k]];
-				auto td = dynamic_cast<TdBlock*>(tc.Node);
-				if (!td)
-					continue;
+				s.Print("<tr>\n");
 
-				LRange cr = LRange(CellOff[row.Cells[k]], td->Length()).Overlap(*Rng);
-				if (FullList || cr.Valid())
+				for (int c = vis.MinCol; c <= vis.MaxCol; c++)
 				{
-					Emit[k] = true;
-					any = true;
-					maxCol = MAX(maxCol, tc.Col + tc.CS - 1);
-				}
-			}
+					int k = vis.Occ[r][c];
+					if (k < 0 || vis.Top[k] != r || vis.Cols[k] <= 0)
+						continue;
 
-			if (!any)
-				continue;
+					auto td = dynamic_cast<TdBlock*>(grid.Cells[k].Node);
+					if (!td)
+						continue;
 
-			s.Print("<tr>\n");
+					td->OpenTag(s, vis.Cols[k], vis.Rows[k]);
 
-			for (size_t k = 0; k < row.Cells.size(); k++)
-			{
-				auto &tc = grid.Cells[row.Cells[k]];
-				auto td = dynamic_cast<TdBlock*>(tc.Node);
-				if (!td)
-					continue;
-
-				if (!Emit[k])
-				{
-					// Emit an empty cell to keep the original column index.
-					if (tc.Col < maxCol)
+					if (!Hit[CellChild[k]])
 					{
-						s.Print("<td");
-						if (tc.CS > 1)
-							s.Print(" colspan='%d'", tc.CS);
-						if (tc.RS > 1)
-							s.Print(" rowspan='%d'", tc.RS);
-						s.Print("></td>\n");
+						// Keep the position of a cell whose content is outside the
+						// selection, with the style that gives it its borders.
+						s.Print("</%s>\n", td->GetElementName());
+						continue;
 					}
-					continue;
+
+					int i = CellChild[k];
+					LRange cr = LRange(ChildOff[i], td->Length()).Overlap(*Rng);
+					if (!FullList)
+						cr.Start -= ChildOff[i];
+
+					if (!td->ToHtmlContent(s, Media, FullList ? nullptr : &cr))
+						status = false;
 				}
 
-				LRange cr = LRange(CellOff[row.Cells[k]], td->Length()).Overlap(*Rng);
-				if (!FullList)
-					cr.Start -= CellOff[row.Cells[k]];
-
-				if (!td->ToHtml(s, Media, FullList ? nullptr : &cr))
-					status = false;
+				s.Print("</tr>\n");
 			}
 
-			s.Print("</tr>\n");
+			// Children that are not grid cells are emitted as their own row.
+			for (int i = 0; i < nchild; i++)
+			{
+				if (ChildCell[i] >= 0 || ChildRow[i] != r || !Hit[i])
+					continue;
+
+				auto b = blocks[i];
+
+				s.Print("<tr>\n");
+				s.Print("<td colspan='%d'>\n", MAX(vis.MaxCol - vis.MinCol + 1, 1));
+
+				LRange cr = LRange(ChildOff[i], b->Length()).Overlap(*Rng);
+				if (!FullList)
+					cr.Start -= ChildOff[i];
+
+				if (!b->ToHtml(s, Media, FullList ? nullptr : &cr))
+					status = false;
+
+				s.Print("</td>\n");
+				s.Print("</tr>\n");
+			}
 		}
 
 		s.Print("</%s>\n", name);

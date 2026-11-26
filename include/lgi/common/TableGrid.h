@@ -31,6 +31,7 @@ namespace TableGrid
         T *Node = nullptr;         // The engine node this cell represents
         int Row = 0, Col = 0, CS = 1, RS = 1;
         MinMax m;                  // Content min/max width, filled by the engine
+        int MinH = 0;              // Content min height in px, filled by the engine
         int Pct = -1;              // Preferred percentage column width, -1 if not set
         bool Fixed = false;        // Exact pixel column width preference
 
@@ -152,6 +153,106 @@ namespace TableGrid
 
         for (int c = 0; c < n; c++)
             cols.Max[c] = std::max(cols.Max[c], cols.Min[c]);
+    }
+
+    /// Per-row minimum content heights from cells that declare one (Cell::MinH),
+    /// distributing the height of vertically spanned cells over the rows they
+    /// cover. The caller applies the result as a lower bound on the row heights
+    /// produced by content measurement.
+    template <typename T>
+    void RowMinHeights(const Grid<T> &g, std::vector<int> &rows)
+    {
+        int n = (int)g.Rows.size();
+        rows.assign(n, 0);
+
+        for (const auto &tc : g.Cells)
+            if (tc.RS == 1)
+                rows[tc.Row] = std::max(rows[tc.Row], tc.MinH);
+
+        for (const auto &tc : g.Cells)
+        {
+            if (tc.RS < 2)
+                continue;
+            int sum = 0;
+            for (int r = 0; r < tc.RS; r++)
+                sum += rows[tc.Row + r];
+            Distribute(rows, tc.Row, tc.RS, tc.MinH - sum);
+        }
+    }
+
+    /// Which rows survive a partial content export, and how each cell that
+    /// overlaps them is placed. 'Occ' is the cell index per row/column (-1 when a
+    /// cell is covered by a span from an earlier row), so a cell that only
+    /// overlaps the range through a span still gets a row and column position.
+    template <typename T>
+    struct Visible
+    {
+        std::vector<std::vector<int>> Occ;
+        std::vector<bool> EmitRow;
+        std::vector<int> Top;      // First emitted row a cell is placed in, -1 if never
+        std::vector<int> Rows;     // Emitted rowspan
+        std::vector<int> Cols;     // Emitted colspan
+        int MinCol = 0, MaxCol = -1;
+    };
+
+    template <typename T>
+    void BuildVisible(const Grid<T> &g, Visible<T> &v)
+    {
+        int rows = std::max((int)g.Rows.size(), 1);
+        int n = std::max(g.NCols, 1);
+
+        v.Occ.assign(rows, std::vector<int>(n, -1));
+        v.EmitRow.assign(rows, false);
+        v.Top.assign(g.Cells.size(), -1);
+        v.Rows.assign(g.Cells.size(), 0);
+        v.Cols.assign(g.Cells.size(), 0);
+        v.MinCol = n;
+        v.MaxCol = -1;
+
+        for (size_t k = 0; k < g.Cells.size(); k++)
+        {
+            const auto &tc = g.Cells[k];
+            for (int r = tc.Row; r < tc.Row + tc.RS && r < rows; r++)
+                for (int c = tc.Col; c < tc.Col + tc.CS && c < n; c++)
+                    v.Occ[r][c] = (int)k;
+        }
+    }
+
+    /// Marks a cell whose content is inside the exported range. Only cells that
+    /// start inside the range can decide which rows and columns survive.
+    template <typename T>
+    void MarkHit(const Grid<T> &g, Visible<T> &v, int k)
+    {
+        const auto &tc = g.Cells[k];
+        v.MinCol = std::min(v.MinCol, tc.Col);
+        v.MaxCol = std::max(v.MaxCol, tc.Col + tc.CS - 1);
+        v.EmitRow[tc.Row] = true;
+    }
+
+    /// Resolves the emitted span of every cell against the surviving rows and
+    /// columns, so spanned cells that start outside the range are shortened.
+    template <typename T>
+    void ResolveVisible(const Grid<T> &g, Visible<T> &v)
+    {
+        int rows = (int)v.EmitRow.size();
+        int n = v.Occ.empty() ? 0 : (int)v.Occ[0].size();
+
+        for (size_t k = 0; k < g.Cells.size(); k++)
+        {
+            const auto &tc = g.Cells[k];
+
+            for (int r = tc.Row; r < tc.Row + tc.RS && r < rows; r++)
+                if (v.EmitRow[r])
+                {
+                    if (v.Top[k] < 0)
+                        v.Top[k] = r;
+                    v.Rows[k]++;
+                }
+
+            for (int c = tc.Col; c < tc.Col + tc.CS && c < n; c++)
+                if (c >= v.MinCol && c <= v.MaxCol)
+                    v.Cols[k]++;
+        }
     }
 
     /// Sum of preferred widths, honouring percentage columns that must fit their

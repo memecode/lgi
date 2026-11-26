@@ -1113,9 +1113,9 @@ public:
 		LCss::ListStyleTypes type;
 
 		const char *TypeToElem();
-		LString Marker(int Index);
 
 	public:
+		LString Marker(int Index);
 		bool IsOrdered();
 		LCss::ListStyleTypes GetListType() { return type; }
 		void SetListType(LCss::ListStyleTypes t) { type = t; }
@@ -1234,6 +1234,8 @@ public:
 		const char *GetClass() { return "TdBlock"; }
 		LRect GetPos() { return CellBox.X() > 0 ? CellBox : Pos; }
 		Block *Clone();
+		void OpenTag(LStream &s, int CS, int RS);
+		bool ToHtmlContent(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng);
 		bool ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng);
 		bool HitTest(HitTestResult &htr);
 		void OnPaint(PaintContext &Ctx);
@@ -1264,6 +1266,8 @@ public:
 		void BuildGrid();
 		int Spacing();
 		LRect CellEdges(TdBlock *td, int cellW);
+		void FillMetrics(TableGrid::Columns &cols, int avail, int depth);
+		TableGrid::MinMax MeasureColumns(int avail, int depth);
 		TableGrid::MinMax MeasureBlock(Block *b, int depth, int avail);
 
 		#ifdef _DEBUG

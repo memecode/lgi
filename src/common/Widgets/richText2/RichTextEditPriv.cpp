@@ -3052,6 +3052,15 @@ static void ApplyLength(LCss *s, const char *v)
 		s->Width(l);
 }
 
+static void ApplyHeight(LCss *s, const char *v)
+{
+	if (!s || !v || s->Height())
+		return;
+	LCss::Len l(v, LCss::ParseRelaxed);
+	if (l)
+		s->Height(l);
+}
+
 static void ApplyBorder(LCss *s, int px)
 {
 	if (!s || px <= 0)
@@ -3068,6 +3077,18 @@ static void ApplyBorder(LCss *s, int px)
 	s->BorderRight(bd);
 	s->BorderBottom(bd);
 	s->BorderLeft(bd);
+}
+
+static void ApplyBackground(LCss *s, const char *v)
+{
+	if (!s || !v)
+		return;
+	if (s->BackgroundColor().Type != LCss::ColorInherit)
+		return;
+
+	LCss::ColorDef c;
+	if (LHtmlParser::ParseColour(v, c))
+		s->BackgroundColor(c);
 }
 
 static void ApplyTablePresentation(LAutoPtr<LCss> &Style, LHtmlElement *e)
@@ -3108,6 +3129,30 @@ static void ApplyTablePresentation(LAutoPtr<LCss> &Style, LHtmlElement *e)
 		if (s)
 			ApplyAlign(s, v);
 	}
+
+	if (e->Get("bgcolor", v))
+	{
+		LCss *s = EnsureStyle(Style);
+		if (s)
+			ApplyBackground(s, v);
+	}
+}
+
+static void ApplyRowPresentation(LAutoPtr<LCss> &Style, LHtmlElement *e)
+{
+	const char *v;
+	LCss *s = EnsureStyle(Style);
+	if (!s)
+		return;
+
+	if (e->Get("align", v))
+		ApplyAlign(s, v);
+
+	if (e->Get("valign", v))
+		ApplyVerticalAlign(s, v);
+
+	if (e->Get("height", v))
+		ApplyHeight(s, v);
 }
 
 static void ApplyCellPresentation(LAutoPtr<LCss> &Style, LHtmlElement *e, HtmlTag tag)
@@ -3128,11 +3173,32 @@ static void ApplyCellPresentation(LAutoPtr<LCss> &Style, LHtmlElement *e, HtmlTa
 			ApplyVerticalAlign(s, v);
 	}
 
+	if (e->Get("height", v))
+	{
+		LCss *s = EnsureStyle(Style);
+		if (s)
+			ApplyHeight(s, v);
+	}
+
 	if (e->Get("width", v))
 	{
 		LCss *s = EnsureStyle(Style);
 		if (s)
 			ApplyLength(s, v);
+	}
+
+	if (e->Get("border", v))
+	{
+		LCss *s = EnsureStyle(Style);
+		if (s)
+			ApplyBorder(s, ParseAttrInt(v));
+	}
+
+	if (e->Get("bgcolor", v))
+	{
+		LCss *s = EnsureStyle(Style);
+		if (s)
+			ApplyBackground(s, v);
 	}
 
 	if (tag == TAG_TH)
@@ -3278,6 +3344,8 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 				ApplyTablePresentation(Style, c);
 			else if (c->TagId == TAG_TD || c->TagId == TAG_TH)
 				ApplyCellPresentation(Style, c, c->TagId);
+			else if (c->TagId == TAG_TR)
+				ApplyRowPresentation(Style, c);
 		}
 
 		// These containers are flattened, so their backgrounds cannot be
@@ -3287,7 +3355,6 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 			switch (c->TagId)
 			{
 				case TAG_DIV:
-				case TAG_TABLE:
 				case TAG_TBODY:
 				case TAG_TR:
 					Style->DeleteProp(LCss::PropBackgroundColor);
