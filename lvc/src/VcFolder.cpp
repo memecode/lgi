@@ -1092,10 +1092,18 @@ void VcFolder::ShowAuthor()
 
 void VcFolder::UpdateAuthorUi()
 {
-	if (AuthorLocal)
-		d->Wnd()->SetCtrlName(IDC_AUTHOR, AuthorLocal.Get());
-	else if (AuthorGlobal)
-		d->Wnd()->SetCtrlName(IDC_AUTHOR, AuthorGlobal.Get());
+	// Show the author of the selected commit, otherwise the author that would
+	// be used for the next commit.
+	LString author;
+	if (d->Commits)
+		if (auto c = dynamic_cast<VcCommit*>(d->Commits->GetSelected()))
+			author = c->GetAuthor();
+
+	if (!author)
+		author = AuthorLocal ? AuthorLocal.Get() : (AuthorGlobal ? AuthorGlobal.Get() : LString());
+
+	if (author)
+		d->Wnd()->SetCtrlName(IDC_AUTHOR, author.Get());
 }
 
 void VcFolder::GetConfigFile(bool local, bool createIfMissing, std::function<void(LString)> callback, bool debug)

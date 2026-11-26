@@ -580,6 +580,9 @@ void VcCommit::Select(bool b)
 		}
 		else LAssert(0);
 	}
+
+	if (GetFolder())
+		GetFolder()->UpdateAuthorUi();
 }
 
 void VcCommit::OnMouseClick(LMouse &m)
