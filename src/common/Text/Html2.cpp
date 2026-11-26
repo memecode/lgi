@@ -11,6 +11,7 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Html2.h"
 #include "lgi/common/LgiDefs.h"
+#include "lgi/common/TableGrid.h"
 #include "lgi/common/ScrollBar.h"
 #include "lgi/common/Variant.h"
 #include "lgi/common/FindReplaceDlg.h"
@@ -278,11 +279,7 @@ class LNewFlow
 		bool Resolved = false;
 	};
 
-  struct MinMax
-  {
-    int Min = 0, Max = 0;
-    bool Has = false;
-  };
+  using MinMax = TableGrid::MinMax;
 
   struct AbsRec
   {
@@ -291,33 +288,9 @@ class LNewFlow
   };
   std::vector<AbsRec> absQueue;
 
-  struct TCell
-	{
-		LTag *T = nullptr;
-		int Row = 0, Col = 0, CS = 1, RS = 1;
-	};
-
-	struct TGrid
-	{
-		struct Row
-		{
-			LTag *T = nullptr;
-			LTag *Group = nullptr;
-			std::vector<LTag*> Cells;
-		};
-
-		std::vector<Row> Rows;
-		std::vector<TCell> Cells;
-		int NCols = 0;
-	};
-
-	struct TCols
-	{
-		std::vector<int> Min, Max;
-		std::vector<int> Pct;		// -1 if not set
-		std::vector<bool> Fixed;
-		int Spacing = 0;
-	};
+	using TCell = TableGrid::Cell<LTag>;
+	using TGrid = TableGrid::Grid<LTag>;
+	using TCols = TableGrid::Columns;
 
 	LHtml *Html;
 	LRect View;
@@ -1024,18 +997,28 @@ class LNewFlow
 
 	void BuildGrid(LTag *table, TGrid &g)
 	{
+		auto addCell = [&](TGrid::Row &row, LTag *cell)
+		{
+			TCell tc(cell);
+			if (cell->Cell)
+			{
+				tc.CS = MAX(cell->Cell->Span.x, 1);
+				tc.RS = MAX(cell->Cell->Span.y, 1);
+			}
+			g.Cells.push_back(tc);
+			row.Cells.push_back((int)g.Cells.size() - 1);
+		};
+
 		std::function<void(LTag*, LTag*)> addRows;
 		addRows = [&](LTag *container, LTag *group)
 		{
-			TGrid::Row anonymous;
-			anonymous.Group = group;
+			TGrid::Row anonymous(nullptr, group);
 			auto flushAnonymous = [&]()
 			{
 				if (!anonymous.Cells.empty())
 				{
 					g.Rows.push_back(std::move(anonymous));
-					anonymous = TGrid::Row();
-					anonymous.Group = group;
+					anonymous = TGrid::Row(nullptr, group);
 				}
 			};
 
@@ -1065,21 +1048,19 @@ class LNewFlow
 				auto kind = KindOf(child);
 				if (kind == KCell)
 				{
-					anonymous.Cells.push_back(child);
+					addCell(anonymous, child);
 					continue;
 				}
 
 				flushAnonymous();
 				if (kind == KRow)
 				{
-					TGrid::Row row;
-					row.T = child;
-					row.Group = group;
+					TGrid::Row row(child, group);
 					for (auto cellElement: child->Children)
 					{
 						auto cell = Child(cellElement);
 						if (cell && KindOf(cell) == KCell)
-							row.Cells.push_back(cell);
+							addCell(row, cell);
 					}
 					g.Rows.push_back(std::move(row));
 				}
@@ -1090,38 +1071,7 @@ class LNewFlow
 		};
 		addRows(table, nullptr);
 
-		std::vector<std::vector<bool>> used(g.Rows.size() + 1);
-		for (size_t r = 0; r < g.Rows.size(); r++)
-		{
-			int col = 0;
-			for (auto cell: g.Rows[r].Cells)
-			{
-				TCell tc;
-				tc.T = cell;
-				tc.Row = (int)r;
-				if (cell->Cell)
-				{
-					tc.CS = MAX(cell->Cell->Span.x, 1);
-					tc.RS = MAX(cell->Cell->Span.y, 1);
-				}
-				tc.RS = MIN(tc.RS, (int)(g.Rows.size() - r));
-
-				while (col < (int)used[r].size() && used[r][col])
-					col++;
-				tc.Col = col;
-				for (int rr = 0; rr < tc.RS; rr++)
-				{
-					auto &u = used[r + rr];
-					if ((int)u.size() < col + tc.CS)
-						u.resize(col + tc.CS, false);
-					for (int cc = 0; cc < tc.CS; cc++)
-						u[col + cc] = true;
-				}
-				col += tc.CS;
-				g.NCols = MAX(g.NCols, col);
-				g.Cells.push_back(tc);
-			}
-		}
+		TableGrid::PlaceCells(g);
 	}
 
 	int SpacingOf(LTag *table)
@@ -1132,23 +1082,6 @@ class LNewFlow
 		if (s && s.Type != LCss::LenAuto)
 			return MAX(s.ToPx(0, FontOf(table)), 0);
 		return 2;
-	}
-
-	static int Distribute(std::vector<int> &v, int from, int count, int extra)
-	{
-		if (extra <= 0 || count <= 0)
-			return 0;
-		int total = 0;
-		for (int i = 0; i < count; i++)
-			total += MAX(v[from + i], 1);
-		int given = 0;
-		for (int i = 0; i < count; i++)
-		{
-			int add = i == count - 1 ? extra - given : (int)((int64_t)extra * MAX(v[from + i], 1) / total);
-			v[from + i] += add;
-			given += add;
-		}
-		return given;
 	}
 
 	MinMax MeasureText(char16 *text, LFont *font)
@@ -1439,76 +1372,32 @@ class LNewFlow
     }
   }
 
-  void ColumnMetrics(TGrid &g, TCols &cols, int depth)
-
+	// Per-cell measurement into the shared grid: content min/max plus the fixed/percent
+	// width preference, then the shared solver folds it into column metrics.
+	void ColumnMetrics(TGrid &g, TCols &cols, int depth)
 	{
-		int n = g.NCols;
-		cols.Min.assign(n, 0);
-		cols.Max.assign(n, 0);
-		cols.Pct.assign(n, -1);
-		cols.Fixed.assign(n, false);
-
-		std::vector<MinMax> cm(g.Cells.size());
-		for (size_t i = 0; i < g.Cells.size(); i++)
+		for (auto &tc: g.Cells)
 		{
-			auto &tc = g.Cells[i];
-			auto font = FontOf(tc.T);
-			auto m = Measure(tc.T, depth);
-			auto w = tc.T->Width();
+			auto font = FontOf(tc.Node);
+			auto m = Measure(tc.Node, depth);
+			auto w = tc.Node->Width();
 			if (w && w.Type == LCss::LenPx)
 			{
-				int spec = MAX((int)w.Value, 0) + HEdges(tc.T);
+				int spec = MAX((int)w.Value, 0) + HEdges(tc.Node);
 				m.Max = MAX(m.Max, spec);
 				if (tc.CS == 1)
-					cols.Fixed[tc.Col] = true;
+					tc.Fixed = true;
 			}
 			else if (w && w.Type == LCss::LenPercent && tc.CS == 1)
-				cols.Pct[tc.Col] = MAX(cols.Pct[tc.Col], (int)w.Value);
+				tc.Pct = MAX(tc.Pct, (int)w.Value);
 			else if (w && w.Type != LCss::LenAuto && w.Type != LCss::LenPercent)
 			{
-				int spec = MAX(w.ToPx(0, font), 0) + HEdges(tc.T);
+				int spec = MAX(w.ToPx(0, font), 0) + HEdges(tc.Node);
 				m.Max = MAX(m.Max, spec);
 			}
-			cm[i] = m;
-			if (tc.CS == 1)
-			{
-				cols.Min[tc.Col] = MAX(cols.Min[tc.Col], m.Min);
-				cols.Max[tc.Col] = MAX(cols.Max[tc.Col], m.Max);
-			}
+			tc.m = m;
 		}
-
-		for (size_t i = 0; i < g.Cells.size(); i++)
-		{
-			auto &tc = g.Cells[i];
-			if (tc.CS < 2)
-				continue;
-			int sMin = 0, sMax = 0;
-			for (int c = 0; c < tc.CS; c++)
-			{
-				sMin += cols.Min[tc.Col + c];
-				sMax += cols.Max[tc.Col + c];
-			}
-			int gaps = cols.Spacing * (tc.CS - 1);
-			Distribute(cols.Min, tc.Col, tc.CS, cm[i].Min - gaps - sMin);
-			Distribute(cols.Max, tc.Col, tc.CS, cm[i].Max - gaps - sMax);
-		}
-
-		for (int c = 0; c < n; c++)
-			cols.Max[c] = MAX(cols.Max[c], cols.Min[c]);
-	}
-
-	static int PreferredTableWidth(const TCols &cols)
-	{
-		int width = 0;
-		for (auto max: cols.Max)
-			width += max;
-		// A percentage column must have room for its preferred width at that percentage.
-		for (size_t c = 0; c < cols.Max.size(); c++)
-		{
-			if (cols.Pct[c] > 0)
-				width = MAX(width, (int)(((int64_t)cols.Max[c] * 100 + cols.Pct[c] - 1) / cols.Pct[c]));
-		}
-		return width;
+		TableGrid::ColumnMetrics(g, cols);
 	}
 
 	// Min/max width of the table excluding its own border/margin
@@ -1529,7 +1418,7 @@ class LNewFlow
 			r.Min += cols.Min[c];
 		}
 		r.Min += extra;
-		r.Max = PreferredTableWidth(cols) + extra;
+		r.Max = TableGrid::PreferredWidth(cols) + extra;
 
 		auto width = table->Width();
 		if (width && width.Type == LCss::LenPx)
@@ -1544,67 +1433,6 @@ class LNewFlow
 			r.Max = MIN(r.Max, mw);
 		}
 		return r;
-	}
-
-	void SolveColumns(TCols &cols, int T, std::vector<int> &w)
-	{
-		int n = (int)cols.Min.size();
-		std::vector<int> pref(n);
-		int sumMin = 0, sumPref = 0;
-		for (int i = 0; i < n; i++)
-		{
-			pref[i] = cols.Pct[i] >= 0 ? MAX(cols.Min[i], T * cols.Pct[i] / 100) : cols.Max[i];
-			sumMin += cols.Min[i];
-			sumPref += pref[i];
-		}
-
-		w = cols.Min;
-		if (T <= sumMin)
-			return;
-
-		if (T >= sumPref)
-		{
-			w = pref;
-			int extra = T - sumPref;
-			if (extra > 0)
-			{
-				std::vector<int> idx;
-				for (int i = 0; i < n; i++)
-					if (cols.Pct[i] < 0 && !cols.Fixed[i])
-						idx.push_back(i);
-				if (idx.empty())
-					for (int i = 0; i < n; i++)
-						idx.push_back(i);
-				int total = 0;
-				for (int i: idx)
-					total += MAX(cols.Max[i], 1);
-				int given = 0;
-				for (size_t k = 0; k < idx.size(); k++)
-				{
-					int i = idx[k];
-					int add = k + 1 == idx.size() ? extra - given : (int)((int64_t)extra * MAX(cols.Max[i], 1) / total);
-					w[i] += add;
-					given += add;
-				}
-			}
-			return;
-		}
-
-		int avail = T - sumMin;
-		int range = sumPref - sumMin;
-		int given = 0, lastGrow = -1;
-		for (int i = 0; i < n; i++)
-			if (pref[i] > cols.Min[i])
-				lastGrow = i;
-		for (int i = 0; i < n; i++)
-		{
-			int grow = pref[i] - cols.Min[i];
-			if (grow <= 0)
-				continue;
-			int add = i == lastGrow ? avail - given : (int)((int64_t)avail * grow / range);
-			w[i] = cols.Min[i] + add;
-			given += add;
-		}
 	}
 
 	static void Shift(LTag *tag, int dx, int dy)
@@ -1681,7 +1509,7 @@ class LNewFlow
 		{
 			sumMin += cols.Min[i];
 		}
-		int sumMax = PreferredTableWidth(cols);
+		int sumMax = TableGrid::PreferredWidth(cols);
 		int fixedExtra = spacing * (n + 1) + bx;
 		int W;
 		auto width = table->Width();
@@ -1700,7 +1528,7 @@ class LNewFlow
 
 		std::vector<int> cw;
 		if (n)
-			SolveColumns(cols, W - fixedExtra, cw);
+			TableGrid::SolveColumns(cols, W - fixedExtra, cw);
 
 		int marginLeft = (int)table->margin.x1;
 		int free = MAX(outerAvail - W, 0);
@@ -1742,7 +1570,7 @@ class LNewFlow
 		{
 			rowTops[r] = rowTop;
 			auto &gridRow = g.Rows[r];
-			auto row = gridRow.T;
+			auto row = gridRow.Node;
 			if (row)
 			{
 				LRectF rb(tableInner, View.Y());
@@ -1764,8 +1592,8 @@ class LNewFlow
 				cc.Right = cc.Left + cellW;
 				cc.y = rowTop;
 				cc.Align = align;
-				LayoutBlock(tc.T, cc, depth + 1, cellW);
-				int h = tc.T->Size.y;
+				LayoutBlock(tc.Node, cc, depth + 1, cellW);
+				int h = tc.Node->Size.y;
 				if (tc.RS == 1)
 				{
 					rowH = MAX(rowH, h);
@@ -1782,7 +1610,7 @@ class LNewFlow
 					rowH = MAX(rowH, rh.ToPx(0, font));
 			}
 			for (auto &s: single)
-				PlaceCell(s.first->T, s.second, rowH);
+				PlaceCell(s.first->Node, s.second, rowH);
 
 			rowHs[r] = rowH;
 			if (row)
@@ -1822,7 +1650,7 @@ class LNewFlow
 		{
 			int last = s.tc->Row + s.tc->RS;
 			int total = rowTops[last] - spacing - s.top;
-			PlaceCell(s.tc->T, s.h, total);
+			PlaceCell(s.tc->Node, s.h, total);
 		}
 
 		int H = g.Rows.empty() ? by : rowTop - y0 + (int)table->border.y2;
