@@ -2961,6 +2961,188 @@ struct HtmlElementCb : public LCss::ElementCallback<LHtmlElement>
 	}
 };
 
+static LCss *EnsureStyle(LAutoPtr<LCss> &Style)
+{
+	if (!Style.Get())
+		Style.Reset(new LCss);
+	return Style.Get();
+}
+
+static bool IsTableContextTag(HtmlTag t)
+{
+	switch (t)
+	{
+		case TAG_TABLE:
+		case TAG_TR:
+		case TAG_TD:
+		case TAG_TH:
+		case TAG_TBODY:
+			return true;
+		default:
+			return false;
+	}
+}
+
+static int ParseAttrInt(const char *s)
+{
+	int v = 0;
+	bool neg = false;
+	if (!s)
+		return 0;
+	while (*s && *s != '-' && (*s < '0' || *s > '9'))
+		s++;
+	if (*s == '-')
+	{
+		neg = true;
+		s++;
+	}
+	while (*s && *s >= '0' && *s <= '9')
+	{
+		v = v * 10 + (*s - '0');
+		s++;
+	}
+	return neg ? -v : v;
+}
+
+static bool AttrValueIs(const char *s, const char *v)
+{
+	return s && v && strcompare(s, v, false) == 0;
+}
+
+static bool IsAllWhiteW(const char16 *s)
+{
+	if (!s || !*s)
+		return false;
+	for (const char16 *p = s; *p; ++p)
+		if (!IsWhite((char)*p))
+			return false;
+	return true;
+}
+
+static void ApplyAlign(LCss *s, const char *v)
+{
+	if (!s || !v || s->TextAlign().Type != LCss::LenInherit)
+		return;
+	if (AttrValueIs(v, "left"))
+		s->TextAlign(LCss::Len(LCss::AlignLeft));
+	else if (AttrValueIs(v, "right"))
+		s->TextAlign(LCss::Len(LCss::AlignRight));
+	else if (AttrValueIs(v, "center"))
+		s->TextAlign(LCss::Len(LCss::AlignCenter));
+}
+
+static void ApplyVerticalAlign(LCss *s, const char *v)
+{
+	if (!s || !v || s->VerticalAlign().Type != LCss::LenInherit)
+		return;
+	if (AttrValueIs(v, "top"))
+		s->VerticalAlign(LCss::Len(LCss::VerticalTop));
+	else if (AttrValueIs(v, "middle"))
+		s->VerticalAlign(LCss::Len(LCss::VerticalMiddle));
+	else if (AttrValueIs(v, "bottom"))
+		s->VerticalAlign(LCss::Len(LCss::VerticalBottom));
+}
+
+static void ApplyLength(LCss *s, const char *v)
+{
+	if (!s || !v || s->Width())
+		return;
+	LCss::Len l(v, LCss::ParseRelaxed);
+	if (l)
+		s->Width(l);
+}
+
+static void ApplyBorder(LCss *s, int px)
+{
+	if (!s || px <= 0)
+		return;
+	if (s->BorderTop().Style != LCss::BorderNone ||
+		s->BorderRight().Style != LCss::BorderNone ||
+		s->BorderBottom().Style != LCss::BorderNone ||
+		s->BorderLeft().Style != LCss::BorderNone)
+		return;
+
+	LCss::BorderDef bd(LCss::LenPx, (float)px, LCss::ColorDef(LCss::ColorRgb, LColour::Black.c32()), LCss::BorderSolid);
+	s->Border(bd);
+	s->BorderTop(bd);
+	s->BorderRight(bd);
+	s->BorderBottom(bd);
+	s->BorderLeft(bd);
+}
+
+static void ApplyTablePresentation(LAutoPtr<LCss> &Style, LHtmlElement *e)
+{
+	const char *v;
+
+	if (e->Get("cellspacing", v))
+	{
+		LCss *s = EnsureStyle(Style);
+		if (s && !s->BorderSpacing())
+			s->BorderSpacing(LCss::Len(LCss::LenPx, ParseAttrInt(v)));
+	}
+
+	if (e->Get("cellpadding", v))
+	{
+		LCss *s = EnsureStyle(Style);
+		if (s && !s->_CellPadding())
+			s->_CellPadding(LCss::Len(LCss::LenPx, ParseAttrInt(v)));
+	}
+
+	if (e->Get("border", v))
+	{
+		LCss *s = EnsureStyle(Style);
+		if (s)
+			ApplyBorder(s, ParseAttrInt(v));
+	}
+
+	if (e->Get("width", v))
+	{
+		LCss *s = EnsureStyle(Style);
+		if (s)
+			ApplyLength(s, v);
+	}
+
+	if (e->Get("align", v))
+	{
+		LCss *s = EnsureStyle(Style);
+		if (s)
+			ApplyAlign(s, v);
+	}
+}
+
+static void ApplyCellPresentation(LAutoPtr<LCss> &Style, LHtmlElement *e, HtmlTag tag)
+{
+	const char *v;
+
+	if (e->Get("align", v))
+	{
+		LCss *s = EnsureStyle(Style);
+		if (s)
+			ApplyAlign(s, v);
+	}
+
+	if (e->Get("valign", v))
+	{
+		LCss *s = EnsureStyle(Style);
+		if (s)
+			ApplyVerticalAlign(s, v);
+	}
+
+	if (e->Get("width", v))
+	{
+		LCss *s = EnsureStyle(Style);
+		if (s)
+			ApplyLength(s, v);
+	}
+
+	if (tag == TAG_TH)
+	{
+		LCss *s = EnsureStyle(Style);
+		if (s && s->FontWeight() == LCss::FontWeightInherit)
+			s->FontWeight(LCss::FontWeightBold);
+	}
+}
+
 bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentStyle, int Depth)
 {
 	char Sp[48];
@@ -3088,6 +3270,16 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 			}
 		}
 
+		bool HadCssWidth = Style && Style->Width();
+
+		if (IsTableContextTag(c->TagId))
+		{
+			if (c->TagId == TAG_TABLE)
+				ApplyTablePresentation(Style, c);
+			else if (c->TagId == TAG_TD || c->TagId == TAG_TH)
+				ApplyCellPresentation(Style, c, c->TagId);
+		}
+
 		// These containers are flattened, so their backgrounds cannot be
 		// painted as boxes. Don't turn them into highlights on descendant text.
 		if (Style)
@@ -3098,8 +3290,6 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 				case TAG_TABLE:
 				case TAG_TBODY:
 				case TAG_TR:
-				case TAG_TD:
-				case TAG_TH:
 					Style->DeleteProp(LCss::PropBackgroundColor);
 					break;
 				default:
@@ -3108,6 +3298,206 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 		}
 
 		LNamedStyle *CachedStyle = AddStyleToCache(Style);
+
+		if (IsTableContextTag(c->TagId) && (c->TagId == TAG_TABLE || ctx.TableTarget))
+		{
+			switch (c->TagId)
+			{
+				case TAG_TABLE:
+				{
+					if (!ctx.TargetBlocks)
+						return Error(_FL, "HTML table has no target block array.");
+
+					if (ctx.Tb && ctx.LastChar != '\n')
+					{
+						const uint32_t NewLine[] = {'\n', 0};
+						if (!ctx.Tb->AddText(NoTransaction, -1, NewLine, 1))
+							return Error(_FL, "Failed to end the paragraph before an HTML table.");
+					}
+
+					auto Table = new TableBlock(this);
+					if (!Table || !ctx.AddBlock(Table))
+					{
+						DeleteObj(Table);
+						return Error(_FL, "Failed to create HTML table block.");
+					}
+
+					Table->SetStyle(CachedStyle);
+					Table->CellPadding = CachedStyle ? CachedStyle->_CellPadding() : LCss::Len();
+
+					auto PreviousTableTarget = ctx.TableTarget;
+					int PreviousTableRow = ctx.TableRow;
+					LCss::Len PreviousCellPadding = ctx.CellPadding;
+					auto PreviousTargetBlocks = ctx.TargetBlocks;
+					auto PreviousTargetParent = ctx.TargetParent;
+					auto PreviousText = ctx.Tb;
+					uint32_t PreviousLastChar = ctx.LastChar;
+					bool PreviousStartOfLine = ctx.StartOfLine;
+
+					ctx.TableTarget = Table;
+					ctx.TableRow = -1;
+					ctx.CellPadding = Table->CellPadding;
+					ctx.TargetBlocks = &Table->blocks;
+					ctx.TargetParent = Table;
+					ctx.Tb = nullptr;
+					ctx.LastChar = '\n';
+					ctx.StartOfLine = true;
+
+					bool Imported = FromHtml(c, ctx, CachedStyle, Depth + 1);
+
+					ctx.TableTarget = PreviousTableTarget;
+					ctx.TableRow = PreviousTableRow;
+					ctx.CellPadding = PreviousCellPadding;
+					ctx.TargetBlocks = PreviousTargetBlocks;
+					ctx.TargetParent = PreviousTargetParent;
+					ctx.Tb = Imported ? nullptr : PreviousText;
+					ctx.LastChar = Imported ? '\n' : PreviousLastChar;
+					ctx.StartOfLine = Imported ? true : PreviousStartOfLine;
+
+					if (!Imported)
+						return Error(_FL, "Failed to import HTML table contents.");
+					continue;
+				}
+
+				case TAG_TR:
+				{
+					if (!ctx.TableTarget)
+						continue;
+
+					ctx.TableRow++;
+					if (!FromHtml(c, ctx, CachedStyle, Depth + 1))
+						return Error(_FL, "Failed to import HTML table row contents.");
+					continue;
+				}
+
+				case TAG_TD:
+				case TAG_TH:
+				{
+					auto Table = ctx.TableTarget;
+					if (!Table)
+						continue;
+
+					auto Cell = new TdBlock(this, c->TagId);
+					if (!Cell || !Table->Add(Cell))
+					{
+						DeleteObj(Cell);
+						return Error(_FL, "Failed to create HTML table cell.");
+					}
+
+					Cell->Row = ctx.TableRow >= 0 ? ctx.TableRow : 0;
+
+					const char *Attr;
+					if (c->Get("colspan", Attr))
+					{
+						int Span = ParseAttrInt(Attr);
+						if (Span > 0)
+							Cell->CS = Span;
+					}
+					if (c->Get("rowspan", Attr))
+					{
+						int Span = ParseAttrInt(Attr);
+						if (Span > 0)
+							Cell->RS = Span;
+					}
+					if (!HadCssWidth && c->Get("width", Attr))
+					{
+						LCss::Len L(Attr, LCss::ParseRelaxed);
+						if (L.Type == LCss::LenPercent && L.Value > 0)
+							Cell->Pct = (int)L.Value;
+						else if (L.Type == LCss::LenPx && L.Value > 0)
+						{
+							Cell->Fixed = true;
+							Cell->FixedPx = L.ToPx();
+						}
+					}
+
+					Cell->SetStyle(CachedStyle);
+
+					if (CachedStyle)
+					{
+						LCss::Len W = CachedStyle->Width();
+						if (W.Type == LCss::LenPercent && Cell->Pct < 0)
+							Cell->Pct = MAX((int)W.Value, 1);
+						else if (W.Type == LCss::LenPx && Cell->Pct < 0 && Cell->FixedPx == 0)
+						{
+							Cell->Fixed = true;
+							Cell->FixedPx = MAX((int)W.Value, 1);
+						}
+					}
+
+					auto ChildStyle = Cell->MakeChildStyle(CachedStyle);
+					if (!ChildStyle)
+						return Error(_FL, "Failed to make HTML table cell child style.");
+
+					auto PreviousTableTarget = ctx.TableTarget;
+					int PreviousTableRow = ctx.TableRow;
+					LCss::Len PreviousCellPadding = ctx.CellPadding;
+					auto PreviousTargetBlocks = ctx.TargetBlocks;
+					auto PreviousTargetParent = ctx.TargetParent;
+					auto PreviousText = ctx.Tb;
+					uint32_t PreviousLastChar = ctx.LastChar;
+					bool PreviousStartOfLine = ctx.StartOfLine;
+
+					ctx.TableTarget = nullptr;
+					ctx.TargetBlocks = &Cell->blocks;
+					ctx.TargetParent = Cell;
+					ctx.Tb = nullptr;
+					ctx.LastChar = '\n';
+					ctx.StartOfLine = true;
+
+					char16 *Txt = c->GetText();
+					bool Imported = false;
+					if (Txt && !IsAllWhiteW(Txt))
+					{
+						auto CellText = Cell->GetTextBlock();
+						if (!CellText)
+							return Error(_FL, "Failed to create HTML table cell text.");
+
+						ctx.Tb = CellText;
+						ctx.Tb->SetStyle(ChildStyle);
+						if (ctx.AddText(ChildStyle, Txt))
+							ctx.StartOfLine = false;
+						Imported = true;
+					}
+
+					Imported = FromHtml(c, ctx, ChildStyle, Depth + 1);
+					if (Imported && !Cell->blocks.Length())
+					{
+						auto Text = Cell->GetTextBlock();
+						if (Text)
+							Text->SetStyle(ChildStyle);
+					}
+
+					ctx.TableTarget = PreviousTableTarget;
+					ctx.TableRow = PreviousTableRow;
+					ctx.CellPadding = PreviousCellPadding;
+					ctx.TargetBlocks = PreviousTargetBlocks;
+					ctx.TargetParent = PreviousTargetParent;
+					ctx.Tb = Imported ? nullptr : PreviousText;
+					ctx.LastChar = Imported ? '\n' : PreviousLastChar;
+					ctx.StartOfLine = Imported ? true : PreviousStartOfLine;
+
+					if (!Imported)
+						return Error(_FL, "Failed to import HTML table cell contents.");
+					continue;
+				}
+
+				case TAG_TBODY:
+				{
+					if (!ctx.TableTarget)
+						continue;
+
+					if (!FromHtml(c, ctx, CachedStyle, Depth + 1))
+						return Error(_FL, "Failed to import HTML table row group.");
+					continue;
+				}
+
+				default:
+				{
+					continue;
+				}
+			}
+		}
 
 		if (c->TagId == TAG_BLOCKQUOTE)
 		{

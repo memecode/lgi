@@ -112,3 +112,151 @@ The grid model and column solver were extracted into `lgi/trunk/include/lgi/comm
 
 The node type is a template parameter so `TableBlock` in RTE2 can instantiate `TableGrid::Grid<Block>` and feed column metrics from a cell content measure (per the `MeasureText`-style min/max in the design above), while `Flow`-based placement continues to use `SolveColumns()` output for column widths.
 
+## Current implementation state
+
+### Files touched
+
+- `lgi/trunk/src/common/Widgets/richText2/RichTextEditPriv.h`
+  - Includes `lgi/common/TableGrid.h` after `SpellCheck.h`.
+  - Adds `TdBlock` and `TableBlock` declarations after `DivBlock` and before `HorzRuleBlock`.
+  - Adds table context fields to `CreateContext`:
+    - `Block *TableTarget = nullptr;`
+    - `int TableRow = -1;`
+    - `LCss::Len CellPadding;`
+    - Existing fields remain: `TargetBlocks`, `TargetParent`, `Tb`, `LastChar`, `StartOfLine`.
+
+- `lgi/trunk/src/common/Widgets/richText2/RichTextEditPriv.cpp`
+  - Adds static table presentation helpers after the closing `};` of `HtmlElementCb`, before `FromHtml`.
+  - Adds table handling in `FromHtml()`.
+  - Captures `HadCssWidth` before presentation attributes so presentation `width` does not override CSS width.
+  - Restricts background removal to flattened containers while preserving `TD` and `TH` backgrounds.
+  - Creates `TdBlock` directly inside `FromHtml()` to avoid private constructor access issues.
+
+- `lgi/trunk/src/common/Widgets/richText2/TableBlock.cpp`
+  - New file for `TdBlock` and `TableBlock`.
+
+### Implemented HTML parsing behavior
+
+Static helpers currently inserted:
+
+- `EnsureStyle`
+- `IsTableContextTag`
+- `ParseAttrInt`
+- `AttrValueIs`
+- `IsAllWhiteW`
+- `ApplyAlign`
+- `ApplyVerticalAlign`
+- `ApplyLength`
+- `ApplyBorder`
+- `ApplyTablePresentation`
+- `ApplyCellPresentation`
+
+Supported table tags are limited to those available in `HtmlCommon.h`:
+
+- `TAG_TABLE`
+- `TAG_TR`
+- `TAG_TD`
+- `TAG_TH`
+- `TAG_TBODY`
+
+Table-related tags not confirmed in `HtmlCommon.h`, such as `TAG_COL`, `TAG_COLGROUP`, `TAG_THEAD`, and `TAG_TFOOT`, are currently skipped as unknown tags when encountered inside table context.
+
+Current parser behavior:
+
+- Creates `TableBlock` on `TAG_TABLE`.
+- Creates rows as parser/grid context, not as `Block` tree nodes.
+- Creates `TdBlock` cells on `TAG_TD` and `TAG_TH`.
+- Saves and restores table context fields around recursion so nested content, lists, images, and nested tables land inside the cell.
+- Whitespace-only text between table elements is skipped instead of producing stray content blocks.
+- Direct non-whitespace cell text is placed in the cell’s `TextBlock`.
+- Empty cells get a placeholder `TextBlock`.
+- Cell content is added through `TdBlock` target blocks.
+- Nested tables inside `TD`/`TH` are handled recursively.
+
+Presentation attributes currently supported in `FromHtml()`:
+
+- Table `align`, `width`, `border`, `cellspacing`, `cellpadding`, `bgcolor`.
+- Cell/row `align`, `valign`, `width`, `height`, `border`, `bgcolor`.
+- `colspan` and `rowspan` on `TD`/`TH`.
+- `TH` default bold is applied only when font weight is inherit/not already set.
+- Presentation width behavior:
+  - Percent width sets `TdBlock::Pct`.
+  - Pixel width sets `TdBlock::Fixed` and `TdBlock::FixedPx`.
+  - If CSS width was already present, CSS width should win over presentation width.
+
+### Style behavior
+
+- `MakeChildStyle()` strips box properties from child styles.
+- `cellpadding` must remain available through `TableBlock::CellPadding`, `TdBlock::GetStyle()`, or explicit edge calculation.
+- `TD` and `TH` background properties are preserved; `DIV`, `TABLE`, `TBODY`, and `TR` backgrounds remain flattened in the parser path.
+- Serialization uses `GetElementName()` where present, otherwise tag info, so cells serialize as `td` or `th`.
+
+### Build integration
+
+Build entries for `TableBlock.cpp` have been added to the actual build systems:
+
+- `lgi/trunk/test/HtmlEditor/linux/Makefile.linux`
+  - Added after `RichTextEditPriv.cpp` and before `TextBlock.cpp`.
+- `scribe/trunk_os/linux/Makefile.linux`
+  - Added after `RichTextEditPriv.cpp` and before `TextBlock.cpp`.
+- `lgi/trunk/test/HtmlEditor/CMakeLists.txt`
+  - Added after `ImageBlock.cpp` and before `TextBlock.cpp`.
+- `scribe/trunk_os/CMakeLists.txt`
+  - Added after `ImageBlock.cpp` and before `TextBlock.cpp`.
+
+Important invocation note: these Makefiles should be invoked from the project directory, not from the `linux` subdirectory, because `VPATH` is relative to the current directory.
+
+Use:
+
+```sh
+make -f linux/Makefile.linux
+```
+
+from:
+
+```text
+/home/matthew/code/lgi/trunk/test/HtmlEditor
+```
+
+for HtmlEditor, and from:
+
+```text
+/home/matthew/code/scribe/trunk_os
+```
+
+for Scribe. Direct `make` from `test/HtmlEditor/linux` or `scribe/trunk_os/linux` fails for object targets because the Makefile’s VPATH search paths are evaluated relative to the wrong working directory.
+
+### Verified so far
+
+- `TableBlock.cpp` compiles with GCC C++17 `-fpermissive`.
+- `RichTextEditPriv.cpp` compiles with GCC C++17 `-fpermissive` after the `HtmlElementCb` closing-brace fix.
+- Debug compilation passes for `RichTextEditPriv.cpp` and `TableBlock.cpp`.
+- HtmlEditor direct object build from the intended project directory works.
+  - `Debug/BlockCursor.o`, `Debug/TableBlock.o`, and `Debug/RichTextEditPriv.o` exist for HtmlEditor.
+  - Full `make -f linux/Makefile.linux` from `/home/matthew/code/lgi/trunk/test/HtmlEditor` succeeded and linked `./htmleditor`.
+  - The linked build used the existing `Debug/TableBlock.o`.
+- Scribe direct object build from the intended project directory works.
+  - `Debug/TableBlock.o` and `Debug/RichTextEditPriv.o` exist for Scribe.
+- Scribe full build was monitored but output was truncated; final exit status has not been confirmed.
+
+### Open issues
+
+- Need verify or complete the full Scribe build.
+- Need force rebuild `TableBlock.o` from clean if a stronger proof of the actual Makefile integration is desired.
+- Need verify actual CMake builds for `HtmlEdit` and `scribe`; entries are added but configure/build output was not verified.
+- MSVC entries in `RichText.vcxproj` and `RichText.vcxproj.filters` are unverified and may need to be added if MSVC builds are used.
+- `LTreeItem` availability for debug `DumpNodes()` is not fully verified.
+- Runtime semantic behavior of `TableBlock.cpp` still needs review:
+  - table grid measurement
+  - row heights
+  - cell edges
+  - vertical alignment
+  - borders
+  - serialization
+  - hit-test
+  - paint
+  - nested table contexts
+  - debug dump compatibility
+- `TD` background preservation needs end-to-end verification beyond parser style handling.
+- Percent presentation width currently stores only `Pct`, not `Fixed`/`FixedPx`; confirm intended serialization/layout behavior.
+

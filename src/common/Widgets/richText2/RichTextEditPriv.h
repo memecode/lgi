@@ -29,6 +29,7 @@
 #include "lgi/common/Popup.h"
 #include "lgi/common/Emoji.h"
 #include "lgi/common/SpellCheck.h"
+#include "lgi/common/TableGrid.h"
 
 namespace Rte2 {
 
@@ -1217,6 +1218,59 @@ public:
 		void Dump();
 	};
 
+	class TdBlock : public DivBlock
+	{
+	public:
+		int Row = 0, Col = 0, CS = 1, RS = 1;
+		int Pct = -1;			// Preferred percentage column width, -1 if not set
+		int FixedPx = 0;		// Preferred exact pixel column width
+		bool Fixed = false;
+		LRect CellBox;			// Full cell border box, assigned by the TableBlock layout
+		int ContentH = 0;		// Content height at the last layout pass
+
+		TdBlock(LRichTextPriv *priv, HtmlTag tag = TAG_TD);
+		TdBlock(const TdBlock *Copy);
+
+		const char *GetClass() { return "TdBlock"; }
+		LRect GetPos() { return CellBox.X() > 0 ? CellBox : Pos; }
+		Block *Clone();
+		bool ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng);
+		bool HitTest(HitTestResult &htr);
+		void OnPaint(PaintContext &Ctx);
+		bool OnLayout(Flow &flow);
+
+		#ifdef _DEBUG
+		void DumpNodes(LTreeItem *Ti);
+		#endif
+	};
+
+	class TableBlock : public DivBlock
+	{
+	public:
+		TableGrid::Grid<Block> grid;
+		std::vector<int> RowH;
+		LCss::Len CellPadding;	// 'cellpadding' presentation attribute from the table
+
+		TableBlock(LRichTextPriv *priv);
+		TableBlock(const TableBlock *Copy);
+
+		const char *GetClass() { return "TableBlock"; }
+		Block *Clone();
+		bool ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng);
+		bool HitTest(HitTestResult &htr);
+		void OnPaint(PaintContext &Ctx);
+		bool OnLayout(Flow &flow);
+
+		void BuildGrid();
+		int Spacing();
+		LRect CellEdges(TdBlock *td, int cellW);
+		TableGrid::MinMax MeasureBlock(Block *b, int depth, int avail);
+
+		#ifdef _DEBUG
+		void DumpNodes(LTreeItem *Ti);
+		#endif
+	};
+
 	class HorzRuleBlock : public Block
 	{
 		LRect Pos;
@@ -1449,6 +1503,9 @@ public:
 		Block *TargetParent = nullptr;
 		LCss::Store StyleStore;
 		bool StartOfLine;
+		Block *TableTarget = nullptr;	// The TableBlock currently being filled
+		int TableRow = -1;				// Row index within TableTarget
+		LCss::Len CellPadding;			// 'cellpadding' presentation attribute
 		
 		CreateContext(LFontCache *fc)
 		{

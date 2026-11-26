@@ -90,6 +90,7 @@ Source =	../../src/common/Lgi/LgiMain.cpp \
 			../../src/common/Widgets/richText2/ListBlock.cpp \
 			../../src/common/Widgets/richText2/RichTextEdit.cpp \
 			../../src/common/Widgets/richText2/RichTextEditPriv.cpp \
+			../../src/common/Widgets/richText2/TableBlock.cpp \
 			../../src/common/Widgets/richText2/TextBlock.cpp \
 			src/Rich.cpp
 
