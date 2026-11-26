@@ -158,7 +158,7 @@ void VcCommit::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 	float x0 = (float)Ctx.x1;
 	float y0 = (float)Ctx.y1;
 
-	VcCommit *Prev = NULL, *Next = NULL;
+	VcCommit *Prev = nullptr, *Next = nullptr;
 	if (Folder->Log.IdxCheck(Idx - 1))
 		Prev = Folder->Log[Idx - 1];
 	if (Folder->Log.IdxCheck(Idx + 1))
@@ -175,9 +175,9 @@ void VcCommit::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 	float top = y0;
 	float bot = y0 + (float)H;
 	float r = pitch * 0.34f;
-	float sw = pitch * 0.16f;
-	if (sw < 1.5f)
-		sw = 1.5f;
+	float sw = pitch * 0.07f;
+	if (sw < 1.0f)
+		sw = 1.0f;
 
 	auto laneX = [&](int lane) -> float
 	{
@@ -264,7 +264,7 @@ void VcCommit::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 			vec.ClosePath();
 		};
 
-		float ring = Current ? sw : 1.2f;
+		float ring = Current ? sw * 2.3f : sw;
 
 		vec.ClearPath();
 		circle(nr);
