@@ -654,7 +654,8 @@ bool LRegKey::DeleteValue(const char *Name)
 		else
 		{
 			DWORD Err = GetLastError();
-			LAssert(!"RegDeleteValue failed");
+			if (AssertOnError)
+				LAssert(!"RegDeleteValue failed");
 		}
 	}
 
@@ -745,8 +746,9 @@ bool LRegKey::SetStr(const char *Name, const char *Value)
 		return false;
 	}
 
-	result = RegSetValueExA(k, Name, 0, REG_SZ, (uchar*)Value, Value ? (DWORD)strlen(Value) : 0);
-	LOG_WRITE("RegSetValueExA(%s,%s,'%s')=%i\n", KeyName.Get(), Name, Value, result);
+	const char *StringValue = Value ? Value : "";
+	result = RegSetValueExA(k, Name, 0, REG_SZ, (uchar*)StringValue, (DWORD)strlen(StringValue) + 1);
+	LOG_WRITE("RegSetValueExA(%s,%s,'%s')=%i\n", KeyName.Get(), Name ? Name : "(default)", StringValue, result);
 	if (result != ERROR_SUCCESS)
 	{
 		if (AssertOnError)
