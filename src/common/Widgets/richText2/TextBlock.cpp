@@ -780,9 +780,10 @@ void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 	if (BorderStyle.Type == LCss::ColorRgb)
 		BorderCol.Set(BorderStyle.Rgb32, 32);
 
-	Ctx.DrawBox(r, margin, Ctx.Colours[Unselected].Back);
+	LColour FillCol = Ctx.FillBack();
+	Ctx.DrawBox(r, margin, FillCol);
 	Ctx.DrawBox(r, border, BorderCol);
-	Ctx.DrawBox(r, padding, Ctx.Colours[Unselected].Back);
+	Ctx.DrawBox(r, padding, FillCol);
 	
 	int CurY = Pos.y1;
 	PaintErrIdx = 0;
@@ -796,7 +797,7 @@ void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 		LinePos.Offset(Pos.x1, Pos.y1);
 		if (Line->PosOff.X() < Pos.X())
 		{
-			Ctx.pDC->Colour(Ctx.Colours[Unselected].Back);
+			Ctx.pDC->Colour(Ctx.FillBack());
 			Ctx.pDC->Rectangle(LinePos.x2, LinePos.y1, Pos.x2, LinePos.y2);
 		}
 
@@ -805,7 +806,7 @@ void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 		if (CurY < LinePos.y1)
 		{
 			// Fill padded area...
-			Ctx.pDC->Colour(Ctx.Colours[Unselected].Back);
+			Ctx.pDC->Colour(Ctx.FillBack());
 			Ctx.pDC->Rectangle(Pos.x1, CurY, Pos.x2, LinePos.y1 - 1);
 		}
 
@@ -985,7 +986,7 @@ void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 			Ctx.pDC->Colour(Ctx.Colours[Selected].Back);
 			Ctx.pDC->Rectangle(x1, LinePos.y1, x2, LinePos.y2);
 		}
-		Ctx.pDC->Colour(Ctx.Colours[Unselected].Back);
+		Ctx.pDC->Colour(Ctx.FillBack());
 		Ctx.pDC->Rectangle(FixedToInt(FixX), LinePos.y1, Pos.x2, LinePos.y2);
 		
 
@@ -1007,7 +1008,7 @@ void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 	if (CurY < Pos.y2)
 	{
 		// Fill padded area...
-		Ctx.pDC->Colour(Ctx.Colours[Unselected].Back);
+		Ctx.pDC->Colour(Ctx.FillBack());
 		Ctx.pDC->Rectangle(Pos.x1, CurY, Pos.x2, Pos.y2);
 	}
 

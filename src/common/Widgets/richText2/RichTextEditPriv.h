@@ -504,6 +504,14 @@ public:
 		ColourPair Colours[2];
 		BlockCursor *Cursor = nullptr, *Select = nullptr;
 
+		// Background of the enclosing table cell, if it has one. Area fills
+		// around text use this so they don't paint the document background.
+		LColour CellBack;
+		LColour FillBack() const
+		{
+			return CellBack.IsValid() ? CellBack : Colours[Unselected].Back;
+		}
+
 		// Cursor stuff
 		int CurEndPoint = 0;
 		LArray<ssize_t> EndPoints;

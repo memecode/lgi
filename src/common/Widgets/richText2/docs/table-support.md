@@ -261,7 +261,7 @@ Presentation attributes currently supported in `FromHtml()`:
 - `MakeChildStyle()` strips box properties from child styles.
 - `cellpadding` is a table presentation attribute, not a real CSS property. It is stored in `TableBlock::CellPadding` for layout, but serialization must not emit `Prop_CellPadding` as CSS. For td/th cells that have no own CSS padding, the table `cellpadding` value is converted to standard CSS `padding` on the cell style so `OutputStyles()` emits browser-visible td padding. Cells with own CSS padding keep their own value. `CellEdges()` still applies the fallback when a cell has no padding of its own, and `MeasureBlock()` measures cells through `CellEdges()` so column min/max match what placement uses.
 - `TD` and `TH` background properties are preserved. `TABLE` backgrounds are no longer removed because `TableBlock` is a real box that can paint them; `DIV`, `TBODY`, and `TR` are still flattened containers and their backgrounds are still removed so they do not become highlights on descendant text.
-- `MakeChildStyle()` does not strip `background-color`, so text inside a coloured cell blends glyphs with the cell colour through `Cols.Back`, which is what `TextBlock::OnPaint` uses.
+- `MakeChildStyle()` does not strip `background-color`, so text inside a coloured cell blends glyphs with the cell colour. `TextBlock::OnPaint` picks that colour up through `PaintContext::CellBack` / `FillBack()`, which `TdBlock::OnPaint` sets.
 - Serialization uses `GetElementName()` where present, otherwise tag info, so cells serialize as `td` or `th`. Presentation `width` and `bgcolor` round-trip through the cached style (`class='stN'` plus `OutputStyles()`), not as HTML attributes, so `TdBlock::Pct`/`Fixed`/`FixedPx` only need to drive layout.
 
 ### Build integration
@@ -453,13 +453,27 @@ make -C lgi/trunk/test/HtmlEditor -f linux/Makefile.linux
   OK
   ```
 
+## Rendering, width and selection fixes
+
+- Pixel table widths: a table `width: 600px` (CSS or presentation) now sets the outer box width directly in `TableBlock` layout. Previously `MIN(PreferredWidth+fixedX, cssWidth)` only let px widths shrink a table, so tables inside the blockquote ignored `width: 600px`.
+- Hit testing (`LRichTextPriv::HitTest`, `RichTextEditPriv.cpp`): a text block only claims a point when the point is inside its cell's x-range (`InCell`). This stops a click in one cell being resolved to text in a neighbouring cell on the same line. Points in empty space inside a tall cell fall back to the nearest text in that cell (`CellAfterBlk` / `CellBeforeBlk`).
+- Double-click word selection goes through `SelectWordInBlock()` (`RichTextEdit.cpp`), so double-clicking a cell word such as "Product" selects that word.
+- Selection highlight is a toggle driven by `Ctx.Type` in `TextBlock::OnPaint`. Containers (`TdBlock`, `TableBlock`, `DivBlock`) must not save and restore `Ctx.Type`, because that resets the toggle and the highlight disappears mid-line.
+- Container backgrounds are painted from `Ctx.Colours[Unselected].Back`, not `Ctx.Back()`. `Ctx.Back()` returns the selected colour while `Ctx.Type == Selected`, so backgrounds would be left in the selection colour after mouse release.
+- Cell background fill: `DrawBox` only paints the margin, border and padding edge strips and never the interior. `TdBlock::OnPaint` fills the full cell box when it has a background.
+- Row background inheritance: `<tr bgcolor>` is removed during flattening (`case TAG_TR: DeleteProp(PropBackgroundColor)` in `FromHtml`), so `td`/`th` cells take the row's `bgcolor` through `ApplyBackground()` when they have none of their own. A cell's own `bgcolor` still wins.
+- Text area fills inside a cell: `TextBlock::OnPaint` fills line remainders and padding with `PaintContext::FillBack()`. `TdBlock::OnPaint` sets `PaintContext::CellBack` while painting children and restores it afterwards, so the area right of short text and the padding match the cell background.
+- Drag repaint: `LRichTextPriv::SetCursor` invalidates the whole document (`InvalidateDoc(NULL)`) whenever a selection is extended. Cells that the mouse never crosses are therefore repainted during the drag, not only on mouse up. A non-select cursor move invalidates only the cursor position.
+- Headless probes: `htmleditor <file> --drag x1,y1,x2,y2` and `--pos x,y` run from a Pulse-based `PendingProbe` in the harness `App::OnPulse` (`SetPulse(100)`, `SettleTicks=6`) so layout has settled after the scrollbar appears. `--nodes <file>` dumps the node tree with layout and colour fields through `LRichTextEdit::DumpNodesFile` (available when `DEBUG_ACTIVITY` is defined). These probes check selection text only, so painting still needs GUI confirmation.
+
 ## Open issues
 
 - Runtime layout/paint still needs visual verification in the HtmlEditor GUI harness; a table test case was added at `lgi/trunk/test/HtmlEditor/testcases/table-test.html` covering colspan, rowspan, percent and pixel width, named and hex `bgcolor`, cellpadding/border, whitespace between cells, a list inside a cell, an empty cell, and a table inside a blockquote with a nested table.
+- `HorzRuleBlock::OnPaint` and `ListBlock` still paint with `Ctx.Back()`, so they may show the selection colour after release. This has not been reported yet.
 - TD/th inheritance fidelity is implemented in the parser/style path, but visual confirmation is still needed for td borders, td width presentation, td background rendering, text inside cells, and alignment.
 - `HasOwnCssTextAlign()` distinguishes own td CSS text-align by comparing the td style with the parent style; a td CSS `text-align` that happens to match the parent is not reliably distinguished from inherited alignment.
 - `StripCellInheritedBoxProps()` intentionally does not strip `PropBackgroundColor`; if the intended behavior is to strip only td’s own background while removing inherited table background, that needs a separate decision.
-- `TD`/`TH`/`TABLE` background now has a full path (`ApplyBackground()` → `LCss::PropBackgroundColor` → `TdBlock::OnPaint()` / `TableBlock::OnPaint()`), pending visual confirmation.
+- `TD`/`TH`/`TABLE` background now has a full path (`ApplyBackground()` → `LCss::PropBackgroundColor` → `TdBlock::OnPaint()` / `TableBlock::OnPaint()`), confirmed in the GUI for `example-reply.html`.
 - Cell/row `height` is now honored as a per-row minimum through `TableGrid::Cell::MinH`
   and `RowMinHeights()`; percentage heights remain unresolved.
 - Percent width behavior is resolved: `TdBlock` stores `Pct` only, and `Fixed`/`FixedPx` are px-only flags, which is correct for `TableGrid::ColumnMetrics()`. Width round-trips through the cached style class rather than an HTML `width` attribute.

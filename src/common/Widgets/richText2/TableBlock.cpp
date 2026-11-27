@@ -197,12 +197,9 @@ namespace Rte2
 		}
 
 		LColour Back = Ctx.Colours[Unselected].Back;
-		if (Style)
-		{
-			LCss::ColorDef bg = Style->BackgroundColor();
-			if (bg.Type == LCss::ColorRgb)
-				Back.Set(bg.Rgb32, 32);
-		}
+		bool HasBack = Style && Style->BackgroundColor().Type == LCss::ColorRgb;
+		if (HasBack)
+			Back.Set(Style->BackgroundColor().Rgb32, 32);
 
 		LColour BorderCol(222, 222, 222);
 		if (Style && Style->BorderLeft().Style != LCss::BorderNone)
@@ -213,11 +210,22 @@ namespace Rte2
 		}
 
 		LRect box = r;
+		// DrawBox only paints the edges, so fill the cell interior too
+		if (HasBack)
+		{
+			Ctx.pDC->Colour(Back);
+			Ctx.pDC->Rectangle(box.x1, box.y1, box.x2, box.y2);
+		}
 		Ctx.DrawBox(box, border, BorderCol);
 		Ctx.DrawBox(box, padding, Back);
 
+		// Text area fills inside this cell use the cell background
+		LColour SavedCellBack = Ctx.CellBack;
+		if (HasBack)
+			Ctx.CellBack = Back;
 		for (auto b : blocks)
 			b->OnPaint(Ctx);
+		Ctx.CellBack = SavedCellBack;
 	}
 
 	void LRichTextPriv::TdBlock::OpenTag(LStream &s, int CS, int RS)

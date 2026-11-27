@@ -1680,16 +1680,12 @@ bool LRichTextPriv::CursorFirst()
 	
 bool LRichTextPriv::SetCursor(LAutoPtr<BlockCursor> c, bool Select)
 {
-	LRect InvalidRc(0, 0, -1, -1);
-
 	if (!c || !c->Blk)
 		return Error(_FL, "Invalid cursor.");
 
 	if (Select && !Selection)
 	{
 		// Selection starting... save cursor as selection end point
-		if (Cursor)
-			InvalidRc = Cursor->Line;
 		Selection = Cursor;
 	}
 	else if (!Select && Selection)
@@ -1701,11 +1697,6 @@ bool LRichTextPriv::SetCursor(LAutoPtr<BlockCursor> c, bool Select)
 		Selection.Reset();
 
 		// LgiTrace("Ending selection delete(sel) Idx=%i\n", i);
-	}
-	else if (Select && Cursor)
-	{
-		// Changing selection...
-		InvalidRc = Cursor->Line;
 	}
 
 	if (Cursor && !Select)
@@ -1733,23 +1724,16 @@ bool LRichTextPriv::SetCursor(LAutoPtr<BlockCursor> c, bool Select)
 	InvalidateDoc(NULL);
 	#else
 	if (Select)
-		InvalidRc.Union(&Cursor->Line);
-	else
-		InvalidateDoc(&Cursor->Pos);
-		
-	if (InvalidRc.Valid())
-	{
-		// Update the screen
-		InvalidateDoc(&InvalidRc);
-	}
-	#endif
-
-	if (Select)
 	{
 		// Blocks between the old and new end points change their highlight
 		// during a drag, so repaint the whole content area
 		InvalidateDoc(NULL);
 	}
+	else
+	{
+		InvalidateDoc(&Cursor->Pos);
+	}
+	#endif
 
 	// Check the cursor is on the visible part of the document.
 	if (Cursor->Pos.Valid())
@@ -3743,6 +3727,17 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 			else if (c->TagId == TAG_TD || c->TagId == TAG_TH)
 			{
 				ApplyCellPresentation(Style, c, c->TagId, AllowAlignOverride);
+				// A row's bgcolor applies to cells that don't set their own
+				if (c->Parent && c->Parent->TagId == TAG_TR)
+				{
+					const char *rowBg = nullptr;
+					if (c->Parent->Get("bgcolor", rowBg))
+					{
+						LCss *s = EnsureStyle(Style);
+						if (s)
+							ApplyBackground(s, rowBg);
+					}
+				}
 				ApplyCellPadding(Style, ctx.CellPadding, HadActualPadding);
 			}
 			else if (c->TagId == TAG_TR)

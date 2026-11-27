@@ -732,7 +732,7 @@ public:
 				
 				LString outFile;
 				LString layoutPath;
-				LString nodesPath;
+				LString optValue;
 				if (LAppInst->GetOption("layout", layoutPath))
 				{
 					if (!layoutPath.Length())
@@ -763,14 +763,14 @@ public:
 						},
 						_FL);
 				}
-				else if (LAppInst->GetOption("drag", nodesPath))
+				else if (LAppInst->GetOption("drag", optValue))
 				{
 					// Simulate a mouse drag from x1,y1 to x2,y2 in window coordinates.
 					// Run from OnPulse once the layout has settled after the scrollbar was added.
-					PendingProbe = [this, nodesPath]()
+					PendingProbe = [this, optValue]()
 					{
 						int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
-						sscanf(nodesPath.Get(), "%i,%i,%i,%i", &x1, &y1, &x2, &y2);
+						sscanf(optValue.Get(), "%i,%i,%i,%i", &x1, &y1, &x2, &y2);
 						LMouse m;
 						m.x = x1; m.y = y1; m.Down(true); m.Left(true);
 						Edit->OnMouseClick(m);
@@ -792,13 +792,13 @@ public:
 					};
 					SetPulse(100);
 				}
-				else if (LAppInst->GetOption("pos", nodesPath))
+				else if (LAppInst->GetOption("pos", optValue))
 				{
 					// Simulate a single click at x,y in window coordinates, once the layout has settled
-					PendingProbe = [this, nodesPath]()
+					PendingProbe = [this, optValue]()
 					{
 						int x = 0, y = 0;
-						sscanf(nodesPath.Get(), "%i,%i", &x, &y);
+						sscanf(optValue.Get(), "%i,%i", &x, &y);
 						LMouse m;
 						m.x = x; m.y = y; m.Down(true); m.Left(true);
 						Edit->OnMouseClick(m);
@@ -810,13 +810,13 @@ public:
 					};
 					SetPulse(100);
 				}
-				else if (LAppInst->GetOption("nodes", nodesPath))
+				else if (LAppInst->GetOption("nodes", optValue))
 				{
-					if (!nodesPath.Length())
-						nodesPath = "nodes.json";
+					if (!optValue.Length())
+						optValue = "nodes.json";
 
-					if (!Edit->DumpNodesFile(nodesPath, 990, 800))
-						LgiTrace("%s:%i - Failed to dump nodes to '%s'.\n", _FL, nodesPath.Get());
+					if (!Edit->DumpNodesFile(optValue, 990, 800))
+						LgiTrace("%s:%i - Failed to dump nodes to '%s'.\n", _FL, optValue.Get());
 
 					LAppInst->RunCallback([]()
 						{
