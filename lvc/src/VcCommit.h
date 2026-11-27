@@ -32,6 +32,8 @@ struct VcEdge
 	~VcEdge();
 	void Set(VcCommit *p, VcCommit *c);
 	void Detach(VcCommit *c);
+	VcCommit *Top() const;
+	VcCommit *Bottom() const;
 };
 
 class VcCommit : public LListItem
@@ -95,5 +97,15 @@ public:
 	void OnMouseClick(LMouse &m);
 	void Select(bool b);
 };
+
+inline VcCommit *VcEdge::Top() const
+{
+	return Child->Idx < Parent->Idx ? Child : Parent;
+}
+
+inline VcCommit *VcEdge::Bottom() const
+{
+	return Child->Idx < Parent->Idx ? Parent : Child;
+}
 
 #endif

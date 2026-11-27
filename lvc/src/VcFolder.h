@@ -340,7 +340,7 @@ protected:
 	void OnCmdError(LString Output, const char *Msg);
 	void ClearError();
 	VcFile *FindFile(const char *Path);
-	void LinkParents(bool firstParentOnly = false);
+	void LinkParents();
 	void AssignColours();
 	void CurrentRev(std::function<void(LString)> Callback);
 	LColour BranchColour(const char *Name);

@@ -1774,7 +1774,7 @@ bool VcFolder::ParseRevList(int Result, LString s, ParseParams *Params)
 
 			auto parseDone = GraphProfileTime();
 			parseUs = parseDone - splitDone;
-			LinkParents(GitLogFirstParentOnly);
+			LinkParents();
 			linkUs = GraphProfileTime() - parseDone;
 			break;
 		}
@@ -2232,7 +2232,7 @@ bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 	return !Result;
 }
 
-void VcFolder::LinkParents(bool firstParentOnly)
+void VcFolder::LinkParents()
 {
 	TraceGraph("LinkParents.begin", Uri.sPath.Get(), "commits=%zu", (size_t)Log.Length());
 	auto started = GraphProfileTime();
@@ -2260,7 +2260,7 @@ void VcFolder::LinkParents(bool firstParentOnly)
 	for (auto c:Log)
 	{
 		auto *Par = c->GetParents();
-		for (size_t parentIdx = 0; parentIdx < Par->Length() && (!firstParentOnly || parentIdx == 0); parentIdx++)
+		for (size_t parentIdx = 0; parentIdx < Par->Length(); parentIdx++)
 		{
 			auto *p = Map.Find((*Par)[parentIdx]);
 			if (p)
@@ -2290,7 +2290,7 @@ void VcFolder::LinkParents(bool firstParentOnly)
 		{
 			for (auto e:Active[i])
 			{
-				if (e->Parent == c)
+				if (e->Bottom() == c)
 				{
 					c->NodeIdx = i;
 					break;
@@ -2304,7 +2304,7 @@ void VcFolder::LinkParents(bool firstParentOnly)
 		bool firstChildEdge = true;
 		for (auto e:c->Edges)
 		{
-			if (e->Child == c)
+			if (e->Top() == c)
 			{
 				int lane = firstChildEdge ? c->NodeIdx : (int)Active.Length();
 				if (lane < 0)
@@ -2346,8 +2346,8 @@ void VcFolder::LinkParents(bool firstParentOnly)
 					{
 						if (tracing) comparisons++;
 						if (edge != e &&
-							edge->Child != c &&
-							edge->Parent != e->Parent)
+							edge->Top() != c &&
+							edge->Bottom() != e->Bottom())
 						{
 							Diff = true;
 							break;
@@ -2366,7 +2366,7 @@ void VcFolder::LinkParents(bool firstParentOnly)
 							for (auto ee: Active[ii])
 							{
 								if (tracing) comparisons++;
-								if (ee->Parent != e->Parent)
+								if (ee->Bottom() != e->Bottom())
 								{
 									Match = false;
 									break;
@@ -2405,7 +2405,7 @@ void VcFolder::LinkParents(bool firstParentOnly)
 		assignUs += assigned - added;
 		for (auto e: c->Edges)
 		{
-			if (e->Parent == c)
+			if (e->Bottom() == c)
 			{
 				if (e->Idx < 0)
 				{

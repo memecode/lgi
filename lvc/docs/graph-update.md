@@ -54,9 +54,10 @@ show all refs as before. The choice is saved and applies to Git repositories,
 including repositories opened over SSH.
 
 The View menu's **Git history: first parent only** option is also enabled by
-default. It follows only the first parent of each Git commit and draws only
-those links, retaining merge commits but hiding merged side history unless
-another selected ref reaches it through its own first-parent history. Turn it
+default. It follows only the first parent of each Git commit when selecting
+history, retaining merge commits but hiding merged side history unless another
+selected ref reaches it through its own first-parent history. The graph draws
+all parent links whose endpoints are in the selected commits. Turn the option
 off to see all parent histories. This setting is saved independently of the
 local-branches filter.
 

@@ -215,7 +215,7 @@ void VcCommit::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 		float cx = laneX(lane);
 		float nodeCx = NodeIdx >= 0 ? laneX(NodeIdx) : cx;
 
-		if (e->Parent == this)
+		if (e->Bottom() == this)
 		{
 			int pl = Prev ? Prev->Pos.Find(e) : -1;
 			if (pl >= 0)
@@ -225,7 +225,7 @@ void VcCommit::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 			continue;
 		}
 
-		if (e->Child == this)
+		if (e->Top() == this)
 		{
 			int nl = Next ? Next->Pos.Find(e) : -1;
 			LColour drawCol = nl >= 0 ? col : LColour(0, 0, 0);
