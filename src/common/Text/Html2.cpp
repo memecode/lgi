@@ -7946,6 +7946,7 @@ bool LHtml::GetFormattedContent(const char *MimeType, LString &Out, LArray<LDocV
 
 		// Export the HTML, including the CID's from the first step
 		Out = Name();
+		return true;
 	}
 	else if (!Stricmp(MimeType, "text/plain"))
 	{
@@ -7957,6 +7958,7 @@ bool LHtml::GetFormattedContent(const char *MimeType, LString &Out, LArray<LDocV
 			Tag->ConvertToText(State);
 		}
 		Out = p.NewLStr();
+		return true;
 	}
 
 	return false;

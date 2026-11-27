@@ -333,6 +333,7 @@ bool LFont::Destroy()
 		d->hFont = NULL;
 	}
 	DeleteArray(d->GlyphMap);
+	d->pSurface = nullptr;
 	
 	return Status;
 }
@@ -958,6 +959,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 	#elif defined __GTK_H__
 	
 		Destroy();
+		d->pSurface = pSurface;
 
 		auto Dpi = pSurface ? pSurface->GetDpi() : LScreenDpi();
 		float DpiScale = (float)Dpi.x / 96.0f;

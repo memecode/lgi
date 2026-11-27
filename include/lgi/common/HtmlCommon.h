@@ -10,10 +10,11 @@ class LHtmlFontCache
 {
 	LFont *DefaultFont = nullptr;
 	float DpiScaleY = 1.0f;
+	LSurface *Surface = nullptr;
 	List<LFont> Fonts;
 
 public:
-	LHtmlFontCache(LFont *defaultFont, float dpiScaleY);
+	LHtmlFontCache(LFont *defaultFont, float dpiScaleY, LSurface *surface = nullptr);
 	~LHtmlFontCache();
 
 	LFont *FontAt(int i);

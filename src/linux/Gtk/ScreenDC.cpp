@@ -14,6 +14,7 @@
 #include <new>
 
 #include "lgi/common/Lgi.h"
+#include "CairoVectorContext.h"
 
 using namespace Gtk;
 
@@ -245,6 +246,11 @@ LScreenDC::LScreenDC(OsDrawable *Drawable)
 	d = new LScreenPrivate;
 	d->Own = false;
 	d->d = Drawable;
+}
+
+LSurfaceVector *CreateGtkCairoVectorContext(Gtk::cairo_t *context)
+{
+	return new (std::nothrow) CairoVectorContext(context);
 }
 
 LScreenDC::LScreenDC(LView *view, void *param)

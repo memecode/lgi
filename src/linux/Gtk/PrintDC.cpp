@@ -1,4 +1,5 @@
 #include "lgi/common/Lgi.h"
+#include "CairoVectorContext.h"
 // #include <cups/ipp.h>
 // #include <cups/cups.h>
 
@@ -16,6 +17,7 @@ public:
 	int Pages = 0;
 	LColour c;
 	LRect Clip;
+	LRect PageBounds;
 	Gtk::cairo_t *cr = nullptr;
 	
 	LPrintDCPrivate(Gtk::GtkPrintContext *handle)
@@ -45,12 +47,27 @@ LPrintDC::LPrintDC(void *Handle, const char *PrintJobName, const char *PrinterNa
 	d->PrinterName = PrinterName;
 	d->cr = gtk_print_context_get_cairo_context(d->Handle);
 	ColourSpace = CsRgb24;
-	d->Clip = Bounds();
+	if (auto pageSetup = gtk_print_context_get_page_setup(d->Handle))
+	{
+		d->PageBounds.Set(0, 0,
+			(int)gtk_page_setup_get_paper_width(pageSetup, Gtk::GTK_UNIT_POINTS) - 1,
+			(int)gtk_page_setup_get_paper_height(pageSetup, Gtk::GTK_UNIT_POINTS) - 1);
+	}
+	else
+	{
+		d->PageBounds = Bounds();
+	}
+	d->Clip = d->PageBounds;
 }
 
 LPrintDC::~LPrintDC()
 {
 	DeleteObj(d);
+}
+
+LSurfaceVector *LPrintDC::CreateVectorContext()
+{
+	return CreateGtkCairoVectorContext(d->cr);
 }
 
 Gtk::GtkPrintContext *LPrintDC::GetPrintContext()
@@ -69,6 +86,20 @@ void LPrintDC::SetHandle(OsPainter hnd)
 	{
 		LgiTrace("%s:%i - LPrintDC updating handle to %p\n", _FL, hnd);
 		d->cr = hnd;
+	}
+}
+
+void LPrintDC::SetOrigin(LPoint pt)
+{
+	LSurface::SetOrigin(pt);
+
+	if (d->cr)
+	{
+		Gtk::cairo_matrix_t m;
+		cairo_get_matrix(d->cr, &m);
+		m.x0 = -pt.x;
+		m.y0 = -pt.y;
+		cairo_set_matrix(d->cr, &m);
 	}
 }
 
@@ -99,7 +130,7 @@ LRect LPrintDC::ClipRgn(LRect *Rgn)
 	if (Rgn)
 		d->Clip = *Rgn;
 	else
-		d->Clip = Bounds();
+		d->Clip = d->PageBounds;
 	return Prev;
 }
 

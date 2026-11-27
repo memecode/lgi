@@ -1189,6 +1189,11 @@ class LgiClass LPrintDC
 {
 	class LPrintDCPrivate *d;
 
+#if defined __GTK_H__
+protected:
+	LSurfaceVector *CreateVectorContext() override;
+#endif
+
 public:
 	LPrintDC(void *Handle, const char *PrintJobName, const char *PrinterName = NULL);
 	~LPrintDC();
@@ -1206,9 +1211,11 @@ public:
 
 	#if defined __GTK_H__
 	
+		using LSurface::SetOrigin;
 		Gtk::GtkPrintContext *GetPrintContext();
 		OsPainter Handle() override;
 		void SetHandle(OsPainter handle);
+		void SetOrigin(LPoint pt) override;
 	
 		int Op() override { return GDC_SET; }
 		int Op(int Op, NativeInt Param = -1) override { return GDC_SET; }

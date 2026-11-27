@@ -298,7 +298,10 @@ LDisplayString::LDisplayString(LFont *f, const char *s, ssize_t l, LSurface *pdc
 		{
 			LAssert(StrWords >= 0);
 			if (StrWords > 0)
-				d->Create(pDC ? pDC->GetPrintContext() : NULL);
+			{
+				auto surface = pDC ? pDC : Font->GetSurface();
+				d->Create(surface ? surface->GetPrintContext() : NULL);
+			}
 		}
 		
 	#endif
@@ -321,7 +324,10 @@ LDisplayString::LDisplayString(LFont *f, const char16 *s, ssize_t l, LSurface *p
 	
 		d = new LDisplayStringPriv(this);
 		if (Font && Str && StrWords > 0)
-			d->Create(pDC ? pDC->GetPrintContext() : NULL);
+		{
+			auto surface = pDC ? pDC : Font->GetSurface();
+			d->Create(surface ? surface->GetPrintContext() : NULL);
+		}
 	
 	#endif
 }
@@ -343,7 +349,10 @@ LDisplayString::LDisplayString(LFont *f, const uint32_t *s, ssize_t l, LSurface 
 	#if defined __GTK_H__
 	d = new LDisplayStringPriv(this);
 	if (Font && Str && StrWords > 0)
-		d->Create(pDC ? pDC->GetPrintContext() : NULL);
+	{
+		auto surface = pDC ? pDC : Font->GetSurface();
+		d->Create(surface ? surface->GetPrintContext() : NULL);
+	}
 	#endif
 }
 #endif
@@ -566,6 +575,10 @@ void LDisplayString::Layout(bool Debug)
 
 			if (b.Hnd)
 			{
+				LFont *font = b.Fnt ? b.Fnt : Font;
+				if (font)
+					Gtk::pango_layout_set_font_description(b.Hnd, font->Handle());
+
 				if (!LIsUtf8(b.Str, b.Bytes))
 				{
 					LgiTrace("Invalid UTF8: '%.*S'\n", (int)b.Bytes, b.Str);

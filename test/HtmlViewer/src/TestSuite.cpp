@@ -19,6 +19,7 @@
 #include "lgi/common/ScrollBar.h"
 #include "lgi/common/ImageThreadManager.h"
 #include "lgi/common/Stat.h"
+#include "lgi/common/FileSelect.h"
 
 #include "lgi/common/Html.h"
 #include "../src/common/Text/HtmlPriv.h"
@@ -45,6 +46,13 @@ enum Controls
 	ID_TAG_TREE,
 	ID_TAG_DETAIL
 };
+
+#if defined(__GTK_H__)
+namespace
+{
+	int PrintHtmlContentToPdf(const LString &content, const char *output);
+}
+#endif
 
 #if 1
 using THtmlClass = Html2::LHtml;
@@ -788,6 +796,43 @@ public:
 				new ImageCompareDlg(this, OutPath);
 				break;
 			}
+			case ID_PRINT:
+			{
+				#if defined(__GTK_H__)
+				if (auto fs = new LFileSelect(this))
+				{
+					fs->Type("PDF", "*.pdf");
+					if (auto item = dynamic_cast<HtmlItem*>(Lst->GetSelected()))
+					{
+						LString fileName = item->GetText();
+						ssize_t extension = fileName.RFind(".");
+						if (extension > 0)
+							fileName.Length(extension);
+						fileName += ".pdf";
+						fs->Name(fileName);
+					}
+
+					fs->Save([this](auto fs, auto status)
+					{
+						if (!status)
+							return;
+
+						LString content;
+						if (!Html || !Html->GetFormattedContent("text/html", content))
+						{
+							LgiMsg(this, "Failed to get the current HTML document.", "Html Test Suite");
+							return;
+						}
+
+						if (PrintHtmlContentToPdf(content, fs->Name()) != 0)
+							LgiMsg(this, "Failed to export the document to PDF.", "Html Test Suite");
+					});
+				}
+				#else
+					LgiMsg(this, "PDF export is only supported by the GTK build.", "Html Test Suite");
+				#endif
+				break;
+			}
 		}
 		
 		return 0;
@@ -1420,14 +1465,76 @@ static bool TestFragmentScroll()
 				"<div style='height:250px'>After</div></body></html>", details, TAG_H2);
 }
 
+static bool TestFormattedContent()
+{
+	Html2::LHtml html(0, 0, 0, 80, 60);
+	const char *document = "<html><body>formatted content</body></html>";
+	if (!html.Name(document))
+		return false;
+
+	LString content;
+	if (!html.GetFormattedContent("text/html", content) ||
+		content.Find("formatted content") < 0)
+	{
+		printf("Formatted content: HTML export failed\n");
+		return false;
+	}
+
+	if (!html.GetFormattedContent("text/plain", content) ||
+		content.Find("formatted content") < 0)
+	{
+		printf("Formatted content: text export failed\n");
+		return false;
+	}
+
+	if (html.GetFormattedContent("application/json", content))
+	{
+		printf("Formatted content: unsupported MIME type was accepted\n");
+		return false;
+	}
+
+	return true;
+}
+
 #if defined(__GTK_H__)
 namespace
 {
 	using namespace Gtk;
 
+	class HtmlPdfView : public Html2::LHtml
+	{
+	public:
+		using Html2::LHtml::LHtml;
+
+		bool SetFontSurface(LSurface *surface)
+		{
+			auto currentFont = GetFont();
+			if (!currentFont || !surface)
+				return false;
+
+			auto printFont = new LFont;
+			if (!printFont)
+				return false;
+			*printFont = *currentFont;
+			if (!printFont->Create(nullptr, 0, surface))
+			{
+				DeleteObj(printFont);
+				return false;
+			}
+
+			DeleteObj(FontCache);
+			SetFont(printFont, true);
+			FontCache = new LHtmlFontCache(printFont, (float)GetDpiScale().y, surface);
+			return FontCache != nullptr;
+		}
+
+	};
+
 	struct HtmlPdfPrint
 	{
-		Html2::LHtml *Html = nullptr;
+		HtmlPdfView *Html = nullptr;
+		LString Content;
+		LAutoPtr<LPrintDC> PrintDC;
 		int PageHeight = 0;
 		int LineHeight = 0;
 		int PageStep = 0;
@@ -1437,8 +1544,16 @@ namespace
 	void HtmlPdfBeginPrint(GtkPrintOperation *operation, GtkPrintContext *context, gpointer data)
 	{
 		auto print = (HtmlPdfPrint*)data;
-		LPrintDC dc(context, "HtmlTestSuite");
-		if (!dc.X() || !dc.Y())
+		print->PrintDC.Reset(new LPrintDC(context, "HtmlTestSuite"));
+		if (!print->PrintDC || !print->PrintDC->X() || !print->PrintDC->Y())
+		{
+			print->Failed = true;
+			gtk_print_operation_cancel(operation);
+			return;
+		}
+
+		if (!print->Html->SetFontSurface(print->PrintDC) ||
+			!print->Html->Name(print->Content))
 		{
 			print->Failed = true;
 			gtk_print_operation_cancel(operation);
@@ -1446,9 +1561,9 @@ namespace
 		}
 
 		LRect pos = print->Html->GetPos();
-		pos.SetSize(dc.X(), dc.Y());
+		pos.SetSize(print->PrintDC->X(), print->PrintDC->Y());
 		print->Html->SetPos(pos);
-		print->PageHeight = dc.Y();
+		print->PageHeight = print->PrintDC->Y();
 
 		LPoint content = print->Html->Layout(true);
 		print->LineHeight = print->Html->GetFont()->GetHeight();
@@ -1466,40 +1581,29 @@ namespace
 	void HtmlPdfDrawPage(GtkPrintOperation*, GtkPrintContext *context, gint page, gpointer data)
 	{
 		auto print = (HtmlPdfPrint*)data;
-		LPrintDC dc(context, "HtmlTestSuite");
-		dc.Colour(LColour::White);
-		dc.Rectangle();
+		print->PrintDC->SetHandle(gtk_print_context_get_cairo_context(context));
+		print->PrintDC->Colour(LColour::White);
+		print->PrintDC->Rectangle();
 		int scrollLines = page * print->PageStep / print->LineHeight;
 		print->Html->SetVScroll(scrollLines);
-		dc.SetOrigin(0, scrollLines * print->LineHeight);
-		print->Html->OnPaint(&dc);
+		print->PrintDC->SetOrigin(0, scrollLines * print->LineHeight);
+		print->Html->OnPaint(print->PrintDC);
 	}
 
-	int PrintHtmlToPdf(const char *fileName)
+	int PrintHtmlContentToPdf(const LString &content, const char *output)
 	{
-		if (!LFileExists(fileName))
+		if (!content || !ValidStr(output))
 		{
-			fprintf(stderr, "HTML file does not exist: %s\n", fileName);
-			return 1;
-		}
-
-		auto content = LReadFile(fileName);
-		if (!content)
-		{
-			fprintf(stderr, "Failed to read HTML file: %s\n", fileName);
+			fprintf(stderr, "Missing HTML content or PDF output path\n");
 			return 1;
 		}
 
 		LDefaultDocumentEnv env;
-		Html2::LHtml html(0, 0, 0, 800, 600, &env);
-		if (!html.Name(content))
-		{
-			fprintf(stderr, "Failed to load HTML file: %s\n", fileName);
-			return 1;
-		}
+		HtmlPdfView html(0, 0, 0, 800, 600, &env);
 
-		LString output = LString::Fmt("%s.pdf", fileName);
-		HtmlPdfPrint print{&html};
+		HtmlPdfPrint print;
+		print.Html = &html;
+		print.Content = content;
 		auto operation = gtk_print_operation_new();
 		if (!operation)
 		{
@@ -1525,12 +1629,31 @@ namespace
 		}
 		if (print.Failed || result != GTK_PRINT_OPERATION_RESULT_APPLY)
 		{
-			fprintf(stderr, "PDF export failed for: %s\n", fileName);
+			fprintf(stderr, "PDF export failed for: %s\n", output);
 			return 1;
 		}
 
-		printf("PDF: %s\n", output.Get());
+		printf("PDF: %s\n", output);
 		return 0;
+	}
+
+	int PrintHtmlToPdf(const char *fileName)
+	{
+		if (!LFileExists(fileName))
+		{
+			fprintf(stderr, "HTML file does not exist: %s\n", fileName);
+			return 1;
+		}
+
+		auto content = LReadFile(fileName);
+		if (!content)
+		{
+			fprintf(stderr, "Failed to read HTML file: %s\n", fileName);
+			return 1;
+		}
+
+		LString output = LString::Fmt("%s.pdf", fileName);
+		return PrintHtmlContentToPdf(content, output);
 	}
 }
 #endif
@@ -1555,6 +1678,13 @@ int LgiMain(OsAppArguments &AppArgs)
 		{
 			bool passed = TestFragmentScroll();
 			printf("Fragment scroll: %s\n", passed ? "PASS" : "FAIL");
+			return passed ? 0 : 1;
+		}
+
+		if (a.GetOption("test-formatted-content"))
+		{
+			bool passed = TestFormattedContent();
+			printf("Formatted content: %s\n", passed ? "PASS" : "FAIL");
 			return passed ? 0 : 1;
 		}
 
@@ -1586,6 +1716,7 @@ int LgiMain(OsAppArguments &AppArgs)
 	        "   -test-iframe-fallback   Run the iframe fallback content test\n"
 	        "   -test-iframe-loaded     Run the iframe loaded content test\n"
 	        "   -test-fragment-scroll   Run the fragment navigation test\n"
+	        "   -test-formatted-content Check HTML and text export results\n"
 	        "   -print <fileName>       Export the HTML file to <fileName>.pdf (GTK only)\n"
 	        "   -render <fileName>      Render the file to the 'render.png'\n",
 	        AppArgs.Arg[0]);

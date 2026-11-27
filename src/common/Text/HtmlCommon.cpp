@@ -11,9 +11,10 @@ static constexpr float HtmlFloatTolerance = 0.001f;
 
 #define FontPxHeight(fnt) (fnt->GetHeight() - (int)(fnt->Leading() + 0.5))
 
-LHtmlFontCache::LHtmlFontCache(LFont *defaultFont, float dpiScaleY) :
+LHtmlFontCache::LHtmlFontCache(LFont *defaultFont, float dpiScaleY, LSurface *surface) :
 	DefaultFont(defaultFont),
-	DpiScaleY(dpiScaleY)
+	DpiScaleY(dpiScaleY),
+	Surface(surface)
 {
 }
 
@@ -152,7 +153,7 @@ LFont *LHtmlFontCache::GetFont(LCss *Style)
 		f->Italic(IsItalic);
 		f->Underline(IsUnderline);
 
-		if (std::abs(Size.Value) >= HtmlFloatTolerance && !f->Create((char*)0, 0))
+		if (std::abs(Size.Value) >= HtmlFloatTolerance && !f->Create((char*)0, 0, Surface))
 		{
 			f->Face(DefaultFont->Face());
 			LFont *DefMatch = FindMatch(f);
@@ -161,7 +162,7 @@ LFont *LHtmlFontCache::GetFont(LCss *Style)
 				DeleteObj(f);
 				return DefMatch;
 			}
-			if (!f->Create((char*)0, 0))
+			if (!f->Create((char*)0, 0, Surface))
 			{
 				DeleteObj(f);
 				return Fonts[0];

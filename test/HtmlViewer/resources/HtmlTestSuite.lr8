@@ -7,10 +7,12 @@
 			<String Ref="3" Cid="502" Define="IDM_MENU_502" />
 			<String Ref="4" Cid="503" Define="IDM_EXIT" en="E&xit" />
 			<String Ref="5" Cid="504" Define="IDM_COMPARE_IMAGES" en="Compare Images" />
+			<String Ref="6" Cid="505" Define="ID_PRINT" en="Print to file" />
 		</string-group>
 		<submenu Ref="1">
 			<menuitem Ref="2" Shortcut="F5" />
 			<menuitem Ref="5" Shortcut="F6" />
+			<menuitem Ref="6" />
 			<menuitem Sep="1" />
 			<menuitem Ref="4" />
 		</submenu>
