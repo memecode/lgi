@@ -3068,6 +3068,18 @@ static bool AttrValueIs(const char *s, const char *v)
 	return s && v && strcompare(s, v, false) == 0;
 }
 
+static bool HasOwnCssTextAlign(LCss *Style, LCss *ParentStyle)
+{
+	if (!Style || !ParentStyle)
+		return false;
+
+	LCss::Len Cur = Style->TextAlign();
+	LCss::Len Parent = ParentStyle->TextAlign();
+	if (!Parent)
+		return Cur;
+	return Cur && Cur != Parent;
+}
+
 static bool IsAllWhiteW(const char16 *s)
 {
 	if (!s || !*s)
@@ -3078,9 +3090,11 @@ static bool IsAllWhiteW(const char16 *s)
 	return true;
 }
 
-static void ApplyAlign(LCss *s, const char *v)
+static void ApplyAlign(LCss *s, const char *v, bool AllowOverride = false)
 {
-	if (!s || !v || s->TextAlign().Type != LCss::LenInherit)
+	if (!s || !v)
+		return;
+	if (!AllowOverride && s->TextAlign().Type != LCss::LenInherit)
 		return;
 	if (AttrValueIs(v, "left"))
 		s->TextAlign(LCss::Len(LCss::AlignLeft));
@@ -3182,13 +3196,6 @@ static void ApplyTablePresentation(LAutoPtr<LCss> &Style, LHtmlElement *e)
 			ApplyLength(s, v);
 	}
 
-	if (e->Get("align", v))
-	{
-		LCss *s = EnsureStyle(Style);
-		if (s)
-			ApplyAlign(s, v);
-	}
-
 	if (e->Get("bgcolor", v))
 	{
 		LCss *s = EnsureStyle(Style);
@@ -3197,7 +3204,7 @@ static void ApplyTablePresentation(LAutoPtr<LCss> &Style, LHtmlElement *e)
 	}
 }
 
-static void ApplyRowPresentation(LAutoPtr<LCss> &Style, LHtmlElement *e)
+static void ApplyRowPresentation(LAutoPtr<LCss> &Style, LHtmlElement *e, bool AllowAlignOverride)
 {
 	const char *v;
 	LCss *s = EnsureStyle(Style);
@@ -3205,7 +3212,7 @@ static void ApplyRowPresentation(LAutoPtr<LCss> &Style, LHtmlElement *e)
 		return;
 
 	if (e->Get("align", v))
-		ApplyAlign(s, v);
+		ApplyAlign(s, v, AllowAlignOverride);
 
 	if (e->Get("valign", v))
 		ApplyVerticalAlign(s, v);
@@ -3214,7 +3221,7 @@ static void ApplyRowPresentation(LAutoPtr<LCss> &Style, LHtmlElement *e)
 		ApplyHeight(s, v);
 }
 
-static void ApplyCellPresentation(LAutoPtr<LCss> &Style, LHtmlElement *e, HtmlTag tag)
+static void ApplyCellPresentation(LAutoPtr<LCss> &Style, LHtmlElement *e, HtmlTag tag, bool AllowAlignOverride)
 {
 	const char *v;
 
@@ -3222,7 +3229,7 @@ static void ApplyCellPresentation(LAutoPtr<LCss> &Style, LHtmlElement *e, HtmlTa
 	{
 		LCss *s = EnsureStyle(Style);
 		if (s)
-			ApplyAlign(s, v);
+			ApplyAlign(s, v, AllowAlignOverride);
 	}
 
 	if (e->Get("valign", v))
@@ -3399,15 +3406,16 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 		}
 
 		bool HadCssWidth = Style && Style->Width();
+		bool AllowAlignOverride = IsTableContextTag(c->TagId) && !HasOwnCssTextAlign(Style.Get(), ParentStyle);
 
 		if (IsTableContextTag(c->TagId))
 		{
 			if (c->TagId == TAG_TABLE)
 				ApplyTablePresentation(Style, c);
 			else if (c->TagId == TAG_TD || c->TagId == TAG_TH)
-				ApplyCellPresentation(Style, c, c->TagId);
+				ApplyCellPresentation(Style, c, c->TagId, AllowAlignOverride);
 			else if (c->TagId == TAG_TR)
-				ApplyRowPresentation(Style, c);
+				ApplyRowPresentation(Style, c, AllowAlignOverride);
 		}
 
 		// These containers are flattened, so their backgrounds cannot be

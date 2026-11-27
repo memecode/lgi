@@ -244,8 +244,8 @@ Current parser behavior:
 
 Presentation attributes currently supported in `FromHtml()`:
 
-- Table `align`, `width`, `border`, `cellspacing`, `cellpadding`, `bgcolor`.
-- Cell `align`, `valign`, `width`, `border`, `bgcolor`.
+- Table `width`, `border`, `cellspacing`, `cellpadding`, `bgcolor`. Table presentation `align` is not mapped to `text-align` for cell content.
+- Cell `align`, `valign`, `width`, `border`, `bgcolor`. Cell `align` overrides inherited presentation alignment when no own td/th CSS text-align is detected.
 - Row `align` and `valign` only (`ApplyRowPresentation`), because `TR` is grid metadata and cannot paint a background box.
 - `bgcolor` is resolved to `LCss::PropBackgroundColor` through `LHtmlParser::ParseColour()`, so hex (`#336699`), named (`yellow`) and `rgb()` values survive as box properties. Cell `border` is mapped to the CSS border properties through `ApplyBorder()`.
 - Cell `height` is not applied: the shared column solver has no per-row minimum height, so there is nowhere to store it yet.
@@ -416,6 +416,7 @@ make -C lgi/trunk/test/HtmlEditor -f linux/Makefile.linux
   - border shorthand, side, style, width, and color properties
   - `PropBorderCollapse`, `PropBorderSpacing`, `PropBorderRadius`, and `Prop_CellPadding`
 - It preserves inherited text properties such as `PropColor`, font properties, `PropTextAlign`, and `PropVerticalAlign`.
+- `ApplyAlign()` may override inherited `PropTextAlign` for td/th presentation `align` when `HasOwnCssTextAlign()` finds no td/th CSS text-align distinct from the parent. This keeps td presentation `align` working when table presentation `align` previously made inherited td styles center.
 - It does not strip `PropBackgroundColor` because td background rules and td presentation backgrounds should survive, and `MakeChildStyle()` intentionally does not strip background.
 - `HadCssWidth` should reflect td CSS width only, not inherited table width. Stripping inherited table `width` before td CSS matching allows presentation td `width` attributes such as `50%` and `100%` to be applied through `ApplyLength()`.
 
@@ -433,6 +434,8 @@ make -C lgi/trunk/test/HtmlEditor -f linux/Makefile.linux
 - td presentation widths now round-trip as CSS width:
   - `50%`
   - `100%`
+- `Total: 1` td exports `text-align: left` from td `align="left"`.
+- Table presentation `align="center"` no longer centers td content. td cells without explicit `align` stay left unless a td CSS rule or row presentation `align` applies.
 - td backgrounds set by td rules remain preserved:
   - `table.items td`
   - `table.items td.title`
@@ -452,7 +455,8 @@ make -C lgi/trunk/test/HtmlEditor -f linux/Makefile.linux
 ## Open issues
 
 - Runtime layout/paint still needs visual verification in the HtmlEditor GUI harness; a table test case was added at `lgi/trunk/test/HtmlEditor/testcases/table-test.html` covering colspan, rowspan, percent and pixel width, named and hex `bgcolor`, cellpadding/border, whitespace between cells, a list inside a cell, an empty cell, and a table inside a blockquote with a nested table.
-- TD/th inheritance fidelity is implemented in the parser/style path, but visual confirmation is still needed for td borders, td width presentation, td background rendering, and text inside cells.
+- TD/th inheritance fidelity is implemented in the parser/style path, but visual confirmation is still needed for td borders, td width presentation, td background rendering, text inside cells, and alignment.
+- `HasOwnCssTextAlign()` distinguishes own td CSS text-align by comparing the td style with the parent style; a td CSS `text-align` that happens to match the parent is not reliably distinguished from inherited alignment.
 - `StripCellInheritedBoxProps()` intentionally does not strip `PropBackgroundColor`; if the intended behavior is to strip only td’s own background while removing inherited table background, that needs a separate decision.
 - `TD`/`TH`/`TABLE` background now has a full path (`ApplyBackground()` → `LCss::PropBackgroundColor` → `TdBlock::OnPaint()` / `TableBlock::OnPaint()`), pending visual confirmation.
 - Cell/row `height` is now honored as a per-row minimum through `TableGrid::Cell::MinH`

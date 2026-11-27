@@ -712,6 +712,7 @@ public:
 				{
 					// Save the processed document
 					LFile out(outFile, O_WRITE);
+					out.SetSize(0);
 					out.Write(Edit->Name());
 					
 					// And exit, deferred until the main loop is running
