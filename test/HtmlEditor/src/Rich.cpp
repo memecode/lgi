@@ -810,6 +810,85 @@ public:
 					};
 					SetPulse(100);
 				}
+				else if (LAppInst->GetOption("keys", optValue))
+				{
+					// Key sequence, e.g. "ctrl+end,up*10,end,pageup", traces the caret after each press
+					PendingProbe = [this, keySeq = LString(optValue)]()
+					{
+						auto keyCode = [](const std::string &name) -> int
+						{
+							static const std::pair<const char*, int> names[] =
+							{
+								{"home", LK_HOME}, {"end", LK_END}, {"up", LK_UP}, {"down", LK_DOWN},
+								{"left", LK_LEFT}, {"right", LK_RIGHT}, {"pageup", LK_PAGEUP},
+								{"pagedown", LK_PAGEDOWN}, {"backspace", LK_BACKSPACE},
+								{"delete", LK_DELETE}, {"return", LK_RETURN}, {"tab", LK_TAB},
+								{"space", LK_SPACE}, {"escape", LK_ESCAPE}
+							};
+							for (auto &n : names)
+								if (name == n.first)
+									return n.second;
+							if (name.size() == 1 && name[0] >= 'a' && name[0] <= 'z')
+								return LK_a + (name[0] - 'a');
+							if (name.size() == 1 && name[0] >= '0' && name[0] <= '9')
+								return LK_0 + (name[0] - '0');
+							return -1;
+						};
+
+						std::string seq = keySeq.Get() ? keySeq.Get() : "";
+						size_t start = 0;
+						while (start <= seq.size())
+						{
+							size_t end = seq.find(',', start);
+							if (end == std::string::npos)
+								end = seq.size();
+							std::string tok = seq.substr(start, end - start);
+							start = end + 1;
+							if (tok.empty())
+								continue;
+
+							int repeat = 1;
+							size_t star = tok.find('*');
+							if (star != std::string::npos)
+							{
+								repeat = atoi(tok.c_str() + star + 1);
+								tok.resize(star);
+							}
+
+							LKey key(0, 0);
+							bool ctrl = false, shift = false, alt = false;
+							size_t plus;
+							while ((plus = tok.find('+')) != std::string::npos)
+							{
+								std::string mod = tok.substr(0, plus);
+								if (mod == "ctrl") ctrl = true;
+								else if (mod == "shift") shift = true;
+								else if (mod == "alt") alt = true;
+								tok.erase(0, plus + 1);
+							}
+
+							int vk = keyCode(tok);
+							if (vk < 0)
+							{
+								LgiTrace("Unknown key '%s'\n", tok.c_str());
+								continue;
+							}
+
+							for (int i = 0; i < repeat; i++)
+							{
+								LKey k(vk, 0);
+								k.Down(true);
+								k.Ctrl(ctrl);
+								k.Shift(shift);
+								k.Alt(alt);
+								bool handled = Edit->OnKey(k);
+								LgiTrace("%s x%i -> caret %i handled=%i\n", tok.c_str(), i + 1, (int)Edit->GetCaret(), (int)handled);
+							}
+						}
+						LCloseApp();
+					};
+					SetPulse(100);
+				}
 				else if (LAppInst->GetOption("nodes", optValue))
 				{
 					if (!optValue.Length())

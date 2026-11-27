@@ -1935,6 +1935,11 @@ ssize_t LRichTextPriv::HitTest(int x, int y, int &LineHint, Block **Blk, ssize_t
 	ssize_t CellAfterPos = 0;
 	Block *CellBeforeBlk = nullptr;
 	ssize_t CellBeforePos = 0;
+	// Points beside a row's cells (outside every cell's x range) map to the nearest cell in that row
+	Block *RowCellBlk = nullptr;
+	ssize_t RowCellPos = 0;
+	int RowCellX = 0;
+	int RowCellDist = 0;
 	auto Test = [&](auto &&Self, Block *b, TdBlock *Cell) -> bool
 	{
 		if (b->blocks.Length())
@@ -1959,6 +1964,20 @@ ssize_t LRichTextPriv::HitTest(int x, int y, int &LineHint, Block **Blk, ssize_t
 
 		if (InCell && y >= p.y1 && y <= p.y2)
 			Error(_FL, "Block failed to hit, pos=%s, y=%i.", p.GetStr(), y);
+
+		if (Cell && !InCell && Cell->CellBox.X() > 0 &&
+			y >= Cell->CellBox.y1 && y <= Cell->CellBox.y2)
+		{
+			int ClampX = MAX(Cell->CellBox.x1, MIN(Cell->CellBox.x2, x));
+			int Dist = abs(x - ClampX);
+			if (!RowCellBlk || Dist < RowCellDist)
+			{
+				RowCellBlk = b;
+				RowCellPos = CharPos;
+				RowCellX = ClampX;
+				RowCellDist = Dist;
+			}
+		}
 
 		if (Cell && InCell && Cell->CellBox.X() > 0 &&
 			y >= Cell->CellBox.y1 && y <= Cell->CellBox.y2)
@@ -1988,6 +2007,13 @@ ssize_t LRichTextPriv::HitTest(int x, int y, int &LineHint, Block **Blk, ssize_t
 		return ReturnCursor(CellAfterBlk, CellAfterBlk->Length(), CellAfterBlk->GetLines() - 1, CellAfterPos + CellAfterBlk->Length());
 	if (CellBeforeBlk)
 		return ReturnCursor(CellBeforeBlk, 0, 0, CellBeforePos);
+	if (RowCellBlk)
+	{
+		HitTestResult rc(RowCellX, y);
+		if (RowCellBlk->HitTest(rc))
+			return ReturnCursor(rc.Blk, rc.Idx, rc.LineHint, RowCellPos + rc.Idx);
+		return ReturnCursor(RowCellBlk, RowCellBlk->Length(), RowCellBlk->GetLines() - 1, RowCellPos + RowCellBlk->Length());
+	}
 
 	LRect rc = Last->GetPos();
 	if (y > rc.y2)
