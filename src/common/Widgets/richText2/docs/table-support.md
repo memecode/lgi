@@ -2,7 +2,7 @@
 
 ## Current state
 
-At the moment the RTE2 control in 'lgi/trunk/src/common/Widgets/richText2' doesn't support tables. They are striped from the input HTML and never reconstituted on the other side. This is problematic for the Scribe email client when configured to use BodyAsHtml style replies. At the very least it should conserve the table inside the quoted part of the email so it can be carried through to the output.
+At the moment the RTE2 control in `lgi/trunk/src/common/Widgets/richText2` has a partial table implementation. Tables are no longer completely stripped by the basic `FromHtml()`/`ToHtml()` round trip: `TableBlock`, `TdBlock`, `FromHtml()`, `ToHtml()`, `TableGrid`, and measurement work are present and conserve table structure for the Scribe `BodyAsHtml` quoted-reply path. The active work is border serialization fidelity and td/th style inheritance. Historically tables were stripped from the input HTML and never reconstituted, which was problematic for the Scribe email client when configured to use `BodyAsHtml` style replies.
 
 There are currently several HTML table style layout engines in Lgi. Perhaps one or more could be generalized to be used in the RTE2 control. For instance the LHtml2 control in 'lgi/trunk/src/common/Text/Html2.cpp' has table layout functionality.
 
@@ -77,20 +77,30 @@ In `FromHtml()`, before the generic block path: on `TAG_TABLE` create `TableBloc
 
 Run through the harness as above and compared the input with `reply-out.html`.
 Aside from the span duplication fixed above, the output is structurally correct but
-not faithful:
+not faithful.
 
-- Invalid CSS is emitted: `border:Inherit none` / `border-top:Inherit none` (browsers
-  drop the whole declaration), `cellpadding: Npx` as a CSS property (should be
+The border and td/th inheritance bullets below were historical findings from the
+initial round trip. Current border fidelity and td/th inheritance behavior is
+summarized in `Current working state`.
+
+- Historically invalid CSS was emitted: `border:Inherit none` / `border-top:Inherit none`
+  (browsers drop the whole declaration), `cellpadding: Npx` as a CSS property (should be
   `padding`), and `font-family: sans-serifVerdana,Geneva,Arial,Helvetica` with the
-  generic family glued to the list.
-- Cell and span styles inherit the table's `width: 600px`, and cell styles pick up
-  `border-left`/`border-top` from the `table` rule, which does not inherit borders.
-  `table.page_header td { border:none }` is lost.
-- Lost details: percentage `width` on `td` (`50%`/`100%` disappear), presentation
-  `align` on `td`/`th` (nothing in the output has `text-align: left`, the right-aligned
-  headers serialize as centre), `<font color="red">`, `&nbsp;` runs (27 → 9),
-  `<h2>`, the `div.scribe_reply`/`div.scribe_sig` wrappers, `<tr bgcolor>`,
-  `lang`/`target`/`rel`, and the named classes (all flattened to `StyleN`).
+  generic family glued to the list. The `border:Inherit none` case is fixed by the
+  border helper. `cellpadding` is still emitted as a CSS property, but td styles no
+  longer inherit it from the table.
+- Historically cell and span styles inherited the table's `width: 600px`, and cell
+  styles picked up `border-left`/`border-top` from the `table` rule, which does not
+  inherit borders. This is fixed for td/th styles by stripping inherited table box
+  properties before td/th selector matching. `table.page_header td { border:none }`
+  now exports as valid `border: none`.
+- td percentage `width` (`50%`/`100%`) is now preserved through the stripped style path.
+- Other round-trip losses remain historical/current gaps: presentation `align`
+  on some `td`/`th` cases (`text-align: left` may not be emitted, and the
+  right-aligned headers can serialize as centre), `<font color="red">`,
+  `&nbsp;` runs (27 → 9), `<h2>`, the `div.scribe_reply`/`div.scribe_sig`
+  wrappers, `<tr bgcolor>`, `lang`/`target`/`rel`, and the named classes
+  (all flattened to `StyleN`).
 - Artifacts: `.Style1` is emitted in the style block but never used (the input span
   that used it lost its class), an empty `<p></p>`, and a second `<a>` wrapping only a
   space from a source newline.
@@ -359,9 +369,91 @@ Remaining semantic gaps:
 - `TAG_COL`, `TAG_COLGROUP`, `TAG_THEAD` and `TAG_TFOOT` are not represented as
   blocks, so their attributes and styling are dropped by the parser.
 
+## Current working state (border fidelity and td/th inheritance)
+
+Exact commands used for this pass:
+
+```sh
+cd ~/code/lgi/trunk/test/HtmlEditor
+make -C lgi/trunk/test/HtmlEditor -f linux/Makefile.linux
+./htmleditor testcases/example-reply.html -export reply-out.html
+```
+
+### Files changed for this pass
+
+- `lgi/trunk/src/common/Lgi/Css.cpp`
+  - Static helpers use `LCss::` qualified names:
+    - `CssBorderStyleName(LCss::BorderStyle Style)`
+    - `IsBorderSide(LCss::PropType Prop)`
+    - `BorderDefEquals(LCss::BorderDef &A, const LCss::BorderDef &B)`
+    - `PrintBorderDef(LStream &p, LCss::BorderDef &B, bool Shorthand)`
+  - `PrintBorderDef()` keeps `B` non-const because `B.Color.ToString(p)` and `((LCss::Len&)B).ToString(p)` require non-const access.
+  - `ToStringPipe()` `case TypeBorder:` skips redundant border side properties when a `PropBorder` shorthand exists and the side is equal to the shorthand.
+  - `Parse()` `case TypeBorder:` propagates `PropBorder` shorthand to `PropBorderTop`, `PropBorderRight`, `PropBorderBottom`, and `PropBorderLeft` when `PropId == PropBorder`.
+
+- `lgi/trunk/src/common/Widgets/richText2/RichTextEditPriv.cpp`
+  - Added `StripCellInheritedBoxProps(LCss *Style)`.
+  - It is called for `TAG_TD` and `TAG_TH` in `FromHtml()` before td/th selector matching, so td/th CSS rules, inline styles, and presentation attributes can re-apply their own properties after inherited table box properties are stripped.
+
+- `lgi/trunk/include/lgi/common/TableGrid.h`
+  - `TableGrid::Visible` has `Left[]`.
+  - `BuildVisible()` initializes `Left[]`.
+  - `ResolveVisible()` fills `Left[]` with the first surviving column for each cell.
+
+- `lgi/trunk/src/common/Widgets/richText2/TableBlock.cpp`
+  - `TableBlock::ToHtml()` emits a cell only at the first surviving column it occupies:
+    ```cpp
+    if (k < 0 || vis.Top[k] != r || vis.Left[k] != c || vis.Cols[k] <= 0)
+    ```
+
+### TD/th style inheritance decisions
+
+- TD/th styles should strip inherited table box properties before td/th CSS selector matching.
+- `StripCellInheritedBoxProps()` strips inherited box properties, including:
+  - `PropWidth`, `PropMinWidth`, `PropMaxWidth`
+  - `PropHeight`, `PropMinHeight`, `PropMaxHeight`
+  - margin and padding shorthand/side properties
+  - border shorthand, side, style, width, and color properties
+  - `PropBorderCollapse`, `PropBorderSpacing`, `PropBorderRadius`, and `Prop_CellPadding`
+- It preserves inherited text properties such as `PropColor`, font properties, `PropTextAlign`, and `PropVerticalAlign`.
+- It does not strip `PropBackgroundColor` because td background rules and td presentation backgrounds should survive, and `MakeChildStyle()` intentionally does not strip background.
+- `HadCssWidth` should reflect td CSS width only, not inherited table width. Stripping inherited table `width` before td CSS matching allows presentation td `width` attributes such as `50%` and `100%` to be applied through `ApplyLength()`.
+
+### Verified state
+
+- Round-trip input/output `td` count matches:
+  ```text
+  input td:  24
+  output td: 24
+  ```
+- Invalid `border:Inherit none` is no longer emitted.
+- `table.page_header td { border:none; }` now exports as valid `border: none`.
+- Redundant border side properties are not emitted when equal to the `border` shorthand.
+- `td` styles no longer inherit table `width`, `cellpadding`, `border-spacing`, or table border properties such as `border-top`/`border-left` unless td itself has those properties.
+- td presentation widths now round-trip as CSS width:
+  - `50%`
+  - `100%`
+- td backgrounds set by td rules remain preserved:
+  - `table.items td`
+  - `table.items td.title`
+  - `table.items th`
+- `MakeChildStyle()` still does not strip background, so text inside coloured cells keeps the background path.
+- Minimal border tests now produce clean outputs:
+  - `border.html`: valid `border: none`.
+  - `border2.html`: valid `border: none` for the table/cell case.
+  - `border3.html`: td emits only its own `border-right`, not table-derived `border-left`.
+- Test outputs should be truncated between runs because stale tails from prior runs can otherwise look like current output.
+- `TableGrid` single-emission test still passes:
+  ```text
+  single-emission: prints=3 left=2 cols=2
+  OK
+  ```
+
 ## Open issues
 
 - Runtime layout/paint still needs visual verification in the HtmlEditor GUI harness; a table test case was added at `lgi/trunk/test/HtmlEditor/testcases/table-test.html` covering colspan, rowspan, percent and pixel width, named and hex `bgcolor`, cellpadding/border, whitespace between cells, a list inside a cell, an empty cell, and a table inside a blockquote with a nested table.
+- TD/th inheritance fidelity is implemented in the parser/style path, but visual confirmation is still needed for td borders, td width presentation, td background rendering, and text inside cells.
+- `StripCellInheritedBoxProps()` intentionally does not strip `PropBackgroundColor`; if the intended behavior is to strip only td’s own background while removing inherited table background, that needs a separate decision.
 - `TD`/`TH`/`TABLE` background now has a full path (`ApplyBackground()` → `LCss::PropBackgroundColor` → `TdBlock::OnPaint()` / `TableBlock::OnPaint()`), pending visual confirmation.
 - Cell/row `height` is now honored as a per-row minimum through `TableGrid::Cell::MinH`
   and `RowMinHeights()`; percentage heights remain unresolved.
