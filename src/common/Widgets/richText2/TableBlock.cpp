@@ -187,29 +187,22 @@ namespace Rte2
 
 	void LRichTextPriv::TdBlock::OnPaint(PaintContext &Ctx)
 	{
-		SelectModeType OldType = Ctx.Type;
-
-		if (Ctx.Select && Ctx.Select->Blk == this)
-			Ctx.Type = Selected;
-
+		// The selection state is toggled by the leaf blocks in document order, so
+		// it must carry through cells without being reset here
 		LRect r = GetPos();
 		if (r.X() <= 0)
 		{
-			Ctx.Type = OldType;
 			DivBlock::OnPaint(Ctx);
 			return;
 		}
 
-		LColour Back = Ctx.Back();
-		if (Ctx.Type != Selected && Style)
+		LColour Back = Ctx.Colours[Unselected].Back;
+		if (Style)
 		{
 			LCss::ColorDef bg = Style->BackgroundColor();
 			if (bg.Type == LCss::ColorRgb)
 				Back.Set(bg.Rgb32, 32);
 		}
-
-		Ctx.pDC->Colour(Back);
-		Ctx.pDC->Rectangle(r.x1, r.y1, r.x2, r.y2);
 
 		LColour BorderCol(222, 222, 222);
 		if (Style && Style->BorderLeft().Style != LCss::BorderNone)
@@ -225,8 +218,6 @@ namespace Rte2
 
 		for (auto b : blocks)
 			b->OnPaint(Ctx);
-
-		Ctx.Type = OldType;
 	}
 
 	void LRichTextPriv::TdBlock::OpenTag(LStream &s, int CS, int RS)
@@ -628,8 +619,10 @@ namespace Rte2
 		if (st)
 		{
 			LCss::Len w = st->Width();
+			// A px width is the table's target: content narrower than it expands to fill it,
+			// and wider content is wrapped down to it.
 			if (w && w.Type == LCss::LenPx)
-				outer = MIN(outer, MAX(1, w.ToPx(avail, font)));
+				outer = MAX(1, w.ToPx(avail, font));
 
 			LCss::Len mx = st->MaxWidth();
 			if (mx && mx.Type == LCss::LenPx)
@@ -834,13 +827,8 @@ namespace Rte2
 
 	void LRichTextPriv::TableBlock::OnPaint(PaintContext &Ctx)
 	{
-		SelectModeType OldType = Ctx.Type;
-
-		if (Ctx.Select && Ctx.Select->Blk == this)
-			Ctx.Type = Selected;
-
-		LColour Back = Ctx.Back();
-		if (Ctx.Type != Selected && Style)
+		LColour Back = Ctx.Colours[Unselected].Back;
+		if (Style)
 		{
 			LCss::ColorDef bg = Style->BackgroundColor();
 			if (bg.Type == LCss::ColorRgb)
@@ -850,7 +838,6 @@ namespace Rte2
 		LRect r = Pos;
 		if (r.X() <= 0)
 		{
-			Ctx.Type = OldType;
 			DivBlock::OnPaint(Ctx);
 			return;
 		}
@@ -875,8 +862,6 @@ namespace Rte2
 
 		for (auto b : blocks)
 			b->OnPaint(Ctx);
-
-		Ctx.Type = OldType;
 	}
 
 	bool LRichTextPriv::TableBlock::ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng)

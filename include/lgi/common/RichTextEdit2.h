@@ -102,6 +102,10 @@ public:
 	LString GetRecordingPath();
 	bool StartActivityRecording(const char *Path);
 	bool SaveActivityRecording();
+	bool CaptureRuntimeLayout(const char *Path, int Width = 990, int Height = 800);
+	// Writes the block/node tree with layout and colour data as JSON. Debug builds only.
+	bool DumpNodesFile(const char *Path, int Width = 990, int Height = 800);
+	void LayoutContent(int Width = 990, int Height = 800);
 	bool LoadActivityRecording(const char *Path);
 	bool ReplayActivityRecording();
 

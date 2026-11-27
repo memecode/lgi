@@ -465,3 +465,154 @@ make -C lgi/trunk/test/HtmlEditor -f linux/Makefile.linux
 - Percent width behavior is resolved: `TdBlock` stores `Pct` only, and `Fixed`/`FixedPx` are px-only flags, which is correct for `TableGrid::ColumnMetrics()`. Width round-trips through the cached style class rather than an HTML `width` attribute.
 - MSVC entries in `RichText.vcxproj` and `RichText.vcxproj.filters` are unverified and may need to be added if MSVC builds are used.
 
+## Runtime layout comparison plan
+
+### Objective
+
+- Verify that runtime RTE2 `TableBlock` actual layout boxes line up with solved table layout.
+- Compare runtime table geometry against an `Html2` `LTag::DumpW()` baseline, currently represented by `~/code/lgi.json`.
+- Confirm td cell geometry, content boxes, edge boxes, border/padding/margin, row heights, spans, and style inheritance.
+
+### Runtime capture commands
+
+```sh
+make -C lgi/trunk/test/HtmlEditor -f linux/Makefile.linux
+timeout 20 ./lgi/trunk/test/HtmlEditor/htmleditor --layout runtime-layout.rte lgi/trunk/test/HtmlEditor/testcases/example-reply.html
+```
+
+Generated file:
+
+```text
+~/code/runtime-layout.rte
+```
+
+### Runtime table traversal
+
+- Runtime activity JSON top-level keys include `format`, `version`, `state`, `finalState`, `actions`.
+- Compare against `finalState.blocks`, traversed recursively.
+- Current runtime table shapes from `finalState.blocks`:
+
+```text
+finalState/blocks[1]/children[1]   1 col, 5 TdBlock cells
+finalState/blocks[1]/children[3]   2 cols, 13 TdBlock cells
+finalState/blocks[1]/children[5]   10 cols, 39 TdBlock cells
+finalState/blocks[1]/children[7]   1 col, 3 TdBlock cells
+finalState/blocks[1]/children[9]   1 col, 3 TdBlock cells
+finalState/blocks[1]/children[11]  1 col, 3 TdBlock cells
+```
+
+- Runtime table JSON fields are sufficient for comparison:
+  - `type`, `uid`, `bounds`, `children`
+  - `tableColumns`, `tableOuter`, `tableActualOuter`
+  - `tableSpacing`, `tableFixedX`, `tableCellPadding`
+  - `tableMinWidths`, `tableMaxWidths`, `tablePctWidths`, `tableFixedWidths`
+  - `tableColumnWidths`, `tableRowHeights`, `tableActualColumnWidths`
+  - per-cell `row`, `col`, `colSpan`, `rowSpan`, `min`, `max`, `pct`, `fixed`, `minH`
+  - `tdUid`, `fixedPx`, `actualCellW`, `solvedCellW`
+  - `cellBox`, `contentBox`, `edges`, `border`, `padding`, `margin`, `style`
+  - `contentH`, `cellPadding`
+
+### Runtime coordinate facts
+
+- `LRect` fields are `x1`, `y1`, `x2`, `y2`; do not use `x` or `y`.
+- Runtime `cellBox` appears to be inclusive.
+  - `actualCellW` corresponds to inclusive width `x2 - x1 + 1` for `cellBox`.
+  - Adjacent cell gap is table spacing.
+- Runtime cell boxes for observed cells currently match solved column widths.
+- Runtime serialized HTML around the `Quantity` table contains many `colspan='10'` and `colspan='6'` rows, so runtime table structure is not a clean one-to-one match to source td/th structure.
+- Runtime `td` `border`, `padding`, and `margin` currently show zero despite source CSS. This is likely because `FromHtml()` does not implement `<style>` parsing: `TAG_STYLE` hits `LAssert(!"Impl me."); continue;`.
+
+### Baseline parsing plan
+
+`~/code/lgi.json` is not directly parseable with standard `json.load()`:
+
+```text
+json.decoder.JSONDecodeError: Extra data: line 1998 column 3
+```
+
+Use a balanced brace/string-aware parser for top-level JSON objects. Current robust parser results:
+
+```text
+234 baseline objects parsed
+5 table objects found
+```
+
+Baseline table shapes found so far:
+
+```text
+html/body[1]/div[1]/table[0]                                      2 td descendants
+html/body[1]/center[0]/table[0]/tr[0]/td[0]/table[6]/.../table[0] 20 td descendants
+html/body[1]/center[0]/table[0]/tr[0]/td[0]/table[7]              1 td descendant
+html/body[1]/center[0]/table[0]/tr[0]/td[0]/table[8]              17 td descendants
+html/body[1]/center[0]/table[0]/tr[0]/td[0]/table[9]              3 td descendants
+```
+
+The baseline includes app-like structure such as `iframe`, `center`, `img`, `a`, `strong`, `font`, and nested table paths. These shapes do not obviously match the runtime `example-reply.html` table shapes.
+
+### Clarification needed before comparing
+
+Confirm whether `~/code/lgi.json` is intended to be the direct `Html2` `LTag::DumpW()` baseline for `testcases/example-reply.html`. If it is not, either regenerate a matching baseline dump from the same input or define a mapping strategy. Do not assume runtime tables and baseline tables correspond until the mapping is verified.
+
+### Next implementation steps
+
+1. Confirm or clarify what `~/code/lgi.json` represents.
+2. If `~/code/lgi.json` is the intended `Html2` baseline for `example-reply.html`, regenerate a matching `LTag::DumpW()` baseline for that input.
+3. Use the balanced brace/string-aware parser to extract baseline table and td objects.
+4. Build a side-by-side runtime/baseline comparison.
+5. Map runtime `TableBlock` entries to baseline table objects using table order, source path, serialized HTML, cell text, column count, row count, bounds, shape, or `uid`.
+6. For each mapped table, compare:
+   - `tableOuter` vs baseline table bounds
+   - `tableActualOuter` vs baseline table bounds
+   - `tableColumnWidths` vs baseline td widths
+   - `tableActualColumnWidths` vs baseline td widths
+   - `tableRowHeights` vs baseline row/cell heights
+   - `solvedCellW` vs `actualCellW`
+   - `cellBox`, `contentBox`, `edges`, `border`, `padding`, `margin`
+   - td `CellBox`, `Pos`, `ContentH`, `ContentBox`
+   - `TableGrid::Cell` span placement
+   - `FillMetrics()`, `TableGrid::SolveColumns()`, `CellEdges()`, and `TableBlock::OnLayout()` placement
+   - vertical alignment, spanned cells, row group placement, and td style inheritance
+7. Compute expected runtime tiling for all table cells using inclusive `cellBox` widths, `tableSpacing`, `cellPadding`, border/padding, and row spans, then flag mismatches.
+8. If mismatches remain, inspect:
+   - `TableBlock::OnLayout()`
+   - `TableGrid::SolveColumns()`
+   - `CellEdges()`
+   - `FillMetrics()`
+   - `TableGrid::Cell` placement
+   - td `ContentH`
+   - vertical alignment
+   - spanned-cell height distribution
+   - runtime border/padding serialization
+   - `TAG_STYLE` CSS parsing in `FromHtml()`
+
+### Relevant files for this plan
+
+- `~/code/runtime-layout.rte`
+  - Generated runtime activity/layout JSON for `testcases/example-reply.html`.
+- `~/code/lgi.json`
+  - `Html2` `LTag::DumpW()` baseline candidate; requires robust parsing.
+- `lgi/trunk/test/HtmlEditor/src/Rich.cpp`
+  - CLI `-layout` branch calls `Edit->CaptureRuntimeLayout(layoutPath.Get(), 990, 800)`.
+- `lgi/trunk/include/lgi/common/RichTextEdit2.h`
+  - Declares `CaptureRuntimeLayout(const char *Path, int Width = 990, int Height = 800)`.
+- `lgi/trunk/src/common/Widgets/richText2/RichTextEdit.cpp`
+  - Implements `CaptureRuntimeLayout()`, sets `d->Areas[ContentArea] = LRect(0, 0, Width, Height)`, then records/saves the activity state.
+- `lgi/trunk/src/common/Widgets/richText2/RichTextEditPriv.h`
+  - Contains `Areas[LRichTextEdit::MaxArea]`, block types, table types, `SnapshotActivityState()`, and `DEBUG_ACTIVITY`.
+- `lgi/trunk/src/common/Widgets/richText2/RichTextEditPriv.cpp`
+  - Contains `ActivityBlockState()`, td box serialization, td inheritance, `FromHtml()`, `StripCellInheritedBoxProps()`, `HasActualPadding()`, `ApplyCellPadding()`, alignment helpers, and the unimplemented `TAG_STYLE` path.
+- `lgi/trunk/src/common/Widgets/richText2/TableBlock.cpp`
+  - Runtime placement, `TdBlock::OnLayout()`, `TableBlock::FillMetrics()`, `MeasureBlock()`, `MeasureColumns()`, `CellEdges()`, `OnLayout()`, row height placement, spanned-cell height distribution, `CellBox`, `Pos`, and `TableGrid::SolveColumns()`.
+- `lgi/trunk/src/common/Widgets/richText2/DivBlock.cpp`
+  - Relevant for td padding inheritance and CSS serialization behavior.
+- `lgi/trunk/include/lgi/common/Json.h`
+  - `LJson` output formatting.
+- `lgi/trunk/include/lgi/common/TableGrid.h`
+  - Grid, cell, column metrics, `SolveColumns()`, `Distribute()`, and `PlaceCells()`.
+- `lgi/trunk/src/common/Text/Html2.cpp`
+  - Source of `LTag::_DumpJson()`, `LTag::DumpW()`, and baseline table layout comparison.
+- `lgi/trunk/test/HtmlEditor/testcases/example-reply.html`
+  - Current runtime layout comparison input.
+- `lgi/trunk/test/HtmlEditor/reply-out.html`
+  - Exported baseline for Firefox comparison.
+

@@ -337,6 +337,11 @@ class App : public LWindow, public LCapabilityInstallTarget
 
 	EditCtrl *Edit;
 
+	// Probe run from OnPulse once the layout has settled (see SettleTicks)
+	std::function<void()> PendingProbe;
+	int ProbeTicks = 0;
+	const int SettleTicks = 6; // 600ms at 100ms per pulse
+
 	LAutoPtr<LSpellCheck> Speller;
 	CapsBar *Bar;
 	LCapabilityTarget::CapsHash Caps;
@@ -519,6 +524,24 @@ public:
 				Installer->PostObject(Installer->GetHandle(), M_INSTALL, s);
 			}
 		}
+	}
+
+	void OnPulse() override
+	{
+		if (!PendingProbe)
+		{
+			SetPulse(-1);
+			return;
+		}
+
+		// Let the vertical scrollbar get added and the content reflow first
+		if (++ProbeTicks < SettleTicks)
+			return;
+
+		SetPulse(-1);
+		auto probe = PendingProbe;
+		PendingProbe = nullptr;
+		probe();
 	}
 
 	void OnInstall(CapsHash *Caps, bool Status) override
@@ -708,7 +731,25 @@ public:
 				Edit->Name(t);
 				
 				LString outFile;
-				if (LAppInst->GetOption("export", outFile))
+				LString layoutPath;
+				LString nodesPath;
+				if (LAppInst->GetOption("layout", layoutPath))
+				{
+					if (!layoutPath.Length())
+						layoutPath = "runtime-layout.rte";
+					else if (!layoutPath.Lower().EndsWith(".rte"))
+						layoutPath += LString(".rte");
+
+					if (Edit->CaptureRuntimeLayout(layoutPath.Get(), 990, 800))
+					{
+						LAppInst->RunCallback([]()
+						{
+							LCloseApp();
+						},
+						_FL);
+					}
+				}
+				else if (LAppInst->GetOption("export", outFile))
 				{
 					// Save the processed document
 					LFile out(outFile, O_WRITE);
@@ -716,6 +757,67 @@ public:
 					out.Write(Edit->Name());
 					
 					// And exit, deferred until the main loop is running
+					LAppInst->RunCallback([]()
+						{
+							LCloseApp();
+						},
+						_FL);
+				}
+				else if (LAppInst->GetOption("drag", nodesPath))
+				{
+					// Simulate a mouse drag from x1,y1 to x2,y2 in window coordinates.
+					// Run from OnPulse once the layout has settled after the scrollbar was added.
+					PendingProbe = [this, nodesPath]()
+					{
+						int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+						sscanf(nodesPath.Get(), "%i,%i,%i,%i", &x1, &y1, &x2, &y2);
+						LMouse m;
+						m.x = x1; m.y = y1; m.Down(true); m.Left(true);
+						Edit->OnMouseClick(m);
+						Edit->Capture(true);
+						const int Steps = 20;
+						for (int s = 1; s <= Steps; s++)
+						{
+							LMouse mv;
+							mv.x = x1 + (x2 - x1) * s / Steps;
+							mv.y = y1 + (y2 - y1) * s / Steps;
+							mv.Left(true);
+							Edit->OnMouseMove(mv);
+						}
+						LMouse up;
+						up.x = x2; up.y = y2; up.Left(false);
+						Edit->OnMouseClick(up);
+						LgiTrace("Drag selection: '%s'\n", Edit->GetSelection().Get());
+						LCloseApp();
+					};
+					SetPulse(100);
+				}
+				else if (LAppInst->GetOption("pos", nodesPath))
+				{
+					// Simulate a single click at x,y in window coordinates, once the layout has settled
+					PendingProbe = [this, nodesPath]()
+					{
+						int x = 0, y = 0;
+						sscanf(nodesPath.Get(), "%i,%i", &x, &y);
+						LMouse m;
+						m.x = x; m.y = y; m.Down(true); m.Left(true);
+						Edit->OnMouseClick(m);
+						LMouse up;
+						up.x = x; up.y = y; up.Left(false);
+						Edit->OnMouseClick(up);
+						LgiTrace("Click caret: %i\n", (int)Edit->GetCaret());
+						LCloseApp();
+					};
+					SetPulse(100);
+				}
+				else if (LAppInst->GetOption("nodes", nodesPath))
+				{
+					if (!nodesPath.Length())
+						nodesPath = "nodes.json";
+
+					if (!Edit->DumpNodesFile(nodesPath, 990, 800))
+						LgiTrace("%s:%i - Failed to dump nodes to '%s'.\n", _FL, nodesPath.Get());
+
 					LAppInst->RunCallback([]()
 						{
 							LCloseApp();

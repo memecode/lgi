@@ -547,6 +547,54 @@ LString LRichTextEdit::GetRecordingPath()
 		(unsigned long long)LGetCurrentProcess(), ++sequence);
 }
 
+bool LRichTextEdit::CaptureRuntimeLayout(const char *Path, int Width, int Height)
+{
+	#if DEBUG_ACTIVITY
+	d->Areas[ContentArea] = LRect(0, 0, Width, Height);
+	if (!StartActivityRecording(Path))
+		return false;
+	return SaveActivityRecording();
+	#else
+	(void)Path;
+	(void)Width;
+	(void)Height;
+	return false;
+	#endif
+}
+
+void LRichTextEdit::LayoutContent(int Width, int Height)
+{
+	d->Areas[ContentArea] = LRect(0, 0, Width, Height);
+	d->Layout(VScroll);
+}
+
+bool LRichTextEdit::DumpNodesFile(const char *Path, int Width, int Height)
+{
+	#if DEBUG_ACTIVITY
+	if (!Path)
+		return false;
+
+	LayoutContent(Width, Height);
+
+	LJson state = d->SnapshotActivityState();
+	state.Set("format", "lgi-rich-text-nodes");
+	state.Set("version", (int64_t)1);
+
+	LString contents = state.GetJson();
+	if (contents.IsEmpty())
+		return false;
+
+	LFile file(Path, O_WRITE);
+	return file && file.SetSize(0) >= 0 && file.SetPos(0) >= 0 &&
+		file.Write(contents.Get(), contents.Length()) == contents.Length();
+	#else
+	(void)Path;
+	(void)Width;
+	(void)Height;
+	return false;
+	#endif
+}
+
 bool LRichTextEdit::StartActivityRecording(const char *Path)
 {
 	#if DEBUG_ACTIVITY
@@ -1477,19 +1525,19 @@ bool LRichTextEdit::OnReplace(LFindReplaceCommon *Params)
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-void LRichTextEdit::SelectWord(size_t From)
+static void SelectWordInBlock(LRichTextPriv *d, LRichTextPriv::Block *b, ssize_t Start)
 {
-	int BlockIdx;
-	ssize_t Start, End;
-	LRichTextPriv::Block *b = d->GetBlockByIndex(From, &Start, &BlockIdx);
-	if (!b)
-		return;
-
 	LArray<uint32_t> Txt;
 	if (!b->CopyAt(0, b->Length(), &Txt))
 		return;
 
-	End = Start;
+	// A click past the end of a word (e.g. after a trailing space) selects the word before it
+	while (Start > 0 &&
+			Start <= Txt.Length() &&
+			IsWordBreakChar(Txt[Start-1]))
+		Start--;
+
+	ssize_t End = Start;
 	while (Start > 0 &&
 			!IsWordBreakChar(Txt[Start-1]))
 		Start--;
@@ -1510,6 +1558,15 @@ void LRichTextEdit::SelectWord(size_t From)
 	d->SetCursor(c);
 	c.Reset(new BlkCursor(b, End, -1));
 	d->SetCursor(c, true);
+}
+
+void LRichTextEdit::SelectWord(size_t From)
+{
+	int BlockIdx;
+	ssize_t Start;
+	LRichTextPriv::Block *b = d->GetBlockByIndex(From, &Start, &BlockIdx);
+	if (b)
+		SelectWordInBlock(d, b, Start);
 }
 
 bool LRichTextEdit::OnMultiLineTab(bool In)
@@ -1939,9 +1996,11 @@ void LRichTextEdit::OnMouseClick(LMouse &m)
 				if (d->CursorFromPos(Doc.x, Doc.y, &c, &Idx))
 				{
 					d->ClickedBtn = ContentArea;
+					LRichTextPriv::Block *ClickBlk = c->Blk;
+					ssize_t ClickOffset = c->Offset;
 					d->SetCursor(c, m.Shift());
-					if (d->WordSelectMode)
-						SelectWord(Idx);
+					if (d->WordSelectMode && ClickBlk)
+						SelectWordInBlock(d, ClickBlk, ClickOffset);
 				}
 			}
 		}

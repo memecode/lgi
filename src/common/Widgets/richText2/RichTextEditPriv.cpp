@@ -19,7 +19,95 @@ static void SetActivityRect(LJson &j, const char *key, const LRect &r)
 	j.Set(prefix + "y2", (int64_t)r.y2);
 }
 
-static LJson ActivityBlockState(LRichTextPriv::Block *b)
+static LString ActivityCssLen(const LCss::Len &len)
+{
+	LStringPipe p;
+	if (len.ToString(p))
+		return p.NewLStr();
+	return LString();
+}
+
+static void SetActivityLen(LJson &j, const char *key, const LCss::Len &len)
+{
+	LString v = ActivityCssLen(len);
+	j.Set(key, v.Get());
+}
+
+static LFont *ActivityFont(LRichTextPriv *priv, LNamedStyle *st)
+{
+	LFont *f = priv ? priv->GetFont(st) : NULL;
+	if (!f && priv && priv->View)
+		f = priv->View->GetFont();
+	return f;
+}
+
+static void AddActivityStringArray(LJson &j, const char *key, const LArray<LString> &a)
+{
+	j.Set(key, a);
+}
+
+static LString ActivityColour(const LCss::ColorDef &c)
+{
+	switch (c.Type)
+	{
+		case LCss::ColorRgb:
+			return LString::Fmt("#%06x", (unsigned)(c.Rgb32 & 0xffffff));
+		case LCss::ColorTransparent:
+			return "transparent";
+		case LCss::ColorLinearGradient:
+			return "linear-gradient";
+		case LCss::ColorRadialGradient:
+			return "radial-gradient";
+		default:
+			return "inherit";
+	}
+}
+
+static void SetActivityBorder(LJson &j, const char *key, const LCss::BorderDef &bd)
+{
+	LString prefix = LString(key) + ".";
+	j.Set(prefix + "width", ActivityCssLen(bd).Get());
+	j.Set(prefix + "style", (int64_t)bd.Style);
+	j.Set(prefix + "color", ActivityColour(bd.Color).Get());
+}
+
+// Writes the resolved style of a node: colours, font, box model and borders.
+static void SetActivityStyle(LRichTextPriv *priv, LJson &j, LNamedStyle *st)
+{
+	if (!st)
+		return;
+
+	j.Set("style", st->Name.Get());
+	j.Set("color", ActivityColour(st->Color()).Get());
+	j.Set("backgroundColor", ActivityColour(st->BackgroundColor()).Get());
+	j.Set("display", (int64_t)st->Display());
+	j.Set("textAlign", ActivityCssLen(st->TextAlign()).Get());
+	SetActivityLen(j, "lineHeight", st->LineHeight());
+	SetActivityLen(j, "fontSize", st->FontSize());
+	j.Set("fontWeight", (int64_t)st->FontWeight());
+	j.Set("fontStyle", (int64_t)st->FontStyle());
+
+	if (LFont *font = ActivityFont(priv, st))
+	{
+		j.Set("font.face", font->Face() ? font->Face() : "");
+		j.Set("font.pointSize", (int64_t)font->PointSize());
+	}
+
+	SetActivityLen(j, "margin.top", st->MarginTop());
+	SetActivityLen(j, "margin.right", st->MarginRight());
+	SetActivityLen(j, "margin.bottom", st->MarginBottom());
+	SetActivityLen(j, "margin.left", st->MarginLeft());
+	SetActivityLen(j, "padding.top", st->PaddingTop());
+	SetActivityLen(j, "padding.right", st->PaddingRight());
+	SetActivityLen(j, "padding.bottom", st->PaddingBottom());
+	SetActivityLen(j, "padding.left", st->PaddingLeft());
+	SetActivityBorder(j, "border.top", st->BorderTop());
+	SetActivityBorder(j, "border.right", st->BorderRight());
+	SetActivityBorder(j, "border.bottom", st->BorderBottom());
+	SetActivityBorder(j, "border.left", st->BorderLeft());
+}
+
+static LJson ActivityBlockState(LRichTextPriv *priv, LRichTextPriv::Block *b)
 {
 	LJson j;
 	if (!b)
@@ -31,11 +119,171 @@ static LJson ActivityBlockState(LRichTextPriv::Block *b)
 	j.Set("length", (int64_t)b->Length());
 	j.Set("lines", (int64_t)b->GetLines());
 	SetActivityRect(j, "bounds", pos);
+	SetActivityStyle(priv, j, b->GetStyle());
+
+	if (auto box = dynamic_cast<LCssBox<LRect>*>(b))
+	{
+		SetActivityRect(j, "boxMargin", box->margin);
+		SetActivityRect(j, "boxBorder", box->border);
+		SetActivityRect(j, "boxPadding", box->padding);
+	}
 
 	LArray<LJson> children;
 	for (auto child : b->blocks)
-		children.Add(ActivityBlockState(child));
+		children.Add(ActivityBlockState(priv, child));
 	j.Set("children", children);
+
+	if (auto table = dynamic_cast<LRichTextPriv::TableBlock*>(b))
+	{
+		int n = table->grid.NCols;
+		if (n > 0 && !table->grid.Cells.empty())
+		{
+			int avail = table->GetPos().X();
+			if (avail <= 0)
+				avail = 1;
+
+			TableGrid::Columns cols;
+			table->FillMetrics(cols, avail, 0);
+
+			int spacing = cols.Spacing;
+			int fixedX = spacing * ((int)cols.Min.size() + 1)
+				+ table->border.x1 + table->border.x2
+				+ table->padding.x1 + table->padding.x2;
+			int outer = TableGrid::PreferredWidth(cols) + fixedX;
+
+			auto st = table->GetStyle();
+			LFont *font = ActivityFont(priv, st);
+			if (st)
+			{
+				SetActivityLen(j, "tableCssWidth", st->Width());
+				SetActivityLen(j, "tableCssMaxWidth", st->MaxWidth());
+				SetActivityLen(j, "tableCssMinWidth", st->MinWidth());
+			}
+			if (st && font)
+			{
+				LCss::Len w = st->Width();
+				if (w && w.Type == LCss::LenPx)
+					outer = MAX(1, (int)w.ToPx(avail, font));
+
+				LCss::Len mx = st->MaxWidth();
+				if (mx && mx.Type == LCss::LenPx)
+					outer = MIN(outer, MAX(1, (int)mx.ToPx(avail, font)));
+
+				LCss::Len mn = st->MinWidth();
+				if (mn && mn.Type == LCss::LenPx)
+					outer = MAX(outer, (int)mn.ToPx(avail, font));
+			}
+
+			outer = MIN(outer, avail);
+			outer = MAX(outer, fixedX);
+
+			std::vector<int> cw;
+			if (cols.Min.size())
+				TableGrid::SolveColumns(cols, MAX(outer - fixedX, 0), cw);
+
+			LArray<LString> minWidths, maxWidths, pctWidths, fixedWidths, columnWidths, rowHeights, actualColumnWidths;
+			int cn = MIN(n, (int)cols.Min.size());
+			for (int c = 0; c < cn; c++)
+			{
+				minWidths.Add(LString::Fmt("%d", cols.Min[c]));
+				maxWidths.Add(LString::Fmt("%d", cols.Max[c]));
+				pctWidths.Add(LString::Fmt("%d", cols.Pct[c]));
+				fixedWidths.Add(LString::Fmt("%d", cols.Fixed[c] ? 1 : 0));
+				columnWidths.Add(LString::Fmt("%d", c < (int)cw.size() ? cw[c] : 0));
+
+				int actual = 0;
+				for (auto &tc : table->grid.Cells)
+				{
+					if (tc.CS != 1 || tc.Col != c)
+						continue;
+					auto td = dynamic_cast<LRichTextPriv::TdBlock*>(tc.Node);
+					if (!td)
+						continue;
+					actual = td->GetPos().X();
+					break;
+				}
+				actualColumnWidths.Add(LString::Fmt("%d", actual));
+			}
+
+			int rows = MIN((int)table->grid.Rows.size(), (int)table->RowH.size());
+			for (int r = 0; r < rows; r++)
+				rowHeights.Add(LString::Fmt("%d", table->RowH[r]));
+
+			j.Set("tableColumns", (int64_t)cn);
+			j.Set("tableOuter", (int64_t)outer);
+			j.Set("tableActualOuter", (int64_t)table->GetPos().X());
+			j.Set("tableSpacing", (int64_t)spacing);
+			j.Set("tableFixedX", (int64_t)fixedX);
+			SetActivityLen(j, "tableCellPadding", table->CellPadding);
+
+			AddActivityStringArray(j, "tableMinWidths", minWidths);
+			AddActivityStringArray(j, "tableMaxWidths", maxWidths);
+			AddActivityStringArray(j, "tablePctWidths", pctWidths);
+			AddActivityStringArray(j, "tableFixedWidths", fixedWidths);
+			AddActivityStringArray(j, "tableColumnWidths", columnWidths);
+			AddActivityStringArray(j, "tableRowHeights", rowHeights);
+			AddActivityStringArray(j, "tableActualColumnWidths", actualColumnWidths);
+
+			LArray<LJson> tableCells;
+			for (size_t idx = 0; idx < table->grid.Cells.size(); idx++)
+			{
+				auto &tc = table->grid.Cells[idx];
+				LJson c;
+				c.Set("idx", (int64_t)idx);
+				c.Set("row", (int64_t)tc.Row);
+				c.Set("col", (int64_t)tc.Col);
+				c.Set("colSpan", (int64_t)tc.CS);
+				c.Set("rowSpan", (int64_t)tc.RS);
+				c.Set("min", (int64_t)tc.m.Min);
+				c.Set("max", (int64_t)tc.m.Max);
+				c.Set("pct", (int64_t)tc.Pct);
+				c.Set("fixed", (int64_t)(tc.Fixed ? 1 : 0));
+				c.Set("minH", (int64_t)tc.MinH);
+
+				int solvedCellW = cols.Spacing * (tc.CS - 1);
+				for (int cc = 0; cc < tc.CS; cc++)
+				{
+					int col = tc.Col + cc;
+					if (col < (int)cw.size())
+						solvedCellW += cw[col];
+				}
+				c.Set("solvedCellW", (int64_t)solvedCellW);
+
+				auto td = dynamic_cast<LRichTextPriv::TdBlock*>(tc.Node);
+				if (!td)
+				{
+					tableCells.Add(c);
+					continue;
+				}
+
+				int actualCellW = td->GetPos().X();
+				LRect e = table->CellEdges(td, actualCellW > 0 ? actualCellW : solvedCellW);
+
+				c.Set("tdUid", (int64_t)td->GetUid());
+				c.Set("fixedPx", (int64_t)td->FixedPx);
+				c.Set("actualCellW", (int64_t)actualCellW);
+				SetActivityLen(c, "cellPadding", table->CellPadding);
+				c.Set("contentH", (int64_t)td->ContentH);
+				SetActivityStyle(priv, c, td->GetStyle());
+
+				LRect cellBox = td->GetPos();
+				LRect content;
+				content.x1 = cellBox.x1 + e.x1;
+				content.y1 = cellBox.y1 + e.y1;
+				content.x2 = cellBox.x2 - e.x2;
+				content.y2 = cellBox.y2 - e.y2;
+
+				SetActivityRect(c, "cellBox", cellBox);
+				SetActivityRect(c, "contentBox", content);
+				SetActivityRect(c, "edges", e);
+				SetActivityRect(c, "border", td->border);
+				SetActivityRect(c, "padding", td->padding);
+				SetActivityRect(c, "margin", td->margin);
+				tableCells.Add(c);
+			}
+			j.Set("tableCells", tableCells);
+		}
+	}
 
 	if (auto tb = dynamic_cast<LRichTextPriv::TextBlock*>(b))
 	{
@@ -52,8 +300,7 @@ static LJson ActivityBlockState(LRichTextPriv::Block *b)
 			runState.Set("length", (int64_t)length);
 			runState.Set("tag", (int64_t)run->Element);
 			runState.Set("emoji", (int64_t)run->Emoji);
-			if (auto style = run->GetStyle())
-				runState.Set("style", style->Name.Get());
+			SetActivityStyle(priv, runState, run->GetStyle());
 			if (length)
 			{
 				LAutoString utf(static_cast<char*>(
@@ -141,7 +388,7 @@ LJson LRichTextPriv::SnapshotActivityState()
 
 	LArray<LJson> blocks;
 	for (auto block : Blocks)
-		blocks.Add(ActivityBlockState(block));
+		blocks.Add(ActivityBlockState(this, block));
 	state.Set("blocks", blocks);
 
 	return state;
@@ -1497,6 +1744,13 @@ bool LRichTextPriv::SetCursor(LAutoPtr<BlockCursor> c, bool Select)
 	}
 	#endif
 
+	if (Select)
+	{
+		// Blocks between the old and new end points change their highlight
+		// during a drag, so repaint the whole content area
+		InvalidateDoc(NULL);
+	}
+
 	// Check the cursor is on the visible part of the document.
 	if (Cursor->Pos.Valid())
 		ScrollTo(Cursor->Pos);
@@ -1686,37 +1940,70 @@ ssize_t LRichTextPriv::HitTest(int x, int y, int &LineHint, Block **Blk, ssize_t
 	};
 
 	if (y < First->GetPos().y1)
+	{
 		return ReturnCursor(First, 0, 0, 0);
+	}
 
 	CharPos = 0;
-	auto Test = [&](auto &&Self, Block *b) -> bool
+	// Table cells whose box contains the point but whose text doesn't (empty space
+	// above or below the text) map to the nearest text in that cell
+	Block *CellAfterBlk = nullptr;
+	ssize_t CellAfterPos = 0;
+	Block *CellBeforeBlk = nullptr;
+	ssize_t CellBeforePos = 0;
+	auto Test = [&](auto &&Self, Block *b, TdBlock *Cell) -> bool
 	{
 		if (b->blocks.Length())
 		{
+			TdBlock *Td = dynamic_cast<TdBlock*>(b);
 			for (auto Child : b->blocks)
-				if (Self(Self, Child))
+				if (Self(Self, Child, Td ? Td : Cell))
 					return true;
 			return false;
 		}
 
+		// Cells share a row, so a cell's text must not claim points in a neighbouring cell
+		bool InCell = !Cell ||
+					Cell->CellBox.X() <= 0 ||
+					(r.In.x >= Cell->CellBox.x1 && r.In.x <= Cell->CellBox.x2);
 		LRect p = b->GetPos();
-		if (b->HitTest(r))
+		if (InCell && b->HitTest(r))
 		{
 			r.Blk = b;
 			return true;
 		}
 
-		if (y >= p.y1 && y <= p.y2)
+		if (InCell && y >= p.y1 && y <= p.y2)
 			Error(_FL, "Block failed to hit, pos=%s, y=%i.", p.GetStr(), y);
+
+		if (Cell && InCell && Cell->CellBox.X() > 0 &&
+			y >= Cell->CellBox.y1 && y <= Cell->CellBox.y2)
+		{
+			if (y > p.y2)
+			{
+				CellAfterBlk = b;
+				CellAfterPos = CharPos;
+			}
+			else if (y < p.y1 && !CellBeforeBlk)
+			{
+				CellBeforeBlk = b;
+				CellBeforePos = CharPos;
+			}
+		}
 
 		CharPos += b->Length();
 		return false;
 	};
 	for (auto b : Blocks)
 	{
-		if (Test(Test, b))
+		if (Test(Test, b, nullptr))
 			return ReturnCursor(r.Blk, r.Idx, r.LineHint, CharPos + r.Idx);
 	}
+
+	if (CellAfterBlk)
+		return ReturnCursor(CellAfterBlk, CellAfterBlk->Length(), CellAfterBlk->GetLines() - 1, CellAfterPos + CellAfterBlk->Length());
+	if (CellBeforeBlk)
+		return ReturnCursor(CellBeforeBlk, 0, 0, CellBeforePos);
 
 	LRect rc = Last->GetPos();
 	if (y > rc.y2)

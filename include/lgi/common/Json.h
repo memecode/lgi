@@ -150,6 +150,8 @@ class LJson
 					auto arrIndent = MakeIndent(Depth + 1);
 					for (unsigned i=0; i<Array.Length(); i++)
 					{
+						if (i)
+							r.Print(",");
 						r.Print("\n%s", arrIndent.Get());
 						auto &e = Array[i];
 						r.Write(e.Print(Depth));

@@ -333,12 +333,7 @@ bool LRichTextPriv::DivBlock::HitTest(HitTestResult &htr)
 
 void LRichTextPriv::DivBlock::OnPaint(PaintContext &Ctx)
 {
-	SelectModeType OldType = Ctx.Type;
-
-	if (Ctx.Select && Ctx.Select->Blk == this)
-		Ctx.Type = Selected;
-
-	LColour Back = Ctx.Back();
+	LColour Back = Ctx.Colours[Unselected].Back;
 	LRect r = Pos;
 
 	r.x1 -= margin.x1;
@@ -361,8 +356,6 @@ void LRichTextPriv::DivBlock::OnPaint(PaintContext &Ctx)
 
 	for (auto b : blocks)
 		b->OnPaint(Ctx);
-
-	Ctx.Type = OldType;
 }
 
 bool LRichTextPriv::DivBlock::OnLayout(Flow &flow)
