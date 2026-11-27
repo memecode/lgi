@@ -436,11 +436,10 @@ namespace Rte2
 			r.Max = MAX(r.Max, w);
 			r.Has = true;
 		}
-		else if (auto hr = dynamic_cast<HorzRuleBlock*>(b))
+		else if (dynamic_cast<HorzRuleBlock*>(b))
 		{
-			r.Min = MAX(r.Min, avail);
-			r.Max = MAX(r.Max, avail);
-			r.Has = true;
+			// A rule fills whatever container it is in, so it has no intrinsic
+			// width. Measuring it as 'avail' would widen the table to the page.
 		}
 		else
 		{

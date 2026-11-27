@@ -512,10 +512,6 @@ public:
 			return CellBack.IsValid() ? CellBack : Colours[Unselected].Back;
 		}
 
-		// Cursor stuff
-		int CurEndPoint = 0;
-		LArray<ssize_t> EndPoints;
-		
 		PaintContext()
 		{
 		}

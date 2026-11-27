@@ -290,7 +290,7 @@ void LRichTextPriv::ListBlock::OnPaint(PaintContext &Ctx)
 {
 	Ctx.SelectBeforePaint(this);
 
-	LColour Fore, Back = Ctx.Back();
+	LColour Fore, Back = Ctx.FillBack();
 	Fore = Ctx.Fore().Mix(Back, 0.75f);
 	#if DEBUG_COVERAGE_TEST
 		Ctx.pDC->Colour(Back.Mix(LColour(255, 0, 255)));

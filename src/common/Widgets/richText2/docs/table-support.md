@@ -469,7 +469,7 @@ make -C lgi/trunk/test/HtmlEditor -f linux/Makefile.linux
 ## Open issues
 
 - Runtime layout/paint still needs visual verification in the HtmlEditor GUI harness; a table test case was added at `lgi/trunk/test/HtmlEditor/testcases/table-test.html` covering colspan, rowspan, percent and pixel width, named and hex `bgcolor`, cellpadding/border, whitespace between cells, a list inside a cell, an empty cell, and a table inside a blockquote with a nested table.
-- `HorzRuleBlock::OnPaint` and `ListBlock` still paint with `Ctx.Back()`, so they may show the selection colour after release. This has not been reported yet.
+- `HorzRuleBlock::OnPaint` and `ListBlock::OnPaint` fill their area with `FillBack()`, so they follow the enclosing cell or the unselected background. Their bullets and rule line keep the selection colours.
 - TD/th inheritance fidelity is implemented in the parser/style path, but visual confirmation is still needed for td borders, td width presentation, td background rendering, text inside cells, and alignment.
 - `HasOwnCssTextAlign()` distinguishes own td CSS text-align by comparing the td style with the parent style; a td CSS `text-align` that happens to match the parent is not reliably distinguished from inherited alignment.
 - `StripCellInheritedBoxProps()` intentionally does not strip `PropBackgroundColor`; if the intended behavior is to strip only td’s own background while removing inherited table background, that needs a separate decision.

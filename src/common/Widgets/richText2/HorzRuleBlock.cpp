@@ -101,7 +101,8 @@ void LRichTextPriv::HorzRuleBlock::OnPaint(PaintContext &Ctx)
 {
 	Ctx.SelectBeforePaint(this);
 
-	LColour Fore, Back = Ctx.Back();
+	// The line is the foreground mixed with the background, in either selection state
+	LColour Fore, Back = Ctx.Type == Selected ? Ctx.Back() : Ctx.FillBack();
 	Fore = Ctx.Fore().Mix(Back, 0.75f);
 	Ctx.pDC->Colour(Back);
 	Ctx.pDC->Rectangle(&Pos);

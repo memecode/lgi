@@ -2894,10 +2894,35 @@ bool LRichTextPriv::InsertHorzRule()
 		return false;
 
 	LAutoPtr<Transaction> Trans(new Transaction);
+	LAutoPtr<Transaction> Scratch;
+	auto Parent = tb->parent;
+	if (Parent)
+	{
+		// Nested in a container (table cell, div, list item). Snapshot the root
+		// block as the only undo record, and send the edits below to a scratch
+		// transaction that is discarded.
+		auto Root = Parent;
+		while (Root->parent)
+			Root = Root->parent;
+		ssize_t RootIndex = Blocks.IndexOf(Root);
+		if (RootIndex < 0 || Root->IsBusy())
+			return false;
+		LAutoPtr<MultiBlockState> State(new MultiBlockState(this, RootIndex, true));
+		if (!State->Copy(RootIndex))
+			return Error(_FL, "Could not save nested insert for undo.");
+		State->Length = 1;
+		Trans->Add(State.Release());
+		Scratch.Reset(new Transaction);
+	}
+	Transaction *Edit = Scratch ? Scratch.Get() : Trans.Get();
 
-	DeleteSelection(Trans, NULL);
+	DeleteSelection(Edit, NULL);
 
-	ssize_t InsertIdx = Blocks.IndexOf(tb) + 1;
+	auto &Siblings = Parent ? Parent->blocks : Blocks;
+	ssize_t InsertIdx = Siblings.IndexOf(tb);
+	if (InsertIdx < 0)
+		return false;
+	InsertIdx++;
 	LRichTextPriv::Block *After = NULL;
 	if (Cursor->Offset == 0)
 	{
@@ -2905,19 +2930,24 @@ bool LRichTextPriv::InsertHorzRule()
 	}
 	else if (Cursor->Offset < tb->Length())
 	{
-		After = tb->Split(Trans, Cursor->Offset);
+		After = tb->Split(Edit, Cursor->Offset);
 		if (!After)
 			return false;
-		tb->StripLast(Trans);
+		tb->StripLast(Edit);
 	}
 
 	HorzRuleBlock *Hr = new HorzRuleBlock(this);
 	if (!Hr)
 		return false;
 
-	Blocks.AddAt(InsertIdx++, Hr);
+	Hr->parent = Parent;
+	Siblings.AddAt(InsertIdx++, Hr);
 	if (After)
-		Blocks.AddAt(InsertIdx++, After);
+	{
+		// Split doesn't set the parent of the new block
+		After->parent = Parent;
+		Siblings.AddAt(InsertIdx++, After);
+	}
 
 	AddTrans(Trans);
 	InvalidateDoc(NULL);
@@ -4344,32 +4374,14 @@ void LRichTextPriv::OnComponentInstall(LString Name)
 // \return TRUE if the content should be drawn selected.
 bool LRichTextPriv::PaintContext::SelectBeforePaint(Block *b)
 {
-	CurEndPoint = 0;
-
+	// Each end point at the start of this block flips the paint state. This
+	// is stateless so that blocks painted later can't reuse an earlier block's end points.
 	if (b->Cursors > 0 && Select)
 	{
-		// Selection end point checks...
-		if (Cursor && Cursor->Blk == b)
-			EndPoints.Add(Cursor->Offset);
-		if (Select && Select->Blk == b)
-			EndPoints.Add(Select->Offset);
-
-		// Sort the end points
-		if (EndPoints.Length() > 1 &&
-			EndPoints[0] > EndPoints[1])
-		{
-			ssize_t ep = EndPoints[0];
-			EndPoints[0] = EndPoints[1];
-			EndPoints[1] = ep;
-		}
-	}
-
-	// Before selection end point
-	if (CurEndPoint < (ssize_t)EndPoints.Length() &&
-		EndPoints[CurEndPoint] == 0)
-	{
-		Type = Type == Selected ? Unselected : Selected;
-		CurEndPoint++;
+		if (Cursor && Cursor->Blk == b && Cursor->Offset == 0)
+			Type = Type == Selected ? Unselected : Selected;
+		if (Select->Blk == b && Select->Offset == 0)
+			Type = Type == Selected ? Unselected : Selected;
 	}
 
 	return Type == Selected;
@@ -4379,12 +4391,13 @@ bool LRichTextPriv::PaintContext::SelectBeforePaint(Block *b)
 // \return TRUE if the content after the block is selected.
 bool LRichTextPriv::PaintContext::SelectAfterPaint(class Block *b)
 {
-	// After image selection end point
-	if (CurEndPoint < (ssize_t)EndPoints.Length() &&
-		EndPoints[CurEndPoint] == 1)
+	// Each end point at the end of this block flips the paint state
+	if (b->Cursors > 0 && Select)
 	{
-		Type = Type == Selected ? Unselected : Selected;
-		CurEndPoint++;
+		if (Cursor && Cursor->Blk == b && Cursor->Offset == 1)
+			Type = Type == Selected ? Unselected : Selected;
+		if (Select->Blk == b && Select->Offset == 1)
+			Type = Type == Selected ? Unselected : Selected;
 	}
 
 	return Type == Selected;
