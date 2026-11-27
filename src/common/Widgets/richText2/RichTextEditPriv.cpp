@@ -2968,6 +2968,11 @@ static LCss *EnsureStyle(LAutoPtr<LCss> &Style)
 	return Style.Get();
 }
 
+static bool IsCellTag(HtmlTag t)
+{
+	return t == TAG_TD || t == TAG_TH;
+}
+
 static bool IsTableContextTag(HtmlTag t)
 {
 	switch (t)
@@ -3068,6 +3073,18 @@ static bool AttrValueIs(const char *s, const char *v)
 	return s && v && strcompare(s, v, false) == 0;
 }
 
+static bool HasActualPadding(LCss *Style)
+{
+	if (!Style)
+		return false;
+
+	return	Style->Padding() ||
+			Style->PaddingTop() ||
+			Style->PaddingRight() ||
+			Style->PaddingBottom() ||
+			Style->PaddingLeft();
+}
+
 static bool HasOwnCssTextAlign(LCss *Style, LCss *ParentStyle)
 {
 	if (!Style || !ParentStyle)
@@ -3078,6 +3095,23 @@ static bool HasOwnCssTextAlign(LCss *Style, LCss *ParentStyle)
 	if (!Parent)
 		return Cur;
 	return Cur && Cur != Parent;
+}
+
+static void ApplyCellPadding(LAutoPtr<LCss> &Style, const LCss::Len &CellPadding, bool HadActualPadding)
+{
+	if (!Style)
+		return;
+
+	if (!HadActualPadding)
+	{
+		LCss::Len cp = Style->_CellPadding();
+		if (!cp)
+			cp = CellPadding;
+		if (cp)
+			Style->Padding(cp);
+	}
+
+	Style->DeleteProp(LCss::Prop_CellPadding);
 }
 
 static bool IsAllWhiteW(const char16 *s)
@@ -3406,14 +3440,24 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 		}
 
 		bool HadCssWidth = Style && Style->Width();
+		bool HadActualPadding = IsCellTag(c->TagId) && HasActualPadding(Style.Get());
 		bool AllowAlignOverride = IsTableContextTag(c->TagId) && !HasOwnCssTextAlign(Style.Get(), ParentStyle);
+		LCss::Len TableCellPadding;
 
 		if (IsTableContextTag(c->TagId))
 		{
 			if (c->TagId == TAG_TABLE)
+			{
 				ApplyTablePresentation(Style, c);
+				TableCellPadding = Style.Get() ? Style.Get()->_CellPadding() : LCss::Len();
+				if (Style)
+					Style->DeleteProp(LCss::Prop_CellPadding);
+			}
 			else if (c->TagId == TAG_TD || c->TagId == TAG_TH)
+			{
 				ApplyCellPresentation(Style, c, c->TagId, AllowAlignOverride);
+				ApplyCellPadding(Style, ctx.CellPadding, HadActualPadding);
+			}
 			else if (c->TagId == TAG_TR)
 				ApplyRowPresentation(Style, c, AllowAlignOverride);
 		}
@@ -3460,7 +3504,7 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 					}
 
 					Table->SetStyle(CachedStyle);
-					Table->CellPadding = CachedStyle ? CachedStyle->_CellPadding() : LCss::Len();
+					Table->CellPadding = TableCellPadding;
 
 					auto PreviousTableTarget = ctx.TableTarget;
 					int PreviousTableRow = ctx.TableRow;

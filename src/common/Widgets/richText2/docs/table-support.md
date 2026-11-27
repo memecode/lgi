@@ -259,7 +259,7 @@ Presentation attributes currently supported in `FromHtml()`:
 ### Style behavior
 
 - `MakeChildStyle()` strips box properties from child styles.
-- `cellpadding` must remain available through `TableBlock::CellPadding`, `TdBlock::GetStyle()`, or explicit edge calculation. `CellEdges()` applies the `cellpadding` fallback when a cell has no padding of its own, and `MeasureBlock()` now measures cells through `CellEdges()` so column min/max match what placement uses.
+- `cellpadding` is a table presentation attribute, not a real CSS property. It is stored in `TableBlock::CellPadding` for layout, but serialization must not emit `Prop_CellPadding` as CSS. For td/th cells that have no own CSS padding, the table `cellpadding` value is converted to standard CSS `padding` on the cell style so `OutputStyles()` emits browser-visible td padding. Cells with own CSS padding keep their own value. `CellEdges()` still applies the fallback when a cell has no padding of its own, and `MeasureBlock()` measures cells through `CellEdges()` so column min/max match what placement uses.
 - `TD` and `TH` background properties are preserved. `TABLE` backgrounds are no longer removed because `TableBlock` is a real box that can paint them; `DIV`, `TBODY`, and `TR` are still flattened containers and their backgrounds are still removed so they do not become highlights on descendant text.
 - `MakeChildStyle()` does not strip `background-color`, so text inside a coloured cell blends glyphs with the cell colour through `Cols.Back`, which is what `TextBlock::OnPaint` uses.
 - Serialization uses `GetElementName()` where present, otherwise tag info, so cells serialize as `td` or `th`. Presentation `width` and `bgcolor` round-trip through the cached style (`class='stN'` plus `OutputStyles()`), not as HTML attributes, so `TdBlock::Pct`/`Fixed`/`FixedPx` only need to drive layout.
@@ -419,6 +419,7 @@ make -C lgi/trunk/test/HtmlEditor -f linux/Makefile.linux
 - `ApplyAlign()` may override inherited `PropTextAlign` for td/th presentation `align` when `HasOwnCssTextAlign()` finds no td/th CSS text-align distinct from the parent. This keeps td presentation `align` working when table presentation `align` previously made inherited td styles center.
 - It does not strip `PropBackgroundColor` because td background rules and td presentation backgrounds should survive, and `MakeChildStyle()` intentionally does not strip background.
 - `HadCssWidth` should reflect td CSS width only, not inherited table width. Stripping inherited table `width` before td CSS matching allows presentation td `width` attributes such as `50%` and `100%` to be applied through `ApplyLength()`.
+- `HasActualPadding()` should reflect td CSS padding only, not inherited table padding. When a td/th has no own CSS padding, `ApplyCellPadding()` converts table `cellpadding` into standard CSS `padding` on the td/th style. Table `Prop_CellPadding` is not emitted as CSS because `cellpadding` is not a browser CSS property.
 
 ### Verified state
 
