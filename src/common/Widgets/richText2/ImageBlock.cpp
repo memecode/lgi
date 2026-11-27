@@ -742,9 +742,10 @@ void LRichTextPriv::ImageBlock::OnPaint(PaintContext &Ctx)
 	if (BorderStyle.Type == LCss::ColorRgb)
 		BorderCol.Set(BorderStyle.Rgb32, 32);
 
-	Ctx.DrawBox(r, margin, Ctx.Colours[Unselected].Back);
+	LColour FillCol = Ctx.FillBack();
+	Ctx.DrawBox(r, margin, FillCol);
 	Ctx.DrawBox(r, border, BorderCol);
-	Ctx.DrawBox(r, padding, Ctx.Colours[Unselected].Back);
+	Ctx.DrawBox(r, padding, FillCol);
 
 	LRegion unpainted(r);
 

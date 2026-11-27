@@ -1490,6 +1490,13 @@ public:
 	bool ClickBtn(LMouse &m, LRichTextEdit::RectType t);
 	bool ToggleList(LCss::ListStyleTypes Type);
 	bool InsertHorzRule();
+	// Nested blocks (table cells, divs, list items) are not in the top-level 'Blocks'.
+	// For a nested 'b', snapshots the root block into 'Trans' as the only undo record
+	// and returns a discarded scratch transaction in 'Edit'. Otherwise 'Edit' is 'Trans'.
+	bool BeginNestedEdit(Transaction *Trans, Block *b, LAutoPtr<Transaction> &Scratch, Transaction *&Edit);
+	// Splits 'b' at 'Offset' and inserts 'New' into the sibling list of 'b', before it
+	// when Offset is 0, otherwise after its first half.
+	bool InsertBlocksAt(Transaction *Edit, Block *b, ssize_t Offset, LArray<Block*> &New);
 	void Paint(LSurface *pDC, LScrollBar *&ScrollY);
 	LHtmlElement *CreateElement(LHtmlElement *Parent);
 	LPoint ScreenToDoc(int x, int y);

@@ -1204,36 +1204,26 @@ bool LRichTextEdit::Paste()
 		else if (Img)
 		{
 			auto b = d->Cursor->Blk;
-			auto BlkIdx = d->Blocks.IndexOf(b);
-			LRichTextPriv::Block *After = NULL;
-			ssize_t AddIndex;
-		
-			LAssert(BlkIdx >= 0);
+			LAutoPtr<LRichTextPriv::Transaction> Scratch;
+			LRichTextPriv::Transaction *Edit = NULL;
+			if (!d->BeginNestedEdit(Trans, b, Scratch, Edit))
+				return false;
 
 			// Split 'b' to make room for the image
-			if (d->Cursor->Offset > 0)
+			LArray<LRichTextPriv::Block*> New;
+			auto ImgBlk = new LRichTextPriv::ImageBlock(d);
+			New.Add(ImgBlk);
+			if (!d->InsertBlocksAt(Edit, b, d->Cursor->Offset, New))
 			{
-				After = b->Split(Trans, d->Cursor->Offset);
-				AddIndex = BlkIdx + 1;									
-			}
-			else
-			{
-				// Insert before..
-				AddIndex = BlkIdx;
+				delete ImgBlk;
+				return false;
 			}
 
-			if (auto ImgBlk = new LRichTextPriv::ImageBlock(d))
-			{
-				d->Blocks.AddAt(AddIndex++, ImgBlk);
-				if (After)
-					d->Blocks.AddAt(AddIndex++, After);
+			Img->MakeOpaque();
+			ImgBlk->SetImage(Img);
 
-				Img->MakeOpaque();
-				ImgBlk->SetImage(Img);
-			
-				AutoCursor c(new BlkCursor(ImgBlk, 1, -1));
-				d->SetCursor(c);			
-			}
+			AutoCursor c(new BlkCursor(ImgBlk, 1, -1));
+			d->SetCursor(c);
 		}
 
 		Invalidate();
@@ -1637,28 +1627,19 @@ int LRichTextEdit::OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
 							LRichTextPriv::Block *b = d->GetBlockByIndex(Idx, &BlkOffset, &BlkIdx);
 							if (b)
 							{
-								LRichTextPriv::Block *After = NULL;
-
-								// Split 'b' to make room for the image
-								if (BlkOffset > 0)
+								LArray<LRichTextPriv::Block*> New;
+								auto ImgBlk = new LRichTextPriv::ImageBlock(d);
+								New.Add(ImgBlk);
+								if (d->InsertBlocksAt(NoTransaction, b, BlkOffset, New))
 								{
-									After = b->Split(NoTransaction, BlkOffset);
-									AddIndex = BlkIdx+1;									
+									// Only one dropped image is inserted per drop
+									AddIndex = BlkIdx;
+									ImgBlk->Load(f);
+									Effect = DROPEFFECT_COPY;
 								}
 								else
 								{
-									// Insert before..
-									AddIndex = BlkIdx;
-								}
-
-								if (auto ImgBlk = new LRichTextPriv::ImageBlock(d))
-								{
-									d->Blocks.AddAt(AddIndex++, ImgBlk);
-									if (After)
-										d->Blocks.AddAt(AddIndex++, After);
-
-									ImgBlk->Load(f);
-									Effect = DROPEFFECT_COPY;
+									delete ImgBlk;
 								}
 							}
 						}

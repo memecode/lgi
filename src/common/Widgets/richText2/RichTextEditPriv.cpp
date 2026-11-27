@@ -2884,6 +2884,63 @@ bool LRichTextPriv::ClickBtn(LMouse &m, LRichTextEdit::RectType t)
 	return true;
 }
 
+bool LRichTextPriv::BeginNestedEdit(Transaction *Trans, Block *b, LAutoPtr<Transaction> &Scratch, Transaction *&Edit)
+{
+	Edit = Trans;
+	if (!Trans || !b->parent)
+		return true;
+
+	auto Root = b;
+	while (Root->parent)
+		Root = Root->parent;
+	ssize_t RootIndex = Blocks.IndexOf(Root);
+	if (RootIndex < 0 || Root->IsBusy())
+		return false;
+
+	LAutoPtr<MultiBlockState> State(new MultiBlockState(this, RootIndex, true));
+	if (!State->Copy(RootIndex))
+		return Error(_FL, "Could not save nested edit for undo.");
+	State->Length = 1;
+	Trans->Add(State.Release());
+
+	Scratch.Reset(new Transaction);
+	Edit = Scratch.Get();
+	return true;
+}
+
+bool LRichTextPriv::InsertBlocksAt(Transaction *Edit, Block *b, ssize_t Offset, LArray<Block*> &New)
+{
+	auto Parent = b->parent;
+	auto &Siblings = Parent ? Parent->blocks : Blocks;
+	ssize_t Idx = Siblings.IndexOf(b);
+	if (Idx < 0)
+		return false;
+
+	Block *After = NULL;
+	ssize_t At = Idx;
+	if (Offset > 0)
+	{
+		if (Offset < b->Length())
+		{
+			After = b->Split(Edit, Offset);
+			if (!After)
+				return false;
+			// Split doesn't set the parent of the new block
+			After->parent = Parent;
+		}
+		At = Idx + 1;
+	}
+
+	for (auto n : New)
+	{
+		n->parent = Parent;
+		Siblings.AddAt(At++, n);
+	}
+	if (After)
+		Siblings.AddAt(At, After);
+	return true;
+}
+
 bool LRichTextPriv::InsertHorzRule()
 {
 	if (!Cursor || !Cursor->Blk)
@@ -2895,59 +2952,28 @@ bool LRichTextPriv::InsertHorzRule()
 
 	LAutoPtr<Transaction> Trans(new Transaction);
 	LAutoPtr<Transaction> Scratch;
-	auto Parent = tb->parent;
-	if (Parent)
-	{
-		// Nested in a container (table cell, div, list item). Snapshot the root
-		// block as the only undo record, and send the edits below to a scratch
-		// transaction that is discarded.
-		auto Root = Parent;
-		while (Root->parent)
-			Root = Root->parent;
-		ssize_t RootIndex = Blocks.IndexOf(Root);
-		if (RootIndex < 0 || Root->IsBusy())
-			return false;
-		LAutoPtr<MultiBlockState> State(new MultiBlockState(this, RootIndex, true));
-		if (!State->Copy(RootIndex))
-			return Error(_FL, "Could not save nested insert for undo.");
-		State->Length = 1;
-		Trans->Add(State.Release());
-		Scratch.Reset(new Transaction);
-	}
-	Transaction *Edit = Scratch ? Scratch.Get() : Trans.Get();
+	Transaction *Edit = NULL;
+	if (!BeginNestedEdit(Trans, tb, Scratch, Edit))
+		return false;
 
 	DeleteSelection(Edit, NULL);
 
-	auto &Siblings = Parent ? Parent->blocks : Blocks;
-	ssize_t InsertIdx = Siblings.IndexOf(tb);
-	if (InsertIdx < 0)
-		return false;
-	InsertIdx++;
-	LRichTextPriv::Block *After = NULL;
-	if (Cursor->Offset == 0)
-	{
-		InsertIdx--;
-	}
-	else if (Cursor->Offset < tb->Length())
-	{
-		After = tb->Split(Edit, Cursor->Offset);
-		if (!After)
-			return false;
-		tb->StripLast(Edit);
-	}
+	// Splitting leaves trailing whitespace on the first half, which the rule replaces
+	bool SplitsText = Cursor->Offset > 0 && Cursor->Offset < tb->Length();
 
 	HorzRuleBlock *Hr = new HorzRuleBlock(this);
 	if (!Hr)
 		return false;
 
-	Hr->parent = Parent;
-	Siblings.AddAt(InsertIdx++, Hr);
-	if (After)
+	LArray<Block*> New;
+	New.Add(Hr);
+	if (!InsertBlocksAt(Edit, tb, Cursor->Offset, New))
 	{
-		// Split doesn't set the parent of the new block
-		After->parent = Parent;
-		Siblings.AddAt(InsertIdx++, After);
+		delete Hr;
+		return false;
 	}
+	if (SplitsText)
+		tb->StripLast(Edit);
 
 	AddTrans(Trans);
 	InvalidateDoc(NULL);
