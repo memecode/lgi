@@ -329,6 +329,7 @@ protected:
 	bool IsCommit = false, IsUpdatingCounts = false;
 	bool IsListingWorking = false;
 	LvcStatus IsBranches = StatusNone, IsIdent = StatusNone;
+	bool GitRefsRefreshPending = false;
 
 	void Init(AppPriv *priv);
 	const char *GetVcName();
@@ -336,6 +337,7 @@ protected:
 	bool StartCmd(const char *Args, ParseFn Parser = NULL, ParseParams *Params = NULL, LoggingType Logging = LogNone);
 	bool RunCmd(const char *Args, LoggingType Logging, std::function<void(Result)> Callback);
 	void OnBranchesChange();
+	void RefreshGitRefs();
 	void NoImplementation(const char *file, int line);
 	void OnCmdError(LString Output, const char *Msg);
 	void ClearError();

@@ -668,6 +668,21 @@ LString VcFolder::GetGitNames(LString Hash)
 
 bool VcFolder::ParseBranches(int Result, LString s, ParseParams *Params)
 {
+	if (GetType() == VcGit && GitRefsRefreshPending)
+	{
+		// A Git operation finished while this snapshot was being read.
+		IsBranches = StatusNone;
+		RefreshGitRefs();
+		return false;
+	}
+
+	if (Result && GetType() == VcGit)
+	{
+		IsBranches = StatusError;
+		OnCmdError(s, "Failed to read branches.");
+		return false;
+	}
+
 	Branches.DeleteObjects();
 
 	switch (GetType())
@@ -761,6 +776,20 @@ bool VcFolder::ParseBranches(int Result, LString s, ParseParams *Params)
 	IsBranches = Result ? StatusError : StatusLoaded;
 	OnBranchesChange();
 	return false;
+}
+
+void VcFolder::RefreshGitRefs()
+{
+	if (IsBranches == StatusActive)
+	{
+		GitRefsRefreshPending = true;
+		return;
+	}
+
+	GitRefsRefreshPending = false;
+	GetBranches(true, true);
+	if (IsBranches != StatusActive)
+		OnCmdError(LString(), "Failed to start Git branch refresh.");
 }
 
 void VcFolder::GetRemoteUrl(ParseParams::TCallback Callback)
@@ -944,14 +973,14 @@ void VcFolder::OnBranchesChange()
 					b.value->Colour = GetPaletteColour(Idx++);
 			}
 		}
+	}
 
-		// Ref names may arrive after the graph was linked, so re-resolve the commit colours
-		if (Log.Length())
-		{
-			AssignColours();
-			if (d->Commits && d->CurFolder == this)
-				d->Commits->UpdateAllItems();
-		}
+	// Ref names may arrive after the graph was linked, or all refs may disappear.
+	if (Log.Length())
+	{
+		AssignColours();
+		if (d->Commits && d->CurFolder == this)
+			d->Commits->UpdateAllItems();
 	}
 
 	UpdateBranchUi();
@@ -3545,6 +3574,7 @@ void VcFolder::Empty()
 	LogStatus = LogState::None;
 	IsUpdatingCounts = false;
 	IsBranches = StatusNone;
+	GitRefsRefreshPending = false;
 	IsIdent = StatusNone;
 
 	Unpushed = Unpulled = -1;
@@ -5563,6 +5593,8 @@ void VcFolder::Push(bool NewBranchOk)
 bool VcFolder::ParsePush(int Result, LString s, ParseParams *Params)
 {
 	bool Status = false;
+	if (GetType() == VcGit)
+		RefreshGitRefs();
 	
 	if (Result)
 	{
@@ -5660,6 +5692,22 @@ void VcFolder::Pull(int AndUpdate, LoggingType Logging)
 bool VcFolder::ParsePull(int Result, LString s, ParseParams *Params)
 {
 	GetTree()->SendNotify((LNotifyType)LvcCommandEnd);
+	bool GitHistoryChanged = false;
+	if (GetType() == VcGit)
+	{
+		// Even a failed pull may have fetched refs or left merge conflicts.
+		bool update = Params && Params->Str.Equals("update");
+		RefreshGitRefs();
+		GitHistoryChanged = update || !d->GitLocalBranchesOnly();
+		if (GitHistoryChanged)
+		{
+			CurrentCommit.Empty();
+			CommitListDirty = true;
+		}
+		if (update && d->CurFolder == this && Uncommit && Uncommit->LListItem::Select())
+			ListWorkingFolder();
+	}
+
 	if (Result)
 	{
 		if (Params && Params->Str.Equals("log"))
@@ -5721,7 +5769,7 @@ bool VcFolder::ParsePull(int Result, LString s, ParseParams *Params)
 		}
 
 		OnCmdError(s, "Pull failed.");
-		return false;
+		return GitHistoryChanged;
 	}
 	else ClearError();
 
@@ -5729,9 +5777,6 @@ bool VcFolder::ParsePull(int Result, LString s, ParseParams *Params)
 	{
 		case VcGit:
 		{
-			// Git does a merge by default, so the current commit changes...
-			CurrentCommit.Empty();
-
 			bool HasUpdates = false;
 			auto Lines = s.SplitDelimit("\n");
 			for (auto Ln : Lines)
@@ -5841,6 +5886,9 @@ bool VcFolder::ParsePull(int Result, LString s, ParseParams *Params)
 		default:
 			break;
 	}
+
+	if (GetType() == VcGit)
+		return GitHistoryChanged;
 
 	CommitListDirty = true;
 	return true; // Yes - reselect and update
@@ -6014,6 +6062,8 @@ void VcFolder::Refresh()
 	Branches.DeleteObjects();
 	if (IsBranches != StatusActive)
 		IsBranches = StatusNone;
+	else if (GetType() == VcGit)
+		GitRefsRefreshPending = true;
 	if (Uncommit && Uncommit->LListItem::Select())
 		Uncommit->Select(true);
 	
