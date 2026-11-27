@@ -1420,11 +1420,137 @@ static bool TestFragmentScroll()
 				"<div style='height:250px'>After</div></body></html>", details, TAG_H2);
 }
 
+#if defined(__GTK_H__)
+namespace
+{
+	using namespace Gtk;
+
+	struct HtmlPdfPrint
+	{
+		Html2::LHtml *Html = nullptr;
+		int PageHeight = 0;
+		int LineHeight = 0;
+		int PageStep = 0;
+		bool Failed = false;
+	};
+
+	void HtmlPdfBeginPrint(GtkPrintOperation *operation, GtkPrintContext *context, gpointer data)
+	{
+		auto print = (HtmlPdfPrint*)data;
+		LPrintDC dc(context, "HtmlTestSuite");
+		if (!dc.X() || !dc.Y())
+		{
+			print->Failed = true;
+			gtk_print_operation_cancel(operation);
+			return;
+		}
+
+		LRect pos = print->Html->GetPos();
+		pos.SetSize(dc.X(), dc.Y());
+		print->Html->SetPos(pos);
+		print->PageHeight = dc.Y();
+
+		LPoint content = print->Html->Layout(true);
+		print->LineHeight = print->Html->GetFont()->GetHeight();
+		if (print->LineHeight <= 0)
+		{
+			print->Failed = true;
+			gtk_print_operation_cancel(operation);
+			return;
+		}
+		print->PageStep = MAX((print->PageHeight / print->LineHeight) * print->LineHeight, print->LineHeight);
+		int pages = MAX((content.y + print->PageStep - 1) / print->PageStep, 1);
+		gtk_print_operation_set_n_pages(operation, pages);
+	}
+
+	void HtmlPdfDrawPage(GtkPrintOperation*, GtkPrintContext *context, gint page, gpointer data)
+	{
+		auto print = (HtmlPdfPrint*)data;
+		LPrintDC dc(context, "HtmlTestSuite");
+		dc.Colour(LColour::White);
+		dc.Rectangle();
+		int scrollLines = page * print->PageStep / print->LineHeight;
+		print->Html->SetVScroll(scrollLines);
+		dc.SetOrigin(0, scrollLines * print->LineHeight);
+		print->Html->OnPaint(&dc);
+	}
+
+	int PrintHtmlToPdf(const char *fileName)
+	{
+		if (!LFileExists(fileName))
+		{
+			fprintf(stderr, "HTML file does not exist: %s\n", fileName);
+			return 1;
+		}
+
+		auto content = LReadFile(fileName);
+		if (!content)
+		{
+			fprintf(stderr, "Failed to read HTML file: %s\n", fileName);
+			return 1;
+		}
+
+		LDefaultDocumentEnv env;
+		Html2::LHtml html(0, 0, 0, 800, 600, &env);
+		if (!html.Name(content))
+		{
+			fprintf(stderr, "Failed to load HTML file: %s\n", fileName);
+			return 1;
+		}
+
+		LString output = LString::Fmt("%s.pdf", fileName);
+		HtmlPdfPrint print{&html};
+		auto operation = gtk_print_operation_new();
+		if (!operation)
+		{
+			fprintf(stderr, "Failed to create PDF print operation\n");
+			return 1;
+		}
+
+		g_signal_connect(G_OBJECT(operation), "begin-print", G_CALLBACK(HtmlPdfBeginPrint), &print);
+		g_signal_connect(G_OBJECT(operation), "draw-page", G_CALLBACK(HtmlPdfDrawPage), &print);
+		gtk_print_operation_set_export_filename(operation, output);
+		GError *error = nullptr;
+		auto result = gtk_print_operation_run(
+			operation,
+			GTK_PRINT_OPERATION_ACTION_EXPORT,
+			nullptr,
+			&error);
+		g_object_unref(operation);
+
+		if (error)
+		{
+			fprintf(stderr, "Failed to export PDF: %s\n", error->message);
+			g_error_free(error);
+		}
+		if (print.Failed || result != GTK_PRINT_OPERATION_RESULT_APPLY)
+		{
+			fprintf(stderr, "PDF export failed for: %s\n", fileName);
+			return 1;
+		}
+
+		printf("PDF: %s\n", output.Get());
+		return 0;
+	}
+}
+#endif
+
 int LgiMain(OsAppArguments &AppArgs)
 {
 	LApp a(AppArgs, "HtmlTestSuite");
 	if (a.IsOk())
 	{
+		LString printFile;
+		if (a.GetOption("print", printFile))
+		{
+			#if defined(__GTK_H__)
+				return PrintHtmlToPdf(printFile);
+			#else
+				fprintf(stderr, "PDF export is only supported by the GTK build\n");
+				return 1;
+			#endif
+		}
+
 		if (a.GetOption("test-fragment-scroll"))
 		{
 			bool passed = TestFragmentScroll();
@@ -1459,8 +1585,9 @@ int LgiMain(OsAppArguments &AppArgs)
 	        "   -test-iframe-background Run the iframe body background test\n"
 	        "   -test-iframe-fallback   Run the iframe fallback content test\n"
 	        "   -test-iframe-loaded     Run the iframe loaded content test\n"
-	        "   -test-fragment-scroll  Run the fragment navigation test\n"
-	        "   -render $fileName       Render the file to the 'render.png'\n",
+	        "   -test-fragment-scroll   Run the fragment navigation test\n"
+	        "   -print <fileName>       Export the HTML file to <fileName>.pdf (GTK only)\n"
+	        "   -render <fileName>      Render the file to the 'render.png'\n",
 	        AppArgs.Arg[0]);
 	
 		if (a.GetOption("test-rounded-borders"))
