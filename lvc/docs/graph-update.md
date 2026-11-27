@@ -120,3 +120,28 @@ previous linear scan using two files: whitespace-separated `hash name` ref
 pairs, and one commit hash per line. It verifies that both implementations
 return the same names for every supplied commit, ignoring ordering.
 
+### Refresh after Git operations
+
+Push, fetch and pull completion request a fresh local-and-remote branch
+snapshot, including when the operation reports an error: a pull can fetch
+successfully before its merge fails. Once the snapshot arrives,
+`OnBranchesChange()` updates the branch UI, commit labels and graph colours.
+Push retains the existing commit objects and graph layout. Fetch also retains
+them when the local-branches-only filter is enabled; with all refs displayed,
+fetch reloads history so newly fetched commits become visible. Pull invalidates
+HEAD and history, and refreshes the working-folder file list if it is displayed.
+
+If a branch query was already running when the operation completed, its
+snapshot is discarded and one follow-up query is queued. Multiple refresh
+requests coalesce while that query is running. An older in-flight HEAD query is
+likewise discarded after pull and replaced with a fresh query. A failed branch
+query reports an error without replacing the last good ref snapshot.
+
+`tests/GitRefresh.cpp` exercises these completion paths using a disposable local
+Git repository. It checks moved remote refs, commit-list invalidation,
+overlapping queries, graph-object preservation after push, the
+history-filter-dependent fetch behavior, pull HEAD invalidation, and refresh
+after merge or branch-query failures. Link it against
+the Lvc objects except `LgiMain.o` and the normal application libraries. The GTK
+build requires a display but does not open a window.
+

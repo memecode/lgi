@@ -330,6 +330,7 @@ protected:
 	bool IsListingWorking = false;
 	LvcStatus IsBranches = StatusNone, IsIdent = StatusNone;
 	bool GitRefsRefreshPending = false;
+	bool GitHeadRefreshPending = false;
 
 	void Init(AppPriv *priv);
 	const char *GetVcName();

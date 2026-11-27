@@ -2692,6 +2692,16 @@ void VcFolder::ClearError()
 
 bool VcFolder::ParseInfo(int Result, LString s, ParseParams *Params)
 {
+	if (GetType() == VcGit && GitHeadRefreshPending)
+	{
+		GitHeadRefreshPending = false;
+		IsIdent = StatusNone;
+		GetCurrentRevision();
+		if (IsIdent != StatusActive)
+			OnCmdError(LString(), "Failed to start Git HEAD refresh.");
+		return false;
+	}
+
 	switch (GetType())
 	{
 		case VcGit:
@@ -3575,6 +3585,7 @@ void VcFolder::Empty()
 	IsUpdatingCounts = false;
 	IsBranches = StatusNone;
 	GitRefsRefreshPending = false;
+	GitHeadRefreshPending = false;
 	IsIdent = StatusNone;
 
 	Unpushed = Unpulled = -1;
@@ -5698,12 +5709,17 @@ bool VcFolder::ParsePull(int Result, LString s, ParseParams *Params)
 		// Even a failed pull may have fetched refs or left merge conflicts.
 		bool update = Params && Params->Str.Equals("update");
 		RefreshGitRefs();
-		GitHistoryChanged = update || !d->GitLocalBranchesOnly();
-		if (GitHistoryChanged)
+		if (update)
 		{
 			CurrentCommit.Empty();
-			CommitListDirty = true;
+			if (IsIdent == StatusActive)
+				GitHeadRefreshPending = true;
+			else
+				IsIdent = StatusNone;
 		}
+		GitHistoryChanged = update || !d->GitLocalBranchesOnly();
+		if (GitHistoryChanged)
+			CommitListDirty = true;
 		if (update && d->CurFolder == this && Uncommit && Uncommit->LListItem::Select())
 			ListWorkingFolder();
 	}
