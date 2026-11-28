@@ -1209,13 +1209,36 @@ public:
 	/// Returns the DPI of the printer or 0,0 on error
 	LPoint GetDpi() override;
 
+	/// Drawable page rectangle in surface coordinates, before SetOrigin.
+	/// Returns false when page geometry is unavailable. On backends that do
+	/// not expose hardware margins, this is the available surface bounds.
+	bool GetPrintableRect(LRect &rect)
+	{
+		#if defined __GTK_H__
+			return GetGtkPrintableRect(rect);
+		#else
+			if (X() <= 0 || Y() <= 0)
+				return false;
+			rect = Bounds();
+			return true;
+		#endif
+	}
+
 	#if defined __GTK_H__
 	
 		using LSurface::SetOrigin;
+		bool GetGtkPrintableRect(LRect &rect);
+		void SetFullPage(bool fullPage);
+		/// Change the default clip for the current drawing coordinate system.
+		void SetDefaultClip(const LRect &rect);
 		Gtk::GtkPrintContext *GetPrintContext();
 		OsPainter Handle() override;
 		void SetHandle(OsPainter handle);
 		void SetOrigin(LPoint pt) override;
+
+		/// Render one printable page to an owned bitmap at the specified DPI.
+		/// The callback receives a separate print DC with the same page geometry.
+		LMemDC *RenderPageToBitmap(LPoint dpi, const std::function<bool(LPrintDC*)> &paint);
 	
 		int Op() override { return GDC_SET; }
 		int Op(int Op, NativeInt Param = -1) override { return GDC_SET; }

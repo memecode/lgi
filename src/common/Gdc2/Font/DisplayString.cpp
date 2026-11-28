@@ -82,6 +82,17 @@ struct LDisplayStringPriv
 	{
 	}
 
+	Gtk::PangoLayout *CreatePrintLayout(Gtk::GtkPrintContext *PrintCtx)
+	{
+		auto layout = Gtk::gtk_print_context_create_pango_layout(PrintCtx);
+		if (layout)
+		{
+			Gtk::pango_cairo_context_set_resolution(Gtk::pango_layout_get_context(layout), 72.0);
+			Gtk::pango_layout_context_changed(layout);
+		}
+		return layout;
+	}
+
 	void Create(Gtk::GtkPrintContext *PrintCtx)
 	{
 		auto *Fs = LFontSystem::Inst();
@@ -130,7 +141,7 @@ struct LDisplayStringPriv
 
 						// Create a pango layout
 						if (PrintCtx)
-							b->Hnd = Gtk::gtk_print_context_create_pango_layout(PrintCtx);
+							b->Hnd = CreatePrintLayout(PrintCtx);
 						else
 							b->Hnd = Gtk::pango_layout_new(DisplayCtx);
 					}
@@ -174,7 +185,7 @@ struct LDisplayStringPriv
 			b.Bytes = p.GetPtr() - Start;
 			b.Chars = Chars;
 			if (PrintCtx)
-				b.Hnd = Gtk::gtk_print_context_create_pango_layout(PrintCtx);
+				b.Hnd = CreatePrintLayout(PrintCtx);
 			else
 				b.Hnd = Gtk::pango_layout_new(LFontSystem::Inst()->GetContext());
 		}

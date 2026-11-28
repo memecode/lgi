@@ -41,6 +41,7 @@ class LHtml :
 protected:	
 	// Data
 	LHtmlFontCache		*FontCache = nullptr;
+	LSurface			*FontSurface = nullptr;
 	LTag				*Tag = nullptr;			// Tree root
 	LTag				*Cursor = nullptr;		// Cursor location..
 	LTag				*Selection = nullptr;	// Edge of selection or NULL
@@ -97,6 +98,9 @@ public:
 	/// Layout content and return size.
 	LPoint Layout(bool ForceLayout = false);
 	bool OnLayout(LViewLayoutInfo &Inf) override;
+	/// Select the font measurement surface before loading a document.
+	/// The surface must outlive the HTML control.
+	bool SetFontSurface(LSurface *surface);
 
 	// Options
 	bool GetLinkDoubleClick();

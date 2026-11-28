@@ -961,8 +961,10 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 		Destroy();
 		d->pSurface = pSurface;
 
+		// GTK print coordinates are points, independent of printer DPI.
+		auto PrintCtx = pSurface ? pSurface->GetPrintContext() : nullptr;
 		auto Dpi = pSurface ? pSurface->GetDpi() : LScreenDpi();
-		float DpiScale = (float)Dpi.x / 96.0f;
+		float DpiScale = PrintCtx ? 1.0f : (float)Dpi.x / 96.0f;
 	
 		d->hFont = Gtk::pango_font_description_new();
 		if (!d->hFont)
@@ -978,7 +980,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 			LString sFace = Face();
 			Gtk::pango_font_description_set_family(d->hFont, sFace);
 
-			auto size = Sz.Value * DpiScale;
+			auto size = Sz.Value * (PrintCtx && Sz.Type == LCss::LenPx ? 72.0f / 96.0f : DpiScale);
 			if (!std::isfinite(size) || size < 0.0f)
 			{
 				LStackTrace("%s:%i - Invalid font size %fpt, %i dpi\n", _FL, Sz.Value, Dpi.x);
@@ -1003,10 +1005,13 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 				Gtk::pango_font_description_set_weight(d->hFont, Gtk::PANGO_WEIGHT_BOLD);
 			
 			// Get metrics for this font...
-			Gtk::GtkPrintContext *PrintCtx = pSurface ? pSurface->GetPrintContext() : NULL;
 			Gtk::PangoContext *SysCtx = LFontSystem::Inst()->GetContext();
 			if (PrintCtx)
+			{
 				d->PangoCtx = gtk_print_context_create_pango_context(PrintCtx);
+				if (d->PangoCtx)
+					Gtk::pango_cairo_context_set_resolution(d->PangoCtx, 72.0);
+			}
 			auto EffectiveCtx = d->PangoCtx ? d->PangoCtx : SysCtx;
 			Gtk::PangoFontMetrics *m = Gtk::pango_context_get_metrics(d->PangoCtx ? d->PangoCtx : SysCtx, d->hFont, 0);
 			if (!m)

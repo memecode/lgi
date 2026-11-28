@@ -80,6 +80,9 @@ GtkPrintBegin(	GtkPrintOperation	*operation,
 
 	if (!d->PrintDC.Reset(new LPrintDC(context, d->JobName, d->PrinterName)))
 		return;
+	gboolean fullPage = false;
+	g_object_get(G_OBJECT(operation), "use-full-page", &fullPage, nullptr);
+	d->PrintDC->SetFullPage(fullPage);
 		
 	d->Events->OnBeginPrint(d->PrintDC, [&](auto Pages)
 	{
@@ -97,9 +100,7 @@ GtkPrintDrawPage(	GtkPrintOperation	*operation,
 					LPrinterPrivate		*d)
 {
 	cairo_t *ct = gtk_print_context_get_cairo_context(context);
-	if (ct &&
-		d->PrintDC &&
-		d->PrintDC->Handle() != ct)
+	if (ct && d->PrintDC)
 	{
 		// Update to the new handle?
 		d->PrintDC->SetHandle(ct);
@@ -144,6 +145,7 @@ void LPrinter::Print(	LPrinter::Context *Events,
 	g_signal_connect(G_OBJECT(d->Op), "draw-page", G_CALLBACK(GtkPrintDrawPage), d);
 	
 	gtk_print_operation_set_job_name(d->Op, PrintJobName);
+	gtk_print_operation_set_unit(d->Op, GTK_UNIT_POINTS);
 	gtk_print_operation_set_embed_page_setup(d->Op, true); // allow customization of page setup
 	
 	if (Events)

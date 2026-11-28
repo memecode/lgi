@@ -686,6 +686,25 @@ public:
 		}
 	}
 
+	template <typename Pixel>
+	void ScaleUpOpaque32(LSurface *Dst, LSurface *Src, int Sx, int EndX,
+		int SrcY, int DstY, int Factor)
+	{
+		auto row = (Pixel*)(*Src)[SrcY];
+		if (!row)
+		{
+			LgiTrace("%s:%i - Missing zoom source row %i.\n", _FL, SrcY);
+			return;
+		}
+		int DstX = 0;
+		for (int x = Sx; x < EndX; x++)
+		{
+			Dst->Colour(LColour(row[x].r, row[x].g, row[x].b));
+			Dst->Rectangle(DstX, DstY, DstX + Factor - 1, DstY + Factor - 1);
+			DstX += Factor;
+		}
+	}
+
 	/// Scale pixels up into a tile
 	void ScaleUp
 	(
@@ -714,6 +733,11 @@ public:
 		Pal32 pal[256];
 		switch (Src->GetColourSpace())
 		{
+			case CsRgbx32:
+			case CsBgrx32:
+			case CsXrgb32:
+			case CsXbgr32:
+				break;
 			default:
 			{
 				LAssert(0);
@@ -779,6 +803,15 @@ public:
 
 			switch (Src->GetColourSpace())
 			{
+				#define ScaleUpOpaqueCase(type) \
+					case Cs##type: \
+						ScaleUpOpaque32<L##type>(Dst, Src, Sx, EndX, SrcY, DstY, Factor); \
+						break;
+				ScaleUpOpaqueCase(Rgbx32)
+				ScaleUpOpaqueCase(Bgrx32)
+				ScaleUpOpaqueCase(Xrgb32)
+				ScaleUpOpaqueCase(Xbgr32)
+				#undef ScaleUpOpaqueCase
 				case CsIndex8:
 				{
 					uint8_t *src = (*Src)[SrcY];

@@ -20,6 +20,7 @@
 #include "lgi/common/ImageThreadManager.h"
 #include "lgi/common/Stat.h"
 #include "lgi/common/FileSelect.h"
+#include "lgi/common/ZoomView.h"
 
 #include "lgi/common/Html.h"
 #include "../src/common/Text/HtmlPriv.h"
@@ -48,9 +49,10 @@ enum Controls
 };
 
 #if defined(__GTK_H__)
+#include "../../../src/linux/Gtk/PrintGeometry.h"
 namespace
 {
-	int PrintHtmlContentToPdf(const LString &content, const char *output);
+	int PrintHtmlContentToPdf(const LString &content, const char *output, bool testBitmap = false);
 }
 #endif
 
@@ -1497,6 +1499,69 @@ static bool TestFormattedContent()
 }
 
 #if defined(__GTK_H__)
+template<typename Pixel>
+static bool TestZoomOpaque32(LColourSpace space, bool exact)
+{
+	LMemDC source(_FL);
+	if (!source.Create(70, 66, space, exact ? LSurface::SurfaceRequireExactCs : 0))
+		return false;
+	if (source.GetColourSpace() != (exact ? space : CsBgrx32))
+		return false;
+	for (int y = 0; y < source.Y(); y++)
+	{
+		auto row = (Pixel*)source[y];
+		for (int x = 0; x < source.X(); x++)
+		{
+			row[x].r = (x * 3 + 17) % 256;
+			row[x].g = (y * 5 + 29) % 256;
+			row[x].b = (x + y + 71) % 256;
+			row[x].pad = 0;
+		}
+	}
+
+	LZoomView zoom(nullptr);
+	LRect bounds(0, 0, 149, 149);
+	zoom.SetPos(bounds);
+	zoom.SetSurface(&source, false);
+	for (int level : {1, 2})
+	{
+		zoom.SetZoom(level);
+		LMemDC output(_FL, 150, 150, System32BitColourSpace);
+		zoom.OnPaint(&output);
+		int factor = level + 1;
+		auto client = zoom.GetClient();
+		for (int y : {0, 1, 42, 49, 63, 65})
+			for (int x : {0, 1, 42, 49, 63, 64, 69})
+			{
+				if (x * factor + factor - 1 > client.x2 ||
+					y * factor + factor - 1 > client.y2)
+					continue;
+				for (int dy : {0, factor - 1})
+					for (int dx : {0, factor - 1})
+					{
+						LColour actual(output.Get(x * factor + dx, y * factor + dy), output.GetBits());
+						if (actual.r() != (x * 3 + 17) % 256 ||
+							actual.g() != (y * 5 + 29) % 256 ||
+							actual.b() != (x + y + 71) % 256 ||
+							actual.a() != 255)
+							return false;
+					}
+			}
+	}
+	return true;
+}
+
+static bool TestZoomOpaque32()
+{
+	return TestZoomOpaque32<LBgrx32>(System24BitColourSpace, false) &&
+		TestZoomOpaque32<LBgrx32>(CsBgrx32, true) &&
+		TestZoomOpaque32<LRgbx32>(CsRgbx32, true) &&
+		TestZoomOpaque32<LXbgr32>(CsXbgr32, true) &&
+		TestZoomOpaque32<LXrgb32>(CsXrgb32, true);
+}
+#endif
+
+#if defined(__GTK_H__)
 namespace
 {
 	using namespace Gtk;
@@ -1506,26 +1571,18 @@ namespace
 	public:
 		using Html2::LHtml::LHtml;
 
-		bool SetFontSurface(LSurface *surface)
+		bool HasPrintFonts(LSurface *surface)
 		{
-			auto currentFont = GetFont();
-			if (!currentFont || !surface)
+			if (!FontCache)
 				return false;
-
-			auto printFont = new LFont;
-			if (!printFont)
-				return false;
-			*printFont = *currentFont;
-			if (!printFont->Create(nullptr, 0, surface))
+			bool found = false;
+			for (int i = 0; auto font = FontCache->FontAt(i); i++)
 			{
-				DeleteObj(printFont);
-				return false;
+				if (font->GetSurface() != surface)
+					return false;
+				found = true;
 			}
-
-			DeleteObj(FontCache);
-			SetFont(printFont, true);
-			FontCache = new LHtmlFontCache(printFont, (float)GetDpiScale().y, surface);
-			return FontCache != nullptr;
+			return found;
 		}
 
 	};
@@ -1535,17 +1592,347 @@ namespace
 		HtmlPdfView *Html = nullptr;
 		LString Content;
 		LAutoPtr<LPrintDC> PrintDC;
+		LRect Printable;
 		int PageHeight = 0;
 		int LineHeight = 0;
 		int PageStep = 0;
+		double Scale = 1.0;
 		bool Failed = false;
+		bool TestBitmap = false;
+		LString BitmapOutput;
 	};
+
+	bool TestPrintGeometry()
+	{
+		auto setup = gtk_page_setup_new();
+		gtk_page_setup_set_top_margin(setup, 10, GTK_UNIT_POINTS);
+		gtk_page_setup_set_bottom_margin(setup, 20, GTK_UNIT_POINTS);
+		gtk_page_setup_set_left_margin(setup, 30, GTK_UNIT_POINTS);
+		gtk_page_setup_set_right_margin(setup, 40, GTK_UNIT_POINTS);
+		bool passed = true;
+		struct Case
+		{
+			GtkPageOrientation orientation;
+			bool fullPage;
+			LRect expected;
+		};
+		Case cases[] = {
+			{GTK_PAGE_ORIENTATION_PORTRAIT, false, LRect(5, 2, 488, 592)},
+			{GTK_PAGE_ORIENTATION_LANDSCAPE, false, LRect(7, 5, 497, 588)},
+			{GTK_PAGE_ORIENTATION_REVERSE_PORTRAIT, false, LRect(11, 7, 494, 597)},
+			{GTK_PAGE_ORIENTATION_REVERSE_LANDSCAPE, false, LRect(2, 11, 492, 594)},
+			{GTK_PAGE_ORIENTATION_PORTRAIT, true, LRect(35, 12, 448, 572)},
+		};
+		for (auto &c : cases)
+		{
+			gtk_page_setup_set_orientation(setup, c.orientation);
+			auto rect = LGtkPrintableRect(setup, 500.5, 600.5, 12, 27, 35, 51, c.fullPage);
+			if (rect != c.expected)
+			{
+				fprintf(stderr, "Printable rect mismatch for orientation %d, full page %d: %d,%d-%d,%d\n",
+					c.orientation, c.fullPage, rect.x1, rect.y1, rect.x2, rect.y2);
+				passed = false;
+			}
+		}
+		g_object_unref(setup);
+		return passed;
+	}
+
+	bool TestPrintFontDpi(HtmlPdfPrint *print)
+	{
+		auto context = print->PrintDC->GetPrintContext();
+		double originalDpiX = gtk_print_context_get_dpi_x(context);
+		double originalDpiY = gtk_print_context_get_dpi_y(context);
+		auto cr = cairo_reference(print->PrintDC->Handle());
+		cairo_save(cr);
+		int firstHeight = 0, firstWidth = 0, firstInkWidth = 0, firstInkHeight = 0;
+		bool passed = true;
+		for (int dpi : {72, 300, 600})
+		{
+			gtk_print_context_set_cairo_context(context, cr, dpi, dpi);
+			LFont font;
+			if (!font.Create("DejaVu Sans", LCss::Len(LCss::LenPt, 12), print->PrintDC))
+			{
+				passed = false;
+				break;
+			}
+			LDisplayString text(&font, "Font size");
+			int height = font.GetHeight();
+			int width = text.X();
+			if (!firstHeight)
+			{
+				firstHeight = height;
+				firstWidth = width;
+			}
+			if (pango_font_description_get_size(font.Handle()) != 12 * PANGO_SCALE ||
+				height < 12 || height > 18 || width < 40 || width > 75 ||
+				std::abs(height - firstHeight) > 1 || std::abs(width - firstWidth) > 1)
+			{
+				fprintf(stderr, "Print font metrics at %d DPI: height %d, width %d (expected %d, %d)\n",
+					dpi, height, width, firstHeight, firstWidth);
+				passed = false;
+			}
+
+			font.Transparent(true);
+			font.Colour(L_TEXT, L_WORKSPACE);
+			LAutoPtr<LMemDC> image(print->PrintDC->RenderPageToBitmap(LPoint(300, 300),
+				[&text](LPrintDC *dc)
+				{
+					text.Draw(dc, 20, 20);
+					return true;
+				}));
+			if (!image)
+			{
+				passed = false;
+				continue;
+			}
+			int x1 = image->X(), y1 = image->Y(), x2 = -1, y2 = -1;
+			for (int y = 0; y < 300; y++)
+				for (int x = 0; x < 600; x++)
+				{
+					LColour c(image->Get(x, y), image->GetBits());
+					if (c.r() < 128 && c.g() < 128 && c.b() < 128)
+					{
+						x1 = MIN(x1, x);
+						y1 = MIN(y1, y);
+						x2 = MAX(x2, x);
+						y2 = MAX(y2, y);
+					}
+				}
+			int inkWidth = x2 - x1 + 1, inkHeight = y2 - y1 + 1;
+			if (x2 < x1 || y2 < y1)
+				passed = false;
+			else if (!firstInkWidth)
+			{
+				firstInkWidth = inkWidth;
+				firstInkHeight = inkHeight;
+			}
+			else if (std::abs(inkWidth - firstInkWidth) > 1 ||
+				std::abs(inkHeight - firstInkHeight) > 1)
+			{
+				fprintf(stderr, "Print font ink at %d DPI: %d x %d (expected %d x %d)\n",
+					dpi, inkWidth, inkHeight, firstInkWidth, firstInkHeight);
+				passed = false;
+			}
+
+			LFont pixelFont;
+			if (!pixelFont.Create("DejaVu Sans", LCss::Len(LCss::LenPx, 16), print->PrintDC) ||
+				pango_font_description_get_size(pixelFont.Handle()) != 12 * PANGO_SCALE)
+				passed = false;
+			else
+			{
+				LDisplayString pixelText(&pixelFont, "Font size");
+				if (std::abs(pixelFont.GetHeight() - firstHeight) > 1 ||
+					std::abs(pixelText.X() - firstWidth) > 1)
+					passed = false;
+			}
+		}
+		gtk_print_context_set_cairo_context(context, cr, originalDpiX, originalDpiY);
+		cairo_restore(cr);
+		cairo_destroy(cr);
+		return passed;
+	}
+
+	bool TestPrintImages(HtmlPdfPrint *print)
+	{
+		LMemDC opaque(_FL, 8, 8, CsBgrx32);
+		LMemDC rgba(_FL, 8, 8, CsRgba32, LSurface::SurfaceRequireExactCs);
+		LMemDC transparent(_FL, 8, 8, CsBgra32);
+		LMemDC empty(_FL);
+		if (!opaque[0] || !rgba[0] || !transparent[0])
+			return false;
+		opaque.Colour(LColour::Blue);
+		opaque.Rectangle();
+		opaque.Colour(LColour::Red);
+		opaque.Rectangle(4, 4, 7, 7);
+		rgba.Colour(LColour(0, 255, 0));
+		rgba.Rectangle();
+		transparent.ConvertPreMulAlpha(false);
+		for (int y = 0; y < 8; y++)
+			for (int x = 0; x < 8; x++)
+			{
+				auto &pixel = reinterpret_cast<LBgra32*>(transparent[y])[x];
+				pixel.r = 200; pixel.g = 0; pixel.b = 0; pixel.a = 128;
+			}
+		LAutoPtr<LMemDC> image(print->PrintDC->RenderPageToBitmap(LPoint(72, 72),
+			[&](LPrintDC *dc)
+			{
+				LRect source(4, 4, 7, 7), dest(20, 20, 35, 35);
+				dc->StretchBlt(&dest, &opaque, &source);
+				dc->Blt(40, 20, &rgba);
+				dc->Blt(60, 20, &transparent);
+				// Failed image allocation must not assert or poison the Cairo target.
+				dc->Blt(80, 20, &empty);
+				dc->SetOrigin(-100, -100);
+				dc->SetDefaultClip(LRect(100, 100, 103, 103));
+				dc->Blt(0, 0, &opaque);
+				return cairo_status(dc->Handle()) == CAIRO_STATUS_SUCCESS;
+			}));
+		if (!image)
+			return false;
+		auto colour = [&](int x, int y) { return LColour(image->Get(x, y), image->GetBits()); };
+		auto red = colour(28, 28), green = colour(44, 24), alpha = colour(64, 24);
+		auto blue = colour(101, 101), outside = colour(105, 105);
+		if (red.r() < 240 || red.g() > 15 || red.b() > 15 ||
+			green.g() < 240 || green.r() > 15 || green.b() > 15 ||
+			std::abs(alpha.r() - 227) > 2 || std::abs(alpha.g() - 127) > 2 ||
+			std::abs(alpha.b() - 127) > 2 ||
+			blue.b() < 240 || blue.r() > 15 || blue.g() > 15 ||
+			outside.r() < 240 || outside.g() < 240 || outside.b() < 240)
+		{
+			fprintf(stderr, "Print image pixels failed: red=%d,%d,%d green=%d,%d,%d alpha=%d,%d,%d blue=%d,%d,%d outside=%d,%d,%d\n",
+				red.r(), red.g(), red.b(), green.r(), green.g(), green.b(),
+				alpha.r(), alpha.g(), alpha.b(), blue.r(), blue.g(), blue.b(),
+				outside.r(), outside.g(), outside.b());
+			return false;
+		}
+		LDefaultDocumentEnv env;
+		TestIframeHtml html(0, 0, 0, 100, 100, &env);
+		if (!html.SetFontSurface(print->PrintDC) ||
+			!html.Name("<html><body style='margin:0'><img width='8' height='8'></body></html>"))
+			return false;
+		auto tag = static_cast<Html2::LTag*>(FindTag(html.RootTag(), TAG_IMG));
+		if (!tag)
+			return false;
+		tag->SetImage("test-empty-image", LAutoPtr<LSurface>(new LMemDC(_FL)));
+		if (tag->Image)
+		{
+			fprintf(stderr, "HTML retained an unreadable image\n");
+			return false;
+		}
+		LAutoPtr<LSurface> loaded(new LMemDC(_FL, 4, 4, CsBgrx32));
+		if (!loaded || !(*loaded)[0])
+			return false;
+		loaded->Colour(LColour::Blue);
+		loaded->Rectangle();
+		tag->SetImage("test-loaded-image", loaded);
+		html.Layout(true);
+		LAutoPtr<LMemDC> htmlImage(print->PrintDC->RenderPageToBitmap(LPoint(72, 72),
+			[&](LPrintDC *dc)
+			{
+				html.OnPaint(dc);
+				return !html.GetMaxPaintTimeout();
+			}));
+		if (!htmlImage || !tag->Image || tag->Image->X() != 8 || tag->Image->Y() != 8)
+			return false;
+		LColour htmlPixel(htmlImage->Get(4, 4), htmlImage->GetBits());
+		if (htmlPixel.b() < 240 || htmlPixel.r() > 15 || htmlPixel.g() > 15)
+		{
+			fprintf(stderr, "HTML image did not reach print bitmap\n");
+			return false;
+		}
+		return true;
+	}
+
+	bool TestPrintBitmap(HtmlPdfPrint *print)
+	{
+		LRect printable;
+		if (!TestPrintGeometry() || !TestPrintImages(print) || !print->PrintDC->GetPrintableRect(printable) ||
+			printable != print->PrintDC->Bounds() ||
+			!print->Html->HasPrintFonts(print->PrintDC) || !TestPrintFontDpi(print))
+			return false;
+		auto originalHandle = print->PrintDC->Handle();
+		auto originalOrigin = print->PrintDC->GetOrigin();
+		for (int dpi : {300, 600})
+		{
+			LAutoPtr<LMemDC> image(print->PrintDC->RenderPageToBitmap(LPoint(dpi, dpi),
+				[print](LPrintDC *dc)
+				{
+					print->Html->SetVScroll(0);
+					print->Html->OnPaint(dc);
+					if (print->Html->GetMaxPaintTimeout())
+						return false;
+					dc->SetOrigin(10, 10);
+					dc->Colour(LColour::Red);
+					dc->Rectangle(200, 200, 209, 209);
+					return true;
+				}));
+			if (!image ||
+				image->X() != (int)ceil(print->PrintDC->X() * dpi / 72.0) ||
+				image->Y() != (int)ceil(print->PrintDC->Y() * dpi / 72.0))
+				return false;
+			if (dpi == 300 && !GdcD->Save(print->BitmapOutput, image))
+				return false;
+
+			int marker = (int)(195.0 * dpi / 72.0);
+			LColour red(image->Get(marker, marker), image->GetBits());
+			if (red.r() < 240 || red.g() > 15 || red.b() > 15)
+				return false;
+
+			int darkPixels = 0;
+			int greenPixels = 0;
+			int bluePixels = 0;
+			for (int y = 0; y < (int)(80.0 * dpi / 72.0); y++)
+				for (int x = 0; x < (int)(300.0 * dpi / 72.0); x++)
+				{
+					LColour c(image->Get(x, y), image->GetBits());
+					if (c.r() < 80 && c.g() < 80 && c.b() < 80)
+						darkPixels++;
+					if (c.r() < 30 && c.g() > 225 && c.b() < 30)
+						greenPixels++;
+					if (c.r() < 30 && c.g() < 30 && c.b() > 225)
+						bluePixels++;
+				}
+			if (darkPixels < 20 || greenPixels < 20 || bluePixels < 20)
+				return false;
+		}
+
+		LAutoPtr<LMemDC> invalid(print->PrintDC->RenderPageToBitmap(LPoint(0, 300),
+			[](LPrintDC*) { return true; }));
+		LAutoPtr<LMemDC> rejected(print->PrintDC->RenderPageToBitmap(LPoint(300, 300),
+			[](LPrintDC*) { return false; }));
+		LAutoPtr<LMemDC> transformed(print->PrintDC->RenderPageToBitmap(LPoint(72, 72),
+			[](LPrintDC *dc)
+			{
+				auto cr = dc->Handle();
+				cairo_translate(cr, 30, 40);
+				dc->SetHandle(cr);
+				dc->SetOrigin(10, 10);
+				dc->Colour(LColour::Red);
+				dc->Rectangle(200, 200, 209, 209);
+				return true;
+			}));
+		if (!transformed)
+			return false;
+		LColour marker(transformed->Get(225, 235), transformed->GetBits());
+		LAutoPtr<LMemDC> clipped(print->PrintDC->RenderPageToBitmap(LPoint(72, 72),
+			[](LPrintDC *dc)
+			{
+				auto cr = dc->Handle();
+				cairo_save(cr);
+				cairo_rectangle(cr, 50, 80, 100, 100);
+				cairo_clip(cr);
+				cairo_translate(cr, 50, 80);
+				cairo_scale(cr, 0.5, 0.5);
+				dc->SetHandle(cr);
+				dc->SetDefaultClip(LRect(0, 0, 199, 199));
+				dc->SetOrigin(0, 40);
+				dc->Colour(LColour::Red);
+				dc->Rectangle(40, 100, 59, 119);
+				dc->Rectangle(200, 200, 240, 240);
+				cairo_restore(cr);
+				return true;
+			}));
+		if (!clipped)
+			return false;
+		LColour inside(clipped->Get(75, 115), clipped->GetBits());
+		LColour outside(clipped->Get(155, 165), clipped->GetBits());
+		return marker.r() > 240 && marker.g() < 15 && marker.b() < 15 &&
+			inside.r() > 240 && inside.g() < 15 && inside.b() < 15 &&
+			outside.r() > 240 && outside.g() > 240 && outside.b() > 240 &&
+			!invalid && !rejected &&
+			print->PrintDC->Handle() == originalHandle &&
+			print->PrintDC->GetOrigin() == originalOrigin;
+	}
 
 	void HtmlPdfBeginPrint(GtkPrintOperation *operation, GtkPrintContext *context, gpointer data)
 	{
 		auto print = (HtmlPdfPrint*)data;
 		print->PrintDC.Reset(new LPrintDC(context, "HtmlTestSuite"));
-		if (!print->PrintDC || !print->PrintDC->X() || !print->PrintDC->Y())
+		gboolean fullPage = false;
+		g_object_get(G_OBJECT(operation), "use-full-page", &fullPage, nullptr);
+		print->PrintDC->SetFullPage(fullPage);
+		if (!print->PrintDC || !print->PrintDC->GetPrintableRect(print->Printable))
 		{
 			print->Failed = true;
 			gtk_print_operation_cancel(operation);
@@ -1561,11 +1948,23 @@ namespace
 		}
 
 		LRect pos = print->Html->GetPos();
-		pos.SetSize(print->PrintDC->X(), print->PrintDC->Y());
+		pos.SetSize(print->Printable.X(), print->Printable.Y());
 		print->Html->SetPos(pos);
-		print->PageHeight = print->PrintDC->Y();
+		print->PageHeight = print->Printable.Y();
 
 		LPoint content = print->Html->Layout(true);
+		if (print->TestBitmap)
+		{
+			if (!print->Html->HasPrintFonts(print->PrintDC) ||
+				!print->Html->Name(print->Content))
+			{
+				fprintf(stderr, "Print font cache did not survive document loading\n");
+				print->Failed = true;
+				gtk_print_operation_cancel(operation);
+				return;
+			}
+			content = print->Html->Layout(true);
+		}
 		print->LineHeight = print->Html->GetFont()->GetHeight();
 		if (print->LineHeight <= 0)
 		{
@@ -1573,9 +1972,18 @@ namespace
 			gtk_print_operation_cancel(operation);
 			return;
 		}
-		print->PageStep = MAX((print->PageHeight / print->LineHeight) * print->LineHeight, print->LineHeight);
+		print->Scale = content.x > print->Printable.X() ?
+			(double)print->Printable.X() / content.x : 1.0;
+		int available = (int)(print->PageHeight / print->Scale);
+		print->PageStep = MAX((available / print->LineHeight) * print->LineHeight, print->LineHeight);
 		int pages = MAX((content.y + print->PageStep - 1) / print->PageStep, 1);
 		gtk_print_operation_set_n_pages(operation, pages);
+		if (print->TestBitmap && !TestPrintBitmap(print))
+		{
+			fprintf(stderr, "Print bitmap test failed\n");
+			print->Failed = true;
+			gtk_print_operation_cancel(operation);
+		}
 	}
 
 	void HtmlPdfDrawPage(GtkPrintOperation*, GtkPrintContext *context, gint page, gpointer data)
@@ -1584,13 +1992,39 @@ namespace
 		print->PrintDC->SetHandle(gtk_print_context_get_cairo_context(context));
 		print->PrintDC->Colour(LColour::White);
 		print->PrintDC->Rectangle();
+		auto cr = print->PrintDC->Handle();
+		cairo_save(cr);
+		cairo_rectangle(cr, print->Printable.x1, print->Printable.y1,
+			print->Printable.X(), print->Printable.Y());
+		cairo_clip(cr);
+		cairo_translate(cr, print->Printable.x1, print->Printable.y1);
+		cairo_scale(cr, print->Scale, print->Scale);
+		print->PrintDC->SetHandle(cr);
+		LRect htmlClip(0, 0, (int)ceil(print->Printable.X() / print->Scale) - 1,
+			(int)ceil(print->Printable.Y() / print->Scale) - 1);
+		print->PrintDC->SetDefaultClip(htmlClip);
 		int scrollLines = page * print->PageStep / print->LineHeight;
-		print->Html->SetVScroll(scrollLines);
+		print->Html->SetVScroll(0);
 		print->PrintDC->SetOrigin(0, scrollLines * print->LineHeight);
 		print->Html->OnPaint(print->PrintDC);
+		cairo_restore(cr);
+		print->PrintDC->SetHandle(cr);
+		print->PrintDC->SetDefaultClip(print->Printable);
+		if (print->TestBitmap)
+		{
+			LMemDC source(_FL, 8, 8, CsRgba32, LSurface::SurfaceRequireExactCs);
+			if (!source[0])
+			{
+				print->Failed = true;
+				return;
+			}
+			source.Colour(LColour::Blue);
+			source.Rectangle();
+			print->PrintDC->Blt(300, 200, &source);
+		}
 	}
 
-	int PrintHtmlContentToPdf(const LString &content, const char *output)
+	int PrintHtmlContentToPdf(const LString &content, const char *output, bool testBitmap)
 	{
 		if (!content || !ValidStr(output))
 		{
@@ -1604,6 +2038,9 @@ namespace
 		HtmlPdfPrint print;
 		print.Html = &html;
 		print.Content = content;
+		print.TestBitmap = testBitmap;
+		if (testBitmap)
+			print.BitmapOutput = LString::Fmt("%s.preview.png", output);
 		auto operation = gtk_print_operation_new();
 		if (!operation)
 		{
@@ -1614,6 +2051,17 @@ namespace
 		g_signal_connect(G_OBJECT(operation), "begin-print", G_CALLBACK(HtmlPdfBeginPrint), &print);
 		g_signal_connect(G_OBJECT(operation), "draw-page", G_CALLBACK(HtmlPdfDrawPage), &print);
 		gtk_print_operation_set_export_filename(operation, output);
+		gtk_print_operation_set_unit(operation, GTK_UNIT_POINTS);
+		if (testBitmap)
+		{
+			auto setup = gtk_page_setup_new();
+			gtk_page_setup_set_left_margin(setup, 18, GTK_UNIT_POINTS);
+			gtk_page_setup_set_right_margin(setup, 27, GTK_UNIT_POINTS);
+			gtk_page_setup_set_top_margin(setup, 36, GTK_UNIT_POINTS);
+			gtk_page_setup_set_bottom_margin(setup, 45, GTK_UNIT_POINTS);
+			gtk_print_operation_set_default_page_setup(operation, setup);
+			g_object_unref(setup);
+		}
 		GError *error = nullptr;
 		auto result = gtk_print_operation_run(
 			operation,
@@ -1663,7 +2111,23 @@ int LgiMain(OsAppArguments &AppArgs)
 	LApp a(AppArgs, "HtmlTestSuite");
 	if (a.IsOk())
 	{
+		#if defined(__GTK_H__)
+		if (a.GetOption("test-zoom-opaque32"))
+		{
+			bool passed = TestZoomOpaque32();
+			printf("Opaque 32-bit zoom: %s\n", passed ? "PASS" : "FAIL");
+			return passed ? 0 : 1;
+		}
+		#endif
 		LString printFile;
+		#if defined(__GTK_H__)
+		if (a.GetOption("test-print-bitmap", printFile))
+			return PrintHtmlContentToPdf(
+				"<html><body style='background-color:white;color:black'>"
+				"<div style='font-size:12pt;background-color:#00ff00;border:2px solid #0000ff;width:150px;height:40px'>"
+				"Preview text sample</div></body></html>",
+				printFile, true);
+		#endif
 		if (a.GetOption("print", printFile))
 		{
 			#if defined(__GTK_H__)
@@ -1717,6 +2181,8 @@ int LgiMain(OsAppArguments &AppArgs)
 	        "   -test-iframe-loaded     Run the iframe loaded content test\n"
 	        "   -test-fragment-scroll   Run the fragment navigation test\n"
 	        "   -test-formatted-content Check HTML and text export results\n"
+	        "   -test-zoom-opaque32     Check zooming opaque 32-bit images (GTK only)\n"
+	        "   -test-print-bitmap <file> Test page capture and export PDF (GTK only)\n"
 	        "   -print <fileName>       Export the HTML file to <fileName>.pdf (GTK only)\n"
 	        "   -render <fileName>      Render the file to the 'render.png'\n",
 	        AppArgs.Arg[0]);

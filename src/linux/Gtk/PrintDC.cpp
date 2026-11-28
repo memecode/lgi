@@ -1,5 +1,6 @@
 #include "lgi/common/Lgi.h"
 #include "CairoVectorContext.h"
+#include "PrintGeometry.h"
 // #include <cups/ipp.h>
 // #include <cups/cups.h>
 
@@ -19,6 +20,8 @@ public:
 	LRect Clip;
 	LRect PageBounds;
 	Gtk::cairo_t *cr = nullptr;
+	Gtk::cairo_matrix_t baseMatrix;
+	bool fullPage = false;
 	
 	LPrintDCPrivate(Gtk::GtkPrintContext *handle)
 	{
@@ -45,18 +48,9 @@ LPrintDC::LPrintDC(void *Handle, const char *PrintJobName, const char *PrinterNa
 	d = new LPrintDCPrivate((Gtk::GtkPrintContext*)Handle);
 	d->PrintJobName = PrintJobName;
 	d->PrinterName = PrinterName;
-	d->cr = gtk_print_context_get_cairo_context(d->Handle);
 	ColourSpace = CsRgb24;
-	if (auto pageSetup = gtk_print_context_get_page_setup(d->Handle))
-	{
-		d->PageBounds.Set(0, 0,
-			(int)gtk_page_setup_get_paper_width(pageSetup, Gtk::GTK_UNIT_POINTS) - 1,
-			(int)gtk_page_setup_get_paper_height(pageSetup, Gtk::GTK_UNIT_POINTS) - 1);
-	}
-	else
-	{
-		d->PageBounds = Bounds();
-	}
+	SetHandle(gtk_print_context_get_cairo_context(d->Handle));
+	d->PageBounds = Bounds();
 	d->Clip = d->PageBounds;
 }
 
@@ -82,11 +76,102 @@ OsPainter LPrintDC::Handle()
 
 void LPrintDC::SetHandle(OsPainter hnd)
 {
-	if (d->cr != hnd)
+	d->cr = hnd;
+	if (d->cr)
 	{
-		LgiTrace("%s:%i - LPrintDC updating handle to %p\n", _FL, hnd);
-		d->cr = hnd;
+		cairo_get_matrix(d->cr, &d->baseMatrix);
+		LSurface::SetOrigin(LPoint(0, 0));
 	}
+}
+
+void LPrintDC::SetFullPage(bool fullPage)
+{
+	d->fullPage = fullPage;
+	LRect printable;
+	if (GetGtkPrintableRect(printable))
+		d->PageBounds = d->Clip = printable;
+}
+
+void LPrintDC::SetDefaultClip(const LRect &rect)
+{
+	d->PageBounds = d->Clip = rect;
+}
+
+bool LPrintDC::GetGtkPrintableRect(LRect &rect)
+{
+	if (!d->Handle || X() <= 0 || Y() <= 0)
+		return false;
+	rect = Bounds();
+	auto setup = gtk_print_context_get_page_setup(d->Handle);
+	if (!setup)
+		return false;
+
+	double top, bottom, left, right;
+	if (!gtk_print_context_get_hard_margins(d->Handle, &top, &bottom, &left, &right))
+		return true;
+
+	rect = LGtkPrintableRect(setup, gtk_print_context_get_width(d->Handle),
+		gtk_print_context_get_height(d->Handle), top, bottom, left, right, d->fullPage);
+	return rect.Valid();
+}
+
+LMemDC *LPrintDC::RenderPageToBitmap(LPoint dpi, const std::function<bool(LPrintDC*)> &paint)
+{
+	if (!d->Handle || X() <= 0 || Y() <= 0 || dpi.x <= 0 || dpi.y <= 0 || !paint)
+	{
+		LgiTrace("%s:%i - Invalid print page capture parameters.\n", _FL);
+		return nullptr;
+	}
+
+	double width = ceil((double)X() * dpi.x / 72.0);
+	double height = ceil((double)Y() * dpi.y / 72.0);
+	// Cairo image surfaces have a maximum dimension of 32767 pixels.
+	if (width < 1 || height < 1 || width > 32767 || height > 32767)
+	{
+		LgiTrace("%s:%i - Invalid print page bitmap dimensions: %.0f x %.0f.\n", _FL, width, height);
+		return nullptr;
+	}
+
+	LAutoPtr<LMemDC> image(new LMemDC(_FL));
+	if (!image || !image->Create((int)width, (int)height, System24BitColourSpace) ||
+		!image->GetSurface() || !(*image)[0])
+	{
+		LgiTrace("%s:%i - Failed to allocate print page bitmap: %.0f x %.0f.\n", _FL, width, height);
+		return nullptr;
+	}
+	auto surface = image->GetSurface();
+	auto cr = image->Handle();
+	if (!cr || cairo_surface_status(surface) != Gtk::CAIRO_STATUS_SUCCESS ||
+		cairo_status(cr) != Gtk::CAIRO_STATUS_SUCCESS)
+	{
+		LgiTrace("%s:%i - Failed to create the print page Cairo target.\n", _FL);
+		return nullptr;
+	}
+
+	image->Colour(LColour::White);
+	image->Rectangle();
+	cairo_surface_set_device_scale(surface, (double)dpi.x / 72.0, (double)dpi.y / 72.0);
+	LPrintDC preview(d->Handle, d->PrintJobName, d->PrinterName);
+	preview.SetFullPage(d->fullPage);
+	preview.SetHandle(cr);
+	bool success = paint(&preview);
+	cairo_surface_flush(surface);
+	if (!success)
+	{
+		LgiTrace("%s:%i - Print page bitmap paint failed.\n", _FL);
+		return nullptr;
+	}
+	auto status = cairo_status(cr);
+	if (status == Gtk::CAIRO_STATUS_SUCCESS)
+		status = cairo_surface_status(surface);
+	if (status != Gtk::CAIRO_STATUS_SUCCESS)
+	{
+		LgiTrace("%s:%i - Failed to render print page bitmap: %s.\n",
+			_FL, cairo_status_to_string(status));
+		return nullptr;
+	}
+	cairo_surface_set_device_scale(surface, 1, 1);
+	return image.Release();
 }
 
 void LPrintDC::SetOrigin(LPoint pt)
@@ -95,10 +180,8 @@ void LPrintDC::SetOrigin(LPoint pt)
 
 	if (d->cr)
 	{
-		Gtk::cairo_matrix_t m;
-		cairo_get_matrix(d->cr, &m);
-		m.x0 = -pt.x;
-		m.y0 = -pt.y;
+		auto m = d->baseMatrix;
+		cairo_matrix_translate(&m, -pt.x, -pt.y);
 		cairo_set_matrix(d->cr, &m);
 	}
 }
@@ -306,79 +389,103 @@ void LPrintDC::Rectangle(LRect *a)
 
 void LPrintDC::Blt(int x, int y, LSurface *Src, LRect *SrcClip)
 {
+	if (!Src)
+	{
+		LgiTrace("%s:%i - Missing print blit source.\n", _FL);
+		return;
+	}
 	LRect s = SrcClip ? *SrcClip : Src->Bounds();
-	LRect d = s;
-	d.ZOff(x, y);
-	StretchBlt(&d, Src, &s);
+	LRect dest(x, y, x + s.X() - 1, y + s.Y() - 1);
+	StretchBlt(&dest, Src, &s);
 }
 
 void LPrintDC::StretchBlt(LRect *rc, LSurface *Src, LRect *s)
 {
-	if (!d->cr)
+	if (!d->cr || !rc || !Src || !rc->Valid())
 	{
-		LAssert(0);
-		return;
-	}
-	
-	uint8_t *Scan0 = (*Src)[0];
-	if (!Scan0)
-	{
-		LAssert(0);
-		return;
-	}
-	
-	Gtk::cairo_format_t Fmt = Gtk::CAIRO_FORMAT_INVALID;
-	switch (Src->GetBits())
-	{
-		case 16:
-			Fmt = Gtk::CAIRO_FORMAT_RGB16_565;
-			break;
-		case 24:
-			Fmt = Gtk::CAIRO_FORMAT_RGB24;
-			break;
-		case 32:
-			Fmt = Gtk::CAIRO_FORMAT_ARGB32;
-			break;
-	}
-	if (Fmt == Gtk::CAIRO_FORMAT_INVALID)
-	{
-		LAssert(0);
-		return;
-	}
-	
-	Gtk::cairo_surface_t *Img = cairo_image_surface_create_for_data(Scan0,
-																	Fmt,
-																	Src->X(),
-																	Src->Y(),
-																	Src->GetRowStep());
-	if (!Img)
-	{
-		LAssert(0);
+		LgiTrace("%s:%i - Invalid print blit parameters.\n", _FL);
 		return;
 	}
 
-	Gtk::cairo_pattern_t *Pat = cairo_pattern_create_for_surface(Img);
-	if (Pat)
+	LRect source = s ? *s : Src->Bounds();
+	if (!source.Valid() || source.x1 < 0 || source.y1 < 0 ||
+		source.x2 >= Src->X() || source.y2 >= Src->Y() || !(*Src)[0])
 	{
-		Gtk::cairo_matrix_t m;
-		double Sx = (double) s->X() / rc->X();
-		double Sy = (double) s->Y() / rc->Y();
-		cairo_matrix_init_scale(&m, Sx, Sy);
-		cairo_matrix_translate(&m, -rc->x1,-rc->y1);
-		cairo_pattern_set_matrix(Pat, &m);
+		LgiTrace("%s:%i - Unreadable print image: %s, %ix%i, %s.\n",
+			_FL, Src->GetClass(), Src->X(), Src->Y(), LColourSpaceToString(Src->GetColourSpace()));
+		return;
+	}
+
+	LAutoPtr<LMemDC> converted;
+	auto mem = dynamic_cast<LMemDC*>(Src);
+	if (!mem || !mem->GetSurface() || Src->AlphaDC())
+	{
+		converted.Reset(new LMemDC(_FL));
+		if (!converted || !converted->Create(source.X(), source.Y(), System32BitColourSpace) ||
+			!(*converted)[0])
+		{
+			LgiTrace("%s:%i - Failed to allocate print image conversion.\n", _FL);
+			return;
+		}
+		converted->Colour(0, 32);
+		converted->Rectangle();
+		converted->Op(GDC_ALPHA);
+		converted->Blt(0, 0, Src, &source);
+		mem = converted;
+		source = mem->Bounds();
+	}
+	auto image = mem->GetSubImage(source);
+	if (!image || Gtk::cairo_surface_status(image) != Gtk::CAIRO_STATUS_SUCCESS)
+	{
+		LgiTrace("%s:%i - Failed to create print image surface.\n", _FL);
+		return;
+	}
+
+	// PDF output may retain the image after the source or conversion is freed.
+	LCairoSurfaceT snapshot(Gtk::cairo_image_surface_create(
+		Gtk::cairo_image_surface_get_format(image), source.X(), source.Y()));
+	if (Gtk::cairo_surface_status(snapshot) != Gtk::CAIRO_STATUS_SUCCESS)
+	{
+		LgiTrace("%s:%i - Failed to allocate print image snapshot.\n", _FL);
+		return;
+	}
+	auto copy = Gtk::cairo_create(snapshot);
+	Gtk::cairo_set_source_surface(copy, image, 0, 0);
+	Gtk::cairo_paint(copy);
+	auto copyStatus = Gtk::cairo_status(copy);
+	Gtk::cairo_destroy(copy);
+	if (copyStatus != Gtk::CAIRO_STATUS_SUCCESS)
+	{
+		LgiTrace("%s:%i - Failed to copy print image: %s.\n", _FL, Gtk::cairo_status_to_string(copyStatus));
+		return;
+	}
+	auto pattern = Gtk::cairo_pattern_create_for_surface(snapshot);
+	auto status = cairo_pattern_status(pattern);
+	if (status == Gtk::CAIRO_STATUS_SUCCESS)
+	{
+		Gtk::cairo_matrix_t matrix;
+		double sx = (double)source.X() / rc->X();
+		double sy = (double)source.Y() / rc->Y();
+		cairo_matrix_init(&matrix, sx, 0, 0, sy, -rc->x1 * sx, -rc->y1 * sy);
+		cairo_pattern_set_matrix(pattern, &matrix);
+		cairo_pattern_set_extend(pattern, Gtk::CAIRO_EXTEND_PAD);
 
 		cairo_save(d->cr);
-		cairo_set_source(d->cr, Pat);
-		
+		auto clip = ClipRgn();
+		auto origin = GetOrigin();
+		cairo_new_path(d->cr);
+		cairo_rectangle(d->cr, clip.x1 + origin.x, clip.y1 + origin.y, clip.X(), clip.Y());
+		cairo_clip(d->cr);
+		cairo_set_source(d->cr, pattern);
 		cairo_new_path(d->cr);
 		cairo_rectangle(d->cr, rc->x1, rc->y1, rc->X(), rc->Y());
 		cairo_fill(d->cr);
-		
 		cairo_restore(d->cr);
-		cairo_pattern_destroy(Pat);
+		status = cairo_status(d->cr);
 	}
-	
-	cairo_surface_destroy(Img);
+	if (status != Gtk::CAIRO_STATUS_SUCCESS)
+		LgiTrace("%s:%i - Print image blit failed: %s.\n", _FL, Gtk::cairo_status_to_string(status));
+	cairo_pattern_destroy(pattern);
 }
 
 void LPrintDC::Polygon(int Points, LPoint *Data)

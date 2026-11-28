@@ -3424,6 +3424,12 @@ void LTag::Find(int TagType, LArray<LTag*> &Out)
 
 void LTag::SetImage(const char *Uri, LAutoPtr<LSurface> Img)
 {
+	if (Img && (Img->X() <= 0 || Img->Y() <= 0 || !(*Img)[0]))
+	{
+		LgiTrace("%s:%i - Discarding unreadable HTML image: %s, %ix%i.\n",
+			_FL, Img->GetClass(), Img->X(), Img->Y());
+		return;
+	}
 	if (Img)
 	{
 		if (TagId != TAG_IMG)
@@ -3440,25 +3446,32 @@ void LTag::SetImage(const char *Uri, LAutoPtr<LSurface> Img)
 		{
 			if (Img->GetColourSpace() == CsIndex8)
 			{
-				if (Image.Reset(new LMemDC(_FL, Img->X(), Img->Y(), System32BitColourSpace)))
+				if (Image.Reset(new LMemDC(_FL)) &&
+					Image->Create(Img->X(), Img->Y(), System32BitColourSpace) && (*Image)[0])
 				{
 					Image->Colour(0, 32);
 					Image->Rectangle();
 					Image->Blt(0, 0, Img);
 				}
-				else LgiTrace("%s:%i - SetImage can't promote 8bit image to 32bit.\n", _FL);
+				else
+				{
+					Image.Reset();
+					LgiTrace("%s:%i - SetImage can't promote 8bit image to 32bit.\n", _FL);
+					return;
+				}
 			}
 			else Image = Img;
 			
 			LRect r = XSubRect();
 			if (r.Valid())
 			{
-				LAutoPtr<LSurface> t(new LMemDC(_FL, r.X(), r.Y(), Image->GetColourSpace()));
-				if (t)
+				LAutoPtr<LSurface> t(new LMemDC(_FL));
+				if (t && t->Create(r.X(), r.Y(), Image->GetColourSpace()) && (*t)[0])
 				{
 					t->Blt(0, 0, Image, &r);
 					Image = t;
 				}
+				else LgiTrace("%s:%i - Failed to allocate HTML sub-image.\n", _FL);
 			}
 		}		
 
@@ -3517,8 +3530,11 @@ void LTag::LoadImage(const char *Uri)
 		if (!Image.Reset(new LMemDC(_FL)))
 			return;
 		auto result = Filter->ReadImage(Image, &bin);
-		if (result != LFilter::IoSuccess)
+		if (result != LFilter::IoSuccess || Image->X() <= 0 || Image->Y() <= 0 || !(*Image)[0])
+		{
+			LgiTrace("%s:%i - Failed to decode HTML data image.\n", _FL);
 			Image.Reset();
+		}
 		return;
 	}
 
@@ -5568,14 +5584,15 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 						Image->AlphaDC())
 						Cs = System32BitColourSpace;
 					
-					LAutoPtr<LSurface> r(new LMemDC(_FL, ContentW, ContentH, Cs));
-					if (r)
+					LAutoPtr<LSurface> r(new LMemDC(_FL));
+					if (r && r->Create(ContentW, ContentH, Cs) && (*r)[0])
 					{
 						if (Cs == CsIndex8)
 							r->Palette(new LPalette(Image->Palette()));
 						ResampleDC(r, Image);
 						Image = r;
 					}
+					else LgiTrace("%s:%i - Failed to allocate resized HTML image (%ix%i).\n", _FL, ContentW, ContentH);
 				}
 				#endif
 
@@ -5961,8 +5978,30 @@ void LHtml::_New()
 	}
 	#endif
 	
-	FontCache = new LHtmlFontCache(GetFont(), (float) GetDpiScale().y);	
+	FontCache = new LHtmlFontCache(GetFont(), FontSurface ? 1.0f : (float)GetDpiScale().y, FontSurface);
 	SetScrollBars(false, false);
+}
+
+bool LHtml::SetFontSurface(LSurface *surface)
+{
+	if (!surface || Tag || !GetFont())
+		return false;
+
+	LAutoPtr<LFont> font(new LFont);
+	if (!font)
+		return false;
+	*font = *GetFont();
+	if (!font->Create(nullptr, 0, surface))
+		return false;
+
+	auto cache = new LHtmlFontCache(font, 1.0f, surface);
+	if (!cache)
+		return false;
+	DeleteObj(FontCache);
+	SetFont(font.Release(), true);
+	FontSurface = surface;
+	FontCache = cache;
+	return true;
 }
 
 void LHtml::_Delete()
@@ -6497,7 +6536,7 @@ void LHtml::OnPaint(LSurface *ScreenDC)
 
 	#if HTML_USE_DOUBLE_BUFFER
 		LRect Client = GetClient();
-		if (ScreenDC->IsScreen())
+		if (ScreenDC->IsScreen() && !ScreenDC->IsPrint())
 		{
 			if (!MemDC ||
 				(MemDC->X() < Client.X() || MemDC->Y() < Client.Y()))
@@ -6524,7 +6563,8 @@ void LHtml::OnPaint(LSurface *ScreenDC)
 		}
 	#endif
 
-	LSurface *pDC = MemDC ? MemDC : ScreenDC;
+	LSurface *pDC = MemDC && !ScreenDC->IsPrint() ? MemDC : ScreenDC;
+	LPoint BaseOrigin = pDC->GetOrigin();
 
 	#if 0
 		Gtk::cairo_matrix_t mx;
@@ -6565,7 +6605,7 @@ void LHtml::OnPaint(LSurface *ScreenDC)
 			PROF("VScroll");
 			int LineY = GetFont()->GetHeight();
 			int Vs = (int)VScroll->Value();
-			pDC->SetOrigin(0, Vs * LineY);
+			pDC->SetOrigin(BaseOrigin.x, BaseOrigin.y + Vs * LineY);
 		}
 
 		bool InSelection = false;
@@ -6606,7 +6646,7 @@ void LHtml::OnPaint(LSurface *ScreenDC)
 	OnPaintFinished(pDC);
 
 	#if HTML_USE_DOUBLE_BUFFER
-		if (MemDC)
+		if (MemDC && !ScreenDC->IsPrint())
 		{
 			pDC->SetOrigin(0, 0);
 			PROF("Blt");
@@ -6618,6 +6658,8 @@ void LHtml::OnPaint(LSurface *ScreenDC)
 			ScreenDC->Blt(0, 0, MemDC);
 		}
 	#endif
+
+	pDC->SetOrigin(BaseOrigin);
 }
 
 bool LHtml::HasSelection()
